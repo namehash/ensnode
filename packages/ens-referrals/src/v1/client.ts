@@ -132,6 +132,9 @@ export class ENSReferralsClient {
    * @throws if the ENSNode request fails
    * @throws if the ENSNode API returns an error response
    * @throws if the ENSNode response breaks required invariants
+   * @throws if the requested edition uses an award model not recognized by this version of
+   *   the client. Call {@link getEditionConfigSet} first to verify the edition's `awardModel`
+   *   is supported before requesting its leaderboard.
    *
    * @example
    * ```typescript
@@ -240,6 +243,9 @@ export class ENSReferralsClient {
    *
    * @throws if the ENSNode request fails
    * @throws if the response data is malformed
+   * @throws if any of the requested editions use an award model not recognized by this
+   *   version of the client. Call {@link getEditionConfigSet} first to verify each
+   *   edition's `awardModel` is supported before requesting metrics.
    *
    * @example
    * ```typescript
@@ -331,6 +337,11 @@ export class ENSReferralsClient {
    * Editions are sorted in descending order by start timestamp (most recent first).
    *
    * @returns A response containing the edition config set, or an error response if unavailable.
+   *
+   * @remarks Editions with unrecognized `rules.awardModel` values are deserialized as
+   * `{ awardModel: string } & Record<string, unknown>`. Callers should check `awardModel`
+   * before accessing model-specific fields and skip editions whose award model they do
+   * not recognize.
    *
    * @example
    * ```typescript

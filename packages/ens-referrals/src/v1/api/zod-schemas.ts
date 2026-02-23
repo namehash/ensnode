@@ -21,6 +21,7 @@ import {
   makeReferrerEditionMetricsRevShareLimitSchema,
   makeReferrerLeaderboardPageRevShareLimitSchema,
 } from "../award-models/rev-share-limit/api/zod-schemas";
+import { ReferralProgramAwardModels } from "../award-models/shared/rules";
 import {
   MAX_EDITIONS_PER_REQUEST,
   ReferralProgramEditionConfigSetResponseCodes,
@@ -38,28 +39,33 @@ import {
  * Clients must check `awardModel` before accessing model-specific fields.
  * This design allows servers to introduce new award model types without breaking existing clients.
  */
-export const makeReferralProgramRulesSchema = (valueLabel: string = "ReferralProgramRules") =>
-  z.union([
+export const makeReferralProgramRulesSchema = (valueLabel: string = "ReferralProgramRules") => {
+  const knownVariants = z.discriminatedUnion("awardModel", [
     makeReferralProgramRulesPieSplitSchema(valueLabel),
     makeReferralProgramRulesRevShareLimitSchema(valueLabel),
-    // Passthrough catch-all for unknown future award model types
-    z
-      .object({ awardModel: z.string() })
-      .passthrough(),
   ]);
+  const knownAwardModels = Object.values(ReferralProgramAwardModels) as string[];
+  return z
+    .object({ awardModel: z.string() })
+    .passthrough()
+    .superRefine((val, ctx) => {
+      if (!knownAwardModels.includes(val.awardModel)) return;
+      const result = knownVariants.safeParse(val);
+      if (!result.success) {
+        for (const issue of result.error.issues) {
+          ctx.addIssue({ code: "custom", path: issue.path, message: issue.message });
+        }
+      }
+    });
+};
 
 /**
  * Schema for {@link ReferrerLeaderboardPage}.
  */
 export const makeReferrerLeaderboardPageSchema = (valueLabel: string = "ReferrerLeaderboardPage") =>
-  z.union([
+  z.discriminatedUnion("awardModel", [
     makeReferrerLeaderboardPagePieSplitSchema(valueLabel),
     makeReferrerLeaderboardPageRevShareLimitSchema(valueLabel),
-    // Passthrough catch-all for unknown future award model types.
-    // Servers may introduce new award model types at any time without breaking existing clients.
-    z
-      .object({ awardModel: z.string() })
-      .passthrough(),
   ]);
 
 /**

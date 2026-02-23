@@ -1,6 +1,6 @@
 import {
-  type AwardedReferrerMetricsPieSplit,
   buildReferralProgramRulesPieSplit,
+  ReferralProgramAwardModels,
   type ReferrerLeaderboard,
 } from "@namehash/ens-referrals/v1";
 import { describe, expect, it, vi } from "vitest";
@@ -37,6 +37,10 @@ describe("ENSAnalytics Referrer Leaderboard", () => {
 
       const result = await getReferrerLeaderboard(rules, accurateAsOf);
 
+      if (result.awardModel !== ReferralProgramAwardModels.PieSplit) {
+        throw new Error("Expected PieSplit leaderboard");
+      }
+
       expect(result).toMatchObject({
         rules,
       });
@@ -62,46 +66,22 @@ describe("ENSAnalytics Referrer Leaderboard", () => {
       expect(unqualifiedReferrers.every(([_, referrer]) => !referrer.isQualified)).toBe(true);
 
       // Assert `finalScoreBoost` (pie-split specific)
-      expect(
-        qualifiedReferrers.every(
-          ([_, r]) => (r as AwardedReferrerMetricsPieSplit).finalScoreBoost > 0,
-        ),
-      ).toBe(true);
-      expect(
-        unqualifiedReferrers.every(
-          ([_, r]) => (r as AwardedReferrerMetricsPieSplit).finalScoreBoost === 0,
-        ),
-      ).toBe(true);
+      expect(qualifiedReferrers.every(([_, r]) => r.finalScoreBoost > 0)).toBe(true);
+      expect(unqualifiedReferrers.every(([_, r]) => r.finalScoreBoost === 0)).toBe(true);
 
       // Assert `finalScore` (pie-split specific)
       expect(
-        qualifiedReferrers.every(([_, r]) => {
-          const referrer = r as AwardedReferrerMetricsPieSplit;
-          return referrer.finalScore === referrer.score * referrer.finalScoreBoost;
-        }),
+        qualifiedReferrers.every(([_, r]) => r.finalScore === r.score * r.finalScoreBoost),
       ).toBe(true);
-      expect(
-        unqualifiedReferrers.every(([_, r]) => {
-          const referrer = r as AwardedReferrerMetricsPieSplit;
-          return referrer.finalScore === referrer.score;
-        }),
-      ).toBe(true);
+      expect(unqualifiedReferrers.every(([_, r]) => r.finalScore === r.score)).toBe(true);
 
       /**
        * Assert {@link AwardedReferrerMetrics}.
        */
 
       // Assert `awardPoolShare` (pie-split specific)
-      expect(
-        qualifiedReferrers.every(
-          ([_, r]) => (r as AwardedReferrerMetricsPieSplit).awardPoolShare > 0,
-        ),
-      ).toBe(true);
-      expect(
-        unqualifiedReferrers.every(
-          ([_, r]) => (r as AwardedReferrerMetricsPieSplit).awardPoolShare === 0,
-        ),
-      ).toBe(true);
+      expect(qualifiedReferrers.every(([_, r]) => r.awardPoolShare > 0)).toBe(true);
+      expect(unqualifiedReferrers.every(([_, r]) => r.awardPoolShare === 0)).toBe(true);
 
       // Assert `awardPoolApproxValue`
       expect(

@@ -55,7 +55,7 @@ export const validateScoredReferrerMetricsPieSplit = (
 };
 
 /**
- * Extends {@link ScoredReferrerMetrics} to include additional metrics relative to all
+ * Extends {@link ScoredReferrerMetricsPieSplit} to include additional metrics relative to all
  * other referrers on a {@link ReferrerLeaderboardPieSplit} and {@link ReferralProgramRulesPieSplit}.
  */
 export interface RankedReferrerMetricsPieSplit extends ScoredReferrerMetricsPieSplit {
