@@ -25,6 +25,8 @@ import type {
   ChainIdString,
 } from "@ensnode/ponder-sdk";
 
+import ponderConfig from "@/ponder/config";
+
 /**
  * Ponder config datasource with a flat `chain` value.
  */
@@ -101,9 +103,7 @@ function isPonderDatasourceNested(
  *
  * @throws Error if any of the above invariants are violated.
  */
-export function buildChainsBlockrange(
-  ponderConfig: PonderConfigType,
-): Map<ChainId, BlockrangeWithStartBlock> {
+export function buildChainsBlockrange(): Map<ChainId, BlockrangeWithStartBlock> {
   const chainsBlockrange = new Map<ChainId, BlockrangeWithStartBlock>();
 
   // 0. Get all ponder sources (includes chain + startBlock & endBlock)
