@@ -1,7 +1,16 @@
 import config from "@/config";
 
+import type { PublicClient } from "viem";
+
 import { type Duration, SWRCache } from "@ensnode/ensnode-sdk";
-import { type ChainId, ChainIndexingStates, PonderClient } from "@ensnode/ponder-sdk";
+import {
+  type BlockRef,
+  type BlockrangeWithStartBlock,
+  type ChainId,
+  type ChainIndexingMetricsHistorical,
+  ChainIndexingStates,
+  PonderClient,
+} from "@ensnode/ponder-sdk";
 
 import type {
   ChainIndexingMetadata,
@@ -13,6 +22,30 @@ import { buildChainsBlockrange } from "../chains-config-blockrange";
 import { buildChainIndexingMetadataImmutable } from "../chains-indexing-metadata-immutable";
 import { fetchBlockRef } from "../fetch-block-ref";
 import { buildPonderCachedPublicClients } from "../ponder-cached-public-clients";
+
+/**
+ * Fetch required block references for building immutable indexing metadata for
+ * a chain.
+ */
+async function fetchChainIndexingBlockRefs(
+  chainConfigBlockrange: BlockrangeWithStartBlock,
+  chainIndexingMetrics: ChainIndexingMetricsHistorical,
+  ponderCachedPublicClient: PublicClient,
+): Promise<{ startBlock: BlockRef; endBlock: BlockRef | null; backfillEndBlock: BlockRef }> {
+  const backfillEndBlockNumber =
+    chainConfigBlockrange.startBlock + chainIndexingMetrics.historicalTotalBlocks - 1;
+
+  // Fetch required block references in parallel.
+  const [startBlock, endBlock, backfillEndBlock] = await Promise.all([
+    fetchBlockRef(ponderCachedPublicClient, chainConfigBlockrange.startBlock),
+    chainConfigBlockrange.endBlock
+      ? fetchBlockRef(ponderCachedPublicClient, chainConfigBlockrange.endBlock)
+      : null,
+    fetchBlockRef(ponderCachedPublicClient, backfillEndBlockNumber),
+  ]);
+
+  return { startBlock, endBlock, backfillEndBlock };
+}
 
 /**
  * Metadata from a Ponder app.
@@ -141,17 +174,11 @@ export const ponderAppMetadataCache = new SWRCache({
             );
           }
 
-          const backfillEndBlockNumber =
-            chainConfigBlockrange.startBlock + chainIndexingMetrics.historicalTotalBlocks - 1;
-
-          // Fetch required block references in parallel.
-          const [startBlock, endBlock, backfillEndBlock] = await Promise.all([
-            fetchBlockRef(ponderCachedPublicClient, chainConfigBlockrange.startBlock),
-            chainConfigBlockrange.endBlock
-              ? fetchBlockRef(ponderCachedPublicClient, chainConfigBlockrange.endBlock)
-              : null,
-            fetchBlockRef(ponderCachedPublicClient, backfillEndBlockNumber),
-          ]);
+          const { startBlock, endBlock, backfillEndBlock } = await fetchChainIndexingBlockRefs(
+            chainConfigBlockrange,
+            chainIndexingMetrics,
+            ponderCachedPublicClient,
+          );
 
           metadataImmutable = buildChainIndexingMetadataImmutable(
             startBlock,
