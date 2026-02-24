@@ -3,16 +3,12 @@ import config from "@/config";
 import { describeRoute, resolver as validationResolver } from "hono-openapi";
 
 import {
-  IndexingStatusResponseCodes,
-  type IndexingStatusResponseError,
-  type IndexingStatusResponseOk,
-  serializeENSApiPublicConfig,
-  serializeIndexingStatusResponse,
+  EnsApiIndexingStatusResponseCodes,
+  type EnsApiIndexingStatusResponseError,
+  type EnsApiIndexingStatusResponseOk,
+  serializeEnsApiIndexingStatusResponse,
 } from "@ensnode/ensnode-sdk";
-import {
-  makeENSApiPublicConfigSchema,
-  makeIndexingStatusResponseSchema,
-} from "@ensnode/ensnode-sdk/internal";
+import { makeIndexingStatusResponseSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { buildEnsApiPublicConfig } from "@/config/config.schema";
 import { factory } from "@/lib/hono-factory";
@@ -23,29 +19,6 @@ import registrarActionsApi from "./registrar-actions-api";
 import resolutionApi from "./resolution-api";
 
 const app = factory.createApp();
-
-app.get(
-  "/config",
-  describeRoute({
-    tags: ["Meta"],
-    summary: "Get ENSApi Public Config",
-    description: "Gets the public config of the ENSApi instance",
-    responses: {
-      200: {
-        description: "Successfully retrieved ENSApi public config",
-        content: {
-          "application/json": {
-            schema: validationResolver(makeENSApiPublicConfigSchema()),
-          },
-        },
-      },
-    },
-  }),
-  async (c) => {
-    const ensApiPublicConfig = buildEnsApiPublicConfig(config);
-    return c.json(serializeENSApiPublicConfig(ensApiPublicConfig));
-  },
-);
 
 app.get(
   "/indexing-status",
@@ -80,19 +53,22 @@ app.get(
 
     if (c.var.indexingStatus instanceof Error) {
       return c.json(
-        serializeIndexingStatusResponse({
-          responseCode: IndexingStatusResponseCodes.Error,
-        } satisfies IndexingStatusResponseError),
+        serializeEnsApiIndexingStatusResponse({
+          responseCode: EnsApiIndexingStatusResponseCodes.Error,
+        } satisfies EnsApiIndexingStatusResponseError),
         503,
       );
     }
 
+    const ensApiPublicConfig = buildEnsApiPublicConfig(config);
+
     // return successful response using the indexing status projection from the middleware context
     return c.json(
-      serializeIndexingStatusResponse({
-        responseCode: IndexingStatusResponseCodes.Ok,
+      serializeEnsApiIndexingStatusResponse({
+        responseCode: EnsApiIndexingStatusResponseCodes.Ok,
         realtimeProjection: c.var.indexingStatus,
-      } satisfies IndexingStatusResponseOk),
+        config: ensApiPublicConfig,
+      } satisfies EnsApiIndexingStatusResponseOk),
     );
   },
 );

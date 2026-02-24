@@ -1,4 +1,4 @@
-import { useENSNodeConfig, useRegistrarActions } from "@ensnode/ensnode-react";
+import { useRegistrarActions } from "@ensnode/ensnode-react";
 import {
   RegistrarActionsOrders,
   RegistrarActionsResponseCodes,
@@ -38,18 +38,16 @@ const {
 export function useStatefulRegistrarActions({
   itemsPerPage,
 }: UseStatefulRegistrarActionsProps): StatefulFetchRegistrarActions {
-  const ensNodeConfigQuery = useENSNodeConfig();
   const indexingStatusQuery = useIndexingStatusWithSwr();
 
   let isRegistrarActionsApiSupported = false;
 
-  if (ensNodeConfigQuery.isSuccess && indexingStatusQuery.isSuccess) {
-    const { ensIndexerPublicConfig } = ensNodeConfigQuery.data;
-    const { realtimeProjection } = indexingStatusQuery.data;
+  if (indexingStatusQuery.isSuccess) {
+    const { realtimeProjection, config } = indexingStatusQuery.data;
     const { omnichainSnapshot } = realtimeProjection.snapshot;
 
     isRegistrarActionsApiSupported =
-      hasEnsIndexerConfigSupport(ensIndexerPublicConfig) &&
+      hasEnsIndexerConfigSupport(config.ensIndexerPublicConfig) &&
       hasIndexingStatusSupport(omnichainSnapshot.omnichainStatus);
   }
 
@@ -63,19 +61,11 @@ export function useStatefulRegistrarActions({
     },
   });
 
-  // ENSNode config is not fetched yet, so wait in the initial status
-  if (ensNodeConfigQuery.isPending || indexingStatusQuery.isPending) {
+  // ENSApi config is not fetched yet, so wait in the initial status
+  if (indexingStatusQuery.isPending) {
     return {
       fetchStatus: StatefulFetchStatusIds.Connecting,
     } satisfies StatefulFetchRegistrarActionsConnecting;
-  }
-
-  // ENSNode config fetched as error
-  if (!ensNodeConfigQuery.isSuccess) {
-    return {
-      fetchStatus: StatefulFetchStatusIds.Error,
-      reason: "ENSNode config could not be fetched successfully",
-    } satisfies StatefulFetchRegistrarActionsError;
   }
 
   // Indexing Status fetched as error
@@ -86,7 +76,7 @@ export function useStatefulRegistrarActions({
     } satisfies StatefulFetchRegistrarActionsError;
   }
 
-  const { ensIndexerPublicConfig } = ensNodeConfigQuery.data;
+  const { ensIndexerPublicConfig } = indexingStatusQuery.data.config;
 
   // fetching is indefinitely not possible due to unsupported ENSNode config
   if (!hasEnsIndexerConfigSupport(ensIndexerPublicConfig)) {

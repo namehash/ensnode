@@ -1,29 +1,29 @@
 import { useQuery } from "@tanstack/react-query";
 
-import type { IndexingStatusRequest, IndexingStatusResponse } from "@ensnode/ensnode-sdk";
+import type {
+  EnsApiIndexingStatusRequest,
+  EnsApiIndexingStatusResponse,
+} from "@ensnode/ensnode-sdk";
 
-import type { QueryParameter, WithSDKConfigParameter } from "../types";
+import type { QueryParameter, WithEnsApiProviderOptions } from "../types";
 import { createIndexingStatusQueryOptions } from "../utils/query";
-import { useENSNodeSDKConfig } from "./useENSNodeSDKConfig";
+import { useEnsApiProviderOptions } from "./useEnsApiProviderOptions";
 
 interface UseIndexingStatusParameters
-  extends IndexingStatusRequest,
-    QueryParameter<IndexingStatusResponse> {}
+  extends EnsApiIndexingStatusRequest,
+    QueryParameter<EnsApiIndexingStatusResponse> {}
 
 export function useIndexingStatus(
-  parameters: WithSDKConfigParameter & UseIndexingStatusParameters = {},
+  parameters: WithEnsApiProviderOptions & UseIndexingStatusParameters = {},
 ) {
-  const { config, query = {} } = parameters;
-  const _config = useENSNodeSDKConfig(config);
+  const { options, query = {} } = parameters;
+  const providerOptions = useEnsApiProviderOptions(options);
+  const queryOptions = createIndexingStatusQueryOptions(providerOptions);
 
-  const queryOptions = createIndexingStatusQueryOptions(_config);
-
-  const options = {
+  return useQuery({
     ...queryOptions,
     refetchInterval: 10 * 1000, // 10 seconds - indexing status changes frequently
     ...query,
     enabled: query.enabled ?? queryOptions.enabled,
-  };
-
-  return useQuery(options);
+  });
 }

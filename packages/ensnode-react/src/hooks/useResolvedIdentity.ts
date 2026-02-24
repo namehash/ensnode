@@ -14,7 +14,6 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import type { UseResolvedIdentityParameters } from "../types";
-import { useENSNodeConfig } from "./useENSNodeConfig";
 import { usePrimaryName } from "./usePrimaryName";
 
 /**
@@ -39,10 +38,7 @@ import { usePrimaryName } from "./usePrimaryName";
  * - All other properties from the underlying {@link usePrimaryName} query (e.g., `isLoading`, `error`, `refetch`, etc.)
  */
 export function useResolvedIdentity(parameters: UseResolvedIdentityParameters) {
-  const { identity, accelerate, query: _query = {} } = parameters;
-
-  const { data } = useENSNodeConfig();
-  const namespace = data?.ensIndexerPublicConfig.namespace;
+  const { identity, namespace, accelerate, query: _query = {} } = parameters;
 
   const {
     data: primaryNameData,
