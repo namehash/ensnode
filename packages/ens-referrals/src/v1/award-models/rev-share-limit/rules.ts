@@ -68,7 +68,11 @@ export const validateReferralProgramRulesRevShareLimit = (
     );
   }
 
-  if (rules.qualifiedRevenueShare < 0 || rules.qualifiedRevenueShare > 1) {
+  if (
+    !Number.isFinite(rules.qualifiedRevenueShare) ||
+    rules.qualifiedRevenueShare < 0 ||
+    rules.qualifiedRevenueShare > 1
+  ) {
     throw new Error(
       `ReferralProgramRulesRevShareLimit: qualifiedRevenueShare must be between 0 and 1 (inclusive), got ${rules.qualifiedRevenueShare}.`,
     );

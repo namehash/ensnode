@@ -167,14 +167,14 @@ export const calcReferrerAwardPoolSharePieSplit = (
 
 /**
  * Extends {@link RankedReferrerMetricsPieSplit} to include additional metrics
- * relative to {@link AggregatedRankedReferrerMetricsPieSplit}.
+ * relative to {@link AggregatedReferrerMetricsPieSplit}.
  */
 export interface AwardedReferrerMetricsPieSplit extends RankedReferrerMetricsPieSplit {
   /**
    * The referrer's share of the award pool.
    *
    * @invariant Guaranteed to be a number between 0 and 1 (inclusive)
-   * @invariant Calculated as: `finalScore / {@link AggregatedRankedReferrerMetricsPieSplit.grandTotalQualifiedReferrersFinalScore}` if `isQualified` is `true`, else `0`
+   * @invariant Calculated as: `finalScore / {@link AggregatedReferrerMetricsPieSplit.grandTotalQualifiedReferrersFinalScore}` if `isQualified` is `true`, else `0`
    */
   awardPoolShare: number;
 

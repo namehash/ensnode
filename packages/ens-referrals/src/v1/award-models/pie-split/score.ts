@@ -6,7 +6,7 @@ import type { ReferrerScore } from "../shared/score";
 /**
  * Calculate the score of a referrer based on the total incremental duration
  * (in seconds) of registrations and renewals for direct subnames of .eth
- * referred by the referrer within the ENS Holiday Awards period.
+ * referred by the referrer within the referral program edition.
  *
  * Used exclusively in the pie-split award model pipeline.
  *

@@ -55,10 +55,10 @@ export interface ReferrerLeaderboardRevShareLimit {
    * @invariant Map is empty if there are no referrers with 1 or more `totalReferrals`
    *            within the `rules` as of `accurateAsOf`.
    * @invariant If a fully-lowercase `Address` is not a key in this map then that `Address` had
-   *            0 `totalReferrals`, `totalIncrementalDuration`, and `score` within the
+   *            0 `totalReferrals`, `totalIncrementalDuration`, and `totalRevenueContribution` within the
    *            `rules` as of `accurateAsOf`.
    * @invariant Each value in this map is guaranteed to have a non-zero
-   *            `totalReferrals`, `totalIncrementalDuration`, and `score`.
+   *            `totalReferrals` and `totalIncrementalDuration`.
    */
   referrers: Map<Address, AwardedReferrerMetricsRevShareLimit>;
 

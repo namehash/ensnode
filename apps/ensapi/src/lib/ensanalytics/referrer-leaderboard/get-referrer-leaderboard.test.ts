@@ -69,7 +69,8 @@ describe("ENSAnalytics Referrer Leaderboard", () => {
       // Assert `finalScore`
       expect(
         qualifiedReferrers.every(
-          ([_, referrer]) => referrer.finalScore === referrer.score * referrer.finalScoreBoost,
+          ([_, referrer]) =>
+            referrer.finalScore === referrer.score * (1 + referrer.finalScoreBoost),
         ),
       ).toBe(true);
       expect(

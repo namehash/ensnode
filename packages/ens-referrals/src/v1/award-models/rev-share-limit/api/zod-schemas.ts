@@ -28,7 +28,7 @@ export const makeReferralProgramRulesRevShareLimitSchema = (
 ) =>
   z
     .object({
-      awardModel: z.literal("rev-share-limit"),
+      awardModel: z.literal(ReferralProgramAwardModels.RevShareLimit),
       totalAwardPoolValue: makePriceUsdcSchema(`${valueLabel}.totalAwardPoolValue`),
       minQualifiedRevenueContribution: makePriceUsdcSchema(
         `${valueLabel}.minQualifiedRevenueContribution`,

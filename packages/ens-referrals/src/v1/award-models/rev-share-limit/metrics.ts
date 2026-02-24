@@ -125,7 +125,7 @@ export interface UnrankedReferrerMetricsRevShareLimit
 }
 
 /**
- * Build an unranked zero-score rev-share-limit referrer record for an address not on the leaderboard.
+ * Build an unranked zero-metrics rev-share-limit referrer record for an address not on the leaderboard.
  */
 export const buildUnrankedReferrerMetricsRevShareLimit = (
   referrer: Address,
