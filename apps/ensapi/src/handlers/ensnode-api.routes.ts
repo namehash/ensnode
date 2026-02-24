@@ -1,5 +1,10 @@
 import { createRoute } from "@hono/zod-openapi";
 
+import {
+  makeSerializedEnsApiIndexingStatusResponseSchema,
+  makeSerializedEnsApiPublicConfigSchema,
+} from "@ensnode/ensnode-sdk/internal";
+
 export const basePath = "/api";
 
 export const getConfigRoute = createRoute({
@@ -11,6 +16,11 @@ export const getConfigRoute = createRoute({
   responses: {
     200: {
       description: "Successfully retrieved ENSApi public config",
+      content: {
+        "application/json": {
+          schema: makeSerializedEnsApiPublicConfigSchema(),
+        },
+      },
     },
   },
 });
@@ -24,9 +34,19 @@ export const getIndexingStatusRoute = createRoute({
   responses: {
     200: {
       description: "Successfully retrieved indexing status",
+      content: {
+        "application/json": {
+          schema: makeSerializedEnsApiIndexingStatusResponseSchema(),
+        },
+      },
     },
     503: {
       description: "Indexing status snapshot unavailable",
+      content: {
+        "application/json": {
+          schema: makeSerializedEnsApiIndexingStatusResponseSchema(),
+        },
+      },
     },
   },
 });
