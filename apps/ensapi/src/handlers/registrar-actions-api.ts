@@ -1,7 +1,10 @@
+import type { Address } from "viem";
+
 import {
   buildPageContext,
   type Node,
   type RegistrarActionsFilter,
+  type RegistrarActionsOrder,
   RegistrarActionsResponseCodes,
   type RegistrarActionsResponseError,
   type RegistrarActionsResponseOk,
@@ -31,11 +34,11 @@ app.use(registrarActionsApiMiddleware);
 async function fetchRegistrarActions(
   parentNode: Node | undefined,
   query: {
-    orderBy: string;
+    orderBy: RegistrarActionsOrder;
     page: number;
     recordsPerPage: number;
     withReferral: boolean;
-    decodedReferrer?: string;
+    decodedReferrer?: Address;
     beginTimestamp?: number;
     endTimestamp?: number;
   },
