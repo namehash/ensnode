@@ -1,6 +1,7 @@
 import { createRoute } from "@hono/zod-openapi";
 
 import {
+  makeEnsApiIndexingStatusResponseErrorSchema,
   makeSerializedEnsApiIndexingStatusResponseSchema,
   makeSerializedEnsApiPublicConfigSchema,
 } from "@ensnode/ensnode-sdk/internal";
@@ -44,7 +45,7 @@ export const getIndexingStatusRoute = createRoute({
       description: "Indexing status snapshot unavailable",
       content: {
         "application/json": {
-          schema: makeSerializedEnsApiIndexingStatusResponseSchema(),
+          schema: makeEnsApiIndexingStatusResponseErrorSchema(),
         },
       },
     },
