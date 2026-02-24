@@ -1,5 +1,7 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
+import { eq } from "drizzle-orm";
 
+import * as schema from "@ensnode/ensnode-schema";
 import {
   type DomainId,
   type ENSv1DomainId,
@@ -209,6 +211,25 @@ DomainInterfaceRef.implement({
               limit,
             }),
         ),
+    }),
+
+    /////////////////////////
+    // Domain.subdomainCount
+    /////////////////////////
+    subdomainCount: t.field({
+      description: "TODO",
+      type: "Int",
+      nullable: false,
+      resolve: async (parent) => {
+        if (isENSv1Domain(parent)) {
+          return db.$count(schema.v1Domain, eq(schema.v1Domain.parentId, parent.id));
+        } else {
+          const { subregistryId } = parent;
+          if (subregistryId === null) return 0;
+
+          return db.$count(schema.v2Domain, eq(schema.v2Domain.registryId, subregistryId));
+        }
+      },
     }),
 
     /////////////////////
