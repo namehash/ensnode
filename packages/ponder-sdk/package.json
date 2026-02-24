@@ -53,10 +53,12 @@
     "@types/node": "catalog:",
     "tsup": "catalog:",
     "typescript": "catalog:",
+    "viem": "catalog:",
     "vitest": "catalog:",
     "zod": "catalog:"
   },
   "peerDependencies": {
+    "viem": "catalog:",
     "zod": "catalog:"
   }
 }
