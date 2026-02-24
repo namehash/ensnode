@@ -1,6 +1,5 @@
 import config from "@/config";
 
-import { publicClients } from "ponder:api";
 import { getUnixTime } from "date-fns";
 import { Hono } from "hono";
 
@@ -15,12 +14,13 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { buildENSIndexerPublicConfig } from "@/config/public";
-import {
-  buildOmnichainIndexingStatusSnapshot,
-  createCrossChainIndexingStatusSnapshotOmnichain,
-} from "@/lib/indexing-status/build-index-status";
+import { createCrossChainIndexingStatusSnapshotOmnichain } from "@/lib/indexing-status/build-index-status";
+import { IndexingStatusBuilder } from "@/lib/indexing-status-builder/indexing-status-builder";
+
+import { localPonderClient } from "../local-ponder-client";
 
 const app = new Hono();
+const indexingStatusBuilder = new IndexingStatusBuilder(localPonderClient);
 
 // include ENSIndexer Public Config endpoint
 app.get("/config", async (c) => {
@@ -38,7 +38,7 @@ app.get("/indexing-status", async (c) => {
   let omnichainSnapshot: OmnichainIndexingStatusSnapshot | undefined;
 
   try {
-    omnichainSnapshot = await buildOmnichainIndexingStatusSnapshot(publicClients);
+    omnichainSnapshot = await indexingStatusBuilder.getOmnichainIndexingStatusSnapshot();
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     console.error(`Omnichain snapshot is currently not available: ${errorMessage}`);
