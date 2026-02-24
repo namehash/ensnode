@@ -14,7 +14,7 @@ import {
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { materializeENSv1DomainEffectiveOwner } from "@/lib/ensv2/domain-db-helpers";
-import { ensureEvent } from "@/lib/ensv2/event-db-helpers";
+import { ensureEvent } from "@/lib/ensv2/event-log-db-helpers";
 import {
   getLatestRegistration,
   insertLatestRegistration,
