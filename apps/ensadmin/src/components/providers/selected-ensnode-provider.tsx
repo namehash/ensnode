@@ -2,32 +2,29 @@
 
 import type { PropsWithChildren } from "react";
 
-import { ENSNodeProvider } from "@ensnode/ensnode-react";
+import { createEnsApiOptions, EnsApiProvider } from "@ensnode/ensnode-react";
 
 import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
 
 /**
- * Provider component that configures ENSNodeProvider with the currently
+ * Provider component that configures EnsApiProvider with the currently
  * selected ENSNode connection.
  *
- * This component wraps the ENSNodeProvider from @ensnode/ensnode-react and
+ * This component wraps the EnsApiProvider from @ensnode/ensnode-react and
  * automatically configures it with the URL from the currently selected ENSNode
  * connection URL. It serves as a bridge between the connection management
  * system and the ENSNode React hooks.
  *
  * @param children - React children to render within the provider context
  */
-export function SelectedENSNodeProvider({ children }: PropsWithChildren) {
+export function SelectedEnsApiProvider({ children }: PropsWithChildren) {
   const selectedConnection = useSelectedConnection();
 
   if (selectedConnection.validatedSelectedConnection.isValid) {
-    return (
-      <ENSNodeProvider
-        config={{ client: { url: selectedConnection.validatedSelectedConnection.url } }}
-      >
-        {children}
-      </ENSNodeProvider>
-    );
+    const options = createEnsApiOptions({
+      url: selectedConnection.validatedSelectedConnection.url,
+    });
+    return <EnsApiProvider options={options}>{children}</EnsApiProvider>;
   } else {
     // TODO: Logic here needs a deeper refactor to recognize the difference
     // between the selected connection being in a valid format or not.
