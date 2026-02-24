@@ -1,6 +1,7 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 
 import * as amIRealtimeRoutes from "./handlers/amirealtime-api.routes";
+import * as resolutionRoutes from "./handlers/resolution-api.routes";
 
 /**
  * Creates an OpenAPIHono app with all route definitions registered using stub handlers.
@@ -10,7 +11,7 @@ import * as amIRealtimeRoutes from "./handlers/amirealtime-api.routes";
 export function createStubRoutesForSpec() {
   const app = new OpenAPIHono();
 
-  const routeGroups = [amIRealtimeRoutes];
+  const routeGroups = [amIRealtimeRoutes, resolutionRoutes];
 
   for (const group of routeGroups) {
     for (const route of group.routes) {
