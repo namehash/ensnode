@@ -10,6 +10,13 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
+import { resolveFindDomains } from "@/graphql-api/lib/find-domains/find-domains-resolver";
+import {
+  domainsBase,
+  filterByName,
+  filterByParent,
+  withOrderingMetadata,
+} from "@/graphql-api/lib/find-domains/layers";
 import { getDomainResolver } from "@/graphql-api/lib/get-domain-resolver";
 import { getLatestRegistration } from "@/graphql-api/lib/get-latest-registration";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
@@ -213,40 +220,16 @@ DomainInterfaceRef.implement({
     subdomains: t.connection({
       description: "TODO",
       type: DomainInterfaceRef,
-      resolve: (parent, args, context) =>
-        resolveCursorConnection(
-          { ...DEFAULT_CONNECTION_ARGS, args },
-          ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) => {
-            if (isENSv1Domain(parent)) {
-              return db.query.v1Domain.findMany({
-                where: (t, { lt, gt, and, eq }) =>
-                  and(
-                    eq(t.parentId, parent.id),
-                    before ? lt(t.id, cursors.decode<ENSv1DomainId>(before)) : undefined,
-                    after ? gt(t.id, cursors.decode<ENSv1DomainId>(after)) : undefined,
-                  ),
-                orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
-                limit,
-                with: { label: true },
-              });
-            } else {
-              const { subregistryId } = parent;
-              if (subregistryId === null) return [];
-
-              return db.query.v2Domain.findMany({
-                where: (t, { lt, gt, eq, and }) =>
-                  and(
-                    eq(t.registryId, subregistryId),
-                    before ? lt(t.id, cursors.decode<ENSv2DomainId>(before)) : undefined,
-                    after ? gt(t.id, cursors.decode<ENSv2DomainId>(after)) : undefined,
-                  ),
-                orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
-                limit,
-                with: { label: true },
-              });
-            }
-          },
-        ),
+      args: {
+        where: t.arg({ type: SubdomainsWhereInput }),
+        order: t.arg({ type: DomainsOrderInput }),
+      },
+      resolve: (parent, { where, order, ...connectionArgs }, context) => {
+        const base = filterByParent(domainsBase(), parent.id);
+        const named = filterByName(base, where?.name);
+        const domains = withOrderingMetadata(named);
+        return resolveFindDomains(context, { domains, order, ...connectionArgs });
+      },
     }),
   }),
 });
@@ -359,20 +342,50 @@ export const DomainIdInput = builder.inputType("DomainIdInput", {
 });
 
 export const DomainsWhereInput = builder.inputType("DomainsWhereInput", {
-  description: "Filter for domains query. Requires one of name or owner.",
+  description: "Filter for the top-level domains query.",
   fields: (t) => ({
     name: t.string({
+      required: true,
       description:
         "A partial Interpreted Name by which to search the set of Domains. ex: 'example', 'example.', 'example.et'.",
-    }),
-    owner: t.field({
-      type: "Address",
-      description: "Filter the set of Domains by those owned by the specified Address.",
     }),
     canonical: t.boolean({
       description:
         "Optional, defaults to false. If true, filters the set of Domains by those that are Canonical (i.e. reachable by ENS Forward Resolution). If false, the set of Domains is not filtered, and may include ENSv2 Domains not reachable by ENS Forward Resolution.",
       defaultValue: false,
+    }),
+  }),
+});
+
+export const AccountDomainsWhereInput = builder.inputType("AccountDomainsWhereInput", {
+  description: "Filter for Account.domains query.",
+  fields: (t) => ({
+    name: t.string({
+      description:
+        "A partial Interpreted Name by which to search the set of Domains. ex: 'example', 'example.', 'example.et'.",
+    }),
+    canonical: t.boolean({
+      description:
+        "Optional, defaults to false. If true, filters the set of Domains by those that are Canonical (i.e. reachable by ENS Forward Resolution).",
+      defaultValue: false,
+    }),
+  }),
+});
+
+export const RegistryDomainsWhereInput = builder.inputType("RegistryDomainsWhereInput", {
+  description: "Filter for Registry.domains query.",
+  fields: (t) => ({
+    name: t.string({
+      description: "A partial Interpreted Name by which to filter Domains in this Registry.",
+    }),
+  }),
+});
+
+export const SubdomainsWhereInput = builder.inputType("SubdomainsWhereInput", {
+  description: "Filter for Domain.subdomains query.",
+  fields: (t) => ({
+    name: t.string({
+      description: "A partial Interpreted Name by which to filter subdomains.",
     }),
   }),
 });
