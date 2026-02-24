@@ -7,7 +7,7 @@ import * as amIRealtimeRoutes from "./handlers/amirealtime-api.routes";
  * This allows generating the OpenAPI spec without importing any handler code that
  * depends on config/env vars.
  */
-export function createRoutesForSpec() {
+export function createStubRoutesForSpec() {
   const app = new OpenAPIHono();
 
   const routeGroups = [amIRealtimeRoutes];

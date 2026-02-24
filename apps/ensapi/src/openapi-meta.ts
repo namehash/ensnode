@@ -1,4 +1,4 @@
-export const openapiDocumentation = {
+export const openapiMeta = {
   openapi: "3.1.0" as const,
   info: {
     title: "ENSApi APIs",
