@@ -9,9 +9,9 @@ import { ChainIcon, getChainName } from "@namehash/namehash-ui";
 import { History, Replace } from "lucide-react";
 import { Fragment, ReactNode } from "react";
 
-import { useENSNodeConfig } from "@ensnode/ensnode-react";
-import { type ENSApiPublicConfig, getENSRootChainId } from "@ensnode/ensnode-sdk";
+import { type EnsApiPublicConfig, getENSRootChainId } from "@ensnode/ensnode-sdk";
 
+import { useEnsApiConfig } from "@/components/config/useEnsApiConfig";
 import { ErrorInfo, type ErrorInfoProps } from "@/components/error-info";
 import { ENSApiIcon } from "@/components/icons/ensnode-apps/ensapi-icon";
 import { ENSDbIcon } from "@/components/icons/ensnode-apps/ensdb-icon";
@@ -96,7 +96,7 @@ function ENSNodeCardLoadingSkeleton() {
  * Props for ENSNodeConfigCardDisplay - display component that accepts props for testing/mocking
  */
 export interface ENSNodeConfigCardDisplayProps {
-  ensApiPublicConfig: ENSApiPublicConfig;
+  ensApiPublicConfig: EnsApiPublicConfig;
 }
 
 /**
@@ -114,7 +114,7 @@ export function ENSNodeConfigCardDisplay({ ensApiPublicConfig }: ENSNodeConfigCa
  * Props for ENSNodeConfigInfoView - internal component that accepts props for testing/mocking
  */
 export interface ENSNodeConfigInfoViewProps {
-  ensApiPublicConfig?: ENSApiPublicConfig;
+  ensApiPublicConfig?: EnsApiPublicConfig;
   error?: ErrorInfoProps;
   isLoading?: boolean;
 }
@@ -147,28 +147,30 @@ export function ENSNodeConfigInfoView({
  * ENSNodeConfigInfo component - fetches and displays ENSNode configuration data
  */
 export function ENSNodeConfigInfo() {
-  const ensNodeConfigQuery = useENSNodeConfig();
+  const ensApiConfig = useEnsApiConfig();
 
-  return (
-    <ENSNodeConfigInfoView
-      ensApiPublicConfig={ensNodeConfigQuery.isSuccess ? ensNodeConfigQuery.data : undefined}
-      error={
-        ensNodeConfigQuery.isError
-          ? {
-              title: "ENSNodeConfigInfo Error",
-              description: ensNodeConfigQuery.error.message,
-            }
-          : undefined
-      }
-      isLoading={ensNodeConfigQuery.isPending}
-    />
-  );
+  if (ensApiConfig.isPending) {
+    return <ENSNodeConfigInfoView isLoading={true} />;
+  }
+
+  if (ensApiConfig.isError) {
+    return (
+      <ENSNodeConfigInfoView
+        error={{
+          title: "Failed to Load ENSNode Configuration",
+          description: ensApiConfig.error.message,
+        }}
+      />
+    );
+  }
+
+  return <ENSNodeConfigInfoView ensApiPublicConfig={ensApiConfig.data} />;
 }
 
 function ENSNodeConfigCardContent({
   ensApiPublicConfig,
 }: {
-  ensApiPublicConfig: ENSApiPublicConfig;
+  ensApiPublicConfig: EnsApiPublicConfig;
 }) {
   const cardItemValueStyles = "text-sm leading-6 font-normal text-black";
 

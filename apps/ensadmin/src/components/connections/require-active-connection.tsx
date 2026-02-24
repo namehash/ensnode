@@ -2,8 +2,7 @@
 
 import type { PropsWithChildren } from "react";
 
-import { useENSNodeConfig } from "@ensnode/ensnode-react";
-
+import { useEnsApiConfig } from "@/components/config/useEnsApiConfig";
 import { ErrorInfo } from "@/components/error-info";
 import { LoadingSpinner } from "@/components/loading-spinner";
 
@@ -11,14 +10,14 @@ import { LoadingSpinner } from "@/components/loading-spinner";
  * Allows consumers to use `useActiveConnection` by blocking rendering until it is available.
  */
 export function RequireActiveConnection({ children }: PropsWithChildren) {
-  const { status, error } = useENSNodeConfig();
+  const ensApiConfig = useEnsApiConfig();
 
-  if (status === "pending") return <Loading />;
+  if (ensApiConfig.status === "pending") return <Loading />;
 
-  if (status === "error") {
+  if (ensApiConfig.status === "error") {
     return (
       <section className="p-6">
-        <ErrorInfo title="Unable to parse ENSNode Config" description={error.message} />
+        <ErrorInfo title="Failed to connect to ENSApi" description={ensApiConfig.error.message} />
       </section>
     );
   }
