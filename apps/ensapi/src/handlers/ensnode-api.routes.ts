@@ -2,7 +2,7 @@ import { createRoute } from "@hono/zod-openapi";
 
 import {
   makeEnsApiIndexingStatusResponseErrorSchema,
-  makeSerializedEnsApiIndexingStatusResponseSchema,
+  makeSerializedEnsApiIndexingStatusResponseOkSchema,
   makeSerializedEnsApiPublicConfigSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
@@ -37,7 +37,7 @@ export const getIndexingStatusRoute = createRoute({
       description: "Successfully retrieved indexing status",
       content: {
         "application/json": {
-          schema: makeSerializedEnsApiIndexingStatusResponseSchema(),
+          schema: makeSerializedEnsApiIndexingStatusResponseOkSchema(),
         },
       },
     },

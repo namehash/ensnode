@@ -1,11 +1,11 @@
 import config from "@/config";
 
 import {
-  IndexingStatusResponseCodes,
-  type IndexingStatusResponseError,
-  type IndexingStatusResponseOk,
+  EnsApiIndexingStatusResponseCodes,
+  type EnsApiIndexingStatusResponseError,
+  type EnsApiIndexingStatusResponseOk,
   serializeENSApiPublicConfig,
-  serializeIndexingStatusResponse,
+  serializeEnsApiIndexingStatusResponse,
 } from "@ensnode/ensnode-sdk";
 
 import { buildEnsApiPublicConfig } from "@/config/config.schema";
@@ -32,19 +32,20 @@ app.openapi(getIndexingStatusRoute, async (c) => {
 
   if (c.var.indexingStatus instanceof Error) {
     return c.json(
-      serializeIndexingStatusResponse({
-        responseCode: IndexingStatusResponseCodes.Error,
-      } satisfies IndexingStatusResponseError),
+      serializeEnsApiIndexingStatusResponse({
+        responseCode: EnsApiIndexingStatusResponseCodes.Error,
+      } satisfies EnsApiIndexingStatusResponseError),
       503,
     );
   }
 
   // return successful response using the indexing status projection from the middleware context
   return c.json(
-    serializeIndexingStatusResponse({
-      responseCode: IndexingStatusResponseCodes.Ok,
+    serializeEnsApiIndexingStatusResponse({
+      responseCode: EnsApiIndexingStatusResponseCodes.Ok,
       realtimeProjection: c.var.indexingStatus,
-    } satisfies IndexingStatusResponseOk),
+    } satisfies EnsApiIndexingStatusResponseOk),
+    200,
   );
 });
 
