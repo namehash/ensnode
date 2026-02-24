@@ -17,6 +17,7 @@ import type {
   ChainIndexingMetadataDynamic,
   ChainIndexingMetadataImmutable,
 } from "@/lib/indexing-status-builder/chain-indexing-metadata";
+import { filterPonderAppMetadataMap } from "@/ponder/api/lib/filter-ponder-app-metadata-map";
 
 import { buildChainsBlockrange } from "../chains-config-blockrange";
 import { buildChainIndexingMetadataImmutable } from "../chains-indexing-metadata-immutable";
@@ -108,29 +109,12 @@ export const ponderAppMetadataCache = new SWRCache({
         ponderClient.status(),
       ]);
 
-      const chainIdsFromMetrics = new Set(ponderIndexingMetrics.chains.keys());
-
-      // Invariant: ponderIndexingMetrics must cover all chains indexed by ENSIndexer
-      // config and must not include any chain that is not indexed.
-      if (chainIdsFromMetrics.symmetricDifference(indexedChainIds).size > 0) {
-        throw new Error(
-          `Ponder indexing metrics must be available for all indexed chains. Indexed chain IDs from ENSIndexer config: ${Array.from(config.indexedChainIds).join(", ")}, Chain IDs with metrics: ${Array.from(chainIdsFromMetrics).join(", ")}`,
-        );
-      }
-
-      const chainIdsFromStatus = new Set(ponderIndexingStatus.chains.keys());
-
-      // Invariant: ponderIndexingStatus must cover all chains indexed by ENSIndexer
-      // config and must not include any chain that is not indexed.
-      if (chainIdsFromStatus.symmetricDifference(indexedChainIds).size > 0) {
-        throw new Error(
-          `Ponder indexing status must be available for all indexed chains. Indexed chain IDs from ENSIndexer config: ${Array.from(config.indexedChainIds).join(", ")}, Chain IDs with status: ${Array.from(chainIdsFromStatus).join(", ")}`,
-        );
-      }
+      const ponderIndexingMetricsChains = filterPonderAppMetadataMap(ponderIndexingMetrics.chains);
+      const ponderIndexingStatusChains = filterPonderAppMetadataMap(ponderIndexingStatus.chains);
 
       for (const chainId of indexedChainIds) {
-        const chainIndexingMetrics = ponderIndexingMetrics.chains.get(chainId);
-        const chainIndexingStatus = ponderIndexingStatus.chains.get(chainId);
+        const chainIndexingMetrics = ponderIndexingMetricsChains.get(chainId);
+        const chainIndexingStatus = ponderIndexingStatusChains.get(chainId);
         const chainConfigBlockrange = chainsConfigBlockrange.get(chainId);
         const ponderCachedPublicClient = ponderCachedPublicClients.get(chainId);
 
