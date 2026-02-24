@@ -2,9 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 
 import type { RegistrarActionsRequest, RegistrarActionsResponse } from "@ensnode/ensnode-sdk";
 
-import type { QueryParameter, WithSDKConfigParameter } from "../types";
+import type { QueryParameter, WithEnsApiProviderOptions } from "../types";
 import { createRegistrarActionsQueryOptions } from "../utils/query";
-import { useENSNodeSDKConfig } from "./useENSNodeSDKConfig";
+import { useEnsApiProviderOptions } from "./useEnsApiProviderOptions";
 
 interface UseRegistrarActionsParameters
   extends RegistrarActionsRequest,
@@ -16,19 +16,17 @@ interface UseRegistrarActionsParameters
  * Query ENSNode Registrar Actions API.
  */
 export function useRegistrarActions(
-  parameters: WithSDKConfigParameter & UseRegistrarActionsParameters = {},
+  parameters: WithEnsApiProviderOptions & UseRegistrarActionsParameters = {},
 ) {
-  const { config, query = {} } = parameters;
-  const _config = useENSNodeSDKConfig(config);
+  const { options, query = {} } = parameters;
+  const providerOptions = useEnsApiProviderOptions(options);
 
-  const queryOptions = createRegistrarActionsQueryOptions(_config, parameters);
+  const queryOptions = createRegistrarActionsQueryOptions(providerOptions, parameters);
 
-  const options = {
+  return useQuery({
     ...queryOptions,
     refetchInterval: 10 * 1000, // 10 seconds - latest registrar actions change frequently
     ...query,
     enabled: query.enabled ?? queryOptions.enabled,
-  };
-
-  return useQuery(options);
+  });
 }
