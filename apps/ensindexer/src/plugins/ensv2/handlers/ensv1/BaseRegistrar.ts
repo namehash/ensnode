@@ -34,7 +34,7 @@ const pluginName = PluginName.ENSv2;
  * ENSv1 Registry). The .eth Registrar doesn't do this, but Basenames and Lineanames do.
  *
  * Because they all technically have this ability, this logic avoids the invariant that an associated
- * v1Domain must exist and the v1Domain.owner is conditionally materialized.
+ * v1Domain must exist and instead the v1Domain.owner is _conditionally_ materialized.
  *
  * Technically each BaseRegistrar Registration also has an associated owner that we could keep track
  * of, but because we're materializing the v1Domain's effective owner, we need not explicitly track
