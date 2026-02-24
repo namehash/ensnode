@@ -31,7 +31,7 @@ const CANONICAL_REGISTRIES_MAX_DEPTH = 16;
  */
 export const getCanonicalRegistriesCTE = () =>
   db
-    .select({ registryId: sql<string>`registry_id`.as("registryId") })
+    .select({ id: sql<string>`registry_id`.as("id") })
     .from(
       sql`(
             WITH RECURSIVE canonical_registries AS (

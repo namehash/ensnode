@@ -1,4 +1,4 @@
-import { eq, isNotNull, isNull, or, sql } from "drizzle-orm";
+import { eq, isNotNull, isNull, or } from "drizzle-orm";
 
 import { getCanonicalRegistriesCTE } from "@/graphql-api/lib/canonical-registries-cte";
 import {
@@ -22,11 +22,11 @@ export function filterByCanonical(base: BaseDomainSet) {
   return db
     .select(selectBase(base))
     .from(base)
-    .leftJoin(canonicalRegistries, eq(canonicalRegistries.registryId, base.registryId))
+    .leftJoin(canonicalRegistries, eq(canonicalRegistries.id, base.registryId))
     .where(
       or(
         isNull(base.registryId), // v1 domains are always canonical
-        isNotNull(canonicalRegistries.registryId), // v2 domains must be in a canonical registry
+        isNotNull(canonicalRegistries.id), // v2 domains must be in a canonical registry
       ),
     )
     .as("baseDomains");
