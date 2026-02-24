@@ -2,6 +2,7 @@ import type { QueryObserverOptions } from "@tanstack/react-query";
 
 import type {
   AcceleratableRequest,
+  ENSNamespaceId,
   EnsApiClientOptions,
   ResolvePrimaryNameRequest,
   ResolvePrimaryNameResponse,
@@ -77,4 +78,5 @@ export interface UseResolvedIdentityParameters
   extends QueryParameter<ResolvePrimaryNameResponse>,
     AcceleratableRequest {
   identity: UnresolvedIdentity;
+  namespace?: ENSNamespaceId;
 }
