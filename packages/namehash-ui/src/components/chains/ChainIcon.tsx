@@ -13,7 +13,7 @@ import {
   sepolia,
 } from "viem/chains";
 
-import { ensTestEnvL1Chain } from "@ensnode/datasources";
+import { ensTestEnvChain } from "@ensnode/datasources";
 import type { ChainId } from "@ensnode/ensnode-sdk";
 
 import { ArbitrumIcon } from "./icons/ArbitrumIcon";
@@ -58,7 +58,7 @@ const chainIcons = new Map<number, React.ComponentType<React.SVGProps<SVGSVGElem
   [scrollSepolia.id, ScrollTestnetIcon],
 
   // ens-test-env
-  [ensTestEnvL1Chain.id, EthereumLocalIcon],
+  [ensTestEnvChain.id, EthereumLocalIcon],
 ]);
 
 /**

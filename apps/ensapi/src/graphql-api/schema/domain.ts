@@ -135,8 +135,6 @@ DomainInterfaceRef.implement({
       },
     }),
 
-    // TODO: maybe supply partial names as well? perhaps a Domain.name.canonical and Domain.name.partial and so on?
-
     ///////////////
     // Domain.path
     ///////////////
@@ -206,6 +204,48 @@ DomainInterfaceRef.implement({
               orderBy: (t, { asc, desc }) => (inverted ? asc(t.index) : desc(t.index)),
               limit,
             }),
+        ),
+    }),
+
+    /////////////////////
+    // Domain.subdomains
+    /////////////////////
+    subdomains: t.connection({
+      description: "TODO",
+      type: DomainInterfaceRef,
+      resolve: (parent, args, context) =>
+        resolveCursorConnection(
+          { ...DEFAULT_CONNECTION_ARGS, args },
+          ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) => {
+            if (isENSv1Domain(parent)) {
+              return db.query.v1Domain.findMany({
+                where: (t, { lt, gt, and, eq }) =>
+                  and(
+                    eq(t.parentId, parent.id),
+                    before ? lt(t.id, cursors.decode<ENSv1DomainId>(before)) : undefined,
+                    after ? gt(t.id, cursors.decode<ENSv1DomainId>(after)) : undefined,
+                  ),
+                orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
+                limit,
+                with: { label: true },
+              });
+            } else {
+              const { subregistryId } = parent;
+              if (subregistryId === null) return [];
+
+              return db.query.v2Domain.findMany({
+                where: (t, { lt, gt, eq, and }) =>
+                  and(
+                    eq(t.registryId, subregistryId),
+                    before ? lt(t.id, cursors.decode<ENSv2DomainId>(before)) : undefined,
+                    after ? gt(t.id, cursors.decode<ENSv2DomainId>(after)) : undefined,
+                  ),
+                orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
+                limit,
+                with: { label: true },
+              });
+            }
+          },
         ),
     }),
   }),
@@ -321,15 +361,19 @@ export const DomainIdInput = builder.inputType("DomainIdInput", {
 export const DomainsWhereInput = builder.inputType("DomainsWhereInput", {
   description: "Filter for domains query. Requires one of name or owner.",
   fields: (t) => ({
-    name: t.string(),
-    owner: t.field({ type: "Address" }),
-  }),
-});
-
-export const AccountDomainsWhereInput = builder.inputType("AccountDomainsWhereInput", {
-  description: "Filter for Account.domains query.",
-  fields: (t) => ({
-    name: t.string({ required: true }),
+    name: t.string({
+      description:
+        "A partial Interpreted Name by which to search the set of Domains. ex: 'example', 'example.', 'example.et'.",
+    }),
+    owner: t.field({
+      type: "Address",
+      description: "Filter the set of Domains by those owned by the specified Address.",
+    }),
+    canonical: t.boolean({
+      description:
+        "Optional, defaults to false. If true, filters the set of Domains by those that are Canonical (i.e. reachable by ENS Forward Resolution). If false, the set of Domains is not filtered, and may include ENSv2 Domains not reachable by ENS Forward Resolution.",
+      defaultValue: false,
+    }),
   }),
 });
 
