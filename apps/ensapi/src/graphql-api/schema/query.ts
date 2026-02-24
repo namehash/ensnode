@@ -15,7 +15,7 @@ import {
 
 import { builder } from "@/graphql-api/builder";
 import { resolveFindDomains } from "@/graphql-api/lib/find-domains/find-domains-resolver";
-import { getDomainIdByInterpretedName } from "@/graphql-api/lib/get-domain-by-fqdn";
+import { getDomainIdByInterpretedName } from "@/graphql-api/lib/get-domain-by-interpreted-name";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { AccountIdInput } from "@/graphql-api/schema/account-id";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";

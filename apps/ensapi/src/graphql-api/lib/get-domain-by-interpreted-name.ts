@@ -21,9 +21,9 @@ import { makeLogger } from "@/lib/logger";
 
 const ROOT_REGISTRY_ID = getENSv2RootRegistryId(config.namespace);
 
-const logger = makeLogger("get-domain-by-fqdn");
-const v1Logger = makeLogger("v1_getDomainIdByFqdn");
-const v2Logger = makeLogger("v2_getDomainIdByFqdn");
+const logger = makeLogger("get-domain-by-interpreted-name");
+const v1Logger = makeLogger("get-domain-by-interpreted-name:v1");
+const v2Logger = makeLogger("get-domain-by-interpreted-name:v2");
 
 /**
  * Gets the DomainId of the Domain addressed by `name`.
@@ -33,8 +33,8 @@ export async function getDomainIdByInterpretedName(
 ): Promise<DomainId | null> {
   // Domains addressable in v2 are preferred, but v1 lookups are cheap, so just do them both ahead of time
   const [v1DomainId, v2DomainId] = await Promise.all([
-    v1_getDomainIdByFqdn(name),
-    v2_getDomainIdByFqdn(ROOT_REGISTRY_ID, name),
+    v1_getDomainIdByInterpretedName(name),
+    v2_getDomainIdByInterpretedName(ROOT_REGISTRY_ID, name),
   ]);
 
   logger.debug({ v1DomainId, v2DomainId });
@@ -46,7 +46,7 @@ export async function getDomainIdByInterpretedName(
 /**
  * Retrieves the ENSv1DomainId for the provided `name`, if exists.
  */
-async function v1_getDomainIdByFqdn(name: InterpretedName): Promise<DomainId | null> {
+async function v1_getDomainIdByInterpretedName(name: InterpretedName): Promise<DomainId | null> {
   const node = namehash(name);
   const domainId = makeENSv1DomainId(node);
 
@@ -62,7 +62,7 @@ async function v1_getDomainIdByFqdn(name: InterpretedName): Promise<DomainId | n
  * Forward-traverses the ENSv2 namegraph from the specified root in order to identify the Domain
  * addressed by `name`.
  */
-async function v2_getDomainIdByFqdn(
+async function v2_getDomainIdByInterpretedName(
   rootRegistryId: RegistryId,
   name: InterpretedName,
 ): Promise<DomainId | null> {
