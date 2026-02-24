@@ -15,6 +15,7 @@ import type {
   RegistrationId,
   RegistryId,
   RenewalId,
+  ResolverId,
 } from "@ensnode/ensnode-sdk";
 
 /**
@@ -520,4 +521,41 @@ export const label_relations = relations(label, ({ many }) => ({
 export const registryCanonicalDomain = onchainTable("registry_canonical_domains", (t) => ({
   registryId: t.text().primaryKey().$type<RegistryId>(),
   domainId: t.text().notNull().$type<ENSv2DomainId>(),
+}));
+
+///////////
+// History
+///////////
+
+// needs more thought, leaving this as a sketch. unsure about product requirements
+
+export const domainHistoryEntryType = onchainEnum("DomainHistoryEntryType", [
+  "OwnershipChanged",
+  "ExpiryChanged",
+  "ResolverChanged",
+  "TTLChanged",
+]);
+
+export const domainHistoryEntry = onchainTable("domain_history_entries", (t) => ({
+  // represents an Event
+  eventId: t.text().primaryKey(),
+
+  // has a type
+  type: domainHistoryEntryType().notNull(),
+
+  // references a Domain
+  domainId: t.text().notNull().$type<DomainId>(),
+}));
+
+export const resolverHistoryEntryType = onchainEnum("ResolverHistoryEntryType", ["..."]);
+
+export const resolverHistoryEntry = onchainTable("resolver_history_entries", (t) => ({
+  // represents an Event
+  eventId: t.text().primaryKey(),
+
+  // has a type
+  type: domainHistoryEntryType().notNull(),
+
+  // references a Resolver
+  resolverId: t.text().notNull().$type<ResolverId>(),
 }));
