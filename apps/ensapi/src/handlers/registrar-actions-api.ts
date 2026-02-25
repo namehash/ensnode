@@ -84,7 +84,7 @@ async function fetchRegistrarActions(parentNode: Node | undefined, query: Regist
  *
  * Example: `GET /api/registrar-actions`
  *
- * @see {@link app.openapi(getRegistrarActionsByParentNodeRoute)} for response documentation
+ * @see {@link app.openapi(getRegistrarActionsRoute)} for response documentation
  */
 app.openapi(getRegistrarActionsRoute, async (c) => {
   try {
