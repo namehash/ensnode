@@ -48,13 +48,16 @@ function buildTestRules(
 /**
  * Build a ReferralEvent with sensible defaults.
  */
+let eventIdCounter = 0;
+
 function makeEvent(
   referrer: `0x${string}`,
   timestamp: number,
   incrementalDuration: number,
-  opts: Partial<Pick<ReferralEvent, "blockNumber" | "transactionHash">> = {},
+  opts: Partial<Pick<ReferralEvent, "blockNumber" | "transactionHash" | "id">> = {},
 ): ReferralEvent {
   return {
+    id: opts.id ?? `event-${++eventIdCounter}`,
     referrer,
     timestamp,
     blockNumber: opts.blockNumber ?? 1n,

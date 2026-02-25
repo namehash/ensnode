@@ -219,6 +219,7 @@ export const makeReferralProgramEditionConfigSetArraySchema = (
 
   return z.array(looseItemSchema).transform((items, ctx): ReferralProgramEditionConfig[] => {
     const result: ReferralProgramEditionConfig[] = [];
+    let attemptedKnownCount = 0;
 
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
@@ -228,6 +229,8 @@ export const makeReferralProgramEditionConfigSetArraySchema = (
         // This allows servers to introduce new award model types without breaking clients.
         continue;
       }
+
+      attemptedKnownCount++;
 
       const parsed = configSchema.safeParse(item);
       if (!parsed.success) {
@@ -243,7 +246,7 @@ export const makeReferralProgramEditionConfigSetArraySchema = (
       }
     }
 
-    if (result.length < 1) {
+    if (attemptedKnownCount === 0) {
       ctx.addIssue({
         code: "custom",
         message: `${valueLabel} must contain at least one edition with a recognized award model`,

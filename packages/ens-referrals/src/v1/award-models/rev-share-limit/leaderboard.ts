@@ -105,6 +105,8 @@ export const buildReferrerLeaderboardRevShareLimit = (
     if (a.blockNumber !== b.blockNumber) return a.blockNumber < b.blockNumber ? -1 : 1;
     if (a.transactionHash < b.transactionHash) return -1;
     if (a.transactionHash > b.transactionHash) return 1;
+    if (a.id < b.id) return -1;
+    if (a.id > b.id) return 1;
     return 0;
   });
 

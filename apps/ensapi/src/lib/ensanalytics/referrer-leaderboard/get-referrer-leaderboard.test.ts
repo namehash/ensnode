@@ -40,6 +40,7 @@ describe("ENSAnalytics Referrer Leaderboard", () => {
         rules,
       });
 
+      // result.referrers is expected to be in rank order (rank 1 first), matching Map insertion order
       const referrerEntries = Array.from(result.referrers.entries());
       const qualifiedReferrers = referrerEntries.slice(0, rules.maxQualifiedReferrers);
       const unqualifiedReferrers = referrerEntries.slice(rules.maxQualifiedReferrers);
@@ -61,7 +62,14 @@ describe("ENSAnalytics Referrer Leaderboard", () => {
       expect(unqualifiedReferrers.every(([_, referrer]) => !referrer.isQualified)).toBe(true);
 
       // Assert `finalScoreBoost`
-      expect(qualifiedReferrers.every(([_, referrer]) => referrer.finalScoreBoost >= 0)).toBe(true);
+      // All qualified referrers except the last have boost > 0; the last qualified referrer
+      // receives boost === 0 by design (formula: 1 - (rank-1)/(maxQualifiedReferrers-1)).
+      const topQualifiedReferrers = qualifiedReferrers.slice(0, -1);
+      const lastQualifiedReferrer = qualifiedReferrers.at(-1);
+      expect(topQualifiedReferrers.every(([_, referrer]) => referrer.finalScoreBoost > 0)).toBe(
+        true,
+      );
+      expect(lastQualifiedReferrer![1].finalScoreBoost).toBe(0);
       expect(unqualifiedReferrers.every(([_, referrer]) => referrer.finalScoreBoost === 0)).toBe(
         true,
       );

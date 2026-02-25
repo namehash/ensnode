@@ -31,6 +31,11 @@ export interface ReferralEvent {
   transactionHash: `0x${string}`;
 
   /**
+   * Registrar action ID.
+   */
+  id: string;
+
+  /**
    * Duration in seconds contributed by this single referral event.
    */
   incrementalDuration: Duration;

@@ -108,6 +108,7 @@ export const getReferralEvents = async (rules: ReferralProgramRules): Promise<Re
   try {
     const records = await db
       .select({
+        id: schema.registrarActions.id,
         referrer: schema.registrarActions.decodedReferrer,
         timestamp: schema.registrarActions.timestamp,
         blockNumber: schema.registrarActions.blockNumber,
@@ -135,6 +136,7 @@ export const getReferralEvents = async (rules: ReferralProgramRules): Promise<Re
         asc(schema.registrarActions.timestamp),
         asc(schema.registrarActions.blockNumber),
         asc(schema.registrarActions.transactionHash),
+        asc(schema.registrarActions.id),
       );
 
     // Type assertion: All fields in NonNullRecord are guaranteed non-null:
@@ -142,6 +144,7 @@ export const getReferralEvents = async (rules: ReferralProgramRules): Promise<Re
     // 2. `timestamp`, `blockNumber`, `transactionHash`, `incrementalDuration` are guaranteed non-null by database schema constraints (NOT NULL columns)
     // 3. `total` is guaranteed non-null by COALESCE with 0
     interface NonNullRecord {
+      id: string;
       referrer: Address;
       timestamp: bigint;
       blockNumber: bigint;
@@ -151,6 +154,7 @@ export const getReferralEvents = async (rules: ReferralProgramRules): Promise<Re
     }
 
     return (records as NonNullRecord[]).map((record) => ({
+      id: record.id,
       referrer: record.referrer,
       timestamp: Number(record.timestamp),
       blockNumber: record.blockNumber,

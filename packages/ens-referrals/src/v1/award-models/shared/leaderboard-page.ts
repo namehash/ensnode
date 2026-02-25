@@ -84,7 +84,7 @@ export interface ReferrerLeaderboardPageContext extends Required<ReferrerLeaderb
 
   /**
    * Indicates if there is a next page available
-   * @invariant true if and only if (`page` * `recordsPerPage` < `total`)
+   * @invariant true if and only if (`page` * `recordsPerPage` < `totalRecords`)
    */
   hasNext: boolean;
 
@@ -122,7 +122,7 @@ export const validateReferrerLeaderboardPageContext = (
   validateReferrerLeaderboardPageParams(context);
   if (!isNonNegativeInteger(context.totalRecords)) {
     throw new Error(
-      `Invalid ReferrerLeaderboardPageContext: total must be a non-negative integer but is ${context.totalRecords}.`,
+      `Invalid ReferrerLeaderboardPageContext: totalRecords must be a non-negative integer but is ${context.totalRecords}.`,
     );
   }
 
@@ -193,11 +193,11 @@ export const validateReferrerLeaderboardPageContext = (
 
   if (!context.hasNext && endIndex < context.totalRecords) {
     throw new Error(
-      `Invalid ReferrerLeaderboardPageContext: if hasNext is false, endIndex (${endIndex}) must be greater than or equal to total (${context.totalRecords}).`,
+      `Invalid ReferrerLeaderboardPageContext: if hasNext is false, endIndex (${endIndex}) must be greater than or equal to totalRecords (${context.totalRecords}).`,
     );
   } else if (context.hasNext && context.page * context.recordsPerPage >= context.totalRecords) {
     throw new Error(
-      `Invalid ReferrerLeaderboardPageContext: if hasNext is true, endIndex (${endIndex}) must be less than total (${context.totalRecords}).`,
+      `Invalid ReferrerLeaderboardPageContext: if hasNext is true, endIndex (${endIndex}) must be less than totalRecords (${context.totalRecords}).`,
     );
   }
   if (!context.hasPrev && context.page !== 1) {

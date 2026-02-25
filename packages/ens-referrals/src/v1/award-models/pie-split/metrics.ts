@@ -154,9 +154,8 @@ export const buildRankedReferrerMetricsPieSplit = (
 export const calcReferrerAwardPoolSharePieSplit = (
   referrer: RankedReferrerMetricsPieSplit,
   aggregatedMetrics: AggregatedReferrerMetricsPieSplit,
-  rules: ReferralProgramRulesPieSplit,
 ): number => {
-  if (!isReferrerQualifiedPieSplit(referrer.rank, rules)) return 0;
+  if (!referrer.isQualified) return 0;
   if (aggregatedMetrics.grandTotalQualifiedReferrersFinalScore === 0) return 0;
 
   return referrer.finalScore / aggregatedMetrics.grandTotalQualifiedReferrersFinalScore;
@@ -210,7 +209,7 @@ export const buildAwardedReferrerMetricsPieSplit = (
   aggregatedMetrics: AggregatedReferrerMetricsPieSplit,
   rules: ReferralProgramRulesPieSplit,
 ): AwardedReferrerMetricsPieSplit => {
-  const awardPoolShare = calcReferrerAwardPoolSharePieSplit(referrer, aggregatedMetrics, rules);
+  const awardPoolShare = calcReferrerAwardPoolSharePieSplit(referrer, aggregatedMetrics);
 
   // Calculate the approximate USDC value by multiplying the share by the total award pool value
   const awardPoolApproxValue = scalePrice(rules.totalAwardPoolValue, awardPoolShare);
