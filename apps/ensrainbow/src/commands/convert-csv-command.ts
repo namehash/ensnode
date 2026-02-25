@@ -8,6 +8,7 @@ import { once } from "node:events";
 import { createReadStream, createWriteStream, rmSync, statSync, type WriteStream } from "node:fs";
 import { unlink } from "node:fs/promises";
 import { dirname, join } from "node:path";
+import { finished } from "node:stream/promises";
 
 import { parse } from "@fast-csv/parse";
 import { ClassicLevel } from "classic-level";
@@ -585,17 +586,28 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
     // Set up progress bar (only if not silent)
     const progressBar = options.silent ? null : setupProgressBar();
 
-    // Process the CSV file
-    const { totalLines, processedRecords } = await processCSVFile(
-      options.inputFile,
-      RainbowRecordType,
-      outputStream,
-      progressInterval,
-      existingDb,
-      dedupDb,
-      stats,
-      progressBar,
-    );
+    // Attach before processCSVFile so any async I/O error on the output stream
+    // (disk full, permission denied, …) is surfaced as a rejection instead of
+    // an unhandled 'error' event that would crash the process and bypass the
+    // finally-block cleanup.
+    const streamErrorPromise = new Promise<never>((_, reject) => {
+      outputStream!.once("error", reject);
+    });
+
+    // Process the CSV file, aborting immediately if the output stream errors.
+    const { totalLines, processedRecords } = await Promise.race([
+      processCSVFile(
+        options.inputFile,
+        RainbowRecordType,
+        outputStream,
+        progressInterval,
+        existingDb,
+        dedupDb,
+        stats,
+        progressBar,
+      ),
+      streamErrorPromise,
+    ]);
 
     stats.totalLines = totalLines;
     stats.processedRecords = processedRecords;
@@ -607,8 +619,11 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
       );
     }
 
-    // Close output stream
+    // Close output stream and wait for all buffered data to be flushed before
+    // continuing. Without this await the function would return while bytes are
+    // still being written, letting callers read a truncated output file.
     outputStream.end();
+    await finished(outputStream);
 
     logger.info(`✅ Processed ${processedRecords} records with streaming fast-csv`);
     logSummary(stats);
@@ -619,9 +634,10 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
     throw error;
   } finally {
     // Clean up output stream if it wasn't gracefully ended (error path).
-    // Use writableEnded/destroyed so we still run cleanup after an I/O error
-    // (writable can be false in that case and would incorrectly skip cleanup).
-    if (outputStream && !outputStream.writableEnded && !outputStream.destroyed) {
+    // Guard on !writableEnded only: if the stream was auto-destroyed by an I/O
+    // error (destroyed=true but writableEnded=false), we still need to unlink
+    // the partial output file.
+    if (outputStream && !outputStream.writableEnded) {
       const outputPath = (outputStream as WriteStream & { path?: string }).path ?? outputFile;
       try {
         // Suppress errors from in-flight writes whose async I/O completes
@@ -630,10 +646,13 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
         outputStream.on("error", () => {});
         if (!outputStream.destroyed) {
           outputStream.destroy();
+          // Wait for the OS file handle to be released before unlinking.
+          // destroy() is asynchronous; the handle is only freed on the 'close' event.
+          await once(outputStream, "close");
+        } else if (!outputStream.closed) {
+          // Auto-destroyed by an I/O error: 'close' may not have fired yet.
+          await once(outputStream, "close");
         }
-        // Wait for the OS file handle to be released before unlinking.
-        // destroy() is asynchronous; the handle is only freed on the 'close' event.
-        await once(outputStream, "close");
         logger.info("Destroyed output stream on error path");
       } catch (error) {
         logger.warn(`Failed to destroy output stream: ${error}`);

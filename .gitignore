@@ -36,11 +36,12 @@ CLAUDE.md
 
 # ENSRainbow data
 apps/ensrainbow/data*
-
-# fallback-ensapi dist
-apps/fallback-ensapi/dist
 apps/ensrainbow/temp*
 apps/ensrainbow/v2*
 apps/ensrainbow/ens-test*
 apps/ensrainbow/test-*
+
+# fallback-ensapi dist
+apps/fallback-ensapi/dist
+
 
