@@ -6,6 +6,8 @@ import type { DomainId } from "@ensnode/ensnode-sdk";
 import type { BaseDomainSet } from "@/graphql-api/lib/find-domains/layers/base-domain-set";
 import { db } from "@/lib/db";
 
+export type DomainsWithOrderingMetadata = ReturnType<typeof withOrderingMetadata>;
+
 /**
  * Enrich a base domain set with ordering metadata.
  *

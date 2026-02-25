@@ -2,6 +2,7 @@ import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@poth
 import { and } from "drizzle-orm";
 
 import type { context as createContext } from "@/graphql-api/context";
+import type { DomainsWithOrderingMetadata } from "@/graphql-api/lib/find-domains/layers/with-ordering-metadata";
 import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import {
@@ -14,7 +15,7 @@ import { db } from "@/lib/db";
 import { makeLogger } from "@/lib/logger";
 
 import { DomainCursor } from "./domain-cursor";
-import { cursorFilter, type DomainsCTE, isEffectiveDesc, orderFindDomains } from "./find-domains";
+import { cursorFilter, isEffectiveDesc, orderFindDomains } from "./find-domains-resolver-helpers";
 import type {
   DomainOrderValue,
   DomainWithOrderValue,
@@ -43,7 +44,7 @@ function getOrderValueFromResult(
 
 /**
  * GraphQL API resolver for domain connection queries. Accepts a pre-built domains CTE
- * (output of withOrderingMetadata) and handles cursor-based pagination, ordering, and
+ * ({@link DomainsWithOrderingMetadata}) and handles cursor-based pagination, ordering, and
  * dataloader loading.
  *
  * Used by Query.domains, Account.domains, Registry.domains, and Domain.subdomains.
@@ -58,8 +59,8 @@ export function resolveFindDomains(
     order,
     ...connectionArgs
   }: {
-    /** Pre-built domains CTE from composing layers (withOrderingMetadata output) */
-    domains: DomainsCTE;
+    /** Pre-built domains CTE from `withOrderingMetadata` */
+    domains: DomainsWithOrderingMetadata;
     /** Optional ordering; defaults to NAME ASC */
     order?: FindDomainsOrderArg | undefined | null;
 

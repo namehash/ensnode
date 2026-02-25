@@ -1,17 +1,17 @@
 import { asc, desc, type SQL, sql } from "drizzle-orm";
 
 import type { DomainCursor } from "@/graphql-api/lib/find-domains/domain-cursor";
-import type { withOrderingMetadata } from "@/graphql-api/lib/find-domains/layers/with-ordering-metadata";
+import type { DomainsWithOrderingMetadata } from "@/graphql-api/lib/find-domains/layers/with-ordering-metadata";
 import type { DomainsOrderBy } from "@/graphql-api/schema/domain";
 import type { OrderDirection } from "@/graphql-api/schema/order-direction";
-
-/** Type of the domains CTE produced by withOrderingMetadata. */
-export type DomainsCTE = ReturnType<typeof withOrderingMetadata>;
 
 /**
  * Get the order column for a given DomainsOrderBy value.
  */
-function getOrderColumn(domains: DomainsCTE, orderBy: typeof DomainsOrderBy.$inferType) {
+function getOrderColumn(
+  domains: DomainsWithOrderingMetadata,
+  orderBy: typeof DomainsOrderBy.$inferType,
+) {
   return {
     NAME: domains.sortableLabel,
     REGISTRATION_TIMESTAMP: domains.registrationTimestamp,
@@ -36,7 +36,7 @@ function getOrderColumn(domains: DomainsCTE, orderBy: typeof DomainsOrderBy.$inf
  * @returns SQL expression for the cursor filter
  */
 export function cursorFilter(
-  domains: DomainsCTE,
+  domains: DomainsWithOrderingMetadata,
   cursor: DomainCursor,
   queryOrderBy: typeof DomainsOrderBy.$inferType,
   queryOrderDir: typeof OrderDirection.$inferType,
@@ -102,7 +102,7 @@ export function isEffectiveDesc(
 }
 
 export function orderFindDomains(
-  domains: DomainsCTE,
+  domains: DomainsWithOrderingMetadata,
   orderBy: typeof DomainsOrderBy.$inferType,
   orderDir: typeof OrderDirection.$inferType,
   inverted: boolean,

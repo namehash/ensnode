@@ -1,6 +1,6 @@
 import { eq, isNotNull, isNull, or } from "drizzle-orm";
 
-import { getCanonicalRegistriesCTE } from "@/graphql-api/lib/canonical-registries-cte";
+import { getCanonicalRegistriesCTE } from "@/graphql-api/lib/find-domains/canonical-registries-cte";
 import {
   type BaseDomainSet,
   selectBase,
