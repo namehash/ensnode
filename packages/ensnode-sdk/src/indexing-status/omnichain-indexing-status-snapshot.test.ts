@@ -17,6 +17,7 @@ import {
   type ChainIndexingStatusSnapshotQueued,
 } from "./chain-indexing-status-snapshot";
 import {
+  buildOmnichainIndexingStatusSnapshot,
   getOmnichainIndexingCursor,
   getOmnichainIndexingStatus,
   OmnichainIndexingStatusIds,
@@ -293,6 +294,175 @@ describe("getOmnichainIndexingCursor", () => {
   it("throws error when no chains were provided", () => {
     expect(() => getOmnichainIndexingCursor([])).toThrowError(
       /Unable to determine omnichain indexing cursor/,
+    );
+  });
+});
+
+describe("buildOmnichainIndexingStatusSnapshot()", () => {
+  it("returns Unstarted status when all chains are Queued", () => {
+    const chainStatusSnapshots = new Map([
+      [
+        1,
+        {
+          chainStatus: ChainIndexingStatusIds.Queued,
+          config: {
+            configType: ChainIndexingConfigTypeIds.Indefinite,
+            startBlock: earliestBlockRef,
+          },
+        } satisfies ChainIndexingStatusSnapshotQueued,
+      ],
+      [
+        8453,
+        {
+          chainStatus: ChainIndexingStatusIds.Queued,
+          config: {
+            configType: ChainIndexingConfigTypeIds.Definite,
+            startBlock: earlierBlockRef,
+            endBlock: latestBlockRef,
+          },
+        } satisfies ChainIndexingStatusSnapshotQueued,
+      ],
+    ]);
+
+    const result = buildOmnichainIndexingStatusSnapshot(chainStatusSnapshots);
+
+    expect(result).toStrictEqual({
+      omnichainStatus: OmnichainIndexingStatusIds.Unstarted,
+      chains: chainStatusSnapshots,
+      omnichainIndexingCursor: earliestBlockRef.timestamp - 1,
+    });
+  });
+
+  it("returns Backfill status when at least one chain is Backfill and none are Following", () => {
+    const evenLaterBlockRef: BlockRef = {
+      timestamp: latestBlockRef.timestamp + 1000,
+      number: latestBlockRef.number + 1000,
+    };
+
+    const chainStatusSnapshots = new Map([
+      [
+        1,
+        {
+          chainStatus: ChainIndexingStatusIds.Queued,
+          config: {
+            configType: ChainIndexingConfigTypeIds.Indefinite,
+            startBlock: evenLaterBlockRef,
+          },
+        } satisfies ChainIndexingStatusSnapshotQueued,
+      ],
+      [
+        8453,
+        {
+          chainStatus: ChainIndexingStatusIds.Backfill,
+          config: {
+            configType: ChainIndexingConfigTypeIds.Definite,
+            startBlock: earliestBlockRef,
+            endBlock: latestBlockRef,
+          },
+          latestIndexedBlock: earlierBlockRef,
+          backfillEndBlock: latestBlockRef,
+        } satisfies ChainIndexingStatusSnapshotBackfill,
+      ],
+      [
+        10,
+        {
+          chainStatus: ChainIndexingStatusIds.Completed,
+          config: {
+            configType: ChainIndexingConfigTypeIds.Definite,
+            startBlock: earlierBlockRef,
+            endBlock: latestBlockRef,
+          },
+          latestIndexedBlock: latestBlockRef,
+        } satisfies ChainIndexingStatusSnapshotCompleted,
+      ],
+    ]);
+
+    const result = buildOmnichainIndexingStatusSnapshot(chainStatusSnapshots);
+
+    expect(result).toStrictEqual({
+      omnichainStatus: OmnichainIndexingStatusIds.Backfill,
+      chains: chainStatusSnapshots,
+      omnichainIndexingCursor: latestBlockRef.timestamp,
+    });
+  });
+
+  it("returns Following status when at least one chain is Following", () => {
+    const chainStatusSnapshots = new Map([
+      [
+        1,
+        {
+          chainStatus: ChainIndexingStatusIds.Backfill,
+          config: {
+            configType: ChainIndexingConfigTypeIds.Indefinite,
+            startBlock: earliestBlockRef,
+          },
+          latestIndexedBlock: earlierBlockRef,
+          backfillEndBlock: laterBlockRef,
+        } satisfies ChainIndexingStatusSnapshotBackfill,
+      ],
+      [
+        8453,
+        {
+          chainStatus: ChainIndexingStatusIds.Following,
+          config: {
+            configType: ChainIndexingConfigTypeIds.Indefinite,
+            startBlock: earlierBlockRef,
+          },
+          latestIndexedBlock: laterBlockRef,
+          latestKnownBlock: latestBlockRef,
+        } satisfies ChainIndexingStatusSnapshotFollowing,
+      ],
+    ]);
+
+    const result = buildOmnichainIndexingStatusSnapshot(chainStatusSnapshots);
+
+    expect(result).toStrictEqual({
+      omnichainStatus: OmnichainIndexingStatusIds.Following,
+      chains: chainStatusSnapshots,
+      omnichainIndexingCursor: laterBlockRef.timestamp,
+    });
+  });
+
+  it("returns Completed status when all chains are Completed", () => {
+    const chainStatusSnapshots = new Map([
+      [
+        1,
+        {
+          chainStatus: ChainIndexingStatusIds.Completed,
+          config: {
+            configType: ChainIndexingConfigTypeIds.Definite,
+            startBlock: earliestBlockRef,
+            endBlock: laterBlockRef,
+          },
+          latestIndexedBlock: laterBlockRef,
+        } satisfies ChainIndexingStatusSnapshotCompleted,
+      ],
+      [
+        8453,
+        {
+          chainStatus: ChainIndexingStatusIds.Completed,
+          config: {
+            configType: ChainIndexingConfigTypeIds.Definite,
+            startBlock: earlierBlockRef,
+            endBlock: latestBlockRef,
+          },
+          latestIndexedBlock: latestBlockRef,
+        } satisfies ChainIndexingStatusSnapshotCompleted,
+      ],
+    ]);
+
+    const result = buildOmnichainIndexingStatusSnapshot(chainStatusSnapshots);
+
+    expect(result).toStrictEqual({
+      omnichainStatus: OmnichainIndexingStatusIds.Completed,
+      chains: chainStatusSnapshots,
+      omnichainIndexingCursor: latestBlockRef.timestamp,
+    });
+  });
+
+  it("throws an error when no chain snapshots are provided", () => {
+    expect(() => buildOmnichainIndexingStatusSnapshot(new Map())).toThrowError(
+      /At least one chain indexing status snapshot is required to build an OmnichainIndexingStatusSnapshot/,
     );
   });
 });
