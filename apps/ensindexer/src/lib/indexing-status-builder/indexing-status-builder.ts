@@ -24,6 +24,7 @@ import {
   type ChainIndexingStatus,
   isBlockRefEqualTo,
   type LocalChainIndexingMetrics,
+  type LocalChainIndexingMetricsHistorical,
   type LocalPonderClient,
 } from "@ensnode/ponder-sdk";
 
@@ -40,9 +41,6 @@ export class IndexingStatusBuilder {
 
   /**
    * Get Omnichain Indexing Status Snapshot
-   *
-   * @returns Omnichain indexing status snapshot representing
-   *          the current indexing status of all indexed chains.
    */
   async getOmnichainIndexingStatusSnapshot(): Promise<OmnichainIndexingStatusSnapshot> {
     const [localPonderIndexingMetrics, localPonderStatus] = await Promise.all([
@@ -52,9 +50,11 @@ export class IndexingStatusBuilder {
 
     // Fetch the chains indexing block refs if not already cached.
     if (!this._chainsIndexingBlockRefs) {
-      this._chainsIndexingBlockRefs = await this.fetchChainsIndexingBlockRefs(
-        localPonderIndexingMetrics.chains,
-      );
+      const chainsIndexingMetrics = localPonderIndexingMetrics.chains;
+      this.assertChainsIndexingMetricsHistorical(chainsIndexingMetrics);
+
+      this._chainsIndexingBlockRefs =
+        await this.fetchChainsIndexingBlockRefs(chainsIndexingMetrics);
     }
 
     const chainStatusSnapshots = this.buildChainIndexingStatusSnapshots(
@@ -72,7 +72,9 @@ export class IndexingStatusBuilder {
    * @param chainIndexingMetrics - Indexing metrics for all indexed chains.
    * @param chainIndexingStatuses - Indexing statuses for all indexed chains.
    * @param chainsIndexingBlockRefs - Block references for all indexed chains.
+   *
    * @returns A map of chain IDs to their corresponding indexing status snapshots.
+   *
    * @throws Error if required data for any chain is missing or if any of the invariants are violated.
    */
   private buildChainIndexingStatusSnapshots(
@@ -162,28 +164,46 @@ export class IndexingStatusBuilder {
   }
 
   /**
+   * Assert Chains Indexing Metrics Historical
+   *
+   * This method asserts that all chains indexing metrics are historical,
+   * which is a necessary condition for fetching the block refs for
+   * the chains with {@link fetchChainsIndexingBlockRefs}.
+   *
+   * @param chainsIndexingMetrics The chains indexing metrics to assert as historical.
+   */
+  private assertChainsIndexingMetricsHistorical(
+    chainsIndexingMetrics: Map<ChainId, LocalChainIndexingMetrics>,
+  ): asserts chainsIndexingMetrics is Map<ChainId, LocalChainIndexingMetricsHistorical> {
+    for (const [chainId, chainIndexingMetric] of chainsIndexingMetrics.entries()) {
+      if (chainIndexingMetric.state === ChainIndexingStates.Historical) {
+        continue;
+      }
+
+      throw new Error(
+        `Expected all chains indexing metrics to be historical for fetching block refs, but chain ID ${chainId} has state ${chainIndexingMetric.state}`,
+      );
+    }
+  }
+
+  /**
    * Fetch Chains Indexing Block Refs
    *
    * This method fetches the block refs for all indexed chains based on
    * the provided Local Ponder Indexing Metrics. It fetches the necessary block
-   * refs for each chain in parallel and stores them in a map for later use
-   * in building the Omnichain Indexing Status Snapshot.
+   * refs for each chain and stores them in a map for later use while building
+   * the Omnichain Indexing Status Snapshot.
    *
-   * @param localChainsIndexingMetrics The Local Ponder Indexing Metrics for all indexed chains.
+   * @param localChainsIndexingMetrics The Local Ponder Indexing Metrics Historical for all indexed chains.
    * @returns A map of chain IDs to their corresponding block refs.
-   * @throws Error if any of the invariants are violated during the fetching of block refs.
+   * @throws Error if fetching any of the block refs fails.
    */
   private async fetchChainsIndexingBlockRefs(
-    localChainsIndexingMetrics: Map<ChainId, LocalChainIndexingMetrics>,
+    localChainsIndexingMetrics: Map<ChainId, LocalChainIndexingMetricsHistorical>,
   ): Promise<Map<ChainId, ChainIndexingBlockRefs>> {
     const chainsIndexingBlockRefs = new Map<ChainId, ChainIndexingBlockRefs>();
 
     for (const [chainId, chainIndexingMetric] of localChainsIndexingMetrics.entries()) {
-      if (chainIndexingMetric.state !== ChainIndexingStates.Historical) {
-        throw new Error(
-          `Expected historical indexing metrics for chain ID ${chainId}, but got state ${chainIndexingMetric.state}`,
-        );
-      }
       const { backfillEndBlock } = chainIndexingMetric;
       const { startBlock, endBlock } = this.localPonderClient.getChainBlockrange(chainId);
 
@@ -217,9 +237,11 @@ export class IndexingStatusBuilder {
   ): Promise<ChainIndexingBlockRefs> {
     const [startBlock, endBlock, backfillEndBlock] = await Promise.all([
       this.fetchBlockRef(chainId, chainIndexingBlocks.startBlock),
-      chainIndexingBlocks.endBlock
+
+      typeof chainIndexingBlocks.endBlock === "number"
         ? this.fetchBlockRef(chainId, chainIndexingBlocks.endBlock)
         : null,
+
       this.fetchBlockRef(chainId, chainIndexingBlocks.backfillEndBlock),
     ]);
 

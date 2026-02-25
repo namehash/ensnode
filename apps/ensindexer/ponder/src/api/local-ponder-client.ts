@@ -9,7 +9,7 @@ import { type ChainId, LocalPonderClient } from "@ensnode/ponder-sdk";
 import { buildChainsBlockrange } from "@/config/chains-blockrange";
 
 /**
- * Builds a map of cached public clients based the Ponder public clients.
+ * Builds a map of cached public clients based on the Ponder public clients.
  *
  * Invariants:
  * - all chain IDs in the Ponder public clients can be deserialized,

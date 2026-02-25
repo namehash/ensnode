@@ -1,13 +1,13 @@
 import type { BlockNumber } from "./blocks";
 import type { ChainId } from "./chains";
-import {
+import type {
   ChainIndexingMetrics,
-  type ChainIndexingMetricsCompleted,
-  type ChainIndexingMetricsHistorical,
-  type ChainIndexingMetricsRealtime,
-  type PonderIndexingMetrics,
+  ChainIndexingMetricsCompleted,
+  ChainIndexingMetricsHistorical,
+  ChainIndexingMetricsRealtime,
+  PonderIndexingMetrics,
 } from "./indexing-metrics";
-import { LocalPonderClient } from "./local-ponder-client";
+import type { LocalPonderClient } from "./local-ponder-client";
 
 /**
  * Local Chain Indexing Metrics Historical

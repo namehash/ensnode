@@ -38,10 +38,12 @@ export class LocalPonderClient extends PonderClient {
   }
 
   /**
-   * Get the block range for a specific chain ID.
-   * @param chainId The chain ID for which to retrieve the block range.
-   * @returns The block range for the specified chain ID.
-   * @throws Error if no block range is found for the specified chain ID.
+   * Get the blockrange for a specific chain ID.
+   *
+   * @param chainId The chain ID for which to retrieve the blockrange.
+   *
+   * @returns The blockrange for the specified chain ID.
+   * @throws Error if no blockrange is found for the specified chain ID.
    */
   getChainBlockrange(chainId: ChainId): BlockrangeWithStartBlock {
     const blockrange = this.chainsBlockrange.get(chainId);

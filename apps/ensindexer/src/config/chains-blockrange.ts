@@ -1,5 +1,6 @@
 import { type ContractConfig, type ENSNamespace, getENSNamespace } from "@ensnode/datasources";
 import type {
+  BlockNumber,
   BlockrangeWithStartBlock,
   ChainId,
   ENSNamespaceId,
@@ -12,9 +13,8 @@ import { getPlugin } from "@/plugins";
  * Build a map of indexed chains to their corresponding blockranges,
  * based on the ENSIndexer configuration.
  *
- * @param namespace The ENS Namespace ID.
- * @param plugins The list of active plugin names.
- * @returns A map of chain IDs to their corresponding blockranges.
+ * Useful for presenting a clear view of the blockranges being indexed
+ * across chains.
  */
 export function buildChainsBlockrange(
   namespace: ENSNamespaceId,
@@ -57,14 +57,21 @@ function buildChainBlockrange(
   contract: ContractConfig,
   currentBlockrange?: BlockrangeWithStartBlock,
 ): BlockrangeWithStartBlock {
-  const startBlock = currentBlockrange
-    ? Math.min(currentBlockrange.startBlock, contract.startBlock)
-    : contract.startBlock;
+  let startBlock: BlockNumber;
 
-  const endBlock =
-    currentBlockrange?.endBlock && contract.endBlock
-      ? Math.max(currentBlockrange.endBlock, contract.endBlock)
-      : contract.endBlock;
+  if (currentBlockrange !== undefined) {
+    startBlock = Math.min(currentBlockrange.startBlock, contract.startBlock);
+  } else {
+    startBlock = contract.startBlock;
+  }
+
+  let endBlock: BlockNumber | undefined;
+
+  if (currentBlockrange?.endBlock !== undefined && contract.endBlock !== undefined) {
+    endBlock = Math.max(currentBlockrange.endBlock, contract.endBlock);
+  } else {
+    endBlock = currentBlockrange?.endBlock ?? contract.endBlock;
+  }
 
   return { startBlock, endBlock };
 }
