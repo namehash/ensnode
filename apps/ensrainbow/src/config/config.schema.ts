@@ -74,7 +74,6 @@ export interface ServeCommandCliArgs {
 
 /**
  * Parses and validates a data-dir string (e.g. from CLI). Use for any command that accepts --data-dir.
- * @throws Error with prettified Zod message if invalid (empty, whitespace-only, etc.)
  */
 export function parseDataDirFromCli(value: string): string {
   try {

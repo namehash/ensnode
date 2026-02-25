@@ -10,16 +10,20 @@ const INPUT_FILE_ERROR_MESSAGE =
  * @throws Error with a user-friendly message if the file does not exist or is not readable
  */
 export function assertInputFileReadable(path: string): void {
+  let stats: ReturnType<typeof statSync>;
   try {
-    const stats = statSync(path);
-    if (!stats.isFile()) {
-      throw new Error(`Input path is not a file: ${path}. ${INPUT_FILE_ERROR_MESSAGE}`);
-    }
+    stats = statSync(path);
+  } catch {
+    throw new Error(`${path}: ${INPUT_FILE_ERROR_MESSAGE}`);
+  }
+
+  if (!stats.isFile()) {
+    throw new Error(`Input path is not a file: ${path}. ${INPUT_FILE_ERROR_MESSAGE}`);
+  }
+
+  try {
     accessSync(path, constants.R_OK);
-  } catch (error) {
-    if (error instanceof Error && error.message.startsWith("Input path is not a file:")) {
-      throw error;
-    }
+  } catch {
     throw new Error(`${path}: ${INPUT_FILE_ERROR_MESSAGE}`);
   }
 }
