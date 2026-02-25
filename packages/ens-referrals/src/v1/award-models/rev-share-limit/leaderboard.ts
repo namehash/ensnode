@@ -75,9 +75,6 @@ interface ReferrerRaceState {
   totalReferrals: number;
   totalIncrementalDuration: Duration;
   totalRevenueContributionAmount: bigint;
-  totalBaseRevenueContributionAmount: bigint;
-  /** Accumulated standard award (qualifiedRevenueShare × baseRevenue), regardless of pool. */
-  accumulatedStandardAwardAmount: bigint;
   /** Whether this referrer has ever crossed the qualification threshold. */
   wasQualified: boolean;
   /** Amount actually claimed from the award pool. */
@@ -124,47 +121,49 @@ export const buildReferrerLeaderboardRevShareLimit = (
         totalReferrals: 0,
         totalIncrementalDuration: 0,
         totalRevenueContributionAmount: 0n,
-        totalBaseRevenueContributionAmount: 0n,
-        accumulatedStandardAwardAmount: 0n,
         wasQualified: false,
         qualifiedAwardValueAmount: 0n,
       };
       referrerStates.set(referrer, state);
     }
 
-    // Compute incremental base revenue: BASE_REVENUE_CONTRIBUTION_PER_YEAR × (duration / SECONDS_PER_YEAR)
-    const incrementalBaseRevenueAmount =
-      (BASE_REVENUE_CONTRIBUTION_PER_YEAR.amount * BigInt(event.incrementalDuration)) /
-      BigInt(SECONDS_PER_YEAR);
-
-    // Compute incremental standard award: qualifiedRevenueShare × incrementalBaseRevenue
-    const incrementalStandardAwardAmount = scalePrice(
-      priceUsdc(incrementalBaseRevenueAmount),
-      rules.qualifiedRevenueShare,
-    ).amount;
-
-    // Update running totals.
+    // Update raw totals.
     state.totalReferrals += 1;
     state.totalIncrementalDuration += event.incrementalDuration;
     state.totalRevenueContributionAmount += event.incrementalRevenueContribution.amount;
-    state.totalBaseRevenueContributionAmount += incrementalBaseRevenueAmount;
-    state.accumulatedStandardAwardAmount += incrementalStandardAwardAmount;
+
+    // Compute totalBaseRevenue from aggregated duration (single division — avoids per-event
+    // truncation that would compound into a sum lower than the correct aggregated value).
+    const totalBaseRevenueAmount =
+      (BASE_REVENUE_CONTRIBUTION_PER_YEAR.amount * BigInt(state.totalIncrementalDuration)) /
+      BigInt(SECONDS_PER_YEAR);
 
     // Determine if newly qualifying or already qualified.
-    const isNowQualified =
-      state.totalBaseRevenueContributionAmount >= rules.minQualifiedRevenueContribution.amount;
+    const isNowQualified = totalBaseRevenueAmount >= rules.minQualifiedRevenueContribution.amount;
 
     if (isNowQualified && !state.wasQualified) {
       // First time crossing the qualification threshold: claim all accumulated standard award.
+      // Compute from aggregated totals to match the single-division used in final output.
+      const accumulatedStandardAwardAmount = scalePrice(
+        priceUsdc(totalBaseRevenueAmount),
+        rules.qualifiedRevenueShare,
+      ).amount;
       const claimAmount =
-        state.accumulatedStandardAwardAmount < poolRemainingAmount
-          ? state.accumulatedStandardAwardAmount
+        accumulatedStandardAwardAmount < poolRemainingAmount
+          ? accumulatedStandardAwardAmount
           : poolRemainingAmount;
       state.qualifiedAwardValueAmount += claimAmount;
       poolRemainingAmount -= claimAmount;
       state.wasQualified = true;
     } else if (state.wasQualified) {
       // Already qualified: claim this event's incremental standard award.
+      const incrementalBaseRevenueAmount =
+        (BASE_REVENUE_CONTRIBUTION_PER_YEAR.amount * BigInt(event.incrementalDuration)) /
+        BigInt(SECONDS_PER_YEAR);
+      const incrementalStandardAwardAmount = scalePrice(
+        priceUsdc(incrementalBaseRevenueAmount),
+        rules.qualifiedRevenueShare,
+      ).amount;
       const claimAmount =
         incrementalStandardAwardAmount < poolRemainingAmount
           ? incrementalStandardAwardAmount
@@ -189,17 +188,10 @@ export const buildReferrerLeaderboardRevShareLimit = (
       return stateB.qualifiedAwardValueAmount > stateA.qualifiedAwardValueAmount ? 1 : -1;
     }
 
-    // Secondary: standardAwardValue = qualifiedRevenueShare × totalBaseRevenue, desc
-    const standardA = scalePrice(
-      priceUsdc(stateA.totalBaseRevenueContributionAmount),
-      rules.qualifiedRevenueShare,
-    ).amount;
-    const standardB = scalePrice(
-      priceUsdc(stateB.totalBaseRevenueContributionAmount),
-      rules.qualifiedRevenueShare,
-    ).amount;
-    if (standardB !== standardA) {
-      return standardB > standardA ? 1 : -1;
+    // Secondary: totalIncrementalDuration desc — monotonically equivalent to standardAwardValue desc
+    // and avoids recomputing scalePrice for every comparison pair.
+    if (stateB.totalIncrementalDuration !== stateA.totalIncrementalDuration) {
+      return stateB.totalIncrementalDuration - stateA.totalIncrementalDuration;
     }
 
     // Tertiary: referrer address desc (lexicographic)

@@ -12,7 +12,6 @@ import type { ReferrerScore } from "../shared/score";
  *
  * @param totalIncrementalDuration - The total incremental duration (in seconds)
  * of referrals made by a referrer within the {@link ReferralProgramRulesPieSplit}.
- * @returns The score of the referrer.
  */
 export const calcReferrerScorePieSplit = (totalIncrementalDuration: Duration): ReferrerScore => {
   return totalIncrementalDuration / SECONDS_PER_YEAR;

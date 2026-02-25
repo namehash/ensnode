@@ -60,7 +60,6 @@ export function calcReferrerFinalScoreMultiplierPieSplit(
  * @param totalIncrementalDuration - The total incremental duration (in seconds)
  * of referrals made by the referrer within the `rules`.
  * @param rules - The pie-split rules of the referral program.
- * @returns The final score of the referrer.
  */
 export function calcReferrerFinalScorePieSplit(
   rank: ReferrerRank,

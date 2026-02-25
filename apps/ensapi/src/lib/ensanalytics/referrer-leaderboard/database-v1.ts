@@ -137,8 +137,10 @@ export const getReferralEvents = async (rules: ReferralProgramRules): Promise<Re
         asc(schema.registrarActions.transactionHash),
       );
 
-    // Type assertion: The WHERE clause in the query above guarantees non-null values for:
-    // 1. `referrer` is guaranteed to be non-null due to isNotNull filter
+    // Type assertion: All fields in NonNullRecord are guaranteed non-null:
+    // 1. `referrer` is guaranteed non-null by isNotNull WHERE filter
+    // 2. `timestamp`, `blockNumber`, `transactionHash`, `incrementalDuration` are guaranteed non-null by database schema constraints (NOT NULL columns)
+    // 3. `total` is guaranteed non-null by COALESCE with 0
     interface NonNullRecord {
       referrer: Address;
       timestamp: bigint;

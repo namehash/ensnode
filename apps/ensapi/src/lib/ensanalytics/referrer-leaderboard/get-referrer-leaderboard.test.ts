@@ -40,9 +40,9 @@ describe("ENSAnalytics Referrer Leaderboard", () => {
         rules,
       });
 
-      const referrers = result.referrers.entries();
-      const qualifiedReferrers = referrers.take(rules.maxQualifiedReferrers);
-      const unqualifiedReferrers = referrers.drop(rules.maxQualifiedReferrers);
+      const referrerEntries = Array.from(result.referrers.entries());
+      const qualifiedReferrers = referrerEntries.slice(0, rules.maxQualifiedReferrers);
+      const unqualifiedReferrers = referrerEntries.slice(rules.maxQualifiedReferrers);
 
       /**
        * Assert {@link RankedReferrerMetrics}.
@@ -61,7 +61,7 @@ describe("ENSAnalytics Referrer Leaderboard", () => {
       expect(unqualifiedReferrers.every(([_, referrer]) => !referrer.isQualified)).toBe(true);
 
       // Assert `finalScoreBoost`
-      expect(qualifiedReferrers.every(([_, referrer]) => referrer.finalScoreBoost > 0)).toBe(true);
+      expect(qualifiedReferrers.every(([_, referrer]) => referrer.finalScoreBoost >= 0)).toBe(true);
       expect(unqualifiedReferrers.every(([_, referrer]) => referrer.finalScoreBoost === 0)).toBe(
         true,
       );

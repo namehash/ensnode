@@ -159,10 +159,7 @@ export const calcReferrerAwardPoolSharePieSplit = (
   if (!isReferrerQualifiedPieSplit(referrer.rank, rules)) return 0;
   if (aggregatedMetrics.grandTotalQualifiedReferrersFinalScore === 0) return 0;
 
-  return (
-    calcReferrerFinalScorePieSplit(referrer.rank, referrer.totalIncrementalDuration, rules) /
-    aggregatedMetrics.grandTotalQualifiedReferrersFinalScore
-  );
+  return referrer.finalScore / aggregatedMetrics.grandTotalQualifiedReferrersFinalScore;
 };
 
 /**

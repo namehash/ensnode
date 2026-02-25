@@ -15,10 +15,6 @@ import type { ReferralProgramRulesRevShareLimit } from "./rules";
  *
  * Includes the referrer's awarded metrics from the leaderboard plus timestamp.
  *
- * Invariants:
- * - `type` is always {@link ReferrerEditionMetricsTypeIds.Ranked}.
- * - `awardModel` is always {@link ReferralProgramAwardModels.RevShareLimit} and equals `rules.awardModel`.
- *
  * @see {@link AwardedReferrerMetricsRevShareLimit}
  */
 export interface ReferrerEditionMetricsRankedRevShareLimit {
@@ -68,10 +64,6 @@ export interface ReferrerEditionMetricsRankedRevShareLimit {
  * Referrer edition metrics data for a specific referrer address NOT on the rev-share-limit leaderboard.
  *
  * Includes the referrer's unranked metrics (with null rank and isQualified: false) plus timestamp.
- *
- * Invariants:
- * - `type` is always {@link ReferrerEditionMetricsTypeIds.Unranked}.
- * - `awardModel` is always {@link ReferralProgramAwardModels.RevShareLimit} and equals `rules.awardModel`.
  *
  * @see {@link UnrankedReferrerMetricsRevShareLimit}
  */

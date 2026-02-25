@@ -78,8 +78,6 @@ export interface AwardedReferrerMetricsRevShareLimit extends RankedReferrerMetri
    *
    * Represents what the referrer would receive if the pool were unlimited.
    * Independent of the pool state.
-   *
-   * @invariant Guaranteed to be a valid PriceUsdc with non-negative amount (>= 0n)
    */
   standardAwardValue: PriceUsdc;
 
