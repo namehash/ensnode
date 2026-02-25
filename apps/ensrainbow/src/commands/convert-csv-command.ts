@@ -16,6 +16,7 @@ import { labelhash } from "viem";
 import { type LabelHash, type LabelSetId, labelHashToBytes } from "@ensnode/ensnode-sdk";
 
 import { ENSRainbowDB } from "../lib/database.js";
+import { assertInputFileReadable } from "../utils/input-file.js";
 import { logger } from "../utils/logger.js";
 import {
   CURRENT_ENSRAINBOW_FILE_FORMAT_VERSION,
@@ -546,6 +547,8 @@ async function processCSVFile(
  * Main CSV conversion command with true streaming using fast-csv
  */
 export async function convertCsvCommand(options: ConvertCsvCommandOptions): Promise<void> {
+  assertInputFileReadable(options.inputFile);
+
   // Get label set version from existing database or default to 0
   // This also opens the database if needed, and we'll reuse that connection
   const { version: labelSetVersion, existingDb: openedDb } = await getLabelSetVersionAndDatabase(
