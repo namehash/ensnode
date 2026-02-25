@@ -8,6 +8,11 @@ import type { DomainId } from "@ensnode/ensnode-sdk";
 import { db } from "@/lib/db";
 
 /**
+ * The type of the base domain set subquery.
+ */
+export type BaseDomainSet = ReturnType<typeof domainsBase>;
+
+/**
  * Universal base domain set: all v1 and v2 domains with consistent metadata.
  *
  * Returns {domainId, ownerId, registryId, parentId, labelHash, sortableLabel} where:
@@ -63,9 +68,6 @@ export function domainsBase() {
       .leftJoin(schema.label, eq(schema.label.labelHash, schema.v2Domain.labelHash)),
   ).as("baseDomains");
 }
-
-/** The type of the base domain set subquery. */
-export type BaseDomainSet = ReturnType<typeof domainsBase>;
 
 /**
  * Select all columns from a base domain set subquery. Use this in filter layers

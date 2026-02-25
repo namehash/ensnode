@@ -9,11 +9,9 @@ import {
   parsePartialInterpretedName,
 } from "@ensnode/ensnode-sdk";
 
-import {
-  type BaseDomainSet,
-  selectBase,
-} from "@/graphql-api/lib/find-domains/layers/base-domain-set";
 import { db } from "@/lib/db";
+
+import { type BaseDomainSet, selectBase } from "./base-domain-set";
 
 /**
  * Maximum depth of the provided `name` argument, to avoid infinite loops and expensive queries.

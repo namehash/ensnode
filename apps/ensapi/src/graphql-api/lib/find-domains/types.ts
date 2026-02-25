@@ -24,15 +24,3 @@ export interface FindDomainsOrderArg {
  * @dev Relevant to composite DomainCursor encoding, see `domain-cursor.ts`
  */
 export type DomainWithOrderValue = Domain & { __orderValue: DomainOrderValue };
-
-/**
- * Result row from domains CTE. Includes columns for all supported orderings.
- *
- * @dev see `withOrderingMetadata`
- */
-export type FindDomainsResult = {
-  id: DomainId;
-  sortableLabel: string | null;
-  registrationTimestamp: bigint | null;
-  registrationExpiry: bigint | null;
-};

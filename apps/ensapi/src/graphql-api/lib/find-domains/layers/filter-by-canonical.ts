@@ -1,11 +1,9 @@
 import { eq, isNotNull, isNull, or } from "drizzle-orm";
 
-import { getCanonicalRegistriesCTE } from "@/graphql-api/lib/find-domains/canonical-registries-cte";
-import {
-  type BaseDomainSet,
-  selectBase,
-} from "@/graphql-api/lib/find-domains/layers/base-domain-set";
 import { db } from "@/lib/db";
+
+import { getCanonicalRegistriesCTE } from "../canonical-registries-cte";
+import { type BaseDomainSet, selectBase } from "./base-domain-set";
 
 /**
  * Filter a base domain set to only include Canonical Domains.

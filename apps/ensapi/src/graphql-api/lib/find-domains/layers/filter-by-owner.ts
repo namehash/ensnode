@@ -1,11 +1,9 @@
 import { eq } from "drizzle-orm";
 import type { Address } from "viem";
 
-import {
-  type BaseDomainSet,
-  selectBase,
-} from "@/graphql-api/lib/find-domains/layers/base-domain-set";
 import { db } from "@/lib/db";
+
+import { type BaseDomainSet, selectBase } from "./base-domain-set";
 
 /**
  * Filter a base domain set by owner address.

@@ -3,10 +3,23 @@ import { and, eq, sql } from "drizzle-orm";
 import * as schema from "@ensnode/ensnode-schema";
 import type { DomainId } from "@ensnode/ensnode-sdk";
 
-import type { BaseDomainSet } from "@/graphql-api/lib/find-domains/layers/base-domain-set";
 import { db } from "@/lib/db";
 
+import type { BaseDomainSet } from "./base-domain-set";
+
 export type DomainsWithOrderingMetadata = ReturnType<typeof withOrderingMetadata>;
+
+/**
+ * Type of row from `withOrderingMetadata`
+ *
+ * @dev should be able to derive this from drizzle, right??
+ */
+export type DomainsWithOrderingMetadataResult = {
+  id: DomainId;
+  sortableLabel: string | null;
+  registrationTimestamp: bigint | null;
+  registrationExpiry: bigint | null;
+};
 
 /**
  * Enrich a base domain set with ordering metadata.

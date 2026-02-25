@@ -2,7 +2,10 @@ import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@poth
 import { and } from "drizzle-orm";
 
 import type { context as createContext } from "@/graphql-api/context";
-import type { DomainsWithOrderingMetadata } from "@/graphql-api/lib/find-domains/layers/with-ordering-metadata";
+import type {
+  DomainsWithOrderingMetadata,
+  DomainsWithOrderingMetadataResult,
+} from "@/graphql-api/lib/find-domains/layers/with-ordering-metadata";
 import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import {
@@ -16,12 +19,7 @@ import { makeLogger } from "@/lib/logger";
 
 import { DomainCursor } from "./domain-cursor";
 import { cursorFilter, isEffectiveDesc, orderFindDomains } from "./find-domains-resolver-helpers";
-import type {
-  DomainOrderValue,
-  DomainWithOrderValue,
-  FindDomainsOrderArg,
-  FindDomainsResult,
-} from "./types";
+import type { DomainOrderValue, DomainWithOrderValue, FindDomainsOrderArg } from "./types";
 
 const logger = makeLogger("find-domains-resolver");
 
@@ -29,7 +27,7 @@ const logger = makeLogger("find-domains-resolver");
  * Extract the order value from a findDomains result row based on the orderBy field.
  */
 function getOrderValueFromResult(
-  result: FindDomainsResult,
+  result: DomainsWithOrderingMetadataResult,
   orderBy: typeof DomainsOrderBy.$inferType,
 ): DomainOrderValue {
   switch (orderBy) {

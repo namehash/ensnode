@@ -2,11 +2,9 @@ import { eq } from "drizzle-orm";
 
 import type { RegistryId } from "@ensnode/ensnode-sdk";
 
-import {
-  type BaseDomainSet,
-  selectBase,
-} from "@/graphql-api/lib/find-domains/layers/base-domain-set";
 import { db } from "@/lib/db";
+
+import { type BaseDomainSet, selectBase } from "./base-domain-set";
 
 /**
  * Filter a base domain set to domains belonging to a specific registry.
