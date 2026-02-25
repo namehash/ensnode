@@ -10,6 +10,7 @@ import {
   type ReferrerLeaderboardPageContext,
   type ReferrerLeaderboardPageParams,
 } from "./award-models/shared/leaderboard-page";
+import { ReferralProgramAwardModels } from "./award-models/shared/rules";
 
 describe("buildReferrerLeaderboardPageContext", () => {
   const pageParams: ReferrerLeaderboardPageParams = {
@@ -19,9 +20,9 @@ describe("buildReferrerLeaderboardPageContext", () => {
 
   it("correctly evaluates `hasNext` when `leaderboard.referrers.size` and `recordsPerPage` are equal", () => {
     const leaderboard: ReferrerLeaderboardPieSplit = {
-      awardModel: "pie-split",
+      awardModel: ReferralProgramAwardModels.PieSplit,
       rules: {
-        awardModel: "pie-split",
+        awardModel: ReferralProgramAwardModels.PieSplit,
         totalAwardPoolValue: priceUsdc(10000n),
         maxQualifiedReferrers: 10,
         startTime: 1764547200,
@@ -107,9 +108,9 @@ describe("buildReferrerLeaderboardPageContext", () => {
 
   it("Correctly builds the pagination context when `leaderboard.referrers.size` is 0", () => {
     const leaderboard: ReferrerLeaderboardPieSplit = {
-      awardModel: "pie-split",
+      awardModel: ReferralProgramAwardModels.PieSplit,
       rules: {
-        awardModel: "pie-split",
+        awardModel: ReferralProgramAwardModels.PieSplit,
         totalAwardPoolValue: priceUsdc(10000n),
         maxQualifiedReferrers: 10,
         startTime: 1764547200,

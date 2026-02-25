@@ -7,9 +7,9 @@ import { validateUnixTimestamp } from "../../time";
  * Discriminant values for the award model used in a referral program edition.
  *
  * @remarks Clients MUST check `awardModel` before accessing model-specific fields.
- * Unrecognized `awardModel` values MUST be handled gracefully - when parsed via Zod schemas,
- * unknown award model objects are returned as `{ awardModel: string } & Record<string, unknown>`.
- * Servers may introduce new award model types at any time without breaking existing clients.
+ * Editions with unrecognized `awardModel` values are silently dropped during parsing
+ * (see `makeReferralProgramEditionConfigSetArraySchema`), so clients will only ever
+ * encounter award models listed here.
  */
 export const ReferralProgramAwardModels = {
   PieSplit: "pie-split",

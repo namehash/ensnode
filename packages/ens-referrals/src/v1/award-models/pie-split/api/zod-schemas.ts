@@ -28,7 +28,7 @@ export const makeReferralProgramRulesPieSplitSchema = (
 ) =>
   z
     .object({
-      awardModel: z.literal("pie-split"),
+      awardModel: z.literal(ReferralProgramAwardModels.PieSplit),
       totalAwardPoolValue: makePriceUsdcSchema(`${valueLabel}.totalAwardPoolValue`),
       maxQualifiedReferrers: makeNonNegativeIntegerSchema(`${valueLabel}.maxQualifiedReferrers`),
       startTime: makeUnixTimestampSchema(`${valueLabel}.startTime`),

@@ -194,12 +194,13 @@ export const validateAwardedReferrerMetricsPieSplit = (
     );
   }
 
-  if (
-    referrer.awardPoolApproxValue.amount < 0n ||
-    referrer.awardPoolApproxValue.amount > rules.totalAwardPoolValue.amount
-  ) {
+  makePriceUsdcSchema("AwardedReferrerMetricsPieSplit.awardPoolApproxValue").parse(
+    referrer.awardPoolApproxValue,
+  );
+
+  if (referrer.awardPoolApproxValue.amount > rules.totalAwardPoolValue.amount) {
     throw new Error(
-      `Invalid AwardedReferrerMetricsPieSplit: ${referrer.awardPoolApproxValue.amount.toString()}. awardPoolApproxValue must be between 0 and ${rules.totalAwardPoolValue.amount.toString()} (inclusive).`,
+      `AwardedReferrerMetricsPieSplit: awardPoolApproxValue.amount ${referrer.awardPoolApproxValue.amount.toString()} exceeds totalAwardPoolValue.amount ${rules.totalAwardPoolValue.amount.toString()}.`,
     );
   }
 };

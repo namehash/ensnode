@@ -178,7 +178,7 @@ export const buildReferrerLeaderboardRevShareLimit = (
 
   // 3. Sort referrers to assign ranks:
   //    1. qualifiedAwardValue (awardPoolApproxValue) desc — actual pool claims, race winners first
-  //    2. standardAwardValue desc — uncapped earned value, separates pool-depleted referrers
+  //    2. totalIncrementalDuration desc — tie-break for pool-depleted referrers
   //    3. referrer address desc — deterministic tie-break
   // Both `a` and `b` are keys from `referrerStates`, so lookups are always defined.
   const sortedAddresses = [...referrerStates.keys()].sort((a, b) => {
@@ -190,8 +190,7 @@ export const buildReferrerLeaderboardRevShareLimit = (
       return stateB.qualifiedAwardValueAmount > stateA.qualifiedAwardValueAmount ? 1 : -1;
     }
 
-    // Secondary: totalIncrementalDuration desc — monotonically equivalent to standardAwardValue desc
-    // and avoids recomputing scalePrice for every comparison pair.
+    // Secondary: totalIncrementalDuration desc (used directly as the tie-breaker).
     if (stateB.totalIncrementalDuration !== stateA.totalIncrementalDuration) {
       return stateB.totalIncrementalDuration - stateA.totalIncrementalDuration;
     }

@@ -31,21 +31,11 @@ import type {
 } from "./types";
 
 /**
- * Serialized representation of an unknown future award model rules object.
- * Unknown types are already JSON-safe (arrived via deserialization passthrough).
- */
-export type SerializedReferralProgramRulesUnknown = { awardModel: string } & Record<
-  string,
-  unknown
->;
-
-/**
  * Serialized representation of referral program rules (union of all award model variants).
  */
 export type SerializedReferralProgramRules =
   | SerializedReferralProgramRulesPieSplit
-  | SerializedReferralProgramRulesRevShareLimit
-  | SerializedReferralProgramRulesUnknown;
+  | SerializedReferralProgramRulesRevShareLimit;
 
 /**
  * Serialized representation of aggregated referrer metrics (union of all award model variants).

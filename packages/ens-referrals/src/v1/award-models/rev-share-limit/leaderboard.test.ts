@@ -347,6 +347,37 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       );
       expect(result.referrers.get(ADDR_B)!.awardPoolApproxValue.amount).toBe(0n);
     });
+
+    it("breaks ties by id (lexicographic) when timestamp, blockNumber, and transactionHash are identical", () => {
+      // Both events share identical timestamp, blockNumber, and transactionHash
+      // Pool = $2.50 — only enough for one
+      // id "1" < "2" lexicographically, so ADDR_A (id "1") wins
+      const SHARED_TX =
+        "0x0000000000000000000000000000000000000000000000000000000000000001" as const;
+      const rules = buildTestRules(parseUsdc("2.5"));
+      const events = [
+        {
+          ...makeEvent(ADDR_B, 1000, SECONDS_PER_YEAR),
+          blockNumber: 100n,
+          transactionHash: SHARED_TX,
+          id: "2",
+        },
+        {
+          ...makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR),
+          blockNumber: 100n,
+          transactionHash: SHARED_TX,
+          id: "1",
+        },
+      ];
+
+      const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
+
+      // ADDR_A has id "1" (lower), should claim the pool first
+      expect(result.referrers.get(ADDR_A)!.awardPoolApproxValue.amount).toBe(
+        STANDARD_AWARD_1Y.amount,
+      );
+      expect(result.referrers.get(ADDR_B)!.awardPoolApproxValue.amount).toBe(0n);
+    });
   });
 
   describe("Ranking", () => {

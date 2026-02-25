@@ -45,9 +45,10 @@ describe("ENSAnalytics Referrer Leaderboard", () => {
         rules,
       });
 
-      const referrers = result.referrers.entries();
-      const qualifiedReferrers = referrers.take(rules.maxQualifiedReferrers);
-      const unqualifiedReferrers = referrers.drop(rules.maxQualifiedReferrers);
+      // result.referrers is expected to be in rank order (rank 1 first), matching Map insertion order
+      const referrerEntries = Array.from(result.referrers.entries());
+      const qualifiedReferrers = referrerEntries.slice(0, rules.maxQualifiedReferrers);
+      const unqualifiedReferrers = referrerEntries.slice(rules.maxQualifiedReferrers);
 
       /**
        * Assert {@link RankedReferrerMetrics}.
@@ -66,12 +67,17 @@ describe("ENSAnalytics Referrer Leaderboard", () => {
       expect(unqualifiedReferrers.every(([_, referrer]) => !referrer.isQualified)).toBe(true);
 
       // Assert `finalScoreBoost` (pie-split specific)
-      expect(qualifiedReferrers.every(([_, r]) => r.finalScoreBoost > 0)).toBe(true);
+      // All qualified referrers except the last have boost > 0; the last qualified referrer
+      // receives boost === 0 by design (formula: 1 - (rank-1)/(maxQualifiedReferrers-1)).
+      const topQualifiedReferrers = qualifiedReferrers.slice(0, -1);
+      const lastQualifiedReferrer = qualifiedReferrers.at(-1);
+      expect(topQualifiedReferrers.every(([_, r]) => r.finalScoreBoost > 0)).toBe(true);
+      expect(lastQualifiedReferrer![1].finalScoreBoost).toBe(0);
       expect(unqualifiedReferrers.every(([_, r]) => r.finalScoreBoost === 0)).toBe(true);
 
       // Assert `finalScore` (pie-split specific)
       expect(
-        qualifiedReferrers.every(([_, r]) => r.finalScore === r.score * r.finalScoreBoost),
+        qualifiedReferrers.every(([_, r]) => r.finalScore === r.score * (1 + r.finalScoreBoost)),
       ).toBe(true);
       expect(unqualifiedReferrers.every(([_, r]) => r.finalScore === r.score)).toBe(true);
 
