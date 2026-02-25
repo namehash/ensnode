@@ -229,7 +229,8 @@ type NormalizedRecordSet = {
 1. Among these, the record whose `rawKey === normalizedKey` wins first.
 2. If none match the normalized key, the first in `unnormalizedKeys` order wins.
 3. The winner gets `op: "Normalized"` and is placed in `normalizedRecords`.
-4. Pass-1 losers get `op: "DuplicateNormalizedKey"` and go into `unnormalizedRecords`.
+4. Pass-1 losers (normalizable but not the winner) get `op: "DuplicateNormalizedKey"` and go into `unnormalizedRecords`.
+5. All `Unnormalizable` candidates are excluded from Pass 1. If Pass 1 found a winner, each excluded `Unnormalizable` record gets `op: "UnnormalizableValue"` and goes into `unnormalizedRecords`. Their raw values remain accessible via `individual.valueResult.rawValue` when `normalizationMetadata` is requested.
 
 **Pass 2 — only if Pass 1 found no winner** (all candidates are `Unnormalizable`):
 
@@ -238,7 +239,7 @@ type NormalizedRecordSet = {
 3. The winner gets `op: "UnnormalizableValue"` and goes into `unnormalizedRecords` (no valid value exists, so `normalizedRecords` has no entry for this normalized key).
 4. Pass-2 losers get `op: "DuplicateNormalizedKey"` and go into `unnormalizedRecords`.
 
-This ensures a valid value from any fallback key always beats an invalid or null value on the canonical key.
+This ensures a valid value from any fallback key always beats an invalid or null value on the canonical key. Example: if `com.twitter = ""` (invalid) and `vnd.twitter = "alice"` (valid), Pass 1 selects `vnd.twitter` as winner; `com.twitter` gets `op: "UnnormalizableValue"` in `unnormalizedRecords` with its bad raw value still accessible via `normalizationMetadata`.
 
 **Key function — build the set:**
 
@@ -326,7 +327,7 @@ Unnormalized variants: `vnd.twitter`, `twitter`, `Twitter`
 - twitter.com URL: `https://twitter.com/alice`, `http://twitter.com/alice`, `twitter.com/alice`
 - x.com URL: `https://x.com/alice`, `http://x.com/alice`, `x.com/alice`
 
-**Validation**: extracted username must match `^[a-zA-Z0-9_]{1,15}$`.
+**Validation**: extracted username must match `^[a-zA-Z0-9_]{4,15}$`.
 
 **Canonical form**: lowercase username without `@` prefix (e.g. `alice`).
 
@@ -494,12 +495,6 @@ Avatar values are complex — they can be HTTPS URLs, IPFS URIs, NFT references 
 
 **url**: for `https://`/`http://` — same as value; for `ipfs://` — convert to `https://ipfs.io/ipfs/{cid}`; for `eip155:` and `data:` URIs — `null` (requires off-chain resolution beyond this layer).
 
----
-
-> **Note**: all existing code at `packages/ensnode-sdk/src/resolution/auto-cleanup/` will be deleted before implementation of this specification begins. No migration is required.
-
----
-
 ## Phase 3: API integration
 
 ### Design decisions
@@ -552,6 +547,9 @@ The `records.texts` field always contains the stripped, clean output when `norma
 1. **Normalized key for Twitter**: `com.twitter` or `com.x` (reflecting the platform rebrand)? What unnormalized variants should be included?
 2. **Parameter name for metadata field**: `normalizationMetadata`, `includeNormalizationMetadata`, or another name?
 3. **Unnormalizable behavior**: When a key is recognized but no candidate produces a valid value, should `records.texts` contain `null` for that key, or should the key be omitted from the response entirely?
-4. **`displayValue` and `url` placement**: Should these enrichment fields be part of `records.texts` (when `normalize=true`) or only inside `normalizationMetadata`? Including them in the main response is more convenient for UI clients but changes the primary response shape significantly for all callers.
+4. `**displayValue` and `url` placement**: Should these enrichment fields be part of `records.texts` (when `normalize=true`) or only inside `normalizationMetadata`? Including them in the main response is more convenient for UI clients but changes the primary response shape significantly for all callers.
 5. **Client requesting an unnormalized key directly**: If a client passes `texts=vnd.twitter` (an unnormalized variant) instead of `texts=com.twitter`, should `expandNormalizedKeys` throw immediately (current spec — fail fast, caller error), or silently map it to the canonical key and expand from there (more forgiving for legacy integrations)? The issue does not address this case.
+6. **Placement of `UnrecognizedKeyAndValue` records**: The current spec places them in `normalizedRecords` (keyed by `rawKey`) so that `stripNormalizationMetadata` only needs to iterate one map to produce the full output. The issue's own description says `normalizedRecords` maps *normalized keys* and `unnormalizedRecords` holds "all records that were unnormalized for one reason or another" — which by that framing would put unrecognized records in `unnormalizedRecords`. Decision: should `unnormalizedRecords` mean "records that don't appear in output" (current spec) or "records that weren't normalized" (issue's framing)?
+7. **Verify validation rules against each service's official constraints**: The regexes and accepted input formats in this spec were derived from best-effort research and may not match each platform's current actual rules. Before finalising implementation, verify against official documentation or source code for: Twitter/X (username charset, 15-char limit), GitHub (39-char limit, hyphen rules), Farcaster (lowercase-only, length), Discord (new-format charset, period rules, legacy discriminator format), Telegram (5–32 chars, charset), Reddit (3–20 chars, charset), email (RFC compliance level), avatar (supported URI schemes). Flag any discrepancy as a bug in the transform definition.
+8. **Canonical key priority when multiple valid values exist**: The issue states "the rawKey equal to the normalizedKey always gets top priority." But if both `com.twitter = "alice"` and `vnd.twitter = "bob"` are valid normalized values, should `com.twitter` win unconditionally (current spec — structural rule, ignores recency), or should priority be purely order-based (treating `normalizedKey` as simply position 0 in a unified key sequence, allowing it to be overridden per definition)? The issue states the rule but does not justify why the canonical key should beat other valid values.
 
