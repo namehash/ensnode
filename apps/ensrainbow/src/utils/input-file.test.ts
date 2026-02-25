@@ -1,4 +1,4 @@
-import { chmodSync, mkdirSync, writeFileSync } from "node:fs";
+import { chmodSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -21,6 +21,11 @@ describe("assertInputFileReadable", () => {
       chmodSync(unreadable, 0o644);
     } catch {
       // file may not exist
+    }
+    try {
+      rmSync(testDir, { recursive: true });
+    } catch {
+      // directory may not exist
     }
   });
 

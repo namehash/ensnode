@@ -6,7 +6,7 @@ import { OptionalPortNumberSchema, PortNumberSchema } from "@ensnode/ensnode-sdk
 
 import { ENSRAINBOW_DEFAULT_PORT, getDefaultDataDir } from "@/config/defaults";
 import type { ENSRainbowEnvironment } from "@/config/environment";
-import type { ENSRainbowEnvConfig, ServeCommandConfig } from "@/config/types";
+import type { AbsolutePath, ENSRainbowEnvConfig, ServeCommandConfig } from "@/config/types";
 import { invariant_dbSchemaVersionMatch } from "@/config/validations";
 import { DB_SCHEMA_VERSION } from "@/lib/database";
 
@@ -72,7 +72,7 @@ export interface ServeCommandCliArgs {
   "data-dir": string;
 }
 
-export function parseDataDirFromCli(value: string): string {
+export function parseDataDirFromCli(value: string): AbsolutePath {
   try {
     return AbsolutePathSchemaBase.parse(value);
   } catch (error) {
