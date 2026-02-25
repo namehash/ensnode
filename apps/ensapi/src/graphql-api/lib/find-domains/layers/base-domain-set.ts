@@ -1,4 +1,4 @@
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { alias, unionAll } from "drizzle-orm/pg-core";
 import type { Address } from "viem";
 
@@ -13,8 +13,9 @@ import { db } from "@/lib/db";
  * Returns {domainId, ownerId, registryId, parentId, labelHash, sortableLabel} where:
  * - registryId is NULL for v1 domains (all v1 domains are canonical)
  * - v1 parentId comes directly from the v1Domain.parentId column
- * - v2 parentId is derived via canonical traversal: the v2Domain whose
- *   subregistryId equals this domain's registryId (one hop up the registry graph)
+ * - v2 parentId is derived via canonical registry traversal: look up the canonical domain
+ *   for this domain's registry (via registryCanonicalDomain), then verify the reverse pointer
+ *   (parent.subregistryId = child.registryId). See getV2CanonicalPath for the recursive version.
  * - sortableLabel is the domain's own interpreted label, used for NAME ordering.
  *   filterByName overrides this with the head domain's label when a concrete path is present.
  *
@@ -45,7 +46,20 @@ export function domainsBase() {
         sortableLabel: sql<string | null>`${schema.label.interpreted}`.as("sortableLabel"),
       })
       .from(schema.v2Domain)
-      .leftJoin(v2ParentDomain, eq(v2ParentDomain.subregistryId, schema.v2Domain.registryId))
+      // derive v2 parentId via canonical registry traversal:
+      // 1. find the canonical domain for this domain's registry
+      .leftJoin(
+        schema.registryCanonicalDomain,
+        eq(schema.registryCanonicalDomain.registryId, schema.v2Domain.registryId),
+      )
+      // 2. verify the reverse pointer: parent.id = rcd.domainId AND parent.subregistryId = child.registryId
+      .leftJoin(
+        v2ParentDomain,
+        and(
+          eq(v2ParentDomain.id, schema.registryCanonicalDomain.domainId),
+          eq(v2ParentDomain.subregistryId, schema.v2Domain.registryId),
+        ),
+      )
       .leftJoin(schema.label, eq(schema.label.labelHash, schema.v2Domain.labelHash)),
   ).as("baseDomains");
 }
