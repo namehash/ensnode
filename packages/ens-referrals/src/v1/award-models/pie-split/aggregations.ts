@@ -53,9 +53,9 @@ export const validateAggregatedReferrerMetricsPieSplit = (
   validateNonNegativeInteger(metrics.grandTotalReferrals);
   validateDuration(metrics.grandTotalIncrementalDuration);
 
-  makePriceEthSchema(
-    "AggregatedReferrerMetricsPieSplit.grandTotalRevenueContribution",
-  ).parse(metrics.grandTotalRevenueContribution);
+  makePriceEthSchema("AggregatedReferrerMetricsPieSplit.grandTotalRevenueContribution").parse(
+    metrics.grandTotalRevenueContribution,
+  );
 
   validateReferrerScore(metrics.grandTotalQualifiedReferrersFinalScore);
   validateReferrerScore(metrics.minFinalScoreToQualify);

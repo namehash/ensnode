@@ -72,10 +72,7 @@ export function deserializeReferralProgramEditionConfigSetArray(
     );
   }
 
-  // makeReferralProgramRulesSchema uses .passthrough() for forward compatibility with unknown award
-  // model types, widening its output to { awardModel: string } & Record<string, unknown>.
-  // This assertion is safe: the schema validates all known fields correctly.
-  return parsed.data as unknown as ReferralProgramEditionConfig[];
+  return parsed.data;
 }
 
 /**
@@ -94,6 +91,5 @@ export function deserializeReferralProgramEditionConfigSetResponse(
     );
   }
 
-  // Same reason as deserializeReferralProgramEditionConfigSetArray above.
-  return parsed.data as unknown as ReferralProgramEditionConfigSetResponse;
+  return parsed.data;
 }

@@ -45,13 +45,13 @@ export const validateAggregatedReferrerMetricsRevShareLimit = (
   validateNonNegativeInteger(metrics.grandTotalReferrals);
   validateDuration(metrics.grandTotalIncrementalDuration);
 
-  makePriceEthSchema(
-    "AggregatedReferrerMetricsRevShareLimit.grandTotalRevenueContribution",
-  ).parse(metrics.grandTotalRevenueContribution);
+  makePriceEthSchema("AggregatedReferrerMetricsRevShareLimit.grandTotalRevenueContribution").parse(
+    metrics.grandTotalRevenueContribution,
+  );
 
-  makePriceUsdcSchema(
-    "AggregatedReferrerMetricsRevShareLimit.awardPoolRemaining",
-  ).parse(metrics.awardPoolRemaining);
+  makePriceUsdcSchema("AggregatedReferrerMetricsRevShareLimit.awardPoolRemaining").parse(
+    metrics.awardPoolRemaining,
+  );
 };
 
 /**

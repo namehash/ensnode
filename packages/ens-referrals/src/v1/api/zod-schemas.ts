@@ -22,6 +22,7 @@ import {
   makeReferrerLeaderboardPageRevShareLimitSchema,
 } from "../award-models/rev-share-limit/api/zod-schemas";
 import { ReferralProgramAwardModels } from "../award-models/shared/rules";
+import type { ReferralProgramEditionConfig } from "../edition";
 import {
   MAX_EDITIONS_PER_REQUEST,
   ReferralProgramEditionConfigSetResponseCodes,
@@ -31,33 +32,12 @@ import {
 
 /**
  * Schema for {@link ReferralProgramRules}.
- *
- * Accepts known award model variants (pie-split, rev-share-limit) with full validation,
- * plus a passthrough catch-all for unknown future types.
- *
- * If `awardModel` is not recognized, the object parses as `{ awardModel: string } & Record<string, unknown>`.
- * Clients must check `awardModel` before accessing model-specific fields.
- * This design allows servers to introduce new award model types without breaking existing clients.
  */
-export const makeReferralProgramRulesSchema = (valueLabel: string = "ReferralProgramRules") => {
-  const knownVariants = z.discriminatedUnion("awardModel", [
+export const makeReferralProgramRulesSchema = (valueLabel: string = "ReferralProgramRules") =>
+  z.discriminatedUnion("awardModel", [
     makeReferralProgramRulesPieSplitSchema(valueLabel),
     makeReferralProgramRulesRevShareLimitSchema(valueLabel),
   ]);
-  const knownAwardModels = Object.values(ReferralProgramAwardModels) as string[];
-  return z
-    .object({ awardModel: z.string() })
-    .passthrough()
-    .superRefine((val, ctx) => {
-      if (!knownAwardModels.includes(val.awardModel)) return;
-      const result = knownVariants.safeParse(val);
-      if (!result.success) {
-        for (const issue of result.error.issues) {
-          ctx.addIssue({ code: "custom", path: issue.path, message: issue.message });
-        }
-      }
-    });
-};
 
 /**
  * Schema for {@link ReferrerLeaderboardPage}.
@@ -213,24 +193,81 @@ export const makeReferralProgramEditionConfigSchema = (
 
 /**
  * Schema for validating referral program edition config set array.
+ *
+ * Editions whose `rules.awardModel` is not recognized by this client version are
+ * silently dropped for forward compatibility — the result contains only editions
+ * with fully validated, recognized award models.
+ *
+ * At least one edition with a recognized award model must remain after filtering,
+ * and all remaining editions must have unique slugs.
+ *
+ * Two-pass approach:
+ *  1. Each item is loosely parsed (only `rules.awardModel` is checked) and unknown
+ *     award models are dropped silently.
+ *  2. Remaining items are fully validated with {@link makeReferralProgramEditionConfigSchema}.
  */
 export const makeReferralProgramEditionConfigSetArraySchema = (
   valueLabel: string = "ReferralProgramEditionConfigSetArray",
-) =>
-  z
-    .array(makeReferralProgramEditionConfigSchema(`${valueLabel}[edition]`))
-    .min(1, `${valueLabel} must contain at least one edition`)
-    .refine(
-      (editions) => {
-        const slugs = new Set<string>();
-        for (const edition of editions) {
-          if (slugs.has(edition.slug)) return false;
-          slugs.add(edition.slug);
+) => {
+  const knownAwardModels = Object.values(ReferralProgramAwardModels) as string[];
+  const configSchema = makeReferralProgramEditionConfigSchema(`${valueLabel}[edition]`);
+
+  // Loose schema used only to peek at rules.awardModel before full validation.
+  const looseItemSchema = z
+    .object({ rules: z.object({ awardModel: z.string() }).passthrough() })
+    .passthrough();
+
+  return z.array(looseItemSchema).transform((items, ctx): ReferralProgramEditionConfig[] => {
+    const result: ReferralProgramEditionConfig[] = [];
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+
+      if (!knownAwardModels.includes(item.rules.awardModel)) {
+        // Unknown award model — silently skip this edition.
+        // This allows servers to introduce new award model types without breaking clients.
+        continue;
+      }
+
+      const parsed = configSchema.safeParse(item);
+      if (!parsed.success) {
+        for (const issue of parsed.error.issues) {
+          ctx.addIssue({
+            code: "custom",
+            path: [i, ...(issue.path as PropertyKey[])],
+            message: issue.message,
+          });
         }
-        return true;
-      },
-      { message: `${valueLabel} must not contain duplicate edition slugs` },
-    );
+      } else {
+        result.push(parsed.data);
+      }
+    }
+
+    if (result.length < 1) {
+      ctx.addIssue({
+        code: "custom",
+        message: `${valueLabel} must contain at least one edition with a recognized award model`,
+      });
+      // Issue above causes the overall parse to fail; this value is never used.
+      return [];
+    }
+
+    const slugs = new Set<string>();
+    for (const edition of result) {
+      if (slugs.has(edition.slug)) {
+        ctx.addIssue({
+          code: "custom",
+          message: `${valueLabel} must not contain duplicate edition slugs`,
+        });
+        // Issue above causes the overall parse to fail; this value is never used.
+        return [];
+      }
+      slugs.add(edition.slug);
+    }
+
+    return result;
+  });
+};
 
 /**
  * Schema for {@link ReferralProgramEditionConfigSetData}.

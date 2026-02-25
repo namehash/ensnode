@@ -230,9 +230,9 @@ export const validateUnrankedReferrerMetricsRevShareLimit = (
     );
   }
 
-  makePriceUsdcSchema(
-    "UnrankedReferrerMetricsRevShareLimit.totalBaseRevenueContribution",
-  ).parse(metrics.totalBaseRevenueContribution);
+  makePriceUsdcSchema("UnrankedReferrerMetricsRevShareLimit.totalBaseRevenueContribution").parse(
+    metrics.totalBaseRevenueContribution,
+  );
   if (metrics.totalBaseRevenueContribution.amount !== 0n) {
     throw new Error(
       `Invalid UnrankedReferrerMetricsRevShareLimit: totalBaseRevenueContribution.amount must be 0n, got: ${metrics.totalBaseRevenueContribution.amount.toString()}.`,

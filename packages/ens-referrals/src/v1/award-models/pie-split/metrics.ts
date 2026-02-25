@@ -267,9 +267,9 @@ export const validateUnrankedReferrerMetricsPieSplit = (
     );
   }
 
-  makePriceEthSchema(
-    "UnrankedReferrerMetricsPieSplit.totalRevenueContribution",
-  ).parse(metrics.totalRevenueContribution);
+  makePriceEthSchema("UnrankedReferrerMetricsPieSplit.totalRevenueContribution").parse(
+    metrics.totalRevenueContribution,
+  );
   if (metrics.totalRevenueContribution.amount !== 0n) {
     throw new Error(
       `Invalid UnrankedReferrerMetricsPieSplit: totalRevenueContribution.amount must be 0n, got: ${metrics.totalRevenueContribution.amount.toString()}.`,
@@ -297,9 +297,9 @@ export const validateUnrankedReferrerMetricsPieSplit = (
     );
   }
 
-  makePriceUsdcSchema(
-    "UnrankedReferrerMetricsPieSplit.awardPoolApproxValue",
-  ).parse(metrics.awardPoolApproxValue);
+  makePriceUsdcSchema("UnrankedReferrerMetricsPieSplit.awardPoolApproxValue").parse(
+    metrics.awardPoolApproxValue,
+  );
   if (metrics.awardPoolApproxValue.amount !== 0n) {
     throw new Error(
       `Invalid UnrankedReferrerMetricsPieSplit: awardPoolApproxValue must be 0n, got: ${metrics.awardPoolApproxValue.amount.toString()}.`,
