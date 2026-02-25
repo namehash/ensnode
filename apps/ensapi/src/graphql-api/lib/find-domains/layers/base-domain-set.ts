@@ -16,8 +16,8 @@ import { db } from "@/lib/db";
  * - v2 parentId is derived via canonical registry traversal: look up the canonical domain
  *   for this domain's registry (via registryCanonicalDomain), then verify the reverse pointer
  *   (parent.subregistryId = child.registryId). See getV2CanonicalPath for the recursive version.
- * - sortableLabel is the domain's own interpreted label, used for NAME ordering.
- *   filterByName overrides this with the head domain's label when a concrete path is present.
+ * - sortableLabel is the domain's own interpreted label, used for NAME ordering, which can be
+ *   overridden by future layers.
  *
  * All downstream filters (owner, parent, registry, name, canonical) operate on this shape.
  */

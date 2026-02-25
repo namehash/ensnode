@@ -12,7 +12,7 @@ import { db } from "@/lib/db";
  * Joins latestRegistrationIndex → registration → event for registration-based ordering.
  * Uses sortableLabel from the base set for NAME ordering.
  *
- * Returns a CTE with columns: {id, headLabel, registrationTimestamp, registrationExpiry}
+ * Returns a CTE with columns: {id, sortableLabel, registrationTimestamp, registrationExpiry}
  * suitable for cursor-based pagination.
  *
  * @param base - A base domain set (output of any filter layer)
@@ -22,8 +22,8 @@ export function withOrderingMetadata(base: BaseDomainSet) {
     .select({
       id: sql<DomainId>`${base.domainId}`.as("id"),
 
-      // for NAME ordering (from base's sortableLabel, possibly overridden by filterByName)
-      headLabel: base.sortableLabel,
+      // for NAME ordering
+      sortableLabel: base.sortableLabel,
 
       // for REGISTRATION_TIMESTAMP ordering
       registrationTimestamp: schema.event.timestamp,

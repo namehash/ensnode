@@ -33,7 +33,7 @@ function getOrderValueFromResult(
 ): DomainOrderValue {
   switch (orderBy) {
     case "NAME":
-      return result.headLabel;
+      return result.sortableLabel;
     case "REGISTRATION_TIMESTAMP":
       return result.registrationTimestamp;
     case "REGISTRATION_EXPIRY":

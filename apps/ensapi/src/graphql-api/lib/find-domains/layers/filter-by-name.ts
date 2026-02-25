@@ -1,4 +1,4 @@
-import { like, sql } from "drizzle-orm";
+import { eq, like, sql } from "drizzle-orm";
 import { alias, unionAll } from "drizzle-orm/pg-core";
 
 import * as schema from "@ensnode/ensnode-schema";
@@ -92,9 +92,9 @@ export function filterByName(base: BaseDomainSet, name?: string | null) {
       sortableLabel: sql<string | null>`${headLabel.interpreted}`.as("sortableLabel"),
     })
     .from(base)
-    .innerJoin(pathResults, sql`${base.domainId} = ${pathResults.leafId}`)
-    .leftJoin(v1HeadDomain, sql`${v1HeadDomain.id} = ${pathResults.headId}`)
-    .leftJoin(v2HeadDomain, sql`${v2HeadDomain.id} = ${pathResults.headId}`)
+    .innerJoin(pathResults, eq(pathResults.leafId, base.domainId))
+    .leftJoin(v1HeadDomain, eq(v1HeadDomain.id, pathResults.headId))
+    .leftJoin(v2HeadDomain, eq(v2HeadDomain.id, pathResults.headId))
     .leftJoin(
       headLabel,
       sql`${headLabel.labelHash} = COALESCE(${v1HeadDomain.labelHash}, ${v2HeadDomain.labelHash})`,

@@ -13,7 +13,7 @@ export type DomainsCTE = ReturnType<typeof withOrderingMetadata>;
  */
 function getOrderColumn(domains: DomainsCTE, orderBy: typeof DomainsOrderBy.$inferType) {
   return {
-    NAME: domains.headLabel,
+    NAME: domains.sortableLabel,
     REGISTRATION_TIMESTAMP: domains.registrationTimestamp,
     REGISTRATION_EXPIRY: domains.registrationExpiry,
   }[orderBy];
