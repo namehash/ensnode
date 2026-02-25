@@ -6,10 +6,11 @@ import {
   type UnixTimestamp,
 } from "@ensnode/ensnode-sdk";
 
-import { factory } from "@/lib/hono-factory";
+import { createApp } from "@/lib/hono-factory";
 import * as middleware from "@/middleware/indexing-status.middleware";
 
-import amIRealtimeApi, { AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE } from "./amirealtime-api"; // adjust import path as needed
+import amIRealtimeApi from "./amirealtime-api";
+import { AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE } from "./amirealtime-api.routes";
 
 vi.mock("@/middleware/indexing-status.middleware", () => ({
   indexingStatusMiddleware: vi.fn(),
@@ -44,11 +45,11 @@ describe("amirealtime-api", () => {
     });
   };
 
-  let app: ReturnType<typeof factory.createApp>;
+  let app: ReturnType<typeof createApp>;
 
   beforeEach(() => {
     // Create a fresh app instance for each test with middleware registered
-    app = factory.createApp();
+    app = createApp();
     app.use(middleware.indexingStatusMiddleware);
     app.route("/amirealtime", amIRealtimeApi);
   });
@@ -76,7 +77,10 @@ describe("amirealtime-api", () => {
 
       it("should accept valid maxWorstCaseDistance query param (set to `0`)", async () => {
         // Arrange: set `indexingStatus` context var
-        arrangeMockedIndexingStatusMiddleware({ now, slowestChainIndexingCursor: now });
+        arrangeMockedIndexingStatusMiddleware({
+          now,
+          slowestChainIndexingCursor: now,
+        });
 
         // Act
         const response = await app.request("http://localhost/amirealtime?maxWorstCaseDistance=0");
@@ -153,7 +157,10 @@ describe("amirealtime-api", () => {
     describe("response", () => {
       it("should return 200 when worstCaseDistance is below maxWorstCaseDistance", async () => {
         // Arrange: set `indexingStatus` context var
-        arrangeMockedIndexingStatusMiddleware({ now, slowestChainIndexingCursor: now - 9 });
+        arrangeMockedIndexingStatusMiddleware({
+          now,
+          slowestChainIndexingCursor: now - 9,
+        });
 
         // Act
         const response = await app.request("http://localhost/amirealtime?maxWorstCaseDistance=10");
@@ -170,7 +177,10 @@ describe("amirealtime-api", () => {
 
       it("should return 200 when worstCaseDistance equals maxWorstCaseDistance", async () => {
         // Arrange: set `indexingStatus` context var
-        arrangeMockedIndexingStatusMiddleware({ now, slowestChainIndexingCursor: now - 10 });
+        arrangeMockedIndexingStatusMiddleware({
+          now,
+          slowestChainIndexingCursor: now - 10,
+        });
 
         // Act
         const response = await app.request("http://localhost/amirealtime?maxWorstCaseDistance=10");
@@ -187,7 +197,10 @@ describe("amirealtime-api", () => {
 
       it("should return 503 when worstCaseDistance exceeds maxWorstCaseDistance", async () => {
         // Arrange: set `indexingStatus` context var
-        arrangeMockedIndexingStatusMiddleware({ now, slowestChainIndexingCursor: now - 11 });
+        arrangeMockedIndexingStatusMiddleware({
+          now,
+          slowestChainIndexingCursor: now - 11,
+        });
 
         // Act
         const response = await app.request("http://localhost/amirealtime?maxWorstCaseDistance=10");
