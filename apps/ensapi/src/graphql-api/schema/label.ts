@@ -2,7 +2,7 @@ import type * as schema from "@ensnode/ensnode-schema";
 
 import { builder } from "@/graphql-api/builder";
 
-export const LabelRef = builder.objectRef<typeof schema.label.$inferSelect>("LabelRef");
+export const LabelRef = builder.objectRef<typeof schema.label.$inferSelect>("Label");
 LabelRef.implement({
   description: "Represents a Label within ENS, providing its hash and interpreted representation.",
   fields: (t) => ({
