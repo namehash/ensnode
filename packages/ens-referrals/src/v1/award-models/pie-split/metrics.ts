@@ -267,15 +267,9 @@ export const validateUnrankedReferrerMetricsPieSplit = (
     );
   }
 
-  const priceEthSchema = makePriceEthSchema(
+  makePriceEthSchema(
     "UnrankedReferrerMetricsPieSplit.totalRevenueContribution",
-  );
-  const ethParseResult = priceEthSchema.safeParse(metrics.totalRevenueContribution);
-  if (!ethParseResult.success) {
-    throw new Error(
-      `Invalid UnrankedReferrerMetricsPieSplit: totalRevenueContribution validation failed: ${ethParseResult.error.message}`,
-    );
-  }
+  ).parse(metrics.totalRevenueContribution);
   if (metrics.totalRevenueContribution.amount !== 0n) {
     throw new Error(
       `Invalid UnrankedReferrerMetricsPieSplit: totalRevenueContribution.amount must be 0n, got: ${metrics.totalRevenueContribution.amount.toString()}.`,
@@ -303,15 +297,9 @@ export const validateUnrankedReferrerMetricsPieSplit = (
     );
   }
 
-  const priceUsdcSchema = makePriceUsdcSchema(
+  makePriceUsdcSchema(
     "UnrankedReferrerMetricsPieSplit.awardPoolApproxValue",
-  );
-  const usdcParseResult = priceUsdcSchema.safeParse(metrics.awardPoolApproxValue);
-  if (!usdcParseResult.success) {
-    throw new Error(
-      `Invalid UnrankedReferrerMetricsPieSplit: awardPoolApproxValue validation failed: ${usdcParseResult.error.message}`,
-    );
-  }
+  ).parse(metrics.awardPoolApproxValue);
   if (metrics.awardPoolApproxValue.amount !== 0n) {
     throw new Error(
       `Invalid UnrankedReferrerMetricsPieSplit: awardPoolApproxValue must be 0n, got: ${metrics.awardPoolApproxValue.amount.toString()}.`,

@@ -45,25 +45,13 @@ export const validateAggregatedReferrerMetricsRevShareLimit = (
   validateNonNegativeInteger(metrics.grandTotalReferrals);
   validateDuration(metrics.grandTotalIncrementalDuration);
 
-  const priceEthSchema = makePriceEthSchema(
+  makePriceEthSchema(
     "AggregatedReferrerMetricsRevShareLimit.grandTotalRevenueContribution",
-  );
-  const parseResultEth = priceEthSchema.safeParse(metrics.grandTotalRevenueContribution);
-  if (!parseResultEth.success) {
-    throw new Error(
-      `AggregatedReferrerMetricsRevShareLimit: grandTotalRevenueContribution validation failed: ${parseResultEth.error.message}`,
-    );
-  }
+  ).parse(metrics.grandTotalRevenueContribution);
 
-  const priceUsdcSchema = makePriceUsdcSchema(
+  makePriceUsdcSchema(
     "AggregatedReferrerMetricsRevShareLimit.awardPoolRemaining",
-  );
-  const parseResultUsdc = priceUsdcSchema.safeParse(metrics.awardPoolRemaining);
-  if (!parseResultUsdc.success) {
-    throw new Error(
-      `AggregatedReferrerMetricsRevShareLimit: awardPoolRemaining validation failed: ${parseResultUsdc.error.message}`,
-    );
-  }
+  ).parse(metrics.awardPoolRemaining);
 };
 
 /**

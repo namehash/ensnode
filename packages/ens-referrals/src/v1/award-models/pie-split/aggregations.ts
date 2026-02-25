@@ -53,15 +53,9 @@ export const validateAggregatedReferrerMetricsPieSplit = (
   validateNonNegativeInteger(metrics.grandTotalReferrals);
   validateDuration(metrics.grandTotalIncrementalDuration);
 
-  const priceEthSchema = makePriceEthSchema(
+  makePriceEthSchema(
     "AggregatedReferrerMetricsPieSplit.grandTotalRevenueContribution",
-  );
-  const parseResult = priceEthSchema.safeParse(metrics.grandTotalRevenueContribution);
-  if (!parseResult.success) {
-    throw new Error(
-      `AggregatedReferrerMetricsPieSplit: grandTotalRevenueContribution validation failed: ${parseResult.error.message}`,
-    );
-  }
+  ).parse(metrics.grandTotalRevenueContribution);
 
   validateReferrerScore(metrics.grandTotalQualifiedReferrersFinalScore);
   validateReferrerScore(metrics.minFinalScoreToQualify);

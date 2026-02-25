@@ -52,6 +52,11 @@ export function serializeReferralProgramRules(
 
     case ReferralProgramAwardModels.RevShareLimit:
       return serializeReferralProgramRulesRevShareLimit(rules);
+
+    default: {
+      const _exhaustiveCheck: never = rules;
+      throw new Error(`Unknown award model: ${(_exhaustiveCheck as ReferralProgramRules).awardModel}`);
+    }
   }
 }
 
@@ -66,6 +71,10 @@ function serializeReferrerLeaderboardPage(
       return serializeReferrerLeaderboardPagePieSplit(page);
     case ReferralProgramAwardModels.RevShareLimit:
       return serializeReferrerLeaderboardPageRevShareLimit(page);
+    default: {
+      const _exhaustiveCheck: never = page;
+      throw new Error(`Unknown award model: ${(_exhaustiveCheck as ReferrerLeaderboardPage).awardModel}`);
+    }
   }
 }
 
@@ -80,6 +89,10 @@ function serializeReferrerEditionMetricsRanked(
       return serializeReferrerEditionMetricsRankedPieSplit(detail);
     case ReferralProgramAwardModels.RevShareLimit:
       return serializeReferrerEditionMetricsRankedRevShareLimit(detail);
+    default: {
+      const _exhaustiveCheck: never = detail;
+      throw new Error(`Unknown award model: ${(_exhaustiveCheck as ReferrerEditionMetricsRanked).awardModel}`);
+    }
   }
 }
 
@@ -94,6 +107,10 @@ function serializeReferrerEditionMetricsUnranked(
       return serializeReferrerEditionMetricsUnrankedPieSplit(detail);
     case ReferralProgramAwardModels.RevShareLimit:
       return serializeReferrerEditionMetricsUnrankedRevShareLimit(detail);
+    default: {
+      const _exhaustiveCheck: never = detail;
+      throw new Error(`Unknown award model: ${(_exhaustiveCheck as ReferrerEditionMetricsUnranked).awardModel}`);
+    }
   }
 }
 

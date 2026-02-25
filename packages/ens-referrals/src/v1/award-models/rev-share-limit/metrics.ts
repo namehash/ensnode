@@ -1,11 +1,13 @@
 import type { Address } from "viem";
 
 import { type PriceUsdc, priceEth, priceUsdc } from "@ensnode/ensnode-sdk";
+import { makePriceEthSchema, makePriceUsdcSchema } from "@ensnode/ensnode-sdk/internal";
 
 import type { ReferrerMetrics } from "../../referrer-metrics";
-import { buildReferrerMetrics } from "../../referrer-metrics";
+import { buildReferrerMetrics, validateReferrerMetrics } from "../../referrer-metrics";
 import { SECONDS_PER_YEAR } from "../../time";
 import type { ReferrerRank } from "../shared/rank";
+import { validateReferrerRank } from "../shared/rank";
 import {
   BASE_REVENUE_CONTRIBUTION_PER_YEAR,
   isReferrerQualifiedRevShareLimit,
@@ -25,6 +27,22 @@ export interface ReferrerMetricsRevShareLimit extends ReferrerMetrics {
   totalBaseRevenueContribution: PriceUsdc;
 }
 
+export const validateReferrerMetricsRevShareLimit = (
+  metrics: ReferrerMetricsRevShareLimit,
+): void => {
+  validateReferrerMetrics(metrics);
+
+  const expectedTotalBaseRevenueContribution = priceUsdc(
+    (BASE_REVENUE_CONTRIBUTION_PER_YEAR.amount * BigInt(metrics.totalIncrementalDuration)) /
+      BigInt(SECONDS_PER_YEAR),
+  );
+  if (metrics.totalBaseRevenueContribution.amount !== expectedTotalBaseRevenueContribution.amount) {
+    throw new Error(
+      `ReferrerMetricsRevShareLimit: Invalid totalBaseRevenueContribution: ${metrics.totalBaseRevenueContribution.amount.toString()}, expected: ${expectedTotalBaseRevenueContribution.amount.toString()}.`,
+    );
+  }
+};
+
 export const buildReferrerMetricsRevShareLimit = (
   metrics: ReferrerMetrics,
 ): ReferrerMetricsRevShareLimit => {
@@ -33,10 +51,13 @@ export const buildReferrerMetricsRevShareLimit = (
       BigInt(SECONDS_PER_YEAR),
   );
 
-  return {
+  const result = {
     ...metrics,
     totalBaseRevenueContribution,
   } satisfies ReferrerMetricsRevShareLimit;
+
+  validateReferrerMetricsRevShareLimit(result);
+  return result;
 };
 
 /**
@@ -56,16 +77,37 @@ export interface RankedReferrerMetricsRevShareLimit extends ReferrerMetricsRevSh
   isQualified: boolean;
 }
 
+export const validateRankedReferrerMetricsRevShareLimit = (
+  metrics: RankedReferrerMetricsRevShareLimit,
+  rules: ReferralProgramRulesRevShareLimit,
+): void => {
+  validateReferrerMetricsRevShareLimit(metrics);
+  validateReferrerRank(metrics.rank);
+
+  const expectedIsQualified = isReferrerQualifiedRevShareLimit(
+    metrics.totalBaseRevenueContribution,
+    rules,
+  );
+  if (metrics.isQualified !== expectedIsQualified) {
+    throw new Error(
+      `RankedReferrerMetricsRevShareLimit: Invalid isQualified: ${metrics.isQualified}, expected: ${expectedIsQualified}.`,
+    );
+  }
+};
+
 export const buildRankedReferrerMetricsRevShareLimit = (
   referrer: ReferrerMetricsRevShareLimit,
   rank: ReferrerRank,
   rules: ReferralProgramRulesRevShareLimit,
 ): RankedReferrerMetricsRevShareLimit => {
-  return {
+  const result = {
     ...referrer,
     rank,
     isQualified: isReferrerQualifiedRevShareLimit(referrer.totalBaseRevenueContribution, rules),
   } satisfies RankedReferrerMetricsRevShareLimit;
+
+  validateRankedReferrerMetricsRevShareLimit(result, rules);
+  return result;
 };
 
 /**
@@ -93,16 +135,47 @@ export interface AwardedReferrerMetricsRevShareLimit extends RankedReferrerMetri
   awardPoolApproxValue: PriceUsdc;
 }
 
+export const validateAwardedReferrerMetricsRevShareLimit = (
+  metrics: AwardedReferrerMetricsRevShareLimit,
+  rules: ReferralProgramRulesRevShareLimit,
+): void => {
+  validateRankedReferrerMetricsRevShareLimit(metrics, rules);
+
+  makePriceUsdcSchema("AwardedReferrerMetricsRevShareLimit.standardAwardValue").parse(
+    metrics.standardAwardValue,
+  );
+
+  makePriceUsdcSchema("AwardedReferrerMetricsRevShareLimit.awardPoolApproxValue").parse(
+    metrics.awardPoolApproxValue,
+  );
+
+  if (metrics.awardPoolApproxValue.amount > rules.totalAwardPoolValue.amount) {
+    throw new Error(
+      `AwardedReferrerMetricsRevShareLimit: awardPoolApproxValue.amount ${metrics.awardPoolApproxValue.amount.toString()} exceeds totalAwardPoolValue.amount ${rules.totalAwardPoolValue.amount.toString()}.`,
+    );
+  }
+
+  if (metrics.awardPoolApproxValue.amount > metrics.standardAwardValue.amount) {
+    throw new Error(
+      `AwardedReferrerMetricsRevShareLimit: awardPoolApproxValue.amount ${metrics.awardPoolApproxValue.amount.toString()} exceeds standardAwardValue.amount ${metrics.standardAwardValue.amount.toString()}.`,
+    );
+  }
+};
+
 export const buildAwardedReferrerMetricsRevShareLimit = (
   referrer: RankedReferrerMetricsRevShareLimit,
   standardAwardValue: PriceUsdc,
   awardPoolApproxValue: PriceUsdc,
+  rules: ReferralProgramRulesRevShareLimit,
 ): AwardedReferrerMetricsRevShareLimit => {
-  return {
+  const result = {
     ...referrer,
     standardAwardValue,
     awardPoolApproxValue,
   } satisfies AwardedReferrerMetricsRevShareLimit;
+
+  validateAwardedReferrerMetricsRevShareLimit(result, rules);
+  return result;
 };
 
 /**
@@ -122,6 +195,69 @@ export interface UnrankedReferrerMetricsRevShareLimit
   isQualified: false;
 }
 
+export const validateUnrankedReferrerMetricsRevShareLimit = (
+  metrics: UnrankedReferrerMetricsRevShareLimit,
+): void => {
+  validateReferrerMetrics(metrics);
+
+  if (metrics.rank !== null) {
+    throw new Error(
+      `Invalid UnrankedReferrerMetricsRevShareLimit: rank must be null, got: ${metrics.rank}.`,
+    );
+  }
+  if (metrics.isQualified !== false) {
+    throw new Error(
+      `Invalid UnrankedReferrerMetricsRevShareLimit: isQualified must be false, got: ${metrics.isQualified}.`,
+    );
+  }
+  if (metrics.totalReferrals !== 0) {
+    throw new Error(
+      `Invalid UnrankedReferrerMetricsRevShareLimit: totalReferrals must be 0, got: ${metrics.totalReferrals}.`,
+    );
+  }
+  if (metrics.totalIncrementalDuration !== 0) {
+    throw new Error(
+      `Invalid UnrankedReferrerMetricsRevShareLimit: totalIncrementalDuration must be 0, got: ${metrics.totalIncrementalDuration}.`,
+    );
+  }
+
+  makePriceEthSchema("UnrankedReferrerMetricsRevShareLimit.totalRevenueContribution").parse(
+    metrics.totalRevenueContribution,
+  );
+  if (metrics.totalRevenueContribution.amount !== 0n) {
+    throw new Error(
+      `Invalid UnrankedReferrerMetricsRevShareLimit: totalRevenueContribution.amount must be 0n, got: ${metrics.totalRevenueContribution.amount.toString()}.`,
+    );
+  }
+
+  makePriceUsdcSchema(
+    "UnrankedReferrerMetricsRevShareLimit.totalBaseRevenueContribution",
+  ).parse(metrics.totalBaseRevenueContribution);
+  if (metrics.totalBaseRevenueContribution.amount !== 0n) {
+    throw new Error(
+      `Invalid UnrankedReferrerMetricsRevShareLimit: totalBaseRevenueContribution.amount must be 0n, got: ${metrics.totalBaseRevenueContribution.amount.toString()}.`,
+    );
+  }
+
+  makePriceUsdcSchema("UnrankedReferrerMetricsRevShareLimit.standardAwardValue").parse(
+    metrics.standardAwardValue,
+  );
+  if (metrics.standardAwardValue.amount !== 0n) {
+    throw new Error(
+      `Invalid UnrankedReferrerMetricsRevShareLimit: standardAwardValue.amount must be 0n, got: ${metrics.standardAwardValue.amount.toString()}.`,
+    );
+  }
+
+  makePriceUsdcSchema("UnrankedReferrerMetricsRevShareLimit.awardPoolApproxValue").parse(
+    metrics.awardPoolApproxValue,
+  );
+  if (metrics.awardPoolApproxValue.amount !== 0n) {
+    throw new Error(
+      `Invalid UnrankedReferrerMetricsRevShareLimit: awardPoolApproxValue.amount must be 0n, got: ${metrics.awardPoolApproxValue.amount.toString()}.`,
+    );
+  }
+};
+
 /**
  * Build an unranked zero-metrics rev-share-limit referrer record for an address not on the leaderboard.
  */
@@ -130,7 +266,7 @@ export const buildUnrankedReferrerMetricsRevShareLimit = (
 ): UnrankedReferrerMetricsRevShareLimit => {
   const metrics = buildReferrerMetrics(referrer, 0, 0, priceEth(0n));
 
-  return {
+  const result = {
     ...metrics,
     totalBaseRevenueContribution: priceUsdc(0n),
     rank: null,
@@ -138,4 +274,7 @@ export const buildUnrankedReferrerMetricsRevShareLimit = (
     standardAwardValue: priceUsdc(0n),
     awardPoolApproxValue: priceUsdc(0n),
   } satisfies UnrankedReferrerMetricsRevShareLimit;
+
+  validateUnrankedReferrerMetricsRevShareLimit(result);
+  return result;
 };

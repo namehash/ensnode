@@ -231,6 +231,7 @@ export const buildReferrerLeaderboardRevShareLimit = (
         rankedMetrics,
         standardAwardValue,
         priceUsdc(state.qualifiedAwardValueAmount),
+        rules,
       );
     },
   );

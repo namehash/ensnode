@@ -1,9 +1,12 @@
 import type { AccountId, PriceUsdc, UnixTimestamp } from "@ensnode/ensnode-sdk";
-import { makeAccountIdSchema, makePriceUsdcSchema } from "@ensnode/ensnode-sdk/internal";
+import { makePriceUsdcSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { validateNonNegativeInteger } from "../../number";
-import { validateUnixTimestamp } from "../../time";
-import { type BaseReferralProgramRules, ReferralProgramAwardModels } from "../shared/rules";
+import {
+  type BaseReferralProgramRules,
+  ReferralProgramAwardModels,
+  validateBaseReferralProgramRules,
+} from "../shared/rules";
 
 export interface ReferralProgramRulesPieSplit extends BaseReferralProgramRules {
   /**
@@ -30,37 +33,13 @@ export interface ReferralProgramRulesPieSplit extends BaseReferralProgramRules {
 }
 
 export const validateReferralProgramRulesPieSplit = (rules: ReferralProgramRulesPieSplit): void => {
-  const priceUsdcSchema = makePriceUsdcSchema("ReferralProgramRulesPieSplit.totalAwardPoolValue");
-  const parseResult = priceUsdcSchema.safeParse(rules.totalAwardPoolValue);
-  if (!parseResult.success) {
-    throw new Error(
-      `ReferralProgramRulesPieSplit: totalAwardPoolValue validation failed: ${parseResult.error.message}`,
-    );
-  }
-
-  const accountIdSchema = makeAccountIdSchema("ReferralProgramRulesPieSplit.subregistryId");
-  const accountIdParseResult = accountIdSchema.safeParse(rules.subregistryId);
-  if (!accountIdParseResult.success) {
-    throw new Error(
-      `ReferralProgramRulesPieSplit: subregistryId validation failed: ${accountIdParseResult.error.message}`,
-    );
-  }
+  makePriceUsdcSchema("ReferralProgramRulesPieSplit.totalAwardPoolValue").parse(
+    rules.totalAwardPoolValue,
+  );
 
   validateNonNegativeInteger(rules.maxQualifiedReferrers);
-  validateUnixTimestamp(rules.startTime);
-  validateUnixTimestamp(rules.endTime);
 
-  if (!(rules.rulesUrl instanceof URL)) {
-    throw new Error(
-      `ReferralProgramRulesPieSplit: rulesUrl must be a URL instance, got ${typeof rules.rulesUrl}.`,
-    );
-  }
-
-  if (rules.endTime < rules.startTime) {
-    throw new Error(
-      `ReferralProgramRulesPieSplit: startTime: ${rules.startTime} is after endTime: ${rules.endTime}.`,
-    );
-  }
+  validateBaseReferralProgramRules(rules);
 };
 
 export const buildReferralProgramRulesPieSplit = (

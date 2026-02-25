@@ -4,10 +4,13 @@ import {
   parseUsdc,
   type UnixTimestamp,
 } from "@ensnode/ensnode-sdk";
-import { makeAccountIdSchema, makePriceUsdcSchema } from "@ensnode/ensnode-sdk/internal";
+import { makePriceUsdcSchema } from "@ensnode/ensnode-sdk/internal";
 
-import { validateUnixTimestamp } from "../../time";
-import { type BaseReferralProgramRules, ReferralProgramAwardModels } from "../shared/rules";
+import {
+  type BaseReferralProgramRules,
+  ReferralProgramAwardModels,
+  validateBaseReferralProgramRules,
+} from "../shared/rules";
 
 /**
  * Base revenue contribution per year of incremental duration.
@@ -50,23 +53,13 @@ export interface ReferralProgramRulesRevShareLimit extends BaseReferralProgramRu
 export const validateReferralProgramRulesRevShareLimit = (
   rules: ReferralProgramRulesRevShareLimit,
 ): void => {
-  const poolSchema = makePriceUsdcSchema("ReferralProgramRulesRevShareLimit.totalAwardPoolValue");
-  const poolResult = poolSchema.safeParse(rules.totalAwardPoolValue);
-  if (!poolResult.success) {
-    throw new Error(
-      `ReferralProgramRulesRevShareLimit: totalAwardPoolValue validation failed: ${poolResult.error.message}`,
-    );
-  }
-
-  const minSchema = makePriceUsdcSchema(
-    "ReferralProgramRulesRevShareLimit.minQualifiedRevenueContribution",
+  makePriceUsdcSchema("ReferralProgramRulesRevShareLimit.totalAwardPoolValue").parse(
+    rules.totalAwardPoolValue,
   );
-  const minResult = minSchema.safeParse(rules.minQualifiedRevenueContribution);
-  if (!minResult.success) {
-    throw new Error(
-      `ReferralProgramRulesRevShareLimit: minQualifiedRevenueContribution validation failed: ${minResult.error.message}`,
-    );
-  }
+
+  makePriceUsdcSchema("ReferralProgramRulesRevShareLimit.minQualifiedRevenueContribution").parse(
+    rules.minQualifiedRevenueContribution,
+  );
 
   if (
     !Number.isFinite(rules.qualifiedRevenueShare) ||
@@ -78,28 +71,7 @@ export const validateReferralProgramRulesRevShareLimit = (
     );
   }
 
-  const accountIdSchema = makeAccountIdSchema("ReferralProgramRulesRevShareLimit.subregistryId");
-  const accountIdResult = accountIdSchema.safeParse(rules.subregistryId);
-  if (!accountIdResult.success) {
-    throw new Error(
-      `ReferralProgramRulesRevShareLimit: subregistryId validation failed: ${accountIdResult.error.message}`,
-    );
-  }
-
-  validateUnixTimestamp(rules.startTime);
-  validateUnixTimestamp(rules.endTime);
-
-  if (!(rules.rulesUrl instanceof URL)) {
-    throw new Error(
-      `ReferralProgramRulesRevShareLimit: rulesUrl must be a URL instance, got ${typeof rules.rulesUrl}.`,
-    );
-  }
-
-  if (rules.endTime < rules.startTime) {
-    throw new Error(
-      `ReferralProgramRulesRevShareLimit: startTime: ${rules.startTime} is after endTime: ${rules.endTime}.`,
-    );
-  }
+  validateBaseReferralProgramRules(rules);
 };
 
 export const buildReferralProgramRulesRevShareLimit = (

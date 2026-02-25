@@ -127,9 +127,9 @@ export const validateReferrerLeaderboardPageContext = (
   }
 
   // Validate totalPages
-  if (!isNonNegativeInteger(context.totalPages)) {
+  if (!isPositiveInteger(context.totalPages)) {
     throw new Error(
-      `Invalid ReferrerLeaderboardPageContext: totalPages must be a non-negative integer but is ${context.totalPages}.`,
+      `Invalid ReferrerLeaderboardPageContext: totalPages must be a positive integer (>= 1) but is ${context.totalPages}.`,
     );
   }
 

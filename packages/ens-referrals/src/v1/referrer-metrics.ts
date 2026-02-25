@@ -67,11 +67,7 @@ export const validateReferrerMetrics = (metrics: ReferrerMetrics): void => {
   validateNonNegativeInteger(metrics.totalReferrals);
   validateDuration(metrics.totalIncrementalDuration);
 
-  const priceEthSchema = makePriceEthSchema("ReferrerMetrics.totalRevenueContribution");
-  const parseResult = priceEthSchema.safeParse(metrics.totalRevenueContribution);
-  if (!parseResult.success) {
-    throw new Error(
-      `ReferrerMetrics: totalRevenueContribution validation failed: ${parseResult.error.message}`,
-    );
-  }
+  makePriceEthSchema("ReferrerMetrics.totalRevenueContribution").parse(
+    metrics.totalRevenueContribution,
+  );
 };

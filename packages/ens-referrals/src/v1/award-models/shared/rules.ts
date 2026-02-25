@@ -1,4 +1,7 @@
 import type { AccountId, UnixTimestamp } from "@ensnode/ensnode-sdk";
+import { makeAccountIdSchema } from "@ensnode/ensnode-sdk/internal";
+
+import { validateUnixTimestamp } from "../../time";
 
 /**
  * Discriminant values for the award model used in a referral program edition.
@@ -51,3 +54,22 @@ export interface BaseReferralProgramRules {
    */
   rulesUrl: URL;
 }
+
+export const validateBaseReferralProgramRules = (rules: BaseReferralProgramRules): void => {
+  makeAccountIdSchema("BaseReferralProgramRules.subregistryId").parse(rules.subregistryId);
+
+  validateUnixTimestamp(rules.startTime);
+  validateUnixTimestamp(rules.endTime);
+
+  if (!(rules.rulesUrl instanceof URL)) {
+    throw new Error(
+      `BaseReferralProgramRules: rulesUrl must be a URL instance, got ${typeof rules.rulesUrl}.`,
+    );
+  }
+
+  if (rules.endTime < rules.startTime) {
+    throw new Error(
+      `BaseReferralProgramRules: startTime: ${rules.startTime} is after endTime: ${rules.endTime}.`,
+    );
+  }
+};
