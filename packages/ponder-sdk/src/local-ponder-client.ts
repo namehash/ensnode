@@ -27,6 +27,12 @@ export class LocalPonderClient extends PonderClient {
     super(ponderAppUrl);
 
     this.indexedChainIds = indexedChainIds;
+
+    // We don't want to use all chains' records that Ponder may give use.
+    // We just need the records for indexed chains (as determined by
+    // `indexedChainIds`).
+    // Both, `chainsBlockrange` and `cachedPublicClients` are filtered to
+    // only include entries for indexed chains.
     this.chainsBlockrange = this.selectEntriesForIndexedChainsOnly(
       chainsBlockrange,
       "Chains Blockrange",
@@ -80,6 +86,10 @@ export class LocalPonderClient extends PonderClient {
    */
   async metrics(): Promise<LocalPonderIndexingMetrics> {
     const metrics = await super.metrics();
+
+    // We don't want to use all chains' records that Ponder may give use.
+    // We just need the records for indexed chains (as determined by
+    // `indexedChainIds`).
     const chainsIndexingMetrics = this.selectEntriesForIndexedChainsOnly(
       metrics.chains,
       "Chains Indexing Metrics",
