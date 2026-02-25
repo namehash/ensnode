@@ -15,6 +15,7 @@
     "start": "tsx src/index.ts",
     "dev": "tsx watch --env-file ./.env.local src/index.ts",
     "test": "vitest",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
     "typecheck": "tsgo --noEmit"
@@ -65,6 +66,7 @@
   "devDependencies": {
     "@ensnode/shared-configs": "workspace:*",
     "@types/node": "catalog:",
+    "graphql-request": "^7.4.0",
     "pino-pretty": "^13.1.2",
     "tsx": "^4.7.1",
     "typescript": "catalog:",
