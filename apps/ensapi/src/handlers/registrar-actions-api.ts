@@ -1,10 +1,7 @@
-import type { Address } from "viem";
-
 import {
   buildPageContext,
   type Node,
   type RegistrarActionsFilter,
-  type RegistrarActionsOrder,
   RegistrarActionsResponseCodes,
   type RegistrarActionsResponseError,
   type RegistrarActionsResponseOk,
@@ -20,6 +17,7 @@ import { registrarActionsApiMiddleware } from "@/middleware/registrar-actions.mi
 import {
   getRegistrarActionsByParentNodeRoute,
   getRegistrarActionsRoute,
+  type RegistrarActionsQuery,
 } from "./registrar-actions-api.routes";
 
 const app = createApp();
@@ -31,18 +29,7 @@ const logger = makeLogger("registrar-actions-api");
 app.use(registrarActionsApiMiddleware);
 
 // Shared business logic for fetching registrar actions
-async function fetchRegistrarActions(
-  parentNode: Node | undefined,
-  query: {
-    orderBy: RegistrarActionsOrder;
-    page: number;
-    recordsPerPage: number;
-    withReferral: boolean;
-    decodedReferrer?: Address;
-    beginTimestamp?: number;
-    endTimestamp?: number;
-  },
-) {
+async function fetchRegistrarActions(parentNode: Node | undefined, query: RegistrarActionsQuery) {
   const {
     orderBy,
     page,

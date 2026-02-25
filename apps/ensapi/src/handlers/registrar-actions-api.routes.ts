@@ -18,7 +18,7 @@ import { params } from "@/lib/handlers/params.schema";
 export const basePath = "/api/registrar-actions";
 
 // Shared query schema for registrar actions
-const registrarActionsQuerySchema = z
+export const registrarActionsQuerySchema = z
   .object({
     orderBy: z
       .enum(RegistrarActionsOrders)
@@ -73,6 +73,8 @@ const registrarActionsQuerySchema = z
       path: ["endTimestamp"],
     },
   );
+
+export type RegistrarActionsQuery = z.output<typeof registrarActionsQuerySchema>;
 
 export const getRegistrarActionsRoute = createRoute({
   method: "get",
