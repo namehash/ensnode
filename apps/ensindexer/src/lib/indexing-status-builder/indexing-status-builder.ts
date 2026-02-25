@@ -28,6 +28,11 @@ import {
   type LocalPonderClient,
 } from "@ensnode/ponder-sdk";
 
+/**
+ * Block refs for an indexed chain.
+ *
+ * Useful for building the Chain Indexing Status Snapshot for the chain.
+ */
 interface ChainIndexingBlockRefs {
   startBlock: BlockRef;
   endBlock: BlockRef | null;
