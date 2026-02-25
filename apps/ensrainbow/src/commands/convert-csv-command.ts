@@ -4,6 +4,7 @@
  * Converts single-column CSV files (one label per line) to .ensrainbow format with fast-csv
  */
 
+import { once } from "node:events";
 import { createReadStream, createWriteStream, rmSync, statSync, type WriteStream } from "node:fs";
 import { unlink } from "node:fs/promises";
 import { dirname, join } from "node:path";
@@ -322,17 +323,14 @@ async function initializeConversion(
   return { RainbowRecordType, outputStream, existingDb };
 }
 
+/** Tuple representing a single-column CSV row (label only). */
+type SingleColumnRow = [string];
+
 /**
  * Create rainbow record from a single-column CSV row (label only).
  * Labelhashes are always computed deterministically from labels.
  */
-function createRainbowRecord(row: string[]): RainbowRecord {
-  if (row.length !== 1) {
-    throw new Error(
-      `Expected 1 column (label only), but found ${row.length} columns. Multi-column CSV formats are not supported.`,
-    );
-  }
-
+function createRainbowRecord(row: SingleColumnRow): RainbowRecord {
   const label = row[0];
   const labelHashBytes = labelHashToBytes(labelhash(label));
   return {
@@ -345,7 +343,7 @@ function createRainbowRecord(row: string[]): RainbowRecord {
  * Process a single CSV record with LevelDB-based deduplication
  */
 async function processRecord(
-  row: string[],
+  row: SingleColumnRow,
   RainbowRecordType: any,
   outputStream: NodeJS.WritableStream,
   existingDb: ENSRainbowDB | null,
@@ -448,6 +446,14 @@ async function processCSVFile(
             return;
           }
 
+          if (row.length !== 1) {
+            throw new Error(
+              `Expected 1 column (label only), but found ${row.length} columns. Multi-column CSV formats are not supported.`,
+            );
+          }
+
+          const singleColumnRow = row as SingleColumnRow;
+
           // Log progress (less frequently to avoid logger crashes)
           if (lineNumber % progressInterval === 0 && lineNumber !== lastLoggedLine) {
             const currentTime = Date.now();
@@ -472,7 +478,7 @@ async function processCSVFile(
 
           // Process this one record
           const wasProcessed = await processRecord(
-            row,
+            singleColumnRow,
             RainbowRecordType,
             outputStream,
             existingDb,
@@ -615,22 +621,26 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
     // Clean up output stream if it wasn't gracefully ended (error path).
     // After end(), writable is false, so this only triggers on error paths.
     if (outputStream?.writable) {
+      const outputPath = (outputStream as WriteStream & { path?: string }).path ?? outputFile;
       try {
         // Suppress errors from in-flight writes whose async I/O completes
         // after destroy (e.g. "Cannot call write after a stream was destroyed").
         // On error paths the output file is incomplete anyway.
         outputStream.on("error", () => {});
         outputStream.destroy();
+        // Wait for the OS file handle to be released before unlinking.
+        // destroy() is asynchronous; the handle is only freed on the 'close' event.
+        await once(outputStream, "close");
         logger.info("Destroyed output stream on error path");
       } catch (error) {
         logger.warn(`Failed to destroy output stream: ${error}`);
       }
-      const outputPath = (outputStream as WriteStream & { path?: string }).path ?? outputFile;
       try {
         await unlink(outputPath);
         logger.info("Removed partial output file on error path");
       } catch (unlinkErr: unknown) {
-        if ((unlinkErr as NodeJS.ErrnoException).code !== "ENOENT") {
+        const code = (unlinkErr as NodeJS.ErrnoException).code;
+        if (code !== "ENOENT" && code !== "EPERM" && code !== "EBUSY") {
           logger.warn(`Failed to remove partial output file: ${unlinkErr}`);
         }
       }

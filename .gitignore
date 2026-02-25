@@ -35,10 +35,13 @@ terraform.tfstate*
 CLAUDE.md
 
 # ENSRainbow data
-apps/ensrainbow/data
+apps/ensrainbow/data*
 
 # fallback-ensapi dist
 apps/fallback-ensapi/dist
 apps/ensrainbow/data*
 apps/ensrainbow/temp*
 apps/ensrainbow/v2*
+apps/ensrainbow/ens-test*
+apps/ensrainbow/test-*
+
