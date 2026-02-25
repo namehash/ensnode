@@ -1,5 +1,7 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
+import { eq } from "drizzle-orm";
 
+import * as schema from "@ensnode/ensnode-schema";
 import {
   type DomainId,
   type ENSv1DomainId,
@@ -17,6 +19,7 @@ import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { cursors } from "@/graphql-api/schema/cursors";
+import { LabelRef } from "@/graphql-api/schema/label";
 import { OrderDirection } from "@/graphql-api/schema/order-direction";
 import { RegistrationInterfaceRef } from "@/graphql-api/schema/registration";
 import { RegistryRef } from "@/graphql-api/schema/registry";
@@ -79,11 +82,12 @@ export type Domain = Exclude<typeof DomainInterfaceRef.$inferType, DomainId>;
 // DomainInterface Implementation
 //////////////////////////////////
 DomainInterfaceRef.implement({
-  description: "a Domain",
+  description:
+    "A Domain represents an individual Label within the ENS namegraph. It may or may not be Canonical. It may be an ENSv1Domain or an ENSv2Domain.",
   fields: (t) => ({
-    //////////////////////
+    /////////////
     // Domain.id
-    //////////////////////
+    /////////////
     id: t.field({
       description: "TODO",
       type: "DomainId",
@@ -91,21 +95,22 @@ DomainInterfaceRef.implement({
       resolve: (parent) => parent.id,
     }),
 
-    //////////////////////
+    ////////////////
     // Domain.label
-    //////////////////////
+    ////////////////
     label: t.field({
-      type: "String",
-      description: "TODO",
+      type: LabelRef,
+      description: "The Label this Domain represents in the ENS Namegraph",
       nullable: false,
-      resolve: ({ label }) => label.interpreted,
+      resolve: (parent) => parent.label,
     }),
 
     ///////////////
     // Domain.name
     ///////////////
     name: t.field({
-      description: "TODO",
+      description:
+        "The Canonical Name for this Domain. If the Domain is not Canonical, then `name` will be null.",
       type: "Name",
       nullable: true,
       resolve: async (domain, args, context) => {
@@ -154,9 +159,9 @@ DomainInterfaceRef.implement({
       },
     }),
 
-    //////////////////////
+    ////////////////
     // Domain.owner
-    //////////////////////
+    ////////////////
     owner: t.field({
       type: AccountRef,
       description: "TODO",
@@ -164,9 +169,9 @@ DomainInterfaceRef.implement({
       resolve: (parent) => parent.ownerId,
     }),
 
-    //////////////////////
+    ///////////////////
     // Domain.resolver
-    //////////////////////
+    ///////////////////
     resolver: t.field({
       description: "TODO",
       type: ResolverRef,
@@ -178,7 +183,8 @@ DomainInterfaceRef.implement({
     // Domain.registration
     ///////////////////////
     registration: t.field({
-      description: "TODO",
+      description:
+        "The latest Registration for this Domain. If the Domain doesn't have an associated Registration, then `registration` will be null.",
       type: RegistrationInterfaceRef,
       nullable: true,
       resolve: (parent) => getLatestRegistration(parent.id),
@@ -188,7 +194,7 @@ DomainInterfaceRef.implement({
     // Domain.registrations
     ////////////////////////
     registrations: t.connection({
-      description: "TODO",
+      description: "All Registrations for a Domain, including the latest Registration.",
       type: RegistrationInterfaceRef,
       resolve: (parent, args, context) =>
         resolveCursorConnection(
@@ -205,6 +211,25 @@ DomainInterfaceRef.implement({
               limit,
             }),
         ),
+    }),
+
+    /////////////////////////
+    // Domain.subdomainCount
+    /////////////////////////
+    subdomainCount: t.field({
+      description: "TODO",
+      type: "Int",
+      nullable: false,
+      resolve: async (parent) => {
+        if (isENSv1Domain(parent)) {
+          return db.$count(schema.v1Domain, eq(schema.v1Domain.parentId, parent.id));
+        } else {
+          const { subregistryId } = parent;
+          if (subregistryId === null) return 0;
+
+          return db.$count(schema.v2Domain, eq(schema.v2Domain.registryId, subregistryId));
+        }
+      },
     }),
 
     /////////////////////
