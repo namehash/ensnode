@@ -5,6 +5,7 @@
  */
 
 import { createReadStream, createWriteStream, rmSync, statSync, type WriteStream } from "node:fs";
+import { unlink } from "node:fs/promises";
 import { dirname, join } from "node:path";
 
 import { parse } from "@fast-csv/parse";
@@ -623,6 +624,15 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
         logger.info("Destroyed output stream on error path");
       } catch (error) {
         logger.warn(`Failed to destroy output stream: ${error}`);
+      }
+      const outputPath = (outputStream as WriteStream & { path?: string }).path ?? outputFile;
+      try {
+        await unlink(outputPath);
+        logger.info("Removed partial output file on error path");
+      } catch (unlinkErr: unknown) {
+        if ((unlinkErr as NodeJS.ErrnoException).code !== "ENOENT") {
+          logger.warn(`Failed to remove partial output file: ${unlinkErr}`);
+        }
       }
     }
 
