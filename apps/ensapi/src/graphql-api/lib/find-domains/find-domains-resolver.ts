@@ -11,15 +11,34 @@ import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import {
   DOMAINS_DEFAULT_ORDER_BY,
   DOMAINS_DEFAULT_ORDER_DIR,
+  type Domain,
   DomainInterfaceRef,
   type DomainsOrderBy,
 } from "@/graphql-api/schema/domain";
+import type { OrderDirection } from "@/graphql-api/schema/order-direction";
 import { db } from "@/lib/db";
 import { makeLogger } from "@/lib/logger";
 
 import { DomainCursor } from "./domain-cursor";
 import { cursorFilter, isEffectiveDesc, orderFindDomains } from "./find-domains-resolver-helpers";
-import type { DomainOrderValue, DomainWithOrderValue, FindDomainsOrderArg } from "./types";
+import type { DomainOrderValue } from "./types";
+
+/**
+ * Describes the ordering of the set of Domains.
+ *
+ * @dev derived from the GraphQL Input Types for 1:1 convenience
+ */
+interface FindDomainsOrderArg {
+  by?: typeof DomainsOrderBy.$inferType | null;
+  dir?: typeof OrderDirection.$inferType | null;
+}
+
+/**
+ * Domain with order value injected.
+ *
+ * @dev Relevant to composite DomainCursor encoding, see `domain-cursor.ts`
+ */
+type DomainWithOrderValue = Domain & { __orderValue: DomainOrderValue };
 
 const logger = makeLogger("find-domains-resolver");
 
