@@ -3,18 +3,15 @@ import { and, asc, desc, eq, gt, lt } from "drizzle-orm";
 import type { Address } from "viem";
 
 import * as schema from "@ensnode/ensnode-schema";
-import type { DomainId, PermissionsUserId } from "@ensnode/ensnode-sdk";
+import type { PermissionsUserId } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
-import { findDomains } from "@/graphql-api/lib/find-domains";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
-import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
 import { AccountIdInput } from "@/graphql-api/schema/account-id";
 import { AccountRegistryPermissionsRef } from "@/graphql-api/schema/account-registries-permissions";
 import { AccountResolverPermissionsRef } from "@/graphql-api/schema/account-resolver-permissions";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { cursors } from "@/graphql-api/schema/cursors";
-import { AccountDomainsWhereInput, DomainInterfaceRef } from "@/graphql-api/schema/domain";
 import { PermissionsUserRef } from "@/graphql-api/schema/permissions";
 import { db } from "@/lib/db";
 
@@ -54,46 +51,6 @@ AccountRef.implement({
       type: "Address",
       nullable: false,
       resolve: (parent) => parent.id,
-    }),
-
-    ///////////////////
-    // Account.domains
-    ///////////////////
-    domains: t.connection({
-      description: "TODO",
-      type: DomainInterfaceRef,
-      args: {
-        where: t.arg({ type: AccountDomainsWhereInput, required: false }),
-      },
-      resolve: (parent, args, context) =>
-        resolveCursorConnection(
-          { ...DEFAULT_CONNECTION_ARGS, args },
-          async ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) => {
-            // construct query for relevant domains
-            const domains = findDomains({ ...args.where, owner: parent.id });
-
-            // execute with pagination constraints
-            const results = await db
-              .with(domains)
-              .select()
-              .from(domains)
-              .where(
-                and(
-                  before ? lt(domains.id, cursors.decode<DomainId>(before)) : undefined,
-                  after ? gt(domains.id, cursors.decode<DomainId>(after)) : undefined,
-                ),
-              )
-              .orderBy(inverted ? desc(domains.id) : asc(domains.id))
-              .limit(limit);
-
-            // provide full Domain entities via dataloader
-            return rejectAnyErrors(
-              DomainInterfaceRef.getDataloader(context).loadMany(
-                results.map((result) => result.id),
-              ),
-            );
-          },
-        ),
     }),
 
     ///////////////////////

@@ -51,6 +51,16 @@ EventRef.implement({
     }),
 
     ///////////////////
+    // Event.timestamp
+    ///////////////////
+    timestamp: t.field({
+      description: "TODO",
+      type: "BigInt",
+      nullable: false,
+      resolve: (parent) => parent.timestamp,
+    }),
+
+    ///////////////////
     // Event.blockHash
     ///////////////////
     blockHash: t.field({

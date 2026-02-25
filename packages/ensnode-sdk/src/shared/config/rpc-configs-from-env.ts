@@ -1,8 +1,7 @@
 import {
   type Datasource,
   type ENSNamespaceId,
-  ensTestEnvL1Chain,
-  ensTestEnvL2Chain,
+  ensTestEnvChain,
   getENSNamespace,
 } from "@ensnode/datasources";
 
@@ -74,17 +73,9 @@ export function buildRpcConfigsFromEnv(
       continue;
     }
 
-    // ens-test-env L1 Chain
-    if (chain.id === ensTestEnvL1Chain.id) {
-      rpcConfigs[serializeChainId(ensTestEnvL1Chain.id)] =
-        ensTestEnvL1Chain.rpcUrls.default.http[0];
-      continue;
-    }
-
-    // ens-test-env L2 Chain
-    if (chain.id === ensTestEnvL2Chain.id) {
-      rpcConfigs[serializeChainId(ensTestEnvL2Chain.id)] =
-        ensTestEnvL2Chain.rpcUrls.default.http[0];
+    // ens-test-env Chain
+    if (chain.id === ensTestEnvChain.id) {
+      rpcConfigs[serializeChainId(ensTestEnvChain.id)] = ensTestEnvChain.rpcUrls.default.http[0];
       continue;
     }
 

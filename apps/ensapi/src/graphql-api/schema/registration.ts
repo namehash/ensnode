@@ -36,7 +36,6 @@ export type RegistrationInterface = Pick<
   | "type"
   | "index"
   | "domainId"
-  | "start"
   | "expiry"
   | "registrarChainId"
   | "registrarAddress"
@@ -85,16 +84,6 @@ RegistrationInterfaceRef.implement({
       type: AccountIdRef,
       nullable: false,
       resolve: (parent) => ({ chainId: parent.registrarChainId, address: parent.registrarAddress }),
-    }),
-
-    //////////////////////
-    // Registration.start
-    //////////////////////
-    start: t.field({
-      description: "TODO",
-      type: "BigInt",
-      nullable: false,
-      resolve: (parent) => parent.start,
     }),
 
     ///////////////////////////

@@ -1,22 +1,14 @@
-import config from "@/config";
-
 import { type Context, ponder } from "ponder:registry";
 import schema from "ponder:schema";
 import { type Address, hexToBigInt, labelhash } from "viem";
 
-import { DatasourceNames } from "@ensnode/datasources";
 import {
   type AccountId,
-  accountIdEqual,
   getCanonicalId,
-  getDatasourceContract,
-  getENSv2RootRegistry,
   interpretAddress,
   isRegistrationFullyExpired,
   type LiteralLabel,
-  labelhashLiteralLabel,
   makeENSv2DomainId,
-  makeLatestRegistrationId,
   makeRegistryId,
   PluginName,
 } from "@ensnode/ensnode-sdk";
@@ -26,7 +18,7 @@ import { ensureEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel } from "@/lib/ensv2/label-db-helpers";
 import {
   getLatestRegistration,
-  supercedeLatestRegistration,
+  insertLatestRegistration,
 } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { toJson } from "@/lib/json-stringify-with-bigints";
@@ -85,26 +77,7 @@ export default function () {
         })
         .onConflictDoNothing();
 
-      // TODO(ensv2): hoist this access once all namespaces declare ENSv2 contracts
-      const ENSV2_ROOT_REGISTRY = getENSv2RootRegistry(config.namespace);
-      const ENSV2_L2_ETH_REGISTRY = getDatasourceContract(
-        config.namespace,
-        DatasourceNames.ENSv2ETHRegistry,
-        "ETHRegistry",
-      );
-
-      // if this Registry is Bridged, we know its Canonical Domain and can set it here
-      // TODO(bridged-registries): generalize this to future ENSv2 Bridged Resolvers
-      if (accountIdEqual(registry, ENSV2_L2_ETH_REGISTRY)) {
-        const domainId = makeENSv2DomainId(
-          ENSV2_ROOT_REGISTRY,
-          getCanonicalId(labelhashLiteralLabel("eth" as LiteralLabel)),
-        );
-        await context.db
-          .insert(schema.registryCanonicalDomain)
-          .values({ registryId: registryId, domainId })
-          .onConflictDoUpdate({ domainId });
-      }
+      // TODO(bridged-registries): upon registry creation, write the registry's canonical domain here
 
       // ensure discovered Label
       await ensureLabel(context, label);
@@ -134,20 +107,14 @@ export default function () {
         // if the v2Domain exists, this is a re-register after expiration and tokenId may have changed
         .onConflictDoUpdate({ tokenId });
 
-      // supercede the latest Registration if exists
-      if (registration) await supercedeLatestRegistration(context, registration);
-
       // insert ENSv2Registry Registration
       await ensureAccount(context, registrant);
-      await context.db.insert(schema.registration).values({
-        id: makeLatestRegistrationId(domainId),
-        index: registration ? registration.index + 1 : 0,
+      await insertLatestRegistration(context, {
+        domainId,
         type: "ENSv2Registry",
         registrarChainId: registry.chainId,
         registrarAddress: registry.address,
         registrantId: interpretAddress(registrant),
-        domainId,
-        start: event.block.timestamp,
         expiry,
         eventId: await ensureEvent(context, event),
       });
@@ -190,11 +157,6 @@ export default function () {
 
       // update Registration
       await context.db.update(schema.registration, { id: registration.id }).set({ expiry });
-
-      // if newExpiry is 0, this is an `unregister` call, related to ejecting
-      // https://github.com/ensdomains/namechain/blob/9e31679f4ee6d8abb4d4e840cdf06f2d653a706b/contracts/src/L1/bridge/L1BridgeController.sol#L141
-      // TODO(migration): maybe do something special with this state?
-      // if (expiry === 0n) return;
     },
   );
 
