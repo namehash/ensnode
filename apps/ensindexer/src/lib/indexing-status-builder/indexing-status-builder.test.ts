@@ -420,8 +420,10 @@ describe("IndexingStatusBuilder", () => {
       expect(publicClientMock.getBlock).toHaveBeenCalledTimes(6);
     });
 
-    it("throws when all chains indexing metrics are not historical on first call", async () => {
+    it("allows non-historical indexing metrics on first call", async () => {
       // Arrange
+      const publicClientMock = buildPublicClientMock();
+
       const localMetrics = buildLocalChainsIndexingMetrics(
         new Map([
           [
@@ -441,14 +443,37 @@ describe("IndexingStatusBuilder", () => {
       const localPonderClientMock = buildLocalPonderClientMock({
         metrics: vi.fn().mockResolvedValue(localMetrics),
         status: vi.fn().mockResolvedValue(localStatus),
+        getChainBlockrange: vi
+          .fn()
+          .mockReturnValue({ startBlock: earliestBlockRef.number, endBlock: undefined }),
+        getCachedPublicClient: vi.fn().mockReturnValue(publicClientMock),
       });
 
       const builder = new IndexingStatusBuilder(localPonderClientMock as LocalPonderClient);
 
-      // Act & Assert
-      await expect(builder.getOmnichainIndexingStatusSnapshot()).rejects.toThrowError(
-        /Expected all chains indexing metrics to be historical for fetching block refs, but chain ID 1 has state realtime/,
-      );
+      // Act
+      const result = await builder.getOmnichainIndexingStatusSnapshot();
+
+      // Assert
+      expect(publicClientMock.getBlock).toHaveBeenCalledTimes(1);
+      expect(result).toStrictEqual({
+        omnichainStatus: OmnichainIndexingStatusIds.Following,
+        chains: new Map([
+          [
+            chainId,
+            {
+              chainStatus: ChainIndexingStatusIds.Following,
+              latestIndexedBlock: laterBlockRef,
+              latestKnownBlock: latestBlockRef,
+              config: {
+                configType: ChainIndexingConfigTypeIds.Indefinite,
+                startBlock: earliestBlockRef,
+              },
+            } satisfies ChainIndexingStatusSnapshotFollowing,
+          ],
+        ]),
+        omnichainIndexingCursor: laterBlockRef.timestamp,
+      } satisfies OmnichainIndexingStatusSnapshot);
     });
   });
 
