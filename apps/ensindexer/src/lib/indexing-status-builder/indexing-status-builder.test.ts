@@ -11,7 +11,10 @@ import {
   type OmnichainIndexingStatusSnapshot,
 } from "@ensnode/ensnode-sdk";
 import {
+  type ChainIndexingMetricsCompleted,
+  type ChainIndexingMetricsRealtime,
   ChainIndexingStates,
+  type LocalChainIndexingMetricsHistorical,
   type LocalPonderClient,
   type PonderIndexingStatus,
 } from "@ensnode/ponder-sdk";
@@ -36,7 +39,7 @@ describe("IndexingStatusBuilder", () => {
   });
 
   describe("Building omnichain indexing status snapshot", () => {
-    it("builds 'queued' omnichain snapshot", async () => {
+    it("builds 'unstarted' omnichain snapshot", async () => {
       // Arrange
       const publicClientMock = buildPublicClientMock();
 
@@ -49,7 +52,7 @@ describe("IndexingStatusBuilder", () => {
               latestSyncedBlock: latestBlockRef,
               historicalTotalBlocks: 100,
               backfillEndBlock: latestBlockRef.number,
-            },
+            } satisfies LocalChainIndexingMetricsHistorical,
           ],
         ]),
       );
@@ -107,7 +110,7 @@ describe("IndexingStatusBuilder", () => {
               latestSyncedBlock: earlierBlockRef,
               historicalTotalBlocks: 100,
               backfillEndBlock: latestBlockRef.number,
-            },
+            } satisfies LocalChainIndexingMetricsHistorical,
           ],
         ]),
       );
@@ -166,7 +169,7 @@ describe("IndexingStatusBuilder", () => {
               latestSyncedBlock: latestBlockRef,
               historicalTotalBlocks: 100,
               backfillEndBlock: latestBlockRef.number,
-            },
+            } satisfies LocalChainIndexingMetricsHistorical,
           ],
         ]),
       );
@@ -178,7 +181,7 @@ describe("IndexingStatusBuilder", () => {
             {
               state: ChainIndexingStates.Completed,
               finalIndexedBlock: latestBlockRef,
-            },
+            } satisfies ChainIndexingMetricsCompleted,
           ],
         ]),
       );
@@ -241,7 +244,7 @@ describe("IndexingStatusBuilder", () => {
               latestSyncedBlock: laterBlockRef,
               historicalTotalBlocks: 100,
               backfillEndBlock: latestBlockRef.number,
-            },
+            } satisfies LocalChainIndexingMetricsHistorical,
           ],
         ]),
       );
@@ -253,9 +256,7 @@ describe("IndexingStatusBuilder", () => {
             {
               state: ChainIndexingStates.Realtime,
               latestSyncedBlock: laterBlockRef,
-              historicalTotalBlocks: 100,
-              backfillEndBlock: latestBlockRef.number,
-            },
+            } satisfies ChainIndexingMetricsRealtime,
           ],
         ]),
       );
@@ -320,7 +321,7 @@ describe("IndexingStatusBuilder", () => {
               latestSyncedBlock: earlierBlockRef,
               historicalTotalBlocks: 100,
               backfillEndBlock: latestBlockRef.number,
-            },
+            } satisfies LocalChainIndexingMetricsHistorical,
           ],
         ]),
       );
@@ -338,7 +339,7 @@ describe("IndexingStatusBuilder", () => {
               latestSyncedBlock: laterBlockRef,
               historicalTotalBlocks: 100,
               backfillEndBlock: latestBlockRef.number,
-            },
+            } satisfies LocalChainIndexingMetricsHistorical,
           ],
         ]),
       );
@@ -372,6 +373,53 @@ describe("IndexingStatusBuilder", () => {
       expect(publicClientMock.getBlock).toHaveBeenCalledTimes(2); // RPC calls for startBlock, and backfillEndBlock
     });
 
+    it("retries fetching block refs when RPC call fails", async () => {
+      // Arrange
+      const publicClientMock = buildPublicClientMock();
+      const getBlockMock = vi.spyOn(publicClientMock, "getBlock") as unknown as ReturnType<
+        typeof vi.fn
+      >;
+      getBlockMock.mockRejectedValueOnce(new Error("RPC down"));
+
+      const localIndexingMetrics = buildLocalChainsIndexingMetrics(
+        new Map([
+          [
+            chainId,
+            {
+              state: ChainIndexingStates.Historical,
+              latestSyncedBlock: earlierBlockRef,
+              historicalTotalBlocks: 100,
+              backfillEndBlock: latestBlockRef.number,
+            } satisfies LocalChainIndexingMetricsHistorical,
+          ],
+        ]),
+      );
+
+      const indexingStatus: PonderIndexingStatus = {
+        chains: new Map([[chainId, { checkpointBlock: earlierBlockRef }]]),
+      };
+
+      const localPonderClientMock = buildLocalPonderClientMock({
+        metrics: vi.fn().mockResolvedValue(localIndexingMetrics),
+        status: vi.fn().mockResolvedValue(indexingStatus),
+        getChainBlockrange: vi.fn().mockReturnValue({
+          startBlock: earliestBlockRef.number,
+          endBlock: latestBlockRef.number,
+        }),
+        getCachedPublicClient: vi.fn().mockReturnValue(publicClientMock),
+      });
+
+      const builder = new IndexingStatusBuilder(localPonderClientMock as LocalPonderClient);
+
+      // Act & Assert
+      await expect(builder.getOmnichainIndexingStatusSnapshot()).rejects.toThrowError(
+        /Error fetching block for chain ID 1 at block number 999: RPC down/,
+      );
+
+      await expect(builder.getOmnichainIndexingStatusSnapshot()).resolves.toBeDefined();
+      expect(publicClientMock.getBlock).toHaveBeenCalledTimes(6);
+    });
+
     it("throws when all chains indexing metrics are not historical on first call", async () => {
       // Arrange
       const localMetrics = buildLocalChainsIndexingMetrics(
@@ -381,7 +429,7 @@ describe("IndexingStatusBuilder", () => {
             {
               state: ChainIndexingStates.Realtime,
               latestSyncedBlock: latestBlockRef,
-            },
+            } satisfies ChainIndexingMetricsRealtime,
           ],
         ]),
       );
@@ -418,7 +466,7 @@ describe("IndexingStatusBuilder", () => {
               latestSyncedBlock: latestBlockRef,
               historicalTotalBlocks: 100,
               backfillEndBlock: latestBlockRef.number,
-            },
+            } satisfies LocalChainIndexingMetricsHistorical,
           ],
         ]),
       );

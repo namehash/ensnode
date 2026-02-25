@@ -88,16 +88,21 @@ describe("LocalPonderClient", () => {
 
   describe("getCachedPublicClient()", () => {
     it("returns cached client for indexed chain", () => {
-      // Arrange & Act
+      // Arrange
+      const optimismPublicClientMock = {} as PublicClient;
+
       const client = createLocalPonderClientMock({
         indexedChainIds: new Set([chainIds.Optimism]),
         cachedPublicClients: new Map<ChainId, PublicClient>([
-          [chainIds.Optimism, {} as PublicClient],
+          [chainIds.Optimism, optimismPublicClientMock],
         ]),
       });
+
+      // Act
       const clientRef = client.getCachedPublicClient(chainIds.Optimism);
 
-      expect(clientRef).toBeDefined();
+      // Assert
+      expect(clientRef).toBe(optimismPublicClientMock);
     });
   });
 
