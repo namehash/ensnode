@@ -6,7 +6,11 @@ import { describe, expect, it } from "vitest";
 
 import { DB_SCHEMA_VERSION } from "@/lib/database";
 
-import { buildEnvConfigFromEnvironment, buildServeCommandConfig } from "./config.schema";
+import {
+  buildEnvConfigFromEnvironment,
+  buildServeCommandConfig,
+  parseDataDirFromCli,
+} from "./config.schema";
 import { ENSRAINBOW_DEFAULT_PORT, getDefaultDataDir } from "./defaults";
 import type { ENSRainbowEnvironment } from "./environment";
 import { buildEnsRainbowPublicConfig } from "./public";
@@ -359,6 +363,22 @@ describe("buildServeCommandConfig", () => {
   it("accepts port at boundary values", () => {
     expect(buildServeCommandConfig({ port: 1, "data-dir": "/valid/path" }).port).toBe(1);
     expect(buildServeCommandConfig({ port: 65535, "data-dir": "/valid/path" }).port).toBe(65535);
+  });
+});
+
+describe("parseDataDirFromCli", () => {
+  it("returns normalized path for valid data-dir", () => {
+    expect(parseDataDirFromCli("/valid/path")).toBe("/valid/path");
+    expect(isAbsolute(parseDataDirFromCli("relative"))).toBe(true);
+    expect(parseDataDirFromCli("relative")).toBe(resolve(process.cwd(), "relative"));
+  });
+
+  it("throws on empty data-dir", () => {
+    expect(() => parseDataDirFromCli("")).toThrow(/Invalid data-dir/);
+  });
+
+  it("throws on whitespace-only data-dir", () => {
+    expect(() => parseDataDirFromCli("   ")).toThrow(/Invalid data-dir/);
   });
 });
 

@@ -72,6 +72,21 @@ export interface ServeCommandCliArgs {
   "data-dir": string;
 }
 
+/**
+ * Parses and validates a data-dir string (e.g. from CLI). Use for any command that accepts --data-dir.
+ * @throws Error with prettified Zod message if invalid (empty, whitespace-only, etc.)
+ */
+export function parseDataDirFromCli(value: string): string {
+  try {
+    return AbsolutePathSchemaBase.parse(value);
+  } catch (error) {
+    if (error instanceof ZodError) {
+      throw new Error(`Invalid data-dir: \n${prettifyError(error)}\n`);
+    }
+    throw error;
+  }
+}
+
 export function buildServeCommandConfig(args: ServeCommandCliArgs): ServeCommandConfig {
   try {
     const port = PortNumberSchema.parse(args.port);

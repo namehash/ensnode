@@ -1,0 +1,25 @@
+import { accessSync, constants, statSync } from "node:fs";
+
+const INPUT_FILE_ERROR_MESSAGE =
+  "Input file not found or not readable. Please ensure the file exists and you have read permission.";
+
+/**
+ * Validates that the given path is a readable file. Use before opening input streams
+ * in convert/ingest commands to fail fast with a clear error.
+ * @param path - Absolute or relative path to the input file
+ * @throws Error with a user-friendly message if the file does not exist or is not readable
+ */
+export function assertInputFileReadable(path: string): void {
+  try {
+    const stats = statSync(path);
+    if (!stats.isFile()) {
+      throw new Error(`Input path is not a file: ${path}. ${INPUT_FILE_ERROR_MESSAGE}`);
+    }
+    accessSync(path, constants.R_OK);
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith("Input path is not a file:")) {
+      throw error;
+    }
+    throw new Error(`${path}: ${INPUT_FILE_ERROR_MESSAGE}`);
+  }
+}
