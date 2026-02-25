@@ -14,7 +14,7 @@ import {
 import { ENSRAINBOW_DEFAULT_PORT, getDefaultDataDir } from "./defaults";
 import type { ENSRainbowEnvironment } from "./environment";
 import { buildEnsRainbowPublicConfig } from "./public";
-import type { DbConfig, ENSRainbowEnvConfig } from "./types";
+import type { DbConfig } from "./types";
 
 describe("buildEnvConfigFromEnvironment", () => {
   describe("Success cases", () => {
@@ -287,12 +287,6 @@ describe("buildEnvConfigFromEnvironment", () => {
 });
 
 describe("buildServeCommandConfig", () => {
-  const baseEnvConfig: ENSRainbowEnvConfig = {
-    port: ENSRAINBOW_DEFAULT_PORT,
-    dataDir: "/env/data/dir",
-    dbSchemaVersion: DB_SCHEMA_VERSION,
-  };
-
   it("normalizes relative data-dir to absolute path", () => {
     const result = buildServeCommandConfig({
       port: 4000,
@@ -317,7 +311,7 @@ describe("buildServeCommandConfig", () => {
 
   it("trims whitespace from data-dir", () => {
     const result = buildServeCommandConfig({
-      port: baseEnvConfig.port,
+      port: ENSRAINBOW_DEFAULT_PORT,
       "data-dir": "  /trimmed/path  ",
     });
 
@@ -326,13 +320,13 @@ describe("buildServeCommandConfig", () => {
 
   it("throws on empty data-dir", () => {
     expect(() => buildServeCommandConfig({ port: 4000, "data-dir": "" })).toThrow(
-      /Invalid serve command arguments/,
+      /Invalid data-dir/,
     );
   });
 
   it("throws on whitespace-only data-dir", () => {
     expect(() => buildServeCommandConfig({ port: 4000, "data-dir": "   " })).toThrow(
-      /Invalid serve command arguments/,
+      /Invalid data-dir/,
     );
   });
 
@@ -371,6 +365,13 @@ describe("parseDataDirFromCli", () => {
     expect(parseDataDirFromCli("/valid/path")).toBe("/valid/path");
     expect(isAbsolute(parseDataDirFromCli("relative"))).toBe(true);
     expect(parseDataDirFromCli("relative")).toBe(resolve(process.cwd(), "relative"));
+  });
+
+  it("trims whitespace from data-dir", () => {
+    const result = parseDataDirFromCli("  relative  ");
+
+    expect(isAbsolute(result)).toBe(true);
+    expect(result).toBe(resolve(process.cwd(), "relative"));
   });
 
   it("throws on empty data-dir", () => {

@@ -18,7 +18,7 @@ export function assertInputFileReadable(path: string): void {
   }
 
   if (!stats.isFile()) {
-    throw new Error(`Input path is not a file: ${path}. ${INPUT_FILE_ERROR_MESSAGE}`);
+    throw new Error(`Input path is not a file: ${path}.`);
   }
 
   try {
