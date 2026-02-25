@@ -619,15 +619,18 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
     throw error;
   } finally {
     // Clean up output stream if it wasn't gracefully ended (error path).
-    // After end(), writable is false, so this only triggers on error paths.
-    if (outputStream?.writable) {
+    // Use writableEnded/destroyed so we still run cleanup after an I/O error
+    // (writable can be false in that case and would incorrectly skip cleanup).
+    if (outputStream && !outputStream.writableEnded && !outputStream.destroyed) {
       const outputPath = (outputStream as WriteStream & { path?: string }).path ?? outputFile;
       try {
         // Suppress errors from in-flight writes whose async I/O completes
         // after destroy (e.g. "Cannot call write after a stream was destroyed").
         // On error paths the output file is incomplete anyway.
         outputStream.on("error", () => {});
-        outputStream.destroy();
+        if (!outputStream.destroyed) {
+          outputStream.destroy();
+        }
         // Wait for the OS file handle to be released before unlinking.
         // destroy() is asynchronous; the handle is only freed on the 'close' event.
         await once(outputStream, "close");
