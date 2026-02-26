@@ -1,4 +1,4 @@
-import { type ChainIndexingConfig, ChainIndexingConfigTypeIds } from "@ensnode/ensnode-sdk";
+import { type BlockRefRange, BlockRefRangeTypeIds } from "@ensnode/ensnode-sdk";
 import type {
   BlockRef,
   ChainIndexingMetrics,
@@ -34,7 +34,7 @@ export function buildChainIndexingMetadataMock({
   latestSyncedBlock,
   backfillEndBlock,
 }: {
-  config: ChainIndexingConfig;
+  config: BlockRefRange;
   checkpointBlock: BlockRef;
   state: ChainIndexingState;
   latestSyncedBlock: BlockRef;
@@ -49,9 +49,7 @@ export function buildChainIndexingMetadataMock({
   const backfillScope = {
     startBlock: config.startBlock,
     endBlock:
-      config.configType === ChainIndexingConfigTypeIds.Definite
-        ? config.endBlock
-        : backfillEndBlock,
+      config.blockRangeType === BlockRefRangeTypeIds.Definite ? config.endBlock : backfillEndBlock,
   } satisfies BackfillScope;
 
   let indexingMetrics: ChainIndexingMetrics;

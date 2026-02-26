@@ -1,6 +1,6 @@
 import {
-  type ChainIndexingConfigDefinite,
-  type ChainIndexingConfigIndefinite,
+  type BlockRefRangeDefinite,
+  type BlockRefRangeIndefinite,
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshot,
   type ChainIndexingStatusSnapshotBackfill,
@@ -41,7 +41,7 @@ function buildChainIndexingStatusSnapshot(
     return validateChainIndexingStatusSnapshot({
       chainStatus: ChainIndexingStatusIds.Completed,
       latestIndexedBlock: checkpointBlock,
-      config: indexingConfig as Unvalidated<ChainIndexingConfigDefinite>,
+      config: indexingConfig as Unvalidated<BlockRefRangeDefinite>,
     } satisfies Unvalidated<ChainIndexingStatusSnapshotCompleted>);
   }
 
@@ -50,7 +50,7 @@ function buildChainIndexingStatusSnapshot(
       chainStatus: ChainIndexingStatusIds.Following,
       latestIndexedBlock: checkpointBlock,
       latestKnownBlock: indexingMetrics.latestSyncedBlock,
-      config: indexingConfig as Unvalidated<ChainIndexingConfigIndefinite>,
+      config: indexingConfig as Unvalidated<BlockRefRangeIndefinite>,
     } satisfies Unvalidated<ChainIndexingStatusSnapshotFollowing>);
   }
 

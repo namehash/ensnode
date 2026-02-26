@@ -1,7 +1,7 @@
 import { assert, describe, expect, it } from "vitest";
 
 import {
-  ChainIndexingConfigTypeIds,
+  BlockRefRangeTypeIds,
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshotBackfill,
   type ChainIndexingStatusSnapshotCompleted,
@@ -47,7 +47,7 @@ describe("OmnichainIndexingStatusSnapshot", () => {
             {
               chainStatus: ChainIndexingStatusIds.Queued,
               config: {
-                configType: ChainIndexingConfigTypeIds.Indefinite,
+                blockRangeType: BlockRefRangeTypeIds.Indefinite,
                 startBlock: earliestBlockRef,
               },
             } satisfies ChainIndexingStatusSnapshotQueued,
@@ -92,7 +92,7 @@ describe("OmnichainIndexingStatusSnapshot", () => {
             {
               chainStatus: ChainIndexingStatusIds.Queued,
               config: {
-                configType: ChainIndexingConfigTypeIds.Indefinite,
+                blockRangeType: BlockRefRangeTypeIds.Indefinite,
                 startBlock: metadataQueued.indexingConfig.startBlock,
               },
             } satisfies ChainIndexingStatusSnapshotQueued,
@@ -102,7 +102,7 @@ describe("OmnichainIndexingStatusSnapshot", () => {
             {
               chainStatus: ChainIndexingStatusIds.Backfill,
               config: {
-                configType: ChainIndexingConfigTypeIds.Indefinite,
+                blockRangeType: BlockRefRangeTypeIds.Indefinite,
                 startBlock: metadataBackfill.indexingConfig.startBlock,
               },
               latestIndexedBlock: metadataBackfill.indexingStatus.checkpointBlock,
@@ -155,7 +155,7 @@ describe("OmnichainIndexingStatusSnapshot", () => {
             {
               chainStatus: ChainIndexingStatusIds.Backfill,
               config: {
-                configType: ChainIndexingConfigTypeIds.Indefinite,
+                blockRangeType: BlockRefRangeTypeIds.Indefinite,
                 startBlock: metadataBackfill.indexingConfig.startBlock,
               },
               latestIndexedBlock: metadataBackfill.indexingStatus.checkpointBlock,
@@ -167,7 +167,7 @@ describe("OmnichainIndexingStatusSnapshot", () => {
             {
               chainStatus: ChainIndexingStatusIds.Following,
               config: {
-                configType: ChainIndexingConfigTypeIds.Indefinite,
+                blockRangeType: BlockRefRangeTypeIds.Indefinite,
                 startBlock: metadataFollowing.indexingConfig.startBlock,
               },
               latestIndexedBlock: metadataFollowing.indexingStatus.checkpointBlock,
@@ -203,7 +203,7 @@ describe("OmnichainIndexingStatusSnapshot", () => {
             {
               chainStatus: ChainIndexingStatusIds.Completed,
               config: {
-                configType: ChainIndexingConfigTypeIds.Definite,
+                blockRangeType: BlockRefRangeTypeIds.Definite,
                 startBlock: earliestBlockRef,
                 endBlock: latestBlockRef,
               },
@@ -263,7 +263,7 @@ describe("OmnichainIndexingStatusSnapshot", () => {
             {
               chainStatus: ChainIndexingStatusIds.Following,
               config: {
-                configType: ChainIndexingConfigTypeIds.Indefinite,
+                blockRangeType: BlockRefRangeTypeIds.Indefinite,
                 startBlock: metadata1.indexingConfig.startBlock,
               },
               latestIndexedBlock: metadata1.indexingStatus.checkpointBlock,
@@ -275,7 +275,7 @@ describe("OmnichainIndexingStatusSnapshot", () => {
             {
               chainStatus: ChainIndexingStatusIds.Following,
               config: {
-                configType: ChainIndexingConfigTypeIds.Indefinite,
+                blockRangeType: BlockRefRangeTypeIds.Indefinite,
                 startBlock: metadata2.indexingConfig.startBlock,
               },
               latestIndexedBlock: metadata2.indexingStatus.checkpointBlock,

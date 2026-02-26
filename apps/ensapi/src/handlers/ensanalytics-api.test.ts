@@ -1,5 +1,4 @@
-import { testClient } from "hono/testing";
-import { describe, expect, it, vi } from "vitest"; // Or your preferred test runner
+import { describe, expect, it, vi } from "vitest";
 
 import { ENSNamespaceIds } from "@ensnode/datasources";
 
@@ -53,27 +52,31 @@ describe("/ensanalytics", () => {
       const allPossibleReferrers = referrerLeaderboardPageResponseOk.data.referrers;
       const allPossibleReferrersIterator = allPossibleReferrers[Symbol.iterator]();
 
-      // Arrange: create the test client from the app instance
-      const client = testClient(app);
       const recordsPerPage = 10;
 
       // Act: send test request to fetch 1st page
-      const responsePage1 = await client.referrers
-        .$get({ query: { recordsPerPage: `${recordsPerPage}`, page: "1" } }, {})
-        .then((r) => r.json())
-        .then(deserializeReferrerLeaderboardPageResponse);
+      const httpResponsePage1 = await app.request(
+        `/referrers?recordsPerPage=${recordsPerPage}&page=1`,
+      );
+      const responsePage1 = deserializeReferrerLeaderboardPageResponse(
+        await httpResponsePage1.json(),
+      );
 
       // Act: send test request to fetch 2nd page
-      const responsePage2 = await client.referrers
-        .$get({ query: { recordsPerPage: `${recordsPerPage}`, page: "2" } }, {})
-        .then((r) => r.json())
-        .then(deserializeReferrerLeaderboardPageResponse);
+      const httpResponsePage2 = await app.request(
+        `/referrers?recordsPerPage=${recordsPerPage}&page=2`,
+      );
+      const responsePage2 = deserializeReferrerLeaderboardPageResponse(
+        await httpResponsePage2.json(),
+      );
 
       // Act: send test request to fetch 3rd page
-      const responsePage3 = await client.referrers
-        .$get({ query: { recordsPerPage: `${recordsPerPage}`, page: "3" } }, {})
-        .then((r) => r.json())
-        .then(deserializeReferrerLeaderboardPageResponse);
+      const httpResponsePage3 = await app.request(
+        `/referrers?recordsPerPage=${recordsPerPage}&page=3`,
+      );
+      const responsePage3 = deserializeReferrerLeaderboardPageResponse(
+        await httpResponsePage3.json(),
+      );
 
       // Assert: 1st page results
       const expectedResponsePage1 = {
@@ -144,15 +147,11 @@ describe("/ensanalytics", () => {
         return await next();
       });
 
-      // Arrange: create the test client from the app instance
-      const client = testClient(app);
       const recordsPerPage = 10;
 
       // Act: send test request to fetch 1st page
-      const response = await client.referrers
-        .$get({ query: { recordsPerPage: `${recordsPerPage}`, page: "1" } }, {})
-        .then((r) => r.json())
-        .then(deserializeReferrerLeaderboardPageResponse);
+      const httpResponse = await app.request(`/referrers?recordsPerPage=${recordsPerPage}&page=1`);
+      const response = deserializeReferrerLeaderboardPageResponse(await httpResponse.json());
 
       // Assert: empty page results
       const expectedResponse = {

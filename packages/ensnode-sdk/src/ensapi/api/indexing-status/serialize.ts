@@ -1,13 +1,28 @@
 import { serializeRealtimeIndexingStatusProjection } from "../../../indexing-status/serialize/realtime-indexing-status-projection";
-import { type EnsApiIndexingStatusResponse, EnsApiIndexingStatusResponseCodes } from "./response";
+import {
+  type EnsApiIndexingStatusResponse,
+  EnsApiIndexingStatusResponseCodes,
+  type EnsApiIndexingStatusResponseError,
+  type EnsApiIndexingStatusResponseOk,
+} from "./response";
 import type {
   SerializedEnsApiIndexingStatusResponse,
+  SerializedEnsApiIndexingStatusResponseError,
   SerializedEnsApiIndexingStatusResponseOk,
 } from "./serialized-response";
 
 /**
  * Serialize a {@link EnsApiIndexingStatusResponse} object.
  */
+export function serializeEnsApiIndexingStatusResponse(
+  response: EnsApiIndexingStatusResponseOk,
+): SerializedEnsApiIndexingStatusResponseOk;
+export function serializeEnsApiIndexingStatusResponse(
+  response: EnsApiIndexingStatusResponseError,
+): SerializedEnsApiIndexingStatusResponseError;
+export function serializeEnsApiIndexingStatusResponse(
+  response: EnsApiIndexingStatusResponse,
+): SerializedEnsApiIndexingStatusResponse;
 export function serializeEnsApiIndexingStatusResponse(
   response: EnsApiIndexingStatusResponse,
 ): SerializedEnsApiIndexingStatusResponse {
