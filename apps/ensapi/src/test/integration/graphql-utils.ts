@@ -1,4 +1,4 @@
-import { type DocumentNode, parse, print } from "graphql";
+import { type DocumentNode, Kind, parse, print } from "graphql";
 import type { RequestDocument, Variables } from "graphql-request";
 
 import { client } from "./ensnode-graphql-api-client";
@@ -16,7 +16,7 @@ function isDocumentNode(obj: any): obj is DocumentNode {
   return (
     typeof obj === "object" &&
     obj !== null &&
-    obj.kind === "Document" &&
+    obj.kind === Kind.DOCUMENT &&
     Array.isArray(obj.definitions)
   );
 }
