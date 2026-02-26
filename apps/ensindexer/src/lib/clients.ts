@@ -2,15 +2,21 @@ import config from "@/config";
 
 import { publicClients } from "ponder:api";
 
+import { buildIndexedBlockranges } from "@ensnode/ensnode-sdk";
 import { LocalPonderClient } from "@ensnode/ponder-sdk";
 
-import { buildChainsBlockrange } from "@/config/chains-blockrange";
+import { getPluginsRequiredDatasourceNames } from "@/lib/plugin-helpers";
 
-const chainsBlockrange = buildChainsBlockrange(config.namespace, config.plugins);
+const pluginsRequiredDatasourceNames = getPluginsRequiredDatasourceNames(config.plugins);
+
+const indexedBlockranges = buildIndexedBlockranges(
+  config.namespace,
+  pluginsRequiredDatasourceNames,
+);
 
 export const localPonderClient = new LocalPonderClient(
   config.ensIndexerUrl,
   config.indexedChainIds,
-  chainsBlockrange,
+  indexedBlockranges,
   publicClients,
 );
