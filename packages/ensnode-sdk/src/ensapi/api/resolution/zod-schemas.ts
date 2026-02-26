@@ -8,12 +8,8 @@ import { withOpenApi } from "../../../shared/zod-types";
 const makeResolverRecordsResponseSchema = () =>
   z.object({
     name: z.string().nullable().optional(),
-    addresses: withOpenApi(z.record(z.string(), z.string().nullable()), {
-      propertyNames: { type: "string" },
-    }).optional(),
-    texts: withOpenApi(z.record(z.string(), z.string().nullable()), {
-      propertyNames: { type: "string" },
-    }).optional(),
+    addresses: z.record(z.string(), z.string().nullable()).optional(),
+    texts: z.record(z.string(), z.string().nullable()).optional(),
   });
 
 /**
