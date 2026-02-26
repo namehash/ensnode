@@ -28,12 +28,12 @@ describe("LocalPonderClient", () => {
       });
 
       // Act & Assert
-      expect(() => client.getChainBlockrange(chainIds.Base)).toThrowError(
-        /No blockrange found for chain ID: 8453/,
+      expect(() => client.getIndexedBlockrange(chainIds.Base)).toThrowError(
+        /Chain ID 8453 is not being indexed and therefore has no indexed blockrange./,
       );
 
       expect(() => client.getCachedPublicClient(chainIds.Base)).toThrowError(
-        /No cached public client found for chain ID: 8453/,
+        /Chain ID 8453 is not being indexed and therefore has no cached public client./,
       );
     });
 
@@ -50,7 +50,7 @@ describe("LocalPonderClient", () => {
           chainsBlockrange,
         }),
       ).toThrowError(
-        /Local Ponder Client is missing the following indexed chain IDs for Chains Blockrange: 10/,
+        /Local Ponder Client is missing the Indexed Blockranges for indexed chain IDs: 10/,
       );
     });
 
@@ -67,12 +67,12 @@ describe("LocalPonderClient", () => {
           indexedChainIds: new Set([chainIds.Mainnet, chainIds.Optimism]),
         }),
       ).toThrowError(
-        /Local Ponder Client is missing the following indexed chain IDs for Cached Public Clients: 10/,
+        /Local Ponder Client is missing the Cached Public Clients for indexed chain IDs: 10/,
       );
     });
   });
 
-  describe("getChainBlockrange()", () => {
+  describe("getIndexedBlockrange()", () => {
     it("returns blockrange for indexed chain", () => {
       // Arrange & Act
       const client = createLocalPonderClientMock({
@@ -82,7 +82,7 @@ describe("LocalPonderClient", () => {
         ]),
       });
 
-      expect(client.getChainBlockrange(chainIds.Mainnet)).toStrictEqual({ startBlock: 50 });
+      expect(client.getIndexedBlockrange(chainIds.Mainnet)).toStrictEqual({ startBlock: 50 });
     });
   });
 
@@ -200,7 +200,7 @@ describe("LocalPonderClient", () => {
 
       // Assert
       await expect(client.metrics()).rejects.toThrowError(
-        /Local Ponder Client is missing the following indexed chain IDs for Chains Indexing Metrics: 10/,
+        /Local Ponder Client is missing the Chains Indexing Metrics for indexed chain IDs: 10/,
       );
     });
   });
