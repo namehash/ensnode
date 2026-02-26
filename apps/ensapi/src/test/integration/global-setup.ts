@@ -1,6 +1,6 @@
 import { client, gql } from "./ensnode-graphql-api-client";
 
-const ENSAPI_GRAPHQL_URL = process.env.ENSAPI_GRAPHQL_URL ?? "http://localhost:4334/api/graphql";
+const ENSAPI_GRAPHQL_URL = process.env.ENSAPI_GRAPHQL_API_URL ?? "http://localhost:4334/api/graphql";
 
 export async function setup() {
   try {
