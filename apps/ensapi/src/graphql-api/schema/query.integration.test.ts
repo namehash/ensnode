@@ -78,12 +78,12 @@ describe("Query.domains", () => {
   `;
 
   it("requires the name filter", async () => {
-    expect(request(gql`{ domains { edges { node { id }} } }`)).rejects.toThrow(
+    await expect(request(gql`{ domains { edges { node { id }} } }`)).rejects.toThrow(
       'argument "where" of type "DomainsWhereInput!" is required, but it was not provided',
     );
   });
 
-  it("sees both .eth Domains", async () => {
+  it("sees .eth domain", async () => {
     const result = await request<QueryDomainsResult>(QueryDomains, { name: "eth" });
 
     const domains = flattenConnection(result.domains);

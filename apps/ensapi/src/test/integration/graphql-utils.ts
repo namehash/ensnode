@@ -1,4 +1,4 @@
-import { parse, print } from "graphql";
+import { type DocumentNode, parse, print } from "graphql";
 import type { RequestDocument, Variables } from "graphql-request";
 
 import { client } from "./ensnode-graphql-api-client";
@@ -18,11 +18,20 @@ export function flattenConnection<T>(connection?: GraphQLConnection<T>): T[] {
   return (connection?.edges ?? []).map((edge) => edge.node);
 }
 
+function isDocumentNode(obj: any): obj is DocumentNode {
+  return (
+    typeof obj === "object" &&
+    obj !== null &&
+    obj.kind === "Document" &&
+    Array.isArray(obj.definitions)
+  );
+}
+
 export async function request<T = unknown>(
   document: RequestDocument,
   variables?: Variables,
 ): Promise<T> {
-  const query = print(parse(document.toString()));
+  const query = print(isDocumentNode(document) ? document : parse(document.toString()));
   const varsSection = variables
     ? `\n── Variables ──\n${highlightJSON(JSON.stringify(variables, null, 2))}`
     : "";

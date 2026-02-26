@@ -34,4 +34,4 @@ export const DEVNET_ETH_LABELS = DEVNET_NAMES.map(({ name, canonical }) => {
   // must be 2ld
   if (segments.length !== 2) return null;
   return segments[0];
-}).filter((l) => l !== null);
+}).filter((l): l is string => l !== null);
