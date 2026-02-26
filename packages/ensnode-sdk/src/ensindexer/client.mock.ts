@@ -1,5 +1,5 @@
 import {
-  ChainIndexingConfigTypeIds,
+  BlockRefRangeTypeIds,
   ChainIndexingStatusIds,
 } from "../indexing-status/chain-indexing-status-snapshot";
 import { CrossChainIndexingStrategyIds } from "../indexing-status/cross-chain-indexing-status-snapshot";
@@ -51,7 +51,7 @@ export const indexingStatusResponseMock = {
           "1": {
             chainStatus: ChainIndexingStatusIds.Backfill,
             config: {
-              configType: ChainIndexingConfigTypeIds.Indefinite,
+              blockRangeType: BlockRefRangeTypeIds.Indefinite,
               startBlock: {
                 timestamp: 1489165544,
                 number: 3327417,
@@ -69,7 +69,7 @@ export const indexingStatusResponseMock = {
           "8453": {
             chainStatus: ChainIndexingStatusIds.Queued,
             config: {
-              configType: ChainIndexingConfigTypeIds.Indefinite,
+              blockRangeType: BlockRefRangeTypeIds.Indefinite,
               startBlock: {
                 timestamp: 1755181691,
                 number: 17571480,

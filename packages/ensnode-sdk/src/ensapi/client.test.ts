@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ENSNamespaceIds, type Name } from "../ens";
 import { PluginName } from "../ensindexer/config/types";
 import {
-  ChainIndexingConfigTypeIds,
+  BlockRefRangeTypeIds,
   ChainIndexingStatusIds,
 } from "../indexing-status/chain-indexing-status-snapshot";
 import { CrossChainIndexingStrategyIds } from "../indexing-status/cross-chain-indexing-status-snapshot";
@@ -108,7 +108,7 @@ const EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE = deserializeEnsApiIndexingStatu
           "1": {
             chainStatus: ChainIndexingStatusIds.Backfill,
             config: {
-              configType: ChainIndexingConfigTypeIds.Indefinite,
+              blockRangeType: BlockRefRangeTypeIds.Indefinite,
               startBlock: {
                 timestamp: 1489165544,
                 number: 3327417,
@@ -126,7 +126,7 @@ const EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE = deserializeEnsApiIndexingStatu
           "8453": {
             chainStatus: ChainIndexingStatusIds.Queued,
             config: {
-              configType: ChainIndexingConfigTypeIds.Indefinite,
+              blockRangeType: BlockRefRangeTypeIds.Indefinite,
               startBlock: {
                 timestamp: 1755181691,
                 number: 17571480,
@@ -158,7 +158,7 @@ const _EXAMPLE_INDEXING_STATUS_FOLLOWING_RESPONSE: EnsApiIndexingStatusResponse 
             "1": {
               chainStatus: ChainIndexingStatusIds.Following,
               config: {
-                configType: ChainIndexingConfigTypeIds.Indefinite,
+                blockRangeType: BlockRefRangeTypeIds.Indefinite,
                 startBlock: {
                   timestamp: 1_496_123_537,
                   number: 23_327_417,
@@ -176,7 +176,7 @@ const _EXAMPLE_INDEXING_STATUS_FOLLOWING_RESPONSE: EnsApiIndexingStatusResponse 
             "8453": {
               chainStatus: ChainIndexingStatusIds.Backfill,
               config: {
-                configType: ChainIndexingConfigTypeIds.Indefinite,
+                blockRangeType: BlockRefRangeTypeIds.Indefinite,
                 startBlock: {
                   timestamp: 1_484_015_544,
                   number: 17_571_480,
