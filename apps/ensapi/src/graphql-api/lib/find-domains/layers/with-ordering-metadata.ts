@@ -1,0 +1,67 @@
+import { and, eq, sql } from "drizzle-orm";
+
+import * as schema from "@ensnode/ensnode-schema";
+import type { DomainId } from "@ensnode/ensnode-sdk";
+
+import { db } from "@/lib/db";
+
+import type { BaseDomainSet } from "./base-domain-set";
+
+export type DomainsWithOrderingMetadata = ReturnType<typeof withOrderingMetadata>;
+
+/**
+ * Type of row from `withOrderingMetadata`
+ *
+ * @dev should be able to derive this from drizzle, right??
+ */
+export type DomainsWithOrderingMetadataResult = {
+  id: DomainId;
+  sortableLabel: string | null;
+  registrationTimestamp: bigint | null;
+  registrationExpiry: bigint | null;
+};
+
+/**
+ * Enrich a base domain set with ordering metadata.
+ *
+ * Joins latestRegistrationIndex → registration → event for registration-based ordering.
+ * Uses sortableLabel from the base set for NAME ordering.
+ *
+ * Returns a CTE with columns: {id, sortableLabel, registrationTimestamp, registrationExpiry}
+ * suitable for cursor-based pagination.
+ *
+ * @param base - A base domain set (output of any filter layer)
+ */
+export function withOrderingMetadata(base: BaseDomainSet) {
+  const domains = db
+    .select({
+      id: sql<DomainId>`${base.domainId}`.as("id"),
+
+      // for NAME ordering
+      sortableLabel: base.sortableLabel,
+
+      // for REGISTRATION_TIMESTAMP ordering
+      registrationTimestamp: schema.event.timestamp,
+
+      // for REGISTRATION_EXPIRY ordering
+      registrationExpiry: schema.registration.expiry,
+    })
+    .from(base)
+    // join latestRegistrationIndex
+    .leftJoin(
+      schema.latestRegistrationIndex,
+      eq(schema.latestRegistrationIndex.domainId, base.domainId),
+    )
+    // join (latest) Registration
+    .leftJoin(
+      schema.registration,
+      and(
+        eq(schema.registration.domainId, base.domainId),
+        eq(schema.registration.index, schema.latestRegistrationIndex.index),
+      ),
+    )
+    // join (latest) Registration's Event
+    .leftJoin(schema.event, eq(schema.event.id, schema.registration.eventId));
+
+  return db.$with("domains").as(domains);
+}

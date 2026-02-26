@@ -31,7 +31,12 @@ const CANONICAL_REGISTRIES_MAX_DEPTH = 16;
  */
 export const getCanonicalRegistriesCTE = () =>
   db
-    .select({ registryId: sql<string>`registry_id`.as("registryId") })
+    .select({
+      // NOTE: using `id` here to avoid clobbering `registryId` in consuming queries, which would
+      // result in '_ is ambiguous' error messages from postgres because drizzle isn't scoping the
+      // selection properly. a bit fragile but works for now.
+      id: sql<string>`registry_id`.as("id"),
+    })
     .from(
       sql`(
             WITH RECURSIVE canonical_registries AS (

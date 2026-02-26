@@ -1,4 +1,8 @@
-import envConfig, { buildServeCommandConfig, type ServeCommandCliArgs } from "@/config";
+import envConfig, {
+  buildServeCommandConfig,
+  parseDataDirFromCli,
+  type ServeCommandCliArgs,
+} from "@/config";
 
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -71,9 +75,10 @@ export function createCLI(options: CLIOptions = {}) {
             });
         },
         async (argv: ArgumentsCamelCase<IngestProtobufCommandCliArgs>) => {
+          const dataDir = parseDataDirFromCli(argv["data-dir"]);
           await ingestProtobufCommand({
             inputFile: argv["input-file"],
-            dataDir: argv["data-dir"],
+            dataDir,
           });
         },
       )
@@ -124,8 +129,9 @@ export function createCLI(options: CLIOptions = {}) {
             });
         },
         async (argv: ArgumentsCamelCase<ValidateCommandCliArgs>) => {
+          const dataDir = parseDataDirFromCli(argv["data-dir"]);
           await validateCommand({
-            dataDir: argv["data-dir"],
+            dataDir,
             lite: argv.lite,
           });
         },
@@ -141,8 +147,9 @@ export function createCLI(options: CLIOptions = {}) {
           });
         },
         async (argv: ArgumentsCamelCase<PurgeCommandCliArgs>) => {
+          const dataDir = parseDataDirFromCli(argv["data-dir"]);
           await purgeCommand({
-            dataDir: argv["data-dir"],
+            dataDir,
           });
         },
       )

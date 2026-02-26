@@ -3,11 +3,23 @@ import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@poth
 import { type ENSv2DomainId, makePermissionsId, type RegistryId } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
+import { resolveFindDomains } from "@/graphql-api/lib/find-domains/find-domains-resolver";
+import {
+  domainsBase,
+  filterByName,
+  filterByRegistry,
+  withOrderingMetadata,
+} from "@/graphql-api/lib/find-domains/layers";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
 import { AccountIdInput, AccountIdRef } from "@/graphql-api/schema/account-id";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { cursors } from "@/graphql-api/schema/cursors";
-import { ENSv2DomainRef } from "@/graphql-api/schema/domain";
+import {
+  DomainInterfaceRef,
+  DomainsOrderInput,
+  ENSv2DomainRef,
+  RegistryDomainsWhereInput,
+} from "@/graphql-api/schema/domain";
 import { PermissionsRef } from "@/graphql-api/schema/permissions";
 import { db } from "@/lib/db";
 
@@ -63,23 +75,17 @@ RegistryRef.implement({
     //////////////////////
     domains: t.connection({
       description: "TODO",
-      type: ENSv2DomainRef,
-      resolve: (parent, args, context) =>
-        resolveCursorConnection(
-          { ...DEFAULT_CONNECTION_ARGS, args },
-          ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-            db.query.v2Domain.findMany({
-              where: (t, { lt, gt, eq, and }) =>
-                and(
-                  eq(t.registryId, parent.id),
-                  before ? lt(t.id, cursors.decode<ENSv2DomainId>(before)) : undefined,
-                  after ? gt(t.id, cursors.decode<ENSv2DomainId>(after)) : undefined,
-                ),
-              orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
-              limit,
-              with: { label: true },
-            }),
-        ),
+      type: DomainInterfaceRef,
+      args: {
+        where: t.arg({ type: RegistryDomainsWhereInput }),
+        order: t.arg({ type: DomainsOrderInput }),
+      },
+      resolve: (parent, { where, order, ...connectionArgs }, context) => {
+        const base = filterByRegistry(domainsBase(), parent.id);
+        const named = filterByName(base, where?.name);
+        const domains = withOrderingMetadata(named);
+        return resolveFindDomains(context, { domains, order, ...connectionArgs });
+      },
     }),
 
     ////////////////////////

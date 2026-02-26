@@ -277,7 +277,7 @@ describe("CLI", () => {
         // Successful convert with args (convert-sql always creates version 0)
         // To test version 1, we need to use convert command with existing database
         // But for this test, we'll create version 0 and then manually test the ingestion failure
-        const csvInputFile = join(TEST_FIXTURES_DIR, "test_labels_2col.csv");
+        const csvInputFile = join(TEST_FIXTURES_DIR, "test_labels_1col.csv");
         const tempDbDirForV1 = join(tempDir, "temp-db-for-v1");
         const version0FileForV1 = join(tempDir, "test_ens_names_0_for_v1.ensrainbow");
 
@@ -340,7 +340,7 @@ describe("CLI", () => {
 
         // Create an ensrainbow file with label set version 2
         // To create version 2, we need to create version 0, ingest it, create version 1, ingest it, then create version 2
-        const csvInputFile = join(TEST_FIXTURES_DIR, "test_labels_2col.csv");
+        const csvInputFile = join(TEST_FIXTURES_DIR, "test_labels_1col.csv");
         const labelSetId = "test-ens-names";
 
         // Create temporary directory for building up versions sequentially
@@ -453,7 +453,7 @@ describe("CLI", () => {
         const thirdInputFile = join(tempDir, "different_label_set_id_1.ensrainbow");
 
         // Create an ensrainbow file with different label set id
-        const csvInputFile = join(TEST_FIXTURES_DIR, "test_labels_2col.csv");
+        const csvInputFile = join(TEST_FIXTURES_DIR, "test_labels_1col.csv");
         const labelSetId = "different-label-set-id"; // Different from test-ens-names
 
         // Create temporary directory for version 0 database

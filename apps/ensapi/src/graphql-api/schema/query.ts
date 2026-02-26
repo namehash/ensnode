@@ -15,7 +15,13 @@ import {
 
 import { builder } from "@/graphql-api/builder";
 import { resolveFindDomains } from "@/graphql-api/lib/find-domains/find-domains-resolver";
-import { getDomainIdByInterpretedName } from "@/graphql-api/lib/get-domain-by-fqdn";
+import {
+  domainsBase,
+  filterByCanonical,
+  filterByName,
+  withOrderingMetadata,
+} from "@/graphql-api/lib/find-domains/layers";
+import { getDomainIdByInterpretedName } from "@/graphql-api/lib/get-domain-by-interpreted-name";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { AccountIdInput } from "@/graphql-api/schema/account-id";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
@@ -141,7 +147,13 @@ builder.queryType({
         where: t.arg({ type: DomainsWhereInput, required: true }),
         order: t.arg({ type: DomainsOrderInput }),
       },
-      resolve: (_, args, context) => resolveFindDomains(context, args),
+      resolve: (_, { where, order, ...connectionArgs }, context) => {
+        const base = domainsBase();
+        const named = filterByName(base, where.name);
+        const canonical = where.canonical === true ? filterByCanonical(named) : named;
+        const domains = withOrderingMetadata(canonical);
+        return resolveFindDomains(context, { domains, order, ...connectionArgs });
+      },
     }),
 
     //////////////////////////////////
