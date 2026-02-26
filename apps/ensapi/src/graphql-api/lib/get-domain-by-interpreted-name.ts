@@ -29,15 +29,14 @@ const v2Logger = makeLogger("get-domain-by-interpreted-name:v2");
  * Domain lookup by Interpreted Name via forward traversal of the namegraph.
  *
  * This mirrors ENS Forward Resolution (walking from the root registry through each label in the name)
- * with two intentional differences because this is designed to support the GraphQL API, not
- * Protocol Acceleration.
+ * with the exception that expired names are still retrievable: this traversal does _not_ check
+ * registration expiry, so callers can query Domains even after they are expired.
  *
- * 1. Expired names are still retrievable — the traversal does _not_ check registration expiry, so
- *    callers can query Domains even after they are expired.
+ * This is because this traversal is designed to support access to a Domain via API—not Protocol
+ * Acceleration—and consumers likely want to reference Domains regardless of Registration status.
  *
  * This means that not every Domain returned by this function is accessible by ENS Forward Resolution:
- * an expired Domain will be considered as non-existing during Forward Resolution, but it will still
- * be accessible as a resource here.
+ * an expired Domain does not exist in the context of Forward Resolution.
  *
  * Note that if a Domain has been migrated from ENSv1 to ENSv2, the ENSv2 Domain entity is returned,
  * mirroring ENS Forward Resolution.
@@ -45,8 +44,8 @@ const v2Logger = makeLogger("get-domain-by-interpreted-name:v2");
  * Finally, this also means that Domains are addressable by any number of (possibly infinite) Aliases.
  * i.e. if a name 'alias.eth' declares that the registry containing 'sub' is its subregistry but
  * that subregistry declares a different Canonical Domain, we are still able to access the 'sub' Domain
- * via 'sub.alias.eth'. That said, the resulting `Domain.name` (which is always its Canonical Name)
- * for the Domain will be 'sub.canonical.eth', not the queried 'sub.alias.eth'.
+ * via 'sub.alias.eth'. Naturally, 'sub's Canonical Name will continue to be 'sub.canonical.eth',
+ * not the alias by which it was queried ('sub.alias.eth').
  */
 export async function getDomainIdByInterpretedName(
   name: InterpretedName,
