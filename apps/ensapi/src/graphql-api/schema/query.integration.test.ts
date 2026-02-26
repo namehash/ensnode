@@ -78,7 +78,7 @@ describe("Query.domains", () => {
     );
   });
 
-  it("sees both .eth Domains", async () => {
+  it("sees .eth domain", async () => {
     const result = await request<QueryDomainsResult>(QueryDomains, { name: "eth" });
 
     const domains = flattenConnection(result.domains);
