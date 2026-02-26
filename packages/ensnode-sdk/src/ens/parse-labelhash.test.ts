@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  InvalidLabelHashError,
   parseEncodedLabelHash,
   parseLabelHash,
   parseLabelHashOrEncodedLabelHash,
@@ -59,29 +58,33 @@ describe("parseLabelHash", () => {
   it("throws for non-hex characters", () => {
     expect(() =>
       parseLabelHash("0xG000000000000000000000000000000000000000000000000000000000000000"),
-    ).toThrow(InvalidLabelHashError);
+    ).toThrow(Error);
   });
 
   it("throws for too short input (e.g. 5 hex chars)", () => {
-    expect(() => parseLabelHash("0x00000")).toThrow(InvalidLabelHashError);
+    expect(() => parseLabelHash("0x00000")).toThrow(Error);
   });
 
   it("throws for too long input (65 hex chars)", () => {
     expect(() =>
       parseLabelHash("0x00000000000000000000000000000000000000000000000000000000000000000"),
-    ).toThrow(InvalidLabelHashError);
+    ).toThrow(Error);
   });
 
   it("throws for 62-char hex (even, but wrong length)", () => {
     expect(() =>
       parseLabelHash("0x00000000000000000000000000000000000000000000000000000000000000"),
-    ).toThrow(InvalidLabelHashError);
+    ).toThrow(Error);
   });
 
   it("throws for uppercase 0X prefix", () => {
     expect(() =>
       parseLabelHash("0X0000000000000000000000000000000000000000000000000000000000000000"),
-    ).toThrow(InvalidLabelHashError);
+    ).toThrow(Error);
+  });
+
+  it("throws for empty string", () => {
+    expect(() => parseLabelHash("")).toThrow(Error);
   });
 });
 
@@ -131,44 +134,52 @@ describe("parseEncodedLabelHash", () => {
   it("throws when missing opening bracket", () => {
     expect(() =>
       parseEncodedLabelHash("0000000000000000000000000000000000000000000000000000000000000000]"),
-    ).toThrow(InvalidLabelHashError);
+    ).toThrow(Error);
   });
 
   it("throws when missing closing bracket", () => {
     expect(() =>
       parseEncodedLabelHash("[0000000000000000000000000000000000000000000000000000000000000000"),
-    ).toThrow(InvalidLabelHashError);
+    ).toThrow(Error);
   });
 
   it("throws when missing both brackets", () => {
     expect(() =>
       parseEncodedLabelHash("0000000000000000000000000000000000000000000000000000000000000000"),
-    ).toThrow(InvalidLabelHashError);
+    ).toThrow(Error);
   });
 
   it("throws for 62 hex chars inside brackets (too short, even length)", () => {
     expect(() =>
       parseEncodedLabelHash("[00000000000000000000000000000000000000000000000000000000000000]"),
-    ).toThrow(InvalidLabelHashError);
+    ).toThrow(Error);
   });
 
   it("throws for 65 hex chars inside brackets (too long)", () => {
     expect(() =>
       parseEncodedLabelHash("[00000000000000000000000000000000000000000000000000000000000000000]"),
-    ).toThrow(InvalidLabelHashError);
+    ).toThrow(Error);
   });
 
   it("throws for uppercase 0X prefix inside brackets", () => {
     expect(() =>
       parseEncodedLabelHash("[0X0000000000000000000000000000000000000000000000000000000000000000]"),
-    ).toThrow(InvalidLabelHashError);
+    ).toThrow(Error);
   });
 
   it("throws for invalid content inside brackets", () => {
-    expect(() => parseEncodedLabelHash("[00000]")).toThrow(InvalidLabelHashError);
+    expect(() => parseEncodedLabelHash("[00000]")).toThrow(Error);
     expect(() =>
       parseEncodedLabelHash("[0xG000000000000000000000000000000000000000000000000000000000000000]"),
-    ).toThrow(InvalidLabelHashError);
+    ).toThrow(Error);
+  });
+
+  it("throws for empty string", () => {
+    expect(() => parseEncodedLabelHash("")).toThrow(Error);
+  });
+
+  it("throws for empty brackets", () => {
+    expect(() => parseEncodedLabelHash("[]")).toThrow(Error);
   });
 });
 
@@ -206,6 +217,6 @@ describe("parseLabelHashOrEncodedLabelHash", () => {
   });
 
   it("throws for invalid input", () => {
-    expect(() => parseLabelHashOrEncodedLabelHash("0xinvalid")).toThrow(InvalidLabelHashError);
+    expect(() => parseLabelHashOrEncodedLabelHash("0xinvalid")).toThrow(Error);
   });
 });

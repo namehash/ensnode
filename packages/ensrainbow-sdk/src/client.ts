@@ -4,7 +4,6 @@ import {
   type EncodedLabelHash,
   type EnsRainbowClientLabelSet,
   type EnsRainbowServerLabelSet,
-  InvalidLabelHashError,
   type Label,
   type LabelHash,
   LruCache,
@@ -336,14 +335,11 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
     try {
       normalizedLabelHash = parseLabelHashOrEncodedLabelHash(labelHash);
     } catch (error) {
-      if (error instanceof InvalidLabelHashError) {
-        return {
-          status: StatusCode.Error,
-          error: error.message,
-          errorCode: ErrorCode.BadRequest,
-        } as EnsRainbow.HealBadRequestError;
-      }
-      throw error;
+      return {
+        status: StatusCode.Error,
+        error: error instanceof Error ? error.message : String(error),
+        errorCode: ErrorCode.BadRequest,
+      } as EnsRainbow.HealBadRequestError;
     }
 
     const cachedResult = this.cache.get(normalizedLabelHash);
