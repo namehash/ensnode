@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  ChainIndexingConfigTypeIds,
+  BlockRefRangeTypeIds,
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshotBackfill,
   type ChainIndexingStatusSnapshotCompleted,
@@ -32,7 +32,7 @@ describe("cross-chain-indexing-status-snapshot", () => {
           {
             chainStatus: ChainIndexingStatusIds.Backfill,
             config: {
-              configType: ChainIndexingConfigTypeIds.Definite,
+              blockRangeType: BlockRefRangeTypeIds.Definite,
               startBlock: earliestBlockRef,
               endBlock: latestBlockRef,
             },
@@ -67,7 +67,7 @@ describe("cross-chain-indexing-status-snapshot", () => {
               {
                 chainStatus: ChainIndexingStatusIds.Backfill,
                 config: {
-                  configType: ChainIndexingConfigTypeIds.Definite,
+                  blockRangeType: BlockRefRangeTypeIds.Definite,
                   startBlock: earliestBlockRef,
                   endBlock: latestBlockRef,
                 },
@@ -92,7 +92,7 @@ describe("cross-chain-indexing-status-snapshot", () => {
           {
             chainStatus: ChainIndexingStatusIds.Completed,
             config: {
-              configType: ChainIndexingConfigTypeIds.Definite,
+              blockRangeType: BlockRefRangeTypeIds.Definite,
               startBlock: earliestBlockRef,
               endBlock: latestBlockRef,
             },
@@ -126,7 +126,7 @@ describe("cross-chain-indexing-status-snapshot", () => {
               {
                 chainStatus: ChainIndexingStatusIds.Completed,
                 config: {
-                  configType: ChainIndexingConfigTypeIds.Definite,
+                  blockRangeType: BlockRefRangeTypeIds.Definite,
                   startBlock: earliestBlockRef,
                   endBlock: latestBlockRef,
                 },
@@ -150,7 +150,7 @@ describe("cross-chain-indexing-status-snapshot", () => {
           {
             chainStatus: ChainIndexingStatusIds.Following,
             config: {
-              configType: ChainIndexingConfigTypeIds.Indefinite,
+              blockRangeType: BlockRefRangeTypeIds.Indefinite,
               startBlock: earliestBlockRef,
             },
             latestIndexedBlock: laterBlockRef,
@@ -184,7 +184,7 @@ describe("cross-chain-indexing-status-snapshot", () => {
               {
                 chainStatus: ChainIndexingStatusIds.Following,
                 config: {
-                  configType: ChainIndexingConfigTypeIds.Indefinite,
+                  blockRangeType: BlockRefRangeTypeIds.Indefinite,
                   startBlock: earliestBlockRef,
                 },
                 latestIndexedBlock: laterBlockRef,
@@ -210,7 +210,7 @@ describe("cross-chain-indexing-status-snapshot", () => {
           {
             chainStatus: ChainIndexingStatusIds.Queued,
             config: {
-              configType: ChainIndexingConfigTypeIds.Definite,
+              blockRangeType: BlockRefRangeTypeIds.Definite,
               startBlock: earliestBlockRef,
               endBlock: latestBlockRef,
             },
@@ -243,7 +243,7 @@ describe("cross-chain-indexing-status-snapshot", () => {
               {
                 chainStatus: ChainIndexingStatusIds.Queued,
                 config: {
-                  configType: ChainIndexingConfigTypeIds.Definite,
+                  blockRangeType: BlockRefRangeTypeIds.Definite,
                   startBlock: earliestBlockRef,
                   endBlock: latestBlockRef,
                 },
@@ -266,7 +266,7 @@ describe("cross-chain-indexing-status-snapshot", () => {
           {
             chainStatus: ChainIndexingStatusIds.Completed,
             config: {
-              configType: ChainIndexingConfigTypeIds.Definite,
+              blockRangeType: BlockRefRangeTypeIds.Definite,
               startBlock: earliestBlockRef,
               endBlock: latestBlockRef,
             },
@@ -300,7 +300,7 @@ describe("cross-chain-indexing-status-snapshot", () => {
               {
                 chainStatus: ChainIndexingStatusIds.Completed,
                 config: {
-                  configType: ChainIndexingConfigTypeIds.Definite,
+                  blockRangeType: BlockRefRangeTypeIds.Definite,
                   startBlock: earliestBlockRef,
                   endBlock: latestBlockRef,
                 },
@@ -324,7 +324,7 @@ describe("cross-chain-indexing-status-snapshot", () => {
           {
             chainStatus: ChainIndexingStatusIds.Following,
             config: {
-              configType: ChainIndexingConfigTypeIds.Indefinite,
+              blockRangeType: BlockRefRangeTypeIds.Indefinite,
               startBlock: earliestBlockRef,
             },
             latestIndexedBlock: laterBlockRef,
@@ -336,7 +336,7 @@ describe("cross-chain-indexing-status-snapshot", () => {
           {
             chainStatus: ChainIndexingStatusIds.Backfill,
             config: {
-              configType: ChainIndexingConfigTypeIds.Definite,
+              blockRangeType: BlockRefRangeTypeIds.Definite,
               startBlock: earliestBlockRef,
               endBlock: latestBlockRef,
             },
@@ -371,7 +371,7 @@ describe("cross-chain-indexing-status-snapshot", () => {
               {
                 chainStatus: ChainIndexingStatusIds.Following,
                 config: {
-                  configType: ChainIndexingConfigTypeIds.Indefinite,
+                  blockRangeType: BlockRefRangeTypeIds.Indefinite,
                   startBlock: earliestBlockRef,
                 },
                 latestIndexedBlock: laterBlockRef,
@@ -383,7 +383,7 @@ describe("cross-chain-indexing-status-snapshot", () => {
               {
                 chainStatus: ChainIndexingStatusIds.Backfill,
                 config: {
-                  configType: ChainIndexingConfigTypeIds.Definite,
+                  blockRangeType: BlockRefRangeTypeIds.Definite,
                   startBlock: earliestBlockRef,
                   endBlock: latestBlockRef,
                 },
