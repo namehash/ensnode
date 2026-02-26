@@ -79,7 +79,7 @@ export type RegistrarActionsQuery = z.output<typeof registrarActionsQuerySchema>
 export const getRegistrarActionsRoute = createRoute({
   method: "get",
   path: "/",
-  operationId: "getApiRegistrar-actions",
+  operationId: "getRegistrarActions",
   tags: ["Explore"],
   summary: "Get Registrar Actions",
   description: "Returns all registrar actions with optional filtering and pagination",
@@ -102,7 +102,7 @@ export const getRegistrarActionsRoute = createRoute({
 export const getRegistrarActionsByParentNodeRoute = createRoute({
   method: "get",
   path: "/{parentNode}",
-  operationId: "getApiRegistrar-actions:parentNode",
+  operationId: "getRegistrarActionsByParentNode",
   tags: ["Explore"],
   summary: "Get Registrar Actions by Parent Node",
   description:

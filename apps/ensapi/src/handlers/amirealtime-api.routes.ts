@@ -15,7 +15,7 @@ export const AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE: Duration = minutesToSe
 export const amIRealtimeGetMeta = createRoute({
   method: "get",
   path: "/",
-  operationId: "getAmirealtime",
+  operationId: "isRealtime",
   tags: ["Meta"],
   summary: "Check indexing progress",
   description:

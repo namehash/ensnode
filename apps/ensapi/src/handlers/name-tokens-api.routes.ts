@@ -31,7 +31,7 @@ export type NameTokensQuery = z.output<typeof nameTokensQuerySchema>;
 export const getNameTokensRoute = createRoute({
   method: "get",
   path: "/",
-  operationId: "getApiNameTokens",
+  operationId: "getNameTokens",
   tags: ["Explore"],
   summary: "Get Name Tokens",
   description: "Returns name tokens for the requested identifier (domainId or name)",

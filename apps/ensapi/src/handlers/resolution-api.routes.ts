@@ -14,7 +14,7 @@ export const basePath = "/api/resolve";
 export const resolveRecordsRoute = createRoute({
   method: "get",
   path: "/records/{name}",
-  operationId: "getApiResolveRecords:name",
+  operationId: "resolveRecords",
   tags: ["Resolution"],
   summary: "Resolve ENS Records",
   description: "Resolves ENS records for a given name",
@@ -49,7 +49,7 @@ export const resolveRecordsRoute = createRoute({
 export const resolvePrimaryNameRoute = createRoute({
   method: "get",
   path: "/primary-name/{address}/{chainId}",
-  operationId: "getApiResolvePrimary-name:address:chainId",
+  operationId: "resolvePrimaryName",
   tags: ["Resolution"],
   summary: "Resolve Primary Name",
   description: "Resolves a primary name for a given `address` and `chainId`",
@@ -78,7 +78,7 @@ export const resolvePrimaryNameRoute = createRoute({
 export const resolvePrimaryNamesRoute = createRoute({
   method: "get",
   path: "/primary-names/{address}",
-  operationId: "getApiResolvePrimary-names:address",
+  operationId: "resolvePrimaryNames",
   tags: ["Resolution"],
   summary: "Resolve Primary Names",
   description: "Resolves all primary names for a given address across multiple chains",
