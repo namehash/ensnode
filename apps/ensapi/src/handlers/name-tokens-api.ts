@@ -107,7 +107,7 @@ app.openapi(getNameTokensRoute, async (c) => {
       return c.json(
         serializeNameTokensResponse(
           makeNameTokensNotIndexedResponse(
-            `This ENSNode instance has not been configured to index tokens for the requested name: '${name}`,
+            `This ENSNode instance has not been configured to index tokens for the requested name: '${name}'`,
           ),
         ),
         404,
