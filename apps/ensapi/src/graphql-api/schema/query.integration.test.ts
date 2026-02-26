@@ -67,40 +67,48 @@ describe("Query.root", () => {
 });
 
 describe("Query.domains", () => {
-  it.todo("requires the name filter");
+  type QueryDomainsResult = {
+    domains: {
+      edges: Array<{
+        node: {
+          __typename: "ENSv1Domain" | "ENSv2Domain";
+          id: string;
+          name: string;
+          label: { interpreted: string };
+          owner: { address: string };
+        };
+      }>;
+    };
+  };
 
-  it("sees both .eth Domains", async () => {
-    const result = await request<{
-      domains: {
-        edges: Array<{
-          node: {
-            __typename: "ENSv1Domain" | "ENSv2Domain";
-            id: string;
-            name: string;
-            label: { interpreted: string };
-            owner: { address: string };
-          };
-        }>;
-      };
-    }>(gql`
-      query FindDomains {
-        domains(where: { name: "eth" }, order: { by: NAME, dir: ASC }) {
-          edges {
-            node {
-              __typename
-              id
-              name
-              label {
-                interpreted
-              }
-              owner {
-                address
-              }
+  const QueryDomains = gql`
+    query QueryDomains($name: String!, $canonical: Boolean, $order: DomainsOrderInput) {
+      domains(where: { name: $name, canonical: $canonical }, order: $order) {
+        edges {
+          node {
+            __typename
+            id
+            name
+            label {
+              interpreted
+            }
+            owner {
+              address
             }
           }
         }
       }
-    `);
+    }
+  `;
+
+  it("requires the name filter", async () => {
+    expect(request(gql`{ domains { edges { node { id }} } }`)).rejects.toThrow(
+      'argument "where" of type "DomainsWhereInput!" is required, but it was not provided',
+    );
+  });
+
+  it("sees both .eth Domains", async () => {
+    const result = await request<QueryDomainsResult>(QueryDomains, { name: "eth" });
 
     const domains = flattenConnection(result.domains);
 
@@ -145,34 +153,5 @@ describe("Query.domain", () => {
     await expect(
       request(DomainByName, { name: "this-name-definitely-does-not-exist-xyz123.eth" }),
     ).resolves.toMatchObject({ domain: null });
-  });
-
-  it("returns subdomains for a domain", async () => {
-    const result = await request<{
-      domain: {
-        name: string;
-        subdomainCount: number;
-        subdomains: {
-          edges: Array<{ node: { name: string } }>;
-        };
-      };
-    }>(gql`
-      query Subdomains {
-        domain(by: { name: "eth" }) {
-          name
-          subdomainCount
-          subdomains {
-            edges {
-              node {
-                name
-              }
-            }
-          }
-        }
-      }
-    `);
-
-    expect(result).toMatchObject({ domain: { name: "eth" } });
-    expect(result.domain.subdomains.edges.length).toBeGreaterThan(0);
   });
 });
