@@ -149,6 +149,7 @@ app.openapi(getNameTokensRoute, async (c) => {
       responseCode: NameTokensResponseCodes.Ok,
       registeredNameTokens,
     }),
+    200,
   );
 });
 

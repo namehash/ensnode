@@ -1,7 +1,11 @@
 import { createRoute } from "@hono/zod-openapi";
 import { z } from "zod/v4";
 
-import { makeNodeSchema } from "@ensnode/ensnode-sdk/internal";
+import {
+  ErrorResponseSchema,
+  makeNameTokensResponseSchema,
+  makeNodeSchema,
+} from "@ensnode/ensnode-sdk/internal";
 
 import { params } from "@/lib/handlers/params.schema";
 
@@ -36,19 +40,44 @@ export const getNameTokensRoute = createRoute({
   responses: {
     200: {
       description: "Name tokens known",
+      content: {
+        "application/json": {
+          schema: makeNameTokensResponseSchema("Name Tokens Response", true),
+        },
+      },
     },
     400: {
       description: "Invalid input",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+        },
+      },
     },
     404: {
       description: "Name tokens not indexed",
+      content: {
+        "application/json": {
+          schema: makeNameTokensResponseSchema("Name Tokens Response", true),
+        },
+      },
     },
     500: {
       description: "Internal server error",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+        },
+      },
     },
     503: {
       description:
         "Service unavailable - Name Tokens API prerequisites not met (indexing status not ready or required plugins not activated)",
+      content: {
+        "application/json": {
+          schema: makeNameTokensResponseSchema("Name Tokens Response", true),
+        },
+      },
     },
   },
 });
