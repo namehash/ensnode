@@ -1,7 +1,6 @@
-import type { PublicClient } from "viem";
-
 import type { BlockrangeWithStartBlock } from "./blocks";
-import type { ChainId } from "./chains";
+import type { CachedPublicClient } from "./cached-public-client";
+import type { ChainId, ChainIdString } from "./chains";
 import { LocalPonderClient } from "./local-ponder-client";
 
 export const chainIds = {
@@ -13,7 +12,7 @@ export const chainIds = {
 export function createLocalPonderClientMock(overrides?: {
   indexedChainIds?: Set<ChainId>;
   chainsBlockrange?: Map<ChainId, BlockrangeWithStartBlock>;
-  cachedPublicClients?: Map<ChainId, PublicClient>;
+  cachedPublicClients?: Record<ChainIdString, CachedPublicClient>;
 }): LocalPonderClient {
   const indexedChainIds =
     overrides?.indexedChainIds ?? new Set<ChainId>([chainIds.Mainnet, chainIds.Optimism]);
@@ -26,11 +25,11 @@ export function createLocalPonderClientMock(overrides?: {
     ]);
   const cachedPublicClients =
     overrides?.cachedPublicClients ??
-    new Map<ChainId, PublicClient>([
-      [chainIds.Mainnet, {} as PublicClient],
-      [chainIds.Optimism, {} as PublicClient],
-      [chainIds.Base, {} as PublicClient],
-    ]);
+    ({
+      [`${chainIds.Mainnet}`]: {} as CachedPublicClient,
+      [`${chainIds.Optimism}`]: {} as CachedPublicClient,
+      [`${chainIds.Base}`]: {} as CachedPublicClient,
+    } satisfies Record<ChainIdString, CachedPublicClient>);
 
   return new LocalPonderClient(
     new URL("http://localhost:3000"),

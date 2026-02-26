@@ -1,8 +1,8 @@
-import type { PublicClient } from "viem";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { earlierBlockRef, earliestBlockRef, latestBlockRef } from "./block-refs.mock";
 import type { BlockrangeWithStartBlock } from "./blocks";
+import type { CachedPublicClient } from "./cached-public-client";
 import type { ChainId } from "./chains";
 import { PonderClient } from "./client";
 import {
@@ -56,9 +56,9 @@ describe("LocalPonderClient", () => {
 
     it("throws when cached public clients are missing an indexed chain", () => {
       // Arrange
-      const cachedPublicClients = new Map<ChainId, PublicClient>([
-        [chainIds.Mainnet, {} as PublicClient],
-      ]);
+      const cachedPublicClients = {
+        [`${chainIds.Mainnet}`]: {} as CachedPublicClient,
+      };
 
       // Act & Assert
       expect(() =>
@@ -89,13 +89,13 @@ describe("LocalPonderClient", () => {
   describe("getCachedPublicClient()", () => {
     it("returns cached client for indexed chain", () => {
       // Arrange
-      const optimismPublicClientMock = {} as PublicClient;
+      const optimismPublicClientMock = {} as CachedPublicClient;
 
       const client = createLocalPonderClientMock({
         indexedChainIds: new Set([chainIds.Optimism]),
-        cachedPublicClients: new Map<ChainId, PublicClient>([
-          [chainIds.Optimism, optimismPublicClientMock],
-        ]),
+        cachedPublicClients: {
+          [`${chainIds.Optimism}`]: optimismPublicClientMock,
+        },
       });
 
       // Act
