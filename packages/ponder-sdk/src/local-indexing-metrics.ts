@@ -43,7 +43,7 @@ export type LocalChainIndexingMetrics =
  */
 export interface LocalPonderIndexingMetrics extends Omit<PonderIndexingMetrics, "chains"> {
   /**
-   * Map of indexed chain IDs to their respective indexing metrics.
+   * Map of indexed chain IDs to their respective local indexing metrics.
    *
    * Guarantees:
    * - Includes entry for at least one indexed chain.

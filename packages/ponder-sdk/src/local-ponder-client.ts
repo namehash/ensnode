@@ -21,32 +21,62 @@ import type {
  * functionality and constraints.
  *
  * Additional functionality includes:
- * - Providing methods to access the configured indexing blockrange
- *   (see {@link getChainBlockrange}) and cached public clients
+ * - Providing methods to access the indexed blockrange
+ *   (see {@link getIndexedBlockrange}) and cached public clients
  *   (see {@link getCachedPublicClient}) for all indexed chains.
  * - Enriching the indexing metrics with additional relevant information
  *   (see {@link LocalPonderIndexingMetrics}).
  *
  * Constraints include:
- * - Requires metadata from the Local Ponder app to include data for
- *   all indexed chains, as determined by {@link indexedChainIds}.
+ * - Validation of the completeness of the Ponder app metadata for
+ *   all indexed chains (see {@link validateIndexedChainIds})
+ * - Filtering of the Ponder app metadata to only include entries for
+ *   indexed chains (see {@link selectEntriesForIndexedChainsOnly})
  */
 export class LocalPonderClient extends PonderClient {
+  /**
+   * Indexed Chain IDs
+   *
+   * Configured indexed chain IDs which are used to validate and filter
+   * the Ponder app metadata to only include entries for indexed chains.
+   */
   private indexedChainIds: Set<ChainId>;
-  private chainsBlockrange: Map<ChainId, BlockrangeWithStartBlock>;
+
+  /**
+   * Indexed Blockranges
+   *
+   * The blockranges that are configured to be indexed for each
+   * indexed chain.
+   *
+   * Invariants:
+   * - Includes entries for all {@link indexedChainIds}.
+   * - Does not include entries for non-indexed chains.
+   */
+  private indexedBlockranges: Map<ChainId, BlockrangeWithStartBlock>;
+
+  /**
+   * Cached Public Clients
+   *
+   * The cached public clients for each indexed chain loaded from
+   * the local Ponder app.
+   *
+   * Invariants:
+   * - Includes entries for all {@link indexedChainIds}.
+   * - Does not include entries for non-indexed chains.
+   */
   private cachedPublicClients: Map<ChainId, CachedPublicClient>;
 
   /**
    * @param localPonderAppUrl URL of the local Ponder app to connect to.
-   * @param indexedChainIds Configured indexed chain IDs.
-   * @param chainsBlockrange Configured indexing blockrange for each indexed chain.
+   * @param indexedChainIds Configured indexed chain IDs which are used to validate and filter the Ponder app metadata to only include entries for indexed chains.
+   * @param indexedBlockranges Configured indexing blockrange for each indexed chain.
    * @param ponderPublicClients All cached public clients provided by the local Ponder app
    *                            (may include non-indexed chains).
    */
   constructor(
     localPonderAppUrl: URL,
     indexedChainIds: Set<ChainId>,
-    chainsBlockrange: Map<ChainId, BlockrangeWithStartBlock>,
+    indexedBlockranges: Map<ChainId, BlockrangeWithStartBlock>,
     ponderPublicClients: Record<ChainIdString, CachedPublicClient>,
   ) {
     super(localPonderAppUrl);
@@ -59,12 +89,12 @@ export class LocalPonderClient extends PonderClient {
     // We don't want to use all chains' records that Ponder may give use.
     // We just need the records for indexed chains (as determined by
     // `indexedChainIds`).
-    // Both, `chainsBlockrange` and `cachedPublicClients` are filtered to
+    // Both, `indexedBlockranges` and `cachedPublicClients` are filtered to
     // only include entries for indexed chains.
-    this.chainsBlockrange = LocalPonderClient.selectEntriesForIndexedChainsOnly(
+    this.indexedBlockranges = LocalPonderClient.selectEntriesForIndexedChainsOnly(
       indexedChainIds,
-      chainsBlockrange,
-      "Chains Blockrange",
+      indexedBlockranges,
+      "Indexed Blockranges",
     );
     this.cachedPublicClients = LocalPonderClient.selectEntriesForIndexedChainsOnly(
       indexedChainIds,
@@ -74,18 +104,20 @@ export class LocalPonderClient extends PonderClient {
   }
 
   /**
-   * Get the blockrange for a specific chain ID.
+   * Get the blockrange that is configured to be indexed for a specific chain ID.
    *
-   * @param chainId The chain ID for which to retrieve the blockrange.
+   * @param chainId The chain ID for which to retrieve the indexed blockrange.
    *
-   * @returns The blockrange for the specified chain ID.
-   * @throws Error if no blockrange is found for the specified chain ID.
+   * @returns The indexed blockrange for the specified chain ID.
+   * @throws Error if the specified chain ID is not being indexed.
    */
-  getChainBlockrange(chainId: ChainId): BlockrangeWithStartBlock {
-    const blockrange = this.chainsBlockrange.get(chainId);
+  getIndexedBlockrange(chainId: ChainId): BlockrangeWithStartBlock {
+    const blockrange = this.indexedBlockranges.get(chainId);
 
     if (!blockrange) {
-      throw new Error(`No blockrange found for chain ID: ${chainId}`);
+      throw new Error(
+        `Chain ID ${chainId} is not being indexed and therefore has no indexed blockrange.`,
+      );
     }
 
     return blockrange;
@@ -102,7 +134,9 @@ export class LocalPonderClient extends PonderClient {
     const client = this.cachedPublicClients.get(chainId);
 
     if (!client) {
-      throw new Error(`No cached public client found for chain ID: ${chainId}`);
+      throw new Error(
+        `Chain ID ${chainId} is not being indexed and therefore has no cached public client.`,
+      );
     }
 
     return client;
@@ -160,7 +194,7 @@ export class LocalPonderClient extends PonderClient {
    * Build Local Ponder Indexing Metrics
    *
    * This method takes the original Ponder Indexing Metrics and enriches these
-   * metrics with additional relevant information for the LocalPonderClient.
+   * metrics with additional relevant information from the LocalPonderClient.
    *
    * @param metrics The original Ponder Indexing Metrics.
    * @returns The enriched Local Ponder Indexing Metrics.
@@ -172,9 +206,9 @@ export class LocalPonderClient extends PonderClient {
     const localChainsIndexingMetrics = new Map<ChainId, LocalChainIndexingMetrics>();
 
     for (const [chainId, chainIndexingMetric] of metrics.chains.entries()) {
-      const chainBlockrange = this.getChainBlockrange(chainId);
+      const indexedBlockrange = this.getIndexedBlockrange(chainId);
       const localChainIndexingMetrics = this.buildLocalChainIndexingMetrics(
-        chainBlockrange,
+        indexedBlockrange,
         chainIndexingMetric,
       );
 
@@ -187,8 +221,19 @@ export class LocalPonderClient extends PonderClient {
     };
   }
 
+  /**
+   * Build Local Chain Indexing Metrics
+   *
+   * Enrich the original Chain Indexing Metrics from Ponder app with additional
+   * relevant information.
+   *
+   * @param indexedBlockrange Indexed blockrange for the chain which the metrics belong to.
+   * @param chainIndexingMetrics The original chain indexing metrics from Ponder app.
+   *
+   * @returns The enriched local chain indexing metrics.
+   */
   private buildLocalChainIndexingMetrics(
-    chainBlockrange: BlockrangeWithStartBlock,
+    indexedBlockrange: BlockrangeWithStartBlock,
     chainIndexingMetrics: ChainIndexingMetrics,
   ): LocalChainIndexingMetrics {
     // Keep the original metric if its state is other than "historical".
@@ -196,9 +241,12 @@ export class LocalPonderClient extends PonderClient {
       return chainIndexingMetrics;
     }
 
-    // For a historical metric, enrich it with the backfill end block.
+    // For metrics in the "historical" state, a LocalPonderClient has
+    // the additional state available (not exposed by Ponder's APIs) to
+    // calculate the backfillEndBlock where the historical phase of indexing
+    // will be completed.
     const backfillEndBlock =
-      chainBlockrange.startBlock + chainIndexingMetrics.historicalTotalBlocks - 1;
+      indexedBlockrange.startBlock + chainIndexingMetrics.historicalTotalBlocks - 1;
 
     return {
       ...chainIndexingMetrics,
@@ -229,7 +277,7 @@ export class LocalPonderClient extends PonderClient {
 
     if (missingChainIds.size > 0) {
       throw new Error(
-        `Local Ponder Client is missing the following indexed chain IDs for ${valueLabel}: ${Array.from(missingChainIds).join(", ")}`,
+        `Local Ponder Client is missing the ${valueLabel} for indexed chain IDs: ${Array.from(missingChainIds).join(", ")}`,
       );
     }
   }
