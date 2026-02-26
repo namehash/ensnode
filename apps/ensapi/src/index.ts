@@ -77,15 +77,15 @@ app.route("/amirealtime", amIRealtimeApi);
 
 // use OpenAPI Schema generated from zod-openapi route definitions
 const stubApp = createStubRoutesForSpec();
+const openApi31Document = stubApp.getOpenAPI31Document({
+  ...openapiMeta,
+  servers: [
+    ...openapiMeta.servers,
+    { url: `http://localhost:${config.port}`, description: "Local Development" },
+  ],
+});
 app.get("/openapi.json", (c) => {
-  const doc = stubApp.getOpenAPI31Document({
-    ...openapiMeta,
-    servers: [
-      ...openapiMeta.servers,
-      { url: `http://localhost:${config.port}`, description: "Local Development" },
-    ],
-  });
-  return c.json(doc);
+  return c.json(openApi31Document);
 });
 
 // will automatically 503 if config is not available due to ensIndexerPublicConfigMiddleware

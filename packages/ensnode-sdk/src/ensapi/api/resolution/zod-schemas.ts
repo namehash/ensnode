@@ -45,7 +45,7 @@ export const makeResolvePrimaryNameResponseSchema = () =>
 export const makeResolvePrimaryNamesResponseSchema = () =>
   z.object({
     names: withOpenApi(z.record(z.number(), z.string().nullable()), {
-      propertyNames: { type: "number" },
+      propertyNames: { type: "string", pattern: "^[0-9]+$" },
     }),
     accelerationRequested: z.boolean(),
     accelerationAttempted: z.boolean(),
