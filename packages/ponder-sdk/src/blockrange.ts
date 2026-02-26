@@ -1,4 +1,4 @@
-import type { BlockNumber, BlockRef } from "./types";
+import type { BlockNumber, BlockRef } from "./blocks";
 
 export const RangeTypes = {
   Indefinite: "indefinite",
@@ -95,43 +95,4 @@ export function buildBlockRefRange(startBlock: BlockRef, endBlock: BlockRef | nu
     startBlock,
     endBlock,
   };
-}
-
-/**
- * Merges two blockranges by taking the minimum start block and maximum end block.
- *
- * @param blockrangeA The first blockrange to merge.
- * @param blockrangeB The second blockrange to merge.
- *
- * @returns The merged blockrange.
- */
-export function mergeBlockNumberRanges(
-  blockrangeA: BlockNumberRangeIndefinite,
-  blockrangeB: BlockNumberRangeIndefinite,
-): BlockNumberRangeIndefinite;
-export function mergeBlockNumberRanges(
-  blockrangeA: BlockNumberRange,
-  blockrangeB: BlockNumberRange,
-): BlockNumberRangeDefinite;
-export function mergeBlockNumberRanges(
-  blockrangeA: BlockNumberRange,
-  blockrangeB: BlockNumberRange,
-): BlockNumberRange {
-  let startBlock: BlockNumber | null;
-
-  if (typeof blockrangeA.startBlock === "number" && typeof blockrangeB.startBlock === "number") {
-    startBlock = Math.min(blockrangeA.startBlock, blockrangeB.startBlock);
-  } else {
-    startBlock = blockrangeA.startBlock ?? blockrangeB.startBlock;
-  }
-
-  let endBlock: BlockNumber | null;
-
-  if (typeof blockrangeA.endBlock === "number" && typeof blockrangeB.endBlock === "number") {
-    endBlock = Math.max(blockrangeA.endBlock, blockrangeB.endBlock);
-  } else {
-    endBlock = blockrangeA.endBlock ?? blockrangeB.endBlock;
-  }
-
-  return buildBlockNumberRange(startBlock, endBlock);
 }

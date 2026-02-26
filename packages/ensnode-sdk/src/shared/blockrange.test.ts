@@ -1,41 +1,33 @@
 import { describe, expect, it } from "vitest";
 
-import { mergeBlockranges } from "./blockrange";
-import type { Blockrange } from "./types";
+import { buildBlockNumberRange, mergeBlockNumberRanges, RangeTypes } from "./blockrange";
 
 describe("blockrange", () => {
-  describe("mergeBlockranges()", () => {
+  describe("mergeBlockNumberRanges()", () => {
     it("uses the minimum start block and maximum end block", () => {
       expect(
-        mergeBlockranges({ startBlock: 100, endBlock: 200 }, { startBlock: 50, endBlock: 250 }),
-      ).toEqual({ startBlock: 50, endBlock: 250 });
+        mergeBlockNumberRanges(buildBlockNumberRange(100, 200), buildBlockNumberRange(50, 250)),
+      ).toEqual(buildBlockNumberRange(50, 250));
     });
 
     it("keeps the defined end block when only one is present", () => {
-      expect(mergeBlockranges({ startBlock: 10, endBlock: 20 }, { startBlock: 5 })).toEqual({
-        startBlock: 5,
-        endBlock: 20,
-      });
+      expect(
+        mergeBlockNumberRanges(buildBlockNumberRange(10, 20), buildBlockNumberRange(5, null)),
+      ).toEqual(buildBlockNumberRange(5, 20));
 
-      expect(mergeBlockranges({ startBlock: 10 }, { startBlock: 5, endBlock: 25 })).toEqual({
-        startBlock: 5,
-        endBlock: 25,
-      });
+      expect(
+        mergeBlockNumberRanges(buildBlockNumberRange(10, null), buildBlockNumberRange(5, 25)),
+      ).toEqual(buildBlockNumberRange(5, 25));
     });
 
-    it("returns an open-ended range when both ends are undefined", () => {
-      expect(mergeBlockranges({ startBlock: 42 }, { startBlock: 7 })).toEqual({
+    it("returns an indefinite range when both ends are null", () => {
+      expect(
+        mergeBlockNumberRanges(buildBlockNumberRange(42, null), buildBlockNumberRange(7, null)),
+      ).toEqual({
+        rangeType: RangeTypes.Indefinite,
+        configType: RangeTypes.Indefinite,
         startBlock: 7,
-        endBlock: undefined,
-      });
-    });
-
-    it("supports the overload where the first range has no start block", () => {
-      const openStartRange: Blockrange = { endBlock: 25 };
-
-      expect(mergeBlockranges(openStartRange, { startBlock: 10 })).toEqual({
-        startBlock: 10,
-        endBlock: 25,
+        endBlock: null,
       });
     });
   });

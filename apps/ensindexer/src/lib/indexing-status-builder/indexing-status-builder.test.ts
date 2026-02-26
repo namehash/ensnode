@@ -11,6 +11,7 @@ import {
   type OmnichainIndexingStatusSnapshot,
 } from "@ensnode/ensnode-sdk";
 import {
+  buildBlockNumberRange,
   type ChainIndexingMetricsCompleted,
   type ChainIndexingMetricsRealtime,
   ChainIndexingStates,
@@ -64,10 +65,9 @@ describe("IndexingStatusBuilder", () => {
       const localPonderClientMock = buildLocalPonderClientMock({
         metrics: vi.fn().mockResolvedValue(localMetrics),
         status: vi.fn().mockResolvedValue(localStatus),
-        getIndexedBlockrange: vi.fn().mockReturnValue({
-          startBlock: earliestBlockRef.number,
-          endBlock: latestBlockRef.number,
-        }),
+        getIndexedBlockrange: vi
+          .fn()
+          .mockReturnValue(buildBlockNumberRange(earliestBlockRef.number, latestBlockRef.number)),
         getCachedPublicClient: vi.fn().mockReturnValue(publicClientMock),
       });
 
@@ -160,20 +160,6 @@ describe("IndexingStatusBuilder", () => {
       // Arrange
       const publicClientMock = buildPublicClientMock();
 
-      const localMetricsHistorical = buildLocalChainsIndexingMetrics(
-        new Map([
-          [
-            chainId,
-            {
-              state: ChainIndexingStates.Historical,
-              latestSyncedBlock: latestBlockRef,
-              historicalTotalBlocks: 100,
-              backfillEndBlock: latestBlockRef.number,
-            } satisfies LocalChainIndexingMetricsHistorical,
-          ],
-        ]),
-      );
-
       const localMetricsCompleted = buildLocalChainsIndexingMetrics(
         new Map([
           [
@@ -191,15 +177,11 @@ describe("IndexingStatusBuilder", () => {
       };
 
       const localPonderClientMock = buildLocalPonderClientMock({
-        metrics: vi
-          .fn()
-          .mockResolvedValueOnce(localMetricsHistorical)
-          .mockResolvedValueOnce(localMetricsCompleted),
+        metrics: vi.fn().mockResolvedValue(localMetricsCompleted),
         status: vi.fn().mockResolvedValue(localStatus),
-        getIndexedBlockrange: vi.fn().mockReturnValue({
-          startBlock: earliestBlockRef.number,
-          endBlock: latestBlockRef.number,
-        }),
+        getIndexedBlockrange: vi
+          .fn()
+          .mockReturnValue(buildBlockNumberRange(earliestBlockRef.number, latestBlockRef.number)),
         getCachedPublicClient: vi.fn().mockReturnValue(publicClientMock),
       });
 
@@ -210,7 +192,7 @@ describe("IndexingStatusBuilder", () => {
       const result = await builder.getOmnichainIndexingStatusSnapshot();
 
       // Assert
-      expect(publicClientMock.getBlock).toHaveBeenCalledTimes(3);
+      expect(publicClientMock.getBlock).toHaveBeenCalledTimes(2);
       expect(result).toStrictEqual({
         omnichainStatus: OmnichainIndexingStatusIds.Completed,
         chains: new Map([
@@ -271,10 +253,9 @@ describe("IndexingStatusBuilder", () => {
           .mockResolvedValueOnce(localMetricsHistorical)
           .mockResolvedValueOnce(localMetricsRealtime),
         status: vi.fn().mockResolvedValue(localStatus),
-        getIndexedBlockrange: vi.fn().mockReturnValue({
-          startBlock: earliestBlockRef.number,
-          endBlock: undefined,
-        }),
+        getIndexedBlockrange: vi
+          .fn()
+          .mockReturnValue(buildBlockNumberRange(earliestBlockRef.number, null)),
         getCachedPublicClient: vi.fn().mockReturnValue(publicClientMock),
       });
 
@@ -359,7 +340,7 @@ describe("IndexingStatusBuilder", () => {
           .mockResolvedValueOnce(indexingStatus2),
         getIndexedBlockrange: vi
           .fn()
-          .mockReturnValue({ startBlock: earliestBlockRef.number, endBlock: undefined }),
+          .mockReturnValue(buildBlockNumberRange(earliestBlockRef.number, null)),
         getCachedPublicClient: vi.fn().mockReturnValue(publicClientMock),
       });
 
@@ -402,10 +383,9 @@ describe("IndexingStatusBuilder", () => {
       const localPonderClientMock = buildLocalPonderClientMock({
         metrics: vi.fn().mockResolvedValue(localIndexingMetrics),
         status: vi.fn().mockResolvedValue(indexingStatus),
-        getIndexedBlockrange: vi.fn().mockReturnValue({
-          startBlock: earliestBlockRef.number,
-          endBlock: latestBlockRef.number,
-        }),
+        getIndexedBlockrange: vi
+          .fn()
+          .mockReturnValue(buildBlockNumberRange(earliestBlockRef.number, null)),
         getCachedPublicClient: vi.fn().mockReturnValue(publicClientMock),
       });
 
@@ -417,7 +397,7 @@ describe("IndexingStatusBuilder", () => {
       );
 
       await expect(builder.getOmnichainIndexingStatusSnapshot()).resolves.toBeDefined();
-      expect(publicClientMock.getBlock).toHaveBeenCalledTimes(6);
+      expect(publicClientMock.getBlock).toHaveBeenCalledTimes(4);
     });
 
     it("allows non-historical indexing metrics on first call", async () => {
@@ -445,7 +425,7 @@ describe("IndexingStatusBuilder", () => {
         status: vi.fn().mockResolvedValue(localStatus),
         getIndexedBlockrange: vi
           .fn()
-          .mockReturnValue({ startBlock: earliestBlockRef.number, endBlock: undefined }),
+          .mockReturnValue(buildBlockNumberRange(earliestBlockRef.number, null)),
         getCachedPublicClient: vi.fn().mockReturnValue(publicClientMock),
       });
 
@@ -503,10 +483,9 @@ describe("IndexingStatusBuilder", () => {
       const localPonderClientMock = buildLocalPonderClientMock({
         metrics: vi.fn().mockResolvedValue(localMetrics),
         status: vi.fn().mockResolvedValue(localStatus),
-        getIndexedBlockrange: vi.fn().mockReturnValue({
-          startBlock: earliestBlockRef.number,
-          endBlock: latestBlockRef.number,
-        }),
+        getIndexedBlockrange: vi
+          .fn()
+          .mockReturnValue(buildBlockNumberRange(earliestBlockRef.number, latestBlockRef.number)),
         getCachedPublicClient: vi.fn().mockReturnValue(publicClientMock),
       });
 

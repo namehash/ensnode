@@ -6,6 +6,7 @@ import { DatasourceNames } from "@ensnode/datasources";
 import { ENSNamespaceIds } from "@ensnode/ensnode-sdk";
 
 import { PluginName } from "../../ensindexer/config/types";
+import { buildBlockNumberRange } from "../blockrange";
 import { buildIndexedBlockranges } from "./indexed-blockranges";
 
 vi.mock("@ensnode/datasources", async () => {
@@ -73,8 +74,8 @@ describe("buildIndexedBlockranges()", () => {
     // Assert
     expect(result).toStrictEqual(
       new Map([
-        [1, { startBlock: 80, endBlock: 200 }],
-        [8453, { startBlock: 5, endBlock: 260 }],
+        [1, buildBlockNumberRange(80, 200)],
+        [8453, buildBlockNumberRange(5, 260)],
       ]),
     );
   });
@@ -108,7 +109,7 @@ describe("buildIndexedBlockranges()", () => {
 
     // Assert
 
-    expect(result).toStrictEqual(new Map([[1, { startBlock: 90, endBlock: undefined }]]));
+    expect(result).toStrictEqual(new Map([[1, buildBlockNumberRange(90, null)]]));
   });
 
   it("throws when a required datasource is missing", () => {

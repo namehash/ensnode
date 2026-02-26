@@ -1,4 +1,4 @@
-import type { BlockrangeWithStartBlock } from "./blocks";
+import type { BlockNumberRange } from "./blockrange";
 import type { CachedPublicClient } from "./cached-public-client";
 import type { ChainId, ChainIdString } from "./chains";
 import { PonderClient } from "./client";
@@ -43,16 +43,16 @@ export class LocalPonderClient extends PonderClient {
   private indexedChainIds: Set<ChainId>;
 
   /**
-   * Indexed Blockranges
+   * Indexed Block Ranges
    *
-   * The blockranges that are configured to be indexed for each
+   * The block ranges that are configured to be indexed for each
    * indexed chain.
    *
    * Invariants:
    * - Includes entries for all {@link indexedChainIds}.
    * - Does not include entries for non-indexed chains.
    */
-  private indexedBlockranges: Map<ChainId, BlockrangeWithStartBlock>;
+  private indexedBlockranges: Map<ChainId, BlockNumberRange>;
 
   /**
    * Cached Public Clients
@@ -76,7 +76,7 @@ export class LocalPonderClient extends PonderClient {
   constructor(
     localPonderAppUrl: URL,
     indexedChainIds: Set<ChainId>,
-    indexedBlockranges: Map<ChainId, BlockrangeWithStartBlock>,
+    indexedBlockranges: Map<ChainId, BlockNumberRange>,
     ponderPublicClients: Record<ChainIdString, CachedPublicClient>,
   ) {
     super(localPonderAppUrl);
@@ -111,7 +111,7 @@ export class LocalPonderClient extends PonderClient {
    * @returns The indexed blockrange for the specified chain ID.
    * @throws Error if the specified chain ID is not being indexed.
    */
-  getIndexedBlockrange(chainId: ChainId): BlockrangeWithStartBlock {
+  getIndexedBlockrange(chainId: ChainId): BlockNumberRange {
     const blockrange = this.indexedBlockranges.get(chainId);
 
     if (!blockrange) {
@@ -233,7 +233,7 @@ export class LocalPonderClient extends PonderClient {
    * @returns The enriched local chain indexing metrics.
    */
   private buildLocalChainIndexingMetrics(
-    indexedBlockrange: BlockrangeWithStartBlock,
+    indexedBlockrange: BlockNumberRange,
     chainIndexingMetrics: ChainIndexingMetrics,
   ): LocalChainIndexingMetrics {
     // Keep the original metric if its state is other than "historical".

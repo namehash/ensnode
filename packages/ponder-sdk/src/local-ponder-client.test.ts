@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { earlierBlockRef, earliestBlockRef, latestBlockRef } from "./block-refs.mock";
-import type { BlockrangeWithStartBlock } from "./blocks";
+import { type BlockNumberRange, buildBlockNumberRange } from "./blockrange";
 import type { CachedPublicClient } from "./cached-public-client";
 import type { ChainId } from "./chains";
 import { PonderClient } from "./client";
@@ -39,15 +39,15 @@ describe("LocalPonderClient", () => {
 
     it("throws when chains blockrange is missing an indexed chain", () => {
       // Arrange
-      const chainsBlockrange = new Map<ChainId, BlockrangeWithStartBlock>([
-        [chainIds.Mainnet, { startBlock: 50 }],
+      const indexedBlockranges = new Map<ChainId, BlockNumberRange>([
+        [chainIds.Mainnet, buildBlockNumberRange(50, null)],
       ]);
 
       // Act & Assert
       expect(() =>
         createLocalPonderClientMock({
           indexedChainIds: new Set([chainIds.Mainnet, chainIds.Optimism]),
-          chainsBlockrange,
+          indexedBlockranges,
         }),
       ).toThrowError(
         /Local Ponder Client is missing the Indexed Blockranges for indexed chain IDs: 10/,
@@ -77,12 +77,14 @@ describe("LocalPonderClient", () => {
       // Arrange & Act
       const client = createLocalPonderClientMock({
         indexedChainIds: new Set([chainIds.Mainnet]),
-        chainsBlockrange: new Map<ChainId, BlockrangeWithStartBlock>([
-          [chainIds.Mainnet, { startBlock: 50 }],
+        indexedBlockranges: new Map<ChainId, BlockNumberRange>([
+          [chainIds.Mainnet, buildBlockNumberRange(50, null)],
         ]),
       });
 
-      expect(client.getIndexedBlockrange(chainIds.Mainnet)).toStrictEqual({ startBlock: 50 });
+      expect(client.getIndexedBlockrange(chainIds.Mainnet)).toStrictEqual(
+        buildBlockNumberRange(50, null),
+      );
     });
   });
 

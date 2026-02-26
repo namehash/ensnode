@@ -6,21 +6,25 @@ import {
 } from "@ensnode/datasources";
 
 import type { PluginName } from "../../ensindexer/config/types";
-import { mergeBlockranges } from "../blockrange";
-import type { BlockrangeWithStartBlock, ChainId } from "../types";
+import {
+  type BlockNumberRange,
+  buildBlockNumberRange,
+  mergeBlockNumberRanges,
+} from "../blockrange";
+import type { ChainId } from "../types";
 
 /**
- * Build a map of indexed blockranges for each indexed chain,
+ * Build a map of indexed block number ranges for each indexed chain,
  * based on the ENSIndexer configuration.
  *
- * Useful for presenting a clear view of the indexed blockranges
+ * Useful for presenting a clear view of the indexed block number ranges
  * across chains.
  */
 export function buildIndexedBlockranges(
   namespace: ENSNamespaceId,
   pluginsRequiredDatasourceNames: Map<PluginName, DatasourceName[]>,
-): Map<ChainId, BlockrangeWithStartBlock> {
-  const indexedBlockranges = new Map<ChainId, BlockrangeWithStartBlock>();
+): Map<ChainId, BlockNumberRange> {
+  const indexedBlockranges = new Map<ChainId, BlockNumberRange>();
 
   for (const [pluginName, requiredDatasourceNames] of pluginsRequiredDatasourceNames) {
     for (const requiredDatasourceName of requiredDatasourceNames) {
@@ -37,14 +41,12 @@ export function buildIndexedBlockranges(
 
       for (const datasourceContract of datasourceContracts) {
         const currentChainIndexedBlockrange = indexedBlockranges.get(datasourceChainId);
+        const { startBlock, endBlock = null } = datasourceContract;
 
-        const contractIndexedBlockrange = {
-          startBlock: datasourceContract.startBlock,
-          endBlock: datasourceContract.endBlock,
-        };
+        const contractIndexedBlockrange = buildBlockNumberRange(startBlock, endBlock);
 
         const indexedBlockrange = currentChainIndexedBlockrange
-          ? mergeBlockranges(currentChainIndexedBlockrange, contractIndexedBlockrange)
+          ? mergeBlockNumberRanges(currentChainIndexedBlockrange, contractIndexedBlockrange)
           : contractIndexedBlockrange;
 
         indexedBlockranges.set(datasourceChainId, indexedBlockrange);
