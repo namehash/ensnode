@@ -3,8 +3,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { DatasourceName } from "@ensnode/datasources";
 import * as datasources from "@ensnode/datasources";
 import { DatasourceNames } from "@ensnode/datasources";
-import { ENSNamespaceIds, PluginName } from "@ensnode/ensnode-sdk";
+import { ENSNamespaceIds } from "@ensnode/ensnode-sdk";
 
+import { PluginName } from "../../ensindexer/config/types";
 import { buildIndexedBlockranges } from "./indexed-blockranges";
 
 vi.mock("@ensnode/datasources", async () => {
