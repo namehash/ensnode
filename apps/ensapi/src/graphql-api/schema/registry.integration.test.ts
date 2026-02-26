@@ -12,6 +12,7 @@ import { gql } from "@/test/integration/ensnode-graphql-api-client";
 import {
   flattenConnection,
   type GraphQLConnection,
+  type PaginatedGraphQLConnection,
   request,
 } from "@/test/integration/graphql-utils";
 import { testDomainPagination } from "@/test/integration/test-domain-pagination";
@@ -60,7 +61,7 @@ describe("Registry.domains", () => {
 describe("Registry.domains pagination", () => {
   testDomainPagination(async (variables) => {
     const result = await request<{
-      registry: { domains: GraphQLConnection<PaginatedDomainResult> };
+      registry: { domains: PaginatedGraphQLConnection<PaginatedDomainResult> };
     }>(RegistryDomainsPaginated, { contract: V2_ETH_REGISTRY, ...variables });
     return result.registry.domains;
   });

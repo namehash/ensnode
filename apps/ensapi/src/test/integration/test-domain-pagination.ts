@@ -1,9 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
 import type { DomainsOrderByValue, DomainsOrderInput } from "@/graphql-api/schema/domain";
 import type { OrderDirectionValue } from "@/graphql-api/schema/order-direction";
 import type { PaginatedDomainResult } from "@/test/integration/domain-pagination-queries";
-import { flattenConnection, type GraphQLConnection } from "@/test/integration/graphql-utils";
+import {
+  flattenConnection,
+  type PaginatedGraphQLConnection,
+} from "@/test/integration/graphql-utils";
 
 type FetchPageVariables = {
   order: typeof DomainsOrderInput.$inferInput;
@@ -15,7 +18,7 @@ type FetchPageVariables = {
 
 type FetchPage = (
   variables: FetchPageVariables,
-) => Promise<GraphQLConnection<PaginatedDomainResult>>;
+) => Promise<PaginatedGraphQLConnection<PaginatedDomainResult>>;
 
 const ORDER_PERMUTATIONS: Array<{ by: DomainsOrderByValue; dir: OrderDirectionValue }> = [
   { by: "NAME", dir: "ASC" },
@@ -96,7 +99,10 @@ async function collectForward(
     all.push(...flattenConnection(page));
 
     if (!page.pageInfo.hasNextPage) break;
-    after = page.pageInfo.endCursor ?? undefined;
+
+    const nextCursor = page.pageInfo.endCursor ?? undefined;
+    expect(nextCursor, "endCursor must advance when hasNextPage is true").not.toBe(after);
+    after = nextCursor;
   }
 
   return all;
@@ -117,23 +123,34 @@ async function collectBackward(
     all.unshift(...flattenConnection(page));
 
     if (!page.pageInfo.hasPreviousPage) break;
-    before = page.pageInfo.startCursor ?? undefined;
+
+    const nextCursor = page.pageInfo.startCursor ?? undefined;
+    expect(nextCursor, "startCursor must advance when hasPreviousPage is true").not.toBe(before);
+    before = nextCursor;
   }
 
   return all;
 }
 
+// NOTE: using small page size to force multiple pages in devnet result set
 const PAGE_SIZE = 2;
 
 /**
- * Generic pagination test suite for any domains connection field.
- * Generates describe/it blocks for all 6 ordering permutations,
- * testing forward pagination, ordering correctness, and backward pagination.
+ * Generic pagination test suite for any find-domains connection field.
+ *
+ * Generates describe/it blocks for all 6 ordering permutations, testing forward pagination,
+ * ordering correctness, and backward pagination.
  */
 export function testDomainPagination(fetchPage: FetchPage) {
   for (const order of ORDER_PERMUTATIONS) {
     describe(`order: ${order.by} ${order.dir}`, async () => {
-      const forwardNodes = await collectForward(fetchPage, order, PAGE_SIZE);
+      let forwardNodes: PaginatedDomainResult[];
+      let backwardNodes: PaginatedDomainResult[];
+
+      beforeAll(async () => {
+        forwardNodes = await collectForward(fetchPage, order, PAGE_SIZE);
+        backwardNodes = await collectBackward(fetchPage, order, PAGE_SIZE);
+      });
 
       it("forward pagination collects all nodes", async () => {
         expect(forwardNodes.length).toBeGreaterThan(0);
@@ -144,7 +161,6 @@ export function testDomainPagination(fetchPage: FetchPage) {
       });
 
       it("backward pagination yields same nodes in same order", async () => {
-        const backwardNodes = await collectBackward(fetchPage, order, PAGE_SIZE);
         expect(backwardNodes).toEqual(forwardNodes);
       });
     });

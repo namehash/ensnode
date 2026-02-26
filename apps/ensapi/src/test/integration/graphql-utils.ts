@@ -5,6 +5,10 @@ import { client } from "./ensnode-graphql-api-client";
 import { highlightGraphQL, highlightJSON } from "./highlight";
 
 export type GraphQLConnection<NODE> = {
+  edges: { node: NODE }[];
+};
+
+export type PaginatedGraphQLConnection<NODE> = {
   edges: { cursor: string; node: NODE }[];
   pageInfo: {
     hasNextPage: boolean;
@@ -14,7 +18,9 @@ export type GraphQLConnection<NODE> = {
   };
 };
 
-export function flattenConnection<T>(connection?: GraphQLConnection<T>): T[] {
+export function flattenConnection<T>(
+  connection?: GraphQLConnection<T> | PaginatedGraphQLConnection<T>,
+): T[] {
   return (connection?.edges ?? []).map((edge) => edge.node);
 }
 
