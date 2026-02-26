@@ -219,7 +219,7 @@ app.openapi(getReferrerDetailRoute, async (c) => {
       } satisfies ReferrerMetricsEditionsResponse),
     );
   } catch (error) {
-    logger.error({ error }, "Error in /v1/ensanalytics/referral-leaderboard/:referrer endpoint");
+    logger.error({ error }, "Error in /v1/ensanalytics/referrer/:referrer endpoint");
     const errorMessage =
       error instanceof Error
         ? error.message
