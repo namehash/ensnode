@@ -14,7 +14,13 @@ import * as resolutionRoutes from "./handlers/resolution-api.routes";
 export function createStubRoutesForSpec() {
   const app = new OpenAPIHono();
 
-  const routeGroups = [amIRealtimeRoutes, ensnodeRoutes, ensanalyticsRoutes, nameTokensRoutes, resolutionRoutes];
+  const routeGroups = [
+    amIRealtimeRoutes,
+    ensnodeRoutes,
+    ensanalyticsRoutes,
+    nameTokensRoutes,
+    resolutionRoutes,
+  ];
 
   for (const group of routeGroups) {
     for (const route of group.routes) {
