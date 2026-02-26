@@ -13,8 +13,17 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { DEVNET_NAMES } from "@/test/integration/devnet-names";
+import {
+  type PaginatedDomainResult,
+  QueryDomainsPaginated,
+} from "@/test/integration/domain-pagination-queries";
 import { gql } from "@/test/integration/ensnode-graphql-api-client";
-import { flattenConnection, request } from "@/test/integration/graphql-utils";
+import {
+  flattenConnection,
+  type GraphQLConnection,
+  request,
+} from "@/test/integration/graphql-utils";
+import { testDomainPagination } from "@/test/integration/test-domain-pagination";
 
 const namespace = "ens-test-env";
 
@@ -39,17 +48,13 @@ describe("Query.root", () => {
 
 describe("Query.domains", () => {
   type QueryDomainsResult = {
-    domains: {
-      edges: Array<{
-        node: {
-          __typename: "ENSv1Domain" | "ENSv2Domain";
-          id: DomainId;
-          name: Name;
-          label: { interpreted: InterpretedLabel };
-          owner: { address: Address };
-        };
-      }>;
-    };
+    domains: GraphQLConnection<{
+      __typename: "ENSv1Domain" | "ENSv2Domain";
+      id: DomainId;
+      name: Name;
+      label: { interpreted: InterpretedLabel };
+      owner: { address: Address };
+    }>;
   };
 
   const QueryDomains = gql`
@@ -124,5 +129,15 @@ describe("Query.domain", () => {
     await expect(
       request(DomainByName, { name: "this-name-definitely-does-not-exist-xyz123.eth" }),
     ).resolves.toMatchObject({ domain: null });
+  });
+});
+
+describe("Query.domains pagination", () => {
+  testDomainPagination(async (variables) => {
+    const result = await request<{ domains: GraphQLConnection<PaginatedDomainResult> }>(
+      QueryDomainsPaginated,
+      variables,
+    );
+    return result.domains;
   });
 });

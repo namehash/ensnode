@@ -3,12 +3,17 @@ import { describe, expect, it } from "vitest";
 
 import type { Name } from "@ensnode/ensnode-sdk";
 
+import {
+  AccountDomainsPaginated,
+  type PaginatedDomainResult,
+} from "@/test/integration/domain-pagination-queries";
 import { gql } from "@/test/integration/ensnode-graphql-api-client";
 import {
   flattenConnection,
   type GraphQLConnection,
   request,
 } from "@/test/integration/graphql-utils";
+import { testDomainPagination } from "@/test/integration/test-domain-pagination";
 
 // via devnet
 const DEFAULT_OWNER: Address = "0x70997970c51812dc3a010c7d01b50e0d17dc79c8";
@@ -68,5 +73,14 @@ describe("Account.domains", () => {
     const names = domains.map((d) => d.name);
 
     expect(names, "expected 'newowner.eth' in new owner's domains").toContain("newowner.eth");
+  });
+});
+
+describe("Account.domains pagination", () => {
+  testDomainPagination(async (variables) => {
+    const result = await request<{
+      account: { domains: GraphQLConnection<PaginatedDomainResult> };
+    }>(AccountDomainsPaginated, { address: DEFAULT_OWNER, ...variables });
+    return result.account.domains;
   });
 });
