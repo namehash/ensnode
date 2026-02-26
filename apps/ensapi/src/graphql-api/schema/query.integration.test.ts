@@ -1,15 +1,18 @@
-import { labelhash, namehash } from "viem";
+import { type Address, labelhash } from "viem";
 import { describe, expect, it } from "vitest";
 
 import { DatasourceNames } from "@ensnode/datasources";
 import {
+  type DomainId,
   getCanonicalId,
   getDatasourceContract,
   getENSv2RootRegistryId,
-  makeENSv1DomainId,
+  type InterpretedLabel,
   makeENSv2DomainId,
+  type Name,
 } from "@ensnode/ensnode-sdk";
 
+import { DEVNET_NAMES } from "@/test/integration/devnet-names";
 import { gql } from "@/test/integration/ensnode-graphql-api-client";
 import { flattenConnection, request } from "@/test/integration/graphql-utils";
 
@@ -21,40 +24,8 @@ const V2_ROOT_REGISTRY = getDatasourceContract(
   "RootRegistry",
 );
 
-const V2_ETH_REGISTRY = getDatasourceContract(
-  namespace, //
-  DatasourceNames.ENSv2Root,
-  "ETHRegistry",
-);
-
-const V1_ETH_DOMAIN_ID = makeENSv1DomainId(namehash("eth"));
-
 const V2_ETH_CANONICAL_ID = getCanonicalId(labelhash("eth"));
 const V2_ETH_DOMAIN_ID = makeENSv2DomainId(V2_ROOT_REGISTRY, V2_ETH_CANONICAL_ID);
-
-const DEVNET_NAMES = [
-  { name: "test.eth", canonical: "test.eth" },
-  { name: "example.eth", canonical: "example.eth" },
-  { name: "demo.eth", canonical: "demo.eth" },
-  { name: "newowner.eth", canonical: "newowner.eth" },
-  { name: "renew.eth", canonical: "renew.eth" },
-  { name: "reregister.eth", canonical: "reregister.eth" },
-  { name: "parent.eth", canonical: "parent.eth" },
-  { name: "changerole.eth", canonical: "changerole.eth" },
-  { name: "alias.eth", canonical: "alias.eth" },
-  { name: "sub2.parent.eth", canonical: "sub2.parent.eth" },
-  { name: "sub1.sub2.parent.eth", canonical: "sub1.sub2.parent.eth" },
-  { name: "linked.parent.eth", canonical: "linked.parent.eth" },
-  { name: "wallet.linked.parent.eth", canonical: "wallet.linked.parent.eth" },
-
-  // this name is actually correctly aliased
-  { name: "wallet.sub1.sub2.parent.eth", canonical: "wallet.linked.parent.eth" },
-
-  // NOTE: devnet says these are names but neither test.eth or alias.eth declare a subregistry
-  // so their subnames aren't resolvable
-  // { name: "sub.alias.eth", canonical: "sub.alias.eth" },
-  // { name: "sub.test.eth", canonical: "sub.alias.eth" },
-];
 
 describe("Query.root", () => {
   it("returns the root registry", async () => {
@@ -72,10 +43,10 @@ describe("Query.domains", () => {
       edges: Array<{
         node: {
           __typename: "ENSv1Domain" | "ENSv2Domain";
-          id: string;
-          name: string;
-          label: { interpreted: string };
-          owner: { address: string };
+          id: DomainId;
+          name: Name;
+          label: { interpreted: InterpretedLabel };
+          owner: { address: Address };
         };
       }>;
     };
