@@ -26,7 +26,27 @@ const v1Logger = makeLogger("get-domain-by-interpreted-name:v1");
 const v2Logger = makeLogger("get-domain-by-interpreted-name:v2");
 
 /**
- * Gets the DomainId of the Domain addressed by `name`.
+ * Domain lookup by Interpreted Name via forward traversal of the namegraph.
+ *
+ * This mirrors ENS Forward Resolution (walking from the root registry through each label in the name)
+ * with two intentional differences because this is designed to support the GraphQL API, not
+ * Protocol Acceleration.
+ *
+ * 1. Expired names are still retrievable — the traversal does _not_ check registration expiry, so
+ *    callers can query Domains even after they are expired.
+ *
+ * This means that not every Domain returned by this function is accessible by ENS Forward Resolution:
+ * an expired Domain will be considered as non-existing during Forward Resolution, but it will still
+ * be accessible as a resource here.
+ *
+ * Note that if a Domain has been migrated from ENSv1 to ENSv2, the ENSv2 Domain entity is returned,
+ * mirroring ENS Forward Resolution.
+ *
+ * Finally, this also means that Domains are addressable by any number of (possibly infinite) Aliases.
+ * i.e. if a name 'alias.eth' declares that the registry containing 'sub' is its subregistry but
+ * that subregistry declares a different Canonical Domain, we are still able to access the 'sub' Domain
+ * via 'sub.alias.eth'. That said, the resulting `Domain.name` (which is always its Canonical Name)
+ * for the Domain will be 'sub.canonical.eth', not the queried 'sub.alias.eth'.
  */
 export async function getDomainIdByInterpretedName(
   name: InterpretedName,
