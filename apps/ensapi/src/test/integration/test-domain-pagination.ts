@@ -143,7 +143,7 @@ const PAGE_SIZE = 2;
  */
 export function testDomainPagination(fetchPage: FetchPage) {
   for (const order of ORDER_PERMUTATIONS) {
-    describe(`order: ${order.by} ${order.dir}`, async () => {
+    describe(`order: ${order.by} ${order.dir}`, () => {
       let forwardNodes: PaginatedDomainResult[];
       let backwardNodes: PaginatedDomainResult[];
 
