@@ -64,7 +64,7 @@ describe("IndexingStatusBuilder", () => {
       const localPonderClientMock = buildLocalPonderClientMock({
         metrics: vi.fn().mockResolvedValue(localMetrics),
         status: vi.fn().mockResolvedValue(localStatus),
-        getChainBlockrange: vi.fn().mockReturnValue({
+        getIndexedBlockrange: vi.fn().mockReturnValue({
           startBlock: earliestBlockRef.number,
           endBlock: latestBlockRef.number,
         }),
@@ -122,7 +122,7 @@ describe("IndexingStatusBuilder", () => {
       const localPonderClientMock = buildLocalPonderClientMock({
         metrics: vi.fn().mockResolvedValue(localMetrics),
         status: vi.fn().mockResolvedValue(localStatus),
-        getChainBlockrange: vi.fn().mockReturnValue({
+        getIndexedBlockrange: vi.fn().mockReturnValue({
           startBlock: earliestBlockRef.number,
           endBlock: undefined,
         }),
@@ -196,7 +196,7 @@ describe("IndexingStatusBuilder", () => {
           .mockResolvedValueOnce(localMetricsHistorical)
           .mockResolvedValueOnce(localMetricsCompleted),
         status: vi.fn().mockResolvedValue(localStatus),
-        getChainBlockrange: vi.fn().mockReturnValue({
+        getIndexedBlockrange: vi.fn().mockReturnValue({
           startBlock: earliestBlockRef.number,
           endBlock: latestBlockRef.number,
         }),
@@ -271,7 +271,7 @@ describe("IndexingStatusBuilder", () => {
           .mockResolvedValueOnce(localMetricsHistorical)
           .mockResolvedValueOnce(localMetricsRealtime),
         status: vi.fn().mockResolvedValue(localStatus),
-        getChainBlockrange: vi.fn().mockReturnValue({
+        getIndexedBlockrange: vi.fn().mockReturnValue({
           startBlock: earliestBlockRef.number,
           endBlock: undefined,
         }),
@@ -357,7 +357,7 @@ describe("IndexingStatusBuilder", () => {
           .fn()
           .mockResolvedValueOnce(indexingStatus1)
           .mockResolvedValueOnce(indexingStatus2),
-        getChainBlockrange: vi
+        getIndexedBlockrange: vi
           .fn()
           .mockReturnValue({ startBlock: earliestBlockRef.number, endBlock: undefined }),
         getCachedPublicClient: vi.fn().mockReturnValue(publicClientMock),
@@ -402,7 +402,7 @@ describe("IndexingStatusBuilder", () => {
       const localPonderClientMock = buildLocalPonderClientMock({
         metrics: vi.fn().mockResolvedValue(localIndexingMetrics),
         status: vi.fn().mockResolvedValue(indexingStatus),
-        getChainBlockrange: vi.fn().mockReturnValue({
+        getIndexedBlockrange: vi.fn().mockReturnValue({
           startBlock: earliestBlockRef.number,
           endBlock: latestBlockRef.number,
         }),
@@ -443,7 +443,7 @@ describe("IndexingStatusBuilder", () => {
       const localPonderClientMock = buildLocalPonderClientMock({
         metrics: vi.fn().mockResolvedValue(localMetrics),
         status: vi.fn().mockResolvedValue(localStatus),
-        getChainBlockrange: vi
+        getIndexedBlockrange: vi
           .fn()
           .mockReturnValue({ startBlock: earliestBlockRef.number, endBlock: undefined }),
         getCachedPublicClient: vi.fn().mockReturnValue(publicClientMock),
@@ -503,7 +503,7 @@ describe("IndexingStatusBuilder", () => {
       const localPonderClientMock = buildLocalPonderClientMock({
         metrics: vi.fn().mockResolvedValue(localMetrics),
         status: vi.fn().mockResolvedValue(localStatus),
-        getChainBlockrange: vi.fn().mockReturnValue({
+        getIndexedBlockrange: vi.fn().mockReturnValue({
           startBlock: earliestBlockRef.number,
           endBlock: latestBlockRef.number,
         }),

@@ -198,13 +198,13 @@ export class IndexingStatusBuilder {
         backfillEndBlock = chainIndexingMetric.backfillEndBlock;
       }
 
-      const chainBlockrange = this.localPonderClient.getChainBlockrange(chainId);
+      const indexedBlockrange = this.localPonderClient.getIndexedBlockrange(chainId);
 
-      if (!chainBlockrange) {
-        throw new Error(`Chain blockrange not found for chain ID ${chainId}`);
+      if (!indexedBlockrange) {
+        throw new Error(`Indexed blockrange not found for chain ID ${chainId}`);
       }
 
-      const { startBlock, endBlock = null } = chainBlockrange;
+      const { startBlock, endBlock = null } = indexedBlockrange;
 
       const chainIndexingBlockRefs = await this.fetchChainIndexingBlockRefs(chainId, {
         startBlock,
