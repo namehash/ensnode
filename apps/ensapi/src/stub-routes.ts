@@ -5,6 +5,7 @@ import * as ensanalyticsRoutes from "./handlers/ensanalytics-api.routes";
 import * as ensanalyticsV1Routes from "./handlers/ensanalytics-api-v1.routes";
 import * as ensnodeRoutes from "./handlers/ensnode-api.routes";
 import * as nameTokensRoutes from "./handlers/name-tokens-api.routes";
+import * as registrarActionsRoutes from "./handlers/registrar-actions-api.routes";
 import * as resolutionRoutes from "./handlers/resolution-api.routes";
 
 /**
@@ -21,6 +22,7 @@ export function createStubRoutesForSpec() {
     ensanalyticsV1Routes,
     ensanalyticsRoutes,
     nameTokensRoutes,
+    registrarActionsRoutes,
     resolutionRoutes,
   ];
 
