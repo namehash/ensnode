@@ -33,7 +33,7 @@ import {
 } from "./types";
 
 /**
- * Schema for {@link ReferralProgramRules}.
+ * Schema for {@link ReferralProgramRules}
  */
 export const makeReferralProgramRulesSchema = (valueLabel: string = "ReferralProgramRules") =>
   z.discriminatedUnion("awardModel", [
@@ -42,7 +42,7 @@ export const makeReferralProgramRulesSchema = (valueLabel: string = "ReferralPro
   ]);
 
 /**
- * Schema for {@link ReferrerLeaderboardPage}.
+ * Schema for {@link ReferrerLeaderboardPage}
  */
 export const makeReferrerLeaderboardPageSchema = (valueLabel: string = "ReferrerLeaderboardPage") =>
   z.discriminatedUnion("awardModel", [

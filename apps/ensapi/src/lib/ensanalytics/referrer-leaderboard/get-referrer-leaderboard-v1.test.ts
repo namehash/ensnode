@@ -37,6 +37,7 @@ describe("ENSAnalytics Referrer Leaderboard", () => {
 
       const result = await getReferrerLeaderboard(rules, accurateAsOf);
 
+      expect(result.awardModel).toBe(ReferralProgramAwardModels.PieSplit);
       if (result.awardModel !== ReferralProgramAwardModels.PieSplit) {
         throw new Error("Expected PieSplit leaderboard");
       }

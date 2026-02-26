@@ -1,22 +1,23 @@
 import type {
-  SerializedAggregatedReferrerMetricsPieSplit,
-  SerializedAwardedReferrerMetricsPieSplit,
   SerializedReferralProgramRulesPieSplit,
   SerializedReferrerEditionMetricsRankedPieSplit,
   SerializedReferrerEditionMetricsUnrankedPieSplit,
   SerializedReferrerLeaderboardPagePieSplit,
-  SerializedUnrankedReferrerMetricsPieSplit,
 } from "../award-models/pie-split/api/serialized-types";
 import type {
-  SerializedAggregatedReferrerMetricsRevShareLimit,
-  SerializedAwardedReferrerMetricsRevShareLimit,
   SerializedReferralProgramRulesRevShareLimit,
   SerializedReferrerEditionMetricsRankedRevShareLimit,
   SerializedReferrerEditionMetricsUnrankedRevShareLimit,
   SerializedReferrerLeaderboardPageRevShareLimit,
-  SerializedUnrankedReferrerMetricsRevShareLimit,
 } from "../award-models/rev-share-limit/api/serialized-types";
 import type { ReferralProgramEditionConfig, ReferralProgramEditionSlug } from "../edition";
+import type {
+  ReferrerEditionMetrics,
+  ReferrerEditionMetricsRanked,
+  ReferrerEditionMetricsUnranked,
+} from "../edition-metrics";
+import type { ReferrerLeaderboardPage } from "../leaderboard-page";
+import type { ReferralProgramRules } from "../rules";
 import type {
   ReferralProgramEditionConfigSetData,
   ReferralProgramEditionConfigSetResponse,
@@ -31,32 +32,11 @@ import type {
 } from "./types";
 
 /**
- * Serialized representation of referral program rules (union of all award model variants).
+ * Serialized representation of {@link ReferralProgramRules}.
  */
 export type SerializedReferralProgramRules =
   | SerializedReferralProgramRulesPieSplit
   | SerializedReferralProgramRulesRevShareLimit;
-
-/**
- * Serialized representation of aggregated referrer metrics (union of all award model variants).
- */
-export type SerializedAggregatedReferrerMetrics =
-  | SerializedAggregatedReferrerMetricsPieSplit
-  | SerializedAggregatedReferrerMetricsRevShareLimit;
-
-/**
- * Serialized representation of awarded referrer metrics (union of all award model variants).
- */
-export type SerializedAwardedReferrerMetrics =
-  | SerializedAwardedReferrerMetricsPieSplit
-  | SerializedAwardedReferrerMetricsRevShareLimit;
-
-/**
- * Serialized representation of unranked referrer metrics (union of all award model variants).
- */
-export type SerializedUnrankedReferrerMetrics =
-  | SerializedUnrankedReferrerMetricsPieSplit
-  | SerializedUnrankedReferrerMetricsRevShareLimit;
 
 /**
  * Serialized representation of {@link ReferrerLeaderboardPage}.
