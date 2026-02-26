@@ -7,13 +7,15 @@ import { validateUnixTimestamp } from "../../time";
  * Discriminant values for the award model used in a referral program edition.
  *
  * @remarks Clients MUST check `awardModel` before accessing model-specific fields.
- * Editions with unrecognized `awardModel` values are silently dropped during parsing
- * (see `makeReferralProgramEditionConfigSetArraySchema`), so clients will only ever
- * encounter award models listed here.
+ * Editions with unrecognized `awardModel` values are preserved as
+ * {@link ReferralProgramRulesUnrecognized} during parsing (see
+ * `makeReferralProgramEditionConfigSetArraySchema`). Clients must handle this variant — typically
+ * by skipping those editions with a warning log rather than crashing.
  */
 export const ReferralProgramAwardModels = {
   PieSplit: "pie-split",
   RevShareLimit: "rev-share-limit",
+  Unrecognized: "unrecognized",
 } as const;
 
 export type ReferralProgramAwardModel =
@@ -53,6 +55,29 @@ export interface BaseReferralProgramRules {
    * @example new URL("https://ensawards.org/ens-holiday-awards-rules")
    */
   rulesUrl: URL;
+}
+
+/**
+ * Rules for a referral program edition whose `awardModel` is not recognized by this client version.
+ *
+ * @remarks
+ * This is a **client-side forward-compatibility** type only. It is never serialized or processed
+ * by business logic on the backend. When the server introduces a new award model type, older
+ * clients preserve the edition rather than silently dropping it, and downstream code that
+ * encounters this type should skip it with a warning log rather than crashing.
+ */
+export interface ReferralProgramRulesUnrecognized extends BaseReferralProgramRules {
+  /**
+   * Discriminant — always `"unrecognized"`.
+   */
+  awardModel: typeof ReferralProgramAwardModels.Unrecognized;
+
+  /**
+   * The original, unrecognized `awardModel` string received from the server.
+   *
+   * @remarks Preserved for logging and debugging. Never used for business logic.
+   */
+  originalAwardModel: string;
 }
 
 export const validateBaseReferralProgramRules = (rules: BaseReferralProgramRules): void => {

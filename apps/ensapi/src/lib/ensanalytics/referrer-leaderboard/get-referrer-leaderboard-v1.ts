@@ -35,5 +35,18 @@ export async function getReferrerLeaderboard(
       const events = await getReferralEvents(rules);
       return buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
     }
+    case ReferralProgramAwardModels.Unrecognized:
+      // ReferralProgramRulesUnrecognized editions are filtered at cache-init time
+      // and should never reach this function.
+      throw new Error(
+        `getReferrerLeaderboard called with unrecognized award model '${rules.originalAwardModel}' — edition should have been filtered before reaching this point.`,
+      );
+
+    default: {
+      const _exhaustiveCheck: never = rules;
+      throw new Error(
+        `Unexpected award model in getReferrerLeaderboard: ${(_exhaustiveCheck as ReferralProgramRules).awardModel}`,
+      );
+    }
   }
 }

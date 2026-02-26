@@ -86,16 +86,15 @@ export class ENSReferralsClient {
    * @param url - The URL to fetch the edition config set from
    * @returns A ReferralProgramEditionConfigSet (Map of edition slugs to edition configurations)
    *
-   * @remarks Editions whose `rules.awardModel` is not recognized by this version of the client
-   * are **silently dropped** for forward compatibility. The returned map contains only editions
-   * with fully validated, recognized award models. If the server introduces a new award model
-   * type, older clients will simply not see those editions rather than crashing.
-   * At least one recognized edition must be present, otherwise deserialization throws.
+   * @remarks Editions whose `rules.awardModel` is not recognized by this client version are
+   * preserved as {@link ReferralProgramRulesUnrecognized}. The returned map includes all
+   * editions — recognized and unrecognized alike. Callers should check `editionConfig.rules.awardModel`
+   * and skip editions with `"unrecognized"` as appropriate. At least one edition of any kind must
+   * be present, otherwise deserialization throws.
    *
    * @throws if the fetch fails
    * @throws if the response is not valid JSON
    * @throws if the data doesn't match the expected schema
-   * @throws if no editions with a recognized award model remain after filtering
    *
    * @example
    * ```typescript
@@ -345,11 +344,11 @@ export class ENSReferralsClient {
    *
    * @returns A response containing the edition config set, or an error response if unavailable.
    *
-   * @remarks Editions whose `rules.awardModel` is not recognized by this version of the client
-   * are **silently dropped** for forward compatibility. The `data.editions` array contains only
-   * editions with fully validated, recognized award models. If the server introduces a new award
-   * model type, older clients will simply not see those editions rather than crashing.
-   * At least one recognized edition must be present, otherwise an error response is returned.
+   * @remarks Editions whose `rules.awardModel` is not recognized by this client version are
+   * preserved as {@link ReferralProgramRulesUnrecognized}. The returned map includes all
+   * editions — recognized and unrecognized alike. Callers should check `editionConfig.rules.awardModel`
+   * and skip editions with `"unrecognized"` as appropriate. At least one edition of any kind must
+   * be present, otherwise deserialization throws.
    *
    * @example
    * ```typescript

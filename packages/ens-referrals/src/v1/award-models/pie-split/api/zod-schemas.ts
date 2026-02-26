@@ -1,7 +1,6 @@
 import z from "zod/v4";
 
 import {
-  makeAccountIdSchema,
   makeDurationSchema,
   makeFiniteNonNegativeNumberSchema,
   makeLowercaseAddressSchema,
@@ -10,10 +9,10 @@ import {
   makePriceEthSchema,
   makePriceUsdcSchema,
   makeUnixTimestampSchema,
-  makeUrlSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
 import {
+  makeBaseReferralProgramRulesSchema,
   makeReferralProgramStatusSchema,
   makeReferrerLeaderboardPageContextSchema,
 } from "../../shared/api/zod-schemas";
@@ -26,20 +25,11 @@ import { ReferralProgramAwardModels } from "../../shared/rules";
 export const makeReferralProgramRulesPieSplitSchema = (
   valueLabel: string = "ReferralProgramRulesPieSplit",
 ) =>
-  z
-    .object({
-      awardModel: z.literal(ReferralProgramAwardModels.PieSplit),
-      totalAwardPoolValue: makePriceUsdcSchema(`${valueLabel}.totalAwardPoolValue`),
-      maxQualifiedReferrers: makeNonNegativeIntegerSchema(`${valueLabel}.maxQualifiedReferrers`),
-      startTime: makeUnixTimestampSchema(`${valueLabel}.startTime`),
-      endTime: makeUnixTimestampSchema(`${valueLabel}.endTime`),
-      subregistryId: makeAccountIdSchema(`${valueLabel}.subregistryId`),
-      rulesUrl: makeUrlSchema(`${valueLabel}.rulesUrl`),
-    })
-    .refine((data) => data.endTime >= data.startTime, {
-      message: `${valueLabel}.endTime must be >= ${valueLabel}.startTime`,
-      path: ["endTime"],
-    });
+  makeBaseReferralProgramRulesSchema(valueLabel).safeExtend({
+    awardModel: z.literal(ReferralProgramAwardModels.PieSplit),
+    totalAwardPoolValue: makePriceUsdcSchema(`${valueLabel}.totalAwardPoolValue`),
+    maxQualifiedReferrers: makeNonNegativeIntegerSchema(`${valueLabel}.maxQualifiedReferrers`),
+  });
 
 /**
  * Schema for {@link AwardedReferrerMetricsPieSplit} (with numeric rank).

@@ -10,6 +10,7 @@ import {
   serializeReferrerEditionMetricsUnrankedRevShareLimit,
   serializeReferrerLeaderboardPageRevShareLimit,
 } from "../award-models/rev-share-limit/api/serialize";
+import type { ReferralProgramRulesUnrecognized } from "../award-models/shared/rules";
 import { ReferralProgramAwardModels } from "../award-models/shared/rules";
 import type { ReferralProgramEditionConfig } from "../edition";
 import type {
@@ -42,6 +43,9 @@ import {
 
 /**
  * Serializes a {@link ReferralProgramRules} object.
+ *
+ * @throws if called with a {@link ReferralProgramRulesUnrecognized} — unrecognized editions are
+ *   client-side forward-compatibility placeholders and must never be serialized.
  */
 export function serializeReferralProgramRules(
   rules: ReferralProgramRules,
@@ -52,6 +56,13 @@ export function serializeReferralProgramRules(
 
     case ReferralProgramAwardModels.RevShareLimit:
       return serializeReferralProgramRulesRevShareLimit(rules);
+
+    case ReferralProgramAwardModels.Unrecognized: {
+      const unrecognized = rules as ReferralProgramRulesUnrecognized;
+      throw new Error(
+        `ReferralProgramRulesUnrecognized (originalAwardModel: '${unrecognized.originalAwardModel}') must not be serialized — it is a client-side forward-compatibility placeholder only.`,
+      );
+    }
 
     default: {
       const _exhaustiveCheck: never = rules;

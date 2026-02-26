@@ -21,6 +21,8 @@ import {
   makeReferrerEditionMetricsRevShareLimitSchema,
   makeReferrerLeaderboardPageRevShareLimitSchema,
 } from "../award-models/rev-share-limit/api/zod-schemas";
+import { makeBaseReferralProgramRulesSchema } from "../award-models/shared/api/zod-schemas";
+import type { ReferralProgramRulesUnrecognized } from "../award-models/shared/rules";
 import { ReferralProgramAwardModels } from "../award-models/shared/rules";
 import type { ReferralProgramEditionConfig } from "../edition";
 import {
@@ -180,36 +182,48 @@ export const makeReferrerMetricsEditionsResponseSchema = (
   ]);
 
 /**
+ * Schema for the shared base fields of a {@link ReferralProgramEditionConfig}.
+ */
+const makeReferralProgramEditionConfigBaseSchema = (valueLabel: string) =>
+  z.object({
+    slug: makeReferralProgramEditionSlugSchema(`${valueLabel}.slug`),
+    displayName: z.string().min(1, `${valueLabel}.displayName must not be empty`),
+    rules: makeBaseReferralProgramRulesSchema(`${valueLabel}.rules`),
+  });
+
+/**
  * Schema for validating a {@link ReferralProgramEditionConfig}.
  */
 export const makeReferralProgramEditionConfigSchema = (
   valueLabel: string = "ReferralProgramEditionConfig",
 ) =>
-  z.object({
-    slug: makeReferralProgramEditionSlugSchema(`${valueLabel}.slug`),
-    displayName: z.string().min(1, `${valueLabel}.displayName must not be empty`),
+  makeReferralProgramEditionConfigBaseSchema(valueLabel).safeExtend({
     rules: makeReferralProgramRulesSchema(`${valueLabel}.rules`),
   });
 
 /**
  * Schema for validating referral program edition config set array.
  *
- * Editions whose `rules.awardModel` is not recognized by this client version are
- * silently dropped for forward compatibility — the result contains only editions
- * with fully validated, recognized award models.
+ * Editions whose `rules.awardModel` is not recognized by this client version are preserved as
+ * {@link ReferralProgramRulesUnrecognized} for forward compatibility — nothing is silently dropped.
+ * Downstream code (e.g., leaderboard cache setup) is responsible for skipping unrecognized
+ * editions with a warning log rather than crashing.
  *
- * At least one edition with a recognized award model must remain after filtering,
- * and all remaining editions must have unique slugs.
+ * The list must not be empty after processing all items. Duplicate slugs are not allowed.
  *
  * Two-pass approach:
- *  1. Each item is loosely parsed (only `rules.awardModel` is checked) and unknown
- *     award models are dropped silently.
- *  2. Remaining items are fully validated with {@link makeReferralProgramEditionConfigSchema}.
+ *  1. Each item is loosely parsed (based on `rules.awardModel` field).
+ *     - Known award models are fully validated with {@link makeReferralProgramEditionConfigSchema}.
+ *     - Unknown award models are parsed with {@link makeBaseReferralProgramRulesSchema} and wrapped as
+ *       `ReferralProgramRulesUnrecognized`.
+ *  2. After processing all items, the result must be non-empty and have no duplicate slugs.
  */
 export const makeReferralProgramEditionConfigSetArraySchema = (
   valueLabel: string = "ReferralProgramEditionConfigSetArray",
 ) => {
-  const knownAwardModels = Object.values(ReferralProgramAwardModels) as string[];
+  const knownAwardModels = Object.values(ReferralProgramAwardModels).filter(
+    (m) => m !== ReferralProgramAwardModels.Unrecognized,
+  ) as string[];
   const configSchema = makeReferralProgramEditionConfigSchema(`${valueLabel}[edition]`);
 
   // Loose schema used only to peek at rules.awardModel before full validation.
@@ -217,39 +231,60 @@ export const makeReferralProgramEditionConfigSetArraySchema = (
     .object({ rules: z.object({ awardModel: z.string() }).passthrough() })
     .passthrough();
 
+  // Schema for extracting base fields from an unrecognized edition.
+  const unrecognizedBaseSchema = makeReferralProgramEditionConfigBaseSchema(
+    `${valueLabel}[edition]`,
+  );
+
   return z.array(looseItemSchema).transform((items, ctx): ReferralProgramEditionConfig[] => {
     const result: ReferralProgramEditionConfig[] = [];
-    let attemptedKnownCount = 0;
 
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
 
-      if (!knownAwardModels.includes(item.rules.awardModel)) {
-        // Unknown award model — silently skip this edition.
-        // This allows servers to introduce new award model types without breaking clients.
-        continue;
-      }
-
-      attemptedKnownCount++;
-
-      const parsed = configSchema.safeParse(item);
-      if (!parsed.success) {
-        for (const issue of parsed.error.issues) {
-          ctx.addIssue({
-            code: "custom",
-            path: [i, ...(issue.path as PropertyKey[])],
-            message: issue.message,
-          });
+      if (knownAwardModels.includes(item.rules.awardModel)) {
+        // Known award model — fully validate.
+        const parsed = configSchema.safeParse(item);
+        if (!parsed.success) {
+          for (const issue of parsed.error.issues) {
+            ctx.addIssue({
+              code: "custom",
+              path: [i, ...(issue.path as PropertyKey[])],
+              message: issue.message,
+            });
+          }
+        } else {
+          result.push(parsed.data);
         }
       } else {
-        result.push(parsed.data);
+        // Unknown award model — preserve as ReferralProgramRulesUnrecognized using base fields.
+        const parsed = unrecognizedBaseSchema.safeParse(item);
+        if (!parsed.success) {
+          for (const issue of parsed.error.issues) {
+            ctx.addIssue({
+              code: "custom",
+              path: [i, ...(issue.path as PropertyKey[])],
+              message: issue.message,
+            });
+          }
+          continue;
+        }
+
+        result.push({
+          ...parsed.data,
+          rules: {
+            ...parsed.data.rules,
+            awardModel: ReferralProgramAwardModels.Unrecognized,
+            originalAwardModel: item.rules.awardModel,
+          } satisfies ReferralProgramRulesUnrecognized,
+        });
       }
     }
 
-    if (attemptedKnownCount === 0) {
+    if (result.length === 0) {
       ctx.addIssue({
         code: "custom",
-        message: `${valueLabel} must contain at least one edition with a recognized award model`,
+        message: `${valueLabel} must contain at least one edition`,
       });
       // Issue above causes the overall parse to fail; this value is never used.
       return [];

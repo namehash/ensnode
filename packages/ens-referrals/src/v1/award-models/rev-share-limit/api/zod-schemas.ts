@@ -1,7 +1,6 @@
 import z from "zod/v4";
 
 import {
-  makeAccountIdSchema,
   makeDurationSchema,
   makeFiniteNonNegativeNumberSchema,
   makeLowercaseAddressSchema,
@@ -10,10 +9,10 @@ import {
   makePriceEthSchema,
   makePriceUsdcSchema,
   makeUnixTimestampSchema,
-  makeUrlSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
 import {
+  makeBaseReferralProgramRulesSchema,
   makeReferralProgramStatusSchema,
   makeReferrerLeaderboardPageContextSchema,
 } from "../../shared/api/zod-schemas";
@@ -26,25 +25,16 @@ import { ReferralProgramAwardModels } from "../../shared/rules";
 export const makeReferralProgramRulesRevShareLimitSchema = (
   valueLabel: string = "ReferralProgramRulesRevShareLimit",
 ) =>
-  z
-    .object({
-      awardModel: z.literal(ReferralProgramAwardModels.RevShareLimit),
-      totalAwardPoolValue: makePriceUsdcSchema(`${valueLabel}.totalAwardPoolValue`),
-      minQualifiedRevenueContribution: makePriceUsdcSchema(
-        `${valueLabel}.minQualifiedRevenueContribution`,
-      ),
-      qualifiedRevenueShare: makeFiniteNonNegativeNumberSchema(
-        `${valueLabel}.qualifiedRevenueShare`,
-      ).max(1, `${valueLabel}.qualifiedRevenueShare must be <= 1`),
-      startTime: makeUnixTimestampSchema(`${valueLabel}.startTime`),
-      endTime: makeUnixTimestampSchema(`${valueLabel}.endTime`),
-      subregistryId: makeAccountIdSchema(`${valueLabel}.subregistryId`),
-      rulesUrl: makeUrlSchema(`${valueLabel}.rulesUrl`),
-    })
-    .refine((data) => data.endTime >= data.startTime, {
-      message: `${valueLabel}.endTime must be >= ${valueLabel}.startTime`,
-      path: ["endTime"],
-    });
+  makeBaseReferralProgramRulesSchema(valueLabel).safeExtend({
+    awardModel: z.literal(ReferralProgramAwardModels.RevShareLimit),
+    totalAwardPoolValue: makePriceUsdcSchema(`${valueLabel}.totalAwardPoolValue`),
+    minQualifiedRevenueContribution: makePriceUsdcSchema(
+      `${valueLabel}.minQualifiedRevenueContribution`,
+    ),
+    qualifiedRevenueShare: makeFiniteNonNegativeNumberSchema(
+      `${valueLabel}.qualifiedRevenueShare`,
+    ).max(1, `${valueLabel}.qualifiedRevenueShare must be <= 1`),
+  });
 
 /**
  * Schema for {@link AwardedReferrerMetricsRevShareLimit} (with numeric rank).

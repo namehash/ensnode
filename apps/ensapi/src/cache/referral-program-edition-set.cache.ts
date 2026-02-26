@@ -3,6 +3,7 @@ import config from "@/config";
 import {
   ENSReferralsClient,
   getDefaultReferralProgramEditionConfigSet,
+  ReferralProgramAwardModels,
   type ReferralProgramEditionConfigSet,
 } from "@namehash/ens-referrals/v1";
 import { minutesToSeconds } from "date-fns";
@@ -28,6 +29,20 @@ async function loadReferralProgramEditionConfigSet(
       const editionConfigSet = await ENSReferralsClient.getReferralProgramEditionConfigSet(
         config.customReferralProgramEditionConfigSetUrl,
       );
+
+      // Strip any unrecognized editions immediately — they are client-side forward-compatibility
+      // placeholders that must never enter the server's operational config set (they can't be
+      // serialized and would cause API handlers to crash).
+      for (const [slug, editionConfig] of editionConfigSet) {
+        if (editionConfig.rules.awardModel === ReferralProgramAwardModels.Unrecognized) {
+          logger.warn(
+            { editionSlug: slug, originalAwardModel: editionConfig.rules.originalAwardModel },
+            `Skipping custom edition with unrecognized award model`,
+          );
+          editionConfigSet.delete(slug);
+        }
+      }
+
       logger.info(`Successfully loaded ${editionConfigSet.size} custom referral program editions`);
       return editionConfigSet;
     } catch (error) {
