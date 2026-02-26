@@ -1,7 +1,4 @@
-import { client, gql } from "./ensnode-graphql-api-client";
-
-const ENSAPI_GRAPHQL_URL =
-  process.env.ENSAPI_GRAPHQL_API_URL ?? "http://localhost:4334/api/graphql";
+import { client, ENSAPI_GRAPHQL_API_URL, gql } from "./ensnode-graphql-api-client";
 
 export async function setup() {
   try {
@@ -16,7 +13,7 @@ export async function setup() {
     `);
   } catch (error) {
     throw new Error(
-      `Integration test health check failed: could not reach ${ENSAPI_GRAPHQL_URL}. ` +
+      `Integration test health check failed: could not reach ${ENSAPI_GRAPHQL_API_URL}. ` +
         `Ensure ensapi is running before running integration tests.\n` +
         `Original error: ${error}`,
     );
