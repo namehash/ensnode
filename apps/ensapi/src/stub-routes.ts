@@ -1,8 +1,8 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 
 import * as amIRealtimeRoutes from "./handlers/amirealtime-api.routes";
-import * as registrarActionsRoutes from "./handlers/registrar-actions-api.routes";
 import * as ensnodeRoutes from "./handlers/ensnode-api.routes";
+import * as registrarActionsRoutes from "./handlers/registrar-actions-api.routes";
 import * as resolutionRoutes from "./handlers/resolution-api.routes";
 
 /**
