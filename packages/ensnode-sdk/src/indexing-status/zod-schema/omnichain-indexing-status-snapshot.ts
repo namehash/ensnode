@@ -6,6 +6,7 @@ import {
   makeChainIdStringSchema,
   makeUnixTimestampSchema,
 } from "../../shared/zod-schemas";
+import { withOpenApi } from "../../shared/zod-types";
 import { ChainIndexingStatusIds } from "../chain-indexing-status-snapshot";
 import {
   checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotBackfill,
@@ -375,11 +376,14 @@ export const makeOmnichainIndexingStatusSnapshotSchema = (
 const makeSerializedOmnichainIndexingStatusSnapshotUnstartedSchema = (valueLabel?: string) =>
   z.object({
     omnichainStatus: z.literal(OmnichainIndexingStatusIds.Unstarted),
-    chains: z.record(
-      makeChainIdStringSchema(),
-      z.discriminatedUnion("chainStatus", [
-        makeChainIndexingStatusSnapshotQueuedSchema(valueLabel),
-      ]),
+    chains: withOpenApi(
+      z.record(
+        makeChainIdStringSchema(),
+        z.discriminatedUnion("chainStatus", [
+          makeChainIndexingStatusSnapshotQueuedSchema(valueLabel),
+        ]),
+      ),
+      { propertyNames: { type: "string" } },
     ),
     omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
   });
@@ -390,13 +394,16 @@ const makeSerializedOmnichainIndexingStatusSnapshotUnstartedSchema = (valueLabel
 const makeSerializedOmnichainIndexingStatusSnapshotBackfillSchema = (valueLabel?: string) =>
   z.object({
     omnichainStatus: z.literal(OmnichainIndexingStatusIds.Backfill),
-    chains: z.record(
-      makeChainIdStringSchema(),
-      z.discriminatedUnion("chainStatus", [
-        makeChainIndexingStatusSnapshotQueuedSchema(valueLabel),
-        makeChainIndexingStatusSnapshotBackfillSchema(valueLabel),
-        makeChainIndexingStatusSnapshotCompletedSchema(valueLabel),
-      ]),
+    chains: withOpenApi(
+      z.record(
+        makeChainIdStringSchema(),
+        z.discriminatedUnion("chainStatus", [
+          makeChainIndexingStatusSnapshotQueuedSchema(valueLabel),
+          makeChainIndexingStatusSnapshotBackfillSchema(valueLabel),
+          makeChainIndexingStatusSnapshotCompletedSchema(valueLabel),
+        ]),
+      ),
+      { propertyNames: { type: "string" } },
     ),
     omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
   });
@@ -407,11 +414,14 @@ const makeSerializedOmnichainIndexingStatusSnapshotBackfillSchema = (valueLabel?
 const makeSerializedOmnichainIndexingStatusSnapshotCompletedSchema = (valueLabel?: string) =>
   z.object({
     omnichainStatus: z.literal(OmnichainIndexingStatusIds.Completed),
-    chains: z.record(
-      makeChainIdStringSchema(),
-      z.discriminatedUnion("chainStatus", [
-        makeChainIndexingStatusSnapshotCompletedSchema(valueLabel),
-      ]),
+    chains: withOpenApi(
+      z.record(
+        makeChainIdStringSchema(),
+        z.discriminatedUnion("chainStatus", [
+          makeChainIndexingStatusSnapshotCompletedSchema(valueLabel),
+        ]),
+      ),
+      { propertyNames: { type: "string" } },
     ),
     omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
   });
@@ -422,14 +432,17 @@ const makeSerializedOmnichainIndexingStatusSnapshotCompletedSchema = (valueLabel
 const makeSerializedOmnichainIndexingStatusSnapshotFollowingSchema = (valueLabel?: string) =>
   z.object({
     omnichainStatus: z.literal(OmnichainIndexingStatusIds.Following),
-    chains: z.record(
-      makeChainIdStringSchema(),
-      z.discriminatedUnion("chainStatus", [
-        makeChainIndexingStatusSnapshotQueuedSchema(valueLabel),
-        makeChainIndexingStatusSnapshotBackfillSchema(valueLabel),
-        makeChainIndexingStatusSnapshotFollowingSchema(valueLabel),
-        makeChainIndexingStatusSnapshotCompletedSchema(valueLabel),
-      ]),
+    chains: withOpenApi(
+      z.record(
+        makeChainIdStringSchema(),
+        z.discriminatedUnion("chainStatus", [
+          makeChainIndexingStatusSnapshotQueuedSchema(valueLabel),
+          makeChainIndexingStatusSnapshotBackfillSchema(valueLabel),
+          makeChainIndexingStatusSnapshotFollowingSchema(valueLabel),
+          makeChainIndexingStatusSnapshotCompletedSchema(valueLabel),
+        ]),
+      ),
+      { propertyNames: { type: "string" } },
     ),
     omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
   });

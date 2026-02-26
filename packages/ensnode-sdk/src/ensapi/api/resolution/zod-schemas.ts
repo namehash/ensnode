@@ -1,13 +1,19 @@
 import { z } from "zod/v4";
 
+import { withOpenApi } from "../../../shared/zod-types";
+
 /**
  * Schema for resolver records response (addresses, texts, name)
  */
 const makeResolverRecordsResponseSchema = () =>
   z.object({
     name: z.string().nullable().optional(),
-    addresses: z.record(z.string(), z.string().nullable()).optional(),
-    texts: z.record(z.string(), z.string().nullable()).optional(),
+    addresses: withOpenApi(z.record(z.string(), z.string().nullable()), {
+      propertyNames: { type: "string" },
+    }).optional(),
+    texts: withOpenApi(z.record(z.string(), z.string().nullable()), {
+      propertyNames: { type: "string" },
+    }).optional(),
   });
 
 /**
@@ -38,7 +44,9 @@ export const makeResolvePrimaryNameResponseSchema = () =>
  */
 export const makeResolvePrimaryNamesResponseSchema = () =>
   z.object({
-    names: z.record(z.number(), z.string().nullable()),
+    names: withOpenApi(z.record(z.number(), z.string().nullable()), {
+      propertyNames: { type: "number" },
+    }),
     accelerationRequested: z.boolean(),
     accelerationAttempted: z.boolean(),
     trace: z.array(z.unknown()).optional(),

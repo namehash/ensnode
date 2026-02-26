@@ -1,6 +1,12 @@
 import { createRoute } from "@hono/zod-openapi";
 import { z } from "zod/v4";
 
+import {
+  makeResolvePrimaryNameResponseSchema,
+  makeResolvePrimaryNamesResponseSchema,
+  makeResolveRecordsResponseSchema,
+} from "@ensnode/ensnode-sdk/internal";
+
 import { params } from "@/lib/handlers/params.schema";
 
 export const basePath = "/api/resolve";
@@ -31,6 +37,11 @@ export const resolveRecordsRoute = createRoute({
   responses: {
     200: {
       description: "Successfully resolved records",
+      content: {
+        "application/json": {
+          schema: makeResolveRecordsResponseSchema(),
+        },
+      },
     },
   },
 });
@@ -55,6 +66,11 @@ export const resolvePrimaryNameRoute = createRoute({
   responses: {
     200: {
       description: "Successfully resolved name",
+      content: {
+        "application/json": {
+          schema: makeResolvePrimaryNameResponseSchema(),
+        },
+      },
     },
   },
 });
@@ -79,6 +95,11 @@ export const resolvePrimaryNamesRoute = createRoute({
   responses: {
     200: {
       description: "Successfully resolved records",
+      content: {
+        "application/json": {
+          schema: makeResolvePrimaryNamesResponseSchema(),
+        },
+      },
     },
   },
 });
