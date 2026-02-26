@@ -54,13 +54,16 @@ export function LayoutWrapper({
             <AppSidebar />
           </Suspense>
           <SidebarInset className="min-w-0">
-            <SelectedENSNodeProvider>
-              <Header>
-                <HeaderNav>
-                  <HeaderBreadcrumbs>{breadcrumbs}</HeaderBreadcrumbs>
-                </HeaderNav>
-                <HeaderActions>{actions}</HeaderActions>
-              </Header>
+            <SelectedENSNodeProvider
+              header={
+                <Header>
+                  <HeaderNav>
+                    <HeaderBreadcrumbs>{breadcrumbs}</HeaderBreadcrumbs>
+                  </HeaderNav>
+                  <HeaderActions>{actions}</HeaderActions>
+                </Header>
+              }
+            >
               <RequireActiveConnection>{children}</RequireActiveConnection>
             </SelectedENSNodeProvider>
           </SidebarInset>
