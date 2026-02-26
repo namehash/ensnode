@@ -17,8 +17,13 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { db } from "@/lib/db";
+import { makeLogger } from "@/lib/logger";
 
 const ROOT_REGISTRY_ID = getENSv2RootRegistryId(config.namespace);
+
+const logger = makeLogger("get-domain-by-interpreted-name");
+const v1Logger = makeLogger("get-domain-by-interpreted-name:v1");
+const v2Logger = makeLogger("get-domain-by-interpreted-name:v2");
 
 /**
  * Gets the DomainId of the Domain addressed by `name`.
@@ -28,9 +33,11 @@ export async function getDomainIdByInterpretedName(
 ): Promise<DomainId | null> {
   // Domains addressable in v2 are preferred, but v1 lookups are cheap, so just do them both ahead of time
   const [v1DomainId, v2DomainId] = await Promise.all([
-    v1_getDomainIdByFqdn(name),
-    v2_getDomainIdByFqdn(ROOT_REGISTRY_ID, name),
+    v1_getDomainIdByInterpretedName(name),
+    v2_getDomainIdByInterpretedName(ROOT_REGISTRY_ID, name),
   ]);
+
+  logger.debug({ v1DomainId, v2DomainId });
 
   // prefer v2Domain over v1Domain
   return v2DomainId || v1DomainId || null;
@@ -39,19 +46,23 @@ export async function getDomainIdByInterpretedName(
 /**
  * Retrieves the ENSv1DomainId for the provided `name`, if exists.
  */
-async function v1_getDomainIdByFqdn(name: InterpretedName): Promise<DomainId | null> {
+async function v1_getDomainIdByInterpretedName(name: InterpretedName): Promise<DomainId | null> {
   const node = namehash(name);
   const domainId = makeENSv1DomainId(node);
 
   const domain = await db.query.v1Domain.findFirst({ where: (t, { eq }) => eq(t.id, domainId) });
-  return domain?.id ?? null;
+  const exists = domain !== undefined;
+
+  v1Logger.debug({ node, exists });
+
+  return exists ? domainId : null;
 }
 
 /**
  * Forward-traverses the ENSv2 namegraph from the specified root in order to identify the Domain
  * addressed by `name`.
  */
-async function v2_getDomainIdByFqdn(
+async function v2_getDomainIdByInterpretedName(
   rootRegistryId: RegistryId,
   name: InterpretedName,
 ): Promise<DomainId | null> {
@@ -100,13 +111,19 @@ async function v2_getDomainIdByFqdn(
   }[];
 
   // this was a query for a TLD and it does not exist within the ENSv2 namegraph
-  if (rows.length === 0) return null;
+  if (rows.length === 0) {
+    v2Logger.debug({ labelHashPath, rows });
+    return null;
+  }
 
   // biome-ignore lint/style/noNonNullAssertion: length check above
   const leaf = rows[rows.length - 1]!;
 
   // the v2Domain was found iff there is an exact match within the ENSv2 namegraph
   const exact = rows.length === labelHashPath.length;
+
+  v2Logger.debug({ labelHashPath, rows, exact });
+
   if (exact) return leaf.domain_id;
 
   // otherwise, the v2 domain was not found

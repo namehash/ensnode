@@ -4,6 +4,7 @@ export type { ENSRainbowEnvConfig, ServeCommandCliArgs, ServeCommandConfig } fro
 export {
   buildEnvConfigFromEnvironment,
   buildServeCommandConfig,
+  parseDataDirFromCli,
 } from "./config.schema";
 export { ENSRAINBOW_DEFAULT_PORT } from "./defaults";
 export type { ENSRainbowEnvironment } from "./environment";

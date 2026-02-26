@@ -2,26 +2,43 @@ import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@poth
 import { and } from "drizzle-orm";
 
 import type { context as createContext } from "@/graphql-api/context";
+import type {
+  DomainsWithOrderingMetadata,
+  DomainsWithOrderingMetadataResult,
+} from "@/graphql-api/lib/find-domains/layers/with-ordering-metadata";
 import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import {
   DOMAINS_DEFAULT_ORDER_BY,
   DOMAINS_DEFAULT_ORDER_DIR,
+  type Domain,
   DomainInterfaceRef,
   type DomainsOrderBy,
 } from "@/graphql-api/schema/domain";
+import type { OrderDirection } from "@/graphql-api/schema/order-direction";
 import { db } from "@/lib/db";
 import { makeLogger } from "@/lib/logger";
 
 import { DomainCursor } from "./domain-cursor";
-import { cursorFilter, findDomains, isEffectiveDesc, orderFindDomains } from "./find-domains";
-import type {
-  DomainOrderValue,
-  DomainWithOrderValue,
-  FindDomainsOrderArg,
-  FindDomainsResult,
-  FindDomainsWhereArg,
-} from "./types";
+import { cursorFilter, isEffectiveDesc, orderFindDomains } from "./find-domains-resolver-helpers";
+import type { DomainOrderValue } from "./types";
+
+/**
+ * Describes the ordering of the set of Domains.
+ *
+ * @dev derived from the GraphQL Input Types for 1:1 convenience
+ */
+interface FindDomainsOrderArg {
+  by?: typeof DomainsOrderBy.$inferType | null;
+  dir?: typeof OrderDirection.$inferType | null;
+}
+
+/**
+ * Domain with order value injected.
+ *
+ * @dev Relevant to composite DomainCursor encoding, see `domain-cursor.ts`
+ */
+type DomainWithOrderValue = Domain & { __orderValue: DomainOrderValue };
 
 const logger = makeLogger("find-domains-resolver");
 
@@ -29,12 +46,12 @@ const logger = makeLogger("find-domains-resolver");
  * Extract the order value from a findDomains result row based on the orderBy field.
  */
 function getOrderValueFromResult(
-  result: FindDomainsResult,
+  result: DomainsWithOrderingMetadataResult,
   orderBy: typeof DomainsOrderBy.$inferType,
 ): DomainOrderValue {
   switch (orderBy) {
     case "NAME":
-      return result.headLabel;
+      return result.sortableLabel;
     case "REGISTRATION_TIMESTAMP":
       return result.registrationTimestamp;
     case "REGISTRATION_EXPIRY":
@@ -43,24 +60,28 @@ function getOrderValueFromResult(
 }
 
 /**
- * GraphQL API resolver for domains connection queries, used by Query.domains.
+ * GraphQL API resolver for domain connection queries. Accepts a pre-built domains CTE
+ * ({@link DomainsWithOrderingMetadata}) and handles cursor-based pagination, ordering, and
+ * dataloader loading.
+ *
+ * Used by Query.domains, Account.domains, Registry.domains, and Domain.subdomains.
  *
  * @param context - The GraphQL Context, required for Dataloader access
- * @param args - The GraphQL Args object (via t.connection) + FindDomains-specific args (where, order)
+ * @param args - The domains CTE, optional ordering, and relay connection args
  */
 export function resolveFindDomains(
   context: ReturnType<typeof createContext>,
   {
-    where,
+    domains,
     order,
     ...connectionArgs
   }: {
-    // `where` MUST be provided, we don't currently allow iterating over the full set of domains
-    where: FindDomainsWhereArg;
-    // `order` MAY be provided; defaults are used otherwise
+    /** Pre-built domains CTE from `withOrderingMetadata` */
+    domains: DomainsWithOrderingMetadata;
+    /** Optional ordering; defaults to NAME ASC */
     order?: FindDomainsOrderArg | undefined | null;
 
-    // these resolver arguments are from t.connection
+    // relay connection args from t.connection
     first?: number | null;
     last?: number | null;
     before?: string | null;
@@ -85,9 +106,6 @@ export function resolveFindDomains(
     async ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) => {
       // identify whether the effective sort direction is descending
       const effectiveDesc = isEffectiveDesc(orderDir, inverted);
-
-      // construct query for relevant domains
-      const domains = findDomains(where);
 
       // build order clauses
       const orderClauses = orderFindDomains(domains, orderBy, orderDir, inverted);
