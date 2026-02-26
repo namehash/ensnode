@@ -1,6 +1,7 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 
 import * as amIRealtimeRoutes from "./handlers/amirealtime-api.routes";
+import * as ensnodeRoutes from "./handlers/ensnode-api.routes";
 import * as resolutionRoutes from "./handlers/resolution-api.routes";
 
 /**
@@ -11,7 +12,7 @@ import * as resolutionRoutes from "./handlers/resolution-api.routes";
 export function createStubRoutesForSpec() {
   const app = new OpenAPIHono();
 
-  const routeGroups = [amIRealtimeRoutes, resolutionRoutes];
+  const routeGroups = [amIRealtimeRoutes, ensnodeRoutes, resolutionRoutes];
 
   for (const group of routeGroups) {
     for (const route of group.routes) {
