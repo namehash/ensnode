@@ -1,8 +1,10 @@
+import packageJson from "@/../package.json" with { type: "json" };
+
 export const openapiMeta = {
   openapi: "3.1.0" as const,
   info: {
     title: "ENSApi APIs",
-    version: "0.0.0",
+    version: packageJson.version,
     description:
       "APIs for ENS resolution, navigating the ENS nameforest, and metadata about an ENSNode",
   },

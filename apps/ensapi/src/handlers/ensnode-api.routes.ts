@@ -11,6 +11,7 @@ export const basePath = "/api";
 export const getConfigRoute = createRoute({
   method: "get",
   path: "/config",
+  operationId: "getConfig",
   tags: ["Meta"],
   summary: "Get ENSApi Public Config",
   description: "Gets the public config of the ENSApi instance",
@@ -29,6 +30,7 @@ export const getConfigRoute = createRoute({
 export const getIndexingStatusRoute = createRoute({
   method: "get",
   path: "/indexing-status",
+  operationId: "getIndexingStatus",
   tags: ["Meta"],
   summary: "Get ENSIndexer Indexing Status",
   description: "Returns the indexing status snapshot most recently captured from ENSIndexer",

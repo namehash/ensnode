@@ -33,6 +33,7 @@ const referrerAddressSchema = z.object({
 export const getReferrerLeaderboardRoute = createRoute({
   method: "get",
   path: "/referrers",
+  operationId: "getReferrerLeaderboard",
   tags: ["ENSAwards"],
   summary: "Get Referrer Leaderboard",
   description: "Returns a paginated page from the referrer leaderboard",
@@ -52,6 +53,7 @@ export const getReferrerLeaderboardRoute = createRoute({
 export const getReferrerDetailRoute = createRoute({
   method: "get",
   path: "/referrers/{referrer}",
+  operationId: "getReferrerDetail",
   tags: ["ENSAwards"],
   summary: "Get Referrer Detail",
   description: "Returns detailed information for a specific referrer by address",
