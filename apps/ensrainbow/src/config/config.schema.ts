@@ -6,7 +6,7 @@ import { OptionalPortNumberSchema, PortNumberSchema } from "@ensnode/ensnode-sdk
 
 import { ENSRAINBOW_DEFAULT_PORT, getDefaultDataDir } from "@/config/defaults";
 import type { ENSRainbowEnvironment } from "@/config/environment";
-import type { ENSRainbowEnvConfig, ServeCommandConfig } from "@/config/types";
+import type { AbsolutePath, ENSRainbowEnvConfig, ServeCommandConfig } from "@/config/types";
 import { invariant_dbSchemaVersionMatch } from "@/config/validations";
 import { DB_SCHEMA_VERSION } from "@/lib/database";
 
@@ -72,10 +72,21 @@ export interface ServeCommandCliArgs {
   "data-dir": string;
 }
 
+export function parseDataDirFromCli(value: string): AbsolutePath {
+  try {
+    return AbsolutePathSchemaBase.parse(value);
+  } catch (error) {
+    if (error instanceof ZodError) {
+      throw new Error(`Invalid data-dir: \n${prettifyError(error)}\n`);
+    }
+    throw error;
+  }
+}
+
 export function buildServeCommandConfig(args: ServeCommandCliArgs): ServeCommandConfig {
   try {
     const port = PortNumberSchema.parse(args.port);
-    const dataDir = AbsolutePathSchemaBase.parse(args["data-dir"]);
+    const dataDir = parseDataDirFromCli(args["data-dir"]);
     return { port, dataDir };
   } catch (error) {
     if (error instanceof ZodError) {

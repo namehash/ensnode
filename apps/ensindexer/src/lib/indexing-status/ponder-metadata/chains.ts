@@ -15,9 +15,9 @@ import { prettifyError } from "zod/v4/core";
 
 import {
   type BlockRef,
+  BlockRefRangeTypeIds,
   type ChainId,
   type ChainIdString,
-  ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshot,
   type ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill,
@@ -147,9 +147,9 @@ export function createChainIndexingSnapshot(
   }
 
   if (isSyncComplete) {
-    if (config.configType !== ChainIndexingConfigTypeIds.Definite) {
+    if (config.blockRangeType !== BlockRefRangeTypeIds.Definite) {
       throw new Error(
-        `The '${ChainIndexingStatusIds.Completed}' indexing status can be only created with the '${ChainIndexingConfigTypeIds.Definite}' indexing config type.`,
+        `The '${ChainIndexingStatusIds.Completed}' indexing status can be only created with the '${BlockRefRangeTypeIds.Definite}' indexing config type.`,
       );
     }
 
@@ -161,9 +161,9 @@ export function createChainIndexingSnapshot(
   }
 
   if (isSyncRealtime) {
-    if (config.configType !== ChainIndexingConfigTypeIds.Indefinite) {
+    if (config.blockRangeType !== BlockRefRangeTypeIds.Indefinite) {
       throw new Error(
-        `The '${ChainIndexingStatusIds.Following}' indexing status can be only created with the '${ChainIndexingConfigTypeIds.Indefinite}' indexing config type.`,
+        `The '${ChainIndexingStatusIds.Following}' indexing status can be only created with the '${BlockRefRangeTypeIds.Indefinite}' indexing config type.`,
       );
     }
 
@@ -172,7 +172,7 @@ export function createChainIndexingSnapshot(
       latestIndexedBlock: chainStatusBlock,
       latestKnownBlock: chainSyncBlock,
       config: {
-        configType: config.configType,
+        blockRangeType: config.blockRangeType,
         startBlock: config.startBlock,
       },
     } satisfies SerializedChainIndexingStatusSnapshotFollowing);

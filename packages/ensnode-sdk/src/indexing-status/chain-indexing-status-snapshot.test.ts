@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import { earlierBlockRef, laterBlockRef } from "./block-refs.mock";
 import {
-  type ChainIndexingConfigDefinite,
-  type ChainIndexingConfigIndefinite,
-  ChainIndexingConfigTypeIds,
+  type BlockRefRangeDefinite,
+  type BlockRefRangeIndefinite,
+  BlockRefRangeTypeIds,
   createIndexingConfig,
 } from "./chain-indexing-status-snapshot";
 
@@ -20,10 +20,10 @@ describe("Chain Indexing Status Snapshot", () => {
 
       // assert
       expect(indexingConfig).toStrictEqual({
-        configType: ChainIndexingConfigTypeIds.Definite,
+        blockRangeType: BlockRefRangeTypeIds.Definite,
         startBlock: earlierBlockRef,
         endBlock: laterBlockRef,
-      } satisfies ChainIndexingConfigDefinite);
+      } satisfies BlockRefRangeDefinite);
     });
 
     it("returns 'indefinite' indexer config if the endBlock does not exist", () => {
@@ -36,9 +36,9 @@ describe("Chain Indexing Status Snapshot", () => {
 
       // assert
       expect(indexingConfig).toStrictEqual({
-        configType: ChainIndexingConfigTypeIds.Indefinite,
+        blockRangeType: BlockRefRangeTypeIds.Indefinite,
         startBlock: earlierBlockRef,
-      } satisfies ChainIndexingConfigIndefinite);
+      } satisfies BlockRefRangeIndefinite);
     });
   });
 });

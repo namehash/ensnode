@@ -4,7 +4,7 @@ import type { ParsePayload } from "zod/v4/core";
 import * as blockRef from "../../shared/block-ref";
 import { makeBlockRefSchema } from "../../shared/zod-schemas";
 import {
-  ChainIndexingConfigTypeIds,
+  BlockRefRangeTypeIds,
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshot,
   type ChainIndexingStatusSnapshotBackfill,
@@ -23,7 +23,7 @@ export function invariant_chainSnapshotQueuedBlocks(
   const { config } = ctx.value;
 
   // The `config.endBlock` does not exist for `indefinite` config type
-  if (config.configType === ChainIndexingConfigTypeIds.Indefinite) {
+  if (config.blockRangeType === BlockRefRangeTypeIds.Indefinite) {
     // invariant holds
     return;
   }
@@ -65,7 +65,7 @@ export function invariant_chainSnapshotBackfillBlocks(
   }
 
   // The `config.endBlock` does not exist for `indefinite` config type
-  if (config.configType === ChainIndexingConfigTypeIds.Indefinite) {
+  if (config.blockRangeType === BlockRefRangeTypeIds.Indefinite) {
     // invariant holds
     return;
   }
@@ -134,16 +134,16 @@ export function invariant_chainSnapshotFollowingBlocks(
 }
 
 /**
- * Makes Zod schema for {@link ChainIndexingConfig} type.
+ * Makes Zod schema for {@link BlockRefRange} type.
  */
-export const makeChainIndexingConfigSchema = (valueLabel: string = "Value") =>
-  z.discriminatedUnion("configType", [
+export const makeBlockRefRangeSchema = (valueLabel: string = "Value") =>
+  z.discriminatedUnion("blockRangeType", [
     z.object({
-      configType: z.literal(ChainIndexingConfigTypeIds.Indefinite),
+      blockRangeType: z.literal(BlockRefRangeTypeIds.Indefinite),
       startBlock: makeBlockRefSchema(valueLabel),
     }),
     z.object({
-      configType: z.literal(ChainIndexingConfigTypeIds.Definite),
+      blockRangeType: z.literal(BlockRefRangeTypeIds.Definite),
       startBlock: makeBlockRefSchema(valueLabel),
       endBlock: makeBlockRefSchema(valueLabel),
     }),
@@ -156,7 +156,7 @@ export const makeChainIndexingStatusSnapshotQueuedSchema = (valueLabel: string =
   z
     .object({
       chainStatus: z.literal(ChainIndexingStatusIds.Queued),
-      config: makeChainIndexingConfigSchema(valueLabel),
+      config: makeBlockRefRangeSchema(valueLabel),
     })
     .check(invariant_chainSnapshotQueuedBlocks);
 
@@ -167,7 +167,7 @@ export const makeChainIndexingStatusSnapshotBackfillSchema = (valueLabel: string
   z
     .object({
       chainStatus: z.literal(ChainIndexingStatusIds.Backfill),
-      config: makeChainIndexingConfigSchema(valueLabel),
+      config: makeBlockRefRangeSchema(valueLabel),
       latestIndexedBlock: makeBlockRefSchema(valueLabel),
       backfillEndBlock: makeBlockRefSchema(valueLabel),
     })
@@ -181,7 +181,7 @@ export const makeChainIndexingStatusSnapshotCompletedSchema = (valueLabel: strin
     .object({
       chainStatus: z.literal(ChainIndexingStatusIds.Completed),
       config: z.object({
-        configType: z.literal(ChainIndexingConfigTypeIds.Definite),
+        blockRangeType: z.literal(BlockRefRangeTypeIds.Definite),
         startBlock: makeBlockRefSchema(valueLabel),
         endBlock: makeBlockRefSchema(valueLabel),
       }),
@@ -197,7 +197,7 @@ export const makeChainIndexingStatusSnapshotFollowingSchema = (valueLabel: strin
     .object({
       chainStatus: z.literal(ChainIndexingStatusIds.Following),
       config: z.object({
-        configType: z.literal(ChainIndexingConfigTypeIds.Indefinite),
+        blockRangeType: z.literal(BlockRefRangeTypeIds.Indefinite),
         startBlock: makeBlockRefSchema(valueLabel),
       }),
       latestIndexedBlock: makeBlockRefSchema(valueLabel),

@@ -8,7 +8,7 @@ import {
   latestBlockRef,
 } from "../block-refs.mock";
 import {
-  ChainIndexingConfigTypeIds,
+  BlockRefRangeTypeIds,
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshot,
   type ChainIndexingStatusSnapshotBackfill,
@@ -29,7 +29,7 @@ describe("ENSIndexer: Indexing Status", () => {
         const serialized: ChainIndexingStatusSnapshot = {
           chainStatus: ChainIndexingStatusIds.Queued,
           config: {
-            configType: ChainIndexingConfigTypeIds.Definite,
+            blockRangeType: BlockRefRangeTypeIds.Definite,
             startBlock: earlierBlockRef,
             endBlock: laterBlockRef,
           },
@@ -42,7 +42,7 @@ describe("ENSIndexer: Indexing Status", () => {
         expect(parsed).toStrictEqual({
           chainStatus: ChainIndexingStatusIds.Queued,
           config: {
-            configType: ChainIndexingConfigTypeIds.Definite,
+            blockRangeType: BlockRefRangeTypeIds.Definite,
             startBlock: earlierBlockRef,
             endBlock: laterBlockRef,
           },
@@ -54,7 +54,7 @@ describe("ENSIndexer: Indexing Status", () => {
         const serialized: ChainIndexingStatusSnapshot = {
           chainStatus: ChainIndexingStatusIds.Queued,
           config: {
-            configType: ChainIndexingConfigTypeIds.Definite,
+            blockRangeType: BlockRefRangeTypeIds.Definite,
             startBlock: laterBlockRef,
             endBlock: earlierBlockRef,
           },
@@ -78,7 +78,7 @@ describe("ENSIndexer: Indexing Status", () => {
         const serialized: ChainIndexingStatusSnapshot = {
           chainStatus: ChainIndexingStatusIds.Backfill,
           config: {
-            configType: ChainIndexingConfigTypeIds.Definite,
+            blockRangeType: BlockRefRangeTypeIds.Definite,
             startBlock: earlierBlockRef,
             endBlock: latestBlockRef,
           },
@@ -93,7 +93,7 @@ describe("ENSIndexer: Indexing Status", () => {
         expect(parsed).toStrictEqual({
           chainStatus: ChainIndexingStatusIds.Backfill,
           config: {
-            configType: ChainIndexingConfigTypeIds.Definite,
+            blockRangeType: BlockRefRangeTypeIds.Definite,
             startBlock: earlierBlockRef,
             endBlock: latestBlockRef,
           },
@@ -107,7 +107,7 @@ describe("ENSIndexer: Indexing Status", () => {
         const serialized: ChainIndexingStatusSnapshot = {
           chainStatus: ChainIndexingStatusIds.Backfill,
           config: {
-            configType: ChainIndexingConfigTypeIds.Definite,
+            blockRangeType: BlockRefRangeTypeIds.Definite,
             startBlock: earlierBlockRef,
             endBlock: laterBlockRef,
           },
@@ -131,7 +131,7 @@ describe("ENSIndexer: Indexing Status", () => {
         const serialized: ChainIndexingStatusSnapshot = {
           chainStatus: ChainIndexingStatusIds.Backfill,
           config: {
-            configType: ChainIndexingConfigTypeIds.Definite,
+            blockRangeType: BlockRefRangeTypeIds.Definite,
             startBlock: earlierBlockRef,
             endBlock: laterBlockRef,
           },
@@ -155,7 +155,7 @@ describe("ENSIndexer: Indexing Status", () => {
         const serialized: ChainIndexingStatusSnapshot = {
           chainStatus: ChainIndexingStatusIds.Backfill,
           config: {
-            configType: ChainIndexingConfigTypeIds.Definite,
+            blockRangeType: BlockRefRangeTypeIds.Definite,
             startBlock: earlierBlockRef,
             endBlock: laterBlockRef,
           },
@@ -179,7 +179,7 @@ describe("ENSIndexer: Indexing Status", () => {
         const serialized: ChainIndexingStatusSnapshot = {
           chainStatus: ChainIndexingStatusIds.Following,
           config: {
-            configType: ChainIndexingConfigTypeIds.Indefinite,
+            blockRangeType: BlockRefRangeTypeIds.Indefinite,
             startBlock: earlierBlockRef,
           },
           latestIndexedBlock: laterBlockRef,
@@ -193,7 +193,7 @@ describe("ENSIndexer: Indexing Status", () => {
         expect(parsed).toStrictEqual({
           chainStatus: ChainIndexingStatusIds.Following,
           config: {
-            configType: ChainIndexingConfigTypeIds.Indefinite,
+            blockRangeType: BlockRefRangeTypeIds.Indefinite,
             startBlock: earlierBlockRef,
           },
           latestIndexedBlock: laterBlockRef,
@@ -206,7 +206,7 @@ describe("ENSIndexer: Indexing Status", () => {
         const serialized: ChainIndexingStatusSnapshot = {
           chainStatus: ChainIndexingStatusIds.Following,
           config: {
-            configType: ChainIndexingConfigTypeIds.Indefinite,
+            blockRangeType: BlockRefRangeTypeIds.Indefinite,
             startBlock: laterBlockRef,
           },
           latestIndexedBlock: earlierBlockRef,
@@ -229,7 +229,7 @@ describe("ENSIndexer: Indexing Status", () => {
         const serialized: ChainIndexingStatusSnapshot = {
           chainStatus: ChainIndexingStatusIds.Following,
           config: {
-            configType: ChainIndexingConfigTypeIds.Indefinite,
+            blockRangeType: BlockRefRangeTypeIds.Indefinite,
             startBlock: earlierBlockRef,
           },
           latestIndexedBlock: latestBlockRef,
@@ -254,7 +254,7 @@ describe("ENSIndexer: Indexing Status", () => {
         const serialized: ChainIndexingStatusSnapshot = {
           chainStatus: ChainIndexingStatusIds.Completed,
           config: {
-            configType: ChainIndexingConfigTypeIds.Definite,
+            blockRangeType: BlockRefRangeTypeIds.Definite,
             startBlock: earlierBlockRef,
             endBlock: laterBlockRef,
           },
@@ -268,7 +268,7 @@ describe("ENSIndexer: Indexing Status", () => {
         expect(parsed).toStrictEqual({
           chainStatus: ChainIndexingStatusIds.Completed,
           config: {
-            configType: ChainIndexingConfigTypeIds.Definite,
+            blockRangeType: BlockRefRangeTypeIds.Definite,
             startBlock: earlierBlockRef,
             endBlock: laterBlockRef,
           },
@@ -281,7 +281,7 @@ describe("ENSIndexer: Indexing Status", () => {
         const serialized: ChainIndexingStatusSnapshot = {
           chainStatus: ChainIndexingStatusIds.Completed,
           config: {
-            configType: ChainIndexingConfigTypeIds.Definite,
+            blockRangeType: BlockRefRangeTypeIds.Definite,
             startBlock: latestBlockRef,
             endBlock: laterBlockRef,
           },
@@ -304,7 +304,7 @@ describe("ENSIndexer: Indexing Status", () => {
         const serialized: ChainIndexingStatusSnapshot = {
           chainStatus: ChainIndexingStatusIds.Completed,
           config: {
-            configType: ChainIndexingConfigTypeIds.Definite,
+            blockRangeType: BlockRefRangeTypeIds.Definite,
             startBlock: earlierBlockRef,
             endBlock: laterBlockRef,
           },
