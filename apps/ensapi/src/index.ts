@@ -16,8 +16,7 @@ import { factory } from "@/lib/hono-factory";
 import { sdk } from "@/lib/instrumentation";
 import logger from "@/lib/logger";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
-import { openapiMeta } from "@/openapi-meta";
-import { createStubRoutesForSpec } from "@/stub-routes";
+import { generateOpenApi31Document } from "@/openapi-document";
 
 import amIRealtimeApi from "./handlers/amirealtime-api";
 import ensanalyticsApi from "./handlers/ensanalytics-api";
@@ -75,15 +74,10 @@ app.route("/v1/ensanalytics", ensanalyticsApiV1);
 // use Am I Realtime API at /amirealtime
 app.route("/amirealtime", amIRealtimeApi);
 
-// use OpenAPI Schema generated from zod-openapi route definitions
-const stubApp = createStubRoutesForSpec();
-const openApi31Document = stubApp.getOpenAPI31Document({
-  ...openapiMeta,
-  servers: [
-    ...openapiMeta.servers,
-    { url: `http://localhost:${config.port}`, description: "Local Development" },
-  ],
-});
+// serve pre-generated OpenAPI 3.1 document
+const openApi31Document = generateOpenApi31Document([
+  { url: `http://localhost:${config.port}`, description: "Local Development" },
+]);
 app.get("/openapi.json", (c) => {
   return c.json(openApi31Document);
 });

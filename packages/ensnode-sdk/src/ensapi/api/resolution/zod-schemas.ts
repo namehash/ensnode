@@ -1,7 +1,5 @@
 import { z } from "zod/v4";
 
-import { withOpenApi } from "../../../shared/zod-types";
-
 /**
  * Schema for resolver records response (addresses, texts, name)
  */
@@ -40,9 +38,7 @@ export const makeResolvePrimaryNameResponseSchema = () =>
  */
 export const makeResolvePrimaryNamesResponseSchema = () =>
   z.object({
-    names: withOpenApi(z.record(z.number(), z.string().nullable()), {
-      propertyNames: { type: "string", pattern: "^[0-9]+$" },
-    }),
+    names: z.record(z.number(), z.string().nullable()),
     accelerationRequested: z.boolean(),
     accelerationAttempted: z.boolean(),
     trace: z.array(z.unknown()).optional(),
