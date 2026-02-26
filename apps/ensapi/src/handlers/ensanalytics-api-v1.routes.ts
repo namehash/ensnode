@@ -53,6 +53,7 @@ const editionsQuerySchema = z.object({
 export const getReferralLeaderboardRoute = createRoute({
   method: "get",
   path: "/referral-leaderboard",
+  operationId: "getV1EnsanalyticsReferralLeaderboard",
   tags: ["ENSAwards"],
   summary: "Get Referrer Leaderboard (v1)",
   description: "Returns a paginated page from the referrer leaderboard for a specific edition",
@@ -78,6 +79,7 @@ export const getReferralLeaderboardRoute = createRoute({
 export const getReferrerDetailRoute = createRoute({
   method: "get",
   path: "/referrer/{referrer}",
+  operationId: "getV1EnsanalyticsReferrerDetail",
   tags: ["ENSAwards"],
   summary: "Get Referrer Detail for Editions (v1)",
   description: `Returns detailed information for a specific referrer for the requested editions. Requires 1-${MAX_EDITIONS_PER_REQUEST} distinct edition slugs. All requested editions must be recognized and have cached data, or the request fails.`,
@@ -107,6 +109,7 @@ export const getReferrerDetailRoute = createRoute({
 export const getEditionsRoute = createRoute({
   method: "get",
   path: "/editions",
+  operationId: "getV1EnsanalyticsEditions",
   tags: ["ENSAwards"],
   summary: "Get Edition Config Set (v1)",
   description:
