@@ -3,7 +3,7 @@ import { z } from "zod/v4";
 
 import { params } from "@/lib/handlers/params.schema";
 
-export const basePath = "/resolve";
+export const basePath = "/api/resolve";
 
 export const resolveRecordsRoute = createRoute({
   method: "get",
