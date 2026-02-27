@@ -8,7 +8,19 @@ export type GraphQLConnection<NODE> = {
   edges: { node: NODE }[];
 };
 
-export function flattenConnection<T>(connection?: GraphQLConnection<T>): T[] {
+export type PaginatedGraphQLConnection<NODE> = {
+  edges: { cursor: string; node: NODE }[];
+  pageInfo: {
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+    startCursor: string | null;
+    endCursor: string | null;
+  };
+};
+
+export function flattenConnection<T>(
+  connection?: GraphQLConnection<T> | PaginatedGraphQLConnection<T>,
+): T[] {
   return (connection?.edges ?? []).map((edge) => edge.node);
 }
 

@@ -30,7 +30,6 @@ function getOrderColumn(
  * @param queryOrderBy - The order field for the current query (must match cursor.by)
  * @param queryOrderDir - The order direction for the current query (must match cursor.dir)
  * @param direction - "after" for forward pagination, "before" for backward
- * @param effectiveDesc - Whether the effective sort direction is descending
  * @throws if cursor.by does not match queryOrderBy
  * @throws if cursor.dir does not match queryOrderDir
  * @returns SQL expression for the cursor filter
@@ -41,7 +40,6 @@ export function cursorFilter(
   queryOrderBy: typeof DomainsOrderBy.$inferType,
   queryOrderDir: typeof OrderDirection.$inferType,
   direction: "after" | "before",
-  effectiveDesc: boolean,
 ): SQL {
   // Validate cursor was created with the same ordering as the current query
   if (cursor.by !== queryOrderBy) {
@@ -63,7 +61,7 @@ export function cursorFilter(
   // - "after" with DESC = less than cursor
   // - "before" with ASC = less than cursor
   // - "before" with DESC = greater than cursor
-  const useGreaterThan = (direction === "after") !== effectiveDesc;
+  const useGreaterThan = (direction === "after") !== (queryOrderDir === "DESC");
 
   // Handle NULL cursor values explicitly (PostgreSQL tuple comparison with NULL yields NULL/unknown)
   // With NULLS LAST ordering: non-NULL values come before NULL values
