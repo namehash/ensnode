@@ -37,7 +37,7 @@
     "overrides": {
       "@adraffy/ens-normalize": "catalog:",
       "esbuild@<=0.24.2": ">=0.25.0",
-      "fast-xml-parser@>=5.0.9 <=5.3.3": ">=5.3.4",
+      "fast-xml-parser@<5.3.8": ">=5.3.8",
       "lodash@>=4.0.0 <=4.17.22": ">=4.17.23",
       "lodash-es@>=4.0.0 <=4.17.22": ">=4.17.23",
       "markdown-it@>=14.0.0 <14.1.1": ">=14.1.1",
