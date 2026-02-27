@@ -2,7 +2,8 @@ import {
   Duration,
   InterpretedName,
   NamedRegistrarAction,
-  registrarActionsPrerequisites,
+  registrarActionsRequiredPlugins,
+  registrarActionsSupportedIndexingStatusIds,
 } from "@ensnode/ensnode-sdk";
 
 import {
@@ -241,14 +242,14 @@ export const variants: Map<StatefulFetchStatusId, StatefulFetchRegistrarActions>
     StatefulFetchStatusIds.Unsupported,
     {
       fetchStatus: StatefulFetchStatusIds.Unsupported,
-      requiredPlugins: registrarActionsPrerequisites.requiredPlugins,
+      requiredPlugins: registrarActionsRequiredPlugins,
     } satisfies StatefulFetchRegistrarActionsUnsupported,
   ],
   [
     StatefulFetchStatusIds.NotReady,
     {
       fetchStatus: StatefulFetchStatusIds.NotReady,
-      supportedIndexingStatusIds: registrarActionsPrerequisites.supportedIndexingStatusIds,
+      supportedIndexingStatusIds: registrarActionsSupportedIndexingStatusIds,
     } satisfies StatefulFetchRegistrarActionsNotReady,
   ],
   [

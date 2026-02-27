@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { InterpretedName } from "../../../ens/types";
-import { registrarActionsPrerequisites } from "../registrar-actions/prerequisites";
+import { registrarActionsSupportedIndexingStatusIds } from "../registrar-actions/prerequisites";
 import { RegistrarActionsResponseCodes, type RegistrarActionsResponseError } from "./response";
 import type {
   SerializedNamedRegistrarAction,
@@ -119,7 +119,7 @@ describe("ENSNode API Schema", () => {
       responseCode: RegistrarActionsResponseCodes.Error,
       error: {
         message: "Registrar Actions API is not available",
-        details: `The cached omnichain indexing status of the Connected ENSIndexer must be one of the following ${registrarActionsPrerequisites.supportedIndexingStatusIds.map((statusId) => `"${statusId}"`).join(", ")}.`,
+        details: `The cached omnichain indexing status of the Connected ENSIndexer must be one of the following ${registrarActionsSupportedIndexingStatusIds.map((statusId) => `"${statusId}"`).join(", ")}.`,
       },
     } satisfies SerializedRegistrarActionsResponseError;
 

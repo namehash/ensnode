@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 
 import { GraphiQLEditor } from "@/components/graphiql-editor";
+import { RequireENSAdminFeature } from "@/components/require-feature";
 import { useValidatedSelectedConnection } from "@/hooks/active/use-selected-connection";
 
 const defaultQuery = `# Welcome to this interactive playground for
@@ -18,7 +19,7 @@ const defaultQuery = `# Welcome to this interactive playground for
 #
 `;
 
-export default function SubgraphGraphQLPage() {
+function SubgraphGraphQLPage() {
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("query") || defaultQuery;
   const initialVariables = searchParams.get("variables") || "";
@@ -31,5 +32,13 @@ export default function SubgraphGraphQLPage() {
 
   return (
     <GraphiQLEditor url={url} initialQuery={initialQuery} initialVariables={initialVariables} />
+  );
+}
+
+export default function Page() {
+  return (
+    <RequireENSAdminFeature title="Subgraph-Compatible GraphQL API" feature="subgraph">
+      <SubgraphGraphQLPage />
+    </RequireENSAdminFeature>
   );
 }

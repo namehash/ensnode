@@ -1,11 +1,15 @@
 import { useENSNodeConfig, useRegistrarActions } from "@ensnode/ensnode-react";
 import {
+  hasRegistrarActionsConfigSupport,
+  hasRegistrarActionsIndexingStatusSupport,
   RegistrarActionsOrders,
   RegistrarActionsResponseCodes,
-  registrarActionsPrerequisites,
+  registrarActionsRequiredPlugins,
+  registrarActionsSupportedIndexingStatusIds,
 } from "@ensnode/ensnode-sdk";
 
 import { useIndexingStatusWithSwr } from "@/components/indexing-status";
+import { useENSAdminFeatures } from "@/hooks/active/use-ensadmin-features";
 
 import {
   StatefulFetchRegistrarActions,
@@ -22,13 +26,6 @@ interface UseStatefulRegistrarActionsProps {
   itemsPerPage: number;
 }
 
-const {
-  hasEnsIndexerConfigSupport,
-  hasIndexingStatusSupport,
-  requiredPlugins,
-  supportedIndexingStatusIds,
-} = registrarActionsPrerequisites;
-
 /**
  * Use Stateful Registrar Actions
  *
@@ -38,73 +35,41 @@ const {
 export function useStatefulRegistrarActions({
   itemsPerPage,
 }: UseStatefulRegistrarActionsProps): StatefulFetchRegistrarActions {
-  const ensNodeConfigQuery = useENSNodeConfig();
-  const indexingStatusQuery = useIndexingStatusWithSwr();
+  const { registrarActions: status } = useENSAdminFeatures();
 
-  let isRegistrarActionsApiSupported = false;
-
-  if (ensNodeConfigQuery.isSuccess && indexingStatusQuery.isSuccess) {
-    const { ensIndexerPublicConfig } = ensNodeConfigQuery.data;
-    const { realtimeProjection } = indexingStatusQuery.data;
-    const { omnichainSnapshot } = realtimeProjection.snapshot;
-
-    isRegistrarActionsApiSupported =
-      hasEnsIndexerConfigSupport(ensIndexerPublicConfig) &&
-      hasIndexingStatusSupport(omnichainSnapshot.omnichainStatus);
-  }
-
-  // Note: ENSNode Registrar Actions API is available only in certain cases.
-  //       We use `isRegistrarActionsApiSupported` to enable query in those cases.
   const registrarActionsQuery = useRegistrarActions({
     order: RegistrarActionsOrders.LatestRegistrarActions,
     recordsPerPage: itemsPerPage,
-    query: {
-      enabled: isRegistrarActionsApiSupported,
-    },
+    // NOTE: because the Registrar Actions API is conditionally available, we only fetch if supported
+    query: { enabled: status.type === "supported" },
   });
 
-  // ENSNode config is not fetched yet, so wait in the initial status
-  if (ensNodeConfigQuery.isPending || indexingStatusQuery.isPending) {
-    return {
-      fetchStatus: StatefulFetchStatusIds.Connecting,
-    } satisfies StatefulFetchRegistrarActionsConnecting;
-  }
+  switch (status.type) {
+    case "connecting":
+      return {
+        fetchStatus: StatefulFetchStatusIds.Connecting,
+      } satisfies StatefulFetchRegistrarActionsConnecting;
 
-  // ENSNode config fetched as error
-  if (!ensNodeConfigQuery.isSuccess) {
-    return {
-      fetchStatus: StatefulFetchStatusIds.Error,
-      reason: "ENSNode config could not be fetched successfully",
-    } satisfies StatefulFetchRegistrarActionsError;
-  }
+    case "error":
+      return {
+        fetchStatus: StatefulFetchStatusIds.Error,
+        reason: status.reason,
+      } satisfies StatefulFetchRegistrarActionsError;
 
-  // Indexing Status fetched as error
-  if (!indexingStatusQuery.isSuccess) {
-    return {
-      fetchStatus: StatefulFetchStatusIds.Error,
-      reason: "Indexing Status could not be fetched successfully",
-    } satisfies StatefulFetchRegistrarActionsError;
-  }
+    case "not-ready":
+      return {
+        fetchStatus: StatefulFetchStatusIds.NotReady,
+        supportedIndexingStatusIds: registrarActionsSupportedIndexingStatusIds,
+      } satisfies StatefulFetchRegistrarActionsNotReady;
 
-  const { ensIndexerPublicConfig } = ensNodeConfigQuery.data;
+    case "unsupported":
+      return {
+        fetchStatus: StatefulFetchStatusIds.Unsupported,
+        requiredPlugins: registrarActionsRequiredPlugins,
+      } satisfies StatefulFetchRegistrarActionsUnsupported;
 
-  // fetching is indefinitely not possible due to unsupported ENSNode config
-  if (!hasEnsIndexerConfigSupport(ensIndexerPublicConfig)) {
-    return {
-      fetchStatus: StatefulFetchStatusIds.Unsupported,
-      requiredPlugins,
-    } satisfies StatefulFetchRegistrarActionsUnsupported;
-  }
-
-  const { realtimeProjection } = indexingStatusQuery.data;
-  const { omnichainSnapshot } = realtimeProjection.snapshot;
-
-  // fetching is temporarily not possible due to indexing status being not advanced enough
-  if (!hasIndexingStatusSupport(omnichainSnapshot.omnichainStatus)) {
-    return {
-      fetchStatus: StatefulFetchStatusIds.NotReady,
-      supportedIndexingStatusIds,
-    } satisfies StatefulFetchRegistrarActionsNotReady;
+    case "supported":
+      break; // continue to query status handling below
   }
 
   // fetching has not been completed

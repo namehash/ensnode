@@ -6,10 +6,11 @@ import { useMemo } from "react";
 import { GRAPHQL_API_EXAMPLE_QUERIES } from "@ensnode/ensnode-sdk/internal";
 
 import { GraphiQLEditor } from "@/components/graphiql-editor";
+import { RequireENSAdminFeature } from "@/components/require-feature";
 import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 import { useValidatedSelectedConnection } from "@/hooks/active/use-selected-connection";
 
-export default function SubgraphGraphQLPage() {
+function GraphQLPage() {
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("query");
   const initialVariables = searchParams.get("variables");
@@ -37,5 +38,13 @@ export default function SubgraphGraphQLPage() {
       initialVariables={initialVariables || undefined}
       defaultTabs={defaultTabs}
     />
+  );
+}
+
+export default function Page() {
+  return (
+    <RequireENSAdminFeature title="ENSNode GraphQL API" feature="graphql">
+      <GraphQLPage />
+    </RequireENSAdminFeature>
   );
 }
