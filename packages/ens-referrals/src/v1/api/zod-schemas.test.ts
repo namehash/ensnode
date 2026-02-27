@@ -25,6 +25,21 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
     },
   };
 
+  const revShareLimitEdition = {
+    slug: "2026-01",
+    displayName: "January 2026",
+    rules: {
+      awardModel: "rev-share-limit",
+      totalAwardPoolValue: { amount: "500", currency: "USDC" },
+      minQualifiedRevenueContribution: { amount: "10", currency: "USDC" },
+      qualifiedRevenueShare: 0.5,
+      startTime: 1000000,
+      endTime: 2000000,
+      subregistryId,
+      rulesUrl: "https://ensawards.org/rules",
+    },
+  };
+
   const futureModelEdition = {
     slug: "2026-03",
     displayName: "March 2026",
@@ -50,6 +65,25 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
 
     expect(pieSplit).toBeDefined();
     expect(pieSplit!.rules.awardModel).toBe(ReferralProgramAwardModels.PieSplit);
+  });
+
+  it("parses the recognized rev-share-limit edition correctly", () => {
+    const result = schema.parse([pieSplitEdition, revShareLimitEdition]);
+    const revShareLimit = result.find((e) => e.slug === "2026-01");
+
+    expect(revShareLimit).toBeDefined();
+    expect(revShareLimit!.rules.awardModel).toBe(ReferralProgramAwardModels.RevShareLimit);
+
+    const rules = revShareLimit!.rules as {
+      awardModel: typeof ReferralProgramAwardModels.RevShareLimit;
+      totalAwardPoolValue: { amount: bigint; currency: string };
+      minQualifiedRevenueContribution: { amount: bigint; currency: string };
+      qualifiedRevenueShare: number;
+    };
+    expect(rules.totalAwardPoolValue).toBeDefined();
+    expect(rules.minQualifiedRevenueContribution).toBeDefined();
+    expect(typeof rules.qualifiedRevenueShare).toBe("number");
+    expect(rules.qualifiedRevenueShare).toBe(0.5);
   });
 
   it("wraps the unrecognized edition as ReferralProgramRulesUnrecognized", () => {

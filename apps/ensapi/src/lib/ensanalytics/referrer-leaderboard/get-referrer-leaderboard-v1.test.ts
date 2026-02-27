@@ -69,11 +69,15 @@ describe("ENSAnalytics Referrer Leaderboard", () => {
 
       // Assert `finalScoreBoost` (pie-split specific)
       // All qualified referrers except the last have boost > 0; the last qualified referrer
-      // receives boost === 0 by design (formula: 1 - (rank-1)/(maxQualifiedReferrers-1)).
+      // receives boost === 0 by design (formula: 1 - (rank-1)/(maxQualifiedReferrers-1)),
+      // but only when the qualified slots are fully filled (length === maxQualifiedReferrers).
+      // With fewer referrers, the last qualified referrer is below the cutoff rank and has boost > 0.
       const topQualifiedReferrers = qualifiedReferrers.slice(0, -1);
       const lastQualifiedReferrer = qualifiedReferrers.at(-1);
       expect(topQualifiedReferrers.every(([_, r]) => r.finalScoreBoost > 0)).toBe(true);
-      expect(lastQualifiedReferrer![1].finalScoreBoost).toBe(0);
+      if (qualifiedReferrers.length === rules.maxQualifiedReferrers) {
+        expect(lastQualifiedReferrer![1].finalScoreBoost).toBe(0);
+      }
       expect(unqualifiedReferrers.every(([_, r]) => r.finalScoreBoost === 0)).toBe(true);
 
       // Assert `finalScore` (pie-split specific)

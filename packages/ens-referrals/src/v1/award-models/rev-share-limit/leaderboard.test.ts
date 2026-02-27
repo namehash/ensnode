@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import { parseTimestamp, parseUsdc, priceEth, priceUsdc } from "@ensnode/ensnode-sdk";
 
@@ -77,6 +77,10 @@ const STANDARD_AWARD_1Y = parseUsdc("2.5");
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe("buildReferrerLeaderboardRevShareLimit", () => {
+  beforeEach(() => {
+    eventIdCounter = 0;
+  });
+
   it("returns empty leaderboard when events list is empty", () => {
     const rules = buildTestRules();
     const result = buildReferrerLeaderboardRevShareLimit([], rules, accurateAsOf);
