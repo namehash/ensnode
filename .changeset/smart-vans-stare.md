@@ -3,4 +3,4 @@
 "@ensnode/ponder-sdk": minor
 ---
 
-Introcudes streamlined datamodel for block ranges.
+Introduced streamlined datamodel for block ranges.
