@@ -324,7 +324,7 @@ export function chainsConnectionConfig(
  * Builds a `ponder#ContractConfig['chain']` given a contract's config, constraining the contract's
  * indexing range by the globally configured blockrange.
  *
- * @param {Blockrange} globalBlockrange
+ * @param {BlockNumberRange} globalBlockrange
  * @param {number} chainId
  * @param {ContractConfig} contractConfig
  *

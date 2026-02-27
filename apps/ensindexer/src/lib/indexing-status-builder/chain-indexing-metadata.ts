@@ -1,6 +1,6 @@
-import type { BlockRefRangeLeftBounded } from "@ensnode/ensnode-sdk";
 import type {
   BlockRefRangeBounded,
+  BlockRefRangeLeftBounded,
   ChainIndexingMetrics,
   ChainIndexingStatus,
 } from "@ensnode/ponder-sdk";
@@ -28,9 +28,6 @@ export interface ChainIndexingMetadata {
    * Indexing config for the chain
    *
    * Defines the range of blocks to be indexed for the chain.
-   *
-   * Invariants:
-   * - `indexingConfig.startBlock` is defined
    */
   indexingConfig: BlockRefRangeLeftBounded | BlockRefRangeBounded;
 

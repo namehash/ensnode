@@ -22,7 +22,7 @@ export function invariant_chainSnapshotQueuedBlocks(
 ) {
   const { config } = ctx.value;
 
-  // The `config.endBlock` does not exist for `indefinite` config type
+  // The `config.endBlock` does not exist for `left-bounded` config range type
   if (config.rangeType === RangeTypeIds.LeftBounded) {
     // invariant holds
     return;
@@ -64,7 +64,7 @@ export function invariant_chainSnapshotBackfillBlocks(
     });
   }
 
-  // The `config.endBlock` does not exist for `indefinite` config type
+  // The `config.endBlock` does not exist for `left-bounded` config range type
   if (config.rangeType === RangeTypeIds.LeftBounded) {
     // invariant holds
     return;
@@ -145,15 +145,11 @@ export const makeChainIndexingStatusSnapshotQueuedSchema = (valueLabel: string =
           rangeType: z.literal(RangeTypeIds.LeftBounded),
           startBlock: makeBlockRefSchema(valueLabel),
         }),
-        z
-          .object({
-            rangeType: z.literal(RangeTypeIds.Bounded),
-            startBlock: makeBlockRefSchema(valueLabel),
-            endBlock: makeBlockRefSchema(valueLabel),
-          })
-          .refine((range) => blockRef.isBeforeOrEqualTo(range.startBlock, range.endBlock), {
-            message: "`startBlock` must be before or same as `endBlock`.",
-          }),
+        z.object({
+          rangeType: z.literal(RangeTypeIds.Bounded),
+          startBlock: makeBlockRefSchema(valueLabel),
+          endBlock: makeBlockRefSchema(valueLabel),
+        }),
       ]),
     })
     .check(invariant_chainSnapshotQueuedBlocks);
@@ -170,15 +166,11 @@ export const makeChainIndexingStatusSnapshotBackfillSchema = (valueLabel: string
           rangeType: z.literal(RangeTypeIds.LeftBounded),
           startBlock: makeBlockRefSchema(valueLabel),
         }),
-        z
-          .object({
-            rangeType: z.literal(RangeTypeIds.Bounded),
-            startBlock: makeBlockRefSchema(valueLabel),
-            endBlock: makeBlockRefSchema(valueLabel),
-          })
-          .refine((range) => blockRef.isBeforeOrEqualTo(range.startBlock, range.endBlock), {
-            message: "`startBlock` must be before or same as `endBlock`.",
-          }),
+        z.object({
+          rangeType: z.literal(RangeTypeIds.Bounded),
+          startBlock: makeBlockRefSchema(valueLabel),
+          endBlock: makeBlockRefSchema(valueLabel),
+        }),
       ]),
       latestIndexedBlock: makeBlockRefSchema(valueLabel),
       backfillEndBlock: makeBlockRefSchema(valueLabel),

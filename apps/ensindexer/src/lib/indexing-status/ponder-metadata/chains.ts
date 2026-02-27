@@ -15,6 +15,8 @@ import { prettifyError } from "zod/v4/core";
 
 import {
   type BlockRef,
+  type BlockRefRangeBounded,
+  type BlockRefRangeLeftBounded,
   buildBlockRefRange,
   type ChainId,
   type ChainIdString,
@@ -135,20 +137,14 @@ export function createChainIndexingSnapshot(
   } = chainMetadata;
 
   const { startBlock, endBlock } = chainBlocksConfig;
-  const config = buildBlockRefRange(startBlock, endBlock ?? undefined);
+  const config: BlockRefRangeLeftBounded | BlockRefRangeBounded =
+    endBlock !== null
+      ? buildBlockRefRange(startBlock, endBlock)
+      : buildBlockRefRange(startBlock, undefined);
 
   // In omnichain ordering, if the startBlock is the same as the
   // status block, the chain has not started yet.
   if (chainBlocksConfig.startBlock.number === chainStatusBlock.number) {
-    if (
-      config.rangeType !== RangeTypeIds.Bounded &&
-      config.rangeType !== RangeTypeIds.LeftBounded
-    ) {
-      throw new Error(
-        `The '${ChainIndexingStatusIds.Queued}' indexing status can be only created with the '${RangeTypeIds.Bounded}' or '${RangeTypeIds.LeftBounded}' indexing config range type.`,
-      );
-    }
-
     return deserializeChainIndexingStatusSnapshot({
       chainStatus: ChainIndexingStatusIds.Queued,
       config,
@@ -182,12 +178,6 @@ export function createChainIndexingSnapshot(
       latestKnownBlock: chainSyncBlock,
       config,
     } satisfies SerializedChainIndexingStatusSnapshotFollowing);
-  }
-
-  if (config.rangeType !== RangeTypeIds.Bounded && config.rangeType !== RangeTypeIds.LeftBounded) {
-    throw new Error(
-      `The '${ChainIndexingStatusIds.Backfill}' indexing status can be only created with the '${RangeTypeIds.Bounded}' or '${RangeTypeIds.LeftBounded}' indexing config range type.`,
-    );
   }
 
   return deserializeChainIndexingStatusSnapshot({

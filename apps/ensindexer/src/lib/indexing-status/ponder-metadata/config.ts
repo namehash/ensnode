@@ -101,7 +101,7 @@ function isPonderDatasourceNested(
 }
 
 /**
- * Get a {@link Blockrange} for each indexed chain.
+ * Get a {@link BlockNumberRange} for each indexed chain.
  *
  * Invariants:
  * - every chain include a startBlock,
