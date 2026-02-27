@@ -1,9 +1,10 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
+import { useMemo } from "react";
 
 import { GraphiQLEditor } from "@/components/graphiql-editor";
-import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
+import { useValidatedSelectedConnection } from "@/hooks/active/use-selected-connection";
 
 const defaultQuery = `# Welcome to this interactive playground for
 # ENSNode's Subgraph-Compatible GraphQL API!
@@ -22,21 +23,11 @@ export default function SubgraphGraphQLPage() {
   const initialQuery = searchParams.get("query") || defaultQuery;
   const initialVariables = searchParams.get("variables") || "";
 
-  const { validatedSelectedConnection } = useSelectedConnection();
-
-  // TODO: we need a broader refactor to recognize the difference between
-  // a selected connection being in a valid format or not.
-  if (!validatedSelectedConnection.isValid) {
-    return (
-      <div className="flex w-full max-w-md items-center space-x-2">
-        <span className="font-mono text-xs select-none text-red-500">
-          Invalid connection URL: {validatedSelectedConnection.error}
-        </span>
-      </div>
-    );
-  }
-
-  const url = new URL(`/subgraph`, validatedSelectedConnection.url).toString();
+  const selectedConnection = useValidatedSelectedConnection();
+  const url = useMemo(
+    () => new URL(`/subgraph`, selectedConnection).toString(),
+    [selectedConnection],
+  );
 
   return (
     <GraphiQLEditor url={url} initialQuery={initialQuery} initialVariables={initialVariables} />
