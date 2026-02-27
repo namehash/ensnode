@@ -29,14 +29,25 @@ const v2Logger = makeLogger("get-domain-by-interpreted-name:v2");
  * Domain lookup by Interpreted Name via forward traversal of the namegraph.
  *
  * This mirrors ENS Forward Resolution (walking from the root registry through each label in the name)
- * with the exception that expired names are still retrievable: this traversal does _not_ check
- * registration expiry, so callers can query Domains even after they are expired.
+ * with the exception that, in ENSv2, expired names are still retrievable: this traversal does _not_
+ * check registration expiry, so callers can query Domains even after they are expired.
  *
- * This is because this traversal is designed to support access to a Domain via API—not Protocol
- * Acceleration—and consumers likely want to reference Domains regardless of Registration status.
+ * For context, in ENSv1, expired names are still resolvable.
+ * In ENSv2, the default PermissionedRegistry (and UserRegistry) implement the logic 'if name is
+ * expired, it doesn't exist', which means expired names would not be resolvable via Forward Resolution.
+ * This choice, however, is made at the Registry level, not within Forward Resolution, so other
+ * Registry implementations could choose to do things differently.
  *
- * This means that not every Domain returned by this function is accessible by ENS Forward Resolution:
- * an expired Domain does not exist in the context of Forward Resolution.
+ * @see https://github.com/ensdomains/contracts-v2/blob/8a5bb130bc25adf68541d55e4a9a9bf453fb37fc/contracts/src/registry/PermissionedRegistry.sol#L217-L220
+ * @see https://github.com/ensdomains/contracts-v2/blob/8a5bb130bc25adf68541d55e4a9a9bf453fb37fc/contracts/src/registry/PermissionedRegistry.sol#L223-L226
+ *
+ * Regardless, this function does not consider a Domain's registration status for retrieval because
+ * this traversal is designed to support access to a Domain via API—not Protocol Acceleration—and
+ * consumers need to reference Domains regardless of whether they're active or expired.
+ *
+ * This means that a Domain identified by this function may not be accessible by ENS Forward Resolution:
+ * an expired Domain in a PermissionedRegistry/UserRegistry does not exist in the context of
+ * Forward Resolution.
  *
  * Note that if a Domain has been migrated from ENSv1 to ENSv2, the ENSv2 Domain entity is returned,
  * mirroring ENS Forward Resolution.
