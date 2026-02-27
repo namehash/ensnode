@@ -10,6 +10,8 @@ export * from "./registrars";
 export * from "./resolution";
 export * from "./shared/account-id";
 export * from "./shared/address";
+// TODO: uncomment once `./indexing-status` is updated and conflicting exports are resolved
+// export * from "./shared/blockrange";
 export * from "./shared/cache";
 export * from "./shared/collections";
 export * from "./shared/currencies";
