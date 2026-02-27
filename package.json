@@ -7,6 +7,7 @@
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
     "test": "vitest --silent passed-only",
+    "test:integration": "vitest --config vitest.integration.config.ts --silent passed-only",
     "typecheck": "pnpm -r --parallel --aggregate-output typecheck",
     "changeset": "changeset",
     "changeset:next": "changeset version --snapshot next",
