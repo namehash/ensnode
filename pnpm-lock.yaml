@@ -427,9 +427,21 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 24.10.9
+      '@types/prismjs':
+        specifier: ^1.26.6
+        version: 1.26.6
+      chalk:
+        specifier: ^5.6.2
+        version: 5.6.2
+      graphql-request:
+        specifier: ^7.4.0
+        version: 7.4.0(graphql@16.11.0)
       pino-pretty:
         specifier: ^13.1.2
         version: 13.1.2
+      prismjs:
+        specifier: ^1.30.0
+        version: 1.30.0
       tsx:
         specifier: ^4.7.1
         version: 4.20.6
@@ -4248,6 +4260,9 @@ packages:
   '@types/node@24.10.9':
     resolution: {integrity: sha512-ne4A0IpG3+2ETuREInjPNhUGis1SFjv1d5asp8MzEAGtOZeTeHVDOYqOgqfhvseqg/iXty2hjBf1zAOb7RNiNw==}
 
+  '@types/prismjs@1.26.6':
+    resolution: {integrity: sha512-vqlvI7qlMvcCBbVe0AKAb4f97//Hy0EBTaiW8AalRnG/xAN5zOiWWyrNqNXeq8+KAuvRewjCVY1+IPxk4RdNYw==}
+
   '@types/progress@2.0.7':
     resolution: {integrity: sha512-iadjw02vte8qWx7U0YM++EybBha2CQLPGu9iJ97whVgJUT5Zq9MjAPYUnbfRI2Kpehimf1QjFJYxD0t8nqzu5w==}
 
@@ -5883,6 +5898,11 @@ packages:
 
   graphql-request@6.1.0:
     resolution: {integrity: sha512-p+XPfS4q7aIpKVcgmnZKhMNqhltk20hfXtkaIkTfjjmiKMJ5xrt5c743cL03y/K7y1rg3WrIC49xGiEQ4mxdNw==}
+    peerDependencies:
+      graphql: 14 - 16
+
+  graphql-request@7.4.0:
+    resolution: {integrity: sha512-xfr+zFb/QYbs4l4ty0dltqiXIp07U6sl+tOKAb0t50/EnQek6CVVBLjETXi+FghElytvgaAWtIOt3EV7zLzIAQ==}
     peerDependencies:
       graphql: 14 - 16
 
@@ -7913,10 +7933,6 @@ packages:
     engines: {node: '>=16 || 14 >=14.17'}
     hasBin: true
 
-  superjson@2.2.5:
-    resolution: {integrity: sha512-zWPTX96LVsA/eVYnqOM2+ofcdPqdS1dAF1LN4TS2/MWuUpfitd9ctTa87wt4xrYnZnkLtS69xpBdSxVBP5Rm6w==}
-    engines: {node: '>=16'}
-
   superjson@2.2.6:
     resolution: {integrity: sha512-H+ue8Zo4vJmV2nRjpx86P35lzwDT3nItnIsocgumgr0hHMQ+ZGq5vrERg9kJBo5AWGmxZDhzDo+WVIJqkB0cGA==}
     engines: {node: '>=16'}
@@ -8157,9 +8173,6 @@ packages:
 
   uc.micro@2.1.0:
     resolution: {integrity: sha512-ARDJmphmdvUk6Glw7y9DQ2bFkKBHwQHLi2lsaH6PPmz/Ka9sFOBsBluozhDltWmnv9u/cF6Rt87znRTPV+yp/A==}
-
-  ufo@1.6.1:
-    resolution: {integrity: sha512-9a4/uxlTWJ4+a5i0ooc1rU7C7YOw3wT+UGqdeNNHWnOF9qcMBgLRS+4IYUqbczewFx4mLEig6gawh7X6mFlEkA==}
 
   ufo@1.6.3:
     resolution: {integrity: sha512-yDJTmhydvl5lJzBmy/hyOAA0d+aqCBuwl818haVdYCRrWV84o7YyeVm4QlVHStqNrrJSTb6jKuFAVqAFsr+K3Q==}
@@ -8673,6 +8686,7 @@ packages:
   whatwg-encoding@3.1.1:
     resolution: {integrity: sha512-6qN4hJdMwfYBtE3YBTTHhoeuUrDBPZmbQaxWAqSALV/MeEnR5z1xd8UKud2RAkFoPkmB+hli1TZSnyi84xz1vQ==}
     engines: {node: '>=18'}
+    deprecated: Use @exodus/bytes instead for a more spec-conformant and faster implementation
 
   whatwg-mimetype@4.0.0:
     resolution: {integrity: sha512-QaKxh0eNIi2mE9p2vEdzfagOKHCcj1pJ56EEHGQOVxp8r9/iszLUUV7v89x9O1p/T+NlTM5W7jW6+cz4Fq1YVg==}
@@ -12706,6 +12720,8 @@ snapshots:
     dependencies:
       undici-types: 7.16.0
 
+  '@types/prismjs@1.26.6': {}
+
   '@types/progress@2.0.7':
     dependencies:
       '@types/node': 24.10.9
@@ -14474,6 +14490,11 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
+  graphql-request@7.4.0(graphql@16.11.0):
+    dependencies:
+      '@graphql-typed-document-node/core': 3.2.0(graphql@16.11.0)
+      graphql: 16.11.0
+
   graphql-scalars@1.25.0(graphql@16.11.0):
     dependencies:
       graphql: 16.11.0
@@ -15719,7 +15740,7 @@ snapshots:
       acorn: 8.15.0
       pathe: 2.0.3
       pkg-types: 1.3.1
-      ufo: 1.6.1
+      ufo: 1.6.3
 
   module-details-from-path@1.0.4: {}
 
@@ -16202,7 +16223,7 @@ snapshots:
       prom-client: 15.1.3
       semver: 7.7.3
       stacktrace-parser: 0.1.11
-      superjson: 2.2.5
+      superjson: 2.2.6
       terminal-size: 4.0.0
       viem: 2.38.5(typescript@5.9.3)(zod@3.25.76)
       vite: 5.4.21(@types/node@24.10.9)(lightningcss@1.30.2)
@@ -16284,7 +16305,7 @@ snapshots:
       prom-client: 15.1.3
       semver: 7.7.3
       stacktrace-parser: 0.1.11
-      superjson: 2.2.5
+      superjson: 2.2.6
       terminal-size: 4.0.0
       viem: 2.38.5(typescript@5.9.3)(zod@4.3.6)
       vite: 5.4.21(@types/node@24.10.9)(lightningcss@1.30.2)
@@ -17195,10 +17216,6 @@ snapshots:
       pirates: 4.0.7
       ts-interface-checker: 0.1.13
 
-  superjson@2.2.5:
-    dependencies:
-      copy-anything: 4.0.5
-
   superjson@2.2.6:
     dependencies:
       copy-anything: 4.0.5
@@ -17444,8 +17461,6 @@ snapshots:
   typescript@5.9.3: {}
 
   uc.micro@2.1.0: {}
-
-  ufo@1.6.1: {}
 
   ufo@1.6.3: {}
 

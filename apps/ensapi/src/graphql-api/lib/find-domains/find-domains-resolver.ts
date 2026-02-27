@@ -20,7 +20,7 @@ import { db } from "@/lib/db";
 import { makeLogger } from "@/lib/logger";
 
 import { DomainCursor } from "./domain-cursor";
-import { cursorFilter, isEffectiveDesc, orderFindDomains } from "./find-domains-resolver-helpers";
+import { cursorFilter, orderFindDomains } from "./find-domains-resolver-helpers";
 import type { DomainOrderValue } from "./types";
 
 /**
@@ -104,9 +104,6 @@ export function resolveFindDomains(
         }),
     },
     async ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) => {
-      // identify whether the effective sort direction is descending
-      const effectiveDesc = isEffectiveDesc(orderDir, inverted);
-
       // build order clauses
       const orderClauses = orderFindDomains(domains, orderBy, orderDir, inverted);
 
@@ -122,10 +119,10 @@ export function resolveFindDomains(
         .where(
           and(
             beforeCursor
-              ? cursorFilter(domains, beforeCursor, orderBy, orderDir, "before", effectiveDesc)
+              ? cursorFilter(domains, beforeCursor, orderBy, orderDir, "before")
               : undefined,
             afterCursor
-              ? cursorFilter(domains, afterCursor, orderBy, orderDir, "after", effectiveDesc)
+              ? cursorFilter(domains, afterCursor, orderBy, orderDir, "after")
               : undefined,
           ),
         )
