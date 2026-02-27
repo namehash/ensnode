@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   type BlockRef,
-  ChainIndexingConfigTypeIds,
+  BlockRefRangeTypeIds,
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshotBackfill,
   type ChainIndexingStatusSnapshotCompleted,
@@ -327,7 +327,7 @@ describe("createChainIndexingSnapshot", () => {
     expect(chainIndexingStatus).toStrictEqual({
       chainStatus: ChainIndexingStatusIds.Queued,
       config: {
-        configType: ChainIndexingConfigTypeIds.Definite,
+        blockRangeType: BlockRefRangeTypeIds.Definite,
         startBlock: blockRef(10, 1000),
         endBlock: blockRef(20, 2000),
       },
@@ -354,7 +354,7 @@ describe("createChainIndexingSnapshot", () => {
     expect(chainIndexingStatus).toStrictEqual({
       chainStatus: ChainIndexingStatusIds.Queued,
       config: {
-        configType: ChainIndexingConfigTypeIds.Indefinite,
+        blockRangeType: BlockRefRangeTypeIds.Indefinite,
         startBlock: blockRef(10, 1000),
       },
     } satisfies ChainIndexingStatusSnapshotQueued);
@@ -380,7 +380,7 @@ describe("createChainIndexingSnapshot", () => {
     expect(chainIndexingStatus).toStrictEqual({
       chainStatus: ChainIndexingStatusIds.Completed,
       config: {
-        configType: ChainIndexingConfigTypeIds.Definite,
+        blockRangeType: BlockRefRangeTypeIds.Definite,
         startBlock: blockRef(10, 1000),
         endBlock: blockRef(20, 2000),
       },
@@ -408,7 +408,7 @@ describe("createChainIndexingSnapshot", () => {
     expect(chainIndexingStatus).toStrictEqual({
       chainStatus: ChainIndexingStatusIds.Following,
       config: {
-        configType: ChainIndexingConfigTypeIds.Indefinite,
+        blockRangeType: BlockRefRangeTypeIds.Indefinite,
         startBlock: blockRef(10, 1000),
       },
       latestIndexedBlock: blockRef(25, 2500),
@@ -436,7 +436,7 @@ describe("createChainIndexingSnapshot", () => {
     expect(chainIndexingStatus).toStrictEqual({
       chainStatus: ChainIndexingStatusIds.Backfill,
       config: {
-        configType: ChainIndexingConfigTypeIds.Definite,
+        blockRangeType: BlockRefRangeTypeIds.Definite,
         startBlock: blockRef(10, 1000),
         endBlock: blockRef(20, 2000),
       },
@@ -465,7 +465,7 @@ describe("createChainIndexingSnapshot", () => {
     expect(chainIndexingStatus).toStrictEqual({
       chainStatus: ChainIndexingStatusIds.Backfill,
       config: {
-        configType: ChainIndexingConfigTypeIds.Indefinite,
+        blockRangeType: BlockRefRangeTypeIds.Indefinite,
         startBlock: blockRef(10, 1000),
       },
       latestIndexedBlock: blockRef(15, 1500),

@@ -8,7 +8,7 @@ import {
   latestBlockRef,
 } from "./block-refs.mock";
 import {
-  ChainIndexingConfigTypeIds,
+  BlockRefRangeTypeIds,
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshot,
   type ChainIndexingStatusSnapshotBackfill,
@@ -30,7 +30,7 @@ describe("ENSIndexer: Indexing Snapshot helpers", () => {
         {
           chainStatus: ChainIndexingStatusIds.Completed,
           config: {
-            configType: ChainIndexingConfigTypeIds.Definite,
+            blockRangeType: BlockRefRangeTypeIds.Definite,
             startBlock: earlierBlockRef,
 
             endBlock: latestBlockRef,
@@ -41,7 +41,7 @@ describe("ENSIndexer: Indexing Snapshot helpers", () => {
         {
           chainStatus: ChainIndexingStatusIds.Completed,
           config: {
-            configType: ChainIndexingConfigTypeIds.Definite,
+            blockRangeType: BlockRefRangeTypeIds.Definite,
             startBlock: earliestBlockRef,
             endBlock: laterBlockRef,
           },
@@ -62,7 +62,7 @@ describe("ENSIndexer: Indexing Snapshot helpers", () => {
         {
           chainStatus: ChainIndexingStatusIds.Queued,
           config: {
-            configType: ChainIndexingConfigTypeIds.Definite,
+            blockRangeType: BlockRefRangeTypeIds.Definite,
             startBlock: earliestBlockRef,
             endBlock: latestBlockRef,
           },
@@ -70,7 +70,7 @@ describe("ENSIndexer: Indexing Snapshot helpers", () => {
         {
           chainStatus: ChainIndexingStatusIds.Queued,
           config: {
-            configType: ChainIndexingConfigTypeIds.Definite,
+            blockRangeType: BlockRefRangeTypeIds.Definite,
             startBlock: earliestBlockRef,
             endBlock: laterBlockRef,
           },
@@ -90,7 +90,7 @@ describe("ENSIndexer: Indexing Snapshot helpers", () => {
         {
           chainStatus: ChainIndexingStatusIds.Queued,
           config: {
-            configType: ChainIndexingConfigTypeIds.Definite,
+            blockRangeType: BlockRefRangeTypeIds.Definite,
             startBlock: earliestBlockRef,
             endBlock: latestBlockRef,
           },
@@ -99,7 +99,7 @@ describe("ENSIndexer: Indexing Snapshot helpers", () => {
         {
           chainStatus: ChainIndexingStatusIds.Backfill,
           config: {
-            configType: ChainIndexingConfigTypeIds.Indefinite,
+            blockRangeType: BlockRefRangeTypeIds.Indefinite,
             startBlock: earliestBlockRef,
           },
           latestIndexedBlock: laterBlockRef,
@@ -109,7 +109,7 @@ describe("ENSIndexer: Indexing Snapshot helpers", () => {
         {
           chainStatus: ChainIndexingStatusIds.Completed,
           config: {
-            configType: ChainIndexingConfigTypeIds.Definite,
+            blockRangeType: BlockRefRangeTypeIds.Definite,
             startBlock: earliestBlockRef,
             endBlock: laterBlockRef,
           },
@@ -130,7 +130,7 @@ describe("ENSIndexer: Indexing Snapshot helpers", () => {
         {
           chainStatus: ChainIndexingStatusIds.Following,
           config: {
-            configType: ChainIndexingConfigTypeIds.Indefinite,
+            blockRangeType: BlockRefRangeTypeIds.Indefinite,
             startBlock: earlierBlockRef,
           },
           latestIndexedBlock: laterBlockRef,
@@ -140,7 +140,7 @@ describe("ENSIndexer: Indexing Snapshot helpers", () => {
         {
           chainStatus: ChainIndexingStatusIds.Backfill,
           config: {
-            configType: ChainIndexingConfigTypeIds.Definite,
+            blockRangeType: BlockRefRangeTypeIds.Definite,
             startBlock: earliestBlockRef,
             endBlock: latestBlockRef,
           },
@@ -151,7 +151,7 @@ describe("ENSIndexer: Indexing Snapshot helpers", () => {
         {
           chainStatus: ChainIndexingStatusIds.Completed,
           config: {
-            configType: ChainIndexingConfigTypeIds.Definite,
+            blockRangeType: BlockRefRangeTypeIds.Definite,
             startBlock: earliestBlockRef,
             endBlock: laterBlockRef,
           },
@@ -180,7 +180,7 @@ describe("getOmnichainIndexingCursor", () => {
       {
         chainStatus: ChainIndexingStatusIds.Queued,
         config: {
-          configType: ChainIndexingConfigTypeIds.Indefinite,
+          blockRangeType: BlockRefRangeTypeIds.Indefinite,
           startBlock: evenLaterBlockRef,
         },
       } satisfies ChainIndexingStatusSnapshotQueued,
@@ -188,7 +188,7 @@ describe("getOmnichainIndexingCursor", () => {
       {
         chainStatus: ChainIndexingStatusIds.Backfill,
         config: {
-          configType: ChainIndexingConfigTypeIds.Definite,
+          blockRangeType: BlockRefRangeTypeIds.Definite,
           startBlock: earliestBlockRef,
           endBlock: latestBlockRef,
         },
@@ -199,7 +199,7 @@ describe("getOmnichainIndexingCursor", () => {
       {
         chainStatus: ChainIndexingStatusIds.Following,
         config: {
-          configType: ChainIndexingConfigTypeIds.Indefinite,
+          blockRangeType: BlockRefRangeTypeIds.Indefinite,
           startBlock: earliestBlockRef,
         },
         latestIndexedBlock: earlierBlockRef,
@@ -208,7 +208,7 @@ describe("getOmnichainIndexingCursor", () => {
       {
         chainStatus: ChainIndexingStatusIds.Completed,
         config: {
-          configType: ChainIndexingConfigTypeIds.Definite,
+          blockRangeType: BlockRefRangeTypeIds.Definite,
           startBlock: earlierBlockRef,
           endBlock: latestBlockRef,
         },
@@ -229,14 +229,14 @@ describe("getOmnichainIndexingCursor", () => {
         {
           chainStatus: ChainIndexingStatusIds.Queued,
           config: {
-            configType: ChainIndexingConfigTypeIds.Indefinite,
+            blockRangeType: BlockRefRangeTypeIds.Indefinite,
             startBlock: earliestBlockRef,
           },
         } satisfies ChainIndexingStatusSnapshotQueued,
         {
           chainStatus: ChainIndexingStatusIds.Queued,
           config: {
-            configType: ChainIndexingConfigTypeIds.Indefinite,
+            blockRangeType: BlockRefRangeTypeIds.Indefinite,
             startBlock: laterBlockRef,
           },
         } satisfies ChainIndexingStatusSnapshotQueued,
@@ -255,7 +255,7 @@ describe("getOmnichainIndexingCursor", () => {
       {
         chainStatus: ChainIndexingStatusIds.Backfill,
         config: {
-          configType: ChainIndexingConfigTypeIds.Definite,
+          blockRangeType: BlockRefRangeTypeIds.Definite,
           startBlock: earliestBlockRef,
           endBlock: latestBlockRef,
         },
@@ -266,7 +266,7 @@ describe("getOmnichainIndexingCursor", () => {
       {
         chainStatus: ChainIndexingStatusIds.Following,
         config: {
-          configType: ChainIndexingConfigTypeIds.Indefinite,
+          blockRangeType: BlockRefRangeTypeIds.Indefinite,
           startBlock: earliestBlockRef,
         },
         latestIndexedBlock: evenLaterBlockRef,
@@ -275,7 +275,7 @@ describe("getOmnichainIndexingCursor", () => {
       {
         chainStatus: ChainIndexingStatusIds.Completed,
         config: {
-          configType: ChainIndexingConfigTypeIds.Definite,
+          blockRangeType: BlockRefRangeTypeIds.Definite,
           startBlock: earlierBlockRef,
           endBlock: latestBlockRef,
         },

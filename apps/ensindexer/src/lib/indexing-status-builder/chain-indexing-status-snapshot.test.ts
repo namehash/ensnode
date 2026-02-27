@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  ChainIndexingConfigTypeIds,
+  BlockRefRangeTypeIds,
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshotBackfill,
   type ChainIndexingStatusSnapshotCompleted,
@@ -42,7 +42,7 @@ describe("ChainIndexingStatusSnapshot", () => {
       expect(result.get(1)).toStrictEqual({
         chainStatus: ChainIndexingStatusIds.Queued,
         config: {
-          configType: ChainIndexingConfigTypeIds.Definite,
+          blockRangeType: BlockRefRangeTypeIds.Definite,
           startBlock: earliestBlockRef,
           endBlock: latestBlockRef,
         },
@@ -68,7 +68,7 @@ describe("ChainIndexingStatusSnapshot", () => {
       expect(result.get(1)).toStrictEqual({
         chainStatus: ChainIndexingStatusIds.Completed,
         config: {
-          configType: ChainIndexingConfigTypeIds.Definite,
+          blockRangeType: BlockRefRangeTypeIds.Definite,
           startBlock: earliestBlockRef,
           endBlock: latestBlockRef,
         },
@@ -95,7 +95,7 @@ describe("ChainIndexingStatusSnapshot", () => {
       expect(result.get(1)).toStrictEqual({
         chainStatus: ChainIndexingStatusIds.Following,
         config: {
-          configType: ChainIndexingConfigTypeIds.Indefinite,
+          blockRangeType: BlockRefRangeTypeIds.Indefinite,
           startBlock: earliestBlockRef,
         },
         latestIndexedBlock: laterBlockRef,
@@ -122,7 +122,7 @@ describe("ChainIndexingStatusSnapshot", () => {
       expect(result.get(1)).toStrictEqual({
         chainStatus: ChainIndexingStatusIds.Backfill,
         config: {
-          configType: ChainIndexingConfigTypeIds.Definite,
+          blockRangeType: BlockRefRangeTypeIds.Definite,
           startBlock: earliestBlockRef,
           endBlock: latestBlockRef,
         },
@@ -150,7 +150,7 @@ describe("ChainIndexingStatusSnapshot", () => {
       expect(result.get(1)).toStrictEqual({
         chainStatus: ChainIndexingStatusIds.Backfill,
         config: {
-          configType: ChainIndexingConfigTypeIds.Indefinite,
+          blockRangeType: BlockRefRangeTypeIds.Indefinite,
           startBlock: earliestBlockRef,
         },
         latestIndexedBlock: earlierBlockRef,
