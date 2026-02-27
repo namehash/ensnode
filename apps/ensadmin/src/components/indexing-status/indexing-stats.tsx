@@ -8,7 +8,7 @@ import { ChainIcon, ChainName } from "@namehash/namehash-ui";
 import type { PropsWithChildren, ReactElement, ReactNode } from "react";
 
 import {
-  ChainIndexingConfigTypeIds,
+  BlockRefRangeTypeIds,
   ChainIndexingStatusIds,
   type CrossChainIndexingStatusSnapshotOmnichain,
   IndexingStatusResponseCodes,
@@ -69,9 +69,7 @@ export function IndexingStatsForSnapshotUnstarted({
 
   return chainEntries.map(([chainId, chain]) => {
     const endBlock =
-      chain.config.configType === ChainIndexingConfigTypeIds.Definite
-        ? chain.config.endBlock
-        : null;
+      chain.config.blockRangeType === BlockRefRangeTypeIds.Definite ? chain.config.endBlock : null;
 
     return (
       <Card key={`Chain#${chainId}`}>
@@ -120,9 +118,7 @@ export function IndexingStatsForSnapshotBackfill({
 
   return chainEntries.map(([chainId, chain]) => {
     const endBlock =
-      chain.config.configType === ChainIndexingConfigTypeIds.Definite
-        ? chain.config.endBlock
-        : null;
+      chain.config.blockRangeType === BlockRefRangeTypeIds.Definite ? chain.config.endBlock : null;
 
     return (
       <Card key={`Chain#${chainId}`}>
@@ -187,9 +183,7 @@ export function IndexingStatsForSnapshotCompleted({
 
   return chainEntries.map(([chainId, chain]) => {
     const endBlock =
-      chain.config.configType === ChainIndexingConfigTypeIds.Definite
-        ? chain.config.endBlock
-        : null;
+      chain.config.blockRangeType === BlockRefRangeTypeIds.Definite ? chain.config.endBlock : null;
 
     return (
       <Card key={`Chain#${chainId}`}>
@@ -244,9 +238,7 @@ export function IndexingStatsForSnapshotFollowing({
 
   return chainEntries.map(([chainId, chain]) => {
     const endBlock =
-      chain.config.configType === ChainIndexingConfigTypeIds.Definite
-        ? chain.config.endBlock
-        : null;
+      chain.config.blockRangeType === BlockRefRangeTypeIds.Definite ? chain.config.endBlock : null;
 
     return (
       <Card key={`Chain#${chainId}`}>

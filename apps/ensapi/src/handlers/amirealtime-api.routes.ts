@@ -15,6 +15,7 @@ export const AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE: Duration = minutesToSe
 export const amIRealtimeGetMeta = createRoute({
   method: "get",
   path: "/",
+  operationId: "isRealtime",
   tags: ["Meta"],
   summary: "Check indexing progress",
   description:
@@ -26,7 +27,9 @@ export const amIRealtimeGetMeta = createRoute({
         .default(AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE)
         .pipe(
           z.coerce
-            .number({ error: "maxWorstCaseDistance query param must be a number" })
+            .number({
+              error: "maxWorstCaseDistance query param must be a number",
+            })
             .pipe(makeDurationSchema("maxWorstCaseDistance query param")),
         )
         .describe("Maximum acceptable worst-case indexing distance in seconds"),
