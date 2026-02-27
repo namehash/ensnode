@@ -308,7 +308,7 @@ describe("getChainsBlockrange", () => {
 });
 
 describe("createChainIndexingSnapshot", () => {
-  it("returns 'queued' status if startBlock equals statusBlock (definite)", () => {
+  it("returns 'queued' status if startBlock equals statusBlock (config range bounded)", () => {
     // arrange
     const meta: ChainMetadata = {
       chainId: 1,
@@ -335,7 +335,7 @@ describe("createChainIndexingSnapshot", () => {
     } satisfies ChainIndexingStatusSnapshotQueued);
   });
 
-  it("returns 'queued' status if startBlock equals statusBlock (indefinite)", () => {
+  it("returns 'queued' status if startBlock equals statusBlock (config range left bounded)", () => {
     // arrange
     const meta: ChainMetadata = {
       chainId: 1,
@@ -417,7 +417,7 @@ describe("createChainIndexingSnapshot", () => {
     } satisfies ChainIndexingStatusSnapshotFollowing);
   });
 
-  it("returns Backfill status otherwise (definite config)", () => {
+  it("returns Backfill status otherwise (config range bounded)", () => {
     // arrange
     const meta: ChainMetadata = {
       chainId: 1,
@@ -446,7 +446,7 @@ describe("createChainIndexingSnapshot", () => {
     } satisfies ChainIndexingStatusSnapshotBackfill);
   });
 
-  it("returns Backfill status otherwise (indefinite config)", () => {
+  it("returns Backfill status otherwise (config range left bounded)", () => {
     // arrange
     const meta: ChainMetadata = {
       chainId: 1,
