@@ -1,6 +1,4 @@
 import {
-  type BlockRefRangeDefinite,
-  type BlockRefRangeIndefinite,
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshot,
   type ChainIndexingStatusSnapshotBackfill,
@@ -10,7 +8,13 @@ import {
   type Unvalidated,
   validateChainIndexingStatusSnapshot,
 } from "@ensnode/ensnode-sdk";
-import { type ChainId, ChainIndexingStates, isBlockRefEqualTo } from "@ensnode/ponder-sdk";
+import {
+  type BlockRefRangeBounded,
+  type BlockRefRangeLeftBounded,
+  type ChainId,
+  ChainIndexingStates,
+  isBlockRefEqualTo,
+} from "@ensnode/ponder-sdk";
 
 import type { ChainIndexingMetadata } from "./chain-indexing-metadata";
 
@@ -41,7 +45,7 @@ function buildChainIndexingStatusSnapshot(
     return validateChainIndexingStatusSnapshot({
       chainStatus: ChainIndexingStatusIds.Completed,
       latestIndexedBlock: checkpointBlock,
-      config: indexingConfig as Unvalidated<BlockRefRangeDefinite>,
+      config: indexingConfig as Unvalidated<BlockRefRangeBounded>,
     } satisfies Unvalidated<ChainIndexingStatusSnapshotCompleted>);
   }
 
@@ -50,7 +54,7 @@ function buildChainIndexingStatusSnapshot(
       chainStatus: ChainIndexingStatusIds.Following,
       latestIndexedBlock: checkpointBlock,
       latestKnownBlock: indexingMetrics.latestSyncedBlock,
-      config: indexingConfig as Unvalidated<BlockRefRangeIndefinite>,
+      config: indexingConfig as Unvalidated<BlockRefRangeLeftBounded>,
     } satisfies Unvalidated<ChainIndexingStatusSnapshotFollowing>);
   }
 

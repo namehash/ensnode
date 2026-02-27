@@ -1,6 +1,8 @@
-import { type BlockRefRange, BlockRefRangeTypeIds } from "@ensnode/ensnode-sdk";
+import { RangeTypeIds } from "@ensnode/ensnode-sdk";
 import type {
   BlockRef,
+  BlockRefRangeBounded,
+  BlockRefRangeLeftBounded,
   ChainIndexingMetrics,
   ChainIndexingMetricsCompleted,
   ChainIndexingMetricsHistorical,
@@ -34,7 +36,7 @@ export function buildChainIndexingMetadataMock({
   latestSyncedBlock,
   backfillEndBlock,
 }: {
-  config: BlockRefRange;
+  config: BlockRefRangeLeftBounded | BlockRefRangeBounded;
   checkpointBlock: BlockRef;
   state: ChainIndexingState;
   latestSyncedBlock: BlockRef;
@@ -48,8 +50,7 @@ export function buildChainIndexingMetadataMock({
 
   const backfillScope = {
     startBlock: config.startBlock,
-    endBlock:
-      config.blockRangeType === BlockRefRangeTypeIds.Definite ? config.endBlock : backfillEndBlock,
+    endBlock: config.rangeType === RangeTypeIds.Bounded ? config.endBlock : backfillEndBlock,
   } satisfies BackfillScope;
 
   let indexingMetrics: ChainIndexingMetrics;

@@ -1,15 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  BlockRefRangeTypeIds,
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshotBackfill,
   type ChainIndexingStatusSnapshotCompleted,
   type ChainIndexingStatusSnapshotFollowing,
   type ChainIndexingStatusSnapshotQueued,
-  createIndexingConfig,
 } from "@ensnode/ensnode-sdk";
-import { ChainIndexingStates } from "@ensnode/ponder-sdk";
+import { buildBlockRefRange, ChainIndexingStates, RangeTypeIds } from "@ensnode/ponder-sdk";
 
 import {
   earlierBlockRef,
@@ -26,7 +24,7 @@ describe("ChainIndexingStatusSnapshot", () => {
     it("returns Queued status when checkpointBlock equals startBlock", () => {
       // arrange
       const metadata = buildChainIndexingMetadataMock({
-        config: createIndexingConfig(earliestBlockRef, latestBlockRef),
+        config: buildBlockRefRange(earliestBlockRef, latestBlockRef),
         checkpointBlock: earliestBlockRef,
         state: ChainIndexingStates.Historical,
         latestSyncedBlock: earlierBlockRef,
@@ -42,7 +40,7 @@ describe("ChainIndexingStatusSnapshot", () => {
       expect(result.get(1)).toStrictEqual({
         chainStatus: ChainIndexingStatusIds.Queued,
         config: {
-          blockRangeType: BlockRefRangeTypeIds.Definite,
+          rangeType: RangeTypeIds.Bounded,
           startBlock: earliestBlockRef,
           endBlock: latestBlockRef,
         },
@@ -52,7 +50,7 @@ describe("ChainIndexingStatusSnapshot", () => {
     it("returns Completed status when indexingMetrics.state is Completed", () => {
       // arrange
       const metadata = buildChainIndexingMetadataMock({
-        config: createIndexingConfig(earliestBlockRef, latestBlockRef),
+        config: buildBlockRefRange(earliestBlockRef, latestBlockRef),
         checkpointBlock: latestBlockRef,
         state: ChainIndexingStates.Completed,
         latestSyncedBlock: latestBlockRef,
@@ -68,7 +66,7 @@ describe("ChainIndexingStatusSnapshot", () => {
       expect(result.get(1)).toStrictEqual({
         chainStatus: ChainIndexingStatusIds.Completed,
         config: {
-          blockRangeType: BlockRefRangeTypeIds.Definite,
+          rangeType: RangeTypeIds.Bounded,
           startBlock: earliestBlockRef,
           endBlock: latestBlockRef,
         },
@@ -79,7 +77,7 @@ describe("ChainIndexingStatusSnapshot", () => {
     it("returns Following status when indexingMetrics.state is Realtime", () => {
       // arrange
       const metadata = buildChainIndexingMetadataMock({
-        config: createIndexingConfig(earliestBlockRef, null),
+        config: buildBlockRefRange(earliestBlockRef, undefined),
         checkpointBlock: laterBlockRef,
         state: ChainIndexingStates.Realtime,
         latestSyncedBlock: latestBlockRef,
@@ -95,7 +93,7 @@ describe("ChainIndexingStatusSnapshot", () => {
       expect(result.get(1)).toStrictEqual({
         chainStatus: ChainIndexingStatusIds.Following,
         config: {
-          blockRangeType: BlockRefRangeTypeIds.Indefinite,
+          rangeType: RangeTypeIds.LeftBounded,
           startBlock: earliestBlockRef,
         },
         latestIndexedBlock: laterBlockRef,
@@ -106,7 +104,7 @@ describe("ChainIndexingStatusSnapshot", () => {
     it("returns Backfill status for Historical state with definite config", () => {
       // arrange
       const metadata = buildChainIndexingMetadataMock({
-        config: createIndexingConfig(earliestBlockRef, latestBlockRef),
+        config: buildBlockRefRange(earliestBlockRef, latestBlockRef),
         checkpointBlock: laterBlockRef,
         state: ChainIndexingStates.Historical,
         latestSyncedBlock: latestBlockRef,
@@ -122,7 +120,7 @@ describe("ChainIndexingStatusSnapshot", () => {
       expect(result.get(1)).toStrictEqual({
         chainStatus: ChainIndexingStatusIds.Backfill,
         config: {
-          blockRangeType: BlockRefRangeTypeIds.Definite,
+          rangeType: RangeTypeIds.Bounded,
           startBlock: earliestBlockRef,
           endBlock: latestBlockRef,
         },
@@ -134,7 +132,7 @@ describe("ChainIndexingStatusSnapshot", () => {
     it("returns Backfill status for Historical state with indefinite config", () => {
       // arrange
       const metadata = buildChainIndexingMetadataMock({
-        config: createIndexingConfig(earliestBlockRef, null),
+        config: buildBlockRefRange(earliestBlockRef, undefined),
         checkpointBlock: earlierBlockRef,
         state: ChainIndexingStates.Historical,
         latestSyncedBlock: laterBlockRef,
@@ -150,7 +148,7 @@ describe("ChainIndexingStatusSnapshot", () => {
       expect(result.get(1)).toStrictEqual({
         chainStatus: ChainIndexingStatusIds.Backfill,
         config: {
-          blockRangeType: BlockRefRangeTypeIds.Indefinite,
+          rangeType: RangeTypeIds.LeftBounded,
           startBlock: earliestBlockRef,
         },
         latestIndexedBlock: earlierBlockRef,

@@ -1,5 +1,5 @@
 import type { ENSNamespaceId } from "@ensnode/datasources";
-import type { Blockrange, ChainId, PluginName } from "@ensnode/ensnode-sdk";
+import type { BlockNumberRange, ChainId, PluginName } from "@ensnode/ensnode-sdk";
 import {
   type DatabaseSchemaName,
   type DatabaseUrl,
@@ -120,8 +120,8 @@ export interface ENSIndexerConfig {
    * This is strictly designed for testing and development and its usage in production will result
    * in incorrect or out-of-date indexes.
    *
-   * ENSIndexer will constrain all indexed contracts to the provided {@link Blockrange.startBlock}
-   * and {@link Blockrange.endBlock} if specified.
+   * ENSIndexer will constrain all indexed contracts to the provided {@link BlockNumberRange.startBlock}
+   * and {@link BlockNumberRange.endBlock} if specified.
    *
    * Invariants:
    * - both `startBlock` and `endBlock` are optional, and expected to be undefined
@@ -131,7 +131,7 @@ export interface ENSIndexerConfig {
    * - if either `startBlock` or `endBlock` are defined, the number of indexed chains described
    *   by {@link plugins} must be 1
    */
-  globalBlockrange: Blockrange;
+  globalBlockrange: BlockNumberRange;
 
   /**
    * A feature flag to enable/disable ENSIndexer's Subgraph Compatible Indexing Behavior.

@@ -42,8 +42,8 @@ export type CrossChainIndexingStrategyId =
  * - `snapshotTime` is always >= the "highest known block timestamp", defined as the max of:
  *     - the `slowestChainIndexingCursor`.
  *     - the `config.startBlock.timestamp` for all indexed chains.
- *     - the `config.endBlock.timestamp` for all indexed chains with a `config.blockRangeType` of
- *       {@link BlockRefRangeTypeIds.Definite}.
+ *     - the `config.endBlock.timestamp` for all indexed chains with a `config.rangeType` of
+ *       {@link RangeTypeIds.Bounded}.
  *     - the `backfillEndBlock.timestamp` for all chains with `chainStatus` of
  *       {@link ChainIndexingStatusIds.Backfill}.
  *     - the `latestKnownBlock.timestamp` for all chains with `chainStatus` of

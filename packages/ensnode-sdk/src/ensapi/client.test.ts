@@ -3,14 +3,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ENSNamespaceIds, type Name } from "../ens";
 import { PluginName } from "../ensindexer/config/types";
-import {
-  BlockRefRangeTypeIds,
-  ChainIndexingStatusIds,
-} from "../indexing-status/chain-indexing-status-snapshot";
+import { ChainIndexingStatusIds } from "../indexing-status/chain-indexing-status-snapshot";
 import { CrossChainIndexingStrategyIds } from "../indexing-status/cross-chain-indexing-status-snapshot";
 import { OmnichainIndexingStatusIds } from "../indexing-status/omnichain-indexing-status-snapshot";
 import type { SerializedOmnichainIndexingStatusSnapshotFollowing } from "../indexing-status/serialize/omnichain-indexing-status-snapshot";
 import type { ResolverRecordsSelection } from "../resolution";
+import { RangeTypeIds } from "../shared/blockrange";
 import { deserializeEnsApiIndexingStatusResponse } from "./api/indexing-status/deserialize";
 import {
   type EnsApiIndexingStatusResponse,
@@ -108,7 +106,7 @@ const EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE = deserializeEnsApiIndexingStatu
           "1": {
             chainStatus: ChainIndexingStatusIds.Backfill,
             config: {
-              blockRangeType: BlockRefRangeTypeIds.Indefinite,
+              rangeType: RangeTypeIds.LeftBounded,
               startBlock: {
                 timestamp: 1489165544,
                 number: 3327417,
@@ -126,7 +124,7 @@ const EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE = deserializeEnsApiIndexingStatu
           "8453": {
             chainStatus: ChainIndexingStatusIds.Queued,
             config: {
-              blockRangeType: BlockRefRangeTypeIds.Indefinite,
+              rangeType: RangeTypeIds.LeftBounded,
               startBlock: {
                 timestamp: 1755181691,
                 number: 17571480,
@@ -158,7 +156,7 @@ const _EXAMPLE_INDEXING_STATUS_FOLLOWING_RESPONSE: EnsApiIndexingStatusResponse 
             "1": {
               chainStatus: ChainIndexingStatusIds.Following,
               config: {
-                blockRangeType: BlockRefRangeTypeIds.Indefinite,
+                rangeType: RangeTypeIds.LeftBounded,
                 startBlock: {
                   timestamp: 1_496_123_537,
                   number: 23_327_417,
@@ -176,7 +174,7 @@ const _EXAMPLE_INDEXING_STATUS_FOLLOWING_RESPONSE: EnsApiIndexingStatusResponse 
             "8453": {
               chainStatus: ChainIndexingStatusIds.Backfill,
               config: {
-                blockRangeType: BlockRefRangeTypeIds.Indefinite,
+                rangeType: RangeTypeIds.LeftBounded,
                 startBlock: {
                   timestamp: 1_484_015_544,
                   number: 17_571_480,

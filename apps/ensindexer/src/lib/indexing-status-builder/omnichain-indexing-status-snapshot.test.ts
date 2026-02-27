@@ -1,16 +1,19 @@
 import { assert, describe, expect, it } from "vitest";
 
 import {
-  BlockRefRangeTypeIds,
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshotBackfill,
   type ChainIndexingStatusSnapshotCompleted,
   type ChainIndexingStatusSnapshotFollowing,
   type ChainIndexingStatusSnapshotQueued,
-  createIndexingConfig,
   OmnichainIndexingStatusIds,
 } from "@ensnode/ensnode-sdk";
-import { type BlockRef, ChainIndexingStates } from "@ensnode/ponder-sdk";
+import {
+  type BlockRef,
+  buildBlockRefRange,
+  ChainIndexingStates,
+  RangeTypeIds,
+} from "@ensnode/ponder-sdk";
 
 import {
   earlierBlockRef,
@@ -26,7 +29,7 @@ describe("OmnichainIndexingStatusSnapshot", () => {
     it("returns Unstarted status when all chains are Queued", () => {
       // arrange
       const metadata = buildChainIndexingMetadataMock({
-        config: createIndexingConfig(earliestBlockRef, null),
+        config: buildBlockRefRange(earliestBlockRef, undefined),
         checkpointBlock: earliestBlockRef,
         state: ChainIndexingStates.Historical,
         latestSyncedBlock: laterBlockRef,
@@ -47,7 +50,7 @@ describe("OmnichainIndexingStatusSnapshot", () => {
             {
               chainStatus: ChainIndexingStatusIds.Queued,
               config: {
-                blockRangeType: BlockRefRangeTypeIds.Indefinite,
+                rangeType: RangeTypeIds.LeftBounded,
                 startBlock: earliestBlockRef,
               },
             } satisfies ChainIndexingStatusSnapshotQueued,
@@ -60,7 +63,7 @@ describe("OmnichainIndexingStatusSnapshot", () => {
     it("returns Backfill status when at least one chain is Backfill and none are Following", () => {
       // arrange
       const metadataQueued = buildChainIndexingMetadataMock({
-        config: createIndexingConfig(laterBlockRef, null),
+        config: buildBlockRefRange(laterBlockRef, undefined),
         checkpointBlock: laterBlockRef,
         state: ChainIndexingStates.Historical,
         latestSyncedBlock: latestBlockRef,
@@ -68,7 +71,7 @@ describe("OmnichainIndexingStatusSnapshot", () => {
       });
 
       const metadataBackfill = buildChainIndexingMetadataMock({
-        config: createIndexingConfig(earliestBlockRef, null),
+        config: buildBlockRefRange(earliestBlockRef, undefined),
         checkpointBlock: earlierBlockRef,
         state: ChainIndexingStates.Historical,
         latestSyncedBlock: laterBlockRef,
@@ -92,8 +95,8 @@ describe("OmnichainIndexingStatusSnapshot", () => {
             {
               chainStatus: ChainIndexingStatusIds.Queued,
               config: {
-                blockRangeType: BlockRefRangeTypeIds.Indefinite,
-                startBlock: metadataQueued.indexingConfig.startBlock,
+                rangeType: RangeTypeIds.LeftBounded,
+                startBlock: laterBlockRef,
               },
             } satisfies ChainIndexingStatusSnapshotQueued,
           ],
@@ -102,8 +105,8 @@ describe("OmnichainIndexingStatusSnapshot", () => {
             {
               chainStatus: ChainIndexingStatusIds.Backfill,
               config: {
-                blockRangeType: BlockRefRangeTypeIds.Indefinite,
-                startBlock: metadataBackfill.indexingConfig.startBlock,
+                rangeType: RangeTypeIds.LeftBounded,
+                startBlock: earliestBlockRef,
               },
               latestIndexedBlock: metadataBackfill.indexingStatus.checkpointBlock,
               backfillEndBlock: metadataBackfill.backfillScope.endBlock,
@@ -118,7 +121,7 @@ describe("OmnichainIndexingStatusSnapshot", () => {
       // arrange
 
       const metadataBackfill = buildChainIndexingMetadataMock({
-        config: createIndexingConfig(earlierBlockRef, null),
+        config: buildBlockRefRange(earlierBlockRef, undefined),
         checkpointBlock: laterBlockRef,
         state: ChainIndexingStates.Historical,
         latestSyncedBlock: latestBlockRef,
@@ -126,7 +129,7 @@ describe("OmnichainIndexingStatusSnapshot", () => {
       });
 
       const metadataFollowing = buildChainIndexingMetadataMock({
-        config: createIndexingConfig(earliestBlockRef, null),
+        config: buildBlockRefRange(earliestBlockRef, undefined),
         checkpointBlock: laterBlockRef,
         state: ChainIndexingStates.Realtime,
         latestSyncedBlock: latestBlockRef,
@@ -155,8 +158,8 @@ describe("OmnichainIndexingStatusSnapshot", () => {
             {
               chainStatus: ChainIndexingStatusIds.Backfill,
               config: {
-                blockRangeType: BlockRefRangeTypeIds.Indefinite,
-                startBlock: metadataBackfill.indexingConfig.startBlock,
+                rangeType: RangeTypeIds.LeftBounded,
+                startBlock: earlierBlockRef,
               },
               latestIndexedBlock: metadataBackfill.indexingStatus.checkpointBlock,
               backfillEndBlock: metadataBackfill.backfillScope.endBlock,
@@ -167,8 +170,8 @@ describe("OmnichainIndexingStatusSnapshot", () => {
             {
               chainStatus: ChainIndexingStatusIds.Following,
               config: {
-                blockRangeType: BlockRefRangeTypeIds.Indefinite,
-                startBlock: metadataFollowing.indexingConfig.startBlock,
+                rangeType: RangeTypeIds.LeftBounded,
+                startBlock: earliestBlockRef,
               },
               latestIndexedBlock: metadataFollowing.indexingStatus.checkpointBlock,
               latestKnownBlock: metadataFollowing.indexingMetrics.latestSyncedBlock,
@@ -182,7 +185,7 @@ describe("OmnichainIndexingStatusSnapshot", () => {
     it("returns Completed status when all chains are Completed", () => {
       // arrange
       const metadataCompleted = buildChainIndexingMetadataMock({
-        config: createIndexingConfig(earliestBlockRef, latestBlockRef),
+        config: buildBlockRefRange(earliestBlockRef, latestBlockRef),
         checkpointBlock: latestBlockRef,
         state: ChainIndexingStates.Completed,
         latestSyncedBlock: latestBlockRef,
@@ -203,7 +206,7 @@ describe("OmnichainIndexingStatusSnapshot", () => {
             {
               chainStatus: ChainIndexingStatusIds.Completed,
               config: {
-                blockRangeType: BlockRefRangeTypeIds.Definite,
+                rangeType: RangeTypeIds.Bounded,
                 startBlock: earliestBlockRef,
                 endBlock: latestBlockRef,
               },
@@ -223,7 +226,7 @@ describe("OmnichainIndexingStatusSnapshot", () => {
       };
 
       const metadata1 = buildChainIndexingMetadataMock({
-        config: createIndexingConfig(earliestBlockRef, null),
+        config: buildBlockRefRange(earliestBlockRef, undefined),
         checkpointBlock: laterBlockRef,
         state: ChainIndexingStates.Realtime,
         latestSyncedBlock: evenLaterBlockRef,
@@ -231,7 +234,7 @@ describe("OmnichainIndexingStatusSnapshot", () => {
       });
 
       const metadata2 = buildChainIndexingMetadataMock({
-        config: createIndexingConfig(earlierBlockRef, null),
+        config: buildBlockRefRange(earlierBlockRef, undefined),
         checkpointBlock: laterBlockRef,
         state: ChainIndexingStates.Realtime,
         latestSyncedBlock: latestBlockRef,
@@ -263,8 +266,8 @@ describe("OmnichainIndexingStatusSnapshot", () => {
             {
               chainStatus: ChainIndexingStatusIds.Following,
               config: {
-                blockRangeType: BlockRefRangeTypeIds.Indefinite,
-                startBlock: metadata1.indexingConfig.startBlock,
+                rangeType: RangeTypeIds.LeftBounded,
+                startBlock: earliestBlockRef,
               },
               latestIndexedBlock: metadata1.indexingStatus.checkpointBlock,
               latestKnownBlock: metadata1.indexingMetrics.latestSyncedBlock,
@@ -275,8 +278,8 @@ describe("OmnichainIndexingStatusSnapshot", () => {
             {
               chainStatus: ChainIndexingStatusIds.Following,
               config: {
-                blockRangeType: BlockRefRangeTypeIds.Indefinite,
-                startBlock: metadata2.indexingConfig.startBlock,
+                rangeType: RangeTypeIds.LeftBounded,
+                startBlock: earlierBlockRef,
               },
               latestIndexedBlock: metadata2.indexingStatus.checkpointBlock,
               latestKnownBlock: metadata2.indexingMetrics.latestSyncedBlock,
