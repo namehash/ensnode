@@ -1,6 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
+import { useMemo } from "react";
 
 import { GRAPHQL_API_EXAMPLE_QUERIES } from "@ensnode/ensnode-sdk/internal";
 
@@ -8,19 +9,10 @@ import { GraphiQLEditor } from "@/components/graphiql-editor";
 import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
 
-const defaultQuery = `# Welcome to this interactive playground for
-# ENSNode's GraphQL API!
-#
-# You can get started by typing your query here or by using
-# the Explorer on the left to select the data you want to query.
-#
-# There are also example queries in the tabs above ☝️
-`;
-
 export default function SubgraphGraphQLPage() {
   const searchParams = useSearchParams();
-  const initialQuery = searchParams.get("query") || defaultQuery;
-  const initialVariables = searchParams.get("variables") || "";
+  const initialQuery = searchParams.get("query");
+  const initialVariables = searchParams.get("variables");
 
   const namespace = useActiveNamespace();
   const { validatedSelectedConnection } = useSelectedConnection();
@@ -37,18 +29,25 @@ export default function SubgraphGraphQLPage() {
     );
   }
 
-  const url = new URL(`/api/graphql`, validatedSelectedConnection.url).toString();
+  const url = useMemo(
+    () => new URL(`/api/graphql`, validatedSelectedConnection.url).toString(),
+    [validatedSelectedConnection],
+  );
 
-  const defaultTabs = GRAPHQL_API_EXAMPLE_QUERIES.map(({ query, variables }) => ({
-    query: query.trim(),
-    variables: JSON.stringify(variables[namespace] ?? variables.default),
-  }));
+  const defaultTabs = useMemo(
+    () =>
+      GRAPHQL_API_EXAMPLE_QUERIES.map(({ query, variables }) => ({
+        query: query.trim(),
+        variables: JSON.stringify(variables[namespace] ?? variables.default, null, 2),
+      })),
+    [namespace],
+  );
 
   return (
     <GraphiQLEditor
       url={url}
-      initialQuery={initialQuery}
-      initialVariables={initialVariables}
+      initialQuery={initialQuery || undefined}
+      initialVariables={initialVariables || undefined}
       defaultTabs={defaultTabs}
     />
   );
