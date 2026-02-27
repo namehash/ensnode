@@ -1,6 +1,6 @@
 import { resolve } from "node:path";
 
-import { configDefaults, defineProject } from "vitest/config";
+import { defineProject } from "vitest/config";
 
 export default defineProject({
   resolve: {
@@ -9,6 +9,7 @@ export default defineProject({
     },
   },
   test: {
-    exclude: [...configDefaults.exclude, "**/*.integration.test.ts"],
+    include: ["src/**/*.integration.test.ts"],
+    globalSetup: "./src/test/integration/global-setup.ts",
   },
 });
