@@ -13,7 +13,6 @@ import { z } from "zod/v4";
 
 import { ENSNamespaceIds, type InterpretedName, type Node } from "../ens";
 import { asLowerCaseAddress } from "./address";
-import { BlockNumberRange } from "./blockrange";
 import {
   type CurrencyId,
   CurrencyIds,
@@ -207,31 +206,6 @@ export const makeCommaSeparatedList = (valueLabel: string = "Value") =>
  */
 export const makeBlockNumberSchema = (valueLabel: string = "Block number") =>
   makeNonNegativeIntegerSchema(valueLabel);
-
-/**
- * Parses an object value as the {@link BlockNumberRange} object.
- */
-export const makeBlockrangeSchema = (valueLabel: string = "Value") =>
-  z
-    .strictObject(
-      {
-        startBlock: makeBlockNumberSchema(`${valueLabel}.startBlock`).optional(),
-        endBlock: makeBlockNumberSchema(`${valueLabel}.endBlock`).optional(),
-      },
-      {
-        error: `${valueLabel} must be a valid BlockNumberRange object.`,
-      },
-    )
-    .refine(
-      (v) => {
-        if (v.startBlock && v.endBlock) {
-          return v.startBlock <= v.endBlock;
-        }
-
-        return true;
-      },
-      { error: `${valueLabel}: startBlock must be before or equal to endBlock` },
-    );
 
 /**
  * Parses an object value as the {@link BlockRef} object.

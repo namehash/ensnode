@@ -6,78 +6,6 @@ import {
 import type { BlockRef, ChainId, UnixTimestamp } from "../shared/types";
 
 /**
- * The type of block reference range for an indexed chain.
- */
-export const BlockRefRangeTypeIds = {
-  /**
-   * Represents that indexing of the chain should be performed for an indefinite range.
-   */
-  Indefinite: "indefinite",
-
-  /**
-   * Represents that indexing of the chain should be performed for a definite range.
-   */
-  Definite: "definite",
-} as const;
-
-/**
- * The derived string union of possible {@link BlockRefRangeTypeIds}.
- */
-export type BlockRefRangeTypeId = (typeof BlockRefRangeTypeIds)[keyof typeof BlockRefRangeTypeIds];
-
-/**
- * Block reference range for a chain whose indexing config `blockRangeType` is
- * {@link BlockRefRangeTypeIds.Indefinite}.
- *
- * Invariants:
- * - `blockRangeType` is always `BlockRefRangeTypeIds.Indefinite`.
- */
-export interface BlockRefRangeIndefinite {
-  /**
-   * The type of block reference range.
-   */
-  blockRangeType: typeof BlockRefRangeTypeIds.Indefinite;
-
-  /**
-   * A {@link BlockRef} to the block where indexing of the chain should start.
-   */
-  startBlock: BlockRef;
-}
-
-/**
- * Block reference range for a chain whose indexing config `blockRangeType` is
- * {@link BlockRefRangeTypeIds.Definite}.
- *
- * Invariants:
- * - `blockRangeType` is always `BlockRefRangeTypeIds.Definite`.
- * - `startBlock` is always before or the same as `endBlock`.
- */
-export interface BlockRefRangeDefinite {
-  /**
-   * The type of block reference range.
-   */
-  blockRangeType: typeof BlockRefRangeTypeIds.Definite;
-
-  /**
-   * A {@link BlockRef} to the block where indexing of the chain should start.
-   */
-  startBlock: BlockRef;
-
-  /**
-   * A {@link BlockRef} to the block where indexing of the chain should end.
-   */
-  endBlock: BlockRef;
-}
-
-/**
- * Block reference range for a chain.
- *
- * Use the `blockRangeType` field to determine the specific type interpretation
- * at runtime.
- */
-export type BlockRefRange = BlockRefRangeIndefinite | BlockRefRangeDefinite;
-
-/**
  * The status of indexing a chain at the time an indexing status snapshot
  * is captured.
  */
@@ -285,30 +213,6 @@ export type ChainIndexingStatusSnapshot =
   | ChainIndexingStatusSnapshotBackfill
   | ChainIndexingStatusSnapshotFollowing
   | ChainIndexingStatusSnapshotCompleted;
-
-/**
- * Create {@link BlockRefRange} for given block refs.
- *
- * @param startBlock required block ref
- * @param endBlock optional block ref
- */
-export function createIndexingConfig(
-  startBlock: BlockRef,
-  endBlock: BlockRef | null,
-): BlockRefRange {
-  if (endBlock) {
-    return {
-      blockRangeType: BlockRefRangeTypeIds.Definite,
-      startBlock,
-      endBlock,
-    } satisfies BlockRefRangeDefinite;
-  }
-
-  return {
-    blockRangeType: BlockRefRangeTypeIds.Indefinite,
-    startBlock,
-  } satisfies BlockRefRangeIndefinite;
-}
 
 /**
  * Get the timestamp of the lowest `config.startBlock` across all chains
