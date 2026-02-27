@@ -148,7 +148,6 @@ export const buildRankedReferrerMetricsPieSplit = (
  * Calculate the share of the award pool for a referrer.
  * @param referrer - The referrer to calculate the award pool share for.
  * @param aggregatedMetrics - Aggregated metrics for all referrers.
- * @param rules - The rules of the referral program.
  * @returns The referrer's share of the award pool as a number between 0 and 1 (inclusive).
  */
 export const calcReferrerAwardPoolSharePieSplit = (
