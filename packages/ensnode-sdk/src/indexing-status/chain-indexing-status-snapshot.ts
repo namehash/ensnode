@@ -1,3 +1,8 @@
+import {
+  type BlockRefRangeBounded,
+  type BlockRefRangeLeftBounded,
+  RangeTypeIds,
+} from "../shared/blockrange";
 import type { BlockRef, ChainId, UnixTimestamp } from "../shared/types";
 
 /**
@@ -123,6 +128,7 @@ export type ChainIndexingStatusId =
  *
  * Invariants:
  * - `chainStatus` is always {@link ChainIndexingStatusIds.Queued}.
+ * - `config` is always {@link BlockRefRangeLeftBounded} or {@link BlockRefRangeBounded}.
  */
 export interface ChainIndexingStatusSnapshotQueued {
   /**
@@ -134,7 +140,7 @@ export interface ChainIndexingStatusSnapshotQueued {
   /**
    * The indexing configuration of the chain.
    */
-  config: BlockRefRange;
+  config: BlockRefRangeLeftBounded | BlockRefRangeBounded;
 }
 
 /**
@@ -147,9 +153,9 @@ export interface ChainIndexingStatusSnapshotQueued {
  *
  * Note how `backfillEndBlock` is a "fixed target" that does not change during
  * the lifetime of an ENSIndexer process instance:
- * - If the `config` is {@link BlockRefRangeDefinite}:
+ * - If the `config` is {@link BlockRefRangeBounded}:
  *   `backfillEndBlock` is always the same as `config.endBlock`.
- * - If the `config` is {@link BlockRefRangeIndefinite}:
+ * - If the `config` is {@link BlockRefRangeLeftBounded}:
  *   `backfillEndBlock` is a {@link BlockRef} to what was the latest block on the
  *    chain when the ENSIndexer process was performing its initialization. Note how
  *    this means that if the backfill process takes X hours to complete, because the
@@ -163,15 +169,16 @@ export interface ChainIndexingStatusSnapshotQueued {
  * `chainStatus` remains {@link ChainIndexingStatusIds.Backfill}. After this internal
  * processing is completed `chainStatus` will transition:
  * - to {@link ChainIndexingStatusIds.Following} if the `config` is
- *   {@link BlockRefRangeIndefinite}.
+ *   {@link BlockRefRangeLeftBounded}.
  * - to {@link ChainIndexingStatusIds.Completed} if the `config` is
- *   {@link BlockRefRangeDefinite}.
+ *   {@link BlockRefRangeBounded}.
  *
  * Invariants:
  * - `chainStatus` is always {@link ChainIndexingStatusIds.Backfill}.
+ * - `config` is always {@link BlockRefRangeLeftBounded} or {@link BlockRefRangeBounded}
  * - `config.startBlock` is always before or the same as `latestIndexedBlock`
  * - `config.endBlock` is always the same as `backfillEndBlock` if and only if
- *   the config is {@link BlockRefRangeDefinite}.
+ *   the config is {@link BlockRefRangeBounded}.
  * - `latestIndexedBlock` is always before or the same as `backfillEndBlock`
  */
 export interface ChainIndexingStatusSnapshotBackfill {
@@ -184,7 +191,7 @@ export interface ChainIndexingStatusSnapshotBackfill {
   /**
    * The indexing configuration of the chain.
    */
-  config: BlockRefRange;
+  config: BlockRefRangeLeftBounded | BlockRefRangeBounded;
 
   /**
    * A {@link BlockRef} to the block that was most recently indexed as of the time the
@@ -204,7 +211,7 @@ export interface ChainIndexingStatusSnapshotBackfill {
  *
  * Invariants:
  * - `chainStatus` is always {@link ChainIndexingStatusIds.Following}.
- * - `config` is always {@link BlockRefRangeIndefinite}
+ * - `config` is always {@link BlockRefRangeLeftBounded}.
  * - `config.startBlock` is always before or the same as `latestIndexedBlock`
  * - `latestIndexedBlock` is always before or the same as `latestKnownBlock`
  */
@@ -218,7 +225,7 @@ export interface ChainIndexingStatusSnapshotFollowing {
   /**
    * The indexing configuration of the chain.
    */
-  config: BlockRefRangeIndefinite;
+  config: BlockRefRangeLeftBounded;
 
   /**
    * A {@link BlockRef} to the block that was most recently indexed as of the time the
@@ -244,7 +251,7 @@ export interface ChainIndexingStatusSnapshotFollowing {
  *
  * Invariants:
  * - `chainStatus` is always {@link ChainIndexingStatusIds.Completed}.
- * - `config` is always {@link BlockRefRangeDefinite}
+ * - `config` is always {@link BlockRefRangeBounded}.
  * - `config.startBlock` is always before or the same as `latestIndexedBlock`
  * - `latestIndexedBlock` is always the same as `config.endBlock`.
  */
@@ -258,7 +265,7 @@ export interface ChainIndexingStatusSnapshotCompleted {
   /**
    * The indexing configuration of the chain.
    */
-  config: BlockRefRangeDefinite;
+  config: BlockRefRangeBounded;
 
   /**
    * A {@link BlockRef} to the block that was most recently indexed as of the time the
@@ -335,7 +342,7 @@ export function getTimestampForLowestOmnichainStartBlock(
  * to be indexed across all chains.
  *
  * The "highest known block" for a chain depends on its status:
- * - `config.endBlock` for a "queued" chain (only if the config is `Definite`),
+ * - `config.endBlock` for a "queued" chain (only if the config range type is `Bounded`),
  * - `backfillEndBlock` for a "backfill" chain,
  * - `latestIndexedBlock` for a "completed" chain,
  * - `latestKnownBlock` for a "following" chain.
@@ -348,7 +355,7 @@ export function getTimestampForHighestOmnichainKnownBlock(
   for (const chain of chains) {
     switch (chain.chainStatus) {
       case ChainIndexingStatusIds.Queued:
-        if (chain.config.blockRangeType === BlockRefRangeTypeIds.Definite) {
+        if (chain.config.rangeType === RangeTypeIds.Bounded) {
           latestKnownBlockTimestamps.push(chain.config.endBlock.timestamp);
         }
         break;
