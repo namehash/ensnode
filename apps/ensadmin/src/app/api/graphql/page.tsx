@@ -2,19 +2,19 @@
 
 import { useSearchParams } from "next/navigation";
 
+import { GRAPHQL_API_EXAMPLE_QUERIES } from "@ensnode/ensnode-sdk/internal";
+
 import { GraphiQLEditor } from "@/components/graphiql-editor";
+import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
 
 const defaultQuery = `# Welcome to this interactive playground for
-# ENSNode's Subgraph-Compatible GraphQL API!
+# ENSNode's GraphQL API!
 #
 # You can get started by typing your query here or by using
-# the Explorer on the left to select the data
-# you want to query.
+# the Explorer on the left to select the data you want to query.
 #
-# When you are ready to execute your query,
-# press the pink Play icon -->
-#
+# There are also example queries in the tabs above ☝️
 `;
 
 export default function SubgraphGraphQLPage() {
@@ -22,6 +22,7 @@ export default function SubgraphGraphQLPage() {
   const initialQuery = searchParams.get("query") || defaultQuery;
   const initialVariables = searchParams.get("variables") || "";
 
+  const namespace = useActiveNamespace();
   const { validatedSelectedConnection } = useSelectedConnection();
 
   // TODO: we need a broader refactor to recognize the difference between
@@ -36,9 +37,19 @@ export default function SubgraphGraphQLPage() {
     );
   }
 
-  const url = new URL(`/subgraph`, validatedSelectedConnection.url).toString();
+  const url = new URL(`/api/graphql`, validatedSelectedConnection.url).toString();
+
+  const defaultTabs = GRAPHQL_API_EXAMPLE_QUERIES.map(({ query, variables }) => ({
+    query: query.trim(),
+    variables: JSON.stringify(variables[namespace] ?? variables.default),
+  }));
 
   return (
-    <GraphiQLEditor url={url} initialQuery={initialQuery} initialVariables={initialVariables} />
+    <GraphiQLEditor
+      url={url}
+      initialQuery={initialQuery}
+      initialVariables={initialVariables}
+      defaultTabs={defaultTabs}
+    />
   );
 }

@@ -12,7 +12,7 @@ export default function ActionsSubgraphCompatPage() {
   // a selected connection being in a valid format or not.
   if (!validatedSelectedConnection.isValid) return null;
 
-  const url = new URL(`/subgraph`, validatedSelectedConnection.url).toString();
+  const url = new URL(`/api/graphql`, validatedSelectedConnection.url).toString();
 
   return (
     <div className="flex w-full max-w-md items-center space-x-2">
