@@ -1,7 +1,6 @@
-import type { PublicClient } from "viem";
-
-import type { BlockrangeWithStartBlock } from "./blocks";
-import type { ChainId } from "./chains";
+import { type BlockNumberRangeWithStartBlock, buildBlockNumberRange } from "./blockrange";
+import type { CachedPublicClient } from "./cached-public-client";
+import type { ChainId, ChainIdString } from "./chains";
 import { LocalPonderClient } from "./local-ponder-client";
 
 export const chainIds = {
@@ -12,30 +11,30 @@ export const chainIds = {
 
 export function createLocalPonderClientMock(overrides?: {
   indexedChainIds?: Set<ChainId>;
-  chainsBlockrange?: Map<ChainId, BlockrangeWithStartBlock>;
-  cachedPublicClients?: Map<ChainId, PublicClient>;
+  indexedBlockranges?: Map<ChainId, BlockNumberRangeWithStartBlock>;
+  cachedPublicClients?: Record<ChainIdString, CachedPublicClient>;
 }): LocalPonderClient {
   const indexedChainIds =
     overrides?.indexedChainIds ?? new Set<ChainId>([chainIds.Mainnet, chainIds.Optimism]);
-  const chainsBlockrange =
-    overrides?.chainsBlockrange ??
-    new Map<ChainId, BlockrangeWithStartBlock>([
-      [chainIds.Mainnet, { startBlock: 50 }],
-      [chainIds.Optimism, { startBlock: 100 }],
-      [chainIds.Base, { startBlock: 500 }],
+  const indexedBlockranges =
+    overrides?.indexedBlockranges ??
+    new Map<ChainId, BlockNumberRangeWithStartBlock>([
+      [chainIds.Mainnet, buildBlockNumberRange(100, undefined)],
+      [chainIds.Optimism, buildBlockNumberRange(200, undefined)],
+      [chainIds.Base, buildBlockNumberRange(500, undefined)],
     ]);
   const cachedPublicClients =
     overrides?.cachedPublicClients ??
-    new Map<ChainId, PublicClient>([
-      [chainIds.Mainnet, {} as PublicClient],
-      [chainIds.Optimism, {} as PublicClient],
-      [chainIds.Base, {} as PublicClient],
-    ]);
+    ({
+      [`${chainIds.Mainnet}`]: {} as CachedPublicClient,
+      [`${chainIds.Optimism}`]: {} as CachedPublicClient,
+      [`${chainIds.Base}`]: {} as CachedPublicClient,
+    } satisfies Record<ChainIdString, CachedPublicClient>);
 
   return new LocalPonderClient(
     new URL("http://localhost:3000"),
     indexedChainIds,
-    chainsBlockrange,
+    indexedBlockranges,
     cachedPublicClients,
   );
 }

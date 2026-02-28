@@ -1,8 +1,8 @@
-import type { PublicClient } from "viem";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { earlierBlockRef, earliestBlockRef, latestBlockRef } from "./block-refs.mock";
-import type { BlockrangeWithStartBlock } from "./blocks";
+import { type BlockNumberRangeWithStartBlock, buildBlockNumberRange } from "./blockrange";
+import type { CachedPublicClient } from "./cached-public-client";
 import type { ChainId } from "./chains";
 import { PonderClient } from "./client";
 import {
@@ -28,37 +28,37 @@ describe("LocalPonderClient", () => {
       });
 
       // Act & Assert
-      expect(() => client.getChainBlockrange(chainIds.Base)).toThrowError(
-        /No blockrange found for chain ID: 8453/,
+      expect(() => client.getIndexedBlockrange(chainIds.Base)).toThrowError(
+        /Chain ID 8453 is not being indexed and therefore has no indexed blockrange./,
       );
 
       expect(() => client.getCachedPublicClient(chainIds.Base)).toThrowError(
-        /No cached public client found for chain ID: 8453/,
+        /Chain ID 8453 is not being indexed and therefore has no cached public client./,
       );
     });
 
     it("throws when chains blockrange is missing an indexed chain", () => {
       // Arrange
-      const chainsBlockrange = new Map<ChainId, BlockrangeWithStartBlock>([
-        [chainIds.Mainnet, { startBlock: 50 }],
+      const indexedBlockranges = new Map<ChainId, BlockNumberRangeWithStartBlock>([
+        [chainIds.Mainnet, buildBlockNumberRange(50, undefined)],
       ]);
 
       // Act & Assert
       expect(() =>
         createLocalPonderClientMock({
           indexedChainIds: new Set([chainIds.Mainnet, chainIds.Optimism]),
-          chainsBlockrange,
+          indexedBlockranges,
         }),
       ).toThrowError(
-        /Local Ponder Client is missing the following indexed chain IDs for Chains Blockrange: 10/,
+        /Local Ponder Client is missing the Indexed Blockranges for indexed chain IDs: 10/,
       );
     });
 
     it("throws when cached public clients are missing an indexed chain", () => {
       // Arrange
-      const cachedPublicClients = new Map<ChainId, PublicClient>([
-        [chainIds.Mainnet, {} as PublicClient],
-      ]);
+      const cachedPublicClients = {
+        [`${chainIds.Mainnet}`]: {} as CachedPublicClient,
+      };
 
       // Act & Assert
       expect(() =>
@@ -67,35 +67,37 @@ describe("LocalPonderClient", () => {
           indexedChainIds: new Set([chainIds.Mainnet, chainIds.Optimism]),
         }),
       ).toThrowError(
-        /Local Ponder Client is missing the following indexed chain IDs for Cached Public Clients: 10/,
+        /Local Ponder Client is missing the Cached Public Clients for indexed chain IDs: 10/,
       );
     });
   });
 
-  describe("getChainBlockrange()", () => {
+  describe("getIndexedBlockrange()", () => {
     it("returns blockrange for indexed chain", () => {
       // Arrange & Act
       const client = createLocalPonderClientMock({
         indexedChainIds: new Set([chainIds.Mainnet]),
-        chainsBlockrange: new Map<ChainId, BlockrangeWithStartBlock>([
-          [chainIds.Mainnet, { startBlock: 50 }],
+        indexedBlockranges: new Map<ChainId, BlockNumberRangeWithStartBlock>([
+          [chainIds.Mainnet, buildBlockNumberRange(50, undefined)],
         ]),
       });
 
-      expect(client.getChainBlockrange(chainIds.Mainnet)).toStrictEqual({ startBlock: 50 });
+      expect(client.getIndexedBlockrange(chainIds.Mainnet)).toStrictEqual(
+        buildBlockNumberRange(50, undefined),
+      );
     });
   });
 
   describe("getCachedPublicClient()", () => {
     it("returns cached client for indexed chain", () => {
       // Arrange
-      const optimismPublicClientMock = {} as PublicClient;
+      const optimismPublicClientMock = {} as CachedPublicClient;
 
       const client = createLocalPonderClientMock({
         indexedChainIds: new Set([chainIds.Optimism]),
-        cachedPublicClients: new Map<ChainId, PublicClient>([
-          [chainIds.Optimism, optimismPublicClientMock],
-        ]),
+        cachedPublicClients: {
+          [`${chainIds.Optimism}`]: optimismPublicClientMock,
+        },
       });
 
       // Act
@@ -159,7 +161,7 @@ describe("LocalPonderClient", () => {
               state: ChainIndexingStates.Historical,
               latestSyncedBlock: earlierBlockRef,
               historicalTotalBlocks: 10,
-              backfillEndBlock: 59,
+              backfillEndBlock: 100 + 10 - 1,
             },
           ],
           [
@@ -168,7 +170,7 @@ describe("LocalPonderClient", () => {
               state: ChainIndexingStates.Historical,
               latestSyncedBlock: earliestBlockRef,
               historicalTotalBlocks: 20,
-              backfillEndBlock: 119,
+              backfillEndBlock: 200 + 20 - 1,
             },
           ],
         ]),
@@ -200,7 +202,7 @@ describe("LocalPonderClient", () => {
 
       // Assert
       await expect(client.metrics()).rejects.toThrowError(
-        /Local Ponder Client is missing the following indexed chain IDs for Chains Indexing Metrics: 10/,
+        /Local Ponder Client is missing the Chains Indexing Metrics for indexed chain IDs: 10/,
       );
     });
   });
