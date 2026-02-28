@@ -19,7 +19,7 @@ import {
 
 export type LocalPonderClientMock = Pick<
   LocalPonderClient,
-  "metrics" | "status" | "getChainBlockrange" | "getCachedPublicClient"
+  "metrics" | "status" | "getIndexedBlockrange" | "getCachedPublicClient"
 >;
 
 export const chainId: ChainId = 1;
@@ -62,7 +62,7 @@ export function buildLocalPonderClientMock(
   return {
     metrics: vi.fn(),
     status: vi.fn(),
-    getChainBlockrange: vi.fn(),
+    getIndexedBlockrange: vi.fn(),
     getCachedPublicClient: vi.fn().mockReturnValue(publicClientMock),
     ...overrides,
   };

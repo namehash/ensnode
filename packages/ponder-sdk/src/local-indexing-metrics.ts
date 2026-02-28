@@ -13,7 +13,7 @@ import type { LocalPonderClient } from "./local-ponder-client";
  * Local Chain Indexing Metrics Historical
  *
  * Extends {@link ChainIndexingMetricsHistorical} with
- * the backfill end block reference.
+ * the backfill end block number.
  */
 export interface LocalChainIndexingMetricsHistorical extends ChainIndexingMetricsHistorical {
   /**
@@ -43,7 +43,7 @@ export type LocalChainIndexingMetrics =
  */
 export interface LocalPonderIndexingMetrics extends Omit<PonderIndexingMetrics, "chains"> {
   /**
-   * Map of indexed chain IDs to their respective indexing metrics.
+   * Map of indexed chain IDs to their respective local indexing metrics.
    *
    * Guarantees:
    * - Includes entry for at least one indexed chain.

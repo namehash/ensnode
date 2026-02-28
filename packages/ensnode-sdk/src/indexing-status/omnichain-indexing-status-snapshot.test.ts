@@ -306,7 +306,7 @@ describe("buildOmnichainIndexingStatusSnapshot()", () => {
         {
           chainStatus: ChainIndexingStatusIds.Queued,
           config: {
-            configType: ChainIndexingConfigTypeIds.Indefinite,
+            rangeType: RangeTypeIds.LeftBounded,
             startBlock: earliestBlockRef,
           },
         } satisfies ChainIndexingStatusSnapshotQueued,
@@ -316,7 +316,7 @@ describe("buildOmnichainIndexingStatusSnapshot()", () => {
         {
           chainStatus: ChainIndexingStatusIds.Queued,
           config: {
-            configType: ChainIndexingConfigTypeIds.Definite,
+            rangeType: RangeTypeIds.Bounded,
             startBlock: earlierBlockRef,
             endBlock: latestBlockRef,
           },
@@ -345,7 +345,7 @@ describe("buildOmnichainIndexingStatusSnapshot()", () => {
         {
           chainStatus: ChainIndexingStatusIds.Queued,
           config: {
-            configType: ChainIndexingConfigTypeIds.Indefinite,
+            rangeType: RangeTypeIds.LeftBounded,
             startBlock: evenLaterBlockRef,
           },
         } satisfies ChainIndexingStatusSnapshotQueued,
@@ -355,7 +355,7 @@ describe("buildOmnichainIndexingStatusSnapshot()", () => {
         {
           chainStatus: ChainIndexingStatusIds.Backfill,
           config: {
-            configType: ChainIndexingConfigTypeIds.Definite,
+            rangeType: RangeTypeIds.Bounded,
             startBlock: earliestBlockRef,
             endBlock: latestBlockRef,
           },
@@ -368,7 +368,7 @@ describe("buildOmnichainIndexingStatusSnapshot()", () => {
         {
           chainStatus: ChainIndexingStatusIds.Completed,
           config: {
-            configType: ChainIndexingConfigTypeIds.Definite,
+            rangeType: RangeTypeIds.Bounded,
             startBlock: earlierBlockRef,
             endBlock: latestBlockRef,
           },
@@ -393,7 +393,7 @@ describe("buildOmnichainIndexingStatusSnapshot()", () => {
         {
           chainStatus: ChainIndexingStatusIds.Backfill,
           config: {
-            configType: ChainIndexingConfigTypeIds.Indefinite,
+            rangeType: RangeTypeIds.LeftBounded,
             startBlock: earliestBlockRef,
           },
           latestIndexedBlock: earlierBlockRef,
@@ -405,7 +405,7 @@ describe("buildOmnichainIndexingStatusSnapshot()", () => {
         {
           chainStatus: ChainIndexingStatusIds.Following,
           config: {
-            configType: ChainIndexingConfigTypeIds.Indefinite,
+            rangeType: RangeTypeIds.LeftBounded,
             startBlock: earlierBlockRef,
           },
           latestIndexedBlock: laterBlockRef,
@@ -430,7 +430,7 @@ describe("buildOmnichainIndexingStatusSnapshot()", () => {
         {
           chainStatus: ChainIndexingStatusIds.Completed,
           config: {
-            configType: ChainIndexingConfigTypeIds.Definite,
+            rangeType: RangeTypeIds.Bounded,
             startBlock: earliestBlockRef,
             endBlock: laterBlockRef,
           },
@@ -442,7 +442,7 @@ describe("buildOmnichainIndexingStatusSnapshot()", () => {
         {
           chainStatus: ChainIndexingStatusIds.Completed,
           config: {
-            configType: ChainIndexingConfigTypeIds.Definite,
+            rangeType: RangeTypeIds.Bounded,
             startBlock: earlierBlockRef,
             endBlock: latestBlockRef,
           },

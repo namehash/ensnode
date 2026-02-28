@@ -1,3 +1,4 @@
+import type { RangeTypeIds } from "../shared/blockrange";
 import type { BlockRef, ChainId, UnixTimestamp } from "../shared/types";
 import { ChainIndexingStatusIds } from "./chain-indexing-status-snapshot";
 import type { OmnichainIndexingStatusSnapshot } from "./omnichain-indexing-status-snapshot";
