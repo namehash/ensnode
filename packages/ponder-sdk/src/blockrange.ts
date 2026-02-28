@@ -152,8 +152,8 @@ export function buildBlockNumberRange(
  * Merge multiple block number ranges into a single range.
  *
  * The resulting range is a union that covers all input ranges:
- * - Uses the minimum start block (undefined if any range is unbounded on the left)
- * - Uses the maximum end block (undefined if any range is unbounded on the right)
+ * - Uses the minimum defined start block (undefined if no ranges define a start block)
+ * - Uses the maximum defined end block (undefined if no ranges define an end block)
  *
  * Returns an unbounded range if no ranges are provided.
  *
@@ -169,14 +169,14 @@ export function mergeBlockNumberRanges(...ranges: BlockNumberRange[]): BlockNumb
   let maxEndBlock: BlockNumber | undefined;
 
   for (const range of ranges) {
-    // Update min start block (lower values win, undefined stays undefined)
+    // Update min start block (lower values win, undefined is ignored)
     if (range.startBlock !== undefined) {
       if (minStartBlock === undefined || range.startBlock < minStartBlock) {
         minStartBlock = range.startBlock;
       }
     }
 
-    // Update max end block (higher values win, undefined stays undefined)
+    // Update max end block (higher values win, undefined is ignored)
     if (range.endBlock !== undefined) {
       if (maxEndBlock === undefined || range.endBlock > maxEndBlock) {
         maxEndBlock = range.endBlock;
