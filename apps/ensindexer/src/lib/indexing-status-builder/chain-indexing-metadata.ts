@@ -1,4 +1,4 @@
-import type { BlockRefRange } from "@ensnode/ensnode-sdk";
+import type { BlockRefRangeWithStartBlock } from "@ensnode/ensnode-sdk";
 import type { ChainIndexingMetrics, ChainIndexingStatus } from "@ensnode/ponder-sdk";
 
 import type { BackfillScope } from "./backfill-scope";
@@ -25,7 +25,7 @@ export interface ChainIndexingMetadata {
    *
    * Defines the range of blocks to be indexed for the chain.
    */
-  indexingConfig: BlockRefRange;
+  indexingConfig: BlockRefRangeWithStartBlock;
 
   /**
    * Indexing metrics for the chain

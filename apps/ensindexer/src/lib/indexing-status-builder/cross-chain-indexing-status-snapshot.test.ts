@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  BlockRefRangeTypeIds,
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshotBackfill,
   type ChainIndexingStatusSnapshotCompleted,
@@ -14,7 +13,7 @@ import {
   type OmnichainIndexingStatusSnapshotFollowing,
   type OmnichainIndexingStatusSnapshotUnstarted,
 } from "@ensnode/ensnode-sdk";
-import type { UnixTimestamp } from "@ensnode/ponder-sdk";
+import { RangeTypeIds, type UnixTimestamp } from "@ensnode/ponder-sdk";
 
 import { earliestBlockRef, laterBlockRef, latestBlockRef } from "./block-refs.mock";
 import { buildCrossChainIndexingStatusSnapshotOmnichain } from "./cross-chain-indexing-status-snapshot";
@@ -32,7 +31,7 @@ describe("cross-chain-indexing-status-snapshot", () => {
           {
             chainStatus: ChainIndexingStatusIds.Backfill,
             config: {
-              blockRangeType: BlockRefRangeTypeIds.Definite,
+              rangeType: RangeTypeIds.Bounded,
               startBlock: earliestBlockRef,
               endBlock: latestBlockRef,
             },
@@ -67,7 +66,7 @@ describe("cross-chain-indexing-status-snapshot", () => {
               {
                 chainStatus: ChainIndexingStatusIds.Backfill,
                 config: {
-                  blockRangeType: BlockRefRangeTypeIds.Definite,
+                  rangeType: RangeTypeIds.Bounded,
                   startBlock: earliestBlockRef,
                   endBlock: latestBlockRef,
                 },
@@ -92,7 +91,7 @@ describe("cross-chain-indexing-status-snapshot", () => {
           {
             chainStatus: ChainIndexingStatusIds.Completed,
             config: {
-              blockRangeType: BlockRefRangeTypeIds.Definite,
+              rangeType: RangeTypeIds.Bounded,
               startBlock: earliestBlockRef,
               endBlock: latestBlockRef,
             },
@@ -126,7 +125,7 @@ describe("cross-chain-indexing-status-snapshot", () => {
               {
                 chainStatus: ChainIndexingStatusIds.Completed,
                 config: {
-                  blockRangeType: BlockRefRangeTypeIds.Definite,
+                  rangeType: RangeTypeIds.Bounded,
                   startBlock: earliestBlockRef,
                   endBlock: latestBlockRef,
                 },
@@ -150,7 +149,7 @@ describe("cross-chain-indexing-status-snapshot", () => {
           {
             chainStatus: ChainIndexingStatusIds.Following,
             config: {
-              blockRangeType: BlockRefRangeTypeIds.Indefinite,
+              rangeType: RangeTypeIds.LeftBounded,
               startBlock: earliestBlockRef,
             },
             latestIndexedBlock: laterBlockRef,
@@ -184,7 +183,7 @@ describe("cross-chain-indexing-status-snapshot", () => {
               {
                 chainStatus: ChainIndexingStatusIds.Following,
                 config: {
-                  blockRangeType: BlockRefRangeTypeIds.Indefinite,
+                  rangeType: RangeTypeIds.LeftBounded,
                   startBlock: earliestBlockRef,
                 },
                 latestIndexedBlock: laterBlockRef,
@@ -210,7 +209,7 @@ describe("cross-chain-indexing-status-snapshot", () => {
           {
             chainStatus: ChainIndexingStatusIds.Queued,
             config: {
-              blockRangeType: BlockRefRangeTypeIds.Definite,
+              rangeType: RangeTypeIds.Bounded,
               startBlock: earliestBlockRef,
               endBlock: latestBlockRef,
             },
@@ -243,7 +242,7 @@ describe("cross-chain-indexing-status-snapshot", () => {
               {
                 chainStatus: ChainIndexingStatusIds.Queued,
                 config: {
-                  blockRangeType: BlockRefRangeTypeIds.Definite,
+                  rangeType: RangeTypeIds.Bounded,
                   startBlock: earliestBlockRef,
                   endBlock: latestBlockRef,
                 },
@@ -266,7 +265,7 @@ describe("cross-chain-indexing-status-snapshot", () => {
           {
             chainStatus: ChainIndexingStatusIds.Completed,
             config: {
-              blockRangeType: BlockRefRangeTypeIds.Definite,
+              rangeType: RangeTypeIds.Bounded,
               startBlock: earliestBlockRef,
               endBlock: latestBlockRef,
             },
@@ -300,7 +299,7 @@ describe("cross-chain-indexing-status-snapshot", () => {
               {
                 chainStatus: ChainIndexingStatusIds.Completed,
                 config: {
-                  blockRangeType: BlockRefRangeTypeIds.Definite,
+                  rangeType: RangeTypeIds.Bounded,
                   startBlock: earliestBlockRef,
                   endBlock: latestBlockRef,
                 },
@@ -324,7 +323,7 @@ describe("cross-chain-indexing-status-snapshot", () => {
           {
             chainStatus: ChainIndexingStatusIds.Following,
             config: {
-              blockRangeType: BlockRefRangeTypeIds.Indefinite,
+              rangeType: RangeTypeIds.LeftBounded,
               startBlock: earliestBlockRef,
             },
             latestIndexedBlock: laterBlockRef,
@@ -336,7 +335,7 @@ describe("cross-chain-indexing-status-snapshot", () => {
           {
             chainStatus: ChainIndexingStatusIds.Backfill,
             config: {
-              blockRangeType: BlockRefRangeTypeIds.Definite,
+              rangeType: RangeTypeIds.Bounded,
               startBlock: earliestBlockRef,
               endBlock: latestBlockRef,
             },
@@ -371,7 +370,7 @@ describe("cross-chain-indexing-status-snapshot", () => {
               {
                 chainStatus: ChainIndexingStatusIds.Following,
                 config: {
-                  blockRangeType: BlockRefRangeTypeIds.Indefinite,
+                  rangeType: RangeTypeIds.LeftBounded,
                   startBlock: earliestBlockRef,
                 },
                 latestIndexedBlock: laterBlockRef,
@@ -383,7 +382,7 @@ describe("cross-chain-indexing-status-snapshot", () => {
               {
                 chainStatus: ChainIndexingStatusIds.Backfill,
                 config: {
-                  blockRangeType: BlockRefRangeTypeIds.Definite,
+                  rangeType: RangeTypeIds.Bounded,
                   startBlock: earliestBlockRef,
                   endBlock: latestBlockRef,
                 },

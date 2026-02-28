@@ -15,18 +15,19 @@ import { prettifyError } from "zod/v4/core";
 
 import {
   type BlockRef,
-  BlockRefRangeTypeIds,
+  type BlockRefRangeWithStartBlock,
+  buildBlockRefRange,
   type ChainId,
   type ChainIdString,
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshot,
   type ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill,
-  createIndexingConfig,
   type DeepPartial,
   deserializeChainIndexingStatusSnapshot,
   getOmnichainIndexingCursor,
   getOmnichainIndexingStatus,
   OmnichainIndexingStatusIds,
+  RangeTypeIds,
   type SerializedChainIndexingStatusSnapshot,
   type SerializedChainIndexingStatusSnapshotBackfill,
   type SerializedChainIndexingStatusSnapshotCompleted,
@@ -135,7 +136,10 @@ export function createChainIndexingSnapshot(
   } = chainMetadata;
 
   const { startBlock, endBlock } = chainBlocksConfig;
-  const config = createIndexingConfig(startBlock, endBlock);
+  const config: BlockRefRangeWithStartBlock =
+    endBlock !== null
+      ? buildBlockRefRange(startBlock, endBlock)
+      : buildBlockRefRange(startBlock, undefined);
 
   // In omnichain ordering, if the startBlock is the same as the
   // status block, the chain has not started yet.
@@ -147,9 +151,9 @@ export function createChainIndexingSnapshot(
   }
 
   if (isSyncComplete) {
-    if (config.blockRangeType !== BlockRefRangeTypeIds.Definite) {
+    if (config.rangeType !== RangeTypeIds.Bounded) {
       throw new Error(
-        `The '${ChainIndexingStatusIds.Completed}' indexing status can be only created with the '${BlockRefRangeTypeIds.Definite}' indexing config type.`,
+        `The '${ChainIndexingStatusIds.Completed}' indexing status can be only created with the '${RangeTypeIds.Bounded}' indexing config range type.`,
       );
     }
 
@@ -161,9 +165,9 @@ export function createChainIndexingSnapshot(
   }
 
   if (isSyncRealtime) {
-    if (config.blockRangeType !== BlockRefRangeTypeIds.Indefinite) {
+    if (config.rangeType !== RangeTypeIds.LeftBounded) {
       throw new Error(
-        `The '${ChainIndexingStatusIds.Following}' indexing status can be only created with the '${BlockRefRangeTypeIds.Indefinite}' indexing config type.`,
+        `The '${ChainIndexingStatusIds.Following}' indexing status can be only created with the '${RangeTypeIds.LeftBounded}' indexing config range type.`,
       );
     }
 
@@ -171,10 +175,7 @@ export function createChainIndexingSnapshot(
       chainStatus: ChainIndexingStatusIds.Following,
       latestIndexedBlock: chainStatusBlock,
       latestKnownBlock: chainSyncBlock,
-      config: {
-        blockRangeType: config.blockRangeType,
-        startBlock: config.startBlock,
-      },
+      config,
     } satisfies SerializedChainIndexingStatusSnapshotFollowing);
   }
 

@@ -14,12 +14,13 @@
 
 import type { AddressConfig, ChainConfig, CreateConfigReturnType } from "ponder";
 
+import { deserializeBlockNumber } from "@ensnode/ensnode-sdk";
 import {
   type BlockNumber,
-  type Blockrange,
-  deserializeBlockNumber,
-  deserializeBlockrange,
-} from "@ensnode/ensnode-sdk";
+  type BlockNumberRange,
+  buildBlockNumberRange,
+  type PonderBlockNumberRange,
+} from "@ensnode/ponder-sdk";
 
 /**
  * Chain Name
@@ -35,13 +36,13 @@ export type ChainName = string;
 export type PonderConfigDatasourceFlat = {
   chain: ChainName;
 } & AddressConfig &
-  Blockrange;
+  PonderBlockNumberRange;
 
 /**
  * Ponder config datasource with a nested `chain` value.
  */
 export type PonderConfigDatasourceNested = {
-  chain: Record<ChainName, AddressConfig & Blockrange>;
+  chain: Record<ChainName, AddressConfig & PonderBlockNumberRange>;
 };
 
 /**
@@ -96,15 +97,17 @@ function isPonderDatasourceNested(
 }
 
 /**
- * Get a {@link Blockrange} for each indexed chain.
+ * Get a {@link BlockNumberRange} for each indexed chain.
  *
  * Invariants:
  * - every chain include a startBlock,
  * - some chains may include an endBlock,
  * - all present startBlock and endBlock values are valid {@link BlockNumber} values.
  */
-export function getChainsBlockrange(ponderConfig: PonderConfigType): Record<ChainName, Blockrange> {
-  const chainsBlockrange = {} as Record<ChainName, Blockrange>;
+export function getChainsBlockrange(
+  ponderConfig: PonderConfigType,
+): Record<ChainName, BlockNumberRange> {
+  const chainsBlockrange = {} as Record<ChainName, BlockNumberRange>;
 
   // 0. Get all ponder sources (includes chain + startBlock & endBlock)
   const ponderSources = [
@@ -121,8 +124,8 @@ export function getChainsBlockrange(ponderConfig: PonderConfigType): Record<Chai
     // 1.1. For every Ponder source (accounts, blocks, contracts),
     //      extract startBlock number (required) and endBlock number (optional).
     for (const ponderSource of ponderSources) {
-      let startBlock: Blockrange["startBlock"];
-      let endBlock: Blockrange["endBlock"];
+      let startBlock: BlockNumberRange["startBlock"];
+      let endBlock: BlockNumberRange["endBlock"];
 
       if (isPonderDatasourceFlat(ponderSource) && ponderSource.chain === chainName) {
         startBlock = ponderSource.startBlock;
@@ -165,11 +168,10 @@ export function getChainsBlockrange(ponderConfig: PonderConfigType): Record<Chai
     }
 
     // 5. Assign a valid blockrange to the chain
-
-    chainsBlockrange[chainName] = deserializeBlockrange({
-      startBlock: chainLowestStartBlock,
-      endBlock: chainHighestEndBlock,
-    });
+    chainsBlockrange[chainName] = buildBlockNumberRange(
+      chainLowestStartBlock,
+      chainHighestEndBlock,
+    );
   }
 
   return chainsBlockrange;

@@ -60,6 +60,13 @@ export interface BlockNumberRangeBounded {
 }
 
 /**
+ * Block number range with start block defined.
+ *
+ * This is a useful type for representing block ranges for indexed chains.
+ */
+export type BlockNumberRangeWithStartBlock = BlockNumberRangeLeftBounded | BlockNumberRangeBounded;
+
+/**
  * Block number range
  *
  * Use the `rangeType` field to determine the specific type interpretation
@@ -197,6 +204,13 @@ export type BlockRefRange =
   | BlockRefRangeLeftBounded
   | BlockRefRangeRightBounded
   | BlockRefRangeBounded;
+
+/**
+ * Block ref range with start block defined.
+ *
+ * This is a useful type for representing block ranges for indexed chains.
+ */
+export type BlockRefRangeWithStartBlock = BlockRefRangeLeftBounded | BlockRefRangeBounded;
 
 /**
  * Build a block ref range object.

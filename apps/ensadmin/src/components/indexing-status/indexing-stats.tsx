@@ -8,7 +8,6 @@ import { ChainIcon, ChainName } from "@namehash/namehash-ui";
 import type { PropsWithChildren, ReactElement, ReactNode } from "react";
 
 import {
-  BlockRefRangeTypeIds,
   ChainIndexingStatusIds,
   type CrossChainIndexingStatusSnapshotOmnichain,
   IndexingStatusResponseCodes,
@@ -19,6 +18,7 @@ import {
   type OmnichainIndexingStatusSnapshotCompleted,
   type OmnichainIndexingStatusSnapshotFollowing,
   type OmnichainIndexingStatusSnapshotUnstarted,
+  RangeTypeIds,
   type RealtimeIndexingStatusProjection,
   sortChainStatusesByStartBlockAsc,
 } from "@ensnode/ensnode-sdk";
@@ -68,8 +68,7 @@ export function IndexingStatsForSnapshotUnstarted({
   const chainEntries = sortChainStatusesByStartBlockAsc([...omnichainSnapshot.chains.entries()]);
 
   return chainEntries.map(([chainId, chain]) => {
-    const endBlock =
-      chain.config.blockRangeType === BlockRefRangeTypeIds.Definite ? chain.config.endBlock : null;
+    const endBlock = chain.config.rangeType === RangeTypeIds.Bounded ? chain.config.endBlock : null;
 
     return (
       <Card key={`Chain#${chainId}`}>
@@ -117,8 +116,7 @@ export function IndexingStatsForSnapshotBackfill({
   const chainEntries = sortChainStatusesByStartBlockAsc([...omnichainSnapshot.chains.entries()]);
 
   return chainEntries.map(([chainId, chain]) => {
-    const endBlock =
-      chain.config.blockRangeType === BlockRefRangeTypeIds.Definite ? chain.config.endBlock : null;
+    const endBlock = chain.config.rangeType === RangeTypeIds.Bounded ? chain.config.endBlock : null;
 
     return (
       <Card key={`Chain#${chainId}`}>
@@ -182,8 +180,7 @@ export function IndexingStatsForSnapshotCompleted({
   const chainEntries = sortChainStatusesByStartBlockAsc([...omnichainSnapshot.chains.entries()]);
 
   return chainEntries.map(([chainId, chain]) => {
-    const endBlock =
-      chain.config.blockRangeType === BlockRefRangeTypeIds.Definite ? chain.config.endBlock : null;
+    const endBlock = chain.config.rangeType === RangeTypeIds.Bounded ? chain.config.endBlock : null;
 
     return (
       <Card key={`Chain#${chainId}`}>
@@ -237,8 +234,7 @@ export function IndexingStatsForSnapshotFollowing({
   const chainEntries = sortChainStatusesByStartBlockAsc([...omnichainSnapshot.chains.entries()]);
 
   return chainEntries.map(([chainId, chain]) => {
-    const endBlock =
-      chain.config.blockRangeType === BlockRefRangeTypeIds.Definite ? chain.config.endBlock : null;
+    const endBlock = chain.config.rangeType === RangeTypeIds.Bounded ? chain.config.endBlock : null;
 
     return (
       <Card key={`Chain#${chainId}`}>

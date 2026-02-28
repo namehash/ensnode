@@ -13,6 +13,7 @@
 import config from "@/config";
 
 import {
+  type BlockNumberRange,
   type CrossChainIndexingStatusSnapshotOmnichain,
   CrossChainIndexingStrategyIds,
   deserializeOmnichainIndexingStatusSnapshot,
@@ -42,7 +43,7 @@ import {
 const chainNames = Object.keys(ponderConfig.chains) as string[];
 
 /**
- * A {@link Blockrange} for each indexed chain.
+ * A {@link BlockNumberRange} for each indexed chain.
  *
  * Invariants:
  * - every chain include a startBlock,
