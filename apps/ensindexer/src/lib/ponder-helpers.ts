@@ -15,8 +15,13 @@ import {
   ensTestEnvChain,
   maybeGetDatasource,
 } from "@ensnode/datasources";
-import type { Blockrange, ChainId, ENSNamespaceId } from "@ensnode/ensnode-sdk";
+import type { ChainId, ENSNamespaceId } from "@ensnode/ensnode-sdk";
 import type { BlockInfo, PonderStatus } from "@ensnode/ponder-metadata";
+import {
+  type BlockNumberRange,
+  buildBlockNumberRange,
+  type PonderBlockNumberRange,
+} from "@ensnode/ponder-sdk";
 
 import type { ENSIndexerConfig } from "@/config/types";
 
@@ -60,9 +65,9 @@ export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<LogE
  *  i.e. (globalStartBlock || 0) <= (contractStartBlock || 0) <= (contractEndBlock if specificed) <= (globalEndBlock if specificed)
  */
 export const constrainBlockrange = (
-  globalBlockrange: Blockrange,
-  contractBlockrange: Blockrange,
-): Blockrange => {
+  globalBlockrange: BlockNumberRange,
+  contractBlockrange: BlockNumberRange,
+): BlockNumberRange => {
   const highestStartBlock = Math.max(
     globalBlockrange.startBlock || 0,
     contractBlockrange.startBlock || 0,
@@ -75,10 +80,12 @@ export const constrainBlockrange = (
 
   const isEndConstrained = Number.isFinite(lowestEndBlock);
 
-  return {
-    startBlock: isEndConstrained ? Math.min(highestStartBlock, lowestEndBlock) : highestStartBlock,
-    endBlock: isEndConstrained ? lowestEndBlock : undefined,
-  };
+  const startBlock = isEndConstrained
+    ? Math.min(highestStartBlock, lowestEndBlock)
+    : highestStartBlock;
+  const endBlock = isEndConstrained ? lowestEndBlock : undefined;
+
+  return buildBlockNumberRange(startBlock, endBlock);
 };
 
 /**
@@ -158,7 +165,7 @@ interface PonderContractBlockConfig {
   contracts: Record<
     string,
     {
-      chain: Record<string, Blockrange>;
+      chain: Record<string, PonderBlockNumberRange>;
     }
   >;
 }
@@ -321,21 +328,21 @@ export function chainsConnectionConfig(
  * Builds a `ponder#ContractConfig['chain']` given a contract's config, constraining the contract's
  * indexing range by the globally configured blockrange.
  *
- * @param {Blockrange} globalBlockrange
+ * @param {BlockNumberRange} globalBlockrange
  * @param {number} chainId
  * @param {ContractConfig} contractConfig
  *
  * @returns network configuration based on the contract
  */
 export function chainConfigForContract<CONTRACT_CONFIG extends ContractConfig>(
-  globalBlockrange: Blockrange,
+  globalBlockrange: BlockNumberRange,
   chainId: number,
   contractConfig: CONTRACT_CONFIG,
 ) {
-  const contractBlockrange = {
-    startBlock: contractConfig.startBlock,
-    endBlock: contractConfig.endBlock,
-  } satisfies Blockrange;
+  const contractBlockrange = buildBlockNumberRange(
+    contractConfig.startBlock,
+    contractConfig.endBlock,
+  );
 
   // Ponder will index the contract in perpetuity if endBlock is `undefined`
   const { startBlock, endBlock } = constrainBlockrange(globalBlockrange, contractBlockrange);

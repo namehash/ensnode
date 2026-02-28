@@ -2,12 +2,13 @@ import { describe, expect, it } from "vitest";
 
 import {
   type BlockRef,
-  BlockRefRangeTypeIds,
+  buildBlockNumberRange,
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshotBackfill,
   type ChainIndexingStatusSnapshotCompleted,
   type ChainIndexingStatusSnapshotFollowing,
   type ChainIndexingStatusSnapshotQueued,
+  RangeTypeIds,
 } from "@ensnode/ensnode-sdk";
 
 import { type ChainMetadata, createChainIndexingSnapshot } from "./chains";
@@ -52,7 +53,7 @@ describe("getChainsBlockrange", () => {
 
     // assert
     expect(result).toStrictEqual({
-      mainnet: { startBlock: 444_444_333, endBlock: 999_999_999 },
+      mainnet: buildBlockNumberRange(444_444_333, 999_999_999),
     });
   });
 
@@ -91,7 +92,7 @@ describe("getChainsBlockrange", () => {
 
     // assert
     expect(result).toStrictEqual({
-      mainnet: { startBlock: 444_444_333, endBlock: undefined },
+      mainnet: buildBlockNumberRange(444_444_333, undefined),
     });
   });
 
@@ -134,7 +135,7 @@ describe("getChainsBlockrange", () => {
 
     // assert
     expect(result).toStrictEqual({
-      mainnet: { startBlock: 50, endBlock: 999 },
+      mainnet: buildBlockNumberRange(50, 999),
     });
   });
 
@@ -202,8 +203,8 @@ describe("getChainsBlockrange", () => {
 
     // assert
     expect(result).toStrictEqual({
-      mainnet: { startBlock: 444_444_333, endBlock: undefined },
-      base: { startBlock: 1_799_430, endBlock: undefined },
+      mainnet: buildBlockNumberRange(444_444_333, undefined),
+      base: buildBlockNumberRange(1_799_430, undefined),
     });
   });
 
@@ -251,8 +252,8 @@ describe("getChainsBlockrange", () => {
 
     // assert
     expect(result).toStrictEqual({
-      mainnet: { startBlock: 444_444_333, endBlock: undefined },
-      base: { startBlock: 1_799_430, endBlock: undefined },
+      mainnet: buildBlockNumberRange(444_444_333, undefined),
+      base: buildBlockNumberRange(1_799_430, undefined),
     });
   });
 
@@ -300,14 +301,14 @@ describe("getChainsBlockrange", () => {
 
     // assert
     expect(result).toStrictEqual({
-      mainnet: { startBlock: 444_444_333, endBlock: undefined },
-      base: { startBlock: 1_799_430, endBlock: undefined },
+      mainnet: buildBlockNumberRange(444_444_333, undefined),
+      base: buildBlockNumberRange(1_799_430, undefined),
     });
   });
 });
 
 describe("createChainIndexingSnapshot", () => {
-  it("returns 'queued' status if startBlock equals statusBlock (definite)", () => {
+  it("returns 'queued' status if startBlock equals statusBlock (config range bounded)", () => {
     // arrange
     const meta: ChainMetadata = {
       chainId: 1,
@@ -327,14 +328,14 @@ describe("createChainIndexingSnapshot", () => {
     expect(chainIndexingStatus).toStrictEqual({
       chainStatus: ChainIndexingStatusIds.Queued,
       config: {
-        blockRangeType: BlockRefRangeTypeIds.Definite,
+        rangeType: RangeTypeIds.Bounded,
         startBlock: blockRef(10, 1000),
         endBlock: blockRef(20, 2000),
       },
     } satisfies ChainIndexingStatusSnapshotQueued);
   });
 
-  it("returns 'queued' status if startBlock equals statusBlock (indefinite)", () => {
+  it("returns 'queued' status if startBlock equals statusBlock (config range left bounded)", () => {
     // arrange
     const meta: ChainMetadata = {
       chainId: 1,
@@ -354,7 +355,7 @@ describe("createChainIndexingSnapshot", () => {
     expect(chainIndexingStatus).toStrictEqual({
       chainStatus: ChainIndexingStatusIds.Queued,
       config: {
-        blockRangeType: BlockRefRangeTypeIds.Indefinite,
+        rangeType: RangeTypeIds.LeftBounded,
         startBlock: blockRef(10, 1000),
       },
     } satisfies ChainIndexingStatusSnapshotQueued);
@@ -380,7 +381,7 @@ describe("createChainIndexingSnapshot", () => {
     expect(chainIndexingStatus).toStrictEqual({
       chainStatus: ChainIndexingStatusIds.Completed,
       config: {
-        blockRangeType: BlockRefRangeTypeIds.Definite,
+        rangeType: RangeTypeIds.Bounded,
         startBlock: blockRef(10, 1000),
         endBlock: blockRef(20, 2000),
       },
@@ -408,7 +409,7 @@ describe("createChainIndexingSnapshot", () => {
     expect(chainIndexingStatus).toStrictEqual({
       chainStatus: ChainIndexingStatusIds.Following,
       config: {
-        blockRangeType: BlockRefRangeTypeIds.Indefinite,
+        rangeType: RangeTypeIds.LeftBounded,
         startBlock: blockRef(10, 1000),
       },
       latestIndexedBlock: blockRef(25, 2500),
@@ -416,7 +417,7 @@ describe("createChainIndexingSnapshot", () => {
     } satisfies ChainIndexingStatusSnapshotFollowing);
   });
 
-  it("returns Backfill status otherwise (definite config)", () => {
+  it("returns Backfill status otherwise (config range bounded)", () => {
     // arrange
     const meta: ChainMetadata = {
       chainId: 1,
@@ -436,7 +437,7 @@ describe("createChainIndexingSnapshot", () => {
     expect(chainIndexingStatus).toStrictEqual({
       chainStatus: ChainIndexingStatusIds.Backfill,
       config: {
-        blockRangeType: BlockRefRangeTypeIds.Definite,
+        rangeType: RangeTypeIds.Bounded,
         startBlock: blockRef(10, 1000),
         endBlock: blockRef(20, 2000),
       },
@@ -445,7 +446,7 @@ describe("createChainIndexingSnapshot", () => {
     } satisfies ChainIndexingStatusSnapshotBackfill);
   });
 
-  it("returns Backfill status otherwise (indefinite config)", () => {
+  it("returns Backfill status otherwise (config range left bounded)", () => {
     // arrange
     const meta: ChainMetadata = {
       chainId: 1,
@@ -465,7 +466,7 @@ describe("createChainIndexingSnapshot", () => {
     expect(chainIndexingStatus).toStrictEqual({
       chainStatus: ChainIndexingStatusIds.Backfill,
       config: {
-        blockRangeType: BlockRefRangeTypeIds.Indefinite,
+        rangeType: RangeTypeIds.LeftBounded,
         startBlock: blockRef(10, 1000),
       },
       latestIndexedBlock: blockRef(15, 1500),

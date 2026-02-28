@@ -5,7 +5,7 @@
  * based on configured chain names, chains blockranges, and RPC calls.
  */
 
-import type { BlockRef, Blockrange } from "@ensnode/ensnode-sdk";
+import type { BlockNumberRange, BlockRef } from "@ensnode/ensnode-sdk";
 
 import type { ChainName } from "./config";
 import type { PrometheusMetrics } from "./metrics";
@@ -39,7 +39,7 @@ export interface ChainBlockRefs {
  */
 export async function getChainsBlockRefs(
   chainNames: ChainName[],
-  chainsBlockrange: Record<ChainName, Blockrange>,
+  chainsBlockrange: Record<ChainName, BlockNumberRange>,
   metrics: PrometheusMetrics,
   publicClients: Record<ChainName, PublicClient>,
 ): Promise<Map<ChainName, ChainBlockRefs>> {

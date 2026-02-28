@@ -107,41 +107,6 @@ export interface BlockRef {
 }
 
 /**
- * Block range
- *
- * Represents a range of blocks
- */
-export interface Blockrange<BlockType = BlockNumber> {
-  /** Start block number */
-  startBlock?: BlockType;
-
-  /** End block number */
-  endBlock?: BlockType;
-}
-
-/**
- * Block range with required start block
- *
- * Represents a range of blocks where the start block is required and the end
- * block is optional.
- */
-export interface BlockrangeWithStartBlock {
-  /**
-   * Start block number
-   *
-   * Guaranteed to be lower than `endBlock` when both are present.
-   */
-  startBlock: BlockNumber;
-
-  /**
-   * End block number
-   *
-   * Guaranteed to be greater than `startBlock` when both are present.
-   */
-  endBlock?: BlockNumber;
-}
-
-/**
  * Duration
  *
  * Representing a duration in seconds.
