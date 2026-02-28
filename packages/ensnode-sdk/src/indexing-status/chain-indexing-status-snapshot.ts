@@ -1,6 +1,7 @@
 import {
   type BlockRefRangeBounded,
   type BlockRefRangeLeftBounded,
+  type BlockRefRangeWithStartBlock,
   RangeTypeIds,
 } from "../shared/blockrange";
 import type { BlockRef, ChainId, UnixTimestamp } from "../shared/types";
@@ -56,7 +57,6 @@ export type ChainIndexingStatusId =
  *
  * Invariants:
  * - `chainStatus` is always {@link ChainIndexingStatusIds.Queued}.
- * - `config` is always {@link BlockRefRangeLeftBounded} or {@link BlockRefRangeBounded}.
  */
 export interface ChainIndexingStatusSnapshotQueued {
   /**
@@ -68,7 +68,7 @@ export interface ChainIndexingStatusSnapshotQueued {
   /**
    * The indexing configuration of the chain.
    */
-  config: BlockRefRangeLeftBounded | BlockRefRangeBounded;
+  config: BlockRefRangeWithStartBlock;
 }
 
 /**
@@ -103,7 +103,6 @@ export interface ChainIndexingStatusSnapshotQueued {
  *
  * Invariants:
  * - `chainStatus` is always {@link ChainIndexingStatusIds.Backfill}.
- * - `config` is always {@link BlockRefRangeLeftBounded} or {@link BlockRefRangeBounded}
  * - `config.startBlock` is always before or the same as `latestIndexedBlock`
  * - `config.endBlock` is always the same as `backfillEndBlock` if and only if
  *   the config is {@link BlockRefRangeBounded}.
@@ -119,7 +118,7 @@ export interface ChainIndexingStatusSnapshotBackfill {
   /**
    * The indexing configuration of the chain.
    */
-  config: BlockRefRangeLeftBounded | BlockRefRangeBounded;
+  config: BlockRefRangeWithStartBlock;
 
   /**
    * A {@link BlockRef} to the block that was most recently indexed as of the time the
@@ -139,7 +138,6 @@ export interface ChainIndexingStatusSnapshotBackfill {
  *
  * Invariants:
  * - `chainStatus` is always {@link ChainIndexingStatusIds.Following}.
- * - `config` is always {@link BlockRefRangeLeftBounded}.
  * - `config.startBlock` is always before or the same as `latestIndexedBlock`
  * - `latestIndexedBlock` is always before or the same as `latestKnownBlock`
  */
@@ -179,7 +177,6 @@ export interface ChainIndexingStatusSnapshotFollowing {
  *
  * Invariants:
  * - `chainStatus` is always {@link ChainIndexingStatusIds.Completed}.
- * - `config` is always {@link BlockRefRangeBounded}.
  * - `config.startBlock` is always before or the same as `latestIndexedBlock`
  * - `latestIndexedBlock` is always the same as `config.endBlock`.
  */

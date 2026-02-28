@@ -15,8 +15,7 @@ import { prettifyError } from "zod/v4/core";
 
 import {
   type BlockRef,
-  type BlockRefRangeBounded,
-  type BlockRefRangeLeftBounded,
+  type BlockRefRangeWithStartBlock,
   buildBlockRefRange,
   type ChainId,
   type ChainIdString,
@@ -137,7 +136,7 @@ export function createChainIndexingSnapshot(
   } = chainMetadata;
 
   const { startBlock, endBlock } = chainBlocksConfig;
-  const config: BlockRefRangeLeftBounded | BlockRefRangeBounded =
+  const config: BlockRefRangeWithStartBlock =
     endBlock !== null
       ? buildBlockRefRange(startBlock, endBlock)
       : buildBlockRefRange(startBlock, undefined);
