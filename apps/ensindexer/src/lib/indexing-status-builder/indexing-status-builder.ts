@@ -2,15 +2,12 @@ import {
   type BlockRef,
   bigIntToNumber,
   buildOmnichainIndexingStatusSnapshot,
-  type ChainIndexingConfigDefinite,
-  type ChainIndexingConfigIndefinite,
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshot,
   type ChainIndexingStatusSnapshotBackfill,
   type ChainIndexingStatusSnapshotCompleted,
   type ChainIndexingStatusSnapshotFollowing,
   type ChainIndexingStatusSnapshotQueued,
-  createIndexingConfig,
   deserializeBlockRef,
   type OmnichainIndexingStatusSnapshot,
   type Unvalidated,
@@ -18,24 +15,30 @@ import {
 } from "@ensnode/ensnode-sdk";
 import {
   type BlockNumber,
+  type BlockNumberRangeWithStartBlock,
+  type BlockRefRangeBounded,
+  type BlockRefRangeLeftBounded,
+  type BlockRefRangeWithStartBlock,
+  buildBlockRefRange,
   type ChainId,
-  type ChainIndexingBlocks,
+  type ChainIndexingConfig,
   ChainIndexingStates,
   type ChainIndexingStatus,
   isBlockRefEqualTo,
   type LocalChainIndexingMetrics,
-  type LocalChainIndexingMetricsHistorical,
   type LocalPonderClient,
+  RangeTypeIds,
 } from "@ensnode/ponder-sdk";
 
-interface ChainIndexingBlockRefs {
-  startBlock: BlockRef;
-  endBlock: BlockRef | null;
-  backfillEndBlock: BlockRef;
-}
-
 export class IndexingStatusBuilder {
-  private _chainsIndexingBlockRefs: Map<ChainId, ChainIndexingBlockRefs> | undefined;
+  /**
+   * Immutable Indexing Config
+   *
+   * This property is used to cache the indexing config for indexed chains
+   * after the config is fetched for the first time. This is done to avoid
+   * redundant RPC calls to fetch block references.
+   */
+  private _immutableIndexingConfig: Map<ChainId, ChainIndexingConfig> | undefined;
 
   constructor(private localPonderClient: LocalPonderClient) {}
 
@@ -48,19 +51,17 @@ export class IndexingStatusBuilder {
       this.localPonderClient.status(),
     ]);
 
-    // Fetch the chains indexing block refs if not already cached.
-    if (!this._chainsIndexingBlockRefs) {
+    // Fetch and cache the immutable indexing config for indexed chains if not already cached.
+    if (!this._immutableIndexingConfig) {
       const chainsIndexingMetrics = localPonderIndexingMetrics.chains;
-      this.assertChainsIndexingMetricsHistorical(chainsIndexingMetrics);
 
-      this._chainsIndexingBlockRefs =
-        await this.fetchChainsIndexingBlockRefs(chainsIndexingMetrics);
+      this._immutableIndexingConfig = await this.fetchChainsIndexingConfig(chainsIndexingMetrics);
     }
 
     const chainStatusSnapshots = this.buildChainIndexingStatusSnapshots(
       localPonderIndexingMetrics.chains,
       localPonderStatus.chains,
-      this._chainsIndexingBlockRefs,
+      this._immutableIndexingConfig,
     );
 
     return buildOmnichainIndexingStatusSnapshot(chainStatusSnapshots);
@@ -71,7 +72,7 @@ export class IndexingStatusBuilder {
    *
    * @param chainIndexingMetrics - Indexing metrics for all indexed chains.
    * @param chainIndexingStatuses - Indexing statuses for all indexed chains.
-   * @param chainsIndexingBlockRefs - Block references for all indexed chains.
+   * @param chainsIndexingConfig - Indexing config for all indexed chains.
    *
    * @returns A map of chain IDs to their corresponding indexing status snapshots.
    *
@@ -80,27 +81,27 @@ export class IndexingStatusBuilder {
   private buildChainIndexingStatusSnapshots(
     chainIndexingMetrics: Map<ChainId, LocalChainIndexingMetrics>,
     chainIndexingStatuses: Map<ChainId, ChainIndexingStatus>,
-    chainsIndexingBlockRefs: Map<ChainId, ChainIndexingBlockRefs>,
+    chainsIndexingConfig: Map<ChainId, ChainIndexingConfig>,
   ): Map<ChainId, ChainIndexingStatusSnapshot> {
     const chainStatusSnapshots = new Map<ChainId, ChainIndexingStatusSnapshot>();
 
     for (const [chainId, chainIndexingMetric] of chainIndexingMetrics.entries()) {
       const chainIndexingStatus = chainIndexingStatuses.get(chainId);
-      const chainIndexingBlockRefs = chainsIndexingBlockRefs.get(chainId);
+      const chainIndexingConfig = chainsIndexingConfig.get(chainId);
 
       // Invariants ensuring required data is available.
       if (!chainIndexingStatus) {
         throw new Error(`Indexing status not found for chain ID ${chainId}`);
       }
 
-      if (!chainIndexingBlockRefs) {
-        throw new Error(`Indexing block refs not found for chain ID ${chainId}`);
+      if (!chainIndexingConfig) {
+        throw new Error(`Indexing config not found for chain ID ${chainId}`);
       }
 
       const chainStatusSnapshot = this.buildChainIndexingStatusSnapshot(
         chainIndexingMetric,
         chainIndexingStatus,
-        chainIndexingBlockRefs,
+        chainIndexingConfig,
       );
 
       chainStatusSnapshots.set(chainId, chainStatusSnapshot);
@@ -114,7 +115,7 @@ export class IndexingStatusBuilder {
    *
    * @param chainIndexingMetrics - The local Ponder indexing metrics for the chain.
    * @param chainIndexingStatus - The Ponder indexing status for the chain.
-   * @param chainIndexingBlockRefs - The block references for the chain.
+   * @param chainIndexingConfig - The indexing config for the chain.
    *
    * @returns The indexing status snapshot for the chain.
    * @throws Error if validation of the built snapshot fails.
@@ -123,129 +124,120 @@ export class IndexingStatusBuilder {
   private buildChainIndexingStatusSnapshot(
     chainIndexingMetrics: LocalChainIndexingMetrics,
     chainIndexingStatus: ChainIndexingStatus,
-    chainIndexingBlockRefs: ChainIndexingBlockRefs,
+    chainIndexingConfig: ChainIndexingConfig,
   ): ChainIndexingStatusSnapshot {
     const { checkpointBlock } = chainIndexingStatus;
-    const { startBlock, endBlock, backfillEndBlock } = chainIndexingBlockRefs;
-    const indexingConfig = createIndexingConfig(startBlock, endBlock);
+    const { indexedBlockrange } = chainIndexingConfig;
 
     // In omnichain ordering, if the startBlock is the same as the
     // status block, the chain has not started yet.
-    if (isBlockRefEqualTo(startBlock, checkpointBlock)) {
+    if (isBlockRefEqualTo(indexedBlockrange.startBlock, checkpointBlock)) {
       return validateChainIndexingStatusSnapshot({
         chainStatus: ChainIndexingStatusIds.Queued,
-        config: indexingConfig,
+        config: indexedBlockrange as Unvalidated<BlockRefRangeWithStartBlock>,
       } satisfies Unvalidated<ChainIndexingStatusSnapshotQueued>);
     }
 
-    if (chainIndexingMetrics.state === ChainIndexingStates.Completed) {
-      return validateChainIndexingStatusSnapshot({
-        chainStatus: ChainIndexingStatusIds.Completed,
-        latestIndexedBlock: checkpointBlock,
-        config: indexingConfig as Unvalidated<ChainIndexingConfigDefinite>,
-      } satisfies Unvalidated<ChainIndexingStatusSnapshotCompleted>);
-    }
+    switch (chainIndexingMetrics.state) {
+      case ChainIndexingStates.Completed:
+        return validateChainIndexingStatusSnapshot({
+          chainStatus: ChainIndexingStatusIds.Completed,
+          latestIndexedBlock: checkpointBlock,
+          config: indexedBlockrange as Unvalidated<BlockRefRangeBounded>,
+        } satisfies Unvalidated<ChainIndexingStatusSnapshotCompleted>);
 
-    if (chainIndexingMetrics.state === ChainIndexingStates.Realtime) {
-      return validateChainIndexingStatusSnapshot({
-        chainStatus: ChainIndexingStatusIds.Following,
-        latestIndexedBlock: checkpointBlock,
-        latestKnownBlock: chainIndexingMetrics.latestSyncedBlock,
-        config: indexingConfig as Unvalidated<ChainIndexingConfigIndefinite>,
-      } satisfies Unvalidated<ChainIndexingStatusSnapshotFollowing>);
-    }
+      case ChainIndexingStates.Realtime:
+        return validateChainIndexingStatusSnapshot({
+          chainStatus: ChainIndexingStatusIds.Following,
+          latestIndexedBlock: checkpointBlock,
+          latestKnownBlock: chainIndexingMetrics.latestSyncedBlock,
+          config: indexedBlockrange as Unvalidated<BlockRefRangeLeftBounded>,
+        } satisfies Unvalidated<ChainIndexingStatusSnapshotFollowing>);
 
-    return validateChainIndexingStatusSnapshot({
-      chainStatus: ChainIndexingStatusIds.Backfill,
-      latestIndexedBlock: checkpointBlock,
-      backfillEndBlock,
-      config: indexingConfig,
-    } satisfies Unvalidated<ChainIndexingStatusSnapshotBackfill>);
-  }
-
-  /**
-   * Assert Chains Indexing Metrics Historical
-   *
-   * This method asserts that all chains indexing metrics are historical,
-   * which is a necessary condition for fetching the block refs for
-   * the chains with {@link fetchChainsIndexingBlockRefs}.
-   *
-   * @param chainsIndexingMetrics The chains indexing metrics to assert as historical.
-   */
-  private assertChainsIndexingMetricsHistorical(
-    chainsIndexingMetrics: Map<ChainId, LocalChainIndexingMetrics>,
-  ): asserts chainsIndexingMetrics is Map<ChainId, LocalChainIndexingMetricsHistorical> {
-    for (const [chainId, chainIndexingMetric] of chainsIndexingMetrics.entries()) {
-      if (chainIndexingMetric.state === ChainIndexingStates.Historical) {
-        continue;
+      case ChainIndexingStates.Historical: {
+        return validateChainIndexingStatusSnapshot({
+          chainStatus: ChainIndexingStatusIds.Backfill,
+          latestIndexedBlock: checkpointBlock,
+          backfillEndBlock: chainIndexingConfig.backfillEndBlock as Unvalidated<BlockRef>,
+          config: indexedBlockrange as Unvalidated<BlockRefRangeWithStartBlock>,
+        } satisfies Unvalidated<ChainIndexingStatusSnapshotBackfill>);
       }
-
-      throw new Error(
-        `Expected all chains indexing metrics to be historical for fetching block refs, but chain ID ${chainId} has state ${chainIndexingMetric.state}`,
-      );
     }
   }
 
   /**
-   * Fetch Chains Indexing Block Refs
+   * Fetch Chains Indexing Config
    *
-   * This method fetches the block refs for all indexed chains based on
+   * This method fetches the indexing config for all indexed chains based on
    * the provided Local Ponder Indexing Metrics. It fetches the necessary block
    * refs for each chain and stores them in a map for later use while building
    * the Omnichain Indexing Status Snapshot.
    *
-   * @param localChainsIndexingMetrics The Local Ponder Indexing Metrics Historical for all indexed chains.
-   * @returns A map of chain IDs to their corresponding block refs.
-   * @throws Error if fetching any of the block refs fails.
+   * @param localChainsIndexingMetrics The Local Ponder Indexing Metrics for all indexed chains.
+   * @returns A map of chain IDs to their corresponding indexing config.
+   * @throws Error if fetching any of the indexing config fails.
    */
-  private async fetchChainsIndexingBlockRefs(
-    localChainsIndexingMetrics: Map<ChainId, LocalChainIndexingMetricsHistorical>,
-  ): Promise<Map<ChainId, ChainIndexingBlockRefs>> {
-    const chainsIndexingBlockRefs = new Map<ChainId, ChainIndexingBlockRefs>();
+  private async fetchChainsIndexingConfig(
+    localChainsIndexingMetrics: Map<ChainId, LocalChainIndexingMetrics>,
+  ): Promise<Map<ChainId, ChainIndexingConfig>> {
+    const chainsIndexingConfig = new Map<ChainId, ChainIndexingConfig>();
 
     for (const [chainId, chainIndexingMetric] of localChainsIndexingMetrics.entries()) {
-      const { backfillEndBlock } = chainIndexingMetric;
-      const { startBlock, endBlock } = this.localPonderClient.getChainBlockrange(chainId);
+      let backfillEndBlock: BlockNumber | null = null;
 
-      const chainIndexingBlockRefs = await this.fetchChainIndexingBlockRefs(chainId, {
-        startBlock,
-        endBlock,
+      if (chainIndexingMetric.state === ChainIndexingStates.Historical) {
+        backfillEndBlock = chainIndexingMetric.backfillEndBlock;
+      }
+
+      const indexedBlockrange = this.localPonderClient.getIndexedBlockrange(chainId);
+      const chainIndexingConfig = await this.fetchChainIndexingConfig(
+        chainId,
+        indexedBlockrange,
         backfillEndBlock,
-      });
+      );
 
-      chainsIndexingBlockRefs.set(chainId, chainIndexingBlockRefs);
+      chainsIndexingConfig.set(chainId, chainIndexingConfig);
     }
 
-    return chainsIndexingBlockRefs;
+    return chainsIndexingConfig;
   }
 
   /**
-   * Fetch Chain Indexing Block Refs
+   * Fetch Chain Indexing Config
    *
-   * This method fetches the block references for a specific chain.
-   * It fetches the necessary block refs in parallel and returns
+   * This method fetches the indexing config for a specific chain.
+   * It fetches the necessary config in parallel and returns
    * them as a single object.
    *
-   * @param chainId - The ID of the chain for which to fetch block refs.
+   * @param chainId - The ID of the chain for which to fetch indexing config.
    * @param chainIndexingBlocks - The blocks relevant for indexing of the chain.
-   * @returns The block references for the specified chain.
-   * @throws Error if fetching any of the block refs fails.
+   * @param backfillEndBlockNumber - The block number at which the backfill will end, if applicable.
+   * @returns The indexing config for the specified chain.
+   * @throws Error if fetching any of the indexing config fails.
    */
-  private async fetchChainIndexingBlockRefs(
+  private async fetchChainIndexingConfig(
     chainId: ChainId,
-    chainIndexingBlocks: ChainIndexingBlocks,
-  ): Promise<ChainIndexingBlockRefs> {
-    const [startBlock, endBlock, backfillEndBlock] = await Promise.all([
-      this.fetchBlockRef(chainId, chainIndexingBlocks.startBlock),
+    chainIndexingBlockrange: BlockNumberRangeWithStartBlock,
+    backfillEndBlockNumber: BlockNumber | null,
+  ): Promise<ChainIndexingConfig> {
+    const [startBlockRef, endBlockRef, backfillEndBlockRef] = await Promise.all([
+      this.fetchBlockRef(chainId, chainIndexingBlockrange.startBlock),
 
-      typeof chainIndexingBlocks.endBlock === "number"
-        ? this.fetchBlockRef(chainId, chainIndexingBlocks.endBlock)
+      chainIndexingBlockrange.rangeType === RangeTypeIds.Bounded
+        ? this.fetchBlockRef(chainId, chainIndexingBlockrange.endBlock)
         : null,
 
-      this.fetchBlockRef(chainId, chainIndexingBlocks.backfillEndBlock),
+      backfillEndBlockNumber !== null ? this.fetchBlockRef(chainId, backfillEndBlockNumber) : null,
     ]);
 
-    return { startBlock, endBlock, backfillEndBlock };
+    const indexedBlockrange = endBlockRef
+      ? buildBlockRefRange(startBlockRef, endBlockRef)
+      : buildBlockRefRange(startBlockRef, undefined);
+
+    return {
+      backfillEndBlock: backfillEndBlockRef,
+      indexedBlockrange,
+    };
   }
 
   /**
