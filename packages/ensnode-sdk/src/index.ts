@@ -13,6 +13,7 @@ export * from "./shared/address";
 export * from "./shared/blockrange";
 export * from "./shared/cache";
 export * from "./shared/collections";
+export * from "./shared/config/indexed-blockranges";
 export * from "./shared/currencies";
 export * from "./shared/datasource-contract";
 export * from "./shared/datetime";

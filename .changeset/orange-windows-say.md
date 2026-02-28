@@ -1,5 +1,5 @@
 ---
-"ensindexer": minor
+"@ensnode/ensnode-sdk": minor
 ---
 
-Includes `buildChainsBlockrange` function that builds a map of blockranges configured for each indexed chain.
+Introduced `buildIndexedBlockranges` function that builds a map of indexed blockranges configured for each indexed chain.
