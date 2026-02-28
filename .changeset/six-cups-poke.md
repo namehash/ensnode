@@ -2,4 +2,4 @@
 "@ensnode/ensnode-sdk": minor
 ---
 
-Replaced `createIndexingConfig` function with `buildBlockRefRannge` that utilises updated `BlockRefRange` data model.
+Replaced `createIndexingConfig` function with `buildBlockRefRange` that utilises updated `BlockRefRange` data model.
