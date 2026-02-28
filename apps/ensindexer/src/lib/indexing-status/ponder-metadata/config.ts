@@ -14,12 +14,13 @@
 
 import type { AddressConfig, ChainConfig, CreateConfigReturnType } from "ponder";
 
+import { deserializeBlockNumber } from "@ensnode/ensnode-sdk";
 import {
   type BlockNumber,
   type BlockNumberRange,
   buildBlockNumberRange,
-  deserializeBlockNumber,
-} from "@ensnode/ensnode-sdk";
+  type PonderBlockNumberRange,
+} from "@ensnode/ponder-sdk";
 
 /**
  * Chain Name
@@ -30,23 +31,18 @@ import {
 export type ChainName = string;
 
 /**
- * Helper type to allow input from Ponder Config without enforcing `rangeType` property.
- */
-type PonderBlockrange = Omit<BlockNumberRange, "rangeType">;
-
-/**
  * Ponder config datasource with a flat `chain` value.
  */
 export type PonderConfigDatasourceFlat = {
   chain: ChainName;
 } & AddressConfig &
-  PonderBlockrange;
+  PonderBlockNumberRange;
 
 /**
  * Ponder config datasource with a nested `chain` value.
  */
 export type PonderConfigDatasourceNested = {
-  chain: Record<ChainName, AddressConfig & PonderBlockrange>;
+  chain: Record<ChainName, AddressConfig & PonderBlockNumberRange>;
 };
 
 /**

@@ -17,7 +17,11 @@ import {
 } from "@ensnode/datasources";
 import type { ChainId, ENSNamespaceId } from "@ensnode/ensnode-sdk";
 import type { BlockInfo, PonderStatus } from "@ensnode/ponder-metadata";
-import { type BlockNumberRange, buildBlockNumberRange } from "@ensnode/ponder-sdk";
+import {
+  type BlockNumberRange,
+  buildBlockNumberRange,
+  type PonderBlockNumberRange,
+} from "@ensnode/ponder-sdk";
 
 import type { ENSIndexerConfig } from "@/config/types";
 
@@ -161,7 +165,7 @@ interface PonderContractBlockConfig {
   contracts: Record<
     string,
     {
-      chain: Record<string, Omit<BlockNumberRange, "rangeType">>;
+      chain: Record<string, PonderBlockNumberRange>;
     }
   >;
 }

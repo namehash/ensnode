@@ -59,6 +59,13 @@ export interface BlockNumberRangeBounded {
 }
 
 /**
+ * Block number range with start block defined.
+ *
+ * This is a useful type for representing block ranges for indexed chains.
+ */
+export type BlockNumberRangeWithStartBlock = BlockNumberRangeLeftBounded | BlockNumberRangeBounded;
+
+/**
  * Block number range
  *
  * Use the `rangeType` field to determine the specific type interpretation
@@ -69,6 +76,11 @@ export type BlockNumberRange =
   | BlockNumberRangeLeftBounded
   | BlockNumberRangeRightBounded
   | BlockNumberRangeBounded;
+
+/**
+ * Helper type to allow number range input from Ponder Config without enforcing `rangeType` property.
+ */
+export type PonderBlockNumberRange = Omit<BlockNumberRange, "rangeType">;
 
 /**
  * Build a block number range object.
@@ -196,6 +208,13 @@ export type BlockRefRange =
   | BlockRefRangeLeftBounded
   | BlockRefRangeRightBounded
   | BlockRefRangeBounded;
+
+/**
+ * Block ref range with start block defined.
+ *
+ * This is a useful type for representing block ranges for indexed chains.
+ */
+export type BlockRefRangeWithStartBlock = BlockRefRangeLeftBounded | BlockRefRangeBounded;
 
 /**
  * Build a block ref range object.
