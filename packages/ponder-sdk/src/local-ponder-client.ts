@@ -86,7 +86,7 @@ export class LocalPonderClient extends PonderClient {
     // Build the cached public clients based on the Ponder public clients.
     const cachedPublicClients = LocalPonderClient.buildCachedPublicClients(ponderPublicClients);
 
-    // We don't want to use all chains' records that Ponder may give use.
+    // We don't want to use all chains' records that Ponder may give us.
     // We just need the records for indexed chains (as determined by
     // `indexedChainIds`).
     // Both, `indexedBlockranges` and `cachedPublicClients` are filtered to
@@ -151,7 +151,7 @@ export class LocalPonderClient extends PonderClient {
   async metrics(): Promise<LocalPonderIndexingMetrics> {
     const metrics = await super.metrics();
 
-    // We don't want to use all chains' records that Ponder may give use.
+    // We don't want to use all chains' records that Ponder may give us.
     // We just need the records for indexed chains (as determined by
     // `indexedChainIds`).
     const chainsIndexingMetrics = LocalPonderClient.selectEntriesForIndexedChainsOnly(

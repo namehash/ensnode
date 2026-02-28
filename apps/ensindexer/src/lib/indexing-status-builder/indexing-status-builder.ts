@@ -210,7 +210,7 @@ export class IndexingStatusBuilder {
    * them as a single object.
    *
    * @param chainId - The ID of the chain for which to fetch indexing config.
-   * @param chainIndexingBlocks - The blocks relevant for indexing of the chain.
+   * @param chainIndexingBlockrange - The block range (with start block) relevant for indexing of the chain.
    * @param backfillEndBlockNumber - The block number at which the backfill will end, if applicable.
    * @returns The indexing config for the specified chain.
    * @throws Error if fetching any of the indexing config fails.

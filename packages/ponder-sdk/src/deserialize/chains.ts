@@ -22,7 +22,7 @@ export const schemaChainIdString = z
   .check(invariant_chainIdStringRepresentsValidChainId);
 
 /**
- * Deserialized an unvalidated string representation of a chain ID.
+ * Deserialize an unvalidated string representation of a chain ID.
  */
 export function deserializeChainId(unvalidatedData: Unvalidated<ChainIdString>): ChainId {
   const parsed = schemaChainIdString
