@@ -12,6 +12,7 @@ import ProgressBar from "progress";
 
 import type { LabelSetId, LabelSetVersion } from "@ensnode/ensrainbow-sdk";
 
+import { assertInputFileReadable } from "@/utils/input-file";
 import { logger } from "@/utils/logger";
 import {
   CURRENT_ENSRAINBOW_FILE_FORMAT_VERSION,
@@ -194,6 +195,8 @@ function logSummary(processedRecords: number, invalidRecords: number, outputFile
  * 2. A stream of individual RainbowRecord messages, each length-prefixed.
  */
 export async function convertCommand(options: ConvertCommandOptions): Promise<void> {
+  assertInputFileReadable(options.inputFile);
+
   try {
     const { labelSetId, labelSetVersion } = options;
 

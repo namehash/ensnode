@@ -15,6 +15,7 @@
     "start": "tsx src/index.ts",
     "dev": "tsx watch --env-file ./.env.local src/index.ts",
     "test": "vitest",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
     "typecheck": "tsgo --noEmit"
@@ -27,7 +28,6 @@
     "@ensnode/ponder-subgraph": "workspace:*",
     "@hono/node-server": "^1.19.5",
     "@hono/otel": "^0.2.2",
-    "@hono/standard-validator": "^0.2.2",
     "@hono/zod-openapi": "^1.2.2",
     "@namehash/ens-referrals": "workspace:*",
     "@opentelemetry/api": "^1.9.0",
@@ -52,7 +52,6 @@
     "graphql": "^16.11.0",
     "graphql-yoga": "^5.16.0",
     "hono": "catalog:",
-    "hono-openapi": "^1.1.2",
     "p-memoize": "^8.0.0",
     "p-retry": "^7.1.0",
     "pg-connection-string": "catalog:",
@@ -65,7 +64,11 @@
   "devDependencies": {
     "@ensnode/shared-configs": "workspace:*",
     "@types/node": "catalog:",
+    "@types/prismjs": "^1.26.6",
+    "chalk": "^5.6.2",
+    "graphql-request": "^7.4.0",
     "pino-pretty": "^13.1.2",
+    "prismjs": "^1.30.0",
     "tsx": "^4.7.1",
     "typescript": "catalog:",
     "vitest": "catalog:"

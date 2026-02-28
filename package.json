@@ -7,6 +7,7 @@
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
     "test": "vitest --silent passed-only",
+    "test:integration": "vitest --config vitest.integration.config.ts --silent passed-only",
     "typecheck": "pnpm -r --parallel --aggregate-output typecheck",
     "changeset": "changeset",
     "changeset:next": "changeset version --snapshot next",
@@ -37,14 +38,15 @@
     "overrides": {
       "@adraffy/ens-normalize": "catalog:",
       "esbuild@<=0.24.2": ">=0.25.0",
-      "fast-xml-parser@>=5.0.9 <=5.3.3": ">=5.3.4",
+      "fast-xml-parser@<5.3.8": ">=5.3.8",
       "lodash@>=4.0.0 <=4.17.22": ">=4.17.23",
       "lodash-es@>=4.0.0 <=4.17.22": ">=4.17.23",
       "markdown-it@>=14.0.0 <14.1.1": ">=14.1.1",
       "tar@<=7.5.8": ">=7.5.9",
       "ajv@<8.18.0": ">=8.18.0",
-      "minimatch@<10.2.2": ">=10.2.2",
-      "devalue@<=5.6.2": ">=5.6.3"
+      "minimatch@<10.2.3": ">=10.2.3",
+      "devalue@<=5.6.2": ">=5.6.3",
+      "rollup@>=4.0.0 <4.59.0": ">=4.59.0"
     },
     "ignoredBuiltDependencies": [
       "bun"

@@ -1,3 +1,4 @@
+export * from "./blockrange";
 export * from "./blocks";
 export * from "./chains";
 export * from "./client";
