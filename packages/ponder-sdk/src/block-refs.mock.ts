@@ -1,4 +1,4 @@
-import type { BlockRef } from "@ensnode/ponder-sdk";
+import type { BlockRef } from "./blocks";
 
 export const earliestBlockRef = {
   timestamp: 1667260799,
