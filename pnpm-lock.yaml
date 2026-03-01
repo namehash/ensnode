@@ -152,9 +152,6 @@ importers:
       '@ensnode/ensnode-sdk':
         specifier: workspace:*
         version: link:../../packages/ensnode-sdk
-      '@ensnode/ponder-metadata':
-        specifier: workspace:*
-        version: link:../../packages/ponder-metadata
       '@formkit/auto-animate':
         specifier: ^0.9.0
         version: 0.9.0
@@ -469,9 +466,6 @@ importers:
       '@ensnode/ensrainbow-sdk':
         specifier: workspace:*
         version: link:../../packages/ensrainbow-sdk
-      '@ensnode/ponder-metadata':
-        specifier: workspace:*
-        version: link:../../packages/ponder-metadata
       '@ensnode/ponder-sdk':
         specifier: workspace:*
         version: link:../../packages/ponder-sdk
@@ -1026,43 +1020,6 @@ importers:
       viem:
         specifier: 'catalog:'
         version: 2.38.5(typescript@5.9.3)(zod@4.3.6)
-      vitest:
-        specifier: 'catalog:'
-        version: 4.0.5(@types/debug@4.1.12)(@types/node@24.10.9)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.1)
-
-  packages/ponder-metadata:
-    dependencies:
-      '@ensnode/ensrainbow-sdk':
-        specifier: workspace:*
-        version: link:../ensrainbow-sdk
-      drizzle-orm:
-        specifier: 'catalog:'
-        version: 0.41.0(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(kysely@0.26.3)(pg@8.16.3)
-      parse-prometheus-text-format:
-        specifier: ^1.1.1
-        version: 1.1.1
-      viem:
-        specifier: 'catalog:'
-        version: 2.38.5(typescript@5.9.3)(zod@3.25.76)
-    devDependencies:
-      '@ensnode/shared-configs':
-        specifier: workspace:*
-        version: link:../shared-configs
-      '@types/node':
-        specifier: 'catalog:'
-        version: 24.10.9
-      hono:
-        specifier: 'catalog:'
-        version: 4.12.2
-      ponder:
-        specifier: 'catalog:'
-        version: 0.16.2(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@24.10.9)(hono@4.12.2)(lightningcss@1.30.2)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(zod@3.25.76)
-      tsup:
-        specifier: 'catalog:'
-        version: 8.5.0(jiti@2.6.1)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
       vitest:
         specifier: 'catalog:'
         version: 4.0.5(@types/debug@4.1.12)(@types/node@24.10.9)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.1)

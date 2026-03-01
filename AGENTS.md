@@ -16,7 +16,6 @@ ENSNode is a multichain ENS indexer monorepo. It indexes ENS names across multip
 - `packages/datasources` — Catalog of chain datasources (contracts, start blocks, event filters)
 - `packages/ponder-subgraph` — Hono middleware for Subgraph-compatible GraphQL
 - `packages/ponder-sdk` — Utility library for interacting with Ponder apps and data
-- `packages/ponder-metadata` — Hono middleware that exposes Ponder app metadata to clients
 - `packages/ens-referrals` — Utilities for ENS Referrals
 - `packages/namehash-ui` — UI components for NameHash Labs apps
 - `packages/shared-configs` — Shared TypeScript configurations
