@@ -7,9 +7,10 @@ Learn more about [ENSNode](https://ensnode.io) from [the "Starlight" ENSNode doc
 ## Local Development
 
 1. `git clone https://github.com/namehash/ensnode.git`
-2. `cd docs/docs.ensnode.io`
-3. `pnpm mint dev`
-4. Open [http://localhost:3000](http://localhost:3000) in your browser
+2. `cd ensnode`
+3. `cd docs/docs.ensnode.io`
+4. `pnpm mint dev`
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
 
 ### Troubleshooting
 
