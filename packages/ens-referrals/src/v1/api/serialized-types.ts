@@ -1,13 +1,22 @@
-import type { SerializedPriceEth, SerializedPriceUsdc } from "@ensnode/ensnode-sdk";
-
-import type { AggregatedReferrerMetrics } from "../aggregations";
+import type {
+  SerializedReferralProgramRulesPieSplit,
+  SerializedReferrerEditionMetricsRankedPieSplit,
+  SerializedReferrerEditionMetricsUnrankedPieSplit,
+  SerializedReferrerLeaderboardPagePieSplit,
+} from "../award-models/pie-split/api/serialized-types";
+import type {
+  SerializedReferralProgramRulesRevShareLimit,
+  SerializedReferrerEditionMetricsRankedRevShareLimit,
+  SerializedReferrerEditionMetricsUnrankedRevShareLimit,
+  SerializedReferrerLeaderboardPageRevShareLimit,
+} from "../award-models/rev-share-limit/api/serialized-types";
 import type { ReferralProgramEditionConfig, ReferralProgramEditionSlug } from "../edition";
 import type {
+  ReferrerEditionMetrics,
   ReferrerEditionMetricsRanked,
   ReferrerEditionMetricsUnranked,
 } from "../edition-metrics";
 import type { ReferrerLeaderboardPage } from "../leaderboard-page";
-import type { AwardedReferrerMetrics, UnrankedReferrerMetrics } from "../referrer-metrics";
 import type { ReferralProgramRules } from "../rules";
 import type {
   ReferralProgramEditionConfigSetData,
@@ -25,67 +34,30 @@ import type {
 /**
  * Serialized representation of {@link ReferralProgramRules}.
  */
-export interface SerializedReferralProgramRules
-  extends Omit<ReferralProgramRules, "totalAwardPoolValue" | "rulesUrl"> {
-  totalAwardPoolValue: SerializedPriceUsdc;
-  rulesUrl: string;
-}
-
-/**
- * Serialized representation of {@link AwardedReferrerMetrics}.
- */
-export interface SerializedAwardedReferrerMetrics
-  extends Omit<AwardedReferrerMetrics, "totalRevenueContribution" | "awardPoolApproxValue"> {
-  totalRevenueContribution: SerializedPriceEth;
-  awardPoolApproxValue: SerializedPriceUsdc;
-}
-
-/**
- * Serialized representation of {@link UnrankedReferrerMetrics}.
- */
-export interface SerializedUnrankedReferrerMetrics
-  extends Omit<UnrankedReferrerMetrics, "totalRevenueContribution" | "awardPoolApproxValue"> {
-  totalRevenueContribution: SerializedPriceEth;
-  awardPoolApproxValue: SerializedPriceUsdc;
-}
-
-/**
- * Serialized representation of {@link AggregatedReferrerMetrics}.
- */
-export interface SerializedAggregatedReferrerMetrics
-  extends Omit<AggregatedReferrerMetrics, "grandTotalRevenueContribution"> {
-  grandTotalRevenueContribution: SerializedPriceEth;
-}
+export type SerializedReferralProgramRules =
+  | SerializedReferralProgramRulesPieSplit
+  | SerializedReferralProgramRulesRevShareLimit;
 
 /**
  * Serialized representation of {@link ReferrerLeaderboardPage}.
  */
-export interface SerializedReferrerLeaderboardPage
-  extends Omit<ReferrerLeaderboardPage, "rules" | "referrers" | "aggregatedMetrics"> {
-  rules: SerializedReferralProgramRules;
-  referrers: SerializedAwardedReferrerMetrics[];
-  aggregatedMetrics: SerializedAggregatedReferrerMetrics;
-}
+export type SerializedReferrerLeaderboardPage =
+  | SerializedReferrerLeaderboardPagePieSplit
+  | SerializedReferrerLeaderboardPageRevShareLimit;
 
 /**
  * Serialized representation of {@link ReferrerEditionMetricsRanked}.
  */
-export interface SerializedReferrerEditionMetricsRanked
-  extends Omit<ReferrerEditionMetricsRanked, "rules" | "referrer" | "aggregatedMetrics"> {
-  rules: SerializedReferralProgramRules;
-  referrer: SerializedAwardedReferrerMetrics;
-  aggregatedMetrics: SerializedAggregatedReferrerMetrics;
-}
+export type SerializedReferrerEditionMetricsRanked =
+  | SerializedReferrerEditionMetricsRankedPieSplit
+  | SerializedReferrerEditionMetricsRankedRevShareLimit;
 
 /**
  * Serialized representation of {@link ReferrerEditionMetricsUnranked}.
  */
-export interface SerializedReferrerEditionMetricsUnranked
-  extends Omit<ReferrerEditionMetricsUnranked, "rules" | "referrer" | "aggregatedMetrics"> {
-  rules: SerializedReferralProgramRules;
-  referrer: SerializedUnrankedReferrerMetrics;
-  aggregatedMetrics: SerializedAggregatedReferrerMetrics;
-}
+export type SerializedReferrerEditionMetricsUnranked =
+  | SerializedReferrerEditionMetricsUnrankedPieSplit
+  | SerializedReferrerEditionMetricsUnrankedRevShareLimit;
 
 /**
  * Serialized representation of {@link ReferrerEditionMetrics} (union of ranked and unranked).

@@ -5,12 +5,13 @@ import {
   parseUsdc,
 } from "@ensnode/ensnode-sdk";
 
+import { buildReferralProgramRulesPieSplit } from "./award-models/pie-split/rules";
+import { buildReferralProgramRulesRevShareLimit } from "./award-models/rev-share-limit/rules";
 import {
   buildReferralProgramEditionConfigSet,
   type ReferralProgramEditionConfig,
   type ReferralProgramEditionConfigSet,
 } from "./edition";
-import { buildReferralProgramRules } from "./rules";
 
 /**
  * Returns the default referral program edition set with pre-built edition configurations.
@@ -30,7 +31,7 @@ export function getDefaultReferralProgramEditionConfigSet(
   const edition1: ReferralProgramEditionConfig = {
     slug: "2025-12",
     displayName: "ENS Holiday Awards",
-    rules: buildReferralProgramRules(
+    rules: buildReferralProgramRulesPieSplit(
       parseUsdc("10000"),
       10,
       parseTimestamp("2025-12-01T00:00:00Z"),
@@ -43,9 +44,10 @@ export function getDefaultReferralProgramEditionConfigSet(
   const edition2: ReferralProgramEditionConfig = {
     slug: "2026-03",
     displayName: "March 2026",
-    rules: buildReferralProgramRules(
+    rules: buildReferralProgramRulesRevShareLimit(
       parseUsdc("10000"),
-      10,
+      parseUsdc("500"),
+      0.5,
       parseTimestamp("2026-03-01T00:00:00Z"),
       parseTimestamp("2026-03-31T23:59:59Z"),
       subregistryId,

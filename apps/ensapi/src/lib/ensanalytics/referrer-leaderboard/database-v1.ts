@@ -1,9 +1,10 @@
 import {
   buildReferrerMetrics,
+  type ReferralEvent,
   type ReferralProgramRules,
   type ReferrerMetrics,
 } from "@namehash/ens-referrals/v1";
-import { and, count, desc, eq, gte, isNotNull, lte, ne, sql, sum } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, isNotNull, lte, ne, sql, sum } from "drizzle-orm";
 import { type Address, zeroAddress } from "viem";
 
 import * as schema from "@ensnode/ensnode-schema";
@@ -91,5 +92,79 @@ export const getReferrerMetrics = async (
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     logger.error({ error }, "Failed to fetch referrer metrics from database");
     throw new Error(`Failed to fetch referrer metrics from database: ${errorMessage}`);
+  }
+};
+
+/**
+ * Get raw referral events from the database for the sequential race algorithm (V1 API).
+ *
+ * Returns individual rows (no GROUP BY) ordered chronologically for deterministic race processing.
+ *
+ * @param rules - The referral program rules for filtering registrar actions
+ * @returns A promise that resolves to an array of {@link ReferralEvent} values.
+ * @throws Error if the database query fails.
+ */
+export const getReferralEvents = async (rules: ReferralProgramRules): Promise<ReferralEvent[]> => {
+  try {
+    const records = await db
+      .select({
+        id: schema.registrarActions.id,
+        referrer: schema.registrarActions.decodedReferrer,
+        timestamp: schema.registrarActions.timestamp,
+        blockNumber: schema.registrarActions.blockNumber,
+        transactionHash: schema.registrarActions.transactionHash,
+        incrementalDuration: schema.registrarActions.incrementalDuration,
+        // Note: Using raw SQL for COALESCE because Drizzle doesn't natively support it yet.
+        // See: https://github.com/drizzle-team/drizzle-orm/issues/3708
+        total: sql<string>`COALESCE(${schema.registrarActions.total}, 0)`.as("total"),
+      })
+      .from(schema.registrarActions)
+      .where(
+        and(
+          // Filter by timestamp range
+          gte(schema.registrarActions.timestamp, BigInt(rules.startTime)),
+          lte(schema.registrarActions.timestamp, BigInt(rules.endTime)),
+          // Filter by decodedReferrer not null
+          isNotNull(schema.registrarActions.decodedReferrer),
+          // Filter by decodedReferrer not zero address
+          ne(schema.registrarActions.decodedReferrer, zeroAddress),
+          // Filter by subregistryId matching the provided subregistryId
+          eq(schema.registrarActions.subregistryId, formatAccountId(rules.subregistryId)),
+        ),
+      )
+      .orderBy(
+        asc(schema.registrarActions.timestamp),
+        asc(schema.registrarActions.blockNumber),
+        asc(schema.registrarActions.transactionHash),
+        asc(schema.registrarActions.id),
+      );
+
+    // Type assertion: All fields in NonNullRecord are guaranteed non-null:
+    // 1. `referrer` is guaranteed non-null by isNotNull WHERE filter
+    // 2. `timestamp`, `blockNumber`, `transactionHash`, `incrementalDuration` are guaranteed non-null by database schema constraints (NOT NULL columns)
+    // 3. `total` is guaranteed non-null by COALESCE with 0
+    interface NonNullRecord {
+      id: string;
+      referrer: Address;
+      timestamp: bigint;
+      blockNumber: bigint;
+      transactionHash: `0x${string}`;
+      incrementalDuration: bigint;
+      total: string;
+    }
+
+    return (records as NonNullRecord[]).map((record) => ({
+      id: record.id,
+      referrer: record.referrer,
+      timestamp: Number(record.timestamp),
+      blockNumber: record.blockNumber,
+      transactionHash: record.transactionHash,
+      incrementalDuration: Number(record.incrementalDuration),
+      incrementalRevenueContribution: priceEth(BigInt(record.total)),
+    }));
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    logger.error({ error }, "Failed to fetch referral events from database");
+    throw new Error(`Failed to fetch referral events from database: ${errorMessage}`);
   }
 };
