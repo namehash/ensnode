@@ -108,11 +108,7 @@
                             },
                             "reason": {
                               "type": "string",
-                              "enum": [
-                                "not-subgraph-compatible",
-                                "no-api-key",
-                                "no-subgraph-url"
-                              ]
+                              "enum": ["not-subgraph-compatible", "no-api-key", "no-subgraph-url"]
                             }
                           },
                           "required": ["canFallback", "reason"],
@@ -151,12 +147,7 @@
                         },
                         "namespace": {
                           "type": "string",
-                          "enum": [
-                            "mainnet",
-                            "sepolia",
-                            "sepolia-v2",
-                            "ens-test-env"
-                          ]
+                          "enum": ["mainnet", "sepolia", "sepolia-v2", "ens-test-env"]
                         },
                         "plugins": {
                           "type": "array",
@@ -224,11 +215,7 @@
                       ]
                     }
                   },
-                  "required": [
-                    "version",
-                    "theGraphFallback",
-                    "ensIndexerPublicConfig"
-                  ]
+                  "required": ["version", "theGraphFallback", "ensIndexerPublicConfig"]
                 }
               }
             }
@@ -310,17 +297,11 @@
                                                             "minimum": 0
                                                           }
                                                         },
-                                                        "required": [
-                                                          "timestamp",
-                                                          "number"
-                                                        ],
+                                                        "required": ["timestamp", "number"],
                                                         "additionalProperties": false
                                                       }
                                                     },
-                                                    "required": [
-                                                      "rangeType",
-                                                      "startBlock"
-                                                    ]
+                                                    "required": ["rangeType", "startBlock"]
                                                   },
                                                   {
                                                     "type": "object",
@@ -340,10 +321,7 @@
                                                             "minimum": 0
                                                           }
                                                         },
-                                                        "required": [
-                                                          "timestamp",
-                                                          "number"
-                                                        ],
+                                                        "required": ["timestamp", "number"],
                                                         "additionalProperties": false
                                                       },
                                                       "endBlock": {
@@ -357,10 +335,7 @@
                                                             "minimum": 0
                                                           }
                                                         },
-                                                        "required": [
-                                                          "timestamp",
-                                                          "number"
-                                                        ],
+                                                        "required": ["timestamp", "number"],
                                                         "additionalProperties": false
                                                       }
                                                     },
@@ -373,10 +348,7 @@
                                                 ]
                                               }
                                             },
-                                            "required": [
-                                              "chainStatus",
-                                              "config"
-                                            ]
+                                            "required": ["chainStatus", "config"]
                                           }
                                         ]
                                       }
@@ -429,17 +401,11 @@
                                                             "minimum": 0
                                                           }
                                                         },
-                                                        "required": [
-                                                          "timestamp",
-                                                          "number"
-                                                        ],
+                                                        "required": ["timestamp", "number"],
                                                         "additionalProperties": false
                                                       }
                                                     },
-                                                    "required": [
-                                                      "rangeType",
-                                                      "startBlock"
-                                                    ]
+                                                    "required": ["rangeType", "startBlock"]
                                                   },
                                                   {
                                                     "type": "object",
@@ -459,10 +425,7 @@
                                                             "minimum": 0
                                                           }
                                                         },
-                                                        "required": [
-                                                          "timestamp",
-                                                          "number"
-                                                        ],
+                                                        "required": ["timestamp", "number"],
                                                         "additionalProperties": false
                                                       },
                                                       "endBlock": {
@@ -476,10 +439,7 @@
                                                             "minimum": 0
                                                           }
                                                         },
-                                                        "required": [
-                                                          "timestamp",
-                                                          "number"
-                                                        ],
+                                                        "required": ["timestamp", "number"],
                                                         "additionalProperties": false
                                                       }
                                                     },
@@ -492,10 +452,7 @@
                                                 ]
                                               }
                                             },
-                                            "required": [
-                                              "chainStatus",
-                                              "config"
-                                            ]
+                                            "required": ["chainStatus", "config"]
                                           },
                                           {
                                             "type": "object",
@@ -524,17 +481,11 @@
                                                             "minimum": 0
                                                           }
                                                         },
-                                                        "required": [
-                                                          "timestamp",
-                                                          "number"
-                                                        ],
+                                                        "required": ["timestamp", "number"],
                                                         "additionalProperties": false
                                                       }
                                                     },
-                                                    "required": [
-                                                      "rangeType",
-                                                      "startBlock"
-                                                    ]
+                                                    "required": ["rangeType", "startBlock"]
                                                   },
                                                   {
                                                     "type": "object",
@@ -554,10 +505,7 @@
                                                             "minimum": 0
                                                           }
                                                         },
-                                                        "required": [
-                                                          "timestamp",
-                                                          "number"
-                                                        ],
+                                                        "required": ["timestamp", "number"],
                                                         "additionalProperties": false
                                                       },
                                                       "endBlock": {
@@ -571,10 +519,7 @@
                                                             "minimum": 0
                                                           }
                                                         },
-                                                        "required": [
-                                                          "timestamp",
-                                                          "number"
-                                                        ],
+                                                        "required": ["timestamp", "number"],
                                                         "additionalProperties": false
                                                       }
                                                     },
@@ -597,10 +542,7 @@
                                                     "minimum": 0
                                                   }
                                                 },
-                                                "required": [
-                                                  "timestamp",
-                                                  "number"
-                                                ],
+                                                "required": ["timestamp", "number"],
                                                 "additionalProperties": false
                                               },
                                               "backfillEndBlock": {
@@ -614,10 +556,7 @@
                                                     "minimum": 0
                                                   }
                                                 },
-                                                "required": [
-                                                  "timestamp",
-                                                  "number"
-                                                ],
+                                                "required": ["timestamp", "number"],
                                                 "additionalProperties": false
                                               }
                                             },
@@ -653,10 +592,7 @@
                                                         "minimum": 0
                                                       }
                                                     },
-                                                    "required": [
-                                                      "timestamp",
-                                                      "number"
-                                                    ],
+                                                    "required": ["timestamp", "number"],
                                                     "additionalProperties": false
                                                   },
                                                   "endBlock": {
@@ -670,18 +606,11 @@
                                                         "minimum": 0
                                                       }
                                                     },
-                                                    "required": [
-                                                      "timestamp",
-                                                      "number"
-                                                    ],
+                                                    "required": ["timestamp", "number"],
                                                     "additionalProperties": false
                                                   }
                                                 },
-                                                "required": [
-                                                  "rangeType",
-                                                  "startBlock",
-                                                  "endBlock"
-                                                ]
+                                                "required": ["rangeType", "startBlock", "endBlock"]
                                               },
                                               "latestIndexedBlock": {
                                                 "type": "object",
@@ -694,10 +623,7 @@
                                                     "minimum": 0
                                                   }
                                                 },
-                                                "required": [
-                                                  "timestamp",
-                                                  "number"
-                                                ],
+                                                "required": ["timestamp", "number"],
                                                 "additionalProperties": false
                                               }
                                             },
@@ -756,10 +682,7 @@
                                                         "minimum": 0
                                                       }
                                                     },
-                                                    "required": [
-                                                      "timestamp",
-                                                      "number"
-                                                    ],
+                                                    "required": ["timestamp", "number"],
                                                     "additionalProperties": false
                                                   },
                                                   "endBlock": {
@@ -773,18 +696,11 @@
                                                         "minimum": 0
                                                       }
                                                     },
-                                                    "required": [
-                                                      "timestamp",
-                                                      "number"
-                                                    ],
+                                                    "required": ["timestamp", "number"],
                                                     "additionalProperties": false
                                                   }
                                                 },
-                                                "required": [
-                                                  "rangeType",
-                                                  "startBlock",
-                                                  "endBlock"
-                                                ]
+                                                "required": ["rangeType", "startBlock", "endBlock"]
                                               },
                                               "latestIndexedBlock": {
                                                 "type": "object",
@@ -797,10 +713,7 @@
                                                     "minimum": 0
                                                   }
                                                 },
-                                                "required": [
-                                                  "timestamp",
-                                                  "number"
-                                                ],
+                                                "required": ["timestamp", "number"],
                                                 "additionalProperties": false
                                               }
                                             },
@@ -861,17 +774,11 @@
                                                             "minimum": 0
                                                           }
                                                         },
-                                                        "required": [
-                                                          "timestamp",
-                                                          "number"
-                                                        ],
+                                                        "required": ["timestamp", "number"],
                                                         "additionalProperties": false
                                                       }
                                                     },
-                                                    "required": [
-                                                      "rangeType",
-                                                      "startBlock"
-                                                    ]
+                                                    "required": ["rangeType", "startBlock"]
                                                   },
                                                   {
                                                     "type": "object",
@@ -891,10 +798,7 @@
                                                             "minimum": 0
                                                           }
                                                         },
-                                                        "required": [
-                                                          "timestamp",
-                                                          "number"
-                                                        ],
+                                                        "required": ["timestamp", "number"],
                                                         "additionalProperties": false
                                                       },
                                                       "endBlock": {
@@ -908,10 +812,7 @@
                                                             "minimum": 0
                                                           }
                                                         },
-                                                        "required": [
-                                                          "timestamp",
-                                                          "number"
-                                                        ],
+                                                        "required": ["timestamp", "number"],
                                                         "additionalProperties": false
                                                       }
                                                     },
@@ -924,10 +825,7 @@
                                                 ]
                                               }
                                             },
-                                            "required": [
-                                              "chainStatus",
-                                              "config"
-                                            ]
+                                            "required": ["chainStatus", "config"]
                                           },
                                           {
                                             "type": "object",
@@ -956,17 +854,11 @@
                                                             "minimum": 0
                                                           }
                                                         },
-                                                        "required": [
-                                                          "timestamp",
-                                                          "number"
-                                                        ],
+                                                        "required": ["timestamp", "number"],
                                                         "additionalProperties": false
                                                       }
                                                     },
-                                                    "required": [
-                                                      "rangeType",
-                                                      "startBlock"
-                                                    ]
+                                                    "required": ["rangeType", "startBlock"]
                                                   },
                                                   {
                                                     "type": "object",
@@ -986,10 +878,7 @@
                                                             "minimum": 0
                                                           }
                                                         },
-                                                        "required": [
-                                                          "timestamp",
-                                                          "number"
-                                                        ],
+                                                        "required": ["timestamp", "number"],
                                                         "additionalProperties": false
                                                       },
                                                       "endBlock": {
@@ -1003,10 +892,7 @@
                                                             "minimum": 0
                                                           }
                                                         },
-                                                        "required": [
-                                                          "timestamp",
-                                                          "number"
-                                                        ],
+                                                        "required": ["timestamp", "number"],
                                                         "additionalProperties": false
                                                       }
                                                     },
@@ -1029,10 +915,7 @@
                                                     "minimum": 0
                                                   }
                                                 },
-                                                "required": [
-                                                  "timestamp",
-                                                  "number"
-                                                ],
+                                                "required": ["timestamp", "number"],
                                                 "additionalProperties": false
                                               },
                                               "backfillEndBlock": {
@@ -1046,10 +929,7 @@
                                                     "minimum": 0
                                                   }
                                                 },
-                                                "required": [
-                                                  "timestamp",
-                                                  "number"
-                                                ],
+                                                "required": ["timestamp", "number"],
                                                 "additionalProperties": false
                                               }
                                             },
@@ -1085,17 +965,11 @@
                                                         "minimum": 0
                                                       }
                                                     },
-                                                    "required": [
-                                                      "timestamp",
-                                                      "number"
-                                                    ],
+                                                    "required": ["timestamp", "number"],
                                                     "additionalProperties": false
                                                   }
                                                 },
-                                                "required": [
-                                                  "rangeType",
-                                                  "startBlock"
-                                                ]
+                                                "required": ["rangeType", "startBlock"]
                                               },
                                               "latestIndexedBlock": {
                                                 "type": "object",
@@ -1108,10 +982,7 @@
                                                     "minimum": 0
                                                   }
                                                 },
-                                                "required": [
-                                                  "timestamp",
-                                                  "number"
-                                                ],
+                                                "required": ["timestamp", "number"],
                                                 "additionalProperties": false
                                               },
                                               "latestKnownBlock": {
@@ -1125,10 +996,7 @@
                                                     "minimum": 0
                                                   }
                                                 },
-                                                "required": [
-                                                  "timestamp",
-                                                  "number"
-                                                ],
+                                                "required": ["timestamp", "number"],
                                                 "additionalProperties": false
                                               }
                                             },
@@ -1164,10 +1032,7 @@
                                                         "minimum": 0
                                                       }
                                                     },
-                                                    "required": [
-                                                      "timestamp",
-                                                      "number"
-                                                    ],
+                                                    "required": ["timestamp", "number"],
                                                     "additionalProperties": false
                                                   },
                                                   "endBlock": {
@@ -1181,18 +1046,11 @@
                                                         "minimum": 0
                                                       }
                                                     },
-                                                    "required": [
-                                                      "timestamp",
-                                                      "number"
-                                                    ],
+                                                    "required": ["timestamp", "number"],
                                                     "additionalProperties": false
                                                   }
                                                 },
-                                                "required": [
-                                                  "rangeType",
-                                                  "startBlock",
-                                                  "endBlock"
-                                                ]
+                                                "required": ["rangeType", "startBlock", "endBlock"]
                                               },
                                               "latestIndexedBlock": {
                                                 "type": "object",
@@ -1205,10 +1063,7 @@
                                                     "minimum": 0
                                                   }
                                                 },
-                                                "required": [
-                                                  "timestamp",
-                                                  "number"
-                                                ],
+                                                "required": ["timestamp", "number"],
                                                 "additionalProperties": false
                                               }
                                             },
@@ -1248,11 +1103,7 @@
                           "type": "number"
                         }
                       },
-                      "required": [
-                        "snapshot",
-                        "projectedAt",
-                        "worstCaseDistance"
-                      ]
+                      "required": ["snapshot", "projectedAt", "worstCaseDistance"]
                     }
                   },
                   "required": ["responseCode", "realtimeProjection"],
@@ -1558,11 +1409,7 @@
                                         "type": "string"
                                       }
                                     },
-                                    "required": [
-                                      "assetNamespace",
-                                      "contract",
-                                      "tokenId"
-                                    ]
+                                    "required": ["assetNamespace", "contract", "tokenId"]
                                   },
                                   "ownership": {
                                     "oneOf": [
@@ -1680,13 +1527,7 @@
                               "type": "integer"
                             }
                           },
-                          "required": [
-                            "domainId",
-                            "name",
-                            "tokens",
-                            "expiresAt",
-                            "accurateAsOf"
-                          ]
+                          "required": ["domainId", "name", "tokens", "expiresAt", "accurateAsOf"]
                         }
                       },
                       "required": ["responseCode", "registeredNameTokens"],
@@ -1845,11 +1686,7 @@
                                         "type": "string"
                                       }
                                     },
-                                    "required": [
-                                      "assetNamespace",
-                                      "contract",
-                                      "tokenId"
-                                    ]
+                                    "required": ["assetNamespace", "contract", "tokenId"]
                                   },
                                   "ownership": {
                                     "oneOf": [
@@ -1967,13 +1804,7 @@
                               "type": "integer"
                             }
                           },
-                          "required": [
-                            "domainId",
-                            "name",
-                            "tokens",
-                            "expiresAt",
-                            "accurateAsOf"
-                          ]
+                          "required": ["domainId", "name", "tokens", "expiresAt", "accurateAsOf"]
                         }
                       },
                       "required": ["responseCode", "registeredNameTokens"],
@@ -2132,11 +1963,7 @@
                                         "type": "string"
                                       }
                                     },
-                                    "required": [
-                                      "assetNamespace",
-                                      "contract",
-                                      "tokenId"
-                                    ]
+                                    "required": ["assetNamespace", "contract", "tokenId"]
                                   },
                                   "ownership": {
                                     "oneOf": [
@@ -2254,13 +2081,7 @@
                               "type": "integer"
                             }
                           },
-                          "required": [
-                            "domainId",
-                            "name",
-                            "tokens",
-                            "expiresAt",
-                            "accurateAsOf"
-                          ]
+                          "required": ["domainId", "name", "tokens", "expiresAt", "accurateAsOf"]
                         }
                       },
                       "required": ["responseCode", "registeredNameTokens"],
@@ -2640,11 +2461,7 @@
                       "items": {}
                     }
                   },
-                  "required": [
-                    "records",
-                    "accelerationRequested",
-                    "accelerationAttempted"
-                  ]
+                  "required": ["records", "accelerationRequested", "accelerationAttempted"]
                 }
               }
             }
@@ -2716,11 +2533,7 @@
                       "items": {}
                     }
                   },
-                  "required": [
-                    "name",
-                    "accelerationRequested",
-                    "accelerationAttempted"
-                  ]
+                  "required": ["name", "accelerationRequested", "accelerationAttempted"]
                 }
               }
             }
@@ -2795,11 +2608,7 @@
                       "items": {}
                     }
                   },
-                  "required": [
-                    "names",
-                    "accelerationRequested",
-                    "accelerationAttempted"
-                  ]
+                  "required": ["names", "accelerationRequested", "accelerationAttempted"]
                 }
               }
             }

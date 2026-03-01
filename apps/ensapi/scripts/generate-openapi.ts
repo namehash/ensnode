@@ -25,8 +25,8 @@ const document = generateOpenApi31Document();
 // Ensure output directory exists
 mkdirSync(dirname(outputPath), { recursive: true });
 
-// Write JSON
-writeFileSync(outputPath, JSON.stringify(document, null, 2) + "\n");
+// Write JSON (Biome handles formatting)
+writeFileSync(outputPath, JSON.stringify(document));
 
 console.log(`OpenAPI spec written to ${outputPath}`);
 
