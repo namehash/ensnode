@@ -2,7 +2,7 @@
   "name": "ensnode-monorepo",
   "version": "0.0.1",
   "private": true,
-  "packageManager": "pnpm@10.28.0",
+  "packageManager": "pnpm@10.30.3",
   "scripts": {
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
@@ -19,6 +19,7 @@
     "docker:build:ensadmin": "docker build -f apps/ensadmin/Dockerfile -t ghcr.io/namehash/ensnode/ensadmin:latest .",
     "docker:build:ensrainbow": "docker build -f apps/ensrainbow/Dockerfile -t ghcr.io/namehash/ensnode/ensrainbow:latest .",
     "docker:build:ensapi": "docker build -f apps/ensapi/Dockerfile -t ghcr.io/namehash/ensnode/ensapi:latest .",
+    "generate:openapi": "pnpm -r generate:openapi",
     "otel-desktop-viewer": "docker run -p 8000:8000 -p 4317:4317 -p 4318:4318 davetron5000/otel-desktop-viewer:alpine-3"
   },
   "devDependencies": {

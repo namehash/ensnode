@@ -1,0 +1,2812 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ENSApi APIs",
+    "version": "1.5.1",
+    "description": "APIs for ENS resolution, navigating the ENS nameforest, and metadata about an ENSNode"
+  },
+  "servers": [
+    {
+      "url": "https://api.alpha.ensnode.io",
+      "description": "ENSNode Alpha (Mainnet)"
+    },
+    {
+      "url": "https://api.alpha-sepolia.ensnode.io",
+      "description": "ENSNode Alpha (Sepolia Testnet)"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Resolution",
+      "description": "APIs for resolving ENS names and addresses"
+    },
+    {
+      "name": "Meta",
+      "description": "APIs for indexing status, configuration, and realtime monitoring"
+    },
+    {
+      "name": "Explore",
+      "description": "APIs for exploring the indexed state of ENS, including name tokens and registrar actions"
+    },
+    {
+      "name": "ENSAwards",
+      "description": "APIs for ENSAwards functionality, including referrer data"
+    }
+  ],
+  "components": {
+    "schemas": {},
+    "parameters": {}
+  },
+  "paths": {
+    "/amirealtime": {
+      "get": {
+        "operationId": "isRealtime",
+        "tags": ["Meta"],
+        "summary": "Check indexing progress",
+        "description": "Checks if the indexing progress is guaranteed to be within a requested worst-case distance of realtime",
+        "parameters": [
+          {
+            "schema": {
+              "description": "Maximum acceptable worst-case indexing distance in seconds"
+            },
+            "required": false,
+            "description": "Maximum acceptable worst-case indexing distance in seconds",
+            "name": "maxWorstCaseDistance",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indexing progress is guaranteed to be within the requested distance of realtime"
+          },
+          "503": {
+            "description": "Indexing progress is not guaranteed to be within the requested distance of realtime or indexing status unavailable"
+          }
+        }
+      }
+    },
+    "/api/config": {
+      "get": {
+        "operationId": "getConfig",
+        "tags": ["Meta"],
+        "summary": "Get ENSApi Public Config",
+        "description": "Gets the public config of the ENSApi instance",
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved ENSApi public config",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "version": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "theGraphFallback": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "canFallback": {
+                              "type": "boolean",
+                              "enum": [true]
+                            },
+                            "url": {
+                              "type": "string"
+                            }
+                          },
+                          "required": ["canFallback", "url"],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "canFallback": {
+                              "type": "boolean",
+                              "enum": [false]
+                            },
+                            "reason": {
+                              "type": "string",
+                              "enum": [
+                                "not-subgraph-compatible",
+                                "no-api-key",
+                                "no-subgraph-url"
+                              ]
+                            }
+                          },
+                          "required": ["canFallback", "reason"],
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    "ensIndexerPublicConfig": {
+                      "type": "object",
+                      "properties": {
+                        "labelSet": {
+                          "type": "object",
+                          "properties": {
+                            "labelSetId": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 50,
+                              "pattern": "^[a-z-]+$"
+                            },
+                            "labelSetVersion": {
+                              "type": ["number", "null"]
+                            }
+                          },
+                          "required": ["labelSetId", "labelSetVersion"]
+                        },
+                        "indexedChainIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "exclusiveMinimum": 0
+                          },
+                          "minItems": 1
+                        },
+                        "isSubgraphCompatible": {
+                          "type": "boolean"
+                        },
+                        "namespace": {
+                          "type": "string",
+                          "enum": [
+                            "mainnet",
+                            "sepolia",
+                            "sepolia-v2",
+                            "ens-test-env"
+                          ]
+                        },
+                        "plugins": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "minItems": 1
+                        },
+                        "databaseSchemaName": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "versionInfo": {
+                          "type": "object",
+                          "properties": {
+                            "nodejs": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "ponder": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "ensDb": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "ensIndexer": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "ensNormalize": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "ensRainbow": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "ensRainbowSchema": {
+                              "type": "integer",
+                              "exclusiveMinimum": 0
+                            }
+                          },
+                          "required": [
+                            "nodejs",
+                            "ponder",
+                            "ensDb",
+                            "ensIndexer",
+                            "ensNormalize",
+                            "ensRainbow",
+                            "ensRainbowSchema"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "labelSet",
+                        "indexedChainIds",
+                        "isSubgraphCompatible",
+                        "namespace",
+                        "plugins",
+                        "databaseSchemaName",
+                        "versionInfo"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "version",
+                    "theGraphFallback",
+                    "ensIndexerPublicConfig"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/indexing-status": {
+      "get": {
+        "operationId": "getIndexingStatus",
+        "tags": ["Meta"],
+        "summary": "Get ENSIndexer Indexing Status",
+        "description": "Returns the indexing status snapshot most recently captured from ENSIndexer",
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved indexing status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "responseCode": {
+                      "type": "string",
+                      "enum": ["ok"]
+                    },
+                    "realtimeProjection": {
+                      "type": "object",
+                      "properties": {
+                        "snapshot": {
+                          "type": "object",
+                          "properties": {
+                            "strategy": {
+                              "type": "string",
+                              "enum": ["omnichain"]
+                            },
+                            "slowestChainIndexingCursor": {
+                              "type": "integer"
+                            },
+                            "snapshotTime": {
+                              "type": "integer"
+                            },
+                            "omnichainSnapshot": {
+                              "oneOf": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "omnichainStatus": {
+                                      "type": "string",
+                                      "enum": ["omnichain-unstarted"]
+                                    },
+                                    "chains": {
+                                      "type": "object",
+                                      "additionalProperties": {
+                                        "oneOf": [
+                                          {
+                                            "type": "object",
+                                            "properties": {
+                                              "chainStatus": {
+                                                "type": "string",
+                                                "enum": ["chain-queued"]
+                                              },
+                                              "config": {
+                                                "oneOf": [
+                                                  {
+                                                    "type": "object",
+                                                    "properties": {
+                                                      "rangeType": {
+                                                        "type": "string",
+                                                        "enum": ["left-bounded"]
+                                                      },
+                                                      "startBlock": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "timestamp": {
+                                                            "type": "integer"
+                                                          },
+                                                          "number": {
+                                                            "type": "integer",
+                                                            "minimum": 0
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "timestamp",
+                                                          "number"
+                                                        ],
+                                                        "additionalProperties": false
+                                                      }
+                                                    },
+                                                    "required": [
+                                                      "rangeType",
+                                                      "startBlock"
+                                                    ]
+                                                  },
+                                                  {
+                                                    "type": "object",
+                                                    "properties": {
+                                                      "rangeType": {
+                                                        "type": "string",
+                                                        "enum": ["bounded"]
+                                                      },
+                                                      "startBlock": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "timestamp": {
+                                                            "type": "integer"
+                                                          },
+                                                          "number": {
+                                                            "type": "integer",
+                                                            "minimum": 0
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "timestamp",
+                                                          "number"
+                                                        ],
+                                                        "additionalProperties": false
+                                                      },
+                                                      "endBlock": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "timestamp": {
+                                                            "type": "integer"
+                                                          },
+                                                          "number": {
+                                                            "type": "integer",
+                                                            "minimum": 0
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "timestamp",
+                                                          "number"
+                                                        ],
+                                                        "additionalProperties": false
+                                                      }
+                                                    },
+                                                    "required": [
+                                                      "rangeType",
+                                                      "startBlock",
+                                                      "endBlock"
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            },
+                                            "required": [
+                                              "chainStatus",
+                                              "config"
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    "omnichainIndexingCursor": {
+                                      "type": "integer"
+                                    }
+                                  },
+                                  "required": [
+                                    "omnichainStatus",
+                                    "chains",
+                                    "omnichainIndexingCursor"
+                                  ]
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "omnichainStatus": {
+                                      "type": "string",
+                                      "enum": ["omnichain-backfill"]
+                                    },
+                                    "chains": {
+                                      "type": "object",
+                                      "additionalProperties": {
+                                        "oneOf": [
+                                          {
+                                            "type": "object",
+                                            "properties": {
+                                              "chainStatus": {
+                                                "type": "string",
+                                                "enum": ["chain-queued"]
+                                              },
+                                              "config": {
+                                                "oneOf": [
+                                                  {
+                                                    "type": "object",
+                                                    "properties": {
+                                                      "rangeType": {
+                                                        "type": "string",
+                                                        "enum": ["left-bounded"]
+                                                      },
+                                                      "startBlock": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "timestamp": {
+                                                            "type": "integer"
+                                                          },
+                                                          "number": {
+                                                            "type": "integer",
+                                                            "minimum": 0
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "timestamp",
+                                                          "number"
+                                                        ],
+                                                        "additionalProperties": false
+                                                      }
+                                                    },
+                                                    "required": [
+                                                      "rangeType",
+                                                      "startBlock"
+                                                    ]
+                                                  },
+                                                  {
+                                                    "type": "object",
+                                                    "properties": {
+                                                      "rangeType": {
+                                                        "type": "string",
+                                                        "enum": ["bounded"]
+                                                      },
+                                                      "startBlock": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "timestamp": {
+                                                            "type": "integer"
+                                                          },
+                                                          "number": {
+                                                            "type": "integer",
+                                                            "minimum": 0
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "timestamp",
+                                                          "number"
+                                                        ],
+                                                        "additionalProperties": false
+                                                      },
+                                                      "endBlock": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "timestamp": {
+                                                            "type": "integer"
+                                                          },
+                                                          "number": {
+                                                            "type": "integer",
+                                                            "minimum": 0
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "timestamp",
+                                                          "number"
+                                                        ],
+                                                        "additionalProperties": false
+                                                      }
+                                                    },
+                                                    "required": [
+                                                      "rangeType",
+                                                      "startBlock",
+                                                      "endBlock"
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            },
+                                            "required": [
+                                              "chainStatus",
+                                              "config"
+                                            ]
+                                          },
+                                          {
+                                            "type": "object",
+                                            "properties": {
+                                              "chainStatus": {
+                                                "type": "string",
+                                                "enum": ["chain-backfill"]
+                                              },
+                                              "config": {
+                                                "oneOf": [
+                                                  {
+                                                    "type": "object",
+                                                    "properties": {
+                                                      "rangeType": {
+                                                        "type": "string",
+                                                        "enum": ["left-bounded"]
+                                                      },
+                                                      "startBlock": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "timestamp": {
+                                                            "type": "integer"
+                                                          },
+                                                          "number": {
+                                                            "type": "integer",
+                                                            "minimum": 0
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "timestamp",
+                                                          "number"
+                                                        ],
+                                                        "additionalProperties": false
+                                                      }
+                                                    },
+                                                    "required": [
+                                                      "rangeType",
+                                                      "startBlock"
+                                                    ]
+                                                  },
+                                                  {
+                                                    "type": "object",
+                                                    "properties": {
+                                                      "rangeType": {
+                                                        "type": "string",
+                                                        "enum": ["bounded"]
+                                                      },
+                                                      "startBlock": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "timestamp": {
+                                                            "type": "integer"
+                                                          },
+                                                          "number": {
+                                                            "type": "integer",
+                                                            "minimum": 0
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "timestamp",
+                                                          "number"
+                                                        ],
+                                                        "additionalProperties": false
+                                                      },
+                                                      "endBlock": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "timestamp": {
+                                                            "type": "integer"
+                                                          },
+                                                          "number": {
+                                                            "type": "integer",
+                                                            "minimum": 0
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "timestamp",
+                                                          "number"
+                                                        ],
+                                                        "additionalProperties": false
+                                                      }
+                                                    },
+                                                    "required": [
+                                                      "rangeType",
+                                                      "startBlock",
+                                                      "endBlock"
+                                                    ]
+                                                  }
+                                                ]
+                                              },
+                                              "latestIndexedBlock": {
+                                                "type": "object",
+                                                "properties": {
+                                                  "timestamp": {
+                                                    "type": "integer"
+                                                  },
+                                                  "number": {
+                                                    "type": "integer",
+                                                    "minimum": 0
+                                                  }
+                                                },
+                                                "required": [
+                                                  "timestamp",
+                                                  "number"
+                                                ],
+                                                "additionalProperties": false
+                                              },
+                                              "backfillEndBlock": {
+                                                "type": "object",
+                                                "properties": {
+                                                  "timestamp": {
+                                                    "type": "integer"
+                                                  },
+                                                  "number": {
+                                                    "type": "integer",
+                                                    "minimum": 0
+                                                  }
+                                                },
+                                                "required": [
+                                                  "timestamp",
+                                                  "number"
+                                                ],
+                                                "additionalProperties": false
+                                              }
+                                            },
+                                            "required": [
+                                              "chainStatus",
+                                              "config",
+                                              "latestIndexedBlock",
+                                              "backfillEndBlock"
+                                            ]
+                                          },
+                                          {
+                                            "type": "object",
+                                            "properties": {
+                                              "chainStatus": {
+                                                "type": "string",
+                                                "enum": ["chain-completed"]
+                                              },
+                                              "config": {
+                                                "type": "object",
+                                                "properties": {
+                                                  "rangeType": {
+                                                    "type": "string",
+                                                    "enum": ["bounded"]
+                                                  },
+                                                  "startBlock": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                      "timestamp": {
+                                                        "type": "integer"
+                                                      },
+                                                      "number": {
+                                                        "type": "integer",
+                                                        "minimum": 0
+                                                      }
+                                                    },
+                                                    "required": [
+                                                      "timestamp",
+                                                      "number"
+                                                    ],
+                                                    "additionalProperties": false
+                                                  },
+                                                  "endBlock": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                      "timestamp": {
+                                                        "type": "integer"
+                                                      },
+                                                      "number": {
+                                                        "type": "integer",
+                                                        "minimum": 0
+                                                      }
+                                                    },
+                                                    "required": [
+                                                      "timestamp",
+                                                      "number"
+                                                    ],
+                                                    "additionalProperties": false
+                                                  }
+                                                },
+                                                "required": [
+                                                  "rangeType",
+                                                  "startBlock",
+                                                  "endBlock"
+                                                ]
+                                              },
+                                              "latestIndexedBlock": {
+                                                "type": "object",
+                                                "properties": {
+                                                  "timestamp": {
+                                                    "type": "integer"
+                                                  },
+                                                  "number": {
+                                                    "type": "integer",
+                                                    "minimum": 0
+                                                  }
+                                                },
+                                                "required": [
+                                                  "timestamp",
+                                                  "number"
+                                                ],
+                                                "additionalProperties": false
+                                              }
+                                            },
+                                            "required": [
+                                              "chainStatus",
+                                              "config",
+                                              "latestIndexedBlock"
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    "omnichainIndexingCursor": {
+                                      "type": "integer"
+                                    }
+                                  },
+                                  "required": [
+                                    "omnichainStatus",
+                                    "chains",
+                                    "omnichainIndexingCursor"
+                                  ]
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "omnichainStatus": {
+                                      "type": "string",
+                                      "enum": ["omnichain-completed"]
+                                    },
+                                    "chains": {
+                                      "type": "object",
+                                      "additionalProperties": {
+                                        "oneOf": [
+                                          {
+                                            "type": "object",
+                                            "properties": {
+                                              "chainStatus": {
+                                                "type": "string",
+                                                "enum": ["chain-completed"]
+                                              },
+                                              "config": {
+                                                "type": "object",
+                                                "properties": {
+                                                  "rangeType": {
+                                                    "type": "string",
+                                                    "enum": ["bounded"]
+                                                  },
+                                                  "startBlock": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                      "timestamp": {
+                                                        "type": "integer"
+                                                      },
+                                                      "number": {
+                                                        "type": "integer",
+                                                        "minimum": 0
+                                                      }
+                                                    },
+                                                    "required": [
+                                                      "timestamp",
+                                                      "number"
+                                                    ],
+                                                    "additionalProperties": false
+                                                  },
+                                                  "endBlock": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                      "timestamp": {
+                                                        "type": "integer"
+                                                      },
+                                                      "number": {
+                                                        "type": "integer",
+                                                        "minimum": 0
+                                                      }
+                                                    },
+                                                    "required": [
+                                                      "timestamp",
+                                                      "number"
+                                                    ],
+                                                    "additionalProperties": false
+                                                  }
+                                                },
+                                                "required": [
+                                                  "rangeType",
+                                                  "startBlock",
+                                                  "endBlock"
+                                                ]
+                                              },
+                                              "latestIndexedBlock": {
+                                                "type": "object",
+                                                "properties": {
+                                                  "timestamp": {
+                                                    "type": "integer"
+                                                  },
+                                                  "number": {
+                                                    "type": "integer",
+                                                    "minimum": 0
+                                                  }
+                                                },
+                                                "required": [
+                                                  "timestamp",
+                                                  "number"
+                                                ],
+                                                "additionalProperties": false
+                                              }
+                                            },
+                                            "required": [
+                                              "chainStatus",
+                                              "config",
+                                              "latestIndexedBlock"
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    "omnichainIndexingCursor": {
+                                      "type": "integer"
+                                    }
+                                  },
+                                  "required": [
+                                    "omnichainStatus",
+                                    "chains",
+                                    "omnichainIndexingCursor"
+                                  ]
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "omnichainStatus": {
+                                      "type": "string",
+                                      "enum": ["omnichain-following"]
+                                    },
+                                    "chains": {
+                                      "type": "object",
+                                      "additionalProperties": {
+                                        "oneOf": [
+                                          {
+                                            "type": "object",
+                                            "properties": {
+                                              "chainStatus": {
+                                                "type": "string",
+                                                "enum": ["chain-queued"]
+                                              },
+                                              "config": {
+                                                "oneOf": [
+                                                  {
+                                                    "type": "object",
+                                                    "properties": {
+                                                      "rangeType": {
+                                                        "type": "string",
+                                                        "enum": ["left-bounded"]
+                                                      },
+                                                      "startBlock": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "timestamp": {
+                                                            "type": "integer"
+                                                          },
+                                                          "number": {
+                                                            "type": "integer",
+                                                            "minimum": 0
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "timestamp",
+                                                          "number"
+                                                        ],
+                                                        "additionalProperties": false
+                                                      }
+                                                    },
+                                                    "required": [
+                                                      "rangeType",
+                                                      "startBlock"
+                                                    ]
+                                                  },
+                                                  {
+                                                    "type": "object",
+                                                    "properties": {
+                                                      "rangeType": {
+                                                        "type": "string",
+                                                        "enum": ["bounded"]
+                                                      },
+                                                      "startBlock": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "timestamp": {
+                                                            "type": "integer"
+                                                          },
+                                                          "number": {
+                                                            "type": "integer",
+                                                            "minimum": 0
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "timestamp",
+                                                          "number"
+                                                        ],
+                                                        "additionalProperties": false
+                                                      },
+                                                      "endBlock": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "timestamp": {
+                                                            "type": "integer"
+                                                          },
+                                                          "number": {
+                                                            "type": "integer",
+                                                            "minimum": 0
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "timestamp",
+                                                          "number"
+                                                        ],
+                                                        "additionalProperties": false
+                                                      }
+                                                    },
+                                                    "required": [
+                                                      "rangeType",
+                                                      "startBlock",
+                                                      "endBlock"
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            },
+                                            "required": [
+                                              "chainStatus",
+                                              "config"
+                                            ]
+                                          },
+                                          {
+                                            "type": "object",
+                                            "properties": {
+                                              "chainStatus": {
+                                                "type": "string",
+                                                "enum": ["chain-backfill"]
+                                              },
+                                              "config": {
+                                                "oneOf": [
+                                                  {
+                                                    "type": "object",
+                                                    "properties": {
+                                                      "rangeType": {
+                                                        "type": "string",
+                                                        "enum": ["left-bounded"]
+                                                      },
+                                                      "startBlock": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "timestamp": {
+                                                            "type": "integer"
+                                                          },
+                                                          "number": {
+                                                            "type": "integer",
+                                                            "minimum": 0
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "timestamp",
+                                                          "number"
+                                                        ],
+                                                        "additionalProperties": false
+                                                      }
+                                                    },
+                                                    "required": [
+                                                      "rangeType",
+                                                      "startBlock"
+                                                    ]
+                                                  },
+                                                  {
+                                                    "type": "object",
+                                                    "properties": {
+                                                      "rangeType": {
+                                                        "type": "string",
+                                                        "enum": ["bounded"]
+                                                      },
+                                                      "startBlock": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "timestamp": {
+                                                            "type": "integer"
+                                                          },
+                                                          "number": {
+                                                            "type": "integer",
+                                                            "minimum": 0
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "timestamp",
+                                                          "number"
+                                                        ],
+                                                        "additionalProperties": false
+                                                      },
+                                                      "endBlock": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "timestamp": {
+                                                            "type": "integer"
+                                                          },
+                                                          "number": {
+                                                            "type": "integer",
+                                                            "minimum": 0
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "timestamp",
+                                                          "number"
+                                                        ],
+                                                        "additionalProperties": false
+                                                      }
+                                                    },
+                                                    "required": [
+                                                      "rangeType",
+                                                      "startBlock",
+                                                      "endBlock"
+                                                    ]
+                                                  }
+                                                ]
+                                              },
+                                              "latestIndexedBlock": {
+                                                "type": "object",
+                                                "properties": {
+                                                  "timestamp": {
+                                                    "type": "integer"
+                                                  },
+                                                  "number": {
+                                                    "type": "integer",
+                                                    "minimum": 0
+                                                  }
+                                                },
+                                                "required": [
+                                                  "timestamp",
+                                                  "number"
+                                                ],
+                                                "additionalProperties": false
+                                              },
+                                              "backfillEndBlock": {
+                                                "type": "object",
+                                                "properties": {
+                                                  "timestamp": {
+                                                    "type": "integer"
+                                                  },
+                                                  "number": {
+                                                    "type": "integer",
+                                                    "minimum": 0
+                                                  }
+                                                },
+                                                "required": [
+                                                  "timestamp",
+                                                  "number"
+                                                ],
+                                                "additionalProperties": false
+                                              }
+                                            },
+                                            "required": [
+                                              "chainStatus",
+                                              "config",
+                                              "latestIndexedBlock",
+                                              "backfillEndBlock"
+                                            ]
+                                          },
+                                          {
+                                            "type": "object",
+                                            "properties": {
+                                              "chainStatus": {
+                                                "type": "string",
+                                                "enum": ["chain-following"]
+                                              },
+                                              "config": {
+                                                "type": "object",
+                                                "properties": {
+                                                  "rangeType": {
+                                                    "type": "string",
+                                                    "enum": ["left-bounded"]
+                                                  },
+                                                  "startBlock": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                      "timestamp": {
+                                                        "type": "integer"
+                                                      },
+                                                      "number": {
+                                                        "type": "integer",
+                                                        "minimum": 0
+                                                      }
+                                                    },
+                                                    "required": [
+                                                      "timestamp",
+                                                      "number"
+                                                    ],
+                                                    "additionalProperties": false
+                                                  }
+                                                },
+                                                "required": [
+                                                  "rangeType",
+                                                  "startBlock"
+                                                ]
+                                              },
+                                              "latestIndexedBlock": {
+                                                "type": "object",
+                                                "properties": {
+                                                  "timestamp": {
+                                                    "type": "integer"
+                                                  },
+                                                  "number": {
+                                                    "type": "integer",
+                                                    "minimum": 0
+                                                  }
+                                                },
+                                                "required": [
+                                                  "timestamp",
+                                                  "number"
+                                                ],
+                                                "additionalProperties": false
+                                              },
+                                              "latestKnownBlock": {
+                                                "type": "object",
+                                                "properties": {
+                                                  "timestamp": {
+                                                    "type": "integer"
+                                                  },
+                                                  "number": {
+                                                    "type": "integer",
+                                                    "minimum": 0
+                                                  }
+                                                },
+                                                "required": [
+                                                  "timestamp",
+                                                  "number"
+                                                ],
+                                                "additionalProperties": false
+                                              }
+                                            },
+                                            "required": [
+                                              "chainStatus",
+                                              "config",
+                                              "latestIndexedBlock",
+                                              "latestKnownBlock"
+                                            ]
+                                          },
+                                          {
+                                            "type": "object",
+                                            "properties": {
+                                              "chainStatus": {
+                                                "type": "string",
+                                                "enum": ["chain-completed"]
+                                              },
+                                              "config": {
+                                                "type": "object",
+                                                "properties": {
+                                                  "rangeType": {
+                                                    "type": "string",
+                                                    "enum": ["bounded"]
+                                                  },
+                                                  "startBlock": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                      "timestamp": {
+                                                        "type": "integer"
+                                                      },
+                                                      "number": {
+                                                        "type": "integer",
+                                                        "minimum": 0
+                                                      }
+                                                    },
+                                                    "required": [
+                                                      "timestamp",
+                                                      "number"
+                                                    ],
+                                                    "additionalProperties": false
+                                                  },
+                                                  "endBlock": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                      "timestamp": {
+                                                        "type": "integer"
+                                                      },
+                                                      "number": {
+                                                        "type": "integer",
+                                                        "minimum": 0
+                                                      }
+                                                    },
+                                                    "required": [
+                                                      "timestamp",
+                                                      "number"
+                                                    ],
+                                                    "additionalProperties": false
+                                                  }
+                                                },
+                                                "required": [
+                                                  "rangeType",
+                                                  "startBlock",
+                                                  "endBlock"
+                                                ]
+                                              },
+                                              "latestIndexedBlock": {
+                                                "type": "object",
+                                                "properties": {
+                                                  "timestamp": {
+                                                    "type": "integer"
+                                                  },
+                                                  "number": {
+                                                    "type": "integer",
+                                                    "minimum": 0
+                                                  }
+                                                },
+                                                "required": [
+                                                  "timestamp",
+                                                  "number"
+                                                ],
+                                                "additionalProperties": false
+                                              }
+                                            },
+                                            "required": [
+                                              "chainStatus",
+                                              "config",
+                                              "latestIndexedBlock"
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    "omnichainIndexingCursor": {
+                                      "type": "integer"
+                                    }
+                                  },
+                                  "required": [
+                                    "omnichainStatus",
+                                    "chains",
+                                    "omnichainIndexingCursor"
+                                  ]
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "strategy",
+                            "slowestChainIndexingCursor",
+                            "snapshotTime",
+                            "omnichainSnapshot"
+                          ]
+                        },
+                        "projectedAt": {
+                          "type": "integer"
+                        },
+                        "worstCaseDistance": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "snapshot",
+                        "projectedAt",
+                        "worstCaseDistance"
+                      ]
+                    }
+                  },
+                  "required": ["responseCode", "realtimeProjection"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Indexing status snapshot unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "responseCode": {
+                      "type": "string",
+                      "enum": ["error"]
+                    }
+                  },
+                  "required": ["responseCode"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/ensanalytics/referral-leaderboard": {
+      "get": {
+        "operationId": "getReferralLeaderboard_v1",
+        "tags": ["ENSAwards"],
+        "summary": "Get Referrer Leaderboard (v1)",
+        "description": "Returns a paginated page from the referrer leaderboard for a specific edition",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+            },
+            "required": true,
+            "name": "edition",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Page number for pagination"
+            },
+            "required": false,
+            "description": "Page number for pagination",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "description": "Number of referrers per page"
+            },
+            "required": false,
+            "description": "Number of referrers per page",
+            "name": "recordsPerPage",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved referrer leaderboard page"
+          },
+          "404": {
+            "description": "Unknown edition slug"
+          },
+          "500": {
+            "description": "Internal server error"
+          },
+          "503": {
+            "description": "Service unavailable"
+          }
+        }
+      }
+    },
+    "/v1/ensanalytics/referrer/{referrer}": {
+      "get": {
+        "operationId": "getReferrerDetail_v1",
+        "tags": ["ENSAwards"],
+        "summary": "Get Referrer Detail for Editions (v1)",
+        "description": "Returns detailed information for a specific referrer for the requested editions. Requires 1-20 distinct edition slugs. All requested editions must be recognized and have cached data, or the request fails.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "Referrer Ethereum address"
+            },
+            "required": true,
+            "description": "Referrer Ethereum address",
+            "name": "referrer",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated list of edition slugs"
+            },
+            "required": true,
+            "description": "Comma-separated list of edition slugs",
+            "name": "editions",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved referrer detail for requested editions"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "404": {
+            "description": "Unknown edition slug"
+          },
+          "500": {
+            "description": "Internal server error"
+          },
+          "503": {
+            "description": "Service unavailable"
+          }
+        }
+      }
+    },
+    "/v1/ensanalytics/editions": {
+      "get": {
+        "operationId": "getEditions_v1",
+        "tags": ["ENSAwards"],
+        "summary": "Get Edition Config Set (v1)",
+        "description": "Returns the currently configured referral program edition config set. Editions are sorted in descending order by start timestamp (most recent first).",
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved edition config set"
+          },
+          "500": {
+            "description": "Internal server error"
+          },
+          "503": {
+            "description": "Service unavailable"
+          }
+        }
+      }
+    },
+    "/ensanalytics/referrers": {
+      "get": {
+        "operationId": "getReferrerLeaderboard",
+        "tags": ["ENSAwards"],
+        "summary": "Get Referrer Leaderboard",
+        "description": "Returns a paginated page from the referrer leaderboard",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Page number for pagination"
+            },
+            "required": false,
+            "description": "Page number for pagination",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "description": "Number of referrers per page"
+            },
+            "required": false,
+            "description": "Number of referrers per page",
+            "name": "recordsPerPage",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved referrer leaderboard page"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/ensanalytics/referrers/{referrer}": {
+      "get": {
+        "operationId": "getReferrerDetail",
+        "tags": ["ENSAwards"],
+        "summary": "Get Referrer Detail",
+        "description": "Returns detailed information for a specific referrer by address",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "Referrer Ethereum address"
+            },
+            "required": true,
+            "description": "Referrer Ethereum address",
+            "name": "referrer",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved referrer detail"
+          },
+          "500": {
+            "description": "Internal server error"
+          },
+          "503": {
+            "description": "Service unavailable - referrer leaderboard data not yet cached"
+          }
+        }
+      }
+    },
+    "/api/name-tokens": {
+      "get": {
+        "operationId": "getNameTokens",
+        "tags": ["Explore"],
+        "summary": "Get Name Tokens",
+        "description": "Returns name tokens for the requested identifier (domainId or name)",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "Domain node hash identifier"
+            },
+            "required": false,
+            "description": "Domain node hash identifier",
+            "name": "domainId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "ENS name to look up tokens for"
+            },
+            "required": false,
+            "description": "ENS name to look up tokens for",
+            "name": "name",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Name tokens known",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "responseCode": {
+                          "type": "string",
+                          "enum": ["ok"]
+                        },
+                        "registeredNameTokens": {
+                          "type": "object",
+                          "properties": {
+                            "domainId": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "tokens": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "token": {
+                                    "type": "object",
+                                    "properties": {
+                                      "assetNamespace": {
+                                        "type": "string",
+                                        "enum": ["erc721", "erc1155"]
+                                      },
+                                      "contract": {
+                                        "type": "object",
+                                        "properties": {
+                                          "chainId": {
+                                            "type": "integer",
+                                            "exclusiveMinimum": 0
+                                          },
+                                          "address": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": ["chainId", "address"],
+                                        "additionalProperties": false
+                                      },
+                                      "tokenId": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "assetNamespace",
+                                      "contract",
+                                      "tokenId"
+                                    ]
+                                  },
+                                  "ownership": {
+                                    "oneOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "ownershipType": {
+                                            "type": "string",
+                                            "enum": ["namewrapper"]
+                                          },
+                                          "owner": {
+                                            "type": "object",
+                                            "properties": {
+                                              "chainId": {
+                                                "type": "integer",
+                                                "exclusiveMinimum": 0
+                                              },
+                                              "address": {
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": ["chainId", "address"],
+                                            "additionalProperties": false
+                                          }
+                                        },
+                                        "required": ["ownershipType", "owner"]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "ownershipType": {
+                                            "type": "string",
+                                            "enum": ["fully-onchain"]
+                                          },
+                                          "owner": {
+                                            "type": "object",
+                                            "properties": {
+                                              "chainId": {
+                                                "type": "integer",
+                                                "exclusiveMinimum": 0
+                                              },
+                                              "address": {
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": ["chainId", "address"],
+                                            "additionalProperties": false
+                                          }
+                                        },
+                                        "required": ["ownershipType", "owner"]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "ownershipType": {
+                                            "type": "string",
+                                            "enum": ["burned"]
+                                          },
+                                          "owner": {
+                                            "type": "object",
+                                            "properties": {
+                                              "chainId": {
+                                                "type": "integer",
+                                                "exclusiveMinimum": 0
+                                              },
+                                              "address": {
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": ["chainId", "address"],
+                                            "additionalProperties": false
+                                          }
+                                        },
+                                        "required": ["ownershipType", "owner"]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "ownershipType": {
+                                            "type": "string",
+                                            "enum": ["unknown"]
+                                          },
+                                          "owner": {
+                                            "type": "object",
+                                            "properties": {
+                                              "chainId": {
+                                                "type": "integer",
+                                                "exclusiveMinimum": 0
+                                              },
+                                              "address": {
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": ["chainId", "address"],
+                                            "additionalProperties": false
+                                          }
+                                        },
+                                        "required": ["ownershipType", "owner"]
+                                      }
+                                    ]
+                                  },
+                                  "mintStatus": {
+                                    "type": "string",
+                                    "enum": ["minted", "burned"]
+                                  }
+                                },
+                                "required": ["token", "ownership", "mintStatus"]
+                              },
+                              "minItems": 1
+                            },
+                            "expiresAt": {
+                              "type": "integer"
+                            },
+                            "accurateAsOf": {
+                              "type": "integer"
+                            }
+                          },
+                          "required": [
+                            "domainId",
+                            "name",
+                            "tokens",
+                            "expiresAt",
+                            "accurateAsOf"
+                          ]
+                        }
+                      },
+                      "required": ["responseCode", "registeredNameTokens"],
+                      "additionalProperties": false
+                    },
+                    {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "responseCode": {
+                              "type": "string",
+                              "enum": ["error"]
+                            },
+                            "errorCode": {
+                              "type": "string",
+                              "enum": ["name-tokens-not-indexed"]
+                            },
+                            "error": {
+                              "type": "object",
+                              "properties": {
+                                "message": {
+                                  "type": "string"
+                                },
+                                "details": {}
+                              },
+                              "required": ["message"]
+                            }
+                          },
+                          "required": ["responseCode", "errorCode", "error"],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "responseCode": {
+                              "type": "string",
+                              "enum": ["error"]
+                            },
+                            "errorCode": {
+                              "type": "string",
+                              "enum": ["unsupported-ensindexer-config"]
+                            },
+                            "error": {
+                              "type": "object",
+                              "properties": {
+                                "message": {
+                                  "type": "string"
+                                },
+                                "details": {}
+                              },
+                              "required": ["message"]
+                            }
+                          },
+                          "required": ["responseCode", "errorCode", "error"],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "responseCode": {
+                              "type": "string",
+                              "enum": ["error"]
+                            },
+                            "errorCode": {
+                              "type": "string",
+                              "enum": ["unsupported-indexing-status"]
+                            },
+                            "error": {
+                              "type": "object",
+                              "properties": {
+                                "message": {
+                                  "type": "string"
+                                },
+                                "details": {}
+                              },
+                              "required": ["message"]
+                            }
+                          },
+                          "required": ["responseCode", "errorCode", "error"],
+                          "additionalProperties": false
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": ["message"]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Name tokens not indexed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "responseCode": {
+                          "type": "string",
+                          "enum": ["ok"]
+                        },
+                        "registeredNameTokens": {
+                          "type": "object",
+                          "properties": {
+                            "domainId": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "tokens": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "token": {
+                                    "type": "object",
+                                    "properties": {
+                                      "assetNamespace": {
+                                        "type": "string",
+                                        "enum": ["erc721", "erc1155"]
+                                      },
+                                      "contract": {
+                                        "type": "object",
+                                        "properties": {
+                                          "chainId": {
+                                            "type": "integer",
+                                            "exclusiveMinimum": 0
+                                          },
+                                          "address": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": ["chainId", "address"],
+                                        "additionalProperties": false
+                                      },
+                                      "tokenId": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "assetNamespace",
+                                      "contract",
+                                      "tokenId"
+                                    ]
+                                  },
+                                  "ownership": {
+                                    "oneOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "ownershipType": {
+                                            "type": "string",
+                                            "enum": ["namewrapper"]
+                                          },
+                                          "owner": {
+                                            "type": "object",
+                                            "properties": {
+                                              "chainId": {
+                                                "type": "integer",
+                                                "exclusiveMinimum": 0
+                                              },
+                                              "address": {
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": ["chainId", "address"],
+                                            "additionalProperties": false
+                                          }
+                                        },
+                                        "required": ["ownershipType", "owner"]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "ownershipType": {
+                                            "type": "string",
+                                            "enum": ["fully-onchain"]
+                                          },
+                                          "owner": {
+                                            "type": "object",
+                                            "properties": {
+                                              "chainId": {
+                                                "type": "integer",
+                                                "exclusiveMinimum": 0
+                                              },
+                                              "address": {
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": ["chainId", "address"],
+                                            "additionalProperties": false
+                                          }
+                                        },
+                                        "required": ["ownershipType", "owner"]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "ownershipType": {
+                                            "type": "string",
+                                            "enum": ["burned"]
+                                          },
+                                          "owner": {
+                                            "type": "object",
+                                            "properties": {
+                                              "chainId": {
+                                                "type": "integer",
+                                                "exclusiveMinimum": 0
+                                              },
+                                              "address": {
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": ["chainId", "address"],
+                                            "additionalProperties": false
+                                          }
+                                        },
+                                        "required": ["ownershipType", "owner"]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "ownershipType": {
+                                            "type": "string",
+                                            "enum": ["unknown"]
+                                          },
+                                          "owner": {
+                                            "type": "object",
+                                            "properties": {
+                                              "chainId": {
+                                                "type": "integer",
+                                                "exclusiveMinimum": 0
+                                              },
+                                              "address": {
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": ["chainId", "address"],
+                                            "additionalProperties": false
+                                          }
+                                        },
+                                        "required": ["ownershipType", "owner"]
+                                      }
+                                    ]
+                                  },
+                                  "mintStatus": {
+                                    "type": "string",
+                                    "enum": ["minted", "burned"]
+                                  }
+                                },
+                                "required": ["token", "ownership", "mintStatus"]
+                              },
+                              "minItems": 1
+                            },
+                            "expiresAt": {
+                              "type": "integer"
+                            },
+                            "accurateAsOf": {
+                              "type": "integer"
+                            }
+                          },
+                          "required": [
+                            "domainId",
+                            "name",
+                            "tokens",
+                            "expiresAt",
+                            "accurateAsOf"
+                          ]
+                        }
+                      },
+                      "required": ["responseCode", "registeredNameTokens"],
+                      "additionalProperties": false
+                    },
+                    {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "responseCode": {
+                              "type": "string",
+                              "enum": ["error"]
+                            },
+                            "errorCode": {
+                              "type": "string",
+                              "enum": ["name-tokens-not-indexed"]
+                            },
+                            "error": {
+                              "type": "object",
+                              "properties": {
+                                "message": {
+                                  "type": "string"
+                                },
+                                "details": {}
+                              },
+                              "required": ["message"]
+                            }
+                          },
+                          "required": ["responseCode", "errorCode", "error"],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "responseCode": {
+                              "type": "string",
+                              "enum": ["error"]
+                            },
+                            "errorCode": {
+                              "type": "string",
+                              "enum": ["unsupported-ensindexer-config"]
+                            },
+                            "error": {
+                              "type": "object",
+                              "properties": {
+                                "message": {
+                                  "type": "string"
+                                },
+                                "details": {}
+                              },
+                              "required": ["message"]
+                            }
+                          },
+                          "required": ["responseCode", "errorCode", "error"],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "responseCode": {
+                              "type": "string",
+                              "enum": ["error"]
+                            },
+                            "errorCode": {
+                              "type": "string",
+                              "enum": ["unsupported-indexing-status"]
+                            },
+                            "error": {
+                              "type": "object",
+                              "properties": {
+                                "message": {
+                                  "type": "string"
+                                },
+                                "details": {}
+                              },
+                              "required": ["message"]
+                            }
+                          },
+                          "required": ["responseCode", "errorCode", "error"],
+                          "additionalProperties": false
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": ["message"]
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable - Name Tokens API prerequisites not met (indexing status not ready or required plugins not activated)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "responseCode": {
+                          "type": "string",
+                          "enum": ["ok"]
+                        },
+                        "registeredNameTokens": {
+                          "type": "object",
+                          "properties": {
+                            "domainId": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "tokens": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "token": {
+                                    "type": "object",
+                                    "properties": {
+                                      "assetNamespace": {
+                                        "type": "string",
+                                        "enum": ["erc721", "erc1155"]
+                                      },
+                                      "contract": {
+                                        "type": "object",
+                                        "properties": {
+                                          "chainId": {
+                                            "type": "integer",
+                                            "exclusiveMinimum": 0
+                                          },
+                                          "address": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": ["chainId", "address"],
+                                        "additionalProperties": false
+                                      },
+                                      "tokenId": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "assetNamespace",
+                                      "contract",
+                                      "tokenId"
+                                    ]
+                                  },
+                                  "ownership": {
+                                    "oneOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "ownershipType": {
+                                            "type": "string",
+                                            "enum": ["namewrapper"]
+                                          },
+                                          "owner": {
+                                            "type": "object",
+                                            "properties": {
+                                              "chainId": {
+                                                "type": "integer",
+                                                "exclusiveMinimum": 0
+                                              },
+                                              "address": {
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": ["chainId", "address"],
+                                            "additionalProperties": false
+                                          }
+                                        },
+                                        "required": ["ownershipType", "owner"]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "ownershipType": {
+                                            "type": "string",
+                                            "enum": ["fully-onchain"]
+                                          },
+                                          "owner": {
+                                            "type": "object",
+                                            "properties": {
+                                              "chainId": {
+                                                "type": "integer",
+                                                "exclusiveMinimum": 0
+                                              },
+                                              "address": {
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": ["chainId", "address"],
+                                            "additionalProperties": false
+                                          }
+                                        },
+                                        "required": ["ownershipType", "owner"]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "ownershipType": {
+                                            "type": "string",
+                                            "enum": ["burned"]
+                                          },
+                                          "owner": {
+                                            "type": "object",
+                                            "properties": {
+                                              "chainId": {
+                                                "type": "integer",
+                                                "exclusiveMinimum": 0
+                                              },
+                                              "address": {
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": ["chainId", "address"],
+                                            "additionalProperties": false
+                                          }
+                                        },
+                                        "required": ["ownershipType", "owner"]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "ownershipType": {
+                                            "type": "string",
+                                            "enum": ["unknown"]
+                                          },
+                                          "owner": {
+                                            "type": "object",
+                                            "properties": {
+                                              "chainId": {
+                                                "type": "integer",
+                                                "exclusiveMinimum": 0
+                                              },
+                                              "address": {
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": ["chainId", "address"],
+                                            "additionalProperties": false
+                                          }
+                                        },
+                                        "required": ["ownershipType", "owner"]
+                                      }
+                                    ]
+                                  },
+                                  "mintStatus": {
+                                    "type": "string",
+                                    "enum": ["minted", "burned"]
+                                  }
+                                },
+                                "required": ["token", "ownership", "mintStatus"]
+                              },
+                              "minItems": 1
+                            },
+                            "expiresAt": {
+                              "type": "integer"
+                            },
+                            "accurateAsOf": {
+                              "type": "integer"
+                            }
+                          },
+                          "required": [
+                            "domainId",
+                            "name",
+                            "tokens",
+                            "expiresAt",
+                            "accurateAsOf"
+                          ]
+                        }
+                      },
+                      "required": ["responseCode", "registeredNameTokens"],
+                      "additionalProperties": false
+                    },
+                    {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "responseCode": {
+                              "type": "string",
+                              "enum": ["error"]
+                            },
+                            "errorCode": {
+                              "type": "string",
+                              "enum": ["name-tokens-not-indexed"]
+                            },
+                            "error": {
+                              "type": "object",
+                              "properties": {
+                                "message": {
+                                  "type": "string"
+                                },
+                                "details": {}
+                              },
+                              "required": ["message"]
+                            }
+                          },
+                          "required": ["responseCode", "errorCode", "error"],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "responseCode": {
+                              "type": "string",
+                              "enum": ["error"]
+                            },
+                            "errorCode": {
+                              "type": "string",
+                              "enum": ["unsupported-ensindexer-config"]
+                            },
+                            "error": {
+                              "type": "object",
+                              "properties": {
+                                "message": {
+                                  "type": "string"
+                                },
+                                "details": {}
+                              },
+                              "required": ["message"]
+                            }
+                          },
+                          "required": ["responseCode", "errorCode", "error"],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "responseCode": {
+                              "type": "string",
+                              "enum": ["error"]
+                            },
+                            "errorCode": {
+                              "type": "string",
+                              "enum": ["unsupported-indexing-status"]
+                            },
+                            "error": {
+                              "type": "object",
+                              "properties": {
+                                "message": {
+                                  "type": "string"
+                                },
+                                "details": {}
+                              },
+                              "required": ["message"]
+                            }
+                          },
+                          "required": ["responseCode", "errorCode", "error"],
+                          "additionalProperties": false
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/registrar-actions": {
+      "get": {
+        "operationId": "getRegistrarActions",
+        "tags": ["Explore"],
+        "summary": "Get Registrar Actions",
+        "description": "Returns all registrar actions with optional filtering and pagination",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": ["orderBy[timestamp]=desc"],
+              "default": "orderBy[timestamp]=desc",
+              "description": "Order of results"
+            },
+            "required": false,
+            "description": "Order of results",
+            "name": "orderBy",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "description": "Page number for pagination"
+            },
+            "required": false,
+            "description": "Page number for pagination",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "description": "Number of records per page"
+            },
+            "required": false,
+            "description": "Number of records per page",
+            "name": "recordsPerPage",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "default": false,
+              "description": "Filter to only include actions with referrals"
+            },
+            "required": false,
+            "description": "Filter to only include actions with referrals",
+            "name": "withReferral",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Filter by decoded referrer address"
+            },
+            "required": false,
+            "description": "Filter by decoded referrer address",
+            "name": "decodedReferrer",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "description": "Filter actions at or after this Unix timestamp"
+            },
+            "required": false,
+            "description": "Filter actions at or after this Unix timestamp",
+            "name": "beginTimestamp",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "description": "Filter actions at or before this Unix timestamp"
+            },
+            "required": false,
+            "description": "Filter actions at or before this Unix timestamp",
+            "name": "endTimestamp",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved registrar actions"
+          },
+          "400": {
+            "description": "Invalid query"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/registrar-actions/{parentNode}": {
+      "get": {
+        "operationId": "getRegistrarActionsByParentNode",
+        "tags": ["Explore"],
+        "summary": "Get Registrar Actions by Parent Node",
+        "description": "Returns registrar actions filtered by parent node hash with optional additional filtering and pagination",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "Parent node to filter registrar actions"
+            },
+            "required": true,
+            "description": "Parent node to filter registrar actions",
+            "name": "parentNode",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": ["orderBy[timestamp]=desc"],
+              "default": "orderBy[timestamp]=desc",
+              "description": "Order of results"
+            },
+            "required": false,
+            "description": "Order of results",
+            "name": "orderBy",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "description": "Page number for pagination"
+            },
+            "required": false,
+            "description": "Page number for pagination",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "description": "Number of records per page"
+            },
+            "required": false,
+            "description": "Number of records per page",
+            "name": "recordsPerPage",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "default": false,
+              "description": "Filter to only include actions with referrals"
+            },
+            "required": false,
+            "description": "Filter to only include actions with referrals",
+            "name": "withReferral",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Filter by decoded referrer address"
+            },
+            "required": false,
+            "description": "Filter by decoded referrer address",
+            "name": "decodedReferrer",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "description": "Filter actions at or after this Unix timestamp"
+            },
+            "required": false,
+            "description": "Filter actions at or after this Unix timestamp",
+            "name": "beginTimestamp",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "description": "Filter actions at or before this Unix timestamp"
+            },
+            "required": false,
+            "description": "Filter actions at or before this Unix timestamp",
+            "name": "endTimestamp",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved registrar actions"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/resolve/records/{name}": {
+      "get": {
+        "operationId": "resolveRecords",
+        "tags": ["Resolution"],
+        "summary": "Resolve ENS Records",
+        "description": "Resolves ENS records for a given name",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "name",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "name": "name",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "name": "addresses",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "name": "texts",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "default": false
+            },
+            "required": false,
+            "name": "trace",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "default": false
+            },
+            "required": false,
+            "name": "accelerate",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully resolved records",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "records": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": ["string", "null"]
+                        },
+                        "addresses": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": ["string", "null"]
+                          }
+                        },
+                        "texts": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": ["string", "null"]
+                          }
+                        }
+                      }
+                    },
+                    "accelerationRequested": {
+                      "type": "boolean"
+                    },
+                    "accelerationAttempted": {
+                      "type": "boolean"
+                    },
+                    "trace": {
+                      "type": "array",
+                      "items": {}
+                    }
+                  },
+                  "required": [
+                    "records",
+                    "accelerationRequested",
+                    "accelerationAttempted"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/resolve/primary-name/{address}/{chainId}": {
+      "get": {
+        "operationId": "resolvePrimaryName",
+        "tags": ["Resolution"],
+        "summary": "Resolve Primary Name",
+        "description": "Resolves a primary name for a given `address` and `chainId`",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "address",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "chainId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "default": false
+            },
+            "required": false,
+            "name": "trace",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "default": false
+            },
+            "required": false,
+            "name": "accelerate",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully resolved name",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": ["string", "null"]
+                    },
+                    "accelerationRequested": {
+                      "type": "boolean"
+                    },
+                    "accelerationAttempted": {
+                      "type": "boolean"
+                    },
+                    "trace": {
+                      "type": "array",
+                      "items": {}
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "accelerationRequested",
+                    "accelerationAttempted"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/resolve/primary-names/{address}": {
+      "get": {
+        "operationId": "resolvePrimaryNames",
+        "tags": ["Resolution"],
+        "summary": "Resolve Primary Names",
+        "description": "Resolves all primary names for a given address across multiple chains",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "address",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "name": "chainIds",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "default": false
+            },
+            "required": false,
+            "name": "trace",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "default": false
+            },
+            "required": false,
+            "name": "accelerate",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully resolved records",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "names": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": ["string", "null"]
+                      }
+                    },
+                    "accelerationRequested": {
+                      "type": "boolean"
+                    },
+                    "accelerationAttempted": {
+                      "type": "boolean"
+                    },
+                    "trace": {
+                      "type": "array",
+                      "items": {}
+                    }
+                  },
+                  "required": [
+                    "names",
+                    "accelerationRequested",
+                    "accelerationAttempted"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "webhooks": {}
+}
