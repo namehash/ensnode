@@ -14,9 +14,9 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { buildENSIndexerPublicConfig } from "@/config/public";
-import { localPonderClient } from "@/lib/clients";
 import { createCrossChainIndexingStatusSnapshotOmnichain } from "@/lib/indexing-status/build-index-status";
 import { IndexingStatusBuilder } from "@/lib/indexing-status-builder/indexing-status-builder";
+import { localPonderClient } from "@/lib/local-ponder-client";
 
 const app = new Hono();
 const indexingStatusBuilder = new IndexingStatusBuilder(localPonderClient);

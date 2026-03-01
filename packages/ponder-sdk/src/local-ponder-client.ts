@@ -16,9 +16,11 @@ import type {
 /**
  * Local Ponder Client
  *
- * It is a specialized client for interacting with a local Ponder app instance.
- * LocalPonderClient extends PonderClient, while adding additional
- * functionality and constraints.
+ * It is "local" because it has access to state through in-memory Ponder
+ * library imports in addition to Ponder's external APIs.
+ *
+ * {@link LocalPonderClient} extends {@link PonderClient}, while adding
+ * specialized functionality and constraints.
  *
  * Additional functionality includes:
  * - Providing methods to access the indexed blockrange
