@@ -4,6 +4,7 @@ import { getUnixTime } from "date-fns";
 import { Hono } from "hono";
 
 import {
+  buildCrossChainIndexingStatusSnapshotOmnichain,
   createRealtimeIndexingStatusProjection,
   IndexingStatusResponseCodes,
   type IndexingStatusResponseError,
@@ -14,8 +15,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { buildENSIndexerPublicConfig } from "@/config/public";
-import { createCrossChainIndexingStatusSnapshotOmnichain } from "@/lib/indexing-status/build-index-status";
-import { IndexingStatusBuilder } from "@/lib/indexing-status-builder/indexing-status-builder";
+import { IndexingStatusBuilder } from "@/lib/indexing-status-builder";
 import { localPonderClient } from "@/lib/local-ponder-client";
 
 const app = new Hono();
@@ -54,7 +54,7 @@ app.get("/indexing-status", async (c) => {
   }
 
   // otherwise, proceed with creating IndexingStatusResponseOk
-  const crossChainSnapshot = createCrossChainIndexingStatusSnapshotOmnichain(
+  const crossChainSnapshot = buildCrossChainIndexingStatusSnapshotOmnichain(
     omnichainSnapshot,
     snapshotTime,
   );

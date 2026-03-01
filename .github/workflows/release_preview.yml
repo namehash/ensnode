@@ -305,7 +305,6 @@ jobs:
           pnpm add @ensnode/ensrainbow-sdk@${{ needs.validate-and-prepare.outputs.dist-tag }}
           pnpm add @ensnode/ensnode-schema@${{ needs.validate-and-prepare.outputs.dist-tag }}
           pnpm add @ensnode/ensnode-sdk@${{ needs.validate-and-prepare.outputs.dist-tag }}
-          pnpm add @ensnode/ponder-metadata@${{ needs.validate-and-prepare.outputs.dist-tag }}
           pnpm add @ensnode/ponder-sdk@${{ needs.validate-and-prepare.outputs.dist-tag }}
           pnpm add @ensnode/ponder-subgraph@${{ needs.validate-and-prepare.outputs.dist-tag }}
           pnpm add @ensnode/ens-referrals@${{ needs.validate-and-prepare.outputs.dist-tag }}

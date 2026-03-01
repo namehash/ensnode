@@ -1,28 +1,31 @@
 import { describe, expect, it } from "vitest";
 
+import { RangeTypeIds } from "../shared/blockrange";
+import { earliestBlockRef, laterBlockRef, latestBlockRef } from "./block-refs.mock";
 import {
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshotBackfill,
   type ChainIndexingStatusSnapshotCompleted,
   type ChainIndexingStatusSnapshotFollowing,
   type ChainIndexingStatusSnapshotQueued,
+} from "./chain-indexing-status-snapshot";
+import {
+  buildCrossChainIndexingStatusSnapshotOmnichain,
   CrossChainIndexingStrategyIds,
+} from "./cross-chain-indexing-status-snapshot";
+import {
   OmnichainIndexingStatusIds,
   type OmnichainIndexingStatusSnapshotBackfill,
   type OmnichainIndexingStatusSnapshotCompleted,
   type OmnichainIndexingStatusSnapshotFollowing,
   type OmnichainIndexingStatusSnapshotUnstarted,
-} from "@ensnode/ensnode-sdk";
-import { RangeTypeIds, type UnixTimestamp } from "@ensnode/ponder-sdk";
+} from "./omnichain-indexing-status-snapshot";
 
-import { earliestBlockRef, laterBlockRef, latestBlockRef } from "./block-refs.mock";
-import { buildCrossChainIndexingStatusSnapshotOmnichain } from "./cross-chain-indexing-status-snapshot";
-
-describe("cross-chain-indexing-status-snapshot", () => {
+describe("Cross-chain Indexing Status Snapshot", () => {
   describe("buildCrossChainIndexingStatusSnapshotOmnichain", () => {
     it("builds snapshot from omnichain backfill snapshot", () => {
       // arrange
-      const snapshotTime = latestBlockRef.timestamp as UnixTimestamp;
+      const snapshotTime = latestBlockRef.timestamp;
       const cursor = laterBlockRef.timestamp;
 
       const chains = new Map([
@@ -82,7 +85,7 @@ describe("cross-chain-indexing-status-snapshot", () => {
 
     it("builds snapshot from omnichain completed snapshot", () => {
       // arrange
-      const snapshotTime = latestBlockRef.timestamp as UnixTimestamp;
+      const snapshotTime = latestBlockRef.timestamp;
       const cursor = latestBlockRef.timestamp;
 
       const chains = new Map([
@@ -140,7 +143,7 @@ describe("cross-chain-indexing-status-snapshot", () => {
 
     it("builds snapshot from omnichain following snapshot", () => {
       // arrange
-      const snapshotTime = latestBlockRef.timestamp as UnixTimestamp;
+      const snapshotTime = latestBlockRef.timestamp;
       const cursor = laterBlockRef.timestamp;
 
       const chains = new Map([
@@ -201,7 +204,7 @@ describe("cross-chain-indexing-status-snapshot", () => {
       const cursor = earliestBlockRef.timestamp - 1;
       // snapshotTime must be >= highest known block timestamp
       // for unstarted with queued chain, this is endBlock timestamp
-      const snapshotTime = latestBlockRef.timestamp as UnixTimestamp;
+      const snapshotTime = latestBlockRef.timestamp;
 
       const chains = new Map([
         [
@@ -257,7 +260,7 @@ describe("cross-chain-indexing-status-snapshot", () => {
     it("includes correct slowestChainIndexingCursor value", () => {
       // arrange
       const cursor = latestBlockRef.timestamp;
-      const snapshotTime = latestBlockRef.timestamp as UnixTimestamp;
+      const snapshotTime = latestBlockRef.timestamp;
 
       const chains = new Map([
         [
@@ -315,7 +318,7 @@ describe("cross-chain-indexing-status-snapshot", () => {
     it("preserves nested omnichainSnapshot structure", () => {
       // arrange
       const cursor = laterBlockRef.timestamp;
-      const snapshotTime = latestBlockRef.timestamp as UnixTimestamp;
+      const snapshotTime = latestBlockRef.timestamp;
 
       const chains = new Map([
         [
