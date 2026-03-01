@@ -2,6 +2,7 @@ import type { RangeTypeIds } from "../shared/blockrange";
 import type { BlockRef, ChainId, UnixTimestamp } from "../shared/types";
 import { ChainIndexingStatusIds } from "./chain-indexing-status-snapshot";
 import type { OmnichainIndexingStatusSnapshot } from "./omnichain-indexing-status-snapshot";
+import { validateCrossChainIndexingStatusSnapshot } from "./validate/cross-chain-indexing-status-snapshot";
 
 /**
  * The strategy used for indexing one or more chains.
@@ -115,4 +116,23 @@ export function getLatestIndexedBlockRef(
   }
 
   return chainIndexingStatus.latestIndexedBlock;
+}
+
+/**
+ * Build a Cross-Chain Indexing Status Snapshot based on the omnichain indexing status snapshot.
+ *
+ * @param omnichainSnapshot - The omnichain indexing status snapshot.
+ * @param snapshotTime - The timestamp when the cross-chain indexing status snapshot was generated.
+ * @returns The cross-chain indexing status snapshot.
+ */
+export function buildCrossChainIndexingStatusSnapshotOmnichain(
+  omnichainSnapshot: OmnichainIndexingStatusSnapshot,
+  snapshotTime: UnixTimestamp,
+): CrossChainIndexingStatusSnapshotOmnichain {
+  return validateCrossChainIndexingStatusSnapshot({
+    strategy: CrossChainIndexingStrategyIds.Omnichain,
+    slowestChainIndexingCursor: omnichainSnapshot.omnichainIndexingCursor,
+    omnichainSnapshot,
+    snapshotTime,
+  });
 }
