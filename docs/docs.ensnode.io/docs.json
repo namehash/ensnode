@@ -25,12 +25,6 @@
               {
                 "group": "API Reference",
                 "openapi": "https://api.alpha.ensnode.io/openapi.json"
-              },
-              {
-                "group": "Preview",
-                "pages": ["ensapi/preview"],
-                "openapi": "ensapi-openapi.json",
-                "hidden": true
               }
             ]
           }
