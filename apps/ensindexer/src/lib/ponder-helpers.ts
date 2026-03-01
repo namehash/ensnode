@@ -6,22 +6,15 @@
 
 import type { Event, EventNames } from "ponder:registry";
 import type { ChainConfig } from "ponder";
-import type { Address, PublicClient } from "viem";
-import { z } from "zod/v4";
 
 import {
   type ContractConfig,
   type DatasourceName,
+  type ENSNamespaceId,
   ensTestEnvChain,
   maybeGetDatasource,
 } from "@ensnode/datasources";
-import type { ChainId, ENSNamespaceId } from "@ensnode/ensnode-sdk";
-import type { BlockInfo, PonderStatus } from "@ensnode/ponder-metadata";
-import {
-  type BlockNumberRange,
-  buildBlockNumberRange,
-  type PonderBlockNumberRange,
-} from "@ensnode/ponder-sdk";
+import { type BlockNumberRange, buildBlockNumberRange, type ChainId } from "@ensnode/ponder-sdk";
 
 import type { ENSIndexerConfig } from "@/config/types";
 
@@ -87,209 +80,6 @@ export const constrainBlockrange = (
 
   return buildBlockNumberRange(startBlock, endBlock);
 };
-
-/**
- * Creates a Prometheus metrics fetcher for the Ponder application.
- *
- * It's a workaround for the lack of an internal API allowing to access
- * Prometheus metrics for the Ponder application.
- *
- * @param ensIndexerUrl the URL of the "primary" ENSIndexer started using `ponder start` and not `ponder serve`
- * @returns fetcher function
- */
-export function createPrometheusMetricsFetcher(ensIndexerUrl: URL): () => Promise<string> {
-  /**
-   * Fetches the Prometheus metrics from the Ponder application endpoint.
-   * @returns Prometheus metrics as a text string
-   */
-  return async function fetchPrometheusMetrics(): Promise<string> {
-    const response = await fetch(new URL("/metrics", ensIndexerUrl));
-    return response.text();
-  };
-}
-
-/**
- * Ponder Data Schemas
- *
- * These schemas allow data validation with Zod.
- */
-const PonderDataSchema = {
-  get Block() {
-    return z.object({
-      number: z.number().int().min(1),
-      timestamp: z.number().int().min(1),
-    });
-  },
-
-  get ChainId() {
-    return z.number().int().min(1);
-  },
-
-  get Status() {
-    return z.record(
-      z.string().transform(Number).pipe(PonderDataSchema.ChainId),
-      z.object({
-        id: PonderDataSchema.ChainId,
-        block: PonderDataSchema.Block,
-      }),
-    );
-  },
-};
-
-/**
- * Creates Ponder Status fetcher for the Ponder application.
- *
- * It's a workaround for the lack of an internal API allowing to access
- * Ponder Status metrics for the Ponder application.
- *
- * @param ensIndexerUrl the URL of the "primary" ENSIndexer started using `ponder start` and not `ponder serve`
- * @returns fetcher function
- */
-export function createPonderStatusFetcher(ensIndexerUrl: URL): () => Promise<PonderStatus> {
-  /**
-   * Fetches the Ponder Ponder status from the Ponder application endpoint.
-   * @returns Parsed Ponder Status object.
-   */
-  return async function fetchPonderStatus() {
-    const response = await fetch(new URL("/status", ensIndexerUrl));
-    const responseData = await response.json();
-
-    return PonderDataSchema.Status.parse(responseData) satisfies PonderStatus;
-  };
-}
-
-/**
- * Ponder contracts configuration including block range.
- */
-interface PonderContractBlockConfig {
-  contracts: Record<
-    string,
-    {
-      chain: Record<string, PonderBlockNumberRange>;
-    }
-  >;
-}
-
-/**
- * Creates a first block to index fetcher for the given ponder configuration.
- */
-export function createFirstBlockToIndexByChainIdFetcher(
-  ponderConfig: Promise<PonderContractBlockConfig>,
-) {
-  /**
-   * Fetches the first block to index for the requested chain ID.
-   *
-   * @param chainId the chain ID to get the first block to index for
-   * @param publicClient the public client to fetch the block from
-   *
-   * @returns {Promise<BlockInfo>} the first block to index for the requested chain ID
-   * @throws if the start block number is not found for the chain ID
-   * @throws if the block is not available on the network
-   */
-  return async function fetchFirstBlockToIndexByChainId(
-    chainId: number,
-    publicClient: PublicClient,
-  ): Promise<BlockInfo> {
-    const startBlockNumbers: Record<number, number> =
-      await createStartBlockByChainIdMap(ponderConfig);
-    const startBlockNumberForChainId = startBlockNumbers[chainId];
-
-    // each chain should have a start block number
-    if (typeof startBlockNumberForChainId !== "number") {
-      // throw an error if the start block number is not found for the chain ID
-      throw new Error(`No start block number found for chain ID ${chainId}`);
-    }
-
-    if (startBlockNumberForChainId < 0) {
-      // throw an error if the start block number is invalid block number
-      throw new Error(
-        `Start block number "${startBlockNumberForChainId}" for chain ID ${chainId} must be a non-negative integer`,
-      );
-    }
-
-    const block = await publicClient.getBlock({
-      blockNumber: BigInt(startBlockNumberForChainId),
-    });
-
-    // the decided start block number should be available on the network
-    if (!block) {
-      // throw an error if the block is not available
-      throw Error(`Failed to fetch block ${startBlockNumberForChainId} for chainId ${chainId}`);
-    }
-
-    // otherwise, return the start block info
-    return {
-      number: Number(block.number),
-      timestamp: Number(block.timestamp),
-    };
-  };
-}
-
-/**
- * Get start block number for each chain ID.
- *
- * @returns start block number for each chain ID.
- * @example
- * ```ts
- * const ponderConfig = {
- *  contracts: {
- *   "subgraph/Registrar": {
- *     chain: {
- *       "1": { id: 1, startBlock: 444_444_444 }
- *      }
- *   },
- *   "subgraph/Registry": {
- *     chain: {
- *       "1": { id: 1, startBlock: 444_444_333 }
- *      }
- *   },
- *   "basenames/Registrar": {
- *     chain: {
- *       "8453": { id: 8453, startBlock: 1_799_433 }
- *     }
- *   },
- *   "basenames/Registry": {
- *     chain: {
- *       "8453": { id: 8453, startBlock: 1_799_430 }
- *     }
- *   }
- * };
- *
- * const startBlockNumbers = await createStartBlockByChainIdMap(ponderConfig);
- *
- * console.log(startBlockNumbers);
- *
- * // Output:
- * // {
- * //   1: 444_444_333,
- * //   8453: 1_799_430
- * // }
- * ```
- */
-export async function createStartBlockByChainIdMap(
-  ponderConfig: Promise<PonderContractBlockConfig>,
-): Promise<Record<number, number>> {
-  const contractsConfig = Object.values((await ponderConfig).contracts);
-
-  const startBlockNumbers: Record<number, number> = {};
-
-  // go through each contract configuration
-  for (const contractConfig of contractsConfig) {
-    // and then through each chain configuration for the contract
-    for (const [_chainId, contractChainConfig] of Object.entries(contractConfig.chain)) {
-      // map string to number
-      const chainId = Number(_chainId);
-      const startBlock = contractChainConfig.startBlock || 0;
-
-      // update the start block number for the chain ID if it's lower than the current one
-      if (!startBlockNumbers[chainId] || startBlock < startBlockNumbers[chainId]) {
-        startBlockNumbers[chainId] = startBlock;
-      }
-    }
-  }
-
-  return startBlockNumbers;
-}
 
 /**
 /**
@@ -423,26 +213,4 @@ export function maybeGetDatasources<
       (datasourceName) => [datasourceName, maybeGetDatasource(namespace, datasourceName)] as const,
     ),
   ) as MapOfMaybeDatasources<N, DATASOURCE_NAMES>;
-}
-
-/**
- * Merges a set of ContractConfigs representing contracts at specific addresses on the same chain.
- * Uses the lowest startBlock to ensure all events are indexed.
- */
-export function mergeContractConfigs<CONTRACTS extends ContractConfig[]>(contracts: CONTRACTS) {
-  if (contracts.length === 0) throw new Error("Cannot merge 0 ContractConfigs");
-
-  const addresses = contracts
-    .map((contract) => contract.address)
-    .filter((address): address is Address => !!address);
-
-  const startBlocks = contracts.map((contract) => contract.startBlock);
-
-  return {
-    // just use the first's ABI, they're all identical, no need to mergeAbis
-    // biome-ignore lint/style/noNonNullAssertion: length check above
-    abi: contracts[0]!.abi,
-    startBlock: Math.min(...startBlocks),
-    address: addresses,
-  };
 }
