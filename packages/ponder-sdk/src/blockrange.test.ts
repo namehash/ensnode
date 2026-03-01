@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { buildBlockNumberRange, buildBlockRefRange, RangeTypeIds } from "./blockrange";
+import {
+  buildBlockNumberRange,
+  buildBlockRefRange,
+  mergeBlockNumberRanges,
+  RangeTypeIds,
+} from "./blockrange";
 
 describe("Blockrange", () => {
   describe("buildBlockNumberRange", () => {
@@ -113,6 +118,68 @@ describe("Blockrange", () => {
       expect(() => buildBlockRefRange(endBlockRef, startBlockRef)).toThrow(
         "For a block ref range startBlock must be before or equal to endBlock.",
       );
+    });
+  });
+
+  describe("mergeBlockNumberRanges", () => {
+    it("returns unbounded range when no ranges provided", () => {
+      const result = mergeBlockNumberRanges();
+
+      expect(result).toStrictEqual({
+        rangeType: RangeTypeIds.Unbounded,
+      });
+    });
+
+    it("merges bounded ranges using minimum start and maximum end", () => {
+      const result = mergeBlockNumberRanges(
+        buildBlockNumberRange(100, 200),
+        buildBlockNumberRange(50, 250),
+        buildBlockNumberRange(150, 180),
+      );
+
+      expect(result).toStrictEqual({
+        rangeType: RangeTypeIds.Bounded,
+        startBlock: 50,
+        endBlock: 250,
+      });
+    });
+
+    it("returns left-bounded range when only left bounds exist", () => {
+      const result = mergeBlockNumberRanges(
+        buildBlockNumberRange(120, undefined),
+        buildBlockNumberRange(80, undefined),
+      );
+
+      expect(result).toStrictEqual({
+        rangeType: RangeTypeIds.LeftBounded,
+        startBlock: 80,
+      });
+    });
+
+    it("returns right-bounded range when only right bounds exist", () => {
+      const result = mergeBlockNumberRanges(
+        buildBlockNumberRange(undefined, 200),
+        buildBlockNumberRange(undefined, 260),
+      );
+
+      expect(result).toStrictEqual({
+        rangeType: RangeTypeIds.RightBounded,
+        endBlock: 260,
+      });
+    });
+
+    it("ignores unbounded range when other bounds exist", () => {
+      const result = mergeBlockNumberRanges(
+        buildBlockNumberRange(100, 200),
+        buildBlockNumberRange(undefined, undefined),
+        buildBlockNumberRange(undefined, 150),
+      );
+
+      expect(result).toStrictEqual({
+        rangeType: RangeTypeIds.Bounded,
+        startBlock: 100,
+        endBlock: 200,
+      });
     });
   });
 });

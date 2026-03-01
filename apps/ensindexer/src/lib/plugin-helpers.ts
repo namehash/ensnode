@@ -4,6 +4,7 @@ import type { DatasourceName } from "@ensnode/datasources";
 import { PluginName, uniq } from "@ensnode/ensnode-sdk";
 
 import type { ENSIndexerConfig } from "@/config/types";
+import { getPlugin } from "@/plugins";
 
 /**
  * Creates a namespaced contract name for Ponder handlers.
@@ -132,6 +133,24 @@ export function getRequiredDatasourceNames(plugins: ENSIndexerPlugin[]): Datasou
   const requiredDatasourceNames = plugins.flatMap((plugin) => plugin.requiredDatasourceNames);
 
   return uniq(requiredDatasourceNames);
+}
+
+/**
+ * Gets a mapping of plugin names to their required datasource names.
+ *
+ * @param pluginNames - Names of the plugins to retrieve required datasource names for.
+ */
+export function getPluginsRequiredDatasourceNames(
+  pluginNames: PluginName[],
+): Map<PluginName, DatasourceName[]> {
+  const plugins = pluginNames.map(getPlugin);
+  const pluginToRequiredDatasources = new Map<PluginName, DatasourceName[]>();
+
+  for (const plugin of plugins) {
+    pluginToRequiredDatasources.set(plugin.name, plugin.requiredDatasourceNames);
+  }
+
+  return pluginToRequiredDatasources;
 }
 
 /**

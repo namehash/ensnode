@@ -11,7 +11,7 @@ import type { EnsRainbowClientLabelSet } from "@ensnode/ensrainbow-sdk";
 /**
  * The complete runtime configuration for an ENSIndexer instance.
  */
-export interface ENSIndexerConfig {
+export interface EnsIndexerConfig {
   /**
    * The ENS namespace that ENSNode operates in the context of.
    *
@@ -172,3 +172,10 @@ export interface ENSIndexerConfig {
    */
   isSubgraphCompatible: boolean;
 }
+
+/**
+ * The complete runtime configuration for an ENSIndexer instance.
+ *
+ * @deprecated Use {@link EnsIndexerConfig} instead.
+ */
+export type ENSIndexerConfig = EnsIndexerConfig;

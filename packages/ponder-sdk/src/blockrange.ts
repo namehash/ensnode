@@ -148,6 +148,45 @@ export function buildBlockNumberRange(
   throw new Error("Invalid block number range. This should be unreachable.");
 }
 
+/**
+ * Merge multiple block number ranges into a single range.
+ *
+ * The resulting range is a union that covers all input ranges:
+ * - Uses the minimum defined start block (undefined if no ranges define a start block)
+ * - Uses the maximum defined end block (undefined if no ranges define an end block)
+ *
+ * Returns an unbounded range if no ranges are provided.
+ *
+ * @param ranges - The block number ranges to merge
+ * @returns A single merged block number range covering all inputs
+ */
+export function mergeBlockNumberRanges(...ranges: BlockNumberRange[]): BlockNumberRange {
+  if (ranges.length === 0) {
+    return buildBlockNumberRange(undefined, undefined);
+  }
+
+  let minStartBlock: BlockNumber | undefined;
+  let maxEndBlock: BlockNumber | undefined;
+
+  for (const range of ranges) {
+    // Update min start block (lower values win, undefined is ignored)
+    if (range.startBlock !== undefined) {
+      if (minStartBlock === undefined || range.startBlock < minStartBlock) {
+        minStartBlock = range.startBlock;
+      }
+    }
+
+    // Update max end block (higher values win, undefined is ignored)
+    if (range.endBlock !== undefined) {
+      if (maxEndBlock === undefined || range.endBlock > maxEndBlock) {
+        maxEndBlock = range.endBlock;
+      }
+    }
+  }
+
+  return buildBlockNumberRange(minStartBlock, maxEndBlock);
+}
+
 /************************
  * Block ref range
  ***********************/

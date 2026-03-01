@@ -1,13 +1,14 @@
-import { type BlockRefRangeWithStartBlock, RangeTypeIds } from "@ensnode/ensnode-sdk";
-import type {
-  BlockRef,
-  ChainIndexingMetrics,
-  ChainIndexingMetricsCompleted,
-  ChainIndexingMetricsHistorical,
-  ChainIndexingMetricsRealtime,
-  ChainIndexingState,
+import {
+  type BlockRef,
+  type BlockRefRangeWithStartBlock,
+  type ChainIndexingMetrics,
+  type ChainIndexingMetricsCompleted,
+  type ChainIndexingMetricsHistorical,
+  type ChainIndexingMetricsRealtime,
+  type ChainIndexingState,
+  ChainIndexingStates,
+  RangeTypeIds,
 } from "@ensnode/ponder-sdk";
-import { ChainIndexingStates } from "@ensnode/ponder-sdk";
 
 import type { BackfillScope } from "./backfill-scope";
 import type { ChainIndexingMetadata } from "./chain-indexing-metadata";
