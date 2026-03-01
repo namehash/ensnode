@@ -3,7 +3,7 @@
  *
  * Usage: tsx scripts/generate-openapi.ts
  *
- * Output: <monorepo-root>/openapi/ensapi-openapi.json
+ * Output: <monorepo-root>/docs/docs.ensnode.io/ensapi-openapi.json
  *
  * This script has no runtime dependencies — it calls generateOpenApi31Document()
  * which uses only stub route handlers and static metadata.
@@ -17,15 +17,21 @@ import { fileURLToPath } from "node:url";
 import { generateOpenApi31Document } from "@/openapi-document";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const outputPath = resolve(__dirname, "..", "..", "..", "openapi", "ensapi-openapi.json");
+const outputPath = resolve(
+  __dirname,
+  "..",
+  "..",
+  "..",
+  "docs",
+  "docs.ensnode.io",
+  "ensapi-openapi.json",
+);
 
 // Generate the document (no additional servers for the static spec)
 const document = generateOpenApi31Document();
 
-// Ensure output directory exists
-mkdirSync(dirname(outputPath), { recursive: true });
-
 // Write JSON (Biome handles formatting)
+mkdirSync(dirname(outputPath), { recursive: true });
 writeFileSync(outputPath, JSON.stringify(document));
 
 console.log(`OpenAPI spec written to ${outputPath}`);
@@ -33,7 +39,7 @@ console.log(`OpenAPI spec written to ${outputPath}`);
 // Format with Biome for consistency
 console.log("Formatting with Biome...");
 try {
-  execFileSync("pnpm", ["exec", "-w", "biome", "format", "--write", outputPath], {
+  execFileSync("pnpm", ["exec", "biome", "format", "--write", outputPath], {
     stdio: "inherit",
   });
 } catch (error) {
