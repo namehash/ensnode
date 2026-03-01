@@ -1,9 +1,9 @@
 /**
  * Generates a static OpenAPI 3.1 JSON document for ENSApi.
  *
- * Usage: tsx scripts/generate-openapi.ts
+ * Usage: tsx --tsconfig apps/ensapi/tsconfig.json scripts/generate-ensapi-openapi.ts
  *
- * Output: <monorepo-root>/docs/docs.ensnode.io/ensapi-openapi.json
+ * Output: docs/docs.ensnode.io/ensapi-openapi.json
  *
  * This script has no runtime dependencies — it calls generateOpenApi31Document()
  * which uses only stub route handlers and static metadata.
@@ -17,15 +17,7 @@ import { fileURLToPath } from "node:url";
 import { generateOpenApi31Document } from "@/openapi-document";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const outputPath = resolve(
-  __dirname,
-  "..",
-  "..",
-  "..",
-  "docs",
-  "docs.ensnode.io",
-  "ensapi-openapi.json",
-);
+const outputPath = resolve(__dirname, "..", "docs", "docs.ensnode.io", "ensapi-openapi.json");
 
 // Generate the document (no additional servers for the static spec)
 const document = generateOpenApi31Document();

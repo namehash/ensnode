@@ -18,8 +18,7 @@
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
-    "typecheck": "tsgo --noEmit",
-    "generate:openapi": "tsx scripts/generate-openapi.ts"
+    "typecheck": "tsgo --noEmit"
   },
   "dependencies": {
     "@ensdomains/ensjs": "^4.0.2",
