@@ -15,11 +15,9 @@ import {
 
 import { buildENSIndexerPublicConfig } from "@/config/public";
 import { createCrossChainIndexingStatusSnapshotOmnichain } from "@/lib/indexing-status/build-index-status";
-import { IndexingStatusBuilder } from "@/lib/indexing-status-builder/indexing-status-builder";
-import { localPonderClient } from "@/lib/local-ponder-client";
+import { indexingStatusBuilder } from "@/lib/indexing-status-builder/singleton";
 
 const app = new Hono();
-const indexingStatusBuilder = new IndexingStatusBuilder(localPonderClient);
 
 // include ENSIndexer Public Config endpoint
 app.get("/config", async (c) => {
