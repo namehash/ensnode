@@ -1,5 +1,52 @@
 # @ensnode/ensnode-sdk
 
+## 1.6.0
+
+### Minor Changes
+
+- [#1621](https://github.com/namehash/ensnode/pull/1621) [`75c8b01`](https://github.com/namehash/ensnode/commit/75c8b01644cae2c5ac96dcc253441c64e755a45c) Thanks [@Goader](https://github.com/Goader)! - SWRCache `fn` now optionally receives the currently cached result as a parameter, allowing implementations to inspect cached data before deciding whether to return it or fetch fresh data. Fully backward compatible.
+
+- [#1675](https://github.com/namehash/ensnode/pull/1675) [`a13e206`](https://github.com/namehash/ensnode/commit/a13e206d4e5c5bfa91c2687bdd602542cc8e887c) Thanks [@tk-o](https://github.com/tk-o)! - Includes `mergeBlockNumberRanges` helper function to enable indexed blockrange aggregation, for example, across multiple contract definitions.
+
+- [#1660](https://github.com/namehash/ensnode/pull/1660) [`9bffd55`](https://github.com/namehash/ensnode/commit/9bffd55963a93921b196e94edf7dfd934a491842) Thanks [@tk-o](https://github.com/tk-o)! - Introduces ENSDb module which includes data model definitions.
+
+- [#1690](https://github.com/namehash/ensnode/pull/1690) [`91d7653`](https://github.com/namehash/ensnode/commit/91d7653b0447e0e767e41b275515fb8423af3c0a) Thanks [@tk-o](https://github.com/tk-o)! - Renames `ChainIndexingConfig*` types to match `BlockRefRange*` pattern to support further data model improvements.
+
+- [#1660](https://github.com/namehash/ensnode/pull/1660) [`9bffd55`](https://github.com/namehash/ensnode/commit/9bffd55963a93921b196e94edf7dfd934a491842) Thanks [@tk-o](https://github.com/tk-o)! - Extends ENSIndexer module with functionality allowing compatibility check between two instances of ENSIndexer public config.
+
+- [#1675](https://github.com/namehash/ensnode/pull/1675) [`a13e206`](https://github.com/namehash/ensnode/commit/a13e206d4e5c5bfa91c2687bdd602542cc8e887c) Thanks [@tk-o](https://github.com/tk-o)! - Includes `buildOmnichainIndexingStatusSnapshot` function for simple builder returning `OmnichainIndexingStatusSnapshot` object.
+
+- [#1699](https://github.com/namehash/ensnode/pull/1699) [`3d7fb07`](https://github.com/namehash/ensnode/commit/3d7fb074a7e25e0cb025fe285f71282a91efddc2) Thanks [@tk-o](https://github.com/tk-o)! - Replaced `Blockrange` data model with more versatile ones: `BlockNumberRange` and `BlockRefRange`.
+
+- [#1675](https://github.com/namehash/ensnode/pull/1675) [`a13e206`](https://github.com/namehash/ensnode/commit/a13e206d4e5c5bfa91c2687bdd602542cc8e887c) Thanks [@tk-o](https://github.com/tk-o)! - Introduced `buildIndexedBlockranges` function that builds a map of indexed blockranges configured for each indexed chain.
+
+- [#1643](https://github.com/namehash/ensnode/pull/1643) [`4cf6f41`](https://github.com/namehash/ensnode/commit/4cf6f412a9fa9aa6c438b83acf090adb8365f497) Thanks [@tk-o](https://github.com/tk-o)! - Introduces `EnsIndexerClient` class, supporting easy interactions with ENSIndexer APIs.
+
+- [#1617](https://github.com/namehash/ensnode/pull/1617) [`1bc599f`](https://github.com/namehash/ensnode/commit/1bc599f99804d1cf08dd0d23d5518b1b8e7928c5) Thanks [@tk-o](https://github.com/tk-o)! - Introduces `validateChainIndexingStatusSnapshot` which enables validating values against business-layer requirements.
+
+- [#1542](https://github.com/namehash/ensnode/pull/1542) [`500388b`](https://github.com/namehash/ensnode/commit/500388b217ea420b79b85670891b99ade07f07f0) Thanks [@Goader](https://github.com/Goader)! - Flipped dependency relationship between `ensnode-sdk` and `ens-referrals`. Introduced new `ENSReferralsClient` for referral leaderboard APIs. Consolidated duplicate types (`ChainId`, `AccountId`, `UnixTimestamp`, `Duration`) by importing from `ensnode-sdk`.
+
+- [#1699](https://github.com/namehash/ensnode/pull/1699) [`3d7fb07`](https://github.com/namehash/ensnode/commit/3d7fb074a7e25e0cb025fe285f71282a91efddc2) Thanks [@tk-o](https://github.com/tk-o)! - Replaced `createIndexingConfig` function with `buildBlockRefRange` that utilises updated `BlockRefRange` data model.
+
+- [#1697](https://github.com/namehash/ensnode/pull/1697) [`70b15a1`](https://github.com/namehash/ensnode/commit/70b15a18800921d3a28e1dcfe512a79287537d87) Thanks [@tk-o](https://github.com/tk-o)! - Introduced streamlined datamodel for block ranges.
+
+- [#1629](https://github.com/namehash/ensnode/pull/1629) [`43d3e9c`](https://github.com/namehash/ensnode/commit/43d3e9cdc6456c8b32940a8860b92c523157ffea) Thanks [@tk-o](https://github.com/tk-o)! - Introduced `validate*` functions for Indexing Status data model. These functions enable new use cases on consumer side.
+
+- [#1562](https://github.com/namehash/ensnode/pull/1562) [`84a4c5e`](https://github.com/namehash/ensnode/commit/84a4c5e70df1e33ceed495888fc9b4436c577fc8) Thanks [@Goader](https://github.com/Goader)! - Migrated v1 referrer leaderboard API to use mature `PriceEth` and `PriceUsdc` types from `ensnode-sdk`, replacing temporary `RevenueContribution` and `USDQuantity` types. Added `/v1` subpath export to `ens-referrals`.
+
+### Patch Changes
+
+- [#1553](https://github.com/namehash/ensnode/pull/1553) [`220b71f`](https://github.com/namehash/ensnode/commit/220b71f1dfcf7d7d7ef6e5a2841dced2501ad3d7) Thanks [@lightwalker-eth](https://github.com/lightwalker-eth)! - Added getDefaultEnsNodeUrl utility to get the URL for the default ENSNode deployment for a given ENS namespace
+
+- [#1688](https://github.com/namehash/ensnode/pull/1688) [`6f4d39b`](https://github.com/namehash/ensnode/commit/6f4d39b026f42ecfeb0f9e21b4473f515dc31a23) Thanks [@djstrong](https://github.com/djstrong)! - `EnsRainbowApiClient.heal()` now accepts labelhashes in any common format — with or without a `0x` prefix, uppercase hex characters, bracket-enclosed encoded labelhashes, or odd-length hex strings — and normalizes them automatically. Invalid inputs return a `HealBadRequestError` rather than throwing.
+
+  The underlying normalization utilities (`parseLabelHash`, `parseEncodedLabelHash`, `parseLabelHashOrEncodedLabelHash`) are also exported from `@ensnode/ensnode-sdk` for use in other contexts.
+
+- [#1603](https://github.com/namehash/ensnode/pull/1603) [`8be113b`](https://github.com/namehash/ensnode/commit/8be113b445a5c475a6e69f6c6c99689d4b974d91) Thanks [@Goader](https://github.com/Goader)! - Adds `parseTimestamp` utility to parse ISO 8601 date strings into Unix timestamps. Adds `errorTtl` option to `SWRCache` for configuring separate revalidation intervals for cached errors vs. successful results.
+
+- Updated dependencies [[`a87b437`](https://github.com/namehash/ensnode/commit/a87b4370ff8b4da6a254dda39afac19e3a7f6e94)]:
+  - @ensnode/datasources@1.6.0
+
 ## 1.5.1
 
 ### Patch Changes

@@ -1,5 +1,21 @@
 # ensrainbow
 
+## 1.6.0
+
+### Minor Changes
+
+- [#1648](https://github.com/namehash/ensnode/pull/1648) [`42534c8`](https://github.com/namehash/ensnode/commit/42534c8443728316cff98ba5c16b087c4d0078d1) Thanks [@djstrong](https://github.com/djstrong)! - Constrain CSV input to single-column format (label only). The two-column format (label + labelhash) is no longer supported. All labelhashes are now computed deterministically from labels, removing the risk of incorrect mappings from untrusted labelhash values.
+
+### Patch Changes
+
+- [#1425](https://github.com/namehash/ensnode/pull/1425) [`b06e60f`](https://github.com/namehash/ensnode/commit/b06e60ff7d1a8de096c5d99c4ecef5cfdff84750) Thanks [@djstrong](https://github.com/djstrong)! - Adds `/v1/config` endpoint to ENSRainbow API returning public configuration (version, label set, records count) and deprecates `/v1/version` endpoint. The new endpoint provides comprehensive service discovery capabilities for clients.
+
+  Server startup now requires an initialized database (with a precalculated record count). Run ingestion before starting the server so `/v1/config` is accurate and the service is ready to serve. If the database is empty or uninitialized, startup fails with a clear error directing you to run ingestion first.
+
+- Updated dependencies [[`220b71f`](https://github.com/namehash/ensnode/commit/220b71f1dfcf7d7d7ef6e5a2841dced2501ad3d7), [`75c8b01`](https://github.com/namehash/ensnode/commit/75c8b01644cae2c5ac96dcc253441c64e755a45c), [`a13e206`](https://github.com/namehash/ensnode/commit/a13e206d4e5c5bfa91c2687bdd602542cc8e887c), [`9bffd55`](https://github.com/namehash/ensnode/commit/9bffd55963a93921b196e94edf7dfd934a491842), [`91d7653`](https://github.com/namehash/ensnode/commit/91d7653b0447e0e767e41b275515fb8423af3c0a), [`9bffd55`](https://github.com/namehash/ensnode/commit/9bffd55963a93921b196e94edf7dfd934a491842), [`a13e206`](https://github.com/namehash/ensnode/commit/a13e206d4e5c5bfa91c2687bdd602542cc8e887c), [`3d7fb07`](https://github.com/namehash/ensnode/commit/3d7fb074a7e25e0cb025fe285f71282a91efddc2), [`6f4d39b`](https://github.com/namehash/ensnode/commit/6f4d39b026f42ecfeb0f9e21b4473f515dc31a23), [`a13e206`](https://github.com/namehash/ensnode/commit/a13e206d4e5c5bfa91c2687bdd602542cc8e887c), [`4cf6f41`](https://github.com/namehash/ensnode/commit/4cf6f412a9fa9aa6c438b83acf090adb8365f497), [`8be113b`](https://github.com/namehash/ensnode/commit/8be113b445a5c475a6e69f6c6c99689d4b974d91), [`1bc599f`](https://github.com/namehash/ensnode/commit/1bc599f99804d1cf08dd0d23d5518b1b8e7928c5), [`500388b`](https://github.com/namehash/ensnode/commit/500388b217ea420b79b85670891b99ade07f07f0), [`3d7fb07`](https://github.com/namehash/ensnode/commit/3d7fb074a7e25e0cb025fe285f71282a91efddc2), [`70b15a1`](https://github.com/namehash/ensnode/commit/70b15a18800921d3a28e1dcfe512a79287537d87), [`43d3e9c`](https://github.com/namehash/ensnode/commit/43d3e9cdc6456c8b32940a8860b92c523157ffea), [`84a4c5e`](https://github.com/namehash/ensnode/commit/84a4c5e70df1e33ceed495888fc9b4436c577fc8), [`b06e60f`](https://github.com/namehash/ensnode/commit/b06e60ff7d1a8de096c5d99c4ecef5cfdff84750)]:
+  - @ensnode/ensnode-sdk@1.6.0
+  - @ensnode/ensrainbow-sdk@1.6.0
+
 ## 1.5.1
 
 ### Patch Changes

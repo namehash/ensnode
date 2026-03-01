@@ -1,5 +1,72 @@
 # ensapi
 
+## 1.6.0
+
+### Minor Changes
+
+- [#1621](https://github.com/namehash/ensnode/pull/1621) [`75c8b01`](https://github.com/namehash/ensnode/commit/75c8b01644cae2c5ac96dcc253441c64e755a45c) Thanks [@Goader](https://github.com/Goader)! - Added `status` field to referral program API responses (`ReferrerLeaderboardPage`, `ReferrerEditionMetricsRanked`, `ReferrerEditionMetricsUnranked`) indicating whether a program is "Scheduled", "Active", or "Closed" based on the program's timing relative to `accurateAsOf`.
+
+- [#1603](https://github.com/namehash/ensnode/pull/1603) [`8be113b`](https://github.com/namehash/ensnode/commit/8be113b445a5c475a6e69f6c6c99689d4b974d91) Thanks [@Goader](https://github.com/Goader)! - Introduces referral program editions support with pre-configured edition definitions (ENS Holiday Awards December 2025, March 2026 edition). Updated ENSAnalytics API v1 to support edition-based leaderboard queries and added edition configuration to environment schema.
+
+- [#1654](https://github.com/namehash/ensnode/pull/1654) [`40b95fb`](https://github.com/namehash/ensnode/commit/40b95fb2cb5209546c0bd38145dbf7c231a968e7) Thanks [@shrugs](https://github.com/shrugs)! - ENSv2 GraphQL API: BREAKING: Removes Account.domains in favor of `Query.domains` with `owner` specified.
+
+- [#1576](https://github.com/namehash/ensnode/pull/1576) [`6e98fb6`](https://github.com/namehash/ensnode/commit/6e98fb677d5021c4bc9d17b01289290d1c286003) Thanks [@shrugs](https://github.com/shrugs)! - The experimental ENSv2 API now supports the following Domain filters, namely matching indexed Domains by name prefix.
+
+  - `Query.domains(where: { name?: "example.et", owner?: "0xdead...beef" })`
+
+- [#1670](https://github.com/namehash/ensnode/pull/1670) [`3ce245e`](https://github.com/namehash/ensnode/commit/3ce245e12c0f87e8439b7018921eed54574afa8c) Thanks [@shrugs](https://github.com/shrugs)! - ENSv2 GraphQL API: BREAKING — `Domain.label` is now a `Label` rather than a `String`, providing `Label.hash` and `Label.interpreted` (the previous value of `Domain.label`).
+
+- [#1670](https://github.com/namehash/ensnode/pull/1670) [`3ce245e`](https://github.com/namehash/ensnode/commit/3ce245e12c0f87e8439b7018921eed54574afa8c) Thanks [@shrugs](https://github.com/shrugs)! - ENSv2GraphQL API: Introduce `Domain.subdomainCount`.
+
+- [#1659](https://github.com/namehash/ensnode/pull/1659) [`43b50cf`](https://github.com/namehash/ensnode/commit/43b50cf399e80ce0bae198eb520dbbb5318c336f) Thanks [@shrugs](https://github.com/shrugs)! - The `ens-test-env` namespace now functions against devnet commit `762de44`, which includes the major refactor of ENSv2 onto the ENS Root Chain, away from Namechain.
+
+- [#1621](https://github.com/namehash/ensnode/pull/1621) [`75c8b01`](https://github.com/namehash/ensnode/commit/75c8b01644cae2c5ac96dcc253441c64e755a45c) Thanks [@Goader](https://github.com/Goader)! - Referral program edition leaderboard caches now check for immutability within the cache builder function. Closed editions past the safety window return cached data without re-fetching.
+
+- [#1655](https://github.com/namehash/ensnode/pull/1655) [`41077b3`](https://github.com/namehash/ensnode/commit/41077b3fc105b349fa42aaef5312d5195ac43472) Thanks [@shrugs](https://github.com/shrugs)! - ENSv2 API: Breaking change, Registration.start is replaced by Registration.event.timestamp.
+
+- [#1658](https://github.com/namehash/ensnode/pull/1658) [`08e893e`](https://github.com/namehash/ensnode/commit/08e893e137307f76303a6ff04707cbcc56ee4c26) Thanks [@shrugs](https://github.com/shrugs)! - ENSv2 GraphQL API: Introduces `Domain.subdomains` for traversal of the unified ENSv1/ENSv2 namegraph without needing to select a type-specific fragment.
+
+- [#1554](https://github.com/namehash/ensnode/pull/1554) [`365c996`](https://github.com/namehash/ensnode/commit/365c9967e07680659746af352b8ba623839c7d6e) Thanks [@Goader](https://github.com/Goader)! - Implemented API versioning for ENSAnalytics referral endpoints. Introduced explicit `/ensanalytics/v1/*` routes while preserving existing `/ensanalytics/*` routes as implicit v0.
+
+- [#1595](https://github.com/namehash/ensnode/pull/1595) [`229eaeb`](https://github.com/namehash/ensnode/commit/229eaeb37bd446bef05c28c1603503c3fd318c47) Thanks [@shrugs](https://github.com/shrugs)! - ENSv2 GraphQL API: Introduces order criteria for Domain methods, i.e. `Query.domains(order: { by: NAME, dir: ASC })`. The supported Order criteria are `NAME`, `REGISTRATION_TIMESTAMP`, and `REGISTRATION_EXPIRY` in either `ASC` or `DESC` orders, defaulting to `NAME` and `ASC`.
+
+- [#1654](https://github.com/namehash/ensnode/pull/1654) [`40b95fb`](https://github.com/namehash/ensnode/commit/40b95fb2cb5209546c0bd38145dbf7c231a968e7) Thanks [@shrugs](https://github.com/shrugs)! - Adds a `canonical?: boolean` filter to the where filter in `Query.domains`. When specified, the resulting set of Domains is composed exclusively of Canonical Domains.
+
+### Patch Changes
+
+- [#1680](https://github.com/namehash/ensnode/pull/1680) [`a5f9178`](https://github.com/namehash/ensnode/commit/a5f9178bdd1d4e42440e4ad24daf5df6036f7737) Thanks [@shrugs](https://github.com/shrugs)! - add `Account.domains` and enhance `Domain.subdomains` and `Registry.domains` with filtering and ordering
+
+  **`Account.domains`** (new) — paginated connection of domains owned by this account.
+
+  - `where: { name?: String, canonical?: Boolean }` — optional partial Interpreted Name filter and canonical filter (defaults to false)
+  - `order: { by: NAME | REGISTRATION_TIMESTAMP | REGISTRATION_EXPIRY, dir: ASC | DESC }` — ordering
+
+  **`Domain.subdomains`** (enhanced) — paginated connection of subdomains of this domain, now with filtering and ordering.
+
+  - `where: { name?: String }` — optional partial Interpreted Name filter
+  - `order: { by: NAME | REGISTRATION_TIMESTAMP | REGISTRATION_EXPIRY, dir: ASC | DESC }` — ordering
+
+  **`Registry.domains`** (enhanced) — paginated connection of domains in this registry, now with filtering and ordering.
+
+  - `where: { name?: String }` — optional partial Interpreted Name filter
+  - `order: { by: NAME | REGISTRATION_TIMESTAMP | REGISTRATION_EXPIRY, dir: ASC | DESC }` — ordering
+
+  **`Query.domains`** (updated) — `where.name` is now required. Added optional `where.canonical` filter (defaults to false).
+
+  - `where: { name: String!, canonical?: Boolean }` — required partial Interpreted Name, optional canonical filter
+  - `order: { by: NAME | REGISTRATION_TIMESTAMP | REGISTRATION_EXPIRY, dir: ASC | DESC }` — ordering
+
+- [#1542](https://github.com/namehash/ensnode/pull/1542) [`500388b`](https://github.com/namehash/ensnode/commit/500388b217ea420b79b85670891b99ade07f07f0) Thanks [@Goader](https://github.com/Goader)! - Flipped dependency relationship between `ensnode-sdk` and `ens-referrals`. Introduced new `ENSReferralsClient` for referral leaderboard APIs. Consolidated duplicate types (`ChainId`, `AccountId`, `UnixTimestamp`, `Duration`) by importing from `ensnode-sdk`.
+
+- [#1562](https://github.com/namehash/ensnode/pull/1562) [`84a4c5e`](https://github.com/namehash/ensnode/commit/84a4c5e70df1e33ceed495888fc9b4436c577fc8) Thanks [@Goader](https://github.com/Goader)! - Migrated v1 referrer leaderboard API to use mature `PriceEth` and `PriceUsdc` types from `ensnode-sdk`, replacing temporary `RevenueContribution` and `USDQuantity` types. Added `/v1` subpath export to `ens-referrals`.
+
+- Updated dependencies [[`75c8b01`](https://github.com/namehash/ensnode/commit/75c8b01644cae2c5ac96dcc253441c64e755a45c), [`220b71f`](https://github.com/namehash/ensnode/commit/220b71f1dfcf7d7d7ef6e5a2841dced2501ad3d7), [`75c8b01`](https://github.com/namehash/ensnode/commit/75c8b01644cae2c5ac96dcc253441c64e755a45c), [`8be113b`](https://github.com/namehash/ensnode/commit/8be113b445a5c475a6e69f6c6c99689d4b974d91), [`a13e206`](https://github.com/namehash/ensnode/commit/a13e206d4e5c5bfa91c2687bdd602542cc8e887c), [`9bffd55`](https://github.com/namehash/ensnode/commit/9bffd55963a93921b196e94edf7dfd934a491842), [`91d7653`](https://github.com/namehash/ensnode/commit/91d7653b0447e0e767e41b275515fb8423af3c0a), [`9bffd55`](https://github.com/namehash/ensnode/commit/9bffd55963a93921b196e94edf7dfd934a491842), [`a13e206`](https://github.com/namehash/ensnode/commit/a13e206d4e5c5bfa91c2687bdd602542cc8e887c), [`3d7fb07`](https://github.com/namehash/ensnode/commit/3d7fb074a7e25e0cb025fe285f71282a91efddc2), [`6f4d39b`](https://github.com/namehash/ensnode/commit/6f4d39b026f42ecfeb0f9e21b4473f515dc31a23), [`a13e206`](https://github.com/namehash/ensnode/commit/a13e206d4e5c5bfa91c2687bdd602542cc8e887c), [`4cf6f41`](https://github.com/namehash/ensnode/commit/4cf6f412a9fa9aa6c438b83acf090adb8365f497), [`8be113b`](https://github.com/namehash/ensnode/commit/8be113b445a5c475a6e69f6c6c99689d4b974d91), [`1bc599f`](https://github.com/namehash/ensnode/commit/1bc599f99804d1cf08dd0d23d5518b1b8e7928c5), [`500388b`](https://github.com/namehash/ensnode/commit/500388b217ea420b79b85670891b99ade07f07f0), [`9bffd55`](https://github.com/namehash/ensnode/commit/9bffd55963a93921b196e94edf7dfd934a491842), [`a87b437`](https://github.com/namehash/ensnode/commit/a87b4370ff8b4da6a254dda39afac19e3a7f6e94), [`3d7fb07`](https://github.com/namehash/ensnode/commit/3d7fb074a7e25e0cb025fe285f71282a91efddc2), [`70b15a1`](https://github.com/namehash/ensnode/commit/70b15a18800921d3a28e1dcfe512a79287537d87), [`43d3e9c`](https://github.com/namehash/ensnode/commit/43d3e9cdc6456c8b32940a8860b92c523157ffea), [`84a4c5e`](https://github.com/namehash/ensnode/commit/84a4c5e70df1e33ceed495888fc9b4436c577fc8)]:
+  - @namehash/ens-referrals@1.6.0
+  - @ensnode/ensnode-sdk@1.6.0
+  - @ensnode/ensnode-schema@1.6.0
+  - @ensnode/datasources@1.6.0
+  - @ensnode/ponder-subgraph@1.6.0
+
 ## 1.5.1
 
 ### Patch Changes

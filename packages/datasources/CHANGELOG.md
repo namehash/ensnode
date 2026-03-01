@@ -1,5 +1,11 @@
 # @ensnode/ens-deployments
 
+## 1.6.0
+
+### Patch Changes
+
+- [#1516](https://github.com/namehash/ensnode/pull/1516) [`a87b437`](https://github.com/namehash/ensnode/commit/a87b4370ff8b4da6a254dda39afac19e3a7f6e94) Thanks [@shrugs](https://github.com/shrugs)! - Introduces a temporary `sepolia-v2` ENS Namespace, intended for testing of ephemeral ENSv2 deployments to the Sepolia chain. This feature is intended for developers of the ENS protocol, and is highly experimental and should be considered unstable.
+
 ## 1.5.1
 
 ## 1.5.0

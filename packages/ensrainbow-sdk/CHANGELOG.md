@@ -1,5 +1,17 @@
 # @ensnode/ensrainbow-sdk
 
+## 1.6.0
+
+### Patch Changes
+
+- [#1688](https://github.com/namehash/ensnode/pull/1688) [`6f4d39b`](https://github.com/namehash/ensnode/commit/6f4d39b026f42ecfeb0f9e21b4473f515dc31a23) Thanks [@djstrong](https://github.com/djstrong)! - `EnsRainbowApiClient.heal()` now accepts labelhashes in any common format — with or without a `0x` prefix, uppercase hex characters, bracket-enclosed encoded labelhashes, or odd-length hex strings — and normalizes them automatically. Invalid inputs return a `HealBadRequestError` rather than throwing.
+
+  The underlying normalization utilities (`parseLabelHash`, `parseEncodedLabelHash`, `parseLabelHashOrEncodedLabelHash`) are also exported from `@ensnode/ensnode-sdk` for use in other contexts.
+
+- [#1425](https://github.com/namehash/ensnode/pull/1425) [`b06e60f`](https://github.com/namehash/ensnode/commit/b06e60ff7d1a8de096c5d99c4ecef5cfdff84750) Thanks [@djstrong](https://github.com/djstrong)! - Adds `/v1/config` endpoint to ENSRainbow API returning public configuration (version, label set, records count) and deprecates `/v1/version` endpoint. The new endpoint provides comprehensive service discovery capabilities for clients.
+
+  Server startup now requires an initialized database (with a precalculated record count). Run ingestion before starting the server so `/v1/config` is accurate and the service is ready to serve. If the database is empty or uninitialized, startup fails with a clear error directing you to run ingestion first.
+
 ## 1.5.1
 
 ## 1.5.0

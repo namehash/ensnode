@@ -1,5 +1,11 @@
 # @ensnode/ensnode-schema
 
+## 1.6.0
+
+### Minor Changes
+
+- [#1660](https://github.com/namehash/ensnode/pull/1660) [`9bffd55`](https://github.com/namehash/ensnode/commit/9bffd55963a93921b196e94edf7dfd934a491842) Thanks [@tk-o](https://github.com/tk-o)! - Includes schema for `ENSNodeMetadata`.
+
 ## 1.5.1
 
 ## 1.5.0
