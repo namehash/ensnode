@@ -29,7 +29,7 @@
               {
                 "group": "Preview",
                 "pages": ["ensapi/preview"],
-                "openapi": "../../openapi/ensapi-openapi.json",
+                "openapi": "ensapi-openapi.json",
                 "hidden": true
               }
             ]
