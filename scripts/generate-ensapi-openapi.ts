@@ -39,7 +39,7 @@ try {
   if (error instanceof Error) {
     const err = error as NodeJS.ErrnoException & { status?: number };
     if (err.code === "ENOENT") {
-      console.error("'pnpm' or 'biome' is not available on your PATH.");
+      console.error("'pnpm' is not available on your PATH.");
     } else if (err.status !== undefined) {
       console.error(`Biome exited with code ${err.status}.`);
       console.error("Try running 'pnpm biome format --write' manually to debug.");
