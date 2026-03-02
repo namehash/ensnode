@@ -106,7 +106,7 @@ export class EnsDbWriterWorker {
    * waiting the same interval used for indexing status updates between attempts.
    *
    * @param options.maxRetries Maximum number of attempts before throwing.
-   * @throws Error if the number of attempts exceeds `maxRetries` or if the worker is stopped before a successful run.
+   * @throws Error if the number of attempts exceeds `maxRetries`.
    */
   public async runWithRetries(options: { maxRetries: number }): Promise<void> {
     let attempt = 0;
@@ -135,12 +135,6 @@ export class EnsDbWriterWorker {
         // not start a new attempt.
         await this.nextTryDelay();
       }
-    }
-
-    // If the loop exits due to the worker being stopped,
-    // ensure that we do not treat it as an error case.
-    if (!this.isStopped) {
-      throw new Error("ENSDb Writer Worker could not process all tasks successfully.");
     }
   }
 
