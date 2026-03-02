@@ -23,8 +23,14 @@ export const ensIndexerPublicConfig = deserializeENSIndexerPublicConfig({
     ponder: "0.11.43",
     ensIndexer: "0.35.0",
     ensDb: "0.35.0",
-    ensRainbow: "0.34.0",
-    ensRainbowSchema: 3,
+    ensRainbowPublicConfig: {
+      version: "0.34.0",
+      labelSet: {
+        labelSetId: "subgraph",
+        highestLabelSetVersion: 0,
+      },
+      recordsCount: 100,
+    },
     ensNormalize: "1.11.1",
   },
 });
