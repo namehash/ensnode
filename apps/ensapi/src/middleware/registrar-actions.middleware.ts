@@ -4,8 +4,6 @@ import {
   hasRegistrarActionsConfigSupport,
   hasRegistrarActionsIndexingStatusSupport,
   RegistrarActionsResponseCodes,
-  registrarActionsRequiredPlugins,
-  registrarActionsSupportedIndexingStatusIds,
   serializeRegistrarActionsResponse,
 } from "@ensnode/ensnode-sdk";
 
@@ -37,13 +35,14 @@ export const registrarActionsApiMiddleware = factory.createMiddleware(
       throw new Error(`Invariant(registrar-actions.middleware): indexingStatusMiddleware required`);
     }
 
-    if (!hasRegistrarActionsConfigSupport(config.ensIndexerPublicConfig)) {
+    const configSupport = hasRegistrarActionsConfigSupport(config.ensIndexerPublicConfig);
+    if (!configSupport.supported) {
       return c.json(
         serializeRegistrarActionsResponse({
           responseCode: RegistrarActionsResponseCodes.Error,
           error: {
             message: `Registrar Actions API is not available`,
-            details: `Connected ENSIndexer must have all following plugins active: ${registrarActionsRequiredPlugins.join(", ")}`,
+            details: configSupport.reason,
           },
         }),
         500,
@@ -71,13 +70,16 @@ export const registrarActionsApiMiddleware = factory.createMiddleware(
 
     const { omnichainSnapshot } = c.var.indexingStatus.snapshot;
 
-    if (!hasRegistrarActionsIndexingStatusSupport(omnichainSnapshot.omnichainStatus))
+    const indexingStatusSupport = hasRegistrarActionsIndexingStatusSupport(
+      omnichainSnapshot.omnichainStatus,
+    );
+    if (!indexingStatusSupport.supported)
       return c.json(
         serializeRegistrarActionsResponse({
           responseCode: RegistrarActionsResponseCodes.Error,
           error: {
             message: `Registrar Actions API is not available`,
-            details: `The cached omnichain indexing status of the Connected ENSIndexer must be one of the following ${registrarActionsSupportedIndexingStatusIds.map((statusId) => `"${statusId}"`).join(", ")}.`,
+            details: indexingStatusSupport.reason,
           },
         }),
         500,

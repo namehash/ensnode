@@ -6,7 +6,7 @@ import { useMemo } from "react";
 
 import { useValidatedSelectedConnection } from "@/hooks/active/use-selected-connection";
 
-export default function ActionsSubgraphCompatPage() {
+export default function Actions() {
   const selectedConnection = useValidatedSelectedConnection();
   const url = useMemo(
     () => new URL(`/subgraph`, selectedConnection).toString(),

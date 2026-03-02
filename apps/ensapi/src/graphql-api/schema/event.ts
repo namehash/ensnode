@@ -19,7 +19,7 @@ export type Event = Exclude<typeof EventRef.$inferType, string>;
 /////////
 EventRef.implement({
   description:
-    "An Event represents a discreet Log Event that was emitted on an EVM chain, including associated metadata.",
+    "An Event represents a discrete Log Event that was emitted on an EVM chain, including associated metadata.",
   fields: (t) => ({
     //////////////
     // Event.id

@@ -19,7 +19,7 @@ import type { PrerequisiteResult } from "../../../shared/prerequisites";
  *    ensure each value in the registrar actions table has
  *    an associated record in the domains table.
  */
-export const registrarActionsRequiredPlugins = [
+const registrarActionsRequiredPlugins = [
   PluginName.Subgraph,
   PluginName.Basenames,
   PluginName.Lineanames,
@@ -49,7 +49,7 @@ export function hasRegistrarActionsConfigSupport(
  * Database indexes are created by the time the omnichain indexing status
  * is either `completed` or `following`.
  */
-export const registrarActionsSupportedIndexingStatusIds = [
+const registrarActionsSupportedIndexingStatusIds = [
   OmnichainIndexingStatusIds.Completed,
   OmnichainIndexingStatusIds.Following,
 ];

@@ -212,7 +212,7 @@ query PermissionsByContract(
     variables: {
       // TODO: same as above
       default: { contract: ENS_TEST_ENV_V2_ETH_REGISTRAR },
-      [ENSNamespaceIds.SepoliaV2]: { registry: SEPOLIA_V2_V2_ETH_REGISTRAR },
+      [ENSNamespaceIds.SepoliaV2]: { contract: SEPOLIA_V2_V2_ETH_REGISTRAR },
     },
   },
 
