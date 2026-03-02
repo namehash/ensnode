@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { RangeTypeIds } from "../shared/blockrange";
 import {
   earlierBlockRef,
   earliestBlockRef,
@@ -7,7 +8,6 @@ import {
   latestBlockRef,
 } from "./block-refs.mock";
 import {
-  BlockRefRangeTypeIds,
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshotBackfill,
   type ChainIndexingStatusSnapshotFollowing,
@@ -35,7 +35,7 @@ describe("ENSIndexer: Indexing Status", () => {
             {
               chainStatus: ChainIndexingStatusIds.Following,
               config: {
-                blockRangeType: BlockRefRangeTypeIds.Indefinite,
+                rangeType: RangeTypeIds.LeftBounded,
                 startBlock: earliestBlockRef,
               },
               latestIndexedBlock: laterBlockRef,
@@ -47,7 +47,7 @@ describe("ENSIndexer: Indexing Status", () => {
             {
               chainStatus: ChainIndexingStatusIds.Backfill,
               config: {
-                blockRangeType: BlockRefRangeTypeIds.Indefinite,
+                rangeType: RangeTypeIds.LeftBounded,
                 startBlock: earlierBlockRef,
               },
               latestIndexedBlock: laterBlockRef,
@@ -59,7 +59,7 @@ describe("ENSIndexer: Indexing Status", () => {
             {
               chainStatus: ChainIndexingStatusIds.Queued,
               config: {
-                blockRangeType: BlockRefRangeTypeIds.Indefinite,
+                rangeType: RangeTypeIds.LeftBounded,
                 startBlock: latestBlockRef,
               },
             } satisfies ChainIndexingStatusSnapshotQueued,
@@ -78,7 +78,7 @@ describe("ENSIndexer: Indexing Status", () => {
           "1": {
             chainStatus: ChainIndexingStatusIds.Following,
             config: {
-              blockRangeType: BlockRefRangeTypeIds.Indefinite,
+              rangeType: RangeTypeIds.LeftBounded,
               startBlock: earliestBlockRef,
             },
             latestIndexedBlock: laterBlockRef,
@@ -87,14 +87,14 @@ describe("ENSIndexer: Indexing Status", () => {
           "8453": {
             chainStatus: ChainIndexingStatusIds.Queued,
             config: {
-              blockRangeType: BlockRefRangeTypeIds.Indefinite,
+              rangeType: RangeTypeIds.LeftBounded,
               startBlock: latestBlockRef,
             },
           } satisfies ChainIndexingStatusSnapshotQueued,
           "10": {
             chainStatus: ChainIndexingStatusIds.Backfill,
             config: {
-              blockRangeType: BlockRefRangeTypeIds.Indefinite,
+              rangeType: RangeTypeIds.LeftBounded,
               startBlock: earlierBlockRef,
             },
             latestIndexedBlock: laterBlockRef,

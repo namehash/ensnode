@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { RangeTypeIds } from "../shared/blockrange";
 import type { BlockRef } from "../shared/types";
 import {
   earlierBlockRef,
@@ -8,7 +9,6 @@ import {
   latestBlockRef,
 } from "./block-refs.mock";
 import {
-  BlockRefRangeTypeIds,
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshot,
   type ChainIndexingStatusSnapshotBackfill,
@@ -17,6 +17,7 @@ import {
   type ChainIndexingStatusSnapshotQueued,
 } from "./chain-indexing-status-snapshot";
 import {
+  buildOmnichainIndexingStatusSnapshot,
   getOmnichainIndexingCursor,
   getOmnichainIndexingStatus,
   OmnichainIndexingStatusIds,
@@ -30,7 +31,7 @@ describe("ENSIndexer: Indexing Snapshot helpers", () => {
         {
           chainStatus: ChainIndexingStatusIds.Completed,
           config: {
-            blockRangeType: BlockRefRangeTypeIds.Definite,
+            rangeType: RangeTypeIds.Bounded,
             startBlock: earlierBlockRef,
 
             endBlock: latestBlockRef,
@@ -41,7 +42,7 @@ describe("ENSIndexer: Indexing Snapshot helpers", () => {
         {
           chainStatus: ChainIndexingStatusIds.Completed,
           config: {
-            blockRangeType: BlockRefRangeTypeIds.Definite,
+            rangeType: RangeTypeIds.Bounded,
             startBlock: earliestBlockRef,
             endBlock: laterBlockRef,
           },
@@ -62,7 +63,7 @@ describe("ENSIndexer: Indexing Snapshot helpers", () => {
         {
           chainStatus: ChainIndexingStatusIds.Queued,
           config: {
-            blockRangeType: BlockRefRangeTypeIds.Definite,
+            rangeType: RangeTypeIds.Bounded,
             startBlock: earliestBlockRef,
             endBlock: latestBlockRef,
           },
@@ -70,7 +71,7 @@ describe("ENSIndexer: Indexing Snapshot helpers", () => {
         {
           chainStatus: ChainIndexingStatusIds.Queued,
           config: {
-            blockRangeType: BlockRefRangeTypeIds.Definite,
+            rangeType: RangeTypeIds.Bounded,
             startBlock: earliestBlockRef,
             endBlock: laterBlockRef,
           },
@@ -90,7 +91,7 @@ describe("ENSIndexer: Indexing Snapshot helpers", () => {
         {
           chainStatus: ChainIndexingStatusIds.Queued,
           config: {
-            blockRangeType: BlockRefRangeTypeIds.Definite,
+            rangeType: RangeTypeIds.Bounded,
             startBlock: earliestBlockRef,
             endBlock: latestBlockRef,
           },
@@ -99,7 +100,7 @@ describe("ENSIndexer: Indexing Snapshot helpers", () => {
         {
           chainStatus: ChainIndexingStatusIds.Backfill,
           config: {
-            blockRangeType: BlockRefRangeTypeIds.Indefinite,
+            rangeType: RangeTypeIds.LeftBounded,
             startBlock: earliestBlockRef,
           },
           latestIndexedBlock: laterBlockRef,
@@ -109,7 +110,7 @@ describe("ENSIndexer: Indexing Snapshot helpers", () => {
         {
           chainStatus: ChainIndexingStatusIds.Completed,
           config: {
-            blockRangeType: BlockRefRangeTypeIds.Definite,
+            rangeType: RangeTypeIds.Bounded,
             startBlock: earliestBlockRef,
             endBlock: laterBlockRef,
           },
@@ -130,7 +131,7 @@ describe("ENSIndexer: Indexing Snapshot helpers", () => {
         {
           chainStatus: ChainIndexingStatusIds.Following,
           config: {
-            blockRangeType: BlockRefRangeTypeIds.Indefinite,
+            rangeType: RangeTypeIds.LeftBounded,
             startBlock: earlierBlockRef,
           },
           latestIndexedBlock: laterBlockRef,
@@ -140,7 +141,7 @@ describe("ENSIndexer: Indexing Snapshot helpers", () => {
         {
           chainStatus: ChainIndexingStatusIds.Backfill,
           config: {
-            blockRangeType: BlockRefRangeTypeIds.Definite,
+            rangeType: RangeTypeIds.Bounded,
             startBlock: earliestBlockRef,
             endBlock: latestBlockRef,
           },
@@ -151,7 +152,7 @@ describe("ENSIndexer: Indexing Snapshot helpers", () => {
         {
           chainStatus: ChainIndexingStatusIds.Completed,
           config: {
-            blockRangeType: BlockRefRangeTypeIds.Definite,
+            rangeType: RangeTypeIds.Bounded,
             startBlock: earliestBlockRef,
             endBlock: laterBlockRef,
           },
@@ -180,7 +181,7 @@ describe("getOmnichainIndexingCursor", () => {
       {
         chainStatus: ChainIndexingStatusIds.Queued,
         config: {
-          blockRangeType: BlockRefRangeTypeIds.Indefinite,
+          rangeType: RangeTypeIds.LeftBounded,
           startBlock: evenLaterBlockRef,
         },
       } satisfies ChainIndexingStatusSnapshotQueued,
@@ -188,7 +189,7 @@ describe("getOmnichainIndexingCursor", () => {
       {
         chainStatus: ChainIndexingStatusIds.Backfill,
         config: {
-          blockRangeType: BlockRefRangeTypeIds.Definite,
+          rangeType: RangeTypeIds.Bounded,
           startBlock: earliestBlockRef,
           endBlock: latestBlockRef,
         },
@@ -199,7 +200,7 @@ describe("getOmnichainIndexingCursor", () => {
       {
         chainStatus: ChainIndexingStatusIds.Following,
         config: {
-          blockRangeType: BlockRefRangeTypeIds.Indefinite,
+          rangeType: RangeTypeIds.LeftBounded,
           startBlock: earliestBlockRef,
         },
         latestIndexedBlock: earlierBlockRef,
@@ -208,7 +209,7 @@ describe("getOmnichainIndexingCursor", () => {
       {
         chainStatus: ChainIndexingStatusIds.Completed,
         config: {
-          blockRangeType: BlockRefRangeTypeIds.Definite,
+          rangeType: RangeTypeIds.Bounded,
           startBlock: earlierBlockRef,
           endBlock: latestBlockRef,
         },
@@ -229,14 +230,14 @@ describe("getOmnichainIndexingCursor", () => {
         {
           chainStatus: ChainIndexingStatusIds.Queued,
           config: {
-            blockRangeType: BlockRefRangeTypeIds.Indefinite,
+            rangeType: RangeTypeIds.LeftBounded,
             startBlock: earliestBlockRef,
           },
         } satisfies ChainIndexingStatusSnapshotQueued,
         {
           chainStatus: ChainIndexingStatusIds.Queued,
           config: {
-            blockRangeType: BlockRefRangeTypeIds.Indefinite,
+            rangeType: RangeTypeIds.LeftBounded,
             startBlock: laterBlockRef,
           },
         } satisfies ChainIndexingStatusSnapshotQueued,
@@ -255,7 +256,7 @@ describe("getOmnichainIndexingCursor", () => {
       {
         chainStatus: ChainIndexingStatusIds.Backfill,
         config: {
-          blockRangeType: BlockRefRangeTypeIds.Definite,
+          rangeType: RangeTypeIds.Bounded,
           startBlock: earliestBlockRef,
           endBlock: latestBlockRef,
         },
@@ -266,7 +267,7 @@ describe("getOmnichainIndexingCursor", () => {
       {
         chainStatus: ChainIndexingStatusIds.Following,
         config: {
-          blockRangeType: BlockRefRangeTypeIds.Indefinite,
+          rangeType: RangeTypeIds.LeftBounded,
           startBlock: earliestBlockRef,
         },
         latestIndexedBlock: evenLaterBlockRef,
@@ -275,7 +276,7 @@ describe("getOmnichainIndexingCursor", () => {
       {
         chainStatus: ChainIndexingStatusIds.Completed,
         config: {
-          blockRangeType: BlockRefRangeTypeIds.Definite,
+          rangeType: RangeTypeIds.Bounded,
           startBlock: earlierBlockRef,
           endBlock: latestBlockRef,
         },
@@ -293,6 +294,175 @@ describe("getOmnichainIndexingCursor", () => {
   it("throws error when no chains were provided", () => {
     expect(() => getOmnichainIndexingCursor([])).toThrowError(
       /Unable to determine omnichain indexing cursor/,
+    );
+  });
+});
+
+describe("buildOmnichainIndexingStatusSnapshot()", () => {
+  it("returns Unstarted status when all chains are Queued", () => {
+    const chainStatusSnapshots = new Map([
+      [
+        1,
+        {
+          chainStatus: ChainIndexingStatusIds.Queued,
+          config: {
+            rangeType: RangeTypeIds.LeftBounded,
+            startBlock: earliestBlockRef,
+          },
+        } satisfies ChainIndexingStatusSnapshotQueued,
+      ],
+      [
+        8453,
+        {
+          chainStatus: ChainIndexingStatusIds.Queued,
+          config: {
+            rangeType: RangeTypeIds.Bounded,
+            startBlock: earlierBlockRef,
+            endBlock: latestBlockRef,
+          },
+        } satisfies ChainIndexingStatusSnapshotQueued,
+      ],
+    ]);
+
+    const result = buildOmnichainIndexingStatusSnapshot(chainStatusSnapshots);
+
+    expect(result).toStrictEqual({
+      omnichainStatus: OmnichainIndexingStatusIds.Unstarted,
+      chains: chainStatusSnapshots,
+      omnichainIndexingCursor: earliestBlockRef.timestamp - 1,
+    });
+  });
+
+  it("returns Backfill status when at least one chain is Backfill and none are Following", () => {
+    const evenLaterBlockRef: BlockRef = {
+      timestamp: latestBlockRef.timestamp + 1000,
+      number: latestBlockRef.number + 1000,
+    };
+
+    const chainStatusSnapshots = new Map([
+      [
+        1,
+        {
+          chainStatus: ChainIndexingStatusIds.Queued,
+          config: {
+            rangeType: RangeTypeIds.LeftBounded,
+            startBlock: evenLaterBlockRef,
+          },
+        } satisfies ChainIndexingStatusSnapshotQueued,
+      ],
+      [
+        8453,
+        {
+          chainStatus: ChainIndexingStatusIds.Backfill,
+          config: {
+            rangeType: RangeTypeIds.Bounded,
+            startBlock: earliestBlockRef,
+            endBlock: latestBlockRef,
+          },
+          latestIndexedBlock: earlierBlockRef,
+          backfillEndBlock: latestBlockRef,
+        } satisfies ChainIndexingStatusSnapshotBackfill,
+      ],
+      [
+        10,
+        {
+          chainStatus: ChainIndexingStatusIds.Completed,
+          config: {
+            rangeType: RangeTypeIds.Bounded,
+            startBlock: earlierBlockRef,
+            endBlock: latestBlockRef,
+          },
+          latestIndexedBlock: latestBlockRef,
+        } satisfies ChainIndexingStatusSnapshotCompleted,
+      ],
+    ]);
+
+    const result = buildOmnichainIndexingStatusSnapshot(chainStatusSnapshots);
+
+    expect(result).toStrictEqual({
+      omnichainStatus: OmnichainIndexingStatusIds.Backfill,
+      chains: chainStatusSnapshots,
+      omnichainIndexingCursor: latestBlockRef.timestamp,
+    });
+  });
+
+  it("returns Following status when at least one chain is Following", () => {
+    const chainStatusSnapshots = new Map([
+      [
+        1,
+        {
+          chainStatus: ChainIndexingStatusIds.Backfill,
+          config: {
+            rangeType: RangeTypeIds.LeftBounded,
+            startBlock: earliestBlockRef,
+          },
+          latestIndexedBlock: earlierBlockRef,
+          backfillEndBlock: laterBlockRef,
+        } satisfies ChainIndexingStatusSnapshotBackfill,
+      ],
+      [
+        8453,
+        {
+          chainStatus: ChainIndexingStatusIds.Following,
+          config: {
+            rangeType: RangeTypeIds.LeftBounded,
+            startBlock: earlierBlockRef,
+          },
+          latestIndexedBlock: laterBlockRef,
+          latestKnownBlock: latestBlockRef,
+        } satisfies ChainIndexingStatusSnapshotFollowing,
+      ],
+    ]);
+
+    const result = buildOmnichainIndexingStatusSnapshot(chainStatusSnapshots);
+
+    expect(result).toStrictEqual({
+      omnichainStatus: OmnichainIndexingStatusIds.Following,
+      chains: chainStatusSnapshots,
+      omnichainIndexingCursor: laterBlockRef.timestamp,
+    });
+  });
+
+  it("returns Completed status when all chains are Completed", () => {
+    const chainStatusSnapshots = new Map([
+      [
+        1,
+        {
+          chainStatus: ChainIndexingStatusIds.Completed,
+          config: {
+            rangeType: RangeTypeIds.Bounded,
+            startBlock: earliestBlockRef,
+            endBlock: laterBlockRef,
+          },
+          latestIndexedBlock: laterBlockRef,
+        } satisfies ChainIndexingStatusSnapshotCompleted,
+      ],
+      [
+        8453,
+        {
+          chainStatus: ChainIndexingStatusIds.Completed,
+          config: {
+            rangeType: RangeTypeIds.Bounded,
+            startBlock: earlierBlockRef,
+            endBlock: latestBlockRef,
+          },
+          latestIndexedBlock: latestBlockRef,
+        } satisfies ChainIndexingStatusSnapshotCompleted,
+      ],
+    ]);
+
+    const result = buildOmnichainIndexingStatusSnapshot(chainStatusSnapshots);
+
+    expect(result).toStrictEqual({
+      omnichainStatus: OmnichainIndexingStatusIds.Completed,
+      chains: chainStatusSnapshots,
+      omnichainIndexingCursor: latestBlockRef.timestamp,
+    });
+  });
+
+  it("throws an error when no chain snapshots are provided", () => {
+    expect(() => buildOmnichainIndexingStatusSnapshot(new Map())).toThrowError(
+      /At least one chain indexing status snapshot is required to build an OmnichainIndexingStatusSnapshot/,
     );
   });
 });

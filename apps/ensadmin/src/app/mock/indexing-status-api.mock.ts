@@ -1,5 +1,4 @@
 import {
-  BlockRefRangeTypeIds,
   ChainIndexingStatusIds,
   CrossChainIndexingStrategyIds,
   deserializeIndexingStatusResponse,
@@ -8,6 +7,7 @@ import {
   type IndexingStatusResponseError,
   type OmnichainIndexingStatusId,
   OmnichainIndexingStatusIds,
+  RangeTypeIds,
   type SerializedChainIndexingStatusSnapshotBackfill,
   type SerializedChainIndexingStatusSnapshotCompleted,
   type SerializedChainIndexingStatusSnapshotFollowing,
@@ -42,7 +42,7 @@ export const indexingStatusResponseOkOmnichain: Record<
             "1": {
               chainStatus: ChainIndexingStatusIds.Queued,
               config: {
-                blockRangeType: BlockRefRangeTypeIds.Indefinite,
+                rangeType: RangeTypeIds.LeftBounded,
                 startBlock: {
                   timestamp: 1759409665,
                   number: 3327417,
@@ -53,7 +53,7 @@ export const indexingStatusResponseOkOmnichain: Record<
             "10": {
               chainStatus: ChainIndexingStatusIds.Queued,
               config: {
-                blockRangeType: BlockRefRangeTypeIds.Indefinite,
+                rangeType: RangeTypeIds.LeftBounded,
                 startBlock: {
                   timestamp: 1731834595,
                   number: 110393959,
@@ -63,7 +63,7 @@ export const indexingStatusResponseOkOmnichain: Record<
             "8453": {
               chainStatus: ChainIndexingStatusIds.Queued,
               config: {
-                blockRangeType: BlockRefRangeTypeIds.Indefinite,
+                rangeType: RangeTypeIds.LeftBounded,
                 startBlock: {
                   timestamp: 1721834595,
                   number: 17522624,
@@ -74,7 +74,7 @@ export const indexingStatusResponseOkOmnichain: Record<
             "59144": {
               chainStatus: ChainIndexingStatusIds.Queued,
               config: {
-                blockRangeType: BlockRefRangeTypeIds.Indefinite,
+                rangeType: RangeTypeIds.LeftBounded,
                 startBlock: {
                   timestamp: 1720768992,
                   number: 6682888,
@@ -103,7 +103,7 @@ export const indexingStatusResponseOkOmnichain: Record<
             "1": {
               chainStatus: ChainIndexingStatusIds.Backfill,
               config: {
-                blockRangeType: BlockRefRangeTypeIds.Indefinite,
+                rangeType: RangeTypeIds.LeftBounded,
                 startBlock: {
                   timestamp: 1489165544,
                   number: 3327417,
@@ -122,7 +122,7 @@ export const indexingStatusResponseOkOmnichain: Record<
             "10": {
               chainStatus: ChainIndexingStatusIds.Queued,
               config: {
-                blockRangeType: BlockRefRangeTypeIds.Indefinite,
+                rangeType: RangeTypeIds.LeftBounded,
                 startBlock: {
                   timestamp: 1696386695,
                   number: 110393959,
@@ -132,7 +132,7 @@ export const indexingStatusResponseOkOmnichain: Record<
             "8453": {
               chainStatus: ChainIndexingStatusIds.Queued,
               config: {
-                blockRangeType: BlockRefRangeTypeIds.Indefinite,
+                rangeType: RangeTypeIds.LeftBounded,
                 startBlock: {
                   timestamp: 1721834595,
                   number: 17522624,
@@ -142,7 +142,7 @@ export const indexingStatusResponseOkOmnichain: Record<
             "59144": {
               chainStatus: ChainIndexingStatusIds.Queued,
               config: {
-                blockRangeType: BlockRefRangeTypeIds.Indefinite,
+                rangeType: RangeTypeIds.LeftBounded,
                 startBlock: {
                   timestamp: 1720768992,
                   number: 6682888,
@@ -152,7 +152,7 @@ export const indexingStatusResponseOkOmnichain: Record<
             "567": {
               chainStatus: ChainIndexingStatusIds.Queued,
               config: {
-                blockRangeType: BlockRefRangeTypeIds.Indefinite,
+                rangeType: RangeTypeIds.LeftBounded,
                 startBlock: {
                   timestamp: 1720768999,
                   number: 6682889,
@@ -181,7 +181,7 @@ export const indexingStatusResponseOkOmnichain: Record<
             "1": {
               chainStatus: ChainIndexingStatusIds.Following,
               config: {
-                blockRangeType: BlockRefRangeTypeIds.Indefinite,
+                rangeType: RangeTypeIds.LeftBounded,
                 startBlock: {
                   timestamp: 1489165544,
                   number: 3327417,
@@ -199,7 +199,7 @@ export const indexingStatusResponseOkOmnichain: Record<
             "10": {
               chainStatus: ChainIndexingStatusIds.Following,
               config: {
-                blockRangeType: BlockRefRangeTypeIds.Indefinite,
+                rangeType: RangeTypeIds.LeftBounded,
                 startBlock: {
                   timestamp: 1696386695,
                   number: 110393959,
@@ -218,7 +218,7 @@ export const indexingStatusResponseOkOmnichain: Record<
             "8453": {
               chainStatus: ChainIndexingStatusIds.Following,
               config: {
-                blockRangeType: BlockRefRangeTypeIds.Indefinite,
+                rangeType: RangeTypeIds.LeftBounded,
                 startBlock: {
                   timestamp: 1721834595,
                   number: 17522624,
@@ -237,7 +237,7 @@ export const indexingStatusResponseOkOmnichain: Record<
             "59144": {
               chainStatus: ChainIndexingStatusIds.Following,
               config: {
-                blockRangeType: BlockRefRangeTypeIds.Indefinite,
+                rangeType: RangeTypeIds.LeftBounded,
                 startBlock: {
                   timestamp: 1720768992,
                   number: 6682888,
@@ -274,7 +274,7 @@ export const indexingStatusResponseOkOmnichain: Record<
             "11155111": {
               chainStatus: ChainIndexingStatusIds.Completed,
               config: {
-                blockRangeType: BlockRefRangeTypeIds.Definite,
+                rangeType: RangeTypeIds.Bounded,
                 startBlock: {
                   timestamp: 1686901632,
                   number: 3702721,

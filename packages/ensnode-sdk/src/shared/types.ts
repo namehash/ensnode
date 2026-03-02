@@ -107,19 +107,6 @@ export interface BlockRef {
 }
 
 /**
- * Block range
- *
- * Represents a range of blocks
- */
-export interface Blockrange<BlockType = BlockNumber> {
-  /** Start block number */
-  startBlock?: BlockType;
-
-  /** End block number */
-  endBlock?: BlockType;
-}
-
-/**
  * Duration
  *
  * Representing a duration in seconds.

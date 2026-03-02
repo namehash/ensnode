@@ -1,7 +1,7 @@
 import { parse as parseConnectionString } from "pg-connection-string";
 import { prettifyError, ZodError, z } from "zod/v4";
 
-import { PluginName, uniq } from "@ensnode/ensnode-sdk";
+import { buildBlockNumberRange, PluginName, uniq } from "@ensnode/ensnode-sdk";
 import {
   buildRpcConfigsFromEnv,
   DatabaseSchemaNameSchema,
@@ -70,9 +70,10 @@ const BlockrangeSchema = z
   })
   .refine(
     (val) =>
-      val.startBlock === undefined || val.endBlock === undefined || val.endBlock > val.startBlock,
-    { error: "END_BLOCK must be greater than START_BLOCK." },
-  );
+      val.startBlock === undefined || val.endBlock === undefined || val.startBlock <= val.endBlock,
+    { error: "START_BLOCK must be less than or equal to END_BLOCK." },
+  )
+  .transform(({ startBlock, endBlock }) => buildBlockNumberRange(startBlock, endBlock));
 
 const PluginsSchema = z.coerce
   .string()

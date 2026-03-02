@@ -1,4 +1,4 @@
-import type { ChainId, UnixTimestamp } from "../shared/types";
+import type { ChainId, UnixTimestamp, Unvalidated } from "../shared/types";
 import {
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshot,
@@ -6,6 +6,7 @@ import {
   type ChainIndexingStatusSnapshotCompleted,
   type ChainIndexingStatusSnapshotQueued,
 } from "./chain-indexing-status-snapshot";
+import { validateOmnichainIndexingStatusSnapshot } from "./validate/omnichain-indexing-status-snapshot";
 
 /**
  * The status of omnichain indexing at the time an omnichain indexing status
@@ -338,4 +339,66 @@ export function getOmnichainIndexingCursor(chains: ChainIndexingStatusSnapshot[]
   }
 
   return Math.max(...latestIndexedBlockTimestamps);
+}
+
+/**
+ * Build an Omnichain Indexing Status Snapshot based on the indexing status snapshots of all indexed chains.
+ *
+ * @param chainStatusSnapshots - A map of chain IDs to their chain indexing status snapshots.
+ * @returns The omnichain indexing status snapshot.
+ */
+export function buildOmnichainIndexingStatusSnapshot(
+  chainStatusSnapshots: Map<ChainId, ChainIndexingStatusSnapshot>,
+): OmnichainIndexingStatusSnapshot {
+  if (chainStatusSnapshots.size === 0) {
+    throw new Error(
+      "At least one chain indexing status snapshot is required to build an OmnichainIndexingStatusSnapshot",
+    );
+  }
+
+  const chains = Array.from(chainStatusSnapshots.values());
+  const omnichainStatus = getOmnichainIndexingStatus(chains);
+  const omnichainIndexingCursor = getOmnichainIndexingCursor(chains);
+
+  switch (omnichainStatus) {
+    case OmnichainIndexingStatusIds.Unstarted: {
+      return validateOmnichainIndexingStatusSnapshot({
+        omnichainStatus: OmnichainIndexingStatusIds.Unstarted,
+        chains: chainStatusSnapshots as Map<
+          ChainId,
+          Unvalidated<ChainIndexingStatusSnapshotQueued>
+        >, // narrowing the type here, will be validated in the following 'check' step
+        omnichainIndexingCursor,
+      } satisfies Unvalidated<OmnichainIndexingStatusSnapshotUnstarted>);
+    }
+
+    case OmnichainIndexingStatusIds.Backfill: {
+      return validateOmnichainIndexingStatusSnapshot({
+        omnichainStatus: OmnichainIndexingStatusIds.Backfill,
+        chains: chainStatusSnapshots as Map<
+          ChainId,
+          Unvalidated<ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill>
+        >, // narrowing the type here, will be validated in the following 'check' step
+        omnichainIndexingCursor,
+      } satisfies Unvalidated<OmnichainIndexingStatusSnapshotBackfill>);
+    }
+
+    case OmnichainIndexingStatusIds.Completed: {
+      return validateOmnichainIndexingStatusSnapshot({
+        omnichainStatus: OmnichainIndexingStatusIds.Completed,
+        chains: chainStatusSnapshots as Map<
+          ChainId,
+          Unvalidated<ChainIndexingStatusSnapshotCompleted>
+        >, // narrowing the type here, will be validated in the following 'check' step
+        omnichainIndexingCursor,
+      } satisfies Unvalidated<OmnichainIndexingStatusSnapshotCompleted>);
+    }
+
+    case OmnichainIndexingStatusIds.Following:
+      return validateOmnichainIndexingStatusSnapshot({
+        omnichainStatus: OmnichainIndexingStatusIds.Following,
+        chains: chainStatusSnapshots,
+        omnichainIndexingCursor,
+      } satisfies Unvalidated<OmnichainIndexingStatusSnapshotFollowing>);
+  }
 }

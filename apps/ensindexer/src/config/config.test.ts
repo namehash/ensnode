@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ensTestEnvChain } from "@ensnode/datasources";
-import { ENSNamespaceIds, PluginName } from "@ensnode/ensnode-sdk";
+import { buildBlockNumberRange, ENSNamespaceIds, PluginName } from "@ensnode/ensnode-sdk";
 import type { RpcConfig } from "@ensnode/ensnode-sdk/internal";
 
 import { buildConfigFromEnvironment } from "@/config/config.schema";
@@ -49,7 +49,7 @@ describe("config (with base env)", () => {
     it("returns a valid config object using environment variables", async () => {
       const config = await getConfig();
       expect(config.namespace).toBe("mainnet");
-      expect(config.globalBlockrange).toEqual({ startBlock: undefined, endBlock: undefined });
+      expect(config.globalBlockrange).toEqual(buildBlockNumberRange(undefined, undefined));
       expect(config.databaseSchemaName).toBe("ensnode");
       expect(config.plugins).toEqual(["subgraph"]);
       expect(config.ensRainbowUrl).toStrictEqual(new URL("http://localhost:3223"));
@@ -71,33 +71,24 @@ describe("config (with base env)", () => {
       vi.stubEnv("START_BLOCK", "10");
       vi.stubEnv("END_BLOCK", "20");
       const config = await getConfig();
-      expect(config.globalBlockrange).toEqual({ startBlock: 10, endBlock: 20 });
+      expect(config.globalBlockrange).toEqual(buildBlockNumberRange(10, 20));
     });
 
     it("returns only startBlock when only START_BLOCK is set", async () => {
       vi.stubEnv("START_BLOCK", "5");
       const config = await getConfig();
-      expect(config.globalBlockrange).toEqual({
-        startBlock: 5,
-        endBlock: undefined,
-      });
+      expect(config.globalBlockrange).toEqual(buildBlockNumberRange(5, undefined));
     });
 
     it("returns only endBlock when only END_BLOCK is set", async () => {
       vi.stubEnv("END_BLOCK", "15");
       const config = await getConfig();
-      expect(config.globalBlockrange).toEqual({
-        startBlock: undefined,
-        endBlock: 15,
-      });
+      expect(config.globalBlockrange).toEqual(buildBlockNumberRange(undefined, 15));
     });
 
     it("returns both as undefined when neither is set", async () => {
       const config = await getConfig();
-      expect(config.globalBlockrange).toEqual({
-        startBlock: undefined,
-        endBlock: undefined,
-      });
+      expect(config.globalBlockrange).toEqual(buildBlockNumberRange(undefined, undefined));
     });
 
     it("throws if START_BLOCK is negative", async () => {
@@ -123,13 +114,16 @@ describe("config (with base env)", () => {
     it("throws if START_BLOCK > END_BLOCK", async () => {
       vi.stubEnv("START_BLOCK", "100");
       vi.stubEnv("END_BLOCK", "50");
-      await expect(getConfig()).rejects.toThrow(/must be greater than/i);
+      await expect(getConfig()).rejects.toThrow(
+        /START_BLOCK must be less than or equal to END_BLOCK/i,
+      );
     });
 
-    it("throws if START_BLOCK == END_BLOCK", async () => {
+    it("does not throw if START_BLOCK == END_BLOCK", async () => {
       vi.stubEnv("START_BLOCK", "100");
       vi.stubEnv("END_BLOCK", "100");
-      await expect(getConfig()).rejects.toThrow(/must be greater than/i);
+      const config = await getConfig();
+      expect(config.globalBlockrange).toEqual(buildBlockNumberRange(100, 100));
     });
   });
 

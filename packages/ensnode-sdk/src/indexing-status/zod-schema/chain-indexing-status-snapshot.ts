@@ -2,9 +2,9 @@ import { z } from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
 import * as blockRef from "../../shared/block-ref";
+import { RangeTypeIds } from "../../shared/blockrange";
 import { makeBlockRefSchema } from "../../shared/zod-schemas";
 import {
-  BlockRefRangeTypeIds,
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshot,
   type ChainIndexingStatusSnapshotBackfill,
@@ -22,8 +22,8 @@ export function invariant_chainSnapshotQueuedBlocks(
 ) {
   const { config } = ctx.value;
 
-  // The `config.endBlock` does not exist for `indefinite` config type
-  if (config.blockRangeType === BlockRefRangeTypeIds.Indefinite) {
+  // The `config.endBlock` does not exist for `left-bounded` config range type
+  if (config.rangeType === RangeTypeIds.LeftBounded) {
     // invariant holds
     return;
   }
@@ -64,8 +64,8 @@ export function invariant_chainSnapshotBackfillBlocks(
     });
   }
 
-  // The `config.endBlock` does not exist for `indefinite` config type
-  if (config.blockRangeType === BlockRefRangeTypeIds.Indefinite) {
+  // The `config.endBlock` does not exist for `left-bounded` config range type
+  if (config.rangeType === RangeTypeIds.LeftBounded) {
     // invariant holds
     return;
   }
@@ -134,29 +134,23 @@ export function invariant_chainSnapshotFollowingBlocks(
 }
 
 /**
- * Makes Zod schema for {@link BlockRefRange} type.
- */
-export const makeBlockRefRangeSchema = (valueLabel: string = "Value") =>
-  z.discriminatedUnion("blockRangeType", [
-    z.object({
-      blockRangeType: z.literal(BlockRefRangeTypeIds.Indefinite),
-      startBlock: makeBlockRefSchema(valueLabel),
-    }),
-    z.object({
-      blockRangeType: z.literal(BlockRefRangeTypeIds.Definite),
-      startBlock: makeBlockRefSchema(valueLabel),
-      endBlock: makeBlockRefSchema(valueLabel),
-    }),
-  ]);
-
-/**
  * Makes Zod schema for {@link ChainIndexingStatusSnapshotQueued} type.
  */
 export const makeChainIndexingStatusSnapshotQueuedSchema = (valueLabel: string = "Value") =>
   z
     .object({
       chainStatus: z.literal(ChainIndexingStatusIds.Queued),
-      config: makeBlockRefRangeSchema(valueLabel),
+      config: z.discriminatedUnion("rangeType", [
+        z.object({
+          rangeType: z.literal(RangeTypeIds.LeftBounded),
+          startBlock: makeBlockRefSchema(valueLabel),
+        }),
+        z.object({
+          rangeType: z.literal(RangeTypeIds.Bounded),
+          startBlock: makeBlockRefSchema(valueLabel),
+          endBlock: makeBlockRefSchema(valueLabel),
+        }),
+      ]),
     })
     .check(invariant_chainSnapshotQueuedBlocks);
 
@@ -167,7 +161,17 @@ export const makeChainIndexingStatusSnapshotBackfillSchema = (valueLabel: string
   z
     .object({
       chainStatus: z.literal(ChainIndexingStatusIds.Backfill),
-      config: makeBlockRefRangeSchema(valueLabel),
+      config: z.discriminatedUnion("rangeType", [
+        z.object({
+          rangeType: z.literal(RangeTypeIds.LeftBounded),
+          startBlock: makeBlockRefSchema(valueLabel),
+        }),
+        z.object({
+          rangeType: z.literal(RangeTypeIds.Bounded),
+          startBlock: makeBlockRefSchema(valueLabel),
+          endBlock: makeBlockRefSchema(valueLabel),
+        }),
+      ]),
       latestIndexedBlock: makeBlockRefSchema(valueLabel),
       backfillEndBlock: makeBlockRefSchema(valueLabel),
     })
@@ -181,7 +185,7 @@ export const makeChainIndexingStatusSnapshotCompletedSchema = (valueLabel: strin
     .object({
       chainStatus: z.literal(ChainIndexingStatusIds.Completed),
       config: z.object({
-        blockRangeType: z.literal(BlockRefRangeTypeIds.Definite),
+        rangeType: z.literal(RangeTypeIds.Bounded),
         startBlock: makeBlockRefSchema(valueLabel),
         endBlock: makeBlockRefSchema(valueLabel),
       }),
@@ -197,7 +201,7 @@ export const makeChainIndexingStatusSnapshotFollowingSchema = (valueLabel: strin
     .object({
       chainStatus: z.literal(ChainIndexingStatusIds.Following),
       config: z.object({
-        blockRangeType: z.literal(BlockRefRangeTypeIds.Indefinite),
+        rangeType: z.literal(RangeTypeIds.LeftBounded),
         startBlock: makeBlockRefSchema(valueLabel),
       }),
       latestIndexedBlock: makeBlockRefSchema(valueLabel),

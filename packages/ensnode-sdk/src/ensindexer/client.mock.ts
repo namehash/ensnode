@@ -1,9 +1,7 @@
-import {
-  BlockRefRangeTypeIds,
-  ChainIndexingStatusIds,
-} from "../indexing-status/chain-indexing-status-snapshot";
+import { ChainIndexingStatusIds } from "../indexing-status/chain-indexing-status-snapshot";
 import { CrossChainIndexingStrategyIds } from "../indexing-status/cross-chain-indexing-status-snapshot";
 import { OmnichainIndexingStatusIds } from "../indexing-status/omnichain-indexing-status-snapshot";
+import { RangeTypeIds } from "../shared/blockrange";
 import type { SerializedEnsIndexerConfigResponse } from "./api/config";
 import { EnsIndexerIndexingStatusResponseCodes } from "./api/indexing-status/response";
 import type { SerializedEnsIndexerIndexingStatusResponse } from "./api/indexing-status/serialized-response";
@@ -51,7 +49,7 @@ export const indexingStatusResponseMock = {
           "1": {
             chainStatus: ChainIndexingStatusIds.Backfill,
             config: {
-              blockRangeType: BlockRefRangeTypeIds.Indefinite,
+              rangeType: RangeTypeIds.LeftBounded,
               startBlock: {
                 timestamp: 1489165544,
                 number: 3327417,
@@ -69,7 +67,7 @@ export const indexingStatusResponseMock = {
           "8453": {
             chainStatus: ChainIndexingStatusIds.Queued,
             config: {
-              blockRangeType: BlockRefRangeTypeIds.Indefinite,
+              rangeType: RangeTypeIds.LeftBounded,
               startBlock: {
                 timestamp: 1755181691,
                 number: 17571480,
