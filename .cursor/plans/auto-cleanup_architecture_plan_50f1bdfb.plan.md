@@ -10,10 +10,12 @@ isProject: false
 ## Goals (from issue #1061)
 
 1. Clients can request that all resolver records are **validated** (value matches expected format) and **normalized** (value is in a single canonical form regardless of how it was stored).
-2. Keys are also normalized: legacy/fallback key variants (e.g. `vnd.twitter`, `twitter`) are resolved and the value is returned under the canonical key (e.g. `com.twitter`).
+2. Keys are also normalized: legacy/fallback key variants (e.g. `com.twitter`, `vnd.twitter`, `twitter`) are resolved and the value is returned under the canonical key (e.g. `com.x`).
 3. Unknown keys (no normalization logic defined) pass through unchanged.
 4. Full normalization metadata is optionally returned so UIs can inspect and explain how each record was processed.
 5. Normalized records carry UI-friendly enrichment: `displayKey`, `displayValue`, `url`.
+
+**Phase 1 scope (this implementation):** Pure in-memory library only. Input = a raw set of key/value pairs (already resolved from a resolver). Output = a normalized record set and optionally stripped/enriched output. No I/O, no resolution logic, no API changes, no client key-request behavior.
 
 ---
 
@@ -45,7 +47,7 @@ type TextRecordNormalizationDefs = {
 };
 
 type TextRecordKeyDef = {
-  /** Canonical key used in API responses and UI labels. e.g. "com.twitter" */
+  /** Canonical key used in API responses and UI labels. e.g. "com.x" */
   normalizedKey: string;
   /** Human-friendly label for UIs. e.g. "Twitter" */
   displayKey: string;
@@ -162,7 +164,7 @@ Logic:
   - If `rawValue` is a string: run validate + normalize on rawValue.
     - If succeeded: `valueResult` is `AlreadyNormalized` iff `normalizedValue === rawValue` (validate + normalize produced a value identical to the original rawValue); otherwise `valueResult` is `Normalized` (normalizedValue differs from rawValue).
     - If failed: `valueResult` is `Unnormalizable` with the reason from the failing step.
-- If not found: `keyResult` is Unrecognized; `valueResult` is Unrecognized. At the set level, the first record with a given unrecognized `rawKey` is written into `normalizedRecords` as `UnrecognizedKeyAndValue`; any subsequent record with the same `rawKey` gets `op: "DuplicateNormalizedKey"` and goes into `unnormalizedRecords` (consistent with how recognized-key duplicates are handled).
+- If not found: `keyResult` is Unrecognized; `valueResult` is Unrecognized. At the set level, the first record with a given unrecognized `rawKey` is written into `records` as `UnrecognizedKeyAndValue`; any subsequent record with the same `rawKey` gets `op: "DuplicateNormalizedKey"` and goes into `excludedRecords` (consistent with how recognized-key duplicates are handled).
 
 ### 1.5 Layer 2: Set-level normalization
 
@@ -202,20 +204,20 @@ type RecordNormalizationResult =
 
 type NormalizedRecordSet = {
   /**
-   * Two distinct kinds of entries are keyed here:
+   * Records that appear in the output. Two distinct kinds of entries are keyed here:
    * - op "Normalized": keyed by normalizedKey (the canonical key for the winner).
    * - op "UnrecognizedKeyAndValue": keyed by rawKey (passed through as-is).
    * No other op values appear in this map.
    */
-  normalizedRecords: Record<
+  records: Record<
     string,
     Extract<RecordNormalizationResult, { op: "Normalized" | "UnrecognizedKeyAndValue" }>
   >;
   /**
-   * Records that did not make it into normalizedRecords:
+   * Records excluded from the main output:
    * UnnormalizableValue and DuplicateNormalizedKey.
    */
-  unnormalizedRecords: Extract<
+  excludedRecords: Extract<
     RecordNormalizationResult,
     { op: "UnnormalizableValue" | "DuplicateNormalizedKey" }
   >[];
@@ -228,18 +230,18 @@ type NormalizedRecordSet = {
 
 1. Among these, the record whose `rawKey === normalizedKey` wins first.
 2. If none match the normalized key, the first in `unnormalizedKeys` order wins.
-3. The winner gets `op: "Normalized"` and is placed in `normalizedRecords`.
-4. Pass-1 losers (normalizable but not the winner) get `op: "DuplicateNormalizedKey"` and go into `unnormalizedRecords`.
-5. All `Unnormalizable` candidates are excluded from Pass 1. If Pass 1 found a winner, each excluded `Unnormalizable` record gets `op: "UnnormalizableValue"` and goes into `unnormalizedRecords`. Their raw values remain accessible via `individual.valueResult.rawValue` when `normalizationMetadata` is requested.
+3. The winner gets `op: "Normalized"` and is placed in `records`.
+4. Pass-1 losers (normalizable but not the winner) get `op: "DuplicateNormalizedKey"` and go into `excludedRecords`.
+5. All `Unnormalizable` candidates are excluded from Pass 1. If Pass 1 found a winner, each excluded `Unnormalizable` record gets `op: "UnnormalizableValue"` and goes into `excludedRecords`. Their raw values remain accessible via `individual.valueResult.rawValue`.
 
 **Pass 2 — only if Pass 1 found no winner** (all candidates are `Unnormalizable`):
 
 1. Among Unnormalizable candidates, the record whose `rawKey === normalizedKey` wins first.
 2. If none match the normalized key, the first in `unnormalizedKeys` order wins.
-3. The winner gets `op: "UnnormalizableValue"` and goes into `unnormalizedRecords` (no valid value exists, so `normalizedRecords` has no entry for this normalized key).
-4. Pass-2 losers get `op: "DuplicateNormalizedKey"` and go into `unnormalizedRecords`.
+3. The winner gets `op: "UnnormalizableValue"` and goes into `excludedRecords` (no valid value exists, so `records` has no entry for this normalized key).
+4. Pass-2 losers get `op: "DuplicateNormalizedKey"` and go into `excludedRecords`.
 
-This ensures a valid value from any fallback key always beats an invalid or null value on the canonical key. Example: if `com.twitter = ""` (invalid) and `vnd.twitter = "alice"` (valid), Pass 1 selects `vnd.twitter` as winner; `com.twitter` gets `op: "UnnormalizableValue"` in `unnormalizedRecords` with its bad raw value still accessible via `normalizationMetadata`.
+This ensures a valid value from any fallback key always beats an invalid or null value on the canonical key. Example: if `com.x = ""` (invalid) and `vnd.twitter = "alice"` (valid), Pass 1 selects `vnd.twitter` as winner; `com.x` gets `op: "UnnormalizableValue"` in `excludedRecords` with its bad raw value still accessible via `individual.valueResult.rawValue`.
 
 **Key function — build the set:**
 
@@ -260,9 +262,27 @@ function stripNormalizationMetadata(
 ): Record<string, string | null>
 ```
 
-Returns only the `normalizedKey → normalizedValue` pairs from the "Normalized" records, plus `rawKey → rawValue` passthrough for "UnrecognizedKeyAndValue" records. Unrecognized keys are always included even when `rawValue` is null — producing `{ [rawKey]: null }` — so the caller receives a complete picture of every key that was present in the input.
+Returns only the `normalizedKey → normalizedValue` pairs from the "Normalized" records, plus `rawKey → rawValue` passthrough for "UnrecognizedKeyAndValue" records. For recognized keys where no candidate produced a valid value (winner is "UnnormalizableValue" in `excludedRecords`), the key is included with value `null` (e.g. `{ "com.x": null }`), so callers can distinguish "key present but invalid" from "key not present." Unrecognized keys are always included even when `rawValue` is null — producing `{ [rawKey]: null }` — so the caller receives a complete picture of every key that was present in the input. Thus the result is built from both `set.records` and, for each "UnnormalizableValue" in `set.excludedRecords`, an entry `normalizedKey → null`.
 
-### 1.7 Pre-resolution: key expansion
+For clients that want UI-friendly enrichment (displayValue, url) without holding the full `NormalizedRecordSet`:
+
+```typescript
+type EnrichedRecord = {
+  value: string | null;
+  displayValue: string | null;
+  url: string | null;
+};
+
+function stripNormalizationMetadataWithEnrichment(
+  set: NormalizedRecordSet,
+): Record<string, EnrichedRecord>
+```
+
+Returns the same key set as `stripNormalizationMetadata`, but each entry includes `displayValue` and `url` derived from the def's enrichment functions when the key is recognized and the value is normalized. For "UnrecognizedKeyAndValue" and "UnnormalizableValue" (key present but invalid) records, `displayValue` and `url` are `null`. This allows UI callers to render enriched records without needing to inspect the full metadata.
+
+### 1.7 Pre-resolution: key expansion *(Phase 2+ — out of scope for Phase 1)*
+
+> **Note:** Key expansion and client-requested key behavior are out of scope for Phase 1. Phase 1 assumes input is already a set of raw key/value pairs obtained from some prior resolution step. Key expansion into candidate keys before resolution is handled in Phase 2/3.
 
 Before resolution, normalized keys are expanded into the full set of candidate keys that the resolver should be queried for:
 
@@ -288,7 +308,7 @@ The initial definitions cover the 9 most common ENS text record key types. All l
 
 | Normalized key              | Display key | Unnormalized key variants                |
 | --------------------------- | ----------- | ---------------------------------------- |
-| `com.twitter` (or `com.x`?) | Twitter / X | `vnd.twitter`, `twitter`, `Twitter`      |
+| `com.x`                     | X (Twitter) | `com.twitter`, `vnd.twitter`, `twitter`, `Twitter` |
 | `com.github`                | GitHub      | `vnd.github`, `github`                   |
 | `xyz.farcaster`             | Farcaster   | `com.warpcast`, `Farcaster`, `farcaster` |
 | `com.discord`               | Discord     | `discord`                                |
@@ -298,8 +318,6 @@ The initial definitions cover the 9 most common ENS text record key types. All l
 | `email`                     | Email       | `Email`                                  |
 | `avatar`                    | Avatar      | `Avatar`                                 |
 
-
-**Open question:** Should the normalized key for Twitter be `com.twitter` or `com.x` (reflecting the platform rebrand)? If `com.x`, what are the unnormalized variants to include?
 
 ### `TextRecordNormalizationDefs` construction
 
@@ -316,9 +334,9 @@ The following specifies validation, normalization, and UI enrichment for each of
 
 ---
 
-#### Twitter / X (`com.twitter` or `com.x` — see open question)
+#### X / Twitter (`com.x`)
 
-Unnormalized variants: `vnd.twitter`, `twitter`, `Twitter`
+Unnormalized variants: `com.twitter`, `vnd.twitter`, `twitter`, `Twitter`
 
 **Accepted input formats**:
 
@@ -542,13 +560,26 @@ The `records.texts` field always contains the stripped, clean output when `norma
 
 ---
 
+## Scope of initial implementation
+
+When this plan is accepted, **only Phase 1** is implemented. Phases 2 and 3 are not in scope for the current implementation.
+
+**In scope:**
+- Pure in-memory data model and functions in `@ensnode/ensnode-sdk` (`packages/ensnode-sdk/src/resolution/normalization/`).
+- `normalizeRecord`, `normalizeRecordSet`, `stripNormalizationMetadata`, `stripNormalizationMetadataWithEnrichment`.
+- Initial `TextRecordNormalizationDefs` covering the 9 recognized key types.
+- Unit tests for all functions and transform definitions.
+
+**Out of scope:**
+- API changes, query parameters, HTTP handlers.
+- Client-requested key behavior and `expandNormalizedKeys` usage in request handling.
+- Integration with the indexed or RPC resolution paths (Phase 3).
+
+---
+
 ## Open questions
 
-1. **Normalized key for Twitter**: `com.twitter` or `com.x` (reflecting the platform rebrand)? What unnormalized variants should be included?
-2. **Parameter name for metadata field**: `normalizationMetadata`, `includeNormalizationMetadata`, or another name?
-3. **Unnormalizable behavior**: When a key is recognized but no candidate produces a valid value, should `records.texts` contain `null` for that key, or should the key be omitted from the response entirely?
-4. `**displayValue` and `url` placement**: Should these enrichment fields be part of `records.texts` (when `normalize=true`) or only inside `normalizationMetadata`? Including them in the main response is more convenient for UI clients but changes the primary response shape significantly for all callers.
-5. **Client requesting an unnormalized key directly**: If a client passes `texts=vnd.twitter` (an unnormalized variant) instead of `texts=com.twitter`, should `expandNormalizedKeys` throw immediately (current spec — fail fast, caller error), or silently map it to the canonical key and expand from there (more forgiving for legacy integrations)? The issue does not address this case.
-6. **Placement of `UnrecognizedKeyAndValue` records**: The current spec places them in `normalizedRecords` (keyed by `rawKey`) so that `stripNormalizationMetadata` only needs to iterate one map to produce the full output. The issue's own description says `normalizedRecords` maps *normalized keys* and `unnormalizedRecords` holds "all records that were unnormalized for one reason or another" — which by that framing would put unrecognized records in `unnormalizedRecords`. Decision: should `unnormalizedRecords` mean "records that don't appear in output" (current spec) or "records that weren't normalized" (issue's framing)?
-7. **Verify validation rules against each service's official constraints**: The regexes and accepted input formats in this spec were derived from best-effort research and may not match each platform's current actual rules. Before finalising implementation, verify against official documentation or source code for: Twitter/X (username charset, 15-char limit), GitHub (39-char limit, hyphen rules), Farcaster (lowercase-only, length), Discord (new-format charset, period rules, legacy discriminator format), Telegram (5–32 chars, charset), Reddit (3–20 chars, charset), email (RFC compliance level), avatar (supported URI schemes). Flag any discrepancy as a bug in the transform definition.
+1. **Parameter name for metadata field** *(Phase 3 only — not applicable to Phase 1)*: `normalizationMetadata`, `includeNormalizationMetadata`, or another name?
+2. **Client requesting an unnormalized key directly** *(Phase 2/3 — out of scope for Phase 1)*: If a client passes `texts=vnd.twitter` (an unnormalized variant) instead of `texts=com.x`, should `expandNormalizedKeys` throw immediately (current spec — fail fast, caller error), or silently map it to the canonical key and expand from there (more forgiving for legacy integrations)? The issue does not address this case.
+3. **Verify validation rules against each service's official constraints**: The regexes and accepted input formats in this spec were derived from best-effort research and may not match each platform's current actual rules. Before finalising implementation, verify against official documentation or source code for: Twitter/X (username charset, 15-char limit), GitHub (39-char limit, hyphen rules), Farcaster (lowercase-only, length), Discord (new-format charset, period rules, legacy discriminator format), Telegram (5–32 chars, charset), Reddit (3–20 chars, charset), email (RFC compliance level), avatar (supported URI schemes). Flag any discrepancy as a bug in the transform definition. Rules will be verified using actual data.
 
