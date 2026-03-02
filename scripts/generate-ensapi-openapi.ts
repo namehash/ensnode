@@ -1,7 +1,7 @@
 /**
  * Generates a static OpenAPI 3.1 JSON document for ENSApi.
  *
- * Usage: tsx --tsconfig apps/ensapi/tsconfig.json scripts/generate-ensapi-openapi.ts
+ * Usage: pnpm generate:openapi
  *
  * Output: docs/docs.ensnode.io/ensapi-openapi.json
  *

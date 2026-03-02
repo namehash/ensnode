@@ -12,7 +12,8 @@
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/docs/docs.ensnode.io",
   "scripts": {
-    "mint": "pnpm dlx mint@^4.1.0"
+    "mint": "pnpm dlx mint@^4.1.0",
+    "generate:openapi": "pnpm --filter ensapi exec tsx --tsconfig tsconfig.json ../../scripts/generate-ensapi-openapi.ts"
   },
   "packageManager": "pnpm@10.28.0"
 }
