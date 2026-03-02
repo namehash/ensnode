@@ -17,7 +17,7 @@ isProject: false
 
 **Phase 1 scope (this implementation):** Pure in-memory library only. Input = a raw set of key/value pairs (already resolved from a resolver). Output = a normalized record set and optionally stripped/enriched output. No I/O, no resolution logic, no API changes, no client key-request behavior.
 
-**Assumption — unique keys in resolver records:** Resolver records (the key/value set passed into the normalizer) are assumed to have unique keys: each key appears at most once. Duplicate handling in this spec applies only to *recognized* keys: multiple *different* raw keys (e.g. `com.twitter`, `vnd.twitter`) can map to the same normalized key (e.g. `com.x`); only one record wins per normalized key. The `DuplicateNormalizedKey` op is used only for those recognized-key losers, not for repeated occurrences of the same raw key. By contrast, the *requested* keys (e.g. the list passed to key expansion / multicall) may contain duplicates—the user may ask for the same key more than once—and the generated query should deduplicate so each key is requested at most once.
+**Assumption — unique keys in resolver records:** Resolver records (the key/value set passed into the normalizer) are assumed to have unique keys: each key appears at most once. Duplicate handling in this spec applies only to *recognized* keys: multiple *different* raw keys (e.g. `com.twitter`, `vnd.twitter`) can map to the same normalized key (e.g. `com.x`); only one record wins per normalized key. The `DuplicateNormalizedKey` op is used only for those recognized-key losers. If the input violates the uniqueness assumption (same unrecognized `rawKey` appears more than once), subsequent occurrences are marked `DuplicateRawKey` and placed in `excludedRecords`—this should not be possible when resolver keys are unique. By contrast, the *requested* keys (e.g. the list passed to key expansion / multicall) may contain duplicates—the user may ask for the same key more than once—and the generated query should deduplicate so each key is requested at most once.
 
 ---
 
@@ -170,7 +170,7 @@ Logic:
 
 ### 1.5 Layer 2: Set-level normalization
 
-After individually normalizing each record, the set is consolidated so only one normalized key is retained as the "winner" when multiple records map to the same normalized key. Duplicate detection requires set context: if a key is not found in defs, at the set level the first record with that unrecognized `rawKey` is written into `records` as `UnrecognizedKeyAndValue`; subsequent records with the same `rawKey` are marked `op: "DuplicateNormalizedKey"` and placed into `excludedRecords`.
+After individually normalizing each record, the set is consolidated so only one normalized key is retained as the "winner" when multiple records map to the same normalized key. Duplicate detection requires set context: if a key is not found in defs, at the set level the first record with that unrecognized `rawKey` is written into `records` as `UnrecognizedKeyAndValue`; subsequent records with the same `rawKey` are marked `op: "DuplicateRawKey"` and placed into `excludedRecords` (this should not occur when resolver keys are unique; see assumption above).
 
 ```typescript
 type RecordNormalizationOp =
@@ -187,7 +187,12 @@ type RecordNormalizationOp =
    */
   | "UnnormalizableValue"
   /** Another record already claimed this normalized key (lower priority variant) */
-  | "DuplicateNormalizedKey";
+  | "DuplicateNormalizedKey"
+  /**
+   * Same unrecognized rawKey appeared again; first occurrence won. Defensive only — should not
+   * occur when resolver records have unique keys (see assumption above).
+   */
+  | "DuplicateRawKey";
 
 type RecordNormalizationResult =
   | {
@@ -200,7 +205,7 @@ type RecordNormalizationResult =
       url: string | null;
     }
   | {
-      op: "UnrecognizedKeyAndValue" | "UnnormalizableValue" | "DuplicateNormalizedKey";
+      op: "UnrecognizedKeyAndValue" | "UnnormalizableValue" | "DuplicateNormalizedKey" | "DuplicateRawKey";
       individual: IndividualRecordNormalizationResult;
     };
 
@@ -217,11 +222,11 @@ type NormalizedRecordSet = {
   >;
   /**
    * Records excluded from the main output:
-   * UnnormalizableValue and DuplicateNormalizedKey.
+   * UnnormalizableValue, DuplicateNormalizedKey, and DuplicateRawKey.
    */
   excludedRecords: Extract<
     RecordNormalizationResult,
-    { op: "UnnormalizableValue" | "DuplicateNormalizedKey" }
+    { op: "UnnormalizableValue" | "DuplicateNormalizedKey" | "DuplicateRawKey" }
   >[];
 };
 ```
@@ -299,7 +304,7 @@ function expandNormalizedKeys(
 
 **Precondition**: no element of `normalizedKeys` may be an unnormalized key variant (i.e. present in `defs.byUnnormalizedKey` but not in `defs.byNormalizedKey`). Passing `vnd.twitter` where `com.x` is expected is a caller error and must throw synchronously with a clear message listing the offending keys. Completely unknown keys (absent from both maps) are not an error — they are passed through as-is, supporting arbitrary user-defined keys.
 
-Returns: `[normalizedKey, ...unnormalizedKeys]` for each key found in `defs.byNormalizedKey`, followed by any unrecognized keys as-is. The result is deduplicated by first-occurrence: the caller may request the same key more than once (e.g. `["com.x", "com.twitter", "com.x"]`); the generated query list must contain each key at most once, so the first occurrence is kept and subsequent duplicates are dropped. Ordering is otherwise stable and deterministic, ensuring consistent multicall construction and reproducible traces.
+Returns: `[normalizedKey, ...unnormalizedKeys]` for each key found in `defs.byNormalizedKey`, followed by any unrecognized keys as-is. The result is deduplicated by first-occurrence: the caller may request the same key more than once (e.g. `["com.x", "com.x"]`); the generated query list must contain each key at most once, so the first occurrence is kept and subsequent duplicates are dropped. Ordering is otherwise stable and deterministic, ensuring consistent multicall construction and reproducible traces.
 
 ---
 
