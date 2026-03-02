@@ -25,10 +25,10 @@ const boolstring = z
   .pipe(z.enum(["true", "false"]))
   .transform((val) => val === "true");
 
-const optionalBoolstring = z.preprocess(
-  (val) => (val === "true" ? true : val === "false" ? false : val === undefined ? false : val),
-  z.boolean().default(false),
-);
+const optionalBoolstring = z
+  .optional(z.string().default("false"))
+  .pipe(z.enum(["true", "false"]))
+  .transform((val) => val === "true");
 
 const stringarray = z
   .string()
