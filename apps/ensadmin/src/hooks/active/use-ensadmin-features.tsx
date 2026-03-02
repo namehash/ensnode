@@ -43,6 +43,18 @@ const prerequisiteResultToFeatureStatus = (result: PrerequisiteResult): FeatureS
   return { type: "unsupported", reason: result.reason };
 };
 
+const CONNECTING_STATUS: FeatureStatus = { type: "connecting" };
+
+const CONFIG_ERROR_STATUS: FeatureStatus = {
+  type: "error",
+  reason: "ENSNode config could not be fetched successfully.",
+};
+
+const INDEXING_STATUS_ERROR_STATUS: FeatureStatus = {
+  type: "error",
+  reason: "Indexing Status could not be fetched successfully.",
+};
+
 /**
  * Hook that derives whether certain ENSAdmin features are supported by the connected ENSNode.
  */
@@ -50,38 +62,20 @@ export function useENSAdminFeatures(): ENSAdminFeatures {
   const configQuery = useENSNodeConfig();
   const indexingStatusQuery = useIndexingStatusWithSwr();
 
-  // all features depend on being able to retrieve the connected ensnode's config
-  if (configQuery.status === "error") {
-    const error: FeatureStatus = {
-      type: "error",
-      reason: "ENSNode config could not be fetched successfully.",
-    };
-    return { registrarActions: error, subgraph: error, graphql: error };
-  }
-
-  // all features depend on being able to retrieve the connected ensnode's config
-  if (configQuery.status === "pending") {
-    const connecting: FeatureStatus = { type: "connecting" };
-    return { registrarActions: connecting, subgraph: connecting, graphql: connecting };
-  }
-
-  const { ensIndexerPublicConfig } = configQuery.data;
-
-  // registrarActions depends on indexing status as well, so derive further
-  // TODO: when any future features require checking indexing status as well, we can abstract this
   const registrarActions = useMemo<FeatureStatus>(() => {
+    if (configQuery.status === "error") return CONFIG_ERROR_STATUS;
+    if (configQuery.status == "pending") return CONNECTING_STATUS;
+
+    const { ensIndexerPublicConfig } = configQuery.data;
     const result = hasRegistrarActionsConfigSupport(ensIndexerPublicConfig);
     if (!result.supported) return prerequisiteResultToFeatureStatus(result);
 
     switch (indexingStatusQuery.status) {
       case "error": {
-        return {
-          type: "error",
-          reason: "Indexing Status could not be fetched successfully.",
-        };
+        return INDEXING_STATUS_ERROR_STATUS;
       }
       case "pending": {
-        return { type: "connecting" };
+        return CONNECTING_STATUS;
       }
       case "success": {
         const { realtimeProjection } = indexingStatusQuery.data;
@@ -92,17 +86,23 @@ export function useENSAdminFeatures(): ENSAdminFeatures {
         return { type: "supported" };
       }
     }
-  }, [indexingStatusQuery, ensIndexerPublicConfig]);
+  }, [configQuery, indexingStatusQuery]);
 
-  // subgraph just depends on config
-  const subgraph: FeatureStatus = prerequisiteResultToFeatureStatus(
-    hasSubgraphApiConfigSupport(ensIndexerPublicConfig),
-  );
+  const subgraph: FeatureStatus = useMemo(() => {
+    if (configQuery.status === "error") return CONFIG_ERROR_STATUS;
+    if (configQuery.status == "pending") return CONNECTING_STATUS;
 
-  // graphql just depends on config
-  const graphql: FeatureStatus = prerequisiteResultToFeatureStatus(
-    hasGraphqlApiConfigSupport(ensIndexerPublicConfig),
-  );
+    const { ensIndexerPublicConfig } = configQuery.data;
+    return prerequisiteResultToFeatureStatus(hasSubgraphApiConfigSupport(ensIndexerPublicConfig));
+  }, [configQuery]);
+
+  const graphql: FeatureStatus = useMemo(() => {
+    if (configQuery.status === "error") return CONFIG_ERROR_STATUS;
+    if (configQuery.status == "pending") return CONNECTING_STATUS;
+
+    const { ensIndexerPublicConfig } = configQuery.data;
+    return prerequisiteResultToFeatureStatus(hasGraphqlApiConfigSupport(ensIndexerPublicConfig));
+  }, [configQuery]);
 
   return { registrarActions, subgraph, graphql };
 }
