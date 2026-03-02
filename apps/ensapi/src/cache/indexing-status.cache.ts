@@ -2,22 +2,22 @@ import config from "@/config";
 
 import {
   type CrossChainIndexingStatusSnapshot,
-  ENSNodeClient,
-  IndexingStatusResponseCodes,
+  EnsIndexerClient,
+  EnsIndexerIndexingStatusResponseCodes,
   SWRCache,
 } from "@ensnode/ensnode-sdk";
 
 import { makeLogger } from "@/lib/logger";
 
 const logger = makeLogger("indexing-status.cache");
-const client = new ENSNodeClient({ url: config.ensIndexerUrl });
+const client = new EnsIndexerClient({ url: config.ensIndexerUrl });
 
 export const indexingStatusCache = new SWRCache<CrossChainIndexingStatusSnapshot>({
   fn: async (_cachedResult) =>
     client
       .indexingStatus() // fetch a new indexing status snapshot
       .then((response) => {
-        if (response.responseCode !== IndexingStatusResponseCodes.Ok) {
+        if (response.responseCode !== EnsIndexerIndexingStatusResponseCodes.Ok) {
           // An indexing status response was successfully fetched, but the response code contained within the response was not 'ok'.
           // Therefore, throw an error to trigger the subsequent `.catch` handler.
           throw new Error("Received Indexing Status response with responseCode other than 'ok'.");

@@ -2,7 +2,8 @@ import type { QueryObserverOptions } from "@tanstack/react-query";
 
 import type {
   AcceleratableRequest,
-  ClientOptions,
+  ENSNamespaceId,
+  EnsApiClientOptions,
   ResolvePrimaryNameRequest,
   ResolvePrimaryNameResponse,
   ResolvePrimaryNamesRequest,
@@ -14,11 +15,11 @@ import type {
 } from "@ensnode/ensnode-sdk";
 
 /**
- * Configuration options for the ENSNode provider
+ * Configuration options for the ENSApi provider
  */
-export interface ENSNodeSDKConfig {
-  /** The ENSNode API client configuration */
-  client: ClientOptions;
+export interface EnsApiProviderOptions {
+  /** The ENSApi client configuration */
+  client: EnsApiClientOptions;
 }
 
 /**
@@ -31,8 +32,10 @@ export interface QueryParameter<TData = unknown, TError = Error> {
 /**
  * Configuration parameter for hooks that need access to config
  */
-export interface WithSDKConfigParameter<TConfig extends ENSNodeSDKConfig = ENSNodeSDKConfig> {
-  config?: TConfig | undefined;
+export interface WithEnsApiProviderOptions<
+  TOptions extends EnsApiProviderOptions = EnsApiProviderOptions,
+> {
+  options?: TOptions | undefined;
 }
 
 /**
@@ -75,4 +78,5 @@ export interface UseResolvedIdentityParameters
   extends QueryParameter<ResolvePrimaryNameResponse>,
     AcceleratableRequest {
   identity: UnresolvedIdentity;
+  namespace?: ENSNamespaceId;
 }

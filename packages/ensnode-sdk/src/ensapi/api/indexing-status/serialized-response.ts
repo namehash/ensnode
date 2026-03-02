@@ -1,4 +1,5 @@
 import type { SerializedRealtimeIndexingStatusProjection } from "../../../indexing-status/serialize/realtime-indexing-status-projection";
+import type { SerializedEnsApiPublicConfig } from "../../config/serialized-types";
 import type {
   EnsApiIndexingStatusResponse,
   EnsApiIndexingStatusResponseError,
@@ -21,8 +22,9 @@ export type SerializedIndexingStatusResponseError = SerializedEnsApiIndexingStat
  * Serialized representation of {@link EnsApiIndexingStatusResponseOk}.
  */
 export interface SerializedEnsApiIndexingStatusResponseOk
-  extends Omit<EnsApiIndexingStatusResponseOk, "realtimeProjection"> {
+  extends Omit<EnsApiIndexingStatusResponseOk, "realtimeProjection" | "config"> {
   realtimeProjection: SerializedRealtimeIndexingStatusProjection;
+  config: SerializedEnsApiPublicConfig;
 }
 
 /**

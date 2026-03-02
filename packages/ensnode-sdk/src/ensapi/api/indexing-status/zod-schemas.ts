@@ -4,6 +4,7 @@ import {
   makeRealtimeIndexingStatusProjectionSchema,
   makeSerializedRealtimeIndexingStatusProjectionSchema,
 } from "../../../indexing-status/zod-schema/realtime-indexing-status-projection";
+import { makeEnsApiPublicConfigSchema, makeSerializedEnsApiPublicConfigSchema } from "../../config";
 import {
   type EnsApiIndexingStatusResponse,
   EnsApiIndexingStatusResponseCodes,
@@ -24,6 +25,7 @@ export const makeEnsApiIndexingStatusResponseOkSchema = (
   z.strictObject({
     responseCode: z.literal(EnsApiIndexingStatusResponseCodes.Ok),
     realtimeProjection: makeRealtimeIndexingStatusProjectionSchema(valueLabel),
+    config: makeEnsApiPublicConfigSchema(valueLabel),
   });
 
 /**
@@ -59,9 +61,10 @@ export const makeIndexingStatusResponseSchema = makeEnsApiIndexingStatusResponse
 export const makeSerializedEnsApiIndexingStatusResponseOkSchema = (
   valueLabel: string = "Serialized Indexing Status Response OK",
 ) =>
-  z.strictObject({
+  z.object({
     responseCode: z.literal(EnsApiIndexingStatusResponseCodes.Ok),
     realtimeProjection: makeSerializedRealtimeIndexingStatusProjectionSchema(valueLabel),
+    config: makeSerializedEnsApiPublicConfigSchema(valueLabel),
   });
 
 /**

@@ -2,9 +2,9 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import type { UsePrimaryNamesParameters, WithSDKConfigParameter } from "../types";
+import type { UsePrimaryNamesParameters, WithEnsApiProviderOptions } from "../types";
 import { createPrimaryNamesQueryOptions } from "../utils/query";
-import { useENSNodeSDKConfig } from "./useENSNodeSDKConfig";
+import { useEnsApiProviderOptions } from "./useEnsApiProviderOptions";
 
 /**
  * Resolves the primary names of a specified address across multiple chains.
@@ -40,21 +40,19 @@ import { useENSNodeSDKConfig } from "./useENSNodeSDKConfig";
  * }
  * ```
  */
-export function usePrimaryNames(parameters: UsePrimaryNamesParameters & WithSDKConfigParameter) {
-  const { config, query = {}, address, ...args } = parameters;
-  const _config = useENSNodeSDKConfig(config);
+export function usePrimaryNames(parameters: UsePrimaryNamesParameters & WithEnsApiProviderOptions) {
+  const { options, query = {}, address, ...args } = parameters;
+  const providerOptions = useEnsApiProviderOptions(options);
 
   const canEnable = address !== null;
 
   const queryOptions = canEnable
-    ? createPrimaryNamesQueryOptions(_config, { ...args, address })
+    ? createPrimaryNamesQueryOptions(providerOptions, { ...args, address })
     : { enabled: false, queryKey: ["disabled"] as const };
 
-  const options = {
+  return useQuery({
     ...queryOptions,
     ...query,
     enabled: canEnable && (query.enabled ?? queryOptions.enabled),
-  };
-
-  return useQuery(options);
+  });
 }

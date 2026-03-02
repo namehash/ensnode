@@ -136,7 +136,7 @@ const EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE = deserializeEnsApiIndexingStatu
       },
     },
   },
-
+  config: EXAMPLE_CONFIG_RESPONSE,
   responseCode: EnsApiIndexingStatusResponseCodes.Ok,
 } satisfies SerializedEnsApiIndexingStatusResponseOk);
 
@@ -194,7 +194,7 @@ const _EXAMPLE_INDEXING_STATUS_FOLLOWING_RESPONSE: EnsApiIndexingStatusResponse 
         } satisfies SerializedOmnichainIndexingStatusSnapshotFollowing,
       },
     },
-
+    config: EXAMPLE_CONFIG_RESPONSE,
     responseCode: EnsApiIndexingStatusResponseCodes.Ok,
   });
 

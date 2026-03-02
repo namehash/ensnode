@@ -1,4 +1,5 @@
 import { serializeRealtimeIndexingStatusProjection } from "../../../indexing-status/serialize/realtime-indexing-status-projection";
+import { serializeEnsApiPublicConfig } from "../../config/serialize";
 import {
   type EnsApiIndexingStatusResponse,
   EnsApiIndexingStatusResponseCodes,
@@ -31,6 +32,7 @@ export function serializeEnsApiIndexingStatusResponse(
       return {
         responseCode: response.responseCode,
         realtimeProjection: serializeRealtimeIndexingStatusProjection(response.realtimeProjection),
+        config: serializeEnsApiPublicConfig(response.config),
       } satisfies SerializedEnsApiIndexingStatusResponseOk;
 
     case EnsApiIndexingStatusResponseCodes.Error:

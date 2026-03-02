@@ -4,25 +4,19 @@ import {
   EnsApiIndexingStatusResponseCodes,
   type EnsApiIndexingStatusResponseError,
   type EnsApiIndexingStatusResponseOk,
-  serializeENSApiPublicConfig,
   serializeEnsApiIndexingStatusResponse,
 } from "@ensnode/ensnode-sdk";
 
 import { buildEnsApiPublicConfig } from "@/config/config.schema";
 import { createApp } from "@/lib/hono-factory";
 
-import { getConfigRoute, getIndexingStatusRoute } from "./ensnode-api.routes";
+import { getIndexingStatusRoute } from "./ensnode-api.routes";
 import ensnodeGraphQLApi from "./ensnode-graphql-api";
 import nameTokensApi from "./name-tokens-api";
 import registrarActionsApi from "./registrar-actions-api";
 import resolutionApi from "./resolution-api";
 
 const app = createApp();
-
-app.openapi(getConfigRoute, async (c) => {
-  const ensApiPublicConfig = buildEnsApiPublicConfig(config);
-  return c.json(serializeENSApiPublicConfig(ensApiPublicConfig));
-});
 
 app.openapi(getIndexingStatusRoute, async (c) => {
   // context must be set by the required middleware
@@ -39,11 +33,14 @@ app.openapi(getIndexingStatusRoute, async (c) => {
     );
   }
 
+  const ensApiPublicConfig = buildEnsApiPublicConfig(config);
+
   // return successful response using the indexing status projection from the middleware context
   return c.json(
     serializeEnsApiIndexingStatusResponse({
       responseCode: EnsApiIndexingStatusResponseCodes.Ok,
       realtimeProjection: c.var.indexingStatus,
+      config: ensApiPublicConfig,
     } satisfies EnsApiIndexingStatusResponseOk),
     200,
   );
