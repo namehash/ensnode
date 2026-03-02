@@ -17,6 +17,8 @@ isProject: false
 
 **Phase 1 scope (this implementation):** Pure in-memory library only. Input = a raw set of key/value pairs (already resolved from a resolver). Output = a normalized record set and optionally stripped/enriched output. No I/O, no resolution logic, no API changes, no client key-request behavior.
 
+**Assumption — unique keys in resolver records:** Resolver records (the key/value set passed into the normalizer) are assumed to have unique keys: each key appears at most once. Duplicate handling in this spec applies only to *recognized* keys: multiple *different* raw keys (e.g. `com.twitter`, `vnd.twitter`) can map to the same normalized key (e.g. `com.x`); only one record wins per normalized key. The `DuplicateNormalizedKey` op is used only for those recognized-key losers, not for repeated occurrences of the same raw key. By contrast, the *requested* keys (e.g. the list passed to key expansion / multicall) may contain duplicates—the user may ask for the same key more than once—and the generated query should deduplicate so each key is requested at most once.
+
 ---
 
 ## Architecture: Phase separation
@@ -164,11 +166,11 @@ Logic:
   - If `rawValue` is a string: run validate + normalize on rawValue.
     - If succeeded: `valueResult` is `AlreadyNormalized` iff `normalizedValue === rawValue` (validate + normalize produced a value identical to the original rawValue); otherwise `valueResult` is `Normalized` (normalizedValue differs from rawValue).
     - If failed: `valueResult` is `Unnormalizable` with the reason from the failing step.
-- If not found: `keyResult` is Unrecognized; `valueResult` is Unrecognized. At the set level, the first record with a given unrecognized `rawKey` is written into `records` as `UnrecognizedKeyAndValue`; any subsequent record with the same `rawKey` gets `op: "DuplicateNormalizedKey"` and goes into `excludedRecords` (consistent with how recognized-key duplicates are handled).
+- If not found: `keyResult` is Unrecognized; `valueResult` is Unrecognized.
 
 ### 1.5 Layer 2: Set-level normalization
 
-After individually normalizing each record, the set is consolidated so only one normalized key is retained as the "winner" when multiple records map to the same normalized key.
+After individually normalizing each record, the set is consolidated so only one normalized key is retained as the "winner" when multiple records map to the same normalized key. Duplicate detection requires set context: if a key is not found in defs, at the set level the first record with that unrecognized `rawKey` is written into `records` as `UnrecognizedKeyAndValue`; subsequent records with the same `rawKey` are marked `op: "DuplicateNormalizedKey"` and placed into `excludedRecords`.
 
 ```typescript
 type RecordNormalizationOp =
@@ -262,6 +264,8 @@ function stripNormalizationMetadata(
 ): Record<string, string | null>
 ```
 
+**Return type note:** The type is intentionally `Record<string, string | null>` because the result is a single flat object that mixes (1) entries from "Normalized" records, where the value is always a string, and (2) entries from "UnrecognizedKeyAndValue" or "UnnormalizableValue", where the value can be null. TypeScript cannot express this per-key distinction in one record type, so the union `string | null` is used for all keys.
+
 Returns only the `normalizedKey → normalizedValue` pairs from the "Normalized" records, plus `rawKey → rawValue` passthrough for "UnrecognizedKeyAndValue" records. For recognized keys where no candidate produced a valid value (winner is "UnnormalizableValue" in `excludedRecords`), the key is included with value `null` (e.g. `{ "com.x": null }`), so callers can distinguish "key present but invalid" from "key not present." Unrecognized keys are always included even when `rawValue` is null — producing `{ [rawKey]: null }` — so the caller receives a complete picture of every key that was present in the input. Thus the result is built from both `set.records` and, for each "UnnormalizableValue" in `set.excludedRecords`, an entry `normalizedKey → null`.
 
 For clients that want UI-friendly enrichment (displayValue, url) without holding the full `NormalizedRecordSet`:
@@ -293,9 +297,9 @@ function expandNormalizedKeys(
 ): string[]
 ```
 
-**Precondition**: no element of `normalizedKeys` may be an unnormalized key variant (i.e. present in `defs.byUnnormalizedKey` but not in `defs.byNormalizedKey`). Passing `vnd.twitter` where `com.twitter` is expected is a caller error and must throw synchronously with a clear message listing the offending keys. Completely unknown keys (absent from both maps) are not an error — they are passed through as-is, supporting arbitrary user-defined keys.
+**Precondition**: no element of `normalizedKeys` may be an unnormalized key variant (i.e. present in `defs.byUnnormalizedKey` but not in `defs.byNormalizedKey`). Passing `vnd.twitter` where `com.x` is expected is a caller error and must throw synchronously with a clear message listing the offending keys. Completely unknown keys (absent from both maps) are not an error — they are passed through as-is, supporting arbitrary user-defined keys.
 
-Returns: `[normalizedKey, ...unnormalizedKeys]` for each key found in `defs.byNormalizedKey`, followed by any unrecognized keys as-is. The result is deduplicated by first-occurrence: if the same key appears more than once, its first position is kept and subsequent occurrences are dropped. Ordering is otherwise stable and deterministic, ensuring consistent multicall construction and reproducible traces.
+Returns: `[normalizedKey, ...unnormalizedKeys]` for each key found in `defs.byNormalizedKey`, followed by any unrecognized keys as-is. The result is deduplicated by first-occurrence: the caller may request the same key more than once (e.g. `["com.x", "com.twitter", "com.x"]`); the generated query list must contain each key at most once, so the first occurrence is kept and subsequent duplicates are dropped. Ordering is otherwise stable and deterministic, ensuring consistent multicall construction and reproducible traces.
 
 ---
 
@@ -306,17 +310,17 @@ The initial definitions cover the 9 most common ENS text record key types. All l
 **Initial set of recognized keys:**
 
 
-| Normalized key              | Display key | Unnormalized key variants                |
-| --------------------------- | ----------- | ---------------------------------------- |
-| `com.x`                     | X (Twitter) | `com.twitter`, `vnd.twitter`, `twitter`, `Twitter` |
-| `com.github`                | GitHub      | `vnd.github`, `github`                   |
-| `xyz.farcaster`             | Farcaster   | `com.warpcast`, `Farcaster`, `farcaster` |
-| `com.discord`               | Discord     | `discord`                                |
-| `org.telegram`              | Telegram    | `telegram`, `com.telegram`, `Telegram`   |
-| `com.reddit`                | Reddit      | `reddit`                                 |
-| `url`                       | Website     | `URL`, `Website`, `website`              |
-| `email`                     | Email       | `Email`                                  |
-| `avatar`                    | Avatar      | `Avatar`                                 |
+| Normalized key  | Display key | Unnormalized key variants                          |
+| --------------- | ----------- | -------------------------------------------------- |
+| `com.x`         | X (Twitter) | `com.twitter`, `vnd.twitter`, `twitter`, `Twitter` |
+| `com.github`    | GitHub      | `vnd.github`, `github`                             |
+| `xyz.farcaster` | Farcaster   | `com.warpcast`, `Farcaster`, `farcaster`           |
+| `com.discord`   | Discord     | `discord`                                          |
+| `org.telegram`  | Telegram    | `telegram`, `com.telegram`, `Telegram`             |
+| `com.reddit`    | Reddit      | `reddit`                                           |
+| `url`           | Website     | `URL`, `Website`, `website`                        |
+| `email`         | Email       | `Email`                                            |
+| `avatar`        | Avatar      | `Avatar`                                           |
 
 
 ### `TextRecordNormalizationDefs` construction
@@ -409,7 +413,7 @@ Discord supports two username formats: the new format (post-2023, no discriminat
 **Validation**:
 
 - New format: must match `^(?!.*\.\.)[a-z0-9_.]{2,32}$` (no consecutive periods).
-- Legacy format: must match `^[^\x00-\x1F\x7F]{2,32}#[0-9]{4}$` (printable characters only before the `#` discriminator).
+- Legacy format: must match `^[^\x00-\x1F\x7F#]{2,32}#[0-9]{4}$` (printable characters only before the `#` discriminator; `#` is excluded from the username portion so inputs like `alice#bob#1234` are rejected).
 
 **Canonical form**: the username as provided (lowercased for new format, `username#NNNN` preserved for legacy).
 
@@ -430,7 +434,7 @@ Unnormalized variants: `telegram`, `com.telegram`, `Telegram`
 - t.me URL: `https://t.me/alice`, `http://t.me/alice`, `t.me/alice`
 - telegram.me URL: `https://telegram.me/alice`, `http://telegram.me/alice`, `telegram.me/alice`
 
-**Validation**: extracted username must match `^[a-zA-Z0-9_]{5,32}$`.
+**Validation**: extracted username must match `^(?!_)(?!.*_$)(?!.*__)[a-zA-Z0-9_]{5,32}$` (5–32 chars from `[a-zA-Z0-9_]`, but no leading underscore, no trailing underscore, and no consecutive underscores; e.g. `_alice`, `alice_`, and `alice__bob` are rejected).
 
 **Canonical form**: lowercase username (e.g. `alice`).
 
@@ -527,6 +531,7 @@ For the RPC path, ENS resolution already uses a multicall pattern: all record lo
 
 Two query parameters on `GET /records/:name`:
 
+> **Breaking change:** The default `normalize=true` alters the response shape (e.g. `records.texts` will contain normalized keys and values instead of raw resolver output). Callers that rely on the previous raw key/value shape must pass `normalize=false` explicitly.
 
 | Parameter               | Type    | Default | Description                                                                                                    |
 | ----------------------- | ------- | ------- | -------------------------------------------------------------------------------------------------------------- |
@@ -556,7 +561,7 @@ interface ResolveRecordsResponse<SELECTION> {
 }
 ```
 
-The `records.texts` field always contains the stripped, clean output when `normalize=true` (normalized keys mapping to normalized values, unrecognized keys passed through).
+When `normalize=true`, the `records.texts` field contains the stripped, clean output (normalized keys mapping to normalized values, unrecognized keys passed through). When `normalize=false`, the expansion/normalization pipeline is not run and `records` keep the original resolved shape.
 
 ---
 
@@ -565,12 +570,14 @@ The `records.texts` field always contains the stripped, clean output when `norma
 When this plan is accepted, **only Phase 1** is implemented. Phases 2 and 3 are not in scope for the current implementation.
 
 **In scope:**
+
 - Pure in-memory data model and functions in `@ensnode/ensnode-sdk` (`packages/ensnode-sdk/src/resolution/normalization/`).
 - `normalizeRecord`, `normalizeRecordSet`, `stripNormalizationMetadata`, `stripNormalizationMetadataWithEnrichment`.
 - Initial `TextRecordNormalizationDefs` covering the 9 recognized key types.
 - Unit tests for all functions and transform definitions.
 
 **Out of scope:**
+
 - API changes, query parameters, HTTP handlers.
 - Client-requested key behavior and `expandNormalizedKeys` usage in request handling.
 - Integration with the indexed or RPC resolution paths (Phase 3).
