@@ -110,8 +110,14 @@ describe("ENSIndexer: Config", () => {
             ensDb: "0.32.0",
             ensIndexer: "0.32.0",
             ensNormalize: "1.11.1",
-            ensRainbow: "0.32.0",
-            ensRainbowSchema: 2,
+            ensRainbowPublicConfig: {
+              version: "0.32.0",
+              labelSet: {
+                labelSetId: "subgraph",
+                highestLabelSetVersion: 0,
+              },
+              recordsCount: 100,
+            },
           } satisfies EnsIndexerVersionInfo),
         ).toStrictEqual({
           nodejs: "v22.22.22",
@@ -119,8 +125,14 @@ describe("ENSIndexer: Config", () => {
           ensDb: "0.32.0",
           ensIndexer: "0.32.0",
           ensNormalize: "1.11.1",
-          ensRainbow: "0.32.0",
-          ensRainbowSchema: 2,
+          ensRainbowPublicConfig: {
+            version: "0.32.0",
+            labelSet: {
+              labelSetId: "subgraph",
+              highestLabelSetVersion: 0,
+            },
+            recordsCount: 100,
+          },
         } satisfies EnsIndexerVersionInfo);
 
         expect(
@@ -131,8 +143,11 @@ describe("ENSIndexer: Config", () => {
               ensDb: "",
               ensIndexer: "",
               ensNormalize: "",
-              ensRainbow: "",
-              ensRainbowSchema: -1,
+              ensRainbowPublicConfig: {
+                version: "",
+                labelSet: { labelSetId: "", highestLabelSetVersion: -1 },
+                recordsCount: -1,
+              },
             } satisfies EnsIndexerVersionInfo),
           ),
         ).toStrictEqual(`✖ Value must be a non-empty string.
@@ -146,9 +161,15 @@ describe("ENSIndexer: Config", () => {
 ✖ Value must be a non-empty string.
   → at ensNormalize
 ✖ Value must be a non-empty string.
-  → at ensRainbow
-✖ Value must be a positive integer (>0).
-  → at ensRainbowSchema`);
+  → at ensRainbowPublicConfig.version
+✖ Value must be a non-negative integer (>=0).
+  → at ensRainbowPublicConfig.recordsCount
+✖ undefined must be 1-50 characters long
+  → at ensRainbowPublicConfig.labelSet.labelSetId
+✖ undefined can only contain lowercase letters (a-z) and hyphens (-)
+  → at ensRainbowPublicConfig.labelSet.labelSetId
+✖ Value must be a non-negative integer (>=0).
+  → at ensRainbowPublicConfig.labelSet.highestLabelSetVersion`);
       });
 
       it("can parse full ENSIndexerPublicConfig with label set", () => {
@@ -168,8 +189,14 @@ describe("ENSIndexer: Config", () => {
             ensDb: "0.32.0",
             ensIndexer: "0.32.0",
             ensNormalize: "1.11.1",
-            ensRainbow: "0.32.0",
-            ensRainbowSchema: 2,
+            ensRainbowPublicConfig: {
+              version: "0.32.0",
+              labelSet: {
+                labelSetId: "subgraph",
+                highestLabelSetVersion: 0,
+              },
+              recordsCount: 100,
+            },
           },
         } satisfies SerializedEnsIndexerPublicConfig;
 

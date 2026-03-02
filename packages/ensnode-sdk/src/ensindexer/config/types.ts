@@ -1,6 +1,6 @@
 import type { ENSNamespaceId } from "@ensnode/datasources";
 
-import type { EnsRainbowClientLabelSet } from "../../ensrainbow";
+import type { EnsRainbowClientLabelSet, EnsRainbowPublicConfig } from "../../ensrainbow";
 import type { ChainId } from "../../shared/types";
 
 /**
@@ -51,16 +51,9 @@ export interface EnsIndexerVersionInfo {
   ensIndexer: string;
 
   /**
-   * ENSRainbow service version
-   *
-   * @see https://ghcr.io/namehash/ensnode/ensindexer
-   **/
-  ensRainbow: string;
-
-  /**
-   * ENSRainbow schema version
-   **/
-  ensRainbowSchema: number;
+   * ENSRainbow public config
+   */
+  ensRainbowPublicConfig: EnsRainbowPublicConfig;
 
   /**
    * ENS Normalize package version

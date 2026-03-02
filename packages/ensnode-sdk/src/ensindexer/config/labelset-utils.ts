@@ -4,7 +4,10 @@ import type {
   LabelSetId,
   LabelSetVersion,
 } from "../../ensrainbow";
-import { makeLabelSetIdSchema, makeLabelSetVersionSchema } from "./zod-schemas";
+import {
+  makeLabelSetIdSchema,
+  makeLabelSetVersionSchema,
+} from "../../ensrainbow/zod-schemas/config";
 
 /**
  * Builds a valid LabelSetId from a string.

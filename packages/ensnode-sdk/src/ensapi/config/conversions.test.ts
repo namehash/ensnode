@@ -23,8 +23,11 @@ const MOCK_ENSAPI_PUBLIC_CONFIG = {
     versionInfo: {
       ensDb: "0.36.0",
       ensIndexer: "0.36.0",
-      ensRainbow: "0.36.0",
-      ensRainbowSchema: 1,
+      ensRainbowPublicConfig: {
+        version: "0.36.0",
+        labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+        recordsCount: 100,
+      },
       ensNormalize: "1.1.1",
       nodejs: "20.0.0",
       ponder: "0.5.0",
@@ -55,8 +58,11 @@ describe("ENSApi Config Serialization/Deserialization", () => {
           versionInfo: {
             ensDb: "0.36.0",
             ensIndexer: "0.36.0",
-            ensRainbow: "0.36.0",
-            ensRainbowSchema: 1,
+            ensRainbowPublicConfig: {
+              version: "0.36.0",
+              labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+              recordsCount: 100,
+            },
             ensNormalize: "1.1.1",
             nodejs: "20.0.0",
             ponder: "0.5.0",
