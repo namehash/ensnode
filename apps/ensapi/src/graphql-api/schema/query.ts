@@ -141,7 +141,7 @@ builder.queryType({
     // Find Domains
     ////////////////
     domains: t.connection({
-      description: "TODO",
+      description: "Find Domains by Name.",
       type: DomainInterfaceRef,
       args: {
         where: t.arg({ type: DomainsWhereInput, required: true }),
@@ -160,7 +160,7 @@ builder.queryType({
     // Get Domain by Name or DomainId
     //////////////////////////////////
     domain: t.field({
-      description: "TODO",
+      description: "Identify a Domain by Name or DomainId",
       type: DomainInterfaceRef,
       args: { by: t.arg({ type: DomainIdInput, required: true }) },
       nullable: true,
@@ -174,7 +174,7 @@ builder.queryType({
     // Get Account by address
     //////////////////////////
     account: t.field({
-      description: "TODO",
+      description: "Identify an Account by Address.",
       type: AccountRef,
       args: { address: t.arg({ type: "Address", required: true }) },
       resolve: async (parent, args, context, info) => args.address,
@@ -184,7 +184,7 @@ builder.queryType({
     // Get Registry by Id or AccountId
     ///////////////////////////////////
     registry: t.field({
-      description: "TODO",
+      description: "Identify a Registry by ID or AccountId.",
       type: RegistryRef,
       args: { by: t.arg({ type: RegistryIdInput, required: true }) },
       resolve: async (parent, args, context, info) => {
@@ -197,7 +197,7 @@ builder.queryType({
     // Get Resolver by Id or AccountId
     ///////////////////////////////////
     resolver: t.field({
-      description: "TODO",
+      description: "Identify a Resolver by ID or AccountId.",
       type: ResolverRef,
       args: { by: t.arg({ type: ResolverIdInput, required: true }) },
       resolve: async (parent, args, context, info) => {
@@ -210,7 +210,7 @@ builder.queryType({
     // Get Permissions by Contract
     ///////////////////////////////
     permissions: t.field({
-      description: "TODO",
+      description: "Find Permissions in a contract by AccountId.",
       type: PermissionsRef,
       args: { for: t.arg({ type: AccountIdInput, required: true }) },
       resolve: (parent, args, context, info) => makePermissionsId(args.for),
@@ -220,7 +220,7 @@ builder.queryType({
     // Get Root Registry
     /////////////////////
     root: t.field({
-      description: "TODO",
+      description: "The ENSv2 Root Registry",
       type: RegistryRef,
       nullable: false,
       resolve: () => getENSv2RootRegistryId(config.namespace),

@@ -22,7 +22,7 @@ AccountResolverPermissionsRef.implement({
     // AccountResolverPermissions.resolver
     ///////////////////////////////////////
     resolver: t.field({
-      description: "TODO",
+      description: "The Resolver in which this Permission is granted.",
       type: ResolverRef,
       nullable: false,
       resolve: (parent) => parent.resolver,
@@ -32,7 +32,7 @@ AccountResolverPermissionsRef.implement({
     // AccountResolverPermissions.resource
     ///////////////////////////////////////
     resource: t.field({
-      description: "TODO",
+      description: "The Resource for which this Permission is granted.",
       type: "BigInt",
       nullable: false,
       resolve: (parent) => parent.permissionsUser.resource,
@@ -42,7 +42,7 @@ AccountResolverPermissionsRef.implement({
     // AccountResolverPermissions.roles
     ////////////////////////////////////
     roles: t.field({
-      description: "TODO",
+      description: "The Roles that this Permission grants.",
       type: "BigInt",
       nullable: false,
       resolve: (parent) => parent.permissionsUser.roles,

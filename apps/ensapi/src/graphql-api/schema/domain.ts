@@ -96,7 +96,7 @@ DomainInterfaceRef.implement({
     // Domain.id
     /////////////
     id: t.field({
-      description: "TODO",
+      description: "A unique reference to this Domain.",
       type: "DomainId",
       nullable: false,
       resolve: (parent) => parent.id,
@@ -151,7 +151,8 @@ DomainInterfaceRef.implement({
     // Domain.path
     ///////////////
     path: t.field({
-      description: "TODO",
+      description:
+        "The Canonical Path from the ENS Root to this Domain. `path` is null if the Domain is not Canonical.",
       type: [DomainInterfaceRef],
       nullable: true,
       resolve: async (domain, args, context) => {
@@ -171,7 +172,7 @@ DomainInterfaceRef.implement({
     ////////////////
     owner: t.field({
       type: AccountRef,
-      description: "TODO",
+      description: "The owner of this Domain.",
       nullable: true,
       resolve: (parent) => parent.ownerId,
     }),
@@ -180,7 +181,8 @@ DomainInterfaceRef.implement({
     // Domain.resolver
     ///////////////////
     resolver: t.field({
-      description: "TODO",
+      description:
+        "The Resolver that this Domain has assigned, if any. NOTE that this is the Domain's _assigned_ Resolver, _not_ its _effective_ Resolver, which can only be determined by following ENS Forward Resolution and ENSIP-10.",
       type: ResolverRef,
       nullable: true,
       resolve: (parent) => getDomainResolver(parent.id),
@@ -190,8 +192,7 @@ DomainInterfaceRef.implement({
     // Domain.registration
     ///////////////////////
     registration: t.field({
-      description:
-        "The latest Registration for this Domain. If the Domain doesn't have an associated Registration, then `registration` will be null.",
+      description: "The latest Registration for this Domain, if exists.",
       type: RegistrationInterfaceRef,
       nullable: true,
       resolve: (parent) => getLatestRegistration(parent.id),
@@ -224,7 +225,8 @@ DomainInterfaceRef.implement({
     // Domain.subdomainCount
     /////////////////////////
     subdomainCount: t.field({
-      description: "TODO",
+      description:
+        "The number of Domains that are direct descendents of this Domain in the namegraph.",
       type: "Int",
       nullable: false,
       resolve: async (parent) => {
@@ -243,7 +245,7 @@ DomainInterfaceRef.implement({
     // Domain.subdomains
     /////////////////////
     subdomains: t.connection({
-      description: "TODO",
+      description: "All Domains that are direct descendents of this Domain in the namegraph.",
       type: DomainInterfaceRef,
       args: {
         where: t.arg({ type: SubdomainsWhereInput }),
@@ -263,7 +265,7 @@ DomainInterfaceRef.implement({
 // ENSv1Domain Implementation
 //////////////////////////////
 ENSv1DomainRef.implement({
-  description: "TODO",
+  description: "An ENSv1Domain represents an ENSv1 Domain.",
   interfaces: [DomainInterfaceRef],
   isTypeOf: (domain) => isENSv1Domain(domain as Domain),
   fields: (t) => ({
@@ -271,7 +273,7 @@ ENSv1DomainRef.implement({
     // ENSv1Domain.parent
     //////////////////////
     parent: t.field({
-      description: "TODO",
+      description: "The parent Domain of this Domain in the ENSv1 nametree.",
       type: ENSv1DomainRef,
       nullable: true,
       resolve: (parent) => parent.parentId,
@@ -281,7 +283,7 @@ ENSv1DomainRef.implement({
     // ENSv1Domain.children
     ////////////////////////
     children: t.connection({
-      description: "TODO",
+      description: "The children Domains of this Domain in the ENSv1 nametree.",
       type: ENSv1DomainRef,
       resolve: (parent, args, context) =>
         resolveCursorConnection(
@@ -307,7 +309,7 @@ ENSv1DomainRef.implement({
 // ENSv2Domain Implementation
 //////////////////////////////
 ENSv2DomainRef.implement({
-  description: "TODO",
+  description: "An ENSv2Domain represents an ENSv2 Domain.",
   interfaces: [DomainInterfaceRef],
   isTypeOf: (domain) => !isENSv1Domain(domain as Domain),
   fields: (t) => ({
@@ -315,8 +317,8 @@ ENSv2DomainRef.implement({
     // Domain.canonicalId
     //////////////////////
     canonicalId: t.field({
+      description: "The ENSv2Domain's Canonical Id.",
       type: "BigInt",
-      description: "TODO",
       nullable: false,
       resolve: (parent) => getCanonicalId(parent.tokenId),
     }),
@@ -325,8 +327,8 @@ ENSv2DomainRef.implement({
     // Domain.tokenId
     //////////////////////
     tokenId: t.field({
+      description: "The ENSv2Domain's current Token Id.",
       type: "BigInt",
-      description: "TODO",
       nullable: false,
       resolve: (parent) => parent.tokenId,
     }),
@@ -335,7 +337,7 @@ ENSv2DomainRef.implement({
     // Domain.registry
     //////////////////////
     registry: t.field({
-      description: "TODO",
+      description: "The Registry under which this ENSv2Domain exists.",
       type: RegistryRef,
       nullable: false,
       resolve: (parent) => parent.registryId,
@@ -346,7 +348,7 @@ ENSv2DomainRef.implement({
     //////////////////////
     subregistry: t.field({
       type: RegistryRef,
-      description: "TODO",
+      description: "The Registry this ENSv2Domain declares as its Subregistry, if exists.",
       nullable: true,
       resolve: (parent) => parent.subregistryId,
     }),
@@ -358,7 +360,7 @@ ENSv2DomainRef.implement({
 //////////////////////
 
 export const DomainIdInput = builder.inputType("DomainIdInput", {
-  description: "TODO",
+  description: "Reference a specific Domain.",
   isOneOf: true,
   fields: (t) => ({
     name: t.field({ type: "Name" }),

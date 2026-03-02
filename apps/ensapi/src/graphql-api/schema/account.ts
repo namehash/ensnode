@@ -44,13 +44,13 @@ export type Account = Exclude<typeof AccountRef.$inferType, Address>;
 // Account
 ///////////
 AccountRef.implement({
-  description: "TODO",
+  description: "Represents an individual Account, keyed by its Address.",
   fields: (t) => ({
     //////////////
     // Account.id
     //////////////
     id: t.field({
-      description: "TODO",
+      description: "A unique reference to this Account.",
       type: "Address",
       nullable: false,
       resolve: (parent) => parent.id,
@@ -60,7 +60,7 @@ AccountRef.implement({
     // Account.address
     ///////////////////
     address: t.field({
-      description: "TODO",
+      description: "An EVM Address that uniquely identifies this Account on-chain.",
       type: "Address",
       nullable: false,
       resolve: (parent) => parent.id,
@@ -70,7 +70,7 @@ AccountRef.implement({
     // Account.domains
     ////////////////////
     domains: t.connection({
-      description: "TODO",
+      description: "The Domains that are owned by the Account.",
       type: DomainInterfaceRef,
       args: {
         where: t.arg({ type: AccountDomainsWhereInput }),
@@ -90,7 +90,7 @@ AccountRef.implement({
     // Account.permissions
     ///////////////////////
     permissions: t.connection({
-      description: "TODO",
+      description: "The Permissions granted to this Account.",
       type: PermissionsUserRef,
       args: {
         in: t.arg({ type: AccountIdInput }),
@@ -123,7 +123,7 @@ AccountRef.implement({
     ///////////////////////////////
     // TODO: this returns all permissions in a registry, perhaps can provide api for non-token resources...
     registryPermissions: t.connection({
-      description: "TODO",
+      description: "The Permissions on Registries granted to this Account.",
       type: AccountRegistryPermissionsRef,
       resolve: (parent, args, context) =>
         resolveCursorConnection(
@@ -165,7 +165,7 @@ AccountRef.implement({
     // Account.resolverPermissions
     ///////////////////////////////
     resolverPermissions: t.connection({
-      description: "TODO",
+      description: "The Permissions on Resolvers granted to this Account.",
       type: AccountResolverPermissionsRef,
       resolve: (parent, args, context) =>
         resolveCursorConnection(

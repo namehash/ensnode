@@ -22,7 +22,7 @@ AccountRegistryPermissionsRef.implement({
     // AccountRegistryPermissions.registry
     ///////////////////////////////////////
     registry: t.field({
-      description: "TODO",
+      description: "The Registry in which this Permission is granted.",
       type: RegistryRef,
       nullable: false,
       resolve: (parent) => parent.registry,
@@ -32,7 +32,7 @@ AccountRegistryPermissionsRef.implement({
     // AccountRegistryPermissions.resource
     ///////////////////////////////////////
     resource: t.field({
-      description: "TODO",
+      description: "The Resource for which this Permission is granted.",
       type: "BigInt",
       nullable: false,
       resolve: (parent) => parent.permissionsUser.resource,
@@ -42,7 +42,7 @@ AccountRegistryPermissionsRef.implement({
     // AccountRegistryPermissions.roles
     ////////////////////////////////////
     roles: t.field({
-      description: "TODO",
+      description: "The Roles that this Permission grants.",
       type: "BigInt",
       nullable: false,
       resolve: (parent) => parent.permissionsUser.roles,

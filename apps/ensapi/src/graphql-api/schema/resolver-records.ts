@@ -18,13 +18,13 @@ export const ResolverRecordsRef = builder.loadableObjectRef("ResolverRecords", {
 export type ResolverRecords = Exclude<typeof ResolverRecordsRef.$inferType, ResolverRecordsId>;
 
 ResolverRecordsRef.implement({
-  description: "TODO",
+  description: "ResolverRecords represents the _indexed_ records within a Resolver.",
   fields: (t) => ({
     //////////////////////
     // ResolverRecords.id
     //////////////////////
     id: t.field({
-      description: "TODO",
+      description: "A unique reference to these ResolverRecords.",
       type: "ID",
       nullable: false,
       resolve: (parent) => parent.id,
@@ -34,7 +34,7 @@ ResolverRecordsRef.implement({
     // ResolverRecords.node
     ////////////////////////
     node: t.field({
-      description: "TODO",
+      description: "The Node for which these ResolverRecords are issued.",
       type: "Node",
       nullable: false,
       resolve: (parent) => parent.node,
@@ -44,7 +44,7 @@ ResolverRecordsRef.implement({
     // ResolverRecords.name
     ////////////////////////
     name: t.expose("name", {
-      description: "TODO",
+      description: "The `name` record for this `node`, if any.",
       type: "String",
       nullable: true,
     }),
@@ -53,7 +53,7 @@ ResolverRecordsRef.implement({
     // ResolverRecords.keys
     ////////////////////////
     keys: t.field({
-      description: "TODO",
+      description: "Unique keys of `text` records for this `node`.",
       type: ["String"],
       nullable: false,
       resolve: (parent) => parent.textRecords.map((r) => r.key).toSorted(),
@@ -63,7 +63,7 @@ ResolverRecordsRef.implement({
     // ResolverRecords.coinTypes
     /////////////////////////////
     coinTypes: t.field({
-      description: "TODO",
+      description: "Unique CoinTypes of `addr` records for this `node`.",
       type: ["CoinType"],
       nullable: false,
       resolve: (parent) =>

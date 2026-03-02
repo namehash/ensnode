@@ -34,13 +34,13 @@ export const RegistryRef = builder.loadableObjectRef("Registry", {
 export type Registry = Exclude<typeof RegistryRef.$inferType, RegistryId>;
 
 RegistryRef.implement({
-  description: "TODO",
+  description: "A Registry represents an ENSv2 Registry contract.",
   fields: (t) => ({
     //////////////////////
     // Registry.id
     //////////////////////
     id: t.field({
-      description: "TODO",
+      description: "A unique reference to this Registry.",
       type: "RegistryId",
       nullable: false,
       resolve: (parent) => parent.id,
@@ -50,7 +50,7 @@ RegistryRef.implement({
     // Registry.parents
     ////////////////////
     parents: t.connection({
-      description: "TODO",
+      description: "The Domains for which this Registry is a Subregistry.",
       type: ENSv2DomainRef,
       resolve: (parent, args, context) =>
         resolveCursorConnection(
@@ -74,7 +74,7 @@ RegistryRef.implement({
     // Registry.domains
     //////////////////////
     domains: t.connection({
-      description: "TODO",
+      description: "The Domains managed by this Registry.",
       type: DomainInterfaceRef,
       args: {
         where: t.arg({ type: RegistryDomainsWhereInput }),
@@ -92,7 +92,7 @@ RegistryRef.implement({
     // Registry.permissions
     ////////////////////////
     permissions: t.field({
-      description: "TODO",
+      description: "The Permissions managed by this Registry.",
       type: PermissionsRef,
       // TODO: render a RegistryPermissions model that parses the backing permissions into registry-semantic roles
       resolve: ({ chainId, address }) => makePermissionsId({ chainId, address }),
@@ -102,7 +102,7 @@ RegistryRef.implement({
     // Registry.contract
     /////////////////////
     contract: t.field({
-      description: "TODO",
+      description: "Contract metadata for this Registry",
       type: AccountIdRef,
       nullable: false,
       resolve: ({ chainId, address }) => ({ chainId, address }),
@@ -115,7 +115,7 @@ RegistryRef.implement({
 //////////
 
 export const RegistryIdInput = builder.inputType("RegistryIdInput", {
-  description: "TODO",
+  description: "Address a Registry by ID or AccountId.",
   isOneOf: true,
   fields: (t) => ({
     id: t.field({ type: "RegistryId" }),
