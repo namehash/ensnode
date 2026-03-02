@@ -22,17 +22,14 @@ export const amIRealtimeGetMeta = createRoute({
     "Checks if the indexing progress is guaranteed to be within a requested worst-case distance of realtime",
   request: {
     query: z.object({
-      maxWorstCaseDistance: params.queryParam
-        .optional()
-        .default(AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE)
-        .pipe(
-          z.coerce
-            .number({
-              error: "maxWorstCaseDistance query param must be a number",
-            })
-            .pipe(makeDurationSchema("maxWorstCaseDistance query param")),
-        )
-        .describe("Maximum acceptable worst-case indexing distance in seconds"),
+      maxWorstCaseDistance: z.preprocess(
+        (val) => (val === "" || val === undefined ? undefined : Number(val)),
+        z
+          .number({ error: "maxWorstCaseDistance query param must be a number" })
+          .pipe(makeDurationSchema("maxWorstCaseDistance query param"))
+          .default(AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE)
+          .describe("Maximum acceptable worst-case indexing distance in seconds"),
+      ),
     }),
   },
   responses: {

@@ -39,10 +39,9 @@ export const registrarActionsQuerySchema = z
       .pipe(makePositiveIntegerSchema("recordsPerPage").max(RECORDS_PER_PAGE_MAX))
       .describe("Number of records per page"),
 
-    withReferral: params.boolstring
-      .optional()
-      .default(false)
-      .describe("Filter to only include actions with referrals"),
+    withReferral: params.optionalBoolstring.describe(
+      "Filter to only include actions with referrals",
+    ),
 
     decodedReferrer: makeLowercaseAddressSchema("decodedReferrer")
       .optional()

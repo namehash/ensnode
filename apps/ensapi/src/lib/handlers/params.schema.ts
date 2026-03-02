@@ -25,6 +25,11 @@ const boolstring = z
   .pipe(z.enum(["true", "false"]))
   .transform((val) => val === "true");
 
+const optionalBoolstring = z.preprocess(
+  (val) => (val === "true" ? true : val === "false" ? false : val === undefined ? false : val),
+  z.boolean().default(false),
+);
+
 const stringarray = z
   .string()
   .transform((val) => val.split(","))
@@ -38,8 +43,8 @@ const name = z
   .refine(isNormalizedName, "Must be normalized, see https://docs.ens.domains/resolution/names/")
   .transform((val) => val as Name);
 
-const trace = z.optional(boolstring).default(false);
-const accelerate = z.optional(boolstring).default(false);
+const trace = optionalBoolstring;
+const accelerate = optionalBoolstring;
 const address = makeLowercaseAddressSchema();
 const defaultableChainId = makeDefaultableChainIdStringSchema();
 const coinType = makeCoinTypeStringSchema();
@@ -102,6 +107,7 @@ const queryParam = z.preprocess((v) => (v === "" ? undefined : v), z.unknown());
 
 export const params = {
   boolstring,
+  optionalBoolstring,
   stringarray,
   name,
   trace,
