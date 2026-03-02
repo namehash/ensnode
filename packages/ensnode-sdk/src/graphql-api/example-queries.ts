@@ -234,7 +234,7 @@ query PermissionsByUser($address: Address!) {
   }
 }`,
     variables: {
-      default: { address: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" },
+      default: { address: DEVNET_DEPLOYER },
       // TODO: figure out a good sepolia-v2 user address
       // [ENSNamespaceIds.SepoliaV2]: { address: "" },
     },
@@ -261,7 +261,7 @@ query AccountResolverPermissions($address: Address!) {
   }
 }`,
     variables: {
-      default: { address: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" },
+      default: { address: DEVNET_DEPLOYER },
       // TODO: figure out a good sepolia-v2 user address
       // [ENSNamespaceIds.SepoliaV2]: { address: "" },
     },

@@ -64,7 +64,7 @@ export function useENSAdminFeatures(): ENSAdminFeatures {
 
   const registrarActions = useMemo<FeatureStatus>(() => {
     if (configQuery.status === "error") return CONFIG_ERROR_STATUS;
-    if (configQuery.status == "pending") return CONNECTING_STATUS;
+    if (configQuery.status === "pending") return CONNECTING_STATUS;
 
     const { ensIndexerPublicConfig } = configQuery.data;
     const result = hasRegistrarActionsConfigSupport(ensIndexerPublicConfig);
@@ -90,7 +90,7 @@ export function useENSAdminFeatures(): ENSAdminFeatures {
 
   const subgraph: FeatureStatus = useMemo(() => {
     if (configQuery.status === "error") return CONFIG_ERROR_STATUS;
-    if (configQuery.status == "pending") return CONNECTING_STATUS;
+    if (configQuery.status === "pending") return CONNECTING_STATUS;
 
     const { ensIndexerPublicConfig } = configQuery.data;
     return prerequisiteResultToFeatureStatus(hasSubgraphApiConfigSupport(ensIndexerPublicConfig));
@@ -98,7 +98,7 @@ export function useENSAdminFeatures(): ENSAdminFeatures {
 
   const graphql: FeatureStatus = useMemo(() => {
     if (configQuery.status === "error") return CONFIG_ERROR_STATUS;
-    if (configQuery.status == "pending") return CONNECTING_STATUS;
+    if (configQuery.status === "pending") return CONNECTING_STATUS;
 
     const { ensIndexerPublicConfig } = configQuery.data;
     return prerequisiteResultToFeatureStatus(hasGraphqlApiConfigSupport(ensIndexerPublicConfig));

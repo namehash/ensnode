@@ -67,6 +67,6 @@ export function hasRegistrarActionsIndexingStatusSupport(
 
   return {
     supported: false,
-    reason: `The Registrar Actions API requires one of the following omnichain indexing statuses: ${registrarActionsSupportedIndexingStatusIds.join(",")}.`,
+    reason: `The Registrar Actions API requires one of the following omnichain indexing statuses: ${registrarActionsSupportedIndexingStatusIds.join(", ")}.`,
   };
 }

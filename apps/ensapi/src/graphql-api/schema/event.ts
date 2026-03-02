@@ -95,7 +95,7 @@ EventRef.implement({
     // Event.logIndex
     //////////////////
     logIndex: t.field({
-      description: "The index of this Event's log within the Transaction.",
+      description: "The index of this Event's log within the Block.",
       type: "Int",
       nullable: false,
       resolve: (parent) => parent.logIndex,
