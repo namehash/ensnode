@@ -8,12 +8,15 @@
  */
 import { z } from "zod/v4";
 
+import {
+  makeLabelSetIdSchema,
+  makeLabelSetVersionSchema,
+} from "../../ensrainbow/zod-schemas/config";
 import { uniq } from "../../shared/collections";
 import {
   makeChainIdSchema,
   makeENSNamespaceIdSchema,
   makeNonNegativeIntegerSchema,
-  makePositiveIntegerSchema,
 } from "../../shared/zod-schemas";
 import type { ZodCheckFnInput } from "../../shared/zod-types";
 import { isSubgraphCompatible } from "./is-subgraph-compatible";
@@ -70,38 +73,6 @@ export const makeDatabaseSchemaNameSchema = (valueLabel: string = "Database sche
     });
 
 /**
- * Makes a schema for parsing a label set ID.
- *
- * The label set ID is guaranteed to be a string between 1-50 characters
- * containing only lowercase letters (a-z) and hyphens (-).
- *
- * @param valueLabel - The label to use in error messages (e.g., "Label set ID", "LABEL_SET_ID")
- */
-export const makeLabelSetIdSchema = (valueLabel: string) => {
-  return z
-    .string({ error: `${valueLabel} must be a string` })
-    .min(1, { error: `${valueLabel} must be 1-50 characters long` })
-    .max(50, { error: `${valueLabel} must be 1-50 characters long` })
-    .regex(/^[a-z-]+$/, {
-      error: `${valueLabel} can only contain lowercase letters (a-z) and hyphens (-)`,
-    });
-};
-
-/**
- * Makes a schema for parsing a label set version.
- *
- * The label set version is guaranteed to be a non-negative integer.
- *
- * @param valueLabel - The label to use in error messages (e.g., "Label set version", "LABEL_SET_VERSION")
-
- */
-export const makeLabelSetVersionSchema = (valueLabel: string) => {
-  return z.coerce
-    .number<number>({ error: `${valueLabel} must be an integer.` })
-    .pipe(makeNonNegativeIntegerSchema(valueLabel));
-};
-
-/**
  * Makes a schema for parsing a label set where both label set ID and label set version are required.
  *
  * @param valueLabel - The label to use in error messages (e.g., "Label set", "LABEL_SET")
@@ -127,15 +98,21 @@ const makeNonEmptyStringSchema = (valueLabel: string = "Value") =>
 
 export const makeEnsIndexerVersionInfoSchema = (valueLabel: string = "Value") =>
   z
-    .strictObject(
+    .object(
       {
         nodejs: makeNonEmptyStringSchema(),
         ponder: makeNonEmptyStringSchema(),
         ensDb: makeNonEmptyStringSchema(),
         ensIndexer: makeNonEmptyStringSchema(),
         ensNormalize: makeNonEmptyStringSchema(),
-        ensRainbow: makeNonEmptyStringSchema(),
-        ensRainbowSchema: makePositiveIntegerSchema(),
+        ensRainbowPublicConfig: z.object({
+          version: makeNonEmptyStringSchema(),
+          labelSet: z.object({
+            labelSetId: makeLabelSetIdSchema(),
+            highestLabelSetVersion: makeLabelSetVersionSchema(),
+          }),
+          recordsCount: makeNonNegativeIntegerSchema(),
+        }),
       },
       {
         error: `${valueLabel} must be a valid ENSIndexerVersionInfo object.`,
