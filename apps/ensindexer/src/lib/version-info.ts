@@ -110,10 +110,7 @@ function getPackageVersionFromPnpmStore(pnpmDir: string, packageName: string): s
  */
 export async function getENSIndexerVersionInfo(): Promise<ENSIndexerVersionInfo> {
   const ensRainbowApiClient = getENSRainbowApiClient();
-  const { versionInfo: ensRainbowVersionInfo } = await ensRainbowApiClient.version();
-
-  // ENSRainbow version (fetched dynamically from the connected ENSRainbow service instance)
-  const ensRainbowSchema = ensRainbowVersionInfo.dbSchemaVersion;
+  const ensRainbowPublicConfig = await ensRainbowApiClient.config();
 
   // ENSIndexer version
   const ensIndexerVersion = packageJson.version;
@@ -125,13 +122,12 @@ export async function getENSIndexerVersionInfo(): Promise<ENSIndexerVersionInfo>
   // parse unvalidated version info
   const schema = makeENSIndexerVersionInfoSchema();
   const parsed = schema.safeParse({
-    ensRainbow: ensRainbowVersionInfo.version,
+    ensRainbowPublicConfig,
     nodejs: process.versions.node,
     ponder: getPackageVersion("ponder"),
     ensDb: ensDbVersion,
     ensIndexer: ensIndexerVersion,
     ensNormalize: getPackageVersion("@adraffy/ens-normalize"),
-    ensRainbowSchema,
   } satisfies SerializedENSIndexerVersionInfo);
 
   if (parsed.error) {
