@@ -6,8 +6,8 @@ import {
   hasRegistrarActionsConfigSupport,
   hasRegistrarActionsIndexingStatusSupport,
   hasSubgraphApiConfigSupport,
+  PrerequisiteResult,
 } from "@ensnode/ensnode-sdk";
-import { PrerequisiteResult } from "@ensnode/ensnode-sdk/internal";
 
 import { useIndexingStatusWithSwr } from "@/components/indexing-status";
 

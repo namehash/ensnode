@@ -32,7 +32,7 @@ export function RequireENSAdminFeature({
 }
 
 /**
- * Pure presentational component that renders the appropriate UI for a given {@link FeatureStatus}.
+ * Presentational component that renders the appropriate UI for a given {@link FeatureStatus}.
  * Used by {@link RequireENSAdminFeature} internally and by mock pages directly.
  */
 export function RequireENSAdminFeatureView({

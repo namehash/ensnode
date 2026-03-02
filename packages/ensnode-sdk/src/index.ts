@@ -24,6 +24,7 @@ export * from "./shared/labelhash";
 export * from "./shared/namespace-specific-value";
 export * from "./shared/null-bytes";
 export * from "./shared/numbers";
+export * from "./shared/prerequisites";
 export * from "./shared/root-registry";
 export * from "./shared/serialize";
 export * from "./shared/serialized-types";

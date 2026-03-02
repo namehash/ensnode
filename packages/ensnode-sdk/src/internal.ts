@@ -37,7 +37,6 @@ export * from "./shared/datasources-with-ensv2-contracts";
 export * from "./shared/datasources-with-resolvers";
 export * from "./shared/interpretation/interpret-record-values";
 export * from "./shared/log-level";
-export * from "./shared/prerequisites";
 export * from "./shared/protocol-acceleration/is-bridged-resolver";
 export * from "./shared/protocol-acceleration/is-ensip-19-reverse-resolver";
 export * from "./shared/protocol-acceleration/is-static-resolver";
