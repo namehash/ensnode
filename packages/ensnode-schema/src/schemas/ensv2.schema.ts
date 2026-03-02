@@ -79,24 +79,33 @@ import type {
  * of multiple pieces of information (for example, a Registry is identified by (chainId, address)),
  * then that information is, as well, included in the entity's columns, not just encoded in the id.
  *
- * Many entities may directly reference an Event, which represents the metadata associated with the
- * on-chain event responsible for its existence.
+ * Many entities may reference an Event, which represents the metadata associated with the
+ * on-chain event log responsible for its existence.
  */
 
-/////////
-// Event
-/////////
+//////////////////
+// Event Metadata
+//////////////////
 
 export const event = onchainTable("events", (t) => ({
   // Ponder's event.id
   id: t.text().primaryKey(),
 
-  // Event Metadata
+  // Event Log Metadata
+
+  // chain
   chainId: t.integer().notNull().$type<ChainId>(),
-  address: t.hex().notNull().$type<Address>(),
+
+  // block
   blockHash: t.hex().notNull().$type<Hash>(),
   timestamp: t.bigint().notNull(),
+
+  // transaction
   transactionHash: t.hex().notNull().$type<Hash>(),
+  from: t.hex().notNull().$type<Address>(),
+
+  // log
+  address: t.hex().notNull().$type<Address>(),
   logIndex: t.integer().notNull().$type<number>(),
 }));
 

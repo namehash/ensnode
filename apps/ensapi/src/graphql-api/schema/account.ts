@@ -6,12 +6,25 @@ import * as schema from "@ensnode/ensnode-schema";
 import type { PermissionsUserId } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
+import { resolveFindDomains } from "@/graphql-api/lib/find-domains/find-domains-resolver";
+import {
+  domainsBase,
+  filterByCanonical,
+  filterByName,
+  filterByOwner,
+  withOrderingMetadata,
+} from "@/graphql-api/lib/find-domains/layers";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
 import { AccountIdInput } from "@/graphql-api/schema/account-id";
 import { AccountRegistryPermissionsRef } from "@/graphql-api/schema/account-registries-permissions";
 import { AccountResolverPermissionsRef } from "@/graphql-api/schema/account-resolver-permissions";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { cursors } from "@/graphql-api/schema/cursors";
+import {
+  AccountDomainsWhereInput,
+  DomainInterfaceRef,
+  DomainsOrderInput,
+} from "@/graphql-api/schema/domain";
 import { PermissionsUserRef } from "@/graphql-api/schema/permissions";
 import { db } from "@/lib/db";
 
@@ -51,6 +64,26 @@ AccountRef.implement({
       type: "Address",
       nullable: false,
       resolve: (parent) => parent.id,
+    }),
+
+    ////////////////////
+    // Account.domains
+    ////////////////////
+    domains: t.connection({
+      description: "TODO",
+      type: DomainInterfaceRef,
+      args: {
+        where: t.arg({ type: AccountDomainsWhereInput }),
+        order: t.arg({ type: DomainsOrderInput }),
+      },
+      resolve: (parent, { where, order, ...connectionArgs }, context) => {
+        const base = domainsBase();
+        const owned = filterByOwner(base, parent.id);
+        const named = filterByName(owned, where?.name);
+        const canonical = where?.canonical === true ? filterByCanonical(named) : named;
+        const domains = withOrderingMetadata(canonical);
+        return resolveFindDomains(context, { domains, order, ...connectionArgs });
+      },
     }),
 
     ///////////////////////

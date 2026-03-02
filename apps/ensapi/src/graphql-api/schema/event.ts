@@ -41,13 +41,13 @@ EventRef.implement({
     }),
 
     ///////////////////
-    // Event.address
+    // Event.blockHash
     ///////////////////
-    address: t.field({
+    blockHash: t.field({
       description: "TODO",
-      type: "Address",
+      type: "Hex",
       nullable: false,
-      resolve: (parent) => parent.address,
+      resolve: (parent) => parent.blockHash,
     }),
 
     ///////////////////
@@ -60,16 +60,6 @@ EventRef.implement({
       resolve: (parent) => parent.timestamp,
     }),
 
-    ///////////////////
-    // Event.blockHash
-    ///////////////////
-    blockHash: t.field({
-      description: "TODO",
-      type: "Hex",
-      nullable: false,
-      resolve: (parent) => parent.blockHash,
-    }),
-
     /////////////////////////
     // Event.transactionHash
     /////////////////////////
@@ -78,6 +68,26 @@ EventRef.implement({
       type: "Hex",
       nullable: false,
       resolve: (parent) => parent.transactionHash,
+    }),
+
+    //////////////
+    // Event.from
+    //////////////
+    from: t.field({
+      description: "TODO",
+      type: "Address",
+      nullable: false,
+      resolve: (parent) => parent.from,
+    }),
+
+    ///////////////////
+    // Event.address
+    ///////////////////
+    address: t.field({
+      description: "TODO",
+      type: "Address",
+      nullable: false,
+      resolve: (parent) => parent.address,
     }),
 
     //////////////////

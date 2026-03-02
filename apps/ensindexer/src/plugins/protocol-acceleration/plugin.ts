@@ -7,7 +7,7 @@ import {
   StandaloneReverseRegistrarABI,
   ThreeDNSTokenABI,
 } from "@ensnode/datasources";
-import { PluginName } from "@ensnode/ensnode-sdk";
+import { buildBlockNumberRange, PluginName } from "@ensnode/ensnode-sdk";
 import {
   DATASOURCE_NAMES_WITH_ENSv2_CONTRACTS,
   DATASOURCE_NAMES_WITH_RESOLVERS,
@@ -90,7 +90,10 @@ export default createPlugin({
               ...memo,
               [datasource.chain.id.toString()]: constrainBlockrange(
                 config.globalBlockrange,
-                datasource.contracts.Resolver,
+                buildBlockNumberRange(
+                  datasource.contracts.Resolver.startBlock,
+                  datasource.contracts.Resolver.endBlock,
+                ),
               ),
             }),
             {},

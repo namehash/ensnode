@@ -1,11 +1,9 @@
 import { z } from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
+import { RangeTypeIds } from "../../shared/blockrange";
 import { makeUnixTimestampSchema } from "../../shared/zod-schemas";
-import {
-  ChainIndexingConfigTypeIds,
-  ChainIndexingStatusIds,
-} from "../chain-indexing-status-snapshot";
+import { ChainIndexingStatusIds } from "../chain-indexing-status-snapshot";
 import {
   type CrossChainIndexingStatusSnapshotOmnichain,
   CrossChainIndexingStrategyIds,
@@ -49,7 +47,7 @@ export function invariant_snapshotTimeIsTheHighestKnownBlockTimestamp(
 
   const endBlockTimestamps = chains
     .map((chain) => chain.config)
-    .filter((chainConfig) => chainConfig.configType === ChainIndexingConfigTypeIds.Definite)
+    .filter((chainConfig) => chainConfig.rangeType === RangeTypeIds.Bounded)
     .map((chainConfig) => chainConfig.endBlock.timestamp);
 
   const backfillEndBlockTimestamps = chains

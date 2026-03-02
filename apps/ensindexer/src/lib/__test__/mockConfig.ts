@@ -1,5 +1,7 @@
 import { vi } from "vitest";
 
+import { buildBlockNumberRange } from "@ensnode/ensnode-sdk";
+
 import { buildConfigFromEnvironment } from "@/config/config.schema";
 import type { ENSIndexerConfig } from "@/config/types";
 import { deepClone } from "@/lib/lib-helpers";
@@ -76,5 +78,5 @@ export function updateMockConfig(updates: Partial<ENSIndexerConfig>) {
  * @param endBlock Optional end block
  */
 export function setGlobalBlockrange(startBlock?: number, endBlock?: number) {
-  updateMockConfig({ globalBlockrange: { startBlock, endBlock } });
+  updateMockConfig({ globalBlockrange: buildBlockNumberRange(startBlock, endBlock) });
 }

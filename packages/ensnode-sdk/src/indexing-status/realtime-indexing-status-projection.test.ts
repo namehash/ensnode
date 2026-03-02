@@ -1,10 +1,8 @@
 import { describe, expect, it } from "vitest";
 
+import { RangeTypeIds } from "../shared/blockrange";
 import { earlierBlockRef, laterBlockRef } from "./block-refs.mock";
-import {
-  ChainIndexingConfigTypeIds,
-  ChainIndexingStatusIds,
-} from "./chain-indexing-status-snapshot";
+import { ChainIndexingStatusIds } from "./chain-indexing-status-snapshot";
 import { CrossChainIndexingStrategyIds } from "./cross-chain-indexing-status-snapshot";
 import { deserializeCrossChainIndexingStatusSnapshot } from "./deserialize/cross-chain-indexing-status-snapshot";
 import { OmnichainIndexingStatusIds } from "./omnichain-indexing-status-snapshot";
@@ -30,7 +28,7 @@ describe("Realtime Indexing Status Projection", () => {
           "1": {
             chainStatus: ChainIndexingStatusIds.Following,
             config: {
-              configType: ChainIndexingConfigTypeIds.Indefinite,
+              rangeType: RangeTypeIds.LeftBounded,
               startBlock: earlierBlockRef,
             },
             latestIndexedBlock: earlierBlockRef,

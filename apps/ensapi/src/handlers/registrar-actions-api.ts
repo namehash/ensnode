@@ -1,10 +1,6 @@
-import { describeRoute } from "hono-openapi";
-import { z } from "zod/v4";
-
 import {
   buildPageContext,
   type Node,
-  RECORDS_PER_PAGE_DEFAULT,
   RECORDS_PER_PAGE_MAX,
   type RegistrarActionsFilter,
   RegistrarActionsOrders,
@@ -14,21 +10,19 @@ import {
   registrarActionsFilter,
   serializeRegistrarActionsResponse,
 } from "@ensnode/ensnode-sdk";
-import {
-  makeLowercaseAddressSchema,
-  makeNodeSchema,
-  makePositiveIntegerSchema,
-  makeUnixTimestampSchema,
-} from "@ensnode/ensnode-sdk/internal";
 
-import { params } from "@/lib/handlers/params.schema";
-import { validate } from "@/lib/handlers/validate";
-import { factory } from "@/lib/hono-factory";
+import { createApp } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
 import { findRegistrarActions } from "@/lib/registrar-actions/find-registrar-actions";
 import { registrarActionsApiMiddleware } from "@/middleware/registrar-actions.middleware";
 
-const app = factory.createApp();
+import {
+  getRegistrarActionsByParentNodeRoute,
+  getRegistrarActionsRoute,
+  type RegistrarActionsQuery,
+} from "./registrar-actions-api.routes";
+
+const app = createApp();
 
 const logger = makeLogger("registrar-actions-api");
 
@@ -36,68 +30,8 @@ const logger = makeLogger("registrar-actions-api");
 // It makes the routes available if all prerequisites are met.
 app.use(registrarActionsApiMiddleware);
 
-// Shared query schema for registrar actions
-const registrarActionsQuerySchema = z
-  .object({
-    orderBy: z
-      .enum(RegistrarActionsOrders)
-      .default(RegistrarActionsOrders.LatestRegistrarActions)
-      .describe("Order of results"),
-
-    page: params.queryParam
-      .optional()
-      .default(1)
-      .pipe(z.coerce.number())
-      .pipe(makePositiveIntegerSchema("page"))
-      .describe("Page number for pagination"),
-
-    recordsPerPage: params.queryParam
-      .optional()
-      .default(RECORDS_PER_PAGE_DEFAULT)
-      .pipe(z.coerce.number())
-      .pipe(makePositiveIntegerSchema("recordsPerPage").max(RECORDS_PER_PAGE_MAX))
-      .describe("Number of records per page"),
-
-    withReferral: params.boolstring
-      .optional()
-      .default(false)
-      .describe("Filter to only include actions with referrals"),
-
-    decodedReferrer: makeLowercaseAddressSchema("decodedReferrer")
-      .optional()
-      .describe("Filter by decoded referrer address"),
-
-    beginTimestamp: params.queryParam
-      .pipe(z.coerce.number())
-      .pipe(makeUnixTimestampSchema("beginTimestamp"))
-      .optional()
-      .describe("Filter actions at or after this Unix timestamp"),
-
-    endTimestamp: params.queryParam
-      .pipe(z.coerce.number())
-      .pipe(makeUnixTimestampSchema("endTimestamp"))
-      .optional()
-      .describe("Filter actions at or before this Unix timestamp"),
-  })
-  .refine(
-    (data) => {
-      // If both timestamps are provided, endTimestamp must be >= beginTimestamp
-      if (data.beginTimestamp !== undefined && data.endTimestamp !== undefined) {
-        return data.endTimestamp >= data.beginTimestamp;
-      }
-      return true;
-    },
-    {
-      message: "endTimestamp must be greater than or equal to beginTimestamp",
-      path: ["endTimestamp"],
-    },
-  );
-
 // Shared business logic for fetching registrar actions
-async function fetchRegistrarActions(
-  parentNode: Node | undefined,
-  query: z.infer<typeof registrarActionsQuerySchema>,
-) {
+async function fetchRegistrarActions(parentNode: Node | undefined, query: RegistrarActionsQuery) {
   const {
     orderBy,
     page,
@@ -152,57 +86,37 @@ async function fetchRegistrarActions(
  *
  * Example: `GET /api/registrar-actions`
  *
- * @see {@link app.get("/:parentNode")} for response documentation
+ * @see {@link app.openapi(getRegistrarActionsRoute)} for response documentation
  */
-app.get(
-  "/",
-  describeRoute({
-    tags: ["Explore"],
-    summary: "Get Registrar Actions",
-    description: "Returns all registrar actions with optional filtering and pagination",
-    responses: {
-      200: {
-        description: "Successfully retrieved registrar actions",
-      },
-      400: {
-        description: "Invalid query",
-      },
-      500: {
-        description: "Internal server error",
-      },
-    },
-  }),
-  validate("query", registrarActionsQuerySchema),
-  async (c) => {
-    try {
-      const query = c.req.valid("query");
-      const { registrarActions, pageContext } = await fetchRegistrarActions(undefined, query);
+app.openapi(getRegistrarActionsRoute, async (c) => {
+  try {
+    const query = c.req.valid("query");
+    const { registrarActions, pageContext } = await fetchRegistrarActions(undefined, query);
 
-      // respond with success response
-      return c.json(
-        serializeRegistrarActionsResponse({
-          responseCode: RegistrarActionsResponseCodes.Ok,
-          registrarActions,
-          pageContext,
-        } satisfies RegistrarActionsResponseOk),
-      );
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      logger.error(errorMessage);
+    // respond with success response
+    return c.json(
+      serializeRegistrarActionsResponse({
+        responseCode: RegistrarActionsResponseCodes.Ok,
+        registrarActions,
+        pageContext,
+      } satisfies RegistrarActionsResponseOk),
+    );
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    logger.error(errorMessage);
 
-      // respond with 500 error response
-      return c.json(
-        serializeRegistrarActionsResponse({
-          responseCode: RegistrarActionsResponseCodes.Error,
-          error: {
-            message: `Registrar Actions API Response is unavailable`,
-          },
-        } satisfies RegistrarActionsResponseError),
-        500,
-      );
-    }
-  },
-);
+    // respond with 500 error response
+    return c.json(
+      serializeRegistrarActionsResponse({
+        responseCode: RegistrarActionsResponseCodes.Error,
+        error: {
+          message: `Registrar Actions API Response is unavailable`,
+        },
+      } satisfies RegistrarActionsResponseError),
+      500,
+    );
+  }
+});
 
 /**
  * Get Registrar Actions (filtered by parent node)
@@ -236,74 +150,45 @@ app.get(
  *     {@link OmnichainIndexingStatusIds.Following}.
  *   - unknown server error occurs.
  */
-app.get(
-  "/:parentNode",
-  describeRoute({
-    tags: ["Explore"],
-    summary: "Get Registrar Actions by Parent Node",
-    description:
-      "Returns registrar actions filtered by parent node hash with optional additional filtering and pagination",
-    responses: {
-      200: {
-        description: "Successfully retrieved registrar actions",
-      },
-      400: {
-        description: "Invalid input",
-      },
-      500: {
-        description: "Internal server error",
-      },
-    },
-  }),
-  validate(
-    "param",
-    z.object({
-      parentNode: makeNodeSchema("parentNode param").describe(
-        "Parent node to filter registrar actions",
-      ),
-    }),
-  ),
-  validate("query", registrarActionsQuerySchema),
-  async (c) => {
-    try {
-      // Middleware ensures indexingStatus is available and not an Error
-      // This check is for TypeScript type safety
-      if (!c.var.indexingStatus || c.var.indexingStatus instanceof Error) {
-        throw new Error("Invariant violation: indexingStatus should be validated by middleware");
-      }
-
-      const { parentNode } = c.req.valid("param");
-      const query = c.req.valid("query");
-      const { registrarActions, pageContext } = await fetchRegistrarActions(parentNode, query);
-
-      // Get the accurateAsOf timestamp from the slowest chain indexing cursor
-      const accurateAsOf = c.var.indexingStatus.snapshot.slowestChainIndexingCursor;
-
-      // respond with success response
-      return c.json(
-        serializeRegistrarActionsResponse({
-          responseCode: RegistrarActionsResponseCodes.Ok,
-          registrarActions,
-          pageContext,
-          accurateAsOf,
-        } satisfies RegistrarActionsResponseOk),
-      );
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      logger.error(errorMessage);
-
-      // respond with 500 error response
-      return c.json(
-        serializeRegistrarActionsResponse({
-          responseCode: RegistrarActionsResponseCodes.Error,
-          error: {
-            message: `Registrar Actions API Response is unavailable`,
-          },
-        } satisfies RegistrarActionsResponseError),
-        500,
-      );
+app.openapi(getRegistrarActionsByParentNodeRoute, async (c) => {
+  try {
+    // Middleware ensures indexingStatus is available and not an Error
+    // This check is for TypeScript type safety
+    if (!c.var.indexingStatus || c.var.indexingStatus instanceof Error) {
+      throw new Error("Invariant violation: indexingStatus should be validated by middleware");
     }
-  },
-);
+
+    const { parentNode } = c.req.valid("param");
+    const query = c.req.valid("query");
+    const { registrarActions, pageContext } = await fetchRegistrarActions(parentNode, query);
+
+    // Get the accurateAsOf timestamp from the slowest chain indexing cursor
+    const accurateAsOf = c.var.indexingStatus.snapshot.slowestChainIndexingCursor;
+
+    // respond with success response
+    return c.json(
+      serializeRegistrarActionsResponse({
+        responseCode: RegistrarActionsResponseCodes.Ok,
+        registrarActions,
+        pageContext,
+        accurateAsOf,
+      } satisfies RegistrarActionsResponseOk),
+    );
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    logger.error(errorMessage);
+
+    // respond with 500 error response
+    return c.json(
+      serializeRegistrarActionsResponse({
+        responseCode: RegistrarActionsResponseCodes.Error,
+        error: {
+          message: `Registrar Actions API Response is unavailable`,
+        },
+      } satisfies RegistrarActionsResponseError),
+      500,
+    );
+  }
+});
 
 export default app;

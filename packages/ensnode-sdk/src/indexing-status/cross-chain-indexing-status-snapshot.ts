@@ -1,6 +1,8 @@
+import type { RangeTypeIds } from "../shared/blockrange";
 import type { BlockRef, ChainId, UnixTimestamp } from "../shared/types";
 import { ChainIndexingStatusIds } from "./chain-indexing-status-snapshot";
 import type { OmnichainIndexingStatusSnapshot } from "./omnichain-indexing-status-snapshot";
+import { validateCrossChainIndexingStatusSnapshot } from "./validate/cross-chain-indexing-status-snapshot";
 
 /**
  * The strategy used for indexing one or more chains.
@@ -42,8 +44,8 @@ export type CrossChainIndexingStrategyId =
  * - `snapshotTime` is always >= the "highest known block timestamp", defined as the max of:
  *     - the `slowestChainIndexingCursor`.
  *     - the `config.startBlock.timestamp` for all indexed chains.
- *     - the `config.endBlock.timestamp` for all indexed chains with a `config.configType` of
- *       {@link ChainIndexingConfigTypeIds.Definite}.
+ *     - the `config.endBlock.timestamp` for all indexed chains with a `config.rangeType` of
+ *       {@link RangeTypeIds.Bounded}.
  *     - the `backfillEndBlock.timestamp` for all chains with `chainStatus` of
  *       {@link ChainIndexingStatusIds.Backfill}.
  *     - the `latestKnownBlock.timestamp` for all chains with `chainStatus` of
@@ -114,4 +116,25 @@ export function getLatestIndexedBlockRef(
   }
 
   return chainIndexingStatus.latestIndexedBlock;
+}
+
+/**
+ * Build a Cross-Chain Indexing Status Snapshot based on the omnichain indexing status snapshot.
+ *
+ * @param omnichainSnapshot - The omnichain indexing status snapshot.
+ * @param snapshotTime - The timestamp when the cross-chain indexing status snapshot was generated.
+ * @returns The cross-chain indexing status snapshot.
+ * @throws if the generated snapshot does not satisfy the invariants defined
+ *         in {@link CrossChainIndexingStatusSnapshotOmnichain}
+ */
+export function buildCrossChainIndexingStatusSnapshotOmnichain(
+  omnichainSnapshot: OmnichainIndexingStatusSnapshot,
+  snapshotTime: UnixTimestamp,
+): CrossChainIndexingStatusSnapshotOmnichain {
+  return validateCrossChainIndexingStatusSnapshot({
+    strategy: CrossChainIndexingStrategyIds.Omnichain,
+    slowestChainIndexingCursor: omnichainSnapshot.omnichainIndexingCursor,
+    omnichainSnapshot,
+    snapshotTime,
+  });
 }

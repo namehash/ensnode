@@ -1,5 +1,4 @@
-import { testClient } from "hono/testing";
-import { describe, expect, it, vi } from "vitest"; // Or your preferred test runner
+import { describe, expect, it, vi } from "vitest";
 
 import { ENSNamespaceIds } from "@ensnode/datasources";
 
@@ -91,28 +90,32 @@ describe("/v1/ensanalytics", () => {
       const allPossibleReferrers = referrerLeaderboardPageResponseOk.data.referrers;
       const allPossibleReferrersIterator = allPossibleReferrers[Symbol.iterator]();
 
-      // Arrange: create the test client from the app instance
-      const client = testClient(app);
       const recordsPerPage = 10;
       const edition = "2025-12";
 
       // Act: send test request to fetch 1st page
-      const responsePage1 = await client["referral-leaderboard"]
-        .$get({ query: { edition, recordsPerPage: `${recordsPerPage}`, page: "1" } }, {})
-        .then((r) => r.json())
-        .then(deserializeReferrerLeaderboardPageResponse);
+      const httpResponsePage1 = await app.request(
+        `/referral-leaderboard?edition=${edition}&recordsPerPage=${recordsPerPage}&page=1`,
+      );
+      const responsePage1 = deserializeReferrerLeaderboardPageResponse(
+        await httpResponsePage1.json(),
+      );
 
       // Act: send test request to fetch 2nd page
-      const responsePage2 = await client["referral-leaderboard"]
-        .$get({ query: { edition, recordsPerPage: `${recordsPerPage}`, page: "2" } }, {})
-        .then((r) => r.json())
-        .then(deserializeReferrerLeaderboardPageResponse);
+      const httpResponsePage2 = await app.request(
+        `/referral-leaderboard?edition=${edition}&recordsPerPage=${recordsPerPage}&page=2`,
+      );
+      const responsePage2 = deserializeReferrerLeaderboardPageResponse(
+        await httpResponsePage2.json(),
+      );
 
       // Act: send test request to fetch 3rd page
-      const responsePage3 = await client["referral-leaderboard"]
-        .$get({ query: { edition, recordsPerPage: `${recordsPerPage}`, page: "3" } }, {})
-        .then((r) => r.json())
-        .then(deserializeReferrerLeaderboardPageResponse);
+      const httpResponsePage3 = await app.request(
+        `/referral-leaderboard?edition=${edition}&recordsPerPage=${recordsPerPage}&page=3`,
+      );
+      const responsePage3 = deserializeReferrerLeaderboardPageResponse(
+        await httpResponsePage3.json(),
+      );
 
       // Assert: 1st page results
       const expectedResponsePage1 = {
@@ -211,16 +214,14 @@ describe("/v1/ensanalytics", () => {
         return await next();
       });
 
-      // Arrange: create the test client from the app instance
-      const client = testClient(app);
       const recordsPerPage = 10;
       const edition = "2025-12";
 
       // Act: send test request to fetch 1st page
-      const response = await client["referral-leaderboard"]
-        .$get({ query: { edition, recordsPerPage: `${recordsPerPage}`, page: "1" } }, {})
-        .then((r) => r.json())
-        .then(deserializeReferrerLeaderboardPageResponse);
+      const httpResponse = await app.request(
+        `/referral-leaderboard?edition=${edition}&recordsPerPage=${recordsPerPage}&page=1`,
+      );
+      const response = deserializeReferrerLeaderboardPageResponse(await httpResponse.json());
 
       // Assert: empty page results
       const expectedResponse = {
@@ -282,15 +283,12 @@ describe("/v1/ensanalytics", () => {
         return await next();
       });
 
-      // Arrange: create the test client from the app instance
-      const client = testClient(app);
       const recordsPerPage = 10;
       const invalidEdition = "invalid-edition";
 
       // Act: send test request with invalid edition slug
-      const httpResponse = await client["referral-leaderboard"].$get(
-        { query: { edition: invalidEdition, recordsPerPage: `${recordsPerPage}`, page: "1" } },
-        {},
+      const httpResponse = await app.request(
+        `/referral-leaderboard?edition=${invalidEdition}&recordsPerPage=${recordsPerPage}&page=1`,
       );
       const responseData = await httpResponse.json();
       const response = deserializeReferrerLeaderboardPageResponse(responseData);

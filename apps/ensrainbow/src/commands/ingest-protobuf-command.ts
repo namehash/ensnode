@@ -13,6 +13,7 @@ import {
 
 import { ENSRainbowDB, IngestionStatus } from "@/lib/database";
 import { getErrorMessage } from "@/utils/error-utils";
+import { assertInputFileReadable } from "@/utils/input-file";
 import { logger } from "@/utils/logger";
 import {
   CURRENT_ENSRAINBOW_FILE_FORMAT_VERSION,
@@ -37,6 +38,8 @@ export interface IngestProtobufCommandOptions {
  * different platforms and languages.
  */
 export async function ingestProtobufCommand(options: IngestProtobufCommandOptions): Promise<void> {
+  assertInputFileReadable(options.inputFile);
+
   const db = await ENSRainbowDB.openOrCreate(options.dataDir);
 
   try {

@@ -1,21 +1,24 @@
 /**
  * ENSRAINBOW CSV FILE CREATION COMMAND
  *
- * Converts CSV files to .ensrainbow format with fast-csv
- * Supports 1-column (label only) and 2-column (label,labelhash) formats
+ * Converts single-column CSV files (one label per line) to .ensrainbow format with fast-csv
  */
 
-import { createReadStream, createWriteStream, rmSync, statSync } from "node:fs";
+import { once } from "node:events";
+import { createReadStream, createWriteStream, rmSync, statSync, type WriteStream } from "node:fs";
+import { unlink } from "node:fs/promises";
 import { dirname, join } from "node:path";
+import { finished } from "node:stream/promises";
 
 import { parse } from "@fast-csv/parse";
 import { ClassicLevel } from "classic-level";
 import ProgressBar from "progress";
 import { labelhash } from "viem";
 
-import { type LabelHash, type LabelSetId, labelHashToBytes } from "@ensnode/ensnode-sdk";
+import { type LabelSetId, labelHashToBytes } from "@ensnode/ensnode-sdk";
 
 import { ENSRainbowDB } from "../lib/database.js";
+import { assertInputFileReadable } from "../utils/input-file.js";
 import { logger } from "../utils/logger.js";
 import {
   CURRENT_ENSRAINBOW_FILE_FORMAT_VERSION,
@@ -55,8 +58,18 @@ class DeduplicationDB {
     try {
       await this.db.get(key);
       return true;
-    } catch (_error) {
-      return false;
+    } catch (error: unknown) {
+      // Only treat a missing-key error as "not found";
+      // rethrow I/O, corruption, LEVEL_LOCKED, or other unexpected errors
+      if (
+        error != null &&
+        typeof error === "object" &&
+        "code" in error &&
+        error.code === "LEVEL_NOT_FOUND"
+      ) {
+        return false;
+      }
+      throw error;
     }
   }
 
@@ -312,62 +325,33 @@ async function initializeConversion(
   return { RainbowRecordType, outputStream, existingDb };
 }
 
-/**
- * Create rainbow record from parsed CSV row
- */
-function createRainbowRecord(row: string[]): RainbowRecord {
-  const label = String(row[0]);
+/** Tuple representing a single-column CSV row (label only). */
+type SingleColumnRow = [string];
 
-  if (row.length === 1) {
-    // Single column: compute labelhash using labelhash function
-    const labelHashBytes = labelHashToBytes(labelhash(label));
-    return {
-      labelHash: labelHashBytes,
-      label: label,
-    };
-  } else if (row.length === 2) {
-    // Two columns: validate labelhash format and use provided hash
-    // Trim whitespace from hash (metadata), but preserve label as-is
-    const providedHash = String(row[1]).trim();
-    if (providedHash === "") {
-      throw new Error("LabelHash cannot be empty");
-    }
-    const maybeLabelHash = providedHash.startsWith("0x") ? providedHash : `0x${providedHash}`;
-    try {
-      const labelHash = labelHashToBytes(maybeLabelHash as LabelHash); // performs labelhash format validation
-      return {
-        labelHash,
-        label,
-      };
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      throw new Error(`Invalid labelHash: ${errorMessage}`);
-    }
-  } else {
-    throw new Error(`Expected 1 or 2 columns, but found ${row.length} columns`);
-  }
+/**
+ * Create rainbow record from a single-column CSV row (label only).
+ * Labelhashes are always computed deterministically from labels.
+ */
+function createRainbowRecord(row: SingleColumnRow): RainbowRecord {
+  const label = row[0];
+  const labelHashBytes = labelHashToBytes(labelhash(label));
+  return {
+    labelHash: labelHashBytes,
+    label,
+  };
 }
 
 /**
  * Process a single CSV record with LevelDB-based deduplication
  */
 async function processRecord(
-  row: string[],
-  expectedColumns: number,
+  row: SingleColumnRow,
   RainbowRecordType: any,
   outputStream: NodeJS.WritableStream,
-  lineNumber: number,
   existingDb: ENSRainbowDB | null,
   dedupDb: DeduplicationDB,
   stats: ConversionStats,
 ): Promise<boolean> {
-  // Validate column count
-  if (row.length !== expectedColumns) {
-    throw new Error(
-      `Expected ${expectedColumns} columns, but found ${row.length} in line ${lineNumber}`,
-    );
-  }
-
   const rainbowRecord = createRainbowRecord(row);
   const label = rainbowRecord.label;
   const labelHashBytes = Buffer.from(rainbowRecord.labelHash);
@@ -427,7 +411,6 @@ async function processCSVFile(
   stats: ConversionStats,
   progressBar: ProgressBar | null,
 ): Promise<{ totalLines: number; processedRecords: number }> {
-  let expectedColumns: number | null = null;
   let lineNumber = 0;
   let processedRecords = 0;
   let lastLoggedLine = 0;
@@ -465,11 +448,13 @@ async function processCSVFile(
             return;
           }
 
-          // Detect column count on first non-empty row
-          if (expectedColumns === null) {
-            expectedColumns = row.length;
-            logger.info(`Detected ${expectedColumns} columns - SEQUENTIAL processing mode`);
+          if (row.length !== 1) {
+            throw new Error(
+              `Expected 1 column (label only), but found ${row.length} columns. Multi-column CSV formats are not supported.`,
+            );
           }
+
+          const singleColumnRow = row as SingleColumnRow;
 
           // Log progress (less frequently to avoid logger crashes)
           if (lineNumber % progressInterval === 0 && lineNumber !== lastLoggedLine) {
@@ -495,11 +480,9 @@ async function processCSVFile(
 
           // Process this one record
           const wasProcessed = await processRecord(
-            row,
-            expectedColumns,
+            singleColumnRow,
             RainbowRecordType,
             outputStream,
-            lineNumber,
             existingDb,
             dedupDb,
             stats,
@@ -546,6 +529,8 @@ async function processCSVFile(
  * Main CSV conversion command with true streaming using fast-csv
  */
 export async function convertCsvCommand(options: ConvertCsvCommandOptions): Promise<void> {
+  assertInputFileReadable(options.inputFile);
+
   // Get label set version from existing database or default to 0
   // This also opens the database if needed, and we'll reuse that connection
   const { version: labelSetVersion, existingDb: openedDb } = await getLabelSetVersionAndDatabase(
@@ -570,13 +555,15 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
   let dedupDb: DeduplicationDB | undefined;
   let tempDb: ClassicLevel<string, string> | undefined;
   let temporaryDedupDir: string | null = null;
+  let outputStream: WriteStream | null = null;
 
   try {
     const {
       RainbowRecordType,
-      outputStream,
+      outputStream: stream,
       existingDb: db,
     } = await initializeConversion(options, labelSetVersion, outputFile, existingDb);
+    outputStream = stream;
     existingDb = db;
 
     // Create temporary deduplication database in the same directory as the output file
@@ -602,17 +589,28 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
     // Set up progress bar (only if not silent)
     const progressBar = options.silent ? null : setupProgressBar();
 
-    // Process the CSV file
-    const { totalLines, processedRecords } = await processCSVFile(
-      options.inputFile,
-      RainbowRecordType,
-      outputStream,
-      progressInterval,
-      existingDb,
-      dedupDb,
-      stats,
-      progressBar,
-    );
+    // Attach before processCSVFile so any async I/O error on the output stream
+    // (disk full, permission denied, …) is surfaced as a rejection instead of
+    // an unhandled 'error' event that would crash the process and bypass the
+    // finally-block cleanup.
+    const streamErrorPromise = new Promise<never>((_, reject) => {
+      outputStream!.once("error", reject);
+    });
+
+    // Process the CSV file, aborting immediately if the output stream errors.
+    const { totalLines, processedRecords } = await Promise.race([
+      processCSVFile(
+        options.inputFile,
+        RainbowRecordType,
+        outputStream,
+        progressInterval,
+        existingDb,
+        dedupDb,
+        stats,
+        progressBar,
+      ),
+      streamErrorPromise,
+    ]);
 
     stats.totalLines = totalLines;
     stats.processedRecords = processedRecords;
@@ -624,8 +622,11 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
       );
     }
 
-    // Close output stream
+    // Close output stream and wait for all buffered data to be flushed before
+    // continuing. Without this await the function would return while bytes are
+    // still being written, letting callers read a truncated output file.
     outputStream.end();
+    await finished(outputStream);
 
     logger.info(`✅ Processed ${processedRecords} records with streaming fast-csv`);
     logSummary(stats);
@@ -635,6 +636,41 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
     logger.error(`❌ CSV conversion failed: ${errorMessage}`);
     throw error;
   } finally {
+    // Clean up output stream if it wasn't gracefully ended (error path).
+    // Guard on !writableEnded only: if the stream was auto-destroyed by an I/O
+    // error (destroyed=true but writableEnded=false), we still need to unlink
+    // the partial output file.
+    if (outputStream && !outputStream.writableEnded) {
+      const outputPath = (outputStream as WriteStream & { path?: string }).path ?? outputFile;
+      try {
+        // Suppress errors from in-flight writes whose async I/O completes
+        // after destroy (e.g. "Cannot call write after a stream was destroyed").
+        // On error paths the output file is incomplete anyway.
+        outputStream.on("error", () => {});
+        if (!outputStream.destroyed) {
+          outputStream.destroy();
+          // Wait for the OS file handle to be released before unlinking.
+          // destroy() is asynchronous; the handle is only freed on the 'close' event.
+          await once(outputStream, "close");
+        } else if (!outputStream.closed) {
+          // Auto-destroyed by an I/O error: 'close' may not have fired yet.
+          await once(outputStream, "close");
+        }
+        logger.info("Destroyed output stream on error path");
+      } catch (error) {
+        logger.warn(`Failed to destroy output stream: ${error}`);
+      }
+      try {
+        await unlink(outputPath);
+        logger.info("Removed partial output file on error path");
+      } catch (unlinkErr: unknown) {
+        const code = (unlinkErr as NodeJS.ErrnoException).code;
+        if (code !== "ENOENT" && code !== "EPERM" && code !== "EBUSY") {
+          logger.warn(`Failed to remove partial output file: ${unlinkErr}`);
+        }
+      }
+    }
+
     // Clean up deduplication database - close the wrapper first
     if (dedupDb !== undefined) {
       try {
