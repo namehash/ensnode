@@ -33,10 +33,7 @@ function EnsApiInternalProvider({
   children?: React.ReactNode;
   options: EnsApiProviderOptions;
 }) {
-  // Memoize the options to prevent unnecessary re-renders
-  const memoizedOptions = useMemo(() => options, [options]);
-
-  return createElement(EnsApiContext.Provider, { value: memoizedOptions }, children);
+  return createElement(EnsApiContext.Provider, { value: options }, children);
 }
 
 export function EnsApiProvider(parameters: React.PropsWithChildren<EnsApiProviderProps>) {

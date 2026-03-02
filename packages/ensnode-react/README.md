@@ -126,11 +126,11 @@ function DisplayPrimaryNames() {
 
 ### EnsApiProvider
 
-The provider component that supplies ENSNode configuration to all child components.
+The provider component that supplies ENSApi options to all child components.
 
 ```tsx
 interface EnsApiProviderProps {
-  config: ENSNodeConfig;
+  options: EnsApiProviderOptions;
   queryClient?: QueryClient;
   queryClientOptions?: QueryClientOptions;
 }
@@ -138,7 +138,7 @@ interface EnsApiProviderProps {
 
 #### Props
 
-- `config`: ENSNode configuration object
+- `options`: ENSApi options object
 - `queryClient`: Optional TanStack Query client instance (requires manual QueryClientProvider setup)
 - `queryClientOptions`: Optional Custom options for auto-created QueryClient (only used when queryClient is not provided)
 
@@ -235,7 +235,7 @@ The `EnsApiProvider` automatically creates and manages a QueryClient for you. Ca
 ```tsx
 // Simple setup - no TanStack Query knowledge needed
 <EnsApiProvider
-  config={config}
+  options={options}
   queryClientOptions={{
     defaultOptions: {
       queries: {
@@ -268,7 +268,7 @@ const queryClient = new QueryClient({
 });
 
 <QueryClientProvider client={queryClient}>
-  <EnsApiProvider config={config} queryClient={queryClient}>
+  <EnsApiProvider options={options} queryClient={queryClient}>
     <App />
   </EnsApiProvider>
 </QueryClientProvider>;

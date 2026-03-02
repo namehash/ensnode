@@ -23,7 +23,7 @@ import { usePrimaryName } from "./usePrimaryName";
  * @param parameters - Configuration object for the hook
  * @param parameters.identity - An {@link UnresolvedIdentity} containing the {@link DefaultableChainId}
  *                              and {@link Address} to resolve.
- * @param parameters.namespaceId - The {@link ENSNamespaceId} that `identity.chainId` should be interpreted
+ * @param parameters.namespace - The {@link ENSNamespaceId} that `identity.chainId` should be interpreted
  *                                 through (via {@link getResolvePrimaryNameChainIdParam}) to determine the literal
  *                                 chainId that should be used for ENSIP-19 primary name resolution.
  * @param parameters.accelerate - Whether to attempt Protocol Acceleration (default: false)

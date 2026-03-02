@@ -1,6 +1,6 @@
 "use client";
 
-import type { PropsWithChildren } from "react";
+import { type PropsWithChildren, useMemo } from "react";
 
 import { createEnsApiOptions, EnsApiProvider } from "@ensnode/ensnode-react";
 
@@ -21,9 +21,15 @@ export function SelectedEnsApiProvider({ children }: PropsWithChildren) {
   const selectedConnection = useSelectedConnection();
 
   if (selectedConnection.validatedSelectedConnection.isValid) {
-    const options = createEnsApiOptions({
-      url: selectedConnection.validatedSelectedConnection.url,
-    });
+    const selectedConenctionUrl = selectedConnection.validatedSelectedConnection.url;
+    const options = useMemo(
+      () =>
+        createEnsApiOptions({
+          url: selectedConenctionUrl,
+        }),
+      [selectedConenctionUrl],
+    );
+
     return <EnsApiProvider options={options}>{children}</EnsApiProvider>;
   } else {
     // TODO: Logic here needs a deeper refactor to recognize the difference
