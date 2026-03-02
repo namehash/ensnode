@@ -39,8 +39,11 @@ const ENSINDEXER_PUBLIC_CONFIG = {
   versionInfo: {
     ensDb: packageJson.version,
     ensIndexer: packageJson.version,
-    ensRainbow: packageJson.version,
-    ensRainbowSchema: 1,
+    ensRainbowPublicConfig: {
+      version: packageJson.version,
+      labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+      recordsCount: 100,
+    },
     ensNormalize: "1.1.1",
     nodejs: "1.1.1",
     ponder: "1.1.1",
