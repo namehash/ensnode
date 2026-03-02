@@ -1,12 +1,15 @@
 import { ReactNode } from "react";
 
-import { ErrorInfo } from "@/components/error-info";
 import { AlertIcon } from "@/components/icons/AlertIcon";
 import { InternalLink } from "@/components/link";
 import { LoadingSpinner } from "@/components/loading-spinner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { ENSAdminFeatures, useENSAdminFeatures } from "@/hooks/active/use-ensadmin-features";
+import {
+  ENSAdminFeatures,
+  FeatureStatus,
+  useENSAdminFeatures,
+} from "@/hooks/active/use-ensadmin-features";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 
 export function RequireENSAdminFeature({
@@ -18,9 +21,30 @@ export function RequireENSAdminFeature({
   feature: keyof ENSAdminFeatures;
   children: ReactNode;
 }) {
-  const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
   const features = useENSAdminFeatures();
   const status = features[feature];
+
+  return (
+    <RequireENSAdminFeatureView title={title} status={status}>
+      {children}
+    </RequireENSAdminFeatureView>
+  );
+}
+
+/**
+ * Pure presentational component that renders the appropriate UI for a given {@link FeatureStatus}.
+ * Used by {@link RequireENSAdminFeature} internally and by mock pages directly.
+ */
+export function RequireENSAdminFeatureView({
+  title,
+  status,
+  children,
+}: {
+  title: ReactNode;
+  status: FeatureStatus;
+  children: ReactNode;
+}) {
+  const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
 
   if (status.type === "supported") return <>{children}</>;
   if (status.type === "connecting") {

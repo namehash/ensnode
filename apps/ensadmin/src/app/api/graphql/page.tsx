@@ -6,7 +6,7 @@ import { useMemo } from "react";
 import { GRAPHQL_API_EXAMPLE_QUERIES } from "@ensnode/ensnode-sdk/internal";
 
 import { GraphiQLEditor } from "@/components/graphiql-editor";
-import { RequireENSAdminFeature } from "@/components/require-feature";
+import { RequireENSAdminFeature } from "@/components/require-ensadmin-feature";
 import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 import { useValidatedSelectedConnection } from "@/hooks/active/use-selected-connection";
 

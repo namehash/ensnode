@@ -1,23 +1,14 @@
 "use client";
 
-import { FetchAndDisplayRegistrarActionsPanel } from "@/components/registrar-actions";
-import { RequireENSAdminFeature } from "@/components/require-feature";
-
-function ExploreRegistrarActions() {
-  return (
-    <section className="flex flex-col gap-6 p-6">
-      <FetchAndDisplayRegistrarActionsPanel
-        title="Latest indexed registrar actions"
-        itemsPerPage={25}
-      />
-    </section>
-  );
-}
+import { LatestRegistrarActions } from "@/components/registrar-actions/latest-registrar-actions";
+import { RequireENSAdminFeature } from "@/components/require-ensadmin-feature";
 
 export default function Page() {
   return (
     <RequireENSAdminFeature title="Registrar Actions API" feature="registrarActions">
-      <ExploreRegistrarActions />
+      <section className="flex flex-col gap-6 p-6">
+        <LatestRegistrarActions recordsPerPage={25} />
+      </section>
     </RequireENSAdminFeature>
   );
 }

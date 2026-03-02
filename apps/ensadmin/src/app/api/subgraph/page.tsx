@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 
 import { GraphiQLEditor } from "@/components/graphiql-editor";
-import { RequireENSAdminFeature } from "@/components/require-feature";
+import { RequireENSAdminFeature } from "@/components/require-ensadmin-feature";
 import { useValidatedSelectedConnection } from "@/hooks/active/use-selected-connection";
 
 const defaultQuery = `# Welcome to this interactive playground for
