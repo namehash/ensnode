@@ -31,7 +31,7 @@ console.log(`OpenAPI spec written to ${outputPath}`);
 // Format with Biome for consistency
 console.log("Formatting with Biome...");
 try {
-  execFileSync("pnpm", ["exec", "biome", "format", "--write", outputPath], {
+  execFileSync("pnpm", ["-w", "exec", "biome", "format", "--write", outputPath], {
     stdio: "inherit",
   });
 } catch (error) {
