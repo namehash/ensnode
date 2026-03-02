@@ -160,15 +160,15 @@ describe("ENSIndexer: Config", () => {
   → at ensIndexer
 ✖ Value must be a non-empty string.
   → at ensNormalize
-✖ Value must be a non-empty string.
+✖ EnsRainbowPublicConfig.version must be a non-empty string.
   → at ensRainbowPublicConfig.version
-✖ Value must be a non-negative integer (>=0).
+✖ EnsRainbowPublicConfig.recordsCount must be a non-negative integer (>=0).
   → at ensRainbowPublicConfig.recordsCount
-✖ undefined must be 1-50 characters long
+✖ EnsRainbowPublicConfig.labelSet.labelSetId must be 1-50 characters long
   → at ensRainbowPublicConfig.labelSet.labelSetId
-✖ undefined can only contain lowercase letters (a-z) and hyphens (-)
+✖ EnsRainbowPublicConfig.labelSet.labelSetId can only contain lowercase letters (a-z) and hyphens (-)
   → at ensRainbowPublicConfig.labelSet.labelSetId
-✖ Value must be a non-negative integer (>=0).
+✖ EnsRainbowPublicConfig.labelSet.highestLabelSetVersion must be a non-negative integer (>=0).
   → at ensRainbowPublicConfig.labelSet.highestLabelSetVersion`);
       });
 

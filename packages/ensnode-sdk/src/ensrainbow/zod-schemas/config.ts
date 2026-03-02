@@ -10,7 +10,7 @@ import { makeNonNegativeIntegerSchema } from "../../shared/zod-schemas";
  *
  * @param valueLabel - The label to use in error messages (e.g., "Label set ID", "LABEL_SET_ID")
  */
-export const makeLabelSetIdSchema = (valueLabel?: string) => {
+export const makeLabelSetIdSchema = (valueLabel: string = "Label set ID") => {
   return z
     .string({ error: `${valueLabel} must be a string` })
     .min(1, { error: `${valueLabel} must be 1-50 characters long` })
@@ -26,9 +26,8 @@ export const makeLabelSetIdSchema = (valueLabel?: string) => {
  * The label set version is guaranteed to be a non-negative integer.
  *
  * @param valueLabel - The label to use in error messages (e.g., "Label set version", "LABEL_SET_VERSION")
-
  */
-export const makeLabelSetVersionSchema = (valueLabel?: string) => {
+export const makeLabelSetVersionSchema = (valueLabel: string = "Label set version") => {
   return z.coerce
     .number<number>({ error: `${valueLabel} must be an integer.` })
     .pipe(makeNonNegativeIntegerSchema(valueLabel));

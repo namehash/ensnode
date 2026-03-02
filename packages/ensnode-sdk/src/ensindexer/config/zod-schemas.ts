@@ -9,15 +9,12 @@
 import { z } from "zod/v4";
 
 import {
+  makeEnsRainbowPublicConfigSchema,
   makeLabelSetIdSchema,
   makeLabelSetVersionSchema,
 } from "../../ensrainbow/zod-schemas/config";
 import { uniq } from "../../shared/collections";
-import {
-  makeChainIdSchema,
-  makeENSNamespaceIdSchema,
-  makeNonNegativeIntegerSchema,
-} from "../../shared/zod-schemas";
+import { makeChainIdSchema, makeENSNamespaceIdSchema } from "../../shared/zod-schemas";
 import type { ZodCheckFnInput } from "../../shared/zod-types";
 import { isSubgraphCompatible } from "./is-subgraph-compatible";
 import type { EnsIndexerPublicConfig } from "./types";
@@ -105,14 +102,7 @@ export const makeEnsIndexerVersionInfoSchema = (valueLabel: string = "Value") =>
         ensDb: makeNonEmptyStringSchema(),
         ensIndexer: makeNonEmptyStringSchema(),
         ensNormalize: makeNonEmptyStringSchema(),
-        ensRainbowPublicConfig: z.object({
-          version: makeNonEmptyStringSchema(),
-          labelSet: z.object({
-            labelSetId: makeLabelSetIdSchema(),
-            highestLabelSetVersion: makeLabelSetVersionSchema(),
-          }),
-          recordsCount: makeNonNegativeIntegerSchema(),
-        }),
+        ensRainbowPublicConfig: makeEnsRainbowPublicConfigSchema(),
       },
       {
         error: `${valueLabel} must be a valid ENSIndexerVersionInfo object.`,
