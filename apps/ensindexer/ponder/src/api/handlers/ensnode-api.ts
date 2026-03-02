@@ -6,11 +6,11 @@ import { Hono } from "hono";
 import {
   buildCrossChainIndexingStatusSnapshotOmnichain,
   createRealtimeIndexingStatusProjection,
-  IndexingStatusResponseCodes,
-  type IndexingStatusResponseError,
-  type IndexingStatusResponseOk,
-  serializeENSIndexerPublicConfig,
-  serializeIndexingStatusResponse,
+  EnsIndexerIndexingStatusResponseCodes,
+  type EnsIndexerIndexingStatusResponseError,
+  type EnsIndexerIndexingStatusResponseOk,
+  serializeEnsIndexerIndexingStatusResponse,
+  serializeEnsIndexerPublicConfig,
 } from "@ensnode/ensnode-sdk";
 
 import { buildENSIndexerPublicConfig } from "@/config/public";
@@ -26,7 +26,7 @@ app.get("/config", async (c) => {
   const publicConfig = await buildENSIndexerPublicConfig(config);
 
   // respond with the serialized public config object
-  return c.json(serializeENSIndexerPublicConfig(publicConfig));
+  return c.json(serializeEnsIndexerPublicConfig(publicConfig));
 });
 
 app.get("/indexing-status", async (c) => {
@@ -48,19 +48,19 @@ app.get("/indexing-status", async (c) => {
     );
 
     return c.json(
-      serializeIndexingStatusResponse({
-        responseCode: IndexingStatusResponseCodes.Ok,
+      serializeEnsIndexerIndexingStatusResponse({
+        responseCode: EnsIndexerIndexingStatusResponseCodes.Ok,
         realtimeProjection,
-      } satisfies IndexingStatusResponseOk),
+      } satisfies EnsIndexerIndexingStatusResponseOk),
     );
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     console.error(`Omnichain snapshot is currently not available: ${errorMessage}`);
 
     return c.json(
-      serializeIndexingStatusResponse({
-        responseCode: IndexingStatusResponseCodes.Error,
-      } satisfies IndexingStatusResponseError),
+      serializeEnsIndexerIndexingStatusResponse({
+        responseCode: EnsIndexerIndexingStatusResponseCodes.Error,
+      } satisfies EnsIndexerIndexingStatusResponseError),
       500,
     );
   }
