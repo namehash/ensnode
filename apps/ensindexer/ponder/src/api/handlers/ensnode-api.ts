@@ -14,21 +14,12 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { buildENSIndexerPublicConfig } from "@/config/public";
-import { ensDbWriterWorker } from "@/lib/ensdb-writer-worker/singleton";
+import { startEnsDbWriterWorker } from "@/lib/ensdb-writer-worker/singleton";
 import { indexingStatusBuilder } from "@/lib/indexing-status-builder/singleton";
 
 const app = new Hono();
 
-// Start ENSDb Writer Worker with retries and error handling
-ensDbWriterWorker.runWithRetries({ maxRetries: 3 }).catch((error) => {
-  // Stop the worker to prevent further attempts to upsert data into ENSDb.
-  ensDbWriterWorker.stop();
-
-  console.error("Error running ENSDb Writer Worker:", error);
-
-  // Trigger graceful shutdown of Ponder app by throwing an error from the top-level scope of the module.
-  throw error;
-});
+startEnsDbWriterWorker();
 
 // include ENSIndexer Public Config endpoint
 app.get("/config", async (c) => {

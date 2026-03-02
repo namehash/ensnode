@@ -29,11 +29,9 @@ const INDEXING_STATUS_RECORD_UPDATE_INTERVAL: Duration = 5;
  */
 export class EnsDbWriterWorker {
   /**
-   * Indicates whether the worker is stopped. When `true`, all recurring tasks
-   * in the worker stop functioning. The worker can be stopped by calling
-   * the {@link stop} method.
+   * AbortController instance used to signal the worker to stop its recurring tasks.
    */
-  private isStopped = false;
+  private abortController: AbortController = new AbortController();
 
   /**
    * ENSDb Client instance used by the worker to interact with ENSDb.
@@ -76,6 +74,7 @@ export class EnsDbWriterWorker {
    *    {@link CrossChainIndexingStatusSnapshot} into ENSDb.
    */
   public async run(): Promise<void> {
+    // Fetch data required for task 1 and task 2.
     const inMemoryConfig = await this.getValidatedEnsIndexerPublicConfig();
 
     // Task 1: upsert ENSDb version into ENSDb.
@@ -94,7 +93,9 @@ export class EnsDbWriterWorker {
     const indexingStatusSnapshotStream = this.getIndexingStatusSnapshotStream();
 
     for await (const snapshot of indexingStatusSnapshotStream) {
+      console.log(`[EnsDbWriterWorker]: Upserting Indexing Status Snapshot into ENSDb...`);
       await this.ensDbClient.upsertIndexingStatusSnapshot(snapshot);
+      console.log(`[EnsDbWriterWorker]: Indexing Status Snapshot upserted successfully`);
     }
   }
 
@@ -104,10 +105,10 @@ export class EnsDbWriterWorker {
    * Retries the {@link run} method up to `maxRetries` times if it throws,
    * waiting the same interval used for indexing status updates between attempts.
    *
-   * @param maxRetries Maximum number of attempts before throwing.
+   * @param options.maxRetries Maximum number of attempts before throwing.
    * @throws Error if the number of attempts exceeds `maxRetries` or if the worker is stopped before a successful run.
    */
-  public async runWithRetries({ maxRetries }: { maxRetries: number }): Promise<void> {
+  public async runWithRetries(options: { maxRetries: number }): Promise<void> {
     let attempt = 0;
 
     while (!this.isStopped) {
@@ -117,19 +118,30 @@ export class EnsDbWriterWorker {
         await this.run();
         return;
       } catch (error) {
-        if (attempt >= maxRetries) {
+        if (this.isStopped) {
+          return;
+        }
+
+        console.error(`[EnsDbWriterWorker]: Error in run attempt #${attempt}:`, error);
+
+        if (attempt >= options.maxRetries) {
           throw new Error(`ENSDb Writer Worker failed after ${attempt} attempts.`, {
             cause: error,
           });
         }
 
-        await new Promise((resolve) =>
-          setTimeout(resolve, secondsToMilliseconds(INDEXING_STATUS_RECORD_UPDATE_INTERVAL)),
-        );
+        // Wait for the configured delay before the next attempt. This also
+        // ensures that if the worker is stopped while waiting, it will
+        // not start a new attempt.
+        await this.nextTryDelay();
       }
     }
 
-    throw new Error("ENSDb Writer Worker could not process all tasks successfully.");
+    // If the loop exits due to the worker being stopped,
+    // ensure that we do not treat it as an error case.
+    if (!this.isStopped) {
+      throw new Error("ENSDb Writer Worker could not process all tasks successfully.");
+    }
   }
 
   /**
@@ -138,7 +150,16 @@ export class EnsDbWriterWorker {
    * Stops all recurring tasks in the worker.
    */
   public stop(): void {
-    this.isStopped = true;
+    if (!this.isStopped) {
+      this.abortController.abort();
+    }
+  }
+
+  /**
+   * Indicates whether the ENSDb Writer Worker is stopped.
+   */
+  get isStopped(): boolean {
+    return this.abortController.signal.aborted;
   }
 
   /**
@@ -189,9 +210,8 @@ export class EnsDbWriterWorker {
    *
    * An async generator function that yields validated Indexing Status Snapshots
    * retrieved from Indexing Status Builder at a regular interval defined by
-   * `INDEXING_STATUS_RECORD_UPDATE_INTERVAL`. Validation criteria are defined
-   * in the function body. The generator stops yielding snapshots when the
-   * worker is stopped.
+   * `INDEXING_STATUS_RECORD_UPDATE_INTERVAL`. The generator stops yielding
+   * snapshots when the worker is stopped.
    *
    * Note: failure to retrieve the Indexing Status from Indexing Status Builder
    * or failure to validate the retrieved Indexing Status Snapshot does not
@@ -233,11 +253,40 @@ export class EnsDbWriterWorker {
         // Instead, continue with the next attempt after the delay.
       } finally {
         // Regardless of success or failure of the attempt to retrieve the Indexing Status,
-        // wait for the specified interval before the next attempt.
-        await new Promise((resolve) =>
-          setTimeout(resolve, secondsToMilliseconds(INDEXING_STATUS_RECORD_UPDATE_INTERVAL)),
-        );
+        // wait for the configured delay before the next attempt.
+        await this.nextTryDelay();
       }
     }
+  }
+
+  /**
+   * Resolves after the configured interval, or immediately if the worker
+   * has been stopped. Prevents hanging on shutdown mid-wait.
+   */
+  private nextTryDelay(): Promise<void> {
+    return new Promise((resolve) => {
+      // Do not delay if the worker is already stopped, to allow for prompt shutdown.
+      if (this.isStopped) {
+        return resolve();
+      }
+
+      // When abort signal is received,
+      // clear the timeout and resolve immediately to allow for prompt shutdown.
+      const onAbort = (): void => {
+        clearTimeout(timeout);
+        resolve();
+      };
+
+      const timeout = setTimeout(() => {
+        // Clear the abort event listener after the timeout completes, to prevent memory leaks.
+        this.abortController.signal.removeEventListener("abort", onAbort);
+
+        resolve();
+      }, secondsToMilliseconds(INDEXING_STATUS_RECORD_UPDATE_INTERVAL));
+
+      // If the worker is stopped while waiting,
+      // resolve immediately to allow for prompt shutdown.
+      this.abortController.signal.addEventListener("abort", onAbort, { once: true });
+    });
   }
 }
