@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 
+import { getNamespaceSpecificValue } from "@ensnode/ensnode-sdk";
 import { GRAPHQL_API_EXAMPLE_QUERIES } from "@ensnode/ensnode-sdk/internal";
 
 import { GraphiQLEditor } from "@/components/graphiql-editor";
@@ -26,7 +27,7 @@ function GraphQLPage() {
     () =>
       GRAPHQL_API_EXAMPLE_QUERIES.map(({ query, variables }) => ({
         query: query.trim(),
-        variables: JSON.stringify(variables[namespace] ?? variables.default, null, 2),
+        variables: JSON.stringify(getNamespaceSpecificValue(namespace, variables), null, 2),
       })),
     [namespace],
   );

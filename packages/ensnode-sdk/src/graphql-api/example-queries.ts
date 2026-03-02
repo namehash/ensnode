@@ -1,6 +1,7 @@
-import { DatasourceNames, type ENSNamespaceId, ENSNamespaceIds } from "@ensnode/datasources";
+import { DatasourceNames, ENSNamespaceIds } from "@ensnode/datasources";
 
 import { maybeGetDatasourceContract } from "../shared/datasource-contract";
+import type { NamespaceSpecificValue } from "../shared/namespace-specific-value";
 
 const SEPOLIA_V2_V2_ETH_REGISTRY = maybeGetDatasourceContract(
   ENSNamespaceIds.SepoliaV2,
@@ -36,7 +37,7 @@ const VITALIK_ADDRESS = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
 
 export const GRAPHQL_API_EXAMPLE_QUERIES: Array<{
   query: string;
-  variables: { default: any } & Partial<Record<ENSNamespaceId, any>>;
+  variables: NamespaceSpecificValue<any>;
 }> = [
   ////////////////
   // Hello World
