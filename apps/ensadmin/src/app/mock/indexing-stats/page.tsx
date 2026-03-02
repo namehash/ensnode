@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import {
   CrossChainIndexingStatusSnapshot,
   createRealtimeIndexingStatusProjection,
+  EnsApiIndexingStatusResponseOk,
   IndexingStatusResponseCodes,
   IndexingStatusResponseOk,
   OmnichainIndexingStatusIds,
@@ -37,7 +38,7 @@ let loadingTimeoutId: number;
 
 async function fetchMockedIndexingStatus(
   selectedVariant: Variant,
-): Promise<CrossChainIndexingStatusSnapshot> {
+): Promise<EnsApiIndexingStatusResponseOk> {
   // always try clearing loading timeout when performing a mocked fetch
   // this way we get a fresh and very long request to observe the loading state
   if (loadingTimeoutId) {
@@ -53,14 +54,14 @@ async function fetchMockedIndexingStatus(
         selectedVariant
       ] as IndexingStatusResponseOk;
 
-      return response.realtimeProjection.snapshot;
+      return response;
     }
     case "Error ResponseCode":
       throw new Error(
         "Received Indexing Status response with responseCode other than 'ok' which will not be cached.",
       );
     case "Loading":
-      return new Promise<CrossChainIndexingStatusSnapshot>((_resolve, reject) => {
+      return new Promise<EnsApiIndexingStatusResponseOk>((_resolve, reject) => {
         loadingTimeoutId = +setTimeout(reject, 5 * 60 * 1_000);
       });
     case "Loading Error":
@@ -77,10 +78,14 @@ export default function MockIndexingStatusPage() {
   const mockedIndexingStatus = useQuery({
     queryKey: ["mock", "useIndexingStatus", selectedVariant],
     queryFn: () => fetchMockedIndexingStatus(selectedVariant),
-    select: (cachedSnapshot) => {
+    select: (response) => {
       return {
         responseCode: IndexingStatusResponseCodes.Ok,
-        realtimeProjection: createRealtimeIndexingStatusProjection(cachedSnapshot, now),
+        realtimeProjection: createRealtimeIndexingStatusProjection(
+          response.realtimeProjection.snapshot,
+          now,
+        ),
+        config: response.config,
       } satisfies IndexingStatusResponseOk;
     },
     retry: false, // allows loading error to be observed immediately

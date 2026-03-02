@@ -18,6 +18,8 @@ import {
   type SerializedOmnichainIndexingStatusSnapshotUnstarted,
 } from "@ensnode/ensnode-sdk";
 
+import { serializedEnsApiPublicConfig } from "@/app/mock/config-api.mock";
+
 export const indexingStatusResponseError: IndexingStatusResponseError = {
   responseCode: IndexingStatusResponseCodes.Error,
 };
@@ -85,6 +87,7 @@ export const indexingStatusResponseOkOmnichain: Record<
         } satisfies SerializedOmnichainIndexingStatusSnapshotUnstarted,
       },
     },
+    config: serializedEnsApiPublicConfig,
   }),
 
   [OmnichainIndexingStatusIds.Backfill]: deserializeIndexingStatusResponse({
@@ -163,6 +166,7 @@ export const indexingStatusResponseOkOmnichain: Record<
         } satisfies SerializedOmnichainIndexingStatusSnapshotBackfill,
       },
     },
+    config: serializedEnsApiPublicConfig,
   }),
 
   [OmnichainIndexingStatusIds.Following]: deserializeIndexingStatusResponse({
@@ -256,6 +260,7 @@ export const indexingStatusResponseOkOmnichain: Record<
         } satisfies SerializedOmnichainIndexingStatusSnapshotFollowing,
       },
     },
+    config: serializedEnsApiPublicConfig,
   }),
 
   [OmnichainIndexingStatusIds.Completed]: deserializeIndexingStatusResponse({
@@ -293,5 +298,6 @@ export const indexingStatusResponseOkOmnichain: Record<
         } satisfies SerializedOmnichainIndexingStatusSnapshotCompleted,
       },
     },
+    config: serializedEnsApiPublicConfig,
   }),
 };

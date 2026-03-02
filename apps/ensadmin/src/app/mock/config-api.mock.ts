@@ -1,6 +1,10 @@
-import { deserializeENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
+import {
+  deserializeENSIndexerPublicConfig,
+  SerializedEnsApiConfigResponse,
+  SerializedEnsIndexerConfigResponse,
+} from "@ensnode/ensnode-sdk";
 
-export const ensIndexerPublicConfig = deserializeENSIndexerPublicConfig({
+const serializedEnsIndexerPublicConfig = {
   labelSet: {
     labelSetId: "subgraph",
     labelSetVersion: 0,
@@ -27,4 +31,17 @@ export const ensIndexerPublicConfig = deserializeENSIndexerPublicConfig({
     ensRainbowSchema: 3,
     ensNormalize: "1.11.1",
   },
-});
+} satisfies SerializedEnsIndexerConfigResponse;
+
+export const ensIndexerPublicConfig = deserializeENSIndexerPublicConfig(
+  serializedEnsIndexerPublicConfig,
+);
+
+export const serializedEnsApiPublicConfig = {
+  ensIndexerPublicConfig: serializedEnsIndexerPublicConfig,
+  theGraphFallback: {
+    canFallback: true,
+    url: "https://api.thegraph.com/subgraphs/name/ensdomains/ens",
+  },
+  version: "0.35.0",
+} satisfies SerializedEnsApiConfigResponse;
