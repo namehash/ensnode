@@ -253,7 +253,7 @@ export function tablifyCallResults<SELECTION extends ResolverRecordsSelection>(
     const interpreted = results[i].result;
 
     return {
-      Call: `.resolve(${call.functionName}, ${call.args})`,
+      Call: `.resolve(${call.functionName}, ${call.args.join(", ")})`,
       "Raw Result": rawResult,
       Result: interpreted,
     };
