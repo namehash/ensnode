@@ -1,6 +1,7 @@
 import { getUnixTime, secondsToMilliseconds } from "date-fns";
 
 import {
+  buildCrossChainIndexingStatusSnapshotOmnichain,
   type CrossChainIndexingStatusSnapshot,
   type Duration,
   type EnsIndexerClient,
@@ -10,8 +11,6 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import type { EnsDbClient } from "@/lib/ensdb-client/ensdb-client";
-// TODO: replace with ENSNode SDK export when available (see PR 1701)
-import { buildCrossChainIndexingStatusSnapshotOmnichain } from "@/lib/indexing-status-builder/cross-chain-indexing-status-snapshot";
 import type { IndexingStatusBuilder } from "@/lib/indexing-status-builder/indexing-status-builder";
 
 /**

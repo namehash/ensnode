@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
+  buildCrossChainIndexingStatusSnapshotOmnichain,
   type CrossChainIndexingStatusSnapshot,
   CrossChainIndexingStrategyIds,
   type EnsIndexerClient,
@@ -13,22 +14,17 @@ import {
 import type { EnsDbClient } from "@/lib/ensdb-client/ensdb-client";
 import { publicConfig } from "@/lib/ensdb-client/ensdb-client.mock";
 import { EnsDbWriterWorker } from "@/lib/ensdb-writer-worker/ensdb-writer-worker";
-import { buildCrossChainIndexingStatusSnapshotOmnichain } from "@/lib/indexing-status-builder/cross-chain-indexing-status-snapshot";
 import type { IndexingStatusBuilder } from "@/lib/indexing-status-builder/indexing-status-builder";
 
 vi.mock("@ensnode/ensnode-sdk", async () => {
-  const actual =
-    await vi.importActual<typeof import("@ensnode/ensnode-sdk")>("@ensnode/ensnode-sdk");
+  const actual = await vi.importActual("@ensnode/ensnode-sdk");
 
   return {
     ...actual,
     validateEnsIndexerPublicConfigCompatibility: vi.fn(),
+    buildCrossChainIndexingStatusSnapshotOmnichain: vi.fn(),
   };
 });
-
-vi.mock("@/lib/indexing-status-builder/cross-chain-indexing-status-snapshot", () => ({
-  buildCrossChainIndexingStatusSnapshotOmnichain: vi.fn(),
-}));
 
 describe("EnsDbWriterWorker", () => {
   beforeEach(() => {
