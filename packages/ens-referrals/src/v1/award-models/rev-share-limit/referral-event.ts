@@ -22,6 +22,9 @@ export interface ReferralEvent {
   /**
    * Registrar action ID.
    *
+   * A deterministic and globally unique identifier for the "logical registrar action"
+   * associated with the ReferralEvent.
+   *
    * A Ponder-encoded checkpoint string that uniquely and deterministically identifies
    * this event. Encodes all ordering-relevant properties:
    * `blockTimestamp → chainId → blockNumber → transactionIndex → eventType → eventIndex`
