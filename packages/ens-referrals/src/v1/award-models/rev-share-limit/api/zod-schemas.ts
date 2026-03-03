@@ -20,6 +20,17 @@ import { ReferrerEditionMetricsTypeIds } from "../../shared/edition-metrics";
 import { ReferralProgramAwardModels } from "../../shared/rules";
 
 /**
+ * Schema for {@link ReferralProgramAdminDisqualification}.
+ */
+export const makeReferralProgramAdminDisqualificationSchema = (
+  valueLabel = "ReferralProgramAdminDisqualification",
+) =>
+  z.object({
+    referrer: makeLowercaseAddressSchema(`${valueLabel}.referrer`),
+    reason: z.string().min(1, `${valueLabel}.reason must not be empty`),
+  });
+
+/**
  * Schema for {@link ReferralProgramRulesRevShareLimit}.
  */
 export const makeReferralProgramRulesRevShareLimitSchema = (
@@ -34,6 +45,11 @@ export const makeReferralProgramRulesRevShareLimitSchema = (
     qualifiedRevenueShare: makeFiniteNonNegativeNumberSchema(
       `${valueLabel}.qualifiedRevenueShare`,
     ).max(1, `${valueLabel}.qualifiedRevenueShare must be <= 1`),
+    disqualifications: z
+      .array(
+        makeReferralProgramAdminDisqualificationSchema(`${valueLabel}.disqualifications[item]`),
+      )
+      .default([]),
   });
 
 /**
@@ -55,10 +71,25 @@ export const makeAwardedReferrerMetricsRevShareLimitSchema = (
       isQualified: z.boolean(),
       standardAwardValue: makePriceUsdcSchema(`${valueLabel}.standardAwardValue`),
       awardPoolApproxValue: makePriceUsdcSchema(`${valueLabel}.awardPoolApproxValue`),
+      isAdminDisqualified: z.boolean(),
+      adminDisqualificationReason: z.string().nullable(),
     })
     .refine((data) => data.awardPoolApproxValue.amount <= data.standardAwardValue.amount, {
       message: `${valueLabel}.awardPoolApproxValue must be <= ${valueLabel}.standardAwardValue`,
       path: ["awardPoolApproxValue"],
+    })
+    .refine(
+      (data) =>
+        !data.isAdminDisqualified ||
+        (data.isQualified === false && data.awardPoolApproxValue.amount === 0n),
+      {
+        message: `When ${valueLabel}.isAdminDisqualified is true, isQualified must be false and awardPoolApproxValue.amount must be 0`,
+        path: ["isAdminDisqualified"],
+      },
+    )
+    .refine((data) => data.isAdminDisqualified === (data.adminDisqualificationReason !== null), {
+      message: `${valueLabel}.adminDisqualificationReason must be non-null iff isAdminDisqualified is true`,
+      path: ["adminDisqualificationReason"],
     });
 
 /**
@@ -80,10 +111,16 @@ export const makeUnrankedReferrerMetricsRevShareLimitSchema = (
       isQualified: z.literal(false),
       standardAwardValue: makePriceUsdcSchema(`${valueLabel}.standardAwardValue`),
       awardPoolApproxValue: makePriceUsdcSchema(`${valueLabel}.awardPoolApproxValue`),
+      isAdminDisqualified: z.boolean(),
+      adminDisqualificationReason: z.string().nullable(),
     })
     .refine((data) => data.awardPoolApproxValue.amount <= data.standardAwardValue.amount, {
       message: `${valueLabel}.awardPoolApproxValue must be <= ${valueLabel}.standardAwardValue`,
       path: ["awardPoolApproxValue"],
+    })
+    .refine((data) => data.isAdminDisqualified === (data.adminDisqualificationReason !== null), {
+      message: `${valueLabel}.adminDisqualificationReason must be non-null iff isAdminDisqualified is true`,
+      path: ["adminDisqualificationReason"],
     });
 
 /**

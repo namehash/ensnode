@@ -24,6 +24,7 @@ import {
 import type { ReferralEvent } from "./referral-event";
 import {
   BASE_REVENUE_CONTRIBUTION_PER_YEAR,
+  isReferrerQualifiedRevShareLimit,
   type ReferralProgramRulesRevShareLimit,
 } from "./rules";
 
@@ -137,7 +138,11 @@ export const buildReferrerLeaderboardRevShareLimit = (
       BigInt(SECONDS_PER_YEAR);
 
     // Determine if newly qualifying or already qualified.
-    const isNowQualified = totalBaseRevenueAmount >= rules.minQualifiedRevenueContribution.amount;
+    const isNowQualified = isReferrerQualifiedRevShareLimit(
+      referrer,
+      priceUsdc(totalBaseRevenueAmount),
+      rules,
+    );
 
     if (isNowQualified && !state.wasQualified) {
       // First time crossing the qualification threshold: claim all accumulated standard award.
