@@ -18,7 +18,7 @@ const logger = makeLogger("registrar-actions.middleware");
  * This middleware that ensures that all prerequisites of
  * the Registrar Actions API were met and HTTP requests can be served.
  *
- * Returns a 500 response for any of the following cases:
+ * Returns a 503 response for any of the following cases:
  * 1) Not all required plugins are active in the connected ENSIndexer
  *    configuration.
  * 2) ENSApi has not yet successfully cached the Indexing Status in memory from
