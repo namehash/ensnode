@@ -27,7 +27,12 @@ describe("EnsDbClient", () => {
   const onConflictDoUpdateMock = vi.fn(async () => undefined);
   const valuesMock = vi.fn(() => ({ onConflictDoUpdate: onConflictDoUpdateMock }));
   const insertMock = vi.fn(() => ({ values: valuesMock }));
-  const dbMock = { select: selectMock, insert: insertMock };
+  const executeMock = vi.fn(async () => undefined);
+  const txMock = { insert: insertMock, execute: executeMock };
+  const transactionMock = vi.fn(async (callback: (tx: typeof txMock) => Promise<void>) =>
+    callback(txMock),
+  );
+  const dbMock = { select: selectMock, insert: insertMock, transaction: transactionMock };
 
   beforeEach(() => {
     selectResult.current = [];
@@ -37,6 +42,8 @@ describe("EnsDbClient", () => {
     onConflictDoUpdateMock.mockClear();
     valuesMock.mockClear();
     insertMock.mockClear();
+    executeMock.mockClear();
+    transactionMock.mockClear();
     vi.mocked(makeDrizzle).mockReturnValue(dbMock as unknown as ReturnType<typeof makeDrizzle>);
   });
 
