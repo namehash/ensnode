@@ -14,18 +14,14 @@ import { factory } from "@/lib/hono-factory";
  */
 export const requireCorePluginMiddleware = (core: "subgraph" | "ensv2") =>
   factory.createMiddleware(async (c, next) => {
-    if (
-      core === "subgraph" && //
-      !hasSubgraphApiConfigSupport(config.ensIndexerPublicConfig).supported
-    ) {
-      return c.text("Service Unavailable", 503);
+    const subgraph = hasSubgraphApiConfigSupport(config.ensIndexerPublicConfig);
+    if (core === "subgraph" && !subgraph.supported) {
+      return c.text(`Service Unavailable: ${subgraph.reason}`, 503);
     }
 
-    if (
-      core === "ensv2" && //
-      !hasGraphqlApiConfigSupport(config.ensIndexerPublicConfig).supported
-    ) {
-      return c.text("Service Unavailable", 503);
+    const graphql = hasGraphqlApiConfigSupport(config.ensIndexerPublicConfig);
+    if (core === "ensv2" && !graphql.supported) {
+      return c.text(`Service Unavailable: ${graphql.reason}`, 503);
     }
 
     await next();
