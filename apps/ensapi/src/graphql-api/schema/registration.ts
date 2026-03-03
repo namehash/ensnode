@@ -1,6 +1,8 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
+import { hexToBigInt } from "viem";
 
 import {
+  type ENSv1DomainId,
   isRegistrationFullyExpired,
   isRegistrationInGracePeriod,
   type RegistrationId,
@@ -16,7 +18,6 @@ import { cursors } from "@/graphql-api/schema/cursors";
 import { DomainInterfaceRef } from "@/graphql-api/schema/domain";
 import { EventRef } from "@/graphql-api/schema/event";
 import { RenewalRef } from "@/graphql-api/schema/renewal";
-import { WrappedBaseRegistrarRegistrationRef } from "@/graphql-api/schema/wrapped-baseregistrar-registration";
 import { db } from "@/lib/db";
 
 export const RegistrationInterfaceRef = builder.loadableInterfaceRef("Registration", {
@@ -54,13 +55,14 @@ export type ThreeDNSRegistration = Registration;
 export type ENSv2RegistryRegistration = Registration;
 
 RegistrationInterfaceRef.implement({
-  description: "TODO",
+  description:
+    "A Registration represents a Domain's registration status within the various registries.",
   fields: (t) => ({
     //////////////////////
     // Registration.id
     //////////////////////
     id: t.field({
-      description: "TODO",
+      description: "A unique reference to this Registration.",
       type: "ID",
       nullable: false,
       resolve: (parent) => parent.id,
@@ -70,7 +72,7 @@ RegistrationInterfaceRef.implement({
     // Registration.domain
     ///////////////////////
     domain: t.field({
-      description: "TODO",
+      description: "The Domain for which this Registration exists.",
       type: DomainInterfaceRef,
       nullable: false,
       resolve: (parent) => parent.domainId,
@@ -80,7 +82,7 @@ RegistrationInterfaceRef.implement({
     // Registration.registrar
     //////////////////////////
     registrar: t.field({
-      description: "TODO",
+      description: "The Registrar contract under which this Registration is managed.",
       type: AccountIdRef,
       nullable: false,
       resolve: (parent) => ({ chainId: parent.registrarChainId, address: parent.registrarAddress }),
@@ -90,7 +92,7 @@ RegistrationInterfaceRef.implement({
     // Registration.expiry
     ///////////////////////////
     expiry: t.field({
-      description: "TODO",
+      description: "A UnixTimestamp indicating the Registration's expiry, if exists.",
       type: "BigInt",
       nullable: true,
       resolve: (parent) => parent.expiry,
@@ -100,7 +102,8 @@ RegistrationInterfaceRef.implement({
     // Registration.expired
     ////////////////////////
     expired: t.field({
-      description: "TODO",
+      description:
+        "Indicates whether this Registration is expired. If the Registration is for an ENSv1Domain, a Registration is only considered `expired` after the Grace Period has elapsed.",
       type: "Boolean",
       nullable: false,
       resolve: (parent, args, context) => isRegistrationFullyExpired(parent, context.now),
@@ -110,7 +113,7 @@ RegistrationInterfaceRef.implement({
     // Registration.referrer
     /////////////////////////
     referrer: t.field({
-      description: "TODO",
+      description: "The extra `referrer` data provided with a Registration, if exists.",
       type: "Hex",
       nullable: true,
       resolve: (parent) => parent.referrer,
@@ -120,7 +123,8 @@ RegistrationInterfaceRef.implement({
     // Registration.renewals
     /////////////////////////
     renewals: t.connection({
-      description: "TODO",
+      description:
+        "Renewals that have occurred within this Registration's lifespan to extend its expiration.",
       type: RenewalRef,
       resolve: (parent, args, context) =>
         resolveCursorConnection(
@@ -144,7 +148,7 @@ RegistrationInterfaceRef.implement({
     // Registration.event
     //////////////////////
     event: t.field({
-      description: "TODO",
+      description: "The Event for which this Registration was created.",
       type: EventRef,
       nullable: false,
       resolve: (parent) => parent.eventId,
@@ -158,7 +162,8 @@ RegistrationInterfaceRef.implement({
 export const NameWrapperRegistrationRef =
   builder.objectRef<NameWrapperRegistration>("NameWrapperRegistration");
 NameWrapperRegistrationRef.implement({
-  description: "TODO",
+  description:
+    "A NameWrapperRegistration represents a Registration initiated by the ENSv1 NameWrapper.",
   interfaces: [RegistrationInterfaceRef],
   isTypeOf: (value) => (value as RegistrationInterface).type === "NameWrapper",
   fields: (t) => ({
@@ -166,7 +171,7 @@ NameWrapperRegistrationRef.implement({
     // NameWrapperRegistration.fuses
     /////////////////////////////////
     fuses: t.field({
-      description: "TODO",
+      description: "The Fuses for this Registration's Domain in the NameWrapper.",
       type: "Int",
       nullable: false,
       // TODO: decode/render Fuses enum
@@ -182,7 +187,8 @@ export const BaseRegistrarRegistrationRef = builder.objectRef<BaseRegistrarRegis
   "BaseRegistrarRegistration",
 );
 BaseRegistrarRegistrationRef.implement({
-  description: "TODO",
+  description:
+    "A BaseRegistrarRegistration represents a Registration within an ENSv1 BaseRegistrar contract, including those deployed by Basenames and Lineanames.",
   interfaces: [RegistrationInterfaceRef],
   isTypeOf: (value) => (value as RegistrationInterface).type === "BaseRegistrar",
   fields: (t) => ({
@@ -190,7 +196,7 @@ BaseRegistrarRegistrationRef.implement({
     // BaseRegistrarRegistration.baseCost
     //////////////////////////////////////
     baseCost: t.field({
-      description: "TODO",
+      description: "The `baseCost` for registering this Domain, in wei.",
       type: "BigInt",
       nullable: true,
       resolve: (parent) => parent.baseCost,
@@ -200,7 +206,7 @@ BaseRegistrarRegistrationRef.implement({
     // BaseRegistrarRegistration.premium
     /////////////////////////////////////
     premium: t.field({
-      description: "TODO",
+      description: "The `premium` for registering this Domain, in wei.",
       type: "BigInt",
       nullable: true,
       resolve: (parent) => parent.premium,
@@ -210,7 +216,8 @@ BaseRegistrarRegistrationRef.implement({
     // BaseRegistrarRegistration.wrapped
     /////////////////////////////////////
     wrapped: t.field({
-      description: "TODO",
+      description:
+        "Additional metadata if this BaseRegistrarRegistration is wrapped by the NameWrapper (i.e. in the case of wrapped .eth names).",
       type: WrappedBaseRegistrarRegistrationRef,
       nullable: true,
       resolve: (parent) => (parent.wrapped ? parent : null),
@@ -220,7 +227,8 @@ BaseRegistrarRegistrationRef.implement({
     // Registration.isInGracePeriod
     ////////////////////////////////
     isInGracePeriod: t.field({
-      description: "TODO",
+      description:
+        "Whether this Registration is in the Grace Period (90 days) and can be renewed by the current owner.",
       type: "Boolean",
       nullable: false,
       resolve: (parent, args, context) => isRegistrationInGracePeriod(parent, context.now),
@@ -234,7 +242,7 @@ BaseRegistrarRegistrationRef.implement({
 export const ThreeDNSRegistrationRef =
   builder.objectRef<ThreeDNSRegistration>("ThreeDNSRegistration");
 ThreeDNSRegistrationRef.implement({
-  description: "TODO",
+  description: "ThreeDNSRegistration represents a Registration within ThreeDNSToken.",
   interfaces: [RegistrationInterfaceRef],
   isTypeOf: (value) => (value as RegistrationInterface).type === "ThreeDNS",
   fields: (t) => ({
@@ -249,8 +257,43 @@ export const ENSv2RegistryRegistrationRef = builder.objectRef<ENSv2RegistryRegis
   "ENSv2RegistryRegistration",
 );
 ENSv2RegistryRegistrationRef.implement({
-  description: "TODO",
+  description: "ENSv2RegistryRegistration represents a Registration within an ENSv2 Registry.",
   interfaces: [RegistrationInterfaceRef],
   isTypeOf: (value) => (value as RegistrationInterface).type === "ENSv2Registry",
   fields: (t) => ({}),
+});
+
+////////////////////////////////////
+// WrappedBaseRegistrarRegistration
+////////////////////////////////////
+export const WrappedBaseRegistrarRegistrationRef = builder.objectRef<BaseRegistrarRegistration>(
+  "WrappedBaseRegistrarRegistration",
+);
+
+WrappedBaseRegistrarRegistrationRef.implement({
+  description:
+    "Additional metadata for BaseRegistrar Registrations wrapped by the NameWrapper (i.e. in the case of a wrapped .eth name)",
+  fields: (t) => ({
+    ///////////////////
+    // Wrapped.tokenId
+    ///////////////////
+    tokenId: t.field({
+      description: "The TokenID for this Domain in the NameWrapper.",
+      type: "BigInt",
+      nullable: false,
+      // NOTE: only ENSv1 Domains can be wrapped, id is guaranteed to be ENSv1DomainId === Node
+      resolve: (parent) => hexToBigInt(parent.domainId as ENSv1DomainId),
+    }),
+
+    /////////////////
+    // Wrapped.fuses
+    /////////////////
+    fuses: t.field({
+      description: "The Fuses for this Registration's Domain in the NameWrapper.",
+      type: "Int",
+      nullable: false,
+      // TODO: decode/render Fuses enum
+      resolve: (parent) => parent.fuses,
+    }),
+  }),
 });

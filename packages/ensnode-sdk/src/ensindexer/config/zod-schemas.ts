@@ -8,15 +8,17 @@
  */
 import { z } from "zod/v4";
 
-import { uniq } from "../../shared/collections";
+import type { EnsRainbowClientLabelSet, EnsRainbowServerLabelSet } from "../../ensrainbow/types";
 import {
-  makeChainIdSchema,
-  makeENSNamespaceIdSchema,
-  makeNonNegativeIntegerSchema,
-  makePositiveIntegerSchema,
-} from "../../shared/zod-schemas";
+  makeEnsRainbowPublicConfigSchema,
+  makeLabelSetIdSchema,
+  makeLabelSetVersionSchema,
+} from "../../ensrainbow/zod-schemas/config";
+import { uniq } from "../../shared/collections";
+import { makeChainIdSchema, makeENSNamespaceIdSchema } from "../../shared/zod-schemas";
 import type { ZodCheckFnInput } from "../../shared/zod-types";
 import { isSubgraphCompatible } from "./is-subgraph-compatible";
+import { validateSupportedLabelSetAndVersion } from "./labelset-utils";
 import type { EnsIndexerPublicConfig } from "./types";
 import { PluginName } from "./types";
 import { invariant_ensDbVersionIsSameAsEnsIndexerVersion } from "./validations";
@@ -70,38 +72,6 @@ export const makeDatabaseSchemaNameSchema = (valueLabel: string = "Database sche
     });
 
 /**
- * Makes a schema for parsing a label set ID.
- *
- * The label set ID is guaranteed to be a string between 1-50 characters
- * containing only lowercase letters (a-z) and hyphens (-).
- *
- * @param valueLabel - The label to use in error messages (e.g., "Label set ID", "LABEL_SET_ID")
- */
-export const makeLabelSetIdSchema = (valueLabel: string) => {
-  return z
-    .string({ error: `${valueLabel} must be a string` })
-    .min(1, { error: `${valueLabel} must be 1-50 characters long` })
-    .max(50, { error: `${valueLabel} must be 1-50 characters long` })
-    .regex(/^[a-z-]+$/, {
-      error: `${valueLabel} can only contain lowercase letters (a-z) and hyphens (-)`,
-    });
-};
-
-/**
- * Makes a schema for parsing a label set version.
- *
- * The label set version is guaranteed to be a non-negative integer.
- *
- * @param valueLabel - The label to use in error messages (e.g., "Label set version", "LABEL_SET_VERSION")
-
- */
-export const makeLabelSetVersionSchema = (valueLabel: string) => {
-  return z.coerce
-    .number<number>({ error: `${valueLabel} must be an integer.` })
-    .pipe(makeNonNegativeIntegerSchema(valueLabel));
-};
-
-/**
  * Makes a schema for parsing a label set where both label set ID and label set version are required.
  *
  * @param valueLabel - The label to use in error messages (e.g., "Label set", "LABEL_SET")
@@ -127,15 +97,13 @@ const makeNonEmptyStringSchema = (valueLabel: string = "Value") =>
 
 export const makeEnsIndexerVersionInfoSchema = (valueLabel: string = "Value") =>
   z
-    .strictObject(
+    .object(
       {
         nodejs: makeNonEmptyStringSchema(),
         ponder: makeNonEmptyStringSchema(),
         ensDb: makeNonEmptyStringSchema(),
         ensIndexer: makeNonEmptyStringSchema(),
         ensNormalize: makeNonEmptyStringSchema(),
-        ensRainbow: makeNonEmptyStringSchema(),
-        ensRainbowSchema: makePositiveIntegerSchema(),
       },
       {
         error: `${valueLabel} must be a valid ENSIndexerVersionInfo object.`,
@@ -165,6 +133,26 @@ export function invariant_isSubgraphCompatibleRequirements(
   }
 }
 
+export function invariant_ensRainbowSupportedLabelSetAndVersion(
+  ctx: ZodCheckFnInput<Pick<EnsIndexerPublicConfig, "labelSet" | "ensRainbowPublicConfig">>,
+) {
+  const clientLabelSet = ctx.value.labelSet satisfies EnsRainbowClientLabelSet;
+  const serverLabelSet = ctx.value.ensRainbowPublicConfig
+    .labelSet satisfies EnsRainbowServerLabelSet;
+
+  try {
+    validateSupportedLabelSetAndVersion(serverLabelSet, clientLabelSet);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+
+    ctx.issues.push({
+      code: "custom",
+      input: ctx.value,
+      message: `The ENSRainbow label set and version specified in the config are not supported by the ENSRainbow version specified in ensRainbowPublicConfig. Cause: ${errorMessage}`,
+    });
+  }
+}
+
 /**
  * ENSIndexer Public Config Schema
  *
@@ -174,14 +162,17 @@ export function invariant_isSubgraphCompatibleRequirements(
 export const makeEnsIndexerPublicConfigSchema = (valueLabel: string = "ENSIndexerPublicConfig") =>
   z
     .object({
-      labelSet: makeFullyPinnedLabelSetSchema(`${valueLabel}.labelSet`),
+      databaseSchemaName: makeDatabaseSchemaNameSchema(`${valueLabel}.databaseSchemaName`),
+      ensRainbowPublicConfig: makeEnsRainbowPublicConfigSchema(
+        `${valueLabel}.ensRainbowPublicConfig`,
+      ),
       indexedChainIds: makeIndexedChainIdsSchema(`${valueLabel}.indexedChainIds`),
       isSubgraphCompatible: z.boolean({
         error: `${valueLabel}.isSubgraphCompatible must be a boolean value.`,
       }),
+      labelSet: makeFullyPinnedLabelSetSchema(`${valueLabel}.labelSet`),
       namespace: makeENSNamespaceIdSchema(`${valueLabel}.namespace`),
       plugins: makePluginsListSchema(`${valueLabel}.plugins`),
-      databaseSchemaName: makeDatabaseSchemaNameSchema(`${valueLabel}.databaseSchemaName`),
       versionInfo: makeEnsIndexerVersionInfoSchema(`${valueLabel}.versionInfo`),
     })
     /**
@@ -189,7 +180,8 @@ export const makeEnsIndexerPublicConfigSchema = (valueLabel: string = "ENSIndexe
      *
      * All required data validations must be performed below.
      */
-    .check(invariant_isSubgraphCompatibleRequirements);
+    .check(invariant_isSubgraphCompatibleRequirements)
+    .check(invariant_ensRainbowSupportedLabelSetAndVersion);
 
 /**
  * ENSIndexer Public Config Schema
@@ -202,13 +194,16 @@ export const makeSerializedEnsIndexerPublicConfigSchema = (
   valueLabel: string = "Serialized ENSIndexerPublicConfig",
 ) =>
   z.object({
-    labelSet: makeFullyPinnedLabelSetSchema(`${valueLabel}.labelSet`),
+    databaseSchemaName: makeDatabaseSchemaNameSchema(`${valueLabel}.databaseSchemaName`),
+    ensRainbowPublicConfig: makeEnsRainbowPublicConfigSchema(
+      `${valueLabel}.ensRainbowPublicConfig`,
+    ),
     indexedChainIds: makeSerializedIndexedChainIdsSchema(`${valueLabel}.indexedChainIds`),
     isSubgraphCompatible: z.boolean({
       error: `${valueLabel}.isSubgraphCompatible must be a boolean value.`,
     }),
+    labelSet: makeFullyPinnedLabelSetSchema(`${valueLabel}.labelSet`),
     namespace: makeENSNamespaceIdSchema(`${valueLabel}.namespace`),
     plugins: makePluginsListSchema(`${valueLabel}.plugins`),
-    databaseSchemaName: makeDatabaseSchemaNameSchema(`${valueLabel}.databaseSchemaName`),
     versionInfo: makeEnsIndexerVersionInfoSchema(`${valueLabel}.versionInfo`),
   });

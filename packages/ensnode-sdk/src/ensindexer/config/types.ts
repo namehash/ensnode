@@ -1,6 +1,6 @@
 import type { ENSNamespaceId } from "@ensnode/datasources";
 
-import type { EnsRainbowClientLabelSet } from "../../ensrainbow";
+import type { EnsRainbowClientLabelSet, EnsRainbowPublicConfig } from "../../ensrainbow";
 import type { ChainId } from "../../shared/types";
 
 /**
@@ -51,18 +51,6 @@ export interface EnsIndexerVersionInfo {
   ensIndexer: string;
 
   /**
-   * ENSRainbow service version
-   *
-   * @see https://ghcr.io/namehash/ensnode/ensindexer
-   **/
-  ensRainbow: string;
-
-  /**
-   * ENSRainbow schema version
-   **/
-  ensRainbowSchema: number;
-
-  /**
    * ENS Normalize package version
    *
    * Available on NPM as: `@adraffy/ens-normalize`
@@ -107,6 +95,13 @@ export interface EnsIndexerPublicConfig {
    *   identifier.
    */
   databaseSchemaName: string;
+
+  /**
+   * ENSRainbow public config
+   *
+   * Represents the public config of the connected ENSRainbow instance.
+   */
+  ensRainbowPublicConfig: EnsRainbowPublicConfig;
 
   /**
    * A set of strings referring to the names of plugins that are active.

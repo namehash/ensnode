@@ -1,8 +1,8 @@
 "use client";
 
-import { getChainName } from "@namehash/namehash-ui";
+import { AddressDisplay, getChainName } from "@namehash/namehash-ui";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useDebouncedValue } from "rooks";
 import { type Address, isAddress } from "viem";
 
@@ -13,6 +13,7 @@ import {
   maybeGetDatasource,
 } from "@ensnode/datasources";
 import { usePrimaryName } from "@ensnode/ensnode-react";
+import { getNamespaceSpecificValue } from "@ensnode/ensnode-sdk";
 
 import { RenderRequestsOutput } from "@/app/inspect/_components/render-requests-output";
 import { Pill } from "@/components/pill";
@@ -27,12 +28,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 
-const EXAMPLE_INPUT = [
-  { address: "0x179A862703a4adfb29896552DF9e307980D19285", chainId: "1" }, // greg mainnet
-  { address: "0x179A862703a4adfb29896552DF9e307980D19285", chainId: "8453" }, // greg base
-  { address: "0xe7a863d7cdC48Cc0CcB135c9c0B4c1fafA3a2e69", chainId: "1" }, // katzman mainnet
-];
+import { EXAMPLE_ADDRESSES } from "../_lib/example-addresses";
 
 const getENSIP19SupportedChainIds = (namespace: ENSNamespaceId) =>
   [
@@ -51,11 +49,19 @@ const getENSIP19SupportedChainIds = (namespace: ENSNamespaceId) =>
 export default function ResolvePrimaryNameInspector() {
   const searchParams = useSearchParams();
 
-  const [address, setAddress] = useState(searchParams.get("address") || EXAMPLE_INPUT[0].address);
-  const [chainId, setChainId] = useState(searchParams.get("chainId") || EXAMPLE_INPUT[0].chainId);
+  const namespace = useActiveNamespace();
+  const exampleAddresses = useMemo(
+    () => getNamespaceSpecificValue(namespace, EXAMPLE_ADDRESSES),
+    [namespace],
+  );
+
+  const [address, setAddress] = useState(
+    searchParams.get("address") || exampleAddresses[0].address,
+  );
+  const [chainId, setChainId] = useState(searchParams.get("chainId") || "1");
   const [debouncedAddress] = useDebouncedValue(address, 150);
 
-  const additionalChainIds = getENSIP19SupportedChainIds(ENSNamespaceIds.Mainnet);
+  const additionalChainIds = getENSIP19SupportedChainIds(namespace);
 
   const canQuery = !!debouncedAddress && isAddress(debouncedAddress);
 
@@ -104,11 +110,11 @@ export default function ResolvePrimaryNameInspector() {
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <div className="flex flex-row gap-4">
-            <Label htmlFor="name" className="flex-[2] flex flex-col gap-1">
+            <Label htmlFor="name" className="flex-2 flex flex-col gap-1">
               EVM Address
               <Input
                 id="name"
-                placeholder={EXAMPLE_INPUT[0].address}
+                placeholder={exampleAddresses[0].address}
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 autoComplete="off"
@@ -124,7 +130,7 @@ export default function ResolvePrimaryNameInspector() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="0">0 (Default EVM Chain Address)</SelectItem>
-                  <SelectItem value="1">1 (Mainnet)</SelectItem>
+                  <SelectItem value="1">1 (ENS Root Chain)</SelectItem>
                   {additionalChainIds.map((chainId) => (
                     <SelectItem key={chainId} value={chainId.toString()}>
                       {chainId} ({getChainName(chainId)})
@@ -138,16 +144,15 @@ export default function ResolvePrimaryNameInspector() {
             <span className="text-sm font-medium leading-none">Examples:</span>
             {/* -mx-6 px-6 insets the scroll container against card for prettier scrolling */}
             <div className="flex flex-row overflow-x-scroll gap-2 no-scrollbar -mx-6 px-6">
-              {EXAMPLE_INPUT.map(({ address, chainId }) => (
+              {exampleAddresses.map(({ address, name }) => (
                 <Pill
-                  key={`${address}-${chainId}`}
+                  key={address}
                   onClick={() => {
                     setAddress(address);
-                    setChainId(chainId);
                   }}
                   className="font-mono"
                 >
-                  {address} ({getChainName(Number(chainId))})
+                  <AddressDisplay address={address} /> ({name})
                 </Pill>
               ))}
             </div>

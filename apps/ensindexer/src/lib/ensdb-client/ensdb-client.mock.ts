@@ -25,6 +25,14 @@ export const databaseSchemaName = "public";
 
 export const publicConfig = {
   databaseSchemaName,
+  ensRainbowPublicConfig: {
+    version: "0.32.0",
+    labelSet: {
+      labelSetId: "subgraph",
+      highestLabelSetVersion: 0,
+    },
+    recordsCount: 100,
+  },
   labelSet: {
     labelSetId: "subgraph",
     labelSetVersion: 0,
@@ -39,8 +47,6 @@ export const publicConfig = {
     ensDb: "0.32.0",
     ensIndexer: "0.32.0",
     ensNormalize: "1.11.1",
-    ensRainbow: "0.32.0",
-    ensRainbowSchema: 2,
   },
 } satisfies EnsIndexerPublicConfig;
 

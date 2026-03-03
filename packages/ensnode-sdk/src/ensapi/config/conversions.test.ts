@@ -5,6 +5,7 @@ import { ENSNamespaceIds } from "@ensnode/datasources";
 import { PluginName } from "../../ensindexer/config/types";
 import { deserializeEnsApiPublicConfig } from "./deserialize";
 import { serializeEnsApiPublicConfig } from "./serialize";
+import type { SerializedEnsApiPublicConfig } from "./serialized-types";
 import type { EnsApiPublicConfig } from "./types";
 
 const MOCK_ENSAPI_PUBLIC_CONFIG = {
@@ -16,6 +17,11 @@ const MOCK_ENSAPI_PUBLIC_CONFIG = {
   ensIndexerPublicConfig: {
     namespace: ENSNamespaceIds.Mainnet,
     databaseSchemaName: "ensapi",
+    ensRainbowPublicConfig: {
+      version: "0.36.0",
+      labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+      recordsCount: 100,
+    },
     indexedChainIds: new Set([1]),
     isSubgraphCompatible: false,
     labelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
@@ -23,8 +29,6 @@ const MOCK_ENSAPI_PUBLIC_CONFIG = {
     versionInfo: {
       ensDb: "0.36.0",
       ensIndexer: "0.36.0",
-      ensRainbow: "0.36.0",
-      ensRainbowSchema: 1,
       ensNormalize: "1.1.1",
       nodejs: "20.0.0",
       ponder: "0.5.0",
@@ -48,6 +52,11 @@ describe("ENSApi Config Serialization/Deserialization", () => {
         ensIndexerPublicConfig: {
           namespace: ENSNamespaceIds.Mainnet,
           databaseSchemaName: "ensapi",
+          ensRainbowPublicConfig: {
+            version: "0.36.0",
+            labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+            recordsCount: 100,
+          },
           indexedChainIds: [1],
           isSubgraphCompatible: false,
           labelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
@@ -55,14 +64,12 @@ describe("ENSApi Config Serialization/Deserialization", () => {
           versionInfo: {
             ensDb: "0.36.0",
             ensIndexer: "0.36.0",
-            ensRainbow: "0.36.0",
-            ensRainbowSchema: 1,
             ensNormalize: "1.1.1",
             nodejs: "20.0.0",
             ponder: "0.5.0",
           },
         },
-      });
+      } satisfies SerializedEnsApiPublicConfig);
     });
   });
 

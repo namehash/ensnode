@@ -19,20 +19,22 @@ export function serializeEnsIndexerPublicConfig(
   config: EnsIndexerPublicConfig,
 ): SerializedEnsIndexerPublicConfig {
   const {
-    labelSet,
-    indexedChainIds,
     databaseSchemaName,
+    ensRainbowPublicConfig,
+    indexedChainIds,
     isSubgraphCompatible,
+    labelSet,
     namespace,
     plugins,
     versionInfo,
   } = config;
 
   return {
-    labelSet,
-    indexedChainIds: serializeIndexedChainIds(indexedChainIds),
     databaseSchemaName,
+    ensRainbowPublicConfig,
+    indexedChainIds: serializeIndexedChainIds(indexedChainIds),
     isSubgraphCompatible,
+    labelSet,
     namespace,
     plugins,
     versionInfo,

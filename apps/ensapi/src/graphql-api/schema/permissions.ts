@@ -61,7 +61,7 @@ PermissionsRef.implement({
     // Permissions.id
     ////////////////////////////
     id: t.field({
-      description: "TODO",
+      description: "A unique reference to this Permission.",
       type: "ID",
       nullable: false,
       resolve: (parent) => parent.id,
@@ -71,7 +71,7 @@ PermissionsRef.implement({
     // Permissions.contract
     ////////////////////////
     contract: t.field({
-      description: "TODO",
+      description: "The contract within which these Permissions are granted.",
       type: AccountIdRef,
       nullable: false,
       resolve: ({ chainId, address }) => ({ chainId, address }),
@@ -81,7 +81,7 @@ PermissionsRef.implement({
     // Permissions.root
     ////////////////////
     root: t.field({
-      description: "TODO",
+      description: "The Root Resource.",
       type: PermissionsResourceRef,
       nullable: false,
       resolve: ({ chainId, address }) =>
@@ -92,7 +92,7 @@ PermissionsRef.implement({
     // Permissions.resources
     /////////////////////////
     resources: t.connection({
-      description: "TODO",
+      description: "All PermissionResources managed by this contract.",
       type: PermissionsResourceRef,
       resolve: (parent, args, context) =>
         resolveCursorConnection(
@@ -124,7 +124,7 @@ PermissionsResourceRef.implement({
     // PermissionsResource.id
     ////////////////////////////
     id: t.field({
-      description: "TODO",
+      description: "A unique reference to this PermissionsResource.",
       type: "ID",
       nullable: false,
       resolve: (parent) => parent.id,
@@ -134,7 +134,7 @@ PermissionsResourceRef.implement({
     // PermissionsResource.permissions
     ///////////////////////////////////
     permissions: t.field({
-      description: "TODO",
+      description: "The Permissions within which this Resource is managed.",
       type: PermissionsRef,
       nullable: false,
       resolve: ({ chainId, address }) => makePermissionsId({ chainId, address }),
@@ -144,7 +144,7 @@ PermissionsResourceRef.implement({
     // PermissionsResource.resource
     ////////////////////////////////
     resource: t.field({
-      description: "TODO",
+      description: "Identifies the Resource that this PermissionsResource represents.",
       type: "BigInt",
       nullable: false,
       resolve: (parent) => parent.resource,
@@ -154,7 +154,7 @@ PermissionsResourceRef.implement({
     // PermissionsResource.users
     /////////////////////////////
     users: t.connection({
-      description: "TODO",
+      description: "The PermissionUsers who have Roles within this Resource.",
       type: PermissionsUserRef,
       resolve: (parent, args, context) =>
         resolveCursorConnection(
@@ -187,7 +187,7 @@ PermissionsUserRef.implement({
     // PermissionsUser.id
     ////////////////////////////
     id: t.field({
-      description: "TODO",
+      description: "A unique reference to this PermissionsUser.",
       type: "ID",
       nullable: false,
       resolve: (parent) => parent.id,
@@ -197,7 +197,7 @@ PermissionsUserRef.implement({
     // PermissionsUser.resource
     ////////////////////////////
     resource: t.field({
-      description: "TODO",
+      description: "The Resource that this user has Roles within.",
       type: "BigInt",
       nullable: false,
       resolve: (parent) => parent.resource,
@@ -207,7 +207,7 @@ PermissionsUserRef.implement({
     // PermissionsUser.user
     ////////////////////////
     user: t.field({
-      description: "TODO",
+      description: "The User for whom these Roles are granted.",
       type: AccountRef,
       nullable: false,
       resolve: (parent) => parent.user,
@@ -217,7 +217,7 @@ PermissionsUserRef.implement({
     // PermissionsUser.roles
     /////////////////////////
     roles: t.field({
-      description: "TODO",
+      description: "The Roles this User has been granted within this Resource.",
       type: "BigInt",
       nullable: false,
       resolve: (parent) => parent.roles,

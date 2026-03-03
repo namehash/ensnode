@@ -594,6 +594,7 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
     // an unhandled 'error' event that would crash the process and bypass the
     // finally-block cleanup.
     const streamErrorPromise = new Promise<never>((_, reject) => {
+      // biome-ignore lint/style/noNonNullAssertion: guaranteed
       outputStream!.once("error", reject);
     });
 

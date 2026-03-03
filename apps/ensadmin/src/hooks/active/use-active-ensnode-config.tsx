@@ -3,7 +3,7 @@
 import { useENSNodeConfig } from "@ensnode/ensnode-react";
 
 /**
- * Hook to get the currently active ENSNode connection synchronously.
+ * Hook to get the currently active ENSNode Config synchronously.
  *
  * This hook provides synchronous access to the active ENSNode connection.
  * If no ENSNode connection is synchronouslly available, components using
@@ -15,11 +15,11 @@ import { useENSNodeConfig } from "@ensnode/ensnode-react";
  * @returns The active ENSNode connection (currently only the ENSIndexer config)
  * @throws Error if no active ENSNode connection is available
  */
-export function useActiveConnection() {
+export function useActiveENSNodeConfig() {
   const { data } = useENSNodeConfig();
 
   if (data === undefined) {
-    throw new Error(`Invariant(useActiveConnection): Expected an active ENSNode Config`);
+    throw new Error(`Invariant(useActiveENSNodeConfig): Expected an active ENSNode Config`);
   }
 
   return data;

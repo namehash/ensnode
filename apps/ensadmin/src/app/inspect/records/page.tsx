@@ -1,10 +1,15 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useDebouncedValue } from "rooks";
 
 import { useRecords } from "@ensnode/ensnode-react";
+import {
+  ENSNamespaceIds,
+  getNamespaceSpecificValue,
+  NamespaceSpecificValue,
+} from "@ensnode/ensnode-sdk";
 
 import { RenderRequestsOutput } from "@/app/inspect/_components/render-requests-output";
 import { Pill } from "@/components/pill";
@@ -15,28 +20,57 @@ import { Label } from "@/components/ui/label";
 import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 import { DefaultRecordsSelection } from "@/lib/default-records-selection";
 
-const EXAMPLE_INPUT = [
-  "vitalik.eth",
-  "gregskril.eth",
-  "katzman.base.eth",
-  "jesse.base.eth",
-  "alain.linea.eth",
-  "goinfrex.linea.eth",
-  "gift.box",
-  "barmstrong.cb.id",
-  "argent.xyz",
-  "lens.xyz",
-  "🔥🔥🔥🔥🔥.eth",
-];
+const EXAMPLE_NAMES: NamespaceSpecificValue<string[]> = {
+  default: [
+    "vitalik.eth",
+    "gregskril.eth",
+    "katzman.base.eth",
+    "jesse.base.eth",
+    "alain.linea.eth",
+    "goinfrex.linea.eth",
+    "gift.box",
+    "barmstrong.cb.id",
+    "argent.xyz",
+    "lens.xyz",
+    "🔥🔥🔥🔥🔥.eth",
+  ],
+  [ENSNamespaceIds.Sepolia]: [
+    "gregskril.eth",
+    "vitalik.eth",
+    "myens.eth",
+    "recordstest.eth",
+    "arrondesean.eth",
+    "decode.eth",
+  ],
+  [ENSNamespaceIds.EnsTestEnv]: [
+    "alias.eth",
+    "changerole.eth",
+    "demo.eth",
+    "example.eth",
+    "linked.parent.eth",
+    "parent.eth",
+    "renew.eth",
+    "reregister.eth",
+    "sub1.sub2.parent.eth",
+    "sub2.parent.eth",
+    "test.eth",
+    "wallet.linked.parent.eth",
+  ],
+};
 
 // TODO: showcase current ENSNode configuration and viable acceleration pathways?
 // TODO: use shadcn/form, react-hook-form, and zod to make all of this nicer aross the board
 // TODO: sync form state to query params, currently just defaulting is supported
 export default function ResolveRecordsInspector() {
-  const namespace = useActiveNamespace();
   const searchParams = useSearchParams();
 
-  const [name, setName] = useState(searchParams.get("name") || EXAMPLE_INPUT[0]);
+  const namespace = useActiveNamespace();
+  const exampleNames = useMemo(
+    () => getNamespaceSpecificValue(namespace, EXAMPLE_NAMES),
+    [namespace],
+  );
+
+  const [name, setName] = useState(searchParams.get("name") || exampleNames[0]);
   const [debouncedName] = useDebouncedValue(name, 150);
 
   const canQuery = !!debouncedName && debouncedName.length > 0;
@@ -92,7 +126,7 @@ export default function ResolveRecordsInspector() {
               ENS Name
               <Input
                 id="name"
-                placeholder={EXAMPLE_INPUT[0]}
+                placeholder={exampleNames[0]}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 autoComplete="off"
@@ -109,7 +143,7 @@ export default function ResolveRecordsInspector() {
             <span className="text-sm font-medium leading-none">Examples:</span>
             {/* -mx-6 px-6 insets the scroll container against card for prettier scrolling */}
             <div className="flex flex-row overflow-x-scroll gap-2 no-scrollbar -mx-6 px-6">
-              {EXAMPLE_INPUT.map((name) => (
+              {exampleNames.map((name) => (
                 <Pill key={name} onClick={() => setName(name)} className="font-mono">
                   {name}
                 </Pill>

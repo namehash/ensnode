@@ -21,13 +21,13 @@ export type Renewal = Exclude<typeof RenewalRef.$inferType, RenewalId>;
 // Renewal
 ///////////
 RenewalRef.implement({
-  description: "TODO",
+  description: "A Renewal represents an extension of a Registration's expiry.",
   fields: (t) => ({
     //////////////
     // Renewal.id
     //////////////
     id: t.field({
-      description: "TODO",
+      description: "A unique reference to this Renewal.",
       type: "ID",
       nullable: false,
       resolve: (parent) => parent.id,
@@ -37,7 +37,7 @@ RenewalRef.implement({
     // Renewal.duration
     ////////////////////
     duration: t.field({
-      description: "TODO",
+      description: "The duration for which a Registration was extended.",
       type: "BigInt",
       nullable: false,
       resolve: (parent) => parent.duration,
@@ -47,7 +47,7 @@ RenewalRef.implement({
     // Renewal.referrer
     ////////////////////
     referrer: t.field({
-      description: "TODO",
+      description: "The extra `referrer` data provided with a Renewal, if exists.",
       type: "Hex",
       nullable: true,
       resolve: (parent) => parent.referrer,
@@ -57,7 +57,7 @@ RenewalRef.implement({
     // Renewal.base
     ////////////////
     base: t.field({
-      description: "TODO",
+      description: "The `base` cost of a Renewal, in wei, if exists.",
       type: "BigInt",
       nullable: true,
       resolve: (parent) => parent.base,
@@ -67,7 +67,7 @@ RenewalRef.implement({
     // Renewal.premium
     ///////////////////
     premium: t.field({
-      description: "TODO",
+      description: "The `premium` cost of a Renewal, in wei, if exists.",
       type: "BigInt",
       nullable: true,
       resolve: (parent) => parent.premium,
@@ -77,7 +77,7 @@ RenewalRef.implement({
     // Renewal.event
     //////////////////////
     event: t.field({
-      description: "TODO",
+      description: "The Event for which this Renewal was created.",
       type: EventRef,
       nullable: false,
       resolve: (parent) => parent.eventId,

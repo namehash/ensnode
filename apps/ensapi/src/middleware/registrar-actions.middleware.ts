@@ -1,8 +1,9 @@
 import config from "@/config";
 
 import {
+  hasRegistrarActionsConfigSupport,
+  hasRegistrarActionsIndexingStatusSupport,
   RegistrarActionsResponseCodes,
-  registrarActionsPrerequisites,
   serializeRegistrarActionsResponse,
 } from "@ensnode/ensnode-sdk";
 
@@ -17,7 +18,7 @@ const logger = makeLogger("registrar-actions.middleware");
  * This middleware that ensures that all prerequisites of
  * the Registrar Actions API were met and HTTP requests can be served.
  *
- * Returns a 500 response for any of the following cases:
+ * Returns a 503 response for any of the following cases:
  * 1) Not all required plugins are active in the connected ENSIndexer
  *    configuration.
  * 2) ENSApi has not yet successfully cached the Indexing Status in memory from
@@ -34,16 +35,17 @@ export const registrarActionsApiMiddleware = factory.createMiddleware(
       throw new Error(`Invariant(registrar-actions.middleware): indexingStatusMiddleware required`);
     }
 
-    if (!registrarActionsPrerequisites.hasEnsIndexerConfigSupport(config.ensIndexerPublicConfig)) {
+    const configSupport = hasRegistrarActionsConfigSupport(config.ensIndexerPublicConfig);
+    if (!configSupport.supported) {
       return c.json(
         serializeRegistrarActionsResponse({
           responseCode: RegistrarActionsResponseCodes.Error,
           error: {
             message: `Registrar Actions API is not available`,
-            details: `Connected ENSIndexer must have all following plugins active: ${registrarActionsPrerequisites.requiredPlugins.join(", ")}`,
+            details: configSupport.reason,
           },
         }),
-        500,
+        503,
       );
     }
 
@@ -62,22 +64,25 @@ export const registrarActionsApiMiddleware = factory.createMiddleware(
             details: `Indexing status is currently unavailable to this ENSApi instance.`,
           },
         }),
-        500,
+        503,
       );
     }
 
     const { omnichainSnapshot } = c.var.indexingStatus.snapshot;
 
-    if (!registrarActionsPrerequisites.hasIndexingStatusSupport(omnichainSnapshot.omnichainStatus))
+    const indexingStatusSupport = hasRegistrarActionsIndexingStatusSupport(
+      omnichainSnapshot.omnichainStatus,
+    );
+    if (!indexingStatusSupport.supported)
       return c.json(
         serializeRegistrarActionsResponse({
           responseCode: RegistrarActionsResponseCodes.Error,
           error: {
             message: `Registrar Actions API is not available`,
-            details: `The cached omnichain indexing status of the Connected ENSIndexer must be one of the following ${registrarActionsPrerequisites.supportedIndexingStatusIds.map((statusId) => `"${statusId}"`).join(", ")}.`,
+            details: indexingStatusSupport.reason,
           },
         }),
-        500,
+        503,
       );
 
     await next();

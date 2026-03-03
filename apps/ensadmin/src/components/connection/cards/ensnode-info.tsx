@@ -507,7 +507,7 @@ function ENSNodeConfigCardContent({
                 {ensIndexerPublicConfig.plugins.map((plugin) => (
                   <span
                     key={`${plugin}-plugin-badge`}
-                    className="flex justify-start items-start py-[2px] px-[10px] rounded-full bg-secondary text-sm leading-normal font-semibold text-black cursor-default whitespace-nowrap"
+                    className="flex justify-start items-start py-0.5 px-2.5 rounded-full bg-secondary text-sm leading-normal font-semibold text-black cursor-default whitespace-nowrap"
                   >
                     {plugin}
                   </span>
@@ -561,7 +561,7 @@ function ENSNodeConfigCardContent({
         icon={<ENSRainbowIcon width={24} height={24} />}
         version={
           <p className="text-sm leading-normal font-normal text-muted-foreground">
-            v{ensIndexerPublicConfig.versionInfo.ensRainbow}
+            v{ensIndexerPublicConfig.ensRainbowPublicConfig.version}
           </p>
         }
         docsLink={new URL("https://ensnode.io/ensrainbow/")}
@@ -571,8 +571,8 @@ function ENSNodeConfigCardContent({
             label="Server LabelSet"
             value={
               <p className={cardItemValueStyles}>
-                {ensIndexerPublicConfig.labelSet.labelSetId}:
-                {ensIndexerPublicConfig.labelSet.labelSetVersion}
+                {ensIndexerPublicConfig.ensRainbowPublicConfig.labelSet.labelSetId}:
+                {ensIndexerPublicConfig.ensRainbowPublicConfig.labelSet.highestLabelSetVersion}
               </p>
             }
             additionalInfo={
@@ -580,6 +580,25 @@ function ENSNodeConfigCardContent({
                 The labelset id and highest labelset version offered by the ENSRainbow server.{" "}
                 <ExternalLinkWithIcon
                   href={`https://ensnode.io/ensrainbow/concepts/label-sets-and-versioning/`}
+                >
+                  Learn more.
+                </ExternalLinkWithIcon>
+              </p>
+            }
+          />
+
+          <InfoCardItem
+            label="Records Count"
+            value={
+              <p className={cardItemValueStyles}>
+                {ensIndexerPublicConfig.ensRainbowPublicConfig.recordsCount.toLocaleString()}
+              </p>
+            }
+            additionalInfo={
+              <p>
+                The total number of Rainbow Records.{" "}
+                <ExternalLinkWithIcon
+                  href={`https://ensnode.io/ensrainbow/concepts/glossary/#rainbow-record`}
                 >
                   Learn more.
                 </ExternalLinkWithIcon>

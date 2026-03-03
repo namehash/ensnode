@@ -3,6 +3,7 @@ import {
   type Cache,
   type EncodedLabelHash,
   type EnsRainbowClientLabelSet,
+  type EnsRainbowPublicConfig,
   type EnsRainbowServerLabelSet,
   type Label,
   type LabelHash,
@@ -168,24 +169,7 @@ export namespace EnsRainbow {
    * Contains all public configuration information about the ENSRainbow service instance,
    * including version, label set information, and record counts.
    */
-  export interface ENSRainbowPublicConfig {
-    /**
-     * ENSRainbow service version
-     *
-     * @see https://ghcr.io/namehash/ensnode/ensrainbow
-     */
-    version: string;
-
-    /**
-     * The label set reference managed by the ENSRainbow server.
-     */
-    labelSet: EnsRainbowServerLabelSet;
-
-    /**
-     * The total count of records managed by the ENSRainbow service.
-     */
-    recordsCount: number;
-  }
+  export type ENSRainbowPublicConfig = EnsRainbowPublicConfig;
 }
 
 export interface EnsRainbowApiClientOptions {

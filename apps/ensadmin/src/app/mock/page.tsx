@@ -43,6 +43,11 @@ export default function MockList() {
                 DisplayIdentity
               </Link>
             </Button>
+            <Button asChild variant="outline" size="sm">
+              <Link href={retainCurrentRawConnectionUrlParam("/mock/require-ensadmin-feature")}>
+                RequireENSAdminFeature
+              </Link>
+            </Button>
           </div>
         </CardContent>
       </Card>
