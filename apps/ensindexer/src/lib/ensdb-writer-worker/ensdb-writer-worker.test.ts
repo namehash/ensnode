@@ -394,6 +394,7 @@ describe("EnsDbWriterWorker", () => {
 
     vi.mocked(buildCrossChainIndexingStatusSnapshotOmnichain)
       .mockReturnValueOnce(crossChainSnapshot1)
+      .mockReturnValueOnce(crossChainSnapshot2)
       .mockReturnValueOnce(crossChainSnapshot2);
 
     const ensDbClient = {
