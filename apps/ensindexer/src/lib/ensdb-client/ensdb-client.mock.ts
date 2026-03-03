@@ -39,8 +39,14 @@ export const publicConfig = {
     ensDb: "0.32.0",
     ensIndexer: "0.32.0",
     ensNormalize: "1.11.1",
-    ensRainbow: "0.32.0",
-    ensRainbowSchema: 2,
+    ensRainbowPublicConfig: {
+      version: "0.32.0",
+      labelSet: {
+        labelSetId: "subgraph",
+        highestLabelSetVersion: 0,
+      },
+      recordsCount: 100,
+    },
   },
 } satisfies EnsIndexerPublicConfig;
 
