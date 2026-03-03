@@ -37,7 +37,7 @@ const VITALIK_ADDRESS = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
 
 export const GRAPHQL_API_EXAMPLE_QUERIES: Array<{
   query: string;
-  variables: NamespaceSpecificValue<any>;
+  variables: NamespaceSpecificValue<Record<string, unknown>>;
 }> = [
   ////////////////
   // Hello World
