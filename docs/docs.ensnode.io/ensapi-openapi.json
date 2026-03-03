@@ -1766,14 +1766,25 @@
             "in": "query"
           },
           {
-            "schema": { "description": "Page number for pagination" },
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "description": "Page number for pagination"
+            },
             "required": false,
             "description": "Page number for pagination",
             "name": "page",
             "in": "query"
           },
           {
-            "schema": { "description": "Number of records per page" },
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10,
+              "description": "Number of records per page"
+            },
             "required": false,
             "description": "Number of records per page",
             "name": "recordsPerPage",
@@ -1849,14 +1860,25 @@
             "in": "query"
           },
           {
-            "schema": { "description": "Page number for pagination" },
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "description": "Page number for pagination"
+            },
             "required": false,
             "description": "Page number for pagination",
             "name": "page",
             "in": "query"
           },
           {
-            "schema": { "description": "Number of records per page" },
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10,
+              "description": "Number of records per page"
+            },
             "required": false,
             "description": "Number of records per page",
             "name": "recordsPerPage",

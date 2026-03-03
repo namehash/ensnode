@@ -1,5 +1,4 @@
-import { createRoute } from "@hono/zod-openapi";
-import { z } from "zod/v4";
+import { createRoute, z } from "@hono/zod-openapi";
 
 import {
   ErrorResponseSchema,
