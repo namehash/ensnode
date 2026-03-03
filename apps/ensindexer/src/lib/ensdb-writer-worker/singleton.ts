@@ -20,6 +20,12 @@ export function startEnsDbWriterWorker() {
 
   ensDbWriterWorker
     .run()
+    .then(() => {
+      // Once the worker has successfully kicked off,
+      // we can listen for termination signals to trigger a graceful shutdown
+      process.on("SIGINT", () => ensDbWriterWorker.stop());
+      process.on("SIGTERM", () => ensDbWriterWorker.stop());
+    })
     // Handle any uncaught errors from the worker
     .catch((error) => {
       // Abort the worker on error to trigger cleanup
@@ -31,8 +37,4 @@ export function startEnsDbWriterWorker() {
       process.exitCode = 1;
       throw error;
     });
-
-  // Handle graceful shutdown on process termination signals
-  process.on("SIGINT", () => ensDbWriterWorker.stop());
-  process.on("SIGTERM", () => ensDbWriterWorker.stop());
 }
