@@ -104,7 +104,6 @@ export const makeEnsIndexerVersionInfoSchema = (valueLabel: string = "Value") =>
         ensDb: makeNonEmptyStringSchema(),
         ensIndexer: makeNonEmptyStringSchema(),
         ensNormalize: makeNonEmptyStringSchema(),
-        ensRainbowPublicConfig: makeEnsRainbowPublicConfigSchema(),
       },
       {
         error: `${valueLabel} must be a valid ENSIndexerVersionInfo object.`,
@@ -135,10 +134,10 @@ export function invariant_isSubgraphCompatibleRequirements(
 }
 
 export function invariant_ensRainbowSupportedLabelSetAndVersion(
-  ctx: ZodCheckFnInput<Pick<EnsIndexerPublicConfig, "labelSet" | "versionInfo">>,
+  ctx: ZodCheckFnInput<Pick<EnsIndexerPublicConfig, "labelSet" | "ensRainbowPublicConfig">>,
 ) {
   const clientLabelSet = ctx.value.labelSet satisfies EnsRainbowClientLabelSet;
-  const serverLabelSet = ctx.value.versionInfo.ensRainbowPublicConfig
+  const serverLabelSet = ctx.value.ensRainbowPublicConfig
     .labelSet satisfies EnsRainbowServerLabelSet;
 
   try {
@@ -149,7 +148,7 @@ export function invariant_ensRainbowSupportedLabelSetAndVersion(
     ctx.issues.push({
       code: "custom",
       input: ctx.value,
-      message: `The ENSRainbow label set and version specified in the config are not supported by the ENSRainbow version specified in versionInfo.ensRainbowPublicConfig. Cause: ${errorMessage}`,
+      message: `The ENSRainbow label set and version specified in the config are not supported by the ENSRainbow version specified in ensRainbowPublicConfig. Cause: ${errorMessage}`,
     });
   }
 }
@@ -163,14 +162,17 @@ export function invariant_ensRainbowSupportedLabelSetAndVersion(
 export const makeEnsIndexerPublicConfigSchema = (valueLabel: string = "ENSIndexerPublicConfig") =>
   z
     .object({
-      labelSet: makeFullyPinnedLabelSetSchema(`${valueLabel}.labelSet`),
+      databaseSchemaName: makeDatabaseSchemaNameSchema(`${valueLabel}.databaseSchemaName`),
+      ensRainbowPublicConfig: makeEnsRainbowPublicConfigSchema(
+        `${valueLabel}.ensRainbowPublicConfig`,
+      ),
       indexedChainIds: makeIndexedChainIdsSchema(`${valueLabel}.indexedChainIds`),
       isSubgraphCompatible: z.boolean({
         error: `${valueLabel}.isSubgraphCompatible must be a boolean value.`,
       }),
+      labelSet: makeFullyPinnedLabelSetSchema(`${valueLabel}.labelSet`),
       namespace: makeENSNamespaceIdSchema(`${valueLabel}.namespace`),
       plugins: makePluginsListSchema(`${valueLabel}.plugins`),
-      databaseSchemaName: makeDatabaseSchemaNameSchema(`${valueLabel}.databaseSchemaName`),
       versionInfo: makeEnsIndexerVersionInfoSchema(`${valueLabel}.versionInfo`),
     })
     /**
@@ -192,13 +194,16 @@ export const makeSerializedEnsIndexerPublicConfigSchema = (
   valueLabel: string = "Serialized ENSIndexerPublicConfig",
 ) =>
   z.object({
-    labelSet: makeFullyPinnedLabelSetSchema(`${valueLabel}.labelSet`),
+    databaseSchemaName: makeDatabaseSchemaNameSchema(`${valueLabel}.databaseSchemaName`),
+    ensRainbowPublicConfig: makeEnsRainbowPublicConfigSchema(
+      `${valueLabel}.ensRainbowPublicConfig`,
+    ),
     indexedChainIds: makeSerializedIndexedChainIdsSchema(`${valueLabel}.indexedChainIds`),
     isSubgraphCompatible: z.boolean({
       error: `${valueLabel}.isSubgraphCompatible must be a boolean value.`,
     }),
+    labelSet: makeFullyPinnedLabelSetSchema(`${valueLabel}.labelSet`),
     namespace: makeENSNamespaceIdSchema(`${valueLabel}.namespace`),
     plugins: makePluginsListSchema(`${valueLabel}.plugins`),
-    databaseSchemaName: makeDatabaseSchemaNameSchema(`${valueLabel}.databaseSchemaName`),
     versionInfo: makeEnsIndexerVersionInfoSchema(`${valueLabel}.versionInfo`),
   });

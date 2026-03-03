@@ -11,6 +11,11 @@ describe("ENSIndexer: Config", () => {
       // arrange
       const config = {
         databaseSchemaName: "public",
+        ensRainbowPublicConfig: {
+          version: "0.32.0",
+          labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+          recordsCount: 100,
+        },
         labelSet: {
           labelSetId: "subgraph",
           labelSetVersion: 0,
@@ -25,11 +30,6 @@ describe("ENSIndexer: Config", () => {
           ensDb: "0.32.0",
           ensIndexer: "0.32.0",
           ensNormalize: "1.11.1",
-          ensRainbowPublicConfig: {
-            version: "0.32.0",
-            labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
-            recordsCount: 100,
-          },
         },
       } satisfies EnsIndexerPublicConfig;
 
@@ -54,6 +54,11 @@ describe("ENSIndexer: Config", () => {
   describe("deserialization", () => {
     const correctSerializedConfig = {
       databaseSchemaName: "public",
+      ensRainbowPublicConfig: {
+        version: "0.32.0",
+        labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+        recordsCount: 100,
+      },
       labelSet: {
         labelSetId: "subgraph",
         labelSetVersion: 0,
@@ -68,11 +73,6 @@ describe("ENSIndexer: Config", () => {
         ensDb: "0.32.0",
         ensIndexer: "0.32.0",
         ensNormalize: "1.11.1",
-        ensRainbowPublicConfig: {
-          version: "0.32.0",
-          labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
-          recordsCount: 100,
-        },
       },
     } satisfies SerializedEnsIndexerPublicConfig;
 

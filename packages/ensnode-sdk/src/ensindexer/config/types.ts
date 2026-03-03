@@ -51,11 +51,6 @@ export interface EnsIndexerVersionInfo {
   ensIndexer: string;
 
   /**
-   * ENSRainbow public config
-   */
-  ensRainbowPublicConfig: EnsRainbowPublicConfig;
-
-  /**
    * ENS Normalize package version
    *
    * Available on NPM as: `@adraffy/ens-normalize`
@@ -100,6 +95,13 @@ export interface EnsIndexerPublicConfig {
    *   identifier.
    */
   databaseSchemaName: string;
+
+  /**
+   * ENSRainbow public config
+   *
+   * Represent the public config of connected ENSRainbow instance.
+   */
+  ensRainbowPublicConfig: EnsRainbowPublicConfig;
 
   /**
    * A set of strings referring to the names of plugins that are active.

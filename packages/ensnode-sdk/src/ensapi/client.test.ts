@@ -64,6 +64,11 @@ const EXAMPLE_CONFIG_RESPONSE = {
     reason: "no-api-key",
   },
   ensIndexerPublicConfig: {
+    ensRainbowPublicConfig: {
+      version: "0.31.0",
+      labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+      recordsCount: 100,
+    },
     labelSet: {
       labelSetId: "subgraph",
       labelSetVersion: 0,
@@ -86,11 +91,6 @@ const EXAMPLE_CONFIG_RESPONSE = {
       ensDb: "0.32.0",
       ensIndexer: "0.32.0",
       ensNormalize: "1.11.1",
-      ensRainbowPublicConfig: {
-        version: "0.31.0",
-        labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
-        recordsCount: 100,
-      },
     },
   },
 } satisfies SerializedEnsApiPublicConfig;

@@ -561,7 +561,7 @@ function ENSNodeConfigCardContent({
         icon={<ENSRainbowIcon width={24} height={24} />}
         version={
           <p className="text-sm leading-normal font-normal text-muted-foreground">
-            v{ensIndexerPublicConfig.versionInfo.ensRainbowPublicConfig.version}
+            v{ensIndexerPublicConfig.ensRainbowPublicConfig.version}
           </p>
         }
         docsLink={new URL("https://ensnode.io/ensrainbow/")}
@@ -571,11 +571,8 @@ function ENSNodeConfigCardContent({
             label="Server LabelSet"
             value={
               <p className={cardItemValueStyles}>
-                {ensIndexerPublicConfig.versionInfo.ensRainbowPublicConfig.labelSet.labelSetId}:
-                {
-                  ensIndexerPublicConfig.versionInfo.ensRainbowPublicConfig.labelSet
-                    .highestLabelSetVersion
-                }
+                {ensIndexerPublicConfig.ensRainbowPublicConfig.labelSet.labelSetId}:
+                {ensIndexerPublicConfig.ensRainbowPublicConfig.labelSet.highestLabelSetVersion}
               </p>
             }
             additionalInfo={
@@ -594,7 +591,7 @@ function ENSNodeConfigCardContent({
             label="Records Count"
             value={
               <p className={cardItemValueStyles}>
-                {ensIndexerPublicConfig.versionInfo.ensRainbowPublicConfig.recordsCount}
+                {ensIndexerPublicConfig.ensRainbowPublicConfig.recordsCount}
               </p>
             }
             additionalInfo={

@@ -34,12 +34,12 @@ export function invariant_ensIndexerPublicConfigVersionInfo(
   }
 
   // Invariant: ENSApi & ENSRainbow must match version numbers
-  if (ensIndexerPublicConfig.versionInfo.ensRainbowPublicConfig.version !== packageJson.version) {
+  if (ensIndexerPublicConfig.ensRainbowPublicConfig.version !== packageJson.version) {
     ctx.issues.push({
       code: "custom",
-      path: ["ensIndexerPublicConfig.versionInfo.ensRainbowPublicConfig.version"],
-      input: ensIndexerPublicConfig.versionInfo.ensRainbowPublicConfig.version,
-      message: `Version Mismatch: ENSRainbow@${ensIndexerPublicConfig.versionInfo.ensRainbowPublicConfig.version} !== ENSApi@${packageJson.version}`,
+      path: ["ensIndexerPublicConfig.ensRainbowPublicConfig.version"],
+      input: ensIndexerPublicConfig.ensRainbowPublicConfig.version,
+      message: `Version Mismatch: ENSRainbow@${ensIndexerPublicConfig.ensRainbowPublicConfig.version} !== ENSApi@${packageJson.version}`,
     });
   }
 }

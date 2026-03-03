@@ -110,14 +110,6 @@ describe("ENSIndexer: Config", () => {
             ensDb: "0.32.0",
             ensIndexer: "0.32.0",
             ensNormalize: "1.11.1",
-            ensRainbowPublicConfig: {
-              version: "0.32.0",
-              labelSet: {
-                labelSetId: "subgraph",
-                highestLabelSetVersion: 0,
-              },
-              recordsCount: 100,
-            },
           } satisfies EnsIndexerVersionInfo),
         ).toStrictEqual({
           nodejs: "v22.22.22",
@@ -125,14 +117,6 @@ describe("ENSIndexer: Config", () => {
           ensDb: "0.32.0",
           ensIndexer: "0.32.0",
           ensNormalize: "1.11.1",
-          ensRainbowPublicConfig: {
-            version: "0.32.0",
-            labelSet: {
-              labelSetId: "subgraph",
-              highestLabelSetVersion: 0,
-            },
-            recordsCount: 100,
-          },
         } satisfies EnsIndexerVersionInfo);
 
         expect(
@@ -143,11 +127,6 @@ describe("ENSIndexer: Config", () => {
               ensDb: "",
               ensIndexer: "",
               ensNormalize: "",
-              ensRainbowPublicConfig: {
-                version: "",
-                labelSet: { labelSetId: "", highestLabelSetVersion: -1 },
-                recordsCount: -1,
-              },
             } satisfies EnsIndexerVersionInfo),
           ),
         ).toStrictEqual(`✖ Value must be a non-empty string.
@@ -159,17 +138,7 @@ describe("ENSIndexer: Config", () => {
 ✖ Value must be a non-empty string.
   → at ensIndexer
 ✖ Value must be a non-empty string.
-  → at ensNormalize
-✖ EnsRainbowPublicConfig.version must be a non-empty string.
-  → at ensRainbowPublicConfig.version
-✖ EnsRainbowPublicConfig.recordsCount must be a non-negative integer (>=0).
-  → at ensRainbowPublicConfig.recordsCount
-✖ EnsRainbowPublicConfig.labelSet.labelSetId must be 1-50 characters long
-  → at ensRainbowPublicConfig.labelSet.labelSetId
-✖ EnsRainbowPublicConfig.labelSet.labelSetId can only contain lowercase letters (a-z) and hyphens (-)
-  → at ensRainbowPublicConfig.labelSet.labelSetId
-✖ EnsRainbowPublicConfig.labelSet.highestLabelSetVersion must be a non-negative integer (>=0).
-  → at ensRainbowPublicConfig.labelSet.highestLabelSetVersion`);
+  → at ensNormalize`);
       });
 
       it("validates ensDb and ensIndexer versions match", () => {
@@ -181,14 +150,6 @@ describe("ENSIndexer: Config", () => {
               ensDb: "0.32.0",
               ensIndexer: "0.33.0", // Different from ensDb
               ensNormalize: "1.11.1",
-              ensRainbowPublicConfig: {
-                version: "0.32.0",
-                labelSet: {
-                  labelSetId: "subgraph",
-                  highestLabelSetVersion: 0,
-                },
-                recordsCount: 100,
-              },
             } satisfies EnsIndexerVersionInfo),
           ),
         ).toContain("`ensDb` version must be same as `ensIndexer` version");
@@ -196,6 +157,14 @@ describe("ENSIndexer: Config", () => {
 
       it("validates ENSRainbow label set and version compatibility", () => {
         const baseConfig = {
+          ensRainbowPublicConfig: {
+            version: "0.32.0",
+            labelSet: {
+              labelSetId: "subgraph",
+              highestLabelSetVersion: 0,
+            },
+            recordsCount: 100,
+          },
           indexedChainIds: [1], // Use array for serialized config
           isSubgraphCompatible: false, // Set to false to bypass isSubgraphCompatible invariant
           namespace: "mainnet" as const,
@@ -207,14 +176,6 @@ describe("ENSIndexer: Config", () => {
             ensDb: "0.32.0",
             ensIndexer: "0.32.0",
             ensNormalize: "1.11.1",
-            ensRainbowPublicConfig: {
-              version: "0.32.0",
-              labelSet: {
-                labelSetId: "subgraph",
-                highestLabelSetVersion: 0,
-              },
-              recordsCount: 100,
-            },
           },
         };
 
@@ -247,6 +208,14 @@ describe("ENSIndexer: Config", () => {
 
       it("can parse full ENSIndexerPublicConfig with label set", () => {
         const validConfig = {
+          ensRainbowPublicConfig: {
+            version: "0.32.0",
+            labelSet: {
+              labelSetId: "subgraph",
+              highestLabelSetVersion: 0,
+            },
+            recordsCount: 100,
+          },
           labelSet: {
             labelSetId: "subgraph",
             labelSetVersion: 0,
@@ -262,14 +231,6 @@ describe("ENSIndexer: Config", () => {
             ensDb: "0.32.0",
             ensIndexer: "0.32.0",
             ensNormalize: "1.11.1",
-            ensRainbowPublicConfig: {
-              version: "0.32.0",
-              labelSet: {
-                labelSetId: "subgraph",
-                highestLabelSetVersion: 0,
-              },
-              recordsCount: 100,
-            },
           },
         } satisfies SerializedEnsIndexerPublicConfig;
 
