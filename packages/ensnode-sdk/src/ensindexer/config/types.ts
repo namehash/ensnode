@@ -99,7 +99,7 @@ export interface EnsIndexerPublicConfig {
   /**
    * ENSRainbow public config
    *
-   * Represent the public config of connected ENSRainbow instance.
+   * Represents the public config of the connected ENSRainbow instance.
    */
   ensRainbowPublicConfig: EnsRainbowPublicConfig;
 
