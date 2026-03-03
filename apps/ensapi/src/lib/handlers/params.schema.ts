@@ -38,8 +38,8 @@ const name = z
   .refine(isNormalizedName, "Must be normalized, see https://docs.ens.domains/resolution/names/")
   .transform((val) => val as Name);
 
-const trace = z.optional(boolstring).default(false);
-const accelerate = z.optional(boolstring).default(false);
+const trace = z.optional(boolstring).prefault("false");
+const accelerate = z.optional(boolstring).prefault("false");
 const address = makeLowercaseAddressSchema();
 const defaultableChainId = makeDefaultableChainIdStringSchema();
 const coinType = makeCoinTypeStringSchema();

@@ -32,6 +32,7 @@ export const amIRealtimeGetMeta = createRoute({
             })
             .pipe(makeDurationSchema("maxWorstCaseDistance query param")),
         )
+        .openapi({ type: "integer", minimum: 0 })
         .describe("Maximum acceptable worst-case indexing distance in seconds"),
     }),
   },
