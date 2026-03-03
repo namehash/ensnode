@@ -179,10 +179,10 @@ export class EnsDbClient implements EnsDbClientQuery, EnsDbClientMutation {
     await this.db.transaction(async (tx) => {
       // Ponder live-query triggers insert into live_query_tables.
       // Because this worker writes outside the Ponder runtime connection pool,
-      // the temp table has to be created per-transaction. Without this,
+      // the temp table must be ensured to exist on this connection. Without this,
       // the upsert would fail with "relation 'live_query_tables' does not exist" error.
       await tx.execute(
-        sql`CREATE TEMP TABLE live_query_tables (table_name TEXT PRIMARY KEY) ON COMMIT DROP`,
+        sql`CREATE TEMP TABLE IF NOT EXISTS live_query_tables (table_name TEXT PRIMARY KEY)`,
       );
 
       await tx
