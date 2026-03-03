@@ -220,9 +220,7 @@ export class EnsDbWriterWorker {
         snapshotTime,
       );
 
-      console.log(`[EnsDbWriterWorker]: Upserting Indexing Status Snapshot into ENSDb...`);
       await this.ensDbClient.upsertIndexingStatusSnapshot(crossChainSnapshot);
-      console.log(`[EnsDbWriterWorker]: Indexing Status Snapshot upserted successfully`);
     } catch (error) {
       console.error(
         `[EnsDbWriterWorker]: Error retrieving or validating Indexing Status Snapshot:`,
@@ -242,6 +240,9 @@ export class EnsDbWriterWorker {
   private async getValidatedIndexingStatusSnapshot(): Promise<OmnichainIndexingStatusSnapshot> {
     const omnichainSnapshot = await this.indexingStatusBuilder.getOmnichainIndexingStatusSnapshot();
 
+    // It only makes sense to write Indexing Status Snapshots into ENSDb once
+    // the indexing process has started, as before that there is no meaningful
+    // status to record.
     // Invariant: the Omnichain Status must indicate that indexing has started already.
     if (omnichainSnapshot.omnichainStatus === OmnichainIndexingStatusIds.Unstarted) {
       throw new Error("Omnichain Status must not be 'Unstarted'.");
