@@ -22,16 +22,8 @@ export function startEnsDbWriterWorker() {
 
   ensDbWriterWorker = new EnsDbWriterWorker(ensDbClient, ensIndexerClient, indexingStatusBuilder);
 
-  const stopWorker = ensDbWriterWorker.stop.bind(ensDbWriterWorker);
-
   ensDbWriterWorker
     .run()
-    .then(() => {
-      // Once the worker has successfully kicked off,
-      // we can listen for termination signals to trigger a graceful shutdown
-      process.once("SIGINT", stopWorker);
-      process.once("SIGTERM", stopWorker);
-    })
     // Handle any uncaught errors from the worker
     .catch((error) => {
       // Abort the worker on error to trigger cleanup
