@@ -6,6 +6,7 @@ import { cors } from "hono/cors";
 import type { ErrorResponse } from "@ensnode/ensnode-sdk";
 
 import ensNodeApi from "./handlers/ensnode-api";
+import "./ensdb-writer-worker-entrypoint";
 
 const app = new Hono();
 

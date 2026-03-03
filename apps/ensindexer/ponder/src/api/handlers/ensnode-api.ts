@@ -14,12 +14,9 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { buildENSIndexerPublicConfig } from "@/config/public";
-import { startEnsDbWriterWorker } from "@/lib/ensdb-writer-worker/singleton";
 import { indexingStatusBuilder } from "@/lib/indexing-status-builder/singleton";
 
 const app = new Hono();
-
-startEnsDbWriterWorker();
 
 // include ENSIndexer Public Config endpoint
 app.get("/config", async (c) => {
