@@ -7,6 +7,7 @@ import {
   type EnsIndexerClient,
   type EnsIndexerPublicConfig,
   OmnichainIndexingStatusIds,
+  type OmnichainIndexingStatusSnapshot,
   validateEnsIndexerPublicConfigCompatibility,
 } from "@ensnode/ensnode-sdk";
 
@@ -17,21 +18,21 @@ import type { IndexingStatusBuilder } from "@/lib/indexing-status-builder/indexi
  * Interval in seconds between two consecutive attempts to upsert
  * the Indexing Status Snapshot record into ENSDb.
  */
-const INDEXING_STATUS_RECORD_UPDATE_INTERVAL: Duration = 5;
+const INDEXING_STATUS_RECORD_UPDATE_INTERVAL: Duration = 1;
 
 /**
  * ENSDb Writer Worker
  *
- * A worker responsible for writing ENSIndexer-related data into ENSDb, including:
+ * A worker responsible for writing ENSIndexer-related metadata into ENSDb, including:
  * - ENSDb version
  * - ENSIndexer Public Config
  * - ENSIndexer Indexing Status Snapshots
  */
 export class EnsDbWriterWorker {
   /**
-   * AbortController instance used to signal the worker to stop its recurring tasks.
+   * Interval for recurring upserts of Indexing Status Snapshots into ENSDb.
    */
-  private abortController: AbortController = new AbortController();
+  private indexingStatusInterval: ReturnType<typeof setInterval> | null = null;
 
   /**
    * ENSDb Client instance used by the worker to interact with ENSDb.
@@ -72,6 +73,9 @@ export class EnsDbWriterWorker {
    *   {@link EnsIndexerPublicConfig} into ENSDb.
    * 3) A recurring attempt to upsert serialized representation of
    *    {@link CrossChainIndexingStatusSnapshot} into ENSDb.
+   *
+   * @throws Error if the in-memory ENSIndexer Public Config is incompatible
+   *         with the stored one in ENSDb (if available).
    */
   public async run(): Promise<void> {
     // Fetch data required for task 1 and task 2.
@@ -90,52 +94,10 @@ export class EnsDbWriterWorker {
     console.log(`[EnsDbWriterWorker]: ENSIndexer Public Config upserted successfully`);
 
     // Task 3: recurring upsert of Indexing Status Snapshot into ENSDb.
-    const indexingStatusSnapshotStream = this.getIndexingStatusSnapshotStream();
-
-    for await (const snapshot of indexingStatusSnapshotStream) {
-      console.log(`[EnsDbWriterWorker]: Upserting Indexing Status Snapshot into ENSDb...`);
-      await this.ensDbClient.upsertIndexingStatusSnapshot(snapshot);
-      console.log(`[EnsDbWriterWorker]: Indexing Status Snapshot upserted successfully`);
-    }
-  }
-
-  /**
-   * Run the ENSDb Writer Worker with retry behavior.
-   *
-   * Retries the {@link run} method up to `maxRetries` times if it throws,
-   * waiting the same interval used for indexing status updates between attempts.
-   *
-   * @param options.maxRetries Maximum number of attempts before throwing.
-   * @throws Error if the number of attempts exceeds `maxRetries`.
-   */
-  public async runWithRetries(options: { maxRetries: number }): Promise<void> {
-    let attempt = 0;
-
-    while (!this.isStopped) {
-      attempt += 1;
-
-      try {
-        await this.run();
-        return;
-      } catch (error) {
-        if (this.isStopped) {
-          return;
-        }
-
-        console.error(`[EnsDbWriterWorker]: Error in run attempt #${attempt}:`, error);
-
-        if (attempt >= options.maxRetries) {
-          throw new Error(`ENSDb Writer Worker failed after ${attempt} attempts.`, {
-            cause: error,
-          });
-        }
-
-        // Wait for the configured delay before the next attempt. This also
-        // ensures that if the worker is stopped while waiting, it will
-        // not start a new attempt.
-        await this.nextTryDelay();
-      }
-    }
+    this.indexingStatusInterval = setInterval(
+      () => this.upsertIndexingStatusSnapshot(),
+      secondsToMilliseconds(INDEXING_STATUS_RECORD_UPDATE_INTERVAL),
+    );
   }
 
   /**
@@ -144,16 +106,10 @@ export class EnsDbWriterWorker {
    * Stops all recurring tasks in the worker.
    */
   public stop(): void {
-    if (!this.isStopped) {
-      this.abortController.abort();
+    if (this.indexingStatusInterval) {
+      clearInterval(this.indexingStatusInterval);
+      this.indexingStatusInterval = null;
     }
-  }
-
-  /**
-   * Indicates whether the ENSDb Writer Worker is stopped.
-   */
-  get isStopped(): boolean {
-    return this.abortController.signal.aborted;
   }
 
   /**
@@ -184,9 +140,11 @@ export class EnsDbWriterWorker {
       try {
         validateEnsIndexerPublicConfigCompatibility(storedConfig, inMemoryConfig);
       } catch (error) {
-        const errorMessage = `In-memory ENSIndexer Public Config object is not compatible with its counterpart stored in ENSDb.`;
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
 
-        console.error(`[EnsDbWriterWorker]: ${errorMessage}`);
+        console.error(
+          `[EnsDbWriterWorker]: In-memory ENSIndexer Public Config object is not compatible with its counterpart stored in ENSDb. Cause: ${errorMessage}`,
+        );
 
         // Throw the error to terminate the ENSIndexer process due to
         // found config incompatibility
@@ -200,87 +158,50 @@ export class EnsDbWriterWorker {
   }
 
   /**
-   * Get Indexing Status Snapshot Stream
+   * Upsert the current Indexing Status Snapshot into ENSDb.
    *
-   * An async generator function that yields validated Indexing Status Snapshots
-   * retrieved from Indexing Status Builder at a regular interval defined by
-   * `INDEXING_STATUS_RECORD_UPDATE_INTERVAL`. The generator stops yielding
-   * snapshots when the worker is stopped.
-   *
-   * Note: failure to retrieve the Indexing Status from Indexing Status Builder
-   * or failure to validate the retrieved Indexing Status Snapshot does not
-   * cause the generator to throw an error. Instead, the generator continues
-   * with the next attempt after the specified delay.
-   *
-   * @yields validated Indexing Status Snapshots retrieved from Indexing Status Builder.
-   *          Validation criteria are defined in the function body.
-   * @returns void when the worker is stopped.
+   * This method is called by the scheduler at regular intervals.
+   * Errors are logged but not thrown, to keep the worker running.
    */
-  private async *getIndexingStatusSnapshotStream(): AsyncGenerator<CrossChainIndexingStatusSnapshot> {
-    while (!this.isStopped) {
-      try {
-        // get system timestamp for the current iteration of the loop
-        const snapshotTime = getUnixTime(new Date());
+  private async upsertIndexingStatusSnapshot(): Promise<void> {
+    try {
+      // get system timestamp for the current iteration
+      const snapshotTime = getUnixTime(new Date());
 
-        const omnichainSnapshot =
-          await this.indexingStatusBuilder.getOmnichainIndexingStatusSnapshot();
+      const omnichainSnapshot = await this.getValidatedIndexingStatusSnapshot();
 
-        // Invariant: the Omnichain Status must indicate that indexing has started already.
-        if (omnichainSnapshot.omnichainStatus === OmnichainIndexingStatusIds.Unstarted) {
-          throw new Error("Omnichain Status must not be 'Unstarted'.");
-        }
+      const crossChainSnapshot = buildCrossChainIndexingStatusSnapshotOmnichain(
+        omnichainSnapshot,
+        snapshotTime,
+      );
 
-        const crossChainSnapshot = buildCrossChainIndexingStatusSnapshotOmnichain(
-          omnichainSnapshot,
-          snapshotTime,
-        );
-
-        // Yield the validated indexing status snapshot
-        yield crossChainSnapshot;
-      } catch (error) {
-        console.error(
-          `[EnsDbWriterWorker]: Error retrieving or validating Indexing Status Snapshot:`,
-          error,
-        );
-        // Do not throw the error, as failure to retrieve the Indexing Status
-        // should not cause the ENSDb Writer Worker to stop functioning.
-        // Instead, continue with the next attempt after the delay.
-      } finally {
-        // Regardless of success or failure of the attempt to retrieve the Indexing Status,
-        // wait for the configured delay before the next attempt.
-        await this.nextTryDelay();
-      }
+      console.log(`[EnsDbWriterWorker]: Upserting Indexing Status Snapshot into ENSDb...`);
+      await this.ensDbClient.upsertIndexingStatusSnapshot(crossChainSnapshot);
+      console.log(`[EnsDbWriterWorker]: Indexing Status Snapshot upserted successfully`);
+    } catch (error) {
+      console.error(
+        `[EnsDbWriterWorker]: Error retrieving or validating Indexing Status Snapshot:`,
+        error,
+      );
+      // Do not throw the error, as failure to retrieve the Indexing Status
+      // should not cause the ENSDb Writer Worker to stop functioning.
     }
   }
 
   /**
-   * Resolves after the configured interval, or immediately if the worker
-   * has been stopped. Prevents hanging on shutdown mid-wait.
+   * Get validated Omnichain Indexing Status Snapshot
+   *
+   * @returns Validated Omnichain Indexing Status Snapshot.
+   * @throws Error if the Omnichain Indexing Status is not in expected status yet.
    */
-  private nextTryDelay(): Promise<void> {
-    return new Promise((resolve) => {
-      // Do not delay if the worker is already stopped, to allow for prompt shutdown.
-      if (this.isStopped) {
-        return resolve();
-      }
+  private async getValidatedIndexingStatusSnapshot(): Promise<OmnichainIndexingStatusSnapshot> {
+    const omnichainSnapshot = await this.indexingStatusBuilder.getOmnichainIndexingStatusSnapshot();
 
-      // When abort signal is received,
-      // clear the timeout and resolve immediately to allow for prompt shutdown.
-      const onAbort = (): void => {
-        clearTimeout(timeout);
-        resolve();
-      };
+    // Invariant: the Omnichain Status must indicate that indexing has started already.
+    if (omnichainSnapshot.omnichainStatus === OmnichainIndexingStatusIds.Unstarted) {
+      throw new Error("Omnichain Status must not be 'Unstarted'.");
+    }
 
-      const timeout = setTimeout(() => {
-        // Clear the abort event listener after the timeout completes, to prevent memory leaks.
-        this.abortController.signal.removeEventListener("abort", onAbort);
-
-        resolve();
-      }, secondsToMilliseconds(INDEXING_STATUS_RECORD_UPDATE_INTERVAL));
-
-      // If the worker is stopped while waiting,
-      // resolve immediately to allow for prompt shutdown.
-      this.abortController.signal.addEventListener("abort", onAbort, { once: true });
-    });
+    return omnichainSnapshot;
   }
 }
