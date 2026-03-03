@@ -17,7 +17,7 @@ let ensDbWriterWorker: EnsDbWriterWorker;
  */
 export function startEnsDbWriterWorker() {
   if (typeof ensDbWriterWorker !== "undefined") {
-    throw new Error("EnsDbWriterWorker is already running");
+    throw new Error("EnsDbWriterWorker has already been initialized");
   }
 
   ensDbWriterWorker = new EnsDbWriterWorker(ensDbClient, ensIndexerClient, indexingStatusBuilder);
