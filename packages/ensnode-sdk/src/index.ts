@@ -27,5 +27,6 @@ export * from "./shared/serialize";
 export * from "./shared/serialized-types";
 export * from "./shared/types";
 export * from "./shared/url";
+export * from "./shared/wait";
 export * from "./tokenscope";
 export * from "./tracing";
