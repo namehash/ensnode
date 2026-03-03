@@ -16,22 +16,18 @@ export interface ReferralEvent {
 
   /**
    * Unix seconds block timestamp.
-   * Used as the primary sort key for chronological ordering.
    */
   timestamp: UnixTimestamp;
 
   /**
-   * Block number. Used for tie-breaking within the same timestamp.
-   */
-  blockNumber: bigint;
-
-  /**
-   * Transaction hash. Used for tie-breaking within the same block.
-   */
-  transactionHash: `0x${string}`;
-
-  /**
    * Registrar action ID.
+   *
+   * A Ponder-encoded checkpoint string that uniquely and deterministically identifies
+   * this event. Encodes all ordering-relevant properties:
+   * `blockTimestamp → chainId → blockNumber → transactionIndex → eventType → eventIndex`
+   *
+   * This field alone is sufficient to establish a total chronological ordering over
+   * all referral events.
    */
   id: string;
 

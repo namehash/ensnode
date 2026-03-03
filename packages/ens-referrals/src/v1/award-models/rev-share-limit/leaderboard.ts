@@ -14,6 +14,7 @@ import { SECONDS_PER_YEAR } from "../../time";
 import type { ReferralProgramAwardModels } from "../shared/rules";
 import type { AggregatedReferrerMetricsRevShareLimit } from "./aggregations";
 import { buildAggregatedReferrerMetricsRevShareLimit } from "./aggregations";
+import { compareEventIds } from "./checkpoint";
 import type { AwardedReferrerMetricsRevShareLimit } from "./metrics";
 import {
   buildAwardedReferrerMetricsRevShareLimit,
@@ -99,16 +100,11 @@ export const buildReferrerLeaderboardRevShareLimit = (
   rules: ReferralProgramRulesRevShareLimit,
   accurateAsOf: UnixTimestamp,
 ): ReferrerLeaderboardRevShareLimit => {
-  // 1. Sort events deterministically: timestamp asc, blockNumber asc, transactionHash asc.
-  const sortedEvents = [...events].sort((a, b) => {
-    if (a.timestamp !== b.timestamp) return a.timestamp - b.timestamp;
-    if (a.blockNumber !== b.blockNumber) return a.blockNumber < b.blockNumber ? -1 : 1;
-    if (a.transactionHash < b.transactionHash) return -1;
-    if (a.transactionHash > b.transactionHash) return 1;
-    if (a.id < b.id) return -1;
-    if (a.id > b.id) return 1;
-    return 0;
-  });
+  // 1. Sort events deterministically using the Ponder checkpoint ID.
+  //    The `id` encodes all ordering-relevant properties (blockTimestamp, chainId,
+  //    blockNumber, transactionIndex, eventIndex), so comparing IDs as bigints
+  //    (after zeroing the internal `eventType` digit) yields a total chronological order.
+  const sortedEvents = [...events].sort((a, b) => compareEventIds(a.id, b.id));
 
   // 2. Process events sequentially to run the race.
   const referrerStates = new Map<Address, ReferrerRaceState>();

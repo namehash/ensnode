@@ -111,8 +111,6 @@ export const getReferralEvents = async (rules: ReferralProgramRules): Promise<Re
         id: schema.registrarActions.id,
         referrer: schema.registrarActions.decodedReferrer,
         timestamp: schema.registrarActions.timestamp,
-        blockNumber: schema.registrarActions.blockNumber,
-        transactionHash: schema.registrarActions.transactionHash,
         incrementalDuration: schema.registrarActions.incrementalDuration,
         // Note: Using raw SQL for COALESCE because Drizzle doesn't natively support it yet.
         // See: https://github.com/drizzle-team/drizzle-orm/issues/3708
@@ -132,23 +130,16 @@ export const getReferralEvents = async (rules: ReferralProgramRules): Promise<Re
           eq(schema.registrarActions.subregistryId, formatAccountId(rules.subregistryId)),
         ),
       )
-      .orderBy(
-        asc(schema.registrarActions.timestamp),
-        asc(schema.registrarActions.blockNumber),
-        asc(schema.registrarActions.transactionHash),
-        asc(schema.registrarActions.id),
-      );
+      .orderBy(asc(schema.registrarActions.id));
 
     // Type assertion: All fields in NonNullRecord are guaranteed non-null:
     // 1. `referrer` is guaranteed non-null by isNotNull WHERE filter
-    // 2. `timestamp`, `blockNumber`, `transactionHash`, `incrementalDuration` are guaranteed non-null by database schema constraints (NOT NULL columns)
+    // 2. `timestamp`, `incrementalDuration` are guaranteed non-null by database schema constraints (NOT NULL columns)
     // 3. `total` is guaranteed non-null by COALESCE with 0
     interface NonNullRecord {
       id: string;
       referrer: Address;
       timestamp: bigint;
-      blockNumber: bigint;
-      transactionHash: `0x${string}`;
       incrementalDuration: bigint;
       total: string;
     }
@@ -157,8 +148,6 @@ export const getReferralEvents = async (rules: ReferralProgramRules): Promise<Re
       id: record.id,
       referrer: record.referrer,
       timestamp: Number(record.timestamp),
-      blockNumber: record.blockNumber,
-      transactionHash: record.transactionHash,
       incrementalDuration: Number(record.incrementalDuration),
       incrementalRevenueContribution: priceEth(BigInt(record.total)),
     }));

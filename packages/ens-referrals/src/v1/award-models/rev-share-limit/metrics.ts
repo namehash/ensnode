@@ -118,8 +118,8 @@ export interface AwardedReferrerMetricsRevShareLimit extends RankedReferrerMetri
    * The standard (uncapped) USDC award value for this referrer, computed as
    * `qualifiedRevenueShare × totalBaseRevenueContribution`.
    *
-   * Represents what the referrer would receive if the pool were unlimited.
-   * Independent of the pool state.
+   * Represents what the referrer would receive if the pool were unlimited and the referrer were qualified.
+   * Independent of the pool state and qualification status.
    */
   standardAwardValue: PriceUsdc;
 

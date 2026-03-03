@@ -13,11 +13,20 @@ const ADDR_A = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" as const;
 const ADDR_B = "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" as const;
 const ADDR_C = "0xcccccccccccccccccccccccccccccccccccccccc" as const;
 
-const TX_1 = "0x0000000000000000000000000000000000000000000000000000000000000001" as const;
-const TX_2 = "0x0000000000000000000000000000000000000000000000000000000000000002" as const;
-const TX_3 = "0x0000000000000000000000000000000000000000000000000000000000000003" as const;
-
 const ZERO_ETH = priceEth(0n);
+
+/**
+ * A shared prefix for test checkpoint IDs representing a realistic (but fixed)
+ * blockTimestamp + chainId + blockNumber + transactionIndex segment.
+ *
+ * Ponder checkpoint IDs are 75 characters long:
+ *   [blockTimestamp: 10][chainId: 16][blockNumber: 16][transactionIndex: 16][eventType: 1][eventIndex: 16]
+ */
+const CHECKPOINT_PREFIX =
+  "0000000000" + // blockTimestamp (10 chars)
+  "0000000000000001" + // chainId (16 chars, mainnet = 1)
+  "0000000000000001" + // blockNumber (16 chars)
+  "0000000000000000"; // transactionIndex (16 chars)
 
 /**
  * Build test rules.
@@ -54,14 +63,13 @@ function makeEvent(
   referrer: `0x${string}`,
   timestamp: number,
   incrementalDuration: number,
-  opts: Partial<Pick<ReferralEvent, "blockNumber" | "transactionHash" | "id">> = {},
+  opts: Partial<Pick<ReferralEvent, "id">> = {},
 ): ReferralEvent {
+  const counter = ++eventIdCounter;
   return {
-    id: opts.id ?? `event-${++eventIdCounter}`,
+    id: opts.id ?? `${CHECKPOINT_PREFIX}0${String(counter).padStart(16, "0")}`,
     referrer,
     timestamp,
-    blockNumber: opts.blockNumber ?? 1n,
-    transactionHash: opts.transactionHash ?? TX_1,
     incrementalDuration,
     incrementalRevenueContribution: ZERO_ETH,
   };
@@ -100,9 +108,7 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
   describe("Scenario A — unqualified referrer: no award claimed", () => {
     it("accumulates standard award but awardPoolApproxValue is $0 when not qualified", () => {
       // Half a year of duration → base revenue = $2.50 (< $5 threshold)
-      const events = [
-        makeEvent(ADDR_A, 1000, Math.floor(SECONDS_PER_YEAR / 2), { transactionHash: TX_1 }),
-      ];
+      const events = [makeEvent(ADDR_A, 1000, Math.floor(SECONDS_PER_YEAR / 2))];
       const rules = buildTestRules();
 
       const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
@@ -128,8 +134,8 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       // Accumulated standard award = 2 × $1.25 = $2.50
       const rules = buildTestRules(parseUsdc("10000")); // large pool
       const events = [
-        makeEvent(ADDR_A, 1000, Math.floor(SECONDS_PER_YEAR / 2), { transactionHash: TX_1 }),
-        makeEvent(ADDR_A, 2000, Math.floor(SECONDS_PER_YEAR / 2), { transactionHash: TX_2 }),
+        makeEvent(ADDR_A, 1000, Math.floor(SECONDS_PER_YEAR / 2)),
+        makeEvent(ADDR_A, 2000, Math.floor(SECONDS_PER_YEAR / 2)),
       ];
 
       const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
@@ -148,8 +154,8 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       const poolAmount = parseUsdc("1.5");
       const rules = buildTestRules(poolAmount);
       const events = [
-        makeEvent(ADDR_A, 1000, Math.floor(SECONDS_PER_YEAR / 2), { transactionHash: TX_1 }),
-        makeEvent(ADDR_A, 2000, Math.floor(SECONDS_PER_YEAR / 2), { transactionHash: TX_2 }),
+        makeEvent(ADDR_A, 1000, Math.floor(SECONDS_PER_YEAR / 2)),
+        makeEvent(ADDR_A, 2000, Math.floor(SECONDS_PER_YEAR / 2)),
       ];
 
       const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
@@ -172,8 +178,8 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       // Total: $5.00
       const rules = buildTestRules(parseUsdc("10000"));
       const events = [
-        makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR, { transactionHash: TX_1 }),
-        makeEvent(ADDR_A, 2000, SECONDS_PER_YEAR, { transactionHash: TX_2 }),
+        makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR),
+        makeEvent(ADDR_A, 2000, SECONDS_PER_YEAR),
       ];
 
       const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
@@ -194,8 +200,8 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       // Event 2 at t=2000: 1 year → already qualified, incremental $2.50, claim min($2.50, $0.50) = $0.50, pool = $0
       const rules = buildTestRules(parseUsdc("3"));
       const events = [
-        makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR, { transactionHash: TX_1 }),
-        makeEvent(ADDR_A, 2000, SECONDS_PER_YEAR, { transactionHash: TX_2 }),
+        makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR),
+        makeEvent(ADDR_A, 2000, SECONDS_PER_YEAR),
       ];
 
       const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
@@ -215,7 +221,7 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
     it("qualified referrer gets $0 when pool is already depleted", () => {
       // Pool = $0
       const rules = buildTestRules(priceUsdc(0n));
-      const events = [makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR, { transactionHash: TX_1 })];
+      const events = [makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR)];
 
       const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
       const referrer = result.referrers.get(ADDR_A)!;
@@ -233,8 +239,8 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       // ReferrerB qualifies at t=2000 (1 year), claims min($2.50, $1.50) = $1.50, pool = $0
       const rules = buildTestRules(parseUsdc("4"));
       const events = [
-        makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR, { transactionHash: TX_1 }),
-        makeEvent(ADDR_B, 2000, SECONDS_PER_YEAR, { transactionHash: TX_2 }),
+        makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR),
+        makeEvent(ADDR_B, 2000, SECONDS_PER_YEAR),
       ];
 
       const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
@@ -257,8 +263,8 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       // ReferrerB qualifies at t=2000, claims min($2.50, $0) = $0
       const rules = buildTestRules(parseUsdc("2.5"));
       const events = [
-        makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR, { transactionHash: TX_1 }),
-        makeEvent(ADDR_B, 2000, SECONDS_PER_YEAR, { transactionHash: TX_2 }),
+        makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR),
+        makeEvent(ADDR_B, 2000, SECONDS_PER_YEAR),
       ];
 
       const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
@@ -277,9 +283,9 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       // ReferrerC qualifies at t=3000, claims $0 (pool empty — fully truncated)
       const rules = buildTestRules(parseUsdc("3.75"));
       const events = [
-        makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR, { transactionHash: TX_1 }),
-        makeEvent(ADDR_B, 2000, SECONDS_PER_YEAR, { transactionHash: TX_2 }),
-        makeEvent(ADDR_C, 3000, SECONDS_PER_YEAR, { transactionHash: TX_3 }),
+        makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR),
+        makeEvent(ADDR_B, 2000, SECONDS_PER_YEAR),
+        makeEvent(ADDR_C, 3000, SECONDS_PER_YEAR),
       ];
 
       const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
@@ -299,84 +305,21 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
   });
 
   describe("Deterministic ordering within same timestamp", () => {
-    it("breaks ties by blockNumber (lower block wins)", () => {
-      // Both referrers have the same timestamp but different block numbers
-      // Pool = $2.50 — only enough for one
+    it("sorts by id as bigint (lower id wins)", () => {
+      // Both referrers have the same timestamp; ADDR_A has a lower checkpoint id.
+      // Pool = $2.50 — only enough for one.
+      // IDs differ only in their eventIndex (last 16 digits): 1 < 2, so ADDR_A wins.
+      const ID_EARLY = `${CHECKPOINT_PREFIX}00000000000000001`;
+      const ID_LATE = `${CHECKPOINT_PREFIX}00000000000000002`;
       const rules = buildTestRules(parseUsdc("2.5"));
       const events = [
-        {
-          ...makeEvent(ADDR_B, 1000, SECONDS_PER_YEAR, { transactionHash: TX_1 }),
-          blockNumber: 200n,
-        },
-        {
-          ...makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR, { transactionHash: TX_2 }),
-          blockNumber: 100n,
-        },
+        { ...makeEvent(ADDR_B, 1000, SECONDS_PER_YEAR), id: ID_LATE },
+        { ...makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR), id: ID_EARLY },
       ];
 
       const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
 
-      // ADDR_A is in block 100 (earlier), should get the award
-      expect(result.referrers.get(ADDR_A)!.awardPoolApproxValue.amount).toBe(
-        STANDARD_AWARD_1Y.amount,
-      );
-      expect(result.referrers.get(ADDR_B)!.awardPoolApproxValue.amount).toBe(0n);
-    });
-
-    it("breaks ties by transactionHash (lexicographic) when block is the same", () => {
-      // Both in same block — TX_1 < TX_2 lexicographically
-      // Pool = $2.50 — only enough for one
-      const TX_EARLY =
-        "0x0000000000000000000000000000000000000000000000000000000000000001" as const;
-      const TX_LATE = "0x0000000000000000000000000000000000000000000000000000000000000002" as const;
-      const rules = buildTestRules(parseUsdc("2.5"));
-      const events = [
-        {
-          ...makeEvent(ADDR_B, 1000, SECONDS_PER_YEAR),
-          blockNumber: 100n,
-          transactionHash: TX_LATE,
-        },
-        {
-          ...makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR),
-          blockNumber: 100n,
-          transactionHash: TX_EARLY,
-        },
-      ];
-
-      const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
-
-      // ADDR_A has earlier tx hash (TX_EARLY), should claim the pool first
-      expect(result.referrers.get(ADDR_A)!.awardPoolApproxValue.amount).toBe(
-        STANDARD_AWARD_1Y.amount,
-      );
-      expect(result.referrers.get(ADDR_B)!.awardPoolApproxValue.amount).toBe(0n);
-    });
-
-    it("breaks ties by id (lexicographic) when timestamp, blockNumber, and transactionHash are identical", () => {
-      // Both events share identical timestamp, blockNumber, and transactionHash
-      // Pool = $2.50 — only enough for one
-      // id "1" < "2" lexicographically, so ADDR_A (id "1") wins
-      const SHARED_TX =
-        "0x0000000000000000000000000000000000000000000000000000000000000001" as const;
-      const rules = buildTestRules(parseUsdc("2.5"));
-      const events = [
-        {
-          ...makeEvent(ADDR_B, 1000, SECONDS_PER_YEAR),
-          blockNumber: 100n,
-          transactionHash: SHARED_TX,
-          id: "2",
-        },
-        {
-          ...makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR),
-          blockNumber: 100n,
-          transactionHash: SHARED_TX,
-          id: "1",
-        },
-      ];
-
-      const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
-
-      // ADDR_A has id "1" (lower), should claim the pool first
+      // ADDR_A has the lower id, should claim the pool first
       expect(result.referrers.get(ADDR_A)!.awardPoolApproxValue.amount).toBe(
         STANDARD_AWARD_1Y.amount,
       );
@@ -392,9 +335,9 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       // ADDR_C: 0.5 years → never qualifies, qualifiedAward = $0, standardAward = $1.25
       const rules = buildTestRules();
       const events = [
-        makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR, { transactionHash: TX_1 }),
-        makeEvent(ADDR_B, 2000, SECONDS_PER_YEAR * 2, { transactionHash: TX_2 }),
-        makeEvent(ADDR_C, 3000, Math.floor(SECONDS_PER_YEAR / 2), { transactionHash: TX_3 }),
+        makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR),
+        makeEvent(ADDR_B, 2000, SECONDS_PER_YEAR * 2),
+        makeEvent(ADDR_C, 3000, Math.floor(SECONDS_PER_YEAR / 2)),
       ];
 
       const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
@@ -413,8 +356,8 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       // ADDR_B: 1 year → qualifies, standardAward = $2.50, qualifiedAward = $0
       const rules = buildTestRules(priceUsdc(0n));
       const events = [
-        makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR * 2, { transactionHash: TX_1 }),
-        makeEvent(ADDR_B, 2000, SECONDS_PER_YEAR, { transactionHash: TX_2 }),
+        makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR * 2),
+        makeEvent(ADDR_B, 2000, SECONDS_PER_YEAR),
       ];
 
       const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
@@ -427,8 +370,8 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
     it("referrers map is ordered by rank ascending", () => {
       const rules = buildTestRules();
       const events = [
-        makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR, { transactionHash: TX_1 }),
-        makeEvent(ADDR_B, 2000, SECONDS_PER_YEAR * 2, { transactionHash: TX_2 }),
+        makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR),
+        makeEvent(ADDR_B, 2000, SECONDS_PER_YEAR * 2),
       ];
 
       const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
@@ -441,9 +384,9 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
     it("correctly sums grandTotalReferrals and grandTotalIncrementalDuration", () => {
       const rules = buildTestRules();
       const events = [
-        makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR, { transactionHash: TX_1 }),
-        makeEvent(ADDR_A, 2000, SECONDS_PER_YEAR, { transactionHash: TX_2 }),
-        makeEvent(ADDR_B, 3000, SECONDS_PER_YEAR, { transactionHash: TX_3 }),
+        makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR),
+        makeEvent(ADDR_A, 2000, SECONDS_PER_YEAR),
+        makeEvent(ADDR_B, 3000, SECONDS_PER_YEAR),
       ];
 
       const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);

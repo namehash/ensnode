@@ -32,8 +32,6 @@ export interface ReferralProgramRulesRevShareLimit extends BaseReferralProgramRu
 
   /**
    * The total value of the award pool in USDC (acts as a cap on total payouts).
-   *
-   * NOTE: Awards will actually be distributed in $ENS tokens.
    */
   totalAwardPoolValue: PriceUsdc;
 
