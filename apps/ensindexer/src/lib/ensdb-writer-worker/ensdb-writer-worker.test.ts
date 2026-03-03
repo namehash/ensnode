@@ -59,7 +59,7 @@ describe("EnsDbWriterWorker", () => {
     buildSnapshot.mockReturnValue(snapshot);
 
     const ensDbClient = {
-      getEnsIndexerPublicConfig: vi.fn().mockResolvedValue(null),
+      getEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
       upsertEnsDbVersion: vi.fn().mockResolvedValue(undefined),
       upsertEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
       upsertIndexingStatusSnapshot: vi.fn().mockResolvedValue(undefined),
@@ -147,7 +147,7 @@ describe("EnsDbWriterWorker", () => {
     vi.mocked(buildCrossChainIndexingStatusSnapshotOmnichain).mockReturnValue(crossChainSnapshot);
 
     const ensDbClient = {
-      getEnsIndexerPublicConfig: vi.fn().mockResolvedValue(null),
+      getEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
       upsertEnsDbVersion: vi.fn().mockResolvedValue(undefined),
       upsertEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
       upsertIndexingStatusSnapshot: vi.fn().mockResolvedValue(undefined),
@@ -195,7 +195,7 @@ describe("EnsDbWriterWorker", () => {
     const upsertIndexingStatusSnapshot = vi.fn().mockResolvedValue(undefined);
 
     const ensDbClient = {
-      getEnsIndexerPublicConfig: vi.fn().mockResolvedValue(null),
+      getEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
       upsertEnsDbVersion: vi.fn().mockResolvedValue(undefined),
       upsertEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
       upsertIndexingStatusSnapshot,
@@ -244,7 +244,7 @@ describe("EnsDbWriterWorker", () => {
     vi.mocked(buildCrossChainIndexingStatusSnapshotOmnichain).mockReturnValue(snapshot);
 
     const ensDbClient = {
-      getEnsIndexerPublicConfig: vi.fn().mockResolvedValue(null),
+      getEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
       upsertEnsDbVersion: vi.fn().mockResolvedValue(undefined),
       upsertEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
       upsertIndexingStatusSnapshot: vi.fn().mockResolvedValue(undefined),
@@ -314,7 +314,7 @@ describe("EnsDbWriterWorker", () => {
     const networkError = new Error("Network failure");
 
     const ensDbClient = {
-      getEnsIndexerPublicConfig: vi.fn().mockResolvedValue(null),
+      getEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
       upsertEnsDbVersion: vi.fn().mockResolvedValue(undefined),
       upsertEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
       upsertIndexingStatusSnapshot: vi.fn().mockResolvedValue(undefined),
@@ -398,7 +398,7 @@ describe("EnsDbWriterWorker", () => {
       .mockReturnValueOnce(crossChainSnapshot2);
 
     const ensDbClient = {
-      getEnsIndexerPublicConfig: vi.fn().mockResolvedValue(null),
+      getEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
       upsertEnsDbVersion: vi.fn().mockResolvedValue(undefined),
       upsertEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
       upsertIndexingStatusSnapshot: vi

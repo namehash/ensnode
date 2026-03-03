@@ -13,18 +13,24 @@ let ensDbWriterWorker: EnsDbWriterWorker;
  * for example in response to a process termination signal or an internal error, at
  * which point it will attempt to gracefully shut down.
  *
- * @throws Error if the worker run method throws an error during execution.
+ * @throws Error if the worker is already running when this function is called.
  */
 export function startEnsDbWriterWorker() {
+  if (typeof ensDbWriterWorker !== "undefined") {
+    throw new Error("EnsDbWriterWorker is already running");
+  }
+
   ensDbWriterWorker = new EnsDbWriterWorker(ensDbClient, ensIndexerClient, indexingStatusBuilder);
+
+  const stopWorker = ensDbWriterWorker.stop.bind(ensDbWriterWorker);
 
   ensDbWriterWorker
     .run()
     .then(() => {
       // Once the worker has successfully kicked off,
       // we can listen for termination signals to trigger a graceful shutdown
-      process.on("SIGINT", () => ensDbWriterWorker.stop());
-      process.on("SIGTERM", () => ensDbWriterWorker.stop());
+      process.once("SIGINT", stopWorker);
+      process.once("SIGTERM", stopWorker);
     })
     // Handle any uncaught errors from the worker
     .catch((error) => {
