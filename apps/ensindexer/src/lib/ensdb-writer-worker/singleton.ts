@@ -9,8 +9,8 @@ let ensDbWriterWorker: EnsDbWriterWorker;
 /**
  * Starts the EnsDbWriterWorker in a new asynchronous context.
  *
- * The worker will run indefinitely until its internal AbortSignal is triggered,
- * for example due to a process termination signal or an internal error, at
+ * The worker will run indefinitely until it is stopped via {@link EnsDbWriterWorker.stop},
+ * for example in response to a process termination signal or an internal error, at
  * which point it will attempt to gracefully shut down.
  *
  * @throws Error if the worker run method throws an error during execution.
