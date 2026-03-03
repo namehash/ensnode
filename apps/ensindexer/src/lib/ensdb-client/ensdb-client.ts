@@ -41,7 +41,7 @@ interface DrizzleDb extends NodePgDatabase<typeof schema> {}
  *
  * This client exists to provide an abstraction layer for interacting with ENSDb.
  * It enables ENSIndexer and ENSApi to decouple from each other, and use
- * the ENSDb Client as the integration point between the two.
+ * ENSDb as the integration point between the two (via ENSDb Client).
  *
  * Enables querying and mutating ENSDb data, such as:
  * - ENSDb version
