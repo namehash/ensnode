@@ -591,7 +591,7 @@ function ENSNodeConfigCardContent({
             label="Records Count"
             value={
               <p className={cardItemValueStyles}>
-                {ensIndexerPublicConfig.ensRainbowPublicConfig.recordsCount}
+                {ensIndexerPublicConfig.ensRainbowPublicConfig.recordsCount.toLocaleString()}
               </p>
             }
             additionalInfo={
