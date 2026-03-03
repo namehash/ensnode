@@ -1,4 +1,5 @@
 import { getUnixTime, secondsToMilliseconds } from "date-fns";
+import pRetry from "p-retry";
 
 import {
   buildCrossChainIndexingStatusSnapshotOmnichain,
@@ -74,10 +75,16 @@ export class EnsDbWriterWorker {
    * 3) A recurring attempt to upsert serialized representation of
    *    {@link CrossChainIndexingStatusSnapshot} into ENSDb.
    *
-   * @throws Error if the in-memory ENSIndexer Public Config is incompatible
-   *         with the stored one in ENSDb (if available).
+   * @throws Error if the worker is already running, or
+   *         if the in-memory ENSIndexer Public Config could not be fetched, or
+   *         if the in-memory ENSIndexer Public Config is incompatible with the stored config in ENSDb.
    */
   public async run(): Promise<void> {
+    // Do not allow multiple concurrent runs of the worker
+    if (this.isRunning) {
+      throw new Error("EnsDbWriterWorker is already running");
+    }
+
     // Fetch data required for task 1 and task 2.
     const inMemoryConfig = await this.getValidatedEnsIndexerPublicConfig();
 
@@ -98,6 +105,13 @@ export class EnsDbWriterWorker {
       () => this.upsertIndexingStatusSnapshot(),
       secondsToMilliseconds(INDEXING_STATUS_RECORD_UPDATE_INTERVAL),
     );
+  }
+
+  /**
+   * Indicates whether the ENSDb Writer Worker is currently running.
+   */
+  get isRunning(): boolean {
+    return this.indexingStatusInterval !== null;
   }
 
   /**
@@ -125,14 +139,45 @@ export class EnsDbWriterWorker {
    *
    * @returns In-memory config object, if the validation is successful or
    *          if there is no stored config.
-   * @throws Error if the in-memory config object is incompatible with
-   *         the stored one.
+   * @throws Error if the in-memory config object cannot be fetched or,
+   *         got fetched and is incompatible with the stored config object.
    */
   private async getValidatedEnsIndexerPublicConfig(): Promise<EnsIndexerPublicConfig> {
-    const [storedConfig, inMemoryConfig] = await Promise.all([
-      this.ensDbClient.getEnsIndexerPublicConfig(),
-      this.ensIndexerClient.config(),
-    ]);
+    /**
+     * Fetch the in-memory config with retries, to handle potential transient errors
+     * in the ENSIndexer Client (e.g. due to network issues). If the fetch fails after
+     * the defined number of retries, the error will be thrown and the worker will not start,
+     * as the ENSIndexer Public Config is a critical dependency for the worker's tasks.
+     */
+    const inMemoryConfigPromise = pRetry(() => this.ensIndexerClient.config(), {
+      retries: 3,
+      onFailedAttempt: ({ error, attemptNumber, retriesLeft }) => {
+        console.warn(
+          `ENSIndexer Config fetch attempt ${attemptNumber} failed (${error.message}). ${retriesLeft} retries left.`,
+        );
+      },
+    });
+
+    let storedConfig: EnsIndexerPublicConfig | undefined;
+    let inMemoryConfig: EnsIndexerPublicConfig;
+
+    try {
+      [storedConfig, inMemoryConfig] = await Promise.all([
+        this.ensDbClient.getEnsIndexerPublicConfig(),
+        inMemoryConfigPromise,
+      ]);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+
+      console.error(
+        `[EnsDbWriterWorker]: Failed to fetch ENSIndexer Public Config: ${errorMessage}`,
+      );
+
+      // Throw the error to terminate the ENSIndexer process due to failed fetch of critical dependency
+      throw new Error(errorMessage, {
+        cause: error,
+      });
+    }
 
     // Validate in-memory config object compatibility with the stored one,
     // if the stored one is available

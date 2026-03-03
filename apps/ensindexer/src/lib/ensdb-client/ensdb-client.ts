@@ -146,7 +146,8 @@ export class EnsDbClient implements EnsDbClientQuery, EnsDbClientMutation {
    * Get ENSNode metadata record
    *
    * @returns selected record in ENSDb.
-   * @throws when exactly one matching metadata record was not found
+   * @throws when more than one matching metadata record is found
+   *         (should be impossible given the PK constraint on 'key')
    */
   private async getEnsNodeMetadata<EnsNodeMetadataType extends SerializedEnsNodeMetadata>(
     metadata: Pick<EnsNodeMetadataType, "key">,

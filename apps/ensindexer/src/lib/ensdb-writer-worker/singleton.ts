@@ -12,27 +12,25 @@ let ensDbWriterWorker: EnsDbWriterWorker;
  * The worker will run indefinitely until its internal AbortSignal is triggered,
  * for example due to a process termination signal or an internal error, at
  * which point it will attempt to gracefully shut down.
+ *
+ * @throws Error if the worker run method throws an error during execution.
  */
 export function startEnsDbWriterWorker() {
-  if (typeof ensDbWriterWorker !== "undefined") {
-    throw new Error("EnsDbWriterWorker has already been started");
-  }
-
   ensDbWriterWorker = new EnsDbWriterWorker(ensDbClient, ensIndexerClient, indexingStatusBuilder);
 
-  const ensDbWriterWorkerRun = ensDbWriterWorker.runWithRetries({ maxRetries: 3 });
+  ensDbWriterWorker
+    .run()
+    // Handle any uncaught errors from the worker
+    .catch((error) => {
+      // Abort the worker on error to trigger cleanup
+      ensDbWriterWorker.stop();
 
-  // Handle any uncaught errors from the worker
-  ensDbWriterWorkerRun.catch((error) => {
-    // Abort the worker on error to trigger cleanup
-    ensDbWriterWorker.stop();
+      console.error("EnsDbWriterWorker encountered an error:", error);
 
-    console.error("EnsDbWriterWorker encountered an error:", error);
-
-    // Re-throw the error to ensure the application shuts down with a non-zero exit code.
-    process.exitCode = 1;
-    throw error;
-  });
+      // Re-throw the error to ensure the application shuts down with a non-zero exit code.
+      process.exitCode = 1;
+      throw error;
+    });
 
   // Handle graceful shutdown on process termination signals
   process.on("SIGINT", () => ensDbWriterWorker.stop());
