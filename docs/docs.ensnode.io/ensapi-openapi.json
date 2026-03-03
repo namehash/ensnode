@@ -1781,9 +1781,9 @@
           },
           {
             "schema": {
-              "type": "string",
-              "default": false,
-              "description": "Filter to only include actions with referrals"
+              "type": "boolean",
+              "description": "Filter to only include actions with referrals",
+              "default": false
             },
             "required": false,
             "description": "Filter to only include actions with referrals",
@@ -1864,9 +1864,9 @@
           },
           {
             "schema": {
-              "type": "string",
-              "default": false,
-              "description": "Filter to only include actions with referrals"
+              "type": "boolean",
+              "description": "Filter to only include actions with referrals",
+              "default": false
             },
             "required": false,
             "description": "Filter to only include actions with referrals",
@@ -1914,13 +1914,13 @@
           { "schema": { "type": "string" }, "required": false, "name": "addresses", "in": "query" },
           { "schema": { "type": "string" }, "required": false, "name": "texts", "in": "query" },
           {
-            "schema": { "type": "string", "default": "false" },
+            "schema": { "type": "boolean", "default": false },
             "required": false,
             "name": "trace",
             "in": "query"
           },
           {
-            "schema": { "type": "string", "default": "false" },
+            "schema": { "type": "boolean", "default": false },
             "required": false,
             "name": "accelerate",
             "in": "query"
@@ -1970,13 +1970,13 @@
           { "schema": { "type": "string" }, "required": true, "name": "address", "in": "path" },
           { "schema": { "type": "string" }, "required": true, "name": "chainId", "in": "path" },
           {
-            "schema": { "type": "string", "default": "false" },
+            "schema": { "type": "boolean", "default": false },
             "required": false,
             "name": "trace",
             "in": "query"
           },
           {
-            "schema": { "type": "string", "default": "false" },
+            "schema": { "type": "boolean", "default": false },
             "required": false,
             "name": "accelerate",
             "in": "query"
@@ -2013,13 +2013,13 @@
           { "schema": { "type": "string" }, "required": true, "name": "address", "in": "path" },
           { "schema": { "type": "string" }, "required": false, "name": "chainIds", "in": "query" },
           {
-            "schema": { "type": "string", "default": "false" },
+            "schema": { "type": "boolean", "default": false },
             "required": false,
             "name": "trace",
             "in": "query"
           },
           {
-            "schema": { "type": "string", "default": "false" },
+            "schema": { "type": "boolean", "default": false },
             "required": false,
             "name": "accelerate",
             "in": "query"

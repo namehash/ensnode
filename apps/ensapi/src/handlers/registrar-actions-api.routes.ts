@@ -42,7 +42,8 @@ export const registrarActionsQuerySchema = z
     withReferral: params.boolstring
       .optional()
       .default(false)
-      .describe("Filter to only include actions with referrals"),
+      .describe("Filter to only include actions with referrals")
+      .openapi({ default: false }),
 
     decodedReferrer: makeLowercaseAddressSchema("decodedReferrer")
       .optional()
