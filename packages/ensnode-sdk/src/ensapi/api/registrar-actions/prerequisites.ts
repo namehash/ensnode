@@ -39,7 +39,7 @@ export function hasRegistrarActionsConfigSupport(
 
   return {
     supported: false,
-    reason: `The Registrar Actions API requires all of the following plugins to be activated: ${registrarActionsRequiredPlugins.map((plugin) => `'${plugin}'`).join(", ")}.`,
+    reason: `The Registrar Actions API requires all of the following plugins to be activated in the connected ENSNode's Config: ${registrarActionsRequiredPlugins.map((plugin) => `'${plugin}'`).join(", ")}.`,
   };
 }
 
@@ -67,6 +67,6 @@ export function hasRegistrarActionsIndexingStatusSupport(
 
   return {
     supported: false,
-    reason: `The Registrar Actions API requires one of the following omnichain indexing statuses: ${registrarActionsSupportedIndexingStatusIds.join(", ")}.`,
+    reason: `The Registrar Actions API requires the connected ENSNode's Indexing Status to be one of the following: ${registrarActionsSupportedIndexingStatusIds.join(", ")}.`,
   };
 }

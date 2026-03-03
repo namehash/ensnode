@@ -45,7 +45,7 @@ export const registrarActionsApiMiddleware = factory.createMiddleware(
             details: configSupport.reason,
           },
         }),
-        500,
+        503,
       );
     }
 
@@ -64,7 +64,7 @@ export const registrarActionsApiMiddleware = factory.createMiddleware(
             details: `Indexing status is currently unavailable to this ENSApi instance.`,
           },
         }),
-        500,
+        503,
       );
     }
 
@@ -82,7 +82,7 @@ export const registrarActionsApiMiddleware = factory.createMiddleware(
             details: indexingStatusSupport.reason,
           },
         }),
-        500,
+        503,
       );
 
     await next();

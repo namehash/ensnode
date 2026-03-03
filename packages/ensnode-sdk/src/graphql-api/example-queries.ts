@@ -267,30 +267,6 @@ query AccountResolverPermissions($address: Address!) {
     },
   },
 
-  //////////////////////////////////
-  // Account Domains (All Domains)
-  //////////////////////////////////
-  {
-    query: `
-query AccountDomainsAll($address: Address!) {
-  account(address: $address) {
-    domains {
-      edges {
-        node {
-          label { interpreted }
-          name
-        }
-      }
-    }
-  }
-}`,
-    variables: {
-      default: { address: DEVNET_DEPLOYER },
-      // TODO: figure out a good sepolia-v2 user address
-      // [ENSNamespaceIds.SepoliaV2]: { address: "" },
-    },
-  },
-
   //////////////
   // Namegraph
   //////////////

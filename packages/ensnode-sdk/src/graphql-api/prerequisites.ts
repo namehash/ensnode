@@ -10,6 +10,6 @@ export function hasGraphqlApiConfigSupport(config: EnsIndexerPublicConfig): Prer
 
   return {
     supported: false,
-    reason: `ENSNode Config must have the '${PluginName.ENSv2}' plugin enabled.`,
+    reason: `The connected ENSNode's Config must have the '${PluginName.ENSv2}' plugin enabled.`,
   };
 }

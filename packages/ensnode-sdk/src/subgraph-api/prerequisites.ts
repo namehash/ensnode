@@ -10,6 +10,6 @@ export function hasSubgraphApiConfigSupport(config: EnsIndexerPublicConfig): Pre
 
   return {
     supported: false,
-    reason: `ENSNode Config must have the '${PluginName.Subgraph}' plugin enabled.`,
+    reason: `The connected ENSNode's Config must have the '${PluginName.Subgraph}' plugin enabled.`,
   };
 }

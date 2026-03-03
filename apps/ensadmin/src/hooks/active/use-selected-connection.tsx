@@ -29,11 +29,11 @@ export function useSelectedConnection(): SelectedConnectionResult {
 }
 
 /**
- * Hook to retrieve the current validated `SelectionConnectionResult`'s URL.
+ * Hook to retrieve the current validated `SelectedConnectionResult`'s URL.
  *
  * @throws if `useSelectedConnection` throws
  * @throws if the `validatedSelectedConnection` is not valid
- * @returns validated `SelectionConnectionResult`'s URL
+ * @returns validated `SelectedConnectionResult`'s URL
  */
 export function useValidatedSelectedConnection(): URL {
   const { validatedSelectedConnection } = useSelectedConnection();

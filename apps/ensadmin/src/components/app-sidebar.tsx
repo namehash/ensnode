@@ -52,7 +52,7 @@ const navItems = [
         url: "/api/subgraph",
       },
       {
-        title: "GraphQL (v1 + v2)",
+        title: "GraphQL (ENS v1 + v2)",
         url: "/api/graphql",
       },
     ],

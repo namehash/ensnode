@@ -35,6 +35,7 @@ const EXAMPLE_NAMES: NamespaceSpecificValue<string[]> = {
     "brantly.eth",
     "lightwalker.eth",
   ],
+  [ENSNamespaceIds.Sepolia]: ["gregskril.eth", "vitalik.eth"],
   [ENSNamespaceIds.EnsTestEnv]: [
     "alias.eth",
     "changerole.eth",
