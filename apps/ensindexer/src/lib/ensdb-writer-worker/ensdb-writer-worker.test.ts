@@ -26,6 +26,10 @@ vi.mock("@ensnode/ensnode-sdk", async () => {
   };
 });
 
+vi.mock("p-retry", () => ({
+  default: vi.fn((fn) => fn()),
+}));
+
 describe("EnsDbWriterWorker", () => {
   beforeEach(() => {
     vi.useFakeTimers();
@@ -220,6 +224,144 @@ describe("EnsDbWriterWorker", () => {
 
     // assert - no more calls after stop
     expect(upsertIndexingStatusSnapshot).toHaveBeenCalledTimes(callCountBeforeStop);
+  });
+
+  it("calls pRetry for config fetch with retry logic", async () => {
+    // arrange - pRetry is mocked to call fn directly
+    const omnichainSnapshot = {
+      omnichainStatus: OmnichainIndexingStatusIds.Following,
+      omnichainIndexingCursor: 100,
+      chains: {},
+    } as OmnichainIndexingStatusSnapshot;
+
+    const snapshot = {
+      strategy: CrossChainIndexingStrategyIds.Omnichain,
+      slowestChainIndexingCursor: 100,
+      snapshotTime: 200,
+      omnichainSnapshot,
+    } as CrossChainIndexingStatusSnapshot;
+
+    vi.mocked(buildCrossChainIndexingStatusSnapshotOmnichain).mockReturnValue(snapshot);
+
+    const ensDbClient = {
+      getEnsIndexerPublicConfig: vi.fn().mockResolvedValue(null),
+      upsertEnsDbVersion: vi.fn().mockResolvedValue(undefined),
+      upsertEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
+      upsertIndexingStatusSnapshot: vi.fn().mockResolvedValue(undefined),
+    } as unknown as EnsDbClient;
+
+    const ensIndexerClient = {
+      config: vi.fn().mockResolvedValue(publicConfig),
+    } as unknown as EnsIndexerClient;
+
+    const indexingStatusBuilder = {
+      getOmnichainIndexingStatusSnapshot: vi.fn().mockResolvedValue(omnichainSnapshot),
+    } as unknown as IndexingStatusBuilder;
+
+    const worker = new EnsDbWriterWorker(ensDbClient, ensIndexerClient, indexingStatusBuilder);
+
+    // act
+    await worker.run();
+
+    // assert - config should be called once (pRetry is mocked)
+    expect(ensIndexerClient.config).toHaveBeenCalledTimes(1);
+    expect(ensDbClient.upsertEnsIndexerPublicConfig).toHaveBeenCalledWith(publicConfig);
+
+    // cleanup
+    worker.stop();
+  });
+
+  it("fetches stored and in-memory configs concurrently", async () => {
+    // arrange
+    const storedConfig = { ...publicConfig, versionInfo: { ...publicConfig.versionInfo } };
+    const inMemoryConfig = publicConfig;
+
+    // Ensure validation passes for this test
+    vi.mocked(validateEnsIndexerPublicConfigCompatibility).mockImplementation(() => {
+      // validation passes
+    });
+
+    const ensDbClient = {
+      getEnsIndexerPublicConfig: vi.fn().mockResolvedValue(storedConfig),
+      upsertEnsDbVersion: vi.fn().mockResolvedValue(undefined),
+      upsertEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
+      upsertIndexingStatusSnapshot: vi.fn().mockResolvedValue(undefined),
+    } as unknown as EnsDbClient;
+
+    const ensIndexerClient = {
+      config: vi.fn().mockResolvedValue(inMemoryConfig),
+    } as unknown as EnsIndexerClient;
+
+    const indexingStatusBuilder = {
+      getOmnichainIndexingStatusSnapshot: vi.fn(),
+    } as unknown as IndexingStatusBuilder;
+
+    const worker = new EnsDbWriterWorker(ensDbClient, ensIndexerClient, indexingStatusBuilder);
+
+    // act
+    await worker.run();
+
+    // assert - both should have been called (concurrent execution via Promise.all)
+    expect(ensDbClient.getEnsIndexerPublicConfig).toHaveBeenCalledTimes(1);
+    expect(ensIndexerClient.config).toHaveBeenCalledTimes(1);
+
+    // cleanup
+    worker.stop();
+  });
+
+  it("throws error when config fetch fails", async () => {
+    // arrange
+    const networkError = new Error("Network failure");
+
+    const ensDbClient = {
+      getEnsIndexerPublicConfig: vi.fn().mockResolvedValue(null),
+      upsertEnsDbVersion: vi.fn().mockResolvedValue(undefined),
+      upsertEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
+      upsertIndexingStatusSnapshot: vi.fn().mockResolvedValue(undefined),
+    } as unknown as EnsDbClient;
+
+    const ensIndexerClient = {
+      config: vi.fn().mockRejectedValue(networkError),
+    } as unknown as EnsIndexerClient;
+
+    const indexingStatusBuilder = {
+      getOmnichainIndexingStatusSnapshot: vi.fn(),
+    } as unknown as IndexingStatusBuilder;
+
+    const worker = new EnsDbWriterWorker(ensDbClient, ensIndexerClient, indexingStatusBuilder);
+
+    // act & assert
+    await expect(worker.run()).rejects.toThrow("Network failure");
+
+    // should be called once (pRetry is mocked to call once)
+    expect(ensIndexerClient.config).toHaveBeenCalledTimes(1);
+    expect(ensDbClient.upsertEnsDbVersion).not.toHaveBeenCalled();
+  });
+
+  it("throws error when stored config fetch fails", async () => {
+    // arrange
+    const dbError = new Error("Database connection lost");
+
+    const ensDbClient = {
+      getEnsIndexerPublicConfig: vi.fn().mockRejectedValue(dbError),
+      upsertEnsDbVersion: vi.fn().mockResolvedValue(undefined),
+      upsertEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
+      upsertIndexingStatusSnapshot: vi.fn().mockResolvedValue(undefined),
+    } as unknown as EnsDbClient;
+
+    const ensIndexerClient = {
+      config: vi.fn().mockResolvedValue(publicConfig),
+    } as unknown as EnsIndexerClient;
+
+    const indexingStatusBuilder = {
+      getOmnichainIndexingStatusSnapshot: vi.fn(),
+    } as unknown as IndexingStatusBuilder;
+
+    const worker = new EnsDbWriterWorker(ensDbClient, ensIndexerClient, indexingStatusBuilder);
+
+    // act & assert
+    await expect(worker.run()).rejects.toThrow("Database connection lost");
+    expect(ensDbClient.upsertEnsDbVersion).not.toHaveBeenCalled();
   });
 
   it("recovers from errors and continues upserting snapshots", async () => {
