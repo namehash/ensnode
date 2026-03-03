@@ -42,7 +42,9 @@ try {
       console.error("'pnpm' is not available on your PATH.");
     } else if (err.status !== undefined) {
       console.error(`Biome exited with code ${err.status}.`);
-      console.error("Try running 'pnpm biome format --write' manually to debug.");
+      console.error(
+        `Try running 'pnpm -w exec biome format --write ${outputPath}' manually to debug.`,
+      );
     } else if (err.message) {
       console.error(err.message);
     }
