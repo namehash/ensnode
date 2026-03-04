@@ -1,3 +1,5 @@
+import type { Address } from "viem";
+
 import {
   type AccountId,
   type PriceUsdc,
@@ -6,11 +8,31 @@ import {
 } from "@ensnode/ensnode-sdk";
 import { makePriceUsdcSchema } from "@ensnode/ensnode-sdk/internal";
 
+import { normalizeAddress, validateLowercaseAddress } from "../../address";
 import {
   type BaseReferralProgramRules,
   ReferralProgramAwardModels,
   validateBaseReferralProgramRules,
 } from "../shared/rules";
+
+/**
+ * An admin-imposed disqualification entry of a specific referrer in an edition.
+ */
+export interface ReferralProgramEditionDisqualification {
+  /**
+   * The address of the disqualified referrer.
+   *
+   * @invariant Guaranteed to be a valid EVM address in lowercase format.
+   */
+  referrer: Address;
+
+  /**
+   * A human-readable explanation of why the referrer was disqualified.
+   *
+   * @invariant Must be a non-empty string.
+   */
+  reason: string;
+}
 
 /**
  * Base revenue contribution per year of incremental duration.
@@ -46,6 +68,14 @@ export interface ReferralProgramRulesRevShareLimit extends BaseReferralProgramRu
    * @invariant Guaranteed to be a number between 0 and 1 (inclusive)
    */
   qualifiedRevenueShare: number;
+
+  /**
+   * Admin-imposed disqualifications for this edition.
+   * Disqualified referrers receive no awards.
+   *
+   * @invariant No duplicate referrer addresses.
+   */
+  disqualifications: ReferralProgramEditionDisqualification[];
 }
 
 export const validateReferralProgramRulesRevShareLimit = (
@@ -69,6 +99,23 @@ export const validateReferralProgramRulesRevShareLimit = (
     );
   }
 
+  for (const d of rules.disqualifications) {
+    validateLowercaseAddress(d.referrer);
+    if (d.reason.trim().length === 0) {
+      throw new Error(
+        "ReferralProgramRulesRevShareLimit: disqualification reason must not be empty.",
+      );
+    }
+  }
+
+  const disqualificationAddresses = rules.disqualifications.map((d) => d.referrer);
+  const uniqueDisqualificationAddresses = new Set(disqualificationAddresses);
+  if (uniqueDisqualificationAddresses.size !== disqualificationAddresses.length) {
+    throw new Error(
+      "ReferralProgramRulesRevShareLimit: disqualifications must not contain duplicate referrer addresses.",
+    );
+  }
+
   validateBaseReferralProgramRules(rules);
 };
 
@@ -80,6 +127,7 @@ export const buildReferralProgramRulesRevShareLimit = (
   endTime: UnixTimestamp,
   subregistryId: AccountId,
   rulesUrl: URL,
+  disqualifications: ReferralProgramEditionDisqualification[] = [],
 ): ReferralProgramRulesRevShareLimit => {
   const result = {
     awardModel: ReferralProgramAwardModels.RevShareLimit,
@@ -90,6 +138,7 @@ export const buildReferralProgramRulesRevShareLimit = (
     endTime,
     subregistryId,
     rulesUrl,
+    disqualifications,
   } satisfies ReferralProgramRulesRevShareLimit;
 
   validateReferralProgramRulesRevShareLimit(result);
@@ -98,14 +147,25 @@ export const buildReferralProgramRulesRevShareLimit = (
 };
 
 /**
- * Determine if a referrer meets the revenue threshold to qualify under rev-share-limit rules.
+ * Determine if a referrer is qualified under rev-share-limit rules.
  *
+ * A referrer is qualified if they meet the revenue threshold AND are not admin-disqualified.
+ *
+ * @param referrer - The referrer's address.
  * @param totalBaseRevenueContribution - The referrer's total base revenue contribution.
  * @param rules - The rev-share-limit rules of the referral program.
  */
 export function isReferrerQualifiedRevShareLimit(
+  referrer: Address,
   totalBaseRevenueContribution: PriceUsdc,
   rules: ReferralProgramRulesRevShareLimit,
 ): boolean {
-  return totalBaseRevenueContribution.amount >= rules.minQualifiedRevenueContribution.amount;
+  const normalizedReferrer = normalizeAddress(referrer);
+  const isAdminDisqualified = rules.disqualifications.some(
+    (d) => d.referrer === normalizedReferrer,
+  );
+  return (
+    totalBaseRevenueContribution.amount >= rules.minQualifiedRevenueContribution.amount &&
+    !isAdminDisqualified
+  );
 }

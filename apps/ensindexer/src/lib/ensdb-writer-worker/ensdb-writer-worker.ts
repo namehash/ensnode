@@ -5,7 +5,6 @@ import {
   buildCrossChainIndexingStatusSnapshotOmnichain,
   type CrossChainIndexingStatusSnapshot,
   type Duration,
-  type EnsIndexerClient,
   type EnsIndexerPublicConfig,
   OmnichainIndexingStatusIds,
   type OmnichainIndexingStatusSnapshot,
@@ -14,6 +13,7 @@ import {
 
 import type { EnsDbClient } from "@/lib/ensdb-client/ensdb-client";
 import type { IndexingStatusBuilder } from "@/lib/indexing-status-builder/indexing-status-builder";
+import type { PublicConfigBuilder } from "@/lib/public-config-builder/public-config-builder";
 
 /**
  * Interval in seconds between two consecutive attempts to upsert
@@ -41,27 +41,27 @@ export class EnsDbWriterWorker {
   private ensDbClient: EnsDbClient;
 
   /**
-   * ENSIndexer Client instance used by the worker to read ENSIndexer Public Config.
-   */
-  private ensIndexerClient: EnsIndexerClient;
-
-  /**
    * Indexing Status Builder instance used by the worker to read ENSIndexer Indexing Status.
    */
   private indexingStatusBuilder: IndexingStatusBuilder;
 
   /**
+   * ENSIndexer Public Config Builder instance used by the worker to read ENSIndexer Public Config.
+   */
+  private publicConfigBuilder: PublicConfigBuilder;
+
+  /**
    * @param ensDbClient ENSDb Client instance used by the worker to interact with ENSDb.
-   * @param ensIndexerClient ENSIndexer Client instance used by the worker to read ENSIndexer Public Config.
+   * @param publicConfigBuilder ENSIndexer Public Config Builder instance used by the worker to read ENSIndexer Public Config.
    * @param indexingStatusBuilder Indexing Status Builder instance used by the worker to read ENSIndexer Indexing Status.
    */
   constructor(
     ensDbClient: EnsDbClient,
-    ensIndexerClient: EnsIndexerClient,
+    publicConfigBuilder: PublicConfigBuilder,
     indexingStatusBuilder: IndexingStatusBuilder,
   ) {
     this.ensDbClient = ensDbClient;
-    this.ensIndexerClient = ensIndexerClient;
+    this.publicConfigBuilder = publicConfigBuilder;
     this.indexingStatusBuilder = indexingStatusBuilder;
   }
 
@@ -145,11 +145,12 @@ export class EnsDbWriterWorker {
   private async getValidatedEnsIndexerPublicConfig(): Promise<EnsIndexerPublicConfig> {
     /**
      * Fetch the in-memory config with retries, to handle potential transient errors
-     * in the ENSIndexer Client (e.g. due to network issues). If the fetch fails after
-     * the defined number of retries, the error will be thrown and the worker will not start,
-     * as the ENSIndexer Public Config is a critical dependency for the worker's tasks.
+     * in the ENSIndexer Public Config Builder (e.g. due to network issues).
+     * If the fetch fails after the defined number of retries, the error
+     * will be thrown and the worker will not start, as the ENSIndexer Public Config
+     * is a critical dependency for the worker's tasks.
      */
-    const inMemoryConfigPromise = pRetry(() => this.ensIndexerClient.config(), {
+    const inMemoryConfigPromise = pRetry(() => this.publicConfigBuilder.getPublicConfig(), {
       retries: 3,
       onFailedAttempt: ({ error, attemptNumber, retriesLeft }) => {
         console.warn(

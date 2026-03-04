@@ -36,6 +36,7 @@ export function serializeReferralProgramRulesRevShareLimit(
     endTime: rules.endTime,
     subregistryId: rules.subregistryId,
     rulesUrl: rules.rulesUrl.toString(),
+    disqualifications: rules.disqualifications,
   };
 }
 
@@ -69,6 +70,8 @@ export function serializeAwardedReferrerMetricsRevShareLimit(
     isQualified: metrics.isQualified,
     standardAwardValue: serializePriceUsdc(metrics.standardAwardValue),
     awardPoolApproxValue: serializePriceUsdc(metrics.awardPoolApproxValue),
+    isAdminDisqualified: metrics.isAdminDisqualified,
+    adminDisqualificationReason: metrics.adminDisqualificationReason,
   };
 }
 
@@ -88,6 +91,8 @@ export function serializeUnrankedReferrerMetricsRevShareLimit(
     isQualified: metrics.isQualified,
     standardAwardValue: serializePriceUsdc(metrics.standardAwardValue),
     awardPoolApproxValue: serializePriceUsdc(metrics.awardPoolApproxValue),
+    isAdminDisqualified: metrics.isAdminDisqualified,
+    adminDisqualificationReason: metrics.adminDisqualificationReason,
   };
 }
 

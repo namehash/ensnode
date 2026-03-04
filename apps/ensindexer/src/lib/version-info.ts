@@ -10,6 +10,20 @@ import type { ENSIndexerVersionInfo, SerializedENSIndexerVersionInfo } from "@en
 import { makeENSIndexerVersionInfoSchema } from "@ensnode/ensnode-sdk/internal";
 
 /**
+ * Get ENSIndexer version
+ */
+export function getEnsIndexerVersion(): string {
+  return packageJson.version;
+}
+
+/**
+ * Get Node.js version
+ */
+export function getNodeJsVersion(): string {
+  return process.versions.node;
+}
+
+/**
  * Get NPM package version.
  *
  * Note:
@@ -101,33 +115,4 @@ function getPackageVersionFromPnpmStore(pnpmDir: string, packageName: string): s
   }
 
   return null;
-}
-
-/**
- * Get complete {@link ENSIndexerVersionInfo} for ENSIndexer app.
- */
-export async function getENSIndexerVersionInfo(): Promise<ENSIndexerVersionInfo> {
-  // ENSIndexer version
-  const ensIndexerVersion = packageJson.version;
-
-  // ENSDb version
-  // ENSDb version is always the same as the ENSIndexer version number
-  const ensDbVersion = ensIndexerVersion;
-
-  // parse unvalidated version info
-  const schema = makeENSIndexerVersionInfoSchema();
-  const parsed = schema.safeParse({
-    nodejs: process.versions.node,
-    ponder: getPackageVersion("ponder"),
-    ensDb: ensDbVersion,
-    ensIndexer: ensIndexerVersion,
-    ensNormalize: getPackageVersion("@adraffy/ens-normalize"),
-  } satisfies SerializedENSIndexerVersionInfo);
-
-  if (parsed.error) {
-    throw new Error(`Cannot deserialize ENSIndexerVersionInfo:\n${prettifyError(parsed.error)}\n`);
-  }
-
-  // return version info we have now validated
-  return parsed.data;
 }

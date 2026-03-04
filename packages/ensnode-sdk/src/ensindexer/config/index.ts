@@ -7,3 +7,5 @@ export * from "./parsing";
 export * from "./serialize";
 export * from "./serialized-types";
 export * from "./types";
+export * from "./validate/ensindexer-public-config";
+export * from "./validate/ensindexer-version-info";

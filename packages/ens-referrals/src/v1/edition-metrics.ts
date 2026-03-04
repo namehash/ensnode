@@ -99,7 +99,7 @@ export const getReferrerEditionMetrics = (
         awardModel: leaderboard.awardModel,
         type: ReferrerEditionMetricsTypeIds.Unranked,
         rules: leaderboard.rules,
-        referrer: buildUnrankedReferrerMetricsRevShareLimit(referrer),
+        referrer: buildUnrankedReferrerMetricsRevShareLimit(referrer, leaderboard.rules),
         aggregatedMetrics: leaderboard.aggregatedMetrics,
         status,
         accurateAsOf: leaderboard.accurateAsOf,

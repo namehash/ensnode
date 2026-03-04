@@ -53,6 +53,7 @@ export function getDefaultReferralProgramEditionConfigSet(
       subregistryId,
       // TODO: replace this with the dedicated March 2026 rules URL once published
       new URL("https://ensawards.org/ens-holiday-awards-rules"),
+      [],
     ),
   };
 
