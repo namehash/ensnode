@@ -82,7 +82,11 @@ export const makeAwardedReferrerMetricsRevShareLimitSchema = (
       standardAwardValue: makePriceUsdcSchema(`${valueLabel}.standardAwardValue`),
       awardPoolApproxValue: makePriceUsdcSchema(`${valueLabel}.awardPoolApproxValue`),
       isAdminDisqualified: z.boolean(),
-      adminDisqualificationReason: z.string().nullable(),
+      adminDisqualificationReason: z
+        .string()
+        .trim()
+        .min(1, `${valueLabel}.adminDisqualificationReason must not be empty`)
+        .nullable(),
     })
     .refine((data) => data.awardPoolApproxValue.amount <= data.standardAwardValue.amount, {
       message: `${valueLabel}.awardPoolApproxValue must be <= ${valueLabel}.standardAwardValue`,
@@ -122,7 +126,11 @@ export const makeUnrankedReferrerMetricsRevShareLimitSchema = (
       standardAwardValue: makePriceUsdcSchema(`${valueLabel}.standardAwardValue`),
       awardPoolApproxValue: makePriceUsdcSchema(`${valueLabel}.awardPoolApproxValue`),
       isAdminDisqualified: z.boolean(),
-      adminDisqualificationReason: z.string().nullable(),
+      adminDisqualificationReason: z
+        .string()
+        .trim()
+        .min(1, `${valueLabel}.adminDisqualificationReason must not be empty`)
+        .nullable(),
     })
     .refine((data) => data.awardPoolApproxValue.amount <= data.standardAwardValue.amount, {
       message: `${valueLabel}.awardPoolApproxValue must be <= ${valueLabel}.standardAwardValue`,
