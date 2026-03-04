@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { en } from "zod/locales";
 
 import { ENSNamespaceIds } from "@ensnode/datasources";
 
@@ -84,11 +85,11 @@ describe("ENSApi Config Serialization/Deserialization", () => {
     it("handles validation errors with custom value label", () => {
       const invalidConfig = {
         ...MOCK_SERIALIZED_ENSAPI_PUBLIC_CONFIG,
-        version: "", // Invalid: empty string
+        ensIndexerPublicConfig: {},
       };
 
       expect(() => deserializeEnsApiPublicConfig(invalidConfig, "testConfig")).toThrow(
-        /testConfig.version/,
+        /testConfig.ensIndexerPublicConfig.databaseSchemaName/,
       );
     });
   });
