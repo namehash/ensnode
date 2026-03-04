@@ -1,6 +1,6 @@
 import { ensDbClient } from "@/lib/ensdb-client/singleton";
-import { ensIndexerClient } from "@/lib/ensindexer-client/singleton";
 import { indexingStatusBuilder } from "@/lib/indexing-status-builder/singleton";
+import { publicConfigBuilder } from "@/lib/public-config-builder/singleton";
 
 import { EnsDbWriterWorker } from "./ensdb-writer-worker";
 
@@ -20,7 +20,11 @@ export function startEnsDbWriterWorker() {
     throw new Error("EnsDbWriterWorker has already been initialized");
   }
 
-  ensDbWriterWorker = new EnsDbWriterWorker(ensDbClient, ensIndexerClient, indexingStatusBuilder);
+  ensDbWriterWorker = new EnsDbWriterWorker(
+    ensDbClient,
+    publicConfigBuilder,
+    indexingStatusBuilder,
+  );
 
   ensDbWriterWorker
     .run()
