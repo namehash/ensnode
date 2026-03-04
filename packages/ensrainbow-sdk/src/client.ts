@@ -404,9 +404,7 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
         .json()
         .then((data: { error?: string }) => data.error)
         .catch(() => undefined);
-      throw new Error(
-        errorMessage ?? `Failed to fetch ENSRainbow config: ${response.statusText}`,
-      );
+      throw new Error(errorMessage ?? `Failed to fetch ENSRainbow config: ${response.statusText}`);
     }
 
     return response.json() as Promise<EnsRainbow.ENSRainbowPublicConfig>;
