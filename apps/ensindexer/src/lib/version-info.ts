@@ -10,6 +10,20 @@ import type { ENSIndexerVersionInfo, SerializedENSIndexerVersionInfo } from "@en
 import { makeENSIndexerVersionInfoSchema } from "@ensnode/ensnode-sdk/internal";
 
 /**
+ * Get ENSIndexer version
+ */
+export function getEnsIndexerVersion(): string {
+  return packageJson.version;
+}
+
+/**
+ * Get Node.js version
+ */
+export function getNodeJsVersion(): string {
+  return process.versions.node;
+}
+
+/**
  * Get NPM package version.
  *
  * Note:
