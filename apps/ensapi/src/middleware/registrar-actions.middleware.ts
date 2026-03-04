@@ -9,6 +9,7 @@ import {
 
 import { factory } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
+import { publicConfigBuilder } from "@/lib/public-config-builder/singleton";
 
 const logger = makeLogger("registrar-actions.middleware");
 
@@ -35,7 +36,9 @@ export const registrarActionsApiMiddleware = factory.createMiddleware(
       throw new Error(`Invariant(registrar-actions.middleware): indexingStatusMiddleware required`);
     }
 
-    const configSupport = hasRegistrarActionsConfigSupport(config.ensIndexerPublicConfig);
+    const { ensIndexerPublicConfig } = await publicConfigBuilder.getPublicConfig();
+
+    const configSupport = hasRegistrarActionsConfigSupport(ensIndexerPublicConfig);
     if (!configSupport.supported) {
       return c.json(
         serializeRegistrarActionsResponse({

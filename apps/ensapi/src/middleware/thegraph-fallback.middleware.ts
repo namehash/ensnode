@@ -6,6 +6,7 @@ import { canFallbackToTheGraph } from "@ensnode/ensnode-sdk/internal";
 
 import { factory } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
+import { publicConfigBuilder } from "@/lib/public-config-builder/singleton";
 
 const logger = makeLogger("thegraph-fallback.middleware");
 
@@ -25,10 +26,12 @@ export const thegraphFallbackMiddleware = factory.createMiddleware(async (c, nex
     throw new Error(`Invariant(thegraphFallbackMiddleware): isRealtimeMiddleware expected`);
   }
 
+  const { ensIndexerPublicConfig } = await publicConfigBuilder.getPublicConfig();
+
   const fallback = canFallbackToTheGraph({
     namespace: config.namespace,
     theGraphApiKey: config.theGraphApiKey,
-    isSubgraphCompatible: config.ensIndexerPublicConfig.isSubgraphCompatible,
+    isSubgraphCompatible: ensIndexerPublicConfig.isSubgraphCompatible,
   });
 
   // log one warning to the console if !canFallback

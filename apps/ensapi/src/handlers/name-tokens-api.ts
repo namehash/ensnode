@@ -17,16 +17,12 @@ import {
 import { createApp } from "@/lib/hono-factory";
 import { findRegisteredNameTokensForDomain } from "@/lib/name-tokens/find-name-tokens-for-domain";
 import { getIndexedSubregistries } from "@/lib/name-tokens/get-indexed-subregistries";
+import { publicConfigBuilder } from "@/lib/public-config-builder/singleton";
 import { nameTokensApiMiddleware } from "@/middleware/name-tokens.middleware";
 
 import { getNameTokensRoute } from "./name-tokens-api.routes";
 
 const app = createApp();
-
-const indexedSubregistries = getIndexedSubregistries(
-  config.namespace,
-  config.ensIndexerPublicConfig.plugins as PluginName[],
-);
 
 // Middleware managing access to Name Tokens API route.
 // It makes the route available if all prerequisites are met,
@@ -98,6 +94,12 @@ app.openapi(getNameTokensRoute, async (c) => {
     }
 
     const parentNode = namehash(getParentNameFQDN(name));
+    const { ensIndexerPublicConfig } = await publicConfigBuilder.getPublicConfig();
+
+    const indexedSubregistries = getIndexedSubregistries(
+      config.namespace,
+      ensIndexerPublicConfig.plugins as PluginName[],
+    );
     const subregistry = indexedSubregistries.find((subregistry) => subregistry.node === parentNode);
 
     // Return 404 response with error code for Name Tokens Not Indexed when

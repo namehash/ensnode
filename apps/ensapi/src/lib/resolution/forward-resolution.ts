@@ -34,6 +34,7 @@ import { getENSIP19ReverseNameRecordFromIndex } from "@/lib/protocol-acceleratio
 import { getRecordsFromIndex } from "@/lib/protocol-acceleration/get-records-from-index";
 import { areResolverRecordsIndexedByProtocolAccelerationPluginOnChainId } from "@/lib/protocol-acceleration/resolver-records-indexed-on-chain";
 import { getPublicClient } from "@/lib/public-client";
+import { publicConfigBuilder } from "@/lib/public-config-builder/singleton";
 import {
   makeEmptyResolverRecordsResponse,
   makeRecordsResponseFromIndexedRecords,
@@ -163,12 +164,13 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           }
 
           const publicClient = getPublicClient(chainId);
+          const { ensIndexerPublicConfig } = await publicConfigBuilder.getPublicConfig();
 
           ////////////////////////////
           /// Temporary ENSv2 Bailout
           ////////////////////////////
           // TODO: re-enable protocol acceleration for ENSv2
-          if (config.ensIndexerPublicConfig.plugins.includes(PluginName.ENSv2)) {
+          if (ensIndexerPublicConfig.plugins.includes(PluginName.ENSv2)) {
             // execute each record's call against the UniversalResolverV2
             const rawResults = await withEnsProtocolStep(
               TraceableENSProtocol.ForwardResolution,
