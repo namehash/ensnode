@@ -11,6 +11,7 @@ import {
   makeUnixTimestampSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
+import { normalizeAddress } from "../../../address";
 import {
   makeBaseReferralProgramRulesSchema,
   makeReferralProgramStatusSchema,
@@ -48,6 +49,15 @@ export const makeReferralProgramRulesRevShareLimitSchema = (
     disqualifications: z
       .array(
         makeReferralProgramAdminDisqualificationSchema(`${valueLabel}.disqualifications[item]`),
+      )
+      .refine(
+        (items) => {
+          const addresses = items.map((item) => normalizeAddress(item.referrer));
+          return new Set(addresses).size === addresses.length;
+        },
+        {
+          message: `${valueLabel}.disqualifications must not contain duplicate referrer addresses`,
+        },
       )
       .default([]),
   });

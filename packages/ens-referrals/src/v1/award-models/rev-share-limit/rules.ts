@@ -8,6 +8,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 import { makePriceUsdcSchema } from "@ensnode/ensnode-sdk/internal";
 
+import { normalizeAddress, validateLowercaseAddress } from "../../address";
 import {
   type BaseReferralProgramRules,
   ReferralProgramAwardModels,
@@ -96,6 +97,15 @@ export const validateReferralProgramRulesRevShareLimit = (
     );
   }
 
+  for (const d of rules.disqualifications) {
+    validateLowercaseAddress(d.referrer);
+    if (d.reason.trim().length === 0) {
+      throw new Error(
+        "ReferralProgramRulesRevShareLimit: disqualification reason must not be empty.",
+      );
+    }
+  }
+
   const disqualificationAddresses = rules.disqualifications.map((d) => d.referrer);
   const uniqueDisqualificationAddresses = new Set(disqualificationAddresses);
   if (uniqueDisqualificationAddresses.size !== disqualificationAddresses.length) {
@@ -148,7 +158,10 @@ export function isReferrerQualifiedRevShareLimit(
   totalBaseRevenueContribution: PriceUsdc,
   rules: ReferralProgramRulesRevShareLimit,
 ): boolean {
-  const isAdminDisqualified = rules.disqualifications.some((d) => d.referrer === referrer);
+  const normalizedReferrer = normalizeAddress(referrer);
+  const isAdminDisqualified = rules.disqualifications.some(
+    (d) => d.referrer === normalizedReferrer,
+  );
   return (
     totalBaseRevenueContribution.amount >= rules.minQualifiedRevenueContribution.amount &&
     !isAdminDisqualified

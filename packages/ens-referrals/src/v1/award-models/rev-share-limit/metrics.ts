@@ -335,7 +335,8 @@ export const buildUnrankedReferrerMetricsRevShareLimit = (
 ): UnrankedReferrerMetricsRevShareLimit => {
   const metrics = buildReferrerMetrics(referrer, 0, 0, priceEth(0n));
 
-  const disqualification = rules.disqualifications.find((d) => d.referrer === referrer) ?? null;
+  const disqualification =
+    rules.disqualifications.find((d) => d.referrer === metrics.referrer) ?? null;
 
   const result = {
     ...metrics,
