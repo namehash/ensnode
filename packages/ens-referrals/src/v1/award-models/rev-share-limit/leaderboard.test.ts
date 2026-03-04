@@ -5,7 +5,7 @@ import { parseTimestamp, parseUsdc, priceEth, priceUsdc } from "@ensnode/ensnode
 import { SECONDS_PER_YEAR } from "../../time";
 import { buildReferrerLeaderboardRevShareLimit } from "./leaderboard";
 import type { ReferralEvent } from "./referral-event";
-import type { ReferralProgramAdminDisqualification } from "./rules";
+import type { ReferralProgramEditionDisqualification } from "./rules";
 import { buildReferralProgramRulesRevShareLimit } from "./rules";
 
 // ─── Test fixtures ───────────────────────────────────────────────────────────
@@ -43,7 +43,7 @@ const CHECKPOINT_PREFIX =
 function buildTestRules(
   totalAwardPoolValue = parseUsdc("1000"),
   minQualifiedRevenueContribution = parseUsdc("5"),
-  disqualifications: ReferralProgramAdminDisqualification[] = [],
+  disqualifications: ReferralProgramEditionDisqualification[] = [],
 ) {
   return buildReferralProgramRulesRevShareLimit(
     totalAwardPoolValue,

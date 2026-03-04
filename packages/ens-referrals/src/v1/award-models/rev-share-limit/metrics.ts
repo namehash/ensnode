@@ -89,7 +89,7 @@ export interface RankedReferrerMetricsRevShareLimit extends ReferrerMetricsRevSh
    * The reason for admin disqualification, or null if not disqualified.
    *
    * @invariant null when {@link isAdminDisqualified} is false.
-   * @invariant Non-null string when {@link isAdminDisqualified} is true.
+   * @invariant Non-empty string when {@link isAdminDisqualified} is true.
    */
   adminDisqualificationReason: string | null;
 }

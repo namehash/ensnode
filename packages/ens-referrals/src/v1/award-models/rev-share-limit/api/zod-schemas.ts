@@ -21,10 +21,10 @@ import { ReferrerEditionMetricsTypeIds } from "../../shared/edition-metrics";
 import { ReferralProgramAwardModels } from "../../shared/rules";
 
 /**
- * Schema for {@link ReferralProgramAdminDisqualification}.
+ * Schema for {@link ReferralProgramEditionDisqualification}.
  */
-export const makeReferralProgramAdminDisqualificationSchema = (
-  valueLabel = "ReferralProgramAdminDisqualification",
+export const makeReferralProgramEditionDisqualificationSchema = (
+  valueLabel = "ReferralProgramEditionDisqualification",
 ) =>
   z.object({
     referrer: makeLowercaseAddressSchema(`${valueLabel}.referrer`),
@@ -48,7 +48,7 @@ export const makeReferralProgramRulesRevShareLimitSchema = (
     ).max(1, `${valueLabel}.qualifiedRevenueShare must be <= 1`),
     disqualifications: z
       .array(
-        makeReferralProgramAdminDisqualificationSchema(`${valueLabel}.disqualifications[item]`),
+        makeReferralProgramEditionDisqualificationSchema(`${valueLabel}.disqualifications[item]`),
       )
       .refine(
         (items) => {

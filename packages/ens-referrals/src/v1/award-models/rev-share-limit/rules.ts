@@ -16,11 +16,13 @@ import {
 } from "../shared/rules";
 
 /**
- * An admin-imposed disqualification entry for a specific referrer in an edition.
+ * An admin-imposed disqualification entry of a specific referrer in an edition.
  */
-export interface ReferralProgramAdminDisqualification {
+export interface ReferralProgramEditionDisqualification {
   /**
    * The address of the disqualified referrer.
+   *
+   * @invariant Guaranteed to be a valid EVM address in lowercase format.
    */
   referrer: Address;
 
@@ -73,7 +75,7 @@ export interface ReferralProgramRulesRevShareLimit extends BaseReferralProgramRu
    *
    * @invariant No duplicate referrer addresses.
    */
-  disqualifications: ReferralProgramAdminDisqualification[];
+  disqualifications: ReferralProgramEditionDisqualification[];
 }
 
 export const validateReferralProgramRulesRevShareLimit = (
@@ -125,7 +127,7 @@ export const buildReferralProgramRulesRevShareLimit = (
   endTime: UnixTimestamp,
   subregistryId: AccountId,
   rulesUrl: URL,
-  disqualifications: ReferralProgramAdminDisqualification[] = [],
+  disqualifications: ReferralProgramEditionDisqualification[] = [],
 ): ReferralProgramRulesRevShareLimit => {
   const result = {
     awardModel: ReferralProgramAwardModels.RevShareLimit,
