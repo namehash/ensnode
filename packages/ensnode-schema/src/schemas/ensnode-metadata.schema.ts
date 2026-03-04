@@ -2,7 +2,9 @@
  * Schema Definitions that hold metadata about the ENSNode instance.
  */
 
-import { onchainTable } from "ponder";
+import { pgSchema } from "drizzle-orm/pg-core";
+
+export const offchainSchema = pgSchema("offchain");
 
 /**
  * ENSNode Metadata
@@ -12,7 +14,7 @@ import { onchainTable } from "ponder";
  * - `EnsNodeMetadataEnsIndexerPublicConfig`
  * - `EnsNodeMetadataEnsIndexerIndexingStatus`
  */
-export const ensNodeMetadata = onchainTable("ensnode_metadata", (t) => ({
+export const ensNodeMetadata = offchainSchema.table("ensnode_metadata", (t) => ({
   /**
    * Key
    *
