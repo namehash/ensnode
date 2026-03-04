@@ -350,9 +350,7 @@ describe("EnsRainbowApiClient", () => {
         json: () => Promise.reject(new SyntaxError("Unexpected token")),
       });
 
-      await expect(client.config()).rejects.toThrow(
-        "Failed to fetch ENSRainbow config: Not Found",
-      );
+      await expect(client.config()).rejects.toThrow("Failed to fetch ENSRainbow config: Not Found");
     });
   });
 });
