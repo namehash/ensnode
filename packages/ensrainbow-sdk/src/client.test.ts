@@ -342,6 +342,18 @@ describe("EnsRainbowApiClient", () => {
         "Failed to fetch ENSRainbow config: Service Unavailable",
       );
     });
+
+    it("should throw with fallback message when error body is not valid JSON", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        statusText: "Not Found",
+        json: () => Promise.reject(new SyntaxError("Unexpected token")),
+      });
+
+      await expect(client.config()).rejects.toThrow(
+        "Failed to fetch ENSRainbow config: Not Found",
+      );
+    });
   });
 });
 
