@@ -28,7 +28,7 @@ export const makeReferralProgramAdminDisqualificationSchema = (
 ) =>
   z.object({
     referrer: makeLowercaseAddressSchema(`${valueLabel}.referrer`),
-    reason: z.string().min(1, `${valueLabel}.reason must not be empty`),
+    reason: z.string().trim().min(1, `${valueLabel}.reason must not be empty`),
   });
 
 /**
