@@ -154,16 +154,14 @@ describe("EnsDbWriterWorker", () => {
 
     it("fetches stored and in-memory configs concurrently", async () => {
       // arrange
-      const storedConfig = ensDbClientMock;
-      const inMemoryConfig = ensDbClientMock.publicConfig;
       vi.mocked(validateEnsIndexerPublicConfigCompatibility).mockImplementation(() => {
         // validation passes
       });
 
       const ensDbClient = createMockEnsDbClient({
-        getEnsIndexerPublicConfig: vi.fn().mockResolvedValue(storedConfig),
+        getEnsIndexerPublicConfig: vi.fn().mockResolvedValue(ensDbClientMock.publicConfig),
       });
-      const publicConfigBuilder = createMockPublicConfigBuilder(inMemoryConfig);
+      const publicConfigBuilder = createMockPublicConfigBuilder(ensDbClientMock.publicConfig);
       const indexingStatusBuilder = createMockIndexingStatusBuilder();
 
       const worker = new EnsDbWriterWorker(ensDbClient, publicConfigBuilder, indexingStatusBuilder);
