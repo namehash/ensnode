@@ -2,11 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   buildCrossChainIndexingStatusSnapshotOmnichain,
-  type CrossChainIndexingStatusSnapshot,
-  CrossChainIndexingStrategyIds,
-  type EnsIndexerPublicConfig,
   OmnichainIndexingStatusIds,
-  type OmnichainIndexingStatusSnapshot,
   validateEnsIndexerPublicConfigCompatibility,
 } from "@ensnode/ensnode-sdk";
 

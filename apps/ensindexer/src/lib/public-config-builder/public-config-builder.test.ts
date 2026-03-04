@@ -50,22 +50,24 @@ import {
 
 import { getEnsIndexerVersion, getNodeJsVersion, getPackageVersion } from "@/lib/version-info";
 
-describe("PublicConfigBuilder", () => {
-  const mockEnsRainbowConfig: EnsRainbowPublicConfig = {
-    version: "1.0.0",
-    labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
-    recordsCount: 1000,
-  };
+// Test fixtures
+const mockEnsRainbowConfig: EnsRainbowPublicConfig = {
+  version: "1.0.0",
+  labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+  recordsCount: 1000,
+};
 
-  const mockVersionInfo: EnsIndexerVersionInfo = {
-    nodejs: "v20.0.0",
-    ponder: "0.9.0",
-    ensDb: "1.0.0",
-    ensIndexer: "1.0.0",
-    ensNormalize: "1.10.0",
-  };
+const mockVersionInfo: EnsIndexerVersionInfo = {
+  nodejs: "v20.0.0",
+  ponder: "0.9.0",
+  ensDb: "1.0.0",
+  ensIndexer: "1.0.0",
+  ensNormalize: "1.10.0",
+};
 
-  const mockPublicConfig: EnsIndexerPublicConfig = {
+// Helper to create unique mock config objects for each call
+function createMockPublicConfig(overrides: Partial<EnsIndexerPublicConfig> = {}) {
+  return {
     databaseSchemaName: "public",
     labelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
     ensRainbowPublicConfig: mockEnsRainbowConfig,
@@ -74,24 +76,32 @@ describe("PublicConfigBuilder", () => {
     namespace: ENSNamespaceIds.Mainnet,
     plugins: ["subgraph"],
     versionInfo: mockVersionInfo,
-  };
+    ...overrides,
+  } as EnsIndexerPublicConfig;
+}
 
+// Helper to setup standard mocks
+function setupStandardMocks() {
+  vi.mocked(getEnsIndexerVersion).mockReturnValue("1.0.0");
+  vi.mocked(getNodeJsVersion).mockReturnValue("v20.0.0");
+  vi.mocked(getPackageVersion).mockReturnValue("0.9.0");
+  vi.mocked(validateEnsIndexerVersionInfo).mockReturnValue(mockVersionInfo);
+}
+
+describe("PublicConfigBuilder", () => {
   afterEach(() => {
     vi.clearAllMocks();
   });
 
-  describe("getPublicConfig()", () => {
+  describe("getPublicConfig() - successful builds", () => {
     it("builds and returns public config on first call", async () => {
       // Arrange
       const ensRainbowClientMock = {
         config: vi.fn().mockResolvedValue(mockEnsRainbowConfig),
       } as unknown as EnsRainbowApiClient;
 
-      vi.mocked(getEnsIndexerVersion).mockReturnValue("1.0.0");
-      vi.mocked(getNodeJsVersion).mockReturnValue("v20.0.0");
-      vi.mocked(getPackageVersion).mockReturnValue("0.9.0");
-
-      vi.mocked(validateEnsIndexerVersionInfo).mockReturnValue(mockVersionInfo);
+      setupStandardMocks();
+      const mockPublicConfig = createMockPublicConfig();
       vi.mocked(validateEnsIndexerPublicConfig).mockReturnValue(mockPublicConfig);
 
       const builder = new PublicConfigBuilder(ensRainbowClientMock);
@@ -134,11 +144,8 @@ describe("PublicConfigBuilder", () => {
         config: vi.fn().mockResolvedValue(mockEnsRainbowConfig),
       } as unknown as EnsRainbowApiClient;
 
-      vi.mocked(getEnsIndexerVersion).mockReturnValue("1.0.0");
-      vi.mocked(getNodeJsVersion).mockReturnValue("v20.0.0");
-      vi.mocked(getPackageVersion).mockReturnValue("0.9.0");
-
-      vi.mocked(validateEnsIndexerVersionInfo).mockReturnValue(mockVersionInfo);
+      setupStandardMocks();
+      const mockPublicConfig = createMockPublicConfig();
       vi.mocked(validateEnsIndexerPublicConfig).mockReturnValue(mockPublicConfig);
 
       const builder = new PublicConfigBuilder(ensRainbowClientMock);
@@ -149,99 +156,27 @@ describe("PublicConfigBuilder", () => {
       const result3 = await builder.getPublicConfig();
 
       // Assert
-      // ENSRainbow client config should only be called once
       expect(ensRainbowClientMock.config).toHaveBeenCalledTimes(1);
-
-      // Version info functions should only be called once
       expect(getEnsIndexerVersion).toHaveBeenCalledTimes(1);
       expect(getNodeJsVersion).toHaveBeenCalledTimes(1);
       expect(getPackageVersion).toHaveBeenCalledTimes(2);
-
-      // Validation functions should only be called once
       expect(validateEnsIndexerVersionInfo).toHaveBeenCalledTimes(1);
       expect(validateEnsIndexerPublicConfig).toHaveBeenCalledTimes(1);
 
       // All results should be the same cached object
-      expect(result1).toStrictEqual(mockPublicConfig);
-      expect(result2).toStrictEqual(mockPublicConfig);
-      expect(result3).toStrictEqual(mockPublicConfig);
-    });
-
-    it("throws when ENSRainbow client config() fails", async () => {
-      // Arrange
-      const ensRainbowError = new Error("ENSRainbow service unavailable");
-      const ensRainbowClientMock = {
-        config: vi.fn().mockRejectedValue(ensRainbowError),
-      } as unknown as EnsRainbowApiClient;
-
-      vi.mocked(getEnsIndexerVersion).mockReturnValue("1.0.0");
-      vi.mocked(getNodeJsVersion).mockReturnValue("v20.0.0");
-      vi.mocked(getPackageVersion).mockReturnValue("0.9.0");
-
-      vi.mocked(validateEnsIndexerVersionInfo).mockReturnValue(mockVersionInfo);
-
-      const builder = new PublicConfigBuilder(ensRainbowClientMock);
-
-      // Act & Assert
-      await expect(builder.getPublicConfig()).rejects.toThrow(ensRainbowError);
-      expect(ensRainbowClientMock.config).toHaveBeenCalledTimes(1);
-      expect(validateEnsIndexerPublicConfig).not.toHaveBeenCalled();
-    });
-
-    it("throws when version info validation fails", async () => {
-      // Arrange
-      const ensRainbowClientMock = {
-        config: vi.fn().mockResolvedValue(mockEnsRainbowConfig),
-      } as unknown as EnsRainbowApiClient;
-
-      vi.mocked(getEnsIndexerVersion).mockReturnValue("1.0.0");
-      vi.mocked(getNodeJsVersion).mockReturnValue("v20.0.0");
-      vi.mocked(getPackageVersion).mockReturnValue("0.9.0");
-
-      const validationError = new Error("Invalid version info: missing required fields");
-      vi.mocked(validateEnsIndexerVersionInfo).mockImplementation(() => {
-        throw validationError;
-      });
-
-      const builder = new PublicConfigBuilder(ensRainbowClientMock);
-
-      // Act & Assert
-      await expect(builder.getPublicConfig()).rejects.toThrow(validationError);
-      expect(validateEnsIndexerVersionInfo).toHaveBeenCalledTimes(1);
-      expect(validateEnsIndexerPublicConfig).not.toHaveBeenCalled();
-    });
-
-    it("throws when public config validation fails", async () => {
-      // Arrange
-      const ensRainbowClientMock = {
-        config: vi.fn().mockResolvedValue(mockEnsRainbowConfig),
-      } as unknown as EnsRainbowApiClient;
-
-      vi.mocked(getEnsIndexerVersion).mockReturnValue("1.0.0");
-      vi.mocked(getNodeJsVersion).mockReturnValue("v20.0.0");
-      vi.mocked(getPackageVersion).mockReturnValue("0.9.0");
-
-      vi.mocked(validateEnsIndexerVersionInfo).mockReturnValue(mockVersionInfo);
-
-      const validationError = new Error("Invalid public config: invalid namespace");
-      vi.mocked(validateEnsIndexerPublicConfig).mockImplementation(() => {
-        throw validationError;
-      });
-
-      const builder = new PublicConfigBuilder(ensRainbowClientMock);
-
-      // Act & Assert
-      await expect(builder.getPublicConfig()).rejects.toThrow(validationError);
-      expect(validateEnsIndexerPublicConfig).toHaveBeenCalledTimes(1);
+      expect(result1).toBe(mockPublicConfig);
+      expect(result2).toBe(mockPublicConfig);
+      expect(result3).toBe(mockPublicConfig);
+      expect(result1).toBe(result2);
+      expect(result2).toBe(result3);
     });
 
     it("handles different plugin configurations", async () => {
       // Arrange
-      const customConfig = {
-        ...mockPublicConfig,
+      const customConfig = createMockPublicConfig({
         plugins: ["basenames", "lineanames", "subgraph"],
         indexedChainIds: new Set([1, 8453, 59144]),
-      };
+      });
 
       const ensRainbowClientMock = {
         config: vi.fn().mockResolvedValue(mockEnsRainbowConfig),
@@ -274,11 +209,10 @@ describe("PublicConfigBuilder", () => {
 
     it("handles non-subgraph-compatible mode", async () => {
       // Arrange
-      const customConfig = {
-        ...mockPublicConfig,
+      const customConfig = createMockPublicConfig({
         isSubgraphCompatible: false,
         labelSet: { labelSetId: "custom", labelSetVersion: 1 },
-      };
+      });
 
       const customEnsRainbowConfig: EnsRainbowPublicConfig = {
         version: "1.0.0",
@@ -290,11 +224,7 @@ describe("PublicConfigBuilder", () => {
         config: vi.fn().mockResolvedValue(customEnsRainbowConfig),
       } as unknown as EnsRainbowApiClient;
 
-      vi.mocked(getEnsIndexerVersion).mockReturnValue("1.0.0");
-      vi.mocked(getNodeJsVersion).mockReturnValue("v20.0.0");
-      vi.mocked(getPackageVersion).mockReturnValue("0.9.0");
-
-      vi.mocked(validateEnsIndexerVersionInfo).mockReturnValue(mockVersionInfo);
+      setupStandardMocks();
       vi.mocked(validateEnsIndexerPublicConfig).mockReturnValue(customConfig);
 
       const builder = new PublicConfigBuilder(ensRainbowClientMock);
@@ -308,33 +238,101 @@ describe("PublicConfigBuilder", () => {
     });
   });
 
-  describe("Caching behavior", () => {
-    it("resets cache when a new builder instance is created", async () => {
+  describe("getPublicConfig() - error handling", () => {
+    it("throws when ENSRainbow client config() fails", async () => {
+      // Arrange
+      const ensRainbowError = new Error("ENSRainbow service unavailable");
+      const ensRainbowClientMock = {
+        config: vi.fn().mockRejectedValue(ensRainbowError),
+      } as unknown as EnsRainbowApiClient;
+
+      setupStandardMocks();
+
+      const builder = new PublicConfigBuilder(ensRainbowClientMock);
+
+      // Act & Assert
+      await expect(builder.getPublicConfig()).rejects.toThrow(ensRainbowError);
+      expect(ensRainbowClientMock.config).toHaveBeenCalledTimes(1);
+      expect(validateEnsIndexerPublicConfig).not.toHaveBeenCalled();
+    });
+
+    it("throws when version info validation fails", async () => {
       // Arrange
       const ensRainbowClientMock = {
         config: vi.fn().mockResolvedValue(mockEnsRainbowConfig),
       } as unknown as EnsRainbowApiClient;
 
-      vi.mocked(getEnsIndexerVersion).mockReturnValue("1.0.0");
-      vi.mocked(getNodeJsVersion).mockReturnValue("v20.0.0");
-      vi.mocked(getPackageVersion).mockReturnValue("0.9.0");
+      setupStandardMocks();
 
-      vi.mocked(validateEnsIndexerVersionInfo).mockReturnValue(mockVersionInfo);
-      vi.mocked(validateEnsIndexerPublicConfig).mockReturnValue(mockPublicConfig);
+      const validationError = new Error("Invalid version info: missing required fields");
+      vi.mocked(validateEnsIndexerVersionInfo).mockImplementation(() => {
+        throw validationError;
+      });
 
+      const builder = new PublicConfigBuilder(ensRainbowClientMock);
+
+      // Act & Assert
+      await expect(builder.getPublicConfig()).rejects.toThrow(validationError);
+      expect(validateEnsIndexerVersionInfo).toHaveBeenCalledTimes(1);
+      expect(validateEnsIndexerPublicConfig).not.toHaveBeenCalled();
+    });
+
+    it("throws when public config validation fails", async () => {
+      // Arrange
+      const ensRainbowClientMock = {
+        config: vi.fn().mockResolvedValue(mockEnsRainbowConfig),
+      } as unknown as EnsRainbowApiClient;
+
+      setupStandardMocks();
+
+      const validationError = new Error("Invalid public config: invalid namespace");
+      vi.mocked(validateEnsIndexerPublicConfig).mockImplementation(() => {
+        throw validationError;
+      });
+
+      const builder = new PublicConfigBuilder(ensRainbowClientMock);
+
+      // Act & Assert
+      await expect(builder.getPublicConfig()).rejects.toThrow(validationError);
+      expect(validateEnsIndexerPublicConfig).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("Caching behavior", () => {
+    it("each builder instance has its own independent cache", async () => {
+      // Arrange - create unique config objects for each builder
+      const config1 = createMockPublicConfig({ databaseSchemaName: "schema1" });
+      const config2 = createMockPublicConfig({ databaseSchemaName: "schema2" });
+
+      let callCount = 0;
+      const ensRainbowClientMock = {
+        config: vi.fn().mockImplementation(() => {
+          callCount++;
+          return Promise.resolve(mockEnsRainbowConfig);
+        }),
+      } as unknown as EnsRainbowApiClient;
+
+      setupStandardMocks();
+
+      // Return different configs for each builder instance
+      vi.mocked(validateEnsIndexerPublicConfig).mockImplementation(() => {
+        return callCount === 1 ? config1 : config2;
+      });
+
+      // Act
       const builder1 = new PublicConfigBuilder(ensRainbowClientMock);
       const result1 = await builder1.getPublicConfig();
 
-      // Create a new builder instance with the same client
       const builder2 = new PublicConfigBuilder(ensRainbowClientMock);
-
-      // Act
       const result2 = await builder2.getPublicConfig();
 
-      // Assert
-      // ENSRainbow config should be called twice - once for each builder instance
+      // Assert - each builder should have fetched and cached its own config independently
       expect(ensRainbowClientMock.config).toHaveBeenCalledTimes(2);
-      expect(result1).toBe(result2);
+      expect(result1).toBe(config1);
+      expect(result2).toBe(config2);
+      expect(result1).not.toBe(result2);
+      expect(result1.databaseSchemaName).toBe("schema1");
+      expect(result2.databaseSchemaName).toBe("schema2");
     });
 
     it("retries building config on subsequent calls after failure", async () => {
@@ -348,20 +346,16 @@ describe("PublicConfigBuilder", () => {
       // Act & Assert - first call fails
       await expect(builder.getPublicConfig()).rejects.toThrow("ENSRainbow down");
 
-      // After the first failure, immutablePublicConfig remains undefined
-      // So the next call will retry and fetch fresh data
-      // Simulate recovery by making the mock return success on subsequent calls
+      // Simulate recovery
       vi.mocked(ensRainbowClientMock.config).mockResolvedValue(mockEnsRainbowConfig);
-      vi.mocked(getEnsIndexerVersion).mockReturnValue("1.0.0");
-      vi.mocked(getNodeJsVersion).mockReturnValue("v20.0.0");
-      vi.mocked(getPackageVersion).mockReturnValue("0.9.0");
-      vi.mocked(validateEnsIndexerVersionInfo).mockReturnValue(mockVersionInfo);
+      setupStandardMocks();
+      const mockPublicConfig = createMockPublicConfig();
       vi.mocked(validateEnsIndexerPublicConfig).mockReturnValue(mockPublicConfig);
 
-      // Second call should now succeed because errors are not cached
+      // Second call should succeed
       const result = await builder.getPublicConfig();
 
-      // The config method should be called twice - once for the failed attempt, once for success
+      // Assert
       expect(ensRainbowClientMock.config).toHaveBeenCalledTimes(2);
       expect(result).toBe(mockPublicConfig);
     });
