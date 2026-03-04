@@ -29,7 +29,6 @@ app.get("/config", async (c) => {
 });
 
 app.get("/indexing-status", async (c) => {
-  // get system timestamp for the current request
   try {
     const crossChainSnapshot = await ensDbClient.getIndexingStatusSnapshot();
 

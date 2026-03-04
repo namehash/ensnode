@@ -1,4 +1,4 @@
-import { prettifyError } from "zod/v4/core";
+import { prettifyError } from "zod/v4";
 
 import type { Unvalidated } from "../../../shared/types";
 import type { EnsIndexerPublicConfig } from "../types";

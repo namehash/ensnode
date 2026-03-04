@@ -46,7 +46,7 @@ export class EnsDbWriterWorker {
   private indexingStatusBuilder: IndexingStatusBuilder;
 
   /**
-   * ENSIndexer Public Config Builder instance used  by the worker to read ENSIndexer Public Config.
+   * ENSIndexer Public Config Builder instance used by the worker to read ENSIndexer Public Config.
    */
   private publicConfigBuilder: PublicConfigBuilder;
 

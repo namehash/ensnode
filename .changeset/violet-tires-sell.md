@@ -2,4 +2,4 @@
 "ensindexer": minor
 ---
 
-Improved HTTP handlers with ENSDb Client being the only data provider that is needed.
+Refactored HTTP handlers to rely solely on ENSDb Client for data.

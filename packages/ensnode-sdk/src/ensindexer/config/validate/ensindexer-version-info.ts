@@ -1,4 +1,4 @@
-import { prettifyError } from "zod/v4/core";
+import { prettifyError } from "zod/v4";
 
 import type { Unvalidated } from "../../../shared/types";
 import type { EnsIndexerVersionInfo } from "../types";
@@ -18,7 +18,7 @@ export function validateEnsIndexerVersionInfo(
   const result = schema.safeParse(unvalidatedVersionInfo);
 
   if (!result.success) {
-    throw new Error(`Invalid EnsIndexerVersionInfo ${prettifyError(result.error)}`);
+    throw new Error(`Invalid EnsIndexerVersionInfo: ${prettifyError(result.error)}`);
   }
 
   return result.data;
