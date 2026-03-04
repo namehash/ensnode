@@ -9,10 +9,9 @@ import { canFallbackToTheGraph } from "@ensnode/ensnode-sdk/internal";
 
 export class PublicConfigBuilder {
   /**
-   * ENSRainbow Client
+   * ENSDb Client
    *
-   * Used to fetch ENSRainbow Public Config, which is part of
-   * the ENSApi Public Config.
+   * Used to fetch the ENSIndexer Public Config from ENSDb.
    */
   private ensDbClient: EnsDbClientQuery;
 

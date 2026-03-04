@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { en } from "zod/locales";
 
 import { ENSNamespaceIds } from "@ensnode/datasources";
 

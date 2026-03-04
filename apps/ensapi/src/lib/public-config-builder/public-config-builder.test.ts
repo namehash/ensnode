@@ -133,7 +133,6 @@ describe("PublicConfigBuilder", () => {
     });
 
     it("masks the API key in theGraphFallback", async () => {
-      new PublicConfigBuilder(ensDbClientMock);
       await new PublicConfigBuilder(ensDbClientMock).getPublicConfig();
 
       expect(canFallbackToTheGraph).toHaveBeenCalledWith(

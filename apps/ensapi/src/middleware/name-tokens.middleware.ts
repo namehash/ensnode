@@ -1,5 +1,3 @@
-import config from "@/config";
-
 import {
   NameTokensResponseCodes,
   NameTokensResponseErrorCodes,

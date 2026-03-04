@@ -1,12 +1,11 @@
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
-import { eq, sql } from "drizzle-orm/sql";
+import { eq } from "drizzle-orm/sql";
 
 import { ensNodeMetadata } from "@ensnode/ensnode-schema";
 import {
   type CrossChainIndexingStatusSnapshot,
   deserializeCrossChainIndexingStatusSnapshot,
   deserializeEnsIndexerPublicConfig,
-  type EnsDbClientMutation,
   type EnsDbClientQuery,
   type EnsIndexerPublicConfig,
   EnsNodeMetadataKeys,
@@ -14,8 +13,6 @@ import {
   type SerializedEnsNodeMetadataEnsDbVersion,
   type SerializedEnsNodeMetadataEnsIndexerIndexingStatus,
   type SerializedEnsNodeMetadataEnsIndexerPublicConfig,
-  serializeCrossChainIndexingStatusSnapshot,
-  serializeEnsIndexerPublicConfig,
 } from "@ensnode/ensnode-sdk";
 
 import { makeDrizzle } from "./drizzle";
@@ -51,25 +48,18 @@ export class EnsDbClient implements EnsDbClientQuery {
   /**
    * Drizzle database instance for ENSDb.
    */
-  private _db: DrizzleDb;
+  private db: DrizzleDb;
 
   /**
    * @param databaseUrl connection string for ENSDb Postgres database
    * @param databaseSchemaName Postgres schema name for ENSDb tables
    */
   constructor(databaseUrl: string, databaseSchemaName: string) {
-    this._db = makeDrizzle({
+    this.db = makeDrizzle({
       databaseSchema: databaseSchemaName,
       databaseUrl,
       schema,
     });
-  }
-
-  /**
-   * Exposes the Drizzle database instance for direct queries to ENSDb.
-   */
-  get db() {
-    return this._db;
   }
 
   /**

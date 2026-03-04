@@ -1,7 +1,6 @@
 import packageJson from "@/../package.json" with { type: "json" };
 
 import { parse as parseConnectionString } from "pg-connection-string";
-import { version } from "pino";
 import { prettifyError, ZodError, z } from "zod/v4";
 
 import {
@@ -75,7 +74,7 @@ const EnsApiConfigSchema = z
 export type EnsApiConfig = z.infer<typeof EnsApiConfigSchema>;
 
 /**
- * Builds the EnsApiConfig from an EnsApiEnvironment object, fetching the EnsIndexerPublicConfig.
+ * Builds the EnsApiConfig from an EnsApiEnvironment object.
  *
  * @returns A validated EnsApiConfig object
  * @throws Error with formatted validation messages if environment parsing fails

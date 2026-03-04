@@ -3,8 +3,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ensNodeMetadata } from "@ensnode/ensnode-schema";
 import {
   deserializeCrossChainIndexingStatusSnapshot,
-  EnsNodeMetadataKeys,
-  serializeCrossChainIndexingStatusSnapshot,
   serializeEnsIndexerPublicConfig,
 } from "@ensnode/ensnode-sdk";
 

@@ -1,5 +1,3 @@
-import config from "@/config";
-
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 import { factory } from "@/lib/hono-factory";
