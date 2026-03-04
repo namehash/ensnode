@@ -1,5 +1,5 @@
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
-import { eq } from "drizzle-orm/sql";
+import { eq, sql } from "drizzle-orm/sql";
 
 import { ensNodeMetadata } from "@ensnode/ensnode-schema";
 import {
@@ -176,15 +176,25 @@ export class EnsDbClient implements EnsDbClientQuery, EnsDbClientMutation {
   private async upsertEnsNodeMetadata<
     EnsNodeMetadataType extends SerializedEnsNodeMetadata = SerializedEnsNodeMetadata,
   >(metadata: EnsNodeMetadataType): Promise<void> {
-    await this.db
-      .insert(ensNodeMetadata)
-      .values({
-        key: metadata.key,
-        value: metadata.value,
-      })
-      .onConflictDoUpdate({
-        target: ensNodeMetadata.key,
-        set: { value: metadata.value },
-      });
+    await this.db.transaction(async (tx) => {
+      // Ponder live-query triggers insert into live_query_tables.
+      // Because this worker writes outside the Ponder runtime connection pool,
+      // the temp table must be ensured to exist on this connection. Without this,
+      // the upsert would fail with "relation 'live_query_tables' does not exist" error.
+      await tx.execute(
+        sql`CREATE TEMP TABLE IF NOT EXISTS live_query_tables (table_name TEXT PRIMARY KEY)`,
+      );
+
+      await tx
+        .insert(ensNodeMetadata)
+        .values({
+          key: metadata.key,
+          value: metadata.value,
+        })
+        .onConflictDoUpdate({
+          target: ensNodeMetadata.key,
+          set: { value: metadata.value },
+        });
+    });
   }
 }
