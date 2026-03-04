@@ -1,3 +1,6 @@
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
 import { getUnixTime, secondsToMilliseconds } from "date-fns";
 import pRetry from "p-retry";
 
@@ -20,6 +23,14 @@ import type { IndexingStatusBuilder } from "@/lib/indexing-status-builder/indexi
  * the Indexing Status Snapshot record into ENSDb.
  */
 const INDEXING_STATUS_RECORD_UPDATE_INTERVAL: Duration = 1;
+
+const defaultMigrationsFolder = fileURLToPath(new URL("../../../drizzle", import.meta.url));
+
+const resolveMigrationsFolder = (): string => {
+  const envValue = process.env.ENSDB_MIGRATIONS_FOLDER;
+  const migrationsFolder = envValue ? resolve(envValue) : defaultMigrationsFolder;
+  return migrationsFolder;
+};
 
 /**
  * ENSDb Writer Worker
@@ -84,6 +95,11 @@ export class EnsDbWriterWorker {
     if (this.isRunning) {
       throw new Error("EnsDbWriterWorker is already running");
     }
+
+    const migrationsFolder = resolveMigrationsFolder();
+    console.log(`[EnsDbWriterWorker]: Running ENSDb migrations from ${migrationsFolder}...`);
+    await this.ensDbClient.runMigrations(migrationsFolder);
+    console.log(`[EnsDbWriterWorker]: ENSDb migrations completed`);
 
     // Fetch data required for task 1 and task 2.
     const inMemoryConfig = await this.getValidatedEnsIndexerPublicConfig();

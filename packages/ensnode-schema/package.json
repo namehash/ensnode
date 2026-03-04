@@ -16,7 +16,8 @@
     "Ponder"
   ],
   "exports": {
-    ".": "./src/ponder.schema.ts"
+    ".": "./src/ponder.schema.ts",
+    "./offchain": "./src/offchain.schema.ts"
   },
   "files": [
     "dist"
@@ -40,9 +41,13 @@
     "ponder": "catalog:",
     "viem": "catalog:"
   },
+  "peerDependencies": {
+    "drizzle-orm": "catalog:"
+  },
   "devDependencies": {
     "@ensnode/ensnode-sdk": "workspace:",
     "@ensnode/shared-configs": "workspace:*",
+    "drizzle-orm": "catalog:",
     "tsup": "catalog:",
     "typescript": "catalog:"
   }

@@ -60,6 +60,7 @@ describe("EnsDbWriterWorker", () => {
 
     const ensDbClient = {
       getEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
+      runMigrations: vi.fn().mockResolvedValue(undefined),
       upsertEnsDbVersion: vi.fn().mockResolvedValue(undefined),
       upsertEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
       upsertIndexingStatusSnapshot: vi.fn().mockResolvedValue(undefined),
@@ -79,6 +80,7 @@ describe("EnsDbWriterWorker", () => {
     await worker.run();
 
     // assert - verify initial upserts happened
+    expect(ensDbClient.runMigrations).toHaveBeenCalledTimes(1);
     expect(ensDbClient.upsertEnsDbVersion).toHaveBeenCalledWith(publicConfig.versionInfo.ensDb);
     expect(ensDbClient.upsertEnsIndexerPublicConfig).toHaveBeenCalledWith(publicConfig);
 
@@ -99,6 +101,7 @@ describe("EnsDbWriterWorker", () => {
 
     const ensDbClient = {
       getEnsIndexerPublicConfig: vi.fn().mockResolvedValue(publicConfig),
+      runMigrations: vi.fn().mockResolvedValue(undefined),
       upsertEnsDbVersion: vi.fn().mockResolvedValue(undefined),
       upsertEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
       upsertIndexingStatusSnapshot: vi.fn().mockResolvedValue(undefined),
@@ -148,6 +151,7 @@ describe("EnsDbWriterWorker", () => {
 
     const ensDbClient = {
       getEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
+      runMigrations: vi.fn().mockResolvedValue(undefined),
       upsertEnsDbVersion: vi.fn().mockResolvedValue(undefined),
       upsertEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
       upsertIndexingStatusSnapshot: vi.fn().mockResolvedValue(undefined),
@@ -196,6 +200,7 @@ describe("EnsDbWriterWorker", () => {
 
     const ensDbClient = {
       getEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
+      runMigrations: vi.fn().mockResolvedValue(undefined),
       upsertEnsDbVersion: vi.fn().mockResolvedValue(undefined),
       upsertEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
       upsertIndexingStatusSnapshot,
@@ -245,6 +250,7 @@ describe("EnsDbWriterWorker", () => {
 
     const ensDbClient = {
       getEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
+      runMigrations: vi.fn().mockResolvedValue(undefined),
       upsertEnsDbVersion: vi.fn().mockResolvedValue(undefined),
       upsertEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
       upsertIndexingStatusSnapshot: vi.fn().mockResolvedValue(undefined),
@@ -283,6 +289,7 @@ describe("EnsDbWriterWorker", () => {
 
     const ensDbClient = {
       getEnsIndexerPublicConfig: vi.fn().mockResolvedValue(storedConfig),
+      runMigrations: vi.fn().mockResolvedValue(undefined),
       upsertEnsDbVersion: vi.fn().mockResolvedValue(undefined),
       upsertEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
       upsertIndexingStatusSnapshot: vi.fn().mockResolvedValue(undefined),
@@ -315,6 +322,7 @@ describe("EnsDbWriterWorker", () => {
 
     const ensDbClient = {
       getEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
+      runMigrations: vi.fn().mockResolvedValue(undefined),
       upsertEnsDbVersion: vi.fn().mockResolvedValue(undefined),
       upsertEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
       upsertIndexingStatusSnapshot: vi.fn().mockResolvedValue(undefined),
@@ -344,6 +352,7 @@ describe("EnsDbWriterWorker", () => {
 
     const ensDbClient = {
       getEnsIndexerPublicConfig: vi.fn().mockRejectedValue(dbError),
+      runMigrations: vi.fn().mockResolvedValue(undefined),
       upsertEnsDbVersion: vi.fn().mockResolvedValue(undefined),
       upsertEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
       upsertIndexingStatusSnapshot: vi.fn().mockResolvedValue(undefined),
@@ -399,6 +408,7 @@ describe("EnsDbWriterWorker", () => {
 
     const ensDbClient = {
       getEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
+      runMigrations: vi.fn().mockResolvedValue(undefined),
       upsertEnsDbVersion: vi.fn().mockResolvedValue(undefined),
       upsertEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
       upsertIndexingStatusSnapshot: vi
