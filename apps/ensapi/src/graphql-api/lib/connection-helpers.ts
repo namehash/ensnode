@@ -1,8 +1,11 @@
 import { and, asc, desc, gt, lt } from "drizzle-orm";
+import z from "zod/v4";
 
 import { cursors } from "@/graphql-api/schema/cursors";
 
 type Column = Parameters<typeof lt>[0];
+
+const indexSchema = z.number();
 
 /**
  * Returns a SQL condition for cursor-based pagination on a string column.
@@ -27,8 +30,8 @@ export const paginateByInt = (
   after: string | undefined,
 ) =>
   and(
-    before ? lt(column, Number(cursors.decode(before))) : undefined,
-    after ? gt(column, Number(cursors.decode(after))) : undefined,
+    before ? lt(column, indexSchema.parse(cursors.decode(before))) : undefined,
+    after ? gt(column, indexSchema.parse(cursors.decode(after))) : undefined,
   );
 
 /**
