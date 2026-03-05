@@ -48,6 +48,29 @@ jobs:
       - uses: ./.github/actions/setup_node_environment
       - run: pnpm test
 
+  openapi-sync-check:
+    name: "OpenAPI Spec Sync Check"
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup_node_environment
+      - name: Generate OpenAPI spec
+        run: pnpm generate:openapi
+      - name: Verify spec is in sync
+        run: |
+          if ! git diff --quiet docs/docs.ensnode.io/ensapi-openapi.json; then
+            echo "Error: OpenAPI spec is out of sync"
+            echo ""
+            echo "The committed ensapi-openapi.json differs from what the code generates:"
+            echo ""
+            git diff --color docs/docs.ensnode.io/ensapi-openapi.json
+            echo ""
+            echo "To fix, run: pnpm generate:openapi"
+            echo "Then commit the updated ensapi-openapi.json."
+            exit 1
+          fi
+          echo "OpenAPI spec is in sync with codebase"
+
   integrity-check:
     name: "Integrity Check"
     runs-on: blacksmith-4vcpu-ubuntu-2204
