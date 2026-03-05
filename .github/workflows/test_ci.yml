@@ -70,6 +70,8 @@ jobs:
             exit 1
           fi
           echo "OpenAPI spec is in sync with codebase"
+      - name: Validate OpenAPI spec with Mintlify
+        run: pnpm dlx mintlify openapi-check docs/docs.ensnode.io/ensapi-openapi.json
 
   integrity-check:
     name: "Integrity Check"
