@@ -1,4 +1,5 @@
-import { type ChildProcess, execSync, spawn } from "node:child_process";
+import { type ChildProcess, execFileSync, spawn } from "node:child_process";
+import { mkdirSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from "@testcontainers/postgresql";
@@ -27,6 +28,16 @@ const ENSRAINBOW_URL = `http://localhost:${ENSRAINBOW_PORT}`;
 // Track resources for cleanup
 const childProcesses: ChildProcess[] = [];
 const containers: (StartedTestContainer | StartedPostgreSqlContainer)[] = [];
+
+// Abort flag — set when a spawned service crashes after health check
+let aborted = false;
+let abortReason = "";
+
+function checkAborted() {
+  if (aborted) {
+    throw new Error(`Aborting: ${abortReason}`);
+  }
+}
 
 async function cleanup() {
   for (const child of childProcesses) {
@@ -62,12 +73,14 @@ function logError(msg: string) {
 async function waitForHealth(url: string, timeoutMs: number, label: string): Promise<void> {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
+    checkAborted();
     try {
       const res = await fetch(url);
       if (res.ok) {
         log(`${label} is healthy`);
         return;
       }
+      log(`${label} health check returned ${res.status}, retrying...`);
     } catch {}
     await new Promise((r) => setTimeout(r, 1000));
   }
@@ -102,6 +115,8 @@ function spawnService(
   child.on("exit", (code) => {
     if (code !== null && code !== 0) {
       logError(`${label} exited with code ${code}`);
+      aborted = true;
+      abortReason = `${label} exited with code ${code}`;
     }
   });
 
@@ -118,6 +133,7 @@ async function pollIndexingStatus(timeoutMs: number): Promise<void> {
   log("Polling indexing status...");
 
   while (Date.now() - start < timeoutMs) {
+    checkAborted();
     try {
       const status = await client.indexingStatus();
       if (status.responseCode === "ok") {
@@ -152,7 +168,7 @@ async function main() {
     .start();
   containers.push(postgres);
   const DATABASE_URL = postgres.getConnectionUri();
-  log(`Postgres is ready (${DATABASE_URL})`);
+  log(`Postgres is ready (port ${postgres.getPort()})`);
 
   // Phase 2: Start devnet
   log("Starting devnet...");
@@ -178,8 +194,14 @@ async function main() {
   const downloadTempDir = resolve(ensrainbowDataDir, "_download_temp");
 
   log("Downloading ENSRainbow database...");
-  execSync(
-    `bash ${ENSRAINBOW_DIR}/scripts/download-prebuilt-database.sh ${DB_SCHEMA_VERSION} ${LABEL_SET_ID} ${LABEL_SET_VERSION}`,
+  execFileSync(
+    "bash",
+    [
+      `${ENSRAINBOW_DIR}/scripts/download-prebuilt-database.sh`,
+      DB_SCHEMA_VERSION,
+      LABEL_SET_ID,
+      LABEL_SET_VERSION,
+    ],
     {
       cwd: ENSRAINBOW_DIR,
       stdio: "inherit",
@@ -194,7 +216,8 @@ async function main() {
     DB_SCHEMA_VERSION,
     `${LABEL_SET_ID}_${LABEL_SET_VERSION}.tgz`,
   );
-  execSync(`tar -xzf ${archivePath} -C ${ensrainbowDataDir}`, {
+  mkdirSync(ensrainbowDataDir, { recursive: true });
+  execFileSync("tar", ["-xzf", archivePath, "-C", ensrainbowDataDir], {
     stdio: "inherit",
   });
   log("ENSRainbow database extracted");
@@ -248,20 +271,15 @@ async function main() {
 
   // Phase 7: Run integration tests
   log("Running integration tests...");
-  try {
-    execSync("pnpm test:integration", {
-      cwd: ENSAPI_DIR,
-      stdio: "inherit",
-      env: {
-        ...process.env,
-        ENSAPI_GRAPHQL_API_URL: `http://localhost:${ENSAPI_PORT}/api/graphql`,
-      },
-    });
-    log("Integration tests passed!");
-  } catch {
-    logError("Integration tests failed!");
-    process.exitCode = 1;
-  }
+  execFileSync("pnpm", ["test:integration"], {
+    cwd: ENSAPI_DIR,
+    stdio: "inherit",
+    env: {
+      ...process.env,
+      ENSAPI_GRAPHQL_API_URL: `http://localhost:${ENSAPI_PORT}/api/graphql`,
+    },
+  });
+  log("Integration tests passed!");
 
   await cleanup();
 }

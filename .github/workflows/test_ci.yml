@@ -1,5 +1,8 @@
 name: "Test: CI"
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
   push:
@@ -103,6 +106,7 @@ jobs:
   integration-tests:
     name: "Integration Tests (ens-test-env)"
     runs-on: blacksmith-4vcpu-ubuntu-2204
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup_node_environment
