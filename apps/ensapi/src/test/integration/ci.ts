@@ -5,6 +5,9 @@ import { resolve } from "node:path";
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from "@testcontainers/postgresql";
 import { GenericContainer, type StartedTestContainer, Wait } from "testcontainers";
 
+import { ENSNamespaceIds } from "@ensnode/datasources";
+import { OmnichainIndexingStatusIds } from "@ensnode/ensnode-sdk";
+
 const MONOREPO_ROOT = resolve(import.meta.dirname, "../../../../..");
 const ENSRAINBOW_DIR = resolve(MONOREPO_ROOT, "apps/ensrainbow");
 const ENSINDEXER_DIR = resolve(MONOREPO_ROOT, "apps/ensindexer");
@@ -151,8 +154,8 @@ async function pollIndexingStatus(timeoutMs: number): Promise<void> {
           status.realtimeProjection.snapshot.omnichainSnapshot.omnichainStatus;
         log(`Omnichain status: ${omnichainStatus}`);
         if (
-          omnichainStatus === "omnichain-following" ||
-          omnichainStatus === "omnichain-completed"
+          omnichainStatus === OmnichainIndexingStatusIds.Following ||
+          omnichainStatus === OmnichainIndexingStatusIds.Completed
         ) {
           log("Indexing reached target status");
           return;
@@ -169,30 +172,28 @@ async function pollIndexingStatus(timeoutMs: number): Promise<void> {
 async function main() {
   log("Starting integration test environment...");
 
-  // Phase 1: Start Postgres
-  log("Starting Postgres...");
-  const postgres = await new PostgreSqlContainer(POSTGRES_IMAGE)
-    .withDatabase("ensnode")
-    .withUsername("postgres")
-    .withPassword("password")
-    .start();
-  containers.push(postgres);
+  // Phase 1: Start Postgres + Devnet in parallel
+  log("Starting Postgres and devnet...");
+  const [postgres, devnet] = await Promise.all([
+    new PostgreSqlContainer(POSTGRES_IMAGE)
+      .withDatabase("ensnode")
+      .withUsername("postgres")
+      .withPassword("password")
+      .start(),
+    new GenericContainer(DEVNET_IMAGE)
+      .withEnvironment({ ANVIL_IP_ADDR: "0.0.0.0" })
+      .withExposedPorts(
+        { container: DEVNET_RPC_PORT, host: DEVNET_RPC_PORT },
+        { container: DEVNET_HEALTH_PORT, host: DEVNET_HEALTH_PORT },
+      )
+      .withCommand(["./script/runDevnet.ts", "--testNames"])
+      .withStartupTimeout(120_000)
+      .withWaitStrategy(Wait.forHttp("/health", DEVNET_HEALTH_PORT))
+      .start(),
+  ]);
+  containers.push(postgres, devnet);
   const DATABASE_URL = postgres.getConnectionUri();
   log(`Postgres is ready (port ${postgres.getPort()})`);
-
-  // Phase 2: Start devnet
-  log("Starting devnet...");
-  const devnet = await new GenericContainer(DEVNET_IMAGE)
-    .withEnvironment({ ANVIL_IP_ADDR: "0.0.0.0" })
-    .withExposedPorts(
-      { container: DEVNET_RPC_PORT, host: DEVNET_RPC_PORT },
-      { container: DEVNET_HEALTH_PORT, host: DEVNET_HEALTH_PORT },
-    )
-    .withCommand(["./script/runDevnet.ts", "--testNames"])
-    .withStartupTimeout(120_000)
-    .withWaitStrategy(Wait.forHttp("/health", DEVNET_HEALTH_PORT))
-    .start();
-  containers.push(devnet);
   log("Devnet is ready");
 
   // Phase 3: Download ENSRainbow database and start from source
@@ -249,7 +250,7 @@ async function main() {
     ["start"],
     ENSINDEXER_DIR,
     {
-      NAMESPACE: "ens-test-env",
+      NAMESPACE: ENSNamespaceIds.EnsTestEnv,
       DATABASE_URL,
       DATABASE_SCHEMA: "public",
       PLUGINS: "ensv2,protocol-acceleration",
