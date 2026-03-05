@@ -49,13 +49,16 @@ function checkAborted() {
 function waitForExit(child: ChildProcess, timeoutMs: number): Promise<void> {
   return new Promise<void>((resolve) => {
     if (child.exitCode !== null || child.signalCode !== null) return resolve();
-    child.on("exit", () => resolve());
-    setTimeout(() => {
+    const timeout = setTimeout(() => {
       try {
         child.kill("SIGKILL");
       } catch {}
       resolve();
     }, timeoutMs);
+    child.once("exit", () => {
+      clearTimeout(timeout);
+      resolve();
+    });
   });
 }
 
@@ -106,7 +109,7 @@ async function waitForHealth(url: string, timeoutMs: number, label: string): Pro
   while (Date.now() - start < timeoutMs) {
     checkAborted();
     try {
-      const res = await fetch(url);
+      const res = await fetch(url, { signal: AbortSignal.timeout(5_000) });
       if (res.ok) {
         log(`${label} is healthy`);
         return;
