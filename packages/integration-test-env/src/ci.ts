@@ -1,4 +1,3 @@
-import { type ChildProcess, execFileSync, spawn } from "node:child_process";
 import { mkdirSync } from "node:fs";
 import { resolve } from "node:path";
 
@@ -7,6 +6,7 @@ process.env.TESTCONTAINERS_RYUK_DISABLED = "true";
 process.env.CI = "1";
 
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from "@testcontainers/postgresql";
+import { execaSync, type ResultPromise, execa as spawn } from "execa";
 import { GenericContainer, type StartedTestContainer, Wait } from "testcontainers";
 
 import { ENSNamespaceIds } from "@ensnode/datasources";
@@ -33,12 +33,13 @@ const ENSINDEXER_URL = `http://localhost:${ENSINDEXER_PORT}`;
 const ENSRAINBOW_URL = `http://localhost:${ENSRAINBOW_PORT}`;
 
 // Track resources for cleanup
-const childProcesses: ChildProcess[] = [];
+const subprocesses: ResultPromise[] = [];
 const containers: (StartedTestContainer | StartedPostgreSqlContainer)[] = [];
 
-// Abort flag — set when a spawned service crashes after health check
+// Abort flag — set when a spawned service crashes
 let aborted = false;
 let abortReason = "";
+let cleanupInProgress = false;
 
 function checkAborted() {
   if (aborted) {
@@ -46,32 +47,22 @@ function checkAborted() {
   }
 }
 
-function waitForExit(child: ChildProcess, timeoutMs: number): Promise<void> {
-  return new Promise<void>((resolve) => {
-    if (child.exitCode !== null || child.signalCode !== null) return resolve();
-    const timeout = setTimeout(() => {
-      try {
-        child.kill("SIGKILL");
-      } catch {}
-      resolve();
-    }, timeoutMs);
-    child.once("exit", () => {
-      clearTimeout(timeout);
-      resolve();
-    });
-  });
+function setAborted(reason: string) {
+  if (cleanupInProgress) return;
+  logError(reason);
+  aborted = true;
+  abortReason = reason;
 }
 
 async function cleanup() {
   log("Cleaning up...");
 
-  // Stop child processes in reverse order (ensapi → ensindexer → ensrainbow)
-  // so DB consumers disconnect before containers are stopped
-  for (const child of [...childProcesses].reverse()) {
-    try {
-      child.kill("SIGTERM");
-    } catch {}
-    await waitForExit(child, 10_000);
+  // Kill child processes in reverse order (ensapi → ensindexer → ensrainbow)
+  // so DB consumers disconnect before containers are stopped.
+  // execa's forceKillAfterDelay (10s) sends SIGKILL if SIGTERM doesn't work.
+  for (const subprocess of [...subprocesses].reverse()) {
+    subprocess.kill();
+    await subprocess;
   }
   log("All child processes stopped");
 
@@ -82,8 +73,6 @@ async function cleanup() {
   }
   log("All containers stopped");
 }
-
-let cleanupInProgress = false;
 
 async function handleShutdown() {
   if (cleanupInProgress) return;
@@ -127,46 +116,36 @@ function spawnService(
   cwd: string,
   env: Record<string, string>,
   label: string,
-): ChildProcess {
-  const child = spawn(command, args, {
+): ResultPromise {
+  const subprocess = spawn(command, args, {
     cwd,
-    env: { ...process.env, ...env },
-    stdio: ["ignore", "pipe", "pipe"],
+    env,
+    stdout: "pipe",
+    stderr: "pipe",
+    reject: false,
+    forceKillAfterDelay: 10_000,
   });
 
-  child.stdout?.on("data", (data: Buffer) => {
+  subprocess.stdout?.on("data", (data: Buffer) => {
     for (const line of data.toString().split("\n").filter(Boolean)) {
       console.log(`[${label}] ${line}`);
     }
   });
 
-  child.stderr?.on("data", (data: Buffer) => {
+  subprocess.stderr?.on("data", (data: Buffer) => {
     for (const line of data.toString().split("\n").filter(Boolean)) {
       console.error(`[${label}] ${line}`);
     }
   });
 
-  child.on("error", (err) => {
-    logError(`${label} failed to start: ${err.message}`);
-    aborted = true;
-    abortReason = `${label} failed to start: ${err.message}`;
-  });
-
-  child.on("exit", (code, signal) => {
-    if (cleanupInProgress) return;
-    if (code !== null && code !== 0) {
-      logError(`${label} exited with code ${code}`);
-      aborted = true;
-      abortReason = `${label} exited with code ${code}`;
-    } else if (code === null && signal !== null) {
-      logError(`${label} was killed by signal ${signal}`);
-      aborted = true;
-      abortReason = `${label} was killed by signal ${signal}`;
+  subprocess.then((result) => {
+    if (result.failed && !result.isTerminated) {
+      setAborted(`${label} exited with code ${result.exitCode}`);
     }
   });
 
-  childProcesses.push(child);
-  return child;
+  subprocesses.push(subprocess);
+  return subprocess;
 }
 
 async function pollIndexingStatus(timeoutMs: number): Promise<void> {
@@ -237,7 +216,7 @@ async function main() {
   const downloadTempDir = resolve(ensrainbowDataDir, "_download_temp");
 
   log("Downloading ENSRainbow database...");
-  execFileSync(
+  execaSync(
     "bash",
     [
       `${ENSRAINBOW_DIR}/scripts/download-prebuilt-database.sh`,
@@ -248,7 +227,7 @@ async function main() {
     {
       cwd: ENSRAINBOW_DIR,
       stdio: "inherit",
-      env: { ...process.env, OUT_DIR: downloadTempDir },
+      env: { OUT_DIR: downloadTempDir },
     },
   );
 
@@ -260,7 +239,7 @@ async function main() {
     `${LABEL_SET_ID}_${LABEL_SET_VERSION}.tgz`,
   );
   mkdirSync(ensrainbowDataDir, { recursive: true });
-  execFileSync("tar", ["-xzf", archivePath, "-C", ensrainbowDataDir], {
+  execaSync("tar", ["-xzf", archivePath, "-C", ensrainbowDataDir], {
     stdio: "inherit",
   });
   log("ENSRainbow database extracted");
@@ -314,11 +293,10 @@ async function main() {
 
   // Phase 6: Run integration tests
   log("Running integration tests...");
-  execFileSync("pnpm", ["test:integration"], {
+  execaSync("pnpm", ["test:integration"], {
     cwd: MONOREPO_ROOT,
     stdio: "inherit",
     env: {
-      ...process.env,
       ENSAPI_GRAPHQL_API_URL: `http://localhost:${ENSAPI_PORT}/api/graphql`,
     },
   });
