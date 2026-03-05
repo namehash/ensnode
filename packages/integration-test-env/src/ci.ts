@@ -2,6 +2,9 @@ import { type ChildProcess, execFileSync, spawn } from "node:child_process";
 import { mkdirSync } from "node:fs";
 import { resolve } from "node:path";
 
+// Disable Ryuk — we handle container cleanup ourselves
+process.env.TESTCONTAINERS_RYUK_DISABLED = "true";
+
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from "@testcontainers/postgresql";
 import { GenericContainer, type StartedTestContainer, Wait } from "testcontainers";
 
