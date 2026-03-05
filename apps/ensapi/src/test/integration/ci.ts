@@ -230,7 +230,7 @@ async function main() {
     { LOG_LEVEL: "error" },
     "ensrainbow",
   );
-  await waitForHealth(`http://localhost:${ENSRAINBOW_PORT}/health`, 120_000, "ENSRainbow");
+  await waitForHealth(`http://localhost:${ENSRAINBOW_PORT}/health`, 30_000, "ENSRainbow");
 
   // Phase 4: Start ENSIndexer
   log("Starting ENSIndexer...");
@@ -250,10 +250,10 @@ async function main() {
     },
     "ensindexer",
   );
-  await waitForHealth(`http://localhost:${ENSINDEXER_PORT}/health`, 120_000, "ENSIndexer");
+  await waitForHealth(`http://localhost:${ENSINDEXER_PORT}/health`, 60_000, "ENSIndexer");
 
   // Phase 5: Wait for indexing to complete
-  await pollIndexingStatus(300_000);
+  await pollIndexingStatus(30_000);
 
   // Phase 6: Start ENSApi
   log("Starting ENSApi...");
@@ -267,7 +267,7 @@ async function main() {
     },
     "ensapi",
   );
-  await waitForHealth(`http://localhost:${ENSAPI_PORT}/health`, 60_000, "ENSApi");
+  await waitForHealth(`http://localhost:${ENSAPI_PORT}/health`, 10_000, "ENSApi");
 
   // Phase 7: Run integration tests
   log("Running integration tests...");
