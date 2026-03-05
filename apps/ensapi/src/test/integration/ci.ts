@@ -112,11 +112,15 @@ function spawnService(
     }
   });
 
-  child.on("exit", (code) => {
+  child.on("exit", (code, signal) => {
     if (code !== null && code !== 0) {
       logError(`${label} exited with code ${code}`);
       aborted = true;
       abortReason = `${label} exited with code ${code}`;
+    } else if (code === null && signal !== null) {
+      logError(`${label} was killed by signal ${signal}`);
+      aborted = true;
+      abortReason = `${label} was killed by signal ${signal}`;
     }
   });
 
