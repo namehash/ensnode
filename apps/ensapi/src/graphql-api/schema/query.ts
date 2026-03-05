@@ -22,6 +22,7 @@ import {
   withOrderingMetadata,
 } from "@/graphql-api/lib/find-domains/layers";
 import { getDomainIdByInterpretedName } from "@/graphql-api/lib/get-domain-by-interpreted-name";
+import { isTotalCountSelected } from "@/graphql-api/lib/is-total-count-selected";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { AccountIdInput } from "@/graphql-api/schema/account-id";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
@@ -152,6 +153,7 @@ builder.queryType({
         const named = filterByName(base, where.name);
         const canonical = where.canonical === true ? filterByCanonical(named) : named;
         const domains = withOrderingMetadata(canonical);
+
         return resolveFindDomains(context, { domains, order, ...connectionArgs });
       },
     }),
