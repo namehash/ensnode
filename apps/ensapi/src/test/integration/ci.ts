@@ -112,6 +112,12 @@ function spawnService(
     }
   });
 
+  child.on("error", (err) => {
+    logError(`${label} failed to start: ${err.message}`);
+    aborted = true;
+    abortReason = `${label} failed to start: ${err.message}`;
+  });
+
   child.on("exit", (code, signal) => {
     if (code !== null && code !== 0) {
       logError(`${label} exited with code ${code}`);
