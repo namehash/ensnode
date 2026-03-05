@@ -1,5 +1,5 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
-import { and, asc, desc, eq, gt, lt } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { hexToBigInt } from "viem";
 
 import * as schema from "@ensnode/ensnode-schema";
@@ -8,16 +8,15 @@ import {
   isRegistrationFullyExpired,
   isRegistrationInGracePeriod,
   type RegistrationId,
-  type RenewalId,
   type RequiredAndNotNull,
 } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
+import { orderPaginationBy, paginateBy } from "@/graphql-api/lib/connection-helpers";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
 import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { AccountIdRef } from "@/graphql-api/schema/account-id";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
-import { cursors } from "@/graphql-api/schema/cursors";
 import { DomainInterfaceRef } from "@/graphql-api/schema/domain";
 import { EventRef } from "@/graphql-api/schema/event";
 import { RenewalRef } from "@/graphql-api/schema/renewal";
@@ -144,14 +143,8 @@ RegistrationInterfaceRef.implement({
                 db
                   .select()
                   .from(schema.renewal)
-                  .where(
-                    and(
-                      scope,
-                      before ? lt(schema.renewal.id, cursors.decode<RenewalId>(before)) : undefined,
-                      after ? gt(schema.renewal.id, cursors.decode<RenewalId>(after)) : undefined,
-                    ),
-                  )
-                  .orderBy(inverted ? desc(schema.renewal.id) : asc(schema.renewal.id))
+                  .where(and(scope, paginateBy(schema.renewal.id, before, after)))
+                  .orderBy(orderPaginationBy(schema.renewal.id, inverted))
                   .limit(limit),
             ),
         });

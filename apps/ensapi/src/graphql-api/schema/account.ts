@@ -1,11 +1,11 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
-import { and, asc, count, desc, eq, gt, lt } from "drizzle-orm";
+import { and, count, eq } from "drizzle-orm";
 import type { Address } from "viem";
 
 import * as schema from "@ensnode/ensnode-schema";
-import type { PermissionsUserId } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
+import { orderPaginationBy, paginateBy } from "@/graphql-api/lib/connection-helpers";
 import { resolveFindDomains } from "@/graphql-api/lib/find-domains/find-domains-resolver";
 import {
   domainsBase,
@@ -20,7 +20,6 @@ import { AccountIdInput } from "@/graphql-api/schema/account-id";
 import { AccountRegistryPermissionsRef } from "@/graphql-api/schema/account-registries-permissions";
 import { AccountResolverPermissionsRef } from "@/graphql-api/schema/account-resolver-permissions";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
-import { cursors } from "@/graphql-api/schema/cursors";
 import {
   AccountDomainsWhereInput,
   DomainInterfaceRef,
@@ -118,20 +117,8 @@ AccountRef.implement({
                 db
                   .select()
                   .from(schema.permissionsUser)
-                  .where(
-                    and(
-                      scope,
-                      before
-                        ? lt(schema.permissionsUser.id, cursors.decode<PermissionsUserId>(before))
-                        : undefined,
-                      after
-                        ? gt(schema.permissionsUser.id, cursors.decode<PermissionsUserId>(after))
-                        : undefined,
-                    ),
-                  )
-                  .orderBy(
-                    inverted ? desc(schema.permissionsUser.id) : asc(schema.permissionsUser.id),
-                  )
+                  .where(and(scope, paginateBy(schema.permissionsUser.id, before, after)))
+                  .orderBy(orderPaginationBy(schema.permissionsUser.id, inverted))
                   .limit(limit),
             ),
         });
@@ -171,20 +158,8 @@ AccountRef.implement({
                   })
                   .from(schema.permissionsUser)
                   .innerJoin(schema.registry, join)
-                  .where(
-                    and(
-                      scope,
-                      before
-                        ? lt(schema.permissionsUser.id, cursors.decode<PermissionsUserId>(before))
-                        : undefined,
-                      after
-                        ? gt(schema.permissionsUser.id, cursors.decode<PermissionsUserId>(after))
-                        : undefined,
-                    ),
-                  )
-                  .orderBy(
-                    inverted ? desc(schema.permissionsUser.id) : asc(schema.permissionsUser.id),
-                  )
+                  .where(and(scope, paginateBy(schema.permissionsUser.id, before, after)))
+                  .orderBy(orderPaginationBy(schema.permissionsUser.id, inverted))
                   .limit(limit)
                   .then((rows) => rows.map((r) => ({ id: r.permissionsUser.id, ...r }))),
             ),
@@ -224,20 +199,8 @@ AccountRef.implement({
                   })
                   .from(schema.permissionsUser)
                   .innerJoin(schema.resolver, join)
-                  .where(
-                    and(
-                      scope,
-                      before
-                        ? lt(schema.permissionsUser.id, cursors.decode<PermissionsUserId>(before))
-                        : undefined,
-                      after
-                        ? gt(schema.permissionsUser.id, cursors.decode<PermissionsUserId>(after))
-                        : undefined,
-                    ),
-                  )
-                  .orderBy(
-                    inverted ? desc(schema.permissionsUser.id) : asc(schema.permissionsUser.id),
-                  )
+                  .where(and(scope, paginateBy(schema.permissionsUser.id, before, after)))
+                  .orderBy(orderPaginationBy(schema.permissionsUser.id, inverted))
                   .limit(limit)
                   .then((rows) => rows.map((r) => ({ id: r.permissionsUser.id, ...r }))),
             ),

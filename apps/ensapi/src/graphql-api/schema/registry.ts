@@ -1,10 +1,11 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
-import { and, asc, desc, eq, gt, lt } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import * as schema from "@ensnode/ensnode-schema";
-import { type ENSv2DomainId, makePermissionsId, type RegistryId } from "@ensnode/ensnode-sdk";
+import { makePermissionsId, type RegistryId } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
+import { orderPaginationBy, paginateBy } from "@/graphql-api/lib/connection-helpers";
 import { resolveFindDomains } from "@/graphql-api/lib/find-domains/find-domains-resolver";
 import {
   domainsBase,
@@ -16,7 +17,6 @@ import { getModelId } from "@/graphql-api/lib/get-model-id";
 import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { AccountIdInput, AccountIdRef } from "@/graphql-api/schema/account-id";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
-import { cursors } from "@/graphql-api/schema/cursors";
 import {
   DomainInterfaceRef,
   DomainsOrderInput,
@@ -65,16 +65,8 @@ RegistryRef.implement({
               { ...DEFAULT_CONNECTION_ARGS, args },
               ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
                 db.query.v2Domain.findMany({
-                  where: and(
-                    scope,
-                    before
-                      ? lt(schema.v2Domain.id, cursors.decode<ENSv2DomainId>(before))
-                      : undefined,
-                    after
-                      ? gt(schema.v2Domain.id, cursors.decode<ENSv2DomainId>(after))
-                      : undefined,
-                  ),
-                  orderBy: inverted ? desc(schema.v2Domain.id) : asc(schema.v2Domain.id),
+                  where: and(scope, paginateBy(schema.v2Domain.id, before, after)),
+                  orderBy: orderPaginationBy(schema.v2Domain.id, inverted),
                   limit,
                   with: { label: true },
                 }),

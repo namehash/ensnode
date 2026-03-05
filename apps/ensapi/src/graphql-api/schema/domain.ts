@@ -1,5 +1,5 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
-import { and, asc, desc, eq, gt, lt } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import * as schema from "@ensnode/ensnode-schema";
 import {
@@ -8,10 +8,10 @@ import {
   type ENSv2DomainId,
   getCanonicalId,
   interpretedLabelsToInterpretedName,
-  type RegistrationId,
 } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
+import { orderPaginationBy, paginateBy } from "@/graphql-api/lib/connection-helpers";
 import { resolveFindDomains } from "@/graphql-api/lib/find-domains/find-domains-resolver";
 import {
   domainsBase,
@@ -26,7 +26,6 @@ import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
-import { cursors } from "@/graphql-api/schema/cursors";
 import { LabelRef } from "@/graphql-api/schema/label";
 import { OrderDirection } from "@/graphql-api/schema/order-direction";
 import { RegistrationInterfaceRef } from "@/graphql-api/schema/registration";
@@ -217,20 +216,8 @@ DomainInterfaceRef.implement({
                 db
                   .select()
                   .from(schema.registration)
-                  .where(
-                    and(
-                      scope,
-                      before
-                        ? lt(schema.registration.id, cursors.decode<RegistrationId>(before))
-                        : undefined,
-                      after
-                        ? gt(schema.registration.id, cursors.decode<RegistrationId>(after))
-                        : undefined,
-                    ),
-                  )
-                  .orderBy(
-                    inverted ? asc(schema.registration.index) : desc(schema.registration.index),
-                  )
+                  .where(and(scope, paginateBy(schema.registration.id, before, after)))
+                  .orderBy(orderPaginationBy(schema.registration.index, inverted))
                   .limit(limit),
             ),
         });

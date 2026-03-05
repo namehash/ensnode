@@ -1,5 +1,5 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
-import { and, asc, desc, eq, gt, lt } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import * as schema from "@ensnode/ensnode-schema";
 import {
@@ -12,12 +12,12 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
+import { orderPaginationBy, paginateBy } from "@/graphql-api/lib/connection-helpers";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
 import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { AccountIdRef } from "@/graphql-api/schema/account-id";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
-import { cursors } from "@/graphql-api/schema/cursors";
 import { db } from "@/lib/db";
 
 export const PermissionsRef = builder.loadableObjectRef("Permissions", {
@@ -112,28 +112,8 @@ PermissionsRef.implement({
                 db
                   .select()
                   .from(schema.permissionsResource)
-                  .where(
-                    and(
-                      scope,
-                      before
-                        ? lt(
-                            schema.permissionsResource.id,
-                            cursors.decode<PermissionsResourceId>(before),
-                          )
-                        : undefined,
-                      after
-                        ? gt(
-                            schema.permissionsResource.id,
-                            cursors.decode<PermissionsResourceId>(after),
-                          )
-                        : undefined,
-                    ),
-                  )
-                  .orderBy(
-                    inverted
-                      ? desc(schema.permissionsResource.id)
-                      : asc(schema.permissionsResource.id),
-                  )
+                  .where(and(scope, paginateBy(schema.permissionsResource.id, before, after)))
+                  .orderBy(orderPaginationBy(schema.permissionsResource.id, inverted))
                   .limit(limit),
             ),
         });
@@ -200,20 +180,8 @@ PermissionsResourceRef.implement({
                 db
                   .select()
                   .from(schema.permissionsUser)
-                  .where(
-                    and(
-                      scope,
-                      before
-                        ? lt(schema.permissionsUser.id, cursors.decode<PermissionsUserId>(before))
-                        : undefined,
-                      after
-                        ? gt(schema.permissionsUser.id, cursors.decode<PermissionsUserId>(after))
-                        : undefined,
-                    ),
-                  )
-                  .orderBy(
-                    inverted ? desc(schema.permissionsUser.id) : asc(schema.permissionsUser.id),
-                  )
+                  .where(and(scope, paginateBy(schema.permissionsUser.id, before, after)))
+                  .orderBy(orderPaginationBy(schema.permissionsUser.id, inverted))
                   .limit(limit),
             ),
         });

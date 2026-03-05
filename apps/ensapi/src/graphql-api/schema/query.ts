@@ -1,21 +1,17 @@
 import config from "@/config";
 
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
-import { and, asc, desc, gt, lt } from "drizzle-orm";
 
 import * as schema from "@ensnode/ensnode-schema";
 import {
-  type ENSv1DomainId,
-  type ENSv2DomainId,
   getENSv2RootRegistryId,
   makePermissionsId,
   makeRegistryId,
   makeResolverId,
-  type RegistrationId,
-  type ResolverId,
 } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
+import { orderPaginationBy, paginateBy } from "@/graphql-api/lib/connection-helpers";
 import { resolveFindDomains } from "@/graphql-api/lib/find-domains/find-domains-resolver";
 import {
   domainsBase,
@@ -28,7 +24,6 @@ import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { AccountIdInput } from "@/graphql-api/schema/account-id";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
-import { cursors } from "@/graphql-api/schema/cursors";
 import {
   DomainIdInput,
   DomainInterfaceRef,
@@ -63,15 +58,8 @@ builder.queryType({
                 { ...DEFAULT_CONNECTION_ARGS, args },
                 ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
                   db.query.v1Domain.findMany({
-                    where: and(
-                      before
-                        ? lt(schema.v1Domain.id, cursors.decode<ENSv1DomainId>(before))
-                        : undefined,
-                      after
-                        ? gt(schema.v1Domain.id, cursors.decode<ENSv1DomainId>(after))
-                        : undefined,
-                    ),
-                    orderBy: inverted ? desc(schema.v1Domain.id) : asc(schema.v1Domain.id),
+                    where: paginateBy(schema.v1Domain.id, before, after),
+                    orderBy: orderPaginationBy(schema.v1Domain.id, inverted),
                     limit,
                     with: { label: true },
                   }),
@@ -93,15 +81,8 @@ builder.queryType({
                 { ...DEFAULT_CONNECTION_ARGS, args },
                 ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
                   db.query.v2Domain.findMany({
-                    where: and(
-                      before
-                        ? lt(schema.v2Domain.id, cursors.decode<ENSv2DomainId>(before))
-                        : undefined,
-                      after
-                        ? gt(schema.v2Domain.id, cursors.decode<ENSv2DomainId>(after))
-                        : undefined,
-                    ),
-                    orderBy: inverted ? desc(schema.v2Domain.id) : asc(schema.v2Domain.id),
+                    where: paginateBy(schema.v2Domain.id, before, after),
+                    orderBy: orderPaginationBy(schema.v2Domain.id, inverted),
                     limit,
                     with: { label: true },
                   }),
@@ -125,17 +106,8 @@ builder.queryType({
                   db
                     .select()
                     .from(schema.resolver)
-                    .where(
-                      and(
-                        before
-                          ? lt(schema.resolver.id, cursors.decode<ResolverId>(before))
-                          : undefined,
-                        after
-                          ? gt(schema.resolver.id, cursors.decode<ResolverId>(after))
-                          : undefined,
-                      ),
-                    )
-                    .orderBy(inverted ? desc(schema.resolver.id) : asc(schema.resolver.id))
+                    .where(paginateBy(schema.resolver.id, before, after))
+                    .orderBy(orderPaginationBy(schema.resolver.id, inverted))
                     .limit(limit),
               ),
           }),
@@ -157,17 +129,8 @@ builder.queryType({
                   db
                     .select()
                     .from(schema.registration)
-                    .where(
-                      and(
-                        before
-                          ? lt(schema.registration.id, cursors.decode<RegistrationId>(before))
-                          : undefined,
-                        after
-                          ? gt(schema.registration.id, cursors.decode<RegistrationId>(after))
-                          : undefined,
-                      ),
-                    )
-                    .orderBy(inverted ? desc(schema.registration.id) : asc(schema.registration.id))
+                    .where(paginateBy(schema.registration.id, before, after))
+                    .orderBy(orderPaginationBy(schema.registration.id, inverted))
                     .limit(limit),
               ),
           }),

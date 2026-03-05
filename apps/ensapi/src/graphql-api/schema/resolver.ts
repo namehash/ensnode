@@ -1,7 +1,7 @@
 import config from "@/config";
 
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
-import { and, asc, desc, eq, gt, lt } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { namehash } from "viem";
 
 import * as schema from "@ensnode/ensnode-schema";
@@ -10,18 +10,17 @@ import {
   makeResolverRecordsId,
   NODE_ANY,
   type ResolverId,
-  type ResolverRecordsId,
   ROOT_RESOURCE,
 } from "@ensnode/ensnode-sdk";
 import { isBridgedResolver } from "@ensnode/ensnode-sdk/internal";
 
 import { builder } from "@/graphql-api/builder";
+import { orderPaginationBy, paginateBy } from "@/graphql-api/lib/connection-helpers";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
 import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { AccountIdInput, AccountIdRef } from "@/graphql-api/schema/account-id";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
-import { cursors } from "@/graphql-api/schema/cursors";
 import { NameOrNodeInput } from "@/graphql-api/schema/name-or-node";
 import { PermissionsRef, type PermissionsUserResource } from "@/graphql-api/schema/permissions";
 import { ResolverRecordsRef } from "@/graphql-api/schema/resolver-records";
@@ -97,18 +96,8 @@ ResolverRef.implement({
               { ...DEFAULT_CONNECTION_ARGS, args },
               ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
                 db.query.resolverRecords.findMany({
-                  where: and(
-                    scope,
-                    before
-                      ? lt(schema.resolverRecords.id, cursors.decode<ResolverRecordsId>(before))
-                      : undefined,
-                    after
-                      ? gt(schema.resolverRecords.id, cursors.decode<ResolverRecordsId>(after))
-                      : undefined,
-                  ),
-                  orderBy: inverted
-                    ? desc(schema.resolverRecords.id)
-                    : asc(schema.resolverRecords.id),
+                  where: and(scope, paginateBy(schema.resolverRecords.id, before, after)),
+                  orderBy: orderPaginationBy(schema.resolverRecords.id, inverted),
                   limit,
                   with: { textRecords: true, addressRecords: true },
                 }),
