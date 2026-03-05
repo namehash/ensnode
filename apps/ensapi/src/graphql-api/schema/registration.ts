@@ -12,11 +12,11 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
-import { orderPaginationBy, paginateBy } from "@/graphql-api/lib/connection-helpers";
+import { orderPaginationBy, paginateByInt } from "@/graphql-api/lib/connection-helpers";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
 import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { AccountIdRef } from "@/graphql-api/schema/account-id";
-import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
+import { INDEX_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { DomainInterfaceRef } from "@/graphql-api/schema/domain";
 import { EventRef } from "@/graphql-api/schema/event";
 import { RenewalRef } from "@/graphql-api/schema/renewal";
@@ -138,13 +138,13 @@ RegistrationInterfaceRef.implement({
           totalCount: () => db.$count(schema.renewal, scope),
           connection: () =>
             resolveCursorConnection(
-              { ...DEFAULT_CONNECTION_ARGS, args },
+              { ...INDEX_PAGINATED_CONNECTION_ARGS, args },
               ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
                 db
                   .select()
                   .from(schema.renewal)
-                  .where(and(scope, paginateBy(schema.renewal.id, before, after)))
-                  .orderBy(orderPaginationBy(schema.renewal.id, inverted))
+                  .where(and(scope, paginateByInt(schema.renewal.index, before, after)))
+                  .orderBy(orderPaginationBy(schema.renewal.index, inverted))
                   .limit(limit),
             ),
         });

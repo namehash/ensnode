@@ -19,7 +19,7 @@ import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { AccountIdInput } from "@/graphql-api/schema/account-id";
 import { AccountRegistryPermissionsRef } from "@/graphql-api/schema/account-registries-permissions";
 import { AccountResolverPermissionsRef } from "@/graphql-api/schema/account-resolver-permissions";
-import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
+import { ID_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import {
   AccountDomainsWhereInput,
   DomainInterfaceRef,
@@ -112,7 +112,7 @@ AccountRef.implement({
           totalCount: () => db.$count(schema.permissionsUser, scope),
           connection: () =>
             resolveCursorConnection(
-              { ...DEFAULT_CONNECTION_ARGS, args },
+              { ...ID_PAGINATED_CONNECTION_ARGS, args },
               ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
                 db
                   .select()
@@ -149,7 +149,7 @@ AccountRef.implement({
               .then((r) => r[0].count),
           connection: () =>
             resolveCursorConnection(
-              { ...DEFAULT_CONNECTION_ARGS, args },
+              { ...ID_PAGINATED_CONNECTION_ARGS, args },
               ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
                 db
                   .select({
@@ -190,7 +190,7 @@ AccountRef.implement({
               .then((r) => r[0].count),
           connection: () =>
             resolveCursorConnection(
-              { ...DEFAULT_CONNECTION_ARGS, args },
+              { ...ID_PAGINATED_CONNECTION_ARGS, args },
               ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
                 db
                   .select({

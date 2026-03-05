@@ -11,7 +11,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
-import { orderPaginationBy, paginateBy } from "@/graphql-api/lib/connection-helpers";
+import { orderPaginationBy, paginateByInt } from "@/graphql-api/lib/connection-helpers";
 import { resolveFindDomains } from "@/graphql-api/lib/find-domains/find-domains-resolver";
 import {
   domainsBase,
@@ -25,7 +25,7 @@ import { getModelId } from "@/graphql-api/lib/get-model-id";
 import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
 import { AccountRef } from "@/graphql-api/schema/account";
-import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
+import { INDEX_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { LabelRef } from "@/graphql-api/schema/label";
 import { OrderDirection } from "@/graphql-api/schema/order-direction";
 import { RegistrationInterfaceRef } from "@/graphql-api/schema/registration";
@@ -211,12 +211,12 @@ DomainInterfaceRef.implement({
           totalCount: () => db.$count(schema.registration, scope),
           connection: () =>
             resolveCursorConnection(
-              { ...DEFAULT_CONNECTION_ARGS, args },
+              { ...INDEX_PAGINATED_CONNECTION_ARGS, args },
               ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
                 db
                   .select()
                   .from(schema.registration)
-                  .where(and(scope, paginateBy(schema.registration.id, before, after)))
+                  .where(and(scope, paginateByInt(schema.registration.index, before, after)))
                   .orderBy(orderPaginationBy(schema.registration.index, inverted))
                   .limit(limit),
             ),

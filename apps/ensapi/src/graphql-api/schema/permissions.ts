@@ -17,7 +17,7 @@ import { getModelId } from "@/graphql-api/lib/get-model-id";
 import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { AccountIdRef } from "@/graphql-api/schema/account-id";
-import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
+import { ID_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { db } from "@/lib/db";
 
 export const PermissionsRef = builder.loadableObjectRef("Permissions", {
@@ -107,7 +107,7 @@ PermissionsRef.implement({
           totalCount: () => db.$count(schema.permissionsResource, scope),
           connection: () =>
             resolveCursorConnection(
-              { ...DEFAULT_CONNECTION_ARGS, args },
+              { ...ID_PAGINATED_CONNECTION_ARGS, args },
               ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
                 db
                   .select()
@@ -175,7 +175,7 @@ PermissionsResourceRef.implement({
           totalCount: () => db.$count(schema.permissionsUser, scope),
           connection: () =>
             resolveCursorConnection(
-              { ...DEFAULT_CONNECTION_ARGS, args },
+              { ...ID_PAGINATED_CONNECTION_ARGS, args },
               ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
                 db
                   .select()

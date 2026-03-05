@@ -20,7 +20,7 @@ import { getModelId } from "@/graphql-api/lib/get-model-id";
 import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { AccountIdInput, AccountIdRef } from "@/graphql-api/schema/account-id";
-import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
+import { ID_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { NameOrNodeInput } from "@/graphql-api/schema/name-or-node";
 import { PermissionsRef, type PermissionsUserResource } from "@/graphql-api/schema/permissions";
 import { ResolverRecordsRef } from "@/graphql-api/schema/resolver-records";
@@ -93,7 +93,7 @@ ResolverRef.implement({
           totalCount: () => db.$count(schema.resolverRecords, scope),
           connection: () =>
             resolveCursorConnection(
-              { ...DEFAULT_CONNECTION_ARGS, args },
+              { ...ID_PAGINATED_CONNECTION_ARGS, args },
               ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
                 db.query.resolverRecords.findMany({
                   where: and(scope, paginateBy(schema.resolverRecords.id, before, after)),

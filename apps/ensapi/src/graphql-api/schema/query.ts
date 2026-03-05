@@ -23,7 +23,7 @@ import { getDomainIdByInterpretedName } from "@/graphql-api/lib/get-domain-by-in
 import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { AccountIdInput } from "@/graphql-api/schema/account-id";
-import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
+import { ID_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import {
   DomainIdInput,
   DomainInterfaceRef,
@@ -55,7 +55,7 @@ builder.queryType({
             totalCount: () => db.$count(schema.v1Domain),
             connection: () =>
               resolveCursorConnection(
-                { ...DEFAULT_CONNECTION_ARGS, args },
+                { ...ID_PAGINATED_CONNECTION_ARGS, args },
                 ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
                   db.query.v1Domain.findMany({
                     where: paginateBy(schema.v1Domain.id, before, after),
@@ -78,7 +78,7 @@ builder.queryType({
             totalCount: () => db.$count(schema.v2Domain),
             connection: () =>
               resolveCursorConnection(
-                { ...DEFAULT_CONNECTION_ARGS, args },
+                { ...ID_PAGINATED_CONNECTION_ARGS, args },
                 ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
                   db.query.v2Domain.findMany({
                     where: paginateBy(schema.v2Domain.id, before, after),
@@ -101,7 +101,7 @@ builder.queryType({
             totalCount: () => db.$count(schema.resolver),
             connection: () =>
               resolveCursorConnection(
-                { ...DEFAULT_CONNECTION_ARGS, args },
+                { ...ID_PAGINATED_CONNECTION_ARGS, args },
                 ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
                   db
                     .select()
@@ -124,7 +124,7 @@ builder.queryType({
             totalCount: () => db.$count(schema.registration),
             connection: () =>
               resolveCursorConnection(
-                { ...DEFAULT_CONNECTION_ARGS, args },
+                { ...ID_PAGINATED_CONNECTION_ARGS, args },
                 ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
                   db
                     .select()

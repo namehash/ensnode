@@ -8,7 +8,7 @@ import type {
 } from "@/graphql-api/lib/find-domains/layers/with-ordering-metadata";
 import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
-import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
+import { ID_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import {
   DOMAINS_DEFAULT_ORDER_BY,
   DOMAINS_DEFAULT_ORDER_DIR,
@@ -103,7 +103,7 @@ export function resolveFindDomains(
     connection: () =>
       resolveCursorConnection(
         {
-          ...DEFAULT_CONNECTION_ARGS,
+          ...ID_PAGINATED_CONNECTION_ARGS,
           args: connectionArgs,
           toCursor: (domain: DomainWithOrderValue) =>
             DomainCursor.encode({
