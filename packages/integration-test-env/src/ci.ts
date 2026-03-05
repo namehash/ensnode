@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 
 // Disable Ryuk — we handle container cleanup ourselves
 process.env.TESTCONTAINERS_RYUK_DISABLED = "true";
+process.env.CI = "1";
 
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from "@testcontainers/postgresql";
 import { GenericContainer, type StartedTestContainer, Wait } from "testcontainers";
@@ -79,14 +80,18 @@ async function cleanup() {
   log("All containers stopped");
 }
 
-process.on("SIGINT", async () => {
+let cleanupInProgress = false;
+
+async function handleShutdown() {
+  if (cleanupInProgress) return;
+  cleanupInProgress = true;
+  log("Shutting down...");
   await cleanup();
   process.exit(1);
-});
-process.on("SIGTERM", async () => {
-  await cleanup();
-  process.exit(1);
-});
+}
+
+process.on("SIGINT", handleShutdown);
+process.on("SIGTERM", handleShutdown);
 
 function log(msg: string) {
   console.log(`[ci] ${msg}`);
@@ -145,6 +150,7 @@ function spawnService(
   });
 
   child.on("exit", (code, signal) => {
+    if (cleanupInProgress) return;
     if (code !== null && code !== 0) {
       logError(`${label} exited with code ${code}`);
       aborted = true;
