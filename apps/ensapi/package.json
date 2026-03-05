@@ -16,7 +16,6 @@
     "dev": "tsx watch --env-file ./.env.local src/index.ts",
     "test": "vitest",
     "test:integration": "vitest run --config vitest.integration.config.ts ",
-    "test:integration:ci": "tsx src/test/integration/ci.ts",
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
     "typecheck": "tsgo --noEmit"
@@ -64,14 +63,12 @@
   },
   "devDependencies": {
     "@ensnode/shared-configs": "workspace:*",
-    "@testcontainers/postgresql": "^11.12.0",
     "@types/node": "catalog:",
     "@types/prismjs": "^1.26.6",
     "chalk": "^5.6.2",
     "graphql-request": "^7.4.0",
     "pino-pretty": "^13.1.2",
     "prismjs": "^1.30.0",
-    "testcontainers": "^11.12.0",
     "tsx": "^4.7.1",
     "typescript": "catalog:",
     "vitest": "catalog:"

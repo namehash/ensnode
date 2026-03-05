@@ -424,9 +424,6 @@ importers:
       '@ensnode/shared-configs':
         specifier: workspace:*
         version: link:../../packages/shared-configs
-      '@testcontainers/postgresql':
-        specifier: ^11.12.0
-        version: 11.12.0
       '@types/node':
         specifier: 'catalog:'
         version: 24.10.9
@@ -445,9 +442,6 @@ importers:
       prismjs:
         specifier: ^1.30.0
         version: 1.30.0
-      testcontainers:
-        specifier: ^11.12.0
-        version: 11.12.0
       tsx:
         specifier: ^4.7.1
         version: 4.20.6
@@ -950,6 +944,24 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.0.5(@types/debug@4.1.12)(@types/node@24.10.9)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.1)
+
+  packages/integration-test-env:
+    dependencies:
+      '@ensnode/datasources':
+        specifier: workspace:*
+        version: link:../datasources
+      '@ensnode/ensnode-sdk':
+        specifier: workspace:*
+        version: link:../ensnode-sdk
+      '@testcontainers/postgresql':
+        specifier: ^11.12.0
+        version: 11.12.0
+      testcontainers:
+        specifier: ^11.12.0
+        version: 11.12.0
+      tsx:
+        specifier: ^4.7.1
+        version: 4.20.6
 
   packages/namehash-ui:
     dependencies:

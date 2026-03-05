@@ -8,7 +8,7 @@ import { GenericContainer, type StartedTestContainer, Wait } from "testcontainer
 import { ENSNamespaceIds } from "@ensnode/datasources";
 import { OmnichainIndexingStatusIds } from "@ensnode/ensnode-sdk";
 
-const MONOREPO_ROOT = resolve(import.meta.dirname, "../../../../..");
+const MONOREPO_ROOT = resolve(import.meta.dirname, "../../..");
 const ENSRAINBOW_DIR = resolve(MONOREPO_ROOT, "apps/ensrainbow");
 const ENSINDEXER_DIR = resolve(MONOREPO_ROOT, "apps/ensindexer");
 const ENSAPI_DIR = resolve(MONOREPO_ROOT, "apps/ensapi");
@@ -154,9 +154,9 @@ function spawnService(
 }
 
 async function pollIndexingStatus(timeoutMs: number): Promise<void> {
-  const { EnsIndexerClient } = await import("@ensnode/ensnode-sdk");
-
-  const client = new EnsIndexerClient({ url: new URL(ENSINDEXER_URL) });
+  const client = new (await import("@ensnode/ensnode-sdk")).EnsIndexerClient({
+    url: new URL(ENSINDEXER_URL),
+  });
 
   const start = Date.now();
   log("Polling indexing status...");
@@ -212,7 +212,7 @@ async function main() {
   log(`Postgres is ready (port ${postgres.getPort()})`);
   log("Devnet is ready");
 
-  // Phase 3: Download ENSRainbow database and start from source
+  // Phase 2: Download ENSRainbow database and start from source
   const LABEL_SET_ID = "ens-test-env";
   const LABEL_SET_VERSION = "0";
   const DB_SCHEMA_VERSION = "3";
@@ -259,7 +259,7 @@ async function main() {
   );
   await waitForHealth(`http://localhost:${ENSRAINBOW_PORT}/health`, 30_000, "ENSRainbow");
 
-  // Phase 4: Start ENSIndexer
+  // Phase 3: Start ENSIndexer
   log("Starting ENSIndexer...");
   spawnService(
     "pnpm",
@@ -279,10 +279,10 @@ async function main() {
   );
   await waitForHealth(`http://localhost:${ENSINDEXER_PORT}/health`, 60_000, "ENSIndexer");
 
-  // Phase 5: Wait for indexing to complete
+  // Phase 4: Wait for indexing to complete
   await pollIndexingStatus(30_000);
 
-  // Phase 6: Start ENSApi
+  // Phase 5: Start ENSApi
   log("Starting ENSApi...");
   spawnService(
     "pnpm",
@@ -296,7 +296,7 @@ async function main() {
   );
   await waitForHealth(`http://localhost:${ENSAPI_PORT}/health`, 10_000, "ENSApi");
 
-  // Phase 7: Run integration tests
+  // Phase 6: Run integration tests
   log("Running integration tests...");
   execFileSync("pnpm", ["test:integration"], {
     cwd: MONOREPO_ROOT,
