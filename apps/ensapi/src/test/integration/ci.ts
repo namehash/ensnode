@@ -42,26 +42,28 @@ function checkAborted() {
   }
 }
 
+function waitForExit(child: ChildProcess, timeoutMs: number): Promise<void> {
+  return new Promise<void>((resolve) => {
+    if (child.exitCode !== null || child.signalCode !== null) return resolve();
+    child.on("exit", () => resolve());
+    setTimeout(() => {
+      try {
+        child.kill("SIGKILL");
+      } catch {}
+      resolve();
+    }, timeoutMs);
+  });
+}
+
 async function cleanup() {
-  // Signal all child processes to stop
-  for (const child of childProcesses) {
+  // Stop child processes in reverse order (ensapi → ensindexer → ensrainbow)
+  // so DB consumers disconnect before containers are stopped
+  for (const child of [...childProcesses].reverse()) {
     try {
       child.kill("SIGTERM");
     } catch {}
+    await waitForExit(child, 10_000);
   }
-
-  // Wait for child processes to exit before stopping containers,
-  // so they can close DB connections gracefully
-  await Promise.all(
-    childProcesses.map(
-      (child) =>
-        new Promise<void>((resolve) => {
-          if (child.exitCode !== null || child.signalCode !== null) return resolve();
-          child.on("exit", () => resolve());
-          setTimeout(() => resolve(), 5_000);
-        }),
-    ),
-  );
 
   for (const container of containers) {
     try {
