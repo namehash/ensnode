@@ -15,7 +15,7 @@
     "start": "tsx src/index.ts",
     "dev": "tsx watch --env-file ./.env.local src/index.ts",
     "test": "vitest",
-    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "test:integration": "vitest run --config vitest.integration.config.ts ",
     "test:integration:ci": "tsx src/test/integration/ci.ts",
     "lint": "biome check --write .",
     "lint:ci": "biome ci",

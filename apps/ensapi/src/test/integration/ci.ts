@@ -299,7 +299,7 @@ async function main() {
   // Phase 7: Run integration tests
   log("Running integration tests...");
   execFileSync("pnpm", ["test:integration"], {
-    cwd: ENSAPI_DIR,
+    cwd: MONOREPO_ROOT,
     stdio: "inherit",
     env: {
       ...process.env,
