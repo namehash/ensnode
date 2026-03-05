@@ -1,5 +1,7 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
+import { and, eq } from "drizzle-orm";
 
+import * as schema from "@ensnode/ensnode-schema";
 import {
   makePermissionsId,
   makePermissionsResourceId,
@@ -10,11 +12,12 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
+import { orderPaginationBy, paginateBy } from "@/graphql-api/lib/connection-helpers";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
+import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { AccountIdRef } from "@/graphql-api/schema/account-id";
-import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
-import { cursors } from "@/graphql-api/schema/cursors";
+import { ID_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { db } from "@/lib/db";
 
 export const PermissionsRef = builder.loadableObjectRef("Permissions", {
@@ -94,22 +97,27 @@ PermissionsRef.implement({
     resources: t.connection({
       description: "All PermissionResources managed by this contract.",
       type: PermissionsResourceRef,
-      resolve: (parent, args, context) =>
-        resolveCursorConnection(
-          { ...DEFAULT_CONNECTION_ARGS, args },
-          ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-            db.query.permissionsResource.findMany({
-              where: (t, { lt, gt, eq, and }) =>
-                and(
-                  eq(t.chainId, parent.chainId),
-                  eq(t.address, parent.address),
-                  before ? lt(t.id, cursors.decode<PermissionsResourceId>(before)) : undefined,
-                  after ? gt(t.id, cursors.decode<PermissionsResourceId>(after)) : undefined,
-                ),
-              orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
-              limit,
-            }),
-        ),
+      resolve: (parent, args) => {
+        const scope = and(
+          eq(schema.permissionsResource.chainId, parent.chainId),
+          eq(schema.permissionsResource.address, parent.address),
+        );
+
+        return lazyConnection({
+          totalCount: () => db.$count(schema.permissionsResource, scope),
+          connection: () =>
+            resolveCursorConnection(
+              { ...ID_PAGINATED_CONNECTION_ARGS, args },
+              ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+                db
+                  .select()
+                  .from(schema.permissionsResource)
+                  .where(and(scope, paginateBy(schema.permissionsResource.id, before, after)))
+                  .orderBy(orderPaginationBy(schema.permissionsResource.id, inverted))
+                  .limit(limit),
+            ),
+        });
+      },
     }),
   }),
 });
@@ -156,23 +164,28 @@ PermissionsResourceRef.implement({
     users: t.connection({
       description: "The PermissionUsers who have Roles within this Resource.",
       type: PermissionsUserRef,
-      resolve: (parent, args, context) =>
-        resolveCursorConnection(
-          { ...DEFAULT_CONNECTION_ARGS, args },
-          ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-            db.query.permissionsUser.findMany({
-              where: (t, { lt, gt, eq, and }) =>
-                and(
-                  eq(t.chainId, parent.chainId),
-                  eq(t.address, parent.address),
-                  eq(t.resource, parent.resource),
-                  before ? lt(t.id, cursors.decode<PermissionsUserId>(before)) : undefined,
-                  after ? gt(t.id, cursors.decode<PermissionsUserId>(after)) : undefined,
-                ),
-              orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
-              limit,
-            }),
-        ),
+      resolve: (parent, args) => {
+        const scope = and(
+          eq(schema.permissionsUser.chainId, parent.chainId),
+          eq(schema.permissionsUser.address, parent.address),
+          eq(schema.permissionsUser.resource, parent.resource),
+        );
+
+        return lazyConnection({
+          totalCount: () => db.$count(schema.permissionsUser, scope),
+          connection: () =>
+            resolveCursorConnection(
+              { ...ID_PAGINATED_CONNECTION_ARGS, args },
+              ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+                db
+                  .select()
+                  .from(schema.permissionsUser)
+                  .where(and(scope, paginateBy(schema.permissionsUser.id, before, after)))
+                  .orderBy(orderPaginationBy(schema.permissionsUser.id, inverted))
+                  .limit(limit),
+            ),
+        });
+      },
     }),
   }),
 });

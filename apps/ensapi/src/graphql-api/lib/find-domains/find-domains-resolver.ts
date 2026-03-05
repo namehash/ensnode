@@ -1,13 +1,14 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
-import { and } from "drizzle-orm";
+import { and, count } from "drizzle-orm";
 
 import type { context as createContext } from "@/graphql-api/context";
 import type {
   DomainsWithOrderingMetadata,
   DomainsWithOrderingMetadataResult,
 } from "@/graphql-api/lib/find-domains/layers/with-ordering-metadata";
+import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
-import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
+import { ID_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import {
   DOMAINS_DEFAULT_ORDER_BY,
   DOMAINS_DEFAULT_ORDER_DIR,
@@ -91,68 +92,79 @@ export function resolveFindDomains(
   const orderBy = order?.by ?? DOMAINS_DEFAULT_ORDER_BY;
   const orderDir = order?.dir ?? DOMAINS_DEFAULT_ORDER_DIR;
 
-  return resolveCursorConnection(
-    {
-      ...DEFAULT_CONNECTION_ARGS,
-      args: connectionArgs,
-      toCursor: (domain: DomainWithOrderValue) =>
-        DomainCursor.encode({
-          id: domain.id,
-          by: orderBy,
-          dir: orderDir,
-          value: domain.__orderValue,
-        }),
-    },
-    async ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) => {
-      // build order clauses
-      const orderClauses = orderFindDomains(domains, orderBy, orderDir, inverted);
-
-      // decode cursors for keyset pagination
-      const beforeCursor = before ? DomainCursor.decode(before) : undefined;
-      const afterCursor = after ? DomainCursor.decode(after) : undefined;
-
-      // build query with pagination constraints
-      const query = db
+  return lazyConnection({
+    totalCount: () =>
+      db
         .with(domains)
-        .select()
+        .select({ count: count() })
         .from(domains)
-        .where(
-          and(
-            beforeCursor
-              ? cursorFilter(domains, beforeCursor, orderBy, orderDir, "before")
-              : undefined,
-            afterCursor
-              ? cursorFilter(domains, afterCursor, orderBy, orderDir, "after")
-              : undefined,
-          ),
-        )
-        .orderBy(...orderClauses)
-        .limit(limit);
+        .then((rows) => rows[0].count),
 
-      // log the generated SQL for debugging
-      logger.debug({ sql: query.toSQL() });
+    connection: () =>
+      resolveCursorConnection(
+        {
+          ...ID_PAGINATED_CONNECTION_ARGS,
+          args: connectionArgs,
+          toCursor: (domain: DomainWithOrderValue) =>
+            DomainCursor.encode({
+              id: domain.id,
+              by: orderBy,
+              dir: orderDir,
+              value: domain.__orderValue,
+            }),
+        },
+        async ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) => {
+          // build order clauses
+          const orderClauses = orderFindDomains(domains, orderBy, orderDir, inverted);
 
-      // execute query
-      const results = await query;
+          // decode cursors for keyset pagination
+          const beforeCursor = before ? DomainCursor.decode(before) : undefined;
+          const afterCursor = after ? DomainCursor.decode(after) : undefined;
 
-      // load Domain entities via dataloader
-      const loadedDomains = await rejectAnyErrors(
-        DomainInterfaceRef.getDataloader(context).loadMany(results.map((result) => result.id)),
-      );
+          // build query with pagination constraints
+          const query = db
+            .with(domains)
+            .select()
+            .from(domains)
+            .where(
+              and(
+                beforeCursor
+                  ? cursorFilter(domains, beforeCursor, orderBy, orderDir, "before")
+                  : undefined,
+                afterCursor
+                  ? cursorFilter(domains, afterCursor, orderBy, orderDir, "after")
+                  : undefined,
+              ),
+            )
+            .orderBy(...orderClauses)
+            .limit(limit);
 
-      // map results by id for faster order value lookup
-      const orderValueById = new Map(
-        results.map((r) => [r.id, getOrderValueFromResult(r, orderBy)]),
-      );
+          // log the generated SQL for debugging
+          logger.debug({ sql: query.toSQL() });
 
-      // inject order values into each result so that it can be encoded into the cursor
-      // (see DomainCursor for more information)
-      return loadedDomains.map((domain): DomainWithOrderValue => {
-        const __orderValue = orderValueById.get(domain.id);
-        if (__orderValue === undefined) throw new Error(`Never: guaranteed to be DomainOrderValue`);
+          // execute query
+          const results = await query;
 
-        return { ...domain, __orderValue };
-      });
-    },
-  );
+          // load Domain entities via dataloader
+          const loadedDomains = await rejectAnyErrors(
+            DomainInterfaceRef.getDataloader(context).loadMany(results.map((result) => result.id)),
+          );
+
+          // map results by id for faster order value lookup
+          const orderValueById = new Map(
+            results.map((r) => [r.id, getOrderValueFromResult(r, orderBy)]),
+          );
+
+          // inject order values into each result so that it can be encoded into the cursor
+          // (see DomainCursor for more information)
+          return loadedDomains.map((domain): DomainWithOrderValue => {
+            const __orderValue = orderValueById.get(domain.id);
+            if (__orderValue === undefined)
+              throw new Error(`Never: guaranteed to be DomainOrderValue`);
+
+            return { ...domain, __orderValue };
+          });
+        },
+      ),
+  });
 }
