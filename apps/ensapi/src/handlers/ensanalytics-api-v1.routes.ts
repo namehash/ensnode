@@ -1,4 +1,4 @@
-import { createRoute } from "@hono/zod-openapi";
+import { createRoute, z } from "@hono/zod-openapi";
 import {
   MAX_EDITIONS_PER_REQUEST,
   REFERRERS_PER_LEADERBOARD_PAGE_MAX,
@@ -7,7 +7,6 @@ import {
   makeReferralProgramEditionSlugSchema,
   makeReferrerMetricsEditionsArraySchema,
 } from "@namehash/ens-referrals/v1/internal";
-import { z } from "zod/v4";
 
 import { makeLowercaseAddressSchema } from "@ensnode/ensnode-sdk/internal";
 
@@ -21,6 +20,7 @@ const referrerLeaderboardPageQuerySchema = z.object({
   edition: makeReferralProgramEditionSlugSchema("edition"),
   page: z
     .optional(z.coerce.number().int().min(1, "Page must be a positive integer"))
+    .openapi({ type: "integer", minimum: 1 })
     .describe("Page number for pagination"),
   recordsPerPage: z
     .optional(
@@ -33,6 +33,7 @@ const referrerLeaderboardPageQuerySchema = z.object({
           `Records per page must not exceed ${REFERRERS_PER_LEADERBOARD_PAGE_MAX}`,
         ),
     )
+    .openapi({ type: "integer", minimum: 1, maximum: REFERRERS_PER_LEADERBOARD_PAGE_MAX })
     .describe("Number of referrers per page"),
 });
 

@@ -2,29 +2,25 @@
 
 [docs.ensnode.io](https://docs.ensnode.io) runs on [Mintlify](https://mintlify.com).
 
+Learn more about [ENSNode](https://ensnode.io) from [the "Starlight" ENSNode docs](https://ensnode.io/docs/). Everything from these "Starlight" docs is planned to be transitioned into these Mintlify docs soon.
+
 ## Local Development
 
-### Getting Started
+1. `git clone https://github.com/namehash/ensnode.git`
+2. `cd ensnode`
+3. `cd docs/docs.ensnode.io`
+4. `pnpm mint dev`
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-1. Clone the repository:
+### Regenerating the OpenAPI Spec
 
-   ```bash
-   git clone https://github.com/namehash/ensnode.git
-   ```
+The ENSApi OpenAPI spec (`ensapi-openapi.json`) is generated from the route definitions in `apps/ensapi`. To regenerate it after making changes to route schemas:
 
-2. Navigate to the docs directory:
+```sh
+pnpm generate:openapi
+```
 
-   ```bash
-   cd ensnode/docs/docs.ensnode.io
-   ```
-
-3. Start the local development server:
-
-   ```bash
-   pnpm mint dev
-   ```
-
-4. Open [http://localhost:3000](http://localhost:3000) in your browser
+This runs from the repo root and outputs the formatted spec to `docs/docs.ensnode.io/ensapi-openapi.json`.
 
 ### Troubleshooting
 
@@ -38,3 +34,4 @@ Changes pushed to the main branch are automatically deployed to production.
 ## Resources
 
 - [Mintlify documentation](https://mintlify.com/docs)
+- [ENSNode "Starlight" docs](https://ensnode.io/docs/)

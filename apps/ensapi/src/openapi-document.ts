@@ -44,14 +44,7 @@ function createStubRoutesForSpec() {
 
 /**
  * Generates an OpenAPI 3.1 document from stub route definitions.
- * Accepts optional additional servers (e.g. a localhost entry derived from
- * runtime config) so that the core generation has no runtime dependencies.
  */
-export function generateOpenApi31Document(
-  additionalServers: { url: string; description: string }[] = [],
-): ReturnType<OpenAPIHono["getOpenAPI31Document"]> {
-  return createStubRoutesForSpec().getOpenAPI31Document({
-    ...openapiMeta,
-    servers: [...openapiMeta.servers, ...additionalServers],
-  });
+export function generateOpenApi31Document(): ReturnType<OpenAPIHono["getOpenAPI31Document"]> {
+  return createStubRoutesForSpec().getOpenAPI31Document(openapiMeta);
 }

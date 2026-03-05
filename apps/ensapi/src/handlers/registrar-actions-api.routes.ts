@@ -1,5 +1,4 @@
-import { createRoute } from "@hono/zod-openapi";
-import { z } from "zod/v4";
+import { createRoute, z } from "@hono/zod-openapi";
 
 import {
   RECORDS_PER_PAGE_DEFAULT,
@@ -30,6 +29,7 @@ export const registrarActionsQuerySchema = z
       .default(1)
       .pipe(z.coerce.number())
       .pipe(makePositiveIntegerSchema("page"))
+      .openapi({ type: "integer", minimum: 1, default: 1 })
       .describe("Page number for pagination"),
 
     recordsPerPage: params.queryParam
@@ -37,12 +37,19 @@ export const registrarActionsQuerySchema = z
       .default(RECORDS_PER_PAGE_DEFAULT)
       .pipe(z.coerce.number())
       .pipe(makePositiveIntegerSchema("recordsPerPage").max(RECORDS_PER_PAGE_MAX))
+      .openapi({
+        type: "integer",
+        minimum: 1,
+        maximum: RECORDS_PER_PAGE_MAX,
+        default: RECORDS_PER_PAGE_DEFAULT,
+      })
       .describe("Number of records per page"),
 
     withReferral: params.boolstring
       .optional()
       .default(false)
-      .describe("Filter to only include actions with referrals"),
+      .describe("Filter to only include actions with referrals")
+      .openapi({ default: false }),
 
     decodedReferrer: makeLowercaseAddressSchema("decodedReferrer")
       .optional()

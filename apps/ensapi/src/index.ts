@@ -75,9 +75,7 @@ app.route("/v1/ensanalytics", ensanalyticsApiV1);
 app.route("/amirealtime", amIRealtimeApi);
 
 // serve pre-generated OpenAPI 3.1 document
-const openApi31Document = generateOpenApi31Document([
-  { url: `http://localhost:${config.port}`, description: "Local Development" },
-]);
+const openApi31Document = generateOpenApi31Document();
 app.get("/openapi.json", (c) => {
   return c.json(openApi31Document);
 });

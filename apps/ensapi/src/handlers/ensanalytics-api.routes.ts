@@ -1,6 +1,5 @@
-import { createRoute } from "@hono/zod-openapi";
+import { createRoute, z } from "@hono/zod-openapi";
 import { REFERRERS_PER_LEADERBOARD_PAGE_MAX } from "@namehash/ens-referrals";
-import { z } from "zod/v4";
 
 import { makeLowercaseAddressSchema } from "@ensnode/ensnode-sdk/internal";
 
@@ -10,6 +9,7 @@ export const basePath = "/ensanalytics";
 const paginationQuerySchema = z.object({
   page: z
     .optional(z.coerce.number().int().min(1, "Page must be a positive integer"))
+    .openapi({ type: "integer", minimum: 1 })
     .describe("Page number for pagination"),
   recordsPerPage: z
     .optional(
@@ -22,6 +22,7 @@ const paginationQuerySchema = z.object({
           `Records per page must not exceed ${REFERRERS_PER_LEADERBOARD_PAGE_MAX}`,
         ),
     )
+    .openapi({ type: "integer", minimum: 1, maximum: REFERRERS_PER_LEADERBOARD_PAGE_MAX })
     .describe("Number of referrers per page"),
 });
 
