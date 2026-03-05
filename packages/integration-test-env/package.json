@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Integration test environment orchestration for ENSNode",
   "scripts": {
-    "start": "tsx src/ci.ts"
+    "start": "CI=1 tsx src/ci.ts"
   },
   "dependencies": {
     "@ensnode/datasources": "workspace:*",

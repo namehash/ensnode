@@ -34,10 +34,6 @@
 import { mkdirSync } from "node:fs";
 import { resolve } from "node:path";
 
-// Disable Ryuk — we handle container cleanup ourselves
-process.env.TESTCONTAINERS_RYUK_DISABLED = "true";
-process.env.CI = "1";
-
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from "@testcontainers/postgresql";
 import { execaSync, type ResultPromise, execa as spawn } from "execa";
 import { GenericContainer, type StartedTestContainer, Wait } from "testcontainers";
@@ -102,7 +98,13 @@ async function cleanup() {
   for (const container of containers) {
     try {
       await container.stop();
-    } catch {}
+    } catch (error) {
+      logError(
+        `Failed to stop container during cleanup: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    }
   }
   log("All containers stopped");
 }
@@ -241,9 +243,9 @@ async function main() {
   log("Devnet is ready");
 
   // Phase 2: Download ENSRainbow database and start from source
+  const DB_SCHEMA_VERSION = "3";
   const LABEL_SET_ID = "ens-test-env";
   const LABEL_SET_VERSION = "0";
-  const DB_SCHEMA_VERSION = "3";
   const dataSubdir = `data-${LABEL_SET_ID}_${LABEL_SET_VERSION}`;
   const ensrainbowDataDir = resolve(ENSRAINBOW_DIR, "data");
   const downloadTempDir = resolve(ensrainbowDataDir, "_download_temp");
@@ -300,8 +302,8 @@ async function main() {
       PLUGINS: "ensv2,protocol-acceleration",
       ENSRAINBOW_URL,
       ENSINDEXER_URL,
-      LABEL_SET_ID: "ens-test-env",
-      LABEL_SET_VERSION: "0",
+      LABEL_SET_ID,
+      LABEL_SET_VERSION,
     },
     "ensindexer",
   );
