@@ -1,8 +1,10 @@
 import config from "@/config";
 
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
+import { and, asc, desc, eq, gt, lt } from "drizzle-orm";
 import { namehash } from "viem";
 
+import * as schema from "@ensnode/ensnode-schema";
 import {
   makePermissionsId,
   makeResolverRecordsId,
@@ -15,6 +17,7 @@ import { isBridgedResolver } from "@ensnode/ensnode-sdk/internal";
 
 import { builder } from "@/graphql-api/builder";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
+import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { AccountIdInput, AccountIdRef } from "@/graphql-api/schema/account-id";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
@@ -81,23 +84,37 @@ ResolverRef.implement({
     records: t.connection({
       description: "ResolverRecords issued by this Resolver.",
       type: ResolverRecordsRef,
-      resolve: (parent, args, context) =>
-        resolveCursorConnection(
-          { ...DEFAULT_CONNECTION_ARGS, args },
-          ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-            db.query.resolverRecords.findMany({
-              where: (t, { lt, gt, and, eq }) =>
-                and(
-                  eq(t.chainId, parent.chainId),
-                  eq(t.address, parent.address),
-                  before ? lt(t.id, cursors.decode<ResolverRecordsId>(before)) : undefined,
-                  after ? gt(t.id, cursors.decode<ResolverRecordsId>(after)) : undefined,
-                ),
-              orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
-              limit,
-              with: { textRecords: true, addressRecords: true },
-            }),
-        ),
+      resolve: (parent, args, context) => {
+        const scope = and(
+          eq(schema.resolverRecords.chainId, parent.chainId),
+          eq(schema.resolverRecords.address, parent.address),
+        );
+
+        return lazyConnection({
+          totalCount: () => db.$count(schema.resolverRecords, scope),
+          connection: () =>
+            resolveCursorConnection(
+              { ...DEFAULT_CONNECTION_ARGS, args },
+              ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+                db.query.resolverRecords.findMany({
+                  where: and(
+                    scope,
+                    before
+                      ? lt(schema.resolverRecords.id, cursors.decode<ResolverRecordsId>(before))
+                      : undefined,
+                    after
+                      ? gt(schema.resolverRecords.id, cursors.decode<ResolverRecordsId>(after))
+                      : undefined,
+                  ),
+                  orderBy: inverted
+                    ? desc(schema.resolverRecords.id)
+                    : asc(schema.resolverRecords.id),
+                  limit,
+                  with: { textRecords: true, addressRecords: true },
+                }),
+            ),
+        });
+      },
     }),
 
     ////////////////////////////////////

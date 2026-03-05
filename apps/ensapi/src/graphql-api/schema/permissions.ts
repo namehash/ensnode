@@ -1,5 +1,7 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
+import { and, asc, desc, eq, gt, lt } from "drizzle-orm";
 
+import * as schema from "@ensnode/ensnode-schema";
 import {
   makePermissionsId,
   makePermissionsResourceId,
@@ -11,6 +13,7 @@ import {
 
 import { builder } from "@/graphql-api/builder";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
+import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { AccountIdRef } from "@/graphql-api/schema/account-id";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
@@ -94,22 +97,47 @@ PermissionsRef.implement({
     resources: t.connection({
       description: "All PermissionResources managed by this contract.",
       type: PermissionsResourceRef,
-      resolve: (parent, args, context) =>
-        resolveCursorConnection(
-          { ...DEFAULT_CONNECTION_ARGS, args },
-          ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-            db.query.permissionsResource.findMany({
-              where: (t, { lt, gt, eq, and }) =>
-                and(
-                  eq(t.chainId, parent.chainId),
-                  eq(t.address, parent.address),
-                  before ? lt(t.id, cursors.decode<PermissionsResourceId>(before)) : undefined,
-                  after ? gt(t.id, cursors.decode<PermissionsResourceId>(after)) : undefined,
-                ),
-              orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
-              limit,
-            }),
-        ),
+      resolve: (parent, args) => {
+        const scope = and(
+          eq(schema.permissionsResource.chainId, parent.chainId),
+          eq(schema.permissionsResource.address, parent.address),
+        );
+
+        return lazyConnection({
+          totalCount: () => db.$count(schema.permissionsResource, scope),
+          connection: () =>
+            resolveCursorConnection(
+              { ...DEFAULT_CONNECTION_ARGS, args },
+              ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+                db
+                  .select()
+                  .from(schema.permissionsResource)
+                  .where(
+                    and(
+                      scope,
+                      before
+                        ? lt(
+                            schema.permissionsResource.id,
+                            cursors.decode<PermissionsResourceId>(before),
+                          )
+                        : undefined,
+                      after
+                        ? gt(
+                            schema.permissionsResource.id,
+                            cursors.decode<PermissionsResourceId>(after),
+                          )
+                        : undefined,
+                    ),
+                  )
+                  .orderBy(
+                    inverted
+                      ? desc(schema.permissionsResource.id)
+                      : asc(schema.permissionsResource.id),
+                  )
+                  .limit(limit),
+            ),
+        });
+      },
     }),
   }),
 });
@@ -156,23 +184,40 @@ PermissionsResourceRef.implement({
     users: t.connection({
       description: "The PermissionUsers who have Roles within this Resource.",
       type: PermissionsUserRef,
-      resolve: (parent, args, context) =>
-        resolveCursorConnection(
-          { ...DEFAULT_CONNECTION_ARGS, args },
-          ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-            db.query.permissionsUser.findMany({
-              where: (t, { lt, gt, eq, and }) =>
-                and(
-                  eq(t.chainId, parent.chainId),
-                  eq(t.address, parent.address),
-                  eq(t.resource, parent.resource),
-                  before ? lt(t.id, cursors.decode<PermissionsUserId>(before)) : undefined,
-                  after ? gt(t.id, cursors.decode<PermissionsUserId>(after)) : undefined,
-                ),
-              orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
-              limit,
-            }),
-        ),
+      resolve: (parent, args) => {
+        const scope = and(
+          eq(schema.permissionsUser.chainId, parent.chainId),
+          eq(schema.permissionsUser.address, parent.address),
+          eq(schema.permissionsUser.resource, parent.resource),
+        );
+
+        return lazyConnection({
+          totalCount: () => db.$count(schema.permissionsUser, scope),
+          connection: () =>
+            resolveCursorConnection(
+              { ...DEFAULT_CONNECTION_ARGS, args },
+              ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+                db
+                  .select()
+                  .from(schema.permissionsUser)
+                  .where(
+                    and(
+                      scope,
+                      before
+                        ? lt(schema.permissionsUser.id, cursors.decode<PermissionsUserId>(before))
+                        : undefined,
+                      after
+                        ? gt(schema.permissionsUser.id, cursors.decode<PermissionsUserId>(after))
+                        : undefined,
+                    ),
+                  )
+                  .orderBy(
+                    inverted ? desc(schema.permissionsUser.id) : asc(schema.permissionsUser.id),
+                  )
+                  .limit(limit),
+            ),
+        });
+      },
     }),
   }),
 });

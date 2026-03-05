@@ -1,7 +1,9 @@
 import config from "@/config";
 
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
+import { and, asc, desc, gt, lt } from "drizzle-orm";
 
+import * as schema from "@ensnode/ensnode-schema";
 import {
   type ENSv1DomainId,
   type ENSv2DomainId,
@@ -22,7 +24,7 @@ import {
   withOrderingMetadata,
 } from "@/graphql-api/lib/find-domains/layers";
 import { getDomainIdByInterpretedName } from "@/graphql-api/lib/get-domain-by-interpreted-name";
-import { isTotalCountSelected } from "@/graphql-api/lib/is-total-count-selected";
+import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { AccountIdInput } from "@/graphql-api/schema/account-id";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
@@ -53,21 +55,28 @@ builder.queryType({
       v1Domains: t.connection({
         description: "TODO",
         type: ENSv1DomainRef,
-        resolve: (parent, args, context) =>
-          resolveCursorConnection(
-            { ...DEFAULT_CONNECTION_ARGS, args },
-            ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-              db.query.v1Domain.findMany({
-                where: (t, { lt, gt, and }) =>
-                  and(
-                    before ? lt(t.id, cursors.decode<ENSv1DomainId>(before)) : undefined,
-                    after ? gt(t.id, cursors.decode<ENSv1DomainId>(after)) : undefined,
-                  ),
-                orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
-                limit,
-                with: { label: true },
-              }),
-          ),
+        resolve: (parent, args) =>
+          lazyConnection({
+            totalCount: () => db.$count(schema.v1Domain),
+            connection: () =>
+              resolveCursorConnection(
+                { ...DEFAULT_CONNECTION_ARGS, args },
+                ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+                  db.query.v1Domain.findMany({
+                    where: and(
+                      before
+                        ? lt(schema.v1Domain.id, cursors.decode<ENSv1DomainId>(before))
+                        : undefined,
+                      after
+                        ? gt(schema.v1Domain.id, cursors.decode<ENSv1DomainId>(after))
+                        : undefined,
+                    ),
+                    orderBy: inverted ? desc(schema.v1Domain.id) : asc(schema.v1Domain.id),
+                    limit,
+                    with: { label: true },
+                  }),
+              ),
+          }),
       }),
 
       /////////////////////////////
@@ -76,21 +85,28 @@ builder.queryType({
       v2Domains: t.connection({
         description: "TODO",
         type: ENSv2DomainRef,
-        resolve: (parent, args, context) =>
-          resolveCursorConnection(
-            { ...DEFAULT_CONNECTION_ARGS, args },
-            ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-              db.query.v2Domain.findMany({
-                where: (t, { lt, gt, and }) =>
-                  and(
-                    before ? lt(t.id, cursors.decode<ENSv2DomainId>(before)) : undefined,
-                    after ? gt(t.id, cursors.decode<ENSv2DomainId>(after)) : undefined,
-                  ),
-                orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
-                limit,
-                with: { label: true },
-              }),
-          ),
+        resolve: (parent, args) =>
+          lazyConnection({
+            totalCount: () => db.$count(schema.v2Domain),
+            connection: () =>
+              resolveCursorConnection(
+                { ...DEFAULT_CONNECTION_ARGS, args },
+                ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+                  db.query.v2Domain.findMany({
+                    where: and(
+                      before
+                        ? lt(schema.v2Domain.id, cursors.decode<ENSv2DomainId>(before))
+                        : undefined,
+                      after
+                        ? gt(schema.v2Domain.id, cursors.decode<ENSv2DomainId>(after))
+                        : undefined,
+                    ),
+                    orderBy: inverted ? desc(schema.v2Domain.id) : asc(schema.v2Domain.id),
+                    limit,
+                    with: { label: true },
+                  }),
+              ),
+          }),
       }),
 
       /////////////////////////////
@@ -99,20 +115,30 @@ builder.queryType({
       resolvers: t.connection({
         description: "TODO",
         type: ResolverRef,
-        resolve: (parent, args, context) =>
-          resolveCursorConnection(
-            { ...DEFAULT_CONNECTION_ARGS, args },
-            ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-              db.query.resolver.findMany({
-                where: (t, { lt, gt, and }) =>
-                  and(
-                    before ? lt(t.id, cursors.decode<ResolverId>(before)) : undefined,
-                    after ? gt(t.id, cursors.decode<ResolverId>(after)) : undefined,
-                  ),
-                orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
-                limit,
-              }),
-          ),
+        resolve: (parent, args) =>
+          lazyConnection({
+            totalCount: () => db.$count(schema.resolver),
+            connection: () =>
+              resolveCursorConnection(
+                { ...DEFAULT_CONNECTION_ARGS, args },
+                ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+                  db
+                    .select()
+                    .from(schema.resolver)
+                    .where(
+                      and(
+                        before
+                          ? lt(schema.resolver.id, cursors.decode<ResolverId>(before))
+                          : undefined,
+                        after
+                          ? gt(schema.resolver.id, cursors.decode<ResolverId>(after))
+                          : undefined,
+                      ),
+                    )
+                    .orderBy(inverted ? desc(schema.resolver.id) : asc(schema.resolver.id))
+                    .limit(limit),
+              ),
+          }),
       }),
 
       /////////////////////////////////
@@ -121,20 +147,30 @@ builder.queryType({
       registrations: t.connection({
         description: "TODO",
         type: RegistrationInterfaceRef,
-        resolve: (parent, args, context) =>
-          resolveCursorConnection(
-            { ...DEFAULT_CONNECTION_ARGS, args },
-            ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-              db.query.registration.findMany({
-                where: (t, { lt, gt, and }) =>
-                  and(
-                    before ? lt(t.id, cursors.decode<RegistrationId>(before)) : undefined,
-                    after ? gt(t.id, cursors.decode<RegistrationId>(after)) : undefined,
-                  ),
-                orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
-                limit,
-              }),
-          ),
+        resolve: (parent, args) =>
+          lazyConnection({
+            totalCount: () => db.$count(schema.registration),
+            connection: () =>
+              resolveCursorConnection(
+                { ...DEFAULT_CONNECTION_ARGS, args },
+                ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+                  db
+                    .select()
+                    .from(schema.registration)
+                    .where(
+                      and(
+                        before
+                          ? lt(schema.registration.id, cursors.decode<RegistrationId>(before))
+                          : undefined,
+                        after
+                          ? gt(schema.registration.id, cursors.decode<RegistrationId>(after))
+                          : undefined,
+                      ),
+                    )
+                    .orderBy(inverted ? desc(schema.registration.id) : asc(schema.registration.id))
+                    .limit(limit),
+              ),
+          }),
       }),
     }),
 
