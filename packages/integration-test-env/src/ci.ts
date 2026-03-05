@@ -1,3 +1,36 @@
+/**
+ * Integration Test Environment Orchestrator
+ *
+ * Co-authored by Claude (Opus 4.6).
+ *
+ * Spins up the full ENSNode stack against the ens-test-env devnet, runs
+ * monorepo-level integration tests, then tears everything down.
+ *
+ * Phases:
+ *   1. Postgres (testcontainers, dynamic port) + devnet (fixed ports 8545/8000) — parallel
+ *   2. Download pre-built ENSRainbow LevelDB, extract, start ENSRainbow from source
+ *   3. Start ENSIndexer, wait for omnichain-following / omnichain-completed
+ *   4. Start ENSApi
+ *   5. Run `pnpm test:integration` at the monorepo root
+ *
+ * Design decisions:
+ *   - testcontainers for Postgres (dynamic port, built-in health check) and devnet
+ *     (fixed ports required — ensTestEnvChain hardcodes localhost:8545).
+ *   - Ryuk disabled — we manage container lifecycle ourselves so cleanup is
+ *     deterministic and we avoid the Ryuk sidecar lingering after exit.
+ *   - execa for child process management — automatic cleanup on parent exit,
+ *     forceKillAfterDelay (10s SIGKILL fallback), env inheritance via extendEnv.
+ *   - Services run from source (pnpm start/serve) rather than Docker so that
+ *     CI tests the actual code in the PR.
+ *   - ENSRainbow database is downloaded via the existing shell script and
+ *     extracted with tar, mirroring the Docker entrypoint behavior.
+ *   - Cleanup stops processes in reverse order (ensapi → ensindexer → ensrainbow)
+ *     so DB consumers close connections before Postgres is stopped.
+ *   - Abort flag pattern: if a background service crashes during polling/health
+ *     checks, the orchestrator fails fast instead of waiting for a timeout.
+ *   - SIGINT/SIGTERM handler is guarded against re-entrance (repeated Ctrl-C).
+ */
+
 import { mkdirSync } from "node:fs";
 import { resolve } from "node:path";
 
@@ -297,7 +330,7 @@ async function main() {
     cwd: MONOREPO_ROOT,
     stdio: "inherit",
     env: {
-      ENSAPI_GRAPHQL_API_URL: `http://localhost:${ENSAPI_PORT}/api/graphql`,
+      ENSNODE_URL: `http://localhost:${ENSAPI_PORT}`,
     },
   });
   log("Integration tests passed!");
