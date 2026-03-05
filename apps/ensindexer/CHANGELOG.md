@@ -1,5 +1,16 @@
 # ensindexer
 
+## 1.7.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/datasources@1.7.0
+  - @ensnode/ensrainbow-sdk@1.7.0
+  - @ensnode/ensnode-schema@1.7.0
+  - @ensnode/ensnode-sdk@1.7.0
+  - @ensnode/ponder-sdk@1.7.0
+
 ## 1.6.0
 
 ### Minor Changes

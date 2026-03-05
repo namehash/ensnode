@@ -1,5 +1,12 @@
 # @ensnode/ensnode-react
 
+## 1.7.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/ensnode-sdk@1.7.0
+
 ## 1.6.0
 
 ### Patch Changes
