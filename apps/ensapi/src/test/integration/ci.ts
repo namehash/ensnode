@@ -43,11 +43,25 @@ function checkAborted() {
 }
 
 async function cleanup() {
+  // Signal all child processes to stop
   for (const child of childProcesses) {
     try {
       child.kill("SIGTERM");
     } catch {}
   }
+
+  // Wait for child processes to exit before stopping containers,
+  // so they can close DB connections gracefully
+  await Promise.all(
+    childProcesses.map(
+      (child) =>
+        new Promise<void>((resolve) => {
+          if (child.exitCode !== null || child.signalCode !== null) return resolve();
+          child.on("exit", () => resolve());
+          setTimeout(() => resolve(), 5_000);
+        }),
+    ),
+  );
 
   for (const container of containers) {
     try {
