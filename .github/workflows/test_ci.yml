@@ -59,7 +59,7 @@ jobs:
       - name: Verify spec is in sync
         run: |
           if ! git diff --quiet docs/docs.ensnode.io/ensapi-openapi.json || \
-             git ls-files --error-unmatch docs/docs.ensnode.io/ensapi-openapi.json 2>/dev/null | xargs -r git status --porcelain | grep -q "^??"; then
+             ! git ls-files --error-unmatch docs/docs.ensnode.io/ensapi-openapi.json >/dev/null 2>&1; then
             echo "Error: OpenAPI spec is out of sync"
             echo ""
             echo "The committed ensapi-openapi.json differs from what the code generates:"
