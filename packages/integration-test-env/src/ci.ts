@@ -56,6 +56,8 @@ function waitForExit(child: ChildProcess, timeoutMs: number): Promise<void> {
 }
 
 async function cleanup() {
+  log("Cleaning up...");
+
   // Stop child processes in reverse order (ensapi → ensindexer → ensrainbow)
   // so DB consumers disconnect before containers are stopped
   for (const child of [...childProcesses].reverse()) {
@@ -64,12 +66,14 @@ async function cleanup() {
     } catch {}
     await waitForExit(child, 10_000);
   }
+  log("All child processes stopped");
 
   for (const container of containers) {
     try {
       await container.stop();
     } catch {}
   }
+  log("All containers stopped");
 }
 
 process.on("SIGINT", async () => {
@@ -309,10 +313,11 @@ async function main() {
   log("Integration tests passed!");
 
   await cleanup();
+  process.exit(0);
 }
 
 main().catch(async (e: unknown) => {
   logError(String(e));
   await cleanup();
-  process.exitCode = 1;
+  process.exit(1);
 });
