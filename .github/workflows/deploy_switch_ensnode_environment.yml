@@ -106,9 +106,6 @@ jobs:
           HTTP_RESPONSE=$(curl --silent --write-out "\n%{http_code}" \
             --connect-timeout 10 \
             --max-time 30 \
-            --retry 2 \
-            --retry-delay 5 \
-            --retry-all-errors \
             --request POST \
             --url "https://api.mintlify.com/v1/project/update/${MINTLIFY_PROJECT_ID}" \
             --header "Authorization: Bearer ${MINTLIFY_API_TOKEN}")
@@ -191,6 +188,7 @@ jobs:
           slack_webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           slack_title: "Mintlify Docs Rebuild Failed"
           slack_message: "Mintlify docs rebuild failed during environment switch to ${{ inputs.target }}. Check the workflow logs for details."
+          slack_color: "danger"
 
       - name: Notify Mintlify Rebuild Success
         if: steps.mintlify_rebuild.outcome == 'success'
@@ -198,7 +196,7 @@ jobs:
         with:
           slack_webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           slack_title: "Mintlify Docs Rebuilt"
-          slack_message: "Mintlify docs successfully rebuilt for environment switch to ${{ inputs.target }}. API Reference built from: https://api.alpha.ensnode.io/openapi.json"
+          slack_message: "Mintlify docs successfully rebuilt for environment switch to ${{ inputs.target }}. API Reference built from canonical endpoint: https://api.alpha.ensnode.io/openapi.json"
 
       - name: Send Slack Notification
         uses: ./.github/actions/send_slack_notification
