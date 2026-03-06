@@ -11,11 +11,11 @@ import type { ZodCheckFnInput } from "@ensnode/ensnode-sdk/internal";
 
 import { getPlugin } from "@/plugins";
 
-import type { EnsIndexerConfig } from "./types";
+import type { ENSIndexerConfig } from "./types";
 
 // Invariant: specified plugins' datasources are available in the specified namespace's Datasources
 export function invariant_requiredDatasources(
-  ctx: ZodCheckFnInput<Pick<EnsIndexerConfig, "namespace" | "plugins">>,
+  ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "namespace" | "plugins">>,
 ) {
   const { value: config } = ctx;
 
@@ -47,7 +47,7 @@ export function invariant_requiredDatasources(
 
 // Invariant: rpcConfig is specified for each indexed chain
 export function invariant_rpcConfigsSpecifiedForIndexedChains(
-  ctx: ZodCheckFnInput<Pick<EnsIndexerConfig, "namespace" | "plugins" | "rpcConfigs">>,
+  ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "namespace" | "plugins" | "rpcConfigs">>,
 ) {
   const { value: config } = ctx;
 
@@ -71,7 +71,7 @@ export function invariant_rpcConfigsSpecifiedForIndexedChains(
 
 // Invariant: if a global blockrange is defined, only one chain is indexed
 export function invariant_globalBlockrange(
-  ctx: ZodCheckFnInput<Pick<EnsIndexerConfig, "globalBlockrange" | "namespace" | "plugins">>,
+  ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "globalBlockrange" | "namespace" | "plugins">>,
 ) {
   const { value: config } = ctx;
   const { globalBlockrange } = config;
@@ -109,7 +109,7 @@ export function invariant_globalBlockrange(
 
 // Invariant: all contracts have a valid ContractConfig defined
 export function invariant_validContractConfigs(
-  ctx: ZodCheckFnInput<Pick<EnsIndexerConfig, "namespace">>,
+  ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "namespace">>,
 ) {
   const { value: config } = ctx;
 
@@ -139,7 +139,7 @@ export function invariant_validContractConfigs(
 
 // Invariant: ensv2 core plugin requires protocol acceleration
 export function invariant_ensv2RequiresProtocolAcceleration(
-  ctx: ZodCheckFnInput<Pick<EnsIndexerConfig, "plugins">>,
+  ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "plugins">>,
 ) {
   const { value: config } = ctx;
 
