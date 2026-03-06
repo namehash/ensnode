@@ -84,6 +84,7 @@ function setAborted(reason: string) {
 }
 
 async function cleanup() {
+  cleanupInProgress = true;
   log("Cleaning up...");
 
   // Kill child processes in reverse order (ensapi → ensindexer → ensrainbow)
