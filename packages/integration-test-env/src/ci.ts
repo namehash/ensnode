@@ -91,7 +91,7 @@ async function cleanup() {
   // servers) are also terminated — pnpm doesn't forward SIGTERM to children.
   for (const subprocess of [...subprocesses].reverse()) {
     try {
-      process.kill(-subprocess.pid!, "SIGTERM");
+      if (subprocess.pid) process.kill(-subprocess.pid, "SIGTERM");
     } catch {}
     subprocess.kill();
     await subprocess;
@@ -224,24 +224,30 @@ async function main() {
 
   // Phase 1: Start Postgres + Devnet in parallel
   log("Starting Postgres and devnet...");
-  const [postgres, devnet] = await Promise.all([
-    new PostgreSqlContainer(POSTGRES_IMAGE)
-      .withDatabase("ensnode")
-      .withUsername("postgres")
-      .withPassword("password")
-      .start(),
-    new GenericContainer(DEVNET_IMAGE)
-      .withEnvironment({ ANVIL_IP_ADDR: "0.0.0.0" })
-      .withExposedPorts(
-        { container: DEVNET_RPC_PORT, host: DEVNET_RPC_PORT },
-        { container: DEVNET_HEALTH_PORT, host: DEVNET_HEALTH_PORT },
-      )
-      .withCommand(["./script/runDevnet.ts", "--testNames"])
-      .withStartupTimeout(120_000)
-      .withWaitStrategy(Wait.forHttp("/health", DEVNET_HEALTH_PORT))
-      .start(),
-  ]);
-  containers.push(postgres, devnet);
+  const postgresPromise = new PostgreSqlContainer(POSTGRES_IMAGE)
+    .withDatabase("ensnode")
+    .withUsername("postgres")
+    .withPassword("password")
+    .start()
+    .then((c) => {
+      containers.push(c);
+      return c;
+    });
+  const devnetPromise = new GenericContainer(DEVNET_IMAGE)
+    .withEnvironment({ ANVIL_IP_ADDR: "0.0.0.0" })
+    .withExposedPorts(
+      { container: DEVNET_RPC_PORT, host: DEVNET_RPC_PORT },
+      { container: DEVNET_HEALTH_PORT, host: DEVNET_HEALTH_PORT },
+    )
+    .withCommand(["./script/runDevnet.ts", "--testNames"])
+    .withStartupTimeout(120_000)
+    .withWaitStrategy(Wait.forHttp("/health", DEVNET_HEALTH_PORT))
+    .start()
+    .then((c) => {
+      containers.push(c);
+      return c;
+    });
+  const [postgres] = await Promise.all([postgresPromise, devnetPromise]);
   const DATABASE_URL = postgres.getConnectionUri();
   log(`Postgres is ready (port ${postgres.getPort()})`);
   log("Devnet is ready");
@@ -278,7 +284,7 @@ async function main() {
     `${LABEL_SET_ID}_${LABEL_SET_VERSION}.tgz`,
   );
   mkdirSync(ensrainbowDataDir, { recursive: true });
-  execaSync("tar", ["-xzf", archivePath, "-C", ensrainbowDataDir], {
+  execaSync("tar", ["-xzf", archivePath, "-C", ensrainbowDataDir, "--strip-components=1"], {
     stdio: "inherit",
   });
   log("ENSRainbow database extracted");
