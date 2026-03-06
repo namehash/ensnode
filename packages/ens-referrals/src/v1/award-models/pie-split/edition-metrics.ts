@@ -113,3 +113,12 @@ export interface ReferrerEditionMetricsUnrankedPieSplit {
    */
   accurateAsOf: UnixTimestamp;
 }
+
+/**
+ * All referrer edition metrics variants for the pie-split award model.
+ *
+ * Use `type` to determine if the referrer is ranked or unranked.
+ */
+export type ReferrerEditionMetricsPieSplit =
+  | ReferrerEditionMetricsRankedPieSplit
+  | ReferrerEditionMetricsUnrankedPieSplit;

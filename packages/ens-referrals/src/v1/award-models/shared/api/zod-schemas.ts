@@ -54,3 +54,14 @@ export const makeReferrerLeaderboardPageContextSchema = (
  */
 export const makeReferralProgramStatusSchema = (_valueLabel: string = "status") =>
   z.enum(ReferralProgramStatuses);
+
+/**
+ * Schema for {@link BaseReferrerLeaderboardPage}.
+ */
+export const makeBaseReferrerLeaderboardPageSchema = (valueLabel: string) =>
+  z.object({
+    awardModel: z.string(),
+    pageContext: makeReferrerLeaderboardPageContextSchema(`${valueLabel}.pageContext`),
+    status: makeReferralProgramStatusSchema(`${valueLabel}.status`),
+    accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
+  });
