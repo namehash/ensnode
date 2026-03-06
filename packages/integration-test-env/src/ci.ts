@@ -89,8 +89,12 @@ async function cleanup() {
 
   // Kill child processes in reverse order (ensapi → ensindexer → ensrainbow)
   // so DB consumers disconnect before containers are stopped.
-  // execa's forceKillAfterDelay (10s) sends SIGKILL if SIGTERM doesn't work.
+  // Kill the entire process group (-pid) so pnpm's children (the actual node
+  // servers) are also terminated — pnpm doesn't forward SIGTERM to children.
   for (const subprocess of [...subprocesses].reverse()) {
+    try {
+      process.kill(-subprocess.pid!, "SIGTERM");
+    } catch {}
     subprocess.kill();
     await subprocess;
   }
@@ -160,6 +164,7 @@ function spawnService(
     stderr: "pipe",
     reject: false,
     forceKillAfterDelay: 10_000,
+    detached: true,
   });
 
   subprocess.stdout?.on("data", (data: Buffer) => {
