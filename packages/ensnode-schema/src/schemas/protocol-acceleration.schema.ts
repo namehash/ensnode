@@ -252,10 +252,10 @@ export const resolverTextRecordRelations = relations(resolverTextRecord, ({ one 
  *
  * Note also that this Registry migration tracking is isolated to the Protocol Acceleration schema/plugin.
  * That is, the subgraph plugin implements its own Registry migration logic. By isolating this logic
- * to the Protocol Acceleration plugin, we allow the Protocol acceleration plugin to be run
+ * to the Protocol Acceleration plugin, we allow the Protocol Acceleration plugin to be run
  * independently of other plugins.
  *
- * The ensv2 plugin depends on the protocol-acceleration plugin in order to piggyback on this
+ * The ensv2 plugin depends on the Protocol Acceleration plugin in order to piggyback on this
  * Registry migration logic.
  */
 export const migratedNode = onchainTable("migrated_nodes", (t) => ({
