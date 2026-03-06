@@ -137,19 +137,18 @@ export function invariant_validContractConfigs(
   }
 }
 
-// Invariant: ensv2 core plugin requires protocol acceleration
+// Invariant: ensv2 plugin requires protocol acceleration
 export function invariant_ensv2RequiresProtocolAcceleration(
   ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "plugins">>,
 ) {
   const { value: config } = ctx;
 
-  // TODO: getCorePlugin(config.plugins)
   if (
     config.plugins.includes(PluginName.ENSv2) &&
     !config.plugins.includes(PluginName.ProtocolAcceleration)
   ) {
     throw new Error(
-      `Core Plugin '${PluginName.ENSv2}' requires inclusion of '${PluginName.ProtocolAcceleration}' plugin.`,
+      `The '${PluginName.ENSv2}' plugin depends on the inclusion of '${PluginName.ProtocolAcceleration}' plugin.`,
     );
   }
 }
