@@ -1,8 +1,7 @@
-import config from "@/config";
-
 import { hasGraphqlApiConfigSupport, hasSubgraphApiConfigSupport } from "@ensnode/ensnode-sdk";
 
 import { factory } from "@/lib/hono-factory";
+import { publicConfigBuilder } from "@/lib/public-config-builder/singleton";
 
 /**
  * Creates middleware that requires a specific core plugin to be enabled in ENSIndexer.
@@ -14,12 +13,14 @@ import { factory } from "@/lib/hono-factory";
  */
 export const requireCorePluginMiddleware = (core: "subgraph" | "ensv2") =>
   factory.createMiddleware(async (c, next) => {
-    const subgraph = hasSubgraphApiConfigSupport(config.ensIndexerPublicConfig);
+    const { ensIndexerPublicConfig } = await publicConfigBuilder.getPublicConfig();
+
+    const subgraph = hasSubgraphApiConfigSupport(ensIndexerPublicConfig);
     if (core === "subgraph" && !subgraph.supported) {
       return c.text(`Service Unavailable: ${subgraph.reason}`, 503);
     }
 
-    const graphql = hasGraphqlApiConfigSupport(config.ensIndexerPublicConfig);
+    const graphql = hasGraphqlApiConfigSupport(ensIndexerPublicConfig);
     if (core === "ensv2" && !graphql.supported) {
       return c.text(`Service Unavailable: ${graphql.reason}`, 503);
     }

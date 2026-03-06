@@ -20,6 +20,6 @@ export const subgraphMetaMiddleware = createMiddleware<{
     throw new Error(`Invariant(subgraphMetaMiddleware): indexingStatusMiddleware required`);
   }
 
-  c.set("_meta", indexingContextToSubgraphMeta(c.var.indexingStatus));
+  c.set("_meta", await indexingContextToSubgraphMeta(c.var.indexingStatus));
   await next();
 });

@@ -1,26 +1,21 @@
-import config from "@/config";
+import { type CrossChainIndexingStatusSnapshot, SWRCache } from "@ensnode/ensnode-sdk";
 
-import {
-  type CrossChainIndexingStatusSnapshot,
-  ENSNodeClient,
-  IndexingStatusResponseCodes,
-  SWRCache,
-} from "@ensnode/ensnode-sdk";
-
+import { ensDbClient } from "@/lib/ensdb-client/singleton";
 import { makeLogger } from "@/lib/logger";
 
 const logger = makeLogger("indexing-status.cache");
-const client = new ENSNodeClient({ url: config.ensIndexerUrl });
 
 export const indexingStatusCache = new SWRCache<CrossChainIndexingStatusSnapshot>({
   fn: async (_cachedResult) =>
-    client
-      .indexingStatus() // fetch a new indexing status snapshot
-      .then((response) => {
-        if (response.responseCode !== IndexingStatusResponseCodes.Ok) {
-          // An indexing status response was successfully fetched, but the response code contained within the response was not 'ok'.
+    ensDbClient
+      .getIndexingStatusSnapshot() // get the latest indexing status snapshot
+      .then((snapshot) => {
+        if (snapshot === undefined) {
+          // An indexing status snapshot has not been found in ENSDb yet.
+          // This might happen during application startup, i.e. when ENSDb
+          // has not yet been populated with the first snapshot.
           // Therefore, throw an error to trigger the subsequent `.catch` handler.
-          throw new Error("Received Indexing Status response with responseCode other than 'ok'.");
+          throw new Error("Indexing Status snapshot not found in ENSDb yet.");
         }
 
         logger.info("Fetched Indexing Status to be cached");
@@ -29,10 +24,10 @@ export const indexingStatusCache = new SWRCache<CrossChainIndexingStatusSnapshot
         // Therefore, return it so that this current invocation of `readCache` will:
         // - Replace the currently cached value (if any) with this new value.
         // - Return this non-null value.
-        return response.realtimeProjection.snapshot;
+        return snapshot;
       })
       .catch((error) => {
-        // Either the indexing status snapshot fetch failed, or the indexing status response was not 'ok'.
+        // Either the indexing status snapshot fetch failed, or the indexing status snapshot was not found in ENSDb yet.
         // Therefore, throw an error so that this current invocation of `readCache` will:
         // - Reject the newly fetched response (if any) such that it won't be cached.
         // - Return the most recently cached value from prior invocations, or `null` if no prior invocation successfully cached a value.

@@ -15,6 +15,7 @@ import { errorResponse } from "@/lib/handlers/error-response";
 import { factory } from "@/lib/hono-factory";
 import { sdk } from "@/lib/instrumentation";
 import logger from "@/lib/logger";
+import { publicConfigBuilder } from "@/lib/public-config-builder/singleton";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 import { generateOpenApi31Document } from "@/openapi-document";
 
@@ -82,7 +83,17 @@ app.get("/openapi.json", (c) => {
 
 // will automatically 503 if config is not available due to ensIndexerPublicConfigMiddleware
 app.get("/health", async (c) => {
-  return c.json({ message: "fallback ok" });
+  try {
+    // ENSApi is healthy when its Public Config can be successfully built.
+    await publicConfigBuilder.getPublicConfig();
+
+    return c.json({ message: "fallback ok" });
+  } catch (error) {
+    logger.error(error, "Health check failed: unable to get ENSApi Public Config");
+
+    // Report unhealthy status
+    return errorResponse(c, "Service Unavailable", 503);
+  }
 });
 
 // log hono errors to console

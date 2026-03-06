@@ -3,6 +3,7 @@ import config from "@/config";
 import { ChainIndexingStatusIds, getENSRootChainId } from "@ensnode/ensnode-sdk";
 import type { SubgraphMeta } from "@ensnode/ponder-subgraph";
 
+import { publicConfigBuilder } from "@/lib/public-config-builder/singleton";
 import type { IndexingStatusMiddlewareVariables } from "@/middleware/indexing-status.middleware";
 
 /**
@@ -16,9 +17,9 @@ import type { IndexingStatusMiddlewareVariables } from "@/middleware/indexing-st
  * @param indexingStatus - The indexing context from the indexing status middleware
  * @returns SubgraphMeta object or null if conversion is not possible
  */
-export function indexingContextToSubgraphMeta(
+export async function indexingContextToSubgraphMeta(
   indexingStatus: IndexingStatusMiddlewareVariables["indexingStatus"],
-): SubgraphMeta {
+): Promise<SubgraphMeta> {
   // indexing status middleware has never successfully fetched (and cached) an indexing status snapshot
   // for the lifetime of this service instance.
   if (indexingStatus instanceof Error) return null;
@@ -35,8 +36,9 @@ export function indexingContextToSubgraphMeta(
     case ChainIndexingStatusIds.Completed:
     case ChainIndexingStatusIds.Backfill:
     case ChainIndexingStatusIds.Following: {
+      const { ensIndexerPublicConfig } = await publicConfigBuilder.getPublicConfig();
       return {
-        deployment: config.ensIndexerPublicConfig.versionInfo.ensIndexer,
+        deployment: ensIndexerPublicConfig.versionInfo.ensIndexer,
         hasIndexingErrors: false,
         block: {
           hash: null,

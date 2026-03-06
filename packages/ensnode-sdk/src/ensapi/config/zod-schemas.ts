@@ -11,6 +11,9 @@ import {
 
 export { TheGraphCannotFallbackReasonSchema, TheGraphFallbackSchema };
 
+export const makeEnsApiVersionSchema = () =>
+  z.string().min(1, `ENSApi version must be a non-empty string`);
+
 /**
  * Create a Zod schema for validating ENSApiPublicConfig.
  *
@@ -20,7 +23,7 @@ export function makeEnsApiPublicConfigSchema(valueLabel?: string) {
   const label = valueLabel ?? "ENSApiPublicConfig";
 
   return z.object({
-    version: z.string().min(1, `${label}.version must be a non-empty string`),
+    version: makeEnsApiVersionSchema(),
     theGraphFallback: TheGraphFallbackSchema,
     ensIndexerPublicConfig: makeEnsIndexerPublicConfigSchema(`${label}.ensIndexerPublicConfig`),
   });
@@ -37,7 +40,7 @@ export function makeSerializedEnsApiPublicConfigSchema(valueLabel?: string) {
   const label = valueLabel ?? "ENSApiPublicConfig";
 
   return z.object({
-    version: z.string().min(1, `${label}.version must be a non-empty string`),
+    version: makeEnsApiVersionSchema(),
     theGraphFallback: TheGraphFallbackSchema,
     ensIndexerPublicConfig: makeSerializedEnsIndexerPublicConfigSchema(
       `${label}.ensIndexerPublicConfig`,

@@ -1,15 +1,13 @@
-import config from "@/config";
-
 import {
   EnsApiIndexingStatusResponseCodes,
   type EnsApiIndexingStatusResponseError,
   type EnsApiIndexingStatusResponseOk,
-  serializeENSApiPublicConfig,
   serializeEnsApiIndexingStatusResponse,
+  serializeEnsApiPublicConfig,
 } from "@ensnode/ensnode-sdk";
 
-import { buildEnsApiPublicConfig } from "@/config/config.schema";
 import { createApp } from "@/lib/hono-factory";
+import { publicConfigBuilder } from "@/lib/public-config-builder/singleton";
 
 import { getConfigRoute, getIndexingStatusRoute } from "./ensnode-api.routes";
 import ensnodeGraphQLApi from "./ensnode-graphql-api";
@@ -20,8 +18,8 @@ import resolutionApi from "./resolution-api";
 const app = createApp();
 
 app.openapi(getConfigRoute, async (c) => {
-  const ensApiPublicConfig = buildEnsApiPublicConfig(config);
-  return c.json(serializeENSApiPublicConfig(ensApiPublicConfig));
+  const ensApiPublicConfig = await publicConfigBuilder.getPublicConfig();
+  return c.json(serializeEnsApiPublicConfig(ensApiPublicConfig));
 });
 
 app.openapi(getIndexingStatusRoute, async (c) => {
