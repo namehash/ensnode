@@ -16,8 +16,6 @@
  * Design decisions:
  *   - testcontainers for Postgres (dynamic port, built-in health check) and devnet
  *     (fixed ports required — ensTestEnvChain hardcodes localhost:8545).
- *   - Ryuk disabled — we manage container lifecycle ourselves so cleanup is
- *     deterministic and we avoid the Ryuk sidecar lingering after exit.
  *   - execa for child process management — automatic cleanup on parent exit,
  *     forceKillAfterDelay (10s SIGKILL fallback), env inheritance via extendEnv.
  *   - Services run from source (pnpm start/serve) rather than Docker so that
