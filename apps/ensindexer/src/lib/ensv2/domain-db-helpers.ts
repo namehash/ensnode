@@ -20,17 +20,3 @@ export async function materializeENSv1DomainEffectiveOwner(
   // update v1Domain's effective owner
   await context.db.update(schema.v1Domain, { id }).set({ ownerId: interpretAddress(owner) });
 }
-
-/**
- * Sets an ENSv1 Domain's manager to `manager`.
- */
-export async function materializeENSv1DomainManager(
-  context: Context,
-  id: ENSv1DomainId,
-  manager: Address,
-) {
-  // ensure manager
-  await ensureAccount(context, manager);
-
-  // update v1Domain's manager
-}
