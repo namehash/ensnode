@@ -182,6 +182,8 @@ export const makeReferrerEditionMetricsSchema = (valueLabel: string = "ReferrerE
     }
 
     // Unknown awardModel — wrap as ReferrerEditionMetricsUnrecognized.
+    // No base fields are extracted here (unlike ReferrerLeaderboardPageUnrecognized) because
+    // callers are expected to skip unrecognized edition metrics entirely rather than inspect them.
     return {
       awardModel: ReferralProgramAwardModels.Unrecognized,
       originalAwardModel: data.awardModel,

@@ -333,6 +333,36 @@ describe("makeReferrerEditionMetricsSchema", () => {
     expect(result.type).toBe(ReferrerEditionMetricsTypeIds.Ranked);
   });
 
+  it("parses a known pie-split unranked edition metrics correctly", () => {
+    const input = {
+      awardModel: ReferralProgramAwardModels.PieSplit,
+      type: ReferrerEditionMetricsTypeIds.Unranked,
+      rules: pieSplitRules,
+      referrer: {
+        referrer: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
+        totalReferrals: 0,
+        totalIncrementalDuration: 0,
+        totalRevenueContribution: parseEth("0"),
+        score: 0,
+        rank: null,
+        isQualified: false,
+        finalScoreBoost: 0,
+        finalScore: 0,
+        awardPoolShare: 0,
+        awardPoolApproxValue: parseUsdc("0"),
+      },
+      aggregatedMetrics: pieSplitAggregatedMetrics,
+      status: ReferralProgramStatuses.Active,
+      accurateAsOf: 1500000,
+    };
+
+    const result = schema.parse(input);
+
+    expect(result.awardModel).toBe(ReferralProgramAwardModels.PieSplit);
+    if (result.awardModel !== ReferralProgramAwardModels.PieSplit) throw new Error();
+    expect(result.type).toBe(ReferrerEditionMetricsTypeIds.Unranked);
+  });
+
   it("parses a known rev-share-limit ranked edition metrics correctly", () => {
     const input = {
       awardModel: ReferralProgramAwardModels.RevShareLimit,

@@ -149,17 +149,16 @@ export class ENSReferralsClient {
    * const editionSlug = "2025-12";
    * const response = await client.getReferrerLeaderboardPage({ edition: editionSlug });
    * if (response.responseCode === ReferrerLeaderboardPageResponseCodes.Ok) {
-   *   const {
-   *     aggregatedMetrics,
-   *     referrers,
-   *     rules,
-   *     pageContext,
-   *     accurateAsOf
-   *   } = response.data;
-   *   console.log(`Edition: ${editionSlug}`);
-   *   console.log(`Subregistry: ${rules.subregistryId}`);
-   *   console.log(`Total Referrers: ${pageContext.totalRecords}`);
-   *   console.log(`Page ${pageContext.page} of ${pageContext.totalPages}`);
+   *   const { awardModel, pageContext, accurateAsOf } = response.data;
+   *   if (awardModel === ReferralProgramAwardModels.Unrecognized) {
+   *     console.log(`Unrecognized award model: ${response.data.originalAwardModel} — skipping`);
+   *   } else {
+   *     const { aggregatedMetrics, referrers, rules } = response.data;
+   *     console.log(`Edition: ${editionSlug}`);
+   *     console.log(`Subregistry: ${rules.subregistryId}`);
+   *     console.log(`Total Referrers: ${pageContext.totalRecords}`);
+   *     console.log(`Page ${pageContext.page} of ${pageContext.totalPages}`);
+   *   }
    * }
    * ```
    *
@@ -222,26 +221,17 @@ export class ENSReferralsClient {
    * referral program editions. Returns a record mapping each requested edition slug
    * to the referrer's metrics for that edition.
    *
-   * The response data maps edition slugs to referrer metrics. Each edition's data is a
-   * discriminated union type — narrow on `awardModel` first, then on `type`:
+   * The response data maps edition slugs to referrer metrics. Each edition's entry is a
+   * {@link ReferrerEditionMetrics} discriminated union. Narrow on `awardModel` first to
+   * exclude unrecognized models, then on `type` to distinguish ranked from unranked:
    *
-   * **For referrers on the leaderboard** (`ReferrerEditionMetricsRanked`):
-   * - `type`: {@link ReferrerEditionMetricsTypeIds.Ranked}
-   * - `referrer`: The `AwardedReferrerMetrics` with rank, qualification status, and award share
-   * - `rules`: The referral program rules for this edition
-   * - `aggregatedMetrics`: Aggregated metrics for all referrers on the leaderboard
-   * - `accurateAsOf`: Unix timestamp indicating when the data was last updated
-   *
-   * **For referrers NOT on the leaderboard** (`ReferrerEditionMetricsUnranked`):
-   * - `type`: {@link ReferrerEditionMetricsTypeIds.Unranked}
-   * - `referrer`: The `UnrankedReferrerMetrics` from @namehash/ens-referrals
-   * - `rules`: The referral program rules for this edition
-   * - `aggregatedMetrics`: Aggregated metrics for all referrers on the leaderboard
-   * - `accurateAsOf`: Unix timestamp indicating when the data was last updated
-   *
-   * **For editions with an unrecognized award model** (`ReferrerEditionMetricsUnrecognized`):
-   * - `awardModel`: `"unrecognized"`
-   * - `originalAwardModel`: The original `awardModel` string from the server (for logging/debugging)
+   * - `awardModel: "unrecognized"` ({@link ReferrerEditionMetricsUnrecognized}): the server
+   *   returned an award model this client does not recognize. Only `originalAwardModel` is
+   *   available; no model-specific fields are present.
+   * - `type: "ranked"` ({@link ReferrerEditionMetricsTypeIds.Ranked}): the referrer appears on
+   *   the leaderboard. `referrer` contains rank, qualification status, and award share.
+   * - `type: "unranked"` ({@link ReferrerEditionMetricsTypeIds.Unranked}): the referrer has no
+   *   activity in this edition. `referrer` contains zero-value placeholders.
    *
    * **Note:** This endpoint does not allow partial success. When `responseCode === Ok`,
    * all requested editions are guaranteed to be present in the response data. If any
@@ -292,12 +282,12 @@ export class ENSReferralsClient {
    *   editions: ["2025-12"]
    * });
    * if (response.responseCode === ReferrerMetricsEditionsResponseCodes.Ok) {
-   *   const edition202512Detail = response.data["2025-12"];
-   *   if (edition202512Detail && edition202512Detail.type === ReferrerEditionMetricsTypeIds.Ranked) {
-   *     // TypeScript knows this is ReferrerEditionMetricsRanked
-   *     console.log(`Edition 2025-12 Rank: ${edition202512Detail.referrer.rank}`);
-   *   } else if (edition202512Detail) {
-   *     // TypeScript knows this is ReferrerEditionMetricsUnranked
+   *   const detail = response.data["2025-12"];
+   *   if (detail && detail.awardModel === ReferralProgramAwardModels.Unrecognized) {
+   *     console.log(`Unrecognized award model: ${detail.originalAwardModel} — skipping`);
+   *   } else if (detail && detail.type === ReferrerEditionMetricsTypeIds.Ranked) {
+   *     console.log(`Edition 2025-12 Rank: ${detail.referrer.rank}`);
+   *   } else if (detail) {
    *     console.log("Referrer is not on the leaderboard for 2025-12");
    *   }
    * }
