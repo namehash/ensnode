@@ -135,12 +135,13 @@ export class ENSReferralsClient {
    * @param request.recordsPerPage - Number of records per page (default: 25, max: 100)
    * @returns {ReferrerLeaderboardPageResponse}
    *
+   * @remarks If the server returns a leaderboard page whose `awardModel` is not recognized by
+   * this client version, it is preserved as {@link ReferrerLeaderboardPageUnrecognized}. Callers
+   * should check `response.data.awardModel` and handle the `"unrecognized"` case accordingly.
+   *
    * @throws if the ENSNode request fails
    * @throws if the ENSNode API returns an error response
    * @throws if the ENSNode response breaks required invariants
-   * @throws if the requested edition uses an award model not recognized by this version of
-   *   the client. Call {@link getEditionConfigSet} first to verify the edition's `awardModel`
-   *   is supported before requesting its leaderboard.
    *
    * @example
    * ```typescript
@@ -222,7 +223,7 @@ export class ENSReferralsClient {
    * to the referrer's metrics for that edition.
    *
    * The response data maps edition slugs to referrer metrics. Each edition's data is a
-   * discriminated union type with a `type` field:
+   * discriminated union type — narrow on `awardModel` first, then on `type`:
    *
    * **For referrers on the leaderboard** (`ReferrerEditionMetricsRanked`):
    * - `type`: {@link ReferrerEditionMetricsTypeIds.Ranked}
@@ -238,6 +239,10 @@ export class ENSReferralsClient {
    * - `aggregatedMetrics`: Aggregated metrics for all referrers on the leaderboard
    * - `accurateAsOf`: Unix timestamp indicating when the data was last updated
    *
+   * **For editions with an unrecognized award model** (`ReferrerEditionMetricsUnrecognized`):
+   * - `awardModel`: `"unrecognized"`
+   * - `originalAwardModel`: The original `awardModel` string from the server (for logging/debugging)
+   *
    * **Note:** This endpoint does not allow partial success. When `responseCode === Ok`,
    * all requested editions are guaranteed to be present in the response data. If any
    * requested edition cannot be returned, the entire request fails with an error.
@@ -247,11 +252,13 @@ export class ENSReferralsClient {
    * @param request The referrer address and edition slugs to query
    * @returns {ReferrerMetricsEditionsResponse} Returns the referrer metrics for requested editions
    *
+   * @remarks If the server returns metrics for an edition whose `awardModel` is not recognized by
+   * this client version, that edition's entry in `response.data` is preserved as
+   * {@link ReferrerEditionMetricsUnrecognized}. Callers should check each edition's `awardModel`
+   * and handle the `"unrecognized"` case accordingly.
+   *
    * @throws if the ENSNode request fails
    * @throws if the response data is malformed
-   * @throws if any of the requested editions use an award model not recognized by this
-   *   version of the client. Call {@link getEditionConfigSet} first to verify each
-   *   edition's `awardModel` is supported before requesting metrics.
    *
    * @example
    * ```typescript
@@ -264,6 +271,10 @@ export class ENSReferralsClient {
    *   // All requested editions are present in response.data
    *   for (const [editionSlug, detail] of Object.entries(response.data)) {
    *     console.log(`Edition: ${editionSlug}`);
+   *     if (detail.awardModel === ReferralProgramAwardModels.Unrecognized) {
+   *       console.log(`Unrecognized award model: ${detail.originalAwardModel} — skipping`);
+   *       continue;
+   *     }
    *     console.log(`Type: ${detail.type}`);
    *     if (detail.type === ReferrerEditionMetricsTypeIds.Ranked) {
    *       console.log(`Rank: ${detail.referrer.rank}`);
