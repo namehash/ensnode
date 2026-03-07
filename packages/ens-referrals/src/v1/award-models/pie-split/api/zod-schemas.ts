@@ -13,8 +13,8 @@ import {
 
 import {
   makeBaseReferralProgramRulesSchema,
+  makeBaseReferrerLeaderboardPageSchema,
   makeReferralProgramStatusSchema,
-  makeReferrerLeaderboardPageContextSchema,
 } from "../../shared/api/zod-schemas";
 import { ReferrerEditionMetricsTypeIds } from "../../shared/edition-metrics";
 import { ReferralProgramAwardModels } from "../../shared/rules";
@@ -169,8 +169,8 @@ export const makeReferrerEditionMetricsPieSplitSchema = (
 export const makeReferrerLeaderboardPagePieSplitSchema = (
   valueLabel: string = "ReferrerLeaderboardPagePieSplit",
 ) =>
-  z
-    .object({
+  makeBaseReferrerLeaderboardPageSchema(valueLabel)
+    .safeExtend({
       awardModel: z.literal(ReferralProgramAwardModels.PieSplit),
       rules: makeReferralProgramRulesPieSplitSchema(`${valueLabel}.rules`),
       referrers: z.array(
@@ -179,9 +179,6 @@ export const makeReferrerLeaderboardPagePieSplitSchema = (
       aggregatedMetrics: makeAggregatedReferrerMetricsPieSplitSchema(
         `${valueLabel}.aggregatedMetrics`,
       ),
-      pageContext: makeReferrerLeaderboardPageContextSchema(`${valueLabel}.pageContext`),
-      status: makeReferralProgramStatusSchema(`${valueLabel}.status`),
-      accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
     })
     .refine((data) => data.awardModel === data.rules.awardModel, {
       message: `${valueLabel}.awardModel must equal ${valueLabel}.rules.awardModel`,

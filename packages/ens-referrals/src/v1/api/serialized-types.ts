@@ -1,21 +1,15 @@
 import type {
   SerializedReferralProgramRulesPieSplit,
-  SerializedReferrerEditionMetricsRankedPieSplit,
-  SerializedReferrerEditionMetricsUnrankedPieSplit,
+  SerializedReferrerEditionMetricsPieSplit,
   SerializedReferrerLeaderboardPagePieSplit,
 } from "../award-models/pie-split/api/serialized-types";
 import type {
   SerializedReferralProgramRulesRevShareLimit,
-  SerializedReferrerEditionMetricsRankedRevShareLimit,
-  SerializedReferrerEditionMetricsUnrankedRevShareLimit,
+  SerializedReferrerEditionMetricsRevShareLimit,
   SerializedReferrerLeaderboardPageRevShareLimit,
 } from "../award-models/rev-share-limit/api/serialized-types";
 import type { ReferralProgramEditionConfig, ReferralProgramEditionSlug } from "../edition";
-import type {
-  ReferrerEditionMetrics,
-  ReferrerEditionMetricsRanked,
-  ReferrerEditionMetricsUnranked,
-} from "../edition-metrics";
+import type { ReferrerEditionMetrics } from "../edition-metrics";
 import type { ReferrerLeaderboardPage } from "../leaderboard-page";
 import type { ReferralProgramRules } from "../rules";
 import type {
@@ -46,25 +40,11 @@ export type SerializedReferrerLeaderboardPage =
   | SerializedReferrerLeaderboardPageRevShareLimit;
 
 /**
- * Serialized representation of {@link ReferrerEditionMetricsRanked}.
- */
-export type SerializedReferrerEditionMetricsRanked =
-  | SerializedReferrerEditionMetricsRankedPieSplit
-  | SerializedReferrerEditionMetricsRankedRevShareLimit;
-
-/**
- * Serialized representation of {@link ReferrerEditionMetricsUnranked}.
- */
-export type SerializedReferrerEditionMetricsUnranked =
-  | SerializedReferrerEditionMetricsUnrankedPieSplit
-  | SerializedReferrerEditionMetricsUnrankedRevShareLimit;
-
-/**
- * Serialized representation of {@link ReferrerEditionMetrics} (union of ranked and unranked).
+ * Serialized representation of {@link ReferrerEditionMetrics}.
  */
 export type SerializedReferrerEditionMetrics =
-  | SerializedReferrerEditionMetricsRanked
-  | SerializedReferrerEditionMetricsUnranked;
+  | SerializedReferrerEditionMetricsPieSplit
+  | SerializedReferrerEditionMetricsRevShareLimit;
 
 /**
  * Serialized representation of {@link ReferrerLeaderboardPageResponseError}.

@@ -1,7 +1,9 @@
 import { serializePriceEth, serializePriceUsdc } from "@ensnode/ensnode-sdk";
 
+import { ReferrerEditionMetricsTypeIds } from "../../shared/edition-metrics";
 import type { AggregatedReferrerMetricsPieSplit } from "../aggregations";
 import type {
+  ReferrerEditionMetricsPieSplit,
   ReferrerEditionMetricsRankedPieSplit,
   ReferrerEditionMetricsUnrankedPieSplit,
 } from "../edition-metrics";
@@ -12,6 +14,7 @@ import type {
   SerializedAggregatedReferrerMetricsPieSplit,
   SerializedAwardedReferrerMetricsPieSplit,
   SerializedReferralProgramRulesPieSplit,
+  SerializedReferrerEditionMetricsPieSplit,
   SerializedReferrerEditionMetricsRankedPieSplit,
   SerializedReferrerEditionMetricsUnrankedPieSplit,
   SerializedReferrerLeaderboardPagePieSplit,
@@ -124,6 +127,24 @@ export function serializeReferrerEditionMetricsUnrankedPieSplit(
     status: detail.status,
     accurateAsOf: detail.accurateAsOf,
   };
+}
+
+/**
+ * Serializes a {@link ReferrerEditionMetricsPieSplit} object (ranked or unranked).
+ */
+export function serializeReferrerEditionMetricsPieSplit(
+  detail: ReferrerEditionMetricsPieSplit,
+): SerializedReferrerEditionMetricsPieSplit {
+  switch (detail.type) {
+    case ReferrerEditionMetricsTypeIds.Ranked:
+      return serializeReferrerEditionMetricsRankedPieSplit(detail);
+    case ReferrerEditionMetricsTypeIds.Unranked:
+      return serializeReferrerEditionMetricsUnrankedPieSplit(detail);
+    default: {
+      const _exhaustiveCheck: never = detail;
+      throw new Error(`Unknown type: ${(_exhaustiveCheck as ReferrerEditionMetricsPieSplit).type}`);
+    }
+  }
 }
 
 /**

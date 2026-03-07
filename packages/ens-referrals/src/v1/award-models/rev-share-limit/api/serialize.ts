@@ -1,8 +1,10 @@
 import { serializePriceEth, serializePriceUsdc } from "@ensnode/ensnode-sdk";
 
+import { ReferrerEditionMetricsTypeIds } from "../../shared/edition-metrics";
 import type { AggregatedReferrerMetricsRevShareLimit } from "../aggregations";
 import type {
   ReferrerEditionMetricsRankedRevShareLimit,
+  ReferrerEditionMetricsRevShareLimit,
   ReferrerEditionMetricsUnrankedRevShareLimit,
 } from "../edition-metrics";
 import type { ReferrerLeaderboardPageRevShareLimit } from "../leaderboard-page";
@@ -16,6 +18,7 @@ import type {
   SerializedAwardedReferrerMetricsRevShareLimit,
   SerializedReferralProgramRulesRevShareLimit,
   SerializedReferrerEditionMetricsRankedRevShareLimit,
+  SerializedReferrerEditionMetricsRevShareLimit,
   SerializedReferrerEditionMetricsUnrankedRevShareLimit,
   SerializedReferrerLeaderboardPageRevShareLimit,
   SerializedUnrankedReferrerMetricsRevShareLimit,
@@ -128,6 +131,26 @@ export function serializeReferrerEditionMetricsUnrankedRevShareLimit(
     status: detail.status,
     accurateAsOf: detail.accurateAsOf,
   };
+}
+
+/**
+ * Serializes a {@link ReferrerEditionMetricsRevShareLimit} object (ranked or unranked).
+ */
+export function serializeReferrerEditionMetricsRevShareLimit(
+  detail: ReferrerEditionMetricsRevShareLimit,
+): SerializedReferrerEditionMetricsRevShareLimit {
+  switch (detail.type) {
+    case ReferrerEditionMetricsTypeIds.Ranked:
+      return serializeReferrerEditionMetricsRankedRevShareLimit(detail);
+    case ReferrerEditionMetricsTypeIds.Unranked:
+      return serializeReferrerEditionMetricsUnrankedRevShareLimit(detail);
+    default: {
+      const _exhaustiveCheck: never = detail;
+      throw new Error(
+        `Unknown type: ${(_exhaustiveCheck as ReferrerEditionMetricsRevShareLimit).type}`,
+      );
+    }
+  }
 }
 
 /**

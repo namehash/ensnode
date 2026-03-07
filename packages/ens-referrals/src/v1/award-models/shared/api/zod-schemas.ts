@@ -12,7 +12,10 @@ import { ReferralProgramStatuses } from "../../../status";
 import { REFERRERS_PER_LEADERBOARD_PAGE_MAX } from "../leaderboard-page";
 
 /**
- * Schema for {@link BaseReferralProgramRules}.
+ * Loose base schema for {@link BaseReferralProgramRules}.
+ *
+ * Accepts any string for `awardModel` to support forward-compatible parsing of unrecognized
+ * models. Model-specific schemas override `awardModel` with a literal.
  */
 export const makeBaseReferralProgramRulesSchema = (valueLabel: string) =>
   z
@@ -54,3 +57,17 @@ export const makeReferrerLeaderboardPageContextSchema = (
  */
 export const makeReferralProgramStatusSchema = (_valueLabel: string = "status") =>
   z.enum(ReferralProgramStatuses);
+
+/**
+ * Loose base schema for {@link BaseReferrerLeaderboardPage}.
+ *
+ * Accepts any string for `awardModel` to support forward-compatible parsing of unrecognized
+ * models. Model-specific schemas override `awardModel` with a literal.
+ */
+export const makeBaseReferrerLeaderboardPageSchema = (valueLabel: string) =>
+  z.object({
+    awardModel: z.string(),
+    pageContext: makeReferrerLeaderboardPageContextSchema(`${valueLabel}.pageContext`),
+    status: makeReferralProgramStatusSchema(`${valueLabel}.status`),
+    accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
+  });

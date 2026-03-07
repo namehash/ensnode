@@ -2,6 +2,7 @@ import type { SerializedPriceEth, SerializedPriceUsdc } from "@ensnode/ensnode-s
 
 import type { AggregatedReferrerMetricsPieSplit } from "../aggregations";
 import type {
+  ReferrerEditionMetricsPieSplit,
   ReferrerEditionMetricsRankedPieSplit,
   ReferrerEditionMetricsUnrankedPieSplit,
 } from "../edition-metrics";
@@ -79,3 +80,10 @@ export interface SerializedReferrerEditionMetricsUnrankedPieSplit
   referrer: SerializedUnrankedReferrerMetricsPieSplit;
   aggregatedMetrics: SerializedAggregatedReferrerMetricsPieSplit;
 }
+
+/**
+ * Serialized representation of {@link ReferrerEditionMetricsPieSplit}.
+ */
+export type SerializedReferrerEditionMetricsPieSplit =
+  | SerializedReferrerEditionMetricsRankedPieSplit
+  | SerializedReferrerEditionMetricsUnrankedPieSplit;
