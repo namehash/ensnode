@@ -38,5 +38,12 @@ export const getReferrerLeaderboardPage = (
       return buildLeaderboardPagePieSplit(pageContext, leaderboard);
     case ReferralProgramAwardModels.RevShareLimit:
       return buildLeaderboardPageRevShareLimit(pageContext, leaderboard);
+
+    default: {
+      const _exhaustiveCheck: never = leaderboard;
+      throw new Error(
+        `Unknown award model: ${(_exhaustiveCheck as ReferrerLeaderboard).awardModel}`,
+      );
+    }
   }
 };
