@@ -1,5 +1,5 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import * as schema from "@ensnode/ensnode-schema";
 import {
@@ -8,10 +8,10 @@ import {
   type ENSv2DomainId,
   getCanonicalId,
   interpretedLabelsToInterpretedName,
-  type RegistrationId,
 } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
+import { orderPaginationBy, paginateByInt } from "@/graphql-api/lib/connection-helpers";
 import { resolveFindDomains } from "@/graphql-api/lib/find-domains/find-domains-resolver";
 import {
   domainsBase,
@@ -22,10 +22,10 @@ import {
 import { getDomainResolver } from "@/graphql-api/lib/get-domain-resolver";
 import { getLatestRegistration } from "@/graphql-api/lib/get-latest-registration";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
+import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
 import { AccountRef } from "@/graphql-api/schema/account";
-import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
-import { cursors } from "@/graphql-api/schema/cursors";
+import { INDEX_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { LabelRef } from "@/graphql-api/schema/label";
 import { OrderDirection } from "@/graphql-api/schema/order-direction";
 import { RegistrationInterfaceRef } from "@/graphql-api/schema/registration";
@@ -204,40 +204,23 @@ DomainInterfaceRef.implement({
     registrations: t.connection({
       description: "All Registrations for a Domain, including the latest Registration.",
       type: RegistrationInterfaceRef,
-      resolve: (parent, args, context) =>
-        resolveCursorConnection(
-          { ...DEFAULT_CONNECTION_ARGS, args },
-          async ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-            db.query.registration.findMany({
-              where: (t, { lt, gt, and, eq }) =>
-                and(
-                  eq(t.domainId, parent.id),
-                  before ? lt(t.id, cursors.decode<RegistrationId>(before)) : undefined,
-                  after ? gt(t.id, cursors.decode<RegistrationId>(after)) : undefined,
-                ),
-              orderBy: (t, { asc, desc }) => (inverted ? asc(t.index) : desc(t.index)),
-              limit,
-            }),
-        ),
-    }),
+      resolve: (parent, args) => {
+        const scope = eq(schema.registration.domainId, parent.id);
 
-    /////////////////////////
-    // Domain.subdomainCount
-    /////////////////////////
-    subdomainCount: t.field({
-      description:
-        "The number of Domains that are direct descendents of this Domain in the namegraph.",
-      type: "Int",
-      nullable: false,
-      resolve: async (parent) => {
-        if (isENSv1Domain(parent)) {
-          return db.$count(schema.v1Domain, eq(schema.v1Domain.parentId, parent.id));
-        } else {
-          const { subregistryId } = parent;
-          if (subregistryId === null) return 0;
-
-          return db.$count(schema.v2Domain, eq(schema.v2Domain.registryId, subregistryId));
-        }
+        return lazyConnection({
+          totalCount: () => db.$count(schema.registration, scope),
+          connection: () =>
+            resolveCursorConnection(
+              { ...INDEX_PAGINATED_CONNECTION_ARGS, args },
+              ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+                db
+                  .select()
+                  .from(schema.registration)
+                  .where(and(scope, paginateByInt(schema.registration.index, before, after)))
+                  .orderBy(orderPaginationBy(schema.registration.index, inverted))
+                  .limit(limit),
+            ),
+        });
       },
     }),
 
@@ -255,6 +238,7 @@ DomainInterfaceRef.implement({
         const base = filterByParent(domainsBase(), parent.id);
         const named = filterByName(base, where?.name);
         const domains = withOrderingMetadata(named);
+
         return resolveFindDomains(context, { domains, order, ...connectionArgs });
       },
     }),
@@ -277,30 +261,6 @@ ENSv1DomainRef.implement({
       type: ENSv1DomainRef,
       nullable: true,
       resolve: (parent) => parent.parentId,
-    }),
-
-    ////////////////////////
-    // ENSv1Domain.children
-    ////////////////////////
-    children: t.connection({
-      description: "The children Domains of this Domain in the ENSv1 nametree.",
-      type: ENSv1DomainRef,
-      resolve: (parent, args, context) =>
-        resolveCursorConnection(
-          { ...DEFAULT_CONNECTION_ARGS, args },
-          ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-            db.query.v1Domain.findMany({
-              where: (t, { lt, gt, and, eq }) =>
-                and(
-                  eq(t.parentId, parent.id),
-                  before ? lt(t.id, cursors.decode<ENSv1DomainId>(before)) : undefined,
-                  after ? gt(t.id, cursors.decode<ENSv1DomainId>(after)) : undefined,
-                ),
-              orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
-              limit,
-              with: { label: true },
-            }),
-        ),
     }),
   }),
 });

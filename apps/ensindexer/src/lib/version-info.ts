@@ -4,11 +4,6 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { prettifyError } from "zod/v4";
-
-import type { ENSIndexerVersionInfo, SerializedENSIndexerVersionInfo } from "@ensnode/ensnode-sdk";
-import { makeENSIndexerVersionInfoSchema } from "@ensnode/ensnode-sdk/internal";
-
 /**
  * Get ENSIndexer version
  */

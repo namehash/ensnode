@@ -1,4 +1,4 @@
-import SchemaBuilder from "@pothos/core";
+import SchemaBuilder, { type MaybePromise } from "@pothos/core";
 import DataloaderPlugin from "@pothos/plugin-dataloader";
 import RelayPlugin from "@pothos/plugin-relay";
 import type { Address, Hex } from "viem";
@@ -29,6 +29,11 @@ export const builder = new SchemaBuilder<{
     RegistryId: { Input: RegistryId; Output: RegistryId };
     ResolverId: { Input: ResolverId; Output: ResolverId };
     // PermissionsId: { Input: PermissionsId; Output: PermissionsId };
+  };
+
+  // the following ensures via typechecker that every t.connection returns a totalCount field
+  Connection: {
+    totalCount: MaybePromise<number>;
   };
 }>({
   plugins: [DataloaderPlugin, RelayPlugin],

@@ -1,20 +1,22 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
+import { and, eq } from "drizzle-orm";
 import { hexToBigInt } from "viem";
 
+import * as schema from "@ensnode/ensnode-schema";
 import {
   type ENSv1DomainId,
   isRegistrationFullyExpired,
   isRegistrationInGracePeriod,
   type RegistrationId,
-  type RenewalId,
   type RequiredAndNotNull,
 } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
+import { orderPaginationBy, paginateByInt } from "@/graphql-api/lib/connection-helpers";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
+import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { AccountIdRef } from "@/graphql-api/schema/account-id";
-import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
-import { cursors } from "@/graphql-api/schema/cursors";
+import { INDEX_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { DomainInterfaceRef } from "@/graphql-api/schema/domain";
 import { EventRef } from "@/graphql-api/schema/event";
 import { RenewalRef } from "@/graphql-api/schema/renewal";
@@ -126,22 +128,27 @@ RegistrationInterfaceRef.implement({
       description:
         "Renewals that have occurred within this Registration's lifespan to extend its expiration.",
       type: RenewalRef,
-      resolve: (parent, args, context) =>
-        resolveCursorConnection(
-          { ...DEFAULT_CONNECTION_ARGS, args },
-          ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-            db.query.renewal.findMany({
-              where: (t, { eq, lt, gt, and }) =>
-                and(
-                  eq(t.domainId, parent.domainId),
-                  eq(t.registrationIndex, parent.index),
-                  before ? lt(t.id, cursors.decode<RenewalId>(before)) : undefined,
-                  after ? gt(t.id, cursors.decode<RenewalId>(after)) : undefined,
-                ),
-              orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
-              limit,
-            }),
-        ),
+      resolve: (parent, args) => {
+        const scope = and(
+          eq(schema.renewal.domainId, parent.domainId),
+          eq(schema.renewal.registrationIndex, parent.index),
+        );
+
+        return lazyConnection({
+          totalCount: () => db.$count(schema.renewal, scope),
+          connection: () =>
+            resolveCursorConnection(
+              { ...INDEX_PAGINATED_CONNECTION_ARGS, args },
+              ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+                db
+                  .select()
+                  .from(schema.renewal)
+                  .where(and(scope, paginateByInt(schema.renewal.index, before, after)))
+                  .orderBy(orderPaginationBy(schema.renewal.index, inverted))
+                  .limit(limit),
+            ),
+        });
+      },
     }),
 
     //////////////////////

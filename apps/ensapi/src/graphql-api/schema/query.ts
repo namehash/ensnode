@@ -2,18 +2,16 @@ import config from "@/config";
 
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 
+import * as schema from "@ensnode/ensnode-schema";
 import {
-  type ENSv1DomainId,
-  type ENSv2DomainId,
   getENSv2RootRegistryId,
   makePermissionsId,
   makeRegistryId,
   makeResolverId,
-  type RegistrationId,
-  type ResolverId,
 } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
+import { orderPaginationBy, paginateBy } from "@/graphql-api/lib/connection-helpers";
 import { resolveFindDomains } from "@/graphql-api/lib/find-domains/find-domains-resolver";
 import {
   domainsBase,
@@ -22,10 +20,10 @@ import {
   withOrderingMetadata,
 } from "@/graphql-api/lib/find-domains/layers";
 import { getDomainIdByInterpretedName } from "@/graphql-api/lib/get-domain-by-interpreted-name";
+import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { AccountIdInput } from "@/graphql-api/schema/account-id";
-import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
-import { cursors } from "@/graphql-api/schema/cursors";
+import { ID_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import {
   DomainIdInput,
   DomainInterfaceRef,
@@ -52,21 +50,21 @@ builder.queryType({
       v1Domains: t.connection({
         description: "TODO",
         type: ENSv1DomainRef,
-        resolve: (parent, args, context) =>
-          resolveCursorConnection(
-            { ...DEFAULT_CONNECTION_ARGS, args },
-            ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-              db.query.v1Domain.findMany({
-                where: (t, { lt, gt, and }) =>
-                  and(
-                    before ? lt(t.id, cursors.decode<ENSv1DomainId>(before)) : undefined,
-                    after ? gt(t.id, cursors.decode<ENSv1DomainId>(after)) : undefined,
-                  ),
-                orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
-                limit,
-                with: { label: true },
-              }),
-          ),
+        resolve: (parent, args) =>
+          lazyConnection({
+            totalCount: () => db.$count(schema.v1Domain),
+            connection: () =>
+              resolveCursorConnection(
+                { ...ID_PAGINATED_CONNECTION_ARGS, args },
+                ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+                  db.query.v1Domain.findMany({
+                    where: paginateBy(schema.v1Domain.id, before, after),
+                    orderBy: orderPaginationBy(schema.v1Domain.id, inverted),
+                    limit,
+                    with: { label: true },
+                  }),
+              ),
+          }),
       }),
 
       /////////////////////////////
@@ -75,21 +73,21 @@ builder.queryType({
       v2Domains: t.connection({
         description: "TODO",
         type: ENSv2DomainRef,
-        resolve: (parent, args, context) =>
-          resolveCursorConnection(
-            { ...DEFAULT_CONNECTION_ARGS, args },
-            ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-              db.query.v2Domain.findMany({
-                where: (t, { lt, gt, and }) =>
-                  and(
-                    before ? lt(t.id, cursors.decode<ENSv2DomainId>(before)) : undefined,
-                    after ? gt(t.id, cursors.decode<ENSv2DomainId>(after)) : undefined,
-                  ),
-                orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
-                limit,
-                with: { label: true },
-              }),
-          ),
+        resolve: (parent, args) =>
+          lazyConnection({
+            totalCount: () => db.$count(schema.v2Domain),
+            connection: () =>
+              resolveCursorConnection(
+                { ...ID_PAGINATED_CONNECTION_ARGS, args },
+                ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+                  db.query.v2Domain.findMany({
+                    where: paginateBy(schema.v2Domain.id, before, after),
+                    orderBy: orderPaginationBy(schema.v2Domain.id, inverted),
+                    limit,
+                    with: { label: true },
+                  }),
+              ),
+          }),
       }),
 
       /////////////////////////////
@@ -98,20 +96,21 @@ builder.queryType({
       resolvers: t.connection({
         description: "TODO",
         type: ResolverRef,
-        resolve: (parent, args, context) =>
-          resolveCursorConnection(
-            { ...DEFAULT_CONNECTION_ARGS, args },
-            ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-              db.query.resolver.findMany({
-                where: (t, { lt, gt, and }) =>
-                  and(
-                    before ? lt(t.id, cursors.decode<ResolverId>(before)) : undefined,
-                    after ? gt(t.id, cursors.decode<ResolverId>(after)) : undefined,
-                  ),
-                orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
-                limit,
-              }),
-          ),
+        resolve: (parent, args) =>
+          lazyConnection({
+            totalCount: () => db.$count(schema.resolver),
+            connection: () =>
+              resolveCursorConnection(
+                { ...ID_PAGINATED_CONNECTION_ARGS, args },
+                ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+                  db
+                    .select()
+                    .from(schema.resolver)
+                    .where(paginateBy(schema.resolver.id, before, after))
+                    .orderBy(orderPaginationBy(schema.resolver.id, inverted))
+                    .limit(limit),
+              ),
+          }),
       }),
 
       /////////////////////////////////
@@ -120,20 +119,21 @@ builder.queryType({
       registrations: t.connection({
         description: "TODO",
         type: RegistrationInterfaceRef,
-        resolve: (parent, args, context) =>
-          resolveCursorConnection(
-            { ...DEFAULT_CONNECTION_ARGS, args },
-            ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-              db.query.registration.findMany({
-                where: (t, { lt, gt, and }) =>
-                  and(
-                    before ? lt(t.id, cursors.decode<RegistrationId>(before)) : undefined,
-                    after ? gt(t.id, cursors.decode<RegistrationId>(after)) : undefined,
-                  ),
-                orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
-                limit,
-              }),
-          ),
+        resolve: (parent, args) =>
+          lazyConnection({
+            totalCount: () => db.$count(schema.registration),
+            connection: () =>
+              resolveCursorConnection(
+                { ...ID_PAGINATED_CONNECTION_ARGS, args },
+                ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+                  db
+                    .select()
+                    .from(schema.registration)
+                    .where(paginateBy(schema.registration.id, before, after))
+                    .orderBy(orderPaginationBy(schema.registration.id, inverted))
+                    .limit(limit),
+              ),
+          }),
       }),
     }),
 
@@ -152,6 +152,7 @@ builder.queryType({
         const named = filterByName(base, where.name);
         const canonical = where.canonical === true ? filterByCanonical(named) : named;
         const domains = withOrderingMetadata(canonical);
+
         return resolveFindDomains(context, { domains, order, ...connectionArgs });
       },
     }),
