@@ -102,16 +102,27 @@ jobs:
           MINTLIFY_API_TOKEN: ${{ secrets.MINTLIFY_API_TOKEN }}
           MINTLIFY_PROJECT_ID: ${{ vars.MINTLIFY_PROJECT_ID }}
         run: |
+          # Validate required env vars
+          if [ -z "$MINTLIFY_API_TOKEN" ]; then
+            echo "Error: MINTLIFY_API_TOKEN is not set"
+            exit 1
+          fi
+          if [ -z "$MINTLIFY_PROJECT_ID" ]; then
+            echo "Error: MINTLIFY_PROJECT_ID is not set"
+            exit 1
+          fi
+
           # Trigger the rebuild and capture the statusId
-          HTTP_RESPONSE=$(curl --silent --write-out "\n%{http_code}" \
+          BODY_FILE=$(mktemp)
+          HTTP_CODE=$(curl --silent --show-error --output "$BODY_FILE" --write-out '%{http_code}' \
             --connect-timeout 10 \
             --max-time 30 \
             --request POST \
             --url "https://api.mintlify.com/v1/project/update/${MINTLIFY_PROJECT_ID}" \
             --header "Authorization: Bearer ${MINTLIFY_API_TOKEN}")
 
-          HTTP_BODY=$(echo "$HTTP_RESPONSE" | sed '$d')
-          HTTP_CODE=$(echo "$HTTP_RESPONSE" | tail -n1)
+          HTTP_BODY=$(cat "$BODY_FILE")
+          rm -f "$BODY_FILE"
 
           if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
             echo "Mintlify API returned HTTP $HTTP_CODE"
@@ -139,15 +150,23 @@ jobs:
             ATTEMPT=$((ATTEMPT + 1))
             echo "Checking status (attempt $ATTEMPT/$MAX_ATTEMPTS)..."
 
-            STATUS_RESPONSE=$(curl --silent --write-out "\n%{http_code}" \
+            STATUS_BODY_FILE=$(mktemp)
+            CURL_STDERR=$(mktemp)
+            if ! STATUS_CODE=$(curl --silent --show-error --output "$STATUS_BODY_FILE" --write-out '%{http_code}' \
               --connect-timeout 10 \
               --max-time 30 \
+              --retry 1 --retry-all-errors \
               --request GET \
               --url "https://api.mintlify.com/v1/project/update-status/${STATUS_ID}" \
-              --header "Authorization: Bearer ${MINTLIFY_API_TOKEN}")
-
-            STATUS_BODY=$(echo "$STATUS_RESPONSE" | sed '$d')
-            STATUS_CODE=$(echo "$STATUS_RESPONSE" | tail -n1)
+              --header "Authorization: Bearer ${MINTLIFY_API_TOKEN}" 2>"$CURL_STDERR"); then
+              CURL_EXIT=$?
+              echo "curl transport error (exit code $CURL_EXIT): $(cat "$CURL_STDERR")"
+              rm -f "$CURL_STDERR" "$STATUS_BODY_FILE"
+              sleep 10
+              continue
+            fi
+            STATUS_BODY=$(cat "$STATUS_BODY_FILE")
+            rm -f "$CURL_STDERR" "$STATUS_BODY_FILE"
 
             if [ "$STATUS_CODE" -lt 200 ] || [ "$STATUS_CODE" -ge 300 ]; then
               echo "Status check failed with HTTP $STATUS_CODE"
