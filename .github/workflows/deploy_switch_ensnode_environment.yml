@@ -117,6 +117,7 @@ jobs:
           HTTP_CODE=$(curl --silent --show-error --output "$BODY_FILE" --write-out '%{http_code}' \
             --connect-timeout 10 \
             --max-time 30 \
+            --retry 2 --retry-delay 5 --retry-all-errors \
             --request POST \
             --url "https://api.mintlify.com/v1/project/update/${MINTLIFY_PROJECT_ID}" \
             --header "Authorization: Bearer ${MINTLIFY_API_TOKEN}")
@@ -142,7 +143,7 @@ jobs:
 
           echo "Status ID: $STATUS_ID"
 
-          # Poll for completion (max 5 minutes, checking every 10 seconds)
+          # Poll for completion (30 attempts, ~5 min best case, up to ~35 min if every request hits timeouts/retries)
           MAX_ATTEMPTS=30
           ATTEMPT=0
 
@@ -152,16 +153,17 @@ jobs:
 
             STATUS_BODY_FILE=$(mktemp)
             CURL_STDERR=$(mktemp)
-            if ! STATUS_CODE=$(curl --silent --show-error --output "$STATUS_BODY_FILE" --write-out '%{http_code}' \
+            STATUS_CODE=$(curl --silent --show-error --output "$STATUS_BODY_FILE" --write-out '%{http_code}' \
               --connect-timeout 10 \
               --max-time 30 \
               --retry 1 --retry-all-errors \
               --request GET \
               --url "https://api.mintlify.com/v1/project/update-status/${STATUS_ID}" \
-              --header "Authorization: Bearer ${MINTLIFY_API_TOKEN}" 2>"$CURL_STDERR"); then
-              CURL_EXIT=$?
+              --header "Authorization: Bearer ${MINTLIFY_API_TOKEN}" 2>"$CURL_STDERR") || CURL_EXIT=$?
+            if [ "${CURL_EXIT:-0}" -ne 0 ]; then
               echo "curl transport error (exit code $CURL_EXIT): $(cat "$CURL_STDERR")"
               rm -f "$CURL_STDERR" "$STATUS_BODY_FILE"
+              CURL_EXIT=0
               sleep 10
               continue
             fi
