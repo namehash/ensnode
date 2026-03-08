@@ -98,6 +98,7 @@ jobs:
         id: mintlify_rebuild
         # Non-blocking: failures are reported to Slack and can be manually retriggered
         continue-on-error: true
+        timeout-minutes: 5
         env:
           MINTLIFY_API_TOKEN: ${{ secrets.MINTLIFY_API_TOKEN }}
           MINTLIFY_PROJECT_ID: ${{ vars.MINTLIFY_PROJECT_ID }}
