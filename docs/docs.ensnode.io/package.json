@@ -12,8 +12,26 @@
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/docs/docs.ensnode.io",
   "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
     "mint": "pnpm dlx mint@^4.1.0",
     "generate:openapi": "pnpm --filter ensapi exec tsx --tsconfig tsconfig.json ../../scripts/generate-ensapi-openapi.ts"
+  },
+  "dependencies": {
+    "astro": "catalog:",
+    "@astrojs/mdx": "^4.3.9",
+    "@astrojs/react": "catalog:",
+    "@mintlify/astro": "^1.0.0",
+    "@mintlify/components": "^1.0.4",
+    "@tailwindcss/vite": "^4.1.15",
+    "react": "^18",
+    "react-dom": "^18",
+    "tailwindcss": "catalog:"
+  },
+  "devDependencies": {
+    "@types/react": "^18",
+    "@types/react-dom": "^18"
   },
   "packageManager": "pnpm@10.28.0"
 }

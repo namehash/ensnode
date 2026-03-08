@@ -1,0 +1,28 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "almond",
+  "name": "ENSNode Docs",
+  "colors": {
+    "primary": "#0080bc",
+    "light": "#0080bc",
+    "dark": "#0080bc"
+  },
+  "favicon": "/assets/favicon.svg",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "ENSApi",
+            "pages": ["ensapi/index"]
+          }
+        ]
+      }
+    ]
+  },
+  "logo": {
+    "light": "/assets/logo-light.svg",
+    "dark": "/assets/logo-dark.svg"
+  }
+}

@@ -4,13 +4,22 @@ import tailwindcss from "@tailwindcss/vite";
 import { defineConfig, envField } from "astro/config";
 import icon from "astro-icon";
 import mermaid from "astro-mermaid";
+import { mintlify } from "@mintlify/astro";
 
 import { sitemap } from "./config/integrations/sitemap";
 import { starlight } from "./config/integrations/starlight";
 
 export default defineConfig({
   site: "https://ensnode.io",
-  integrations: [mermaid(), starlight(), sitemap(), react(), mdx(), icon()],
+  integrations: [
+    mermaid(),
+    mintlify({ docsDir: "./mintlify-docs" }),
+    starlight(),
+    sitemap(),
+    react(),
+    mdx(),
+    icon(),
+  ],
   vite: {
     ssr: {
       noExternal: ["@namehash/namekit-react"],
@@ -22,7 +31,8 @@ export default defineConfig({
     "/ensnode/deploying/railway": "/docs/deploying/railway",
     "/ensnode/concepts/what-is-ensnode": "/docs/concepts/what-is-ensnode",
     "/ensnode/running/ens-test-env": "/docs/running/ens-test-env",
-    "/ensnode/concepts/what-is-the-ens-subgraph": "/docs/concepts/what-is-the-ens-subgraph",
+    "/ensnode/concepts/what-is-the-ens-subgraph":
+      "/docs/concepts/what-is-the-ens-subgraph",
   },
   env: {
     schema: {

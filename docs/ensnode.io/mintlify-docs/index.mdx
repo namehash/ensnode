@@ -1,0 +1,35 @@
+---
+title: ENSApi
+sidebarTitle: Introduction
+description: ENSApi is the API service for ENSNode.
+---
+
+ENSApi is the REST API service that provides access to ENS data indexed by ENSNode.
+
+## Features
+
+- **Name resolution** — resolve ENS names to records, addresses, and content hashes
+- **Primary names** — look up primary names for Ethereum addresses
+- **Name token browsing** — explore registered ENS name tokens
+- **Registrar actions** — query registration, renewal, and transfer history
+
+## Getting Started
+
+The ENSApi is available at the following endpoints:
+
+<CardGroup cols={2}>
+  <Card title="Mainnet (Alpha)" href="https://api.alpha.ensnode.io">
+    ENSNode Alpha indexing Ethereum mainnet
+  </Card>
+  <Card title="Sepolia Testnet" href="https://api.sepolia.ensnode.io">
+    ENSNode indexing Sepolia testnet
+  </Card>
+</CardGroup>
+
+## Quick Example
+
+Resolve records for an ENS name:
+
+```bash
+curl https://api.alpha.ensnode.io/api/resolve/records/nick.eth
+```

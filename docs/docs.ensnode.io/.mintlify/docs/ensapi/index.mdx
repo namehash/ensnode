@@ -1,0 +1,30 @@
+---
+title: ENSApi
+sidebarTitle: Introduction
+description: ENSApi is the API service for ENSNode.
+---
+
+import { CardGroup_1 } from "../../components/ensapi/index/CardGroup_1.jsx";
+
+ENSApi is the REST API service that provides access to ENS data indexed by ENSNode.
+
+## Features
+
+* **Name resolution** — resolve ENS names to records, addresses, and content hashes
+* **Primary names** — look up primary names for Ethereum addresses
+* **Name token browsing** — explore registered ENS name tokens
+* **Registrar actions** — query registration, renewal, and transfer history
+
+## Getting Started
+
+The ENSApi is available at the following endpoints:
+
+<CardGroup_1 client:load />
+
+## Quick Example
+
+Resolve records for an ENS name:
+
+```bash
+curl https://api.alpha.ensnode.io/api/resolve/records/nick.eth
+```

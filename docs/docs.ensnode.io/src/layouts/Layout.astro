@@ -1,0 +1,44 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title} - ENSNode Docs</title>
+    {description && <meta name="description" content={description} />}
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+  </head>
+  <body class="min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100">
+    <header class="border-b border-gray-200 dark:border-gray-800 px-6 py-4">
+      <div class="max-w-7xl mx-auto flex items-center justify-between">
+        <a href="/" class="text-xl font-semibold">ENSNode Docs</a>
+        <nav class="flex gap-4 text-sm">
+          <a href="https://ensnode.io" class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">
+            Main Site
+          </a>
+          <a href="https://admin.ensnode.io" class="bg-[#0080bc] text-white px-3 py-1 rounded-md hover:bg-[#006699]">
+            ENSAdmin
+          </a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-6 py-10">
+      <slot />
+    </main>
+
+    <footer class="border-t border-gray-200 dark:border-gray-800 px-6 py-6 mt-20">
+      <div class="max-w-7xl mx-auto text-center text-sm text-gray-500">
+        <p>ENSNode Documentation — Powered by Mintlify + Astro</p>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,78 @@
+---
+import { getCollection, render } from "astro:content";
+import { readDocsConfig } from "@mintlify/astro";
+import { resolvePageData } from "@mintlify/astro/helpers";
+import Layout from "../layouts/Layout.astro";
+import "../styles/global.css";
+
+export async function getStaticPaths() {
+  const docs = await getCollection("docs");
+  return docs.map((doc) => ({
+    params: { slug: doc.id === "index" ? undefined : doc.id },
+    props: { doc },
+  }));
+}
+
+const { doc } = Astro.props;
+const { Content } = await render(doc);
+
+// Build a title map from all docs for navigation decoration
+const allDocs = await getCollection("docs");
+const titleMap: Record<string, string> = {};
+for (const d of allDocs) {
+  titleMap[d.id] = d.data.title ?? d.id;
+}
+
+// Read docs config and resolve page data
+const docsConfig = await readDocsConfig("./docs");
+const currentPath = `/${doc.id}`;
+const pageData = resolvePageData(docsConfig, { currentPath, titleMap });
+
+// Flatten sidebar entries for rendering
+function flattenEntries(entries: any[]): Array<{ href: string; title: string }> {
+  return entries.flatMap((entry) => {
+    if ("href" in entry) return [entry];
+    if ("pages" in entry) return flattenEntries(entry.pages);
+    return [];
+  });
+}
+const navPages = flattenEntries(pageData.sidebarEntries);
+---
+
+<Layout title={doc.data.title} description={doc.data.description}>
+  <div class="flex gap-10">
+    {/* Sidebar */}
+    <aside class="hidden md:block w-56 shrink-0">
+      <nav class="sticky top-10">
+        <ul class="space-y-1 text-sm">
+          {navPages.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                class:list={[
+                  "block px-3 py-1.5 rounded-md transition-colors",
+                  item.href === currentPath
+                    ? "bg-[#0080bc]/10 text-[#0080bc] font-medium"
+                    : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100",
+                ]}
+              >
+                {item.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </aside>
+
+    {/* Content */}
+    <article class="flex-1 min-w-0 prose dark:prose-invert max-w-none">
+      <h1>{doc.data.title}</h1>
+      {doc.data.description && (
+        <p class="text-lg text-gray-600 dark:text-gray-400 -mt-4">
+          {doc.data.description}
+        </p>
+      )}
+      <Content />
+    </article>
+  </div>
+</Layout>

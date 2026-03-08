@@ -1,0 +1,210 @@
+---
+import { getCollection, render } from "astro:content";
+import { readDocsConfig } from "@mintlify/astro";
+import { resolvePageData } from "@mintlify/astro/helpers";
+
+const allDocs = await getCollection("mintlify-docs");
+const doc = allDocs.find((d) => d.id === "index");
+
+
+
+const { Content } = await render(doc);
+
+// Build a title map from all docs for navigation decoration
+const titleMap: Record<string, string> = {};
+for (const d of allDocs) {
+  titleMap[d.id] = d.data.title ?? d.id;
+}
+
+// Read docs config and resolve page data
+const docsConfig = await readDocsConfig("./mintlify-docs");
+const currentPath = `/${doc.id}`;
+const pageData = resolvePageData(docsConfig, { currentPath, titleMap });
+
+// Flatten sidebar entries for rendering
+function flattenEntries(entries: any[]): Array<{ href: string; title: string }> {
+  return entries.flatMap((entry: any) => {
+    if ("href" in entry) return [entry];
+    if ("pages" in entry) return flattenEntries(entry.pages);
+    return [];
+  });
+}
+const navPages = flattenEntries(pageData.sidebarEntries);
+---
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{doc.data.title} - Mintlify Test</title>
+    {doc.data.description && <meta name="description" content={doc.data.description} />}
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <style>
+      @import "@mintlify/components/styles.css";
+
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        margin: 0;
+        padding: 0;
+        color: #1a1a1a;
+      }
+
+      .page-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      .test-banner {
+        background: linear-gradient(135deg, #0080bc, #006699);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        text-align: center;
+        font-size: 0.875rem;
+      }
+
+      .test-banner a {
+        color: white;
+        text-decoration: underline;
+      }
+
+      header {
+        border-bottom: 1px solid #e5e7eb;
+        padding: 1rem 1.5rem;
+      }
+
+      header .inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      header .logo {
+        font-size: 1.25rem;
+        font-weight: 600;
+        text-decoration: none;
+        color: inherit;
+      }
+
+      .content-grid {
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        gap: 2.5rem;
+        align-items: start;
+      }
+
+      @media (max-width: 768px) {
+        .content-grid {
+          grid-template-columns: 1fr;
+        }
+        .sidebar { display: none; }
+      }
+
+      .sidebar {
+        position: sticky;
+        top: 2rem;
+      }
+
+      .sidebar ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .sidebar a {
+        display: block;
+        padding: 0.375rem 0.75rem;
+        border-radius: 0.375rem;
+        color: #6b7280;
+        text-decoration: none;
+        font-size: 0.875rem;
+        transition: color 0.15s;
+      }
+
+      .sidebar a:hover {
+        color: #1a1a1a;
+      }
+
+      .sidebar a.active {
+        background: rgba(0, 128, 188, 0.1);
+        color: #0080bc;
+        font-weight: 500;
+      }
+
+      article {
+        min-width: 0;
+      }
+
+      article h1 {
+        font-size: 2rem;
+        margin: 0 0 0.5rem;
+      }
+
+      article .description {
+        font-size: 1.125rem;
+        color: #6b7280;
+        margin: 0 0 2rem;
+      }
+
+      footer {
+        border-top: 1px solid #e5e7eb;
+        padding: 1.5rem;
+        margin-top: 4rem;
+        text-align: center;
+        color: #9ca3af;
+        font-size: 0.875rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="test-banner">
+      Mintlify Headless Test — <a href="/docs">Back to Starlight docs</a>
+    </div>
+
+    <header>
+      <div class="inner">
+        <a href="/mintlify-test" class="logo">ENSNode Docs</a>
+        <nav>
+          <a href="https://admin.ensnode.io" style="background:#0080bc;color:white;padding:0.375rem 0.75rem;border-radius:0.375rem;text-decoration:none;font-size:0.875rem;">
+            ENSAdmin
+          </a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="page-wrapper">
+      <div class="content-grid">
+        <aside class="sidebar">
+          <nav>
+            <ul>
+              {navPages.map((item) => (
+                <li>
+                  <a
+                    href={`/mintlify-test`}
+                    class:list={[item.href === currentPath && "active"]}
+                  >
+                    {item.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </aside>
+
+        <article>
+          <h1>{doc.data.title}</h1>
+          {doc.data.description && (
+            <p class="description">{doc.data.description}</p>
+          )}
+          <Content />
+        </article>
+      </div>
+    </div>
+
+    <footer>
+      <p>ENSNode Documentation — Mintlify Headless Test</p>
+    </footer>
+  </body>
+</html>
