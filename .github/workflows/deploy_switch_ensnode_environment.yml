@@ -144,8 +144,8 @@ jobs:
 
           echo "Status ID: $STATUS_ID"
 
-          # Poll for completion (30 attempts, ~5 min best case, up to ~35 min if every request hits timeouts/retries)
-          MAX_ATTEMPTS=30
+          # Poll for completion (hard-capped at 5 minutes by timeout-minutes above)
+          MAX_ATTEMPTS=24
           ATTEMPT=0
 
           while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
