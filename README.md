@@ -104,7 +104,7 @@ Mintlify deploys automatically: preview deploys on each branch, production deplo
 
 | Content Type      | Source             | Behavior                                    |
 | ----------------- | ------------------ | ------------------------------------------- |
-| **API Reference** | Production API URL | Always in sync with deployed production API |
+| **REST API Docs** | Production API URL | Always in sync with deployed production API |
 | **Other docs**    | Committed files    | Deploys immediately on merge to main        |
 
 Non-API documentation (guides, concepts, etc.) may be published before the corresponding code is released to production. The API Reference always reflects the actual production API since Mintlify fetches it from the production URL at build time.
