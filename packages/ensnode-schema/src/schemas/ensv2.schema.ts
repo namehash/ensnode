@@ -129,15 +129,9 @@ export const event = onchainTable(
   }),
 );
 
-export const v1DomainEvent = onchainTable(
-  "v1_domain_events",
-  (t) => ({ domainId: t.text().$type<ENSv1DomainId>(), eventId: t.text() }),
-  (t) => ({ pk: primaryKey({ columns: [t.domainId, t.eventId] }) }),
-);
-
-export const v2DomainEvent = onchainTable(
-  "v2_domain_events",
-  (t) => ({ domainId: t.text().$type<ENSv2DomainId>(), eventId: t.text() }),
+export const domainEvent = onchainTable(
+  "domain_events",
+  (t) => ({ domainId: t.text().$type<DomainId>(), eventId: t.text() }),
   (t) => ({ pk: primaryKey({ columns: [t.domainId, t.eventId] }) }),
 );
 

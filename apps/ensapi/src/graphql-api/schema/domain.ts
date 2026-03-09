@@ -19,6 +19,7 @@ import {
   filterByParent,
   withOrderingMetadata,
 } from "@/graphql-api/lib/find-domains/layers";
+import { resolveFindEvents } from "@/graphql-api/lib/find-events/find-events-resolver";
 import { getDomainResolver } from "@/graphql-api/lib/get-domain-resolver";
 import { getLatestRegistration } from "@/graphql-api/lib/get-latest-registration";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
@@ -26,6 +27,7 @@ import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { INDEX_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
+import { EventRef } from "@/graphql-api/schema/event";
 import { LabelRef } from "@/graphql-api/schema/label";
 import { OrderDirection } from "@/graphql-api/schema/order-direction";
 import { RegistrationInterfaceRef } from "@/graphql-api/schema/registration";
@@ -241,6 +243,17 @@ DomainInterfaceRef.implement({
 
         return resolveFindDomains(context, { domains, order, ...connectionArgs });
       },
+    }),
+
+    //////////////////
+    // Domain.events
+    //////////////////
+    events: t.connection({
+      description: "All Events associated with this Domain.",
+      type: EventRef,
+      // TODO: args for where/order
+      resolve: (parent, args) =>
+        resolveFindEvents(schema.domainEvent, eq(schema.domainEvent.domainId, parent.id), args),
     }),
   }),
 });

@@ -274,7 +274,7 @@ export const EnhancedAccessControl = [
       },
       {
         internalType: "uint256",
-        name: "rolesBitmap",
+        name: "roleBitmap",
         type: "uint256",
       },
       {
@@ -298,7 +298,7 @@ export const EnhancedAccessControl = [
     inputs: [
       {
         internalType: "uint256",
-        name: "rolesBitmap",
+        name: "roleBitmap",
         type: "uint256",
       },
       {
