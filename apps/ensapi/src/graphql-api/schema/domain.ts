@@ -262,6 +262,17 @@ ENSv1DomainRef.implement({
       nullable: true,
       resolve: (parent) => parent.parentId,
     }),
+
+    /////////////////////////////////
+    // ENSv1Domain.rootRegistryOwner
+    /////////////////////////////////
+    rootRegistryOwner: t.field({
+      description:
+        "The rootRegistryOwner of this Domain, i.e. the owner() of this Domain within the ENSv1 Registry.",
+      type: AccountRef,
+      nullable: true,
+      resolve: (parent) => parent.rootRegistryOwnerId,
+    }),
   }),
 });
 

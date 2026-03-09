@@ -76,12 +76,13 @@ export default function () {
     // upsert domain
     await context.db
       .insert(schema.v1Domain)
-      .values({
-        id: domainId,
-        parentId,
-        labelHash,
-      })
+      .values({ id: domainId, parentId, labelHash })
       .onConflictDoNothing();
+
+    // update rootRegistryOwner
+    await context.db
+      .update(schema.v1Domain, { id: domainId })
+      .set({ rootRegistryOwnerId: interpretAddress(owner) });
 
     // materialize domain owner
     // NOTE: despite Domain.ownerId being materialized from other sources of truth (i.e. Registrars
@@ -99,25 +100,25 @@ export default function () {
     context: Context;
     event: EventWithArgs<{ node: Node; owner: Address }>;
   }) {
-    const { node, owner: _owner } = event.args;
-    const owner = interpretAddress(_owner);
+    const { node, owner } = event.args;
 
     // ENSv2 model does not include root node, no-op
     if (node === ROOT_NODE) return;
 
     const domainId = makeENSv1DomainId(node);
 
-    if (owner === null) {
-      await context.db.delete(schema.v1Domain, { id: domainId });
-    } else {
-      // materialize domain owner
-      // NOTE: despite Domain.ownerId being materialized from other sources of truth (i.e. Registrars
-      // like BaseRegistrars & NameWrapper) it's ok to always set it here because the Registrar-emitted
-      // events occur _after_ the Registry events. So when a name is wrapped, for example, the Registry's
-      // owner changes to that of the NameWrapper but then the NameWrapper emits NameWrapped, and this
-      // indexing code re-materializes the Domain.ownerId to the NameWraper-emitted value.
-      await materializeENSv1DomainEffectiveOwner(context, domainId, owner);
-    }
+    // set the domain's rootRegistryOwner to `owner`
+    await context.db
+      .update(schema.v1Domain, { id: domainId })
+      .set({ rootRegistryOwnerId: interpretAddress(owner) });
+
+    // materialize domain owner
+    // NOTE: despite Domain.ownerId being materialized from other sources of truth (i.e. Registrars
+    // like BaseRegistrars & NameWrapper) it's ok to always set it here because the Registrar-emitted
+    // events occur _after_ the Registry events. So when a name is wrapped, for example, the Registry's
+    // owner changes to that of the NameWrapper but then the NameWrapper emits NameWrapped, and this
+    // indexing code re-materializes the Domain.ownerId to the NameWraper-emitted value.
+    await materializeENSv1DomainEffectiveOwner(context, domainId, owner);
   }
 
   /**
