@@ -41,6 +41,16 @@ EventRef.implement({
       resolve: (parent) => parent.chainId,
     }),
 
+    /////////////////////
+    // Event.blockNumber
+    /////////////////////
+    blockNumber: t.field({
+      description: "The block number within which this Event was emitted.",
+      type: "BigInt",
+      nullable: false,
+      resolve: (parent) => parent.blockNumber,
+    }),
+
     ///////////////////
     // Event.blockHash
     ///////////////////
@@ -71,6 +81,16 @@ EventRef.implement({
       resolve: (parent) => parent.transactionHash,
     }),
 
+    ////////////////////////////
+    // Event.transactionIndex
+    ////////////////////////////
+    transactionIndex: t.field({
+      description: "The index of the Transaction within the Block.",
+      type: "Int",
+      nullable: false,
+      resolve: (parent) => parent.transactionIndex,
+    }),
+
     //////////////
     // Event.from
     //////////////
@@ -79,6 +99,17 @@ EventRef.implement({
       type: "Address",
       nullable: false,
       resolve: (parent) => parent.from,
+    }),
+
+    ////////////
+    // Event.to
+    ////////////
+    to: t.field({
+      description:
+        "Identifies the recipient of the Transaction within which this Event was emitted. Null if the transaction deployed a contract.",
+      type: "Address",
+      nullable: true,
+      resolve: (parent) => parent.to,
     }),
 
     ///////////////////
@@ -99,6 +130,26 @@ EventRef.implement({
       type: "Int",
       nullable: false,
       resolve: (parent) => parent.logIndex,
+    }),
+
+    ////////////////
+    // Event.topics
+    ////////////////
+    topics: t.field({
+      description: "The indexed topics of this Event's log.",
+      type: ["Hex"],
+      nullable: false,
+      resolve: (parent) => parent.topics,
+    }),
+
+    //////////////
+    // Event.data
+    //////////////
+    data: t.field({
+      description: "The non-indexed data of this Event's log.",
+      type: "Hex",
+      nullable: false,
+      resolve: (parent) => parent.data,
     }),
   }),
 });

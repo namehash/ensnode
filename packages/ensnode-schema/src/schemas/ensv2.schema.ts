@@ -1,5 +1,5 @@
 import { index, onchainEnum, onchainTable, primaryKey, relations, sql, uniqueIndex } from "ponder";
-import type { Address, Hash } from "viem";
+import type { Address, BlockNumber, Hash } from "viem";
 
 import type {
   ChainId,
@@ -15,6 +15,7 @@ import type {
   RegistrationId,
   RegistryId,
   RenewalId,
+  ResolverId,
 } from "@ensnode/ensnode-sdk";
 
 /**
@@ -79,35 +80,79 @@ import type {
  * of multiple pieces of information (for example, a Registry is identified by (chainId, address)),
  * then that information is, as well, included in the entity's columns, not just encoded in the id.
  *
- * Many entities may reference an Event, which represents the metadata associated with the
- * on-chain event log responsible for its existence.
+ * Events are structured as a single "events" table which tracks EVM Event Metadata for any on-chain
+ * Event. Then, join tables (DomainEvent, ResolverEvent, etc) track the relationship between an
+ * entity that has many events (Domain, Resolver) to the relevant set of Events. These join tables
+ * may store additional
+ *
+ * A Registration references the event that initiated the Registration. A Renewal, too, references
+ * the Event responsible for its existence.
  */
 
-//////////////////
-// Event Metadata
-//////////////////
+//////////
+// Events
+//////////
 
-export const event = onchainTable("events", (t) => ({
-  // Ponder's event.id
-  id: t.text().primaryKey(),
+export const event = onchainTable(
+  "events",
+  (t) => ({
+    // Ponder's event.id
+    id: t.text().primaryKey(),
 
-  // Event Log Metadata
+    // Event Log Metadata
 
-  // chain
-  chainId: t.integer().notNull().$type<ChainId>(),
+    // chain
+    chainId: t.integer().notNull().$type<ChainId>(),
 
-  // block
-  blockHash: t.hex().notNull().$type<Hash>(),
-  timestamp: t.bigint().notNull(),
+    // block
+    blockNumber: t.bigint().notNull().$type<BlockNumber>(),
+    blockHash: t.hex().notNull().$type<Hash>(),
+    timestamp: t.bigint().notNull(),
 
-  // transaction
-  transactionHash: t.hex().notNull().$type<Hash>(),
-  from: t.hex().notNull().$type<Address>(),
+    // transaction
+    transactionHash: t.hex().notNull().$type<Hash>(),
+    transactionIndex: t.integer().notNull(),
+    from: t.hex().notNull().$type<Address>(),
+    to: t.hex().$type<Address>(), // NOTE: a null `to` means this was a tx that deployed a contract
 
-  // log
-  address: t.hex().notNull().$type<Address>(),
-  logIndex: t.integer().notNull().$type<number>(),
-}));
+    // log
+    address: t.hex().notNull().$type<Address>(),
+    logIndex: t.integer().notNull().$type<number>(),
+    topic0: t.hex().notNull().$type<Hash>(),
+    topics: t.hex().array().notNull().$type<[Hash, ...Hash[]]>(),
+    data: t.hex().notNull(),
+  }),
+  (t) => ({
+    // compound index on the primary sort for the table, mirror's ponder's event.id structure
+    bySort: index().on(t.timestamp, t.chainId, t.blockNumber, t.transactionIndex, t.logIndex, t.id),
+    byTopic0: index().on(t.topic0),
+  }),
+);
+
+export const v1DomainEvent = onchainTable(
+  "v1_domain_events",
+  (t) => ({ domainId: t.text().$type<ENSv1DomainId>(), eventId: t.text() }),
+  (t) => ({ pk: primaryKey({ columns: [t.domainId, t.eventId] }) }),
+);
+
+export const v2DomainEvent = onchainTable(
+  "v2_domain_events",
+  (t) => ({ domainId: t.text().$type<ENSv2DomainId>(), eventId: t.text() }),
+  (t) => ({ pk: primaryKey({ columns: [t.domainId, t.eventId] }) }),
+);
+
+export const resolverEvent = onchainTable(
+  "resolver_events",
+  (t) => ({ resolverId: t.text().$type<ResolverId>(), eventId: t.text() }),
+  (t) => ({ pk: primaryKey({ columns: [t.resolverId, t.eventId] }) }),
+);
+
+// join table relating Registries to Events
+export const registryEvent = onchainTable(
+  "registry_events",
+  (t) => ({ registryId: t.text().$type<RegistryId>(), eventId: t.text() }),
+  (t) => ({ pk: primaryKey({ columns: [t.registryId, t.eventId] }) }),
+);
 
 ///////////
 // Account
