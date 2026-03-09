@@ -29,7 +29,10 @@ import { db } from "@/lib/db";
 function buildOrderByClause(order: RegistrarActionsOrder): SQL {
   switch (order) {
     case RegistrarActionsOrders.LatestRegistrarActions:
-      return desc(schema.registrarActions.timestamp);
+      // id is a Ponder checkpoint (blockTimestamp → chainId → blockNumber → transactionIndex →
+      // eventType → eventIndex); fixed-length decimal strings compare lexicographically =
+      // numerically, so DESC gives "latest first" with full determinism across same-block actions.
+      return desc(schema.registrarActions.id);
   }
 }
 
