@@ -1,8 +1,6 @@
 /**
  * Integration Test Environment Orchestrator
  *
- * Co-authored by Claude (Opus 4.6).
- *
  * Spins up the full ENSNode stack against the ens-test-env devnet, runs
  * monorepo-level integration tests, then tears everything down.
  *
@@ -17,7 +15,7 @@
  *   - testcontainers for Postgres (dynamic port, built-in health check) and devnet
  *     (fixed ports required — ensTestEnvChain hardcodes localhost:8545).
  *   - execa for child process management — automatic cleanup on parent exit,
- *     forceKillAfterDelay (10s SIGKILL fallback), env inheritance via extendEnv.
+ *     forceKillAfterDelay (10s SIGKILL fallback), env inherited from parent.
  *   - Services run from source (pnpm start/serve) rather than Docker so that
  *     CI tests the actual code in the PR.
  *   - ENSRainbow database is downloaded via the existing shell script and
@@ -131,21 +129,21 @@ function logError(msg: string) {
   console.error(`[ci] ERROR: ${msg}`);
 }
 
-async function waitForHealth(url: string, timeoutMs: number, label: string): Promise<void> {
+async function waitForHealth(url: string, timeoutMs: number, serviceName: string): Promise<void> {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
     checkAborted();
     try {
       const res = await fetch(url, { signal: AbortSignal.timeout(5_000) });
       if (res.ok) {
-        log(`${label} is healthy`);
+        log(`${serviceName} is healthy`);
         return;
       }
-      log(`${label} health check returned ${res.status}, retrying...`);
+      log(`${serviceName} health check returned ${res.status}, retrying...`);
     } catch {}
     await new Promise((r) => setTimeout(r, 1000));
   }
-  throw new Error(`${label} did not become healthy within ${timeoutMs / 1000}s`);
+  throw new Error(`${serviceName} did not become healthy within ${timeoutMs / 1000}s`);
 }
 
 function spawnService(
@@ -153,7 +151,7 @@ function spawnService(
   args: string[],
   cwd: string,
   env: Record<string, string>,
-  label: string,
+  serviceName: string,
 ): ResultPromise {
   const subprocess = spawn(command, args, {
     cwd,
@@ -167,19 +165,19 @@ function spawnService(
 
   subprocess.stdout?.on("data", (data: Buffer) => {
     for (const line of data.toString().split("\n").filter(Boolean)) {
-      console.log(`[${label}] ${line}`);
+      console.log(`[${serviceName}] ${line}`);
     }
   });
 
   subprocess.stderr?.on("data", (data: Buffer) => {
     for (const line of data.toString().split("\n").filter(Boolean)) {
-      console.error(`[${label}] ${line}`);
+      console.error(`[${serviceName}] ${line}`);
     }
   });
 
   subprocess.then((result) => {
     if (result.failed && !result.isTerminated) {
-      setAborted(`${label} exited with code ${result.exitCode}`);
+      setAborted(`${serviceName} exited with code ${result.exitCode}`);
     }
   });
 
@@ -219,8 +217,18 @@ async function pollIndexingStatus(timeoutMs: number): Promise<void> {
   throw new Error(`Indexing did not complete within ${timeoutMs / 1000}s`);
 }
 
+function logVersions() {
+  log("Software versions:");
+  log(`  Node.js:  ${process.version}`);
+  log(`  pnpm:     ${execaSync("pnpm", ["--version"]).stdout.trim()}`);
+  log(`  Docker:   ${execaSync("docker", ["--version"]).stdout.trim()}`);
+  log(`  Postgres image: ${POSTGRES_IMAGE}`);
+  log(`  Devnet image:   ${DEVNET_IMAGE}`);
+}
+
 async function main() {
   log("Starting integration test environment...");
+  logVersions();
 
   // Phase 1: Start Postgres + Devnet in parallel
   log("Starting Postgres and devnet...");
