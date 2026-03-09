@@ -15,18 +15,6 @@ catalogs:
     '@namehash/namekit-react':
       specifier: 0.12.0
       version: 0.12.0
-    '@ponder/client':
-      specifier: 0.16.3
-      version: 0.16.3
-    '@ponder/utils':
-      specifier: 0.2.16
-      version: 0.2.16
-    '@testing-library/react':
-      specifier: ^16.3.0
-      version: 16.3.0
-    '@types/node':
-      specifier: 24.10.9
-      version: 24.10.9
     astro:
       specifier: ^5.15.9
       version: 5.16.0
@@ -36,57 +24,6 @@ catalogs:
     astro-seo:
       specifier: ^0.8.4
       version: 0.8.4
-    caip:
-      specifier: 1.1.1
-      version: 1.1.1
-    date-fns:
-      specifier: 4.1.0
-      version: 4.1.0
-    drizzle-orm:
-      specifier: 0.41.0
-      version: 0.41.0
-    hono:
-      specifier: ^4.12.4
-      version: 4.12.5
-    lucide-react:
-      specifier: ^0.548.0
-      version: 0.548.0
-    p-retry:
-      specifier: 7.1.1
-      version: 7.1.1
-    pg-connection-string:
-      specifier: ^2.9.1
-      version: 2.9.1
-    pino:
-      specifier: 10.1.0
-      version: 10.1.0
-    ponder:
-      specifier: 0.16.3
-      version: 0.16.3
-    tailwind-merge:
-      specifier: ^3.4.0
-      version: 3.4.0
-    tailwindcss:
-      specifier: ^4.1.18
-      version: 4.1.18
-    tailwindcss-animate:
-      specifier: ^1.0.7
-      version: 1.0.7
-    tsup:
-      specifier: ^8.3.6
-      version: 8.5.0
-    typescript:
-      specifier: ^5.7.3
-      version: 5.9.3
-    viem:
-      specifier: ^2.22.13
-      version: 2.38.5
-    vitest:
-      specifier: ^4.0.2
-      version: 4.0.5
-    zod:
-      specifier: ^4.3.6
-      version: 4.3.6
 
 overrides:
   '@adraffy/ens-normalize': 1.11.1
@@ -651,9 +588,6 @@ importers:
       '@astrojs/tailwind':
         specifier: 'catalog:'
         version: 6.0.2(astro@5.16.0(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.59.0)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1))(tailwindcss@4.1.5)(ts-node@10.9.2(@types/node@24.10.9)(typescript@5.9.3))
-      '@chevrotain/regexp-to-ast':
-        specifier: ^11.2.0
-        version: 11.2.0
       '@fontsource/inter':
         specifier: ^5.2.5
         version: 5.2.8
@@ -1566,9 +1500,6 @@ packages:
 
   '@chevrotain/regexp-to-ast@11.1.2':
     resolution: {integrity: sha512-nMU3Uj8naWer7xpZTYJdxbAs6RIv/dxYzkYU8GSwgUtcAAlzjcPfX1w+RKRcYG8POlzMeayOQ/znfwxEGo5ulw==}
-
-  '@chevrotain/regexp-to-ast@11.2.0':
-    resolution: {integrity: sha512-lG73pBFqbXODTbXhdZwv0oyUaI+3Irm+uOv5/W79lI3g5hasYaJnVJOm3H2NkhA0Ef4XLBU4Scr7TJDJwgFkAw==}
 
   '@chevrotain/types@11.1.2':
     resolution: {integrity: sha512-U+HFai5+zmJCkK86QsaJtoITlboZHBqrVketcO2ROv865xfCMSFpELQoz1GkX5GzME8pTa+3kbKrZHQtI0gdbw==}
@@ -9776,8 +9707,6 @@ snapshots:
       lodash-es: 4.17.23
 
   '@chevrotain/regexp-to-ast@11.1.2': {}
-
-  '@chevrotain/regexp-to-ast@11.2.0': {}
 
   '@chevrotain/types@11.1.2': {}
 
