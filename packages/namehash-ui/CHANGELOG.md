@@ -1,5 +1,14 @@
 # @namehash/namehash-ui
 
+## 1.7.0
+
+### Patch Changes
+
+- Updated dependencies [[`2d03bcd`](https://github.com/namehash/ensnode/commit/2d03bcd94107168e24b9620721e023cfa17d0440)]:
+  - @ensnode/ensnode-sdk@1.7.0
+  - @ensnode/ensnode-react@1.7.0
+  - @ensnode/datasources@1.7.0
+
 ## 1.6.0
 
 ### Patch Changes

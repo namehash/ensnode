@@ -1,5 +1,24 @@
 # ensapi
 
+## 1.7.0
+
+### Minor Changes
+
+- [#1719](https://github.com/namehash/ensnode/pull/1719) [`4cb6dee`](https://github.com/namehash/ensnode/commit/4cb6dee2a0198b630b4efdd02eb71c36c7d38025) Thanks [@shrugs](https://github.com/shrugs)! - ENSNode GraphQL API: BREAKING: Removed `ENSv1Domain.children` in favor of `Domain.subdomains`.
+
+- [#1719](https://github.com/namehash/ensnode/pull/1719) [`4cb6dee`](https://github.com/namehash/ensnode/commit/4cb6dee2a0198b630b4efdd02eb71c36c7d38025) Thanks [@shrugs](https://github.com/shrugs)! - ENSNode GraphQL API: Introduce `*Connection.totalCount` for all `*Connection` fields, following the Relay specification.
+
+- [#1719](https://github.com/namehash/ensnode/pull/1719) [`4cb6dee`](https://github.com/namehash/ensnode/commit/4cb6dee2a0198b630b4efdd02eb71c36c7d38025) Thanks [@shrugs](https://github.com/shrugs)! - ENSNode GraphQL API: BREAKING: Removed `Domain.subdomainCount` in favor of `Domain.subdomains.totalCount`.
+
+### Patch Changes
+
+- Updated dependencies [[`9ef8ab7`](https://github.com/namehash/ensnode/commit/9ef8ab740f03cbc9abba189ff959e4f94b093cbb), [`2d03bcd`](https://github.com/namehash/ensnode/commit/2d03bcd94107168e24b9620721e023cfa17d0440)]:
+  - @namehash/ens-referrals@1.7.0
+  - @ensnode/ensnode-sdk@1.7.0
+  - @ensnode/datasources@1.7.0
+  - @ensnode/ensnode-schema@1.7.0
+  - @ensnode/ponder-subgraph@1.7.0
+
 ## 1.6.0
 
 ### Minor Changes

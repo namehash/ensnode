@@ -1,5 +1,11 @@
 # @ensnode/ponder-sdk
 
+## 1.7.0
+
+### Minor Changes
+
+- [#1734](https://github.com/namehash/ensnode/pull/1734) [`2d03bcd`](https://github.com/namehash/ensnode/commit/2d03bcd94107168e24b9620721e023cfa17d0440) Thanks [@tk-o](https://github.com/tk-o)! - Fixed logic applied while building indexed blockrange for a chain.
+
 ## 1.6.0
 
 ### Minor Changes
