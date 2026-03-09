@@ -140,7 +140,11 @@ jobs:
           echo "Mintlify rebuild triggered successfully (HTTP $HTTP_CODE)"
 
           # Extract statusId from response
-          STATUS_ID=$(echo "$HTTP_BODY" | jq -r '.statusId // empty')
+          if ! STATUS_ID=$(echo "$HTTP_BODY" | jq -r '.statusId // empty' 2>&1); then
+            echo "Failed to parse JSON response from Mintlify API"
+            echo "Response body: $HTTP_BODY"
+            exit 1
+          fi
           if [ -z "$STATUS_ID" ]; then
             echo "Failed to extract statusId from response"
             echo "Response body: $HTTP_BODY"
@@ -150,7 +154,9 @@ jobs:
           echo "Status ID: $STATUS_ID"
 
           # Poll for completion (hard-capped at 5 minutes by timeout-minutes above)
-          MAX_ATTEMPTS=24
+          # Worst case per attempt: ~15s curl (connect 10s + max-time 15s) + 10s sleep = ~25s
+          # 12 attempts × 25s = ~5 min, fitting within timeout-minutes: 5
+          MAX_ATTEMPTS=12
           ATTEMPT=0
 
           while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
@@ -162,8 +168,7 @@ jobs:
             CURL_EXIT=0
             STATUS_CODE=$(curl --silent --show-error --output "$STATUS_BODY_FILE" --write-out '%{http_code}' \
               --connect-timeout 10 \
-              --max-time 30 \
-              --retry 1 --retry-all-errors \
+              --max-time 15 \
               --request GET \
               --url "https://api.mintlify.com/v1/project/update-status/${STATUS_ID}" \
               --header "Authorization: Bearer ${MINTLIFY_API_TOKEN}" 2>"$CURL_STDERR") || CURL_EXIT=$?
@@ -183,7 +188,11 @@ jobs:
               continue
             fi
 
-            STATUS=$(echo "$STATUS_BODY" | jq -r '.status // empty')
+            if ! STATUS=$(echo "$STATUS_BODY" | jq -r '.status // empty' 2>&1); then
+              echo "Failed to parse JSON from status response: $STATUS"
+              echo "Response body: $STATUS_BODY"
+              exit 1
+            fi
             echo "Current status: $STATUS"
 
             case "$STATUS" in
@@ -209,12 +218,12 @@ jobs:
           exit 1
 
       - name: Notify Mintlify Rebuild Failure
-        if: steps.mintlify_rebuild.outcome == 'failure'
+        if: steps.mintlify_rebuild.outcome == 'failure' || steps.mintlify_rebuild.outcome == 'cancelled'
         uses: ./.github/actions/send_slack_notification
         with:
           slack_webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           slack_title: "Mintlify Docs Rebuild Failed"
-          slack_message: "Mintlify docs rebuild failed during environment switch to ${{ inputs.target }}. Check the workflow logs for details."
+          slack_message: "Mintlify docs rebuild ${{ steps.mintlify_rebuild.outcome }} during environment switch to ${{ inputs.target }}. Check the workflow logs for details."
           slack_color: "danger"
 
       - name: Notify Mintlify Rebuild Success
