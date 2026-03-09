@@ -1,9 +1,19 @@
 /**
- * Generates a static OpenAPI 3.1 JSON document for ENSApi.
+ * Generates a static OpenAPI 3.1 JSON document for an app.
  *
- * Usage: pnpm generate:openapi
+ * This script is app-agnostic — it imports `generateOpenApi31Document` from
+ * `@/openapi-document`, which resolves to whichever app context the script
+ * is executed in (controlled by `--filter <app>` in the calling script).
  *
- * Output: docs/docs.ensnode.io/ensapi-openapi.json
+ * Usage:
+ *   pnpm --filter <app> exec tsx --tsconfig tsconfig.json \
+ *     ../../scripts/generate-openapi.ts --out <output-path>
+ *
+ * Example:
+ *   pnpm --filter ensapi exec tsx --tsconfig tsconfig.json \
+ *     ../../scripts/generate-openapi.ts --out ../../docs/docs.ensnode.io/ensapi-openapi.json
+ *
+ * The --out path is resolved relative to the app's root directory.
  *
  * This script has no runtime dependencies — it calls generateOpenApi31Document()
  * which uses only stub route handlers and static metadata.
@@ -12,12 +22,23 @@
 import { execFileSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { parseArgs } from "node:util";
 
 import { generateOpenApi31Document } from "@/openapi-document";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const outputPath = resolve(__dirname, "..", "docs", "docs.ensnode.io", "ensapi-openapi.json");
+const { values } = parseArgs({
+  options: {
+    out: { type: "string" },
+  },
+  strict: true,
+});
+
+if (!values.out) {
+  console.error("Error: --out <path> is required.");
+  process.exit(1);
+}
+
+const outputPath = resolve(values.out);
 
 // Generate the document (no additional servers for the static spec)
 const document = generateOpenApi31Document();
