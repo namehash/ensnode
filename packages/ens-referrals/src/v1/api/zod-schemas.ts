@@ -21,10 +21,17 @@ import {
   makeReferrerEditionMetricsRevShareLimitSchema,
   makeReferrerLeaderboardPageRevShareLimitSchema,
 } from "../award-models/rev-share-limit/api/zod-schemas";
-import { makeBaseReferralProgramRulesSchema } from "../award-models/shared/api/zod-schemas";
+import {
+  makeBaseReferralProgramRulesSchema,
+  makeBaseReferrerLeaderboardPageSchema,
+} from "../award-models/shared/api/zod-schemas";
+import type { ReferrerEditionMetricsUnrecognized } from "../award-models/shared/edition-metrics";
+import type { ReferrerLeaderboardPageUnrecognized } from "../award-models/shared/leaderboard-page";
 import type { ReferralProgramRulesUnrecognized } from "../award-models/shared/rules";
 import { ReferralProgramAwardModels } from "../award-models/shared/rules";
 import type { ReferralProgramEditionConfig } from "../edition";
+import type { ReferrerEditionMetrics } from "../edition-metrics";
+import type { ReferrerLeaderboardPage } from "../leaderboard-page";
 import {
   MAX_EDITIONS_PER_REQUEST,
   ReferralProgramEditionConfigSetResponseCodes,
@@ -42,13 +49,66 @@ export const makeReferralProgramRulesSchema = (valueLabel: string = "ReferralPro
   ]);
 
 /**
- * Schema for {@link ReferrerLeaderboardPage}
+ * Schema for {@link ReferrerLeaderboardPage}.
+ *
+ * Forward-compatible — peeks at `awardModel` before committing to full validation:
+ * - Known award models are fully validated with the model-specific schema.
+ * - Unknown award models are wrapped as {@link ReferrerLeaderboardPageUnrecognized}.
  */
-export const makeReferrerLeaderboardPageSchema = (valueLabel: string = "ReferrerLeaderboardPage") =>
-  z.discriminatedUnion("awardModel", [
+export const makeReferrerLeaderboardPageSchema = (
+  valueLabel: string = "ReferrerLeaderboardPage",
+) => {
+  const knownAwardModels = Object.values(ReferralProgramAwardModels).filter(
+    (m) => m !== ReferralProgramAwardModels.Unrecognized,
+  ) as string[];
+
+  // Loose schema used only to peek at awardModel before full validation.
+  const looseSchema = z.object({ awardModel: z.string() }).passthrough();
+
+  // Schema for known award models — dispatch is handled automatically by discriminatedUnion.
+  const knownSchema = z.discriminatedUnion("awardModel", [
     makeReferrerLeaderboardPagePieSplitSchema(valueLabel),
     makeReferrerLeaderboardPageRevShareLimitSchema(valueLabel),
   ]);
+
+  // Base schema for fields present on all leaderboard page variants (used for Unrecognized).
+  const baseSchema = makeBaseReferrerLeaderboardPageSchema(valueLabel);
+
+  return looseSchema.transform((data, ctx): ReferrerLeaderboardPage => {
+    if (knownAwardModels.includes(data.awardModel)) {
+      const parsed = knownSchema.safeParse(data);
+      if (!parsed.success) {
+        for (const issue of parsed.error.issues) {
+          ctx.addIssue({
+            code: "custom",
+            path: issue.path as PropertyKey[],
+            message: issue.message,
+          });
+        }
+        return z.NEVER;
+      }
+      return parsed.data;
+    }
+
+    // Unknown awardModel — preserve as ReferrerLeaderboardPageUnrecognized using base fields.
+    const parsed = baseSchema.safeParse(data);
+    if (!parsed.success) {
+      for (const issue of parsed.error.issues) {
+        ctx.addIssue({
+          code: "custom",
+          path: issue.path as PropertyKey[],
+          message: issue.message,
+        });
+      }
+      return z.NEVER;
+    }
+    return {
+      ...parsed.data,
+      awardModel: ReferralProgramAwardModels.Unrecognized,
+      originalAwardModel: data.awardModel,
+    } satisfies ReferrerLeaderboardPageUnrecognized;
+  });
+};
 
 /**
  * Schema for {@link ReferrerLeaderboardPageResponseOk}
@@ -85,13 +145,51 @@ export const makeReferrerLeaderboardPageResponseSchema = (
   ]);
 
 /**
- * Schema for {@link ReferrerEditionMetrics} (discriminated union of all ranked and unranked model variants).
+ * Schema for {@link ReferrerEditionMetrics} (all ranked and unranked model variants, plus Unrecognized).
+ *
+ * Forward-compatible — peeks at `awardModel` before committing to full validation:
+ * - Known award models are fully validated with the model-specific schema.
+ * - Unknown award models are wrapped as {@link ReferrerEditionMetricsUnrecognized}.
  */
-export const makeReferrerEditionMetricsSchema = (valueLabel: string = "ReferrerEditionMetrics") =>
-  z.discriminatedUnion("awardModel", [
+export const makeReferrerEditionMetricsSchema = (valueLabel: string = "ReferrerEditionMetrics") => {
+  const knownAwardModels = Object.values(ReferralProgramAwardModels).filter(
+    (m) => m !== ReferralProgramAwardModels.Unrecognized,
+  ) as string[];
+
+  // Loose schema used only to peek at awardModel before full validation.
+  const looseSchema = z.object({ awardModel: z.string() }).passthrough();
+
+  // Schema for known award models — dispatch is handled automatically by discriminatedUnion.
+  const knownSchema = z.discriminatedUnion("awardModel", [
     makeReferrerEditionMetricsPieSplitSchema(valueLabel),
     makeReferrerEditionMetricsRevShareLimitSchema(valueLabel),
   ]);
+
+  return looseSchema.transform((data, ctx): ReferrerEditionMetrics => {
+    if (knownAwardModels.includes(data.awardModel)) {
+      const parsed = knownSchema.safeParse(data);
+      if (!parsed.success) {
+        for (const issue of parsed.error.issues) {
+          ctx.addIssue({
+            code: "custom",
+            path: issue.path as PropertyKey[],
+            message: issue.message,
+          });
+        }
+        return z.NEVER;
+      }
+      return parsed.data;
+    }
+
+    // Unknown awardModel — wrap as ReferrerEditionMetricsUnrecognized.
+    // No base fields are extracted here (unlike ReferrerLeaderboardPageUnrecognized) because
+    // callers are expected to skip unrecognized edition metrics entirely rather than inspect them.
+    return {
+      awardModel: ReferralProgramAwardModels.Unrecognized,
+      originalAwardModel: data.awardModel,
+    } satisfies ReferrerEditionMetricsUnrecognized;
+  });
+};
 
 /**
  * Schema for validating a {@link ReferralProgramEditionSlug}.

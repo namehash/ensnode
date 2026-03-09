@@ -3,6 +3,7 @@ import type { SerializedPriceEth, SerializedPriceUsdc } from "@ensnode/ensnode-s
 import type { AggregatedReferrerMetricsRevShareLimit } from "../aggregations";
 import type {
   ReferrerEditionMetricsRankedRevShareLimit,
+  ReferrerEditionMetricsRevShareLimit,
   ReferrerEditionMetricsUnrankedRevShareLimit,
 } from "../edition-metrics";
 import type { ReferrerLeaderboardPageRevShareLimit } from "../leaderboard-page";
@@ -106,3 +107,10 @@ export interface SerializedReferrerEditionMetricsUnrankedRevShareLimit
   referrer: SerializedUnrankedReferrerMetricsRevShareLimit;
   aggregatedMetrics: SerializedAggregatedReferrerMetricsRevShareLimit;
 }
+
+/**
+ * Serialized representation of {@link ReferrerEditionMetricsRevShareLimit}.
+ */
+export type SerializedReferrerEditionMetricsRevShareLimit =
+  | SerializedReferrerEditionMetricsRankedRevShareLimit
+  | SerializedReferrerEditionMetricsUnrankedRevShareLimit;

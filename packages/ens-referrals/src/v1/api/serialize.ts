@@ -1,23 +1,19 @@
 import {
   serializeReferralProgramRulesPieSplit,
-  serializeReferrerEditionMetricsRankedPieSplit,
-  serializeReferrerEditionMetricsUnrankedPieSplit,
+  serializeReferrerEditionMetricsPieSplit,
   serializeReferrerLeaderboardPagePieSplit,
 } from "../award-models/pie-split/api/serialize";
 import {
   serializeReferralProgramRulesRevShareLimit,
-  serializeReferrerEditionMetricsRankedRevShareLimit,
-  serializeReferrerEditionMetricsUnrankedRevShareLimit,
+  serializeReferrerEditionMetricsRevShareLimit,
   serializeReferrerLeaderboardPageRevShareLimit,
 } from "../award-models/rev-share-limit/api/serialize";
+import type { ReferrerEditionMetricsUnrecognized } from "../award-models/shared/edition-metrics";
+import type { ReferrerLeaderboardPageUnrecognized } from "../award-models/shared/leaderboard-page";
 import type { ReferralProgramRulesUnrecognized } from "../award-models/shared/rules";
 import { ReferralProgramAwardModels } from "../award-models/shared/rules";
 import type { ReferralProgramEditionConfig } from "../edition";
-import type {
-  ReferrerEditionMetrics,
-  ReferrerEditionMetricsRanked,
-  ReferrerEditionMetricsUnranked,
-} from "../edition-metrics";
+import type { ReferrerEditionMetrics } from "../edition-metrics";
 import type { ReferrerLeaderboardPage } from "../leaderboard-page";
 import type { ReferralProgramRules } from "../rules";
 import type {
@@ -25,8 +21,6 @@ import type {
   SerializedReferralProgramEditionConfigSetResponse,
   SerializedReferralProgramRules,
   SerializedReferrerEditionMetrics,
-  SerializedReferrerEditionMetricsRanked,
-  SerializedReferrerEditionMetricsUnranked,
   SerializedReferrerLeaderboardPage,
   SerializedReferrerLeaderboardPageResponse,
   SerializedReferrerMetricsEditionsData,
@@ -75,6 +69,9 @@ export function serializeReferralProgramRules(
 
 /**
  * Serializes a {@link ReferrerLeaderboardPage} object.
+ *
+ * @throws if called with a {@link ReferrerLeaderboardPageUnrecognized} — unrecognized pages are
+ *   client-side forward-compatibility placeholders and must never be serialized.
  */
 function serializeReferrerLeaderboardPage(
   page: ReferrerLeaderboardPage,
@@ -84,6 +81,12 @@ function serializeReferrerLeaderboardPage(
       return serializeReferrerLeaderboardPagePieSplit(page);
     case ReferralProgramAwardModels.RevShareLimit:
       return serializeReferrerLeaderboardPageRevShareLimit(page);
+    case ReferralProgramAwardModels.Unrecognized: {
+      const unrecognized = page as ReferrerLeaderboardPageUnrecognized;
+      throw new Error(
+        `ReferrerLeaderboardPageUnrecognized (originalAwardModel: '${unrecognized.originalAwardModel}') must not be serialized — it is a client-side forward-compatibility placeholder only.`,
+      );
+    }
     default: {
       const _exhaustiveCheck: never = page;
       throw new Error(
@@ -94,59 +97,30 @@ function serializeReferrerLeaderboardPage(
 }
 
 /**
- * Serializes a {@link ReferrerEditionMetricsRanked} object.
- */
-function serializeReferrerEditionMetricsRanked(
-  detail: ReferrerEditionMetricsRanked,
-): SerializedReferrerEditionMetricsRanked {
-  switch (detail.awardModel) {
-    case ReferralProgramAwardModels.PieSplit:
-      return serializeReferrerEditionMetricsRankedPieSplit(detail);
-    case ReferralProgramAwardModels.RevShareLimit:
-      return serializeReferrerEditionMetricsRankedRevShareLimit(detail);
-    default: {
-      const _exhaustiveCheck: never = detail;
-      throw new Error(
-        `Unknown award model: ${(_exhaustiveCheck as ReferrerEditionMetricsRanked).awardModel}`,
-      );
-    }
-  }
-}
-
-/**
- * Serializes a {@link ReferrerEditionMetricsUnranked} object.
- */
-function serializeReferrerEditionMetricsUnranked(
-  detail: ReferrerEditionMetricsUnranked,
-): SerializedReferrerEditionMetricsUnranked {
-  switch (detail.awardModel) {
-    case ReferralProgramAwardModels.PieSplit:
-      return serializeReferrerEditionMetricsUnrankedPieSplit(detail);
-    case ReferralProgramAwardModels.RevShareLimit:
-      return serializeReferrerEditionMetricsUnrankedRevShareLimit(detail);
-    default: {
-      const _exhaustiveCheck: never = detail;
-      throw new Error(
-        `Unknown award model: ${(_exhaustiveCheck as ReferrerEditionMetricsUnranked).awardModel}`,
-      );
-    }
-  }
-}
-
-/**
- * Serializes a {@link ReferrerEditionMetrics} object (ranked or unranked).
+ * Serializes a {@link ReferrerEditionMetrics} object.
+ *
+ * @throws if called with a {@link ReferrerEditionMetricsUnrecognized} — unrecognized metrics are
+ *   client-side forward-compatibility placeholders and must never be serialized.
  */
 function serializeReferrerEditionMetrics(
   detail: ReferrerEditionMetrics,
 ): SerializedReferrerEditionMetrics {
-  switch (detail.type) {
-    case "ranked":
-      return serializeReferrerEditionMetricsRanked(detail);
-    case "unranked":
-      return serializeReferrerEditionMetricsUnranked(detail);
+  switch (detail.awardModel) {
+    case ReferralProgramAwardModels.PieSplit:
+      return serializeReferrerEditionMetricsPieSplit(detail);
+    case ReferralProgramAwardModels.RevShareLimit:
+      return serializeReferrerEditionMetricsRevShareLimit(detail);
+    case ReferralProgramAwardModels.Unrecognized: {
+      const unrecognized = detail as ReferrerEditionMetricsUnrecognized;
+      throw new Error(
+        `ReferrerEditionMetricsUnrecognized (originalAwardModel: '${unrecognized.originalAwardModel}') must not be serialized — it is a client-side forward-compatibility placeholder only.`,
+      );
+    }
     default: {
       const _exhaustiveCheck: never = detail;
-      throw new Error(`Unknown detail type: ${(_exhaustiveCheck as ReferrerEditionMetrics).type}`);
+      throw new Error(
+        `Unknown award model: ${(_exhaustiveCheck as ReferrerEditionMetrics).awardModel}`,
+      );
     }
   }
 }

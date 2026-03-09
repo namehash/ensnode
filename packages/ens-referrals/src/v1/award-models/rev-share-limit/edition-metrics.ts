@@ -108,3 +108,12 @@ export interface ReferrerEditionMetricsUnrankedRevShareLimit {
    */
   accurateAsOf: UnixTimestamp;
 }
+
+/**
+ * All referrer edition metrics variants for the rev-share-limit award model.
+ *
+ * Use `type` to determine if the referrer is ranked or unranked.
+ */
+export type ReferrerEditionMetricsRevShareLimit =
+  | ReferrerEditionMetricsRankedRevShareLimit
+  | ReferrerEditionMetricsUnrankedRevShareLimit;

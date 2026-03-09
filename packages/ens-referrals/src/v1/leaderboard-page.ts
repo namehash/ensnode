@@ -9,6 +9,7 @@ import {
 import {
   buildReferrerLeaderboardPageContext,
   type ReferrerLeaderboardPageParams,
+  type ReferrerLeaderboardPageUnrecognized,
 } from "./award-models/shared/leaderboard-page";
 import { ReferralProgramAwardModels } from "./award-models/shared/rules";
 import type { ReferrerLeaderboard } from "./leaderboard";
@@ -18,10 +19,13 @@ import type { ReferrerLeaderboard } from "./leaderboard";
  *
  * Use `awardModel` to narrow the specific variant at runtime. Within each variant,
  * `rules`, `referrers`, and `aggregatedMetrics` are all guaranteed to be from the same model.
+ * When `awardModel` is `"unrecognized"`, the page was produced by a server running a newer
+ * version — use {@link ReferrerLeaderboardPageUnrecognized} to access `originalAwardModel`.
  */
 export type ReferrerLeaderboardPage =
   | ReferrerLeaderboardPagePieSplit
-  | ReferrerLeaderboardPageRevShareLimit;
+  | ReferrerLeaderboardPageRevShareLimit
+  | ReferrerLeaderboardPageUnrecognized;
 
 export const getReferrerLeaderboardPage = (
   pageParams: ReferrerLeaderboardPageParams,
@@ -34,5 +38,12 @@ export const getReferrerLeaderboardPage = (
       return buildLeaderboardPagePieSplit(pageContext, leaderboard);
     case ReferralProgramAwardModels.RevShareLimit:
       return buildLeaderboardPageRevShareLimit(pageContext, leaderboard);
+
+    default: {
+      const _exhaustiveCheck: never = leaderboard;
+      throw new Error(
+        `Unknown award model: ${(_exhaustiveCheck as ReferrerLeaderboard).awardModel}`,
+      );
+    }
   }
 };
