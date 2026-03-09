@@ -89,9 +89,9 @@ ENSNode is a modern, multichain indexer for ENS. It supports backwards-compatibl
 
 Documentation for the ENSNode suite of apps is available at [ensnode.io](https://ensnode.io).
 
-## API Reference
+## REST API Docs
 
-The API Reference is generated from an OpenAPI spec. Two sources are used depending on context:
+The REST API Docs are generated from an OpenAPI spec. Two sources are used depending on context:
 
 | Context         | OpenAPI Source                              | Page                                                            |
 | --------------- | ------------------------------------------- | --------------------------------------------------------------- |
