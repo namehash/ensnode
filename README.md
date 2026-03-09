@@ -89,42 +89,6 @@ ENSNode is a modern, multichain indexer for ENS. It supports backwards-compatibl
 
 Documentation for the ENSNode suite of apps is available at [ensnode.io](https://ensnode.io).
 
-## REST API Docs
-
-The REST API Docs are generated from an OpenAPI spec. Two sources are used depending on context:
-
-| Context         | OpenAPI Source                              | Page                                                            |
-| --------------- | ------------------------------------------- | --------------------------------------------------------------- |
-| **Production**  | Fetched from `https://api.alpha.ensnode.io` | API Reference                                                   |
-| **PR Previews** | Committed `openapi.json` file               | [Preview page](https://docs.ensnode.io/ensapi/preview) (hidden) |
-
-This means production docs always reflect the live API, while PR previews can show upcoming API changes before they're deployed.
-
-Mintlify deploys automatically: preview deploys on each branch, production deploys on merge to `main`.
-
-| Content Type      | Source             | Behavior                                    |
-| ----------------- | ------------------ | ------------------------------------------- |
-| **REST API Docs** | Production API URL | Always in sync with deployed production API |
-| **All other docs**    | Committed files    | Deploys immediately on merge to main        |
-
-Non-API documentation (guides, concepts, etc.) may be published before the corresponding code is released to production. The API Reference always reflects the actual production API since Mintlify fetches it from the production URL at build time.
-
-## OpenAPI Spec Sync Check
-
-On every PR, CI runs an `openapi-sync-check` job that:
-
-1. Regenerates the OpenAPI spec from the ENSApi route definitions by running `pnpm generate:openapi`
-2. Compares the freshly generated spec against the committed [`ensapi-openapi.json`](docs/docs.ensnode.io/ensapi-openapi.json), failing with a diff if they don't match
-3. Validates that Mintlify can parse the spec with `openapi-check`
-
-If you modify any API route schemas in `apps/ensapi`, you must regenerate and commit the updated spec:
-
-```sh
-pnpm generate:openapi
-```
-
-Then commit the updated `docs/docs.ensnode.io/ensapi-openapi.json`.
-
 ## Contributions
 
 We welcome community contributions and feedback—please see [CONTRIBUTING.md](CONTRIBUTING.md) for more information.
