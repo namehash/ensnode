@@ -1,5 +1,16 @@
 # @namehash/ens-referrals
 
+## 1.7.0
+
+### Minor Changes
+
+- [#1732](https://github.com/namehash/ensnode/pull/1732) [`9ef8ab7`](https://github.com/namehash/ensnode/commit/9ef8ab740f03cbc9abba189ff959e4f94b093cbb) Thanks [@Goader](https://github.com/Goader)! - Add client-side forward compatibility for unrecognized leaderboard page and edition metrics award models. When a server returns a newer `awardModel` not known to this client, the deserializers now wrap the response as `ReferrerLeaderboardPageUnrecognized` or `ReferrerEditionMetricsUnrecognized` instead of throwing.
+
+### Patch Changes
+
+- Updated dependencies [[`2d03bcd`](https://github.com/namehash/ensnode/commit/2d03bcd94107168e24b9620721e023cfa17d0440)]:
+  - @ensnode/ensnode-sdk@1.7.0
+
 ## 1.6.0
 
 ### Minor Changes

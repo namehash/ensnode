@@ -135,12 +135,13 @@ export class ENSReferralsClient {
    * @param request.recordsPerPage - Number of records per page (default: 25, max: 100)
    * @returns {ReferrerLeaderboardPageResponse}
    *
+   * @remarks If the server returns a leaderboard page whose `awardModel` is not recognized by
+   * this client version, it is preserved as {@link ReferrerLeaderboardPageUnrecognized}. Callers
+   * should check `response.data.awardModel` and handle the `"unrecognized"` case accordingly.
+   *
    * @throws if the ENSNode request fails
    * @throws if the ENSNode API returns an error response
    * @throws if the ENSNode response breaks required invariants
-   * @throws if the requested edition uses an award model not recognized by this version of
-   *   the client. Call {@link getEditionConfigSet} first to verify the edition's `awardModel`
-   *   is supported before requesting its leaderboard.
    *
    * @example
    * ```typescript
@@ -148,17 +149,16 @@ export class ENSReferralsClient {
    * const editionSlug = "2025-12";
    * const response = await client.getReferrerLeaderboardPage({ edition: editionSlug });
    * if (response.responseCode === ReferrerLeaderboardPageResponseCodes.Ok) {
-   *   const {
-   *     aggregatedMetrics,
-   *     referrers,
-   *     rules,
-   *     pageContext,
-   *     accurateAsOf
-   *   } = response.data;
-   *   console.log(`Edition: ${editionSlug}`);
-   *   console.log(`Subregistry: ${rules.subregistryId}`);
-   *   console.log(`Total Referrers: ${pageContext.totalRecords}`);
-   *   console.log(`Page ${pageContext.page} of ${pageContext.totalPages}`);
+   *   const { awardModel, pageContext, accurateAsOf } = response.data;
+   *   if (awardModel === ReferralProgramAwardModels.Unrecognized) {
+   *     console.log(`Unrecognized award model: ${response.data.originalAwardModel} — skipping`);
+   *   } else {
+   *     const { aggregatedMetrics, referrers, rules } = response.data;
+   *     console.log(`Edition: ${editionSlug}`);
+   *     console.log(`Subregistry: ${rules.subregistryId}`);
+   *     console.log(`Total Referrers: ${pageContext.totalRecords}`);
+   *     console.log(`Page ${pageContext.page} of ${pageContext.totalPages}`);
+   *   }
    * }
    * ```
    *
@@ -221,22 +221,17 @@ export class ENSReferralsClient {
    * referral program editions. Returns a record mapping each requested edition slug
    * to the referrer's metrics for that edition.
    *
-   * The response data maps edition slugs to referrer metrics. Each edition's data is a
-   * discriminated union type with a `type` field:
+   * The response data maps edition slugs to referrer metrics. Each edition's entry is a
+   * {@link ReferrerEditionMetrics} discriminated union. Narrow on `awardModel` first to
+   * exclude unrecognized models, then on `type` to distinguish ranked from unranked:
    *
-   * **For referrers on the leaderboard** (`ReferrerEditionMetricsRanked`):
-   * - `type`: {@link ReferrerEditionMetricsTypeIds.Ranked}
-   * - `referrer`: The `AwardedReferrerMetrics` with rank, qualification status, and award share
-   * - `rules`: The referral program rules for this edition
-   * - `aggregatedMetrics`: Aggregated metrics for all referrers on the leaderboard
-   * - `accurateAsOf`: Unix timestamp indicating when the data was last updated
-   *
-   * **For referrers NOT on the leaderboard** (`ReferrerEditionMetricsUnranked`):
-   * - `type`: {@link ReferrerEditionMetricsTypeIds.Unranked}
-   * - `referrer`: The `UnrankedReferrerMetrics` from @namehash/ens-referrals
-   * - `rules`: The referral program rules for this edition
-   * - `aggregatedMetrics`: Aggregated metrics for all referrers on the leaderboard
-   * - `accurateAsOf`: Unix timestamp indicating when the data was last updated
+   * - `awardModel: "unrecognized"` ({@link ReferrerEditionMetricsUnrecognized}): the server
+   *   returned an award model this client does not recognize. Only `originalAwardModel` is
+   *   available; no model-specific fields are present.
+   * - `type: "ranked"` ({@link ReferrerEditionMetricsTypeIds.Ranked}): the referrer appears on
+   *   the leaderboard. `referrer` contains rank, qualification status, and award share.
+   * - `type: "unranked"` ({@link ReferrerEditionMetricsTypeIds.Unranked}): the referrer has no
+   *   activity in this edition. `referrer` contains zero-value placeholders.
    *
    * **Note:** This endpoint does not allow partial success. When `responseCode === Ok`,
    * all requested editions are guaranteed to be present in the response data. If any
@@ -247,11 +242,13 @@ export class ENSReferralsClient {
    * @param request The referrer address and edition slugs to query
    * @returns {ReferrerMetricsEditionsResponse} Returns the referrer metrics for requested editions
    *
+   * @remarks If the server returns metrics for an edition whose `awardModel` is not recognized by
+   * this client version, that edition's entry in `response.data` is preserved as
+   * {@link ReferrerEditionMetricsUnrecognized}. Callers should check each edition's `awardModel`
+   * and handle the `"unrecognized"` case accordingly.
+   *
    * @throws if the ENSNode request fails
    * @throws if the response data is malformed
-   * @throws if any of the requested editions use an award model not recognized by this
-   *   version of the client. Call {@link getEditionConfigSet} first to verify each
-   *   edition's `awardModel` is supported before requesting metrics.
    *
    * @example
    * ```typescript
@@ -264,6 +261,10 @@ export class ENSReferralsClient {
    *   // All requested editions are present in response.data
    *   for (const [editionSlug, detail] of Object.entries(response.data)) {
    *     console.log(`Edition: ${editionSlug}`);
+   *     if (detail.awardModel === ReferralProgramAwardModels.Unrecognized) {
+   *       console.log(`Unrecognized award model: ${detail.originalAwardModel} — skipping`);
+   *       continue;
+   *     }
    *     console.log(`Type: ${detail.type}`);
    *     if (detail.type === ReferrerEditionMetricsTypeIds.Ranked) {
    *       console.log(`Rank: ${detail.referrer.rank}`);
@@ -281,12 +282,12 @@ export class ENSReferralsClient {
    *   editions: ["2025-12"]
    * });
    * if (response.responseCode === ReferrerMetricsEditionsResponseCodes.Ok) {
-   *   const edition202512Detail = response.data["2025-12"];
-   *   if (edition202512Detail && edition202512Detail.type === ReferrerEditionMetricsTypeIds.Ranked) {
-   *     // TypeScript knows this is ReferrerEditionMetricsRanked
-   *     console.log(`Edition 2025-12 Rank: ${edition202512Detail.referrer.rank}`);
-   *   } else if (edition202512Detail) {
-   *     // TypeScript knows this is ReferrerEditionMetricsUnranked
+   *   const detail = response.data["2025-12"];
+   *   if (detail && detail.awardModel === ReferralProgramAwardModels.Unrecognized) {
+   *     console.log(`Unrecognized award model: ${detail.originalAwardModel} — skipping`);
+   *   } else if (detail && detail.type === ReferrerEditionMetricsTypeIds.Ranked) {
+   *     console.log(`Edition 2025-12 Rank: ${detail.referrer.rank}`);
+   *   } else if (detail) {
    *     console.log("Referrer is not on the leaderboard for 2025-12");
    *   }
    * }

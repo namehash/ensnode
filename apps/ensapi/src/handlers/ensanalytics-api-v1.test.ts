@@ -445,33 +445,31 @@ describe("/v1/ensanalytics", () => {
 
         // Check 2025-12
         expect(edition1.awardModel).toBe(ReferralProgramAwardModels.PieSplit);
+        if (edition1.awardModel !== ReferralProgramAwardModels.PieSplit) throw new Error();
         expect(edition1.type).toBe(ReferrerEditionMetricsTypeIds.Unranked);
-        if (
-          edition1.awardModel === ReferralProgramAwardModels.PieSplit &&
-          edition1.type === ReferrerEditionMetricsTypeIds.Unranked
-        ) {
-          expect(edition1.rules).toEqual(populatedReferrerLeaderboard.rules);
-          expect(edition1.aggregatedMetrics).toEqual(
-            populatedReferrerLeaderboard.aggregatedMetrics,
-          );
-          expect(edition1.referrer.referrer).toBe(nonExistingReferrer);
-          expect(edition1.referrer.rank).toBe(null);
-          expect(edition1.referrer.totalReferrals).toBe(0);
-          expect(edition1.referrer.totalIncrementalDuration).toBe(0);
-          expect(edition1.referrer.score).toBe(0);
-          expect(edition1.referrer.isQualified).toBe(false);
-          expect(edition1.referrer.finalScoreBoost).toBe(0);
-          expect(edition1.referrer.finalScore).toBe(0);
-          expect(edition1.referrer.awardPoolShare).toBe(0);
-          expect(edition1.referrer.awardPoolApproxValue).toStrictEqual({
-            currency: "USDC",
-            amount: 0n,
-          });
-          expect(edition1.accurateAsOf).toBe(expectedAccurateAsOf);
-        }
+        if (edition1.type !== ReferrerEditionMetricsTypeIds.Unranked) throw new Error();
+        expect(edition1.rules).toEqual(populatedReferrerLeaderboard.rules);
+        expect(edition1.aggregatedMetrics).toEqual(populatedReferrerLeaderboard.aggregatedMetrics);
+        expect(edition1.referrer.referrer).toBe(nonExistingReferrer);
+        expect(edition1.referrer.rank).toBe(null);
+        expect(edition1.referrer.totalReferrals).toBe(0);
+        expect(edition1.referrer.totalIncrementalDuration).toBe(0);
+        expect(edition1.referrer.score).toBe(0);
+        expect(edition1.referrer.isQualified).toBe(false);
+        expect(edition1.referrer.finalScoreBoost).toBe(0);
+        expect(edition1.referrer.finalScore).toBe(0);
+        expect(edition1.referrer.awardPoolShare).toBe(0);
+        expect(edition1.referrer.awardPoolApproxValue).toStrictEqual({
+          currency: "USDC",
+          amount: 0n,
+        });
+        expect(edition1.accurateAsOf).toBe(expectedAccurateAsOf);
 
         // Check 2026-03
+        expect(edition2.awardModel).toBe(ReferralProgramAwardModels.PieSplit);
+        if (edition2.awardModel !== ReferralProgramAwardModels.PieSplit) throw new Error();
         expect(edition2.type).toBe(ReferrerEditionMetricsTypeIds.Unranked);
+        if (edition2.type !== ReferrerEditionMetricsTypeIds.Unranked) throw new Error();
         expect(edition2.referrer.referrer).toBe(nonExistingReferrer);
         expect(edition2.referrer.rank).toBe(null);
       }
@@ -534,31 +532,31 @@ describe("/v1/ensanalytics", () => {
 
         // Check 2025-12
         expect(edition1.awardModel).toBe(ReferralProgramAwardModels.PieSplit);
+        if (edition1.awardModel !== ReferralProgramAwardModels.PieSplit) throw new Error();
         expect(edition1.type).toBe(ReferrerEditionMetricsTypeIds.Unranked);
-        if (
-          edition1.awardModel === ReferralProgramAwardModels.PieSplit &&
-          edition1.type === ReferrerEditionMetricsTypeIds.Unranked
-        ) {
-          expect(edition1.rules).toEqual(emptyReferralLeaderboard.rules);
-          expect(edition1.aggregatedMetrics).toEqual(emptyReferralLeaderboard.aggregatedMetrics);
-          expect(edition1.referrer.referrer).toBe(referrer);
-          expect(edition1.referrer.rank).toBe(null);
-          expect(edition1.referrer.totalReferrals).toBe(0);
-          expect(edition1.referrer.totalIncrementalDuration).toBe(0);
-          expect(edition1.referrer.score).toBe(0);
-          expect(edition1.referrer.isQualified).toBe(false);
-          expect(edition1.referrer.finalScoreBoost).toBe(0);
-          expect(edition1.referrer.finalScore).toBe(0);
-          expect(edition1.referrer.awardPoolShare).toBe(0);
-          expect(edition1.referrer.awardPoolApproxValue).toStrictEqual({
-            currency: "USDC",
-            amount: 0n,
-          });
-          expect(edition1.accurateAsOf).toBe(expectedAccurateAsOf);
-        }
+        if (edition1.type !== ReferrerEditionMetricsTypeIds.Unranked) throw new Error();
+        expect(edition1.rules).toEqual(emptyReferralLeaderboard.rules);
+        expect(edition1.aggregatedMetrics).toEqual(emptyReferralLeaderboard.aggregatedMetrics);
+        expect(edition1.referrer.referrer).toBe(referrer);
+        expect(edition1.referrer.rank).toBe(null);
+        expect(edition1.referrer.totalReferrals).toBe(0);
+        expect(edition1.referrer.totalIncrementalDuration).toBe(0);
+        expect(edition1.referrer.score).toBe(0);
+        expect(edition1.referrer.isQualified).toBe(false);
+        expect(edition1.referrer.finalScoreBoost).toBe(0);
+        expect(edition1.referrer.finalScore).toBe(0);
+        expect(edition1.referrer.awardPoolShare).toBe(0);
+        expect(edition1.referrer.awardPoolApproxValue).toStrictEqual({
+          currency: "USDC",
+          amount: 0n,
+        });
+        expect(edition1.accurateAsOf).toBe(expectedAccurateAsOf);
 
         // Check 2026-03
+        expect(edition2.awardModel).toBe(ReferralProgramAwardModels.PieSplit);
+        if (edition2.awardModel !== ReferralProgramAwardModels.PieSplit) throw new Error();
         expect(edition2.type).toBe(ReferrerEditionMetricsTypeIds.Unranked);
+        if (edition2.type !== ReferrerEditionMetricsTypeIds.Unranked) throw new Error();
         expect(edition2.referrer.referrer).toBe(referrer);
         expect(edition2.referrer.rank).toBe(null);
       }
