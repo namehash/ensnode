@@ -263,15 +263,15 @@ ENSv1DomainRef.implement({
       resolve: (parent) => parent.parentId,
     }),
 
-    ///////////////////////
-    // ENSv1Domain.manager
-    ///////////////////////
-    manager: t.field({
+    /////////////////////////////////
+    // ENSv1Domain.rootRegistryOwner
+    /////////////////////////////////
+    rootRegistryOwner: t.field({
       description:
-        "The manager of this Domain, i.e. the owner() of this Domain within the ENSv1 Registry.",
+        "The rootRegistryOwner of this Domain, i.e. the owner() of this Domain within the ENSv1 Registry.",
       type: AccountRef,
       nullable: true,
-      resolve: (parent) => parent.managerId,
+      resolve: (parent) => parent.rootRegistryOwnerId,
     }),
   }),
 });

@@ -79,10 +79,10 @@ export default function () {
       .values({ id: domainId, parentId, labelHash })
       .onConflictDoNothing();
 
-    // update manager
+    // update rootRegistryOwner
     await context.db
       .update(schema.v1Domain, { id: domainId })
-      .set({ managerId: interpretAddress(owner) });
+      .set({ rootRegistryOwnerId: interpretAddress(owner) });
 
     // materialize domain owner
     // NOTE: despite Domain.ownerId being materialized from other sources of truth (i.e. Registrars
@@ -107,10 +107,10 @@ export default function () {
 
     const domainId = makeENSv1DomainId(node);
 
-    // set the domain's manager to `owner`
+    // set the domain's rootRegistryOwner to `owner`
     await context.db
       .update(schema.v1Domain, { id: domainId })
-      .set({ managerId: interpretAddress(owner) });
+      .set({ rootRegistryOwnerId: interpretAddress(owner) });
 
     // materialize domain owner
     // NOTE: despite Domain.ownerId being materialized from other sources of truth (i.e. Registrars

@@ -102,7 +102,7 @@ query DomainByName($name: Name!) {
     name
 
     ... on ENSv1Domain {
-      manager { address }
+      rootRegistryOwner { address }
     }
 
     ... on ENSv2Domain {
