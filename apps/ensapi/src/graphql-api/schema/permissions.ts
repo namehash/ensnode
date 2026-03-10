@@ -19,7 +19,7 @@ import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { AccountIdRef } from "@/graphql-api/schema/account-id";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
-import { EventRef } from "@/graphql-api/schema/event";
+import { EventRef, EventsWhereInput } from "@/graphql-api/schema/event";
 import { db } from "@/lib/db";
 
 export const PermissionsRef = builder.loadableObjectRef("Permissions", {
@@ -128,9 +128,15 @@ PermissionsRef.implement({
     events: t.connection({
       description: "All Events associated with these Permissions.",
       type: EventRef,
+      args: {
+        where: t.arg({ type: EventsWhereInput }),
+      },
       resolve: (parent, args) =>
-        resolveFindEvents(eq(schema.permissionsEvents.permissionsId, parent.id), args, {
-          through: schema.permissionsEvents,
+        resolveFindEvents(args, {
+          through: {
+            table: schema.permissionsEvents,
+            scope: eq(schema.permissionsEvents.permissionsId, parent.id),
+          },
         }),
     }),
   }),

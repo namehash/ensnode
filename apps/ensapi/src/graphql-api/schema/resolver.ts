@@ -22,7 +22,7 @@ import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { AccountIdInput, AccountIdRef } from "@/graphql-api/schema/account-id";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
-import { EventRef } from "@/graphql-api/schema/event";
+import { EventRef, EventsWhereInput } from "@/graphql-api/schema/event";
 import { NameOrNodeInput } from "@/graphql-api/schema/name-or-node";
 import { PermissionsRef, type PermissionsUserResource } from "@/graphql-api/schema/permissions";
 import { ResolverRecordsRef } from "@/graphql-api/schema/resolver-records";
@@ -165,9 +165,15 @@ ResolverRef.implement({
     events: t.connection({
       description: "All Events associated with this Resolver.",
       type: EventRef,
+      args: {
+        where: t.arg({ type: EventsWhereInput }),
+      },
       resolve: (parent, args) =>
-        resolveFindEvents(eq(schema.resolverEvent.resolverId, parent.id), args, {
-          through: schema.resolverEvent,
+        resolveFindEvents(args, {
+          through: {
+            table: schema.resolverEvent,
+            scope: eq(schema.resolverEvent.resolverId, parent.id),
+          },
         }),
     }),
   }),

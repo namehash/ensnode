@@ -27,7 +27,7 @@ import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { INDEX_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
-import { EventRef } from "@/graphql-api/schema/event";
+import { EventRef, EventsWhereInput } from "@/graphql-api/schema/event";
 import { LabelRef } from "@/graphql-api/schema/label";
 import { OrderDirection } from "@/graphql-api/schema/order-direction";
 import { RegistrationInterfaceRef } from "@/graphql-api/schema/registration";
@@ -251,10 +251,15 @@ DomainInterfaceRef.implement({
     events: t.connection({
       description: "All Events associated with this Domain.",
       type: EventRef,
-      // TODO: args for where/order
+      args: {
+        where: t.arg({ type: EventsWhereInput }),
+      },
       resolve: (parent, args) =>
-        resolveFindEvents(eq(schema.domainEvent.domainId, parent.id), args, {
-          through: schema.domainEvent,
+        resolveFindEvents(args, {
+          through: {
+            table: schema.domainEvent,
+            scope: eq(schema.domainEvent.domainId, parent.id),
+          },
         }),
     }),
   }),

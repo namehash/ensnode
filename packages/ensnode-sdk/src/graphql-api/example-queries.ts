@@ -184,6 +184,24 @@ query AccountDomains(
     },
   },
 
+  ////////////////////
+  // Account Events
+  ////////////////////
+  {
+    query: `
+query AccountDomains(
+  $address: Address!
+) {
+  account(address: $address) {
+    events { edges { node { topics data timestamp } } }
+  }
+}`,
+    variables: {
+      default: { address: VITALIK_ADDRESS },
+      [ENSNamespaceIds.EnsTestEnv]: { address: DEVNET_DEPLOYER },
+    },
+  },
+
   /////////////////////
   // Registry Domains
   /////////////////////

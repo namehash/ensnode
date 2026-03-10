@@ -153,3 +153,54 @@ EventRef.implement({
     }),
   }),
 });
+
+//////////
+// Inputs
+//////////
+
+/**
+ * Shared filter for events connections. Used by Domain.events, Resolver.events, Permissions.events,
+ * and Account.events (which excludes `from` since it's implied).
+ */
+export const EventsWhereInput = builder.inputType("EventsWhereInput", {
+  description: "Filter conditions for an events connection.",
+  fields: (t) => ({
+    topic0_in: t.field({
+      type: ["Hex"],
+      description: "Filter to events whose topic0 (event signature) is one of the provided values.",
+    }),
+    timestamp_gte: t.field({
+      type: "BigInt",
+      description: "Filter to events at or after this UnixTimestamp.",
+    }),
+    timestamp_lte: t.field({
+      type: "BigInt",
+      description: "Filter to events at or before this UnixTimestamp.",
+    }),
+    from: t.field({
+      type: "Address",
+      description: "Filter to events sent by this address.",
+    }),
+  }),
+});
+
+/**
+ * Like EventsWhereInput but without `from` (used where `from` is implied, e.g. Account.events).
+ */
+export const AccountEventsWhereInput = builder.inputType("AccountEventsWhereInput", {
+  description: "Filter conditions for Account.events (where `from` is implied by the Account).",
+  fields: (t) => ({
+    topic0_in: t.field({
+      type: ["Hex"],
+      description: "Filter to events whose topic0 (event signature) is one of the provided values.",
+    }),
+    timestamp_gte: t.field({
+      type: "BigInt",
+      description: "Filter to events at or after this UnixTimestamp.",
+    }),
+    timestamp_lte: t.field({
+      type: "BigInt",
+      description: "Filter to events at or before this UnixTimestamp.",
+    }),
+  }),
+});

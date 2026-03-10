@@ -26,7 +26,7 @@ import {
   DomainInterfaceRef,
   DomainsOrderInput,
 } from "@/graphql-api/schema/domain";
-import { EventRef } from "@/graphql-api/schema/event";
+import { AccountEventsWhereInput, EventRef } from "@/graphql-api/schema/event";
 import { PermissionsUserRef } from "@/graphql-api/schema/permissions";
 import { db } from "@/lib/db";
 
@@ -94,7 +94,11 @@ AccountRef.implement({
     events: t.connection({
       description: "All Events for which this Account is the sender (i.e. `Transaction.from`).",
       type: EventRef,
-      resolve: (parent, args) => resolveFindEvents(eq(schema.event.from, parent.id), args),
+      args: {
+        where: t.arg({ type: AccountEventsWhereInput }),
+      },
+      resolve: (parent, args) =>
+        resolveFindEvents({ ...args, where: { ...args.where, from: parent.id } }),
     }),
 
     ///////////////////////
