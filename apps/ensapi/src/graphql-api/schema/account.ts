@@ -92,8 +92,7 @@ AccountRef.implement({
     // Account.events
     //////////////////
     events: t.connection({
-      description:
-        "All Events initiated by this Account (where this Account is the transaction sender).",
+      description: "All Events for which this Account is the sender (i.e. `Transaction.from`).",
       type: EventRef,
       resolve: (parent, args) => resolveFindEvents(eq(schema.event.from, parent.id), args),
     }),
