@@ -31,7 +31,7 @@ Non-API documentation (guides, concepts, etc.) may be published before the corre
 On every PR, CI runs an `openapi-sync-check` job that:
 
 1. Regenerates the OpenAPI spec from the ENSApi route definitions by running `pnpm generate:openapi`
-2. Compares the freshly generated spec against the committed [`ensapi-openapi.json`](https://github.com/namehash/ensnode/blob/main/docs/docs.ensnode.io/ensapi-openapi.json), failing with a diff if they don't match
+2. Compares the freshly generated OpenAPI spec against the committed [`ensapi-openapi.json`](https://github.com/namehash/ensnode/blob/main/docs/docs.ensnode.io/ensapi-openapi.json), failing with a diff if they don't match
 3. Validates that Mintlify can parse the spec with `openapi-check`
 
 If you modify any API route schemas in `apps/ensapi`, you must regenerate and commit the updated spec:
