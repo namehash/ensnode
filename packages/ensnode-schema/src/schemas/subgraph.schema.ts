@@ -93,6 +93,7 @@ export const subgraph_domain = onchainTable(
     expiryDate: t.bigint(),
   }),
   (t) => ({
+    byName: index().on(t.name),
     byLabelhash: index().on(t.labelhash),
     byParentId: index().on(t.parentId),
     byOwnerId: index().on(t.ownerId),
