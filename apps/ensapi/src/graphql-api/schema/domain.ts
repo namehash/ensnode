@@ -11,7 +11,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
-import { orderPaginationBy, paginateByInt } from "@/graphql-api/lib/connection-helpers";
+import { orderPaginationBy, paginateBy, paginateByInt } from "@/graphql-api/lib/connection-helpers";
 import { resolveFindDomains } from "@/graphql-api/lib/find-domains/find-domains-resolver";
 import {
   domainsBase,
@@ -25,9 +25,13 @@ import { getModelId } from "@/graphql-api/lib/get-model-id";
 import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
 import { AccountRef } from "@/graphql-api/schema/account";
-import { INDEX_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
+import {
+  ID_PAGINATED_CONNECTION_ARGS,
+  INDEX_PAGINATED_CONNECTION_ARGS,
+} from "@/graphql-api/schema/constants";
 import { LabelRef } from "@/graphql-api/schema/label";
 import { OrderDirection } from "@/graphql-api/schema/order-direction";
+import { PermissionsUserRef } from "@/graphql-api/schema/permissions";
 import { RegistrationInterfaceRef } from "@/graphql-api/schema/registration";
 import { RegistryRef } from "@/graphql-api/schema/registry";
 import { ResolverRef } from "@/graphql-api/schema/resolver";
@@ -323,12 +327,56 @@ ENSv2DomainRef.implement({
       nullable: true,
       resolve: (parent) => parent.subregistryId,
     }),
+
+    /////////////////////
+    // ENSv2Domain.roles
+    /////////////////////
+    roles: t.connection({
+      description:
+        "The Permission entries for this Domain within its Registry, representing the roles granted to users for this Domain's token.",
+      type: PermissionsUserRef,
+      args: {
+        where: t.arg({ type: PermissionsUserWhereInput }),
+      },
+      resolve: async (parent, args, context) => {
+        const registry = await RegistryRef.getDataloader(context).load(parent.registryId);
+        if (!registry) throw new Error("never");
+
+        const scope = and(
+          eq(schema.permissionsUser.chainId, registry.chainId),
+          eq(schema.permissionsUser.address, registry.address),
+          eq(schema.permissionsUser.resource, parent.tokenId),
+          args.where?.user ? eq(schema.permissionsUser.user, args.where.user) : undefined,
+        );
+
+        return lazyConnection({
+          totalCount: () => db.$count(schema.permissionsUser, scope),
+          connection: () =>
+            resolveCursorConnection(
+              { ...ID_PAGINATED_CONNECTION_ARGS, args },
+              ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+                db
+                  .select()
+                  .from(schema.permissionsUser)
+                  .where(and(scope, paginateBy(schema.permissionsUser.id, before, after)))
+                  .orderBy(orderPaginationBy(schema.permissionsUser.id, inverted))
+                  .limit(limit),
+            ),
+        });
+      },
+    }),
   }),
 });
 
 //////////////////////
 // Inputs
 //////////////////////
+
+export const PermissionsUserWhereInput = builder.inputType("PermissionsUserWhereInput", {
+  fields: (t) => ({
+    user: t.field({ type: "Address" }),
+  }),
+});
 
 export const DomainIdInput = builder.inputType("DomainIdInput", {
   description: "Reference a specific Domain.",
