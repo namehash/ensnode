@@ -2,6 +2,7 @@ import { index, onchainEnum, onchainTable, primaryKey, relations, sql, uniqueInd
 import type { Address, BlockNumber, Hash } from "viem";
 
 import type {
+  AccountIdString,
   ChainId,
   DomainId,
   ENSv1DomainId,
@@ -141,11 +142,10 @@ export const resolverEvent = onchainTable(
   (t) => ({ pk: primaryKey({ columns: [t.resolverId, t.eventId] }) }),
 );
 
-// join table relating Registries to Events
-export const registryEvent = onchainTable(
-  "registry_events",
-  (t) => ({ registryId: t.text().$type<RegistryId>(), eventId: t.text() }),
-  (t) => ({ pk: primaryKey({ columns: [t.registryId, t.eventId] }) }),
+export const permissionsEvents = onchainTable(
+  "permissions_events",
+  (t) => ({ permissionsId: t.text().$type<PermissionsId>(), eventId: t.text() }),
+  (t) => ({ pk: primaryKey({ columns: [t.permissionsId, t.eventId] }) }),
 );
 
 ///////////

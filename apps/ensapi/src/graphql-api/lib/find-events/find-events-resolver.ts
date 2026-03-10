@@ -17,7 +17,7 @@ import { db } from "@/lib/db";
 type EventJoinTable =
   | typeof schema.domainEvent
   | typeof schema.resolverEvent
-  | typeof schema.registryEvent;
+  | typeof schema.permissionsEvents;
 
 /**
  * The columns that define the stable sort order for events, mirroring the composite index on the
@@ -44,7 +44,7 @@ function eventCursorWhere(op: ">" | "<", key: EventCursor): SQL {
 /**
  * Resolves a paginated events connection by joining through a join table to the events table.
  *
- * Reusable for Domain.events, Resolver.events, Registry.events, etc.
+ * Reusable for Domain.events, Resolver.events, Permissions.events, etc.
  *
  * @param joinTable - A join table with an `eventId` column (e.g. schema.domainEvent)
  * @param scope - A WHERE condition scoping to the parent entity

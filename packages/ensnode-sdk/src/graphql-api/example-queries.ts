@@ -1,4 +1,4 @@
-import { DatasourceNames, ENSNamespaceIds } from "@ensnode/datasources";
+import { DatasourceNames, ENSNamespaceIds, ensTestEnvChain } from "@ensnode/datasources";
 
 import { getDatasourceContract, maybeGetDatasourceContract } from "../shared/datasource-contract";
 import type { NamespaceSpecificValue } from "../shared/namespace-specific-value";
@@ -210,36 +210,6 @@ query RegistryDomains(
     },
   },
 
-  ///////////////////
-  // Registry Events
-  ///////////////////
-  {
-    query: `
-query RegistryEvents(
-  $registry: AccountIdInput!
-) {
-  registry(by: { contract: $registry }) {
-    events {
-      edges {
-        node {
-          from
-          to
-          topics
-          data
-          timestamp
-          transactionHash
-        }
-      }
-    }
-  }
-}`,
-    variables: {
-      // TODO: this only accesses v2 registries, so we default to ens-test-env for now
-      default: { registry: ENS_TEST_ENV_V2_ETH_REGISTRY },
-      [ENSNamespaceIds.SepoliaV2]: { registry: SEPOLIA_V2_V2_ETH_REGISTRY },
-    },
-  },
-
   ////////////////////////////
   // Permissions By Contract
   ////////////////////////////
@@ -265,6 +235,7 @@ query PermissionsByContract(
         }
       }
     }
+    events { edges { node { topics data timestamp } } }
   }
 }`,
     variables: {
@@ -359,11 +330,10 @@ query Resolver($resolver: AccountIdInput!) {
         ),
       },
       [ENSNamespaceIds.EnsTestEnv]: {
-        resolver: getDatasourceContract(
-          ENSNamespaceIds.EnsTestEnv,
-          DatasourceNames.ReverseResolverRoot,
-          "DefaultPublicResolver5",
-        ),
+        resolver: {
+          chainId: ensTestEnvChain.id,
+          address: "0x159d1244b7b627a40013b880f6f77dd35041d7d4", // idk, random resolver
+        },
       },
     },
   },

@@ -13,7 +13,6 @@ import {
   filterByRegistry,
   withOrderingMetadata,
 } from "@/graphql-api/lib/find-domains/layers";
-import { resolveFindEvents } from "@/graphql-api/lib/find-events/find-events-resolver";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
 import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { AccountIdInput, AccountIdRef } from "@/graphql-api/schema/account-id";
@@ -24,7 +23,6 @@ import {
   ENSv2DomainRef,
   RegistryDomainsWhereInput,
 } from "@/graphql-api/schema/domain";
-import { EventRef } from "@/graphql-api/schema/event";
 import { PermissionsRef } from "@/graphql-api/schema/permissions";
 import { db } from "@/lib/db";
 
@@ -113,20 +111,6 @@ RegistryRef.implement({
       type: AccountIdRef,
       nullable: false,
       resolve: ({ chainId, address }) => ({ chainId, address }),
-    }),
-
-    ////////////////////
-    // Registry.events
-    ////////////////////
-    events: t.connection({
-      description: "All Events associated with this Registry.",
-      type: EventRef,
-      resolve: (parent, args) =>
-        resolveFindEvents(
-          schema.registryEvent,
-          eq(schema.registryEvent.registryId, parent.id),
-          args,
-        ),
     }),
   }),
 });

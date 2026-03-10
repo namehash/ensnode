@@ -2,7 +2,13 @@ import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import type { Hash } from "viem";
 
-import type { DomainId } from "@ensnode/ensnode-sdk";
+import {
+  type AccountId,
+  type DomainId,
+  makePermissionsId,
+  makeRegistryId,
+  makeResolverId,
+} from "@ensnode/ensnode-sdk";
 
 import type { LogEventBase } from "@/lib/ponder-helpers";
 
@@ -62,4 +68,28 @@ export async function ensureEvent(context: Context, event: LogEventBase) {
 export async function ensureDomainEvent(context: Context, event: LogEventBase, domainId: DomainId) {
   const eventId = await ensureEvent(context, event);
   await context.db.insert(schema.domainEvent).values({ domainId, eventId }).onConflictDoNothing();
+}
+
+export async function ensureResolverEvent(
+  context: Context,
+  event: LogEventBase,
+  resolver: AccountId,
+) {
+  const eventId = await ensureEvent(context, event);
+  await context.db
+    .insert(schema.resolverEvent)
+    .values({ resolverId: makeResolverId(resolver), eventId })
+    .onConflictDoNothing();
+}
+
+export async function ensurePermissionsEvent(
+  context: Context,
+  event: LogEventBase,
+  contract: AccountId,
+) {
+  const eventId = await ensureEvent(context, event);
+  await context.db
+    .insert(schema.permissionsEvents)
+    .values({ permissionsId: makePermissionsId(contract), eventId })
+    .onConflictDoNothing();
 }
