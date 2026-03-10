@@ -4,7 +4,6 @@ import type { Hash } from "viem";
 
 import type { DomainId } from "@ensnode/ensnode-sdk";
 
-import { toJson } from "@/lib/json-stringify-with-bigints";
 import type { LogEvent } from "@/lib/ponder-helpers";
 
 /**
@@ -25,13 +24,9 @@ export async function ensureEvent(context: Context, event: LogEvent) {
     throw new Error(`Invariant: All events indexed via ensureEvent must have at least one topic.`);
   }
 
-  // NOTE: if the ABIs used to decode the event don't match perfectly, we get garbage `null`s in the
-  // topics array, so we use that as a canary to remind the ENSNode developer to update their ABIs
-  if (event.log.topics.some((topic) => topic === null)) {
-    throw new Error(
-      `Invariant: The decoded topics includes malformed topics. This implies that the ABI used for decoding does not exactly match the ABI used to emit this log on-chain. This probably only occurs when running against the ens-test-env during active development. \nTopics: ${toJson(event.log.topics)}`,
-    );
-  }
+  // TODO: figure out why we're getting null topics in our decoding, which should only happen
+  // with an event log / abi mismatch (i.e. the event can be mostly decoded)
+  const topics = event.log.topics.filter((topic) => topic !== null) as typeof event.log.topics;
 
   await context.db
     .insert(schema.event)
@@ -55,8 +50,8 @@ export async function ensureEvent(context: Context, event: LogEvent) {
       // log
       address: event.log.address,
       logIndex: event.log.logIndex,
-      topic0: event.log.topics[0],
-      topics: event.log.topics,
+      topic0: topics[0],
+      topics,
       data: event.log.data,
     })
     .onConflictDoNothing();

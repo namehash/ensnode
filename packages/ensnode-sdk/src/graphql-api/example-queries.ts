@@ -1,6 +1,6 @@
 import { DatasourceNames, ENSNamespaceIds } from "@ensnode/datasources";
 
-import { maybeGetDatasourceContract } from "../shared/datasource-contract";
+import { getDatasourceContract, maybeGetDatasourceContract } from "../shared/datasource-contract";
 import type { NamespaceSpecificValue } from "../shared/namespace-specific-value";
 
 const SEPOLIA_V2_V2_ETH_REGISTRY = maybeGetDatasourceContract(
@@ -135,6 +135,30 @@ query DomainSubdomains($name: Name!) {
     variables: { default: { name: "eth" } },
   },
 
+  /////////////////
+  // Domain Events
+  /////////////////
+  {
+    query: `
+query DomainEvents($name: Name!) {
+  domain(by: {name: $name}) {
+    events {
+      edges {
+        node {
+          from
+          to
+          topics
+          data
+          timestamp
+          transactionHash
+        }
+      }
+    }
+  }
+}`,
+    variables: { default: { name: "newowner.eth" } },
+  },
+
   ////////////////////
   // Account Domains
   ////////////////////
@@ -174,6 +198,36 @@ query RegistryDomains(
         node {
           label { interpreted }
           name
+        }
+      }
+    }
+  }
+}`,
+    variables: {
+      // TODO: this only accesses v2 registries, so we default to ens-test-env for now
+      default: { registry: ENS_TEST_ENV_V2_ETH_REGISTRY },
+      [ENSNamespaceIds.SepoliaV2]: { registry: SEPOLIA_V2_V2_ETH_REGISTRY },
+    },
+  },
+
+  ///////////////////
+  // Registry Events
+  ///////////////////
+  {
+    query: `
+query RegistryEvents(
+  $registry: AccountIdInput!
+) {
+  registry(by: { contract: $registry }) {
+    events {
+      edges {
+        node {
+          from
+          to
+          topics
+          data
+          timestamp
+          transactionHash
         }
       }
     }
@@ -268,6 +322,49 @@ query AccountResolverPermissions($address: Address!) {
       default: { address: DEVNET_DEPLOYER },
       // TODO: figure out a good sepolia-v2 user address
       // [ENSNamespaceIds.SepoliaV2]: { address: "" },
+    },
+  },
+
+  ////////////////////////
+  // Resolver by Contract
+  ////////////////////////
+  {
+    query: `
+query Resolver($resolver: AccountIdInput!) {
+  resolver(by: { contract: $resolver }) {
+    permissions { resources { edges { node { resource users { edges { node { user { address } roles } } } } } } }
+    events { edges { node { topics data timestamp } } }
+  }
+}`,
+    variables: {
+      default: {
+        resolver: getDatasourceContract(
+          ENSNamespaceIds.Mainnet,
+          DatasourceNames.ReverseResolverRoot,
+          "DefaultPublicResolver5",
+        ),
+      },
+      [ENSNamespaceIds.Sepolia]: {
+        resolver: getDatasourceContract(
+          ENSNamespaceIds.Sepolia,
+          DatasourceNames.ReverseResolverRoot,
+          "DefaultPublicResolver5",
+        ),
+      },
+      [ENSNamespaceIds.SepoliaV2]: {
+        resolver: getDatasourceContract(
+          ENSNamespaceIds.SepoliaV2,
+          DatasourceNames.ReverseResolverRoot,
+          "DefaultPublicResolver5",
+        ),
+      },
+      [ENSNamespaceIds.EnsTestEnv]: {
+        resolver: getDatasourceContract(
+          ENSNamespaceIds.EnsTestEnv,
+          DatasourceNames.ReverseResolverRoot,
+          "DefaultPublicResolver5",
+        ),
+      },
     },
   },
 

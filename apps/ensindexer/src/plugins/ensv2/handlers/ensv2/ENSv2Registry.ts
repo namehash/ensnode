@@ -7,6 +7,7 @@ import {
   getCanonicalId,
   interpretAddress,
   isRegistrationFullyExpired,
+  type LabelHash,
   type LiteralLabel,
   makeENSv2DomainId,
   makeRegistryId,
@@ -37,12 +38,14 @@ export default function () {
       context: Context;
       event: EventWithArgs<{
         tokenId: bigint;
+        labelHash: LabelHash;
         label: string;
+        owner: Address;
         expiry: bigint;
-        registeredBy: Address;
+        sender: Address;
       }>;
     }) => {
-      const { tokenId, label: _label, expiry, registeredBy: registrant } = event.args;
+      const { tokenId, label: _label, expiry, sender: registrant } = event.args;
       const label = _label as LiteralLabel;
 
       const labelHash = labelhash(label);
@@ -131,11 +134,11 @@ export default function () {
       event: EventWithArgs<{
         tokenId: bigint;
         newExpiry: bigint;
-        changedBy: Address;
+        sender: Address;
       }>;
     }) => {
-      // biome-ignore lint/correctness/noUnusedVariables: not sure if we care to index changedBy
-      const { tokenId, newExpiry: expiry, changedBy } = event.args;
+      // biome-ignore lint/correctness/noUnusedVariables: not sure if we care to index sender
+      const { tokenId, newExpiry: expiry, sender } = event.args;
 
       const registry = getThisAccountId(context, event);
       const canonicalId = getCanonicalId(tokenId);
@@ -219,11 +222,9 @@ export default function () {
       event: EventWithArgs<{
         oldTokenId: bigint;
         newTokenId: bigint;
-        resource: bigint;
       }>;
     }) => {
-      // biome-ignore lint/correctness/noUnusedVariables: TODO: use resource
-      const { oldTokenId, newTokenId, resource } = event.args;
+      const { oldTokenId, newTokenId } = event.args;
 
       // Invariant: CanonicalIds must match
       if (getCanonicalId(oldTokenId) !== getCanonicalId(newTokenId)) {
@@ -233,9 +234,6 @@ export default function () {
       const canonicalId = getCanonicalId(oldTokenId);
       const registryAccountId = getThisAccountId(context, event);
       const domainId = makeENSv2DomainId(registryAccountId, canonicalId);
-
-      // TODO: likely need to track resource as well, since it depends on eacVersion
-      // then we can likely provide a Domain.resource -> PermissionsResource resolver in the api
 
       await context.db.update(schema.v2Domain, { id: domainId }).set({ tokenId: newTokenId });
     },

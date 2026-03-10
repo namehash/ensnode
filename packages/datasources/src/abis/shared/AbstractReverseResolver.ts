@@ -47,6 +47,19 @@ export const AbstractReverseResolver = [
   },
   {
     inputs: [],
+    name: "chainRegistrar",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
     name: "coinType",
     outputs: [
       {

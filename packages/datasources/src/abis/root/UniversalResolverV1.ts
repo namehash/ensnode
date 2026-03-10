@@ -1,9 +1,14 @@
-export const UniversalResolver = [
+export const UniversalResolverV1 = [
   {
     inputs: [
       {
-        internalType: "contract IRegistry",
-        name: "root",
+        internalType: "address",
+        name: "owner",
+        type: "address",
+      },
+      {
+        internalType: "contract ENS",
+        name: "ens",
         type: "address",
       },
       {
@@ -174,19 +179,6 @@ export const UniversalResolver = [
     ],
     name: "UnsupportedResolverProfile",
     type: "error",
-  },
-  {
-    inputs: [],
-    name: "ROOT_REGISTRY",
-    outputs: [
-      {
-        internalType: "contract IRegistry",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
   },
   {
     inputs: [],
@@ -372,41 +364,35 @@ export const UniversalResolver = [
         type: "bytes",
       },
     ],
-    name: "findRegistries",
+    name: "findResolver",
     outputs: [
       {
-        internalType: "contract IRegistry[]",
+        internalType: "address",
         name: "",
-        type: "address[]",
+        type: "address",
+      },
+      {
+        internalType: "bytes32",
+        name: "",
+        type: "bytes32",
+      },
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
       },
     ],
     stateMutability: "view",
     type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "bytes",
-        name: "name",
-        type: "bytes",
-      },
-    ],
-    name: "findResolver",
+    inputs: [],
+    name: "registry",
     outputs: [
       {
-        internalType: "address",
-        name: "resolver",
+        internalType: "contract ENS",
+        name: "",
         type: "address",
-      },
-      {
-        internalType: "bytes32",
-        name: "node",
-        type: "bytes32",
-      },
-      {
-        internalType: "uint256",
-        name: "offset",
-        type: "uint256",
       },
     ],
     stateMutability: "view",

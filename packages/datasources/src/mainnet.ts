@@ -17,7 +17,7 @@ import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } fro
 import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
 import { Registry as root_Registry } from "./abis/root/Registry";
 import { UniversalRegistrarRenewalWithReferrer as root_UniversalRegistrarRenewalWithReferrer } from "./abis/root/UniversalRegistrarRenewalWithReferrer";
-import { UniversalResolver as root_UniversalResolver } from "./abis/root/UniversalResolver";
+import { UniversalResolverV1 } from "./abis/root/UniversalResolverV1";
 import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
 import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
 import { Seaport as Seaport1_5 } from "./abis/seaport/Seaport1.5";
@@ -86,7 +86,7 @@ export default {
         startBlock: 16925608,
       },
       UniversalResolver: {
-        abi: root_UniversalResolver,
+        abi: UniversalResolverV1,
         address: "0xabd80e8a13596feea40fd26fd6a24c3fe76f05fb",
         startBlock: 22671701,
       },
