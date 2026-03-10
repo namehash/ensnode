@@ -253,7 +253,9 @@ DomainInterfaceRef.implement({
       type: EventRef,
       // TODO: args for where/order
       resolve: (parent, args) =>
-        resolveFindEvents(schema.domainEvent, eq(schema.domainEvent.domainId, parent.id), args),
+        resolveFindEvents(eq(schema.domainEvent.domainId, parent.id), args, {
+          through: schema.domainEvent,
+        }),
     }),
   }),
 });

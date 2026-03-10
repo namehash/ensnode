@@ -14,6 +14,7 @@ import {
   filterByOwner,
   withOrderingMetadata,
 } from "@/graphql-api/lib/find-domains/layers";
+import { resolveFindEvents } from "@/graphql-api/lib/find-events/find-events-resolver";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
 import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { AccountIdInput } from "@/graphql-api/schema/account-id";
@@ -25,6 +26,7 @@ import {
   DomainInterfaceRef,
   DomainsOrderInput,
 } from "@/graphql-api/schema/domain";
+import { EventRef } from "@/graphql-api/schema/event";
 import { PermissionsUserRef } from "@/graphql-api/schema/permissions";
 import { db } from "@/lib/db";
 
@@ -84,6 +86,16 @@ AccountRef.implement({
         const domains = withOrderingMetadata(canonical);
         return resolveFindDomains(context, { domains, order, ...connectionArgs });
       },
+    }),
+
+    //////////////////
+    // Account.events
+    //////////////////
+    events: t.connection({
+      description:
+        "All Events initiated by this Account (where this Account is the transaction sender).",
+      type: EventRef,
+      resolve: (parent, args) => resolveFindEvents(eq(schema.event.from, parent.id), args),
     }),
 
     ///////////////////////

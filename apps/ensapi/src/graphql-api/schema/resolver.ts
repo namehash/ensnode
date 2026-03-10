@@ -166,11 +166,9 @@ ResolverRef.implement({
       description: "All Events associated with this Resolver.",
       type: EventRef,
       resolve: (parent, args) =>
-        resolveFindEvents(
-          schema.resolverEvent,
-          eq(schema.resolverEvent.resolverId, parent.id),
-          args,
-        ),
+        resolveFindEvents(eq(schema.resolverEvent.resolverId, parent.id), args, {
+          through: schema.resolverEvent,
+        }),
     }),
   }),
 });

@@ -42,16 +42,14 @@ function eventCursorWhere(op: ">" | "<", key: EventCursor): SQL {
 }
 
 /**
- * Resolves a paginated events connection by joining through a join table to the events table.
+ * Resolves a paginated events connection. Always queries the events table directly, with an
+ * optional join table to narrow results through a relation (e.g. domainEvent, resolverEvent).
  *
- * Reusable for Domain.events, Resolver.events, Permissions.events, etc.
- *
- * @param joinTable - A join table with an `eventId` column (e.g. schema.domainEvent)
- * @param scope - A WHERE condition scoping to the parent entity
+ * @param scope - A WHERE condition scoping the results
  * @param args - Relay connection args (first/last/before/after)
+ * @param options.through - Optional join table with an `eventId` column to narrow results through a relation
  */
 export function resolveFindEvents(
-  joinTable: EventJoinTable,
   scope: SQL,
   args: {
     before?: string | null;
@@ -59,9 +57,12 @@ export function resolveFindEvents(
     first?: number | null;
     last?: number | null;
   },
+  options?: { through: EventJoinTable },
 ) {
+  const through = options?.through;
+
   return lazyConnection({
-    totalCount: () => db.$count(joinTable, scope),
+    totalCount: () => (through ? db.$count(through, scope) : db.$count(schema.event, scope)),
     connection: () =>
       resolveCursorConnection(
         {
@@ -70,11 +71,15 @@ export function resolveFindEvents(
           maxSize: PAGINATION_DEFAULT_MAX_SIZE,
           args,
         },
-        ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-          db
-            .select(getTableColumns(schema.event))
-            .from(joinTable)
-            .innerJoin(schema.event, eq(joinTable.eventId, schema.event.id))
+        ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) => {
+          const query = through
+            ? db
+                .select(getTableColumns(schema.event))
+                .from(schema.event)
+                .innerJoin(through, eq(through.eventId, schema.event.id))
+            : db.select(getTableColumns(schema.event)).from(schema.event);
+
+          return query
             .where(
               and(
                 scope,
@@ -83,7 +88,8 @@ export function resolveFindEvents(
               ),
             )
             .orderBy(...EVENT_SORT_COLUMNS.map((col) => (inverted ? desc(col) : asc(col))))
-            .limit(limit),
+            .limit(limit);
+        },
       ),
   });
 }

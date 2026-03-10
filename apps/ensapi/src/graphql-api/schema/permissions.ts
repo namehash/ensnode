@@ -129,11 +129,9 @@ PermissionsRef.implement({
       description: "All Events associated with these Permissions.",
       type: EventRef,
       resolve: (parent, args) =>
-        resolveFindEvents(
-          schema.permissionsEvents,
-          eq(schema.permissionsEvents.permissionsId, parent.id),
-          args,
-        ),
+        resolveFindEvents(eq(schema.permissionsEvents.permissionsId, parent.id), args, {
+          through: schema.permissionsEvents,
+        }),
     }),
   }),
 });
