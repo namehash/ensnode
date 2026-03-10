@@ -61,5 +61,5 @@ export async function ensureEvent(context: Context, event: LogEventBase) {
 
 export async function ensureDomainEvent(context: Context, event: LogEventBase, domainId: DomainId) {
   const eventId = await ensureEvent(context, event);
-  await context.db.insert(schema.domainEvent).values({ domainId, eventId });
+  await context.db.insert(schema.domainEvent).values({ domainId, eventId }).onConflictDoNothing();
 }

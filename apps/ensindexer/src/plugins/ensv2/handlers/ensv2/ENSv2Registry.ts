@@ -15,7 +15,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
-import { ensureEvent } from "@/lib/ensv2/event-db-helpers";
+import { ensureDomainEvent, ensureEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel } from "@/lib/ensv2/label-db-helpers";
 import {
   getLatestRegistration,
@@ -121,6 +121,9 @@ export default function () {
         expiry,
         eventId: await ensureEvent(context, event),
       });
+
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
     },
   );
 
@@ -160,6 +163,9 @@ export default function () {
 
       // update Registration
       await context.db.update(schema.registration, { id: registration.id }).set({ expiry });
+
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
     },
   );
 
@@ -209,6 +215,9 @@ export default function () {
 
         await context.db.update(schema.v2Domain, { id: domainId }).set({ subregistryId });
       }
+
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
     },
   );
 
@@ -236,6 +245,9 @@ export default function () {
       const domainId = makeENSv2DomainId(registryAccountId, canonicalId);
 
       await context.db.update(schema.v2Domain, { id: domainId }).set({ tokenId: newTokenId });
+
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
     },
   );
 
@@ -262,6 +274,9 @@ export default function () {
     await context.db
       .update(schema.v2Domain, { id: domainId })
       .set({ ownerId: interpretAddress(owner) });
+
+    // push event to domain history
+    await ensureDomainEvent(context, event, domainId);
   }
 
   ponder.on(namespaceContract(pluginName, "ENSv2Registry:TransferSingle"), handleTransferSingle);
