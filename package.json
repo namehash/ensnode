@@ -50,6 +50,13 @@
       "svgo@>=3.0.0 <3.3.3": "^3.3.3",
       "@hono/node-server@<1.19.10": "^1.19.10"
     },
+    "packageExtensions": {
+      "langium": {
+        "dependencies": {
+          "@chevrotain/regexp-to-ast": "*"
+        }
+      }
+    },
     "ignoredBuiltDependencies": [
       "bun"
     ],

@@ -15,6 +15,18 @@ catalogs:
     '@namehash/namekit-react':
       specifier: 0.12.0
       version: 0.12.0
+    '@ponder/client':
+      specifier: 0.16.3
+      version: 0.16.3
+    '@ponder/utils':
+      specifier: 0.2.16
+      version: 0.2.16
+    '@testing-library/react':
+      specifier: ^16.3.0
+      version: 16.3.0
+    '@types/node':
+      specifier: 24.10.9
+      version: 24.10.9
     astro:
       specifier: ^5.15.9
       version: 5.16.0
@@ -24,6 +36,57 @@ catalogs:
     astro-seo:
       specifier: ^0.8.4
       version: 0.8.4
+    caip:
+      specifier: 1.1.1
+      version: 1.1.1
+    date-fns:
+      specifier: 4.1.0
+      version: 4.1.0
+    drizzle-orm:
+      specifier: 0.41.0
+      version: 0.41.0
+    hono:
+      specifier: ^4.12.4
+      version: 4.12.5
+    lucide-react:
+      specifier: ^0.548.0
+      version: 0.548.0
+    p-retry:
+      specifier: 7.1.1
+      version: 7.1.1
+    pg-connection-string:
+      specifier: ^2.9.1
+      version: 2.9.1
+    pino:
+      specifier: 10.1.0
+      version: 10.1.0
+    ponder:
+      specifier: 0.16.3
+      version: 0.16.3
+    tailwind-merge:
+      specifier: ^3.4.0
+      version: 3.4.0
+    tailwindcss:
+      specifier: ^4.1.18
+      version: 4.1.18
+    tailwindcss-animate:
+      specifier: ^1.0.7
+      version: 1.0.7
+    tsup:
+      specifier: ^8.3.6
+      version: 8.5.0
+    typescript:
+      specifier: ^5.7.3
+      version: 5.9.3
+    viem:
+      specifier: ^2.22.13
+      version: 2.38.5
+    vitest:
+      specifier: ^4.0.2
+      version: 4.0.5
+    zod:
+      specifier: ^4.3.6
+      version: 4.3.6
 
 overrides:
   '@adraffy/ens-normalize': 1.11.1
@@ -37,6 +100,8 @@ overrides:
   rollup@>=4.0.0 <4.59.0: '>=4.59.0'
   svgo@>=3.0.0 <3.3.3: ^3.3.3
   '@hono/node-server@<1.19.10': ^1.19.10
+
+packageExtensionsChecksum: sha256-Mf4EvA/+CvVPGrhNgFDcj12+qVCUcmQEKydO1fpUwyk=
 
 patchedDependencies:
   '@changesets/assemble-release-plan@6.0.9':
@@ -15494,6 +15559,7 @@ snapshots:
 
   langium@4.2.1:
     dependencies:
+      '@chevrotain/regexp-to-ast': 11.1.2
       chevrotain: 11.1.2
       chevrotain-allstar: 0.3.1(chevrotain@11.1.2)
       vscode-languageserver: 9.0.1
