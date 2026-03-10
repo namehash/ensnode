@@ -118,10 +118,12 @@ export function resolveFindEvents(
 
   return lazyConnection({
     totalCount: () => {
+      // note: not possible to dynamically change the .select() columns so we make a new query
       let query = db.select({ count: count() }).from(schema.event).$dynamic();
       if (through) {
         query = query.innerJoin(through.table, eq(through.table.eventId, schema.event.id));
       }
+
       return query.where(conditions).then((rows) => rows[0].count);
     },
     connection: () =>
@@ -133,6 +135,7 @@ export function resolveFindEvents(
           args,
         },
         ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) => {
+          // note: not possible to dynamically change the .select() columns so we make a new query
           let query = db.select(getTableColumns(schema.event)).from(schema.event).$dynamic();
           if (through) {
             query = query.innerJoin(through.table, eq(through.table.eventId, schema.event.id));
