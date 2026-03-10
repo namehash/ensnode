@@ -6,7 +6,7 @@ import {
   validateEnsIndexerPublicConfig,
   validateEnsIndexerVersionInfo,
 } from "@ensnode/ensnode-sdk";
-import type { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
+import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
 
 import { getEnsIndexerVersion, getNodeJsVersion, getPackageVersion } from "@/lib/version-info";
 
@@ -17,7 +17,7 @@ export class PublicConfigBuilder {
    * Used to fetch ENSRainbow Public Config, which is part of
    * the ENSIndexer Public Config.
    */
-  private ensRainbowClient: EnsRainbowApiClient;
+  private ensRainbowClient: EnsRainbow.ApiClient;
 
   /**
    * Immutable ENSIndexer Public Config
@@ -30,7 +30,7 @@ export class PublicConfigBuilder {
   /**
    * @param ensRainbowClient ENSRainbow Client instance used to fetch ENSRainbow Public Config
    */
-  constructor(ensRainbowClient: EnsRainbowApiClient) {
+  constructor(ensRainbowClient: EnsRainbow.ApiClient) {
     this.ensRainbowClient = ensRainbowClient;
   }
 
