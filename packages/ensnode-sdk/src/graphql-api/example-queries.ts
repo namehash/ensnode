@@ -143,6 +143,7 @@ query DomainSubdomains($name: Name!) {
 query DomainEvents($name: Name!) {
   domain(by: {name: $name}) {
     events {
+      totalCount
       edges {
         node {
           from
@@ -193,7 +194,7 @@ query AccountDomains(
   $address: Address!
 ) {
   account(address: $address) {
-    events { edges { node { topics data timestamp } } }
+    events { totalCount edges { node { topics data timestamp } } }
   }
 }`,
     variables: {
@@ -253,7 +254,7 @@ query PermissionsByContract(
         }
       }
     }
-    events { edges { node { topics data timestamp } } }
+    events { totalCount edges { node { topics data timestamp } } }
   }
 }`,
     variables: {
@@ -322,7 +323,7 @@ query AccountResolverPermissions($address: Address!) {
 query Resolver($resolver: AccountIdInput!) {
   resolver(by: { contract: $resolver }) {
     permissions { resources { edges { node { resource users { edges { node { user { address } roles } } } } } } }
-    events { edges { node { topics data timestamp } } }
+    events { totalCount edges { node { topics data timestamp } } }
   }
 }`,
     variables: {

@@ -1,5 +1,17 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
-import { and, asc, desc, eq, getTableColumns, gte, inArray, lte, type SQL, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  getTableColumns,
+  gte,
+  inArray,
+  lte,
+  type SQL,
+  sql,
+} from "drizzle-orm";
 import type { Address, Hex } from "viem";
 
 import * as schema from "@ensnode/ensnode-schema";
@@ -101,14 +113,17 @@ export function resolveFindEvents(
   const through = options?.through;
   const whereConditions = eventsWhereConditions(where);
 
-  let query = db.select(getTableColumns(schema.event)).from(schema.event).$dynamic();
-  if (through) query = query.innerJoin(through.table, eq(through.table.eventId, schema.event.id));
-
   // combine join scope (if specified) + event table conditions
   const conditions = and(through?.scope, whereConditions);
 
   return lazyConnection({
-    totalCount: () => db.$count(query, conditions),
+    totalCount: () => {
+      let query = db.select({ count: count() }).from(schema.event).$dynamic();
+      if (through) {
+        query = query.innerJoin(through.table, eq(through.table.eventId, schema.event.id));
+      }
+      return query.where(conditions).then((rows) => rows[0].count);
+    },
     connection: () =>
       resolveCursorConnection(
         {
@@ -117,8 +132,13 @@ export function resolveFindEvents(
           maxSize: PAGINATION_DEFAULT_MAX_SIZE,
           args,
         },
-        ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-          query
+        ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) => {
+          let query = db.select(getTableColumns(schema.event)).from(schema.event).$dynamic();
+          if (through) {
+            query = query.innerJoin(through.table, eq(through.table.eventId, schema.event.id));
+          }
+
+          return query
             .where(
               and(
                 conditions,
@@ -127,7 +147,8 @@ export function resolveFindEvents(
               ),
             )
             .orderBy(...EVENT_SORT_COLUMNS.map((col) => (inverted ? desc(col) : asc(col))))
-            .limit(limit),
+            .limit(limit);
+        },
       ),
   });
 }
