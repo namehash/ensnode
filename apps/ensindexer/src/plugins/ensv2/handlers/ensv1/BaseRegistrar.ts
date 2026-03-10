@@ -128,6 +128,7 @@ export default function () {
       registrarChainId: registrar.chainId,
       registrarAddress: registrar.address,
       registrantId: interpretAddress(registrant),
+      start: event.block.timestamp,
       expiry,
       // all BaseRegistrar-derived Registrars use the same GRACE_PERIOD
       gracePeriod: BigInt(GRACE_PERIOD_SECONDS),

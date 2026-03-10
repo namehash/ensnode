@@ -90,6 +90,16 @@ RegistrationInterfaceRef.implement({
       resolve: (parent) => ({ chainId: parent.registrarChainId, address: parent.registrarAddress }),
     }),
 
+    //////////////////////
+    // Registration.start
+    //////////////////////
+    start: t.field({
+      description: "A UnixTimestamp indicating when this Registration was created.",
+      type: "BigInt",
+      nullable: false,
+      resolve: (parent) => parent.start,
+    }),
+
     ///////////////////////////
     // Registration.expiry
     ///////////////////////////

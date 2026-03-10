@@ -250,6 +250,7 @@ export default function () {
           registrarAddress: registrar.address,
           registrantId: interpretAddress(registrant),
           fuses,
+          start: event.block.timestamp,
           expiry,
           eventId: await ensureEvent(context, event),
         });

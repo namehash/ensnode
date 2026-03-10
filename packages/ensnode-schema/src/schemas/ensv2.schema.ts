@@ -334,6 +334,8 @@ export const registration = onchainTable(
     // has a type
     type: registrationType().notNull(),
 
+    // has a start
+    start: t.bigint().notNull(),
     // may have an expiry
     expiry: t.bigint(),
     // maybe have a grace period (BaseRegistrar)
