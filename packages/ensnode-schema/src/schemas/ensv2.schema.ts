@@ -174,6 +174,9 @@ export const v1Domain = onchainTable(
     // represents a labelHash
     labelHash: t.hex().notNull().$type<LabelHash>(),
 
+    // may have a `rootRegistryOwner` (ENSv1Registry's owner()), zeroAddress interpreted as null
+    rootRegistryOwnerId: t.hex().$type<Address>(),
+
     // NOTE: Domain-Resolver Relations tracked via Protocol Acceleration plugin
   }),
   (t) => ({
@@ -190,6 +193,11 @@ export const relations_v1Domain = relations(v1Domain, ({ one, many }) => ({
     references: [v1Domain.id],
   }),
   children: many(v1Domain, { relationName: "parent" }),
+  rootRegistryOwner: one(account, {
+    relationName: "rootRegistryOwner",
+    fields: [v1Domain.rootRegistryOwnerId],
+    references: [account.id],
+  }),
 
   // shared
   owner: one(account, {

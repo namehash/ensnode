@@ -101,6 +101,10 @@ query DomainByName($name: Name!) {
     label { interpreted }
     name
 
+    ... on ENSv1Domain {
+      rootRegistryOwner { address }
+    }
+
     ... on ENSv2Domain {
       subregistry {
         contract { chainId address }
