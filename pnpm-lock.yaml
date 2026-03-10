@@ -101,8 +101,6 @@ overrides:
   svgo@>=3.0.0 <3.3.3: ^3.3.3
   '@hono/node-server@<1.19.10': ^1.19.10
 
-packageExtensionsChecksum: sha256-Mf4EvA/+CvVPGrhNgFDcj12+qVCUcmQEKydO1fpUwyk=
-
 patchedDependencies:
   '@changesets/assemble-release-plan@6.0.9':
     hash: b91e9036dbd12ef14c78acf46baf46fe65bf204d25b315027bc8266c8b0fee52
@@ -15559,7 +15557,6 @@ snapshots:
 
   langium@4.2.1:
     dependencies:
-      '@chevrotain/regexp-to-ast': 11.1.2
       chevrotain: 11.1.2
       chevrotain-allstar: 0.3.1(chevrotain@11.1.2)
       vscode-languageserver: 9.0.1
