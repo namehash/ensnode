@@ -4,12 +4,12 @@ import type { Hash } from "viem";
 
 import type { DomainId } from "@ensnode/ensnode-sdk";
 
-import type { LogEvent } from "@/lib/ponder-helpers";
+import type { LogEventBase } from "@/lib/ponder-helpers";
 
 /**
  * Constrains the type of topics from [] | [Hash, ...Hash[]] to just [Hash, ...Hash[]]
  */
-const hasTopics = (topics: LogEvent["log"]["topics"]): topics is [Hash, ...Hash[]] =>
+const hasTopics = (topics: LogEventBase["log"]["topics"]): topics is [Hash, ...Hash[]] =>
   topics.length !== 0;
 
 /**
@@ -18,7 +18,7 @@ const hasTopics = (topics: LogEvent["log"]["topics"]): topics is [Hash, ...Hash[
  *
  * @returns event.id
  */
-export async function ensureEvent(context: Context, event: LogEvent) {
+export async function ensureEvent(context: Context, event: LogEventBase) {
   // all relevant ENS events obviously have a topic, so we can safely constrain the type of this data
   if (!hasTopics(event.log.topics)) {
     throw new Error(`Invariant: All events indexed via ensureEvent must have at least one topic.`);
@@ -59,7 +59,7 @@ export async function ensureEvent(context: Context, event: LogEvent) {
   return event.id;
 }
 
-export async function ensureDomainEvent(context: Context, event: LogEvent, domainId: DomainId) {
+export async function ensureDomainEvent(context: Context, event: LogEventBase, domainId: DomainId) {
   const eventId = await ensureEvent(context, event);
   await context.db.insert(schema.domainEvent).values({ domainId, eventId });
 }
