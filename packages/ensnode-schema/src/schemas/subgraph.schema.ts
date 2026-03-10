@@ -98,6 +98,7 @@ export const subgraph_domain = onchainTable(
     byOwnerId: index().on(t.ownerId),
     byRegistrantId: index().on(t.registrantId),
     byWrappedOwnerId: index().on(t.wrappedOwnerId),
+    byResolvedAddressId: index().on(t.resolvedAddressId),
   }),
 );
 
@@ -263,6 +264,7 @@ export const subgraph_registration = onchainTable(
   (t) => ({
     byDomainId: index().on(t.domainId),
     byRegistrationDate: index().on(t.registrationDate),
+    byExpiryDate: index().on(t.expiryDate),
   }),
 );
 
