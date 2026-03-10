@@ -193,6 +193,18 @@ describe("EnsRainbowClientWithRetry", () => {
       warnSpy.mockRestore();
     });
 
+    it("throws network error when HealServerError is followed by thrown errors", async () => {
+      vi.mocked(inner.heal)
+        .mockResolvedValueOnce(healServerError())
+        .mockRejectedValueOnce(new Error("connection reset"))
+        .mockRejectedValueOnce(new Error("connection reset"))
+        .mockRejectedValueOnce(new Error("connection reset"));
+
+      await expect(wrapper.heal(TEST_LABEL_HASH)).rejects.toThrow("connection reset");
+
+      expect(inner.heal).toHaveBeenCalledTimes(4);
+    });
+
     it("mixes thrown errors and HealServerError before succeeding", async () => {
       const success = healSuccess("nick");
       vi.mocked(inner.heal)

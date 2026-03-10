@@ -46,6 +46,7 @@ export class EnsRainbowClientWithRetry implements EnsRainbow.ApiClient {
     try {
       return await pRetry(
         async () => {
+          lastServerError = undefined;
           const response = await this.inner.heal(labelHash);
 
           if (isHealError(response) && response.errorCode === ErrorCode.ServerError) {
@@ -67,6 +68,10 @@ export class EnsRainbowClientWithRetry implements EnsRainbow.ApiClient {
         },
       );
     } catch (error) {
+      // heal() callers (e.g. labelByLabelHash) expect HealServerError as a resolved
+      // response value, not a thrown exception. If lastServerError is set, the final
+      // failure was a HealServerError — return it to preserve API compatibility.
+      // Network/fetch exceptions (lastServerError unset) are rethrown.
       if (lastServerError) {
         return lastServerError;
       }
