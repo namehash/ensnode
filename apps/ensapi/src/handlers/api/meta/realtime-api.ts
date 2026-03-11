@@ -1,7 +1,7 @@
 import { errorResponse } from "@/lib/handlers/error-response";
 import { createApp } from "@/lib/hono-factory";
 
-import { amIRealtimeGetMeta } from "./amirealtime-api.routes";
+import { amIRealtimeGetMeta } from "./realtime-api.routes";
 
 const app = createApp();
 

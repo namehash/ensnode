@@ -12,10 +12,6 @@ import { buildEnsApiPublicConfig } from "@/config/config.schema";
 import { createApp } from "@/lib/hono-factory";
 
 import { getConfigRoute, getIndexingStatusRoute } from "./ensnode-api.routes";
-import ensnodeGraphQLApi from "./ensnode-graphql-api";
-import nameTokensApi from "./name-tokens-api";
-import registrarActionsApi from "./registrar-actions-api";
-import resolutionApi from "./resolution-api";
 
 const app = createApp();
 
@@ -48,17 +44,5 @@ app.openapi(getIndexingStatusRoute, async (c) => {
     200,
   );
 });
-
-// Name Tokens API
-app.route("/name-tokens", nameTokensApi);
-
-// Registrar Actions API
-app.route("/registrar-actions", registrarActionsApi);
-
-// Resolution API
-app.route("/resolve", resolutionApi);
-
-// ENSNode GraphQL API
-app.route("/graphql", ensnodeGraphQLApi);
 
 export default app;

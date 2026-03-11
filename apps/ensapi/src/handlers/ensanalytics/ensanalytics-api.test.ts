@@ -3,8 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { ENSNamespaceIds } from "@ensnode/datasources";
 
 import type { EnsApiConfig } from "@/config/config.schema";
-
-import * as middleware from "../middleware/referrer-leaderboard.middleware";
+import * as middleware from "@/middleware/referrer-leaderboard.middleware";
 
 vi.mock("@/config", () => ({
   get default() {
@@ -17,7 +16,7 @@ vi.mock("@/config", () => ({
   },
 }));
 
-vi.mock("../middleware/referrer-leaderboard.middleware", () => ({
+vi.mock("@/middleware/referrer-leaderboard.middleware", () => ({
   referrerLeaderboardMiddleware: vi.fn(),
 }));
 
