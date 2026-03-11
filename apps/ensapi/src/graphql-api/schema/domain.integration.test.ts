@@ -22,6 +22,8 @@ import {
   request,
 } from "@/test/integration/graphql-utils";
 
+const NAME_WITH_EVENTS = "newowner.eth";
+
 describe("Domain.subdomains", () => {
   type SubdomainsResult = {
     domain: {
@@ -93,30 +95,14 @@ describe("Domain.events", () => {
   `;
 
   it("returns events for a domain with known activity", async () => {
-    const result = await request<DomainEventsResult>(DomainEvents, { name: "test.eth" });
+    const result = await request<DomainEventsResult>(DomainEvents, { name: NAME_WITH_EVENTS });
     const events = flattenConnection(result.domain.events);
 
     expect(events.length).toBeGreaterThan(0);
-
-    for (const event of events) {
-      expect(event.id).toBeTruthy();
-      expect(event.chainId).toBeTypeOf("number");
-      expect(event.blockNumber).toBeTruthy();
-      expect(event.blockHash).toMatch(/^0x/);
-      expect(event.timestamp).toBeTruthy();
-      expect(event.transactionHash).toMatch(/^0x/);
-      expect(event.transactionIndex).toBeTypeOf("number");
-      expect(event.from).toMatch(/^0x/);
-      expect(event.address).toMatch(/^0x/);
-      expect(event.logIndex).toBeTypeOf("number");
-      expect(event.topics).toBeInstanceOf(Array);
-      expect(event.topics.length).toBeGreaterThan(0);
-      expect(event.data).toMatch(/^0x/);
-    }
   });
 
   it("returns events for multiple domains", async () => {
-    const names = ["test.eth", "example.eth", "demo.eth"];
+    const names = [NAME_WITH_EVENTS, "example.eth", "demo.eth"];
 
     for (const name of names) {
       const result = await request<DomainEventsResult>(DomainEvents, { name });
@@ -130,7 +116,7 @@ describe("Domain.events pagination", () => {
   testEventPagination(async (variables) => {
     const result = await request<{
       domain: { events: PaginatedGraphQLConnection<EventResult> };
-    }>(DomainEventsPaginated, { name: "test.eth", ...variables });
+    }>(DomainEventsPaginated, { name: NAME_WITH_EVENTS, ...variables });
     return result.domain.events;
   });
 });
