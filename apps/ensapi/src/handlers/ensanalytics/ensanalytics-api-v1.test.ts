@@ -3,9 +3,8 @@ import { describe, expect, it, vi } from "vitest";
 import { ENSNamespaceIds } from "@ensnode/datasources";
 
 import type { EnsApiConfig } from "@/config/config.schema";
-
-import * as editionsCachesMiddleware from "../middleware/referral-leaderboard-editions-caches.middleware";
-import * as editionSetMiddleware from "../middleware/referral-program-edition-set.middleware";
+import * as editionsCachesMiddleware from "@/middleware/referral-leaderboard-editions-caches.middleware";
+import * as editionSetMiddleware from "@/middleware/referral-program-edition-set.middleware";
 
 vi.mock("@/config", () => ({
   get default() {
@@ -18,11 +17,11 @@ vi.mock("@/config", () => ({
   },
 }));
 
-vi.mock("../middleware/referral-program-edition-set.middleware", () => ({
+vi.mock("@/middleware/referral-program-edition-set.middleware", () => ({
   referralProgramEditionConfigSetMiddleware: vi.fn(),
 }));
 
-vi.mock("../middleware/referral-leaderboard-editions-caches.middleware", () => ({
+vi.mock("@/middleware/referral-leaderboard-editions-caches.middleware", () => ({
   referralLeaderboardEditionsCachesMiddleware: vi.fn(),
 }));
 
