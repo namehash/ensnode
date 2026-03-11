@@ -138,6 +138,16 @@ PermissionsResourceRef.implement({
       resolve: (parent) => parent.id,
     }),
 
+    ////////////////////////
+    // Permissions.contract
+    ////////////////////////
+    contract: t.field({
+      description: "The contract within which these Permissions are granted.",
+      type: AccountIdRef,
+      nullable: false,
+      resolve: ({ chainId, address }) => ({ chainId, address }),
+    }),
+
     ///////////////////////////////////
     // PermissionsResource.permissions
     ///////////////////////////////////
@@ -204,6 +214,16 @@ PermissionsUserRef.implement({
       type: "ID",
       nullable: false,
       resolve: (parent) => parent.id,
+    }),
+
+    ////////////////////////
+    // Permissions.contract
+    ////////////////////////
+    contract: t.field({
+      description: "The contract within which these Permissions are granted.",
+      type: AccountIdRef,
+      nullable: false,
+      resolve: ({ chainId, address }) => ({ chainId, address }),
     }),
 
     ////////////////////////////

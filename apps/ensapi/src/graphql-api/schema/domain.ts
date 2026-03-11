@@ -328,10 +328,10 @@ ENSv2DomainRef.implement({
       resolve: (parent) => parent.subregistryId,
     }),
 
-    /////////////////////
-    // ENSv2Domain.roles
-    /////////////////////
-    roles: t.connection({
+    ///////////////////////////
+    // ENSv2Domain.permissions
+    ///////////////////////////
+    permissions: t.connection({
       description:
         "Permissions for this Domain within its Registry, representing the roles granted to users for this Domain's token.",
       type: PermissionsUserRef,
