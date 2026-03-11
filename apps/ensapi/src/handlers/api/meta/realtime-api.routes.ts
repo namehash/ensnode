@@ -6,7 +6,7 @@ import { makeDurationSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { params } from "@/lib/handlers/params.schema";
 
-export const basePath = "/amirealtime";
+export const basePath = "/api/realtime";
 
 // Set default `maxWorstCaseDistance` for `GET /amirealtime` endpoint to one minute.
 export const AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE: Duration = minutesToSeconds(1);
@@ -14,7 +14,7 @@ export const AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE: Duration = minutesToSe
 export const amIRealtimeGetMeta = createRoute({
   method: "get",
   path: "/",
-  operationId: "isRealtime",
+  operationId: "getRealtime",
   tags: ["Meta"],
   summary: "Check indexing progress",
   description:

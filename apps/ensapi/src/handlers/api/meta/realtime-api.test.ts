@@ -9,8 +9,8 @@ import {
 import { createApp } from "@/lib/hono-factory";
 import * as middleware from "@/middleware/indexing-status.middleware";
 
-import amIRealtimeApi from "./amirealtime-api";
-import { AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE } from "./amirealtime-api.routes";
+import amIRealtimeApi from "./realtime-api";
+import { AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE } from "./realtime-api.routes";
 
 vi.mock("@/middleware/indexing-status.middleware", () => ({
   indexingStatusMiddleware: vi.fn(),
