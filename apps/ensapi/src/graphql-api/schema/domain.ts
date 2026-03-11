@@ -340,7 +340,7 @@ ENSv2DomainRef.implement({
       },
       resolve: async (parent, args, context) => {
         const registry = await RegistryRef.getDataloader(context).load(parent.registryId);
-        if (!registry) throw new Error("never");
+        if (!registry) throw new Error(`Invariant: Registry '${parent.registryId}' not found.`);
 
         const scope = and(
           eq(schema.permissionsUser.chainId, registry.chainId),
@@ -373,6 +373,7 @@ ENSv2DomainRef.implement({
 //////////////////////
 
 export const PermissionsUserWhereInput = builder.inputType("PermissionsUserWhereInput", {
+  description: "Filter Permissions over this Domain by a specific User address.",
   fields: (t) => ({
     user: t.field({ type: "Address" }),
   }),
