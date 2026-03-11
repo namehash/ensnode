@@ -24,6 +24,8 @@ import {
   DomainsOrderInput,
 } from "@/graphql-api/schema/domain";
 import { PermissionsUserRef } from "@/graphql-api/schema/permissions";
+import { RegistryPermissionsUserRef } from "@/graphql-api/schema/registry-permissions-user";
+import { ResolverPermissionsUserRef } from "@/graphql-api/schema/resolver-permissions-user";
 import { db } from "@/lib/db";
 
 export const AccountRef = builder.loadableObjectRef("Account", {
@@ -129,7 +131,7 @@ AccountRef.implement({
     ///////////////////////////////
     registryPermissions: t.connection({
       description: "The Permissions on Registries granted to this Account.",
-      type: PermissionsUserRef,
+      type: RegistryPermissionsUserRef,
       resolve: (parent, args) => {
         const scope = eq(schema.permissionsUser.user, parent.id);
         const join = and(
@@ -166,7 +168,7 @@ AccountRef.implement({
     ///////////////////////////////
     resolverPermissions: t.connection({
       description: "The Permissions on Resolvers granted to this Account.",
-      type: PermissionsUserRef,
+      type: ResolverPermissionsUserRef,
       resolve: (parent, args) => {
         const scope = eq(schema.permissionsUser.user, parent.id);
         const join = and(

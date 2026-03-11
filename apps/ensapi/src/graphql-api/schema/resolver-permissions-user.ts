@@ -1,0 +1,45 @@
+import type * as schema from "@ensnode/ensnode-schema";
+import { makeResolverId } from "@ensnode/ensnode-sdk";
+
+import { builder } from "@/graphql-api/builder";
+import { ResolverRef } from "@/graphql-api/schema/resolver";
+
+/**
+ * Represents a PermissionsUser whose contract is a Resolver, providing a semantic `resolver` field.
+ */
+export const ResolverPermissionsUserRef =
+  builder.objectRef<typeof schema.permissionsUser.$inferSelect>("ResolverPermissionsUser");
+
+ResolverPermissionsUserRef.implement({
+  fields: (t) => ({
+    ///////////////////////////////////////
+    // ResolverPermissionsUser.resolver
+    ///////////////////////////////////////
+    resolver: t.field({
+      description: "The Resolver in which this Permission is granted.",
+      type: ResolverRef,
+      nullable: false,
+      resolve: ({ chainId, address }) => makeResolverId({ chainId, address }),
+    }),
+
+    ///////////////////////////////////////
+    // ResolverPermissionsUser.resource
+    ///////////////////////////////////////
+    resource: t.field({
+      description: "The Resource for which this Permission is granted.",
+      type: "BigInt",
+      nullable: false,
+      resolve: (parent) => parent.resource,
+    }),
+
+    ////////////////////////////////////
+    // ResolverPermissionsUser.roles
+    ////////////////////////////////////
+    roles: t.field({
+      description: "The Roles that this Permission grants.",
+      type: "BigInt",
+      nullable: false,
+      resolve: (parent) => parent.roles,
+    }),
+  }),
+});
