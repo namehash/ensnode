@@ -122,9 +122,9 @@ PermissionsRef.implement({
       },
     }),
 
-    ////////////////////
+    //////////////////////
     // Permissions.events
-    ////////////////////
+    //////////////////////
     events: t.connection({
       description: "All Events associated with these Permissions.",
       type: EventRef,

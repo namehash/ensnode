@@ -13,6 +13,7 @@ const PageInfoFragment = gql`
 
 const PaginatedDomainFragment = gql`
   fragment PaginatedDomainFragment on Domain {
+    id
     name
     label { interpreted }
     registration {
@@ -23,6 +24,7 @@ const PaginatedDomainFragment = gql`
 `;
 
 export type PaginatedDomainResult = {
+  id: string;
   name: Name | null;
   label: { interpreted: InterpretedLabel };
   registration: {
