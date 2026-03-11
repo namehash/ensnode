@@ -1,8 +1,6 @@
 import { builder } from "@/graphql-api/builder";
 
 import "./schema/account-id";
-import "./schema/account-registries-permissions";
-import "./schema/account-resolver-permissions";
 import "./schema/connection";
 import "./schema/domain";
 import "./schema/event";

@@ -1,5 +1,5 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
-import { and, eq } from "drizzle-orm";
+import { and, count, eq, getTableColumns } from "drizzle-orm";
 
 import * as schema from "@ensnode/ensnode-schema";
 import {
@@ -338,26 +338,37 @@ ENSv2DomainRef.implement({
       args: {
         where: t.arg({ type: PermissionsUserWhereInput }),
       },
-      resolve: async (parent, args, context) => {
-        const registry = await RegistryRef.getDataloader(context).load(parent.registryId);
-        if (!registry) throw new Error(`Invariant: Registry '${parent.registryId}' not found.`);
-
+      resolve: (parent, args) => {
         const scope = and(
-          eq(schema.permissionsUser.chainId, registry.chainId),
-          eq(schema.permissionsUser.address, registry.address),
+          // filter by resource === tokenId
           eq(schema.permissionsUser.resource, parent.tokenId),
+          // optionally filter by user
           args.where?.user ? eq(schema.permissionsUser.user, args.where.user) : undefined,
         );
 
+        // inner join against this Domain's registry to filter Permissions by those in said registry
+        const join = and(
+          eq(schema.permissionsUser.chainId, schema.registry.chainId),
+          eq(schema.permissionsUser.address, schema.registry.address),
+          eq(schema.registry.id, parent.registryId),
+        );
+
         return lazyConnection({
-          totalCount: () => db.$count(schema.permissionsUser, scope),
+          totalCount: () =>
+            db
+              .select({ count: count() })
+              .from(schema.permissionsUser)
+              .innerJoin(schema.registry, join)
+              .where(scope)
+              .then((r) => r[0].count),
           connection: () =>
             resolveCursorConnection(
               { ...ID_PAGINATED_CONNECTION_ARGS, args },
               ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
                 db
-                  .select()
+                  .select(getTableColumns(schema.permissionsUser))
                   .from(schema.permissionsUser)
+                  .innerJoin(schema.registry, join)
                   .where(and(scope, paginateBy(schema.permissionsUser.id, before, after)))
                   .orderBy(orderPaginationBy(schema.permissionsUser.id, inverted))
                   .limit(limit),
