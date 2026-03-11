@@ -30,7 +30,7 @@ import { db } from "@/lib/db";
 type EventJoinTable =
   | typeof schema.domainEvent
   | typeof schema.resolverEvent
-  | typeof schema.permissionsEvents;
+  | typeof schema.permissionsEvent;
 
 /**
  * Available filter options for find-events queries.

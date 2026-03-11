@@ -146,7 +146,7 @@ export const resolverEvent = onchainTable(
   (t) => ({ pk: primaryKey({ columns: [t.resolverId, t.eventId] }) }),
 );
 
-export const permissionsEvents = onchainTable(
+export const permissionsEvent = onchainTable(
   "permissions_events",
   (t) => ({
     permissionsId: t.text().notNull().$type<PermissionsId>(),

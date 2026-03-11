@@ -190,7 +190,7 @@ query AccountDomains(
   ////////////////////
   {
     query: `
-query AccountDomains(
+query AccountEvents(
   $address: Address!
 ) {
   account(address: $address) {
@@ -351,7 +351,8 @@ query Resolver($resolver: AccountIdInput!) {
       [ENSNamespaceIds.EnsTestEnv]: {
         resolver: {
           chainId: ensTestEnvChain.id,
-          address: "0x159d1244b7b627a40013b880f6f77dd35041d7d4", // idk, random resolver
+          // NOTE: this is an OwnedResolver deployed in the devnet
+          address: "0x159d1244b7b627a40013b880f6f77dd35041d7d4",
         },
       },
     },

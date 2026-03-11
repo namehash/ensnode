@@ -15,7 +15,7 @@ import type { LogEventBase } from "@/lib/ponder-helpers";
  * Constrains the type of topics from [] | [Hash, ...Hash[]] to just [Hash, ...Hash[]]
  */
 const hasTopics = (topics: LogEventBase["log"]["topics"]): topics is [Hash, ...Hash[]] =>
-  topics.length !== 0;
+  topics.length !== 0 && topics[0] !== null;
 
 /**
  * Ensures that an Event entity exists for the given `context` and `event`, returning the Event's
@@ -88,7 +88,7 @@ export async function ensurePermissionsEvent(
 ) {
   const eventId = await ensureEvent(context, event);
   await context.db
-    .insert(schema.permissionsEvents)
+    .insert(schema.permissionsEvent)
     .values({ permissionsId: makePermissionsId(contract), eventId })
     .onConflictDoNothing();
 }

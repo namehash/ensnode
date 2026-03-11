@@ -134,8 +134,8 @@ PermissionsRef.implement({
       resolve: (parent, args) =>
         resolveFindEvents(args, {
           through: {
-            table: schema.permissionsEvents,
-            scope: eq(schema.permissionsEvents.permissionsId, parent.id),
+            table: schema.permissionsEvent,
+            scope: eq(schema.permissionsEvent.permissionsId, parent.id),
           },
         }),
     }),
