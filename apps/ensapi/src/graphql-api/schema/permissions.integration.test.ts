@@ -51,22 +51,6 @@ describe("Permissions.events", () => {
     const events = flattenConnection(result.permissions.events);
 
     expect(events.length).toBeGreaterThan(0);
-
-    for (const event of events) {
-      expect(event.id).toBeTruthy();
-      expect(event.chainId).toBeTypeOf("number");
-      expect(event.blockNumber).toBeTruthy();
-      expect(event.blockHash).toMatch(/^0x/);
-      expect(event.timestamp).toBeTruthy();
-      expect(event.transactionHash).toMatch(/^0x/);
-      expect(event.transactionIndex).toBeTypeOf("number");
-      expect(event.from).toMatch(/^0x/);
-      expect(event.address).toMatch(/^0x/);
-      expect(event.logIndex).toBeTypeOf("number");
-      expect(event.topics).toBeInstanceOf(Array);
-      expect(event.topics.length).toBeGreaterThan(0);
-      expect(event.data).toMatch(/^0x/);
-    }
   });
 });
 

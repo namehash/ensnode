@@ -33,6 +33,9 @@ const DEVNET_OWNER = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8";
 // biome-ignore lint/correctness/noUnusedVariables: keeping it around for the future
 const DEVNET_USER = "0x90F79bf6EB2c4f870365E785982E1f101E93b906";
 
+// NOTE: this is an OwnedResolver deployed in the devnet
+const SOME_OWNED_RESOLVER = "0x125ee1aef73e9ef9bc167ed86a0dc4c139ce5e35";
+
 const VITALIK_ADDRESS = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
 
 export const GRAPHQL_API_EXAMPLE_QUERIES: Array<{
@@ -351,8 +354,7 @@ query Resolver($resolver: AccountIdInput!) {
       [ENSNamespaceIds.EnsTestEnv]: {
         resolver: {
           chainId: ensTestEnvChain.id,
-          // NOTE: this is an OwnedResolver deployed in the devnet
-          address: "0x159d1244b7b627a40013b880f6f77dd35041d7d4",
+          address: SOME_OWNED_RESOLVER,
         },
       },
     },
