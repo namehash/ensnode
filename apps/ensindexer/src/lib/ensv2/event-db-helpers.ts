@@ -11,10 +11,12 @@ import {
 
 import type { LogEventBase } from "@/lib/ponder-helpers";
 
+type Topics = [Hash, ...Hash[]];
+
 /**
  * Constrains the type of topics from [] | [Hash, ...Hash[]] to just [Hash, ...Hash[]]
  */
-const hasTopics = (topics: LogEventBase["log"]["topics"]): topics is [Hash, ...Hash[]] =>
+const hasTopics = (topics: LogEventBase["log"]["topics"]): topics is Topics =>
   topics.length !== 0 && topics[0] !== null;
 
 /**
@@ -30,8 +32,8 @@ export async function ensureEvent(context: Context, event: LogEventBase) {
   }
 
   // TODO: figure out why we're getting null topics in our decoding, which should only happen
-  // with an event log / abi mismatch (i.e. the event can be mostly decoded)
-  const topics = event.log.topics.filter((topic) => topic !== null) as typeof event.log.topics;
+  // with an event log / abi mismatch (i.e. the event can be _mostly_ decoded)
+  const topics = event.log.topics.filter((topic): topic is Hash => topic !== null) as Topics;
 
   await context.db
     .insert(schema.event)

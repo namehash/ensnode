@@ -280,7 +280,7 @@ export default function () {
       await ensureDomainEvent(context, event, domainId);
 
       if (registration.type === "BaseRegistrar") {
-        // if this is a wrapped BaseRegisrar Registration, unwrap it
+        // if this is a wrapped BaseRegistrar Registration, unwrap it
         await context.db.update(schema.registration, { id: registration.id }).set({
           wrapped: false,
           fuses: null,

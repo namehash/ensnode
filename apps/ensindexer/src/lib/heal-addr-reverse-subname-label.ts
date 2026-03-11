@@ -62,16 +62,18 @@ export async function healAddrReverseSubnameLabel(
   // Try healing based on the deployed contract's address, if exists.
   //
   // This handles contract setting their own Reverse Name in their constructor via ReverseClaimer.sol
-  // NOTE(shrugs): context.client.getTransactionReceipt can throw; if this actually ocurrs at runtime, we
-  // should swallow the error and move on to the trace parsing, but my hunch is that if this throws
-  // we have bigger problems
-  const receipt = await context.client.getTransactionReceipt({ hash: event.transaction.hash });
-  if (receipt.contractAddress) {
-    const healedFromContractAddress = maybeHealLabelByAddrReverseSubname(
-      labelHash,
-      receipt.contractAddress,
-    );
-    if (healedFromContractAddress) return healedFromContractAddress;
+  try {
+    const receipt = await context.client.getTransactionReceipt({ hash: event.transaction.hash });
+    if (receipt.contractAddress) {
+      const healedFromContractAddress = maybeHealLabelByAddrReverseSubname(
+        labelHash,
+        receipt.contractAddress,
+      );
+      if (healedFromContractAddress) return healedFromContractAddress;
+    }
+  } catch {
+    // NOTE: context.client.getTransactionReceipt can throw, so we swallow the error in order to
+    // proceed to trace parsing
   }
 
   // If previous healing methods failed, try all addresses from the transaction trace.
