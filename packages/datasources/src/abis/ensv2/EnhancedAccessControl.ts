@@ -1,3 +1,5 @@
+import type { Abi } from "viem";
+
 export const EnhancedAccessControl = [
   {
     inputs: [
@@ -433,4 +435,4 @@ export const EnhancedAccessControl = [
     stateMutability: "view",
     type: "function",
   },
-] as const;
+] as const satisfies Abi;

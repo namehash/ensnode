@@ -2,7 +2,6 @@ import { index, onchainEnum, onchainTable, primaryKey, relations, sql, uniqueInd
 import type { Address, BlockNumber, Hash } from "viem";
 
 import type {
-  AccountIdString,
   ChainId,
   DomainId,
   ENSv1DomainId,
@@ -83,8 +82,7 @@ import type {
  *
  * Events are structured as a single "events" table which tracks EVM Event Metadata for any on-chain
  * Event. Then, join tables (DomainEvent, ResolverEvent, etc) track the relationship between an
- * entity that has many events (Domain, Resolver) to the relevant set of Events. These join tables
- * may store additional
+ * entity that has many events (Domain, Resolver) to the relevant set of Events.
  *
  * A Registration references the event that initiated the Registration. A Renewal, too, references
  * the Event responsible for its existence.
@@ -124,27 +122,36 @@ export const event = onchainTable(
     data: t.hex().notNull(),
   }),
   (t) => ({
-    // compound index on the primary sort for the table, mirror's ponder's event.id structure
-    bySort: index().on(t.timestamp, t.chainId, t.blockNumber, t.transactionIndex, t.logIndex, t.id),
     byTopic0: index().on(t.topic0),
+    byFrom: index().on(t.from),
+    byTimestamp: index().on(t.timestamp),
   }),
 );
 
 export const domainEvent = onchainTable(
   "domain_events",
-  (t) => ({ domainId: t.text().$type<DomainId>(), eventId: t.text() }),
+  (t) => ({
+    domainId: t.text().notNull().$type<DomainId>(),
+    eventId: t.text().notNull(),
+  }),
   (t) => ({ pk: primaryKey({ columns: [t.domainId, t.eventId] }) }),
 );
 
 export const resolverEvent = onchainTable(
   "resolver_events",
-  (t) => ({ resolverId: t.text().$type<ResolverId>(), eventId: t.text() }),
+  (t) => ({
+    resolverId: t.text().notNull().$type<ResolverId>(),
+    eventId: t.text().notNull(),
+  }),
   (t) => ({ pk: primaryKey({ columns: [t.resolverId, t.eventId] }) }),
 );
 
 export const permissionsEvents = onchainTable(
   "permissions_events",
-  (t) => ({ permissionsId: t.text().$type<PermissionsId>(), eventId: t.text() }),
+  (t) => ({
+    permissionsId: t.text().notNull().$type<PermissionsId>(),
+    eventId: t.text().notNull(),
+  }),
   (t) => ({ pk: primaryKey({ columns: [t.permissionsId, t.eventId] }) }),
 );
 

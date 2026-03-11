@@ -13,7 +13,7 @@ export const cursors = {
       return superjson.parse<T>(Buffer.from(cursor, "base64").toString("utf8"));
     } catch {
       throw new Error(
-        "Invalid cursor: failed to decode event cursor. The cursor may be malformed or from an incompatible query.",
+        "Invalid cursor: failed to decode cursor. The cursor may be malformed or from an incompatible query.",
       );
     }
   },

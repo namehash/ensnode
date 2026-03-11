@@ -1,3 +1,5 @@
+import type { Abi } from "viem";
+
 export const StandaloneReverseRegistrar = [
   {
     anonymous: false,
@@ -56,4 +58,4 @@ export const StandaloneReverseRegistrar = [
     stateMutability: "view",
     type: "function",
   },
-] as const;
+] as const satisfies Abi;

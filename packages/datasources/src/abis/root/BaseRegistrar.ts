@@ -1,3 +1,5 @@
+import type { Abi } from "viem";
+
 export const BaseRegistrar = [
   {
     inputs: [
@@ -727,4 +729,4 @@ export const BaseRegistrar = [
     stateMutability: "nonpayable",
     type: "function",
   },
-] as const;
+] as const satisfies Abi;

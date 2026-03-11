@@ -6,7 +6,6 @@ import {
   type AccountId,
   type DomainId,
   makePermissionsId,
-  makeRegistryId,
   makeResolverId,
 } from "@ensnode/ensnode-sdk";
 

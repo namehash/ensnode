@@ -1,3 +1,5 @@
+import type { Abi } from "viem";
+
 export const NameWrapper = [
   {
     inputs: [
@@ -1468,4 +1470,4 @@ export const NameWrapper = [
     stateMutability: "nonpayable",
     type: "function",
   },
-] as const;
+] as const satisfies Abi;

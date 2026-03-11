@@ -138,6 +138,9 @@ export default function () {
     const { node } = event.args;
     const domainId = makeENSv1DomainId(node);
 
+    // ENSv2 model does not include root node, no-op
+    if (node === ROOT_NODE) return;
+
     // push event to domain history
     await ensureDomainEvent(context, event, domainId);
   }
@@ -151,6 +154,9 @@ export default function () {
   }) {
     const { node } = event.args;
     const domainId = makeENSv1DomainId(node);
+
+    // ENSv2 model does not include root node, no-op
+    if (node === ROOT_NODE) return;
 
     // NOTE: Domain-Resolver relations are handled by the protocol-acceleration plugin and are not
     // directly indexed here

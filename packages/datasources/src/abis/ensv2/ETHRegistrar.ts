@@ -1,3 +1,5 @@
+import type { Abi } from "viem";
+
 export const ETHRegistrar = [
   {
     inputs: [
@@ -1139,4 +1141,4 @@ export const ETHRegistrar = [
     stateMutability: "view",
     type: "function",
   },
-] as const;
+] as const satisfies Abi;

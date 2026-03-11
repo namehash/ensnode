@@ -1,3 +1,5 @@
+import type { Abi } from "viem";
+
 export const Registry = [
   {
     anonymous: false,
@@ -585,4 +587,4 @@ export const Registry = [
     stateMutability: "view",
     type: "function",
   },
-] as const;
+] as const satisfies Abi;

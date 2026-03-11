@@ -1,3 +1,5 @@
+import type { Abi } from "viem";
+
 export const ThreeDNSToken = [
   {
     type: "event",
@@ -153,4 +155,4 @@ export const ThreeDNSToken = [
     name: "TransferBatch",
     type: "event",
   },
-] as const;
+] as const satisfies Abi;

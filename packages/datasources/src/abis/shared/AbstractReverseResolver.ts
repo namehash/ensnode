@@ -1,3 +1,5 @@
+import type { Abi } from "viem";
+
 export const AbstractReverseResolver = [
   {
     inputs: [
@@ -133,4 +135,4 @@ export const AbstractReverseResolver = [
     stateMutability: "view",
     type: "function",
   },
-] as const;
+] as const satisfies Abi;

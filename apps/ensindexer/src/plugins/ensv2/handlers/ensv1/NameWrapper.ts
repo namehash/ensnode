@@ -179,9 +179,6 @@ export default function () {
       // materialize domain owner
       await materializeENSv1DomainEffectiveOwner(context, domainId, owner);
 
-      // push event to domain history
-      await ensureDomainEvent(context, event, domainId);
-
       // handle wraps of direct-subname-of-registrar-managed-names
       if (registration && !isFullyExpired && registration.type === "BaseRegistrar") {
         const { node: managedNode } = getManagedName(getThisAccountId(context, event));
@@ -255,6 +252,9 @@ export default function () {
           eventId: await ensureEvent(context, event),
         });
       }
+
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
     },
   );
 
