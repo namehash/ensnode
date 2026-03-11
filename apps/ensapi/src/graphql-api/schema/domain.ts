@@ -336,7 +336,7 @@ ENSv2DomainRef.implement({
         "Permissions for this Domain within its Registry, representing the roles granted to users for this Domain's token.",
       type: PermissionsUserRef,
       args: {
-        where: t.arg({ type: PermissionsUserWhereInput }),
+        where: t.arg({ type: DomainPermissionsWhereInput }),
       },
       resolve: (parent, args) => {
         const scope = and(
@@ -383,7 +383,7 @@ ENSv2DomainRef.implement({
 // Inputs
 //////////////////////
 
-export const PermissionsUserWhereInput = builder.inputType("PermissionsUserWhereInput", {
+export const DomainPermissionsWhereInput = builder.inputType("DomainPermissionsWhereInput", {
   description: "Filter Permissions over this Domain by a specific User address.",
   fields: (t) => ({
     user: t.field({ type: "Address" }),
