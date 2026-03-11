@@ -9,6 +9,9 @@ import {
   type PaginatedGraphQLConnection,
 } from "@/test/integration/graphql-utils";
 
+// NOTE: using small page size to force multiple pages in devnet result set
+const PAGE_SIZE = 2;
+
 type FetchPageVariables = {
   order: typeof DomainsOrderInput.$inferInput;
   first?: number;
@@ -86,9 +89,6 @@ function assertOrdering(
     }
   }
 }
-
-// NOTE: using small page size to force multiple pages in devnet result set
-const PAGE_SIZE = 2;
 
 /**
  * Generic pagination test suite for any find-domains connection field.

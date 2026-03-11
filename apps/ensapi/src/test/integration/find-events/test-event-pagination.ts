@@ -7,6 +7,9 @@ import {
   type PaginatedGraphQLConnection,
 } from "@/test/integration/graphql-utils";
 
+// NOTE: using small page size to force multiple pages in devnet result set
+const PAGE_SIZE = 2;
+
 type FetchPage = (variables: {
   first?: number;
   after?: string;
@@ -62,9 +65,6 @@ function compareSortKey(a: EventResult, b: EventResult): number {
   // equal sort key (differentiated only by id)
   return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
 }
-
-// NOTE: using small page size to force multiple pages in devnet result set
-const PAGE_SIZE = 2;
 
 /**
  * Generic pagination test suite for any find-events connection field.
