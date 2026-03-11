@@ -1,27 +1,12 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
-import {
-  and,
-  asc,
-  count,
-  desc,
-  eq,
-  getTableColumns,
-  gte,
-  inArray,
-  lte,
-  type SQL,
-  sql,
-} from "drizzle-orm";
+import { and, count, eq, getTableColumns, gte, inArray, lte, type SQL } from "drizzle-orm";
 import type { Address, Hex } from "viem";
 
 import * as schema from "@ensnode/ensnode-schema";
 
-import { type EventCursor, EventCursors } from "@/graphql-api/lib/find-events/event-cursor";
+import { orderPaginationBy, paginateBy } from "@/graphql-api/lib/connection-helpers";
 import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
-import {
-  PAGINATION_DEFAULT_MAX_SIZE,
-  PAGINATION_DEFAULT_PAGE_SIZE,
-} from "@/graphql-api/schema/constants";
+import { ID_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { db } from "@/lib/db";
 
 /**
@@ -44,28 +29,6 @@ interface EventsWhere {
   timestamp_lte?: bigint | null;
   /** Filter to events sent by this address. */
   from?: Address | null;
-}
-
-/**
- * The columns that define the stable sort order for events, mirroring the composite index on the
- * events table.
- */
-const EVENT_SORT_COLUMNS = [
-  schema.event.timestamp,
-  schema.event.chainId,
-  schema.event.blockNumber,
-  schema.event.transactionIndex,
-  schema.event.logIndex,
-  schema.event.id,
-] as const;
-
-/**
- * Builds a PostgreSQL row-value comparison for compound cursor pagination.
- * Uses native tuple comparison: (a, b, c) > (x, y, z)
- */
-function eventCursorWhere(op: ">" | "<", key: EventCursor): SQL {
-  const [tCol, cCol, bCol, txCol, lCol, idCol] = EVENT_SORT_COLUMNS;
-  return sql`(${tCol}, ${cCol}, ${bCol}, ${txCol}, ${lCol}, ${idCol}) ${sql.raw(op)} (${key.timestamp}, ${key.chainId}, ${key.blockNumber}, ${key.transactionIndex}, ${key.logIndex}, ${key.id})`;
 }
 
 /**
@@ -129,9 +92,7 @@ export function resolveFindEvents(
     connection: () =>
       resolveCursorConnection(
         {
-          toCursor: EventCursors.encode,
-          defaultSize: PAGINATION_DEFAULT_PAGE_SIZE,
-          maxSize: PAGINATION_DEFAULT_MAX_SIZE,
+          ...ID_PAGINATED_CONNECTION_ARGS,
           args,
         },
         ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) => {
@@ -142,14 +103,8 @@ export function resolveFindEvents(
           }
 
           return query
-            .where(
-              and(
-                conditions,
-                after ? eventCursorWhere(">", EventCursors.decode(after)) : undefined,
-                before ? eventCursorWhere("<", EventCursors.decode(before)) : undefined,
-              ),
-            )
-            .orderBy(...EVENT_SORT_COLUMNS.map((col) => (inverted ? desc(col) : asc(col))))
+            .where(and(conditions, paginateBy(schema.event.id, before, after)))
+            .orderBy(orderPaginationBy(schema.event.id, inverted))
             .limit(limit);
         },
       ),

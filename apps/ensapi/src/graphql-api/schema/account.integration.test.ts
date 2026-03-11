@@ -85,3 +85,19 @@ describe("Account.domains pagination", () => {
     return result.account.domains;
   });
 });
+
+/**
+ * The columns that define the stable sort order for events, mirroring the composite index on the
+ * events table.
+ */
+// const EVENT_SORT_COLUMNS = [
+//   schema.event.timestamp,
+//   schema.event.chainId,
+//   schema.event.blockNumber,
+//   schema.event.transactionIndex,
+//   schema.event.logIndex,
+//   schema.event.id,
+// ] as const;
+
+describe("Account.events", () => {});
+describe("Account.events pagination", () => {});
