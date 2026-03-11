@@ -333,7 +333,7 @@ ENSv2DomainRef.implement({
     /////////////////////
     roles: t.connection({
       description:
-        "The Permission entries for this Domain within its Registry, representing the roles granted to users for this Domain's token.",
+        "Permissions for this Domain within its Registry, representing the roles granted to users for this Domain's token.",
       type: PermissionsUserRef,
       args: {
         where: t.arg({ type: PermissionsUserWhereInput }),
