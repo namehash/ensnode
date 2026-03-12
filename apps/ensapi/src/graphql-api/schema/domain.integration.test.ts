@@ -107,8 +107,8 @@ describe("Domain.events filtering (EventsWhereInput)", () => {
   };
 
   const DomainEventsFiltered = gql`
-    query DomainEventsFiltered($name: Name!, $where: EventsWhereInput) {
-      domain(by: { name: $name }) { events(where: $where) { edges { node { ...EventFragment } } } }
+    query DomainEventsFiltered($name: Name!, $where: EventsWhereInput, $first: Int) {
+      domain(by: { name: $name }) { events(where: $where, first: $first) { edges { node { ...EventFragment } } } }
     }
     ${EventFragment}
   `;
@@ -118,6 +118,7 @@ describe("Domain.events filtering (EventsWhereInput)", () => {
   beforeAll(async () => {
     const result = await request<DomainEventsResult>(DomainEventsFiltered, {
       name: NAME_WITH_EVENTS,
+      first: 1000,
     });
     allEvents = flattenConnection(result.domain.events);
     expect(allEvents.length).toBeGreaterThan(0);
@@ -197,6 +198,7 @@ describe("Domain.events filtering (EventsWhereInput)", () => {
     const result = await request<DomainEventsResult>(DomainEventsFiltered, {
       name: NAME_WITH_EVENTS,
       where: { timestamp_gte: minTs, timestamp_lte: maxTs },
+      first: 1000,
     });
     const events = flattenConnection(result.domain.events);
     expect(events.length).toBe(allEvents.length);

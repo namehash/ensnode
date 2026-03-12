@@ -165,7 +165,7 @@ describe("Domain.permissions", () => {
     expect(allUsers.length).toBeGreaterThan(0);
   });
 
-  it("resolves permissions for changerole.eth", () => {
+  it("resolves permissions for test.eth", () => {
     // all users should have the same resource (the domain's tokenId)
     const resources = new Set(allUsers.map((u) => u.resource));
     expect(resources.size).toBe(1);
@@ -202,8 +202,7 @@ describe("Domain.permissions", () => {
   });
 });
 
-// Account.permissions and Account.registryPermissions share a root user lookup
-describe("Account.permissions", () => {
+describe("Account.permissions and Account.registryPermissions", () => {
   const PermissionsRootUsers = gql`
     query PermissionsRootUsers($contract: AccountIdInput!) {
       permissions(for: $contract) {
@@ -216,6 +215,14 @@ describe("Account.permissions", () => {
     query AccountPermissions($address: Address!) {
       account(address: $address) {
         permissions { edges { node { id resource user { address } roles } } }
+      }
+    }
+  `;
+
+  const AccountRegistryPermissions = gql`
+    query AccountRegistryPermissions($address: Address!) {
+      account(address: $address) {
+        registryPermissions { edges { node { id registry { id } resource user { address } roles } } }
       }
     }
   `;
@@ -252,38 +259,6 @@ describe("Account.permissions", () => {
     for (const p of permissions) {
       expect(p.user.address.toLowerCase()).toBe(targetAddress.toLowerCase());
     }
-  });
-});
-
-describe("Account.registryPermissions", () => {
-  const PermissionsRootUsers = gql`
-    query PermissionsRootUsers($contract: AccountIdInput!) {
-      permissions(for: $contract) {
-        root { users { edges { node { user { address } } } } }
-      }
-    }
-  `;
-
-  const AccountRegistryPermissions = gql`
-    query AccountRegistryPermissions($address: Address!) {
-      account(address: $address) {
-        registryPermissions { edges { node { id registry { id } resource user { address } roles } } }
-      }
-    }
-  `;
-
-  let targetAddress: Address;
-
-  beforeAll(async () => {
-    const rootResult = await request<{
-      permissions: {
-        root: { users: GraphQLConnection<{ user: { address: Address } }> };
-      };
-    }>(PermissionsRootUsers, { contract: V2_ETH_REGISTRY });
-
-    const rootUsers = flattenConnection(rootResult.permissions.root.users);
-    expect(rootUsers.length).toBeGreaterThan(0);
-    targetAddress = rootUsers[0].user.address;
   });
 
   it("resolves registry-scoped permissions for an account", async () => {
@@ -384,8 +359,8 @@ describe("Permissions.events filtering (EventsWhereInput)", () => {
   };
 
   const PermissionsEventsFiltered = gql`
-    query PermissionsEventsFiltered($contract: AccountIdInput!, $where: EventsWhereInput) {
-      permissions(for: $contract) { events(where: $where) { edges { node { ...EventFragment } } } }
+    query PermissionsEventsFiltered($contract: AccountIdInput!, $where: EventsWhereInput, $first: Int) {
+      permissions(for: $contract) { events(where: $where, first: $first) { edges { node { ...EventFragment } } } }
     }
     ${EventFragment}
   `;
@@ -395,6 +370,7 @@ describe("Permissions.events filtering (EventsWhereInput)", () => {
   beforeAll(async () => {
     const result = await request<PermissionsEventsResult>(PermissionsEventsFiltered, {
       contract: V2_ETH_REGISTRY,
+      first: 1000,
     });
     allEvents = flattenConnection(result.permissions.events);
     expect(allEvents.length).toBeGreaterThan(0);
@@ -472,6 +448,7 @@ describe("Permissions.events filtering (EventsWhereInput)", () => {
     const result = await request<PermissionsEventsResult>(PermissionsEventsFiltered, {
       contract: V2_ETH_REGISTRY,
       where: { timestamp_gte: minTs, timestamp_lte: maxTs },
+      first: 1000,
     });
     const events = flattenConnection(result.permissions.events);
 
