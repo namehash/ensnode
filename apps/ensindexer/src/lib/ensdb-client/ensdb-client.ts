@@ -1,5 +1,6 @@
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
-import { and, eq, sql } from "drizzle-orm/sql";
+import { migrate } from "drizzle-orm/node-postgres/migrator";
+import { and, eq } from "drizzle-orm/sql";
 
 import * as ensNodeSchema from "@ensnode/ensnode-schema/ensnode";
 import {
@@ -8,6 +9,7 @@ import {
   deserializeEnsIndexerPublicConfig,
   type EnsDbClientMutation,
   type EnsDbClientQuery,
+  type EnsDbMigration,
   type EnsIndexerPublicConfig,
   EnsNodeMetadataKeys,
   type SerializedEnsNodeMetadata,
@@ -38,7 +40,7 @@ interface DrizzleDb extends NodePgDatabase<typeof ensNodeSchema> {}
  * - ENSDb version
  * - ENSIndexer Public Config, and Indexing Status Snapshot and CrossChainIndexingStatusSnapshot.
  */
-export class EnsDbClient implements EnsDbClientQuery, EnsDbClientMutation {
+export class EnsDbClient implements EnsDbClientQuery, EnsDbClientMutation, EnsDbMigration {
   /**
    * Drizzle database instance for ENSDb.
    */
@@ -190,5 +192,14 @@ export class EnsDbClient implements EnsDbClientQuery, EnsDbClientMutation {
         target: [ensNodeSchema.ensNodeMetadata.ensIndexerRef, ensNodeSchema.ensNodeMetadata.key],
         set: { value: metadata.value },
       });
+  }
+
+  /**
+   * @inheritdoc
+   */
+  async migrate(migrationsDirPath: string): Promise<void> {
+    return migrate(this.db, {
+      migrationsFolder: migrationsDirPath,
+    });
   }
 }

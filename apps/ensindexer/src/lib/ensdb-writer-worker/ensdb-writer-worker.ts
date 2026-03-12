@@ -24,10 +24,12 @@ const INDEXING_STATUS_RECORD_UPDATE_INTERVAL: Duration = 1;
 /**
  * ENSDb Writer Worker
  *
- * A worker responsible for writing ENSIndexer-related metadata into ENSDb, including:
- * - ENSDb version
- * - ENSIndexer Public Config
- * - ENSIndexer Indexing Status Snapshots
+ * A worker responsible for:
+ * - executing ENSDb database migrations on startup, and
+ * - writing ENSNode-related metadata into ENSDb, including:
+ *   - ENSDb version
+ *   - ENSIndexer Public Config
+ *   - Indexing Status Snapshots
  */
 export class EnsDbWriterWorker {
   /**
@@ -51,24 +53,33 @@ export class EnsDbWriterWorker {
   private publicConfigBuilder: PublicConfigBuilder;
 
   /**
+   * Path to the directory containing ENSDb migrations to be executed by the worker on startup.
+   */
+  private migrationsDirPath: string;
+
+  /**
    * @param ensDbClient ENSDb Client instance used by the worker to interact with ENSDb.
    * @param publicConfigBuilder ENSIndexer Public Config Builder instance used by the worker to read ENSIndexer Public Config.
    * @param indexingStatusBuilder Indexing Status Builder instance used by the worker to read ENSIndexer Indexing Status.
+   * @param migrationsDirPath Path to the directory containing ENSDb migrations to be executed by the worker on startup.
    */
   constructor(
     ensDbClient: EnsDbClient,
     publicConfigBuilder: PublicConfigBuilder,
     indexingStatusBuilder: IndexingStatusBuilder,
+    migrationsDirPath: string,
   ) {
     this.ensDbClient = ensDbClient;
     this.publicConfigBuilder = publicConfigBuilder;
     this.indexingStatusBuilder = indexingStatusBuilder;
+    this.migrationsDirPath = migrationsDirPath;
   }
 
   /**
    * Run the ENSDb Writer Worker
    *
    * The worker performs the following tasks:
+   * 0) Execute pending ENSDb migrations.
    * 1) A single attempt to upsert ENSDb version into ENSDb.
    * 2) A single attempt to upsert serialized representation of
    *   {@link EnsIndexerPublicConfig} into ENSDb.
@@ -76,6 +87,7 @@ export class EnsDbWriterWorker {
    *    {@link CrossChainIndexingStatusSnapshot} into ENSDb.
    *
    * @throws Error if the worker is already running, or
+   *         if database migrations execution fails, or
    *         if the in-memory ENSIndexer Public Config could not be fetched, or
    *         if the in-memory ENSIndexer Public Config is incompatible with the stored config in ENSDb.
    */
@@ -84,6 +96,11 @@ export class EnsDbWriterWorker {
     if (this.isRunning) {
       throw new Error("EnsDbWriterWorker is already running");
     }
+
+    // Task 0: execute database migrations
+    console.log(`[EnsDbWriterWorker]: Executing database migrations...`);
+    await this.executeMigrations();
+    console.log(`[EnsDbWriterWorker]: Database migrations executed successfully`);
 
     // Fetch data required for task 1 and task 2.
     const inMemoryConfig = await this.getValidatedEnsIndexerPublicConfig();
@@ -124,6 +141,17 @@ export class EnsDbWriterWorker {
       clearInterval(this.indexingStatusInterval);
       this.indexingStatusInterval = null;
     }
+  }
+
+  /**
+   * Execute database migrations for the ENSDb Writer Worker.
+   *
+   * Runs all pending migrations in the defined migrations directory.
+   *
+   * @throws Error if any migration fails to execute.
+   */
+  private async executeMigrations(): Promise<void> {
+    await this.ensDbClient.migrate(this.migrationsDirPath);
   }
 
   /**

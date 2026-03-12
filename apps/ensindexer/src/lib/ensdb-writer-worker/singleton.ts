@@ -1,3 +1,5 @@
+import { fileURLToPath } from "node:url";
+
 import { ensDbClient } from "@/lib/ensdb-client/singleton";
 import { indexingStatusBuilder } from "@/lib/indexing-status-builder/singleton";
 import { publicConfigBuilder } from "@/lib/public-config-builder/singleton";
@@ -20,10 +22,15 @@ export function startEnsDbWriterWorker() {
     throw new Error("EnsDbWriterWorker has already been initialized");
   }
 
+  const migrationsDirPath = fileURLToPath(
+    new URL("../../../drizzle-kit/migrations/", import.meta.url),
+  );
+
   ensDbWriterWorker = new EnsDbWriterWorker(
     ensDbClient,
     publicConfigBuilder,
     indexingStatusBuilder,
+    migrationsDirPath,
   );
 
   ensDbWriterWorker

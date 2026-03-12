@@ -56,3 +56,13 @@ export interface EnsDbClientMutation {
    */
   upsertIndexingStatusSnapshot(indexingStatus: CrossChainIndexingStatusSnapshot): Promise<void>;
 }
+
+export interface EnsDbMigration {
+  /**
+   * Execute pending migrations for ENSDb.
+   *
+   * @param migrationsDirPath - The file path to the directory containing migration files.
+   * @throws error when migration execution fails.
+   */
+  migrate(migrationsDirPath: string): Promise<void>;
+}
