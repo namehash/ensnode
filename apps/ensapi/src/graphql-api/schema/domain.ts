@@ -1,5 +1,5 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
-import { and, eq } from "drizzle-orm";
+import { and, count, eq, getTableColumns } from "drizzle-orm";
 
 import * as schema from "@ensnode/ensnode-schema";
 import {
@@ -11,7 +11,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
-import { orderPaginationBy, paginateByInt } from "@/graphql-api/lib/connection-helpers";
+import { orderPaginationBy, paginateBy, paginateByInt } from "@/graphql-api/lib/connection-helpers";
 import { resolveFindDomains } from "@/graphql-api/lib/find-domains/find-domains-resolver";
 import {
   domainsBase,
@@ -25,9 +25,13 @@ import { getModelId } from "@/graphql-api/lib/get-model-id";
 import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
 import { AccountRef } from "@/graphql-api/schema/account";
-import { INDEX_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
+import {
+  ID_PAGINATED_CONNECTION_ARGS,
+  INDEX_PAGINATED_CONNECTION_ARGS,
+} from "@/graphql-api/schema/constants";
 import { LabelRef } from "@/graphql-api/schema/label";
 import { OrderDirection } from "@/graphql-api/schema/order-direction";
+import { PermissionsUserRef } from "@/graphql-api/schema/permissions";
 import { RegistrationInterfaceRef } from "@/graphql-api/schema/registration";
 import { RegistryRef } from "@/graphql-api/schema/registry";
 import { ResolverRef } from "@/graphql-api/schema/resolver";
@@ -323,12 +327,68 @@ ENSv2DomainRef.implement({
       nullable: true,
       resolve: (parent) => parent.subregistryId,
     }),
+
+    ///////////////////////////
+    // ENSv2Domain.permissions
+    ///////////////////////////
+    permissions: t.connection({
+      description:
+        "Permissions for this Domain within its Registry, representing the roles granted to users for this Domain's token.",
+      type: PermissionsUserRef,
+      args: {
+        where: t.arg({ type: DomainPermissionsWhereInput }),
+      },
+      resolve: (parent, args) => {
+        const scope = and(
+          // filter by resource === tokenId
+          eq(schema.permissionsUser.resource, parent.tokenId),
+          // optionally filter by user
+          args.where?.user ? eq(schema.permissionsUser.user, args.where.user) : undefined,
+        );
+
+        // inner join against this Domain's registry to filter Permissions by those in said registry
+        const join = and(
+          eq(schema.permissionsUser.chainId, schema.registry.chainId),
+          eq(schema.permissionsUser.address, schema.registry.address),
+          eq(schema.registry.id, parent.registryId),
+        );
+
+        return lazyConnection({
+          totalCount: () =>
+            db
+              .select({ count: count() })
+              .from(schema.permissionsUser)
+              .innerJoin(schema.registry, join)
+              .where(scope)
+              .then((r) => r[0].count),
+          connection: () =>
+            resolveCursorConnection(
+              { ...ID_PAGINATED_CONNECTION_ARGS, args },
+              ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+                db
+                  .select(getTableColumns(schema.permissionsUser))
+                  .from(schema.permissionsUser)
+                  .innerJoin(schema.registry, join)
+                  .where(and(scope, paginateBy(schema.permissionsUser.id, before, after)))
+                  .orderBy(orderPaginationBy(schema.permissionsUser.id, inverted))
+                  .limit(limit),
+            ),
+        });
+      },
+    }),
   }),
 });
 
 //////////////////////
 // Inputs
 //////////////////////
+
+export const DomainPermissionsWhereInput = builder.inputType("DomainPermissionsWhereInput", {
+  description: "Filter Permissions over this Domain by a specific User address.",
+  fields: (t) => ({
+    user: t.field({ type: "Address" }),
+  }),
+});
 
 export const DomainIdInput = builder.inputType("DomainIdInput", {
   description: "Reference a specific Domain.",

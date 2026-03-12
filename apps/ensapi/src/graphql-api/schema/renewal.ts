@@ -28,7 +28,7 @@ RenewalRef.implement({
     //////////////
     id: t.field({
       description: "A unique reference to this Renewal.",
-      type: "ID",
+      type: "RenewalId",
       nullable: false,
       resolve: (parent) => parent.id,
     }),
