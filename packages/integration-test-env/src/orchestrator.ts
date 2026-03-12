@@ -339,6 +339,7 @@ async function main() {
     {
       ENSINDEXER_URL,
       DATABASE_URL,
+      DATABASE_SCHEMA: "public",
     },
     "ensapi",
   );
