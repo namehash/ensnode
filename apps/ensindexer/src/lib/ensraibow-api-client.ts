@@ -2,11 +2,6 @@ import config from "@/config";
 
 import { type EnsRainbow, EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 
-import { EnsRainbowClientWithRetry } from "@/lib/ensrainbow-client-with-retry";
-
-/**
- * Get an {@link EnsRainbow.ApiClient} instance with retry-on-heal.
- */
 export function getENSRainbowApiClient(): EnsRainbow.ApiClient {
   const ensRainbowApiClient = new EnsRainbowApiClient({
     endpointUrl: config.ensRainbowUrl,
@@ -22,5 +17,5 @@ export function getENSRainbowApiClient(): EnsRainbow.ApiClient {
     );
   }
 
-  return new EnsRainbowClientWithRetry(ensRainbowApiClient);
+  return ensRainbowApiClient;
 }
