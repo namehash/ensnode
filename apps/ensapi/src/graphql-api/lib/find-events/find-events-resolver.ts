@@ -1,5 +1,5 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
-import { and, count, eq, getTableColumns, gte, inArray, lte, type SQL } from "drizzle-orm";
+import { and, count, eq, getTableColumns, gte, inArray, lte, type SQL, sql } from "drizzle-orm";
 import type { Address, Hex } from "viem";
 
 import * as schema from "@ensnode/ensnode-schema";
@@ -38,7 +38,11 @@ function eventsWhereConditions(where?: EventsWhere | null): SQL | undefined {
   if (!where) return undefined;
 
   return and(
-    where.topic0_in?.length ? inArray(schema.event.topic0, where.topic0_in) : undefined,
+    where.topic0_in
+      ? where.topic0_in.length
+        ? inArray(schema.event.topic0, where.topic0_in)
+        : sql`false`
+      : undefined,
     typeof where.timestamp_gte === "bigint"
       ? gte(schema.event.timestamp, where.timestamp_gte)
       : undefined,
