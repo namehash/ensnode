@@ -18,15 +18,22 @@ export const makeReadOnlyDrizzle = <SCHEMA extends Schema>({
 }: {
   schema: SCHEMA;
   databaseUrl: string;
-  databaseSchema: string;
+  databaseSchema?: string;
 }) => {
-  // monkeypatch schema onto tables
-  setDatabaseSchema(schema, databaseSchema);
+  // monkeypatch schema onto tables if databaseSchema is provided
+  if (databaseSchema) {
+    setDatabaseSchema(schema, databaseSchema);
+  }
+
+  const parsedConfig = parseIntoClientConfig(databaseUrl);
+  const existingOptions = parsedConfig.options || "";
+  const readOnlyOption = "-c default_transaction_read_only=on";
 
   return drizzle({
     connection: {
-      ...parseIntoClientConfig(databaseUrl),
-      options: "-c default_transaction_read_only=on",
+      ...parsedConfig,
+      // Combine existing options from URL with read-only requirement
+      options: existingOptions ? `${existingOptions} ${readOnlyOption}` : readOnlyOption,
     },
     schema,
     casing: "snake_case",

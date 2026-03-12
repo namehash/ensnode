@@ -55,7 +55,6 @@ export class EnsDbClient implements EnsDbClientQuery, EnsDbClientMutation {
    */
   constructor(databaseUrl: string, ensIndexerRef: string) {
     this.db = makeDrizzle({
-      databaseSchema: ensNodeSchema.ENSNODE_SCHEMA_NAME,
       databaseUrl,
       schema: ensNodeSchema,
     });
@@ -145,7 +144,8 @@ export class EnsDbClient implements EnsDbClientQuery, EnsDbClientMutation {
    *
    * @returns selected record in ENSDb.
    * @throws when more than one matching metadata record is found
-   *         (should be impossible given the PK constraint on 'key')
+   *         (should be impossible given the composite PK constraint on
+   *         'ensIndexerRef' and 'key').
    */
   private async getEnsNodeMetadata<EnsNodeMetadataType extends SerializedEnsNodeMetadata>(
     metadata: Pick<EnsNodeMetadataType, "key">,
