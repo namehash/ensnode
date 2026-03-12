@@ -16,7 +16,10 @@
     "Ponder"
   ],
   "exports": {
-    ".": "./src/ponder.schema.ts"
+    ".": "./src/index.ts",
+    "./ponder": "./src/ponder-schema/index.ts",
+    "./ensindexer": "./src/ensindexer-schema/index.ts",
+    "./ensnode": "./src/ensnode-schema/index.ts"
   },
   "files": [
     "dist"
@@ -24,26 +27,49 @@
   "publishConfig": {
     "access": "public",
     "exports": {
-      "types": "./dist/ponder.schema.d.ts",
-      "default": "./dist/ponder.schema.js"
-    },
-    "main": "./dist/ponder.schema.js",
-    "module": "./dist/ponder.schema.mjs",
-    "types": "./dist/ponder.schema.d.ts"
+      ".": {
+        "import": {
+          "types": "./dist/index.d.ts",
+          "default": "./dist/index.js"
+        }
+      },
+      "./ponder": {
+        "import": {
+          "types": "./dist/ponder-schema.d.ts",
+          "default": "./dist/ponder-schema.js"
+        }
+      },
+      "./ensindexer": {
+        "import": {
+          "types": "./dist/ensindexer-schema.d.ts",
+          "default": "./dist/ensindexer-schema.js"
+        }
+      },
+      "./ensnode": {
+        "import": {
+          "types": "./dist/ensnode-schema.d.ts",
+          "default": "./dist/ensnode-schema.js"
+        }
+      }
+    }
   },
   "scripts": {
     "prepublish": "tsup",
     "lint": "biome check --write .",
     "lint:ci": "biome ci"
   },
-  "dependencies": {
+  "peerDependencies": {
+    "drizzle-orm": "catalog:",
     "ponder": "catalog:",
     "viem": "catalog:"
   },
   "devDependencies": {
     "@ensnode/ensnode-sdk": "workspace:",
     "@ensnode/shared-configs": "workspace:*",
+    "drizzle-orm": "catalog:",
+    "ponder": "catalog:",
     "tsup": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "viem": "catalog:"
   }
 }
