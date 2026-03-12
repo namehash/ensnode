@@ -35,20 +35,20 @@
       },
       "./ponder": {
         "import": {
-          "types": "./dist/ponder-schema.d.ts",
-          "default": "./dist/ponder-schema.js"
+          "types": "./dist/ponder-schema/index.d.ts",
+          "default": "./dist/ponder-schema/index.js"
         }
       },
       "./ensindexer": {
         "import": {
-          "types": "./dist/ensindexer-schema.d.ts",
-          "default": "./dist/ensindexer-schema.js"
+          "types": "./dist/ensindexer-schema/index.d.ts",
+          "default": "./dist/ensindexer-schema/index.js"
         }
       },
       "./ensnode": {
         "import": {
-          "types": "./dist/ensnode-schema.d.ts",
-          "default": "./dist/ensnode-schema.js"
+          "types": "./dist/ensnode-schema/index.d.ts",
+          "default": "./dist/ensnode-schema/index.js"
         }
       }
     }

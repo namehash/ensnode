@@ -23,6 +23,10 @@ export const databaseUrl = "postgres://user:pass@localhost:5432/ensdb";
 
 export const databaseSchemaName = "public";
 
+// This is the same as the default value of config.databaseSchemaName,
+// which is used as the ensIndexerRef for multi-tenancy in ENSDb.
+export const ensIndexerRef = databaseSchemaName;
+
 export const publicConfig = {
   databaseSchemaName,
   ensRainbowPublicConfig: {

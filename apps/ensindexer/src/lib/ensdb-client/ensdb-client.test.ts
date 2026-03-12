@@ -50,10 +50,7 @@ describe("EnsDbClient", () => {
   describe("getEnsDbVersion", () => {
     it("returns undefined when no record exists", async () => {
       // arrange
-      const client = new EnsDbClient(
-        ensDbClientMock.databaseUrl,
-        ensDbClientMock.databaseSchemaName,
-      );
+      const client = new EnsDbClient(ensDbClientMock.databaseUrl, ensDbClientMock.ensIndexerRef);
 
       // act & assert
       await expect(client.getEnsDbVersion()).resolves.toBeUndefined();
@@ -66,10 +63,7 @@ describe("EnsDbClient", () => {
       // arrange
       selectResult.current = [{ value: "0.1.0" }];
 
-      const client = new EnsDbClient(
-        ensDbClientMock.databaseUrl,
-        ensDbClientMock.databaseSchemaName,
-      );
+      const client = new EnsDbClient(ensDbClientMock.databaseUrl, ensDbClientMock.ensIndexerRef);
 
       // act & assert
       await expect(client.getEnsDbVersion()).resolves.toBe("0.1.0");
@@ -81,10 +75,7 @@ describe("EnsDbClient", () => {
       // arrange
       selectResult.current = [{ value: "0.1.0" }, { value: "0.1.1" }];
 
-      const client = new EnsDbClient(
-        ensDbClientMock.databaseUrl,
-        ensDbClientMock.databaseSchemaName,
-      );
+      const client = new EnsDbClient(ensDbClientMock.databaseUrl, ensDbClientMock.ensIndexerRef);
 
       // act & assert
       await expect(client.getEnsDbVersion()).rejects.toThrowError(/ensdb_version/i);
@@ -94,10 +85,7 @@ describe("EnsDbClient", () => {
   describe("getEnsIndexerPublicConfig", () => {
     it("returns undefined when no record exists", async () => {
       // arrange
-      const client = new EnsDbClient(
-        ensDbClientMock.databaseUrl,
-        ensDbClientMock.databaseSchemaName,
-      );
+      const client = new EnsDbClient(ensDbClientMock.databaseUrl, ensDbClientMock.ensIndexerRef);
 
       // act & assert
       await expect(client.getEnsIndexerPublicConfig()).resolves.toBeUndefined();
@@ -108,10 +96,7 @@ describe("EnsDbClient", () => {
       const serializedConfig = serializeEnsIndexerPublicConfig(ensDbClientMock.publicConfig);
       selectResult.current = [{ value: serializedConfig }];
 
-      const client = new EnsDbClient(
-        ensDbClientMock.databaseUrl,
-        ensDbClientMock.databaseSchemaName,
-      );
+      const client = new EnsDbClient(ensDbClientMock.databaseUrl, ensDbClientMock.ensIndexerRef);
 
       // act & assert
       await expect(client.getEnsIndexerPublicConfig()).resolves.toStrictEqual(
@@ -125,10 +110,7 @@ describe("EnsDbClient", () => {
       // arrange
       selectResult.current = [{ value: ensDbClientMock.serializedSnapshot }];
 
-      const client = new EnsDbClient(
-        ensDbClientMock.databaseUrl,
-        ensDbClientMock.databaseSchemaName,
-      );
+      const client = new EnsDbClient(ensDbClientMock.databaseUrl, ensDbClientMock.ensIndexerRef);
       const expected = deserializeCrossChainIndexingStatusSnapshot(
         ensDbClientMock.serializedSnapshot,
       );
@@ -141,10 +123,7 @@ describe("EnsDbClient", () => {
   describe("upsertEnsDbVersion", () => {
     it("writes the database version metadata", async () => {
       // arrange
-      const client = new EnsDbClient(
-        ensDbClientMock.databaseUrl,
-        ensDbClientMock.databaseSchemaName,
-      );
+      const client = new EnsDbClient(ensDbClientMock.databaseUrl, ensDbClientMock.ensIndexerRef);
 
       // act
       await client.upsertEnsDbVersion("0.2.0");
@@ -152,7 +131,7 @@ describe("EnsDbClient", () => {
       // assert
       expect(insertMock).toHaveBeenCalledWith(ensNodeSchema.ensNodeMetadata);
       expect(valuesMock).toHaveBeenCalledWith({
-        ensIndexerRef: ensDbClientMock.databaseSchemaName,
+        ensIndexerRef: ensDbClientMock.ensIndexerRef,
         key: EnsNodeMetadataKeys.EnsDbVersion,
         value: "0.2.0",
       });
@@ -166,10 +145,7 @@ describe("EnsDbClient", () => {
   describe("upsertEnsIndexerPublicConfig", () => {
     it("serializes and writes the public config", async () => {
       // arrange
-      const client = new EnsDbClient(
-        ensDbClientMock.databaseUrl,
-        ensDbClientMock.databaseSchemaName,
-      );
+      const client = new EnsDbClient(ensDbClientMock.databaseUrl, ensDbClientMock.ensIndexerRef);
       const expectedValue = serializeEnsIndexerPublicConfig(ensDbClientMock.publicConfig);
 
       // act
@@ -177,7 +153,7 @@ describe("EnsDbClient", () => {
 
       // assert
       expect(valuesMock).toHaveBeenCalledWith({
-        ensIndexerRef: ensDbClientMock.databaseSchemaName,
+        ensIndexerRef: ensDbClientMock.ensIndexerRef,
         key: EnsNodeMetadataKeys.EnsIndexerPublicConfig,
         value: expectedValue,
       });
@@ -187,10 +163,7 @@ describe("EnsDbClient", () => {
   describe("upsertIndexingStatusSnapshot", () => {
     it("serializes and writes the indexing status snapshot", async () => {
       // arrange
-      const client = new EnsDbClient(
-        ensDbClientMock.databaseUrl,
-        ensDbClientMock.databaseSchemaName,
-      );
+      const client = new EnsDbClient(ensDbClientMock.databaseUrl, ensDbClientMock.ensIndexerRef);
       const snapshot = deserializeCrossChainIndexingStatusSnapshot(
         ensDbClientMock.serializedSnapshot,
       );
@@ -201,7 +174,7 @@ describe("EnsDbClient", () => {
 
       // assert
       expect(valuesMock).toHaveBeenCalledWith({
-        ensIndexerRef: ensDbClientMock.databaseSchemaName,
+        ensIndexerRef: ensDbClientMock.ensIndexerRef,
         key: EnsNodeMetadataKeys.EnsIndexerIndexingStatus,
         value: expectedValue,
       });
