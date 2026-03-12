@@ -179,26 +179,16 @@ export class EnsDbClient implements EnsDbClientQuery, EnsDbClientMutation {
   private async upsertEnsNodeMetadata<
     EnsNodeMetadataType extends SerializedEnsNodeMetadata = SerializedEnsNodeMetadata,
   >(metadata: EnsNodeMetadataType): Promise<void> {
-    await this.db.transaction(async (tx) => {
-      // Ponder live-query triggers insert into live_query_tables.
-      // Because this worker writes outside the Ponder runtime connection pool,
-      // the temp table must be ensured to exist on this connection. Without this,
-      // the upsert would fail with "relation 'live_query_tables' does not exist" error.
-      await tx.execute(
-        sql`CREATE TEMP TABLE IF NOT EXISTS live_query_tables (table_name TEXT PRIMARY KEY)`,
-      );
-
-      await tx
-        .insert(ensNodeSchema.ensNodeMetadata)
-        .values({
-          ensIndexerRef: this.ensIndexerRef,
-          key: metadata.key,
-          value: metadata.value,
-        })
-        .onConflictDoUpdate({
-          target: [ensNodeSchema.ensNodeMetadata.ensIndexerRef, ensNodeSchema.ensNodeMetadata.key],
-          set: { value: metadata.value },
-        });
-    });
+    await this.db
+      .insert(ensNodeSchema.ensNodeMetadata)
+      .values({
+        ensIndexerRef: this.ensIndexerRef,
+        key: metadata.key,
+        value: metadata.value,
+      })
+      .onConflictDoUpdate({
+        target: [ensNodeSchema.ensNodeMetadata.ensIndexerRef, ensNodeSchema.ensNodeMetadata.key],
+        set: { value: metadata.value },
+      });
   }
 }
