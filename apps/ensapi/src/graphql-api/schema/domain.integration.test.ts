@@ -120,3 +120,5 @@ describe("Domain.events pagination", () => {
     return result.domain.events;
   });
 });
+
+describe.todo("Domain.events filtering (EventsWhereInput)");

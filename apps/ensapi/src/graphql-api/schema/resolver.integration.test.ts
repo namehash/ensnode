@@ -63,3 +63,5 @@ describe("Resolver.events pagination", () => {
     return result.resolver.events;
   });
 });
+
+describe.todo("Resolver.events filtering (EventsWhereInput)");

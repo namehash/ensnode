@@ -51,6 +51,11 @@ describe("Permissions.events", () => {
     const events = flattenConnection(result.permissions.events);
 
     expect(events.length).toBeGreaterThan(0);
+
+    // all events should be scoped to the ETHRegistry contract
+    for (const event of events) {
+      expect(event.address.toLowerCase()).toBe(V2_ETH_REGISTRY.address);
+    }
   });
 });
 
@@ -62,3 +67,5 @@ describe("Permissions.events pagination", () => {
     return result.permissions.events;
   });
 });
+
+describe.todo("Permissions.events filtering (EventsWhereInput)");

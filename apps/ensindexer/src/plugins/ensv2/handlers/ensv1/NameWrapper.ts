@@ -276,9 +276,6 @@ export default function () {
         throw new Error(`Invariant(NameWrapper:NameUnwrapped): Registration expected`);
       }
 
-      // push event to domain history
-      await ensureDomainEvent(context, event, domainId);
-
       if (registration.type === "BaseRegistrar") {
         // if this is a wrapped BaseRegistrar Registration, unwrap it
         await context.db.update(schema.registration, { id: registration.id }).set({
@@ -292,6 +289,9 @@ export default function () {
           expiry: event.block.timestamp,
         });
       }
+
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
 
       // NOTE: we don't need to adjust Domain.ownerId because NameWrapper always calls ens.setOwner
     },
