@@ -30,7 +30,7 @@ import type { ENSIndexerConfig } from "@/config/types";
  * - `${string}.${string}` (call trace events)
  * - `${ContractName}:setup` (setup events)
  */
-export type LogEvent<T extends EventNames = EventNames> = T extends `${string}:block`
+type FilterLogEvents<T extends EventNames> = T extends `${string}:block`
   ? never
   : T extends `${string}:transaction:${"from" | "to"}`
     ? never
@@ -44,7 +44,12 @@ export type LogEvent<T extends EventNames = EventNames> = T extends `${string}:b
             ? Event<T>
             : never;
 
-export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<LogEvent, "args"> & {
+export type LogEvent = FilterLogEvents<EventNames>;
+
+/** LogEvent without args — for functions that only need block/transaction/log metadata. */
+export type LogEventBase = Omit<LogEvent, "args">;
+
+export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = LogEventBase & {
   args: ARGS;
 };
 /**

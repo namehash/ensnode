@@ -1,3 +1,5 @@
+import type { Abi } from "viem";
+
 export const Resolver = [
   {
     inputs: [
@@ -1049,4 +1051,4 @@ export const Resolver = [
     stateMutability: "view",
     type: "function",
   },
-] as const;
+] as const satisfies Abi;

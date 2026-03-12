@@ -2,11 +2,15 @@ import { beforeAll, describe, expect, it } from "vitest";
 
 import type { DomainsOrderByValue, DomainsOrderInput } from "@/graphql-api/schema/domain";
 import type { OrderDirectionValue } from "@/graphql-api/schema/order-direction";
-import type { PaginatedDomainResult } from "@/test/integration/domain-pagination-queries";
+import type { PaginatedDomainResult } from "@/test/integration/find-domains/domain-pagination-queries";
 import {
-  flattenConnection,
+  collectBackward,
+  collectForward,
   type PaginatedGraphQLConnection,
 } from "@/test/integration/graphql-utils";
+
+// NOTE: using small page size to force multiple pages in devnet result set
+const PAGE_SIZE = 2;
 
 type FetchPageVariables = {
   order: typeof DomainsOrderInput.$inferInput;
@@ -34,7 +38,7 @@ function getSortValue(domain: PaginatedDomainResult, by: DomainsOrderByValue): s
     case "NAME":
       return domain.label.interpreted;
     case "REGISTRATION_TIMESTAMP":
-      return domain.registration?.event.timestamp ?? null;
+      return domain.registration?.start ?? null;
     case "REGISTRATION_EXPIRY":
       return domain.registration?.expiry ?? null;
   }
@@ -86,55 +90,6 @@ function assertOrdering(
   }
 }
 
-async function collectForward(
-  fetchPage: FetchPage,
-  order: typeof DomainsOrderInput.$inferInput,
-  pageSize: number,
-): Promise<PaginatedDomainResult[]> {
-  const all: PaginatedDomainResult[] = [];
-  let after: string | undefined;
-
-  while (true) {
-    const page = await fetchPage({ order, first: pageSize, after });
-    all.push(...flattenConnection(page));
-
-    if (!page.pageInfo.hasNextPage) break;
-
-    const nextCursor = page.pageInfo.endCursor ?? undefined;
-    expect(nextCursor, "endCursor must advance when hasNextPage is true").not.toBe(after);
-    after = nextCursor;
-  }
-
-  return all;
-}
-
-async function collectBackward(
-  fetchPage: FetchPage,
-  order: typeof DomainsOrderInput.$inferInput,
-  pageSize: number,
-): Promise<PaginatedDomainResult[]> {
-  const all: PaginatedDomainResult[] = [];
-  let before: string | undefined;
-
-  while (true) {
-    const page = await fetchPage({ order, last: pageSize, before });
-    // prepend: last pages come in forward order within the page,
-    // but we're iterating from the end of the full list
-    all.unshift(...flattenConnection(page));
-
-    if (!page.pageInfo.hasPreviousPage) break;
-
-    const nextCursor = page.pageInfo.startCursor ?? undefined;
-    expect(nextCursor, "startCursor must advance when hasPreviousPage is true").not.toBe(before);
-    before = nextCursor;
-  }
-
-  return all;
-}
-
-// NOTE: using small page size to force multiple pages in devnet result set
-const PAGE_SIZE = 2;
-
 /**
  * Generic pagination test suite for any find-domains connection field.
  *
@@ -148,19 +103,27 @@ export function testDomainPagination(fetchPage: FetchPage) {
       let backwardNodes: PaginatedDomainResult[];
 
       beforeAll(async () => {
-        forwardNodes = await collectForward(fetchPage, order, PAGE_SIZE);
-        backwardNodes = await collectBackward(fetchPage, order, PAGE_SIZE);
+        forwardNodes = await collectForward((vars) => fetchPage({ order, ...vars }), PAGE_SIZE);
+        backwardNodes = await collectBackward((vars) => fetchPage({ order, ...vars }), PAGE_SIZE);
       });
 
-      it("forward pagination collects all nodes", async () => {
-        expect(forwardNodes.length).toBeGreaterThan(0);
+      it("forward pagination collects more nodes than page size", () => {
+        expect(
+          forwardNodes.length,
+          `expected more than ${PAGE_SIZE} nodes to prove pagination was exercised`,
+        ).toBeGreaterThan(PAGE_SIZE);
+      });
+
+      it("no duplicate ids across pages", () => {
+        const ids = forwardNodes.map((d) => d.id);
+        expect(ids.length).toBe(new Set(ids).size);
       });
 
       it("nodes are correctly ordered", () => {
         assertOrdering(forwardNodes, order.by, order.dir);
       });
 
-      it("backward pagination yields same nodes in same order", async () => {
+      it("backward pagination yields same nodes in same order", () => {
         expect(backwardNodes).toEqual(forwardNodes);
       });
     });

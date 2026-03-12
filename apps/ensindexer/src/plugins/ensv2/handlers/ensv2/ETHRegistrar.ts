@@ -14,16 +14,16 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
-import { ensureEvent } from "@/lib/ensv2/event-db-helpers";
+import { ensureDomainEvent, ensureEvent } from "@/lib/ensv2/event-db-helpers";
 import { getLatestRegistration, insertLatestRenewal } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { toJson } from "@/lib/json-stringify-with-bigints";
 import { namespaceContract } from "@/lib/plugin-helpers";
-import type { EventWithArgs, LogEvent } from "@/lib/ponder-helpers";
+import type { EventWithArgs, LogEventBase } from "@/lib/ponder-helpers";
 
 const pluginName = PluginName.ENSv2;
 
-async function getRegistrarAndRegistry(context: Context, event: LogEvent) {
+async function getRegistrarAndRegistry(context: Context, event: LogEventBase) {
   const registrar = getThisAccountId(context, event);
   const registry: AccountId = {
     chainId: context.chain.id,
@@ -112,6 +112,9 @@ export default function () {
         base,
         premium,
       });
+
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
     },
   );
 
@@ -166,6 +169,9 @@ export default function () {
         // TODO(paymentToken)
         base,
       });
+
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
     },
   );
 }

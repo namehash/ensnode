@@ -13,6 +13,7 @@ import {
   PluginName,
 } from "@ensnode/ensnode-sdk";
 
+import { ensureDomainEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel, ensureUnknownLabel } from "@/lib/ensv2/label-db-helpers";
 import { getLatestRegistration, getLatestRenewal } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
@@ -72,6 +73,9 @@ export default function () {
     await context.db
       .update(schema.registration, { id: registration.id })
       .set({ base, premium, referrer });
+
+    // push event to domain history
+    await ensureDomainEvent(context, event, domainId);
   }
 
   async function handleNameRenewedByController({
@@ -142,6 +146,9 @@ export default function () {
     // update renewal info
     // TODO(paymentToken): add payment token tracking here
     await context.db.update(schema.renewal, { id: renewal.id }).set({ base, premium, referrer });
+
+    // push event to domain history
+    await ensureDomainEvent(context, event, domainId);
   }
 
   //////////////////////////////////////

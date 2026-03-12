@@ -1,3 +1,5 @@
+import type { Abi } from "viem";
+
 export const Registry = [
   {
     inputs: [
@@ -7,7 +9,6 @@ export const Registry = [
         type: "address",
       },
     ],
-    payable: false,
     stateMutability: "nonpayable",
     type: "constructor",
   },
@@ -119,7 +120,6 @@ export const Registry = [
     type: "event",
   },
   {
-    constant: true,
     inputs: [
       {
         internalType: "address",
@@ -140,12 +140,10 @@ export const Registry = [
         type: "bool",
       },
     ],
-    payable: false,
     stateMutability: "view",
     type: "function",
   },
   {
-    constant: true,
     inputs: [],
     name: "old",
     outputs: [
@@ -155,12 +153,10 @@ export const Registry = [
         type: "address",
       },
     ],
-    payable: false,
     stateMutability: "view",
     type: "function",
   },
   {
-    constant: true,
     inputs: [
       {
         internalType: "bytes32",
@@ -176,12 +172,10 @@ export const Registry = [
         type: "address",
       },
     ],
-    payable: false,
     stateMutability: "view",
     type: "function",
   },
   {
-    constant: true,
     inputs: [
       {
         internalType: "bytes32",
@@ -197,12 +191,10 @@ export const Registry = [
         type: "bool",
       },
     ],
-    payable: false,
     stateMutability: "view",
     type: "function",
   },
   {
-    constant: true,
     inputs: [
       {
         internalType: "bytes32",
@@ -218,12 +210,10 @@ export const Registry = [
         type: "address",
       },
     ],
-    payable: false,
     stateMutability: "view",
     type: "function",
   },
   {
-    constant: false,
     inputs: [
       {
         internalType: "address",
@@ -238,12 +228,10 @@ export const Registry = [
     ],
     name: "setApprovalForAll",
     outputs: [],
-    payable: false,
     stateMutability: "nonpayable",
     type: "function",
   },
   {
-    constant: false,
     inputs: [
       {
         internalType: "bytes32",
@@ -258,12 +246,10 @@ export const Registry = [
     ],
     name: "setOwner",
     outputs: [],
-    payable: false,
     stateMutability: "nonpayable",
     type: "function",
   },
   {
-    constant: false,
     inputs: [
       {
         internalType: "bytes32",
@@ -288,12 +274,10 @@ export const Registry = [
     ],
     name: "setRecord",
     outputs: [],
-    payable: false,
     stateMutability: "nonpayable",
     type: "function",
   },
   {
-    constant: false,
     inputs: [
       {
         internalType: "bytes32",
@@ -308,12 +292,10 @@ export const Registry = [
     ],
     name: "setResolver",
     outputs: [],
-    payable: false,
     stateMutability: "nonpayable",
     type: "function",
   },
   {
-    constant: false,
     inputs: [
       {
         internalType: "bytes32",
@@ -339,12 +321,10 @@ export const Registry = [
         type: "bytes32",
       },
     ],
-    payable: false,
     stateMutability: "nonpayable",
     type: "function",
   },
   {
-    constant: false,
     inputs: [
       {
         internalType: "bytes32",
@@ -374,12 +354,10 @@ export const Registry = [
     ],
     name: "setSubnodeRecord",
     outputs: [],
-    payable: false,
     stateMutability: "nonpayable",
     type: "function",
   },
   {
-    constant: false,
     inputs: [
       {
         internalType: "bytes32",
@@ -394,12 +372,10 @@ export const Registry = [
     ],
     name: "setTTL",
     outputs: [],
-    payable: false,
     stateMutability: "nonpayable",
     type: "function",
   },
   {
-    constant: true,
     inputs: [
       {
         internalType: "bytes32",
@@ -415,8 +391,7 @@ export const Registry = [
         type: "uint64",
       },
     ],
-    payable: false,
     stateMutability: "view",
     type: "function",
   },
-] as const;
+] as const satisfies Abi;
