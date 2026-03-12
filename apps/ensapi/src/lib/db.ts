@@ -1,6 +1,6 @@
 import config from "@/config";
 
-import * as schema from "@ensnode/ensnode-schema";
+import * as ensIndexerSchema from "@ensnode/ensnode-schema/ensindexer";
 
 import { makeReadOnlyDrizzle } from "@/lib/handlers/drizzle";
 
@@ -10,5 +10,5 @@ import { makeReadOnlyDrizzle } from "@/lib/handlers/drizzle";
 export const db = makeReadOnlyDrizzle({
   databaseUrl: config.databaseUrl,
   databaseSchema: config.databaseSchemaName,
-  schema,
+  schema: ensIndexerSchema,
 });
