@@ -1,3 +1,5 @@
+import type { Abi } from "viem";
+
 export const NameWrapper = [
   {
     inputs: [
@@ -86,6 +88,22 @@ export const NameWrapper = [
   {
     inputs: [
       {
+        internalType: "uint256",
+        name: "offset",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "length",
+        type: "uint256",
+      },
+    ],
+    name: "OffsetOutOfBoundsError",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
         internalType: "bytes32",
         name: "node",
         type: "bytes32",
@@ -109,6 +127,31 @@ export const NameWrapper = [
     ],
     name: "Unauthorised",
     type: "error",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "owner",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "approved",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "tokenId",
+        type: "uint256",
+      },
+    ],
+    name: "Approval",
+    type: "event",
   },
   {
     anonymous: false,
@@ -407,6 +450,24 @@ export const NameWrapper = [
     inputs: [
       {
         internalType: "address",
+        name: "to",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "tokenId",
+        type: "uint256",
+      },
+    ],
+    name: "approve",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
         name: "account",
         type: "address",
       },
@@ -446,6 +507,30 @@ export const NameWrapper = [
         internalType: "uint256[]",
         name: "",
         type: "uint256[]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "node",
+        type: "bytes32",
+      },
+      {
+        internalType: "address",
+        name: "addr",
+        type: "address",
+      },
+    ],
+    name: "canExtendSubnames",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
       },
     ],
     stateMutability: "view",
@@ -544,6 +629,25 @@ export const NameWrapper = [
         type: "uint256",
       },
     ],
+    name: "getApproved",
+    outputs: [
+      {
+        internalType: "address",
+        name: "operator",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "id",
+        type: "uint256",
+      },
+    ],
     name: "getData",
     outputs: [
       {
@@ -579,6 +683,30 @@ export const NameWrapper = [
       },
     ],
     name: "isApprovedForAll",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "parentNode",
+        type: "bytes32",
+      },
+      {
+        internalType: "bytes32",
+        name: "labelhash",
+        type: "bytes32",
+      },
+    ],
+    name: "isWrapped",
     outputs: [
       {
         internalType: "bool",
@@ -1238,24 +1366,14 @@ export const NameWrapper = [
   {
     inputs: [
       {
-        internalType: "bytes32",
-        name: "parentNode",
-        type: "bytes32",
+        internalType: "bytes",
+        name: "name",
+        type: "bytes",
       },
       {
-        internalType: "string",
-        name: "label",
-        type: "string",
-      },
-      {
-        internalType: "address",
-        name: "wrappedOwner",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "resolver",
-        type: "address",
+        internalType: "bytes",
+        name: "extraData",
+        type: "bytes",
       },
     ],
     name: "upgrade",
@@ -1274,29 +1392,6 @@ export const NameWrapper = [
       },
     ],
     stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "string",
-        name: "label",
-        type: "string",
-      },
-      {
-        internalType: "address",
-        name: "wrappedOwner",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "resolver",
-        type: "address",
-      },
-    ],
-    name: "upgradeETH2LD",
-    outputs: [],
-    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -1365,8 +1460,14 @@ export const NameWrapper = [
       },
     ],
     name: "wrapETH2LD",
-    outputs: [],
+    outputs: [
+      {
+        internalType: "uint64",
+        name: "expiry",
+        type: "uint64",
+      },
+    ],
     stateMutability: "nonpayable",
     type: "function",
   },
-] as const;
+] as const satisfies Abi;

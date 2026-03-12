@@ -24,7 +24,7 @@ export type DomainsWithOrderingMetadataResult = {
 /**
  * Enrich a base domain set with ordering metadata.
  *
- * Joins latestRegistrationIndex → registration → event for registration-based ordering.
+ * Joins latestRegistrationIndex → registration for registration-based ordering.
  * Uses sortableLabel from the base set for NAME ordering.
  *
  * Returns a CTE with columns: {id, sortableLabel, registrationTimestamp, registrationExpiry}
@@ -40,8 +40,8 @@ export function withOrderingMetadata(base: BaseDomainSet) {
       // for NAME ordering
       sortableLabel: base.sortableLabel,
 
-      // for REGISTRATION_TIMESTAMP ordering
-      registrationTimestamp: schema.event.timestamp,
+      // for REGISTRATION_TIMESTAMP ordering (materialized on registration)
+      registrationTimestamp: schema.registration.start,
 
       // for REGISTRATION_EXPIRY ordering
       registrationExpiry: schema.registration.expiry,
@@ -59,9 +59,7 @@ export function withOrderingMetadata(base: BaseDomainSet) {
         eq(schema.registration.domainId, base.domainId),
         eq(schema.registration.index, schema.latestRegistrationIndex.index),
       ),
-    )
-    // join (latest) Registration's Event
-    .leftJoin(schema.event, eq(schema.event.id, schema.registration.eventId));
+    );
 
   return db.$with("domains").as(domains);
 }

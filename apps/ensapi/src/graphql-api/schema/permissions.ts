@@ -13,11 +13,13 @@ import {
 
 import { builder } from "@/graphql-api/builder";
 import { orderPaginationBy, paginateBy } from "@/graphql-api/lib/connection-helpers";
+import { resolveFindEvents } from "@/graphql-api/lib/find-events/find-events-resolver";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
 import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { AccountIdRef } from "@/graphql-api/schema/account-id";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
+import { EventRef, EventsWhereInput } from "@/graphql-api/schema/event";
 import { db } from "@/lib/db";
 
 export const PermissionsRef = builder.loadableObjectRef("Permissions", {
@@ -118,6 +120,24 @@ PermissionsRef.implement({
             ),
         });
       },
+    }),
+
+    //////////////////////
+    // Permissions.events
+    //////////////////////
+    events: t.connection({
+      description: "All Events associated with these Permissions.",
+      type: EventRef,
+      args: {
+        where: t.arg({ type: EventsWhereInput }),
+      },
+      resolve: (parent, args) =>
+        resolveFindEvents(args, {
+          through: {
+            table: schema.permissionsEvent,
+            scope: eq(schema.permissionsEvent.permissionsId, parent.id),
+          },
+        }),
     }),
   }),
 });

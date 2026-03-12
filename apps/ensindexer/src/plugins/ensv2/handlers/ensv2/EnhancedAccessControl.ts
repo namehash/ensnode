@@ -10,6 +10,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
+import { ensurePermissionsEvent } from "@/lib/ensv2/event-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
@@ -84,6 +85,9 @@ export default function () {
           .values({ id: permissionsUserId, ...contract, resource, user, roles })
           .onConflictDoUpdate({ roles });
       }
+
+      // push event to permissions
+      await ensurePermissionsEvent(context, event, contract);
     },
   );
 }

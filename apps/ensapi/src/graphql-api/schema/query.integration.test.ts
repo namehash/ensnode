@@ -14,18 +14,18 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { DEVNET_NAMES } from "@/test/integration/devnet-names";
+import { gql } from "@/test/integration/ensnode-graphql-api-client";
 import {
   type PaginatedDomainResult,
   QueryDomainsPaginated,
-} from "@/test/integration/domain-pagination-queries";
-import { gql } from "@/test/integration/ensnode-graphql-api-client";
+} from "@/test/integration/find-domains/domain-pagination-queries";
+import { testDomainPagination } from "@/test/integration/find-domains/test-domain-pagination";
 import {
   flattenConnection,
   type GraphQLConnection,
   type PaginatedGraphQLConnection,
   request,
 } from "@/test/integration/graphql-utils";
-import { testDomainPagination } from "@/test/integration/test-domain-pagination";
 
 const namespace = "ens-test-env";
 

@@ -8,7 +8,10 @@ import type {
 } from "@/graphql-api/lib/find-domains/layers/with-ordering-metadata";
 import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
-import { ID_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
+import {
+  PAGINATION_DEFAULT_MAX_SIZE,
+  PAGINATION_DEFAULT_PAGE_SIZE,
+} from "@/graphql-api/schema/constants";
 import {
   DOMAINS_DEFAULT_ORDER_BY,
   DOMAINS_DEFAULT_ORDER_DIR,
@@ -20,7 +23,7 @@ import type { OrderDirection } from "@/graphql-api/schema/order-direction";
 import { db } from "@/lib/db";
 import { makeLogger } from "@/lib/logger";
 
-import { DomainCursor } from "./domain-cursor";
+import { DomainCursors } from "./domain-cursor";
 import { cursorFilter, orderFindDomains } from "./find-domains-resolver-helpers";
 import type { DomainOrderValue } from "./types";
 
@@ -103,23 +106,24 @@ export function resolveFindDomains(
     connection: () =>
       resolveCursorConnection(
         {
-          ...ID_PAGINATED_CONNECTION_ARGS,
-          args: connectionArgs,
           toCursor: (domain: DomainWithOrderValue) =>
-            DomainCursor.encode({
+            DomainCursors.encode({
               id: domain.id,
               by: orderBy,
               dir: orderDir,
               value: domain.__orderValue,
             }),
+          defaultSize: PAGINATION_DEFAULT_PAGE_SIZE,
+          maxSize: PAGINATION_DEFAULT_MAX_SIZE,
+          args: connectionArgs,
         },
         async ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) => {
           // build order clauses
           const orderClauses = orderFindDomains(domains, orderBy, orderDir, inverted);
 
           // decode cursors for keyset pagination
-          const beforeCursor = before ? DomainCursor.decode(before) : undefined;
-          const afterCursor = after ? DomainCursor.decode(after) : undefined;
+          const beforeCursor = before ? DomainCursors.decode(before) : undefined;
+          const afterCursor = after ? DomainCursors.decode(after) : undefined;
 
           // build query with pagination constraints
           const query = db

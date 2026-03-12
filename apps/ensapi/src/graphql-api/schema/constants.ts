@@ -1,13 +1,16 @@
+import { cursors } from "@/graphql-api/lib/cursors";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
-import { cursors } from "@/graphql-api/schema/cursors";
+
+export const PAGINATION_DEFAULT_PAGE_SIZE = 100;
+export const PAGINATION_DEFAULT_MAX_SIZE = 1000;
 
 /**
  * Default Connection field arguments for use with the Relay plugin.
  */
 export const ID_PAGINATED_CONNECTION_ARGS = {
   toCursor: <T extends { id: string }>(model: T) => cursors.encode(getModelId(model)),
-  defaultSize: 100,
-  maxSize: 1000,
+  defaultSize: PAGINATION_DEFAULT_PAGE_SIZE,
+  maxSize: PAGINATION_DEFAULT_MAX_SIZE,
 } as const;
 
 /**
@@ -18,6 +21,6 @@ export const ID_PAGINATED_CONNECTION_ARGS = {
  */
 export const INDEX_PAGINATED_CONNECTION_ARGS = {
   toCursor: <T extends { index: number }>(model: T) => cursors.encode(String(model.index)),
-  defaultSize: 100,
-  maxSize: 1000,
+  defaultSize: PAGINATION_DEFAULT_PAGE_SIZE,
+  maxSize: PAGINATION_DEFAULT_MAX_SIZE,
 } as const;
