@@ -1,4 +1,8 @@
+import config from "@/config";
+
 import { eq, isNotNull, isNull, or } from "drizzle-orm";
+
+import { maybeGetENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
 
 import { db } from "@/lib/db";
 
@@ -15,6 +19,9 @@ import { type BaseDomainSet, selectBase } from "./base-domain-set";
  * v2 domains must match a canonical registry.
  */
 export function filterByCanonical(base: BaseDomainSet) {
+  // skip the CTE/join if ENSv2 not defined
+  if (!maybeGetENSv2RootRegistryId(config.namespace)) return base;
+
   const canonicalRegistries = getCanonicalRegistriesCTE();
 
   return db
