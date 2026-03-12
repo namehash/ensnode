@@ -1,10 +1,9 @@
 /**
- * Merge the various sub-schemas into a single ponder (drizzle) schema.
+ * Merge the various sub-schemas into ENSIndexer Schema.
  */
 
-export * from "./schemas/ensnode-metadata.schema";
-export * from "./schemas/ensv2.schema";
-export * from "./schemas/protocol-acceleration.schema";
-export * from "./schemas/registrars.schema";
-export * from "./schemas/subgraph.schema";
-export * from "./schemas/tokenscope.schema";
+export * from "./ensv2.subschema";
+export * from "./protocol-acceleration.subschema";
+export * from "./registrars.subschema";
+export * from "./subgraph.subschema";
+export * from "./tokenscope.subschema";
