@@ -31,8 +31,8 @@ export async function ensureEvent(context: Context, event: LogEventBase) {
     throw new Error(`Invariant: All events indexed via ensureEvent must have at least one topic.`);
   }
 
-  // TODO: figure out why we're getting null topics in our decoding, which should only happen
-  // with an event log / abi mismatch (i.e. the event can be _mostly_ decoded)
+  // TODO: ponder provides nulls in the topics array, so we filter them out
+  // https://github.com/ponder-sh/ponder/blob/main/packages/core/src/sync-store/encode.ts#L59
   const topics = event.log.topics.filter((topic): topic is Hash => topic !== null) as Topics;
 
   await context.db
