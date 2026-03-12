@@ -1,5 +1,6 @@
 import { setDatabaseSchema } from "@ponder/client";
 import { drizzle } from "drizzle-orm/node-postgres";
+import { parseIntoClientConfig } from "pg-connection-string";
 
 import { makeLogger } from "@/lib/logger";
 
@@ -8,9 +9,9 @@ type Schema = { [name: string]: unknown };
 const logger = makeLogger("drizzle");
 
 /**
- * Makes a Drizzle DB object.
+ * Makes a read-only Drizzle DB object.
  */
-export const makeDrizzle = <SCHEMA extends Schema>({
+export const makeReadOnlyDrizzle = <SCHEMA extends Schema>({
   schema,
   databaseUrl,
   databaseSchema,
@@ -22,7 +23,11 @@ export const makeDrizzle = <SCHEMA extends Schema>({
   // monkeypatch schema onto tables
   setDatabaseSchema(schema, databaseSchema);
 
-  return drizzle(databaseUrl, {
+  return drizzle({
+    connection: {
+      ...parseIntoClientConfig(databaseUrl),
+      options: "-c default_transaction_read_only=on",
+    },
     schema,
     casing: "snake_case",
     logger: {

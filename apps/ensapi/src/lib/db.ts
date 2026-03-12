@@ -2,9 +2,12 @@ import config from "@/config";
 
 import * as schema from "@ensnode/ensnode-schema";
 
-import { makeDrizzle } from "@/lib/handlers/drizzle";
+import { makeReadOnlyDrizzle } from "@/lib/handlers/drizzle";
 
-export const db = makeDrizzle({
+/**
+ * Read-only Drizzle instance for ENSDb queries to ENSIndexer Schema
+ */
+export const db = makeReadOnlyDrizzle({
   databaseUrl: config.databaseUrl,
   databaseSchema: config.databaseSchemaName,
   schema,
