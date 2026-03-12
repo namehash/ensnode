@@ -65,7 +65,7 @@ RegistrationInterfaceRef.implement({
     //////////////////////
     id: t.field({
       description: "A unique reference to this Registration.",
-      type: "ID",
+      type: "RegistrationId",
       nullable: false,
       resolve: (parent) => parent.id,
     }),

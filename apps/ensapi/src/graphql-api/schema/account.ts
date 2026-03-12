@@ -1,5 +1,5 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
-import { and, count, eq } from "drizzle-orm";
+import { and, count, eq, getTableColumns } from "drizzle-orm";
 import type { Address } from "viem";
 
 import * as schema from "@ensnode/ensnode-schema";
@@ -18,8 +18,6 @@ import { resolveFindEvents } from "@/graphql-api/lib/find-events/find-events-res
 import { getModelId } from "@/graphql-api/lib/get-model-id";
 import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { AccountIdInput } from "@/graphql-api/schema/account-id";
-import { AccountRegistryPermissionsRef } from "@/graphql-api/schema/account-registries-permissions";
-import { AccountResolverPermissionsRef } from "@/graphql-api/schema/account-resolver-permissions";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import {
   AccountDomainsWhereInput,
@@ -28,6 +26,8 @@ import {
 } from "@/graphql-api/schema/domain";
 import { AccountEventsWhereInput, EventRef } from "@/graphql-api/schema/event";
 import { PermissionsUserRef } from "@/graphql-api/schema/permissions";
+import { RegistryPermissionsUserRef } from "@/graphql-api/schema/registry-permissions-user";
+import { ResolverPermissionsUserRef } from "@/graphql-api/schema/resolver-permissions-user";
 import { db } from "@/lib/db";
 
 export const AccountRef = builder.loadableObjectRef("Account", {
@@ -105,7 +105,8 @@ AccountRef.implement({
     // Account.permissions
     ///////////////////////
     permissions: t.connection({
-      description: "The Permissions granted to this Account.",
+      description:
+        "The Permissions granted to this Account, optionally filtered to Permissions in a specific contract.",
       type: PermissionsUserRef,
       args: {
         in: t.arg({ type: AccountIdInput }),
@@ -143,10 +144,9 @@ AccountRef.implement({
     ///////////////////////////////
     // Account.registryPermissions
     ///////////////////////////////
-    // TODO: this returns all permissions in a registry, perhaps can provide api for non-token resources...
     registryPermissions: t.connection({
       description: "The Permissions on Registries granted to this Account.",
-      type: AccountRegistryPermissionsRef,
+      type: RegistryPermissionsUserRef,
       resolve: (parent, args) => {
         const scope = eq(schema.permissionsUser.user, parent.id);
         const join = and(
@@ -167,16 +167,12 @@ AccountRef.implement({
               { ...ID_PAGINATED_CONNECTION_ARGS, args },
               ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
                 db
-                  .select({
-                    permissionsUser: schema.permissionsUser,
-                    registry: schema.registry,
-                  })
+                  .select(getTableColumns(schema.permissionsUser))
                   .from(schema.permissionsUser)
                   .innerJoin(schema.registry, join)
                   .where(and(scope, paginateBy(schema.permissionsUser.id, before, after)))
                   .orderBy(orderPaginationBy(schema.permissionsUser.id, inverted))
-                  .limit(limit)
-                  .then((rows) => rows.map((r) => ({ id: r.permissionsUser.id, ...r }))),
+                  .limit(limit),
             ),
         });
       },
@@ -187,7 +183,7 @@ AccountRef.implement({
     ///////////////////////////////
     resolverPermissions: t.connection({
       description: "The Permissions on Resolvers granted to this Account.",
-      type: AccountResolverPermissionsRef,
+      type: ResolverPermissionsUserRef,
       resolve: (parent, args) => {
         const scope = eq(schema.permissionsUser.user, parent.id);
         const join = and(
@@ -208,16 +204,12 @@ AccountRef.implement({
               { ...ID_PAGINATED_CONNECTION_ARGS, args },
               ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
                 db
-                  .select({
-                    permissionsUser: schema.permissionsUser,
-                    resolver: schema.resolver,
-                  })
+                  .select(getTableColumns(schema.permissionsUser))
                   .from(schema.permissionsUser)
                   .innerJoin(schema.resolver, join)
                   .where(and(scope, paginateBy(schema.permissionsUser.id, before, after)))
                   .orderBy(orderPaginationBy(schema.permissionsUser.id, inverted))
-                  .limit(limit)
-                  .then((rows) => rows.map((r) => ({ id: r.permissionsUser.id, ...r }))),
+                  .limit(limit),
             ),
         });
       },
