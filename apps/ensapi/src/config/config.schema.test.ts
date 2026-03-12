@@ -19,12 +19,20 @@ vi.mock("@/lib/logger", () => ({
     error: vi.fn(),
     info: vi.fn(),
   },
+  makeLogger: vi.fn(() => ({
+    error: vi.fn(),
+    info: vi.fn(),
+    debug: vi.fn(),
+    warn: vi.fn(),
+    trace: vi.fn(),
+  })),
 }));
 
 const VALID_RPC_URL = "https://eth-sepolia.g.alchemy.com/v2/1234";
 
 const BASE_ENV = {
   DATABASE_URL: "postgresql://user:password@localhost:5432/mydb",
+  DATABASE_SCHEMA: "public",
   ENSINDEXER_URL: "http://localhost:42069",
   RPC_URL_1: VALID_RPC_URL,
 } satisfies EnsApiEnvironment;
@@ -49,6 +57,20 @@ const ENSINDEXER_PUBLIC_CONFIG = {
     ponder: "1.1.1",
   },
 } satisfies ENSIndexerPublicConfig;
+
+// Mock EnsDbClient - must be defined after ENSINDEXER_PUBLIC_CONFIG since vi.mock is hoisted
+// We'll use a simple class mock and configure it in beforeEach
+const mockGetVersion = vi.fn().mockResolvedValue("1.0.0");
+const mockGetEnsIndexerPublicConfig = vi.fn().mockResolvedValue(ENSINDEXER_PUBLIC_CONFIG);
+const mockGetIndexingStatusSnapshot = vi.fn().mockResolvedValue(null);
+
+vi.mock("@/lib/ensdb-client/ensdb-client", () => ({
+  EnsDbClient: class MockEnsDbClient {
+    getVersion = mockGetVersion;
+    getEnsIndexerPublicConfig = mockGetEnsIndexerPublicConfig;
+    getIndexingStatusSnapshot = mockGetIndexingStatusSnapshot;
+  },
+}));
 
 const mockFetch = vi.fn();
 vi.stubGlobal("fetch", mockFetch);
@@ -116,6 +138,7 @@ describe("buildConfigFromEnvironment", () => {
 
     const TEST_ENV: EnsApiEnvironment = {
       DATABASE_URL: BASE_ENV.DATABASE_URL,
+      DATABASE_SCHEMA: BASE_ENV.DATABASE_SCHEMA,
       ENSINDEXER_URL: BASE_ENV.ENSINDEXER_URL,
     };
 
