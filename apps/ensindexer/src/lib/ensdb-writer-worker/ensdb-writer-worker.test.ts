@@ -7,13 +7,13 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import * as ensDbClientMock from "@/lib/ensdb-client/ensdb-client.mock";
-import { EnsDbWriterWorker } from "@/lib/ensdb-writer-worker/ensdb-writer-worker";
 import type { IndexingStatusBuilder } from "@/lib/indexing-status-builder/indexing-status-builder";
 import type { PublicConfigBuilder } from "@/lib/public-config-builder/public-config-builder";
 
 import {
   createMockCrossChainSnapshot,
   createMockEnsDbClient,
+  createMockEnsDbWriterWorker,
   createMockIndexingStatusBuilder,
   createMockOmnichainSnapshot,
   createMockPublicConfigBuilder,
@@ -54,7 +54,11 @@ describe("EnsDbWriterWorker", () => {
       const publicConfigBuilder = createMockPublicConfigBuilder();
       const indexingStatusBuilder = createMockIndexingStatusBuilder(omnichainSnapshot);
 
-      const worker = new EnsDbWriterWorker(ensDbClient, publicConfigBuilder, indexingStatusBuilder);
+      const worker = createMockEnsDbWriterWorker(
+        ensDbClient,
+        publicConfigBuilder,
+        indexingStatusBuilder,
+      );
 
       // act
       await worker.run();
@@ -94,7 +98,11 @@ describe("EnsDbWriterWorker", () => {
       const publicConfigBuilder = createMockPublicConfigBuilder(ensDbClientMock.publicConfig);
       const indexingStatusBuilder = createMockIndexingStatusBuilder();
 
-      const worker = new EnsDbWriterWorker(ensDbClient, publicConfigBuilder, indexingStatusBuilder);
+      const worker = createMockEnsDbWriterWorker(
+        ensDbClient,
+        publicConfigBuilder,
+        indexingStatusBuilder,
+      );
 
       // act & assert
       await expect(worker.run()).rejects.toThrow("incompatible");
@@ -107,7 +115,11 @@ describe("EnsDbWriterWorker", () => {
       const publicConfigBuilder = createMockPublicConfigBuilder();
       const indexingStatusBuilder = createMockIndexingStatusBuilder();
 
-      const worker = new EnsDbWriterWorker(ensDbClient, publicConfigBuilder, indexingStatusBuilder);
+      const worker = createMockEnsDbWriterWorker(
+        ensDbClient,
+        publicConfigBuilder,
+        indexingStatusBuilder,
+      );
 
       // act - first run
       await worker.run();
@@ -128,7 +140,11 @@ describe("EnsDbWriterWorker", () => {
       } as unknown as PublicConfigBuilder;
       const indexingStatusBuilder = createMockIndexingStatusBuilder();
 
-      const worker = new EnsDbWriterWorker(ensDbClient, publicConfigBuilder, indexingStatusBuilder);
+      const worker = createMockEnsDbWriterWorker(
+        ensDbClient,
+        publicConfigBuilder,
+        indexingStatusBuilder,
+      );
 
       // act & assert
       await expect(worker.run()).rejects.toThrow("Network failure");
@@ -145,7 +161,11 @@ describe("EnsDbWriterWorker", () => {
       const publicConfigBuilder = createMockPublicConfigBuilder();
       const indexingStatusBuilder = createMockIndexingStatusBuilder();
 
-      const worker = new EnsDbWriterWorker(ensDbClient, publicConfigBuilder, indexingStatusBuilder);
+      const worker = createMockEnsDbWriterWorker(
+        ensDbClient,
+        publicConfigBuilder,
+        indexingStatusBuilder,
+      );
 
       // act & assert
       await expect(worker.run()).rejects.toThrow("Database connection lost");
@@ -164,7 +184,11 @@ describe("EnsDbWriterWorker", () => {
       const publicConfigBuilder = createMockPublicConfigBuilder(ensDbClientMock.publicConfig);
       const indexingStatusBuilder = createMockIndexingStatusBuilder();
 
-      const worker = new EnsDbWriterWorker(ensDbClient, publicConfigBuilder, indexingStatusBuilder);
+      const worker = createMockEnsDbWriterWorker(
+        ensDbClient,
+        publicConfigBuilder,
+        indexingStatusBuilder,
+      );
 
       // act
       await worker.run();
@@ -186,7 +210,11 @@ describe("EnsDbWriterWorker", () => {
       const publicConfigBuilder = createMockPublicConfigBuilder();
       const indexingStatusBuilder = createMockIndexingStatusBuilder();
 
-      const worker = new EnsDbWriterWorker(ensDbClient, publicConfigBuilder, indexingStatusBuilder);
+      const worker = createMockEnsDbWriterWorker(
+        ensDbClient,
+        publicConfigBuilder,
+        indexingStatusBuilder,
+      );
 
       // act
       await worker.run();
@@ -210,7 +238,11 @@ describe("EnsDbWriterWorker", () => {
       const publicConfigBuilder = createMockPublicConfigBuilder();
       const indexingStatusBuilder = createMockIndexingStatusBuilder();
 
-      const worker = new EnsDbWriterWorker(ensDbClient, publicConfigBuilder, indexingStatusBuilder);
+      const worker = createMockEnsDbWriterWorker(
+        ensDbClient,
+        publicConfigBuilder,
+        indexingStatusBuilder,
+      );
 
       // act
       await worker.run();
@@ -235,7 +267,11 @@ describe("EnsDbWriterWorker", () => {
       const publicConfigBuilder = createMockPublicConfigBuilder();
       const indexingStatusBuilder = createMockIndexingStatusBuilder();
 
-      const worker = new EnsDbWriterWorker(ensDbClient, publicConfigBuilder, indexingStatusBuilder);
+      const worker = createMockEnsDbWriterWorker(
+        ensDbClient,
+        publicConfigBuilder,
+        indexingStatusBuilder,
+      );
 
       // assert - not running initially
       expect(worker.isRunning).toBe(false);
@@ -280,7 +316,11 @@ describe("EnsDbWriterWorker", () => {
           .mockResolvedValueOnce(validSnapshot),
       } as unknown as IndexingStatusBuilder;
 
-      const worker = new EnsDbWriterWorker(ensDbClient, publicConfigBuilder, indexingStatusBuilder);
+      const worker = createMockEnsDbWriterWorker(
+        ensDbClient,
+        publicConfigBuilder,
+        indexingStatusBuilder,
+      );
 
       // act - run returns immediately
       await worker.run();
@@ -337,7 +377,11 @@ describe("EnsDbWriterWorker", () => {
           .mockResolvedValueOnce(snapshot2),
       } as unknown as IndexingStatusBuilder;
 
-      const worker = new EnsDbWriterWorker(ensDbClient, publicConfigBuilder, indexingStatusBuilder);
+      const worker = createMockEnsDbWriterWorker(
+        ensDbClient,
+        publicConfigBuilder,
+        indexingStatusBuilder,
+      );
 
       // act
       await worker.run();

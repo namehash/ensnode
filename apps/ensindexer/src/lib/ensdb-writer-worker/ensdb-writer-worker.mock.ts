@@ -10,6 +10,7 @@ import {
 
 import type { EnsDbClient } from "@/lib/ensdb-client/ensdb-client";
 import * as ensDbClientMock from "@/lib/ensdb-client/ensdb-client.mock";
+import { EnsDbWriterWorker } from "@/lib/ensdb-writer-worker/ensdb-writer-worker";
 import type { IndexingStatusBuilder } from "@/lib/indexing-status-builder";
 import type { PublicConfigBuilder } from "@/lib/public-config-builder";
 
@@ -23,12 +24,27 @@ export function createMockEnsDbClient(
   } as unknown as EnsDbClient;
 }
 
+export function createMockEnsDbWriterWorker(
+  ensDbClient: EnsDbClient,
+  publicConfigBuilder: PublicConfigBuilder,
+  indexingStatusBuilder: IndexingStatusBuilder,
+  migrationsDirPath: string = "/mock/migrations",
+) {
+  return new EnsDbWriterWorker(
+    ensDbClient,
+    publicConfigBuilder,
+    indexingStatusBuilder,
+    migrationsDirPath,
+  );
+}
+
 export function baseEnsDbClient() {
   return {
     getEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
     upsertEnsDbVersion: vi.fn().mockResolvedValue(undefined),
     upsertEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
     upsertIndexingStatusSnapshot: vi.fn().mockResolvedValue(undefined),
+    migrate: vi.fn().mockResolvedValue(undefined),
   };
 }
 
