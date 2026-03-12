@@ -7,9 +7,9 @@ import {
   type CrossChainIndexingStatusSnapshot,
   deserializeCrossChainIndexingStatusSnapshot,
   deserializeEnsIndexerPublicConfig,
+  type EnsDbClientMigration,
   type EnsDbClientMutation,
   type EnsDbClientQuery,
-  type EnsDbMigration,
   type EnsIndexerPublicConfig,
   EnsNodeMetadataKeys,
   type SerializedEnsNodeMetadata,
@@ -40,7 +40,7 @@ interface DrizzleDb extends NodePgDatabase<typeof ensNodeSchema> {}
  * - ENSDb version
  * - ENSIndexer Public Config, and Indexing Status Snapshot and CrossChainIndexingStatusSnapshot.
  */
-export class EnsDbClient implements EnsDbClientQuery, EnsDbClientMutation, EnsDbMigration {
+export class EnsDbClient implements EnsDbClientQuery, EnsDbClientMutation, EnsDbClientMigration {
   /**
    * Drizzle database instance for ENSDb.
    */

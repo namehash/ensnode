@@ -2,4 +2,4 @@
 "ensindexer": minor
 ---
 
-Extended `EnsDbClient` with `EnsDbMigration` interface implementation.
+Extended `EnsDbClient` with `EnsDbClientMigration` interface implementation.

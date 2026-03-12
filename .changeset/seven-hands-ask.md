@@ -2,4 +2,4 @@
 "@ensnode/ensnode-sdk": minor
 ---
 
-Introduced `EnsDbMigration` interface.
+Introduced `EnsDbClientMigration` interface.

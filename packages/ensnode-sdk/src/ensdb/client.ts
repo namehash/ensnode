@@ -57,7 +57,7 @@ export interface EnsDbClientMutation {
   upsertIndexingStatusSnapshot(indexingStatus: CrossChainIndexingStatusSnapshot): Promise<void>;
 }
 
-export interface EnsDbMigration {
+export interface EnsDbClientMigration {
   /**
    * Execute pending migrations for ENSDb.
    *
