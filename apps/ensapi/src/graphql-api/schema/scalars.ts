@@ -9,8 +9,14 @@ import {
   isInterpretedName,
   type Name,
   type Node,
+  type PermissionsId,
+  type PermissionsResourceId,
+  type PermissionsUserId,
+  type RegistrationId,
   type RegistryId,
+  type RenewalId,
   type ResolverId,
+  type ResolverRecordsId,
 } from "@ensnode/ensnode-sdk";
 import {
   makeChainIdSchema,
@@ -128,5 +134,65 @@ builder.scalarType("ResolverId", {
     z.coerce
       .string()
       .transform((val) => val as ResolverId)
+      .parse(value),
+});
+
+builder.scalarType("PermissionsId", {
+  description: "PermissionsId represents a @ensnode/ensnode-sdk#PermissionsId.",
+  serialize: (value: PermissionsId) => value,
+  parseValue: (value) =>
+    z.coerce
+      .string()
+      .transform((val) => val as PermissionsId)
+      .parse(value),
+});
+
+builder.scalarType("PermissionsResourceId", {
+  description: "PermissionsResourceId represents a @ensnode/ensnode-sdk#PermissionsResourceId.",
+  serialize: (value: PermissionsResourceId) => value,
+  parseValue: (value) =>
+    z.coerce
+      .string()
+      .transform((val) => val as PermissionsResourceId)
+      .parse(value),
+});
+
+builder.scalarType("PermissionsUserId", {
+  description: "PermissionsUserId represents a @ensnode/ensnode-sdk#PermissionsUserId.",
+  serialize: (value: PermissionsUserId) => value,
+  parseValue: (value) =>
+    z.coerce
+      .string()
+      .transform((val) => val as PermissionsUserId)
+      .parse(value),
+});
+
+builder.scalarType("RegistrationId", {
+  description: "RegistrationId represents a @ensnode/ensnode-sdk#RegistrationId.",
+  serialize: (value: RegistrationId) => value,
+  parseValue: (value) =>
+    z.coerce
+      .string()
+      .transform((val) => val as RegistrationId)
+      .parse(value),
+});
+
+builder.scalarType("RenewalId", {
+  description: "RenewalId represents a @ensnode/ensnode-sdk#RenewalId.",
+  serialize: (value: RenewalId) => value,
+  parseValue: (value) =>
+    z.coerce
+      .string()
+      .transform((val) => val as RenewalId)
+      .parse(value),
+});
+
+builder.scalarType("ResolverRecordsId", {
+  description: "ResolverRecordsId represents a @ensnode/ensnode-sdk#ResolverRecordsId.",
+  serialize: (value: ResolverRecordsId) => value,
+  parseValue: (value) =>
+    z.coerce
+      .string()
+      .transform((val) => val as ResolverRecordsId)
       .parse(value),
 });

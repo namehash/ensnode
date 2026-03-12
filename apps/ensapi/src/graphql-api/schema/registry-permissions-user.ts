@@ -2,6 +2,7 @@ import type * as schema from "@ensnode/ensnode-schema";
 import { makeRegistryId } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
+import { AccountRef } from "@/graphql-api/schema/account";
 import { RegistryRef } from "@/graphql-api/schema/registry";
 
 /**
@@ -12,6 +13,16 @@ export const RegistryPermissionsUserRef =
 
 RegistryPermissionsUserRef.implement({
   fields: (t) => ({
+    /////////////////////////////////
+    // RegistryPermissionsUser.id
+    /////////////////////////////////
+    id: t.field({
+      description: "A unique reference to this RegistryPermissionsUser.",
+      type: "PermissionsUserId",
+      nullable: false,
+      resolve: (parent) => parent.id,
+    }),
+
     /////////////////////////////////////
     // RegistryPermissionsUser.registry
     /////////////////////////////////////
@@ -30,6 +41,16 @@ RegistryPermissionsUserRef.implement({
       type: "BigInt",
       nullable: false,
       resolve: (parent) => parent.resource,
+    }),
+
+    /////////////////////////////////
+    // RegistryPermissionsUser.user
+    /////////////////////////////////
+    user: t.field({
+      description: "The User for whom these Roles are granted.",
+      type: AccountRef,
+      nullable: false,
+      resolve: (parent) => parent.user,
     }),
 
     //////////////////////////////////

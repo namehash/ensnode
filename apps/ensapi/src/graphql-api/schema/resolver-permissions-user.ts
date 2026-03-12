@@ -2,6 +2,7 @@ import type * as schema from "@ensnode/ensnode-schema";
 import { makeResolverId } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
+import { AccountRef } from "@/graphql-api/schema/account";
 import { ResolverRef } from "@/graphql-api/schema/resolver";
 
 /**
@@ -12,6 +13,16 @@ export const ResolverPermissionsUserRef =
 
 ResolverPermissionsUserRef.implement({
   fields: (t) => ({
+    //////////////////////////////////
+    // ResolverPermissionsUser.id
+    //////////////////////////////////
+    id: t.field({
+      description: "A unique reference to this ResolverPermissionsUser.",
+      type: "PermissionsUserId",
+      nullable: false,
+      resolve: (parent) => parent.id,
+    }),
+
     ///////////////////////////////////////
     // ResolverPermissionsUser.resolver
     ///////////////////////////////////////
@@ -30,6 +41,16 @@ ResolverPermissionsUserRef.implement({
       type: "BigInt",
       nullable: false,
       resolve: (parent) => parent.resource,
+    }),
+
+    //////////////////////////////////
+    // ResolverPermissionsUser.user
+    //////////////////////////////////
+    user: t.field({
+      description: "The User for whom these Roles are granted.",
+      type: AccountRef,
+      nullable: false,
+      resolve: (parent) => parent.user,
     }),
 
     ////////////////////////////////////

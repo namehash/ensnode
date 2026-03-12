@@ -65,7 +65,7 @@ PermissionsRef.implement({
     ////////////////////////////
     id: t.field({
       description: "A unique reference to this Permission.",
-      type: "ID",
+      type: "PermissionsId",
       nullable: false,
       resolve: (parent) => parent.id,
     }),
@@ -133,7 +133,7 @@ PermissionsResourceRef.implement({
     ////////////////////////////
     id: t.field({
       description: "A unique reference to this PermissionsResource.",
-      type: "ID",
+      type: "PermissionsResourceId",
       nullable: false,
       resolve: (parent) => parent.id,
     }),
@@ -211,7 +211,7 @@ PermissionsUserRef.implement({
     ////////////////////////////
     id: t.field({
       description: "A unique reference to this PermissionsUser.",
-      type: "ID",
+      type: "PermissionsUserId",
       nullable: false,
       resolve: (parent) => parent.id,
     }),
