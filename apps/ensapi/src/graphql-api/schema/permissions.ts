@@ -65,7 +65,7 @@ PermissionsRef.implement({
     ////////////////////////////
     id: t.field({
       description: "A unique reference to this Permission.",
-      type: "ID",
+      type: "PermissionsId",
       nullable: false,
       resolve: (parent) => parent.id,
     }),
@@ -133,9 +133,19 @@ PermissionsResourceRef.implement({
     ////////////////////////////
     id: t.field({
       description: "A unique reference to this PermissionsResource.",
-      type: "ID",
+      type: "PermissionsResourceId",
       nullable: false,
       resolve: (parent) => parent.id,
+    }),
+
+    ////////////////////////
+    // Permissions.contract
+    ////////////////////////
+    contract: t.field({
+      description: "The contract within which these Permissions are granted.",
+      type: AccountIdRef,
+      nullable: false,
+      resolve: ({ chainId, address }) => ({ chainId, address }),
     }),
 
     ///////////////////////////////////
@@ -201,9 +211,19 @@ PermissionsUserRef.implement({
     ////////////////////////////
     id: t.field({
       description: "A unique reference to this PermissionsUser.",
-      type: "ID",
+      type: "PermissionsUserId",
       nullable: false,
       resolve: (parent) => parent.id,
+    }),
+
+    ////////////////////////
+    // Permissions.contract
+    ////////////////////////
+    contract: t.field({
+      description: "The contract within which these Permissions are granted.",
+      type: AccountIdRef,
+      nullable: false,
+      resolve: ({ chainId, address }) => ({ chainId, address }),
     }),
 
     ////////////////////////////
