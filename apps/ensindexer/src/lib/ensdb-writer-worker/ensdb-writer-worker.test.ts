@@ -44,6 +44,91 @@ describe("EnsDbWriterWorker", () => {
   });
 
   describe("run() - worker initialization", () => {
+    it("executes database migrations on startup", async () => {
+      // arrange
+      const migrationsDirPath = "/custom/migrations/path";
+      const ensDbClient = createMockEnsDbClient();
+      const publicConfigBuilder = createMockPublicConfigBuilder();
+      const indexingStatusBuilder = createMockIndexingStatusBuilder();
+
+      const worker = createMockEnsDbWriterWorker(
+        ensDbClient,
+        publicConfigBuilder,
+        indexingStatusBuilder,
+        migrationsDirPath,
+      );
+
+      // act
+      await worker.run();
+
+      // assert - verify migrations were executed with correct path
+      expect(ensDbClient.migrate).toHaveBeenCalledTimes(1);
+      expect(ensDbClient.migrate).toHaveBeenCalledWith(migrationsDirPath);
+
+      // cleanup
+      worker.stop();
+    });
+
+    it("throws when database migration fails", async () => {
+      // arrange
+      const migrationError = new Error("Migration failed: invalid SQL syntax");
+      const ensDbClient = createMockEnsDbClient({
+        migrate: vi.fn().mockRejectedValue(migrationError),
+      });
+      const publicConfigBuilder = createMockPublicConfigBuilder();
+      const indexingStatusBuilder = createMockIndexingStatusBuilder();
+
+      const worker = createMockEnsDbWriterWorker(
+        ensDbClient,
+        publicConfigBuilder,
+        indexingStatusBuilder,
+      );
+
+      // act & assert
+      await expect(worker.run()).rejects.toThrow("Migration failed: invalid SQL syntax");
+      expect(ensDbClient.migrate).toHaveBeenCalledTimes(1);
+      expect(ensDbClient.upsertEnsDbVersion).not.toHaveBeenCalled();
+      expect(ensDbClient.upsertEnsIndexerPublicConfig).not.toHaveBeenCalled();
+    });
+
+    it("executes migrations before any other operations", async () => {
+      // arrange
+      const operationOrder: string[] = [];
+      const ensDbClient = createMockEnsDbClient({
+        migrate: vi.fn().mockImplementation(async () => {
+          operationOrder.push("migrate");
+        }),
+        upsertEnsDbVersion: vi.fn().mockImplementation(async () => {
+          operationOrder.push("upsertEnsDbVersion");
+        }),
+        upsertEnsIndexerPublicConfig: vi.fn().mockImplementation(async () => {
+          operationOrder.push("upsertEnsIndexerPublicConfig");
+        }),
+      });
+      const publicConfigBuilder = createMockPublicConfigBuilder();
+      const indexingStatusBuilder = createMockIndexingStatusBuilder();
+
+      const worker = createMockEnsDbWriterWorker(
+        ensDbClient,
+        publicConfigBuilder,
+        indexingStatusBuilder,
+      );
+
+      // act
+      await worker.run();
+
+      // assert - verify migrations executed first
+      expect(operationOrder[0]).toBe("migrate");
+      expect(operationOrder).toEqual([
+        "migrate",
+        "upsertEnsDbVersion",
+        "upsertEnsIndexerPublicConfig",
+      ]);
+
+      // cleanup
+      worker.stop();
+    });
+
     it("upserts version, config, and starts interval for indexing status snapshots", async () => {
       // arrange
       const omnichainSnapshot = createMockOmnichainSnapshot();
