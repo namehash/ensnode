@@ -18,7 +18,7 @@ const PaginatedDomainFragment = gql`
     label { interpreted }
     registration {
       expiry
-      event { timestamp }
+      start
     }
   }
 `;
@@ -29,7 +29,7 @@ export type PaginatedDomainResult = {
   label: { interpreted: InterpretedLabel };
   registration: {
     expiry: string | null;
-    event: { timestamp: string };
+    start: string;
   } | null;
 };
 

@@ -38,7 +38,7 @@ function getSortValue(domain: PaginatedDomainResult, by: DomainsOrderByValue): s
     case "NAME":
       return domain.label.interpreted;
     case "REGISTRATION_TIMESTAMP":
-      return domain.registration?.event.timestamp ?? null;
+      return domain.registration?.start ?? null;
     case "REGISTRATION_EXPIRY":
       return domain.registration?.expiry ?? null;
   }
