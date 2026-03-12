@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { LabelHash } from "@ensnode/ensnode-sdk";
 
@@ -145,6 +145,10 @@ describe("labelByLabelHash", () => {
   });
 
   describe("retry behavior", () => {
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
     // Use unique labelHashes in each test to prevent LRU cache hits from other tests
     // carrying over cacheable responses (HealSuccess, HealNotFoundError) and bypassing fetch.
 
@@ -166,7 +170,6 @@ describe("labelByLabelHash", () => {
       expect(result).toEqual("nick");
       expect(fetch).toHaveBeenCalledTimes(3);
       expect(warnSpy).toHaveBeenCalledTimes(2);
-      warnSpy.mockRestore();
     });
 
     it("retries on HealServerError and succeeds on a later attempt", async () => {
@@ -190,7 +193,6 @@ describe("labelByLabelHash", () => {
       expect(result).toEqual("vitalik");
       expect(fetch).toHaveBeenCalledTimes(2);
       expect(warnSpy).toHaveBeenCalledTimes(1);
-      warnSpy.mockRestore();
     });
 
     it("does not retry HealNotFoundError — returns null after a single call", async () => {
@@ -240,7 +242,6 @@ describe("labelByLabelHash", () => {
       // 1 initial attempt + 3 retries = 4 total
       expect(fetch).toHaveBeenCalledTimes(4);
       expect(warnSpy).toHaveBeenCalledTimes(4);
-      warnSpy.mockRestore();
     });
 
     it("throws after exhausting retries on persistent HealServerError responses", async () => {
@@ -252,16 +253,20 @@ describe("labelByLabelHash", () => {
           Promise.resolve({ status: "error", error: "Internal server error", errorCode: 500 }),
       });
 
-      await expect(
-        labelByLabelHash(
-          "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" as LabelHash,
-        ),
-      ).rejects.toThrow(/Internal server error/i);
+      const err = await labelByLabelHash(
+        "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" as LabelHash,
+      ).then(
+        () => null as unknown as Error,
+        (e: unknown) => e as Error,
+      );
+      expect(err).not.toBeNull();
+      expect(err!.message).toMatch(/Internal server error/i);
+      expect(err!.cause).toBeInstanceOf(Error);
+      expect((err!.cause as Error).message).toBe("Internal server error");
 
       // 1 initial attempt + 3 retries = 4 total
       expect(fetch).toHaveBeenCalledTimes(4);
       expect(warnSpy).toHaveBeenCalledTimes(4);
-      warnSpy.mockRestore();
     });
   });
 });

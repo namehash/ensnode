@@ -74,6 +74,7 @@ export async function labelByLabelHash(labelHash: LabelHash): Promise<LiteralLab
       // Not recoverable; causes the ENSIndexer process to terminate.
       throw new Error(
         `Error healing labelHash: "${labelHash}". Error (${lastServerError.errorCode}): ${lastServerError.error}.`,
+        { cause: error },
       );
     }
 
