@@ -52,7 +52,7 @@ export const GRAPHQL_API_EXAMPLE_QUERIES: Array<{
 #
 # There are also example queries in the tabs above ☝️
 query HelloWorld {
-  root { id }
+  domain(by: { name: "eth" }) { name owner { address } }
 }`,
     variables: { default: {} },
   },
@@ -98,8 +98,9 @@ query DomainByName($name: Name!) {
   domain(by: {name: $name}) {
     __typename
     id
-    label { interpreted }
+    label { interpreted hash }
     name
+    owner { address }
 
     ... on ENSv1Domain {
       rootRegistryOwner { address }
