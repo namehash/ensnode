@@ -1,7 +1,7 @@
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
-import { eq, sql } from "drizzle-orm/sql";
+import { and, eq, sql } from "drizzle-orm/sql";
 
-import { ensNodeMetadata } from "@ensnode/ensnode-schema";
+import * as ensNodeSchema from "@ensnode/ensnode-schema/ensnode";
 import {
   type CrossChainIndexingStatusSnapshot,
   deserializeCrossChainIndexingStatusSnapshot,
@@ -21,20 +21,11 @@ import {
 import { makeDrizzle } from "./drizzle";
 
 /**
- * ENSDb Client Schema
- *
- * Includes schema definitions for {@link EnsDbClient} queries and mutations.
- */
-const schema = {
-  ensNodeMetadata,
-};
-
-/**
  * Drizzle database
  *
  * Allows interacting with Postgres database for ENSDb, using Drizzle ORM.
  */
-interface DrizzleDb extends NodePgDatabase<typeof schema> {}
+interface DrizzleDb extends NodePgDatabase<typeof ensNodeSchema> {}
 
 /**
  * ENSDb Client
@@ -54,15 +45,22 @@ export class EnsDbClient implements EnsDbClientQuery, EnsDbClientMutation {
   private db: DrizzleDb;
 
   /**
-   * @param databaseUrl connection string for ENSDb Postgres database
-   * @param databaseSchemaName Postgres schema name for ENSDb tables
+   * ENSIndexer reference string for multi-tenancy in ENSDb.
    */
-  constructor(databaseUrl: string, databaseSchemaName: string) {
+  private ensIndexerRef: string;
+
+  /**
+   * @param databaseUrl connection string for ENSDb Postgres database
+   * @param ensIndexerRef reference string for ENSIndexer instance (used for multi-tenancy in ENSDb)
+   */
+  constructor(databaseUrl: string, ensIndexerRef: string) {
     this.db = makeDrizzle({
-      databaseSchema: databaseSchemaName,
+      databaseSchema: ensNodeSchema.ENSNODE_SCHEMA_NAME,
       databaseUrl,
-      schema,
+      schema: ensNodeSchema,
     });
+
+    this.ensIndexerRef = ensIndexerRef;
   }
 
   /**
@@ -154,8 +152,13 @@ export class EnsDbClient implements EnsDbClientQuery, EnsDbClientMutation {
   ): Promise<EnsNodeMetadataType["value"] | undefined> {
     const result = await this.db
       .select()
-      .from(ensNodeMetadata)
-      .where(eq(ensNodeMetadata.key, metadata.key));
+      .from(ensNodeSchema.ensNodeMetadata)
+      .where(
+        and(
+          eq(ensNodeSchema.ensNodeMetadata.ensIndexerRef, this.ensIndexerRef),
+          eq(ensNodeSchema.ensNodeMetadata.key, metadata.key),
+        ),
+      );
 
     if (result.length === 0) {
       return undefined;
@@ -186,13 +189,14 @@ export class EnsDbClient implements EnsDbClientQuery, EnsDbClientMutation {
       );
 
       await tx
-        .insert(ensNodeMetadata)
+        .insert(ensNodeSchema.ensNodeMetadata)
         .values({
+          ensIndexerRef: this.ensIndexerRef,
           key: metadata.key,
           value: metadata.value,
         })
         .onConflictDoUpdate({
-          target: ensNodeMetadata.key,
+          target: [ensNodeSchema.ensNodeMetadata.ensIndexerRef, ensNodeSchema.ensNodeMetadata.key],
           set: { value: metadata.value },
         });
     });

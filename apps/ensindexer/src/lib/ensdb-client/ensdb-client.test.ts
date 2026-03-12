@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ensNodeMetadata } from "@ensnode/ensnode-schema";
+import * as ensNodeSchema from "@ensnode/ensnode-schema/ensnode";
 import {
   deserializeCrossChainIndexingStatusSnapshot,
   EnsNodeMetadataKeys,
@@ -59,7 +59,7 @@ describe("EnsDbClient", () => {
       await expect(client.getEnsDbVersion()).resolves.toBeUndefined();
 
       expect(selectMock).toHaveBeenCalledTimes(1);
-      expect(fromMock).toHaveBeenCalledWith(ensNodeMetadata);
+      expect(fromMock).toHaveBeenCalledWith(ensNodeSchema.ensNodeMetadata);
     });
 
     it("returns value when one record exists", async () => {
@@ -150,13 +150,14 @@ describe("EnsDbClient", () => {
       await client.upsertEnsDbVersion("0.2.0");
 
       // assert
-      expect(insertMock).toHaveBeenCalledWith(ensNodeMetadata);
+      expect(insertMock).toHaveBeenCalledWith(ensNodeSchema.ensNodeMetadata);
       expect(valuesMock).toHaveBeenCalledWith({
+        ensIndexerRef: ensDbClientMock.databaseSchemaName,
         key: EnsNodeMetadataKeys.EnsDbVersion,
         value: "0.2.0",
       });
       expect(onConflictDoUpdateMock).toHaveBeenCalledWith({
-        target: ensNodeMetadata.key,
+        target: [ensNodeSchema.ensNodeMetadata.ensIndexerRef, ensNodeSchema.ensNodeMetadata.key],
         set: { value: "0.2.0" },
       });
     });
@@ -176,6 +177,7 @@ describe("EnsDbClient", () => {
 
       // assert
       expect(valuesMock).toHaveBeenCalledWith({
+        ensIndexerRef: ensDbClientMock.databaseSchemaName,
         key: EnsNodeMetadataKeys.EnsIndexerPublicConfig,
         value: expectedValue,
       });
@@ -199,6 +201,7 @@ describe("EnsDbClient", () => {
 
       // assert
       expect(valuesMock).toHaveBeenCalledWith({
+        ensIndexerRef: ensDbClientMock.databaseSchemaName,
         key: EnsNodeMetadataKeys.EnsIndexerIndexingStatus,
         value: expectedValue,
       });
