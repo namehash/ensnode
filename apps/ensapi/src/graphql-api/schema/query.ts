@@ -221,7 +221,7 @@ builder.queryType({
     // Get Root Registry
     /////////////////////
     root: t.field({
-      description: "The ENSv2 Root Registry",
+      description: "The ENSv2 Root Registry, if exists.",
       type: RegistryRef,
       // TODO: make this nullable: false after all namespaces define ENSv2Root
       nullable: true,

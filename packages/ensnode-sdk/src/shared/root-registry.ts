@@ -55,7 +55,7 @@ export const isENSv2RootRegistry = (namespace: ENSNamespaceId, contract: Account
  * Gets the AccountId representing the ENSv2 Root Registry in the selected `namespace` if defined,
  * otherwise `undefined`.
  *
- * TODO: remove this function and its usage after all namespaces defined ENSv2Root
+ * TODO: remove this function and its usage after all namespaces define ENSv2Root
  */
 export const maybeGetENSv2RootRegistry = (namespace: ENSNamespaceId) =>
   maybeGetDatasourceContract(namespace, DatasourceNames.ENSv2Root, "RootRegistry");
@@ -64,7 +64,7 @@ export const maybeGetENSv2RootRegistry = (namespace: ENSNamespaceId) =>
  * Gets the RegistryId representing the ENSv2 Root Registry in the selected `namespace` if defined,
  * otherwise `undefined`.
  *
- * TODO: remove this function and its usage after all namespaces defined ENSv2Root
+ * TODO: remove this function and its usage after all namespaces define ENSv2Root
  */
 export const maybeGetENSv2RootRegistryId = (namespace: ENSNamespaceId) => {
   const root = maybeGetENSv2RootRegistry(namespace);
