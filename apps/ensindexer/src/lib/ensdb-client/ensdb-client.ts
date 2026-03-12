@@ -200,6 +200,7 @@ export class EnsDbClient implements EnsDbClientQuery, EnsDbClientMutation, EnsDb
   async migrate(migrationsDirPath: string): Promise<void> {
     return migrate(this.db, {
       migrationsFolder: migrationsDirPath,
+      migrationsSchema: ensNodeSchema.ENSNODE_SCHEMA_NAME,
     });
   }
 }
