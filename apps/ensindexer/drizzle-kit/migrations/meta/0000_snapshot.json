@@ -1,0 +1,55 @@
+{
+  "id": "d05a87cf-3971-41ac-9eab-a15a54711a47",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "ensnode.ensnode_metadata": {
+      "name": "ensnode_metadata",
+      "schema": "ensnode",
+      "columns": {
+        "ens_indexer_ref": {
+          "name": "ens_indexer_ref",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "value": {
+          "name": "value",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "ensnode_metadata_pkey": {
+          "name": "ensnode_metadata_pkey",
+          "columns": ["ens_indexer_ref", "key"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
