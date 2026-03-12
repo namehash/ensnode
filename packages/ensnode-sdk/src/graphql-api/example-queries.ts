@@ -1,6 +1,6 @@
-import { DatasourceNames, ENSNamespaceIds, ensTestEnvChain } from "@ensnode/datasources";
+import { DatasourceNames, ENSNamespaceIds } from "@ensnode/datasources";
 
-import { getDatasourceContract, maybeGetDatasourceContract } from "../shared/datasource-contract";
+import { maybeGetDatasourceContract } from "../shared/datasource-contract";
 import type { NamespaceSpecificValue } from "../shared/namespace-specific-value";
 
 const SEPOLIA_V2_V2_ETH_REGISTRY = maybeGetDatasourceContract(
@@ -33,10 +33,9 @@ const DEVNET_OWNER = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8";
 // biome-ignore lint/correctness/noUnusedVariables: keeping it around for the future
 const DEVNET_USER = "0x90F79bf6EB2c4f870365E785982E1f101E93b906";
 
-// NOTE: this is an OwnedResolver deployed in the devnet
-const SOME_OWNED_RESOLVER = "0x125eE1aeF73e9ef9Bc167eD86A0dC4c139ce5E35";
-
 const VITALIK_ADDRESS = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
+
+const DEVNET_NAME_WITH_OWNED_RESOLVER = "example.eth";
 
 export const GRAPHQL_API_EXAMPLE_QUERIES: Array<{
   query: string;
@@ -318,45 +317,23 @@ query AccountResolverPermissions($address: Address!) {
     },
   },
 
-  ////////////////////////
-  // Resolver by Contract
-  ////////////////////////
+  //////////////////////////////
+  // Domain's Assigned Resolver
+  //////////////////////////////
   {
     query: `
-query Resolver($resolver: AccountIdInput!) {
-  resolver(by: { contract: $resolver }) {
-    permissions { resources { edges { node { resource users { edges { node { user { address } roles } } } } } } }
-    events { totalCount edges { node { topics data timestamp } } }
+query DomainResolver($name: Name!) {
+  domain(by: { name: $name }) {
+    resolver {
+      records { edges { node { node keys coinTypes } } }
+      permissions { resources { edges { node { resource users { edges { node { user { address } roles } } } } } } }
+      events { totalCount edges { node { topics data timestamp } } }
+    }
   }
 }`,
     variables: {
-      default: {
-        resolver: getDatasourceContract(
-          ENSNamespaceIds.Mainnet,
-          DatasourceNames.ReverseResolverRoot,
-          "DefaultPublicResolver5",
-        ),
-      },
-      [ENSNamespaceIds.Sepolia]: {
-        resolver: getDatasourceContract(
-          ENSNamespaceIds.Sepolia,
-          DatasourceNames.ReverseResolverRoot,
-          "DefaultPublicResolver5",
-        ),
-      },
-      [ENSNamespaceIds.SepoliaV2]: {
-        resolver: getDatasourceContract(
-          ENSNamespaceIds.SepoliaV2,
-          DatasourceNames.ReverseResolverRoot,
-          "DefaultPublicResolver5",
-        ),
-      },
-      [ENSNamespaceIds.EnsTestEnv]: {
-        resolver: {
-          chainId: ensTestEnvChain.id,
-          address: SOME_OWNED_RESOLVER,
-        },
-      },
+      default: { name: "vitalik.eth" },
+      [ENSNamespaceIds.EnsTestEnv]: { name: DEVNET_NAME_WITH_OWNED_RESOLVER },
     },
   },
 

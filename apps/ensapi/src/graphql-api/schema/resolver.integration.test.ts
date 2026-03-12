@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
 
-import { ensTestEnvChain } from "@ensnode/datasources";
-import type { AccountId } from "@ensnode/ensnode-sdk";
-
 import { gql } from "@/test/integration/ensnode-graphql-api-client";
 import {
   EventFragment,
@@ -17,25 +14,28 @@ import {
   request,
 } from "@/test/integration/graphql-utils";
 
-const SOME_OWNED_RESOLVER: AccountId = {
-  chainId: ensTestEnvChain.id,
-  address: "0x125ee1aef73e9ef9bc167ed86a0dc4c139ce5e35",
-};
+// TODO: once the devnet has deterministic resolver addresses, we can resolver(by: { contract })
+// but until then we'll access by a domain's assigned resolver
+const DEVNET_NAME_WITH_OWNED_RESOLVER = "example.eth";
 
 describe("Resolver.events", () => {
   type ResolverEventsResult = {
-    resolver: {
-      events: GraphQLConnection<EventResult>;
+    domain: {
+      resolver: {
+        events: GraphQLConnection<EventResult>;
+      };
     };
   };
 
   const ResolverEvents = gql`
-    query ResolverEvents($contract: AccountIdInput!) {
-      resolver(by: { contract: $contract }) {
-        events {
-          edges {
-            node {
-              ...EventFragment
+    query ResolverEvents($name: Name!) {
+      domain(by: { name: $name }) {
+        resolver {
+          events {
+            edges {
+              node {
+                ...EventFragment
+              }
             }
           }
         }
@@ -47,9 +47,10 @@ describe("Resolver.events", () => {
 
   it("returns events for a known resolver", async () => {
     const result = await request<ResolverEventsResult>(ResolverEvents, {
-      contract: SOME_OWNED_RESOLVER,
+      name: DEVNET_NAME_WITH_OWNED_RESOLVER,
     });
-    const events = flattenConnection(result.resolver.events);
+
+    const events = flattenConnection(result.domain.resolver.events);
 
     expect(events.length).toBeGreaterThan(0);
   });
@@ -58,10 +59,8 @@ describe("Resolver.events", () => {
 describe("Resolver.events pagination", () => {
   testEventPagination(async (variables) => {
     const result = await request<{
-      resolver: { events: PaginatedGraphQLConnection<EventResult> };
-    }>(ResolverEventsPaginated, { contract: SOME_OWNED_RESOLVER, ...variables });
-    return result.resolver.events;
+      domain: { resolver: { events: PaginatedGraphQLConnection<EventResult> } };
+    }>(ResolverEventsPaginated, { name: DEVNET_NAME_WITH_OWNED_RESOLVER, ...variables });
+    return result.domain.resolver.events;
   });
 });
-
-describe.todo("Resolver.events filtering (EventsWhereInput)");

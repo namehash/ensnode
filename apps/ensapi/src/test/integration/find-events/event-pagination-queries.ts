@@ -85,16 +85,18 @@ export const AccountEventsPaginated = gql`
 
 export const ResolverEventsPaginated = gql`
   query ResolverEventsPaginated(
-    $contract: AccountIdInput!
+    $name: Name!
     $first: Int
     $after: String
     $last: Int
     $before: String
   ) {
-    resolver(by: { contract: $contract }) {
-      events(first: $first, after: $after, last: $last, before: $before) {
-        edges { cursor node { ...EventFragment } }
-        pageInfo { ...PageInfoFragment }
+    domain(by: { name: $name }) {
+      resolver {
+        events(first: $first, after: $after, last: $last, before: $before) {
+          edges { cursor node { ...EventFragment } }
+          pageInfo { ...PageInfoFragment }
+        }
       }
     }
   }
