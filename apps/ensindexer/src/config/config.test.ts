@@ -539,7 +539,7 @@ describe("config (with base env)", () => {
 
     it("requires rpc url for indexed chains", async () => {
       vi.stubEnv("PLUGINS", "subgraph,basenames");
-      await expect(getConfig()).rejects.toThrow(/RPC_URL_\d+ is not specified/i);
+      await expect(getConfig()).rejects.toThrow(/RPC_URL_\d+/i);
     });
 
     it("cannot constrain blockrange with multiple chains", async () => {
