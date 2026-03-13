@@ -1,2 +1,2 @@
-// Re-export relevant schema definitions for backward compatibility.
-export * from "./ensindexer-schema";
+export * from "./ensnode-db";
+export * from "./lib/drizzle";

@@ -1,12 +1,12 @@
 import config from "@/config";
 
-import { EnsDbClient } from "./ensdb-client";
+import { EnsNodeDbWriter } from "@ensnode/ensnode-schema";
 
-// config.databaseSchemaName is unique per ENSIndexer instance and is used as the ensIndexerRef
-// tenant key in the shared ENSNode schema (ensnode.*).
-const ensIndexerRef = config.databaseSchemaName;
+// TODO: pending rename `config.databaseSchemaName` to `config.ensIndexerSchemaName`
+// Will be executed once https://github.com/namehash/ensnode/issues/1762 is resolved.
+const ensIndexerSchemaName = config.databaseSchemaName;
 
 /**
- * Singleton instance of {@link EnsDbClient} for use in ENSIndexer.
+ * Singleton instance of {@link EnsNodeDbWriter} for use in ENSIndexer.
  */
-export const ensDbClient = new EnsDbClient(config.databaseUrl, ensIndexerRef);
+export const ensNodeDbWriter = new EnsNodeDbWriter(config.databaseUrl, ensIndexerSchemaName);
