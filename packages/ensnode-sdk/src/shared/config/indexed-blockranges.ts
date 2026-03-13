@@ -15,14 +15,9 @@ import {
 import type { ChainId } from "../types";
 
 /**
- * Build a map of indexed blockranges for each indexed chain,
- * based on the ENSIndexer configuration.
+ * Build a map of indexed blockranges for each indexed chain, based on the ENSIndexer configuration.
  *
- * Useful for presenting a clear view of the indexed blockranges
- * across chains.
- *
- * Datasources that do not exist in the given namespace are silently skipped,
- * allowing callers to pass all (required + optional) datasource names.
+ * Useful for presenting a clear view of the indexed blockranges across chains.
  */
 export function buildIndexedBlockranges(
   namespace: ENSNamespaceId,
@@ -34,7 +29,7 @@ export function buildIndexedBlockranges(
     for (const datasourceName of datasourceNames) {
       const datasource = maybeGetDatasource(namespace, datasourceName);
 
-      // skip datasources not defined in this namespace (optional datasources)
+      // skip datasources not defined in this namespace, mirroring derive_indexedChainIds logic
       if (!datasource) continue;
 
       const datasourceChainId = datasource.chain.id;

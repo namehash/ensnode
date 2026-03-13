@@ -134,8 +134,8 @@ const ENSIndexerConfigSchema = z
    * Invariant enforcement
    *
    * We enforce invariants across the parsed and derived config values by calling
-   * `.check()` after `.transform()`. Each check function has access to all parsed
-   * values plus derived properties (e.g. `indexedChainIds`).
+   * `.check()`. Each check function has access to all parsed values plus derived properties
+   * (e.g. `indexedChainIds`).
    *
    * To constrain specific config value permutations, define the `.check()` callback
    * with a `Pick` of the relevant properties:

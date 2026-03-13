@@ -51,7 +51,7 @@ export function invariant_rpcConfigsSpecifiedForIndexedChains(
       ctx.issues.push({
         code: "custom",
         input: config,
-        message: `RPC_URL_${chainId} is not specified for indexed chain id ${chainId}.`,
+        message: `An active plugin indexes chain ${chainId}, but RPC_URL_${chainId} is not configured.`,
       });
     }
   }
