@@ -1,12 +1,12 @@
-import type { EnsIndexerPublicConfig } from "../ensindexer/config";
-import type { CrossChainIndexingStatusSnapshot } from "../indexing-status/cross-chain-indexing-status-snapshot";
+import type {
+  CrossChainIndexingStatusSnapshot,
+  EnsIndexerPublicConfig,
+} from "@ensnode/ensnode-sdk";
 
 /**
- * ENSDb Client Query
- *
- * Includes methods for reading from ENSDb.
+ * Client interface with read-only query methods for ENSNode Schema in ENSDb.
  */
-export interface EnsDbClientQuery {
+export interface EnsNodeDbClientQuery {
   /**
    * Get ENSDb Version
    *
@@ -30,11 +30,9 @@ export interface EnsDbClientQuery {
 }
 
 /**
- * ENSDb Client Mutation
- *
- * Includes methods for writing into ENSDb.
+ * Client interface with mutation methods for ENSNode Schema in ENSDb.
  */
-export interface EnsDbClientMutation {
+export interface EnsNodeDbClientMutation {
   /**
    * Upsert ENSDb Version
    *
@@ -57,11 +55,15 @@ export interface EnsDbClientMutation {
   upsertIndexingStatusSnapshot(indexingStatus: CrossChainIndexingStatusSnapshot): Promise<void>;
 }
 
-export interface EnsDbClientMigration {
+/**
+ * Client interface with migration methods for ENSNode Schema in ENSDb.
+ */
+export interface EnsNodeDbClientMigration {
   /**
-   * Execute pending migrations for ENSDb.
+   * Execute pending database migrations for ENSNode Schema in ENSDb.
    *
-   * @param migrationsDirPath - The file path to the directory containing migration files.
+   * @param migrationsDirPath - The file path to the directory containing
+   *                            database migration files for ENSNode Schema.
    * @throws error when migration execution fails.
    */
   migrate(migrationsDirPath: string): Promise<void>;

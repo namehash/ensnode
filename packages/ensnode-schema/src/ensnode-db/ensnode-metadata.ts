@@ -1,5 +1,7 @@
-import type { EnsIndexerPublicConfig } from "../ensindexer/config";
-import type { CrossChainIndexingStatusSnapshot } from "../indexing-status/cross-chain-indexing-status-snapshot";
+import type {
+  CrossChainIndexingStatusSnapshot,
+  EnsIndexerPublicConfig,
+} from "@ensnode/ensnode-sdk";
 
 /**
  * Keys used to distinguish records in `ensnode_metadata` table in the ENSDb.

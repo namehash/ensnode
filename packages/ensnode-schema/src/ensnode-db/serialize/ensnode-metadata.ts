@@ -1,5 +1,8 @@
-import type { SerializedEnsIndexerPublicConfig } from "../../ensindexer/config";
-import type { SerializedCrossChainIndexingStatusSnapshot } from "../../indexing-status/serialize/cross-chain-indexing-status-snapshot";
+import type {
+  SerializedCrossChainIndexingStatusSnapshot,
+  SerializedEnsIndexerPublicConfig,
+} from "@ensnode/ensnode-sdk";
+
 import type {
   EnsNodeMetadata,
   EnsNodeMetadataEnsDbVersion,
