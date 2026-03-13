@@ -221,8 +221,12 @@ describe("Domain.events filtering (EventsWhereInput)", () => {
   });
 
   it("combines selector_in and timestamp_gte", async () => {
-    const targetSelector = allEvents[0].topics[0];
-    const midTimestamp = allEvents[Math.floor(allEvents.length / 2)].timestamp;
+    // pick a seed event from the second half so its selector is guaranteed to
+    // appear at or after midTimestamp, avoiding flaky empty-result failures
+    const midIndex = Math.floor(allEvents.length / 2);
+    const seedEvent = allEvents[midIndex];
+    const targetSelector = seedEvent.topics[0];
+    const midTimestamp = seedEvent.timestamp;
 
     const result = await request<DomainEventsResult>(DomainEventsFiltered, {
       name: NAME_WITH_EVENTS,
