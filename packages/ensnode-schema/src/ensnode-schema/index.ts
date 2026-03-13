@@ -22,14 +22,13 @@ export const ensNodeMetadata = ENSNODE_SCHEMA.table(
   "ensnode_metadata",
   (t) => ({
     /**
-     * ENSIndexer Reference
+     * ENSIndexer Schema Name
      *
-     * References the ENSIndexer instance by a unique ENSIndexer schema name
-     * that a metadata record is associated with. This allows us to support
-     * multiple ENSIndexer instances using the same database, while ensuring
-     * that their metadata records do not conflict with each other.
+     * References the name of the ENSIndexer Schema that the metadata record
+     * belongs to. This allows multi-tenancy where multiple ENSIndexer
+     * instances can write to the same ENSNode Metadata table.
      */
-    ensIndexerRef: t.text().notNull(),
+    ensIndexerSchemaName: t.text().notNull(),
 
     /**
      * Key
@@ -55,12 +54,12 @@ export const ensNodeMetadata = ENSNODE_SCHEMA.table(
   }),
   (table) => [
     /**
-     * Primary key constraint on 'ensIndexerRef' and 'key' columns,
+     * Primary key constraint on 'ensIndexerSchemaName' and 'key' columns,
      * to ensure that there is only one record for each key per ENSIndexer instance.
      */
     primaryKey({
       name: "ensnode_metadata_pkey",
-      columns: [table.ensIndexerRef, table.key],
+      columns: [table.ensIndexerSchemaName, table.key],
     }),
   ],
 );
