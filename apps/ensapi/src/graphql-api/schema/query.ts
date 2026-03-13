@@ -4,10 +4,10 @@ import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@poth
 
 import * as schema from "@ensnode/ensnode-schema";
 import {
-  getENSv2RootRegistryId,
   makePermissionsId,
   makeRegistryId,
   makeResolverId,
+  maybeGetENSv2RootRegistryId,
 } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
@@ -221,10 +221,11 @@ builder.queryType({
     // Get Root Registry
     /////////////////////
     root: t.field({
-      description: "The ENSv2 Root Registry",
+      description: "The ENSv2 Root Registry, if exists.",
       type: RegistryRef,
-      nullable: false,
-      resolve: () => getENSv2RootRegistryId(config.namespace),
+      // TODO: make this nullable: false after all namespaces define ENSv2Root
+      nullable: true,
+      resolve: () => maybeGetENSv2RootRegistryId(config.namespace),
     }),
   }),
 });

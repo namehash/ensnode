@@ -117,12 +117,12 @@ export const event = onchainTable(
     // log
     address: t.hex().notNull().$type<Address>(),
     logIndex: t.integer().notNull().$type<number>(),
-    topic0: t.hex().notNull().$type<Hash>(),
+    selector: t.hex().notNull().$type<Hash>(),
     topics: t.hex().array().notNull().$type<[Hash, ...Hash[]]>(),
     data: t.hex().notNull(),
   }),
   (t) => ({
-    byTopic0: index().on(t.topic0),
+    bySelector: index().on(t.selector),
     byFrom: index().on(t.from),
     byTimestamp: index().on(t.timestamp),
   }),

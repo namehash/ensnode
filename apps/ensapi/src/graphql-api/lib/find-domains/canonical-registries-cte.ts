@@ -3,7 +3,7 @@ import config from "@/config";
 import { sql } from "drizzle-orm";
 
 import * as schema from "@ensnode/ensnode-schema";
-import { getENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
+import { maybeGetENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
 
 import { db } from "@/lib/db";
 
@@ -22,6 +22,8 @@ import { db } from "@/lib/db";
  */
 const CANONICAL_REGISTRIES_MAX_DEPTH = 16;
 
+const ENSV2_ROOT_REGISTRY_ID = maybeGetENSv2RootRegistryId(config.namespace);
+
 /**
  * Builds a recursive CTE that traverses from the ENSv2 Root Registry to construct a set of all
  * Canonical Registries. A Canonical Registry is an ENSv2 Registry that is the Root Registry or the
@@ -29,8 +31,16 @@ const CANONICAL_REGISTRIES_MAX_DEPTH = 16;
  *
  * TODO: could this be optimized further, perhaps as a materialized view?
  */
-export const getCanonicalRegistriesCTE = () =>
-  db
+export const getCanonicalRegistriesCTE = () => {
+  // if ENSv2 is not defined, return an empty set with identical structure to below
+  if (!ENSV2_ROOT_REGISTRY_ID) {
+    return db
+      .select({ id: sql<string>`registry_id`.as("id") })
+      .from(sql`(SELECT NULL::text AS registry_id WHERE FALSE) AS canonical_registries_cte`)
+      .as("canonical_registries");
+  }
+
+  return db
     .select({
       // NOTE: using `id` here to avoid clobbering `registryId` in consuming queries, which would
       // result in '_ is ambiguous' error messages from postgres because drizzle isn't scoping the
@@ -38,17 +48,19 @@ export const getCanonicalRegistriesCTE = () =>
       id: sql<string>`registry_id`.as("id"),
     })
     .from(
-      sql`(
-            WITH RECURSIVE canonical_registries AS (
-              SELECT ${getENSv2RootRegistryId(config.namespace)}::text AS registry_id, 0 AS depth
-              UNION ALL
-              SELECT rcd.registry_id, cr.depth + 1
-              FROM ${schema.registryCanonicalDomain} rcd
-              JOIN ${schema.v2Domain} parent ON parent.id = rcd.domain_id AND parent.subregistry_id = rcd.registry_id
-              JOIN canonical_registries cr ON cr.registry_id = parent.registry_id
-              WHERE cr.depth < ${CANONICAL_REGISTRIES_MAX_DEPTH}
-            )
-            SELECT registry_id FROM canonical_registries
-          ) AS canonical_registries_cte`,
+      sql`
+      (
+        WITH RECURSIVE canonical_registries AS (
+          SELECT ${ENSV2_ROOT_REGISTRY_ID}::text AS registry_id, 0 AS depth
+          UNION ALL
+          SELECT rcd.registry_id, cr.depth + 1
+          FROM ${schema.registryCanonicalDomain} rcd
+          JOIN ${schema.v2Domain} parent ON parent.id = rcd.domain_id AND parent.subregistry_id = rcd.registry_id
+          JOIN canonical_registries cr ON cr.registry_id = parent.registry_id
+          WHERE cr.depth < ${CANONICAL_REGISTRIES_MAX_DEPTH}
+        )
+        SELECT registry_id FROM canonical_registries
+      ) AS canonical_registries_cte`,
     )
     .as("canonical_registries");
+};
