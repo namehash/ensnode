@@ -8,6 +8,27 @@ import { getPlugin } from "@/plugins";
 
 import type { EnsIndexerConfig } from "./types";
 
+// Invariant: each plugin's requiredDatasourceNames is a subset of its allDatasourceNames
+export function invariant_requiredDatasourcesSubsetOfAll(
+  ctx: ZodCheckFnInput<Pick<EnsIndexerConfig, "plugins">>,
+) {
+  const { value: config } = ctx;
+
+  for (const pluginName of config.plugins) {
+    const plugin = getPlugin(pluginName);
+    const allSet = new Set(plugin.allDatasourceNames);
+    const missing = plugin.requiredDatasourceNames.filter((name) => !allSet.has(name));
+
+    if (missing.length > 0) {
+      ctx.issues.push({
+        code: "custom",
+        input: config,
+        message: `Plugin '${pluginName}' has requiredDatasourceNames [${missing.join(", ")}] that are not included in its allDatasourceNames.`,
+      });
+    }
+  }
+}
+
 // Invariant: specified plugins' datasources are available in the specified namespace's Datasources
 export function invariant_requiredDatasources(
   ctx: ZodCheckFnInput<Pick<EnsIndexerConfig, "namespace" | "plugins">>,

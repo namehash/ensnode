@@ -23,6 +23,7 @@ import type { EnsIndexerConfig } from "./types";
 import {
   invariant_globalBlockrange,
   invariant_requiredDatasources,
+  invariant_requiredDatasourcesSubsetOfAll,
   invariant_rpcConfigsSpecifiedForIndexedChains,
   invariant_validContractConfigs,
 } from "./validations";
@@ -144,6 +145,7 @@ const ENSIndexerConfigSchema = z
    * ctx: ZodCheckFnInput<Pick<EnsIndexerConfig, "namespace" | "plugins">>
    * ```
    */
+  .check(invariant_requiredDatasourcesSubsetOfAll)
   .check(invariant_requiredDatasources)
   .check(invariant_rpcConfigsSpecifiedForRootChain)
   .check(invariant_validContractConfigs)
