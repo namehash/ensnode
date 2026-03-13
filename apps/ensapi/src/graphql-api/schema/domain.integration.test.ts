@@ -120,6 +120,7 @@ describe("Domain.events filtering (EventsWhereInput)", () => {
       name: NAME_WITH_EVENTS,
       first: 1000,
     });
+    // events are returned in ascending order, so first/last access yields min/max values
     allEvents = flattenConnection(result.domain.events);
     expect(allEvents.length).toBeGreaterThan(0);
   });
@@ -229,6 +230,8 @@ describe("Domain.events filtering (EventsWhereInput)", () => {
     });
     const events = flattenConnection(result.domain.events);
 
+    expect(events.length).toBeGreaterThan(0);
+    expect(events.length).toBeLessThanOrEqual(allEvents.length);
     for (const event of events) {
       expect(event.topics[0]?.toLowerCase()).toBe(targetSelector.toLowerCase());
       expect(BigInt(event.timestamp)).toBeGreaterThanOrEqual(BigInt(midTimestamp));

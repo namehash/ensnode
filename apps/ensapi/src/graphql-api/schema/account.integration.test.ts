@@ -134,6 +134,7 @@ describe("Account.events filtering (AccountEventsWhereInput)", () => {
       address: DEVNET_DEPLOYER,
       first: 1000,
     });
+    // events are returned in ascending order, so first/last access yields min/max values
     allEvents = flattenConnection(result.account.events);
     expect(allEvents.length).toBeGreaterThan(0);
   });
@@ -228,6 +229,8 @@ describe("Account.events filtering (AccountEventsWhereInput)", () => {
     });
     const events = flattenConnection(result.account.events);
 
+    expect(events.length).toBeGreaterThan(0);
+    expect(events.length).toBeLessThanOrEqual(allEvents.length);
     for (const event of events) {
       expect(event.topics[0]?.toLowerCase()).toBe(targetSelector.toLowerCase());
       expect(BigInt(event.timestamp)).toBeGreaterThanOrEqual(BigInt(midTimestamp));

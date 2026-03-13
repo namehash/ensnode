@@ -23,6 +23,8 @@ const namespace = "ens-test-env";
 
 const V2_ETH_REGISTRY = getDatasourceContract(namespace, DatasourceNames.ENSv2Root, "ETHRegistry");
 
+const NAME_WITH_RESOLVER = "example.eth";
+
 const EAC_ROLES_CHANGED_SELECTOR = toEventSelector(
   EnhancedAccessControlABI.find(
     (item) => item.type === "event" && item.name === "EACRolesChanged",
@@ -181,7 +183,7 @@ describe("Domain.permissions", () => {
       query DomainPermissionsFiltered($name: Name!, $user: Address!) {
         domain(by: { name: $name }) {
           ... on ENSv2Domain {
-            permissions(where: { user: $user }) { edges { node { id user { address } roles } } }
+            permissions(where: { user: $user }) { edges { node { id resource user { address } roles } } }
           }
         }
       }
@@ -300,8 +302,12 @@ describe("Resolver.permissions", () => {
           permissions: { id: string; contract: { chainId: number; address: Address } };
         };
       };
-    }>(ResolverPermissions, { name: "example.eth" });
+    }>(ResolverPermissions, { name: NAME_WITH_RESOLVER });
 
+    expect(
+      result.domain.resolver,
+      `expected ${NAME_WITH_RESOLVER} to have a resolver`,
+    ).toBeDefined();
     expect(result.domain.resolver.permissions.id).toBeTruthy();
     expect(result.domain.resolver.permissions.contract.address).toBeTruthy();
     expect(result.domain.resolver.permissions.contract.chainId).toBeTruthy();
@@ -314,8 +320,8 @@ describe("Permissions.events", () => {
   };
 
   const PermissionsEvents = gql`
-    query PermissionsEvents($contract: AccountIdInput!) {
-      permissions(for: $contract) { events { edges { node { ...EventFragment } } } }
+    query PermissionsEvents($contract: AccountIdInput!, $first: Int) {
+      permissions(for: $contract) { events(first: $first) { edges { node { ...EventFragment } } } }
     }
     ${EventFragment}
   `;
@@ -325,7 +331,9 @@ describe("Permissions.events", () => {
   beforeAll(async () => {
     const result = await request<PermissionsEventsResult>(PermissionsEvents, {
       contract: V2_ETH_REGISTRY,
+      first: 1000,
     });
+    // events are returned in ascending order, so first/last access yields min/max values
     allEvents = flattenConnection(result.permissions.events);
     expect(allEvents.length).toBeGreaterThan(0);
   });
@@ -372,6 +380,7 @@ describe("Permissions.events filtering (EventsWhereInput)", () => {
       contract: V2_ETH_REGISTRY,
       first: 1000,
     });
+    // events are returned in ascending order, so first/last access yields min/max values
     allEvents = flattenConnection(result.permissions.events);
     expect(allEvents.length).toBeGreaterThan(0);
   });
