@@ -10,13 +10,13 @@ import {
   serializeIndexingStatusResponse,
 } from "@ensnode/ensnode-sdk";
 
-import { ensDbClient } from "@/lib/ensdb-client/singleton";
+import { ensNodeDbWriter } from "@/lib/ensdb-client/singleton";
 
 const app = new Hono();
 
 // include ENSIndexer Public Config endpoint
 app.get("/config", async (c) => {
-  const publicConfig = await ensDbClient.getEnsIndexerPublicConfig();
+  const publicConfig = await ensNodeDbWriter.getEnsIndexerPublicConfig();
 
   // Invariant: the public config is guaranteed to be available in ENSDb after
   // application startup.
@@ -30,7 +30,7 @@ app.get("/config", async (c) => {
 
 app.get("/indexing-status", async (c) => {
   try {
-    const crossChainSnapshot = await ensDbClient.getIndexingStatusSnapshot();
+    const crossChainSnapshot = await ensNodeDbWriter.getIndexingStatusSnapshot();
 
     // Invariant: the Indexing Status Snapshot is expected to be available in
     // ENSDb shortly after application startup. There is a possibility that

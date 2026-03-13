@@ -1,6 +1,6 @@
 import { fileURLToPath } from "node:url";
 
-import { ensDbClient } from "@/lib/ensdb-client/singleton";
+import { ensNodeDbWriter } from "@/lib/ensdb-client/singleton";
 import { indexingStatusBuilder } from "@/lib/indexing-status-builder/singleton";
 import { publicConfigBuilder } from "@/lib/public-config-builder/singleton";
 
@@ -27,7 +27,7 @@ export function startEnsDbWriterWorker() {
   );
 
   ensDbWriterWorker = new EnsDbWriterWorker(
-    ensDbClient,
+    ensNodeDbWriter,
     publicConfigBuilder,
     indexingStatusBuilder,
     migrationsDirPath,

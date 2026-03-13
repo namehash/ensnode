@@ -1,6 +1,7 @@
 import { getUnixTime, secondsToMilliseconds } from "date-fns";
 import pRetry from "p-retry";
 
+import type { EnsNodeDbWriter } from "@ensnode/ensnode-schema";
 import {
   buildCrossChainIndexingStatusSnapshotOmnichain,
   type CrossChainIndexingStatusSnapshot,
@@ -11,7 +12,6 @@ import {
   validateEnsIndexerPublicConfigCompatibility,
 } from "@ensnode/ensnode-sdk";
 
-import type { EnsDbClient } from "@/lib/ensdb-client/ensdb-client";
 import type { IndexingStatusBuilder } from "@/lib/indexing-status-builder/indexing-status-builder";
 import type { PublicConfigBuilder } from "@/lib/public-config-builder/public-config-builder";
 
@@ -38,9 +38,9 @@ export class EnsDbWriterWorker {
   private indexingStatusInterval: ReturnType<typeof setInterval> | null = null;
 
   /**
-   * ENSDb Client instance used by the worker to interact with ENSDb.
+   * Client instance used by the worker to write data into ENSNode Schema in ENSDb.
    */
-  private ensDbClient: EnsDbClient;
+  private ensNodeDbWriter: EnsNodeDbWriter;
 
   /**
    * Indexing Status Builder instance used by the worker to read ENSIndexer Indexing Status.
@@ -58,18 +58,18 @@ export class EnsDbWriterWorker {
   private migrationsDirPath: string;
 
   /**
-   * @param ensDbClient ENSDb Client instance used by the worker to interact with ENSDb.
+   * @param ensNodeDbWriter ENSNodeDbWriter instance used by the worker to write data into ENSNode Schema in ENSDb.
    * @param publicConfigBuilder ENSIndexer Public Config Builder instance used by the worker to read ENSIndexer Public Config.
    * @param indexingStatusBuilder Indexing Status Builder instance used by the worker to read ENSIndexer Indexing Status.
    * @param migrationsDirPath Path to the directory containing ENSDb migrations to be executed by the worker on startup.
    */
   constructor(
-    ensDbClient: EnsDbClient,
+    ensNodeDbWriter: EnsNodeDbWriter,
     publicConfigBuilder: PublicConfigBuilder,
     indexingStatusBuilder: IndexingStatusBuilder,
     migrationsDirPath: string,
   ) {
-    this.ensDbClient = ensDbClient;
+    this.ensNodeDbWriter = ensNodeDbWriter;
     this.publicConfigBuilder = publicConfigBuilder;
     this.indexingStatusBuilder = indexingStatusBuilder;
     this.migrationsDirPath = migrationsDirPath;
@@ -107,14 +107,14 @@ export class EnsDbWriterWorker {
 
     // Task 1: upsert ENSDb version into ENSDb.
     console.log(`[EnsDbWriterWorker]: Upserting ENSDb version into ENSDb...`);
-    await this.ensDbClient.upsertEnsDbVersion(inMemoryConfig.versionInfo.ensDb);
+    await this.ensNodeDbWriter.upsertEnsDbVersion(inMemoryConfig.versionInfo.ensDb);
     console.log(
       `[EnsDbWriterWorker]: ENSDb version upserted successfully: ${inMemoryConfig.versionInfo.ensDb}`,
     );
 
     // Task 2: upsert of EnsIndexerPublicConfig into ENSDb.
     console.log(`[EnsDbWriterWorker]: Upserting ENSIndexer Public Config into ENSDb...`);
-    await this.ensDbClient.upsertEnsIndexerPublicConfig(inMemoryConfig);
+    await this.ensNodeDbWriter.upsertEnsIndexerPublicConfig(inMemoryConfig);
     console.log(`[EnsDbWriterWorker]: ENSIndexer Public Config upserted successfully`);
 
     // Task 3: recurring upsert of Indexing Status Snapshot into ENSDb.
@@ -151,7 +151,7 @@ export class EnsDbWriterWorker {
    * @throws Error if any migration fails to execute.
    */
   private async executeMigrations(): Promise<void> {
-    await this.ensDbClient.migrate(this.migrationsDirPath);
+    await this.ensNodeDbWriter.migrate(this.migrationsDirPath);
   }
 
   /**
@@ -192,7 +192,7 @@ export class EnsDbWriterWorker {
 
     try {
       [storedConfig, inMemoryConfig] = await Promise.all([
-        this.ensDbClient.getEnsIndexerPublicConfig(),
+        this.ensNodeDbWriter.getEnsIndexerPublicConfig(),
         inMemoryConfigPromise,
       ]);
     } catch (error) {
@@ -249,7 +249,7 @@ export class EnsDbWriterWorker {
         snapshotTime,
       );
 
-      await this.ensDbClient.upsertIndexingStatusSnapshot(crossChainSnapshot);
+      await this.ensNodeDbWriter.upsertIndexingStatusSnapshot(crossChainSnapshot);
     } catch (error) {
       console.error(
         `[EnsDbWriterWorker]: Error retrieving or validating Indexing Status Snapshot:`,
