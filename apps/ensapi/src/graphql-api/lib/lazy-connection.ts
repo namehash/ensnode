@@ -12,8 +12,7 @@ export const lazyConnection = <Edges, PageInfo>({
 }) => {
   let _conn: ReturnType<typeof connection> | null = null;
   const memoizedConnection = () => {
-    if (_conn !== null) return _conn;
-    _conn = connection();
+    if (_conn === null) _conn = connection();
     return _conn;
   };
 

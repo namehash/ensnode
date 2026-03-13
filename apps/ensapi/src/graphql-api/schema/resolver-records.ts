@@ -25,7 +25,7 @@ ResolverRecordsRef.implement({
     //////////////////////
     id: t.field({
       description: "A unique reference to these ResolverRecords.",
-      type: "ID",
+      type: "ResolverRecordsId",
       nullable: false,
       resolve: (parent) => parent.id,
     }),

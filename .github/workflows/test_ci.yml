@@ -1,5 +1,8 @@
 name: "Test: CI"
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
   push:
@@ -99,3 +102,13 @@ jobs:
           # healthcheck script env variables
           HEALTH_CHECK_TIMEOUT: 60
         run: ./.github/scripts/run_ensindexer_healthcheck.sh
+
+  integration-tests:
+    name: "Integration Tests"
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup_node_environment
+      - name: Run integration tests
+        run: pnpm test:integration:ci

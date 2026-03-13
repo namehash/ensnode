@@ -7,6 +7,7 @@ import {
   getCanonicalId,
   interpretAddress,
   isRegistrationFullyExpired,
+  type LabelHash,
   type LiteralLabel,
   makeENSv2DomainId,
   makeRegistryId,
@@ -14,7 +15,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
-import { ensureEvent } from "@/lib/ensv2/event-db-helpers";
+import { ensureDomainEvent, ensureEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel } from "@/lib/ensv2/label-db-helpers";
 import {
   getLatestRegistration,
@@ -37,12 +38,14 @@ export default function () {
       context: Context;
       event: EventWithArgs<{
         tokenId: bigint;
+        labelHash: LabelHash;
         label: string;
+        owner: Address;
         expiry: bigint;
-        registeredBy: Address;
+        sender: Address;
       }>;
     }) => {
-      const { tokenId, label: _label, expiry, registeredBy: registrant } = event.args;
+      const { tokenId, label: _label, expiry, sender: registrant } = event.args;
       const label = _label as LiteralLabel;
 
       const labelHash = labelhash(label);
@@ -115,9 +118,13 @@ export default function () {
         registrarChainId: registry.chainId,
         registrarAddress: registry.address,
         registrantId: interpretAddress(registrant),
+        start: event.block.timestamp,
         expiry,
         eventId: await ensureEvent(context, event),
       });
+
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
     },
   );
 
@@ -131,11 +138,11 @@ export default function () {
       event: EventWithArgs<{
         tokenId: bigint;
         newExpiry: bigint;
-        changedBy: Address;
+        sender: Address;
       }>;
     }) => {
-      // biome-ignore lint/correctness/noUnusedVariables: not sure if we care to index changedBy
-      const { tokenId, newExpiry: expiry, changedBy } = event.args;
+      // biome-ignore lint/correctness/noUnusedVariables: not sure if we care to index sender
+      const { tokenId, newExpiry: expiry, sender } = event.args;
 
       const registry = getThisAccountId(context, event);
       const canonicalId = getCanonicalId(tokenId);
@@ -157,6 +164,9 @@ export default function () {
 
       // update Registration
       await context.db.update(schema.registration, { id: registration.id }).set({ expiry });
+
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
     },
   );
 
@@ -206,6 +216,9 @@ export default function () {
 
         await context.db.update(schema.v2Domain, { id: domainId }).set({ subregistryId });
       }
+
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
     },
   );
 
@@ -219,11 +232,9 @@ export default function () {
       event: EventWithArgs<{
         oldTokenId: bigint;
         newTokenId: bigint;
-        resource: bigint;
       }>;
     }) => {
-      // biome-ignore lint/correctness/noUnusedVariables: TODO: use resource
-      const { oldTokenId, newTokenId, resource } = event.args;
+      const { oldTokenId, newTokenId } = event.args;
 
       // Invariant: CanonicalIds must match
       if (getCanonicalId(oldTokenId) !== getCanonicalId(newTokenId)) {
@@ -234,10 +245,10 @@ export default function () {
       const registryAccountId = getThisAccountId(context, event);
       const domainId = makeENSv2DomainId(registryAccountId, canonicalId);
 
-      // TODO: likely need to track resource as well, since it depends on eacVersion
-      // then we can likely provide a Domain.resource -> PermissionsResource resolver in the api
-
       await context.db.update(schema.v2Domain, { id: domainId }).set({ tokenId: newTokenId });
+
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
     },
   );
 
@@ -264,6 +275,9 @@ export default function () {
     await context.db
       .update(schema.v2Domain, { id: domainId })
       .set({ ownerId: interpretAddress(owner) });
+
+    // push event to domain history
+    await ensureDomainEvent(context, event, domainId);
   }
 
   ponder.on(namespaceContract(pluginName, "ENSv2Registry:TransferSingle"), handleTransferSingle);

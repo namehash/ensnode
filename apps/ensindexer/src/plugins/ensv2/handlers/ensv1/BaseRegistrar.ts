@@ -14,7 +14,7 @@ import {
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { materializeENSv1DomainEffectiveOwner } from "@/lib/ensv2/domain-db-helpers";
-import { ensureEvent } from "@/lib/ensv2/event-db-helpers";
+import { ensureDomainEvent, ensureEvent } from "@/lib/ensv2/event-db-helpers";
 import {
   getLatestRegistration,
   insertLatestRegistration,
@@ -83,6 +83,9 @@ export default function () {
       // materialize Domain owner if exists
       const domain = await context.db.find(schema.v1Domain, { id: domainId });
       if (domain) await materializeENSv1DomainEffectiveOwner(context, domainId, to);
+
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
     },
   );
 
@@ -125,6 +128,7 @@ export default function () {
       registrarChainId: registrar.chainId,
       registrarAddress: registrar.address,
       registrantId: interpretAddress(registrant),
+      start: event.block.timestamp,
       expiry,
       // all BaseRegistrar-derived Registrars use the same GRACE_PERIOD
       gracePeriod: BigInt(GRACE_PERIOD_SECONDS),
@@ -134,6 +138,9 @@ export default function () {
     // materialize Domain owner if exists
     const domain = await context.db.find(schema.v1Domain, { id: domainId });
     if (domain) await materializeENSv1DomainEffectiveOwner(context, domainId, owner);
+
+    // push event to domain history
+    await ensureDomainEvent(context, event, domainId);
   }
 
   ponder.on(namespaceContract(pluginName, "BaseRegistrar:NameRegistered"), handleNameRegistered);
@@ -223,6 +230,9 @@ export default function () {
         // NOTE: no pricing information from BaseRegistrar#NameRenewed. in ENSv1, this info is
         // indexed from the Registrar Controllers, see apps/ensindexer/src/plugins/ensv2/handlers/ensv1/RegistrarController.ts
       });
+
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
     },
   );
 }
