@@ -9,6 +9,7 @@ import {
 } from "@ensnode/datasources";
 import { buildBlockNumberRange, PluginName } from "@ensnode/ensnode-sdk";
 import {
+  DATASOURCE_NAMES_WITH_ENSv2_CONTRACTS,
   DATASOURCE_NAMES_WITH_RESOLVERS,
   getDatasourcesWithENSv2Contracts,
   getDatasourcesWithResolvers,
@@ -46,10 +47,10 @@ const DATASOURCE_NAMES_WITH_REVERSE_RESOLVERS = [
   DatasourceNames.ReverseResolverScroll,
 ];
 
-// NOTE: DATASOURCE_NAMES_WITH_RESOLVERS already includes DATASOURCE_NAMES_WITH_ENSv2_CONTRACTS
 const ALL_DATASOURCE_NAMES = [
   ...DATASOURCE_NAMES_WITH_RESOLVERS,
   ...DATASOURCE_NAMES_WITH_REVERSE_RESOLVERS,
+  ...DATASOURCE_NAMES_WITH_ENSv2_CONTRACTS,
 ];
 
 const REQUIRED_DATASOURCE_NAMES = [DatasourceNames.ENSRoot];
