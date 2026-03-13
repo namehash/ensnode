@@ -133,19 +133,16 @@ const ENSIndexerConfigSchema = z
   /**
    * Invariant enforcement
    *
-   * We enforce invariants across multiple values parsed with `ENSIndexerConfigSchema`
-   * by calling `.check()` function with relevant invariant-enforcing logic.
-   * Each such function has access to config values that were already parsed.
-   * If you need to ensure certain config value permutation, say across `namespace`
-   * and `plugins` values, you can define the `.check()` function callback with the following
-   * input param:
+   * We enforce invariants across the parsed and derived config values by calling
+   * `.check()` after `.transform()`. Each check function has access to all parsed
+   * values plus derived properties (e.g. `indexedChainIds`).
+   *
+   * To constrain specific config value permutations, define the `.check()` callback
+   * with a `Pick` of the relevant properties:
    *
    * ```ts
-   * ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "namespace" | "plugins">>
+   * ctx: ZodCheckFnInput<Pick<EnsIndexerConfig, "namespace" | "plugins">>
    * ```
-   *
-   * This way, the invariant logic can access all information it needs, while keeping room
-   * for the derived values of ENSIndexerConfig to be computed after all `.check()`s.
    */
   .check(invariant_requiredDatasources)
   .check(invariant_rpcConfigsSpecifiedForRootChain)
