@@ -4,9 +4,9 @@ import type {
 } from "@ensnode/ensnode-sdk";
 
 /**
- * Client interface with mutation methods for ENSNode Schema in ENSDb.
+ * Client interface with mutations for ENSNode Schema in ENSDb.
  */
-export interface EnsNodeDbClientMutation {
+export interface EnsNodeDbMutations {
   /**
    * Upsert ENSDb Version
    *
@@ -27,18 +27,4 @@ export interface EnsNodeDbClientMutation {
    * @throws when upsert operation failed.
    */
   upsertIndexingStatusSnapshot(indexingStatus: CrossChainIndexingStatusSnapshot): Promise<void>;
-}
-
-/**
- * Client interface with migration methods for ENSNode Schema in ENSDb.
- */
-export interface EnsNodeDbClientMigration {
-  /**
-   * Execute pending database migrations for ENSNode Schema in ENSDb.
-   *
-   * @param migrationsDirPath - The file path to the directory containing
-   *                            database migration files for ENSNode Schema.
-   * @throws error when migration execution fails.
-   */
-  migrate(migrationsDirPath: string): Promise<void>;
 }
