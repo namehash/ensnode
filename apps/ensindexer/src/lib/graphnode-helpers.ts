@@ -35,8 +35,9 @@ const ensRainbowApiClient = getENSRainbowApiClient();
  * ENSIndexer process to terminate.
  *
  * @returns the original label if found, or null if not found for the labelHash.
- * @throws if the labelHash is not correctly formatted, or a transient error persists after all
- *   retries are exhausted.
+ * @throws if ENSRainbow returns a non-retryable error response (e.g. HealBadRequestError / 400),
+ *   or if a transient error (network failure, HealServerError / 500) persists after all retries
+ *   are exhausted.
  */
 export async function labelByLabelHash(labelHash: LabelHash): Promise<LiteralLabel | null> {
   // Reset at the start of each attempt so that after p-retry exhaustion we can distinguish
