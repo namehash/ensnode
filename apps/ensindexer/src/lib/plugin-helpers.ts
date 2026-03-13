@@ -79,7 +79,7 @@ export interface ENSIndexerPlugin<
    * which is derived from the plugins themselves.
    */
   createPonderConfig(
-    config: Omit<EnsIndexerConfig, "indexedChainIds">,
+    config: EnsIndexerConfig,
   ): PonderConfigResult<CHAINS, CONTRACTS, ACCOUNTS, BLOCKS>;
 }
 
@@ -118,7 +118,7 @@ export interface BuildPluginOptions<
    * nested factory functions, i.e. to ensure that the ponder configuration
    * is only created for this plugin when it is activated.
    */
-  createPonderConfig(config: Omit<EnsIndexerConfig, "indexedChainIds">): PONDER_CONFIG_RESULT;
+  createPonderConfig(config: EnsIndexerConfig): PONDER_CONFIG_RESULT;
 }
 
 /**
