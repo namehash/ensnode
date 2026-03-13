@@ -1,7 +1,6 @@
 locals {
   common_variables = {
     # Common configuration
-    "DATABASE_SCHEMA"         = { value = var.database_schema },
     "DATABASE_URL"            = { value = var.ensdb_url },
     "ALCHEMY_API_KEY"         = { value = var.alchemy_api_key }
     "QUICKNODE_API_KEY"       = { value = var.quicknode_api_key }
@@ -29,6 +28,7 @@ resource "render_web_service" "ensindexer" {
   }
 
   env_vars = merge(local.common_variables, {
+    "DATABASE_SCHEMA"   = { value = var.database_schema },
     "ENSRAINBOW_URL"    = { value = var.ensrainbow_url },
     "LABEL_SET_ID"      = { value = var.ensindexer_label_set_id },
     "LABEL_SET_VERSION" = { value = var.ensindexer_label_set_version },
