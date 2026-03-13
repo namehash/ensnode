@@ -3,7 +3,7 @@ import type { createConfig as createPonderConfig } from "ponder";
 import type { DatasourceName } from "@ensnode/datasources";
 import { PluginName, uniq } from "@ensnode/ensnode-sdk";
 
-import type { ENSIndexerConfig } from "@/config/types";
+import type { EnsIndexerConfig } from "@/config/types";
 import { getPlugin } from "@/plugins";
 
 /**
@@ -67,10 +67,10 @@ export interface ENSIndexerPlugin<
   /**
    * Create Ponder Config for the plugin.
    *
-   * @param {ENSIndexerConfig} config
+   * @param {EnsIndexerConfig} config
    */
   createPonderConfig(
-    config: ENSIndexerConfig,
+    config: Omit<EnsIndexerConfig, "indexedChainIds">,
   ): PonderConfigResult<CHAINS, CONTRACTS, ACCOUNTS, BLOCKS>;
 }
 
@@ -105,7 +105,7 @@ export interface BuildPluginOptions<
    * nested factory functions, i.e. to ensure that the ponder configuration
    * is only created for this plugin when it is activated.
    */
-  createPonderConfig(config: ENSIndexerConfig): PONDER_CONFIG_RESULT;
+  createPonderConfig(config: EnsIndexerConfig): PONDER_CONFIG_RESULT;
 }
 
 /**
@@ -127,12 +127,6 @@ export function createPlugin<
   PONDER_CONFIG_RESULT["blocks"]
 > {
   return options;
-}
-
-export function getRequiredDatasourceNames(plugins: ENSIndexerPlugin[]): DatasourceName[] {
-  const requiredDatasourceNames = plugins.flatMap((plugin) => plugin.requiredDatasourceNames);
-
-  return uniq(requiredDatasourceNames);
 }
 
 /**

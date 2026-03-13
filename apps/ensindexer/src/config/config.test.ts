@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ensTestEnvChain } from "@ensnode/datasources";
+import { type ENSNamespaceId, ensTestEnvChain, getENSNamespace } from "@ensnode/datasources";
 import { buildBlockNumberRange, ENSNamespaceIds, PluginName } from "@ensnode/ensnode-sdk";
 import type { RpcConfig } from "@ensnode/ensnode-sdk/internal";
 
@@ -34,6 +34,17 @@ async function getConfig() {
 
 async function stubEnv(env: ENSIndexerEnvironment) {
   Object.entries(env).forEach(([key, value]) => vi.stubEnv(key, value));
+}
+
+/**
+ * Stubs RPC_URL env vars for all chains defined in the given namespace's datasources.
+ */
+function stubRpcUrlsForNamespace(namespace: ENSNamespaceId) {
+  const datasources = getENSNamespace(namespace);
+  const chainIds = new Set(Object.values(datasources).map((ds) => ds.chain.id));
+  for (const chainId of chainIds) {
+    vi.stubEnv(`RPC_URL_${chainId}`, VALID_RPC_URL);
+  }
 }
 
 describe("config (with base env)", () => {
@@ -203,7 +214,7 @@ describe("config (with base env)", () => {
   describe(".namespace", () => {
     it("returns the NAMESPACE if set", async () => {
       vi.stubEnv("NAMESPACE", "sepolia");
-      vi.stubEnv("RPC_URL_11155111", VALID_RPC_URL);
+      stubRpcUrlsForNamespace("sepolia");
       const config = await getConfig();
       expect(config.namespace).toBe("sepolia");
     });
@@ -243,10 +254,7 @@ describe("config (with base env)", () => {
 
       it("has default plugins", async () => {
         vi.stubEnv("PLUGINS", undefined);
-        vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
-        vi.stubEnv("RPC_URL_59144", VALID_RPC_URL);
-        vi.stubEnv("RPC_URL_10", VALID_RPC_URL);
-        vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
+        stubRpcUrlsForNamespace("mainnet");
 
         await expect(getConfig()).resolves.toMatchObject({
           plugins: EnvironmentDefaults.alpha.PLUGINS.split(","),
@@ -256,14 +264,14 @@ describe("config (with base env)", () => {
 
     it("returns the PLUGINS if it is a valid array", async () => {
       vi.stubEnv("PLUGINS", "subgraph,basenames");
-      vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
+      stubRpcUrlsForNamespace("mainnet");
       const config = await getConfig();
       expect(config.plugins).toEqual(["subgraph", "basenames"]);
     });
 
     it("returns a single plugin if only one is provided", async () => {
       vi.stubEnv("PLUGINS", "basenames");
-      vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
+      stubRpcUrlsForNamespace("mainnet");
       const config = await getConfig();
       expect(config.plugins).toEqual(["basenames"]);
     });
@@ -469,16 +477,65 @@ describe("config (with base env)", () => {
 
     it("throws when PLUGINS does not include subgraph", async () => {
       vi.stubEnv("PLUGINS", "basenames");
-      vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
+      stubRpcUrlsForNamespace("mainnet");
 
       await expect(getConfig()).rejects.toThrow(/isSubgraphCompatible/);
     });
 
     it("throws when PLUGINS includes subgraph along with other plugins", async () => {
       vi.stubEnv("PLUGINS", "subgraph,basenames");
-      vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
+      stubRpcUrlsForNamespace("mainnet");
 
       await expect(getConfig()).rejects.toThrow(/isSubgraphCompatible/);
+    });
+  });
+
+  describe(".indexedChainIds", () => {
+    it("derives chain id 1 for subgraph plugin on mainnet", async () => {
+      vi.stubEnv("PLUGINS", "subgraph");
+      const config = await getConfig();
+      expect(config.indexedChainIds).toEqual(new Set([1]));
+    });
+
+    it("derives chain ids 1 and 8453 for subgraph,basenames on mainnet", async () => {
+      vi.stubEnv("PLUGINS", "subgraph,basenames");
+      stubRpcUrlsForNamespace("mainnet");
+      const config = await getConfig();
+      expect(config.indexedChainIds).toEqual(new Set([1, 8453]));
+    });
+
+    it("derives all expected chain ids for protocol-acceleration on mainnet", async () => {
+      vi.stubEnv("PLUGINS", "protocol-acceleration");
+      stubRpcUrlsForNamespace("mainnet");
+      const config = await getConfig();
+      // mainnet(1), base(8453), linea(59144), optimism(10), arbitrum(42161), scroll(534352)
+      expect(config.indexedChainIds).toEqual(new Set([1, 8453, 59144, 10, 42161, 534352]));
+    });
+
+    it("unions chain ids across multiple plugins", async () => {
+      vi.stubEnv("PLUGINS", "subgraph,basenames");
+      stubRpcUrlsForNamespace("mainnet");
+      const config = await getConfig();
+      // subgraph contributes 1, basenames contributes 1 and 8453
+      expect(config.indexedChainIds).toEqual(new Set([1, 8453]));
+      expect(config.indexedChainIds.size).toBe(2);
+    });
+
+    // This test asserts that protocol-acceleration derives different chain ids per namespace,
+    // because available datasources differ (e.g. sepolia has no ThreeDNS datasources).
+    // If this test fails after updating datasources for a namespace, update the expected
+    // chain ids or remove this test if the distinction no longer holds.
+    it("derives different chain ids for protocol-acceleration on sepolia vs mainnet", async () => {
+      vi.stubEnv("PLUGINS", "protocol-acceleration");
+
+      stubRpcUrlsForNamespace("mainnet");
+      const mainnetConfig = await getConfig();
+
+      vi.stubEnv("NAMESPACE", "sepolia");
+      stubRpcUrlsForNamespace("sepolia");
+      const sepoliaConfig = await getConfig();
+
+      expect(mainnetConfig.indexedChainIds).not.toEqual(sepoliaConfig.indexedChainIds);
     });
   });
 
@@ -496,7 +553,7 @@ describe("config (with base env)", () => {
 
     it("cannot constrain blockrange with multiple chains", async () => {
       vi.stubEnv("PLUGINS", "subgraph,basenames");
-      vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
+      stubRpcUrlsForNamespace("mainnet");
       vi.stubEnv("END_BLOCK", "1");
       await expect(getConfig()).rejects.toThrow(/multiple chains/i);
     });
@@ -628,11 +685,7 @@ describe("config (minimal base env)", () => {
     });
 
     it("provides default plugins", async () => {
-      stubEnv({
-        RPC_URL_8453: VALID_RPC_URL,
-        RPC_URL_59144: VALID_RPC_URL,
-        RPC_URL_10: VALID_RPC_URL,
-      });
+      stubRpcUrlsForNamespace("mainnet");
 
       await expect(getConfig()).resolves.toMatchObject({
         plugins: EnvironmentDefaults.alpha.PLUGINS.split(","),
@@ -640,12 +693,8 @@ describe("config (minimal base env)", () => {
     });
 
     it("allows override of default plugins", async () => {
-      stubEnv({
-        PLUGINS: "tokenscope",
-        RPC_URL_8453: VALID_RPC_URL,
-        RPC_URL_59144: VALID_RPC_URL,
-        RPC_URL_10: VALID_RPC_URL,
-      });
+      stubEnv({ PLUGINS: "tokenscope" });
+      stubRpcUrlsForNamespace("mainnet");
 
       await expect(getConfig()).resolves.toMatchObject({ plugins: [PluginName.TokenScope] });
     });
