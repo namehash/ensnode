@@ -103,6 +103,10 @@ export const buildReferrerLeaderboardRevShareLimit = (
   // 1. Sort events deterministically by id (lexicographic order).
   //    Ponder checkpoint IDs are constant-length decimal strings, so lexicographic
   //    order equals chronological order across all fields including eventType.
+  //    NOTE: This relies on the invariant that all ReferralEvents are produced by
+  //    Ponder log (smart-contract event) handlers and therefore share the same
+  //    eventType digit. If mixed event types are ever introduced, ordering by id
+  //    directly would need revisiting.
   const sortedEvents = [...events].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
 
   // 2. Process events sequentially to run the race.
