@@ -521,7 +521,7 @@ describe("config (with base env)", () => {
           .map((name) => maybeGetDatasource(ENSNamespaceIds.Mainnet, name)?.chain.id)
           .filter((id) => id !== undefined),
       );
-      1;
+
       expect(config.indexedChainIds).toEqual(expected);
     });
 
