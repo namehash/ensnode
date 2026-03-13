@@ -74,9 +74,6 @@ export interface ENSIndexerPlugin<
 
   /**
    * Create Ponder Config for the plugin.
-   *
-   * Uses `Omit` to prevent plugins from depending on `indexedChainIds`,
-   * which is derived from the plugins themselves.
    */
   createPonderConfig(
     config: EnsIndexerConfig,
