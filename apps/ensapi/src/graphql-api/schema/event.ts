@@ -165,9 +165,10 @@ EventRef.implement({
 export const EventsWhereInput = builder.inputType("EventsWhereInput", {
   description: "Filter conditions for an events connection.",
   fields: (t) => ({
-    topic0_in: t.field({
+    selector_in: t.field({
       type: ["Hex"],
-      description: "Filter to events whose topic0 (event signature) is one of the provided values.",
+      description:
+        "Filter to events whose selector (event signature) is one of the provided values.",
     }),
     timestamp_gte: t.field({
       type: "BigInt",
@@ -190,9 +191,10 @@ export const EventsWhereInput = builder.inputType("EventsWhereInput", {
 export const AccountEventsWhereInput = builder.inputType("AccountEventsWhereInput", {
   description: "Filter conditions for Account.events (where `from` is implied by the Account).",
   fields: (t) => ({
-    topic0_in: t.field({
+    selector_in: t.field({
       type: ["Hex"],
-      description: "Filter to events whose topic0 (event signature) is one of the provided values.",
+      description:
+        "Filter to events whose selector (event signature) is one of the provided values.",
     }),
     timestamp_gte: t.field({
       type: "BigInt",
