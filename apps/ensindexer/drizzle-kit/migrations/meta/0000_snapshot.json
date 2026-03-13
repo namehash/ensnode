@@ -1,5 +1,5 @@
 {
-  "id": "d05a87cf-3971-41ac-9eab-a15a54711a47",
+  "id": "033e8b27-4739-4da9-b9da-517b0c2700d7",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -8,8 +8,8 @@
       "name": "ensnode_metadata",
       "schema": "ensnode",
       "columns": {
-        "ens_indexer_ref": {
-          "name": "ens_indexer_ref",
+        "ens_indexer_schema_name": {
+          "name": "ens_indexer_schema_name",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -32,7 +32,10 @@
       "compositePrimaryKeys": {
         "ensnode_metadata_pkey": {
           "name": "ensnode_metadata_pkey",
-          "columns": ["ens_indexer_ref", "key"]
+          "columns": [
+            "ens_indexer_schema_name",
+            "key"
+          ]
         }
       },
       "uniqueConstraints": {},
