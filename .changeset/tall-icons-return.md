@@ -1,5 +1,6 @@
 ---
 "ensapi": patch
+"@namehash/ens-referrals": patch
 ---
 
-Fix non-deterministic ordering of registrar actions when multiple actions share the same block timestamp by sorting on `id` (Ponder checkpoint) instead of `timestamp`.
+Fix inconsistent ordering of registrar actions by sorting on the constant-length Ponder checkpoint `id` field (lexicographic = chronological). Simplify the rev-share-limit leaderboard race sort the same way and remove the now-unused `compareEventIds` / `resetEncodedEventType` helpers.

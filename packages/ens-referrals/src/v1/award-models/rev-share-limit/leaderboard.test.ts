@@ -27,7 +27,8 @@ const CHECKPOINT_PREFIX =
   "0000000000" + // blockTimestamp (10 chars)
   "0000000000000001" + // chainId (16 chars, mainnet = 1)
   "0000000000000001" + // blockNumber (16 chars)
-  "0000000000000000"; // transactionIndex (16 chars)
+  "0000000000000000" + // transactionIndex (16 chars)
+  "0"; // eventType (1 char)
 
 /**
  * Build test rules.
@@ -70,7 +71,7 @@ function makeEvent(
 ): ReferralEvent {
   const counter = ++eventIdCounter;
   return {
-    id: opts.id ?? `${CHECKPOINT_PREFIX}0${String(counter).padStart(16, "0")}`,
+    id: opts.id ?? `${CHECKPOINT_PREFIX}${String(counter).padStart(16, "0")}`,
     referrer,
     timestamp,
     incrementalDuration,
@@ -308,21 +309,22 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
   });
 
   describe("Deterministic ordering within same timestamp", () => {
-    it("sorts by id as bigint (lower id wins)", () => {
-      // Both referrers have the same timestamp; ADDR_A has a lower checkpoint id.
+    it("sorts by id — event with lexicographically smaller id wins when timestamps are equal", () => {
+      // Both referrers have the same timestamp; ADDR_A has the smaller id and wins the race.
       // Pool = $2.50 — only enough for one.
-      // IDs differ only in their eventIndex (last 16 digits): 1 < 2, so ADDR_A wins.
-      const ID_EARLY = `${CHECKPOINT_PREFIX}00000000000000001`;
-      const ID_LATE = `${CHECKPOINT_PREFIX}00000000000000002`;
       const rules = buildTestRules(parseUsdc("2.5"));
       const events = [
-        { ...makeEvent(ADDR_B, 1000, SECONDS_PER_YEAR), id: ID_LATE },
-        { ...makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR), id: ID_EARLY },
+        makeEvent(ADDR_B, 1000, SECONDS_PER_YEAR, {
+          id: `${CHECKPOINT_PREFIX}${"1".padStart(16, "0")}`,
+        }),
+        makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR, {
+          id: `${CHECKPOINT_PREFIX}${"0".padStart(16, "0")}`,
+        }),
       ];
 
       const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
 
-      // ADDR_A has the lower id, should claim the pool first
+      // ADDR_A has the lower (earlier) id, should claim the pool first
       expect(result.referrers.get(ADDR_A)!.awardPoolApproxValue.amount).toBe(
         STANDARD_AWARD_1Y.amount,
       );

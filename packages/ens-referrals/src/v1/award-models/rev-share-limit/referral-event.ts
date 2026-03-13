@@ -22,7 +22,7 @@ export interface ReferralEvent {
   /**
    * Registrar action ID.
    *
-   * A deterministic and globally unique identifier for the "logical registrar action"
+   * A deterministic and globally unique fixed-length identifier for the "logical registrar action"
    * associated with the ReferralEvent.
    *
    * A Ponder-encoded checkpoint string that uniquely and deterministically identifies
