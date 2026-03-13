@@ -19,7 +19,7 @@ import type { ENSIndexerEnvironment } from "@/config/environment";
 import { applyDefaults, EnvironmentDefaults } from "@/config/environment-defaults";
 
 import { derive_indexedChainIds } from "./derived-params";
-import type { ENSIndexerConfig } from "./types";
+import type { EnsIndexerConfig } from "./types";
 import {
   invariant_globalBlockrange,
   invariant_requiredDatasources,
@@ -119,6 +119,18 @@ const ENSIndexerConfigSchema = z
     labelSet: LabelSetSchema,
   })
   /**
+   * Derived configuration
+   *
+   * We create new configuration parameters from the values parsed with `ENSIndexerConfigSchema`.
+   * This way, we can include complex configuration objects, for example, `datasources` that was
+   * derived from `namespace` and relevant SDK helper method, and attach result value to
+   * ENSIndexerConfig object. For example, we can get a slice of already parsed and validated
+   * ENSIndexerConfig values, and return this slice PLUS the derived configuration properties.
+   *
+   * See {@link derive_indexedChainIds} for example.
+   */
+  .transform(derive_indexedChainIds)
+  /**
    * Invariant enforcement
    *
    * We enforce invariants across multiple values parsed with `ENSIndexerConfigSchema`
@@ -137,22 +149,9 @@ const ENSIndexerConfigSchema = z
    */
   .check(invariant_requiredDatasources)
   .check(invariant_rpcConfigsSpecifiedForRootChain)
-  .check(invariant_rpcConfigsSpecifiedForIndexedChains)
   .check(invariant_validContractConfigs)
   .check(invariant_isSubgraphCompatibleRequirements)
-  /**
-   * Derived configuration
-   *
-   * We create new configuration parameters from the values parsed with `ENSIndexerConfigSchema`.
-   * This way, we can include complex configuration objects, for example, `datasources` that was
-   * derived from `namespace` and relevant SDK helper method, and attach result value to
-   * ENSIndexerConfig object. For example, we can get a slice of already parsed and validated
-   * ENSIndexerConfig values, and return this slice PLUS the derived configuration properties.
-   *
-   * See {@link derive_indexedChainIds} for example.
-   */
-  .transform(derive_indexedChainIds)
-  // `invariant_globalBlockrange` has dependency on `derive_indexedChainIds`
+  .check(invariant_rpcConfigsSpecifiedForIndexedChains)
   .check(invariant_globalBlockrange);
 
 /**
@@ -169,7 +168,7 @@ const ENSIndexerConfigSchema = z
  * @returns A validated ENSIndexerConfig object
  * @throws Error with formatted validation messages if environment parsing fails
  */
-export function buildConfigFromEnvironment(_env: ENSIndexerEnvironment): ENSIndexerConfig {
+export function buildConfigFromEnvironment(_env: ENSIndexerEnvironment): EnsIndexerConfig {
   try {
     // first parse the SUBGRAPH_COMPAT and NAMESPACE env variables
     const isSubgraphCompatible = IsSubgraphCompatibleSchema.parse(_env.SUBGRAPH_COMPAT);

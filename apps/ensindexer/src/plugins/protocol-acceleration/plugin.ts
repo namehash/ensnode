@@ -58,6 +58,7 @@ const REQUIRED_DATASOURCE_NAMES = [DatasourceNames.ENSRoot];
 export default createPlugin({
   name: pluginName,
   requiredDatasourceNames: REQUIRED_DATASOURCE_NAMES,
+  allDatasourceNames: ALL_DATASOURCE_NAMES,
   createPonderConfig(config) {
     const { ensroot } = getRequiredDatasources(config.namespace, REQUIRED_DATASOURCE_NAMES);
     const {

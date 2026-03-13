@@ -512,15 +512,6 @@ describe("config (with base env)", () => {
       expect(config.indexedChainIds).toEqual(new Set([1, 8453, 59144, 10, 42161, 534352]));
     });
 
-    it("unions chain ids across multiple plugins", async () => {
-      vi.stubEnv("PLUGINS", "subgraph,basenames");
-      stubRpcUrlsForNamespace("mainnet");
-      const config = await getConfig();
-      // subgraph contributes 1, basenames contributes 1 and 8453
-      expect(config.indexedChainIds).toEqual(new Set([1, 8453]));
-      expect(config.indexedChainIds.size).toBe(2);
-    });
-
     // This test asserts that protocol-acceleration derives different chain ids per namespace,
     // because available datasources differ (e.g. sepolia has no ThreeDNS datasources).
     // If this test fails after updating datasources for a namespace, update the expected

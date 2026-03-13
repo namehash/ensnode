@@ -30,6 +30,7 @@ const REQUIRED_DATASOURCE_NAMES = [
 export default createPlugin({
   name: pluginName,
   requiredDatasourceNames: REQUIRED_DATASOURCE_NAMES,
+  allDatasourceNames: REQUIRED_DATASOURCE_NAMES,
   createPonderConfig(config) {
     const {
       seaport, //

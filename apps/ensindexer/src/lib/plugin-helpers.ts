@@ -1,7 +1,7 @@
 import type { createConfig as createPonderConfig } from "ponder";
 
 import type { DatasourceName } from "@ensnode/datasources";
-import { PluginName, uniq } from "@ensnode/ensnode-sdk";
+import { PluginName } from "@ensnode/ensnode-sdk";
 
 import type { EnsIndexerConfig } from "@/config/types";
 import { getPlugin } from "@/plugins";
@@ -48,6 +48,7 @@ export function namespaceContract<const PREFIX extends string, const CONTRACT_NA
 export interface ENSIndexerPlugin<
   PLUGIN_NAME extends PluginName = PluginName,
   REQUIRED_DATASOURCE_NAMES extends readonly DatasourceName[] = DatasourceName[],
+  ALL_DATASOURCE_NAMES extends readonly DatasourceName[] = DatasourceName[],
   CHAINS extends object = {},
   CONTRACTS extends object = {},
   ACCOUNTS extends object = {},
@@ -65,12 +66,19 @@ export interface ENSIndexerPlugin<
   requiredDatasourceNames: REQUIRED_DATASOURCE_NAMES;
 
   /**
+   * The complete list of DatasourceNames this plugin may index (required + optional).
+   * Used to derive {@link EnsIndexerConfig.indexedChainIds} from static metadata without
+   * calling {@link createPonderConfig}.
+   */
+  allDatasourceNames: ALL_DATASOURCE_NAMES;
+
+  /**
    * Create Ponder Config for the plugin.
    *
    * @param {EnsIndexerConfig} config
    */
   createPonderConfig(
-    config: Omit<EnsIndexerConfig, "indexedChainIds">,
+    config: EnsIndexerConfig,
   ): PonderConfigResult<CHAINS, CONTRACTS, ACCOUNTS, BLOCKS>;
 }
 
@@ -92,6 +100,7 @@ type PonderConfigResult<
 export interface BuildPluginOptions<
   PLUGIN_NAME extends PluginName,
   REQUIRED_DATASOURCE_NAMES extends readonly DatasourceName[],
+  ALL_DATASOURCE_NAMES extends readonly DatasourceName[],
   PONDER_CONFIG_RESULT extends PonderConfigResult,
 > {
   /** The unique plugin name */
@@ -99,6 +108,9 @@ export interface BuildPluginOptions<
 
   /** The plugin's required Datasources */
   requiredDatasourceNames: REQUIRED_DATASOURCE_NAMES;
+
+  /** All DatasourceNames this plugin may index (required + optional) */
+  allDatasourceNames: ALL_DATASOURCE_NAMES;
 
   /**
    * Create the ponder configuration lazily to prevent premature execution of
@@ -115,12 +127,19 @@ export interface BuildPluginOptions<
 export function createPlugin<
   PLUGIN_NAME extends PluginName,
   REQUIRED_DATASOURCE_NAMES extends readonly DatasourceName[],
+  ALL_DATASOURCE_NAMES extends readonly DatasourceName[],
   PONDER_CONFIG_RESULT extends PonderConfigResult,
 >(
-  options: BuildPluginOptions<PLUGIN_NAME, REQUIRED_DATASOURCE_NAMES, PONDER_CONFIG_RESULT>,
+  options: BuildPluginOptions<
+    PLUGIN_NAME,
+    REQUIRED_DATASOURCE_NAMES,
+    ALL_DATASOURCE_NAMES,
+    PONDER_CONFIG_RESULT
+  >,
 ): ENSIndexerPlugin<
   PLUGIN_NAME,
   REQUIRED_DATASOURCE_NAMES,
+  ALL_DATASOURCE_NAMES,
   PONDER_CONFIG_RESULT["chains"],
   PONDER_CONFIG_RESULT["contracts"],
   PONDER_CONFIG_RESULT["accounts"],
