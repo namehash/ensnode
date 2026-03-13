@@ -167,6 +167,24 @@ export function getPluginsRequiredDatasourceNames(
 }
 
 /**
+ * Gets a mapping of plugin names to all their datasource names (required + optional).
+ *
+ * @param pluginNames - Names of the plugins to retrieve all datasource names for.
+ */
+export function getPluginsAllDatasourceNames(
+  pluginNames: PluginName[],
+): Map<PluginName, DatasourceName[]> {
+  const plugins = pluginNames.map(getPlugin);
+  const pluginToAllDatasources = new Map<PluginName, DatasourceName[]>();
+
+  for (const plugin of plugins) {
+    pluginToAllDatasources.set(plugin.name, plugin.allDatasourceNames);
+  }
+
+  return pluginToAllDatasources;
+}
+
+/**
  * Determines whether a plugin supports 'preminted' names. See `apps/ensindexer/src/handlers/Registrar.ts`
  * for further discussion.
  */
