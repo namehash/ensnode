@@ -21,8 +21,8 @@ type EventJoinTable =
  * Available filter options for find-events queries.
  */
 interface EventsWhere {
-  /** Filter to events whose first topic matches any of the provided values. */
-  topic0_in?: Hex[] | null;
+  /** Filter to events whose selector (event signature) matches any of the provided values. */
+  selector_in?: Hex[] | null;
   /** Filter to events at or after this timestamp. */
   timestamp_gte?: bigint | null;
   /** Filter to events at or before this timestamp. */
@@ -38,9 +38,9 @@ function eventsWhereConditions(where?: EventsWhere | null): SQL | undefined {
   if (!where) return undefined;
 
   return and(
-    where.topic0_in
-      ? where.topic0_in.length
-        ? inArray(schema.event.topic0, where.topic0_in)
+    where.selector_in
+      ? where.selector_in.length
+        ? inArray(schema.event.selector, where.selector_in)
         : sql`false`
       : undefined,
     typeof where.timestamp_gte === "bigint"

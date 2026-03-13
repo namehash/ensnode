@@ -57,7 +57,7 @@ export async function ensureEvent(context: Context, event: LogEventBase) {
       // log
       address: event.log.address,
       logIndex: event.log.logIndex,
-      topic0: topics[0],
+      selector: topics[0],
       topics,
       data: event.log.data,
     })
