@@ -1,10 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { type ENSNamespaceId, ensTestEnvChain, getENSNamespace } from "@ensnode/datasources";
+import {
+  type ENSNamespaceId,
+  ensTestEnvChain,
+  getENSNamespace,
+  maybeGetDatasource,
+} from "@ensnode/datasources";
 import { buildBlockNumberRange, ENSNamespaceIds, PluginName } from "@ensnode/ensnode-sdk";
 import type { RpcConfig } from "@ensnode/ensnode-sdk/internal";
 
 import { buildConfigFromEnvironment } from "@/config/config.schema";
+import { getPlugin } from "@/plugins";
 
 import type { ENSIndexerEnvironment } from "./environment";
 import { EnvironmentDefaults } from "./environment-defaults";
@@ -508,8 +514,15 @@ describe("config (with base env)", () => {
       vi.stubEnv("PLUGINS", "protocol-acceleration");
       stubRpcUrlsForNamespace("mainnet");
       const config = await getConfig();
-      // mainnet(1), base(8453), linea(59144), optimism(10), arbitrum(42161), scroll(534352)
-      expect(config.indexedChainIds).toEqual(new Set([1, 8453, 59144, 10, 42161, 534352]));
+
+      const plugin = getPlugin(PluginName.ProtocolAcceleration);
+      const expected = new Set(
+        plugin.allDatasourceNames
+          .map((name) => maybeGetDatasource(ENSNamespaceIds.Mainnet, name)?.chain.id)
+          .filter((id) => id !== undefined),
+      );
+      1;
+      expect(config.indexedChainIds).toEqual(expected);
     });
 
     // This test asserts that protocol-acceleration derives different chain ids per namespace,

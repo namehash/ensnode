@@ -147,24 +147,6 @@ export function createPlugin<
 }
 
 /**
- * Gets a mapping of plugin names to their required datasource names.
- *
- * @param pluginNames - Names of the plugins to retrieve required datasource names for.
- */
-export function getPluginsRequiredDatasourceNames(
-  pluginNames: PluginName[],
-): Map<PluginName, DatasourceName[]> {
-  const plugins = pluginNames.map(getPlugin);
-  const pluginToRequiredDatasources = new Map<PluginName, DatasourceName[]>();
-
-  for (const plugin of plugins) {
-    pluginToRequiredDatasources.set(plugin.name, plugin.requiredDatasourceNames);
-  }
-
-  return pluginToRequiredDatasources;
-}
-
-/**
  * Gets a mapping of plugin names to all their datasource names (required + optional).
  *
  * @param pluginNames - Names of the plugins to retrieve all datasource names for.
