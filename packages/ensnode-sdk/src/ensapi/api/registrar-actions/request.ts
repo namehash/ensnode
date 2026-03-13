@@ -53,7 +53,16 @@ export type RegistrarActionsFilter =
  * Records Orders
  */
 export const RegistrarActionsOrders = {
-  LatestRegistrarActions: "orderBy[timestamp]=desc",
+  /**
+   * Returns registrar actions newest-first.
+   *
+   * Sorts by the `id` field descending. Each `id` is a Ponder checkpoint string
+   * encoding (blockTimestamp, chainId, blockNumber, transactionIndex, eventType,
+   * eventIndex), all zero-padded to fixed widths. Because the string is constant
+   * length, lexicographic descending order equals chronological descending order,
+   * giving fully deterministic "latest first" pagination across same-block actions.
+   */
+  LatestRegistrarActions: "orderBy[id]=desc",
 } as const;
 
 export type RegistrarActionsOrder =
