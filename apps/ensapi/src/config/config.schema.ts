@@ -1,5 +1,6 @@
 import packageJson from "@/../package.json" with { type: "json" };
 
+import pRetry from "p-retry";
 import { parse as parseConnectionString } from "pg-connection-string";
 import { prettifyError, ZodError, z } from "zod/v4";
 
@@ -20,7 +21,7 @@ import {
 import { ENSApi_DEFAULT_PORT } from "@/config/defaults";
 import type { EnsApiEnvironment } from "@/config/environment";
 import { invariant_ensIndexerPublicConfigVersionInfo } from "@/config/validations";
-import { EnsDbClient } from "@/lib/ensdb-client/ensdb-client";
+import { fetchENSIndexerConfig } from "@/lib/fetch-ensindexer-config";
 import logger from "@/lib/logger";
 
 export const DatabaseUrlSchema = z.string().refine(
@@ -77,19 +78,6 @@ const EnsApiConfigSchema = z
 export type EnsApiConfig = z.infer<typeof EnsApiConfigSchema>;
 
 /**
- * Builds an instance of {@link EnsDbClient} using environment variables.
- *
- * @returns instance of {@link EnsDbClient}
- * @throws Error with formatted validation messages if environment parsing fails
- */
-function buildEnsDbClientFromEnvironment(env: EnsApiEnvironment): EnsDbClient {
-  const databaseUrl = DatabaseUrlSchema.parse(env.DATABASE_URL);
-  const ensIndexerSchemaName = DatabaseSchemaNameSchema.parse(env.DATABASE_SCHEMA);
-
-  return new EnsDbClient(databaseUrl, ensIndexerSchemaName);
-}
-
-/**
  * Builds the EnsApiConfig from an EnsApiEnvironment object, fetching the EnsIndexerPublicConfig.
  *
  * @returns A validated EnsApiConfig object
@@ -97,13 +85,16 @@ function buildEnsDbClientFromEnvironment(env: EnsApiEnvironment): EnsDbClient {
  */
 export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promise<EnsApiConfig> {
   try {
-    const ensDbClient = buildEnsDbClientFromEnvironment(env);
+    const ensIndexerUrl = EnsIndexerUrlSchema.parse(env.ENSINDEXER_URL);
 
-    const ensIndexerPublicConfig = await ensDbClient.getEnsIndexerPublicConfig();
-
-    if (!ensIndexerPublicConfig) {
-      throw new Error("Failed to load EnsIndexerPublicConfig from ENSDb.");
-    }
+    const ensIndexerPublicConfig = await pRetry(() => fetchENSIndexerConfig(ensIndexerUrl), {
+      retries: 3,
+      onFailedAttempt: ({ error, attemptNumber, retriesLeft }) => {
+        logger.info(
+          `ENSIndexer Config fetch attempt ${attemptNumber} failed (${error.message}). ${retriesLeft} retries left.`,
+        );
+      },
+    });
 
     const rpcConfigs = buildRpcConfigsFromEnv(env, ensIndexerPublicConfig.namespace);
 

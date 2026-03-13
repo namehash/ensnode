@@ -15,7 +15,7 @@ import type {
  * their state in `process.env`. This interface is intended to be the source type which then gets
  * mapped/parsed into a structured configuration object like `EnsApiConfig`.
  */
-export type EnsApiEnvironment = DatabaseEnvironment &
+export type EnsApiEnvironment = Omit<DatabaseEnvironment, "DATABASE_SCHEMA"> &
   EnsIndexerUrlEnvironment &
   RpcEnvironment &
   PortEnvironment &
