@@ -60,6 +60,7 @@
   },
   "peerDependencies": {
     "drizzle-orm": "catalog:",
+    "pg-connection-string": "catalog:",
     "ponder": "catalog:",
     "viem": "catalog:"
   },
@@ -67,6 +68,7 @@
     "@ensnode/ensnode-sdk": "workspace:",
     "@ensnode/shared-configs": "workspace:*",
     "drizzle-orm": "catalog:",
+    "pg-connection-string": "catalog:",
     "ponder": "catalog:",
     "tsup": "catalog:",
     "typescript": "catalog:",
