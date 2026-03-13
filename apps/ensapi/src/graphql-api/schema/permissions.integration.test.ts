@@ -23,7 +23,7 @@ const namespace = "ens-test-env";
 
 const V2_ETH_REGISTRY = getDatasourceContract(namespace, DatasourceNames.ENSv2Root, "ETHRegistry");
 
-const EAC_ROLES_CHANGED_TOPIC0 = toEventSelector(
+const EAC_ROLES_CHANGED_SELECTOR = toEventSelector(
   EnhancedAccessControlABI.find(
     (item) => item.type === "event" && item.name === "EACRolesChanged",
   )!,
@@ -338,7 +338,7 @@ describe("Permissions.events", () => {
 
   it("includes EACRolesChanged events", () => {
     const rolesChangedEvents = allEvents.filter(
-      (e) => e.topics[0]?.toLowerCase() === EAC_ROLES_CHANGED_TOPIC0,
+      (e) => e.topics[0]?.toLowerCase() === EAC_ROLES_CHANGED_SELECTOR,
     );
     expect(rolesChangedEvents.length).toBeGreaterThan(0);
   });
@@ -376,34 +376,34 @@ describe("Permissions.events filtering (EventsWhereInput)", () => {
     expect(allEvents.length).toBeGreaterThan(0);
   });
 
-  it("filters by topic0_in", async () => {
+  it("filters by selector_in", async () => {
     const result = await request<PermissionsEventsResult>(PermissionsEventsFiltered, {
       contract: V2_ETH_REGISTRY,
-      where: { topic0_in: [EAC_ROLES_CHANGED_TOPIC0] },
+      where: { selector_in: [EAC_ROLES_CHANGED_SELECTOR] },
     });
     const events = flattenConnection(result.permissions.events);
 
     expect(events.length).toBeGreaterThan(0);
     for (const event of events) {
-      expect(event.topics[0]?.toLowerCase()).toBe(EAC_ROLES_CHANGED_TOPIC0);
+      expect(event.topics[0]?.toLowerCase()).toBe(EAC_ROLES_CHANGED_SELECTOR);
     }
   });
 
-  it("filters by topic0_in with unknown topic returns no results", async () => {
+  it("filters by selector_in with unknown topic returns no results", async () => {
     const result = await request<PermissionsEventsResult>(PermissionsEventsFiltered, {
       contract: V2_ETH_REGISTRY,
       where: {
-        topic0_in: ["0x0000000000000000000000000000000000000000000000000000000000000001"],
+        selector_in: ["0x0000000000000000000000000000000000000000000000000000000000000001"],
       },
     });
     const events = flattenConnection(result.permissions.events);
     expect(events.length).toBe(0);
   });
 
-  it("filters by empty topic0_in returns no results", async () => {
+  it("filters by empty selector_in returns no results", async () => {
     const result = await request<PermissionsEventsResult>(PermissionsEventsFiltered, {
       contract: V2_ETH_REGISTRY,
-      where: { topic0_in: [] },
+      where: { selector_in: [] },
     });
     const events = flattenConnection(result.permissions.events);
     expect(events.length).toBe(0);
@@ -471,19 +471,19 @@ describe("Permissions.events filtering (EventsWhereInput)", () => {
     }
   });
 
-  it("combines topic0_in and timestamp_gte", async () => {
+  it("combines selector_in and timestamp_gte", async () => {
     const midTimestamp = allEvents[Math.floor(allEvents.length / 2)].timestamp;
 
     const result = await request<PermissionsEventsResult>(PermissionsEventsFiltered, {
       contract: V2_ETH_REGISTRY,
-      where: { topic0_in: [EAC_ROLES_CHANGED_TOPIC0], timestamp_gte: midTimestamp },
+      where: { selector_in: [EAC_ROLES_CHANGED_SELECTOR], timestamp_gte: midTimestamp },
     });
     const events = flattenConnection(result.permissions.events);
 
     expect(events.length).toBeGreaterThan(0);
     expect(events.length).toBeLessThanOrEqual(allEvents.length);
     for (const event of events) {
-      expect(event.topics[0]?.toLowerCase()).toBe(EAC_ROLES_CHANGED_TOPIC0);
+      expect(event.topics[0]?.toLowerCase()).toBe(EAC_ROLES_CHANGED_SELECTOR);
       expect(BigInt(event.timestamp)).toBeGreaterThanOrEqual(BigInt(midTimestamp));
     }
   });

@@ -124,36 +124,36 @@ describe("Domain.events filtering (EventsWhereInput)", () => {
     expect(allEvents.length).toBeGreaterThan(0);
   });
 
-  it("filters by topic0_in", async () => {
-    const targetTopic0 = allEvents[0].topics[0];
+  it("filters by selector_in", async () => {
+    const targetSelector = allEvents[0].topics[0];
 
     const result = await request<DomainEventsResult>(DomainEventsFiltered, {
       name: NAME_WITH_EVENTS,
-      where: { topic0_in: [targetTopic0] },
+      where: { selector_in: [targetSelector] },
     });
     const events = flattenConnection(result.domain.events);
 
     expect(events.length).toBeGreaterThan(0);
     for (const event of events) {
-      expect(event.topics[0]?.toLowerCase()).toBe(targetTopic0.toLowerCase());
+      expect(event.topics[0]?.toLowerCase()).toBe(targetSelector.toLowerCase());
     }
   });
 
-  it("filters by topic0_in with unknown topic returns no results", async () => {
+  it("filters by selector_in with unknown topic returns no results", async () => {
     const result = await request<DomainEventsResult>(DomainEventsFiltered, {
       name: NAME_WITH_EVENTS,
       where: {
-        topic0_in: ["0x0000000000000000000000000000000000000000000000000000000000000001"],
+        selector_in: ["0x0000000000000000000000000000000000000000000000000000000000000001"],
       },
     });
     const events = flattenConnection(result.domain.events);
     expect(events.length).toBe(0);
   });
 
-  it("filters by empty topic0_in returns no results", async () => {
+  it("filters by empty selector_in returns no results", async () => {
     const result = await request<DomainEventsResult>(DomainEventsFiltered, {
       name: NAME_WITH_EVENTS,
-      where: { topic0_in: [] },
+      where: { selector_in: [] },
     });
     const events = flattenConnection(result.domain.events);
     expect(events.length).toBe(0);
@@ -219,18 +219,18 @@ describe("Domain.events filtering (EventsWhereInput)", () => {
     }
   });
 
-  it("combines topic0_in and timestamp_gte", async () => {
-    const targetTopic0 = allEvents[0].topics[0];
+  it("combines selector_in and timestamp_gte", async () => {
+    const targetSelector = allEvents[0].topics[0];
     const midTimestamp = allEvents[Math.floor(allEvents.length / 2)].timestamp;
 
     const result = await request<DomainEventsResult>(DomainEventsFiltered, {
       name: NAME_WITH_EVENTS,
-      where: { topic0_in: [targetTopic0], timestamp_gte: midTimestamp },
+      where: { selector_in: [targetSelector], timestamp_gte: midTimestamp },
     });
     const events = flattenConnection(result.domain.events);
 
     for (const event of events) {
-      expect(event.topics[0]?.toLowerCase()).toBe(targetTopic0.toLowerCase());
+      expect(event.topics[0]?.toLowerCase()).toBe(targetSelector.toLowerCase());
       expect(BigInt(event.timestamp)).toBeGreaterThanOrEqual(BigInt(midTimestamp));
     }
   });
