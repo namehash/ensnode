@@ -4,32 +4,6 @@ import type {
 } from "@ensnode/ensnode-sdk";
 
 /**
- * Client interface with read-only query methods for ENSNode Schema in ENSDb.
- */
-export interface EnsNodeDbClientQuery {
-  /**
-   * Get ENSDb Version
-   *
-   * @returns the existing record, or `undefined`.
-   */
-  getEnsDbVersion(): Promise<string | undefined>;
-
-  /**
-   * Get ENSIndexer Public Config
-   *
-   * @returns the existing record, or `undefined`.
-   */
-  getEnsIndexerPublicConfig(): Promise<EnsIndexerPublicConfig | undefined>;
-
-  /**
-   * Get Indexing Status Snapshot
-   *
-   * @returns the existing record, or `undefined`.
-   */
-  getIndexingStatusSnapshot(): Promise<CrossChainIndexingStatusSnapshot | undefined>;
-}
-
-/**
  * Client interface with mutation methods for ENSNode Schema in ENSDb.
  */
 export interface EnsNodeDbClientMutation {
