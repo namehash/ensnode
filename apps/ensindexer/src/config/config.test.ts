@@ -544,6 +544,16 @@ describe("config (with base env)", () => {
   });
 
   describe("additional checks", () => {
+    it("all plugins have requiredDatasourceNames as a subset of allDatasourceNames", () => {
+      for (const pluginName of Object.values(PluginName)) {
+        const plugin = getPlugin(pluginName);
+        const allSet = new Set(plugin.allDatasourceNames);
+        for (const required of plugin.requiredDatasourceNames) {
+          expect(allSet.has(required), `${pluginName}: requiredDatasourceName '${required}' missing from allDatasourceNames`).toBe(true);
+        }
+      }
+    });
+
     it("requires available datasources", async () => {
       vi.stubEnv("NAMESPACE", "ens-test-env");
       vi.stubEnv("PLUGINS", "basenames");
