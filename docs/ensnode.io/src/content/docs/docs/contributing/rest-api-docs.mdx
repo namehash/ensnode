@@ -20,7 +20,7 @@ On each commit to the `main` branch, Mintlify automatically deploys a build of t
 
 ### Preview Deployments
 
-Mintlify creates a deployment preview for every pull request that changes files in the docs directory. The preview URL is posted as a comment on the PR. In preview deployments, the REST API Docs are generated from the committed OpenAPI spec file rather than the live API, so you can review upcoming API changes before they're deployed.
+On each push to a pull request branch that changes files in the docs directory, Mintlify automatically deploys a "preview" build of the docs as follows:
 
 | Content Type       | Source                                                                                                                                                          | Output                                                           |
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
