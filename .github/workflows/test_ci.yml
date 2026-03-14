@@ -61,13 +61,25 @@ jobs:
         run: pnpm generate:openapi
       - name: Verify spec is in sync
         run: |
-          if ! git diff --quiet docs/docs.ensnode.io/ensapi-openapi.json || \
-             ! git ls-files --error-unmatch docs/docs.ensnode.io/ensapi-openapi.json >/dev/null 2>&1; then
+          SPEC_PATH="docs/docs.ensnode.io/ensapi-openapi.json"
+          # First, ensure the spec file exists and is tracked by git.
+          if ! git ls-files --error-unmatch "$SPEC_PATH" >/dev/null 2>&1; then
+            echo "Error: OpenAPI spec file is missing or untracked: $SPEC_PATH"
+            echo ""
+            echo "Git status for the spec file (if any):"
+            git status --porcelain "$SPEC_PATH" || true
+            echo ""
+            echo "To fix, run: pnpm generate:openapi"
+            echo "Then add and commit the generated ensapi-openapi.json."
+            exit 1
+          fi
+          # Then, ensure the committed spec matches what the code generates.
+          if ! git diff --quiet "$SPEC_PATH"; then
             echo "Error: OpenAPI spec is out of sync"
             echo ""
             echo "The committed ensapi-openapi.json differs from what the code generates:"
             echo ""
-            git diff --color docs/docs.ensnode.io/ensapi-openapi.json
+            git diff --color "$SPEC_PATH"
             echo ""
             echo "To fix, run: pnpm generate:openapi"
             echo "Then commit the updated ensapi-openapi.json."
