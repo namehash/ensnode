@@ -22,7 +22,7 @@ On each commit to the `main` branch, Mintlify automatically deploys a build of t
 
 On each push to a pull request branch that changes files in the docs directory, Mintlify automatically deploys a "preview" build of the docs as follows:
 
-| Content Type       | Source                                                                                                                                                          | Output                                                           |
+| Content       | Source                                                                                                                                                          | Output                                                           |
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
 | **REST API Docs**  | Committed [`docs/docs.ensnode.io/ensapi-openapi.json`](https://github.com/namehash/ensnode/blob/main/docs/docs.ensnode.io/ensapi-openapi.json) file on the branch associated with the PR | Mintlify preview deployment (link posted as a comment on the PR) |
 | **All other docs** | Committed files on the branch associated with the PR                                                                                                                                      | Mintlify preview deployment (link posted as a comment on the PR) |
