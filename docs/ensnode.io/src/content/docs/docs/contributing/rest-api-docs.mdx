@@ -17,7 +17,6 @@ On each commit to the `main` branch, Mintlify automatically deploys a build of t
 | **REST API Docs**  | OpenAPI spec fetched from `https://api.alpha.ensnode.io/openapi.json` at build time (published by the ENSApi service running in production) | [Production REST API Docs](https://docs.ensnode.io/ensapi) |
 | **All other docs** | Committed files on `main`                                                                                                                         | Deploys immediately on merge to `main`                     |
 
-Note: the production OpenAPI spec is generally different than the committed [`docs/docs.ensnode.io/ensapi-openapi.json`](https://github.com/namehash/ensnode/blob/main/docs/docs.ensnode.io/ensapi-openapi.json) file, since the committed file may contain upcoming changes not yet deployed to the API. Non-API documentation (guides, concepts, etc.) may also be published before the corresponding code is released to production.
 
 ### Preview Deployments
 
