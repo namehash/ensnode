@@ -9,224 +9,211 @@
   },
   "favicon": "/assets/favicon.svg",
   "navigation": {
-    "products": [
+    "anchors": [
       {
-        "product": "ENSNode",
+        "anchor": "ENSNode",
         "icon": "/assets/ensnode.svg",
-        "description": "Multi-chain ENS indexing infrastructure",
-        "tabs": [
+        "groups": [
           {
-            "tab": "ENSNode",
-            "icon": "/assets/ensnode.svg",
-            "groups": [
-              {
-                "group": "Overview",
-                "pages": [
-                  "ensnode/index",
-                  "ensnode/concepts/what-is-ensnode",
-                  "ensnode/concepts/what-is-the-ens-subgraph",
-                  "ensnode/concepts/roadmap"
-                ]
-              },
-              {
-                "group": "Using ENSNode",
-                "pages": [
-                  "ensnode/usage/api",
-                  "ensnode/usage/hosted-ensnode-instances",
-                  "ensnode/usage/querying-best-practices",
-                  "ensnode/usage/with-ensjs",
-                  "ensnode/usage/with-viem"
-                ]
-              },
-              {
-                "group": "Deploying",
-                "expanded": false,
-                "pages": [
-                  "ensnode/deploying/index",
-                  "ensnode/deploying/docker",
-                  "ensnode/deploying/terraform"
-                ]
-              },
-              {
-                "group": "Running Locally",
-                "expanded": false,
-                "pages": [
-                  "ensnode/running/index",
-                  "ensnode/running/ens-test-env"
-                ]
-              },
-              {
-                "group": "Contributing",
-                "expanded": false,
-                "pages": [
-                  "ensnode/contributing/index",
-                  "ensnode/contributing/building",
-                  "ensnode/contributing/prs",
-                  "ensnode/contributing/releases"
-                ]
-              },
-              {
-                "group": "Reference",
-                "expanded": false,
-                "pages": [
-                  "ensnode/reference/terminology",
-                  "ensnode/reference/ensnode-v2-notes",
-                  "ensnode/reference/indexing-ens-compatible-onchain-names",
-                  "ensnode/reference/subgraph-compatibility-tooling",
-                  "ensnode/reference/subgraph-dependent-applications",
-                  "ensnode/reference/mainnet-registered-subnames-of-subregistries"
-                ]
-              }
+            "group": "Overview",
+            "pages": [
+              "ensnode/index",
+              "ensnode/concepts/what-is-ensnode",
+              "ensnode/concepts/what-is-the-ens-subgraph",
+              "ensnode/concepts/roadmap"
             ]
           },
           {
-            "tab": "ENSApi",
-            "icon": "/assets/ensapi.svg",
-            "groups": [
-              {
-                "group": "Overview",
-                "pages": ["ensapi/index"]
-              },
-              {
-                "group": "Using ENSApi",
-                "pages": ["ensapi/usage/configuration"]
-              },
-              {
-                "group": "API Reference",
-                "openapi": "https://api.alpha.ensnode.io/openapi.json"
-              },
-              {
-                "group": "Preview",
-                "pages": ["ensapi/preview"],
-                "openapi": "ensapi-openapi.json",
-                "hidden": true
-              },
-              {
-                "group": "Contributing",
-                "expanded": false,
-                "pages": ["ensapi/contributing/index"]
-              }
+            "group": "Using ENSNode",
+            "pages": [
+              "ensnode/usage/api",
+              "ensnode/usage/hosted-ensnode-instances",
+              "ensnode/usage/querying-best-practices",
+              "ensnode/usage/with-ensjs",
+              "ensnode/usage/with-viem"
             ]
           },
           {
-            "tab": "ENSIndexer",
-            "icon": "/assets/ensindexer.svg",
-            "groups": [
-              {
-                "group": "Overview",
-                "pages": ["ensindexer/index"]
-              },
-              {
-                "group": "Using ENSIndexer",
-                "pages": [
-                  "ensindexer/usage/configuration",
-                  "ensindexer/usage/management"
-                ]
-              },
-              {
-                "group": "Contributing",
-                "expanded": false,
-                "pages": [
-                  "ensindexer/contributing/index",
-                  "ensindexer/contributing/creating-a-plugin"
-                ]
-              }
+            "group": "Deploying",
+            "expanded": false,
+            "pages": [
+              "ensnode/deploying/index",
+              "ensnode/deploying/docker",
+              "ensnode/deploying/terraform"
             ]
           },
           {
-            "tab": "ENSRainbow",
-            "icon": "/assets/ensrainbow.svg",
-            "groups": [
-              {
-                "group": "Overview",
-                "pages": ["ensrainbow/index"]
-              },
-              {
-                "group": "Concepts",
-                "pages": [
-                  "ensrainbow/concepts/index",
-                  "ensrainbow/concepts/architecture",
-                  "ensrainbow/concepts/data-model",
-                  "ensrainbow/concepts/label-sets-and-versioning",
-                  "ensrainbow/concepts/versioning",
-                  "ensrainbow/concepts/creating-files",
-                  "ensrainbow/concepts/performance",
-                  "ensrainbow/concepts/typescript-interfaces",
-                  "ensrainbow/concepts/glossary"
-                ]
-              },
-              {
-                "group": "Using ENSRainbow",
-                "pages": [
-                  "ensrainbow/usage/index",
-                  "ensrainbow/usage/api",
-                  "ensrainbow/usage/client-sdk",
-                  "ensrainbow/usage/configuration",
-                  "ensrainbow/usage/hosted-ensrainbow-instances",
-                  "ensrainbow/usage/available-label-sets",
-                  "ensrainbow/usage/troubleshooting"
-                ]
-              },
-              {
-                "group": "Deploying",
-                "expanded": false,
-                "pages": [
-                  "ensrainbow/deploying/index",
-                  "ensrainbow/deploying/docker",
-                  "ensrainbow/deploying/railway"
-                ]
-              },
-              {
-                "group": "Contributing",
-                "expanded": false,
-                "pages": [
-                  "ensrainbow/contributing/index",
-                  "ensrainbow/contributing/building",
-                  "ensrainbow/contributing/local-development",
-                  "ensrainbow/contributing/system-requirements",
-                  "ensrainbow/contributing/service-management",
-                  "ensrainbow/contributing/cli-reference"
-                ]
-              },
-              {
-                "group": "More",
-                "pages": ["ensrainbow/faq"]
-              }
+            "group": "Running Locally",
+            "expanded": false,
+            "pages": [
+              "ensnode/running/index",
+              "ensnode/running/ens-test-env"
             ]
           },
           {
-            "tab": "ENSDb",
-            "icon": "/assets/ensdb.svg",
-            "groups": [
-              {
-                "group": "Overview",
-                "pages": ["ensdb/index"]
-              }
+            "group": "Contributing",
+            "expanded": false,
+            "pages": [
+              "ensnode/contributing/index",
+              "ensnode/contributing/building",
+              "ensnode/contributing/prs",
+              "ensnode/contributing/releases"
+            ]
+          },
+          {
+            "group": "Reference",
+            "expanded": false,
+            "pages": [
+              "ensnode/reference/terminology",
+              "ensnode/reference/ensnode-v2-notes",
+              "ensnode/reference/indexing-ens-compatible-onchain-names",
+              "ensnode/reference/subgraph-compatibility-tooling",
+              "ensnode/reference/subgraph-dependent-applications",
+              "ensnode/reference/mainnet-registered-subnames-of-subregistries"
             ]
           }
         ]
       },
       {
-        "product": "ENSAdmin",
-        "icon": "/assets/ensadmin.svg",
-        "description": "Admin dashboard for ENSNode",
-        "tabs": [
+        "anchor": "ENSApi",
+        "icon": "/assets/ensapi.svg",
+        "groups": [
           {
-            "tab": "Documentation",
-            "groups": [
-              {
-                "group": "Overview",
-                "pages": [
-                  "ensadmin/index",
-                  "ensadmin/overview/what-is-ensadmin"
-                ]
-              },
-              {
-                "group": "Contributing",
-                "expanded": false,
-                "pages": ["ensadmin/contributing/index"]
-              }
+            "group": "Overview",
+            "pages": ["ensapi/index"]
+          },
+          {
+            "group": "Using ENSApi",
+            "pages": ["ensapi/usage/configuration"]
+          },
+          {
+            "group": "API Reference",
+            "openapi": "https://api.alpha.ensnode.io/openapi.json"
+          },
+          {
+            "group": "Preview",
+            "pages": ["ensapi/preview"],
+            "openapi": "ensapi-openapi.json",
+            "hidden": true
+          },
+          {
+            "group": "Contributing",
+            "expanded": false,
+            "pages": ["ensapi/contributing/index"]
+          }
+        ]
+      },
+      {
+        "anchor": "ENSIndexer",
+        "icon": "/assets/ensindexer.svg",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": ["ensindexer/index"]
+          },
+          {
+            "group": "Using ENSIndexer",
+            "pages": [
+              "ensindexer/usage/configuration",
+              "ensindexer/usage/management"
             ]
+          },
+          {
+            "group": "Contributing",
+            "expanded": false,
+            "pages": [
+              "ensindexer/contributing/index",
+              "ensindexer/contributing/creating-a-plugin"
+            ]
+          }
+        ]
+      },
+      {
+        "anchor": "ENSRainbow",
+        "icon": "/assets/ensrainbow.svg",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": ["ensrainbow/index"]
+          },
+          {
+            "group": "Concepts",
+            "pages": [
+              "ensrainbow/concepts/index",
+              "ensrainbow/concepts/architecture",
+              "ensrainbow/concepts/data-model",
+              "ensrainbow/concepts/label-sets-and-versioning",
+              "ensrainbow/concepts/versioning",
+              "ensrainbow/concepts/creating-files",
+              "ensrainbow/concepts/performance",
+              "ensrainbow/concepts/typescript-interfaces",
+              "ensrainbow/concepts/glossary"
+            ]
+          },
+          {
+            "group": "Using ENSRainbow",
+            "pages": [
+              "ensrainbow/usage/index",
+              "ensrainbow/usage/api",
+              "ensrainbow/usage/client-sdk",
+              "ensrainbow/usage/configuration",
+              "ensrainbow/usage/hosted-ensrainbow-instances",
+              "ensrainbow/usage/available-label-sets",
+              "ensrainbow/usage/troubleshooting"
+            ]
+          },
+          {
+            "group": "Deploying",
+            "expanded": false,
+            "pages": [
+              "ensrainbow/deploying/index",
+              "ensrainbow/deploying/docker",
+              "ensrainbow/deploying/railway"
+            ]
+          },
+          {
+            "group": "Contributing",
+            "expanded": false,
+            "pages": [
+              "ensrainbow/contributing/index",
+              "ensrainbow/contributing/building",
+              "ensrainbow/contributing/local-development",
+              "ensrainbow/contributing/system-requirements",
+              "ensrainbow/contributing/service-management",
+              "ensrainbow/contributing/cli-reference"
+            ]
+          },
+          {
+            "group": "More",
+            "pages": ["ensrainbow/faq"]
+          }
+        ]
+      },
+      {
+        "anchor": "ENSDb",
+        "icon": "/assets/ensdb.svg",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": ["ensdb/index"]
+          }
+        ]
+      },
+      {
+        "anchor": "ENSAdmin",
+        "icon": "/assets/ensadmin.svg",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "ensadmin/index",
+              "ensadmin/overview/what-is-ensadmin"
+            ]
+          },
+          {
+            "group": "Contributing",
+            "expanded": false,
+            "pages": ["ensadmin/contributing/index"]
           }
         ]
       }
