@@ -16,7 +16,8 @@
         "description": "Multi-chain ENS indexing infrastructure",
         "tabs": [
           {
-            "tab": "Documentation",
+            "tab": "ENSNode",
+            "icon": "/assets/ensnode.svg",
             "groups": [
               {
                 "group": "Overview",
@@ -77,35 +78,19 @@
                 ]
               }
             ]
-          }
-        ]
-      },
-      {
-        "product": "ENSApi",
-        "icon": "/assets/ensapi.svg",
-        "description": "ENSApi is the API service for ENSNode",
-        "tabs": [
+          },
           {
-            "tab": "Documentation",
+            "tab": "ENSApi",
+            "icon": "/assets/ensapi.svg",
             "groups": [
               {
-                "group": "ENSApi",
+                "group": "Overview",
                 "pages": ["ensapi/index"]
               },
               {
                 "group": "Using ENSApi",
                 "pages": ["ensapi/usage/configuration"]
               },
-              {
-                "group": "Contributing",
-                "expanded": false,
-                "pages": ["ensapi/contributing/index"]
-              }
-            ]
-          },
-          {
-            "tab": "API Reference",
-            "groups": [
               {
                 "group": "API Reference",
                 "openapi": "https://api.alpha.ensnode.io/openapi.json"
@@ -115,18 +100,17 @@
                 "pages": ["ensapi/preview"],
                 "openapi": "ensapi-openapi.json",
                 "hidden": true
+              },
+              {
+                "group": "Contributing",
+                "expanded": false,
+                "pages": ["ensapi/contributing/index"]
               }
             ]
-          }
-        ]
-      },
-      {
-        "product": "ENSIndexer",
-        "icon": "/assets/ensindexer.svg",
-        "description": "The ENS indexing engine",
-        "tabs": [
+          },
           {
-            "tab": "Documentation",
+            "tab": "ENSIndexer",
+            "icon": "/assets/ensindexer.svg",
             "groups": [
               {
                 "group": "Overview",
@@ -148,16 +132,10 @@
                 ]
               }
             ]
-          }
-        ]
-      },
-      {
-        "product": "ENSRainbow",
-        "icon": "/assets/ensrainbow.svg",
-        "description": "ENS label healing service",
-        "tabs": [
+          },
           {
-            "tab": "Documentation",
+            "tab": "ENSRainbow",
+            "icon": "/assets/ensrainbow.svg",
             "groups": [
               {
                 "group": "Overview",
@@ -215,6 +193,16 @@
                 "pages": ["ensrainbow/faq"]
               }
             ]
+          },
+          {
+            "tab": "ENSDb",
+            "icon": "/assets/ensdb.svg",
+            "groups": [
+              {
+                "group": "Overview",
+                "pages": ["ensdb/index"]
+              }
+            ]
           }
         ]
       },
@@ -237,22 +225,6 @@
                 "group": "Contributing",
                 "expanded": false,
                 "pages": ["ensadmin/contributing/index"]
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "product": "ENSDb",
-        "icon": "/assets/ensdb.svg",
-        "description": "ENS database layer",
-        "tabs": [
-          {
-            "tab": "Documentation",
-            "groups": [
-              {
-                "group": "Overview",
-                "pages": ["ensdb/index"]
               }
             ]
           }
