@@ -9,9 +9,9 @@
   },
   "favicon": "/assets/favicon.svg",
   "navigation": {
-    "anchors": [
+    "dropdowns": [
       {
-        "anchor": "ENSNode",
+        "dropdown": "ENSNode",
         "icon": "/assets/ensnode.svg",
         "groups": [
           {
@@ -75,7 +75,7 @@
         ]
       },
       {
-        "anchor": "ENSApi",
+        "dropdown": "ENSApi",
         "icon": "/assets/ensapi.svg",
         "groups": [
           {
@@ -104,7 +104,7 @@
         ]
       },
       {
-        "anchor": "ENSIndexer",
+        "dropdown": "ENSIndexer",
         "icon": "/assets/ensindexer.svg",
         "groups": [
           {
@@ -129,7 +129,7 @@
         ]
       },
       {
-        "anchor": "ENSRainbow",
+        "dropdown": "ENSRainbow",
         "icon": "/assets/ensrainbow.svg",
         "groups": [
           {
@@ -190,7 +190,7 @@
         ]
       },
       {
-        "anchor": "ENSDb",
+        "dropdown": "ENSDb",
         "icon": "/assets/ensdb.svg",
         "groups": [
           {
@@ -200,7 +200,7 @@
         ]
       },
       {
-        "anchor": "ENSAdmin",
+        "dropdown": "ENSAdmin",
         "icon": "/assets/ensadmin.svg",
         "groups": [
           {
