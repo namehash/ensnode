@@ -17,6 +17,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { materializeENSv1DomainEffectiveOwner } from "@/lib/ensv2/domain-db-helpers";
+import { ensureDomainEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel, ensureUnknownLabel } from "@/lib/ensv2/label-db-helpers";
 import { healAddrReverseSubnameLabel } from "@/lib/heal-addr-reverse-subname-label";
 import { namespaceContract } from "@/lib/plugin-helpers";
@@ -91,6 +92,9 @@ export default function () {
     // owner changes to that of the NameWrapper but then the NameWrapper emits NameWrapped, and this
     // indexing code re-materializes the Domain.ownerId to the NameWraper-emitted value.
     await materializeENSv1DomainEffectiveOwner(context, domainId, owner);
+
+    // push event to domain history
+    await ensureDomainEvent(context, event, domainId);
   }
 
   async function handleTransfer({
@@ -119,6 +123,46 @@ export default function () {
     // owner changes to that of the NameWrapper but then the NameWrapper emits NameWrapped, and this
     // indexing code re-materializes the Domain.ownerId to the NameWraper-emitted value.
     await materializeENSv1DomainEffectiveOwner(context, domainId, owner);
+
+    // push event to domain history
+    await ensureDomainEvent(context, event, domainId);
+  }
+
+  async function handleNewTTL({
+    context,
+    event,
+  }: {
+    context: Context;
+    event: EventWithArgs<{ node: Node }>;
+  }) {
+    const { node } = event.args;
+    const domainId = makeENSv1DomainId(node);
+
+    // ENSv2 model does not include root node, no-op
+    if (node === ROOT_NODE) return;
+
+    // push event to domain history
+    await ensureDomainEvent(context, event, domainId);
+  }
+
+  async function handleNewResolver({
+    context,
+    event,
+  }: {
+    context: Context;
+    event: EventWithArgs<{ node: Node }>;
+  }) {
+    const { node } = event.args;
+    const domainId = makeENSv1DomainId(node);
+
+    // ENSv2 model does not include root node, no-op
+    if (node === ROOT_NODE) return;
+
+    // NOTE: Domain-Resolver relations are handled by the protocol-acceleration plugin and are not
+    // directly indexed here
+
+    // push event to domain history
+    await ensureDomainEvent(context, event, domainId);
   }
 
   /**
@@ -154,6 +198,34 @@ export default function () {
   );
 
   /**
+   * Handles Registry#NewTTL for:
+   * - ENS Root Chain's ENSv1RegistryOld
+   */
+  ponder.on(
+    namespaceContract(pluginName, "ENSv1RegistryOld:NewTTL"),
+    async ({ context, event }) => {
+      const shouldIgnoreEvent = await nodeIsMigrated(context, event.args.node);
+      if (shouldIgnoreEvent) return;
+
+      return handleNewTTL({ context, event });
+    },
+  );
+
+  /**
+   * Handles Registry#NewResolver for:
+   * - ENS Root Chain's ENSv1RegistryOld
+   */
+  ponder.on(
+    namespaceContract(pluginName, "ENSv1RegistryOld:NewResolver"),
+    async ({ context, event }) => {
+      const shouldIgnoreEvent = await nodeIsMigrated(context, event.args.node);
+      if (shouldIgnoreEvent) return;
+
+      return handleNewResolver({ context, event });
+    },
+  );
+
+  /**
    * Handles Registry events for:
    * - ENS Root Chain's (new) Registry
    * - Basenames Registry
@@ -161,4 +233,6 @@ export default function () {
    */
   ponder.on(namespaceContract(pluginName, "ENSv1Registry:NewOwner"), handleNewOwner);
   ponder.on(namespaceContract(pluginName, "ENSv1Registry:Transfer"), handleTransfer);
+  ponder.on(namespaceContract(pluginName, "ENSv1Registry:NewTTL"), handleNewTTL);
+  ponder.on(namespaceContract(pluginName, "ENSv1Registry:NewResolver"), handleNewResolver);
 }

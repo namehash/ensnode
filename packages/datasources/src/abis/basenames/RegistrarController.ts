@@ -1,3 +1,5 @@
+import type { Abi } from "viem";
+
 export const RegistrarController = [
   {
     inputs: [
@@ -630,4 +632,4 @@ export const RegistrarController = [
     stateMutability: "nonpayable",
     type: "function",
   },
-] as const;
+] as const satisfies Abi;

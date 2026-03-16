@@ -1,4 +1,6 @@
-export const UniversalResolver = [
+import type { Abi } from "viem";
+
+export const UniversalResolverV2 = [
   {
     inputs: [
       {
@@ -61,6 +63,22 @@ export const UniversalResolver = [
   {
     inputs: [],
     name: "InvalidBatchGatewayResponse",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "LabelIsEmpty",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "label",
+        type: "string",
+      },
+    ],
+    name: "LabelIsTooLong",
     type: "error",
   },
   {
@@ -361,6 +379,44 @@ export const UniversalResolver = [
     ],
     name: "ccipReadCallback",
     outputs: [],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "contract IRegistry",
+        name: "registry",
+        type: "address",
+      },
+    ],
+    name: "findCanonicalName",
+    outputs: [
+      {
+        internalType: "bytes",
+        name: "",
+        type: "bytes",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes",
+        name: "name",
+        type: "bytes",
+      },
+    ],
+    name: "findCanonicalRegistry",
+    outputs: [
+      {
+        internalType: "contract IRegistry",
+        name: "",
+        type: "address",
+      },
+    ],
     stateMutability: "view",
     type: "function",
   },
@@ -798,4 +854,4 @@ export const UniversalResolver = [
     stateMutability: "view",
     type: "function",
   },
-] as const;
+] as const satisfies Abi;

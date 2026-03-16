@@ -5,6 +5,7 @@ import attach_RegistrarControllerHandlers from "./handlers/ensv1/RegistrarContro
 import attach_RegistryHandlers from "./handlers/ensv2/ENSv2Registry";
 import attach_EnhancedAccessControlHandlers from "./handlers/ensv2/EnhancedAccessControl";
 import attach_ETHRegistrarHandlers from "./handlers/ensv2/ETHRegistrar";
+import attach_ResolverHandlers from "./handlers/shared/Resolver";
 
 export default function () {
   attach_BaseRegistrarHandlers();
@@ -14,4 +15,5 @@ export default function () {
   attach_EnhancedAccessControlHandlers();
   attach_RegistryHandlers();
   attach_ETHRegistrarHandlers();
+  attach_ResolverHandlers();
 }

@@ -1,3 +1,5 @@
+import type { Abi } from "viem";
+
 export const Registry = [
   {
     inputs: [{ internalType: "address", name: "rootOwner", type: "address" }],
@@ -196,4 +198,4 @@ export const Registry = [
     stateMutability: "view",
     type: "function",
   },
-] as const;
+] as const satisfies Abi;

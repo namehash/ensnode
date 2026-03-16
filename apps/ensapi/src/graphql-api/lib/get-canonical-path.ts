@@ -8,7 +8,7 @@ import {
   type DomainId,
   type ENSv1DomainId,
   type ENSv2DomainId,
-  getENSv2RootRegistryId,
+  maybeGetENSv2RootRegistryId,
   type RegistryId,
   ROOT_NODE,
 } from "@ensnode/ensnode-sdk";
@@ -16,7 +16,7 @@ import {
 import { db } from "@/lib/db";
 
 const MAX_DEPTH = 16;
-const ENSv2_ROOT_REGISTRY_ID = getENSv2RootRegistryId(config.namespace);
+const ENSv2_ROOT_REGISTRY_ID = maybeGetENSv2RootRegistryId(config.namespace);
 
 /**
  * Provide the canonical parents for an ENSv1 Domain.
@@ -74,6 +74,9 @@ export async function getV1CanonicalPath(domainId: ENSv1DomainId): Promise<Canon
  * i.e. reverse traversal of the namegraph via registry_canonical_domains
  */
 export async function getV2CanonicalPath(domainId: ENSv2DomainId): Promise<CanonicalPath | null> {
+  // if the ENSv2 Root Registry is not defined, null
+  if (!ENSv2_ROOT_REGISTRY_ID) return null;
+
   const result = await db.execute(sql`
     WITH RECURSIVE upward AS (
       -- Base case: start from the target domain

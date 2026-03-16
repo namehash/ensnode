@@ -7,19 +7,19 @@ import * as schema from "@ensnode/ensnode-schema";
 import {
   type DomainId,
   type ENSv2DomainId,
-  getENSv2RootRegistryId,
   type InterpretedName,
   interpretedLabelsToLabelHashPath,
   interpretedNameToInterpretedLabels,
   type LabelHash,
   makeENSv1DomainId,
+  maybeGetENSv2RootRegistryId,
   type RegistryId,
 } from "@ensnode/ensnode-sdk";
 
 import { db } from "@/lib/db";
 import { makeLogger } from "@/lib/logger";
 
-const ROOT_REGISTRY_ID = getENSv2RootRegistryId(config.namespace);
+const ROOT_REGISTRY_ID = maybeGetENSv2RootRegistryId(config.namespace);
 
 const logger = makeLogger("get-domain-by-interpreted-name");
 const v1Logger = makeLogger("get-domain-by-interpreted-name:v1");
@@ -64,7 +64,8 @@ export async function getDomainIdByInterpretedName(
   // Domains addressable in v2 are preferred, but v1 lookups are cheap, so just do them both ahead of time
   const [v1DomainId, v2DomainId] = await Promise.all([
     v1_getDomainIdByInterpretedName(name),
-    v2_getDomainIdByInterpretedName(ROOT_REGISTRY_ID, name),
+    // only resolve v2Domain if ENSv2 Root Registry is defined
+    ROOT_REGISTRY_ID ? v2_getDomainIdByInterpretedName(ROOT_REGISTRY_ID, name) : null,
   ]);
 
   logger.debug({ v1DomainId, v2DomainId });

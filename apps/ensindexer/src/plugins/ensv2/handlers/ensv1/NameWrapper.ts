@@ -22,7 +22,7 @@ import {
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { materializeENSv1DomainEffectiveOwner } from "@/lib/ensv2/domain-db-helpers";
-import { ensureEvent } from "@/lib/ensv2/event-db-helpers";
+import { ensureDomainEvent, ensureEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel } from "@/lib/ensv2/label-db-helpers";
 import {
   getLatestRegistration,
@@ -133,6 +133,9 @@ export default function () {
     // now guaranteed to be an unexpired transferrable Registration
     // so materialize domain owner
     await materializeENSv1DomainEffectiveOwner(context, domainId, to);
+
+    // push event to domain history
+    await ensureDomainEvent(context, event, domainId);
   }
 
   ponder.on(
@@ -244,10 +247,14 @@ export default function () {
           registrarAddress: registrar.address,
           registrantId: interpretAddress(registrant),
           fuses,
+          start: event.block.timestamp,
           expiry,
           eventId: await ensureEvent(context, event),
         });
       }
+
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
     },
   );
 
@@ -270,7 +277,7 @@ export default function () {
       }
 
       if (registration.type === "BaseRegistrar") {
-        // if this is a wrapped BaseRegisrar Registration, unwrap it
+        // if this is a wrapped BaseRegistrar Registration, unwrap it
         await context.db.update(schema.registration, { id: registration.id }).set({
           wrapped: false,
           fuses: null,
@@ -282,6 +289,9 @@ export default function () {
           expiry: event.block.timestamp,
         });
       }
+
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
 
       // NOTE: we don't need to adjust Domain.ownerId because NameWrapper always calls ens.setOwner
     },
@@ -316,6 +326,9 @@ export default function () {
         fuses,
         // expiry: // TODO: NameWrapper expiry logic ?
       });
+
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
     },
   );
 
@@ -345,6 +358,9 @@ export default function () {
       }
 
       await context.db.update(schema.registration, { id: registration.id }).set({ expiry });
+
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
 
       // if this is a NameWrapper Registration, this is a Renewal event. otherwise, this is a wrapped
       // BaseRegistrar Registration, and the Renewal is already being managed

@@ -36,14 +36,19 @@ import {
   EnhancedAccessControlABI,
   ETHRegistrarABI,
   RegistryABI,
+  ResolverABI,
 } from "@ensnode/datasources";
-import { PluginName } from "@ensnode/ensnode-sdk";
-import { getDatasourcesWithENSv2Contracts } from "@ensnode/ensnode-sdk/internal";
+import { buildBlockNumberRange, PluginName } from "@ensnode/ensnode-sdk";
+import {
+  getDatasourcesWithENSv2Contracts,
+  getDatasourcesWithResolvers,
+} from "@ensnode/ensnode-sdk/internal";
 
 import { createPlugin, namespaceContract } from "@/lib/plugin-helpers";
 import {
   chainConfigForContract,
   chainsConnectionConfigForDatasources,
+  constrainBlockrange,
   getRequiredDatasources,
   maybeGetDatasources,
 } from "@/lib/ponder-helpers";
@@ -291,6 +296,26 @@ export default createPlugin({
                 lineanames.contracts.EthRegistrarController,
               )),
           },
+        },
+
+        //////////////////////
+        // Resolver Contracts
+        //////////////////////
+        [namespaceContract(pluginName, "Resolver")]: {
+          abi: ResolverABI,
+          chain: getDatasourcesWithResolvers(config.namespace).reduce(
+            (memo, datasource) => ({
+              ...memo,
+              [datasource.chain.id.toString()]: constrainBlockrange(
+                config.globalBlockrange,
+                buildBlockNumberRange(
+                  datasource.contracts.Resolver.startBlock,
+                  datasource.contracts.Resolver.endBlock,
+                ),
+              ),
+            }),
+            {},
+          ),
         },
       },
     });

@@ -31,8 +31,9 @@ generated
 .terraform*
 terraform.tfstate*
 
-# CLAUDE.md
+# Claude
 CLAUDE.md
+.claude
 
 # ENSRainbow data
 apps/ensrainbow/data*

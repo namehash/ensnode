@@ -35,6 +35,8 @@ const DEVNET_USER = "0x90F79bf6EB2c4f870365E785982E1f101E93b906";
 
 const VITALIK_ADDRESS = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
 
+const DEVNET_NAME_WITH_OWNED_RESOLVER = "example.eth";
+
 export const GRAPHQL_API_EXAMPLE_QUERIES: Array<{
   query: string;
   variables: NamespaceSpecificValue<Record<string, unknown>>;
@@ -52,7 +54,7 @@ export const GRAPHQL_API_EXAMPLE_QUERIES: Array<{
 #
 # There are also example queries in the tabs above ☝️
 query HelloWorld {
-  root { id }
+  domain(by: { name: "eth" }) { name owner { address } }
 }`,
     variables: { default: {} },
   },
@@ -98,8 +100,9 @@ query DomainByName($name: Name!) {
   domain(by: {name: $name}) {
     __typename
     id
-    label { interpreted }
+    label { interpreted hash }
     name
+    owner { address }
 
     ... on ENSv1Domain {
       rootRegistryOwner { address }
@@ -135,6 +138,31 @@ query DomainSubdomains($name: Name!) {
     variables: { default: { name: "eth" } },
   },
 
+  /////////////////
+  // Domain Events
+  /////////////////
+  {
+    query: `
+query DomainEvents($name: Name!) {
+  domain(by: {name: $name}) {
+    events {
+      totalCount
+      edges {
+        node {
+          from
+          to
+          topics
+          data
+          timestamp
+          transactionHash
+        }
+      }
+    }
+  }
+}`,
+    variables: { default: { name: "newowner.eth" } },
+  },
+
   ////////////////////
   // Account Domains
   ////////////////////
@@ -157,6 +185,24 @@ query AccountDomains(
     variables: {
       default: { address: VITALIK_ADDRESS },
       [ENSNamespaceIds.EnsTestEnv]: { address: DEVNET_OWNER },
+    },
+  },
+
+  ////////////////////
+  // Account Events
+  ////////////////////
+  {
+    query: `
+query AccountEvents(
+  $address: Address!
+) {
+  account(address: $address) {
+    events { totalCount edges { node { topics data timestamp } } }
+  }
+}`,
+    variables: {
+      default: { address: VITALIK_ADDRESS },
+      [ENSNamespaceIds.EnsTestEnv]: { address: DEVNET_DEPLOYER },
     },
   },
 
@@ -211,6 +257,7 @@ query PermissionsByContract(
         }
       }
     }
+    events { totalCount edges { node { topics data timestamp } } }
   }
 }`,
     variables: {
@@ -268,6 +315,26 @@ query AccountResolverPermissions($address: Address!) {
       default: { address: DEVNET_DEPLOYER },
       // TODO: figure out a good sepolia-v2 user address
       // [ENSNamespaceIds.SepoliaV2]: { address: "" },
+    },
+  },
+
+  //////////////////////////////
+  // Domain's Assigned Resolver
+  //////////////////////////////
+  {
+    query: `
+query DomainResolver($name: Name!) {
+  domain(by: { name: $name }) {
+    resolver {
+      records { edges { node { node keys coinTypes } } }
+      permissions { resources { edges { node { resource users { edges { node { user { address } roles } } } } } } }
+      events { totalCount edges { node { topics data timestamp } } }
+    }
+  }
+}`,
+    variables: {
+      default: { name: "vitalik.eth" },
+      [ENSNamespaceIds.EnsTestEnv]: { name: DEVNET_NAME_WITH_OWNED_RESOLVER },
     },
   },
 

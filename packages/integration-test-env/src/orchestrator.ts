@@ -44,7 +44,7 @@ const ENSAPI_DIR = resolve(MONOREPO_ROOT, "apps/ensapi");
 
 // Docker images
 const POSTGRES_IMAGE = "postgres:17";
-const DEVNET_IMAGE = "ghcr.io/ensdomains/contracts-v2:main-f476641";
+const DEVNET_IMAGE = "ghcr.io/ensdomains/contracts-v2:main-cb8e11c";
 
 // Ports (devnet ports must be fixed — ensTestEnvChain hardcodes localhost:8545)
 const DEVNET_RPC_PORT = 8545;
