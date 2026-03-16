@@ -1,7 +1,7 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig({
-  entry: ["src/ponder.schema.ts"],
+  entry: ["src/index.ts"],
   platform: "neutral",
   format: ["esm"],
   target: "es2022",

@@ -1,7 +1,7 @@
 import { eq, like, Param, sql } from "drizzle-orm";
 import { alias, unionAll } from "drizzle-orm/pg-core";
 
-import * as schema from "@ensnode/ensnode-schema";
+import * as schema from "@ensnode/ensdb-sdk";
 import type { ENSv1DomainId, ENSv2DomainId, LabelHashPath } from "@ensnode/ensnode-sdk";
 import {
   type DomainId,

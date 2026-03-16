@@ -1,22 +1,22 @@
 {
-  "name": "@ensnode/ensnode-schema",
+  "name": "@ensnode/ensdb-sdk",
   "version": "1.7.0",
   "type": "module",
-  "description": "The ponder schema for ENSNode",
+  "description": "SDK for interacting with data in ENSDb",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/namehash/ensnode.git",
-    "directory": "packages/ensnode-schema"
+    "directory": "packages/ensdb-sdk"
   },
-  "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ensnode-schema",
+  "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ensdb-sdk",
   "keywords": [
     "ENS",
     "ENSNode",
-    "Ponder"
+    "ENSDb"
   ],
   "exports": {
-    ".": "./src/ponder.schema.ts"
+    ".": "./src/index.ts"
   },
   "files": [
     "dist"
@@ -24,12 +24,12 @@
   "publishConfig": {
     "access": "public",
     "exports": {
-      "types": "./dist/ponder.schema.d.ts",
-      "default": "./dist/ponder.schema.js"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     },
-    "main": "./dist/ponder.schema.js",
-    "module": "./dist/ponder.schema.mjs",
-    "types": "./dist/ponder.schema.d.ts"
+    "main": "./dist/index.js",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.ts"
   },
   "scripts": {
     "prepublish": "tsup",

@@ -1,6 +1,6 @@
 import { and, count, desc, eq, gte, isNotNull, lte, not, type SQL } from "drizzle-orm/sql";
 
-import * as schema from "@ensnode/ensnode-schema";
+import * as schema from "@ensnode/ensdb-sdk";
 import {
   type BlockRef,
   bigIntToNumber,

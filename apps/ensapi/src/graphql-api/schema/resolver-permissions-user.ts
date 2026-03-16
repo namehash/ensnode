@@ -1,4 +1,4 @@
-import type * as schema from "@ensnode/ensnode-schema";
+import type * as schema from "@ensnode/ensdb-sdk";
 import { makeResolverId } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
