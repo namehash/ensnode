@@ -47,7 +47,7 @@ On each push to a pull request branch that changes files in the [`docs/docs.ensn
 
 ## OpenAPI Spec Sync Check
 
-On every PR, CI runs an `openapi-sync-check` job that:
+On every PR, our CI runs an `openapi-sync-check` job that:
 
 1. Regenerates the OpenAPI spec from the ENSApi route definitions by running `pnpm generate:openapi`
 2. Compares the freshly generated OpenAPI spec against the committed [`docs/docs.ensnode.io/ensapi-openapi.json`](https://github.com/namehash/ensnode/blob/main/docs/docs.ensnode.io/ensapi-openapi.json), failing with a diff if they don't match
