@@ -44,7 +44,10 @@
           "default": "./dist/ensnode/index.js"
         }
       }
-    }
+    },
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts"
   },
   "scripts": {
     "prepublish": "tsup",
@@ -53,7 +56,6 @@
   },
   "peerDependencies": {
     "drizzle-orm": "catalog:",
-    "pg-connection-string": "catalog:",
     "ponder": "catalog:",
     "viem": "catalog:"
   },
@@ -61,7 +63,6 @@
     "@ensnode/ensnode-sdk": "workspace:",
     "@ensnode/shared-configs": "workspace:*",
     "drizzle-orm": "catalog:",
-    "pg-connection-string": "catalog:",
     "ponder": "catalog:",
     "tsup": "catalog:",
     "typescript": "catalog:",
