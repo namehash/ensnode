@@ -16,7 +16,9 @@
     "ENSDb"
   ],
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./ensindexer": "./src/ensindexer/index.ts",
+    "./ensnode": "./src/ensnode/index.ts"
   },
   "files": [
     "dist"
@@ -24,26 +26,45 @@
   "publishConfig": {
     "access": "public",
     "exports": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    },
-    "main": "./dist/index.js",
-    "module": "./dist/index.mjs",
-    "types": "./dist/index.d.ts"
+      ".": {
+        "import": {
+          "types": "./dist/index.d.ts",
+          "default": "./dist/index.js"
+        }
+      },
+      "./ensindexer": {
+        "import": {
+          "types": "./dist/ensindexer/index.d.ts",
+          "default": "./dist/ensindexer/index.js"
+        }
+      },
+      "./ensnode": {
+        "import": {
+          "types": "./dist/ensnode/index.d.ts",
+          "default": "./dist/ensnode/index.js"
+        }
+      }
+    }
   },
   "scripts": {
     "prepublish": "tsup",
     "lint": "biome check --write .",
     "lint:ci": "biome ci"
   },
-  "dependencies": {
+  "peerDependencies": {
+    "drizzle-orm": "catalog:",
+    "pg-connection-string": "catalog:",
     "ponder": "catalog:",
     "viem": "catalog:"
   },
   "devDependencies": {
     "@ensnode/ensnode-sdk": "workspace:",
     "@ensnode/shared-configs": "workspace:*",
+    "drizzle-orm": "catalog:",
+    "pg-connection-string": "catalog:",
+    "ponder": "catalog:",
     "tsup": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "viem": "catalog:"
   }
 }
