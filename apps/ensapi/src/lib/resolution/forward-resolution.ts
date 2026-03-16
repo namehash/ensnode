@@ -43,6 +43,7 @@ import {
   executeResolveCalls,
   interpretRawCallsAndResults,
   makeResolveCalls,
+  tablifyCallResults,
 } from "@/lib/resolution/resolve-calls-and-results";
 import { executeResolveCallsWithUniversalResolver } from "@/lib/resolution/resolve-with-universal-resolver";
 import {
@@ -168,7 +169,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           ////////////////////////////
           // TODO: re-enable protocol acceleration for ENSv2
           if (config.ensIndexerPublicConfig.plugins.includes(PluginName.ENSv2)) {
-            // execute each record's call against the UniversalResolver
+            // execute each record's call against the UniversalResolverV2
             const rawResults = await withEnsProtocolStep(
               TraceableENSProtocol.ForwardResolution,
               ForwardResolutionProtocolStep.ExecuteResolveCalls,
@@ -181,11 +182,14 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
                 }),
             );
 
-            span.setAttribute("rawResults", JSON.stringify(replaceBigInts(rawResults, String)));
-
             // additional semantic interpretation of the raw results from the chain
             const results = interpretRawCallsAndResults(rawResults);
-            span.setAttribute("results", JSON.stringify(replaceBigInts(results, String)));
+
+            if (process.env.NODE_ENV !== "production") {
+              console.table(tablifyCallResults(rawResults, results));
+            } else {
+              logger.debug({ rawResults, results });
+            }
 
             // return record values
             return makeRecordsResponseFromResolveResults(selection, results);
@@ -408,11 +412,14 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
               }),
           );
 
-          span.setAttribute("rawResults", JSON.stringify(replaceBigInts(rawResults, String)));
-
           // additional semantic interpretation of the raw results from the chain
           const results = interpretRawCallsAndResults(rawResults);
-          span.setAttribute("results", JSON.stringify(replaceBigInts(results, String)));
+
+          if (process.env.NODE_ENV !== "production") {
+            console.table(tablifyCallResults(rawResults, results));
+          } else {
+            logger.debug({ rawResults, results });
+          }
 
           // return record values
           return makeRecordsResponseFromResolveResults(selection, results);

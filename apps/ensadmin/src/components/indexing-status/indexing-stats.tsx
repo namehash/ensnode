@@ -5,11 +5,9 @@
  */
 
 import { ChainIcon, ChainName } from "@namehash/namehash-ui";
-import type { PropsWithChildren, ReactElement } from "react";
+import type { PropsWithChildren, ReactElement, ReactNode } from "react";
 
-import type { useIndexingStatus } from "@ensnode/ensnode-react";
 import {
-  ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
   type CrossChainIndexingStatusSnapshotOmnichain,
   IndexingStatusResponseCodes,
@@ -20,11 +18,11 @@ import {
   type OmnichainIndexingStatusSnapshotCompleted,
   type OmnichainIndexingStatusSnapshotFollowing,
   type OmnichainIndexingStatusSnapshotUnstarted,
+  RangeTypeIds,
   type RealtimeIndexingStatusProjection,
   sortChainStatusesByStartBlockAsc,
 } from "@ensnode/ensnode-sdk";
 
-import { useIndexingStatusWithSwr } from "@/components/indexing-status/use-indexing-status-with-swr";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatChainStatus, formatOmnichainIndexingStatus } from "@/lib/indexing-status";
@@ -33,6 +31,8 @@ import { cn } from "@/lib/utils";
 import { BackfillStatus } from "./backfill-status";
 import { BlockStats } from "./block-refs";
 import { IndexingStatusLoading } from "./indexing-status-loading";
+import { ProjectionInfo } from "./projection-info";
+import type { useIndexingStatusWithSwr } from "./use-indexing-status-with-swr";
 
 interface IndexingStatsForOmnichainStatusSnapshotProps<
   OmnichainIndexingStatusSnapshotType extends
@@ -68,10 +68,7 @@ export function IndexingStatsForSnapshotUnstarted({
   const chainEntries = sortChainStatusesByStartBlockAsc([...omnichainSnapshot.chains.entries()]);
 
   return chainEntries.map(([chainId, chain]) => {
-    const endBlock =
-      chain.config.configType === ChainIndexingConfigTypeIds.Definite
-        ? chain.config.endBlock
-        : null;
+    const endBlock = chain.config.rangeType === RangeTypeIds.Bounded ? chain.config.endBlock : null;
 
     return (
       <Card key={`Chain#${chainId}`}>
@@ -119,10 +116,7 @@ export function IndexingStatsForSnapshotBackfill({
   const chainEntries = sortChainStatusesByStartBlockAsc([...omnichainSnapshot.chains.entries()]);
 
   return chainEntries.map(([chainId, chain]) => {
-    const endBlock =
-      chain.config.configType === ChainIndexingConfigTypeIds.Definite
-        ? chain.config.endBlock
-        : null;
+    const endBlock = chain.config.rangeType === RangeTypeIds.Bounded ? chain.config.endBlock : null;
 
     return (
       <Card key={`Chain#${chainId}`}>
@@ -186,10 +180,7 @@ export function IndexingStatsForSnapshotCompleted({
   const chainEntries = sortChainStatusesByStartBlockAsc([...omnichainSnapshot.chains.entries()]);
 
   return chainEntries.map(([chainId, chain]) => {
-    const endBlock =
-      chain.config.configType === ChainIndexingConfigTypeIds.Definite
-        ? chain.config.endBlock
-        : null;
+    const endBlock = chain.config.rangeType === RangeTypeIds.Bounded ? chain.config.endBlock : null;
 
     return (
       <Card key={`Chain#${chainId}`}>
@@ -243,10 +234,7 @@ export function IndexingStatsForSnapshotFollowing({
   const chainEntries = sortChainStatusesByStartBlockAsc([...omnichainSnapshot.chains.entries()]);
 
   return chainEntries.map(([chainId, chain]) => {
-    const endBlock =
-      chain.config.configType === ChainIndexingConfigTypeIds.Definite
-        ? chain.config.endBlock
-        : null;
+    const endBlock = chain.config.rangeType === RangeTypeIds.Bounded ? chain.config.endBlock : null;
 
     return (
       <Card key={`Chain#${chainId}`}>
@@ -316,30 +304,20 @@ export function IndexingStatsForSnapshotFollowing({
   });
 }
 
+interface IndexingStatsShellProps extends PropsWithChildren {
+  title: ReactNode;
+}
+
 /**
  * Indexing Stats Shell
  *
  * UI component for presenting indexing stats UI for specific overall status.
  */
-export function IndexingStatsShell({
-  omnichainStatus,
-  children,
-}: PropsWithChildren<{ omnichainStatus?: OmnichainIndexingStatusId }>) {
+export function IndexingStatsShell({ title, children }: IndexingStatsShellProps) {
   return (
     <Card className="w-full flex flex-col gap-2">
       <CardHeader>
-        <CardTitle className="flex gap-2 items-center">
-          <span>Indexing Status</span>
-
-          {omnichainStatus && (
-            <Badge
-              className={cn("uppercase text-xs leading-none")}
-              title={`Omnichain indexing status: ${formatOmnichainIndexingStatus(omnichainStatus)}`}
-            >
-              {formatOmnichainIndexingStatus(omnichainStatus)}
-            </Badge>
-          )}
-        </CardTitle>
+        <CardTitle className="flex gap-2 items-center">{title}</CardTitle>
       </CardHeader>
 
       <CardContent className="flex flex-col gap-8">
@@ -418,11 +396,34 @@ export function IndexingStatsForRealtimeStatusProjection({
       break;
   }
 
+  const { snapshot, worstCaseDistance } = realtimeProjection;
+  const { omnichainSnapshot, snapshotTime } = snapshot;
+  const omnichainStatus = omnichainSnapshot.omnichainStatus;
+
   return (
     <section className="flex flex-col gap-6">
       {maybeIndexingTimeline}
 
-      <IndexingStatsShell omnichainStatus={omnichainStatusSnapshot.omnichainStatus}>
+      <IndexingStatsShell
+        title={
+          <>
+            <span>Indexing Status</span>
+
+            <ProjectionInfo
+              omnichainIndexingCursor={omnichainSnapshot.omnichainIndexingCursor}
+              snapshotTime={snapshotTime}
+              worstCaseDistance={worstCaseDistance}
+            />
+
+            <Badge
+              className={cn("uppercase text-xs leading-none")}
+              title={`Omnichain indexing status: ${formatOmnichainIndexingStatus(omnichainStatus)}`}
+            >
+              {formatOmnichainIndexingStatus(omnichainStatus)}
+            </Badge>
+          </>
+        }
+      >
         {indexingStats}
       </IndexingStatsShell>
     </section>
@@ -439,7 +440,7 @@ export function IndexingStats(props: IndexingStatsProps) {
 
   if (indexingStatusQuery.isError) {
     return (
-      <IndexingStatsShell>
+      <IndexingStatsShell title="Indexing Status Unavailable">
         <IndexingStatsForUnavailableSnapshot />
       </IndexingStatsShell>
     );
@@ -449,11 +450,7 @@ export function IndexingStats(props: IndexingStatsProps) {
     return <IndexingStatusLoading />;
   }
 
-  const indexingStatus = indexingStatusQuery.data;
+  const { realtimeProjection } = indexingStatusQuery.data;
 
-  return (
-    <IndexingStatsForRealtimeStatusProjection
-      realtimeProjection={indexingStatus.realtimeProjection}
-    />
-  );
+  return <IndexingStatsForRealtimeStatusProjection realtimeProjection={realtimeProjection} />;
 }

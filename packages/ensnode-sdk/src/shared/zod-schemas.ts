@@ -87,7 +87,7 @@ export const makeNonNegativeIntegerSchema = (valueLabel: string = "Value") =>
  * Parses a numeric value as {@link Duration}
  */
 export const makeDurationSchema = (valueLabel: string = "Value") =>
-  z.coerce
+  z
     .number({
       error: `${valueLabel} must be a number.`,
     })
@@ -206,31 +206,6 @@ export const makeCommaSeparatedList = (valueLabel: string = "Value") =>
  */
 export const makeBlockNumberSchema = (valueLabel: string = "Block number") =>
   makeNonNegativeIntegerSchema(valueLabel);
-
-/**
- * Parses an object value as the {@link Blockrange} object.
- */
-export const makeBlockrangeSchema = (valueLabel: string = "Value") =>
-  z
-    .strictObject(
-      {
-        startBlock: makeBlockNumberSchema(`${valueLabel}.startBlock`).optional(),
-        endBlock: makeBlockNumberSchema(`${valueLabel}.endBlock`).optional(),
-      },
-      {
-        error: `${valueLabel} must be a valid Blockrange object.`,
-      },
-    )
-    .refine(
-      (v) => {
-        if (v.startBlock && v.endBlock) {
-          return v.startBlock <= v.endBlock;
-        }
-
-        return true;
-      },
-      { error: `${valueLabel}: startBlock must be before or equal to endBlock` },
-    );
 
 /**
  * Parses an object value as the {@link BlockRef} object.

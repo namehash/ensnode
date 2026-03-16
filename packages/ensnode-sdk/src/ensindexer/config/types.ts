@@ -1,6 +1,6 @@
 import type { ENSNamespaceId } from "@ensnode/datasources";
 
-import type { EnsRainbowClientLabelSet } from "../../ensrainbow";
+import type { EnsRainbowClientLabelSet, EnsRainbowPublicConfig } from "../../ensrainbow";
 import type { ChainId } from "../../shared/types";
 
 /**
@@ -21,7 +21,7 @@ export enum PluginName {
 /**
  * Version info about ENSIndexer and its dependencies.
  */
-export interface ENSIndexerVersionInfo {
+export interface EnsIndexerVersionInfo {
   /**
    * Node.js runtime version
    *
@@ -51,18 +51,6 @@ export interface ENSIndexerVersionInfo {
   ensIndexer: string;
 
   /**
-   * ENSRainbow service version
-   *
-   * @see https://ghcr.io/namehash/ensnode/ensindexer
-   **/
-  ensRainbow: string;
-
-  /**
-   * ENSRainbow schema version
-   **/
-  ensRainbowSchema: number;
-
-  /**
    * ENS Normalize package version
    *
    * Available on NPM as: `@adraffy/ens-normalize`
@@ -73,12 +61,19 @@ export interface ENSIndexerVersionInfo {
 }
 
 /**
+ * Version info about ENSIndexer and its dependencies.
+ *
+ * @deprecated Use {@link EnsIndexerVersionInfo} instead.
+ */
+export type ENSIndexerVersionInfo = EnsIndexerVersionInfo;
+
+/**
  * Complete public configuration object for ENSIndexer.
  *
  * We use parameter types to maintain fields layout and documentation across
  * the domain model and its serialized counterpart.
  */
-export interface ENSIndexerPublicConfig {
+export interface EnsIndexerPublicConfig {
   /**
    * The ENS namespace that ENSNode operates in the context of.
    *
@@ -100,6 +95,13 @@ export interface ENSIndexerPublicConfig {
    *   identifier.
    */
   databaseSchemaName: string;
+
+  /**
+   * ENSRainbow public config
+   *
+   * Represents the public config of the connected ENSRainbow instance.
+   */
+  ensRainbowPublicConfig: EnsRainbowPublicConfig;
 
   /**
    * A set of strings referring to the names of plugins that are active.
@@ -161,5 +163,12 @@ export interface ENSIndexerPublicConfig {
   /**
    * Version info about ENSIndexer.
    */
-  versionInfo: ENSIndexerVersionInfo;
+  versionInfo: EnsIndexerVersionInfo;
 }
+
+/**
+ * Complete public configuration object for ENSIndexer.
+ *
+ * @deprecated Use {@link EnsIndexerPublicConfig} instead.
+ */
+export type ENSIndexerPublicConfig = EnsIndexerPublicConfig;

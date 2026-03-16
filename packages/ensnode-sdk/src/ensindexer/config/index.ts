@@ -1,3 +1,4 @@
+export * from "./compatibility";
 export * from "./deserialize";
 export * from "./is-subgraph-compatible";
 export * from "./label-utils";
@@ -6,3 +7,5 @@ export * from "./parsing";
 export * from "./serialize";
 export * from "./serialized-types";
 export * from "./types";
+export * from "./validate/ensindexer-public-config";
+export * from "./validate/ensindexer-version-info";

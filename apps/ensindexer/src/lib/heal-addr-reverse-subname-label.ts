@@ -6,6 +6,7 @@ import type { Address } from "viem";
 import { getENSRootChainId } from "@ensnode/datasources";
 import type { LabelHash, LiteralLabel } from "@ensnode/ensnode-sdk";
 
+import { toJson } from "@/lib/json-stringify-with-bigints";
 import { maybeHealLabelByAddrReverseSubname } from "@/lib/maybe-heal-label-by-addr-reverse-subname";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import {
@@ -30,7 +31,7 @@ export async function healAddrReverseSubnameLabel(
     );
   }
 
-  // First, try healing with the transaction sender address.
+  // Try healing with the transaction sender address.
   //
   // NOTE: In most cases, the transaction sender calls `setName` on the ENS Registry, which may
   // request the ENS Reverse Registry to create a reverse address record assigned to the transaction
@@ -58,15 +59,27 @@ export async function healAddrReverseSubnameLabel(
   const healedFromOwner = maybeHealLabelByAddrReverseSubname(labelHash, event.args.owner);
   if (healedFromOwner !== null) return healedFromOwner;
 
-  // If previous healing methods failed, try addresses from transaction traces. In rare cases,
-  // neither the transaction sender nor event owner is used for the reverse address record.
-  // This can happen if the sender calls a factory contract that creates a new contract, which
-  // then acquires a subdomain under a proxy-managed ENS name. The new contract's address is
-  // used for the reverse record and is only found in traces, not as sender or owner.
+  // Try healing based on the deployed contract's address, if exists.
   //
-  // For these transactions, search the traces for addresses that could heal the label. All
-  // caller addresses are included in traces. This brute-force method is a last resort, as it
-  // requires an extra RPC call and parsing all addresses involved in the transaction.
+  // This handles contract setting their own Reverse Name in their constructor via ReverseClaimer.sol
+  try {
+    const receipt = await context.client.getTransactionReceipt({ hash: event.transaction.hash });
+    if (receipt.contractAddress) {
+      const healedFromContractAddress = maybeHealLabelByAddrReverseSubname(
+        labelHash,
+        receipt.contractAddress,
+      );
+      if (healedFromContractAddress) return healedFromContractAddress;
+    }
+  } catch {
+    // NOTE: context.client.getTransactionReceipt can throw, so we swallow the error in order to
+    // proceed to trace parsing
+  }
+
+  // If previous healing methods failed, try all addresses from the transaction trace.
+  //
+  // This brute-force method is a last resort, as it requires an extra RPC call and parsing all
+  // addresses involved in the transaction.
   //
   // Example transaction:
   // https://etherscan.io/tx/0x9a6a5156f9f1fc6b1d5551483b97930df32e802f2f9229b35572170f1111134d
@@ -89,6 +102,6 @@ export async function healAddrReverseSubnameLabel(
 
   // Invariant: by this point, we should have healed all subnames of addr.reverse
   throw new Error(
-    `Invariant(healAddrReverseSubnameLabel): Unable to heal the label for subname of addr.reverse with labelHash '${labelHash}'.`,
+    `Invariant(healAddrReverseSubnameLabel): Unable to heal the label for subname of addr.reverse with labelHash '${labelHash}'. Event:\n${toJson(event)}`,
   );
 }

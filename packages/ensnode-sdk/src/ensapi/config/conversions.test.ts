@@ -3,8 +3,10 @@ import { describe, expect, it } from "vitest";
 import { ENSNamespaceIds } from "@ensnode/datasources";
 
 import { PluginName } from "../../ensindexer/config/types";
-import { deserializeENSApiPublicConfig, serializeENSApiPublicConfig } from ".";
-import type { ENSApiPublicConfig } from "./types";
+import { deserializeEnsApiPublicConfig } from "./deserialize";
+import { serializeEnsApiPublicConfig } from "./serialize";
+import type { SerializedEnsApiPublicConfig } from "./serialized-types";
+import type { EnsApiPublicConfig } from "./types";
 
 const MOCK_ENSAPI_PUBLIC_CONFIG = {
   version: "0.36.0",
@@ -15,6 +17,11 @@ const MOCK_ENSAPI_PUBLIC_CONFIG = {
   ensIndexerPublicConfig: {
     namespace: ENSNamespaceIds.Mainnet,
     databaseSchemaName: "ensapi",
+    ensRainbowPublicConfig: {
+      version: "0.36.0",
+      labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+      recordsCount: 100,
+    },
     indexedChainIds: new Set([1]),
     isSubgraphCompatible: false,
     labelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
@@ -22,21 +29,19 @@ const MOCK_ENSAPI_PUBLIC_CONFIG = {
     versionInfo: {
       ensDb: "0.36.0",
       ensIndexer: "0.36.0",
-      ensRainbow: "0.36.0",
-      ensRainbowSchema: 1,
       ensNormalize: "1.1.1",
       nodejs: "20.0.0",
       ponder: "0.5.0",
     },
   },
-} satisfies ENSApiPublicConfig;
+} satisfies EnsApiPublicConfig;
 
-const MOCK_SERIALIZED_ENSAPI_PUBLIC_CONFIG = serializeENSApiPublicConfig(MOCK_ENSAPI_PUBLIC_CONFIG);
+const MOCK_SERIALIZED_ENSAPI_PUBLIC_CONFIG = serializeEnsApiPublicConfig(MOCK_ENSAPI_PUBLIC_CONFIG);
 
 describe("ENSApi Config Serialization/Deserialization", () => {
-  describe("serializeENSApiPublicConfig", () => {
+  describe("serializeEnsApiPublicConfig", () => {
     it("serializes ENSAPI public config correctly", () => {
-      const result = serializeENSApiPublicConfig(MOCK_ENSAPI_PUBLIC_CONFIG);
+      const result = serializeEnsApiPublicConfig(MOCK_ENSAPI_PUBLIC_CONFIG);
 
       expect(result).toEqual({
         version: "0.36.0",
@@ -47,6 +52,11 @@ describe("ENSApi Config Serialization/Deserialization", () => {
         ensIndexerPublicConfig: {
           namespace: ENSNamespaceIds.Mainnet,
           databaseSchemaName: "ensapi",
+          ensRainbowPublicConfig: {
+            version: "0.36.0",
+            labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+            recordsCount: 100,
+          },
           indexedChainIds: [1],
           isSubgraphCompatible: false,
           labelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
@@ -54,21 +64,19 @@ describe("ENSApi Config Serialization/Deserialization", () => {
           versionInfo: {
             ensDb: "0.36.0",
             ensIndexer: "0.36.0",
-            ensRainbow: "0.36.0",
-            ensRainbowSchema: 1,
             ensNormalize: "1.1.1",
             nodejs: "20.0.0",
             ponder: "0.5.0",
           },
         },
-      });
+      } satisfies SerializedEnsApiPublicConfig);
     });
   });
 
-  describe("deserializeENSApiPublicConfig", () => {
+  describe("deserializeEnsApiPublicConfig", () => {
     it("deserializes ENSAPI public config correctly", () => {
-      const serialized = serializeENSApiPublicConfig(MOCK_ENSAPI_PUBLIC_CONFIG);
-      const result = deserializeENSApiPublicConfig(serialized);
+      const serialized = serializeEnsApiPublicConfig(MOCK_ENSAPI_PUBLIC_CONFIG);
+      const result = deserializeEnsApiPublicConfig(serialized);
 
       expect(result).toEqual(MOCK_ENSAPI_PUBLIC_CONFIG);
     });
@@ -79,7 +87,7 @@ describe("ENSApi Config Serialization/Deserialization", () => {
         version: "", // Invalid: empty string
       };
 
-      expect(() => deserializeENSApiPublicConfig(invalidConfig, "testConfig")).toThrow(
+      expect(() => deserializeEnsApiPublicConfig(invalidConfig, "testConfig")).toThrow(
         /testConfig.version/,
       );
     });
@@ -87,8 +95,8 @@ describe("ENSApi Config Serialization/Deserialization", () => {
 
   describe("round-trip conversion", () => {
     it("maintains data integrity through serialize -> deserialize cycle", () => {
-      const serialized = serializeENSApiPublicConfig(MOCK_ENSAPI_PUBLIC_CONFIG);
-      const deserialized = deserializeENSApiPublicConfig(serialized);
+      const serialized = serializeEnsApiPublicConfig(MOCK_ENSAPI_PUBLIC_CONFIG);
+      const deserialized = deserializeEnsApiPublicConfig(serialized);
 
       expect(deserialized).toStrictEqual(MOCK_ENSAPI_PUBLIC_CONFIG);
     });

@@ -7,13 +7,13 @@ import { deserializeENSApiPublicConfig, SerializedENSApiPublicConfig } from "@en
 import {
   ENSNodeConfigInfoView,
   ENSNodeConfigInfoViewProps,
-} from "@/components/connection/config-info/config-info";
+} from "@/components/connection/cards/ensnode-info";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 import mockDataJson from "./data.json" with { type: "json" };
 
-const mockConfigData = mockDataJson as Record<string, SerializedENSApiPublicConfig>;
+const mockConfigData = mockDataJson as unknown as Record<string, SerializedENSApiPublicConfig>;
 
 type LoadingVariant = "Loading" | "Loading Error";
 type ConfigVariant = keyof typeof mockConfigData | LoadingVariant;

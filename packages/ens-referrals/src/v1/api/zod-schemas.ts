@@ -9,137 +9,106 @@
 
 import z from "zod/v4";
 
-import {
-  makeAccountIdSchema,
-  makeDurationSchema,
-  makeFiniteNonNegativeNumberSchema,
-  makeLowercaseAddressSchema,
-  makeNonNegativeIntegerSchema,
-  makePositiveIntegerSchema,
-  makePriceEthSchema,
-  makePriceUsdcSchema,
-  makeUnixTimestampSchema,
-} from "@ensnode/ensnode-sdk/internal";
+import { makeLowercaseAddressSchema } from "@ensnode/ensnode-sdk/internal";
 
-import { REFERRERS_PER_LEADERBOARD_PAGE_MAX } from "../leaderboard-page";
-import { type ReferrerDetailRanked, ReferrerDetailTypeIds } from "../referrer-detail";
-import { ReferrerDetailResponseCodes, ReferrerLeaderboardPageResponseCodes } from "./types";
+import {
+  makeReferralProgramRulesPieSplitSchema,
+  makeReferrerEditionMetricsPieSplitSchema,
+  makeReferrerLeaderboardPagePieSplitSchema,
+} from "../award-models/pie-split/api/zod-schemas";
+import {
+  makeReferralProgramRulesRevShareLimitSchema,
+  makeReferrerEditionMetricsRevShareLimitSchema,
+  makeReferrerLeaderboardPageRevShareLimitSchema,
+} from "../award-models/rev-share-limit/api/zod-schemas";
+import {
+  makeBaseReferralProgramRulesSchema,
+  makeBaseReferrerLeaderboardPageSchema,
+} from "../award-models/shared/api/zod-schemas";
+import type { ReferrerEditionMetricsUnrecognized } from "../award-models/shared/edition-metrics";
+import type { ReferrerLeaderboardPageUnrecognized } from "../award-models/shared/leaderboard-page";
+import type { ReferralProgramRulesUnrecognized } from "../award-models/shared/rules";
+import { ReferralProgramAwardModels } from "../award-models/shared/rules";
+import type { ReferralProgramEditionConfig } from "../edition";
+import type { ReferrerEditionMetrics } from "../edition-metrics";
+import type { ReferrerLeaderboardPage } from "../leaderboard-page";
+import {
+  MAX_EDITIONS_PER_REQUEST,
+  ReferralProgramEditionConfigSetResponseCodes,
+  ReferrerLeaderboardPageResponseCodes,
+  ReferrerMetricsEditionsResponseCodes,
+} from "./types";
 
 /**
- * Schema for ReferralProgramRules
+ * Schema for {@link ReferralProgramRules}
  */
 export const makeReferralProgramRulesSchema = (valueLabel: string = "ReferralProgramRules") =>
-  z
-    .object({
-      totalAwardPoolValue: makePriceUsdcSchema(`${valueLabel}.totalAwardPoolValue`),
-      maxQualifiedReferrers: makeNonNegativeIntegerSchema(`${valueLabel}.maxQualifiedReferrers`),
-      startTime: makeUnixTimestampSchema(`${valueLabel}.startTime`),
-      endTime: makeUnixTimestampSchema(`${valueLabel}.endTime`),
-      subregistryId: makeAccountIdSchema(`${valueLabel}.subregistryId`),
-    })
-    .refine((data) => data.endTime >= data.startTime, {
-      message: `${valueLabel}.endTime must be >= ${valueLabel}.startTime`,
-      path: ["endTime"],
-    });
+  z.discriminatedUnion("awardModel", [
+    makeReferralProgramRulesPieSplitSchema(valueLabel),
+    makeReferralProgramRulesRevShareLimitSchema(valueLabel),
+  ]);
 
 /**
- * Schema for AwardedReferrerMetrics (with numeric rank)
+ * Schema for {@link ReferrerLeaderboardPage}.
+ *
+ * Forward-compatible — peeks at `awardModel` before committing to full validation:
+ * - Known award models are fully validated with the model-specific schema.
+ * - Unknown award models are wrapped as {@link ReferrerLeaderboardPageUnrecognized}.
  */
-export const makeAwardedReferrerMetricsSchema = (valueLabel: string = "AwardedReferrerMetrics") =>
-  z.object({
-    referrer: makeLowercaseAddressSchema(`${valueLabel}.referrer`),
-    totalReferrals: makeNonNegativeIntegerSchema(`${valueLabel}.totalReferrals`),
-    totalIncrementalDuration: makeDurationSchema(`${valueLabel}.totalIncrementalDuration`),
-    totalRevenueContribution: makePriceEthSchema(`${valueLabel}.totalRevenueContribution`),
-    score: makeFiniteNonNegativeNumberSchema(`${valueLabel}.score`),
-    rank: makePositiveIntegerSchema(`${valueLabel}.rank`),
-    isQualified: z.boolean(),
-    finalScoreBoost: makeFiniteNonNegativeNumberSchema(`${valueLabel}.finalScoreBoost`).max(
-      1,
-      `${valueLabel}.finalScoreBoost must be <= 1`,
-    ),
-    finalScore: makeFiniteNonNegativeNumberSchema(`${valueLabel}.finalScore`),
-    awardPoolShare: makeFiniteNonNegativeNumberSchema(`${valueLabel}.awardPoolShare`).max(
-      1,
-      `${valueLabel}.awardPoolShare must be <= 1`,
-    ),
-    awardPoolApproxValue: makePriceUsdcSchema(`${valueLabel}.awardPoolApproxValue`),
-  });
+export const makeReferrerLeaderboardPageSchema = (
+  valueLabel: string = "ReferrerLeaderboardPage",
+) => {
+  const knownAwardModels = Object.values(ReferralProgramAwardModels).filter(
+    (m) => m !== ReferralProgramAwardModels.Unrecognized,
+  ) as string[];
 
-/**
- * Schema for UnrankedReferrerMetrics (with null rank)
- */
-export const makeUnrankedReferrerMetricsSchema = (valueLabel: string = "UnrankedReferrerMetrics") =>
-  z.object({
-    referrer: makeLowercaseAddressSchema(`${valueLabel}.referrer`),
-    totalReferrals: makeNonNegativeIntegerSchema(`${valueLabel}.totalReferrals`),
-    totalIncrementalDuration: makeDurationSchema(`${valueLabel}.totalIncrementalDuration`),
-    totalRevenueContribution: makePriceEthSchema(`${valueLabel}.totalRevenueContribution`),
-    score: makeFiniteNonNegativeNumberSchema(`${valueLabel}.score`),
-    rank: z.null(),
-    isQualified: z.literal(false),
-    finalScoreBoost: makeFiniteNonNegativeNumberSchema(`${valueLabel}.finalScoreBoost`).max(
-      1,
-      `${valueLabel}.finalScoreBoost must be <= 1`,
-    ),
-    finalScore: makeFiniteNonNegativeNumberSchema(`${valueLabel}.finalScore`),
-    awardPoolShare: makeFiniteNonNegativeNumberSchema(`${valueLabel}.awardPoolShare`).max(
-      1,
-      `${valueLabel}.awardPoolShare must be <= 1`,
-    ),
-    awardPoolApproxValue: makePriceUsdcSchema(`${valueLabel}.awardPoolApproxValue`),
-  });
+  // Loose schema used only to peek at awardModel before full validation.
+  const looseSchema = z.object({ awardModel: z.string() }).passthrough();
 
-/**
- * Schema for AggregatedReferrerMetrics
- */
-export const makeAggregatedReferrerMetricsSchema = (
-  valueLabel: string = "AggregatedReferrerMetrics",
-) =>
-  z.object({
-    grandTotalReferrals: makeNonNegativeIntegerSchema(`${valueLabel}.grandTotalReferrals`),
-    grandTotalIncrementalDuration: makeDurationSchema(
-      `${valueLabel}.grandTotalIncrementalDuration`,
-    ),
-    grandTotalRevenueContribution: makePriceEthSchema(
-      `${valueLabel}.grandTotalRevenueContribution`,
-    ),
-    grandTotalQualifiedReferrersFinalScore: makeFiniteNonNegativeNumberSchema(
-      `${valueLabel}.grandTotalQualifiedReferrersFinalScore`,
-    ),
-    minFinalScoreToQualify: makeFiniteNonNegativeNumberSchema(
-      `${valueLabel}.minFinalScoreToQualify`,
-    ),
-  });
+  // Schema for known award models — dispatch is handled automatically by discriminatedUnion.
+  const knownSchema = z.discriminatedUnion("awardModel", [
+    makeReferrerLeaderboardPagePieSplitSchema(valueLabel),
+    makeReferrerLeaderboardPageRevShareLimitSchema(valueLabel),
+  ]);
 
-export const makeReferrerLeaderboardPageContextSchema = (
-  valueLabel: string = "ReferrerLeaderboardPageContext",
-) =>
-  z.object({
-    page: makePositiveIntegerSchema(`${valueLabel}.page`),
-    recordsPerPage: makePositiveIntegerSchema(`${valueLabel}.recordsPerPage`).max(
-      REFERRERS_PER_LEADERBOARD_PAGE_MAX,
-      `${valueLabel}.recordsPerPage must not exceed ${REFERRERS_PER_LEADERBOARD_PAGE_MAX}`,
-    ),
-    totalRecords: makeNonNegativeIntegerSchema(`${valueLabel}.totalRecords`),
-    totalPages: makePositiveIntegerSchema(`${valueLabel}.totalPages`),
-    hasNext: z.boolean(),
-    hasPrev: z.boolean(),
-    startIndex: z.optional(makeNonNegativeIntegerSchema(`${valueLabel}.startIndex`)),
-    endIndex: z.optional(makeNonNegativeIntegerSchema(`${valueLabel}.endIndex`)),
-  });
+  // Base schema for fields present on all leaderboard page variants (used for Unrecognized).
+  const baseSchema = makeBaseReferrerLeaderboardPageSchema(valueLabel);
 
-/**
- * Schema for ReferrerLeaderboardPage
- */
-export const makeReferrerLeaderboardPageSchema = (valueLabel: string = "ReferrerLeaderboardPage") =>
-  z.object({
-    rules: makeReferralProgramRulesSchema(`${valueLabel}.rules`),
-    referrers: z.array(makeAwardedReferrerMetricsSchema(`${valueLabel}.referrers[record]`)),
-    aggregatedMetrics: makeAggregatedReferrerMetricsSchema(`${valueLabel}.aggregatedMetrics`),
-    pageContext: makeReferrerLeaderboardPageContextSchema(`${valueLabel}.pageContext`),
-    accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
+  return looseSchema.transform((data, ctx): ReferrerLeaderboardPage => {
+    if (knownAwardModels.includes(data.awardModel)) {
+      const parsed = knownSchema.safeParse(data);
+      if (!parsed.success) {
+        for (const issue of parsed.error.issues) {
+          ctx.addIssue({
+            code: "custom",
+            path: issue.path as PropertyKey[],
+            message: issue.message,
+          });
+        }
+        return z.NEVER;
+      }
+      return parsed.data;
+    }
+
+    // Unknown awardModel — preserve as ReferrerLeaderboardPageUnrecognized using base fields.
+    const parsed = baseSchema.safeParse(data);
+    if (!parsed.success) {
+      for (const issue of parsed.error.issues) {
+        ctx.addIssue({
+          code: "custom",
+          path: issue.path as PropertyKey[],
+          message: issue.message,
+        });
+      }
+      return z.NEVER;
+    }
+    return {
+      ...parsed.data,
+      awardModel: ReferralProgramAwardModels.Unrecognized,
+      originalAwardModel: data.awardModel,
+    } satisfies ReferrerLeaderboardPageUnrecognized;
   });
+};
 
 /**
  * Schema for {@link ReferrerLeaderboardPageResponseOk}
@@ -176,59 +145,306 @@ export const makeReferrerLeaderboardPageResponseSchema = (
   ]);
 
 /**
- * Schema for {@link ReferrerDetailRanked} (with ranked metrics)
+ * Schema for {@link ReferrerEditionMetrics} (all ranked and unranked model variants, plus Unrecognized).
+ *
+ * Forward-compatible — peeks at `awardModel` before committing to full validation:
+ * - Known award models are fully validated with the model-specific schema.
+ * - Unknown award models are wrapped as {@link ReferrerEditionMetricsUnrecognized}.
  */
-export const makeReferrerDetailRankedSchema = (valueLabel: string = "ReferrerDetailRanked") =>
-  z.object({
-    type: z.literal(ReferrerDetailTypeIds.Ranked),
-    rules: makeReferralProgramRulesSchema(`${valueLabel}.rules`),
-    referrer: makeAwardedReferrerMetricsSchema(`${valueLabel}.referrer`),
-    aggregatedMetrics: makeAggregatedReferrerMetricsSchema(`${valueLabel}.aggregatedMetrics`),
-    accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
+export const makeReferrerEditionMetricsSchema = (valueLabel: string = "ReferrerEditionMetrics") => {
+  const knownAwardModels = Object.values(ReferralProgramAwardModels).filter(
+    (m) => m !== ReferralProgramAwardModels.Unrecognized,
+  ) as string[];
+
+  // Loose schema used only to peek at awardModel before full validation.
+  const looseSchema = z.object({ awardModel: z.string() }).passthrough();
+
+  // Schema for known award models — dispatch is handled automatically by discriminatedUnion.
+  const knownSchema = z.discriminatedUnion("awardModel", [
+    makeReferrerEditionMetricsPieSplitSchema(valueLabel),
+    makeReferrerEditionMetricsRevShareLimitSchema(valueLabel),
+  ]);
+
+  return looseSchema.transform((data, ctx): ReferrerEditionMetrics => {
+    if (knownAwardModels.includes(data.awardModel)) {
+      const parsed = knownSchema.safeParse(data);
+      if (!parsed.success) {
+        for (const issue of parsed.error.issues) {
+          ctx.addIssue({
+            code: "custom",
+            path: issue.path as PropertyKey[],
+            message: issue.message,
+          });
+        }
+        return z.NEVER;
+      }
+      return parsed.data;
+    }
+
+    // Unknown awardModel — wrap as ReferrerEditionMetricsUnrecognized.
+    // No base fields are extracted here (unlike ReferrerLeaderboardPageUnrecognized) because
+    // callers are expected to skip unrecognized edition metrics entirely rather than inspect them.
+    return {
+      awardModel: ReferralProgramAwardModels.Unrecognized,
+      originalAwardModel: data.awardModel,
+    } satisfies ReferrerEditionMetricsUnrecognized;
   });
+};
 
 /**
- * Schema for {@link ReferrerDetailUnranked} (with unranked metrics)
+ * Schema for validating a {@link ReferralProgramEditionSlug}.
+ *
+ * Enforces the slug format invariant: lowercase letters (a-z), digits (0-9),
+ * and hyphens (-) only. Must not start or end with a hyphen.
+ *
+ * Runtime validation against configured editions happens at the business logic level.
  */
-export const makeReferrerDetailUnrankedSchema = (valueLabel: string = "ReferrerDetailUnranked") =>
-  z.object({
-    type: z.literal(ReferrerDetailTypeIds.Unranked),
-    rules: makeReferralProgramRulesSchema(`${valueLabel}.rules`),
-    referrer: makeUnrankedReferrerMetricsSchema(`${valueLabel}.referrer`),
-    aggregatedMetrics: makeAggregatedReferrerMetricsSchema(`${valueLabel}.aggregatedMetrics`),
-    accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
-  });
+export const makeReferralProgramEditionSlugSchema = (
+  valueLabel: string = "ReferralProgramEditionSlug",
+) =>
+  z
+    .string()
+    .min(1, `${valueLabel} must not be empty`)
+    .regex(
+      /^[a-z0-9]+(-[a-z0-9]+)*$/,
+      `${valueLabel} must contain only lowercase letters, digits, and hyphens. Must not start or end with a hyphen.`,
+    );
 
 /**
- * Schema for {@link ReferrerDetailResponseOk}
- * Accepts either ranked or unranked referrer detail data
+ * Schema for validating editions array (min 1, max {@link MAX_EDITIONS_PER_REQUEST}, distinct values).
  */
-export const makeReferrerDetailResponseOkSchema = (valueLabel: string = "ReferrerDetailResponse") =>
-  z.object({
-    responseCode: z.literal(ReferrerDetailResponseCodes.Ok),
-    data: z.discriminatedUnion("type", [
-      makeReferrerDetailRankedSchema(`${valueLabel}.data`),
-      makeReferrerDetailUnrankedSchema(`${valueLabel}.data`),
-    ]),
-  });
+export const makeReferrerMetricsEditionsArraySchema = (
+  valueLabel: string = "ReferrerMetricsEditionsArray",
+) =>
+  z
+    .array(makeReferralProgramEditionSlugSchema(`${valueLabel}[edition]`))
+    .min(1, `${valueLabel} must contain at least 1 edition`)
+    .max(
+      MAX_EDITIONS_PER_REQUEST,
+      `${valueLabel} must not contain more than ${MAX_EDITIONS_PER_REQUEST} editions`,
+    )
+    .refine(
+      (editions) => {
+        const uniqueEditions = new Set(editions);
+        return uniqueEditions.size === editions.length;
+      },
+      { message: `${valueLabel} must not contain duplicate edition slugs` },
+    );
 
 /**
- * Schema for {@link ReferrerDetailResponseError}
+ * Schema for {@link ReferrerMetricsEditionsRequest}
  */
-export const makeReferrerDetailResponseErrorSchema = (
-  _valueLabel: string = "ReferrerDetailResponse",
+export const makeReferrerMetricsEditionsRequestSchema = (
+  valueLabel: string = "ReferrerMetricsEditionsRequest",
 ) =>
   z.object({
-    responseCode: z.literal(ReferrerDetailResponseCodes.Error),
+    referrer: makeLowercaseAddressSchema(`${valueLabel}.referrer`),
+    editions: makeReferrerMetricsEditionsArraySchema(`${valueLabel}.editions`),
+  });
+
+/**
+ * Schema for {@link ReferrerMetricsEditionsResponseOk}
+ */
+export const makeReferrerMetricsEditionsResponseOkSchema = (
+  valueLabel: string = "ReferrerMetricsEditionsResponseOk",
+) =>
+  z.object({
+    responseCode: z.literal(ReferrerMetricsEditionsResponseCodes.Ok),
+    data: z.record(
+      makeReferralProgramEditionSlugSchema(`${valueLabel}.data[edition]`),
+      makeReferrerEditionMetricsSchema(`${valueLabel}.data[edition]`),
+    ),
+  });
+
+/**
+ * Schema for {@link ReferrerMetricsEditionsResponseError}
+ */
+export const makeReferrerMetricsEditionsResponseErrorSchema = (
+  _valueLabel: string = "ReferrerMetricsEditionsResponseError",
+) =>
+  z.object({
+    responseCode: z.literal(ReferrerMetricsEditionsResponseCodes.Error),
     error: z.string(),
     errorMessage: z.string(),
   });
 
 /**
- * Schema for {@link ReferrerDetailResponse}
+ * Schema for {@link ReferrerMetricsEditionsResponse}
  */
-export const makeReferrerDetailResponseSchema = (valueLabel: string = "ReferrerDetailResponse") =>
+export const makeReferrerMetricsEditionsResponseSchema = (
+  valueLabel: string = "ReferrerMetricsEditionsResponse",
+) =>
   z.discriminatedUnion("responseCode", [
-    makeReferrerDetailResponseOkSchema(valueLabel),
-    makeReferrerDetailResponseErrorSchema(valueLabel),
+    makeReferrerMetricsEditionsResponseOkSchema(valueLabel),
+    makeReferrerMetricsEditionsResponseErrorSchema(valueLabel),
+  ]);
+
+/**
+ * Schema for the shared base fields of a {@link ReferralProgramEditionConfig}.
+ */
+const makeReferralProgramEditionConfigBaseSchema = (valueLabel: string) =>
+  z.object({
+    slug: makeReferralProgramEditionSlugSchema(`${valueLabel}.slug`),
+    displayName: z.string().min(1, `${valueLabel}.displayName must not be empty`),
+    rules: makeBaseReferralProgramRulesSchema(`${valueLabel}.rules`),
+  });
+
+/**
+ * Schema for validating a {@link ReferralProgramEditionConfig}.
+ */
+export const makeReferralProgramEditionConfigSchema = (
+  valueLabel: string = "ReferralProgramEditionConfig",
+) =>
+  makeReferralProgramEditionConfigBaseSchema(valueLabel).safeExtend({
+    rules: makeReferralProgramRulesSchema(`${valueLabel}.rules`),
+  });
+
+/**
+ * Schema for validating referral program edition config set array.
+ *
+ * Editions whose `rules.awardModel` is not recognized by this client version are preserved as
+ * {@link ReferralProgramRulesUnrecognized} for forward compatibility — nothing is silently dropped.
+ * Downstream code (e.g., leaderboard cache setup) is responsible for skipping unrecognized
+ * editions with a warning log rather than crashing.
+ *
+ * The list must not be empty after processing all items. Duplicate slugs are not allowed.
+ *
+ * Two-pass approach:
+ *  1. Each item is loosely parsed (based on `rules.awardModel` field).
+ *     - Known award models are fully validated with {@link makeReferralProgramEditionConfigSchema}.
+ *     - Unknown award models are parsed with {@link makeBaseReferralProgramRulesSchema} and wrapped as
+ *       `ReferralProgramRulesUnrecognized`.
+ *  2. After processing all items, the result must be non-empty and have no duplicate slugs.
+ */
+export const makeReferralProgramEditionConfigSetArraySchema = (
+  valueLabel: string = "ReferralProgramEditionConfigSetArray",
+) => {
+  const knownAwardModels = Object.values(ReferralProgramAwardModels).filter(
+    (m) => m !== ReferralProgramAwardModels.Unrecognized,
+  ) as string[];
+  const configSchema = makeReferralProgramEditionConfigSchema(`${valueLabel}[edition]`);
+
+  // Loose schema used only to peek at rules.awardModel before full validation.
+  const looseItemSchema = z
+    .object({ rules: z.object({ awardModel: z.string() }).passthrough() })
+    .passthrough();
+
+  // Schema for extracting base fields from an unrecognized edition.
+  const unrecognizedBaseSchema = makeReferralProgramEditionConfigBaseSchema(
+    `${valueLabel}[edition]`,
+  );
+
+  return z.array(looseItemSchema).transform((items, ctx): ReferralProgramEditionConfig[] => {
+    const result: ReferralProgramEditionConfig[] = [];
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+
+      if (knownAwardModels.includes(item.rules.awardModel)) {
+        // Known award model — fully validate.
+        const parsed = configSchema.safeParse(item);
+        if (!parsed.success) {
+          for (const issue of parsed.error.issues) {
+            ctx.addIssue({
+              code: "custom",
+              path: [i, ...(issue.path as PropertyKey[])],
+              message: issue.message,
+            });
+          }
+        } else {
+          result.push(parsed.data);
+        }
+      } else {
+        // Unknown award model — preserve as ReferralProgramRulesUnrecognized using base fields.
+        const parsed = unrecognizedBaseSchema.safeParse(item);
+        if (!parsed.success) {
+          for (const issue of parsed.error.issues) {
+            ctx.addIssue({
+              code: "custom",
+              path: [i, ...(issue.path as PropertyKey[])],
+              message: issue.message,
+            });
+          }
+          continue;
+        }
+
+        result.push({
+          ...parsed.data,
+          rules: {
+            ...parsed.data.rules,
+            awardModel: ReferralProgramAwardModels.Unrecognized,
+            originalAwardModel: item.rules.awardModel,
+          } satisfies ReferralProgramRulesUnrecognized,
+        });
+      }
+    }
+
+    if (result.length === 0) {
+      ctx.addIssue({
+        code: "custom",
+        message: `${valueLabel} must contain at least one edition`,
+      });
+      // Issue above causes the overall parse to fail; this value is never used.
+      return [];
+    }
+
+    const slugs = new Set<string>();
+    for (const edition of result) {
+      if (slugs.has(edition.slug)) {
+        ctx.addIssue({
+          code: "custom",
+          message: `${valueLabel} must not contain duplicate edition slugs`,
+        });
+        // Issue above causes the overall parse to fail; this value is never used.
+        return [];
+      }
+      slugs.add(edition.slug);
+    }
+
+    return result;
+  });
+};
+
+/**
+ * Schema for {@link ReferralProgramEditionConfigSetData}.
+ */
+export const makeReferralProgramEditionConfigSetDataSchema = (
+  valueLabel: string = "ReferralProgramEditionConfigSetData",
+) =>
+  z.object({
+    editions: makeReferralProgramEditionConfigSetArraySchema(`${valueLabel}.editions`),
+  });
+
+/**
+ * Schema for {@link ReferralProgramEditionConfigSetResponseOk}.
+ */
+export const makeReferralProgramEditionConfigSetResponseOkSchema = (
+  valueLabel: string = "ReferralProgramEditionConfigSetResponseOk",
+) =>
+  z.object({
+    responseCode: z.literal(ReferralProgramEditionConfigSetResponseCodes.Ok),
+    data: makeReferralProgramEditionConfigSetDataSchema(`${valueLabel}.data`),
+  });
+
+/**
+ * Schema for {@link ReferralProgramEditionConfigSetResponseError}.
+ */
+export const makeReferralProgramEditionConfigSetResponseErrorSchema = (
+  _valueLabel: string = "ReferralProgramEditionConfigSetResponseError",
+) =>
+  z.object({
+    responseCode: z.literal(ReferralProgramEditionConfigSetResponseCodes.Error),
+    error: z.string(),
+    errorMessage: z.string(),
+  });
+
+/**
+ * Schema for {@link ReferralProgramEditionConfigSetResponse}.
+ */
+export const makeReferralProgramEditionConfigSetResponseSchema = (
+  valueLabel: string = "ReferralProgramEditionConfigSetResponse",
+) =>
+  z.discriminatedUnion("responseCode", [
+    makeReferralProgramEditionConfigSetResponseOkSchema(valueLabel),
+    makeReferralProgramEditionConfigSetResponseErrorSchema(valueLabel),
   ]);

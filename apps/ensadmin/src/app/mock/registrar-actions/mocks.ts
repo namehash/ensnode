@@ -1,21 +1,4 @@
-import {
-  Duration,
-  InterpretedName,
-  NamedRegistrarAction,
-  registrarActionsPrerequisites,
-} from "@ensnode/ensnode-sdk";
-
-import {
-  StatefulFetchRegistrarActions,
-  StatefulFetchRegistrarActionsConnecting,
-  StatefulFetchRegistrarActionsError,
-  StatefulFetchRegistrarActionsLoaded,
-  StatefulFetchRegistrarActionsLoading,
-  StatefulFetchRegistrarActionsNotReady,
-  StatefulFetchRegistrarActionsUnsupported,
-  StatefulFetchStatusId,
-  StatefulFetchStatusIds,
-} from "@/components/registrar-actions";
+import { Duration, InterpretedName, NamedRegistrarAction } from "@ensnode/ensnode-sdk";
 
 export const registrationWithReferral = {
   action: {
@@ -230,55 +213,13 @@ function registrarActionWithUpdatedIncrementalDuration(
   } satisfies NamedRegistrarAction;
 }
 
-export const variants: Map<StatefulFetchStatusId, StatefulFetchRegistrarActions> = new Map([
-  [
-    StatefulFetchStatusIds.Connecting,
-    {
-      fetchStatus: StatefulFetchStatusIds.Connecting,
-    } satisfies StatefulFetchRegistrarActionsConnecting,
-  ],
-  [
-    StatefulFetchStatusIds.Unsupported,
-    {
-      fetchStatus: StatefulFetchStatusIds.Unsupported,
-      requiredPlugins: registrarActionsPrerequisites.requiredPlugins,
-    } satisfies StatefulFetchRegistrarActionsUnsupported,
-  ],
-  [
-    StatefulFetchStatusIds.NotReady,
-    {
-      fetchStatus: StatefulFetchStatusIds.NotReady,
-      supportedIndexingStatusIds: registrarActionsPrerequisites.supportedIndexingStatusIds,
-    } satisfies StatefulFetchRegistrarActionsNotReady,
-  ],
-  [
-    StatefulFetchStatusIds.Loading,
-    {
-      fetchStatus: StatefulFetchStatusIds.Loading,
-      itemsPerPage: 8,
-    } satisfies StatefulFetchRegistrarActionsLoading,
-  ],
-  [
-    StatefulFetchStatusIds.Error,
-    {
-      fetchStatus: StatefulFetchStatusIds.Error,
-      reason: "ENSNode connection error. Please check your selected connection.",
-    } satisfies StatefulFetchRegistrarActionsError,
-  ],
-  [
-    StatefulFetchStatusIds.Loaded,
-    {
-      fetchStatus: StatefulFetchStatusIds.Loaded,
-      registrarActions: [
-        renewalWithNoReferral,
-        registrarActionWithUpdatedIncrementalDuration(renewalWithNoReferral, 0),
-        registrarActionWithUpdatedIncrementalDuration(renewalWithNoReferral, 1),
-        registrarActionWithUpdatedIncrementalDuration(renewalWithNoReferral, 2),
-        registrationWithReferral,
-        registrationWithNoReferralAndEncodedLabelHashes,
-        registrationWithZeroEncodedReferrer,
-        registrationWithReferrerNotMatchingENSHolidayAwardsFormat,
-      ],
-    } satisfies StatefulFetchRegistrarActionsLoaded,
-  ],
-]);
+export const mockRegistrarActions: NamedRegistrarAction[] = [
+  renewalWithNoReferral,
+  registrarActionWithUpdatedIncrementalDuration(renewalWithNoReferral, 0),
+  registrarActionWithUpdatedIncrementalDuration(renewalWithNoReferral, 1),
+  registrarActionWithUpdatedIncrementalDuration(renewalWithNoReferral, 2),
+  registrationWithReferral,
+  registrationWithNoReferralAndEncodedLabelHashes,
+  registrationWithZeroEncodedReferrer,
+  registrationWithReferrerNotMatchingENSHolidayAwardsFormat,
+];

@@ -27,6 +27,7 @@ locals {
     subgraph = {
       ensrainbow_label_set_id      = "subgraph"
       ensrainbow_label_set_version = "0"
+      disk_size_gb                 = 50
     }
 
     # The Searchlight instance uses fixed label set ID "searchlight" and
@@ -34,6 +35,7 @@ locals {
     searchlight = {
       ensrainbow_label_set_id      = "searchlight"
       ensrainbow_label_set_version = var.ensrainbow_searchlight_label_set_version
+      disk_size_gb                 = 100
     }
   }
 
@@ -117,7 +119,7 @@ module "ensdb" {
 
   render_environment_id = render_project.ensnode.environments["default"].id
   render_region         = local.render_region
-  disk_size_gb          = var.ensdb_disk_size_gb
+  disk_size_gb          = 500
 }
 
 module "ensrainbow" {
@@ -127,6 +129,7 @@ module "ensrainbow" {
 
   render_environment_id = render_project.ensnode.environments["default"].id
   render_region         = local.render_region
+  disk_size_gb          = each.value.disk_size_gb
   ensnode_version       = var.ensnode_version
 
   # Label set that ENSRainbow will offer to its clients
@@ -140,10 +143,11 @@ module "ensadmin" {
   render_environment_id = render_project.ensnode.environments["default"].id
   render_instance_plan  = "starter"
 
-  hosted_zone_name         = local.hosted_zone_name
-  ensnode_version          = var.ensnode_version
-  ensnode_environment_name = var.render_environment
-  anthropic_api_key        = var.anthropic_api_key
+  hosted_zone_name                      = local.hosted_zone_name
+  ensnode_version                       = var.ensnode_version
+  ensnode_environment_name              = var.render_environment
+  anthropic_api_key                     = var.anthropic_api_key
+  next_public_server_connection_library = var.next_public_server_connection_library
 
   # NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY is not currently configurable through
   # Docker due to this known issue: https://github.com/namehash/ensnode/issues/1037

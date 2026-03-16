@@ -1,13 +1,20 @@
-import type { SerializedENSIndexerPublicConfig } from "../../ensindexer";
-import type { ENSApiPublicConfig } from "./types";
+import type { SerializedEnsIndexerPublicConfig } from "../../ensindexer/config/serialized-types";
+import type { EnsApiPublicConfig } from "./types";
 
 /**
- * Serialized representation of {@link ENSApiPublicConfig}
+ * Serialized representation of {@link EnsApiPublicConfig}
  */
-export interface SerializedENSApiPublicConfig
-  extends Omit<ENSApiPublicConfig, "ensIndexerPublicConfig"> {
+export interface SerializedEnsApiPublicConfig
+  extends Omit<EnsApiPublicConfig, "ensIndexerPublicConfig"> {
   /**
-   * Serialized representation of {@link ENSApiPublicConfig.ensIndexerPublicConfig}.
+   * Serialized representation of {@link EnsApiPublicConfig.ensIndexerPublicConfig}.
    */
-  ensIndexerPublicConfig: SerializedENSIndexerPublicConfig;
+  ensIndexerPublicConfig: SerializedEnsIndexerPublicConfig;
 }
+
+/**
+ * Serialized representation of {@link EnsApiPublicConfig}
+ *
+ * @deprecated Use {@link SerializedEnsApiPublicConfig} instead.
+ */
+export type SerializedENSApiPublicConfig = SerializedEnsApiPublicConfig;

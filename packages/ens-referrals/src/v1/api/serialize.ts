@@ -1,142 +1,140 @@
-import { serializePriceEth, serializePriceUsdc } from "@ensnode/ensnode-sdk";
-
-import type { AggregatedReferrerMetrics } from "../aggregations";
+import {
+  serializeReferralProgramRulesPieSplit,
+  serializeReferrerEditionMetricsPieSplit,
+  serializeReferrerLeaderboardPagePieSplit,
+} from "../award-models/pie-split/api/serialize";
+import {
+  serializeReferralProgramRulesRevShareLimit,
+  serializeReferrerEditionMetricsRevShareLimit,
+  serializeReferrerLeaderboardPageRevShareLimit,
+} from "../award-models/rev-share-limit/api/serialize";
+import type { ReferrerEditionMetricsUnrecognized } from "../award-models/shared/edition-metrics";
+import type { ReferrerLeaderboardPageUnrecognized } from "../award-models/shared/leaderboard-page";
+import type { ReferralProgramRulesUnrecognized } from "../award-models/shared/rules";
+import { ReferralProgramAwardModels } from "../award-models/shared/rules";
+import type { ReferralProgramEditionConfig } from "../edition";
+import type { ReferrerEditionMetrics } from "../edition-metrics";
 import type { ReferrerLeaderboardPage } from "../leaderboard-page";
-import type { ReferrerDetailRanked, ReferrerDetailUnranked } from "../referrer-detail";
-import type { AwardedReferrerMetrics, UnrankedReferrerMetrics } from "../referrer-metrics";
 import type { ReferralProgramRules } from "../rules";
 import type {
-  SerializedAggregatedReferrerMetrics,
-  SerializedAwardedReferrerMetrics,
+  SerializedReferralProgramEditionConfig,
+  SerializedReferralProgramEditionConfigSetResponse,
   SerializedReferralProgramRules,
-  SerializedReferrerDetailRanked,
-  SerializedReferrerDetailResponse,
-  SerializedReferrerDetailUnranked,
+  SerializedReferrerEditionMetrics,
   SerializedReferrerLeaderboardPage,
   SerializedReferrerLeaderboardPageResponse,
-  SerializedUnrankedReferrerMetrics,
+  SerializedReferrerMetricsEditionsData,
+  SerializedReferrerMetricsEditionsResponse,
 } from "./serialized-types";
 import {
-  type ReferrerDetailResponse,
-  ReferrerDetailResponseCodes,
+  type ReferralProgramEditionConfigSetResponse,
+  ReferralProgramEditionConfigSetResponseCodes,
   type ReferrerLeaderboardPageResponse,
   ReferrerLeaderboardPageResponseCodes,
+  type ReferrerMetricsEditionsResponse,
+  ReferrerMetricsEditionsResponseCodes,
 } from "./types";
 
 /**
  * Serializes a {@link ReferralProgramRules} object.
+ *
+ * @throws if called with a {@link ReferralProgramRulesUnrecognized} — unrecognized editions are
+ *   client-side forward-compatibility placeholders and must never be serialized.
  */
 export function serializeReferralProgramRules(
   rules: ReferralProgramRules,
 ): SerializedReferralProgramRules {
-  return {
-    totalAwardPoolValue: serializePriceUsdc(rules.totalAwardPoolValue),
-    maxQualifiedReferrers: rules.maxQualifiedReferrers,
-    startTime: rules.startTime,
-    endTime: rules.endTime,
-    subregistryId: rules.subregistryId,
-  };
-}
+  switch (rules.awardModel) {
+    case ReferralProgramAwardModels.PieSplit:
+      return serializeReferralProgramRulesPieSplit(rules);
 
-/**
- * Serializes an {@link AwardedReferrerMetrics} object.
- */
-function serializeAwardedReferrerMetrics(
-  metrics: AwardedReferrerMetrics,
-): SerializedAwardedReferrerMetrics {
-  return {
-    referrer: metrics.referrer,
-    totalReferrals: metrics.totalReferrals,
-    totalIncrementalDuration: metrics.totalIncrementalDuration,
-    totalRevenueContribution: serializePriceEth(metrics.totalRevenueContribution),
-    score: metrics.score,
-    rank: metrics.rank,
-    isQualified: metrics.isQualified,
-    finalScoreBoost: metrics.finalScoreBoost,
-    finalScore: metrics.finalScore,
-    awardPoolShare: metrics.awardPoolShare,
-    awardPoolApproxValue: serializePriceUsdc(metrics.awardPoolApproxValue),
-  };
-}
+    case ReferralProgramAwardModels.RevShareLimit:
+      return serializeReferralProgramRulesRevShareLimit(rules);
 
-/**
- * Serializes an {@link UnrankedReferrerMetrics} object.
- */
-function serializeUnrankedReferrerMetrics(
-  metrics: UnrankedReferrerMetrics,
-): SerializedUnrankedReferrerMetrics {
-  return {
-    referrer: metrics.referrer,
-    totalReferrals: metrics.totalReferrals,
-    totalIncrementalDuration: metrics.totalIncrementalDuration,
-    totalRevenueContribution: serializePriceEth(metrics.totalRevenueContribution),
-    score: metrics.score,
-    rank: metrics.rank,
-    isQualified: metrics.isQualified,
-    finalScoreBoost: metrics.finalScoreBoost,
-    finalScore: metrics.finalScore,
-    awardPoolShare: metrics.awardPoolShare,
-    awardPoolApproxValue: serializePriceUsdc(metrics.awardPoolApproxValue),
-  };
-}
+    case ReferralProgramAwardModels.Unrecognized: {
+      const unrecognized = rules as ReferralProgramRulesUnrecognized;
+      throw new Error(
+        `ReferralProgramRulesUnrecognized (originalAwardModel: '${unrecognized.originalAwardModel}') must not be serialized — it is a client-side forward-compatibility placeholder only.`,
+      );
+    }
 
-/**
- * Serializes an {@link AggregatedReferrerMetrics} object.
- */
-function serializeAggregatedReferrerMetrics(
-  metrics: AggregatedReferrerMetrics,
-): SerializedAggregatedReferrerMetrics {
-  return {
-    grandTotalReferrals: metrics.grandTotalReferrals,
-    grandTotalIncrementalDuration: metrics.grandTotalIncrementalDuration,
-    grandTotalRevenueContribution: serializePriceEth(metrics.grandTotalRevenueContribution),
-    grandTotalQualifiedReferrersFinalScore: metrics.grandTotalQualifiedReferrersFinalScore,
-    minFinalScoreToQualify: metrics.minFinalScoreToQualify,
-  };
+    default: {
+      const _exhaustiveCheck: never = rules;
+      throw new Error(
+        `Unknown award model: ${(_exhaustiveCheck as ReferralProgramRules).awardModel}`,
+      );
+    }
+  }
 }
 
 /**
  * Serializes a {@link ReferrerLeaderboardPage} object.
+ *
+ * @throws if called with a {@link ReferrerLeaderboardPageUnrecognized} — unrecognized pages are
+ *   client-side forward-compatibility placeholders and must never be serialized.
  */
 function serializeReferrerLeaderboardPage(
   page: ReferrerLeaderboardPage,
 ): SerializedReferrerLeaderboardPage {
-  return {
-    rules: serializeReferralProgramRules(page.rules),
-    referrers: page.referrers.map(serializeAwardedReferrerMetrics),
-    aggregatedMetrics: serializeAggregatedReferrerMetrics(page.aggregatedMetrics),
-    pageContext: page.pageContext,
-    accurateAsOf: page.accurateAsOf,
-  };
+  switch (page.awardModel) {
+    case ReferralProgramAwardModels.PieSplit:
+      return serializeReferrerLeaderboardPagePieSplit(page);
+    case ReferralProgramAwardModels.RevShareLimit:
+      return serializeReferrerLeaderboardPageRevShareLimit(page);
+    case ReferralProgramAwardModels.Unrecognized: {
+      const unrecognized = page as ReferrerLeaderboardPageUnrecognized;
+      throw new Error(
+        `ReferrerLeaderboardPageUnrecognized (originalAwardModel: '${unrecognized.originalAwardModel}') must not be serialized — it is a client-side forward-compatibility placeholder only.`,
+      );
+    }
+    default: {
+      const _exhaustiveCheck: never = page;
+      throw new Error(
+        `Unknown award model: ${(_exhaustiveCheck as ReferrerLeaderboardPage).awardModel}`,
+      );
+    }
+  }
 }
 
 /**
- * Serializes a {@link ReferrerDetailRanked} object.
+ * Serializes a {@link ReferrerEditionMetrics} object.
+ *
+ * @throws if called with a {@link ReferrerEditionMetricsUnrecognized} — unrecognized metrics are
+ *   client-side forward-compatibility placeholders and must never be serialized.
  */
-function serializeReferrerDetailRanked(
-  detail: ReferrerDetailRanked,
-): SerializedReferrerDetailRanked {
-  return {
-    type: detail.type,
-    rules: serializeReferralProgramRules(detail.rules),
-    referrer: serializeAwardedReferrerMetrics(detail.referrer),
-    aggregatedMetrics: serializeAggregatedReferrerMetrics(detail.aggregatedMetrics),
-    accurateAsOf: detail.accurateAsOf,
-  };
+function serializeReferrerEditionMetrics(
+  detail: ReferrerEditionMetrics,
+): SerializedReferrerEditionMetrics {
+  switch (detail.awardModel) {
+    case ReferralProgramAwardModels.PieSplit:
+      return serializeReferrerEditionMetricsPieSplit(detail);
+    case ReferralProgramAwardModels.RevShareLimit:
+      return serializeReferrerEditionMetricsRevShareLimit(detail);
+    case ReferralProgramAwardModels.Unrecognized: {
+      const unrecognized = detail as ReferrerEditionMetricsUnrecognized;
+      throw new Error(
+        `ReferrerEditionMetricsUnrecognized (originalAwardModel: '${unrecognized.originalAwardModel}') must not be serialized — it is a client-side forward-compatibility placeholder only.`,
+      );
+    }
+    default: {
+      const _exhaustiveCheck: never = detail;
+      throw new Error(
+        `Unknown award model: ${(_exhaustiveCheck as ReferrerEditionMetrics).awardModel}`,
+      );
+    }
+  }
 }
 
 /**
- * Serializes a {@link ReferrerDetailUnranked} object.
+ * Serializes a {@link ReferralProgramEditionConfig} object.
  */
-function serializeReferrerDetailUnranked(
-  detail: ReferrerDetailUnranked,
-): SerializedReferrerDetailUnranked {
+export function serializeReferralProgramEditionConfig(
+  editionConfig: ReferralProgramEditionConfig,
+): SerializedReferralProgramEditionConfig {
   return {
-    type: detail.type,
-    rules: serializeReferralProgramRules(detail.rules),
-    referrer: serializeUnrankedReferrerMetrics(detail.referrer),
-    aggregatedMetrics: serializeAggregatedReferrerMetrics(detail.aggregatedMetrics),
-    accurateAsOf: detail.accurateAsOf,
+    slug: editionConfig.slug,
+    displayName: editionConfig.displayName,
+    rules: serializeReferralProgramRules(editionConfig.rules),
   };
 }
 
@@ -159,29 +157,61 @@ export function serializeReferrerLeaderboardPageResponse(
 }
 
 /**
- * Serialize a {@link ReferrerDetailResponse} object.
+ * Serialize a {@link ReferrerMetricsEditionsResponse} object.
  */
-export function serializeReferrerDetailResponse(
-  response: ReferrerDetailResponse,
-): SerializedReferrerDetailResponse {
+export function serializeReferrerMetricsEditionsResponse(
+  response: ReferrerMetricsEditionsResponse,
+): SerializedReferrerMetricsEditionsResponse {
   switch (response.responseCode) {
-    case ReferrerDetailResponseCodes.Ok:
-      switch (response.data.type) {
-        case "ranked":
-          return {
-            responseCode: response.responseCode,
-            data: serializeReferrerDetailRanked(response.data),
-          };
+    case ReferrerMetricsEditionsResponseCodes.Ok: {
+      const serializedData = Object.fromEntries(
+        Object.entries(response.data).map(([editionSlug, detail]) => [
+          editionSlug,
+          serializeReferrerEditionMetrics(detail as ReferrerEditionMetrics),
+        ]),
+      ) as SerializedReferrerMetricsEditionsData;
 
-        case "unranked":
-          return {
-            responseCode: response.responseCode,
-            data: serializeReferrerDetailUnranked(response.data),
-          };
-      }
-      break;
+      return {
+        responseCode: response.responseCode,
+        data: serializedData,
+      };
+    }
 
-    case ReferrerDetailResponseCodes.Error:
+    case ReferrerMetricsEditionsResponseCodes.Error:
       return response;
+
+    default: {
+      const _exhaustiveCheck: never = response;
+      throw new Error(
+        `Unknown response code: ${(_exhaustiveCheck as ReferrerMetricsEditionsResponse).responseCode}`,
+      );
+    }
+  }
+}
+
+/**
+ * Serialize a {@link ReferralProgramEditionConfigSetResponse} object.
+ */
+export function serializeReferralProgramEditionConfigSetResponse(
+  response: ReferralProgramEditionConfigSetResponse,
+): SerializedReferralProgramEditionConfigSetResponse {
+  switch (response.responseCode) {
+    case ReferralProgramEditionConfigSetResponseCodes.Ok:
+      return {
+        responseCode: response.responseCode,
+        data: {
+          editions: response.data.editions.map(serializeReferralProgramEditionConfig),
+        },
+      };
+
+    case ReferralProgramEditionConfigSetResponseCodes.Error:
+      return response;
+
+    default: {
+      const _exhaustiveCheck: never = response;
+      throw new Error(
+        `Unknown response code: ${(_exhaustiveCheck as ReferralProgramEditionConfigSetResponse).responseCode}`,
+      );
+    }
   }
 }

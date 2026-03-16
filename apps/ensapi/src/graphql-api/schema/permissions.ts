@@ -1,5 +1,7 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
+import { and, eq } from "drizzle-orm";
 
+import * as schema from "@ensnode/ensnode-schema";
 import {
   makePermissionsId,
   makePermissionsResourceId,
@@ -10,11 +12,14 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
+import { orderPaginationBy, paginateBy } from "@/graphql-api/lib/connection-helpers";
+import { resolveFindEvents } from "@/graphql-api/lib/find-events/find-events-resolver";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
+import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { AccountIdRef } from "@/graphql-api/schema/account-id";
-import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
-import { cursors } from "@/graphql-api/schema/cursors";
+import { ID_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
+import { EventRef, EventsWhereInput } from "@/graphql-api/schema/event";
 import { db } from "@/lib/db";
 
 export const PermissionsRef = builder.loadableObjectRef("Permissions", {
@@ -61,8 +66,8 @@ PermissionsRef.implement({
     // Permissions.id
     ////////////////////////////
     id: t.field({
-      description: "TODO",
-      type: "ID",
+      description: "A unique reference to this Permission.",
+      type: "PermissionsId",
       nullable: false,
       resolve: (parent) => parent.id,
     }),
@@ -71,7 +76,7 @@ PermissionsRef.implement({
     // Permissions.contract
     ////////////////////////
     contract: t.field({
-      description: "TODO",
+      description: "The contract within which these Permissions are granted.",
       type: AccountIdRef,
       nullable: false,
       resolve: ({ chainId, address }) => ({ chainId, address }),
@@ -81,7 +86,7 @@ PermissionsRef.implement({
     // Permissions.root
     ////////////////////
     root: t.field({
-      description: "TODO",
+      description: "The Root Resource.",
       type: PermissionsResourceRef,
       nullable: false,
       resolve: ({ chainId, address }) =>
@@ -92,24 +97,47 @@ PermissionsRef.implement({
     // Permissions.resources
     /////////////////////////
     resources: t.connection({
-      description: "TODO",
+      description: "All PermissionResources managed by this contract.",
       type: PermissionsResourceRef,
-      resolve: (parent, args, context) =>
-        resolveCursorConnection(
-          { ...DEFAULT_CONNECTION_ARGS, args },
-          ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-            db.query.permissionsResource.findMany({
-              where: (t, { lt, gt, eq, and }) =>
-                and(
-                  eq(t.chainId, parent.chainId),
-                  eq(t.address, parent.address),
-                  before ? lt(t.id, cursors.decode<PermissionsResourceId>(before)) : undefined,
-                  after ? gt(t.id, cursors.decode<PermissionsResourceId>(after)) : undefined,
-                ),
-              orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
-              limit,
-            }),
-        ),
+      resolve: (parent, args) => {
+        const scope = and(
+          eq(schema.permissionsResource.chainId, parent.chainId),
+          eq(schema.permissionsResource.address, parent.address),
+        );
+
+        return lazyConnection({
+          totalCount: () => db.$count(schema.permissionsResource, scope),
+          connection: () =>
+            resolveCursorConnection(
+              { ...ID_PAGINATED_CONNECTION_ARGS, args },
+              ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+                db
+                  .select()
+                  .from(schema.permissionsResource)
+                  .where(and(scope, paginateBy(schema.permissionsResource.id, before, after)))
+                  .orderBy(orderPaginationBy(schema.permissionsResource.id, inverted))
+                  .limit(limit),
+            ),
+        });
+      },
+    }),
+
+    //////////////////////
+    // Permissions.events
+    //////////////////////
+    events: t.connection({
+      description: "All Events associated with these Permissions.",
+      type: EventRef,
+      args: {
+        where: t.arg({ type: EventsWhereInput }),
+      },
+      resolve: (parent, args) =>
+        resolveFindEvents(args, {
+          through: {
+            table: schema.permissionsEvent,
+            scope: eq(schema.permissionsEvent.permissionsId, parent.id),
+          },
+        }),
     }),
   }),
 });
@@ -124,17 +152,27 @@ PermissionsResourceRef.implement({
     // PermissionsResource.id
     ////////////////////////////
     id: t.field({
-      description: "TODO",
-      type: "ID",
+      description: "A unique reference to this PermissionsResource.",
+      type: "PermissionsResourceId",
       nullable: false,
       resolve: (parent) => parent.id,
+    }),
+
+    ////////////////////////
+    // Permissions.contract
+    ////////////////////////
+    contract: t.field({
+      description: "The contract within which these Permissions are granted.",
+      type: AccountIdRef,
+      nullable: false,
+      resolve: ({ chainId, address }) => ({ chainId, address }),
     }),
 
     ///////////////////////////////////
     // PermissionsResource.permissions
     ///////////////////////////////////
     permissions: t.field({
-      description: "TODO",
+      description: "The Permissions within which this Resource is managed.",
       type: PermissionsRef,
       nullable: false,
       resolve: ({ chainId, address }) => makePermissionsId({ chainId, address }),
@@ -144,7 +182,7 @@ PermissionsResourceRef.implement({
     // PermissionsResource.resource
     ////////////////////////////////
     resource: t.field({
-      description: "TODO",
+      description: "Identifies the Resource that this PermissionsResource represents.",
       type: "BigInt",
       nullable: false,
       resolve: (parent) => parent.resource,
@@ -154,25 +192,30 @@ PermissionsResourceRef.implement({
     // PermissionsResource.users
     /////////////////////////////
     users: t.connection({
-      description: "TODO",
+      description: "The PermissionUsers who have Roles within this Resource.",
       type: PermissionsUserRef,
-      resolve: (parent, args, context) =>
-        resolveCursorConnection(
-          { ...DEFAULT_CONNECTION_ARGS, args },
-          ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-            db.query.permissionsUser.findMany({
-              where: (t, { lt, gt, eq, and }) =>
-                and(
-                  eq(t.chainId, parent.chainId),
-                  eq(t.address, parent.address),
-                  eq(t.resource, parent.resource),
-                  before ? lt(t.id, cursors.decode<PermissionsUserId>(before)) : undefined,
-                  after ? gt(t.id, cursors.decode<PermissionsUserId>(after)) : undefined,
-                ),
-              orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
-              limit,
-            }),
-        ),
+      resolve: (parent, args) => {
+        const scope = and(
+          eq(schema.permissionsUser.chainId, parent.chainId),
+          eq(schema.permissionsUser.address, parent.address),
+          eq(schema.permissionsUser.resource, parent.resource),
+        );
+
+        return lazyConnection({
+          totalCount: () => db.$count(schema.permissionsUser, scope),
+          connection: () =>
+            resolveCursorConnection(
+              { ...ID_PAGINATED_CONNECTION_ARGS, args },
+              ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+                db
+                  .select()
+                  .from(schema.permissionsUser)
+                  .where(and(scope, paginateBy(schema.permissionsUser.id, before, after)))
+                  .orderBy(orderPaginationBy(schema.permissionsUser.id, inverted))
+                  .limit(limit),
+            ),
+        });
+      },
     }),
   }),
 });
@@ -187,17 +230,27 @@ PermissionsUserRef.implement({
     // PermissionsUser.id
     ////////////////////////////
     id: t.field({
-      description: "TODO",
-      type: "ID",
+      description: "A unique reference to this PermissionsUser.",
+      type: "PermissionsUserId",
       nullable: false,
       resolve: (parent) => parent.id,
+    }),
+
+    ////////////////////////
+    // Permissions.contract
+    ////////////////////////
+    contract: t.field({
+      description: "The contract within which these Permissions are granted.",
+      type: AccountIdRef,
+      nullable: false,
+      resolve: ({ chainId, address }) => ({ chainId, address }),
     }),
 
     ////////////////////////////
     // PermissionsUser.resource
     ////////////////////////////
     resource: t.field({
-      description: "TODO",
+      description: "The Resource that this user has Roles within.",
       type: "BigInt",
       nullable: false,
       resolve: (parent) => parent.resource,
@@ -207,7 +260,7 @@ PermissionsUserRef.implement({
     // PermissionsUser.user
     ////////////////////////
     user: t.field({
-      description: "TODO",
+      description: "The User for whom these Roles are granted.",
       type: AccountRef,
       nullable: false,
       resolve: (parent) => parent.user,
@@ -217,7 +270,7 @@ PermissionsUserRef.implement({
     // PermissionsUser.roles
     /////////////////////////
     roles: t.field({
-      description: "TODO",
+      description: "The Roles this User has been granted within this Resource.",
       type: "BigInt",
       nullable: false,
       resolve: (parent) => parent.roles,

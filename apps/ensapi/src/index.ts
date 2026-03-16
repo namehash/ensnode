@@ -5,17 +5,18 @@ import { serve } from "@hono/node-server";
 import { otel } from "@hono/otel";
 import { cors } from "hono/cors";
 import { html } from "hono/html";
-import { openAPIRouteHandler } from "hono-openapi";
 
 import { indexingStatusCache } from "@/cache/indexing-status.cache";
+import { getReferralLeaderboardEditionsCaches } from "@/cache/referral-leaderboard-editions.cache";
+import { referralProgramEditionConfigSetCache } from "@/cache/referral-program-edition-set.cache";
 import { referrerLeaderboardCache } from "@/cache/referrer-leaderboard.cache";
-import { referrerLeaderboardCacheV1 } from "@/cache/referrer-leaderboard.cache-v1";
 import { redactEnsApiConfig } from "@/config/redact";
 import { errorResponse } from "@/lib/handlers/error-response";
 import { factory } from "@/lib/hono-factory";
 import { sdk } from "@/lib/instrumentation";
 import logger from "@/lib/logger";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
+import { generateOpenApi31Document } from "@/openapi-document";
 
 import amIRealtimeApi from "./handlers/amirealtime-api";
 import ensanalyticsApi from "./handlers/ensanalytics-api";
@@ -73,47 +74,11 @@ app.route("/v1/ensanalytics", ensanalyticsApiV1);
 // use Am I Realtime API at /amirealtime
 app.route("/amirealtime", amIRealtimeApi);
 
-// use OpenAPI Schema
-app.get(
-  "/openapi.json",
-  openAPIRouteHandler(app, {
-    documentation: {
-      info: {
-        title: "ENSApi APIs",
-        version: packageJson.version,
-        description:
-          "APIs for ENS resolution, navigating the ENS nameforest, and metadata about an ENSNode",
-      },
-      servers: [
-        { url: "https://api.alpha.ensnode.io", description: "ENSNode Alpha (Mainnet)" },
-        {
-          url: "https://api.alpha-sepolia.ensnode.io",
-          description: "ENSNode Alpha (Sepolia Testnet)",
-        },
-        { url: `http://localhost:${config.port}`, description: "Local Development" },
-      ],
-      tags: [
-        {
-          name: "Resolution",
-          description: "APIs for resolving ENS names and addresses",
-        },
-        {
-          name: "Meta",
-          description: "APIs for indexing status, configuration, and realtime monitoring",
-        },
-        {
-          name: "Explore",
-          description:
-            "APIs for exploring the indexed state of ENS, including name tokens and registrar actions",
-        },
-        {
-          name: "ENSAwards",
-          description: "APIs for ENSAwards functionality, including referrer data",
-        },
-      ],
-    },
-  }),
-);
+// serve pre-generated OpenAPI 3.1 document
+const openApi31Document = generateOpenApi31Document();
+app.get("/openapi.json", (c) => {
+  return c.json(openApi31Document);
+});
 
 // will automatically 503 if config is not available due to ensIndexerPublicConfigMiddleware
 app.get("/health", async (c) => {
@@ -161,8 +126,18 @@ const gracefulShutdown = async () => {
     referrerLeaderboardCache.destroy();
     logger.info("Destroyed referrerLeaderboardCache");
 
-    referrerLeaderboardCacheV1.destroy();
-    logger.info("Destroyed referrerLeaderboardCacheV1");
+    // Destroy referral program edition config set cache
+    referralProgramEditionConfigSetCache.destroy();
+    logger.info("Destroyed referralProgramEditionConfigSetCache");
+
+    // Destroy all edition caches (if initialized)
+    const editionsCaches = getReferralLeaderboardEditionsCaches();
+    if (editionsCaches) {
+      for (const [editionSlug, cache] of editionsCaches) {
+        cache.destroy();
+        logger.info(`Destroyed referralLeaderboardEditionsCache for ${editionSlug}`);
+      }
+    }
 
     indexingStatusCache.destroy();
     logger.info("Destroyed indexingStatusCache");

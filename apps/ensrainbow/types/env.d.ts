@@ -1,7 +1,7 @@
-import type { LogLevelEnvironment } from "@ensnode/ensnode-sdk/internal";
+import type { ENSRainbowEnvironment } from "@/config/environment";
 
 declare global {
   namespace NodeJS {
-    interface ProcessEnv extends LogLevelEnvironment {}
+    interface ProcessEnv extends ENSRainbowEnvironment {}
   }
 }

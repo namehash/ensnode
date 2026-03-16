@@ -1,4 +1,4 @@
-import SchemaBuilder from "@pothos/core";
+import SchemaBuilder, { type MaybePromise } from "@pothos/core";
 import DataloaderPlugin from "@pothos/plugin-dataloader";
 import RelayPlugin from "@pothos/plugin-relay";
 import type { Address, Hex } from "viem";
@@ -9,8 +9,14 @@ import type {
   DomainId,
   InterpretedName,
   Node,
+  PermissionsId,
+  PermissionsResourceId,
+  PermissionsUserId,
+  RegistrationId,
   RegistryId,
+  RenewalId,
   ResolverId,
+  ResolverRecordsId,
 } from "@ensnode/ensnode-sdk";
 
 import type { context } from "@/graphql-api/context";
@@ -28,7 +34,17 @@ export const builder = new SchemaBuilder<{
     DomainId: { Input: DomainId; Output: DomainId };
     RegistryId: { Input: RegistryId; Output: RegistryId };
     ResolverId: { Input: ResolverId; Output: ResolverId };
-    // PermissionsId: { Input: PermissionsId; Output: PermissionsId };
+    PermissionsId: { Input: PermissionsId; Output: PermissionsId };
+    PermissionsResourceId: { Input: PermissionsResourceId; Output: PermissionsResourceId };
+    PermissionsUserId: { Input: PermissionsUserId; Output: PermissionsUserId };
+    RegistrationId: { Input: RegistrationId; Output: RegistrationId };
+    RenewalId: { Input: RenewalId; Output: RenewalId };
+    ResolverRecordsId: { Input: ResolverRecordsId; Output: ResolverRecordsId };
+  };
+
+  // the following ensures via typechecker that every t.connection returns a totalCount field
+  Connection: {
+    totalCount: MaybePromise<number>;
   };
 }>({
   plugins: [DataloaderPlugin, RelayPlugin],

@@ -13,6 +13,7 @@ import {
   PluginName,
 } from "@ensnode/ensnode-sdk";
 
+import { ensureDomainEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel, ensureUnknownLabel } from "@/lib/ensv2/label-db-helpers";
 import { getLatestRegistration, getLatestRenewal } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
@@ -72,6 +73,9 @@ export default function () {
     await context.db
       .update(schema.registration, { id: registration.id })
       .set({ base, premium, referrer });
+
+    // push event to domain history
+    await ensureDomainEvent(context, event, domainId);
   }
 
   async function handleNameRenewedByController({
@@ -95,6 +99,14 @@ export default function () {
       throw new Error(
         `Invariant(RegistrarController:NameRegistered): Emitted label '${label}' does not labelhash to emitted labelHash '${labelHash}'.`,
       );
+    }
+
+    // ensure label
+    // NOTE: technically not necessary, as should be ensured by NameRegistered, but we include here anyway
+    if (label !== undefined) {
+      await ensureLabel(context, label);
+    } else {
+      await ensureUnknownLabel(context, labelHash);
     }
 
     const controller = getThisAccountId(context, event);
@@ -131,17 +143,12 @@ export default function () {
       );
     }
 
-    // ensure label
-    // NOTE: technically not necessary, as should be ensured by NameRegistered, but we include here anyway
-    if (label !== undefined) {
-      await ensureLabel(context, label);
-    } else {
-      await ensureUnknownLabel(context, labelHash);
-    }
-
     // update renewal info
     // TODO(paymentToken): add payment token tracking here
     await context.db.update(schema.renewal, { id: renewal.id }).set({ base, premium, referrer });
+
+    // push event to domain history
+    await ensureDomainEvent(context, event, domainId);
   }
 
   //////////////////////////////////////

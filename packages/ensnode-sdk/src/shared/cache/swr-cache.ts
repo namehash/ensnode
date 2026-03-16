@@ -7,7 +7,7 @@ import type { Duration, UnixTimestamp } from "../types";
 /**
  * Data structure for a single cached result.
  */
-interface CachedResult<ValueType> {
+export interface CachedResult<ValueType> {
   /**
    * The cached result of the fn, either its ValueType or Error.
    */
@@ -23,8 +23,12 @@ export interface SWRCacheOptions<ValueType> {
   /**
    * The async function generating a value of `ValueType` to wrap with SWR caching. It may throw an
    * Error type.
+   *
+   * The function optionally receives the currently cached result (or undefined if no value is
+   * cached yet). This allows the function to implement custom caching strategies, such as
+   * returning the same data for immutable values without re-fetching.
    */
-  fn: () => Promise<ValueType>;
+  fn: (cachedResult?: CachedResult<ValueType>) => Promise<ValueType>;
 
   /**
    * Time-to-live duration of a cached result in seconds. After this duration:
@@ -33,8 +37,24 @@ export interface SWRCacheOptions<ValueType> {
    * - Each time the cache is read, if the cached result is "stale" and no background
    *   revalidation attempt is already in progress, a new background revalidation
    *   attempt will be made.
+   *
+   * This TTL applies to successfully cached values. For error results, see `errorTtl`.
    */
   ttl: Duration;
+
+  /**
+   * Optional time-to-live duration for cached errors in seconds.
+   *
+   * If specified, this TTL is used instead of `ttl` when the cached result is an Error.
+   * This allows different revalidation strategies for errors vs successful results.
+   *
+   * Common use case: Set `ttl` to `Number.POSITIVE_INFINITY` (never revalidate successful results)
+   * and `errorTtl` to a shorter duration (e.g., 60 seconds) to retry failed fetches periodically
+   * until they succeed.
+   *
+   * If not specified, errors use the same `ttl` as successful results.
+   */
+  errorTtl?: Duration;
 
   /**
    * Optional time-to-proactively-revalidate duration in seconds. After a cached result is
@@ -98,7 +118,7 @@ export class SWRCache<ValueType> {
     // ensure that there is exactly one in progress revalidation promise
     if (!this.inProgressRevalidate) {
       this.inProgressRevalidate = this.options
-        .fn()
+        .fn(this.cache ?? undefined)
         .then((result) => {
           // on success, always update the cache with the latest revalidation
           this.cache = {
@@ -107,8 +127,8 @@ export class SWRCache<ValueType> {
           };
         })
         .catch((error) => {
-          // on error, only update the cache if this is the first revalidation
-          if (!this.cache) {
+          // on error, only update the cache if there has been no successful revalidation yet
+          if (!this.cache || this.cache.result instanceof Error) {
             this.cache = {
               // ensure thrown value is always an Error instance
               result: error instanceof Error ? error : new Error(String(error)),
@@ -139,8 +159,14 @@ export class SWRCache<ValueType> {
     // NOTE: not documenting read() as throwable because this is just for typechecking
     if (!this.cache) throw new Error("never");
 
-    // if ttl expired, revalidate in background
-    if (durationBetween(this.cache.updatedAt, getUnixTime(new Date())) > this.options.ttl) {
+    // Determine which TTL to use: errorTtl for errors (if specified), otherwise ttl
+    const effectiveTtl =
+      this.cache.result instanceof Error && this.options.errorTtl !== undefined
+        ? this.options.errorTtl
+        : this.options.ttl;
+
+    // if effective TTL expired, revalidate in background
+    if (durationBetween(this.cache.updatedAt, getUnixTime(new Date())) > effectiveTtl) {
       this.revalidate();
     }
 

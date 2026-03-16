@@ -2,38 +2,74 @@
 
 import { NameDisplay } from "@namehash/namehash-ui";
 import { useRouter, useSearchParams } from "next/navigation";
-import { type ChangeEvent, useState } from "react";
+import { type ChangeEvent, useMemo, useState } from "react";
 
-import type { Name } from "@ensnode/ensnode-sdk";
+import { ENSNamespaceIds } from "@ensnode/datasources";
+import {
+  getNamespaceSpecificValue,
+  type Name,
+  type NamespaceSpecificValue,
+} from "@ensnode/ensnode-sdk";
 
 import { getNameDetailsRelativePath, NameLink } from "@/components/name-links";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 
 import { NameDetailPageContent } from "./_components/NameDetailPageContent";
 
-const EXAMPLE_NAMES = [
-  "vitalik.eth",
-  "gregskril.eth",
-  "katzman.base.eth",
-  "jesse.base.eth",
-  "alain.linea.eth",
-  "goinfrex.linea.eth",
-  "gift.box",
-  "barmstrong.cb.id",
-  "argent.xyz",
-  "lens.xyz",
-  "brantly.eth",
-  "lightwalker.eth",
-];
+const EXAMPLE_NAMES: NamespaceSpecificValue<string[]> = {
+  default: [
+    "vitalik.eth",
+    "gregskril.eth",
+    "katzman.base.eth",
+    "jesse.base.eth",
+    "alain.linea.eth",
+    "goinfrex.linea.eth",
+    "gift.box",
+    "barmstrong.cb.id",
+    "argent.xyz",
+    "lens.xyz",
+    "brantly.eth",
+    "lightwalker.eth",
+  ],
+  [ENSNamespaceIds.Sepolia]: [
+    "gregskril.eth",
+    "vitalik.eth",
+    "myens.eth",
+    "recordstest.eth",
+    "arrondesean.eth",
+    "decode.eth",
+  ],
+  [ENSNamespaceIds.EnsTestEnv]: [
+    "alias.eth",
+    "changerole.eth",
+    "demo.eth",
+    "example.eth",
+    "linked.parent.eth",
+    "parent.eth",
+    "renew.eth",
+    "reregister.eth",
+    "sub1.sub2.parent.eth",
+    "sub2.parent.eth",
+    "test.eth",
+    "wallet.linked.parent.eth",
+  ],
+};
 
 export default function ExploreNamesPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const nameFromQuery = searchParams.get("name");
   const [rawInputName, setRawInputName] = useState<Name>("");
+
+  const namespace = useActiveNamespace();
+  const exampleNames = useMemo(
+    () => getNamespaceSpecificValue(namespace, EXAMPLE_NAMES),
+    [namespace],
+  );
 
   const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
 
@@ -89,7 +125,7 @@ export default function ExploreNamesPage() {
           <div className="flex flex-col gap-2 justify-center">
             <p className="text-sm font-medium leading-none">Examples:</p>
             <div className="flex flex-row flex-wrap gap-2 -mx-6 px-6">
-              {EXAMPLE_NAMES.map((exampleName) => (
+              {exampleNames.map((exampleName) => (
                 <NameLink name={exampleName} key={`example-name-link-${exampleName}`}>
                   <Button
                     variant={"outline"}

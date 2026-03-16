@@ -33,6 +33,8 @@ jobs:
       TF_VAR_ensrainbow_searchlight_label_set_version: ${{ vars.ENSRAINBOW_SEARCHLIGHT_LABEL_SET_VERSION }}
       TF_VAR_db_schema_version: ${{ vars.DB_SCHEMA_VERSION }}
       TF_VAR_anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+      # ENSAdmin needs to know the list of ENSNode API endpoints to connect to.
+      TF_VAR_next_public_server_connection_library: ${{ vars.NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY }}
       # For now only one Terraform environment is active. In future this will be calculated based on workflow input.
       TF_VAR_render_environment: "yellow"
       TF_VAR_render_api_key: ${{ secrets.RENDER_API_KEY }}

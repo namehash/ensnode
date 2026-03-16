@@ -8,20 +8,17 @@ import {
   interpretTokenIdAsLabelHash,
   isRegistrationFullyExpired,
   makeENSv1DomainId,
-  makeLatestRegistrationId,
-  makeLatestRenewalId,
   makeSubdomainNode,
   PluginName,
 } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { materializeENSv1DomainEffectiveOwner } from "@/lib/ensv2/domain-db-helpers";
-import { ensureEvent } from "@/lib/ensv2/event-db-helpers";
+import { ensureDomainEvent, ensureEvent } from "@/lib/ensv2/event-db-helpers";
 import {
   getLatestRegistration,
-  getLatestRenewal,
-  supercedeLatestRegistration,
-  supercedeLatestRenewal,
+  insertLatestRegistration,
+  insertLatestRenewal,
 } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { toJson } from "@/lib/json-stringify-with-bigints";
@@ -37,7 +34,7 @@ const pluginName = PluginName.ENSv2;
  * ENSv1 Registry). The .eth Registrar doesn't do this, but Basenames and Lineanames do.
  *
  * Because they all technically have this ability, this logic avoids the invariant that an associated
- * v1Domain must exist and the v1Domain.owner is conditionally materialized.
+ * v1Domain must exist and instead the v1Domain.owner is _conditionally_ materialized.
  *
  * Technically each BaseRegistrar Registration also has an associated owner that we could keep track
  * of, but because we're materializing the v1Domain's effective owner, we need not explicitly track
@@ -86,6 +83,9 @@ export default function () {
       // materialize Domain owner if exists
       const domain = await context.db.find(schema.v1Domain, { id: domainId });
       if (domain) await materializeENSv1DomainEffectiveOwner(context, domainId, to);
+
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
     },
   );
 
@@ -120,19 +120,14 @@ export default function () {
       );
     }
 
-    // supercede the latest Registration if exists
-    if (registration) await supercedeLatestRegistration(context, registration);
-
     // insert BaseRegistrar Registration
     await ensureAccount(context, registrant);
-    await context.db.insert(schema.registration).values({
-      id: makeLatestRegistrationId(domainId),
-      index: registration ? registration.index + 1 : 0,
+    await insertLatestRegistration(context, {
+      domainId,
       type: "BaseRegistrar",
       registrarChainId: registrar.chainId,
       registrarAddress: registrar.address,
       registrantId: interpretAddress(registrant),
-      domainId,
       start: event.block.timestamp,
       expiry,
       // all BaseRegistrar-derived Registrars use the same GRACE_PERIOD
@@ -143,6 +138,9 @@ export default function () {
     // materialize Domain owner if exists
     const domain = await context.db.find(schema.v1Domain, { id: domainId });
     if (domain) await materializeENSv1DomainEffectiveOwner(context, domainId, owner);
+
+    // push event to domain history
+    await ensureDomainEvent(context, event, domainId);
   }
 
   ponder.on(namespaceContract(pluginName, "BaseRegistrar:NameRegistered"), handleNameRegistered);
@@ -218,27 +216,23 @@ export default function () {
         );
       }
 
-      // infer duration
+      // derive duration from previous registration's expiry
       const duration = expiry - registration.expiry;
 
       // update the registration
       await context.db.update(schema.registration, { id: registration.id }).set({ expiry });
 
-      // get latest Renewal and supercede if exists
-      const renewal = await getLatestRenewal(context, domainId, registration.index);
-      if (renewal) await supercedeLatestRenewal(context, renewal);
-
-      // insert latest Renewal
-      await context.db.insert(schema.renewal).values({
-        id: makeLatestRenewalId(domainId, registration.index),
+      // insert Renewal
+      await insertLatestRenewal(context, registration, {
         domainId,
-        registrationIndex: registration.index,
-        index: renewal ? renewal.index + 1 : 0,
         duration,
         eventId: await ensureEvent(context, event),
         // NOTE: no pricing information from BaseRegistrar#NameRenewed. in ENSv1, this info is
         // indexed from the Registrar Controllers, see apps/ensindexer/src/plugins/ensv2/handlers/ensv1/RegistrarController.ts
       });
+
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
     },
   );
 }

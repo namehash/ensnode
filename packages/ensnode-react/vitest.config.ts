@@ -1,6 +1,6 @@
 import { resolve } from "node:path";
 
-import { defineProject } from "vitest/config";
+import { configDefaults, defineProject } from "vitest/config";
 
 export default defineProject({
   resolve: {
@@ -10,5 +10,6 @@ export default defineProject({
   },
   test: {
     environment: "jsdom",
+    exclude: [...configDefaults.exclude, "**/*.integration.test.ts"],
   },
 });

@@ -1,3 +1,5 @@
+import type { Abi } from "viem";
+
 export const Seaport = [
   {
     inputs: [{ internalType: "address", name: "conduitController", type: "address" }],
@@ -1999,4 +2001,4 @@ export const Seaport = [
     type: "function",
   },
   { stateMutability: "payable", type: "receive" },
-] as const;
+] as const satisfies Abi;

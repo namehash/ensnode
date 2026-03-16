@@ -1,3 +1,5 @@
+import type { Abi } from "viem";
+
 export const LegacyPublicResolver = [
   {
     inputs: [
@@ -860,4 +862,4 @@ export const LegacyPublicResolver = [
     stateMutability: "view",
     type: "function",
   },
-] as const;
+] as const satisfies Abi;

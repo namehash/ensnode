@@ -1,30 +1,38 @@
+import type { ServeCommandConfig } from "@/config";
+
 import { serve } from "@hono/node-server";
 
+import { prettyPrintJson } from "@ensnode/ensnode-sdk/internal";
+
+import { buildEnsRainbowPublicConfig } from "@/config/public";
 import { createApi } from "@/lib/api";
 import { ENSRainbowDB } from "@/lib/database";
+import { buildDbConfig, ENSRainbowServer } from "@/lib/server";
 import { logger } from "@/utils/logger";
 
-export interface ServerCommandOptions {
-  dataDir: string;
-  port: number;
-}
-
-/**
- * Creates and configures the ENS Rainbow server application
- */
-export async function createServer(db: ENSRainbowDB) {
-  return createApi(db);
-}
+export type ServerCommandOptions = ServeCommandConfig;
 
 export async function serverCommand(options: ServerCommandOptions): Promise<void> {
+  // console.log is used so it can't be skipped by the logger
+  console.log("ENSRainbow running with config:");
+  console.log(prettyPrintJson(options));
+
   logger.info(`ENS Rainbow server starting on port ${options.port}...`);
 
   const db = await ENSRainbowDB.open(options.dataDir);
 
   try {
-    const app = await createServer(db);
+    const ensRainbowServer = await ENSRainbowServer.init(db);
+    const dbConfig = await buildDbConfig(ensRainbowServer);
+    const publicConfig = buildEnsRainbowPublicConfig(dbConfig);
 
-    const server = serve({
+    // console.log is used so it can't be skipped by the logger
+    console.log("ENSRainbow public config:");
+    console.log(prettyPrintJson(publicConfig));
+
+    const app = createApi(ensRainbowServer, publicConfig);
+
+    const httpServer = serve({
       fetch: app.fetch,
       port: options.port,
     });
@@ -33,7 +41,7 @@ export async function serverCommand(options: ServerCommandOptions): Promise<void
     const shutdown = async () => {
       logger.info("Shutting down server...");
       try {
-        await server.close();
+        await httpServer.close();
         await db.close();
         logger.info("Server shutdown complete");
       } catch (error) {

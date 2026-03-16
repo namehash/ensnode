@@ -1,41 +1,44 @@
 "use client";
 
-import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { useMemo } from "react";
 
-import { SubgraphGraphiQLEditor } from "@/components/graphiql-editor";
-import { LoadingSpinner } from "@/components/loading-spinner";
-import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
+import { GraphiQLEditor } from "@/components/graphiql-editor";
+import { RequireENSAdminFeature } from "@/components/require-ensadmin-feature";
+import { useValidatedSelectedConnection } from "@/hooks/active/use-selected-connection";
 
-function SubgraphGraphQLContent() {
-  const { validatedSelectedConnection } = useSelectedConnection();
+const defaultQuery = `# Welcome to this interactive playground for
+# ENSNode's Subgraph-Compatible GraphQL API!
+#
+# You can get started by typing your query here or by using
+# the Explorer on the left to select the data
+# you want to query.
+#
+# When you are ready to execute your query,
+# press the pink Play icon -->
+#
+`;
 
-  // TODO: we need a broader refactor to recognize the difference between
-  // a selected connection being in a valid format or not.
-  if (!validatedSelectedConnection.isValid) {
-    return (
-      <div className="flex w-full max-w-md items-center space-x-2">
-        <span className="font-mono text-xs select-none text-red-500">
-          Invalid connection URL: {validatedSelectedConnection.error}
-        </span>
-      </div>
-    );
-  }
+function SubgraphGraphQLPage() {
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams.get("query") || defaultQuery;
+  const initialVariables = searchParams.get("variables") || "";
 
-  const url = new URL(`/subgraph`, validatedSelectedConnection.url).toString();
+  const selectedConnection = useValidatedSelectedConnection();
+  const url = useMemo(
+    () => new URL(`/subgraph`, selectedConnection).toString(),
+    [selectedConnection],
+  );
 
-  return <SubgraphGraphiQLEditor url={url} />;
+  return (
+    <GraphiQLEditor url={url} initialQuery={initialQuery} initialVariables={initialVariables} />
+  );
 }
 
-export default function SubgraphGraphQLPage() {
+export default function Page() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex flex-col items-center justify-center h-screen">
-          <LoadingSpinner className="h-16 w-16" />
-        </div>
-      }
-    >
-      <SubgraphGraphQLContent />
-    </Suspense>
+    <RequireENSAdminFeature title="Subgraph-Compatible GraphQL API" feature="subgraph">
+      <SubgraphGraphQLPage />
+    </RequireENSAdminFeature>
   );
 }

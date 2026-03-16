@@ -4,12 +4,19 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { prettifyError } from "zod/v4";
+/**
+ * Get ENSIndexer version
+ */
+export function getEnsIndexerVersion(): string {
+  return packageJson.version;
+}
 
-import type { ENSIndexerVersionInfo, SerializedENSIndexerVersionInfo } from "@ensnode/ensnode-sdk";
-import { makeENSIndexerVersionInfoSchema } from "@ensnode/ensnode-sdk/internal";
-
-import { getENSRainbowApiClient } from "@/lib/ensraibow-api-client";
+/**
+ * Get Node.js version
+ */
+export function getNodeJsVersion(): string {
+  return process.versions.node;
+}
 
 /**
  * Get NPM package version.
@@ -103,41 +110,4 @@ function getPackageVersionFromPnpmStore(pnpmDir: string, packageName: string): s
   }
 
   return null;
-}
-
-/**
- * Get complete {@link ENSIndexerVersionInfo} for ENSIndexer app.
- */
-export async function getENSIndexerVersionInfo(): Promise<ENSIndexerVersionInfo> {
-  const ensRainbowApiClient = getENSRainbowApiClient();
-  const { versionInfo: ensRainbowVersionInfo } = await ensRainbowApiClient.version();
-
-  // ENSRainbow version (fetched dynamically from the connected ENSRainbow service instance)
-  const ensRainbowSchema = ensRainbowVersionInfo.dbSchemaVersion;
-
-  // ENSIndexer version
-  const ensIndexerVersion = packageJson.version;
-
-  // ENSDb version
-  // ENSDb version is always the same as the ENSIndexer version number
-  const ensDbVersion = ensIndexerVersion;
-
-  // parse unvalidated version info
-  const schema = makeENSIndexerVersionInfoSchema();
-  const parsed = schema.safeParse({
-    ensRainbow: ensRainbowVersionInfo.version,
-    nodejs: process.versions.node,
-    ponder: getPackageVersion("ponder"),
-    ensDb: ensDbVersion,
-    ensIndexer: ensIndexerVersion,
-    ensNormalize: getPackageVersion("@adraffy/ens-normalize"),
-    ensRainbowSchema,
-  } satisfies SerializedENSIndexerVersionInfo);
-
-  if (parsed.error) {
-    throw new Error(`Cannot deserialize ENSIndexerVersionInfo:\n${prettifyError(parsed.error)}\n`);
-  }
-
-  // return version info we have now validated
-  return parsed.data;
 }

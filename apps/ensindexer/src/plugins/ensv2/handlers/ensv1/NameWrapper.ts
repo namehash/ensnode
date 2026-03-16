@@ -15,8 +15,6 @@ import {
   type LiteralLabel,
   labelhashLiteralLabel,
   makeENSv1DomainId,
-  makeLatestRegistrationId,
-  makeLatestRenewalId,
   makeSubdomainNode,
   type Node,
   PluginName,
@@ -24,13 +22,12 @@ import {
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { materializeENSv1DomainEffectiveOwner } from "@/lib/ensv2/domain-db-helpers";
-import { ensureEvent } from "@/lib/ensv2/event-db-helpers";
+import { ensureDomainEvent, ensureEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel } from "@/lib/ensv2/label-db-helpers";
 import {
   getLatestRegistration,
-  getLatestRenewal,
-  supercedeLatestRegistration,
-  supercedeLatestRenewal,
+  insertLatestRegistration,
+  insertLatestRenewal,
 } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { toJson } from "@/lib/json-stringify-with-bigints";
@@ -136,6 +133,9 @@ export default function () {
     // now guaranteed to be an unexpired transferrable Registration
     // so materialize domain owner
     await materializeENSv1DomainEffectiveOwner(context, domainId, to);
+
+    // push event to domain history
+    await ensureDomainEvent(context, event, domainId);
   }
 
   ponder.on(
@@ -238,25 +238,23 @@ export default function () {
         // incoming `expiry` that is _already_ expired, so we explicitly do not create an invariant
         // to validate the incoming `expiry` value
 
-        // supercede the latest Registration if exists
-        if (registration) await supercedeLatestRegistration(context, registration);
-
         // insert NameWrapper Registration
         await ensureAccount(context, registrant);
-        await context.db.insert(schema.registration).values({
-          id: makeLatestRegistrationId(domainId),
-          index: registration ? registration.index + 1 : 0,
+        await insertLatestRegistration(context, {
+          domainId,
           type: "NameWrapper",
           registrarChainId: registrar.chainId,
           registrarAddress: registrar.address,
           registrantId: interpretAddress(registrant),
-          domainId,
-          start: event.block.timestamp,
           fuses,
+          start: event.block.timestamp,
           expiry,
           eventId: await ensureEvent(context, event),
         });
       }
+
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
     },
   );
 
@@ -279,7 +277,7 @@ export default function () {
       }
 
       if (registration.type === "BaseRegistrar") {
-        // if this is a wrapped BaseRegisrar Registration, unwrap it
+        // if this is a wrapped BaseRegistrar Registration, unwrap it
         await context.db.update(schema.registration, { id: registration.id }).set({
           wrapped: false,
           fuses: null,
@@ -291,6 +289,9 @@ export default function () {
           expiry: event.block.timestamp,
         });
       }
+
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
 
       // NOTE: we don't need to adjust Domain.ownerId because NameWrapper always calls ens.setOwner
     },
@@ -325,6 +326,9 @@ export default function () {
         fuses,
         // expiry: // TODO: NameWrapper expiry logic ?
       });
+
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
     },
   );
 
@@ -355,6 +359,9 @@ export default function () {
 
       await context.db.update(schema.registration, { id: registration.id }).set({ expiry });
 
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
+
       // if this is a NameWrapper Registration, this is a Renewal event. otherwise, this is a wrapped
       // BaseRegistrar Registration, and the Renewal is already being managed
 
@@ -375,16 +382,9 @@ export default function () {
       // as 'time added since now' (which could be 0 seconds)
       const duration = expiry - (registration.expiry ?? event.block.timestamp);
 
-      // get latest Renewal and supercede if exists
-      const renewal = await getLatestRenewal(context, domainId, registration.index);
-      if (renewal) await supercedeLatestRenewal(context, renewal);
-
-      // insert latest Renewal
-      await context.db.insert(schema.renewal).values({
-        id: makeLatestRenewalId(domainId, registration.index),
+      // insert Renewal
+      await insertLatestRenewal(context, registration, {
         domainId,
-        registrationIndex: registration.index,
-        index: renewal ? renewal.index + 1 : 0,
         duration,
         eventId: await ensureEvent(context, event),
         // NOTE: NameWrapper does not include pricing information

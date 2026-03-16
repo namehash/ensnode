@@ -11,7 +11,7 @@ import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } fro
 import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
 import { Registry as root_Registry } from "./abis/root/Registry";
 import { UniversalRegistrarRenewalWithReferrer as root_UniversalRegistrarRenewalWithReferrer } from "./abis/root/UniversalRegistrarRenewalWithReferrer";
-import { UniversalResolver as root_UniversalResolver } from "./abis/root/UniversalResolver";
+import { UniversalResolverV1 } from "./abis/root/UniversalResolverV1";
 import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
 import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
 // Shared ABIs
@@ -25,7 +25,6 @@ import { DatasourceNames, type ENSNamespace } from "./lib/types";
  *
  * This represents a testing deployment of ENSv1 w/ ENSv2 on Sepolia.
  *
- * @dev the ENSv2ETHRegistry Datasource contracts are deployed to Sepolia (rather than an L2).
  * @dev we use the earliest start block for simplicity (it's just for efficiency re: log fetches).
  */
 export default {
@@ -78,7 +77,7 @@ export default {
         startBlock: 9374708,
       },
       UniversalResolver: {
-        abi: root_UniversalResolver,
+        abi: UniversalResolverV1,
         address: "0x198827b2316e020c48b500fc3cebdbcaf58787ce",
         startBlock: 9374708,
       },
@@ -106,20 +105,6 @@ export default {
         address: "0x3f0920aa92c5f9bce54643c09955c5f241f1f763",
         startBlock: 9374708,
       },
-    },
-  },
-
-  [DatasourceNames.ENSv2ETHRegistry]: {
-    chain: sepolia,
-    contracts: {
-      Resolver: { abi: ResolverABI, startBlock: 9374708 },
-      Registry: { abi: Registry, startBlock: 9374708 },
-      EnhancedAccessControl: { abi: EnhancedAccessControl, startBlock: 9374708 },
-      ETHRegistry: {
-        abi: Registry,
-        address: "0xf332544e6234f1ca149907d0d4658afd5feb6831",
-        startBlock: 9374708,
-      },
       ETHRegistrar: {
         abi: ETHRegistrar,
         address: "0x3334f0ebcbc4b5b7067f3aff25c6da8973690d54",
@@ -139,6 +124,11 @@ export default {
       DefaultReverseResolver3: {
         abi: ResolverABI,
         address: "0xa238d3aca667210d272391a119125d38816af4b1",
+        startBlock: 9374708,
+      },
+      DefaultPublicResolver5: {
+        abi: ResolverABI,
+        address: "0x0e14ee0592da66bb4c8a8090066bc8a5af15f3e6",
         startBlock: 9374708,
       },
       BaseReverseResolver: {

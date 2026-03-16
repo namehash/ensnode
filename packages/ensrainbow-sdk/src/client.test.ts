@@ -145,23 +145,97 @@ describe("EnsRainbowApiClient", () => {
     } satisfies EnsRainbow.HealNotFoundError);
   });
 
-  it("should return a bad request error for an invalid labelHash", async () => {
-    mockFetch.mockResolvedValueOnce({
-      json: () =>
-        Promise.resolve({
-          status: StatusCode.Error,
-          error: "Invalid labelHash length 9 characters (expected 66)",
-          errorCode: ErrorCode.BadRequest,
-        } satisfies EnsRainbow.HealBadRequestError),
-    });
-
+  it("should return a bad request error for an invalid labelHash without making a network request", async () => {
     const response = await client.heal("0xinvalid");
 
     expect(response).toEqual({
       status: StatusCode.Error,
-      error: "Invalid labelHash length 9 characters (expected 66)",
+      error: "Invalid labelHash: contains non-hex characters: 0xinvalid",
       errorCode: ErrorCode.BadRequest,
     } satisfies EnsRainbow.HealBadRequestError);
+
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it("should normalize an uppercase labelHash before healing", async () => {
+    mockFetch.mockResolvedValueOnce({
+      json: () =>
+        Promise.resolve({
+          status: StatusCode.Success,
+          label: "vitalik",
+        } satisfies EnsRainbow.HealSuccess),
+    });
+
+    const response = await client.heal(
+      "0xAf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc",
+    );
+
+    expect(response).toEqual({
+      status: StatusCode.Success,
+      label: "vitalik",
+    } satisfies EnsRainbow.HealSuccess);
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        href: expect.stringContaining(
+          "0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc",
+        ),
+      }),
+    );
+  });
+
+  it("should normalize a labelHash missing 0x prefix before healing", async () => {
+    mockFetch.mockResolvedValueOnce({
+      json: () =>
+        Promise.resolve({
+          status: StatusCode.Success,
+          label: "vitalik",
+        } satisfies EnsRainbow.HealSuccess),
+    });
+
+    const response = await client.heal(
+      "af2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc",
+    );
+
+    expect(response).toEqual({
+      status: StatusCode.Success,
+      label: "vitalik",
+    } satisfies EnsRainbow.HealSuccess);
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        href: expect.stringContaining(
+          "0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc",
+        ),
+      }),
+    );
+  });
+
+  it("should normalize an encoded labelHash before healing", async () => {
+    mockFetch.mockResolvedValueOnce({
+      json: () =>
+        Promise.resolve({
+          status: StatusCode.Success,
+          label: "vitalik",
+        } satisfies EnsRainbow.HealSuccess),
+    });
+
+    const response = await client.heal(
+      "[af2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc]",
+    );
+
+    expect(response).toEqual({
+      status: StatusCode.Success,
+      label: "vitalik",
+    } satisfies EnsRainbow.HealSuccess);
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        href: expect.stringContaining(
+          "0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc",
+        ),
+      }),
+    );
   });
 
   it("should return a count of healable labels", async () => {
@@ -219,6 +293,35 @@ describe("EnsRainbowApiClient", () => {
     expect(response.status).toEqual(StatusCode.Success);
     expect(typeof response.versionInfo.version === "string").toBeTruthy();
     expect(typeof response.versionInfo.dbSchemaVersion === "number").toBeTruthy();
+  });
+
+  describe("config", () => {
+    it("should request /v1/config and return public config on success", async () => {
+      const configData: EnsRainbow.ENSRainbowPublicConfig = {
+        version: "2.0.0",
+        labelSet: {
+          labelSetId: "subgraph",
+          highestLabelSetVersion: 5,
+        },
+        recordsCount: 133856894,
+      };
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(configData),
+      });
+
+      const response = await client.config();
+
+      expect(mockFetch).toHaveBeenCalledWith(new URL("/v1/config", DEFAULT_ENSRAINBOW_URL));
+      expect(response).toEqual(configData);
+    });
+
+    it("should throw with fallback message when error body is not valid JSON", async () => {
+      mockFetch.mockResolvedValueOnce({ ok: false, statusText: "Not Found" });
+
+      await expect(client.config()).rejects.toThrow(/Not Found/);
+    });
   });
 });
 

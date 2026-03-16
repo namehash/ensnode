@@ -31,11 +31,18 @@ generated
 .terraform*
 terraform.tfstate*
 
-# CLAUDE.md
+# Claude
 CLAUDE.md
+.claude
 
 # ENSRainbow data
-apps/ensrainbow/data
+apps/ensrainbow/data*
+apps/ensrainbow/temp*
+apps/ensrainbow/v2*
+apps/ensrainbow/ens-test*
+apps/ensrainbow/test-*
 
 # fallback-ensapi dist
 apps/fallback-ensapi/dist
+
+

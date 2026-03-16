@@ -1,387 +1,43 @@
+import type { Abi } from "viem";
+
 export const BaseRegistrar = [
   {
-    constant: true,
-    inputs: [{ name: "interfaceID", type: "bytes4" }],
-    name: "supportsInterface",
-    outputs: [{ name: "", type: "bool" }],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    constant: true,
-    inputs: [{ name: "tokenId", type: "uint256" }],
-    name: "getApproved",
-    outputs: [{ name: "", type: "address" }],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    constant: false,
     inputs: [
-      { name: "to", type: "address" },
-      { name: "tokenId", type: "uint256" },
+      {
+        internalType: "contract ENS",
+        name: "_ens",
+        type: "address",
+      },
+      {
+        internalType: "bytes32",
+        name: "_baseNode",
+        type: "bytes32",
+      },
     ],
-    name: "approve",
-    outputs: [],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    constant: false,
-    inputs: [
-      { name: "from", type: "address" },
-      { name: "to", type: "address" },
-      { name: "tokenId", type: "uint256" },
-    ],
-    name: "transferFrom",
-    outputs: [],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    constant: false,
-    inputs: [
-      { name: "id", type: "uint256" },
-      { name: "owner", type: "address" },
-    ],
-    name: "reclaim",
-    outputs: [],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: "ens",
-    outputs: [{ name: "", type: "address" }],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    constant: false,
-    inputs: [
-      { name: "from", type: "address" },
-      { name: "to", type: "address" },
-      { name: "tokenId", type: "uint256" },
-    ],
-    name: "safeTransferFrom",
-    outputs: [],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: "transferPeriodEnds",
-    outputs: [{ name: "", type: "uint256" }],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    constant: false,
-    inputs: [{ name: "resolver", type: "address" }],
-    name: "setResolver",
-    outputs: [],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    constant: true,
-    inputs: [{ name: "tokenId", type: "uint256" }],
-    name: "ownerOf",
-    outputs: [{ name: "", type: "address" }],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: "MIGRATION_LOCK_PERIOD",
-    outputs: [{ name: "", type: "uint256" }],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    constant: true,
-    inputs: [{ name: "owner", type: "address" }],
-    name: "balanceOf",
-    outputs: [{ name: "", type: "uint256" }],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    constant: false,
-    inputs: [],
-    name: "renounceOwnership",
-    outputs: [],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: "owner",
-    outputs: [{ name: "", type: "address" }],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: "isOwner",
-    outputs: [{ name: "", type: "bool" }],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    constant: true,
-    inputs: [{ name: "id", type: "uint256" }],
-    name: "available",
-    outputs: [{ name: "", type: "bool" }],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    constant: false,
-    inputs: [
-      { name: "to", type: "address" },
-      { name: "approved", type: "bool" },
-    ],
-    name: "setApprovalForAll",
-    outputs: [],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    constant: false,
-    inputs: [{ name: "controller", type: "address" }],
-    name: "addController",
-    outputs: [],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: "previousRegistrar",
-    outputs: [{ name: "", type: "address" }],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    constant: false,
-    inputs: [
-      { name: "from", type: "address" },
-      { name: "to", type: "address" },
-      { name: "tokenId", type: "uint256" },
-      { name: "_data", type: "bytes" },
-    ],
-    name: "safeTransferFrom",
-    outputs: [],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: "GRACE_PERIOD",
-    outputs: [{ name: "", type: "uint256" }],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    constant: false,
-    inputs: [
-      { name: "id", type: "uint256" },
-      { name: "duration", type: "uint256" },
-    ],
-    name: "renew",
-    outputs: [{ name: "", type: "uint256" }],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    constant: true,
-    inputs: [{ name: "id", type: "uint256" }],
-    name: "nameExpires",
-    outputs: [{ name: "", type: "uint256" }],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    constant: true,
-    inputs: [{ name: "", type: "address" }],
-    name: "controllers",
-    outputs: [{ name: "", type: "bool" }],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: "baseNode",
-    outputs: [{ name: "", type: "bytes32" }],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    constant: true,
-    inputs: [
-      { name: "owner", type: "address" },
-      { name: "operator", type: "address" },
-    ],
-    name: "isApprovedForAll",
-    outputs: [{ name: "", type: "bool" }],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    constant: false,
-    inputs: [
-      { name: "label", type: "bytes32" },
-      { name: "deed", type: "address" },
-      { name: "", type: "uint256" },
-    ],
-    name: "acceptRegistrarTransfer",
-    outputs: [],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    constant: false,
-    inputs: [{ name: "newOwner", type: "address" }],
-    name: "transferOwnership",
-    outputs: [],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    constant: false,
-    inputs: [{ name: "controller", type: "address" }],
-    name: "removeController",
-    outputs: [],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    constant: false,
-    inputs: [
-      { name: "id", type: "uint256" },
-      { name: "owner", type: "address" },
-      { name: "duration", type: "uint256" },
-    ],
-    name: "register",
-    outputs: [{ name: "", type: "uint256" }],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      { name: "_ens", type: "address" },
-      { name: "_previousRegistrar", type: "address" },
-      { name: "_baseNode", type: "bytes32" },
-      { name: "_transferPeriodEnds", type: "uint256" },
-    ],
-    payable: false,
     stateMutability: "nonpayable",
     type: "constructor",
   },
   {
     anonymous: false,
-    inputs: [{ indexed: true, name: "controller", type: "address" }],
-    name: "ControllerAdded",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [{ indexed: true, name: "controller", type: "address" }],
-    name: "ControllerRemoved",
-    type: "event",
-  },
-  {
-    anonymous: false,
     inputs: [
-      { indexed: true, name: "id", type: "uint256" },
-      { indexed: true, name: "owner", type: "address" },
-      { indexed: false, name: "expires", type: "uint256" },
-    ],
-    name: "NameMigrated",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      { indexed: true, name: "id", type: "uint256" },
-      { indexed: true, name: "owner", type: "address" },
-      { indexed: false, name: "expires", type: "uint256" },
-    ],
-    name: "NameRegistered",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      { indexed: true, name: "id", type: "uint256" },
-      { indexed: false, name: "expires", type: "uint256" },
-    ],
-    name: "NameRenewed",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      { indexed: true, name: "previousOwner", type: "address" },
-      { indexed: true, name: "newOwner", type: "address" },
-    ],
-    name: "OwnershipTransferred",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      { indexed: true, name: "from", type: "address" },
-      { indexed: true, name: "to", type: "address" },
-      { indexed: true, name: "tokenId", type: "uint256" },
-    ],
-    name: "Transfer",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      { indexed: true, name: "owner", type: "address" },
-      { indexed: true, name: "approved", type: "address" },
-      { indexed: true, name: "tokenId", type: "uint256" },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "owner",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "approved",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "tokenId",
+        type: "uint256",
+      },
     ],
     name: "Approval",
     type: "event",
@@ -389,11 +45,688 @@ export const BaseRegistrar = [
   {
     anonymous: false,
     inputs: [
-      { indexed: true, name: "owner", type: "address" },
-      { indexed: true, name: "operator", type: "address" },
-      { indexed: false, name: "approved", type: "bool" },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "owner",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "operator",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "bool",
+        name: "approved",
+        type: "bool",
+      },
     ],
     name: "ApprovalForAll",
     type: "event",
   },
-] as const;
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "controller",
+        type: "address",
+      },
+    ],
+    name: "ControllerAdded",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "controller",
+        type: "address",
+      },
+    ],
+    name: "ControllerRemoved",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "id",
+        type: "uint256",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "owner",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "expires",
+        type: "uint256",
+      },
+    ],
+    name: "NameMigrated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "id",
+        type: "uint256",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "owner",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "expires",
+        type: "uint256",
+      },
+    ],
+    name: "NameRegistered",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "id",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "expires",
+        type: "uint256",
+      },
+    ],
+    name: "NameRenewed",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "previousOwner",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "OwnershipTransferred",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "from",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "to",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "tokenId",
+        type: "uint256",
+      },
+    ],
+    name: "Transfer",
+    type: "event",
+  },
+  {
+    inputs: [],
+    name: "GRACE_PERIOD",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "controller",
+        type: "address",
+      },
+    ],
+    name: "addController",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "to",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "tokenId",
+        type: "uint256",
+      },
+    ],
+    name: "approve",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "id",
+        type: "uint256",
+      },
+    ],
+    name: "available",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "owner",
+        type: "address",
+      },
+    ],
+    name: "balanceOf",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "baseNode",
+    outputs: [
+      {
+        internalType: "bytes32",
+        name: "",
+        type: "bytes32",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    name: "controllers",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "ens",
+    outputs: [
+      {
+        internalType: "contract ENS",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "tokenId",
+        type: "uint256",
+      },
+    ],
+    name: "getApproved",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "owner",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "operator",
+        type: "address",
+      },
+    ],
+    name: "isApprovedForAll",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "name",
+    outputs: [
+      {
+        internalType: "string",
+        name: "",
+        type: "string",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "id",
+        type: "uint256",
+      },
+    ],
+    name: "nameExpires",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "owner",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "tokenId",
+        type: "uint256",
+      },
+    ],
+    name: "ownerOf",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "id",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "owner",
+        type: "address",
+      },
+    ],
+    name: "reclaim",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "id",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "owner",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "duration",
+        type: "uint256",
+      },
+    ],
+    name: "register",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "id",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "owner",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "duration",
+        type: "uint256",
+      },
+    ],
+    name: "registerOnly",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "controller",
+        type: "address",
+      },
+    ],
+    name: "removeController",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "id",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "duration",
+        type: "uint256",
+      },
+    ],
+    name: "renew",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "renounceOwnership",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "from",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "to",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "tokenId",
+        type: "uint256",
+      },
+    ],
+    name: "safeTransferFrom",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "from",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "to",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "tokenId",
+        type: "uint256",
+      },
+      {
+        internalType: "bytes",
+        name: "data",
+        type: "bytes",
+      },
+    ],
+    name: "safeTransferFrom",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "operator",
+        type: "address",
+      },
+      {
+        internalType: "bool",
+        name: "approved",
+        type: "bool",
+      },
+    ],
+    name: "setApprovalForAll",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "resolver",
+        type: "address",
+      },
+    ],
+    name: "setResolver",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes4",
+        name: "interfaceID",
+        type: "bytes4",
+      },
+    ],
+    name: "supportsInterface",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "symbol",
+    outputs: [
+      {
+        internalType: "string",
+        name: "",
+        type: "string",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "tokenId",
+        type: "uint256",
+      },
+    ],
+    name: "tokenURI",
+    outputs: [
+      {
+        internalType: "string",
+        name: "",
+        type: "string",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "from",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "to",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "tokenId",
+        type: "uint256",
+      },
+    ],
+    name: "transferFrom",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "transferOwnership",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+] as const satisfies Abi;

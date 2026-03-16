@@ -41,7 +41,7 @@ For detailed information about the file format structure, see the [Data Model](/
 
 | Method | Input Format | Use Case | Command |
 |--------|-------------|----------|---------|
-| **CSV Conversion** | CSV file (1 or 2 columns) | Building new ENS rainbow tables | `pnpm run convert` |
+| **CSV Conversion** | Single-column CSV file (one label per line) | Building new ENS rainbow tables | `pnpm run convert` |
 | **SQL Conversion** | Gzipped SQL dump (`ens_names.sql.gz`) | Converting legacy ENS Subgraph data | `pnpm run convert-sql` |
 
 ### When to Use CSV Conversion
@@ -55,7 +55,7 @@ For detailed information about the file format structure, see the [Data Model](/
 
 ## Method 1: Converting from CSV Files
 
-The `convert` command processes CSV files with flexible column formats.
+The `convert` command processes single-column CSV files with one label per line.
 
 ### Command Syntax
 
@@ -81,27 +81,17 @@ pnpm run convert \
 - `--existing-db-path`: Path to existing ENSRainbow database to filter out existing labels from the generated ensrainbow file and determine the next label set version
 - `--silent`: Disable progress bar (useful for scripts and automated workflows)
 
-### CSV Format Support
+### CSV Format
 
-The CSV converter supports two formats and expects CSV files **without a header row**.
+The CSV converter expects a single-column CSV file with one label per line, **without a header row**.
 
-#### Single Column Format (Label Only)
 ```csv
 ethereum
 vitalik
 ens
 ```
 
-The converter automatically computes labelhashes using the `labelhash()` function.
-
-#### Two Column Format (Label + Labelhash)
-```csv
-ethereum,0x541111248b45b7a8dc3f5579f630e74cb01456ea6ac067d3f4d793245a255155
-vitalik,0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
-ens,0x5cee339e13375638553bdf5a6e36ba80fb9f6a4f0783680884d92b558aa471da
-```
-
-The converter validates the format of provided labelhashes (does not verify they match the label).
+The converter automatically computes labelhashes from labels using the `labelhash()` function. This ensures all label-to-labelhash mappings are deterministically correct.
 
 ### Label Filtering
 
@@ -161,16 +151,12 @@ pnpm run convert \
 
 ### How It Works
 
-1. **Detects** CSV format automatically (1 or 2 columns)
-2. **Streams** CSV parsing using fast-csv for memory efficiency
-3. **Validates** column count and data format
-4. **Computes** or validates labelhashes as needed
-   - For single-column format: Computes labelhash using the `labelhash()` function
-   - For two-column format: Validates the format of the provided labelhash (does not verify it matches the label)
-   - Invalid labelhashes are rejected if they don't meet format requirements (66 characters including "0x" prefix, lowercase hex, valid hex format)
-5. **Filters** existing labels if `--existing-db-path` is provided
-6. **Filters** duplicate labels within the same CSV file
-7. **Writes** .ensrainbow file as output
+1. **Streams** CSV parsing using fast-csv for memory efficiency
+2. **Validates** that each row contains exactly one column (the label)
+3. **Computes** labelhashes deterministically from labels using the `labelhash()` function
+4. **Filters** existing labels if `--existing-db-path` is provided
+5. **Filters** duplicate labels within the same CSV file
+6. **Writes** .ensrainbow file as output
 
 ## Method 2: Migrating from ENS Subgraph
 

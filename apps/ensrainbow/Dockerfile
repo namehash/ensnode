@@ -2,7 +2,13 @@
 FROM node:24-slim AS runtime
 
 # Install only essential system dependencies for runtime
-RUN apt-get update && apt-get install -y wget tar && rm -rf /var/lib/apt/lists/*
+# netcat-openbsd: Used during container initialization to keep the service port open
+# while the database is being downloaded and validated (which can take up to 20 minutes).
+# Without a listener on the port during this phase, Render's health checks fail and orchestration
+# systems may mark the container as unhealthy or restart it prematurely. See scripts/entrypoint.sh for implementation details.
+# Note: The netcat listener only keeps the port open and accepts connections; it does not respond
+# to HTTP requests, so it will not work with Docker HEALTHCHECK commands that expect HTTP responses. See https://github.com/namehash/ensnode/issues/1610
+RUN apt-get update && apt-get install -y wget tar netcat-openbsd && rm -rf /var/lib/apt/lists/*
 
 # Set up pnpm
 ENV PNPM_HOME="/pnpm"

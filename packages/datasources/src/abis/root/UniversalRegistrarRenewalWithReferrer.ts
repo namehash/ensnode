@@ -1,3 +1,5 @@
+import type { Abi } from "viem";
+
 export const UniversalRegistrarRenewalWithReferrer = [
   {
     inputs: [
@@ -35,4 +37,4 @@ export const UniversalRegistrarRenewalWithReferrer = [
     type: "function",
   },
   { stateMutability: "payable", type: "receive" },
-] as const;
+] as const satisfies Abi;

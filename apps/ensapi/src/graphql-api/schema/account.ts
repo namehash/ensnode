@@ -1,21 +1,33 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
-import { and, asc, desc, eq, gt, lt } from "drizzle-orm";
+import { and, count, eq, getTableColumns } from "drizzle-orm";
 import type { Address } from "viem";
 
 import * as schema from "@ensnode/ensnode-schema";
-import type { DomainId, PermissionsUserId } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
-import { findDomains } from "@/graphql-api/lib/find-domains";
+import { orderPaginationBy, paginateBy } from "@/graphql-api/lib/connection-helpers";
+import { resolveFindDomains } from "@/graphql-api/lib/find-domains/find-domains-resolver";
+import {
+  domainsBase,
+  filterByCanonical,
+  filterByName,
+  filterByOwner,
+  withOrderingMetadata,
+} from "@/graphql-api/lib/find-domains/layers";
+import { resolveFindEvents } from "@/graphql-api/lib/find-events/find-events-resolver";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
-import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
+import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { AccountIdInput } from "@/graphql-api/schema/account-id";
-import { AccountRegistryPermissionsRef } from "@/graphql-api/schema/account-registries-permissions";
-import { AccountResolverPermissionsRef } from "@/graphql-api/schema/account-resolver-permissions";
-import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
-import { cursors } from "@/graphql-api/schema/cursors";
-import { AccountDomainsWhereInput, DomainInterfaceRef } from "@/graphql-api/schema/domain";
+import { ID_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
+import {
+  AccountDomainsWhereInput,
+  DomainInterfaceRef,
+  DomainsOrderInput,
+} from "@/graphql-api/schema/domain";
+import { AccountEventsWhereInput, EventRef } from "@/graphql-api/schema/event";
 import { PermissionsUserRef } from "@/graphql-api/schema/permissions";
+import { RegistryPermissionsUserRef } from "@/graphql-api/schema/registry-permissions-user";
+import { ResolverPermissionsUserRef } from "@/graphql-api/schema/resolver-permissions-user";
 import { db } from "@/lib/db";
 
 export const AccountRef = builder.loadableObjectRef("Account", {
@@ -34,13 +46,13 @@ export type Account = Exclude<typeof AccountRef.$inferType, Address>;
 // Account
 ///////////
 AccountRef.implement({
-  description: "TODO",
+  description: "Represents an individual Account, keyed by its Address.",
   fields: (t) => ({
     //////////////
     // Account.id
     //////////////
     id: t.field({
-      description: "TODO",
+      description: "A unique reference to this Account.",
       type: "Address",
       nullable: false,
       resolve: (parent) => parent.id,
@@ -50,167 +62,157 @@ AccountRef.implement({
     // Account.address
     ///////////////////
     address: t.field({
-      description: "TODO",
+      description: "An EVM Address that uniquely identifies this Account on-chain.",
       type: "Address",
       nullable: false,
       resolve: (parent) => parent.id,
     }),
 
-    ///////////////////
+    ////////////////////
     // Account.domains
-    ///////////////////
+    ////////////////////
     domains: t.connection({
-      description: "TODO",
+      description: "The Domains that are owned by the Account.",
       type: DomainInterfaceRef,
       args: {
-        where: t.arg({ type: AccountDomainsWhereInput, required: false }),
+        where: t.arg({ type: AccountDomainsWhereInput }),
+        order: t.arg({ type: DomainsOrderInput }),
       },
-      resolve: (parent, args, context) =>
-        resolveCursorConnection(
-          { ...DEFAULT_CONNECTION_ARGS, args },
-          async ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) => {
-            // construct query for relevant domains
-            const domains = findDomains({ ...args.where, owner: parent.id });
+      resolve: (parent, { where, order, ...connectionArgs }, context) => {
+        const base = domainsBase();
+        const owned = filterByOwner(base, parent.id);
+        const named = filterByName(owned, where?.name);
+        const canonical = where?.canonical === true ? filterByCanonical(named) : named;
+        const domains = withOrderingMetadata(canonical);
+        return resolveFindDomains(context, { domains, order, ...connectionArgs });
+      },
+    }),
 
-            // execute with pagination constraints
-            const results = await db
-              .with(domains)
-              .select()
-              .from(domains)
-              .where(
-                and(
-                  before ? lt(domains.id, cursors.decode<DomainId>(before)) : undefined,
-                  after ? gt(domains.id, cursors.decode<DomainId>(after)) : undefined,
-                ),
-              )
-              .orderBy(inverted ? desc(domains.id) : asc(domains.id))
-              .limit(limit);
-
-            // provide full Domain entities via dataloader
-            return rejectAnyErrors(
-              DomainInterfaceRef.getDataloader(context).loadMany(
-                results.map((result) => result.id),
-              ),
-            );
-          },
-        ),
+    //////////////////
+    // Account.events
+    //////////////////
+    events: t.connection({
+      description: "All Events for which this Account is the sender (i.e. `Transaction.from`).",
+      type: EventRef,
+      args: {
+        where: t.arg({ type: AccountEventsWhereInput }),
+      },
+      resolve: (parent, args) =>
+        resolveFindEvents({ ...args, where: { ...args.where, from: parent.id } }),
     }),
 
     ///////////////////////
     // Account.permissions
     ///////////////////////
     permissions: t.connection({
-      description: "TODO",
+      description:
+        "The Permissions granted to this Account, optionally filtered to Permissions in a specific contract.",
       type: PermissionsUserRef,
       args: {
         in: t.arg({ type: AccountIdInput }),
       },
-      resolve: (parent, args, context) =>
-        resolveCursorConnection(
-          { ...DEFAULT_CONNECTION_ARGS, args },
-          async ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-            db.query.permissionsUser.findMany({
-              where: (t, { lt, gt, and, eq }) =>
-                and(
-                  // this user's permissions
-                  eq(t.user, parent.id),
-                  // optionally filtered by contract
-                  args.in
-                    ? and(eq(t.chainId, args.in.chainId), eq(t.address, args.in.address))
-                    : undefined,
-                  // optionall filtered by cursor
-                  before ? lt(t.id, cursors.decode<PermissionsUserId>(before)) : undefined,
-                  after ? gt(t.id, cursors.decode<PermissionsUserId>(after)) : undefined,
-                ),
-              orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
-              limit,
-            }),
-        ),
+      resolve: (parent, args) => {
+        const scope = and(
+          // this user's permissions
+          eq(schema.permissionsUser.user, parent.id),
+          // optionally filtered by contract
+          args.in
+            ? and(
+                eq(schema.permissionsUser.chainId, args.in.chainId),
+                eq(schema.permissionsUser.address, args.in.address),
+              )
+            : undefined,
+        );
+
+        return lazyConnection({
+          totalCount: () => db.$count(schema.permissionsUser, scope),
+          connection: () =>
+            resolveCursorConnection(
+              { ...ID_PAGINATED_CONNECTION_ARGS, args },
+              ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+                db
+                  .select()
+                  .from(schema.permissionsUser)
+                  .where(and(scope, paginateBy(schema.permissionsUser.id, before, after)))
+                  .orderBy(orderPaginationBy(schema.permissionsUser.id, inverted))
+                  .limit(limit),
+            ),
+        });
+      },
     }),
 
     ///////////////////////////////
     // Account.registryPermissions
     ///////////////////////////////
-    // TODO: this returns all permissions in a registry, perhaps can provide api for non-token resources...
     registryPermissions: t.connection({
-      description: "TODO",
-      type: AccountRegistryPermissionsRef,
-      resolve: (parent, args, context) =>
-        resolveCursorConnection(
-          { ...DEFAULT_CONNECTION_ARGS, args },
-          async ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) => {
-            const results = await db
-              .select({
-                permissionsUser: schema.permissionsUser,
-                registry: schema.registry,
-              })
-              .from(schema.permissionsUser)
-              .innerJoin(
-                schema.registry,
-                and(
-                  eq(schema.permissionsUser.chainId, schema.registry.chainId),
-                  eq(schema.permissionsUser.address, schema.registry.address),
-                ),
-              )
-              .where(
-                and(
-                  eq(schema.permissionsUser.user, parent.id),
-                  before
-                    ? lt(schema.permissionsUser.id, cursors.decode<PermissionsUserId>(before))
-                    : undefined,
-                  after
-                    ? gt(schema.permissionsUser.id, cursors.decode<PermissionsUserId>(after))
-                    : undefined,
-                ),
-              )
-              .orderBy(inverted ? desc(schema.permissionsUser.id) : asc(schema.permissionsUser.id))
-              .limit(limit);
+      description: "The Permissions on Registries granted to this Account.",
+      type: RegistryPermissionsUserRef,
+      resolve: (parent, args) => {
+        const scope = eq(schema.permissionsUser.user, parent.id);
+        const join = and(
+          eq(schema.permissionsUser.chainId, schema.registry.chainId),
+          eq(schema.permissionsUser.address, schema.registry.address),
+        );
 
-            return results.map((result) => ({ id: result.permissionsUser.id, ...result }));
-          },
-        ),
+        return lazyConnection({
+          totalCount: () =>
+            db
+              .select({ count: count() })
+              .from(schema.permissionsUser)
+              .innerJoin(schema.registry, join)
+              .where(scope)
+              .then((r) => r[0].count),
+          connection: () =>
+            resolveCursorConnection(
+              { ...ID_PAGINATED_CONNECTION_ARGS, args },
+              ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+                db
+                  .select(getTableColumns(schema.permissionsUser))
+                  .from(schema.permissionsUser)
+                  .innerJoin(schema.registry, join)
+                  .where(and(scope, paginateBy(schema.permissionsUser.id, before, after)))
+                  .orderBy(orderPaginationBy(schema.permissionsUser.id, inverted))
+                  .limit(limit),
+            ),
+        });
+      },
     }),
 
     ///////////////////////////////
     // Account.resolverPermissions
     ///////////////////////////////
     resolverPermissions: t.connection({
-      description: "TODO",
-      type: AccountResolverPermissionsRef,
-      resolve: (parent, args, context) =>
-        resolveCursorConnection(
-          { ...DEFAULT_CONNECTION_ARGS, args },
-          async ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) => {
-            const results = await db
-              .select({
-                permissionsUser: schema.permissionsUser,
-                resolver: schema.resolver,
-              })
-              .from(schema.permissionsUser)
-              .innerJoin(
-                schema.resolver,
-                and(
-                  eq(schema.permissionsUser.chainId, schema.resolver.chainId),
-                  eq(schema.permissionsUser.address, schema.resolver.address),
-                ),
-              )
-              .where(
-                and(
-                  eq(schema.permissionsUser.user, parent.id),
-                  before
-                    ? lt(schema.permissionsUser.id, cursors.decode<PermissionsUserId>(before))
-                    : undefined,
-                  after
-                    ? gt(schema.permissionsUser.id, cursors.decode<PermissionsUserId>(after))
-                    : undefined,
-                ),
-              )
-              .orderBy(inverted ? desc(schema.permissionsUser.id) : asc(schema.permissionsUser.id))
-              .limit(limit);
+      description: "The Permissions on Resolvers granted to this Account.",
+      type: ResolverPermissionsUserRef,
+      resolve: (parent, args) => {
+        const scope = eq(schema.permissionsUser.user, parent.id);
+        const join = and(
+          eq(schema.permissionsUser.chainId, schema.resolver.chainId),
+          eq(schema.permissionsUser.address, schema.resolver.address),
+        );
 
-            return results.map((result) => ({ id: result.permissionsUser.id, ...result }));
-          },
-        ),
+        return lazyConnection({
+          totalCount: () =>
+            db
+              .select({ count: count() })
+              .from(schema.permissionsUser)
+              .innerJoin(schema.resolver, join)
+              .where(scope)
+              .then((r) => r[0].count),
+          connection: () =>
+            resolveCursorConnection(
+              { ...ID_PAGINATED_CONNECTION_ARGS, args },
+              ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+                db
+                  .select(getTableColumns(schema.permissionsUser))
+                  .from(schema.permissionsUser)
+                  .innerJoin(schema.resolver, join)
+                  .where(and(scope, paginateBy(schema.permissionsUser.id, before, after)))
+                  .orderBy(orderPaginationBy(schema.permissionsUser.id, inverted))
+                  .limit(limit),
+            ),
+        });
+      },
     }),
   }),
 });

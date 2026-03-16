@@ -1,4 +1,0 @@
-validlabel,0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
-invalidhash,not-a-hex-hash
-anotherlabel,0x123
-toolong,0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef123456789

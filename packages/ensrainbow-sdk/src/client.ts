@@ -1,11 +1,14 @@
 import {
   buildEnsRainbowClientLabelSet,
   type Cache,
+  type EncodedLabelHash,
   type EnsRainbowClientLabelSet,
+  type EnsRainbowPublicConfig,
   type EnsRainbowServerLabelSet,
   type Label,
   type LabelHash,
   LruCache,
+  parseLabelHashOrEncodedLabelHash,
 } from "@ensnode/ensnode-sdk";
 
 import { DEFAULT_ENSRAINBOW_URL, ErrorCode, StatusCode } from "./consts";
@@ -17,13 +20,25 @@ export namespace EnsRainbow {
     count(): Promise<CountResponse>;
 
     /**
-     * Heal a labelhash to its original label
-     * @param labelHash The labelhash to heal
+     * Get the public configuration of the ENSRainbow service
      */
-    heal(labelHash: LabelHash): Promise<HealResponse>;
+    config(): Promise<ENSRainbowPublicConfig>;
+
+    /**
+     * Heal a labelHash to its original label.
+     * Accepts a strict `LabelHash`, an `EncodedLabelHash` (bracket-enclosed), or any string
+     * that can be normalized (missing `0x` prefix, uppercase hex chars, or 63-char hex).
+     * Returns a `HealBadRequestError` if the input cannot be normalized to a valid labelHash.
+     */
+    heal(labelHash: LabelHash | EncodedLabelHash | string): Promise<HealResponse>;
 
     health(): Promise<HealthResponse>;
 
+    /**
+     * Get the version information of the ENSRainbow service
+     *
+     * @deprecated Use {@link ApiClient.config} instead. This method will be removed in a future version.
+     */
     version(): Promise<VersionResponse>;
 
     getOptions(): Readonly<EnsRainbowApiClientOptions>;
@@ -118,6 +133,8 @@ export namespace EnsRainbow {
 
   /**
    * ENSRainbow version information.
+   *
+   * @deprecated Use {@link ENSRainbowPublicConfig} instead. This type will be removed in a future version.
    */
   export interface VersionInfo {
     /**
@@ -138,11 +155,21 @@ export namespace EnsRainbow {
 
   /**
    * Interface for the version endpoint response
+   *
+   * @deprecated Use {@link ENSRainbowPublicConfig} instead. This type will be removed in a future version.
    */
   export interface VersionResponse {
     status: typeof StatusCode.Success;
     versionInfo: VersionInfo;
   }
+
+  /**
+   * Complete public configuration object for ENSRainbow.
+   *
+   * Contains all public configuration information about the ENSRainbow service instance,
+   * including version, label set information, and record counts.
+   */
+  export type ENSRainbowPublicConfig = EnsRainbowPublicConfig;
 }
 
 export interface EnsRainbowApiClientOptions {
@@ -251,8 +278,11 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
    * - Labels can contain any valid string, including dots, null bytes, or be empty
    * - Clients should handle all possible string values appropriately
    *
-   * @param labelHash all lowercase 64-digit hex string with 0x prefix (total length of 66 characters)
-   * @returns a `HealResponse` indicating the result of the request and the healed label if successful
+   * @param labelHash - A labelHash to heal, either as a strict `LabelHash`, an `EncodedLabelHash`
+   * (bracket-enclosed), or any string that can be normalized (missing `0x` prefix, uppercase hex
+   * chars, or 63-char hex are all accepted and normalized automatically).
+   * @returns a `HealResponse` indicating the result of the request and the healed label if successful.
+   * Returns a `HealBadRequestError` if the input cannot be normalized to a valid labelHash.
    * @throws if the request fails due to network failures, DNS lookup failures, request timeouts,
    * CORS violations, or Invalid URLs
    * @example
@@ -283,11 +313,23 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
    * // }
    * ```
    */
-  async heal(labelHash: LabelHash): Promise<EnsRainbow.HealResponse> {
-    const cachedResult = this.cache.get(labelHash);
+  async heal(labelHash: LabelHash | EncodedLabelHash | string): Promise<EnsRainbow.HealResponse> {
+    let normalizedLabelHash: LabelHash;
+
+    try {
+      normalizedLabelHash = parseLabelHashOrEncodedLabelHash(labelHash);
+    } catch (error) {
+      return {
+        status: StatusCode.Error,
+        error: error instanceof Error ? error.message : String(error),
+        errorCode: ErrorCode.BadRequest,
+      } as EnsRainbow.HealBadRequestError;
+    }
+
+    const cachedResult = this.cache.get(normalizedLabelHash);
     if (cachedResult) return cachedResult;
 
-    const url = new URL(`/v1/heal/${labelHash}`, this.options.endpointUrl);
+    const url = new URL(`/v1/heal/${normalizedLabelHash}`, this.options.endpointUrl);
 
     // Apply pre-computed label set query parameters
     this.labelSetSearchParams.forEach((value, key) => {
@@ -298,7 +340,7 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
     const healResponse = (await response.json()) as EnsRainbow.HealResponse;
 
     if (isCacheableHealResponse(healResponse)) {
-      this.cache.set(labelHash, healResponse);
+      this.cache.set(normalizedLabelHash, healResponse);
     }
 
     return healResponse;
@@ -352,8 +394,22 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
   }
 
   /**
+   * Get the public configuration of the ENSRainbow service.
+   */
+  async config(): Promise<EnsRainbow.ENSRainbowPublicConfig> {
+    const response = await fetch(new URL("/v1/config", this.options.endpointUrl));
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch ENSRainbow config: ${response.statusText}`);
+    }
+
+    return response.json() as Promise<EnsRainbow.ENSRainbowPublicConfig>;
+  }
+
+  /**
    * Get the version information of the ENSRainbow service
    *
+   * @deprecated Use {@link EnsRainbowApiClient.config} instead. This method will be removed in a future version.
    * @returns the version information of the ENSRainbow service
    * @throws if the request fails due to network failures, DNS lookup failures, request
    * timeouts, CORS violations, or invalid URLs

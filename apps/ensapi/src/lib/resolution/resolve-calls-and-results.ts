@@ -241,3 +241,21 @@ export function interpretRawCallsAndResults<SELECTION extends ResolverRecordsSel
     }
   });
 }
+
+/**
+ * Organizes the results of executing and interpreting resolve calls, for debug logging.
+ */
+export function tablifyCallResults<SELECTION extends ResolverRecordsSelection>(
+  rawResults: ResolveCallsAndRawResults<SELECTION>,
+  results: ResolveCallsAndResults<SELECTION>,
+) {
+  return rawResults.map(({ call, result: rawResult }, i) => {
+    const interpreted = results[i].result;
+
+    return {
+      Call: `.resolve(${call.functionName}, ${call.args.join(", ")})`,
+      "Raw Result": rawResult,
+      Result: interpreted,
+    };
+  });
+}

@@ -1,10 +1,13 @@
 "use client";
 
+import { useNow } from "@namehash/namehash-ui";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 import {
-  type IndexingStatusResponse,
+  CrossChainIndexingStatusSnapshot,
+  createRealtimeIndexingStatusProjection,
+  IndexingStatusResponseCodes,
   IndexingStatusResponseOk,
   OmnichainIndexingStatusIds,
 } from "@ensnode/ensnode-sdk";
@@ -13,10 +16,7 @@ import { IndexingStats } from "@/components/indexing-status/indexing-stats";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-import {
-  indexingStatusResponseError,
-  indexingStatusResponseOkOmnichain,
-} from "../indexing-status-api.mock";
+import { indexingStatusResponseOkOmnichain } from "../indexing-status-api.mock";
 
 type LoadingVariant = "Loading" | "Loading Error";
 type ResponseOkVariant = keyof typeof indexingStatusResponseOkOmnichain;
@@ -37,7 +37,7 @@ let loadingTimeoutId: number;
 
 async function fetchMockedIndexingStatus(
   selectedVariant: Variant,
-): Promise<IndexingStatusResponseOk> {
+): Promise<CrossChainIndexingStatusSnapshot> {
   // always try clearing loading timeout when performing a mocked fetch
   // this way we get a fresh and very long request to observe the loading state
   if (loadingTimeoutId) {
@@ -48,14 +48,19 @@ async function fetchMockedIndexingStatus(
     case OmnichainIndexingStatusIds.Unstarted:
     case OmnichainIndexingStatusIds.Backfill:
     case OmnichainIndexingStatusIds.Following:
-    case OmnichainIndexingStatusIds.Completed:
-      return indexingStatusResponseOkOmnichain[selectedVariant] as IndexingStatusResponseOk;
+    case OmnichainIndexingStatusIds.Completed: {
+      const response = indexingStatusResponseOkOmnichain[
+        selectedVariant
+      ] as IndexingStatusResponseOk;
+
+      return response.realtimeProjection.snapshot;
+    }
     case "Error ResponseCode":
       throw new Error(
         "Received Indexing Status response with responseCode other than 'ok' which will not be cached.",
       );
     case "Loading":
-      return new Promise<IndexingStatusResponseOk>((_resolve, reject) => {
+      return new Promise<CrossChainIndexingStatusSnapshot>((_resolve, reject) => {
         loadingTimeoutId = +setTimeout(reject, 5 * 60 * 1_000);
       });
     case "Loading Error":
@@ -67,10 +72,17 @@ export default function MockIndexingStatusPage() {
   const [selectedVariant, setSelectedVariant] = useState<Variant>(
     OmnichainIndexingStatusIds.Unstarted,
   );
+  const now = useNow();
 
   const mockedIndexingStatus = useQuery({
     queryKey: ["mock", "useIndexingStatus", selectedVariant],
     queryFn: () => fetchMockedIndexingStatus(selectedVariant),
+    select: (cachedSnapshot) => {
+      return {
+        responseCode: IndexingStatusResponseCodes.Ok,
+        realtimeProjection: createRealtimeIndexingStatusProjection(cachedSnapshot, now),
+      } satisfies IndexingStatusResponseOk;
+    },
     retry: false, // allows loading error to be observed immediately
   });
 

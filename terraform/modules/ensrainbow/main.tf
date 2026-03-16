@@ -20,7 +20,7 @@ resource "render_web_service" "ensrainbow" {
 
   disk = {
     name       = "ensrainbow-data-${local.resource_name_suffix}"
-    size_gb    = 50
+    size_gb    = var.disk_size_gb
     mount_path = local.mount_path
   }
 

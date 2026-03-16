@@ -1,5 +1,5 @@
-import { index, onchainEnum, onchainTable, relations, uniqueIndex } from "ponder";
-import type { Address, Hash } from "viem";
+import { index, onchainEnum, onchainTable, primaryKey, relations, sql, uniqueIndex } from "ponder";
+import type { Address, BlockNumber, Hash } from "viem";
 
 import type {
   ChainId,
@@ -15,6 +15,7 @@ import type {
   RegistrationId,
   RegistryId,
   RenewalId,
+  ResolverId,
 } from "@ensnode/ensnode-sdk";
 
 /**
@@ -79,26 +80,80 @@ import type {
  * of multiple pieces of information (for example, a Registry is identified by (chainId, address)),
  * then that information is, as well, included in the entity's columns, not just encoded in the id.
  *
- * Many entities may directly reference an Event, which represents the metadata associated with the
- * on-chain event responsible for its existence.
+ * Events are structured as a single "events" table which tracks EVM Event Metadata for any on-chain
+ * Event. Then, join tables (DomainEvent, ResolverEvent, etc) track the relationship between an
+ * entity that has many events (Domain, Resolver) to the relevant set of Events.
+ *
+ * A Registration references the event that initiated the Registration. A Renewal, too, references
+ * the Event responsible for its existence.
  */
 
-/////////
-// Event
-/////////
+//////////
+// Events
+//////////
 
-export const event = onchainTable("events", (t) => ({
-  // Ponder's event.id
-  id: t.text().primaryKey(),
+export const event = onchainTable(
+  "events",
+  (t) => ({
+    // Ponder's event.id
+    id: t.text().primaryKey(),
 
-  // Event Metadata
-  chainId: t.integer().notNull().$type<ChainId>(),
-  address: t.hex().notNull().$type<Address>(),
-  blockHash: t.hex().notNull().$type<Hash>(),
-  timestamp: t.bigint().notNull(),
-  transactionHash: t.hex().notNull().$type<Hash>(),
-  logIndex: t.integer().notNull().$type<number>(),
-}));
+    // Event Log Metadata
+
+    // chain
+    chainId: t.integer().notNull().$type<ChainId>(),
+
+    // block
+    blockNumber: t.bigint().notNull().$type<BlockNumber>(),
+    blockHash: t.hex().notNull().$type<Hash>(),
+    timestamp: t.bigint().notNull(),
+
+    // transaction
+    transactionHash: t.hex().notNull().$type<Hash>(),
+    transactionIndex: t.integer().notNull(),
+    from: t.hex().notNull().$type<Address>(),
+    to: t.hex().$type<Address>(), // NOTE: a null `to` means this was a tx that deployed a contract
+
+    // log
+    address: t.hex().notNull().$type<Address>(),
+    logIndex: t.integer().notNull().$type<number>(),
+    selector: t.hex().notNull().$type<Hash>(),
+    topics: t.hex().array().notNull().$type<[Hash, ...Hash[]]>(),
+    data: t.hex().notNull(),
+  }),
+  (t) => ({
+    bySelector: index().on(t.selector),
+    byFrom: index().on(t.from),
+    byTimestamp: index().on(t.timestamp),
+  }),
+);
+
+export const domainEvent = onchainTable(
+  "domain_events",
+  (t) => ({
+    domainId: t.text().notNull().$type<DomainId>(),
+    eventId: t.text().notNull(),
+  }),
+  (t) => ({ pk: primaryKey({ columns: [t.domainId, t.eventId] }) }),
+);
+
+export const resolverEvent = onchainTable(
+  "resolver_events",
+  (t) => ({
+    resolverId: t.text().notNull().$type<ResolverId>(),
+    eventId: t.text().notNull(),
+  }),
+  (t) => ({ pk: primaryKey({ columns: [t.resolverId, t.eventId] }) }),
+);
+
+export const permissionsEvent = onchainTable(
+  "permissions_events",
+  (t) => ({
+    permissionsId: t.text().notNull().$type<PermissionsId>(),
+    eventId: t.text().notNull(),
+  }),
+  (t) => ({ pk: primaryKey({ columns: [t.permissionsId, t.eventId] }) }),
+);
 
 ///////////
 // Account
@@ -165,6 +220,9 @@ export const v1Domain = onchainTable(
     // represents a labelHash
     labelHash: t.hex().notNull().$type<LabelHash>(),
 
+    // may have a `rootRegistryOwner` (ENSv1Registry's owner()), zeroAddress interpreted as null
+    rootRegistryOwnerId: t.hex().$type<Address>(),
+
     // NOTE: Domain-Resolver Relations tracked via Protocol Acceleration plugin
   }),
   (t) => ({
@@ -181,6 +239,11 @@ export const relations_v1Domain = relations(v1Domain, ({ one, many }) => ({
     references: [v1Domain.id],
   }),
   children: many(v1Domain, { relationName: "parent" }),
+  rootRegistryOwner: one(account, {
+    relationName: "rootRegistryOwner",
+    fields: [v1Domain.rootRegistryOwnerId],
+    references: [account.id],
+  }),
 
   // shared
   owner: one(account, {
@@ -221,6 +284,7 @@ export const v2Domain = onchainTable(
   }),
   (t) => ({
     byRegistry: index().on(t.registryId),
+    bySubregistry: index().on(t.subregistryId).where(sql`${t.subregistryId} IS NOT NULL`),
     byOwner: index().on(t.ownerId),
     byLabelHash: index().on(t.labelHash),
   }),
@@ -272,12 +336,12 @@ export const registration = onchainTable(
     id: t.text().primaryKey().$type<RegistrationId>(),
 
     domainId: t.text().notNull().$type<DomainId>(),
-    index: t.integer().notNull().default(0),
+    index: t.integer().notNull(),
 
     // has a type
     type: registrationType().notNull(),
 
-    // must have a start timestamp
+    // has a start
     start: t.bigint().notNull(),
     // may have an expiry
     expiry: t.bigint(),
@@ -315,6 +379,11 @@ export const registration = onchainTable(
     byId: uniqueIndex().on(t.domainId, t.index),
   }),
 );
+
+export const latestRegistrationIndex = onchainTable("latest_registration_indexes", (t) => ({
+  domainId: t.text().primaryKey().$type<DomainId>(),
+  index: t.integer().notNull(),
+}));
 
 export const registration_relations = relations(registration, ({ one, many }) => ({
   // belongs to either v1Domain or v2Domain
@@ -355,8 +424,8 @@ export const renewal = onchainTable(
     id: t.text().primaryKey().$type<RenewalId>(),
 
     domainId: t.text().notNull().$type<DomainId>(),
-    registrationIndex: t.integer().notNull().default(0),
-    index: t.integer().notNull().default(0),
+    registrationIndex: t.integer().notNull(),
+    index: t.integer().notNull(),
 
     // all renewals have a duration
     duration: t.bigint().notNull(),
@@ -393,6 +462,16 @@ export const renewal_relations = relations(renewal, ({ one }) => ({
     references: [event.id],
   }),
 }));
+
+export const latestRenewalIndex = onchainTable(
+  "latest_renewal_indexes",
+  (t) => ({
+    domainId: t.text().notNull().$type<DomainId>(),
+    registrationIndex: t.integer().notNull(),
+    index: t.integer().notNull(),
+  }),
+  (t) => ({ pk: primaryKey({ columns: [t.domainId, t.registrationIndex] }) }),
+);
 
 ///////////////
 // Permissions

@@ -1,32 +1,25 @@
-import config from "@/config";
-
 import { type Context, ponder } from "ponder:registry";
 import schema from "ponder:schema";
 import { type Address, hexToBigInt, labelhash } from "viem";
 
-import { DatasourceNames } from "@ensnode/datasources";
 import {
   type AccountId,
-  accountIdEqual,
   getCanonicalId,
-  getDatasourceContract,
-  getENSv2RootRegistry,
   interpretAddress,
   isRegistrationFullyExpired,
+  type LabelHash,
   type LiteralLabel,
-  labelhashLiteralLabel,
   makeENSv2DomainId,
-  makeLatestRegistrationId,
   makeRegistryId,
   PluginName,
 } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
-import { ensureEvent } from "@/lib/ensv2/event-db-helpers";
+import { ensureDomainEvent, ensureEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel } from "@/lib/ensv2/label-db-helpers";
 import {
   getLatestRegistration,
-  supercedeLatestRegistration,
+  insertLatestRegistration,
 } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { toJson } from "@/lib/json-stringify-with-bigints";
@@ -45,12 +38,14 @@ export default function () {
       context: Context;
       event: EventWithArgs<{
         tokenId: bigint;
+        labelHash: LabelHash;
         label: string;
+        owner: Address;
         expiry: bigint;
-        registeredBy: Address;
+        sender: Address;
       }>;
     }) => {
-      const { tokenId, label: _label, expiry, registeredBy: registrant } = event.args;
+      const { tokenId, label: _label, expiry, sender: registrant } = event.args;
       const label = _label as LiteralLabel;
 
       const labelHash = labelhash(label);
@@ -85,26 +80,7 @@ export default function () {
         })
         .onConflictDoNothing();
 
-      // TODO(ensv2): hoist this access once all namespaces declare ENSv2 contracts
-      const ENSV2_ROOT_REGISTRY = getENSv2RootRegistry(config.namespace);
-      const ENSV2_L2_ETH_REGISTRY = getDatasourceContract(
-        config.namespace,
-        DatasourceNames.ENSv2ETHRegistry,
-        "ETHRegistry",
-      );
-
-      // if this Registry is Bridged, we know its Canonical Domain and can set it here
-      // TODO(bridged-registries): generalize this to future ENSv2 Bridged Resolvers
-      if (accountIdEqual(registry, ENSV2_L2_ETH_REGISTRY)) {
-        const domainId = makeENSv2DomainId(
-          ENSV2_ROOT_REGISTRY,
-          getCanonicalId(labelhashLiteralLabel("eth" as LiteralLabel)),
-        );
-        await context.db
-          .insert(schema.registryCanonicalDomain)
-          .values({ registryId: registryId, domainId })
-          .onConflictDoUpdate({ domainId });
-      }
+      // TODO(bridged-registries): upon registry creation, write the registry's canonical domain here
 
       // ensure discovered Label
       await ensureLabel(context, label);
@@ -134,23 +110,21 @@ export default function () {
         // if the v2Domain exists, this is a re-register after expiration and tokenId may have changed
         .onConflictDoUpdate({ tokenId });
 
-      // supercede the latest Registration if exists
-      if (registration) await supercedeLatestRegistration(context, registration);
-
       // insert ENSv2Registry Registration
       await ensureAccount(context, registrant);
-      await context.db.insert(schema.registration).values({
-        id: makeLatestRegistrationId(domainId),
-        index: registration ? registration.index + 1 : 0,
+      await insertLatestRegistration(context, {
+        domainId,
         type: "ENSv2Registry",
         registrarChainId: registry.chainId,
         registrarAddress: registry.address,
         registrantId: interpretAddress(registrant),
-        domainId,
         start: event.block.timestamp,
         expiry,
         eventId: await ensureEvent(context, event),
       });
+
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
     },
   );
 
@@ -164,11 +138,11 @@ export default function () {
       event: EventWithArgs<{
         tokenId: bigint;
         newExpiry: bigint;
-        changedBy: Address;
+        sender: Address;
       }>;
     }) => {
-      // biome-ignore lint/correctness/noUnusedVariables: not sure if we care to index changedBy
-      const { tokenId, newExpiry: expiry, changedBy } = event.args;
+      // biome-ignore lint/correctness/noUnusedVariables: not sure if we care to index sender
+      const { tokenId, newExpiry: expiry, sender } = event.args;
 
       const registry = getThisAccountId(context, event);
       const canonicalId = getCanonicalId(tokenId);
@@ -191,10 +165,8 @@ export default function () {
       // update Registration
       await context.db.update(schema.registration, { id: registration.id }).set({ expiry });
 
-      // if newExpiry is 0, this is an `unregister` call, related to ejecting
-      // https://github.com/ensdomains/namechain/blob/9e31679f4ee6d8abb4d4e840cdf06f2d653a706b/contracts/src/L1/bridge/L1BridgeController.sol#L141
-      // TODO(migration): maybe do something special with this state?
-      // if (expiry === 0n) return;
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
     },
   );
 
@@ -244,6 +216,9 @@ export default function () {
 
         await context.db.update(schema.v2Domain, { id: domainId }).set({ subregistryId });
       }
+
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
     },
   );
 
@@ -257,11 +232,9 @@ export default function () {
       event: EventWithArgs<{
         oldTokenId: bigint;
         newTokenId: bigint;
-        resource: bigint;
       }>;
     }) => {
-      // biome-ignore lint/correctness/noUnusedVariables: TODO: use resource
-      const { oldTokenId, newTokenId, resource } = event.args;
+      const { oldTokenId, newTokenId } = event.args;
 
       // Invariant: CanonicalIds must match
       if (getCanonicalId(oldTokenId) !== getCanonicalId(newTokenId)) {
@@ -272,10 +245,10 @@ export default function () {
       const registryAccountId = getThisAccountId(context, event);
       const domainId = makeENSv2DomainId(registryAccountId, canonicalId);
 
-      // TODO: likely need to track resource as well, since it depends on eacVersion
-      // then we can likely provide a Domain.resource -> PermissionsResource resolver in the api
-
       await context.db.update(schema.v2Domain, { id: domainId }).set({ tokenId: newTokenId });
+
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
     },
   );
 
@@ -302,6 +275,9 @@ export default function () {
     await context.db
       .update(schema.v2Domain, { id: domainId })
       .set({ ownerId: interpretAddress(owner) });
+
+    // push event to domain history
+    await ensureDomainEvent(context, event, domainId);
   }
 
   ponder.on(namespaceContract(pluginName, "ENSv2Registry:TransferSingle"), handleTransferSingle);

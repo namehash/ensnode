@@ -48,8 +48,12 @@ const navItems = [
     isActive: true,
     items: [
       {
-        title: "Subgraph (GraphQL)",
+        title: "Subgraph-Compatible",
         url: "/api/subgraph",
+      },
+      {
+        title: "GraphQL (ENS v1 + v2)",
+        url: "/api/graphql",
       },
     ],
   },

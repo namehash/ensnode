@@ -1,6 +1,6 @@
 import { ENSNamespaceIds } from "@ensnode/datasources";
 
-import { type ENSIndexerPublicConfig, PluginName } from "./types";
+import { type EnsIndexerPublicConfig, PluginName } from "./types";
 
 /**
  * Determines if the provided `config` results in indexing behavior compatible with the legacy ENS
@@ -9,7 +9,7 @@ import { type ENSIndexerPublicConfig, PluginName } from "./types";
  * @see https://ensnode.io/docs/concepts/what-is-the-ens-subgraph/
  */
 export function isSubgraphCompatible(
-  config: Pick<ENSIndexerPublicConfig, "namespace" | "plugins" | "labelSet">,
+  config: Pick<EnsIndexerPublicConfig, "namespace" | "plugins" | "labelSet">,
 ): boolean {
   // 1. only the subgraph plugin is active
   const onlySubgraphPluginActivated =

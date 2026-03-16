@@ -1,3 +1,5 @@
+import type { Abi } from "viem";
+
 export const UnwrappedEthRegistrarController = [
   {
     inputs: [
@@ -674,4 +676,4 @@ export const UnwrappedEthRegistrarController = [
     stateMutability: "nonpayable",
     type: "function",
   },
-] as const;
+] as const satisfies Abi;

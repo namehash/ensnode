@@ -2,18 +2,16 @@
 
 import { CopyButton } from "@namehash/namehash-ui";
 import { CheckIcon, CopyIcon } from "lucide-react";
-import * as React from "react";
+import { useMemo } from "react";
 
-import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
+import { useValidatedSelectedConnection } from "@/hooks/active/use-selected-connection";
 
-export default function ActionsSubgraphCompatPage() {
-  const { validatedSelectedConnection } = useSelectedConnection();
-
-  // TODO: we need a broader refactor to recognize the difference between
-  // a selected connection being in a valid format or not.
-  if (!validatedSelectedConnection.isValid) return null;
-
-  const url = new URL(`/subgraph`, validatedSelectedConnection.url).toString();
+export default function Actions() {
+  const selectedConnection = useValidatedSelectedConnection();
+  const url = useMemo(
+    () => new URL(`/subgraph`, selectedConnection).toString(),
+    [selectedConnection],
+  );
 
   return (
     <div className="flex w-full max-w-md items-center space-x-2">

@@ -2,7 +2,7 @@
   "name": "@docs/ensnode",
   "private": true,
   "type": "module",
-  "version": "1.5.1",
+  "version": "1.7.0",
   "packageManager": "pnpm@10.28.0",
   "scripts": {
     "dev": "astro dev",
@@ -34,7 +34,7 @@
     "astro-seo": "catalog:",
     "classcat": "5.0.5",
     "fuse.js": "^7.1.0",
-    "mermaid": "^11.10.0",
+    "mermaid": "^11.12.3",
     "react": "^18",
     "react-dom": "^18",
     "react-wrap-balancer": "^1.1.1",

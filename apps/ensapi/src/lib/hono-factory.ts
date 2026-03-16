@@ -1,17 +1,31 @@
+import { OpenAPIHono } from "@hono/zod-openapi";
 import { createFactory } from "hono/factory";
 
+import { errorResponse } from "@/lib/handlers/error-response";
 import type { CanAccelerateMiddlewareVariables } from "@/middleware/can-accelerate.middleware";
 import type { IndexingStatusMiddlewareVariables } from "@/middleware/indexing-status.middleware";
 import type { IsRealtimeMiddlewareVariables } from "@/middleware/is-realtime.middleware";
+import type { ReferralLeaderboardEditionsCachesMiddlewareVariables } from "@/middleware/referral-leaderboard-editions-caches.middleware";
+import type { ReferralProgramEditionConfigSetMiddlewareVariables } from "@/middleware/referral-program-edition-set.middleware";
 import type { ReferrerLeaderboardMiddlewareVariables } from "@/middleware/referrer-leaderboard.middleware";
-import type { ReferrerLeaderboardMiddlewareV1Variables } from "@/middleware/referrer-leaderboard.middleware-v1";
 
 export type MiddlewareVariables = IndexingStatusMiddlewareVariables &
   IsRealtimeMiddlewareVariables &
   CanAccelerateMiddlewareVariables &
   ReferrerLeaderboardMiddlewareVariables &
-  ReferrerLeaderboardMiddlewareV1Variables;
+  ReferralProgramEditionConfigSetMiddlewareVariables &
+  ReferralLeaderboardEditionsCachesMiddlewareVariables;
 
-export const factory = createFactory<{
-  Variables: Partial<MiddlewareVariables>;
-}>();
+type AppEnv = { Variables: Partial<MiddlewareVariables> };
+
+export const factory = createFactory<AppEnv>();
+
+export function createApp() {
+  return new OpenAPIHono<AppEnv>({
+    defaultHook: (result, c) => {
+      if (!result.success) {
+        return errorResponse(c, result.error);
+      }
+    },
+  });
+}

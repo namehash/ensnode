@@ -53,11 +53,15 @@ export type TheGraphEnvironment = {
 };
 
 /**
- * Environment variables for ENS Holiday Awards date range configuration.
+ * Environment variables for referral program editions configuration.
  *
- * Dates must be specified in ISO 8601 format (e.g., '2025-12-01T00:00:00Z').
+ * If CUSTOM_REFERRAL_PROGRAM_EDITIONS is set, it should be a URL that returns
+ * the JSON for a valid serialized custom referral program editions definition.
  */
-export interface EnsHolidayAwardsEnvironment {
-  ENS_HOLIDAY_AWARDS_START?: string;
-  ENS_HOLIDAY_AWARDS_END?: string;
+export interface ReferralProgramEditionsEnvironment {
+  /**
+   * Optional URL that returns the JSON for a valid serialized custom referral program editions definition.
+   * If not set, the default edition set will be used.
+   */
+  CUSTOM_REFERRAL_PROGRAM_EDITIONS?: string;
 }

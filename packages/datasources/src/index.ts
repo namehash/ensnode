@@ -2,6 +2,7 @@ export { EnhancedAccessControl as EnhancedAccessControlABI } from "./abis/ensv2/
 export { ETHRegistrar as ETHRegistrarABI } from "./abis/ensv2/ETHRegistrar";
 export { Registry as RegistryABI } from "./abis/ensv2/Registry";
 export { StandaloneReverseRegistrar as StandaloneReverseRegistrarABI } from "./abis/shared/StandaloneReverseRegistrar";
+export { UniversalResolverABI } from "./abis/shared/UniversalResolver";
 export { ThreeDNSToken as ThreeDNSTokenABI } from "./abis/threedns/ThreeDNSToken";
 export { AnyRegistrarABI } from "./lib/AnyRegistrarABI";
 export { AnyRegistrarControllerABI } from "./lib/AnyRegistrarControllerABI";

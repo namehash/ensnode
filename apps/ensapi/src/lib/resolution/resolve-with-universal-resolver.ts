@@ -11,15 +11,30 @@ import {
 } from "viem";
 import { packetToBytes } from "viem/ens";
 
-import { DatasourceNames, getDatasource, ResolverABI } from "@ensnode/datasources";
-import type { Name, ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
+import { DatasourceNames, ResolverABI, UniversalResolverABI } from "@ensnode/datasources";
+import {
+  getDatasourceContract,
+  maybeGetDatasourceContract,
+  type Name,
+  type ResolverRecordsSelection,
+} from "@ensnode/ensnode-sdk";
 
 import type {
   ResolveCalls,
   ResolveCallsAndRawResults,
 } from "@/lib/resolution/resolve-calls-and-results";
 
-const ensroot = getDatasource(config.namespace, DatasourceNames.ENSRoot);
+const UniversalResolver = getDatasourceContract(
+  config.namespace,
+  DatasourceNames.ENSRoot,
+  "UniversalResolver",
+);
+
+const UniversalResolverV2 = maybeGetDatasourceContract(
+  config.namespace,
+  DatasourceNames.ENSRoot,
+  "UniversalResolverV2",
+);
 
 /**
  * Execute a set of ResolveCalls for `name` against the UniversalResolver.
@@ -43,8 +58,10 @@ export async function executeResolveCallsWithUniversalResolver<
         const encodedMethod = encodeFunctionData({ abi: ResolverABI, ...call });
 
         const [value] = await publicClient.readContract({
-          abi: ensroot.contracts.UniversalResolver.abi,
-          address: ensroot.contracts.UniversalResolver.address,
+          abi: UniversalResolverABI,
+          // NOTE(ensv2-transition): if UniversalResolverV2 is defined, prefer it over UniversalResolver
+          // TODO(ensv2-transition): confirm this is correct
+          address: UniversalResolverV2?.address ?? UniversalResolver.address,
           functionName: "resolve",
           args: [encodedName, encodedMethod],
         });
@@ -63,16 +80,12 @@ export async function executeResolveCallsWithUniversalResolver<
         // NOTE: results is type-guaranteed to have at least 1 result (because each abi item's outputs.length >= 1)
         const result = results[0];
 
-        console.log(`.resolve(${call.functionName}, ${call.args}) -> ${result}`);
-
         return {
           call,
           result: result,
           reason: `.resolve(${call.functionName}, ${call.args})`,
         };
       } catch (error) {
-        console.log(`.resolve(${call.functionName}, ${call.args}) -> ${error}`);
-
         // in general, reverts are expected behavior
         if (error instanceof ContractFunctionExecutionError) {
           return { call, result: null, reason: error.shortMessage };

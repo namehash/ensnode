@@ -107,19 +107,6 @@ export interface BlockRef {
 }
 
 /**
- * Block range
- *
- * Represents a range of blocks
- */
-export interface Blockrange<BlockType = BlockNumber> {
-  /** Start block number */
-  startBlock?: BlockType;
-
-  /** End block number */
-  endBlock?: BlockType;
-}
-
-/**
  * Duration
  *
  * Representing a duration in seconds.
@@ -165,6 +152,37 @@ export type DeepPartial<T> = {
       ? DeepPartial<T[P]>
       : T[P];
 };
+
+/**
+ * Helper type to represent an unvalidated version of a business layer type `T`,
+ * where all properties are optional.
+ *
+ * This is useful for building a validated object `T` from partial input,
+ * where the input may be missing required fields or have fields that
+ * are not yet validated.
+ *
+ * For example, transforming serialized representation of type `T` into
+ * an unvalidated version of `T` that can be later validated against
+ * defined business rules and constraints.
+ *
+ * ```ts
+ * function buildUnvalidatedValue(serialized: SerializedChainId): Unvalidated<ChainId> {
+ *  // transform serialized chainId into unvalidated number (e.g. parseInt)
+ *  return parseInt(serialized, 10);
+ * }
+ *
+ * // Later, we can validate the unvalidated value against our business rules
+ * function validateChainId(unvalidatedChainId: Unvalidated<ChainId>): ChainId {
+ *   if (typeof unvalidatedChainId !== "number" || unvalidatedChainId <= 0) {
+ *     throw new Error("Invalid ChainId");
+ *   }
+ *
+ *   return unvalidatedChainId as ChainId;
+ * }
+ *
+ * ```
+ */
+export type Unvalidated<T> = DeepPartial<T>;
 
 /**
  * Marks keys in K as required (not undefined) and not null.

@@ -1,3 +1,5 @@
+import type { Abi } from "viem";
+
 export const EnhancedAccessControl = [
   {
     inputs: [
@@ -274,7 +276,7 @@ export const EnhancedAccessControl = [
       },
       {
         internalType: "uint256",
-        name: "rolesBitmap",
+        name: "roleBitmap",
         type: "uint256",
       },
       {
@@ -298,7 +300,7 @@ export const EnhancedAccessControl = [
     inputs: [
       {
         internalType: "uint256",
-        name: "rolesBitmap",
+        name: "roleBitmap",
         type: "uint256",
       },
       {
@@ -433,4 +435,4 @@ export const EnhancedAccessControl = [
     stateMutability: "view",
     type: "function",
   },
-] as const;
+] as const satisfies Abi;
