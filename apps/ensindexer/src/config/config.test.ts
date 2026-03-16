@@ -549,7 +549,10 @@ describe("config (with base env)", () => {
         const plugin = getPlugin(pluginName);
         const allSet = new Set(plugin.allDatasourceNames);
         for (const required of plugin.requiredDatasourceNames) {
-          expect(allSet.has(required), `${pluginName}: requiredDatasourceName '${required}' missing from allDatasourceNames`).toBe(true);
+          expect(
+            allSet.has(required),
+            `${pluginName}: requiredDatasourceName '${required}' missing from allDatasourceNames`,
+          ).toBe(true);
         }
       }
     });
