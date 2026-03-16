@@ -166,6 +166,25 @@ export const registrarActions = onchainTable(
      * the onchain events referenced in the `eventIds` field.
      *
      * Guaranteed to be the very first element in `eventIds` array.
+     *
+     * Implementation details: The `id` value is a Ponder checkpoint string — a fixed-length
+     * decimal string encoding the following fields (left to right, most to least significant):
+     *
+     * | Field              | Width (digits) | Description                               |
+     * |--------------------|----------------|-------------------------------------------|
+     * | `blockTimestamp`   | 10             | Unix seconds timestamp of the block       |
+     * | `chainId`          | 16             | EIP-155 chain ID                          |
+     * | `blockNumber`      | 16             | Block number                              |
+     * | `transactionIndex` | 16             | Index of the transaction within the block |
+     * | `eventType`        | 1              | Internal Ponder event type (always 5)     |
+     * | `eventIndex`       | 16             | Index of the event within the transaction |
+     *
+     * All fields are zero-padded to their fixed widths, so the string has constant
+     * length and lexicographic order equals chronological order.
+     *
+     * Because all registrar actions originate from Ponder log (smart-contract event)
+     * handlers, every `id` shares the same `eventType` digit (5), making direct
+     * lexicographic or bigint comparison safe for establishing total chronological order.
      */
     id: t.text().primaryKey(),
 

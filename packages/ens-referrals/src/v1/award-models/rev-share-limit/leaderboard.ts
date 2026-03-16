@@ -21,6 +21,7 @@ import {
   buildReferrerMetricsRevShareLimit,
 } from "./metrics";
 import type { ReferralEvent } from "./referral-event";
+import { sortReferralEvents } from "./sort-referral-events";
 import {
   BASE_REVENUE_CONTRIBUTION_PER_YEAR,
   isReferrerQualifiedRevShareLimit,
@@ -100,14 +101,8 @@ export const buildReferrerLeaderboardRevShareLimit = (
   rules: ReferralProgramRulesRevShareLimit,
   accurateAsOf: UnixTimestamp,
 ): ReferrerLeaderboardRevShareLimit => {
-  // 1. Sort events deterministically by id (lexicographic order).
-  //    Ponder checkpoint IDs are constant-length decimal strings, so lexicographic
-  //    order equals chronological order across all fields including eventType.
-  //    NOTE: This relies on the invariant that all ReferralEvents are produced by
-  //    Ponder log (smart-contract event) handlers and therefore share the same
-  //    eventType digit. If mixed event types are ever introduced, ordering by id
-  //    directly would need revisiting.
-  const sortedEvents = [...events].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  // 1. Sort events into chronological order by onchain execution order.
+  const sortedEvents = sortReferralEvents(events);
 
   // 2. Process events sequentially to run the race.
   const referrerStates = new Map<Address, ReferrerRaceState>();
