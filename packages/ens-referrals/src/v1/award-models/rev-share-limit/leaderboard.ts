@@ -21,12 +21,12 @@ import {
   buildReferrerMetricsRevShareLimit,
 } from "./metrics";
 import type { ReferralEvent } from "./referral-event";
-import { sortReferralEvents } from "./sort-referral-events";
 import {
   BASE_REVENUE_CONTRIBUTION_PER_YEAR,
   isReferrerQualifiedRevShareLimit,
   type ReferralProgramRulesRevShareLimit,
 } from "./rules";
+import { sortReferralEvents } from "./sort-referral-events";
 
 /**
  * Represents a leaderboard with the rev-share-limit award model for any number of referrers.
