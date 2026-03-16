@@ -1,2 +1,2 @@
-// export the shared ponder schema
-export * from "@ensnode/ensnode-schema";
+// export database schema definition for ENSIndexer
+export * from "@ensnode/ensdb-sdk";
