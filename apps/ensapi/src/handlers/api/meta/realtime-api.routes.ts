@@ -11,7 +11,7 @@ export const basePath = "/api/realtime";
 // Set default `maxWorstCaseDistance` for `GET /amirealtime` endpoint to one minute.
 export const AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE: Duration = minutesToSeconds(1);
 
-export const amIRealtimeGetMeta = createRoute({
+export const realtimeGetMeta = createRoute({
   method: "get",
   path: "/",
   operationId: "getRealtime",
@@ -47,4 +47,4 @@ export const amIRealtimeGetMeta = createRoute({
   },
 });
 
-export const routes = [amIRealtimeGetMeta];
+export const routes = [realtimeGetMeta];

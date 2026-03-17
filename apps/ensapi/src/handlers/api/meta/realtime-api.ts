@@ -1,13 +1,13 @@
 import { errorResponse } from "@/lib/handlers/error-response";
 import { createApp } from "@/lib/hono-factory";
 
-import { amIRealtimeGetMeta } from "./realtime-api.routes";
+import { realtimeGetMeta } from "./realtime-api.routes";
 
 const app = createApp();
 
 // allow performance monitoring clients to read HTTP Status for the provided
 // `maxWorstCaseDistance` param
-app.openapi(amIRealtimeGetMeta, async (c) => {
+app.openapi(realtimeGetMeta, async (c) => {
   // context must be set by the required middleware
   if (c.var.indexingStatus === undefined) {
     throw new Error(`Invariant(amirealtime-api): indexingStatusMiddleware required.`);
