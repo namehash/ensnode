@@ -1,0 +1,71 @@
+{
+  "name": "@ensnode/ensdb-sdk",
+  "version": "1.7.0",
+  "type": "module",
+  "description": "SDK for interacting with data in ENSDb",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/namehash/ensnode.git",
+    "directory": "packages/ensdb-sdk"
+  },
+  "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ensdb-sdk",
+  "keywords": [
+    "ENS",
+    "ENSNode",
+    "ENSDb"
+  ],
+  "exports": {
+    ".": "./src/index.ts",
+    "./ensindexer": "./src/ensindexer/index.ts",
+    "./ensnode": "./src/ensnode/index.ts"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": {
+        "import": {
+          "types": "./dist/index.d.ts",
+          "default": "./dist/index.js"
+        }
+      },
+      "./ensindexer": {
+        "import": {
+          "types": "./dist/ensindexer/index.d.ts",
+          "default": "./dist/ensindexer/index.js"
+        }
+      },
+      "./ensnode": {
+        "import": {
+          "types": "./dist/ensnode/index.d.ts",
+          "default": "./dist/ensnode/index.js"
+        }
+      }
+    },
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts"
+  },
+  "scripts": {
+    "prepublish": "tsup",
+    "lint": "biome check --write .",
+    "lint:ci": "biome ci"
+  },
+  "peerDependencies": {
+    "drizzle-orm": "catalog:",
+    "ponder": "catalog:",
+    "viem": "catalog:"
+  },
+  "devDependencies": {
+    "@ensnode/ensnode-sdk": "workspace:",
+    "@ensnode/shared-configs": "workspace:*",
+    "drizzle-orm": "catalog:",
+    "ponder": "catalog:",
+    "tsup": "catalog:",
+    "typescript": "catalog:",
+    "viem": "catalog:"
+  }
+}

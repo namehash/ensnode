@@ -1,4 +1,4 @@
-# @ensnode/ensnode-schema
+# @ensnode/ensdb-sdk
 
 ## 1.7.0
 

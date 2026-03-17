@@ -3,7 +3,7 @@ import config from "@/config";
 import { Param, sql } from "drizzle-orm";
 import { namehash } from "viem";
 
-import * as schema from "@ensnode/ensnode-schema";
+import * as schema from "@ensnode/ensdb-sdk";
 import {
   type DomainId,
   type ENSv2DomainId,
