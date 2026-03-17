@@ -1,4 +1,3 @@
-import { calcReferralProgramStatusRevShareLimit } from "../../status";
 import {
   type BaseReferrerLeaderboardPage,
   type ReferrerLeaderboardPageContext,
@@ -9,6 +8,7 @@ import type { AggregatedReferrerMetricsRevShareLimit } from "./aggregations";
 import type { ReferrerLeaderboardRevShareLimit } from "./leaderboard";
 import type { AwardedReferrerMetricsRevShareLimit } from "./metrics";
 import type { ReferralProgramRulesRevShareLimit } from "./rules";
+import { calcReferralProgramStatusRevShareLimit } from "./status";
 
 /**
  * A page of referrers from the rev-share-limit referrer leaderboard.

@@ -8,8 +8,8 @@ import {
   makeUrlSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
-import { ReferralProgramStatuses } from "../../../status";
 import { REFERRERS_PER_LEADERBOARD_PAGE_MAX } from "../leaderboard-page";
+import { ReferralProgramStatuses } from "../status";
 
 /**
  * Loose base schema for {@link BaseReferralProgramRules}.

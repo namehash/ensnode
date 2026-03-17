@@ -2,13 +2,13 @@ import type { PriceUsdc } from "@ensnode/ensnode-sdk";
 import { makePriceUsdcSchema } from "@ensnode/ensnode-sdk/internal";
 
 import type { ReferralProgramEditionSlug } from "../../edition";
-import { calcReferralProgramStatusRevShareLimit } from "../../status";
 import type { BaseReferralProgramEditionSummary } from "../shared/edition-summary";
 import { validateBaseReferralProgramEditionSummary } from "../shared/edition-summary";
 import type { ReferralProgramAwardModels } from "../shared/rules";
 import type { ReferrerLeaderboardRevShareLimit } from "./leaderboard";
 import type { ReferralProgramRulesRevShareLimit } from "./rules";
 import { validateReferralProgramRulesRevShareLimit } from "./rules";
+import { calcReferralProgramStatusRevShareLimit } from "./status";
 
 /**
  * Edition summary for a `rev-share-limit` referral program edition.

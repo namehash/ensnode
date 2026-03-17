@@ -6,7 +6,7 @@ import type { ReferrerEditionMetricsUnrecognized } from "../award-models/shared/
 import { ReferrerEditionMetricsTypeIds } from "../award-models/shared/edition-metrics";
 import type { ReferrerLeaderboardPageUnrecognized } from "../award-models/shared/leaderboard-page";
 import { ReferralProgramAwardModels } from "../award-models/shared/rules";
-import { ReferralProgramStatuses } from "../status";
+import { ReferralProgramStatuses } from "../award-models/shared/status";
 import {
   makeReferralProgramEditionConfigSetArraySchema,
   makeReferrerEditionMetricsSchema,

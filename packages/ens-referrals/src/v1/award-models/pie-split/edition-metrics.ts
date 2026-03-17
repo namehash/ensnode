@@ -1,8 +1,8 @@
 import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
 
-import type { ReferralProgramStatusId } from "../../status";
 import type { ReferrerEditionMetricsTypeIds } from "../shared/edition-metrics";
 import type { ReferralProgramAwardModels } from "../shared/rules";
+import type { ReferralProgramStatusId } from "../shared/status";
 import type { AggregatedReferrerMetricsPieSplit } from "./aggregations";
 import type { AwardedReferrerMetricsPieSplit, UnrankedReferrerMetricsPieSplit } from "./metrics";
 import type { ReferralProgramRulesPieSplit } from "./rules";

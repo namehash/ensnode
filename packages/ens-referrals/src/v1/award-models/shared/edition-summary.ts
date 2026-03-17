@@ -2,13 +2,13 @@ import {
   REFERRAL_PROGRAM_EDITION_SLUG_PATTERN,
   type ReferralProgramEditionSlug,
 } from "../../edition";
-import type { ReferralProgramStatusId } from "../../status";
 import type {
   BaseReferralProgramRules,
   ReferralProgramAwardModel,
   ReferralProgramAwardModels,
   ReferralProgramRulesUnrecognized,
 } from "./rules";
+import type { ReferralProgramStatusId } from "./status";
 
 /**
  * Base fields shared by all edition summary variants.

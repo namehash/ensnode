@@ -1,11 +1,11 @@
 import type { ReferralProgramEditionSlug } from "../../edition";
-import { calcReferralProgramStatus } from "../../status";
 import type { BaseReferralProgramEditionSummary } from "../shared/edition-summary";
 import { validateBaseReferralProgramEditionSummary } from "../shared/edition-summary";
 import type { ReferralProgramAwardModels } from "../shared/rules";
 import type { ReferrerLeaderboardPieSplit } from "./leaderboard";
 import type { ReferralProgramRulesPieSplit } from "./rules";
 import { validateReferralProgramRulesPieSplit } from "./rules";
+import { calcReferralProgramStatusPieSplit } from "./status";
 
 /**
  * Edition summary for a `pie-split` referral program edition.
@@ -41,7 +41,7 @@ export function buildEditionSummaryPieSplit(
   rules: ReferralProgramRulesPieSplit,
   leaderboard: ReferrerLeaderboardPieSplit,
 ): ReferralProgramEditionSummaryPieSplit {
-  const status = calcReferralProgramStatus(rules, leaderboard.accurateAsOf);
+  const status = calcReferralProgramStatusPieSplit(rules, leaderboard.accurateAsOf);
   const result = { awardModel: rules.awardModel, slug, displayName, status, rules };
 
   validateEditionSummaryPieSplit(result);

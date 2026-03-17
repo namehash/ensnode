@@ -3,7 +3,10 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { parseTimestamp, parseUsdc, priceEth, priceUsdc } from "@ensnode/ensnode-sdk";
 
 import { SECONDS_PER_YEAR } from "../../time";
+import { buildReferrerLeaderboardPageContext } from "../shared/leaderboard-page";
+import { ReferralProgramStatuses } from "../shared/status";
 import { buildReferrerLeaderboardRevShareLimit } from "./leaderboard";
+import { buildLeaderboardPageRevShareLimit } from "./leaderboard-page";
 import type { ReferralEvent } from "./referral-event";
 import type { ReferralProgramEditionDisqualification } from "./rules";
 import { buildReferralProgramRulesRevShareLimit } from "./rules";
@@ -383,6 +386,24 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
       const ranks = [...result.referrers.values()].map((r) => r.rank);
       expect(ranks).toEqual([1, 2]);
+    });
+  });
+
+  describe("Edition status via leaderboard page", () => {
+    it("page status is Exhausted when pool is fully consumed within the active window", () => {
+      // Pool = $2.50 — just enough for one qualifying referrer
+      // ADDR_A qualifies at t=1000 (1 year), claims the full pool → awardPoolRemaining = $0
+      // accurateAsOf is within the active window (2026-06-01), so status must be Exhausted
+      const rules = buildTestRules(parseUsdc("2.5"));
+      const events = [makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR)];
+
+      const leaderboard = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
+      expect(leaderboard.aggregatedMetrics.awardPoolRemaining.amount).toBe(0n);
+
+      const pageContext = buildReferrerLeaderboardPageContext({ page: 1 }, leaderboard);
+      const page = buildLeaderboardPageRevShareLimit(pageContext, leaderboard);
+
+      expect(page.status).toBe(ReferralProgramStatuses.Exhausted);
     });
   });
 

@@ -4,8 +4,8 @@ import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
 
 import type { ReferrerLeaderboard } from "../../leaderboard";
 import { isNonNegativeInteger, isPositiveInteger } from "../../number";
-import type { ReferralProgramStatusId } from "../../status";
 import type { ReferralProgramAwardModel, ReferralProgramAwardModels } from "./rules";
+import type { ReferralProgramStatusId } from "./status";
 
 /**
  * The default number of referrers per leaderboard page.
