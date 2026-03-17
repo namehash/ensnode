@@ -11,12 +11,13 @@
   "navigation": {
     "dropdowns": [
       {
-        "dropdown": "ENSNode",
-        "icon": "/assets/ensnode.svg",
+        "dropdown": "Docs Home",
+        "description": "",
         "groups": [
           {
             "group": "Overview",
             "pages": [
+              "index",
               "ensnode/index",
               "ensnode/concepts/what-is-ensnode",
               "ensnode/concepts/what-is-the-ens-subgraph",
@@ -45,10 +46,7 @@
           {
             "group": "Running Locally",
             "expanded": false,
-            "pages": [
-              "ensnode/running/index",
-              "ensnode/running/ens-test-env"
-            ]
+            "pages": ["ensnode/running/index", "ensnode/running/ens-test-env"]
           },
           {
             "group": "Contributing",
@@ -76,6 +74,7 @@
       },
       {
         "dropdown": "ENSApi",
+        "description": "REST API for ENS data",
         "icon": "/assets/ensapi.svg",
         "groups": [
           {
@@ -105,6 +104,7 @@
       },
       {
         "dropdown": "ENSIndexer",
+        "description": "ENS blockchain indexing engine",
         "icon": "/assets/ensindexer.svg",
         "groups": [
           {
@@ -130,6 +130,7 @@
       },
       {
         "dropdown": "ENSRainbow",
+        "description": "ENS label healing service",
         "icon": "/assets/ensrainbow.svg",
         "groups": [
           {
@@ -191,6 +192,7 @@
       },
       {
         "dropdown": "ENSDb",
+        "description": "ENS shared database layer",
         "icon": "/assets/ensdb.svg",
         "groups": [
           {
@@ -201,14 +203,12 @@
       },
       {
         "dropdown": "ENSAdmin",
+        "description": "ENS admin dashboard UI",
         "icon": "/assets/ensadmin.svg",
         "groups": [
           {
             "group": "Overview",
-            "pages": [
-              "ensadmin/index",
-              "ensadmin/overview/what-is-ensadmin"
-            ]
+            "pages": ["ensadmin/index", "ensadmin/overview/what-is-ensadmin"]
           },
           {
             "group": "Contributing",
@@ -223,21 +223,17 @@
     "light": "/assets/logo-light.svg",
     "dark": "/assets/logo-dark.svg"
   },
-  "navbar": {
-    "links": [
-      {
-        "label": "Support",
-        "href": "mailto:hello@namehashlabs.org"
-      }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "ENSAdmin",
-      "href": "https://admin.ensnode.io"
-    }
-  },
   "contextual": {
-    "options": ["copy", "view", "chatgpt", "claude", "perplexity", "mcp", "cursor", "vscode"]
+    "options": [
+      "copy",
+      "view",
+      "chatgpt",
+      "claude",
+      "perplexity",
+      "mcp",
+      "cursor",
+      "vscode"
+    ]
   },
   "footer": {
     "socials": {
