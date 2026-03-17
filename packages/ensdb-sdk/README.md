@@ -6,16 +6,16 @@ This package is a utility library for interacting with ENSDb.
 
 ### ENSIndexer Schema
 
-This schema consists of database object definitions exported from `src/ensindexer` module.
+This schema consists of database object definitions exported from the `src/ensindexer` module.
 Defining database objects is done by using functionality from `ponder` package.
 
 #### Applying schema definition updates
 
-Updating database object definitions in ENSIndexer Schema _does not_ require any extra steps. ENSIndexer app is built on top of Ponder app. The Ponder app runtime takes care of generating migrations and having them executed during application runtime. In other words, ENSIndexer Schema in ENSDb gets auto-updated when ENSIndexer app starts.
+Updating database object definitions in the ENSIndexer Schema _does not_ require manual database migrations. The ENSIndexer app delegates to its imported Ponder package to execute database migrations on an ENSIndexer Schema. In other words, each ENSIndexer Schema in ENSDb is automatically migrated by Ponder when ENSIndexer starts.
 
 ### ENSNode Schema
 
-This schema consists of database object definitions exported from `src/ensnode` module.
+This schema consists of database object definitions exported from the `src/ensnode` module.
 Defining database objects is done by using functionality from `drizzle-orm` package.
 
 #### Applying schema definition updates
