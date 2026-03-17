@@ -1,7 +1,7 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, eq } from "drizzle-orm";
 
-import * as schema from "@ensnode/ensnode-schema";
+import * as schema from "@ensnode/ensdb-sdk";
 import {
   makePermissionsId,
   makePermissionsResourceId,
@@ -13,11 +13,13 @@ import {
 
 import { builder } from "@/graphql-api/builder";
 import { orderPaginationBy, paginateBy } from "@/graphql-api/lib/connection-helpers";
+import { resolveFindEvents } from "@/graphql-api/lib/find-events/find-events-resolver";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
 import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { AccountIdRef } from "@/graphql-api/schema/account-id";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
+import { EventRef, EventsWhereInput } from "@/graphql-api/schema/event";
 import { db } from "@/lib/db";
 
 export const PermissionsRef = builder.loadableObjectRef("Permissions", {
@@ -65,7 +67,7 @@ PermissionsRef.implement({
     ////////////////////////////
     id: t.field({
       description: "A unique reference to this Permission.",
-      type: "ID",
+      type: "PermissionsId",
       nullable: false,
       resolve: (parent) => parent.id,
     }),
@@ -119,6 +121,24 @@ PermissionsRef.implement({
         });
       },
     }),
+
+    //////////////////////
+    // Permissions.events
+    //////////////////////
+    events: t.connection({
+      description: "All Events associated with these Permissions.",
+      type: EventRef,
+      args: {
+        where: t.arg({ type: EventsWhereInput }),
+      },
+      resolve: (parent, args) =>
+        resolveFindEvents(args, {
+          through: {
+            table: schema.permissionsEvent,
+            scope: eq(schema.permissionsEvent.permissionsId, parent.id),
+          },
+        }),
+    }),
   }),
 });
 
@@ -133,9 +153,19 @@ PermissionsResourceRef.implement({
     ////////////////////////////
     id: t.field({
       description: "A unique reference to this PermissionsResource.",
-      type: "ID",
+      type: "PermissionsResourceId",
       nullable: false,
       resolve: (parent) => parent.id,
+    }),
+
+    ////////////////////////
+    // Permissions.contract
+    ////////////////////////
+    contract: t.field({
+      description: "The contract within which these Permissions are granted.",
+      type: AccountIdRef,
+      nullable: false,
+      resolve: ({ chainId, address }) => ({ chainId, address }),
     }),
 
     ///////////////////////////////////
@@ -201,9 +231,19 @@ PermissionsUserRef.implement({
     ////////////////////////////
     id: t.field({
       description: "A unique reference to this PermissionsUser.",
-      type: "ID",
+      type: "PermissionsUserId",
       nullable: false,
       resolve: (parent) => parent.id,
+    }),
+
+    ////////////////////////
+    // Permissions.contract
+    ////////////////////////
+    contract: t.field({
+      description: "The contract within which these Permissions are granted.",
+      type: AccountIdRef,
+      nullable: false,
+      resolve: ({ chainId, address }) => ({ chainId, address }),
     }),
 
     ////////////////////////////

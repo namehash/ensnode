@@ -9,9 +9,9 @@ ENSNode is a multichain ENS indexer monorepo. It indexes ENS names across multip
 - `apps/ensadmin` — Dashboard for navigating indexed ENS state (Next.js)
 - `apps/ensrainbow` — Label healing service: recovers labels from labelHashes (Hono)
 - `apps/fallback-ensapi` — AWS Lambda fallback that proxies ENS Subgraph requests when ENSApi is unhealthy
+- `packages/ensdb-sdk` — SDK for interacting with data in ENSDb
 - `packages/ensnode-sdk` — SDK for interacting with ENSNode
 - `packages/ensnode-react` — React hooks and providers for ENSNode API
-- `packages/ensnode-schema` — Shared Drizzle schema definitions
 - `packages/ensrainbow-sdk` — SDK for interacting with ENSRainbow
 - `packages/datasources` — Catalog of chain datasources (contracts, start blocks, event filters)
 - `packages/ponder-subgraph` — Hono middleware for Subgraph-compatible GraphQL

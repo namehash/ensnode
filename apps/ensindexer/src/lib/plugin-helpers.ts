@@ -1,9 +1,9 @@
 import type { createConfig as createPonderConfig } from "ponder";
 
 import type { DatasourceName } from "@ensnode/datasources";
-import { PluginName, uniq } from "@ensnode/ensnode-sdk";
+import { PluginName } from "@ensnode/ensnode-sdk";
 
-import type { ENSIndexerConfig } from "@/config/types";
+import type { EnsIndexerConfig } from "@/config/types";
 import { getPlugin } from "@/plugins";
 
 /**
@@ -48,6 +48,7 @@ export function namespaceContract<const PREFIX extends string, const CONTRACT_NA
 export interface ENSIndexerPlugin<
   PLUGIN_NAME extends PluginName = PluginName,
   REQUIRED_DATASOURCE_NAMES extends readonly DatasourceName[] = DatasourceName[],
+  ALL_DATASOURCE_NAMES extends readonly DatasourceName[] = DatasourceName[],
   CHAINS extends object = {},
   CONTRACTS extends object = {},
   ACCOUNTS extends object = {},
@@ -65,12 +66,17 @@ export interface ENSIndexerPlugin<
   requiredDatasourceNames: REQUIRED_DATASOURCE_NAMES;
 
   /**
+   * The complete list of DatasourceNames this plugin may index (required + optional).
+   * Used to derive {@link EnsIndexerConfig.indexedChainIds} from static metadata without
+   * calling {@link createPonderConfig}.
+   */
+  allDatasourceNames: ALL_DATASOURCE_NAMES;
+
+  /**
    * Create Ponder Config for the plugin.
-   *
-   * @param {ENSIndexerConfig} config
    */
   createPonderConfig(
-    config: ENSIndexerConfig,
+    config: EnsIndexerConfig,
   ): PonderConfigResult<CHAINS, CONTRACTS, ACCOUNTS, BLOCKS>;
 }
 
@@ -92,6 +98,7 @@ type PonderConfigResult<
 export interface BuildPluginOptions<
   PLUGIN_NAME extends PluginName,
   REQUIRED_DATASOURCE_NAMES extends readonly DatasourceName[],
+  ALL_DATASOURCE_NAMES extends readonly DatasourceName[],
   PONDER_CONFIG_RESULT extends PonderConfigResult,
 > {
   /** The unique plugin name */
@@ -100,12 +107,15 @@ export interface BuildPluginOptions<
   /** The plugin's required Datasources */
   requiredDatasourceNames: REQUIRED_DATASOURCE_NAMES;
 
+  /** All DatasourceNames this plugin may index (required + optional) */
+  allDatasourceNames: ALL_DATASOURCE_NAMES;
+
   /**
    * Create the ponder configuration lazily to prevent premature execution of
    * nested factory functions, i.e. to ensure that the ponder configuration
    * is only created for this plugin when it is activated.
    */
-  createPonderConfig(config: ENSIndexerConfig): PONDER_CONFIG_RESULT;
+  createPonderConfig(config: EnsIndexerConfig): PONDER_CONFIG_RESULT;
 }
 
 /**
@@ -115,12 +125,19 @@ export interface BuildPluginOptions<
 export function createPlugin<
   PLUGIN_NAME extends PluginName,
   REQUIRED_DATASOURCE_NAMES extends readonly DatasourceName[],
+  ALL_DATASOURCE_NAMES extends readonly DatasourceName[],
   PONDER_CONFIG_RESULT extends PonderConfigResult,
 >(
-  options: BuildPluginOptions<PLUGIN_NAME, REQUIRED_DATASOURCE_NAMES, PONDER_CONFIG_RESULT>,
+  options: BuildPluginOptions<
+    PLUGIN_NAME,
+    REQUIRED_DATASOURCE_NAMES,
+    ALL_DATASOURCE_NAMES,
+    PONDER_CONFIG_RESULT
+  >,
 ): ENSIndexerPlugin<
   PLUGIN_NAME,
   REQUIRED_DATASOURCE_NAMES,
+  ALL_DATASOURCE_NAMES,
   PONDER_CONFIG_RESULT["chains"],
   PONDER_CONFIG_RESULT["contracts"],
   PONDER_CONFIG_RESULT["accounts"],
@@ -129,28 +146,22 @@ export function createPlugin<
   return options;
 }
 
-export function getRequiredDatasourceNames(plugins: ENSIndexerPlugin[]): DatasourceName[] {
-  const requiredDatasourceNames = plugins.flatMap((plugin) => plugin.requiredDatasourceNames);
-
-  return uniq(requiredDatasourceNames);
-}
-
 /**
- * Gets a mapping of plugin names to their required datasource names.
+ * Gets a mapping of plugin names to all their datasource names (required + optional).
  *
- * @param pluginNames - Names of the plugins to retrieve required datasource names for.
+ * @param pluginNames - Names of the plugins to retrieve all datasource names for.
  */
-export function getPluginsRequiredDatasourceNames(
+export function getPluginsAllDatasourceNames(
   pluginNames: PluginName[],
 ): Map<PluginName, DatasourceName[]> {
   const plugins = pluginNames.map(getPlugin);
-  const pluginToRequiredDatasources = new Map<PluginName, DatasourceName[]>();
+  const pluginToAllDatasources = new Map<PluginName, DatasourceName[]>();
 
   for (const plugin of plugins) {
-    pluginToRequiredDatasources.set(plugin.name, plugin.requiredDatasourceNames);
+    pluginToAllDatasources.set(plugin.name, plugin.allDatasourceNames);
   }
 
-  return pluginToRequiredDatasources;
+  return pluginToAllDatasources;
 }
 
 /**

@@ -6,7 +6,7 @@ import {
 import { and, count, desc, eq, gte, isNotNull, lte, ne, sql, sum } from "drizzle-orm";
 import { type Address, zeroAddress } from "viem";
 
-import * as schema from "@ensnode/ensnode-schema";
+import * as schema from "@ensnode/ensdb-sdk";
 import { deserializeDuration, formatAccountId } from "@ensnode/ensnode-sdk";
 
 import { db } from "@/lib/db";

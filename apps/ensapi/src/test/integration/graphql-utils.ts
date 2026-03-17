@@ -1,5 +1,6 @@
 import { type DocumentNode, Kind, parse, print } from "graphql";
 import type { RequestDocument, Variables } from "graphql-request";
+import { expect } from "vitest";
 
 import { client } from "./ensnode-graphql-api-client";
 import { highlightGraphQL, highlightJSON } from "./highlight";
@@ -24,6 +25,61 @@ export function flattenConnection<T>(
   return (connection?.edges ?? []).map((edge) => edge.node);
 }
 
+/**
+ * A function that fetches a page given cursor pagination variables.
+ * Extra variables (e.g. order, filters) should be closed over by the caller.
+ */
+type FetchPage<T> = (variables: {
+  first?: number;
+  after?: string;
+  last?: number;
+  before?: string;
+}) => Promise<PaginatedGraphQLConnection<T>>;
+
+/**
+ * Collects all nodes by paginating forward through a connection.
+ */
+export async function collectForward<T>(fetchPage: FetchPage<T>, pageSize: number): Promise<T[]> {
+  const all: T[] = [];
+  let after: string | undefined;
+
+  while (true) {
+    const page = await fetchPage({ first: pageSize, after });
+    all.push(...flattenConnection(page));
+
+    if (!page.pageInfo.hasNextPage) break;
+
+    const nextCursor = page.pageInfo.endCursor ?? undefined;
+    expect(nextCursor, "endCursor must advance when hasNextPage is true").not.toBe(after);
+    after = nextCursor;
+  }
+
+  return all;
+}
+
+/**
+ * Collects all nodes by paginating backward through a connection.
+ */
+export async function collectBackward<T>(fetchPage: FetchPage<T>, pageSize: number): Promise<T[]> {
+  const all: T[] = [];
+  let before: string | undefined;
+
+  while (true) {
+    const page = await fetchPage({ last: pageSize, before });
+    // prepend: last pages come in forward order within the page,
+    // but we're iterating from the end of the full list
+    all.unshift(...flattenConnection(page));
+
+    if (!page.pageInfo.hasPreviousPage) break;
+
+    const nextCursor = page.pageInfo.startCursor ?? undefined;
+    expect(nextCursor, "startCursor must advance when hasPreviousPage is true").not.toBe(before);
+    before = nextCursor;
+  }
+
+  return all;
+}
+
 function isDocumentNode(obj: any): obj is DocumentNode {
   return (
     typeof obj === "object" &&
@@ -33,6 +89,9 @@ function isDocumentNode(obj: any): obj is DocumentNode {
   );
 }
 
+/**
+ * Wrapper over client.request with logging for test debugging.
+ */
 export async function request<T = unknown>(
   document: RequestDocument,
   variables?: Variables,

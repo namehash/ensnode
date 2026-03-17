@@ -1,21 +1,37 @@
 import { type Address, isAddress } from "viem";
 
-import {
-  type DatasourceName,
-  type ENSNamespace,
-  getENSNamespace,
-  maybeGetDatasource,
-} from "@ensnode/datasources";
-import { asLowerCaseAddress, PluginName, uniq } from "@ensnode/ensnode-sdk";
+import { type DatasourceName, type ENSNamespace, getENSNamespace } from "@ensnode/datasources";
+import { asLowerCaseAddress, PluginName } from "@ensnode/ensnode-sdk";
 import type { ZodCheckFnInput } from "@ensnode/ensnode-sdk/internal";
 
 import { getPlugin } from "@/plugins";
 
-import type { ENSIndexerConfig } from "./types";
+import type { EnsIndexerConfig } from "./types";
+
+// Invariant: each plugin's requiredDatasourceNames is a subset of its allDatasourceNames
+export function invariant_requiredDatasourcesSubsetOfAll(
+  ctx: ZodCheckFnInput<Pick<EnsIndexerConfig, "plugins">>,
+) {
+  const { value: config } = ctx;
+
+  for (const pluginName of config.plugins) {
+    const plugin = getPlugin(pluginName);
+    const allSet = new Set(plugin.allDatasourceNames);
+    const missing = plugin.requiredDatasourceNames.filter((name) => !allSet.has(name));
+
+    if (missing.length > 0) {
+      ctx.issues.push({
+        code: "custom",
+        input: config,
+        message: `Plugin '${pluginName}' has requiredDatasourceNames [${missing.join(", ")}] that are not included in its allDatasourceNames.`,
+      });
+    }
+  }
+}
 
 // Invariant: specified plugins' datasources are available in the specified namespace's Datasources
 export function invariant_requiredDatasources(
-  ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "namespace" | "plugins">>,
+  ctx: ZodCheckFnInput<Pick<EnsIndexerConfig, "namespace" | "plugins">>,
 ) {
   const { value: config } = ctx;
 
@@ -47,46 +63,32 @@ export function invariant_requiredDatasources(
 
 // Invariant: rpcConfig is specified for each indexed chain
 export function invariant_rpcConfigsSpecifiedForIndexedChains(
-  ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "namespace" | "plugins" | "rpcConfigs">>,
+  ctx: ZodCheckFnInput<Pick<EnsIndexerConfig, "indexedChainIds" | "rpcConfigs">>,
 ) {
   const { value: config } = ctx;
 
-  for (const pluginName of config.plugins) {
-    const datasourceNames = getPlugin(pluginName).requiredDatasourceNames;
-
-    for (const datasourceName of datasourceNames) {
-      const datasource = maybeGetDatasource(config.namespace, datasourceName);
-      if (!datasource) continue; // ignore undefined datasources, caught by requiredDatasources invariant
-
-      if (!config.rpcConfigs.has(datasource.chain.id)) {
-        ctx.issues.push({
-          code: "custom",
-          input: config,
-          message: `Plugin '${pluginName}' indexes chain with id ${datasource.chain.id} but RPC_URL_${datasource.chain.id} is not specified.`,
-        });
-      }
+  for (const chainId of config.indexedChainIds) {
+    if (!config.rpcConfigs.has(chainId)) {
+      ctx.issues.push({
+        code: "custom",
+        input: config,
+        message: `An active plugin indexes chain ${chainId}, but RPC_URL_${chainId} is not configured.`,
+      });
     }
   }
 }
 
 // Invariant: if a global blockrange is defined, only one chain is indexed
 export function invariant_globalBlockrange(
-  ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "globalBlockrange" | "namespace" | "plugins">>,
+  ctx: ZodCheckFnInput<
+    Pick<EnsIndexerConfig, "globalBlockrange" | "indexedChainIds" | "namespace" | "plugins">
+  >,
 ) {
   const { value: config } = ctx;
   const { globalBlockrange } = config;
 
   if (globalBlockrange.startBlock !== undefined || globalBlockrange.endBlock !== undefined) {
-    const datasources = getENSNamespace(config.namespace) as ENSNamespace;
-    const indexedChainIds = uniq(
-      config.plugins
-        .flatMap((pluginName) => getPlugin(pluginName).requiredDatasourceNames)
-        .map((datasourceName) => datasources[datasourceName])
-        .filter((ds) => !!ds) // ignore undefined datasources, caught by requiredDatasources invariant
-        .map((datasource) => datasource.chain.id),
-    );
-
-    if (indexedChainIds.length > 1) {
+    if (config.indexedChainIds.size > 1) {
       ctx.issues.push({
         code: "custom",
         input: config,
@@ -109,7 +111,7 @@ export function invariant_globalBlockrange(
 
 // Invariant: all contracts have a valid ContractConfig defined
 export function invariant_validContractConfigs(
-  ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "namespace">>,
+  ctx: ZodCheckFnInput<Pick<EnsIndexerConfig, "namespace">>,
 ) {
   const { value: config } = ctx;
 
@@ -139,7 +141,7 @@ export function invariant_validContractConfigs(
 
 // Invariant: ensv2 plugin requires protocol acceleration
 export function invariant_ensv2RequiresProtocolAcceleration(
-  ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "plugins">>,
+  ctx: ZodCheckFnInput<Pick<EnsIndexerConfig, "plugins">>,
 ) {
   const { value: config } = ctx;
 

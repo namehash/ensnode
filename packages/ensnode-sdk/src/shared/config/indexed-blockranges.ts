@@ -15,30 +15,25 @@ import {
 import type { ChainId } from "../types";
 
 /**
- * Build a map of indexed blockranges for each indexed chain,
- * based on the ENSIndexer configuration.
+ * Build a map of indexed blockranges for each indexed chain, based on the ENSIndexer configuration.
  *
- * Useful for presenting a clear view of the indexed blockranges
- * across chains.
+ * Useful for presenting a clear view of the indexed blockranges across chains.
  */
 export function buildIndexedBlockranges(
   namespace: ENSNamespaceId,
-  pluginsRequiredDatasourceNames: Map<PluginName, DatasourceName[]>,
+  pluginsDatasourceNames: Map<PluginName, DatasourceName[]>,
 ): Map<ChainId, BlockNumberRangeWithStartBlock> {
   const indexedBlockranges = new Map<ChainId, BlockNumberRangeWithStartBlock>();
 
-  for (const [pluginName, requiredDatasourceNames] of pluginsRequiredDatasourceNames) {
-    for (const requiredDatasourceName of requiredDatasourceNames) {
-      const requiredDatasource = maybeGetDatasource(namespace, requiredDatasourceName);
+  for (const [, datasourceNames] of pluginsDatasourceNames) {
+    for (const datasourceName of datasourceNames) {
+      const datasource = maybeGetDatasource(namespace, datasourceName);
 
-      if (!requiredDatasource) {
-        throw new Error(
-          `Datasource ${requiredDatasourceName} required by plugin ${pluginName} is not defined in namespace ${namespace}.`,
-        );
-      }
+      // skip datasources not defined in this namespace, mirroring derive_indexedChainIds logic
+      if (!datasource) continue;
 
-      const datasourceChainId = requiredDatasource.chain.id;
-      const datasourceContracts = Object.values<ContractConfig>(requiredDatasource.contracts);
+      const datasourceChainId = datasource.chain.id;
+      const datasourceContracts = Object.values<ContractConfig>(datasource.contracts);
 
       for (const datasourceContract of datasourceContracts) {
         const currentChainIndexedBlockrange = indexedBlockranges.get(datasourceChainId);

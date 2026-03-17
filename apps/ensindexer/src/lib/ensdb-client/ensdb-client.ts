@@ -1,7 +1,7 @@
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { eq, sql } from "drizzle-orm/sql";
 
-import { ensNodeMetadata } from "@ensnode/ensnode-schema";
+import { ensNodeMetadata } from "@ensnode/ensdb-sdk";
 import {
   type CrossChainIndexingStatusSnapshot,
   deserializeCrossChainIndexingStatusSnapshot,

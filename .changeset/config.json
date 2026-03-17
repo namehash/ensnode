@@ -13,7 +13,7 @@
       "fallback-ensapi",
       "@ensnode/datasources",
       "@ensnode/ensrainbow-sdk",
-      "@ensnode/ensnode-schema",
+      "@ensnode/ensdb-sdk",
       "@ensnode/ensnode-react",
       "@ensnode/ensnode-sdk",
       "@ensnode/ponder-sdk",

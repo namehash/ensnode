@@ -22,6 +22,7 @@ const REQUIRED_DATASOURCE_NAMES = [DatasourceNames.Lineanames];
 export default createPlugin({
   name: pluginName,
   requiredDatasourceNames: REQUIRED_DATASOURCE_NAMES,
+  allDatasourceNames: REQUIRED_DATASOURCE_NAMES,
   createPonderConfig(config) {
     const {
       lineanames: { chain, contracts },

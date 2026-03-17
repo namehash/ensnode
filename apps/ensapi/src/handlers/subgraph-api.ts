@@ -2,7 +2,7 @@ import config from "@/config";
 
 import { createDocumentationMiddleware } from "ponder-enrich-gql-docs-middleware";
 
-import * as schema from "@ensnode/ensnode-schema";
+import * as schema from "@ensnode/ensdb-sdk";
 import { type Duration, hasSubgraphApiConfigSupport } from "@ensnode/ensnode-sdk";
 import { subgraphGraphQLMiddleware } from "@ensnode/ponder-subgraph";
 

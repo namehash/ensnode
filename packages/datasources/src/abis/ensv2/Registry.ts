@@ -1,3 +1,5 @@
+import type { Abi } from "viem";
+
 export const Registry = [
   {
     anonymous: false,
@@ -40,9 +42,9 @@ export const Registry = [
         type: "uint64",
       },
       {
-        indexed: false,
+        indexed: true,
         internalType: "address",
-        name: "changedBy",
+        name: "sender",
         type: "address",
       },
     ],
@@ -59,10 +61,22 @@ export const Registry = [
         type: "uint256",
       },
       {
+        indexed: true,
+        internalType: "bytes32",
+        name: "labelHash",
+        type: "bytes32",
+      },
+      {
         indexed: false,
         internalType: "string",
         name: "label",
         type: "string",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "owner",
+        type: "address",
       },
       {
         indexed: false,
@@ -71,9 +85,9 @@ export const Registry = [
         type: "uint64",
       },
       {
-        indexed: false,
+        indexed: true,
         internalType: "address",
-        name: "registeredBy",
+        name: "sender",
         type: "address",
       },
     ],
@@ -90,9 +104,96 @@ export const Registry = [
         type: "uint256",
       },
       {
+        indexed: true,
+        internalType: "bytes32",
+        name: "labelHash",
+        type: "bytes32",
+      },
+      {
+        indexed: false,
+        internalType: "string",
+        name: "label",
+        type: "string",
+      },
+      {
+        indexed: false,
+        internalType: "uint64",
+        name: "expiry",
+        type: "uint64",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "sender",
+        type: "address",
+      },
+    ],
+    name: "NameReserved",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "tokenId",
+        type: "uint256",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "sender",
+        type: "address",
+      },
+    ],
+    name: "NameUnregistered",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "contract IRegistry",
+        name: "parent",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "string",
+        name: "label",
+        type: "string",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "sender",
+        type: "address",
+      },
+    ],
+    name: "ParentUpdated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "tokenId",
+        type: "uint256",
+      },
+      {
         indexed: false,
         internalType: "address",
         name: "resolver",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "sender",
         type: "address",
       },
     ],
@@ -114,6 +215,12 @@ export const Registry = [
         name: "subregistry",
         type: "address",
       },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "sender",
+        type: "address",
+      },
     ],
     name: "SubregistryUpdated",
     type: "event",
@@ -131,12 +238,6 @@ export const Registry = [
         indexed: true,
         internalType: "uint256",
         name: "newTokenId",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "resource",
         type: "uint256",
       },
     ],
@@ -279,6 +380,24 @@ export const Registry = [
         internalType: "uint256[]",
         name: "",
         type: "uint256[]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getParent",
+    outputs: [
+      {
+        internalType: "contract IRegistry",
+        name: "parent",
+        type: "address",
+      },
+      {
+        internalType: "string",
+        name: "label",
+        type: "string",
       },
     ],
     stateMutability: "view",
@@ -468,4 +587,4 @@ export const Registry = [
     stateMutability: "view",
     type: "function",
   },
-] as const;
+] as const satisfies Abi;

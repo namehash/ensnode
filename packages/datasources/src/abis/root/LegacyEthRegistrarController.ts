@@ -1,3 +1,5 @@
+import type { Abi } from "viem";
+
 export const LegacyEthRegistrarController = [
   {
     constant: true,
@@ -237,4 +239,4 @@ export const LegacyEthRegistrarController = [
     name: "OwnershipTransferred",
     type: "event",
   },
-] as const;
+] as const satisfies Abi;

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ensNodeMetadata } from "@ensnode/ensnode-schema";
+import { ensNodeMetadata } from "@ensnode/ensdb-sdk";
 import {
   deserializeCrossChainIndexingStatusSnapshot,
   EnsNodeMetadataKeys,

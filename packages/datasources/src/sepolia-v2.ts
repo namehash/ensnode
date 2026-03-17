@@ -11,7 +11,7 @@ import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } fro
 import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
 import { Registry as root_Registry } from "./abis/root/Registry";
 import { UniversalRegistrarRenewalWithReferrer as root_UniversalRegistrarRenewalWithReferrer } from "./abis/root/UniversalRegistrarRenewalWithReferrer";
-import { UniversalResolver as root_UniversalResolver } from "./abis/root/UniversalResolver";
+import { UniversalResolverV1 } from "./abis/root/UniversalResolverV1";
 import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
 import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
 // Shared ABIs
@@ -77,7 +77,7 @@ export default {
         startBlock: 9374708,
       },
       UniversalResolver: {
-        abi: root_UniversalResolver,
+        abi: UniversalResolverV1,
         address: "0x198827b2316e020c48b500fc3cebdbcaf58787ce",
         startBlock: 9374708,
       },
@@ -124,6 +124,11 @@ export default {
       DefaultReverseResolver3: {
         abi: ResolverABI,
         address: "0xa238d3aca667210d272391a119125d38816af4b1",
+        startBlock: 9374708,
+      },
+      DefaultPublicResolver5: {
+        abi: ResolverABI,
+        address: "0x0e14ee0592da66bb4c8a8090066bc8a5af15f3e6",
         startBlock: 9374708,
       },
       BaseReverseResolver: {

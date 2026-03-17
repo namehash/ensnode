@@ -2,7 +2,7 @@ import { and, eq, sql } from "drizzle-orm";
 import { alias, unionAll } from "drizzle-orm/pg-core";
 import type { Address } from "viem";
 
-import * as schema from "@ensnode/ensnode-schema";
+import * as schema from "@ensnode/ensdb-sdk";
 import type { DomainId } from "@ensnode/ensnode-sdk";
 
 import { db } from "@/lib/db";

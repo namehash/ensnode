@@ -6,8 +6,9 @@ Integration test environment orchestration for ENSNode. Spins up the full ENSNod
 
 The current devnet image is pinned to:
 
+
 ```
-ghcr.io/ensdomains/contracts-v2:main-f476641
+ghcr.io/ensdomains/contracts-v2:main-cb8e11c
 ```
 
 Update the `DEVNET_IMAGE` constant in the orchestrator source to change the devnet version.

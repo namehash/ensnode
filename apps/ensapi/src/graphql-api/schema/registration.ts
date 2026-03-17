@@ -2,7 +2,7 @@ import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@poth
 import { and, eq } from "drizzle-orm";
 import { hexToBigInt } from "viem";
 
-import * as schema from "@ensnode/ensnode-schema";
+import * as schema from "@ensnode/ensdb-sdk";
 import {
   type ENSv1DomainId,
   isRegistrationFullyExpired,
@@ -65,7 +65,7 @@ RegistrationInterfaceRef.implement({
     //////////////////////
     id: t.field({
       description: "A unique reference to this Registration.",
-      type: "ID",
+      type: "RegistrationId",
       nullable: false,
       resolve: (parent) => parent.id,
     }),
@@ -88,6 +88,16 @@ RegistrationInterfaceRef.implement({
       type: AccountIdRef,
       nullable: false,
       resolve: (parent) => ({ chainId: parent.registrarChainId, address: parent.registrarAddress }),
+    }),
+
+    //////////////////////
+    // Registration.start
+    //////////////////////
+    start: t.field({
+      description: "A UnixTimestamp indicating when this Registration was created.",
+      type: "BigInt",
+      nullable: false,
+      resolve: (parent) => parent.start,
     }),
 
     ///////////////////////////

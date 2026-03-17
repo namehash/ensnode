@@ -1,6 +1,6 @@
 import config from "@/config";
 
-import * as schema from "@ensnode/ensnode-schema";
+import * as schema from "@ensnode/ensdb-sdk";
 
 import { makeDrizzle } from "@/lib/handlers/drizzle";
 
