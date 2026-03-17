@@ -5,13 +5,13 @@ import { openapiMeta } from "@/openapi-meta";
 import * as nameTokensRoutes from "./handlers/api/explore/name-tokens-api.routes";
 import * as registrarActionsRoutes from "./handlers/api/explore/registrar-actions-api.routes";
 import * as ensnodeRoutes from "./handlers/api/meta/ensnode-api.routes";
-import * as amIRealtimeRoutes from "./handlers/api/meta/realtime-api.routes";
+import * as realtimeRoutes from "./handlers/api/meta/realtime-api.routes";
 import * as resolutionRoutes from "./handlers/api/resolution/resolution-api.routes";
 import * as ensanalyticsRoutes from "./handlers/ensanalytics/ensanalytics-api.routes";
 import * as ensanalyticsV1Routes from "./handlers/ensanalytics/ensanalytics-api-v1.routes";
 
 const routeGroups = [
-  amIRealtimeRoutes,
+  realtimeRoutes,
   ensnodeRoutes,
   ensanalyticsV1Routes,
   ensanalyticsRoutes,
