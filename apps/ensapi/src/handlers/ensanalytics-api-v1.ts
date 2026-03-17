@@ -1,16 +1,18 @@
 import {
+  buildEditionSummary,
   getReferrerEditionMetrics,
   getReferrerLeaderboardPage,
-  type ReferralProgramEditionConfigSetResponse,
-  ReferralProgramEditionConfigSetResponseCodes,
   type ReferralProgramEditionSlug,
+  type ReferralProgramEditionSummariesResponse,
+  ReferralProgramEditionSummariesResponseCodes,
+  type ReferralProgramEditionSummary,
   type ReferrerLeaderboard,
   type ReferrerLeaderboardPageResponse,
   ReferrerLeaderboardPageResponseCodes,
   type ReferrerMetricsEditionsData,
   type ReferrerMetricsEditionsResponse,
   ReferrerMetricsEditionsResponseCodes,
-  serializeReferralProgramEditionConfigSetResponse,
+  serializeReferralProgramEditionSummariesResponse,
   serializeReferrerLeaderboardPageResponse,
   serializeReferrerMetricsEditionsResponse,
 } from "@namehash/ens-referrals/v1";
@@ -235,12 +237,18 @@ app.openapi(getReferrerDetailRoute, async (c) => {
   }
 });
 
-// Get configured edition config set
+// Get edition summaries
 app.openapi(getEditionsRoute, async (c) => {
   // context must be set by the required middleware
   if (c.var.referralProgramEditionConfigSet === undefined) {
     throw new Error(
       `Invariant(ensanalytics-api-v1): referralProgramEditionConfigSetMiddleware required`,
+    );
+  }
+
+  if (c.var.referralLeaderboardEditionsCaches === undefined) {
+    throw new Error(
+      `Invariant(ensanalytics-api-v1): referralLeaderboardEditionsCachesMiddleware required`,
     );
   }
 
@@ -252,27 +260,74 @@ app.openapi(getEditionsRoute, async (c) => {
         "Referral program edition config set failed to load",
       );
       return c.json(
-        serializeReferralProgramEditionConfigSetResponse({
-          responseCode: ReferralProgramEditionConfigSetResponseCodes.Error,
+        serializeReferralProgramEditionSummariesResponse({
+          responseCode: ReferralProgramEditionSummariesResponseCodes.Error,
           error: "Service Unavailable",
           errorMessage: "Referral program configuration is currently unavailable.",
-        } satisfies ReferralProgramEditionConfigSetResponse),
+        } satisfies ReferralProgramEditionSummariesResponse),
         503,
       );
     }
 
-    // Convert Map to array and sort by start timestamp descending
-    const editions = Array.from(c.var.referralProgramEditionConfigSet.values()).sort(
+    // Check if leaderboard caches failed to load
+    if (c.var.referralLeaderboardEditionsCaches instanceof Error) {
+      logger.error(
+        { error: c.var.referralLeaderboardEditionsCaches },
+        "Referral program leaderboard caches failed to load",
+      );
+      return c.json(
+        serializeReferralProgramEditionSummariesResponse({
+          responseCode: ReferralProgramEditionSummariesResponseCodes.Error,
+          error: "Service Unavailable",
+          errorMessage: "Referral program leaderboard data is currently unavailable.",
+        } satisfies ReferralProgramEditionSummariesResponse),
+        503,
+      );
+    }
+
+    // Sort edition configs by start timestamp descending
+    const editionConfigs = Array.from(c.var.referralProgramEditionConfigSet.values()).sort(
       (a, b) => b.rules.startTime - a.rules.startTime,
     );
 
+    // Read all edition leaderboard caches in parallel
+    const leaderboardCaches = c.var.referralLeaderboardEditionsCaches;
+    const editionLeaderboards = await Promise.all(
+      editionConfigs.map(async (config) => {
+        const cache = leaderboardCaches.get(config.slug);
+        if (!cache) throw new Error(`Invariant: edition cache for ${config.slug} should exist`);
+        return { slug: config.slug, leaderboard: await cache.read() };
+      }),
+    );
+
+    // Return 503 if any leaderboard failed to load
+    const failedEditions = editionLeaderboards
+      .filter(({ leaderboard }) => leaderboard instanceof Error)
+      .map(({ slug }) => slug);
+
+    if (failedEditions.length > 0) {
+      return c.json(
+        serializeReferralProgramEditionSummariesResponse({
+          responseCode: ReferralProgramEditionSummariesResponseCodes.Error,
+          error: "Service Unavailable",
+          errorMessage: `Leaderboard data not available for edition(s): ${failedEditions.join(", ")}`,
+        } satisfies ReferralProgramEditionSummariesResponse),
+        503,
+      );
+    }
+
+    // Type narrowing: all leaderboards are guaranteed to be non-Error
+    const editions: ReferralProgramEditionSummary[] = editionConfigs.map((config, i) =>
+      buildEditionSummary(config, editionLeaderboards[i].leaderboard as ReferrerLeaderboard),
+    );
+
     return c.json(
-      serializeReferralProgramEditionConfigSetResponse({
-        responseCode: ReferralProgramEditionConfigSetResponseCodes.Ok,
+      serializeReferralProgramEditionSummariesResponse({
+        responseCode: ReferralProgramEditionSummariesResponseCodes.Ok,
         data: {
           editions,
         },
-      } satisfies ReferralProgramEditionConfigSetResponse),
+      } satisfies ReferralProgramEditionSummariesResponse),
     );
   } catch (error) {
     logger.error({ error }, "Error in /v1/ensanalytics/editions endpoint");
@@ -281,11 +336,11 @@ app.openapi(getEditionsRoute, async (c) => {
         ? error.message
         : "An unexpected error occurred while processing your request";
     return c.json(
-      serializeReferralProgramEditionConfigSetResponse({
-        responseCode: ReferralProgramEditionConfigSetResponseCodes.Error,
+      serializeReferralProgramEditionSummariesResponse({
+        responseCode: ReferralProgramEditionSummariesResponseCodes.Error,
         error: "Internal server error",
         errorMessage,
-      } satisfies ReferralProgramEditionConfigSetResponse),
+      } satisfies ReferralProgramEditionSummariesResponse),
       500,
     );
   }

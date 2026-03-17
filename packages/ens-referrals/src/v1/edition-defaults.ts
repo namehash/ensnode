@@ -38,6 +38,7 @@ export function getDefaultReferralProgramEditionConfigSet(
       parseTimestamp("2025-12-31T23:59:59Z"),
       subregistryId,
       new URL("https://ensawards.org/ens-holiday-awards-rules"),
+      true,
     ),
   };
 
@@ -54,6 +55,7 @@ export function getDefaultReferralProgramEditionConfigSet(
       // TODO: replace this with the dedicated March 2026 rules URL once published
       new URL("https://ensawards.org/ens-holiday-awards-rules"),
       [],
+      false,
     ),
   };
 

@@ -55,6 +55,13 @@ export interface BaseReferralProgramRules {
    * @example new URL("https://ensawards.org/ens-holiday-awards-rules")
    */
   rulesUrl: URL;
+
+  /**
+   * Whether the awards for this edition have been distributed.
+   *
+   * When `true` and `now > endTime`, the status transitions from `AwardsReview` to `Closed`.
+   */
+  areAwardsDistributed: boolean;
 }
 
 /**

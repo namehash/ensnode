@@ -55,6 +55,7 @@ function buildTestRules(
     { chainId: 1, address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85" },
     new URL("https://example.com/rules"),
     disqualifications,
+    false,
   );
 }
 

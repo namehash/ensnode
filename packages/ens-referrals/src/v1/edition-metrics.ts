@@ -18,7 +18,7 @@ import {
 } from "./award-models/shared/edition-metrics";
 import { ReferralProgramAwardModels } from "./award-models/shared/rules";
 import type { ReferrerLeaderboard } from "./leaderboard";
-import { calcReferralProgramStatus } from "./status";
+import { calcReferralProgramStatus, calcReferralProgramStatusRevShareLimit } from "./status";
 
 /**
  * Referrer edition metrics data for a specific referrer address.
@@ -46,10 +46,9 @@ export const getReferrerEditionMetrics = (
   referrer: Address,
   leaderboard: ReferrerLeaderboard,
 ): ReferrerEditionMetrics => {
-  const status = calcReferralProgramStatus(leaderboard.rules, leaderboard.accurateAsOf);
-
   switch (leaderboard.awardModel) {
     case ReferralProgramAwardModels.PieSplit: {
+      const status = calcReferralProgramStatus(leaderboard.rules, leaderboard.accurateAsOf);
       const awardedReferrerMetrics = leaderboard.referrers.get(referrer);
       if (awardedReferrerMetrics) {
         return {
@@ -74,6 +73,11 @@ export const getReferrerEditionMetrics = (
     }
 
     case ReferralProgramAwardModels.RevShareLimit: {
+      const status = calcReferralProgramStatusRevShareLimit(
+        leaderboard.rules,
+        leaderboard.accurateAsOf,
+        leaderboard.aggregatedMetrics,
+      );
       const awardedReferrerMetrics = leaderboard.referrers.get(referrer);
       if (awardedReferrerMetrics) {
         return {

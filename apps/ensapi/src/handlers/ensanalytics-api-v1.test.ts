@@ -28,12 +28,12 @@ vi.mock("../middleware/referral-leaderboard-editions-caches.middleware", () => (
 
 import {
   buildReferralProgramRulesPieSplit,
-  deserializeReferralProgramEditionConfigSetResponse,
+  deserializeReferralProgramEditionSummariesResponse,
   deserializeReferrerLeaderboardPageResponse,
   deserializeReferrerMetricsEditionsResponse,
   ReferralProgramAwardModels,
-  ReferralProgramEditionConfigSetResponseCodes,
   type ReferralProgramEditionSlug,
+  ReferralProgramEditionSummariesResponseCodes,
   ReferralProgramStatuses,
   ReferrerEditionMetricsTypeIds,
   type ReferrerLeaderboard,
@@ -824,6 +824,7 @@ describe("/v1/ensanalytics", () => {
               parseTimestamp("2025-12-31T23:59:59Z"),
               { chainId: 1, address: "0x0000000000000000000000000000000000000000" },
               new URL("https://example.com/rules"),
+              false,
             ),
           },
         ],
@@ -839,6 +840,7 @@ describe("/v1/ensanalytics", () => {
               parseTimestamp("2026-03-31T23:59:59Z"),
               { chainId: 1, address: "0x0000000000000000000000000000000000000000" },
               new URL("https://example.com/rules"),
+              false,
             ),
           },
         ],
@@ -854,6 +856,7 @@ describe("/v1/ensanalytics", () => {
               parseTimestamp("2026-06-30T23:59:59Z"),
               { chainId: 1, address: "0x0000000000000000000000000000000000000000" },
               new URL("https://example.com/rules"),
+              false,
             ),
           },
         ],
@@ -867,24 +870,40 @@ describe("/v1/ensanalytics", () => {
         },
       );
 
-      // Mock caches middleware (needed by middleware chain)
+      // Mock caches middleware with a cache for each edition
+      const mockEditionsCaches = new Map<ReferralProgramEditionSlug, SWRCache<ReferrerLeaderboard>>(
+        [
+          [
+            "2025-12",
+            { read: async () => emptyReferralLeaderboard } as SWRCache<ReferrerLeaderboard>,
+          ],
+          [
+            "2026-03",
+            { read: async () => emptyReferralLeaderboard } as SWRCache<ReferrerLeaderboard>,
+          ],
+          [
+            "2026-06",
+            { read: async () => emptyReferralLeaderboard } as SWRCache<ReferrerLeaderboard>,
+          ],
+        ],
+      );
       vi.mocked(
         editionsCachesMiddleware.referralLeaderboardEditionsCachesMiddleware,
       ).mockImplementation(async (c, next) => {
-        c.set("referralLeaderboardEditionsCaches", new Map());
+        c.set("referralLeaderboardEditionsCaches", mockEditionsCaches);
         return await next();
       });
 
       // Act: send test request
       const httpResponse = await app.request("/editions");
       const responseData = await httpResponse.json();
-      const response = deserializeReferralProgramEditionConfigSetResponse(responseData);
+      const response = deserializeReferralProgramEditionSummariesResponse(responseData);
 
       // Assert: response contains all editions sorted by start timestamp descending
       expect(httpResponse.status).toBe(200);
-      expect(response.responseCode).toBe(ReferralProgramEditionConfigSetResponseCodes.Ok);
+      expect(response.responseCode).toBe(ReferralProgramEditionSummariesResponseCodes.Ok);
 
-      if (response.responseCode === ReferralProgramEditionConfigSetResponseCodes.Ok) {
+      if (response.responseCode === ReferralProgramEditionSummariesResponseCodes.Ok) {
         expect(response.data.editions).toHaveLength(3);
 
         // Verify sorting: most recent start time first
@@ -920,13 +939,13 @@ describe("/v1/ensanalytics", () => {
       // Act: send test request
       const httpResponse = await app.request("/editions");
       const responseData = await httpResponse.json();
-      const response = deserializeReferralProgramEditionConfigSetResponse(responseData);
+      const response = deserializeReferralProgramEditionSummariesResponse(responseData);
 
       // Assert: response is error
       expect(httpResponse.status).toBe(503);
-      expect(response.responseCode).toBe(ReferralProgramEditionConfigSetResponseCodes.Error);
+      expect(response.responseCode).toBe(ReferralProgramEditionSummariesResponseCodes.Error);
 
-      if (response.responseCode === ReferralProgramEditionConfigSetResponseCodes.Error) {
+      if (response.responseCode === ReferralProgramEditionSummariesResponseCodes.Error) {
         expect(response.error).toBe("Service Unavailable");
         expect(response.errorMessage).toContain("currently unavailable");
       }

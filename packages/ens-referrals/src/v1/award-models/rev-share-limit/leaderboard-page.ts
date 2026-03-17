@@ -1,4 +1,4 @@
-import { calcReferralProgramStatus } from "../../status";
+import { calcReferralProgramStatusRevShareLimit } from "../../status";
 import {
   type BaseReferrerLeaderboardPage,
   type ReferrerLeaderboardPageContext,
@@ -46,7 +46,11 @@ export function buildLeaderboardPageRevShareLimit(
   pageContext: ReferrerLeaderboardPageContext,
   leaderboard: ReferrerLeaderboardRevShareLimit,
 ): ReferrerLeaderboardPageRevShareLimit {
-  const status = calcReferralProgramStatus(leaderboard.rules, leaderboard.accurateAsOf);
+  const status = calcReferralProgramStatusRevShareLimit(
+    leaderboard.rules,
+    leaderboard.accurateAsOf,
+    leaderboard.aggregatedMetrics,
+  );
   return {
     awardModel: leaderboard.awardModel,
     rules: leaderboard.rules,

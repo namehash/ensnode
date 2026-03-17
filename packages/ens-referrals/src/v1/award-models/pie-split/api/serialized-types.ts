@@ -6,6 +6,7 @@ import type {
   ReferrerEditionMetricsRankedPieSplit,
   ReferrerEditionMetricsUnrankedPieSplit,
 } from "../edition-metrics";
+import type { ReferralProgramEditionSummaryPieSplit } from "../edition-summary";
 import type { ReferrerLeaderboardPagePieSplit } from "../leaderboard-page";
 import type { AwardedReferrerMetricsPieSplit, UnrankedReferrerMetricsPieSplit } from "../metrics";
 import type { ReferralProgramRulesPieSplit } from "../rules";
@@ -87,3 +88,11 @@ export interface SerializedReferrerEditionMetricsUnrankedPieSplit
 export type SerializedReferrerEditionMetricsPieSplit =
   | SerializedReferrerEditionMetricsRankedPieSplit
   | SerializedReferrerEditionMetricsUnrankedPieSplit;
+
+/**
+ * Serialized representation of {@link ReferralProgramEditionSummaryPieSplit}.
+ */
+export interface SerializedReferralProgramEditionSummaryPieSplit
+  extends Omit<ReferralProgramEditionSummaryPieSplit, "rules"> {
+  rules: SerializedReferralProgramRulesPieSplit;
+}

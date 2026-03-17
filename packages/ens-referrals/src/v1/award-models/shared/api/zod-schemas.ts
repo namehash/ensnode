@@ -25,6 +25,7 @@ export const makeBaseReferralProgramRulesSchema = (valueLabel: string) =>
       endTime: makeUnixTimestampSchema(`${valueLabel}.endTime`),
       subregistryId: makeAccountIdSchema(`${valueLabel}.subregistryId`),
       rulesUrl: makeUrlSchema(`${valueLabel}.rulesUrl`),
+      areAwardsDistributed: z.boolean(),
     })
     .refine((data) => data.endTime >= data.startTime, {
       message: `${valueLabel}.endTime must be >= ${valueLabel}.startTime`,
@@ -57,6 +58,20 @@ export const makeReferrerLeaderboardPageContextSchema = (
  */
 export const makeReferralProgramStatusSchema = (_valueLabel: string = "status") =>
   z.enum(ReferralProgramStatuses);
+
+/**
+ * Loose base schema for {@link BaseReferralProgramEditionSummary}.
+ *
+ * Accepts any string for `rules.awardModel` to support forward-compatible parsing.
+ */
+export const makeBaseReferralProgramEditionSummarySchema = (valueLabel: string) =>
+  z.object({
+    awardModel: z.string(),
+    slug: z.string().min(1, `${valueLabel}.slug must not be empty`),
+    displayName: z.string().min(1, `${valueLabel}.displayName must not be empty`),
+    status: makeReferralProgramStatusSchema(`${valueLabel}.status`),
+    rules: makeBaseReferralProgramRulesSchema(`${valueLabel}.rules`),
+  });
 
 /**
  * Loose base schema for {@link BaseReferrerLeaderboardPage}.

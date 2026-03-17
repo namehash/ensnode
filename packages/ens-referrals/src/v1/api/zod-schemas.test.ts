@@ -32,6 +32,7 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
       endTime: 2000000,
       subregistryId,
       rulesUrl: "https://ensawards.org/rules",
+      areAwardsDistributed: false,
     },
   };
 
@@ -47,6 +48,7 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
       endTime: 2000000,
       subregistryId,
       rulesUrl: "https://ensawards.org/rules",
+      areAwardsDistributed: false,
     },
   };
 
@@ -59,6 +61,7 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
       endTime: 3000000,
       subregistryId,
       rulesUrl: "https://ensawards.org/rules",
+      areAwardsDistributed: false,
       someNewField: "extra-data",
     },
   };
@@ -126,6 +129,7 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
         // startTime missing, endTime missing
         subregistryId,
         rulesUrl: "https://ensawards.org/rules",
+        areAwardsDistributed: false,
       },
     };
 
@@ -182,6 +186,7 @@ describe("makeReferrerLeaderboardPageSchema", () => {
       endTime: 2000000,
       subregistryId,
       rulesUrl: "https://ensawards.org/rules",
+      areAwardsDistributed: false,
     },
     referrers: [],
     aggregatedMetrics: {
@@ -207,6 +212,7 @@ describe("makeReferrerLeaderboardPageSchema", () => {
       endTime: 2000000,
       subregistryId,
       rulesUrl: "https://ensawards.org/rules",
+      areAwardsDistributed: false,
     },
     referrers: [],
     aggregatedMetrics: {
@@ -293,6 +299,7 @@ describe("makeReferrerEditionMetricsSchema", () => {
     endTime: 2000000,
     subregistryId,
     rulesUrl: "https://ensawards.org/rules",
+    areAwardsDistributed: false,
   };
 
   const pieSplitAggregatedMetrics = {
@@ -376,6 +383,7 @@ describe("makeReferrerEditionMetricsSchema", () => {
         endTime: 2000000,
         subregistryId,
         rulesUrl: "https://ensawards.org/rules",
+        areAwardsDistributed: false,
       },
       referrer: {
         referrer: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
