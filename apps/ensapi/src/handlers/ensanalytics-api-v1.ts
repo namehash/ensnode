@@ -5,7 +5,6 @@ import {
   type ReferralProgramEditionSlug,
   type ReferralProgramEditionSummariesResponse,
   ReferralProgramEditionSummariesResponseCodes,
-  type ReferralProgramEditionSummary,
   type ReferrerLeaderboard,
   type ReferrerLeaderboardPageResponse,
   ReferrerLeaderboardPageResponseCodes,
@@ -290,35 +289,43 @@ app.openapi(getEditionsRoute, async (c) => {
       (a, b) => b.rules.startTime - a.rules.startTime,
     );
 
-    // Read all edition leaderboard caches in parallel
+    // Read all leaderboard caches in parallel, keeping config colocated with its leaderboard
     const leaderboardCaches = c.var.referralLeaderboardEditionsCaches;
-    const editionLeaderboards = await Promise.all(
+    const results = await Promise.all(
       editionConfigs.map(async (config) => {
         const cache = leaderboardCaches.get(config.slug);
         if (!cache) throw new Error(`Invariant: edition cache for ${config.slug} should exist`);
-        return { slug: config.slug, leaderboard: await cache.read() };
+        return { config, leaderboard: await cache.read() };
       }),
     );
 
-    // Return 503 if any leaderboard failed to load
-    const failedEditions = editionLeaderboards
-      .filter(({ leaderboard }) => leaderboard instanceof Error)
-      .map(({ slug }) => slug);
+    // Partition into failures and successes in one pass
+    const failedSlugs: ReferralProgramEditionSlug[] = [];
+    const valid: {
+      config: (typeof results)[number]["config"];
+      leaderboard: ReferrerLeaderboard;
+    }[] = [];
+    for (const { config, leaderboard } of results) {
+      if (leaderboard instanceof Error) {
+        failedSlugs.push(config.slug);
+      } else {
+        valid.push({ config, leaderboard });
+      }
+    }
 
-    if (failedEditions.length > 0) {
+    if (failedSlugs.length > 0) {
       return c.json(
         serializeReferralProgramEditionSummariesResponse({
           responseCode: ReferralProgramEditionSummariesResponseCodes.Error,
           error: "Service Unavailable",
-          errorMessage: `Leaderboard data not available for edition(s): ${failedEditions.join(", ")}`,
+          errorMessage: `Leaderboard data not available for edition(s): ${failedSlugs.join(", ")}`,
         } satisfies ReferralProgramEditionSummariesResponse),
         503,
       );
     }
 
-    // Type narrowing: all leaderboards are guaranteed to be non-Error
-    const editions: ReferralProgramEditionSummary[] = editionConfigs.map((config, i) =>
-      buildEditionSummary(config, editionLeaderboards[i].leaderboard as ReferrerLeaderboard),
+    const editions = valid.map(({ config, leaderboard }) =>
+      buildEditionSummary(config, leaderboard),
     );
 
     return c.json(

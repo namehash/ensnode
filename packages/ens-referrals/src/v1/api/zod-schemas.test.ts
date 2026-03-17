@@ -4,11 +4,13 @@ import { CurrencyIds, parseEth, parseUsdc } from "@ensnode/ensnode-sdk";
 
 import type { ReferrerEditionMetricsUnrecognized } from "../award-models/shared/edition-metrics";
 import { ReferrerEditionMetricsTypeIds } from "../award-models/shared/edition-metrics";
+import type { ReferralProgramEditionSummaryUnrecognized } from "../award-models/shared/edition-summary";
 import type { ReferrerLeaderboardPageUnrecognized } from "../award-models/shared/leaderboard-page";
 import { ReferralProgramAwardModels } from "../award-models/shared/rules";
 import { ReferralProgramStatuses } from "../award-models/shared/status";
 import {
   makeReferralProgramEditionConfigSetArraySchema,
+  makeReferralProgramEditionSummarySchema,
   makeReferrerEditionMetricsSchema,
   makeReferrerLeaderboardPageSchema,
 } from "./zod-schemas";
@@ -284,6 +286,127 @@ describe("makeReferrerLeaderboardPageSchema", () => {
     const input = {
       awardModel: "future-model",
       // pageContext missing, status missing, accurateAsOf missing
+    };
+
+    expect(() => schema.parse(input)).toThrow();
+  });
+});
+
+describe("makeReferralProgramEditionSummarySchema", () => {
+  const schema = makeReferralProgramEditionSummarySchema();
+
+  const subregistryId = {
+    chainId: 1,
+    address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
+  };
+
+  const pieSplitSummary = {
+    awardModel: ReferralProgramAwardModels.PieSplit,
+    slug: "2025-12",
+    displayName: "December 2025",
+    status: ReferralProgramStatuses.Active,
+    rules: {
+      awardModel: ReferralProgramAwardModels.PieSplit,
+      totalAwardPoolValue: parseUsdc("1000"),
+      maxQualifiedReferrers: 100,
+      startTime: 1000000,
+      endTime: 2000000,
+      subregistryId,
+      rulesUrl: "https://ensawards.org/rules",
+      areAwardsDistributed: false,
+    },
+  };
+
+  const revShareLimitSummary = {
+    awardModel: ReferralProgramAwardModels.RevShareLimit,
+    slug: "2026-01",
+    displayName: "January 2026",
+    status: ReferralProgramStatuses.Active,
+    rules: {
+      awardModel: ReferralProgramAwardModels.RevShareLimit,
+      totalAwardPoolValue: parseUsdc("2000"),
+      minQualifiedRevenueContribution: parseUsdc("10"),
+      qualifiedRevenueShare: 0.5,
+      startTime: 1000000,
+      endTime: 2000000,
+      subregistryId,
+      rulesUrl: "https://ensawards.org/rules",
+      areAwardsDistributed: false,
+    },
+    awardPoolRemaining: parseUsdc("2000"),
+  };
+
+  it("parses a known pie-split edition summary correctly", () => {
+    const result = schema.parse(pieSplitSummary);
+
+    expect(result.awardModel).toBe(ReferralProgramAwardModels.PieSplit);
+    expect(result.slug).toBe("2025-12");
+    expect(result.status).toBe(ReferralProgramStatuses.Active);
+    expect(result.rules.awardModel).toBe(ReferralProgramAwardModels.PieSplit);
+  });
+
+  it("parses a known rev-share-limit edition summary correctly, including awardPoolRemaining", () => {
+    const result = schema.parse(revShareLimitSummary);
+
+    expect(result.awardModel).toBe(ReferralProgramAwardModels.RevShareLimit);
+    if (result.awardModel !== ReferralProgramAwardModels.RevShareLimit) throw new Error();
+    expect(result.awardPoolRemaining.amount).toBe(parseUsdc("2000").amount);
+    expect(result.status).toBe(ReferralProgramStatuses.Active);
+  });
+
+  it("parses Exhausted status on a rev-share-limit edition summary", () => {
+    const result = schema.parse({
+      ...revShareLimitSummary,
+      status: ReferralProgramStatuses.Exhausted,
+      awardPoolRemaining: parseUsdc("0"),
+    });
+
+    expect(result.status).toBe(ReferralProgramStatuses.Exhausted);
+  });
+
+  it("wraps an unknown awardModel as ReferralProgramEditionSummaryUnrecognized", () => {
+    const input = {
+      awardModel: "future-model",
+      slug: "2026-03",
+      displayName: "March 2026",
+      status: ReferralProgramStatuses.Scheduled,
+      rules: {
+        awardModel: "future-model",
+        startTime: 2000000,
+        endTime: 3000000,
+        subregistryId,
+        rulesUrl: "https://ensawards.org/rules",
+        areAwardsDistributed: false,
+        someNewField: "extra-data",
+      },
+    };
+
+    const result = schema.parse(input);
+
+    expect(result.awardModel).toBe(ReferralProgramAwardModels.Unrecognized);
+    expect((result as ReferralProgramEditionSummaryUnrecognized).rules.originalAwardModel).toBe(
+      "future-model",
+    );
+    expect(result.slug).toBe("2026-03");
+    expect(result.status).toBe(ReferralProgramStatuses.Scheduled);
+  });
+
+  it("fails when a known awardModel has invalid fields", () => {
+    const invalid = {
+      ...pieSplitSummary,
+      rules: {
+        ...pieSplitSummary.rules,
+        endTime: 500000, // endTime < startTime → refine violation
+      },
+    };
+
+    expect(() => schema.parse(invalid)).toThrow();
+  });
+
+  it("fails when an unknown awardModel is missing required base fields", () => {
+    const input = {
+      awardModel: "future-model",
+      // slug, displayName, status, rules all missing
     };
 
     expect(() => schema.parse(input)).toThrow();
