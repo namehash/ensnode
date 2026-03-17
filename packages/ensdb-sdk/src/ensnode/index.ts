@@ -3,14 +3,14 @@ import { pgSchema, primaryKey } from "drizzle-orm/pg-core";
 /**
  * ENSNode Schema Name
  *
- * This is the name of the Postgres schema that will be present in the ENSDb.
+ * The name of the ENSNode schema in an ENSDb.
  */
 const ENSNODE_SCHEMA_NAME = "ensnode";
 
 /**
  * ENSNode Schema
  *
- * Used to define database objects within the ENSNode Schema in ENSDb.
+ * Defines database objects within the ENSNode Schema in ENSDb.
  */
 const ENSNODE_SCHEMA = pgSchema(ENSNODE_SCHEMA_NAME);
 
