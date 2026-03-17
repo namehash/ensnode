@@ -78,6 +78,7 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
 
     expect(pieSplit).toBeDefined();
     expect(pieSplit!.rules.awardModel).toBe(ReferralProgramAwardModels.PieSplit);
+    expect(pieSplit!.rules.areAwardsDistributed).toBe(pieSplitEdition.rules.areAwardsDistributed);
   });
 
   it("parses the recognized rev-share-limit edition correctly", () => {
@@ -97,6 +98,9 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
     expect(rules.minQualifiedRevenueContribution).toBeDefined();
     expect(typeof rules.qualifiedRevenueShare).toBe("number");
     expect(rules.qualifiedRevenueShare).toBe(0.5);
+    expect(revShareLimit!.rules.areAwardsDistributed).toBe(
+      revShareLimitEdition.rules.areAwardsDistributed,
+    );
   });
 
   it("wraps the unrecognized edition as ReferralProgramRulesUnrecognized", () => {
@@ -118,6 +122,9 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
     expect(unrecognized!.rules.endTime).toBe(3000000);
     expect(unrecognized!.rules.rulesUrl).toBeInstanceOf(URL);
     expect(unrecognized!.rules.rulesUrl.href).toBe("https://ensawards.org/rules");
+    expect(unrecognized!.rules.areAwardsDistributed).toBe(
+      futureModelEdition.rules.areAwardsDistributed,
+    );
   });
 
   it("fails when an unrecognized edition has malformed base fields", () => {

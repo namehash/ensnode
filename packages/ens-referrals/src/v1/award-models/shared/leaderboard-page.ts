@@ -273,8 +273,7 @@ export interface BaseReferrerLeaderboardPage {
   pageContext: ReferrerLeaderboardPageContext;
 
   /**
-   * The status of the referral program ("Scheduled", "Active", or "Closed")
-   * calculated based on the program's timing relative to {@link accurateAsOf}.
+   * The status of the referral program edition.
    */
   status: ReferralProgramStatusId;
 

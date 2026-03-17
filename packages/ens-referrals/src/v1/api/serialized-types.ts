@@ -12,6 +12,7 @@ import type {
 } from "../award-models/rev-share-limit/api/serialized-types";
 import type { ReferralProgramEditionSlug } from "../edition";
 import type { ReferrerEditionMetrics } from "../edition-metrics";
+import type { ReferralProgramEditionSummary } from "../edition-summary";
 import type { ReferrerLeaderboardPage } from "../leaderboard-page";
 import type { ReferralProgramRules } from "../rules";
 import type {
