@@ -21,7 +21,9 @@
     "./ensnode": "./src/ensnode/index.ts"
   },
   "files": [
-    "dist"
+    "dist",
+    "migrations",
+    "migrations/meta"
   ],
   "publishConfig": {
     "access": "public",
