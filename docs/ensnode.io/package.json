@@ -26,6 +26,7 @@
     "@iconify-json/lucide": "^1.2.52",
     "@namehash/namekit-react": "catalog:",
     "@octokit/rest": "^20.1.2",
+    "@scalar/astro": "^0.2.3",
     "@tailwindcss/vite": "^4.1.15",
     "astro": "catalog:",
     "astro-font": "catalog:",
