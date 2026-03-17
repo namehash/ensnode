@@ -5,7 +5,8 @@
 }
 
 .nav-dropdown-trigger::before {
-  content: "Select a service to start";
+  /*content: "Docs section";*/
+  content: "";
   position: absolute;
   top: -1.5rem;
   left: 0;

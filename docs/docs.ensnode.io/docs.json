@@ -12,7 +12,8 @@
     "dropdowns": [
       {
         "dropdown": "Docs Home",
-        "description": "",
+        "icon": "/assets/layout-icon.svg",
+        "description": "Select a docs section",
         "groups": [
           {
             "group": "Overview",
