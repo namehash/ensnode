@@ -15,7 +15,7 @@ jobs:
     name: "Audit Dependencies"
     runs-on: blacksmith-4vcpu-ubuntu-2204
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup_node_environment
       - run: pnpm audit --audit-level=moderate
 
@@ -23,7 +23,7 @@ jobs:
     name: "Build NPM Packages"
     runs-on: blacksmith-4vcpu-ubuntu-2204
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup_node_environment
       - run: pnpm packages:prepublish
 
@@ -31,7 +31,7 @@ jobs:
     name: "Static Analysis"
     runs-on: blacksmith-4vcpu-ubuntu-2204
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup_node_environment
 
       - name: Run Biome CI
@@ -47,7 +47,7 @@ jobs:
     name: "Unit Tests"
     runs-on: blacksmith-4vcpu-ubuntu-2204
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup_node_environment
       - run: pnpm test
 
@@ -55,7 +55,7 @@ jobs:
     name: "OpenAPI Spec Sync Check"
     runs-on: blacksmith-4vcpu-ubuntu-2204
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup_node_environment
       - name: Generate OpenAPI spec
         run: pnpm generate:openapi
@@ -108,7 +108,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup_node_environment
 
       # This will run the dev command in background, and wait up to
@@ -146,7 +146,7 @@ jobs:
     runs-on: blacksmith-4vcpu-ubuntu-2204
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup_node_environment
       - name: Run integration tests
         run: pnpm test:integration:ci

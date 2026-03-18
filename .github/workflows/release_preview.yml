@@ -89,7 +89,7 @@ jobs:
       pr-title: ${{ steps.validate.outputs.pr-title }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -182,7 +182,7 @@ jobs:
       published-version: ${{ steps.publish.outputs.published-version }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -233,7 +233,7 @@ jobs:
         app: [ensindexer, ensadmin, ensapi, ensrainbow]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
 
@@ -260,7 +260,7 @@ jobs:
         lambda: [fallback-ensapi]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
 
@@ -280,7 +280,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
 
