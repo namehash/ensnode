@@ -13,7 +13,6 @@
       {
         "dropdown": "Docs Home",
         "icon": "/assets/layout-icon.svg",
-        "description": "Select a docs section",
         "groups": [
           {
             "group": "Overview",
@@ -75,7 +74,6 @@
       },
       {
         "dropdown": "ENSApi",
-        "description": "REST API for ENS data",
         "icon": "/assets/ensapi.svg",
         "groups": [
           {
@@ -105,7 +103,6 @@
       },
       {
         "dropdown": "ENSIndexer",
-        "description": "ENS blockchain indexing engine",
         "icon": "/assets/ensindexer.svg",
         "groups": [
           {
@@ -114,24 +111,17 @@
           },
           {
             "group": "Using ENSIndexer",
-            "pages": [
-              "ensindexer/usage/configuration",
-              "ensindexer/usage/management"
-            ]
+            "pages": ["ensindexer/usage/configuration", "ensindexer/usage/management"]
           },
           {
             "group": "Contributing",
             "expanded": false,
-            "pages": [
-              "ensindexer/contributing/index",
-              "ensindexer/contributing/creating-a-plugin"
-            ]
+            "pages": ["ensindexer/contributing/index", "ensindexer/contributing/creating-a-plugin"]
           }
         ]
       },
       {
         "dropdown": "ENSRainbow",
-        "description": "ENS label healing service",
         "icon": "/assets/ensrainbow.svg",
         "groups": [
           {
@@ -193,7 +183,6 @@
       },
       {
         "dropdown": "ENSDb",
-        "description": "ENS shared database layer",
         "icon": "/assets/ensdb.svg",
         "groups": [
           {
@@ -204,7 +193,6 @@
       },
       {
         "dropdown": "ENSAdmin",
-        "description": "ENS admin dashboard UI",
         "icon": "/assets/ensadmin.svg",
         "groups": [
           {
@@ -225,16 +213,7 @@
     "dark": "/assets/logo-dark.svg"
   },
   "contextual": {
-    "options": [
-      "copy",
-      "view",
-      "chatgpt",
-      "claude",
-      "perplexity",
-      "mcp",
-      "cursor",
-      "vscode"
-    ]
+    "options": ["copy", "view", "chatgpt", "claude", "perplexity", "mcp", "cursor", "vscode"]
   },
   "footer": {
     "socials": {

@@ -1,12 +1,12 @@
 .nav-dropdown-trigger {
+  /* biome-ignore lint/complexity/noImportantStyles: override Mintlify scoped styles on dropdown trigger */
   overflow: visible !important;
   position: relative;
   margin-top: 1.5rem;
 }
 
 .nav-dropdown-trigger::before {
-  /*content: "Docs section";*/
-  content: "";
+  content: "Docs section";
   position: absolute;
   top: -1.5rem;
   left: 0;
