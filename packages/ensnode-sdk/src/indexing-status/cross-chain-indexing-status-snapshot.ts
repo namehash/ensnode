@@ -122,17 +122,31 @@ export function getLatestIndexedBlockRef(
 }
 
 /**
- * Get the "highest known block timestamp" from an omnichain indexing status snapshot.
+ * Get the "highest known block timestamp" from chain indexing status snapshots.
  *
- * This is the maximum timestamp across all:
+ * Returns the maximum timestamp referenced anywhere in the provided chain snapshots,
+ * across all of:
  * - `config.startBlock` timestamps for all chains
  * - `config.endBlock` timestamps for bounded chains
  * - `backfillEndBlock` timestamps for chains in backfill status
  * - `latestKnownBlock` timestamps for chains in following status
+ *
+ * This is used to enforce the invariant that `snapshotTime` must be >= all
+ * referenced block timestamps. It differs from {@link getTimestampForHighestOmnichainKnownBlock},
+ * which computes the highest "target" block timestamp for progress display and
+ * does not include `startBlock` timestamps.
+ *
+ * @throws Error if `chains` is empty.
  */
 export function getHighestKnownBlockTimestamp(
   chains: ChainIndexingStatusSnapshot[],
 ): UnixTimestamp {
+  if (chains.length === 0) {
+    throw new Error(
+      "Invariant violation: at least one chain is required to determine the highest known block timestamp",
+    );
+  }
+
   const startBlockTimestamps = chains.map((chain) => chain.config.startBlock.timestamp);
 
   const endBlockTimestamps = chains

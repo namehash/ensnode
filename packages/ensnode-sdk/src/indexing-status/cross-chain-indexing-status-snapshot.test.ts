@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import { RangeTypeIds } from "../shared/blockrange";
-import { earliestBlockRef, laterBlockRef, latestBlockRef } from "./block-refs.mock";
+import {
+  earlierBlockRef,
+  earliestBlockRef,
+  laterBlockRef,
+  latestBlockRef,
+} from "./block-refs.mock";
 import {
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshotBackfill,
@@ -497,6 +502,52 @@ describe("Cross-chain Indexing Status Snapshot", () => {
       ];
 
       expect(getHighestKnownBlockTimestamp(chains)).toBe(latestBlockRef.timestamp);
+    });
+
+    it("returns the max across mixed-status multi-chain snapshots", () => {
+      const chains = [
+        {
+          chainStatus: ChainIndexingStatusIds.Queued,
+          config: {
+            rangeType: RangeTypeIds.LeftBounded,
+            startBlock: earliestBlockRef,
+          },
+        } satisfies ChainIndexingStatusSnapshotQueued,
+        {
+          chainStatus: ChainIndexingStatusIds.Completed,
+          config: {
+            rangeType: RangeTypeIds.Bounded,
+            startBlock: earliestBlockRef,
+            endBlock: laterBlockRef,
+          },
+          latestIndexedBlock: laterBlockRef,
+        } satisfies ChainIndexingStatusSnapshotCompleted,
+        {
+          chainStatus: ChainIndexingStatusIds.Following,
+          config: {
+            rangeType: RangeTypeIds.LeftBounded,
+            startBlock: earliestBlockRef,
+          },
+          latestIndexedBlock: laterBlockRef,
+          latestKnownBlock: latestBlockRef,
+        } satisfies ChainIndexingStatusSnapshotFollowing,
+        {
+          chainStatus: ChainIndexingStatusIds.Backfill,
+          config: {
+            rangeType: RangeTypeIds.LeftBounded,
+            startBlock: earliestBlockRef,
+          },
+          latestIndexedBlock: earlierBlockRef,
+          backfillEndBlock: laterBlockRef,
+        } satisfies ChainIndexingStatusSnapshotBackfill,
+      ];
+
+      // latestKnownBlock (from the Following chain) has the highest timestamp
+      expect(getHighestKnownBlockTimestamp(chains)).toBe(latestBlockRef.timestamp);
+    });
+
+    it("throws when chains array is empty", () => {
+      expect(() => getHighestKnownBlockTimestamp([])).toThrow("at least one chain is required");
     });
   });
 });
