@@ -22,8 +22,7 @@
   },
   "files": [
     "dist",
-    "migrations",
-    "migrations/meta"
+    "migrations"
   ],
   "publishConfig": {
     "access": "public",
