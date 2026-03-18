@@ -21,7 +21,8 @@
     "./ensnode": "./src/ensnode/index.ts"
   },
   "files": [
-    "dist"
+    "dist",
+    "migrations"
   ],
   "publishConfig": {
     "access": "public",
@@ -52,7 +53,8 @@
   "scripts": {
     "prepublish": "tsup",
     "lint": "biome check --write .",
-    "lint:ci": "biome ci"
+    "lint:ci": "biome ci",
+    "drizzle-kit:generate": "drizzle-kit generate"
   },
   "peerDependencies": {
     "drizzle-orm": "catalog:",
@@ -62,6 +64,7 @@
   "devDependencies": {
     "@ensnode/ensnode-sdk": "workspace:",
     "@ensnode/shared-configs": "workspace:*",
+    "drizzle-kit": "0.31.10",
     "drizzle-orm": "catalog:",
     "ponder": "catalog:",
     "tsup": "catalog:",
