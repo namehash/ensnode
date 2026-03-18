@@ -8,7 +8,7 @@ import type { AggregatedReferrerMetricsRevShareLimit } from "./aggregations";
 import type { ReferrerLeaderboardRevShareLimit } from "./leaderboard";
 import type { AwardedReferrerMetricsRevShareLimit } from "./metrics";
 import type { ReferralProgramRulesRevShareLimit } from "./rules";
-import { calcReferralProgramStatusRevShareLimit } from "./status";
+import { calcReferralProgramEditionStatusRevShareLimit } from "./status";
 
 /**
  * A page of referrers from the rev-share-limit referrer leaderboard.
@@ -46,7 +46,7 @@ export function buildLeaderboardPageRevShareLimit(
   pageContext: ReferrerLeaderboardPageContext,
   leaderboard: ReferrerLeaderboardRevShareLimit,
 ): ReferrerLeaderboardPageRevShareLimit {
-  const status = calcReferralProgramStatusRevShareLimit(
+  const status = calcReferralProgramEditionStatusRevShareLimit(
     leaderboard.rules,
     leaderboard.accurateAsOf,
     leaderboard.aggregatedMetrics,

@@ -2,7 +2,7 @@ import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
 
 import type { ReferrerEditionMetricsTypeIds } from "../shared/edition-metrics";
 import type { ReferralProgramAwardModels } from "../shared/rules";
-import type { ReferralProgramStatusId } from "../shared/status";
+import type { ReferralProgramEditionStatusId } from "../shared/status";
 import type { AggregatedReferrerMetricsPieSplit } from "./aggregations";
 import type { AwardedReferrerMetricsPieSplit, UnrankedReferrerMetricsPieSplit } from "./metrics";
 import type { ReferralProgramRulesPieSplit } from "./rules";
@@ -53,7 +53,7 @@ export interface ReferrerEditionMetricsRankedPieSplit {
    * The status of the referral program ("Scheduled", "Active", or "Closed")
    * calculated based on the program's timing relative to {@link accurateAsOf}.
    */
-  status: ReferralProgramStatusId;
+  status: ReferralProgramEditionStatusId;
 
   /**
    * The {@link UnixTimestamp} of when the data used to build the {@link ReferrerEditionMetricsRankedPieSplit} was accurate as of.
@@ -106,7 +106,7 @@ export interface ReferrerEditionMetricsUnrankedPieSplit {
    * The status of the referral program ("Scheduled", "Active", or "Closed")
    * calculated based on the program's timing relative to {@link accurateAsOf}.
    */
-  status: ReferralProgramStatusId;
+  status: ReferralProgramEditionStatusId;
 
   /**
    * The {@link UnixTimestamp} of when the data used to build the {@link ReferrerEditionMetricsUnrankedPieSplit} was accurate as of.

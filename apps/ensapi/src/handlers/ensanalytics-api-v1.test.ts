@@ -33,8 +33,8 @@ import {
   deserializeReferrerMetricsEditionsResponse,
   ReferralProgramAwardModels,
   type ReferralProgramEditionSlug,
+  ReferralProgramEditionStatuses,
   ReferralProgramEditionSummariesResponseCodes,
-  ReferralProgramStatuses,
   ReferrerEditionMetricsTypeIds,
   type ReferrerLeaderboard,
   ReferrerLeaderboardPageResponseCodes,
@@ -123,7 +123,7 @@ describe("/v1/ensanalytics", () => {
         responseCode: ReferrerLeaderboardPageResponseCodes.Ok,
         data: {
           ...populatedReferrerLeaderboard,
-          status: ReferralProgramStatuses.Active,
+          status: ReferralProgramEditionStatuses.Active,
           pageContext: {
             endIndex: 9,
             hasNext: true,
@@ -145,7 +145,7 @@ describe("/v1/ensanalytics", () => {
         responseCode: ReferrerLeaderboardPageResponseCodes.Ok,
         data: {
           ...populatedReferrerLeaderboard,
-          status: ReferralProgramStatuses.Active,
+          status: ReferralProgramEditionStatuses.Active,
           pageContext: {
             endIndex: 19,
             hasNext: true,
@@ -166,7 +166,7 @@ describe("/v1/ensanalytics", () => {
         responseCode: ReferrerLeaderboardPageResponseCodes.Ok,
         data: {
           ...populatedReferrerLeaderboard,
-          status: ReferralProgramStatuses.Active,
+          status: ReferralProgramEditionStatuses.Active,
           pageContext: {
             endIndex: 28,
             hasNext: false,
@@ -229,7 +229,7 @@ describe("/v1/ensanalytics", () => {
         responseCode: ReferrerLeaderboardPageResponseCodes.Ok,
         data: {
           ...emptyReferralLeaderboard,
-          status: ReferralProgramStatuses.Active,
+          status: ReferralProgramEditionStatuses.Active,
           pageContext: {
             hasNext: false,
             hasPrev: false,
@@ -369,7 +369,7 @@ describe("/v1/ensanalytics", () => {
             referrer: expectedMetrics,
             aggregatedMetrics: populatedReferrerLeaderboard.aggregatedMetrics,
             accurateAsOf: expectedAccurateAsOf,
-            status: ReferralProgramStatuses.Active,
+            status: ReferralProgramEditionStatuses.Active,
           },
           "2026-03": {
             awardModel: populatedReferrerLeaderboard.awardModel,
@@ -378,7 +378,7 @@ describe("/v1/ensanalytics", () => {
             referrer: expectedMetrics,
             aggregatedMetrics: populatedReferrerLeaderboard.aggregatedMetrics,
             accurateAsOf: expectedAccurateAsOf,
-            status: ReferralProgramStatuses.Active,
+            status: ReferralProgramEditionStatuses.Active,
           },
         },
       } satisfies ReferrerMetricsEditionsResponseOk;

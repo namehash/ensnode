@@ -8,7 +8,7 @@ import type {
   ReferralProgramAwardModels,
   ReferralProgramRulesUnrecognized,
 } from "./rules";
-import type { ReferralProgramStatusId } from "./status";
+import type { ReferralProgramEditionStatusId } from "./status";
 
 /**
  * Base fields shared by all edition summary variants.
@@ -34,7 +34,7 @@ export interface BaseReferralProgramEditionSummary {
   /**
    * The current runtime status of the edition.
    */
-  status: ReferralProgramStatusId;
+  status: ReferralProgramEditionStatusId;
 
   /**
    * The rules for this edition. Per-model subtypes narrow this to their specific rules type.

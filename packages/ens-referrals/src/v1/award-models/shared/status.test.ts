@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import { ReferralProgramAwardModels } from "./rules";
 import {
-  calcBaseReferralProgramStatus,
-  ReferralProgramStatuses,
-  type ReferralProgramStatusId,
+  calcBaseReferralProgramEditionStatus,
+  ReferralProgramEditionStatuses,
+  type ReferralProgramEditionStatusId,
 } from "./status";
 
 const baseRules = {
@@ -15,36 +15,38 @@ const baseRules = {
   rulesUrl: new URL("https://example.com/rules"),
 };
 
-describe("calcBaseReferralProgramStatus", () => {
+describe("calcBaseReferralProgramEditionStatus", () => {
   it("returns Scheduled when now is before startTime", () => {
-    const status = calcBaseReferralProgramStatus(
+    const status = calcBaseReferralProgramEditionStatus(
       { ...baseRules, areAwardsDistributed: false },
       999,
     );
-    expect(status).toBe<ReferralProgramStatusId>(ReferralProgramStatuses.Scheduled);
+    expect(status).toBe<ReferralProgramEditionStatusId>(ReferralProgramEditionStatuses.Scheduled);
   });
 
   it("returns Active when now is within the active window", () => {
-    const status = calcBaseReferralProgramStatus(
+    const status = calcBaseReferralProgramEditionStatus(
       { ...baseRules, areAwardsDistributed: false },
       1500,
     );
-    expect(status).toBe<ReferralProgramStatusId>(ReferralProgramStatuses.Active);
+    expect(status).toBe<ReferralProgramEditionStatusId>(ReferralProgramEditionStatuses.Active);
   });
 
   it("returns AwardsReview when now is after endTime and awards are not yet distributed", () => {
-    const status = calcBaseReferralProgramStatus(
+    const status = calcBaseReferralProgramEditionStatus(
       { ...baseRules, areAwardsDistributed: false },
       2001,
     );
-    expect(status).toBe<ReferralProgramStatusId>(ReferralProgramStatuses.AwardsReview);
+    expect(status).toBe<ReferralProgramEditionStatusId>(
+      ReferralProgramEditionStatuses.AwardsReview,
+    );
   });
 
   it("returns Closed when now is after endTime and awards have been distributed", () => {
-    const status = calcBaseReferralProgramStatus(
+    const status = calcBaseReferralProgramEditionStatus(
       { ...baseRules, areAwardsDistributed: true },
       2001,
     );
-    expect(status).toBe<ReferralProgramStatusId>(ReferralProgramStatuses.Closed);
+    expect(status).toBe<ReferralProgramEditionStatusId>(ReferralProgramEditionStatuses.Closed);
   });
 });

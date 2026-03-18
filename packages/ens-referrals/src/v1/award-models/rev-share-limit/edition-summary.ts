@@ -8,7 +8,7 @@ import type { ReferralProgramAwardModels } from "../shared/rules";
 import type { ReferrerLeaderboardRevShareLimit } from "./leaderboard";
 import type { ReferralProgramRulesRevShareLimit } from "./rules";
 import { validateReferralProgramRulesRevShareLimit } from "./rules";
-import { calcReferralProgramStatusRevShareLimit } from "./status";
+import { calcReferralProgramEditionStatusRevShareLimit } from "./status";
 
 /**
  * Edition summary for a `rev-share-limit` referral program edition.
@@ -33,7 +33,7 @@ export interface ReferralProgramEditionSummaryRevShareLimit
   /**
    * The remaining award pool after sequential race processing.
    *
-   * When `0n`, the edition's status will be {@link ReferralProgramStatuses.Exhausted}
+   * When `0n`, the edition's status will be {@link ReferralProgramEditionStatuses.Exhausted}
    * if the edition is still within its active window.
    */
   awardPoolRemaining: PriceUsdc;
@@ -61,7 +61,7 @@ export function buildEditionSummaryRevShareLimit(
   rules: ReferralProgramRulesRevShareLimit,
   leaderboard: ReferrerLeaderboardRevShareLimit,
 ): ReferralProgramEditionSummaryRevShareLimit {
-  const status = calcReferralProgramStatusRevShareLimit(
+  const status = calcReferralProgramEditionStatusRevShareLimit(
     rules,
     leaderboard.accurateAsOf,
     leaderboard.aggregatedMetrics,

@@ -7,7 +7,7 @@ import { ReferrerEditionMetricsTypeIds } from "../award-models/shared/edition-me
 import type { ReferralProgramEditionSummaryUnrecognized } from "../award-models/shared/edition-summary";
 import type { ReferrerLeaderboardPageUnrecognized } from "../award-models/shared/leaderboard-page";
 import { ReferralProgramAwardModels } from "../award-models/shared/rules";
-import { ReferralProgramStatuses } from "../award-models/shared/status";
+import { ReferralProgramEditionStatuses } from "../award-models/shared/status";
 import {
   makeReferralProgramEditionConfigSetArraySchema,
   makeReferralProgramEditionSummarySchema,
@@ -206,7 +206,7 @@ describe("makeReferrerLeaderboardPageSchema", () => {
       minFinalScoreToQualify: 0,
     },
     pageContext: emptyPageContext,
-    status: ReferralProgramStatuses.Scheduled,
+    status: ReferralProgramEditionStatuses.Scheduled,
     accurateAsOf: 500000,
   };
 
@@ -231,7 +231,7 @@ describe("makeReferrerLeaderboardPageSchema", () => {
       awardPoolRemaining: parseUsdc("2000"),
     },
     pageContext: emptyPageContext,
-    status: ReferralProgramStatuses.Active,
+    status: ReferralProgramEditionStatuses.Active,
     accurateAsOf: 1500000,
   };
 
@@ -239,7 +239,7 @@ describe("makeReferrerLeaderboardPageSchema", () => {
     const result = schema.parse(pieSplitLeaderboardPage);
 
     expect(result.awardModel).toBe(ReferralProgramAwardModels.PieSplit);
-    expect(result.status).toBe(ReferralProgramStatuses.Scheduled);
+    expect(result.status).toBe(ReferralProgramEditionStatuses.Scheduled);
     expect(result.accurateAsOf).toBe(500000);
     expect(result.pageContext.page).toBe(1);
   });
@@ -248,7 +248,7 @@ describe("makeReferrerLeaderboardPageSchema", () => {
     const result = schema.parse(revShareLimitLeaderboardPage);
 
     expect(result.awardModel).toBe(ReferralProgramAwardModels.RevShareLimit);
-    expect(result.status).toBe(ReferralProgramStatuses.Active);
+    expect(result.status).toBe(ReferralProgramEditionStatuses.Active);
     expect(result.accurateAsOf).toBe(1500000);
   });
 
@@ -256,7 +256,7 @@ describe("makeReferrerLeaderboardPageSchema", () => {
     const input = {
       awardModel: "future-model",
       pageContext: emptyPageContext,
-      status: ReferralProgramStatuses.Active,
+      status: ReferralProgramEditionStatuses.Active,
       accurateAsOf: 1000000,
       someNewField: "extra-data",
     };
@@ -265,7 +265,7 @@ describe("makeReferrerLeaderboardPageSchema", () => {
 
     expect(result.awardModel).toBe(ReferralProgramAwardModels.Unrecognized);
     expect((result as ReferrerLeaderboardPageUnrecognized).originalAwardModel).toBe("future-model");
-    expect(result.status).toBe(ReferralProgramStatuses.Active);
+    expect(result.status).toBe(ReferralProgramEditionStatuses.Active);
     expect(result.accurateAsOf).toBe(1000000);
     expect(result.pageContext.page).toBe(1);
   });
@@ -304,7 +304,7 @@ describe("makeReferralProgramEditionSummarySchema", () => {
     awardModel: ReferralProgramAwardModels.PieSplit,
     slug: "2025-12",
     displayName: "December 2025",
-    status: ReferralProgramStatuses.Active,
+    status: ReferralProgramEditionStatuses.Active,
     rules: {
       awardModel: ReferralProgramAwardModels.PieSplit,
       totalAwardPoolValue: parseUsdc("1000"),
@@ -321,7 +321,7 @@ describe("makeReferralProgramEditionSummarySchema", () => {
     awardModel: ReferralProgramAwardModels.RevShareLimit,
     slug: "2026-01",
     displayName: "January 2026",
-    status: ReferralProgramStatuses.Active,
+    status: ReferralProgramEditionStatuses.Active,
     rules: {
       awardModel: ReferralProgramAwardModels.RevShareLimit,
       totalAwardPoolValue: parseUsdc("2000"),
@@ -341,7 +341,7 @@ describe("makeReferralProgramEditionSummarySchema", () => {
 
     expect(result.awardModel).toBe(ReferralProgramAwardModels.PieSplit);
     expect(result.slug).toBe("2025-12");
-    expect(result.status).toBe(ReferralProgramStatuses.Active);
+    expect(result.status).toBe(ReferralProgramEditionStatuses.Active);
     expect(result.rules.awardModel).toBe(ReferralProgramAwardModels.PieSplit);
   });
 
@@ -351,17 +351,17 @@ describe("makeReferralProgramEditionSummarySchema", () => {
     expect(result.awardModel).toBe(ReferralProgramAwardModels.RevShareLimit);
     if (result.awardModel !== ReferralProgramAwardModels.RevShareLimit) throw new Error();
     expect(result.awardPoolRemaining.amount).toBe(parseUsdc("2000").amount);
-    expect(result.status).toBe(ReferralProgramStatuses.Active);
+    expect(result.status).toBe(ReferralProgramEditionStatuses.Active);
   });
 
   it("parses Exhausted status on a rev-share-limit edition summary", () => {
     const result = schema.parse({
       ...revShareLimitSummary,
-      status: ReferralProgramStatuses.Exhausted,
+      status: ReferralProgramEditionStatuses.Exhausted,
       awardPoolRemaining: parseUsdc("0"),
     });
 
-    expect(result.status).toBe(ReferralProgramStatuses.Exhausted);
+    expect(result.status).toBe(ReferralProgramEditionStatuses.Exhausted);
   });
 
   it("wraps an unknown awardModel as ReferralProgramEditionSummaryUnrecognized", () => {
@@ -369,7 +369,7 @@ describe("makeReferralProgramEditionSummarySchema", () => {
       awardModel: "future-model",
       slug: "2026-03",
       displayName: "March 2026",
-      status: ReferralProgramStatuses.Scheduled,
+      status: ReferralProgramEditionStatuses.Scheduled,
       rules: {
         awardModel: "future-model",
         startTime: 2000000,
@@ -388,7 +388,7 @@ describe("makeReferralProgramEditionSummarySchema", () => {
       "future-model",
     );
     expect(result.slug).toBe("2026-03");
-    expect(result.status).toBe(ReferralProgramStatuses.Scheduled);
+    expect(result.status).toBe(ReferralProgramEditionStatuses.Scheduled);
   });
 
   it("fails when a known awardModel has invalid fields", () => {
@@ -459,7 +459,7 @@ describe("makeReferrerEditionMetricsSchema", () => {
         awardPoolApproxValue: parseUsdc("500"),
       },
       aggregatedMetrics: pieSplitAggregatedMetrics,
-      status: ReferralProgramStatuses.Active,
+      status: ReferralProgramEditionStatuses.Active,
       accurateAsOf: 1500000,
     };
 
@@ -489,7 +489,7 @@ describe("makeReferrerEditionMetricsSchema", () => {
         awardPoolApproxValue: parseUsdc("0"),
       },
       aggregatedMetrics: pieSplitAggregatedMetrics,
-      status: ReferralProgramStatuses.Active,
+      status: ReferralProgramEditionStatuses.Active,
       accurateAsOf: 1500000,
     };
 
@@ -534,7 +534,7 @@ describe("makeReferrerEditionMetricsSchema", () => {
         grandTotalRevenueContribution: parseEth("300"),
         awardPoolRemaining: parseUsdc("1800"),
       },
-      status: ReferralProgramStatuses.Active,
+      status: ReferralProgramEditionStatuses.Active,
       accurateAsOf: 1500000,
     };
 
@@ -567,7 +567,7 @@ describe("makeReferrerEditionMetricsSchema", () => {
         awardPoolApproxValue: parseUsdc("500"),
       },
       aggregatedMetrics: pieSplitAggregatedMetrics,
-      status: ReferralProgramStatuses.Active,
+      status: ReferralProgramEditionStatuses.Active,
       accurateAsOf: 1500000,
     };
 

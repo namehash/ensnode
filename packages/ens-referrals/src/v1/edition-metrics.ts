@@ -6,14 +6,14 @@ import type {
   ReferrerEditionMetricsUnrankedPieSplit,
 } from "./award-models/pie-split/edition-metrics";
 import { buildUnrankedReferrerMetricsPieSplit } from "./award-models/pie-split/metrics";
-import { calcReferralProgramStatusPieSplit } from "./award-models/pie-split/status";
+import { calcReferralProgramEditionStatusPieSplit } from "./award-models/pie-split/status";
 import type {
   ReferrerEditionMetricsRankedRevShareLimit,
   ReferrerEditionMetricsRevShareLimit,
   ReferrerEditionMetricsUnrankedRevShareLimit,
 } from "./award-models/rev-share-limit/edition-metrics";
 import { buildUnrankedReferrerMetricsRevShareLimit } from "./award-models/rev-share-limit/metrics";
-import { calcReferralProgramStatusRevShareLimit } from "./award-models/rev-share-limit/status";
+import { calcReferralProgramEditionStatusRevShareLimit } from "./award-models/rev-share-limit/status";
 import {
   ReferrerEditionMetricsTypeIds,
   type ReferrerEditionMetricsUnrecognized,
@@ -49,7 +49,10 @@ export const getReferrerEditionMetrics = (
 ): ReferrerEditionMetrics => {
   switch (leaderboard.awardModel) {
     case ReferralProgramAwardModels.PieSplit: {
-      const status = calcReferralProgramStatusPieSplit(leaderboard.rules, leaderboard.accurateAsOf);
+      const status = calcReferralProgramEditionStatusPieSplit(
+        leaderboard.rules,
+        leaderboard.accurateAsOf,
+      );
       const awardedReferrerMetrics = leaderboard.referrers.get(referrer);
       if (awardedReferrerMetrics) {
         return {
@@ -74,7 +77,7 @@ export const getReferrerEditionMetrics = (
     }
 
     case ReferralProgramAwardModels.RevShareLimit: {
-      const status = calcReferralProgramStatusRevShareLimit(
+      const status = calcReferralProgramEditionStatusRevShareLimit(
         leaderboard.rules,
         leaderboard.accurateAsOf,
         leaderboard.aggregatedMetrics,

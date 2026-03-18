@@ -2,7 +2,7 @@ import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
 
 import type { ReferrerEditionMetricsTypeIds } from "../shared/edition-metrics";
 import type { ReferralProgramAwardModels } from "../shared/rules";
-import type { ReferralProgramStatusId } from "../shared/status";
+import type { ReferralProgramEditionStatusId } from "../shared/status";
 import type { AggregatedReferrerMetricsRevShareLimit } from "./aggregations";
 import type {
   AwardedReferrerMetricsRevShareLimit,
@@ -52,7 +52,7 @@ export interface ReferrerEditionMetricsRankedRevShareLimit {
    * The status of the referral program ("Scheduled", "Active", or "Closed")
    * calculated based on the program's timing relative to {@link accurateAsOf}.
    */
-  status: ReferralProgramStatusId;
+  status: ReferralProgramEditionStatusId;
 
   /**
    * The {@link UnixTimestamp} of when the data used to build the {@link ReferrerEditionMetricsRankedRevShareLimit} was accurate as of.
@@ -101,7 +101,7 @@ export interface ReferrerEditionMetricsUnrankedRevShareLimit {
    * The status of the referral program ("Scheduled", "Active", or "Closed")
    * calculated based on the program's timing relative to {@link accurateAsOf}.
    */
-  status: ReferralProgramStatusId;
+  status: ReferralProgramEditionStatusId;
 
   /**
    * The {@link UnixTimestamp} of when the data used to build the {@link ReferrerEditionMetricsUnrankedRevShareLimit} was accurate as of.

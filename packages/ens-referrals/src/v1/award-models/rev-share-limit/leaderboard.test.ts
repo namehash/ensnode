@@ -4,7 +4,7 @@ import { parseTimestamp, parseUsdc, priceEth, priceUsdc } from "@ensnode/ensnode
 
 import { SECONDS_PER_YEAR } from "../../time";
 import { buildReferrerLeaderboardPageContext } from "../shared/leaderboard-page";
-import { ReferralProgramStatuses } from "../shared/status";
+import { ReferralProgramEditionStatuses } from "../shared/status";
 import { buildReferrerLeaderboardRevShareLimit } from "./leaderboard";
 import { buildLeaderboardPageRevShareLimit } from "./leaderboard-page";
 import type { ReferralEvent } from "./referral-event";
@@ -403,7 +403,7 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       const pageContext = buildReferrerLeaderboardPageContext({ page: 1 }, leaderboard);
       const page = buildLeaderboardPageRevShareLimit(pageContext, leaderboard);
 
-      expect(page.status).toBe(ReferralProgramStatuses.Exhausted);
+      expect(page.status).toBe(ReferralProgramEditionStatuses.Exhausted);
     });
   });
 

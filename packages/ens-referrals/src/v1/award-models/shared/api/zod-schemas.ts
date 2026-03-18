@@ -9,7 +9,7 @@ import {
 } from "@ensnode/ensnode-sdk/internal";
 
 import { REFERRERS_PER_LEADERBOARD_PAGE_MAX } from "../leaderboard-page";
-import { ReferralProgramStatuses } from "../status";
+import { ReferralProgramEditionStatuses } from "../status";
 
 /**
  * Loose base schema for {@link BaseReferralProgramRules}.
@@ -54,10 +54,10 @@ export const makeReferrerLeaderboardPageContextSchema = (
 
 /**
  * Schema for referral program status field.
- * Validates that the status is one of the values in {@link ReferralProgramStatuses}.
+ * Validates that the status is one of the values in {@link ReferralProgramEditionStatuses}.
  */
 export const makeReferralProgramStatusSchema = (_valueLabel: string = "status") =>
-  z.enum(ReferralProgramStatuses);
+  z.enum(ReferralProgramEditionStatuses);
 
 /**
  * Loose base schema for {@link BaseReferralProgramEditionSummary}.

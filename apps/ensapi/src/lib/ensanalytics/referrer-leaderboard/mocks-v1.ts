@@ -1,6 +1,6 @@
 import {
   ReferralProgramAwardModels,
-  ReferralProgramStatuses,
+  ReferralProgramEditionStatuses,
   type ReferrerLeaderboardPagePieSplit,
   ReferrerLeaderboardPageResponseCodes,
   type ReferrerLeaderboardPageResponseOk,
@@ -1105,7 +1105,7 @@ export const referrerLeaderboardPageResponseOk = {
       startIndex: 0,
       endIndex: 28,
     },
-    status: ReferralProgramStatuses.Active,
+    status: ReferralProgramEditionStatuses.Active,
     accurateAsOf: 1735689600,
   } satisfies ReferrerLeaderboardPagePieSplit,
 } satisfies ReferrerLeaderboardPageResponseOk;

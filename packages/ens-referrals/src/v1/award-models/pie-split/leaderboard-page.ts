@@ -8,7 +8,7 @@ import type { AggregatedReferrerMetricsPieSplit } from "./aggregations";
 import type { ReferrerLeaderboardPieSplit } from "./leaderboard";
 import type { AwardedReferrerMetricsPieSplit } from "./metrics";
 import type { ReferralProgramRulesPieSplit } from "./rules";
-import { calcReferralProgramStatusPieSplit } from "./status";
+import { calcReferralProgramEditionStatusPieSplit } from "./status";
 
 /**
  * A page of referrers from the pie-split referrer leaderboard.
@@ -46,7 +46,10 @@ export function buildLeaderboardPagePieSplit(
   pageContext: ReferrerLeaderboardPageContext,
   leaderboard: ReferrerLeaderboardPieSplit,
 ): ReferrerLeaderboardPagePieSplit {
-  const status = calcReferralProgramStatusPieSplit(leaderboard.rules, leaderboard.accurateAsOf);
+  const status = calcReferralProgramEditionStatusPieSplit(
+    leaderboard.rules,
+    leaderboard.accurateAsOf,
+  );
   return {
     awardModel: leaderboard.awardModel,
     rules: leaderboard.rules,
