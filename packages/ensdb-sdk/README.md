@@ -1,31 +1,53 @@
 # ENSDb SDK
 
-This package is a utility library for interacting with ENSDb.
+This package defines the database schema used by ENSDb.
 
-## Database schema definitions
+It exposes two schema modules because `ENSIndexer` needs two different kinds of tables:
 
-### ENSIndexer Schema
+- ENSIndexer Schema for indexing onchain data
+- ENSNode Schema for indexing offchain data
 
-This schema consists of database object definitions exported from the `src/ensindexer` module.
-Defining database objects is done by using functionality from `ponder` package.
+## ENSIndexer Schema
 
-#### Applying schema definition updates
+Source: `packages/ensdb-sdk/src/ensindexer`
 
-Updating database object definitions in the ENSIndexer Schema _does not_ require manual database migrations. The ENSIndexer app delegates to its imported Ponder package to execute database migrations on an ENSIndexer Schema. In other words, each ENSIndexer Schema in ENSDb is automatically migrated by Ponder when ENSIndexer starts.
+This database schema is required by the Ponder app that powers `ENSIndexer`.
 
-### ENSNode Schema
+Ponder requires `ponder.schema.ts` to follow specific rules: `https://ponder.sh/docs/api-reference/ponder/schema#file-requirements`.
 
-This schema consists of database object definitions exported from the `src/ensnode` module.
-Defining database objects is done by using functionality from `drizzle-orm` package.
+The most important rule here is that tables must be defined with `onchainTable()`, not with Drizzle's `pgSchema(schemaName).table()`.
 
-#### Applying schema definition updates
+Both APIs produce Drizzle table objects, but there is one important difference: `onchainTable()` does not hardcode the Postgres schema name up front. Ponder chooses the schema name dynamically from its configuration.
 
-Updating database object definitions in ENSNode Schema _does_ require an extra step: generating SQL queries to be executed for ENSNode Schema in ENSDb. 
+Ponder is also responsible for initializing and migrating the ENSIndexer Schema. It reads this schema through `apps/ensindexer/ponder/ponder.schema.ts`, which re-exports `packages/ensdb-sdk/src/ensindexer`.
 
-Generating SQL queries can be done with the following CLI command:
-```
+### When it changes
+
+Update files in `src/ensindexer`, then start `ENSIndexer`. Ponder handles the rest.
+
+## ENSNode Schema
+
+Source: `packages/ensdb-sdk/src/ensnode`
+
+This schema is also required by `ENSIndexer`, but for offchain data rather than onchain data.
+
+It uses Drizzle's Postgres schema APIs such as `pgSchema("ensnode").table()`. Unlike the ENSIndexer Schema, the database schema name is fixed up front as `ensnode`.
+
+### When it changes
+
+You must generate migration files:
+
+```bash
 pnpm -F @ensnode/ensdb-sdk drizzle-kit:generate
 ```
 
-This command will update files inside the `migrations` directory, including SQL files.
-The `migrations` directory can later be referenced by the application runtime (i.e. ENSIndexer app) in order to execute pending SQL migrations for ENSNode Schema in ENSDb.
+This updates `packages/ensdb-sdk/migrations`. `ENSIndexer` currently takes responsibility for applying those migrations and initializing the ENSNode Schema.
+
+## Rule of thumb
+
+- `onchainTable()` + schema name chosen by Ponder = ENSIndexer Schema
+- `pgSchema().table()` + fixed schema name + generated migrations = ENSNode Schema
+
+## Current transition
+
+`packages/ensdb-sdk/src/ensindexer/index.ts` still re-exports `ensnode-metadata.schema.ts` as a temporary bridge until ENSNode Schema migrations are fully in place.
