@@ -50,7 +50,7 @@ export interface ReferrerEditionMetricsRankedPieSplit {
   aggregatedMetrics: AggregatedReferrerMetricsPieSplit;
 
   /**
-   * The status of the referral program ("Scheduled", "Active", or "Closed")
+   * The status of the referral program edition
    * calculated based on the program's timing relative to {@link accurateAsOf}.
    */
   status: ReferralProgramEditionStatusId;
@@ -103,7 +103,7 @@ export interface ReferrerEditionMetricsUnrankedPieSplit {
   aggregatedMetrics: AggregatedReferrerMetricsPieSplit;
 
   /**
-   * The status of the referral program ("Scheduled", "Active", or "Closed")
+   * The status of the referral program edition
    * calculated based on the program's timing relative to {@link accurateAsOf}.
    */
   status: ReferralProgramEditionStatusId;
