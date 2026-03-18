@@ -1,4 +1,4 @@
-import { createApp } from "@/lib/hono-factory";
+import { createOpenApiApp } from "@/lib/hono-factory";
 
 import nameTokensApi from "./explore/name-tokens-api";
 import registrarActionsApi from "./explore/registrar-actions-api";
@@ -7,7 +7,7 @@ import metaApi from "./meta/ensnode-api";
 import realtimeApi from "./meta/realtime-api";
 import resolutionApi from "./resolution/resolution-api";
 
-const app = createApp();
+const app = createOpenApiApp();
 
 app.route("/", metaApi);
 app.route("/realtime", realtimeApi);

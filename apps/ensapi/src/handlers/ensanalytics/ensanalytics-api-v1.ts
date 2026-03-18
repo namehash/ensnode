@@ -15,7 +15,7 @@ import {
   serializeReferrerMetricsEditionsResponse,
 } from "@namehash/ens-referrals/v1";
 
-import { createApp } from "@/lib/hono-factory";
+import { createOpenApiApp } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
 import { referralLeaderboardEditionsCachesMiddleware } from "@/middleware/referral-leaderboard-editions-caches.middleware";
 import { referralProgramEditionConfigSetMiddleware } from "@/middleware/referral-program-edition-set.middleware";
@@ -28,7 +28,9 @@ import {
 
 const logger = makeLogger("ensanalytics-api-v1");
 
-const app = createApp();
+const app = createOpenApiApp<
+  "referralLeaderboardEditionsCaches" | "referralProgramEditionConfigSet"
+>();
 
 // Apply referral program edition config set middleware
 app.use(referralProgramEditionConfigSetMiddleware);
@@ -38,13 +40,6 @@ app.use(referralLeaderboardEditionsCachesMiddleware);
 
 // Get a page from the referrer leaderboard for a specific edition
 app.openapi(getReferralLeaderboardRoute, async (c) => {
-  // context must be set by the required middleware
-  if (c.var.referralLeaderboardEditionsCaches === undefined) {
-    throw new Error(
-      `Invariant(ensanalytics-api-v1): referralLeaderboardEditionsCachesMiddleware required`,
-    );
-  }
-
   try {
     const { edition, page, recordsPerPage } = c.req.valid("query");
 
@@ -121,13 +116,6 @@ app.openapi(getReferralLeaderboardRoute, async (c) => {
 
 // Get referrer detail for a specific address for requested editions
 app.openapi(getReferrerDetailRoute, async (c) => {
-  // context must be set by the required middleware
-  if (c.var.referralLeaderboardEditionsCaches === undefined) {
-    throw new Error(
-      `Invariant(ensanalytics-api-v1): referralLeaderboardEditionsCachesMiddleware required`,
-    );
-  }
-
   try {
     const { referrer } = c.req.valid("param");
     const { editions } = c.req.valid("query");
@@ -237,13 +225,6 @@ app.openapi(getReferrerDetailRoute, async (c) => {
 
 // Get configured edition config set
 app.openapi(getEditionsRoute, async (c) => {
-  // context must be set by the required middleware
-  if (c.var.referralProgramEditionConfigSet === undefined) {
-    throw new Error(
-      `Invariant(ensanalytics-api-v1): referralProgramEditionConfigSetMiddleware required`,
-    );
-  }
-
   try {
     // Check if edition config set failed to load
     if (c.var.referralProgramEditionConfigSet instanceof Error) {

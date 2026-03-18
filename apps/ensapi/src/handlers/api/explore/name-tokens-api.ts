@@ -14,14 +14,14 @@ import {
   serializeNameTokensResponse,
 } from "@ensnode/ensnode-sdk";
 
-import { createApp } from "@/lib/hono-factory";
+import { createOpenApiApp } from "@/lib/hono-factory";
 import { findRegisteredNameTokensForDomain } from "@/lib/name-tokens/find-name-tokens-for-domain";
 import { getIndexedSubregistries } from "@/lib/name-tokens/get-indexed-subregistries";
 import { nameTokensApiMiddleware } from "@/middleware/name-tokens.middleware";
 
 import { getNameTokensRoute } from "./name-tokens-api.routes";
 
-const app = createApp();
+const app = createOpenApiApp<"indexingStatus">();
 
 const indexedSubregistries = getIndexedSubregistries(
   config.namespace,
@@ -48,21 +48,6 @@ const makeNameTokensNotIndexedResponse = (
 });
 
 app.openapi(getNameTokensRoute, async (c) => {
-  // Invariant: context must be set by the required middleware
-  if (c.var.indexingStatus === undefined) {
-    return c.json(
-      serializeNameTokensResponse({
-        responseCode: NameTokensResponseCodes.Error,
-        errorCode: NameTokensResponseErrorCodes.IndexingStatusUnsupported,
-        error: {
-          message: "Name Tokens API is not available yet",
-          details: "Indexing status middleware is required but not initialized.",
-        },
-      }),
-      503,
-    );
-  }
-
   // Check if Indexing Status resolution failed.
   if (c.var.indexingStatus instanceof Error) {
     return c.json(
