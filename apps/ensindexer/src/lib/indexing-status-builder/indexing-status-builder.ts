@@ -24,6 +24,7 @@ import {
   type ChainIndexingConfig,
   ChainIndexingStates,
   type ChainIndexingStatus,
+  isBlockRefBeforeOrEqualTo,
   isBlockRefEqualTo,
   type LocalChainIndexingMetrics,
   type LocalPonderClient,
@@ -146,13 +147,24 @@ export class IndexingStatusBuilder {
           config: indexedBlockrange as Unvalidated<BlockRefRangeBounded>,
         } satisfies Unvalidated<ChainIndexingStatusSnapshotCompleted>);
 
-      case ChainIndexingStates.Realtime:
+      case ChainIndexingStates.Realtime: {
+        // Metrics and status are fetched concurrently — the checkpoint block
+        // can briefly advance past the synced block metric. Clamp to maintain
+        // the invariant: latestIndexedBlock <= latestKnownBlock.
+        const latestKnownBlock = isBlockRefBeforeOrEqualTo(
+          checkpointBlock,
+          chainIndexingMetrics.latestSyncedBlock,
+        )
+          ? chainIndexingMetrics.latestSyncedBlock
+          : checkpointBlock;
+
         return validateChainIndexingStatusSnapshot({
           chainStatus: ChainIndexingStatusIds.Following,
           latestIndexedBlock: checkpointBlock,
-          latestKnownBlock: chainIndexingMetrics.latestSyncedBlock,
+          latestKnownBlock,
           config: indexedBlockrange as Unvalidated<BlockRefRangeLeftBounded>,
         } satisfies Unvalidated<ChainIndexingStatusSnapshotFollowing>);
+      }
 
       case ChainIndexingStates.Historical: {
         return validateChainIndexingStatusSnapshot({

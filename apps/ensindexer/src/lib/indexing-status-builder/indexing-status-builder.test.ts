@@ -473,6 +473,84 @@ describe("IndexingStatusBuilder", () => {
     });
   });
 
+  describe("Race condition handling", () => {
+    it("clamps latestKnownBlock when checkpointBlock is ahead of latestSyncedBlock in realtime", async () => {
+      // Arrange — simulate a race where the checkpoint block has advanced
+      // past the synced block metric between concurrent fetches.
+      const publicClientMock = buildPublicClientMock();
+
+      const localMetricsHistorical = buildLocalChainsIndexingMetrics(
+        new Map([
+          [
+            chainId,
+            {
+              state: ChainIndexingStates.Historical,
+              latestSyncedBlock: laterBlockRef,
+              historicalTotalBlocks: 100,
+              backfillEndBlock: latestBlockRef.number,
+            } satisfies LocalChainIndexingMetricsHistorical,
+          ],
+        ]),
+      );
+
+      // In realtime, latestSyncedBlock is behind the checkpoint
+      const localMetricsRealtime = buildLocalChainsIndexingMetrics(
+        new Map([
+          [
+            chainId,
+            {
+              state: ChainIndexingStates.Realtime,
+              latestSyncedBlock: earlierBlockRef, // behind checkpointBlock
+            } satisfies ChainIndexingMetricsRealtime,
+          ],
+        ]),
+      );
+
+      const localStatus: PonderIndexingStatus = {
+        chains: new Map([[chainId, { checkpointBlock: laterBlockRef }]]), // ahead of latestSyncedBlock
+      };
+
+      const localPonderClientMock = buildLocalPonderClientMock({
+        metrics: vi
+          .fn()
+          .mockResolvedValueOnce(localMetricsHistorical)
+          .mockResolvedValueOnce(localMetricsRealtime),
+        status: vi.fn().mockResolvedValue(localStatus),
+        getIndexedBlockrange: vi
+          .fn()
+          .mockReturnValue(buildBlockNumberRange(earliestBlockRef.number, undefined)),
+        getCachedPublicClient: vi.fn().mockReturnValue(publicClientMock),
+      });
+
+      const builder = new IndexingStatusBuilder(localPonderClientMock as LocalPonderClient);
+
+      // Act
+      await builder.getOmnichainIndexingStatusSnapshot();
+      const result = await builder.getOmnichainIndexingStatusSnapshot();
+
+      // Assert — latestKnownBlock should be clamped to checkpointBlock (laterBlockRef)
+      // instead of the stale latestSyncedBlock (earlierBlockRef)
+      expect(result).toStrictEqual({
+        omnichainStatus: OmnichainIndexingStatusIds.Following,
+        chains: new Map([
+          [
+            chainId,
+            {
+              chainStatus: ChainIndexingStatusIds.Following,
+              latestIndexedBlock: laterBlockRef,
+              latestKnownBlock: laterBlockRef, // clamped: same as latestIndexedBlock
+              config: {
+                rangeType: RangeTypeIds.LeftBounded,
+                startBlock: earliestBlockRef,
+              },
+            } satisfies ChainIndexingStatusSnapshotFollowing,
+          ],
+        ]),
+        omnichainIndexingCursor: laterBlockRef.timestamp,
+      } satisfies OmnichainIndexingStatusSnapshot);
+    });
+  });
+
   describe("Error handling", () => {
     it("throws when indexing status is missing for a chain", async () => {
       // Arrange

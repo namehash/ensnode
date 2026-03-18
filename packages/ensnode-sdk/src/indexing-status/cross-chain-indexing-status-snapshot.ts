@@ -1,6 +1,9 @@
-import type { RangeTypeIds } from "../shared/blockrange";
+import { RangeTypeIds } from "../shared/blockrange";
 import type { BlockRef, ChainId, UnixTimestamp } from "../shared/types";
-import { ChainIndexingStatusIds } from "./chain-indexing-status-snapshot";
+import {
+  ChainIndexingStatusIds,
+  type ChainIndexingStatusSnapshot,
+} from "./chain-indexing-status-snapshot";
 import type { OmnichainIndexingStatusSnapshot } from "./omnichain-indexing-status-snapshot";
 import { validateCrossChainIndexingStatusSnapshot } from "./validate/cross-chain-indexing-status-snapshot";
 
@@ -119,10 +122,47 @@ export function getLatestIndexedBlockRef(
 }
 
 /**
+ * Get the "highest known block timestamp" from an omnichain indexing status snapshot.
+ *
+ * This is the maximum timestamp across all:
+ * - `config.startBlock` timestamps for all chains
+ * - `config.endBlock` timestamps for bounded chains
+ * - `backfillEndBlock` timestamps for chains in backfill status
+ * - `latestKnownBlock` timestamps for chains in following status
+ */
+export function getHighestKnownBlockTimestamp(
+  chains: ChainIndexingStatusSnapshot[],
+): UnixTimestamp {
+  const startBlockTimestamps = chains.map((chain) => chain.config.startBlock.timestamp);
+
+  const endBlockTimestamps = chains
+    .map((chain) => chain.config)
+    .filter((chainConfig) => chainConfig.rangeType === RangeTypeIds.Bounded)
+    .map((chainConfig) => chainConfig.endBlock.timestamp);
+
+  const backfillEndBlockTimestamps = chains
+    .filter((chain) => chain.chainStatus === ChainIndexingStatusIds.Backfill)
+    .map((chain) => chain.backfillEndBlock.timestamp);
+
+  const latestKnownBlockTimestamps = chains
+    .filter((chain) => chain.chainStatus === ChainIndexingStatusIds.Following)
+    .map((chain) => chain.latestKnownBlock.timestamp);
+
+  return Math.max(
+    ...startBlockTimestamps,
+    ...endBlockTimestamps,
+    ...backfillEndBlockTimestamps,
+    ...latestKnownBlockTimestamps,
+  );
+}
+
+/**
  * Build a Cross-Chain Indexing Status Snapshot based on the omnichain indexing status snapshot.
  *
  * @param omnichainSnapshot - The omnichain indexing status snapshot.
  * @param snapshotTime - The timestamp when the cross-chain indexing status snapshot was generated.
+ *        Will be adjusted upward if necessary to satisfy the invariant that snapshotTime must
+ *        be >= the highest known block timestamp (handles clock skew and future block timestamps).
  * @returns The cross-chain indexing status snapshot.
  * @throws if the generated snapshot does not satisfy the invariants defined
  *         in {@link CrossChainIndexingStatusSnapshotOmnichain}
@@ -131,10 +171,13 @@ export function buildCrossChainIndexingStatusSnapshotOmnichain(
   omnichainSnapshot: OmnichainIndexingStatusSnapshot,
   snapshotTime: UnixTimestamp,
 ): CrossChainIndexingStatusSnapshotOmnichain {
+  const chains = Array.from(omnichainSnapshot.chains.values());
+  const adjustedSnapshotTime = Math.max(snapshotTime, getHighestKnownBlockTimestamp(chains));
+
   return validateCrossChainIndexingStatusSnapshot({
     strategy: CrossChainIndexingStrategyIds.Omnichain,
     slowestChainIndexingCursor: omnichainSnapshot.omnichainIndexingCursor,
     omnichainSnapshot,
-    snapshotTime,
+    snapshotTime: adjustedSnapshotTime,
   });
 }

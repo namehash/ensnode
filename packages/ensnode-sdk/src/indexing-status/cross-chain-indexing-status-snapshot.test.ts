@@ -12,6 +12,7 @@ import {
 import {
   buildCrossChainIndexingStatusSnapshotOmnichain,
   CrossChainIndexingStrategyIds,
+  getHighestKnownBlockTimestamp,
 } from "./cross-chain-indexing-status-snapshot";
 import {
   OmnichainIndexingStatusIds,
@@ -399,7 +400,7 @@ describe("Cross-chain Indexing Status Snapshot", () => {
       });
     });
 
-    it("throws when snapshotTime is below the highest known block timestamp", () => {
+    it("clamps snapshotTime up to highest known block timestamp when too low", () => {
       // arrange
       const chains = new Map([
         [
@@ -424,10 +425,78 @@ describe("Cross-chain Indexing Status Snapshot", () => {
 
       const snapshotTime = latestBlockRef.timestamp - 1;
 
-      // act & assert
-      expect(() =>
-        buildCrossChainIndexingStatusSnapshotOmnichain(omnichainSnapshot, snapshotTime),
-      ).toThrow("Invalid CrossChainIndexingStatusSnapshot");
+      // act
+      const result = buildCrossChainIndexingStatusSnapshotOmnichain(
+        omnichainSnapshot,
+        snapshotTime,
+      );
+
+      // assert - snapshotTime should be clamped to the highest known block timestamp
+      expect(result.snapshotTime).toBe(latestBlockRef.timestamp);
+    });
+  });
+
+  describe("getHighestKnownBlockTimestamp", () => {
+    it("returns startBlock timestamp for queued chains", () => {
+      const chains = [
+        {
+          chainStatus: ChainIndexingStatusIds.Queued,
+          config: {
+            rangeType: RangeTypeIds.LeftBounded,
+            startBlock: laterBlockRef,
+          },
+        } satisfies ChainIndexingStatusSnapshotQueued,
+      ];
+
+      expect(getHighestKnownBlockTimestamp(chains)).toBe(laterBlockRef.timestamp);
+    });
+
+    it("returns endBlock timestamp for bounded chains", () => {
+      const chains = [
+        {
+          chainStatus: ChainIndexingStatusIds.Completed,
+          config: {
+            rangeType: RangeTypeIds.Bounded,
+            startBlock: earliestBlockRef,
+            endBlock: latestBlockRef,
+          },
+          latestIndexedBlock: latestBlockRef,
+        } satisfies ChainIndexingStatusSnapshotCompleted,
+      ];
+
+      expect(getHighestKnownBlockTimestamp(chains)).toBe(latestBlockRef.timestamp);
+    });
+
+    it("returns latestKnownBlock timestamp for following chains", () => {
+      const chains = [
+        {
+          chainStatus: ChainIndexingStatusIds.Following,
+          config: {
+            rangeType: RangeTypeIds.LeftBounded,
+            startBlock: earliestBlockRef,
+          },
+          latestIndexedBlock: laterBlockRef,
+          latestKnownBlock: latestBlockRef,
+        } satisfies ChainIndexingStatusSnapshotFollowing,
+      ];
+
+      expect(getHighestKnownBlockTimestamp(chains)).toBe(latestBlockRef.timestamp);
+    });
+
+    it("returns backfillEndBlock timestamp for backfill chains", () => {
+      const chains = [
+        {
+          chainStatus: ChainIndexingStatusIds.Backfill,
+          config: {
+            rangeType: RangeTypeIds.LeftBounded,
+            startBlock: earliestBlockRef,
+          },
+          latestIndexedBlock: laterBlockRef,
+          backfillEndBlock: latestBlockRef,
+        } satisfies ChainIndexingStatusSnapshotBackfill,
+      ];
+
+      expect(getHighestKnownBlockTimestamp(chains)).toBe(latestBlockRef.timestamp);
     });
   });
 });
