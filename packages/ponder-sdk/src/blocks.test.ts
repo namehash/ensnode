@@ -73,5 +73,11 @@ describe("BlockRef comparisons", () => {
         isBlockRefBeforeOrEqualTo({ number: 1, timestamp: 100 }, { number: 2, timestamp: 100 }),
       ).toBe(true);
     });
+
+    it("returns false when block numbers are equal but timestamps differ", () => {
+      expect(
+        isBlockRefBeforeOrEqualTo({ number: 1, timestamp: 100 }, { number: 1, timestamp: 200 }),
+      ).toBe(false);
+    });
   });
 });

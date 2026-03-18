@@ -59,5 +59,11 @@ describe("block-ref comparisons", () => {
         true,
       );
     });
+
+    it("returns false when block numbers are equal but timestamps differ", () => {
+      expect(isBeforeOrEqualTo({ number: 1, timestamp: 100 }, { number: 1, timestamp: 200 })).toBe(
+        false,
+      );
+    });
   });
 });
