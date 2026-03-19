@@ -68,16 +68,20 @@ export function createApp<const TRequired extends keyof MiddlewareVariables = ne
     // all middleware — both global (index.ts) and sub-app level — have had a chance to set vars.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (app as any).openapi = (route: any, handler: any, hook?: any) =>
-      _openapi(route, async (c: any) => {
-        for (const dep of requiredVars) {
-          if (c.var[dep] === undefined) {
-            throw new Error(
-              `Invariant: handler requires "${dep}" but no middleware provided it in c.var`,
-            );
+      _openapi(
+        route,
+        async (c: any) => {
+          for (const dep of requiredVars) {
+            if (c.var[dep] === undefined) {
+              throw new Error(
+                `Invariant: handler requires "${dep}" but no middleware provided it in c.var`,
+              );
+            }
           }
-        }
-        return handler(c);
-      }, hook);
+          return handler(c);
+        },
+        hook,
+      );
   }
 
   return app;
