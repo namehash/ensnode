@@ -1,9 +1,9 @@
 import { errorResponse } from "@/lib/handlers/error-response";
-import { createOpenApiApp } from "@/lib/hono-factory";
+import { createApp } from "@/lib/hono-factory";
 
 import { realtimeGetMeta } from "./realtime-api.routes";
 
-const app = createOpenApiApp<"indexingStatus">();
+const app = createApp("indexingStatus");
 
 // allow performance monitoring clients to read HTTP Status for the provided
 // `maxWorstCaseDistance` param

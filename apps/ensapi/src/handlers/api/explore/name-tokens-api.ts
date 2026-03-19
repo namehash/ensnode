@@ -14,14 +14,14 @@ import {
   serializeNameTokensResponse,
 } from "@ensnode/ensnode-sdk";
 
-import { createOpenApiApp } from "@/lib/hono-factory";
+import { createApp } from "@/lib/hono-factory";
 import { findRegisteredNameTokensForDomain } from "@/lib/name-tokens/find-name-tokens-for-domain";
 import { getIndexedSubregistries } from "@/lib/name-tokens/get-indexed-subregistries";
 import { nameTokensApiMiddleware } from "@/middleware/name-tokens.middleware";
 
 import { getNameTokensRoute } from "./name-tokens-api.routes";
 
-const app = createOpenApiApp<"indexingStatus">();
+const app = createApp("indexingStatus");
 
 const indexedSubregistries = getIndexedSubregistries(
   config.namespace,

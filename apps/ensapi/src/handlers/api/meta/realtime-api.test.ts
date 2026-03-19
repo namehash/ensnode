@@ -6,7 +6,7 @@ import {
   type UnixTimestamp,
 } from "@ensnode/ensnode-sdk";
 
-import { createOpenApiApp } from "@/lib/hono-factory";
+import { createApp } from "@/lib/hono-factory";
 import * as middleware from "@/middleware/indexing-status.middleware";
 
 import amIRealtimeApi from "./realtime-api";
@@ -45,11 +45,11 @@ describe("amirealtime-api", () => {
     });
   };
 
-  let app: ReturnType<typeof createOpenApiApp>;
+  let app: ReturnType<typeof createApp>;
 
   beforeEach(() => {
     // Create a fresh app instance for each test with middleware registered
-    app = createOpenApiApp();
+    app = createApp();
     app.use(middleware.indexingStatusMiddleware);
     app.route("/amirealtime", amIRealtimeApi);
   });

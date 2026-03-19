@@ -15,7 +15,7 @@ import {
   serializeReferrerMetricsEditionsResponse,
 } from "@namehash/ens-referrals/v1";
 
-import { createOpenApiApp } from "@/lib/hono-factory";
+import { createApp } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
 import { referralLeaderboardEditionsCachesMiddleware } from "@/middleware/referral-leaderboard-editions-caches.middleware";
 import { referralProgramEditionConfigSetMiddleware } from "@/middleware/referral-program-edition-set.middleware";
@@ -28,9 +28,7 @@ import {
 
 const logger = makeLogger("ensanalytics-api-v1");
 
-const app = createOpenApiApp<
-  "referralLeaderboardEditionsCaches" | "referralProgramEditionConfigSet"
->();
+const app = createApp("referralLeaderboardEditionsCaches", "referralProgramEditionConfigSet");
 
 // Apply referral program edition config set middleware
 app.use(referralProgramEditionConfigSetMiddleware);

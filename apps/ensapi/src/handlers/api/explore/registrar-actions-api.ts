@@ -9,7 +9,7 @@ import {
   serializeRegistrarActionsResponse,
 } from "@ensnode/ensnode-sdk";
 
-import { createOpenApiApp } from "@/lib/hono-factory";
+import { createApp } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
 import { findRegistrarActions } from "@/lib/registrar-actions/find-registrar-actions";
 import { registrarActionsApiMiddleware } from "@/middleware/registrar-actions.middleware";
@@ -20,7 +20,7 @@ import {
   type RegistrarActionsQuery,
 } from "./registrar-actions-api.routes";
 
-const app = createOpenApiApp<"indexingStatus">();
+const app = createApp("indexingStatus");
 
 const logger = makeLogger("registrar-actions-api");
 

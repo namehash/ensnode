@@ -9,11 +9,11 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { buildEnsApiPublicConfig } from "@/config/config.schema";
-import { createOpenApiApp } from "@/lib/hono-factory";
+import { createApp } from "@/lib/hono-factory";
 
 import { getConfigRoute, getIndexingStatusRoute } from "./ensnode-api.routes";
 
-const app = createOpenApiApp<"indexingStatus">();
+const app = createApp("indexingStatus");
 
 app.openapi(getConfigRoute, async (c) => {
   const ensApiPublicConfig = buildEnsApiPublicConfig(config);

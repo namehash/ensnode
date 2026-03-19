@@ -5,7 +5,7 @@ import type {
   ResolveRecordsResponse,
 } from "@ensnode/ensnode-sdk";
 
-import { createOpenApiApp } from "@/lib/hono-factory";
+import { createApp } from "@/lib/hono-factory";
 import { resolveForward } from "@/lib/resolution/forward-resolution";
 import { resolvePrimaryNames } from "@/lib/resolution/multichain-primary-name-resolution";
 import { resolveReverse } from "@/lib/resolution/reverse-resolution";
@@ -25,7 +25,7 @@ import {
  */
 const MAX_REALTIME_DISTANCE_TO_ACCELERATE: Duration = 60; // 1 minute in seconds
 
-const app = createOpenApiApp<"canAccelerate">();
+const app = createApp("canAccelerate");
 
 // inject c.var.isRealtime derived from MAX_REALTIME_DISTANCE_TO_ACCELERATE
 app.use(makeIsRealtimeMiddleware("resolution-api", MAX_REALTIME_DISTANCE_TO_ACCELERATE));

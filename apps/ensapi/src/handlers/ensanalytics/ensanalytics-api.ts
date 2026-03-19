@@ -9,7 +9,7 @@ import {
   serializeReferrerLeaderboardPageResponse,
 } from "@namehash/ens-referrals";
 
-import { createOpenApiApp } from "@/lib/hono-factory";
+import { createApp } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
 import { referrerLeaderboardMiddleware } from "@/middleware/referrer-leaderboard.middleware";
 
@@ -17,7 +17,7 @@ import { getReferrerDetailRoute, getReferrerLeaderboardRoute } from "./ensanalyt
 
 const logger = makeLogger("ensanalytics-api");
 
-const app = createOpenApiApp<"referrerLeaderboard">();
+const app = createApp("referrerLeaderboard");
 
 // Apply referrer leaderboard cache middleware to all routes in this handler
 app.use(referrerLeaderboardMiddleware);
