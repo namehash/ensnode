@@ -17,6 +17,14 @@ import type { ReferralProgramRules } from "./rules";
 export type ReferralProgramEditionSlug = string;
 
 /**
+ * Regex pattern that all {@link ReferralProgramEditionSlug} values must match.
+ *
+ * Allows lowercase letters (a-z), digits (0-9), and hyphens (-).
+ * Must not start or end with a hyphen.
+ */
+export const REFERRAL_PROGRAM_EDITION_SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+/**
  * Represents a referral program edition configuration.
  */
 export interface ReferralProgramEditionConfig {

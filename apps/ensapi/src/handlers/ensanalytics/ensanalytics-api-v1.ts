@@ -1,16 +1,17 @@
 import {
+  buildEditionSummary,
   getReferrerEditionMetrics,
   getReferrerLeaderboardPage,
-  type ReferralProgramEditionConfigSetResponse,
-  ReferralProgramEditionConfigSetResponseCodes,
   type ReferralProgramEditionSlug,
+  type ReferralProgramEditionSummariesResponse,
+  ReferralProgramEditionSummariesResponseCodes,
   type ReferrerLeaderboard,
   type ReferrerLeaderboardPageResponse,
   ReferrerLeaderboardPageResponseCodes,
   type ReferrerMetricsEditionsData,
   type ReferrerMetricsEditionsResponse,
   ReferrerMetricsEditionsResponseCodes,
-  serializeReferralProgramEditionConfigSetResponse,
+  serializeReferralProgramEditionSummariesResponse,
   serializeReferrerLeaderboardPageResponse,
   serializeReferrerMetricsEditionsResponse,
 } from "@namehash/ens-referrals/v1";
@@ -221,7 +222,7 @@ app.openapi(getReferrerDetailRoute, async (c) => {
   }
 });
 
-// Get configured edition config set
+// Get edition summaries
 app.openapi(getEditionsRoute, async (c) => {
   try {
     // Check if edition config set failed to load
@@ -231,27 +232,82 @@ app.openapi(getEditionsRoute, async (c) => {
         "Referral program edition config set failed to load",
       );
       return c.json(
-        serializeReferralProgramEditionConfigSetResponse({
-          responseCode: ReferralProgramEditionConfigSetResponseCodes.Error,
+        serializeReferralProgramEditionSummariesResponse({
+          responseCode: ReferralProgramEditionSummariesResponseCodes.Error,
           error: "Service Unavailable",
           errorMessage: "Referral program configuration is currently unavailable.",
-        } satisfies ReferralProgramEditionConfigSetResponse),
+        } satisfies ReferralProgramEditionSummariesResponse),
         503,
       );
     }
 
-    // Convert Map to array and sort by start timestamp descending
-    const editions = Array.from(c.var.referralProgramEditionConfigSet.values()).sort(
+    // Check if leaderboard caches failed to load
+    if (c.var.referralLeaderboardEditionsCaches instanceof Error) {
+      logger.error(
+        { error: c.var.referralLeaderboardEditionsCaches },
+        "Referral program leaderboard caches failed to load",
+      );
+      return c.json(
+        serializeReferralProgramEditionSummariesResponse({
+          responseCode: ReferralProgramEditionSummariesResponseCodes.Error,
+          error: "Service Unavailable",
+          errorMessage: "Referral program leaderboard data is currently unavailable.",
+        } satisfies ReferralProgramEditionSummariesResponse),
+        503,
+      );
+    }
+
+    // Sort edition configs by start timestamp descending
+    const editionConfigs = Array.from(c.var.referralProgramEditionConfigSet.values()).sort(
       (a, b) => b.rules.startTime - a.rules.startTime,
     );
 
+    // Read all leaderboard caches in parallel, keeping config colocated with its leaderboard
+    const leaderboardCaches = c.var.referralLeaderboardEditionsCaches;
+    const results = await Promise.all(
+      editionConfigs.map(async (config) => {
+        const cache = leaderboardCaches.get(config.slug);
+        if (!cache) throw new Error(`Invariant: edition cache for ${config.slug} should exist`);
+        return { config, leaderboard: await cache.read() };
+      }),
+    );
+
+    // Partition into failures and successes in one pass
+    const failedSlugs: ReferralProgramEditionSlug[] = [];
+    const valid: {
+      config: (typeof results)[number]["config"];
+      leaderboard: ReferrerLeaderboard;
+    }[] = [];
+    for (const { config, leaderboard } of results) {
+      if (leaderboard instanceof Error) {
+        failedSlugs.push(config.slug);
+      } else {
+        valid.push({ config, leaderboard });
+      }
+    }
+
+    if (failedSlugs.length > 0) {
+      return c.json(
+        serializeReferralProgramEditionSummariesResponse({
+          responseCode: ReferralProgramEditionSummariesResponseCodes.Error,
+          error: "Service Unavailable",
+          errorMessage: `Leaderboard data not available for edition(s): ${failedSlugs.join(", ")}`,
+        } satisfies ReferralProgramEditionSummariesResponse),
+        503,
+      );
+    }
+
+    const editions = valid.map(({ config, leaderboard }) =>
+      buildEditionSummary(config, leaderboard),
+    );
+
     return c.json(
-      serializeReferralProgramEditionConfigSetResponse({
-        responseCode: ReferralProgramEditionConfigSetResponseCodes.Ok,
+      serializeReferralProgramEditionSummariesResponse({
+        responseCode: ReferralProgramEditionSummariesResponseCodes.Ok,
         data: {
           editions,
         },
-      } satisfies ReferralProgramEditionConfigSetResponse),
+      } satisfies ReferralProgramEditionSummariesResponse),
     );
   } catch (error) {
     logger.error({ error }, "Error in /v1/ensanalytics/editions endpoint");
@@ -260,11 +316,11 @@ app.openapi(getEditionsRoute, async (c) => {
         ? error.message
         : "An unexpected error occurred while processing your request";
     return c.json(
-      serializeReferralProgramEditionConfigSetResponse({
-        responseCode: ReferralProgramEditionConfigSetResponseCodes.Error,
+      serializeReferralProgramEditionSummariesResponse({
+        responseCode: ReferralProgramEditionSummariesResponseCodes.Error,
         error: "Internal server error",
         errorMessage,
-      } satisfies ReferralProgramEditionConfigSetResponse),
+      } satisfies ReferralProgramEditionSummariesResponse),
       500,
     );
   }

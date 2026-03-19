@@ -14,12 +14,12 @@ runs:
   using: composite
   steps:
     - name: Checkout Repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         fetch-depth: 1
 
     - name: Setup pnpm
-      uses: pnpm/action-setup@v4
+      uses: pnpm/action-setup@v5
 
     - name: Setup Node.js
       uses: useblacksmith/setup-node@v5
@@ -35,7 +35,7 @@ runs:
       run: pnpm -F ${{ inputs.name }} build
 
     - name: Publish ${{ inputs.name }}-${{ inputs.version }}
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: ${{ inputs.name }}-${{ inputs.version }}
         path: apps/${{ inputs.name }}/dist/lambda.zip

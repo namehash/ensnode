@@ -2,18 +2,18 @@ import { prettifyError } from "zod/v4";
 
 import type { ReferralProgramEditionConfig } from "../edition";
 import type {
-  SerializedReferralProgramEditionConfigSetResponse,
+  SerializedReferralProgramEditionSummariesResponse,
   SerializedReferrerLeaderboardPageResponse,
   SerializedReferrerMetricsEditionsResponse,
 } from "./serialized-types";
 import type {
-  ReferralProgramEditionConfigSetResponse,
+  ReferralProgramEditionSummariesResponse,
   ReferrerLeaderboardPageResponse,
   ReferrerMetricsEditionsResponse,
 } from "./types";
 import {
   makeReferralProgramEditionConfigSetArraySchema,
-  makeReferralProgramEditionConfigSetResponseSchema,
+  makeReferralProgramEditionSummariesResponseSchema,
   makeReferrerLeaderboardPageResponseSchema,
   makeReferrerMetricsEditionsResponseSchema,
 } from "./zod-schemas";
@@ -76,18 +76,18 @@ export function deserializeReferralProgramEditionConfigSetArray(
 }
 
 /**
- * Deserialize a {@link ReferralProgramEditionConfigSetResponse} object.
+ * Deserialize a {@link ReferralProgramEditionSummariesResponse} object.
  */
-export function deserializeReferralProgramEditionConfigSetResponse(
-  maybeResponse: SerializedReferralProgramEditionConfigSetResponse,
+export function deserializeReferralProgramEditionSummariesResponse(
+  maybeResponse: SerializedReferralProgramEditionSummariesResponse,
   valueLabel?: string,
-): ReferralProgramEditionConfigSetResponse {
-  const schema = makeReferralProgramEditionConfigSetResponseSchema(valueLabel);
+): ReferralProgramEditionSummariesResponse {
+  const schema = makeReferralProgramEditionSummariesResponseSchema(valueLabel);
   const parsed = schema.safeParse(maybeResponse);
 
   if (parsed.error) {
     throw new Error(
-      `Cannot deserialize ReferralProgramEditionConfigSetResponse:\n${prettifyError(parsed.error)}\n`,
+      `Cannot deserialize ReferralProgramEditionSummariesResponse:\n${prettifyError(parsed.error)}\n`,
     );
   }
 

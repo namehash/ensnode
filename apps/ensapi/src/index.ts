@@ -72,6 +72,7 @@ app.route("/ensanalytics", ensanalyticsApi);
 app.route("/v1/ensanalytics", ensanalyticsApiV1);
 
 // use Am I Realtime API at /amirealtime
+// NOTE: this is legacy endpoint and will be deleted in future. one should use /api/realtime instead
 app.route("/amirealtime", realtimeApi);
 
 // serve pre-generated OpenAPI 3.1 document

@@ -4,11 +4,13 @@ import { CurrencyIds, parseEth, parseUsdc } from "@ensnode/ensnode-sdk";
 
 import type { ReferrerEditionMetricsUnrecognized } from "../award-models/shared/edition-metrics";
 import { ReferrerEditionMetricsTypeIds } from "../award-models/shared/edition-metrics";
+import type { ReferralProgramEditionSummaryUnrecognized } from "../award-models/shared/edition-summary";
 import type { ReferrerLeaderboardPageUnrecognized } from "../award-models/shared/leaderboard-page";
 import { ReferralProgramAwardModels } from "../award-models/shared/rules";
-import { ReferralProgramStatuses } from "../status";
+import { ReferralProgramEditionStatuses } from "../award-models/shared/status";
 import {
   makeReferralProgramEditionConfigSetArraySchema,
+  makeReferralProgramEditionSummarySchema,
   makeReferrerEditionMetricsSchema,
   makeReferrerLeaderboardPageSchema,
 } from "./zod-schemas";
@@ -32,6 +34,7 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
       endTime: 2000000,
       subregistryId,
       rulesUrl: "https://ensawards.org/rules",
+      areAwardsDistributed: false,
     },
   };
 
@@ -47,6 +50,7 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
       endTime: 2000000,
       subregistryId,
       rulesUrl: "https://ensawards.org/rules",
+      areAwardsDistributed: false,
     },
   };
 
@@ -59,6 +63,7 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
       endTime: 3000000,
       subregistryId,
       rulesUrl: "https://ensawards.org/rules",
+      areAwardsDistributed: false,
       someNewField: "extra-data",
     },
   };
@@ -75,6 +80,7 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
 
     expect(pieSplit).toBeDefined();
     expect(pieSplit!.rules.awardModel).toBe(ReferralProgramAwardModels.PieSplit);
+    expect(pieSplit!.rules.areAwardsDistributed).toBe(pieSplitEdition.rules.areAwardsDistributed);
   });
 
   it("parses the recognized rev-share-limit edition correctly", () => {
@@ -94,6 +100,9 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
     expect(rules.minQualifiedRevenueContribution).toBeDefined();
     expect(typeof rules.qualifiedRevenueShare).toBe("number");
     expect(rules.qualifiedRevenueShare).toBe(0.5);
+    expect(revShareLimit!.rules.areAwardsDistributed).toBe(
+      revShareLimitEdition.rules.areAwardsDistributed,
+    );
   });
 
   it("wraps the unrecognized edition as ReferralProgramRulesUnrecognized", () => {
@@ -115,6 +124,9 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
     expect(unrecognized!.rules.endTime).toBe(3000000);
     expect(unrecognized!.rules.rulesUrl).toBeInstanceOf(URL);
     expect(unrecognized!.rules.rulesUrl.href).toBe("https://ensawards.org/rules");
+    expect(unrecognized!.rules.areAwardsDistributed).toBe(
+      futureModelEdition.rules.areAwardsDistributed,
+    );
   });
 
   it("fails when an unrecognized edition has malformed base fields", () => {
@@ -126,6 +138,7 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
         // startTime missing, endTime missing
         subregistryId,
         rulesUrl: "https://ensawards.org/rules",
+        areAwardsDistributed: false,
       },
     };
 
@@ -182,6 +195,7 @@ describe("makeReferrerLeaderboardPageSchema", () => {
       endTime: 2000000,
       subregistryId,
       rulesUrl: "https://ensawards.org/rules",
+      areAwardsDistributed: false,
     },
     referrers: [],
     aggregatedMetrics: {
@@ -192,7 +206,7 @@ describe("makeReferrerLeaderboardPageSchema", () => {
       minFinalScoreToQualify: 0,
     },
     pageContext: emptyPageContext,
-    status: ReferralProgramStatuses.Scheduled,
+    status: ReferralProgramEditionStatuses.Scheduled,
     accurateAsOf: 500000,
   };
 
@@ -207,6 +221,7 @@ describe("makeReferrerLeaderboardPageSchema", () => {
       endTime: 2000000,
       subregistryId,
       rulesUrl: "https://ensawards.org/rules",
+      areAwardsDistributed: false,
     },
     referrers: [],
     aggregatedMetrics: {
@@ -216,7 +231,7 @@ describe("makeReferrerLeaderboardPageSchema", () => {
       awardPoolRemaining: parseUsdc("2000"),
     },
     pageContext: emptyPageContext,
-    status: ReferralProgramStatuses.Active,
+    status: ReferralProgramEditionStatuses.Active,
     accurateAsOf: 1500000,
   };
 
@@ -224,7 +239,7 @@ describe("makeReferrerLeaderboardPageSchema", () => {
     const result = schema.parse(pieSplitLeaderboardPage);
 
     expect(result.awardModel).toBe(ReferralProgramAwardModels.PieSplit);
-    expect(result.status).toBe(ReferralProgramStatuses.Scheduled);
+    expect(result.status).toBe(ReferralProgramEditionStatuses.Scheduled);
     expect(result.accurateAsOf).toBe(500000);
     expect(result.pageContext.page).toBe(1);
   });
@@ -233,7 +248,7 @@ describe("makeReferrerLeaderboardPageSchema", () => {
     const result = schema.parse(revShareLimitLeaderboardPage);
 
     expect(result.awardModel).toBe(ReferralProgramAwardModels.RevShareLimit);
-    expect(result.status).toBe(ReferralProgramStatuses.Active);
+    expect(result.status).toBe(ReferralProgramEditionStatuses.Active);
     expect(result.accurateAsOf).toBe(1500000);
   });
 
@@ -241,7 +256,7 @@ describe("makeReferrerLeaderboardPageSchema", () => {
     const input = {
       awardModel: "future-model",
       pageContext: emptyPageContext,
-      status: ReferralProgramStatuses.Active,
+      status: ReferralProgramEditionStatuses.Active,
       accurateAsOf: 1000000,
       someNewField: "extra-data",
     };
@@ -250,7 +265,7 @@ describe("makeReferrerLeaderboardPageSchema", () => {
 
     expect(result.awardModel).toBe(ReferralProgramAwardModels.Unrecognized);
     expect((result as ReferrerLeaderboardPageUnrecognized).originalAwardModel).toBe("future-model");
-    expect(result.status).toBe(ReferralProgramStatuses.Active);
+    expect(result.status).toBe(ReferralProgramEditionStatuses.Active);
     expect(result.accurateAsOf).toBe(1000000);
     expect(result.pageContext.page).toBe(1);
   });
@@ -277,6 +292,127 @@ describe("makeReferrerLeaderboardPageSchema", () => {
   });
 });
 
+describe("makeReferralProgramEditionSummarySchema", () => {
+  const schema = makeReferralProgramEditionSummarySchema();
+
+  const subregistryId = {
+    chainId: 1,
+    address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
+  };
+
+  const pieSplitSummary = {
+    awardModel: ReferralProgramAwardModels.PieSplit,
+    slug: "2025-12",
+    displayName: "December 2025",
+    status: ReferralProgramEditionStatuses.Active,
+    rules: {
+      awardModel: ReferralProgramAwardModels.PieSplit,
+      totalAwardPoolValue: parseUsdc("1000"),
+      maxQualifiedReferrers: 100,
+      startTime: 1000000,
+      endTime: 2000000,
+      subregistryId,
+      rulesUrl: "https://ensawards.org/rules",
+      areAwardsDistributed: false,
+    },
+  };
+
+  const revShareLimitSummary = {
+    awardModel: ReferralProgramAwardModels.RevShareLimit,
+    slug: "2026-01",
+    displayName: "January 2026",
+    status: ReferralProgramEditionStatuses.Active,
+    rules: {
+      awardModel: ReferralProgramAwardModels.RevShareLimit,
+      totalAwardPoolValue: parseUsdc("2000"),
+      minQualifiedRevenueContribution: parseUsdc("10"),
+      qualifiedRevenueShare: 0.5,
+      startTime: 1000000,
+      endTime: 2000000,
+      subregistryId,
+      rulesUrl: "https://ensawards.org/rules",
+      areAwardsDistributed: false,
+    },
+    awardPoolRemaining: parseUsdc("2000"),
+  };
+
+  it("parses a known pie-split edition summary correctly", () => {
+    const result = schema.parse(pieSplitSummary);
+
+    expect(result.awardModel).toBe(ReferralProgramAwardModels.PieSplit);
+    expect(result.slug).toBe("2025-12");
+    expect(result.status).toBe(ReferralProgramEditionStatuses.Active);
+    expect(result.rules.awardModel).toBe(ReferralProgramAwardModels.PieSplit);
+  });
+
+  it("parses a known rev-share-limit edition summary correctly, including awardPoolRemaining", () => {
+    const result = schema.parse(revShareLimitSummary);
+
+    expect(result.awardModel).toBe(ReferralProgramAwardModels.RevShareLimit);
+    if (result.awardModel !== ReferralProgramAwardModels.RevShareLimit) throw new Error();
+    expect(result.awardPoolRemaining.amount).toBe(parseUsdc("2000").amount);
+    expect(result.status).toBe(ReferralProgramEditionStatuses.Active);
+  });
+
+  it("parses Exhausted status on a rev-share-limit edition summary", () => {
+    const result = schema.parse({
+      ...revShareLimitSummary,
+      status: ReferralProgramEditionStatuses.Exhausted,
+      awardPoolRemaining: parseUsdc("0"),
+    });
+
+    expect(result.status).toBe(ReferralProgramEditionStatuses.Exhausted);
+  });
+
+  it("wraps an unknown awardModel as ReferralProgramEditionSummaryUnrecognized", () => {
+    const input = {
+      awardModel: "future-model",
+      slug: "2026-03",
+      displayName: "March 2026",
+      status: ReferralProgramEditionStatuses.Scheduled,
+      rules: {
+        awardModel: "future-model",
+        startTime: 2000000,
+        endTime: 3000000,
+        subregistryId,
+        rulesUrl: "https://ensawards.org/rules",
+        areAwardsDistributed: false,
+        someNewField: "extra-data",
+      },
+    };
+
+    const result = schema.parse(input);
+
+    expect(result.awardModel).toBe(ReferralProgramAwardModels.Unrecognized);
+    expect((result as ReferralProgramEditionSummaryUnrecognized).rules.originalAwardModel).toBe(
+      "future-model",
+    );
+    expect(result.slug).toBe("2026-03");
+    expect(result.status).toBe(ReferralProgramEditionStatuses.Scheduled);
+  });
+
+  it("fails when a known awardModel has invalid fields", () => {
+    const invalid = {
+      ...pieSplitSummary,
+      rules: {
+        ...pieSplitSummary.rules,
+        endTime: 500000, // endTime < startTime → refine violation
+      },
+    };
+
+    expect(() => schema.parse(invalid)).toThrow();
+  });
+
+  it("fails when an unknown awardModel is missing required base fields", () => {
+    const input = {
+      awardModel: "future-model",
+      // slug, displayName, status, rules all missing
+    };
+
+    expect(() => schema.parse(input)).toThrow();
+  });
+});
+
 describe("makeReferrerEditionMetricsSchema", () => {
   const schema = makeReferrerEditionMetricsSchema();
 
@@ -293,6 +429,7 @@ describe("makeReferrerEditionMetricsSchema", () => {
     endTime: 2000000,
     subregistryId,
     rulesUrl: "https://ensawards.org/rules",
+    areAwardsDistributed: false,
   };
 
   const pieSplitAggregatedMetrics = {
@@ -322,7 +459,7 @@ describe("makeReferrerEditionMetricsSchema", () => {
         awardPoolApproxValue: parseUsdc("500"),
       },
       aggregatedMetrics: pieSplitAggregatedMetrics,
-      status: ReferralProgramStatuses.Active,
+      status: ReferralProgramEditionStatuses.Active,
       accurateAsOf: 1500000,
     };
 
@@ -352,7 +489,7 @@ describe("makeReferrerEditionMetricsSchema", () => {
         awardPoolApproxValue: parseUsdc("0"),
       },
       aggregatedMetrics: pieSplitAggregatedMetrics,
-      status: ReferralProgramStatuses.Active,
+      status: ReferralProgramEditionStatuses.Active,
       accurateAsOf: 1500000,
     };
 
@@ -376,6 +513,7 @@ describe("makeReferrerEditionMetricsSchema", () => {
         endTime: 2000000,
         subregistryId,
         rulesUrl: "https://ensawards.org/rules",
+        areAwardsDistributed: false,
       },
       referrer: {
         referrer: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
@@ -396,7 +534,7 @@ describe("makeReferrerEditionMetricsSchema", () => {
         grandTotalRevenueContribution: parseEth("300"),
         awardPoolRemaining: parseUsdc("1800"),
       },
-      status: ReferralProgramStatuses.Active,
+      status: ReferralProgramEditionStatuses.Active,
       accurateAsOf: 1500000,
     };
 
@@ -429,7 +567,7 @@ describe("makeReferrerEditionMetricsSchema", () => {
         awardPoolApproxValue: parseUsdc("500"),
       },
       aggregatedMetrics: pieSplitAggregatedMetrics,
-      status: ReferralProgramStatuses.Active,
+      status: ReferralProgramEditionStatuses.Active,
       accurateAsOf: 1500000,
     };
 

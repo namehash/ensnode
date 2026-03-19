@@ -112,12 +112,12 @@ export const getEditionsRoute = createRoute({
   path: "/editions",
   operationId: "getEditions_v1",
   tags: ["ENSAwards"],
-  summary: "Get Edition Config Set (v1)",
+  summary: "Get Edition Summaries (v1)",
   description:
-    "Returns the currently configured referral program edition config set. Editions are sorted in descending order by start timestamp (most recent first).",
+    "Returns a summary for each configured referral program edition, including its current status and award-model-specific runtime data. Editions are sorted in descending order by start timestamp (most recent first).",
   responses: {
     200: {
-      description: "Successfully retrieved edition config set",
+      description: "Successfully retrieved edition summaries.",
     },
     500: {
       description: "Internal server error",

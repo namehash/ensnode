@@ -7,12 +7,14 @@ import type {
   ReferrerEditionMetricsRankedPieSplit,
   ReferrerEditionMetricsUnrankedPieSplit,
 } from "../edition-metrics";
+import type { ReferralProgramEditionSummaryPieSplit } from "../edition-summary";
 import type { ReferrerLeaderboardPagePieSplit } from "../leaderboard-page";
 import type { AwardedReferrerMetricsPieSplit, UnrankedReferrerMetricsPieSplit } from "../metrics";
 import type { ReferralProgramRulesPieSplit } from "../rules";
 import type {
   SerializedAggregatedReferrerMetricsPieSplit,
   SerializedAwardedReferrerMetricsPieSplit,
+  SerializedReferralProgramEditionSummaryPieSplit,
   SerializedReferralProgramRulesPieSplit,
   SerializedReferrerEditionMetricsPieSplit,
   SerializedReferrerEditionMetricsRankedPieSplit,
@@ -35,6 +37,7 @@ export function serializeReferralProgramRulesPieSplit(
     endTime: rules.endTime,
     subregistryId: rules.subregistryId,
     rulesUrl: rules.rulesUrl.toString(),
+    areAwardsDistributed: rules.areAwardsDistributed,
   };
 }
 
@@ -161,5 +164,20 @@ export function serializeReferrerLeaderboardPagePieSplit(
     pageContext: page.pageContext,
     status: page.status,
     accurateAsOf: page.accurateAsOf,
+  };
+}
+
+/**
+ * Serializes a {@link ReferralProgramEditionSummaryPieSplit} object.
+ */
+export function serializeReferralProgramEditionSummaryPieSplit(
+  summary: ReferralProgramEditionSummaryPieSplit,
+): SerializedReferralProgramEditionSummaryPieSplit {
+  return {
+    awardModel: summary.awardModel,
+    slug: summary.slug,
+    displayName: summary.displayName,
+    status: summary.status,
+    rules: serializeReferralProgramRulesPieSplit(summary.rules),
   };
 }

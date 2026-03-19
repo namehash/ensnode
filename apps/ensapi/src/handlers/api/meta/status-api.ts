@@ -11,7 +11,7 @@ import {
 import { buildEnsApiPublicConfig } from "@/config/config.schema";
 import { createApp } from "@/lib/hono-factory";
 
-import { getConfigRoute, getIndexingStatusRoute } from "./ensnode-api.routes";
+import { getConfigRoute, getIndexingStatusRoute } from "./status-api.routes";
 
 const app = createApp("indexingStatus");
 

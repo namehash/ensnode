@@ -127,6 +127,7 @@ export const buildReferralProgramRulesRevShareLimit = (
   endTime: UnixTimestamp,
   subregistryId: AccountId,
   rulesUrl: URL,
+  areAwardsDistributed: boolean,
   disqualifications: ReferralProgramEditionDisqualification[] = [],
 ): ReferralProgramRulesRevShareLimit => {
   const result = {
@@ -138,6 +139,7 @@ export const buildReferralProgramRulesRevShareLimit = (
     endTime,
     subregistryId,
     rulesUrl,
+    areAwardsDistributed,
     disqualifications,
   } satisfies ReferralProgramRulesRevShareLimit;
 

@@ -12,29 +12,34 @@ import z from "zod/v4";
 import { makeLowercaseAddressSchema } from "@ensnode/ensnode-sdk/internal";
 
 import {
+  makeReferralProgramEditionSummaryPieSplitSchema,
   makeReferralProgramRulesPieSplitSchema,
   makeReferrerEditionMetricsPieSplitSchema,
   makeReferrerLeaderboardPagePieSplitSchema,
 } from "../award-models/pie-split/api/zod-schemas";
 import {
+  makeReferralProgramEditionSummaryRevShareLimitSchema,
   makeReferralProgramRulesRevShareLimitSchema,
   makeReferrerEditionMetricsRevShareLimitSchema,
   makeReferrerLeaderboardPageRevShareLimitSchema,
 } from "../award-models/rev-share-limit/api/zod-schemas";
 import {
+  makeBaseReferralProgramEditionSummarySchema,
   makeBaseReferralProgramRulesSchema,
   makeBaseReferrerLeaderboardPageSchema,
 } from "../award-models/shared/api/zod-schemas";
 import type { ReferrerEditionMetricsUnrecognized } from "../award-models/shared/edition-metrics";
+import type { ReferralProgramEditionSummaryUnrecognized } from "../award-models/shared/edition-summary";
 import type { ReferrerLeaderboardPageUnrecognized } from "../award-models/shared/leaderboard-page";
 import type { ReferralProgramRulesUnrecognized } from "../award-models/shared/rules";
 import { ReferralProgramAwardModels } from "../award-models/shared/rules";
 import type { ReferralProgramEditionConfig } from "../edition";
 import type { ReferrerEditionMetrics } from "../edition-metrics";
+import type { ReferralProgramEditionSummary } from "../edition-summary";
 import type { ReferrerLeaderboardPage } from "../leaderboard-page";
 import {
   MAX_EDITIONS_PER_REQUEST,
-  ReferralProgramEditionConfigSetResponseCodes,
+  ReferralProgramEditionSummariesResponseCodes,
   ReferrerLeaderboardPageResponseCodes,
   ReferrerMetricsEditionsResponseCodes,
 } from "./types";
@@ -406,45 +411,111 @@ export const makeReferralProgramEditionConfigSetArraySchema = (
 };
 
 /**
- * Schema for {@link ReferralProgramEditionConfigSetData}.
+ * Schema for {@link ReferralProgramEditionSummary}.
+ *
+ * Forward-compatible — peeks at `awardModel` before committing to full validation:
+ * - Known award models are fully validated with the model-specific schema.
+ * - Unknown award models are wrapped as {@link ReferralProgramEditionSummaryUnrecognized}.
  */
-export const makeReferralProgramEditionConfigSetDataSchema = (
-  valueLabel: string = "ReferralProgramEditionConfigSetData",
+export const makeReferralProgramEditionSummarySchema = (
+  valueLabel: string = "ReferralProgramEditionSummary",
+) => {
+  const knownAwardModels = Object.values(ReferralProgramAwardModels).filter(
+    (m) => m !== ReferralProgramAwardModels.Unrecognized,
+  ) as string[];
+
+  // Loose schema used only to peek at awardModel before full validation.
+  const looseSchema = z.object({ awardModel: z.string() }).passthrough();
+
+  // Schema for known award models — dispatch handled automatically by discriminatedUnion.
+  const knownSchema = z.discriminatedUnion("awardModel", [
+    makeReferralProgramEditionSummaryPieSplitSchema(valueLabel),
+    makeReferralProgramEditionSummaryRevShareLimitSchema(valueLabel),
+  ]);
+
+  // Base schema for fields present on all edition summary variants (used for Unrecognized).
+  const baseSchema = makeBaseReferralProgramEditionSummarySchema(valueLabel);
+
+  return looseSchema.transform((data, ctx): ReferralProgramEditionSummary => {
+    if (knownAwardModels.includes(data.awardModel)) {
+      const parsed = knownSchema.safeParse(data);
+      if (!parsed.success) {
+        for (const issue of parsed.error.issues) {
+          ctx.addIssue({
+            code: "custom",
+            path: issue.path as PropertyKey[],
+            message: issue.message,
+          });
+        }
+        return z.NEVER;
+      }
+      return parsed.data;
+    }
+
+    // Unknown awardModel — preserve as ReferralProgramEditionSummaryUnrecognized using base fields.
+    const parsed = baseSchema.safeParse(data);
+    if (!parsed.success) {
+      for (const issue of parsed.error.issues) {
+        ctx.addIssue({
+          code: "custom",
+          path: issue.path as PropertyKey[],
+          message: issue.message,
+        });
+      }
+      return z.NEVER;
+    }
+    return {
+      ...parsed.data,
+      awardModel: ReferralProgramAwardModels.Unrecognized,
+      rules: {
+        ...parsed.data.rules,
+        awardModel: ReferralProgramAwardModels.Unrecognized,
+        originalAwardModel: data.awardModel,
+      },
+    } satisfies ReferralProgramEditionSummaryUnrecognized;
+  });
+};
+
+/**
+ * Schema for {@link ReferralProgramEditionSummariesData}.
+ */
+export const makeReferralProgramEditionSummariesDataSchema = (
+  valueLabel: string = "ReferralProgramEditionSummariesData",
 ) =>
   z.object({
-    editions: makeReferralProgramEditionConfigSetArraySchema(`${valueLabel}.editions`),
+    editions: z.array(makeReferralProgramEditionSummarySchema(`${valueLabel}.editions[edition]`)),
   });
 
 /**
- * Schema for {@link ReferralProgramEditionConfigSetResponseOk}.
+ * Schema for {@link ReferralProgramEditionSummariesResponseOk}.
  */
-export const makeReferralProgramEditionConfigSetResponseOkSchema = (
-  valueLabel: string = "ReferralProgramEditionConfigSetResponseOk",
+export const makeReferralProgramEditionSummariesResponseOkSchema = (
+  valueLabel: string = "ReferralProgramEditionSummariesResponseOk",
 ) =>
   z.object({
-    responseCode: z.literal(ReferralProgramEditionConfigSetResponseCodes.Ok),
-    data: makeReferralProgramEditionConfigSetDataSchema(`${valueLabel}.data`),
+    responseCode: z.literal(ReferralProgramEditionSummariesResponseCodes.Ok),
+    data: makeReferralProgramEditionSummariesDataSchema(`${valueLabel}.data`),
   });
 
 /**
- * Schema for {@link ReferralProgramEditionConfigSetResponseError}.
+ * Schema for {@link ReferralProgramEditionSummariesResponseError}.
  */
-export const makeReferralProgramEditionConfigSetResponseErrorSchema = (
-  _valueLabel: string = "ReferralProgramEditionConfigSetResponseError",
+export const makeReferralProgramEditionSummariesResponseErrorSchema = (
+  _valueLabel: string = "ReferralProgramEditionSummariesResponseError",
 ) =>
   z.object({
-    responseCode: z.literal(ReferralProgramEditionConfigSetResponseCodes.Error),
+    responseCode: z.literal(ReferralProgramEditionSummariesResponseCodes.Error),
     error: z.string(),
     errorMessage: z.string(),
   });
 
 /**
- * Schema for {@link ReferralProgramEditionConfigSetResponse}.
+ * Schema for {@link ReferralProgramEditionSummariesResponse}.
  */
-export const makeReferralProgramEditionConfigSetResponseSchema = (
-  valueLabel: string = "ReferralProgramEditionConfigSetResponse",
+export const makeReferralProgramEditionSummariesResponseSchema = (
+  valueLabel: string = "ReferralProgramEditionSummariesResponse",
 ) =>
   z.discriminatedUnion("responseCode", [
-    makeReferralProgramEditionConfigSetResponseOkSchema(valueLabel),
-    makeReferralProgramEditionConfigSetResponseErrorSchema(valueLabel),
+    makeReferralProgramEditionSummariesResponseOkSchema(valueLabel),
+    makeReferralProgramEditionSummariesResponseErrorSchema(valueLabel),
   ]);

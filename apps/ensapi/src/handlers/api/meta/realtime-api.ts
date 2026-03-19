@@ -12,7 +12,7 @@ app.openapi(realtimeGetMeta, async (c) => {
   if (c.var.indexingStatus instanceof Error) {
     return errorResponse(
       c,
-      `Invariant(amirealtime-api): Indexing Status has to be resolved successfully before 'maxWorstCaseDistance' can be applied.`,
+      `Invariant(realtime-api): Indexing Status has to be resolved successfully before 'maxWorstCaseDistance' can be applied.`,
       503,
     );
   }

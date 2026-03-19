@@ -53,14 +53,14 @@ jobs:
       publishedLambdas: ${{ steps.publishedLambdas.outputs.output }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
 
       - uses: ./.github/actions/setup_node_environment
 
       - name: Create Release Pull Request or Publish to npm
-        uses: changesets/action@v1.4.10
+        uses: changesets/action@v1.7.0
         id: changesets
         with:
           commit: "chore(release): version apps"
@@ -132,7 +132,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
 
@@ -161,7 +161,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
 
@@ -180,7 +180,7 @@ jobs:
     needs: [changesets, build-and-push-ensnode]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -236,7 +236,7 @@ jobs:
           echo "Extracted version: $VERSION"
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.get-pr.outputs.version }}
           name: v${{ steps.get-pr.outputs.version }}
