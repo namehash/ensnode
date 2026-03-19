@@ -10,14 +10,14 @@ const app = createApp();
 app.openapi(realtimeGetMeta, async (c) => {
   // context must be set by the required middleware
   if (c.var.indexingStatus === undefined) {
-    throw new Error(`Invariant(amirealtime-api): indexingStatusMiddleware required.`);
+    throw new Error(`Invariant(realtime-api): indexingStatusMiddleware required.`);
   }
 
   // return 503 response error with details on prerequisite being unavailable
   if (c.var.indexingStatus instanceof Error) {
     return errorResponse(
       c,
-      `Invariant(amirealtime-api): Indexing Status has to be resolved successfully before 'maxWorstCaseDistance' can be applied.`,
+      `Invariant(realtime-api): Indexing Status has to be resolved successfully before 'maxWorstCaseDistance' can be applied.`,
       503,
     );
   }
