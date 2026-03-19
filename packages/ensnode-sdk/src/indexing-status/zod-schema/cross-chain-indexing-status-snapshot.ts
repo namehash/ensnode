@@ -1,12 +1,11 @@
 import { z } from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
-import { RangeTypeIds } from "../../shared/blockrange";
 import { makeUnixTimestampSchema } from "../../shared/zod-schemas";
-import { ChainIndexingStatusIds } from "../chain-indexing-status-snapshot";
 import {
   type CrossChainIndexingStatusSnapshotOmnichain,
   CrossChainIndexingStrategyIds,
+  getHighestKnownBlockTimestamp,
 } from "../cross-chain-indexing-status-snapshot";
 import type { SerializedCrossChainIndexingStatusSnapshot } from "../serialize/cross-chain-indexing-status-snapshot";
 import {
@@ -42,28 +41,7 @@ export function invariant_snapshotTimeIsTheHighestKnownBlockTimestamp(
 ) {
   const { snapshotTime, omnichainSnapshot } = ctx.value;
   const chains = Array.from(omnichainSnapshot.chains.values());
-
-  const startBlockTimestamps = chains.map((chain) => chain.config.startBlock.timestamp);
-
-  const endBlockTimestamps = chains
-    .map((chain) => chain.config)
-    .filter((chainConfig) => chainConfig.rangeType === RangeTypeIds.Bounded)
-    .map((chainConfig) => chainConfig.endBlock.timestamp);
-
-  const backfillEndBlockTimestamps = chains
-    .filter((chain) => chain.chainStatus === ChainIndexingStatusIds.Backfill)
-    .map((chain) => chain.backfillEndBlock.timestamp);
-
-  const latestKnownBlockTimestamps = chains
-    .filter((chain) => chain.chainStatus === ChainIndexingStatusIds.Following)
-    .map((chain) => chain.latestKnownBlock.timestamp);
-
-  const highestKnownBlockTimestamp = Math.max(
-    ...startBlockTimestamps,
-    ...endBlockTimestamps,
-    ...backfillEndBlockTimestamps,
-    ...latestKnownBlockTimestamps,
-  );
+  const highestKnownBlockTimestamp = getHighestKnownBlockTimestamp(chains);
 
   if (snapshotTime < highestKnownBlockTimestamp) {
     ctx.issues.push({
