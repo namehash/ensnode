@@ -73,7 +73,7 @@ const EnsApiConfigSchema = z
     customReferralProgramEditionConfigSetUrl: CustomReferralProgramEditionConfigSetUrlSchema,
   })
   .check(invariant_rpcConfigsSpecifiedForRootChain)
-  // .check(invariant_ensIndexerPublicConfigVersionInfo);
+  .check(invariant_ensIndexerPublicConfigVersionInfo);
 
 export type EnsApiConfig = z.infer<typeof EnsApiConfigSchema>;
 
