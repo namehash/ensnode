@@ -1,0 +1,34 @@
+---
+import { ScalarComponent } from "@scalar/astro";
+import openapiSpec from "../../../../docs.ensnode.io/ensapi-openapi.json";
+---
+
+<ScalarComponent
+  configuration={{
+    content: openapiSpec,
+    pageTitle: "ENSApi API Reference",
+    title: "ENSApi API Reference",
+    agent: { disabled: true },
+    hideDownloadButton: true,
+    hiddenClients: true,
+    theme: "none",
+    telemetry: false,
+    defaultOpenAllTags: true,
+    expandAllResponses: true,
+    hideClientButton: true,
+    hideSearch: true,
+    showOperationId: true,
+    showSidebar: true,
+    showDeveloperTools: "never",
+    isEditable: false,
+    isLoading: false,
+    documentDownloadType: "both",
+    hideTestRequestButton: false,
+    hideDarkModeToggle: false,
+    withDefaultFonts: true,
+    expandAllModelSections: true,
+    customCss: `
+      .scalar-mcp-layer { display: none !important; }
+    `
+  }}
+/>

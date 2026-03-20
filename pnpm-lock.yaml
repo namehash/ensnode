@@ -673,6 +673,9 @@ importers:
       '@octokit/rest':
         specifier: ^20.1.2
         version: 20.1.2
+      '@scalar/astro':
+        specifier: ^0.2.4
+        version: 0.2.4(astro@5.16.0(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.59.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.1))
       '@tailwindcss/vite':
         specifier: ^4.1.15
         version: 4.1.16(vite@7.1.12(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.1))
@@ -3662,6 +3665,24 @@ packages:
     resolution: {integrity: sha512-2HRCml6OztYXyJXAvdDXPKcawukWY2GpR5/nxKp4iBgiO3wcoEGkAaqctIbZcNB6KlUQBIqt8VYkNSj2397EfA==}
     cpu: [x64]
     os: [win32]
+
+  '@scalar/astro@0.2.4':
+    resolution: {integrity: sha512-5nlUsC6tbR6bOq+WT2NDbc6yOVmysZE2L9Vq9t3YgV0Q6m96sCmfmdTsWKEM82ZrqMSTVZPnOMYvPZZTXVothA==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      astro: ^4.0.0 || ^5.0.0
+
+  '@scalar/core@0.4.4':
+    resolution: {integrity: sha512-eXIG0opyQn45FzpTp0dAWFP1Vjcx+helgUAsa0uN36tyUR7DSmz2kRwHqqedzvPWryeRCKPz7/vwzKpETZp5lg==}
+    engines: {node: '>=22'}
+
+  '@scalar/helpers@0.4.2':
+    resolution: {integrity: sha512-IrgrGVSahCfYDNWITazz4Q1BOndp5eEzlimRkfxiYn++KqeWyLfALyym1omqcdKGYtiSx1KIbKaUJL9vkjaN7w==}
+    engines: {node: '>=22'}
+
+  '@scalar/types@0.7.4':
+    resolution: {integrity: sha512-1o9uf42lZ9YD0XP/HMWrwXN0unx6vFTTgtduA1F28Yloea9Pfv9N2R/t0wO91iSIzw4+NubEFolunbdb2QcgHA==}
+    engines: {node: '>=22'}
 
   '@scure/base@1.1.9':
     resolution: {integrity: sha512-8YKhl8GHiNI/pU2VMaofa2Tor7PJRAjwQLBBuilkJ9L5+13yVbC7JO/wS7piioAvPSwR3JKM1IJ/u4xQzbcXKg==}
@@ -7060,6 +7081,11 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
+  nanoid@5.1.7:
+    resolution: {integrity: sha512-ua3NDgISf6jdwezAheMOk4mbE1LXjm1DfMUDMuJf4AqxLFK3ccGpgWizwa5YV7Yz9EpXwEaWoRXSb/BnV0t5dQ==}
+    engines: {node: ^18 || >=20}
+    hasBin: true
+
   napi-macros@2.2.2:
     resolution: {integrity: sha512-hmEVtAGYzVQpCKdbQea4skABsdXW4RUh5t5mJ2zzqowJS2OyXZTU1KhDVFhx+NlWZ4ap9mqR9TcDO3LTTttd+g==}
 
@@ -8275,6 +8301,10 @@ packages:
   tabbable@6.3.0:
     resolution: {integrity: sha512-EIHvdY5bPLuWForiR/AN2Bxngzpuwn1is4asboytXtpTgsArc+WmSJKVLlhdh71u7jFcryDqB2A8lQvj78MkyQ==}
 
+  tagged-tag@1.0.0:
+    resolution: {integrity: sha512-yEFYrVhod+hdNyx7g5Bnkkb0G6si8HJurOoOEgC8B/O0uXLHlaey/65KRv6cuWBNhBgHKAROVpc7QyYqE5gFng==}
+    engines: {node: '>=20'}
+
   tailwind-merge@3.4.0:
     resolution: {integrity: sha512-uSaO4gnW+b3Y2aWoWfFpX62vn2sR3skfhbjsEnaBI81WD1wBLlHZe5sWf0AqjksNdYTbGBEd0UasQMT3SNV15g==}
 
@@ -8504,6 +8534,10 @@ packages:
   type-fest@4.41.0:
     resolution: {integrity: sha512-TeTSQ6H5YHvpqVwBRcnLDCBnDOHWYu7IvGbHT6N8AOymcr9PJGjc1GTtiWZTYg0NCgYwvnYWEkVChQAr9bjfwA==}
     engines: {node: '>=16'}
+
+  type-fest@5.5.0:
+    resolution: {integrity: sha512-PlBfpQwiUvGViBNX84Yxwjsdhd1TUlXr6zjX7eoirtCPIr08NAmxwa+fcYBTeRQxHo9YC9wwF3m9i700sHma8g==}
+    engines: {node: '>=20'}
 
   typesafe-path@0.2.2:
     resolution: {integrity: sha512-OJabfkAg1WLZSqJAJ0Z6Sdt3utnbzr/jh+NAHoyWHJe8CMSy79Gm085094M9nvTPy22KzTVn5Zq5mbapCI/hPA==}
@@ -12329,6 +12363,24 @@ snapshots:
 
   '@rollup/rollup-win32-x64-msvc@4.59.0':
     optional: true
+
+  '@scalar/astro@0.2.4(astro@5.16.0(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.59.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.1))':
+    dependencies:
+      '@scalar/core': 0.4.4
+      astro: 5.16.0(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.59.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.1)
+
+  '@scalar/core@0.4.4':
+    dependencies:
+      '@scalar/types': 0.7.4
+
+  '@scalar/helpers@0.4.2': {}
+
+  '@scalar/types@0.7.4':
+    dependencies:
+      '@scalar/helpers': 0.4.2
+      nanoid: 5.1.7
+      type-fest: 5.5.0
+      zod: 4.3.6
 
   '@scure/base@1.1.9': {}
 
@@ -16379,6 +16431,8 @@ snapshots:
 
   nanoid@3.3.11: {}
 
+  nanoid@5.1.7: {}
+
   napi-macros@2.2.2: {}
 
   negotiator@0.6.4: {}
@@ -17942,6 +17996,8 @@ snapshots:
 
   tabbable@6.3.0: {}
 
+  tagged-tag@1.0.0: {}
+
   tailwind-merge@3.4.0: {}
 
   tailwindcss-animate@1.0.7(tailwindcss@4.1.18):
@@ -18224,6 +18280,10 @@ snapshots:
   type-fest@3.13.1: {}
 
   type-fest@4.41.0: {}
+
+  type-fest@5.5.0:
+    dependencies:
+      tagged-tag: 1.0.0
 
   typesafe-path@0.2.2: {}
 

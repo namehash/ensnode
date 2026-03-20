@@ -98,6 +98,10 @@ export function starlight(): AstroIntegration {
               ],
             },
             {
+              label: "API Reference",
+              link: "/ensapi/api-reference",
+            },
+            {
               label: "Using ENSApi",
               collapsed: false,
               autogenerate: { directory: "ensapi/usage" },
