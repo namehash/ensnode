@@ -27,6 +27,7 @@
     "@namehash/namekit-react": "catalog:",
     "@octokit/rest": "^20.1.2",
     "@scalar/astro": "^0.2.4",
+    "@scalar/core": "^0.4.4",
     "@tailwindcss/vite": "^4.1.15",
     "astro": "catalog:",
     "astro-font": "catalog:",
