@@ -101,7 +101,25 @@ function buildEnsIndexerSchema<EnsIndexerSchemaType extends AbstractEnsIndexerSc
  *
  * Represents the ENSNode Schema definition for ENSDb.
  */
-type EnsNodeSchema = typeof ensNodeSchema;
+export type EnsNodeSchema = typeof ensNodeSchema;
+
+/**
+ * Build individual ENSDb Schemas
+ *
+ * @param ensIndexerSchemaName - The name of the ENSIndexer Schema instance in ENSDb.
+ * @returns An object containing the "concrete" ENSIndexer Schema and the ENSNode Schema.
+ */
+export function buildIndividualEnsDbSchemas<EnsIndexerSchemaType extends AbstractEnsIndexerSchema>(
+  ensIndexerSchemaName: string,
+): {
+  ensIndexerSchema: EnsIndexerSchemaType;
+  ensNodeSchema: EnsNodeSchema;
+} {
+  return {
+    ensIndexerSchema: buildEnsIndexerSchema(ensIndexerSchemaName),
+    ensNodeSchema,
+  };
+}
 
 /**
  * ENSDb Schema type
@@ -115,19 +133,16 @@ export type EnsDbSchema<EnsIndexerSchemaType extends AbstractEnsIndexerSchema> =
 /**
  * Build ENSDb Schema for Drizzle client
  *
- * Uses the provided ENSIndexer Schema name to build
- * the "concrete" ENSIndexer Schema definition within the ENSDb Schema.
+ * Uses the provided "concrete" ENSIndexer Schema definition to build
+ * the ENSDb Schema.
  *
- * @param ensIndexerSchemaName - The name of the ENSIndexer Schema instance
- *                               in ENSDb.
+ * @param ensIndexerSchema - The "concrete" ENSIndexer Schema definition.
  * @returns The ENSDb Schema definition for use in building
  *          a Drizzle client for ENSDb.
  */
 export function buildEnsDbSchema<EnsIndexerSchemaType extends AbstractEnsIndexerSchema>(
-  ensIndexerSchemaName: string,
+  ensIndexerSchema: EnsIndexerSchemaType,
 ): EnsDbSchema<EnsIndexerSchemaType> {
-  const ensIndexerSchema = buildEnsIndexerSchema<EnsIndexerSchemaType>(ensIndexerSchemaName);
-
   return {
     ...ensIndexerSchema,
     ...ensNodeSchema,

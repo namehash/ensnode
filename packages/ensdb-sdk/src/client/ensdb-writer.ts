@@ -80,14 +80,14 @@ export class EnsDbWriter extends EnsDbReader {
    */
   private async upsertEnsNodeMetadata(metadata: SerializedEnsNodeMetadata): Promise<void> {
     await this.drizzleClient
-      .insert(this.ensDbSchema.metadata)
+      .insert(this.ensNodeSchema.metadata)
       .values({
         ensIndexerSchemaName: this.ensIndexerSchemaName,
         key: metadata.key,
         value: metadata.value,
       })
       .onConflictDoUpdate({
-        target: [this.ensDbSchema.metadata.ensIndexerSchemaName, this.ensDbSchema.metadata.key],
+        target: [this.ensNodeSchema.metadata.ensIndexerSchemaName, this.ensNodeSchema.metadata.key],
         set: { value: metadata.value },
       });
   }

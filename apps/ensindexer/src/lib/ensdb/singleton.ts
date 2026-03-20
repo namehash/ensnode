@@ -1,16 +1,27 @@
 import config from "@/config";
 
-import { buildEnsDbDrizzleClient, buildEnsDbSchema, EnsDbWriter } from "@ensnode/ensdb-sdk";
+import {
+  buildEnsDbDrizzleClient,
+  buildEnsDbSchema,
+  buildIndividualEnsDbSchemas,
+  EnsDbWriter,
+} from "@ensnode/ensdb-sdk";
 
 const { databaseUrl: ensDbConnectionString, databaseSchemaName: ensIndexerSchemaName } = config;
 
+const { ensIndexerSchema, ensNodeSchema } = buildIndividualEnsDbSchemas(ensIndexerSchemaName);
 /**
  * Build a ENSDb Schema for Drizzle client using the ENSIndexer Schema name from config.
  */
-const ensDbSchema = buildEnsDbSchema(ensIndexerSchemaName);
+const ensDbSchema = buildEnsDbSchema(ensIndexerSchema);
 const ensDbDrizzleClient = buildEnsDbDrizzleClient(ensDbConnectionString, ensDbSchema);
 
 /**
  * Singleton instance of ENSDbWriter for the ENSIndexer application.
  */
-export const ensDbWriter = new EnsDbWriter(ensDbDrizzleClient, ensDbSchema, ensIndexerSchemaName);
+export const ensDbWriter = new EnsDbWriter(
+  ensDbDrizzleClient,
+  ensIndexerSchema,
+  ensIndexerSchemaName,
+  ensNodeSchema,
+);
