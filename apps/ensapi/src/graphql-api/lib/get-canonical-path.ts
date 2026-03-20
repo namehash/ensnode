@@ -14,9 +14,10 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { db } from "@/lib/db";
+import { lazy } from "@/lib/lazy";
 
 const MAX_DEPTH = 16;
-const ENSv2_ROOT_REGISTRY_ID = maybeGetENSv2RootRegistryId(config.namespace);
+const getENSv2RootRegistryId = lazy(() => maybeGetENSv2RootRegistryId(config.namespace));
 
 /**
  * Provide the canonical parents for an ENSv1 Domain.
@@ -75,7 +76,7 @@ export async function getV1CanonicalPath(domainId: ENSv1DomainId): Promise<Canon
  */
 export async function getV2CanonicalPath(domainId: ENSv2DomainId): Promise<CanonicalPath | null> {
   // if the ENSv2 Root Registry is not defined, null
-  if (!ENSv2_ROOT_REGISTRY_ID) return null;
+  if (!getENSv2RootRegistryId()) return null;
 
   const result = await db.execute(sql`
     WITH RECURSIVE upward AS (
@@ -101,7 +102,7 @@ export async function getV2CanonicalPath(domainId: ENSv2DomainId): Promise<Canon
         ON rcd.registry_id = upward.registry_id
       JOIN ${schema.v2Domain} pd
         ON pd.id = rcd.domain_id AND pd.subregistry_id = upward.registry_id
-      WHERE upward.registry_id != ${ENSv2_ROOT_REGISTRY_ID}
+      WHERE upward.registry_id != ${getENSv2RootRegistryId()}
         AND upward.depth < ${MAX_DEPTH}
     )
     SELECT *
@@ -116,7 +117,7 @@ export async function getV2CanonicalPath(domainId: ENSv2DomainId): Promise<Canon
   }
 
   const tld = rows[rows.length - 1];
-  const isCanonical = tld.registry_id === ENSv2_ROOT_REGISTRY_ID;
+  const isCanonical = tld.registry_id === getENSv2RootRegistryId();
 
   if (!isCanonical) return null;
 

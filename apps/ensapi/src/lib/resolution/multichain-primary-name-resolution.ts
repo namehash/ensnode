@@ -12,11 +12,12 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
+import { lazy } from "@/lib/lazy";
 import { resolveReverse } from "@/lib/resolution/reverse-resolution";
 
 const tracer = trace.getTracer("multichain-primary-name-resolution");
 
-const ENSIP19_SUPPORTED_CHAIN_IDS: ChainId[] = [
+const getENSIP19SupportedChainIds = lazy<ChainId[]>(() => [
   // always include Mainnet, because its chainId corresponds to the ENS Root Chain's coinType,
   // regardless of the current namespace
   mainnet.id,
@@ -34,7 +35,7 @@ const ENSIP19_SUPPORTED_CHAIN_IDS: ChainId[] = [
       .filter((ds) => ds !== undefined)
       .map((ds) => ds.chain.id),
   ),
-];
+]);
 
 /**
  * Implements batch resolution of an address' Primary Name across the provided `chainIds`.
@@ -50,7 +51,7 @@ const ENSIP19_SUPPORTED_CHAIN_IDS: ChainId[] = [
  */
 export async function resolvePrimaryNames(
   address: MultichainPrimaryNameResolutionArgs["address"],
-  chainIds: MultichainPrimaryNameResolutionArgs["chainIds"] = ENSIP19_SUPPORTED_CHAIN_IDS,
+  chainIds: MultichainPrimaryNameResolutionArgs["chainIds"] = getENSIP19SupportedChainIds(),
   options: Parameters<typeof resolveReverse>[2],
 ): Promise<MultichainPrimaryNameResolutionResult> {
   // parallel reverseResolve

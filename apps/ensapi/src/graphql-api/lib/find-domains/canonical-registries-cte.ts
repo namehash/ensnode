@@ -6,6 +6,7 @@ import * as schema from "@ensnode/ensdb-sdk";
 import { maybeGetENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
 
 import { db } from "@/lib/db";
+import { lazy } from "@/lib/lazy";
 
 /**
  * The maximum depth to traverse the ENSv2 namegraph in order to construct the set of Canonical
@@ -22,7 +23,7 @@ import { db } from "@/lib/db";
  */
 const CANONICAL_REGISTRIES_MAX_DEPTH = 16;
 
-const ENSV2_ROOT_REGISTRY_ID = maybeGetENSv2RootRegistryId(config.namespace);
+const getENSV2RootRegistryId = lazy(() => maybeGetENSv2RootRegistryId(config.namespace));
 
 /**
  * Builds a recursive CTE that traverses from the ENSv2 Root Registry to construct a set of all
@@ -33,7 +34,7 @@ const ENSV2_ROOT_REGISTRY_ID = maybeGetENSv2RootRegistryId(config.namespace);
  */
 export const getCanonicalRegistriesCTE = () => {
   // if ENSv2 is not defined, return an empty set with identical structure to below
-  if (!ENSV2_ROOT_REGISTRY_ID) {
+  if (!getENSV2RootRegistryId()) {
     return db
       .select({ id: sql<string>`registry_id`.as("id") })
       .from(sql`(SELECT NULL::text AS registry_id WHERE FALSE) AS canonical_registries_cte`)
@@ -51,7 +52,7 @@ export const getCanonicalRegistriesCTE = () => {
       sql`
       (
         WITH RECURSIVE canonical_registries AS (
-          SELECT ${ENSV2_ROOT_REGISTRY_ID}::text AS registry_id, 0 AS depth
+          SELECT ${getENSV2RootRegistryId()}::text AS registry_id, 0 AS depth
           UNION ALL
           SELECT rcd.registry_id, cr.depth + 1
           FROM ${schema.registryCanonicalDomain} rcd

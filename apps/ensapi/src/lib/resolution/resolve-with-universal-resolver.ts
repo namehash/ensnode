@@ -19,21 +19,18 @@ import {
   type ResolverRecordsSelection,
 } from "@ensnode/ensnode-sdk";
 
+import { lazy } from "@/lib/lazy";
 import type {
   ResolveCalls,
   ResolveCallsAndRawResults,
 } from "@/lib/resolution/resolve-calls-and-results";
 
-const UniversalResolver = getDatasourceContract(
-  config.namespace,
-  DatasourceNames.ENSRoot,
-  "UniversalResolver",
+const getUniversalResolver = lazy(() =>
+  getDatasourceContract(config.namespace, DatasourceNames.ENSRoot, "UniversalResolver"),
 );
 
-const UniversalResolverV2 = maybeGetDatasourceContract(
-  config.namespace,
-  DatasourceNames.ENSRoot,
-  "UniversalResolverV2",
+const getUniversalResolverV2 = lazy(() =>
+  maybeGetDatasourceContract(config.namespace, DatasourceNames.ENSRoot, "UniversalResolverV2"),
 );
 
 /**
@@ -61,7 +58,7 @@ export async function executeResolveCallsWithUniversalResolver<
           abi: UniversalResolverABI,
           // NOTE(ensv2-transition): if UniversalResolverV2 is defined, prefer it over UniversalResolver
           // TODO(ensv2-transition): confirm this is correct
-          address: UniversalResolverV2?.address ?? UniversalResolver.address,
+          address: getUniversalResolverV2()?.address ?? getUniversalResolver().address,
           functionName: "resolve",
           args: [encodedName, encodedMethod],
         });

@@ -17,9 +17,10 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { db } from "@/lib/db";
+import { lazy } from "@/lib/lazy";
 import { makeLogger } from "@/lib/logger";
 
-const ROOT_REGISTRY_ID = maybeGetENSv2RootRegistryId(config.namespace);
+const getRootRegistryId = lazy(() => maybeGetENSv2RootRegistryId(config.namespace));
 
 const logger = makeLogger("get-domain-by-interpreted-name");
 const v1Logger = makeLogger("get-domain-by-interpreted-name:v1");
@@ -65,7 +66,7 @@ export async function getDomainIdByInterpretedName(
   const [v1DomainId, v2DomainId] = await Promise.all([
     v1_getDomainIdByInterpretedName(name),
     // only resolve v2Domain if ENSv2 Root Registry is defined
-    ROOT_REGISTRY_ID ? v2_getDomainIdByInterpretedName(ROOT_REGISTRY_ID, name) : null,
+    getRootRegistryId() ? v2_getDomainIdByInterpretedName(getRootRegistryId()!, name) : null,
   ]);
 
   logger.debug({ v1DomainId, v2DomainId });

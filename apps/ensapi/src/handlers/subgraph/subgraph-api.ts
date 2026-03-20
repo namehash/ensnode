@@ -7,6 +7,7 @@ import { type Duration, hasSubgraphApiConfigSupport } from "@ensnode/ensnode-sdk
 import { subgraphGraphQLMiddleware } from "@ensnode/ponder-subgraph";
 
 import { factory } from "@/lib/hono-factory";
+import { lazy } from "@/lib/lazy";
 import { makeSubgraphApiDocumentation } from "@/lib/subgraph/api-documentation";
 import { filterSchemaByPrefix } from "@/lib/subgraph/filter-schema-by-prefix";
 import { fixContentLengthMiddleware } from "@/middleware/fix-content-length.middleware";
@@ -51,7 +52,7 @@ app.use(createDocumentationMiddleware(makeSubgraphApiDocumentation(), { path: "/
 app.use(subgraphMetaMiddleware);
 
 // use subgraph middleware
-app.use(
+const getSubgraphMiddleware = lazy(() =>
   subgraphGraphQLMiddleware({
     databaseUrl: config.databaseUrl,
     databaseSchema: config.databaseSchemaName,
@@ -96,5 +97,6 @@ app.use(
     },
   }),
 );
+app.use((c, next) => getSubgraphMiddleware()(c, next));
 
 export default app;

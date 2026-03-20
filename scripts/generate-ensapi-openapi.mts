@@ -5,8 +5,8 @@
  *
  * Output: docs/docs.ensnode.io/ensapi-openapi.json
  *
- * This script has no runtime dependencies — it calls generateOpenApi31Document()
- * which uses only stub route handlers and static metadata.
+ * This script calls generateOpenApi31Document() which uses the real app routes
+ * and static metadata. No config initialization is required.
  */
 
 import { execFileSync } from "node:child_process";
@@ -51,3 +51,7 @@ try {
   }
   process.exit(1);
 }
+
+// Explicitly exit to prevent lazy-initialized SWR caches (imported transitively via app.ts)
+// from keeping the process alive with their background timers.
+process.exit(0);
