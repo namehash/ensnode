@@ -7,6 +7,7 @@ import {
   serializeEnsIndexerPublicConfig,
 } from "@ensnode/ensnode-sdk";
 
+import * as ensIndexerSchema from "../ensindexer-abstract";
 import * as ensNodeSchema from "../ensnode";
 import * as ensDbClientMock from "./ensdb-client.mock";
 import { EnsDbWriter } from "./ensdb-writer";
@@ -19,10 +20,16 @@ describe("EnsDbWriter", () => {
   const valuesMock = vi.fn(() => ({ onConflictDoUpdate: onConflictDoUpdateMock }));
   const insertMock = vi.fn(() => ({ values: valuesMock }));
   const drizzleClientMock = { insert: insertMock } as any;
-  const schemaMock = ensNodeSchema as any;
+  const ensIndexerSchemaMock = ensIndexerSchema as any;
+  const ensNodeSchemaMock = ensNodeSchema as any;
 
   const createEnsDbWriter = () =>
-    new EnsDbWriter(drizzleClientMock, schemaMock, ensDbClientMock.ensIndexerSchemaName);
+    new EnsDbWriter(
+      drizzleClientMock,
+      ensIndexerSchemaMock,
+      ensDbClientMock.ensIndexerSchemaName,
+      ensNodeSchemaMock,
+    );
 
   beforeEach(() => {
     onConflictDoUpdateMock.mockClear();
@@ -35,14 +42,14 @@ describe("EnsDbWriter", () => {
     it("writes the database version metadata", async () => {
       await createEnsDbWriter().upsertEnsDbVersion("0.2.0");
 
-      expect(insertMock).toHaveBeenCalledWith(schemaMock.metadata);
+      expect(insertMock).toHaveBeenCalledWith(ensNodeSchemaMock.metadata);
       expect(valuesMock).toHaveBeenCalledWith({
         ensIndexerSchemaName: ensDbClientMock.ensIndexerSchemaName,
         key: EnsNodeMetadataKeys.EnsDbVersion,
         value: "0.2.0",
       });
       expect(onConflictDoUpdateMock).toHaveBeenCalledWith({
-        target: [schemaMock.metadata.ensIndexerSchemaName, schemaMock.metadata.key],
+        target: [ensNodeSchemaMock.metadata.ensIndexerSchemaName, ensNodeSchemaMock.metadata.key],
         set: { value: "0.2.0" },
       });
     });
