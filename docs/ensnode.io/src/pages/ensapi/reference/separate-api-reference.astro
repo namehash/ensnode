@@ -4,6 +4,8 @@ import HeaderButtons from "../../../components/molecules/HeaderButtons";
 import Layout from "../../../layouts/Layout.astro";
 import openapiSpec from "@workspace/docs/docs.ensnode.io/ensapi-openapi.json";
 
+import "@scalar/api-reference/style.css";
+
 const scalarConfig = JSON.stringify({
   content: openapiSpec,
   theme: "none",
@@ -30,8 +32,6 @@ const scalarConfig = JSON.stringify({
 ---
 
 <style>
-
-
   /* custom --scalar-custom-header-height to match header height */
   :root {
     --scalar-custom-header-height: 56px;
@@ -42,7 +42,6 @@ const scalarConfig = JSON.stringify({
     }
   }
 </style>
-
 
 <Layout title="ENSApi API Reference">
 
@@ -63,14 +62,13 @@ const scalarConfig = JSON.stringify({
     </div>
   </header>
 
-    <!-- spacer to physically take up the space behind the header -->
+  <!-- spacer to physically take up the space behind the header -->
   <div class="h-[56px] sm:h-[70px]"></div>
 
-    <!-- scalar -->
-  <div id="scalar-api-reference" data-config={scalarConfig}></div>
+  <!-- scalar -->
+  <div id="scalar-api-reference"data-config={scalarConfig} class="min-h-full"></div>
 
   <script>
-    import "@scalar/api-reference/style.css";
     import { createApiReference } from "@scalar/api-reference";
 
     const el = document.getElementById("scalar-api-reference")!;
