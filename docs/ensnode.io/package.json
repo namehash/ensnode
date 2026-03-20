@@ -28,9 +28,7 @@
     "@octokit/rest": "^20.1.2",
     "@scalar/api-reference": "^1.49.3",
     "@scalar/astro": "^0.2.4",
-    "@scalar/core": "^0.4.4",
     "@tailwindcss/vite": "^4.1.15",
-    "@vue/server-renderer": "^3.5.30",
     "astro": "catalog:",
     "astro-font": "catalog:",
     "astro-icon": "^1.1.5",
@@ -45,8 +43,7 @@
     "sharp": "^0.33.5",
     "starlight-llms-txt": "^0.5.0",
     "starlight-sidebar-topics": "^0.4.1",
-    "tailwindcss": "4.1.5",
-    "vue": "^3.5.30"
+    "tailwindcss": "4.1.5"
   },
   "devDependencies": {
     "@types/react": "^18",
