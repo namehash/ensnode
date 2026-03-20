@@ -1,0 +1,33 @@
+---
+title: ENSApi API Reference
+description: Learn how to run ENSApi locally for development and contributions.
+sidebar:
+  label: API Reference
+---
+
+import { ScalarComponent } from '@scalar/astro'
+import openapiSpec from "@workspace/docs/docs.ensnode.io/ensapi-openapi.json";
+
+<ScalarComponent configuration={{
+  content: openapiSpec,
+  theme: "none",
+  agent: { disabled: true },
+  hideDownloadButton: true,
+  hiddenClients: true,
+  telemetry: false,
+  defaultOpenAllTags: true,
+  expandAllResponses: true,
+  hideClientButton: true,
+  hideSearch: true,
+  showOperationId: true,
+  showSidebar: false,
+  showDeveloperTools: "never",
+  isEditable: false,
+  isLoading: false,
+  documentDownloadType: "both",
+  hideTestRequestButton: false,
+  hideDarkModeToggle: false,
+  withDefaultFonts: true,
+  expandAllModelSections: true,
+  customCss: `.scalar-mcp-layer { display: none !important; }`,
+}} />
