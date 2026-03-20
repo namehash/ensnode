@@ -10,7 +10,7 @@ import { isTable, Table } from "drizzle-orm/table";
 // It's called "abstract" here because tables defined in this schema do not
 // reference the specific ENSIndexer Schema name, and therefore cannot be used
 // directly to build a Drizzle client for ENSDb.
-import * as abstractEnsIndexerSchema from "../ensindexer";
+import * as abstractEnsIndexerSchema from "../ensindexer-abstract";
 import * as ensNodeSchema from "../ensnode";
 
 /**
@@ -20,6 +20,36 @@ import * as ensNodeSchema from "../ensnode";
  * the specific ENSIndexer Schema name.
  */
 export type AbstractEnsIndexerSchema = typeof abstractEnsIndexerSchema;
+
+/**
+ * Clone a Drizzle Table object with a new schema name.
+ *
+ * Drizzle tables store their identity (name, columns, schema) on
+ * Symbol-keyed properties. Cloning a table requires creating
+ * a new object with the same prototype, copying all properties,
+ * and updating the schema name.
+ */
+function cloneTableWithSchema<TableType extends Table>(
+  table: TableType,
+  schemaName: string,
+): TableType {
+  const clone = Object.create(
+    Object.getPrototypeOf(table),
+    Object.getOwnPropertyDescriptors(table),
+  ) as TableType;
+
+  // @ts-expect-error - Drizzle's Table type for the schema symbol is
+  // not typed in a way that allows us to set it directly,
+  // but we know it exists and can be set.
+  clone[Table.Symbol.Schema] = schemaName;
+
+  // Fail-fast if the clone lost the Drizzle sentinel.
+  if (!isTable(clone)) {
+    throw new Error(`Cloned table is no longer a valid Drizzle Table (schema: ${schemaName}).`);
+  }
+
+  return clone;
+}
 
 /**
  * Build a "concrete" ENSIndexer Schema definition for ENSDb.
@@ -40,14 +70,14 @@ function buildEnsIndexerSchema<EnsIndexerSchemaType extends AbstractEnsIndexerSc
 
   for (const [key, abstractSchemaObject] of Object.entries(abstractEnsIndexerSchema)) {
     if (isTable(abstractSchemaObject)) {
-      const concreteSchemaObject = { ...abstractSchemaObject };
-      // @ts-expect-error - Drizzle's Table type for the schema symbol is
-      // not typed in a way that allows us to set it directly,
-      // but we know it exists and can be set.
-      concreteSchemaObject[Table.Symbol.Schema] = ensIndexerSchemaName;
-      (ensIndexerSchema as any)[key] = concreteSchemaObject;
+      (ensIndexerSchema as any)[key] = cloneTableWithSchema(
+        abstractSchemaObject,
+        ensIndexerSchemaName,
+      );
     } else if (isPgEnum(abstractSchemaObject)) {
       // Enums are functions; clone by copying properties onto a new function.
+      // Unlike tables, enums don't rely on prototype identity, so
+      // Object.assign is sufficient here.
       const concreteSchemaObject = Object.assign(
         (...args: any[]) => abstractSchemaObject(...args),
         abstractSchemaObject,

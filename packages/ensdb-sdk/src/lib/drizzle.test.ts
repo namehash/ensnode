@@ -2,7 +2,7 @@ import { isPgEnum } from "drizzle-orm/pg-core";
 import { isTable } from "drizzle-orm/table";
 import { describe, expect, it, vi } from "vitest";
 
-import * as abstractEnsIndexerSchema from "../ensindexer";
+import * as abstractEnsIndexerSchema from "../ensindexer-abstract";
 import { buildEnsDbDrizzleClient, buildEnsDbSchema } from "./drizzle";
 
 vi.mock("drizzle-orm/node-postgres", () => ({
@@ -12,7 +12,7 @@ vi.mock("drizzle-orm/node-postgres", () => ({
 // Re-import after mock to get the mocked version
 const { drizzle } = await import("drizzle-orm/node-postgres");
 
-const SCHEMA_NAME = "ensindexer_test";
+const ENSINDEXER_SCHEMA_NAME = "ensindexer_test";
 
 const DrizzleSchemaSymbol = Symbol.for("drizzle:Schema");
 
@@ -22,13 +22,13 @@ function getSchemaName(obj: unknown): string | undefined {
 
 describe("buildEnsDbSchema", () => {
   it("returns an object containing all ENSNode schema exports", () => {
-    const schema = buildEnsDbSchema(SCHEMA_NAME);
+    const schema = buildEnsDbSchema(ENSINDEXER_SCHEMA_NAME);
 
     expect(schema.metadata).toBeDefined();
   });
 
   it("returns an object containing all ENSIndexer schema exports", () => {
-    const schema = buildEnsDbSchema(SCHEMA_NAME);
+    const schema = buildEnsDbSchema(ENSINDEXER_SCHEMA_NAME);
 
     expect(schema.event).toBeDefined();
     expect(schema.v1Domain).toBeDefined();
@@ -36,36 +36,56 @@ describe("buildEnsDbSchema", () => {
     expect(schema.registrationType).toBeDefined();
   });
 
-  it("sets the schema name on all ENSIndexer tables", () => {
-    const schema = buildEnsDbSchema(SCHEMA_NAME);
+  it("preserves table/enum classification across abstract → concrete", () => {
+    const schema = buildEnsDbSchema(ENSINDEXER_SCHEMA_NAME);
 
-    for (const [key] of Object.entries(abstractEnsIndexerSchema)) {
-      const value = schema[key as keyof typeof schema];
-      if (isTable(value)) {
-        expect(getSchemaName(value)).toBe(SCHEMA_NAME);
+    for (const [key, abstractValue] of Object.entries(abstractEnsIndexerSchema)) {
+      const concreteValue = schema[key as keyof typeof schema];
+
+      if (isTable(abstractValue)) {
+        expect(isTable(concreteValue)).toBe(true);
+      } else {
+        expect(isTable(concreteValue)).toBe(false);
+      }
+
+      if (isPgEnum(abstractValue)) {
+        expect(isPgEnum(concreteValue)).toBe(true);
+      } else {
+        expect(isPgEnum(concreteValue)).toBe(false);
       }
     }
   });
 
+  it("sets the schema name on all ENSIndexer tables", () => {
+    const schema = buildEnsDbSchema(ENSINDEXER_SCHEMA_NAME);
+
+    for (const [key, abstractValue] of Object.entries(abstractEnsIndexerSchema)) {
+      if (!isTable(abstractValue)) continue;
+      const concreteValue = schema[key as keyof typeof schema];
+      expect(isTable(concreteValue)).toBe(true);
+      expect(getSchemaName(concreteValue)).toBe(ENSINDEXER_SCHEMA_NAME);
+    }
+  });
+
   it("does not mutate the schema name on ENSNode tables", () => {
-    const schema = buildEnsDbSchema(SCHEMA_NAME);
+    const schema = buildEnsDbSchema(ENSINDEXER_SCHEMA_NAME);
 
     expect(getSchemaName(schema.metadata)).toBe("ensnode");
   });
 
   it("sets the schema name on all ENSIndexer enums", () => {
-    const schema = buildEnsDbSchema(SCHEMA_NAME);
+    const schema = buildEnsDbSchema(ENSINDEXER_SCHEMA_NAME);
 
-    for (const [key] of Object.entries(abstractEnsIndexerSchema)) {
-      const value = schema[key as keyof typeof schema];
-      if (isPgEnum(value)) {
-        expect((value as any).schema).toBe(SCHEMA_NAME);
-      }
+    for (const [key, abstractValue] of Object.entries(abstractEnsIndexerSchema)) {
+      if (!isPgEnum(abstractValue)) continue;
+      const concreteValue = schema[key as keyof typeof schema];
+      expect(isPgEnum(concreteValue)).toBe(true);
+      expect((concreteValue as any).schema).toBe(ENSINDEXER_SCHEMA_NAME);
     }
   });
 
   it("skips relation objects (neither tables nor enums)", () => {
-    const schema = buildEnsDbSchema(SCHEMA_NAME);
+    const schema = buildEnsDbSchema(ENSINDEXER_SCHEMA_NAME);
 
     for (const [key, value] of Object.entries(schema)) {
       if (key.endsWith("_relations") || key.endsWith("Relations")) {
@@ -79,11 +99,11 @@ describe("buildEnsDbSchema", () => {
     const otherSchemaName = "ensindexer_other";
     const schema = buildEnsDbSchema(otherSchemaName);
 
-    for (const [key] of Object.entries(abstractEnsIndexerSchema)) {
-      const value = schema[key as keyof typeof schema];
-      if (isTable(value)) {
-        expect(getSchemaName(value)).toBe(otherSchemaName);
-      }
+    for (const [key, abstractValue] of Object.entries(abstractEnsIndexerSchema)) {
+      if (!isTable(abstractValue)) continue;
+      const concreteValue = schema[key as keyof typeof schema];
+      expect(isTable(concreteValue)).toBe(true);
+      expect(getSchemaName(concreteValue)).toBe(otherSchemaName);
     }
   });
 
@@ -99,11 +119,16 @@ describe("buildEnsDbSchema", () => {
       const valueB = concreteB[key as keyof typeof concreteB];
 
       if (isTable(abstractValue)) {
+        expect(isTable(valueA)).toBe(true);
+        expect(isTable(valueB)).toBe(true);
         expect(getSchemaName(valueA)).toBe(schemaNameA);
         expect(getSchemaName(valueB)).toBe(schemaNameB);
         expect(getSchemaName(abstractValue)).toBeUndefined();
       }
+
       if (isPgEnum(abstractValue)) {
+        expect(isPgEnum(valueA)).toBe(true);
+        expect(isPgEnum(valueB)).toBe(true);
         expect((valueA as any).schema).toBe(schemaNameA);
         expect((valueB as any).schema).toBe(schemaNameB);
         expect((abstractValue as any).schema).toBeUndefined();
@@ -115,10 +140,42 @@ describe("buildEnsDbSchema", () => {
   });
 });
 
+describe("buildEnsDbSchema — prototype and Symbol preservation", () => {
+  const IsDrizzleTable = Symbol.for("drizzle:IsDrizzleTable");
+  const Columns = Symbol.for("drizzle:Columns");
+  const TableName = Symbol.for("drizzle:Name");
+
+  it("preserves the Table prototype on cloned tables", () => {
+    const schema = buildEnsDbSchema(ENSINDEXER_SCHEMA_NAME);
+    const abstractTable = abstractEnsIndexerSchema.v1Domain;
+    const concreteTable = schema.v1Domain;
+
+    expect(Object.getPrototypeOf(concreteTable)).toBe(Object.getPrototypeOf(abstractTable));
+  });
+
+  it("preserves Symbol-keyed properties (IsDrizzleTable, Columns, TableName) on cloned tables", () => {
+    const schema = buildEnsDbSchema(ENSINDEXER_SCHEMA_NAME);
+    const abstractTable = abstractEnsIndexerSchema.v1Domain;
+    const concreteTable = schema.v1Domain;
+
+    expect((concreteTable as any)[IsDrizzleTable]).toBe((abstractTable as any)[IsDrizzleTable]);
+    expect((concreteTable as any)[Columns]).toBe((abstractTable as any)[Columns]);
+    expect((concreteTable as any)[TableName]).toBe((abstractTable as any)[TableName]);
+  });
+
+  it("isTable() returns true for cloned concrete tables", () => {
+    const schema = buildEnsDbSchema(ENSINDEXER_SCHEMA_NAME);
+
+    expect(isTable(schema.v1Domain)).toBe(true);
+    expect(isTable(schema.registration)).toBe(true);
+    expect(isTable(schema.event)).toBe(true);
+  });
+});
+
 describe("buildEnsDbDrizzleClient", () => {
   it("calls drizzle with the correct connection config", () => {
     const connectionString = "postgres://user:pass@localhost:5432/ensdb";
-    const schema = buildEnsDbSchema(SCHEMA_NAME);
+    const schema = buildEnsDbSchema(ENSINDEXER_SCHEMA_NAME);
 
     buildEnsDbDrizzleClient(connectionString, schema);
 
@@ -132,7 +189,7 @@ describe("buildEnsDbDrizzleClient", () => {
 
   it("passes the logger to drizzle when provided", () => {
     const connectionString = "postgres://user:pass@localhost:5432/ensdb";
-    const schema = buildEnsDbSchema(SCHEMA_NAME);
+    const schema = buildEnsDbSchema(ENSINDEXER_SCHEMA_NAME);
     const logger = { logQuery: vi.fn() };
 
     buildEnsDbDrizzleClient(connectionString, schema, logger);
