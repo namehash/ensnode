@@ -834,7 +834,7 @@ importers:
   packages/ensdb-sdk:
     devDependencies:
       '@ensnode/ensnode-sdk':
-        specifier: 'workspace:'
+        specifier: workspace:*
         version: link:../ensnode-sdk
       '@ensnode/shared-configs':
         specifier: workspace:*

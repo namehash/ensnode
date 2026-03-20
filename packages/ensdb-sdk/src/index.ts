@@ -1,3 +1,3 @@
 export * from "./client";
-export * from "./ensindexer";
+export * from "./ensindexer-abstract";
 export * from "./lib/drizzle";

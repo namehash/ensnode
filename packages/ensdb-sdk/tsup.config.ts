@@ -1,7 +1,7 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig({
-  entry: ["src/index.ts", "src/ensindexer/index.ts", "src/ensnode/index.ts"],
+  entry: ["src/index.ts", "src/ensindexer-abstract/index.ts", "src/ensnode/index.ts"],
   platform: "neutral",
   format: ["esm"],
   target: "es2022",

@@ -17,7 +17,7 @@
   ],
   "exports": {
     ".": "./src/index.ts",
-    "./ensindexer": "./src/ensindexer/index.ts",
+    "./ensindexer-abstract": "./src/ensindexer-abstract/index.ts",
     "./ensnode": "./src/ensnode/index.ts"
   },
   "files": [
@@ -33,10 +33,10 @@
           "default": "./dist/index.js"
         }
       },
-      "./ensindexer": {
+      "./ensindexer-abstract": {
         "import": {
-          "types": "./dist/ensindexer/index.d.ts",
-          "default": "./dist/ensindexer/index.js"
+          "types": "./dist/ensindexer-abstract/index.d.ts",
+          "default": "./dist/ensindexer-abstract/index.js"
         }
       },
       "./ensnode": {
@@ -59,13 +59,13 @@
     "drizzle-kit:generate": "drizzle-kit generate"
   },
   "peerDependencies": {
-    "@ensnode/ensnode-sdk": "workspace:",
+    "@ensnode/ensnode-sdk": "workspace:*",
     "drizzle-orm": "catalog:",
     "ponder": "catalog:",
     "viem": "catalog:"
   },
   "devDependencies": {
-    "@ensnode/ensnode-sdk": "workspace:",
+    "@ensnode/ensnode-sdk": "workspace:*",
     "@ensnode/shared-configs": "workspace:*",
     "drizzle-kit": "0.31.10",
     "drizzle-orm": "catalog:",
