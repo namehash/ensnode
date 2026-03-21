@@ -8,7 +8,6 @@ import {
   buildRpcConfigsFromEnv,
   canFallbackToTheGraph,
   ENSNamespaceSchema,
-  EnsIndexerUrlSchema,
   invariant_rpcConfigsSpecifiedForRootChain,
   makeENSIndexerPublicConfigSchema,
   OptionalPortNumberSchema,
@@ -44,7 +43,6 @@ const CustomReferralProgramEditionConfigSetUrlSchema = z
 const EnsApiConfigSchema = z
   .object({
     port: OptionalPortNumberSchema.default(ENSApi_DEFAULT_PORT),
-    ensIndexerUrl: EnsIndexerUrlSchema,
     theGraphApiKey: TheGraphApiKeySchema,
     namespace: ENSNamespaceSchema,
     rpcConfigs: RpcConfigsSchema,
@@ -83,7 +81,6 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
     return EnsApiConfigSchema.parse({
       port: env.PORT,
       databaseUrl: env.DATABASE_URL,
-      ensIndexerUrl: env.ENSINDEXER_URL,
       theGraphApiKey: env.THEGRAPH_API_KEY,
       ensIndexerPublicConfig,
       namespace: ensIndexerPublicConfig.namespace,
