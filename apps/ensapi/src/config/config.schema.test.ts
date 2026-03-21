@@ -9,6 +9,12 @@ import {
 } from "@ensnode/ensnode-sdk";
 import type { RpcConfig } from "@ensnode/ensnode-sdk/internal";
 
+vi.mock("@/lib/ensdb/singleton", () => ({
+  ensDbClient: {
+    getEnsIndexerPublicConfig: vi.fn(() => ENSINDEXER_PUBLIC_CONFIG),
+  },
+}));
+
 import { buildConfigFromEnvironment, buildEnsApiPublicConfig } from "@/config/config.schema";
 import { ENSApi_DEFAULT_PORT } from "@/config/defaults";
 import type { EnsApiEnvironment } from "@/config/environment";
@@ -114,7 +120,6 @@ describe("buildConfigFromEnvironment", () => {
 
     const TEST_ENV: EnsApiEnvironment = {
       DATABASE_URL: BASE_ENV.DATABASE_URL,
-
     };
 
     it("logs error and exits when CUSTOM_REFERRAL_PROGRAM_EDITIONS is not a valid URL", async () => {

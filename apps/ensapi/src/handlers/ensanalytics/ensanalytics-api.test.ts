@@ -7,8 +7,7 @@ import * as middleware from "@/middleware/referrer-leaderboard.middleware";
 
 vi.mock("@/config", () => ({
   get default() {
-    const mockedConfig: Pick<EnsApiConfig, "ensIndexerUrl" | "namespace"> = {
-      ensIndexerUrl: new URL("https://ensnode.example.com"),
+    const mockedConfig: Pick<EnsApiConfig, "namespace"> = {
       namespace: ENSNamespaceIds.Mainnet,
     };
 
