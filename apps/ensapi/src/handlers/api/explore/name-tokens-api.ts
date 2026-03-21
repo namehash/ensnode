@@ -22,7 +22,7 @@ import { nameTokensApiMiddleware } from "@/middleware/name-tokens.middleware";
 
 import { getNameTokensRoute } from "./name-tokens-api.routes";
 
-const app = createApp(indexingStatusMiddleware, nameTokensApiMiddleware);
+const app = createApp({ middlewares: [indexingStatusMiddleware, nameTokensApiMiddleware] });
 
 const indexedSubregistries = getIndexedSubregistries(
   config.namespace,

@@ -4,7 +4,7 @@ import { indexingStatusMiddleware } from "@/middleware/indexing-status.middlewar
 
 import { realtimeGetMeta } from "./realtime-api.routes";
 
-const app = createApp(indexingStatusMiddleware);
+const app = createApp({ middlewares: [indexingStatusMiddleware] });
 
 // allow performance monitoring clients to read HTTP Status for the provided
 // `maxWorstCaseDistance` param

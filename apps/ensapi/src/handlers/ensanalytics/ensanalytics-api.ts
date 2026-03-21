@@ -17,7 +17,7 @@ import { getReferrerDetailRoute, getReferrerLeaderboardRoute } from "./ensanalyt
 
 const logger = makeLogger("ensanalytics-api");
 
-const app = createApp(referrerLeaderboardMiddleware);
+const app = createApp({ middlewares: [referrerLeaderboardMiddleware] });
 
 // Get a page from the referrer leaderboard
 app.openapi(getReferrerLeaderboardRoute, async (c) => {

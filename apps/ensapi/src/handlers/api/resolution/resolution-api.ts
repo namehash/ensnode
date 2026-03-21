@@ -26,11 +26,13 @@ import {
  */
 const MAX_REALTIME_DISTANCE_TO_ACCELERATE: Duration = 60; // 1 minute in seconds
 
-const app = createApp(
-  indexingStatusMiddleware,
-  makeIsRealtimeMiddleware("resolution-api", MAX_REALTIME_DISTANCE_TO_ACCELERATE),
-  canAccelerateMiddleware,
-);
+const app = createApp({
+  middlewares: [
+    indexingStatusMiddleware,
+    makeIsRealtimeMiddleware("resolution-api", MAX_REALTIME_DISTANCE_TO_ACCELERATE),
+    canAccelerateMiddleware,
+  ],
+});
 
 /**
  * Example queries for /records:

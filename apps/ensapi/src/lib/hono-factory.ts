@@ -68,22 +68,23 @@ export function producing<const K extends keyof MiddlewareVariables>(
  * Plain middlewares (without `__produces`) are applied in order but don't affect typing.
  *
  * ```ts
- * const app = createApp(
- *   indexingStatusMiddleware,   // producing — c.var.indexingStatus becomes non-optional
- *   nameTokensApiMiddleware,    // plain gate — applied but doesn't affect types
- * );
+ * const app = createApp({
+ *   middlewares: [
+ *     indexingStatusMiddleware,   // producing — c.var.indexingStatus becomes non-optional
+ *     nameTokensApiMiddleware,    // plain gate — applied but doesn't affect types
+ *   ],
+ * });
  * ```
  *
  * Without arguments, all variables remain optional (same as a plain OpenAPIHono app).
  */
 export function createApp<
-  const TMiddlewares extends readonly (ProducingMiddleware<any> | MiddlewareHandler<AppEnv>)[],
->(...middlewares: TMiddlewares) {
+  const TMiddlewares extends readonly (ProducingMiddleware<any> | MiddlewareHandler<AppEnv>)[] = [],
+>({ middlewares }: { middlewares?: TMiddlewares } = {}) {
   type TRequired = ExtractProduced<TMiddlewares[number]>;
-  // TODO: how to keep only ProducingMiddleware by type properly?
-  const requiredVars = middlewares
-    .filter((m) => "__produces" in m)
-    .map((m) => m as ProducingMiddleware<any>)
+  const mws: readonly (ProducingMiddleware<any> | MiddlewareHandler<AppEnv>)[] = middlewares ?? [];
+  const requiredVars = mws
+    .filter((m): m is ProducingMiddleware<any> => "__produces" in m)
     .flatMap((m) => [...m.__produces]) as TRequired[];
 
   const app = new OpenAPIHono<{ Variables: RequireVars<TRequired> }>({
@@ -95,7 +96,7 @@ export function createApp<
   });
 
   // Apply the middlewares in order so callers don't need separate app.use() calls.
-  for (const middleware of middlewares) {
+  for (const middleware of mws) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     app.use(middleware as any);
   }

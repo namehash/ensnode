@@ -21,7 +21,7 @@ import {
   type RegistrarActionsQuery,
 } from "./registrar-actions-api.routes";
 
-const app = createApp(indexingStatusMiddleware, registrarActionsApiMiddleware);
+const app = createApp({ middlewares: [indexingStatusMiddleware, registrarActionsApiMiddleware] });
 
 const logger = makeLogger("registrar-actions-api");
 

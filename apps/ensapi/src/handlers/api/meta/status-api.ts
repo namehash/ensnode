@@ -14,7 +14,7 @@ import { indexingStatusMiddleware } from "@/middleware/indexing-status.middlewar
 
 import { getConfigRoute, getIndexingStatusRoute } from "./status-api.routes";
 
-const app = createApp(indexingStatusMiddleware);
+const app = createApp({ middlewares: [indexingStatusMiddleware] });
 
 app.openapi(getConfigRoute, async (c) => {
   const ensApiPublicConfig = buildEnsApiPublicConfig(config);

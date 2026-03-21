@@ -29,10 +29,12 @@ import {
 
 const logger = makeLogger("ensanalytics-api-v1");
 
-const app = createApp(
-  referralProgramEditionConfigSetMiddleware,
-  referralLeaderboardEditionsCachesMiddleware,
-);
+const app = createApp({
+  middlewares: [
+    referralProgramEditionConfigSetMiddleware,
+    referralLeaderboardEditionsCachesMiddleware,
+  ],
+});
 
 // Get a page from the referrer leaderboard for a specific edition
 app.openapi(getReferralLeaderboardRoute, async (c) => {
