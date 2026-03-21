@@ -5,27 +5,24 @@ import {
   serializeEnsIndexerPublicConfig,
 } from "@ensnode/ensnode-sdk";
 
-import { buildIndividualEnsDbSchemas } from "../lib/drizzle";
 import * as ensDbClientMock from "./ensdb-client.mock";
 import { EnsDbReader } from "./ensdb-reader";
 
+const whereMock = vi.fn(async () => [] as Array<{ value: unknown }>);
+const fromMock = vi.fn(() => ({ where: whereMock }));
+const selectMock = vi.fn(() => ({ from: fromMock }));
+const drizzleClientMock = { select: selectMock } as any;
+
+vi.mock("drizzle-orm/node-postgres", () => ({
+  drizzle: vi.fn(() => drizzleClientMock),
+}));
+
 describe("EnsDbReader", () => {
   const selectResult = { current: [] as Array<{ value: unknown }> };
-  const whereMock = vi.fn(async () => selectResult.current);
-  const fromMock = vi.fn(() => ({ where: whereMock }));
-  const selectMock = vi.fn(() => ({ from: fromMock }));
-  const drizzleClientMock = { select: selectMock } as any;
-  const { concreteEnsIndexerSchema, ensNodeSchema } = buildIndividualEnsDbSchemas(
-    ensDbClientMock.ensIndexerSchemaName,
-  );
+  whereMock.mockImplementation(async () => selectResult.current);
 
   const createEnsDbReader = () =>
-    new EnsDbReader(
-      drizzleClientMock,
-      concreteEnsIndexerSchema,
-      ensDbClientMock.ensIndexerSchemaName,
-      ensNodeSchema,
-    );
+    new EnsDbReader(ensDbClientMock.ensDbUrl, ensDbClientMock.ensIndexerSchemaName);
 
   beforeEach(() => {
     selectResult.current = [];
@@ -36,7 +33,10 @@ describe("EnsDbReader", () => {
 
   describe("getEnsDbVersion", () => {
     it("returns undefined when no record exists", async () => {
-      await expect(createEnsDbReader().getEnsDbVersion()).resolves.toBeUndefined();
+      const ensDbClient = createEnsDbReader();
+      const { ensNodeSchema } = ensDbClient;
+
+      await expect(ensDbClient.getEnsDbVersion()).resolves.toBeUndefined();
 
       expect(selectMock).toHaveBeenCalledTimes(1);
       expect(fromMock).toHaveBeenCalledWith(ensNodeSchema.metadata);

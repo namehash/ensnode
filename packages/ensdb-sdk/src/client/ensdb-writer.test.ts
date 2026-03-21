@@ -7,29 +7,23 @@ import {
   serializeEnsIndexerPublicConfig,
 } from "@ensnode/ensnode-sdk";
 
-import { buildIndividualEnsDbSchemas } from "../lib/drizzle";
 import * as ensDbClientMock from "./ensdb-client.mock";
 import { EnsDbWriter } from "./ensdb-writer";
 import { EnsNodeMetadataKeys } from "./ensnode-metadata";
 
+const onConflictDoUpdateMock = vi.fn(async () => undefined);
+const valuesMock = vi.fn(() => ({ onConflictDoUpdate: onConflictDoUpdateMock }));
+const insertMock = vi.fn(() => ({ values: valuesMock }));
+const drizzleClientMock = { insert: insertMock } as any;
+
+vi.mock("drizzle-orm/node-postgres", () => ({
+  drizzle: vi.fn(() => drizzleClientMock),
+}));
 vi.mock("drizzle-orm/node-postgres/migrator", () => ({ migrate: vi.fn() }));
 
 describe("EnsDbWriter", () => {
-  const onConflictDoUpdateMock = vi.fn(async () => undefined);
-  const valuesMock = vi.fn(() => ({ onConflictDoUpdate: onConflictDoUpdateMock }));
-  const insertMock = vi.fn(() => ({ values: valuesMock }));
-  const drizzleClientMock = { insert: insertMock } as any;
-  const { concreteEnsIndexerSchema, ensNodeSchema } = buildIndividualEnsDbSchemas(
-    ensDbClientMock.ensIndexerSchemaName,
-  );
-
   const createEnsDbWriter = () =>
-    new EnsDbWriter(
-      drizzleClientMock,
-      concreteEnsIndexerSchema,
-      ensDbClientMock.ensIndexerSchemaName,
-      ensNodeSchema,
-    );
+    new EnsDbWriter(ensDbClientMock.ensDbUrl, ensDbClientMock.ensIndexerSchemaName);
 
   beforeEach(() => {
     onConflictDoUpdateMock.mockClear();
@@ -40,7 +34,10 @@ describe("EnsDbWriter", () => {
 
   describe("upsertEnsDbVersion", () => {
     it("writes the database version metadata", async () => {
-      await createEnsDbWriter().upsertEnsDbVersion("0.2.0");
+      const ensDbClient = createEnsDbWriter();
+      const { ensNodeSchema } = ensDbClient;
+
+      await ensDbClient.upsertEnsDbVersion("0.2.0");
 
       expect(insertMock).toHaveBeenCalledWith(ensNodeSchema.metadata);
       expect(valuesMock).toHaveBeenCalledWith({
