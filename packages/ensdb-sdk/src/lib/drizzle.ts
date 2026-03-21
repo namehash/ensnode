@@ -129,7 +129,7 @@ export function buildIndividualEnsDbSchemas<
  * Represents the combined database schema for ENSDb,
  * including both the "concrete" ENSIndexer Schema and the ENSNode Schema.
  */
-export type EnsDbSchema<ConcreteEnsIndexerSchema extends AbstractEnsIndexerSchema> =
+type EnsDbSchema<ConcreteEnsIndexerSchema extends AbstractEnsIndexerSchema> =
   ConcreteEnsIndexerSchema & EnsNodeSchema;
 
 /**
@@ -138,15 +138,15 @@ export type EnsDbSchema<ConcreteEnsIndexerSchema extends AbstractEnsIndexerSchem
  * Uses the provided "concrete" ENSIndexer Schema definition to build
  * the ENSDb Schema.
  *
- * @param ensIndexerSchema - The "concrete" ENSIndexer Schema definition.
+ * @param concreteEnsIndexerSchema - The "concrete" ENSIndexer Schema definition.
  * @returns The ENSDb Schema definition for use in building
  *          a Drizzle client for ENSDb.
  */
-export function buildEnsDbSchema<ConcreteEnsIndexerSchema extends AbstractEnsIndexerSchema>(
-  ensIndexerSchema: ConcreteEnsIndexerSchema,
+function buildEnsDbSchema<ConcreteEnsIndexerSchema extends AbstractEnsIndexerSchema>(
+  concreteEnsIndexerSchema: ConcreteEnsIndexerSchema,
 ): EnsDbSchema<ConcreteEnsIndexerSchema> {
   return {
-    ...ensIndexerSchema,
+    ...concreteEnsIndexerSchema,
     ...ensNodeSchema,
   };
 }
@@ -165,15 +165,17 @@ export type EnsDbDrizzleClient<ConcreteEnsIndexerSchema extends AbstractEnsIndex
  * Build a Drizzle client for ENSDb.
  *
  * @param connectionString - The connection string for the ENSDb.
- * @param ensDbSchema - The ENSDb Schema definition for the Drizzle client.
+ * @param concreteEnsIndexerSchema - The "concrete" ENSIndexer Schema definition for the Drizzle client.
  * @param logger - Optional Drizzle logger for query logging.
  * @returns A Drizzle client for ENSDb.
  */
 export function buildEnsDbDrizzleClient<ConcreteEnsIndexerSchema extends AbstractEnsIndexerSchema>(
   connectionString: string,
-  ensDbSchema: EnsDbSchema<ConcreteEnsIndexerSchema>,
+  concreteEnsIndexerSchema: ConcreteEnsIndexerSchema,
   logger?: DrizzleLogger,
 ): EnsDbDrizzleClient<ConcreteEnsIndexerSchema> {
+  const ensDbSchema = buildEnsDbSchema<ConcreteEnsIndexerSchema>(concreteEnsIndexerSchema);
+
   return drizzle({
     connection: connectionString,
     schema: ensDbSchema,
