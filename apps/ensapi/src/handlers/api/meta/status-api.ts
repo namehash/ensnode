@@ -10,10 +10,11 @@ import {
 
 import { buildEnsApiPublicConfig } from "@/config/config.schema";
 import { createApp } from "@/lib/hono-factory";
+import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 
 import { getConfigRoute, getIndexingStatusRoute } from "./status-api.routes";
 
-const app = createApp("indexingStatus");
+const app = createApp(indexingStatusMiddleware);
 
 app.openapi(getConfigRoute, async (c) => {
   const ensApiPublicConfig = buildEnsApiPublicConfig(config);

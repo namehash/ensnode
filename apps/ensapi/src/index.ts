@@ -15,7 +15,6 @@ import { errorResponse } from "@/lib/handlers/error-response";
 import { factory } from "@/lib/hono-factory";
 import { sdk } from "@/lib/instrumentation";
 import logger from "@/lib/logger";
-import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 import { generateOpenApi31Document } from "@/openapi-document";
 
 import realtimeApi from "./handlers/api/meta/realtime-api";
@@ -37,9 +36,6 @@ app.use(cors({ origin: "*" }));
 
 // include automatic OpenTelemetry instrumentation for incoming requests
 app.use(otel());
-
-// add ENSIndexer Indexing Status Middleware to all routes for convenience
-app.use(indexingStatusMiddleware);
 
 // host welcome page
 app.get("/", (c) =>

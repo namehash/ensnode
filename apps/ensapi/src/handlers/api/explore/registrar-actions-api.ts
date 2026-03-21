@@ -12,6 +12,7 @@ import {
 import { createApp } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
 import { findRegistrarActions } from "@/lib/registrar-actions/find-registrar-actions";
+import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 import { registrarActionsApiMiddleware } from "@/middleware/registrar-actions.middleware";
 
 import {
@@ -20,13 +21,9 @@ import {
   type RegistrarActionsQuery,
 } from "./registrar-actions-api.routes";
 
-const app = createApp("indexingStatus");
+const app = createApp(indexingStatusMiddleware, registrarActionsApiMiddleware);
 
 const logger = makeLogger("registrar-actions-api");
-
-// Middleware managing access to Registrar Actions API routes.
-// It makes the routes available if all prerequisites are met.
-app.use(registrarActionsApiMiddleware);
 
 // Shared business logic for fetching registrar actions
 async function fetchRegistrarActions(parentNode: Node | undefined, query: RegistrarActionsQuery) {

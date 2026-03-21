@@ -11,6 +11,7 @@ import { resolvePrimaryNames } from "@/lib/resolution/multichain-primary-name-re
 import { resolveReverse } from "@/lib/resolution/reverse-resolution";
 import { runWithTrace } from "@/lib/tracing/tracing-api";
 import { canAccelerateMiddleware } from "@/middleware/can-accelerate.middleware";
+import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 import { makeIsRealtimeMiddleware } from "@/middleware/is-realtime.middleware";
 
 import {
@@ -25,12 +26,11 @@ import {
  */
 const MAX_REALTIME_DISTANCE_TO_ACCELERATE: Duration = 60; // 1 minute in seconds
 
-const app = createApp("canAccelerate");
-
-// inject c.var.isRealtime derived from MAX_REALTIME_DISTANCE_TO_ACCELERATE
-app.use(makeIsRealtimeMiddleware("resolution-api", MAX_REALTIME_DISTANCE_TO_ACCELERATE));
-// inject c.var.canAccelerate derived from that c.var.isRealtime
-app.use(canAccelerateMiddleware);
+const app = createApp(
+  indexingStatusMiddleware,
+  makeIsRealtimeMiddleware("resolution-api", MAX_REALTIME_DISTANCE_TO_ACCELERATE),
+  canAccelerateMiddleware,
+);
 
 /**
  * Example queries for /records:

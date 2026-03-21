@@ -2,7 +2,7 @@ import {
   initializeReferralLeaderboardEditionsCaches,
   type ReferralLeaderboardEditionsCacheMap,
 } from "@/cache/referral-leaderboard-editions.cache";
-import { factory } from "@/lib/hono-factory";
+import { factory, producing } from "@/lib/hono-factory";
 import type { referralProgramEditionConfigSetMiddleware } from "@/middleware/referral-program-edition-set.middleware";
 
 /**
@@ -40,8 +40,9 @@ export type ReferralLeaderboardEditionsCachesMiddlewareVariables = {
  * Each cache's builder function handles immutability internally - when an edition becomes immutably
  * closed (past the safety window), the builder returns previously cached data without re-fetching.
  */
-export const referralLeaderboardEditionsCachesMiddleware = factory.createMiddleware(
-  async (c, next) => {
+export const referralLeaderboardEditionsCachesMiddleware = producing(
+  ["referralLeaderboardEditionsCaches"],
+  factory.createMiddleware(async (c, next) => {
     const editionConfigSet = c.get("referralProgramEditionConfigSet");
 
     // Invariant: referralProgramEditionConfigSetMiddleware must be applied before this middleware
@@ -62,5 +63,5 @@ export const referralLeaderboardEditionsCachesMiddleware = factory.createMiddlew
     const caches = initializeReferralLeaderboardEditionsCaches(editionConfigSet);
     c.set("referralLeaderboardEditionsCaches", caches);
     await next();
-  },
+  }),
 );

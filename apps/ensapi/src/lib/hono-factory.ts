@@ -1,4 +1,5 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
+import type { MiddlewareHandler } from "hono";
 import { createFactory } from "hono/factory";
 
 import { errorResponse } from "@/lib/handlers/error-response";
@@ -30,26 +31,61 @@ type RequireVars<TRequired extends keyof MiddlewareVariables = never> = Omit<
 
 export const factory = createFactory<AppEnv>();
 
+/** A middleware that declares the context variable keys it produces via `__produces`. */
+export type ProducingMiddleware<K extends keyof MiddlewareVariables = keyof MiddlewareVariables> =
+  MiddlewareHandler<AppEnv> & { readonly __produces: readonly K[] };
+
+type ExtractProduced<T> = T extends ProducingMiddleware<infer K> ? K : never;
+
+/**
+ * Tags a middleware with the context variable keys it produces.
+ * Pass the result to `createApp` to get compile-time + runtime guarantees on `c.var`.
+ *
+ * ```ts
+ * export const indexingStatusMiddleware = producing(
+ *   ["indexingStatus"],
+ *   factory.createMiddleware(async (c, next) => { ... })
+ * );
+ * ```
+ */
+export function producing<const K extends keyof MiddlewareVariables>(
+  keys: readonly K[],
+  middleware: MiddlewareHandler<AppEnv>,
+): ProducingMiddleware<K> {
+  return Object.assign(middleware, { __produces: keys });
+}
+
 /**
  * Creates an OpenAPIHono sub-app that declares which middleware variables its handlers require.
  *
- * Pass the required variable names as arguments. This gives two guarantees:
+ * Pass middlewares in execution order. Producing middlewares (created with `producing()`) give
+ * two additional guarantees beyond plain `app.use()`:
  *
  * 1. **Compile-time**: `c.var.<name>` is typed as non-optional inside handlers.
  * 2. **Runtime**: each handler asserts the variables are present before executing,
  *    producing a clear invariant error if the required middleware was never applied.
  *
+ * Plain middlewares (without `__produces`) are applied in order but don't affect typing.
+ *
  * ```ts
- * // c.var.canAccelerate is `boolean`, never `boolean | undefined`
- * // every handler throws if canAccelerate was not set by middleware
- * const app = createApp("canAccelerate");
+ * const app = createApp(
+ *   indexingStatusMiddleware,   // producing — c.var.indexingStatus becomes non-optional
+ *   nameTokensApiMiddleware,    // plain gate — applied but doesn't affect types
+ * );
  * ```
  *
  * Without arguments, all variables remain optional (same as a plain OpenAPIHono app).
  */
-export function createApp<const TRequired extends keyof MiddlewareVariables = never>(
-  ...requiredVars: TRequired[]
-) {
+export function createApp<
+  const TMiddlewares extends readonly (ProducingMiddleware<any> | MiddlewareHandler<AppEnv>)[],
+>(...middlewares: TMiddlewares) {
+  type TRequired = ExtractProduced<TMiddlewares[number]>;
+  // TODO: how to keep only ProducingMiddleware by type properly?
+  const requiredVars = middlewares
+    .filter((m) => "__produces" in m)
+    .map((m) => m as ProducingMiddleware<any>)
+    .flatMap((m) => [...m.__produces]) as TRequired[];
+
   const app = new OpenAPIHono<{ Variables: RequireVars<TRequired> }>({
     defaultHook: (result, c) => {
       if (!result.success) {
@@ -58,6 +94,12 @@ export function createApp<const TRequired extends keyof MiddlewareVariables = ne
     },
   });
 
+  // Apply the middlewares in order so callers don't need separate app.use() calls.
+  for (const middleware of middlewares) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    app.use(middleware as any);
+  }
+
   if (requiredVars.length > 0) {
     // Bind openapi as any to avoid fighting overload resolution when wrapping.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -65,7 +107,7 @@ export function createApp<const TRequired extends keyof MiddlewareVariables = ne
 
     // Override app.openapi to inject a runtime invariant check at the top of every handler body.
     // Running the check inside the handler (rather than as a middleware) ensures it fires after
-    // all middleware — both global (index.ts) and sub-app level — have had a chance to set vars.
+    // all middleware have had a chance to set vars.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (app as any).openapi = (route: any, handler: any, hook?: any) =>
       _openapi(
@@ -74,7 +116,8 @@ export function createApp<const TRequired extends keyof MiddlewareVariables = ne
           for (const dep of requiredVars) {
             if (c.var[dep] === undefined) {
               throw new Error(
-                `Invariant: handler requires "${dep}" but no middleware provided it in c.var`,
+                `Invariant: handler requires "${dep}" but no middleware provided it in c.var.
+                Probably middleware didn't produce it.`,
               );
             }
           }

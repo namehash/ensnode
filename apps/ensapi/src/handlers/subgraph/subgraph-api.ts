@@ -10,6 +10,7 @@ import { factory } from "@/lib/hono-factory";
 import { makeSubgraphApiDocumentation } from "@/lib/subgraph/api-documentation";
 import { filterSchemaByPrefix } from "@/lib/subgraph/filter-schema-by-prefix";
 import { fixContentLengthMiddleware } from "@/middleware/fix-content-length.middleware";
+import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 import { makeIsRealtimeMiddleware } from "@/middleware/is-realtime.middleware";
 import { subgraphMetaMiddleware } from "@/middleware/subgraph-meta.middleware";
 import { thegraphFallbackMiddleware } from "@/middleware/thegraph-fallback.middleware";
@@ -30,6 +31,9 @@ app.use(async (c, next) => {
 
   await next();
 });
+
+// inject c.var.indexingStatus
+app.use(indexingStatusMiddleware);
 
 // inject c.var.isRealtime derived from MAX_REALTIME_DISTANCE_TO_RESOLVE
 app.use(makeIsRealtimeMiddleware("subgraph-api", MAX_REALTIME_DISTANCE_TO_RESOLVE));

@@ -1,7 +1,7 @@
 import type { ReferrerLeaderboard } from "@namehash/ens-referrals";
 
 import { referrerLeaderboardCache } from "@/cache/referrer-leaderboard.cache";
-import { factory } from "@/lib/hono-factory";
+import { factory, producing } from "@/lib/hono-factory";
 
 /**
  * Type definition for the referrer leaderboard middleware context passed to downstream middleware and handlers.
@@ -25,9 +25,12 @@ export type ReferrerLeaderboardMiddlewareVariables = {
  * Middleware that provides {@link ReferrerLeaderboardMiddlewareVariables}
  * to downstream middleware and handlers.
  */
-export const referrerLeaderboardMiddleware = factory.createMiddleware(async (c, next) => {
-  const leaderboard = await referrerLeaderboardCache.read();
+export const referrerLeaderboardMiddleware = producing(
+  ["referrerLeaderboard"],
+  factory.createMiddleware(async (c, next) => {
+    const leaderboard = await referrerLeaderboardCache.read();
 
-  c.set("referrerLeaderboard", leaderboard);
-  await next();
-});
+    c.set("referrerLeaderboard", leaderboard);
+    await next();
+  }),
+);

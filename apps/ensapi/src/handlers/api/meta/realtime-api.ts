@@ -1,9 +1,10 @@
 import { errorResponse } from "@/lib/handlers/error-response";
 import { createApp } from "@/lib/hono-factory";
+import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 
 import { realtimeGetMeta } from "./realtime-api.routes";
 
-const app = createApp("indexingStatus");
+const app = createApp(indexingStatusMiddleware);
 
 // allow performance monitoring clients to read HTTP Status for the provided
 // `maxWorstCaseDistance` param
