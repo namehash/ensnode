@@ -7,7 +7,13 @@ import {
   type EnsIndexerPublicConfig,
 } from "@ensnode/ensnode-sdk";
 
-import type { AbstractEnsIndexerSchema, EnsDbDrizzleClient, EnsNodeSchema } from "../lib/drizzle";
+import {
+  type AbstractEnsIndexerSchema,
+  buildEnsDbDrizzleClient,
+  buildIndividualEnsDbSchemas,
+  type EnsDbDrizzleClient,
+  type EnsNodeSchema,
+} from "../lib/drizzle";
 import { EnsNodeMetadataKeys } from "./ensnode-metadata";
 import type {
   SerializedEnsNodeMetadata,
@@ -43,7 +49,7 @@ export class EnsDbReader<
    * This is the "concrete" ENSIndexer Schema in which tables reference
    * the ENSIndexer Schema name from {@link ensIndexerSchemaName}.
    */
-  protected _ensIndexerSchema: ConcreteEnsIndexerSchema;
+  protected _concreteEnsIndexerSchema: ConcreteEnsIndexerSchema;
 
   /**
    * The name of the ENSIndexer schema to read from in ENSDb.
@@ -56,19 +62,18 @@ export class EnsDbReader<
   protected _ensNodeSchema: EnsNodeSchema;
 
   /**
-   * @param ensDbDrizzleClient Drizzle client for ENSDb, typed with the "concrete" ENSIndexer Schema type.
-   * @param ensDbSchema ENSDb Schema definition for ENSDb used by the Drizzle client.
+   * @param ensDbConnectionString The connection string for Drizzle to connect to the ENSDb instance.
    * @param ensIndexerSchemaName The name of the ENSIndexer schema to read from in ENSDb, used to identify which ENSNode metadata records to read.
-   * @param ensNodeSchema The ENSNode Schema definition for ENSDb used by the Drizzle client.
    */
-  constructor(
-    ensDbDrizzleClient: EnsDbDrizzleClient<ConcreteEnsIndexerSchema>,
-    ensIndexerSchema: ConcreteEnsIndexerSchema,
-    ensIndexerSchemaName: string,
-    ensNodeSchema: EnsNodeSchema,
-  ) {
+  constructor(ensDbConnectionString: string, ensIndexerSchemaName: string) {
+    const { concreteEnsIndexerSchema, ensNodeSchema } =
+      buildIndividualEnsDbSchemas<ConcreteEnsIndexerSchema>(ensIndexerSchemaName);
+    const ensDbDrizzleClient = buildEnsDbDrizzleClient(
+      ensDbConnectionString,
+      concreteEnsIndexerSchema,
+    );
     this.drizzleClient = ensDbDrizzleClient;
-    this._ensIndexerSchema = ensIndexerSchema;
+    this._concreteEnsIndexerSchema = concreteEnsIndexerSchema;
     this.ensIndexerSchemaName = ensIndexerSchemaName;
     this._ensNodeSchema = ensNodeSchema;
   }
@@ -87,9 +92,14 @@ export class EnsDbReader<
    * for ENSDb instance.
    *
    * Useful while working on complex queries for ENSDb.
+   *
+   * Note: using `ensIndexerSchema` name for this getter to make it read better
+   * in the context of query building. For example:
+   * `this.client.select().from(this.ensIndexerSchema.event)` vs.
+   * `this.client.select().from(this.concreteEnsIndexerSchema.event)`.
    */
   get ensIndexerSchema(): ConcreteEnsIndexerSchema {
-    return this._ensIndexerSchema;
+    return this._concreteEnsIndexerSchema;
   }
 
   /**
