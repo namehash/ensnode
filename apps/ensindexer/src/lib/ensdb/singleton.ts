@@ -19,7 +19,7 @@ const ensDbDrizzleClient = buildEnsDbDrizzleClient(ensDbConnectionString, ensDbS
 /**
  * Singleton instance of ENSDbWriter for the ENSIndexer application.
  */
-export const ensDbWriter = new EnsDbWriter(
+export const ensDbClient = new EnsDbWriter(
   ensDbDrizzleClient,
   ensIndexerSchema,
   ensIndexerSchemaName,

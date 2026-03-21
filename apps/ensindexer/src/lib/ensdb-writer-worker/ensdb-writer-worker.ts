@@ -38,7 +38,7 @@ export class EnsDbWriterWorker {
   /**
    * ENSDb Client instance used by the worker to interact with ENSDb.
    */
-  private ensDbWriter: EnsDbWriter;
+  private ensDbClient: EnsDbWriter;
 
   /**
    * Indexing Status Builder instance used by the worker to read ENSIndexer Indexing Status.
@@ -51,16 +51,16 @@ export class EnsDbWriterWorker {
   private publicConfigBuilder: PublicConfigBuilder;
 
   /**
-   * @param ensDbWriter ENSDb Writer instance used by the worker to interact with ENSDb.
+   * @param ensDbClient ENSDb Writer instance used by the worker to interact with ENSDb.
    * @param publicConfigBuilder ENSIndexer Public Config Builder instance used by the worker to read ENSIndexer Public Config.
    * @param indexingStatusBuilder Indexing Status Builder instance used by the worker to read ENSIndexer Indexing Status.
    */
   constructor(
-    ensDbWriter: EnsDbWriter,
+    ensDbClient: EnsDbWriter,
     publicConfigBuilder: PublicConfigBuilder,
     indexingStatusBuilder: IndexingStatusBuilder,
   ) {
-    this.ensDbWriter = ensDbWriter;
+    this.ensDbClient = ensDbClient;
     this.publicConfigBuilder = publicConfigBuilder;
     this.indexingStatusBuilder = indexingStatusBuilder;
   }
@@ -90,14 +90,14 @@ export class EnsDbWriterWorker {
 
     // Task 1: upsert ENSDb version into ENSDb.
     console.log(`[EnsDbWriterWorker]: Upserting ENSDb version into ENSDb...`);
-    await this.ensDbWriter.upsertEnsDbVersion(inMemoryConfig.versionInfo.ensDb);
+    await this.ensDbClient.upsertEnsDbVersion(inMemoryConfig.versionInfo.ensDb);
     console.log(
       `[EnsDbWriterWorker]: ENSDb version upserted successfully: ${inMemoryConfig.versionInfo.ensDb}`,
     );
 
     // Task 2: upsert of EnsIndexerPublicConfig into ENSDb.
     console.log(`[EnsDbWriterWorker]: Upserting ENSIndexer Public Config into ENSDb...`);
-    await this.ensDbWriter.upsertEnsIndexerPublicConfig(inMemoryConfig);
+    await this.ensDbClient.upsertEnsIndexerPublicConfig(inMemoryConfig);
     console.log(`[EnsDbWriterWorker]: ENSIndexer Public Config upserted successfully`);
 
     // Task 3: recurring upsert of Indexing Status Snapshot into ENSDb.
@@ -164,7 +164,7 @@ export class EnsDbWriterWorker {
 
     try {
       [storedConfig, inMemoryConfig] = await Promise.all([
-        this.ensDbWriter.getEnsIndexerPublicConfig(),
+        this.ensDbClient.getEnsIndexerPublicConfig(),
         inMemoryConfigPromise,
       ]);
     } catch (error) {
@@ -221,7 +221,7 @@ export class EnsDbWriterWorker {
         snapshotTime,
       );
 
-      await this.ensDbWriter.upsertIndexingStatusSnapshot(crossChainSnapshot);
+      await this.ensDbClient.upsertIndexingStatusSnapshot(crossChainSnapshot);
     } catch (error) {
       console.error(
         `[EnsDbWriterWorker]: Error retrieving or validating Indexing Status Snapshot:`,
