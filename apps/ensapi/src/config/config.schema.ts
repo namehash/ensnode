@@ -20,7 +20,7 @@ import { ENSApi_DEFAULT_PORT } from "@/config/defaults";
 import { EnsDbConfigSchema } from "@/config/ensdb-config.schema";
 import type { EnsApiEnvironment } from "@/config/environment";
 import { invariant_ensIndexerPublicConfigVersionInfo } from "@/config/validations";
-import { fetchENSIndexerConfig } from "@/lib/fetch-ensindexer-config";
+import { ensDbClient } from "@/lib/ensdb/singleton";
 import logger from "@/lib/logger";
 
 /**
@@ -65,9 +65,7 @@ export type EnsApiConfig = z.infer<typeof EnsApiConfigSchema>;
  */
 export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promise<EnsApiConfig> {
   try {
-    const ensIndexerUrl = EnsIndexerUrlSchema.parse(env.ENSINDEXER_URL);
-
-    const ensIndexerPublicConfig = await pRetry(() => fetchENSIndexerConfig(ensIndexerUrl), {
+    const ensIndexerPublicConfig = await pRetry(() => ensDbClient.getEnsIndexerPublicConfig(), {
       retries: 3,
       onFailedAttempt: ({ error, attemptNumber, retriesLeft }) => {
         logger.info(
@@ -75,6 +73,10 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
         );
       },
     });
+
+    if (!ensIndexerPublicConfig) {
+      throw new Error(`Failed to fetch ENSIndexer Public Config from ENSDb`);
+    }
 
     const rpcConfigs = buildRpcConfigsFromEnv(env, ensIndexerPublicConfig.namespace);
 
