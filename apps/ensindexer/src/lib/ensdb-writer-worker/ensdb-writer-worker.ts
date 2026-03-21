@@ -1,6 +1,7 @@
 import { getUnixTime, secondsToMilliseconds } from "date-fns";
 import pRetry from "p-retry";
 
+import type { EnsDbWriter } from "@ensnode/ensdb-sdk";
 import {
   buildCrossChainIndexingStatusSnapshotOmnichain,
   type CrossChainIndexingStatusSnapshot,
@@ -11,7 +12,6 @@ import {
   validateEnsIndexerPublicConfigCompatibility,
 } from "@ensnode/ensnode-sdk";
 
-import type { EnsDbClient } from "@/lib/ensdb-client/ensdb-client";
 import type { IndexingStatusBuilder } from "@/lib/indexing-status-builder/indexing-status-builder";
 import type { PublicConfigBuilder } from "@/lib/public-config-builder/public-config-builder";
 
@@ -38,7 +38,7 @@ export class EnsDbWriterWorker {
   /**
    * ENSDb Client instance used by the worker to interact with ENSDb.
    */
-  private ensDbClient: EnsDbClient;
+  private ensDbClient: EnsDbWriter;
 
   /**
    * Indexing Status Builder instance used by the worker to read ENSIndexer Indexing Status.
@@ -51,12 +51,12 @@ export class EnsDbWriterWorker {
   private publicConfigBuilder: PublicConfigBuilder;
 
   /**
-   * @param ensDbClient ENSDb Client instance used by the worker to interact with ENSDb.
+   * @param ensDbClient ENSDb Writer instance used by the worker to interact with ENSDb.
    * @param publicConfigBuilder ENSIndexer Public Config Builder instance used by the worker to read ENSIndexer Public Config.
    * @param indexingStatusBuilder Indexing Status Builder instance used by the worker to read ENSIndexer Indexing Status.
    */
   constructor(
-    ensDbClient: EnsDbClient,
+    ensDbClient: EnsDbWriter,
     publicConfigBuilder: PublicConfigBuilder,
     indexingStatusBuilder: IndexingStatusBuilder,
   ) {

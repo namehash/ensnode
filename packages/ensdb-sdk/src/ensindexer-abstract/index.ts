@@ -1,5 +1,7 @@
 /**
- * Merge the various sub-schemas into ENSIndexer Schema.
+ * Merge the various sub-schemas into an "abstract" ENSIndexer Schema.
+ * This "abstract" ENSIndexer Schema is used to build the "concrete" ENSIndexer Schema
+ * for ENSDb, which is then used to build the ENSDb Schema for a Drizzle client for ENSDb.
  */
 
 // TODO: remove `ensnode-metadata.schema` export when database migrations

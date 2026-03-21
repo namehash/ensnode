@@ -19,12 +19,12 @@ export const laterBlockRef = {
   number: 1025,
 } as const satisfies BlockRef;
 
-export const databaseUrl = "postgres://user:pass@localhost:5432/ensdb";
+export const ensDbUrl = "postgres://user:pass@localhost:5432/ensdb";
 
-export const databaseSchemaName = "public";
+export const ensIndexerSchemaName = "ensindexer_0";
 
 export const publicConfig = {
-  databaseSchemaName,
+  databaseSchemaName: ensIndexerSchemaName,
   ensRainbowPublicConfig: {
     version: "0.32.0",
     labelSet: {
@@ -42,7 +42,7 @@ export const publicConfig = {
   namespace: "mainnet",
   plugins: [PluginName.Subgraph],
   versionInfo: {
-    nodejs: "v22.10.12",
+    nodejs: "22.10.12",
     ponder: "0.11.25",
     ensDb: "0.32.0",
     ensIndexer: "0.32.0",

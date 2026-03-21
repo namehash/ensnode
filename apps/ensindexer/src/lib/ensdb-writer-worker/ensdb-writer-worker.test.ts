@@ -6,17 +6,17 @@ import {
   validateEnsIndexerPublicConfigCompatibility,
 } from "@ensnode/ensnode-sdk";
 
-import * as ensDbClientMock from "@/lib/ensdb-client/ensdb-client.mock";
 import { EnsDbWriterWorker } from "@/lib/ensdb-writer-worker/ensdb-writer-worker";
 import type { IndexingStatusBuilder } from "@/lib/indexing-status-builder/indexing-status-builder";
 import type { PublicConfigBuilder } from "@/lib/public-config-builder/public-config-builder";
 
 import {
   createMockCrossChainSnapshot,
-  createMockEnsDbClient,
+  createMockEnsDbWriter,
   createMockIndexingStatusBuilder,
   createMockOmnichainSnapshot,
   createMockPublicConfigBuilder,
+  mockPublicConfig,
 } from "./ensdb-writer-worker.mock";
 
 vi.mock("@ensnode/ensnode-sdk", async () => {
@@ -50,7 +50,7 @@ describe("EnsDbWriterWorker", () => {
       const snapshot = createMockCrossChainSnapshot({ omnichainSnapshot });
       vi.mocked(buildCrossChainIndexingStatusSnapshotOmnichain).mockReturnValue(snapshot);
 
-      const ensDbClient = createMockEnsDbClient();
+      const ensDbClient = createMockEnsDbWriter();
       const publicConfigBuilder = createMockPublicConfigBuilder();
       const indexingStatusBuilder = createMockIndexingStatusBuilder(omnichainSnapshot);
 
@@ -61,11 +61,9 @@ describe("EnsDbWriterWorker", () => {
 
       // assert - verify initial upserts happened
       expect(ensDbClient.upsertEnsDbVersion).toHaveBeenCalledWith(
-        ensDbClientMock.publicConfig.versionInfo.ensDb,
+        mockPublicConfig.versionInfo.ensDb,
       );
-      expect(ensDbClient.upsertEnsIndexerPublicConfig).toHaveBeenCalledWith(
-        ensDbClientMock.publicConfig,
-      );
+      expect(ensDbClient.upsertEnsIndexerPublicConfig).toHaveBeenCalledWith(mockPublicConfig);
 
       // advance time to trigger interval
       await vi.advanceTimersByTimeAsync(1000);
@@ -88,10 +86,10 @@ describe("EnsDbWriterWorker", () => {
         throw incompatibleError;
       });
 
-      const ensDbClient = createMockEnsDbClient({
-        getEnsIndexerPublicConfig: vi.fn().mockResolvedValue(ensDbClientMock.publicConfig),
+      const ensDbClient = createMockEnsDbWriter({
+        getEnsIndexerPublicConfig: vi.fn().mockResolvedValue(mockPublicConfig),
       });
-      const publicConfigBuilder = createMockPublicConfigBuilder(ensDbClientMock.publicConfig);
+      const publicConfigBuilder = createMockPublicConfigBuilder(mockPublicConfig);
       const indexingStatusBuilder = createMockIndexingStatusBuilder();
 
       const worker = new EnsDbWriterWorker(ensDbClient, publicConfigBuilder, indexingStatusBuilder);
@@ -103,7 +101,7 @@ describe("EnsDbWriterWorker", () => {
 
     it("throws error when worker is already running", async () => {
       // arrange
-      const ensDbClient = createMockEnsDbClient();
+      const ensDbClient = createMockEnsDbWriter();
       const publicConfigBuilder = createMockPublicConfigBuilder();
       const indexingStatusBuilder = createMockIndexingStatusBuilder();
 
@@ -122,7 +120,7 @@ describe("EnsDbWriterWorker", () => {
     it("throws error when config fetch fails", async () => {
       // arrange
       const networkError = new Error("Network failure");
-      const ensDbClient = createMockEnsDbClient();
+      const ensDbClient = createMockEnsDbWriter();
       const publicConfigBuilder = {
         getPublicConfig: vi.fn().mockRejectedValue(networkError),
       } as unknown as PublicConfigBuilder;
@@ -139,7 +137,7 @@ describe("EnsDbWriterWorker", () => {
     it("throws error when stored config fetch fails", async () => {
       // arrange
       const dbError = new Error("Database connection lost");
-      const ensDbClient = createMockEnsDbClient({
+      const ensDbClient = createMockEnsDbWriter({
         getEnsIndexerPublicConfig: vi.fn().mockRejectedValue(dbError),
       });
       const publicConfigBuilder = createMockPublicConfigBuilder();
@@ -158,10 +156,10 @@ describe("EnsDbWriterWorker", () => {
         // validation passes
       });
 
-      const ensDbClient = createMockEnsDbClient({
-        getEnsIndexerPublicConfig: vi.fn().mockResolvedValue(ensDbClientMock.publicConfig),
+      const ensDbClient = createMockEnsDbWriter({
+        getEnsIndexerPublicConfig: vi.fn().mockResolvedValue(mockPublicConfig),
       });
-      const publicConfigBuilder = createMockPublicConfigBuilder(ensDbClientMock.publicConfig);
+      const publicConfigBuilder = createMockPublicConfigBuilder(mockPublicConfig);
       const indexingStatusBuilder = createMockIndexingStatusBuilder();
 
       const worker = new EnsDbWriterWorker(ensDbClient, publicConfigBuilder, indexingStatusBuilder);
@@ -182,7 +180,7 @@ describe("EnsDbWriterWorker", () => {
       const snapshot = createMockCrossChainSnapshot();
       vi.mocked(buildCrossChainIndexingStatusSnapshotOmnichain).mockReturnValue(snapshot);
 
-      const ensDbClient = createMockEnsDbClient();
+      const ensDbClient = createMockEnsDbWriter();
       const publicConfigBuilder = createMockPublicConfigBuilder();
       const indexingStatusBuilder = createMockIndexingStatusBuilder();
 
@@ -193,9 +191,7 @@ describe("EnsDbWriterWorker", () => {
 
       // assert - config should be called once (pRetry is mocked)
       expect(publicConfigBuilder.getPublicConfig).toHaveBeenCalledTimes(1);
-      expect(ensDbClient.upsertEnsIndexerPublicConfig).toHaveBeenCalledWith(
-        ensDbClientMock.publicConfig,
-      );
+      expect(ensDbClient.upsertEnsIndexerPublicConfig).toHaveBeenCalledWith(mockPublicConfig);
 
       // cleanup
       worker.stop();
@@ -206,7 +202,7 @@ describe("EnsDbWriterWorker", () => {
     it("stops the interval when stop() is called", async () => {
       // arrange
       const upsertIndexingStatusSnapshot = vi.fn().mockResolvedValue(undefined);
-      const ensDbClient = createMockEnsDbClient({ upsertIndexingStatusSnapshot });
+      const ensDbClient = createMockEnsDbWriter({ upsertIndexingStatusSnapshot });
       const publicConfigBuilder = createMockPublicConfigBuilder();
       const indexingStatusBuilder = createMockIndexingStatusBuilder();
 
@@ -231,7 +227,7 @@ describe("EnsDbWriterWorker", () => {
   describe("isRunning - worker state", () => {
     it("indicates isRunning status correctly", async () => {
       // arrange
-      const ensDbClient = createMockEnsDbClient();
+      const ensDbClient = createMockEnsDbWriter();
       const publicConfigBuilder = createMockPublicConfigBuilder();
       const indexingStatusBuilder = createMockIndexingStatusBuilder();
 
@@ -271,7 +267,7 @@ describe("EnsDbWriterWorker", () => {
 
       vi.mocked(buildCrossChainIndexingStatusSnapshotOmnichain).mockReturnValue(crossChainSnapshot);
 
-      const ensDbClient = createMockEnsDbClient();
+      const ensDbClient = createMockEnsDbWriter();
       const publicConfigBuilder = createMockPublicConfigBuilder();
       const indexingStatusBuilder = {
         getOmnichainIndexingStatusSnapshot: vi
@@ -321,7 +317,7 @@ describe("EnsDbWriterWorker", () => {
         .mockReturnValueOnce(crossChainSnapshot2)
         .mockReturnValueOnce(crossChainSnapshot2);
 
-      const ensDbClient = createMockEnsDbClient({
+      const ensDbClient = createMockEnsDbWriter({
         upsertIndexingStatusSnapshot: vi
           .fn()
           .mockResolvedValueOnce(undefined)

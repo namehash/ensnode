@@ -1,1 +1,2 @@
-export * from "./ensindexer";
+export * from "./client";
+export * from "./ensindexer-abstract";

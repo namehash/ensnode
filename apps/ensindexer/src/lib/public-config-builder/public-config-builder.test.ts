@@ -58,7 +58,7 @@ const mockEnsRainbowConfig: EnsRainbowPublicConfig = {
 };
 
 const mockVersionInfo: EnsIndexerVersionInfo = {
-  nodejs: "v20.0.0",
+  nodejs: "20.0.0",
   ponder: "0.9.0",
   ensDb: "1.0.0",
   ensIndexer: "1.0.0",
@@ -83,7 +83,7 @@ function createMockPublicConfig(overrides: Partial<EnsIndexerPublicConfig> = {})
 // Helper to setup standard mocks
 function setupStandardMocks() {
   vi.mocked(getEnsIndexerVersion).mockReturnValue("1.0.0");
-  vi.mocked(getNodeJsVersion).mockReturnValue("v20.0.0");
+  vi.mocked(getNodeJsVersion).mockReturnValue("20.0.0");
   vi.mocked(getPackageVersion).mockReturnValue("0.9.0");
   vi.mocked(validateEnsIndexerVersionInfo).mockReturnValue(mockVersionInfo);
 }
@@ -117,7 +117,7 @@ describe("PublicConfigBuilder", () => {
       expect(getPackageVersion).toHaveBeenCalledWith("@adraffy/ens-normalize");
 
       expect(validateEnsIndexerVersionInfo).toHaveBeenCalledWith({
-        nodejs: "v20.0.0",
+        nodejs: "20.0.0",
         ponder: "0.9.0",
         ensDb: "1.0.0",
         ensIndexer: "1.0.0",
@@ -183,11 +183,11 @@ describe("PublicConfigBuilder", () => {
       } as unknown as EnsRainbowApiClient;
 
       vi.mocked(getEnsIndexerVersion).mockReturnValue("2.0.0");
-      vi.mocked(getNodeJsVersion).mockReturnValue("v22.0.0");
+      vi.mocked(getNodeJsVersion).mockReturnValue("22.0.0");
       vi.mocked(getPackageVersion).mockReturnValue("1.0.0");
 
       const customVersionInfo: EnsIndexerVersionInfo = {
-        nodejs: "v22.0.0",
+        nodejs: "22.0.0",
         ponder: "1.0.0",
         ensDb: "2.0.0",
         ensIndexer: "2.0.0",

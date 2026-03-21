@@ -1,4 +1,4 @@
-import { ensDbClient } from "@/lib/ensdb-client/singleton";
+import { ensDbClient } from "@/lib/ensdb/singleton";
 import { indexingStatusBuilder } from "@/lib/indexing-status-builder/singleton";
 import { publicConfigBuilder } from "@/lib/public-config-builder/singleton";
 
