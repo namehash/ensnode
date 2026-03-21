@@ -9,11 +9,12 @@ import {
 
 const { databaseUrl: ensDbConnectionString, databaseSchemaName: ensIndexerSchemaName } = config;
 
-const { ensIndexerSchema, ensNodeSchema } = buildIndividualEnsDbSchemas(ensIndexerSchemaName);
+const { concreteEnsIndexerSchema, ensNodeSchema } =
+  buildIndividualEnsDbSchemas(ensIndexerSchemaName);
 /**
  * Build a ENSDb Schema for Drizzle client using the ENSIndexer Schema name from config.
  */
-const ensDbSchema = buildEnsDbSchema(ensIndexerSchema);
+const ensDbSchema = buildEnsDbSchema(concreteEnsIndexerSchema);
 const ensDbDrizzleClient = buildEnsDbDrizzleClient(ensDbConnectionString, ensDbSchema);
 
 /**
@@ -21,7 +22,7 @@ const ensDbDrizzleClient = buildEnsDbDrizzleClient(ensDbConnectionString, ensDbS
  */
 export const ensDbClient = new EnsDbWriter(
   ensDbDrizzleClient,
-  ensIndexerSchema,
+  concreteEnsIndexerSchema,
   ensIndexerSchemaName,
   ensNodeSchema,
 );

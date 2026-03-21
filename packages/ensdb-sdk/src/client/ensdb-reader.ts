@@ -22,20 +22,20 @@ import type {
  * Enables read-only querying of an ENSDb instance, including data spanning
  * the ENSNode Schema and the specified ENSIndexer Schema.
  *
- * Note: we use a parameter type `EnsIndexerSchemaType` to represent
+ * Note: we use a parameter type `ConcreteEnsIndexerSchema` to represent
  * the "concrete" ENSIndexer Schema type within the ENSDb Schema and
  * make sure that the Drizzle client used for querying is typed with
  * the same "concrete" ENSIndexer Schema type.
  */
 export class EnsDbReader<
-  EnsIndexerSchemaType extends AbstractEnsIndexerSchema = AbstractEnsIndexerSchema,
+  ConcreteEnsIndexerSchema extends AbstractEnsIndexerSchema = AbstractEnsIndexerSchema,
 > {
   /**
    * Drizzle client for ENSDb.
    *
    * Uses the ENSDb Schema from {@link ensDbSchema}.
    */
-  protected drizzleClient: EnsDbDrizzleClient<EnsIndexerSchemaType>;
+  protected drizzleClient: EnsDbDrizzleClient<ConcreteEnsIndexerSchema>;
 
   /**
    * "Concrete" ENSIndexer Schema definition for ENSDb.
@@ -43,7 +43,7 @@ export class EnsDbReader<
    * This is the "concrete" ENSIndexer Schema in which tables reference
    * the ENSIndexer Schema name from {@link ensIndexerSchemaName}.
    */
-  protected _ensIndexerSchema: EnsIndexerSchemaType;
+  protected _ensIndexerSchema: ConcreteEnsIndexerSchema;
 
   /**
    * The name of the ENSIndexer schema to read from in ENSDb.
@@ -62,8 +62,8 @@ export class EnsDbReader<
    * @param ensNodeSchema The ENSNode Schema definition for ENSDb used by the Drizzle client.
    */
   constructor(
-    ensDbDrizzleClient: EnsDbDrizzleClient<EnsIndexerSchemaType>,
-    ensIndexerSchema: EnsIndexerSchemaType,
+    ensDbDrizzleClient: EnsDbDrizzleClient<ConcreteEnsIndexerSchema>,
+    ensIndexerSchema: ConcreteEnsIndexerSchema,
     ensIndexerSchemaName: string,
     ensNodeSchema: EnsNodeSchema,
   ) {
@@ -78,7 +78,7 @@ export class EnsDbReader<
    *
    * Useful while working on complex queries for ENSDb.
    */
-  get client(): EnsDbDrizzleClient<EnsIndexerSchemaType> {
+  get client(): EnsDbDrizzleClient<ConcreteEnsIndexerSchema> {
     return this.drizzleClient;
   }
 
@@ -88,7 +88,7 @@ export class EnsDbReader<
    *
    * Useful while working on complex queries for ENSDb.
    */
-  get ensIndexerSchema(): EnsIndexerSchemaType {
+  get ensIndexerSchema(): ConcreteEnsIndexerSchema {
     return this._ensIndexerSchema;
   }
 

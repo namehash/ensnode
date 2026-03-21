@@ -5,13 +5,9 @@ import {
   serializeEnsIndexerPublicConfig,
 } from "@ensnode/ensnode-sdk";
 
-import * as ensIndexerSchema from "../ensindexer-abstract";
-import * as ensNodeSchema from "../ensnode";
+import { buildIndividualEnsDbSchemas } from "../lib/drizzle";
 import * as ensDbClientMock from "./ensdb-client.mock";
 import { EnsDbReader } from "./ensdb-reader";
-
-const ensIndexerSchemaMock = ensIndexerSchema as any;
-const ensNodeSchemaMock = ensNodeSchema as any;
 
 describe("EnsDbReader", () => {
   const selectResult = { current: [] as Array<{ value: unknown }> };
@@ -19,13 +15,16 @@ describe("EnsDbReader", () => {
   const fromMock = vi.fn(() => ({ where: whereMock }));
   const selectMock = vi.fn(() => ({ from: fromMock }));
   const drizzleClientMock = { select: selectMock } as any;
+  const { concreteEnsIndexerSchema, ensNodeSchema } = buildIndividualEnsDbSchemas(
+    ensDbClientMock.ensIndexerSchemaName,
+  );
 
   const createEnsDbReader = () =>
     new EnsDbReader(
       drizzleClientMock,
-      ensIndexerSchemaMock,
+      concreteEnsIndexerSchema,
       ensDbClientMock.ensIndexerSchemaName,
-      ensNodeSchemaMock,
+      ensNodeSchema,
     );
 
   beforeEach(() => {
@@ -40,7 +39,7 @@ describe("EnsDbReader", () => {
       await expect(createEnsDbReader().getEnsDbVersion()).resolves.toBeUndefined();
 
       expect(selectMock).toHaveBeenCalledTimes(1);
-      expect(fromMock).toHaveBeenCalledWith(ensNodeSchemaMock.metadata);
+      expect(fromMock).toHaveBeenCalledWith(ensNodeSchema.metadata);
     });
 
     it("returns value when one record exists", async () => {
