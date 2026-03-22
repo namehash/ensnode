@@ -15,8 +15,6 @@ import apiRouter from "./handlers/api/router";
 import ensanalyticsApi from "./handlers/ensanalytics/ensanalytics-api";
 import ensanalyticsApiV1 from "./handlers/ensanalytics/ensanalytics-api-v1";
 import subgraphApi from "./handlers/subgraph/subgraph-api";
-import { generateOpenApi31Document } from "@/openapi-document";
-
 const app = createApp();
 
 // set the X-ENSNode-Version header to the current version
@@ -66,9 +64,8 @@ app.route("/v1/ensanalytics", ensanalyticsApiV1);
 app.route("/amirealtime", realtimeApi);
 
 // serve pre-generated OpenAPI 3.1 document
-const openApi31Document = generateOpenApi31Document();
 app.get("/openapi.json", (c) => {
-  return c.json(openApi31Document);
+  return c.json(app.getOpenAPI31Document(openapiMeta));
 });
 
 // will automatically 503 if config is not available due to ensIndexerPublicConfigMiddleware
