@@ -206,4 +206,26 @@ describe("LocalPonderClient", () => {
       );
     });
   });
+
+  describe("isInDevMode", () => {
+    it("returns true when Ponder app command is 'dev'", () => {
+      // Arrange
+      const client = createLocalPonderClientMock({
+        ponderAppContext: { command: PonderAppCommands.Dev },
+      });
+
+      // Act & Assert
+      expect(client.isInDevMode).toBe(true);
+    });
+
+    it("returns false when Ponder app command is not 'dev'", () => {
+      // Arrange
+      const client = createLocalPonderClientMock({
+        ponderAppContext: { command: PonderAppCommands.Start },
+      });
+
+      // Act & Assert
+      expect(client.isInDevMode).toBe(false);
+    });
+  });
 });
