@@ -9,11 +9,11 @@ import {
   type ChainIndexingMetricsHistorical,
   type ChainIndexingMetricsRealtime,
   ChainIndexingStates,
-  PonderAppCommands,
   type PonderIndexingMetrics,
   PonderIndexingOrderings,
 } from "./indexing-metrics";
 import { chainIds, createLocalPonderClientMock } from "./local-ponder-client.mock";
+import { PonderAppCommands } from "./ponder-app-context";
 
 describe("LocalPonderClient", () => {
   afterEach(() => {

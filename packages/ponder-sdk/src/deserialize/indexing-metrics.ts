@@ -17,14 +17,14 @@ import {
   type ChainIndexingMetricsHistorical,
   type ChainIndexingMetricsRealtime,
   ChainIndexingStates,
-  type PonderAppCommand,
-  PonderAppCommands,
   type PonderIndexingMetrics,
   type PonderIndexingOrdering,
   PonderIndexingOrderings,
 } from "../indexing-metrics";
 import { schemaPositiveInteger } from "../numbers";
+import type { PonderAppCommand } from "../ponder-app-context";
 import { schemaChainIdString } from "./chains";
+import { PonderAppCommandSchema } from "./ponder-app-context";
 import { deserializePrometheusMetrics, type PrometheusMetrics } from "./prometheus-metrics-text";
 import type { Unvalidated } from "./utils";
 
@@ -158,7 +158,7 @@ function invariant_includesAtLeastOneIndexedChain(ctx: ParsePayload<PonderIndexi
  * Schema representing settings of a Ponder app.
  */
 const schemaApplicationSettings = z.object({
-  command: z.enum(PonderAppCommands),
+  command: PonderAppCommandSchema,
   ordering: z.enum(PonderIndexingOrderings),
 });
 
