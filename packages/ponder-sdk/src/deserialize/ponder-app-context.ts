@@ -1,3 +1,13 @@
+/**
+ * This module provides functionality to deserialize the "raw" context of
+ * a local Ponder app into a validated Ponder App Context.
+ *
+ * The "raw" context is injected by Ponder at runtime as
+ * the `PONDER_COMMON` global variable.
+ *
+ * @see https://github.com/ponder-sh/ponder/blob/6fcc15d4234e43862cb6e21c05f3c57f4c2f7464/packages/core/src/internal/common.ts#L7-L15
+ */
+
 import { prettifyError, z } from "zod/v4";
 
 import {
@@ -7,12 +17,8 @@ import {
 } from "../ponder-app-context";
 import type { Unvalidated } from "./utils";
 
-export const PonderAppCommandSchema = z.enum(PonderAppCommands);
-
 /**
- * Schema representing the raw context of a local Ponder app.
- *
- * @see https://github.com/ponder-sh/ponder/blob/6fcc15d4234e43862cb6e21c05f3c57f4c2f7464/packages/core/src/internal/common.ts#L7-L15
+ * Type representing the "raw" context of a local Ponder app.
  */
 const schemaRawPonderAppContext = z.object({
   options: z.object({
@@ -20,13 +26,16 @@ const schemaRawPonderAppContext = z.object({
   }),
 });
 
-type RawPonderAppContext = z.infer<typeof schemaRawPonderAppContext>;
+/**
+ * Type representing the "raw" context of a local Ponder app.
+ */
+export type RawPonderAppContext = z.infer<typeof schemaRawPonderAppContext>;
 
 /**
- * Schema representing the context of a local Ponder app.
+ * Schema representing the "deserialized" context of a local Ponder app.
  */
 const schemaPonderAppContext = z.object({
-  command: PonderAppCommandSchema,
+  command: z.enum(PonderAppCommands),
 });
 
 /**
@@ -36,7 +45,7 @@ const schemaPonderAppContext = z.object({
  * @returns Unvalidated Ponder App Context
  *          to be validated with {@link schemaPonderAppContext}.
  */
-export function buildUnvalidatedPonderAppContext(
+function buildUnvalidatedPonderAppContext(
   rawPonderAppContext: RawPonderAppContext,
 ): Unvalidated<PonderAppContext> {
   return {

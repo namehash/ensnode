@@ -144,14 +144,16 @@ export class EnsDbWriterWorker {
    * - stored config in ENSDb, if available, and
    * - in-memory config from ENSIndexer Client.
    *
-   * If, and only if, a stored config is available in ENSDb, then the function
-   * validates the compatibility of the in-memory config object against
-   * the stored one. Validation criteria are defined in the function body.
+   * If a stored config exists **and** the local Ponder app is **not** in dev
+   * mode, the in-memory config is validated for compatibility against the
+   * stored one. Validation is skipped if the local Ponder app is in dev mode,
+   * allowing to override the stored config in ENSDb with the current in-memory
+   * config, without having to keep them compatible.
    *
-   * @returns In-memory config object, if the validation is successful or
-   *          if there is no stored config.
-   * @throws Error if the in-memory config object cannot be fetched or,
-   *         got fetched and is incompatible with the stored config object.
+   * @returns The in-memory config when validation passes or no stored config
+   *          exists.
+   * @throws Error if either fetch fails, or if the in-memory config is
+   *         incompatible with the stored config.
    */
   private async getValidatedEnsIndexerPublicConfig(): Promise<EnsIndexerPublicConfig> {
     /**
