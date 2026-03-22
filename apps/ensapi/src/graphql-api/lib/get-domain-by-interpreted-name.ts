@@ -63,10 +63,11 @@ export async function getDomainIdByInterpretedName(
   name: InterpretedName,
 ): Promise<DomainId | null> {
   // Domains addressable in v2 are preferred, but v1 lookups are cheap, so just do them both ahead of time
+  const rootRegistryId = getRootRegistryId();
   const [v1DomainId, v2DomainId] = await Promise.all([
     v1_getDomainIdByInterpretedName(name),
     // only resolve v2Domain if ENSv2 Root Registry is defined
-    getRootRegistryId() ? v2_getDomainIdByInterpretedName(getRootRegistryId()!, name) : null,
+    rootRegistryId ? v2_getDomainIdByInterpretedName(rootRegistryId, name) : null,
   ]);
 
   logger.debug({ v1DomainId, v2DomainId });

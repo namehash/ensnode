@@ -7,7 +7,6 @@ import { html } from "hono/html";
 import { errorResponse } from "@/lib/handlers/error-response";
 import { createApp } from "@/lib/hono-factory";
 import logger from "@/lib/logger";
-import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 import { openapiMeta } from "@/openapi-meta";
 
 import realtimeApi from "./handlers/api/meta/realtime-api";
@@ -15,6 +14,7 @@ import apiRouter from "./handlers/api/router";
 import ensanalyticsApi from "./handlers/ensanalytics/ensanalytics-api";
 import ensanalyticsApiV1 from "./handlers/ensanalytics/ensanalytics-api-v1";
 import subgraphApi from "./handlers/subgraph/subgraph-api";
+
 const app = createApp();
 
 // set the X-ENSNode-Version header to the current version
