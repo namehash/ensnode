@@ -1,5 +1,6 @@
 import { ensDbClient } from "@/lib/ensdb/singleton";
 import { indexingStatusBuilder } from "@/lib/indexing-status-builder/singleton";
+import { localPonderClient } from "@/lib/local-ponder-client";
 import { publicConfigBuilder } from "@/lib/public-config-builder/singleton";
 
 import { EnsDbWriterWorker } from "./ensdb-writer-worker";
@@ -24,6 +25,7 @@ export function startEnsDbWriterWorker() {
     ensDbClient,
     publicConfigBuilder,
     indexingStatusBuilder,
+    localPonderClient,
   );
 
   ensDbWriterWorker
