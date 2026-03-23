@@ -1,5 +1,32 @@
 # ensindexer
 
+## 1.8.0
+
+### Minor Changes
+
+- [#1798](https://github.com/namehash/ensnode/pull/1798) [`f0007b4`](https://github.com/namehash/ensnode/commit/f0007b43a11645efc7efc3c9563f36254352c772) Thanks [@tk-o](https://github.com/tk-o)! - Replaced a bespoke `EnsDbClient` implementation with `EnsDbWriter` from ENSDb SDK.
+
+- [#1807](https://github.com/namehash/ensnode/pull/1807) [`410f937`](https://github.com/namehash/ensnode/commit/410f93798b45ae334a2089135c5fd22b7716b128) Thanks [@tk-o](https://github.com/tk-o)! - Improved developer experience by skipping validation step in ENSDb Writer Worker while in dev mode.
+
+- [#1758](https://github.com/namehash/ensnode/pull/1758) [`f276efe`](https://github.com/namehash/ensnode/commit/f276efe9c48361a330bfcc4bc6f045c6ed9963d2) Thanks [@shrugs](https://github.com/shrugs)! - The ENSv2 Plugin can now be safely activated for ENSv1-only namespaces (ex: 'mainnet', 'sepolia').
+
+- [#1798](https://github.com/namehash/ensnode/pull/1798) [`f0007b4`](https://github.com/namehash/ensnode/commit/f0007b43a11645efc7efc3c9563f36254352c772) Thanks [@tk-o](https://github.com/tk-o)! - Added running database migrations for ENSDb as a responsibility for ENSIndexer.
+
+- [#1730](https://github.com/namehash/ensnode/pull/1730) [`5c64d89`](https://github.com/namehash/ensnode/commit/5c64d8976fdaf93cd9f9256b93b5216b34d48a90) Thanks [@shrugs](https://github.com/shrugs)! - The `subgraph` and `ensv2` plugins can now be activated in parallel.
+
+- [#1778](https://github.com/namehash/ensnode/pull/1778) [`d6dd425`](https://github.com/namehash/ensnode/commit/d6dd4252f690daba13bf02aa53a1ef3e868c823e) Thanks [@tk-o](https://github.com/tk-o)! - Made `ponder.schema.ts` to explicitly import just ENSIndexer Schema.
+
+- [#1766](https://github.com/namehash/ensnode/pull/1766) [`9ea8580`](https://github.com/namehash/ensnode/commit/9ea858055109eaf3a92d210f2b3d9170232a32e8) Thanks [@shrugs](https://github.com/shrugs)! - Fixes issue with derivation of `EnsIndexerConfig.indexedChainIds` in plugins that conditionally index multiple chains (ex: 'protocol-acceleration').
+
+### Patch Changes
+
+- Updated dependencies [[`5ce102e`](https://github.com/namehash/ensnode/commit/5ce102e11c7b891844b0762cffa45ade1a997e0f), [`410f937`](https://github.com/namehash/ensnode/commit/410f93798b45ae334a2089135c5fd22b7716b128), [`f0007b4`](https://github.com/namehash/ensnode/commit/f0007b43a11645efc7efc3c9563f36254352c772), [`d6dd425`](https://github.com/namehash/ensnode/commit/d6dd4252f690daba13bf02aa53a1ef3e868c823e), [`5ac81cb`](https://github.com/namehash/ensnode/commit/5ac81cb42ad3a4bf561d82c2dd628e85988240ef), [`f0007b4`](https://github.com/namehash/ensnode/commit/f0007b43a11645efc7efc3c9563f36254352c772), [`9ea8580`](https://github.com/namehash/ensnode/commit/9ea858055109eaf3a92d210f2b3d9170232a32e8)]:
+  - @ensnode/ensdb-sdk@1.8.0
+  - @ensnode/ponder-sdk@1.8.0
+  - @ensnode/ensnode-sdk@1.8.0
+  - @ensnode/ensrainbow-sdk@1.8.0
+  - @ensnode/datasources@1.8.0
+
 ## 1.7.0
 
 ### Patch Changes

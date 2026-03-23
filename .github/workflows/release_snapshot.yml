@@ -57,7 +57,7 @@ jobs:
       hasChanges: ${{ steps.snapshot.outputs.hasChanges }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -100,7 +100,7 @@ jobs:
         app: [ensindexer, ensadmin, ensrainbow, ensapi]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
 
@@ -135,7 +135,7 @@ jobs:
         lambda: [fallback-ensapi]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
 

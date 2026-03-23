@@ -26,6 +26,7 @@ const rules = buildReferralProgramRulesPieSplit(
     address: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
   },
   new URL("https://example.com/rules"),
+  false,
 );
 
 const accurateAsOf = parseTimestamp("2025-11-30T23:59:59Z");

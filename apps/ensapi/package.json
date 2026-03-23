@@ -1,6 +1,6 @@
 {
   "name": "ensapi",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "private": true,
   "type": "module",
   "description": "ENSNode's ENS API",
@@ -23,7 +23,7 @@
   "dependencies": {
     "@ensdomains/ensjs": "^4.0.2",
     "@ensnode/datasources": "workspace:*",
-    "@ensnode/ensnode-schema": "workspace:*",
+    "@ensnode/ensdb-sdk": "workspace:*",
     "@ensnode/ensnode-sdk": "workspace:*",
     "@ensnode/ponder-subgraph": "workspace:*",
     "@hono/node-server": "^1.19.10",

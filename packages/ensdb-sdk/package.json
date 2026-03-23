@@ -1,0 +1,78 @@
+{
+  "name": "@ensnode/ensdb-sdk",
+  "version": "1.8.0",
+  "type": "module",
+  "description": "SDK for interacting with data in ENSDb",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/namehash/ensnode.git",
+    "directory": "packages/ensdb-sdk"
+  },
+  "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ensdb-sdk",
+  "keywords": [
+    "ENS",
+    "ENSNode",
+    "ENSDb"
+  ],
+  "exports": {
+    ".": "./src/index.ts",
+    "./ensindexer-abstract": "./src/ensindexer-abstract/index.ts",
+    "./ensnode": "./src/ensnode/index.ts"
+  },
+  "files": [
+    "dist",
+    "migrations"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": {
+        "import": {
+          "types": "./dist/index.d.ts",
+          "default": "./dist/index.js"
+        }
+      },
+      "./ensindexer-abstract": {
+        "import": {
+          "types": "./dist/ensindexer-abstract/index.d.ts",
+          "default": "./dist/ensindexer-abstract/index.js"
+        }
+      },
+      "./ensnode": {
+        "import": {
+          "types": "./dist/ensnode/index.d.ts",
+          "default": "./dist/ensnode/index.js"
+        }
+      }
+    },
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts"
+  },
+  "scripts": {
+    "prepublish": "tsup",
+    "lint": "biome check --write .",
+    "lint:ci": "biome ci",
+    "test": "vitest",
+    "typecheck": "tsgo --noEmit",
+    "drizzle-kit:generate": "drizzle-kit generate"
+  },
+  "peerDependencies": {
+    "@ensnode/ensnode-sdk": "workspace:*",
+    "drizzle-orm": "catalog:",
+    "ponder": "catalog:",
+    "viem": "catalog:"
+  },
+  "devDependencies": {
+    "@ensnode/ensnode-sdk": "workspace:*",
+    "@ensnode/shared-configs": "workspace:*",
+    "drizzle-kit": "0.31.10",
+    "drizzle-orm": "catalog:",
+    "ponder": "catalog:",
+    "tsup": "catalog:",
+    "typescript": "catalog:",
+    "viem": "catalog:",
+    "vitest": "catalog:"
+  }
+}

@@ -49,6 +49,7 @@ export const buildReferralProgramRulesPieSplit = (
   endTime: UnixTimestamp,
   subregistryId: AccountId,
   rulesUrl: URL,
+  areAwardsDistributed: boolean,
 ): ReferralProgramRulesPieSplit => {
   const result = {
     awardModel: ReferralProgramAwardModels.PieSplit,
@@ -58,6 +59,7 @@ export const buildReferralProgramRulesPieSplit = (
     endTime,
     subregistryId,
     rulesUrl,
+    areAwardsDistributed,
   } satisfies ReferralProgramRulesPieSplit;
 
   validateReferralProgramRulesPieSplit(result);

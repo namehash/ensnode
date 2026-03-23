@@ -7,6 +7,7 @@ import type {
   ReferrerEditionMetricsRevShareLimit,
   ReferrerEditionMetricsUnrankedRevShareLimit,
 } from "../edition-metrics";
+import type { ReferralProgramEditionSummaryRevShareLimit } from "../edition-summary";
 import type { ReferrerLeaderboardPageRevShareLimit } from "../leaderboard-page";
 import type {
   AwardedReferrerMetricsRevShareLimit,
@@ -16,6 +17,7 @@ import type { ReferralProgramRulesRevShareLimit } from "../rules";
 import type {
   SerializedAggregatedReferrerMetricsRevShareLimit,
   SerializedAwardedReferrerMetricsRevShareLimit,
+  SerializedReferralProgramEditionSummaryRevShareLimit,
   SerializedReferralProgramRulesRevShareLimit,
   SerializedReferrerEditionMetricsRankedRevShareLimit,
   SerializedReferrerEditionMetricsRevShareLimit,
@@ -39,6 +41,7 @@ export function serializeReferralProgramRulesRevShareLimit(
     endTime: rules.endTime,
     subregistryId: rules.subregistryId,
     rulesUrl: rules.rulesUrl.toString(),
+    areAwardsDistributed: rules.areAwardsDistributed,
     disqualifications: rules.disqualifications,
   };
 }
@@ -167,5 +170,21 @@ export function serializeReferrerLeaderboardPageRevShareLimit(
     pageContext: page.pageContext,
     status: page.status,
     accurateAsOf: page.accurateAsOf,
+  };
+}
+
+/**
+ * Serializes a {@link ReferralProgramEditionSummaryRevShareLimit} object.
+ */
+export function serializeReferralProgramEditionSummaryRevShareLimit(
+  summary: ReferralProgramEditionSummaryRevShareLimit,
+): SerializedReferralProgramEditionSummaryRevShareLimit {
+  return {
+    awardModel: summary.awardModel,
+    slug: summary.slug,
+    displayName: summary.displayName,
+    status: summary.status,
+    rules: serializeReferralProgramRulesRevShareLimit(summary.rules),
+    awardPoolRemaining: serializePriceUsdc(summary.awardPoolRemaining),
   };
 }

@@ -6,6 +6,7 @@ import type {
   ReferrerEditionMetricsRevShareLimit,
   ReferrerEditionMetricsUnrankedRevShareLimit,
 } from "../edition-metrics";
+import type { ReferralProgramEditionSummaryRevShareLimit } from "../edition-summary";
 import type { ReferrerLeaderboardPageRevShareLimit } from "../leaderboard-page";
 import type {
   AwardedReferrerMetricsRevShareLimit,
@@ -114,3 +115,12 @@ export interface SerializedReferrerEditionMetricsUnrankedRevShareLimit
 export type SerializedReferrerEditionMetricsRevShareLimit =
   | SerializedReferrerEditionMetricsRankedRevShareLimit
   | SerializedReferrerEditionMetricsUnrankedRevShareLimit;
+
+/**
+ * Serialized representation of {@link ReferralProgramEditionSummaryRevShareLimit}.
+ */
+export interface SerializedReferralProgramEditionSummaryRevShareLimit
+  extends Omit<ReferralProgramEditionSummaryRevShareLimit, "rules" | "awardPoolRemaining"> {
+  rules: SerializedReferralProgramRulesRevShareLimit;
+  awardPoolRemaining: SerializedPriceUsdc;
+}

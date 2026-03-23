@@ -13,6 +13,7 @@ import {
 
 import { normalizeAddress } from "../../../address";
 import {
+  makeBaseReferralProgramEditionSummarySchema,
   makeBaseReferralProgramRulesSchema,
   makeBaseReferrerLeaderboardPageSchema,
   makeReferralProgramStatusSchema,
@@ -215,6 +216,23 @@ export const makeReferrerEditionMetricsRevShareLimitSchema = (
     makeReferrerEditionMetricsRankedRevShareLimitSchema(valueLabel),
     makeReferrerEditionMetricsUnrankedRevShareLimitSchema(valueLabel),
   ]);
+
+/**
+ * Schema for {@link ReferralProgramEditionSummaryRevShareLimit}.
+ */
+export const makeReferralProgramEditionSummaryRevShareLimitSchema = (
+  valueLabel: string = "ReferralProgramEditionSummaryRevShareLimit",
+) =>
+  makeBaseReferralProgramEditionSummarySchema(valueLabel)
+    .safeExtend({
+      awardModel: z.literal(ReferralProgramAwardModels.RevShareLimit),
+      rules: makeReferralProgramRulesRevShareLimitSchema(`${valueLabel}.rules`),
+      awardPoolRemaining: makePriceUsdcSchema(`${valueLabel}.awardPoolRemaining`),
+    })
+    .refine((data) => data.awardModel === data.rules.awardModel, {
+      message: `${valueLabel}.awardModel must equal ${valueLabel}.rules.awardModel`,
+      path: ["awardModel"],
+    });
 
 /**
  * Schema for {@link ReferrerLeaderboardPageRevShareLimit}.

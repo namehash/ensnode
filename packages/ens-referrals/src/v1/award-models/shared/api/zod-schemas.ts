@@ -8,8 +8,8 @@ import {
   makeUrlSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
-import { ReferralProgramStatuses } from "../../../status";
 import { REFERRERS_PER_LEADERBOARD_PAGE_MAX } from "../leaderboard-page";
+import { ReferralProgramEditionStatuses } from "../status";
 
 /**
  * Loose base schema for {@link BaseReferralProgramRules}.
@@ -25,6 +25,7 @@ export const makeBaseReferralProgramRulesSchema = (valueLabel: string) =>
       endTime: makeUnixTimestampSchema(`${valueLabel}.endTime`),
       subregistryId: makeAccountIdSchema(`${valueLabel}.subregistryId`),
       rulesUrl: makeUrlSchema(`${valueLabel}.rulesUrl`),
+      areAwardsDistributed: z.boolean(),
     })
     .refine((data) => data.endTime >= data.startTime, {
       message: `${valueLabel}.endTime must be >= ${valueLabel}.startTime`,
@@ -53,10 +54,24 @@ export const makeReferrerLeaderboardPageContextSchema = (
 
 /**
  * Schema for referral program status field.
- * Validates that the status is one of: "Scheduled", "Active", or "Closed".
+ * Validates that the status is one of the values in {@link ReferralProgramEditionStatuses}.
  */
 export const makeReferralProgramStatusSchema = (_valueLabel: string = "status") =>
-  z.enum(ReferralProgramStatuses);
+  z.enum(ReferralProgramEditionStatuses);
+
+/**
+ * Loose base schema for {@link BaseReferralProgramEditionSummary}.
+ *
+ * Accepts any string for `rules.awardModel` to support forward-compatible parsing.
+ */
+export const makeBaseReferralProgramEditionSummarySchema = (valueLabel: string) =>
+  z.object({
+    awardModel: z.string(),
+    slug: z.string().min(1, `${valueLabel}.slug must not be empty`),
+    displayName: z.string().min(1, `${valueLabel}.displayName must not be empty`),
+    status: makeReferralProgramStatusSchema(`${valueLabel}.status`),
+    rules: makeBaseReferralProgramRulesSchema(`${valueLabel}.rules`),
+  });
 
 /**
  * Loose base schema for {@link BaseReferrerLeaderboardPage}.

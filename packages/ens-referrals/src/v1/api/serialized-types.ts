@@ -1,22 +1,25 @@
 import type {
+  SerializedReferralProgramEditionSummaryPieSplit,
   SerializedReferralProgramRulesPieSplit,
   SerializedReferrerEditionMetricsPieSplit,
   SerializedReferrerLeaderboardPagePieSplit,
 } from "../award-models/pie-split/api/serialized-types";
 import type {
+  SerializedReferralProgramEditionSummaryRevShareLimit,
   SerializedReferralProgramRulesRevShareLimit,
   SerializedReferrerEditionMetricsRevShareLimit,
   SerializedReferrerLeaderboardPageRevShareLimit,
 } from "../award-models/rev-share-limit/api/serialized-types";
-import type { ReferralProgramEditionConfig, ReferralProgramEditionSlug } from "../edition";
+import type { ReferralProgramEditionSlug } from "../edition";
 import type { ReferrerEditionMetrics } from "../edition-metrics";
+import type { ReferralProgramEditionSummary } from "../edition-summary";
 import type { ReferrerLeaderboardPage } from "../leaderboard-page";
 import type { ReferralProgramRules } from "../rules";
 import type {
-  ReferralProgramEditionConfigSetData,
-  ReferralProgramEditionConfigSetResponse,
-  ReferralProgramEditionConfigSetResponseError,
-  ReferralProgramEditionConfigSetResponseOk,
+  ReferralProgramEditionSummariesData,
+  ReferralProgramEditionSummariesResponse,
+  ReferralProgramEditionSummariesResponseError,
+  ReferralProgramEditionSummariesResponseOk,
   ReferrerLeaderboardPageResponse,
   ReferrerLeaderboardPageResponseError,
   ReferrerLeaderboardPageResponseOk,
@@ -69,12 +72,11 @@ export type SerializedReferrerLeaderboardPageResponse =
   | SerializedReferrerLeaderboardPageResponseError;
 
 /**
- * Serialized representation of {@link ReferralProgramEditionConfig}.
+ * Serialized representation of {@link ReferralProgramEditionSummary}.
  */
-export interface SerializedReferralProgramEditionConfig
-  extends Omit<ReferralProgramEditionConfig, "rules"> {
-  rules: SerializedReferralProgramRules;
-}
+export type SerializedReferralProgramEditionSummary =
+  | SerializedReferralProgramEditionSummaryPieSplit
+  | SerializedReferralProgramEditionSummaryRevShareLimit;
 
 /**
  * Serialized representation of referrer metrics data for requested editions.
@@ -109,32 +111,32 @@ export type SerializedReferrerMetricsEditionsResponse =
   | SerializedReferrerMetricsEditionsResponseError;
 
 /**
- * Serialized representation of {@link ReferralProgramEditionConfigSetData}.
+ * Serialized representation of {@link ReferralProgramEditionSummariesData}.
  */
-export interface SerializedReferralProgramEditionConfigSetData
-  extends Omit<ReferralProgramEditionConfigSetData, "editions"> {
-  editions: SerializedReferralProgramEditionConfig[];
+export interface SerializedReferralProgramEditionSummariesData
+  extends Omit<ReferralProgramEditionSummariesData, "editions"> {
+  editions: SerializedReferralProgramEditionSummary[];
 }
 
 /**
- * Serialized representation of {@link ReferralProgramEditionConfigSetResponseOk}.
+ * Serialized representation of {@link ReferralProgramEditionSummariesResponseOk}.
  */
-export interface SerializedReferralProgramEditionConfigSetResponseOk
-  extends Omit<ReferralProgramEditionConfigSetResponseOk, "data"> {
-  data: SerializedReferralProgramEditionConfigSetData;
+export interface SerializedReferralProgramEditionSummariesResponseOk
+  extends Omit<ReferralProgramEditionSummariesResponseOk, "data"> {
+  data: SerializedReferralProgramEditionSummariesData;
 }
 
 /**
- * Serialized representation of {@link ReferralProgramEditionConfigSetResponseError}.
+ * Serialized representation of {@link ReferralProgramEditionSummariesResponseError}.
  *
  * Note: All fields are already serializable, so this type is identical to the source type.
  */
-export type SerializedReferralProgramEditionConfigSetResponseError =
-  ReferralProgramEditionConfigSetResponseError;
+export type SerializedReferralProgramEditionSummariesResponseError =
+  ReferralProgramEditionSummariesResponseError;
 
 /**
- * Serialized representation of {@link ReferralProgramEditionConfigSetResponse}.
+ * Serialized representation of {@link ReferralProgramEditionSummariesResponse}.
  */
-export type SerializedReferralProgramEditionConfigSetResponse =
-  | SerializedReferralProgramEditionConfigSetResponseOk
-  | SerializedReferralProgramEditionConfigSetResponseError;
+export type SerializedReferralProgramEditionSummariesResponse =
+  | SerializedReferralProgramEditionSummariesResponseOk
+  | SerializedReferralProgramEditionSummariesResponseError;

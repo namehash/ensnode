@@ -143,21 +143,16 @@ describe("buildIndexedBlockranges()", () => {
     expect(result).toStrictEqual(new Map([[8453, buildBlockNumberRange(17571480, undefined)]]));
   });
 
-  it("throws when a required datasource is missing", () => {
+  it("skips datasources that do not exist in the namespace", () => {
     // Arrange
     maybeGetDatasourceMock.mockReturnValue(undefined);
 
-    const pluginsRequiredDatasourceNames = new Map([
-      [PluginName.Subgraph, [DatasourceNames.Seaport]],
-    ]);
+    const pluginsDatasourceNames = new Map([[PluginName.Subgraph, [DatasourceNames.Seaport]]]);
 
-    // Act + Assert
-    expect(() =>
-      buildIndexedBlockranges(ENSNamespaceIds.Mainnet, pluginsRequiredDatasourceNames),
-    ).toThrow(
-      new RegExp(
-        `Datasource ${DatasourceNames.Seaport} required by plugin ${PluginName.Subgraph} is not defined in namespace ${ENSNamespaceIds.Mainnet}`,
-      ),
-    );
+    // Act
+    const result = buildIndexedBlockranges(ENSNamespaceIds.Mainnet, pluginsDatasourceNames);
+
+    // Assert
+    expect(result).toStrictEqual(new Map());
   });
 });

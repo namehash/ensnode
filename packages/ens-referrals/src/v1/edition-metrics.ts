@@ -6,19 +6,20 @@ import type {
   ReferrerEditionMetricsUnrankedPieSplit,
 } from "./award-models/pie-split/edition-metrics";
 import { buildUnrankedReferrerMetricsPieSplit } from "./award-models/pie-split/metrics";
+import { calcReferralProgramEditionStatusPieSplit } from "./award-models/pie-split/status";
 import type {
   ReferrerEditionMetricsRankedRevShareLimit,
   ReferrerEditionMetricsRevShareLimit,
   ReferrerEditionMetricsUnrankedRevShareLimit,
 } from "./award-models/rev-share-limit/edition-metrics";
 import { buildUnrankedReferrerMetricsRevShareLimit } from "./award-models/rev-share-limit/metrics";
+import { calcReferralProgramEditionStatusRevShareLimit } from "./award-models/rev-share-limit/status";
 import {
   ReferrerEditionMetricsTypeIds,
   type ReferrerEditionMetricsUnrecognized,
 } from "./award-models/shared/edition-metrics";
 import { ReferralProgramAwardModels } from "./award-models/shared/rules";
 import type { ReferrerLeaderboard } from "./leaderboard";
-import { calcReferralProgramStatus } from "./status";
 
 /**
  * Referrer edition metrics data for a specific referrer address.
@@ -46,10 +47,12 @@ export const getReferrerEditionMetrics = (
   referrer: Address,
   leaderboard: ReferrerLeaderboard,
 ): ReferrerEditionMetrics => {
-  const status = calcReferralProgramStatus(leaderboard.rules, leaderboard.accurateAsOf);
-
   switch (leaderboard.awardModel) {
     case ReferralProgramAwardModels.PieSplit: {
+      const status = calcReferralProgramEditionStatusPieSplit(
+        leaderboard.rules,
+        leaderboard.accurateAsOf,
+      );
       const awardedReferrerMetrics = leaderboard.referrers.get(referrer);
       if (awardedReferrerMetrics) {
         return {
@@ -74,6 +77,11 @@ export const getReferrerEditionMetrics = (
     }
 
     case ReferralProgramAwardModels.RevShareLimit: {
+      const status = calcReferralProgramEditionStatusRevShareLimit(
+        leaderboard.rules,
+        leaderboard.accurateAsOf,
+        leaderboard.aggregatedMetrics,
+      );
       const awardedReferrerMetrics = leaderboard.referrers.get(referrer);
       if (awardedReferrerMetrics) {
         return {

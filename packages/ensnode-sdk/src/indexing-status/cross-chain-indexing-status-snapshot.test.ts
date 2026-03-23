@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import { RangeTypeIds } from "../shared/blockrange";
-import { earliestBlockRef, laterBlockRef, latestBlockRef } from "./block-refs.mock";
+import {
+  earlierBlockRef,
+  earliestBlockRef,
+  laterBlockRef,
+  latestBlockRef,
+} from "./block-refs.mock";
 import {
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshotBackfill,
@@ -12,6 +17,7 @@ import {
 import {
   buildCrossChainIndexingStatusSnapshotOmnichain,
   CrossChainIndexingStrategyIds,
+  getHighestKnownBlockTimestamp,
 } from "./cross-chain-indexing-status-snapshot";
 import {
   OmnichainIndexingStatusIds,
@@ -399,7 +405,7 @@ describe("Cross-chain Indexing Status Snapshot", () => {
       });
     });
 
-    it("throws when snapshotTime is below the highest known block timestamp", () => {
+    it("clamps snapshotTime up to highest known block timestamp when too low", () => {
       // arrange
       const chains = new Map([
         [
@@ -424,10 +430,124 @@ describe("Cross-chain Indexing Status Snapshot", () => {
 
       const snapshotTime = latestBlockRef.timestamp - 1;
 
-      // act & assert
-      expect(() =>
-        buildCrossChainIndexingStatusSnapshotOmnichain(omnichainSnapshot, snapshotTime),
-      ).toThrow("Invalid CrossChainIndexingStatusSnapshot");
+      // act
+      const result = buildCrossChainIndexingStatusSnapshotOmnichain(
+        omnichainSnapshot,
+        snapshotTime,
+      );
+
+      // assert - snapshotTime should be clamped to the highest known block timestamp
+      expect(result.snapshotTime).toBe(latestBlockRef.timestamp);
+    });
+  });
+
+  describe("getHighestKnownBlockTimestamp", () => {
+    it("returns startBlock timestamp for queued chains", () => {
+      const chains = [
+        {
+          chainStatus: ChainIndexingStatusIds.Queued,
+          config: {
+            rangeType: RangeTypeIds.LeftBounded,
+            startBlock: laterBlockRef,
+          },
+        } satisfies ChainIndexingStatusSnapshotQueued,
+      ];
+
+      expect(getHighestKnownBlockTimestamp(chains)).toBe(laterBlockRef.timestamp);
+    });
+
+    it("returns endBlock timestamp for bounded chains", () => {
+      const chains = [
+        {
+          chainStatus: ChainIndexingStatusIds.Completed,
+          config: {
+            rangeType: RangeTypeIds.Bounded,
+            startBlock: earliestBlockRef,
+            endBlock: latestBlockRef,
+          },
+          latestIndexedBlock: latestBlockRef,
+        } satisfies ChainIndexingStatusSnapshotCompleted,
+      ];
+
+      expect(getHighestKnownBlockTimestamp(chains)).toBe(latestBlockRef.timestamp);
+    });
+
+    it("returns latestKnownBlock timestamp for following chains", () => {
+      const chains = [
+        {
+          chainStatus: ChainIndexingStatusIds.Following,
+          config: {
+            rangeType: RangeTypeIds.LeftBounded,
+            startBlock: earliestBlockRef,
+          },
+          latestIndexedBlock: laterBlockRef,
+          latestKnownBlock: latestBlockRef,
+        } satisfies ChainIndexingStatusSnapshotFollowing,
+      ];
+
+      expect(getHighestKnownBlockTimestamp(chains)).toBe(latestBlockRef.timestamp);
+    });
+
+    it("returns backfillEndBlock timestamp for backfill chains", () => {
+      const chains = [
+        {
+          chainStatus: ChainIndexingStatusIds.Backfill,
+          config: {
+            rangeType: RangeTypeIds.LeftBounded,
+            startBlock: earliestBlockRef,
+          },
+          latestIndexedBlock: laterBlockRef,
+          backfillEndBlock: latestBlockRef,
+        } satisfies ChainIndexingStatusSnapshotBackfill,
+      ];
+
+      expect(getHighestKnownBlockTimestamp(chains)).toBe(latestBlockRef.timestamp);
+    });
+
+    it("returns the max across mixed-status multi-chain snapshots", () => {
+      const chains = [
+        {
+          chainStatus: ChainIndexingStatusIds.Queued,
+          config: {
+            rangeType: RangeTypeIds.LeftBounded,
+            startBlock: earliestBlockRef,
+          },
+        } satisfies ChainIndexingStatusSnapshotQueued,
+        {
+          chainStatus: ChainIndexingStatusIds.Completed,
+          config: {
+            rangeType: RangeTypeIds.Bounded,
+            startBlock: earliestBlockRef,
+            endBlock: laterBlockRef,
+          },
+          latestIndexedBlock: laterBlockRef,
+        } satisfies ChainIndexingStatusSnapshotCompleted,
+        {
+          chainStatus: ChainIndexingStatusIds.Following,
+          config: {
+            rangeType: RangeTypeIds.LeftBounded,
+            startBlock: earliestBlockRef,
+          },
+          latestIndexedBlock: laterBlockRef,
+          latestKnownBlock: latestBlockRef,
+        } satisfies ChainIndexingStatusSnapshotFollowing,
+        {
+          chainStatus: ChainIndexingStatusIds.Backfill,
+          config: {
+            rangeType: RangeTypeIds.LeftBounded,
+            startBlock: earliestBlockRef,
+          },
+          latestIndexedBlock: earlierBlockRef,
+          backfillEndBlock: laterBlockRef,
+        } satisfies ChainIndexingStatusSnapshotBackfill,
+      ];
+
+      // latestKnownBlock (from the Following chain) has the highest timestamp
+      expect(getHighestKnownBlockTimestamp(chains)).toBe(latestBlockRef.timestamp);
+    });
+
+    it("throws when chains array is empty", () => {
+      expect(() => getHighestKnownBlockTimestamp([])).toThrow("at least one chain is required");
     });
   });
 });

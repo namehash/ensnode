@@ -3,20 +3,22 @@ import config from "@/config";
 import { publicClients } from "ponder:api";
 
 import { buildIndexedBlockranges } from "@ensnode/ensnode-sdk";
-import { LocalPonderClient } from "@ensnode/ponder-sdk";
+import { deserializePonderAppContext, LocalPonderClient } from "@ensnode/ponder-sdk";
 
-import { getPluginsRequiredDatasourceNames } from "@/lib/plugin-helpers";
+import { getPluginsAllDatasourceNames } from "@/lib/plugin-helpers";
 
-const pluginsRequiredDatasourceNames = getPluginsRequiredDatasourceNames(config.plugins);
+if (!globalThis.PONDER_COMMON) {
+  throw new Error("PONDER_COMMON must be defined by Ponder at runtime as a global variable.");
+}
 
-const indexedBlockranges = buildIndexedBlockranges(
-  config.namespace,
-  pluginsRequiredDatasourceNames,
-);
+const ponderAppContext = deserializePonderAppContext(globalThis.PONDER_COMMON);
+const pluginsAllDatasourceNames = getPluginsAllDatasourceNames(config.plugins);
+const indexedBlockranges = buildIndexedBlockranges(config.namespace, pluginsAllDatasourceNames);
 
 export const localPonderClient = new LocalPonderClient(
   config.ensIndexerUrl,
   config.indexedChainIds,
   indexedBlockranges,
   publicClients,
+  ponderAppContext,
 );

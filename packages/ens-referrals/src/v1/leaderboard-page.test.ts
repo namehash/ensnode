@@ -32,6 +32,7 @@ describe("buildReferrerLeaderboardPageContext", () => {
           address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
         },
         rulesUrl: new URL("https://example.com/rules"),
+        areAwardsDistributed: false,
       },
       aggregatedMetrics: {
         grandTotalReferrals: 17,
@@ -120,6 +121,7 @@ describe("buildReferrerLeaderboardPageContext", () => {
           address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
         },
         rulesUrl: new URL("https://example.com/rules"),
+        areAwardsDistributed: false,
       },
       aggregatedMetrics: {
         grandTotalReferrals: 17,

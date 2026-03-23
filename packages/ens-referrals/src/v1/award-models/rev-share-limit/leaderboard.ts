@@ -14,7 +14,6 @@ import { SECONDS_PER_YEAR } from "../../time";
 import type { ReferralProgramAwardModels } from "../shared/rules";
 import type { AggregatedReferrerMetricsRevShareLimit } from "./aggregations";
 import { buildAggregatedReferrerMetricsRevShareLimit } from "./aggregations";
-import { compareEventIds } from "./checkpoint";
 import type { AwardedReferrerMetricsRevShareLimit } from "./metrics";
 import {
   buildAwardedReferrerMetricsRevShareLimit,
@@ -27,6 +26,7 @@ import {
   isReferrerQualifiedRevShareLimit,
   type ReferralProgramRulesRevShareLimit,
 } from "./rules";
+import { sortReferralEvents } from "./sort-referral-events";
 
 /**
  * Represents a leaderboard with the rev-share-limit award model for any number of referrers.
@@ -101,11 +101,8 @@ export const buildReferrerLeaderboardRevShareLimit = (
   rules: ReferralProgramRulesRevShareLimit,
   accurateAsOf: UnixTimestamp,
 ): ReferrerLeaderboardRevShareLimit => {
-  // 1. Sort events deterministically using the Ponder checkpoint ID.
-  //    The `id` encodes all ordering-relevant properties (blockTimestamp, chainId,
-  //    blockNumber, transactionIndex, eventIndex), so comparing IDs as bigints
-  //    (after zeroing the internal `eventType` digit) yields a total chronological order.
-  const sortedEvents = [...events].sort((a, b) => compareEventIds(a.id, b.id));
+  // 1. Sort events into chronological order by onchain execution order.
+  const sortedEvents = sortReferralEvents(events);
 
   // 2. Process events sequentially to run the race.
   const referrerStates = new Map<Address, ReferrerRaceState>();

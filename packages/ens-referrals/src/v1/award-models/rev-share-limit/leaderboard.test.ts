@@ -3,7 +3,10 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { parseTimestamp, parseUsdc, priceEth, priceUsdc } from "@ensnode/ensnode-sdk";
 
 import { SECONDS_PER_YEAR } from "../../time";
+import { buildReferrerLeaderboardPageContext } from "../shared/leaderboard-page";
+import { ReferralProgramEditionStatuses } from "../shared/status";
 import { buildReferrerLeaderboardRevShareLimit } from "./leaderboard";
+import { buildLeaderboardPageRevShareLimit } from "./leaderboard-page";
 import type { ReferralEvent } from "./referral-event";
 import type { ReferralProgramEditionDisqualification } from "./rules";
 import { buildReferralProgramRulesRevShareLimit } from "./rules";
@@ -27,7 +30,8 @@ const CHECKPOINT_PREFIX =
   "0000000000" + // blockTimestamp (10 chars)
   "0000000000000001" + // chainId (16 chars, mainnet = 1)
   "0000000000000001" + // blockNumber (16 chars)
-  "0000000000000000"; // transactionIndex (16 chars)
+  "0000000000000000" + // transactionIndex (16 chars)
+  "0"; // eventType (1 char)
 
 /**
  * Build test rules.
@@ -53,6 +57,7 @@ function buildTestRules(
     parseTimestamp("2026-12-31T23:59:59Z"),
     { chainId: 1, address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85" },
     new URL("https://example.com/rules"),
+    false,
     disqualifications,
   );
 }
@@ -70,7 +75,7 @@ function makeEvent(
 ): ReferralEvent {
   const counter = ++eventIdCounter;
   return {
-    id: opts.id ?? `${CHECKPOINT_PREFIX}0${String(counter).padStart(16, "0")}`,
+    id: opts.id ?? `${CHECKPOINT_PREFIX}${String(counter).padStart(16, "0")}`,
     referrer,
     timestamp,
     incrementalDuration,
@@ -308,21 +313,22 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
   });
 
   describe("Deterministic ordering within same timestamp", () => {
-    it("sorts by id as bigint (lower id wins)", () => {
-      // Both referrers have the same timestamp; ADDR_A has a lower checkpoint id.
+    it("sorts by id — event with lexicographically smaller id wins when timestamps are equal", () => {
+      // Both referrers have the same timestamp; ADDR_A has the smaller id and wins the race.
       // Pool = $2.50 — only enough for one.
-      // IDs differ only in their eventIndex (last 16 digits): 1 < 2, so ADDR_A wins.
-      const ID_EARLY = `${CHECKPOINT_PREFIX}00000000000000001`;
-      const ID_LATE = `${CHECKPOINT_PREFIX}00000000000000002`;
       const rules = buildTestRules(parseUsdc("2.5"));
       const events = [
-        { ...makeEvent(ADDR_B, 1000, SECONDS_PER_YEAR), id: ID_LATE },
-        { ...makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR), id: ID_EARLY },
+        makeEvent(ADDR_B, 1000, SECONDS_PER_YEAR, {
+          id: `${CHECKPOINT_PREFIX}${"1".padStart(16, "0")}`,
+        }),
+        makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR, {
+          id: `${CHECKPOINT_PREFIX}${"0".padStart(16, "0")}`,
+        }),
       ];
 
       const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
 
-      // ADDR_A has the lower id, should claim the pool first
+      // ADDR_A has the lower (earlier) id, should claim the pool first
       expect(result.referrers.get(ADDR_A)!.awardPoolApproxValue.amount).toBe(
         STANDARD_AWARD_1Y.amount,
       );
@@ -380,6 +386,24 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
       const ranks = [...result.referrers.values()].map((r) => r.rank);
       expect(ranks).toEqual([1, 2]);
+    });
+  });
+
+  describe("Edition status via leaderboard page", () => {
+    it("page status is Exhausted when pool is fully consumed within the active window", () => {
+      // Pool = $2.50 — just enough for one qualifying referrer
+      // ADDR_A qualifies at t=1000 (1 year), claims the full pool → awardPoolRemaining = $0
+      // accurateAsOf is within the active window (2026-06-01), so status must be Exhausted
+      const rules = buildTestRules(parseUsdc("2.5"));
+      const events = [makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR)];
+
+      const leaderboard = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
+      expect(leaderboard.aggregatedMetrics.awardPoolRemaining.amount).toBe(0n);
+
+      const pageContext = buildReferrerLeaderboardPageContext({ page: 1 }, leaderboard);
+      const page = buildLeaderboardPageRevShareLimit(pageContext, leaderboard);
+
+      expect(page.status).toBe(ReferralProgramEditionStatuses.Exhausted);
     });
   });
 

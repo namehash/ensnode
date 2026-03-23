@@ -1,0 +1,96 @@
+import config from "@/config";
+
+import { createDocumentationMiddleware } from "ponder-enrich-gql-docs-middleware";
+
+import * as schema from "@ensnode/ensdb-sdk";
+import { type Duration, hasSubgraphApiConfigSupport } from "@ensnode/ensnode-sdk";
+import { subgraphGraphQLMiddleware } from "@ensnode/ponder-subgraph";
+
+import { factory } from "@/lib/hono-factory";
+import { makeSubgraphApiDocumentation } from "@/lib/subgraph/api-documentation";
+import { filterSchemaByPrefix } from "@/lib/subgraph/filter-schema-by-prefix";
+import { fixContentLengthMiddleware } from "@/middleware/fix-content-length.middleware";
+import { makeIsRealtimeMiddleware } from "@/middleware/is-realtime.middleware";
+import { subgraphMetaMiddleware } from "@/middleware/subgraph-meta.middleware";
+import { thegraphFallbackMiddleware } from "@/middleware/thegraph-fallback.middleware";
+
+const MAX_REALTIME_DISTANCE_TO_RESOLVE: Duration = 10 * 60; // 10 minutes in seconds
+
+// generate a subgraph-specific subset of the schema
+const subgraphSchema = filterSchemaByPrefix("subgraph_", schema);
+
+const app = factory.createApp();
+
+// 503 if subgraph plugin not available
+app.use(async (c, next) => {
+  const prerequisite = hasSubgraphApiConfigSupport(config.ensIndexerPublicConfig);
+  if (!prerequisite.supported) {
+    return c.text(`Service Unavailable: ${prerequisite.reason}`, 503);
+  }
+
+  await next();
+});
+
+// inject c.var.isRealtime derived from MAX_REALTIME_DISTANCE_TO_RESOLVE
+app.use(makeIsRealtimeMiddleware("subgraph-api", MAX_REALTIME_DISTANCE_TO_RESOLVE));
+
+// fallback to The Graph based on c.var.isRealtime
+app.use(thegraphFallbackMiddleware);
+
+// hotfix content length after documentation injection
+app.use(fixContentLengthMiddleware);
+
+// inject api documentation into graphql introspection requests
+app.use(createDocumentationMiddleware(makeSubgraphApiDocumentation(), { path: "/subgraph" }));
+
+// inject _meta into the hono (and yoga) context for the subgraph middleware
+app.use(subgraphMetaMiddleware);
+
+// use subgraph middleware
+app.use(
+  subgraphGraphQLMiddleware({
+    databaseUrl: config.databaseUrl,
+    databaseSchema: config.databaseSchemaName,
+    schema: subgraphSchema,
+    // describes the polymorphic (interface) relationships in the schema
+    polymorphicConfig: {
+      types: {
+        DomainEvent: [
+          subgraphSchema.transfer,
+          subgraphSchema.newOwner,
+          subgraphSchema.newResolver,
+          subgraphSchema.newTTL,
+          subgraphSchema.wrappedTransfer,
+          subgraphSchema.nameWrapped,
+          subgraphSchema.nameUnwrapped,
+          subgraphSchema.fusesSet,
+          subgraphSchema.expiryExtended,
+        ],
+        RegistrationEvent: [
+          subgraphSchema.nameRegistered,
+          subgraphSchema.nameRenewed,
+          subgraphSchema.nameTransferred,
+        ],
+        ResolverEvent: [
+          subgraphSchema.addrChanged,
+          subgraphSchema.multicoinAddrChanged,
+          subgraphSchema.nameChanged,
+          subgraphSchema.abiChanged,
+          subgraphSchema.pubkeyChanged,
+          subgraphSchema.textChanged,
+          subgraphSchema.contenthashChanged,
+          subgraphSchema.interfaceChanged,
+          subgraphSchema.authorisationChanged,
+          subgraphSchema.versionChanged,
+        ],
+      },
+      fields: {
+        "Domain.events": "DomainEvent",
+        "Registration.events": "RegistrationEvent",
+        "Resolver.events": "ResolverEvent",
+      },
+    },
+  }),
+);
+
+export default app;
