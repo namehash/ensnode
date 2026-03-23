@@ -50,7 +50,7 @@ app.use(subgraphMetaMiddleware);
 app.use(
   subgraphGraphQLMiddleware({
     databaseUrl: config.databaseUrl,
-    databaseSchema: config.databaseSchemaName,
+    databaseSchema: config.ensIndexerSchemaName,
     schema: subgraphSchema,
     // describes the polymorphic (interface) relationships in the schema
     polymorphicConfig: {

@@ -1,8 +1,6 @@
 import { parse as parseConnectionString } from "pg-connection-string";
 import { prettifyError, z } from "zod/v4";
 
-import { DatabaseSchemaNameSchema } from "@ensnode/ensnode-sdk/internal";
-
 import type { EnsApiEnvironment } from "@/config/environment";
 import logger from "@/lib/logger";
 
@@ -24,9 +22,18 @@ export const DatabaseUrlSchema = z.string().refine(
   },
 );
 
+const EnsIndexerSchemaNameSchema = z
+  .string({
+    error: "ENSINDEXER_SCHEMA_NAME is required.",
+  })
+  .trim()
+  .min(1, {
+    error: "ENSINDEXER_SCHEMA_NAME is required and cannot be an empty string.",
+  });
+
 export const EnsDbConfigSchema = z.object({
   databaseUrl: DatabaseUrlSchema,
-  databaseSchemaName: DatabaseSchemaNameSchema,
+  ensIndexerSchemaName: EnsIndexerSchemaNameSchema,
 });
 
 export type EnsDbConfig = z.infer<typeof EnsDbConfigSchema>;
@@ -39,7 +46,7 @@ export type EnsDbConfig = z.infer<typeof EnsDbConfigSchema>;
 export function buildEnsDbConfigFromEnvironment(env: EnsApiEnvironment): EnsDbConfig {
   const ensDbConfig = EnsDbConfigSchema.safeParse({
     databaseUrl: env.DATABASE_URL,
-    databaseSchemaName: env.DATABASE_SCHEMA,
+    ensIndexerSchemaName: env.ENSINDEXER_SCHEMA_NAME,
   });
 
   if (!ensDbConfig.success) {

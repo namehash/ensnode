@@ -60,7 +60,7 @@ describe("buildConfigFromEnvironment", () => {
 
       ensIndexerPublicConfig: ENSINDEXER_PUBLIC_CONFIG,
       namespace: ENSINDEXER_PUBLIC_CONFIG.namespace,
-      databaseSchemaName: ENSINDEXER_PUBLIC_CONFIG.databaseSchemaName,
+      ensIndexerSchemaName: ENSINDEXER_PUBLIC_CONFIG.databaseSchemaName,
       rpcConfigs: new Map([
         [
           1,
@@ -152,7 +152,7 @@ describe("buildEnsApiPublicConfig", () => {
       databaseUrl: BASE_ENV.DATABASE_URL,
       ensIndexerPublicConfig: ENSINDEXER_PUBLIC_CONFIG,
       namespace: ENSINDEXER_PUBLIC_CONFIG.namespace,
-      databaseSchemaName: ENSINDEXER_PUBLIC_CONFIG.databaseSchemaName,
+      ensIndexerSchemaName: ENSINDEXER_PUBLIC_CONFIG.databaseSchemaName,
       rpcConfigs: new Map([
         [
           1,
@@ -183,7 +183,7 @@ describe("buildEnsApiPublicConfig", () => {
       databaseUrl: BASE_ENV.DATABASE_URL,
       ensIndexerPublicConfig: ENSINDEXER_PUBLIC_CONFIG,
       namespace: ENSINDEXER_PUBLIC_CONFIG.namespace,
-      databaseSchemaName: ENSINDEXER_PUBLIC_CONFIG.databaseSchemaName,
+      ensIndexerSchemaName: ENSINDEXER_PUBLIC_CONFIG.databaseSchemaName,
       rpcConfigs: new Map(),
       customReferralProgramEditionConfigSetUrl: undefined,
     };
@@ -216,7 +216,7 @@ describe("buildEnsApiPublicConfig", () => {
         isSubgraphCompatible: true,
       },
       namespace: ENSINDEXER_PUBLIC_CONFIG.namespace,
-      databaseSchemaName: ENSINDEXER_PUBLIC_CONFIG.databaseSchemaName,
+      ensIndexerSchemaName: ENSINDEXER_PUBLIC_CONFIG.databaseSchemaName,
       rpcConfigs: new Map(),
       customReferralProgramEditionConfigSetUrl: undefined,
       theGraphApiKey: "secret-api-key",

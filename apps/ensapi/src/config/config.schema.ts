@@ -91,7 +91,7 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
       theGraphApiKey: env.THEGRAPH_API_KEY,
       ensIndexerPublicConfig,
       namespace: ensIndexerPublicConfig.namespace,
-      databaseSchemaName: ensIndexerPublicConfig.databaseSchemaName,
+      ensIndexerSchemaName: ensIndexerPublicConfig.databaseSchemaName,
       rpcConfigs,
       customReferralProgramEditionConfigSetUrl: env.CUSTOM_REFERRAL_PROGRAM_EDITIONS,
     });
