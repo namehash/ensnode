@@ -7,7 +7,7 @@ import { defineConfig } from "astro/config";
 export default defineConfig({
   integrations: [react(), tailwind()],
   trailingSlash: "never",
-  
+
   vite: {
     ssr: {
       noExternal: ["@namehash/namekit-react"],
