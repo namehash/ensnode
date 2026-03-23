@@ -10,6 +10,7 @@ import { starlight } from "./config/integrations/starlight";
 
 export default defineConfig({
   site: "https://ensnode.io",
+  trailingSlash: "never",
   integrations: [mermaid(), starlight(), sitemap(), react(), mdx(), icon()],
   vite: {
     ssr: {

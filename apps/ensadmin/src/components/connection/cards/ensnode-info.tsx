@@ -202,7 +202,7 @@ function ENSNodeConfigCardContent({
       "Interpreted Labels" and "Interpreted Names". Therefore apps integrating with this ENSNode
       don't need to worry about receiving unnormalized labels from ENSNode that are not encoded
       labelhashes.{" "}
-      <ExternalLinkWithIcon href="https://ensnode.io/docs/reference/terminology/#interpreted-label">
+      <ExternalLinkWithIcon href="https://ensnode.io/docs/reference/terminology#interpreted-label">
         Learn more.
       </ExternalLinkWithIcon>
     </p>
@@ -543,7 +543,7 @@ function ENSNodeConfigCardContent({
                 labels across time. The label set version may be equal to or less than the highest
                 label set version offered by the connected ENSRainbow server.{" "}
                 <ExternalLinkWithIcon
-                  href={`https://ensnode.io/ensrainbow/concepts/label-sets-and-versioning/#client-behavior`}
+                  href={`https://ensnode.io/ensrainbow/concepts/label-sets-and-versioning#client-behavior`}
                 >
                   Learn more.
                 </ExternalLinkWithIcon>
@@ -598,7 +598,7 @@ function ENSNodeConfigCardContent({
               <p>
                 The total number of Rainbow Records.{" "}
                 <ExternalLinkWithIcon
-                  href={`https://ensnode.io/ensrainbow/concepts/glossary/#rainbow-record`}
+                  href={`https://ensnode.io/ensrainbow/concepts/glossary#rainbow-record`}
                 >
                   Learn more.
                 </ExternalLinkWithIcon>

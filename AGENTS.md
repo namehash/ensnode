@@ -75,4 +75,4 @@ Fail fast and loudly on invalid inputs.
 
 ## Workflow
 
-- Add a changeset when your PR includes a logical change that should bump versions or be communicated in release notes: https://ensnode.io/docs/contributing/prs/#changesets
+- Add a changeset when your PR includes a logical change that should bump versions or be communicated in release notes: https://ensnode.io/docs/contributing/prs#changesets
