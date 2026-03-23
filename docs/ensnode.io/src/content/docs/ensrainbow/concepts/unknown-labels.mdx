@@ -37,23 +37,19 @@ Unknown labels arise from the fundamental design of the ENS protocol:
 Unknown labels are a consequence of the ENS Registry not emitting the actual label in events when subnames are created. Only the labelhash is emitted.
 
 **Understanding the distinction:**
-- The ENS Registry contract ([`ENSRegistryWithFallback`](https://etherscan.io/address/0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e#code)) stores only the **node** for each registered name (the node is a 32-byte hash computed via `namehash`)
-- **However**, indexers don't generally read what's stored on-chain—they read the data from **events** emitted by contracts
-- The problem for indexers emerges from what's emitted in events, not what's stored
-
-**The root cause:** All subnames are created by calling the [`setSubnodeOwner`](https://etherscan.io/address/0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e#code#F1#L84) function on the Registry contract. When this happens, the Registry emits a `NewOwner` event for the newly created subname. However, this event contains a parameter misleadingly named `label` that is **not actually the label string**—it's the **labelhash** of the new subname's label:
+- The ENS Registry contract ([`ENSRegistryWithFallback`](https://etherscan.io/address/0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e#code)) stores the **node** for each name (the node is a 32-byte hash of a name computed via `namehash`)
+- All subnames in the ENS Registry are created by calling [`setSubnodeOwner`](https://etherscan.io/address/0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e#code#F1#L84). This emits a `NewOwner` event for the newly created subname. However, this event contains a parameter misleadingly named `label` that is **not actually the label string**—it's the **labelhash** of the new subname's label.
 
 ```solidity
 event NewOwner(bytes32 indexed node, bytes32 indexed label, address owner);
-//                                                       ^^^^^ This is actually a labelhash, not a label!
+//                                                   ^^^^^ This is actually a labelhash, not a label!
 ```
 
 **The critical issue:** When a subname is added to the Registry, the Registry doesn't emit the label of the newly created subname—only the labelhash of the new subname's label. This means:
 
-1. **Indexers only receive labelhashes**: When indexers listen to `NewOwner` events, they can only discover the labelhash, not the human-readable label
-2. **Contracts that wrap the Registry** (like `ETHRegistrarController` or `NameWrapper`) can emit additional events with the actual label string, making labels discoverable to indexers
-3. **Direct Registry calls** from contracts that don't wrap the Registry and emit the label separately will result in unknown labels for indexers
-4. **Historical data** from before label emission was standardized may not include label information
+1. **Indexers may only receive the labelhashes of subnames**, and are not guaranteed to always receive the human-readable label
+2. **Many subnames are created through contracts that wrap the Registry** (like `ETHRegistrarController` or `NameWrapper`). These contracts emit additional events with the actual label string, enabling indexers to automatically discover such labels
+3. **Direct Registry calls**, or calls from contracts that wrap the Registry but don't emit the subname label in a separate known event will result in unknown labels for indexers
 
 ### Shadow Registries
 
@@ -61,13 +57,12 @@ The unknown label problem also impacts **Shadow Registries**, which are essentia
 
 - **Basenames** on Base
 - **Lineanames** on Linea
-- Other ENS-compatible naming systems on L2s and alternative chains
 
-Shadow Registries inherit the same architectural design as the original ENS Registry, meaning they also only emit labelhashes (not labels) in their events. This means unknown labels are a challenge across the entire ecosystem of ENS-compatible naming systems, not just on Ethereum mainnet.
+Shadow Registries inherit the same architectural design as the original ENS Registry, meaning they also only emit labelhashes (not labels) in their events.
 
 ### When Labels Can Be Made Known
 
-In many cases, the labels that make up a name can be made **known** through several strategies:
+In many cases, the labels that make up a name can be **healed** (made **known**) through several strategies:
 
 - **Contract events**: Some contracts (like `ETHRegistrarController` or `NameWrapper`) emit the human-readable label in their events
 - **[Rainbow table](/ensrainbow/concepts/glossary#rainbow-table) lookups**: The human-readable label for a given labelhash can be determined via customizable and massive rainbow table lookups through ENSRainbow
@@ -130,7 +125,7 @@ The representation of labels can change over time as ENSRainbow's healing capabi
 This mutability means that:
 - Label representations should not be used as immutable identifiers
 - The node (computed via `namehash`) should always be used as the stable identifier for querying
-- For deterministic results, pin healing to a specific label set ID + version (see [Label Sets & Versioning](/ensrainbow/concepts/label-sets-and-versioning))
+- For deterministic indexing results across time, pin healing to a specific label set ID + version (see [Label Sets & Versioning](/ensrainbow/concepts/label-sets-and-versioning))
 
 ### Subgraph-Unindexable Labels
 
@@ -173,7 +168,7 @@ ENSRainbow mitigates the unknown labels problem by providing a **[healing](/ensr
 
 ### What is Healing?
 
-[**Healing**](/ensrainbow/concepts/glossary#heal) is the act of converting a labelhash back to its original label via a rainbow table lookup. ENSRainbow maintains pre-computed mappings of `labelhash → label` pairs (called [rainbow records](/ensrainbow/concepts/glossary#rainbow-record)) that enable this reverse lookup.
+[**Healing**](/ensrainbow/concepts/glossary#heal) is the act of converting a labelhash back to its original label via a rainbow table lookup or other special strategies implemented in ENSNode. ENSRainbow maintains pre-computed mappings of `labelhash → label` pairs (called [rainbow records](/ensrainbow/concepts/glossary#rainbow-record)) that enable this reverse lookup.
 
 ### How ENSRainbow Works
 
@@ -189,11 +184,11 @@ ENSRainbow operates as a **sidecar service** to ENSNode:
 When ENSNode encounters an unknown label during indexing:
 
 ```typescript
-// 1. ENSNode encounters labelhash: 0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
-// 2. ENSNode queries ENSRainbow: GET /v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
+// 1. ENSIndexer encounters labelhash: 0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
+// 2. ENSIndexer queries ENSRainbow: GET /v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
 // 3. ENSRainbow looks up in rainbow table
 // 4. If found: Returns { "status": "success", "label": "vitalik" }
-// 5. ENSNode stores the name as "vitalik.eth" instead of "[af2c...].eth"
+// 5. ENSIndexer stores the name as "vitalik.eth" instead of "[af2c...].eth"
 ```
 
 ### Coverage and Limitations
@@ -210,7 +205,7 @@ ENSRainbow uses a [**label set**](/ensrainbow/concepts/glossary#label-set) syste
 
 - **[Label Set ID](/ensrainbow/concepts/glossary#label-set-id)**: Identifies a collection of [rainbow records](/ensrainbow/concepts/glossary#rainbow-record) (e.g., `subgraph`, `discovery-a`)
 - **[Label Set Version](/ensrainbow/concepts/glossary#label-set-version)**: Monotonically increasing version numbers that enable incremental updates
-- **Deterministic Results**: Clients can pin to specific versions for reproducible healing results
+- **Deterministic Results**: ENSRainbow clients (such as ENSIndexer) can pin to specific versions for reproducible healing results
 
 This system enables:
 - **Extensibility**: New label sets can be created and published by anyone
