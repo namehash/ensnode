@@ -18,7 +18,7 @@ const ensRainbowApiClient = getENSRainbowApiClient();
  * transient failure (e.g. a momentary network blip or a brief ENSRainbow server hiccup) would
  * otherwise crash the ENSIndexer process, forcing a full restart and re-index from the last
  * checkpoint. To avoid this disproportionate impact, transient failures are retried with
- * exponential backoff (up to 3 retries, with a 1–30 second timeout range) before the error is thrown:
+ * exponential backoff (up to 3 retries, with backoff delays between 1 and 30 seconds between attempts) before the error is thrown:
  * - Network/fetch failure: heal() throws because the ENSRainbow service was unreachable.
  * - HealServerError (errorCode 500): ENSRainbow returned a transient server-side error.
  *
