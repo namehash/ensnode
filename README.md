@@ -140,7 +140,7 @@ ENSAdmin is a dashboard for ENSNode and the ENS protocol. See the [ENSAdmin docu
   </tr>
 </table>
 
-ENSIndexer is a Ponder-powered indexer for ENS across mulitple chains. See the [ENSIndexer documentation](https://ensnode.io/ensindexer) for more details.
+ENSIndexer is a Ponder-powered indexer for ENS across multiple chains. See the [ENSIndexer documentation](https://ensnode.io/ensindexer) for more details.
 
 ### [`apps/ensrainbow`](apps/ensrainbow)
 
