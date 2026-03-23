@@ -1,5 +1,24 @@
 # @ensnode/ensdb-sdk
 
+## 1.8.0
+
+### Minor Changes
+
+- [#1772](https://github.com/namehash/ensnode/pull/1772) [`5ce102e`](https://github.com/namehash/ensnode/commit/5ce102e11c7b891844b0762cffa45ade1a997e0f) Thanks [@tk-o](https://github.com/tk-o)! - Renamed `@ensnode/ensnode-schema` to `@ensnode/ensdb-sdk`.
+
+- [#1798](https://github.com/namehash/ensnode/pull/1798) [`f0007b4`](https://github.com/namehash/ensnode/commit/f0007b43a11645efc7efc3c9563f36254352c772) Thanks [@tk-o](https://github.com/tk-o)! - Moved `ensdb` module from ENSNode SDK into ENSDb SDK.
+
+- [#1778](https://github.com/namehash/ensnode/pull/1778) [`d6dd425`](https://github.com/namehash/ensnode/commit/d6dd4252f690daba13bf02aa53a1ef3e868c823e) Thanks [@tk-o](https://github.com/tk-o)! - Created isolated database schema definitions: ENSIndexer Schema and ENSNode Schema.
+
+- [#1779](https://github.com/namehash/ensnode/pull/1779) [`5ac81cb`](https://github.com/namehash/ensnode/commit/5ac81cb42ad3a4bf561d82c2dd628e85988240ef) Thanks [@tk-o](https://github.com/tk-o)! - Introduced toolkit for managing ENSDb migrations for ENSNode Schema.
+
+- [#1798](https://github.com/namehash/ensnode/pull/1798) [`f0007b4`](https://github.com/namehash/ensnode/commit/f0007b43a11645efc7efc3c9563f36254352c772) Thanks [@tk-o](https://github.com/tk-o)! - Introduced two client implementations for ENSDb: `EnsDbReader` and `EnsDbWriter`.
+
+### Patch Changes
+
+- Updated dependencies [[`f0007b4`](https://github.com/namehash/ensnode/commit/f0007b43a11645efc7efc3c9563f36254352c772), [`9ea8580`](https://github.com/namehash/ensnode/commit/9ea858055109eaf3a92d210f2b3d9170232a32e8)]:
+  - @ensnode/ensnode-sdk@1.8.0
+
 ## 1.7.0
 
 ## 1.6.0

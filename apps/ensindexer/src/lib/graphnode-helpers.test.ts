@@ -1,10 +1,21 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { LabelHash } from "@ensnode/ensnode-sdk";
 
 import { setupConfigMock } from "@/lib/__test__/mockConfig";
 
 setupConfigMock(); // setup config mock before importing dependent modules
+
+// Use real p-retry logic but with 0 timeouts so tests don't incur actual backoff delays.
+vi.mock("p-retry", async () => {
+  const { default: actualPRetry } = await vi.importActual<typeof import("p-retry")>("p-retry");
+  return {
+    default: (
+      fn: Parameters<typeof actualPRetry>[0],
+      options?: Parameters<typeof actualPRetry>[1],
+    ) => actualPRetry(fn, { ...options, minTimeout: 0, maxTimeout: 0 }),
+  };
+});
 
 // Mock fetch globally to prevent real network calls
 global.fetch = vi.fn();
@@ -131,5 +142,131 @@ describe("labelByLabelHash", () => {
       ), // 66 hex chars
     ).rejects.toThrow(/Invalid labelHash length/i);
     expect(fetch).not.toHaveBeenCalled();
+  });
+
+  describe("retry behavior", () => {
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    // Use unique labelHashes in each test to prevent LRU cache hits from other tests
+    // carrying over cacheable responses (HealSuccess, HealNotFoundError) and bypassing fetch.
+
+    it("retries on network/fetch failure and succeeds on a later attempt", async () => {
+      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+      (fetch as any)
+        .mockRejectedValueOnce(new Error("network error"))
+        .mockRejectedValueOnce(new Error("network error"))
+        .mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve({ status: "success", label: "nick" }),
+        });
+
+      const result = await labelByLabelHash(
+        "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" as LabelHash,
+      );
+
+      expect(result).toEqual("nick");
+      expect(fetch).toHaveBeenCalledTimes(3);
+      expect(warnSpy).toHaveBeenCalledTimes(2);
+    });
+
+    it("retries on HealServerError and succeeds on a later attempt", async () => {
+      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+      (fetch as any)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () =>
+            Promise.resolve({ status: "error", error: "Internal server error", errorCode: 500 }),
+        })
+        .mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve({ status: "success", label: "vitalik" }),
+        });
+
+      const result = await labelByLabelHash(
+        "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" as LabelHash,
+      );
+
+      expect(result).toEqual("vitalik");
+      expect(fetch).toHaveBeenCalledTimes(2);
+      expect(warnSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it("does not retry HealNotFoundError — returns null after a single call", async () => {
+      (fetch as any).mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ status: "error", error: "Label not found", errorCode: 404 }),
+      });
+
+      const result = await labelByLabelHash(
+        "0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc" as LabelHash,
+      );
+
+      expect(result).toBeNull();
+      expect(fetch).toHaveBeenCalledTimes(1);
+    });
+
+    it("does not retry HealBadRequestError — throws after a single call", async () => {
+      (fetch as any).mockResolvedValue({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            status: "error",
+            error: "Invalid labelhash",
+            errorCode: 400,
+          }),
+      });
+
+      await expect(
+        labelByLabelHash(
+          "0xdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd" as LabelHash,
+        ),
+      ).rejects.toThrow(/Invalid labelhash/i);
+      expect(fetch).toHaveBeenCalledTimes(1);
+    });
+
+    it("throws after exhausting retries on persistent network/fetch failures", async () => {
+      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+      (fetch as any).mockRejectedValue(new Error("network error"));
+
+      await expect(
+        labelByLabelHash(
+          "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" as LabelHash,
+        ),
+      ).rejects.toThrow(/ENSRainbow Heal Request Failed/i);
+
+      // 1 initial attempt + 3 retries = 4 total
+      expect(fetch).toHaveBeenCalledTimes(4);
+      expect(warnSpy).toHaveBeenCalledTimes(4);
+    });
+
+    it("throws after exhausting retries on persistent HealServerError responses", async () => {
+      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+      (fetch as any).mockResolvedValue({
+        ok: true,
+        json: () =>
+          Promise.resolve({ status: "error", error: "Internal server error", errorCode: 500 }),
+      });
+
+      const err = await labelByLabelHash(
+        "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" as LabelHash,
+      ).then(
+        () => null as unknown as Error,
+        (e: unknown) => e as Error,
+      );
+      expect(err).not.toBeNull();
+      expect(err!.message).toMatch(/Internal server error/i);
+      expect(err!.cause).toBeInstanceOf(Error);
+      expect((err!.cause as Error).message).toBe("Internal server error");
+
+      // 1 initial attempt + 3 retries = 4 total
+      expect(fetch).toHaveBeenCalledTimes(4);
+      expect(warnSpy).toHaveBeenCalledTimes(4);
+    });
   });
 });

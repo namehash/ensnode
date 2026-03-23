@@ -1,11 +1,8 @@
 import config from "@/config";
 
-import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
+import { type EnsRainbow, EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 
-/**
- * Get a {@link EnsRainbowApiClient} instance.
- */
-export function getENSRainbowApiClient() {
+export function getENSRainbowApiClient(): EnsRainbow.ApiClient {
   const ensRainbowApiClient = new EnsRainbowApiClient({
     endpointUrl: config.ensRainbowUrl,
     labelSet: config.labelSet,

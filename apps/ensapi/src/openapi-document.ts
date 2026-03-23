@@ -2,17 +2,17 @@ import { OpenAPIHono } from "@hono/zod-openapi";
 
 import { openapiMeta } from "@/openapi-meta";
 
-import * as amIRealtimeRoutes from "./handlers/amirealtime-api.routes";
-import * as ensanalyticsRoutes from "./handlers/ensanalytics-api.routes";
-import * as ensanalyticsV1Routes from "./handlers/ensanalytics-api-v1.routes";
-import * as ensnodeRoutes from "./handlers/ensnode-api.routes";
-import * as nameTokensRoutes from "./handlers/name-tokens-api.routes";
-import * as registrarActionsRoutes from "./handlers/registrar-actions-api.routes";
-import * as resolutionRoutes from "./handlers/resolution-api.routes";
+import * as nameTokensRoutes from "./handlers/api/explore/name-tokens-api.routes";
+import * as registrarActionsRoutes from "./handlers/api/explore/registrar-actions-api.routes";
+import * as realtimeRoutes from "./handlers/api/meta/realtime-api.routes";
+import * as statusRoutes from "./handlers/api/meta/status-api.routes";
+import * as resolutionRoutes from "./handlers/api/resolution/resolution-api.routes";
+import * as ensanalyticsRoutes from "./handlers/ensanalytics/ensanalytics-api.routes";
+import * as ensanalyticsV1Routes from "./handlers/ensanalytics/ensanalytics-api-v1.routes";
 
 const routeGroups = [
-  amIRealtimeRoutes,
-  ensnodeRoutes,
+  realtimeRoutes,
+  statusRoutes,
   ensanalyticsV1Routes,
   ensanalyticsRoutes,
   nameTokensRoutes,

@@ -10,7 +10,7 @@ import {
   serializeIndexingStatusResponse,
 } from "@ensnode/ensnode-sdk";
 
-import { ensDbClient } from "@/lib/ensdb-client/singleton";
+import { ensDbClient } from "@/lib/ensdb/singleton";
 
 const app = new Hono();
 

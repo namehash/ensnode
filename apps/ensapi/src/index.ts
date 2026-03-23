@@ -12,19 +12,18 @@ import { referralProgramEditionConfigSetCache } from "@/cache/referral-program-e
 import { referrerLeaderboardCache } from "@/cache/referrer-leaderboard.cache";
 import { redactEnsApiConfig } from "@/config/redact";
 import { errorResponse } from "@/lib/handlers/error-response";
-import { factory } from "@/lib/hono-factory";
+import { createApp } from "@/lib/hono-factory";
 import { sdk } from "@/lib/instrumentation";
 import logger from "@/lib/logger";
-import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 import { generateOpenApi31Document } from "@/openapi-document";
 
-import amIRealtimeApi from "./handlers/amirealtime-api";
-import ensanalyticsApi from "./handlers/ensanalytics-api";
-import ensanalyticsApiV1 from "./handlers/ensanalytics-api-v1";
-import ensNodeApi from "./handlers/ensnode-api";
-import subgraphApi from "./handlers/subgraph-api";
+import realtimeApi from "./handlers/api/meta/realtime-api";
+import apiRouter from "./handlers/api/router";
+import ensanalyticsApi from "./handlers/ensanalytics/ensanalytics-api";
+import ensanalyticsApiV1 from "./handlers/ensanalytics/ensanalytics-api-v1";
+import subgraphApi from "./handlers/subgraph/subgraph-api";
 
-const app = factory.createApp();
+const app = createApp();
 
 // set the X-ENSNode-Version header to the current version
 app.use(async (ctx, next) => {
@@ -37,9 +36,6 @@ app.use(cors({ origin: "*" }));
 
 // include automatic OpenTelemetry instrumentation for incoming requests
 app.use(otel());
-
-// add ENSIndexer Indexing Status Middleware to all routes for convenience
-app.use(indexingStatusMiddleware);
 
 // host welcome page
 app.get("/", (c) =>
@@ -60,7 +56,7 @@ app.get("/", (c) =>
 );
 
 // use ENSNode HTTP API at /api
-app.route("/api", ensNodeApi);
+app.route("/api", apiRouter);
 
 // use Subgraph GraphQL API at /subgraph
 app.route("/subgraph", subgraphApi);
@@ -72,7 +68,8 @@ app.route("/ensanalytics", ensanalyticsApi);
 app.route("/v1/ensanalytics", ensanalyticsApiV1);
 
 // use Am I Realtime API at /amirealtime
-app.route("/amirealtime", amIRealtimeApi);
+// NOTE: this is legacy endpoint and will be deleted in future. one should use /api/realtime instead
+app.route("/amirealtime", realtimeApi);
 
 // serve pre-generated OpenAPI 3.1 document
 const openApi31Document = generateOpenApi31Document();
