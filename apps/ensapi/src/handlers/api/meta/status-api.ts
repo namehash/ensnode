@@ -10,10 +10,11 @@ import {
 
 import { buildEnsApiPublicConfig } from "@/config/config.schema";
 import { createApp } from "@/lib/hono-factory";
+import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 
 import { getConfigRoute, getIndexingStatusRoute } from "./status-api.routes";
 
-const app = createApp();
+const app = createApp({ middlewares: [indexingStatusMiddleware] });
 
 app.openapi(getConfigRoute, async (c) => {
   const ensApiPublicConfig = buildEnsApiPublicConfig(config);
@@ -21,11 +22,6 @@ app.openapi(getConfigRoute, async (c) => {
 });
 
 app.openapi(getIndexingStatusRoute, async (c) => {
-  // context must be set by the required middleware
-  if (c.var.indexingStatus === undefined) {
-    throw new Error(`Invariant(indexing-status): indexingStatusMiddleware required`);
-  }
-
   if (c.var.indexingStatus instanceof Error) {
     return c.json(
       serializeEnsApiIndexingStatusResponse({

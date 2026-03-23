@@ -6,10 +6,11 @@ import * as schema from "@ensnode/ensdb-sdk";
 import { type Duration, hasSubgraphApiConfigSupport } from "@ensnode/ensnode-sdk";
 import { subgraphGraphQLMiddleware } from "@ensnode/ponder-subgraph";
 
-import { factory } from "@/lib/hono-factory";
+import { createApp } from "@/lib/hono-factory";
 import { makeSubgraphApiDocumentation } from "@/lib/subgraph/api-documentation";
 import { filterSchemaByPrefix } from "@/lib/subgraph/filter-schema-by-prefix";
 import { fixContentLengthMiddleware } from "@/middleware/fix-content-length.middleware";
+import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 import { makeIsRealtimeMiddleware } from "@/middleware/is-realtime.middleware";
 import { subgraphMetaMiddleware } from "@/middleware/subgraph-meta.middleware";
 import { thegraphFallbackMiddleware } from "@/middleware/thegraph-fallback.middleware";
@@ -19,7 +20,7 @@ const MAX_REALTIME_DISTANCE_TO_RESOLVE: Duration = 10 * 60; // 10 minutes in sec
 // generate a subgraph-specific subset of the schema
 const subgraphSchema = filterSchemaByPrefix("subgraph_", schema);
 
-const app = factory.createApp();
+const app = createApp();
 
 // 503 if subgraph plugin not available
 app.use(async (c, next) => {
@@ -30,6 +31,9 @@ app.use(async (c, next) => {
 
   await next();
 });
+
+// inject c.var.indexingStatus
+app.use(indexingStatusMiddleware);
 
 // inject c.var.isRealtime derived from MAX_REALTIME_DISTANCE_TO_RESOLVE
 app.use(makeIsRealtimeMiddleware("subgraph-api", MAX_REALTIME_DISTANCE_TO_RESOLVE));

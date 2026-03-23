@@ -11,6 +11,7 @@ import { resolvePrimaryNames } from "@/lib/resolution/multichain-primary-name-re
 import { resolveReverse } from "@/lib/resolution/reverse-resolution";
 import { runWithTrace } from "@/lib/tracing/tracing-api";
 import { canAccelerateMiddleware } from "@/middleware/can-accelerate.middleware";
+import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 import { makeIsRealtimeMiddleware } from "@/middleware/is-realtime.middleware";
 
 import {
@@ -25,12 +26,13 @@ import {
  */
 const MAX_REALTIME_DISTANCE_TO_ACCELERATE: Duration = 60; // 1 minute in seconds
 
-const app = createApp();
-
-// inject c.var.isRealtime derived from MAX_REALTIME_DISTANCE_TO_ACCELERATE
-app.use(makeIsRealtimeMiddleware("resolution-api", MAX_REALTIME_DISTANCE_TO_ACCELERATE));
-// inject c.var.canAccelerate derived from that c.var.isRealtime
-app.use(canAccelerateMiddleware);
+const app = createApp({
+  middlewares: [
+    indexingStatusMiddleware,
+    makeIsRealtimeMiddleware("resolution-api", MAX_REALTIME_DISTANCE_TO_ACCELERATE),
+    canAccelerateMiddleware,
+  ],
+});
 
 /**
  * Example queries for /records:
@@ -45,11 +47,6 @@ app.use(canAccelerateMiddleware);
  * GET /records/example.eth&name=true&addresses=60,0&texts=avatar,com.twitter
  */
 app.openapi(resolveRecordsRoute, async (c) => {
-  // context must be set by the required middleware
-  if (c.var.canAccelerate === undefined) {
-    throw new Error(`Invariant(resolution-api): canAccelerateMiddleware required`);
-  }
-
   const { name } = c.req.valid("param");
   const { selection, trace: showTrace, accelerate } = c.req.valid("query");
   const canAccelerate = c.var.canAccelerate;
@@ -82,11 +79,6 @@ app.openapi(resolveRecordsRoute, async (c) => {
  * GET /primary-name/0x1234...abcd/0
  */
 app.openapi(resolvePrimaryNameRoute, async (c) => {
-  // context must be set by the required middleware
-  if (c.var.canAccelerate === undefined) {
-    throw new Error(`Invariant(resolution-api): canAccelerateMiddleware required`);
-  }
-
   const { address, chainId } = c.req.valid("param");
   const { trace: showTrace, accelerate } = c.req.valid("query");
   const canAccelerate = c.var.canAccelerate;
@@ -116,11 +108,6 @@ app.openapi(resolvePrimaryNameRoute, async (c) => {
  * GET /primary-names/0x1234...abcd?chainIds=1,10,8453
  */
 app.openapi(resolvePrimaryNamesRoute, async (c) => {
-  // context must be set by the required middleware
-  if (c.var.canAccelerate === undefined) {
-    throw new Error(`Invariant(resolution-api): canAccelerateMiddleware required`);
-  }
-
   const { address } = c.req.valid("param");
   const { chainIds, trace: showTrace, accelerate } = c.req.valid("query");
   const canAccelerate = c.var.canAccelerate;

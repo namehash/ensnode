@@ -17,21 +17,17 @@ import {
 import { createApp } from "@/lib/hono-factory";
 import { findRegisteredNameTokensForDomain } from "@/lib/name-tokens/find-name-tokens-for-domain";
 import { getIndexedSubregistries } from "@/lib/name-tokens/get-indexed-subregistries";
+import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 import { nameTokensApiMiddleware } from "@/middleware/name-tokens.middleware";
 
 import { getNameTokensRoute } from "./name-tokens-api.routes";
 
-const app = createApp();
+const app = createApp({ middlewares: [indexingStatusMiddleware, nameTokensApiMiddleware] });
 
 const indexedSubregistries = getIndexedSubregistries(
   config.namespace,
   config.ensIndexerPublicConfig.plugins as PluginName[],
 );
-
-// Middleware managing access to Name Tokens API route.
-// It makes the route available if all prerequisites are met,
-// and if not returns the appropriate HTTP 503 (Service Unavailable) error.
-app.use(nameTokensApiMiddleware);
 
 /**
  * Factory function for creating a 404 Name Tokens Not Indexed error response
@@ -48,21 +44,6 @@ const makeNameTokensNotIndexedResponse = (
 });
 
 app.openapi(getNameTokensRoute, async (c) => {
-  // Invariant: context must be set by the required middleware
-  if (c.var.indexingStatus === undefined) {
-    return c.json(
-      serializeNameTokensResponse({
-        responseCode: NameTokensResponseCodes.Error,
-        errorCode: NameTokensResponseErrorCodes.IndexingStatusUnsupported,
-        error: {
-          message: "Name Tokens API is not available yet",
-          details: "Indexing status middleware is required but not initialized.",
-        },
-      }),
-      503,
-    );
-  }
-
   // Check if Indexing Status resolution failed.
   if (c.var.indexingStatus instanceof Error) {
     return c.json(

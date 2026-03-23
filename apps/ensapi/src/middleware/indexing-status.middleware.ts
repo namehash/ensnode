@@ -7,7 +7,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { indexingStatusCache } from "@/cache/indexing-status.cache";
-import { factory } from "@/lib/hono-factory";
+import { factory, producing } from "@/lib/hono-factory";
 
 /**
  * Type definition for the indexing status middleware context passed to downstream middleware and handlers.
@@ -39,18 +39,21 @@ export type IndexingStatusMiddlewareVariables = {
  *   continue generating new {@link RealtimeIndexingStatusProjection} containing updated worst-case distances
  *   to downstream middleware and handlers.
  */
-export const indexingStatusMiddleware = factory.createMiddleware(async (c, next) => {
-  const indexingStatus = await indexingStatusCache.read();
+export const indexingStatusMiddleware = producing(
+  ["indexingStatus"],
+  factory.createMiddleware(async (c, next) => {
+    const indexingStatus = await indexingStatusCache.read();
 
-  if (indexingStatus instanceof Error) {
-    // if indexingStatus was never fetched (and cached), propagate error to consumers
-    c.set("indexingStatus", indexingStatus);
-  } else {
-    // otherwise, build realtime indexing status projection
-    const now = getUnixTime(new Date());
-    const realtimeProjection = createRealtimeIndexingStatusProjection(indexingStatus, now);
-    c.set("indexingStatus", realtimeProjection);
-  }
+    if (indexingStatus instanceof Error) {
+      // if indexingStatus was never fetched (and cached), propagate error to consumers
+      c.set("indexingStatus", indexingStatus);
+    } else {
+      // otherwise, build realtime indexing status projection
+      const now = getUnixTime(new Date());
+      const realtimeProjection = createRealtimeIndexingStatusProjection(indexingStatus, now);
+      c.set("indexingStatus", realtimeProjection);
+    }
 
-  await next();
-});
+    await next();
+  }),
+);
