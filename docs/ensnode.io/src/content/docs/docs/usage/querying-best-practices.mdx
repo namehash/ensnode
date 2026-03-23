@@ -144,7 +144,7 @@ For more details, see [Subgraph Compatibility](/docs/concepts/what-is-the-ens-su
 
 ### When `SUBGRAPH_COMPAT=true`
 
-ENSNode may return unnormalized labels as [Subgraph Interpreted Labels](/docs/reference/terminology/#subgraph-interpreted-label) associated with indexed names. It is important to note that **ENSNode clients should never attempt to normalize labels returned by ENSNode**. This is because when ENSNode returns an unnormalized label, that label is associated with a specific node that has been indexed. Normalizing an unnormalized label in this context would represent a different node.
+ENSNode may return unnormalized labels as [Subgraph Interpreted Labels](/docs/reference/terminology#subgraph-interpreted-label) associated with indexed names. It is important to note that **ENSNode clients should never attempt to normalize labels returned by ENSNode**. This is because when ENSNode returns an unnormalized label, that label is associated with a specific node that has been indexed. Normalizing an unnormalized label in this context would represent a different node.
 
 There are effectively two distinct query patterns to consider:
 
@@ -155,7 +155,7 @@ An ENSNode client is permitted to validate that all labels returned by ENSNode a
 
 ### When `SUBGRAPH_COMPAT=false` (default)
 
-By default, ENSNode is configured to use [Interpreted Labels](/docs/reference/terminology/#interpreted-label) instead of [Subgraph Interpreted Labels](/docs/reference/terminology/#subgraph-interpreted-label), which helps avoid edge cases related to null bytes, full-stop characters (periods), or exotic unicode characters. When names are returned from any of the ENSNode APIs, including the Subgraph-compatible GraphQL API, names will be [Interpreted Names](/docs/reference/terminology/#interpreted-name)
+By default, ENSNode is configured to use [Interpreted Labels](/docs/reference/terminology#interpreted-label) instead of [Subgraph Interpreted Labels](/docs/reference/terminology#subgraph-interpreted-label), which helps avoid edge cases related to null bytes, full-stop characters (periods), or exotic unicode characters. When names are returned from any of the ENSNode APIs, including the Subgraph-compatible GraphQL API, names will be [Interpreted Names](/docs/reference/terminology#interpreted-name)
 
 ## Calculating the Node for Names that contain Encoded LabelHashes
 
