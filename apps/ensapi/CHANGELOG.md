@@ -1,5 +1,38 @@
 # ensapi
 
+## 1.8.0
+
+### Minor Changes
+
+- [#1744](https://github.com/namehash/ensnode/pull/1744) [`9429530`](https://github.com/namehash/ensnode/commit/9429530dd7966735252e6216b2769ebb6941c987) Thanks [@shrugs](https://github.com/shrugs)! - ENSNode GraphQL API: `Registration.start` is now available, indicating the start timestamp of the Registration.
+
+- [#1758](https://github.com/namehash/ensnode/pull/1758) [`f276efe`](https://github.com/namehash/ensnode/commit/f276efe9c48361a330bfcc4bc6f045c6ed9963d2) Thanks [@shrugs](https://github.com/shrugs)! - The ENSv2 Plugin can now be safely activated for ENSv1-only namespaces (ex: 'mainnet', 'sepolia').
+
+- [#1730](https://github.com/namehash/ensnode/pull/1730) [`5c64d89`](https://github.com/namehash/ensnode/commit/5c64d8976fdaf93cd9f9256b93b5216b34d48a90) Thanks [@shrugs](https://github.com/shrugs)! - The `subgraph` and `ensv2` plugins can now be activated in parallel.
+
+- [#1761](https://github.com/namehash/ensnode/pull/1761) [`337ef4b`](https://github.com/namehash/ensnode/commit/337ef4b54e62acd973df7120aa2b213399b1a42b) Thanks [@shrugs](https://github.com/shrugs)! - Introduces integration testing for the ENSv2 Plugin and GraphQL API against the ENSv2 devnet.
+
+- [#1744](https://github.com/namehash/ensnode/pull/1744) [`9429530`](https://github.com/namehash/ensnode/commit/9429530dd7966735252e6216b2769ebb6941c987) Thanks [@shrugs](https://github.com/shrugs)! - ENSNode GraphQL API: Add `where` filters to all `*.events` connections (`Domain.events`, `Resolver.events`, `Permissions.events`, `Account.events`). Supports filtering by `selector_in`, `timestamp_gte`, `timestamp_lte`, and `from` (where applicable). Also adds `Account.events` field to find events by transaction sender.
+
+- [#1733](https://github.com/namehash/ensnode/pull/1733) [`10b368a`](https://github.com/namehash/ensnode/commit/10b368a052e24d165327b8b0f97ef952699e924b) Thanks [@shrugs](https://github.com/shrugs)! - ENSNode GraphQL API: `ENSv1Domain.rootRegistryOwner` is now available, indicating the owner of the Domain's node within the ENSv1 Registry contract.
+
+- [#1744](https://github.com/namehash/ensnode/pull/1744) [`9429530`](https://github.com/namehash/ensnode/commit/9429530dd7966735252e6216b2769ebb6941c987) Thanks [@shrugs](https://github.com/shrugs)! - ENSNode GraphQL API: `Account.events` now provides the set of Events for which this Account is the sender (i.e. `Transaction.from`).
+
+### Patch Changes
+
+- [#1787](https://github.com/namehash/ensnode/pull/1787) [`4838dc7`](https://github.com/namehash/ensnode/commit/4838dc7825d92e2e6e3d1fef3843f913c870ef60) Thanks [@sevenzing](https://github.com/sevenzing)! - API file handlers rearrange, making them grouped by open api tags. Moving /amirealtime to /api/realtime and keeping old endpoint for backward compatibility.
+
+- [#1780](https://github.com/namehash/ensnode/pull/1780) [`0bb79fc`](https://github.com/namehash/ensnode/commit/0bb79fc601a43ea35dfdeed2afe91e24bbc6b5fd) Thanks [@Goader](https://github.com/Goader)! - Add `Exhausted` and `AwardsReview` referral program statuses; add `areAwardsDistributed` to base rules; enrich `/editions` with runtime `status` and `awardPoolRemaining` per edition.
+
+- [#1742](https://github.com/namehash/ensnode/pull/1742) [`0bde568`](https://github.com/namehash/ensnode/commit/0bde56873f5cba6ee8bcfa18534a6026b8649bbd) Thanks [@Goader](https://github.com/Goader)! - Provide deterministic sorting of registrar actions by their execution order.
+
+- Updated dependencies [[`5ce102e`](https://github.com/namehash/ensnode/commit/5ce102e11c7b891844b0762cffa45ade1a997e0f), [`0bde568`](https://github.com/namehash/ensnode/commit/0bde56873f5cba6ee8bcfa18534a6026b8649bbd), [`f0007b4`](https://github.com/namehash/ensnode/commit/f0007b43a11645efc7efc3c9563f36254352c772), [`d6dd425`](https://github.com/namehash/ensnode/commit/d6dd4252f690daba13bf02aa53a1ef3e868c823e), [`0bb79fc`](https://github.com/namehash/ensnode/commit/0bb79fc601a43ea35dfdeed2afe91e24bbc6b5fd), [`5ac81cb`](https://github.com/namehash/ensnode/commit/5ac81cb42ad3a4bf561d82c2dd628e85988240ef), [`f0007b4`](https://github.com/namehash/ensnode/commit/f0007b43a11645efc7efc3c9563f36254352c772), [`9ea8580`](https://github.com/namehash/ensnode/commit/9ea858055109eaf3a92d210f2b3d9170232a32e8)]:
+  - @ensnode/ensdb-sdk@1.8.0
+  - @namehash/ens-referrals@1.8.0
+  - @ensnode/ensnode-sdk@1.8.0
+  - @ensnode/datasources@1.8.0
+  - @ensnode/ponder-subgraph@1.8.0
+
 ## 1.7.0
 
 ### Minor Changes
