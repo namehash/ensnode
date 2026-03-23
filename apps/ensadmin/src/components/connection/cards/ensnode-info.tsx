@@ -294,7 +294,7 @@ function ENSNodeConfigCardContent({
             v{ensApiPublicConfig.version}
           </p>
         }
-        docsLink={new URL("https://ensnode.io/ensapi/")}
+        docsLink={new URL("https://ensnode.io/ensapi")}
       >
         <InfoCardItems>
           <InfoCardItem label="Database" value={<p className={cardItemValueStyles}>Postgres</p>} />
@@ -380,7 +380,7 @@ function ENSNodeConfigCardContent({
             v{ensIndexerPublicConfig.versionInfo.ensDb}
           </p>
         }
-        docsLink={new URL("https://ensnode.io/ensdb/")}
+        docsLink={new URL("https://ensnode.io/ensdb")}
       >
         <InfoCardItems>
           <InfoCardItem label="Database" value={<p className={cardItemValueStyles}>Postgres</p>} />
@@ -407,7 +407,7 @@ function ENSNodeConfigCardContent({
             v{ensIndexerPublicConfig.versionInfo.ensIndexer}
           </p>
         }
-        docsLink={new URL("https://ensnode.io/ensindexer/")}
+        docsLink={new URL("https://ensnode.io/ensindexer")}
       >
         <InfoCardItems>
           <InfoCardItem label="Database" value={<p className={cardItemValueStyles}>Postgres</p>} />
@@ -564,7 +564,7 @@ function ENSNodeConfigCardContent({
             v{ensIndexerPublicConfig.ensRainbowPublicConfig.version}
           </p>
         }
-        docsLink={new URL("https://ensnode.io/ensrainbow/")}
+        docsLink={new URL("https://ensnode.io/ensrainbow")}
       >
         <InfoCardItems>
           <InfoCardItem
@@ -579,7 +579,7 @@ function ENSNodeConfigCardContent({
               <p>
                 The labelset id and highest labelset version offered by the ENSRainbow server.{" "}
                 <ExternalLinkWithIcon
-                  href={`https://ensnode.io/ensrainbow/concepts/label-sets-and-versioning/`}
+                  href={`https://ensnode.io/ensrainbow/concepts/label-sets-and-versioning`}
                 >
                   Learn more.
                 </ExternalLinkWithIcon>

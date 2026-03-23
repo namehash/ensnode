@@ -2,7 +2,7 @@
 
 React hooks and providers for the ENSNode API. This package provides a React-friendly interface to the ENSNode SDK with automatic caching, loading states, and error handling. **TanStack Query is handled automatically** - no setup required unless you want custom configuration.
 
-Learn more about [ENSNode](https://ensnode.io/) from [the ENSNode docs](https://ensnode.io/docs/).
+Learn more about [ENSNode](https://ensnode.io/) from [the ENSNode docs](https://ensnode.io/docs).
 
 ## Installation
 
