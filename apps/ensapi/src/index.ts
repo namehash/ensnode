@@ -12,7 +12,7 @@ import { referralProgramEditionConfigSetCache } from "@/cache/referral-program-e
 import { referrerLeaderboardCache } from "@/cache/referrer-leaderboard.cache";
 import { redactEnsApiConfig } from "@/config/redact";
 import { errorResponse } from "@/lib/handlers/error-response";
-import { factory } from "@/lib/hono-factory";
+import { createApp } from "@/lib/hono-factory";
 import { sdk } from "@/lib/instrumentation";
 import logger from "@/lib/logger";
 import { generateOpenApi31Document } from "@/openapi-document";
@@ -23,7 +23,7 @@ import ensanalyticsApi from "./handlers/ensanalytics/ensanalytics-api";
 import ensanalyticsApiV1 from "./handlers/ensanalytics/ensanalytics-api-v1";
 import subgraphApi from "./handlers/subgraph/subgraph-api";
 
-const app = factory.createApp();
+const app = createApp();
 
 // set the X-ENSNode-Version header to the current version
 app.use(async (ctx, next) => {

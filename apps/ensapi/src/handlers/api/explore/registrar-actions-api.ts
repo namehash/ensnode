@@ -148,7 +148,7 @@ app.openapi(getRegistrarActionsRoute, async (c) => {
 app.openapi(getRegistrarActionsByParentNodeRoute, async (c) => {
   try {
     if (c.var.indexingStatus instanceof Error) {
-      throw new Error("Invariant violation: indexingStatus should be validated by middleware");
+      throw new Error("Indexing status has not been loaded yet");
     }
 
     const { parentNode } = c.req.valid("param");

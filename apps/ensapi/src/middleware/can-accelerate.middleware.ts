@@ -38,7 +38,7 @@ export const canAccelerateMiddleware = producing(
     if (config.ensIndexerPublicConfig.plugins.includes(PluginName.ENSv2)) {
       if (!didWarnCannotAccelerateENSv2) {
         logger.warn(
-          `ENSApi is currently unable to accelerate Resolution API requests while indexing ENSv2. Protocol Acceleration is DISABLED.`,
+          `ENSApi is temporarily unable to accelerate Resolution API requests while indexing ENSv2. Protocol Acceleration is DISABLED.`,
         );
 
         didWarnCannotAccelerateENSv2 = true;

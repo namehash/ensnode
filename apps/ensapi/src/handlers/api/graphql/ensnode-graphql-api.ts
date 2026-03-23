@@ -2,9 +2,9 @@ import config from "@/config";
 
 import { hasGraphqlApiConfigSupport } from "@ensnode/ensnode-sdk";
 
-import { factory } from "@/lib/hono-factory";
+import { createApp } from "@/lib/hono-factory";
 
-const app = factory.createApp();
+const app = createApp();
 
 // 503 if ensv2 plugin not available
 app.use(async (c, next) => {
