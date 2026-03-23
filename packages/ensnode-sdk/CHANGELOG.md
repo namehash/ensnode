@@ -1,5 +1,18 @@
 # @ensnode/ensnode-sdk
 
+## 1.8.0
+
+### Minor Changes
+
+- [#1798](https://github.com/namehash/ensnode/pull/1798) [`f0007b4`](https://github.com/namehash/ensnode/commit/f0007b43a11645efc7efc3c9563f36254352c772) Thanks [@tk-o](https://github.com/tk-o)! - Moved `ensdb` module from ENSNode SDK into ENSDb SDK.
+
+### Patch Changes
+
+- [#1766](https://github.com/namehash/ensnode/pull/1766) [`9ea8580`](https://github.com/namehash/ensnode/commit/9ea858055109eaf3a92d210f2b3d9170232a32e8) Thanks [@shrugs](https://github.com/shrugs)! - Fixes issue with derivation of `EnsIndexerConfig.indexedChainIds` in plugins that conditionally index multiple chains (ex: 'protocol-acceleration').
+
+- Updated dependencies []:
+  - @ensnode/datasources@1.8.0
+
 ## 1.7.0
 
 ### Minor Changes

@@ -1,5 +1,18 @@
 # @namehash/ens-referrals
 
+## 1.8.0
+
+### Minor Changes
+
+- [#1780](https://github.com/namehash/ensnode/pull/1780) [`0bb79fc`](https://github.com/namehash/ensnode/commit/0bb79fc601a43ea35dfdeed2afe91e24bbc6b5fd) Thanks [@Goader](https://github.com/Goader)! - Add `Exhausted` and `AwardsReview` referral program statuses; add `areAwardsDistributed` to base rules; enrich `/editions` with runtime `status` and `awardPoolRemaining` per edition.
+
+### Patch Changes
+
+- [#1742](https://github.com/namehash/ensnode/pull/1742) [`0bde568`](https://github.com/namehash/ensnode/commit/0bde56873f5cba6ee8bcfa18534a6026b8649bbd) Thanks [@Goader](https://github.com/Goader)! - Simplify how rev-share-limit leaderboard race sorting achieves deterministic sorting by execution order.
+
+- Updated dependencies [[`f0007b4`](https://github.com/namehash/ensnode/commit/f0007b43a11645efc7efc3c9563f36254352c772), [`9ea8580`](https://github.com/namehash/ensnode/commit/9ea858055109eaf3a92d210f2b3d9170232a32e8)]:
+  - @ensnode/ensnode-sdk@1.8.0
+
 ## 1.7.0
 
 ### Minor Changes

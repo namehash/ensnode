@@ -12,6 +12,7 @@ import type {
   LocalChainIndexingMetrics,
   LocalPonderIndexingMetrics,
 } from "./local-indexing-metrics";
+import { PonderAppCommands, type PonderAppContext } from "./ponder-app-context";
 
 /**
  * Local Ponder Client
@@ -69,17 +70,26 @@ export class LocalPonderClient extends PonderClient {
   private cachedPublicClients: Map<ChainId, CachedPublicClient>;
 
   /**
+   * Ponder App Context
+   *
+   * The internal context of the local Ponder app.
+   */
+  private ponderAppContext: PonderAppContext;
+
+  /**
    * @param localPonderAppUrl URL of the local Ponder app to connect to.
    * @param indexedChainIds Configured indexed chain IDs which are used to validate and filter the Ponder app metadata to only include entries for indexed chains.
    * @param indexedBlockranges Configured indexing blockrange for each indexed chain.
    * @param ponderPublicClients All cached public clients provided by the local Ponder app
    *                            (may include non-indexed chains).
+   * @param ponderAppContext The internal context of the local Ponder app.
    */
   constructor(
     localPonderAppUrl: URL,
     indexedChainIds: Set<ChainId>,
     indexedBlockranges: Map<ChainId, BlockNumberRangeWithStartBlock>,
     ponderPublicClients: Record<ChainIdString, CachedPublicClient>,
+    ponderAppContext: PonderAppContext,
   ) {
     super(localPonderAppUrl);
 
@@ -103,6 +113,8 @@ export class LocalPonderClient extends PonderClient {
       cachedPublicClients,
       "Cached Public Clients",
     );
+
+    this.ponderAppContext = ponderAppContext;
   }
 
   /**
@@ -168,6 +180,13 @@ export class LocalPonderClient extends PonderClient {
     });
 
     return localMetrics;
+  }
+
+  /**
+   * Indicates whether the local Ponder app is running in dev mode.
+   */
+  get isInDevMode(): boolean {
+    return this.ponderAppContext.command === PonderAppCommands.Dev;
   }
 
   /**

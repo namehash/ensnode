@@ -11,6 +11,7 @@ import {
   type OmnichainIndexingStatusSnapshot,
   validateEnsIndexerPublicConfigCompatibility,
 } from "@ensnode/ensnode-sdk";
+import type { LocalPonderClient } from "@ensnode/ponder-sdk";
 
 import type { IndexingStatusBuilder } from "@/lib/indexing-status-builder/indexing-status-builder";
 import type { PublicConfigBuilder } from "@/lib/public-config-builder/public-config-builder";
@@ -51,18 +52,28 @@ export class EnsDbWriterWorker {
   private publicConfigBuilder: PublicConfigBuilder;
 
   /**
+   * Local Ponder Client instance
+   *
+   * Used to get local Ponder app command.
+   */
+  private localPonderClient: LocalPonderClient;
+
+  /**
    * @param ensDbClient ENSDb Writer instance used by the worker to interact with ENSDb.
    * @param publicConfigBuilder ENSIndexer Public Config Builder instance used by the worker to read ENSIndexer Public Config.
    * @param indexingStatusBuilder Indexing Status Builder instance used by the worker to read ENSIndexer Indexing Status.
+   * @param localPonderClient Local Ponder Client instance, used to get local Ponder app command.
    */
   constructor(
     ensDbClient: EnsDbWriter,
     publicConfigBuilder: PublicConfigBuilder,
     indexingStatusBuilder: IndexingStatusBuilder,
+    localPonderClient: LocalPonderClient,
   ) {
     this.ensDbClient = ensDbClient;
     this.publicConfigBuilder = publicConfigBuilder;
     this.indexingStatusBuilder = indexingStatusBuilder;
+    this.localPonderClient = localPonderClient;
   }
 
   /**
@@ -133,14 +144,16 @@ export class EnsDbWriterWorker {
    * - stored config in ENSDb, if available, and
    * - in-memory config from ENSIndexer Client.
    *
-   * If, and only if, a stored config is available in ENSDb, then the function
-   * validates the compatibility of the in-memory config object against
-   * the stored one. Validation criteria are defined in the function body.
+   * If a stored config exists **and** the local Ponder app is **not** in dev
+   * mode, the in-memory config is validated for compatibility against the
+   * stored one. Validation is skipped if the local Ponder app is in dev mode,
+   * allowing to override the stored config in ENSDb with the current in-memory
+   * config, without having to keep them compatible.
    *
-   * @returns In-memory config object, if the validation is successful or
-   *          if there is no stored config.
-   * @throws Error if the in-memory config object cannot be fetched or,
-   *         got fetched and is incompatible with the stored config object.
+   * @returns The in-memory config when validation passes or no stored config
+   *          exists.
+   * @throws Error if either fetch fails, or if the in-memory config is
+   *         incompatible with the stored config.
    */
   private async getValidatedEnsIndexerPublicConfig(): Promise<EnsIndexerPublicConfig> {
     /**
@@ -181,8 +194,12 @@ export class EnsDbWriterWorker {
     }
 
     // Validate in-memory config object compatibility with the stored one,
-    // if the stored one is available
-    if (storedConfig) {
+    // if the stored one is available.
+    // The validation is skipped if the local Ponder app is running in dev mode.
+    // This is to improve the development experience during ENSIndexer
+    // development, by allowing to override the stored config in ENSDb with
+    // the current in-memory config, without having to keep them compatible.
+    if (storedConfig && !this.localPonderClient.isInDevMode) {
       try {
         validateEnsIndexerPublicConfigCompatibility(storedConfig, inMemoryConfig);
       } catch (error) {
