@@ -74,10 +74,10 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
         return config;
       },
       {
-        retries: 3,
+        retries: 13, // This allows for a total of over 1 hour of retries with the exponential backoff strategy
         onFailedAttempt: ({ error, attemptNumber, retriesLeft }) => {
           logger.info(
-            `ENSIndexer Config fetch attempt ${attemptNumber} failed (${error.message}). ${retriesLeft} retries left.`,
+            `ENSIndexer Public Config fetch attempt ${attemptNumber} failed (${error.message}). ${retriesLeft} retries left.`,
           );
         },
       },
