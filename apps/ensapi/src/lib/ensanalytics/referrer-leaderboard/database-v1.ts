@@ -7,10 +7,9 @@ import {
 import { and, asc, count, desc, eq, gte, isNotNull, lte, ne, sql, sum } from "drizzle-orm";
 import { type Address, zeroAddress } from "viem";
 
-import * as schema from "@ensnode/ensdb-sdk";
 import { deserializeDuration, formatAccountId, priceEth } from "@ensnode/ensnode-sdk";
 
-import { db } from "@/lib/db";
+import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import logger from "@/lib/logger";
 
 /**
@@ -38,35 +37,35 @@ export const getReferrerMetrics = async (
    */
 
   try {
-    const records = await db
+    const records = await ensDb
       .select({
-        referrer: schema.registrarActions.decodedReferrer,
+        referrer: ensIndexerSchema.registrarActions.decodedReferrer,
         totalReferrals: count().as("total_referrals"),
-        totalIncrementalDuration: sum(schema.registrarActions.incrementalDuration).as(
+        totalIncrementalDuration: sum(ensIndexerSchema.registrarActions.incrementalDuration).as(
           "total_incremental_duration",
         ),
         // Note: Using raw SQL for COALESCE because Drizzle doesn't natively support it yet.
         // See: https://github.com/drizzle-team/drizzle-orm/issues/3708
         totalRevenueContribution:
-          sql<string>`COALESCE(SUM(${schema.registrarActions.total}), 0)`.as(
+          sql<string>`COALESCE(SUM(${ensIndexerSchema.registrarActions.total}), 0)`.as(
             "total_revenue_contribution",
           ),
       })
-      .from(schema.registrarActions)
+      .from(ensIndexerSchema.registrarActions)
       .where(
         and(
           // Filter by timestamp range
-          gte(schema.registrarActions.timestamp, BigInt(rules.startTime)),
-          lte(schema.registrarActions.timestamp, BigInt(rules.endTime)),
+          gte(ensIndexerSchema.registrarActions.timestamp, BigInt(rules.startTime)),
+          lte(ensIndexerSchema.registrarActions.timestamp, BigInt(rules.endTime)),
           // Filter by decodedReferrer not null
-          isNotNull(schema.registrarActions.decodedReferrer),
+          isNotNull(ensIndexerSchema.registrarActions.decodedReferrer),
           // Filter by decodedReferrer not zero address
-          ne(schema.registrarActions.decodedReferrer, zeroAddress),
+          ne(ensIndexerSchema.registrarActions.decodedReferrer, zeroAddress),
           // Filter by subregistryId matching the provided subregistryId
-          eq(schema.registrarActions.subregistryId, formatAccountId(rules.subregistryId)),
+          eq(ensIndexerSchema.registrarActions.subregistryId, formatAccountId(rules.subregistryId)),
         ),
       )
-      .groupBy(schema.registrarActions.decodedReferrer)
+      .groupBy(ensIndexerSchema.registrarActions.decodedReferrer)
       .orderBy(desc(sql`total_incremental_duration`));
 
     // Type assertion: The WHERE clause in the query above guarantees non-null values for:
@@ -106,31 +105,31 @@ export const getReferrerMetrics = async (
  */
 export const getReferralEvents = async (rules: ReferralProgramRules): Promise<ReferralEvent[]> => {
   try {
-    const records = await db
+    const records = await ensDb
       .select({
-        id: schema.registrarActions.id,
-        referrer: schema.registrarActions.decodedReferrer,
-        timestamp: schema.registrarActions.timestamp,
-        incrementalDuration: schema.registrarActions.incrementalDuration,
+        id: ensIndexerSchema.registrarActions.id,
+        referrer: ensIndexerSchema.registrarActions.decodedReferrer,
+        timestamp: ensIndexerSchema.registrarActions.timestamp,
+        incrementalDuration: ensIndexerSchema.registrarActions.incrementalDuration,
         // Note: Using raw SQL for COALESCE because Drizzle doesn't natively support it yet.
         // See: https://github.com/drizzle-team/drizzle-orm/issues/3708
-        total: sql<string>`COALESCE(${schema.registrarActions.total}, 0)`.as("total"),
+        total: sql<string>`COALESCE(${ensIndexerSchema.registrarActions.total}, 0)`.as("total"),
       })
-      .from(schema.registrarActions)
+      .from(ensIndexerSchema.registrarActions)
       .where(
         and(
           // Filter by timestamp range
-          gte(schema.registrarActions.timestamp, BigInt(rules.startTime)),
-          lte(schema.registrarActions.timestamp, BigInt(rules.endTime)),
+          gte(ensIndexerSchema.registrarActions.timestamp, BigInt(rules.startTime)),
+          lte(ensIndexerSchema.registrarActions.timestamp, BigInt(rules.endTime)),
           // Filter by decodedReferrer not null
-          isNotNull(schema.registrarActions.decodedReferrer),
+          isNotNull(ensIndexerSchema.registrarActions.decodedReferrer),
           // Filter by decodedReferrer not zero address
-          ne(schema.registrarActions.decodedReferrer, zeroAddress),
+          ne(ensIndexerSchema.registrarActions.decodedReferrer, zeroAddress),
           // Filter by subregistryId matching the provided subregistryId
-          eq(schema.registrarActions.subregistryId, formatAccountId(rules.subregistryId)),
+          eq(ensIndexerSchema.registrarActions.subregistryId, formatAccountId(rules.subregistryId)),
         ),
       )
-      .orderBy(asc(schema.registrarActions.id));
+      .orderBy(asc(ensIndexerSchema.registrarActions.id));
 
     // Type assertion: All fields in NonNullRecord are guaranteed non-null:
     // 1. `referrer` is guaranteed non-null by isNotNull WHERE filter

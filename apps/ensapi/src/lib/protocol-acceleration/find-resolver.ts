@@ -25,7 +25,7 @@ import {
   type NormalizedName,
 } from "@ensnode/ensnode-sdk";
 
-import { db } from "@/lib/db";
+import { ensDb } from "@/lib/ensdb/singleton";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/instrumentation/auto-span";
 
 type FindResolverResult =
@@ -212,7 +212,7 @@ async function findResolverWithIndex(
           // doesn't exist in its own storage, it directs the lookup to RegistryOld. We must encode
           // this logic here, so that the active resolver of unmigrated nodes can be correctly identified.
           // https://github.com/ensdomains/ens-contracts/blob/be53b9c25be5b2c7326f524bbd34a3939374ab1f/contracts/registry/ENSRegistryWithFallback.sol#L19
-          const records = await db.query.domainResolverRelation.findMany({
+          const records = await ensDb.query.domainResolverRelation.findMany({
             where: (t, { inArray, and, or, eq }) =>
               and(
                 or(

@@ -23,6 +23,13 @@ import type {
 } from "./serialize/ensnode-metadata";
 
 /**
+ * Re-export the ENSDb Drizzle Client type for external use in building
+ * custom ENSDb queries with proper typing of the "concrete" ENSIndexer Schema
+ * from the ENSDbReader instance.
+ */
+export type { EnsDbDrizzleClient } from "../lib/drizzle";
+
+/**
  * ENSDb Reader
  *
  * Enables read-only querying of an ENSDb instance, including data spanning
@@ -68,7 +75,7 @@ export class EnsDbReader<
   constructor(ensDbConnectionString: string, ensIndexerSchemaName: string) {
     const { concreteEnsIndexerSchema, ensNodeSchema } =
       buildIndividualEnsDbSchemas<ConcreteEnsIndexerSchema>(ensIndexerSchemaName);
-    const ensDbDrizzleClient = buildEnsDbDrizzleClient(
+    const ensDbDrizzleClient = buildEnsDbDrizzleClient<ConcreteEnsIndexerSchema>(
       ensDbConnectionString,
       concreteEnsIndexerSchema,
     );

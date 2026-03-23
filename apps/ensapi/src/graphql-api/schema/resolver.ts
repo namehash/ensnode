@@ -4,7 +4,6 @@ import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@poth
 import { and, eq } from "drizzle-orm";
 import { namehash } from "viem";
 
-import * as schema from "@ensnode/ensdb-sdk";
 import {
   makePermissionsId,
   makeResolverRecordsId,
@@ -26,7 +25,7 @@ import { EventRef, EventsWhereInput } from "@/graphql-api/schema/event";
 import { NameOrNodeInput } from "@/graphql-api/schema/name-or-node";
 import { PermissionsRef, type PermissionsUserResource } from "@/graphql-api/schema/permissions";
 import { ResolverRecordsRef } from "@/graphql-api/schema/resolver-records";
-import { db } from "@/lib/db";
+import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 
 /**
  * Note that this indexed Resolver entity represents not _all_ Resolver contracts that exist onchain,
@@ -43,7 +42,7 @@ import { db } from "@/lib/db";
 
 export const ResolverRef = builder.loadableObjectRef("Resolver", {
   load: (ids: ResolverId[]) =>
-    db.query.resolver.findMany({
+    ensDb.query.resolver.findMany({
       where: (t, { inArray }) => inArray(t.id, ids),
     }),
   toKey: getModelId,
@@ -87,19 +86,19 @@ ResolverRef.implement({
       type: ResolverRecordsRef,
       resolve: (parent, args, context) => {
         const scope = and(
-          eq(schema.resolverRecords.chainId, parent.chainId),
-          eq(schema.resolverRecords.address, parent.address),
+          eq(ensIndexerSchema.resolverRecords.chainId, parent.chainId),
+          eq(ensIndexerSchema.resolverRecords.address, parent.address),
         );
 
         return lazyConnection({
-          totalCount: () => db.$count(schema.resolverRecords, scope),
+          totalCount: () => ensDb.$count(ensIndexerSchema.resolverRecords, scope),
           connection: () =>
             resolveCursorConnection(
               { ...ID_PAGINATED_CONNECTION_ARGS, args },
               ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-                db.query.resolverRecords.findMany({
-                  where: and(scope, paginateBy(schema.resolverRecords.id, before, after)),
-                  orderBy: orderPaginationBy(schema.resolverRecords.id, inverted),
+                ensDb.query.resolverRecords.findMany({
+                  where: and(scope, paginateBy(ensIndexerSchema.resolverRecords.id, before, after)),
+                  orderBy: orderPaginationBy(ensIndexerSchema.resolverRecords.id, inverted),
                   limit,
                   with: { textRecords: true, addressRecords: true },
                 }),
@@ -130,7 +129,7 @@ ResolverRef.implement({
       type: DedicatedResolverMetadataRef,
       nullable: true,
       resolve: async (parent, args, context) =>
-        db.query.permissionsUser.findFirst({
+        ensDb.query.permissionsUser.findFirst({
           where: (t, { eq, and }) =>
             and(
               eq(t.chainId, parent.chainId),
@@ -171,8 +170,8 @@ ResolverRef.implement({
       resolve: (parent, args) =>
         resolveFindEvents(args, {
           through: {
-            table: schema.resolverEvent,
-            scope: eq(schema.resolverEvent.resolverId, parent.id),
+            table: ensIndexerSchema.resolverEvent,
+            scope: eq(ensIndexerSchema.resolverEvent.resolverId, parent.id),
           },
         }),
     }),

@@ -20,7 +20,7 @@ import {
   type DomainsOrderBy,
 } from "@/graphql-api/schema/domain";
 import type { OrderDirection } from "@/graphql-api/schema/order-direction";
-import { db } from "@/lib/db";
+import { ensDb } from "@/lib/ensdb/singleton";
 import { makeLogger } from "@/lib/logger";
 
 import { DomainCursors } from "./domain-cursor";
@@ -97,7 +97,7 @@ export function resolveFindDomains(
 
   return lazyConnection({
     totalCount: () =>
-      db
+      ensDb
         .with(domains)
         .select({ count: count() })
         .from(domains)
@@ -126,7 +126,7 @@ export function resolveFindDomains(
           const afterCursor = after ? DomainCursors.decode(after) : undefined;
 
           // build query with pagination constraints
-          const query = db
+          const query = ensDb
             .with(domains)
             .select()
             .from(domains)

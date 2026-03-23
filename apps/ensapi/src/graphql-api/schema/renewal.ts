@@ -3,11 +3,11 @@ import type { RenewalId } from "@ensnode/ensnode-sdk";
 import { builder } from "@/graphql-api/builder";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
 import { EventRef } from "@/graphql-api/schema/event";
-import { db } from "@/lib/db";
+import { ensDb } from "@/lib/ensdb/singleton";
 
 export const RenewalRef = builder.loadableObjectRef("Renewal", {
   load: (ids: RenewalId[]) =>
-    db.query.renewal.findMany({
+    ensDb.query.renewal.findMany({
       where: (t, { inArray }) => inArray(t.id, ids),
     }),
   toKey: getModelId,

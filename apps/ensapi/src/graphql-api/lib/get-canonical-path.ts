@@ -2,7 +2,6 @@ import config from "@/config";
 
 import { sql } from "drizzle-orm";
 
-import * as schema from "@ensnode/ensdb-sdk";
 import {
   type CanonicalPath,
   type DomainId,
@@ -13,7 +12,7 @@ import {
   ROOT_NODE,
 } from "@ensnode/ensnode-sdk";
 
-import { db } from "@/lib/db";
+import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 
 const MAX_DEPTH = 16;
 const ENSv2_ROOT_REGISTRY_ID = maybeGetENSv2RootRegistryId(config.namespace);
@@ -24,7 +23,7 @@ const ENSv2_ROOT_REGISTRY_ID = maybeGetENSv2RootRegistryId(config.namespace);
  * i.e. reverse traversal of the nametree
  */
 export async function getV1CanonicalPath(domainId: ENSv1DomainId): Promise<CanonicalPath | null> {
-  const result = await db.execute(sql`
+  const result = await ensDb.execute(sql`
     WITH RECURSIVE upward AS (
       -- Base case: start from the target domain
       SELECT
@@ -32,7 +31,7 @@ export async function getV1CanonicalPath(domainId: ENSv1DomainId): Promise<Canon
         d.parent_id,
         d.label_hash,
         1 AS depth
-      FROM ${schema.v1Domain} d
+      FROM ${ensIndexerSchema.v1Domain} d
       WHERE d.id = ${domainId}
 
       UNION ALL
@@ -44,7 +43,7 @@ export async function getV1CanonicalPath(domainId: ENSv1DomainId): Promise<Canon
         pd.label_hash,
         upward.depth + 1
       FROM upward
-      JOIN ${schema.v1Domain} pd
+      JOIN ${ensIndexerSchema.v1Domain} pd
         ON pd.id = upward.parent_id
       WHERE upward.depth < ${MAX_DEPTH}
     )
@@ -77,7 +76,7 @@ export async function getV2CanonicalPath(domainId: ENSv2DomainId): Promise<Canon
   // if the ENSv2 Root Registry is not defined, null
   if (!ENSv2_ROOT_REGISTRY_ID) return null;
 
-  const result = await db.execute(sql`
+  const result = await ensDb.execute(sql`
     WITH RECURSIVE upward AS (
       -- Base case: start from the target domain
       SELECT
@@ -85,7 +84,7 @@ export async function getV2CanonicalPath(domainId: ENSv2DomainId): Promise<Canon
         d.registry_id,
         d.label_hash,
         1 AS depth
-      FROM ${schema.v2Domain} d
+      FROM ${ensIndexerSchema.v2Domain} d
       WHERE d.id = ${domainId}
 
       UNION ALL
@@ -97,9 +96,9 @@ export async function getV2CanonicalPath(domainId: ENSv2DomainId): Promise<Canon
         pd.label_hash,
         upward.depth + 1
       FROM upward
-      JOIN ${schema.registryCanonicalDomain} rcd
+      JOIN ${ensIndexerSchema.registryCanonicalDomain} rcd
         ON rcd.registry_id = upward.registry_id
-      JOIN ${schema.v2Domain} pd
+      JOIN ${ensIndexerSchema.v2Domain} pd
         ON pd.id = rcd.domain_id AND pd.subregistry_id = upward.registry_id
       WHERE upward.registry_id != ${ENSv2_ROOT_REGISTRY_ID}
         AND upward.depth < ${MAX_DEPTH}

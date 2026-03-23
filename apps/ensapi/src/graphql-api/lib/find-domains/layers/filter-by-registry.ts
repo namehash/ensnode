@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 
 import type { RegistryId } from "@ensnode/ensnode-sdk";
 
-import { db } from "@/lib/db";
+import { ensDb } from "@/lib/ensdb/singleton";
 
 import { type BaseDomainSet, selectBase } from "./base-domain-set";
 
@@ -13,7 +13,7 @@ import { type BaseDomainSet, selectBase } from "./base-domain-set";
  * in the given registry.
  */
 export function filterByRegistry(base: BaseDomainSet, registryId: RegistryId) {
-  return db
+  return ensDb
     .select(selectBase(base))
     .from(base)
     .where(eq(base.registryId, registryId))
