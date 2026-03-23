@@ -29,23 +29,15 @@ import {
 
 const logger = makeLogger("ensanalytics-api-v1");
 
-const app = createApp();
-
-// Apply referral program edition config set middleware
-app.use(referralProgramEditionConfigSetMiddleware);
-
-// Apply referrer leaderboard cache middleware (depends on edition config set middleware)
-app.use(referralLeaderboardEditionsCachesMiddleware);
+const app = createApp({
+  middlewares: [
+    referralProgramEditionConfigSetMiddleware,
+    referralLeaderboardEditionsCachesMiddleware,
+  ],
+});
 
 // Get a page from the referrer leaderboard for a specific edition
 app.openapi(getReferralLeaderboardRoute, async (c) => {
-  // context must be set by the required middleware
-  if (c.var.referralLeaderboardEditionsCaches === undefined) {
-    throw new Error(
-      `Invariant(ensanalytics-api-v1): referralLeaderboardEditionsCachesMiddleware required`,
-    );
-  }
-
   try {
     const { edition, page, recordsPerPage } = c.req.valid("query");
 
@@ -122,13 +114,6 @@ app.openapi(getReferralLeaderboardRoute, async (c) => {
 
 // Get referrer detail for a specific address for requested editions
 app.openapi(getReferrerDetailRoute, async (c) => {
-  // context must be set by the required middleware
-  if (c.var.referralLeaderboardEditionsCaches === undefined) {
-    throw new Error(
-      `Invariant(ensanalytics-api-v1): referralLeaderboardEditionsCachesMiddleware required`,
-    );
-  }
-
   try {
     const { referrer } = c.req.valid("param");
     const { editions } = c.req.valid("query");
@@ -238,19 +223,6 @@ app.openapi(getReferrerDetailRoute, async (c) => {
 
 // Get edition summaries
 app.openapi(getEditionsRoute, async (c) => {
-  // context must be set by the required middleware
-  if (c.var.referralProgramEditionConfigSet === undefined) {
-    throw new Error(
-      `Invariant(ensanalytics-api-v1): referralProgramEditionConfigSetMiddleware required`,
-    );
-  }
-
-  if (c.var.referralLeaderboardEditionsCaches === undefined) {
-    throw new Error(
-      `Invariant(ensanalytics-api-v1): referralLeaderboardEditionsCachesMiddleware required`,
-    );
-  }
-
   try {
     // Check if edition config set failed to load
     if (c.var.referralProgramEditionConfigSet instanceof Error) {

@@ -1,6 +1,6 @@
 import type { Duration } from "@ensnode/ensnode-sdk";
 
-import { factory } from "@/lib/hono-factory";
+import { factory, producing } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
 
 /**
@@ -14,44 +14,47 @@ export const makeIsRealtimeMiddleware = (scope: string, maxWorstCaseDistance: Du
   let hasLoggedIndexingStatusError = false;
   let lastLoggedIsRealtime: boolean | null = null;
 
-  return factory.createMiddleware(async function isRealtimeMiddleware(c, next) {
-    // context must be set by the required middleware
-    if (c.var.indexingStatus === undefined) {
-      throw new Error(`Invariant(isRealtimeMiddleware): indexingStatusMiddleware required`);
-    }
-
-    if (c.var.indexingStatus instanceof Error) {
-      // no indexing status available in context
-      if (!hasLoggedIndexingStatusError) {
-        logger.warn(
-          `ENSIndexer is NOT guaranteed to be within ${maxWorstCaseDistance} seconds of realtime. Current indexing status has not been successfully fetched by this ENSApi instance yet and is therefore unknown to this ENSApi instance because: ${c.var.indexingStatus.message}.`,
-        );
-
-        hasLoggedIndexingStatusError = true;
+  return producing(
+    ["isRealtime"],
+    factory.createMiddleware(async function isRealtimeMiddleware(c, next) {
+      // context must be set by the required middleware
+      if (c.var.indexingStatus === undefined) {
+        throw new Error(`Invariant(isRealtimeMiddleware): indexingStatusMiddleware required`);
       }
 
-      c.set("isRealtime", false);
+      if (c.var.indexingStatus instanceof Error) {
+        // no indexing status available in context
+        if (!hasLoggedIndexingStatusError) {
+          logger.warn(
+            `ENSIndexer is NOT guaranteed to be within ${maxWorstCaseDistance} seconds of realtime. Current indexing status has not been successfully fetched by this ENSApi instance yet and is therefore unknown to this ENSApi instance because: ${c.var.indexingStatus.message}.`,
+          );
+
+          hasLoggedIndexingStatusError = true;
+        }
+
+        c.set("isRealtime", false);
+        return await next();
+      }
+
+      // determine if we're within the max worst-case distance to qualify as "realtime".
+      const isRealtime = c.var.indexingStatus.worstCaseDistance <= maxWorstCaseDistance;
+
+      if (lastLoggedIsRealtime !== isRealtime) {
+        if (isRealtime) {
+          logger.info(
+            `ENSIndexer is guaranteed to be within ${maxWorstCaseDistance} seconds of realtime`,
+          );
+        } else {
+          logger.warn(
+            `ENSIndexer is NOT guaranteed to be within ${maxWorstCaseDistance} seconds of realtime. (Worst Case distance: ${c.var.indexingStatus.worstCaseDistance} seconds > ${maxWorstCaseDistance} seconds).`,
+          );
+        }
+
+        lastLoggedIsRealtime = isRealtime;
+      }
+
+      c.set("isRealtime", isRealtime);
       return await next();
-    }
-
-    // determine if we're within the max worst-case distance to qualify as "realtime".
-    const isRealtime = c.var.indexingStatus.worstCaseDistance <= maxWorstCaseDistance;
-
-    if (lastLoggedIsRealtime !== isRealtime) {
-      if (isRealtime) {
-        logger.info(
-          `ENSIndexer is guaranteed to be within ${maxWorstCaseDistance} seconds of realtime`,
-        );
-      } else {
-        logger.warn(
-          `ENSIndexer is NOT guaranteed to be within ${maxWorstCaseDistance} seconds of realtime. (Worst Case distance: ${c.var.indexingStatus.worstCaseDistance} seconds > ${maxWorstCaseDistance} seconds).`,
-        );
-      }
-
-      lastLoggedIsRealtime = isRealtime;
-    }
-
-    c.set("isRealtime", isRealtime);
-    return await next();
-  });
+    }),
+  );
 };
