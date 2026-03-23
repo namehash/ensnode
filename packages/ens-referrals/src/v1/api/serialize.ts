@@ -1,24 +1,27 @@
 import {
+  serializeReferralProgramEditionSummaryPieSplit,
   serializeReferralProgramRulesPieSplit,
   serializeReferrerEditionMetricsPieSplit,
   serializeReferrerLeaderboardPagePieSplit,
 } from "../award-models/pie-split/api/serialize";
 import {
+  serializeReferralProgramEditionSummaryRevShareLimit,
   serializeReferralProgramRulesRevShareLimit,
   serializeReferrerEditionMetricsRevShareLimit,
   serializeReferrerLeaderboardPageRevShareLimit,
 } from "../award-models/rev-share-limit/api/serialize";
 import type { ReferrerEditionMetricsUnrecognized } from "../award-models/shared/edition-metrics";
+import type { ReferralProgramEditionSummaryUnrecognized } from "../award-models/shared/edition-summary";
 import type { ReferrerLeaderboardPageUnrecognized } from "../award-models/shared/leaderboard-page";
 import type { ReferralProgramRulesUnrecognized } from "../award-models/shared/rules";
 import { ReferralProgramAwardModels } from "../award-models/shared/rules";
-import type { ReferralProgramEditionConfig } from "../edition";
 import type { ReferrerEditionMetrics } from "../edition-metrics";
+import type { ReferralProgramEditionSummary } from "../edition-summary";
 import type { ReferrerLeaderboardPage } from "../leaderboard-page";
 import type { ReferralProgramRules } from "../rules";
 import type {
-  SerializedReferralProgramEditionConfig,
-  SerializedReferralProgramEditionConfigSetResponse,
+  SerializedReferralProgramEditionSummariesResponse,
+  SerializedReferralProgramEditionSummary,
   SerializedReferralProgramRules,
   SerializedReferrerEditionMetrics,
   SerializedReferrerLeaderboardPage,
@@ -27,8 +30,8 @@ import type {
   SerializedReferrerMetricsEditionsResponse,
 } from "./serialized-types";
 import {
-  type ReferralProgramEditionConfigSetResponse,
-  ReferralProgramEditionConfigSetResponseCodes,
+  type ReferralProgramEditionSummariesResponse,
+  ReferralProgramEditionSummariesResponseCodes,
   type ReferrerLeaderboardPageResponse,
   ReferrerLeaderboardPageResponseCodes,
   type ReferrerMetricsEditionsResponse,
@@ -126,16 +129,35 @@ function serializeReferrerEditionMetrics(
 }
 
 /**
- * Serializes a {@link ReferralProgramEditionConfig} object.
+ * Serializes a {@link ReferralProgramEditionSummary} object.
+ *
+ * @throws if called with a {@link ReferralProgramEditionSummaryUnrecognized} — unrecognized
+ *   summaries are client-side forward-compatibility placeholders and must never be serialized.
  */
-export function serializeReferralProgramEditionConfig(
-  editionConfig: ReferralProgramEditionConfig,
-): SerializedReferralProgramEditionConfig {
-  return {
-    slug: editionConfig.slug,
-    displayName: editionConfig.displayName,
-    rules: serializeReferralProgramRules(editionConfig.rules),
-  };
+export function serializeReferralProgramEditionSummary(
+  summary: ReferralProgramEditionSummary,
+): SerializedReferralProgramEditionSummary {
+  switch (summary.awardModel) {
+    case ReferralProgramAwardModels.PieSplit:
+      return serializeReferralProgramEditionSummaryPieSplit(summary);
+
+    case ReferralProgramAwardModels.RevShareLimit:
+      return serializeReferralProgramEditionSummaryRevShareLimit(summary);
+
+    case ReferralProgramAwardModels.Unrecognized: {
+      const unrecognized = summary as ReferralProgramEditionSummaryUnrecognized;
+      throw new Error(
+        `ReferralProgramEditionSummaryUnrecognized (originalAwardModel: '${unrecognized.rules.originalAwardModel}') must not be serialized — it is a client-side forward-compatibility placeholder only.`,
+      );
+    }
+
+    default: {
+      const _exhaustiveCheck: never = summary;
+      throw new Error(
+        `Unknown award model: ${(_exhaustiveCheck as ReferralProgramEditionSummary).awardModel}`,
+      );
+    }
+  }
 }
 
 /**
@@ -190,27 +212,27 @@ export function serializeReferrerMetricsEditionsResponse(
 }
 
 /**
- * Serialize a {@link ReferralProgramEditionConfigSetResponse} object.
+ * Serialize a {@link ReferralProgramEditionSummariesResponse} object.
  */
-export function serializeReferralProgramEditionConfigSetResponse(
-  response: ReferralProgramEditionConfigSetResponse,
-): SerializedReferralProgramEditionConfigSetResponse {
+export function serializeReferralProgramEditionSummariesResponse(
+  response: ReferralProgramEditionSummariesResponse,
+): SerializedReferralProgramEditionSummariesResponse {
   switch (response.responseCode) {
-    case ReferralProgramEditionConfigSetResponseCodes.Ok:
+    case ReferralProgramEditionSummariesResponseCodes.Ok:
       return {
         responseCode: response.responseCode,
         data: {
-          editions: response.data.editions.map(serializeReferralProgramEditionConfig),
+          editions: response.data.editions.map(serializeReferralProgramEditionSummary),
         },
       };
 
-    case ReferralProgramEditionConfigSetResponseCodes.Error:
+    case ReferralProgramEditionSummariesResponseCodes.Error:
       return response;
 
     default: {
       const _exhaustiveCheck: never = response;
       throw new Error(
-        `Unknown response code: ${(_exhaustiveCheck as ReferralProgramEditionConfigSetResponse).responseCode}`,
+        `Unknown response code: ${(_exhaustiveCheck as ReferralProgramEditionSummariesResponse).responseCode}`,
       );
     }
   }

@@ -17,13 +17,12 @@ import {
   type ChainIndexingMetricsHistorical,
   type ChainIndexingMetricsRealtime,
   ChainIndexingStates,
-  type PonderAppCommand,
-  PonderAppCommands,
   type PonderIndexingMetrics,
   type PonderIndexingOrdering,
   PonderIndexingOrderings,
 } from "../indexing-metrics";
 import { schemaPositiveInteger } from "../numbers";
+import { type PonderAppCommand, PonderAppCommands } from "../ponder-app-context";
 import { schemaChainIdString } from "./chains";
 import { deserializePrometheusMetrics, type PrometheusMetrics } from "./prometheus-metrics-text";
 import type { Unvalidated } from "./utils";

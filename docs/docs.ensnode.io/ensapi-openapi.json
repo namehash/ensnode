@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "ENSApi APIs",
-    "version": "1.7.0",
+    "version": "1.8.0",
     "description": "APIs for ENS resolution, navigating the ENS nameforest, and metadata about an ENSNode"
   },
   "servers": [
@@ -29,9 +29,9 @@
   ],
   "components": { "schemas": {}, "parameters": {} },
   "paths": {
-    "/amirealtime": {
+    "/api/realtime": {
       "get": {
-        "operationId": "isRealtime",
+        "operationId": "getRealtime",
         "tags": ["Meta"],
         "summary": "Check indexing progress",
         "description": "Checks if the indexing progress is guaranteed to be within a requested worst-case distance of realtime",
@@ -1036,10 +1036,10 @@
       "get": {
         "operationId": "getEditions_v1",
         "tags": ["ENSAwards"],
-        "summary": "Get Edition Config Set (v1)",
-        "description": "Returns the currently configured referral program edition config set. Editions are sorted in descending order by start timestamp (most recent first).",
+        "summary": "Get Edition Summaries (v1)",
+        "description": "Returns a summary for each configured referral program edition, including its current status and award-model-specific runtime data. Editions are sorted in descending order by start timestamp (most recent first).",
         "responses": {
-          "200": { "description": "Successfully retrieved edition config set" },
+          "200": { "description": "Successfully retrieved edition summaries." },
           "500": { "description": "Internal server error" },
           "503": { "description": "Service unavailable" }
         }

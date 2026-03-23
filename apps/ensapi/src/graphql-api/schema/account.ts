@@ -2,7 +2,7 @@ import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@poth
 import { and, count, eq, getTableColumns } from "drizzle-orm";
 import type { Address } from "viem";
 
-import * as schema from "@ensnode/ensnode-schema";
+import * as schema from "@ensnode/ensdb-sdk";
 
 import { builder } from "@/graphql-api/builder";
 import { orderPaginationBy, paginateBy } from "@/graphql-api/lib/connection-helpers";

@@ -4,7 +4,7 @@ import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@poth
 import { and, eq } from "drizzle-orm";
 import { namehash } from "viem";
 
-import * as schema from "@ensnode/ensnode-schema";
+import * as schema from "@ensnode/ensdb-sdk";
 import {
   makePermissionsId,
   makeResolverRecordsId,

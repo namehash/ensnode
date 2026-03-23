@@ -1,6 +1,6 @@
 import {
   ReferralProgramAwardModels,
-  ReferralProgramStatuses,
+  ReferralProgramEditionStatuses,
   type ReferrerLeaderboardPagePieSplit,
   ReferrerLeaderboardPageResponseCodes,
   type ReferrerLeaderboardPageResponseOk,
@@ -188,6 +188,7 @@ export const emptyReferralLeaderboard: ReferrerLeaderboardPieSplit = {
       address: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
     },
     rulesUrl: new URL("https://example.com/rules"),
+    areAwardsDistributed: false,
   },
   aggregatedMetrics: {
     grandTotalReferrals: 0,
@@ -213,6 +214,7 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboardPieSplit = {
       address: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
     },
     rulesUrl: new URL("https://example.com/rules"),
+    areAwardsDistributed: false,
   },
   aggregatedMetrics: {
     grandTotalReferrals: 68,
@@ -705,6 +707,7 @@ export const referrerLeaderboardPageResponseOk = {
         address: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
       },
       rulesUrl: new URL("https://example.com/rules"),
+      areAwardsDistributed: false,
     },
     referrers: [
       {
@@ -1102,7 +1105,7 @@ export const referrerLeaderboardPageResponseOk = {
       startIndex: 0,
       endIndex: 28,
     },
-    status: ReferralProgramStatuses.Active,
+    status: ReferralProgramEditionStatuses.Active,
     accurateAsOf: 1735689600,
   } satisfies ReferrerLeaderboardPagePieSplit,
 } satisfies ReferrerLeaderboardPageResponseOk;

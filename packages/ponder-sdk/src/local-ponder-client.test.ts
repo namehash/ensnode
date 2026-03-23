@@ -9,11 +9,11 @@ import {
   type ChainIndexingMetricsHistorical,
   type ChainIndexingMetricsRealtime,
   ChainIndexingStates,
-  PonderAppCommands,
   type PonderIndexingMetrics,
   PonderIndexingOrderings,
 } from "./indexing-metrics";
 import { chainIds, createLocalPonderClientMock } from "./local-ponder-client.mock";
+import { PonderAppCommands } from "./ponder-app-context";
 
 describe("LocalPonderClient", () => {
   afterEach(() => {
@@ -204,6 +204,28 @@ describe("LocalPonderClient", () => {
       await expect(client.metrics()).rejects.toThrowError(
         /Local Ponder Client is missing the Chains Indexing Metrics for indexed chain IDs: 10/,
       );
+    });
+  });
+
+  describe("isInDevMode", () => {
+    it("returns true when Ponder app command is 'dev'", () => {
+      // Arrange
+      const client = createLocalPonderClientMock({
+        ponderAppContext: { command: PonderAppCommands.Dev },
+      });
+
+      // Act & Assert
+      expect(client.isInDevMode).toBe(true);
+    });
+
+    it("returns false when Ponder app command is not 'dev'", () => {
+      // Arrange
+      const client = createLocalPonderClientMock({
+        ponderAppContext: { command: PonderAppCommands.Start },
+      });
+
+      // Act & Assert
+      expect(client.isInDevMode).toBe(false);
     });
   });
 });

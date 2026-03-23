@@ -1,6 +1,6 @@
 import { and, count, desc, eq, gte, isNotNull, lte, not, type SQL } from "drizzle-orm/sql";
 
-import * as schema from "@ensnode/ensnode-schema";
+import * as schema from "@ensnode/ensdb-sdk";
 import {
   type BlockRef,
   bigIntToNumber,
@@ -29,7 +29,7 @@ import { db } from "@/lib/db";
 function buildOrderByClause(order: RegistrarActionsOrder): SQL {
   switch (order) {
     case RegistrarActionsOrders.LatestRegistrarActions:
-      return desc(schema.registrarActions.timestamp);
+      return desc(schema.registrarActions.id);
   }
 }
 

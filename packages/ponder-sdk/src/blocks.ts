@@ -29,9 +29,13 @@ export type BlockRef = z.infer<typeof schemaBlockRef>;
 /**
  * Compare two {@link BlockRef} objects to check
  * if blockA is before blockB.
+ *
+ * Ordering is determined by block number, which is the canonical
+ * ordering on a single chain. Timestamp is not used because EVM
+ * chains allow consecutive blocks to share the same timestamp.
  */
 export function isBlockRefBefore(blockA: BlockRef, blockB: BlockRef) {
-  return blockA.number < blockB.number && blockA.timestamp < blockB.timestamp;
+  return blockA.number < blockB.number;
 }
 
 /**

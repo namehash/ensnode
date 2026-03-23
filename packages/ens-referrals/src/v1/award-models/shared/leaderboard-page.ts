@@ -4,8 +4,8 @@ import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
 
 import type { ReferrerLeaderboard } from "../../leaderboard";
 import { isNonNegativeInteger, isPositiveInteger } from "../../number";
-import type { ReferralProgramStatusId } from "../../status";
 import type { ReferralProgramAwardModel, ReferralProgramAwardModels } from "./rules";
+import type { ReferralProgramEditionStatusId } from "./status";
 
 /**
  * The default number of referrers per leaderboard page.
@@ -273,10 +273,9 @@ export interface BaseReferrerLeaderboardPage {
   pageContext: ReferrerLeaderboardPageContext;
 
   /**
-   * The status of the referral program ("Scheduled", "Active", or "Closed")
-   * calculated based on the program's timing relative to {@link accurateAsOf}.
+   * The status of the referral program edition.
    */
-  status: ReferralProgramStatusId;
+  status: ReferralProgramEditionStatusId;
 
   /**
    * The {@link UnixTimestamp} of when the data used to build this page was accurate as of.

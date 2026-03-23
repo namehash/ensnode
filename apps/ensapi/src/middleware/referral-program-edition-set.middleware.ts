@@ -1,7 +1,7 @@
 import type { ReferralProgramEditionConfigSet } from "@namehash/ens-referrals/v1";
 
 import { referralProgramEditionConfigSetCache } from "@/cache/referral-program-edition-set.cache";
-import { factory } from "@/lib/hono-factory";
+import { factory, producing } from "@/lib/hono-factory";
 
 /**
  * Type definition for the referral program edition config set middleware context.
@@ -26,10 +26,11 @@ export type ReferralProgramEditionConfigSetMiddlewareVariables = {
  *
  * If the cache fails to load, the JSON fetching will be retried on subsequent requests.
  */
-export const referralProgramEditionConfigSetMiddleware = factory.createMiddleware(
-  async (c, next) => {
+export const referralProgramEditionConfigSetMiddleware = producing(
+  ["referralProgramEditionConfigSet"],
+  factory.createMiddleware(async (c, next) => {
     const editionConfigSet = await referralProgramEditionConfigSetCache.read();
     c.set("referralProgramEditionConfigSet", editionConfigSet);
     await next();
-  },
+  }),
 );

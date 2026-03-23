@@ -1,14 +1,14 @@
 import {
   deserializeReferralProgramEditionConfigSetArray,
-  deserializeReferralProgramEditionConfigSetResponse,
+  deserializeReferralProgramEditionSummariesResponse,
   deserializeReferrerLeaderboardPageResponse,
   deserializeReferrerMetricsEditionsResponse,
-  type ReferralProgramEditionConfigSetResponse,
+  type ReferralProgramEditionSummariesResponse,
   type ReferrerLeaderboardPageRequest,
   type ReferrerLeaderboardPageResponse,
   type ReferrerMetricsEditionsRequest,
   type ReferrerMetricsEditionsResponse,
-  type SerializedReferralProgramEditionConfigSetResponse,
+  type SerializedReferralProgramEditionSummariesResponse,
   type SerializedReferrerLeaderboardPageResponse,
   type SerializedReferrerMetricsEditionsResponse,
 } from "./api";
@@ -340,22 +340,22 @@ export class ENSReferralsClient {
   }
 
   /**
-   * Get the currently configured referral program edition config set.
+   * Get the currently configured referral program edition summaries.
    * Editions are sorted in descending order by start timestamp (most recent first).
    *
-   * @returns A response containing the edition config set, or an error response if unavailable.
+   * @returns A response containing edition summaries, or an error response if unavailable.
    *
    * @remarks Editions whose `rules.awardModel` is not recognized by this client version are
-   * preserved as {@link ReferralProgramRulesUnrecognized}. The returned map includes all
-   * editions — recognized and unrecognized alike. Callers should check `editionConfig.rules.awardModel`
+   * preserved as {@link ReferralProgramEditionSummaryUnrecognized}. The returned response includes all
+   * editions — recognized and unrecognized alike. Callers should check `edition.awardModel`
    * and skip editions with `"unrecognized"` as appropriate. At least one edition of any kind must
    * be present, otherwise deserialization throws.
    *
    * @example
    * ```typescript
-   * const response = await client.getEditionConfigSet();
+   * const response = await client.getEditionSummaries();
    *
-   * if (response.responseCode === ReferralProgramEditionConfigSetResponseCodes.Ok) {
+   * if (response.responseCode === ReferralProgramEditionSummariesResponseCodes.Ok) {
    *   console.log(`Found ${response.data.editions.length} editions`);
    *   for (const edition of response.data.editions) {
    *     console.log(`${edition.slug}: ${edition.displayName}`);
@@ -366,15 +366,15 @@ export class ENSReferralsClient {
    * @example
    * ```typescript
    * // Handle error response
-   * const response = await client.getEditionConfigSet();
+   * const response = await client.getEditionSummaries();
    *
-   * if (response.responseCode === ReferralProgramEditionConfigSetResponseCodes.Error) {
+   * if (response.responseCode === ReferralProgramEditionSummariesResponseCodes.Error) {
    *   console.error(response.error);
    *   console.error(response.errorMessage);
    * }
    * ```
    */
-  async getEditionConfigSet(): Promise<ReferralProgramEditionConfigSetResponse> {
+  async getEditionSummaries(): Promise<ReferralProgramEditionSummariesResponse> {
     const url = new URL(`/v1/ensanalytics/editions`, this.options.url);
 
     const response = await fetch(url);
@@ -389,12 +389,12 @@ export class ENSReferralsClient {
     }
 
     // The API can return errors with various status codes, but they're still in the
-    // ReferralProgramEditionConfigSetResponse format with responseCode: 'error'
+    // ReferralProgramEditionSummariesResponse format with responseCode: 'error'
     // So we don't need to check response.ok here, just deserialize and let
     // the caller handle the responseCode
 
-    return deserializeReferralProgramEditionConfigSetResponse(
-      responseData as SerializedReferralProgramEditionConfigSetResponse,
+    return deserializeReferralProgramEditionSummariesResponse(
+      responseData as SerializedReferralProgramEditionSummariesResponse,
     );
   }
 }

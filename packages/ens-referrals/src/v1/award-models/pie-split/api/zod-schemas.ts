@@ -12,6 +12,7 @@ import {
 } from "@ensnode/ensnode-sdk/internal";
 
 import {
+  makeBaseReferralProgramEditionSummarySchema,
   makeBaseReferralProgramRulesSchema,
   makeBaseReferrerLeaderboardPageSchema,
   makeReferralProgramStatusSchema,
@@ -162,6 +163,22 @@ export const makeReferrerEditionMetricsPieSplitSchema = (
     makeReferrerEditionMetricsRankedPieSplitSchema(valueLabel),
     makeReferrerEditionMetricsUnrankedPieSplitSchema(valueLabel),
   ]);
+
+/**
+ * Schema for {@link ReferralProgramEditionSummaryPieSplit}.
+ */
+export const makeReferralProgramEditionSummaryPieSplitSchema = (
+  valueLabel: string = "ReferralProgramEditionSummaryPieSplit",
+) =>
+  makeBaseReferralProgramEditionSummarySchema(valueLabel)
+    .safeExtend({
+      awardModel: z.literal(ReferralProgramAwardModels.PieSplit),
+      rules: makeReferralProgramRulesPieSplitSchema(`${valueLabel}.rules`),
+    })
+    .refine((data) => data.awardModel === data.rules.awardModel, {
+      message: `${valueLabel}.awardModel must equal ${valueLabel}.rules.awardModel`,
+      path: ["awardModel"],
+    });
 
 /**
  * Schema for {@link ReferrerLeaderboardPagePieSplit}.

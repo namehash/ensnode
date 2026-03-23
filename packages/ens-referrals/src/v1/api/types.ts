@@ -1,8 +1,9 @@
 import type { Address } from "viem";
 
 import type { ReferrerLeaderboardPageParams } from "../award-models/shared/leaderboard-page";
-import type { ReferralProgramEditionConfig, ReferralProgramEditionSlug } from "../edition";
+import type { ReferralProgramEditionSlug } from "../edition";
 import type { ReferrerEditionMetrics } from "../edition-metrics";
+import type { ReferralProgramEditionSummary } from "../edition-summary";
 import type { ReferrerLeaderboardPage } from "../leaderboard-page";
 
 /**
@@ -137,57 +138,57 @@ export type ReferrerMetricsEditionsResponse =
   | ReferrerMetricsEditionsResponseError;
 
 /**
- * A status code for referral program edition config set API responses.
+ * A status code for referral program edition summaries API responses.
  */
-export const ReferralProgramEditionConfigSetResponseCodes = {
+export const ReferralProgramEditionSummariesResponseCodes = {
   /**
-   * Represents that the edition config set is available.
+   * Represents that the edition summaries are available.
    */
   Ok: "ok",
 
   /**
-   * Represents that the edition config set is not available.
+   * Represents that the edition summaries are not available.
    */
   Error: "error",
 } as const;
 
 /**
- * The derived string union of possible {@link ReferralProgramEditionConfigSetResponseCodes}.
+ * The derived string union of possible {@link ReferralProgramEditionSummariesResponseCodes}.
  */
-export type ReferralProgramEditionConfigSetResponseCode =
-  (typeof ReferralProgramEditionConfigSetResponseCodes)[keyof typeof ReferralProgramEditionConfigSetResponseCodes];
+export type ReferralProgramEditionSummariesResponseCode =
+  (typeof ReferralProgramEditionSummariesResponseCodes)[keyof typeof ReferralProgramEditionSummariesResponseCodes];
 
 /**
- * The data payload containing edition configs.
+ * The data payload containing edition summaries.
  * Editions are sorted in descending order by start timestamp.
  */
-export type ReferralProgramEditionConfigSetData = {
-  editions: ReferralProgramEditionConfig[];
+export type ReferralProgramEditionSummariesData = {
+  editions: ReferralProgramEditionSummary[];
 };
 
 /**
- * A successful response containing the configured edition config set.
+ * A successful response containing edition summaries.
  */
-export type ReferralProgramEditionConfigSetResponseOk = {
-  responseCode: typeof ReferralProgramEditionConfigSetResponseCodes.Ok;
-  data: ReferralProgramEditionConfigSetData;
+export type ReferralProgramEditionSummariesResponseOk = {
+  responseCode: typeof ReferralProgramEditionSummariesResponseCodes.Ok;
+  data: ReferralProgramEditionSummariesData;
 };
 
 /**
- * An edition config set response when an error occurs.
+ * An edition summaries response when an error occurs.
  */
-export type ReferralProgramEditionConfigSetResponseError = {
-  responseCode: typeof ReferralProgramEditionConfigSetResponseCodes.Error;
+export type ReferralProgramEditionSummariesResponseError = {
+  responseCode: typeof ReferralProgramEditionSummariesResponseCodes.Error;
   error: string;
   errorMessage: string;
 };
 
 /**
- * A referral program edition config set API response.
+ * A referral program edition summaries API response.
  *
  * Use the `responseCode` field to determine the specific type interpretation
  * at runtime.
  */
-export type ReferralProgramEditionConfigSetResponse =
-  | ReferralProgramEditionConfigSetResponseOk
-  | ReferralProgramEditionConfigSetResponseError;
+export type ReferralProgramEditionSummariesResponse =
+  | ReferralProgramEditionSummariesResponseOk
+  | ReferralProgramEditionSummariesResponseError;

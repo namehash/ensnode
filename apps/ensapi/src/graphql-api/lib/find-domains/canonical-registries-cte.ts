@@ -2,7 +2,7 @@ import config from "@/config";
 
 import { sql } from "drizzle-orm";
 
-import * as schema from "@ensnode/ensnode-schema";
+import * as schema from "@ensnode/ensdb-sdk";
 import { maybeGetENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
 
 import { db } from "@/lib/db";
