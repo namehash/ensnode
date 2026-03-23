@@ -18,11 +18,11 @@ const ensRainbowApiClient = getENSRainbowApiClient();
  * transient failure (e.g. a momentary network blip or a brief ENSRainbow server hiccup) would
  * otherwise crash the ENSIndexer process, forcing a full restart and re-index from the last
  * checkpoint. To avoid this disproportionate impact, transient failures are retried with
- * exponential backoff (up to 3 retries, with a 1–30 second timeout range) before the error is surfaced:
+ * exponential backoff (up to 3 retries, with a 1–30 second timeout range) before the error is thrown:
  * - Network/fetch failure: heal() throws because the ENSRainbow service was unreachable.
  * - HealServerError (errorCode 500): ENSRainbow returned a transient server-side error.
  *
- * Non-transient outcomes are handled immediately without retry, because retrying would not change
+ * Non-transient outcomes are thrown immediately without retry, because retrying would not change
  * the result:
  * - HealSuccess: the label was healed successfully; returned.
  * - HealNotFoundError (errorCode 404): no label is known for this labelHash; null returned.
@@ -30,7 +30,7 @@ const ensRainbowApiClient = getENSRainbowApiClient();
  *
  * ## Non-recoverable throws
  *
- * Any throw from this function is not recoverable. It propagates to the calling indexing handler
+ * Any throw from this function is not recoverable or has exceeded the max retries. It propagates to the calling indexing handler
  * (Registry, Registrar, ThreeDNSToken, label-db-helpers) which does not catch it, causing the
  * ENSIndexer process to terminate.
  *
