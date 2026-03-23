@@ -1,6 +1,5 @@
 import type {
   DatabaseEnvironment,
-  EnsIndexerUrlEnvironment,
   LogLevelEnvironment,
   PortEnvironment,
   ReferralProgramEditionsEnvironment,
@@ -16,7 +15,6 @@ import type {
  * mapped/parsed into a structured configuration object like `EnsApiConfig`.
  */
 export type EnsApiEnvironment = DatabaseEnvironment &
-  EnsIndexerUrlEnvironment &
   RpcEnvironment &
   PortEnvironment &
   LogLevelEnvironment &

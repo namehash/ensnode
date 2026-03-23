@@ -50,8 +50,6 @@ services:
       start_period: 1m
       start_interval: 1s
     depends_on:
-      ensindexer:
-        condition: service_healthy
       postgres:
         condition: service_started
 

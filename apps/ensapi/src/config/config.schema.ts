@@ -63,18 +63,25 @@ export type EnsApiConfig = z.infer<typeof EnsApiConfigSchema>;
  */
 export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promise<EnsApiConfig> {
   try {
-    const ensIndexerPublicConfig = await pRetry(() => ensDbClient.getEnsIndexerPublicConfig(), {
-      retries: 3,
-      onFailedAttempt: ({ error, attemptNumber, retriesLeft }) => {
-        logger.info(
-          `ENSIndexer Config fetch attempt ${attemptNumber} failed (${error.message}). ${retriesLeft} retries left.`,
-        );
-      },
-    });
+    const ensIndexerPublicConfig = await pRetry(
+      async () => {
+        const config = await ensDbClient.getEnsIndexerPublicConfig();
 
-    if (!ensIndexerPublicConfig) {
-      throw new Error(`Failed to fetch ENSIndexer Public Config from ENSDb`);
-    }
+        if (!config) {
+          throw new Error("ENSIndexer Public Config not yet available in ENSDb.");
+        }
+
+        return config;
+      },
+      {
+        retries: 3,
+        onFailedAttempt: ({ error, attemptNumber, retriesLeft }) => {
+          logger.info(
+            `ENSIndexer Config fetch attempt ${attemptNumber} failed (${error.message}). ${retriesLeft} retries left.`,
+          );
+        },
+      },
+    );
 
     const rpcConfigs = buildRpcConfigsFromEnv(env, ensIndexerPublicConfig.namespace);
 

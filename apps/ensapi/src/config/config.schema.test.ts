@@ -2,16 +2,12 @@ import packageJson from "@/../package.json" with { type: "json" };
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import {
-  type ENSIndexerPublicConfig,
-  PluginName,
-  serializeENSIndexerPublicConfig,
-} from "@ensnode/ensnode-sdk";
+import { type ENSIndexerPublicConfig, PluginName } from "@ensnode/ensnode-sdk";
 import type { RpcConfig } from "@ensnode/ensnode-sdk/internal";
 
 vi.mock("@/lib/ensdb/singleton", () => ({
   ensDbClient: {
-    getEnsIndexerPublicConfig: vi.fn(() => ENSINDEXER_PUBLIC_CONFIG),
+    getEnsIndexerPublicConfig: vi.fn(async () => ENSINDEXER_PUBLIC_CONFIG),
   },
 }));
 
@@ -55,20 +51,8 @@ const ENSINDEXER_PUBLIC_CONFIG = {
   },
 } satisfies ENSIndexerPublicConfig;
 
-const mockFetch = vi.fn();
-vi.stubGlobal("fetch", mockFetch);
-
 describe("buildConfigFromEnvironment", () => {
-  afterEach(() => {
-    mockFetch.mockReset();
-  });
-
   it("returns a valid config object using environment variables", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve(serializeENSIndexerPublicConfig(ENSINDEXER_PUBLIC_CONFIG)),
-    });
-
     await expect(buildConfigFromEnvironment(BASE_ENV)).resolves.toStrictEqual({
       port: ENSApi_DEFAULT_PORT,
       databaseUrl: BASE_ENV.DATABASE_URL,
@@ -92,11 +76,6 @@ describe("buildConfigFromEnvironment", () => {
 
   it("parses CUSTOM_REFERRAL_PROGRAM_EDITIONS as a URL object", async () => {
     const customUrl = "https://example.com/editions.json";
-
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve(serializeENSIndexerPublicConfig(ENSINDEXER_PUBLIC_CONFIG)),
-    });
 
     const config = await buildConfigFromEnvironment({
       ...BASE_ENV,
@@ -123,11 +102,6 @@ describe("buildConfigFromEnvironment", () => {
     };
 
     it("logs error and exits when CUSTOM_REFERRAL_PROGRAM_EDITIONS is not a valid URL", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(serializeENSIndexerPublicConfig(ENSINDEXER_PUBLIC_CONFIG)),
-      });
-
       await buildConfigFromEnvironment({
         ...TEST_ENV,
         CUSTOM_REFERRAL_PROGRAM_EDITIONS: "not-a-url",
@@ -140,11 +114,6 @@ describe("buildConfigFromEnvironment", () => {
     });
 
     it("logs error message when QuickNode RPC config was partially configured (missing endpoint name)", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(serializeENSIndexerPublicConfig(ENSINDEXER_PUBLIC_CONFIG)),
-      });
-
       await buildConfigFromEnvironment({
         ...TEST_ENV,
         QUICKNODE_API_KEY: "my-api-key",
@@ -160,11 +129,6 @@ describe("buildConfigFromEnvironment", () => {
     });
 
     it("logs error message when QuickNode RPC config was partially configured (missing API key)", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(serializeENSIndexerPublicConfig(ENSINDEXER_PUBLIC_CONFIG)),
-      });
-
       await buildConfigFromEnvironment({
         ...TEST_ENV,
         QUICKNODE_ENDPOINT_NAME: "my-endpoint-name",
