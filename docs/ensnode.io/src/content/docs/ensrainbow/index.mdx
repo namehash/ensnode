@@ -16,6 +16,8 @@ ENSRainbow builds upon work from The Graph Protocol (original ENS rainbow tables
 
 The ENS Registry allows subnames to be created onchain without revealing onchain what those subnames are. As a result, when querying indexed ENS names, some names include labels represented as encoded labelhashes (e.g., `[428...b0b]`). These represent unknown labels and are an unfortunate user experience issue in the ENS ecosystem.
 
+For a comprehensive explanation of unknown labels — what they are, why they exist, how they're formatted, and their impact on indexing and applications — see [Unknown Labels](/ensrainbow/concepts/unknown-labels/).
+
 ## How ENSRainbow Helps
 
 ENSRainbow significantly improves "name [healing](/docs/ensrainbow/concepts/glossary#heal)" coverage compared to relying solely on services like the ENS Subgraph. Its goal is to heal as many ENS names as possible, minimizing the probability that end-users encounter unknown labels.

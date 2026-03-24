@@ -6,13 +6,13 @@ import {
   validateEnsIndexerPublicConfigCompatibility,
 } from "@ensnode/ensnode-sdk";
 
-import { EnsDbWriterWorker } from "@/lib/ensdb-writer-worker/ensdb-writer-worker";
 import type { IndexingStatusBuilder } from "@/lib/indexing-status-builder/indexing-status-builder";
 import type { PublicConfigBuilder } from "@/lib/public-config-builder/public-config-builder";
 
 import {
   createMockCrossChainSnapshot,
   createMockEnsDbWriter,
+  createMockEnsDbWriterWorker,
   createMockIndexingStatusBuilder,
   createMockOmnichainSnapshot,
   createMockPublicConfigBuilder,
@@ -51,10 +51,10 @@ describe("EnsDbWriterWorker", () => {
       vi.mocked(buildCrossChainIndexingStatusSnapshotOmnichain).mockReturnValue(snapshot);
 
       const ensDbClient = createMockEnsDbWriter();
-      const publicConfigBuilder = createMockPublicConfigBuilder();
-      const indexingStatusBuilder = createMockIndexingStatusBuilder(omnichainSnapshot);
-
-      const worker = new EnsDbWriterWorker(ensDbClient, publicConfigBuilder, indexingStatusBuilder);
+      const worker = createMockEnsDbWriterWorker({
+        ensDbClient,
+        indexingStatusBuilder: createMockIndexingStatusBuilder(omnichainSnapshot),
+      });
 
       // act
       await worker.run();
@@ -81,31 +81,58 @@ describe("EnsDbWriterWorker", () => {
 
     it("throws when stored config is incompatible", async () => {
       // arrange
-      const incompatibleError = new Error("incompatible");
       vi.mocked(validateEnsIndexerPublicConfigCompatibility).mockImplementation(() => {
-        throw incompatibleError;
+        throw new Error("incompatible");
       });
 
       const ensDbClient = createMockEnsDbWriter({
         getEnsIndexerPublicConfig: vi.fn().mockResolvedValue(mockPublicConfig),
       });
-      const publicConfigBuilder = createMockPublicConfigBuilder(mockPublicConfig);
-      const indexingStatusBuilder = createMockIndexingStatusBuilder();
-
-      const worker = new EnsDbWriterWorker(ensDbClient, publicConfigBuilder, indexingStatusBuilder);
+      const worker = createMockEnsDbWriterWorker({
+        ensDbClient,
+        publicConfigBuilder: createMockPublicConfigBuilder(mockPublicConfig),
+      });
 
       // act & assert
       await expect(worker.run()).rejects.toThrow("incompatible");
       expect(ensDbClient.upsertEnsDbVersion).not.toHaveBeenCalled();
     });
 
+    it("skips config validation when in dev mode", async () => {
+      // arrange
+      vi.mocked(validateEnsIndexerPublicConfigCompatibility).mockImplementation(() => {
+        throw new Error("incompatible");
+      });
+
+      const snapshot = createMockCrossChainSnapshot();
+      vi.mocked(buildCrossChainIndexingStatusSnapshotOmnichain).mockReturnValue(snapshot);
+
+      const ensDbClient = createMockEnsDbWriter({
+        getEnsIndexerPublicConfig: vi.fn().mockResolvedValue(mockPublicConfig),
+      });
+      const worker = createMockEnsDbWriterWorker({
+        ensDbClient,
+        publicConfigBuilder: createMockPublicConfigBuilder(mockPublicConfig),
+        isInDevMode: true,
+      });
+
+      // act - should not throw even though configs are incompatible
+      await worker.run();
+
+      // assert - validation should not have been called
+      expect(validateEnsIndexerPublicConfigCompatibility).not.toHaveBeenCalled();
+      expect(ensDbClient.upsertEnsDbVersion).toHaveBeenCalledWith(
+        mockPublicConfig.versionInfo.ensDb,
+      );
+      expect(ensDbClient.upsertEnsIndexerPublicConfig).toHaveBeenCalledWith(mockPublicConfig);
+
+      // cleanup
+      worker.stop();
+    });
+
     it("throws error when worker is already running", async () => {
       // arrange
-      const ensDbClient = createMockEnsDbWriter();
-      const publicConfigBuilder = createMockPublicConfigBuilder();
-      const indexingStatusBuilder = createMockIndexingStatusBuilder();
-
-      const worker = new EnsDbWriterWorker(ensDbClient, publicConfigBuilder, indexingStatusBuilder);
+      const worker = createMockEnsDbWriterWorker();
 
       // act - first run
       await worker.run();
@@ -119,14 +146,11 @@ describe("EnsDbWriterWorker", () => {
 
     it("throws error when config fetch fails", async () => {
       // arrange
-      const networkError = new Error("Network failure");
-      const ensDbClient = createMockEnsDbWriter();
       const publicConfigBuilder = {
-        getPublicConfig: vi.fn().mockRejectedValue(networkError),
+        getPublicConfig: vi.fn().mockRejectedValue(new Error("Network failure")),
       } as unknown as PublicConfigBuilder;
-      const indexingStatusBuilder = createMockIndexingStatusBuilder();
-
-      const worker = new EnsDbWriterWorker(ensDbClient, publicConfigBuilder, indexingStatusBuilder);
+      const ensDbClient = createMockEnsDbWriter();
+      const worker = createMockEnsDbWriterWorker({ ensDbClient, publicConfigBuilder });
 
       // act & assert
       await expect(worker.run()).rejects.toThrow("Network failure");
@@ -136,14 +160,10 @@ describe("EnsDbWriterWorker", () => {
 
     it("throws error when stored config fetch fails", async () => {
       // arrange
-      const dbError = new Error("Database connection lost");
       const ensDbClient = createMockEnsDbWriter({
-        getEnsIndexerPublicConfig: vi.fn().mockRejectedValue(dbError),
+        getEnsIndexerPublicConfig: vi.fn().mockRejectedValue(new Error("Database connection lost")),
       });
-      const publicConfigBuilder = createMockPublicConfigBuilder();
-      const indexingStatusBuilder = createMockIndexingStatusBuilder();
-
-      const worker = new EnsDbWriterWorker(ensDbClient, publicConfigBuilder, indexingStatusBuilder);
+      const worker = createMockEnsDbWriterWorker({ ensDbClient });
 
       // act & assert
       await expect(worker.run()).rejects.toThrow("Database connection lost");
@@ -152,17 +172,16 @@ describe("EnsDbWriterWorker", () => {
 
     it("fetches stored and in-memory configs concurrently", async () => {
       // arrange
-      vi.mocked(validateEnsIndexerPublicConfigCompatibility).mockImplementation(() => {
-        // validation passes
-      });
+      vi.mocked(validateEnsIndexerPublicConfigCompatibility).mockImplementation(() => {});
 
       const ensDbClient = createMockEnsDbWriter({
         getEnsIndexerPublicConfig: vi.fn().mockResolvedValue(mockPublicConfig),
       });
       const publicConfigBuilder = createMockPublicConfigBuilder(mockPublicConfig);
-      const indexingStatusBuilder = createMockIndexingStatusBuilder();
-
-      const worker = new EnsDbWriterWorker(ensDbClient, publicConfigBuilder, indexingStatusBuilder);
+      const worker = createMockEnsDbWriterWorker({
+        ensDbClient,
+        publicConfigBuilder,
+      });
 
       // act
       await worker.run();
@@ -182,9 +201,7 @@ describe("EnsDbWriterWorker", () => {
 
       const ensDbClient = createMockEnsDbWriter();
       const publicConfigBuilder = createMockPublicConfigBuilder();
-      const indexingStatusBuilder = createMockIndexingStatusBuilder();
-
-      const worker = new EnsDbWriterWorker(ensDbClient, publicConfigBuilder, indexingStatusBuilder);
+      const worker = createMockEnsDbWriterWorker({ ensDbClient, publicConfigBuilder });
 
       // act
       await worker.run();
@@ -203,10 +220,7 @@ describe("EnsDbWriterWorker", () => {
       // arrange
       const upsertIndexingStatusSnapshot = vi.fn().mockResolvedValue(undefined);
       const ensDbClient = createMockEnsDbWriter({ upsertIndexingStatusSnapshot });
-      const publicConfigBuilder = createMockPublicConfigBuilder();
-      const indexingStatusBuilder = createMockIndexingStatusBuilder();
-
-      const worker = new EnsDbWriterWorker(ensDbClient, publicConfigBuilder, indexingStatusBuilder);
+      const worker = createMockEnsDbWriterWorker({ ensDbClient });
 
       // act
       await worker.run();
@@ -227,11 +241,7 @@ describe("EnsDbWriterWorker", () => {
   describe("isRunning - worker state", () => {
     it("indicates isRunning status correctly", async () => {
       // arrange
-      const ensDbClient = createMockEnsDbWriter();
-      const publicConfigBuilder = createMockPublicConfigBuilder();
-      const indexingStatusBuilder = createMockIndexingStatusBuilder();
-
-      const worker = new EnsDbWriterWorker(ensDbClient, publicConfigBuilder, indexingStatusBuilder);
+      const worker = createMockEnsDbWriterWorker();
 
       // assert - not running initially
       expect(worker.isRunning).toBe(false);
@@ -268,15 +278,13 @@ describe("EnsDbWriterWorker", () => {
       vi.mocked(buildCrossChainIndexingStatusSnapshotOmnichain).mockReturnValue(crossChainSnapshot);
 
       const ensDbClient = createMockEnsDbWriter();
-      const publicConfigBuilder = createMockPublicConfigBuilder();
       const indexingStatusBuilder = {
         getOmnichainIndexingStatusSnapshot: vi
           .fn()
           .mockResolvedValueOnce(unstartedSnapshot)
           .mockResolvedValueOnce(validSnapshot),
       } as unknown as IndexingStatusBuilder;
-
-      const worker = new EnsDbWriterWorker(ensDbClient, publicConfigBuilder, indexingStatusBuilder);
+      const worker = createMockEnsDbWriterWorker({ ensDbClient, indexingStatusBuilder });
 
       // act - run returns immediately
       await worker.run();
@@ -324,7 +332,6 @@ describe("EnsDbWriterWorker", () => {
           .mockRejectedValueOnce(new Error("DB error"))
           .mockResolvedValueOnce(undefined),
       });
-      const publicConfigBuilder = createMockPublicConfigBuilder();
       const indexingStatusBuilder = {
         getOmnichainIndexingStatusSnapshot: vi
           .fn()
@@ -332,8 +339,7 @@ describe("EnsDbWriterWorker", () => {
           .mockResolvedValueOnce(snapshot2)
           .mockResolvedValueOnce(snapshot2),
       } as unknown as IndexingStatusBuilder;
-
-      const worker = new EnsDbWriterWorker(ensDbClient, publicConfigBuilder, indexingStatusBuilder);
+      const worker = createMockEnsDbWriterWorker({ ensDbClient, indexingStatusBuilder });
 
       // act
       await worker.run();

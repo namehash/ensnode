@@ -12,7 +12,9 @@ import {
   type OmnichainIndexingStatusSnapshot,
   PluginName,
 } from "@ensnode/ensnode-sdk";
+import type { LocalPonderClient } from "@ensnode/ponder-sdk";
 
+import { EnsDbWriterWorker } from "@/lib/ensdb-writer-worker/ensdb-writer-worker";
 import type { IndexingStatusBuilder } from "@/lib/indexing-status-builder";
 import type { PublicConfigBuilder } from "@/lib/public-config-builder";
 
@@ -102,4 +104,38 @@ export function createMockCrossChainSnapshot(
     omnichainSnapshot: createMockOmnichainSnapshot(),
     ...overrides,
   };
+}
+
+export function createMockLocalPonderClient(
+  overrides: { isInDevMode?: boolean } = {},
+): LocalPonderClient {
+  const isInDevMode = overrides.isInDevMode ?? false;
+
+  return {
+    isInDevMode,
+  } as unknown as LocalPonderClient;
+}
+
+export function createMockEnsDbWriterWorker(
+  overrides: {
+    ensDbClient?: EnsDbWriter;
+    publicConfigBuilder?: PublicConfigBuilder;
+    indexingStatusBuilder?: IndexingStatusBuilder;
+    isInDevMode?: boolean;
+  } = {},
+) {
+  const ensDbClient = overrides.ensDbClient ?? createMockEnsDbWriter();
+  const publicConfigBuilder = overrides.publicConfigBuilder ?? createMockPublicConfigBuilder();
+  const indexingStatusBuilder =
+    overrides.indexingStatusBuilder ?? createMockIndexingStatusBuilder();
+  const localPonderClient = createMockLocalPonderClient({
+    isInDevMode: overrides.isInDevMode ?? false,
+  });
+
+  return new EnsDbWriterWorker(
+    ensDbClient,
+    publicConfigBuilder,
+    indexingStatusBuilder,
+    localPonderClient,
+  );
 }
