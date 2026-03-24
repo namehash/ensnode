@@ -34,12 +34,7 @@ const RpcAutoGenModes = {
 } as const;
 
 /**
- * Defines the mode for auto-generating RPCs across indexed chains.
- *
- * - "http-only": Auto-generates only HTTP RPCs for supported chains.
- * - "http-and-ws": Auto-generates both HTTP and WebSocket RPCs for supported chains.
- *
- * The default mode is "http-only" to ensure broad compatibility, as not all chains or providers support WebSocket endpoints. Additionally, the use of websocket RPCs may significantly increase RPC consumption.
+ * The derived string union of possible {@link RpcAutoGenModes}.
  */
 type RpcAutoGenMode = (typeof RpcAutoGenModes)[keyof typeof RpcAutoGenModes];
 
