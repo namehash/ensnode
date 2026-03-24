@@ -11,24 +11,6 @@ import { monkeypatchCollate } from "../lib/collate";
  */
 
 /**
- * Maximum character count for the `subgraph_domain.name` partial index.
- *
- * PostgreSQL B-tree indexes have a maximum size of 8,191 bytes (8KB) per entry.
- * Without a limit, index creation fails for entries exceeding this size.
- * For example, spam domain records with thousands of characters in `name` column
- * cause index creation to fail.
- *
- * UTF-8 uses 1-4 bytes per character. For the safe maximum of 4 bytes:
- * 8,191 ÷ 4 = ~2,000 characters would be the upper bound.
- *
- * We use 255, which is sufficient for virtually all ENS names in practice.
- * This is implemented as a partial index with WHERE length(name) <= 255,
- * which excludes oversized spam entries while still allowing normal lookups
- * (e.g. where: { name: "foo.eth" }) to use the index.
- */
-const BY_NAME_INDEX_MAX_CHARS = 255;
-
-/**
  * Domain
  */
 
@@ -111,7 +93,23 @@ export const subgraph_domain = onchainTable(
     expiryDate: t.bigint(),
   }),
   (t) => ({
-    byName: index().on(t.name).where(sql`length(${t.name}) <= ${BY_NAME_INDEX_MAX_CHARS}`),
+    /**
+     * Maximum character length for the `subgraph_domain.name` partial index.
+     *
+     * PostgreSQL B-tree indexes have a maximum size of 8,191 bytes (8KB) per entry.
+     * Without a limit, index creation fails for entries exceeding this size.
+     * For example, spam domain records with thousands of characters in `name` column
+     * cause index creation to fail.
+     *
+     * UTF-8 uses 1-4 bytes per character. For the safe maximum of 4 bytes:
+     * 8,191 ÷ 4 = ~2,000 characters would be the upper bound.
+     *
+     * We use 255, which is sufficient for virtually all ENS names in practice.
+     * This is implemented as a partial index with WHERE length(name) <= 255,
+     * which excludes oversized spam entries while still allowing normal lookups
+     * (e.g. where: { name: "foo.eth" }) to use the index.
+     */
+    byName: index().on(t.name).where(sql`length(${t.name}) <= 255`),
     byLabelhash: index().on(t.labelhash),
     byParentId: index().on(t.parentId),
     byOwnerId: index().on(t.ownerId),
