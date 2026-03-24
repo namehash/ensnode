@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "ENSApi APIs",
-    "version": "1.8.0",
+    "version": "1.8.1",
     "description": "APIs for ENS resolution, navigating the ENS nameforest, and metadata about an ENSNode"
   },
   "servers": [
@@ -2079,35 +2079,6 @@
           "200": { "description": "Successfully retrieved edition summaries." },
           "500": { "description": "Internal server error" },
           "503": { "description": "Service unavailable" }
-        }
-      }
-    },
-    "/amirealtime": {
-      "get": {
-        "operationId": "getRealtime",
-        "tags": ["Meta"],
-        "summary": "Check indexing progress",
-        "description": "Checks if the indexing progress is guaranteed to be within a requested worst-case distance of realtime",
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "description": "Maximum acceptable worst-case indexing distance in seconds"
-            },
-            "required": false,
-            "description": "Maximum acceptable worst-case indexing distance in seconds",
-            "name": "maxWorstCaseDistance",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Indexing progress is guaranteed to be within the requested distance of realtime"
-          },
-          "503": {
-            "description": "Indexing progress is not guaranteed to be within the requested distance of realtime or indexing status unavailable"
-          }
         }
       }
     }

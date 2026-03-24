@@ -1,4 +1,4 @@
-import config, { initConfig } from "@/config";
+import config, { initEnvConfig } from "@/config";
 
 import { serve } from "@hono/node-server";
 
@@ -12,7 +12,7 @@ import logger from "@/lib/logger";
 
 import app from "./app";
 
-await initConfig(process.env);
+await initEnvConfig(process.env);
 
 // start ENSNode API OpenTelemetry SDK
 sdk.start();
@@ -26,8 +26,12 @@ const server = serve(
   async (info) => {
     logger.info({ config: redactEnsApiConfig(config) }, `ENSApi listening on port ${info.port}`);
 
-    // self-healthcheck to connect to ENSIndexer & warm Indexing Status cache
-    await app.request("/health");
+    // Trigger proactive initialization of the indexing status cache at startup.
+    // SWRCache with proactivelyInitialize: true starts fetching immediately upon
+    // construction, but construction is deferred via the lazy proxy until first
+    // access — so we access it explicitly here rather than waiting for the first
+    // user request.
+    indexingStatusCache.read();
   },
 );
 

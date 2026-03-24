@@ -25,6 +25,8 @@ import type {
   ResolveCallsAndRawResults,
 } from "@/lib/resolution/resolve-calls-and-results";
 
+// lazy() defers construction until first use so that this module can be
+// imported without env vars being present (e.g. during OpenAPI generation).
 const getUniversalResolver = lazy(() =>
   getDatasourceContract(config.namespace, DatasourceNames.ENSRoot, "UniversalResolver"),
 );

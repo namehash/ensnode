@@ -6,7 +6,7 @@
  * Output: docs/docs.ensnode.io/ensapi-openapi.json
  *
  * This script calls generateOpenApi31Document() which uses the real app routes
- * and static metadata. No config initialization is required.
+ * and static metadata. Lazy initialization enables this script to run without config initialization.
  */
 
 import { execFileSync } from "node:child_process";
@@ -14,13 +14,14 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import app from "@/app";
 import { generateOpenApi31Document } from "@/openapi-document";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const outputPath = resolve(__dirname, "..", "docs", "docs.ensnode.io", "ensapi-openapi.json");
 
 // Generate the document (no additional servers for the static spec)
-const document = generateOpenApi31Document();
+const document = generateOpenApi31Document(app);
 
 // Write JSON (Biome handles formatting)
 mkdirSync(dirname(outputPath), { recursive: true });

@@ -45,6 +45,8 @@ const NULL_RESULT: FindResolverResult = {
 
 const tracer = trace.getTracer("find-resolver");
 
+// lazy() defers construction until first use so that this module can be
+// imported without env vars being present (e.g. during OpenAPI generation).
 const getENSv1RegistryOld = lazy(() =>
   getDatasourceContract(config.namespace, DatasourceNames.ENSRoot, "ENSv1RegistryOld"),
 );

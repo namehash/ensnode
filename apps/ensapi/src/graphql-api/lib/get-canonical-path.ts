@@ -17,6 +17,8 @@ import { db } from "@/lib/db";
 import { lazy } from "@/lib/lazy";
 
 const MAX_DEPTH = 16;
+// lazy() defers construction until first use so that this module can be
+// imported without env vars being present (e.g. during OpenAPI generation).
 const getENSv2RootRegistryId = lazy(() => maybeGetENSv2RootRegistryId(config.namespace));
 
 /**

@@ -51,7 +51,8 @@ app.use(createDocumentationMiddleware(makeSubgraphApiDocumentation(), { path: "/
 // inject _meta into the hono (and yoga) context for the subgraph middleware
 app.use(subgraphMetaMiddleware);
 
-// use subgraph middleware
+// lazy() defers construction until first use so that this module can be
+// imported without env vars being present (e.g. during OpenAPI generation).
 const getSubgraphMiddleware = lazy(() =>
   subgraphGraphQLMiddleware({
     databaseUrl: config.databaseUrl,

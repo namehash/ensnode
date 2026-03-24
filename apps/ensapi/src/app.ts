@@ -7,7 +7,7 @@ import { html } from "hono/html";
 import { errorResponse } from "@/lib/handlers/error-response";
 import { createApp } from "@/lib/hono-factory";
 import logger from "@/lib/logger";
-import { openapiMeta } from "@/openapi-meta";
+import { generateOpenApi31Document } from "@/openapi-document";
 
 import realtimeApi from "./handlers/api/meta/realtime-api";
 import apiRouter from "./handlers/api/router";
@@ -17,7 +17,7 @@ import subgraphApi from "./handlers/subgraph/subgraph-api";
 
 const app = createApp();
 
-// set the X-ENSNode-Version header to the current version
+// set the X-ENSNode-Version response header to the current version
 app.use(async (ctx, next) => {
   ctx.header("x-ensnode-version", packageJson.version);
   return next();
@@ -63,12 +63,11 @@ app.route("/v1/ensanalytics", ensanalyticsApiV1);
 // NOTE: this is legacy endpoint and will be deleted in future. one should use /api/realtime instead
 app.route("/amirealtime", realtimeApi);
 
-// serve pre-generated OpenAPI 3.1 document
+// generate and return OpenAPI 3.1 document
 app.get("/openapi.json", (c) => {
-  return c.json(app.getOpenAPI31Document(openapiMeta));
+  return c.json(generateOpenApi31Document(app));
 });
 
-// will automatically 503 if config is not available due to ensIndexerPublicConfigMiddleware
 app.get("/health", async (c) => {
   return c.json({ message: "fallback ok" });
 });

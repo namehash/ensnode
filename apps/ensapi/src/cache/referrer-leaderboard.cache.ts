@@ -26,6 +26,8 @@ import { indexingStatusCache } from "./indexing-status.cache";
 
 const logger = makeLogger("referrer-leaderboard-cache.cache");
 
+// lazy() defers construction until first use so that this module can be
+// imported without env vars being present (e.g. during OpenAPI generation).
 const getRules = lazy(() =>
   buildReferralProgramRules(
     ENS_HOLIDAY_AWARDS_TOTAL_AWARD_POOL_VALUE,

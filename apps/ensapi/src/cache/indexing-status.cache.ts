@@ -12,10 +12,14 @@ import { makeLogger } from "@/lib/logger";
 
 const logger = makeLogger("indexing-status.cache");
 
+// lazy() defers construction until first use so that this module can be
+// imported without env vars being present (e.g. during OpenAPI generation).
 const getClient = lazy(() => new ENSNodeClient({ url: config.ensIndexerUrl }));
 
 type IndexingStatusCache = SWRCache<CrossChainIndexingStatusSnapshot>;
 
+// lazy() defers construction until first use so that this module can be
+// imported without env vars being present (e.g. during OpenAPI generation).
 const _getCache = lazy<IndexingStatusCache>(
   () =>
     new SWRCache<CrossChainIndexingStatusSnapshot>({
@@ -56,6 +60,13 @@ const _getCache = lazy<IndexingStatusCache>(
     }),
 );
 
+// Wraps the lazily-initialized cache in a Proxy so that consumers can import
+// `indexingStatusCache` as a stable object reference and call methods on it
+// directly (e.g. `indexingStatusCache.read()`), without needing to call a
+// getter function.
+//
+// So the Proxy gives a stable reference that looks and feels like a plain object 
+// to the rest of the codebase.
 export const indexingStatusCache = new Proxy({} as IndexingStatusCache, {
   get(_, prop) {
     const cache = _getCache();

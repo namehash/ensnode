@@ -25,6 +25,8 @@ import { getNameTokensRoute } from "./name-tokens-api.routes";
 
 const app = createApp({ middlewares: [indexingStatusMiddleware, nameTokensApiMiddleware] });
 
+// lazy() defers construction until first use so that this module can be
+// imported without env vars being present (e.g. during OpenAPI generation).
 const getIndexedSubregistriesOnce = lazy(() =>
   getIndexedSubregistries(config.namespace, config.ensIndexerPublicConfig.plugins as PluginName[]),
 );
