@@ -52,15 +52,15 @@ ENSNode provides enhanced ENS indexing capabilities beyond the ENS Subgraph, inc
   - ✅ Automatically reconciles chain reorganizations
   - ✅ Deploy anywhere with Node.js & Docker
 - Designed for web developers
-  - ✅ [use ENSNode with ENSjs](https://ensnode.io/docs/usage/with-ensjs/)
-  - ✅ [GraphQL APIs](https://ensnode.io/docs/usage/api/)
+  - ✅ [use ENSNode with ENSjs](https://ensnode.io/docs/usage/with-ensjs)
+  - ✅ [GraphQL APIs](https://ensnode.io/docs/usage/api)
   - ✅ Custom APIs for your app
-- [1:1 Subgraph Compatibility](https://ensnode.io/docs/concepts/what-is-the-ens-subgraph/)
+- [1:1 Subgraph Compatibility](https://ensnode.io/docs/concepts/what-is-the-ens-subgraph)
   - ✅ [100% data equivalency](https://github.com/namehash/ens-subgraph-transition-tools) as compared to Subgraph
   - ✅ 100% ensjs test suites passing via [ens-test-env](https://github.com/namehash/ens-test-env)
   - ✅ 100% ens-app-v3 test suites passing via [ens-test-env](https://github.com/namehash/ens-test-env)
 - Own your ENSNode index
-  - ✅ [Deploy ENSNode to your own cloud](https://ensnode.io/docs/deploying/) for controlling your own uptime guarantees and private queries
+  - ✅ [Deploy ENSNode to your own cloud](https://ensnode.io/docs/deploying) for controlling your own uptime guarantees and private queries
 
 ## Why Index ENS? Why ENSNode?
 
@@ -125,33 +125,33 @@ The ENSNode monorepo contains multiple modules in the following subdirectories:
 <table>
   <tr>
     <td><img alt="ENSadmin" src=".github/assets/ensadmin-light.svg" width="auto" height="44"></td>
-    <td><a href="https://ensnode.io/ensadmin/" target="_blank">ENSAdmin</a></td>
+    <td><a href="https://ensnode.io/ensadmin" target="_blank">ENSAdmin</a></td>
   </tr>
 </table>
 
-ENSAdmin is a dashboard for ENSNode and the ENS protocol. See the [ENSAdmin documentation](https://ensnode.io/ensadmin/) for more details.
+ENSAdmin is a dashboard for ENSNode and the ENS protocol. See the [ENSAdmin documentation](https://ensnode.io/ensadmin) for more details.
 
 ### [`apps/ensindexer`](apps/ensindexer)
 
 <table>
   <tr>
     <td><img alt="ENSIndexer" src=".github/assets/ensindexer-light.svg" width="auto" height="44"></td>
-    <td><a href="https://ensnode.io/ensindexer/" target="_blank">ENSIndexer</a></td>
+    <td><a href="https://ensnode.io/ensindexer" target="_blank">ENSIndexer</a></td>
   </tr>
 </table>
 
-ENSIndexer is a Ponder-powered indexer for ENS across mulitple chains. See the [ENSIndexer documentation](https://ensnode.io/ensindexer/) for more details.
+ENSIndexer is a Ponder-powered indexer for ENS across multiple chains. See the [ENSIndexer documentation](https://ensnode.io/ensindexer) for more details.
 
 ### [`apps/ensrainbow`](apps/ensrainbow)
 
 <table>
   <tr>
     <td><img alt="ENSRainbow" src=".github/assets/ensrainbow-light.svg" width="auto" height="44"></td>
-    <td><a href="https://ensnode.io/ensrainbow/" target="_blank">ENSRainbow</a></td>
+    <td><a href="https://ensnode.io/ensrainbow" target="_blank">ENSRainbow</a></td>
   </tr>
 </table>
 
-ENSRainbow heals unknown ENS names: it provides a simple API to recover labels from their labelHashes. See the [ENSRainbow documentation](https://ensnode.io/ensrainbow/) for more details.
+ENSRainbow heals unknown ENS names: it provides a simple API to recover labels from their labelHashes. See the [ENSRainbow documentation](https://ensnode.io/ensrainbow) for more details.
 
 ## Packages
 

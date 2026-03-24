@@ -2,7 +2,7 @@
 
 [docs.ensnode.io](https://docs.ensnode.io) runs on [Mintlify](https://mintlify.com).
 
-Learn more about [ENSNode](https://ensnode.io) from [the "Starlight" ENSNode docs](https://ensnode.io/docs/). Everything from these "Starlight" docs is planned to be transitioned into these Mintlify docs soon.
+Learn more about [ENSNode](https://ensnode.io) from [the "Starlight" ENSNode docs](https://ensnode.io/docs). Everything from these "Starlight" docs is planned to be transitioned into these Mintlify docs soon.
 
 ## Local Development
 
@@ -34,4 +34,4 @@ Changes pushed to the main branch are automatically deployed to production.
 ## Resources
 
 - [Mintlify documentation](https://mintlify.com/docs)
-- [ENSNode "Starlight" docs](https://ensnode.io/docs/)
+- [ENSNode "Starlight" docs](https://ensnode.io/docs)
