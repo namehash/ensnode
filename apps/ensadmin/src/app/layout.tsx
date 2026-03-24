@@ -63,7 +63,7 @@ export default function Layout({
         <QueryClientProvider>
           <Suspense>
             <ConnectionsLibraryProvider>
-              <UseClearUrlParams allowedParams={{ name: ["/name"] }} />
+              <UseClearUrlParams allowedParams={{ name: ["/name", "/inspect/records"] }} />
               <LayoutWrapper breadcrumbs={breadcrumbs} actions={actions}>
                 {children}
               </LayoutWrapper>
