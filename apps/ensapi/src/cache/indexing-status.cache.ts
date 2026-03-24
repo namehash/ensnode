@@ -7,14 +7,14 @@ import {
   SWRCache,
 } from "@ensnode/ensnode-sdk";
 
-import { lazy, lazyProxy } from "@/lib/lazy";
+import { lazyProxy } from "@/lib/lazy";
 import { makeLogger } from "@/lib/logger";
 
 const logger = makeLogger("indexing-status.cache");
 
-// lazy() defers construction until first use so that this module can be
+// lazyProxy defers construction until first use so that this module can be
 // imported without env vars being present (e.g. during OpenAPI generation).
-const getClient = lazy(() => new ENSNodeClient({ url: config.ensIndexerUrl }));
+const client = lazyProxy(() => new ENSNodeClient({ url: config.ensIndexerUrl }));
 
 type IndexingStatusCache = SWRCache<CrossChainIndexingStatusSnapshot>;
 
@@ -24,7 +24,7 @@ export const indexingStatusCache = lazyProxy<IndexingStatusCache>(
   () =>
     new SWRCache<CrossChainIndexingStatusSnapshot>({
       fn: async (_cachedResult) =>
-        getClient()
+        client
           .indexingStatus() // fetch a new indexing status snapshot
           .then((response) => {
             if (response.responseCode !== IndexingStatusResponseCodes.Ok) {

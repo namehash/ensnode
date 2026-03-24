@@ -79,14 +79,13 @@ type ReferralProgramEditionConfigSetCache = SWRCache<ReferralProgramEditionConfi
  */
 // lazyProxy defers construction until first use so that this module can be
 // imported without env vars being present (e.g. during OpenAPI generation).
-export const referralProgramEditionConfigSetCache =
-  lazyProxy<ReferralProgramEditionConfigSetCache>(
-    () =>
-      new SWRCache<ReferralProgramEditionConfigSet>({
-        fn: loadReferralProgramEditionConfigSet,
-        ttl: Number.POSITIVE_INFINITY,
-        errorTtl: minutesToSeconds(1),
-        proactiveRevalidationInterval: undefined,
-        proactivelyInitialize: true,
-      }),
-  );
+export const referralProgramEditionConfigSetCache = lazyProxy<ReferralProgramEditionConfigSetCache>(
+  () =>
+    new SWRCache<ReferralProgramEditionConfigSet>({
+      fn: loadReferralProgramEditionConfigSet,
+      ttl: Number.POSITIVE_INFINITY,
+      errorTtl: minutesToSeconds(1),
+      proactiveRevalidationInterval: undefined,
+      proactivelyInitialize: true,
+    }),
+);

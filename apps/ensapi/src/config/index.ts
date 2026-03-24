@@ -40,10 +40,9 @@ export default new Proxy({} as EnsApiConfig, {
   },
 });
 
-
 const err = (prop: string | symbol) => {
   throw new Error(
     `Config not initialized — call initConfig() before accessing config.${String(prop)}
         Probably you access config in top level of the module. Use @/lib/lazy for lazy loading dependencies.`,
   );
-}
+};

@@ -27,7 +27,7 @@ import {
 
 import { db } from "@/lib/db";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/instrumentation/auto-span";
-import { lazy } from "@/lib/lazy";
+import { lazyProxy } from "@/lib/lazy";
 
 type FindResolverResult =
   | {
@@ -45,9 +45,9 @@ const NULL_RESULT: FindResolverResult = {
 
 const tracer = trace.getTracer("find-resolver");
 
-// lazy() defers construction until first use so that this module can be
+// lazyProxy defers construction until first use so that this module can be
 // imported without env vars being present (e.g. during OpenAPI generation).
-const getENSv1RegistryOld = lazy(() =>
+const ensv1RegistryOld = lazyProxy(() =>
   getDatasourceContract(config.namespace, DatasourceNames.ENSRoot, "ENSv1RegistryOld"),
 );
 
@@ -222,8 +222,8 @@ async function findResolverWithIndex(
                   // OR, if the registry is the ENS Root Registry, also include records from RegistryOld
                   isENSv1Registry(config.namespace, registry)
                     ? and(
-                        eq(t.chainId, getENSv1RegistryOld().chainId),
-                        eq(t.address, getENSv1RegistryOld().address),
+                        eq(t.chainId, ensv1RegistryOld.chainId),
+                        eq(t.address, ensv1RegistryOld.address),
                       )
                     : undefined,
                 ),

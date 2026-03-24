@@ -19,16 +19,16 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { getReferrerLeaderboard } from "@/lib/ensanalytics/referrer-leaderboard";
-import { lazy, lazyProxy } from "@/lib/lazy";
+import { lazyProxy } from "@/lib/lazy";
 import { makeLogger } from "@/lib/logger";
 
 import { indexingStatusCache } from "./indexing-status.cache";
 
 const logger = makeLogger("referrer-leaderboard-cache.cache");
 
-// lazy() defers construction until first use so that this module can be
+// lazyProxy defers construction until first use so that this module can be
 // imported without env vars being present (e.g. during OpenAPI generation).
-const getRules = lazy(() =>
+const rules = lazyProxy(() =>
   buildReferralProgramRules(
     ENS_HOLIDAY_AWARDS_TOTAL_AWARD_POOL_VALUE,
     ENS_HOLIDAY_AWARDS_MAX_QUALIFIED_REFERRERS,
@@ -72,7 +72,6 @@ export const referrerLeaderboardCache = lazyProxy<ReferrerLeaderboardCache>(
           );
         }
 
-        const rules = getRules();
         const latestIndexedBlockRef = getLatestIndexedBlockRef(
           indexingStatus,
           rules.subregistryId.chainId,

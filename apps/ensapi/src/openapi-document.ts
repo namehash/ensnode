@@ -19,13 +19,11 @@ function removeHiddenEndpoints(doc: OpenApiDocument): OpenApiDocument {
 
 /**
  * Generates an OpenAPI 3.1 document from the registered routes.
- * 
+ *
  * Generation script and the runtime endpoint share the same function so that
  * the generated OpenAPI document is always in sync with the actual API.
  */
-export function generateOpenApi31Document(
-  app: OpenAPIHono<any>,
-): OpenApiDocument {
+export function generateOpenApi31Document(app: OpenAPIHono<any>): OpenApiDocument {
   const doc = app.getOpenAPI31Document(openapiMeta);
   return removeHiddenEndpoints(doc);
 }

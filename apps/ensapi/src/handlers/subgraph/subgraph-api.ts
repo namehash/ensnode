@@ -6,8 +6,8 @@ import * as schema from "@ensnode/ensdb-sdk";
 import { type Duration, hasSubgraphApiConfigSupport } from "@ensnode/ensnode-sdk";
 import { subgraphGraphQLMiddleware } from "@ensnode/ponder-subgraph";
 
-import { lazy } from "@/lib/lazy";
 import { createApp } from "@/lib/hono-factory";
+import { lazy } from "@/lib/lazy";
 import { makeSubgraphApiDocumentation } from "@/lib/subgraph/api-documentation";
 import { filterSchemaByPrefix } from "@/lib/subgraph/filter-schema-by-prefix";
 import { fixContentLengthMiddleware } from "@/middleware/fix-content-length.middleware";
