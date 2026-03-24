@@ -81,11 +81,9 @@ export default function ResolveRecordsInspector() {
 
   const [inputName, setInputName] = useState(nameFromQuery ?? "");
 
-  // Sync input with URL param when it changes (e.g., clicking examples)
+  // Sync input with URL param when it changes (e.g., clicking examples or navigating back)
   useEffect(() => {
-    if (nameFromQuery !== null) {
-      setInputName(nameFromQuery);
-    }
+    setInputName(nameFromQuery ?? "");
   }, [nameFromQuery]);
 
   const selection = DefaultRecordsSelection[namespace];
