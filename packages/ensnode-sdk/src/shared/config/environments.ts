@@ -15,6 +15,7 @@ export interface RpcEnvironment {
   QUICKNODE_API_KEY?: string;
   QUICKNODE_ENDPOINT_NAME?: string;
   DRPC_API_KEY?: string;
+  RPC_AUTO_GEN_MODE?: string;
 }
 
 /**
