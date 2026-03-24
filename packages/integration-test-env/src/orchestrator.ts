@@ -312,7 +312,7 @@ async function main() {
 
   // Phase 3: Start ENSIndexer
   const ENSINDEXER_URL = `http://localhost:${ENSINDEXER_PORT}`;
-  const ENSINDEXER_SCHEMA_NAME = "ensindexer_0";
+  const ENSINDEXER_SCHEMA_NAME = "public";
 
   log("Starting ENSIndexer...");
   spawnService(
