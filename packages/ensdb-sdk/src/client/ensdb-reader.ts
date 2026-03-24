@@ -90,7 +90,7 @@ export class EnsDbReader<
    *
    * Useful while working on complex queries for ENSDb.
    */
-  get drizzle(): EnsDbDrizzleClient<ConcreteEnsIndexerSchema> {
+  get ensDb(): EnsDbDrizzleClient<ConcreteEnsIndexerSchema> {
     return this.drizzleClient;
   }
 
@@ -102,8 +102,8 @@ export class EnsDbReader<
    *
    * Note: using `ensIndexerSchema` name for this getter to make it read better
    * in the context of query building. For example:
-   * `this.drizzle.select().from(this.ensIndexerSchema.event)` vs.
-   * `this.drizzle.select().from(this.concreteEnsIndexerSchema.event)`.
+   * `this.ensDb.select().from(this.ensIndexerSchema.event)` vs.
+   * `this.ensDb.select().from(this.concreteEnsIndexerSchema.event)`.
    */
   get ensIndexerSchema(): ConcreteEnsIndexerSchema {
     return this._concreteEnsIndexerSchema;
@@ -179,7 +179,7 @@ export class EnsDbReader<
   private async getEnsNodeMetadata<EnsNodeMetadataType extends SerializedEnsNodeMetadata>(
     metadata: Pick<EnsNodeMetadataType, "key">,
   ): Promise<EnsNodeMetadataType["value"] | undefined> {
-    const result = await this.drizzle
+    const result = await this.ensDb
       .select()
       .from(this.ensNodeSchema.metadata)
       .where(

@@ -79,7 +79,7 @@ export class EnsDbWriter extends EnsDbReader {
    * @throws when upsert operation failed.
    */
   private async upsertEnsNodeMetadata(metadata: SerializedEnsNodeMetadata): Promise<void> {
-    await this.drizzle
+    await this.ensDb
       .insert(this.ensNodeSchema.metadata)
       .values({
         ensIndexerSchemaName: this.ensIndexerSchemaName,

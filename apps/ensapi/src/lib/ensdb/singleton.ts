@@ -10,10 +10,10 @@ const { databaseUrl: ensDbConnectionString, ensIndexerSchemaName } = ensDbConfig
 export const ensDbClient = new EnsDbReader(ensDbConnectionString, ensIndexerSchemaName);
 
 /**
- * Convenience alias for {@link ensDbClient.drizzle} to be used for building
+ * Convenience alias for {@link ensDbClient.ensDb} to be used for building
  * custom ENSDb queries throughout the ENSApi codebase.
  */
-export const ensDb = ensDbClient.drizzle;
+export const ensDb = ensDbClient.ensDb;
 
 /**
  * Convenience alias for {@link ensDbClient.ensIndexerSchema} to be used for building
