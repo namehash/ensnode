@@ -127,7 +127,7 @@ More examples are available in [`packages/ens-referrals/src/v1/client.ts`](src/v
 The package also includes helpers for building referral links.
 
 ```typescript
-import { buildEnsReferralUrl } from "@namehash/ens-referrals";
+import { buildEnsReferralUrl } from "@namehash/ens-referrals/v1";
 import type { Address } from "viem";
 
 const referrerAddress: Address = "0xd8da6bf26964af9d7eed9e03e53415d37aa96045";
