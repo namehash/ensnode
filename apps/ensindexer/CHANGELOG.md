@@ -1,5 +1,18 @@
 # ensindexer
 
+## 1.8.1
+
+### Patch Changes
+
+- [#1735](https://github.com/namehash/ensnode/pull/1735) [`eff25f9`](https://github.com/namehash/ensnode/commit/eff25f99a05643128dd85bf19ea563b5be027a39) Thanks [@djstrong](https://github.com/djstrong)! - Add retry-with-backoff for ENSRainbow `heal()` calls during indexing. Transient failures (network errors and server errors) are retried up to 3 times with exponential backoff, with a warning logged on each failed attempt. This prevents a single transient ENSRainbow error from causing indexing to fail.
+
+- Updated dependencies [[`12f279d`](https://github.com/namehash/ensnode/commit/12f279da603da358869a709cc8a7a8c0d56080e5)]:
+  - @ensnode/ensdb-sdk@1.8.1
+  - @ensnode/datasources@1.8.1
+  - @ensnode/ensrainbow-sdk@1.8.1
+  - @ensnode/ensnode-sdk@1.8.1
+  - @ensnode/ponder-sdk@1.8.1
+
 ## 1.8.0
 
 ### Minor Changes

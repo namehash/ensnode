@@ -7,7 +7,7 @@ import {
   type EnsRainbowPublicConfig,
   PluginName,
 } from "@ensnode/ensnode-sdk";
-import type { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
+import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
 
 import { PublicConfigBuilder } from "./public-config-builder";
 
@@ -98,7 +98,7 @@ describe("PublicConfigBuilder", () => {
       // Arrange
       const ensRainbowClientMock = {
         config: vi.fn().mockResolvedValue(mockEnsRainbowConfig),
-      } as unknown as EnsRainbowApiClient;
+      } as unknown as EnsRainbow.ApiClient;
 
       setupStandardMocks();
       const mockPublicConfig = createMockPublicConfig();
@@ -142,7 +142,7 @@ describe("PublicConfigBuilder", () => {
       // Arrange
       const ensRainbowClientMock = {
         config: vi.fn().mockResolvedValue(mockEnsRainbowConfig),
-      } as unknown as EnsRainbowApiClient;
+      } as unknown as EnsRainbow.ApiClient;
 
       setupStandardMocks();
       const mockPublicConfig = createMockPublicConfig();
@@ -180,7 +180,7 @@ describe("PublicConfigBuilder", () => {
 
       const ensRainbowClientMock = {
         config: vi.fn().mockResolvedValue(mockEnsRainbowConfig),
-      } as unknown as EnsRainbowApiClient;
+      } as unknown as EnsRainbow.ApiClient;
 
       vi.mocked(getEnsIndexerVersion).mockReturnValue("2.0.0");
       vi.mocked(getNodeJsVersion).mockReturnValue("22.0.0");
@@ -222,7 +222,7 @@ describe("PublicConfigBuilder", () => {
 
       const ensRainbowClientMock = {
         config: vi.fn().mockResolvedValue(customEnsRainbowConfig),
-      } as unknown as EnsRainbowApiClient;
+      } as unknown as EnsRainbow.ApiClient;
 
       setupStandardMocks();
       vi.mocked(validateEnsIndexerPublicConfig).mockReturnValue(customConfig);
@@ -244,7 +244,7 @@ describe("PublicConfigBuilder", () => {
       const ensRainbowError = new Error("ENSRainbow service unavailable");
       const ensRainbowClientMock = {
         config: vi.fn().mockRejectedValue(ensRainbowError),
-      } as unknown as EnsRainbowApiClient;
+      } as unknown as EnsRainbow.ApiClient;
 
       setupStandardMocks();
 
@@ -260,7 +260,7 @@ describe("PublicConfigBuilder", () => {
       // Arrange
       const ensRainbowClientMock = {
         config: vi.fn().mockResolvedValue(mockEnsRainbowConfig),
-      } as unknown as EnsRainbowApiClient;
+      } as unknown as EnsRainbow.ApiClient;
 
       setupStandardMocks();
 
@@ -281,7 +281,7 @@ describe("PublicConfigBuilder", () => {
       // Arrange
       const ensRainbowClientMock = {
         config: vi.fn().mockResolvedValue(mockEnsRainbowConfig),
-      } as unknown as EnsRainbowApiClient;
+      } as unknown as EnsRainbow.ApiClient;
 
       setupStandardMocks();
 
@@ -310,7 +310,7 @@ describe("PublicConfigBuilder", () => {
           callCount++;
           return Promise.resolve(mockEnsRainbowConfig);
         }),
-      } as unknown as EnsRainbowApiClient;
+      } as unknown as EnsRainbow.ApiClient;
 
       setupStandardMocks();
 
@@ -339,7 +339,7 @@ describe("PublicConfigBuilder", () => {
       // Arrange
       const ensRainbowClientMock = {
         config: vi.fn().mockRejectedValueOnce(new Error("ENSRainbow down")),
-      } as unknown as EnsRainbowApiClient;
+      } as unknown as EnsRainbow.ApiClient;
 
       const builder = new PublicConfigBuilder(ensRainbowClientMock);
 
