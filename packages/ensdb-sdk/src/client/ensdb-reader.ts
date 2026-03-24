@@ -64,7 +64,7 @@ export class EnsDbReader<
    * This also identifies which ENSNode metadata records to read from the ENSNode Schema
    * as the ENSNode Schema is multi-tenant across ENSIndexer instances / ENSIndexer Schemas in an ENSDb.
    */
-  protected ensIndexerSchemaName: string;
+  protected _ensIndexerSchemaName: string;
 
   protected _ensNodeSchema: EnsNodeSchema;
 
@@ -81,7 +81,7 @@ export class EnsDbReader<
     );
     this.drizzleClient = ensDbDrizzleClient;
     this._concreteEnsIndexerSchema = concreteEnsIndexerSchema;
-    this.ensIndexerSchemaName = ensIndexerSchemaName;
+    this._ensIndexerSchemaName = ensIndexerSchemaName;
     this._ensNodeSchema = ensNodeSchema;
   }
 
@@ -107,6 +107,13 @@ export class EnsDbReader<
    */
   get ensIndexerSchema(): ConcreteEnsIndexerSchema {
     return this._concreteEnsIndexerSchema;
+  }
+
+  /**
+   * Getter for the ENSIndexer Schema Name used by this ENSDbReader instance.
+   */
+  get ensIndexerSchemaName(): string {
+    return this._ensIndexerSchemaName;
   }
 
   /**

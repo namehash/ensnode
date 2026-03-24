@@ -1,3 +1,4 @@
+import { EnsNodeMetadataKeys } from "@ensnode/ensdb-sdk";
 import { type CrossChainIndexingStatusSnapshot, SWRCache } from "@ensnode/ensnode-sdk";
 
 import { ensDbClient } from "@/lib/ensdb/singleton";
@@ -18,8 +19,6 @@ export const indexingStatusCache = new SWRCache<CrossChainIndexingStatusSnapshot
           throw new Error("Indexing Status snapshot not found in ENSDb yet.");
         }
 
-        logger.info("Fetched Indexing Status to be cached");
-
         // The indexing status snapshot has been fetched and successfully validated for caching.
         // Therefore, return it so that this current invocation of `readCache` will:
         // - Replace the currently cached value (if any) with this new value.
@@ -33,11 +32,15 @@ export const indexingStatusCache = new SWRCache<CrossChainIndexingStatusSnapshot
         // - Return the most recently cached value from prior invocations, or `null` if no prior invocation successfully cached a value.
         logger.error(
           error,
-          "Error occurred while fetching a new indexing status snapshot. The cached indexing status snapshot (if any) will not be updated.",
+          `Error occurred while loading Indexing Status snapshot record from ENSNode Metadata table in ENSDb. ` +
+            `Where clause applied: ("ensIndexerSchemaName" = "${ensDbClient.ensIndexerSchemaName}", "key" = "${EnsNodeMetadataKeys.EnsIndexerIndexingStatus}"). ` +
+            `The cached indexing status snapshot (if any) will not be updated.`,
         );
         throw error;
       }),
-  ttl: 5, // 5 seconds
-  proactiveRevalidationInterval: 10, // 10 seconds
+  // We need to refresh the indexing status cache very frequently.
+  // ENSDb won't have issues handling this frequency of queries.
+  ttl: 1, // 1 second
+  proactiveRevalidationInterval: 1, // 1 second
   proactivelyInitialize: true,
 });
