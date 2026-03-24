@@ -2,4 +2,4 @@
 "ensapi": minor
 ---
 
-Updated data source for Indexing Status snapshot, from Indexing Status API route to ENSDb.
+Decoupled ENSApi from ENSIndexer by updating the data source for Indexing Status snapshots, from ENSIndexer's Indexing Status API route to ENSDb.

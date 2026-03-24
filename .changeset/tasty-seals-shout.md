@@ -2,4 +2,4 @@
 "ensapi": minor
 ---
 
-Updated data source for `EnsIndexerPublicConfig`, from ENSIndexer to ENSDb.
+Decoupled ENSApi from ENSIndexer by updating the data source for `EnsIndexerPublicConfig` from ENSIndexer to ENSDb.
