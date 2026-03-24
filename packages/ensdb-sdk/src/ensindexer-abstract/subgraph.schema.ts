@@ -1,4 +1,4 @@
-import { index, onchainTable, relations } from "ponder";
+import { index, onchainTable, relations, sql } from "ponder";
 import type { Address } from "viem";
 
 import { monkeypatchCollate } from "../lib/collate";
@@ -9,6 +9,24 @@ import { monkeypatchCollate } from "../lib/collate";
  * When the subgraph_prefix is stripped and the resulting schema is paired with @ensnode/ponder-subgraph,
  * the resulting GraphQL API is fully compatible with the legacy ENS Subgraph.
  */
+
+/**
+ * Maximum character count for the `subgraph_domain.name` index.
+ *
+ * PostgreSQL B-tree indexes have a maximum size of 8,191 bytes (8KB) per entry.
+ * Without a limit, index creation fails for entries exceeding this size.
+ * For example, spam domain records with thousands of characters in `name` column
+ * cause index creation to fail.
+ *
+ * UTF-8 uses 1-4 bytes per character. For the safe maximum of 4 bytes:
+ * 8,191 ÷ 4 = ~2,000 characters would be the upper bound.
+ *
+ * We use 255, which is sufficient for virtually all ENS names in practice.
+ * This handles known spam entries (~6,800 chars)
+ * by indexing only their first 255 characters, which is acceptable since
+ * these represent abusive data not meaningful to index fully.
+ */
+const BY_NAME_INDEX_MAX_CHARS = 255;
 
 /**
  * Domain
@@ -93,7 +111,7 @@ export const subgraph_domain = onchainTable(
     expiryDate: t.bigint(),
   }),
   (t) => ({
-    byName: index().on(t.name),
+    byName: index().on(sql`left(${t.name}, ${BY_NAME_INDEX_MAX_CHARS})`),
     byLabelhash: index().on(t.labelhash),
     byParentId: index().on(t.parentId),
     byOwnerId: index().on(t.ownerId),
