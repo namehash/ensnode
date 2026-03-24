@@ -13,7 +13,10 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { RenderRequestsOutput } from "@/app/inspect/_components/render-requests-output";
-import { getNameDetailsRelativePath } from "@/components/name-links";
+import {
+  getNameDetailsRelativePath,
+  getRecordResolutionRelativePath,
+} from "@/components/name-links";
 import { Pill } from "@/components/pill";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -60,13 +63,6 @@ const EXAMPLE_NAMES: NamespaceSpecificValue<string[]> = {
     "wallet.linked.parent.eth",
   ],
 };
-
-/**
- * Gets the relative path of the record resolution inspector page for a given name.
- */
-export function getRecordResolutionRelativePath(name: string): string {
-  return `/inspect/records?name=${encodeURIComponent(name)}`;
-}
 
 // TODO: showcase current ENSNode configuration and viable acceleration pathways?
 // TODO: use shadcn/form, react-hook-form, and zod to make all of this nicer aross the board
