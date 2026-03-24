@@ -7,7 +7,7 @@ import {
   SWRCache,
 } from "@ensnode/ensnode-sdk";
 
-import { lazy } from "@/lib/lazy";
+import { lazy, lazyProxy } from "@/lib/lazy";
 import { makeLogger } from "@/lib/logger";
 
 const logger = makeLogger("indexing-status.cache");
@@ -18,9 +18,9 @@ const getClient = lazy(() => new ENSNodeClient({ url: config.ensIndexerUrl }));
 
 type IndexingStatusCache = SWRCache<CrossChainIndexingStatusSnapshot>;
 
-// lazy() defers construction until first use so that this module can be
+// lazyProxy defers construction until first use so that this module can be
 // imported without env vars being present (e.g. during OpenAPI generation).
-const _getCache = lazy<IndexingStatusCache>(
+export const indexingStatusCache = lazyProxy<IndexingStatusCache>(
   () =>
     new SWRCache<CrossChainIndexingStatusSnapshot>({
       fn: async (_cachedResult) =>
@@ -59,21 +59,3 @@ const _getCache = lazy<IndexingStatusCache>(
       proactivelyInitialize: true,
     }),
 );
-
-// Wraps the lazily-initialized cache in a Proxy so that consumers can import
-// `indexingStatusCache` as a stable object reference and call methods on it
-// directly (e.g. `indexingStatusCache.read()`), without needing to call a
-// getter function.
-//
-// So the Proxy gives a stable reference that looks and feels like a plain object 
-// to the rest of the codebase.
-export const indexingStatusCache = new Proxy({} as IndexingStatusCache, {
-  get(_, prop) {
-    const cache = _getCache();
-    const value = Reflect.get(cache, prop as string, cache);
-    if (typeof value === "function") {
-      return (value as (...args: unknown[]) => unknown).bind(cache);
-    }
-    return value;
-  },
-});

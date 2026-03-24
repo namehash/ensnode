@@ -19,7 +19,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { getReferrerLeaderboard } from "@/lib/ensanalytics/referrer-leaderboard";
-import { lazy } from "@/lib/lazy";
+import { lazy, lazyProxy } from "@/lib/lazy";
 import { makeLogger } from "@/lib/logger";
 
 import { indexingStatusCache } from "./indexing-status.cache";
@@ -52,7 +52,9 @@ const supportedOmnichainIndexingStatuses: OmnichainIndexingStatusId[] = [
 
 type ReferrerLeaderboardCache = SWRCache<ReferrerLeaderboard>;
 
-const _getCache = lazy<ReferrerLeaderboardCache>(
+// lazyProxy defers construction until first use so that this module can be
+// imported without env vars being present (e.g. during OpenAPI generation).
+export const referrerLeaderboardCache = lazyProxy<ReferrerLeaderboardCache>(
   () =>
     new SWRCache<ReferrerLeaderboard>({
       fn: async (_cachedResult) => {
@@ -99,14 +101,3 @@ const _getCache = lazy<ReferrerLeaderboardCache>(
       proactivelyInitialize: true,
     }),
 );
-
-export const referrerLeaderboardCache = new Proxy({} as ReferrerLeaderboardCache, {
-  get(_, prop) {
-    const cache = _getCache();
-    const value = Reflect.get(cache, prop as string, cache);
-    if (typeof value === "function") {
-      return (value as (...args: unknown[]) => unknown).bind(cache);
-    }
-    return value;
-  },
-});

@@ -3,28 +3,16 @@ import config from "@/config";
 import * as schema from "@ensnode/ensdb-sdk";
 
 import { makeDrizzle } from "@/lib/handlers/drizzle";
-import { lazy } from "@/lib/lazy";
+import { lazyProxy } from "@/lib/lazy";
 
 type Db = ReturnType<typeof makeDrizzle<typeof schema>>;
 
-const _getDb = lazy<Db>(() =>
+// lazyProxy defers construction until first use so that this module can be
+// imported without env vars being present (e.g. during OpenAPI generation).
+export const db = lazyProxy<Db>(() =>
   makeDrizzle({
     databaseUrl: config.databaseUrl,
     databaseSchema: config.databaseSchemaName,
     schema,
   }),
 );
-
-export const db = new Proxy({} as Db, {
-  get(_, prop) {
-    const realDb = _getDb();
-    const value = Reflect.get(realDb, prop as string, realDb);
-    if (typeof value === "function") {
-      return (value as (...args: unknown[]) => unknown).bind(realDb);
-    }
-    return value;
-  },
-  has(_, prop) {
-    return Reflect.has(_getDb(), prop);
-  },
-});
