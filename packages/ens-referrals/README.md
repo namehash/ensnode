@@ -2,7 +2,7 @@
 
 Utilities for working with ENS Referrals data. This package is intended for developers who want to build referral dashboards, stats pages, or other integrations on top of ENS Referrals APIs.
 
-The main entry point today is [`v1`](./src/v1), which includes the current client and response types for the latest ENS Referrals program format.
+The main entry point today is [`v1`](packages\ens-referrals\src\v1), which includes the current client and response types for the latest ENS Referrals program format.
 
 ## Installation
 
@@ -14,8 +14,8 @@ npm install @namehash/ens-referrals viem
 
 `v1` is the recommended version for new integrations.
 
-- `v1` is the actively supported version that reflects the current ENS Referrals program rules and awards.
-- `v0` is kept only for backwards compatibility with the ENS Holiday Awards edition.
+- [`v1`](packages\ens-referrals\src\v1) is the actively supported version that reflects the current ENS Referrals program rules and awards.
+- The root [`@namehash/ens-referrals`](packages\ens-referrals\src\client.ts) import is kept only for backwards compatibility with the ENS Holiday Awards edition.
 
 ### Set up `ENSReferralsClient`
 
@@ -56,7 +56,7 @@ if (response.responseCode === ReferralProgramEditionSummariesResponseCodes.Ok) {
 }
 ```
 
-More examples are available in [`packages/ens-referrals/src/v1/client.ts`](./src/v1/client.ts).
+More examples are available in [`packages/ens-referrals/src/v1/client.ts`](packages\ens-referrals\src\v1\client.ts).
 
 ### Get the referrer leaderboard page &rarr; `getReferrerLeaderboardPage()`
 
@@ -87,7 +87,7 @@ if (response.responseCode === ReferrerLeaderboardPageResponseCodes.Ok) {
 }
 ```
 
-More examples are available in [`packages/ens-referrals/src/v1/client.ts`](./src/v1/client.ts).
+More examples are available in [`packages/ens-referrals/src/v1/client.ts`](packages\ens-referrals\src\v1\client.ts).
 
 ### Get single referrer data &rarr; `getReferrerMetricsEditions()`
 
@@ -120,7 +120,7 @@ if (response.responseCode === ReferrerMetricsEditionsResponseCodes.Ok) {
 }
 ```
 
-More examples are available in [`packages/ens-referrals/src/v1/client.ts`](./src/v1/client.ts).
+More examples are available in [`packages/ens-referrals/src/v1/client.ts`](packages\ens-referrals\src\v1\client.ts).
 
 ## Other Utilities
 
