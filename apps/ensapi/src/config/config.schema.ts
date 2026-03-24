@@ -63,6 +63,9 @@ export type EnsApiConfig = z.infer<typeof EnsApiConfigSchema>;
  */
 export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promise<EnsApiConfig> {
   try {
+    // TODO: transfer the responsibility of fetching
+    // the ENSIndexer Public Config to a middleware layer, as per:
+    // https://github.com/namehash/ensnode/issues/1806
     const ensIndexerPublicConfig = await pRetry(
       async () => {
         const config = await ensDbClient.getEnsIndexerPublicConfig();
