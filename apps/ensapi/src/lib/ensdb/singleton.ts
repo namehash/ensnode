@@ -2,12 +2,12 @@ import { EnsDbReader } from "@ensnode/ensdb-sdk";
 
 import ensDbConfig from "@/config/ensdb-config";
 
-const { databaseUrl: ensDbConnectionString, ensIndexerSchemaName } = ensDbConfig;
+const { databaseUrl: ensDbUrl, ensIndexerSchemaName } = ensDbConfig;
 
 /**
  * Singleton instance of ENSDbReader for the ENSApi application.
  */
-export const ensDbClient = new EnsDbReader(ensDbConnectionString, ensIndexerSchemaName);
+export const ensDbClient = new EnsDbReader(ensDbUrl, ensIndexerSchemaName);
 
 /**
  * Convenience alias for {@link ensDbClient.ensDb} to be used for building

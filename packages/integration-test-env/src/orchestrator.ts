@@ -185,12 +185,12 @@ function spawnService(
 }
 
 async function pollIndexingStatus(
-  ensDbConnectionString: string,
+  ensDbUrl: string,
   ensIndexerSchemaName: string,
   timeoutMs: number,
 ): Promise<void> {
   const client = new (await import("@ensnode/ensdb-sdk")).EnsDbReader(
-    ensDbConnectionString,
+    ensDbUrl,
     ensIndexerSchemaName,
   );
 

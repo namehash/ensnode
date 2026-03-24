@@ -69,14 +69,14 @@ export class EnsDbReader<
   protected _ensNodeSchema: EnsNodeSchema;
 
   /**
-   * @param ensDbConnectionString The connection string for Drizzle to connect to the ENSDb instance.
+   * @param ensDbUrl The connection string for Drizzle to connect to the ENSDb instance.
    * @param ensIndexerSchemaName The name of the ENSIndexer schema to read from in ENSDb, used to identify which ENSNode metadata records to read.
    */
-  constructor(ensDbConnectionString: string, ensIndexerSchemaName: string) {
+  constructor(ensDbUrl: string, ensIndexerSchemaName: string) {
     const { concreteEnsIndexerSchema, ensNodeSchema } =
       buildIndividualEnsDbSchemas<ConcreteEnsIndexerSchema>(ensIndexerSchemaName);
     const ensDbDrizzleClient = buildEnsDbDrizzleClient<ConcreteEnsIndexerSchema>(
-      ensDbConnectionString,
+      ensDbUrl,
       concreteEnsIndexerSchema,
     );
     this.drizzleClient = ensDbDrizzleClient;
