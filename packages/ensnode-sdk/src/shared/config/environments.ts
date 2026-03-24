@@ -1,7 +1,15 @@
 /**
- * Environment variables for database configuration.
+ * Environment variables for ENSApi database configuration.
  */
-export interface DatabaseEnvironment {
+export interface EnsApiDatabaseEnvironment {
+  DATABASE_URL?: string;
+  ENSINDEXER_SCHEMA_NAME?: string;
+}
+
+/**
+ * Environment variables for ENSIndexer database configuration.
+ */
+export interface EnsIndexerDatabaseEnvironment {
   DATABASE_URL?: string;
   DATABASE_SCHEMA?: string;
 }
