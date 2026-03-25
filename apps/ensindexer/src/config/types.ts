@@ -1,8 +1,8 @@
 import type { ENSNamespaceId } from "@ensnode/datasources";
 import type { BlockNumberRange, ChainId, PluginName } from "@ensnode/ensnode-sdk";
 import {
-  type DatabaseSchemaName,
   type DatabaseUrl,
+  type EnsIndexerSchemaName,
   RpcConfig,
   type RpcConfigs,
 } from "@ensnode/ensnode-sdk/internal";
@@ -38,15 +38,15 @@ export interface EnsIndexerConfig {
   labelSet: Required<EnsRainbowClientLabelSet>;
 
   /**
-   * A Postgres database schema name. This instance of ENSIndexer will write indexed data to the
-   * tables in this schema.
+   * The name of the ENSIndexer Schema in the ENSDb instance,
+   * which the ENSIndexer instance will use while indexing and querying.
    *
-   * The {@link databaseSchemaName} must be unique per running instance of ENSIndexer (ponder will
+   * The {@link ensIndexerSchemaName} must be unique per running instance of ENSIndexer (ponder will
    * enforce this with database locks). If multiple instances of ENSIndexer with the same
-   * {@link databaseSchemaName} are running, only the first will successfully acquire the lock and begin
+   * {@link ensIndexerSchemaName} are running, only the first will successfully acquire the lock and begin
    * indexing: the rest will crash.
    *
-   * If an ENSIndexer instance with the same configuration (including `databaseSchemaName`) is
+   * If an ENSIndexer instance with the same configuration (including `ensIndexerSchemaName`) is
    * started, and it successfully acquires the lock on this schema, it will continue indexing from
    * the current state.
    *
@@ -58,7 +58,7 @@ export interface EnsIndexerConfig {
    * Invariants:
    * - Must be a non-empty string that is a valid Postgres database schema identifier.
    */
-  databaseSchemaName: DatabaseSchemaName;
+  ensIndexerSchemaName: EnsIndexerSchemaName;
 
   /**
    * A set of {@link PluginName}s indicating which plugins to activate.
@@ -91,12 +91,13 @@ export interface EnsIndexerConfig {
   indexedChainIds: Set<ChainId>;
 
   /**
-   * The database connection string for the indexer.
+   * The connection string for ENSIndexer instance to connect to
+   * the ENSDb instance.
    *
    * Invariants:
    * - The URL must be a valid PostgreSQL connection string
    */
-  databaseUrl: DatabaseUrl;
+  ensDbUrl: DatabaseUrl;
 
   /**
    * The "primary" ENSIndexer service URL
