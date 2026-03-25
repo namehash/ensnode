@@ -44,7 +44,7 @@ const rainbowSections: AboutRainbowProps[] = [
         <Link
           href="https://app.ens.domains/0xfFD1Ac3e8818AdCbe5C597ea076E8D3210B45df5"
           target="_blank"
-          className="!text-black"
+          className="text-black!"
           variant="underline"
           size="large"
         >
@@ -54,7 +54,7 @@ const rainbowSections: AboutRainbowProps[] = [
         <Link
           href="https://app.ens.domains/[4283f2583432677d3dac6d2c021cdd7ef6855349ea584813ad5811c0e497eb0b].makoto.eth"
           target="_blank"
-          className="!text-black"
+          className="text-black!"
           variant="underline"
           size="large"
         >
@@ -87,7 +87,7 @@ const rainbowSections: AboutRainbowProps[] = [
         <Link
           href="https://ensnode.io/"
           target="_blank"
-          className="!text-black"
+          className="text-black!"
           variant="underline"
           size="large"
         >

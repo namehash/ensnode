@@ -168,7 +168,7 @@ export default function Footer({ ...props }: FooterProps) {
             <Link
               variant="underline"
               size="small"
-              className="!text-black"
+              className="text-black!"
               href="https://namehashlabs.org/"
             >
               NameHash Labs

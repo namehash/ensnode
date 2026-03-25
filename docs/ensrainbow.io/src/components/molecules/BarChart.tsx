@@ -64,7 +64,7 @@ export default function BarChart({ data, title, subtitle, footnote }: BarChartPr
                   />
                 </div>
               </div>
-              {index < data.length - 1 && <div className="bg-gray-200 h-[1px] self-stretch" />}
+              {index < data.length - 1 && <div className="bg-gray-200 h-px self-stretch" />}
             </Fragment>
           ))}
         </div>

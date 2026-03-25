@@ -752,6 +752,9 @@ importers:
       '@namehash/namekit-react':
         specifier: 'catalog:'
         version: 0.12.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)(zod@3.25.76)
+      '@tailwindcss/vite':
+        specifier: ^4.1.15
+        version: 4.1.16(vite@7.1.12(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.1))
       astro:
         specifier: 'catalog:'
         version: 5.16.0(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.59.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.1)
