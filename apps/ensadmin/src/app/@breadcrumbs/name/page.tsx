@@ -20,7 +20,7 @@ export default function Page() {
   const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
   const exploreNamesBaseHref = retainCurrentRawConnectionUrlParam("/name");
 
-  const name = nameParam ? (decodeURIComponent(nameParam) as Name) : null;
+  const name = nameParam ? (nameParam as Name) : null;
 
   return (
     <BreadcrumbsGroup name="ENS Explorer">
