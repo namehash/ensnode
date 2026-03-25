@@ -6,8 +6,8 @@ services:
       - "42069:42069"
     environment:
       # Override environment variables to point to docker instances
-      DATABASE_URL: postgresql://postgres:password@postgres:5432/postgres
-      DATABASE_SCHEMA: ensindexer_0
+      ENSDB_URL: postgresql://postgres:password@postgres:5432/postgres
+      ENSINDEXER_SCHEMA_NAME: ensindexer_0
       ENSRAINBOW_URL: http://ensrainbow:3223
       ENSINDEXER_URL: http://ensindexer:42069
     env_file:
@@ -35,7 +35,7 @@ services:
       - "4334:4334"
     environment:
       # Override environment variables to point to docker instances
-      DATABASE_URL: postgresql://postgres:password@postgres:5432/postgres
+      ENSDB_URL: postgresql://postgres:password@postgres:5432/postgres
       ENSINDEXER_SCHEMA_NAME: ensindexer_0
     env_file:
       # NOTE: must define apps/ensapi/.env.local (see apps/ensapi/.env.local.example)

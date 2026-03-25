@@ -23,8 +23,8 @@ const VALID_RPC_WS_URL_ALT = "wss://lb.drpc.org/ethereum/987";
 const BASE_ENV: ENSIndexerEnvironment = {
   NAMESPACE: "mainnet",
   PLUGINS: "subgraph",
-  DATABASE_SCHEMA: "ensnode",
-  DATABASE_URL: "postgresql://user:password@localhost:5432/mydb",
+  ENSINDEXER_SCHEMA_NAME: "ensnode",
+  ENSDB_URL: "postgresql://user:password@localhost:5432/mydb",
   ENSINDEXER_URL: "http://localhost:42069",
   ENSRAINBOW_URL: "http://localhost:3223",
   LABEL_SET_ID: "ens-test-env",
@@ -67,7 +67,7 @@ describe("config (with base env)", () => {
       const config = await getConfig();
       expect(config.namespace).toBe("mainnet");
       expect(config.globalBlockrange).toEqual(buildBlockNumberRange(undefined, undefined));
-      expect(config.databaseSchemaName).toBe("ensnode");
+      expect(config.ensIndexerSchemaName).toBe("ensnode");
       expect(config.plugins).toEqual(["subgraph"]);
       expect(config.ensRainbowUrl).toStrictEqual(new URL("http://localhost:3223"));
     });
@@ -190,29 +190,29 @@ describe("config (with base env)", () => {
     });
   });
 
-  describe(".databaseSchemaName", () => {
-    it("returns the DATABASE_SCHEMA if set", async () => {
-      vi.stubEnv("DATABASE_SCHEMA", "someschema");
+  describe(".ensIndexerSchemaName", () => {
+    it("returns the ENSINDEXER_SCHEMA_NAME if set", async () => {
+      vi.stubEnv("ENSINDEXER_SCHEMA_NAME", "someschema");
       const config = await getConfig();
-      expect(config.databaseSchemaName).toBe("someschema");
+      expect(config.ensIndexerSchemaName).toBe("someschema");
     });
 
-    it("throws an error when DATABASE_SCHEMA is not set", async () => {
-      vi.stubEnv("DATABASE_SCHEMA", undefined);
-      await expect(getConfig()).rejects.toThrow(/DATABASE_SCHEMA is required/);
+    it("throws an error when ENSINDEXER_SCHEMA_NAME is not set", async () => {
+      vi.stubEnv("ENSINDEXER_SCHEMA_NAME", undefined);
+      await expect(getConfig()).rejects.toThrow(/ENSINDEXER_SCHEMA_NAME is required/);
     });
 
-    it("throws an error when DATABASE_SCHEMA is empty", async () => {
-      vi.stubEnv("DATABASE_SCHEMA", "");
+    it("throws an error when ENSINDEXER_SCHEMA_NAME is empty", async () => {
+      vi.stubEnv("ENSINDEXER_SCHEMA_NAME", "");
       await expect(getConfig()).rejects.toThrow(
-        /DATABASE_SCHEMA is required and cannot be an empty string/,
+        /ENSINDEXER_SCHEMA_NAME is required and cannot be an empty string/,
       );
     });
 
-    it("throws an error when DATABASE_SCHEMA is only whitespace", async () => {
-      vi.stubEnv("DATABASE_SCHEMA", "   ");
+    it("throws an error when ENSINDEXER_SCHEMA_NAME is only whitespace", async () => {
+      vi.stubEnv("ENSINDEXER_SCHEMA_NAME", "   ");
       await expect(getConfig()).rejects.toThrow(
-        /DATABASE_SCHEMA is required and cannot be an empty string/,
+        /ENSINDEXER_SCHEMA_NAME is required and cannot be an empty string/,
       );
     });
   });
@@ -416,56 +416,56 @@ describe("config (with base env)", () => {
     });
   });
 
-  describe(".databaseUrl", () => {
+  describe(".ensDbUrl", () => {
     it("accepts a valid PostgreSQL connection string", async () => {
-      vi.stubEnv("DATABASE_URL", "postgresql://user:password@localhost:5432/mydb");
+      vi.stubEnv("ENSDB_URL", "postgresql://user:password@localhost:5432/mydb");
       const config = await getConfig();
-      expect(config.databaseUrl).toBe("postgresql://user:password@localhost:5432/mydb");
+      expect(config.ensDbUrl).toBe("postgresql://user:password@localhost:5432/mydb");
     });
 
     it("accepts a connection string with additional parameters", async () => {
-      vi.stubEnv("DATABASE_URL", "postgresql://user:password@localhost:5432/mydb?sslmode=require");
+      vi.stubEnv("ENSDB_URL", "postgresql://user:password@localhost:5432/mydb?sslmode=require");
       const config = await getConfig();
-      expect(config.databaseUrl).toBe(
+      expect(config.ensDbUrl).toBe(
         "postgresql://user:password@localhost:5432/mydb?sslmode=require",
       );
     });
 
-    it("throws an error if DATABASE_URL is not set", async () => {
-      vi.stubEnv("DATABASE_URL", undefined);
+    it("throws an error if ENSDB_URL is not set", async () => {
+      vi.stubEnv("ENSDB_URL", undefined);
       await expect(getConfig()).rejects.toThrow(/Invalid input/);
     });
 
-    it("throws an error if DATABASE_URL is empty", async () => {
-      vi.stubEnv("DATABASE_URL", "");
+    it("throws an error if ENSDB_URL is empty", async () => {
+      vi.stubEnv("ENSDB_URL", "");
       await expect(getConfig()).rejects.toThrow(/Invalid PostgreSQL connection string/);
     });
 
-    it("throws an error if DATABASE_URL is not a valid postgres connection string", async () => {
-      vi.stubEnv("DATABASE_URL", "not-a-postgres-connection-string");
+    it("throws an error if ENSDB_URL is not a valid postgres connection string", async () => {
+      vi.stubEnv("ENSDB_URL", "not-a-postgres-connection-string");
       await expect(getConfig()).rejects.toThrow(/Invalid PostgreSQL connection string/);
     });
 
-    it("throws an error if DATABASE_URL uses the wrong protocol", async () => {
-      vi.stubEnv("DATABASE_URL", "mysql://user:password@localhost:3306/mydb");
+    it("throws an error if ENSDB_URL uses the wrong protocol", async () => {
+      vi.stubEnv("ENSDB_URL", "mysql://user:password@localhost:3306/mydb");
       await expect(getConfig()).rejects.toThrow(/Invalid PostgreSQL connection string/);
     });
 
-    it("throws an error if DATABASE_URL is missing required components", async () => {
-      vi.stubEnv("DATABASE_URL", "postgresql://localhost:5432");
+    it("throws an error if ENSDB_URL is missing required components", async () => {
+      vi.stubEnv("ENSDB_URL", "postgresql://localhost:5432");
       await expect(getConfig()).rejects.toThrow(/Invalid PostgreSQL connection string/);
     });
 
     it("accepts postgres:// protocol", async () => {
-      vi.stubEnv("DATABASE_URL", "postgres://user:password@localhost:5432/mydb");
+      vi.stubEnv("ENSDB_URL", "postgres://user:password@localhost:5432/mydb");
       const config = await getConfig();
-      expect(config.databaseUrl).toBe("postgres://user:password@localhost:5432/mydb");
+      expect(config.ensDbUrl).toBe("postgres://user:password@localhost:5432/mydb");
     });
 
     it("accepts postgresql:// protocol", async () => {
-      vi.stubEnv("DATABASE_URL", "postgresql://user:password@localhost:5432/mydb");
+      vi.stubEnv("ENSDB_URL", "postgresql://user:password@localhost:5432/mydb");
       const config = await getConfig();
-      expect(config.databaseUrl).toBe("postgresql://user:password@localhost:5432/mydb");
+      expect(config.ensDbUrl).toBe("postgresql://user:password@localhost:5432/mydb");
     });
   });
 
@@ -676,14 +676,20 @@ describe("config (with base env)", () => {
  */
 describe("config (minimal base env)", () => {
   beforeEach(() => {
-    const { NAMESPACE, ENSINDEXER_URL, ENSRAINBOW_URL, DATABASE_URL, DATABASE_SCHEMA, RPC_URL_1 } =
-      BASE_ENV;
+    const {
+      NAMESPACE,
+      ENSINDEXER_URL,
+      ENSRAINBOW_URL,
+      ENSDB_URL,
+      ENSINDEXER_SCHEMA_NAME,
+      RPC_URL_1,
+    } = BASE_ENV;
     stubEnv({
       NAMESPACE,
       ENSINDEXER_URL,
       ENSRAINBOW_URL,
-      DATABASE_URL,
-      DATABASE_SCHEMA,
+      ENSDB_URL,
+      ENSINDEXER_SCHEMA_NAME,
       RPC_URL_1,
     });
   });

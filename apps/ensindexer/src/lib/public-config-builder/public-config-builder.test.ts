@@ -14,7 +14,7 @@ import { PublicConfigBuilder } from "./public-config-builder";
 // Mock the config module
 vi.mock("@/config", () => ({
   default: {
-    databaseSchemaName: "public",
+    ensIndexerSchemaName: "ensindexer_0",
     labelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
     indexedChainIds: new Set([1, 8453]),
     isSubgraphCompatible: true,
@@ -68,7 +68,7 @@ const mockVersionInfo: EnsIndexerVersionInfo = {
 // Helper to create unique mock config objects for each call
 function createMockPublicConfig(overrides: Partial<EnsIndexerPublicConfig> = {}) {
   return {
-    databaseSchemaName: "public",
+    ensIndexerSchemaName: "ensindexer_0",
     labelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
     ensRainbowPublicConfig: mockEnsRainbowConfig,
     indexedChainIds: new Set([1, 8453]),
@@ -125,7 +125,7 @@ describe("PublicConfigBuilder", () => {
       });
 
       expect(validateEnsIndexerPublicConfig).toHaveBeenCalledWith({
-        databaseSchemaName: config.databaseSchemaName,
+        ensIndexerSchemaName: config.ensIndexerSchemaName,
         ensRainbowPublicConfig: mockEnsRainbowConfig,
         labelSet: config.labelSet,
         indexedChainIds: config.indexedChainIds,
@@ -301,8 +301,8 @@ describe("PublicConfigBuilder", () => {
   describe("Caching behavior", () => {
     it("each builder instance has its own independent cache", async () => {
       // Arrange - create unique config objects for each builder
-      const config1 = createMockPublicConfig({ databaseSchemaName: "schema1" });
-      const config2 = createMockPublicConfig({ databaseSchemaName: "schema2" });
+      const config1 = createMockPublicConfig({ ensIndexerSchemaName: "schema1" });
+      const config2 = createMockPublicConfig({ ensIndexerSchemaName: "schema2" });
 
       let callCount = 0;
       const ensRainbowClientMock = {
@@ -331,8 +331,8 @@ describe("PublicConfigBuilder", () => {
       expect(result1).toBe(config1);
       expect(result2).toBe(config2);
       expect(result1).not.toBe(result2);
-      expect(result1.databaseSchemaName).toBe("schema1");
-      expect(result2.databaseSchemaName).toBe("schema2");
+      expect(result1.ensIndexerSchemaName).toBe("schema1");
+      expect(result2.ensIndexerSchemaName).toBe("schema2");
     });
 
     it("retries building config on subsequent calls after failure", async () => {

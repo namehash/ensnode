@@ -90,11 +90,11 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
 
     return EnsApiConfigSchema.parse({
       port: env.PORT,
-      databaseUrl: env.DATABASE_URL,
+      ensDbUrl: env.ENSDB_URL,
       theGraphApiKey: env.THEGRAPH_API_KEY,
       ensIndexerPublicConfig,
       namespace: ensIndexerPublicConfig.namespace,
-      ensIndexerSchemaName: ensIndexerPublicConfig.databaseSchemaName,
+      ensIndexerSchemaName: ensIndexerPublicConfig.ensIndexerSchemaName,
       rpcConfigs,
       customReferralProgramEditionConfigSetUrl: env.CUSTOM_REFERRAL_PROGRAM_EDITIONS,
     });

@@ -4,8 +4,8 @@ import { prettifyError, ZodError, z } from "zod/v4";
 import { buildBlockNumberRange, PluginName, uniq } from "@ensnode/ensnode-sdk";
 import {
   buildRpcConfigsFromEnv,
-  DatabaseSchemaNameSchema,
   ENSNamespaceSchema,
+  EnsIndexerSchemaNameSchema,
   EnsIndexerUrlSchema,
   invariant_isSubgraphCompatibleRequirements,
   invariant_rpcConfigsSpecifiedForRootChain,
@@ -28,7 +28,7 @@ import {
   invariant_validContractConfigs,
 } from "./validations";
 
-export const DatabaseUrlSchema = z.string().refine(
+export const EnsDbUrlSchema = z.string().refine(
   (url) => {
     try {
       if (!url.startsWith("postgresql://") && !url.startsWith("postgres://")) {
@@ -42,7 +42,7 @@ export const DatabaseUrlSchema = z.string().refine(
   },
   {
     error:
-      "Invalid PostgreSQL connection string. Expected format: postgresql://username:password@host:port/database",
+      "Invalid PostgreSQL connection string for ENSDb. Expected format: postgresql://username:password@host:port/database",
   },
 );
 
@@ -107,8 +107,8 @@ const IsSubgraphCompatibleSchema =
 
 const ENSIndexerConfigSchema = z
   .object({
-    databaseUrl: DatabaseUrlSchema,
-    databaseSchemaName: DatabaseSchemaNameSchema,
+    ensDbUrl: EnsDbUrlSchema,
+    ensIndexerSchemaName: EnsIndexerSchemaNameSchema,
     rpcConfigs: RpcConfigsSchema,
     ensIndexerUrl: EnsIndexerUrlSchema,
 
@@ -186,8 +186,8 @@ export function buildConfigFromEnvironment(_env: ENSIndexerEnvironment): EnsInde
 
     // parse/validate with ENSIndexerConfigSchema
     return ENSIndexerConfigSchema.parse({
-      databaseUrl: env.DATABASE_URL,
-      databaseSchemaName: env.DATABASE_SCHEMA,
+      ensDbUrl: env.ENSDB_URL,
+      ensIndexerSchemaName: env.ENSINDEXER_SCHEMA_NAME,
       ensIndexerUrl: env.ENSINDEXER_URL,
       namespace: env.NAMESPACE,
       rpcConfigs,

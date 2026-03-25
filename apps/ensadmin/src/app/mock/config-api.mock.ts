@@ -6,7 +6,7 @@ export const ensIndexerPublicConfig = deserializeENSIndexerPublicConfig({
     labelSetVersion: 0,
   },
   indexedChainIds: [1, 8453, 59144, 10, 42161, 534352, 567],
-  databaseSchemaName: "alphaSchema0.34.0",
+  ensIndexerSchemaName: "alphaSchema0.34.0",
   ensRainbowPublicConfig: {
     version: "0.34.0",
     labelSet: {

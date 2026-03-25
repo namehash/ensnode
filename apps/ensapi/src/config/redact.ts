@@ -8,7 +8,7 @@ import type { EnsApiConfig } from "@/config/config.schema";
 export function redactEnsApiConfig(config: EnsApiConfig) {
   return {
     ...config,
-    databaseUrl: redactString(config.databaseUrl),
+    ensDbUrl: redactString(config.ensDbUrl),
     rpcConfigs: redactRpcConfigs(config.rpcConfigs),
   };
 }

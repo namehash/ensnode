@@ -44,8 +44,8 @@ export function serializeRedactedENSIndexerConfig(
   const redactedConfig = redactENSIndexerConfig(config);
 
   return {
-    databaseSchemaName: redactedConfig.databaseSchemaName,
-    databaseUrl: redactedConfig.databaseUrl,
+    ensIndexerSchemaName: redactedConfig.ensIndexerSchemaName,
+    ensDbUrl: redactedConfig.ensDbUrl,
     ensIndexerUrl: serializeUrl(redactedConfig.ensIndexerUrl),
     ensRainbowUrl: serializeUrl(redactedConfig.ensRainbowUrl),
     labelSet: redactedConfig.labelSet,

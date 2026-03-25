@@ -4,7 +4,7 @@ import { prettifyError, z } from "zod/v4";
 import type { EnsApiEnvironment } from "@/config/environment";
 import logger from "@/lib/logger";
 
-export const DatabaseUrlSchema = z.string().refine(
+export const EnsDbUrlSchema = z.string().refine(
   (url) => {
     try {
       if (!url.startsWith("postgresql://") && !url.startsWith("postgres://")) {
@@ -18,7 +18,7 @@ export const DatabaseUrlSchema = z.string().refine(
   },
   {
     error:
-      "Invalid PostgreSQL connection string. Expected format: postgresql://username:password@host:port/database",
+      "Invalid PostgreSQL connection string for ENSDb. Expected format: postgresql://username:password@host:port/database",
   },
 );
 
@@ -32,7 +32,7 @@ const EnsIndexerSchemaNameSchema = z
   });
 
 export const EnsDbConfigSchema = z.object({
-  databaseUrl: DatabaseUrlSchema,
+  ensDbUrl: EnsDbUrlSchema,
   ensIndexerSchemaName: EnsIndexerSchemaNameSchema,
 });
 
@@ -45,7 +45,7 @@ export type EnsDbConfig = z.infer<typeof EnsDbConfigSchema>;
  */
 export function buildEnsDbConfigFromEnvironment(env: EnsApiEnvironment): EnsDbConfig {
   const ensDbConfig = EnsDbConfigSchema.safeParse({
-    databaseUrl: env.DATABASE_URL,
+    ensDbUrl: env.ENSDB_URL,
     ensIndexerSchemaName: env.ENSINDEXER_SCHEMA_NAME,
   });
 

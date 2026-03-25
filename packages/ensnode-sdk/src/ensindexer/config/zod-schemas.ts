@@ -63,7 +63,7 @@ export const makePluginsListSchema = (valueLabel: string = "Plugins") =>
  *
  * The name is guaranteed to be a non-empty string.
  */
-export const makeDatabaseSchemaNameSchema = (valueLabel: string = "Database schema name") =>
+export const makeEnsIndexerSchemaNameSchema = (valueLabel: string = "ENS Indexer Schema Name") =>
   z
     .string({ error: `${valueLabel} must be a string` })
     .trim()
@@ -162,7 +162,7 @@ export function invariant_ensRainbowSupportedLabelSetAndVersion(
 export const makeEnsIndexerPublicConfigSchema = (valueLabel: string = "ENSIndexerPublicConfig") =>
   z
     .object({
-      databaseSchemaName: makeDatabaseSchemaNameSchema(`${valueLabel}.databaseSchemaName`),
+      ensIndexerSchemaName: makeEnsIndexerSchemaNameSchema(`${valueLabel}.ensIndexerSchemaName`),
       ensRainbowPublicConfig: makeEnsRainbowPublicConfigSchema(
         `${valueLabel}.ensRainbowPublicConfig`,
       ),
@@ -194,7 +194,7 @@ export const makeSerializedEnsIndexerPublicConfigSchema = (
   valueLabel: string = "Serialized ENSIndexerPublicConfig",
 ) =>
   z.object({
-    databaseSchemaName: makeDatabaseSchemaNameSchema(`${valueLabel}.databaseSchemaName`),
+    ensIndexerSchemaName: makeEnsIndexerSchemaNameSchema(`${valueLabel}.ensIndexerSchemaName`),
     ensRainbowPublicConfig: makeEnsRainbowPublicConfigSchema(
       `${valueLabel}.ensRainbowPublicConfig`,
     ),
