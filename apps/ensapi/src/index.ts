@@ -1,92 +1,18 @@
-import packageJson from "@/../package.json" with { type: "json" };
-import config from "@/config";
+import config, { initEnvConfig } from "@/config";
 
 import { serve } from "@hono/node-server";
-import { otel } from "@hono/otel";
-import { cors } from "hono/cors";
-import { html } from "hono/html";
 
 import { indexingStatusCache } from "@/cache/indexing-status.cache";
 import { getReferralLeaderboardEditionsCaches } from "@/cache/referral-leaderboard-editions.cache";
 import { referralProgramEditionConfigSetCache } from "@/cache/referral-program-edition-set.cache";
 import { referrerLeaderboardCache } from "@/cache/referrer-leaderboard.cache";
 import { redactEnsApiConfig } from "@/config/redact";
-import { errorResponse } from "@/lib/handlers/error-response";
-import { createApp } from "@/lib/hono-factory";
 import { sdk } from "@/lib/instrumentation";
 import logger from "@/lib/logger";
-import { generateOpenApi31Document } from "@/openapi-document";
 
-import realtimeApi from "./handlers/api/meta/realtime-api";
-import apiRouter from "./handlers/api/router";
-import ensanalyticsApi from "./handlers/ensanalytics/ensanalytics-api";
-import ensanalyticsApiV1 from "./handlers/ensanalytics/ensanalytics-api-v1";
-import subgraphApi from "./handlers/subgraph/subgraph-api";
+import app from "./app";
 
-const app = createApp();
-
-// set the X-ENSNode-Version header to the current version
-app.use(async (ctx, next) => {
-  ctx.header("x-ensnode-version", packageJson.version);
-  return next();
-});
-
-// use CORS middleware
-app.use(cors({ origin: "*" }));
-
-// include automatic OpenTelemetry instrumentation for incoming requests
-app.use(otel());
-
-// host welcome page
-app.get("/", (c) =>
-  c.html(html`
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ENSApi</title>
-</head>
-<body>
-    <h1>Hello, World!</h1>
-    <p>You've reached the root of an ENSApi instance. You might be looking for the <a href="https://ensnode.io/docs">ENSNode documentation</a>.</p>
-</body>
-</html>
-`),
-);
-
-// use ENSNode HTTP API at /api
-app.route("/api", apiRouter);
-
-// use Subgraph GraphQL API at /subgraph
-app.route("/subgraph", subgraphApi);
-
-// use ENSAnalytics API at /ensanalytics (v0, implicit)
-app.route("/ensanalytics", ensanalyticsApi);
-
-// use ENSAnalytics API v1 at /v1/ensanalytics
-app.route("/v1/ensanalytics", ensanalyticsApiV1);
-
-// use Am I Realtime API at /amirealtime
-// NOTE: this is legacy endpoint and will be deleted in future. one should use /api/realtime instead
-app.route("/amirealtime", realtimeApi);
-
-// serve pre-generated OpenAPI 3.1 document
-const openApi31Document = generateOpenApi31Document();
-app.get("/openapi.json", (c) => {
-  return c.json(openApi31Document);
-});
-
-// will automatically 503 if config is not available due to ensIndexerPublicConfigMiddleware
-app.get("/health", async (c) => {
-  return c.json({ message: "fallback ok" });
-});
-
-// log hono errors to console
-app.onError((error, ctx) => {
-  logger.error(error);
-  return errorResponse(ctx, "Internal Server Error");
-});
+await initEnvConfig(process.env);
 
 // start ENSNode API OpenTelemetry SDK
 sdk.start();
@@ -100,8 +26,12 @@ const server = serve(
   async (info) => {
     logger.info({ config: redactEnsApiConfig(config) }, `ENSApi listening on port ${info.port}`);
 
-    // self-healthcheck to connect to ENSIndexer & warm Indexing Status cache
-    await app.request("/health");
+    // Trigger proactive initialization of the indexing status cache at startup.
+    // SWRCache with proactivelyInitialize: true starts fetching immediately upon
+    // construction, but construction is deferred via the lazy proxy until first
+    // access — so we access it explicitly here rather than waiting for the first
+    // user request.
+    indexingStatusCache.read();
   },
 );
 

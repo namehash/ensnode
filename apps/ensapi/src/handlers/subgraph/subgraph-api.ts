@@ -7,6 +7,7 @@ import { subgraphGraphQLMiddleware } from "@ensnode/ponder-subgraph";
 
 import { ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { createApp } from "@/lib/hono-factory";
+import { lazy } from "@/lib/lazy";
 import { makeSubgraphApiDocumentation } from "@/lib/subgraph/api-documentation";
 import { filterSchemaByPrefix } from "@/lib/subgraph/filter-schema-by-prefix";
 import { fixContentLengthMiddleware } from "@/middleware/fix-content-length.middleware";
@@ -50,8 +51,9 @@ app.use(createDocumentationMiddleware(makeSubgraphApiDocumentation(), { path: "/
 // inject _meta into the hono (and yoga) context for the subgraph middleware
 app.use(subgraphMetaMiddleware);
 
-// use subgraph middleware
-app.use(
+// lazy() defers construction until first use so that this module can be
+// imported without env vars being present (e.g. during OpenAPI generation).
+const getSubgraphMiddleware = lazy(() =>
   subgraphGraphQLMiddleware({
     databaseUrl: config.databaseUrl,
     databaseSchema: config.ensIndexerSchemaName,
@@ -96,5 +98,6 @@ app.use(
     },
   }),
 );
+app.use((c, next) => getSubgraphMiddleware()(c, next));
 
 export default app;

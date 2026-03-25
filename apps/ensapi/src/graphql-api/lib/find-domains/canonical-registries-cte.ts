@@ -5,6 +5,7 @@ import { sql } from "drizzle-orm";
 import { maybeGetENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+import { lazy } from "@/lib/lazy";
 
 /**
  * The maximum depth to traverse the ENSv2 namegraph in order to construct the set of Canonical
@@ -21,7 +22,9 @@ import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
  */
 const CANONICAL_REGISTRIES_MAX_DEPTH = 16;
 
-const ENSV2_ROOT_REGISTRY_ID = maybeGetENSv2RootRegistryId(config.namespace);
+// lazy() defers construction until first use so that this module can be
+// imported without env vars being present (e.g. during OpenAPI generation).
+const getENSV2RootRegistryId = lazy(() => maybeGetENSv2RootRegistryId(config.namespace));
 
 /**
  * Builds a recursive CTE that traverses from the ENSv2 Root Registry to construct a set of all
@@ -32,7 +35,7 @@ const ENSV2_ROOT_REGISTRY_ID = maybeGetENSv2RootRegistryId(config.namespace);
  */
 export const getCanonicalRegistriesCTE = () => {
   // if ENSv2 is not defined, return an empty set with identical structure to below
-  if (!ENSV2_ROOT_REGISTRY_ID) {
+  if (!getENSV2RootRegistryId()) {
     return ensDb
       .select({ id: sql<string>`registry_id`.as("id") })
       .from(sql`(SELECT NULL::text AS registry_id WHERE FALSE) AS canonical_registries_cte`)
@@ -50,7 +53,7 @@ export const getCanonicalRegistriesCTE = () => {
       sql`
       (
         WITH RECURSIVE canonical_registries AS (
-          SELECT ${ENSV2_ROOT_REGISTRY_ID}::text AS registry_id, 0 AS depth
+          SELECT ${getENSV2RootRegistryId()}::text AS registry_id, 0 AS depth
           UNION ALL
           SELECT rcd.registry_id, cr.depth + 1
           FROM ${ensIndexerSchema.registryCanonicalDomain} rcd
