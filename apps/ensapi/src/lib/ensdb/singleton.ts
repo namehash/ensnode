@@ -24,4 +24,6 @@ export const ensDb = lazyProxy<EnsDbReader["ensDb"]>(() => ensDbClient.ensDb);
  * Convenience alias for {@link ensDbClient.ensIndexerSchema} to be used for building
  * custom ENSDb queries throughout the ENSApi codebase.
  */
-export const ensIndexerSchema = lazyProxy<EnsDbReader["ensIndexerSchema"]>(() => ensDbClient.ensIndexerSchema);
+export const ensIndexerSchema = lazyProxy<EnsDbReader["ensIndexerSchema"]>(
+  () => ensDbClient.ensIndexerSchema,
+);
