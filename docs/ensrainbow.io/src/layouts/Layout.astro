@@ -3,6 +3,8 @@ import { AstroFont } from "astro-font";
 import { SEO } from "astro-seo";
 import Header from "../components/organisms/Header";
 import "../styles/global.css";
+
+import { Footer } from "@namehash/namehash-ui";
 ---
 
 <!doctype html>
@@ -59,7 +61,7 @@ import "../styles/global.css";
 <body>
 <Header client:only="react"/>
 <slot/>
-<!-- <Footer client:load/> -->
+<Footer />
 </body>
 </html>
 
