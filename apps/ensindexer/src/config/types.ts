@@ -53,7 +53,7 @@ export interface EnsIndexerConfig {
    * Many clients can read from this Postgres schema during or after indexing.
    *
    * Read more about database schema rules here:
-   * @see https://ponder.sh/docs/api-reference/database#database-schema-rules
+   * @see https://ponder.sh/docs/api-reference/ponder/database#database-schema-rules
    *
    * Invariants:
    * - Must be a non-empty string that is a valid Postgres database schema identifier.
