@@ -1,7 +1,6 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, count, eq, getTableColumns } from "drizzle-orm";
 
-import * as schema from "@ensnode/ensdb-sdk";
 import {
   type DomainId,
   type ENSv1DomainId,
@@ -37,7 +36,7 @@ import { PermissionsUserRef } from "@/graphql-api/schema/permissions";
 import { RegistrationInterfaceRef } from "@/graphql-api/schema/registration";
 import { RegistryRef } from "@/graphql-api/schema/registry";
 import { ResolverRef } from "@/graphql-api/schema/resolver";
-import { db } from "@/lib/db";
+import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 
 const isENSv1Domain = (domain: Domain): domain is ENSv1Domain => "parentId" in domain;
 
@@ -47,7 +46,7 @@ const isENSv1Domain = (domain: Domain): domain is ENSv1Domain => "parentId" in d
 
 export const ENSv1DomainRef = builder.loadableObjectRef("ENSv1Domain", {
   load: (ids: ENSv1DomainId[]) =>
-    db.query.v1Domain.findMany({
+    ensDb.query.v1Domain.findMany({
       where: (t, { inArray }) => inArray(t.id, ids),
       with: { label: true },
     }),
@@ -58,7 +57,7 @@ export const ENSv1DomainRef = builder.loadableObjectRef("ENSv1Domain", {
 
 export const ENSv2DomainRef = builder.loadableObjectRef("ENSv2Domain", {
   load: (ids: ENSv2DomainId[]) =>
-    db.query.v2Domain.findMany({
+    ensDb.query.v2Domain.findMany({
       where: (t, { inArray }) => inArray(t.id, ids),
       with: { label: true },
     }),
@@ -70,11 +69,11 @@ export const ENSv2DomainRef = builder.loadableObjectRef("ENSv2Domain", {
 export const DomainInterfaceRef = builder.loadableInterfaceRef("Domain", {
   load: async (ids: DomainId[]): Promise<(ENSv1Domain | ENSv2Domain)[]> => {
     const [v1Domains, v2Domains] = await Promise.all([
-      db.query.v1Domain.findMany({
+      ensDb.query.v1Domain.findMany({
         where: (t, { inArray }) => inArray(t.id, ids as any), // ignore downcast to ENSv1DomainId
         with: { label: true },
       }),
-      db.query.v2Domain.findMany({
+      ensDb.query.v2Domain.findMany({
         where: (t, { inArray }) => inArray(t.id, ids as any), // ignore downcast to ENSv2DomainId
         with: { label: true },
       }),
@@ -211,19 +210,21 @@ DomainInterfaceRef.implement({
       description: "All Registrations for a Domain, including the latest Registration.",
       type: RegistrationInterfaceRef,
       resolve: (parent, args) => {
-        const scope = eq(schema.registration.domainId, parent.id);
+        const scope = eq(ensIndexerSchema.registration.domainId, parent.id);
 
         return lazyConnection({
-          totalCount: () => db.$count(schema.registration, scope),
+          totalCount: () => ensDb.$count(ensIndexerSchema.registration, scope),
           connection: () =>
             resolveCursorConnection(
               { ...INDEX_PAGINATED_CONNECTION_ARGS, args },
               ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-                db
+                ensDb
                   .select()
-                  .from(schema.registration)
-                  .where(and(scope, paginateByInt(schema.registration.index, before, after)))
-                  .orderBy(orderPaginationBy(schema.registration.index, inverted))
+                  .from(ensIndexerSchema.registration)
+                  .where(
+                    and(scope, paginateByInt(ensIndexerSchema.registration.index, before, after)),
+                  )
+                  .orderBy(orderPaginationBy(ensIndexerSchema.registration.index, inverted))
                   .limit(limit),
             ),
         });
@@ -261,8 +262,8 @@ DomainInterfaceRef.implement({
       resolve: (parent, args) =>
         resolveFindEvents(args, {
           through: {
-            table: schema.domainEvent,
-            scope: eq(schema.domainEvent.domainId, parent.id),
+            table: ensIndexerSchema.domainEvent,
+            scope: eq(ensIndexerSchema.domainEvent.domainId, parent.id),
           },
         }),
     }),
@@ -361,36 +362,36 @@ ENSv2DomainRef.implement({
       resolve: (parent, args) => {
         const scope = and(
           // filter by resource === tokenId
-          eq(schema.permissionsUser.resource, parent.tokenId),
+          eq(ensIndexerSchema.permissionsUser.resource, parent.tokenId),
           // optionally filter by user
-          args.where?.user ? eq(schema.permissionsUser.user, args.where.user) : undefined,
+          args.where?.user ? eq(ensIndexerSchema.permissionsUser.user, args.where.user) : undefined,
         );
 
         // inner join against this Domain's registry to filter Permissions by those in said registry
         const join = and(
-          eq(schema.permissionsUser.chainId, schema.registry.chainId),
-          eq(schema.permissionsUser.address, schema.registry.address),
-          eq(schema.registry.id, parent.registryId),
+          eq(ensIndexerSchema.permissionsUser.chainId, ensIndexerSchema.registry.chainId),
+          eq(ensIndexerSchema.permissionsUser.address, ensIndexerSchema.registry.address),
+          eq(ensIndexerSchema.registry.id, parent.registryId),
         );
 
         return lazyConnection({
           totalCount: () =>
-            db
+            ensDb
               .select({ count: count() })
-              .from(schema.permissionsUser)
-              .innerJoin(schema.registry, join)
+              .from(ensIndexerSchema.permissionsUser)
+              .innerJoin(ensIndexerSchema.registry, join)
               .where(scope)
               .then((r) => r[0].count),
           connection: () =>
             resolveCursorConnection(
               { ...ID_PAGINATED_CONNECTION_ARGS, args },
               ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-                db
-                  .select(getTableColumns(schema.permissionsUser))
-                  .from(schema.permissionsUser)
-                  .innerJoin(schema.registry, join)
-                  .where(and(scope, paginateBy(schema.permissionsUser.id, before, after)))
-                  .orderBy(orderPaginationBy(schema.permissionsUser.id, inverted))
+                ensDb
+                  .select(getTableColumns(ensIndexerSchema.permissionsUser))
+                  .from(ensIndexerSchema.permissionsUser)
+                  .innerJoin(ensIndexerSchema.registry, join)
+                  .where(and(scope, paginateBy(ensIndexerSchema.permissionsUser.id, before, after)))
+                  .orderBy(orderPaginationBy(ensIndexerSchema.permissionsUser.id, inverted))
                   .limit(limit),
             ),
         });

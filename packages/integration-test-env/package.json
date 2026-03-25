@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@ensnode/datasources": "workspace:*",
+    "@ensnode/ensdb-sdk": "workspace:*",
     "@ensnode/ensnode-sdk": "workspace:*",
     "@testcontainers/postgresql": "^11.12.0",
     "execa": "^9.6.1",

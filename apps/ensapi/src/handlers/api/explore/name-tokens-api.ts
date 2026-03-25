@@ -15,6 +15,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { createApp } from "@/lib/hono-factory";
+import { lazyProxy } from "@/lib/lazy";
 import { findRegisteredNameTokensForDomain } from "@/lib/name-tokens/find-name-tokens-for-domain";
 import { getIndexedSubregistries } from "@/lib/name-tokens/get-indexed-subregistries";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
@@ -24,9 +25,10 @@ import { getNameTokensRoute } from "./name-tokens-api.routes";
 
 const app = createApp({ middlewares: [indexingStatusMiddleware, nameTokensApiMiddleware] });
 
-const indexedSubregistries = getIndexedSubregistries(
-  config.namespace,
-  config.ensIndexerPublicConfig.plugins as PluginName[],
+// lazyProxy defers construction until first use so that this module can be
+// imported without env vars being present (e.g. during OpenAPI generation).
+const indexedSubregistries = lazyProxy(() =>
+  getIndexedSubregistries(config.namespace, config.ensIndexerPublicConfig.plugins as PluginName[]),
 );
 
 /**
@@ -79,7 +81,7 @@ app.openapi(getNameTokensRoute, async (c) => {
     }
 
     const parentNode = namehash(getParentNameFQDN(name));
-    const subregistry = indexedSubregistries.find((subregistry) => subregistry.node === parentNode);
+    const subregistry = indexedSubregistries.find((s) => s.node === parentNode);
 
     // Return 404 response with error code for Name Tokens Not Indexed when
     // the parent name of the requested name does not match any of the

@@ -23,6 +23,13 @@ import type {
 } from "./serialize/ensnode-metadata";
 
 /**
+ * Re-export the ENSDb Drizzle Client type for external use in building
+ * custom ENSDb queries with proper typing of the "concrete" ENSIndexer Schema
+ * from the ENSDbReader instance.
+ */
+export type { EnsDbDrizzleClient } from "../lib/drizzle";
+
+/**
  * ENSDb Reader
  *
  * Enables read-only querying of an ENSDb instance, including data spanning
@@ -57,24 +64,24 @@ export class EnsDbReader<
    * This also identifies which ENSNode metadata records to read from the ENSNode Schema
    * as the ENSNode Schema is multi-tenant across ENSIndexer instances / ENSIndexer Schemas in an ENSDb.
    */
-  protected ensIndexerSchemaName: string;
+  protected _ensIndexerSchemaName: string;
 
   protected _ensNodeSchema: EnsNodeSchema;
 
   /**
-   * @param ensDbConnectionString The connection string for Drizzle to connect to the ENSDb instance.
+   * @param ensDbUrl The connection string for Drizzle to connect to the ENSDb instance.
    * @param ensIndexerSchemaName The name of the ENSIndexer schema to read from in ENSDb, used to identify which ENSNode metadata records to read.
    */
-  constructor(ensDbConnectionString: string, ensIndexerSchemaName: string) {
+  constructor(ensDbUrl: string, ensIndexerSchemaName: string) {
     const { concreteEnsIndexerSchema, ensNodeSchema } =
       buildIndividualEnsDbSchemas<ConcreteEnsIndexerSchema>(ensIndexerSchemaName);
-    const ensDbDrizzleClient = buildEnsDbDrizzleClient(
-      ensDbConnectionString,
+    const ensDbDrizzleClient = buildEnsDbDrizzleClient<ConcreteEnsIndexerSchema>(
+      ensDbUrl,
       concreteEnsIndexerSchema,
     );
     this.drizzleClient = ensDbDrizzleClient;
     this._concreteEnsIndexerSchema = concreteEnsIndexerSchema;
-    this.ensIndexerSchemaName = ensIndexerSchemaName;
+    this._ensIndexerSchemaName = ensIndexerSchemaName;
     this._ensNodeSchema = ensNodeSchema;
   }
 
@@ -83,7 +90,7 @@ export class EnsDbReader<
    *
    * Useful while working on complex queries for ENSDb.
    */
-  get client(): EnsDbDrizzleClient<ConcreteEnsIndexerSchema> {
+  get ensDb(): EnsDbDrizzleClient<ConcreteEnsIndexerSchema> {
     return this.drizzleClient;
   }
 
@@ -95,11 +102,18 @@ export class EnsDbReader<
    *
    * Note: using `ensIndexerSchema` name for this getter to make it read better
    * in the context of query building. For example:
-   * `this.client.select().from(this.ensIndexerSchema.event)` vs.
-   * `this.client.select().from(this.concreteEnsIndexerSchema.event)`.
+   * `this.ensDb.select().from(this.ensIndexerSchema.event)` vs.
+   * `this.ensDb.select().from(this.concreteEnsIndexerSchema.event)`.
    */
   get ensIndexerSchema(): ConcreteEnsIndexerSchema {
     return this._concreteEnsIndexerSchema;
+  }
+
+  /**
+   * Getter for the ENSIndexer Schema Name used by this ENSDbReader instance.
+   */
+  get ensIndexerSchemaName(): string {
+    return this._ensIndexerSchemaName;
   }
 
   /**
@@ -172,7 +186,7 @@ export class EnsDbReader<
   private async getEnsNodeMetadata<EnsNodeMetadataType extends SerializedEnsNodeMetadata>(
     metadata: Pick<EnsNodeMetadataType, "key">,
   ): Promise<EnsNodeMetadataType["value"] | undefined> {
-    const result = await this.drizzleClient
+    const result = await this.ensDb
       .select()
       .from(this.ensNodeSchema.metadata)
       .where(

@@ -54,7 +54,6 @@ const ENSINDEXER_PORT = 42069;
 const ENSAPI_PORT = 4334;
 
 // Shared config
-const ENSINDEXER_URL = `http://localhost:${ENSINDEXER_PORT}`;
 const ENSRAINBOW_URL = `http://localhost:${ENSRAINBOW_PORT}`;
 
 // Track resources for cleanup
@@ -185,10 +184,15 @@ function spawnService(
   return subprocess;
 }
 
-async function pollIndexingStatus(timeoutMs: number): Promise<void> {
-  const client = new (await import("@ensnode/ensnode-sdk")).EnsIndexerClient({
-    url: new URL(ENSINDEXER_URL),
-  });
+async function pollIndexingStatus(
+  ensDbUrl: string,
+  ensIndexerSchemaName: string,
+  timeoutMs: number,
+): Promise<void> {
+  const client = new (await import("@ensnode/ensdb-sdk")).EnsDbReader(
+    ensDbUrl,
+    ensIndexerSchemaName,
+  );
 
   const start = Date.now();
   log("Polling indexing status...");
@@ -196,10 +200,9 @@ async function pollIndexingStatus(timeoutMs: number): Promise<void> {
   while (Date.now() - start < timeoutMs) {
     checkAborted();
     try {
-      const status = await client.indexingStatus();
-      if (status.responseCode === "ok") {
-        const omnichainStatus =
-          status.realtimeProjection.snapshot.omnichainSnapshot.omnichainStatus;
+      const snapshot = await client.getIndexingStatusSnapshot();
+      if (snapshot !== undefined) {
+        const omnichainStatus = snapshot.omnichainSnapshot.omnichainStatus;
         log(`Omnichain status: ${omnichainStatus}`);
         if (
           omnichainStatus === OmnichainIndexingStatusIds.Following ||
@@ -308,6 +311,9 @@ async function main() {
   await waitForHealth(`http://localhost:${ENSRAINBOW_PORT}/health`, 30_000, "ENSRainbow");
 
   // Phase 3: Start ENSIndexer
+  const ENSINDEXER_URL = `http://localhost:${ENSINDEXER_PORT}`;
+  const ENSINDEXER_SCHEMA_NAME = "public";
+
   log("Starting ENSIndexer...");
   spawnService(
     "pnpm",
@@ -316,7 +322,7 @@ async function main() {
     {
       NAMESPACE: ENSNamespaceIds.EnsTestEnv,
       DATABASE_URL,
-      DATABASE_SCHEMA: "public",
+      DATABASE_SCHEMA: ENSINDEXER_SCHEMA_NAME,
       PLUGINS: "ensv2,protocol-acceleration",
       ENSRAINBOW_URL,
       ENSINDEXER_URL,
@@ -328,7 +334,7 @@ async function main() {
   await waitForHealth(`http://localhost:${ENSINDEXER_PORT}/health`, 60_000, "ENSIndexer");
 
   // Phase 4: Wait for indexing to complete
-  await pollIndexingStatus(30_000);
+  await pollIndexingStatus(DATABASE_URL, ENSINDEXER_SCHEMA_NAME, 30_000);
 
   // Phase 5: Start ENSApi
   log("Starting ENSApi...");
@@ -337,8 +343,8 @@ async function main() {
     ["start"],
     ENSAPI_DIR,
     {
-      ENSINDEXER_URL,
       DATABASE_URL,
+      ENSINDEXER_SCHEMA_NAME,
     },
     "ensapi",
   );

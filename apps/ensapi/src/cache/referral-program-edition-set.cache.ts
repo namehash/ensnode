@@ -10,6 +10,7 @@ import { minutesToSeconds } from "date-fns";
 
 import { type CachedResult, SWRCache } from "@ensnode/ensnode-sdk";
 
+import { lazyProxy } from "@/lib/lazy";
 import { makeLogger } from "@/lib/logger";
 
 const logger = makeLogger("referral-program-edition-set-cache");
@@ -63,6 +64,8 @@ async function loadReferralProgramEditionConfigSet(
   return editionConfigSet;
 }
 
+type ReferralProgramEditionConfigSetCache = SWRCache<ReferralProgramEditionConfigSet>;
+
 /**
  * SWR Cache for the referral program edition config set.
  *
@@ -74,10 +77,15 @@ async function loadReferralProgramEditionConfigSet(
  * - proactiveRevalidationInterval: undefined - No proactive revalidation
  * - proactivelyInitialize: true - Load immediately on startup
  */
-export const referralProgramEditionConfigSetCache = new SWRCache<ReferralProgramEditionConfigSet>({
-  fn: loadReferralProgramEditionConfigSet,
-  ttl: Number.POSITIVE_INFINITY,
-  errorTtl: minutesToSeconds(1),
-  proactiveRevalidationInterval: undefined,
-  proactivelyInitialize: true,
-});
+// lazyProxy defers construction until first use so that this module can be
+// imported without env vars being present (e.g. during OpenAPI generation).
+export const referralProgramEditionConfigSetCache = lazyProxy<ReferralProgramEditionConfigSetCache>(
+  () =>
+    new SWRCache<ReferralProgramEditionConfigSet>({
+      fn: loadReferralProgramEditionConfigSet,
+      ttl: Number.POSITIVE_INFINITY,
+      errorTtl: minutesToSeconds(1),
+      proactiveRevalidationInterval: undefined,
+      proactivelyInitialize: true,
+    }),
+);

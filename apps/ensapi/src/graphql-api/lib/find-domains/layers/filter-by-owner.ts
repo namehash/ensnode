@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import type { Address } from "viem";
 
-import { db } from "@/lib/db";
+import { ensDb } from "@/lib/ensdb/singleton";
 
 import { type BaseDomainSet, selectBase } from "./base-domain-set";
 
@@ -9,7 +9,7 @@ import { type BaseDomainSet, selectBase } from "./base-domain-set";
  * Filter a base domain set by owner address.
  */
 export function filterByOwner(base: BaseDomainSet, owner: Address) {
-  return db //
+  return ensDb //
     .select(selectBase(base))
     .from(base)
     .where(eq(base.ownerId, owner))

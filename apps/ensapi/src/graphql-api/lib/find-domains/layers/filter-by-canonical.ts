@@ -1,6 +1,6 @@
 import { eq, isNotNull, isNull, or } from "drizzle-orm";
 
-import { db } from "@/lib/db";
+import { ensDb } from "@/lib/ensdb/singleton";
 
 import { getCanonicalRegistriesCTE } from "../canonical-registries-cte";
 import { type BaseDomainSet, selectBase } from "./base-domain-set";
@@ -17,7 +17,7 @@ import { type BaseDomainSet, selectBase } from "./base-domain-set";
 export function filterByCanonical(base: BaseDomainSet) {
   const canonicalRegistries = getCanonicalRegistriesCTE();
 
-  return db
+  return ensDb
     .select(selectBase(base))
     .from(base)
     .leftJoin(canonicalRegistries, eq(canonicalRegistries.id, base.registryId))
