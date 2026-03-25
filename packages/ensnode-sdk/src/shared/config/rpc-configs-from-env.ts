@@ -7,6 +7,7 @@ import {
 
 import { serializeChainId } from "../serialize";
 import type { ChainIdString } from "../serialized-types";
+import type { Unvalidated } from "../types";
 import {
   alchemySupportsChain,
   buildAlchemyBaseUrl,
@@ -18,10 +19,62 @@ import {
 import type { ChainIdSpecificRpcEnvironmentVariable, RpcEnvironment } from "./environments";
 
 /**
+ * Mode for auto-generating RPCs across indexed chains.
+ */
+const RpcAutoGenModes = {
+  /**
+   * Auto-generates only HTTP RPCs for supported chains.
+   */
+  HttpOnly: "http-only",
+
+  /**
+   * Auto-generates both HTTP and WebSocket RPCs for supported chains.
+   */
+  HttpAndWs: "http-and-ws",
+} as const;
+
+/**
+ * The derived string union of possible {@link RpcAutoGenModes}.
+ */
+type RpcAutoGenMode = (typeof RpcAutoGenModes)[keyof typeof RpcAutoGenModes];
+
+/**
+ * Default mode for auto-generating RPCs across indexed chains.
+ */
+const DEFAULT_RPC_AUTO_GEN_MODE: RpcAutoGenMode = RpcAutoGenModes.HttpOnly;
+
+/**
+ * Build the RPCs auto-generation mode based on environment variables, with validation.
+ *
+ * Note: if env.RPC_AUTO_GEN_MODE is not set,
+ * {@link DEFAULT_RPC_AUTO_GEN_MODE} will be used as the default.
+ *
+ * @param env The RPC environment variables to determine the auto-generation mode.
+ * @returns The RPCs auto-generation mode to use for building RPC configurations.
+ * @throws Error if the provided RPC_AUTO_GEN_MODE env var is invalid.
+ */
+export function buildRpcAutoGenMode(env: RpcEnvironment): RpcAutoGenMode {
+  const mode = env.RPC_AUTO_GEN_MODE as Unvalidated<RpcAutoGenMode>;
+
+  if (!mode) {
+    return DEFAULT_RPC_AUTO_GEN_MODE;
+  }
+
+  if (!Object.values(RpcAutoGenModes).includes(mode)) {
+    throw new Error(
+      `Invalid RPC_AUTO_GEN_MODE env var: ${mode}. Valid values are: ${Object.values(RpcAutoGenModes).join(", ")}`,
+    );
+  }
+
+  return mode;
+}
+
+/**
  * Constructs dynamic chain configuration from environment variables, scoped to chain IDs that appear
  * in the specified `namespace`.
  *
- * This function auto-generates RPC URLs in the following order:
+ * This function auto-generates RPCs, depending on
+ * the configured {@link RpcAutoGenMode}, in the following order:
  * 1. RPC_URL_*, if available in the env
  * 2. Alchemy, if ALCHEMY_API_KEY is available in the env
  * 3. QuickNode, if both, QUICKNODE_API_KEY and QUICKNODE_ENDPOINT_NAME are specified,
@@ -63,6 +116,7 @@ export function buildRpcConfigsFromEnv(
     ([, datasource]) => (datasource as Datasource).chain,
   );
 
+  const rpcAutoGenMode = buildRpcAutoGenMode(env);
   const rpcConfigs: Record<ChainIdString, ChainIdSpecificRpcEnvironmentVariable> = {};
 
   for (const chain of chainsInNamespace) {
@@ -96,6 +150,7 @@ export function buildRpcConfigsFromEnv(
     ];
 
     const wsUrl =
+      rpcAutoGenMode === RpcAutoGenModes.HttpAndWs &&
       alchemyApiKey &&
       alchemySupportsChain(chain.id) && //
       `wss://${buildAlchemyBaseUrl(chain.id, alchemyApiKey)}`;

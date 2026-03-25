@@ -2,10 +2,10 @@ import config from "@/config";
 
 import { createDocumentationMiddleware } from "ponder-enrich-gql-docs-middleware";
 
-import * as schema from "@ensnode/ensdb-sdk";
 import { type Duration, hasSubgraphApiConfigSupport } from "@ensnode/ensnode-sdk";
 import { subgraphGraphQLMiddleware } from "@ensnode/ponder-subgraph";
 
+import { ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { createApp } from "@/lib/hono-factory";
 import { lazy } from "@/lib/lazy";
 import { makeSubgraphApiDocumentation } from "@/lib/subgraph/api-documentation";
@@ -19,7 +19,7 @@ import { thegraphFallbackMiddleware } from "@/middleware/thegraph-fallback.middl
 const MAX_REALTIME_DISTANCE_TO_RESOLVE: Duration = 10 * 60; // 10 minutes in seconds
 
 // generate a subgraph-specific subset of the schema
-const subgraphSchema = filterSchemaByPrefix("subgraph_", schema);
+const subgraphSchema = filterSchemaByPrefix("subgraph_", ensIndexerSchema);
 
 const app = createApp();
 
@@ -56,7 +56,7 @@ app.use(subgraphMetaMiddleware);
 const getSubgraphMiddleware = lazy(() =>
   subgraphGraphQLMiddleware({
     databaseUrl: config.databaseUrl,
-    databaseSchema: config.databaseSchemaName,
+    databaseSchema: config.ensIndexerSchemaName,
     schema: subgraphSchema,
     // describes the polymorphic (interface) relationships in the schema
     polymorphicConfig: {

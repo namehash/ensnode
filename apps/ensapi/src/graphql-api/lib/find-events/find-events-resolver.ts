@@ -2,20 +2,18 @@ import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@poth
 import { and, count, eq, getTableColumns, gte, inArray, lte, type SQL, sql } from "drizzle-orm";
 import type { Address, Hex } from "viem";
 
-import * as schema from "@ensnode/ensdb-sdk";
-
 import { orderPaginationBy, paginateBy } from "@/graphql-api/lib/connection-helpers";
 import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
-import { db } from "@/lib/db";
+import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 
 /**
  * A join table that relates some entity to events via an `eventId` column.
  */
 type EventJoinTable =
-  | typeof schema.domainEvent
-  | typeof schema.resolverEvent
-  | typeof schema.permissionsEvent;
+  | typeof ensIndexerSchema.domainEvent
+  | typeof ensIndexerSchema.resolverEvent
+  | typeof ensIndexerSchema.permissionsEvent;
 
 /**
  * Available filter options for find-events queries.
@@ -40,16 +38,16 @@ function eventsWhereConditions(where?: EventsWhere | null): SQL | undefined {
   return and(
     where.selector_in
       ? where.selector_in.length
-        ? inArray(schema.event.selector, where.selector_in)
+        ? inArray(ensIndexerSchema.event.selector, where.selector_in)
         : sql`false`
       : undefined,
     typeof where.timestamp_gte === "bigint"
-      ? gte(schema.event.timestamp, where.timestamp_gte)
+      ? gte(ensIndexerSchema.event.timestamp, where.timestamp_gte)
       : undefined,
     typeof where.timestamp_lte === "bigint"
-      ? lte(schema.event.timestamp, where.timestamp_lte)
+      ? lte(ensIndexerSchema.event.timestamp, where.timestamp_lte)
       : undefined,
-    where.from ? eq(schema.event.from, where.from) : undefined,
+    where.from ? eq(ensIndexerSchema.event.from, where.from) : undefined,
   );
 }
 
@@ -86,9 +84,12 @@ export function resolveFindEvents(
   return lazyConnection({
     totalCount: () => {
       // note: not possible to dynamically change the .select() columns so we make a new query
-      let query = db.select({ count: count() }).from(schema.event).$dynamic();
+      let query = ensDb.select({ count: count() }).from(ensIndexerSchema.event).$dynamic();
       if (through) {
-        query = query.innerJoin(through.table, eq(through.table.eventId, schema.event.id));
+        query = query.innerJoin(
+          through.table,
+          eq(through.table.eventId, ensIndexerSchema.event.id),
+        );
       }
 
       return query.where(conditions).then((rows) => rows[0].count);
@@ -101,14 +102,20 @@ export function resolveFindEvents(
         },
         ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) => {
           // note: not possible to dynamically change the .select() columns so we make a new query
-          let query = db.select(getTableColumns(schema.event)).from(schema.event).$dynamic();
+          let query = ensDb
+            .select(getTableColumns(ensIndexerSchema.event))
+            .from(ensIndexerSchema.event)
+            .$dynamic();
           if (through) {
-            query = query.innerJoin(through.table, eq(through.table.eventId, schema.event.id));
+            query = query.innerJoin(
+              through.table,
+              eq(through.table.eventId, ensIndexerSchema.event.id),
+            );
           }
 
           return query
-            .where(and(conditions, paginateBy(schema.event.id, before, after)))
-            .orderBy(orderPaginationBy(schema.event.id, inverted))
+            .where(and(conditions, paginateBy(ensIndexerSchema.event.id, before, after)))
+            .orderBy(orderPaginationBy(ensIndexerSchema.event.id, inverted))
             .limit(limit);
         },
       ),

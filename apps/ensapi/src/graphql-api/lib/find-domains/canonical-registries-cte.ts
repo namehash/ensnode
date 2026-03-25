@@ -2,10 +2,9 @@ import config from "@/config";
 
 import { sql } from "drizzle-orm";
 
-import * as schema from "@ensnode/ensdb-sdk";
 import { maybeGetENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
 
-import { db } from "@/lib/db";
+import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { lazy } from "@/lib/lazy";
 
 /**
@@ -37,13 +36,13 @@ const getENSV2RootRegistryId = lazy(() => maybeGetENSv2RootRegistryId(config.nam
 export const getCanonicalRegistriesCTE = () => {
   // if ENSv2 is not defined, return an empty set with identical structure to below
   if (!getENSV2RootRegistryId()) {
-    return db
+    return ensDb
       .select({ id: sql<string>`registry_id`.as("id") })
       .from(sql`(SELECT NULL::text AS registry_id WHERE FALSE) AS canonical_registries_cte`)
       .as("canonical_registries");
   }
 
-  return db
+  return ensDb
     .select({
       // NOTE: using `id` here to avoid clobbering `registryId` in consuming queries, which would
       // result in '_ is ambiguous' error messages from postgres because drizzle isn't scoping the
@@ -57,8 +56,8 @@ export const getCanonicalRegistriesCTE = () => {
           SELECT ${getENSV2RootRegistryId()}::text AS registry_id, 0 AS depth
           UNION ALL
           SELECT rcd.registry_id, cr.depth + 1
-          FROM ${schema.registryCanonicalDomain} rcd
-          JOIN ${schema.v2Domain} parent ON parent.id = rcd.domain_id AND parent.subregistry_id = rcd.registry_id
+          FROM ${ensIndexerSchema.registryCanonicalDomain} rcd
+          JOIN ${ensIndexerSchema.v2Domain} parent ON parent.id = rcd.domain_id AND parent.subregistry_id = rcd.registry_id
           JOIN canonical_registries cr ON cr.registry_id = parent.registry_id
           WHERE cr.depth < ${CANONICAL_REGISTRIES_MAX_DEPTH}
         )

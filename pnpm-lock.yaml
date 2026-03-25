@@ -962,6 +962,9 @@ importers:
       '@ensnode/datasources':
         specifier: workspace:*
         version: link:../datasources
+      '@ensnode/ensdb-sdk':
+        specifier: workspace:*
+        version: link:../ensdb-sdk
       '@ensnode/ensnode-sdk':
         specifier: workspace:*
         version: link:../ensnode-sdk

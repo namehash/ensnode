@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/config", () => ({ default: { namespace: "mainnet" } }));
-vi.mock("@/lib/db", () => ({ db: {} }));
 vi.mock("@/graphql-api/lib/find-domains/find-domains-by-labelhash-path", () => ({}));
 
 import { isEffectiveDesc } from "./find-domains-resolver-helpers";

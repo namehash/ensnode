@@ -1,15 +1,17 @@
-import type * as schema from "@ensnode/ensdb-sdk";
 import { makeResolverId } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { ResolverRef } from "@/graphql-api/schema/resolver";
+import type { ensIndexerSchema } from "@/lib/ensdb/singleton";
 
 /**
  * Represents a PermissionsUser whose contract is a Resolver, providing a semantic `resolver` field.
  */
 export const ResolverPermissionsUserRef =
-  builder.objectRef<typeof schema.permissionsUser.$inferSelect>("ResolverPermissionsUser");
+  builder.objectRef<typeof ensIndexerSchema.permissionsUser.$inferSelect>(
+    "ResolverPermissionsUser",
+  );
 
 ResolverPermissionsUserRef.implement({
   fields: (t) => ({

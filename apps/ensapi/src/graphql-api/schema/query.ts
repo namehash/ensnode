@@ -2,7 +2,6 @@ import config from "@/config";
 
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 
-import * as schema from "@ensnode/ensdb-sdk";
 import {
   makePermissionsId,
   makeRegistryId,
@@ -36,7 +35,7 @@ import { PermissionsRef } from "@/graphql-api/schema/permissions";
 import { RegistrationInterfaceRef } from "@/graphql-api/schema/registration";
 import { RegistryIdInput, RegistryRef } from "@/graphql-api/schema/registry";
 import { ResolverIdInput, ResolverRef } from "@/graphql-api/schema/resolver";
-import { db } from "@/lib/db";
+import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 
 // don't want them to get familiar/accustomed to these methods until their necessity is certain
 const INCLUDE_DEV_METHODS = process.env.NODE_ENV !== "production";
@@ -52,14 +51,14 @@ builder.queryType({
         type: ENSv1DomainRef,
         resolve: (parent, args) =>
           lazyConnection({
-            totalCount: () => db.$count(schema.v1Domain),
+            totalCount: () => ensDb.$count(ensIndexerSchema.v1Domain),
             connection: () =>
               resolveCursorConnection(
                 { ...ID_PAGINATED_CONNECTION_ARGS, args },
                 ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-                  db.query.v1Domain.findMany({
-                    where: paginateBy(schema.v1Domain.id, before, after),
-                    orderBy: orderPaginationBy(schema.v1Domain.id, inverted),
+                  ensDb.query.v1Domain.findMany({
+                    where: paginateBy(ensIndexerSchema.v1Domain.id, before, after),
+                    orderBy: orderPaginationBy(ensIndexerSchema.v1Domain.id, inverted),
                     limit,
                     with: { label: true },
                   }),
@@ -75,14 +74,14 @@ builder.queryType({
         type: ENSv2DomainRef,
         resolve: (parent, args) =>
           lazyConnection({
-            totalCount: () => db.$count(schema.v2Domain),
+            totalCount: () => ensDb.$count(ensIndexerSchema.v2Domain),
             connection: () =>
               resolveCursorConnection(
                 { ...ID_PAGINATED_CONNECTION_ARGS, args },
                 ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-                  db.query.v2Domain.findMany({
-                    where: paginateBy(schema.v2Domain.id, before, after),
-                    orderBy: orderPaginationBy(schema.v2Domain.id, inverted),
+                  ensDb.query.v2Domain.findMany({
+                    where: paginateBy(ensIndexerSchema.v2Domain.id, before, after),
+                    orderBy: orderPaginationBy(ensIndexerSchema.v2Domain.id, inverted),
                     limit,
                     with: { label: true },
                   }),
@@ -98,16 +97,16 @@ builder.queryType({
         type: ResolverRef,
         resolve: (parent, args) =>
           lazyConnection({
-            totalCount: () => db.$count(schema.resolver),
+            totalCount: () => ensDb.$count(ensIndexerSchema.resolver),
             connection: () =>
               resolveCursorConnection(
                 { ...ID_PAGINATED_CONNECTION_ARGS, args },
                 ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-                  db
+                  ensDb
                     .select()
-                    .from(schema.resolver)
-                    .where(paginateBy(schema.resolver.id, before, after))
-                    .orderBy(orderPaginationBy(schema.resolver.id, inverted))
+                    .from(ensIndexerSchema.resolver)
+                    .where(paginateBy(ensIndexerSchema.resolver.id, before, after))
+                    .orderBy(orderPaginationBy(ensIndexerSchema.resolver.id, inverted))
                     .limit(limit),
               ),
           }),
@@ -121,16 +120,16 @@ builder.queryType({
         type: RegistrationInterfaceRef,
         resolve: (parent, args) =>
           lazyConnection({
-            totalCount: () => db.$count(schema.registration),
+            totalCount: () => ensDb.$count(ensIndexerSchema.registration),
             connection: () =>
               resolveCursorConnection(
                 { ...ID_PAGINATED_CONNECTION_ARGS, args },
                 ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-                  db
+                  ensDb
                     .select()
-                    .from(schema.registration)
-                    .where(paginateBy(schema.registration.id, before, after))
-                    .orderBy(orderPaginationBy(schema.registration.id, inverted))
+                    .from(ensIndexerSchema.registration)
+                    .where(paginateBy(ensIndexerSchema.registration.id, before, after))
+                    .orderBy(orderPaginationBy(ensIndexerSchema.registration.id, inverted))
                     .limit(limit),
               ),
           }),

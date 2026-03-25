@@ -1,9 +1,9 @@
 import type { DomainId } from "@ensnode/ensnode-sdk";
 
-import { db } from "@/lib/db";
+import { ensDb } from "@/lib/ensdb/singleton";
 
 export async function getDomainResolver(domainId: DomainId) {
-  const drr = await db.query.domainResolverRelation.findFirst({
+  const drr = await ensDb.query.domainResolverRelation.findFirst({
     where: (t, { eq }) => eq(t.domainId, domainId),
     with: { resolver: true },
   });

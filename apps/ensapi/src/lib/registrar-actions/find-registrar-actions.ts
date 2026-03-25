@@ -1,6 +1,5 @@
 import { and, count, desc, eq, gte, isNotNull, lte, not, type SQL } from "drizzle-orm/sql";
 
-import * as schema from "@ensnode/ensdb-sdk";
 import {
   type BlockRef,
   bigIntToNumber,
@@ -21,7 +20,7 @@ import {
   ZERO_ENCODED_REFERRER,
 } from "@ensnode/ensnode-sdk";
 
-import { db } from "@/lib/db";
+import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 
 /**
  * Build SQL for order clause from provided order param.
@@ -29,7 +28,7 @@ import { db } from "@/lib/db";
 function buildOrderByClause(order: RegistrarActionsOrder): SQL {
   switch (order) {
     case RegistrarActionsOrders.LatestRegistrarActions:
-      return desc(schema.registrarActions.id);
+      return desc(ensIndexerSchema.registrarActions.id);
   }
 }
 
@@ -42,13 +41,13 @@ function buildWhereClause(filters: RegistrarActionsFilter[] | undefined): SQL[] 
       switch (filter.filterType) {
         case RegistrarActionsFilterTypes.BySubregistryNode:
           // apply subregistry node equality filter
-          return eq(schema.subregistries.node, filter.value);
+          return eq(ensIndexerSchema.subregistries.node, filter.value);
 
         case RegistrarActionsFilterTypes.WithEncodedReferral: {
           // apply referral encoded referrer inclusion filter
           const filterSql = and(
-            isNotNull(schema.registrarActions.encodedReferrer),
-            not(eq(schema.registrarActions.encodedReferrer, ZERO_ENCODED_REFERRER)),
+            isNotNull(ensIndexerSchema.registrarActions.encodedReferrer),
+            not(eq(ensIndexerSchema.registrarActions.encodedReferrer, ZERO_ENCODED_REFERRER)),
           );
 
           // Invariant: filterSql is `SQL` object - should never occur
@@ -63,15 +62,15 @@ function buildWhereClause(filters: RegistrarActionsFilter[] | undefined): SQL[] 
 
         case RegistrarActionsFilterTypes.ByDecodedReferrer:
           // apply decoded referrer equality filter
-          return eq(schema.registrarActions.decodedReferrer, filter.value);
+          return eq(ensIndexerSchema.registrarActions.decodedReferrer, filter.value);
 
         case RegistrarActionsFilterTypes.BeginTimestamp:
           // apply begin timestamp filter (inclusive)
-          return gte(schema.registrarActions.timestamp, BigInt(filter.value));
+          return gte(ensIndexerSchema.registrarActions.timestamp, BigInt(filter.value));
 
         case RegistrarActionsFilterTypes.EndTimestamp:
           // apply end timestamp filter (inclusive)
-          return lte(schema.registrarActions.timestamp, BigInt(filter.value));
+          return lte(ensIndexerSchema.registrarActions.timestamp, BigInt(filter.value));
 
         default:
           // Invariant: Unknown filter type — should never occur
@@ -98,25 +97,28 @@ interface FindRegistrarActionsOptions {
 export async function _countRegistrarActions(
   filters: RegistrarActionsFilter[] | undefined,
 ): Promise<number> {
-  const countQuery = db
+  const countQuery = ensDb
     .select({
       count: count(),
     })
-    .from(schema.registrarActions)
+    .from(ensIndexerSchema.registrarActions)
     // join Registration Lifecycles associated with Registrar Actions
     .innerJoin(
-      schema.registrationLifecycles,
-      eq(schema.registrarActions.node, schema.registrationLifecycles.node),
+      ensIndexerSchema.registrationLifecycles,
+      eq(ensIndexerSchema.registrarActions.node, ensIndexerSchema.registrationLifecycles.node),
     )
     // join Domains associated with Registration Lifecycles
     .innerJoin(
-      schema.subgraph_domain,
-      eq(schema.registrationLifecycles.node, schema.subgraph_domain.id),
+      ensIndexerSchema.subgraph_domain,
+      eq(ensIndexerSchema.registrationLifecycles.node, ensIndexerSchema.subgraph_domain.id),
     )
     // join Subregistries associated with Registration Lifecycles
     .innerJoin(
-      schema.subregistries,
-      eq(schema.registrationLifecycles.subregistryId, schema.subregistries.subregistryId),
+      ensIndexerSchema.subregistries,
+      eq(
+        ensIndexerSchema.registrationLifecycles.subregistryId,
+        ensIndexerSchema.subregistries.subregistryId,
+      ),
     )
     .where(and(...buildWhereClause(filters)));
 
@@ -129,28 +131,31 @@ export async function _countRegistrarActions(
  * build a list of {@link NamedRegistrarAction} objects.
  */
 export async function _findRegistrarActions(options: FindRegistrarActionsOptions) {
-  const query = db
+  const query = ensDb
     .select({
-      registrarActions: schema.registrarActions,
-      registrationLifecycles: schema.registrationLifecycles,
-      subregistries: schema.subregistries,
-      domain: schema.subgraph_domain,
+      registrarActions: ensIndexerSchema.registrarActions,
+      registrationLifecycles: ensIndexerSchema.registrationLifecycles,
+      subregistries: ensIndexerSchema.subregistries,
+      domain: ensIndexerSchema.subgraph_domain,
     })
-    .from(schema.registrarActions)
+    .from(ensIndexerSchema.registrarActions)
     // join Registration Lifecycles associated with Registrar Actions
     .innerJoin(
-      schema.registrationLifecycles,
-      eq(schema.registrarActions.node, schema.registrationLifecycles.node),
+      ensIndexerSchema.registrationLifecycles,
+      eq(ensIndexerSchema.registrarActions.node, ensIndexerSchema.registrationLifecycles.node),
     )
     // join Domains associated with Registration Lifecycles
     .innerJoin(
-      schema.subgraph_domain,
-      eq(schema.registrationLifecycles.node, schema.subgraph_domain.id),
+      ensIndexerSchema.subgraph_domain,
+      eq(ensIndexerSchema.registrationLifecycles.node, ensIndexerSchema.subgraph_domain.id),
     )
     // join Subregistries associated with Registration Lifecycles
     .innerJoin(
-      schema.subregistries,
-      eq(schema.registrationLifecycles.subregistryId, schema.subregistries.subregistryId),
+      ensIndexerSchema.subregistries,
+      eq(
+        ensIndexerSchema.registrationLifecycles.subregistryId,
+        ensIndexerSchema.subregistries.subregistryId,
+      ),
     )
     .where(and(...buildWhereClause(options.filters)))
     .orderBy(buildOrderByClause(options.orderBy))

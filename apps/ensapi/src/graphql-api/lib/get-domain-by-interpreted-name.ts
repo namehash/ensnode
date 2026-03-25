@@ -3,7 +3,6 @@ import config from "@/config";
 import { Param, sql } from "drizzle-orm";
 import { namehash } from "viem";
 
-import * as schema from "@ensnode/ensdb-sdk";
 import {
   type DomainId,
   type ENSv2DomainId,
@@ -16,7 +15,7 @@ import {
   type RegistryId,
 } from "@ensnode/ensnode-sdk";
 
-import { db } from "@/lib/db";
+import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { lazy } from "@/lib/lazy";
 import { makeLogger } from "@/lib/logger";
 
@@ -85,7 +84,7 @@ async function v1_getDomainIdByInterpretedName(name: InterpretedName): Promise<D
   const node = namehash(name);
   const domainId = makeENSv1DomainId(node);
 
-  const domain = await db.query.v1Domain.findFirst({ where: (t, { eq }) => eq(t.id, domainId) });
+  const domain = await ensDb.query.v1Domain.findFirst({ where: (t, { eq }) => eq(t.id, domainId) });
   const exists = domain !== undefined;
 
   v1Logger.debug({ node, exists });
@@ -108,14 +107,14 @@ async function v2_getDomainIdByInterpretedName(
 
   // TODO: need to join latest registration and confirm that it's not expired, if expired should treat the domain as not existing
 
-  const result = await db.execute(sql`
+  const result = await ensDb.execute(sql`
     WITH RECURSIVE path AS (
       SELECT
         r.id AS registry_id,
         NULL::text AS domain_id,
         NULL::text AS label_hash,
         0 AS depth
-      FROM ${schema.registry} r
+      FROM ${ensIndexerSchema.registry} r
       WHERE r.id = ${rootRegistryId}
 
       UNION ALL
@@ -126,7 +125,7 @@ async function v2_getDomainIdByInterpretedName(
         d.label_hash,
         path.depth + 1
       FROM path
-      JOIN ${schema.v2Domain} d
+      JOIN ${ensIndexerSchema.v2Domain} d
         ON d.registry_id = path.registry_id
       WHERE d.label_hash = (${rawLabelHashPathArray})[path.depth + 1]
         AND path.depth + 1 <= array_length(${rawLabelHashPathArray}, 1)

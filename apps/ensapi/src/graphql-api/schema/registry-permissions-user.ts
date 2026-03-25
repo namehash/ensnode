@@ -1,15 +1,17 @@
-import type * as schema from "@ensnode/ensdb-sdk";
 import { makeRegistryId } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { RegistryRef } from "@/graphql-api/schema/registry";
+import type { ensIndexerSchema } from "@/lib/ensdb/singleton";
 
 /**
  * Represents a PermissionsUser whose contract is a Registry, providing a semantic `registry` field.
  */
 export const RegistryPermissionsUserRef =
-  builder.objectRef<typeof schema.permissionsUser.$inferSelect>("RegistryPermissionsUser");
+  builder.objectRef<typeof ensIndexerSchema.permissionsUser.$inferSelect>(
+    "RegistryPermissionsUser",
+  );
 
 RegistryPermissionsUserRef.implement({
   fields: (t) => ({

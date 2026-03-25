@@ -1,5 +1,5 @@
 import type {
-  DatabaseEnvironment,
+  EnsIndexerDatabaseEnvironment,
   EnsIndexerUrlEnvironment,
   RpcEnvironment,
 } from "@ensnode/ensnode-sdk/internal";
@@ -11,7 +11,7 @@ import type {
  * their state in `process.env`. This interface is intended to be the source type which then gets
  * mapped/parsed into a structured configuration object like `ENSIndexerConfig`.
  */
-export type ENSIndexerEnvironment = DatabaseEnvironment &
+export type ENSIndexerEnvironment = EnsIndexerDatabaseEnvironment &
   EnsIndexerUrlEnvironment &
   RpcEnvironment & {
     NAMESPACE?: string;
