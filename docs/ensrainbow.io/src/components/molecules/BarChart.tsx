@@ -1,4 +1,4 @@
-import { Fragment } from "react/jsx-runtime";
+import { Fragment } from "react";
 
 interface BarChartData {
   label: React.ReactNode;

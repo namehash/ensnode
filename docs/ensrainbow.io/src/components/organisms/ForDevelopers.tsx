@@ -95,7 +95,7 @@ const devElements: ListSectionElement[] = [
     header: (
       <div className={DeveloperSectionWrapperStyles}>
         <div className={DeveloperSectionTitleStyles}>Host your own ENSRainbow</div>
-        <ListSectionBadge width={53} height={20} text="Recommended" />
+        <ListSectionBadge text="Recommended" />
       </div>
     ),
     text: <Fragment>Deploy easily with prebuilt Docker images.</Fragment>,

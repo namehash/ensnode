@@ -10,7 +10,7 @@ export default defineConfig({
 
   vite: {
     ssr: {
-      noExternal: ["@namehash/namekit-react"],
+      noExternal: ["@namehash/namekit-react", "@namehash/namehash-ui"],
     },
     plugins: [tailwindcss()],
   },

@@ -15,7 +15,6 @@
   },
   "dependencies": {
     "@astrojs/react": "catalog:",
-    "@astrojs/tailwind": "catalog:",
     "@heroicons/react": "^2.2.0",
     "@namehash/ens-webfont": "^0.7.0",
     "@namehash/namekit-react": "catalog:",
