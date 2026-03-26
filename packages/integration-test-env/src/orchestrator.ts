@@ -189,35 +189,41 @@ async function pollIndexingStatus(
   ensIndexerSchemaName: string,
   timeoutMs: number,
 ): Promise<void> {
-  const client = new (await import("@ensnode/ensdb-sdk")).EnsDbReader(
-    ensDbUrl,
-    ensIndexerSchemaName,
-  );
+  const { EnsDbReader } = await import("@ensnode/ensdb-sdk");
+  const ensDbClient = new EnsDbReader(ensDbUrl, ensIndexerSchemaName);
 
   const start = Date.now();
   log("Polling indexing status...");
 
-  while (Date.now() - start < timeoutMs) {
-    checkAborted();
-    try {
-      const snapshot = await client.getIndexingStatusSnapshot();
-      if (snapshot !== undefined) {
-        const omnichainStatus = snapshot.omnichainSnapshot.omnichainStatus;
-        log(`Omnichain status: ${omnichainStatus}`);
-        if (
-          omnichainStatus === OmnichainIndexingStatusIds.Following ||
-          omnichainStatus === OmnichainIndexingStatusIds.Completed
-        ) {
-          log("Indexing reached target status");
-          return;
+  try {
+    while (Date.now() - start < timeoutMs) {
+      checkAborted();
+      try {
+        const snapshot = await ensDbClient.getIndexingStatusSnapshot();
+        if (snapshot !== undefined) {
+          const omnichainStatus = snapshot.omnichainSnapshot.omnichainStatus;
+          log(`Omnichain status: ${omnichainStatus}`);
+          if (
+            omnichainStatus === OmnichainIndexingStatusIds.Following ||
+            omnichainStatus === OmnichainIndexingStatusIds.Completed
+          ) {
+            log("Indexing reached target status");
+            return;
+          }
         }
+      } catch {
+        // indexer may not be ready yet
       }
-    } catch {
-      // indexer may not be ready yet
+      await new Promise((r) => setTimeout(r, 3000));
     }
-    await new Promise((r) => setTimeout(r, 3000));
+    throw new Error(`Indexing did not complete within ${timeoutMs / 1000}s`);
+  } finally {
+    console.log("Closing ENSDb client...");
+    // @ts-expect-error - DrizzleClient.$client is not typed to have an `end` method,
+    // but in practice it does (e.g. pg's Client does).
+    await ensDbClient.ensDb.$client.end();
+    console.log("ENSDb client closed");
   }
-  throw new Error(`Indexing did not complete within ${timeoutMs / 1000}s`);
 }
 
 function logVersions() {
