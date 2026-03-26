@@ -4,9 +4,6 @@
  * for ENSDb, which is then used to build the ENSDb Schema for a Drizzle client for ENSDb.
  */
 
-// TODO: remove `ensnode-metadata.schema` export when database migrations
-// for ENSNode Schema are executable.
-export * from "./ensnode-metadata.schema";
 export * from "./ensv2.schema";
 export * from "./protocol-acceleration.schema";
 export * from "./registrars.schema";
