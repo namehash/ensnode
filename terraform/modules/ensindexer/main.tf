@@ -61,7 +61,7 @@ resource "render_web_service" "ensapi" {
   }
 
   env_vars = merge(local.common_variables, {
-    "ENSINDEXER_URL" = { value = "http://ensindexer-${var.ensnode_indexer_type}:10000" }
+    "ENSINDEXER_SCHEMA_NAME" = { value = var.database_schema },
   })
 
   # See https://render.com/docs/custom-domains

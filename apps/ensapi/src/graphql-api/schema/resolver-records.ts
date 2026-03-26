@@ -2,11 +2,11 @@ import { bigintToCoinType, type ResolverRecordsId } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
-import { db } from "@/lib/db";
+import { ensDb } from "@/lib/ensdb/singleton";
 
 export const ResolverRecordsRef = builder.loadableObjectRef("ResolverRecords", {
   load: (ids: ResolverRecordsId[]) =>
-    db.query.resolverRecords.findMany({
+    ensDb.query.resolverRecords.findMany({
       where: (t, { inArray }) => inArray(t.id, ids),
       with: { textRecords: true, addressRecords: true },
     }),

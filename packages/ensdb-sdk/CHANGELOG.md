@@ -1,5 +1,14 @@
 # @ensnode/ensdb-sdk
 
+## 1.8.1
+
+### Patch Changes
+
+- [#1820](https://github.com/namehash/ensnode/pull/1820) [`12f279d`](https://github.com/namehash/ensnode/commit/12f279da603da358869a709cc8a7a8c0d56080e5) Thanks [@tk-o](https://github.com/tk-o)! - Temporarily removed the `byName` index on `subgraph_domains` table in ENSDb.
+
+- Updated dependencies []:
+  - @ensnode/ensnode-sdk@1.8.1
+
 ## 1.8.0
 
 ### Minor Changes

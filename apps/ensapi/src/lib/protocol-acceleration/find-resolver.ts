@@ -25,8 +25,9 @@ import {
   type NormalizedName,
 } from "@ensnode/ensnode-sdk";
 
-import { db } from "@/lib/db";
+import { ensDb } from "@/lib/ensdb/singleton";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/instrumentation/auto-span";
+import { lazyProxy } from "@/lib/lazy";
 
 type FindResolverResult =
   | {
@@ -44,10 +45,10 @@ const NULL_RESULT: FindResolverResult = {
 
 const tracer = trace.getTracer("find-resolver");
 
-const ENSv1RegistryOld = getDatasourceContract(
-  config.namespace,
-  DatasourceNames.ENSRoot,
-  "ENSv1RegistryOld",
+// lazyProxy defers construction until first use so that this module can be
+// imported without env vars being present (e.g. during OpenAPI generation).
+const ensv1RegistryOld = lazyProxy(() =>
+  getDatasourceContract(config.namespace, DatasourceNames.ENSRoot, "ENSv1RegistryOld"),
 );
 
 /**
@@ -212,7 +213,7 @@ async function findResolverWithIndex(
           // doesn't exist in its own storage, it directs the lookup to RegistryOld. We must encode
           // this logic here, so that the active resolver of unmigrated nodes can be correctly identified.
           // https://github.com/ensdomains/ens-contracts/blob/be53b9c25be5b2c7326f524bbd34a3939374ab1f/contracts/registry/ENSRegistryWithFallback.sol#L19
-          const records = await db.query.domainResolverRelation.findMany({
+          const records = await ensDb.query.domainResolverRelation.findMany({
             where: (t, { inArray, and, or, eq }) =>
               and(
                 or(
@@ -221,8 +222,8 @@ async function findResolverWithIndex(
                   // OR, if the registry is the ENS Root Registry, also include records from RegistryOld
                   isENSv1Registry(config.namespace, registry)
                     ? and(
-                        eq(t.chainId, ENSv1RegistryOld.chainId),
-                        eq(t.address, ENSv1RegistryOld.address),
+                        eq(t.chainId, ensv1RegistryOld.chainId),
+                        eq(t.address, ensv1RegistryOld.address),
                       )
                     : undefined,
                 ),

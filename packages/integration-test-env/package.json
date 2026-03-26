@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/integration-test-env",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "type": "module",
   "description": "Integration test environment orchestration for ENSNode",
@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@ensnode/datasources": "workspace:*",
+    "@ensnode/ensdb-sdk": "workspace:*",
     "@ensnode/ensnode-sdk": "workspace:*",
     "@testcontainers/postgresql": "^11.12.0",
     "execa": "^9.6.1",

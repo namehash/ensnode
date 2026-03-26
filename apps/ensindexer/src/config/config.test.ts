@@ -739,11 +739,73 @@ describe("config (minimal base env)", () => {
           rpcConfigs.every((rpcConfig) => rpcConfig.httpRPCs.length >= 1),
           "must have http rpc url",
         ).toBe(true);
+      });
 
+      it("should not generate WS RPCs by default (http-only mode)", async () => {
+        const config = await getConfig();
+        const rpcConfigs = [...config.rpcConfigs.values()];
+
+        expect(rpcConfigs.length, "should have some configs").toBeGreaterThan(0);
         expect(
-          rpcConfigs.every((rpcConfig) => rpcConfig.websocketRPC !== undefined),
-          "must have ws rpc url",
+          rpcConfigs.every((rpcConfig) => rpcConfig.websocketRPC === undefined),
+          "must not have ws rpc url",
         ).toBe(true);
+      });
+    });
+
+    describe("with ALCHEMY_API_KEY and RPC_AUTO_GEN_MODE=http-and-ws", () => {
+      beforeEach(() => {
+        stubEnv({
+          ALCHEMY_API_KEY: "anything",
+          RPC_URL_1: undefined,
+          RPC_AUTO_GEN_MODE: "http-and-ws",
+        });
+      });
+
+      it("should generate WS RPCs for chains that support them", async () => {
+        const config = await getConfig();
+        const rpcConfigs = [...config.rpcConfigs.values()];
+
+        expect(rpcConfigs.length, "should have some configs").toBeGreaterThan(0);
+        expect(
+          rpcConfigs.some((rpcConfig) => rpcConfig.websocketRPC !== undefined),
+          "should have at least one ws rpc url",
+        ).toBe(true);
+      });
+    });
+
+    describe("with ALCHEMY_API_KEY and RPC_AUTO_GEN_MODE=http-only", () => {
+      beforeEach(() => {
+        stubEnv({
+          ALCHEMY_API_KEY: "anything",
+          RPC_URL_1: undefined,
+          RPC_AUTO_GEN_MODE: "http-only",
+        });
+      });
+
+      it("should not generate WS RPCs", async () => {
+        const config = await getConfig();
+        const rpcConfigs = [...config.rpcConfigs.values()];
+
+        expect(rpcConfigs.length, "should have some configs").toBeGreaterThan(0);
+        expect(
+          rpcConfigs.every((rpcConfig) => rpcConfig.websocketRPC === undefined),
+          "must not have ws rpc url",
+        ).toBe(true);
+      });
+    });
+
+    describe("with ALCHEMY_API_KEY and RPC_AUTO_GEN_MODE=invalid", () => {
+      beforeEach(() => {
+        stubEnv({
+          ALCHEMY_API_KEY: "anything",
+          RPC_URL_1: undefined,
+          RPC_AUTO_GEN_MODE: "invalid",
+        });
+      });
+
+      it("throws an error for invalid RPC_AUTO_GEN_MODE", async () => {
+        await expect(getConfig()).rejects.toThrow(/Invalid RPC_AUTO_GEN_MODE env var/i);
       });
     });
 

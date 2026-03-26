@@ -7,7 +7,7 @@ import { index, onchainEnum, onchainTable, relations, uniqueIndex } from "ponder
 /**
  * Subregistries
  *
- * @see https://ensnode.io/docs/reference/terminology/#subregistry
+ * @see https://ensnode.io/docs/reference/terminology#subregistry
  */
 export const subregistries = onchainTable(
   "subregistries",

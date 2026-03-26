@@ -2,10 +2,9 @@ import { and, eq, sql } from "drizzle-orm";
 import { alias, unionAll } from "drizzle-orm/pg-core";
 import type { Address } from "viem";
 
-import * as schema from "@ensnode/ensdb-sdk";
 import type { DomainId } from "@ensnode/ensnode-sdk";
 
-import { db } from "@/lib/db";
+import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 
 /**
  * The type of the base domain set subquery.
@@ -27,45 +26,58 @@ export type BaseDomainSet = ReturnType<typeof domainsBase>;
  * All downstream filters (owner, parent, registry, name, canonical) operate on this shape.
  */
 export function domainsBase() {
-  const v2ParentDomain = alias(schema.v2Domain, "v2ParentDomain");
+  const v2ParentDomain = alias(ensIndexerSchema.v2Domain, "v2ParentDomain");
 
   return unionAll(
-    db
+    ensDb
       .select({
-        domainId: sql<DomainId>`${schema.v1Domain.id}`.as("domainId"),
-        ownerId: sql<Address | null>`${schema.v1Domain.ownerId}`.as("ownerId"),
+        domainId: sql<DomainId>`${ensIndexerSchema.v1Domain.id}`.as("domainId"),
+        ownerId: sql<Address | null>`${ensIndexerSchema.v1Domain.ownerId}`.as("ownerId"),
         registryId: sql<string | null>`NULL::text`.as("registryId"),
-        parentId: sql<DomainId | null>`${schema.v1Domain.parentId}`.as("parentId"),
-        labelHash: sql<string>`${schema.v1Domain.labelHash}`.as("labelHash"),
-        sortableLabel: sql<string | null>`${schema.label.interpreted}`.as("sortableLabel"),
+        parentId: sql<DomainId | null>`${ensIndexerSchema.v1Domain.parentId}`.as("parentId"),
+        labelHash: sql<string>`${ensIndexerSchema.v1Domain.labelHash}`.as("labelHash"),
+        sortableLabel: sql<string | null>`${ensIndexerSchema.label.interpreted}`.as(
+          "sortableLabel",
+        ),
       })
-      .from(schema.v1Domain)
-      .leftJoin(schema.label, eq(schema.label.labelHash, schema.v1Domain.labelHash)),
-    db
+      .from(ensIndexerSchema.v1Domain)
+      .leftJoin(
+        ensIndexerSchema.label,
+        eq(ensIndexerSchema.label.labelHash, ensIndexerSchema.v1Domain.labelHash),
+      ),
+    ensDb
       .select({
-        domainId: sql<DomainId>`${schema.v2Domain.id}`.as("domainId"),
-        ownerId: sql<Address | null>`${schema.v2Domain.ownerId}`.as("ownerId"),
-        registryId: sql<string | null>`${schema.v2Domain.registryId}`.as("registryId"),
+        domainId: sql<DomainId>`${ensIndexerSchema.v2Domain.id}`.as("domainId"),
+        ownerId: sql<Address | null>`${ensIndexerSchema.v2Domain.ownerId}`.as("ownerId"),
+        registryId: sql<string | null>`${ensIndexerSchema.v2Domain.registryId}`.as("registryId"),
         parentId: sql<DomainId | null>`${v2ParentDomain.id}`.as("parentId"),
-        labelHash: sql<string>`${schema.v2Domain.labelHash}`.as("labelHash"),
-        sortableLabel: sql<string | null>`${schema.label.interpreted}`.as("sortableLabel"),
+        labelHash: sql<string>`${ensIndexerSchema.v2Domain.labelHash}`.as("labelHash"),
+        sortableLabel: sql<string | null>`${ensIndexerSchema.label.interpreted}`.as(
+          "sortableLabel",
+        ),
       })
-      .from(schema.v2Domain)
+      .from(ensIndexerSchema.v2Domain)
       // derive v2 parentId via canonical registry traversal:
       // 1. find the canonical domain for this domain's registry
       .leftJoin(
-        schema.registryCanonicalDomain,
-        eq(schema.registryCanonicalDomain.registryId, schema.v2Domain.registryId),
+        ensIndexerSchema.registryCanonicalDomain,
+        eq(
+          ensIndexerSchema.registryCanonicalDomain.registryId,
+          ensIndexerSchema.v2Domain.registryId,
+        ),
       )
       // 2. verify the reverse pointer: parent.id = rcd.domainId AND parent.subregistryId = child.registryId
       .leftJoin(
         v2ParentDomain,
         and(
-          eq(v2ParentDomain.id, schema.registryCanonicalDomain.domainId),
-          eq(v2ParentDomain.subregistryId, schema.v2Domain.registryId),
+          eq(v2ParentDomain.id, ensIndexerSchema.registryCanonicalDomain.domainId),
+          eq(v2ParentDomain.subregistryId, ensIndexerSchema.v2Domain.registryId),
         ),
       )
-      .leftJoin(schema.label, eq(schema.label.labelHash, schema.v2Domain.labelHash)),
+      .leftJoin(
+        ensIndexerSchema.label,
+        eq(ensIndexerSchema.label.labelHash, ensIndexerSchema.v2Domain.labelHash),
+      ),
   ).as("baseDomains");
 }
 

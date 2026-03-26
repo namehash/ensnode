@@ -1,9 +1,8 @@
 import { and, eq, sql } from "drizzle-orm";
 
-import * as schema from "@ensnode/ensdb-sdk";
 import type { DomainId } from "@ensnode/ensnode-sdk";
 
-import { db } from "@/lib/db";
+import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 
 import type { BaseDomainSet } from "./base-domain-set";
 
@@ -33,7 +32,7 @@ export type DomainsWithOrderingMetadataResult = {
  * @param base - A base domain set (output of any filter layer)
  */
 export function withOrderingMetadata(base: BaseDomainSet) {
-  const domains = db
+  const domains = ensDb
     .select({
       id: sql<DomainId>`${base.domainId}`.as("id"),
 
@@ -41,25 +40,25 @@ export function withOrderingMetadata(base: BaseDomainSet) {
       sortableLabel: base.sortableLabel,
 
       // for REGISTRATION_TIMESTAMP ordering (materialized on registration)
-      registrationTimestamp: schema.registration.start,
+      registrationTimestamp: ensIndexerSchema.registration.start,
 
       // for REGISTRATION_EXPIRY ordering
-      registrationExpiry: schema.registration.expiry,
+      registrationExpiry: ensIndexerSchema.registration.expiry,
     })
     .from(base)
     // join latestRegistrationIndex
     .leftJoin(
-      schema.latestRegistrationIndex,
-      eq(schema.latestRegistrationIndex.domainId, base.domainId),
+      ensIndexerSchema.latestRegistrationIndex,
+      eq(ensIndexerSchema.latestRegistrationIndex.domainId, base.domainId),
     )
     // join (latest) Registration
     .leftJoin(
-      schema.registration,
+      ensIndexerSchema.registration,
       and(
-        eq(schema.registration.domainId, base.domainId),
-        eq(schema.registration.index, schema.latestRegistrationIndex.index),
+        eq(ensIndexerSchema.registration.domainId, base.domainId),
+        eq(ensIndexerSchema.registration.index, ensIndexerSchema.latestRegistrationIndex.index),
       ),
     );
 
-  return db.$with("domains").as(domains);
+  return ensDb.$with("domains").as(domains);
 }

@@ -1,5 +1,12 @@
 # @ensnode/ensnode-sdk
 
+## 1.8.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/datasources@1.8.1
+
 ## 1.8.0
 
 ### Minor Changes

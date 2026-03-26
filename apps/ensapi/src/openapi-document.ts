@@ -1,50 +1,29 @@
-import { OpenAPIHono } from "@hono/zod-openapi";
+import type { OpenAPIHono } from "@hono/zod-openapi";
 
 import { openapiMeta } from "@/openapi-meta";
 
-import * as nameTokensRoutes from "./handlers/api/explore/name-tokens-api.routes";
-import * as registrarActionsRoutes from "./handlers/api/explore/registrar-actions-api.routes";
-import * as realtimeRoutes from "./handlers/api/meta/realtime-api.routes";
-import * as statusRoutes from "./handlers/api/meta/status-api.routes";
-import * as resolutionRoutes from "./handlers/api/resolution/resolution-api.routes";
-import * as ensanalyticsRoutes from "./handlers/ensanalytics/ensanalytics-api.routes";
-import * as ensanalyticsV1Routes from "./handlers/ensanalytics/ensanalytics-api-v1.routes";
-
-const routeGroups = [
-  realtimeRoutes,
-  statusRoutes,
-  ensanalyticsV1Routes,
-  ensanalyticsRoutes,
-  nameTokensRoutes,
-  registrarActionsRoutes,
-  resolutionRoutes,
-];
-
 /**
- * Creates an OpenAPIHono app with all route definitions registered using stub
- * handlers. This allows generating the OpenAPI spec without importing any
- * handler code that depends on config/env vars.
+ * Endpoints to exclude from the generated OpenAPI document.
+ * TODO: remove /amirealtime once the legacy endpoint is deleted.
  */
-function createStubRoutesForSpec() {
-  const app = new OpenAPIHono();
+const HIDE_OPENAPI_ENDPOINTS: string[] = ["/amirealtime"];
 
-  for (const group of routeGroups) {
-    for (const route of group.routes) {
-      const path = route.path === "/" ? group.basePath : `${group.basePath}${route.path}`;
-      app.openapi(
-        { ...route, path },
-        // stub handler — never called, only needed for route registration
-        (c) => c.json({}),
-      );
-    }
+type OpenApiDocument = ReturnType<OpenAPIHono["getOpenAPI31Document"]>;
+
+function removeHiddenEndpoints(doc: OpenApiDocument): OpenApiDocument {
+  for (const path of HIDE_OPENAPI_ENDPOINTS) {
+    delete doc.paths?.[path];
   }
-
-  return app;
+  return doc;
 }
 
 /**
- * Generates an OpenAPI 3.1 document from stub route definitions.
+ * Generates an OpenAPI 3.1 document from the registered routes.
+ *
+ * Generation script and the runtime endpoint share the same function so that
+ * the generated OpenAPI document is always in sync with the actual API.
  */
-export function generateOpenApi31Document(): ReturnType<OpenAPIHono["getOpenAPI31Document"]> {
-  return createStubRoutesForSpec().getOpenAPI31Document(openapiMeta);
+export function generateOpenApi31Document(app: OpenAPIHono<any>): OpenApiDocument {
+  const doc = app.getOpenAPI31Document(openapiMeta);
+  return removeHiddenEndpoints(doc);
 }

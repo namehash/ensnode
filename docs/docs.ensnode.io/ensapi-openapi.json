@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "ENSApi APIs",
-    "version": "1.8.0",
+    "version": "1.8.1",
     "description": "APIs for ENS resolution, navigating the ENS nameforest, and metadata about an ENSNode"
   },
   "servers": [
@@ -29,35 +29,6 @@
   ],
   "components": { "schemas": {}, "parameters": {} },
   "paths": {
-    "/api/realtime": {
-      "get": {
-        "operationId": "getRealtime",
-        "tags": ["Meta"],
-        "summary": "Check indexing progress",
-        "description": "Checks if the indexing progress is guaranteed to be within a requested worst-case distance of realtime",
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "description": "Maximum acceptable worst-case indexing distance in seconds"
-            },
-            "required": false,
-            "description": "Maximum acceptable worst-case indexing distance in seconds",
-            "name": "maxWorstCaseDistance",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Indexing progress is guaranteed to be within the requested distance of realtime"
-          },
-          "503": {
-            "description": "Indexing progress is not guaranteed to be within the requested distance of realtime or indexing status unavailable"
-          }
-        }
-      }
-    },
     "/api/config": {
       "get": {
         "operationId": "getConfig",
@@ -956,151 +927,179 @@
         }
       }
     },
-    "/v1/ensanalytics/referral-leaderboard": {
+    "/api/realtime": {
       "get": {
-        "operationId": "getReferralLeaderboard_v1",
-        "tags": ["ENSAwards"],
-        "summary": "Get Referrer Leaderboard (v1)",
-        "description": "Returns a paginated page from the referrer leaderboard for a specific edition",
-        "parameters": [
-          {
-            "schema": { "type": "string", "minLength": 1, "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
-            "required": true,
-            "name": "edition",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "description": "Page number for pagination"
-            },
-            "required": false,
-            "description": "Page number for pagination",
-            "name": "page",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 100,
-              "description": "Number of referrers per page"
-            },
-            "required": false,
-            "description": "Number of referrers per page",
-            "name": "recordsPerPage",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": { "description": "Successfully retrieved referrer leaderboard page" },
-          "404": { "description": "Unknown edition slug" },
-          "500": { "description": "Internal server error" },
-          "503": { "description": "Service unavailable" }
-        }
-      }
-    },
-    "/v1/ensanalytics/referrer/{referrer}": {
-      "get": {
-        "operationId": "getReferrerDetail_v1",
-        "tags": ["ENSAwards"],
-        "summary": "Get Referrer Detail for Editions (v1)",
-        "description": "Returns detailed information for a specific referrer for the requested editions. Requires 1-20 distinct edition slugs. All requested editions must be recognized and have cached data, or the request fails.",
-        "parameters": [
-          {
-            "schema": { "type": "string", "description": "Referrer Ethereum address" },
-            "required": true,
-            "description": "Referrer Ethereum address",
-            "name": "referrer",
-            "in": "path"
-          },
-          {
-            "schema": { "type": "string", "description": "Comma-separated list of edition slugs" },
-            "required": true,
-            "description": "Comma-separated list of edition slugs",
-            "name": "editions",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": { "description": "Successfully retrieved referrer detail for requested editions" },
-          "400": { "description": "Invalid request" },
-          "404": { "description": "Unknown edition slug" },
-          "500": { "description": "Internal server error" },
-          "503": { "description": "Service unavailable" }
-        }
-      }
-    },
-    "/v1/ensanalytics/editions": {
-      "get": {
-        "operationId": "getEditions_v1",
-        "tags": ["ENSAwards"],
-        "summary": "Get Edition Summaries (v1)",
-        "description": "Returns a summary for each configured referral program edition, including its current status and award-model-specific runtime data. Editions are sorted in descending order by start timestamp (most recent first).",
-        "responses": {
-          "200": { "description": "Successfully retrieved edition summaries." },
-          "500": { "description": "Internal server error" },
-          "503": { "description": "Service unavailable" }
-        }
-      }
-    },
-    "/ensanalytics/referrers": {
-      "get": {
-        "operationId": "getReferrerLeaderboard",
-        "tags": ["ENSAwards"],
-        "summary": "Get Referrer Leaderboard",
-        "description": "Returns a paginated page from the referrer leaderboard",
+        "operationId": "getRealtime",
+        "tags": ["Meta"],
+        "summary": "Check indexing progress",
+        "description": "Checks if the indexing progress is guaranteed to be within a requested worst-case distance of realtime",
         "parameters": [
           {
             "schema": {
               "type": "integer",
-              "minimum": 1,
-              "description": "Page number for pagination"
+              "minimum": 0,
+              "description": "Maximum acceptable worst-case indexing distance in seconds"
             },
             "required": false,
-            "description": "Page number for pagination",
-            "name": "page",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 100,
-              "description": "Number of referrers per page"
-            },
-            "required": false,
-            "description": "Number of referrers per page",
-            "name": "recordsPerPage",
+            "description": "Maximum acceptable worst-case indexing distance in seconds",
+            "name": "maxWorstCaseDistance",
             "in": "query"
           }
         ],
         "responses": {
-          "200": { "description": "Successfully retrieved referrer leaderboard page" },
-          "500": { "description": "Internal server error" }
+          "200": {
+            "description": "Indexing progress is guaranteed to be within the requested distance of realtime"
+          },
+          "503": {
+            "description": "Indexing progress is not guaranteed to be within the requested distance of realtime or indexing status unavailable"
+          }
         }
       }
     },
-    "/ensanalytics/referrers/{referrer}": {
+    "/api/resolve/records/{name}": {
       "get": {
-        "operationId": "getReferrerDetail",
-        "tags": ["ENSAwards"],
-        "summary": "Get Referrer Detail",
-        "description": "Returns detailed information for a specific referrer by address",
+        "operationId": "resolveRecords",
+        "tags": ["Resolution"],
+        "summary": "Resolve ENS Records",
+        "description": "Resolves ENS records for a given name",
         "parameters": [
+          { "schema": { "type": "string" }, "required": true, "name": "name", "in": "path" },
+          { "schema": { "type": "string" }, "required": false, "name": "name", "in": "query" },
+          { "schema": { "type": "string" }, "required": false, "name": "addresses", "in": "query" },
+          { "schema": { "type": "string" }, "required": false, "name": "texts", "in": "query" },
           {
-            "schema": { "type": "string", "description": "Referrer Ethereum address" },
-            "required": true,
-            "description": "Referrer Ethereum address",
-            "name": "referrer",
-            "in": "path"
+            "schema": { "type": "boolean", "default": false },
+            "required": false,
+            "name": "trace",
+            "in": "query"
+          },
+          {
+            "schema": { "type": "boolean", "default": false },
+            "required": false,
+            "name": "accelerate",
+            "in": "query"
           }
         ],
         "responses": {
-          "200": { "description": "Successfully retrieved referrer detail" },
-          "500": { "description": "Internal server error" },
-          "503": { "description": "Service unavailable - referrer leaderboard data not yet cached" }
+          "200": {
+            "description": "Successfully resolved records",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "records": {
+                      "type": "object",
+                      "properties": {
+                        "name": { "type": ["string", "null"] },
+                        "addresses": {
+                          "type": "object",
+                          "additionalProperties": { "type": ["string", "null"] }
+                        },
+                        "texts": {
+                          "type": "object",
+                          "additionalProperties": { "type": ["string", "null"] }
+                        }
+                      }
+                    },
+                    "accelerationRequested": { "type": "boolean" },
+                    "accelerationAttempted": { "type": "boolean" },
+                    "trace": { "type": "array", "items": {} }
+                  },
+                  "required": ["records", "accelerationRequested", "accelerationAttempted"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/resolve/primary-name/{address}/{chainId}": {
+      "get": {
+        "operationId": "resolvePrimaryName",
+        "tags": ["Resolution"],
+        "summary": "Resolve Primary Name",
+        "description": "Resolves a primary name for a given `address` and `chainId`",
+        "parameters": [
+          { "schema": { "type": "string" }, "required": true, "name": "address", "in": "path" },
+          { "schema": { "type": "string" }, "required": true, "name": "chainId", "in": "path" },
+          {
+            "schema": { "type": "boolean", "default": false },
+            "required": false,
+            "name": "trace",
+            "in": "query"
+          },
+          {
+            "schema": { "type": "boolean", "default": false },
+            "required": false,
+            "name": "accelerate",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully resolved name",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": ["string", "null"] },
+                    "accelerationRequested": { "type": "boolean" },
+                    "accelerationAttempted": { "type": "boolean" },
+                    "trace": { "type": "array", "items": {} }
+                  },
+                  "required": ["name", "accelerationRequested", "accelerationAttempted"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/resolve/primary-names/{address}": {
+      "get": {
+        "operationId": "resolvePrimaryNames",
+        "tags": ["Resolution"],
+        "summary": "Resolve Primary Names",
+        "description": "Resolves all primary names for a given address across multiple chains",
+        "parameters": [
+          { "schema": { "type": "string" }, "required": true, "name": "address", "in": "path" },
+          { "schema": { "type": "string" }, "required": false, "name": "chainIds", "in": "query" },
+          {
+            "schema": { "type": "boolean", "default": false },
+            "required": false,
+            "name": "trace",
+            "in": "query"
+          },
+          {
+            "schema": { "type": "boolean", "default": false },
+            "required": false,
+            "name": "accelerate",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully resolved records",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "names": {
+                      "type": "object",
+                      "additionalProperties": { "type": ["string", "null"] }
+                    },
+                    "accelerationRequested": { "type": "boolean" },
+                    "accelerationAttempted": { "type": "boolean" },
+                    "trace": { "type": "array", "items": {} }
+                  },
+                  "required": ["names", "accelerationRequested", "accelerationAttempted"]
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -1935,150 +1934,151 @@
         }
       }
     },
-    "/api/resolve/records/{name}": {
+    "/ensanalytics/referrers": {
       "get": {
-        "operationId": "resolveRecords",
-        "tags": ["Resolution"],
-        "summary": "Resolve ENS Records",
-        "description": "Resolves ENS records for a given name",
+        "operationId": "getReferrerLeaderboard",
+        "tags": ["ENSAwards"],
+        "summary": "Get Referrer Leaderboard",
+        "description": "Returns a paginated page from the referrer leaderboard",
         "parameters": [
-          { "schema": { "type": "string" }, "required": true, "name": "name", "in": "path" },
-          { "schema": { "type": "string" }, "required": false, "name": "name", "in": "query" },
-          { "schema": { "type": "string" }, "required": false, "name": "addresses", "in": "query" },
-          { "schema": { "type": "string" }, "required": false, "name": "texts", "in": "query" },
           {
-            "schema": { "type": "boolean", "default": false },
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Page number for pagination"
+            },
             "required": false,
-            "name": "trace",
+            "description": "Page number for pagination",
+            "name": "page",
             "in": "query"
           },
           {
-            "schema": { "type": "boolean", "default": false },
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "description": "Number of referrers per page"
+            },
             "required": false,
-            "name": "accelerate",
+            "description": "Number of referrers per page",
+            "name": "recordsPerPage",
             "in": "query"
           }
         ],
         "responses": {
-          "200": {
-            "description": "Successfully resolved records",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "records": {
-                      "type": "object",
-                      "properties": {
-                        "name": { "type": ["string", "null"] },
-                        "addresses": {
-                          "type": "object",
-                          "additionalProperties": { "type": ["string", "null"] }
-                        },
-                        "texts": {
-                          "type": "object",
-                          "additionalProperties": { "type": ["string", "null"] }
-                        }
-                      }
-                    },
-                    "accelerationRequested": { "type": "boolean" },
-                    "accelerationAttempted": { "type": "boolean" },
-                    "trace": { "type": "array", "items": {} }
-                  },
-                  "required": ["records", "accelerationRequested", "accelerationAttempted"]
-                }
-              }
-            }
-          }
+          "200": { "description": "Successfully retrieved referrer leaderboard page" },
+          "500": { "description": "Internal server error" }
         }
       }
     },
-    "/api/resolve/primary-name/{address}/{chainId}": {
+    "/ensanalytics/referrers/{referrer}": {
       "get": {
-        "operationId": "resolvePrimaryName",
-        "tags": ["Resolution"],
-        "summary": "Resolve Primary Name",
-        "description": "Resolves a primary name for a given `address` and `chainId`",
+        "operationId": "getReferrerDetail",
+        "tags": ["ENSAwards"],
+        "summary": "Get Referrer Detail",
+        "description": "Returns detailed information for a specific referrer by address",
         "parameters": [
-          { "schema": { "type": "string" }, "required": true, "name": "address", "in": "path" },
-          { "schema": { "type": "string" }, "required": true, "name": "chainId", "in": "path" },
           {
-            "schema": { "type": "boolean", "default": false },
-            "required": false,
-            "name": "trace",
-            "in": "query"
-          },
-          {
-            "schema": { "type": "boolean", "default": false },
-            "required": false,
-            "name": "accelerate",
-            "in": "query"
+            "schema": { "type": "string", "description": "Referrer Ethereum address" },
+            "required": true,
+            "description": "Referrer Ethereum address",
+            "name": "referrer",
+            "in": "path"
           }
         ],
         "responses": {
-          "200": {
-            "description": "Successfully resolved name",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "name": { "type": ["string", "null"] },
-                    "accelerationRequested": { "type": "boolean" },
-                    "accelerationAttempted": { "type": "boolean" },
-                    "trace": { "type": "array", "items": {} }
-                  },
-                  "required": ["name", "accelerationRequested", "accelerationAttempted"]
-                }
-              }
-            }
-          }
+          "200": { "description": "Successfully retrieved referrer detail" },
+          "500": { "description": "Internal server error" },
+          "503": { "description": "Service unavailable - referrer leaderboard data not yet cached" }
         }
       }
     },
-    "/api/resolve/primary-names/{address}": {
+    "/v1/ensanalytics/referral-leaderboard": {
       "get": {
-        "operationId": "resolvePrimaryNames",
-        "tags": ["Resolution"],
-        "summary": "Resolve Primary Names",
-        "description": "Resolves all primary names for a given address across multiple chains",
+        "operationId": "getReferralLeaderboard_v1",
+        "tags": ["ENSAwards"],
+        "summary": "Get Referrer Leaderboard (v1)",
+        "description": "Returns a paginated page from the referrer leaderboard for a specific edition",
         "parameters": [
-          { "schema": { "type": "string" }, "required": true, "name": "address", "in": "path" },
-          { "schema": { "type": "string" }, "required": false, "name": "chainIds", "in": "query" },
           {
-            "schema": { "type": "boolean", "default": false },
-            "required": false,
-            "name": "trace",
+            "schema": { "type": "string", "minLength": 1, "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+            "required": true,
+            "name": "edition",
             "in": "query"
           },
           {
-            "schema": { "type": "boolean", "default": false },
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Page number for pagination"
+            },
             "required": false,
-            "name": "accelerate",
+            "description": "Page number for pagination",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "description": "Number of referrers per page"
+            },
+            "required": false,
+            "description": "Number of referrers per page",
+            "name": "recordsPerPage",
             "in": "query"
           }
         ],
         "responses": {
-          "200": {
-            "description": "Successfully resolved records",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "names": {
-                      "type": "object",
-                      "additionalProperties": { "type": ["string", "null"] }
-                    },
-                    "accelerationRequested": { "type": "boolean" },
-                    "accelerationAttempted": { "type": "boolean" },
-                    "trace": { "type": "array", "items": {} }
-                  },
-                  "required": ["names", "accelerationRequested", "accelerationAttempted"]
-                }
-              }
-            }
+          "200": { "description": "Successfully retrieved referrer leaderboard page" },
+          "404": { "description": "Unknown edition slug" },
+          "500": { "description": "Internal server error" },
+          "503": { "description": "Service unavailable" }
+        }
+      }
+    },
+    "/v1/ensanalytics/referrer/{referrer}": {
+      "get": {
+        "operationId": "getReferrerDetail_v1",
+        "tags": ["ENSAwards"],
+        "summary": "Get Referrer Detail for Editions (v1)",
+        "description": "Returns detailed information for a specific referrer for the requested editions. Requires 1-20 distinct edition slugs. All requested editions must be recognized and have cached data, or the request fails.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "description": "Referrer Ethereum address" },
+            "required": true,
+            "description": "Referrer Ethereum address",
+            "name": "referrer",
+            "in": "path"
+          },
+          {
+            "schema": { "type": "string", "description": "Comma-separated list of edition slugs" },
+            "required": true,
+            "description": "Comma-separated list of edition slugs",
+            "name": "editions",
+            "in": "query"
           }
+        ],
+        "responses": {
+          "200": { "description": "Successfully retrieved referrer detail for requested editions" },
+          "400": { "description": "Invalid request" },
+          "404": { "description": "Unknown edition slug" },
+          "500": { "description": "Internal server error" },
+          "503": { "description": "Service unavailable" }
+        }
+      }
+    },
+    "/v1/ensanalytics/editions": {
+      "get": {
+        "operationId": "getEditions_v1",
+        "tags": ["ENSAwards"],
+        "summary": "Get Edition Summaries (v1)",
+        "description": "Returns a summary for each configured referral program edition, including its current status and award-model-specific runtime data. Editions are sorted in descending order by start timestamp (most recent first).",
+        "responses": {
+          "200": { "description": "Successfully retrieved edition summaries." },
+          "500": { "description": "Internal server error" },
+          "503": { "description": "Service unavailable" }
         }
       }
     }

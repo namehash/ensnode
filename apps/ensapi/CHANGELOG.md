@@ -1,5 +1,16 @@
 # ensapi
 
+## 1.8.1
+
+### Patch Changes
+
+- Updated dependencies [[`12f279d`](https://github.com/namehash/ensnode/commit/12f279da603da358869a709cc8a7a8c0d56080e5)]:
+  - @ensnode/ensdb-sdk@1.8.1
+  - @ensnode/datasources@1.8.1
+  - @ensnode/ensnode-sdk@1.8.1
+  - @ensnode/ponder-subgraph@1.8.1
+  - @namehash/ens-referrals@1.8.1
+
 ## 1.8.0
 
 ### Minor Changes

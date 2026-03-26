@@ -1,5 +1,13 @@
 # @ensnode/integration-test-env
 
+## 0.0.2
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/datasources@1.8.1
+  - @ensnode/ensnode-sdk@1.8.1
+
 ## 0.0.1
 
 ### Patch Changes

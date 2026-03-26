@@ -1,5 +1,18 @@
 # ensindexer
 
+## 1.8.1
+
+### Patch Changes
+
+- [#1735](https://github.com/namehash/ensnode/pull/1735) [`eff25f9`](https://github.com/namehash/ensnode/commit/eff25f99a05643128dd85bf19ea563b5be027a39) Thanks [@djstrong](https://github.com/djstrong)! - Add retry-with-backoff for ENSRainbow `heal()` calls during indexing. Transient failures (network errors and server errors) are retried up to 3 times with exponential backoff, with a warning logged on each failed attempt. This prevents a single transient ENSRainbow error from causing indexing to fail.
+
+- Updated dependencies [[`12f279d`](https://github.com/namehash/ensnode/commit/12f279da603da358869a709cc8a7a8c0d56080e5)]:
+  - @ensnode/ensdb-sdk@1.8.1
+  - @ensnode/datasources@1.8.1
+  - @ensnode/ensrainbow-sdk@1.8.1
+  - @ensnode/ensnode-sdk@1.8.1
+  - @ensnode/ponder-sdk@1.8.1
+
 ## 1.8.0
 
 ### Minor Changes
@@ -329,11 +342,11 @@
 
 ### Minor Changes
 
-- [#997](https://github.com/namehash/ensnode/pull/997) [`319e4b0`](https://github.com/namehash/ensnode/commit/319e4b0e8bf2d1d51c2c5affa999453b99cb8580) Thanks [@shrugs](https://github.com/shrugs)! - Added REPLACE_UNNORMALIZED configuration option (defaults to `true`). When enabled, all stored Label and Name values are guaranteed to be [Interpreted Labels](https://ensnode.io/docs/reference/terminology/#interpreted-label) and [Interpreted Names](https://ensnode.io/docs/reference/terminology/#interpreted-name), avoiding edge cases with unnormalized characters by representing unnormalized values as [Encoded LabelHashes](https://ensnode.io/docs/reference/terminology/#rendering-unknown-labels) of the Literal Label value found onchain.
+- [#997](https://github.com/namehash/ensnode/pull/997) [`319e4b0`](https://github.com/namehash/ensnode/commit/319e4b0e8bf2d1d51c2c5affa999453b99cb8580) Thanks [@shrugs](https://github.com/shrugs)! - Added REPLACE_UNNORMALIZED configuration option (defaults to `true`). When enabled, all stored Label and Name values are guaranteed to be [Interpreted Labels](https://ensnode.io/docs/reference/terminology#interpreted-label) and [Interpreted Names](https://ensnode.io/docs/reference/terminology#interpreted-name), avoiding edge cases with unnormalized characters by representing unnormalized values as [Encoded LabelHashes](https://ensnode.io/docs/reference/terminology#rendering-unknown-labels) of the Literal Label value found onchain.
 
 - [#997](https://github.com/namehash/ensnode/pull/997) [`319e4b0`](https://github.com/namehash/ensnode/commit/319e4b0e8bf2d1d51c2c5affa999453b99cb8580) Thanks [@shrugs](https://github.com/shrugs)! - The ENSNode Resolution API (`/resolve/*`) is now guaranteed to only return normalized names. This includes both primary name resolution (reverse resolution) and `name` record resolution (forward resolution).
 
-- [#997](https://github.com/namehash/ensnode/pull/997) [`319e4b0`](https://github.com/namehash/ensnode/commit/319e4b0e8bf2d1d51c2c5affa999453b99cb8580) Thanks [@shrugs](https://github.com/shrugs)! - Added REPLACE_UNNORMALIZED configuration option (defaults to `true`). When enabled, all Label and Name values returned from the Subgraph-Compatible GraphQL API (`/subgraph`) are guaranteed to be [Interpreted Labels](https://ensnode.io/docs/reference/terminology/#interpreted-label) and [Interpreted Names](https://ensnode.io/docs/reference/terminology/#interpreted-name), avoiding edge cases with unnormalized characters by representing unnormalized values as [Encoded LabelHashes](https://ensnode.io/docs/reference/terminology/#rendering-unknown-labels) of the Literal Label value found onchain.
+- [#997](https://github.com/namehash/ensnode/pull/997) [`319e4b0`](https://github.com/namehash/ensnode/commit/319e4b0e8bf2d1d51c2c5affa999453b99cb8580) Thanks [@shrugs](https://github.com/shrugs)! - Added REPLACE_UNNORMALIZED configuration option (defaults to `true`). When enabled, all Label and Name values returned from the Subgraph-Compatible GraphQL API (`/subgraph`) are guaranteed to be [Interpreted Labels](https://ensnode.io/docs/reference/terminology#interpreted-label) and [Interpreted Names](https://ensnode.io/docs/reference/terminology#interpreted-name), avoiding edge cases with unnormalized characters by representing unnormalized values as [Encoded LabelHashes](https://ensnode.io/docs/reference/terminology#rendering-unknown-labels) of the Literal Label value found onchain.
 
 - [#1001](https://github.com/namehash/ensnode/pull/1001) [`7ccaa65`](https://github.com/namehash/ensnode/commit/7ccaa65c5142f0491d7f1882cd84eed7e0d3c8ea) Thanks [@lightwalker-eth](https://github.com/lightwalker-eth)! - Index mappings between ENS names and their ownership controlling tokens.
 

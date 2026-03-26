@@ -1,7 +1,6 @@
 import { eq, like, Param, sql } from "drizzle-orm";
 import { alias, unionAll } from "drizzle-orm/pg-core";
 
-import * as schema from "@ensnode/ensdb-sdk";
 import type { ENSv1DomainId, ENSv2DomainId, LabelHashPath } from "@ensnode/ensnode-sdk";
 import {
   type DomainId,
@@ -9,7 +8,7 @@ import {
   parsePartialInterpretedName,
 } from "@ensnode/ensnode-sdk";
 
-import { db } from "@/lib/db";
+import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 
 import { type BaseDomainSet, selectBase } from "./base-domain-set";
 
@@ -37,12 +36,12 @@ function v1DomainsByLabelHashPath(labelHashPath: LabelHashPath) {
   // If no concrete path, return all domains (leaf = head = self)
   // Postgres will optimize this simple subquery when joined
   if (labelHashPath.length === 0) {
-    return db
+    return ensDb
       .select({
-        leafId: sql<ENSv1DomainId>`${schema.v1Domain.id}`.as("leafId"),
-        headId: sql<ENSv1DomainId>`${schema.v1Domain.id}`.as("headId"),
+        leafId: sql<ENSv1DomainId>`${ensIndexerSchema.v1Domain.id}`.as("leafId"),
+        headId: sql<ENSv1DomainId>`${ensIndexerSchema.v1Domain.id}`.as("headId"),
       })
-      .from(schema.v1Domain)
+      .from(ensIndexerSchema.v1Domain)
       .as("v1_path");
   }
 
@@ -55,7 +54,7 @@ function v1DomainsByLabelHashPath(labelHashPath: LabelHashPath) {
   // 1. Starts with domains matching the leaf labelHash (deepest child)
   // 2. Recursively joins parents, verifying each ancestor's labelHash
   // 3. Returns both the leaf (for result/ownership) and head (for partial match)
-  return db
+  return ensDb
     .select({
       // https://github.com/drizzle-team/drizzle-orm/issues/1242
       leafId: sql<ENSv1DomainId>`v1_path_check.leaf_id`.as("leafId"),
@@ -69,7 +68,7 @@ function v1DomainsByLabelHashPath(labelHashPath: LabelHashPath) {
             d.id AS leaf_id,
             d.parent_id AS current_id,
             1 AS depth
-          FROM ${schema.v1Domain} d
+          FROM ${ensIndexerSchema.v1Domain} d
           WHERE d.label_hash = (${rawLabelHashPathArray})[${pathLength}]
 
           UNION ALL
@@ -80,7 +79,7 @@ function v1DomainsByLabelHashPath(labelHashPath: LabelHashPath) {
             pd.parent_id AS current_id,
             upward_check.depth + 1
           FROM upward_check
-          JOIN ${schema.v1Domain} pd
+          JOIN ${ensIndexerSchema.v1Domain} pd
             ON pd.id = upward_check.current_id
           WHERE upward_check.depth < ${pathLength}
             AND pd.label_hash = (${rawLabelHashPathArray})[${pathLength} - upward_check.depth]
@@ -112,12 +111,12 @@ function v2DomainsByLabelHashPath(labelHashPath: LabelHashPath) {
   // If no concrete path, return all domains (leaf = head = self)
   // Postgres will optimize this simple subquery when joined
   if (labelHashPath.length === 0) {
-    return db
+    return ensDb
       .select({
-        leafId: sql<ENSv2DomainId>`${schema.v2Domain.id}`.as("leafId"),
-        headId: sql<ENSv2DomainId>`${schema.v2Domain.id}`.as("headId"),
+        leafId: sql<ENSv2DomainId>`${ensIndexerSchema.v2Domain.id}`.as("leafId"),
+        headId: sql<ENSv2DomainId>`${ensIndexerSchema.v2Domain.id}`.as("headId"),
       })
-      .from(schema.v2Domain)
+      .from(ensIndexerSchema.v2Domain)
       .as("v2_path");
   }
 
@@ -130,7 +129,7 @@ function v2DomainsByLabelHashPath(labelHashPath: LabelHashPath) {
   // 1. Starts with domains matching the leaf labelHash (deepest child)
   // 2. Recursively joins parents via registryCanonicalDomain, verifying each ancestor's labelHash
   // 3. Returns both the leaf (for result/ownership) and head (for partial match)
-  return db
+  return ensDb
     .select({
       // https://github.com/drizzle-team/drizzle-orm/issues/1242
       leafId: sql<ENSv2DomainId>`v2_path_check.leaf_id`.as("leafId"),
@@ -147,10 +146,10 @@ function v2DomainsByLabelHashPath(labelHashPath: LabelHashPath) {
             d.id AS leaf_id,
             rcd.domain_id AS current_id,
             1 AS depth
-          FROM ${schema.v2Domain} d
-          JOIN ${schema.registryCanonicalDomain} rcd
+          FROM ${ensIndexerSchema.v2Domain} d
+          JOIN ${ensIndexerSchema.registryCanonicalDomain} rcd
             ON rcd.registry_id = d.registry_id
-          JOIN ${schema.v2Domain} rcd_parent
+          JOIN ${ensIndexerSchema.v2Domain} rcd_parent
             ON rcd_parent.id = rcd.domain_id AND rcd_parent.subregistry_id = d.registry_id
           WHERE d.label_hash = (${rawLabelHashPathArray})[${pathLength}]
 
@@ -163,11 +162,11 @@ function v2DomainsByLabelHashPath(labelHashPath: LabelHashPath) {
             rcd.domain_id AS current_id,
             upward_check.depth + 1
           FROM upward_check
-          JOIN ${schema.v2Domain} pd
+          JOIN ${ensIndexerSchema.v2Domain} pd
             ON pd.id = upward_check.current_id
-          JOIN ${schema.registryCanonicalDomain} rcd
+          JOIN ${ensIndexerSchema.registryCanonicalDomain} rcd
             ON rcd.registry_id = pd.registry_id
-          JOIN ${schema.v2Domain} rcd_parent
+          JOIN ${ensIndexerSchema.v2Domain} rcd_parent
             ON rcd_parent.id = rcd.domain_id AND rcd_parent.subregistry_id = pd.registry_id
           WHERE upward_check.depth < ${pathLength}
             AND pd.label_hash = (${rawLabelHashPathArray})[${pathLength} - upward_check.depth]
@@ -202,7 +201,7 @@ export function filterByName(base: BaseDomainSet, name?: string | null) {
 
   if (concrete.length === 0) {
     // No path traversal — sortableLabel is already the domain's own label from the base set
-    return db
+    return ensDb
       .select(selectBase(base))
       .from(base)
       .where(
@@ -220,13 +219,13 @@ export function filterByName(base: BaseDomainSet, name?: string | null) {
 
   // Union path results into a single set of {leafId, headId}
   const pathResults = unionAll(
-    db
+    ensDb
       .select({
         leafId: sql<DomainId>`${v1Path.leafId}`.as("leafId"),
         headId: sql<DomainId>`${v1Path.headId}`.as("headId"),
       })
       .from(v1Path),
-    db
+    ensDb
       .select({
         leafId: sql<DomainId>`${v2Path.leafId}`.as("leafId"),
         headId: sql<DomainId>`${v2Path.headId}`.as("headId"),
@@ -235,14 +234,14 @@ export function filterByName(base: BaseDomainSet, name?: string | null) {
   ).as("pathResults");
 
   // Aliases for head domain lookup (to get headLabelHash for label join)
-  const v1HeadDomain = alias(schema.v1Domain, "v1HeadDomain");
-  const v2HeadDomain = alias(schema.v2Domain, "v2HeadDomain");
-  const headLabel = alias(schema.label, "headLabel");
+  const v1HeadDomain = alias(ensIndexerSchema.v1Domain, "v1HeadDomain");
+  const v2HeadDomain = alias(ensIndexerSchema.v2Domain, "v2HeadDomain");
+  const headLabel = alias(ensIndexerSchema.label, "headLabel");
 
   // Join base set with path results, look up head domain's label, override sortableLabel.
   // The inner join on pathResults scopes results to domains matching the concrete path.
   // LEFT JOINs on head domains: exactly one will match (v1 or v2).
-  return db
+  return ensDb
     .select({
       ...selectBase(base),
       // Override sortableLabel with head domain's label for NAME ordering
