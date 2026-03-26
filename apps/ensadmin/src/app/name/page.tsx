@@ -93,7 +93,7 @@ export default function ExploreNamesPage() {
     setRawInputName(e.target.value);
   };
 
-  if (nameFromQuery) {
+  if (nameFromQuery !== null) {
     if (!isInterpretedName(nameFromQuery)) {
       return <InvalidNameError name={nameFromQuery} />;
     }
