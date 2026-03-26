@@ -13,7 +13,7 @@
   "homepage": "https://github.com/namehash/ensnode/tree/main/apps/ensapi",
   "scripts": {
     "start": "tsx src/index.ts",
-    "dev": "ENSINDEXER_SCHEMA_NAME=public tsx watch --env-file ./.env.local src/index.ts",
+    "dev": "tsx watch --env-file ./.env.local src/index.ts",
     "test": "vitest",
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "lint": "biome check --write .",
