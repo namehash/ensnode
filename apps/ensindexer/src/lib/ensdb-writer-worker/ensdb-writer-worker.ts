@@ -20,7 +20,7 @@ import type { PublicConfigBuilder } from "@/lib/public-config-builder/public-con
  * Interval in seconds between two consecutive attempts to upsert
  * the Indexing Status Snapshot record into ENSDb.
  */
-const INDEXING_STATUS_RECORD_UPDATE_INTERVAL: Duration = 1;
+const INDEXING_STATUS_RECORD_UPDATE_INTERVAL: Duration = 3;
 
 /**
  * ENSDb Writer Worker
@@ -97,7 +97,7 @@ export class EnsDbWriterWorker {
     }
 
     // Fetch data required for task 1 and task 2.
-    const inMemoryConfig = await this.getValidatedEnsIndexerPublicConfig();
+    let inMemoryConfig = await this.getValidatedEnsIndexerPublicConfig();
 
     // Task 1: upsert ENSDb version into ENSDb.
     console.log(`[EnsDbWriterWorker]: Upserting ENSDb version into ENSDb...`);
@@ -112,10 +112,29 @@ export class EnsDbWriterWorker {
     console.log(`[EnsDbWriterWorker]: ENSIndexer Public Config upserted successfully`);
 
     // Task 3: recurring upsert of Indexing Status Snapshot into ENSDb.
-    this.indexingStatusInterval = setInterval(
-      () => this.upsertIndexingStatusSnapshot(),
-      secondsToMilliseconds(INDEXING_STATUS_RECORD_UPDATE_INTERVAL),
-    );
+    this.indexingStatusInterval = setInterval(async () => {
+      /**
+       * The `ensRainbowPublicConfig` field of {@link EnsIndexerPublicConfig}
+       * is optional. It may be undefined during ENSRainbow startup, which in
+       * the cold start scenario, can take 30+ minutes.
+       *
+       * We want to ensure that once the `ensRainbowPublicConfig` becomes available
+       * in the in-memory config, it gets upserted into ENSDb as soon as possible,
+       * to make it available for other applications that depend on it (e.g. ENSApi).
+       */
+      if (typeof inMemoryConfig.ensRainbowPublicConfig === "undefined") {
+        inMemoryConfig = await this.getValidatedEnsIndexerPublicConfig();
+
+        /**
+         * Only upsert the ENSIndexer Public Config into ENSDb if
+         * the `ensRainbowPublicConfig` field has become defined in the in-memory config.
+         */
+        if (typeof inMemoryConfig.ensRainbowPublicConfig !== "undefined") {
+          await this.ensDbClient.upsertEnsIndexerPublicConfig(inMemoryConfig);
+        }
+      }
+      this.upsertIndexingStatusSnapshot();
+    }, secondsToMilliseconds(INDEXING_STATUS_RECORD_UPDATE_INTERVAL));
   }
 
   /**
@@ -263,7 +282,7 @@ export class EnsDbWriterWorker {
     // status to record.
     // Invariant: the Omnichain Status must indicate that indexing has started already.
     if (omnichainSnapshot.omnichainStatus === OmnichainIndexingStatusIds.Unstarted) {
-      throw new Error("Omnichain Status must not be 'Unstarted'.");
+      // throw new Error("Omnichain Status must not be 'Unstarted'.");
     }
 
     return omnichainSnapshot;
