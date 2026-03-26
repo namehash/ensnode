@@ -3,9 +3,7 @@ import pRetry from "p-retry";
 import type { LabelHash, LiteralLabel } from "@ensnode/ensnode-sdk";
 import { type EnsRainbow, ErrorCode, isHealError } from "@ensnode/ensrainbow-sdk";
 
-import { getENSRainbowApiClient } from "@/lib/ensraibow-api-client";
-
-const ensRainbowApiClient = getENSRainbowApiClient();
+import { ensRainbowClient, waitForEnsRainbowHealthy } from "@/lib/ensrainbow/singleton";
 
 /**
  * Attempt to heal a labelHash to its original label.
@@ -40,17 +38,20 @@ const ensRainbowApiClient = getENSRainbowApiClient();
  *   are exhausted.
  */
 export async function labelByLabelHash(labelHash: LabelHash): Promise<LiteralLabel | null> {
+  // Wait for ENSRainbow to be available before making requests, to avoid unnecessary retries and error logs.
+  await waitForEnsRainbowHealthy;
+
   // Reset at the start of each attempt so that after p-retry exhaustion we can distinguish
   // "last failure was HealServerError" (set) from "last failure was a network throw" (undefined).
   let lastServerError: EnsRainbow.HealServerError | undefined;
 
-  let response: Awaited<ReturnType<typeof ensRainbowApiClient.heal>>;
+  let response: Awaited<ReturnType<typeof ensRainbowClient.heal>>;
 
   try {
     response = await pRetry(
       async () => {
         lastServerError = undefined;
-        const result = await ensRainbowApiClient.heal(labelHash);
+        const result = await ensRainbowClient.heal(labelHash);
 
         if (isHealError(result) && result.errorCode === ErrorCode.ServerError) {
           lastServerError = result;
@@ -81,7 +82,7 @@ export async function labelByLabelHash(labelHash: LabelHash): Promise<LiteralLab
 
     // Not recoverable; causes the ENSIndexer process to terminate.
     if (error instanceof Error) {
-      error.message = `ENSRainbow Heal Request Failed: ENSRainbow unavailable at '${ensRainbowApiClient.getOptions().endpointUrl}'.`;
+      error.message = `ENSRainbow Heal Request Failed: ENSRainbow unavailable at '${ensRainbowClient.getOptions().endpointUrl}'.`;
     }
 
     throw error;
