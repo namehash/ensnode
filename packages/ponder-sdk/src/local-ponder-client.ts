@@ -77,7 +77,6 @@ export class LocalPonderClient extends PonderClient {
   private ponderAppContext: PonderAppContext;
 
   /**
-   * @param localPonderAppUrl URL of the local Ponder app to connect to.
    * @param indexedChainIds Configured indexed chain IDs which are used to validate and filter the Ponder app metadata to only include entries for indexed chains.
    * @param indexedBlockranges Configured indexing blockrange for each indexed chain.
    * @param ponderPublicClients All cached public clients provided by the local Ponder app
@@ -85,13 +84,12 @@ export class LocalPonderClient extends PonderClient {
    * @param ponderAppContext The internal context of the local Ponder app.
    */
   constructor(
-    localPonderAppUrl: URL,
     indexedChainIds: Set<ChainId>,
     indexedBlockranges: Map<ChainId, BlockNumberRangeWithStartBlock>,
     ponderPublicClients: Record<ChainIdString, CachedPublicClient>,
     ponderAppContext: PonderAppContext,
   ) {
-    super(localPonderAppUrl);
+    super(ponderAppContext.localPonderAppUrl);
 
     this.indexedChainIds = indexedChainIds;
 
