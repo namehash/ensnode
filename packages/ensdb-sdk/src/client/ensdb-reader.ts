@@ -1,12 +1,15 @@
-import { and, eq } from "drizzle-orm/sql";
+import { and, eq, sql } from "drizzle-orm/sql";
 
 import {
   type CrossChainIndexingStatusSnapshot,
   deserializeCrossChainIndexingStatusSnapshot,
   deserializeEnsIndexerPublicConfig,
+  type EnsDbPublicConfig,
   type EnsIndexerPublicConfig,
+  validateEnsDbPublicConfig,
 } from "@ensnode/ensnode-sdk";
 
+import { ENSDB_ROOT_SCHEMA_VERSION } from "../config";
 import {
   type AbstractEnsIndexerSchema,
   buildEnsDbDrizzleClient,
@@ -127,6 +130,19 @@ export class EnsDbReader<
   }
 
   /**
+   * Get ENSDb Public Config
+   */
+  async getEnsDbPublicConfig(): Promise<EnsDbPublicConfig> {
+    const postgresVersion = await this.getPgVersion();
+    const rootSchemaVersion = ENSDB_ROOT_SCHEMA_VERSION;
+
+    return validateEnsDbPublicConfig({
+      postgresVersion,
+      rootSchemaVersion,
+    });
+  }
+
+  /**
    * Get ENSDb Version
    *
    * @returns the existing record, or `undefined`.
@@ -207,5 +223,30 @@ export class EnsDbReader<
     throw new Error(
       `There must be exactly one ENSNodeMetadata record for ('${this.ensIndexerSchemaName}', '${metadata.key}') composite key`,
     );
+  }
+
+  /**
+   * Get PostgreSQL version for ENSDb instance.
+   */
+  private async getPgVersion(): Promise<string> {
+    const queryResult = await this.ensDb.execute(
+      sql`SELECT current_setting('server_version') as setting_server_version;`,
+    );
+    const serverVersionSetting = queryResult.rows[0]?.setting_server_version;
+
+    if (typeof serverVersionSetting !== "string") {
+      throw new Error(`Unexpected type for server_version setting: ${typeof serverVersionSetting}`);
+    }
+
+    // Extract version number from full version string,
+    // which is typically in the format "17.4 (Debian 17.4-1.pgdg120+2)".
+    // We just want the "17.4" part for the PostgreSQL version.
+    const [pgVersion = ""] = serverVersionSetting.split(" ");
+
+    if (pgVersion.length === 0) {
+      throw new Error(`PostgreSQL version must be a non-empty string.`);
+    }
+
+    return pgVersion;
   }
 }
