@@ -27,13 +27,6 @@ export interface RpcEnvironment {
 }
 
 /**
- * Environment variables for ENSIndexer URL configuration.
- */
-export interface EnsIndexerUrlEnvironment {
-  ENSINDEXER_URL?: string;
-}
-
-/**
  * Environment variables for port configuration.
  */
 export interface PortEnvironment {
