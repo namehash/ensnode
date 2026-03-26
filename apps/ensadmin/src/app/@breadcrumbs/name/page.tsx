@@ -3,7 +3,7 @@
 import { NameDisplay } from "@namehash/namehash-ui";
 import { useSearchParams } from "next/navigation";
 
-import type { Name } from "@ensnode/ensnode-sdk";
+import { isInterpretedName, type Name } from "@ensnode/ensnode-sdk";
 
 import BreadcrumbsGroup from "@/components/breadcrumbs/group";
 import {
@@ -20,7 +20,7 @@ export default function Page() {
   const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
   const exploreNamesBaseHref = retainCurrentRawConnectionUrlParam("/name");
 
-  const name = nameParam ? (decodeURIComponent(nameParam) as Name) : null;
+  const name = nameParam ? (nameParam as Name) : null;
 
   return (
     <BreadcrumbsGroup name="ENS Explorer">
@@ -32,7 +32,7 @@ export default function Page() {
           <BreadcrumbSeparator className="hidden md:block" />
           <BreadcrumbItem>
             <BreadcrumbPage>
-              <NameDisplay name={name} />
+              {isInterpretedName(name) ? <NameDisplay name={name} /> : name}
             </BreadcrumbPage>
           </BreadcrumbItem>
         </>

@@ -7,6 +7,8 @@ import { type ChangeEvent, useMemo, useState } from "react";
 import { ENSNamespaceIds } from "@ensnode/datasources";
 import {
   getNamespaceSpecificValue,
+  isInterpretedName,
+  isNormalizedName,
   type Name,
   type NamespaceSpecificValue,
 } from "@ensnode/ensnode-sdk";
@@ -19,6 +21,7 @@ import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 
 import { NameDetailPageContent } from "./_components/NameDetailPageContent";
+import { EncodedLabelhashUnsupportedError, InvalidNameError } from "./_components/NameErrors";
 
 const EXAMPLE_NAMES: NamespaceSpecificValue<string[]> = {
   default: [
@@ -91,6 +94,14 @@ export default function ExploreNamesPage() {
   };
 
   if (nameFromQuery) {
+    if (!isInterpretedName(nameFromQuery)) {
+      return <InvalidNameError name={nameFromQuery} />;
+    }
+
+    if (!isNormalizedName(nameFromQuery)) {
+      return <EncodedLabelhashUnsupportedError name={nameFromQuery} />;
+    }
+
     return <NameDetailPageContent name={nameFromQuery} />;
   }
 
