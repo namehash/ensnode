@@ -69,7 +69,7 @@ const EXAMPLE_NAMES: NamespaceSpecificValue<string[]> = {
 export default function ResolveRecordsInspector() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const nameFromQuery = searchParams.get("name");
+  const nameFromQuery = searchParams.get("name")?.trim() || null;
 
   const namespace = useActiveNamespace();
   const exampleNames = useMemo(

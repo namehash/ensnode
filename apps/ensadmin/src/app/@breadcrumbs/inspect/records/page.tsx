@@ -25,7 +25,7 @@ export default function Page() {
     return (
       <>
         <BreadcrumbItem>
-          <BreadcrumbLink href={recordsBaseHref}>Records Resolution</BreadcrumbLink>
+          <BreadcrumbLink href={recordsBaseHref}>Record Resolution</BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
@@ -39,7 +39,7 @@ export default function Page() {
 
   return (
     <BreadcrumbItem>
-      <BreadcrumbPage>Records Resolution</BreadcrumbPage>
+      <BreadcrumbPage>Record Resolution</BreadcrumbPage>
     </BreadcrumbItem>
   );
 }
