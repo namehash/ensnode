@@ -1,6 +1,4 @@
-import { getENSRainbowApiClient } from "@/lib/ensraibow-api-client";
+import { ensRainbowPublicConfigCache } from "@/cache/ensrainbow-public-config";
 import { PublicConfigBuilder } from "@/lib/public-config-builder/public-config-builder";
 
-const ensRainbowClient = getENSRainbowApiClient();
-
-export const publicConfigBuilder = new PublicConfigBuilder(ensRainbowClient);
+export const publicConfigBuilder = new PublicConfigBuilder(ensRainbowPublicConfigCache);
