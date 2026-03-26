@@ -2,11 +2,16 @@ import packageJson from "@/../package.json" with { type: "json" };
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { type ENSIndexerPublicConfig, PluginName } from "@ensnode/ensnode-sdk";
+import {
+  type ENSIndexerPublicConfig,
+  type EnsDbPublicConfig,
+  PluginName,
+} from "@ensnode/ensnode-sdk";
 import type { RpcConfig } from "@ensnode/ensnode-sdk/internal";
 
 vi.mock("@/lib/ensdb/singleton", () => ({
   ensDbClient: {
+    getEnsDbPublicConfig: vi.fn(async () => ENSDB_PUBLIC_CONFIG),
     getEnsIndexerPublicConfig: vi.fn(async () => ENSINDEXER_PUBLIC_CONFIG),
   },
 }));
@@ -29,6 +34,11 @@ const BASE_ENV = {
   DATABASE_URL: "postgresql://user:password@localhost:5432/mydb",
   RPC_URL_1: VALID_RPC_URL,
 } satisfies EnsApiEnvironment;
+
+const ENSDB_PUBLIC_CONFIG = {
+  postgresVersion: "17.4",
+  rootSchemaVersion: "1.0.0",
+} satisfies EnsDbPublicConfig;
 
 const ENSINDEXER_PUBLIC_CONFIG = {
   namespace: "mainnet",
@@ -58,6 +68,7 @@ describe("buildConfigFromEnvironment", () => {
       databaseUrl: BASE_ENV.DATABASE_URL,
       theGraphApiKey: undefined,
 
+      ensDbPublicConfig: ENSDB_PUBLIC_CONFIG,
       ensIndexerPublicConfig: ENSINDEXER_PUBLIC_CONFIG,
       namespace: ENSINDEXER_PUBLIC_CONFIG.namespace,
       ensIndexerSchemaName: ENSINDEXER_PUBLIC_CONFIG.databaseSchemaName,
@@ -150,6 +161,7 @@ describe("buildEnsApiPublicConfig", () => {
     const mockConfig = {
       port: ENSApi_DEFAULT_PORT,
       databaseUrl: BASE_ENV.DATABASE_URL,
+      ensDbPublicConfig: ENSDB_PUBLIC_CONFIG,
       ensIndexerPublicConfig: ENSINDEXER_PUBLIC_CONFIG,
       namespace: ENSINDEXER_PUBLIC_CONFIG.namespace,
       ensIndexerSchemaName: ENSINDEXER_PUBLIC_CONFIG.databaseSchemaName,
@@ -173,6 +185,7 @@ describe("buildEnsApiPublicConfig", () => {
         canFallback: false,
         reason: "not-subgraph-compatible",
       },
+      ensDbPublicConfig: ENSDB_PUBLIC_CONFIG,
       ensIndexerPublicConfig: ENSINDEXER_PUBLIC_CONFIG,
     });
   });
@@ -181,6 +194,7 @@ describe("buildEnsApiPublicConfig", () => {
     const mockConfig = {
       port: ENSApi_DEFAULT_PORT,
       databaseUrl: BASE_ENV.DATABASE_URL,
+      ensDbPublicConfig: ENSDB_PUBLIC_CONFIG,
       ensIndexerPublicConfig: ENSINDEXER_PUBLIC_CONFIG,
       namespace: ENSINDEXER_PUBLIC_CONFIG.namespace,
       ensIndexerSchemaName: ENSINDEXER_PUBLIC_CONFIG.databaseSchemaName,
@@ -210,6 +224,7 @@ describe("buildEnsApiPublicConfig", () => {
     const mockConfig = {
       port: ENSApi_DEFAULT_PORT,
       databaseUrl: BASE_ENV.DATABASE_URL,
+      ensDbPublicConfig: ENSDB_PUBLIC_CONFIG,
       ensIndexerPublicConfig: {
         ...ENSINDEXER_PUBLIC_CONFIG,
         plugins: ["subgraph"],
