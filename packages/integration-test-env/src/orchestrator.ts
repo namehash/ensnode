@@ -317,7 +317,6 @@ async function main() {
   await waitForHealth(`http://localhost:${ENSRAINBOW_PORT}/health`, 30_000, "ENSRainbow");
 
   // Phase 3: Start ENSIndexer
-  const ENSINDEXER_URL = `http://localhost:${ENSINDEXER_PORT}`;
   const ENSINDEXER_SCHEMA_NAME = "ensindexer_0";
 
   log("Starting ENSIndexer...");
@@ -331,7 +330,6 @@ async function main() {
       DATABASE_SCHEMA: ENSINDEXER_SCHEMA_NAME,
       PLUGINS: "ensv2,protocol-acceleration",
       ENSRAINBOW_URL,
-      ENSINDEXER_URL,
       LABEL_SET_ID,
       LABEL_SET_VERSION,
     },
