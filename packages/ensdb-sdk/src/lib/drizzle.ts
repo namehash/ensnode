@@ -21,6 +21,17 @@ import * as ensNodeSchema from "../ensnode";
  */
 export type AbstractEnsIndexerSchema = typeof abstractEnsIndexerSchema;
 
+// TODO: remove the `appliedNameForConcreteEnsIndexerSchema` variable and
+// related logic when the `buildConcreteEnsIndexerSchema` function is
+// refactored to avoid mutating the "abstract" ENSIndexer Schema definition.
+/**
+ * Applied name for the "concrete" ENSIndexer Schema.
+ *
+ * This is needed to prevent multiple calls to `buildConcreteEnsIndexerSchema` with different schema names,
+ * which would mutate the same "abstract" ENSIndexer Schema and cause schema corruption.
+ */
+let appliedNameForConcreteEnsIndexerSchema: string | undefined;
+
 /**
  * Build a "concrete" ENSIndexer Schema definition for ENSDb.
  *
@@ -38,6 +49,18 @@ function buildConcreteEnsIndexerSchema<ConcreteEnsIndexerSchema extends Abstract
 ): ConcreteEnsIndexerSchema {
   // TODO: Refactor this function to avoid mutating the "abstract" ENSIndexer Schema definition.
   // https://github.com/namehash/ensnode/issues/1830
+
+  if (
+    appliedNameForConcreteEnsIndexerSchema !== undefined &&
+    appliedNameForConcreteEnsIndexerSchema !== ensIndexerSchemaName
+  ) {
+    throw new Error(
+      `buildConcreteEnsIndexerSchema was already called with schema "${appliedNameForConcreteEnsIndexerSchema}". ` +
+        `Calling it again with "${ensIndexerSchemaName}" would corrupt the previously built schema.`,
+    );
+  }
+  appliedNameForConcreteEnsIndexerSchema = ensIndexerSchemaName;
+
   const concreteEnsIndexerSchema = abstractEnsIndexerSchema as ConcreteEnsIndexerSchema;
 
   for (const dbObject of Object.values(abstractEnsIndexerSchema)) {
