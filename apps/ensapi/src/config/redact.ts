@@ -7,8 +7,11 @@ import type { EnsApiConfig } from "@/config/config.schema";
  */
 export function redactEnsApiConfig(config: EnsApiConfig) {
   return {
-    ...config,
-    databaseUrl: redactString(config.databaseUrl),
+    port: config.port,
+    namespace: config.namespace,
+    customReferralProgramEditionConfigSetUrl: config.customReferralProgramEditionConfigSetUrl,
+    ensIndexerPublicConfig: config.ensIndexerPublicConfig,
+    ensDbUrl: redactString(config.ensDbUrl),
     rpcConfigs: redactRpcConfigs(config.rpcConfigs),
   };
 }

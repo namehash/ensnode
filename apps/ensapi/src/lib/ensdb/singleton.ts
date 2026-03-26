@@ -10,8 +10,8 @@ import { lazyProxy } from "@/lib/lazy";
  * Singleton instance of ENSDbReader for the ENSApi application.
  */
 export const ensDbClient = lazyProxy<EnsDbReader>(() => {
-  const { databaseUrl, ensIndexerSchemaName } = buildEnsDbConfigFromEnvironment(process.env);
-  return new EnsDbReader(databaseUrl, ensIndexerSchemaName);
+  const { ensDbUrl, ensIndexerSchemaName } = buildEnsDbConfigFromEnvironment(process.env);
+  return new EnsDbReader(ensDbUrl, ensIndexerSchemaName);
 });
 
 /**

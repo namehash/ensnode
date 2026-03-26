@@ -74,7 +74,7 @@ const EXAMPLE_CONFIG_RESPONSE = {
       labelSetVersion: 0,
     },
     indexedChainIds: [1, 8453, 59144, 10, 42161, 534352],
-    databaseSchemaName: "alphaSchema0.31.0",
+    ensIndexerSchemaName: "alphaSchema0.31.0",
     isSubgraphCompatible: false,
     namespace: "mainnet",
     plugins: [

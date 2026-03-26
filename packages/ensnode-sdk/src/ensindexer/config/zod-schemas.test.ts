@@ -5,8 +5,8 @@ import { buildUnvalidatedEnsIndexerPublicConfig } from "./deserialize";
 import type { SerializedEnsIndexerPublicConfig } from "./serialized-types";
 import { type EnsIndexerVersionInfo, PluginName } from "./types";
 import {
-  makeDatabaseSchemaNameSchema,
   makeEnsIndexerPublicConfigSchema,
+  makeEnsIndexerSchemaNameSchema,
   makeEnsIndexerVersionInfoSchema,
   makeFullyPinnedLabelSetSchema,
   makeIndexedChainIdsSchema,
@@ -21,12 +21,12 @@ describe("ENSIndexer: Config", () => {
 
     describe("Parsing", () => {
       it("can parse database schema name values", () => {
-        expect(makeDatabaseSchemaNameSchema().parse("public")).toBe("public");
-        expect(makeDatabaseSchemaNameSchema().parse("the_schema")).toBe("the_schema");
-        expect(makeDatabaseSchemaNameSchema().parse("theSchema")).toBe("theSchema");
+        expect(makeEnsIndexerSchemaNameSchema().parse("public")).toBe("public");
+        expect(makeEnsIndexerSchemaNameSchema().parse("the_schema")).toBe("the_schema");
+        expect(makeEnsIndexerSchemaNameSchema().parse("theSchema")).toBe("theSchema");
 
-        expect(formatParseError(makeDatabaseSchemaNameSchema().safeParse(1))).toContain(
-          "Database schema name must be a string",
+        expect(formatParseError(makeEnsIndexerSchemaNameSchema().safeParse(1))).toContain(
+          "ENS Indexer Schema Name must be a string",
         );
       });
 
@@ -169,7 +169,7 @@ describe("ENSIndexer: Config", () => {
           isSubgraphCompatible: false, // Set to false to bypass isSubgraphCompatible invariant
           namespace: "mainnet" as const,
           plugins: [PluginName.Subgraph, PluginName.Registrars], // Multiple plugins allowed when not subgraph compatible
-          databaseSchemaName: "test_schema",
+          ensIndexerSchemaName: "ensindexer_0",
           versionInfo: {
             nodejs: "v22.22.22",
             ponder: "0.11.25",
@@ -224,7 +224,7 @@ describe("ENSIndexer: Config", () => {
           isSubgraphCompatible: true,
           namespace: "mainnet" as const,
           plugins: [PluginName.Subgraph],
-          databaseSchemaName: "test_schema",
+          ensIndexerSchemaName: "ensindexer_0",
           versionInfo: {
             nodejs: "v22.22.22",
             ponder: "0.11.25",
@@ -271,11 +271,13 @@ describe("ENSIndexer: Config", () => {
     describe("Useful error messages", () => {
       it("can apply custom value labels", () => {
         expect(
-          formatParseError(makeDatabaseSchemaNameSchema("databaseSchema").safeParse("")),
-        ).toContain("databaseSchema is required and must be a non-empty string.");
+          formatParseError(makeEnsIndexerSchemaNameSchema("ensIndexerSchemaName").safeParse("")),
+        ).toContain("ensIndexerSchemaName is required and must be a non-empty string.");
         expect(
-          formatParseError(makeDatabaseSchemaNameSchema("DATABASE_SCHEMA env var").safeParse("")),
-        ).toContain("DATABASE_SCHEMA env var is required and must be a non-empty string.");
+          formatParseError(
+            makeEnsIndexerSchemaNameSchema("ENSINDEXER_SCHEMA_NAME env var").safeParse(""),
+          ),
+        ).toContain("ENSINDEXER_SCHEMA_NAME env var is required and must be a non-empty string.");
 
         expect(
           formatParseError(

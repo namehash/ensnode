@@ -24,7 +24,7 @@ export const ensDbUrl = "postgres://user:pass@localhost:5432/ensdb";
 export const ensIndexerSchemaName = "ensindexer_0";
 
 export const publicConfig = {
-  databaseSchemaName: ensIndexerSchemaName,
+  ensIndexerSchemaName,
   ensRainbowPublicConfig: {
     version: "0.32.0",
     labelSet: {

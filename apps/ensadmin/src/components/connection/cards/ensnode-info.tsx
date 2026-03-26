@@ -299,12 +299,12 @@ function ENSNodeConfigCardContent({
         <InfoCardItems>
           <InfoCardItem label="Database" value={<p className={cardItemValueStyles}>Postgres</p>} />
           <InfoCardItem
-            label="Database Schema"
+            label="ENSIndexer Schema Name"
             value={
-              <p className={cardItemValueStyles}>{ensIndexerPublicConfig.databaseSchemaName}</p>
+              <p className={cardItemValueStyles}>{ensIndexerPublicConfig.ensIndexerSchemaName}</p>
             }
             additionalInfo={
-              <p>ENSApi reads indexed data from tables within this Postgres database schema.</p>
+              <p>ENSApi reads indexed data from tables within this ENSIndexer Schema in ENSDb.</p>
             }
           />
           <InfoCardItem
@@ -385,12 +385,14 @@ function ENSNodeConfigCardContent({
         <InfoCardItems>
           <InfoCardItem label="Database" value={<p className={cardItemValueStyles}>Postgres</p>} />
           <InfoCardItem
-            label="Database Schema"
+            label="ENSIndexer Schema Name"
             value={
-              <p className={cardItemValueStyles}>{ensIndexerPublicConfig.databaseSchemaName}</p>
+              <p className={cardItemValueStyles}>{ensIndexerPublicConfig.ensIndexerSchemaName}</p>
             }
             additionalInfo={
-              <p>ENSIndexer writes indexed data to tables within this Postgres database schema.</p>
+              <p>
+                ENSIndexer writes indexed data to tables within this ENSIndexer Schema in ENSDb.
+              </p>
             }
           />
         </InfoCardItems>
@@ -412,12 +414,14 @@ function ENSNodeConfigCardContent({
         <InfoCardItems>
           <InfoCardItem label="Database" value={<p className={cardItemValueStyles}>Postgres</p>} />
           <InfoCardItem
-            label="Database Schema"
+            label="ENSIndexer Schema Name"
             value={
-              <p className={cardItemValueStyles}>{ensIndexerPublicConfig.databaseSchemaName}</p>
+              <p className={cardItemValueStyles}>{ensIndexerPublicConfig.ensIndexerSchemaName}</p>
             }
             additionalInfo={
-              <p>ENSIndexer writes indexed data to tables within this Postgres database schema.</p>
+              <p>
+                ENSIndexer writes indexed data to tables within this ENSIndexer Schema in ENSDb.
+              </p>
             }
           />
           <InfoCardItem

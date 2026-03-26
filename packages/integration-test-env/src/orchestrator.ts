@@ -265,7 +265,7 @@ async function main() {
       return c;
     });
   const [postgres] = await Promise.all([postgresPromise, devnetPromise]);
-  const DATABASE_URL = postgres.getConnectionUri();
+  const ENSDB_URL = postgres.getConnectionUri();
   log(`Postgres is ready (port ${postgres.getPort()})`);
   log("Devnet is ready");
 
@@ -327,8 +327,8 @@ async function main() {
     ENSINDEXER_DIR,
     {
       NAMESPACE: ENSNamespaceIds.EnsTestEnv,
-      DATABASE_URL,
-      DATABASE_SCHEMA: ENSINDEXER_SCHEMA_NAME,
+      ENSDB_URL,
+      ENSINDEXER_SCHEMA_NAME,
       PLUGINS: "ensv2,protocol-acceleration",
       ENSRAINBOW_URL,
       ENSINDEXER_URL,
@@ -340,7 +340,7 @@ async function main() {
   await waitForHealth(`http://localhost:${ENSINDEXER_PORT}/health`, 60_000, "ENSIndexer");
 
   // Phase 4: Wait for indexing to complete
-  await pollIndexingStatus(DATABASE_URL, ENSINDEXER_SCHEMA_NAME, 30_000);
+  await pollIndexingStatus(ENSDB_URL, ENSINDEXER_SCHEMA_NAME, 30_000);
 
   // Phase 5: Start ENSApi
   log("Starting ENSApi...");
@@ -349,7 +349,7 @@ async function main() {
     ["start"],
     ENSAPI_DIR,
     {
-      DATABASE_URL,
+      ENSDB_URL,
       ENSINDEXER_SCHEMA_NAME,
     },
     "ensapi",

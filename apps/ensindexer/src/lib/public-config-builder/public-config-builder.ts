@@ -51,7 +51,7 @@ export class PublicConfigBuilder {
       ]);
 
       this.immutablePublicConfig = validateEnsIndexerPublicConfig({
-        databaseSchemaName: config.databaseSchemaName,
+        ensIndexerSchemaName: config.ensIndexerSchemaName,
         ensRainbowPublicConfig,
         labelSet: config.labelSet,
         indexedChainIds: config.indexedChainIds,

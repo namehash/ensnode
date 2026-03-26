@@ -12,13 +12,13 @@ import {
   invariant_rpcEndpointConfigIncludesAtMostOneWebSocketsProtocolURL,
 } from "./validatons";
 
-export const DatabaseSchemaNameSchema = z
+export const EnsIndexerSchemaNameSchema = z
   .string({
-    error: "DATABASE_SCHEMA is required.",
+    error: "ENSINDEXER_SCHEMA_NAME is required.",
   })
   .trim()
   .min(1, {
-    error: "DATABASE_SCHEMA is required and cannot be an empty string.",
+    error: "ENSINDEXER_SCHEMA_NAME is required and cannot be an empty string.",
   });
 
 const RpcConfigSchema = z
