@@ -10,7 +10,7 @@ export default function Hero() {
     "flex flex-col justify-center items-center w-6 sm:w-[52px] h-9 sm:h-[72px] rounded sm:rounded-lg border border-gray-200 text-lg sm:text-2xl leading-7 font-bold bg-white";
 
   return (
-    <div className="box-border py-[60px] pt-[100px] sm:py-24 lg:py-5 lg:pt-24 px-5 md:px-10 bg-gradient-to-b from-white to-[#F9FAFB] h-fit lg:h-full lg:flex flex-col flex-nowrap justify-center items-center xl:gap-5 lg:max-h-screen">
+    <div className="box-border py-[60px] pt-[100px] sm:py-24 lg:py-5 lg:pt-24 px-5 md:px-10 bg-linear-to-b from-white to-[#F9FAFB] h-fit lg:h-full lg:flex flex-col flex-nowrap justify-center items-center xl:gap-5 lg:max-h-screen">
       <section className="box-border relative z-10 w-full h-fit flex flex-col lg:flex-row items-center justify-center gap-5 hero:gap-0 hero:justify-between pb-14 sm:pb-0 max-w-[1216px]">
         <div className="w-full lg:w-1/3 box-border sm:hidden flex flex-col flex-nowrap justify-start items-center pb-[49px]">
           <BeforeAfterSlider />
@@ -31,7 +31,7 @@ export default function Hero() {
             <Link
               href="https://ensnode.io/"
               target="_blank"
-              className="!text-black"
+              className="text-black!"
               variant="underline"
               size="medium"
             >
@@ -62,7 +62,7 @@ export default function Hero() {
         <p className="text-center not-italic font-normal text-gray-500 text-lg leading-7">
           Unknown labels healed by ENSRainbow
         </p>
-        <div className="flex flex-nowrap flex-row justify-center items-center w-[fit-content] gap-1 sm:gap-3 max-w-[1216px]">
+        <div className="flex flex-nowrap flex-row justify-center items-center w-fit gap-1 sm:gap-3 max-w-[1216px]">
           {healedLabelsArray.map((elem, idx) => {
             if (
               (healedLabelsArray.length - (idx + 1)) % 3 === 0 &&

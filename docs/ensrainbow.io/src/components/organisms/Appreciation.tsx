@@ -8,8 +8,8 @@ export default function Appreciation() {
   const subsectionStyles =
     "h-fit lg:w-1/3 flex flex-col flex-nowrap items-center lg:items-start justify-start self-stretch";
   const textStyles = "text-lg leading-7 font-normal text-gray-500 text-center lg:text-left";
-  const verticalDividerStyles = "hidden lg:block w-[1px] shrink-0 self-stretch bg-gray-200";
-  const horizontalDividerStyles = "block lg:hidden h-[1px] shrink-0 self-stretch bg-gray-200";
+  const verticalDividerStyles = "hidden lg:block w-px shrink-0 self-stretch bg-gray-200";
+  const horizontalDividerStyles = "block lg:hidden h-px shrink-0 self-stretch bg-gray-200";
   const smallerHeaderStyles = "text-black text-lg leading-6 font-semibold";
   const iconWrapperStyles =
     "w-[52px] h-[52px] flex flex-col justify-center items-center bg-white border border-gray-200 rounded-[40px]";

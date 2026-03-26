@@ -13,7 +13,7 @@ import ENSNode2D from "../../assets/dark-logo.svg";
 export default function HeaderMobileNavigation() {
   const MobileNavigationLinks = [
     {
-      element: <Link href="/docs/">Docs</Link>,
+      element: <Link href="/docs">Docs</Link>,
     },
     {
       element: (
