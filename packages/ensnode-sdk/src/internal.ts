@@ -19,6 +19,7 @@ export * from "./ensapi/api/resolution/zod-schemas";
 export * from "./ensapi/api/shared/errors/zod-schemas";
 export * from "./ensapi/api/shared/pagination/zod-schemas";
 export * from "./ensapi/config/zod-schemas";
+export * from "./ensdb/zod-schemas/ensdb-public-config";
 export * from "./ensindexer/config/zod-schemas";
 export * from "./graphql-api/example-queries";
 export * from "./registrars/zod-schemas";
