@@ -13,33 +13,38 @@ export function invariant_ensIndexerPublicConfigVersionInfo(
     value: { ensIndexerPublicConfig },
   } = ctx;
 
+  const { ensRainbowPublicConfig, versionInfo } = ensIndexerPublicConfig;
+
   // Invariant: ENSApi & ENSDB must match version numbers
-  if (ensIndexerPublicConfig.versionInfo.ensDb !== packageJson.version) {
+  if (versionInfo.ensDb !== packageJson.version) {
     ctx.issues.push({
       code: "custom",
       path: ["ensIndexerPublicConfig.versionInfo.ensDb"],
-      input: ensIndexerPublicConfig.versionInfo.ensDb,
-      message: `Version Mismatch: ENSDB@${ensIndexerPublicConfig.versionInfo.ensDb} !== ENSApi@${packageJson.version}`,
+      input: versionInfo.ensDb,
+      message: `Version Mismatch: ENSDB@${versionInfo.ensDb} !== ENSApi@${packageJson.version}`,
     });
   }
 
   // Invariant: ENSApi & ENSIndexer must match version numbers
-  if (ensIndexerPublicConfig.versionInfo.ensIndexer !== packageJson.version) {
+  if (versionInfo.ensIndexer !== packageJson.version) {
     ctx.issues.push({
       code: "custom",
       path: ["ensIndexerPublicConfig.versionInfo.ensIndexer"],
-      input: ensIndexerPublicConfig.versionInfo.ensIndexer,
-      message: `Version Mismatch: ENSIndexer@${ensIndexerPublicConfig.versionInfo.ensIndexer} !== ENSApi@${packageJson.version}`,
+      input: versionInfo.ensIndexer,
+      message: `Version Mismatch: ENSIndexer@${versionInfo.ensIndexer} !== ENSApi@${packageJson.version}`,
     });
   }
 
   // Invariant: ENSApi & ENSRainbow must match version numbers
-  if (ensIndexerPublicConfig.ensRainbowPublicConfig.version !== packageJson.version) {
+  if (
+    typeof ensRainbowPublicConfig !== "undefined" &&
+    ensRainbowPublicConfig.version !== packageJson.version
+  ) {
     ctx.issues.push({
       code: "custom",
       path: ["ensIndexerPublicConfig.ensRainbowPublicConfig.version"],
-      input: ensIndexerPublicConfig.ensRainbowPublicConfig.version,
-      message: `Version Mismatch: ENSRainbow@${ensIndexerPublicConfig.ensRainbowPublicConfig.version} !== ENSApi@${packageJson.version}`,
+      input: ensRainbowPublicConfig.version,
+      message: `Version Mismatch: ENSRainbow@${ensRainbowPublicConfig.version} !== ENSApi@${packageJson.version}`,
     });
   }
 }
