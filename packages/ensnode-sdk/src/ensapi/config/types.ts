@@ -1,3 +1,4 @@
+import type { EnsDbPublicConfig } from "../../ensdb/ensdb-public-config";
 import type { EnsIndexerPublicConfig } from "../../ensindexer/config/types";
 import type { TheGraphCannotFallbackReason, TheGraphFallback } from "../../shared/config/thegraph";
 
@@ -29,6 +30,15 @@ export interface EnsApiPublicConfig {
    * namespace, plugins, version info, etc.
    */
   ensIndexerPublicConfig: EnsIndexerPublicConfig;
+
+  /**
+   * ENSDb public config
+   *
+   * Contains ENSDb-specific public configuration, including:
+   * - Postgres version,
+   * - ENSDb Root Schema version.
+   */
+  ensDbPublicConfig: EnsDbPublicConfig;
 }
 
 /**

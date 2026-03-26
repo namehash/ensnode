@@ -14,6 +14,10 @@ const MOCK_ENSAPI_PUBLIC_CONFIG = {
     canFallback: false,
     reason: "no-api-key",
   },
+  ensDbPublicConfig: {
+    postgresVersion: "17.4",
+    rootSchemaVersion: "1.0.0",
+  },
   ensIndexerPublicConfig: {
     namespace: ENSNamespaceIds.Mainnet,
     databaseSchemaName: "ensapi",
@@ -48,6 +52,10 @@ describe("ENSApi Config Serialization/Deserialization", () => {
         theGraphFallback: {
           canFallback: false,
           reason: "no-api-key",
+        },
+        ensDbPublicConfig: {
+          postgresVersion: "17.4",
+          rootSchemaVersion: "1.0.0",
         },
         ensIndexerPublicConfig: {
           namespace: ENSNamespaceIds.Mainnet,

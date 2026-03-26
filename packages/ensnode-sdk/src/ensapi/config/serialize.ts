@@ -8,11 +8,12 @@ import type { EnsApiPublicConfig } from "./types";
 export function serializeEnsApiPublicConfig(
   config: EnsApiPublicConfig,
 ): SerializedEnsApiPublicConfig {
-  const { version, theGraphFallback, ensIndexerPublicConfig } = config;
+  const { version, theGraphFallback, ensDbPublicConfig, ensIndexerPublicConfig } = config;
 
   return {
     version,
     theGraphFallback,
+    ensDbPublicConfig,
     ensIndexerPublicConfig: serializeEnsIndexerPublicConfig(ensIndexerPublicConfig),
   } satisfies SerializedEnsApiPublicConfig;
 }

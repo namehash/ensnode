@@ -63,6 +63,10 @@ const EXAMPLE_CONFIG_RESPONSE = {
     canFallback: false,
     reason: "no-api-key",
   },
+  ensDbPublicConfig: {
+    postgresVersion: "17.4",
+    rootSchemaVersion: "1.0.0",
+  },
   ensIndexerPublicConfig: {
     ensRainbowPublicConfig: {
       version: "0.31.0",
