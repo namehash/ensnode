@@ -20,7 +20,7 @@ export default function AboutRainbow(props: AboutRainbowProps) {
         {!props.isTextOnTheLeft && (
           <div
             className={cc([
-              "relative hidden xl:flex flex-row justify-center items-center w-full max-w-2xl xl:w-1/2 rounded-none bg-origin-border flex-shrink-0 box-border pr-20",
+              "relative hidden xl:flex flex-row justify-center items-center w-full max-w-2xl xl:w-1/2 rounded-none bg-origin-border shrink-0 box-border pr-20",
             ])}
           >
             {props.normalImage ? (
@@ -40,7 +40,7 @@ export default function AboutRainbow(props: AboutRainbowProps) {
           </div>
         )}
         {props.mobileImageOnTop && (
-          <div className="flex sm:hidden flex-row justify-center items-center w-full h-fit rounded-none bg-origin-border bg-center bg-no-repeat bg-contain flex-shrink-0">
+          <div className="flex sm:hidden flex-row justify-center items-center w-full h-fit rounded-none bg-origin-border bg-center bg-no-repeat bg-contain shrink-0">
             {props.designatedMobileImage ? props.designatedMobileImage : props.svgImage}
           </div>
         )}
@@ -59,7 +59,7 @@ export default function AboutRainbow(props: AboutRainbowProps) {
           {props.descriptionExternalElements && props.descriptionExternalElements}
         </div>
 
-        <div className="relative hidden sm:flex flex-row justify-center items-center w-full h-2/3 xl:h-full xl:w-3/5 rounded-none bg-origin-border flex-shrink-0">
+        <div className="relative hidden sm:flex flex-row justify-center items-center w-full h-2/3 xl:h-full xl:w-3/5 rounded-none bg-origin-border shrink-0">
           {props.normalImage ? (
             <img
               className={cc([
@@ -77,7 +77,7 @@ export default function AboutRainbow(props: AboutRainbowProps) {
         </div>
 
         {!props.mobileImageOnTop && (
-          <div className="flex sm:hidden flex-row justify-center items-center w-full h-fit rounded-none py-5 bg-origin-border bg-center bg-no-repeat bg-contain flex-shrink-0">
+          <div className="flex sm:hidden flex-row justify-center items-center w-full h-fit rounded-none py-5 bg-origin-border bg-center bg-no-repeat bg-contain shrink-0">
             {props.designatedMobileImage ? props.designatedMobileImage : props.svgImage}
           </div>
         )}
