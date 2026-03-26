@@ -11,7 +11,7 @@ export function InvalidNameError({ name }: NameErrorProps) {
     <section className="p-6">
       <ErrorInfo
         title="Invalid Name"
-        description={`The provided name "${name}" is not ENS normalized.`}
+        description={`The provided name "${name}" is not a valid ENS name.`}
       />
     </section>
   );
