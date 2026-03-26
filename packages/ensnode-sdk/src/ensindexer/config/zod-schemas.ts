@@ -136,6 +136,12 @@ export function invariant_isSubgraphCompatibleRequirements(
 export function invariant_ensRainbowSupportedLabelSetAndVersion(
   ctx: ZodCheckFnInput<Pick<EnsIndexerPublicConfig, "labelSet" | "ensRainbowPublicConfig">>,
 ) {
+  if (typeof ctx.value.ensRainbowPublicConfig === "undefined") {
+    // If ENSRainbow Public Config has not been available yet,
+    // we skip this validation as we cannot determine the supported label sets and versions.
+    return;
+  }
+
   const clientLabelSet = ctx.value.labelSet satisfies EnsRainbowClientLabelSet;
   const serverLabelSet = ctx.value.ensRainbowPublicConfig
     .labelSet satisfies EnsRainbowServerLabelSet;
@@ -163,8 +169,8 @@ export const makeEnsIndexerPublicConfigSchema = (valueLabel: string = "ENSIndexe
   z
     .object({
       databaseSchemaName: makeDatabaseSchemaNameSchema(`${valueLabel}.databaseSchemaName`),
-      ensRainbowPublicConfig: makeEnsRainbowPublicConfigSchema(
-        `${valueLabel}.ensRainbowPublicConfig`,
+      ensRainbowPublicConfig: z.optional(
+        makeEnsRainbowPublicConfigSchema(`${valueLabel}.ensRainbowPublicConfig`),
       ),
       indexedChainIds: makeIndexedChainIdsSchema(`${valueLabel}.indexedChainIds`),
       isSubgraphCompatible: z.boolean({
@@ -195,8 +201,8 @@ export const makeSerializedEnsIndexerPublicConfigSchema = (
 ) =>
   z.object({
     databaseSchemaName: makeDatabaseSchemaNameSchema(`${valueLabel}.databaseSchemaName`),
-    ensRainbowPublicConfig: makeEnsRainbowPublicConfigSchema(
-      `${valueLabel}.ensRainbowPublicConfig`,
+    ensRainbowPublicConfig: z.optional(
+      makeEnsRainbowPublicConfigSchema(`${valueLabel}.ensRainbowPublicConfig`),
     ),
     indexedChainIds: makeSerializedIndexedChainIdsSchema(`${valueLabel}.indexedChainIds`),
     isSubgraphCompatible: z.boolean({

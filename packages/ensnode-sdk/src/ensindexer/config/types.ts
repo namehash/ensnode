@@ -101,7 +101,7 @@ export interface EnsIndexerPublicConfig {
    *
    * Represents the public config of the connected ENSRainbow instance.
    */
-  ensRainbowPublicConfig: EnsRainbowPublicConfig;
+  ensRainbowPublicConfig?: EnsRainbowPublicConfig;
 
   /**
    * A set of strings referring to the names of plugins that are active.
