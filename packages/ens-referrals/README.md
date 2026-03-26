@@ -15,7 +15,7 @@ npm install @namehash/ens-referrals viem
 `v1` is the recommended version for new integrations.
 
 - [`v1`](https://github.com/namehash/ensnode/tree/main/packages/ens-referrals/src/v1) is the actively supported version that reflects the current ENS Referrals program rules and awards.
-- The root [`@namehash/ens-referrals`](https://github.com/namehash/ensnode/tree/main/packages/ens-referrals/src/client.ts) import is kept only for backwards compatibility with the ENS Holiday Awards edition.
+- The root [`@namehash/ens-referrals`](https://github.com/namehash/ensnode/tree/main/packages/ens-referrals/src/client.ts) import is deprecated and is planned to be removed soon.
 
 ### Set up `ENSReferralsClient`
 
@@ -58,7 +58,7 @@ if (response.responseCode === ReferralProgramEditionSummariesResponseCodes.Ok) {
 
 More examples are available in [`packages/ens-referrals/src/v1/client.ts`](https://github.com/namehash/ensnode/tree/main/packages/ens-referrals/src/v1/client.ts).
 
-### Get the referrer leaderboard page &rarr; `getReferrerLeaderboardPage()`
+### Get a referrer leaderboard page &rarr; `getReferrerLeaderboardPage()`
 
 Returns a paginated leaderboard for a specific referral program edition.
 
@@ -70,26 +70,48 @@ const response = await client.getReferrerLeaderboardPage({
 });
 
 if (response.responseCode === ReferrerLeaderboardPageResponseCodes.Ok) {
-  const { awardModel, pageContext } = response.data;
+  const leaderboardPage = response.data;
 
-  if (awardModel === ReferralProgramAwardModels.Unrecognized) {
-    console.log(
-      `Unrecognized award model: ${response.data.originalAwardModel} - skipping`,
-    );
+  if (leaderboardPage.awardModel === ReferralProgramAwardModels.Unrecognized) {
+    // gracefully handle forwards-compatibility as new award models are added in the future
+    console.log(`Unrecognized award model: ${leaderboardPage.originalAwardModel} - skipping`);
   } else {
-    const { rules } = response.data;
-
     console.log(`Edition: ${editionSlug}`);
-    console.log(`Subregistry: ${rules.subregistryId}`);
-    console.log(`Total Referrers: ${pageContext.totalRecords}`);
-    console.log(`Page ${pageContext.page} of ${pageContext.totalPages}`);
+    console.log(`Subregistry: ${leaderboardPage.rules.subregistryId}`);
+    console.log(`Total Referrers: ${leaderboardPage.pageContext.totalRecords}`);
+    console.log(
+      `Page ${leaderboardPage.pageContext.page} of ${leaderboardPage.pageContext.totalPages}`,
+    );
+
+    const noReferrersFallback = "No referrers in this edition";
+    const firstReferrer = leaderboardPage.referrers[0] ?? null;
+
+    if (leaderboardPage.awardModel === ReferralProgramAwardModels.PieSplit) {
+      console.log(`Max Qualified Referrers: ${leaderboardPage.rules.maxQualifiedReferrers}`);
+      console.log(
+        `First Referrer's Final Score Boost: ${firstReferrer !== null ? firstReferrer.finalScoreBoost : noReferrersFallback}`,
+      );
+      console.log(
+        `First Referrer's Award Pool Share: ${firstReferrer !== null ? firstReferrer.awardPoolShare : noReferrersFallback}`,
+      );
+    }
+
+    if (leaderboardPage.awardModel === ReferralProgramAwardModels.RevShareLimit) {
+      console.log(
+        `Min Qualified Revenue Contribution: ${leaderboardPage.rules.minQualifiedRevenueContribution}`,
+      );
+      console.log(`Qualified Revenue Share: ${leaderboardPage.rules.qualifiedRevenueShare}`);
+      console.log(
+        `Tentative award for the best referrer: ${firstReferrer !== null ? firstReferrer.awardPoolApproxValue : noReferrersFallback}`,
+      );
+    }
   }
 }
 ```
 
 More examples are available in [`packages/ens-referrals/src/v1/client.ts`](https://github.com/namehash/ensnode/tree/main/packages/ens-referrals/src/v1/client.ts).
 
-### Get single referrer data &rarr; `getReferrerMetricsEditions()`
+### Get a referrer's metrics across editions &rarr; `getReferrerMetricsEditions()`
 
 Returns referrer metrics for a specified referrer across one or more editions.
 
@@ -104,9 +126,8 @@ if (response.responseCode === ReferrerMetricsEditionsResponseCodes.Ok) {
     console.log(`Edition: ${editionSlug}`);
 
     if (detail.awardModel === ReferralProgramAwardModels.Unrecognized) {
-      console.log(
-        `Unrecognized award model: ${detail.originalAwardModel} - skipping`,
-      );
+      // gracefully handle forwards-compatibility as new award models are added in the future
+      console.log(`Unrecognized award model: ${detail.originalAwardModel} - skipping`);
       continue;
     }
 
@@ -114,7 +135,18 @@ if (response.responseCode === ReferrerMetricsEditionsResponseCodes.Ok) {
 
     if (detail.type === ReferrerEditionMetricsTypeIds.Ranked) {
       console.log(`Rank: ${detail.referrer.rank}`);
-      console.log(`Award Share: ${detail.referrer.awardPoolShare * 100}%`);
+    }
+
+    if (detail.awardModel === ReferralProgramAwardModels.PieSplit) {
+      console.log(`Referrer's Final Score: ${detail.referrer.finalScore}`);
+      console.log(`Referrer's Award Pool Share: ${detail.referrer.awardPoolShare * 100}%`);
+    }
+
+    if (detail.awardModel === ReferralProgramAwardModels.RevShareLimit) {
+      console.log(
+        `Referrer's total base revenue contribution: ${detail.referrer.totalBaseRevenueContribution}`,
+      );
+      console.log(`Referrer's standard award value: ${detail.referrer.standardAwardValue}`);
     }
   }
 }
