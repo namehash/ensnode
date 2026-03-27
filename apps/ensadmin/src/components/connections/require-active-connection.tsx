@@ -4,6 +4,7 @@ import type { PropsWithChildren } from "react";
 
 import { useENSNodeConfig } from "@ensnode/ensnode-react";
 
+import { ENSNodeConnectionError } from "@/components/connections/connection-error";
 import { ErrorInfo } from "@/components/error-info";
 import { LoadingSpinner } from "@/components/loading-spinner";
 
@@ -18,7 +19,9 @@ export function RequireActiveConnection({ children }: PropsWithChildren) {
   if (status === "error") {
     return (
       <section className="p-6">
-        <ErrorInfo title="Unable to parse ENSNode Config" description={error.message} />
+        <ENSNodeConnectionError
+          error={new Error(`Unable to parse ENSNode Config: ${error?.message}`)}
+        />
       </section>
     );
   }
