@@ -1,5 +1,6 @@
 import { z } from "zod/v4";
 
+import { schemaEnsDbPublicConfig } from "../../ensdb/zod-schemas/ensdb-public-config";
 import {
   makeEnsIndexerPublicConfigSchema,
   makeSerializedEnsIndexerPublicConfigSchema,
@@ -22,6 +23,7 @@ export function makeEnsApiPublicConfigSchema(valueLabel?: string) {
   return z.object({
     version: z.string().min(1, `${label}.version must be a non-empty string`),
     theGraphFallback: TheGraphFallbackSchema,
+    ensDbPublicConfig: schemaEnsDbPublicConfig,
     ensIndexerPublicConfig: makeEnsIndexerPublicConfigSchema(`${label}.ensIndexerPublicConfig`),
   });
 }
@@ -39,6 +41,7 @@ export function makeSerializedEnsApiPublicConfigSchema(valueLabel?: string) {
   return z.object({
     version: z.string().min(1, `${label}.version must be a non-empty string`),
     theGraphFallback: TheGraphFallbackSchema,
+    ensDbPublicConfig: schemaEnsDbPublicConfig,
     ensIndexerPublicConfig: makeSerializedEnsIndexerPublicConfigSchema(
       `${label}.ensIndexerPublicConfig`,
     ),

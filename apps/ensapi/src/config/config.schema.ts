@@ -12,6 +12,7 @@ import {
   makeENSIndexerPublicConfigSchema,
   OptionalPortNumberSchema,
   RpcConfigsSchema,
+  schemaEnsDbPublicConfig,
   TheGraphApiKeySchema,
 } from "@ensnode/ensnode-sdk/internal";
 
@@ -47,6 +48,7 @@ const EnsApiConfigSchema = z
     namespace: ENSNamespaceSchema,
     rpcConfigs: RpcConfigsSchema,
     ensIndexerPublicConfig: makeENSIndexerPublicConfigSchema("ensIndexerPublicConfig"),
+    ensDbPublicConfig: schemaEnsDbPublicConfig,
     customReferralProgramEditionConfigSetUrl: CustomReferralProgramEditionConfigSetUrlSchema,
   })
   .extend(EnsDbConfigSchema.shape)
@@ -86,12 +88,18 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
       },
     );
 
+    // TODO: transfer the responsibility of fetching
+    // the ENSDb Public Config to a middleware layer as well,
+    // similar to the ENSIndexer Public Config, as per:
+    // https://github.com/namehash/ensnode/issues/1806
+    const ensDbPublicConfig = await ensDbClient.getEnsDbPublicConfig();
     const rpcConfigs = buildRpcConfigsFromEnv(env, ensIndexerPublicConfig.namespace);
 
     return EnsApiConfigSchema.parse({
       port: env.PORT,
       databaseUrl: env.DATABASE_URL,
       theGraphApiKey: env.THEGRAPH_API_KEY,
+      ensDbPublicConfig,
       ensIndexerPublicConfig,
       namespace: ensIndexerPublicConfig.namespace,
       ensIndexerSchemaName: ensIndexerPublicConfig.databaseSchemaName,
@@ -128,6 +136,7 @@ export function buildEnsApiPublicConfig(config: EnsApiConfig): EnsApiPublicConfi
       theGraphApiKey: config.theGraphApiKey ? "<API_KEY>" : undefined,
       isSubgraphCompatible: config.ensIndexerPublicConfig.isSubgraphCompatible,
     }),
+    ensDbPublicConfig: config.ensDbPublicConfig,
     ensIndexerPublicConfig: config.ensIndexerPublicConfig,
   };
 }

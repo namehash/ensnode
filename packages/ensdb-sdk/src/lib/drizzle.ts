@@ -119,16 +119,16 @@ type EnsDbSchema<ConcreteEnsIndexerSchema extends AbstractEnsIndexerSchema> =
   ConcreteEnsIndexerSchema & EnsNodeSchema;
 
 /**
- * Build ENSDb Schema for Drizzle client
+ * Build ENSDb Root Schema for Drizzle client
  *
  * Uses the provided "concrete" ENSIndexer Schema definition to build
- * the ENSDb Schema.
+ * the ENSDb Root Schema.
  *
  * @param concreteEnsIndexerSchema - The "concrete" ENSIndexer Schema definition.
- * @returns The ENSDb Schema definition for use in building
+ * @returns The ENSDb Root Schema definition for use in building
  *          a Drizzle client for ENSDb.
  */
-function buildEnsDbSchema<ConcreteEnsIndexerSchema extends AbstractEnsIndexerSchema>(
+function buildEnsDbRootSchema<ConcreteEnsIndexerSchema extends AbstractEnsIndexerSchema>(
   concreteEnsIndexerSchema: ConcreteEnsIndexerSchema,
 ): EnsDbSchema<ConcreteEnsIndexerSchema> {
   return {
@@ -160,11 +160,11 @@ export function buildEnsDbDrizzleClient<ConcreteEnsIndexerSchema extends Abstrac
   concreteEnsIndexerSchema: ConcreteEnsIndexerSchema,
   logger?: DrizzleLogger,
 ): EnsDbDrizzleClient<ConcreteEnsIndexerSchema> {
-  const ensDbSchema = buildEnsDbSchema<ConcreteEnsIndexerSchema>(concreteEnsIndexerSchema);
+  const ensDbRootSchema = buildEnsDbRootSchema<ConcreteEnsIndexerSchema>(concreteEnsIndexerSchema);
 
   return drizzle({
     connection: connectionString,
-    schema: ensDbSchema,
+    schema: ensDbRootSchema,
     casing: "snake_case",
     logger,
   });

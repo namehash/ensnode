@@ -69,6 +69,14 @@
                         }
                       ]
                     },
+                    "ensDbPublicConfig": {
+                      "type": "object",
+                      "properties": {
+                        "postgresVersion": { "type": "string", "minLength": 1 },
+                        "rootSchemaVersion": { "type": "string", "minLength": 1 }
+                      },
+                      "required": ["postgresVersion", "rootSchemaVersion"]
+                    },
                     "ensIndexerPublicConfig": {
                       "type": "object",
                       "properties": {
@@ -146,7 +154,12 @@
                       ]
                     }
                   },
-                  "required": ["version", "theGraphFallback", "ensIndexerPublicConfig"]
+                  "required": [
+                    "version",
+                    "theGraphFallback",
+                    "ensDbPublicConfig",
+                    "ensIndexerPublicConfig"
+                  ]
                 }
               }
             }
