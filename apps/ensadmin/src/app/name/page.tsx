@@ -3,6 +3,7 @@
 import { NameDisplay } from "@namehash/namehash-ui";
 import { useRouter, useSearchParams } from "next/navigation";
 import { type ChangeEvent, useMemo, useState } from "react";
+import { normalize } from "viem/ens";
 
 import { ENSNamespaceIds } from "@ensnode/datasources";
 import {
@@ -67,6 +68,7 @@ export default function ExploreNamesPage() {
   const searchParams = useSearchParams();
   const nameFromQuery = searchParams.get("name");
   const [rawInputName, setRawInputName] = useState<Name>("");
+  const [formError, setFormError] = useState<string | null>(null);
 
   const namespace = useActiveNamespace();
   const exampleNames = useMemo(
@@ -78,18 +80,26 @@ export default function ExploreNamesPage() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setFormError(null);
 
-    // TODO: Input validation and normalization.
-    // see: https://github.com/namehash/ensnode/issues/1140
-
-    const href = retainCurrentRawConnectionUrlParam(getNameDetailsRelativePath(rawInputName));
-
-    router.push(href);
+    try {
+      const normalizedName = normalize(rawInputName);
+      const href = retainCurrentRawConnectionUrlParam(getNameDetailsRelativePath(normalizedName));
+      router.push(href);
+    } catch {
+      if (isInterpretedName(rawInputName)) {
+        setFormError(
+          `The name "${rawInputName}" contains encoded labelhashes. Support for resolving names with encoded labelhashes is in progress and coming soon.`,
+        );
+      } else {
+        setFormError(`The name "${rawInputName}" is not a valid ENS name.`);
+      }
+    }
   };
 
   const handleRawInputNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
-
+    setFormError(null);
     setRawInputName(e.target.value);
   };
 
@@ -132,6 +142,7 @@ export default function ExploreNamesPage() {
                 View Profile
               </Button>
             </fieldset>
+            {formError && <p className="text-sm text-red-600">{formError}</p>}
           </form>
           <div className="flex flex-col gap-2 justify-center">
             <p className="text-sm font-medium leading-none">Examples:</p>
