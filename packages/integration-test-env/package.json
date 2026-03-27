@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/integration-test-env",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "private": true,
   "type": "module",
   "description": "Integration test environment orchestration for ENSNode",

@@ -1,5 +1,18 @@
 # @ensnode/ensnode-sdk
 
+## 1.9.0
+
+### Minor Changes
+
+- [#1822](https://github.com/namehash/ensnode/pull/1822) [`70e6f24`](https://github.com/namehash/ensnode/commit/70e6f2475a566135602f4adbcf44df2a6f74e5fd) Thanks [@tk-o](https://github.com/tk-o)! - Updated auto-generation rules for HTTP and WS RPCs.
+
+- [#1836](https://github.com/namehash/ensnode/pull/1836) [`387715e`](https://github.com/namehash/ensnode/commit/387715e1bc4c996c0ae7545bfc78b79149e04f58) Thanks [@tk-o](https://github.com/tk-o)! - Removed the `EnsIndexerUrlEnvironment` interface as it was unused.
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/datasources@1.9.0
+
 ## 1.8.1
 
 ### Patch Changes
