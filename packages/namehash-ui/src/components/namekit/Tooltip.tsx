@@ -1,5 +1,6 @@
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import * as React from "react";
+import { useState } from "react";
 
 import { cn } from "../../utils/cn";
 
@@ -41,12 +42,15 @@ export function Tooltip({
   ...props
 }: Props) {
   const triggerNode = React.isValidElement(trigger) ? trigger : <span>{trigger}</span>;
+  const [open, setOpen] = useState(false);
 
   return (
     <TooltipPrimitive.Provider delayDuration={withDelay ? 300 : 0}>
-      <TooltipPrimitive.Root>
+      <TooltipPrimitive.Root open={open} onOpenChange={setOpen}>
         <div className={cn("nhui:flex nhui:items-center", className)}>
-          <TooltipPrimitive.Trigger asChild>{triggerNode}</TooltipPrimitive.Trigger>
+          <TooltipPrimitive.Trigger onClick={() => setOpen(true)} asChild>
+            {triggerNode}
+          </TooltipPrimitive.Trigger>
           <TooltipPrimitive.Portal>
             <TooltipPrimitive.Content
               side={placement}
@@ -68,8 +72,8 @@ export function Tooltip({
               style={{ maxWidth: maxTooltipWidth }}
               {...props}
             >
-              <TooltipPrimitive.Arrow width={20} height={10} className="nhui:fill-black" />
-              <div className="nhui:relative nhui:h-full nhui:rounded-md nhui:px-4 nhui:py-2 nhui:text-sm nhui:font-medium nhui:text-white">
+              <TooltipPrimitive.Arrow className="nhui:z-50 nhui:size-2.5 nhui:translate-y-[calc(-50%_-_2px)] nhui:rotate-45 nhui:rounded-[2px] nhui:bg-black nhui:fill-black" />
+              <div className="nhui:relative nhui:z-10 nhui:h-full nhui:rounded-md nhui:px-4 nhui:py-2 nhui:text-sm nhui:font-medium nhui:text-white">
                 {children}
               </div>
             </TooltipPrimitive.Content>

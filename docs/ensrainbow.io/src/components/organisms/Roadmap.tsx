@@ -1,6 +1,6 @@
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
-import { Link } from "@namehash/namekit-react";
 import cc from "classcat";
+import { namekitLinkVariants } from "@namehash/namehash-ui/namekit";
 
 import { RainbowIcon } from "../atoms/icons/RainbowIcon.tsx";
 import { RocketIcon } from "../atoms/icons/RocketIcon.tsx";
@@ -81,9 +81,17 @@ export default function RoadMap() {
       commentSentences: [
         <span key="AutoHealReverseLookupFragment">
           Description with a{" "}
-          <Link href="" target="_blank" className="text-black!" variant="underline" size="small">
+          <a
+            href=""
+            target="_blank"
+            className={namekitLinkVariants({
+              variant: "underline",
+              size: "small",
+              className: "text-black!",
+            })}
+          >
             hyperlink
-          </Link>
+          </a>
         </span>,
       ],
     },
@@ -93,9 +101,17 @@ export default function RoadMap() {
       commentSentences: [
         <span key="BulkLabelHealingFragment">
           Description with a{" "}
-          <Link href="" target="_blank" className="text-black!" variant="underline" size="small">
+          <a
+            href=""
+            target="_blank"
+            className={namekitLinkVariants({
+              variant: "underline",
+              size: "small",
+              className: "text-black!",
+            })}
+          >
             hyperlink
-          </Link>
+          </a>
         </span>,
       ],
     },
@@ -105,9 +121,17 @@ export default function RoadMap() {
       commentSentences: [
         <span key="AutomatedLabelCrackingFragment">
           Description with a{" "}
-          <Link href="" target="_blank" className="text-black!" variant="underline" size="small">
+          <a
+            href=""
+            target="_blank"
+            className={namekitLinkVariants({
+              variant: "underline",
+              size: "small",
+              className: "text-black!",
+            })}
+          >
             hyperlink
-          </Link>
+          </a>
         </span>,
       ],
     },

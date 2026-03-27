@@ -20,7 +20,8 @@
   ],
   "exports": {
     ".": "./src/index.ts",
-    "./styles.css": "./dist/index.css"
+    "./styles.css": "./dist/index.css",
+    "./namekit": "./src/components/namekit/index.ts"
   },
   "sideEffects": false,
   "publishConfig": {
@@ -29,6 +30,10 @@
       ".": {
         "default": "./dist/index.js",
         "types": "./dist/index.d.ts"
+      },
+      "./namekit": {
+        "default": "./dist/components/namekit/index.js",
+        "types": "./dist/components/namekit/index.d.ts"
       },
       "./styles.css": {
         "import": "./dist/index.css",

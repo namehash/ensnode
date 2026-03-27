@@ -1,4 +1,4 @@
-import "./styles.css";
+import "../../styles.css";
 
 export * from "./buttonVariants";
 export * from "./linkVariants";
