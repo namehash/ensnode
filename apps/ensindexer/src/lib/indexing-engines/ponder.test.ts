@@ -1,5 +1,5 @@
 import type { Context, EventNames } from "ponder:registry";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest";
 
 import {
   addOnchainEventListener,
@@ -7,7 +7,7 @@ import {
   type IndexingEngineEvent,
 } from "./ponder";
 
-const mockPonderOn = vi.fn();
+const { mockPonderOn } = vi.hoisted(() => ({ mockPonderOn: vi.fn() }));
 
 vi.mock("ponder:registry", () => ({
   ponder: {
@@ -189,15 +189,7 @@ describe("addOnchainEventListener", () => {
 });
 
 describe("IndexingEngineContext type", () => {
-  it("should have ensDb property extending from Ponder context", () => {
-    const mockContext: IndexingEngineContext = {
-      db: vi.fn(),
-      ensDb: vi.fn(),
-      chain: { id: 1 },
-      block: { number: 100n },
-      client: vi.fn(),
-    } as unknown as IndexingEngineContext;
-
-    expect(mockContext.ensDb).toBeDefined();
+  it("exposes ensDb matching the Ponder db type", () => {
+    expectTypeOf<IndexingEngineContext["ensDb"]>().toEqualTypeOf<Context<EventNames>["db"]>();
   });
 });
