@@ -2,7 +2,7 @@
 
 import { NameDisplay } from "@namehash/namehash-ui";
 import { useRouter, useSearchParams } from "next/navigation";
-import { type ChangeEvent, useMemo, useState } from "react";
+import { type ChangeEvent, useEffect, useMemo, useState } from "react";
 import { normalize } from "viem/ens";
 
 import { ENSNamespaceIds } from "@ensnode/datasources";
@@ -78,6 +78,39 @@ export default function ExploreNamesPage() {
 
   const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
 
+  // Compute normalization result for the name query param.
+  const nameQueryResult = useMemo(() => {
+    if (nameFromQuery === null || nameFromQuery === "") return null;
+
+    try {
+      const normalizedName = normalize(nameFromQuery) as NormalizedName;
+
+      if (normalizedName !== nameFromQuery) {
+        return {
+          status: "needs-redirect" as const,
+          redirectHref: retainCurrentRawConnectionUrlParam(
+            getNameDetailsRelativePath(normalizedName),
+          ),
+        };
+      }
+
+      return { status: "valid" as const, normalizedName };
+    } catch {
+      if (isInterpretedName(nameFromQuery)) {
+        return { status: "encoded-labelhash" as const, name: nameFromQuery };
+      }
+
+      return { status: "invalid" as const, name: nameFromQuery };
+    }
+  }, [nameFromQuery, retainCurrentRawConnectionUrlParam]);
+
+  // Redirect to the normalized form when needed.
+  useEffect(() => {
+    if (nameQueryResult?.status === "needs-redirect") {
+      router.replace(nameQueryResult.redirectHref);
+    }
+  }, [nameQueryResult, router]);
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setFormError(null);
@@ -103,24 +136,16 @@ export default function ExploreNamesPage() {
     setRawInputName(e.target.value);
   };
 
-  if (nameFromQuery !== null && nameFromQuery !== "") {
-    try {
-      const normalizedName = normalize(nameFromQuery);
-
-      // If the name is normalizable but not yet normalized, redirect to the normalized form.
-      if (normalizedName !== nameFromQuery) {
-        const href = retainCurrentRawConnectionUrlParam(getNameDetailsRelativePath(normalizedName));
-        router.replace(href);
+  if (nameQueryResult) {
+    switch (nameQueryResult.status) {
+      case "needs-redirect":
         return null;
-      }
-
-      return <NameDetailPageContent name={normalizedName as NormalizedName} />;
-    } catch {
-      if (isInterpretedName(nameFromQuery)) {
-        return <EncodedLabelhashUnsupportedError name={nameFromQuery} />;
-      }
-
-      return <InvalidNameError name={nameFromQuery} />;
+      case "valid":
+        return <NameDetailPageContent name={nameQueryResult.normalizedName} />;
+      case "encoded-labelhash":
+        return <EncodedLabelhashUnsupportedError name={nameQueryResult.name} />;
+      case "invalid":
+        return <InvalidNameError name={nameQueryResult.name} />;
     }
   }
 
