@@ -1,6 +1,6 @@
 import config from "@/config";
 
-import schema from "ponder:schema";
+import ensIndexerSchema from "ponder:schema";
 
 import { getENSRootChainId } from "@ensnode/datasources";
 import { DEFAULT_EVM_COIN_TYPE, evmChainIdToCoinType, PluginName } from "@ensnode/ensnode-sdk";
@@ -40,11 +40,11 @@ export default function () {
       const isDeletion = interpretedValue === null;
       if (isDeletion) {
         // delete
-        await context.db.delete(schema.reverseNameRecord, id);
+        await context.ensDb.delete(ensIndexerSchema.reverseNameRecord, id);
       } else {
         // upsert
-        await context.db
-          .insert(schema.reverseNameRecord)
+        await context.ensDb
+          .insert(ensIndexerSchema.reverseNameRecord)
           .values({ ...id, value: interpretedValue })
           .onConflictDoUpdate({ value: interpretedValue });
       }

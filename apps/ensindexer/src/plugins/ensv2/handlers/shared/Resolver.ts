@@ -1,9 +1,8 @@
-import type { Context } from "ponder:registry";
-
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 import { ensureResolverEvent } from "@/lib/ensv2/event-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
+import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { LogEventBase } from "@/lib/ponder-helpers";
@@ -21,7 +20,7 @@ export default function () {
     context,
     event,
   }: {
-    context: Context;
+    context: IndexingEngineContext;
     event: LogEventBase;
   }) {
     const resolver = getThisAccountId(context, event);

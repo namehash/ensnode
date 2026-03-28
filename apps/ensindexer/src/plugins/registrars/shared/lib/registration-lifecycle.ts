@@ -1,5 +1,4 @@
-import type { Context } from "ponder:registry";
-import schema from "ponder:schema";
+import ensIndexerSchema from "ponder:schema";
 
 import {
   type AccountId,
@@ -8,14 +7,16 @@ import {
   type UnixTimestamp,
 } from "@ensnode/ensnode-sdk";
 
+import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
+
 /**
  * Get RegistrationLifecycle by node value.
  */
 export async function getRegistrationLifecycle(
-  context: Context,
+  context: IndexingEngineContext,
   { node }: { node: Node },
-): Promise<typeof schema.registrationLifecycles.$inferSelect | null> {
-  return context.db.find(schema.registrationLifecycles, { node });
+): Promise<typeof ensIndexerSchema.registrationLifecycles.$inferSelect | null> {
+  return context.ensDb.find(ensIndexerSchema.registrationLifecycles, { node });
 }
 
 /**
@@ -25,7 +26,7 @@ export async function getRegistrationLifecycle(
  * the Registration Lifecycle by node value.
  */
 export async function insertRegistrationLifecycle(
-  context: Context,
+  context: IndexingEngineContext,
   {
     subregistryId,
     node,
@@ -36,7 +37,7 @@ export async function insertRegistrationLifecycle(
     expiresAt: UnixTimestamp;
   },
 ): Promise<void> {
-  await context.db.insert(schema.registrationLifecycles).values({
+  await context.ensDb.insert(ensIndexerSchema.registrationLifecycles).values({
     subregistryId: formatAccountId(subregistryId),
     node,
     expiresAt: BigInt(expiresAt),
@@ -49,7 +50,7 @@ export async function insertRegistrationLifecycle(
  * Updates the current state of the Registration Lifecycle by node value.
  */
 export async function updateRegistrationLifecycle(
-  context: Context,
+  context: IndexingEngineContext,
   {
     node,
     expiresAt,
@@ -58,7 +59,7 @@ export async function updateRegistrationLifecycle(
     expiresAt: UnixTimestamp;
   },
 ): Promise<void> {
-  await context.db
-    .update(schema.registrationLifecycles, { node })
+  await context.ensDb
+    .update(ensIndexerSchema.registrationLifecycles, { node })
     .set({ expiresAt: BigInt(expiresAt) });
 }

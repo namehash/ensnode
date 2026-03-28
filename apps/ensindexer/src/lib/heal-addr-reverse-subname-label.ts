@@ -1,11 +1,11 @@
 import config from "@/config";
 
-import type { Context } from "ponder:registry";
 import type { Address } from "viem";
 
 import { getENSRootChainId } from "@ensnode/datasources";
 import type { LabelHash, LiteralLabel } from "@ensnode/ensnode-sdk";
 
+import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import { toJson } from "@/lib/json-stringify-with-bigints";
 import { maybeHealLabelByAddrReverseSubname } from "@/lib/maybe-heal-label-by-addr-reverse-subname";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
@@ -21,7 +21,7 @@ import {
  * @throws if unable to heal the addr.reverse subname's label
  */
 export async function healAddrReverseSubnameLabel(
-  context: Context,
+  context: IndexingEngineContext,
   event: EventWithArgs<{ owner: Address }>,
   labelHash: LabelHash,
 ): Promise<LiteralLabel> {

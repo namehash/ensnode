@@ -1,6 +1,5 @@
 import config from "@/config";
 
-import type { Context } from "ponder:registry";
 import type { Address } from "viem";
 
 import { getENSRootChainId } from "@ensnode/datasources";
@@ -13,6 +12,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { getThisAccountId } from "@/lib/get-this-account-id";
+import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
@@ -33,7 +33,7 @@ export default function () {
     context,
     event,
   }: {
-    context: Context;
+    context: IndexingEngineContext;
     event: EventWithArgs<{ node: Node; resolver: Address }>;
   }) {
     const { node, resolver } = event.args;
@@ -54,7 +54,7 @@ export default function () {
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{
         // NOTE: `node` event arg represents a `Node` that is the _parent_ of the node the NewOwner event is about
         node: Node;
@@ -82,7 +82,7 @@ export default function () {
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{ node: Node; resolver: Address }>;
     }) => {
       // ignore the event on ENSv1RegistryOld if node is migrated to new Registry

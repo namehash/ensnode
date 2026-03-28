@@ -1,7 +1,6 @@
-import type { Context } from "ponder:registry";
-
 import type { AccountId } from "@ensnode/ensnode-sdk";
 
+import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import type { LogEventBase } from "@/lib/ponder-helpers";
 
 /**
@@ -10,5 +9,7 @@ import type { LogEventBase } from "@/lib/ponder-helpers";
  * @example
  * const { chainId, address } = getThisAccountId(context, event);
  */
-export const getThisAccountId = (context: Context, event: Pick<LogEventBase, "log">) =>
-  ({ chainId: context.chain.id, address: event.log.address }) satisfies AccountId;
+export const getThisAccountId = (
+  context: IndexingEngineContext,
+  event: Pick<LogEventBase, "log">,
+) => ({ chainId: context.chain.id, address: event.log.address }) satisfies AccountId;

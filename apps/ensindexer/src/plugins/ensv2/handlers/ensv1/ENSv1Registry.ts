@@ -1,7 +1,6 @@
 import config from "@/config";
 
-import type { Context } from "ponder:registry";
-import schema from "ponder:schema";
+import ensIndexerSchema from "ponder:schema";
 import { type Address, isAddressEqual, zeroAddress } from "viem";
 
 import {
@@ -20,6 +19,7 @@ import { materializeENSv1DomainEffectiveOwner } from "@/lib/ensv2/domain-db-help
 import { ensureDomainEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel, ensureUnknownLabel } from "@/lib/ensv2/label-db-helpers";
 import { healAddrReverseSubnameLabel } from "@/lib/heal-addr-reverse-subname-label";
+import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
@@ -39,7 +39,7 @@ export default function () {
     context,
     event,
   }: {
-    context: Context;
+    context: IndexingEngineContext;
     event: EventWithArgs<{
       // NOTE: `node` event arg represents a `Node` that is the _parent_ of the node the NewOwner event is about
       node: Node;
@@ -76,14 +76,14 @@ export default function () {
     }
 
     // upsert domain
-    await context.db
-      .insert(schema.v1Domain)
+    await context.ensDb
+      .insert(ensIndexerSchema.v1Domain)
       .values({ id: domainId, parentId, labelHash })
       .onConflictDoNothing();
 
     // update rootRegistryOwner
-    await context.db
-      .update(schema.v1Domain, { id: domainId })
+    await context.ensDb
+      .update(ensIndexerSchema.v1Domain, { id: domainId })
       .set({ rootRegistryOwnerId: interpretAddress(owner) });
 
     // materialize domain owner
@@ -102,7 +102,7 @@ export default function () {
     context,
     event,
   }: {
-    context: Context;
+    context: IndexingEngineContext;
     event: EventWithArgs<{ node: Node; owner: Address }>;
   }) {
     const { node, owner } = event.args;
@@ -113,8 +113,8 @@ export default function () {
     const domainId = makeENSv1DomainId(node);
 
     // set the domain's rootRegistryOwner to `owner`
-    await context.db
-      .update(schema.v1Domain, { id: domainId })
+    await context.ensDb
+      .update(ensIndexerSchema.v1Domain, { id: domainId })
       .set({ rootRegistryOwnerId: interpretAddress(owner) });
 
     // materialize domain owner
@@ -133,7 +133,7 @@ export default function () {
     context,
     event,
   }: {
-    context: Context;
+    context: IndexingEngineContext;
     event: EventWithArgs<{ node: Node }>;
   }) {
     const { node } = event.args;
@@ -150,7 +150,7 @@ export default function () {
     context,
     event,
   }: {
-    context: Context;
+    context: IndexingEngineContext;
     event: EventWithArgs<{ node: Node }>;
   }) {
     const { node } = event.args;

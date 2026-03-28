@@ -150,7 +150,7 @@ export default function () {
   //     // to look it up in the database. this query is then repeated in handleTransfer which
   //     // is a bit of a bummer but better to keep our logic simple.
   //     const serializedAssetId = serializeAssetId(nft);
-  //     const indexedNft = await context.db.find(schema.nameTokens, { id: serializedAssetId });
+  //     const indexedNft = await context.ensDb.find(ensIndexerSchema.nameTokens, { id: serializedAssetId });
 
   //     const metadata: NFTTransferEventMetadata = {
   //       chainId: context.chain.id,
@@ -185,7 +185,7 @@ export default function () {
   //     // to look it up in the database. this query is then repeated in handleTransfer which
   //     // is a bit of a bummer but better to keep our logic simple.
   //     const serializedAssetId = serializeAssetId(nft);
-  //     const indexedNft = await context.db.find(schema.nameTokens, { id: serializedAssetId });
+  //     const indexedNft = await context.ensDb.find(ensIndexerSchema.nameTokens, { id: serializedAssetId });
 
   //     const metadata: NFTTransferEventMetadata = {
   //       chainId: context.chain.id,

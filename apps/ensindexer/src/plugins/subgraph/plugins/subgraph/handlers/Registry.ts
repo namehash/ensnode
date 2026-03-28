@@ -1,8 +1,8 @@
-import type { Context } from "ponder:registry";
-import schema from "ponder:schema";
+import ensIndexerSchema from "ponder:schema";
 
 import { makeSubdomainNode, type Node, PluginName, ROOT_NODE } from "@ensnode/ensnode-sdk";
 
+import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { setupRootNode } from "@/lib/subgraph/subgraph-helpers";
@@ -21,8 +21,8 @@ import {
 
 // these handlers should ignore 'RegistryOld' events for a given domain if it has been migrated to the
 // (new) Registry, which is tracked in the `Domain.isMigrated` field
-async function shouldIgnoreRegistryOldEvents(context: Context, node: Node) {
-  const domain = await context.db.find(schema.subgraph_domain, { id: node });
+async function shouldIgnoreRegistryOldEvents(context: IndexingEngineContext, node: Node) {
+  const domain = await context.ensDb.find(ensIndexerSchema.subgraph_domain, { id: node });
   return domain?.isMigrated ?? false;
 }
 

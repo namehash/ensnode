@@ -1,6 +1,6 @@
 /** biome-ignore-all lint/correctness/noUnusedVariables: ignore for now */
-import type { Context } from "ponder:registry";
-import schema from "ponder:schema";
+
+import ensIndexerSchema from "ponder:schema";
 
 import {
   type EncodedReferrer,
@@ -17,6 +17,7 @@ import { ensureDomainEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel, ensureUnknownLabel } from "@/lib/ensv2/label-db-helpers";
 import { getLatestRegistration, getLatestRenewal } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
+import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";
 import { toJson } from "@/lib/json-stringify-with-bigints";
 import { getManagedName } from "@/lib/managed-names";
@@ -30,7 +31,7 @@ export default function () {
     context,
     event,
   }: {
-    context: Context;
+    context: IndexingEngineContext;
     event: EventWithArgs<{
       label?: Label;
       labelHash: LabelHash;
@@ -71,8 +72,8 @@ export default function () {
 
     // update registration's base/premium
     // TODO(paymentToken): add payment token tracking here
-    await context.db
-      .update(schema.registration, { id: registration.id })
+    await context.ensDb
+      .update(ensIndexerSchema.registration, { id: registration.id })
       .set({ base, premium, referrer });
 
     // push event to domain history
@@ -83,7 +84,7 @@ export default function () {
     context,
     event,
   }: {
-    context: Context;
+    context: IndexingEngineContext;
     event: EventWithArgs<{
       label?: string;
       labelHash: LabelHash;
@@ -146,7 +147,9 @@ export default function () {
 
     // update renewal info
     // TODO(paymentToken): add payment token tracking here
-    await context.db.update(schema.renewal, { id: renewal.id }).set({ base, premium, referrer });
+    await context.ensDb
+      .update(ensIndexerSchema.renewal, { id: renewal.id })
+      .set({ base, premium, referrer });
 
     // push event to domain history
     await ensureDomainEvent(context, event, domainId);

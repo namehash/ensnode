@@ -1,5 +1,4 @@
-import type { Context } from "ponder:registry";
-import schema from "ponder:schema";
+import ensIndexerSchema from "ponder:schema";
 import { type Address, isAddressEqual, zeroAddress } from "viem";
 
 import {
@@ -30,6 +29,7 @@ import {
   insertLatestRenewal,
 } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
+import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";
 import { toJson } from "@/lib/json-stringify-with-bigints";
 import { getManagedName } from "@/lib/managed-names";
@@ -90,7 +90,7 @@ export default function () {
     context,
     event,
   }: {
-    context: Context;
+    context: IndexingEngineContext;
     event: EventWithArgs<{
       operator: Address;
       from: Address;
@@ -145,7 +145,7 @@ export default function () {
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{
         node: Node;
         name: DNSEncodedName;
@@ -222,7 +222,7 @@ export default function () {
           throw new Error("Wrapper expiry exceeds registrar expiry + grace period");
         }
 
-        await context.db.update(schema.registration, { id: registration.id }).set({
+        await context.ensDb.update(ensIndexerSchema.registration, { id: registration.id }).set({
           wrapped: true,
           fuses,
           // expiry, // TODO: NameWrapper expiry logic
@@ -265,7 +265,7 @@ export default function () {
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{ node: Node; owner: Address }>;
     }) => {
       const { node } = event.args;
@@ -279,14 +279,14 @@ export default function () {
 
       if (registration.type === "BaseRegistrar") {
         // if this is a wrapped BaseRegistrar Registration, unwrap it
-        await context.db.update(schema.registration, { id: registration.id }).set({
+        await context.ensDb.update(ensIndexerSchema.registration, { id: registration.id }).set({
           wrapped: false,
           fuses: null,
           // expiry: null // TODO: NameWrapper expiry logic? maybe nothing to do here
         });
       } else {
         // otherwise, deactivate the latest registration by setting its expiry to this block
-        await context.db.update(schema.registration, { id: registration.id }).set({
+        await context.ensDb.update(ensIndexerSchema.registration, { id: registration.id }).set({
           expiry: event.block.timestamp,
         });
       }
@@ -307,7 +307,7 @@ export default function () {
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{ node: Node; fuses: number }>;
     }) => {
       const { node, fuses } = event.args;
@@ -323,7 +323,7 @@ export default function () {
       }
 
       // upsert fuses
-      await context.db.update(schema.registration, { id: registration.id }).set({
+      await context.ensDb.update(ensIndexerSchema.registration, { id: registration.id }).set({
         fuses,
         // expiry: // TODO: NameWrapper expiry logic ?
       });
@@ -342,7 +342,7 @@ export default function () {
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{ node: Node; expiry: bigint }>;
     }) => {
       const { node, expiry: _expiry } = event.args;
@@ -358,7 +358,9 @@ export default function () {
         );
       }
 
-      await context.db.update(schema.registration, { id: registration.id }).set({ expiry });
+      await context.ensDb
+        .update(ensIndexerSchema.registration, { id: registration.id })
+        .set({ expiry });
 
       // push event to domain history
       await ensureDomainEvent(context, event, domainId);
