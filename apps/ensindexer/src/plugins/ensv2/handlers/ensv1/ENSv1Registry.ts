@@ -1,6 +1,6 @@
 import config from "@/config";
 
-import { type Context, ponder } from "ponder:registry";
+import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { type Address, isAddressEqual, zeroAddress } from "viem";
 
@@ -20,6 +20,7 @@ import { materializeENSv1DomainEffectiveOwner } from "@/lib/ensv2/domain-db-help
 import { ensureDomainEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel, ensureUnknownLabel } from "@/lib/ensv2/label-db-helpers";
 import { healAddrReverseSubnameLabel } from "@/lib/heal-addr-reverse-subname-label";
+import { addOnchainEventListener } from "@/lib/onchain-events/add-onchain-event-listener";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import { nodeIsMigrated } from "@/lib/protocol-acceleration/registry-migration-status";
@@ -169,7 +170,7 @@ export default function () {
    * Handles Registry#NewOwner for:
    * - ENS Root Chain's ENSv1RegistryOld
    */
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "ENSv1RegistryOld:NewOwner"),
     async ({ context, event }) => {
       const { label: labelHash, node: parentNode } = event.args;
@@ -187,7 +188,7 @@ export default function () {
    * Handles Registry#Transfer for:
    * - ENS Root Chain's ENSv1RegistryOld
    */
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "ENSv1RegistryOld:Transfer"),
     async ({ context, event }) => {
       const shouldIgnoreEvent = await nodeIsMigrated(context, event.args.node);
@@ -201,7 +202,7 @@ export default function () {
    * Handles Registry#NewTTL for:
    * - ENS Root Chain's ENSv1RegistryOld
    */
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "ENSv1RegistryOld:NewTTL"),
     async ({ context, event }) => {
       const shouldIgnoreEvent = await nodeIsMigrated(context, event.args.node);
@@ -215,7 +216,7 @@ export default function () {
    * Handles Registry#NewResolver for:
    * - ENS Root Chain's ENSv1RegistryOld
    */
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "ENSv1RegistryOld:NewResolver"),
     async ({ context, event }) => {
       const shouldIgnoreEvent = await nodeIsMigrated(context, event.args.node);
@@ -231,8 +232,11 @@ export default function () {
    * - Basenames Registry
    * - Lineanames Registry
    */
-  ponder.on(namespaceContract(pluginName, "ENSv1Registry:NewOwner"), handleNewOwner);
-  ponder.on(namespaceContract(pluginName, "ENSv1Registry:Transfer"), handleTransfer);
-  ponder.on(namespaceContract(pluginName, "ENSv1Registry:NewTTL"), handleNewTTL);
-  ponder.on(namespaceContract(pluginName, "ENSv1Registry:NewResolver"), handleNewResolver);
+  addOnchainEventListener(namespaceContract(pluginName, "ENSv1Registry:NewOwner"), handleNewOwner);
+  addOnchainEventListener(namespaceContract(pluginName, "ENSv1Registry:Transfer"), handleTransfer);
+  addOnchainEventListener(namespaceContract(pluginName, "ENSv1Registry:NewTTL"), handleNewTTL);
+  addOnchainEventListener(
+    namespaceContract(pluginName, "ENSv1Registry:NewResolver"),
+    handleNewResolver,
+  );
 }

@@ -1,4 +1,4 @@
-import { type Context, ponder } from "ponder:registry";
+import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { type Address, isAddressEqual, zeroAddress } from "viem";
 
@@ -12,6 +12,7 @@ import {
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { ensurePermissionsEvent } from "@/lib/ensv2/event-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
+import { addOnchainEventListener } from "@/lib/onchain-events/add-onchain-event-listener";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 
@@ -44,7 +45,7 @@ const ensurePermissionsResource = async (
 const isZeroRoles = (roles: bigint) => roles === 0n;
 
 export default function () {
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(PluginName.ENSv2, "EnhancedAccessControl:EACRolesChanged"),
     async ({
       context,

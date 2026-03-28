@@ -1,4 +1,4 @@
-import { type Context, ponder } from "ponder:registry";
+import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { type Address, hexToBigInt, labelhash } from "viem";
 
@@ -23,13 +23,14 @@ import {
 } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { toJson } from "@/lib/json-stringify-with-bigints";
+import { addOnchainEventListener } from "@/lib/onchain-events/add-onchain-event-listener";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 
 const pluginName = PluginName.ENSv2;
 
 export default function () {
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "ENSv2Registry:NameRegistered"),
     async ({
       context,
@@ -128,7 +129,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "ENSv2Registry:ExpiryUpdated"),
     async ({
       context,
@@ -170,7 +171,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "ENSv2Registry:SubregistryUpdated"),
     async ({
       context,
@@ -222,7 +223,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "ENSv2Registry:TokenRegenerated"),
     async ({
       context,
@@ -280,8 +281,11 @@ export default function () {
     await ensureDomainEvent(context, event, domainId);
   }
 
-  ponder.on(namespaceContract(pluginName, "ENSv2Registry:TransferSingle"), handleTransferSingle);
-  ponder.on(
+  addOnchainEventListener(
+    namespaceContract(pluginName, "ENSv2Registry:TransferSingle"),
+    handleTransferSingle,
+  );
+  addOnchainEventListener(
     namespaceContract(pluginName, "ENSv2Registry:TransferBatch"),
     async ({ context, event }) => {
       for (const id of event.args.ids) {

@@ -1,6 +1,6 @@
 import config from "@/config";
 
-import { type Context, ponder } from "ponder:registry";
+import type { Context } from "ponder:registry";
 import type { Address } from "viem";
 
 import { getENSRootChainId } from "@ensnode/datasources";
@@ -13,6 +13,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { getThisAccountId } from "@/lib/get-this-account-id";
+import { addOnchainEventListener } from "@/lib/onchain-events/add-onchain-event-listener";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import { ensureDomainResolverRelation } from "@/lib/protocol-acceleration/domain-resolver-relationship-db-helpers";
@@ -47,7 +48,7 @@ export default function () {
    * Handles Registry#NewOwner for:
    * - ENS Root Chain's (new) Registry
    */
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(PluginName.ProtocolAcceleration, "ENSv1Registry:NewOwner"),
     async ({
       context,
@@ -75,7 +76,7 @@ export default function () {
    * Handles Registry#NewResolver for:
    * - ENS Root Chain's ENSv1RegistryOld
    */
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(PluginName.ProtocolAcceleration, "ENSv1RegistryOld:NewResolver"),
     async ({
       context,
@@ -98,7 +99,7 @@ export default function () {
    * - Basename's (shadow) Registry
    * - Lineanames's (shadow) Registry
    */
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(PluginName.ProtocolAcceleration, "ENSv1Registry:NewResolver"),
     handleNewResolver,
   );

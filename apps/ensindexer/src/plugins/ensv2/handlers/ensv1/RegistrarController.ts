@@ -1,5 +1,5 @@
 /** biome-ignore-all lint/correctness/noUnusedVariables: ignore for now */
-import { type Context, ponder } from "ponder:registry";
+import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
 
 import {
@@ -19,6 +19,7 @@ import { getLatestRegistration, getLatestRenewal } from "@/lib/ensv2/registratio
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { toJson } from "@/lib/json-stringify-with-bigints";
 import { getManagedName } from "@/lib/managed-names";
+import { addOnchainEventListener } from "@/lib/onchain-events/add-onchain-event-listener";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 
@@ -154,7 +155,7 @@ export default function () {
   //////////////////////////////////////
   // RegistrarController:NameRegistered
   //////////////////////////////////////
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(
       pluginName,
       "RegistrarController:NameRegistered(string label, bytes32 indexed labelhash, address indexed owner, uint256 baseCost, uint256 premium, uint256 expires, bytes32 referrer)",
@@ -168,7 +169,7 @@ export default function () {
         },
       }),
   );
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(
       pluginName,
       "RegistrarController:NameRegistered(string name, bytes32 indexed label, address indexed owner, uint256 baseCost, uint256 premium, uint256 expires)",
@@ -182,7 +183,7 @@ export default function () {
         },
       }),
   );
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(
       pluginName,
       "RegistrarController:NameRegistered(string name, bytes32 indexed label, address indexed owner, uint256 cost, uint256 expires)",
@@ -196,7 +197,7 @@ export default function () {
         },
       }),
   );
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(
       pluginName,
       "RegistrarController:NameRegistered(string name, bytes32 indexed label, address indexed owner, uint256 expires)",
@@ -214,7 +215,7 @@ export default function () {
   ///////////////////////////////////
   // RegistrarController:NameRenewed
   ///////////////////////////////////
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(
       pluginName,
       "RegistrarController:NameRenewed(string label, bytes32 indexed labelhash, uint256 cost, uint256 expires, bytes32 referrer)",
@@ -228,7 +229,7 @@ export default function () {
         },
       }),
   );
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(
       pluginName,
       "RegistrarController:NameRenewed(string name, bytes32 indexed label, uint256 cost, uint256 expires)",
@@ -248,7 +249,7 @@ export default function () {
         },
       }),
   );
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(
       pluginName,
       "RegistrarController:NameRenewed(string name, bytes32 indexed label, uint256 expires)",

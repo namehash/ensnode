@@ -1,12 +1,12 @@
 import config from "@/config";
 
-import { ponder } from "ponder:registry";
 import schema from "ponder:schema";
 
 import { getENSRootChainId } from "@ensnode/datasources";
 import { DEFAULT_EVM_COIN_TYPE, evmChainIdToCoinType, PluginName } from "@ensnode/ensnode-sdk";
 import { interpretNameRecordValue } from "@ensnode/ensnode-sdk/internal";
 
+import { addOnchainEventListener } from "@/lib/onchain-events/add-onchain-event-listener";
 import { namespaceContract } from "@/lib/plugin-helpers";
 
 /**
@@ -15,7 +15,7 @@ import { namespaceContract } from "@/lib/plugin-helpers";
  * - indexes ENSIP-19 Reverse Name Records for an address, per-coinType (derived from context.chain.id)
  */
 export default function () {
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(
       PluginName.ProtocolAcceleration,
       "StandaloneReverseRegistrar:NameForAddrChanged",

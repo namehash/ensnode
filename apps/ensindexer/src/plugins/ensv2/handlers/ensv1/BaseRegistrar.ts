@@ -1,4 +1,4 @@
-import { type Context, ponder } from "ponder:registry";
+import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { GRACE_PERIOD_SECONDS } from "@ensdomains/ensjs/utils";
 import { type Address, isAddressEqual, zeroAddress } from "viem";
@@ -23,6 +23,7 @@ import {
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { toJson } from "@/lib/json-stringify-with-bigints";
 import { getManagedName } from "@/lib/managed-names";
+import { addOnchainEventListener } from "@/lib/onchain-events/add-onchain-event-listener";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 
@@ -42,7 +43,7 @@ const pluginName = PluginName.ENSv2;
  * exists and materialize its effective owner correctly.
  */
 export default function () {
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "BaseRegistrar:Transfer"),
     async ({
       context,
@@ -143,13 +144,16 @@ export default function () {
     await ensureDomainEvent(context, event, domainId);
   }
 
-  ponder.on(namespaceContract(pluginName, "BaseRegistrar:NameRegistered"), handleNameRegistered);
-  ponder.on(
+  addOnchainEventListener(
+    namespaceContract(pluginName, "BaseRegistrar:NameRegistered"),
+    handleNameRegistered,
+  );
+  addOnchainEventListener(
     namespaceContract(pluginName, "BaseRegistrar:NameRegisteredWithRecord"),
     handleNameRegistered,
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "BaseRegistrar:NameRenewed"),
     async ({
       context,

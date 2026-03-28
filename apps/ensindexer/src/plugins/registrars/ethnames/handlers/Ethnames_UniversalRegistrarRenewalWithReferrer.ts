@@ -1,5 +1,3 @@
-import { ponder } from "ponder:registry";
-
 import {
   decodeEncodedReferrer,
   makeSubdomainNode,
@@ -9,6 +7,7 @@ import {
 
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { getManagedName } from "@/lib/managed-names";
+import { addOnchainEventListener } from "@/lib/onchain-events/add-onchain-event-listener";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { handleUniversalRegistrarRenewalEvent } from "@/plugins/registrars/shared/lib/universal-registrar-renewal-with-referrer-events";
 
@@ -18,7 +17,7 @@ import { handleUniversalRegistrarRenewalEvent } from "@/plugins/registrars/share
 export default function () {
   const pluginName = PluginName.Registrars;
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "Ethnames_UniversalRegistrarRenewalWithReferrer:RenewalReferred"),
     async ({ context, event }) => {
       const {

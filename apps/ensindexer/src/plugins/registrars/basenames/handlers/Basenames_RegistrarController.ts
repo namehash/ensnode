@@ -1,5 +1,3 @@
-import { ponder } from "ponder:registry";
-
 import {
   makeSubdomainNode,
   PluginName,
@@ -9,6 +7,7 @@ import {
 
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { getManagedName } from "@/lib/managed-names";
+import { addOnchainEventListener } from "@/lib/onchain-events/add-onchain-event-listener";
 import { namespaceContract } from "@/lib/plugin-helpers";
 
 import { handleRegistrarControllerEvent } from "../../shared/lib/registrar-controller-events";
@@ -45,7 +44,7 @@ export default function () {
    * Basenames_EARegistrarController Event Handlers
    */
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "Basenames_EARegistrarController:NameRegistered"),
     async ({ context, event }) => {
       const {
@@ -75,7 +74,7 @@ export default function () {
    * Basenames_RegistrarController Event Handlers
    */
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "Basenames_RegistrarController:NameRegistered"),
     async ({ context, event }) => {
       const {
@@ -101,7 +100,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "Basenames_RegistrarController:NameRenewed"),
     async ({ context, event }) => {
       const {
@@ -131,7 +130,7 @@ export default function () {
    * Basenames_UpgradeableRegistrarController Event Handlers
    */
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "Basenames_UpgradeableRegistrarController:NameRegistered"),
     async ({ context, event }) => {
       const {
@@ -157,7 +156,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "Basenames_UpgradeableRegistrarController:NameRenewed"),
     async ({ context, event }) => {
       const {

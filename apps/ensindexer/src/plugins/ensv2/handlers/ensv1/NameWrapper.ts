@@ -1,4 +1,4 @@
-import { type Context, ponder } from "ponder:registry";
+import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { type Address, isAddressEqual, zeroAddress } from "viem";
 
@@ -32,6 +32,7 @@ import {
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { toJson } from "@/lib/json-stringify-with-bigints";
 import { getManagedName } from "@/lib/managed-names";
+import { addOnchainEventListener } from "@/lib/onchain-events/add-onchain-event-listener";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 
@@ -138,7 +139,7 @@ export default function () {
     await ensureDomainEvent(context, event, domainId);
   }
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "NameWrapper:NameWrapped"),
     async ({
       context,
@@ -258,7 +259,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "NameWrapper:NameUnwrapped"),
     async ({
       context,
@@ -300,7 +301,7 @@ export default function () {
   /**
    * FusesSet can occur for expired or unexpired Registrations.
    */
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "NameWrapper:FusesSet"),
     async ({
       context,
@@ -335,7 +336,7 @@ export default function () {
   /**
    * ExpiryExtended can occur for expired or unexpired Registrations.
    */
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "NameWrapper:ExpiryExtended"),
     async ({
       context,
@@ -392,8 +393,11 @@ export default function () {
     },
   );
 
-  ponder.on(namespaceContract(pluginName, "NameWrapper:TransferSingle"), handleTransfer);
-  ponder.on(
+  addOnchainEventListener(
+    namespaceContract(pluginName, "NameWrapper:TransferSingle"),
+    handleTransfer,
+  );
+  addOnchainEventListener(
     namespaceContract(pluginName, "NameWrapper:TransferBatch"),
     async ({ context, event }) => {
       for (const id of event.args.ids) {

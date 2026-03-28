@@ -1,5 +1,3 @@
-import { ponder } from "ponder:registry";
-
 import {
   addPrices,
   makeSubdomainNode,
@@ -11,6 +9,7 @@ import {
 
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { getManagedName } from "@/lib/managed-names";
+import { addOnchainEventListener } from "@/lib/onchain-events/add-onchain-event-listener";
 import { namespaceContract } from "@/lib/plugin-helpers";
 
 import { handleRegistrarControllerEvent } from "../../shared/lib/registrar-controller-events";
@@ -34,7 +33,7 @@ export default function () {
    * Lineanames_EthRegistrarController Event Handlers
    */
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "Lineanames_EthRegistrarController:OwnerNameRegistered"),
     async ({ context, event }) => {
       const {
@@ -71,7 +70,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "Lineanames_EthRegistrarController:PohNameRegistered"),
     async ({ context, event }) => {
       const {
@@ -108,7 +107,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "Lineanames_EthRegistrarController:NameRegistered"),
     async ({ context, event }) => {
       const {
@@ -143,7 +142,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "Lineanames_EthRegistrarController:NameRenewed"),
     async ({ context, event }) => {
       const {

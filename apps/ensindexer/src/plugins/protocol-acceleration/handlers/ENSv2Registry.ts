@@ -1,9 +1,10 @@
-import { type Context, ponder } from "ponder:registry";
+import type { Context } from "ponder:registry";
 import type { Address } from "viem";
 
 import { getCanonicalId, makeENSv2DomainId, PluginName } from "@ensnode/ensnode-sdk";
 
 import { getThisAccountId } from "@/lib/get-this-account-id";
+import { addOnchainEventListener } from "@/lib/onchain-events/add-onchain-event-listener";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import { ensureDomainResolverRelation } from "@/lib/protocol-acceleration/domain-resolver-relationship-db-helpers";
@@ -11,7 +12,7 @@ import { ensureDomainResolverRelation } from "@/lib/protocol-acceleration/domain
 const pluginName = PluginName.ProtocolAcceleration;
 
 export default function () {
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "ENSv2Registry:ResolverUpdated"),
     async ({
       context,

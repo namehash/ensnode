@@ -1,8 +1,9 @@
-import { type Context, ponder } from "ponder:registry";
+import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
 
 import { makeSubdomainNode, type Node, PluginName, ROOT_NODE } from "@ensnode/ensnode-sdk";
 
+import { addOnchainEventListener } from "@/lib/onchain-events/add-onchain-event-listener";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { setupRootNode } from "@/lib/subgraph/subgraph-helpers";
 import {
@@ -31,11 +32,11 @@ async function shouldIgnoreRegistryOldEvents(context: Context, node: Node) {
 export default function () {
   const pluginName = PluginName.Subgraph;
 
-  ponder.on(namespaceContract(pluginName, "ENSv1RegistryOld:setup"), setupRootNode);
+  addOnchainEventListener(namespaceContract(pluginName, "ENSv1RegistryOld:setup"), setupRootNode);
 
   // old registry functions are proxied to the current handlers
   // iff the domain has not yet been migrated
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "ENSv1RegistryOld:NewOwner"),
     async ({ context, event }) => {
       const { label: labelHash, node: parentNode } = event.args;
@@ -48,7 +49,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "ENSv1RegistryOld:NewResolver"),
     async ({ context, event }) => {
       const shouldIgnoreEvent = await shouldIgnoreRegistryOldEvents(context, event.args.node);
@@ -63,7 +64,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "ENSv1RegistryOld:NewTTL"),
     async ({ context, event }) => {
       const shouldIgnoreEvent = await shouldIgnoreRegistryOldEvents(context, event.args.node);
@@ -73,7 +74,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "ENSv1RegistryOld:Transfer"),
     async ({ context, event }) => {
       // NOTE: this logic derived from the subgraph introduces a bug for queries with a blockheight
@@ -89,8 +90,14 @@ export default function () {
     },
   );
 
-  ponder.on(namespaceContract(pluginName, "ENSv1Registry:NewOwner"), handleNewOwner(true));
-  ponder.on(namespaceContract(pluginName, "ENSv1Registry:NewResolver"), handleNewResolver);
-  ponder.on(namespaceContract(pluginName, "ENSv1Registry:NewTTL"), handleNewTTL);
-  ponder.on(namespaceContract(pluginName, "ENSv1Registry:Transfer"), handleTransfer);
+  addOnchainEventListener(
+    namespaceContract(pluginName, "ENSv1Registry:NewOwner"),
+    handleNewOwner(true),
+  );
+  addOnchainEventListener(
+    namespaceContract(pluginName, "ENSv1Registry:NewResolver"),
+    handleNewResolver,
+  );
+  addOnchainEventListener(namespaceContract(pluginName, "ENSv1Registry:NewTTL"), handleNewTTL);
+  addOnchainEventListener(namespaceContract(pluginName, "ENSv1Registry:Transfer"), handleTransfer);
 }
