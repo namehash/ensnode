@@ -1,0 +1,24 @@
+.nav-dropdown-trigger {
+  /* biome-ignore lint/complexity/noImportantStyles: override Mintlify scoped styles on dropdown trigger */
+  overflow: visible !important;
+  position: relative;
+  margin-top: 1.5rem;
+}
+
+.nav-dropdown-trigger::before {
+  content: "Docs section";
+  position: absolute;
+  top: -1.5rem;
+  left: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-muted-foreground, #6b7280);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+@media (max-width: 1023px) {
+  .nav-dropdown-trigger::before {
+    display: none;
+  }
+}
