@@ -24,7 +24,7 @@ import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 import { NameDetailPageContent } from "./_components/NameDetailPageContent";
 import { EncodedLabelhashUnsupportedError, InvalidNameError } from "./_components/NameErrors";
 
-const EXAMPLE_NAMES: NamespaceSpecificValue<string[]> = {
+const EXAMPLE_NAMES: NamespaceSpecificValue<NormalizedName[]> = {
   default: [
     "vitalik.eth",
     "gregskril.eth",
