@@ -1,6 +1,6 @@
 import { interpretTokenIdAsLabelHash, PluginName } from "@ensnode/ensnode-sdk";
 
-import { addOnchainEventListener } from "@/lib/onchain-events/add-onchain-event-listener";
+import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { makeRegistrarHandlers } from "@/plugins/subgraph/shared-handlers/Registrar";
 

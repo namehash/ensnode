@@ -8,8 +8,8 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { getThisAccountId } from "@/lib/get-this-account-id";
+import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";
 import { getManagedName } from "@/lib/managed-names";
-import { addOnchainEventListener } from "@/lib/onchain-events/add-onchain-event-listener";
 import { namespaceContract } from "@/lib/plugin-helpers";
 
 import { handleRegistrarControllerEvent } from "../../shared/lib/registrar-controller-events";

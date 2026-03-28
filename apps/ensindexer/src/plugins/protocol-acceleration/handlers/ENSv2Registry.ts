@@ -4,7 +4,7 @@ import type { Address } from "viem";
 import { getCanonicalId, makeENSv2DomainId, PluginName } from "@ensnode/ensnode-sdk";
 
 import { getThisAccountId } from "@/lib/get-this-account-id";
-import { addOnchainEventListener } from "@/lib/onchain-events/add-onchain-event-listener";
+import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import { ensureDomainResolverRelation } from "@/lib/protocol-acceleration/domain-resolver-relationship-db-helpers";

@@ -20,7 +20,7 @@ import { materializeENSv1DomainEffectiveOwner } from "@/lib/ensv2/domain-db-help
 import { ensureDomainEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel, ensureUnknownLabel } from "@/lib/ensv2/label-db-helpers";
 import { healAddrReverseSubnameLabel } from "@/lib/heal-addr-reverse-subname-label";
-import { addOnchainEventListener } from "@/lib/onchain-events/add-onchain-event-listener";
+import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import { nodeIsMigrated } from "@/lib/protocol-acceleration/registry-migration-status";

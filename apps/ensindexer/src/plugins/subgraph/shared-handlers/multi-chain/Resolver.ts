@@ -1,4 +1,4 @@
-import { addOnchainEventListener } from "@/lib/onchain-events/add-onchain-event-listener";
+import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";
 
 import {
   handleABIChanged,

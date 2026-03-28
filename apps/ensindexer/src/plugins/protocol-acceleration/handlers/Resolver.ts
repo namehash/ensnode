@@ -3,7 +3,7 @@ import { bigintToCoinType, type CoinType, ETH_COIN_TYPE, PluginName } from "@ens
 
 import { parseDnsTxtRecordArgs } from "@/lib/dns-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
-import { addOnchainEventListener } from "@/lib/onchain-events/add-onchain-event-listener";
+import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import {
   ensureResolver,
