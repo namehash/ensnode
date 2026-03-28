@@ -11,9 +11,7 @@ import { useNamespace } from "@/hooks/async/use-namespace";
 
 export default function ActionsNamePage() {
   const searchParams = useSearchParams();
-  const nameParam = searchParams.get("name");
-
-  const name = nameParam ? (nameParam as Name) : null;
+  const name = searchParams.get("name") as Name | null;
 
   const { data: namespace } = useNamespace();
 

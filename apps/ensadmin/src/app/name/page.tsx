@@ -66,7 +66,7 @@ const EXAMPLE_NAMES: NamespaceSpecificValue<string[]> = {
 export default function ExploreNamesPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const nameFromQuery = searchParams.get("name");
+  const nameFromQuery = searchParams.get("name") as Name | null;
   const [rawInputName, setRawInputName] = useState<Name>("");
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -103,13 +103,23 @@ export default function ExploreNamesPage() {
     setRawInputName(e.target.value);
   };
 
-  if (nameFromQuery !== null) {
-    if (!isInterpretedName(nameFromQuery)) {
-      return <InvalidNameError name={nameFromQuery} />;
-    }
-
+  if (nameFromQuery !== null && nameFromQuery !== "") {
+    // If the name is normalizable but not yet normalized, redirect to the normalized form.
     if (!isNormalizedName(nameFromQuery)) {
-      return <EncodedLabelhashUnsupportedError name={nameFromQuery} />;
+      try {
+        const normalizedName = normalize(nameFromQuery);
+        const href = retainCurrentRawConnectionUrlParam(getNameDetailsRelativePath(normalizedName));
+        router.replace(href);
+        return null;
+      } catch {
+        // normalize() threw — fall through to error handling below
+      }
+
+      if (isInterpretedName(nameFromQuery)) {
+        return <EncodedLabelhashUnsupportedError name={nameFromQuery} />;
+      }
+
+      return <InvalidNameError name={nameFromQuery} />;
     }
 
     return <NameDetailPageContent name={nameFromQuery} />;
