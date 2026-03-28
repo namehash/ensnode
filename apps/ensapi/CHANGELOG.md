@@ -1,5 +1,24 @@
 # ensapi
 
+## 1.9.0
+
+### Minor Changes
+
+- [#1809](https://github.com/namehash/ensnode/pull/1809) [`aaa471f`](https://github.com/namehash/ensnode/commit/aaa471f0a33d0f96389e706dcaed2b704e2952ea) Thanks [@tk-o](https://github.com/tk-o)! - Updated custom queries for ENSDb to implement data model from ENSDb SDK.
+
+- [#1809](https://github.com/namehash/ensnode/pull/1809) [`aaa471f`](https://github.com/namehash/ensnode/commit/aaa471f0a33d0f96389e706dcaed2b704e2952ea) Thanks [@tk-o](https://github.com/tk-o)! - Decoupled ENSApi from ENSIndexer by updating the data source for `EnsIndexerPublicConfig` from ENSIndexer to ENSDb.
+
+- [#1809](https://github.com/namehash/ensnode/pull/1809) [`aaa471f`](https://github.com/namehash/ensnode/commit/aaa471f0a33d0f96389e706dcaed2b704e2952ea) Thanks [@tk-o](https://github.com/tk-o)! - Decoupled ENSApi from ENSIndexer by updating the data source for Indexing Status snapshots, from ENSIndexer's Indexing Status API route to ENSDb.
+
+### Patch Changes
+
+- Updated dependencies [[`70e6f24`](https://github.com/namehash/ensnode/commit/70e6f2475a566135602f4adbcf44df2a6f74e5fd), [`9f52a66`](https://github.com/namehash/ensnode/commit/9f52a662e5828e944210f35d47571661899fc30e), [`aaa471f`](https://github.com/namehash/ensnode/commit/aaa471f0a33d0f96389e706dcaed2b704e2952ea), [`387715e`](https://github.com/namehash/ensnode/commit/387715e1bc4c996c0ae7545bfc78b79149e04f58), [`113232b`](https://github.com/namehash/ensnode/commit/113232bd02a876a1dbf4607019e724d7cc577351)]:
+  - @ensnode/ensnode-sdk@1.9.0
+  - @ensnode/ensdb-sdk@1.9.0
+  - @namehash/ens-referrals@1.9.0
+  - @ensnode/datasources@1.9.0
+  - @ensnode/ponder-subgraph@1.9.0
+
 ## 1.8.1
 
 ### Patch Changes

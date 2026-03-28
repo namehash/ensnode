@@ -18,11 +18,21 @@ import {
 import type { Unvalidated } from "./utils";
 
 /**
+ * Schema representing a valid port number for the Ponder app to listen on.
+ */
+export const schemaPortNumber = z
+  .number({ error: "Port must be a number." })
+  .int({ error: "Port must be an integer." })
+  .min(1, { error: "Port must be greater than or equal to 1." })
+  .max(65535, { error: "Port must be less than or equal to 65535." });
+
+/**
  * Type representing the "raw" context of a local Ponder app.
  */
 const schemaRawPonderAppContext = z.object({
   options: z.object({
-    command: z.string(),
+    command: z.enum(PonderAppCommands),
+    port: schemaPortNumber,
   }),
 });
 
@@ -36,6 +46,7 @@ export type RawPonderAppContext = z.infer<typeof schemaRawPonderAppContext>;
  */
 const schemaPonderAppContext = z.object({
   command: z.enum(PonderAppCommands),
+  localPonderAppUrl: z.instanceof(URL, { error: "localPonderAppUrl must be a valid URL." }),
 });
 
 /**
@@ -50,6 +61,7 @@ function buildUnvalidatedPonderAppContext(
 ): Unvalidated<PonderAppContext> {
   return {
     command: rawPonderAppContext.options.command as Unvalidated<PonderAppCommand>,
+    localPonderAppUrl: new URL(`http://localhost:${rawPonderAppContext.options.port}`),
   };
 }
 

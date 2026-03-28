@@ -20,4 +20,9 @@ export interface PonderAppContext {
    * Command used to start the Ponder app.
    */
   command: PonderAppCommand;
+
+  /**
+   * URL of the local Ponder app.
+   */
+  localPonderAppUrl: URL;
 }

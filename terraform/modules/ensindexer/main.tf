@@ -34,8 +34,7 @@ resource "render_web_service" "ensindexer" {
     "LABEL_SET_VERSION" = { value = var.ensindexer_label_set_version },
     "PLUGINS"           = { value = var.plugins },
     "NAMESPACE"         = { value = var.namespace },
-    "SUBGRAPH_COMPAT"   = { value = var.subgraph_compat },
-    "ENSINDEXER_URL"    = { value = "http://ensindexer-${var.ensnode_indexer_type}:10000" }
+    "SUBGRAPH_COMPAT"   = { value = var.subgraph_compat }
   })
 
   # See https://render.com/docs/custom-domains
