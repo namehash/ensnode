@@ -9,9 +9,9 @@ import { ENSNamespaceIds } from "@ensnode/datasources";
 import {
   getNamespaceSpecificValue,
   isInterpretedName,
-  isNormalizedName,
   type Name,
   type NamespaceSpecificValue,
+  type NormalizedName,
 } from "@ensnode/ensnode-sdk";
 
 import { getNameDetailsRelativePath, NameLink } from "@/components/name-links";
@@ -38,7 +38,7 @@ const EXAMPLE_NAMES: NamespaceSpecificValue<NormalizedName[]> = {
     "lens.xyz",
     "brantly.eth",
     "lightwalker.eth",
-  ],
+  ] as NormalizedName[],
   [ENSNamespaceIds.Sepolia]: [
     "gregskril.eth",
     "vitalik.eth",
@@ -46,7 +46,7 @@ const EXAMPLE_NAMES: NamespaceSpecificValue<NormalizedName[]> = {
     "recordstest.eth",
     "arrondesean.eth",
     "decode.eth",
-  ],
+  ] as NormalizedName[],
   [ENSNamespaceIds.EnsTestEnv]: [
     "alias.eth",
     "changerole.eth",
@@ -60,7 +60,7 @@ const EXAMPLE_NAMES: NamespaceSpecificValue<NormalizedName[]> = {
     "sub2.parent.eth",
     "test.eth",
     "wallet.linked.parent.eth",
-  ],
+  ] as NormalizedName[],
 };
 
 export default function ExploreNamesPage() {
@@ -104,25 +104,24 @@ export default function ExploreNamesPage() {
   };
 
   if (nameFromQuery !== null && nameFromQuery !== "") {
-    // If the name is normalizable but not yet normalized, redirect to the normalized form.
-    if (!isNormalizedName(nameFromQuery)) {
-      try {
-        const normalizedName = normalize(nameFromQuery);
+    try {
+      const normalizedName = normalize(nameFromQuery);
+
+      // If the name is normalizable but not yet normalized, redirect to the normalized form.
+      if (normalizedName !== nameFromQuery) {
         const href = retainCurrentRawConnectionUrlParam(getNameDetailsRelativePath(normalizedName));
         router.replace(href);
         return null;
-      } catch {
-        // normalize() threw — fall through to error handling below
       }
 
+      return <NameDetailPageContent name={normalizedName as NormalizedName} />;
+    } catch {
       if (isInterpretedName(nameFromQuery)) {
         return <EncodedLabelhashUnsupportedError name={nameFromQuery} />;
       }
 
       return <InvalidNameError name={nameFromQuery} />;
     }
-
-    return <NameDetailPageContent name={nameFromQuery} />;
   }
 
   return (
