@@ -1,5 +1,4 @@
-import type { Context } from "ponder:registry";
-import schema from "ponder:schema";
+import ensIndexerSchema from "ponder:schema";
 import { labelhash } from "viem";
 
 import {
@@ -11,16 +10,17 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
+import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 
 /**
  * Ensures that the LiteralLabel `label` is interpreted and upserted into the Label rainbow table.
  */
-export async function ensureLabel(context: Context, label: LiteralLabel) {
+export async function ensureLabel(context: IndexingEngineContext, label: LiteralLabel) {
   const labelHash = labelhash(label);
   const interpreted = literalLabelToInterpretedLabel(label);
 
-  await context.db
-    .insert(schema.label)
+  await context.ensDb
+    .insert(ensIndexerSchema.label)
     .values({ labelHash, interpreted })
     .onConflictDoUpdate({ interpreted });
 }
@@ -29,9 +29,9 @@ export async function ensureLabel(context: Context, label: LiteralLabel) {
  * Ensures that the LabelHash `labelHash` is available in the Label rainbow table, attempting an
  * ENSRainbow heal if this is the first time it has been encountered.
  */
-export async function ensureUnknownLabel(context: Context, labelHash: LabelHash) {
+export async function ensureUnknownLabel(context: IndexingEngineContext, labelHash: LabelHash) {
   // do nothing for existing labels, they're either healed or we don't know them
-  const exists = await context.db.find(schema.label, { labelHash });
+  const exists = await context.ensDb.find(ensIndexerSchema.label, { labelHash });
   if (exists) return;
 
   // attempt ENSRainbow heal
@@ -42,5 +42,8 @@ export async function ensureUnknownLabel(context: Context, labelHash: LabelHash)
 
   // otherwise upsert label entity
   const interpreted = encodeLabelHash(labelHash) as InterpretedLabel;
-  await context.db.insert(schema.label).values({ labelHash, interpreted }).onConflictDoNothing();
+  await context.ensDb
+    .insert(ensIndexerSchema.label)
+    .values({ labelHash, interpreted })
+    .onConflictDoNothing();
 }

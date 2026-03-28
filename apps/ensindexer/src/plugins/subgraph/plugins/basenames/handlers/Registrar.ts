@@ -1,7 +1,6 @@
-import { ponder } from "ponder:registry";
-
 import { interpretTokenIdAsLabelHash, PluginName } from "@ensnode/ensnode-sdk";
 
+import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { makeRegistrarHandlers } from "@/plugins/subgraph/shared-handlers/Registrar";
 
@@ -20,7 +19,7 @@ export default function () {
   } = makeRegistrarHandlers({ pluginName });
 
   // support NameRegisteredWithRecord for BaseRegistrar as it used by Base's RegistrarControllers
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "BaseRegistrar:NameRegisteredWithRecord"),
     async ({ context, event }) => {
       await handleNameRegistered({
@@ -33,7 +32,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "BaseRegistrar:NameRegistered"),
     async ({ context, event }) => {
       await handleNameRegistered({
@@ -46,7 +45,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "BaseRegistrar:NameRenewed"),
     async ({ context, event }) => {
       await handleNameRenewed({
@@ -59,17 +58,20 @@ export default function () {
     },
   );
 
-  ponder.on(namespaceContract(pluginName, "BaseRegistrar:Transfer"), async ({ context, event }) => {
-    await handleNameTransferred({
-      context,
-      event: {
-        ...event,
-        args: { ...event.args, labelHash: interpretTokenIdAsLabelHash(event.args.tokenId) },
-      },
-    });
-  });
+  addOnchainEventListener(
+    namespaceContract(pluginName, "BaseRegistrar:Transfer"),
+    async ({ context, event }) => {
+      await handleNameTransferred({
+        context,
+        event: {
+          ...event,
+          args: { ...event.args, labelHash: interpretTokenIdAsLabelHash(event.args.tokenId) },
+        },
+      });
+    },
+  );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "EARegistrarController:NameRegistered"),
     async ({ context, event }) => {
       await handleNameRegisteredByController({
@@ -87,7 +89,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "RegistrarController:NameRegistered"),
     async ({ context, event }) => {
       await handleNameRegisteredByController({
@@ -105,7 +107,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "RegistrarController:NameRenewed"),
     async ({ context, event }) => {
       await handleNameRenewedByController({
@@ -123,7 +125,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "UpgradeableRegistrarController:NameRegistered"),
     async ({ context, event }) => {
       await handleNameRegisteredByController({
@@ -141,7 +143,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "UpgradeableRegistrarController:NameRenewed"),
     async ({ context, event }) => {
       await handleNameRenewedByController({

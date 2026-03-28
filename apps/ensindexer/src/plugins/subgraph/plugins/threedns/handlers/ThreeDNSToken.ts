@@ -1,7 +1,6 @@
-import { ponder } from "ponder:registry";
-
 import { PluginName } from "@ensnode/ensnode-sdk";
 
+import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { setupRootNode } from "@/lib/subgraph/subgraph-helpers";
 import {
@@ -17,14 +16,14 @@ import {
 export default function () {
   const pluginName = PluginName.ThreeDNS;
 
-  ponder.on(namespaceContract(pluginName, "ThreeDNSToken:setup"), setupRootNode);
-  ponder.on(namespaceContract(pluginName, "ThreeDNSToken:NewOwner"), handleNewOwner);
-  ponder.on(namespaceContract(pluginName, "ThreeDNSToken:Transfer"), handleTransfer);
-  ponder.on(
+  addOnchainEventListener(namespaceContract(pluginName, "ThreeDNSToken:setup"), setupRootNode);
+  addOnchainEventListener(namespaceContract(pluginName, "ThreeDNSToken:NewOwner"), handleNewOwner);
+  addOnchainEventListener(namespaceContract(pluginName, "ThreeDNSToken:Transfer"), handleTransfer);
+  addOnchainEventListener(
     namespaceContract(pluginName, "ThreeDNSToken:RegistrationCreated"),
     handleRegistrationCreated,
   );
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "ThreeDNSToken:RegistrationExtended"),
     handleRegistrationExtended,
   );
