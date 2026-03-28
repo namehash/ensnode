@@ -15,7 +15,7 @@ describe("addOnchainEventListener", () => {
   });
 
   it("should call ponder.on with the correct event name and handler", async () => {
-    const { addOnchainEventListener } = await import("./add-onchain-event-listener");
+    const { addOnchainEventListener } = await import("./ponder");
     const testHandler = vi.fn();
 
     addOnchainEventListener("Resolver:AddrChanged", testHandler);
