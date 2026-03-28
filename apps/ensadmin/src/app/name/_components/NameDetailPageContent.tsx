@@ -1,7 +1,7 @@
 "use client";
 
 import { ASSUME_IMMUTABLE_QUERY, useRecords } from "@ensnode/ensnode-react";
-import { type Name, type ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
+import { type NormalizedName, type ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
@@ -39,7 +39,7 @@ const AllRequestedTextRecords = [
 ];
 
 interface NameDetailPageContentProps {
-  name: Name;
+  name: NormalizedName;
 }
 
 export function NameDetailPageContent({ name }: NameDetailPageContentProps) {

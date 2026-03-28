@@ -2,13 +2,16 @@
 
 import { NameDisplay } from "@namehash/namehash-ui";
 import { useRouter, useSearchParams } from "next/navigation";
-import { type ChangeEvent, useMemo, useState } from "react";
+import { type ChangeEvent, useEffect, useMemo, useState } from "react";
+import { normalize } from "viem/ens";
 
 import { ENSNamespaceIds } from "@ensnode/datasources";
 import {
   getNamespaceSpecificValue,
+  isInterpretedName,
   type Name,
   type NamespaceSpecificValue,
+  type NormalizedName,
 } from "@ensnode/ensnode-sdk";
 
 import { getNameDetailsRelativePath, NameLink } from "@/components/name-links";
@@ -19,8 +22,9 @@ import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 
 import { NameDetailPageContent } from "./_components/NameDetailPageContent";
+import { EncodedLabelhashUnsupportedError, InvalidNameError } from "./_components/NameErrors";
 
-const EXAMPLE_NAMES: NamespaceSpecificValue<string[]> = {
+const EXAMPLE_NAMES: NamespaceSpecificValue<NormalizedName[]> = {
   default: [
     "vitalik.eth",
     "gregskril.eth",
@@ -34,7 +38,7 @@ const EXAMPLE_NAMES: NamespaceSpecificValue<string[]> = {
     "lens.xyz",
     "brantly.eth",
     "lightwalker.eth",
-  ],
+  ] as NormalizedName[],
   [ENSNamespaceIds.Sepolia]: [
     "gregskril.eth",
     "vitalik.eth",
@@ -42,7 +46,7 @@ const EXAMPLE_NAMES: NamespaceSpecificValue<string[]> = {
     "recordstest.eth",
     "arrondesean.eth",
     "decode.eth",
-  ],
+  ] as NormalizedName[],
   [ENSNamespaceIds.EnsTestEnv]: [
     "alias.eth",
     "changerole.eth",
@@ -56,14 +60,15 @@ const EXAMPLE_NAMES: NamespaceSpecificValue<string[]> = {
     "sub2.parent.eth",
     "test.eth",
     "wallet.linked.parent.eth",
-  ],
+  ] as NormalizedName[],
 };
 
 export default function ExploreNamesPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const nameFromQuery = searchParams.get("name");
+  const nameFromQuery = searchParams.get("name") as Name | null;
   const [rawInputName, setRawInputName] = useState<Name>("");
+  const [formError, setFormError] = useState<string | null>(null);
 
   const namespace = useActiveNamespace();
   const exampleNames = useMemo(
@@ -73,25 +78,75 @@ export default function ExploreNamesPage() {
 
   const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
 
+  // Compute normalization result for the name query param.
+  const nameQueryResult = useMemo(() => {
+    if (nameFromQuery === null || nameFromQuery === "") return null;
+
+    try {
+      const normalizedName = normalize(nameFromQuery) as NormalizedName;
+
+      if (normalizedName !== nameFromQuery) {
+        return {
+          status: "needs-redirect" as const,
+          redirectHref: retainCurrentRawConnectionUrlParam(
+            getNameDetailsRelativePath(normalizedName),
+          ),
+        };
+      }
+
+      return { status: "valid" as const, normalizedName };
+    } catch {
+      if (isInterpretedName(nameFromQuery)) {
+        return { status: "encoded-labelhash" as const, name: nameFromQuery };
+      }
+
+      return { status: "invalid" as const, name: nameFromQuery };
+    }
+  }, [nameFromQuery, retainCurrentRawConnectionUrlParam]);
+
+  // Redirect to the normalized form when needed.
+  useEffect(() => {
+    if (nameQueryResult?.status === "needs-redirect") {
+      router.replace(nameQueryResult.redirectHref);
+    }
+  }, [nameQueryResult, router]);
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setFormError(null);
 
-    // TODO: Input validation and normalization.
-    // see: https://github.com/namehash/ensnode/issues/1140
-
-    const href = retainCurrentRawConnectionUrlParam(getNameDetailsRelativePath(rawInputName));
-
-    router.push(href);
+    try {
+      const normalizedName = normalize(rawInputName);
+      const href = retainCurrentRawConnectionUrlParam(getNameDetailsRelativePath(normalizedName));
+      router.push(href);
+    } catch {
+      if (isInterpretedName(rawInputName)) {
+        setFormError(
+          `The name "${rawInputName}" contains encoded labelhashes. Support for resolving names with encoded labelhashes is in progress and coming soon.`,
+        );
+      } else {
+        setFormError(`The name "${rawInputName}" is not a valid ENS name.`);
+      }
+    }
   };
 
   const handleRawInputNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
-
+    setFormError(null);
     setRawInputName(e.target.value);
   };
 
-  if (nameFromQuery) {
-    return <NameDetailPageContent name={nameFromQuery} />;
+  if (nameQueryResult) {
+    switch (nameQueryResult.status) {
+      case "needs-redirect":
+        return null;
+      case "valid":
+        return <NameDetailPageContent name={nameQueryResult.normalizedName} />;
+      case "encoded-labelhash":
+        return <EncodedLabelhashUnsupportedError name={nameQueryResult.name} />;
+      case "invalid":
+        return <InvalidNameError name={nameQueryResult.name} />;
+    }
   }
 
   return (
@@ -121,6 +176,7 @@ export default function ExploreNamesPage() {
                 View Profile
               </Button>
             </fieldset>
+            {formError && <p className="text-sm text-red-600">{formError}</p>}
           </form>
           <div className="flex flex-col gap-2 justify-center">
             <p className="text-sm font-medium leading-none">Examples:</p>

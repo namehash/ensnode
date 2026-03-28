@@ -3,7 +3,7 @@
 import { getEnsManagerNameDetailsUrl } from "@namehash/namehash-ui";
 import { useSearchParams } from "next/navigation";
 
-import type { Name } from "@ensnode/ensnode-sdk";
+import { isNormalizedName, type Name } from "@ensnode/ensnode-sdk";
 
 import { ExternalLinkWithIcon } from "@/components/link";
 import { Button } from "@/components/ui/button";
@@ -11,13 +11,14 @@ import { useNamespace } from "@/hooks/async/use-namespace";
 
 export default function ActionsNamePage() {
   const searchParams = useSearchParams();
-  const nameParam = searchParams.get("name");
-
-  const name = nameParam ? (decodeURIComponent(nameParam) as Name) : null;
+  const name = searchParams.get("name") as Name | null;
 
   const { data: namespace } = useNamespace();
 
-  const ensAppProfileUrl = name && namespace ? getEnsManagerNameDetailsUrl(name, namespace) : null;
+  const ensAppProfileUrl =
+    name && isNormalizedName(name) && namespace
+      ? getEnsManagerNameDetailsUrl(name, namespace)
+      : null;
 
   if (!ensAppProfileUrl) return null;
 
