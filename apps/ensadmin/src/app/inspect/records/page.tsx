@@ -9,7 +9,7 @@ import { useRecords } from "@ensnode/ensnode-react";
 import {
   ENSNamespaceIds,
   getNamespaceSpecificValue,
-  Name,
+  type Name,
   NamespaceSpecificValue,
 } from "@ensnode/ensnode-sdk";
 

@@ -15,8 +15,8 @@ export function ResolveButton({
 }: ResolveButtonProps) {
   return (
     <Button
+      disabled={!canResolve}
       onClick={() => {
-        if (!canResolve) return;
         if (hasChanged) {
           onNavigate();
         } else {

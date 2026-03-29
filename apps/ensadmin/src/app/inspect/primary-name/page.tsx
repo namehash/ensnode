@@ -66,7 +66,7 @@ export default function ResolvePrimaryNameInspector() {
   const [debouncedAddress] = useDebouncedValue(address, 150);
 
   useEffect(() => {
-    if (addressFromQuery) setAddress(addressFromQuery);
+    setAddress(addressFromQuery ?? "");
   }, [addressFromQuery]);
 
   useEffect(() => {
@@ -178,7 +178,7 @@ export default function ResolvePrimaryNameInspector() {
         </CardContent>
         <CardFooter>
           <ResolveButton
-            canResolve={!!address.trim()}
+            canResolve={isAddress(address.trim())}
             hasChanged={address.trim() !== addressFromQuery || chainId !== chainIdFromQuery}
             onRefetch={refetch}
             onNavigate={() => navigateToAddress(address.trim(), chainId)}

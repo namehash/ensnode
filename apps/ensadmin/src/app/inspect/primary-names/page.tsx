@@ -4,7 +4,7 @@ import { AddressDisplay } from "@namehash/namehash-ui";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useDebouncedValue } from "rooks";
-import type { Address } from "viem";
+import { type Address, isAddress } from "viem";
 
 import { usePrimaryNames } from "@ensnode/ensnode-react";
 import { getNamespaceSpecificValue } from "@ensnode/ensnode-sdk";
@@ -40,7 +40,7 @@ export default function ResolvePrimaryNameInspector() {
   const [debouncedAddress] = useDebouncedValue(address, 150);
 
   useEffect(() => {
-    if (addressFromQuery) setAddress(addressFromQuery);
+    setAddress(addressFromQuery ?? "");
   }, [addressFromQuery]);
 
   const navigateToAddress = (addr: string) => {
@@ -127,7 +127,7 @@ export default function ResolvePrimaryNameInspector() {
         </CardContent>
         <CardFooter>
           <ResolveButton
-            canResolve={!!address.trim()}
+            canResolve={isAddress(address.trim())}
             hasChanged={address.trim() !== addressFromQuery}
             onRefetch={refetch}
             onNavigate={() => navigateToAddress(address.trim())}
