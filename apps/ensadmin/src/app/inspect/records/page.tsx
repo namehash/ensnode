@@ -88,7 +88,7 @@ export default function ResolveRecordsInspector() {
 
   const selection = DefaultRecordsSelection[namespace];
 
-  const navigateToName = (name: string) => {
+  const navigateToName = (name: Name) => {
     setInputName(name);
     const href = retainCurrentRawConnectionUrlParam(getRecordResolutionRelativePath(name));
     router.push(href);
