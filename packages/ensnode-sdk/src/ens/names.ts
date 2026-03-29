@@ -87,11 +87,11 @@ export const beautifyName = (name: Name): Name => {
  * The return type is Name (not InterpretedName) because beautification
  * may produce labels that are not normalized.
  *
- * @param name - The InterpretedName to format for display.
+ * @param interpretedName - The InterpretedName to format for display.
  * @returns The formatted name.
  */
-export const formatInterpretedNameForDisplay = (name: InterpretedName): Name => {
-  const displayLabels = name.split(".").map((label: Label) => {
+export const formatInterpretedNameForDisplay = (interpretedName: InterpretedName): Name => {
+  const displayLabels = interpretedName.split(".").map((label: Label) => {
     if (isNormalizedLabel(label)) {
       return ens_beautify(label);
     } else {
