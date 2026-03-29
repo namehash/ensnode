@@ -6,7 +6,11 @@ import { usePathname, useSearchParams } from "next/navigation";
 
 import type { UrlString } from "@ensnode/ensnode-sdk";
 
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -36,22 +40,11 @@ export function NavMain({
   const pathname = usePathname();
 
   const appendQueryParams = (url: UrlString) => {
-    if (pathname.startsWith("/inspector") && !url.startsWith("/inspector")) {
-      const params = new URLSearchParams(searchParams.toString());
-      params.delete("strategy");
-      params.delete("name");
+    const connection = searchParams.get("connection");
 
-      if (params.toString()) {
-        const separator = url.includes("?") ? "&" : "?";
-        return `${url}${separator}${params.toString()}`;
-      }
-
-      return url;
-    }
-
-    if (searchParams?.toString()) {
+    if (connection) {
       const separator = url.includes("?") ? "&" : "?";
-      return `${url}${separator}${searchParams.toString()}`;
+      return `${url}${separator}connection=${encodeURIComponent(connection)}`;
     }
 
     return url;
@@ -75,7 +68,11 @@ export function NavMain({
           if (!hasItems)
             return (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild tooltip={item.title} isActive={isItemActive}>
+                <SidebarMenuButton
+                  asChild
+                  tooltip={item.title}
+                  isActive={isItemActive}
+                >
                   <Link href={itemUrl}>
                     {item.icon && <item.icon />}
                     <span>{item.title}</span>
@@ -85,7 +82,8 @@ export function NavMain({
             );
 
           const anySubItemActive =
-            item.items?.some((subItem) => isActive(subItem.url)) || isItemActive;
+            item.items?.some((subItem) => isActive(subItem.url)) ||
+            isItemActive;
 
           return (
             <Collapsible
@@ -96,7 +94,10 @@ export function NavMain({
             >
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
-                  <SidebarMenuButton tooltip={item.title} isActive={isItemActive}>
+                  <SidebarMenuButton
+                    tooltip={item.title}
+                    isActive={isItemActive}
+                  >
                     {item.icon && <item.icon />}
                     <span>{item.title}</span>
                     <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
@@ -110,7 +111,10 @@ export function NavMain({
 
                       return (
                         <SidebarMenuSubItem key={subItem.title}>
-                          <SidebarMenuSubButton asChild isActive={isSubItemActive}>
+                          <SidebarMenuSubButton
+                            asChild
+                            isActive={isSubItemActive}
+                          >
                             <Link href={subItemUrl}>
                               <span>{subItem.title}</span>
                             </Link>
