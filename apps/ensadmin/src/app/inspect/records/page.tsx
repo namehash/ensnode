@@ -100,6 +100,9 @@ export default function ResolveRecordsInspector() {
     e.preventDefault();
     if (inputName.trim()) {
       navigateToName(inputName.trim());
+    } else {
+      const href = retainCurrentRawConnectionUrlParam("/inspect/records");
+      router.push(href);
     }
   };
 
