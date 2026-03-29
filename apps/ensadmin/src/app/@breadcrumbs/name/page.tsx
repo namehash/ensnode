@@ -4,7 +4,7 @@ import { NameDisplay } from "@namehash/namehash-ui";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
-import { isInterpretedName, type Name } from "@ensnode/ensnode-sdk";
+import type { Name } from "@ensnode/ensnode-sdk";
 
 import BreadcrumbsGroup from "@/components/breadcrumbs/group";
 import {
@@ -31,7 +31,7 @@ export default function Page() {
           <BreadcrumbSeparator className="hidden md:block" />
           <BreadcrumbItem>
             <BreadcrumbPage>
-              {isInterpretedName(name) ? <NameDisplay name={name} /> : name}
+              <NameDisplay name={name} />
             </BreadcrumbPage>
           </BreadcrumbItem>
         </>

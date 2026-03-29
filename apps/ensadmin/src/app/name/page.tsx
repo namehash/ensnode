@@ -2,13 +2,13 @@
 
 import { NameDisplay } from "@namehash/namehash-ui";
 import { useRouter, useSearchParams } from "next/navigation";
-import { type ChangeEvent, useEffect, useMemo, useState } from "react";
-import { normalize } from "viem/ens";
+import { type ChangeEvent, useMemo, useState } from "react";
 
 import { ENSNamespaceIds } from "@ensnode/datasources";
 import {
   getNamespaceSpecificValue,
   isInterpretedName,
+  isNormalizedName,
   type Name,
   type NamespaceSpecificValue,
   type NormalizedName,
@@ -20,9 +20,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
+import {
+  interpretNameFromUserInput,
+  NameInterpretationOutcomeResult,
+} from "@/lib/interpret-name-from-user-input";
 
 import { NameDetailPageContent } from "./_components/NameDetailPageContent";
-import { EncodedLabelhashUnsupportedError, InvalidNameError } from "./_components/NameErrors";
+import { InterpretedNameUnsupportedError, UnnormalizedNameError } from "./_components/NameErrors";
 
 const EXAMPLE_NAMES: NamespaceSpecificValue<NormalizedName[]> = {
   default: [
@@ -78,55 +82,30 @@ export default function ExploreNamesPage() {
 
   const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
 
-  // Compute normalization result for the name query param.
-  const nameQueryResult = useMemo(() => {
-    if (nameFromQuery === null || nameFromQuery === "") return null;
-
-    try {
-      const normalizedName = normalize(nameFromQuery) as NormalizedName;
-
-      if (normalizedName !== nameFromQuery) {
-        return {
-          status: "needs-redirect" as const,
-          redirectHref: retainCurrentRawConnectionUrlParam(
-            getNameDetailsRelativePath(normalizedName),
-          ),
-        };
-      }
-
-      return { status: "valid" as const, normalizedName };
-    } catch {
-      if (isInterpretedName(nameFromQuery)) {
-        return { status: "encoded-labelhash" as const, name: nameFromQuery };
-      }
-
-      return { status: "invalid" as const, name: nameFromQuery };
-    }
-  }, [nameFromQuery, retainCurrentRawConnectionUrlParam]);
-
-  // Redirect to the normalized form when needed.
-  useEffect(() => {
-    if (nameQueryResult?.status === "needs-redirect") {
-      router.replace(nameQueryResult.redirectHref);
-    }
-  }, [nameQueryResult, router]);
-
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setFormError(null);
 
-    try {
-      const normalizedName = normalize(rawInputName);
-      const href = retainCurrentRawConnectionUrlParam(getNameDetailsRelativePath(normalizedName));
-      router.push(href);
-    } catch {
-      if (isInterpretedName(rawInputName)) {
-        setFormError(
-          `The name "${rawInputName}" contains encoded labelhashes. Support for resolving names with encoded labelhashes is in progress and coming soon.`,
+    const result = interpretNameFromUserInput(rawInputName);
+
+    switch (result.outcome) {
+      case NameInterpretationOutcomeResult.Empty:
+        break;
+      case NameInterpretationOutcomeResult.Normalized: {
+        const href = retainCurrentRawConnectionUrlParam(
+          getNameDetailsRelativePath(result.interpretation),
         );
-      } else {
-        setFormError(`The name "${rawInputName}" is not a valid ENS name.`);
+        router.push(href);
+        break;
       }
+      case NameInterpretationOutcomeResult.Reencoded:
+        setFormError(
+          "The provided input contains encoded labelhashes. Support for resolving names with encoded labelhashes is in progress and coming soon.",
+        );
+        break;
+      case NameInterpretationOutcomeResult.Encoded:
+        setFormError("The provided input is not a valid ENS name.");
+        break;
     }
   };
 
@@ -136,17 +115,18 @@ export default function ExploreNamesPage() {
     setRawInputName(e.target.value);
   };
 
-  if (nameQueryResult) {
-    switch (nameQueryResult.status) {
-      case "needs-redirect":
-        return null;
-      case "valid":
-        return <NameDetailPageContent name={nameQueryResult.normalizedName} />;
-      case "encoded-labelhash":
-        return <EncodedLabelhashUnsupportedError name={nameQueryResult.name} />;
-      case "invalid":
-        return <InvalidNameError name={nameQueryResult.name} />;
+  // Detail page: validate name from query params using only validation checks (no normalization).
+  // see: https://github.com/namehash/ensnode/issues/1140
+  if (nameFromQuery !== null && nameFromQuery !== "") {
+    if (isNormalizedName(nameFromQuery)) {
+      return <NameDetailPageContent name={nameFromQuery} />;
     }
+
+    if (isInterpretedName(nameFromQuery)) {
+      return <InterpretedNameUnsupportedError />;
+    }
+
+    return <UnnormalizedNameError />;
   }
 
   return (
@@ -170,7 +150,7 @@ export default function ExploreNamesPage() {
               />
               <Button
                 type="submit"
-                disabled={rawInputName.length === 0}
+                disabled={rawInputName.trim().length === 0}
                 className="max-sm:self-stretch"
               >
                 View Profile
