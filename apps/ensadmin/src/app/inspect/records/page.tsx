@@ -13,6 +13,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { RenderRequestsOutput } from "@/app/inspect/_components/render-requests-output";
+import { ResolveButton } from "@/app/inspect/_components/resolve-button";
 import {
   getNameDetailsRelativePath,
   getRecordResolutionRelativePath,
@@ -173,9 +174,14 @@ export default function ResolveRecordsInspector() {
             </div>
           </div>
         </CardContent>
-        {nameFromQuery && (
+        {(nameFromQuery || inputName.trim()) && (
           <CardFooter>
-            <Button onClick={() => refetch()}>Refresh</Button>
+            <ResolveButton
+              canResolve={!!inputName.trim()}
+              hasChanged={inputName.trim() !== nameFromQuery}
+              onRefetch={refetch}
+              onNavigate={() => navigateToName(inputName.trim())}
+            />
           </CardFooter>
         )}
       </Card>

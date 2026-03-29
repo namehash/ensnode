@@ -1,8 +1,8 @@
 "use client";
 
 import { AddressDisplay, getChainName } from "@namehash/namehash-ui";
-import { useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { useDebouncedValue } from "rooks";
 import { type Address, isAddress } from "viem";
 
@@ -16,8 +16,8 @@ import { usePrimaryName } from "@ensnode/ensnode-react";
 import { getNamespaceSpecificValue } from "@ensnode/ensnode-sdk";
 
 import { RenderRequestsOutput } from "@/app/inspect/_components/render-requests-output";
+import { ResolveButton } from "@/app/inspect/_components/resolve-button";
 import { Pill } from "@/components/pill";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,6 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
+import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 
 import { EXAMPLE_ADDRESSES } from "../_lib/example-addresses";
 
@@ -47,7 +48,9 @@ const getENSIP19SupportedChainIds = (namespace: ENSNamespaceId) =>
 // TODO: use shadcn/form, react-hook-form, and zod to make all of this nicer aross the board
 // TODO: sync form state to query params, current just defaulting is supported
 export default function ResolvePrimaryNameInspector() {
+  const router = useRouter();
   const searchParams = useSearchParams();
+  const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
 
   const namespace = useActiveNamespace();
   const exampleAddresses = useMemo(
@@ -55,11 +58,28 @@ export default function ResolvePrimaryNameInspector() {
     [namespace],
   );
 
-  const [address, setAddress] = useState(
-    searchParams.get("address") || exampleAddresses[0].address,
-  );
-  const [chainId, setChainId] = useState(searchParams.get("chainId") || "1");
+  const addressFromQuery = searchParams.get("address")?.trim() || null;
+  const chainIdFromQuery = searchParams.get("chainId") || "1";
+
+  const [address, setAddress] = useState(addressFromQuery || exampleAddresses[0].address);
+  const [chainId, setChainId] = useState(chainIdFromQuery);
   const [debouncedAddress] = useDebouncedValue(address, 150);
+
+  useEffect(() => {
+    if (addressFromQuery) setAddress(addressFromQuery);
+  }, [addressFromQuery]);
+
+  useEffect(() => {
+    setChainId(chainIdFromQuery);
+  }, [chainIdFromQuery]);
+
+  const navigateToAddress = (addr: string, chain: string) => {
+    setAddress(addr);
+    setChainId(chain);
+    const path = `/inspect/primary-name?address=${encodeURIComponent(addr)}&chainId=${encodeURIComponent(chain)}`;
+    const href = retainCurrentRawConnectionUrlParam(path);
+    router.push(href);
+  };
 
   const additionalChainIds = getENSIP19SupportedChainIds(namespace);
 
@@ -144,22 +164,25 @@ export default function ResolvePrimaryNameInspector() {
             <span className="text-sm font-medium leading-none">Examples:</span>
             {/* -mx-6 px-6 insets the scroll container against card for prettier scrolling */}
             <div className="flex flex-row overflow-x-scroll gap-2 no-scrollbar -mx-6 px-6">
-              {exampleAddresses.map(({ address, name }) => (
+              {exampleAddresses.map(({ address: exampleAddress, name }) => (
                 <Pill
-                  key={address}
-                  onClick={() => {
-                    setAddress(address);
-                  }}
+                  key={exampleAddress}
+                  onClick={() => navigateToAddress(exampleAddress, chainId)}
                   className="font-mono"
                 >
-                  <AddressDisplay address={address} /> ({name})
+                  <AddressDisplay address={exampleAddress} /> ({name})
                 </Pill>
               ))}
             </div>
           </div>
         </CardContent>
         <CardFooter>
-          <Button onClick={() => refetch()}>Refresh</Button>
+          <ResolveButton
+            canResolve={!!address.trim()}
+            hasChanged={address.trim() !== addressFromQuery || chainId !== chainIdFromQuery}
+            onRefetch={refetch}
+            onNavigate={() => navigateToAddress(address.trim(), chainId)}
+          />
         </CardFooter>
       </Card>
 
