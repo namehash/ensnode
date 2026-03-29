@@ -49,13 +49,12 @@ function buildIndexingEngineContext(
  * A thin wrapper around `ponder.on` that allows us to:
  * - Provide custom context to event handlers.
  * - Execute additional logic before or after the event handler, if needed.
- * 
+ *
  * Note that this function is called on every event, so it should be
  * efficient and avoid doing any heavy computations or database queries.
- * 
+ *
  * For more details on `ponder.on`, see the Ponder indexing guide.
  * @see https://ponder.sh/docs/indexing/overview#register-an-indexing-function
- 
  */
 export function addOnchainEventListener<EventName extends EventNames>(
   eventName: EventName,
