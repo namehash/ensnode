@@ -2,10 +2,9 @@
  * This file contains handlers used in event handlers for a subregistry contract.
  */
 
-import type { Context } from "ponder:registry";
-import schema from "ponder:schema";
-
 import { type AccountId, formatAccountId, type Node } from "@ensnode/ensnode-sdk";
+
+import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 
 /**
  * Upsert Subregistry record
@@ -13,7 +12,7 @@ import { type AccountId, formatAccountId, type Node } from "@ensnode/ensnode-sdk
  * If the record already exists, do nothing.
  */
 export async function upsertSubregistry(
-  context: Context,
+  context: IndexingEngineContext,
   {
     subregistryId,
     node,
@@ -22,8 +21,8 @@ export async function upsertSubregistry(
     node: Node;
   },
 ): Promise<void> {
-  await context.db
-    .insert(schema.subregistries)
+  await context.ensDb
+    .insert(ensIndexerSchema.subregistries)
     .values({
       subregistryId: formatAccountId(subregistryId),
       node,
@@ -35,10 +34,10 @@ export async function upsertSubregistry(
  * Get Subregistry record by AccountId.
  */
 export async function getSubregistry(
-  context: Context,
+  context: IndexingEngineContext,
   { subregistryId }: { subregistryId: AccountId },
-): Promise<typeof schema.subregistries.$inferSelect | null> {
-  return context.db.find(schema.subregistries, {
+): Promise<typeof ensIndexerSchema.subregistries.$inferSelect | null> {
+  return context.ensDb.find(ensIndexerSchema.subregistries, {
     subregistryId: formatAccountId(subregistryId),
   });
 }

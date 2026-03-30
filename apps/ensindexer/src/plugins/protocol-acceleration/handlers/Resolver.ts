@@ -1,10 +1,9 @@
-import { ponder } from "ponder:registry";
-
 import { ResolverABI } from "@ensnode/datasources";
 import { bigintToCoinType, type CoinType, ETH_COIN_TYPE, PluginName } from "@ensnode/ensnode-sdk";
 
 import { parseDnsTxtRecordArgs } from "@/lib/dns-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
+import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import {
   ensureResolver,
@@ -22,19 +21,22 @@ const pluginName = PluginName.ProtocolAcceleration;
  * - indexes all Resolver Records described by protocol-acceleration.schema.ts
  */
 export default function () {
-  ponder.on(namespaceContract(pluginName, "Resolver:AddrChanged"), async ({ context, event }) => {
-    const { a: address } = event.args;
-    const resolver = getThisAccountId(context, event);
-    await ensureResolver(context, resolver);
+  addOnchainEventListener(
+    namespaceContract(pluginName, "Resolver:AddrChanged"),
+    async ({ context, event }) => {
+      const { a: address } = event.args;
+      const resolver = getThisAccountId(context, event);
+      await ensureResolver(context, resolver);
 
-    const resolverRecordsKey = makeResolverRecordsCompositeKey(resolver, event);
-    await ensureResolverRecords(context, resolverRecordsKey);
+      const resolverRecordsKey = makeResolverRecordsCompositeKey(resolver, event);
+      await ensureResolverRecords(context, resolverRecordsKey);
 
-    // the Resolver#AddrChanged event is just Resolver#AddressChanged with implicit coinType of ETH
-    await handleResolverAddressRecordUpdate(context, resolverRecordsKey, ETH_COIN_TYPE, address);
-  });
+      // the Resolver#AddrChanged event is just Resolver#AddressChanged with implicit coinType of ETH
+      await handleResolverAddressRecordUpdate(context, resolverRecordsKey, ETH_COIN_TYPE, address);
+    },
+  );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "Resolver:AddressChanged"),
     async ({ context, event }) => {
       const { coinType: _coinType, newAddress } = event.args;
@@ -57,19 +59,22 @@ export default function () {
     },
   );
 
-  ponder.on(namespaceContract(pluginName, "Resolver:NameChanged"), async ({ context, event }) => {
-    const { name } = event.args;
+  addOnchainEventListener(
+    namespaceContract(pluginName, "Resolver:NameChanged"),
+    async ({ context, event }) => {
+      const { name } = event.args;
 
-    const resolver = getThisAccountId(context, event);
-    await ensureResolver(context, resolver);
+      const resolver = getThisAccountId(context, event);
+      await ensureResolver(context, resolver);
 
-    const resolverRecordsKey = makeResolverRecordsCompositeKey(resolver, event);
-    await ensureResolverRecords(context, resolverRecordsKey);
+      const resolverRecordsKey = makeResolverRecordsCompositeKey(resolver, event);
+      await ensureResolverRecords(context, resolverRecordsKey);
 
-    await handleResolverNameUpdate(context, resolverRecordsKey, name);
-  });
+      await handleResolverNameUpdate(context, resolverRecordsKey, name);
+    },
+  );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(
       PluginName.ProtocolAcceleration,
       "Resolver:TextChanged(bytes32 indexed node, string indexed indexedKey, string key)",
@@ -101,7 +106,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(
       PluginName.ProtocolAcceleration,
       "Resolver:TextChanged(bytes32 indexed node, string indexed indexedKey, string key, string value)",
@@ -121,7 +126,7 @@ export default function () {
 
   // ens-contracts' IDNSRecordResolver#DNSRecordChanged
   // https://github.com/ensdomains/ens-contracts/blob/85ddeb9f/contracts/resolvers/profiles/IDNSRecordResolver.sol#L6
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(
       PluginName.ProtocolAcceleration,
       "Resolver:DNSRecordChanged(bytes32 indexed node, bytes name, uint16 resource, bytes record)",
@@ -141,7 +146,7 @@ export default function () {
   );
 
   // 3DNS' IDNSRecordResolver#DNSRecordChanged (includes `ttl` parameter)
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(
       PluginName.ProtocolAcceleration,
       "Resolver:DNSRecordChanged(bytes32 indexed node, bytes name, uint16 resource, uint32 ttl, bytes record)",
@@ -160,7 +165,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "Resolver:DNSRecordDeleted"),
     async ({ context, event }) => {
       const { key } = parseDnsTxtRecordArgs(event.args);

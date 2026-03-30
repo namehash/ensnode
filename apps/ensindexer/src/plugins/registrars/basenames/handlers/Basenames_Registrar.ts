@@ -1,5 +1,3 @@
-import { ponder } from "ponder:registry";
-
 import {
   type BlockRef,
   bigIntToNumber,
@@ -10,6 +8,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { getThisAccountId } from "@/lib/get-this-account-id";
+import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";
 import { getManagedName } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
 
@@ -26,7 +25,7 @@ export default function () {
   const pluginName = PluginName.Registrars;
 
   // support NameRegisteredWithRecord for BaseRegistrar as it used by Base's RegistrarControllers
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "Basenames_BaseRegistrar:NameRegisteredWithRecord"),
     async ({ context, event }) => {
       const id = event.id;
@@ -59,7 +58,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "Basenames_BaseRegistrar:NameRegistered"),
     async ({ context, event }) => {
       const id = event.id;
@@ -92,7 +91,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "Basenames_BaseRegistrar:NameRenewed"),
     async ({ context, event }) => {
       const id = event.id;

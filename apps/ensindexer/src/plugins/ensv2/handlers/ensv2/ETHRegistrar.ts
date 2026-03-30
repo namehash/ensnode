@@ -1,5 +1,3 @@
-import { type Context, ponder } from "ponder:registry";
-import schema from "ponder:schema";
 import type { Address } from "viem";
 
 import {
@@ -17,13 +15,18 @@ import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { ensureDomainEvent, ensureEvent } from "@/lib/ensv2/event-db-helpers";
 import { getLatestRegistration, insertLatestRenewal } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
+import {
+  addOnchainEventListener,
+  ensIndexerSchema,
+  type IndexingEngineContext,
+} from "@/lib/indexing-engines/ponder";
 import { toJson } from "@/lib/json-stringify-with-bigints";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs, LogEventBase } from "@/lib/ponder-helpers";
 
 const pluginName = PluginName.ENSv2;
 
-async function getRegistrarAndRegistry(context: Context, event: LogEventBase) {
+async function getRegistrarAndRegistry(context: IndexingEngineContext, event: LogEventBase) {
   const registrar = getThisAccountId(context, event);
   const registry: AccountId = {
     chainId: context.chain.id,
@@ -39,13 +42,13 @@ async function getRegistrarAndRegistry(context: Context, event: LogEventBase) {
 }
 
 export default function () {
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "ETHRegistrar:NameRegistered"),
     async ({
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{
         tokenId: TokenId;
         label: string;
@@ -98,7 +101,7 @@ export default function () {
       await ensureAccount(context, owner);
 
       // update latest Registration
-      await context.db.update(schema.registration, { id: registration.id }).set({
+      await context.ensDb.update(ensIndexerSchema.registration, { id: registration.id }).set({
         // TODO: reconsider 'Registration.registrant' if ENSv2 doesn't provide explicit 'registrant'
         registrantId: interpretAddress(owner),
 
@@ -118,13 +121,13 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "ETHRegistrar:NameRenewed"),
     async ({
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{
         tokenId: TokenId;
         label: string;
