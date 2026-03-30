@@ -129,6 +129,64 @@ function buildEventTypeId(eventName: EventNames): EventTypeId {
   }
 }
 
+let preparedIndexingSetup = false;
+
+/**
+ * Prepare for executing the "setup" event handlers.
+ *
+ * This function is idempotent and will only execute its logic once, even if
+ * called multiple times. This is to ensure that we affect the "hot path" of
+ * indexing as little as possible, since this function is called for
+ * every "setup" event.
+ */
+function prepareIndexingSetup(): void {
+  if (preparedIndexingSetup) {
+    return;
+  }
+
+  preparedIndexingSetup = true;
+
+  /**
+   * Setup event handlers should not have any *blocking* preconditions. This is because
+   * Ponder populates the indexing metrics for all indexed chains only after all setup handlers have run.
+   * ENSIndexer relies on these indexing metrics being immediately available on startup to build and
+   * store the current Indexing Status in ENSDb.
+   */
+}
+
+let preparedIndexingActivation = false;
+
+/**
+ * Prepare for executing the "onchain" event handlers.
+ *
+ * This function is idempotent and will only execute its logic once, even if
+ * called multiple times. This is to ensure that we affect the "hot path" of
+ * indexing as little as possible, since this function is called for every
+ * "onchain" event.
+ *
+ * @example A single blocking precondition
+ * ```ts
+ * await waitForEnsRainbowToBeReady();
+ * ```
+ *
+ * @example Multiple blocking preconditions
+ * ```ts
+ * await Promise.all([
+ *   waitForEnsRainbowToBeReady(),
+ *   waitForAnotherPrecondition(),
+ * ]);
+ * ```
+ */
+async function prepareIndexingActivation() {
+  if (preparedIndexingActivation) {
+    return;
+  }
+
+  preparedIndexingActivation = true;
+
+  await waitForEnsRainbowToBeReady();
+}
+
 /**
  * Execute any necessary preconditions before running an event handler
  * for a given event type.
@@ -136,20 +194,16 @@ function buildEventTypeId(eventName: EventNames): EventTypeId {
  * Some event handlers may have preconditions that need to be met before
  * they can run.
  */
-async function eventHandlerPreconditions<EventName extends EventNames>(eventName: EventName) {
+async function eventHandlerPreconditions<EventName extends EventNames>(
+  eventName: EventName,
+): Promise<void> {
   const eventType = buildEventTypeId(eventName);
 
   switch (eventType) {
     case EventTypeIds.Setup:
-      /**
-       * Setup event handlers should not have any *blocking* preconditions. This is because
-       * Ponder populates the indexing metrics for all indexed chains only after all setup handlers have run.
-       * ENSIndexer relies on these indexing metrics being immediately available on startup to build and 
-       * store the current Indexing Status in ENSDb.
-       */
-      return;
+      return prepareIndexingSetup();
     case EventTypeIds.Onchain: {
-      return await waitForEnsRainbowToBeReady();
+      return prepareIndexingActivation();
     }
   }
 }

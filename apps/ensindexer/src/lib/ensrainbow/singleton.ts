@@ -49,10 +49,11 @@ export function waitForEnsRainbowToBeReady(): Promise<void> {
   console.log(`Waiting for ENSRainbow instance to be ready at '${ensRainbowUrl}'...`);
 
   waitForEnsRainbowToBeReadyPromise = pRetry(async () => ensRainbowClient.health(), {
-    retries: 12, // This allows for a total of over 1 hour of retries with the exponential backoff strategy
+    retries: 12, // This allows for a total of over 1 hour of retries with the exponential backoff strategy.
+    // 1 + 2 + 4 + ... + 2048 = 2^12 - 1 = 4,095s ≈ 1h 8m
     onFailedAttempt: ({ error, attemptNumber, retriesLeft }) => {
-      console.log(
-        `ENSRainbow health check attempt ${attemptNumber} failed (${error.message}). ${retriesLeft} retries left.`,
+      console.warn(
+        `Attempt ${attemptNumber} failed for the ENSRainbow health check at '${ensRainbowUrl}' (${error.message}). ${retriesLeft} retries left.`,
       );
     },
   })
