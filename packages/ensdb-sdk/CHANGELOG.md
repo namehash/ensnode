@@ -1,5 +1,18 @@
 # @ensnode/ensdb-sdk
 
+## 1.9.0
+
+### Minor Changes
+
+- [#1832](https://github.com/namehash/ensnode/pull/1832) [`9f52a66`](https://github.com/namehash/ensnode/commit/9f52a662e5828e944210f35d47571661899fc30e) Thanks [@tk-o](https://github.com/tk-o)! - Hotfixed the `buildConcreteEnsIndexerSchema` function by replacing the cloning approach with working mutation approach.
+
+- [#1809](https://github.com/namehash/ensnode/pull/1809) [`aaa471f`](https://github.com/namehash/ensnode/commit/aaa471f0a33d0f96389e706dcaed2b704e2952ea) Thanks [@tk-o](https://github.com/tk-o)! - Renamed the `client` getter on `EnsDbReader` class to `ensDb`.
+
+### Patch Changes
+
+- Updated dependencies [[`70e6f24`](https://github.com/namehash/ensnode/commit/70e6f2475a566135602f4adbcf44df2a6f74e5fd), [`387715e`](https://github.com/namehash/ensnode/commit/387715e1bc4c996c0ae7545bfc78b79149e04f58)]:
+  - @ensnode/ensnode-sdk@1.9.0
+
 ## 1.8.1
 
 ### Patch Changes

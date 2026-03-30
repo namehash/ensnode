@@ -98,45 +98,12 @@ describe("buildIndividualEnsDbSchemas", () => {
     }
   });
 
-  it("applies a different schema name to ENSIndexer objects", () => {
-    const otherSchemaName = "ensindexer_other";
-    const { concreteEnsIndexerSchema } = buildIndividualEnsDbSchemas(otherSchemaName);
+  it("throws an error when called a second time with a different schema name", () => {
+    buildIndividualEnsDbSchemas(ENSINDEXER_SCHEMA_NAME);
 
-    for (const [key, abstractValue] of Object.entries(abstractEnsIndexerSchema)) {
-      if (!isTable(abstractValue)) continue;
-      const concreteValue = concreteEnsIndexerSchema[key as keyof typeof concreteEnsIndexerSchema];
-      expect(isTable(concreteValue)).toBe(true);
-      expect(getSchemaName(concreteValue)).toBe(otherSchemaName);
-    }
-  });
-
-  it("builds two concrete schemas with respective names, leaving abstract unaffected", () => {
-    const schemaNameA = "ensindexer_alpha";
-    const schemaNameB = "ensindexer_beta";
-
-    const { concreteEnsIndexerSchema: concreteA } = buildIndividualEnsDbSchemas(schemaNameA);
-    const { concreteEnsIndexerSchema: concreteB } = buildIndividualEnsDbSchemas(schemaNameB);
-
-    for (const [key, abstractValue] of Object.entries(abstractEnsIndexerSchema)) {
-      const valueA = concreteA[key as keyof typeof concreteA];
-      const valueB = concreteB[key as keyof typeof concreteB];
-
-      if (isTable(abstractValue)) {
-        expect(isTable(valueA)).toBe(true);
-        expect(isTable(valueB)).toBe(true);
-        expect(getSchemaName(valueA)).toBe(schemaNameA);
-        expect(getSchemaName(valueB)).toBe(schemaNameB);
-        expect(getSchemaName(abstractValue)).toBeUndefined();
-      }
-
-      if (isPgEnum(abstractValue)) {
-        expect(isPgEnum(valueA)).toBe(true);
-        expect(isPgEnum(valueB)).toBe(true);
-        expect((valueA as any).schema).toBe(schemaNameA);
-        expect((valueB as any).schema).toBe(schemaNameB);
-        expect((abstractValue as any).schema).toBeUndefined();
-      }
-    }
+    expect(() => buildIndividualEnsDbSchemas("ensindexer_other")).toThrow(
+      /buildConcreteEnsIndexerSchema was already called with schema/,
+    );
   });
 });
 
@@ -164,14 +131,6 @@ describe("combined schema (via buildEnsDbDrizzleClient)", () => {
         expect(isPgEnum(concreteValue)).toBe(true);
       }
     }
-  });
-
-  it("ensures ensnode metadata schema is consistent across multiple concrete schemas", () => {
-    const schemaA = getCombinedSchema("ensindexer_alpha");
-    const schemaB = getCombinedSchema("ensindexer_beta");
-
-    expect(getSchemaName(schemaA.metadata)).toBe("ensnode");
-    expect(getSchemaName(schemaB.metadata)).toBe("ensnode");
   });
 });
 

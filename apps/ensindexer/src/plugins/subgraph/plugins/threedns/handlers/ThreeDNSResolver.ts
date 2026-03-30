@@ -1,7 +1,6 @@
-import { ponder } from "ponder:registry";
-
 import { PluginName } from "@ensnode/ensnode-sdk";
 
+import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import {
   handleABIChanged,
@@ -26,43 +25,64 @@ import {
 export default function () {
   const pluginName = PluginName.ThreeDNS;
 
-  ponder.on(namespaceContract(pluginName, "Resolver:AddrChanged"), handleAddrChanged);
-  ponder.on(namespaceContract(pluginName, "Resolver:AddressChanged"), handleAddressChanged);
-  ponder.on(namespaceContract(pluginName, "Resolver:NameChanged"), handleNameChanged);
-  ponder.on(namespaceContract(pluginName, "Resolver:ABIChanged"), handleABIChanged);
-  ponder.on(namespaceContract(pluginName, "Resolver:PubkeyChanged"), handlePubkeyChanged);
-  ponder.on(
+  addOnchainEventListener(namespaceContract(pluginName, "Resolver:AddrChanged"), handleAddrChanged);
+  addOnchainEventListener(
+    namespaceContract(pluginName, "Resolver:AddressChanged"),
+    handleAddressChanged,
+  );
+  addOnchainEventListener(namespaceContract(pluginName, "Resolver:NameChanged"), handleNameChanged);
+  addOnchainEventListener(namespaceContract(pluginName, "Resolver:ABIChanged"), handleABIChanged);
+  addOnchainEventListener(
+    namespaceContract(pluginName, "Resolver:PubkeyChanged"),
+    handlePubkeyChanged,
+  );
+  addOnchainEventListener(
     namespaceContract(
       pluginName,
       "Resolver:TextChanged(bytes32 indexed node, string indexed indexedKey, string key)",
     ),
     handleTextChanged,
   );
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(
       pluginName,
       "Resolver:TextChanged(bytes32 indexed node, string indexed indexedKey, string key, string value)",
     ),
     handleTextChanged,
   );
-  ponder.on(namespaceContract(pluginName, "Resolver:ContenthashChanged"), handleContenthashChanged);
-  ponder.on(namespaceContract(pluginName, "Resolver:InterfaceChanged"), handleInterfaceChanged);
-  ponder.on(
+  addOnchainEventListener(
+    namespaceContract(pluginName, "Resolver:ContenthashChanged"),
+    handleContenthashChanged,
+  );
+  addOnchainEventListener(
+    namespaceContract(pluginName, "Resolver:InterfaceChanged"),
+    handleInterfaceChanged,
+  );
+  addOnchainEventListener(
     namespaceContract(pluginName, "Resolver:AuthorisationChanged"),
     handleAuthorisationChanged,
   );
-  ponder.on(namespaceContract(pluginName, "Resolver:VersionChanged"), handleVersionChanged);
+  addOnchainEventListener(
+    namespaceContract(pluginName, "Resolver:VersionChanged"),
+    handleVersionChanged,
+  );
   // NOTE: 3DNS' Resolver contract only emits DNSRecordChanged with the included `ttl` argument
   // and we explicitly do not index ens-contracts' IDNSRecordResolver#DNSRecordChanged (without the `ttl`)
   // in this file, as these handlers are 3DNS-specific
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(
       pluginName,
       "Resolver:DNSRecordChanged(bytes32 indexed node, bytes name, uint16 resource, uint32 ttl, bytes record)",
     ),
     handleDNSRecordChanged,
   );
-  ponder.on(namespaceContract(pluginName, "Resolver:DNSRecordDeleted"), handleDNSRecordDeleted);
-  ponder.on(namespaceContract(pluginName, "Resolver:DNSZonehashChanged"), handleDNSZonehashChanged);
-  ponder.on(namespaceContract(pluginName, "Resolver:ZoneCreated"), handleZoneCreated);
+  addOnchainEventListener(
+    namespaceContract(pluginName, "Resolver:DNSRecordDeleted"),
+    handleDNSRecordDeleted,
+  );
+  addOnchainEventListener(
+    namespaceContract(pluginName, "Resolver:DNSZonehashChanged"),
+    handleDNSZonehashChanged,
+  );
+  addOnchainEventListener(namespaceContract(pluginName, "Resolver:ZoneCreated"), handleZoneCreated);
 }

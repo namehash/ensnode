@@ -1,8 +1,8 @@
-import type { Context } from "ponder:registry";
-import schema from "ponder:schema";
 import { type Address, isAddressEqual, zeroAddress } from "viem";
 
 import type { AccountId, DomainId } from "@ensnode/ensnode-sdk";
+
+import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 
 /**
  * Ensures that the Domain-Resolver Relationship for the provided `domainId` in `registry` is set
@@ -10,16 +10,16 @@ import type { AccountId, DomainId } from "@ensnode/ensnode-sdk";
  * is removed.
  */
 export async function ensureDomainResolverRelation(
-  context: Context,
+  context: IndexingEngineContext,
   registry: AccountId,
   domainId: DomainId,
   resolver: Address,
 ) {
   if (isAddressEqual(zeroAddress, resolver)) {
-    await context.db.delete(schema.domainResolverRelation, { ...registry, domainId });
+    await context.ensDb.delete(ensIndexerSchema.domainResolverRelation, { ...registry, domainId });
   } else {
-    await context.db
-      .insert(schema.domainResolverRelation)
+    await context.ensDb
+      .insert(ensIndexerSchema.domainResolverRelation)
       .values({ ...registry, domainId, resolver })
       .onConflictDoUpdate({ resolver });
   }

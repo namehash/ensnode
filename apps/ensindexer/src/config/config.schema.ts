@@ -6,7 +6,6 @@ import {
   buildRpcConfigsFromEnv,
   DatabaseSchemaNameSchema,
   ENSNamespaceSchema,
-  EnsIndexerUrlSchema,
   invariant_isSubgraphCompatibleRequirements,
   invariant_rpcConfigsSpecifiedForRootChain,
   makeFullyPinnedLabelSetSchema,
@@ -110,7 +109,6 @@ const ENSIndexerConfigSchema = z
     databaseUrl: DatabaseUrlSchema,
     databaseSchemaName: DatabaseSchemaNameSchema,
     rpcConfigs: RpcConfigsSchema,
-    ensIndexerUrl: EnsIndexerUrlSchema,
 
     namespace: ENSNamespaceSchema,
     plugins: PluginsSchema,
@@ -188,7 +186,6 @@ export function buildConfigFromEnvironment(_env: ENSIndexerEnvironment): EnsInde
     return ENSIndexerConfigSchema.parse({
       databaseUrl: env.DATABASE_URL,
       databaseSchemaName: env.DATABASE_SCHEMA,
-      ensIndexerUrl: env.ENSINDEXER_URL,
       namespace: env.NAMESPACE,
       rpcConfigs,
 

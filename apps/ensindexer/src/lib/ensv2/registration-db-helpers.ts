@@ -1,7 +1,6 @@
-import type { Context } from "ponder:registry";
-import schema from "ponder:schema";
-
 import { type DomainId, makeRegistrationId, makeRenewalId } from "@ensnode/ensnode-sdk";
+
+import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 
 /**
  * Latest Registration & Renewals
@@ -22,19 +21,21 @@ import { type DomainId, makeRegistrationId, makeRenewalId } from "@ensnode/ensno
 /**
  * Gets the latest Registration for the provided `domainId`.
  */
-export async function getLatestRegistration(context: Context, domainId: DomainId) {
-  const pointer = await context.db.find(schema.latestRegistrationIndex, { domainId });
+export async function getLatestRegistration(context: IndexingEngineContext, domainId: DomainId) {
+  const pointer = await context.ensDb.find(ensIndexerSchema.latestRegistrationIndex, { domainId });
   if (!pointer) return null;
 
-  return context.db.find(schema.registration, { id: makeRegistrationId(domainId, pointer.index) });
+  return context.ensDb.find(ensIndexerSchema.registration, {
+    id: makeRegistrationId(domainId, pointer.index),
+  });
 }
 
 /**
  * Inserts a Registration and updates the latestRegistration pointer for its `domainId`.
  */
 export async function insertLatestRegistration(
-  context: Context,
-  values: Omit<typeof schema.registration.$inferInsert, "id" | "index">,
+  context: IndexingEngineContext,
+  values: Omit<typeof ensIndexerSchema.registration.$inferInsert, "id" | "index">,
 ) {
   const { domainId } = values;
 
@@ -43,15 +44,15 @@ export async function insertLatestRegistration(
   const index = previous ? previous.index + 1 : 0;
 
   // insert new Registration
-  await context.db.insert(schema.registration).values({
+  await context.ensDb.insert(ensIndexerSchema.registration).values({
     id: makeRegistrationId(domainId, index),
     index,
     ...values,
   });
 
   // ensure this Registration is the latest
-  await context.db
-    .insert(schema.latestRegistrationIndex)
+  await context.ensDb
+    .insert(ensIndexerSchema.latestRegistrationIndex)
     .values({ domainId, index })
     .onConflictDoUpdate({ index });
 }
@@ -60,17 +61,17 @@ export async function insertLatestRegistration(
  * Gets the latest Renewal for the provided `domainId` and `registrationIndex`.
  */
 export async function getLatestRenewal(
-  context: Context,
+  context: IndexingEngineContext,
   domainId: DomainId,
   registrationIndex: number,
 ) {
-  const pointer = await context.db.find(schema.latestRenewalIndex, {
+  const pointer = await context.ensDb.find(ensIndexerSchema.latestRenewalIndex, {
     domainId,
     registrationIndex,
   });
   if (!pointer) return null;
 
-  return context.db.find(schema.renewal, {
+  return context.ensDb.find(ensIndexerSchema.renewal, {
     id: makeRenewalId(domainId, registrationIndex, pointer.index),
   });
 }
@@ -79,9 +80,9 @@ export async function getLatestRenewal(
  * Inserts a Renewal and updates the latestRenewal pointer for its `domainId` and `registrationIndex`.
  */
 export async function insertLatestRenewal(
-  context: Context,
-  registration: Pick<typeof schema.registration.$inferInsert, "index">,
-  values: Omit<typeof schema.renewal.$inferInsert, "id" | "registrationIndex" | "index">,
+  context: IndexingEngineContext,
+  registration: Pick<typeof ensIndexerSchema.registration.$inferInsert, "index">,
+  values: Omit<typeof ensIndexerSchema.renewal.$inferInsert, "id" | "registrationIndex" | "index">,
 ) {
   const { index: registrationIndex } = registration;
   const { domainId } = values;
@@ -91,7 +92,7 @@ export async function insertLatestRenewal(
   const index = previous ? previous.index + 1 : 0;
 
   // insert new Renewal
-  await context.db.insert(schema.renewal).values({
+  await context.ensDb.insert(ensIndexerSchema.renewal).values({
     id: makeRenewalId(domainId, registrationIndex, index),
     registrationIndex,
     index,
@@ -99,8 +100,8 @@ export async function insertLatestRenewal(
   });
 
   // ensure this Renewal is the latest
-  await context.db
-    .insert(schema.latestRenewalIndex)
+  await context.ensDb
+    .insert(ensIndexerSchema.latestRenewalIndex)
     .values({ domainId, registrationIndex, index })
     .onConflictDoUpdate({ index });
 }

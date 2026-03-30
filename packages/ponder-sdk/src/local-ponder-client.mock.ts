@@ -14,7 +14,7 @@ export function createLocalPonderClientMock(overrides?: {
   indexedChainIds?: Set<ChainId>;
   indexedBlockranges?: Map<ChainId, BlockNumberRangeWithStartBlock>;
   cachedPublicClients?: Record<ChainIdString, CachedPublicClient>;
-  ponderAppContext?: PonderAppContext;
+  ponderAppContext?: Pick<PonderAppContext, "command">;
 }): LocalPonderClient {
   const indexedChainIds =
     overrides?.indexedChainIds ?? new Set<ChainId>([chainIds.Mainnet, chainIds.Optimism]);
@@ -35,14 +35,12 @@ export function createLocalPonderClientMock(overrides?: {
       [`${chainIds.Base}`]: {} as CachedPublicClient,
     } satisfies Record<ChainIdString, CachedPublicClient>);
 
-  const ponderAppContext =
-    overrides?.ponderAppContext ??
-    ({
-      command: PonderAppCommands.Start,
-    } satisfies PonderAppContext);
+  const ponderAppContext = {
+    command: overrides?.ponderAppContext?.command ?? PonderAppCommands.Start,
+    localPonderAppUrl: new URL("http://localhost:3000"),
+  } satisfies PonderAppContext;
 
   return new LocalPonderClient(
-    new URL("http://localhost:3000"),
     indexedChainIds,
     indexedBlockranges,
     cachedPublicClients,

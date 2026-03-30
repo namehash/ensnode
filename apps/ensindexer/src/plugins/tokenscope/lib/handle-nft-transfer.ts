@@ -1,5 +1,3 @@
-import type { Context } from "ponder:registry";
-import schema from "ponder:schema";
 import { type Address, zeroAddress } from "viem";
 
 import {
@@ -12,10 +10,11 @@ import {
   NFTTransferTypes,
 } from "@ensnode/ensnode-sdk";
 
+import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import { upsertAccount } from "@/lib/subgraph/db-helpers";
 
 export const handleERC1155Transfer = async (
-  context: Context,
+  context: IndexingEngineContext,
   from: Address,
   to: Address,
   allowMintedRemint: boolean,
@@ -35,7 +34,7 @@ export const handleERC1155Transfer = async (
 };
 
 export const handleNFTTransfer = async (
-  context: Context,
+  context: IndexingEngineContext,
   from: Address,
   to: Address,
   allowMintedRemint: boolean,
@@ -45,7 +44,7 @@ export const handleNFTTransfer = async (
   const assetIdString = formatAssetId(nft);
 
   // get the previously indexed record for the assetId (if it exists)
-  const previous = await context.db.find(schema.nameTokens, { id: assetIdString });
+  const previous = await context.ensDb.find(ensIndexerSchema.nameTokens, { id: assetIdString });
   const transferType = getNFTTransferType(from, to, allowMintedRemint, metadata, previous?.owner);
 
   switch (transferType) {
@@ -53,7 +52,7 @@ export const handleNFTTransfer = async (
       // mint status transition from unindexed -> minted
       // insert the record of the nft that has been minted for the first time
       await upsertAccount(context, to);
-      await context.db.insert(schema.nameTokens).values({
+      await context.ensDb.insert(ensIndexerSchema.nameTokens).values({
         id: assetIdString,
         chainId: nft.contract.chainId,
         contractAddress: nft.contract.address,
@@ -72,7 +71,7 @@ export const handleNFTTransfer = async (
       // it's state as burned
       // TODO: should we remove this upsertAccount call with the zeroAddress?
       await upsertAccount(context, zeroAddress);
-      await context.db.insert(schema.nameTokens).values({
+      await context.ensDb.insert(ensIndexerSchema.nameTokens).values({
         id: assetIdString,
         chainId: nft.contract.chainId,
         contractAddress: nft.contract.address,
@@ -88,7 +87,7 @@ export const handleNFTTransfer = async (
       // mint status transition from burned -> minted
       // update the mint status and owner of the previously indexed nft
       await upsertAccount(context, to);
-      await context.db.update(schema.nameTokens, { id: assetIdString }).set({
+      await context.ensDb.update(ensIndexerSchema.nameTokens, { id: assetIdString }).set({
         owner: to,
         mintStatus: NFTMintStatuses.Minted,
       });
@@ -101,7 +100,7 @@ export const handleNFTTransfer = async (
       // update the mint status and owner of the previously indexed nft
       // TODO: should we remove this upsertAccount call with the zeroAddress?
       await upsertAccount(context, zeroAddress);
-      await context.db.update(schema.nameTokens, { id: assetIdString }).set({
+      await context.ensDb.update(ensIndexerSchema.nameTokens, { id: assetIdString }).set({
         owner: zeroAddress,
         mintStatus: NFTMintStatuses.Burned,
       });
@@ -113,7 +112,7 @@ export const handleNFTTransfer = async (
       // mint status remains minted (no change)
       // update owner of the previously indexed nft
       await upsertAccount(context, to);
-      await context.db.update(schema.nameTokens, { id: assetIdString }).set({
+      await context.ensDb.update(ensIndexerSchema.nameTokens, { id: assetIdString }).set({
         owner: to,
       });
       break;

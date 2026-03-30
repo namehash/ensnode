@@ -1,5 +1,3 @@
-import { type Context, ponder } from "ponder:registry";
-import schema from "ponder:schema";
 import { type Address, isAddressEqual, zeroAddress } from "viem";
 
 import {
@@ -12,16 +10,24 @@ import {
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { ensurePermissionsEvent } from "@/lib/ensv2/event-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
+import {
+  addOnchainEventListener,
+  ensIndexerSchema,
+  type IndexingEngineContext,
+} from "@/lib/indexing-engines/ponder";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 
 /**
  * Infer the type of the Permission entity's composite key.
  */
-type PermissionsCompositeKey = Pick<typeof schema.permissions.$inferInsert, "chainId" | "address">;
+type PermissionsCompositeKey = Pick<
+  typeof ensIndexerSchema.permissions.$inferInsert,
+  "chainId" | "address"
+>;
 
 const ensurePermissionsResource = async (
-  context: Context,
+  context: IndexingEngineContext,
   contract: PermissionsCompositeKey,
   resource: bigint,
 ) => {
@@ -29,14 +35,14 @@ const ensurePermissionsResource = async (
   const permissionsResourceId = makePermissionsResourceId(contract, resource);
 
   // ensure permissions
-  await context.db
-    .insert(schema.permissions)
+  await context.ensDb
+    .insert(ensIndexerSchema.permissions)
     .values({ id: permissionsId, ...contract })
     .onConflictDoNothing();
 
   // ensure permissions resource
-  await context.db
-    .insert(schema.permissionsResource)
+  await context.ensDb
+    .insert(ensIndexerSchema.permissionsResource)
     .values({ id: permissionsResourceId, ...contract, resource })
     .onConflictDoNothing();
 };
@@ -44,13 +50,13 @@ const ensurePermissionsResource = async (
 const isZeroRoles = (roles: bigint) => roles === 0n;
 
 export default function () {
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(PluginName.ENSv2, "EnhancedAccessControl:EACRolesChanged"),
     async ({
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{
         resource: bigint;
         account: Address;
@@ -77,11 +83,11 @@ export default function () {
       const roles = newRoleBitmap;
       if (isZeroRoles(roles)) {
         // ensure deleted
-        await context.db.delete(schema.permissionsUser, { id: permissionsUserId });
+        await context.ensDb.delete(ensIndexerSchema.permissionsUser, { id: permissionsUserId });
       } else {
         // ensure upserted
-        await context.db
-          .insert(schema.permissionsUser)
+        await context.ensDb
+          .insert(ensIndexerSchema.permissionsUser)
           .values({ id: permissionsUserId, ...contract, resource, user, roles })
           .onConflictDoUpdate({ roles });
       }

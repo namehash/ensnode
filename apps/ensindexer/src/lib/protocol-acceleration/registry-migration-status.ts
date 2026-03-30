@@ -1,36 +1,35 @@
 import config from "@/config";
 
-import type { Context } from "ponder:registry";
-import schema from "ponder:schema";
-
 import { getENSRootChainId } from "@ensnode/datasources";
 import type { Node } from "@ensnode/ensnode-sdk";
+
+import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 
 const ensRootChainId = getENSRootChainId(config.namespace);
 
 /**
  * Returns whether the `node` has migrated to the new Registry contract.
  */
-export async function nodeIsMigrated(context: Context, node: Node) {
+export async function nodeIsMigrated(context: IndexingEngineContext, node: Node) {
   if (context.chain.id !== ensRootChainId) {
     throw new Error(
       `Invariant(nodeIsMigrated): Node migration status is only relevant on the ENS Root Chain, and this function was called in the context of ${context.chain.id}.`,
     );
   }
 
-  const record = await context.db.find(schema.migratedNode, { node });
+  const record = await context.ensDb.find(ensIndexerSchema.migratedNode, { node });
   return !!record;
 }
 
 /**
  * Record that the `node` has migrated to the new Registry contract.
  */
-export async function migrateNode(context: Context, node: Node) {
+export async function migrateNode(context: IndexingEngineContext, node: Node) {
   if (context.chain.id !== ensRootChainId) {
     throw new Error(
       `Invariant(migrateNode): Node migration status is only relevant on the ENS Root Chain, and this function was called in the context of ${context.chain.id}.`,
     );
   }
 
-  await context.db.insert(schema.migratedNode).values({ node }).onConflictDoNothing();
+  await context.ensDb.insert(ensIndexerSchema.migratedNode).values({ node }).onConflictDoNothing();
 }

@@ -1,5 +1,3 @@
-import { type Context, ponder } from "ponder:registry";
-import schema from "ponder:schema";
 import { type Address, hexToBigInt, labelhash } from "viem";
 
 import {
@@ -22,6 +20,11 @@ import {
   insertLatestRegistration,
 } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
+import {
+  addOnchainEventListener,
+  ensIndexerSchema,
+  type IndexingEngineContext,
+} from "@/lib/indexing-engines/ponder";
 import { toJson } from "@/lib/json-stringify-with-bigints";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
@@ -29,13 +32,13 @@ import type { EventWithArgs } from "@/lib/ponder-helpers";
 const pluginName = PluginName.ENSv2;
 
 export default function () {
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "ENSv2Registry:NameRegistered"),
     async ({
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{
         tokenId: bigint;
         labelHash: LabelHash;
@@ -71,8 +74,8 @@ export default function () {
 
       // upsert Registry
       // TODO(signals) — move to NewRegistry and add invariant here
-      await context.db
-        .insert(schema.registry)
+      await context.ensDb
+        .insert(ensIndexerSchema.registry)
         .values({
           id: registryId,
           type: "RegistryContract",
@@ -98,8 +101,8 @@ export default function () {
 
       // insert or update v2Domain
       // console.log(`NameRegistered: '${label}'\n ↳ ${domainId}`);
-      await context.db
-        .insert(schema.v2Domain)
+      await context.ensDb
+        .insert(ensIndexerSchema.v2Domain)
         .values({
           id: domainId,
           tokenId,
@@ -128,13 +131,13 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "ENSv2Registry:ExpiryUpdated"),
     async ({
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{
         tokenId: bigint;
         newExpiry: bigint;
@@ -163,20 +166,22 @@ export default function () {
       }
 
       // update Registration
-      await context.db.update(schema.registration, { id: registration.id }).set({ expiry });
+      await context.ensDb
+        .update(ensIndexerSchema.registration, { id: registration.id })
+        .set({ expiry });
 
       // push event to domain history
       await ensureDomainEvent(context, event, domainId);
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "ENSv2Registry:SubregistryUpdated"),
     async ({
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{
         tokenId: bigint;
         subregistry: Address;
@@ -195,26 +200,30 @@ export default function () {
         // subregistry. i.e. the (sub)Registry's Canonical Domain becomes null, making it disjoint because
         // we don't track other domains who have set it as a Subregistry. This is acceptable for now,
         // and obviously isn't an issue once ENS Team implements Canonical Names
-        const previous = await context.db.find(schema.v2Domain, { id: domainId });
+        const previous = await context.ensDb.find(ensIndexerSchema.v2Domain, { id: domainId });
         if (previous?.subregistryId) {
-          await context.db.delete(schema.registryCanonicalDomain, {
+          await context.ensDb.delete(ensIndexerSchema.registryCanonicalDomain, {
             registryId: previous.subregistryId,
           });
         }
 
-        await context.db.update(schema.v2Domain, { id: domainId }).set({ subregistryId: null });
+        await context.ensDb
+          .update(ensIndexerSchema.v2Domain, { id: domainId })
+          .set({ subregistryId: null });
       } else {
         const subregistryAccountId: AccountId = { chainId: context.chain.id, address: subregistry };
         const subregistryId = makeRegistryId(subregistryAccountId);
 
         // TODO(canonical-names): this implements last-write-wins heuristic for a Registry's canonical name,
         // replace with real logic once ENS Team implements Canonical Names
-        await context.db
-          .insert(schema.registryCanonicalDomain)
+        await context.ensDb
+          .insert(ensIndexerSchema.registryCanonicalDomain)
           .values({ registryId: subregistryId, domainId })
           .onConflictDoUpdate({ domainId });
 
-        await context.db.update(schema.v2Domain, { id: domainId }).set({ subregistryId });
+        await context.ensDb
+          .update(ensIndexerSchema.v2Domain, { id: domainId })
+          .set({ subregistryId });
       }
 
       // push event to domain history
@@ -222,13 +231,13 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "ENSv2Registry:TokenRegenerated"),
     async ({
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{
         oldTokenId: bigint;
         newTokenId: bigint;
@@ -245,7 +254,9 @@ export default function () {
       const registryAccountId = getThisAccountId(context, event);
       const domainId = makeENSv2DomainId(registryAccountId, canonicalId);
 
-      await context.db.update(schema.v2Domain, { id: domainId }).set({ tokenId: newTokenId });
+      await context.ensDb
+        .update(ensIndexerSchema.v2Domain, { id: domainId })
+        .set({ tokenId: newTokenId });
 
       // push event to domain history
       await ensureDomainEvent(context, event, domainId);
@@ -256,7 +267,7 @@ export default function () {
     context,
     event,
   }: {
-    context: Context;
+    context: IndexingEngineContext;
     event: EventWithArgs<{ id: bigint; to: Address }>;
   }) {
     const { id: tokenId, to: owner } = event.args;
@@ -267,21 +278,24 @@ export default function () {
 
     // TODO(signals): remove this
     const registryId = makeRegistryId(registry);
-    const exists = await context.db.find(schema.registry, { id: registryId });
+    const exists = await context.ensDb.find(ensIndexerSchema.registry, { id: registryId });
     if (!exists) return; // no-op non-Registry ERC1155 Transfers
 
     // just update the owner
     // any _burns are always followed by a _mint, which would set the owner correctly
-    await context.db
-      .update(schema.v2Domain, { id: domainId })
+    await context.ensDb
+      .update(ensIndexerSchema.v2Domain, { id: domainId })
       .set({ ownerId: interpretAddress(owner) });
 
     // push event to domain history
     await ensureDomainEvent(context, event, domainId);
   }
 
-  ponder.on(namespaceContract(pluginName, "ENSv2Registry:TransferSingle"), handleTransferSingle);
-  ponder.on(
+  addOnchainEventListener(
+    namespaceContract(pluginName, "ENSv2Registry:TransferSingle"),
+    handleTransferSingle,
+  );
+  addOnchainEventListener(
     namespaceContract(pluginName, "ENSv2Registry:TransferBatch"),
     async ({ context, event }) => {
       for (const id of event.args.ids) {

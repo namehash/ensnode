@@ -1,5 +1,3 @@
-import type { Context } from "ponder:registry";
-import schema from "ponder:schema";
 import type { Address } from "viem";
 
 import {
@@ -16,13 +14,14 @@ import {
   interpretTextRecordValue,
 } from "@ensnode/ensnode-sdk/internal";
 
+import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 
 /**
  * Infer the type of the ResolverRecord entity's composite key.
  */
 type ResolverRecordsCompositeKey = Pick<
-  typeof schema.resolverRecords.$inferInsert,
+  typeof ensIndexerSchema.resolverRecords.$inferInsert,
   "chainId" | "address" | "node"
 >;
 
@@ -44,9 +43,9 @@ export function makeResolverRecordsCompositeKey(
 /**
  * Ensures that the Resolver contract described by `resolver` exists.
  */
-export async function ensureResolver(context: Context, resolver: AccountId) {
-  await context.db
-    .insert(schema.resolver)
+export async function ensureResolver(context: IndexingEngineContext, resolver: AccountId) {
+  await context.ensDb
+    .insert(ensIndexerSchema.resolver)
     .values({
       id: makeResolverId(resolver),
       ...resolver,
@@ -58,7 +57,7 @@ export async function ensureResolver(context: Context, resolver: AccountId) {
  * Ensures that the ResolverRecords entity described by `resolverRecordsKey` exists.
  */
 export async function ensureResolverRecords(
-  context: Context,
+  context: IndexingEngineContext,
   resolverRecordsKey: ResolverRecordsCompositeKey,
 ) {
   const resolver: AccountId = {
@@ -68,8 +67,8 @@ export async function ensureResolverRecords(
   const resolverRecordsId = makeResolverRecordsId(resolver, resolverRecordsKey.node);
 
   // ensure ResolverRecords
-  await context.db
-    .insert(schema.resolverRecords)
+  await context.ensDb
+    .insert(ensIndexerSchema.resolverRecords)
     .values({
       id: resolverRecordsId,
       ...resolverRecordsKey,
@@ -81,7 +80,7 @@ export async function ensureResolverRecords(
  * Updates the `name` record value for the ResolverRecords described by `id`.
  */
 export async function handleResolverNameUpdate(
-  context: Context,
+  context: IndexingEngineContext,
   resolverRecordsKey: ResolverRecordsCompositeKey,
   name: string,
 ) {
@@ -90,8 +89,8 @@ export async function handleResolverNameUpdate(
     resolverRecordsKey.node,
   );
 
-  await context.db
-    .update(schema.resolverRecords, { id: resolverRecordsId })
+  await context.ensDb
+    .update(ensIndexerSchema.resolverRecords, { id: resolverRecordsId })
     .set({ name: interpretNameRecordValue(name) });
 }
 
@@ -99,7 +98,7 @@ export async function handleResolverNameUpdate(
  * Updates the `address` record value by `coinType` for the ResolverRecords described by `id`.
  */
 export async function handleResolverAddressRecordUpdate(
-  context: Context,
+  context: IndexingEngineContext,
   resolverRecordsKey: ResolverRecordsCompositeKey,
   coinType: CoinType,
   address: Address,
@@ -114,11 +113,11 @@ export async function handleResolverAddressRecordUpdate(
   const isDeletion = interpretedValue === null;
   if (isDeletion) {
     // delete
-    await context.db.delete(schema.resolverAddressRecord, id);
+    await context.ensDb.delete(ensIndexerSchema.resolverAddressRecord, id);
   } else {
     // upsert
-    await context.db
-      .insert(schema.resolverAddressRecord)
+    await context.ensDb
+      .insert(ensIndexerSchema.resolverAddressRecord)
       .values({ ...id, value: interpretedValue })
       .onConflictDoUpdate({ value: interpretedValue });
   }
@@ -130,7 +129,7 @@ export async function handleResolverAddressRecordUpdate(
  * If `value` is null, it will be interpreted as a deletion of the associated record.
  */
 export async function handleResolverTextRecordUpdate(
-  context: Context,
+  context: IndexingEngineContext,
   resolverRecordsId: ResolverRecordsCompositeKey,
   key: string,
   value: string | null,
@@ -150,11 +149,11 @@ export async function handleResolverTextRecordUpdate(
   const isDeletion = interpretedValue === null;
   if (isDeletion) {
     // delete
-    await context.db.delete(schema.resolverTextRecord, id);
+    await context.ensDb.delete(ensIndexerSchema.resolverTextRecord, id);
   } else {
     // upsert
-    await context.db
-      .insert(schema.resolverTextRecord)
+    await context.ensDb
+      .insert(ensIndexerSchema.resolverTextRecord)
       .values({ ...id, value: interpretedValue })
       .onConflictDoUpdate({ value: interpretedValue });
   }
