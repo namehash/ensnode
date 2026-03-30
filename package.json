@@ -15,6 +15,7 @@
     "changeset-publish": "changeset publish",
     "changeset-publish:next": "changeset publish --no-git-tag --snapshot --tag next",
     "packages:prepublish": "pnpm -r prepublish",
+    "devnet": "docker compose up devnet",
     "docker:build:ensnode": "pnpm run -w --parallel \"/^docker:build:.*/\"",
     "docker:build:ensindexer": "docker build -f apps/ensindexer/Dockerfile -t ghcr.io/namehash/ensnode/ensindexer:latest .",
     "docker:build:ensadmin": "docker build -f apps/ensadmin/Dockerfile -t ghcr.io/namehash/ensnode/ensadmin:latest .",
