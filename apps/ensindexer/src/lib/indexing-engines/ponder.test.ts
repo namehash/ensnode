@@ -1,11 +1,7 @@
 import type { Context, EventNames } from "ponder:registry";
 import { beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest";
 
-import {
-  addOnchainEventListener,
-  type IndexingEngineContext,
-  type IndexingEngineEvent,
-} from "./ponder";
+import type { IndexingEngineContext, IndexingEngineEvent } from "./ponder";
 
 const { mockPonderOn } = vi.hoisted(() => ({ mockPonderOn: vi.fn() }));
 
@@ -26,76 +22,118 @@ vi.mock("@/lib/ensrainbow/singleton", () => ({
 }));
 
 describe("addOnchainEventListener", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
     mockWaitForEnsRainbow.mockResolvedValue(undefined);
+    // Reset module state to test idempotent behavior correctly
+    vi.resetModules();
   });
 
-  describe("registration", () => {
-    it("registers the handler with the correct event name", () => {
-      const testHandler = vi.fn();
+  // Helper to get fresh module reference after resetModules()
+  async function getPonderModule() {
+    return await import("./ponder");
+  }
 
-      addOnchainEventListener("Resolver:AddrChanged" as EventNames, testHandler);
+  // Helper to extract the callback registered with ponder.on
+  function getRegisteredCallback(
+    callIndex = 0,
+  ): (args: {
+    context: Context<EventNames>;
+    event: IndexingEngineEvent<EventNames>;
+  }) => Promise<void> {
+    return mockPonderOn.mock.calls[callIndex]![1] as ReturnType<typeof getRegisteredCallback>;
+  }
+
+  describe("handler registration", () => {
+    it("registers the event name and handler with ponder.on", async () => {
+      const { addOnchainEventListener } = await getPonderModule();
+      const handler = vi.fn();
+
+      addOnchainEventListener("Resolver:AddrChanged" as EventNames, handler);
 
       expect(mockPonderOn).toHaveBeenCalledWith("Resolver:AddrChanged", expect.any(Function));
     });
 
-    it("returns the result from ponder.on", () => {
-      const mockReturnValue = { unsubscribe: vi.fn() };
-      mockPonderOn.mockReturnValue(mockReturnValue);
-      const testHandler = vi.fn();
+    it("returns the subscription object from ponder.on", async () => {
+      const { addOnchainEventListener } = await getPonderModule();
+      const mockSubscription = { unsubscribe: vi.fn() };
+      mockPonderOn.mockReturnValue(mockSubscription);
+      const handler = vi.fn();
 
-      const result = addOnchainEventListener("Resolver:AddrChanged" as EventNames, testHandler);
+      const result = addOnchainEventListener("Resolver:AddrChanged" as EventNames, handler);
 
-      expect(result).toBe(mockReturnValue);
+      expect(result).toBe(mockSubscription);
     });
   });
 
   describe("context transformation", () => {
-    it("adds ensDb property referencing the same object as db", async () => {
-      const testHandler = vi.fn();
+    it("adds ensDb as an alias to the Ponder db", async () => {
+      const { addOnchainEventListener } = await getPonderModule();
+      const handler = vi.fn();
       const mockDb = vi.fn();
       const mockContext = { db: mockDb } as unknown as Context<EventNames>;
-      const mockEvent = {} as IndexingEngineEvent<EventNames>;
 
-      addOnchainEventListener("Resolver:AddrChanged" as EventNames, testHandler);
+      addOnchainEventListener("Resolver:AddrChanged" as EventNames, handler);
+      await getRegisteredCallback()({
+        context: mockContext,
+        event: {} as IndexingEngineEvent<EventNames>,
+      });
 
-      const [, callback] = mockPonderOn.mock.calls[0]!;
-      await callback({ context: mockContext, event: mockEvent });
-
-      const callArg = testHandler.mock.calls[0]?.[0];
-      expect(callArg?.context.ensDb).toBe(callArg?.context.db);
+      const receivedContext = handler.mock.calls[0]![0].context;
+      expect(receivedContext.ensDb).toBe(mockDb);
+      expect(receivedContext.ensDb).toBe(receivedContext.db);
     });
 
-    it("preserves all other context properties", async () => {
-      const testHandler = vi.fn().mockResolvedValue(undefined);
+    it("preserves all other Ponder context properties", async () => {
+      const { addOnchainEventListener } = await getPonderModule();
+      const handler = vi.fn().mockResolvedValue(undefined);
       const mockDb = vi.fn();
       const mockContext = {
         db: mockDb,
         chain: { id: 1 },
         block: { number: 100n },
+        client: { request: vi.fn() },
       } as unknown as Context<EventNames>;
-      const mockEvent = { args: { a: "0x123" } } as unknown as IndexingEngineEvent<EventNames>;
+      const mockEvent = { args: { node: "0x123" } } as unknown as IndexingEngineEvent<EventNames>;
 
-      addOnchainEventListener("Resolver:AddrChanged" as EventNames, testHandler);
+      addOnchainEventListener("Resolver:AddrChanged" as EventNames, handler);
+      await getRegisteredCallback()({ context: mockContext, event: mockEvent });
 
-      const [, callback] = mockPonderOn.mock.calls[0]!;
-      await callback({ context: mockContext, event: mockEvent });
-
-      expect(testHandler).toHaveBeenCalledWith({
+      expect(handler).toHaveBeenCalledWith({
         context: expect.objectContaining({
           db: mockDb,
           ensDb: mockDb,
           chain: { id: 1 },
           block: { number: 100n },
+          client: expect.any(Object),
         }),
         event: mockEvent,
       });
     });
   });
 
-  describe("event handling", () => {
-    it("supports multiple event names independently", async () => {
+  describe("event forwarding", () => {
+    it("passes the original event to the handler unchanged", async () => {
+      const { addOnchainEventListener } = await getPonderModule();
+      const handler = vi.fn().mockResolvedValue(undefined);
+      const mockDb = vi.fn();
+      const mockEvent = {
+        args: { node: "0x123", label: "0x456", owner: "0x789" },
+        block: { number: 100n },
+        transaction: { hash: "0xabc" },
+      } as unknown as IndexingEngineEvent<EventNames>;
+
+      addOnchainEventListener("Registry:Transfer" as EventNames, handler);
+      await getRegisteredCallback()({
+        context: { db: mockDb } as unknown as Context<EventNames>,
+        event: mockEvent,
+      });
+
+      expect(handler).toHaveBeenCalledWith(expect.objectContaining({ event: mockEvent }));
+    });
+
+    it("supports multiple independent event registrations", async () => {
+      const { addOnchainEventListener } = await getPonderModule();
       const handler1 = vi.fn().mockResolvedValue(undefined);
       const handler2 = vi.fn().mockResolvedValue(undefined);
 
@@ -104,220 +142,234 @@ describe("addOnchainEventListener", () => {
 
       expect(mockPonderOn).toHaveBeenCalledTimes(2);
 
-      const [, callback1] = mockPonderOn.mock.calls[0]!;
-      const mockDb1 = vi.fn();
-      const event1 = {} as IndexingEngineEvent<EventNames>;
-      await callback1({
-        context: { db: mockDb1 } as unknown as Context<EventNames>,
-        event: event1,
+      // Trigger first handler
+      await getRegisteredCallback(0)({
+        context: { db: vi.fn() } as unknown as Context<EventNames>,
+        event: {} as IndexingEngineEvent<EventNames>,
       });
-
       expect(handler1).toHaveBeenCalledTimes(1);
-      expect(handler2).toHaveBeenCalledTimes(0);
+      expect(handler2).not.toHaveBeenCalled();
 
-      const [, callback2] = mockPonderOn.mock.calls[1]!;
-      const mockDb2 = vi.fn();
-      const event2 = {} as IndexingEngineEvent<EventNames>;
-      await callback2({
-        context: { db: mockDb2 } as unknown as Context<EventNames>,
-        event: event2,
+      // Trigger second handler
+      await getRegisteredCallback(1)({
+        context: { db: vi.fn() } as unknown as Context<EventNames>,
+        event: {} as IndexingEngineEvent<EventNames>,
       });
-
       expect(handler2).toHaveBeenCalledTimes(1);
-    });
-
-    it("passes the event argument through to the handler", async () => {
-      const testHandler = vi.fn().mockResolvedValue(undefined);
-      const mockDb = vi.fn();
-      const mockEvent = {
-        args: { node: "0x123", label: "0x456" },
-      } as unknown as IndexingEngineEvent<EventNames>;
-
-      addOnchainEventListener("Resolver:AddrChanged" as EventNames, testHandler);
-
-      const [, callback] = mockPonderOn.mock.calls[0]!;
-      await callback({
-        context: { db: mockDb } as unknown as Context<EventNames>,
-        event: mockEvent,
-      });
-
-      expect(testHandler).toHaveBeenCalledWith(expect.objectContaining({ event: mockEvent }));
     });
   });
 
   describe("handler types", () => {
-    it("handles async handlers", async () => {
+    it("supports async handlers", async () => {
+      const { addOnchainEventListener } = await getPonderModule();
       const asyncHandler = vi.fn().mockResolvedValue(undefined);
-      const mockDb = vi.fn();
-      const mockContext = { db: mockDb } as unknown as Context<EventNames>;
-      const mockEvent = {} as IndexingEngineEvent<EventNames>;
 
       addOnchainEventListener("Resolver:AddrChanged" as EventNames, asyncHandler);
-
-      const [, callback] = mockPonderOn.mock.calls[0]!;
-      await callback({ context: mockContext, event: mockEvent });
+      await getRegisteredCallback()({
+        context: { db: vi.fn() } as unknown as Context<EventNames>,
+        event: {} as IndexingEngineEvent<EventNames>,
+      });
 
       expect(asyncHandler).toHaveBeenCalled();
     });
 
-    it("handles sync handlers", async () => {
+    it("supports sync handlers", async () => {
+      const { addOnchainEventListener } = await getPonderModule();
       const syncHandler = vi.fn();
-      const mockDb = vi.fn();
-      const mockContext = { db: mockDb } as unknown as Context<EventNames>;
-      const mockEvent = {} as IndexingEngineEvent<EventNames>;
 
       addOnchainEventListener("Resolver:AddrChanged" as EventNames, syncHandler);
-
-      const [, callback] = mockPonderOn.mock.calls[0]!;
-      await callback({ context: mockContext, event: mockEvent });
+      await getRegisteredCallback()({
+        context: { db: vi.fn() } as unknown as Context<EventNames>,
+        event: {} as IndexingEngineEvent<EventNames>,
+      });
 
       expect(syncHandler).toHaveBeenCalled();
     });
   });
 
-  describe("error handling", () => {
-    it("propagates errors from sync handlers", async () => {
-      const error = new Error("Handler failed");
+  describe("error propagation", () => {
+    it("re-throws errors from sync handlers", async () => {
+      const { addOnchainEventListener } = await getPonderModule();
+      const error = new Error("Sync handler failed");
       const failingHandler = vi.fn(() => {
         throw error;
       });
-      const mockDb = vi.fn();
-      const mockContext = { db: mockDb } as unknown as Context<EventNames>;
-      const mockEvent = {} as IndexingEngineEvent<EventNames>;
 
       addOnchainEventListener("Resolver:AddrChanged" as EventNames, failingHandler);
 
-      const [, callback] = mockPonderOn.mock.calls[0]!;
-      await expect(callback({ context: mockContext, event: mockEvent })).rejects.toThrow(
-        "Handler failed",
-      );
+      await expect(
+        getRegisteredCallback()({
+          context: { db: vi.fn() } as unknown as Context<EventNames>,
+          event: {} as IndexingEngineEvent<EventNames>,
+        }),
+      ).rejects.toThrow("Sync handler failed");
     });
 
-    it("propagates errors from async handlers", async () => {
+    it("re-throws errors from async handlers", async () => {
+      const { addOnchainEventListener } = await getPonderModule();
       const error = new Error("Async handler failed");
       const failingHandler = vi.fn().mockRejectedValue(error);
-      const mockDb = vi.fn();
-      const mockContext = { db: mockDb } as unknown as Context<EventNames>;
-      const mockEvent = {} as IndexingEngineEvent<EventNames>;
 
       addOnchainEventListener("Resolver:AddrChanged" as EventNames, failingHandler);
 
-      const [, callback] = mockPonderOn.mock.calls[0]!;
-      await expect(callback({ context: mockContext, event: mockEvent })).rejects.toThrow(
-        "Async handler failed",
-      );
+      await expect(
+        getRegisteredCallback()({
+          context: { db: vi.fn() } as unknown as Context<EventNames>,
+          event: {} as IndexingEngineEvent<EventNames>,
+        }),
+      ).rejects.toThrow("Async handler failed");
     });
   });
 
-  describe("preconditions", () => {
-    it("waits for ENSRainbow to be ready before executing onchain event handlers", async () => {
-      const testHandler = vi.fn().mockResolvedValue(undefined);
-      const mockDb = vi.fn();
-      const mockContext = { db: mockDb } as unknown as Context<EventNames>;
-      const mockEvent = {} as IndexingEngineEvent<EventNames>;
+  describe("ENSRainbow preconditions (onchain events)", () => {
+    it("waits for ENSRainbow before executing the handler", async () => {
+      const { addOnchainEventListener } = await getPonderModule();
+      const handler = vi.fn().mockResolvedValue(undefined);
 
-      addOnchainEventListener("Resolver:AddrChanged" as EventNames, testHandler);
+      addOnchainEventListener("Resolver:AddrChanged" as EventNames, handler);
+      await getRegisteredCallback()({
+        context: { db: vi.fn() } as unknown as Context<EventNames>,
+        event: {} as IndexingEngineEvent<EventNames>,
+      });
 
-      const [, callback] = mockPonderOn.mock.calls[0]!;
-      await callback({ context: mockContext, event: mockEvent });
-
-      expect(mockWaitForEnsRainbow).toHaveBeenCalled();
-      expect(testHandler).toHaveBeenCalled();
+      expect(mockWaitForEnsRainbow).toHaveBeenCalledTimes(1);
+      expect(handler).toHaveBeenCalled();
     });
 
-    it("does not execute handler if ENSRainbow precondition fails", async () => {
-      const testHandler = vi.fn().mockResolvedValue(undefined);
-      const mockDb = vi.fn();
-      const mockContext = { db: mockDb } as unknown as Context<EventNames>;
-      const mockEvent = {} as IndexingEngineEvent<EventNames>;
-      const preconditionError = new Error("ENSRainbow not ready");
+    it("prevents handler execution if ENSRainbow is not ready", async () => {
+      const { addOnchainEventListener } = await getPonderModule();
+      const handler = vi.fn().mockResolvedValue(undefined);
+      mockWaitForEnsRainbow.mockRejectedValue(new Error("ENSRainbow not ready"));
 
-      mockWaitForEnsRainbow.mockRejectedValue(preconditionError);
+      addOnchainEventListener("Resolver:AddrChanged" as EventNames, handler);
 
-      addOnchainEventListener("Resolver:AddrChanged" as EventNames, testHandler);
+      await expect(
+        getRegisteredCallback()({
+          context: { db: vi.fn() } as unknown as Context<EventNames>,
+          event: {} as IndexingEngineEvent<EventNames>,
+        }),
+      ).rejects.toThrow("ENSRainbow not ready");
 
-      const [, callback] = mockPonderOn.mock.calls[0]!;
-      await expect(callback({ context: mockContext, event: mockEvent })).rejects.toThrow(
-        "ENSRainbow not ready",
-      );
-      expect(testHandler).not.toHaveBeenCalled();
+      expect(handler).not.toHaveBeenCalled();
     });
 
-    it("does not throw error for setup events - they have no preconditions", async () => {
-      const testHandler = vi.fn().mockResolvedValue(undefined);
-      const mockDb = vi.fn();
-      const mockContext = { db: mockDb } as unknown as Context<EventNames>;
-      const mockEvent = {} as IndexingEngineEvent<EventNames>;
+    it("calls waitForEnsRainbowToBeReady only once across multiple onchain events (idempotent)", async () => {
+      const { addOnchainEventListener } = await getPonderModule();
+      const handler1 = vi.fn().mockResolvedValue(undefined);
+      const handler2 = vi.fn().mockResolvedValue(undefined);
 
-      addOnchainEventListener("Registry:setup" as EventNames, testHandler);
+      // Register two different onchain event listeners
+      addOnchainEventListener("Resolver:AddrChanged" as EventNames, handler1);
+      addOnchainEventListener("Registry:Transfer" as EventNames, handler2);
 
-      const [, callback] = mockPonderOn.mock.calls[0]!;
-      // Should not throw and should call handler without waiting for ENSRainbow
-      await expect(callback({ context: mockContext, event: mockEvent })).resolves.toBeUndefined();
-      expect(testHandler).toHaveBeenCalled();
-      expect(mockWaitForEnsRainbow).not.toHaveBeenCalled();
+      // Trigger the first event handler
+      await getRegisteredCallback(0)({
+        context: { db: vi.fn() } as unknown as Context<EventNames>,
+        event: { args: { a: "1" } } as unknown as IndexingEngineEvent<EventNames>,
+      });
+      expect(mockWaitForEnsRainbow).toHaveBeenCalledTimes(1);
+
+      // Trigger the second event handler
+      await getRegisteredCallback(1)({
+        context: { db: vi.fn() } as unknown as Context<EventNames>,
+        event: { args: { a: "2" } } as unknown as IndexingEngineEvent<EventNames>,
+      });
+
+      // Should still only have been called once (idempotent behavior)
+      expect(mockWaitForEnsRainbow).toHaveBeenCalledTimes(1);
+      expect(handler1).toHaveBeenCalledTimes(1);
+      expect(handler2).toHaveBeenCalledTimes(1);
     });
 
-    it("resolves ENSRainbow precondition before calling handler", async () => {
-      const testHandler = vi.fn().mockResolvedValue(undefined);
-      const mockDb = vi.fn();
-      const mockContext = { db: mockDb } as unknown as Context<EventNames>;
-      const mockEvent = {} as IndexingEngineEvent<EventNames>;
-
+    it("resolves ENSRainbow before calling the handler", async () => {
+      const { addOnchainEventListener } = await getPonderModule();
+      const handler = vi.fn().mockResolvedValue(undefined);
       let preconditionResolved = false;
+
       mockWaitForEnsRainbow.mockImplementation(async () => {
         await new Promise((resolve) => setTimeout(resolve, 10));
         preconditionResolved = true;
       });
 
-      addOnchainEventListener("Resolver:AddrChanged" as EventNames, testHandler);
-
-      const [, callback] = mockPonderOn.mock.calls[0]!;
-      await callback({ context: mockContext, event: mockEvent });
+      addOnchainEventListener("Resolver:AddrChanged" as EventNames, handler);
+      await getRegisteredCallback()({
+        context: { db: vi.fn() } as unknown as Context<EventNames>,
+        event: {} as IndexingEngineEvent<EventNames>,
+      });
 
       expect(preconditionResolved).toBe(true);
-      expect(testHandler).toHaveBeenCalled();
+      expect(handler).toHaveBeenCalled();
+    });
+  });
+
+  describe("setup events (no preconditions)", () => {
+    it("skips ENSRainbow wait for :setup events", async () => {
+      const { addOnchainEventListener } = await getPonderModule();
+      const handler = vi.fn().mockResolvedValue(undefined);
+
+      addOnchainEventListener("Registry:setup" as EventNames, handler);
+      await getRegisteredCallback()({
+        context: { db: vi.fn() } as unknown as Context<EventNames>,
+        event: {} as IndexingEngineEvent<EventNames>,
+      });
+
+      expect(mockWaitForEnsRainbow).not.toHaveBeenCalled();
+      expect(handler).toHaveBeenCalled();
+    });
+
+    it("handles various setup event name formats", async () => {
+      const { addOnchainEventListener } = await getPonderModule();
+      const handler = vi.fn().mockResolvedValue(undefined);
+      const setupEvents = [
+        "Registry:setup",
+        "PublicResolver:setup",
+        "ETHRegistrarController:setup",
+      ];
+
+      for (const eventName of setupEvents) {
+        vi.clearAllMocks();
+        handler.mockClear();
+
+        addOnchainEventListener(eventName as EventNames, handler);
+        await getRegisteredCallback()({
+          context: { db: vi.fn() } as unknown as Context<EventNames>,
+          event: {} as IndexingEngineEvent<EventNames>,
+        });
+
+        expect(mockWaitForEnsRainbow).not.toHaveBeenCalled();
+        expect(handler).toHaveBeenCalled();
+      }
     });
   });
 
   describe("event type detection", () => {
-    it("correctly identifies onchain events by name", async () => {
+    it("treats :setup suffix as setup event type", async () => {
+      const { addOnchainEventListener } = await getPonderModule();
+      const setupHandler = vi.fn().mockResolvedValue(undefined);
       const onchainHandler = vi.fn().mockResolvedValue(undefined);
-      const mockDb = vi.fn();
-      const mockContext = { db: mockDb } as unknown as Context<EventNames>;
-      const mockEvent = {} as IndexingEngineEvent<EventNames>;
 
-      addOnchainEventListener("ETHRegistry:NewOwner" as EventNames, onchainHandler);
+      addOnchainEventListener("PublicResolver:setup" as EventNames, setupHandler);
+      addOnchainEventListener("PublicResolver:AddrChanged" as EventNames, onchainHandler);
 
-      const [, callback] = mockPonderOn.mock.calls[0]!;
-      await callback({ context: mockContext, event: mockEvent });
+      // Setup event - no ENSRainbow wait
+      await getRegisteredCallback(0)({
+        context: { db: vi.fn() } as unknown as Context<EventNames>,
+        event: {} as IndexingEngineEvent<EventNames>,
+      });
+      expect(mockWaitForEnsRainbow).not.toHaveBeenCalled();
+      expect(setupHandler).toHaveBeenCalled();
 
-      expect(mockWaitForEnsRainbow).toHaveBeenCalled();
+      // Onchain event - ENSRainbow wait required
+      await getRegisteredCallback(1)({
+        context: { db: vi.fn() } as unknown as Context<EventNames>,
+        event: {} as IndexingEngineEvent<EventNames>,
+      });
+      expect(mockWaitForEnsRainbow).toHaveBeenCalledTimes(1);
       expect(onchainHandler).toHaveBeenCalled();
     });
 
-    it("correctly identifies setup events by :setup suffix and skips preconditions", async () => {
-      const setupHandler = vi.fn().mockResolvedValue(undefined);
-      const mockDb = vi.fn();
-      const mockContext = { db: mockDb } as unknown as Context<EventNames>;
-      const mockEvent = {} as IndexingEngineEvent<EventNames>;
-
-      addOnchainEventListener("PublicResolver:setup" as EventNames, setupHandler);
-
-      const [, callback] = mockPonderOn.mock.calls[0]!;
-      await callback({ context: mockContext, event: mockEvent });
-
-      // Setup events should not call ENSRainbow preconditions
-      expect(mockWaitForEnsRainbow).not.toHaveBeenCalled();
-      expect(setupHandler).toHaveBeenCalled();
-    });
-
-    it("handles various onchain event name formats", async () => {
-      const testHandler = vi.fn().mockResolvedValue(undefined);
-      const mockDb = vi.fn();
-      const mockContext = { db: mockDb } as unknown as Context<EventNames>;
-      const mockEvent = {} as IndexingEngineEvent<EventNames>;
-
+    it("treats all non-:setup events as onchain events", async () => {
+      const handler = vi.fn().mockResolvedValue(undefined);
       const onchainEvents = [
         "Resolver:AddrChanged",
         "Registry:Transfer",
@@ -327,13 +379,18 @@ describe("addOnchainEventListener", () => {
 
       for (const eventName of onchainEvents) {
         vi.clearAllMocks();
-        addOnchainEventListener(eventName as EventNames, testHandler);
+        vi.resetModules();
+        const { addOnchainEventListener: freshAddOnchainEventListener } = await getPonderModule();
+        handler.mockClear();
 
-        const [, callback] = mockPonderOn.mock.calls[0]!;
-        await callback({ context: mockContext, event: mockEvent });
+        freshAddOnchainEventListener(eventName as EventNames, handler);
+        await getRegisteredCallback()({
+          context: { db: vi.fn() } as unknown as Context<EventNames>,
+          event: {} as IndexingEngineEvent<EventNames>,
+        });
 
         expect(mockWaitForEnsRainbow).toHaveBeenCalled();
-        expect(testHandler).toHaveBeenCalled();
+        expect(handler).toHaveBeenCalled();
       }
     });
   });
