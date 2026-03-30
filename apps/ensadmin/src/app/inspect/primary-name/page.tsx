@@ -6,9 +6,15 @@ import { useEffect, useMemo, useState } from "react";
 import { useDebouncedValue } from "rooks";
 import { type Address, isAddress } from "viem";
 
-import { DatasourceNames, type ENSNamespaceId, maybeGetDatasource } from "@ensnode/datasources";
+import {
+  DatasourceNames,
+  type ENSNamespaceId,
+  getENSRootChainId,
+  maybeGetDatasource,
+} from "@ensnode/datasources";
 import { usePrimaryName } from "@ensnode/ensnode-react";
 import { type DefaultableChainId, getNamespaceSpecificValue } from "@ensnode/ensnode-sdk";
+import { makeDefaultableChainIdStringSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { RenderRequestsOutput } from "@/app/inspect/_components/render-requests-output";
 import { ResolveButton } from "@/app/inspect/_components/resolve-button";
@@ -27,6 +33,8 @@ import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 
 import { EXAMPLE_ADDRESSES } from "../_lib/example-addresses";
+
+const defaultableChainIdStringSchema = makeDefaultableChainIdStringSchema("chainId");
 
 const getENSIP19SupportedChainIds = (namespace: ENSNamespaceId) =>
   [
@@ -54,11 +62,11 @@ export default function ResolvePrimaryNameInspector() {
   );
 
   const addressFromQuery = searchParams.get("address")?.trim() || null;
-  const parsedChainId = Number(searchParams.get("chainId") ?? "1");
-  const chainIdFromQuery: DefaultableChainId =
-    Number.isFinite(parsedChainId) && parsedChainId >= 0 && Number.isInteger(parsedChainId)
-      ? (parsedChainId as DefaultableChainId)
-      : 1;
+  const chainIdParam = searchParams.get("chainId");
+  const defaultChainId = getENSRootChainId(namespace) as DefaultableChainId;
+  const chainIdFromQuery: DefaultableChainId = chainIdParam
+    ? (defaultableChainIdStringSchema.safeParse(chainIdParam).data ?? defaultChainId)
+    : defaultChainId;
 
   const [address, setAddress] = useState(addressFromQuery || exampleAddresses[0].address);
   const [chainId, setChainId] = useState<DefaultableChainId>(chainIdFromQuery);
@@ -84,15 +92,16 @@ export default function ResolvePrimaryNameInspector() {
 
   const additionalChainIds = getENSIP19SupportedChainIds(namespace);
 
-  const canQuery = !!debouncedAddress && isAddress(debouncedAddress);
+  const validAddress: Address | null =
+    debouncedAddress && isAddress(debouncedAddress) ? debouncedAddress : null;
 
   const accelerated = usePrimaryName({
-    address: debouncedAddress as Address,
+    address: validAddress,
     chainId,
     accelerate: true,
     trace: true,
     query: {
-      enabled: canQuery,
+      enabled: !!validAddress,
       staleTime: 0,
       refetchInterval: 0,
       refetchOnMount: false,
@@ -103,12 +112,12 @@ export default function ResolvePrimaryNameInspector() {
   });
 
   const unaccelerated = usePrimaryName({
-    address: debouncedAddress as Address,
+    address: validAddress,
     chainId,
     accelerate: false,
     trace: true,
     query: {
-      enabled: canQuery,
+      enabled: !!validAddress,
       staleTime: 0,
       refetchInterval: 0,
       refetchOnMount: false,
@@ -147,7 +156,7 @@ export default function ResolvePrimaryNameInspector() {
               ENSIP-19 Chain ID
               <Select
                 value={String(chainId)}
-                onValueChange={(val) => setChainId(Number(val) as DefaultableChainId)}
+                onValueChange={(val) => setChainId(defaultableChainIdStringSchema.parse(val))}
               >
                 <SelectTrigger>
                   <SelectValue />

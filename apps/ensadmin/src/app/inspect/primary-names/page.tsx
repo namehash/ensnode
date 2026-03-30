@@ -50,15 +50,15 @@ export default function ResolvePrimaryNameInspector() {
     router.push(href);
   };
 
-  const canQuery =
-    !!debouncedAddress && debouncedAddress.length > 0 && debouncedAddress.startsWith("0x");
+  const validAddress: Address | null =
+    debouncedAddress && isAddress(debouncedAddress) ? debouncedAddress : null;
 
   const accelerated = usePrimaryNames({
-    address: debouncedAddress as Address,
+    address: validAddress,
     accelerate: true,
     trace: true,
     query: {
-      enabled: canQuery,
+      enabled: !!validAddress,
       staleTime: 0,
       refetchInterval: 0,
       refetchOnMount: false,
@@ -69,11 +69,11 @@ export default function ResolvePrimaryNameInspector() {
   });
 
   const unaccelerated = usePrimaryNames({
-    address: debouncedAddress as Address,
+    address: validAddress,
     accelerate: false,
     trace: true,
     query: {
-      enabled: canQuery,
+      enabled: !!validAddress,
       staleTime: 0,
       refetchInterval: 0,
       refetchOnMount: false,
