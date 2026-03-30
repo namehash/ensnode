@@ -54,6 +54,7 @@ export type BaseRegistrarRegistration = RequiredAndNotNull<
 };
 export type ThreeDNSRegistration = Registration;
 export type ENSv2RegistryRegistration = Registration;
+export type ENSv2RegistryReservation = Registration;
 
 RegistrationInterfaceRef.implement({
   description:
@@ -275,7 +276,20 @@ export const ENSv2RegistryRegistrationRef = builder.objectRef<ENSv2RegistryRegis
 ENSv2RegistryRegistrationRef.implement({
   description: "ENSv2RegistryRegistration represents a Registration within an ENSv2 Registry.",
   interfaces: [RegistrationInterfaceRef],
-  isTypeOf: (value) => (value as RegistrationInterface).type === "ENSv2Registry",
+  isTypeOf: (value) => (value as RegistrationInterface).type === "ENSv2RegistryRegistration",
+  fields: (t) => ({}),
+});
+
+////////////////////////////
+// ENSv2RegistryReservation
+////////////////////////////
+export const ENSv2RegistryReservationRef = builder.objectRef<ENSv2RegistryReservation>(
+  "ENSv2RegistryReservation",
+);
+ENSv2RegistryReservationRef.implement({
+  description: "ENSv2RegistryReservation represents a Reservation within an ENSv2 Registry.",
+  interfaces: [RegistrationInterfaceRef],
+  isTypeOf: (value) => (value as RegistrationInterface).type === "ENSv2RegistryReservation",
   fields: (t) => ({}),
 });
 

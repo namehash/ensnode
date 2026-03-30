@@ -326,7 +326,8 @@ export const registrationType = onchainEnum("RegistrationType", [
   "NameWrapper",
   "BaseRegistrar",
   "ThreeDNS",
-  "ENSv2Registry",
+  "ENSv2RegistryRegistration",
+  "ENSv2RegistryReservation",
 ]);
 
 export const registration = onchainTable(
