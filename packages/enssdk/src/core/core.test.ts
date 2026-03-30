@@ -24,22 +24,18 @@ describe("createENSSDKClient", () => {
 
 describe("extend", () => {
   it("adds module properties to the client", () => {
-    const client = createENSSDKClient({ url: "https://example.com" }).extend(
-      () => ({
-        myModule: { greet: () => "hello" },
-      }),
-    );
+    const client = createENSSDKClient({ url: "https://example.com" }).extend(() => ({
+      myModule: { greet: () => "hello" },
+    }));
 
     expect(client.myModule.greet()).toBe("hello");
     expect(client.config.url).toBe("https://example.com");
   });
 
   it("passes the base client to the decorator function", () => {
-    const client = createENSSDKClient({ url: "https://example.com" }).extend(
-      (base) => ({
-        meta: { getUrl: () => base.config.url },
-      }),
-    );
+    const client = createENSSDKClient({ url: "https://example.com" }).extend((base) => ({
+      meta: { getUrl: () => base.config.url },
+    }));
 
     expect(client.meta.getUrl()).toBe("https://example.com");
   });
