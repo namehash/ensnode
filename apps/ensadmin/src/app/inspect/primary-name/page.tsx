@@ -59,7 +59,11 @@ export default function ResolvePrimaryNameInspector() {
   );
 
   const addressFromQuery = searchParams.get("address")?.trim() || null;
-  const chainIdFromQuery = Number(searchParams.get("chainId") ?? "1") as DefaultableChainId;
+  const parsedChainId = Number(searchParams.get("chainId") ?? "1");
+  const chainIdFromQuery: DefaultableChainId =
+    Number.isFinite(parsedChainId) && parsedChainId >= 0 && Number.isInteger(parsedChainId)
+      ? (parsedChainId as DefaultableChainId)
+      : 1;
 
   const [address, setAddress] = useState(addressFromQuery || exampleAddresses[0].address);
   const [chainId, setChainId] = useState<DefaultableChainId>(chainIdFromQuery);
