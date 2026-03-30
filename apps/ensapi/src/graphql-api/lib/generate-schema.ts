@@ -1,6 +1,6 @@
 import config from "@/config";
 
-import { writeFileSync } from "node:fs";
+import { writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 import { lexicographicSortSchema, printSchema } from "graphql";
@@ -25,7 +25,7 @@ export async function writeGeneratedSchema() {
   const schemaAsString = printSchema(lexicographicSortSchema(schema));
 
   try {
-    writeFileSync(OUTPUT_PATH, schemaAsString);
+    await writeFile(OUTPUT_PATH, schemaAsString);
     logger.info(`Wrote SDL to ${OUTPUT_PATH}`);
   } catch (error) {
     logger.error(error, `Unable to write SDL to ${OUTPUT_PATH}`);

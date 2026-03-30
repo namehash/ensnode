@@ -3,6 +3,13 @@ import { describe, expect, it, vi } from "vitest";
 import { createENSSDKClient } from "../core/index";
 import { omnigraph } from "./index";
 
+function createMockClient(mockFetch: ReturnType<typeof vi.fn>) {
+  return createENSSDKClient({
+    url: "https://example.com",
+    fetch: mockFetch as unknown as typeof globalThis.fetch,
+  }).extend(omnigraph);
+}
+
 describe("omnigraph module", () => {
   it("attaches omnigraph namespace to client", () => {
     const client = createENSSDKClient({ url: "https://example.com" }).extend(omnigraph);
@@ -17,10 +24,7 @@ describe("omnigraph module", () => {
       json: () => Promise.resolve(mockResponse),
     });
 
-    const client = createENSSDKClient({
-      url: "https://example.com",
-      fetch: mockFetch as unknown as typeof globalThis.fetch,
-    }).extend(omnigraph);
+    const client = createMockClient(mockFetch);
 
     const result = await client.omnigraph.query({
       query: 'query { domain(by: { name: "nick.eth" }) { name } }',
@@ -44,10 +48,7 @@ describe("omnigraph module", () => {
       json: () => Promise.resolve({ data: null }),
     });
 
-    const client = createENSSDKClient({
-      url: "https://example.com",
-      fetch: mockFetch as unknown as typeof globalThis.fetch,
-    }).extend(omnigraph);
+    const client = createMockClient(mockFetch);
 
     await client.omnigraph.query({
       query: "query($name: String!) { domain(by: { name: $name }) { name } }",
@@ -64,10 +65,7 @@ describe("omnigraph module", () => {
     });
     const controller = new AbortController();
 
-    const client = createENSSDKClient({
-      url: "https://example.com",
-      fetch: mockFetch as unknown as typeof globalThis.fetch,
-    }).extend(omnigraph);
+    const client = createMockClient(mockFetch);
 
     await client.omnigraph.query({
       query: "query { domains { name } }",
