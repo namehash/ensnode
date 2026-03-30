@@ -83,15 +83,16 @@ export default function ResolvePrimaryNameInspector() {
 
   const additionalChainIds = getENSIP19SupportedChainIds(namespace);
 
-  const canQuery = !!debouncedAddress && isAddress(debouncedAddress);
+  const validAddress: Address | null =
+    debouncedAddress && isAddress(debouncedAddress) ? debouncedAddress : null;
 
   const accelerated = usePrimaryName({
-    address: debouncedAddress as Address,
+    address: validAddress,
     chainId,
     accelerate: true,
     trace: true,
     query: {
-      enabled: canQuery,
+      enabled: !!validAddress,
       staleTime: 0,
       refetchInterval: 0,
       refetchOnMount: false,
@@ -102,12 +103,12 @@ export default function ResolvePrimaryNameInspector() {
   });
 
   const unaccelerated = usePrimaryName({
-    address: debouncedAddress as Address,
+    address: validAddress,
     chainId,
     accelerate: false,
     trace: true,
     query: {
-      enabled: canQuery,
+      enabled: !!validAddress,
       staleTime: 0,
       refetchInterval: 0,
       refetchOnMount: false,
