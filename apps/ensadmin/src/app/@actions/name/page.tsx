@@ -15,9 +15,7 @@ import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 
 export default function ActionsNamePage() {
   const searchParams = useSearchParams();
-  const nameParam = searchParams.get("name");
-
-  const name = nameParam ? (nameParam as Name) : null;
+  const name = (searchParams.get("name")?.trim() || null) as Name | null;
 
   const { data: namespace } = useNamespace();
   const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
