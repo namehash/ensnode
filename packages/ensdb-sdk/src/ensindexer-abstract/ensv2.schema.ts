@@ -407,6 +407,13 @@ export const registration_relations = relations(registration, ({ one, many }) =>
     relationName: "registrant",
   }),
 
+  // has one unregistrant
+  unregistrant: one(account, {
+    fields: [registration.unregistrantId],
+    references: [account.id],
+    relationName: "unregistrant",
+  }),
+
   // has many renewals
   renewals: many(renewal),
 
