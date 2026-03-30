@@ -1,4 +1,3 @@
-import ensIndexerSchema from "ponder:schema";
 import type { Hash } from "viem";
 
 import {
@@ -8,7 +7,7 @@ import {
   makeResolverId,
 } from "@ensnode/ensnode-sdk";
 
-import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
+import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import type { LogEventBase } from "@/lib/ponder-helpers";
 
 type Topics = [Hash, ...Hash[]];

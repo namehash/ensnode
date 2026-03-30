@@ -1,8 +1,6 @@
-import ensIndexerSchema from "ponder:schema";
-
 import { type DomainId, makeRegistrationId, makeRenewalId } from "@ensnode/ensnode-sdk";
 
-import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
+import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 
 /**
  * Latest Registration & Renewals

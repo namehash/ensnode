@@ -1,4 +1,3 @@
-import ensIndexerSchema from "ponder:schema";
 import { type Address, hexToBigInt, labelhash } from "viem";
 
 import {
@@ -21,8 +20,11 @@ import {
   insertLatestRegistration,
 } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
-import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
-import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";
+import {
+  addOnchainEventListener,
+  ensIndexerSchema,
+  type IndexingEngineContext,
+} from "@/lib/indexing-engines/ponder";
 import { toJson } from "@/lib/json-stringify-with-bigints";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";

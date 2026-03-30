@@ -1,9 +1,8 @@
-import ensIndexerSchema from "ponder:schema";
 import type { Hash } from "viem";
 
 import { formatAccountId, type Node, type RegistrarAction } from "@ensnode/ensnode-sdk";
 
-import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
+import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 
 /**
  * Logical Event Key

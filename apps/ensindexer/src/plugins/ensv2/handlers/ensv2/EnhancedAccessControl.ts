@@ -1,4 +1,3 @@
-import ensIndexerSchema from "ponder:schema";
 import { type Address, isAddressEqual, zeroAddress } from "viem";
 
 import {
@@ -11,8 +10,11 @@ import {
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { ensurePermissionsEvent } from "@/lib/ensv2/event-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
-import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
-import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";
+import {
+  addOnchainEventListener,
+  ensIndexerSchema,
+  type IndexingEngineContext,
+} from "@/lib/indexing-engines/ponder";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 

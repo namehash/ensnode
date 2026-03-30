@@ -1,7 +1,6 @@
-import ensIndexerSchema from "ponder:schema";
 import type { Address } from "viem";
 
-import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
+import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import type { LogEventBase } from "@/lib/ponder-helpers";
 import { makeEventId } from "@/lib/subgraph/ids";
 

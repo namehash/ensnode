@@ -1,6 +1,5 @@
 import config from "@/config";
 
-import ensIndexerSchema from "ponder:schema";
 /**
  * NOTE: the subgraph has a helper function called `checkPccBurned` which checks if the bit is SET:
  * https://github.com/ensdomains/ens-subgraph/blob/c844791/src/nameWrapper.ts#L63
@@ -34,7 +33,7 @@ import {
 
 import { subgraph_decodeDNSEncodedLiteralName } from "@/lib/dns-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
-import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
+import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import { bigintMax } from "@/lib/lib-helpers";
 import { getManagedName } from "@/lib/managed-names";
 import type { EventWithArgs } from "@/lib/ponder-helpers";

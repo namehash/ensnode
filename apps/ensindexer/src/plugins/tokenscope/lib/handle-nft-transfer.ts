@@ -1,4 +1,3 @@
-import ensIndexerSchema from "ponder:schema";
 import { type Address, zeroAddress } from "viem";
 
 import {
@@ -11,7 +10,7 @@ import {
   NFTTransferTypes,
 } from "@ensnode/ensnode-sdk";
 
-import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
+import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import { upsertAccount } from "@/lib/subgraph/db-helpers";
 
 export const handleERC1155Transfer = async (

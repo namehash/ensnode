@@ -15,6 +15,10 @@ vi.mock("ponder:registry", () => ({
   },
 }));
 
+vi.mock("ponder:schema", () => ({
+  ensIndexerSchema: {},
+}));
+
 describe("addOnchainEventListener", () => {
   beforeEach(() => {
     vi.clearAllMocks();

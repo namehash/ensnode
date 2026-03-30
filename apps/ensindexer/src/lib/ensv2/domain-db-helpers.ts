@@ -1,10 +1,9 @@
-import ensIndexerSchema from "ponder:schema";
 import type { Address } from "viem";
 
 import { type ENSv1DomainId, interpretAddress } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
-import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
+import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 
 /**
  * Sets an ENSv1 Domain's effective owner to `owner`.

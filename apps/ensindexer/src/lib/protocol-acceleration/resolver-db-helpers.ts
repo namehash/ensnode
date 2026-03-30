@@ -1,4 +1,3 @@
-import ensIndexerSchema from "ponder:schema";
 import type { Address } from "viem";
 
 import {
@@ -15,7 +14,7 @@ import {
   interpretTextRecordValue,
 } from "@ensnode/ensnode-sdk/internal";
 
-import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
+import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 
 /**

@@ -1,4 +1,3 @@
-import ensIndexerSchema from "ponder:schema";
 import type { Address, Hash } from "viem";
 
 import {
@@ -10,7 +9,11 @@ import {
   type RegistrarActionReferral,
 } from "@ensnode/ensnode-sdk";
 
-import type { IndexingEngineContext, IndexingEngineEvent } from "@/lib/indexing-engines/ponder";
+import {
+  ensIndexerSchema,
+  type IndexingEngineContext,
+  type IndexingEngineEvent,
+} from "@/lib/indexing-engines/ponder";
 
 import { makeLogicalEventKey } from "./registrar-action";
 

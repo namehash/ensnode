@@ -1,6 +1,5 @@
 import config from "@/config";
 
-import ensIndexerSchema from "ponder:schema";
 import type { Address } from "viem";
 
 import {
@@ -19,7 +18,7 @@ import {
 
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
-import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
+import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import { getManagedName } from "@/lib/managed-names";
 import { pluginSupportsPremintedNames } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";

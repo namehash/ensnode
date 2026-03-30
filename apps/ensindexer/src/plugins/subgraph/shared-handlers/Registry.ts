@@ -1,6 +1,5 @@
 import config from "@/config";
 
-import ensIndexerSchema from "ponder:schema";
 import { type Address, isAddressEqual, zeroAddress } from "viem";
 
 import { getENSRootChainId } from "@ensnode/datasources";
@@ -20,7 +19,7 @@ import {
 
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { healAddrReverseSubnameLabel } from "@/lib/heal-addr-reverse-subname-label";
-import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
+import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import { sharedEventValues, upsertAccount, upsertResolver } from "@/lib/subgraph/db-helpers";
 import { makeResolverId } from "@/lib/subgraph/ids";

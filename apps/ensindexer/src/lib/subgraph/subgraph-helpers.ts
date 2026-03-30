@@ -1,11 +1,10 @@
 import config from "@/config";
 
-import ensIndexerSchema from "ponder:schema";
 import { isAddressEqual, zeroAddress } from "viem";
 
 import { type Node, ROOT_NODE } from "@ensnode/ensnode-sdk";
 
-import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
+import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import { upsertAccount } from "@/lib/subgraph/db-helpers";
 
 /**

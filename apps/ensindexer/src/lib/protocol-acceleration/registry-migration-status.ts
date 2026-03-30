@@ -1,11 +1,9 @@
 import config from "@/config";
 
-import ensIndexerSchema from "ponder:schema";
-
 import { getENSRootChainId } from "@ensnode/datasources";
 import type { Node } from "@ensnode/ensnode-sdk";
 
-import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
+import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 
 const ensRootChainId = getENSRootChainId(config.namespace);
 

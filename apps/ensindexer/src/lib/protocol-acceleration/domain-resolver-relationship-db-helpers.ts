@@ -1,9 +1,8 @@
-import ensIndexerSchema from "ponder:schema";
 import { type Address, isAddressEqual, zeroAddress } from "viem";
 
 import type { AccountId, DomainId } from "@ensnode/ensnode-sdk";
 
-import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
+import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 
 /**
  * Ensures that the Domain-Resolver Relationship for the provided `domainId` in `registry` is set

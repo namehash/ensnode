@@ -1,12 +1,11 @@
 import config from "@/config";
 
-import ensIndexerSchema from "ponder:schema";
 import type { Address, Hash, Hex } from "viem";
 
 import { hasNullByte, type Node, stripNullBytes, uniq } from "@ensnode/ensnode-sdk";
 
 import { parseDnsTxtRecordArgs } from "@/lib/dns-helpers";
-import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
+import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import { sharedEventValues, upsertAccount, upsertResolver } from "@/lib/subgraph/db-helpers";
 import { makeResolverId } from "@/lib/subgraph/ids";

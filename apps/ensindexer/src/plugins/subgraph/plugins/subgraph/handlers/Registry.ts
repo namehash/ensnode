@@ -1,9 +1,10 @@
-import ensIndexerSchema from "ponder:schema";
-
 import { makeSubdomainNode, type Node, PluginName, ROOT_NODE } from "@ensnode/ensnode-sdk";
 
-import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
-import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";
+import {
+  addOnchainEventListener,
+  ensIndexerSchema,
+  type IndexingEngineContext,
+} from "@/lib/indexing-engines/ponder";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { setupRootNode } from "@/lib/subgraph/subgraph-helpers";
 import {

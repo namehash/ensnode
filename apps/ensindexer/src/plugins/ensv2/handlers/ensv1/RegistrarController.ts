@@ -1,7 +1,5 @@
 /** biome-ignore-all lint/correctness/noUnusedVariables: ignore for now */
 
-import ensIndexerSchema from "ponder:schema";
-
 import {
   type EncodedReferrer,
   type Label,
@@ -17,8 +15,11 @@ import { ensureDomainEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel, ensureUnknownLabel } from "@/lib/ensv2/label-db-helpers";
 import { getLatestRegistration, getLatestRenewal } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
-import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
-import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";
+import {
+  addOnchainEventListener,
+  ensIndexerSchema,
+  type IndexingEngineContext,
+} from "@/lib/indexing-engines/ponder";
 import { toJson } from "@/lib/json-stringify-with-bigints";
 import { getManagedName } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";

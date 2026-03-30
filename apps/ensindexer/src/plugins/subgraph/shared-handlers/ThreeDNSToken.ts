@@ -1,4 +1,3 @@
-import ensIndexerSchema from "ponder:schema";
 import { type Address, isAddressEqual, zeroAddress, zeroHash } from "viem";
 
 import {
@@ -18,7 +17,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
-import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
+import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import { parseLabelAndNameFromOnChainMetadata } from "@/lib/json-metadata";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import {

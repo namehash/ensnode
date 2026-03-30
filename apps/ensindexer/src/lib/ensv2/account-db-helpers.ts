@@ -1,9 +1,8 @@
-import ensIndexerSchema from "ponder:schema";
 import type { Address } from "viem";
 
 import { interpretAddress } from "@ensnode/ensnode-sdk";
 
-import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
+import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 
 /**
  * Ensures that the account identified by `address` exists.

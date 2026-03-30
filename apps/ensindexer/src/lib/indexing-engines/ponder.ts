@@ -1,3 +1,5 @@
+export * as ensIndexerSchema from "ponder:schema";
+
 import {
   type EventNames,
   type Context as PonderIndexingContext,

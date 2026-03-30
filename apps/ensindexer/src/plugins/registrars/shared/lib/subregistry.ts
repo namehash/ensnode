@@ -2,11 +2,9 @@
  * This file contains handlers used in event handlers for a subregistry contract.
  */
 
-import ensIndexerSchema from "ponder:schema";
-
 import { type AccountId, formatAccountId, type Node } from "@ensnode/ensnode-sdk";
 
-import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
+import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 
 /**
  * Upsert Subregistry record

@@ -1,12 +1,10 @@
 import config from "@/config";
 
-import ensIndexerSchema from "ponder:schema";
-
 import { getENSRootChainId } from "@ensnode/datasources";
 import { DEFAULT_EVM_COIN_TYPE, evmChainIdToCoinType, PluginName } from "@ensnode/ensnode-sdk";
 import { interpretNameRecordValue } from "@ensnode/ensnode-sdk/internal";
 
-import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";
+import { addOnchainEventListener, ensIndexerSchema } from "@/lib/indexing-engines/ponder";
 import { namespaceContract } from "@/lib/plugin-helpers";
 
 /**

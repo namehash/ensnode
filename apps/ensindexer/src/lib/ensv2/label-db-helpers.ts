@@ -1,4 +1,3 @@
-import ensIndexerSchema from "ponder:schema";
 import { labelhash } from "viem";
 
 import {
@@ -10,7 +9,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
-import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
+import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 
 /**
  * Ensures that the LiteralLabel `label` is interpreted and upserted into the Label rainbow table.
