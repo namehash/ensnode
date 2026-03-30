@@ -19,7 +19,6 @@ import {
   getLatestRegistration,
   insertLatestRegistration,
 } from "@/lib/ensv2/registration-db-helpers";
-import { ensureRegistry } from "@/lib/ensv2/registry-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import {
   addOnchainEventListener,
@@ -75,7 +74,10 @@ export default function () {
 
     // ensure Registry
     // TODO(signals) — move to NewRegistry and add invariant here
-    await ensureRegistry(context, registry);
+    await context.ensDb
+      .insert(ensIndexerSchema.registry)
+      .values({ id: registryId, ...registry })
+      .onConflictDoNothing();
 
     // ensure discovered Label
     await ensureLabel(context, label);
