@@ -6,12 +6,11 @@ Integration test environment orchestration for ENSNode. Spins up the full ENSNod
 
 The current devnet image is pinned to:
 
-
 ```
-ghcr.io/ensdomains/contracts-v2:main-cb8e11c
+ghcr.io/ensdomains/contracts-v2:main-e8696c6
 ```
 
-Update the `DEVNET_IMAGE` constant in the orchestrator source to change the devnet version.
+via the `docker-compose.yml` at the monorepo root.
 
 ## How It Works
 
@@ -22,7 +21,7 @@ The orchestrator runs a 6-phase pipeline:
 3. **ENSIndexer** — starts from source, waits for health
 4. **Indexing** — polls until omnichain status reaches "Following" or "Completed"
 5. **ENSApi** — starts from source, waits for health
-6. **Integration tests** — runs `pnpm test:integration` at monorepo root
+6. **Integration tests** — runs `pnpm test:integration`
 
 ## Usage
 
