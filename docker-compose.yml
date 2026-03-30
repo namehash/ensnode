@@ -104,6 +104,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   devnet:
+    container_name: devnet
     image: ghcr.io/ensdomains/contracts-v2:main-e8696c6
     command: ./script/runDevnet.ts --testNames
     pull_policy: always
