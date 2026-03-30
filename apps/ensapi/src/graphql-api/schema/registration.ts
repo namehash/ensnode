@@ -2,7 +2,6 @@ import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@poth
 import { and, eq } from "drizzle-orm";
 import { hexToBigInt } from "viem";
 
-import * as schema from "@ensnode/ensdb-sdk";
 import {
   type ENSv1DomainId,
   isRegistrationFullyExpired,
@@ -20,11 +19,11 @@ import { INDEX_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants"
 import { DomainInterfaceRef } from "@/graphql-api/schema/domain";
 import { EventRef } from "@/graphql-api/schema/event";
 import { RenewalRef } from "@/graphql-api/schema/renewal";
-import { db } from "@/lib/db";
+import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 
 export const RegistrationInterfaceRef = builder.loadableInterfaceRef("Registration", {
   load: (ids: RegistrationId[]) =>
-    db.query.registration.findMany({
+    ensDb.query.registration.findMany({
       where: (t, { inArray }) => inArray(t.id, ids),
     }),
   toKey: getModelId,
@@ -140,21 +139,21 @@ RegistrationInterfaceRef.implement({
       type: RenewalRef,
       resolve: (parent, args) => {
         const scope = and(
-          eq(schema.renewal.domainId, parent.domainId),
-          eq(schema.renewal.registrationIndex, parent.index),
+          eq(ensIndexerSchema.renewal.domainId, parent.domainId),
+          eq(ensIndexerSchema.renewal.registrationIndex, parent.index),
         );
 
         return lazyConnection({
-          totalCount: () => db.$count(schema.renewal, scope),
+          totalCount: () => ensDb.$count(ensIndexerSchema.renewal, scope),
           connection: () =>
             resolveCursorConnection(
               { ...INDEX_PAGINATED_CONNECTION_ARGS, args },
               ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-                db
+                ensDb
                   .select()
-                  .from(schema.renewal)
-                  .where(and(scope, paginateByInt(schema.renewal.index, before, after)))
-                  .orderBy(orderPaginationBy(schema.renewal.index, inverted))
+                  .from(ensIndexerSchema.renewal)
+                  .where(and(scope, paginateByInt(ensIndexerSchema.renewal.index, before, after)))
+                  .orderBy(orderPaginationBy(ensIndexerSchema.renewal.index, inverted))
                   .limit(limit),
             ),
         });

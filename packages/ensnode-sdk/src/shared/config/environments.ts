@@ -1,7 +1,15 @@
 /**
- * Environment variables for database configuration.
+ * Environment variables for ENSApi database configuration.
  */
-export interface DatabaseEnvironment {
+export interface EnsApiDatabaseEnvironment {
+  DATABASE_URL?: string;
+  ENSINDEXER_SCHEMA_NAME?: string;
+}
+
+/**
+ * Environment variables for ENSIndexer database configuration.
+ */
+export interface EnsIndexerDatabaseEnvironment {
   DATABASE_URL?: string;
   DATABASE_SCHEMA?: string;
 }
@@ -15,13 +23,7 @@ export interface RpcEnvironment {
   QUICKNODE_API_KEY?: string;
   QUICKNODE_ENDPOINT_NAME?: string;
   DRPC_API_KEY?: string;
-}
-
-/**
- * Environment variables for ENSIndexer URL configuration.
- */
-export interface EnsIndexerUrlEnvironment {
-  ENSINDEXER_URL?: string;
+  RPC_AUTO_GEN_MODE?: string;
 }
 
 /**

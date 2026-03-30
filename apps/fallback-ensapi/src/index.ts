@@ -34,7 +34,7 @@ app.get("/", (c) =>
 </head>
 <body>
     <h1>Hello, World!</h1>
-    <p>You've reached the root of the Fallback ENSApi. You might be looking for the <a href="https://ensnode.io/docs/">ENSNode documentation</a>.</p>
+    <p>You've reached the root of the Fallback ENSApi. You might be looking for the <a href="https://ensnode.io/docs">ENSNode documentation</a>.</p>
 </body>
 </html>
 `),

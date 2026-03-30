@@ -11,7 +11,7 @@ set -euo pipefail
 #   - LABEL_SET_ID
 #   - LABEL_SET_VERSION
 #
-# See https://ensnode.io/ensrainbow/concepts/glossary/ for details.
+# See https://ensnode.io/ensrainbow/concepts/glossary for details.
 #
 # This script requires these two identifiers as command-line arguments to
 # download the correct labelset file (.ensrainbow), its checksum, and a

@@ -1,7 +1,6 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, eq } from "drizzle-orm";
 
-import * as schema from "@ensnode/ensdb-sdk";
 import { makePermissionsId, type RegistryId } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
@@ -24,11 +23,11 @@ import {
   RegistryDomainsWhereInput,
 } from "@/graphql-api/schema/domain";
 import { PermissionsRef } from "@/graphql-api/schema/permissions";
-import { db } from "@/lib/db";
+import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 
 export const RegistryRef = builder.loadableObjectRef("Registry", {
   load: (ids: RegistryId[]) =>
-    db.query.registry.findMany({ where: (t, { inArray }) => inArray(t.id, ids) }),
+    ensDb.query.registry.findMany({ where: (t, { inArray }) => inArray(t.id, ids) }),
   toKey: getModelId,
   cacheResolved: true,
   sort: true,
@@ -56,17 +55,17 @@ RegistryRef.implement({
       description: "The Domains for which this Registry is a Subregistry.",
       type: ENSv2DomainRef,
       resolve: (parent, args) => {
-        const scope = eq(schema.v2Domain.subregistryId, parent.id);
+        const scope = eq(ensIndexerSchema.v2Domain.subregistryId, parent.id);
 
         return lazyConnection({
-          totalCount: () => db.$count(schema.v2Domain, scope),
+          totalCount: () => ensDb.$count(ensIndexerSchema.v2Domain, scope),
           connection: () =>
             resolveCursorConnection(
               { ...ID_PAGINATED_CONNECTION_ARGS, args },
               ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-                db.query.v2Domain.findMany({
-                  where: and(scope, paginateBy(schema.v2Domain.id, before, after)),
-                  orderBy: orderPaginationBy(schema.v2Domain.id, inverted),
+                ensDb.query.v2Domain.findMany({
+                  where: and(scope, paginateBy(ensIndexerSchema.v2Domain.id, before, after)),
+                  orderBy: orderPaginationBy(ensIndexerSchema.v2Domain.id, inverted),
                   limit,
                   with: { label: true },
                 }),

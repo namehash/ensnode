@@ -2,7 +2,7 @@
   "name": "@docs/ensnode",
   "private": true,
   "type": "module",
-  "version": "1.7.0",
+  "version": "1.9.0",
   "packageManager": "pnpm@10.28.0",
   "scripts": {
     "dev": "astro dev",
@@ -25,6 +25,7 @@
     "@headlessui/react": "^2.2.0",
     "@iconify-json/lucide": "^1.2.52",
     "@namehash/namekit-react": "catalog:",
+    "@namehash/namehash-ui": "workspace:*",
     "@octokit/rest": "^20.1.2",
     "@scalar/api-reference": "^1.49.3",
     "@scalar/astro": "^0.2.4",

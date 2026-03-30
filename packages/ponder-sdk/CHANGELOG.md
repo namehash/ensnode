@@ -1,5 +1,21 @@
 # @ensnode/ponder-sdk
 
+## 1.9.0
+
+### Minor Changes
+
+- [#1836](https://github.com/namehash/ensnode/pull/1836) [`387715e`](https://github.com/namehash/ensnode/commit/387715e1bc4c996c0ae7545bfc78b79149e04f58) Thanks [@tk-o](https://github.com/tk-o)! - Extended `PonderAppContext` data model with `localPonderAppUrl` field.
+
+- [#1836](https://github.com/namehash/ensnode/pull/1836) [`387715e`](https://github.com/namehash/ensnode/commit/387715e1bc4c996c0ae7545bfc78b79149e04f58) Thanks [@tk-o](https://github.com/tk-o)! - Replaced `localPonderAppUrl` reference with `ponderAppContext.localPonderAppUrl` in the constructor for `LocalPonderClient`.
+
+## 1.8.1
+
+## 1.8.0
+
+### Minor Changes
+
+- [#1807](https://github.com/namehash/ensnode/pull/1807) [`410f937`](https://github.com/namehash/ensnode/commit/410f93798b45ae334a2089135c5fd22b7716b128) Thanks [@tk-o](https://github.com/tk-o)! - Introduced `PonderAppContext` data model to capture the internal context of a local Ponder app.
+
 ## 1.7.0
 
 ### Minor Changes

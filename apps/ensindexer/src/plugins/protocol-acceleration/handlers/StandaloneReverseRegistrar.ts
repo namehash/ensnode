@@ -1,12 +1,10 @@
 import config from "@/config";
 
-import { ponder } from "ponder:registry";
-import schema from "ponder:schema";
-
 import { getENSRootChainId } from "@ensnode/datasources";
 import { DEFAULT_EVM_COIN_TYPE, evmChainIdToCoinType, PluginName } from "@ensnode/ensnode-sdk";
 import { interpretNameRecordValue } from "@ensnode/ensnode-sdk/internal";
 
+import { addOnchainEventListener, ensIndexerSchema } from "@/lib/indexing-engines/ponder";
 import { namespaceContract } from "@/lib/plugin-helpers";
 
 /**
@@ -15,7 +13,7 @@ import { namespaceContract } from "@/lib/plugin-helpers";
  * - indexes ENSIP-19 Reverse Name Records for an address, per-coinType (derived from context.chain.id)
  */
 export default function () {
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(
       PluginName.ProtocolAcceleration,
       "StandaloneReverseRegistrar:NameForAddrChanged",
@@ -40,11 +38,11 @@ export default function () {
       const isDeletion = interpretedValue === null;
       if (isDeletion) {
         // delete
-        await context.db.delete(schema.reverseNameRecord, id);
+        await context.ensDb.delete(ensIndexerSchema.reverseNameRecord, id);
       } else {
         // upsert
-        await context.db
-          .insert(schema.reverseNameRecord)
+        await context.ensDb
+          .insert(ensIndexerSchema.reverseNameRecord)
           .values({ ...id, value: interpretedValue })
           .onConflictDoUpdate({ value: interpretedValue });
       }

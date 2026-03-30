@@ -1,5 +1,62 @@
 # ensindexer
 
+## 1.9.0
+
+### Minor Changes
+
+- [#1822](https://github.com/namehash/ensnode/pull/1822) [`70e6f24`](https://github.com/namehash/ensnode/commit/70e6f2475a566135602f4adbcf44df2a6f74e5fd) Thanks [@tk-o](https://github.com/tk-o)! - Introduced a new `RPC_AUTO_GEN_MODE` environment variable (optional, by default set to `http-only`).
+
+- [#1836](https://github.com/namehash/ensnode/pull/1836) [`387715e`](https://github.com/namehash/ensnode/commit/387715e1bc4c996c0ae7545bfc78b79149e04f58) Thanks [@tk-o](https://github.com/tk-o)! - Cleaned up all references to `config.ensIndexerUrl`. The local Ponder app URL is now automatically derived from the Ponder app runtime context, eliminating the need for manual configuration.
+
+### Patch Changes
+
+- Updated dependencies [[`70e6f24`](https://github.com/namehash/ensnode/commit/70e6f2475a566135602f4adbcf44df2a6f74e5fd), [`9f52a66`](https://github.com/namehash/ensnode/commit/9f52a662e5828e944210f35d47571661899fc30e), [`aaa471f`](https://github.com/namehash/ensnode/commit/aaa471f0a33d0f96389e706dcaed2b704e2952ea), [`387715e`](https://github.com/namehash/ensnode/commit/387715e1bc4c996c0ae7545bfc78b79149e04f58), [`387715e`](https://github.com/namehash/ensnode/commit/387715e1bc4c996c0ae7545bfc78b79149e04f58), [`387715e`](https://github.com/namehash/ensnode/commit/387715e1bc4c996c0ae7545bfc78b79149e04f58)]:
+  - @ensnode/ensnode-sdk@1.9.0
+  - @ensnode/ensdb-sdk@1.9.0
+  - @ensnode/ponder-sdk@1.9.0
+  - @ensnode/ensrainbow-sdk@1.9.0
+  - @ensnode/datasources@1.9.0
+
+## 1.8.1
+
+### Patch Changes
+
+- [#1735](https://github.com/namehash/ensnode/pull/1735) [`eff25f9`](https://github.com/namehash/ensnode/commit/eff25f99a05643128dd85bf19ea563b5be027a39) Thanks [@djstrong](https://github.com/djstrong)! - Add retry-with-backoff for ENSRainbow `heal()` calls during indexing. Transient failures (network errors and server errors) are retried up to 3 times with exponential backoff, with a warning logged on each failed attempt. This prevents a single transient ENSRainbow error from causing indexing to fail.
+
+- Updated dependencies [[`12f279d`](https://github.com/namehash/ensnode/commit/12f279da603da358869a709cc8a7a8c0d56080e5)]:
+  - @ensnode/ensdb-sdk@1.8.1
+  - @ensnode/datasources@1.8.1
+  - @ensnode/ensrainbow-sdk@1.8.1
+  - @ensnode/ensnode-sdk@1.8.1
+  - @ensnode/ponder-sdk@1.8.1
+
+## 1.8.0
+
+### Minor Changes
+
+- [#1798](https://github.com/namehash/ensnode/pull/1798) [`f0007b4`](https://github.com/namehash/ensnode/commit/f0007b43a11645efc7efc3c9563f36254352c772) Thanks [@tk-o](https://github.com/tk-o)! - Replaced a bespoke `EnsDbClient` implementation with `EnsDbWriter` from ENSDb SDK.
+
+- [#1807](https://github.com/namehash/ensnode/pull/1807) [`410f937`](https://github.com/namehash/ensnode/commit/410f93798b45ae334a2089135c5fd22b7716b128) Thanks [@tk-o](https://github.com/tk-o)! - Improved developer experience by skipping validation step in ENSDb Writer Worker while in dev mode.
+
+- [#1758](https://github.com/namehash/ensnode/pull/1758) [`f276efe`](https://github.com/namehash/ensnode/commit/f276efe9c48361a330bfcc4bc6f045c6ed9963d2) Thanks [@shrugs](https://github.com/shrugs)! - The ENSv2 Plugin can now be safely activated for ENSv1-only namespaces (ex: 'mainnet', 'sepolia').
+
+- [#1798](https://github.com/namehash/ensnode/pull/1798) [`f0007b4`](https://github.com/namehash/ensnode/commit/f0007b43a11645efc7efc3c9563f36254352c772) Thanks [@tk-o](https://github.com/tk-o)! - Added running database migrations for ENSDb as a responsibility for ENSIndexer.
+
+- [#1730](https://github.com/namehash/ensnode/pull/1730) [`5c64d89`](https://github.com/namehash/ensnode/commit/5c64d8976fdaf93cd9f9256b93b5216b34d48a90) Thanks [@shrugs](https://github.com/shrugs)! - The `subgraph` and `ensv2` plugins can now be activated in parallel.
+
+- [#1778](https://github.com/namehash/ensnode/pull/1778) [`d6dd425`](https://github.com/namehash/ensnode/commit/d6dd4252f690daba13bf02aa53a1ef3e868c823e) Thanks [@tk-o](https://github.com/tk-o)! - Made `ponder.schema.ts` to explicitly import just ENSIndexer Schema.
+
+- [#1766](https://github.com/namehash/ensnode/pull/1766) [`9ea8580`](https://github.com/namehash/ensnode/commit/9ea858055109eaf3a92d210f2b3d9170232a32e8) Thanks [@shrugs](https://github.com/shrugs)! - Fixes issue with derivation of `EnsIndexerConfig.indexedChainIds` in plugins that conditionally index multiple chains (ex: 'protocol-acceleration').
+
+### Patch Changes
+
+- Updated dependencies [[`5ce102e`](https://github.com/namehash/ensnode/commit/5ce102e11c7b891844b0762cffa45ade1a997e0f), [`410f937`](https://github.com/namehash/ensnode/commit/410f93798b45ae334a2089135c5fd22b7716b128), [`f0007b4`](https://github.com/namehash/ensnode/commit/f0007b43a11645efc7efc3c9563f36254352c772), [`d6dd425`](https://github.com/namehash/ensnode/commit/d6dd4252f690daba13bf02aa53a1ef3e868c823e), [`5ac81cb`](https://github.com/namehash/ensnode/commit/5ac81cb42ad3a4bf561d82c2dd628e85988240ef), [`f0007b4`](https://github.com/namehash/ensnode/commit/f0007b43a11645efc7efc3c9563f36254352c772), [`9ea8580`](https://github.com/namehash/ensnode/commit/9ea858055109eaf3a92d210f2b3d9170232a32e8)]:
+  - @ensnode/ensdb-sdk@1.8.0
+  - @ensnode/ponder-sdk@1.8.0
+  - @ensnode/ensnode-sdk@1.8.0
+  - @ensnode/ensrainbow-sdk@1.8.0
+  - @ensnode/datasources@1.8.0
+
 ## 1.7.0
 
 ### Patch Changes
@@ -302,11 +359,11 @@
 
 ### Minor Changes
 
-- [#997](https://github.com/namehash/ensnode/pull/997) [`319e4b0`](https://github.com/namehash/ensnode/commit/319e4b0e8bf2d1d51c2c5affa999453b99cb8580) Thanks [@shrugs](https://github.com/shrugs)! - Added REPLACE_UNNORMALIZED configuration option (defaults to `true`). When enabled, all stored Label and Name values are guaranteed to be [Interpreted Labels](https://ensnode.io/docs/reference/terminology/#interpreted-label) and [Interpreted Names](https://ensnode.io/docs/reference/terminology/#interpreted-name), avoiding edge cases with unnormalized characters by representing unnormalized values as [Encoded LabelHashes](https://ensnode.io/docs/reference/terminology/#rendering-unknown-labels) of the Literal Label value found onchain.
+- [#997](https://github.com/namehash/ensnode/pull/997) [`319e4b0`](https://github.com/namehash/ensnode/commit/319e4b0e8bf2d1d51c2c5affa999453b99cb8580) Thanks [@shrugs](https://github.com/shrugs)! - Added REPLACE_UNNORMALIZED configuration option (defaults to `true`). When enabled, all stored Label and Name values are guaranteed to be [Interpreted Labels](https://ensnode.io/docs/reference/terminology#interpreted-label) and [Interpreted Names](https://ensnode.io/docs/reference/terminology#interpreted-name), avoiding edge cases with unnormalized characters by representing unnormalized values as [Encoded LabelHashes](https://ensnode.io/docs/reference/terminology#rendering-unknown-labels) of the Literal Label value found onchain.
 
 - [#997](https://github.com/namehash/ensnode/pull/997) [`319e4b0`](https://github.com/namehash/ensnode/commit/319e4b0e8bf2d1d51c2c5affa999453b99cb8580) Thanks [@shrugs](https://github.com/shrugs)! - The ENSNode Resolution API (`/resolve/*`) is now guaranteed to only return normalized names. This includes both primary name resolution (reverse resolution) and `name` record resolution (forward resolution).
 
-- [#997](https://github.com/namehash/ensnode/pull/997) [`319e4b0`](https://github.com/namehash/ensnode/commit/319e4b0e8bf2d1d51c2c5affa999453b99cb8580) Thanks [@shrugs](https://github.com/shrugs)! - Added REPLACE_UNNORMALIZED configuration option (defaults to `true`). When enabled, all Label and Name values returned from the Subgraph-Compatible GraphQL API (`/subgraph`) are guaranteed to be [Interpreted Labels](https://ensnode.io/docs/reference/terminology/#interpreted-label) and [Interpreted Names](https://ensnode.io/docs/reference/terminology/#interpreted-name), avoiding edge cases with unnormalized characters by representing unnormalized values as [Encoded LabelHashes](https://ensnode.io/docs/reference/terminology/#rendering-unknown-labels) of the Literal Label value found onchain.
+- [#997](https://github.com/namehash/ensnode/pull/997) [`319e4b0`](https://github.com/namehash/ensnode/commit/319e4b0e8bf2d1d51c2c5affa999453b99cb8580) Thanks [@shrugs](https://github.com/shrugs)! - Added REPLACE_UNNORMALIZED configuration option (defaults to `true`). When enabled, all Label and Name values returned from the Subgraph-Compatible GraphQL API (`/subgraph`) are guaranteed to be [Interpreted Labels](https://ensnode.io/docs/reference/terminology#interpreted-label) and [Interpreted Names](https://ensnode.io/docs/reference/terminology#interpreted-name), avoiding edge cases with unnormalized characters by representing unnormalized values as [Encoded LabelHashes](https://ensnode.io/docs/reference/terminology#rendering-unknown-labels) of the Literal Label value found onchain.
 
 - [#1001](https://github.com/namehash/ensnode/pull/1001) [`7ccaa65`](https://github.com/namehash/ensnode/commit/7ccaa65c5142f0491d7f1882cd84eed7e0d3c8ea) Thanks [@lightwalker-eth](https://github.com/lightwalker-eth)! - Index mappings between ENS names and their ownership controlling tokens.
 

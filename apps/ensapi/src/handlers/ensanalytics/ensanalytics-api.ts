@@ -17,18 +17,10 @@ import { getReferrerDetailRoute, getReferrerLeaderboardRoute } from "./ensanalyt
 
 const logger = makeLogger("ensanalytics-api");
 
-const app = createApp();
-
-// Apply referrer leaderboard cache middleware to all routes in this handler
-app.use(referrerLeaderboardMiddleware);
+const app = createApp({ middlewares: [referrerLeaderboardMiddleware] });
 
 // Get a page from the referrer leaderboard
 app.openapi(getReferrerLeaderboardRoute, async (c) => {
-  // context must be set by the required middleware
-  if (c.var.referrerLeaderboard === undefined) {
-    throw new Error(`Invariant(ensanalytics-api): referrerLeaderboardMiddleware required`);
-  }
-
   try {
     if (c.var.referrerLeaderboard instanceof Error) {
       return c.json(
@@ -72,11 +64,6 @@ app.openapi(getReferrerLeaderboardRoute, async (c) => {
 
 // Get referrer detail for a specific address
 app.openapi(getReferrerDetailRoute, async (c) => {
-  // context must be set by the required middleware
-  if (c.var.referrerLeaderboard === undefined) {
-    throw new Error(`Invariant(ensanalytics-api): referrerLeaderboardMiddleware required`);
-  }
-
   try {
     // Check if leaderboard failed to load
     if (c.var.referrerLeaderboard instanceof Error) {

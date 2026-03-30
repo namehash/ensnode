@@ -1,10 +1,10 @@
 import { builder } from "@/graphql-api/builder";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
-import { db } from "@/lib/db";
+import { ensDb } from "@/lib/ensdb/singleton";
 
 export const EventRef = builder.loadableObjectRef("Event", {
   load: (ids: string[]) =>
-    db.query.event.findMany({
+    ensDb.query.event.findMany({
       where: (t, { inArray }) => inArray(t.id, ids),
     }),
   toKey: getModelId,

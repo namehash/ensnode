@@ -1,5 +1,46 @@
 # @ensnode/ensdb-sdk
 
+## 1.9.0
+
+### Minor Changes
+
+- [#1832](https://github.com/namehash/ensnode/pull/1832) [`9f52a66`](https://github.com/namehash/ensnode/commit/9f52a662e5828e944210f35d47571661899fc30e) Thanks [@tk-o](https://github.com/tk-o)! - Hotfixed the `buildConcreteEnsIndexerSchema` function by replacing the cloning approach with working mutation approach.
+
+- [#1809](https://github.com/namehash/ensnode/pull/1809) [`aaa471f`](https://github.com/namehash/ensnode/commit/aaa471f0a33d0f96389e706dcaed2b704e2952ea) Thanks [@tk-o](https://github.com/tk-o)! - Renamed the `client` getter on `EnsDbReader` class to `ensDb`.
+
+### Patch Changes
+
+- Updated dependencies [[`70e6f24`](https://github.com/namehash/ensnode/commit/70e6f2475a566135602f4adbcf44df2a6f74e5fd), [`387715e`](https://github.com/namehash/ensnode/commit/387715e1bc4c996c0ae7545bfc78b79149e04f58)]:
+  - @ensnode/ensnode-sdk@1.9.0
+
+## 1.8.1
+
+### Patch Changes
+
+- [#1820](https://github.com/namehash/ensnode/pull/1820) [`12f279d`](https://github.com/namehash/ensnode/commit/12f279da603da358869a709cc8a7a8c0d56080e5) Thanks [@tk-o](https://github.com/tk-o)! - Temporarily removed the `byName` index on `subgraph_domains` table in ENSDb.
+
+- Updated dependencies []:
+  - @ensnode/ensnode-sdk@1.8.1
+
+## 1.8.0
+
+### Minor Changes
+
+- [#1772](https://github.com/namehash/ensnode/pull/1772) [`5ce102e`](https://github.com/namehash/ensnode/commit/5ce102e11c7b891844b0762cffa45ade1a997e0f) Thanks [@tk-o](https://github.com/tk-o)! - Renamed `@ensnode/ensnode-schema` to `@ensnode/ensdb-sdk`.
+
+- [#1798](https://github.com/namehash/ensnode/pull/1798) [`f0007b4`](https://github.com/namehash/ensnode/commit/f0007b43a11645efc7efc3c9563f36254352c772) Thanks [@tk-o](https://github.com/tk-o)! - Moved `ensdb` module from ENSNode SDK into ENSDb SDK.
+
+- [#1778](https://github.com/namehash/ensnode/pull/1778) [`d6dd425`](https://github.com/namehash/ensnode/commit/d6dd4252f690daba13bf02aa53a1ef3e868c823e) Thanks [@tk-o](https://github.com/tk-o)! - Created isolated database schema definitions: ENSIndexer Schema and ENSNode Schema.
+
+- [#1779](https://github.com/namehash/ensnode/pull/1779) [`5ac81cb`](https://github.com/namehash/ensnode/commit/5ac81cb42ad3a4bf561d82c2dd628e85988240ef) Thanks [@tk-o](https://github.com/tk-o)! - Introduced toolkit for managing ENSDb migrations for ENSNode Schema.
+
+- [#1798](https://github.com/namehash/ensnode/pull/1798) [`f0007b4`](https://github.com/namehash/ensnode/commit/f0007b43a11645efc7efc3c9563f36254352c772) Thanks [@tk-o](https://github.com/tk-o)! - Introduced two client implementations for ENSDb: `EnsDbReader` and `EnsDbWriter`.
+
+### Patch Changes
+
+- Updated dependencies [[`f0007b4`](https://github.com/namehash/ensnode/commit/f0007b43a11645efc7efc3c9563f36254352c772), [`9ea8580`](https://github.com/namehash/ensnode/commit/9ea858055109eaf3a92d210f2b3d9170232a32e8)]:
+  - @ensnode/ensnode-sdk@1.8.0
+
 ## 1.7.0
 
 ## 1.6.0

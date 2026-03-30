@@ -12,6 +12,7 @@ import {
 import { createApp } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
 import { findRegistrarActions } from "@/lib/registrar-actions/find-registrar-actions";
+import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 import { registrarActionsApiMiddleware } from "@/middleware/registrar-actions.middleware";
 
 import {
@@ -20,13 +21,9 @@ import {
   type RegistrarActionsQuery,
 } from "./registrar-actions-api.routes";
 
-const app = createApp();
+const app = createApp({ middlewares: [indexingStatusMiddleware, registrarActionsApiMiddleware] });
 
 const logger = makeLogger("registrar-actions-api");
-
-// Middleware managing access to Registrar Actions API routes.
-// It makes the routes available if all prerequisites are met.
-app.use(registrarActionsApiMiddleware);
 
 // Shared business logic for fetching registrar actions
 async function fetchRegistrarActions(parentNode: Node | undefined, query: RegistrarActionsQuery) {
@@ -150,10 +147,8 @@ app.openapi(getRegistrarActionsRoute, async (c) => {
  */
 app.openapi(getRegistrarActionsByParentNodeRoute, async (c) => {
   try {
-    // Middleware ensures indexingStatus is available and not an Error
-    // This check is for TypeScript type safety
-    if (!c.var.indexingStatus || c.var.indexingStatus instanceof Error) {
-      throw new Error("Invariant violation: indexingStatus should be validated by middleware");
+    if (c.var.indexingStatus instanceof Error) {
+      throw new Error("Indexing status has not been loaded yet");
     }
 
     const { parentNode } = c.req.valid("param");

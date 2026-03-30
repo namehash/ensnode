@@ -1,5 +1,24 @@
 # @docs/ensnode
 
+## 1.9.0
+
+### Minor Changes
+
+- [#1827](https://github.com/namehash/ensnode/pull/1827) [`c9fc7f8`](https://github.com/namehash/ensnode/commit/c9fc7f8c43ab6d2c66907d2b71843d52565a28ed) Thanks [@Y3drk](https://github.com/Y3drk)! - Updated ensnode.io's landing page to use standardized footer component.
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @namehash/namehash-ui@1.9.0
+
+## 1.8.1
+
+### Patch Changes
+
+- [#1513](https://github.com/namehash/ensnode/pull/1513) [`798614a`](https://github.com/namehash/ensnode/commit/798614ae4e84a793c75ca98f124f4be423beb8b0) Thanks [@djstrong](https://github.com/djstrong)! - Document Introductory ENSRainbow Topics
+
+## 1.8.0
+
 ## 1.7.0
 
 ## 1.6.0

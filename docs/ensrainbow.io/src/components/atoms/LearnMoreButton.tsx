@@ -11,7 +11,7 @@ export type LearnMoreButtonProps = {
 
 export const LearnMoreButton = (props: LearnMoreButtonProps) => {
   return (
-    <Button variant="secondary" className="max-w-[100%] overflow-x-hidden" size="medium" asChild>
+    <Button variant="secondary" className="max-w-full overflow-x-hidden" size="medium" asChild>
       <Link href={props.source}>
         {props.text}
         <ExternalLinkIcon fillColor="fill-gray-400" />

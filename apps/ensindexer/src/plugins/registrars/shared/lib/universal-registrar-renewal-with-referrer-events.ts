@@ -1,5 +1,3 @@
-import type { Context, Event } from "ponder:registry";
-import schema from "ponder:schema";
 import type { Address, Hash } from "viem";
 
 import {
@@ -9,6 +7,12 @@ import {
   type RegistrarActionReferral,
 } from "@ensnode/ensnode-sdk";
 
+import {
+  ensIndexerSchema,
+  type IndexingEngineContext,
+  type IndexingEngineEvent,
+} from "@/lib/indexing-engines/ponder";
+
 import { makeLogicalEventKey } from "./registrar-action";
 
 /**
@@ -17,14 +21,14 @@ import { makeLogicalEventKey } from "./registrar-action";
  * - append new event ID to `eventIds`
  */
 export async function handleUniversalRegistrarRenewalEvent(
-  context: Context,
+  context: IndexingEngineContext,
   {
     id,
     node,
     referral,
     transactionHash,
   }: {
-    id: Event["id"];
+    id: IndexingEngineEvent["id"];
     node: Node;
     referral: RegistrarActionReferral;
     transactionHash: Hash;
@@ -40,9 +44,12 @@ export async function handleUniversalRegistrarRenewalEvent(
   //    which needs to be updated.
 
   // 2. a) Find registrarActionMetadata record for the current "logical registrar action".
-  const registrarActionMetadata = await context.db.find(schema.internal_registrarActionMetadata, {
-    metadataType: "CURRENT_LOGICAL_REGISTRAR_ACTION",
-  });
+  const registrarActionMetadata = await context.ensDb.find(
+    ensIndexerSchema.internal_registrarActionMetadata,
+    {
+      metadataType: "CURRENT_LOGICAL_REGISTRAR_ACTION",
+    },
+  );
 
   // Invariant: the registrarActionMetadata record must exist
   if (!registrarActionMetadata) {
@@ -59,7 +66,7 @@ export async function handleUniversalRegistrarRenewalEvent(
   }
 
   // 2. b) Find "logical registrar action" record by `logicalEventId`.
-  const logicalRegistrarAction = await context.db.find(schema.registrarActions, {
+  const logicalRegistrarAction = await context.ensDb.find(ensIndexerSchema.registrarActions, {
     id: registrarActionMetadata.logicalEventId,
   });
 
@@ -85,8 +92,8 @@ export async function handleUniversalRegistrarRenewalEvent(
   // 4. Update the "logical registrar action" record with
   //    - referral data
   //    - new event ID appended to `eventIds`
-  await context.db
-    .update(schema.registrarActions, { id: logicalRegistrarAction.id })
+  await context.ensDb
+    .update(ensIndexerSchema.registrarActions, { id: logicalRegistrarAction.id })
     .set(({ eventIds }) => ({
       encodedReferrer,
       decodedReferrer,

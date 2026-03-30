@@ -2,7 +2,6 @@ import config from "@/config";
 
 import { eq } from "drizzle-orm/sql";
 
-import * as schema from "@ensnode/ensdb-sdk";
 import {
   type AccountId,
   bigIntToNumber,
@@ -17,12 +16,12 @@ import {
   type UnixTimestamp,
 } from "@ensnode/ensnode-sdk";
 
-import { db } from "@/lib/db";
+import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 
 interface FindRegisteredNameTokensForDomainRecord {
-  domains: typeof schema.subgraph_domain.$inferSelect;
-  nameTokens: typeof schema.nameTokens.$inferSelect;
-  registrationLifecycles: typeof schema.registrationLifecycles.$inferSelect;
+  domains: typeof ensIndexerSchema.subgraph_domain.$inferSelect;
+  nameTokens: typeof ensIndexerSchema.nameTokens.$inferSelect;
+  registrationLifecycles: typeof ensIndexerSchema.registrationLifecycles.$inferSelect;
 }
 
 /**
@@ -32,21 +31,24 @@ interface FindRegisteredNameTokensForDomainRecord {
 async function _findRegisteredNameTokensForDomain(
   domainId: Node,
 ): Promise<FindRegisteredNameTokensForDomainRecord[]> {
-  const query = db
+  const query = ensDb
     .select({
-      nameTokens: schema.nameTokens,
-      registrationLifecycles: schema.registrationLifecycles,
-      domains: schema.subgraph_domain,
+      nameTokens: ensIndexerSchema.nameTokens,
+      registrationLifecycles: ensIndexerSchema.registrationLifecycles,
+      domains: ensIndexerSchema.subgraph_domain,
     })
-    .from(schema.nameTokens)
+    .from(ensIndexerSchema.nameTokens)
     // join Registration Lifecycles associated with Name Tokens
     .innerJoin(
-      schema.registrationLifecycles,
-      eq(schema.nameTokens.domainId, schema.registrationLifecycles.node),
+      ensIndexerSchema.registrationLifecycles,
+      eq(ensIndexerSchema.nameTokens.domainId, ensIndexerSchema.registrationLifecycles.node),
     )
     // join Domains associated with Name Tokens
-    .innerJoin(schema.subgraph_domain, eq(schema.nameTokens.domainId, schema.subgraph_domain.id))
-    .where(eq(schema.nameTokens.domainId, domainId));
+    .innerJoin(
+      ensIndexerSchema.subgraph_domain,
+      eq(ensIndexerSchema.nameTokens.domainId, ensIndexerSchema.subgraph_domain.id),
+    )
+    .where(eq(ensIndexerSchema.nameTokens.domainId, domainId));
 
   const records = await query;
 

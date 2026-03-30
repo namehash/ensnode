@@ -6,7 +6,7 @@ import { type EnsIndexerPublicConfig, PluginName } from "./types";
  * Determines if the provided `config` results in indexing behavior compatible with the legacy ENS
  * Subgraph.
  *
- * @see https://ensnode.io/docs/concepts/what-is-the-ens-subgraph/
+ * @see https://ensnode.io/docs/concepts/what-is-the-ens-subgraph
  */
 export function isSubgraphCompatible(
   config: Pick<EnsIndexerPublicConfig, "namespace" | "plugins" | "labelSet">,

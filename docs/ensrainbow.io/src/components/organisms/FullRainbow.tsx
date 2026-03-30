@@ -48,7 +48,7 @@ export default function FullRainbow() {
   return (
     <section className="box-border w-full h-fit flex flex-col flex-nowrap items-center justify-center py-[60px] px-5 bg-[#FEFEFF] md:py-20 lg:px-28 lg:py-[120px]">
       <div className="flex flex-col xl:flex-row items-center justify-center gap-8 xl:justify-between max-w-[1216px]">
-        <div className="relative flex flex-row justify-center lg:justify-start items-center w-full max-w-2xl xl:w-[60%] rounded-none bg-origin-border flex-shrink-0 box-border">
+        <div className="relative flex flex-row justify-center lg:justify-start items-center w-full max-w-2xl xl:w-[60%] rounded-none bg-origin-border shrink-0 box-border">
           {barChart()}
         </div>
         <div className="flex flex-col gap-4 h-fit w-full max-w-3xl items-center xl:items-start xl:w-[40%] md:px-[72px] xl:px-0">
