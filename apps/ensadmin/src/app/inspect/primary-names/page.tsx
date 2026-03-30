@@ -40,8 +40,8 @@ export default function ResolvePrimaryNameInspector() {
   const [debouncedAddress] = useDebouncedValue(address, 150);
 
   useEffect(() => {
-    setAddress(addressFromQuery ?? "");
-  }, [addressFromQuery]);
+    setAddress(addressFromQuery ?? exampleAddresses[0].address);
+  }, [addressFromQuery, exampleAddresses]);
 
   const navigateToAddress = (addr: Address) => {
     setAddress(addr);

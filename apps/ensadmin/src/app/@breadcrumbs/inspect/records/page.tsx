@@ -15,11 +15,10 @@ import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 
 export default function Page() {
   const searchParams = useSearchParams();
-  const nameParam = searchParams.get("name");
   const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
   const recordsBaseHref = retainCurrentRawConnectionUrlParam("/inspect/records");
 
-  const name = nameParam ? (nameParam as Name) : null;
+  const name = (searchParams.get("name")?.trim() || null) as Name | null;
 
   if (name) {
     return (

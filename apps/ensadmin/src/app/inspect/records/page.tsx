@@ -10,7 +10,7 @@ import {
   ENSNamespaceIds,
   getNamespaceSpecificValue,
   type Name,
-  NamespaceSpecificValue,
+  type NamespaceSpecificValue,
 } from "@ensnode/ensnode-sdk";
 
 import { RenderRequestsOutput } from "@/app/inspect/_components/render-requests-output";
