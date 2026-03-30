@@ -1,6 +1,7 @@
 {
+  "private": true,
   "name": "enscli",
-  "version": "0.0.1",
+  "version": "1.9.0",
   "description": "Reserved for the ENSNode project by NameHash Labs. See https://ensnode.io",
   "repository": {
     "type": "git",

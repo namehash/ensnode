@@ -7,6 +7,7 @@ import { getReferralLeaderboardEditionsCaches } from "@/cache/referral-leaderboa
 import { referralProgramEditionConfigSetCache } from "@/cache/referral-program-edition-set.cache";
 import { referrerLeaderboardCache } from "@/cache/referrer-leaderboard.cache";
 import { redactEnsApiConfig } from "@/config/redact";
+import { writeGeneratedSchema } from "@/graphql-api/lib/generate-schema";
 import { sdk } from "@/lib/instrumentation";
 import logger from "@/lib/logger";
 
@@ -26,12 +27,15 @@ const server = serve(
   async (info) => {
     logger.info({ config: redactEnsApiConfig(config) }, `ENSApi listening on port ${info.port}`);
 
+    // Write the generated graphql schema
+    await writeGeneratedSchema();
+
     // Trigger proactive initialization of the indexing status cache at startup.
     // SWRCache with proactivelyInitialize: true starts fetching immediately upon
     // construction, but construction is deferred via the lazy proxy until first
     // access — so we access it explicitly here rather than waiting for the first
     // user request.
-    indexingStatusCache.read();
+    await indexingStatusCache.read();
   },
 );
 

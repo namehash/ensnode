@@ -6,7 +6,7 @@ import { createApp } from "@/lib/hono-factory";
 
 const app = createApp();
 
-// 503 if ensv2 plugin not available
+// 503 if prerequisites not met
 app.use(async (c, next) => {
   const prerequisite = hasGraphqlApiConfigSupport(config.ensIndexerPublicConfig);
   if (!prerequisite.supported) {
