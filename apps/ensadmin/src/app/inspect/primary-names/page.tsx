@@ -43,7 +43,7 @@ export default function ResolvePrimaryNameInspector() {
     setAddress(addressFromQuery ?? "");
   }, [addressFromQuery]);
 
-  const navigateToAddress = (addr: string) => {
+  const navigateToAddress = (addr: Address) => {
     setAddress(addr);
     const path = `/inspect/primary-names?address=${encodeURIComponent(addr)}`;
     const href = retainCurrentRawConnectionUrlParam(path);
@@ -130,7 +130,7 @@ export default function ResolvePrimaryNameInspector() {
             canResolve={isAddress(address.trim())}
             hasChanged={address.trim() !== addressFromQuery}
             onRefetch={refetch}
-            onNavigate={() => navigateToAddress(address.trim())}
+            onNavigate={() => navigateToAddress(address.trim() as Address)}
           />
         </CardFooter>
       </Card>

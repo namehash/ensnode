@@ -13,7 +13,7 @@ import {
   maybeGetDatasource,
 } from "@ensnode/datasources";
 import { usePrimaryName } from "@ensnode/ensnode-react";
-import { getNamespaceSpecificValue } from "@ensnode/ensnode-sdk";
+import { type DefaultableChainId, getNamespaceSpecificValue } from "@ensnode/ensnode-sdk";
 
 import { RenderRequestsOutput } from "@/app/inspect/_components/render-requests-output";
 import { ResolveButton } from "@/app/inspect/_components/resolve-button";
@@ -59,10 +59,10 @@ export default function ResolvePrimaryNameInspector() {
   );
 
   const addressFromQuery = searchParams.get("address")?.trim() || null;
-  const chainIdFromQuery = searchParams.get("chainId") || "1";
+  const chainIdFromQuery = Number(searchParams.get("chainId") ?? "1") as DefaultableChainId;
 
   const [address, setAddress] = useState(addressFromQuery || exampleAddresses[0].address);
-  const [chainId, setChainId] = useState(chainIdFromQuery);
+  const [chainId, setChainId] = useState<DefaultableChainId>(chainIdFromQuery);
   const [debouncedAddress] = useDebouncedValue(address, 150);
 
   useEffect(() => {
@@ -73,10 +73,10 @@ export default function ResolvePrimaryNameInspector() {
     setChainId(chainIdFromQuery);
   }, [chainIdFromQuery]);
 
-  const navigateToAddress = (addr: string, chain: string) => {
+  const navigateToAddress = (addr: Address, chain: DefaultableChainId) => {
     setAddress(addr);
     setChainId(chain);
-    const path = `/inspect/primary-name?address=${encodeURIComponent(addr)}&chainId=${encodeURIComponent(chain)}`;
+    const path = `/inspect/primary-name?address=${encodeURIComponent(addr)}&chainId=${encodeURIComponent(String(chain))}`;
     const href = retainCurrentRawConnectionUrlParam(path);
     router.push(href);
   };
@@ -87,7 +87,7 @@ export default function ResolvePrimaryNameInspector() {
 
   const accelerated = usePrimaryName({
     address: debouncedAddress as Address,
-    chainId: Number(chainId),
+    chainId,
     accelerate: true,
     trace: true,
     query: {
@@ -103,7 +103,7 @@ export default function ResolvePrimaryNameInspector() {
 
   const unaccelerated = usePrimaryName({
     address: debouncedAddress as Address,
-    chainId: Number(chainId),
+    chainId,
     accelerate: false,
     trace: true,
     query: {
@@ -144,7 +144,10 @@ export default function ResolvePrimaryNameInspector() {
             </Label>
             <Label htmlFor="chainId" className="flex-1 flex flex-col gap-1">
               ENSIP-19 Chain ID
-              <Select value={chainId} onValueChange={setChainId}>
+              <Select
+                value={String(chainId)}
+                onValueChange={(val) => setChainId(Number(val) as DefaultableChainId)}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -181,7 +184,7 @@ export default function ResolvePrimaryNameInspector() {
             canResolve={isAddress(address.trim())}
             hasChanged={address.trim() !== addressFromQuery || chainId !== chainIdFromQuery}
             onRefetch={refetch}
-            onNavigate={() => navigateToAddress(address.trim(), chainId)}
+            onNavigate={() => navigateToAddress(address.trim() as Address, chainId)}
           />
         </CardFooter>
       </Card>

@@ -28,7 +28,7 @@ import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 import { DefaultRecordsSelection } from "@/lib/default-records-selection";
 
-const EXAMPLE_NAMES: NamespaceSpecificValue<string[]> = {
+const EXAMPLE_NAMES: NamespaceSpecificValue<Name[]> = {
   default: [
     "vitalik.eth",
     "gregskril.eth",
@@ -71,7 +71,7 @@ const EXAMPLE_NAMES: NamespaceSpecificValue<string[]> = {
 export default function ResolveRecordsInspector() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const nameFromQuery = searchParams.get("name")?.trim() || null;
+  const nameFromQuery = (searchParams.get("name")?.trim() || null) as Name | null;
 
   const namespace = useActiveNamespace();
   const exampleNames = useMemo(
@@ -178,16 +178,14 @@ export default function ResolveRecordsInspector() {
             </div>
           </div>
         </CardContent>
-        {(nameFromQuery || inputName.trim()) && (
-          <CardFooter>
-            <ResolveButton
-              canResolve={!!inputName.trim()}
-              hasChanged={inputName.trim() !== nameFromQuery}
-              onRefetch={refetch}
-              onNavigate={() => navigateToName(inputName.trim())}
-            />
-          </CardFooter>
-        )}
+        <CardFooter>
+          <ResolveButton
+            canResolve={!!inputName.trim()}
+            hasChanged={inputName.trim() !== nameFromQuery}
+            onRefetch={refetch}
+            onNavigate={() => navigateToName(inputName.trim())}
+          />
+        </CardFooter>
       </Card>
 
       {nameFromQuery && (
