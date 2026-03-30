@@ -57,8 +57,11 @@ export default function ResolveRecordsInspector() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (inputName.trim()) {
-      navigateToName(inputName.trim());
+    const trimmed = inputName.trim();
+    if (trimmed === nameFromQuery) {
+      refetch();
+    } else if (trimmed) {
+      navigateToName(trimmed);
     } else {
       const href = retainCurrentRawConnectionUrlParam("/inspect/records");
       router.push(href);
