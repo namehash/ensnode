@@ -8,7 +8,11 @@ import { type Address, isAddress } from "viem";
 
 import { getENSRootChainId } from "@ensnode/datasources";
 import { usePrimaryName } from "@ensnode/ensnode-react";
-import { type DefaultableChainId, getNamespaceSpecificValue } from "@ensnode/ensnode-sdk";
+import {
+  DEFAULT_EVM_CHAIN_ID,
+  type DefaultableChainId,
+  getNamespaceSpecificValue,
+} from "@ensnode/ensnode-sdk";
 import { makeDefaultableChainIdStringSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { RenderRequestsOutput } from "@/app/inspect/_components/render-requests-output";
@@ -147,8 +151,12 @@ export default function ResolvePrimaryNameInspector() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="0">0 (Default EVM Chain Address)</SelectItem>
-                  <SelectItem value="1">1 (ENS Root Chain)</SelectItem>
+                  <SelectItem value={String(DEFAULT_EVM_CHAIN_ID)}>
+                    {DEFAULT_EVM_CHAIN_ID} (Default EVM Chain Address)
+                  </SelectItem>
+                  <SelectItem value={String(defaultChainId)}>
+                    {defaultChainId} ({getChainName(defaultChainId)} — ENS Root Chain)
+                  </SelectItem>
                   {additionalChainIds.map((chainId) => (
                     <SelectItem key={chainId} value={chainId.toString()}>
                       {chainId} ({getChainName(chainId)})

@@ -13,7 +13,5 @@ export const getENSIP19SupportedChainIds = (namespace: ENSNamespaceId): ChainId[
       maybeGetDatasource(namespace, DatasourceNames.ReverseResolverOptimism),
       maybeGetDatasource(namespace, DatasourceNames.ReverseResolverArbitrum),
       maybeGetDatasource(namespace, DatasourceNames.ReverseResolverScroll),
-    ]
-      .filter((ds) => ds !== undefined)
-      .map((ds) => ds.chain.id),
+    ].flatMap((ds) => (ds ? [ds.chain.id] : [])),
   );

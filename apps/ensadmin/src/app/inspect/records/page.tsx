@@ -74,6 +74,7 @@ export default function ResolveRecordsInspector() {
     selection,
     trace: true,
     query: {
+      enabled: !!nameFromQuery,
       staleTime: 0,
       refetchInterval: 0,
       refetchOnMount: false,
@@ -89,6 +90,7 @@ export default function ResolveRecordsInspector() {
     selection,
     trace: true,
     query: {
+      enabled: !!nameFromQuery,
       staleTime: 0,
       refetchInterval: 0,
       refetchOnMount: false,
