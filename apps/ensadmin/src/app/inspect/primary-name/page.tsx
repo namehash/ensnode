@@ -6,12 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useDebouncedValue } from "rooks";
 import { type Address, isAddress } from "viem";
 
-import {
-  DatasourceNames,
-  type ENSNamespaceId,
-  getENSRootChainId,
-  maybeGetDatasource,
-} from "@ensnode/datasources";
+import { getENSRootChainId } from "@ensnode/datasources";
 import { usePrimaryName } from "@ensnode/ensnode-react";
 import { type DefaultableChainId, getNamespaceSpecificValue } from "@ensnode/ensnode-sdk";
 import { makeDefaultableChainIdStringSchema } from "@ensnode/ensnode-sdk/internal";
@@ -31,21 +26,11 @@ import {
 } from "@/components/ui/select";
 import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
+import { getENSIP19SupportedChainIds } from "@/lib/get-ensip19-supported-chain-ids";
 
 import { EXAMPLE_ADDRESSES } from "../_lib/example-addresses";
 
 const defaultableChainIdStringSchema = makeDefaultableChainIdStringSchema("chainId");
-
-const getENSIP19SupportedChainIds = (namespace: ENSNamespaceId) =>
-  [
-    maybeGetDatasource(namespace, DatasourceNames.ReverseResolverBase),
-    maybeGetDatasource(namespace, DatasourceNames.ReverseResolverLinea),
-    maybeGetDatasource(namespace, DatasourceNames.ReverseResolverOptimism),
-    maybeGetDatasource(namespace, DatasourceNames.ReverseResolverArbitrum),
-    maybeGetDatasource(namespace, DatasourceNames.ReverseResolverScroll),
-  ]
-    .filter((ds) => ds !== undefined)
-    .map((ds) => ds.chain.id);
 
 // TODO: showcase current ENSNode configuration and viable acceleration pathways?
 // TODO: use shadcn/form, react-hook-form, and zod to make all of this nicer aross the board

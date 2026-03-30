@@ -6,12 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import { useRecords } from "@ensnode/ensnode-react";
-import {
-  ENSNamespaceIds,
-  getNamespaceSpecificValue,
-  type Name,
-  type NamespaceSpecificValue,
-} from "@ensnode/ensnode-sdk";
+import { getNamespaceSpecificValue, type Name } from "@ensnode/ensnode-sdk";
 
 import { RenderRequestsOutput } from "@/app/inspect/_components/render-requests-output";
 import { ResolveButton } from "@/app/inspect/_components/resolve-button";
@@ -28,43 +23,7 @@ import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 import { DefaultRecordsSelection } from "@/lib/default-records-selection";
 
-const EXAMPLE_NAMES: NamespaceSpecificValue<Name[]> = {
-  default: [
-    "vitalik.eth",
-    "gregskril.eth",
-    "katzman.base.eth",
-    "jesse.base.eth",
-    "alain.linea.eth",
-    "goinfrex.linea.eth",
-    "gift.box",
-    "barmstrong.cb.id",
-    "argent.xyz",
-    "lens.xyz",
-    "🔥🔥🔥🔥🔥.eth",
-  ],
-  [ENSNamespaceIds.Sepolia]: [
-    "gregskril.eth",
-    "vitalik.eth",
-    "myens.eth",
-    "recordstest.eth",
-    "arrondesean.eth",
-    "decode.eth",
-  ],
-  [ENSNamespaceIds.EnsTestEnv]: [
-    "alias.eth",
-    "changerole.eth",
-    "demo.eth",
-    "example.eth",
-    "linked.parent.eth",
-    "parent.eth",
-    "renew.eth",
-    "reregister.eth",
-    "sub1.sub2.parent.eth",
-    "sub2.parent.eth",
-    "test.eth",
-    "wallet.linked.parent.eth",
-  ],
-};
+import { EXAMPLE_NAMES } from "../_lib/example-names";
 
 // TODO: showcase current ENSNode configuration and viable acceleration pathways?
 // TODO: use shadcn/form, react-hook-form, and zod to make all of this nicer aross the board
