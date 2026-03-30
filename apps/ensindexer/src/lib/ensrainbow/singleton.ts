@@ -6,7 +6,7 @@ import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 
 const { ensRainbowUrl, labelSet } = config;
 
-if (ensRainbowUrl === EnsRainbowApiClient.defaultOptions().endpointUrl) {
+if (ensRainbowUrl.href === EnsRainbowApiClient.defaultOptions().endpointUrl.href) {
   console.warn(
     `Using default public ENSRainbow server which may cause increased network latency. For production, use your own ENSRainbow server that runs on the same network as the ENSIndexer server.`,
   );
