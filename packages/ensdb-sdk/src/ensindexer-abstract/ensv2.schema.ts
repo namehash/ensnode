@@ -353,10 +353,13 @@ export const registration = onchainTable(
     registrarChainId: t.integer().notNull().$type<ChainId>(),
     registrarAddress: t.hex().notNull().$type<Address>(),
 
-    // references registrant
+    // may reference a registrant
     registrantId: t.hex().$type<Address>(),
 
-    // may have a referrer
+    // may reference an unregistrant
+    unregistrantId: t.hex().$type<Address>(),
+
+    // may have referrer data
     referrer: t.hex().$type<EncodedReferrer>(),
 
     // may have fuses (NameWrapper, Wrapped BaseRegistrar)

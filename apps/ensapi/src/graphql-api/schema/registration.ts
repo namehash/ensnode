@@ -14,6 +14,7 @@ import { builder } from "@/graphql-api/builder";
 import { orderPaginationBy, paginateByInt } from "@/graphql-api/lib/connection-helpers";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
 import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
+import { AccountRef } from "@/graphql-api/schema/account";
 import { AccountIdRef } from "@/graphql-api/schema/account-id";
 import { INDEX_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { DomainInterfaceRef } from "@/graphql-api/schema/domain";
@@ -42,6 +43,7 @@ export type RegistrationInterface = Pick<
   | "registrarChainId"
   | "registrarAddress"
   | "registrantId"
+  | "unregistrantId"
   | "referrer"
 >;
 export type NameWrapperRegistration = RequiredAndNotNull<Registration, "fuses">;
@@ -129,6 +131,26 @@ RegistrationInterfaceRef.implement({
       type: "Hex",
       nullable: true,
       resolve: (parent) => parent.referrer,
+    }),
+
+    ///////////////////////////
+    // Registration.registrant
+    ///////////////////////////
+    registrant: t.field({
+      description: "The Registrant of a Registration, if exists.",
+      type: AccountRef,
+      nullable: true,
+      resolve: (parent) => parent.registrantId,
+    }),
+
+    /////////////////////////////
+    // Registration.unregistrant
+    /////////////////////////////
+    unregistrant: t.field({
+      description: "The Unregistrant of a Registration, if exists.",
+      type: AccountRef,
+      nullable: true,
+      resolve: (parent) => parent.unregistrantId,
     }),
 
     /////////////////////////

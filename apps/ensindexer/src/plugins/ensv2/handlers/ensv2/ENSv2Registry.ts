@@ -177,9 +177,11 @@ export default function () {
 
       // unregistering a label just immediately sets its expiration to event.block.timestamp, which
       // effectively removes it from resolution (which interprets expired names as non-existent)
-      await context.ensDb
-        .update(ensIndexerSchema.registration, { id: registration.id })
-        .set({ expiry: event.block.timestamp });
+      await ensureAccount(context, unregistrant);
+      await context.ensDb.update(ensIndexerSchema.registration, { id: registration.id }).set({
+        expiry: event.block.timestamp,
+        unregistrantId: interpretAddress(unregistrant),
+      });
 
       // NOTE(shrugs): PermissionedRegistry also increments eacVersionId and tokenVersionId if there was a
       // previous owner, but i'm not sure if we need to handle that detail here
