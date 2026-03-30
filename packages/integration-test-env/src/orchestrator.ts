@@ -239,12 +239,12 @@ async function main() {
   // Phase 1: Start Postgres + Devnet via docker-compose
   log("Starting Postgres and devnet...");
   composeEnvironment = await new DockerComposeEnvironment(MONOREPO_ROOT, "docker-compose.yml")
-    .withWaitStrategy("devnet-1", Wait.forHealthCheck())
-    .withWaitStrategy("postgres-1", Wait.forListeningPorts())
+    .withWaitStrategy("devnet", Wait.forHealthCheck())
+    .withWaitStrategy("postgres", Wait.forListeningPorts())
     .withStartupTimeout(120_000)
     .up(["postgres", "devnet"]);
 
-  const postgresContainer = composeEnvironment.getContainer("postgres-1");
+  const postgresContainer = composeEnvironment.getContainer("postgres");
   const postgresPort = postgresContainer.getMappedPort(5432);
   const DATABASE_URL = `postgresql://postgres:password@localhost:${postgresPort}/postgres`;
   log(`Postgres is ready (port ${postgresPort})`);
