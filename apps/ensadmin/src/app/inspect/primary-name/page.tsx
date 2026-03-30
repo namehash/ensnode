@@ -6,12 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useDebouncedValue } from "rooks";
 import { type Address, isAddress } from "viem";
 
-import {
-  DatasourceNames,
-  type ENSNamespaceId,
-  ENSNamespaceIds,
-  maybeGetDatasource,
-} from "@ensnode/datasources";
+import { DatasourceNames, type ENSNamespaceId, maybeGetDatasource } from "@ensnode/datasources";
 import { usePrimaryName } from "@ensnode/ensnode-react";
 import { type DefaultableChainId, getNamespaceSpecificValue } from "@ensnode/ensnode-sdk";
 
@@ -80,7 +75,9 @@ export default function ResolvePrimaryNameInspector() {
   const navigateToAddress = (addr: Address, chain: DefaultableChainId) => {
     setAddress(addr);
     setChainId(chain);
-    const path = `/inspect/primary-name?address=${encodeURIComponent(addr)}&chainId=${encodeURIComponent(String(chain))}`;
+    const path = `/inspect/primary-name?address=${encodeURIComponent(
+      addr,
+    )}&chainId=${encodeURIComponent(String(chain))}`;
     const href = retainCurrentRawConnectionUrlParam(path);
     router.push(href);
   };
