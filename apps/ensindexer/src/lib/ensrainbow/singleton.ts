@@ -19,3 +19,8 @@ export function getENSRainbowApiClient(): EnsRainbow.ApiClient {
 
   return ensRainbowApiClient;
 }
+
+/**
+ * Singleton ENSRainbow API Client instance for ENSIndexer app.
+ */
+export const ensRainbowClient = getENSRainbowApiClient();

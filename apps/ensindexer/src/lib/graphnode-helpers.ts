@@ -3,9 +3,7 @@ import pRetry from "p-retry";
 import type { LabelHash, LiteralLabel } from "@ensnode/ensnode-sdk";
 import { type EnsRainbow, ErrorCode, isHealError } from "@ensnode/ensrainbow-sdk";
 
-import { getENSRainbowApiClient } from "@/lib/ensraibow-api-client";
-
-const ensRainbowApiClient = getENSRainbowApiClient();
+import { ensRainbowClient } from "@/lib/ensrainbow/singleton";
 
 /**
  * Attempt to heal a labelHash to its original label.
@@ -44,13 +42,13 @@ export async function labelByLabelHash(labelHash: LabelHash): Promise<LiteralLab
   // "last failure was HealServerError" (set) from "last failure was a network throw" (undefined).
   let lastServerError: EnsRainbow.HealServerError | undefined;
 
-  let response: Awaited<ReturnType<typeof ensRainbowApiClient.heal>>;
+  let response: EnsRainbow.HealResponse;
 
   try {
     response = await pRetry(
       async () => {
         lastServerError = undefined;
-        const result = await ensRainbowApiClient.heal(labelHash);
+        const result = await ensRainbowClient.heal(labelHash);
 
         if (isHealError(result) && result.errorCode === ErrorCode.ServerError) {
           lastServerError = result;
@@ -81,7 +79,7 @@ export async function labelByLabelHash(labelHash: LabelHash): Promise<LiteralLab
 
     // Not recoverable; causes the ENSIndexer process to terminate.
     if (error instanceof Error) {
-      error.message = `ENSRainbow Heal Request Failed: ENSRainbow unavailable at '${ensRainbowApiClient.getOptions().endpointUrl}'.`;
+      error.message = `ENSRainbow Heal Request Failed: ENSRainbow unavailable at '${ensRainbowClient.getOptions().endpointUrl}'.`;
     }
 
     throw error;
