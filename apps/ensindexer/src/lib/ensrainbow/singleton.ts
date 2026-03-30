@@ -62,7 +62,7 @@ export function waitForEnsRainbowToBeReady(): Promise<void> {
 
       console.error(`ENSRainbow health check failed after multiple attempts: ${errorMessage}`);
 
-      // Throw the error to terminate the ENSIndexer process due to failed health check of critical dependency
+      // Throw the error to terminate the ENSIndexer process due to the failed health check of a critical dependency
       throw new Error(errorMessage, {
         cause: error instanceof Error ? error : undefined,
       });

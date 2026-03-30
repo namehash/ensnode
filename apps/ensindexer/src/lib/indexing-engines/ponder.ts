@@ -100,7 +100,7 @@ const EventTypeIds = {
   /**
    * Setup event
    *
-   * Driven by code, not by an onchain event.
+   * Driven by indexing initialization code, not by indexing an onchain event.
    *
    * Event handlers for the setup events are fully executed before
    * any onchain event handlers are executed, so they can be used to set up
@@ -134,8 +134,7 @@ function buildEventTypeId(eventName: EventNames): EventTypeId {
  * for a given event type.
  *
  * Some event handlers may have preconditions that need to be met before
- * they can run. For example, onchain event handlers depend on ENSRainbow
- * instance being ready to serve "heal" requests.
+ * they can run.
  */
 async function eventHandlerPreconditions<EventName extends EventNames>(eventName: EventName) {
   const eventType = buildEventTypeId(eventName);
@@ -143,10 +142,9 @@ async function eventHandlerPreconditions<EventName extends EventNames>(eventName
   switch (eventType) {
     case EventTypeIds.Setup:
       /**
-       * Setup event handlers should not have any precondition. This is because
-       * only after all setup handlers have run, the indexing metrics for
-       * Ponder app are populated for all indexed chains.
-       * ENSIndexer relies on these indexing metrics immediately on startup to
+       * Setup event handlers should not have any *blocking* preconditions. This is because
+       * Ponder populates the indexing metrics for all indexed chains only after all setup handlers have run.
+       * ENSIndexer relies on these indexing metrics being immediately available on startup to build and 
        * store the current Indexing Status in ENSDb.
        */
       return;
