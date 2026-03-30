@@ -15,6 +15,8 @@ import {
   ponder,
 } from "ponder:registry";
 
+import { waitForEnsRainbowToBeReady } from "@/lib/ensrainbow/singleton";
+
 /**
  * Context passed to event handlers registered with
  * {@link addOnchainEventListener}.
@@ -92,6 +94,69 @@ function buildIndexingEngineContext(
 }
 
 /**
+ * Event type IDs for indexing handlers.
+ */
+const EventTypeIds = {
+  /**
+   * Setup event
+   *
+   * Driven by code, not by an onchain event.
+   *
+   * Event handlers for the setup events are fully executed before
+   * any onchain event handlers are executed, so they can be used to set up
+   * necessary state for onchain event handlers.
+   */
+  Setup: "Setup",
+
+  /**
+   * Onchain event
+   *
+   * Driven by an onchain event emitted by an indexed contract.
+   */
+  Onchain: "Onchain",
+} as const;
+
+/**
+ * The derived string union of possible {@link EventTypeIds}.
+ */
+type EventTypeId = (typeof EventTypeIds)[keyof typeof EventTypeIds];
+
+function buildEventTypeId(eventName: EventNames): EventTypeId {
+  if (eventName.endsWith(":setup")) {
+    return EventTypeIds.Setup;
+  } else {
+    return EventTypeIds.Onchain;
+  }
+}
+
+/**
+ * Execute any necessary preconditions before running an event handler
+ * for a given event type.
+ *
+ * Some event handlers may have preconditions that need to be met before
+ * they can run. For example, onchain event handlers depend on ENSRainbow
+ * instance being ready to serve "heal" requests.
+ */
+async function eventHandlerPreconditions<EventName extends EventNames>(eventName: EventName) {
+  const eventType = buildEventTypeId(eventName);
+
+  switch (eventType) {
+    case EventTypeIds.Setup:
+      /**
+       * Setup event handlers should not have any precondition. This is because
+       * only after all setup handlers have run, the indexing metrics for
+       * Ponder app are populated for all indexed chains.
+       * ENSIndexer relies on these indexing metrics immediately on startup to
+       * store the current Indexing Status in ENSDb.
+       */
+      return;
+    case EventTypeIds.Onchain: {
+      return await waitForEnsRainbowToBeReady();
+    }
+  }
+}
+
+/**
  * A thin wrapper around `ponder.on` that allows us to:
  * - Provide custom context to event handlers.
  * - Execute additional logic before or after event handlers, if needed.
@@ -106,10 +171,12 @@ export function addOnchainEventListener<EventName extends EventNames>(
   eventName: EventName,
   eventHandler: (args: IndexingEngineEventHandlerArgs<EventName>) => Promise<void> | void,
 ) {
-  return ponder.on(eventName, ({ context, event }) =>
-    eventHandler({
-      context: buildIndexingEngineContext(context),
-      event,
-    }),
+  return ponder.on(eventName, async ({ context, event }) =>
+    eventHandlerPreconditions(eventName).then(() =>
+      eventHandler({
+        context: buildIndexingEngineContext(context),
+        event,
+      }),
+    ),
   );
 }
