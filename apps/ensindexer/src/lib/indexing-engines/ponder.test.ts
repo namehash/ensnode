@@ -281,6 +281,51 @@ describe("addOnchainEventListener", () => {
       expect(handler2).toHaveBeenCalledTimes(1);
     });
 
+    it("calls waitForEnsRainbowToBeReady only once when two onchain callbacks fire concurrently before the readiness promise resolves", async () => {
+      const { addOnchainEventListener } = await getPonderModule();
+      const handler1 = vi.fn().mockResolvedValue(undefined);
+      const handler2 = vi.fn().mockResolvedValue(undefined);
+      let resolveReadiness: (() => void) | undefined;
+
+      // Create a promise that won't resolve until we manually trigger it
+      mockWaitForEnsRainbow.mockImplementation(() => {
+        return new Promise<void>((resolve) => {
+          resolveReadiness = resolve;
+        });
+      });
+
+      // Register two different onchain event listeners
+      addOnchainEventListener("Resolver:AddrChanged" as EventNames, handler1);
+      addOnchainEventListener("Registry:Transfer" as EventNames, handler2);
+
+      // Fire both handlers concurrently - neither should complete yet
+      const promise1 = getRegisteredCallback(0)({
+        context: { db: vi.fn() } as unknown as Context<EventNames>,
+        event: { args: { a: "1" } } as unknown as IndexingEngineEvent<EventNames>,
+      });
+      const promise2 = getRegisteredCallback(1)({
+        context: { db: vi.fn() } as unknown as Context<EventNames>,
+        event: { args: { a: "2" } } as unknown as IndexingEngineEvent<EventNames>,
+      });
+
+      // Should only have been called once despite concurrent execution
+      expect(mockWaitForEnsRainbow).toHaveBeenCalledTimes(1);
+
+      // Neither handler should have executed yet
+      expect(handler1).not.toHaveBeenCalled();
+      expect(handler2).not.toHaveBeenCalled();
+
+      // Now resolve the readiness promise
+      resolveReadiness!();
+
+      // Wait for both handlers to complete
+      await Promise.all([promise1, promise2]);
+
+      // Both handlers should have executed after resolution
+      expect(handler1).toHaveBeenCalledTimes(1);
+      expect(handler2).toHaveBeenCalledTimes(1);
+    });
+
     it("resolves ENSRainbow before calling the handler", async () => {
       const { addOnchainEventListener } = await getPonderModule();
       const handler = vi.fn().mockResolvedValue(undefined);
