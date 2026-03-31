@@ -5,16 +5,17 @@ import type { introspection } from "./generated/graphql-env";
 // Semantic scalar types — these will eventually be imported from enssdk's
 // own type definitions. For now, defined inline.
 type Name = string;
-type UnixTimestamp = number;
 
 export const graphql = initGraphQLTada<{
   introspection: introspection;
   scalars: {
-    Name: Name;
+    Address: `0x${string}`;
     BigInt: bigint;
-    Bytes: `0x${string}`;
+    ChainId: number;
+    Hex: `0x${string}`;
     ID: string;
-    UnixTimestamp: UnixTimestamp;
+    Name: Name;
+    Node: `0x${string}`;
   };
 }>();
 

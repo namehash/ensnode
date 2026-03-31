@@ -12,7 +12,7 @@ export interface ENSSDKClientConfig {
 
 export type ENSSDKClient<TExtended extends object = {}> = TExtended & {
   readonly config: Readonly<ENSSDKClientConfig>;
-  extend<const T extends object>(
+  extend<const T extends object & { config?: never; extend?: never }>(
     fn: (client: ENSSDKClient<TExtended>) => T,
   ): ENSSDKClient<TExtended & T>;
 };

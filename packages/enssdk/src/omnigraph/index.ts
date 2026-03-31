@@ -11,12 +11,11 @@ type GraphQLDocument<R = unknown, V = unknown> = string | DocumentNode | TadaDoc
 
 type QueryOptions<R, V extends Record<string, unknown> | undefined> = {
   query: GraphQLDocument<R, V>;
-  variables?: V;
   signal?: AbortSignal;
-};
+} & (V extends Record<string, unknown> ? { variables: V } : { variables?: undefined });
 
 type QueryResult<R> = {
-  data?: R;
+  data?: R | null;
   errors?: Array<{
     message: string;
     path?: (string | number)[];

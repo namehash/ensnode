@@ -1,3 +1,4 @@
+import { parse } from "graphql";
 import { describe, expect, it, vi } from "vitest";
 
 import { createENSSDKClient } from "../core/index";
@@ -73,5 +74,20 @@ describe("omnigraph module", () => {
     });
 
     expect(mockFetch.mock.calls[0][1].signal).toBe(controller.signal);
+  });
+
+  it("prints DocumentNode queries to string", async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      json: () => Promise.resolve({ data: null }),
+    });
+
+    const client = createMockClient(mockFetch);
+    const doc = parse("query { domain(by: { name: \"nick.eth\" }) { name } }");
+
+    await client.omnigraph.query({ query: doc });
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.query).toContain("domain");
+    expect(body.query).toContain("nick.eth");
   });
 });
