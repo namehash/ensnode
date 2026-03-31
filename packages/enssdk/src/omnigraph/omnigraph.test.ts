@@ -1,11 +1,11 @@
 import { parse } from "graphql";
 import { describe, expect, it, vi } from "vitest";
 
-import { createENSSDKClient } from "../core/index";
+import { createEnsNodeClient } from "../core/index";
 import { omnigraph } from "./index";
 
 function createMockClient(mockFetch: ReturnType<typeof vi.fn>) {
-  return createENSSDKClient({
+  return createEnsNodeClient({
     url: "https://example.com",
     fetch: mockFetch as unknown as typeof globalThis.fetch,
   }).extend(omnigraph);
@@ -13,7 +13,7 @@ function createMockClient(mockFetch: ReturnType<typeof vi.fn>) {
 
 describe("omnigraph module", () => {
   it("attaches omnigraph namespace to client", () => {
-    const client = createENSSDKClient({ url: "https://example.com" }).extend(omnigraph);
+    const client = createEnsNodeClient({ url: "https://example.com" }).extend(omnigraph);
 
     expect(client.omnigraph).toBeDefined();
     expect(typeof client.omnigraph.query).toBe("function");

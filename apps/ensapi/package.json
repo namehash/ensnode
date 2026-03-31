@@ -19,7 +19,7 @@
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
     "typecheck": "tsgo --noEmit",
-    "generate:schema": "tsx src/graphql-api/lib/generate-schema.ts"
+    "generate:gqlschema": "tsx src/graphql-api/lib/generate-schema.ts"
   },
   "dependencies": {
     "@ensdomains/ensjs": "^4.0.2",

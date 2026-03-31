@@ -1,4 +1,4 @@
-export interface ENSSDKClientConfig {
+export interface EnsNodeClientConfig {
   /**
    * ENSNode instance URL (e.g. "https://api.alpha.ensnode.io")
    */
@@ -10,17 +10,17 @@ export interface ENSSDKClientConfig {
   fetch?: typeof globalThis.fetch;
 }
 
-export type ENSSDKClient<TExtended extends object = {}> = TExtended & {
-  readonly config: Readonly<ENSSDKClientConfig>;
+export type EnsNodeClient<TExtended extends object = {}> = TExtended & {
+  readonly config: Readonly<EnsNodeClientConfig>;
   extend<const T extends object & { config?: never; extend?: never }>(
-    fn: (client: ENSSDKClient<TExtended>) => T,
-  ): ENSSDKClient<TExtended & T>;
+    fn: (client: EnsNodeClient<TExtended>) => T,
+  ): EnsNodeClient<TExtended & T>;
 };
 
-export function createENSSDKClient(config: ENSSDKClientConfig): ENSSDKClient {
+export function createEnsNodeClient(config: EnsNodeClientConfig): EnsNodeClient {
   const frozenConfig = Object.freeze({ ...config });
 
-  function makeClient(base: Record<string, unknown>): ENSSDKClient<Record<string, unknown>> {
+  function makeClient(base: Record<string, unknown>): EnsNodeClient<Record<string, unknown>> {
     const client = {
       ...base,
       config: frozenConfig,
@@ -32,8 +32,8 @@ export function createENSSDKClient(config: ENSSDKClientConfig): ENSSDKClient {
         });
       },
     };
-    return client as ENSSDKClient<Record<string, unknown>>;
+    return client as EnsNodeClient<Record<string, unknown>>;
   }
 
-  return makeClient({}) as ENSSDKClient;
+  return makeClient({}) as EnsNodeClient;
 }

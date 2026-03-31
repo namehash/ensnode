@@ -2,7 +2,7 @@
   "name": "enssdk",
   "version": "1.9.0",
   "type": "module",
-  "description": "The foundational ENS client library",
+  "description": "The foundational ENS development library",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -42,7 +42,7 @@
     "lint:ci": "biome ci",
     "test": "vitest",
     "typecheck": "tsgo --noEmit",
-    "generate:schema": "gql.tada generate-output"
+    "generate:gqlschema": "gql.tada generate-output"
   },
   "dependencies": {
     "gql.tada": "^1.8.10",

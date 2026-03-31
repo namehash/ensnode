@@ -97,7 +97,7 @@ jobs:
       - uses: ./.github/actions/setup_node_environment
 
       - name: Generate Schemas & Typings
-        run: pnpm generate:schema
+        run: pnpm generate:gqlschema
 
       - name: Verify generated files are committed
         run: |
@@ -108,7 +108,7 @@ jobs:
             git diff --name-status packages/enssdk/src/omnigraph/generated/
             echo ""
             echo "To fix, run:"
-            echo "  pnpm generate:schema"
+            echo "  pnpm generate:gqlschema"
             echo "Then commit the updated generated files."
             exit 1
           fi

@@ -1,6 +1,6 @@
 # enssdk
 
-The foundational ENS client library. Isomorphic, tree-shakable, with composable modules via subpath exports.
+The foundational ENS developer library. Isomorphic, tree-shakable, with composable modules via subpath exports.
 
 Learn more about [ENSNode](https://ensnode.io/) from [the ENSNode docs](https://ensnode.io/docs).
 
@@ -15,18 +15,18 @@ npm install enssdk
 ### Core Client
 
 ```typescript
-import { createENSSDKClient } from "enssdk/core";
+import { createEnsNodeClient } from "enssdk/core";
 
-const client = createENSSDKClient({ url: "https://api.alpha.ensnode.io" });
+const client = createEnsNodeClient({ url: "https://api.alpha.ensnode.io" });
 ```
 
 ### Omnigraph (Typed GraphQL)
 
 ```typescript
-import { createENSSDKClient } from "enssdk/core";
+import { createEnsNodeClient } from "enssdk/core";
 import { omnigraph, graphql } from "enssdk/omnigraph";
 
-const client = createENSSDKClient({ url: "https://api.alpha.ensnode.io" })
+const client = createEnsNodeClient({ url: "https://api.alpha.ensnode.io" })
   .extend(omnigraph);
 
 const MyQuery = graphql(`

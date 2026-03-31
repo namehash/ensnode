@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { createENSSDKClient } from "./index";
+import { createEnsNodeClient } from "./index";
 
-describe("createENSSDKClient", () => {
+describe("createEnsNodeClient", () => {
   it("creates a client with frozen config", () => {
-    const client = createENSSDKClient({ url: "https://example.com" });
+    const client = createEnsNodeClient({ url: "https://example.com" });
 
     expect(client.config.url).toBe("https://example.com");
     expect(client.config.fetch).toBeUndefined();
@@ -13,7 +13,7 @@ describe("createENSSDKClient", () => {
 
   it("preserves custom fetch in config", () => {
     const customFetch = vi.fn();
-    const client = createENSSDKClient({
+    const client = createEnsNodeClient({
       url: "https://example.com",
       fetch: customFetch as unknown as typeof globalThis.fetch,
     });
@@ -24,7 +24,7 @@ describe("createENSSDKClient", () => {
 
 describe("extend", () => {
   it("adds module properties to the client", () => {
-    const client = createENSSDKClient({ url: "https://example.com" }).extend(() => ({
+    const client = createEnsNodeClient({ url: "https://example.com" }).extend(() => ({
       myModule: { greet: () => "hello" },
     }));
 
@@ -33,7 +33,7 @@ describe("extend", () => {
   });
 
   it("passes the base client to the decorator function", () => {
-    const client = createENSSDKClient({ url: "https://example.com" }).extend((base) => ({
+    const client = createEnsNodeClient({ url: "https://example.com" }).extend((base) => ({
       meta: { getUrl: () => base.config.url },
     }));
 
@@ -41,7 +41,7 @@ describe("extend", () => {
   });
 
   it("supports chaining multiple extend calls", () => {
-    const client = createENSSDKClient({ url: "https://example.com" })
+    const client = createEnsNodeClient({ url: "https://example.com" })
       .extend(() => ({ a: { value: 1 } }))
       .extend(() => ({ b: { value: 2 } }));
 
@@ -51,7 +51,7 @@ describe("extend", () => {
   });
 
   it("later extensions can see earlier extensions via the base client", () => {
-    const client = createENSSDKClient({ url: "https://example.com" })
+    const client = createEnsNodeClient({ url: "https://example.com" })
       .extend(() => ({ a: { value: 42 } }))
       .extend((base) => ({
         b: { doubled: () => base.a.value * 2 },

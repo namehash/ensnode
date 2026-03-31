@@ -11,7 +11,7 @@ const MONOREPO_ROOT = resolve(import.meta.dirname, "../../../../../");
 const ENSSDK_ROOT = resolve(MONOREPO_ROOT, "packages/enssdk/");
 const OUTPUT_PATH = resolve(ENSSDK_ROOT, "src/omnigraph/generated/schema.graphql");
 
-export async function writeGeneratedSchema() {
+export async function writeGraphQLSchema() {
   const { schema } = await import("@/graphql-api/schema");
   const schemaAsString = printSchema(lexicographicSortSchema(schema));
 
@@ -25,6 +25,6 @@ export async function writeGeneratedSchema() {
 
 // when executed directly, write generated schema and exit
 if (import.meta.url === `file://${process.argv[1]}`) {
-  await writeGeneratedSchema();
+  await writeGraphQLSchema();
   process.exit(0);
 }

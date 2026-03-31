@@ -2,7 +2,7 @@ import type { TadaDocumentNode } from "gql.tada";
 import type { DocumentNode } from "graphql";
 import { print } from "graphql";
 
-import type { ENSSDKClient } from "../core/index";
+import type { EnsNodeClient } from "../core/index";
 
 export type { FragmentOf, ResultOf, VariablesOf } from "./graphql";
 export { graphql, readFragment } from "./graphql";
@@ -31,7 +31,7 @@ export interface OmnigraphModule {
   };
 }
 
-export function omnigraph(client: ENSSDKClient): OmnigraphModule {
+export function omnigraph(client: EnsNodeClient): OmnigraphModule {
   const { config } = client;
   const _fetch = config.fetch ?? globalThis.fetch;
   const endpoint = new URL("/api/omnigraph", config.url).href;
