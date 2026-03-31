@@ -15,7 +15,7 @@ import {
   ponder,
 } from "ponder:registry";
 
-import { waitForEnsRainbowToBeReady } from "@/lib/ensrainbow/singleton";
+import { ensureValidEnsRainbowConnection } from "./preconditions/valid-ensrainbow-connection";
 
 /**
  * Context passed to event handlers registered with
@@ -164,17 +164,26 @@ let preparedIndexingActivation = false;
  * indexing as little as possible, since this function is called for every
  * "onchain" event.
  *
+ * @throws If valid ENSRainbow connection could not be established after
+ *         multiple attempts.
+ *
  * @example A single blocking precondition
  * ```ts
  * await waitForEnsRainbowToBeReady();
  * ```
  *
- * @example Multiple blocking preconditions
+ * @example Multiple concurrent blocking preconditions
  * ```ts
  * await Promise.all([
  *   waitForEnsRainbowToBeReady(),
  *   waitForAnotherPrecondition(),
  * ]);
+ * ```
+ *
+ * @example Multiple sequential blocking preconditions
+ * ```ts
+ * await waitForEnsRainbowToBeReady();
+ * await waitForAnotherPrecondition();
  * ```
  */
 async function prepareIndexingActivation() {
@@ -184,7 +193,20 @@ async function prepareIndexingActivation() {
 
   preparedIndexingActivation = true;
 
-  await waitForEnsRainbowToBeReady();
+  try {
+    await ensureValidEnsRainbowConnection();
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+
+    console.error(
+      `[Ponder Indexing Engine]: Failed to establish a valid connection to ENSRainbow: ${errorMessage}`,
+    );
+
+    // Throw the error to terminate the ENSIndexer process due to failed connection to critical dependency
+    throw new Error(errorMessage, {
+      cause: error,
+    });
+  }
 }
 
 /**
