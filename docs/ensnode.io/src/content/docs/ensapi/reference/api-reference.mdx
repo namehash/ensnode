@@ -1,0 +1,37 @@
+---
+title: ENSApi API Reference
+description: Interactive API reference documentation for ENSApi endpoints.
+sidebar:
+  label: API Reference
+tableOfContents: false
+---
+
+import { ScalarComponent } from "@scalar/astro";
+import openapiSpec from "@workspace/docs/docs.ensnode.io/ensapi-openapi.json";
+
+<ScalarComponent
+  configuration={{
+    content: openapiSpec,
+    theme: "none",
+    agent: { disabled: true },
+    hideDownloadButton: true,
+    hiddenClients: true,
+    telemetry: false,
+    defaultOpenAllTags: true,
+    expandAllResponses: true,
+    hideClientButton: true,
+    hideSearch: true,
+    showOperationId: true,
+    showSidebar: false,
+    showDeveloperTools: "never",
+    isEditable: false,
+    isLoading: false,
+    documentDownloadType: "both",
+    hideTestRequestButton: false,
+    forceDarkModeState: "light",
+    hideDarkModeToggle: true,
+    withDefaultFonts: true,
+    expandAllModelSections: true,
+    customCss: `.scalar-mcp-layer { display: none !important; } .section { padding-inline: 0 !important; }`,
+  }}
+/>
