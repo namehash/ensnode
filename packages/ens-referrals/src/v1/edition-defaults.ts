@@ -28,7 +28,7 @@ export function getDefaultReferralProgramEditionConfigSet(
 ): ReferralProgramEditionConfigSet {
   const subregistryId = getEthnamesSubregistryId(ensNamespaceId);
 
-  const edition1: ReferralProgramEditionConfig = {
+  const december2025Edition: ReferralProgramEditionConfig = {
     slug: "2025-12",
     displayName: "ENS Holiday Awards",
     rules: buildReferralProgramRulesPieSplit(
@@ -37,26 +37,44 @@ export function getDefaultReferralProgramEditionConfigSet(
       parseTimestamp("2025-12-01T00:00:00Z"),
       parseTimestamp("2025-12-31T23:59:59Z"),
       subregistryId,
-      new URL("https://ensawards.org/ens-holiday-awards-rules"),
+      new URL("https://ensawards.org/ens-referral-program/editions/2025-12/rules"),
       true,
     ),
   };
 
-  const edition2: ReferralProgramEditionConfig = {
-    slug: "2026-03",
-    displayName: "March 2026",
+  const april2026Edition: ReferralProgramEditionConfig = {
+    slug: "2026-04",
+    displayName: "April 2026",
     rules: buildReferralProgramRulesRevShareLimit(
       parseUsdc("10000"),
-      parseUsdc("500"),
+      parseUsdc("100"),
       0.5,
-      parseTimestamp("2026-03-01T00:00:00Z"),
-      parseTimestamp("2026-03-31T23:59:59Z"),
+      parseTimestamp("2026-04-01T00:00:00Z"),
+      parseTimestamp("2026-04-30T23:59:59Z"),
       subregistryId,
-      // TODO: replace this with the dedicated March 2026 rules URL once published
-      new URL("https://ensawards.org/ens-holiday-awards-rules"),
+      new URL("https://ensawards.org/ens-referral-program/editions/2026-04/rules"),
       false,
     ),
   };
 
-  return buildReferralProgramEditionConfigSet([edition1, edition2]);
+  const may2026Edition: ReferralProgramEditionConfig = {
+    slug: "2026-05",
+    displayName: "May 2026",
+    rules: buildReferralProgramRulesRevShareLimit(
+      parseUsdc("30000"),
+      parseUsdc("100"),
+      0.5,
+      parseTimestamp("2026-05-01T00:00:00Z"),
+      parseTimestamp("2026-05-31T23:59:59Z"),
+      subregistryId,
+      new URL("https://ensawards.org/ens-referral-program/editions/2026-05/rules"),
+      false,
+    ),
+  };
+
+  return buildReferralProgramEditionConfigSet([
+    december2025Edition,
+    april2026Edition,
+    may2026Edition,
+  ]);
 }
