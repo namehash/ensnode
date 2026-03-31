@@ -10,7 +10,6 @@ export function starlight(): AstroIntegration {
       ThemeSelect: "./src/components/overrides/ThemeSelect.astro",
       SocialIcons: "./src/components/overrides/SocialIcons.astro",
       Hero: "./src/components/overrides/Hero.astro",
-      PageSidebar: "./src/components/overrides/PageSidebar.astro",
       TwoColumnContent: "./src/components/overrides/TwoColumnContent.astro",
       Search: "./src/components/overrides/DocsSearch.astro",
       EditLink: "./src/components/overrides/EditLink.astro",

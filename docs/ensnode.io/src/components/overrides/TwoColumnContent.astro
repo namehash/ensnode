@@ -2,15 +2,16 @@
 /**
  * Override of Starlight's TwoColumnContent that always renders the right
  * sidebar column. The original conditionally hides it when tableOfContents
- * is disabled, which also removes our TelegramInvite from the
- * TableOfContents override.
+ * is disabled, which also removes our TelegramInvite.
  */
+import TelegramInvite from "../molecules/TelegramInvite.astro";
 ---
 
 <div class="lg:sl-flex">
 	<aside class="right-sidebar-container print:hidden">
 		<div class="right-sidebar">
 			<slot name="right-sidebar" />
+			<TelegramInvite />
 		</div>
 	</aside>
 	<div class="main-pane"><slot /></div>
