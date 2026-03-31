@@ -38,7 +38,9 @@ describe("getDefaultReferralProgramEditionConfigSet", () => {
     });
 
     it("Contains all expected edition `slug`s", () => {
-      expect(new Set(configSet.keys())).toStrictEqual(new Set(productionEditions.map((e) => e.slug)));
+      expect(new Set(configSet.keys())).toStrictEqual(
+        new Set(productionEditions.map((e) => e.slug)),
+      );
     });
 
     for (const expected of productionEditions) {
