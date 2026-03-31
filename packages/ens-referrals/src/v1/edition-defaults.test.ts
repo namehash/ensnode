@@ -15,13 +15,16 @@ import { getDefaultReferralProgramEditionConfigSet } from "./edition-defaults";
 const PRODUCTION_EDITIONS_URL = "https://ensawards.org/production-editions.json";
 
 async function fetchProductionEditions(): Promise<ReferralProgramEditionConfig[] | null> {
+  let response: Response;
   try {
-    const response = await fetch(PRODUCTION_EDITIONS_URL);
-    if (!response.ok) return null;
-    return deserializeReferralProgramEditionConfigSetArray(await response.json());
+    response = await fetch(PRODUCTION_EDITIONS_URL);
   } catch {
     return null;
   }
+
+  if (!response.ok) return null;
+  // Intentionally let deserialize errors throw so parity regressions fail the suite.
+  return deserializeReferralProgramEditionConfigSetArray(await response.json());
 }
 
 describe("getDefaultReferralProgramEditionConfigSet", () => {
