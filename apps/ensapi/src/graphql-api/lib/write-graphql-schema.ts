@@ -11,20 +11,33 @@ const MONOREPO_ROOT = resolve(import.meta.dirname, "../../../../../");
 const ENSSDK_ROOT = resolve(MONOREPO_ROOT, "packages/enssdk/");
 const OUTPUT_PATH = resolve(ENSSDK_ROOT, "src/omnigraph/generated/schema.graphql");
 
-export async function writeGraphQLSchema() {
+async function _writeGraphQLSchema() {
   const { schema } = await import("@/graphql-api/schema");
   const schemaAsString = printSchema(lexicographicSortSchema(schema));
 
+  await writeFile(OUTPUT_PATH, schemaAsString);
+}
+
+/**
+ * Attempts to write the GraphQL Schema, swallowing any errors.
+ */
+export async function writeGraphQLSchema() {
   try {
-    await writeFile(OUTPUT_PATH, schemaAsString);
+    await _writeGraphQLSchema();
     logger.info(`Wrote SDL to ${OUTPUT_PATH}`);
   } catch (error) {
-    logger.error(error, `Unable to write SDL to ${OUTPUT_PATH}`);
+    logger.warn(error, `Unable to write SDL to ${OUTPUT_PATH}`);
   }
 }
 
-// when executed directly, write generated schema and exit
+// when executed directly (`pnpm generate:gqlschema`), write generated schema and produce an exit code
 if (import.meta.url === `file://${process.argv[1]}`) {
-  await writeGraphQLSchema();
-  process.exit(0);
+  try {
+    await writeGraphQLSchema();
+    console.log(`Wrote SDL to ${OUTPUT_PATH}`);
+    process.exit(0);
+  } catch (error) {
+    console.error(error);
+    process.exit(1);
+  }
 }
