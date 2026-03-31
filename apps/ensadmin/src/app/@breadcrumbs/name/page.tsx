@@ -17,9 +17,9 @@ import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 
 export default function Page() {
   const searchParams = useSearchParams();
-  const name = searchParams.get("name") as Name | null;
   const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
   const exploreNamesBaseHref = retainCurrentRawConnectionUrlParam("/name");
+  const name = (searchParams.get("name")?.trim() || null) as Name | null;
 
   return (
     <BreadcrumbsGroup name="ENS Explorer">

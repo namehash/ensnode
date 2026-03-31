@@ -13,6 +13,13 @@ export function getNameDetailsRelativePath(name: Name): string {
   return `/name?name=${encodeURIComponent(name)}`;
 }
 
+/**
+ * Gets the relative path of the record resolution inspector page for a given name.
+ */
+export function getRecordResolutionRelativePath(name: Name): string {
+  return `/inspect/records?name=${encodeURIComponent(name)}`;
+}
+
 interface NameLinkProps {
   name: Name;
   className?: string;
