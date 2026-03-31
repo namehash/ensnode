@@ -1,7 +1,6 @@
+import type { ChainId, UrlString } from "enssdk";
 import type { z } from "zod/v4";
 
-import type { UrlString } from "../serialized-types";
-import type { ChainId } from "../types";
 import type {
   DatabaseSchemaNameSchema,
   PortNumberSchema,

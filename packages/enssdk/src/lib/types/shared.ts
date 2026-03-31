@@ -1,5 +1,3 @@
-import type { AccountId } from "./types";
-
 /**
  * Serialized representation of {@link ChainId}.
  **/

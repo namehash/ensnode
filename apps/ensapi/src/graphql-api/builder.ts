@@ -1,8 +1,6 @@
 import SchemaBuilder, { type MaybePromise } from "@pothos/core";
 import DataloaderPlugin from "@pothos/plugin-dataloader";
 import RelayPlugin from "@pothos/plugin-relay";
-import type { Address, Hex } from "viem";
-
 import type {
   ChainId,
   CoinType,
@@ -17,7 +15,8 @@ import type {
   RenewalId,
   ResolverId,
   ResolverRecordsId,
-} from "@ensnode/ensnode-sdk";
+} from "enssdk";
+import type { Address, Hex } from "viem";
 
 import type { context } from "@/graphql-api/context";
 

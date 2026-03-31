@@ -396,6 +396,9 @@ importers:
       drizzle-orm:
         specifier: 'catalog:'
         version: 0.41.0(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/pg@8.16.0)(kysely@0.28.14)(pg@8.16.3)
+      enssdk:
+        specifier: workspace:*
+        version: link:../../packages/enssdk
       graphql:
         specifier: ^16.11.0
         version: 16.11.0
@@ -927,6 +930,9 @@ importers:
       date-fns:
         specifier: 'catalog:'
         version: 4.1.0
+      enssdk:
+        specifier: workspace:*
+        version: link:../enssdk
       zod:
         specifier: 'catalog:'
         version: 4.3.6
@@ -974,12 +980,18 @@ importers:
 
   packages/enssdk:
     dependencies:
+      '@ensdomains/address-encoder':
+        specifier: ^1.1.2
+        version: 1.1.4
       gql.tada:
         specifier: ^1.8.10
         version: 1.9.1(graphql@16.11.0)(typescript@5.9.3)
       graphql:
         specifier: ^16.11.0
         version: 16.11.0
+      viem:
+        specifier: 'catalog:'
+        version: 2.38.5(typescript@5.9.3)(zod@4.3.6)
     devDependencies:
       '@ensnode/shared-configs':
         specifier: workspace:*

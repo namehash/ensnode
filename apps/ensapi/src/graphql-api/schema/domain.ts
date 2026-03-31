@@ -5,7 +5,6 @@ import {
   type DomainId,
   type ENSv1DomainId,
   type ENSv2DomainId,
-  getStorageId,
   interpretedLabelsToInterpretedName,
 } from "@ensnode/ensnode-sdk";
 

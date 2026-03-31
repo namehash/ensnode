@@ -1,7 +1,8 @@
+import type { ChainId } from "enssdk";
+
 import type { ENSNamespaceId } from "@ensnode/datasources";
 
 import type { EnsRainbowClientLabelSet, EnsRainbowPublicConfig } from "../../ensrainbow";
-import type { ChainId } from "../../shared/types";
 
 /**
  * A PluginName is a unique id for a 'plugin': we use the notion of

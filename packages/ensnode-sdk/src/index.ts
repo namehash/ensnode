@@ -1,3 +1,8 @@
+// re-export ENSNamespaceIds and ENSNamespaceId from @ensnode/datasources
+// so consumers don't need it as a dependency
+export type { ENSNamespaceId } from "@ensnode/datasources";
+export { ENSNamespaceIds } from "@ensnode/datasources";
+
 export * from "./ens";
 export * from "./ensapi";
 export * from "./ensindexer";
@@ -26,7 +31,6 @@ export * from "./shared/numbers";
 export * from "./shared/prerequisites";
 export * from "./shared/root-registry";
 export * from "./shared/serialize";
-export * from "./shared/serialized-types";
 export * from "./shared/types";
 export * from "./shared/url";
 export * from "./subgraph-api/prerequisites";

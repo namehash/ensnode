@@ -1,18 +1,10 @@
-import { type Address, hexToBigInt } from "viem";
-
-import {
-  type AccountId,
-  AssetNamespaces,
-  formatAccountId,
-  formatAssetId,
-  type LabelHash,
-  type Node,
-} from "@ensnode/ensnode-sdk";
-
 import type {
+  AccountId,
   DomainId,
   ENSv1DomainId,
   ENSv2DomainId,
+  LabelHash,
+  Node,
   PermissionsId,
   PermissionsResourceId,
   PermissionsUserId,
@@ -22,7 +14,11 @@ import type {
   ResolverId,
   ResolverRecordsId,
   StorageId,
-} from "./ids";
+} from "enssdk";
+import { AssetNamespaces } from "enssdk";
+import { type Address, hexToBigInt } from "viem";
+
+import { formatAccountId, formatAssetId } from "@ensnode/ensnode-sdk";
 
 /**
  * Formats and brands an AccountId as a RegistryId.

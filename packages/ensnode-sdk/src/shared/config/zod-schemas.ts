@@ -1,9 +1,9 @@
+import type { ChainId } from "enssdk";
 import { z } from "zod/v4";
 
 import { ENSNamespaceIds } from "@ensnode/datasources";
 
 import { deserializeChainId } from "../deserialize";
-import type { ChainId } from "../types";
 import { isHttpProtocol, isWebSocketProtocol } from "../url";
 import { makeChainIdStringSchema, makeUrlSchema } from "../zod-schemas";
 import type { RpcConfig } from "./types";

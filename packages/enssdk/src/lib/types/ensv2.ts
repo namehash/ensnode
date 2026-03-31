@@ -1,4 +1,5 @@
-import type { AccountIdString, Node } from "@ensnode/ensnode-sdk";
+import type { Node } from "./ens";
+import type { AccountIdString } from "./shared";
 
 /**
  * Serialized CAIP-10 Asset ID that uniquely identifies a Registry contract.
@@ -6,9 +7,12 @@ import type { AccountIdString, Node } from "@ensnode/ensnode-sdk";
 export type RegistryId = string & { __brand: "RegistryContractId" };
 
 /**
- * A Domain's Canonical Id is uint256(labelHash) with lower (right-most) 32 bits zero'd.
+ * A Label's Storage Id is uint256(labelHash) with lower (right-most) 32 bits zero'd.
+ *
+ * In ENSv2, the rightmost 32 bits of a TokenId is used for version management, and it is the leftmost
+ * 224 bits that are a stable identifier for a Label within a Registry.
  */
-export type CanonicalId = bigint;
+export type StorageId = bigint;
 
 /**
  * The node that uniquely identifies an ENSv1 name.
@@ -16,7 +20,8 @@ export type CanonicalId = bigint;
 export type ENSv1DomainId = Node & { __brand: "ENSv1DomainId" };
 
 /**
- * The Serialized CAIP-19 Asset ID that uniquely identifies an ENSv2 name.
+ * The Serialized CAIP-19 Asset ID (using Storage Id instead of TokenId) that uniquely identifies
+ * an ENSv2 name.
  */
 export type ENSv2DomainId = string & { __brand: "ENSv2DomainId" };
 
@@ -59,3 +64,9 @@ export type RegistrationId = string & { __brand: "RegistrationId" };
  * Uniquely identifies a Renewal entity.
  */
 export type RenewalId = string & { __brand: "RenewalId" };
+
+/**
+ * CanonicalPath is an ordered list of DomainIds describing the canonical path to a Domain.
+ * It is ordered in namegraph TRAVERSAL order (i.e. the opposite order of an ENS Name's labels).
+ */
+export type CanonicalPath = DomainId[];

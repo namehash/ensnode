@@ -50,6 +50,7 @@
     "dataloader": "^2.2.3",
     "date-fns": "catalog:",
     "drizzle-orm": "catalog:",
+    "enssdk": "workspace:*",
     "graphql": "^16.11.0",
     "graphql-yoga": "^5.16.0",
     "hono": "catalog:",

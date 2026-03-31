@@ -1,4 +1,4 @@
-import type { CoinType } from "../ens";
+import type { CoinType } from "enssdk";
 
 /**
  * Encodes a selection of Resolver records in the context of a specific Name.

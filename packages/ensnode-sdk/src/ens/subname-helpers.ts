@@ -1,6 +1,5 @@
+import type { LabelHash, Node } from "enssdk";
 import { concat, type Hex, keccak256, toHex } from "viem";
-
-import type { LabelHash, Node } from "./types";
 
 /**
  * Implements one step of the namehash algorithm, combining `labelHash` with `node` to produce

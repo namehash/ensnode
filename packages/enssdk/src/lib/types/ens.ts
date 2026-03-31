@@ -1,12 +1,5 @@
 import type { Hex } from "viem";
 
-import type { DomainId } from "../ensv2";
-
-export type { ENSNamespaceId } from "@ensnode/datasources";
-// re-export ENSNamespaceIds and ENSNamespaceId from @ensnode/datasources
-// so consumers don't need it as a dependency
-export { ENSNamespaceIds } from "@ensnode/datasources";
-
 /**
  * A hash value that uniquely identifies a single ENS name.
  * Result of `namehash` function as specified in ENSIP-1.
@@ -64,12 +57,6 @@ export type LabelHash = Hex;
  * ]
  */
 export type LabelHashPath = LabelHash[];
-
-/**
- * CanonicalPath is an ordered list of DomainIds describing the canonical path to a Domain.
- * It is ordered in namegraph TRAVERSAL order (i.e. the opposite order of an ENS Name's labels).
- */
-export type CanonicalPath = DomainId[];
 
 /**
  * A Label is a single part of an ENS Name.

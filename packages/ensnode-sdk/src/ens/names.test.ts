@@ -1,7 +1,7 @@
+import type { Name, NormalizedName } from "enssdk";
 import { describe, expect, it } from "vitest";
 
 import { beautifyName, ENS_ROOT, getNameHierarchy, getParentNameFQDN } from "./names";
-import type { Name, NormalizedName } from "./types";
 
 describe("names", () => {
   describe("getNameHierarchy", () => {

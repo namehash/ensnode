@@ -1,4 +1,6 @@
-import { type LabelHash, type Node, uint256ToHex32 } from "../../ens";
+import type { LabelHash, Node } from "enssdk";
+
+import { uint256ToHex32 } from "../../ens";
 
 /**
  * Decodes a uint256-encoded-LabelHash (eg. from a tokenId) into a {@link LabelHash}.
