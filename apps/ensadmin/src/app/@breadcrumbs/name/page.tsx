@@ -1,6 +1,7 @@
 "use client";
 
 import { NameDisplay } from "@namehash/namehash-ui";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 import type { Name } from "@ensnode/ensnode-sdk";
@@ -25,8 +26,8 @@ export default function Page() {
     <BreadcrumbsGroup name="ENS Explorer">
       {name ? (
         <>
-          <BreadcrumbLink href={exploreNamesBaseHref} className="hidden md:block">
-            Names
+          <BreadcrumbLink asChild className="hidden md:block">
+            <Link href={exploreNamesBaseHref}>Names</Link>
           </BreadcrumbLink>
           <BreadcrumbSeparator className="hidden md:block" />
           <BreadcrumbItem>

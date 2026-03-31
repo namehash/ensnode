@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import {
   BreadcrumbItem,
   BreadcrumbLink,
@@ -13,8 +15,8 @@ export default function Page() {
   const uiMocksBaseHref = retainCurrentRawConnectionUrlParam("/mock");
   return (
     <>
-      <BreadcrumbLink href={uiMocksBaseHref} className="hidden md:block">
-        UI Mocks
+      <BreadcrumbLink asChild className="hidden md:block">
+        <Link href={uiMocksBaseHref}>UI Mocks</Link>
       </BreadcrumbLink>
       <BreadcrumbSeparator className="hidden md:block" />
       <BreadcrumbItem>
