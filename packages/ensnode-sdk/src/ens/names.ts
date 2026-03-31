@@ -1,7 +1,7 @@
 import { ens_beautify } from "@adraffy/ens-normalize";
 
 import { isNormalizedLabel } from "./is-normalized";
-import type { Label, Name, NormalizedName } from "./types";
+import type { InterpretedName, Label, Name, NormalizedName } from "./types";
 
 /**
  * Name for the ENS Root
@@ -75,4 +75,28 @@ export const beautifyName = (name: Name): Name => {
     }
   });
   return beautifiedLabels.join(".");
+};
+
+/**
+ * Formats an InterpretedName for display in UI strings.
+ *
+ * - Normalized labels are beautified (via ens_beautify).
+ * - Non-normalized labels (encoded labelhashes) are lowercased for consistent display.
+ *
+ * NOTE: This function only takes an InterpretedName, not a raw Name.
+ * The return type is Name (not InterpretedName) because beautification
+ * may produce labels that are not normalized.
+ *
+ * @param interpretedName - The InterpretedName to format for display.
+ * @returns The formatted name.
+ */
+export const formatInterpretedNameForDisplay = (interpretedName: InterpretedName): Name => {
+  const displayLabels = interpretedName.split(".").map((label: Label) => {
+    if (isNormalizedLabel(label)) {
+      return ens_beautify(label);
+    } else {
+      return label.toLowerCase();
+    }
+  });
+  return displayLabels.join(".");
 };

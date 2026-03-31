@@ -7,8 +7,11 @@ import { type ChangeEvent, useMemo, useState } from "react";
 import { ENSNamespaceIds } from "@ensnode/datasources";
 import {
   getNamespaceSpecificValue,
+  isInterpretedName,
+  isNormalizedName,
   type Name,
   type NamespaceSpecificValue,
+  type NormalizedName,
 } from "@ensnode/ensnode-sdk";
 
 import { getNameDetailsRelativePath, NameLink } from "@/components/name-links";
@@ -17,10 +20,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
+import {
+  interpretNameFromUserInput,
+  NameInterpretationOutcomeResult,
+} from "@/lib/interpret-name-from-user-input";
 
 import { NameDetailPageContent } from "./_components/NameDetailPageContent";
+import { InterpretedNameUnsupportedError, UnnormalizedNameError } from "./_components/NameErrors";
 
-const EXAMPLE_NAMES: NamespaceSpecificValue<string[]> = {
+const EXAMPLE_NAMES: NamespaceSpecificValue<NormalizedName[]> = {
   default: [
     "vitalik.eth",
     "gregskril.eth",
@@ -34,7 +42,7 @@ const EXAMPLE_NAMES: NamespaceSpecificValue<string[]> = {
     "lens.xyz",
     "brantly.eth",
     "lightwalker.eth",
-  ],
+  ] as NormalizedName[],
   [ENSNamespaceIds.Sepolia]: [
     "gregskril.eth",
     "vitalik.eth",
@@ -42,7 +50,7 @@ const EXAMPLE_NAMES: NamespaceSpecificValue<string[]> = {
     "recordstest.eth",
     "arrondesean.eth",
     "decode.eth",
-  ],
+  ] as NormalizedName[],
   [ENSNamespaceIds.EnsTestEnv]: [
     "alias.eth",
     "changerole.eth",
@@ -56,14 +64,15 @@ const EXAMPLE_NAMES: NamespaceSpecificValue<string[]> = {
     "sub2.parent.eth",
     "test.eth",
     "wallet.linked.parent.eth",
-  ],
+  ] as NormalizedName[],
 };
 
 export default function ExploreNamesPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const nameFromQuery = searchParams.get("name");
+  const nameFromQuery = searchParams.get("name") as Name | null;
   const [rawInputName, setRawInputName] = useState<Name>("");
+  const [formError, setFormError] = useState<string | null>(null);
 
   const namespace = useActiveNamespace();
   const exampleNames = useMemo(
@@ -75,23 +84,49 @@ export default function ExploreNamesPage() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setFormError(null);
 
-    // TODO: Input validation and normalization.
-    // see: https://github.com/namehash/ensnode/issues/1140
+    const result = interpretNameFromUserInput(rawInputName);
 
-    const href = retainCurrentRawConnectionUrlParam(getNameDetailsRelativePath(rawInputName));
-
-    router.push(href);
+    switch (result.outcome) {
+      case NameInterpretationOutcomeResult.Empty:
+        break;
+      case NameInterpretationOutcomeResult.Normalized: {
+        const href = retainCurrentRawConnectionUrlParam(
+          getNameDetailsRelativePath(result.interpretation),
+        );
+        router.push(href);
+        break;
+      }
+      case NameInterpretationOutcomeResult.Reencoded:
+        setFormError(
+          "The provided input contains encoded labelhashes. Support for resolving names with encoded labelhashes is in progress and coming soon.",
+        );
+        break;
+      case NameInterpretationOutcomeResult.Encoded:
+        setFormError("The provided input is not a valid ENS name.");
+        break;
+    }
   };
 
   const handleRawInputNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
-
+    setFormError(null);
     setRawInputName(e.target.value);
   };
 
-  if (nameFromQuery) {
-    return <NameDetailPageContent name={nameFromQuery} />;
+  // Detail page: validate name from query params using only validation checks (no normalization).
+  // see: https://github.com/namehash/ensnode/issues/1140
+  if (nameFromQuery !== null && nameFromQuery !== "") {
+    if (isNormalizedName(nameFromQuery)) {
+      return <NameDetailPageContent name={nameFromQuery} />;
+    }
+
+    if (isInterpretedName(nameFromQuery)) {
+      return <InterpretedNameUnsupportedError />;
+    }
+
+    return <UnnormalizedNameError />;
   }
 
   return (
@@ -115,12 +150,13 @@ export default function ExploreNamesPage() {
               />
               <Button
                 type="submit"
-                disabled={rawInputName.length === 0}
+                disabled={rawInputName.trim().length === 0}
                 className="max-sm:self-stretch"
               >
                 View Profile
               </Button>
             </fieldset>
+            {formError && <p className="text-sm text-red-600">{formError}</p>}
           </form>
           <div className="flex flex-col gap-2 justify-center">
             <p className="text-sm font-medium leading-none">Examples:</p>
