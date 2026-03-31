@@ -82,7 +82,7 @@ describe("omnigraph module", () => {
     });
 
     const client = createMockClient(mockFetch);
-    const doc = parse("query { domain(by: { name: \"nick.eth\" }) { name } }");
+    const doc = parse('query { domain(by: { name: "nick.eth" }) { name } }');
 
     await client.omnigraph.query({ query: doc });
 
