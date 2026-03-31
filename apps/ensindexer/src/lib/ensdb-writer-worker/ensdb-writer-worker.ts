@@ -7,8 +7,6 @@ import {
   type CrossChainIndexingStatusSnapshot,
   type Duration,
   type EnsIndexerPublicConfig,
-  OmnichainIndexingStatusIds,
-  type OmnichainIndexingStatusSnapshot,
   validateEnsIndexerPublicConfigCompatibility,
 } from "@ensnode/ensnode-sdk";
 import type { LocalPonderClient } from "@ensnode/ponder-sdk";
@@ -231,7 +229,8 @@ export class EnsDbWriterWorker {
       // get system timestamp for the current iteration
       const snapshotTime = getUnixTime(new Date());
 
-      const omnichainSnapshot = await this.getValidatedIndexingStatusSnapshot();
+      const omnichainSnapshot =
+        await this.indexingStatusBuilder.getOmnichainIndexingStatusSnapshot();
 
       const crossChainSnapshot = buildCrossChainIndexingStatusSnapshotOmnichain(
         omnichainSnapshot,
@@ -247,25 +246,5 @@ export class EnsDbWriterWorker {
       // Do not throw the error, as failure to retrieve the Indexing Status
       // should not cause the ENSDb Writer Worker to stop functioning.
     }
-  }
-
-  /**
-   * Get validated Omnichain Indexing Status Snapshot
-   *
-   * @returns Validated Omnichain Indexing Status Snapshot.
-   * @throws Error if the Omnichain Indexing Status is not in expected status yet.
-   */
-  private async getValidatedIndexingStatusSnapshot(): Promise<OmnichainIndexingStatusSnapshot> {
-    const omnichainSnapshot = await this.indexingStatusBuilder.getOmnichainIndexingStatusSnapshot();
-
-    // It only makes sense to write Indexing Status Snapshots into ENSDb once
-    // the indexing process has started, as before that there is no meaningful
-    // status to record.
-    // Invariant: the Omnichain Status must indicate that indexing has started already.
-    if (omnichainSnapshot.omnichainStatus === OmnichainIndexingStatusIds.Unstarted) {
-      throw new Error("Omnichain Status must not be 'Unstarted'.");
-    }
-
-    return omnichainSnapshot;
   }
 }

@@ -261,7 +261,7 @@ describe("EnsDbWriterWorker", () => {
   });
 
   describe("interval behavior - snapshot upserts", () => {
-    it("continues upserting after snapshot validation errors", async () => {
+    it("upserts snapshots across different omnichain statuses", async () => {
       // arrange
       const unstartedSnapshot = createMockOmnichainSnapshot({
         omnichainStatus: OmnichainIndexingStatusIds.Unstarted,
@@ -269,13 +269,20 @@ describe("EnsDbWriterWorker", () => {
       const validSnapshot = createMockOmnichainSnapshot({
         omnichainIndexingCursor: 200,
       });
-      const crossChainSnapshot = createMockCrossChainSnapshot({
+      const unstartedCrossChainSnapshot = createMockCrossChainSnapshot({
+        slowestChainIndexingCursor: 100,
+        snapshotTime: 200,
+        omnichainSnapshot: unstartedSnapshot,
+      });
+      const validCrossChainSnapshot = createMockCrossChainSnapshot({
         slowestChainIndexingCursor: 200,
         snapshotTime: 300,
         omnichainSnapshot: validSnapshot,
       });
 
-      vi.mocked(buildCrossChainIndexingStatusSnapshotOmnichain).mockReturnValue(crossChainSnapshot);
+      vi.mocked(buildCrossChainIndexingStatusSnapshotOmnichain)
+        .mockReturnValueOnce(unstartedCrossChainSnapshot)
+        .mockReturnValueOnce(validCrossChainSnapshot);
 
       const ensDbClient = createMockEnsDbWriter();
       const indexingStatusBuilder = {
@@ -297,8 +304,15 @@ describe("EnsDbWriterWorker", () => {
 
       // assert
       expect(indexingStatusBuilder.getOmnichainIndexingStatusSnapshot).toHaveBeenCalledTimes(2);
-      expect(ensDbClient.upsertIndexingStatusSnapshot).toHaveBeenCalledTimes(1);
-      expect(ensDbClient.upsertIndexingStatusSnapshot).toHaveBeenCalledWith(crossChainSnapshot);
+      expect(ensDbClient.upsertIndexingStatusSnapshot).toHaveBeenCalledTimes(2);
+      expect(ensDbClient.upsertIndexingStatusSnapshot).toHaveBeenNthCalledWith(
+        1,
+        unstartedCrossChainSnapshot,
+      );
+      expect(ensDbClient.upsertIndexingStatusSnapshot).toHaveBeenNthCalledWith(
+        2,
+        validCrossChainSnapshot,
+      );
 
       // cleanup
       worker.stop();
