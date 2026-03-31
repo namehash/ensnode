@@ -85,8 +85,8 @@ describe("getDefaultReferralProgramEditionConfigSet", () => {
         ).toStrictEqual(expected.rules.subregistryId);
         expect(
           rules.rulesUrl,
-          `edition "${expected.slug}" should have the correct <rulesUrl>. Expected "${new URL(expected.rules.rulesUrl)}", got "${rules.rulesUrl}"`,
-        ).toStrictEqual(new URL(expected.rules.rulesUrl));
+          `edition "${expected.slug}" should have the correct <rulesUrl>. Expected "${expected.rules.rulesUrl.href}", got "${rules.rulesUrl.href}"`,
+        ).toStrictEqual(expected.rules.rulesUrl);
         expect(
           rules.areAwardsDistributed,
           `edition "${expected.slug}" should have the correct <areAwardsDistributed>. Expected "${expected.rules.areAwardsDistributed}", got "${rules.areAwardsDistributed}"`,
@@ -130,6 +130,9 @@ describe("getDefaultReferralProgramEditionConfigSet", () => {
             rules.qualifiedRevenueShare,
             `edition "${expected.slug}" should have the correct <qualifiedRevenueShare>. Expected "${expectedRevShareLimitRules.qualifiedRevenueShare}", got "${rules.qualifiedRevenueShare}"`,
           ).toBe(expectedRevShareLimitRules.qualifiedRevenueShare);
+
+          // Skipping the test of `disqualifications` intentionally due to high volatility of the field.
+          // Additionally it should not be expected of edition defaults to provide up-to-date disqualifications info.
         }
       }
     });
