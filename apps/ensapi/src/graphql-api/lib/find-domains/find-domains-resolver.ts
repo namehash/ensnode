@@ -21,6 +21,8 @@ import {
 } from "@/graphql-api/schema/domain";
 import type { OrderDirection } from "@/graphql-api/schema/order-direction";
 import { ensDb } from "@/lib/ensdb/singleton";
+import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
+import { graphqlTracer } from "@/lib/instrumentation/tracer";
 import { makeLogger } from "@/lib/logger";
 
 import { DomainCursors } from "./domain-cursor";
@@ -97,11 +99,15 @@ export function resolveFindDomains(
 
   return lazyConnection({
     totalCount: () =>
-      ensDb
-        .with(domains)
-        .select({ count: count() })
-        .from(domains)
-        .then((rows) => rows[0].count),
+      withActiveSpanAsync(
+        graphqlTracer,
+        "find-domains.totalCount",
+        { orderBy, orderDir },
+        async (_span) => {
+          const rows = await ensDb.with(domains).select({ count: count() }).from(domains);
+          return rows[0].count;
+        },
+      ),
 
     connection: () =>
       resolveCursorConnection(
@@ -146,12 +152,25 @@ export function resolveFindDomains(
           // log the generated SQL for debugging
           logger.debug({ sql: query.toSQL() });
 
-          // execute query
-          const results = await query;
+          // execute paginated query
+          const results = await withActiveSpanAsync(
+            graphqlTracer,
+            "find-domains.connection",
+            { orderBy, orderDir, limit },
+            async (_span) => query.execute(),
+          );
 
           // load Domain entities via dataloader
-          const loadedDomains = await rejectAnyErrors(
-            DomainInterfaceRef.getDataloader(context).loadMany(results.map((result) => result.id)),
+          const loadedDomains = await withActiveSpanAsync(
+            graphqlTracer,
+            "find-domains.dataloader-load",
+            { count: results.length },
+            async (_span) =>
+              rejectAnyErrors(
+                DomainInterfaceRef.getDataloader(context).loadMany(
+                  results.map((result) => result.id),
+                ),
+              ),
           );
 
           // map results by id for faster order value lookup

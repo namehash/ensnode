@@ -1,6 +1,8 @@
 import SchemaBuilder, { type MaybePromise } from "@pothos/core";
 import DataloaderPlugin from "@pothos/plugin-dataloader";
 import RelayPlugin from "@pothos/plugin-relay";
+import TracingPlugin from "@pothos/plugin-tracing";
+import { createOpenTelemetryWrapper } from "@pothos/tracing-opentelemetry";
 import type { Address, Hex } from "viem";
 
 import type {
@@ -20,6 +22,14 @@ import type {
 } from "@ensnode/ensnode-sdk";
 
 import type { context } from "@/graphql-api/context";
+import { graphqlTracer } from "@/lib/instrumentation/tracer";
+
+const graphqlTracingEnabled =
+  process.env.ENSAPI_GRAPHQL_TRACING === "1" || process.env.ENSAPI_GRAPHQL_TRACING === "true";
+
+const createSpan = createOpenTelemetryWrapper(graphqlTracer, {
+  includeSource: false,
+});
 
 export const builder = new SchemaBuilder<{
   Context: ReturnType<typeof context>;
@@ -47,7 +57,17 @@ export const builder = new SchemaBuilder<{
     totalCount: MaybePromise<number>;
   };
 }>({
-  plugins: [DataloaderPlugin, RelayPlugin],
+  plugins: graphqlTracingEnabled
+    ? ([TracingPlugin, DataloaderPlugin, RelayPlugin] as const)
+    : ([DataloaderPlugin, RelayPlugin] as const),
+  ...(graphqlTracingEnabled
+    ? {
+        tracing: {
+          default: () => true,
+          wrap: (resolver, options) => createSpan(resolver, options),
+        },
+      }
+    : {}),
   relay: {
     // disable the Query.node & Query.nodes methods
     nodeQueryOptions: false,
