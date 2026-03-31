@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 
-import { gql } from "@/test/integration/ensnode-graphql-api-client";
 import {
   EventFragment,
   type EventResult,
@@ -13,6 +12,7 @@ import {
   type PaginatedGraphQLConnection,
   request,
 } from "@/test/integration/graphql-utils";
+import { gql } from "@/test/integration/omnigraph-api-client";
 
 // TODO: once the devnet has deterministic resolver addresses, we can resolver(by: { contract })
 // but until then we'll access by a domain's assigned resolver

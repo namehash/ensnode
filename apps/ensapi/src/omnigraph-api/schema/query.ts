@@ -9,20 +9,21 @@ import {
   maybeGetENSv2RootRegistryId,
 } from "@ensnode/ensnode-sdk";
 
-import { builder } from "@/graphql-api/builder";
-import { orderPaginationBy, paginateBy } from "@/graphql-api/lib/connection-helpers";
-import { resolveFindDomains } from "@/graphql-api/lib/find-domains/find-domains-resolver";
+import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+import { builder } from "@/omnigraph-api/builder";
+import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
+import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domains-resolver";
 import {
   domainsBase,
   filterByCanonical,
   filterByName,
   withOrderingMetadata,
-} from "@/graphql-api/lib/find-domains/layers";
-import { getDomainIdByInterpretedName } from "@/graphql-api/lib/get-domain-by-interpreted-name";
-import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
-import { AccountRef } from "@/graphql-api/schema/account";
-import { AccountIdInput } from "@/graphql-api/schema/account-id";
-import { ID_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
+} from "@/omnigraph-api/lib/find-domains/layers";
+import { getDomainIdByInterpretedName } from "@/omnigraph-api/lib/get-domain-by-interpreted-name";
+import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
+import { AccountRef } from "@/omnigraph-api/schema/account";
+import { AccountIdInput } from "@/omnigraph-api/schema/account-id";
+import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
 import {
   DomainIdInput,
   DomainInterfaceRef,
@@ -30,12 +31,11 @@ import {
   DomainsWhereInput,
   ENSv1DomainRef,
   ENSv2DomainRef,
-} from "@/graphql-api/schema/domain";
-import { PermissionsRef } from "@/graphql-api/schema/permissions";
-import { RegistrationInterfaceRef } from "@/graphql-api/schema/registration";
-import { RegistryIdInput, RegistryRef } from "@/graphql-api/schema/registry";
-import { ResolverIdInput, ResolverRef } from "@/graphql-api/schema/resolver";
-import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+} from "@/omnigraph-api/schema/domain";
+import { PermissionsRef } from "@/omnigraph-api/schema/permissions";
+import { RegistrationInterfaceRef } from "@/omnigraph-api/schema/registration";
+import { RegistryIdInput, RegistryRef } from "@/omnigraph-api/schema/registry";
+import { ResolverIdInput, ResolverRef } from "@/omnigraph-api/schema/resolver";
 
 // don't want them to get familiar/accustomed to these methods until their necessity is certain
 const INCLUDE_DEV_METHODS = process.env.NODE_ENV !== "production";

@@ -1,6 +1,6 @@
 import type { AccountId } from "@ensnode/ensnode-sdk";
 
-import { builder } from "@/graphql-api/builder";
+import { builder } from "@/omnigraph-api/builder";
 
 export const AccountIdRef = builder.objectRef<AccountId>("AccountId");
 AccountIdRef.implement({

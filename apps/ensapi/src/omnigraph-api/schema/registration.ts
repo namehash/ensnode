@@ -10,17 +10,17 @@ import {
   type RequiredAndNotNull,
 } from "@ensnode/ensnode-sdk";
 
-import { builder } from "@/graphql-api/builder";
-import { orderPaginationBy, paginateByInt } from "@/graphql-api/lib/connection-helpers";
-import { getModelId } from "@/graphql-api/lib/get-model-id";
-import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
-import { AccountRef } from "@/graphql-api/schema/account";
-import { AccountIdRef } from "@/graphql-api/schema/account-id";
-import { INDEX_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
-import { DomainInterfaceRef } from "@/graphql-api/schema/domain";
-import { EventRef } from "@/graphql-api/schema/event";
-import { RenewalRef } from "@/graphql-api/schema/renewal";
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+import { builder } from "@/omnigraph-api/builder";
+import { orderPaginationBy, paginateByInt } from "@/omnigraph-api/lib/connection-helpers";
+import { getModelId } from "@/omnigraph-api/lib/get-model-id";
+import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
+import { AccountRef } from "@/omnigraph-api/schema/account";
+import { AccountIdRef } from "@/omnigraph-api/schema/account-id";
+import { INDEX_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
+import { DomainInterfaceRef } from "@/omnigraph-api/schema/domain";
+import { EventRef } from "@/omnigraph-api/schema/event";
+import { RenewalRef } from "@/omnigraph-api/schema/renewal";
 
 export const RegistrationInterfaceRef = builder.loadableInterfaceRef("Registration", {
   load: (ids: RegistrationId[]) =>

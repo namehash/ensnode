@@ -10,16 +10,16 @@ import {
   ROOT_RESOURCE,
 } from "@ensnode/ensnode-sdk";
 
-import { builder } from "@/graphql-api/builder";
-import { orderPaginationBy, paginateBy } from "@/graphql-api/lib/connection-helpers";
-import { resolveFindEvents } from "@/graphql-api/lib/find-events/find-events-resolver";
-import { getModelId } from "@/graphql-api/lib/get-model-id";
-import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
-import { AccountRef } from "@/graphql-api/schema/account";
-import { AccountIdRef } from "@/graphql-api/schema/account-id";
-import { ID_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
-import { EventRef, EventsWhereInput } from "@/graphql-api/schema/event";
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+import { builder } from "@/omnigraph-api/builder";
+import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
+import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-resolver";
+import { getModelId } from "@/omnigraph-api/lib/get-model-id";
+import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
+import { AccountRef } from "@/omnigraph-api/schema/account";
+import { AccountIdRef } from "@/omnigraph-api/schema/account-id";
+import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
+import { EventRef, EventsWhereInput } from "@/omnigraph-api/schema/event";
 
 export const PermissionsRef = builder.loadableObjectRef("Permissions", {
   load: (ids: PermissionsId[]) =>

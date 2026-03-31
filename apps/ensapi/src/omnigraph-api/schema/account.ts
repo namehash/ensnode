@@ -2,31 +2,31 @@ import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@poth
 import { and, count, eq, getTableColumns } from "drizzle-orm";
 import type { Address } from "viem";
 
-import { builder } from "@/graphql-api/builder";
-import { orderPaginationBy, paginateBy } from "@/graphql-api/lib/connection-helpers";
-import { resolveFindDomains } from "@/graphql-api/lib/find-domains/find-domains-resolver";
+import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+import { builder } from "@/omnigraph-api/builder";
+import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
+import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domains-resolver";
 import {
   domainsBase,
   filterByCanonical,
   filterByName,
   filterByOwner,
   withOrderingMetadata,
-} from "@/graphql-api/lib/find-domains/layers";
-import { resolveFindEvents } from "@/graphql-api/lib/find-events/find-events-resolver";
-import { getModelId } from "@/graphql-api/lib/get-model-id";
-import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
-import { AccountIdInput } from "@/graphql-api/schema/account-id";
-import { ID_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
+} from "@/omnigraph-api/lib/find-domains/layers";
+import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-resolver";
+import { getModelId } from "@/omnigraph-api/lib/get-model-id";
+import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
+import { AccountIdInput } from "@/omnigraph-api/schema/account-id";
+import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
 import {
   AccountDomainsWhereInput,
   DomainInterfaceRef,
   DomainsOrderInput,
-} from "@/graphql-api/schema/domain";
-import { AccountEventsWhereInput, EventRef } from "@/graphql-api/schema/event";
-import { PermissionsUserRef } from "@/graphql-api/schema/permissions";
-import { RegistryPermissionsUserRef } from "@/graphql-api/schema/registry-permissions-user";
-import { ResolverPermissionsUserRef } from "@/graphql-api/schema/resolver-permissions-user";
-import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+} from "@/omnigraph-api/schema/domain";
+import { AccountEventsWhereInput, EventRef } from "@/omnigraph-api/schema/event";
+import { PermissionsUserRef } from "@/omnigraph-api/schema/permissions";
+import { RegistryPermissionsUserRef } from "@/omnigraph-api/schema/registry-permissions-user";
+import { ResolverPermissionsUserRef } from "@/omnigraph-api/schema/resolver-permissions-user";
 
 export const AccountRef = builder.loadableObjectRef("Account", {
   load: (ids: Address[]) =>

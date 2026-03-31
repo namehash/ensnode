@@ -7,18 +7,18 @@ import { namehash } from "viem";
 import { makePermissionsId, makeResolverRecordsId, type ResolverId } from "@ensnode/ensnode-sdk";
 import { isBridgedResolver } from "@ensnode/ensnode-sdk/internal";
 
-import { builder } from "@/graphql-api/builder";
-import { orderPaginationBy, paginateBy } from "@/graphql-api/lib/connection-helpers";
-import { resolveFindEvents } from "@/graphql-api/lib/find-events/find-events-resolver";
-import { getModelId } from "@/graphql-api/lib/get-model-id";
-import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
-import { AccountIdInput, AccountIdRef } from "@/graphql-api/schema/account-id";
-import { ID_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
-import { EventRef, EventsWhereInput } from "@/graphql-api/schema/event";
-import { NameOrNodeInput } from "@/graphql-api/schema/name-or-node";
-import { PermissionsRef } from "@/graphql-api/schema/permissions";
-import { ResolverRecordsRef } from "@/graphql-api/schema/resolver-records";
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+import { builder } from "@/omnigraph-api/builder";
+import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
+import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-resolver";
+import { getModelId } from "@/omnigraph-api/lib/get-model-id";
+import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
+import { AccountIdInput, AccountIdRef } from "@/omnigraph-api/schema/account-id";
+import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
+import { EventRef, EventsWhereInput } from "@/omnigraph-api/schema/event";
+import { NameOrNodeInput } from "@/omnigraph-api/schema/name-or-node";
+import { PermissionsRef } from "@/omnigraph-api/schema/permissions";
+import { ResolverRecordsRef } from "@/omnigraph-api/schema/resolver-records";
 
 /**
  * Note that this indexed Resolver entity represents not _all_ Resolver contracts that exist onchain,

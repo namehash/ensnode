@@ -1,4 +1,4 @@
-import { builder } from "@/graphql-api/builder";
+import { builder } from "@/omnigraph-api/builder";
 
 export const OrderDirection = builder.enumType("OrderDirection", {
   description: "Sort direction",

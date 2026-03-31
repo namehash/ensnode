@@ -1,9 +1,9 @@
 import type { RenewalId } from "@ensnode/ensnode-sdk";
 
-import { builder } from "@/graphql-api/builder";
-import { getModelId } from "@/graphql-api/lib/get-model-id";
-import { EventRef } from "@/graphql-api/schema/event";
 import { ensDb } from "@/lib/ensdb/singleton";
+import { builder } from "@/omnigraph-api/builder";
+import { getModelId } from "@/omnigraph-api/lib/get-model-id";
+import { EventRef } from "@/omnigraph-api/schema/event";
 
 export const RenewalRef = builder.loadableObjectRef("Renewal", {
   load: (ids: RenewalId[]) =>

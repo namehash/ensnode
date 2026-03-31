@@ -1,4 +1,4 @@
-import { builder } from "@/graphql-api/builder";
+import { builder } from "@/omnigraph-api/builder";
 
 /**
  * Input that requires one of `name` or `node`.

@@ -3,7 +3,6 @@ import { beforeAll, describe, expect, it } from "vitest";
 import type { InterpretedLabel, Name } from "@ensnode/ensnode-sdk";
 
 import { DEVNET_ETH_LABELS } from "@/test/integration/devnet-names";
-import { gql } from "@/test/integration/ensnode-graphql-api-client";
 import {
   DomainSubdomainsPaginated,
   type PaginatedDomainResult,
@@ -21,6 +20,7 @@ import {
   type PaginatedGraphQLConnection,
   request,
 } from "@/test/integration/graphql-utils";
+import { gql } from "@/test/integration/omnigraph-api-client";
 
 const NAME_WITH_EVENTS = "newowner.eth";
 

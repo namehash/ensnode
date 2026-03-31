@@ -13,7 +13,7 @@ const ENSSDK_ROOT = resolve(MONOREPO_ROOT, "packages/enssdk/");
 const OUTPUT_PATH = resolve(ENSSDK_ROOT, "src/omnigraph/generated/schema.graphql");
 
 async function _writeGraphQLSchema() {
-  const { schema } = await import("@/graphql-api/schema");
+  const { schema } = await import("@/omnigraph-api/schema");
   const schemaAsString = printSchema(lexicographicSortSchema(schema));
 
   await writeFile(OUTPUT_PATH, schemaAsString);

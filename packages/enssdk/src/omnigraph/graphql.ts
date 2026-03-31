@@ -2,6 +2,7 @@ import { initGraphQLTada } from "gql.tada";
 import type { Address, Hex } from "viem";
 
 import type {
+  ChainId,
   CoinType,
   DomainId,
   InterpretedName,
@@ -19,15 +20,15 @@ import type { introspection } from "./generated/graphql-env";
 
 export const graphql = initGraphQLTada<{
   introspection: introspection;
-  // NOTE: keep these type defs in sync with the scalars in apps/ensapi/src/graphql-api/builder.ts
   scalars: {
     ID: string;
     // NOTE: graphql clients don't really do deserialization of scalars like bigint, so instead we
     // just helpfully type the string as 'a stringified bigint'
     BigInt: `${bigint}`;
+    // NOTE: keep these scalar types in sync with the scalars in apps/ensapi/src/omnigraph-api/builder.ts
     Address: Address;
     Hex: Hex;
-    ChainId: number;
+    ChainId: ChainId;
     CoinType: CoinType;
     Name: InterpretedName;
     Node: Node;

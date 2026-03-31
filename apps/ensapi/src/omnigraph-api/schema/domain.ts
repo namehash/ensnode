@@ -8,34 +8,38 @@ import {
   interpretedLabelsToInterpretedName,
 } from "@ensnode/ensnode-sdk";
 
-import { builder } from "@/graphql-api/builder";
-import { orderPaginationBy, paginateBy, paginateByInt } from "@/graphql-api/lib/connection-helpers";
-import { resolveFindDomains } from "@/graphql-api/lib/find-domains/find-domains-resolver";
+import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+import { builder } from "@/omnigraph-api/builder";
+import {
+  orderPaginationBy,
+  paginateBy,
+  paginateByInt,
+} from "@/omnigraph-api/lib/connection-helpers";
+import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domains-resolver";
 import {
   domainsBase,
   filterByName,
   filterByParent,
   withOrderingMetadata,
-} from "@/graphql-api/lib/find-domains/layers";
-import { resolveFindEvents } from "@/graphql-api/lib/find-events/find-events-resolver";
-import { getDomainResolver } from "@/graphql-api/lib/get-domain-resolver";
-import { getLatestRegistration } from "@/graphql-api/lib/get-latest-registration";
-import { getModelId } from "@/graphql-api/lib/get-model-id";
-import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
-import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
-import { AccountRef } from "@/graphql-api/schema/account";
+} from "@/omnigraph-api/lib/find-domains/layers";
+import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-resolver";
+import { getDomainResolver } from "@/omnigraph-api/lib/get-domain-resolver";
+import { getLatestRegistration } from "@/omnigraph-api/lib/get-latest-registration";
+import { getModelId } from "@/omnigraph-api/lib/get-model-id";
+import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
+import { rejectAnyErrors } from "@/omnigraph-api/lib/reject-any-errors";
+import { AccountRef } from "@/omnigraph-api/schema/account";
 import {
   ID_PAGINATED_CONNECTION_ARGS,
   INDEX_PAGINATED_CONNECTION_ARGS,
-} from "@/graphql-api/schema/constants";
-import { EventRef, EventsWhereInput } from "@/graphql-api/schema/event";
-import { LabelRef } from "@/graphql-api/schema/label";
-import { OrderDirection } from "@/graphql-api/schema/order-direction";
-import { PermissionsUserRef } from "@/graphql-api/schema/permissions";
-import { RegistrationInterfaceRef } from "@/graphql-api/schema/registration";
-import { RegistryRef } from "@/graphql-api/schema/registry";
-import { ResolverRef } from "@/graphql-api/schema/resolver";
-import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+} from "@/omnigraph-api/schema/constants";
+import { EventRef, EventsWhereInput } from "@/omnigraph-api/schema/event";
+import { LabelRef } from "@/omnigraph-api/schema/label";
+import { OrderDirection } from "@/omnigraph-api/schema/order-direction";
+import { PermissionsUserRef } from "@/omnigraph-api/schema/permissions";
+import { RegistrationInterfaceRef } from "@/omnigraph-api/schema/registration";
+import { RegistryRef } from "@/omnigraph-api/schema/registry";
+import { ResolverRef } from "@/omnigraph-api/schema/resolver";
 
 const isENSv1Domain = (domain: Domain): domain is ENSv1Domain => "parentId" in domain;
 

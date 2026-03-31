@@ -1,6 +1,6 @@
-import { builder } from "@/graphql-api/builder";
-import { getModelId } from "@/graphql-api/lib/get-model-id";
 import { ensDb } from "@/lib/ensdb/singleton";
+import { builder } from "@/omnigraph-api/builder";
+import { getModelId } from "@/omnigraph-api/lib/get-model-id";
 
 export const EventRef = builder.loadableObjectRef("Event", {
   load: (ids: string[]) =>

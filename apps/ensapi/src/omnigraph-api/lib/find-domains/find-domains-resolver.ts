@@ -1,27 +1,27 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, count } from "drizzle-orm";
 
-import type { context as createContext } from "@/graphql-api/context";
+import { ensDb } from "@/lib/ensdb/singleton";
+import { makeLogger } from "@/lib/logger";
+import type { context as createContext } from "@/omnigraph-api/context";
 import type {
   DomainsWithOrderingMetadata,
   DomainsWithOrderingMetadataResult,
-} from "@/graphql-api/lib/find-domains/layers/with-ordering-metadata";
-import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
-import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
+} from "@/omnigraph-api/lib/find-domains/layers/with-ordering-metadata";
+import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
+import { rejectAnyErrors } from "@/omnigraph-api/lib/reject-any-errors";
 import {
   PAGINATION_DEFAULT_MAX_SIZE,
   PAGINATION_DEFAULT_PAGE_SIZE,
-} from "@/graphql-api/schema/constants";
+} from "@/omnigraph-api/schema/constants";
 import {
   DOMAINS_DEFAULT_ORDER_BY,
   DOMAINS_DEFAULT_ORDER_DIR,
   type Domain,
   DomainInterfaceRef,
   type DomainsOrderBy,
-} from "@/graphql-api/schema/domain";
-import type { OrderDirection } from "@/graphql-api/schema/order-direction";
-import { ensDb } from "@/lib/ensdb/singleton";
-import { makeLogger } from "@/lib/logger";
+} from "@/omnigraph-api/schema/domain";
+import type { OrderDirection } from "@/omnigraph-api/schema/order-direction";
 
 import { DomainCursors } from "./domain-cursor";
 import { cursorFilter, orderFindDomains } from "./find-domains-resolver-helpers";

@@ -9,7 +9,7 @@ import { useValidatedSelectedConnection } from "@/hooks/active/use-selected-conn
 export default function Actions() {
   const selectedConnection = useValidatedSelectedConnection();
   const url = useMemo(
-    () => new URL(`/api/graphql`, selectedConnection).toString(),
+    () => new URL(`/api/omnigraph`, selectedConnection).toString(),
     [selectedConnection],
   );
 

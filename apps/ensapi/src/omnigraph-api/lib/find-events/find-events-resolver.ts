@@ -2,10 +2,10 @@ import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@poth
 import { and, count, eq, getTableColumns, gte, inArray, lte, type SQL, sql } from "drizzle-orm";
 import type { Address, Hex } from "viem";
 
-import { orderPaginationBy, paginateBy } from "@/graphql-api/lib/connection-helpers";
-import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
-import { ID_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
+import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
+import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
 
 /**
  * A join table that relates some entity to events via an `eventId` column.

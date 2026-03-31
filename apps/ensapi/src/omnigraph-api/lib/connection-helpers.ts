@@ -1,7 +1,7 @@
 import { and, asc, desc, gt, lt } from "drizzle-orm";
 import z from "zod/v4";
 
-import { cursors } from "@/graphql-api/lib/cursors";
+import { cursors } from "@/omnigraph-api/lib/cursors";
 
 type Column = Parameters<typeof lt>[0];
 

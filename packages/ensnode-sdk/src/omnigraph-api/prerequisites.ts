@@ -2,9 +2,9 @@ import { type EnsIndexerPublicConfig, PluginName } from "../ensindexer/config/ty
 import type { PrerequisiteResult } from "../shared/prerequisites";
 
 /**
- * Check if provided EnsIndexerPublicConfig supports the ENSNode GraphQL API.
+ * Check if provided EnsIndexerPublicConfig supports the ENSNode Omnigraph API.
  */
-export function hasGraphqlApiConfigSupport(config: EnsIndexerPublicConfig): PrerequisiteResult {
+export function hasOmnigraphApiConfigSupport(config: EnsIndexerPublicConfig): PrerequisiteResult {
   const supported = config.plugins.includes(PluginName.ENSv2);
   if (supported) return { supported };
 

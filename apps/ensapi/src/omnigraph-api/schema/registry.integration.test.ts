@@ -4,7 +4,6 @@ import { DatasourceNames } from "@ensnode/datasources";
 import { getDatasourceContract, type InterpretedLabel } from "@ensnode/ensnode-sdk";
 
 import { DEVNET_ETH_LABELS } from "@/test/integration/devnet-names";
-import { gql } from "@/test/integration/ensnode-graphql-api-client";
 import {
   type PaginatedDomainResult,
   RegistryDomainsPaginated,
@@ -16,6 +15,7 @@ import {
   type PaginatedGraphQLConnection,
   request,
 } from "@/test/integration/graphql-utils";
+import { gql } from "@/test/integration/omnigraph-api-client";
 
 const namespace = "ens-test-env";
 

@@ -1,9 +1,9 @@
 import { makeResolverId } from "@ensnode/ensnode-sdk";
 
-import { builder } from "@/graphql-api/builder";
-import { AccountRef } from "@/graphql-api/schema/account";
-import { ResolverRef } from "@/graphql-api/schema/resolver";
 import type { ensIndexerSchema } from "@/lib/ensdb/singleton";
+import { builder } from "@/omnigraph-api/builder";
+import { AccountRef } from "@/omnigraph-api/schema/account";
+import { ResolverRef } from "@/omnigraph-api/schema/resolver";
 
 /**
  * Represents a PermissionsUser whose contract is a Resolver, providing a semantic `resolver` field.

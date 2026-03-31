@@ -1,9 +1,9 @@
 import { makeRegistryId } from "@ensnode/ensnode-sdk";
 
-import { builder } from "@/graphql-api/builder";
-import { AccountRef } from "@/graphql-api/schema/account";
-import { RegistryRef } from "@/graphql-api/schema/registry";
 import type { ensIndexerSchema } from "@/lib/ensdb/singleton";
+import { builder } from "@/omnigraph-api/builder";
+import { AccountRef } from "@/omnigraph-api/schema/account";
+import { RegistryRef } from "@/omnigraph-api/schema/registry";
 
 /**
  * Represents a PermissionsUser whose contract is a Registry, providing a semantic `registry` field.

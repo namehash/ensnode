@@ -1,9 +1,9 @@
 import type { DomainId } from "@ensnode/ensnode-sdk";
 
-import { cursors } from "@/graphql-api/lib/cursors";
-import type { DomainOrderValue } from "@/graphql-api/lib/find-domains/types";
-import type { DomainsOrderBy } from "@/graphql-api/schema/domain";
-import type { OrderDirection } from "@/graphql-api/schema/order-direction";
+import { cursors } from "@/omnigraph-api/lib/cursors";
+import type { DomainOrderValue } from "@/omnigraph-api/lib/find-domains/types";
+import type { DomainsOrderBy } from "@/omnigraph-api/schema/domain";
+import type { OrderDirection } from "@/omnigraph-api/schema/order-direction";
 
 /**
  * Composite Domain cursor for keyset pagination.

@@ -3,7 +3,6 @@ import { beforeAll, describe, expect, it } from "vitest";
 
 import type { Name } from "@ensnode/ensnode-sdk";
 
-import { gql } from "@/test/integration/ensnode-graphql-api-client";
 import {
   AccountDomainsPaginated,
   type PaginatedDomainResult,
@@ -21,6 +20,7 @@ import {
   type PaginatedGraphQLConnection,
   request,
 } from "@/test/integration/graphql-utils";
+import { gql } from "@/test/integration/omnigraph-api-client";
 
 // via devnet
 const DEVNET_DEPLOYER: Address = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266";

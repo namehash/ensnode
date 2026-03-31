@@ -1,4 +1,4 @@
-import { builder } from "@/graphql-api/builder";
+import { builder } from "@/omnigraph-api/builder";
 
 builder.globalConnectionField("totalCount", (t) =>
   t.field({

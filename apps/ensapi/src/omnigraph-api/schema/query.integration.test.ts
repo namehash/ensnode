@@ -14,7 +14,6 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { DEVNET_NAMES } from "@/test/integration/devnet-names";
-import { gql } from "@/test/integration/ensnode-graphql-api-client";
 import {
   type PaginatedDomainResult,
   QueryDomainsPaginated,
@@ -26,6 +25,7 @@ import {
   type PaginatedGraphQLConnection,
   request,
 } from "@/test/integration/graphql-utils";
+import { gql } from "@/test/integration/omnigraph-api-client";
 
 const namespace = "ens-test-env";
 
@@ -37,8 +37,8 @@ const V2_ROOT_REGISTRY = getDatasourceContract(
 
 const V1_ETH_DOMAIN_ID = makeENSv1DomainId(namehash("eth"));
 
-const V2_ETH_CANONICAL_ID = getStorageId(labelhash("eth"));
-const V2_ETH_DOMAIN_ID = makeENSv2DomainId(V2_ROOT_REGISTRY, V2_ETH_CANONICAL_ID);
+const V2_ETH_STORAGE_ID = getStorageId(labelhash("eth"));
+const V2_ETH_DOMAIN_ID = makeENSv2DomainId(V2_ROOT_REGISTRY, V2_ETH_STORAGE_ID);
 
 describe("Query.root", () => {
   it("returns the root registry", async () => {

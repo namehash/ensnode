@@ -1,5 +1,5 @@
-import { builder } from "@/graphql-api/builder";
 import type { ensIndexerSchema } from "@/lib/ensdb/singleton";
+import { builder } from "@/omnigraph-api/builder";
 
 export const LabelRef = builder.objectRef<typeof ensIndexerSchema.label.$inferSelect>("Label");
 LabelRef.implement({

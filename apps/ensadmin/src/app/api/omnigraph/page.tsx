@@ -19,7 +19,7 @@ function GraphQLPage() {
   const namespace = useActiveNamespace();
   const selectedConnection = useValidatedSelectedConnection();
   const url = useMemo(
-    () => new URL(`/api/graphql`, selectedConnection).toString(),
+    () => new URL(`/api/omnigraph`, selectedConnection).toString(),
     [selectedConnection],
   );
 
@@ -44,7 +44,7 @@ function GraphQLPage() {
 
 export default function Page() {
   return (
-    <RequireENSAdminFeature title="ENSNode GraphQL API" feature="graphql">
+    <RequireENSAdminFeature title="ENSNode Omnigraph API" feature="omnigraph">
       <GraphQLPage />
     </RequireENSAdminFeature>
   );

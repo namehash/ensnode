@@ -1,5 +1,5 @@
-import { cursors } from "@/graphql-api/lib/cursors";
-import { getModelId } from "@/graphql-api/lib/get-model-id";
+import { cursors } from "@/omnigraph-api/lib/cursors";
+import { getModelId } from "@/omnigraph-api/lib/get-model-id";
 
 export const PAGINATION_DEFAULT_PAGE_SIZE = 100;
 export const PAGINATION_DEFAULT_MAX_SIZE = 1000;

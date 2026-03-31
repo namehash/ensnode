@@ -3,27 +3,27 @@ import { and, eq } from "drizzle-orm";
 
 import { makePermissionsId, type RegistryId } from "@ensnode/ensnode-sdk";
 
-import { builder } from "@/graphql-api/builder";
-import { orderPaginationBy, paginateBy } from "@/graphql-api/lib/connection-helpers";
-import { resolveFindDomains } from "@/graphql-api/lib/find-domains/find-domains-resolver";
+import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+import { builder } from "@/omnigraph-api/builder";
+import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
+import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domains-resolver";
 import {
   domainsBase,
   filterByName,
   filterByRegistry,
   withOrderingMetadata,
-} from "@/graphql-api/lib/find-domains/layers";
-import { getModelId } from "@/graphql-api/lib/get-model-id";
-import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
-import { AccountIdInput, AccountIdRef } from "@/graphql-api/schema/account-id";
-import { ID_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
+} from "@/omnigraph-api/lib/find-domains/layers";
+import { getModelId } from "@/omnigraph-api/lib/get-model-id";
+import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
+import { AccountIdInput, AccountIdRef } from "@/omnigraph-api/schema/account-id";
+import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
 import {
   DomainInterfaceRef,
   DomainsOrderInput,
   ENSv2DomainRef,
   RegistryDomainsWhereInput,
-} from "@/graphql-api/schema/domain";
-import { PermissionsRef } from "@/graphql-api/schema/permissions";
-import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+} from "@/omnigraph-api/schema/domain";
+import { PermissionsRef } from "@/omnigraph-api/schema/permissions";
 
 export const RegistryRef = builder.loadableObjectRef("Registry", {
   load: (ids: RegistryId[]) =>

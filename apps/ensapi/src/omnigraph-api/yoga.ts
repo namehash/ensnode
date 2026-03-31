@@ -4,9 +4,9 @@
 
 import { createYoga } from "graphql-yoga";
 
-import { context } from "@/graphql-api/context";
-import { schema } from "@/graphql-api/schema";
 import { makeLogger } from "@/lib/logger";
+import { context } from "@/omnigraph-api/context";
+import { schema } from "@/omnigraph-api/schema";
 
 const logger = makeLogger("ensnode-graphql");
 

@@ -18,7 +18,7 @@ import type {
 } from "enssdk";
 import type { Address, Hex } from "viem";
 
-import type { context } from "@/graphql-api/context";
+import type { context } from "@/omnigraph-api/context";
 
 export const builder = new SchemaBuilder<{
   Context: ReturnType<typeof context>;

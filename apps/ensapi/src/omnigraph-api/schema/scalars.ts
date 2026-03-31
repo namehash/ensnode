@@ -24,7 +24,7 @@ import {
   makeLowercaseAddressSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
-import { builder } from "@/graphql-api/builder";
+import { builder } from "@/omnigraph-api/builder";
 
 builder.scalarType("BigInt", {
   description: "BigInt represents non-fractional signed whole numeric values.",

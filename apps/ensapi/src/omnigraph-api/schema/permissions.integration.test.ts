@@ -5,7 +5,6 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { DatasourceNames, EnhancedAccessControlABI } from "@ensnode/datasources";
 import { getDatasourceContract } from "@ensnode/ensnode-sdk";
 
-import { gql } from "@/test/integration/ensnode-graphql-api-client";
 import {
   EventFragment,
   type EventResult,
@@ -18,6 +17,7 @@ import {
   type PaginatedGraphQLConnection,
   request,
 } from "@/test/integration/graphql-utils";
+import { gql } from "@/test/integration/omnigraph-api-client";
 
 const namespace = "ens-test-env";
 
