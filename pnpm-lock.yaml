@@ -979,9 +979,9 @@ importers:
       '@ensnode/ensnode-sdk':
         specifier: workspace:*
         version: link:../ensnode-sdk
-      '@testcontainers/postgresql':
-        specifier: ^11.12.0
-        version: 11.12.0
+      '@ensnode/shared-configs':
+        specifier: workspace:*
+        version: link:../shared-configs
       execa:
         specifier: ^9.6.1
         version: 9.6.1
@@ -4278,9 +4278,6 @@ packages:
 
   '@tanstack/virtual-core@3.13.12':
     resolution: {integrity: sha512-1YBOJfRHV4sXUmWsFSf5rQor4Ss82G8dQWLRbnk3GA4jeP8hQt1hxXh0tmflpC0dz3VgEv/1+qwPyLeWkQuPFA==}
-
-  '@testcontainers/postgresql@11.12.0':
-    resolution: {integrity: sha512-w4ZK0H+WIYBUBk57H9wCSxPMSMZUNsFpx2MZAX4iru0Aevz9HFWDfAhFLAu+/SwsHtEJUD7XfWUDlqBGC3OF0Q==}
 
   '@testing-library/dom@10.4.1':
     resolution: {integrity: sha512-o4PXJQidqJl82ckFaXUeoAW+XysPLauYI43Abki5hABd853iMhitooc6znOnczgbTYmEP6U6/y1ZyKAIsvMKGg==}
@@ -13090,15 +13087,6 @@ snapshots:
       react-dom: 19.2.1(react@19.2.1)
 
   '@tanstack/virtual-core@3.13.12': {}
-
-  '@testcontainers/postgresql@11.12.0':
-    dependencies:
-      testcontainers: 11.12.0
-    transitivePeerDependencies:
-      - bare-abort-controller
-      - bare-buffer
-      - react-native-b4a
-      - supports-color
 
   '@testing-library/dom@10.4.1':
     dependencies:

@@ -31,7 +31,7 @@ const ENS_TEST_ENV_V2_ETH_REGISTRAR = maybeGetDatasourceContract(
 const DEVNET_DEPLOYER = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
 const DEVNET_OWNER = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8";
 // biome-ignore lint/correctness/noUnusedVariables: keeping it around for the future
-const DEVNET_USER = "0x90F79bf6EB2c4f870365E785982E1f101E93b906";
+const DEVNET_USER = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC";
 
 const VITALIK_ADDRESS = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
 

@@ -83,7 +83,7 @@ export default function () {
       }
 
       // Invariant: must be ENSv2Registry Registration
-      if (registration.type !== "ENSv2Registry") {
+      if (registration.type !== "ENSv2RegistryRegistration") {
         throw new Error(
           `Invariant(ETHRegistrar:NameRegistered): Registration found but not ENSv2Registry Registration:\n${toJson(registration)}`,
         );
@@ -156,7 +156,7 @@ export default function () {
       }
 
       // Invariant: Must be ENSv2Registry Registration
-      if (registration.type !== "ENSv2Registry") {
+      if (registration.type !== "ENSv2RegistryRegistration") {
         throw new Error(
           `Invariant(ETHRegistrar:NameRenewed): Registration found but not ENSv2Registry Registration:\n${toJson(registration)}`,
         );

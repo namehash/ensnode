@@ -5,15 +5,16 @@
  * monorepo-level integration tests, then tears everything down.
  *
  * Phases:
- *   1. Postgres (testcontainers, dynamic port) + devnet (fixed ports 8545/8000) — parallel
+ *   1. Postgres + devnet via docker-compose (testcontainers DockerComposeEnvironment)
  *   2. Download pre-built ENSRainbow LevelDB, extract, start ENSRainbow from source
  *   3. Start ENSIndexer, wait for omnichain-following / omnichain-completed
  *   4. Start ENSApi
  *   5. Run `pnpm test:integration` at the monorepo root
  *
  * Design decisions:
- *   - testcontainers for Postgres (dynamic port, built-in health check) and devnet
- *     (fixed ports required — ensTestEnvChain hardcodes localhost:8545).
+ *   - Postgres and devnet are started from the root docker-compose.yml via
+ *     testcontainers DockerComposeEnvironment, ensuring the orchestrator always
+ *     uses the same images and configuration defined there.
  *   - execa for child process management — automatic cleanup on parent exit,
  *     forceKillAfterDelay (10s SIGKILL fallback), env inherited from parent.
  *   - Services run from source (pnpm start/serve) rather than Docker so that
@@ -30,9 +31,12 @@
 import { mkdirSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { PostgreSqlContainer, type StartedPostgreSqlContainer } from "@testcontainers/postgresql";
 import { execaSync, type ResultPromise, execa as spawn } from "execa";
-import { GenericContainer, type StartedTestContainer, Wait } from "testcontainers";
+import {
+  DockerComposeEnvironment,
+  type StartedDockerComposeEnvironment,
+  Wait,
+} from "testcontainers";
 
 import { ENSNamespaceIds } from "@ensnode/datasources";
 import { OmnichainIndexingStatusIds } from "@ensnode/ensnode-sdk";
@@ -42,23 +46,18 @@ const ENSRAINBOW_DIR = resolve(MONOREPO_ROOT, "apps/ensrainbow");
 const ENSINDEXER_DIR = resolve(MONOREPO_ROOT, "apps/ensindexer");
 const ENSAPI_DIR = resolve(MONOREPO_ROOT, "apps/ensapi");
 
-// Docker images
-const POSTGRES_IMAGE = "postgres:17";
-const DEVNET_IMAGE = "ghcr.io/ensdomains/contracts-v2:main-cb8e11c";
-
-// Ports (devnet ports must be fixed — ensTestEnvChain hardcodes localhost:8545)
-const DEVNET_RPC_PORT = 8545;
-const DEVNET_HEALTH_PORT = 8000;
+// Ports
 const ENSRAINBOW_PORT = 3223;
 const ENSINDEXER_PORT = 42069;
 const ENSAPI_PORT = 4334;
 
 // Shared config
 const ENSRAINBOW_URL = `http://localhost:${ENSRAINBOW_PORT}`;
+const ENSINDEXER_SCHEMA_NAME = "ensindexer_integration_test";
 
 // Track resources for cleanup
 const subprocesses: ResultPromise[] = [];
-const containers: (StartedTestContainer | StartedPostgreSqlContainer)[] = [];
+let composeEnvironment: StartedDockerComposeEnvironment | undefined;
 
 // Abort flag — set when a spawned service crashes
 let aborted = false;
@@ -95,12 +94,12 @@ async function cleanup() {
   }
   log("All child processes stopped");
 
-  for (const container of containers) {
+  if (composeEnvironment) {
     try {
-      await container.stop();
+      await composeEnvironment.down();
     } catch (error) {
       logError(
-        `Failed to stop container during cleanup: ${
+        `Failed to stop compose environment during cleanup: ${
           error instanceof Error ? error.message : String(error)
         }`,
       );
@@ -231,42 +230,24 @@ function logVersions() {
   log(`  Node.js:  ${process.version}`);
   log(`  pnpm:     ${execaSync("pnpm", ["--version"]).stdout.trim()}`);
   log(`  Docker:   ${execaSync("docker", ["--version"]).stdout.trim()}`);
-  log(`  Postgres image: ${POSTGRES_IMAGE}`);
-  log(`  Devnet image:   ${DEVNET_IMAGE}`);
 }
 
 async function main() {
   log("Starting integration test environment...");
   logVersions();
 
-  // Phase 1: Start Postgres + Devnet in parallel
+  // Phase 1: Start Postgres + Devnet via docker-compose
   log("Starting Postgres and devnet...");
-  const postgresPromise = new PostgreSqlContainer(POSTGRES_IMAGE)
-    .withDatabase("ensnode")
-    .withUsername("postgres")
-    .withPassword("password")
-    .start()
-    .then((c) => {
-      containers.push(c);
-      return c;
-    });
-  const devnetPromise = new GenericContainer(DEVNET_IMAGE)
-    .withEnvironment({ ANVIL_IP_ADDR: "0.0.0.0" })
-    .withExposedPorts(
-      { container: DEVNET_RPC_PORT, host: DEVNET_RPC_PORT },
-      { container: DEVNET_HEALTH_PORT, host: DEVNET_HEALTH_PORT },
-    )
-    .withCommand(["./script/runDevnet.ts", "--testNames"])
+  composeEnvironment = await new DockerComposeEnvironment(MONOREPO_ROOT, "docker-compose.yml")
+    .withWaitStrategy("devnet", Wait.forHealthCheck())
+    .withWaitStrategy("postgres", Wait.forListeningPorts())
     .withStartupTimeout(120_000)
-    .withWaitStrategy(Wait.forHttp("/health", DEVNET_HEALTH_PORT))
-    .start()
-    .then((c) => {
-      containers.push(c);
-      return c;
-    });
-  const [postgres] = await Promise.all([postgresPromise, devnetPromise]);
-  const DATABASE_URL = postgres.getConnectionUri();
-  log(`Postgres is ready (port ${postgres.getPort()})`);
+    .up(["postgres", "devnet"]);
+
+  const postgresContainer = composeEnvironment.getContainer("postgres");
+  const postgresPort = postgresContainer.getMappedPort(5432);
+  const DATABASE_URL = `postgresql://postgres:password@localhost:${postgresPort}/postgres`;
+  log(`Postgres is ready (port ${postgresPort})`);
   log("Devnet is ready");
 
   // Phase 2: Download ENSRainbow database and start from source
@@ -317,8 +298,6 @@ async function main() {
   await waitForHealth(`http://localhost:${ENSRAINBOW_PORT}/health`, 30_000, "ENSRainbow");
 
   // Phase 3: Start ENSIndexer
-  const ENSINDEXER_SCHEMA_NAME = "ensindexer_0";
-
   log("Starting ENSIndexer...");
   spawnService(
     "pnpm",

@@ -103,6 +103,23 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  devnet:
+    container_name: devnet
+    image: ghcr.io/ensdomains/contracts-v2:main-e8696c6
+    command: ./script/runDevnet.ts --testNames
+    pull_policy: always
+    ports:
+      - "8545:8545"
+    environment:
+      ANVIL_IP_ADDR: "0.0.0.0"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "-s", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+      start_interval: 1s
+
 volumes:
   postgres_data:
     driver: local
