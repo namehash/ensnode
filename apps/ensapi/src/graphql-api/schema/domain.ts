@@ -5,7 +5,7 @@ import {
   type DomainId,
   type ENSv1DomainId,
   type ENSv2DomainId,
-  getCanonicalId,
+  getStorageId,
   interpretedLabelsToInterpretedName,
 } from "@ensnode/ensnode-sdk";
 
@@ -309,16 +309,6 @@ ENSv2DomainRef.implement({
   interfaces: [DomainInterfaceRef],
   isTypeOf: (domain) => !isENSv1Domain(domain as Domain),
   fields: (t) => ({
-    //////////////////////
-    // Domain.canonicalId
-    //////////////////////
-    canonicalId: t.field({
-      description: "The ENSv2Domain's Canonical Id.",
-      type: "BigInt",
-      nullable: false,
-      resolve: (parent) => getCanonicalId(parent.tokenId),
-    }),
-
     //////////////////////
     // Domain.tokenId
     //////////////////////

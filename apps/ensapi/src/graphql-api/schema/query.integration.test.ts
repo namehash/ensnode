@@ -4,9 +4,9 @@ import { describe, expect, it } from "vitest";
 import { DatasourceNames } from "@ensnode/datasources";
 import {
   type DomainId,
-  getCanonicalId,
   getDatasourceContract,
   getENSv2RootRegistryId,
+  getStorageId,
   type InterpretedLabel,
   makeENSv1DomainId,
   makeENSv2DomainId,
@@ -37,7 +37,7 @@ const V2_ROOT_REGISTRY = getDatasourceContract(
 
 const V1_ETH_DOMAIN_ID = makeENSv1DomainId(namehash("eth"));
 
-const V2_ETH_CANONICAL_ID = getCanonicalId(labelhash("eth"));
+const V2_ETH_CANONICAL_ID = getStorageId(labelhash("eth"));
 const V2_ETH_DOMAIN_ID = makeENSv2DomainId(V2_ROOT_REGISTRY, V2_ETH_CANONICAL_ID);
 
 describe("Query.root", () => {

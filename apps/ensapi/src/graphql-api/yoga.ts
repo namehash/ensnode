@@ -28,7 +28,6 @@ export const yoga = createYoga({
             parent { label }
           }
           ... on ENSv2Domain {
-            canonicalId
             registry { contract {chainId address}}
           }
         }
