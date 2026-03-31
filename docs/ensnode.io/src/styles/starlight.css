@@ -81,7 +81,6 @@
 }
 
 /* Starlight-specific component styles */
-
 @media (min-width: 1484px) {
   .page {
     flex-direction: row;
