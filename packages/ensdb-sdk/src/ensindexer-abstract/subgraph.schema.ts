@@ -93,9 +93,9 @@ export const subgraph_domain = onchainTable(
     expiryDate: t.bigint(),
   }),
   (t) => ({
-    // Temporarily disable the `byName` index to avoid index creation issues.
-    // For more details, see: https://github.com/namehash/ensnode/issues/1819
-    // byName: index().on(t.name),
+    // uses a hash index because some name values exceed the btree max row size (8191 bytes)
+    byExactName: index().using("hash", t.name),
+
     byLabelhash: index().on(t.labelhash),
     byParentId: index().on(t.parentId),
     byOwnerId: index().on(t.ownerId),
