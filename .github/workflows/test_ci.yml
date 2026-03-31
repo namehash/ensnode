@@ -96,6 +96,9 @@ jobs:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup_node_environment
 
+      - name: Generate SDL from Pothos schema
+        run: pnpm --filter ensapi generate:schema
+
       - name: Generate gql.tada output and turbo cache
         run: pnpm --filter enssdk generate:schema
 
@@ -107,7 +110,9 @@ jobs:
             echo "The following generated files differ from what is committed:"
             git diff --name-status packages/enssdk/src/omnigraph/generated/
             echo ""
-            echo "To fix, run: pnpm --filter enssdk generate:schema"
+            echo "To fix, run:"
+            echo "  pnpm --filter ensapi generate:schema"
+            echo "  pnpm --filter enssdk generate:schema"
             echo "Then commit the updated generated files."
             exit 1
           fi
