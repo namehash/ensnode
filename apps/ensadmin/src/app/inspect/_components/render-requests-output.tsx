@@ -29,10 +29,12 @@ export function RenderRequestsOutput<KEY extends string>({
   dataKey,
   accelerated,
   unaccelerated,
+  headerActions,
 }: {
   dataKey: KEY;
   accelerated: QueryResult<KEY>;
   unaccelerated: QueryResult<KEY>;
+  headerActions?: React.ReactNode;
 }) {
   const [tab, setTab] = useState("accelerated");
 
@@ -91,7 +93,10 @@ export function RenderRequestsOutput<KEY extends string>({
       {/* Response Card */}
       <Card className="w-full">
         <CardHeader>
-          <CardTitle>ENSNode Response</CardTitle>
+          <CardTitle className="flex flex-row items-center justify-between gap-4">
+            <span>ENSNode Response</span>
+            {headerActions}
+          </CardTitle>
         </CardHeader>
         <CardContent className="max-h-[30rem] overflow-scroll">
           {(() => {
