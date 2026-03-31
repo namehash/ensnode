@@ -1,7 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
-import { priceUsdc } from "@ensnode/ensnode-sdk";
+import { ENSNamespaceIds, priceUsdc } from "@ensnode/ensnode-sdk";
 
+import { deserializeReferralProgramEditionConfigSetArray } from "./api";
 import type { ReferralProgramRulesPieSplit } from "./award-models/pie-split/rules";
 import type { ReferralProgramRulesRevShareLimit } from "./award-models/rev-share-limit/rules";
 import { ReferralProgramAwardModels } from "./award-models/shared/rules";
@@ -17,139 +18,152 @@ async function fetchProductionEditions(): Promise<ReferralProgramEditionConfig[]
   try {
     const response = await fetch(PRODUCTION_EDITIONS_URL);
     if (!response.ok) return null;
-    return (await response.json()) as ReferralProgramEditionConfig[];
+    return deserializeReferralProgramEditionConfigSetArray(await response.json());
   } catch {
     return null;
   }
 }
 
 describe("getDefaultReferralProgramEditionConfigSet", () => {
-  const configSet = getDefaultReferralProgramEditionConfigSet("mainnet");
+  const configSet = getDefaultReferralProgramEditionConfigSet(ENSNamespaceIds.Mainnet);
 
-  describe("Should match production editions", async () => {
-    const productionEditions = await fetchProductionEditions();
+  describe("Should match production editions", () => {
+    let productionEditions: ReferralProgramEditionConfig[] | null = null;
 
-    if (!productionEditions) {
-      throw new Error(`Could not fetch production editions from ${PRODUCTION_EDITIONS_URL}`);
-    }
+    beforeAll(async () => {
+      productionEditions = await fetchProductionEditions();
+    });
 
-    it("Returns the expected number of editions", () => {
+    it("Returns the expected number of editions", ({ skip }) => {
+      if (!productionEditions)
+        return skip(`Could not fetch production editions from ${PRODUCTION_EDITIONS_URL}`);
       expect(configSet.size).toBe(productionEditions.length);
     });
 
-    it("Contains all expected edition `slug`s", () => {
+    it("Contains all expected edition `slug`s", ({ skip }) => {
+      if (!productionEditions)
+        return skip(`Could not fetch production editions from ${PRODUCTION_EDITIONS_URL}`);
       expect(new Set(configSet.keys())).toStrictEqual(
         new Set(productionEditions.map((e) => e.slug)),
       );
     });
 
-    for (const expected of productionEditions) {
-      describe(`${expected.slug} edition (${expected.rules.awardModel})`, () => {
+    it("Each edition matches its production counterpart", ({ skip }) => {
+      if (!productionEditions)
+        return skip(`Could not fetch production editions from ${PRODUCTION_EDITIONS_URL}`);
+
+      for (const expected of productionEditions) {
         const edition = configSet.get(expected.slug);
+        expect(edition, `edition "${expected.slug}" should exist`).toBeDefined();
 
-        it("Should exist in the config set", () => {
-          expect(edition).toBeDefined();
-        });
+        if (edition === undefined) continue;
 
-        if (edition !== undefined) {
-          const rules = edition.rules;
+        const rules = edition.rules;
 
-          it("Should have the correct `displayName`", () => {
-            expect(edition.displayName).toBe(expected.displayName);
-          });
+        expect(
+          edition.displayName,
+          `edition "${expected.slug}" should have the correct <displayName>. Expected "${expected.displayName}", got "${edition.displayName}"`,
+        ).toBe(expected.displayName);
+        expect(
+          rules.awardModel,
+          `edition "${expected.slug}" should have the correct <awardModel>. Expected "${expected.rules.awardModel}", got "${rules.awardModel}"`,
+        ).toBe(expected.rules.awardModel);
+        expect(
+          rules.startTime,
+          `edition "${expected.slug}" should have the correct <startTime>. Expected "${expected.rules.startTime}", got "${rules.startTime}"`,
+        ).toBe(expected.rules.startTime);
+        expect(
+          rules.endTime,
+          `edition "${expected.slug}" should have the correct <endTime>. Expected "${expected.rules.endTime}", got "${rules.endTime}"`,
+        ).toBe(expected.rules.endTime);
+        expect(
+          rules.subregistryId,
+          `edition "${expected.slug}" should have the correct <subregistryId>. Expected "${expected.rules.subregistryId}", got "${rules.subregistryId}"`,
+        ).toStrictEqual(expected.rules.subregistryId);
+        expect(
+          rules.rulesUrl,
+          `edition "${expected.slug}" should have the correct <rulesUrl>. Expected "${new URL(expected.rules.rulesUrl)}", got "${rules.rulesUrl}"`,
+        ).toStrictEqual(new URL(expected.rules.rulesUrl));
+        expect(
+          rules.areAwardsDistributed,
+          `edition "${expected.slug}" should have the correct <areAwardsDistributed>. Expected "${expected.rules.areAwardsDistributed}", got "${rules.areAwardsDistributed}"`,
+        ).toBe(expected.rules.areAwardsDistributed);
 
-          it("Should have the correct `awardModel`", () => {
-            expect(rules.awardModel).toBe(expected.rules.awardModel);
-          });
-
-          it("Should have the correct start and end times", () => {
-            expect(rules.startTime).toBe(expected.rules.startTime);
-            expect(rules.endTime).toBe(expected.rules.endTime);
-          });
-
-          it("Should have the correct `subregistryId`", () => {
-            expect(rules.subregistryId).toStrictEqual(expected.rules.subregistryId);
-          });
-
-          it("Should have the correct `rulesUrl`", () => {
-            expect(rules.rulesUrl).toStrictEqual(new URL(expected.rules.rulesUrl));
-          });
-
-          it("Should have the correct `areAwardsDistributed` flag", () => {
-            expect(rules.areAwardsDistributed).toBe(expected.rules.areAwardsDistributed);
-          });
-
-          it("Should have the correct `totalAwardPoolValue`", () => {
-            if (
-              rules.awardModel !== ReferralProgramAwardModels.Unrecognized &&
-              expected.rules.awardModel !== ReferralProgramAwardModels.Unrecognized
-            ) {
-              expect(rules.totalAwardPoolValue).toStrictEqual(
-                priceUsdc(BigInt(expected.rules.totalAwardPoolValue.amount)),
-              );
-            }
-          });
-
-          if (expected.rules.awardModel === ReferralProgramAwardModels.PieSplit) {
-            const expectedPieSplitRules = expected.rules as ReferralProgramRulesPieSplit;
-
-            it("Should have the correct `maxQualifiedReferrers`", () => {
-              if (rules.awardModel === ReferralProgramAwardModels.PieSplit) {
-                expect(rules.maxQualifiedReferrers).toBe(
-                  expectedPieSplitRules.maxQualifiedReferrers,
-                );
-              }
-            });
-          }
-
-          if (expected.rules.awardModel === ReferralProgramAwardModels.RevShareLimit) {
-            const expectedRevShareLimitRules = expected.rules as ReferralProgramRulesRevShareLimit;
-
-            it("Should have the correct `minQualifiedRevenueContribution`", () => {
-              if (rules.awardModel === ReferralProgramAwardModels.RevShareLimit) {
-                expect(rules.minQualifiedRevenueContribution).toStrictEqual(
-                  priceUsdc(
-                    BigInt(expectedRevShareLimitRules.minQualifiedRevenueContribution!.amount),
-                  ),
-                );
-              }
-            });
-
-            it("Should have the correct `qualifiedRevenueShare`", () => {
-              if (rules.awardModel === ReferralProgramAwardModels.RevShareLimit) {
-                expect(rules.qualifiedRevenueShare).toBe(
-                  expectedRevShareLimitRules.qualifiedRevenueShare,
-                );
-              }
-            });
-          }
+        if (
+          rules.awardModel !== ReferralProgramAwardModels.Unrecognized &&
+          expected.rules.awardModel !== ReferralProgramAwardModels.Unrecognized
+        ) {
+          expect(
+            rules.totalAwardPoolValue,
+            `edition "${expected.slug}" should have the correct <totalAwardPoolValue>. Expected "${priceUsdc(expected.rules.totalAwardPoolValue.amount)}", got "${rules.totalAwardPoolValue}"`,
+          ).toStrictEqual(priceUsdc(expected.rules.totalAwardPoolValue.amount));
         }
-      });
-    }
+
+        // If statements required for type-safety.
+        // The equality of the `awardModel` field is guaranteed by the test above
+        if (
+          rules.awardModel === ReferralProgramAwardModels.PieSplit &&
+          expected.rules.awardModel === ReferralProgramAwardModels.PieSplit
+        ) {
+          const expectedPieSplitRules = expected.rules as ReferralProgramRulesPieSplit;
+          expect(
+            rules.maxQualifiedReferrers,
+            `edition "${expected.slug}" should have the correct <maxQualifiedReferrers>. Expected "${expectedPieSplitRules.maxQualifiedReferrers}", got "${rules.maxQualifiedReferrers}"`,
+          ).toBe(expectedPieSplitRules.maxQualifiedReferrers);
+        }
+
+        if (
+          rules.awardModel === ReferralProgramAwardModels.RevShareLimit &&
+          expected.rules.awardModel === ReferralProgramAwardModels.RevShareLimit
+        ) {
+          const expectedRevShareLimitRules = expected.rules as ReferralProgramRulesRevShareLimit;
+          expect(
+            rules.minQualifiedRevenueContribution,
+            `edition "${expected.slug}" should have the correct <minQualifiedRevenueContribution>. Expected "${priceUsdc(expectedRevShareLimitRules.minQualifiedRevenueContribution.amount)}", got "${rules.minQualifiedRevenueContribution}"`,
+          ).toStrictEqual(
+            priceUsdc(expectedRevShareLimitRules.minQualifiedRevenueContribution.amount),
+          );
+          expect(
+            rules.qualifiedRevenueShare,
+            `edition "${expected.slug}" should have the correct <qualifiedRevenueShare>. Expected "${expectedRevShareLimitRules.qualifiedRevenueShare}", got "${rules.qualifiedRevenueShare}"`,
+          ).toBe(expectedRevShareLimitRules.qualifiedRevenueShare);
+        }
+      }
+    });
   });
 
   describe("Should have a valid structure", () => {
     it("Maintains the config set invariant (map key === config.slug)", () => {
       for (const [key, config] of configSet) {
-        expect(key).toBe(config.slug);
+        expect(key, `config key "${key}" should match config.slug "${config.slug}"`).toBe(
+          config.slug,
+        );
       }
     });
 
     it("All editions have valid `slug` format", () => {
       for (const [slug] of configSet) {
-        expect(slug).toMatch(REFERRAL_PROGRAM_EDITION_SLUG_PATTERN);
+        expect(slug, `edition "${slug}" should match the slug pattern`).toMatch(
+          REFERRAL_PROGRAM_EDITION_SLUG_PATTERN,
+        );
       }
     });
 
     it("All editions have non-empty `displayName`s", () => {
       for (const [, config] of configSet) {
-        expect(config.displayName.length).toBeGreaterThan(0);
+        expect(
+          config.displayName.length,
+          `edition "${config.slug}" should have a non-empty <displayName>`,
+        ).toBeGreaterThan(0);
       }
     });
 
     it("All editions have `endTime` >= `startTime`", () => {
       for (const [, config] of configSet) {
-        expect(config.rules.endTime).toBeGreaterThanOrEqual(config.rules.startTime);
+        expect(
+          config.rules.endTime,
+          `edition "${config.slug}" should have <endTime> >= <startTime>. Got endTime: "${config.rules.endTime}", startTime: "${config.rules.startTime}"`,
+        ).toBeGreaterThanOrEqual(config.rules.startTime);
       }
     });
 
@@ -159,14 +173,23 @@ describe("getDefaultReferralProgramEditionConfigSet", () => {
         ReferralProgramAwardModels.RevShareLimit,
       ];
       for (const [, config] of configSet) {
-        expect(recognizedModels).toContain(config.rules.awardModel);
+        expect(
+          recognizedModels,
+          `edition "${config.slug}" should have a recognized <awardModel>`,
+        ).toContain(config.rules.awardModel);
       }
     });
 
     it("All editions have valid `rulesUrl`s", () => {
       for (const [, config] of configSet) {
-        expect(config.rules.rulesUrl).toBeInstanceOf(URL);
-        expect(config.rules.rulesUrl.protocol).toBe("https:");
+        expect(
+          config.rules.rulesUrl,
+          `edition "${config.slug}" should have a valid <rulesUrl>`,
+        ).toBeInstanceOf(URL);
+        expect(
+          config.rules.rulesUrl.protocol,
+          `edition "${config.slug}" should have a valid <rulesUrl> protocol`,
+        ).toBe("https:");
       }
     });
   });
