@@ -25,7 +25,8 @@ export const graphql = initGraphQLTada<{
     // NOTE: graphql clients don't really do deserialization of scalars like bigint, so instead we
     // just helpfully type the string as 'a stringified bigint'
     BigInt: `${bigint}`;
-    // NOTE: keep these scalar types in sync with the scalars in apps/ensapi/src/omnigraph-api/builder.ts
+    // NOTE: keep these semantic scalar types in sync with the scalars in apps/ensapi/src/omnigraph-api/builder.ts
+    // (i.e. excluding the BigInt scalar, which we handle above)
     Address: Address;
     Hex: Hex;
     ChainId: ChainId;
