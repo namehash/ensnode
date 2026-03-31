@@ -42,7 +42,7 @@
     "lint:ci": "biome ci",
     "test": "vitest",
     "typecheck": "tsgo --noEmit",
-    "generate:schema": "gql.tada generate-output && gql.tada turbo"
+    "generate:schema": "gql.tada generate-output"
   },
   "dependencies": {
     "gql.tada": "^1.8.10",

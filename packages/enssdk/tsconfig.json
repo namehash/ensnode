@@ -6,8 +6,7 @@
       {
         "name": "gql.tada/ts-plugin",
         "schema": "./src/omnigraph/generated/schema.graphql",
-        "tadaOutputLocation": "./src/omnigraph/generated/graphql-env.d.ts",
-        "tadaTurboLocation": "./src/omnigraph/generated/graphql-cache.d.ts"
+        "tadaOutputLocation": "./src/omnigraph/generated/graphql-env.d.ts"
       }
     ]
   },
