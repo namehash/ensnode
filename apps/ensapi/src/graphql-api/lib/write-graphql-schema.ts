@@ -1,11 +1,12 @@
 import { writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { lexicographicSortSchema, printSchema } from "graphql";
 
 import { makeLogger } from "@/lib/logger";
 
-const logger = makeLogger("generate-schema");
+const logger = makeLogger("write-graphql-schema");
 
 const MONOREPO_ROOT = resolve(import.meta.dirname, "../../../../../");
 const ENSSDK_ROOT = resolve(MONOREPO_ROOT, "packages/enssdk/");
@@ -31,9 +32,9 @@ export async function writeGraphQLSchema() {
 }
 
 // when executed directly (`pnpm generate:gqlschema`), write generated schema and produce an exit code
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
-    await writeGraphQLSchema();
+    await _writeGraphQLSchema();
     console.log(`Wrote SDL to ${OUTPUT_PATH}`);
     process.exit(0);
   } catch (error) {
