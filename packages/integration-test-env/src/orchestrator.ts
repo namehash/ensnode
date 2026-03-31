@@ -53,7 +53,7 @@ const ENSAPI_PORT = 4334;
 
 // Shared config
 const ENSRAINBOW_URL = `http://localhost:${ENSRAINBOW_PORT}`;
-const ENSINDEXER_SCHEMA_NAME = "integration_test_ensindexer_schema";
+const ENSINDEXER_SCHEMA_NAME = "ensindexer_integration_test";
 
 // Track resources for cleanup
 const subprocesses: ResultPromise[] = [];

@@ -54,6 +54,7 @@ brew services start postgresql@17
 ```
 
 or with the local docker compose:
+
 ```sh
 docker compose up postgres
 ```
@@ -90,7 +91,11 @@ cd apps/ensindexer && pnpm dev
 with environment variables:
 
 ```env
+<<<<<<< HEAD
 DATABASE_SCHEMA=public
+=======
+DATABASE_SCHEMA=ensindexer_0
+>>>>>>> main
 NAMESPACE=ens-test-env
 PLUGINS=ensv2,protocol-acceleration
 ```
@@ -107,7 +112,11 @@ with environment variables:
 
 ```env
 DATABASE_URL=postgresql://ensnode:ensnode@localhost:5432/ensnode
+<<<<<<< HEAD
 ENSINDEXER_SCHEMA_NAME=public
+=======
+ENSINDEXER_SCHEMA_NAME=ensindexer_0
+>>>>>>> main
 ```
 
 `ENSINDEXER_SCHEMA_NAME` must match the `DATABASE_SCHEMA` used by ENSIndexer above.
