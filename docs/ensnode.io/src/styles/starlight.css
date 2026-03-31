@@ -331,10 +331,3 @@ a.starlight-sidebar-topics-current .starlight-sidebar-topics-icon {
     filter 0.2s ease-in-out,
     box-shadow 0.2s ease-in-out;
 }
-
-/* Starlight's TwoColumnContent sets `isolation: isolate` on .main-pane,
-   creating a stacking context that traps Scalar's fixed-position modal
-   behind the header/sidebar/TOC. Remove it so the modal can layer above. */
-.main-pane {
-  isolation: auto !important;
-}
