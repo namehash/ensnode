@@ -118,7 +118,7 @@ Returns referrer metrics for a specified referrer across one or more editions.
 ```typescript
 const response = await client.getReferrerMetricsEditions({
   referrer: "0x1234567890123456789012345678901234567890",
-  editions: ["2025-12", "2026-01"],
+  editions: ["2025-12", "2026-04"],
 });
 
 if (response.responseCode === ReferrerMetricsEditionsResponseCodes.Ok) {
