@@ -85,4 +85,17 @@ describe("EnsDbReader", () => {
       );
     });
   });
+
+  describe("getEnsRainbowPublicConfig", () => {
+    it("returns undefined when no record exists", async () => {
+      await expect(createEnsDbReader().getEnsRainbowPublicConfig()).resolves.toBeUndefined();
+    });
+
+    it("returns the stored config", async () => {
+      const config = ensDbClientMock.publicConfig.ensRainbowPublicConfig;
+      selectResult.current = [{ value: config }];
+
+      await expect(createEnsDbReader().getEnsRainbowPublicConfig()).resolves.toStrictEqual(config);
+    });
+  });
 });

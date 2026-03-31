@@ -83,6 +83,20 @@ describe("EnsDbWriter", () => {
     });
   });
 
+  describe("upsertEnsRainbowPublicConfig", () => {
+    it("writes the rainbow public config", async () => {
+      const config = ensDbClientMock.publicConfig.ensRainbowPublicConfig;
+
+      await createEnsDbWriter().upsertEnsRainbowPublicConfig(config);
+
+      expect(valuesMock).toHaveBeenCalledWith({
+        ensIndexerSchemaName: ensDbClientMock.ensIndexerSchemaName,
+        key: EnsNodeMetadataKeys.EnsRainbowPublicConfig,
+        value: config,
+      });
+    });
+  });
+
   describe("migrateEnsNodeSchema", () => {
     it("calls drizzle-orm migrateEnsNodeSchema with the correct parameters", async () => {
       const migrationsDirPath = "/path/to/migrations";

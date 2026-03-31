@@ -5,6 +5,7 @@ import {
   deserializeCrossChainIndexingStatusSnapshot,
   deserializeEnsIndexerPublicConfig,
   type EnsIndexerPublicConfig,
+  type EnsRainbowPublicConfig,
 } from "@ensnode/ensnode-sdk";
 
 import {
@@ -20,6 +21,7 @@ import type {
   SerializedEnsNodeMetadataEnsDbVersion,
   SerializedEnsNodeMetadataEnsIndexerIndexingStatus,
   SerializedEnsNodeMetadataEnsIndexerPublicConfig,
+  SerializedEnsNodeMetadataEnsRainbowPublicConfig,
 } from "./serialize/ensnode-metadata";
 
 /**
@@ -154,6 +156,23 @@ export class EnsDbReader<
     }
 
     return deserializeEnsIndexerPublicConfig(record);
+  }
+
+  /**
+   * Get ENSRainbow Public Config
+   *
+   * @returns the existing record, or `undefined`.
+   */
+  async getEnsRainbowPublicConfig(): Promise<EnsRainbowPublicConfig | undefined> {
+    const record = await this.getEnsNodeMetadata<SerializedEnsNodeMetadataEnsRainbowPublicConfig>({
+      key: EnsNodeMetadataKeys.EnsRainbowPublicConfig,
+    });
+
+    if (!record) {
+      return undefined;
+    }
+
+    return record;
   }
 
   /**

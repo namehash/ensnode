@@ -3,6 +3,7 @@ import { migrate } from "drizzle-orm/node-postgres/migrator";
 import {
   type CrossChainIndexingStatusSnapshot,
   type EnsIndexerPublicConfig,
+  type EnsRainbowPublicConfig,
   serializeCrossChainIndexingStatusSnapshot,
   serializeEnsIndexerPublicConfig,
 } from "@ensnode/ensnode-sdk";
@@ -56,6 +57,20 @@ export class EnsDbWriter extends EnsDbReader {
     await this.upsertEnsNodeMetadata({
       key: EnsNodeMetadataKeys.EnsIndexerPublicConfig,
       value: serializeEnsIndexerPublicConfig(ensIndexerPublicConfig),
+    });
+  }
+
+  /**
+   * Upsert ENSRainbow Public Config
+   *
+   * @throws when upsert operation failed.
+   */
+  async upsertEnsRainbowPublicConfig(
+    ensRainbowPublicConfig: EnsRainbowPublicConfig,
+  ): Promise<void> {
+    await this.upsertEnsNodeMetadata({
+      key: EnsNodeMetadataKeys.EnsRainbowPublicConfig,
+      value: ensRainbowPublicConfig,
     });
   }
 

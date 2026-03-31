@@ -8,6 +8,7 @@ import type {
   EnsNodeMetadataEnsDbVersion,
   EnsNodeMetadataEnsIndexerIndexingStatus,
   EnsNodeMetadataEnsIndexerPublicConfig,
+  EnsNodeMetadataEnsRainbowPublicConfig,
   EnsNodeMetadataKeys,
 } from "../ensnode-metadata";
 
@@ -25,6 +26,10 @@ export interface SerializedEnsNodeMetadataEnsIndexerPublicConfig {
 }
 
 /**
+ * Serialized representation of {@link EnsNodeMetadataEnsRainbowPublicConfig}.
+ */
+export type SerializedEnsNodeMetadataEnsRainbowPublicConfig = EnsNodeMetadataEnsRainbowPublicConfig;
+/**
  * Serialized representation of {@link EnsNodeMetadataEnsIndexerIndexingStatus}.
  */
 export interface SerializedEnsNodeMetadataEnsIndexerIndexingStatus {
@@ -38,4 +43,5 @@ export interface SerializedEnsNodeMetadataEnsIndexerIndexingStatus {
 export type SerializedEnsNodeMetadata =
   | SerializedEnsNodeMetadataEnsDbVersion
   | SerializedEnsNodeMetadataEnsIndexerPublicConfig
+  | SerializedEnsNodeMetadataEnsRainbowPublicConfig
   | SerializedEnsNodeMetadataEnsIndexerIndexingStatus;
