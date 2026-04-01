@@ -47,7 +47,6 @@ const ENSINDEXER_PUBLIC_CONFIG = {
     ensDb: packageJson.version,
     ensIndexer: packageJson.version,
     ensNormalize: ensApiVersionInfo.ensNormalize,
-    nodejs: "20.0.0",
     ponder: "0.8.0",
   },
 } satisfies ENSIndexerPublicConfig;

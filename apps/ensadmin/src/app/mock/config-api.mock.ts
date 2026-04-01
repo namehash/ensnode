@@ -27,7 +27,6 @@ export const ensIndexerPublicConfig = deserializeENSIndexerPublicConfig({
     "tokenscope",
   ],
   versionInfo: {
-    nodejs: "22.18.0",
     ponder: "0.11.43",
     ensIndexer: "0.35.0",
     ensDb: "0.35.0",
