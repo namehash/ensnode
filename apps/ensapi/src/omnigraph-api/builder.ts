@@ -35,13 +35,13 @@ const createSpan = createOpenTelemetryWrapper(tracer, {
     // inject the graphql.field.args attribute using superjson to handle our BigInt scalar
     span.setAttribute(AttributeNames.FIELD_ARGS, superjson.stringify(args));
 
-    // edge field names are too loud by default and not helpful
+    // edge span names are too loud by default and not helpful
     if (info.fieldName === "edges") return span.updateName("edges");
 
-    // turn a node field name into "Typename([:id])", ex: 'ENSv2Domain([:id])'
-    if (info.fieldName === "node") {
+    // turn an *Edge.node span name into "Typename([:id])", ex: 'ENSv2Domain([:id])'
+    if (info.parentType.name.endsWith("Edge") && info.fieldName === "node") {
       const typename = getNamedType(info.returnType);
-      const id = (parent as any).node.id;
+      const id = (parent as any).node?.id ?? "Unknown";
 
       return span.updateName(`${typename}(${id})`);
     }
