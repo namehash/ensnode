@@ -58,7 +58,10 @@ const EXAMPLE_PRIMARY_NAMES_RESPONSE = {
 const EXAMPLE_ERROR_RESPONSE: ErrorResponse = { message: "error" };
 
 const EXAMPLE_CONFIG_RESPONSE = {
-  version: "0.32.0",
+  versionInfo: {
+    ensApi: "1.9.0",
+    ensNormalize: "1.11.1",
+  },
   theGraphFallback: {
     canFallback: false,
     reason: "no-api-key",
