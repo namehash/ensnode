@@ -1,0 +1,1162 @@
+"""Represents an individual Account, keyed by its Address."""
+type Account {
+  """An EVM Address that uniquely identifies this Account on-chain."""
+  address: Address!
+
+  """The Domains that are owned by the Account."""
+  domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: AccountDomainsWhereInput): AccountDomainsConnection
+
+  """
+  All Events for which this Account is the sender (i.e. `Transaction.from`).
+  """
+  events(after: String, before: String, first: Int, last: Int, where: AccountEventsWhereInput): AccountEventsConnection
+
+  """A unique reference to this Account."""
+  id: Address!
+
+  """
+  The Permissions granted to this Account, optionally filtered to Permissions in a specific contract.
+  """
+  permissions(after: String, before: String, first: Int, in: AccountIdInput, last: Int): AccountPermissionsConnection
+
+  """The Permissions on Registries granted to this Account."""
+  registryPermissions(after: String, before: String, first: Int, last: Int): AccountRegistryPermissionsConnection
+
+  """The Permissions on Resolvers granted to this Account."""
+  resolverPermissions(after: String, before: String, first: Int, last: Int): AccountResolverPermissionsConnection
+}
+
+type AccountDomainsConnection {
+  edges: [AccountDomainsConnectionEdge]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type AccountDomainsConnectionEdge {
+  cursor: String!
+  node: Domain
+}
+
+"""Filter for Account.domains query."""
+input AccountDomainsWhereInput {
+  """
+  Optional, defaults to false. If true, filters the set of Domains by those that are Canonical (i.e. reachable by ENS Forward Resolution).
+  """
+  canonical: Boolean = false
+
+  """
+  A partial Interpreted Name by which to search the set of Domains. ex: 'example', 'example.', 'example.et'.
+  """
+  name: String
+}
+
+type AccountEventsConnection {
+  edges: [AccountEventsConnectionEdge]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type AccountEventsConnectionEdge {
+  cursor: String!
+  node: Event
+}
+
+"""
+Filter conditions for Account.events (where `from` is implied by the Account).
+"""
+input AccountEventsWhereInput {
+  """
+  Filter to events whose selector (event signature) is one of the provided values.
+  """
+  selector_in: [Hex!]
+
+  """Filter to events at or after this UnixTimestamp."""
+  timestamp_gte: BigInt
+
+  """Filter to events at or before this UnixTimestamp."""
+  timestamp_lte: BigInt
+}
+
+"""A CAIP-10 Account ID including chainId and address."""
+type AccountId {
+  address: Address
+  chainId: ChainId
+}
+
+"""A CAIP-10 Account ID including chainId and address."""
+input AccountIdInput {
+  address: Address!
+  chainId: ChainId!
+}
+
+type AccountPermissionsConnection {
+  edges: [AccountPermissionsConnectionEdge]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type AccountPermissionsConnectionEdge {
+  cursor: String!
+  node: PermissionsUser
+}
+
+type AccountRegistryPermissionsConnection {
+  edges: [AccountRegistryPermissionsConnectionEdge]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type AccountRegistryPermissionsConnectionEdge {
+  cursor: String!
+  node: RegistryPermissionsUser
+}
+
+type AccountResolverPermissionsConnection {
+  edges: [AccountResolverPermissionsConnectionEdge]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type AccountResolverPermissionsConnectionEdge {
+  cursor: String!
+  node: ResolverPermissionsUser
+}
+
+"""Address represents a lowercase (unchecksummed) viem#Address."""
+scalar Address
+
+"""
+A BaseRegistrarRegistration represents a Registration within an ENSv1 BaseRegistrar contract, including those deployed by Basenames and Lineanames.
+"""
+type BaseRegistrarRegistration implements Registration {
+  """The `baseCost` for registering this Domain, in wei."""
+  baseCost: BigInt
+
+  """The Domain for which this Registration exists."""
+  domain: Domain!
+
+  """The Event for which this Registration was created."""
+  event: Event!
+
+  """
+  Indicates whether this Registration is expired. If the Registration is for an ENSv1Domain, a Registration is only considered `expired` after the Grace Period has elapsed.
+  """
+  expired: Boolean!
+
+  """A UnixTimestamp indicating the Registration's expiry, if exists."""
+  expiry: BigInt
+
+  """A unique reference to this Registration."""
+  id: RegistrationId!
+
+  """
+  Whether this Registration is in the Grace Period (90 days) and can be renewed by the current owner.
+  """
+  isInGracePeriod: Boolean!
+
+  """The `premium` for registering this Domain, in wei."""
+  premium: BigInt
+
+  """The extra `referrer` data provided with a Registration, if exists."""
+  referrer: Hex
+
+  """The Registrant of a Registration, if exists."""
+  registrant: Account
+
+  """The Registrar contract under which this Registration is managed."""
+  registrar: AccountId!
+
+  """
+  Renewals that have occurred within this Registration's lifespan to extend its expiration.
+  """
+  renewals(after: String, before: String, first: Int, last: Int): RegistrationRenewalsConnection
+
+  """A UnixTimestamp indicating when this Registration was created."""
+  start: BigInt!
+
+  """The Unregistrant of a Registration, if exists."""
+  unregistrant: Account
+
+  """
+  Additional metadata if this BaseRegistrarRegistration is wrapped by the NameWrapper (i.e. in the case of wrapped .eth names).
+  """
+  wrapped: WrappedBaseRegistrarRegistration
+}
+
+"""BigInt represents non-fractional signed whole numeric values."""
+scalar BigInt
+
+"""ChainId represents a @ensnode/ensnode-sdk#ChainId."""
+scalar ChainId
+
+"""CoinType represents a @ensnode/ensnode-sdk#CoinType."""
+scalar CoinType
+
+"""
+A Domain represents an individual Label within the ENS namegraph. It may or may not be Canonical. It may be an ENSv1Domain or an ENSv2Domain.
+"""
+interface Domain {
+  """All Events associated with this Domain."""
+  events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): DomainEventsConnection
+
+  """A unique reference to this Domain."""
+  id: DomainId!
+
+  """The Label this Domain represents in the ENS Namegraph"""
+  label: Label!
+
+  """
+  The Canonical Name for this Domain. If the Domain is not Canonical, then `name` will be null.
+  """
+  name: Name
+
+  """The owner of this Domain."""
+  owner: Account
+
+  """
+  The Canonical Path from the ENS Root to this Domain. `path` is null if the Domain is not Canonical.
+  """
+  path: [Domain!]
+
+  """The latest Registration for this Domain, if exists."""
+  registration: Registration
+
+  """All Registrations for a Domain, including the latest Registration."""
+  registrations(after: String, before: String, first: Int, last: Int): DomainRegistrationsConnection
+
+  """
+  The Resolver that this Domain has assigned, if any. NOTE that this is the Domain's _assigned_ Resolver, _not_ its _effective_ Resolver, which can only be determined by following ENS Forward Resolution and ENSIP-10.
+  """
+  resolver: Resolver
+
+  """
+  All Domains that are direct descendents of this Domain in the namegraph.
+  """
+  subdomains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: SubdomainsWhereInput): DomainSubdomainsConnection
+}
+
+type DomainEventsConnection {
+  edges: [DomainEventsConnectionEdge]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type DomainEventsConnectionEdge {
+  cursor: String!
+  node: Event
+}
+
+"""DomainId represents a @ensnode/ensnode-sdk#DomainId."""
+scalar DomainId
+
+"""Reference a specific Domain."""
+input DomainIdInput @oneOf {
+  id: DomainId
+  name: Name
+}
+
+"""Filter Permissions over this Domain by a specific User address."""
+input DomainPermissionsWhereInput {
+  user: Address
+}
+
+type DomainRegistrationsConnection {
+  edges: [DomainRegistrationsConnectionEdge]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type DomainRegistrationsConnectionEdge {
+  cursor: String!
+  node: Registration
+}
+
+type DomainSubdomainsConnection {
+  edges: [DomainSubdomainsConnectionEdge]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type DomainSubdomainsConnectionEdge {
+  cursor: String!
+  node: Domain
+}
+
+"""Fields by which domains can be ordered"""
+enum DomainsOrderBy {
+  NAME
+  REGISTRATION_EXPIRY
+  REGISTRATION_TIMESTAMP
+}
+
+"""
+Ordering options for domains query. If no order is provided, the default is ASC.
+"""
+input DomainsOrderInput {
+  by: DomainsOrderBy!
+  dir: OrderDirection = ASC
+}
+
+"""Filter for the top-level domains query."""
+input DomainsWhereInput {
+  """
+  Optional, defaults to false. If true, filters the set of Domains by those that are Canonical (i.e. reachable by ENS Forward Resolution). If false, the set of Domains is not filtered, and may include ENSv2 Domains not reachable by ENS Forward Resolution.
+  """
+  canonical: Boolean = false
+
+  """
+  A partial Interpreted Name by which to search the set of Domains. ex: 'example', 'example.', 'example.et'.
+  """
+  name: String!
+}
+
+"""An ENSv1Domain represents an ENSv1 Domain."""
+type ENSv1Domain implements Domain {
+  """All Events associated with this Domain."""
+  events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): DomainEventsConnection
+
+  """A unique reference to this Domain."""
+  id: DomainId!
+
+  """The Label this Domain represents in the ENS Namegraph"""
+  label: Label!
+
+  """
+  The Canonical Name for this Domain. If the Domain is not Canonical, then `name` will be null.
+  """
+  name: Name
+
+  """The owner of this Domain."""
+  owner: Account
+
+  """The parent Domain of this Domain in the ENSv1 nametree."""
+  parent: ENSv1Domain
+
+  """
+  The Canonical Path from the ENS Root to this Domain. `path` is null if the Domain is not Canonical.
+  """
+  path: [Domain!]
+
+  """The latest Registration for this Domain, if exists."""
+  registration: Registration
+
+  """All Registrations for a Domain, including the latest Registration."""
+  registrations(after: String, before: String, first: Int, last: Int): DomainRegistrationsConnection
+
+  """
+  The Resolver that this Domain has assigned, if any. NOTE that this is the Domain's _assigned_ Resolver, _not_ its _effective_ Resolver, which can only be determined by following ENS Forward Resolution and ENSIP-10.
+  """
+  resolver: Resolver
+
+  """
+  The rootRegistryOwner of this Domain, i.e. the owner() of this Domain within the ENSv1 Registry.
+  """
+  rootRegistryOwner: Account
+
+  """
+  All Domains that are direct descendents of this Domain in the namegraph.
+  """
+  subdomains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: SubdomainsWhereInput): DomainSubdomainsConnection
+}
+
+"""An ENSv2Domain represents an ENSv2 Domain."""
+type ENSv2Domain implements Domain {
+  """The ENSv2Domain's Canonical Id."""
+  canonicalId: BigInt!
+
+  """All Events associated with this Domain."""
+  events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): DomainEventsConnection
+
+  """A unique reference to this Domain."""
+  id: DomainId!
+
+  """The Label this Domain represents in the ENS Namegraph"""
+  label: Label!
+
+  """
+  The Canonical Name for this Domain. If the Domain is not Canonical, then `name` will be null.
+  """
+  name: Name
+
+  """The owner of this Domain."""
+  owner: Account
+
+  """
+  The Canonical Path from the ENS Root to this Domain. `path` is null if the Domain is not Canonical.
+  """
+  path: [Domain!]
+
+  """
+  Permissions for this Domain within its Registry, representing the roles granted to users for this Domain's token.
+  """
+  permissions(after: String, before: String, first: Int, last: Int, where: DomainPermissionsWhereInput): ENSv2DomainPermissionsConnection
+
+  """The latest Registration for this Domain, if exists."""
+  registration: Registration
+
+  """All Registrations for a Domain, including the latest Registration."""
+  registrations(after: String, before: String, first: Int, last: Int): DomainRegistrationsConnection
+
+  """The Registry under which this ENSv2Domain exists."""
+  registry: Registry!
+
+  """
+  The Resolver that this Domain has assigned, if any. NOTE that this is the Domain's _assigned_ Resolver, _not_ its _effective_ Resolver, which can only be determined by following ENS Forward Resolution and ENSIP-10.
+  """
+  resolver: Resolver
+
+  """
+  All Domains that are direct descendents of this Domain in the namegraph.
+  """
+  subdomains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: SubdomainsWhereInput): DomainSubdomainsConnection
+
+  """The Registry this ENSv2Domain declares as its Subregistry, if exists."""
+  subregistry: Registry
+
+  """The ENSv2Domain's current Token Id."""
+  tokenId: BigInt!
+}
+
+type ENSv2DomainPermissionsConnection {
+  edges: [ENSv2DomainPermissionsConnectionEdge]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type ENSv2DomainPermissionsConnectionEdge {
+  cursor: String!
+  node: PermissionsUser
+}
+
+"""
+ENSv2RegistryRegistration represents a Registration within an ENSv2 Registry.
+"""
+type ENSv2RegistryRegistration implements Registration {
+  """The Domain for which this Registration exists."""
+  domain: Domain!
+
+  """The Event for which this Registration was created."""
+  event: Event!
+
+  """
+  Indicates whether this Registration is expired. If the Registration is for an ENSv1Domain, a Registration is only considered `expired` after the Grace Period has elapsed.
+  """
+  expired: Boolean!
+
+  """A UnixTimestamp indicating the Registration's expiry, if exists."""
+  expiry: BigInt
+
+  """A unique reference to this Registration."""
+  id: RegistrationId!
+
+  """The extra `referrer` data provided with a Registration, if exists."""
+  referrer: Hex
+
+  """The Registrant of a Registration, if exists."""
+  registrant: Account
+
+  """The Registrar contract under which this Registration is managed."""
+  registrar: AccountId!
+
+  """
+  Renewals that have occurred within this Registration's lifespan to extend its expiration.
+  """
+  renewals(after: String, before: String, first: Int, last: Int): RegistrationRenewalsConnection
+
+  """A UnixTimestamp indicating when this Registration was created."""
+  start: BigInt!
+
+  """The Unregistrant of a Registration, if exists."""
+  unregistrant: Account
+}
+
+"""
+ENSv2RegistryReservation represents a Reservation within an ENSv2 Registry.
+"""
+type ENSv2RegistryReservation implements Registration {
+  """The Domain for which this Registration exists."""
+  domain: Domain!
+
+  """The Event for which this Registration was created."""
+  event: Event!
+
+  """
+  Indicates whether this Registration is expired. If the Registration is for an ENSv1Domain, a Registration is only considered `expired` after the Grace Period has elapsed.
+  """
+  expired: Boolean!
+
+  """A UnixTimestamp indicating the Registration's expiry, if exists."""
+  expiry: BigInt
+
+  """A unique reference to this Registration."""
+  id: RegistrationId!
+
+  """The extra `referrer` data provided with a Registration, if exists."""
+  referrer: Hex
+
+  """The Registrant of a Registration, if exists."""
+  registrant: Account
+
+  """The Registrar contract under which this Registration is managed."""
+  registrar: AccountId!
+
+  """
+  Renewals that have occurred within this Registration's lifespan to extend its expiration.
+  """
+  renewals(after: String, before: String, first: Int, last: Int): RegistrationRenewalsConnection
+
+  """A UnixTimestamp indicating when this Registration was created."""
+  start: BigInt!
+
+  """The Unregistrant of a Registration, if exists."""
+  unregistrant: Account
+}
+
+"""
+An Event represents a discrete Log Event that was emitted on an EVM chain, including associated metadata.
+"""
+type Event {
+  """Identifies the contract by which this Event was emitted."""
+  address: Address!
+
+  """Identifies the Block within which this Event was emitted."""
+  blockHash: Hex!
+
+  """The block number within which this Event was emitted."""
+  blockNumber: BigInt!
+
+  """The ChainId upon which this Event was emitted."""
+  chainId: ChainId!
+
+  """The non-indexed data of this Event's log."""
+  data: Hex!
+
+  """
+  Identifies the sender of the Transaction within which this Event was emitted.
+  """
+  from: Address!
+
+  """A unique reference to this Event."""
+  id: ID!
+
+  """The index of this Event's log within the Block."""
+  logIndex: Int!
+
+  """
+  The UnixTimestamp indicating the moment in which this Event was emitted.
+  """
+  timestamp: BigInt!
+
+  """
+  Identifies the recipient of the Transaction within which this Event was emitted. Null if the transaction deployed a contract.
+  """
+  to: Address
+
+  """The indexed topics of this Event's log."""
+  topics: [Hex!]!
+
+  """Identifies the Transaction within which this Event was emitted."""
+  transactionHash: Hex!
+
+  """The index of the Transaction within the Block."""
+  transactionIndex: Int!
+}
+
+"""Filter conditions for an events connection."""
+input EventsWhereInput {
+  """Filter to events sent by this address."""
+  from: Address
+
+  """
+  Filter to events whose selector (event signature) is one of the provided values.
+  """
+  selector_in: [Hex!]
+
+  """Filter to events at or after this UnixTimestamp."""
+  timestamp_gte: BigInt
+
+  """Filter to events at or before this UnixTimestamp."""
+  timestamp_lte: BigInt
+}
+
+"""Hex represents viem#Hex."""
+scalar Hex
+
+"""
+Represents a Label within ENS, providing its hash and interpreted representation.
+"""
+type Label {
+  """
+  The Label's LabelHash
+  (@see https://ensnode.io/docs/reference/terminology#labels-labelhashes-labelhash-function)
+  """
+  hash: Hex!
+
+  """
+  The Label represented as an Interpreted Label. This is either a normalized Literal Label or an Encoded LabelHash. 
+  (@see https://ensnode.io/docs/reference/terminology#interpreted-label)
+  """
+  interpreted: String!
+}
+
+"""Name represents a @ensnode/ensnode-sdk#InterpretedName."""
+scalar Name
+
+"""Constructs a reference to a specific Node via one of `name` or `node`."""
+input NameOrNodeInput @oneOf {
+  name: Name
+  node: Node
+}
+
+"""
+A NameWrapperRegistration represents a Registration initiated by the ENSv1 NameWrapper.
+"""
+type NameWrapperRegistration implements Registration {
+  """The Domain for which this Registration exists."""
+  domain: Domain!
+
+  """The Event for which this Registration was created."""
+  event: Event!
+
+  """
+  Indicates whether this Registration is expired. If the Registration is for an ENSv1Domain, a Registration is only considered `expired` after the Grace Period has elapsed.
+  """
+  expired: Boolean!
+
+  """A UnixTimestamp indicating the Registration's expiry, if exists."""
+  expiry: BigInt
+
+  """The Fuses for this Registration's Domain in the NameWrapper."""
+  fuses: Int!
+
+  """A unique reference to this Registration."""
+  id: RegistrationId!
+
+  """The extra `referrer` data provided with a Registration, if exists."""
+  referrer: Hex
+
+  """The Registrant of a Registration, if exists."""
+  registrant: Account
+
+  """The Registrar contract under which this Registration is managed."""
+  registrar: AccountId!
+
+  """
+  Renewals that have occurred within this Registration's lifespan to extend its expiration.
+  """
+  renewals(after: String, before: String, first: Int, last: Int): RegistrationRenewalsConnection
+
+  """A UnixTimestamp indicating when this Registration was created."""
+  start: BigInt!
+
+  """The Unregistrant of a Registration, if exists."""
+  unregistrant: Account
+}
+
+"""Node represents a @ensnode/ensnode-sdk#Node."""
+scalar Node
+
+"""Sort direction"""
+enum OrderDirection {
+  ASC
+  DESC
+}
+
+type PageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+"""Permissions"""
+type Permissions {
+  """The contract within which these Permissions are granted."""
+  contract: AccountId!
+
+  """All Events associated with these Permissions."""
+  events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): PermissionsEventsConnection
+
+  """A unique reference to this Permission."""
+  id: PermissionsId!
+
+  """All PermissionResources managed by this contract."""
+  resources(after: String, before: String, first: Int, last: Int): PermissionsResourcesConnection
+
+  """The Root Resource."""
+  root: PermissionsResource!
+}
+
+type PermissionsEventsConnection {
+  edges: [PermissionsEventsConnectionEdge]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type PermissionsEventsConnectionEdge {
+  cursor: String!
+  node: Event
+}
+
+"""PermissionsId represents a @ensnode/ensnode-sdk#PermissionsId."""
+scalar PermissionsId
+
+"""PermissionsResource"""
+type PermissionsResource {
+  """The contract within which these Permissions are granted."""
+  contract: AccountId!
+
+  """A unique reference to this PermissionsResource."""
+  id: PermissionsResourceId!
+
+  """The Permissions within which this Resource is managed."""
+  permissions: Permissions!
+
+  """Identifies the Resource that this PermissionsResource represents."""
+  resource: BigInt!
+
+  """The PermissionUsers who have Roles within this Resource."""
+  users(after: String, before: String, first: Int, last: Int): PermissionsResourceUsersConnection
+}
+
+"""
+PermissionsResourceId represents a @ensnode/ensnode-sdk#PermissionsResourceId.
+"""
+scalar PermissionsResourceId
+
+type PermissionsResourceUsersConnection {
+  edges: [PermissionsResourceUsersConnectionEdge]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type PermissionsResourceUsersConnectionEdge {
+  cursor: String!
+  node: PermissionsUser
+}
+
+type PermissionsResourcesConnection {
+  edges: [PermissionsResourcesConnectionEdge]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type PermissionsResourcesConnectionEdge {
+  cursor: String!
+  node: PermissionsResource
+}
+
+"""PermissionsUser"""
+type PermissionsUser {
+  """The contract within which these Permissions are granted."""
+  contract: AccountId!
+
+  """A unique reference to this PermissionsUser."""
+  id: PermissionsUserId!
+
+  """The Resource that this user has Roles within."""
+  resource: BigInt!
+
+  """The Roles this User has been granted within this Resource."""
+  roles: BigInt!
+
+  """The User for whom these Roles are granted."""
+  user: Account!
+}
+
+"""PermissionsUserId represents a @ensnode/ensnode-sdk#PermissionsUserId."""
+scalar PermissionsUserId
+
+type Query {
+  """Identify an Account by Address."""
+  account(address: Address!): Account
+
+  """Identify a Domain by Name or DomainId"""
+  domain(by: DomainIdInput!): Domain
+
+  """Find Domains by Name."""
+  domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: DomainsWhereInput!): QueryDomainsConnection
+
+  """Find Permissions in a contract by AccountId."""
+  permissions(for: AccountIdInput!): Permissions
+
+  """TODO"""
+  registrations(after: String, before: String, first: Int, last: Int): QueryRegistrationsConnection
+
+  """Identify a Registry by ID or AccountId."""
+  registry(by: RegistryIdInput!): Registry
+
+  """Identify a Resolver by ID or AccountId."""
+  resolver(by: ResolverIdInput!): Resolver
+
+  """TODO"""
+  resolvers(after: String, before: String, first: Int, last: Int): QueryResolversConnection
+
+  """The ENSv2 Root Registry, if exists."""
+  root: Registry
+
+  """TODO"""
+  v1Domains(after: String, before: String, first: Int, last: Int): QueryV1DomainsConnection
+
+  """TODO"""
+  v2Domains(after: String, before: String, first: Int, last: Int): QueryV2DomainsConnection
+}
+
+type QueryDomainsConnection {
+  edges: [QueryDomainsConnectionEdge]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type QueryDomainsConnectionEdge {
+  cursor: String!
+  node: Domain
+}
+
+type QueryRegistrationsConnection {
+  edges: [QueryRegistrationsConnectionEdge]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type QueryRegistrationsConnectionEdge {
+  cursor: String!
+  node: Registration
+}
+
+type QueryResolversConnection {
+  edges: [QueryResolversConnectionEdge]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type QueryResolversConnectionEdge {
+  cursor: String!
+  node: Resolver
+}
+
+type QueryV1DomainsConnection {
+  edges: [QueryV1DomainsConnectionEdge]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type QueryV1DomainsConnectionEdge {
+  cursor: String!
+  node: ENSv1Domain
+}
+
+type QueryV2DomainsConnection {
+  edges: [QueryV2DomainsConnectionEdge]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type QueryV2DomainsConnectionEdge {
+  cursor: String!
+  node: ENSv2Domain
+}
+
+"""
+A Registration represents a Domain's registration status within the various registries.
+"""
+interface Registration {
+  """The Domain for which this Registration exists."""
+  domain: Domain!
+
+  """The Event for which this Registration was created."""
+  event: Event!
+
+  """
+  Indicates whether this Registration is expired. If the Registration is for an ENSv1Domain, a Registration is only considered `expired` after the Grace Period has elapsed.
+  """
+  expired: Boolean!
+
+  """A UnixTimestamp indicating the Registration's expiry, if exists."""
+  expiry: BigInt
+
+  """A unique reference to this Registration."""
+  id: RegistrationId!
+
+  """The extra `referrer` data provided with a Registration, if exists."""
+  referrer: Hex
+
+  """The Registrant of a Registration, if exists."""
+  registrant: Account
+
+  """The Registrar contract under which this Registration is managed."""
+  registrar: AccountId!
+
+  """
+  Renewals that have occurred within this Registration's lifespan to extend its expiration.
+  """
+  renewals(after: String, before: String, first: Int, last: Int): RegistrationRenewalsConnection
+
+  """A UnixTimestamp indicating when this Registration was created."""
+  start: BigInt!
+
+  """The Unregistrant of a Registration, if exists."""
+  unregistrant: Account
+}
+
+"""RegistrationId represents a @ensnode/ensnode-sdk#RegistrationId."""
+scalar RegistrationId
+
+type RegistrationRenewalsConnection {
+  edges: [RegistrationRenewalsConnectionEdge]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type RegistrationRenewalsConnectionEdge {
+  cursor: String!
+  node: Renewal
+}
+
+"""A Registry represents an ENSv2 Registry contract."""
+type Registry {
+  """Contract metadata for this Registry"""
+  contract: AccountId!
+
+  """The Domains managed by this Registry."""
+  domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: RegistryDomainsWhereInput): RegistryDomainsConnection
+
+  """A unique reference to this Registry."""
+  id: RegistryId!
+
+  """The Domains for which this Registry is a Subregistry."""
+  parents(after: String, before: String, first: Int, last: Int): RegistryParentsConnection
+
+  """The Permissions managed by this Registry."""
+  permissions: Permissions
+}
+
+type RegistryDomainsConnection {
+  edges: [RegistryDomainsConnectionEdge]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type RegistryDomainsConnectionEdge {
+  cursor: String!
+  node: Domain
+}
+
+"""Filter for Registry.domains query."""
+input RegistryDomainsWhereInput {
+  """
+  A partial Interpreted Name by which to filter Domains in this Registry.
+  """
+  name: String
+}
+
+"""RegistryId represents a @ensnode/ensnode-sdk#RegistryId."""
+scalar RegistryId
+
+"""Address a Registry by ID or AccountId."""
+input RegistryIdInput @oneOf {
+  contract: AccountIdInput
+  id: RegistryId
+}
+
+type RegistryParentsConnection {
+  edges: [RegistryParentsConnectionEdge]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type RegistryParentsConnectionEdge {
+  cursor: String!
+  node: ENSv2Domain
+}
+
+type RegistryPermissionsUser {
+  """A unique reference to this RegistryPermissionsUser."""
+  id: PermissionsUserId!
+
+  """The Registry in which this Permission is granted."""
+  registry: Registry!
+
+  """The Resource for which this Permission is granted."""
+  resource: BigInt!
+
+  """The Roles that this Permission grants."""
+  roles: BigInt!
+
+  """The User for whom these Roles are granted."""
+  user: Account!
+}
+
+"""A Renewal represents an extension of a Registration's expiry."""
+type Renewal {
+  """The `base` cost of a Renewal, in wei, if exists."""
+  base: BigInt
+
+  """The duration for which a Registration was extended."""
+  duration: BigInt!
+
+  """The Event for which this Renewal was created."""
+  event: Event!
+
+  """A unique reference to this Renewal."""
+  id: RenewalId!
+
+  """The `premium` cost of a Renewal, in wei, if exists."""
+  premium: BigInt
+
+  """The extra `referrer` data provided with a Renewal, if exists."""
+  referrer: Hex
+}
+
+"""RenewalId represents a @ensnode/ensnode-sdk#RenewalId."""
+scalar RenewalId
+
+"""A Resolver represents a Resolver contract on-chain."""
+type Resolver {
+  """Whether Resolver is a BridgedResolver."""
+  bridged: AccountId
+
+  """Contract metadata for this Resolver."""
+  contract: AccountId!
+
+  """All Events associated with this Resolver."""
+  events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): ResolverEventsConnection
+
+  """A unique reference to this Resolver."""
+  id: ResolverId!
+
+  """Permissions granted by this Resolver."""
+  permissions: Permissions
+
+  """ResolverRecords issued by this Resolver."""
+  records(after: String, before: String, first: Int, last: Int): ResolverRecordsConnection
+
+  """Identify a ResolverRecord by `name` or `node`."""
+  records_(for: NameOrNodeInput!): ResolverRecords
+}
+
+type ResolverEventsConnection {
+  edges: [ResolverEventsConnectionEdge]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type ResolverEventsConnectionEdge {
+  cursor: String!
+  node: Event
+}
+
+"""ResolverId represents a @ensnode/ensnode-sdk#ResolverId."""
+scalar ResolverId
+
+"""Address a Resolver by ID or AccountId."""
+input ResolverIdInput @oneOf {
+  contract: AccountIdInput
+  id: ResolverId
+}
+
+type ResolverPermissionsUser {
+  """A unique reference to this ResolverPermissionsUser."""
+  id: PermissionsUserId!
+
+  """The Resolver in which this Permission is granted."""
+  resolver: Resolver!
+
+  """The Resource for which this Permission is granted."""
+  resource: BigInt!
+
+  """The Roles that this Permission grants."""
+  roles: BigInt!
+
+  """The User for whom these Roles are granted."""
+  user: Account!
+}
+
+"""ResolverRecords represents the _indexed_ records within a Resolver."""
+type ResolverRecords {
+  """Unique CoinTypes of `addr` records for this `node`."""
+  coinTypes: [CoinType!]!
+
+  """A unique reference to these ResolverRecords."""
+  id: ResolverRecordsId!
+
+  """Unique keys of `text` records for this `node`."""
+  keys: [String!]!
+
+  """The `name` record for this `node`, if any."""
+  name: String
+
+  """The Node for which these ResolverRecords are issued."""
+  node: Node!
+}
+
+type ResolverRecordsConnection {
+  edges: [ResolverRecordsConnectionEdge]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type ResolverRecordsConnectionEdge {
+  cursor: String!
+  node: ResolverRecords
+}
+
+"""ResolverRecordsId represents a @ensnode/ensnode-sdk#ResolverRecordsId."""
+scalar ResolverRecordsId
+
+"""Filter for Domain.subdomains query."""
+input SubdomainsWhereInput {
+  """A partial Interpreted Name by which to filter subdomains."""
+  name: String
+}
+
+"""ThreeDNSRegistration represents a Registration within ThreeDNSToken."""
+type ThreeDNSRegistration implements Registration {
+  """The Domain for which this Registration exists."""
+  domain: Domain!
+
+  """The Event for which this Registration was created."""
+  event: Event!
+
+  """
+  Indicates whether this Registration is expired. If the Registration is for an ENSv1Domain, a Registration is only considered `expired` after the Grace Period has elapsed.
+  """
+  expired: Boolean!
+
+  """A UnixTimestamp indicating the Registration's expiry, if exists."""
+  expiry: BigInt
+
+  """A unique reference to this Registration."""
+  id: RegistrationId!
+
+  """The extra `referrer` data provided with a Registration, if exists."""
+  referrer: Hex
+
+  """The Registrant of a Registration, if exists."""
+  registrant: Account
+
+  """The Registrar contract under which this Registration is managed."""
+  registrar: AccountId!
+
+  """
+  Renewals that have occurred within this Registration's lifespan to extend its expiration.
+  """
+  renewals(after: String, before: String, first: Int, last: Int): RegistrationRenewalsConnection
+
+  """A UnixTimestamp indicating when this Registration was created."""
+  start: BigInt!
+
+  """The Unregistrant of a Registration, if exists."""
+  unregistrant: Account
+}
+
+"""
+Additional metadata for BaseRegistrar Registrations wrapped by the NameWrapper (i.e. in the case of a wrapped .eth name)
+"""
+type WrappedBaseRegistrarRegistration {
+  """The Fuses for this Registration's Domain in the NameWrapper."""
+  fuses: Int!
+
+  """The TokenID for this Domain in the NameWrapper."""
+  tokenId: BigInt!
+}

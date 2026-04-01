@@ -4,13 +4,7 @@ import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@poth
 import { and, eq } from "drizzle-orm";
 import { namehash } from "viem";
 
-import {
-  makePermissionsId,
-  makeResolverRecordsId,
-  NODE_ANY,
-  type ResolverId,
-  ROOT_RESOURCE,
-} from "@ensnode/ensnode-sdk";
+import { makePermissionsId, makeResolverRecordsId, type ResolverId } from "@ensnode/ensnode-sdk";
 import { isBridgedResolver } from "@ensnode/ensnode-sdk/internal";
 
 import { builder } from "@/graphql-api/builder";
@@ -18,12 +12,11 @@ import { orderPaginationBy, paginateBy } from "@/graphql-api/lib/connection-help
 import { resolveFindEvents } from "@/graphql-api/lib/find-events/find-events-resolver";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
 import { lazyConnection } from "@/graphql-api/lib/lazy-connection";
-import { AccountRef } from "@/graphql-api/schema/account";
 import { AccountIdInput, AccountIdRef } from "@/graphql-api/schema/account-id";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { EventRef, EventsWhereInput } from "@/graphql-api/schema/event";
 import { NameOrNodeInput } from "@/graphql-api/schema/name-or-node";
-import { PermissionsRef, type PermissionsUserResource } from "@/graphql-api/schema/permissions";
+import { PermissionsRef } from "@/graphql-api/schema/permissions";
 import { ResolverRecordsRef } from "@/graphql-api/schema/resolver-records";
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 
@@ -121,24 +114,6 @@ ResolverRef.implement({
       },
     }),
 
-    //////////////////////
-    // Resolver.dedicated
-    //////////////////////
-    dedicated: t.field({
-      description: "If Resolver is a DedicatedResolver, additional DedicatedResolverMetadata.",
-      type: DedicatedResolverMetadataRef,
-      nullable: true,
-      resolve: async (parent, args, context) =>
-        ensDb.query.permissionsUser.findFirst({
-          where: (t, { eq, and }) =>
-            and(
-              eq(t.chainId, parent.chainId),
-              eq(t.address, parent.address),
-              eq(t.resource, ROOT_RESOURCE),
-            ),
-        }),
-    }),
-
     ////////////////////
     // Resolver.bridged
     ////////////////////
@@ -174,49 +149,6 @@ ResolverRef.implement({
             scope: eq(ensIndexerSchema.resolverEvent.resolverId, parent.id),
           },
         }),
-    }),
-  }),
-});
-
-/////////////////////////////
-// DedicatedResolverMetadata
-/////////////////////////////
-export const DedicatedResolverMetadataRef = builder.objectRef<PermissionsUserResource>(
-  "DedicatedResolverMetadataRef",
-);
-DedicatedResolverMetadataRef.implement({
-  description: "Represents additional metadata available for DedicatedResolvers.",
-  fields: (t) => ({
-    ///////////////////////////
-    // DedicatedResolver.owner
-    ///////////////////////////
-    owner: t.field({
-      description: "The Account that owns this DedicatedResolver.",
-      type: AccountRef,
-      nullable: false,
-      resolve: (parent) => parent.user,
-    }),
-
-    /////////////////////////////////
-    // DedicatedResolver.permissions
-    /////////////////////////////////
-    permissions: t.field({
-      description: "TODO",
-      type: PermissionsRef,
-      nullable: false,
-      // TODO: render a DedicatedResolverPermissions model that parses the backing permissions into dedicated-resolver-semantic roles?
-      resolve: ({ chainId, address }) => makePermissionsId({ chainId, address }),
-    }),
-
-    /////////////////////////////
-    // Resolver.dedicatedRecords
-    /////////////////////////////
-    records: t.field({
-      description: "The ResolverRecords issued under `NODE_ANY`.",
-      type: ResolverRecordsRef,
-      nullable: true,
-      resolve: ({ chainId, address }, args) =>
-        makeResolverRecordsId({ chainId, address }, NODE_ANY),
     }),
   }),
 });

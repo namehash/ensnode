@@ -2,856 +2,875 @@ import type { Abi } from "viem";
 
 export const UniversalResolverV2 = [
   {
+    type: "constructor",
     inputs: [
       {
-        internalType: "contract IRegistry",
         name: "root",
         type: "address",
+        internalType: "contract IRegistry",
       },
       {
-        internalType: "contract IGatewayProvider",
         name: "batchGatewayProvider",
         type: "address",
+        internalType: "contract IGatewayProvider",
       },
     ],
     stateMutability: "nonpayable",
-    type: "constructor",
   },
   {
-    inputs: [
-      {
-        internalType: "bytes",
-        name: "dns",
-        type: "bytes",
-      },
-    ],
-    name: "DNSDecodingFailed",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "string",
-        name: "ens",
-        type: "string",
-      },
-    ],
-    name: "DNSEncodingFailed",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "EmptyAddress",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint16",
-        name: "status",
-        type: "uint16",
-      },
-      {
-        internalType: "string",
-        name: "message",
-        type: "string",
-      },
-    ],
-    name: "HttpError",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "InvalidBatchGatewayResponse",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "LabelIsEmpty",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "string",
-        name: "label",
-        type: "string",
-      },
-    ],
-    name: "LabelIsTooLong",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "sender",
-        type: "address",
-      },
-      {
-        internalType: "string[]",
-        name: "urls",
-        type: "string[]",
-      },
-      {
-        internalType: "bytes",
-        name: "callData",
-        type: "bytes",
-      },
-      {
-        internalType: "bytes4",
-        name: "callbackFunction",
-        type: "bytes4",
-      },
-      {
-        internalType: "bytes",
-        name: "extraData",
-        type: "bytes",
-      },
-    ],
-    name: "OffchainLookup",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "offset",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "length",
-        type: "uint256",
-      },
-    ],
-    name: "OffsetOutOfBoundsError",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes",
-        name: "errorData",
-        type: "bytes",
-      },
-    ],
-    name: "ResolverError",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes",
-        name: "name",
-        type: "bytes",
-      },
-      {
-        internalType: "address",
-        name: "resolver",
-        type: "address",
-      },
-    ],
-    name: "ResolverNotContract",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes",
-        name: "name",
-        type: "bytes",
-      },
-    ],
-    name: "ResolverNotFound",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "string",
-        name: "primary",
-        type: "string",
-      },
-      {
-        internalType: "bytes",
-        name: "primaryAddress",
-        type: "bytes",
-      },
-    ],
-    name: "ReverseAddressMismatch",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes4",
-        name: "selector",
-        type: "bytes4",
-      },
-    ],
-    name: "UnsupportedResolverProfile",
-    type: "error",
-  },
-  {
-    inputs: [],
+    type: "function",
     name: "ROOT_REGISTRY",
-    outputs: [
-      {
-        internalType: "contract IRegistry",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
     inputs: [],
-    name: "batchGatewayProvider",
     outputs: [
       {
-        internalType: "contract IGatewayProvider",
         name: "",
         type: "address",
+        internalType: "contract IRegistry",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
-    inputs: [
-      {
-        components: [
-          {
-            components: [
-              {
-                internalType: "address",
-                name: "target",
-                type: "address",
-              },
-              {
-                internalType: "bytes",
-                name: "call",
-                type: "bytes",
-              },
-              {
-                internalType: "bytes",
-                name: "data",
-                type: "bytes",
-              },
-              {
-                internalType: "uint256",
-                name: "flags",
-                type: "uint256",
-              },
-            ],
-            internalType: "struct CCIPBatcher.Lookup[]",
-            name: "lookups",
-            type: "tuple[]",
-          },
-          {
-            internalType: "string[]",
-            name: "gateways",
-            type: "string[]",
-          },
-        ],
-        internalType: "struct CCIPBatcher.Batch",
-        name: "batch",
-        type: "tuple",
-      },
-    ],
-    name: "ccipBatch",
+    type: "function",
+    name: "batchGatewayProvider",
+    inputs: [],
     outputs: [
       {
+        name: "",
+        type: "address",
+        internalType: "contract IGatewayProvider",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "ccipBatch",
+    inputs: [
+      {
+        name: "batch",
+        type: "tuple",
+        internalType: "struct CCIPBatcher.Batch",
         components: [
           {
-            components: [
-              {
-                internalType: "address",
-                name: "target",
-                type: "address",
-              },
-              {
-                internalType: "bytes",
-                name: "call",
-                type: "bytes",
-              },
-              {
-                internalType: "bytes",
-                name: "data",
-                type: "bytes",
-              },
-              {
-                internalType: "uint256",
-                name: "flags",
-                type: "uint256",
-              },
-            ],
-            internalType: "struct CCIPBatcher.Lookup[]",
             name: "lookups",
             type: "tuple[]",
+            internalType: "struct CCIPBatcher.Lookup[]",
+            components: [
+              {
+                name: "target",
+                type: "address",
+                internalType: "address",
+              },
+              {
+                name: "call",
+                type: "bytes",
+                internalType: "bytes",
+              },
+              {
+                name: "data",
+                type: "bytes",
+                internalType: "bytes",
+              },
+              {
+                name: "flags",
+                type: "uint256",
+                internalType: "uint256",
+              },
+            ],
           },
           {
-            internalType: "string[]",
             name: "gateways",
             type: "string[]",
+            internalType: "string[]",
           },
         ],
-        internalType: "struct CCIPBatcher.Batch",
+      },
+    ],
+    outputs: [
+      {
         name: "",
         type: "tuple",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes",
-        name: "response",
-        type: "bytes",
-      },
-      {
-        internalType: "bytes",
-        name: "extraData",
-        type: "bytes",
-      },
-    ],
-    name: "ccipBatchCallback",
-    outputs: [
-      {
+        internalType: "struct CCIPBatcher.Batch",
         components: [
           {
-            components: [
-              {
-                internalType: "address",
-                name: "target",
-                type: "address",
-              },
-              {
-                internalType: "bytes",
-                name: "call",
-                type: "bytes",
-              },
-              {
-                internalType: "bytes",
-                name: "data",
-                type: "bytes",
-              },
-              {
-                internalType: "uint256",
-                name: "flags",
-                type: "uint256",
-              },
-            ],
-            internalType: "struct CCIPBatcher.Lookup[]",
             name: "lookups",
             type: "tuple[]",
+            internalType: "struct CCIPBatcher.Lookup[]",
+            components: [
+              {
+                name: "target",
+                type: "address",
+                internalType: "address",
+              },
+              {
+                name: "call",
+                type: "bytes",
+                internalType: "bytes",
+              },
+              {
+                name: "data",
+                type: "bytes",
+                internalType: "bytes",
+              },
+              {
+                name: "flags",
+                type: "uint256",
+                internalType: "uint256",
+              },
+            ],
           },
           {
-            internalType: "string[]",
             name: "gateways",
             type: "string[]",
+            internalType: "string[]",
           },
         ],
-        internalType: "struct CCIPBatcher.Batch",
-        name: "batch",
-        type: "tuple",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
+    type: "function",
+    name: "ccipBatchCallback",
     inputs: [
       {
-        internalType: "bytes",
         name: "response",
         type: "bytes",
+        internalType: "bytes",
       },
       {
-        internalType: "bytes",
         name: "extraData",
         type: "bytes",
+        internalType: "bytes",
       },
     ],
+    outputs: [
+      {
+        name: "batch",
+        type: "tuple",
+        internalType: "struct CCIPBatcher.Batch",
+        components: [
+          {
+            name: "lookups",
+            type: "tuple[]",
+            internalType: "struct CCIPBatcher.Lookup[]",
+            components: [
+              {
+                name: "target",
+                type: "address",
+                internalType: "address",
+              },
+              {
+                name: "call",
+                type: "bytes",
+                internalType: "bytes",
+              },
+              {
+                name: "data",
+                type: "bytes",
+                internalType: "bytes",
+              },
+              {
+                name: "flags",
+                type: "uint256",
+                internalType: "uint256",
+              },
+            ],
+          },
+          {
+            name: "gateways",
+            type: "string[]",
+            internalType: "string[]",
+          },
+        ],
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "ccipReadCallback",
+    inputs: [
+      {
+        name: "response",
+        type: "bytes",
+        internalType: "bytes",
+      },
+      {
+        name: "extraData",
+        type: "bytes",
+        internalType: "bytes",
+      },
+    ],
     outputs: [],
     stateMutability: "view",
-    type: "function",
   },
   {
+    type: "function",
+    name: "findCanonicalName",
     inputs: [
       {
-        internalType: "contract IRegistry",
         name: "registry",
         type: "address",
+        internalType: "contract IRegistry",
       },
     ],
-    name: "findCanonicalName",
     outputs: [
       {
-        internalType: "bytes",
         name: "",
         type: "bytes",
+        internalType: "bytes",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
+    type: "function",
+    name: "findCanonicalRegistry",
     inputs: [
       {
-        internalType: "bytes",
         name: "name",
         type: "bytes",
+        internalType: "bytes",
       },
     ],
-    name: "findCanonicalRegistry",
     outputs: [
       {
-        internalType: "contract IRegistry",
         name: "",
         type: "address",
+        internalType: "contract IRegistry",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
+    type: "function",
+    name: "findExactRegistry",
     inputs: [
       {
-        internalType: "bytes",
         name: "name",
         type: "bytes",
+        internalType: "bytes",
       },
     ],
-    name: "findRegistries",
     outputs: [
       {
-        internalType: "contract IRegistry[]",
+        name: "",
+        type: "address",
+        internalType: "contract IRegistry",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "findRegistries",
+    inputs: [
+      {
+        name: "name",
+        type: "bytes",
+        internalType: "bytes",
+      },
+    ],
+    outputs: [
+      {
         name: "",
         type: "address[]",
+        internalType: "contract IRegistry[]",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
+    type: "function",
+    name: "findResolver",
     inputs: [
       {
-        internalType: "bytes",
         name: "name",
         type: "bytes",
+        internalType: "bytes",
       },
     ],
-    name: "findResolver",
     outputs: [
       {
-        internalType: "address",
         name: "resolver",
         type: "address",
+        internalType: "address",
       },
       {
-        internalType: "bytes32",
         name: "node",
         type: "bytes32",
+        internalType: "bytes32",
       },
       {
-        internalType: "uint256",
         name: "offset",
         type: "uint256",
+        internalType: "uint256",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
+    type: "function",
+    name: "requireResolver",
     inputs: [
       {
-        internalType: "bytes",
         name: "name",
         type: "bytes",
+        internalType: "bytes",
       },
     ],
-    name: "requireResolver",
     outputs: [
       {
-        components: [
-          {
-            internalType: "bytes",
-            name: "name",
-            type: "bytes",
-          },
-          {
-            internalType: "uint256",
-            name: "offset",
-            type: "uint256",
-          },
-          {
-            internalType: "bytes32",
-            name: "node",
-            type: "bytes32",
-          },
-          {
-            internalType: "address",
-            name: "resolver",
-            type: "address",
-          },
-          {
-            internalType: "bool",
-            name: "extended",
-            type: "bool",
-          },
-        ],
-        internalType: "struct AbstractUniversalResolver.ResolverInfo",
         name: "info",
         type: "tuple",
+        internalType: "struct AbstractUniversalResolver.ResolverInfo",
+        components: [
+          {
+            name: "name",
+            type: "bytes",
+            internalType: "bytes",
+          },
+          {
+            name: "offset",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "node",
+            type: "bytes32",
+            internalType: "bytes32",
+          },
+          {
+            name: "resolver",
+            type: "address",
+            internalType: "address",
+          },
+          {
+            name: "extended",
+            type: "bool",
+            internalType: "bool",
+          },
+        ],
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "bytes",
-        name: "name",
-        type: "bytes",
-      },
-      {
-        internalType: "bytes",
-        name: "data",
-        type: "bytes",
-      },
-    ],
+    type: "function",
     name: "resolve",
-    outputs: [
-      {
-        internalType: "bytes",
-        name: "",
-        type: "bytes",
-      },
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
     inputs: [
       {
-        internalType: "bytes",
-        name: "response",
-        type: "bytes",
-      },
-      {
-        internalType: "bytes",
-        name: "extraData",
-        type: "bytes",
-      },
-    ],
-    name: "resolveBatchCallback",
-    outputs: [],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes",
-        name: "response",
-        type: "bytes",
-      },
-      {
-        internalType: "bytes",
-        name: "extraData",
-        type: "bytes",
-      },
-    ],
-    name: "resolveCallback",
-    outputs: [
-      {
-        internalType: "bytes",
-        name: "",
-        type: "bytes",
-      },
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "pure",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes",
-        name: "response",
-        type: "bytes",
-      },
-      {
-        internalType: "bytes",
-        name: "extraData",
-        type: "bytes",
-      },
-    ],
-    name: "resolveDirectCallback",
-    outputs: [],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes",
-        name: "response",
-        type: "bytes",
-      },
-      {
-        internalType: "bytes",
-        name: "",
-        type: "bytes",
-      },
-    ],
-    name: "resolveDirectCallbackError",
-    outputs: [],
-    stateMutability: "pure",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes",
         name: "name",
         type: "bytes",
+        internalType: "bytes",
       },
       {
-        internalType: "bytes",
         name: "data",
         type: "bytes",
+        internalType: "bytes",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "bytes",
+        internalType: "bytes",
       },
       {
-        internalType: "string[]",
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "resolveBatchCallback",
+    inputs: [
+      {
+        name: "response",
+        type: "bytes",
+        internalType: "bytes",
+      },
+      {
+        name: "extraData",
+        type: "bytes",
+        internalType: "bytes",
+      },
+    ],
+    outputs: [],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "resolveCallback",
+    inputs: [
+      {
+        name: "response",
+        type: "bytes",
+        internalType: "bytes",
+      },
+      {
+        name: "extraData",
+        type: "bytes",
+        internalType: "bytes",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "bytes",
+        internalType: "bytes",
+      },
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    stateMutability: "pure",
+  },
+  {
+    type: "function",
+    name: "resolveDirectCallback",
+    inputs: [
+      {
+        name: "response",
+        type: "bytes",
+        internalType: "bytes",
+      },
+      {
+        name: "extraData",
+        type: "bytes",
+        internalType: "bytes",
+      },
+    ],
+    outputs: [],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "resolveDirectCallbackError",
+    inputs: [
+      {
+        name: "response",
+        type: "bytes",
+        internalType: "bytes",
+      },
+      {
+        name: "",
+        type: "bytes",
+        internalType: "bytes",
+      },
+    ],
+    outputs: [],
+    stateMutability: "pure",
+  },
+  {
+    type: "function",
+    name: "resolveWithGateways",
+    inputs: [
+      {
+        name: "name",
+        type: "bytes",
+        internalType: "bytes",
+      },
+      {
+        name: "data",
+        type: "bytes",
+        internalType: "bytes",
+      },
+      {
         name: "gateways",
         type: "string[]",
+        internalType: "string[]",
       },
     ],
-    name: "resolveWithGateways",
     outputs: [
       {
-        internalType: "bytes",
         name: "result",
         type: "bytes",
+        internalType: "bytes",
       },
       {
-        internalType: "address",
         name: "resolver",
         type: "address",
+        internalType: "address",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
+    type: "function",
+    name: "resolveWithResolver",
     inputs: [
       {
-        internalType: "address",
         name: "resolver",
         type: "address",
+        internalType: "address",
       },
       {
-        internalType: "bytes",
         name: "name",
         type: "bytes",
+        internalType: "bytes",
       },
       {
-        internalType: "bytes",
         name: "data",
         type: "bytes",
+        internalType: "bytes",
       },
       {
-        internalType: "string[]",
         name: "gateways",
         type: "string[]",
+        internalType: "string[]",
       },
     ],
-    name: "resolveWithResolver",
     outputs: [
       {
-        internalType: "bytes",
         name: "",
         type: "bytes",
+        internalType: "bytes",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
+    type: "function",
+    name: "reverse",
     inputs: [
       {
-        internalType: "bytes",
         name: "lookupAddress",
         type: "bytes",
+        internalType: "bytes",
       },
       {
-        internalType: "uint256",
         name: "coinType",
         type: "uint256",
+        internalType: "uint256",
       },
     ],
-    name: "reverse",
     outputs: [
       {
-        internalType: "string",
         name: "",
         type: "string",
+        internalType: "string",
       },
       {
-        internalType: "address",
         name: "",
         type: "address",
+        internalType: "address",
       },
       {
-        internalType: "address",
         name: "",
         type: "address",
+        internalType: "address",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
+    type: "function",
+    name: "reverseAddressCallback",
     inputs: [
       {
-        internalType: "bytes",
         name: "response",
         type: "bytes",
+        internalType: "bytes",
       },
       {
-        internalType: "bytes",
         name: "extraData",
         type: "bytes",
+        internalType: "bytes",
       },
     ],
-    name: "reverseAddressCallback",
     outputs: [
       {
-        internalType: "string",
         name: "primary",
         type: "string",
+        internalType: "string",
       },
       {
-        internalType: "address",
         name: "resolver",
         type: "address",
+        internalType: "address",
       },
       {
-        internalType: "address",
         name: "reverseResolver",
         type: "address",
+        internalType: "address",
       },
     ],
     stateMutability: "pure",
-    type: "function",
   },
   {
+    type: "function",
+    name: "reverseNameCallback",
     inputs: [
       {
-        internalType: "bytes",
         name: "response",
         type: "bytes",
+        internalType: "bytes",
       },
       {
-        internalType: "bytes",
         name: "extraData",
         type: "bytes",
+        internalType: "bytes",
       },
     ],
-    name: "reverseNameCallback",
     outputs: [
       {
-        internalType: "string",
         name: "primary",
         type: "string",
+        internalType: "string",
       },
       {
-        internalType: "address",
         name: "",
         type: "address",
+        internalType: "address",
       },
       {
-        internalType: "address",
         name: "",
         type: "address",
+        internalType: "address",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
+    type: "function",
+    name: "reverseWithGateways",
     inputs: [
       {
-        internalType: "bytes",
         name: "lookupAddress",
         type: "bytes",
+        internalType: "bytes",
       },
       {
-        internalType: "uint256",
         name: "coinType",
         type: "uint256",
+        internalType: "uint256",
       },
       {
-        internalType: "string[]",
         name: "gateways",
         type: "string[]",
+        internalType: "string[]",
       },
     ],
-    name: "reverseWithGateways",
     outputs: [
       {
-        internalType: "string",
         name: "primary",
         type: "string",
+        internalType: "string",
       },
       {
-        internalType: "address",
         name: "resolver",
         type: "address",
+        internalType: "address",
       },
       {
-        internalType: "address",
         name: "reverseResolver",
         type: "address",
+        internalType: "address",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
+    type: "function",
+    name: "supportsInterface",
     inputs: [
       {
-        internalType: "bytes4",
         name: "interfaceId",
         type: "bytes4",
+        internalType: "bytes4",
       },
     ],
-    name: "supportsInterface",
     outputs: [
       {
-        internalType: "bool",
         name: "",
         type: "bool",
+        internalType: "bool",
       },
     ],
     stateMutability: "view",
-    type: "function",
+  },
+  {
+    type: "error",
+    name: "DNSDecodingFailed",
+    inputs: [
+      {
+        name: "dns",
+        type: "bytes",
+        internalType: "bytes",
+      },
+    ],
+  },
+  {
+    type: "error",
+    name: "DNSEncodingFailed",
+    inputs: [
+      {
+        name: "ens",
+        type: "string",
+        internalType: "string",
+      },
+    ],
+  },
+  {
+    type: "error",
+    name: "EmptyAddress",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "HttpError",
+    inputs: [
+      {
+        name: "status",
+        type: "uint16",
+        internalType: "uint16",
+      },
+      {
+        name: "message",
+        type: "string",
+        internalType: "string",
+      },
+    ],
+  },
+  {
+    type: "error",
+    name: "InvalidBatchGatewayResponse",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "LabelIsEmpty",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "LabelIsTooLong",
+    inputs: [
+      {
+        name: "label",
+        type: "string",
+        internalType: "string",
+      },
+    ],
+  },
+  {
+    type: "error",
+    name: "OffchainLookup",
+    inputs: [
+      {
+        name: "sender",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "urls",
+        type: "string[]",
+        internalType: "string[]",
+      },
+      {
+        name: "callData",
+        type: "bytes",
+        internalType: "bytes",
+      },
+      {
+        name: "callbackFunction",
+        type: "bytes4",
+        internalType: "bytes4",
+      },
+      {
+        name: "extraData",
+        type: "bytes",
+        internalType: "bytes",
+      },
+    ],
+  },
+  {
+    type: "error",
+    name: "OffsetOutOfBoundsError",
+    inputs: [
+      {
+        name: "offset",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "length",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+  },
+  {
+    type: "error",
+    name: "ResolverError",
+    inputs: [
+      {
+        name: "errorData",
+        type: "bytes",
+        internalType: "bytes",
+      },
+    ],
+  },
+  {
+    type: "error",
+    name: "ResolverNotContract",
+    inputs: [
+      {
+        name: "name",
+        type: "bytes",
+        internalType: "bytes",
+      },
+      {
+        name: "resolver",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+  },
+  {
+    type: "error",
+    name: "ResolverNotFound",
+    inputs: [
+      {
+        name: "name",
+        type: "bytes",
+        internalType: "bytes",
+      },
+    ],
+  },
+  {
+    type: "error",
+    name: "ReverseAddressMismatch",
+    inputs: [
+      {
+        name: "primary",
+        type: "string",
+        internalType: "string",
+      },
+      {
+        name: "primaryAddress",
+        type: "bytes",
+        internalType: "bytes",
+      },
+    ],
+  },
+  {
+    type: "error",
+    name: "UnsupportedResolverProfile",
+    inputs: [
+      {
+        name: "selector",
+        type: "bytes4",
+        internalType: "bytes4",
+      },
+    ],
   },
 ] as const satisfies Abi;
