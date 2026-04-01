@@ -134,24 +134,27 @@ let preparedIndexingSetup = false;
 /**
  * Prepare for executing the "setup" event handlers.
  *
- * This function is idempotent and will only execute its logic once, even if
- * called multiple times. This is to ensure that we affect the "hot path" of
- * indexing as little as possible, since this function is called for
- * every "setup" event.
+ * This function is guaranteed to be executed just once before
+ * the first "setup" event handler is executed.
+ * This is to ensure that we affect the "hot path" of
+ * indexing as little as possible, since this function is
+ * called as part of preconditions for every "setup" event.
+ *
+ * Note that this functions should not have any long-running operations.
+ * That would delay the population of Ponder Indexing Metrics for
+ * all indexed chains. Ponder Indexing Metrics are populated only after
+ * all setup handlers have completed. ENSIndexer relies on
+ * Ponder Indexing Metrics being immediately available on startup to
+ * build and store the current Indexing Status snapshot in ENSDb.
  */
-function prepareIndexingSetup(): void {
+async function prepareIndexingSetup(): Promise<void> {
   if (preparedIndexingSetup) {
     return;
   }
 
   preparedIndexingSetup = true;
 
-  /**
-   * Setup event handlers should not have any *blocking* preconditions. This is because
-   * Ponder populates the indexing metrics for all indexed chains only after all setup handlers have run.
-   * ENSIndexer relies on these indexing metrics being immediately available on startup to build and
-   * store the current Indexing Status in ENSDb.
-   */
+  // Currently, we don't have any indexing setup preconditions.
 }
 
 let preparedIndexingActivation = false;
@@ -159,10 +162,11 @@ let preparedIndexingActivation = false;
 /**
  * Prepare for executing the "onchain" event handlers.
  *
- * This function is idempotent and will only execute its logic once, even if
- * called multiple times. This is to ensure that we affect the "hot path" of
- * indexing as little as possible, since this function is called for every
- * "onchain" event.
+ * This function is guaranteed to be executed just once before
+ * the first "onchain" event handler is executed.
+ * This is to ensure that we affect the "hot path" of
+ * indexing as little as possible, since this function is
+ * called as part of preconditions for every "onchain" event.
  *
  * @throws If valid ENSRainbow connection could not be established after
  *         multiple attempts.
@@ -245,12 +249,12 @@ export function addOnchainEventListener<EventName extends EventNames>(
   eventName: EventName,
   eventHandler: (args: IndexingEngineEventHandlerArgs<EventName>) => Promise<void> | void,
 ) {
-  return ponder.on(eventName, async ({ context, event }) =>
-    eventHandlerPreconditions(eventName).then(() =>
-      eventHandler({
-        context: buildIndexingEngineContext(context),
-        event,
-      }),
-    ),
-  );
+  return ponder.on(eventName, async ({ context, event }) => {
+    await eventHandlerPreconditions(eventName);
+
+    await eventHandler({
+      context: buildIndexingEngineContext(context),
+      event,
+    });
+  });
 }
