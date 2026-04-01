@@ -3,7 +3,7 @@ import SchemaBuilder, { type MaybePromise } from "@pothos/core";
 import DataloaderPlugin from "@pothos/plugin-dataloader";
 import RelayPlugin from "@pothos/plugin-relay";
 import TracingPlugin from "@pothos/plugin-tracing";
-import { createOpenTelemetryWrapper } from "@pothos/tracing-opentelemetry";
+import { AttributeNames, createOpenTelemetryWrapper } from "@pothos/tracing-opentelemetry";
 import type {
   ChainId,
   CoinType,
@@ -19,15 +19,21 @@ import type {
   ResolverId,
   ResolverRecordsId,
 } from "enssdk";
+import superjson from "superjson";
 import type { Address, Hex } from "viem";
 
 import type { context } from "@/omnigraph-api/context";
 
 const tracer = trace.getTracer("graphql");
 const createSpan = createOpenTelemetryWrapper(tracer, {
-  includeArgs: true,
   includeSource: false,
+  // NOTE: the native implementation of `includeArgs` doesn't handle bigints, so we re-implement in onSpan below
+  // https://github.com/hayes/pothos/blob/9fadc4916929a838671714fb7cf8d6bb382bcf14/packages/tracing-opentelemetry/src/index.ts#L54
+  includeArgs: false,
   onSpan: (span, options, parent, args, ctx, info) => {
+    // inject the graphql.field.args attribute using superjson to handle our BigInt scalar
+    span.setAttribute(AttributeNames.FIELD_ARGS, superjson.stringify(args));
+
     // edge field names are too loud by default and not helpful
     if (info.fieldName === "edges") return span.updateName("edges");
 
