@@ -1,5 +1,6 @@
+import type { EncodedLabelHash, LabelHash } from "enssdk";
+
 import { isLabelHash } from "./labelhash";
-import type { EncodedLabelHash, LabelHash } from "./types";
 
 /**
  * Formats a LabelHash as an Encoded LabelHash.

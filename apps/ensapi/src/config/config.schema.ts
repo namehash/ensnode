@@ -1,5 +1,3 @@
-import packageJson from "@/../package.json" with { type: "json" };
-
 import pRetry from "p-retry";
 import { prettifyError, ZodError, z } from "zod/v4";
 
@@ -21,6 +19,7 @@ import type { EnsApiEnvironment } from "@/config/environment";
 import { invariant_ensIndexerPublicConfigVersionInfo } from "@/config/validations";
 import { ensDbClient } from "@/lib/ensdb/singleton";
 import logger from "@/lib/logger";
+import { ensApiVersionInfo } from "@/lib/version-info";
 
 /**
  * Schema for validating custom referral program edition config set URL.
@@ -119,7 +118,7 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
  */
 export function buildEnsApiPublicConfig(config: EnsApiConfig): EnsApiPublicConfig {
   return {
-    version: packageJson.version,
+    versionInfo: ensApiVersionInfo,
     theGraphFallback: canFallbackToTheGraph({
       namespace: config.namespace,
       // NOTE: very important here that we replace the actual server-side api key with a placeholder

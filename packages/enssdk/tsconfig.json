@@ -1,0 +1,15 @@
+{
+  "extends": "@ensnode/shared-configs/tsconfig.lib.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "plugins": [
+      {
+        "name": "gql.tada/ts-plugin",
+        "schema": "./src/omnigraph/generated/schema.graphql",
+        "tadaOutputLocation": "./src/omnigraph/generated/graphql-env.d.ts"
+      }
+    ]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["dist"]
+}

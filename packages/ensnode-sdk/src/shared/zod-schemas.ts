@@ -1,5 +1,13 @@
 import type { CoinType } from "@ensdomains/address-encoder";
 import { AccountId as CaipAccountId } from "caip";
+import type {
+  AccountId,
+  AccountIdString,
+  ChainId,
+  DefaultableChainId,
+  InterpretedName,
+  Node,
+} from "enssdk";
 import { type Address, type Hex, isAddress, isHex, size } from "viem";
 /**
  * All zod schemas we define must remain internal implementation details.
@@ -11,7 +19,7 @@ import { type Address, type Hex, isAddress, isHex, size } from "viem";
  */
 import { z } from "zod/v4";
 
-import { ENSNamespaceIds, type InterpretedName, type Node } from "../ens";
+import { ENSNamespaceIds } from "../ens";
 import { asLowerCaseAddress } from "./address";
 import {
   type CurrencyId,
@@ -21,16 +29,7 @@ import {
   type PriceUsdc,
 } from "./currencies";
 import { reinterpretName } from "./interpretation/reinterpretation";
-import type { AccountIdString } from "./serialized-types";
-import type {
-  AccountId,
-  BlockRef,
-  ChainId,
-  Datetime,
-  DefaultableChainId,
-  Duration,
-  UnixTimestamp,
-} from "./types";
+import type { BlockRef, Datetime, Duration, UnixTimestamp } from "./types";
 
 /**
  * Parses a string value as a boolean.

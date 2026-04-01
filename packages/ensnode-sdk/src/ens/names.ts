@@ -1,7 +1,7 @@
 import { ens_beautify } from "@adraffy/ens-normalize";
+import type { Label, Name, NormalizedName } from "enssdk";
 
 import { isNormalizedLabel } from "./is-normalized";
-import type { Label, Name, NormalizedName } from "./types";
 
 /**
  * Name for the ENS Root

@@ -1,3 +1,4 @@
+import type { ChainId } from "enssdk";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import * as datasources from "@ensnode/datasources";
@@ -5,7 +6,6 @@ import { type DatasourceName, DatasourceNames, ENSNamespaceIds } from "@ensnode/
 
 import { PluginName } from "../../ensindexer/config/types";
 import { type BlockNumberRangeWithStartBlock, buildBlockNumberRange } from "../blockrange";
-import type { ChainId } from "../types";
 import { buildIndexedBlockranges } from "./indexed-blockranges";
 
 vi.mock("@ensnode/datasources", async () => {

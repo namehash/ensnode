@@ -89,6 +89,31 @@ jobs:
       - name: Validate OpenAPI spec with Mintlify
         run: pnpm dlx mint@^4.1.0 openapi-check docs/docs.ensnode.io/ensapi-openapi.json
 
+  graphql-schema-check:
+    name: "GraphQL Schema Check"
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup_node_environment
+
+      - name: Generate Schemas & Typings
+        run: pnpm generate:gqlschema
+
+      - name: Verify generated files are committed
+        run: |
+          if ! git diff --quiet packages/enssdk/src/omnigraph/generated/; then
+            echo "Error: Generated files are out of sync"
+            echo ""
+            echo "The following generated files differ from what is committed:"
+            git diff --name-status packages/enssdk/src/omnigraph/generated/
+            echo ""
+            echo "To fix, run:"
+            echo "  pnpm generate:gqlschema"
+            echo "Then commit the updated generated files."
+            exit 1
+          fi
+          echo "GraphQL schema generated files are in sync"
+
   integrity-check:
     name: "Integrity Check"
     runs-on: blacksmith-4vcpu-ubuntu-2204

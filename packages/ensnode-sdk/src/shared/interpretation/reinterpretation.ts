@@ -1,12 +1,7 @@
+import type { InterpretedLabel, InterpretedName } from "enssdk";
 import { labelhash as labelToLabelHash } from "viem";
 
-import {
-  encodeLabelHash,
-  type InterpretedLabel,
-  type InterpretedName,
-  isEncodedLabelHash,
-  isNormalizedLabel,
-} from "../../ens";
+import { encodeLabelHash, isEncodedLabelHash, isNormalizedLabel } from "../../ens";
 
 /**
  * Reinterpret Label

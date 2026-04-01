@@ -1,7 +1,7 @@
+import type { CoinType, Label, LiteralLabel, Name } from "enssdk";
 import type { Address } from "viem";
 
-import { type CoinType, DEFAULT_EVM_COIN_TYPE, ETH_COIN_TYPE } from "./coin-type";
-import type { Label, LiteralLabel, Name } from "./types";
+import { DEFAULT_EVM_COIN_TYPE, ETH_COIN_TYPE } from "./coin-type";
 
 /**
  * Gets the Label used for the reverse names of subnames as per ENSIP-11 & ENSIP-19.

@@ -1,6 +1,5 @@
+import type { Node } from "enssdk";
 import { namehash, zeroHash } from "viem";
-
-import type { Node } from "./types";
 
 export const ROOT_NODE: Node = namehash("");
 export const ETH_NODE: Node = namehash("eth");

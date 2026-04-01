@@ -326,7 +326,8 @@ export const registrationType = onchainEnum("RegistrationType", [
   "NameWrapper",
   "BaseRegistrar",
   "ThreeDNS",
-  "ENSv2Registry",
+  "ENSv2RegistryRegistration",
+  "ENSv2RegistryReservation",
 ]);
 
 export const registration = onchainTable(
@@ -352,10 +353,13 @@ export const registration = onchainTable(
     registrarChainId: t.integer().notNull().$type<ChainId>(),
     registrarAddress: t.hex().notNull().$type<Address>(),
 
-    // references registrant
+    // may reference a registrant
     registrantId: t.hex().$type<Address>(),
 
-    // may have a referrer
+    // may reference an unregistrant
+    unregistrantId: t.hex().$type<Address>(),
+
+    // may have referrer data
     referrer: t.hex().$type<EncodedReferrer>(),
 
     // may have fuses (NameWrapper, Wrapped BaseRegistrar)
@@ -401,6 +405,13 @@ export const registration_relations = relations(registration, ({ one, many }) =>
     fields: [registration.registrantId],
     references: [account.id],
     relationName: "registrant",
+  }),
+
+  // has one unregistrant
+  unregistrant: one(account, {
+    fields: [registration.unregistrantId],
+    references: [account.id],
+    relationName: "unregistrant",
   }),
 
   // has many renewals

@@ -1,10 +1,9 @@
+import type { AccountId, InterpretedName } from "enssdk";
 import { zeroAddress } from "viem";
 import { describe, expect, it } from "vitest";
 
 import { ENSNamespaceIds } from "@ensnode/datasources";
 
-import type { InterpretedName } from "../ens";
-import type { AccountId } from "../shared/types";
 import {
   getNameTokenOwnership,
   type NameTokenOwnershipBurned,
