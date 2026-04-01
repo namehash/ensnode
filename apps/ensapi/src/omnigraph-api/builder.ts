@@ -2,7 +2,7 @@ import { trace } from "@opentelemetry/api";
 import SchemaBuilder, { type MaybePromise } from "@pothos/core";
 import DataloaderPlugin from "@pothos/plugin-dataloader";
 import RelayPlugin from "@pothos/plugin-relay";
-import TracingPlugin, { isRootField } from "@pothos/plugin-tracing";
+import TracingPlugin from "@pothos/plugin-tracing";
 import { createOpenTelemetryWrapper } from "@pothos/tracing-opentelemetry";
 import type {
   ChainId,
@@ -24,7 +24,25 @@ import type { Address, Hex } from "viem";
 import type { context } from "@/omnigraph-api/context";
 
 const tracer = trace.getTracer("graphql");
-const createSpan = createOpenTelemetryWrapper(tracer, { includeArgs: true, includeSource: false });
+const createSpan = createOpenTelemetryWrapper(tracer, {
+  includeArgs: true,
+  includeSource: false,
+  onSpan: (span, options, parent, args, ctx, info) => {
+    // edge field names are too loud by default and not helpful
+    if (info.fieldName === "edges") return span.updateName("edges");
+
+    // turn a node field name into "Typename([:id])"
+    if (info.fieldName === "node") {
+      const typename = (info.returnType as any).name;
+      const id = (parent as any).node.id;
+
+      return span.updateName(`${typename}(${id})`);
+    }
+
+    // otherwise name the span as "Typename.fieldName"
+    return span.updateName(`${info.parentType.name}.${info.fieldName}`);
+  },
+});
 
 export const builder = new SchemaBuilder<{
   Context: ReturnType<typeof context>;
@@ -54,7 +72,7 @@ export const builder = new SchemaBuilder<{
 }>({
   plugins: [TracingPlugin, DataloaderPlugin, RelayPlugin],
   tracing: {
-    default: (config) => isRootField(config),
+    default: () => true,
     wrap: (resolver, options) => createSpan(resolver, options),
   },
   relay: {

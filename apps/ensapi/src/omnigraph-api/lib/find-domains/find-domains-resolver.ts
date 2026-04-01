@@ -3,7 +3,7 @@ import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@poth
 import { and, count } from "drizzle-orm";
 
 import { ensDb } from "@/lib/ensdb/singleton";
-import { withSpanAsync } from "@/lib/instrumentation/auto-span";
+import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
 import { makeLogger } from "@/lib/logger";
 import type { context as createContext } from "@/omnigraph-api/context";
 import type {
@@ -100,7 +100,7 @@ export function resolveFindDomains(
 
   return lazyConnection({
     totalCount: () =>
-      withSpanAsync(tracer, "totalCount", {}, async () => {
+      withActiveSpanAsync(tracer, "find-domains.totalCount", {}, async () => {
         const rows = await ensDb.with(domains).select({ count: count() }).from(domains);
         return rows[0].count;
       }),
@@ -149,17 +149,17 @@ export function resolveFindDomains(
           logger.debug({ sql: query.toSQL() });
 
           // execute paginated query
-          const results = await withSpanAsync(
+          const results = await withActiveSpanAsync(
             tracer,
-            "connection",
+            "find-domains.connection",
             { orderBy, orderDir, limit },
             () => query.execute(),
           );
 
           // load Domain entities via dataloader
-          const loadedDomains = await withSpanAsync(
+          const loadedDomains = await withActiveSpanAsync(
             tracer,
-            "dataloader",
+            "find-domains.dataloader",
             { count: results.length },
             () =>
               rejectAnyErrors(

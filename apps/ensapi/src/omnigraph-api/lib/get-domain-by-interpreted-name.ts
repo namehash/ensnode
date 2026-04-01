@@ -1,5 +1,6 @@
 import config from "@/config";
 
+import { trace } from "@opentelemetry/api";
 import { Param, sql } from "drizzle-orm";
 import { namehash } from "viem";
 
@@ -16,13 +17,15 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
 import { lazy } from "@/lib/lazy";
 import { makeLogger } from "@/lib/logger";
 
 // lazy() defers construction until first use so that this module can be
 // imported without env vars being present (e.g. during OpenAPI generation).
-const getRootRegistryId = lazy(() => maybeGetENSv2RootRegistryId(config.namespace));
+const _maybeGetENSv2RootRegistryId = lazy(() => maybeGetENSv2RootRegistryId(config.namespace));
 
+const tracer = trace.getTracer("get-domain-by-interpreted-name");
 const logger = makeLogger("get-domain-by-interpreted-name");
 const v1Logger = makeLogger("get-domain-by-interpreted-name:v1");
 const v2Logger = makeLogger("get-domain-by-interpreted-name:v2");
@@ -63,18 +66,27 @@ const v2Logger = makeLogger("get-domain-by-interpreted-name:v2");
 export async function getDomainIdByInterpretedName(
   name: InterpretedName,
 ): Promise<DomainId | null> {
-  // Domains addressable in v2 are preferred, but v1 lookups are cheap, so just do them both ahead of time
-  const rootRegistryId = getRootRegistryId();
-  const [v1DomainId, v2DomainId] = await Promise.all([
-    v1_getDomainIdByInterpretedName(name),
-    // only resolve v2Domain if ENSv2 Root Registry is defined
-    rootRegistryId ? v2_getDomainIdByInterpretedName(rootRegistryId, name) : null,
-  ]);
+  return withActiveSpanAsync(tracer, "getDomainIdByInterpretedName", { name }, async () => {
+    // Domains addressable in v2 are preferred, but v1 lookups are cheap, so just do them both ahead of time
+    const rootRegistryId = _maybeGetENSv2RootRegistryId();
 
-  logger.debug({ v1DomainId, v2DomainId });
+    const [v1DomainId, v2DomainId] = await Promise.all([
+      withActiveSpanAsync(tracer, "v1_getDomainId", {}, () =>
+        v1_getDomainIdByInterpretedName(name),
+      ),
+      // only resolve v2Domain if ENSv2 Root Registry is defined
+      rootRegistryId
+        ? withActiveSpanAsync(tracer, "v2_getDomainId", {}, () =>
+            v2_getDomainIdByInterpretedName(rootRegistryId, name),
+          )
+        : null,
+    ]);
 
-  // prefer v2Domain over v1Domain
-  return v2DomainId || v1DomainId || null;
+    logger.debug({ v1DomainId, v2DomainId });
+
+    // prefer v2Domain over v1Domain
+    return v2DomainId || v1DomainId || null;
+  });
 }
 
 /**
