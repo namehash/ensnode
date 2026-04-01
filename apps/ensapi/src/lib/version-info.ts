@@ -21,50 +21,47 @@ function getEnsApiVersion(): string {
  * the `package.json` file would give us `catalog:` values, and not resolved
  * version values. We need the latter, so we implement our own version
  * resolution method.
+ *
+ * @throws If the package version cannot be found in any
+ *         `node_modules` up to the workspace root.
  */
 function getPackageVersion(packageName: string): string {
-  try {
-    // Start from current file's directory
-    const currentFile = fileURLToPath(import.meta.url);
-    let searchDir = dirname(currentFile);
+  // Start from current file's directory
+  const currentFile = fileURLToPath(import.meta.url);
+  let searchDir = dirname(currentFile);
 
-    while (true) {
-      const workspaceFile = join(searchDir, "pnpm-workspace.yaml");
-      const isWorkspaceRoot = existsSync(workspaceFile);
+  while (true) {
+    const workspaceFile = join(searchDir, "pnpm-workspace.yaml");
+    const isWorkspaceRoot = existsSync(workspaceFile);
 
-      // Check for node_modules in current directory
-      const nodeModulesPath = join(searchDir, "node_modules", packageName, "package.json");
-      if (existsSync(nodeModulesPath)) {
-        const packageJson = JSON.parse(readFileSync(nodeModulesPath, "utf8"));
-        return packageJson.version;
-      }
-
-      // Check PNPM's .pnpm virtual store
-      const pnpmDir = join(searchDir, "node_modules", ".pnpm");
-      if (existsSync(pnpmDir)) {
-        const version = getPackageVersionFromPnpmStore(pnpmDir, packageName);
-        if (version) return version;
-      }
-
-      // If we're at workspace root and still haven't found it, stop searching
-      if (isWorkspaceRoot) {
-        throw new Error(
-          `Package ${packageName} not found in any node_modules up to workspace root`,
-        );
-      }
-
-      // Move up one directory
-      const parentDir = dirname(searchDir);
-
-      // Prevent infinite loop if we reach filesystem root
-      if (parentDir === searchDir) {
-        throw new Error(`Package ${packageName} not found and no workspace root detected`);
-      }
-
-      searchDir = parentDir;
+    // Check for node_modules in current directory
+    const nodeModulesPath = join(searchDir, "node_modules", packageName, "package.json");
+    if (existsSync(nodeModulesPath)) {
+      const packageJson = JSON.parse(readFileSync(nodeModulesPath, "utf8"));
+      return packageJson.version;
     }
-  } catch {
-    return "unknown";
+
+    // Check PNPM's .pnpm virtual store
+    const pnpmDir = join(searchDir, "node_modules", ".pnpm");
+    if (existsSync(pnpmDir)) {
+      const version = getPackageVersionFromPnpmStore(pnpmDir, packageName);
+      if (version) return version;
+    }
+
+    // If we're at workspace root and still haven't found it, stop searching
+    if (isWorkspaceRoot) {
+      throw new Error(`Package ${packageName} not found in any node_modules up to workspace root`);
+    }
+
+    // Move up one directory
+    const parentDir = dirname(searchDir);
+
+    // Prevent infinite loop if we reach filesystem root
+    if (parentDir === searchDir) {
+      throw new Error(`Package ${packageName} not found and no workspace root detected`);
+    }
+
+    searchDir = parentDir;
   }
 }
 
