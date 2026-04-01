@@ -448,23 +448,6 @@ function ENSNodeConfigCardContent({
             }
           />
           <InfoCardItem
-            label="Node.js"
-            value={
-              <p className={cardItemValueStyles}>{ensIndexerPublicConfig.versionInfo.nodejs}</p>
-            }
-            additionalInfo={
-              <p>
-                Version of the{" "}
-                <ExternalLinkWithIcon
-                  href={`https://nodejs.org/en/download/archive/v${ensIndexerPublicConfig.versionInfo.nodejs}`}
-                >
-                  Node.js
-                </ExternalLinkWithIcon>{" "}
-                runtime.
-              </p>
-            }
-          />
-          <InfoCardItem
             label="Ponder"
             value={
               <p className={cardItemValueStyles}>{ensIndexerPublicConfig.versionInfo.ponder}</p>

@@ -105,14 +105,12 @@ describe("ENSIndexer: Config", () => {
       it("can parse version info values", () => {
         expect(
           makeEnsIndexerVersionInfoSchema().parse({
-            nodejs: "v22.22.22",
             ponder: "0.11.25",
             ensDb: "0.32.0",
             ensIndexer: "0.32.0",
             ensNormalize: "1.11.1",
           } satisfies EnsIndexerVersionInfo),
         ).toStrictEqual({
-          nodejs: "v22.22.22",
           ponder: "0.11.25",
           ensDb: "0.32.0",
           ensIndexer: "0.32.0",
@@ -122,7 +120,6 @@ describe("ENSIndexer: Config", () => {
         expect(
           formatParseError(
             makeEnsIndexerVersionInfoSchema().safeParse({
-              nodejs: "",
               ponder: "",
               ensDb: "",
               ensIndexer: "",
@@ -130,8 +127,6 @@ describe("ENSIndexer: Config", () => {
             } satisfies EnsIndexerVersionInfo),
           ),
         ).toStrictEqual(`✖ Value must be a non-empty string.
-  → at nodejs
-✖ Value must be a non-empty string.
   → at ponder
 ✖ Value must be a non-empty string.
   → at ensDb
@@ -145,7 +140,6 @@ describe("ENSIndexer: Config", () => {
         expect(
           formatParseError(
             makeEnsIndexerVersionInfoSchema().safeParse({
-              nodejs: "v22.22.22",
               ponder: "0.11.25",
               ensDb: "0.32.0",
               ensIndexer: "0.33.0", // Different from ensDb
@@ -171,7 +165,6 @@ describe("ENSIndexer: Config", () => {
           plugins: [PluginName.Subgraph, PluginName.Registrars], // Multiple plugins allowed when not subgraph compatible
           databaseSchemaName: "test_schema",
           versionInfo: {
-            nodejs: "v22.22.22",
             ponder: "0.11.25",
             ensDb: "0.32.0",
             ensIndexer: "0.32.0",
@@ -226,7 +219,6 @@ describe("ENSIndexer: Config", () => {
           plugins: [PluginName.Subgraph],
           databaseSchemaName: "test_schema",
           versionInfo: {
-            nodejs: "v22.22.22",
             ponder: "0.11.25",
             ensDb: "0.32.0",
             ensIndexer: "0.32.0",

@@ -86,7 +86,6 @@ const EXAMPLE_CONFIG_RESPONSE = {
       PluginName.Registrars,
     ],
     versionInfo: {
-      nodejs: "22.18.0",
       ponder: "0.11.43",
       ensDb: "0.32.0",
       ensIndexer: "0.32.0",

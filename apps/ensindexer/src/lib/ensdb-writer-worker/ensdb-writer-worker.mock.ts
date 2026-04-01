@@ -27,7 +27,6 @@ export const mockEnsRainbowPublicConfig: EnsRainbowPublicConfig = {
 
 // Test fixture for EnsIndexerVersionInfo
 export const mockVersionInfo: EnsIndexerVersionInfo = {
-  nodejs: "20.0.0",
   ponder: "0.9.0",
   ensDb: "1.0.0",
   ensIndexer: "1.0.0",
