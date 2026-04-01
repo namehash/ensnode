@@ -15,6 +15,7 @@ import { buildConfigFromEnvironment, buildEnsApiPublicConfig } from "@/config/co
 import { ENSApi_DEFAULT_PORT } from "@/config/defaults";
 import type { EnsApiEnvironment } from "@/config/environment";
 import logger from "@/lib/logger";
+import { ensApiVersionInfo } from "@/lib/version-info";
 
 vi.mock("@/lib/logger", () => ({
   default: {
@@ -45,9 +46,9 @@ const ENSINDEXER_PUBLIC_CONFIG = {
   versionInfo: {
     ensDb: packageJson.version,
     ensIndexer: packageJson.version,
-    ensNormalize: "1.1.1",
-    nodejs: "1.1.1",
-    ponder: "1.1.1",
+    ensNormalize: ensApiVersionInfo.ensNormalize,
+    nodejs: "20.0.0",
+    ponder: "0.8.0",
   },
 } satisfies ENSIndexerPublicConfig;
 
@@ -168,7 +169,7 @@ describe("buildEnsApiPublicConfig", () => {
     const result = buildEnsApiPublicConfig(mockConfig);
 
     expect(result).toStrictEqual({
-      version: packageJson.version,
+      versionInfo: ensApiVersionInfo,
       theGraphFallback: {
         canFallback: false,
         reason: "not-subgraph-compatible",
