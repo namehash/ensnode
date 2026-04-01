@@ -16,7 +16,6 @@
   "dependencies": {
     "@astrojs/react": "catalog:",
     "@heroicons/react": "^2.2.0",
-    "@namehash/namekit-react": "catalog:",
     "@namehash/namehash-ui": "workspace:*",
     "@tailwindcss/vite": "^4.1.15",
     "astro": "catalog:",

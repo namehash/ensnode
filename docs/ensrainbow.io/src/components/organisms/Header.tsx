@@ -1,4 +1,4 @@
-import { Button, IconButton, Link } from "@namehash/namekit-react";
+import { namekitButtonVariants } from "@namehash/namehash-ui/namekit";
 
 import ENSRainbow2D from "../../assets/ENSRainbow2D.svg";
 import { GithubIcon } from "../atoms/icons/GithubIcon.tsx";
@@ -19,46 +19,36 @@ export default function Header() {
             </a>
           </div>
         </div>
-        <div className="hidden sm:flex items-center justify-center gap-1">
-          <Button variant="ghost" asChild>
-            <Link href="https://ensnode.io/ensrainbow">Docs</Link>
-          </Button>
+        <div className="flex items-center justify-center gap-1">
+          <a
+            href="https://ensnode.io/ensrainbow"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={namekitButtonVariants({
+              variant: "ghost",
+              className: "max-sm:p-2 max-sm:text-sm",
+            })}
+          >
+            Docs
+          </a>
 
-          <Button variant="ghost" asChild>
-            <Link href="https://github.com/namehash/ensnode">
-              <GithubIcon className="fill-current" />
-            </Link>
-          </Button>
+          <a
+            href="https://github.com/namehash/ensnode"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={namekitButtonVariants({ variant: "ghost", className: "max-sm:p-2" })}
+          >
+            <GithubIcon className="fill-current" />
+          </a>
 
-          <Button variant="ghost" asChild>
-            <Link href="http://t.me/ensnode">
-              <TelegramIcon className="text-[#1F2937]" />
-            </Link>
-          </Button>
-        </div>
-        <div className="sm:hidden flex items-center justify-center gap-1">
-          <IconButton asChild variant="ghost">
-            <Link
-              href="https://ensnode.io/ensrainbow"
-              target="_blank"
-              size="small"
-              className="hover:no-underline nk-underline-none"
-            >
-              Docs
-            </Link>
-          </IconButton>
-
-          <IconButton asChild variant="ghost" className="p-[7px]">
-            <Link href="https://github.com/namehash/ensnode">
-              <GithubIcon className="fill-current" />
-            </Link>
-          </IconButton>
-
-          <IconButton asChild variant="ghost" className="p-[7px]">
-            <Link href="http://t.me/ensnode">
-              <TelegramIcon className="text-[#1F2937]" />
-            </Link>
-          </IconButton>
+          <a
+            href="http://t.me/ensnode"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={namekitButtonVariants({ variant: "ghost", className: "max-sm:p-2" })}
+          >
+            <TelegramIcon className="text-[#1F2937]" />
+          </a>
         </div>
       </div>
     </header>
