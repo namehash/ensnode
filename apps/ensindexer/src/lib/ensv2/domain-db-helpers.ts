@@ -1,16 +1,15 @@
-import type { Context } from "ponder:registry";
-import schema from "ponder:schema";
 import type { Address } from "viem";
 
 import { type ENSv1DomainId, interpretAddress } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
+import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 
 /**
  * Sets an ENSv1 Domain's effective owner to `owner`.
  */
 export async function materializeENSv1DomainEffectiveOwner(
-  context: Context,
+  context: IndexingEngineContext,
   id: ENSv1DomainId,
   owner: Address,
 ) {
@@ -18,5 +17,7 @@ export async function materializeENSv1DomainEffectiveOwner(
   await ensureAccount(context, owner);
 
   // update v1Domain's effective owner
-  await context.db.update(schema.v1Domain, { id }).set({ ownerId: interpretAddress(owner) });
+  await context.ensDb
+    .update(ensIndexerSchema.v1Domain, { id })
+    .set({ ownerId: interpretAddress(owner) });
 }

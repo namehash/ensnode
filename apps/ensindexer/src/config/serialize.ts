@@ -46,7 +46,6 @@ export function serializeRedactedENSIndexerConfig(
   return {
     ensIndexerSchemaName: redactedConfig.ensIndexerSchemaName,
     ensDbUrl: redactedConfig.ensDbUrl,
-    ensIndexerUrl: serializeUrl(redactedConfig.ensIndexerUrl),
     ensRainbowUrl: serializeUrl(redactedConfig.ensRainbowUrl),
     labelSet: redactedConfig.labelSet,
     globalBlockrange: redactedConfig.globalBlockrange,

@@ -1,11 +1,11 @@
 import config from "@/config";
 
-import { ponder } from "ponder:registry";
 import { base, optimism } from "viem/chains";
 
 import { type DatasourceName, DatasourceNames } from "@ensnode/datasources";
 import { type ChainId, type NFTTransferEventMetadata, PluginName } from "@ensnode/ensnode-sdk";
 
+import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { buildSupportedNFT } from "@/lib/tokenscope/nft-issuers";
 
@@ -28,7 +28,7 @@ const getThreeDNSDatasourceName = (chainId: ChainId): DatasourceName => {
 export default function () {
   const pluginName = PluginName.TokenScope;
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "ThreeDNSToken:TransferSingle"),
     async ({ context, event }) => {
       const nft = buildSupportedNFT(
@@ -64,7 +64,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "ThreeDNSToken:TransferBatch"),
     async ({ context, event }) => {
       if (event.args.ids.length !== event.args.values.length) {
@@ -112,7 +112,7 @@ export default function () {
       }
     },
   );
-  // ponder.on(
+  // addOnchainEventListener(
   //   namespaceContract(pluginName, "ThreeDNSToken:RegistrationCreated"),
   //   async ({ context, event }) => {
   //     // currently no use for tld, fqdn, controlBitmap, or expiry fields in event.args
@@ -135,7 +135,7 @@ export default function () {
   //   },
   // );
 
-  // ponder.on(
+  // addOnchainEventListener(
   //   namespaceContract(pluginName, "ThreeDNSToken:RegistrationTransferred"),
   //   async ({ context, event }) => {
   //     // currently no use for operator field in event.args
@@ -150,7 +150,7 @@ export default function () {
   //     // to look it up in the database. this query is then repeated in handleTransfer which
   //     // is a bit of a bummer but better to keep our logic simple.
   //     const serializedAssetId = serializeAssetId(nft);
-  //     const indexedNft = await context.db.find(schema.nameTokens, { id: serializedAssetId });
+  //     const indexedNft = await context.ensDb.find(ensIndexerSchema.nameTokens, { id: serializedAssetId });
 
   //     const metadata: NFTTransferEventMetadata = {
   //       chainId: context.chain.id,
@@ -170,7 +170,7 @@ export default function () {
   //   },
   // );
 
-  // ponder.on(
+  // addOnchainEventListener(
   //   namespaceContract(pluginName, "ThreeDNSToken:RegistrationBurned"),
   //   async ({ context, event }) => {
   //     // currently no use for burner field in event.args
@@ -185,7 +185,7 @@ export default function () {
   //     // to look it up in the database. this query is then repeated in handleTransfer which
   //     // is a bit of a bummer but better to keep our logic simple.
   //     const serializedAssetId = serializeAssetId(nft);
-  //     const indexedNft = await context.db.find(schema.nameTokens, { id: serializedAssetId });
+  //     const indexedNft = await context.ensDb.find(ensIndexerSchema.nameTokens, { id: serializedAssetId });
 
   //     const metadata: NFTTransferEventMetadata = {
   //       chainId: context.chain.id,

@@ -1,6 +1,5 @@
 import config from "@/config";
 
-import { type Context, ponder } from "ponder:registry";
 import type { Address } from "viem";
 
 import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
@@ -14,6 +13,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { getThisAccountId } from "@/lib/get-this-account-id";
+import { addOnchainEventListener, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import { ensureDomainResolverRelation } from "@/lib/protocol-acceleration/domain-resolver-relationship-db-helpers";
@@ -38,13 +38,13 @@ const ThreeDNSResolverByChainId: Record<ChainId, Address> = [
  * - indexes Node-Resolver Relationships for all nodes registred in ThreeDNSToken
  */
 export default function () {
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(PluginName.ProtocolAcceleration, "ThreeDNSToken:NewOwner"),
     async ({
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{
         // NOTE: `node` event arg represents a `Node` that is the _parent_ of the node the NewOwner event is about
         node: Node;

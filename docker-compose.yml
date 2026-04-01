@@ -7,9 +7,8 @@ services:
     environment:
       # Override environment variables to point to docker instances
       ENSDB_URL: postgresql://postgres:password@postgres:5432/postgres
-      ENSINDEXER_SCHEMA_NAME: ensindexer_0
+      ENSINDEXER_SCHEMA_NAME: docker_compose_ensindexer_schema
       ENSRAINBOW_URL: http://ensrainbow:3223
-      ENSINDEXER_URL: http://ensindexer:42069
     env_file:
       # NOTE: must define apps/ensindexer/.env.local (see apps/ensindexer/.env.local.example)
       # Copy .env.local.example to .env.local and configure all required values
@@ -36,7 +35,7 @@ services:
     environment:
       # Override environment variables to point to docker instances
       ENSDB_URL: postgresql://postgres:password@postgres:5432/postgres
-      ENSINDEXER_SCHEMA_NAME: ensindexer_0
+      ENSINDEXER_SCHEMA_NAME: docker_compose_ensindexer_schema
     env_file:
       # NOTE: must define apps/ensapi/.env.local (see apps/ensapi/.env.local.example)
       # Copy .env.local.example to .env.local and configure all required values
@@ -103,6 +102,23 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+  devnet:
+    container_name: devnet
+    image: ghcr.io/ensdomains/contracts-v2:main-e8696c6
+    command: ./script/runDevnet.ts --testNames
+    pull_policy: always
+    ports:
+      - "8545:8545"
+    environment:
+      ANVIL_IP_ADDR: "0.0.0.0"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "-s", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+      start_interval: 1s
 
 volumes:
   postgres_data:

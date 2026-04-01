@@ -1,6 +1,5 @@
 import config from "@/config";
 
-import { type Context, ponder } from "ponder:registry";
 import type { Address } from "viem";
 
 import { getENSRootChainId } from "@ensnode/datasources";
@@ -13,6 +12,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { getThisAccountId } from "@/lib/get-this-account-id";
+import { addOnchainEventListener, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import { ensureDomainResolverRelation } from "@/lib/protocol-acceleration/domain-resolver-relationship-db-helpers";
@@ -32,7 +32,7 @@ export default function () {
     context,
     event,
   }: {
-    context: Context;
+    context: IndexingEngineContext;
     event: EventWithArgs<{ node: Node; resolver: Address }>;
   }) {
     const { node, resolver } = event.args;
@@ -47,13 +47,13 @@ export default function () {
    * Handles Registry#NewOwner for:
    * - ENS Root Chain's (new) Registry
    */
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(PluginName.ProtocolAcceleration, "ENSv1Registry:NewOwner"),
     async ({
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{
         // NOTE: `node` event arg represents a `Node` that is the _parent_ of the node the NewOwner event is about
         node: Node;
@@ -75,13 +75,13 @@ export default function () {
    * Handles Registry#NewResolver for:
    * - ENS Root Chain's ENSv1RegistryOld
    */
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(PluginName.ProtocolAcceleration, "ENSv1RegistryOld:NewResolver"),
     async ({
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{ node: Node; resolver: Address }>;
     }) => {
       // ignore the event on ENSv1RegistryOld if node is migrated to new Registry
@@ -98,7 +98,7 @@ export default function () {
    * - Basename's (shadow) Registry
    * - Lineanames's (shadow) Registry
    */
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(PluginName.ProtocolAcceleration, "ENSv1Registry:NewResolver"),
     handleNewResolver,
   );

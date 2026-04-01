@@ -1,5 +1,3 @@
-import { ponder } from "ponder:registry";
-
 import {
   addPrices,
   decodeEncodedReferrer,
@@ -12,6 +10,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { getThisAccountId } from "@/lib/get-this-account-id";
+import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";
 import { getManagedName } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
 
@@ -27,7 +26,7 @@ export default function () {
    * Ethnames_LegacyEthRegistrarController Event Handlers
    */
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "Ethnames_LegacyEthRegistrarController:NameRegistered"),
     async ({ context, event }) => {
       const {
@@ -75,7 +74,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "Ethnames_LegacyEthRegistrarController:NameRenewed"),
     async ({ context, event }) => {
       const {
@@ -129,7 +128,7 @@ export default function () {
    * Ethnames_WrappedEthRegistrarController Event Handlers
    */
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "Ethnames_WrappedEthRegistrarController:NameRegistered"),
     async ({ context, event }) => {
       const {
@@ -176,7 +175,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "Ethnames_WrappedEthRegistrarController:NameRenewed"),
     async ({ context, event }) => {
       const {
@@ -229,7 +228,7 @@ export default function () {
    * Ethnames_UnwrappedEthRegistrarController Event Handlers
    */
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "Ethnames_UnwrappedEthRegistrarController:NameRegistered"),
     async ({ context, event }) => {
       const {
@@ -279,7 +278,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "Ethnames_UnwrappedEthRegistrarController:NameRenewed"),
     async ({ context, event }) => {
       const {

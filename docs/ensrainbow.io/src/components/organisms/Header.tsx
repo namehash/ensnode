@@ -9,7 +9,7 @@ export default function Header() {
     <header className="fixed bg-white top-0 w-full z-20 border-b border-gray-300 h-[56px] py-[9px] sm:h-[70px] sm:py-4 select-none">
       <div className="max-w-7xl mx-auto items-center justify-between flex flex-row px-8">
         <div className="flex flex-row lg:gap-2 xl:gap-7 justify-between items-center">
-          <div className="flex flex-row justify-between items-center gap-2 sm:gap-[14px] cursor-pointer flex-shrink-0 pr-2">
+          <div className="flex flex-row justify-between items-center gap-2 sm:gap-[14px] cursor-pointer shrink-0 pr-2">
             <a
               href="/"
               className="text-black not-italic font-bold text-[21.539px] leading-[26.51px] tracking-[-0.907px] sm:text-[26px] sm:leading-8 sm:tracking-[-1.113px]"

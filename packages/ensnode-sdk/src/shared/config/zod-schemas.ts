@@ -51,8 +51,6 @@ export const RpcConfigsSchema = z
     return rpcConfigs;
   });
 
-export const EnsIndexerUrlSchema = makeUrlSchema("ENSINDEXER_URL");
-
 export const ENSNamespaceSchema = z.enum(ENSNamespaceIds, {
   error: ({ input }) =>
     `Invalid NAMESPACE. Got '${input}', but supported ENS namespaces are: ${Object.keys(ENSNamespaceIds).join(", ")}`,

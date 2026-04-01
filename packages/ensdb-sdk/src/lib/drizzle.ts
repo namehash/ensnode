@@ -21,35 +21,16 @@ import * as ensNodeSchema from "../ensnode";
  */
 export type AbstractEnsIndexerSchema = typeof abstractEnsIndexerSchema;
 
+// TODO: remove the `appliedNameForConcreteEnsIndexerSchema` variable and
+// related logic when the `buildConcreteEnsIndexerSchema` function is
+// refactored to avoid mutating the "abstract" ENSIndexer Schema definition.
 /**
- * Clone a Drizzle Table object with a new schema name.
+ * Applied name for the "concrete" ENSIndexer Schema.
  *
- * Drizzle tables store their identity (name, columns, schema) on
- * Symbol-keyed properties. Cloning a table requires creating
- * a new object with the same prototype, copying all properties,
- * and updating the schema name.
+ * This is needed to prevent multiple calls to `buildConcreteEnsIndexerSchema` with different schema names,
+ * which would mutate the same "abstract" ENSIndexer Schema and cause schema corruption.
  */
-function cloneTableWithSchema<TableType extends Table>(
-  table: TableType,
-  schemaName: string,
-): TableType {
-  const clone = Object.create(
-    Object.getPrototypeOf(table),
-    Object.getOwnPropertyDescriptors(table),
-  ) as TableType;
-
-  // @ts-expect-error - Drizzle's Table type for the schema symbol is
-  // not typed in a way that allows us to set it directly,
-  // but we know it exists and can be set.
-  clone[Table.Symbol.Schema] = schemaName;
-
-  // Fail-fast if the clone lost the Drizzle sentinel.
-  if (!isTable(clone)) {
-    throw new Error(`Cloned table is no longer a valid Drizzle Table (schema: ${schemaName}).`);
-  }
-
-  return clone;
-}
+let appliedNameForConcreteEnsIndexerSchema: string | undefined;
 
 /**
  * Build a "concrete" ENSIndexer Schema definition for ENSDb.
@@ -66,34 +47,39 @@ function cloneTableWithSchema<TableType extends Table>(
 function buildConcreteEnsIndexerSchema<ConcreteEnsIndexerSchema extends AbstractEnsIndexerSchema>(
   ensIndexerSchemaName: string,
 ): ConcreteEnsIndexerSchema {
-  const ensIndexerSchema = {} as ConcreteEnsIndexerSchema;
+  // TODO: Refactor this function to avoid mutating the "abstract" ENSIndexer Schema definition.
+  // https://github.com/namehash/ensnode/issues/1830
 
-  for (const [key, abstractSchemaObject] of Object.entries(abstractEnsIndexerSchema)) {
-    if (isTable(abstractSchemaObject)) {
-      (ensIndexerSchema as any)[key] = cloneTableWithSchema(
-        abstractSchemaObject,
-        ensIndexerSchemaName,
-      );
-    } else if (isPgEnum(abstractSchemaObject)) {
-      // Enums are functions; clone by copying properties onto a new function.
-      // Unlike tables, enums don't rely on prototype identity, so
-      // Object.assign is sufficient here.
-      const concreteSchemaObject = Object.assign(
-        (...args: any[]) => abstractSchemaObject(...args),
-        abstractSchemaObject,
-      );
-      // @ts-expect-error - Drizzle's PgEnum type for the schema symbol is
-      // typed as readonly, but we need to set it here so
-      // the output schema definition has the correct schema for
-      // all table and enum objects.
-      concreteSchemaObject.schema = ensIndexerSchemaName;
-      (ensIndexerSchema as any)[key] = concreteSchemaObject;
-    } else {
-      (ensIndexerSchema as any)[key] = abstractSchemaObject;
+  if (
+    appliedNameForConcreteEnsIndexerSchema !== undefined &&
+    appliedNameForConcreteEnsIndexerSchema !== ensIndexerSchemaName
+  ) {
+    throw new Error(
+      `buildConcreteEnsIndexerSchema was already called with schema "${appliedNameForConcreteEnsIndexerSchema}". ` +
+        `Calling it again with "${ensIndexerSchemaName}" would corrupt the previously built schema.`,
+    );
+  }
+  appliedNameForConcreteEnsIndexerSchema = ensIndexerSchemaName;
+
+  const concreteEnsIndexerSchema = abstractEnsIndexerSchema as ConcreteEnsIndexerSchema;
+
+  for (const dbObject of Object.values(abstractEnsIndexerSchema)) {
+    if (isTable(dbObject)) {
+      // Update Drizzle table definition to reference
+      // the specific `ensIndexerSchemaName` name of the ENSIndexer Schema.
+      // @ts-expect-error - Drizzle types don't define `Table.Symbol.Schema` type,
+      // but it's present at runtime.
+      dbObject[Table.Symbol.Schema] = ensIndexerSchemaName;
+    } else if (isPgEnum(dbObject)) {
+      // Update Drizzle enum definition to reference
+      // the specific `ensIndexerSchemaName` name of the ENSIndexer Schema.
+      // @ts-expect-error - Drizzle types consider `schema` to be
+      // a readonly property.
+      dbObject.schema = ensIndexerSchemaName;
     }
   }
 
-  return ensIndexerSchema;
+  return concreteEnsIndexerSchema;
 }
 
 /**

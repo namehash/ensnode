@@ -1,11 +1,10 @@
 import config from "@/config";
 
-import type { Context } from "ponder:registry";
-import schema from "ponder:schema";
 import { isAddressEqual, zeroAddress } from "viem";
 
 import { type Node, ROOT_NODE } from "@ensnode/ensnode-sdk";
 
+import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import { upsertAccount } from "@/lib/subgraph/db-helpers";
 
 /**
@@ -19,14 +18,14 @@ import { upsertAccount } from "@/lib/subgraph/db-helpers";
  * entirely idempotent (i.e. with `.onConflictDoNothing()`).
  * https://ponder.sh/docs/api-reference/indexing-functions#setup-event
  */
-export async function setupRootNode({ context }: { context: Context }) {
+export async function setupRootNode({ context }: { context: IndexingEngineContext }) {
   // Each domain must reference an account of its owner,
   // so we ensure the account exists before inserting the domain
   await upsertAccount(context, zeroAddress);
 
   // create the ENS root domain (if not exists)
-  await context.db
-    .insert(schema.subgraph_domain)
+  await context.ensDb
+    .insert(ensIndexerSchema.subgraph_domain)
     .values({
       id: ROOT_NODE,
       ownerId: zeroAddress,
@@ -49,7 +48,7 @@ export async function setupRootNode({ context }: { context: Context }) {
 
 // a domain is 'empty' if it has no resolver, no owner, and no subdomains
 // via https://github.com/ensdomains/ens-subgraph/blob/c844791/src/ensRegistry.ts#L65
-function isDomainEmpty(domain: typeof schema.subgraph_domain.$inferSelect) {
+function isDomainEmpty(domain: typeof ensIndexerSchema.subgraph_domain.$inferSelect) {
   return (
     domain.resolverId === null &&
     isAddressEqual(domain.ownerId, zeroAddress) &&
@@ -60,16 +59,16 @@ function isDomainEmpty(domain: typeof schema.subgraph_domain.$inferSelect) {
 // a more accurate name for 'recurseDomainDelete'
 // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L64
 export async function recursivelyRemoveEmptyDomainFromParentSubdomainCount(
-  context: Context,
+  context: IndexingEngineContext,
   node: Node,
 ) {
-  const domain = await context.db.find(schema.subgraph_domain, { id: node });
+  const domain = await context.ensDb.find(ensIndexerSchema.subgraph_domain, { id: node });
   if (!domain) throw new Error(`Domain not found: ${node}`);
 
   if (isDomainEmpty(domain) && domain.parentId !== null) {
     // decrement parent's subdomain count
-    await context.db
-      .update(schema.subgraph_domain, { id: domain.parentId })
+    await context.ensDb
+      .update(ensIndexerSchema.subgraph_domain, { id: domain.parentId })
       .set((row) => ({ subdomainCount: row.subdomainCount - 1 }));
 
     // recurse to parent

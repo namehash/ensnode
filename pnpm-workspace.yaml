@@ -12,7 +12,7 @@ catalog:
   "@ponder/utils": 0.2.16
   "@testing-library/react": ^16.3.0
   "@types/node": 24.10.9
-  astro: ^5.15.9
+  astro: ^5.18.1
   astro-font: ^1.1.0
   astro-seo: ^0.8.4
   caip: 1.1.1

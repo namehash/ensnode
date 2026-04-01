@@ -1,7 +1,5 @@
 import config from "@/config";
 
-import type { Context } from "ponder:registry";
-import schema from "ponder:schema";
 /**
  * NOTE: the subgraph has a helper function called `checkPccBurned` which checks if the bit is SET:
  * https://github.com/ensdomains/ens-subgraph/blob/c844791/src/nameWrapper.ts#L63
@@ -35,6 +33,7 @@ import {
 
 import { subgraph_decodeDNSEncodedLiteralName } from "@/lib/dns-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
+import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import { bigintMax } from "@/lib/lib-helpers";
 import { getManagedName } from "@/lib/managed-names";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
@@ -98,15 +97,17 @@ function decodeSubgraphInterpretedNameWrapperName(
  * If the WrappedDomain fuses has PCC set ('the parent cannot control this subdomain'), then
  * materialize the relevant Domain entity's expiryDate to the greater of the two.
  */
-async function materializeDomainExpiryDate(context: Context, node: Node) {
-  const wrappedDomain = await context.db.find(schema.subgraph_wrappedDomain, { id: node });
+async function materializeDomainExpiryDate(context: IndexingEngineContext, node: Node) {
+  const wrappedDomain = await context.ensDb.find(ensIndexerSchema.subgraph_wrappedDomain, {
+    id: node,
+  });
   if (!wrappedDomain) throw new Error(`Expected WrappedDomain(${node})`);
 
   // if PCC fuse is SET ('burned'), update the expiry
   // translated: if the parent CANNOT control the subname, update the subname's expiry
   if (isPccFuseSet(BigInt(wrappedDomain.fuses))) {
     // update the domain's expiry to the greater of the two
-    await context.db.update(schema.subgraph_domain, { id: node }).set((domain) => ({
+    await context.ensDb.update(ensIndexerSchema.subgraph_domain, { id: node }).set((domain) => ({
       expiryDate: bigintMax(domain.expiryDate ?? 0n, wrappedDomain.expiryDate),
     }));
   }
@@ -117,7 +118,7 @@ async function materializeDomainExpiryDate(context: Context, node: Node) {
  */
 export const makeNameWrapperHandlers = () => {
   async function handleTransfer(
-    context: Context,
+    context: IndexingEngineContext,
     event: EventWithArgs,
     eventId: string,
     tokenId: bigint,
@@ -131,15 +132,15 @@ export const makeNameWrapperHandlers = () => {
     // NOTE: subgraph technically upserts domain with `createOrLoadDomain()` here, but domain
     // is guaranteed to exist. we encode this stricter logic here to illustrate that fact.
     // via https://github.com/ensdomains/ens-subgraph/blob/c8447914e8743671fb4b20cffe5a0a97020b3cee/src/nameWrapper.ts#L197C18-L197C36
-    const domain = await context.db.find(schema.subgraph_domain, { id: node });
+    const domain = await context.ensDb.find(ensIndexerSchema.subgraph_domain, { id: node });
     if (!domain) {
       console.table({ ...event.args, node });
       throw new Error(`NameWrapper:handleTransfer called before domain '${node}' exists.`);
     }
 
     // upsert the WrappedDomain
-    await context.db
-      .insert(schema.subgraph_wrappedDomain)
+    await context.ensDb
+      .insert(ensIndexerSchema.subgraph_wrappedDomain)
       .values({
         id: node,
         ownerId: to,
@@ -153,10 +154,12 @@ export const makeNameWrapperHandlers = () => {
       .onConflictDoUpdate({ ownerId: to });
 
     // materialize `Domain.wrappedOwner`
-    await context.db.update(schema.subgraph_domain, { id: node }).set({ wrappedOwnerId: to });
+    await context.ensDb
+      .update(ensIndexerSchema.subgraph_domain, { id: node })
+      .set({ wrappedOwnerId: to });
 
     // log DomainEvent
-    await context.db.insert(schema.subgraph_wrappedTransfer).values({
+    await context.ensDb.insert(ensIndexerSchema.subgraph_wrappedTransfer).values({
       ...sharedEventValues(context.chain.id, event),
       id: eventId, // NOTE: override the shared id in this case, to account for TransferBatch
       domainId: node,
@@ -169,7 +172,7 @@ export const makeNameWrapperHandlers = () => {
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{
         node: Node;
         owner: Address;
@@ -187,7 +190,7 @@ export const makeNameWrapperHandlers = () => {
         ? decodeSubgraphInterpretedNameWrapperName(event.args.name as DNSEncodedLiteralName)
         : decodeInterpretedNameWrapperName(event.args.name as DNSEncodedLiteralName);
 
-      const domain = await context.db.find(schema.subgraph_domain, { id: node });
+      const domain = await context.ensDb.find(ensIndexerSchema.subgraph_domain, { id: node });
       if (!domain) throw new Error("domain is guaranteed to already exist");
 
       // upsert the healed name iff !domain.labelName && label
@@ -199,26 +202,28 @@ export const makeNameWrapperHandlers = () => {
         // name will _not_ use the newly healed label emitted by the NameWrapper contract, and will
         // continue to have an un-healed EncodedLabelHash in its name field
         // ex: domain id 0x0093b7095a35094ecbd246f5d5638cb094c3061a5f29679f5969ad0abcfae27f
-        await context.db
-          .update(schema.subgraph_domain, { id: node })
+        await context.ensDb
+          .update(ensIndexerSchema.subgraph_domain, { id: node })
           .set({ labelName: label, name });
       }
 
       // update the WrappedDomain that was created in handleTransfer
-      await context.db.update(schema.subgraph_wrappedDomain, { id: node }).set({
+      await context.ensDb.update(ensIndexerSchema.subgraph_wrappedDomain, { id: node }).set({
         name,
         expiryDate: expiry,
         fuses,
       });
 
       // materialize wrappedOwner relation
-      await context.db.update(schema.subgraph_domain, { id: node }).set({ wrappedOwnerId: owner });
+      await context.ensDb
+        .update(ensIndexerSchema.subgraph_domain, { id: node })
+        .set({ wrappedOwnerId: owner });
 
       // materialize domain expiryDate
       await materializeDomainExpiryDate(context, node);
 
       // log DomainEvent
-      await context.db.insert(schema.subgraph_nameWrapped).values({
+      await context.ensDb.insert(ensIndexerSchema.subgraph_nameWrapped).values({
         ...sharedEventValues(context.chain.id, event),
         domainId: node,
         name,
@@ -232,7 +237,7 @@ export const makeNameWrapperHandlers = () => {
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{ node: Node; owner: Address }>;
     }) {
       const { node, owner } = event.args;
@@ -241,7 +246,7 @@ export const makeNameWrapperHandlers = () => {
 
       await upsertAccount(context, owner);
 
-      await context.db.update(schema.subgraph_domain, { id: node }).set((domain) => ({
+      await context.ensDb.update(ensIndexerSchema.subgraph_domain, { id: node }).set((domain) => ({
         // when a WrappedDomain is Unwrapped, reset any PCC-materialized expiryDate on the Domain entity
         // i.e if the domain in question normally has an expiry date (is a direct subname of a
         // Registrar that implements expiries), keep the domain's expiry date, otherwise, set its
@@ -253,10 +258,10 @@ export const makeNameWrapperHandlers = () => {
       }));
 
       // delete the WrappedDomain
-      await context.db.delete(schema.subgraph_wrappedDomain, { id: node });
+      await context.ensDb.delete(ensIndexerSchema.subgraph_wrappedDomain, { id: node });
 
       // log DomainEvent
-      await context.db.insert(schema.subgraph_nameUnwrapped).values({
+      await context.ensDb.insert(ensIndexerSchema.subgraph_nameUnwrapped).values({
         ...sharedEventValues(context.chain.id, event),
         domainId: node,
         ownerId: owner,
@@ -267,24 +272,28 @@ export const makeNameWrapperHandlers = () => {
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{ node: Node; fuses: number }>;
     }) {
       const { node, fuses } = event.args;
 
       // NOTE: subgraph no-ops this event if there's not a wrappedDomain already in the db.
       // via https://github.com/ensdomains/ens-subgraph/blob/c844791/src/nameWrapper.ts#L144
-      const wrappedDomain = await context.db.find(schema.subgraph_wrappedDomain, { id: node });
+      const wrappedDomain = await context.ensDb.find(ensIndexerSchema.subgraph_wrappedDomain, {
+        id: node,
+      });
       if (wrappedDomain) {
         // set fuses
-        await context.db.update(schema.subgraph_wrappedDomain, { id: node }).set({ fuses });
+        await context.ensDb
+          .update(ensIndexerSchema.subgraph_wrappedDomain, { id: node })
+          .set({ fuses });
 
         // materialize the domain's expiryDate because the fuses have potentially changed
         await materializeDomainExpiryDate(context, node);
       }
 
       // log DomainEvent
-      await context.db.insert(schema.subgraph_fusesSet).values({
+      await context.ensDb.insert(ensIndexerSchema.subgraph_fusesSet).values({
         ...sharedEventValues(context.chain.id, event),
         domainId: node,
         fuses,
@@ -294,18 +303,20 @@ export const makeNameWrapperHandlers = () => {
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{ node: Node; expiry: bigint }>;
     }) {
       const { node, expiry } = event.args;
 
       // NOTE: subgraph no-ops this event if there's not a wrappedDomain already in the db.
       // https://github.com/ensdomains/ens-subgraph/blob/c844791/src/nameWrapper.ts#L169
-      const wrappedDomain = await context.db.find(schema.subgraph_wrappedDomain, { id: node });
+      const wrappedDomain = await context.ensDb.find(ensIndexerSchema.subgraph_wrappedDomain, {
+        id: node,
+      });
       if (wrappedDomain) {
         // update expiryDate
-        await context.db
-          .update(schema.subgraph_wrappedDomain, { id: node })
+        await context.ensDb
+          .update(ensIndexerSchema.subgraph_wrappedDomain, { id: node })
           .set({ expiryDate: expiry });
 
         // materialize the domain's expiryDate
@@ -313,7 +324,7 @@ export const makeNameWrapperHandlers = () => {
       }
 
       // log DomainEvent
-      await context.db.insert(schema.subgraph_expiryExtended).values({
+      await context.ensDb.insert(ensIndexerSchema.subgraph_expiryExtended).values({
         ...sharedEventValues(context.chain.id, event),
         domainId: node,
         expiryDate: expiry,
@@ -323,7 +334,7 @@ export const makeNameWrapperHandlers = () => {
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{ id: bigint; to: Address }>;
     }) {
       const { id: tokenId, to } = event.args;
@@ -345,7 +356,7 @@ export const makeNameWrapperHandlers = () => {
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{ ids: readonly bigint[]; to: Address }>;
     }) {
       const { ids: tokenIds, to } = event.args;

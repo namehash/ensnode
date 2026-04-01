@@ -1,7 +1,6 @@
-import { ponder } from "ponder:registry";
-
 import { PluginName } from "@ensnode/ensnode-sdk";
 
+import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { makeNameWrapperHandlers } from "@/plugins/subgraph/shared-handlers/NameWrapper";
 
@@ -20,10 +19,25 @@ export default function () {
     handleTransferSingle,
   } = makeNameWrapperHandlers();
 
-  ponder.on(namespaceContract(pluginName, "NameWrapper:NameWrapped"), handleNameWrapped);
-  ponder.on(namespaceContract(pluginName, "NameWrapper:NameUnwrapped"), handleNameUnwrapped);
-  ponder.on(namespaceContract(pluginName, "NameWrapper:FusesSet"), handleFusesSet);
-  ponder.on(namespaceContract(pluginName, "NameWrapper:ExpiryExtended"), handleExpiryExtended);
-  ponder.on(namespaceContract(pluginName, "NameWrapper:TransferSingle"), handleTransferSingle);
-  ponder.on(namespaceContract(pluginName, "NameWrapper:TransferBatch"), handleTransferBatch);
+  addOnchainEventListener(
+    namespaceContract(pluginName, "NameWrapper:NameWrapped"),
+    handleNameWrapped,
+  );
+  addOnchainEventListener(
+    namespaceContract(pluginName, "NameWrapper:NameUnwrapped"),
+    handleNameUnwrapped,
+  );
+  addOnchainEventListener(namespaceContract(pluginName, "NameWrapper:FusesSet"), handleFusesSet);
+  addOnchainEventListener(
+    namespaceContract(pluginName, "NameWrapper:ExpiryExtended"),
+    handleExpiryExtended,
+  );
+  addOnchainEventListener(
+    namespaceContract(pluginName, "NameWrapper:TransferSingle"),
+    handleTransferSingle,
+  );
+  addOnchainEventListener(
+    namespaceContract(pluginName, "NameWrapper:TransferBatch"),
+    handleTransferBatch,
+  );
 }

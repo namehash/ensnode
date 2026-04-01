@@ -23,9 +23,8 @@ const VALID_RPC_WS_URL_ALT = "wss://lb.drpc.org/ethereum/987";
 const BASE_ENV: ENSIndexerEnvironment = {
   NAMESPACE: "mainnet",
   PLUGINS: "subgraph",
-  ENSINDEXER_SCHEMA_NAME: "ensnode",
+  ENSINDEXER_SCHEMA_NAME: "ensindexer_test",
   ENSDB_URL: "postgresql://user:password@localhost:5432/mydb",
-  ENSINDEXER_URL: "http://localhost:42069",
   ENSRAINBOW_URL: "http://localhost:3223",
   LABEL_SET_ID: "ens-test-env",
   LABEL_SET_VERSION: "0",
@@ -67,7 +66,7 @@ describe("config (with base env)", () => {
       const config = await getConfig();
       expect(config.namespace).toBe("mainnet");
       expect(config.globalBlockrange).toEqual(buildBlockNumberRange(undefined, undefined));
-      expect(config.ensIndexerSchemaName).toBe("ensnode");
+      expect(config.ensIndexerSchemaName).toBe("ensindexer_test");
       expect(config.plugins).toEqual(["subgraph"]);
       expect(config.ensRainbowUrl).toStrictEqual(new URL("http://localhost:3223"));
     });
@@ -144,34 +143,6 @@ describe("config (with base env)", () => {
     });
   });
 
-  describe(".ensIndexerUrl", () => {
-    it("throws an error if ENSINDEXER_URL is not a valid URL", async () => {
-      vi.stubEnv("ENSINDEXER_URL", "invalid url");
-      await expect(getConfig()).rejects.toThrow(/ENSINDEXER_URL must be a valid URL string/i);
-    });
-
-    it("throws an error if ENSINDEXER_URL is empty", async () => {
-      vi.stubEnv("ENSINDEXER_URL", "");
-      await expect(getConfig()).rejects.toThrow(/ENSINDEXER_URL must be a valid URL string/i);
-    });
-
-    it("throws an error if ENSINDEXER_URL is undefined", async () => {
-      vi.stubEnv("ENSINDEXER_URL", undefined);
-      await expect(getConfig()).rejects.toThrow(/ENSINDEXER_URL must be a valid URL string/i);
-    });
-
-    it("returns the ENSINDEXER_URL if it is a valid URL", async () => {
-      const config = await getConfig();
-      expect(config.ensIndexerUrl).toStrictEqual(new URL("http://localhost:42069"));
-    });
-
-    it("returns a different valid ENSINDEXER_URL if set", async () => {
-      vi.stubEnv("ENSINDEXER_URL", "https://someotherurl.com");
-      const config = await getConfig();
-      expect(config.ensIndexerUrl).toStrictEqual(new URL("https://someotherurl.com"));
-    });
-  });
-
   describe(".ensRainbowUrl", () => {
     it("throws an error if ENSRAINBOW_URL is not a valid URL", async () => {
       vi.stubEnv("ENSRAINBOW_URL", "invalid url");
@@ -192,9 +163,9 @@ describe("config (with base env)", () => {
 
   describe(".ensIndexerSchemaName", () => {
     it("returns the ENSINDEXER_SCHEMA_NAME if set", async () => {
-      vi.stubEnv("ENSINDEXER_SCHEMA_NAME", "someschema");
+      vi.stubEnv("ENSINDEXER_SCHEMA_NAME", "ensindexer_test_1");
       const config = await getConfig();
-      expect(config.ensIndexerSchemaName).toBe("someschema");
+      expect(config.ensIndexerSchemaName).toBe("ensindexer_test_1");
     });
 
     it("throws an error when ENSINDEXER_SCHEMA_NAME is not set", async () => {
@@ -676,17 +647,9 @@ describe("config (with base env)", () => {
  */
 describe("config (minimal base env)", () => {
   beforeEach(() => {
-    const {
-      NAMESPACE,
-      ENSINDEXER_URL,
-      ENSRAINBOW_URL,
-      ENSDB_URL,
-      ENSINDEXER_SCHEMA_NAME,
-      RPC_URL_1,
-    } = BASE_ENV;
+    const { NAMESPACE, ENSRAINBOW_URL, ENSDB_URL, ENSINDEXER_SCHEMA_NAME, RPC_URL_1 } = BASE_ENV;
     stubEnv({
       NAMESPACE,
-      ENSINDEXER_URL,
       ENSRAINBOW_URL,
       ENSDB_URL,
       ENSINDEXER_SCHEMA_NAME,

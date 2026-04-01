@@ -4,7 +4,6 @@ import type { UrlString } from "../serialized-types";
 import type { ChainId } from "../types";
 import type {
   EnsIndexerSchemaNameSchema,
-  EnsIndexerUrlSchema,
   PortNumberSchema,
   TheGraphApiKeySchema,
 } from "./zod-schemas";
@@ -46,8 +45,9 @@ export interface RpcConfig {
 export type RpcConfigs = Map<ChainId, RpcConfig>;
 
 export type DatabaseUrl = UrlString;
+
 export type EnsIndexerSchemaName = z.infer<typeof EnsIndexerSchemaNameSchema>;
-export type EnsIndexerUrl = z.infer<typeof EnsIndexerUrlSchema>;
+
 export type TheGraphApiKey = z.infer<typeof TheGraphApiKeySchema>;
 
 export type PortNumber = z.infer<typeof PortNumberSchema>;
