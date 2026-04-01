@@ -125,13 +125,12 @@
                         "versionInfo": {
                           "type": "object",
                           "properties": {
-                            "nodejs": { "type": "string", "minLength": 1 },
                             "ponder": { "type": "string", "minLength": 1 },
                             "ensDb": { "type": "string", "minLength": 1 },
                             "ensIndexer": { "type": "string", "minLength": 1 },
                             "ensNormalize": { "type": "string", "minLength": 1 }
                           },
-                          "required": ["nodejs", "ponder", "ensDb", "ensIndexer", "ensNormalize"]
+                          "required": ["ponder", "ensDb", "ensIndexer", "ensNormalize"]
                         }
                       },
                       "required": [
