@@ -84,9 +84,9 @@ describe("getDefaultReferralProgramEditionConfigSet", () => {
           `edition "${expected.slug}" should have the correct <subregistryId>. Expected "${expected.rules.subregistryId}", got "${rules.subregistryId}"`,
         ).toStrictEqual(expected.rules.subregistryId);
         expect(
-          rules.rulesUrl,
+          rules.rulesUrl.href,
           `edition "${expected.slug}" should have the correct <rulesUrl>. Expected "${expected.rules.rulesUrl.href}", got "${rules.rulesUrl.href}"`,
-        ).toStrictEqual(expected.rules.rulesUrl);
+        ).toStrictEqual(expected.rules.rulesUrl.href);
         expect(
           rules.areAwardsDistributed,
           `edition "${expected.slug}" should have the correct <areAwardsDistributed>. Expected "${expected.rules.areAwardsDistributed}", got "${rules.areAwardsDistributed}"`,
