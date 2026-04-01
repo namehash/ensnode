@@ -169,20 +169,20 @@ let preparedIndexingActivation = false;
  *
  * @example A single blocking precondition
  * ```ts
- * await waitForEnsRainbowToBeReady();
+ * await ensureValidEnsRainbowConnection();
  * ```
  *
  * @example Multiple concurrent blocking preconditions
  * ```ts
  * await Promise.all([
- *   waitForEnsRainbowToBeReady(),
+ *   ensureValidEnsRainbowConnection(),
  *   waitForAnotherPrecondition(),
  * ]);
  * ```
  *
  * @example Multiple sequential blocking preconditions
  * ```ts
- * await waitForEnsRainbowToBeReady();
+ * await ensureValidEnsRainbowConnection();
  * await waitForAnotherPrecondition();
  * ```
  */

@@ -29,6 +29,7 @@ export interface SerializedEnsNodeMetadataEnsIndexerPublicConfig {
  * Serialized representation of {@link EnsNodeMetadataEnsRainbowPublicConfig}.
  */
 export type SerializedEnsNodeMetadataEnsRainbowPublicConfig = EnsNodeMetadataEnsRainbowPublicConfig;
+
 /**
  * Serialized representation of {@link EnsNodeMetadataEnsIndexerIndexingStatus}.
  */

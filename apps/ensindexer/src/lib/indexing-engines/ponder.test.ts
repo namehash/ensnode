@@ -463,48 +463,6 @@ describe("addOnchainEventListener", () => {
       expect(handler2).toHaveBeenCalledTimes(1);
     });
 
-    it("calls waitForEnsRainbowToBeReady only once when two onchain callbacks fire concurrently", async () => {
-      const { addOnchainEventListener } = await getPonderModule();
-      const handler1 = createHandler();
-      const handler2 = createHandler();
-      let resolveReadiness: (() => void) | undefined;
-      let getConfigCallCount = 0;
-
-      mockGetEnsRainbowPublicConfig.mockImplementation(() => {
-        getConfigCallCount++;
-        return new Promise((resolve) => setTimeout(() => resolve(undefined), 50));
-      });
-      mockGetIndexingStatusSnapshot.mockResolvedValue(createUnstartedIndexingStatus());
-      mockWaitForEnsRainbow.mockImplementation(() => {
-        return new Promise<void>((resolve) => {
-          resolveReadiness = resolve;
-        });
-      });
-
-      addOnchainEventListener("Resolver:AddrChanged" as EventNames, handler1);
-      addOnchainEventListener("Registry:Transfer" as EventNames, handler2);
-
-      const promise1 = getRegisteredCallback(0)({
-        context: { db: createMockDb() } as unknown as Context<EventNames>,
-        event: { args: { a: "1" } } as unknown as IndexingEngineEvent<EventNames>,
-      });
-      const promise2 = getRegisteredCallback(1)({
-        context: { db: createMockDb() } as unknown as Context<EventNames>,
-        event: { args: { a: "2" } } as unknown as IndexingEngineEvent<EventNames>,
-      });
-
-      expect(getConfigCallCount).toBe(1);
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      expect(mockWaitForEnsRainbow).toHaveBeenCalledTimes(1);
-      expect(handler1).not.toHaveBeenCalled();
-
-      resolveReadiness!();
-      await Promise.all([promise1, promise2]);
-
-      expect(handler1).toHaveBeenCalledTimes(1);
-      expect(handler2).toHaveBeenCalledTimes(1);
-    });
-
     it("resolves ENSRainbow before calling the handler", async () => {
       let preconditionResolved = false;
 

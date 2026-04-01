@@ -49,8 +49,8 @@ function invariant_labelSetIdCompatibility(
 
 /**
  * The highest label set version in the fetched ENSRainbow public config must be
- * lower than or equal to the highest label set version in the stored ENSRainbow
- * public config.
+ * greater than or equal to the highest label set version in
+ * the stored ENSRainbow public config.
  *
  * This invariant is necessary to ensure that we don't run indexing logic with
  * two incompatible versions of the label set, which could lead to
@@ -172,7 +172,7 @@ export async function ensureValidEnsRainbowConnection(): Promise<void> {
 
   await waitForEnsRainbowToBeReady();
 
-  // Once the connected ENSRainbow instance is ready, we we can try
+  // Once the connected ENSRainbow instance is ready, we can try
   // upserting the ENSRainbow Public Config into ENSDb.
   console.log("Upserting the validated ENSRainbow Public Config into ENSDb...");
   const validatedEnsRainbowConfig = await getValidatedEnsRainbowPublicConfig(storedConfig);
