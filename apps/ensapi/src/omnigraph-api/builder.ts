@@ -2,7 +2,7 @@ import { trace } from "@opentelemetry/api";
 import SchemaBuilder, { type MaybePromise } from "@pothos/core";
 import DataloaderPlugin from "@pothos/plugin-dataloader";
 import RelayPlugin from "@pothos/plugin-relay";
-import TracingPlugin from "@pothos/plugin-tracing";
+import TracingPlugin, { isRootField } from "@pothos/plugin-tracing";
 import { AttributeNames, createOpenTelemetryWrapper } from "@pothos/tracing-opentelemetry";
 import type {
   ChainId,
@@ -35,8 +35,10 @@ const createSpan = createOpenTelemetryWrapper(tracer, {
     // inject the graphql.field.args attribute using superjson to handle our BigInt scalar
     span.setAttribute(AttributeNames.FIELD_ARGS, superjson.stringify(args));
 
-    // edge span names are too loud by default and not helpful
-    if (info.fieldName === "edges") return span.updateName("edges");
+    // name edge spans as the parent's "Typename.fieldName" for clarity
+    if (info.fieldName === "edges") {
+      return span.updateName(`${info.path.prev?.typename}.${info.path.prev?.key}`);
+    }
 
     // turn an *Edge.node span name into "Typename([:id])", ex: 'ENSv2Domain([:id])'
     if (info.parentType.name.endsWith("Edge") && info.fieldName === "node") {
@@ -79,7 +81,23 @@ export const builder = new SchemaBuilder<{
 }>({
   plugins: [TracingPlugin, DataloaderPlugin, RelayPlugin],
   tracing: {
-    default: () => true,
+    default: (config) => {
+      // NOTE: if you need all the tracing possible in order to debug something, you can return true
+      // from this fn and pothos will wrap every resolver in a span for your otel trace, but it may
+      // be quite verbose
+
+      // always start a root span
+      if (isRootField(config)) return true;
+
+      // always include edges for hierarchy
+      // NOTE: this means that setting tracing: true on connection fields will result in (somewhat)
+      // superfluous spans, though technically they measure different things
+      if (config.name === "edges") return true;
+
+      // note that we don't trace node by default, as this results in lots of spans (one for each node)
+
+      return false;
+    },
     wrap: (resolver, options) => createSpan(resolver, options),
   },
   relay: {

@@ -133,6 +133,7 @@ DomainInterfaceRef.implement({
     name: t.field({
       description:
         "The Canonical Name for this Domain. If the Domain is not Canonical, then `name` will be null.",
+      tracing: true,
       type: "Name",
       nullable: true,
       resolve: async (domain, args, context) => {
@@ -168,6 +169,7 @@ DomainInterfaceRef.implement({
     path: t.field({
       description:
         "The Canonical Path from the ENS Root to this Domain. `path` is null if the Domain is not Canonical.",
+      tracing: true,
       type: [DomainInterfaceRef],
       nullable: true,
       resolve: async (domain, args, context) => {
