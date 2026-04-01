@@ -291,7 +291,7 @@ function ENSNodeConfigCardContent({
         icon={<ENSApiIcon width={24} height={24} />}
         version={
           <p className="text-sm leading-normal font-normal text-muted-foreground">
-            v{ensApiPublicConfig.version}
+            v{ensApiPublicConfig.versionInfo.ensApi}
           </p>
         }
         docsLink={new URL("https://ensnode.io/ensapi")}
@@ -333,6 +333,23 @@ function ENSNodeConfigCardContent({
               <p>
                 This ENS Root Chain RPC is used to power the Resolution API, in situations where
                 Protocol Acceleration is not possible.
+              </p>
+            }
+          />
+          <InfoCardItem
+            label="ens-normalize.js"
+            value={
+              <p className={cardItemValueStyles}>{ensApiPublicConfig.versionInfo.ensNormalize}</p>
+            }
+            additionalInfo={
+              <p>
+                Version of the{" "}
+                <ExternalLinkWithIcon
+                  href={`https://www.npmjs.com/package/@adraffy/ens-normalize/v/${ensIndexerPublicConfig.versionInfo.ensNormalize}`}
+                >
+                  @adraffy/ens-normalize
+                </ExternalLinkWithIcon>{" "}
+                package used for ENS name normalization.
               </p>
             }
           />
