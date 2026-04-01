@@ -45,7 +45,7 @@ builder.scalarType("Hex", {
     z.coerce
       .string()
       .check((ctx) => {
-        if (!isHex(value)) {
+        if (!isHex(ctx.value)) {
           ctx.issues.push({
             code: "custom",
             message: "Must be a valid Hex",
