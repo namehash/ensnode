@@ -429,8 +429,8 @@ function ENSNodeConfigCardContent({
             value={<p className={cardItemValueStyles}>ponder_sync</p>}
             additionalInfo={
               <p>
-                Ponder manages this database schema to stores cached RPC results and is shared
-                across all ENSIndexer instances using this ENSDb.
+                Ponder manages this database schema to store cached RPC results and is shared across
+                all ENSIndexer instances using this ENSDb.
               </p>
             }
           />

@@ -13,5 +13,7 @@ export function redactEnsApiConfig(config: EnsApiConfig) {
     ensIndexerPublicConfig: config.ensIndexerPublicConfig,
     ensDbUrl: redactString(config.ensDbUrl),
     rpcConfigs: redactRpcConfigs(config.rpcConfigs),
+    ensIndexerSchemaName: config.ensIndexerSchemaName,
+    theGraphApiKey: config.theGraphApiKey ? redactString(config.theGraphApiKey) : undefined,
   };
 }

@@ -38,21 +38,44 @@ export interface EnsIndexerConfig {
   labelSet: Required<EnsRainbowClientLabelSet>;
 
   /**
-   * The name of the ENSIndexer Schema in the ENSDb instance,
-   * where the ENSIndexer instance will store indexed data.
+   * The name of the ENSIndexer Schema in ENSDb where ENSIndexer will create
+   * tables to store indexed data.
    *
-   * The {@link ensIndexerSchemaName} must be unique per running instance of ENSIndexer (ponder will
-   * enforce this with database locks). If multiple instances of ENSIndexer with the same
-   * {@link ensIndexerSchemaName} are running, only the first will successfully acquire the lock and begin
-   * indexing: the rest will crash.
+   * Each ENSIndexer instance is the exclusive writer to its ENSIndexer Schema
+   * within an ENSDb. Therefore, {@link ensIndexerSchemaName} must be
+   * a unique ENSIndexer Schema Name for all ENSIndexer instances writing to
+   * the same ENSDb. Multiple ENSIndexer instances can write to the same ENSDb,
+   * but each requires a distinct ENSIndexer Schema Name.
    *
-   * If an ENSIndexer instance with the same configuration (including `ensIndexerSchemaName`) is
-   * started, and it successfully acquires the lock on this schema, it will continue indexing from
-   * the current state.
+   * When ENSIndexer runs in production mode, the following rules apply:
+   * - For safety, any changes to the indexing behavior in ENSIndexer (including
+   *   any changes to indexing code or any changes to environment variables that
+   *   influence indexing behavior) will cause ENSIndexer to refuse to use
+   *   an ENSIndexer Schema that was already built with different indexing behavior.
+   *   This is to prevent data corruption from multiple ENSIndexer instances writing
+   *   state to the same ENSIndexer Schema at the same time.
+   * - If you wish to change the indexing behavior of your ENSIndexer (such as
+   *   upgrading to a new ENSIndexer version or changing environment variables
+   *   that influence indexing behavior) you must either:
+   *   - Configure a new ENSIndexer Schema Name
+   *   - Remove or rename the existing ENSIndexer Schema you previously built
+   * - Each time you configure a new ENSIndexer Schema Name there is
+   *   no automatic "garbage collection" of any ENSIndexer Schemas you may have
+   *   previously built. Over time, this can result in the consumption of more and
+   *   more storage space consumption. To solve for this, manually garbage collect
+   *   any ENSIndexer Schemas you have previously built when they are
+   *   no longer needed.
+   * - If ENSIndexer restarts without changes in the indexing behavior,
+   *   the indexing will continue from where it left off.
    *
-   * Many clients can read from this Postgres schema during or after indexing.
+   * When ENSIndexer runs in dev mode, the following rules apply:
+   * - Any change to indexing behavior in ENSIndexer results in the ENSIndexer instance being restarted.
+   * - Each time ENSIndexer starts in dev mode, the ENSIndexer Schema for
+   *   the {@link ensIndexerSchemaName} is recreated. This means that any existing ENSIndexer Schema with
+   *   the {@link ensIndexerSchemaName} will be dropped and a new ENSIndexer Schema with the same name will be created.
    *
-   * Read more about database schema rules here:
+   * ENSIndexer manages the ENSIndexer Schemas according to the rules of Ponder-managed database schemas.
+   * Read more about these rules here:
    * @see https://ponder.sh/docs/api-reference/ponder/database#database-schema-rules
    *
    * Invariants:
