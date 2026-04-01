@@ -7,7 +7,7 @@ export const namekitButtonVariants = cva(
       variant: {
         primary: "nhui:bg-black nhui:text-white nhui:border-black nhui:hover:bg-[#272727]",
         secondary:
-          "nhui:bg-white nhui:text-black nhui:border-alto nhui:shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] nhui:hover:bg-gray-50",
+          "nhui:bg-white nhui:text-black nhui:border-[#DBDBDB] nhui:shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] nhui:hover:bg-gray-50",
         ghost: "nhui:text-black nhui:border-transparent nhui:hover:bg-black/5",
       },
       size: {

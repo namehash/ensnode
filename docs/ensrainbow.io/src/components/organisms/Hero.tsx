@@ -1,4 +1,3 @@
-import { Button, Link } from "@namehash/namekit-react";
 import { namekitLinkVariants, namekitButtonVariants } from "@namehash/namehash-ui/namekit";
 
 import BeforeAfterSlider from "../molecules/BeforeAfterSlider.tsx";
