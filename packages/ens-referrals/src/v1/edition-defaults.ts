@@ -28,7 +28,7 @@ export function getDefaultReferralProgramEditionConfigSet(
 ): ReferralProgramEditionConfigSet {
   const subregistryId = getEthnamesSubregistryId(ensNamespaceId);
 
-  const december2025Edition: ReferralProgramEditionConfig = {
+  const dec2025Edition: ReferralProgramEditionConfig = {
     slug: "2025-12",
     displayName: "ENS Holiday Awards",
     rules: buildReferralProgramRulesPieSplit(
@@ -42,7 +42,7 @@ export function getDefaultReferralProgramEditionConfigSet(
     ),
   };
 
-  const april2026Edition: ReferralProgramEditionConfig = {
+  const apr2026Edition: ReferralProgramEditionConfig = {
     slug: "2026-04",
     displayName: "April 2026",
     rules: buildReferralProgramRulesRevShareLimit(
@@ -72,9 +72,5 @@ export function getDefaultReferralProgramEditionConfigSet(
     ),
   };
 
-  return buildReferralProgramEditionConfigSet([
-    december2025Edition,
-    april2026Edition,
-    may2026Edition,
-  ]);
+  return buildReferralProgramEditionConfigSet([dec2025Edition, apr2026Edition, may2026Edition]);
 }
