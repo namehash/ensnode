@@ -1,5 +1,3 @@
-import type { Context } from "ponder:registry";
-import schema from "ponder:schema";
 import { type Address, isAddressEqual, zeroAddress, zeroHash } from "viem";
 
 import {
@@ -19,6 +17,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
+import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import { parseLabelAndNameFromOnChainMetadata } from "@/lib/json-metadata";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import {
@@ -35,7 +34,10 @@ import { getThreeDNSTokenId } from "@/lib/threedns-helpers";
 /**
  * Gets the `uri` for a given tokenId using the relevant ThreeDNSToken from `context`
  */
-const getUriForTokenId = async (context: Context, tokenId: bigint): Promise<string> => {
+const getUriForTokenId = async (
+  context: IndexingEngineContext,
+  tokenId: bigint,
+): Promise<string> => {
   // ThreeDNSToken is chain-specific in ponder multi-chain usage
   // https://ponder.sh/docs/indexing/read-contracts#multiple-chains
   return context.client.readContract({
@@ -100,7 +102,7 @@ export async function handleNewOwner({
   context,
   event,
 }: {
-  context: Context;
+  context: IndexingEngineContext;
   event: EventWithArgs<{
     // NOTE: `node` event arg represents a `Node` that is the _parent_ of the node the NewOwner event is about
     node: Node;
@@ -115,7 +117,7 @@ export async function handleNewOwner({
 
   // the domain in question is a subdomain of `parentNode`
   const node = makeSubdomainNode(labelHash, parentNode);
-  let domain = await context.db.find(schema.subgraph_domain, { id: node });
+  let domain = await context.ensDb.find(ensIndexerSchema.subgraph_domain, { id: node });
 
   // biome-ignore lint/style/noNonNullAssertion: NetworkConfig#address is `Address | Address[] | undefined`, but we know this is a single address
   const resolverAddress = context.contracts["threedns/Resolver"].address! as Address;
@@ -131,10 +133,12 @@ export async function handleNewOwner({
 
   if (domain) {
     // if the domain already exists, this is just an update of the owner record
-    domain = await context.db.update(schema.subgraph_domain, { id: node }).set({ ownerId: owner });
+    domain = await context.ensDb
+      .update(ensIndexerSchema.subgraph_domain, { id: node })
+      .set({ ownerId: owner });
   } else {
     // otherwise create the domain
-    domain = await context.db.insert(schema.subgraph_domain).values({
+    domain = await context.ensDb.insert(ensIndexerSchema.subgraph_domain).values({
       id: node,
       ownerId: owner,
       parentId: parentNode,
@@ -147,8 +151,8 @@ export async function handleNewOwner({
     });
 
     // and increment parent subdomainCount
-    await context.db
-      .update(schema.subgraph_domain, { id: parentNode })
+    await context.ensDb
+      .update(ensIndexerSchema.subgraph_domain, { id: parentNode })
       .set((row) => ({ subdomainCount: row.subdomainCount + 1 }));
   }
 
@@ -157,7 +161,7 @@ export async function handleNewOwner({
   // always emit `RegistrationCreated`, including Domain's `name`, before this `NewOwner` event
   // is indexed.
   if (domain.name === null) {
-    const parent = await context.db.find(schema.subgraph_domain, { id: parentNode });
+    const parent = await context.ensDb.find(ensIndexerSchema.subgraph_domain, { id: parentNode });
 
     // 1. attempt metadata retrieval
     const tokenId = getThreeDNSTokenId(node);
@@ -184,13 +188,13 @@ export async function handleNewOwner({
       parent?.name ? `${interpretedLabel}.${parent.name}` : interpretedLabel
     ) as InterpretedName;
 
-    await context.db
-      .update(schema.subgraph_domain, { id: node })
+    await context.ensDb
+      .update(ensIndexerSchema.subgraph_domain, { id: node })
       .set({ name: interpretedName, labelName: interpretedLabel });
   }
 
   // log DomainEvent
-  await context.db.insert(schema.subgraph_newOwner).values({
+  await context.ensDb.insert(ensIndexerSchema.subgraph_newOwner).values({
     ...sharedEventValues(context.chain.id, event),
     parentDomainId: parentNode,
     domainId: node,
@@ -202,7 +206,7 @@ export async function handleTransfer({
   context,
   event,
 }: {
-  context: Context;
+  context: IndexingEngineContext;
   event: EventWithArgs<{ node: Node; owner: Address }>;
 }) {
   const { node, owner } = event.args;
@@ -210,7 +214,9 @@ export async function handleTransfer({
   await upsertAccount(context, owner);
 
   // update owner (Domain is guaranteed to exist because NewOwner fires before Transfer)
-  await context.db.update(schema.subgraph_domain, { id: node }).set({ ownerId: owner });
+  await context.ensDb
+    .update(ensIndexerSchema.subgraph_domain, { id: node })
+    .set({ ownerId: owner });
 
   // garbage collect newly 'empty' domain iff necessary
   if (isAddressEqual(owner, zeroAddress)) {
@@ -218,7 +224,7 @@ export async function handleTransfer({
   }
 
   // log DomainEvent
-  await context.db.insert(schema.subgraph_transfer).values({
+  await context.ensDb.insert(ensIndexerSchema.subgraph_transfer).values({
     ...sharedEventValues(context.chain.id, event),
     domainId: node,
     ownerId: owner,
@@ -229,7 +235,7 @@ export async function handleRegistrationCreated({
   context,
   event,
 }: {
-  context: Context;
+  context: IndexingEngineContext;
   event: EventWithArgs<{
     // NOTE: `node` event arg represents a `Node` that is the domain this registration is about
     node: Node;
@@ -284,7 +290,7 @@ export async function handleRegistrationCreated({
   });
 
   // log RegistrationEvent
-  await context.db.insert(schema.subgraph_nameRegistered).values({
+  await context.ensDb.insert(ensIndexerSchema.subgraph_nameRegistered).values({
     ...sharedEventValues(context.chain.id, event),
     registrationId,
     registrantId: registrant,
@@ -296,22 +302,24 @@ export async function handleRegistrationExtended({
   context,
   event,
 }: {
-  context: Context;
+  context: IndexingEngineContext;
   event: EventWithArgs<{ node: Node; duration: bigint; newExpiry: bigint }>;
 }) {
   const { node, newExpiry } = event.args;
 
   // update domain expiry date
-  await context.db.update(schema.subgraph_domain, { id: node }).set({ expiryDate: newExpiry });
+  await context.ensDb
+    .update(ensIndexerSchema.subgraph_domain, { id: node })
+    .set({ expiryDate: newExpiry });
 
   // udpate registration expiry date
   const registrationId = makeRegistrationId(zeroHash, node);
-  await context.db
-    .update(schema.subgraph_registration, { id: registrationId })
+  await context.ensDb
+    .update(ensIndexerSchema.subgraph_registration, { id: registrationId })
     .set({ expiryDate: newExpiry });
 
   // log RegistratioEvent
-  await context.db.insert(schema.subgraph_nameRenewed).values({
+  await context.ensDb.insert(ensIndexerSchema.subgraph_nameRenewed).values({
     ...sharedEventValues(context.chain.id, event),
     registrationId,
     expiryDate: newExpiry,

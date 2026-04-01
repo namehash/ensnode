@@ -25,7 +25,7 @@ import {
 // via devnet
 const DEVNET_DEPLOYER: Address = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266";
 const DEFAULT_OWNER: Address = "0x70997970c51812dc3a010c7d01b50e0d17dc79c8";
-const NEW_OWNER: Address = "0x90f79bf6eb2c4f870365e785982e1f101e93b906";
+const NEW_OWNER_OWNER: Address = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC";
 
 describe("Account.domains", () => {
   type AccountDomainsResult = {
@@ -66,7 +66,9 @@ describe("Account.domains", () => {
   });
 
   it("returns domains owned by the new owner", async () => {
-    const result = await request<AccountDomainsResult>(AccountDomains, { address: NEW_OWNER });
+    const result = await request<AccountDomainsResult>(AccountDomains, {
+      address: NEW_OWNER_OWNER,
+    });
     const domains = flattenConnection(result.account.domains);
     const names = domains.map((d) => d.name);
 

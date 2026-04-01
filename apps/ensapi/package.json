@@ -1,6 +1,6 @@
 {
   "name": "ensapi",
-  "version": "1.8.1",
+  "version": "1.9.0",
   "private": true,
   "type": "module",
   "description": "ENSNode's ENS API",
@@ -18,7 +18,8 @@
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
-    "typecheck": "tsgo --noEmit"
+    "typecheck": "tsgo --noEmit",
+    "generate:gqlschema": "tsx src/graphql-api/lib/write-graphql-schema.ts"
   },
   "dependencies": {
     "@ensdomains/ensjs": "^4.0.2",

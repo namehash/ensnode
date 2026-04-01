@@ -25,7 +25,6 @@ const BASE_ENV: ENSIndexerEnvironment = {
   PLUGINS: "subgraph",
   DATABASE_SCHEMA: "ensnode",
   DATABASE_URL: "postgresql://user:password@localhost:5432/mydb",
-  ENSINDEXER_URL: "http://localhost:42069",
   ENSRAINBOW_URL: "http://localhost:3223",
   LABEL_SET_ID: "ens-test-env",
   LABEL_SET_VERSION: "0",
@@ -141,34 +140,6 @@ describe("config (with base env)", () => {
       vi.stubEnv("END_BLOCK", "100");
       const config = await getConfig();
       expect(config.globalBlockrange).toEqual(buildBlockNumberRange(100, 100));
-    });
-  });
-
-  describe(".ensIndexerUrl", () => {
-    it("throws an error if ENSINDEXER_URL is not a valid URL", async () => {
-      vi.stubEnv("ENSINDEXER_URL", "invalid url");
-      await expect(getConfig()).rejects.toThrow(/ENSINDEXER_URL must be a valid URL string/i);
-    });
-
-    it("throws an error if ENSINDEXER_URL is empty", async () => {
-      vi.stubEnv("ENSINDEXER_URL", "");
-      await expect(getConfig()).rejects.toThrow(/ENSINDEXER_URL must be a valid URL string/i);
-    });
-
-    it("throws an error if ENSINDEXER_URL is undefined", async () => {
-      vi.stubEnv("ENSINDEXER_URL", undefined);
-      await expect(getConfig()).rejects.toThrow(/ENSINDEXER_URL must be a valid URL string/i);
-    });
-
-    it("returns the ENSINDEXER_URL if it is a valid URL", async () => {
-      const config = await getConfig();
-      expect(config.ensIndexerUrl).toStrictEqual(new URL("http://localhost:42069"));
-    });
-
-    it("returns a different valid ENSINDEXER_URL if set", async () => {
-      vi.stubEnv("ENSINDEXER_URL", "https://someotherurl.com");
-      const config = await getConfig();
-      expect(config.ensIndexerUrl).toStrictEqual(new URL("https://someotherurl.com"));
     });
   });
 
@@ -676,11 +647,9 @@ describe("config (with base env)", () => {
  */
 describe("config (minimal base env)", () => {
   beforeEach(() => {
-    const { NAMESPACE, ENSINDEXER_URL, ENSRAINBOW_URL, DATABASE_URL, DATABASE_SCHEMA, RPC_URL_1 } =
-      BASE_ENV;
+    const { NAMESPACE, ENSRAINBOW_URL, DATABASE_URL, DATABASE_SCHEMA, RPC_URL_1 } = BASE_ENV;
     stubEnv({
       NAMESPACE,
-      ENSINDEXER_URL,
       ENSRAINBOW_URL,
       DATABASE_URL,
       DATABASE_SCHEMA,

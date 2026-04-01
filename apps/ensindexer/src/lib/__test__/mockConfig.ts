@@ -12,7 +12,6 @@ const _defaultMockConfig = buildConfigFromEnvironment({
   DATABASE_SCHEMA: "test_schema",
   NAMESPACE: "mainnet",
   PLUGINS: "subgraph",
-  ENSINDEXER_URL: "http://localhost:42069",
   ENSRAINBOW_URL: "http://localhost:3223",
   LABEL_SET_ID: "ens-test-env",
   LABEL_SET_VERSION: "0",

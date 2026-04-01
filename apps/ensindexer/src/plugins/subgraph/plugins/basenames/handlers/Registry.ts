@@ -1,7 +1,6 @@
-import { ponder } from "ponder:registry";
-
 import { PluginName } from "@ensnode/ensnode-sdk";
 
+import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { setupRootNode } from "@/lib/subgraph/subgraph-helpers";
 import {
@@ -17,9 +16,9 @@ import {
 export default function () {
   const pluginName = PluginName.Basenames;
 
-  ponder.on(namespaceContract(pluginName, "Registry:setup"), setupRootNode);
-  ponder.on(namespaceContract(pluginName, "Registry:NewOwner"), handleNewOwner(true));
-  ponder.on(namespaceContract(pluginName, "Registry:NewResolver"), handleNewResolver);
-  ponder.on(namespaceContract(pluginName, "Registry:NewTTL"), handleNewTTL);
-  ponder.on(namespaceContract(pluginName, "Registry:Transfer"), handleTransfer);
+  addOnchainEventListener(namespaceContract(pluginName, "Registry:setup"), setupRootNode);
+  addOnchainEventListener(namespaceContract(pluginName, "Registry:NewOwner"), handleNewOwner(true));
+  addOnchainEventListener(namespaceContract(pluginName, "Registry:NewResolver"), handleNewResolver);
+  addOnchainEventListener(namespaceContract(pluginName, "Registry:NewTTL"), handleNewTTL);
+  addOnchainEventListener(namespaceContract(pluginName, "Registry:Transfer"), handleTransfer);
 }

@@ -1,10 +1,9 @@
 import config from "@/config";
 
-import { ponder } from "ponder:registry";
-
 import { DatasourceNames } from "@ensnode/datasources";
 import { type NFTTransferEventMetadata, PluginName } from "@ensnode/ensnode-sdk";
 
+import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { buildSupportedNFT } from "@/lib/tokenscope/nft-issuers";
 
@@ -16,7 +15,7 @@ import { handleNFTTransfer } from "../lib/handle-nft-transfer";
 export default function () {
   const pluginName = PluginName.TokenScope;
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "EthBaseRegistrar:Transfer"),
     async ({ context, event }) => {
       const nft = buildSupportedNFT(
@@ -38,7 +37,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "BaseBaseRegistrar:Transfer"),
     async ({ context, event }) => {
       const nft = buildSupportedNFT(
@@ -60,7 +59,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "LineaBaseRegistrar:Transfer"),
     async ({ context, event }) => {
       const nft = buildSupportedNFT(

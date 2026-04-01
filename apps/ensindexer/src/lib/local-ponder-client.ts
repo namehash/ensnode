@@ -16,7 +16,6 @@ const pluginsAllDatasourceNames = getPluginsAllDatasourceNames(config.plugins);
 const indexedBlockranges = buildIndexedBlockranges(config.namespace, pluginsAllDatasourceNames);
 
 export const localPonderClient = new LocalPonderClient(
-  config.ensIndexerUrl,
   config.indexedChainIds,
   indexedBlockranges,
   publicClients,

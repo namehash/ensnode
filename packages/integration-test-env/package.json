@@ -1,17 +1,18 @@
 {
   "name": "@ensnode/integration-test-env",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "private": true,
   "type": "module",
   "description": "Integration test environment orchestration for ENSNode",
   "scripts": {
-    "start": "CI=1 tsx src/orchestrator.ts"
+    "start": "CI=1 tsx src/orchestrator.ts",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@ensnode/shared-configs": "workspace:*",
     "@ensnode/datasources": "workspace:*",
     "@ensnode/ensdb-sdk": "workspace:*",
     "@ensnode/ensnode-sdk": "workspace:*",
-    "@testcontainers/postgresql": "^11.12.0",
     "execa": "^9.6.1",
     "testcontainers": "^11.12.0",
     "tsx": "^4.7.1"

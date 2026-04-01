@@ -1,8 +1,4 @@
-import type {
-  EnsIndexerDatabaseEnvironment,
-  EnsIndexerUrlEnvironment,
-  RpcEnvironment,
-} from "@ensnode/ensnode-sdk/internal";
+import type { EnsIndexerDatabaseEnvironment, RpcEnvironment } from "@ensnode/ensnode-sdk/internal";
 
 /**
  * Represents the raw, unvalidated environment variables for the ENSIndexer application.
@@ -12,7 +8,6 @@ import type {
  * mapped/parsed into a structured configuration object like `ENSIndexerConfig`.
  */
 export type ENSIndexerEnvironment = EnsIndexerDatabaseEnvironment &
-  EnsIndexerUrlEnvironment &
   RpcEnvironment & {
     NAMESPACE?: string;
     PLUGINS?: string;

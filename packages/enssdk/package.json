@@ -1,0 +1,57 @@
+{
+  "name": "enssdk",
+  "version": "1.9.0",
+  "type": "module",
+  "description": "The foundational ENS development library",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/namehash/ensnode.git",
+    "directory": "packages/enssdk"
+  },
+  "homepage": "https://ensnode.io",
+  "keywords": [
+    "ENS",
+    "ENSNode",
+    "Omnigraph"
+  ],
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    "./core": "./src/core/index.ts",
+    "./omnigraph": "./src/omnigraph/index.ts"
+  },
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      "./core": {
+        "types": "./dist/core/index.d.ts",
+        "default": "./dist/core/index.js"
+      },
+      "./omnigraph": {
+        "types": "./dist/omnigraph/index.d.ts",
+        "default": "./dist/omnigraph/index.js"
+      }
+    }
+  },
+  "scripts": {
+    "prepublish": "tsup",
+    "lint": "biome check --write .",
+    "lint:ci": "biome ci",
+    "test": "vitest",
+    "typecheck": "tsgo --noEmit",
+    "generate:gqlschema": "gql.tada generate-output"
+  },
+  "dependencies": {
+    "gql.tada": "^1.8.10",
+    "graphql": "^16.11.0"
+  },
+  "devDependencies": {
+    "@ensnode/shared-configs": "workspace:*",
+    "tsup": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
