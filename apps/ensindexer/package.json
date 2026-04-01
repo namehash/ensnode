@@ -12,9 +12,8 @@
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/apps/ensindexer",
   "scripts": {
-    "dev": "ENSINDEXER_SCHEMA_NAME=public ponder --root ./ponder dev --disable-ui --schema public",
+    "dev": "ENSINDEXER_SCHEMA_NAME=ensindexer_temp_dev ponder --root ./ponder dev --disable-ui --schema ensindexer_temp_dev",
     "start": "ponder --root ./ponder start --schema $ENSINDEXER_SCHEMA_NAME",
-    "serve": "ponder --root ./ponder serve",
     "db": "ponder --root ./ponder db",
     "codegen": "ponder --root ./ponder codegen",
     "test": "vitest",

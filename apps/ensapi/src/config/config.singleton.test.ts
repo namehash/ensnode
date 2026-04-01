@@ -8,7 +8,7 @@ vi.mock("@/lib/logger", () => ({
 }));
 
 const VALID_ENSDB_URL = "postgresql://user:password@localhost:5432/mydb";
-const VALID_ENSINDEXER_SCHEMA_NAME = "ensapi";
+const VALID_ENSINDEXER_SCHEMA_NAME = "ensindexer_test";
 
 describe("ensdb singleton bootstrap", () => {
   beforeEach(() => {

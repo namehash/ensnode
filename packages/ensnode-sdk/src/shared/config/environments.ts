@@ -1,7 +1,7 @@
 /**
  * Environment variables for ENSDb configuration.
  */
-export interface DatabaseEnvironment {
+export interface EnsDbEnvironment {
   ENSDB_URL?: string;
   ENSINDEXER_SCHEMA_NAME?: string;
 }
