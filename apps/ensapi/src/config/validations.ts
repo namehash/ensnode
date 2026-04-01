@@ -45,13 +45,13 @@ export function invariant_ensIndexerPublicConfigVersionInfo(
     });
   }
 
-  // Invariant: `ens-normalize` package version must match between ENSApi & ENSIndexer
+  // Invariant: `@adraffy/ens-normalize` package version must match between ENSApi & ENSIndexer
   if (ensIndexerPublicConfig.versionInfo.ensNormalize !== ensApiVersionInfo.ensNormalize) {
     ctx.issues.push({
       code: "custom",
       path: ["ensIndexerPublicConfig.versionInfo.ensNormalize"],
       input: ensIndexerPublicConfig.versionInfo.ensNormalize,
-      message: `Dependency Version Mismatch: 'ens-normalize.js' version must be the same between ENSIndexer and ENSApi. Found ENSApi@${ensApiVersionInfo.ensNormalize} and ENSIndexer@${ensIndexerPublicConfig.versionInfo.ensNormalize}`,
+      message: `Dependency Version Mismatch: '@adraffy/ens-normalize' version must be the same between ENSIndexer and ENSApi. Found ENSApi@${ensApiVersionInfo.ensNormalize} and ENSIndexer@${ensIndexerPublicConfig.versionInfo.ensNormalize}`,
     });
   }
 }

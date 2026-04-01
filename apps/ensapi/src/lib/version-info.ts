@@ -19,10 +19,10 @@ function getEnsApiVersion(): string {
  * Note:
  * Since we use PNPM's `catalog:` references, reading directly from
  * the `package.json` file would give us `catalog:` values, and not resolved
- * version values. We need the later, so we implement our own version
+ * version values. We need the latter, so we implement our own version
  * resolution method.
  */
-function getPackageVersion(packageName: string) {
+function getPackageVersion(packageName: string): string {
   try {
     // Start from current file's directory
     const currentFile = fileURLToPath(import.meta.url);
@@ -63,11 +63,7 @@ function getPackageVersion(packageName: string) {
 
       searchDir = parentDir;
     }
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-
-    console.warn(`Could not find version for ${packageName}:`, errorMessage);
-
+  } catch {
     return "unknown";
   }
 }

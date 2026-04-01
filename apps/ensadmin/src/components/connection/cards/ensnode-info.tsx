@@ -345,7 +345,7 @@ function ENSNodeConfigCardContent({
               <p>
                 Version of the{" "}
                 <ExternalLinkWithIcon
-                  href={`https://www.npmjs.com/package/@adraffy/ens-normalize/v/${ensIndexerPublicConfig.versionInfo.ensNormalize}`}
+                  href={`https://www.npmjs.com/package/@adraffy/ens-normalize/v/${ensApiPublicConfig.versionInfo.ensNormalize}`}
                 >
                   @adraffy/ens-normalize
                 </ExternalLinkWithIcon>{" "}
