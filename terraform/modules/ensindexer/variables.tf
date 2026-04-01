@@ -47,7 +47,6 @@ variable "ensdb_url" {
 
 variable "ensindexer_schema_name" {
   type        = string
-  description = "The name of a specific ENSIndexer Schema in ENSDb."
 }
 
 variable "ensrainbow_url" {

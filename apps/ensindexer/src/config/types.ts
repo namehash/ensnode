@@ -39,7 +39,7 @@ export interface EnsIndexerConfig {
 
   /**
    * The name of the ENSIndexer Schema in the ENSDb instance,
-   * which the ENSIndexer instance will use while indexing and querying.
+   * where the ENSIndexer instance will store indexed data.
    *
    * The {@link ensIndexerSchemaName} must be unique per running instance of ENSIndexer (ponder will
    * enforce this with database locks). If multiple instances of ENSIndexer with the same
@@ -91,8 +91,7 @@ export interface EnsIndexerConfig {
   indexedChainIds: Set<ChainId>;
 
   /**
-   * The connection string for ENSIndexer instance to connect to
-   * the ENSDb instance.
+   * The Postgres connection string for the ENSDb instance the ENSIndexer instance will use.
    *
    * Invariants:
    * - The URL must be a valid PostgreSQL connection string

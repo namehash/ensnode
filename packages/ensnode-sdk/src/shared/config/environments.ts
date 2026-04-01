@@ -1,5 +1,5 @@
 /**
- * Environment variables for database configuration.
+ * Environment variables for ENSDb configuration.
  */
 export interface DatabaseEnvironment {
   ENSDB_URL?: string;

@@ -88,7 +88,7 @@ export interface EnsIndexerPublicConfig {
 
   /**
    * The name of the ENSIndexer Schema in the ENSDb instance,
-   * which the ENSIndexer instance will write indexed data to.
+   * where the ENSIndexer instance writes indexed data.
    *
    * Invariants:
    * - Must be a non-empty string that is a valid Postgres database schema

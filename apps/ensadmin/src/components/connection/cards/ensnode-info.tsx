@@ -420,7 +420,7 @@ function ENSNodeConfigCardContent({
             }
             additionalInfo={
               <p>
-                ENSIndexer writes indexed data to tables within this ENSIndexer Schema in ENSDb.
+                ENSIndexer is the exclusive writer of indexed data to tables within this ENSIndexer Schema in ENSDb.
               </p>
             }
           />
