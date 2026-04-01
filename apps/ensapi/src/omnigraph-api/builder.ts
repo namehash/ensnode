@@ -1,7 +1,8 @@
+import { trace } from "@opentelemetry/api";
 import SchemaBuilder, { type MaybePromise } from "@pothos/core";
 import DataloaderPlugin from "@pothos/plugin-dataloader";
 import RelayPlugin from "@pothos/plugin-relay";
-import TracingPlugin from "@pothos/plugin-tracing";
+import TracingPlugin, { isRootField } from "@pothos/plugin-tracing";
 import { createOpenTelemetryWrapper } from "@pothos/tracing-opentelemetry";
 import type {
   ChainId,
@@ -21,14 +22,9 @@ import type {
 import type { Address, Hex } from "viem";
 
 import type { context } from "@/omnigraph-api/context";
-import { graphqlTracer } from "@/lib/instrumentation/tracer";
 
-const graphqlTracingEnabled =
-  process.env.ENSAPI_GRAPHQL_TRACING === "1" || process.env.ENSAPI_GRAPHQL_TRACING === "true";
-
-const createSpan = createOpenTelemetryWrapper(graphqlTracer, {
-  includeSource: false,
-});
+const tracer = trace.getTracer("graphql");
+const createSpan = createOpenTelemetryWrapper(tracer, { includeArgs: true, includeSource: false });
 
 export const builder = new SchemaBuilder<{
   Context: ReturnType<typeof context>;
@@ -56,17 +52,11 @@ export const builder = new SchemaBuilder<{
     totalCount: MaybePromise<number>;
   };
 }>({
-  plugins: graphqlTracingEnabled
-    ? ([TracingPlugin, DataloaderPlugin, RelayPlugin] as const)
-    : ([DataloaderPlugin, RelayPlugin] as const),
-  ...(graphqlTracingEnabled
-    ? {
-        tracing: {
-          default: () => true,
-          wrap: (resolver, options) => createSpan(resolver, options),
-        },
-      }
-    : {}),
+  plugins: [TracingPlugin, DataloaderPlugin, RelayPlugin],
+  tracing: {
+    default: (config) => isRootField(config),
+    wrap: (resolver, options) => createSpan(resolver, options),
+  },
   relay: {
     // disable the Query.node & Query.nodes methods
     nodeQueryOptions: false,

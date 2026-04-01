@@ -2,51 +2,13 @@
 // import { maxDepthPlugin } from "@escape.tech/graphql-armor-max-depth";
 // import { maxTokensPlugin } from "@escape.tech/graphql-armor-max-tokens";
 
-import { AttributeNames, SpanNames } from "@pothos/tracing-opentelemetry";
-import { print } from "graphql";
-import { createYoga, type Plugin } from "graphql-yoga";
+import { createYoga } from "graphql-yoga";
 
-import { graphqlTracer } from "@/lib/instrumentation/tracer";
 import { makeLogger } from "@/lib/logger";
 import { context } from "@/omnigraph-api/context";
 import { schema } from "@/omnigraph-api/schema";
 
-const logger = makeLogger("ensnode-graphql");
-
-const graphqlTracingEnabled =
-  process.env.ENSAPI_GRAPHQL_TRACING === "1" || process.env.ENSAPI_GRAPHQL_TRACING === "true";
-
-const graphqlTracingIncludeSource =
-  process.env.ENSAPI_GRAPHQL_TRACING_SOURCE === "1" ||
-  process.env.ENSAPI_GRAPHQL_TRACING_SOURCE === "true";
-
-const executionTracingPlugin: Plugin = {
-  onExecute: ({ setExecuteFn, executeFn }) => {
-    setExecuteFn((options) =>
-      graphqlTracer.startActiveSpan(
-        SpanNames.EXECUTE,
-        {
-          attributes: {
-            [AttributeNames.OPERATION_NAME]: options.operationName ?? undefined,
-            ...(graphqlTracingIncludeSource
-              ? { [AttributeNames.SOURCE]: print(options.document) }
-              : {}),
-          },
-        },
-        async (span) => {
-          try {
-            return await executeFn(options);
-          } catch (error) {
-            span.recordException(error as Error);
-            throw error;
-          } finally {
-            span.end();
-          }
-        },
-      ),
-    );
-  },
-};
+const logger = makeLogger("omnigraph");
 
 export const yoga = createYoga({
   graphqlEndpoint: "*",
@@ -79,7 +41,6 @@ export const yoga = createYoga({
   logging: logger,
 
   plugins: [
-    ...(graphqlTracingEnabled ? [executionTracingPlugin] : []),
     // TODO: plugins
     // maxTokensPlugin({ n: maxOperationTokens }),
     // maxDepthPlugin({ n: maxOperationDepth, ignoreIntrospection: false }),

@@ -1,9 +1,9 @@
+import { trace } from "@opentelemetry/api";
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, count } from "drizzle-orm";
 
 import { ensDb } from "@/lib/ensdb/singleton";
-import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
-import { graphqlTracer } from "@/lib/instrumentation/tracer";
+import { withSpanAsync } from "@/lib/instrumentation/auto-span";
 import { makeLogger } from "@/lib/logger";
 import type { context as createContext } from "@/omnigraph-api/context";
 import type {
@@ -46,6 +46,7 @@ interface FindDomainsOrderArg {
  */
 type DomainWithOrderValue = Domain & { __orderValue: DomainOrderValue };
 
+const tracer = trace.getTracer("find-domains");
 const logger = makeLogger("find-domains-resolver");
 
 /**
@@ -99,15 +100,10 @@ export function resolveFindDomains(
 
   return lazyConnection({
     totalCount: () =>
-      withActiveSpanAsync(
-        graphqlTracer,
-        "find-domains.totalCount",
-        { orderBy, orderDir },
-        async (_span) => {
-          const rows = await ensDb.with(domains).select({ count: count() }).from(domains);
-          return rows[0].count;
-        },
-      ),
+      withSpanAsync(tracer, "totalCount", {}, async () => {
+        const rows = await ensDb.with(domains).select({ count: count() }).from(domains);
+        return rows[0].count;
+      }),
 
     connection: () =>
       resolveCursorConnection(
@@ -153,19 +149,19 @@ export function resolveFindDomains(
           logger.debug({ sql: query.toSQL() });
 
           // execute paginated query
-          const results = await withActiveSpanAsync(
-            graphqlTracer,
-            "find-domains.connection",
+          const results = await withSpanAsync(
+            tracer,
+            "connection",
             { orderBy, orderDir, limit },
-            async (_span) => query.execute(),
+            () => query.execute(),
           );
 
           // load Domain entities via dataloader
-          const loadedDomains = await withActiveSpanAsync(
-            graphqlTracer,
-            "find-domains.dataloader-load",
+          const loadedDomains = await withSpanAsync(
+            tracer,
+            "dataloader",
             { count: results.length },
-            async (_span) =>
+            () =>
               rejectAnyErrors(
                 DomainInterfaceRef.getDataloader(context).loadMany(
                   results.map((result) => result.id),
