@@ -29,7 +29,7 @@ describe("ensdb singleton bootstrap", () => {
     expect(ensDbClient.ensIndexerSchemaName).toBe(VALID_SCHEMA_NAME);
     expect(ensDb).toBeDefined();
     expect(ensIndexerSchema).toBeDefined();
-  }, 15_000);
+  }, 10_000);
 
   it("exits when DATABASE_URL is missing", async () => {
     const mockExit = vi.spyOn(process, "exit").mockImplementation((() => {
