@@ -46,7 +46,7 @@ variable "ensdb_url" {
 }
 
 variable "ensindexer_schema_name" {
-  type        = string
+  type = string
 }
 
 variable "ensrainbow_url" {

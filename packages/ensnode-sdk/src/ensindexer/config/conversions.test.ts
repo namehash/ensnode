@@ -25,7 +25,6 @@ describe("ENSIndexer: Config", () => {
         namespace: "mainnet",
         plugins: [PluginName.Subgraph],
         versionInfo: {
-          nodejs: "v22.10.12",
           ponder: "0.11.25",
           ensDb: "0.32.0",
           ensIndexer: "0.32.0",
@@ -68,7 +67,6 @@ describe("ENSIndexer: Config", () => {
       namespace: "mainnet",
       plugins: [PluginName.Subgraph],
       versionInfo: {
-        nodejs: "v22.10.12",
         ponder: "0.11.25",
         ensDb: "0.32.0",
         ensIndexer: "0.32.0",

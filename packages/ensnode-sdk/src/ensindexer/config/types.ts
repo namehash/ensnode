@@ -23,13 +23,6 @@ export enum PluginName {
  */
 export interface EnsIndexerVersionInfo {
   /**
-   * Node.js runtime version
-   *
-   * @see https://nodejs.org/en/about/previous-releases
-   **/
-  nodejs: string;
-
-  /**
    * Ponder framework version
    *
    * @see https://www.npmjs.com/package/ponder
