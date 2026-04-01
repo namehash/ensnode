@@ -19,6 +19,7 @@ import type {
   ResolverId,
   ResolverRecordsId,
 } from "enssdk";
+import { getNamedType } from "graphql";
 import superjson from "superjson";
 import type { Address, Hex } from "viem";
 
@@ -37,15 +38,15 @@ const createSpan = createOpenTelemetryWrapper(tracer, {
     // edge field names are too loud by default and not helpful
     if (info.fieldName === "edges") return span.updateName("edges");
 
-    // turn a node field name into "Typename([:id])"
+    // turn a node field name into "Typename([:id])", ex: 'ENSv2Domain([:id])'
     if (info.fieldName === "node") {
-      const typename = (info.returnType as any).name;
+      const typename = getNamedType(info.returnType);
       const id = (parent as any).node.id;
 
       return span.updateName(`${typename}(${id})`);
     }
 
-    // otherwise name the span as "Typename.fieldName"
+    // otherwise name the span as "Typename.fieldName", ex: 'Query.domain'
     return span.updateName(`${info.parentType.name}.${info.fieldName}`);
   },
 });
