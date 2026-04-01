@@ -41,7 +41,7 @@ const createSpan = createOpenTelemetryWrapper(tracer, {
     // turn an *Edge.node span name into "Typename([:id])", ex: 'ENSv2Domain([:id])'
     if (info.parentType.name.endsWith("Edge") && info.fieldName === "node") {
       const typename = getNamedType(info.returnType);
-      const id = (parent as any).node?.id ?? "Unknown";
+      const id = (parent as any).node?.id ?? "?";
 
       return span.updateName(`${typename}(${id})`);
     }
