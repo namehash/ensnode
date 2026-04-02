@@ -29,7 +29,7 @@ export default function HeaderMobileNavigation() {
     },
     {
       text: "Telegram",
-      href: "http://t.me/ensnode",
+      href: "https://t.me/ensnode",
       target: "_blank",
     },
   ];
