@@ -21,6 +21,7 @@ export default function Header() {
         </div>
         <div className="flex items-center justify-center gap-1">
           <a
+            aria-label="docs-link"
             href="https://ensnode.io/ensrainbow"
             target="_blank"
             rel="noopener noreferrer"
@@ -33,6 +34,7 @@ export default function Header() {
           </a>
 
           <a
+            aria-label="github-link"
             href="https://github.com/namehash/ensnode"
             target="_blank"
             rel="noopener noreferrer"
@@ -42,7 +44,8 @@ export default function Header() {
           </a>
 
           <a
-            href="http://t.me/ensnode"
+            aria-label="telegram-link"
+            href="https://t.me/ensnode"
             target="_blank"
             rel="noopener noreferrer"
             className={namekitButtonVariants({ variant: "ghost", className: "max-sm:p-2" })}

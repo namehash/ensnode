@@ -31,6 +31,7 @@ export default function Hero() {
             <a
               href="https://ensnode.io/"
               target="_blank"
+              rel="noopener noreferrer"
               className={namekitLinkVariants({
                 variant: "underline",
                 size: "medium",
@@ -42,7 +43,7 @@ export default function Hero() {
             sidecar service.
           </p>
 
-          <HeroInstallCommand client:load />
+          <HeroInstallCommand />
 
           <div className="block relative z-10 pt-3 lg:hidden">
             <a

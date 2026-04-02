@@ -22,7 +22,7 @@ export default function JoinTelegram() {
           Get updates, technical support, and connect with our team building the multichain future.
         </Balancer>
         <a
-          href="http://t.me/ensnode"
+          href="https://t.me/ensnode"
           target="_blank"
           rel="noopener noreferrer"
           className={namekitButtonVariants({ variant: "primary", size: "medium" })}

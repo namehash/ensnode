@@ -93,6 +93,7 @@ export default function HeaderMobileNavigation() {
                   </div>
                   <div className="h-fit w-full flex flex-row flex-nowrap justify-center items-center gap-1">
                     <a
+                      aria-label="x-link"
                       href="https://x.com/NamehashLabs"
                       target="_blank"
                       rel="noopener noreferrer"
@@ -101,6 +102,7 @@ export default function HeaderMobileNavigation() {
                       <TwitterIcon />
                     </a>
                     <a
+                      aria-label="github-link"
                       href="https://github.com/namehash/ensnode"
                       target="_blank"
                       rel="noopener noreferrer"
@@ -109,7 +111,8 @@ export default function HeaderMobileNavigation() {
                       <GithubIcon />
                     </a>
                     <a
-                      href="http://t.me/ensnode"
+                      aria-label="telegram-link"
+                      href="https://t.me/ensnode"
                       target="_blank"
                       rel="noopener noreferrer"
                       className={namekitButtonVariants({ className: "p-2 text-white" })}

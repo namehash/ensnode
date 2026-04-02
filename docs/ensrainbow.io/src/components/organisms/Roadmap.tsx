@@ -84,6 +84,7 @@ export default function RoadMap() {
           <a
             href=""
             target="_blank"
+            rel="noopener noreferrer"
             className={namekitLinkVariants({
               variant: "underline",
               size: "small",
@@ -104,6 +105,7 @@ export default function RoadMap() {
           <a
             href=""
             target="_blank"
+            rel="noopener noreferrer"
             className={namekitLinkVariants({
               variant: "underline",
               size: "small",
@@ -124,6 +126,7 @@ export default function RoadMap() {
           <a
             href=""
             target="_blank"
+            rel="noopener noreferrer"
             className={namekitLinkVariants({
               variant: "underline",
               size: "small",

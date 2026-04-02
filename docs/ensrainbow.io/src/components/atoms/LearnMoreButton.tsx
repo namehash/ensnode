@@ -1,7 +1,7 @@
 import { namekitButtonVariants } from "@namehash/namehash-ui/namekit";
 
 import { ExternalLinkIcon } from "./icons/ExternalLinkIcon.tsx";
-import { cn } from "../../../../../packages/namehash-ui/src/utils/cn.ts";
+import cc from "classcat";
 
 export type LearnMoreButtonProps = {
   text: string;
@@ -24,7 +24,7 @@ export const LearnMoreButton = ({
       className={namekitButtonVariants({
         variant: "secondary",
         size: "medium",
-        className: cn("max-w-full overflow-x-hidden", styles),
+        className: cc("max-w-full overflow-x-hidden", styles),
       })}
     >
       {text}
