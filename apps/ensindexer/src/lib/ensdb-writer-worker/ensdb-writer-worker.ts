@@ -14,7 +14,7 @@ import {
 import type { LocalPonderClient } from "@ensnode/ponder-sdk";
 
 import type { IndexingStatusBuilder } from "@/lib/indexing-status-builder/indexing-status-builder";
-import { formatLogParam, logger } from "@/lib/logger";
+import { buildLogError, formatLogParam, logger } from "@/lib/logger";
 import type { PublicConfigBuilder } from "@/lib/public-config-builder/public-config-builder";
 
 /**
@@ -210,7 +210,7 @@ export class EnsDbWriterWorker {
 
       logger.error({
         msg: "Failed to fetch ENSIndexer public config",
-        error: error instanceof Error ? error : undefined,
+        error: buildLogError(error),
         module: formatLogParam("EnsDbWriterWorker"),
       });
 
@@ -234,7 +234,7 @@ export class EnsDbWriterWorker {
 
         logger.error({
           msg: "In-memory config incompatible with stored config",
-          error: error instanceof Error ? error : undefined,
+          error: buildLogError(error),
           module: formatLogParam("EnsDbWriterWorker"),
         });
 
@@ -271,7 +271,7 @@ export class EnsDbWriterWorker {
     } catch (error) {
       logger.error({
         msg: "Failed to upsert indexing status snapshot",
-        error: error instanceof Error ? error : undefined,
+        error: buildLogError(error),
         module: formatLogParam("EnsDbWriterWorker"),
       });
       // Do not throw the error, as failure to retrieve the Indexing Status

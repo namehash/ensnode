@@ -3,9 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { LabelHash } from "@ensnode/ensnode-sdk";
 
 import { setupConfigMock } from "@/lib/__test__/mockConfig";
-import { setupLoggerMock } from "@/lib/__test__/mockLogger";
+import "@/lib/__test__/mockLogger";
 
-setupLoggerMock();
 setupConfigMock(); // setup config mock before importing dependent modules
 
 // Use real p-retry logic but with 0 timeouts so tests don't incur actual backoff delays.

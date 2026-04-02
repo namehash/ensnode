@@ -3,9 +3,7 @@ import { bytesToHex, decodeEventLog, stringToHex, zeroHash } from "viem";
 import { packetToBytes } from "viem/ens";
 import { describe, expect, it } from "vitest";
 
-import { setupLoggerMock } from "@/lib/__test__/mockLogger";
-
-setupLoggerMock();
+import "@/lib/__test__/mockLogger";
 
 import { getDatasource } from "@ensnode/datasources";
 import type { DNSEncodedLiteralName } from "@ensnode/ensnode-sdk";

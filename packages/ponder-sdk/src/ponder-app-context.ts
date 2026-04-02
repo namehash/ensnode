@@ -50,18 +50,18 @@ export interface PonderAppLogger {
    * ```ts
    * logger.error({
    *   msg: "Incorrect omnichain status",
-   *   error: new Error("The omnichain status be either 'omnichain-backfill' or 'omnichain-following'"),
+   *   error: new Error("The omnichain status must be either 'omnichain-backfill' or 'omnichain-following'"),
    *    expected: "omnichain-backfill or omnichain-following",
    *    actual: "omnichain-unstarted"
    * });
    *
    * logger.error({
    *   msg: "Incorrect omnichain status",
-   *   error: new Error("The omnichain status be either 'omnichain-backfill' or 'omnichain-following'"),
+   *   error: new Error("The omnichain status must be either 'omnichain-backfill' or 'omnichain-following'"),
    * });
    *
    * logger.error({
-   *   msg: "The omnichain status be either 'omnichain-backfill' or 'omnichain-following'"
+   *   msg: "The omnichain status must be either 'omnichain-backfill' or 'omnichain-following'"
    * });
    * ```
    */

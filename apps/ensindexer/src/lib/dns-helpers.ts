@@ -168,7 +168,11 @@ export function parseDnsTxtRecordArgs({
     });
 
   if (txtDatas.length === 0) {
-    logger.warn({ msg: `parseDNSRecordArgs: No TXT answers found in DNS record for key '${key}'` });
+    logger.warn({
+      msg: "No TXT answers found in DNS record",
+      fn: "parseDnsTxtRecordArgs",
+      textRecordKey: formatLogParam(key),
+    });
 
     // no text answers? interpret as deletion
     return { key, value: null };
@@ -176,8 +180,10 @@ export function parseDnsTxtRecordArgs({
 
   if (txtDatas.length > 1) {
     logger.warn({
-      msg: `parseDNSRecordArgs: received multiple TXT answers, this is unexpected. Only using the first one.`,
-      answers: `[${txtDatas.join(",")}]`,
+      msg: `Received multiple TXT answers, this is unexpected. Only using the first one.`,
+      fn: "parseDnsTxtRecordArgs",
+      textRecordKey: formatLogParam(key),
+      answers: formatLogParam(txtDatas),
     });
   }
 
