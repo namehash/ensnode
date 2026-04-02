@@ -1,5 +1,6 @@
 import config from "@/config";
 
+import { secondsToMilliseconds } from "date-fns";
 import pRetry from "p-retry";
 
 import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
@@ -35,8 +36,9 @@ let waitForEnsRainbowToBeReadyPromise: Promise<void> | undefined;
  * Blocks execution until the ENSRainbow instance is ready to serve requests.
  *
  * Note: It may take 30+ minutes for the ENSRainbow instance to become ready in
- * a cold start scenario. We use retries for the ENSRainbow health check with
- * an exponential backoff strategy to handle this.
+ * a cold start scenario. We use retries with a fixed interval between attempts
+ * for the ENSRainbow health check to allow for ample time for ENSRainbow to
+ * become ready.
  *
  * @throws When ENSRainbow fails to become ready after all configured retry attempts.
  *         This error will trigger termination of the ENSIndexer process.
@@ -49,11 +51,12 @@ export function waitForEnsRainbowToBeReady(): Promise<void> {
   console.log(`Waiting for ENSRainbow instance to be ready at '${ensRainbowUrl}'...`);
 
   waitForEnsRainbowToBeReadyPromise = pRetry(async () => ensRainbowClient.health(), {
-    retries: 12, // This allows for a total of over 1 hour of retries with the exponential backoff strategy.
-    // 1 + 2 + 4 + ... + 2048 = 2^12 - 1 = 4,095s ≈ 1h 8m
+    retries: 60, // This allows for a total of over 1 hour of retries with 1 minute between attempts.
+    minTimeout: secondsToMilliseconds(60),
+    maxTimeout: secondsToMilliseconds(60),
     onFailedAttempt: ({ error, attemptNumber, retriesLeft }) => {
       console.warn(
-        `Attempt ${attemptNumber} failed for the ENSRainbow health check at '${ensRainbowUrl}' (${error.message}). ${retriesLeft} retries left.`,
+        `Attempt ${attemptNumber} failed for the ENSRainbow health check at '${ensRainbowUrl}' (${error.message}). ${retriesLeft} retries left. This might be due to ENSRainbow having a cold start, which can take 30+ minutes.`,
       );
     },
   })

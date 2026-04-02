@@ -129,40 +129,35 @@ function buildEventTypeId(eventName: EventNames): EventTypeId {
   }
 }
 
-let preparedIndexingSetup = false;
-
 /**
  * Prepare for executing the "setup" event handlers.
  *
- * This function is idempotent and will only execute its logic once, even if
- * called multiple times. This is to ensure that we affect the "hot path" of
- * indexing as little as possible, since this function is called for
- * every "setup" event.
+ * During Ponder startup, the "setup" event handlers are executed:
+ * - After Ponder completed database migrations for ENSIndexer Schema in ENSDb.
+ * - Before Ponder starts processing any onchain events for indexed chains.
+ *
+ * This function is useful to make sure ENSDb is ready for writes, for example,
+ * by ensuring all required Postgres extensions are installed, etc.
  */
-function prepareIndexingSetup(): void {
-  if (preparedIndexingSetup) {
-    return;
-  }
-
-  preparedIndexingSetup = true;
-
+async function initializeIndexingSetup(): Promise<void> {
   /**
-   * Setup event handlers should not have any *blocking* preconditions. This is because
+   * Setup event handlers should not have any *long-running* preconditions. This is because
    * Ponder populates the indexing metrics for all indexed chains only after all setup handlers have run.
    * ENSIndexer relies on these indexing metrics being immediately available on startup to build and
    * store the current Indexing Status in ENSDb.
    */
 }
 
-let preparedIndexingActivation = false;
-
 /**
  * Prepare for executing the "onchain" event handlers.
  *
- * This function is idempotent and will only execute its logic once, even if
- * called multiple times. This is to ensure that we affect the "hot path" of
- * indexing as little as possible, since this function is called for every
- * "onchain" event.
+ * During Ponder startup, the "onchain" event handlers are executed
+ * after all "setup" event handlers have completed.
+ *
+ * This function is useful to make sure any long-running preconditions for
+ * onchain event handlers are met, for example, waiting for
+ * the ENSRainbow instance to be ready before processing any onchain events
+ * that require data from ENSRainbow.
  *
  * @example A single blocking precondition
  * ```ts
@@ -177,15 +172,12 @@ let preparedIndexingActivation = false;
  * ]);
  * ```
  */
-async function prepareIndexingActivation() {
-  if (preparedIndexingActivation) {
-    return;
-  }
-
-  preparedIndexingActivation = true;
-
+async function initializeIndexingActivation(): Promise<void> {
   await waitForEnsRainbowToBeReady();
 }
+
+let indexingSetupPromise: Promise<void> | null = null;
+let indexingActivationPromise: Promise<void> | null = null;
 
 /**
  * Execute any necessary preconditions before running an event handler
@@ -193,18 +185,23 @@ async function prepareIndexingActivation() {
  *
  * Some event handlers may have preconditions that need to be met before
  * they can run.
+ *
+ * This function is idempotent and will only execute its logic once, even if
+ * called multiple times. This is to ensure that we affect the "hot path" of
+ * indexing as little as possible, since this function is called for every
+ * "onchain" event.
  */
-async function eventHandlerPreconditions<EventName extends EventNames>(
-  eventName: EventName,
-): Promise<void> {
-  const eventType = buildEventTypeId(eventName);
-
-  switch (eventType) {
-    case EventTypeIds.Setup:
-      return prepareIndexingSetup();
-    case EventTypeIds.Onchain: {
-      return prepareIndexingActivation();
-    }
+async function eventHandlerPreconditions(eventType: EventTypeId): Promise<void> {
+  if (eventType === EventTypeIds.Setup && indexingSetupPromise === null) {
+    // Initialize the indexing setup just once.
+    indexingSetupPromise = initializeIndexingSetup();
+    return await indexingSetupPromise;
+  } else if (eventType === EventTypeIds.Onchain && indexingActivationPromise === null) {
+    // Initialize the indexing activation just once in order to
+    // optimize the "hot path" of indexing onchain events, since these are
+    // much more frequent than setup events.
+    indexingActivationPromise = initializeIndexingActivation();
+    return await indexingActivationPromise;
   }
 }
 
@@ -223,12 +220,13 @@ export function addOnchainEventListener<EventName extends EventNames>(
   eventName: EventName,
   eventHandler: (args: IndexingEngineEventHandlerArgs<EventName>) => Promise<void> | void,
 ) {
-  return ponder.on(eventName, async ({ context, event }) =>
-    eventHandlerPreconditions(eventName).then(() =>
-      eventHandler({
-        context: buildIndexingEngineContext(context),
-        event,
-      }),
-    ),
-  );
+  const eventType = buildEventTypeId(eventName);
+
+  return ponder.on(eventName, async ({ context, event }) => {
+    await eventHandlerPreconditions(eventType);
+    await eventHandler({
+      context: buildIndexingEngineContext(context),
+      event,
+    });
+  });
 }
