@@ -192,16 +192,26 @@ let indexingActivationPromise: Promise<void> | null = null;
  * "onchain" event.
  */
 async function eventHandlerPreconditions(eventType: EventTypeId): Promise<void> {
-  if (eventType === EventTypeIds.Setup && indexingSetupPromise === null) {
-    // Initialize the indexing setup just once.
-    indexingSetupPromise = initializeIndexingSetup();
-    return await indexingSetupPromise;
-  } else if (eventType === EventTypeIds.Onchain && indexingActivationPromise === null) {
-    // Initialize the indexing activation just once in order to
-    // optimize the "hot path" of indexing onchain events, since these are
-    // much more frequent than setup events.
-    indexingActivationPromise = initializeIndexingActivation();
-    return await indexingActivationPromise;
+  switch (eventType) {
+    case EventTypeIds.Setup: {
+      if (indexingSetupPromise === null) {
+        // Initialize the indexing setup just once.
+        indexingSetupPromise = initializeIndexingSetup();
+      }
+
+      return await indexingSetupPromise;
+    }
+
+    case EventTypeIds.Onchain: {
+      if (indexingActivationPromise === null) {
+        // Initialize the indexing activation just once in order to
+        // optimize the "hot path" of indexing onchain events, since these are
+        // much more frequent than setup events.
+        indexingActivationPromise = initializeIndexingActivation();
+      }
+
+      return await indexingActivationPromise;
+    }
   }
 }
 
