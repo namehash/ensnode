@@ -91,12 +91,9 @@ cd apps/ensindexer && pnpm dev
 with environment variables:
 
 ```env
-ENSINDEXER_SCHEMA_NAME=ensindexer_0
 NAMESPACE=ens-test-env
 PLUGINS=ensv2,protocol-acceleration
 ```
-
-`ENSINDEXER_SCHEMA_NAME` can be any valid Postgres schema name — just make sure ENSApi uses the same value.
 
 #### 5. Start ENSApi
 
@@ -108,14 +105,14 @@ with environment variables:
 
 ```env
 ENSDB_URL=postgresql://ensnode:ensnode@localhost:5432/ensnode
-ENSINDEXER_SCHEMA_NAME=ensindexer_0
+ENSINDEXER_SCHEMA_NAME=ensindexer_temp_dev
 ```
 
-`ENSINDEXER_SCHEMA_NAME` must match the `ENSINDEXER_SCHEMA_NAME` used by ENSIndexer above.
+`ENSINDEXER_SCHEMA_NAME` must match the `ENSINDEXER_SCHEMA_NAME` used by ENSIndexer above, and `ensindexer_temp_dev` is the schema name used when running ENSIndexer with `pnpm dev`.
 
 #### 6. Run Integration Tests
 
-Finally, you can run vitest on the integration tests using:
+Finally, you can run vitest with the integration test suite using:
 
 ```sh
 pnpm test:integration
