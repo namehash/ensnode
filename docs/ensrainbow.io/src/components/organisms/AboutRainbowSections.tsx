@@ -48,7 +48,7 @@ const rainbowSections: AboutRainbowProps[] = [
           className={namekitLinkVariants({
             variant: "underline",
             size: "large",
-            className: "text-black!",
+            className: "!text-black",
           })}
         >
           Example 1
@@ -61,7 +61,7 @@ const rainbowSections: AboutRainbowProps[] = [
           className={namekitLinkVariants({
             variant: "underline",
             size: "large",
-            className: "text-black!",
+            className: "!text-black",
           })}
         >
           Example 2
@@ -96,7 +96,7 @@ const rainbowSections: AboutRainbowProps[] = [
           className={namekitLinkVariants({
             variant: "underline",
             size: "large",
-            className: "text-black!",
+            className: "!text-black",
           })}
         >
           ENSNode

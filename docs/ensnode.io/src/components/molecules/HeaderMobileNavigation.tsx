@@ -82,7 +82,7 @@ export default function HeaderMobileNavigation() {
                           <a
                             target={link.target}
                             href={link.href}
-                            rel="noopener noreferrer"
+                            rel={link.target === "_blank" ? "noopener noreferrer" : undefined}
                             className={namekitButtonVariants({ className: "w-full text-white" })}
                           >
                             {link.text}

@@ -35,7 +35,7 @@ export default function Hero() {
               className={namekitLinkVariants({
                 variant: "underline",
                 size: "medium",
-                className: "text-black!",
+                className: "!text-black",
               })}
             >
               ENSNode

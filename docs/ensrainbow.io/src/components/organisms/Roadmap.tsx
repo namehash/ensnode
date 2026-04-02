@@ -88,7 +88,7 @@ export default function RoadMap() {
             className={namekitLinkVariants({
               variant: "underline",
               size: "small",
-              className: "text-black!",
+              className: "!text-black",
             })}
           >
             hyperlink
@@ -109,7 +109,7 @@ export default function RoadMap() {
             className={namekitLinkVariants({
               variant: "underline",
               size: "small",
-              className: "text-black!",
+              className: "!text-black",
             })}
           >
             hyperlink
@@ -130,7 +130,7 @@ export default function RoadMap() {
             className={namekitLinkVariants({
               variant: "underline",
               size: "small",
-              className: "text-black!",
+              className: "!text-black",
             })}
           >
             hyperlink
