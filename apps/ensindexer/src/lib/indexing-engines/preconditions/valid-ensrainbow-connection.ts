@@ -133,7 +133,7 @@ export async function ensureValidEnsRainbowConnection(): Promise<void> {
    */
   if (!storedConfig) {
     console.log(
-      'No stored ENSRainbow Public Config found in ENSDb. Validating the omnichain indexing status is "Unstarted"...',
+      "No stored ENSRainbow Public Config found in ENSDb. Validating the omnichain indexing status is 'Unstarted'...",
     );
     /**
      * Fetch the indexing status snapshot with retries, to handle potential

@@ -109,9 +109,10 @@ const EventTypeIds = {
   Setup: "Setup",
 
   /**
-   * Onchain event
+   * Onchain log event
    *
-   * Driven by an onchain event emitted by an indexed contract.
+   * This is Ponder's `LogEvent`, driven by an onchain log event emitted by
+   * an indexed contract.
    */
   Onchain: "Onchain",
 } as const;
