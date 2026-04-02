@@ -335,7 +335,7 @@ async function main() {
 
   // Phase 6: Run integration tests
   log("Running integration tests...");
-  execaSync("pnpm", ["test:integration"], {
+  execaSync("pnpm", ["test:integration", "--", "--bail", "1"], {
     cwd: MONOREPO_ROOT,
     stdio: "inherit",
     env: {

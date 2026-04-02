@@ -1,5 +1,4 @@
-import type { Node } from "../ens";
-import type { AccountId } from "../shared/types";
+import type { AccountId, Node } from "enssdk";
 
 /**
  * Subregistry

@@ -1,4 +1,5 @@
-import type { ChainIdString } from "../../shared/serialized-types";
+import type { ChainIdString } from "enssdk";
+
 import type {
   ChainIndexingStatusSnapshot,
   ChainIndexingStatusSnapshotCompleted,

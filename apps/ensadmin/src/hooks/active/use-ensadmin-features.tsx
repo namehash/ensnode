@@ -2,7 +2,7 @@ import { useMemo } from "react";
 
 import { useENSNodeConfig } from "@ensnode/ensnode-react";
 import {
-  hasGraphqlApiConfigSupport,
+  hasOmnigraphApiConfigSupport,
   hasRegistrarActionsConfigSupport,
   hasRegistrarActionsIndexingStatusSupport,
   hasSubgraphApiConfigSupport,
@@ -33,9 +33,9 @@ export interface ENSAdminFeatures {
   subgraph: FeatureStatus;
 
   /**
-   * Whether ENSAdmin's ENSNode GraphQL API tooling is supported by the connected ENSNode.
+   * Whether ENSAdmin's ENSNode Omnigraph API tooling is supported by the connected ENSNode.
    */
-  graphql: FeatureStatus;
+  omnigraph: FeatureStatus;
 }
 
 const prerequisiteResultToFeatureStatus = (result: PrerequisiteResult): FeatureStatus => {
@@ -96,13 +96,13 @@ export function useENSAdminFeatures(): ENSAdminFeatures {
     return prerequisiteResultToFeatureStatus(hasSubgraphApiConfigSupport(ensIndexerPublicConfig));
   }, [configQuery]);
 
-  const graphql: FeatureStatus = useMemo(() => {
+  const omnigraph: FeatureStatus = useMemo(() => {
     if (configQuery.status === "error") return CONFIG_ERROR_STATUS;
     if (configQuery.status === "pending") return CONNECTING_STATUS;
 
     const { ensIndexerPublicConfig } = configQuery.data;
-    return prerequisiteResultToFeatureStatus(hasGraphqlApiConfigSupport(ensIndexerPublicConfig));
+    return prerequisiteResultToFeatureStatus(hasOmnigraphApiConfigSupport(ensIndexerPublicConfig));
   }, [configQuery]);
 
-  return { registrarActions, subgraph, graphql };
+  return { registrarActions, subgraph, omnigraph };
 }

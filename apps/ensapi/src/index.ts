@@ -7,9 +7,9 @@ import { getReferralLeaderboardEditionsCaches } from "@/cache/referral-leaderboa
 import { referralProgramEditionConfigSetCache } from "@/cache/referral-program-edition-set.cache";
 import { referrerLeaderboardCache } from "@/cache/referrer-leaderboard.cache";
 import { redactEnsApiConfig } from "@/config/redact";
-import { writeGraphQLSchema } from "@/graphql-api/lib/write-graphql-schema";
 import { sdk } from "@/lib/instrumentation";
 import logger from "@/lib/logger";
+import { writeGraphQLSchema } from "@/omnigraph-api/lib/write-graphql-schema";
 
 import app from "./app";
 

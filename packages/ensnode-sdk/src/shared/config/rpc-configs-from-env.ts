@@ -1,3 +1,5 @@
+import type { ChainIdString } from "enssdk";
+
 import {
   type Datasource,
   type ENSNamespaceId,
@@ -6,7 +8,6 @@ import {
 } from "@ensnode/datasources";
 
 import { serializeChainId } from "../serialize";
-import type { ChainIdString } from "../serialized-types";
 import type { Unvalidated } from "../types";
 import {
   alchemySupportsChain,

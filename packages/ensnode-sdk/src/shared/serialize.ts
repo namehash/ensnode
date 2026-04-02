@@ -1,4 +1,14 @@
 import { AccountId as CaipAccountId, AssetId as CaipAssetId } from "caip";
+import type {
+  AccountId,
+  AccountIdString,
+  AssetId,
+  AssetIdString,
+  ChainId,
+  ChainIdString,
+  DatetimeISO8601,
+  UrlString,
+} from "enssdk";
 
 import { uint256ToHex32 } from "../ens";
 import type {
@@ -11,14 +21,7 @@ import type {
   SerializedPriceEth,
   SerializedPriceUsdc,
 } from "./currencies";
-import type {
-  AccountIdString,
-  AssetIdString,
-  ChainIdString,
-  DatetimeISO8601,
-  UrlString,
-} from "./serialized-types";
-import type { AccountId, AssetId, ChainId, Datetime } from "./types";
+import type { Datetime } from "./types";
 
 /**
  * Serializes a {@link ChainId} value into its string representation.
