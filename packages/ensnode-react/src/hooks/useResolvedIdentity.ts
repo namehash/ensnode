@@ -57,6 +57,8 @@ export function useResolvedIdentity(parameters: UseResolvedIdentityParameters) {
     ),
     accelerate,
     query: {
+      staleTime: 5 * 60 * 1000,
+      refetchInterval: 5 * 60 * 1000, // 5 minutes - identities change rarely
       ..._query,
       enabled: (_query.enabled ?? true) && namespace !== undefined,
     },
