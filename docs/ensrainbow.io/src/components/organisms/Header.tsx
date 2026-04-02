@@ -21,7 +21,7 @@ export default function Header() {
         </div>
         <div className="flex items-center justify-center gap-1">
           <a
-            aria-label="docs-link"
+            aria-label="Docs"
             href="https://ensnode.io/ensrainbow"
             target="_blank"
             rel="noopener noreferrer"
@@ -34,7 +34,7 @@ export default function Header() {
           </a>
 
           <a
-            aria-label="github-link"
+            aria-label="GitHub"
             href="https://github.com/namehash/ensnode"
             target="_blank"
             rel="noopener noreferrer"
@@ -44,7 +44,7 @@ export default function Header() {
           </a>
 
           <a
-            aria-label="telegram-link"
+            aria-label="Telegram"
             href="https://t.me/ensnode"
             target="_blank"
             rel="noopener noreferrer"
