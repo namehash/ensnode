@@ -4,11 +4,7 @@ import { DiagConsoleLogger, DiagLogLevel, diag } from "@opentelemetry/api";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
 import { resourceFromAttributes } from "@opentelemetry/resources";
 import { NodeSDK } from "@opentelemetry/sdk-node";
-import {
-  AlwaysOffSampler,
-  AlwaysOnSampler,
-  BatchSpanProcessor,
-} from "@opentelemetry/sdk-trace-node";
+import { AlwaysOffSampler, BatchSpanProcessor } from "@opentelemetry/sdk-trace-node";
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from "@opentelemetry/semantic-conventions";
 
 // instrumentation is enabled if OTEL_EXPORTER_OTLP_ENDPOINT is defined
@@ -24,8 +20,8 @@ export const sdk = new NodeSDK({
     [ATTR_SERVICE_NAME]: packageJson.name,
     [ATTR_SERVICE_VERSION]: packageJson.version,
   }),
-  // if !enabled, we disable sampling,
-  sampler: enabled ? new AlwaysOnSampler() : new AlwaysOffSampler(),
+  // if enabled, default sampler, otherwise AlwaysOffSampler avoids span allocation entirely
+  sampler: enabled ? undefined : new AlwaysOffSampler(),
   spanProcessors: [
     new BatchSpanProcessor(new OTLPTraceExporter(), {
       scheduledDelayMillis: process.env.NODE_ENV === "development" ? 1_000 : undefined,
