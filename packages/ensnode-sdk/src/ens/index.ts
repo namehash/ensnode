@@ -1,4 +1,7 @@
-export { getENSRootChainId } from "@ensnode/datasources";
+export * from "enssdk";
+
+export type { ENSNamespaceId } from "@ensnode/datasources";
+export { ENSNamespaceIds, getENSRootChainId } from "@ensnode/datasources";
 
 export * from "./coin-type";
 export * from "./constants";
@@ -12,4 +15,3 @@ export * from "./parse-labelhash";
 export * from "./parse-reverse-name";
 export * from "./reverse-name";
 export * from "./subname-helpers";
-export * from "./types";

@@ -1,19 +1,10 @@
-import { type Address, hexToBigInt } from "viem";
-
-import {
-  type AccountId,
-  AssetNamespaces,
-  formatAccountId,
-  formatAssetId,
-  type LabelHash,
-  type Node,
-} from "@ensnode/ensnode-sdk";
-
 import type {
-  CanonicalId,
+  AccountId,
   DomainId,
   ENSv1DomainId,
   ENSv2DomainId,
+  LabelHash,
+  Node,
   PermissionsId,
   PermissionsResourceId,
   PermissionsUserId,
@@ -22,7 +13,12 @@ import type {
   RenewalId,
   ResolverId,
   ResolverRecordsId,
-} from "./ids";
+  StorageId,
+} from "enssdk";
+import { AssetNamespaces } from "enssdk";
+import { type Address, hexToBigInt } from "viem";
+
+import { formatAccountId, formatAssetId } from "@ensnode/ensnode-sdk";
 
 /**
  * Formats and brands an AccountId as a RegistryId.
@@ -35,13 +31,13 @@ export const makeRegistryId = (accountId: AccountId) => formatAccountId(accountI
 export const makeENSv1DomainId = (node: Node) => node as ENSv1DomainId;
 
 /**
- * Makes an ENSv2 Domain Id given the parent `registry` and the domain's `canonicalId`.
+ * Makes an ENSv2 Domain Id given the parent `registry` and the domain's `storageId`.
  */
-export const makeENSv2DomainId = (registry: AccountId, canonicalId: CanonicalId) =>
+export const makeENSv2DomainId = (registry: AccountId, storageId: StorageId) =>
   formatAssetId({
     assetNamespace: AssetNamespaces.ERC1155,
     contract: registry,
-    tokenId: canonicalId,
+    tokenId: storageId,
   }) as ENSv2DomainId;
 
 /**
@@ -50,11 +46,11 @@ export const makeENSv2DomainId = (registry: AccountId, canonicalId: CanonicalId)
 const maskLower32Bits = (num: bigint) => num ^ (num & 0xffffffffn);
 
 /**
- * Computes a Domain's {@link CanonicalId} given its tokenId or LabelHash as `input`.
+ * Computes a Label's {@link StorageId} given its tokenId or LabelHash as `input`.
  */
-export const getCanonicalId = (input: bigint | LabelHash): CanonicalId => {
+export const getStorageId = (input: bigint | LabelHash): StorageId => {
   if (typeof input === "bigint") return maskLower32Bits(input);
-  return getCanonicalId(hexToBigInt(input));
+  return getStorageId(hexToBigInt(input));
 };
 
 /**

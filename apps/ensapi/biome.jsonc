@@ -4,7 +4,7 @@
   "overrides": [
     // allow unused function parameters in pothos schema files due to resolve() pattern
     {
-      "includes": ["./src/graphql-api/**/*.ts"],
+      "includes": ["./src/omnigraph-api/**/*.ts"],
       "linter": {
         "rules": {
           "correctness": {

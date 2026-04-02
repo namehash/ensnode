@@ -1,21 +1,47 @@
 import { initGraphQLTada } from "gql.tada";
+import type { Address, Hex } from "viem";
 
+import type {
+  ChainId,
+  CoinType,
+  DomainId,
+  InterpretedName,
+  Node,
+  PermissionsId,
+  PermissionsResourceId,
+  PermissionsUserId,
+  RegistrationId,
+  RegistryId,
+  RenewalId,
+  ResolverId,
+  ResolverRecordsId,
+} from "../lib/types";
 import type { introspection } from "./generated/graphql-env";
-
-// Semantic scalar types — these will eventually be imported from enssdk's
-// own type definitions. For now, defined inline.
-type Name = string;
 
 export const graphql = initGraphQLTada<{
   introspection: introspection;
   scalars: {
-    Address: `0x${string}`;
-    BigInt: bigint;
-    ChainId: number;
-    Hex: `0x${string}`;
     ID: string;
-    Name: Name;
-    Node: `0x${string}`;
+    // NOTE: graphql clients don't really do deserialization of scalars like bigint, so instead we
+    // just helpfully type the string as 'a stringified bigint'
+    BigInt: `${bigint}`;
+    // NOTE: keep these semantic scalar types in sync with the scalars in apps/ensapi/src/omnigraph-api/builder.ts
+    // (i.e. excluding the BigInt scalar, which we handle above)
+    Address: Address;
+    Hex: Hex;
+    ChainId: ChainId;
+    CoinType: CoinType;
+    Name: InterpretedName;
+    Node: Node;
+    DomainId: DomainId;
+    RegistryId: RegistryId;
+    ResolverId: ResolverId;
+    PermissionsId: PermissionsId;
+    PermissionsResourceId: PermissionsResourceId;
+    PermissionsUserId: PermissionsUserId;
+    RegistrationId: RegistrationId;
+    RenewalId: RenewalId;
+    ResolverRecordsId: ResolverRecordsId;
   };
 }>();
 

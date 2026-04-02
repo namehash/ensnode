@@ -246,7 +246,7 @@ async function main() {
 
   const postgresContainer = composeEnvironment.getContainer("postgres");
   const postgresPort = postgresContainer.getMappedPort(5432);
-  const DATABASE_URL = `postgresql://postgres:password@localhost:${postgresPort}/postgres`;
+  const ENSDB_URL = `postgresql://postgres:password@localhost:${postgresPort}/postgres`;
   log(`Postgres is ready (port ${postgresPort})`);
   log("Devnet is ready");
 
@@ -305,8 +305,8 @@ async function main() {
     ENSINDEXER_DIR,
     {
       NAMESPACE: ENSNamespaceIds.EnsTestEnv,
-      DATABASE_URL,
-      DATABASE_SCHEMA: ENSINDEXER_SCHEMA_NAME,
+      ENSDB_URL,
+      ENSINDEXER_SCHEMA_NAME,
       PLUGINS: "ensv2,protocol-acceleration",
       ENSRAINBOW_URL,
       LABEL_SET_ID,
@@ -317,7 +317,7 @@ async function main() {
   await waitForHealth(`http://localhost:${ENSINDEXER_PORT}/health`, 60_000, "ENSIndexer");
 
   // Phase 4: Wait for indexing to complete
-  await pollIndexingStatus(DATABASE_URL, ENSINDEXER_SCHEMA_NAME, 30_000);
+  await pollIndexingStatus(ENSDB_URL, ENSINDEXER_SCHEMA_NAME, 30_000);
 
   // Phase 5: Start ENSApi
   log("Starting ENSApi...");
@@ -326,7 +326,7 @@ async function main() {
     ["start"],
     ENSAPI_DIR,
     {
-      DATABASE_URL,
+      ENSDB_URL,
       ENSINDEXER_SCHEMA_NAME,
     },
     "ensapi",
@@ -335,7 +335,7 @@ async function main() {
 
   // Phase 6: Run integration tests
   log("Running integration tests...");
-  execaSync("pnpm", ["test:integration"], {
+  execaSync("pnpm", ["test:integration", "--", "--bail", "1"], {
     cwd: MONOREPO_ROOT,
     stdio: "inherit",
     env: {

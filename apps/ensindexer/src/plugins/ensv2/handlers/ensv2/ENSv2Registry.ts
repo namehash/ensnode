@@ -2,7 +2,7 @@ import { type Address, hexToBigInt, labelhash } from "viem";
 
 import {
   type AccountId,
-  getCanonicalId,
+  getStorageId,
   interpretAddress,
   isRegistrationFullyExpired,
   type LabelHash,
@@ -57,18 +57,18 @@ export default function () {
 
     const registry = getThisAccountId(context, event);
     const registryId = makeRegistryId(registry);
-    const canonicalId = getCanonicalId(tokenId);
-    const domainId = makeENSv2DomainId(registry, canonicalId);
+    const storageId = getStorageId(tokenId);
+    const domainId = makeENSv2DomainId(registry, storageId);
 
     // Sanity Check: LabelHash must match Label
     if (labelHash !== labelhash(label)) {
       throw new Error(`Sanity Check: labelHash !== labelhash(label)\n${toJson(event.args)}`);
     }
 
-    // Sanity Check: CanonicalId must match LabelHash
-    if (canonicalId !== getCanonicalId(hexToBigInt(labelHash))) {
+    // Sanity Check: StorageId must match LabelHash
+    if (storageId !== getStorageId(hexToBigInt(labelHash))) {
       throw new Error(
-        `Sanity Check: canonicalId !== getCanonicalId(hexToBigInt(labelHash))\n${toJson(event.args)}`,
+        `Sanity Check: storageId !== getStorageId(hexToBigInt(labelHash))\n${toJson(event.args)}`,
       );
     }
 
@@ -160,8 +160,8 @@ export default function () {
       const { tokenId, sender: unregistrant } = event.args;
 
       const registry = getThisAccountId(context, event);
-      const canonicalId = getCanonicalId(tokenId);
-      const domainId = makeENSv2DomainId(registry, canonicalId);
+      const storageId = getStorageId(tokenId);
+      const domainId = makeENSv2DomainId(registry, storageId);
 
       const registration = await getLatestRegistration(context, domainId);
 
@@ -210,8 +210,8 @@ export default function () {
       const { tokenId, newExpiry: expiry, sender } = event.args;
 
       const registry = getThisAccountId(context, event);
-      const canonicalId = getCanonicalId(tokenId);
-      const domainId = makeENSv2DomainId(registry, canonicalId);
+      const storageId = getStorageId(tokenId);
+      const domainId = makeENSv2DomainId(registry, storageId);
 
       const registration = await getLatestRegistration(context, domainId);
 
@@ -253,8 +253,8 @@ export default function () {
       const subregistry = interpretAddress(_subregistry);
 
       const registryAccountId = getThisAccountId(context, event);
-      const canonicalId = getCanonicalId(tokenId);
-      const domainId = makeENSv2DomainId(registryAccountId, canonicalId);
+      const storageId = getStorageId(tokenId);
+      const domainId = makeENSv2DomainId(registryAccountId, storageId);
 
       // update domain's subregistry
       if (subregistry === null) {
@@ -307,14 +307,14 @@ export default function () {
     }) => {
       const { oldTokenId, newTokenId } = event.args;
 
-      // Invariant: CanonicalIds must match
-      if (getCanonicalId(oldTokenId) !== getCanonicalId(newTokenId)) {
-        throw new Error(`Invariant(ENSv2Registry:TokenRegenerated): Canonical ID Malformed.`);
+      // Invariant: StorageIds must match
+      if (getStorageId(oldTokenId) !== getStorageId(newTokenId)) {
+        throw new Error(`Invariant(ENSv2Registry:TokenRegenerated): Storage Id Malformed.`);
       }
 
-      const canonicalId = getCanonicalId(oldTokenId);
+      const storageId = getStorageId(oldTokenId);
       const registryAccountId = getThisAccountId(context, event);
-      const domainId = makeENSv2DomainId(registryAccountId, canonicalId);
+      const domainId = makeENSv2DomainId(registryAccountId, storageId);
 
       await context.ensDb
         .update(ensIndexerSchema.v2Domain, { id: domainId })
@@ -334,9 +334,9 @@ export default function () {
   }) {
     const { id: tokenId, to: owner } = event.args;
 
-    const canonicalId = getCanonicalId(tokenId);
+    const storageId = getStorageId(tokenId);
     const registry = getThisAccountId(context, event);
-    const domainId = makeENSv2DomainId(registry, canonicalId);
+    const domainId = makeENSv2DomainId(registry, storageId);
 
     // TODO(signals): remove this invariant, since we'll only be indexing Registry contracts
     const registryId = makeRegistryId(registry);

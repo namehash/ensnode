@@ -27,7 +27,6 @@ export const mockEnsRainbowPublicConfig: EnsRainbowPublicConfig = {
 
 // Test fixture for EnsIndexerVersionInfo
 export const mockVersionInfo: EnsIndexerVersionInfo = {
-  nodejs: "20.0.0",
   ponder: "0.9.0",
   ensDb: "1.0.0",
   ensIndexer: "1.0.0",
@@ -36,7 +35,7 @@ export const mockVersionInfo: EnsIndexerVersionInfo = {
 
 // Test fixture for EnsIndexerPublicConfig
 export const mockPublicConfig: EnsIndexerPublicConfig = {
-  databaseSchemaName: "public",
+  ensIndexerSchemaName: "ensindexer_0",
   labelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
   ensRainbowPublicConfig: mockEnsRainbowPublicConfig,
   indexedChainIds: new Set([1, 8453]),

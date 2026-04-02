@@ -1,5 +1,7 @@
+import type { ChainId } from "enssdk";
+
 import { RangeTypeIds } from "../shared/blockrange";
-import type { BlockRef, ChainId, UnixTimestamp } from "../shared/types";
+import type { BlockRef, UnixTimestamp } from "../shared/types";
 import {
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshot,

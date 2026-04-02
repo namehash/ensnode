@@ -10,7 +10,7 @@ describe("ENSIndexer: Config", () => {
     it("can serialize EnsIndexerPublicConfig", () => {
       // arrange
       const config = {
-        databaseSchemaName: "public",
+        ensIndexerSchemaName: "ensindexer_0",
         ensRainbowPublicConfig: {
           version: "0.32.0",
           labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
@@ -25,7 +25,6 @@ describe("ENSIndexer: Config", () => {
         namespace: "mainnet",
         plugins: [PluginName.Subgraph],
         versionInfo: {
-          nodejs: "v22.10.12",
           ponder: "0.11.25",
           ensDb: "0.32.0",
           ensIndexer: "0.32.0",
@@ -53,7 +52,7 @@ describe("ENSIndexer: Config", () => {
 
   describe("deserialization", () => {
     const correctSerializedConfig = {
-      databaseSchemaName: "public",
+      ensIndexerSchemaName: "ensindexer_0",
       ensRainbowPublicConfig: {
         version: "0.32.0",
         labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
@@ -68,7 +67,6 @@ describe("ENSIndexer: Config", () => {
       namespace: "mainnet",
       plugins: [PluginName.Subgraph],
       versionInfo: {
-        nodejs: "v22.10.12",
         ponder: "0.11.25",
         ensDb: "0.32.0",
         ensIndexer: "0.32.0",

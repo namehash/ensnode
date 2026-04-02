@@ -158,7 +158,7 @@ jobs:
           #ENSADMIN
           update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ENSADMIN_SVC_ID}                ${{ env.ENSADMIN_DOCKER_IMAGE }}
 
-      # Update DATABASE_SCHEMA for each indexer based on input tag
+      # Update ENSINDEXER_SCHEMA_NAME for each indexer based on input tag
       - name: Update shared environment variable
         run: |
           set_shared_variable() {
@@ -181,6 +181,12 @@ jobs:
           set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "ALPHA-SEPOLIA_DATABASE_SCHEMA" "alphaSepoliaSchema${TAG}"
           set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "V2-SEPOLIA_DATABASE_SCHEMA" "v2SepoliaSchema${TAG}"
           set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "SEPOLIA_DATABASE_SCHEMA" "sepoliaSchema${TAG}"
+
+          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "ALPHA_ENSINDEXER_SCHEMA_NAME" "alphaSchema${TAG}"
+          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "MAINNET_ENSINDEXER_SCHEMA_NAME" "mainnetSchema${TAG}"
+          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "ALPHA-SEPOLIA_ENSINDEXER_SCHEMA_NAME" "alphaSepoliaSchema${TAG}"
+          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "V2-SEPOLIA_ENSINDEXER_SCHEMA_NAME" "v2SepoliaSchema${TAG}"
+          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "SEPOLIA_ENSINDEXER_SCHEMA_NAME" "sepoliaSchema${TAG}"
 
       - name: Redeploy ENSNode instances
         run: |

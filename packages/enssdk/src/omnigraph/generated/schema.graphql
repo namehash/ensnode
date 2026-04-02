@@ -361,9 +361,6 @@ type ENSv1Domain implements Domain {
 
 """An ENSv2Domain represents an ENSv2 Domain."""
 type ENSv2Domain implements Domain {
-  """The ENSv2Domain's Canonical Id."""
-  canonicalId: BigInt!
-
   """All Events associated with this Domain."""
   events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): DomainEventsConnection
 

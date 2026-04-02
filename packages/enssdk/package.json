@@ -19,6 +19,7 @@
     "dist"
   ],
   "exports": {
+    ".": "./src/index.ts",
     "./core": "./src/core/index.ts",
     "./omnigraph": "./src/omnigraph/index.ts"
   },
@@ -26,6 +27,10 @@
   "publishConfig": {
     "access": "public",
     "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
       "./core": {
         "types": "./dist/core/index.d.ts",
         "default": "./dist/core/index.js"
@@ -45,13 +50,18 @@
     "generate:gqlschema": "gql.tada generate-output"
   },
   "dependencies": {
+    "@ensdomains/address-encoder": "^1.1.2",
     "gql.tada": "^1.8.10",
     "graphql": "^16.11.0"
+  },
+  "peerDependencies": {
+    "viem": "^2"
   },
   "devDependencies": {
     "@ensnode/shared-configs": "workspace:*",
     "tsup": "catalog:",
     "typescript": "catalog:",
+    "viem": "catalog:",
     "vitest": "catalog:"
   }
 }

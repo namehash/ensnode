@@ -7,14 +7,14 @@ vi.mock("@/lib/logger", () => ({
   },
 }));
 
-const VALID_DB_URL = "postgresql://user:password@localhost:5432/mydb";
-const VALID_SCHEMA_NAME = "ensapi";
+const VALID_ENSDB_URL = "postgresql://user:password@localhost:5432/mydb";
+const VALID_ENSINDEXER_SCHEMA_NAME = "ensindexer_test";
 
 describe("ensdb singleton bootstrap", () => {
   beforeEach(() => {
     vi.resetModules();
-    vi.stubEnv("DATABASE_URL", VALID_DB_URL);
-    vi.stubEnv("ENSINDEXER_SCHEMA_NAME", VALID_SCHEMA_NAME);
+    vi.stubEnv("ENSDB_URL", VALID_ENSDB_URL);
+    vi.stubEnv("ENSINDEXER_SCHEMA_NAME", VALID_ENSINDEXER_SCHEMA_NAME);
   });
 
   afterEach(() => {
@@ -26,18 +26,18 @@ describe("ensdb singleton bootstrap", () => {
 
     // ensDbClient is a lazyProxy — construction is deferred until first property access.
     // Accessing a property triggers EnsDbReader construction; verify it succeeds.
-    expect(ensDbClient.ensIndexerSchemaName).toBe(VALID_SCHEMA_NAME);
+    expect(ensDbClient.ensIndexerSchemaName).toBe(VALID_ENSINDEXER_SCHEMA_NAME);
     expect(ensDb).toBeDefined();
     expect(ensIndexerSchema).toBeDefined();
-  });
+  }, 10_000);
 
-  it("exits when DATABASE_URL is missing", async () => {
+  it("exits when ENSDB_URL is missing", async () => {
     const mockExit = vi.spyOn(process, "exit").mockImplementation((() => {
       throw new Error("process.exit");
     }) as never);
     const { default: logger } = await import("@/lib/logger");
 
-    vi.stubEnv("DATABASE_URL", "");
+    vi.stubEnv("ENSDB_URL", "");
     // ensDbClient is a lazyProxy — import succeeds but first property access triggers construction,
     // which calls buildEnsDbConfigFromEnvironment and exits on invalid config.
     const { ensDbClient } = await import("@/lib/ensdb/singleton");

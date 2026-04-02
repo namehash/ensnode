@@ -45,7 +45,7 @@ variable "ensdb_url" {
   type = string
 }
 
-variable "database_schema" {
+variable "ensindexer_schema_name" {
   type = string
 }
 
