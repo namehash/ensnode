@@ -1,6 +1,6 @@
 import { cva } from "class-variance-authority";
 
-export const namekitLinkVariants = cva("nhui:transition nhui:cursor-pointer", {
+export const legacyLinkVariants = cva("nhui:transition nhui:cursor-pointer", {
   variants: {
     variant: {
       primary:

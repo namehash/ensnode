@@ -1,4 +1,4 @@
-import { namekitButtonVariants } from "@namehash/namehash-ui/namekit";
+import { legacyButtonVariants } from "@namehash/namehash-ui/legacy";
 
 import ENSRainbow2D from "../../assets/ENSRainbow2D.svg";
 import { GithubIcon } from "../atoms/icons/GithubIcon.tsx";
@@ -25,7 +25,7 @@ export default function Header() {
             href="https://ensnode.io/ensrainbow"
             target="_blank"
             rel="noopener noreferrer"
-            className={namekitButtonVariants({
+            className={legacyButtonVariants({
               variant: "ghost",
               className: "max-sm:p-2 max-sm:text-sm",
             })}
@@ -38,7 +38,7 @@ export default function Header() {
             href="https://github.com/namehash/ensnode"
             target="_blank"
             rel="noopener noreferrer"
-            className={namekitButtonVariants({ variant: "ghost", className: "max-sm:p-2" })}
+            className={legacyButtonVariants({ variant: "ghost", className: "max-sm:p-2" })}
           >
             <GithubIcon className="fill-current" />
           </a>
@@ -48,7 +48,7 @@ export default function Header() {
             href="https://t.me/ensnode"
             target="_blank"
             rel="noopener noreferrer"
-            className={namekitButtonVariants({ variant: "ghost", className: "max-sm:p-2" })}
+            className={legacyButtonVariants({ variant: "ghost", className: "max-sm:p-2" })}
           >
             <TelegramIcon className="text-[#1F2937]" />
           </a>

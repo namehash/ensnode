@@ -1,4 +1,4 @@
-import { namekitLinkVariants, namekitButtonVariants } from "@namehash/namehash-ui/namekit";
+import { legacyLinkVariants, legacyButtonVariants } from "@namehash/namehash-ui/legacy";
 
 import BeforeAfterSlider from "../molecules/BeforeAfterSlider.tsx";
 import HeroInstallCommand from "../molecules/HeroInstallCommand.tsx";
@@ -32,7 +32,7 @@ export default function Hero() {
               href="https://ensnode.io/"
               target="_blank"
               rel="noopener noreferrer"
-              className={namekitLinkVariants({
+              className={legacyLinkVariants({
                 variant: "underline",
                 size: "medium",
                 className: "!text-black",
@@ -50,7 +50,7 @@ export default function Hero() {
               href="https://ensnode.io/ensrainbow"
               target="_blank"
               rel="noopener noreferrer"
-              className={namekitButtonVariants({ variant: "primary", size: "medium" })}
+              className={legacyButtonVariants({ variant: "primary", size: "medium" })}
             >
               View the docs
             </a>
@@ -60,7 +60,7 @@ export default function Hero() {
               href="https://ensnode.io/ensrainbow"
               target="_blank"
               rel="noopener noreferrer"
-              className={namekitButtonVariants({ variant: "primary", size: "large" })}
+              className={legacyButtonVariants({ variant: "primary", size: "large" })}
             >
               View the docs
             </a>

@@ -1,6 +1,6 @@
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import cc from "classcat";
-import { namekitLinkVariants } from "@namehash/namehash-ui/namekit";
+import { legacyLinkVariants } from "@namehash/namehash-ui/legacy";
 
 import { RainbowIcon } from "../atoms/icons/RainbowIcon.tsx";
 import { RocketIcon } from "../atoms/icons/RocketIcon.tsx";
@@ -85,7 +85,7 @@ export default function RoadMap() {
             href=""
             target="_blank"
             rel="noopener noreferrer"
-            className={namekitLinkVariants({
+            className={legacyLinkVariants({
               variant: "underline",
               size: "small",
               className: "!text-black",
@@ -106,7 +106,7 @@ export default function RoadMap() {
             href=""
             target="_blank"
             rel="noopener noreferrer"
-            className={namekitLinkVariants({
+            className={legacyLinkVariants({
               variant: "underline",
               size: "small",
               className: "!text-black",
@@ -127,7 +127,7 @@ export default function RoadMap() {
             href=""
             target="_blank"
             rel="noopener noreferrer"
-            className={namekitLinkVariants({
+            className={legacyLinkVariants({
               variant: "underline",
               size: "small",
               className: "!text-black",

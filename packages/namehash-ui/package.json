@@ -21,7 +21,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./styles.css": "./dist/index.css",
-    "./namekit": "./src/components/namekit/index.ts"
+    "./legacy": "./src/components/legacy/index.ts"
   },
   "sideEffects": false,
   "publishConfig": {
@@ -31,9 +31,9 @@
         "default": "./dist/index.js",
         "types": "./dist/index.d.ts"
       },
-      "./namekit": {
-        "default": "./dist/components/namekit/index.js",
-        "types": "./dist/components/namekit/index.d.ts"
+      "./legacy": {
+        "default": "./dist/components/legacy/index.js",
+        "types": "./dist/components/legacy/index.d.ts"
       },
       "./styles.css": {
         "import": "./dist/index.css",

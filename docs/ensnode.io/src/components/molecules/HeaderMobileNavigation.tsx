@@ -1,5 +1,5 @@
 import { Popover, Transition } from "@headlessui/react";
-import { namekitButtonVariants } from "@namehash/namehash-ui/namekit";
+import { legacyButtonVariants } from "@namehash/namehash-ui/legacy";
 import { MenuIcon } from "@workspace/docs/ensnode.io/src/components/atoms/icons/MenuIcon.tsx";
 import { XMarkIcon } from "@workspace/docs/ensnode.io/src/components/atoms/icons/XMarkIcon.tsx";
 import { GithubIcon } from "@workspace/docs/ensrainbow.io/src/components/atoms/icons/GithubIcon.tsx";
@@ -83,7 +83,7 @@ export default function HeaderMobileNavigation() {
                             target={link.target}
                             href={link.href}
                             rel={link.target === "_blank" ? "noopener noreferrer" : undefined}
-                            className={namekitButtonVariants({ className: "w-full text-white" })}
+                            className={legacyButtonVariants({ className: "w-full text-white" })}
                           >
                             {link.text}
                           </a>
@@ -97,7 +97,7 @@ export default function HeaderMobileNavigation() {
                       href="https://x.com/NamehashLabs"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={namekitButtonVariants({ className: "p-2 text-white" })}
+                      className={legacyButtonVariants({ className: "p-2 text-white" })}
                     >
                       <TwitterIcon />
                     </a>
@@ -106,7 +106,7 @@ export default function HeaderMobileNavigation() {
                       href="https://github.com/namehash/ensnode"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={namekitButtonVariants({ className: "p-2 text-white" })}
+                      className={legacyButtonVariants({ className: "p-2 text-white" })}
                     >
                       <GithubIcon />
                     </a>
@@ -115,7 +115,7 @@ export default function HeaderMobileNavigation() {
                       href="https://t.me/ensnode"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={namekitButtonVariants({ className: "p-2 text-white" })}
+                      className={legacyButtonVariants({ className: "p-2 text-white" })}
                     >
                       <TelegramIcon />
                     </a>

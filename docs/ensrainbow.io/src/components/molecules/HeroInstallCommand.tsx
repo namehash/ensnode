@@ -1,4 +1,4 @@
-import { Tooltip } from "@namehash/namehash-ui/namekit";
+import { Tooltip } from "@namehash/namehash-ui/legacy";
 import { useEffect, useState } from "react";
 
 import { CopyIcon } from "../atoms/icons/CopyIcon.tsx";

@@ -1,4 +1,4 @@
-import { namekitButtonVariants } from "@namehash/namehash-ui/namekit";
+import { legacyButtonVariants } from "@namehash/namehash-ui/legacy";
 import { StarIcon } from "@workspace/docs/ensnode.io/src/components/atoms/icons/StarIcon.tsx";
 import cc from "classcat";
 import { Fragment } from "react";
@@ -95,7 +95,7 @@ export default function ENSNodeSuite() {
                   href={namehashApp.docsLinkHref}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={namekitButtonVariants({ variant: "secondary", size: "medium" })}
+                  className={legacyButtonVariants({ variant: "secondary", size: "medium" })}
                 >
                   View documentation
                 </a>

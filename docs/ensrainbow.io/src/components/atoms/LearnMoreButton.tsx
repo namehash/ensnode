@@ -1,4 +1,4 @@
-import { namekitButtonVariants } from "@namehash/namehash-ui/namekit";
+import { legacyButtonVariants } from "@namehash/namehash-ui/legacy";
 
 import { ExternalLinkIcon } from "./icons/ExternalLinkIcon.tsx";
 import cc from "classcat";
@@ -21,7 +21,7 @@ export const LearnMoreButton = ({
       href={source}
       target="_blank"
       rel="noopener noreferrer"
-      className={namekitButtonVariants({
+      className={legacyButtonVariants({
         variant: "secondary",
         size: "medium",
         className: cc("max-w-full overflow-x-hidden", styles),

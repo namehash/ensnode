@@ -1,6 +1,6 @@
 import { cva } from "class-variance-authority";
 
-export const namekitButtonVariants = cva(
+export const legacyButtonVariants = cva(
   "nhui:relative nhui:transition nhui:text-base nhui:rounded-md nhui:border nhui:font-medium nhui:inline-flex nhui:gap-2 nhui:items-center nhui:whitespace-nowrap nhui:underline-none nhui:disabled:opacity-50",
   {
     variants: {

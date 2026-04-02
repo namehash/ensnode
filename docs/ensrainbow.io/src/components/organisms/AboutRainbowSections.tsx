@@ -1,4 +1,4 @@
-import { namekitLinkVariants } from "@namehash/namehash-ui/namekit";
+import { legacyLinkVariants } from "@namehash/namehash-ui/legacy";
 import { Fragment } from "react";
 
 import RainbowLogo from "../../assets/ENSRainbowLogo.svg";
@@ -45,7 +45,7 @@ const rainbowSections: AboutRainbowProps[] = [
           href="https://app.ens.domains/0xfFD1Ac3e8818AdCbe5C597ea076E8D3210B45df5"
           target="_blank"
           rel="noopener noreferrer"
-          className={namekitLinkVariants({
+          className={legacyLinkVariants({
             variant: "underline",
             size: "large",
             className: "!text-black",
@@ -58,7 +58,7 @@ const rainbowSections: AboutRainbowProps[] = [
           href="https://app.ens.domains/[4283f2583432677d3dac6d2c021cdd7ef6855349ea584813ad5811c0e497eb0b].makoto.eth"
           target="_blank"
           rel="noopener noreferrer"
-          className={namekitLinkVariants({
+          className={legacyLinkVariants({
             variant: "underline",
             size: "large",
             className: "!text-black",
@@ -93,7 +93,7 @@ const rainbowSections: AboutRainbowProps[] = [
           href="https://ensnode.io/"
           target="_blank"
           rel="noopener noreferrer"
-          className={namekitLinkVariants({
+          className={legacyLinkVariants({
             variant: "underline",
             size: "large",
             className: "!text-black",
