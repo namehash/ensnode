@@ -6,6 +6,10 @@ import {
   validateEnsIndexerPublicConfigCompatibility,
 } from "@ensnode/ensnode-sdk";
 
+import { setupLoggerMock } from "@/lib/__test__/mockLogger";
+
+setupLoggerMock();
+
 import type { IndexingStatusBuilder } from "@/lib/indexing-status-builder/indexing-status-builder";
 import type { PublicConfigBuilder } from "@/lib/public-config-builder/public-config-builder";
 
