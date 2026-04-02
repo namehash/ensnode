@@ -105,6 +105,10 @@ jobs:
               or .name == "@ensnode/namehash-ui"
               or .name == "@ensnode/ponder-sdk"
               or .name == "@ensnode/ponder-subgraph"
+              or .name == "enssdk"
+              or .name == "enskit"
+              or .name == "enscli"
+              or .name == "ensskills"
             ))
 
       - name: Filter Published Packages For Lambdas

@@ -2,10 +2,14 @@ import config from "@/config";
 
 import { createDocumentationMiddleware } from "ponder-enrich-gql-docs-middleware";
 
+// FIXME: use the import from:
+// import { ensIndexerSchema } from "@/lib/ensdb/singleton";
+// Once the lazy proxy implemented for `ensIndexerSchema` export is improved
+// to support Drizzle ORM in `ponder-subgraph` package.
+import * as ensIndexerSchema from "@ensnode/ensdb-sdk/ensindexer-abstract";
 import { type Duration, hasSubgraphApiConfigSupport } from "@ensnode/ensnode-sdk";
 import { subgraphGraphQLMiddleware } from "@ensnode/ponder-subgraph";
 
-import { ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { createApp } from "@/lib/hono-factory";
 import { lazy } from "@/lib/lazy";
 import { makeSubgraphApiDocumentation } from "@/lib/subgraph/api-documentation";
@@ -55,7 +59,7 @@ app.use(subgraphMetaMiddleware);
 // imported without env vars being present (e.g. during OpenAPI generation).
 const getSubgraphMiddleware = lazy(() =>
   subgraphGraphQLMiddleware({
-    databaseUrl: config.databaseUrl,
+    databaseUrl: config.ensDbUrl,
     databaseSchema: config.ensIndexerSchemaName,
     schema: subgraphSchema,
     // describes the polymorphic (interface) relationships in the schema

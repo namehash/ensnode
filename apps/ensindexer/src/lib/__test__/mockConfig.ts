@@ -8,8 +8,8 @@ import { deepClone } from "@/lib/lib-helpers";
 
 // default, non-exported mock configuration template
 const _defaultMockConfig = buildConfigFromEnvironment({
-  DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postgres",
-  DATABASE_SCHEMA: "test_schema",
+  ENSDB_URL: "postgresql://postgres:postgres@localhost:5432/postgres",
+  ENSINDEXER_SCHEMA_NAME: "ensindexer_0",
   NAMESPACE: "mainnet",
   PLUGINS: "subgraph",
   ENSRAINBOW_URL: "http://localhost:3223",

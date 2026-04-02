@@ -1,11 +1,11 @@
+import type { AccountId, AssetId, InterpretedName } from "enssdk";
 import { isAddressEqual, zeroAddress } from "viem";
 
 import { DatasourceNames, type ENSNamespaceId } from "@ensnode/datasources";
 
-import { getParentNameFQDN, type InterpretedName } from "../ens";
+import { getParentNameFQDN } from "../ens";
 import { accountIdEqual } from "../shared/account-id";
 import { getDatasourceContract, maybeGetDatasourceContract } from "../shared/datasource-contract";
-import type { AccountId, AssetId } from "../shared/types";
 import { type NFTMintStatus, type SerializedAssetId, serializeAssetId } from "./assets";
 
 /**

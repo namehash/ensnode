@@ -1,4 +1,4 @@
-import type { Name, Node } from "../../../ens/types";
+import type { Name, Node } from "enssdk";
 
 /**
  * Represents request to Name Tokens API.

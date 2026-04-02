@@ -1,14 +1,8 @@
-import type { CoinType, EvmCoinType } from "@ensdomains/address-encoder";
 import {
   coinTypeToEvmChainId as _coinTypeToEvmChainId,
   evmChainIdToCoinType as _evmChainIdToCoinType,
 } from "@ensdomains/address-encoder/utils";
-
-import type { ChainId } from "../shared/types";
-
-// re-export CoinType and EvmCoinType from @ensdomains/address-encoder
-// so consumers don't need it as a dependency
-export type { CoinType, EvmCoinType } from "@ensdomains/address-encoder";
+import type { ChainId, CoinType, EvmCoinType } from "enssdk";
 
 /**
  * The ETH coinType.
@@ -38,7 +32,7 @@ export const DEFAULT_EVM_COIN_TYPE = 0x8000_0000 as EvmCoinType;
  * NOTE: for whatever reason @ensdomains/address-encoder#coinTypeToEvmChainId doesn't handle the
  * mainnet case so we implement that here
  *
- * @see https://docs.ens.domains/ensip/11/
+ * @see https://docs.ens.domains/ensip/11
  */
 export const coinTypeToEvmChainId = (coinType: CoinType): ChainId => {
   if (coinType === ETH_COIN_TYPE) return 1;

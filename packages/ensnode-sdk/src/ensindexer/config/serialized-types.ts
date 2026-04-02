@@ -1,4 +1,5 @@
-import type { ChainId } from "../../shared/types";
+import type { ChainId } from "enssdk";
+
 import type { EnsIndexerPublicConfig, EnsIndexerVersionInfo } from "./types";
 
 export type SerializedIndexedChainIds = Array<ChainId>;

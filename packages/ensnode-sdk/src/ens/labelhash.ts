@@ -1,6 +1,5 @@
+import type { LabelHash } from "enssdk";
 import { isHex } from "viem";
-
-import type { LabelHash } from "./types";
 
 /**
  * Checks if the input is a {@link LabelHash}.

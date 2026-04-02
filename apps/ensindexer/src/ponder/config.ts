@@ -54,4 +54,13 @@ const ponderConfig = activePlugins.reduce(
 // For additional info see: https://ponder.sh/docs/api-reference/ponder/config#guarantees
 ponderConfig.ordering = "omnichain";
 
+// By default, if the `DATABASE_URL` environment variable is set,
+// Ponder will use it for the connection string to the Postgres database.
+// However, we want Ponder to always use the `ENSDB_URL` environment variable instead and so
+// we make explicit use of it here.
+ponderConfig.database = {
+  connectionString: config.ensDbUrl,
+  kind: "postgres",
+};
+
 export default ponderConfig;
