@@ -1,0 +1,102 @@
+---
+---
+
+<nav class="scalar-toc">
+  <h2 class="scalar-toc-heading">On this page</h2>
+  <ul class="scalar-toc-list"></ul>
+</nav>
+
+<script>
+  function buildToc() {
+    const list = document.querySelector('.scalar-toc-list');
+    if (!list) return;
+
+    const headings = document.querySelectorAll('h2.section-header-label[id]');
+    if (headings.length === 0) return false;
+
+    list.innerHTML = '';
+    headings.forEach((h2) => {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.href = `#${h2.id}`;
+      a.textContent = h2.textContent?.trim() ?? '';
+      li.appendChild(a);
+
+      // Find h3s that belong to this h2's section
+      const section = h2.closest('.section');
+      if (section) {
+        const h3s = section.querySelectorAll('h3[id]');
+        if (h3s.length > 0) {
+          const subList = document.createElement('ul');
+          subList.className = 'scalar-toc-sublist';
+          h3s.forEach((h3) => {
+            const subLi = document.createElement('li');
+            const subA = document.createElement('a');
+            subA.href = `#${h3.id}`;
+            subA.textContent = h3.textContent?.trim() ?? '';
+            subLi.appendChild(subA);
+            subList.appendChild(subLi);
+          });
+          li.appendChild(subList);
+        }
+      }
+
+      list.appendChild(li);
+    });
+
+    return true;
+  }
+
+  // Scalar renders async, so observe for headings to appear
+  if (!buildToc()) {
+    const observer = new MutationObserver(() => {
+      if (buildToc()) observer.disconnect();
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+  }
+</script>
+
+<style>
+  .scalar-toc {
+    padding: 1rem 0;
+  }
+
+  .scalar-toc-heading {
+    color: var(--sl-color-white);
+    font-size: var(--sl-text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding-bottom: 0.5rem;
+  }
+
+  .scalar-toc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-inline-start: 1px solid var(--sl-color-hairline);
+  }
+
+  .scalar-toc-list li a {
+    display: block;
+    padding: 0.25rem 0 0.25rem 0.75rem;
+    color: var(--sl-color-gray-3);
+    font-size: var(--sl-text-xs);
+    text-decoration: none;
+    line-height: 1.5;
+  }
+
+  .scalar-toc-list li a:hover {
+    color: var(--sl-color-white);
+  }
+
+  .scalar-toc-sublist {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .scalar-toc-sublist li a {
+    padding-inline-start: 1.5rem;
+  }
+</style>
