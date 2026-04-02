@@ -12,13 +12,6 @@ export function getEnsIndexerVersion(): string {
 }
 
 /**
- * Get Node.js version
- */
-export function getNodeJsVersion(): string {
-  return process.versions.node;
-}
-
-/**
  * Get NPM package version.
  *
  * Note:

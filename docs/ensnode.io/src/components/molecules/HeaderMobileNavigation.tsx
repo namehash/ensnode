@@ -1,5 +1,5 @@
 import { Popover, Transition } from "@headlessui/react";
-import { Button, IconButton, Link } from "@namehash/namekit-react";
+import { legacyButtonVariants } from "@namehash/namehash-ui/legacy";
 import { MenuIcon } from "@workspace/docs/ensnode.io/src/components/atoms/icons/MenuIcon.tsx";
 import { XMarkIcon } from "@workspace/docs/ensnode.io/src/components/atoms/icons/XMarkIcon.tsx";
 import { GithubIcon } from "@workspace/docs/ensrainbow.io/src/components/atoms/icons/GithubIcon.tsx";
@@ -13,28 +13,24 @@ import ENSNode2D from "../../assets/dark-logo.svg";
 export default function HeaderMobileNavigation() {
   const MobileNavigationLinks = [
     {
-      element: <Link href="/docs">Docs</Link>,
+      text: "Docs",
+      href: "/docs",
+      target: "_self",
     },
     {
-      element: (
-        <Link target="_blank" href="https://x.com/NamehashLabs">
-          X
-        </Link>
-      ),
+      text: "X",
+      href: "https://x.com/NamehashLabs",
+      target: "_blank",
     },
     {
-      element: (
-        <Link href="https://github.com/namehash/ensnode" target="_blank">
-          GitHub
-        </Link>
-      ),
+      text: "GitHub",
+      href: "https://github.com/namehash/ensnode",
+      target: "_blank",
     },
     {
-      element: (
-        <Link target="_blank" href="http://t.me/ensnode">
-          Telegram
-        </Link>
-      ),
+      text: "Telegram",
+      href: "https://t.me/ensnode",
+      target: "_blank",
     },
   ];
 
@@ -80,34 +76,49 @@ export default function HeaderMobileNavigation() {
                     <ul className="py-3 flex flex-col justify-center gap-1">
                       {MobileNavigationLinks.map((link, idx) => (
                         <li
-                          key={String(link.element) + idx}
+                          key={String(link.text) + idx}
                           className="cursor-pointer text-base leading-6 font-medium text-white w-full"
                         >
-                          <Button className="w-full" asChild>
-                            {link.element}
-                          </Button>
+                          <a
+                            target={link.target}
+                            href={link.href}
+                            rel={link.target === "_blank" ? "noopener noreferrer" : undefined}
+                            className={legacyButtonVariants({ className: "w-full text-white" })}
+                          >
+                            {link.text}
+                          </a>
                         </li>
                       ))}
                     </ul>
                   </div>
                   <div className="h-fit w-full flex flex-row flex-nowrap justify-center items-center gap-1">
-                    <IconButton asChild variant="ghost" className="p-[7px]">
-                      <Link href="https://x.com/NamehashLabs" style={{ color: "white" }}>
-                        <TwitterIcon />
-                      </Link>
-                    </IconButton>
-
-                    <IconButton asChild variant="ghost" className="p-[7px]">
-                      <Link href="https://github.com/namehash/ensnode" style={{ color: "white" }}>
-                        <GithubIcon />
-                      </Link>
-                    </IconButton>
-
-                    <IconButton asChild variant="ghost" className="p-[7px]">
-                      <Link href="http://t.me/ensnode">
-                        <TelegramIcon className="text-white" />
-                      </Link>
-                    </IconButton>
+                    <a
+                      aria-label="X"
+                      href="https://x.com/NamehashLabs"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={legacyButtonVariants({ className: "p-2 text-white" })}
+                    >
+                      <TwitterIcon />
+                    </a>
+                    <a
+                      aria-label="GitHub"
+                      href="https://github.com/namehash/ensnode"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={legacyButtonVariants({ className: "p-2 text-white" })}
+                    >
+                      <GithubIcon />
+                    </a>
+                    <a
+                      aria-label="Telegram"
+                      href="https://t.me/ensnode"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={legacyButtonVariants({ className: "p-2 text-white" })}
+                    >
+                      <TelegramIcon />
+                    </a>
                   </div>
                 </div>
               </Popover.Panel>

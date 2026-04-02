@@ -1,4 +1,5 @@
-import type { CoinType, Name } from "../ens";
+import type { CoinType, Name } from "enssdk";
+
 import type { ResolverRecordsSelection } from "./resolver-records-selection";
 
 /**

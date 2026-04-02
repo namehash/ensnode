@@ -651,9 +651,7 @@ describe("addOnchainEventListener", () => {
         });
         expect.fail("Should have thrown");
       } catch (error) {
-        expect(error).toBeInstanceOf(Error);
-        expect((error as Error).message).toBe("Original connection error");
-        expect((error as Error).cause).toBe(originalError);
+        expect(error).toBe(originalError);
       }
     });
   });

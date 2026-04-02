@@ -61,13 +61,13 @@ export default {
       // NOTE: named BaseRegistrarImplementation in devnet
       BaseRegistrar: {
         abi: root_BaseRegistrar,
-        address: "0xcd8a1c3ba11cf5ecfa6267617243239504a98d90",
+        address: "0x8a791620dd6260079bf849dc5567adc3f2fdc318",
         startBlock: 0,
       },
       // NOTE: named LegacyETHRegistrarController in devnet
       LegacyEthRegistrarController: {
         abi: root_LegacyEthRegistrarController,
-        address: "0xd8a5a9b31c3c0232e196d518e89fd8bf83acad43",
+        address: "0xfbc22278a96299d91d41c453234d97b4f5eb9b2d",
         startBlock: 0,
       },
       // NOTE: named WrappedETHRegistrarController in devnet
@@ -79,7 +79,7 @@ export default {
       // NOTE: named ETHRegistrarController in devnet
       UnwrappedEthRegistrarController: {
         abi: root_UnwrappedEthRegistrarController,
-        address: "0x36b58f5c1969b7b6591d752ea6f5486d069010ab",
+        address: "0x1c85638e118b37167e9298c2268758e058ddfda0",
         startBlock: 0,
       },
       // NOTE: not in devnet, set to zeroAddress
@@ -90,18 +90,18 @@ export default {
       },
       NameWrapper: {
         abi: root_NameWrapper,
-        address: "0xcbeaf3bde82155f56486fb5a1072cb8baaf547cc",
+        address: "0x5081a39b8a5f0e35a8d959395a630b68b74dd30f",
         startBlock: 0,
       },
       UniversalResolver: {
         abi: UniversalResolverV1,
-        address: "0xd84379ceae14aa33c123af12424a37803f885889",
+        address: "0x5067457698fd6fa1c6964e416b3f42713513b3dd",
         startBlock: 0,
       },
       // NOTE: named UniversalResolverV2 in devnet
       UniversalResolverV2: {
         abi: UniversalResolverV2,
-        address: "0x162a433068f51e18b7d13932f27e66a3f99e6890",
+        address: "0x8198f5d8f8cffe8f9c413d98a0a55aeb8ab9fbb7",
         startBlock: 0,
       },
     },
@@ -120,12 +120,12 @@ export default {
       },
       ETHRegistry: {
         abi: Registry,
-        address: "0x9e545e3c0baab3e08cdfd552c960a1050f373042",
+        address: "0x8f86403a4de0bb5791fa46b8e795c547942fe4cf",
         startBlock: 0,
       },
       ETHRegistrar: {
         abi: ETHRegistrar,
-        address: "0x5f3f1dbd7b74c6b46e8c44f98792a1daf8d69154",
+        address: "0x4c4a2f8c81640e47606d3fd77b353e87ba015584",
         startBlock: 0,
       },
     },
@@ -136,28 +136,28 @@ export default {
     contracts: {
       DefaultReverseRegistrar: {
         abi: StandaloneReverseRegistrar,
-        address: "0x998abeb3e57409262ae5b751f60747921b33613e",
+        address: "0x4c5859f0f772848b2d91f1d83e2fe57935348029",
         startBlock: 0,
       },
 
       // NOTE: named DefaultReverseResolver in devnet
       DefaultReverseResolver3: {
         abi: ResolverABI,
-        address: "0x4826533b4897376654bb4d4ad88b7fafd0c98528",
+        address: "0x5f3f1dbd7b74c6b46e8c44f98792a1daf8d69154",
         startBlock: 0,
       },
 
       // NOTE: named LegacyPublicResolver in devnet
       DefaultPublicResolver4: {
         abi: ResolverABI,
-        address: "0x4ee6ecad1c2dae9f525404de8555724e3c35d07b",
+        address: "0x86a2ee8faf9a840f7a2c64ca3d51209f9a02081d",
         startBlock: 0,
       },
 
       // NOTE: named PublicResolver in devnet
       DefaultPublicResolver5: {
         abi: ResolverABI,
-        address: "0xbec49fa140acaa83533fb00a2bb19bddd0290f25",
+        address: "0xa4899d35897033b927acfcf422bc745916139776",
         startBlock: 0,
       },
     },

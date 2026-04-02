@@ -43,36 +43,10 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "version": { "type": "string", "minLength": 1 },
-                    "theGraphFallback": {
-                      "oneOf": [
-                        {
-                          "type": "object",
-                          "properties": {
-                            "canFallback": { "type": "boolean", "enum": [true] },
-                            "url": { "type": "string" }
-                          },
-                          "required": ["canFallback", "url"],
-                          "additionalProperties": false
-                        },
-                        {
-                          "type": "object",
-                          "properties": {
-                            "canFallback": { "type": "boolean", "enum": [false] },
-                            "reason": {
-                              "type": "string",
-                              "enum": ["not-subgraph-compatible", "no-api-key", "no-subgraph-url"]
-                            }
-                          },
-                          "required": ["canFallback", "reason"],
-                          "additionalProperties": false
-                        }
-                      ]
-                    },
                     "ensIndexerPublicConfig": {
                       "type": "object",
                       "properties": {
-                        "databaseSchemaName": { "type": "string", "minLength": 1 },
+                        "ensIndexerSchemaName": { "type": "string", "minLength": 1 },
                         "ensRainbowPublicConfig": {
                           "type": "object",
                           "properties": {
@@ -125,17 +99,16 @@
                         "versionInfo": {
                           "type": "object",
                           "properties": {
-                            "nodejs": { "type": "string", "minLength": 1 },
                             "ponder": { "type": "string", "minLength": 1 },
                             "ensDb": { "type": "string", "minLength": 1 },
                             "ensIndexer": { "type": "string", "minLength": 1 },
                             "ensNormalize": { "type": "string", "minLength": 1 }
                           },
-                          "required": ["nodejs", "ponder", "ensDb", "ensIndexer", "ensNormalize"]
+                          "required": ["ponder", "ensDb", "ensIndexer", "ensNormalize"]
                         }
                       },
                       "required": [
-                        "databaseSchemaName",
+                        "ensIndexerSchemaName",
                         "ensRainbowPublicConfig",
                         "indexedChainIds",
                         "isSubgraphCompatible",
@@ -144,9 +117,42 @@
                         "plugins",
                         "versionInfo"
                       ]
+                    },
+                    "theGraphFallback": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "canFallback": { "type": "boolean", "enum": [true] },
+                            "url": { "type": "string" }
+                          },
+                          "required": ["canFallback", "url"],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "canFallback": { "type": "boolean", "enum": [false] },
+                            "reason": {
+                              "type": "string",
+                              "enum": ["not-subgraph-compatible", "no-api-key", "no-subgraph-url"]
+                            }
+                          },
+                          "required": ["canFallback", "reason"],
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    "versionInfo": {
+                      "type": "object",
+                      "properties": {
+                        "ensApi": { "type": "string", "minLength": 1 },
+                        "ensNormalize": { "type": "string", "minLength": 1 }
+                      },
+                      "required": ["ensApi", "ensNormalize"]
                     }
                   },
-                  "required": ["version", "theGraphFallback", "ensIndexerPublicConfig"]
+                  "required": ["ensIndexerPublicConfig", "theGraphFallback", "versionInfo"]
                 }
               }
             }

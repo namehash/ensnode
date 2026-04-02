@@ -3,7 +3,7 @@ import type { Address } from "viem";
 import {
   type AccountId,
   type EncodedReferrer,
-  getCanonicalId,
+  getStorageId,
   interpretAddress,
   isRegistrationFullyExpired,
   makeENSv2DomainId,
@@ -70,8 +70,8 @@ export default function () {
       // _before_ this event. This event upserts the latest Registration with payment info.
 
       const { registrar, registry } = await getRegistrarAndRegistry(context, event);
-      const canonicalId = getCanonicalId(tokenId);
-      const domainId = makeENSv2DomainId(registry, canonicalId);
+      const storageId = getStorageId(tokenId);
+      const domainId = makeENSv2DomainId(registry, storageId);
 
       const registration = await getLatestRegistration(context, domainId);
 
@@ -83,7 +83,7 @@ export default function () {
       }
 
       // Invariant: must be ENSv2Registry Registration
-      if (registration.type !== "ENSv2Registry") {
+      if (registration.type !== "ENSv2RegistryRegistration") {
         throw new Error(
           `Invariant(ETHRegistrar:NameRegistered): Registration found but not ENSv2Registry Registration:\n${toJson(registration)}`,
         );
@@ -145,8 +145,8 @@ export default function () {
       // update Registration.expiry, it just needs to update the latest Renewal
 
       const { registry } = await getRegistrarAndRegistry(context, event);
-      const canonicalId = getCanonicalId(tokenId);
-      const domainId = makeENSv2DomainId(registry, canonicalId);
+      const storageId = getStorageId(tokenId);
+      const domainId = makeENSv2DomainId(registry, storageId);
 
       const registration = await getLatestRegistration(context, domainId);
 
@@ -156,7 +156,7 @@ export default function () {
       }
 
       // Invariant: Must be ENSv2Registry Registration
-      if (registration.type !== "ENSv2Registry") {
+      if (registration.type !== "ENSv2RegistryRegistration") {
         throw new Error(
           `Invariant(ETHRegistrar:NameRenewed): Registration found but not ENSv2Registry Registration:\n${toJson(registration)}`,
         );

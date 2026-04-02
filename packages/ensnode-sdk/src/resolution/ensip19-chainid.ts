@@ -1,9 +1,9 @@
+import type { ChainId, DefaultableChainId } from "enssdk";
 import { mainnet } from "viem/chains";
 
 import { type ENSNamespaceId, getENSRootChainId } from "@ensnode/datasources";
 
 import { DEFAULT_EVM_CHAIN_ID } from "../ens";
-import type { ChainId, DefaultableChainId } from "../shared/types";
 
 /**
  * Gets the "chainId param" that should be used for a primary name resolution

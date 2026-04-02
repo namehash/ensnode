@@ -1,4 +1,4 @@
-import { gql } from "@/test/integration/ensnode-graphql-api-client";
+import { gql } from "@/test/integration/omnigraph-api-client";
 
 const PageInfoFragment = gql`
   fragment PageInfoFragment on PageInfo {

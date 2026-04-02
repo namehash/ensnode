@@ -1,6 +1,6 @@
+import type { InterpretedName } from "enssdk";
 import { describe, expect, it } from "vitest";
 
-import type { InterpretedName } from "../../../ens/types";
 import { RegistrarActionsResponseCodes, type RegistrarActionsResponseError } from "./response";
 import type {
   SerializedNamedRegistrarAction,

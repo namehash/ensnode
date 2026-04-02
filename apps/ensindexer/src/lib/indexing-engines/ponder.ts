@@ -129,89 +129,55 @@ function buildEventTypeId(eventName: EventNames): EventTypeId {
   }
 }
 
-let preparedIndexingSetup = false;
-
 /**
  * Prepare for executing the "setup" event handlers.
  *
- * This function is guaranteed to be executed just once before
- * the first "setup" event handler is executed.
- * This is to ensure that we affect the "hot path" of
- * indexing as little as possible, since this function is
- * called as part of preconditions for every "setup" event.
+ * During Ponder startup, the "setup" event handlers are executed:
+ * - After Ponder completed database migrations for ENSIndexer Schema in ENSDb.
+ * - Before Ponder starts processing any onchain events for indexed chains.
  *
- * Note that this functions should not have any long-running operations.
- * That would delay the population of Ponder Indexing Metrics for
- * all indexed chains. Ponder Indexing Metrics are populated only after
- * all setup handlers have completed. ENSIndexer relies on
- * Ponder Indexing Metrics being immediately available on startup to
- * build and store the current Indexing Status snapshot in ENSDb.
+ * This function is useful to make sure ENSDb is ready for writes, for example,
+ * by ensuring all required Postgres extensions are installed, etc.
  */
-async function prepareIndexingSetup(): Promise<void> {
-  if (preparedIndexingSetup) {
-    return;
-  }
-
-  preparedIndexingSetup = true;
-
-  // Currently, we don't have any indexing setup preconditions.
+async function initializeIndexingSetup(): Promise<void> {
+  /**
+   * Setup event handlers should not have any *long-running* preconditions. This is because
+   * Ponder populates the indexing metrics for all indexed chains only after all setup handlers have run.
+   * ENSIndexer relies on these indexing metrics being immediately available on startup to build and
+   * store the current Indexing Status in ENSDb.
+   */
 }
-
-let preparedIndexingActivation = false;
 
 /**
  * Prepare for executing the "onchain" event handlers.
  *
- * This function is guaranteed to be executed just once before
- * the first "onchain" event handler is executed.
- * This is to ensure that we affect the "hot path" of
- * indexing as little as possible, since this function is
- * called as part of preconditions for every "onchain" event.
+ * During Ponder startup, the "onchain" event handlers are executed
+ * after all "setup" event handlers have completed.
  *
- * @throws If valid ENSRainbow connection could not be established after
- *         multiple attempts.
+ * This function is useful to make sure any long-running preconditions for
+ * onchain event handlers are met, for example, waiting for
+ * the ENSRainbow instance to be ready before processing any onchain events
+ * that require data from ENSRainbow.
  *
  * @example A single blocking precondition
  * ```ts
- * await ensureValidEnsRainbowConnection();
+ * await waitForEnsRainbowToBeReady();
  * ```
  *
- * @example Multiple concurrent blocking preconditions
+ * @example Multiple blocking preconditions
  * ```ts
  * await Promise.all([
- *   ensureValidEnsRainbowConnection(),
+ *   waitForEnsRainbowToBeReady(),
  *   waitForAnotherPrecondition(),
  * ]);
  * ```
- *
- * @example Multiple sequential blocking preconditions
- * ```ts
- * await ensureValidEnsRainbowConnection();
- * await waitForAnotherPrecondition();
- * ```
  */
-async function prepareIndexingActivation() {
-  if (preparedIndexingActivation) {
-    return;
-  }
-
-  preparedIndexingActivation = true;
-
-  try {
-    await ensureValidEnsRainbowConnection();
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-
-    console.error(
-      `[Ponder Indexing Engine]: Failed to establish a valid connection to ENSRainbow: ${errorMessage}`,
-    );
-
-    // Throw the error to terminate the ENSIndexer process due to failed connection to critical dependency
-    throw new Error(errorMessage, {
-      cause: error,
-    });
-  }
+async function initializeIndexingActivation(): Promise<void> {
+  await ensureValidEnsRainbowConnection();
 }
+
+let indexingSetupPromise: Promise<void> | null = null;
+let indexingActivationPromise: Promise<void> | null = null;
 
 /**
  * Execute any necessary preconditions before running an event handler
@@ -219,17 +185,32 @@ async function prepareIndexingActivation() {
  *
  * Some event handlers may have preconditions that need to be met before
  * they can run.
+ *
+ * This function is idempotent and will only execute its logic once, even if
+ * called multiple times. This is to ensure that we affect the "hot path" of
+ * indexing as little as possible, since this function is called for every
+ * "onchain" event.
  */
-async function eventHandlerPreconditions<EventName extends EventNames>(
-  eventName: EventName,
-): Promise<void> {
-  const eventType = buildEventTypeId(eventName);
-
+async function eventHandlerPreconditions(eventType: EventTypeId): Promise<void> {
   switch (eventType) {
-    case EventTypeIds.Setup:
-      return prepareIndexingSetup();
+    case EventTypeIds.Setup: {
+      if (indexingSetupPromise === null) {
+        // Initialize the indexing setup just once.
+        indexingSetupPromise = initializeIndexingSetup();
+      }
+
+      return await indexingSetupPromise;
+    }
+
     case EventTypeIds.Onchain: {
-      return prepareIndexingActivation();
+      if (indexingActivationPromise === null) {
+        // Initialize the indexing activation just once in order to
+        // optimize the "hot path" of indexing onchain events, since these are
+        // much more frequent than setup events.
+        indexingActivationPromise = initializeIndexingActivation();
+      }
+
+      return await indexingActivationPromise;
     }
   }
 }
@@ -249,9 +230,10 @@ export function addOnchainEventListener<EventName extends EventNames>(
   eventName: EventName,
   eventHandler: (args: IndexingEngineEventHandlerArgs<EventName>) => Promise<void> | void,
 ) {
-  return ponder.on(eventName, async ({ context, event }) => {
-    await eventHandlerPreconditions(eventName);
+  const eventType = buildEventTypeId(eventName);
 
+  return ponder.on(eventName, async ({ context, event }) => {
+    await eventHandlerPreconditions(eventType);
     await eventHandler({
       context: buildIndexingEngineContext(context),
       event,

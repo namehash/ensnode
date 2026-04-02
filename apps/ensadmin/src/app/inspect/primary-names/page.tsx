@@ -1,21 +1,22 @@
 "use client";
 
 import { AddressDisplay } from "@namehash/namehash-ui";
-import { useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { useDebouncedValue } from "rooks";
-import type { Address } from "viem";
+import { type Address, isAddress } from "viem";
 
 import { usePrimaryNames } from "@ensnode/ensnode-react";
 import { getNamespaceSpecificValue } from "@ensnode/ensnode-sdk";
 
 import { RenderRequestsOutput } from "@/app/inspect/_components/render-requests-output";
+import { ResolveButton } from "@/app/inspect/_components/resolve-button";
 import { Pill } from "@/components/pill";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
+import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 
 import { EXAMPLE_ADDRESSES } from "../_lib/example-addresses";
 
@@ -23,7 +24,9 @@ import { EXAMPLE_ADDRESSES } from "../_lib/example-addresses";
 // TODO: use shadcn/form, react-hook-form, and zod to make all of this nicer aross the board
 // TODO: sync form state to query params, current just defaulting is supported
 export default function ResolvePrimaryNameInspector() {
+  const router = useRouter();
   const searchParams = useSearchParams();
+  const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
 
   const namespace = useActiveNamespace();
   const exampleAddresses = useMemo(
@@ -31,20 +34,31 @@ export default function ResolvePrimaryNameInspector() {
     [namespace],
   );
 
-  const [address, setAddress] = useState(
-    searchParams.get("address") || exampleAddresses[0].address,
-  );
+  const addressFromQuery = searchParams.get("address")?.trim() || null;
+
+  const [address, setAddress] = useState(addressFromQuery || exampleAddresses[0].address);
   const [debouncedAddress] = useDebouncedValue(address, 150);
 
-  const canQuery =
-    !!debouncedAddress && debouncedAddress.length > 0 && debouncedAddress.startsWith("0x");
+  useEffect(() => {
+    setAddress(addressFromQuery ?? exampleAddresses[0].address);
+  }, [addressFromQuery, exampleAddresses]);
+
+  const navigateToAddress = (addr: Address) => {
+    setAddress(addr);
+    const path = `/inspect/primary-names?address=${encodeURIComponent(addr)}`;
+    const href = retainCurrentRawConnectionUrlParam(path);
+    router.push(href);
+  };
+
+  const validAddress: Address | null =
+    debouncedAddress && isAddress(debouncedAddress) ? debouncedAddress : null;
 
   const accelerated = usePrimaryNames({
-    address: debouncedAddress as Address,
+    address: validAddress,
     accelerate: true,
     trace: true,
     query: {
-      enabled: canQuery,
+      enabled: !!validAddress,
       staleTime: 0,
       refetchInterval: 0,
       refetchOnMount: false,
@@ -55,11 +69,11 @@ export default function ResolvePrimaryNameInspector() {
   });
 
   const unaccelerated = usePrimaryNames({
-    address: debouncedAddress as Address,
+    address: validAddress,
     accelerate: false,
     trace: true,
     query: {
-      enabled: canQuery,
+      enabled: !!validAddress,
       staleTime: 0,
       refetchInterval: 0,
       refetchOnMount: false,
@@ -99,16 +113,25 @@ export default function ResolvePrimaryNameInspector() {
             <span className="text-sm font-medium leading-none">Examples:</span>
             {/* -mx-6 px-6 insets the scroll container against card for prettier scrolling */}
             <div className="flex flex-row overflow-x-scroll gap-2 no-scrollbar -mx-6 px-6">
-              {exampleAddresses.map(({ address, name }) => (
-                <Pill key={address} onClick={() => setAddress(address)} className="font-mono">
-                  <AddressDisplay address={address} /> ({name})
+              {exampleAddresses.map(({ address: exampleAddress, name }) => (
+                <Pill
+                  key={exampleAddress}
+                  onClick={() => navigateToAddress(exampleAddress)}
+                  className="font-mono"
+                >
+                  <AddressDisplay address={exampleAddress} /> ({name})
                 </Pill>
               ))}
             </div>
           </div>
         </CardContent>
         <CardFooter>
-          <Button onClick={() => refetch()}>Refresh</Button>
+          <ResolveButton
+            canResolve={isAddress(address.trim())}
+            hasChanged={address.trim() !== addressFromQuery}
+            onRefetch={refetch}
+            onNavigate={() => navigateToAddress(address.trim() as Address)}
+          />
         </CardFooter>
       </Card>
 
