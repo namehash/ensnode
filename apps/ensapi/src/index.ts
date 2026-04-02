@@ -30,11 +30,7 @@ const server = serve(
     // Write the generated graphql schema in the background
     void writeGraphQLSchema();
 
-    // Trigger proactive initialization of the indexing status cache at startup.
-    // SWRCache with proactivelyInitialize: true starts fetching immediately upon
-    // construction, but construction is deferred via the lazy proxy until first
-    // access — so we access it explicitly here rather than waiting for the first
-    // user request.
+    // proactively read the indexing status to warm cache
     void indexingStatusCache.read();
   },
 );
