@@ -11,6 +11,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { ensDbClient } from "@/lib/ensdb/singleton";
+import { formatLogParam, logger } from "@/lib/logger";
 
 const app = new Hono();
 
@@ -55,8 +56,12 @@ app.get("/indexing-status", async (c) => {
       } satisfies IndexingStatusResponseOk),
     );
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    console.error(`Indexing Status Snapshot is currently not available: ${errorMessage}`);
+    logger.error({
+      msg: "Indexing status snapshot unavailable",
+      error: error instanceof Error ? error : undefined,
+      module: formatLogParam("ensnode-api"),
+      endpoint: formatLogParam("/indexing-status"),
+    });
 
     return c.json(
       serializeIndexingStatusResponse({
