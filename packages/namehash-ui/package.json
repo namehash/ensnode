@@ -20,7 +20,8 @@
   ],
   "exports": {
     ".": "./src/index.ts",
-    "./styles.css": "./dist/index.css"
+    "./styles.css": "./dist/index.css",
+    "./legacy": "./src/components/legacy/index.ts"
   },
   "sideEffects": false,
   "publishConfig": {
@@ -29,6 +30,10 @@
       ".": {
         "default": "./dist/index.js",
         "types": "./dist/index.d.ts"
+      },
+      "./legacy": {
+        "default": "./dist/components/legacy/index.js",
+        "types": "./dist/components/legacy/index.d.ts"
       },
       "./styles.css": {
         "import": "./dist/index.css",

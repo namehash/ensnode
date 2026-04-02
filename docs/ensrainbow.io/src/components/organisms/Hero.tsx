@@ -1,4 +1,4 @@
-import { Button, Link } from "@namehash/namekit-react";
+import { legacyLinkVariants, legacyButtonVariants } from "@namehash/namehash-ui/legacy";
 
 import BeforeAfterSlider from "../molecules/BeforeAfterSlider.tsx";
 import HeroInstallCommand from "../molecules/HeroInstallCommand.tsx";
@@ -28,29 +28,42 @@ export default function Hero() {
           </div>
           <p className="not-italic font-normal text-gray-500 text-lg leading-7 sm:text-base sm:leading-6 text-center lg:text-left">
             Heal millions of unknown ENS names with this{" "}
-            <Link
+            <a
               href="https://ensnode.io/"
               target="_blank"
-              className="text-black!"
-              variant="underline"
-              size="medium"
+              rel="noopener noreferrer"
+              className={legacyLinkVariants({
+                variant: "underline",
+                size: "medium",
+                className: "!text-black",
+              })}
             >
               ENSNode
-            </Link>{" "}
+            </a>{" "}
             sidecar service.
           </p>
 
           <HeroInstallCommand />
 
           <div className="block relative z-10 pt-3 lg:hidden">
-            <Button asChild>
-              <Link href="https://ensnode.io/ensrainbow">View the docs</Link>
-            </Button>
+            <a
+              href="https://ensnode.io/ensrainbow"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={legacyButtonVariants({ variant: "primary", size: "medium" })}
+            >
+              View the docs
+            </a>
           </div>
           <div className="hidden lg:block relative z-10">
-            <Button variant="primary" size="large" asChild>
-              <Link href="https://ensnode.io/ensrainbow">View the docs</Link>
-            </Button>
+            <a
+              href="https://ensnode.io/ensrainbow"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={legacyButtonVariants({ variant: "primary", size: "large" })}
+            >
+              View the docs
+            </a>
           </div>
         </div>
         <div className="w-full lg:w-1/3 box-border hidden sm:flex flex-col flex-nowrap justify-start items-center">
