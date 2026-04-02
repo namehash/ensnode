@@ -14,6 +14,7 @@ import {
   type PonderAppCommand,
   PonderAppCommands,
   type PonderAppContext,
+  type PonderAppLogger,
 } from "../ponder-app-context";
 import type { Unvalidated } from "./utils";
 
@@ -27,6 +28,32 @@ export const schemaPortNumber = z
   .max(65535, { error: "Port must be less than or equal to 65535." });
 
 /**
+ * Represents the Ponder app logger method
+ */
+const schemaPonderAppLoggerMethod = z.function({
+  input: [
+    z.looseObject({
+      msg: z.string({ error: "Log message must be a string." }),
+      error: z.optional(z.instanceof(Error, { error: "Error must be an instance of Error." })),
+    }),
+  ],
+  output: z.void(),
+});
+
+/**
+ * Represents the logger provided by the Ponder runtime to a local Ponder app.
+ */
+const schemaPonderAppLogger = z
+  .looseObject({
+    error: schemaPonderAppLoggerMethod,
+    warn: schemaPonderAppLoggerMethod,
+    info: schemaPonderAppLoggerMethod,
+    debug: schemaPonderAppLoggerMethod,
+    trace: schemaPonderAppLoggerMethod,
+  })
+  .transform((logger) => logger as PonderAppLogger);
+
+/**
  * Type representing the "raw" context of a local Ponder app.
  */
 const schemaRawPonderAppContext = z.object({
@@ -34,6 +61,7 @@ const schemaRawPonderAppContext = z.object({
     command: z.enum(PonderAppCommands),
     port: schemaPortNumber,
   }),
+  logger: schemaPonderAppLogger,
 });
 
 /**
@@ -47,6 +75,7 @@ export type RawPonderAppContext = z.infer<typeof schemaRawPonderAppContext>;
 const schemaPonderAppContext = z.object({
   command: z.enum(PonderAppCommands),
   localPonderAppUrl: z.instanceof(URL, { error: "localPonderAppUrl must be a valid URL." }),
+  logger: schemaPonderAppLogger,
 });
 
 /**
@@ -62,6 +91,7 @@ function buildUnvalidatedPonderAppContext(
   return {
     command: rawPonderAppContext.options.command as Unvalidated<PonderAppCommand>,
     localPonderAppUrl: new URL(`http://localhost:${rawPonderAppContext.options.port}`),
+    logger: rawPonderAppContext.logger,
   };
 }
 
