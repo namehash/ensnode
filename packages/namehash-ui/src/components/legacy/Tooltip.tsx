@@ -41,7 +41,12 @@ export function Tooltip({
   avoidCollisions = true,
   ...props
 }: Props) {
-  const triggerNode = React.isValidElement(trigger) ? trigger : <span>{trigger}</span>;
+  const triggerNode =
+    React.isValidElement(trigger) && trigger.type !== React.Fragment ? (
+      trigger
+    ) : (
+      <span>{trigger}</span>
+    );
   const [open, setOpen] = useState(false);
 
   return (
