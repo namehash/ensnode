@@ -2,9 +2,9 @@ import config from "@/config";
 
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, eq } from "drizzle-orm";
+import { makePermissionsId, makeResolverRecordsId, type ResolverId } from "enssdk";
 import { namehash } from "viem";
 
-import { makePermissionsId, makeResolverRecordsId, type ResolverId } from "@ensnode/ensnode-sdk";
 import { isBridgedResolver } from "@ensnode/ensnode-sdk/internal";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";

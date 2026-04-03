@@ -1,4 +1,4 @@
-import { type DomainId, makeRegistrationId, makeRenewalId } from "@ensnode/ensnode-sdk";
+import { type DomainId, makeRegistrationId, makeRenewalId } from "enssdk";
 
 import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 

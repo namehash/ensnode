@@ -1,4 +1,4 @@
-import { makeRegistryId } from "@ensnode/ensnode-sdk";
+import { makeRegistryId } from "enssdk";
 
 import type { ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { builder } from "@/omnigraph-api/builder";

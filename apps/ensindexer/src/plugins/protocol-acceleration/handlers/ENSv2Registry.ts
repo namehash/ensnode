@@ -1,6 +1,7 @@
+import { getStorageId, makeENSv2DomainId } from "enssdk";
 import type { Address } from "viem";
 
-import { getStorageId, makeENSv2DomainId, PluginName } from "@ensnode/ensnode-sdk";
+import { PluginName } from "@ensnode/ensnode-sdk";
 
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { addOnchainEventListener, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";

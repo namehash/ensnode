@@ -7,7 +7,6 @@ export * from "./ens";
 export * from "./ensapi";
 export * from "./ensindexer";
 export * from "./ensrainbow";
-export * from "./ensv2";
 export * from "./identity";
 export * from "./indexing-status";
 export * from "./omnigraph-api/prerequisites";

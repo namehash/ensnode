@@ -2,7 +2,7 @@
  * This file contains handlers used in event handlers for a subregistry contract.
  */
 
-import { type AccountId, formatAccountId, type Node } from "@ensnode/ensnode-sdk";
+import { type AccountId, type Node, stringifyAccountId } from "enssdk";
 
 import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 
@@ -24,7 +24,7 @@ export async function upsertSubregistry(
   await context.ensDb
     .insert(ensIndexerSchema.subregistries)
     .values({
-      subregistryId: formatAccountId(subregistryId),
+      subregistryId: stringifyAccountId(subregistryId),
       node,
     })
     .onConflictDoNothing();
@@ -38,6 +38,6 @@ export async function getSubregistry(
   { subregistryId }: { subregistryId: AccountId },
 ): Promise<typeof ensIndexerSchema.subregistries.$inferSelect | null> {
   return context.ensDb.find(ensIndexerSchema.subregistries, {
-    subregistryId: formatAccountId(subregistryId),
+    subregistryId: stringifyAccountId(subregistryId),
   });
 }

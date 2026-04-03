@@ -1,16 +1,5 @@
-import { AccountId as CaipAccountId, AssetId as CaipAssetId } from "caip";
-import type {
-  AccountId,
-  AccountIdString,
-  AssetId,
-  AssetIdString,
-  ChainId,
-  ChainIdString,
-  DatetimeISO8601,
-  UrlString,
-} from "enssdk";
+import type { ChainId, ChainIdString, DatetimeISO8601, UrlString } from "enssdk";
 
-import { uint256ToHex32 } from "../ens";
 import type {
   Price,
   PriceDai,
@@ -73,37 +62,4 @@ export function serializePriceUsdc(price: PriceUsdc): SerializedPriceUsdc {
  */
 export function serializePriceDai(price: PriceDai): SerializedPriceDai {
   return serializePrice(price) as SerializedPriceDai;
-}
-
-/**
- * Format {@link AccountId} object as a string.
- *
- * Formatted as a fully lowercase CAIP-10 AccountId.
- *
- * @see https://chainagnostic.org/CAIPs/caip-10
- */
-export function formatAccountId(accountId: AccountId): AccountIdString {
-  return CaipAccountId.format({
-    chainId: { namespace: "eip155", reference: accountId.chainId.toString() },
-    address: accountId.address,
-  }).toLowerCase();
-}
-
-/**
- * Format {@link AssetId} object as a string.
- *
- * Formatted as a fully lowercase CAIP-19 AssetId.
- *
- * @see https://chainagnostic.org/CAIPs/caip-19
- */
-export function formatAssetId({
-  assetNamespace,
-  contract: { chainId, address },
-  tokenId,
-}: AssetId): AssetIdString {
-  return CaipAssetId.format({
-    chainId: { namespace: "eip155", reference: chainId.toString() },
-    assetName: { namespace: assetNamespace, reference: address },
-    tokenId: uint256ToHex32(tokenId),
-  }).toLowerCase();
 }

@@ -4,9 +4,10 @@ import {
   type ReferrerMetrics,
 } from "@namehash/ens-referrals";
 import { and, count, desc, eq, gte, isNotNull, lte, ne, sql, sum } from "drizzle-orm";
+import { stringifyAccountId } from "enssdk";
 import { type Address, zeroAddress } from "viem";
 
-import { deserializeDuration, formatAccountId } from "@ensnode/ensnode-sdk";
+import { deserializeDuration } from "@ensnode/ensnode-sdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import logger from "@/lib/logger";
@@ -61,7 +62,10 @@ export const getReferrerMetrics = async (
           // Filter by decodedReferrer not zero address
           ne(ensIndexerSchema.registrarActions.decodedReferrer, zeroAddress),
           // Filter by subregistryId matching the provided subregistryId
-          eq(ensIndexerSchema.registrarActions.subregistryId, formatAccountId(rules.subregistryId)),
+          eq(
+            ensIndexerSchema.registrarActions.subregistryId,
+            stringifyAccountId(rules.subregistryId),
+          ),
         ),
       )
       .groupBy(ensIndexerSchema.registrarActions.decodedReferrer)

@@ -54,6 +54,7 @@
   },
   "dependencies": {
     "@ensdomains/address-encoder": "^1.1.2",
+    "caip": "catalog:",
     "gql.tada": "^1.8.10",
     "graphql": "^16.11.0"
   },

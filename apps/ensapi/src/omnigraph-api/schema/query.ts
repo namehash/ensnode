@@ -1,13 +1,9 @@
 import config from "@/config";
 
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
+import { makePermissionsId, makeRegistryId, makeResolverId } from "enssdk";
 
-import {
-  makePermissionsId,
-  makeRegistryId,
-  makeResolverId,
-  maybeGetENSv2RootRegistryId,
-} from "@ensnode/ensnode-sdk";
+import { maybeGetENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { builder } from "@/omnigraph-api/builder";

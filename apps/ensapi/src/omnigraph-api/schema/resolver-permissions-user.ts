@@ -1,4 +1,4 @@
-import { makeResolverId } from "@ensnode/ensnode-sdk";
+import { makeResolverId } from "enssdk";
 
 import type { ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { builder } from "@/omnigraph-api/builder";

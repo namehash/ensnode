@@ -1,3 +1,4 @@
+import { makeENSv1DomainId, type Node } from "enssdk";
 import { type Address, isAddressEqual, zeroAddress } from "viem";
 
 import {
@@ -12,9 +13,7 @@ import {
   isRegistrationInGracePeriod,
   type LiteralLabel,
   labelhashLiteralLabel,
-  makeENSv1DomainId,
   makeSubdomainNode,
-  type Node,
   PluginName,
 } from "@ensnode/ensnode-sdk";
 

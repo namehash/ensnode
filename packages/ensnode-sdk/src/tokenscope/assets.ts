@@ -7,11 +7,11 @@ import type {
   Node,
   TokenId,
 } from "enssdk";
+import { stringifyAssetId } from "enssdk";
 import { type Address, type Hex, isAddressEqual, zeroAddress } from "viem";
 import { prettifyError } from "zod/v4";
 
 import { uint256ToHex32 } from "../ens";
-import { formatAssetId } from "../shared/serialize";
 import { makeAssetIdSchema, makeAssetIdStringSchema } from "./zod-schemas";
 
 /**
@@ -142,7 +142,7 @@ export interface NFTTransferEventMetadata {
 }
 
 export const formatNFTTransferEventMetadata = (metadata: NFTTransferEventMetadata): string => {
-  const assetIdString = formatAssetId(metadata.nft);
+  const assetIdString = stringifyAssetId(metadata.nft);
 
   return [
     `Event: ${metadata.eventHandlerName}`,

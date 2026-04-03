@@ -1,9 +1,9 @@
 import type { AccountId } from "enssdk";
+import { stringifyAccountId } from "enssdk";
 import type { Address } from "viem";
 import { describe, expect, it } from "vitest";
 
 import { parseAccountId } from "./deserialize";
-import { formatAccountId } from "./serialize";
 
 const vitalikEthAddressLowercase: Address = "0xd8da6bf26964af9d7eed9e03e53415d37aa96045";
 const vitalikEthAddressChecksummed: Address = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
@@ -11,14 +11,14 @@ const vitalikEthAddressChecksummed: Address = "0xd8dA6BF26964aF9D7eEd9e03E53415D
 describe("ENSNode SDK Shared: AccountId", () => {
   it("can serialize AccountId object into a CAIP-10 formatted inline string", () => {
     expect(
-      formatAccountId({
+      stringifyAccountId({
         chainId: 1,
         address: vitalikEthAddressLowercase,
       }),
     ).toStrictEqual(`eip155:1:${vitalikEthAddressLowercase}`);
 
     expect(
-      formatAccountId({
+      stringifyAccountId({
         chainId: 1,
         address: vitalikEthAddressChecksummed,
       }),

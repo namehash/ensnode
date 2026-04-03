@@ -1,11 +1,7 @@
+import { makePermissionsId, makePermissionsResourceId, makePermissionsUserId } from "enssdk";
 import { type Address, isAddressEqual, zeroAddress } from "viem";
 
-import {
-  makePermissionsId,
-  makePermissionsResourceId,
-  makePermissionsUserId,
-  PluginName,
-} from "@ensnode/ensnode-sdk";
+import { PluginName } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { ensurePermissionsEvent } from "@/lib/ensv2/event-db-helpers";

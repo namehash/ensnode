@@ -1,12 +1,12 @@
-import type { Address } from "viem";
-
 import {
   type AccountId,
   type CoinType,
   makeResolverId,
   makeResolverRecordsId,
   type Node,
-} from "@ensnode/ensnode-sdk";
+} from "enssdk";
+import type { Address } from "viem";
+
 import {
   interpretAddressRecordValue,
   interpretNameRecordValue,

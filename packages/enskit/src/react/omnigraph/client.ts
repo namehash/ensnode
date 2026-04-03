@@ -1,6 +1,7 @@
 import { Client, fetchExchange } from "@urql/core";
 import { cacheExchange } from "@urql/exchange-graphcache";
 import type { AccountId } from "enssdk";
+import { makePermissionsId } from "enssdk";
 import { introspection } from "enssdk/omnigraph";
 
 /**
@@ -73,6 +74,12 @@ export function createOmnigraphUrqlClient(ensNodeUrl: string): Client {
               if (!by?.id) return undefined;
 
               return { __typename: "Resolver", id: by.id };
+            },
+            permissions(parent, args, cache, info) {
+              const forArg = args.for as AccountId | undefined;
+              if (!forArg) return undefined;
+
+              return { __typename: "Permissions", id: makePermissionsId(forArg) };
             },
           },
         },

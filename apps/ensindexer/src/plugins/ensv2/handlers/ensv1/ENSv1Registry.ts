@@ -1,15 +1,13 @@
 import config from "@/config";
 
+import { type LabelHash, makeENSv1DomainId, type Node } from "enssdk";
 import { type Address, isAddressEqual, zeroAddress } from "viem";
 
 import {
   ADDR_REVERSE_NODE,
   getENSRootChainId,
   interpretAddress,
-  type LabelHash,
-  makeENSv1DomainId,
   makeSubdomainNode,
-  type Node,
   PluginName,
   ROOT_NODE,
 } from "@ensnode/ensnode-sdk";

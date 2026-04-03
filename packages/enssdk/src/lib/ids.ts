@@ -1,5 +1,11 @@
+import { AccountId as CaipAccountId, AssetId as CaipAssetId } from "caip";
+import { type Address, type Hex, hexToBigInt, toHex } from "viem";
+
 import type {
   AccountId,
+  AccountIdString,
+  AssetId,
+  AssetIdString,
   DomainId,
   ENSv1DomainId,
   ENSv2DomainId,
@@ -14,27 +20,51 @@ import type {
   ResolverId,
   ResolverRecordsId,
   StorageId,
-} from "enssdk";
-import { AssetNamespaces } from "enssdk";
-import { type Address, hexToBigInt } from "viem";
-
-import { formatAccountId, formatAssetId } from "@ensnode/ensnode-sdk";
+} from "./types";
+import { AssetNamespaces } from "./types";
 
 /**
- * Formats and brands an AccountId as a RegistryId.
+ * Stringify an {@link AccountId} as a fully lowercase CAIP-10 AccountId string.
+ *
+ * @see https://chainagnostic.org/CAIPs/caip-10
  */
-export const makeRegistryId = (accountId: AccountId) => formatAccountId(accountId) as RegistryId;
+export function stringifyAccountId(accountId: AccountId): AccountIdString {
+  return CaipAccountId.format({
+    chainId: { namespace: "eip155", reference: accountId.chainId.toString() },
+    address: accountId.address,
+  }).toLowerCase();
+}
 
 /**
- * Makes an ENSv1 Domain Id given the ENSv1 Domain's `node`
+ * Stringify an {@link AssetId} as a fully lowercase CAIP-19 AssetId string.
+ *
+ * @see https://chainagnostic.org/CAIPs/caip-19
  */
+export function stringifyAssetId({
+  assetNamespace,
+  contract: { chainId, address },
+  tokenId,
+}: AssetId): AssetIdString {
+  const uint256ToHex32 = (num: bigint): Hex => toHex(num, { size: 32 });
+
+  return CaipAssetId.format({
+    chainId: { namespace: "eip155", reference: chainId.toString() },
+    assetName: { namespace: assetNamespace, reference: address },
+    tokenId: uint256ToHex32(tokenId),
+  }).toLowerCase();
+}
+
+export const makeRegistryId = (accountId: AccountId) => stringifyAccountId(accountId) as RegistryId;
+
+export const makePermissionsId = (contract: AccountId) =>
+  stringifyAccountId(contract) as PermissionsId;
+
+export const makeResolverId = (contract: AccountId) => stringifyAccountId(contract) as ResolverId;
+
 export const makeENSv1DomainId = (node: Node) => node as ENSv1DomainId;
 
-/**
- * Makes an ENSv2 Domain Id given the parent `registry` and the domain's `storageId`.
- */
 export const makeENSv2DomainId = (registry: AccountId, storageId: StorageId) =>
-  formatAssetId({
+  stringifyAssetId({
     assetNamespace: AssetNamespaces.ERC1155,
     contract: registry,
     tokenId: storageId,
@@ -53,43 +83,17 @@ export const getStorageId = (input: bigint | LabelHash): StorageId => {
   return getStorageId(hexToBigInt(input));
 };
 
-/**
- * Formats and brands an AccountId as a PermissionsId.
- */
-export const makePermissionsId = (contract: AccountId) =>
-  formatAccountId(contract) as PermissionsId;
-
-/**
- * Constructs a PermissionsResourceId for a given `contract`'s `resource`.
- */
 export const makePermissionsResourceId = (contract: AccountId, resource: bigint) =>
   `${makePermissionsId(contract)}/${resource}` as PermissionsResourceId;
 
-/**
- * Constructs a PermissionsUserId for a given `contract`'s `resource`'s `user`.
- */
 export const makePermissionsUserId = (contract: AccountId, resource: bigint, user: Address) =>
   `${makePermissionsId(contract)}/${resource}/${user}` as PermissionsUserId;
 
-/**
- * Formats and brands an AccountId as a ResolverId.
- */
-export const makeResolverId = (contract: AccountId) => formatAccountId(contract) as ResolverId;
-
-/**
- * Constructs a ResolverRecordsId for a given `node` under `resolver`.
- */
 export const makeResolverRecordsId = (resolver: AccountId, node: Node) =>
   `${makeResolverId(resolver)}/${node}` as ResolverRecordsId;
 
-/**
- * Constructs a RegistrationId for a `domainId`'s `index`'thd Registration.
- */
 export const makeRegistrationId = (domainId: DomainId, index: number) =>
   `${domainId}/${index}` as RegistrationId;
 
-/**
- * Constructs a RenewalId for a `domainId`'s `registrationIndex`thd Registration's `index`'thd Renewal.
- */
 export const makeRenewalId = (domainId: DomainId, registrationIndex: number, index: number) =>
   `${makeRegistrationId(domainId, registrationIndex)}/${index}` as RenewalId;
