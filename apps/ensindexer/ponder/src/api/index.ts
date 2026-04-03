@@ -7,6 +7,7 @@ import type { ErrorResponse } from "@ensnode/ensnode-sdk";
 
 import { migrateEnsNodeSchema } from "@/lib/ensdb/migrate-ensnode-schema";
 import { startEnsDbWriterWorker } from "@/lib/ensdb-writer-worker/singleton";
+import { logger } from "@/lib/logger";
 
 import ensNodeApi from "./handlers/ensnode-api";
 
@@ -19,7 +20,11 @@ import ensNodeApi from "./handlers/ensnode-api";
 migrateEnsNodeSchema()
   .then(startEnsDbWriterWorker)
   .catch((error) => {
-    console.error("Failed to migrate ENSNode Schema — ", error);
+    logger.error({
+      msg: "Failed to initialize ENSNode metadata",
+      error,
+      module: "ponder-api",
+    });
     process.exit(1);
   });
 
@@ -39,7 +44,12 @@ app.route("/api", ensNodeApi);
 
 // log hono errors to console
 app.onError((error, ctx) => {
-  console.error(error);
+  logger.error({
+    msg: "Internal server error",
+    error,
+    path: ctx.req.path,
+    module: "ponder-api",
+  });
   return ctx.json({ message: "Internal Server Error" } satisfies ErrorResponse, 500);
 });
 

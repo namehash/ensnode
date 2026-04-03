@@ -2,7 +2,7 @@ import type { ServeCommandConfig } from "@/config";
 
 import { serve } from "@hono/node-server";
 
-import { prettyPrintJson } from "@ensnode/ensnode-sdk/internal";
+import { stringifyConfig } from "@ensnode/ensnode-sdk/internal";
 
 import { buildEnsRainbowPublicConfig } from "@/config/public";
 import { createApi } from "@/lib/api";
@@ -15,7 +15,7 @@ export type ServerCommandOptions = ServeCommandConfig;
 export async function serverCommand(options: ServerCommandOptions): Promise<void> {
   // console.log is used so it can't be skipped by the logger
   console.log("ENSRainbow running with config:");
-  console.log(prettyPrintJson(options));
+  console.log(stringifyConfig(options, { pretty: true }));
 
   logger.info(`ENS Rainbow server starting on port ${options.port}...`);
 
@@ -28,7 +28,7 @@ export async function serverCommand(options: ServerCommandOptions): Promise<void
 
     // console.log is used so it can't be skipped by the logger
     console.log("ENSRainbow public config:");
-    console.log(prettyPrintJson(publicConfig));
+    console.log(stringifyConfig(publicConfig, { pretty: true }));
 
     const app = createApi(ensRainbowServer, publicConfig);
 

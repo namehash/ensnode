@@ -58,7 +58,6 @@
     "hono": "catalog:",
     "p-memoize": "^8.0.0",
     "p-retry": "catalog:",
-    "pg-connection-string": "catalog:",
     "pino": "catalog:",
     "ponder-enrich-gql-docs-middleware": "^0.1.3",
     "superjson": "^2.2.6",

@@ -34,7 +34,6 @@
     "deepmerge-ts": "^7.1.5",
     "dns-packet": "^5.6.1",
     "drizzle-orm": "catalog:",
-    "pg-connection-string": "catalog:",
     "p-retry": "catalog:",
     "hono": "catalog:",
     "ponder": "catalog:",

@@ -195,23 +195,21 @@ let indexingActivationPromise: Promise<void> | null = null;
 async function eventHandlerPreconditions(eventType: EventTypeId): Promise<void> {
   switch (eventType) {
     case EventTypeIds.Setup: {
+      // Initialize the indexing setup just once
       if (indexingSetupPromise === null) {
-        // Initialize the indexing setup just once.
         indexingSetupPromise = initializeIndexingSetup();
       }
 
-      return await indexingSetupPromise;
+      return indexingSetupPromise;
     }
 
     case EventTypeIds.Onchain: {
+      // Initialize the indexing activation just once
       if (indexingActivationPromise === null) {
-        // Initialize the indexing activation just once in order to
-        // optimize the "hot path" of indexing onchain events, since these are
-        // much more frequent than setup events.
         indexingActivationPromise = initializeIndexingActivation();
       }
 
-      return await indexingActivationPromise;
+      return indexingActivationPromise;
     }
   }
 }
@@ -235,9 +233,6 @@ export function addOnchainEventListener<EventName extends EventNames>(
 
   return ponder.on(eventName, async ({ context, event }) => {
     await eventHandlerPreconditions(eventType);
-    await eventHandler({
-      context: buildIndexingEngineContext(context),
-      event,
-    });
+    await eventHandler({ context: buildIndexingEngineContext(context), event });
   });
 }

@@ -6,12 +6,15 @@ import pRetry from "p-retry";
 import type { Duration } from "@ensnode/ensnode-sdk";
 import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 
+import { logger } from "@/lib/logger";
+
 const { ensRainbowUrl, labelSet } = config;
 
 if (ensRainbowUrl.href === EnsRainbowApiClient.defaultOptions().endpointUrl.href) {
-  console.warn(
-    `Using default public ENSRainbow server which may cause increased network latency. For production, use your own ENSRainbow server that runs on the same network as the ENSIndexer server.`,
-  );
+  logger.warn({
+    msg: `Using default public ENSRainbow server which may cause increased network latency`,
+    advice: `For production, use your own ENSRainbow server that runs on the same network as the ENSIndexer server.`,
+  });
 }
 
 /**
@@ -45,11 +48,12 @@ let waitForEnsRainbowToBeReadyPromise: Promise<void> | undefined;
  *         This error will trigger termination of the ENSIndexer process.
  */
 export function waitForEnsRainbowToBeReady(): Promise<void> {
-  if (waitForEnsRainbowToBeReadyPromise) {
-    return waitForEnsRainbowToBeReadyPromise;
-  }
+  if (waitForEnsRainbowToBeReadyPromise) return waitForEnsRainbowToBeReadyPromise;
 
-  console.log(`Waiting for ENSRainbow instance to be ready at '${ensRainbowUrl}'...`);
+  logger.info({
+    msg: `Waiting for ENSRainbow instance to be ready`,
+    ensRainbowInstance: ensRainbowUrl.href,
+  });
 
   const retryInterval: Duration = 5;
   const retryIntervalMs = secondsToMilliseconds(retryInterval);
@@ -63,19 +67,30 @@ export function waitForEnsRainbowToBeReady(): Promise<void> {
       // Log once every minute to avoid excessive logging during ENSRainbow cold start,
       // while still providing visibility into the retry process.
       if (attemptNumber % 12 === 0) {
-        console.warn(
-          `Attempt ${attemptNumber} failed for the ENSRainbow health check at '${ensRainbowUrl}' (${error.message}). ${retriesLeft} retries left. This might be due to ENSRainbow having a cold start, which can take 30+ minutes.`,
-        );
+        logger.warn({
+          msg: `ENSRainbow health check failed`,
+          attempt: attemptNumber,
+          retriesLeft,
+          error: retriesLeft === 0 ? error : undefined,
+          ensRainbowInstance: ensRainbowUrl.href,
+          advice: `This might be due to ENSRainbow having a cold start, which can take 30+ minutes.`,
+        });
       }
     },
   })
-    .then(() => console.log(`ENSRainbow instance is ready at '${ensRainbowUrl}'.`))
+    .then(() => {
+      logger.info({
+        msg: `ENSRainbow instance is ready`,
+        ensRainbowInstance: ensRainbowUrl.href,
+      });
+    })
     .catch((error) => {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      logger.error({
+        msg: `ENSRainbow health check failed after multiple attempts`,
+        error,
+        ensRainbowInstance: ensRainbowUrl.href,
+      });
 
-      console.error(`ENSRainbow health check failed after multiple attempts: ${errorMessage}`);
-
-      // Throw the error to terminate the ENSIndexer process due to the failed health check of a critical dependency
       throw error;
     });
 

@@ -1,11 +1,7 @@
-import type { ChainId, UrlString } from "enssdk";
+import type { ChainId } from "enssdk";
 import type { z } from "zod/v4";
 
-import type {
-  EnsIndexerSchemaNameSchema,
-  PortNumberSchema,
-  TheGraphApiKeySchema,
-} from "./zod-schemas";
+import type { PortNumberSchema, TheGraphApiKeySchema } from "./zod-schemas";
 
 /**
  * RPC configuration for a single chain.
@@ -42,10 +38,6 @@ export interface RpcConfig {
 }
 
 export type RpcConfigs = Map<ChainId, RpcConfig>;
-
-export type DatabaseUrl = UrlString;
-
-export type EnsIndexerSchemaName = z.infer<typeof EnsIndexerSchemaNameSchema>;
 
 export type TheGraphApiKey = z.infer<typeof TheGraphApiKeySchema>;
 

@@ -1,6 +1,6 @@
 import { EnsDbReader } from "@ensnode/ensdb-sdk";
 
-import { buildEnsDbConfigFromEnvironment } from "@/config/ensdb-config.schema";
+import { buildEnsDbConfigFromEnvironment } from "@/config/ensdb-config";
 import { lazyProxy } from "@/lib/lazy";
 
 // lazyProxy defers construction until first use so that this module can be

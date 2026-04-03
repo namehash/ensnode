@@ -34,6 +34,7 @@ import {
   type IndexingEngineContext,
 } from "@/lib/indexing-engines/ponder";
 import { toJson } from "@/lib/json-stringify-with-bigints";
+import { logger } from "@/lib/logger";
 import { getManagedName } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
@@ -172,7 +173,7 @@ export default function () {
         }
       } catch {
         // NameWrapper emitted malformed name? just warn and move on
-        console.warn(`NameWrapper emitted malformed DNSEncodedName: '${name}'`);
+        logger.warn({ msg: `NameWrapper emitted malformed DNSEncodedName: '${name}'` });
       }
 
       const registration = await getLatestRegistration(context, domainId);
