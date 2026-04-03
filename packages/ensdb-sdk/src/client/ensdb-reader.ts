@@ -151,9 +151,7 @@ export class EnsDbReader<
       key: EnsNodeMetadataKeys.EnsIndexerPublicConfig,
     });
 
-    if (!record) {
-      return undefined;
-    }
+    if (!record) return undefined;
 
     return deserializeEnsIndexerPublicConfig(record);
   }
@@ -167,10 +165,6 @@ export class EnsDbReader<
     const record = await this.getEnsNodeMetadata<SerializedEnsNodeMetadataEnsRainbowPublicConfig>({
       key: EnsNodeMetadataKeys.EnsRainbowPublicConfig,
     });
-
-    if (!record) {
-      return undefined;
-    }
 
     return record;
   }
@@ -187,9 +181,7 @@ export class EnsDbReader<
       },
     );
 
-    if (!record) {
-      return undefined;
-    }
+    if (!record) return undefined;
 
     return deserializeCrossChainIndexingStatusSnapshot(record);
   }
@@ -215,9 +207,7 @@ export class EnsDbReader<
         ),
       );
 
-    if (result.length === 0) {
-      return undefined;
-    }
+    if (result.length === 0) return undefined;
 
     if (result.length === 1 && result[0]) {
       return result[0].value as EnsNodeMetadataType["value"];
