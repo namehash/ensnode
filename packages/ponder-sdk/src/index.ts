@@ -10,4 +10,5 @@ export * from "./local-indexing-metrics";
 export * from "./local-ponder-client";
 export * from "./numbers";
 export * from "./ponder-app-context";
+export * from "./ponder-app-logger";
 export * from "./time";

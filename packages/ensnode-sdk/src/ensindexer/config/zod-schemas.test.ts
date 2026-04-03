@@ -6,7 +6,6 @@ import type { SerializedEnsIndexerPublicConfig } from "./serialized-types";
 import { type EnsIndexerVersionInfo, PluginName } from "./types";
 import {
   makeEnsIndexerPublicConfigSchema,
-  makeEnsIndexerSchemaNameSchema,
   makeEnsIndexerVersionInfoSchema,
   makeFullyPinnedLabelSetSchema,
   makeIndexedChainIdsSchema,
@@ -20,16 +19,6 @@ describe("ENSIndexer: Config", () => {
       prettifyError(zodParseError.error!);
 
     describe("Parsing", () => {
-      it("can parse database schema name values", () => {
-        expect(makeEnsIndexerSchemaNameSchema().parse("public")).toBe("public");
-        expect(makeEnsIndexerSchemaNameSchema().parse("the_schema")).toBe("the_schema");
-        expect(makeEnsIndexerSchemaNameSchema().parse("theSchema")).toBe("theSchema");
-
-        expect(formatParseError(makeEnsIndexerSchemaNameSchema().safeParse(1))).toContain(
-          "ENS Indexer Schema Name must be a string",
-        );
-      });
-
       it("can parse a list of plugin name values", () => {
         expect(
           makePluginsListSchema().parse([
@@ -262,15 +251,6 @@ describe("ENSIndexer: Config", () => {
 
     describe("Useful error messages", () => {
       it("can apply custom value labels", () => {
-        expect(
-          formatParseError(makeEnsIndexerSchemaNameSchema("ensIndexerSchemaName").safeParse("")),
-        ).toContain("ensIndexerSchemaName is required and must be a non-empty string.");
-        expect(
-          formatParseError(
-            makeEnsIndexerSchemaNameSchema("ENSINDEXER_SCHEMA_NAME env var").safeParse(""),
-          ),
-        ).toContain("ENSINDEXER_SCHEMA_NAME env var is required and must be a non-empty string.");
-
         expect(
           formatParseError(
             makePluginsListSchema("PLUGINS env var").safeParse([

@@ -14,7 +14,7 @@ import {
 } from "@ensnode/ensnode-sdk/internal";
 
 import { ENSApi_DEFAULT_PORT } from "@/config/defaults";
-import { EnsDbConfigSchema } from "@/config/ensdb-config.schema";
+import ensDbConfig from "@/config/ensdb-config";
 import type { EnsApiEnvironment } from "@/config/environment";
 import { invariant_ensIndexerPublicConfigVersionInfo } from "@/config/validations";
 import { ensDbClient } from "@/lib/ensdb/singleton";
@@ -47,8 +47,11 @@ const EnsApiConfigSchema = z
     rpcConfigs: RpcConfigsSchema,
     ensIndexerPublicConfig: makeENSIndexerPublicConfigSchema("ensIndexerPublicConfig"),
     customReferralProgramEditionConfigSetUrl: CustomReferralProgramEditionConfigSetUrlSchema,
+
+    // include the ENSDbConfig params in the EnsApiConfigSchema
+    ensDbUrl: z.string(),
+    ensIndexerSchemaName: z.string(),
   })
-  .extend(EnsDbConfigSchema.shape)
   .check(invariant_rpcConfigsSpecifiedForRootChain)
   .check(invariant_ensIndexerPublicConfigVersionInfo);
 
@@ -89,13 +92,15 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
 
     return EnsApiConfigSchema.parse({
       port: env.PORT,
-      ensDbUrl: env.ENSDB_URL,
       theGraphApiKey: env.THEGRAPH_API_KEY,
       ensIndexerPublicConfig,
       namespace: ensIndexerPublicConfig.namespace,
-      ensIndexerSchemaName: ensIndexerPublicConfig.ensIndexerSchemaName,
       rpcConfigs,
       customReferralProgramEditionConfigSetUrl: env.CUSTOM_REFERRAL_PROGRAM_EDITIONS,
+
+      // include the validated ENSDb config values in the parsed EnsApiConfig
+      ensDbUrl: ensDbConfig.ensDbUrl,
+      ensIndexerSchemaName: ensDbConfig.ensIndexerSchemaName,
     });
   } catch (error) {
     if (error instanceof ZodError) {

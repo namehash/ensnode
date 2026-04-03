@@ -14,6 +14,7 @@ import {
 import type { LocalPonderClient } from "@ensnode/ponder-sdk";
 
 import type { IndexingStatusBuilder } from "@/lib/indexing-status-builder/indexing-status-builder";
+import { logger } from "@/lib/logger";
 import type { PublicConfigBuilder } from "@/lib/public-config-builder/public-config-builder";
 
 /**
@@ -100,16 +101,24 @@ export class EnsDbWriterWorker {
     const inMemoryConfig = await this.getValidatedEnsIndexerPublicConfig();
 
     // Task 1: upsert ENSDb version into ENSDb.
-    console.log(`[EnsDbWriterWorker]: Upserting ENSDb version into ENSDb...`);
+    logger.debug({ msg: "Upserting ENSDb version", module: "EnsDbWriterWorker" });
     await this.ensDbClient.upsertEnsDbVersion(inMemoryConfig.versionInfo.ensDb);
-    console.log(
-      `[EnsDbWriterWorker]: ENSDb version upserted successfully: ${inMemoryConfig.versionInfo.ensDb}`,
-    );
+    logger.info({
+      msg: "Upserted ENSDb version",
+      ensDbVersion: inMemoryConfig.versionInfo.ensDb,
+      module: "EnsDbWriterWorker",
+    });
 
     // Task 2: upsert of EnsIndexerPublicConfig into ENSDb.
-    console.log(`[EnsDbWriterWorker]: Upserting ENSIndexer Public Config into ENSDb...`);
+    logger.debug({
+      msg: "Upserting ENSIndexer public config",
+      module: "EnsDbWriterWorker",
+    });
     await this.ensDbClient.upsertEnsIndexerPublicConfig(inMemoryConfig);
-    console.log(`[EnsDbWriterWorker]: ENSIndexer Public Config upserted successfully`);
+    logger.info({
+      msg: "Upserted ENSIndexer public config",
+      module: "EnsDbWriterWorker",
+    });
 
     // Task 3: recurring upsert of Indexing Status Snapshot into ENSDb.
     this.indexingStatusInterval = setInterval(
@@ -163,12 +172,23 @@ export class EnsDbWriterWorker {
      * will be thrown and the worker will not start, as the ENSIndexer Public Config
      * is a critical dependency for the worker's tasks.
      */
+    const configFetchRetries = 3;
+
+    logger.debug({
+      msg: "Fetching ENSIndexer public config",
+      retries: configFetchRetries,
+      module: "EnsDbWriterWorker",
+    });
+
     const inMemoryConfigPromise = pRetry(() => this.publicConfigBuilder.getPublicConfig(), {
-      retries: 3,
-      onFailedAttempt: ({ error, attemptNumber, retriesLeft }) => {
-        console.warn(
-          `ENSIndexer Config fetch attempt ${attemptNumber} failed (${error.message}). ${retriesLeft} retries left.`,
-        );
+      retries: configFetchRetries,
+      onFailedAttempt: ({ attemptNumber, retriesLeft }) => {
+        logger.warn({
+          msg: "Config fetch attempt failed",
+          attempt: attemptNumber,
+          retriesLeft,
+          module: "EnsDbWriterWorker",
+        });
       },
     });
 
@@ -180,12 +200,19 @@ export class EnsDbWriterWorker {
         this.ensDbClient.getEnsIndexerPublicConfig(),
         inMemoryConfigPromise,
       ]);
+      logger.info({
+        msg: "Fetched ENSIndexer public config",
+        module: "EnsDbWriterWorker",
+        config: inMemoryConfig,
+      });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
 
-      console.error(
-        `[EnsDbWriterWorker]: Failed to fetch ENSIndexer Public Config: ${errorMessage}`,
-      );
+      logger.error({
+        msg: "Failed to fetch ENSIndexer public config",
+        error,
+        module: "EnsDbWriterWorker",
+      });
 
       // Throw the error to terminate the ENSIndexer process due to failed fetch of critical dependency
       throw new Error(errorMessage, {
@@ -205,9 +232,11 @@ export class EnsDbWriterWorker {
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Unknown error";
 
-        console.error(
-          `[EnsDbWriterWorker]: In-memory ENSIndexer Public Config object is not compatible with its counterpart stored in ENSDb. Cause: ${errorMessage}`,
-        );
+        logger.error({
+          msg: "In-memory config incompatible with stored config",
+          error,
+          module: "EnsDbWriterWorker",
+        });
 
         // Throw the error to terminate the ENSIndexer process due to
         // found config incompatibility
@@ -240,10 +269,11 @@ export class EnsDbWriterWorker {
 
       await this.ensDbClient.upsertIndexingStatusSnapshot(crossChainSnapshot);
     } catch (error) {
-      console.error(
-        `[EnsDbWriterWorker]: Error retrieving or validating Indexing Status Snapshot:`,
+      logger.error({
+        msg: "Failed to upsert indexing status snapshot",
         error,
-      );
+        module: "EnsDbWriterWorker",
+      });
       // Do not throw the error, as failure to retrieve the Indexing Status
       // should not cause the ENSDb Writer Worker to stop functioning.
     }

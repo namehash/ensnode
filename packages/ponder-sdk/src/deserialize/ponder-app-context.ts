@@ -15,6 +15,7 @@ import {
   PonderAppCommands,
   type PonderAppContext,
 } from "../ponder-app-context";
+import { wrapPonderAppLogger } from "./ponder-app-logger";
 import type { Unvalidated } from "./utils";
 
 /**
@@ -27,6 +28,36 @@ export const schemaPortNumber = z
   .max(65535, { error: "Port must be less than or equal to 65535." });
 
 /**
+ * Represents the Ponder app logger method
+ */
+const schemaPonderAppLoggerMethod = z.function({
+  input: [
+    z.looseObject({
+      msg: z.string({ error: "Log message must be a string." }),
+      error: z.optional(z.unknown()),
+    }),
+  ],
+  output: z.void(),
+});
+
+/**
+ * Represents the "raw" logger provided by the Ponder runtime to a local Ponder app.
+ */
+const schemaRawPonderAppLogger = z.looseObject({
+  error: schemaPonderAppLoggerMethod,
+  warn: schemaPonderAppLoggerMethod,
+  info: schemaPonderAppLoggerMethod,
+  debug: schemaPonderAppLoggerMethod,
+  trace: schemaPonderAppLoggerMethod,
+});
+
+/**
+ * Represents the "wrapper" logger that formats log parameters
+ * before passing to the underlying logger.
+ */
+const schemaPonderAppLogger = schemaRawPonderAppLogger.transform(wrapPonderAppLogger);
+
+/**
  * Type representing the "raw" context of a local Ponder app.
  */
 const schemaRawPonderAppContext = z.object({
@@ -34,6 +65,7 @@ const schemaRawPonderAppContext = z.object({
     command: z.enum(PonderAppCommands),
     port: schemaPortNumber,
   }),
+  logger: schemaRawPonderAppLogger,
 });
 
 /**
@@ -47,6 +79,7 @@ export type RawPonderAppContext = z.infer<typeof schemaRawPonderAppContext>;
 const schemaPonderAppContext = z.object({
   command: z.enum(PonderAppCommands),
   localPonderAppUrl: z.instanceof(URL, { error: "localPonderAppUrl must be a valid URL." }),
+  logger: schemaPonderAppLogger,
 });
 
 /**
@@ -62,6 +95,7 @@ function buildUnvalidatedPonderAppContext(
   return {
     command: rawPonderAppContext.options.command as Unvalidated<PonderAppCommand>,
     localPonderAppUrl: new URL(`http://localhost:${rawPonderAppContext.options.port}`),
+    logger: rawPonderAppContext.logger,
   };
 }
 

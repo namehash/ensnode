@@ -1,11 +1,7 @@
 import type { ENSNamespaceId } from "@ensnode/datasources";
+import type { EnsDbConfig } from "@ensnode/ensdb-sdk";
 import type { BlockNumberRange, ChainId, PluginName } from "@ensnode/ensnode-sdk";
-import {
-  type DatabaseUrl,
-  type EnsIndexerSchemaName,
-  RpcConfig,
-  type RpcConfigs,
-} from "@ensnode/ensnode-sdk/internal";
+import { RpcConfig, type RpcConfigs } from "@ensnode/ensnode-sdk/internal";
 import type { EnsRainbowClientLabelSet } from "@ensnode/ensrainbow-sdk";
 
 /**
@@ -81,7 +77,7 @@ export interface EnsIndexerConfig {
    * Invariants:
    * - Must be a non-empty string that is a valid Postgres database schema identifier.
    */
-  ensIndexerSchemaName: EnsIndexerSchemaName;
+  ensIndexerSchemaName: EnsDbConfig["ensIndexerSchemaName"];
 
   /**
    * A set of {@link PluginName}s indicating which plugins to activate.
@@ -119,7 +115,7 @@ export interface EnsIndexerConfig {
    * Invariants:
    * - The URL must be a valid PostgreSQL connection string
    */
-  ensDbUrl: DatabaseUrl;
+  ensDbUrl: EnsDbConfig["ensDbUrl"];
 
   /**
    * Constrains the global blockrange for indexing, useful for testing purposes.

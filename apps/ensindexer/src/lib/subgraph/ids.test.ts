@@ -1,8 +1,15 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { resetMockConfig, setupConfigMock, updateMockConfig } from "@/lib/__test__/mockConfig";
+import {
+  resetMockConfig,
+  setupConfigMock,
+  setupEnsDbConfigMock,
+  updateMockConfig,
+} from "@/lib/__test__/mockConfig";
 
-setupConfigMock(); // setup config mock before importing dependent modules
+// Setup mocks before any imports that depend on them
+setupEnsDbConfigMock();
+setupConfigMock();
 
 import { labelhash, namehash, zeroAddress } from "viem";
 

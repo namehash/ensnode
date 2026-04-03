@@ -1,5 +1,28 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+// For config.test.ts, we need a mock that validates env vars without providing defaults,
+// because this test file specifically tests validation failures.
+vi.mock("@/config/ensdb-config", async () => {
+  const { validateEnsDbConfig } =
+    await vi.importActual<typeof import("@ensnode/ensdb-sdk")>("@ensnode/ensdb-sdk");
+  return {
+    default: {
+      get ensDbUrl() {
+        const url = process.env.ENSDB_URL;
+        const schema = process.env.ENSINDEXER_SCHEMA_NAME;
+        validateEnsDbConfig({ ensDbUrl: url, ensIndexerSchemaName: schema });
+        return url;
+      },
+      get ensIndexerSchemaName() {
+        const url = process.env.ENSDB_URL;
+        const schema = process.env.ENSINDEXER_SCHEMA_NAME;
+        validateEnsDbConfig({ ensDbUrl: url, ensIndexerSchemaName: schema });
+        return schema;
+      },
+    },
+  };
+});
+
 import {
   type ENSNamespaceId,
   ensTestEnvChain,
@@ -170,21 +193,17 @@ describe("config (with base env)", () => {
 
     it("throws an error when ENSINDEXER_SCHEMA_NAME is not set", async () => {
       vi.stubEnv("ENSINDEXER_SCHEMA_NAME", undefined);
-      await expect(getConfig()).rejects.toThrow(/ENSINDEXER_SCHEMA_NAME is required/);
+      await expect(getConfig()).rejects.toThrow(/ENSIndexer Schema Name is required/);
     });
 
     it("throws an error when ENSINDEXER_SCHEMA_NAME is empty", async () => {
       vi.stubEnv("ENSINDEXER_SCHEMA_NAME", "");
-      await expect(getConfig()).rejects.toThrow(
-        /ENSINDEXER_SCHEMA_NAME is required and cannot be an empty string/,
-      );
+      await expect(getConfig()).rejects.toThrow(/ENSIndexer Schema Name cannot be an empty string/);
     });
 
     it("throws an error when ENSINDEXER_SCHEMA_NAME is only whitespace", async () => {
       vi.stubEnv("ENSINDEXER_SCHEMA_NAME", "   ");
-      await expect(getConfig()).rejects.toThrow(
-        /ENSINDEXER_SCHEMA_NAME is required and cannot be an empty string/,
-      );
+      await expect(getConfig()).rejects.toThrow(/ENSIndexer Schema Name cannot be an empty string/);
     });
   });
 
