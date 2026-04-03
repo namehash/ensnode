@@ -95,14 +95,10 @@ const ENSIndexerConfigSchema = z
     globalBlockrange: BlockrangeSchema,
     ensRainbowUrl: EnsRainbowUrlSchema,
     labelSet: LabelSetSchema,
-  })
-  // include the validated ENSDb config params
-  .transform(function includeEnsDbConfig(config) {
-    return {
-      ...config,
-      ensDbUrl: ensDbConfig.ensDbUrl,
-      ensIndexerSchemaName: ensDbConfig.ensIndexerSchemaName,
-    };
+
+    // include the ENSDbConfig params in the EnsApiConfigSchema
+    ensDbUrl: z.string(),
+    ensIndexerSchemaName: z.string(),
   })
   /**
    * Derived configuration
@@ -171,8 +167,6 @@ export function buildConfigFromEnvironment(_env: ENSIndexerEnvironment): EnsInde
 
     // parse/validate with ENSIndexerConfigSchema
     return ENSIndexerConfigSchema.parse({
-      ensDbUrl: env.ENSDB_URL,
-      ensIndexerSchemaName: env.ENSINDEXER_SCHEMA_NAME,
       namespace: env.NAMESPACE,
       rpcConfigs,
 
@@ -187,6 +181,10 @@ export function buildConfigFromEnvironment(_env: ENSIndexerEnvironment): EnsInde
         labelSetId: env.LABEL_SET_ID,
         labelSetVersion: env.LABEL_SET_VERSION,
       },
+
+      // include the validated ENSDb config params in the parsed EnsApiConfig
+      ensDbUrl: ensDbConfig.ensDbUrl,
+      ensIndexerSchemaName: ensDbConfig.ensIndexerSchemaName,
     });
   } catch (error) {
     if (error instanceof ZodError) {
