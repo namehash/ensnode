@@ -18,7 +18,6 @@ import {
 import { getDomainIdByInterpretedName } from "@/omnigraph-api/lib/get-domain-by-interpreted-name";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
 import { AccountRef } from "@/omnigraph-api/schema/account";
-import { AccountIdInput } from "@/omnigraph-api/schema/account-id";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
 import {
   DomainIdInput,
@@ -28,7 +27,7 @@ import {
   ENSv1DomainRef,
   ENSv2DomainRef,
 } from "@/omnigraph-api/schema/domain";
-import { PermissionsRef } from "@/omnigraph-api/schema/permissions";
+import { PermissionsIdInput, PermissionsRef } from "@/omnigraph-api/schema/permissions";
 import { RegistrationInterfaceRef } from "@/omnigraph-api/schema/registration";
 import { RegistryIdInput, RegistryRef } from "@/omnigraph-api/schema/registry";
 import { ResolverIdInput, ResolverRef } from "@/omnigraph-api/schema/resolver";
@@ -202,14 +201,17 @@ builder.queryType({
       },
     }),
 
-    ///////////////////////////////
-    // Get Permissions by Contract
-    ///////////////////////////////
+    ///////////////////////////////////////
+    // Get Permissions by Id or AccountId
+    ///////////////////////////////////////
     permissions: t.field({
-      description: "Find Permissions in a contract by AccountId.",
+      description: "Identify Permissions by ID or AccountId.",
       type: PermissionsRef,
-      args: { for: t.arg({ type: AccountIdInput, required: true }) },
-      resolve: (parent, args, context, info) => makePermissionsId(args.for),
+      args: { by: t.arg({ type: PermissionsIdInput, required: true }) },
+      resolve: (parent, args, context, info) => {
+        if (args.by.id !== undefined) return args.by.id;
+        return makePermissionsId(args.by.contract);
+      },
     }),
 
     /////////////////////

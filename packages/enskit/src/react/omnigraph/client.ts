@@ -1,8 +1,14 @@
 import { Client, fetchExchange } from "@urql/core";
-import { cacheExchange } from "@urql/exchange-graphcache";
-import type { AccountId } from "enssdk";
-import { makePermissionsId } from "enssdk";
+import {
+  type Cache,
+  cacheExchange,
+  type ResolveInfo,
+  type Variables,
+} from "@urql/exchange-graphcache";
+import type { AccountId, PermissionsId, RegistryId, ResolverId } from "enssdk";
+import { makePermissionsId, makeRegistryId, makeResolverId } from "enssdk";
 import { introspection } from "enssdk/omnigraph";
+import type { Address } from "viem";
 
 /**
  * Entities without keys are 'Embedded Data', and we tell graphcache about them to avoid warnings
@@ -11,6 +17,14 @@ import { introspection } from "enssdk/omnigraph";
  * @see https://nearform.com/open-source/urql/docs/graphcache/normalized-caching/#custom-keys-and-non-keyable-entities
  */
 const EMBEDDED_DATA = () => null;
+
+/**
+ * Many of our resolvers allow for exact
+ *
+ * @returns the cached data or undefined
+ */
+const passthrough = (args: Variables, cache: Cache, info: ResolveInfo) =>
+  cache.resolve(info.parentTypeName, info.fieldName, args);
 
 export function createOmnigraphUrqlClient(ensNodeUrl: string): Client {
   const url = new URL("/api/omnigraph", ensNodeUrl).href;
@@ -43,43 +57,50 @@ export function createOmnigraphUrqlClient(ensNodeUrl: string): Client {
           // automatically, without falling out of sync with the actual api
           // @see https://nearform.com/open-source/urql/docs/graphcache/local-resolvers/#transforming-records
 
+          // TODO: maybe there's a better way to import/cast the type of args in these local resolvers?
+
           Query: {
             domain(parent, args, cache, info) {
-              // TODO: maybe there's a better way to import/cast the type of args, but i don't see it...
-              const by = args.by as { id?: string; name?: string } | undefined;
-              if (!by?.id) return undefined;
+              const by = args.by as { id?: string; name?: string };
 
-              const v1Key = cache.keyOfEntity({ __typename: "ENSv1Domain", id: by.id });
-              if (v1Key && cache.resolve(v1Key, "id")) return v1Key;
+              if (by.id) {
+                const v1Key = cache.keyOfEntity({ __typename: "ENSv1Domain", id: by.id });
+                if (v1Key && cache.resolve(v1Key, "id")) return v1Key;
 
-              const v2Key = cache.keyOfEntity({ __typename: "ENSv2Domain", id: by.id });
-              if (v2Key && cache.resolve(v2Key, "id")) return v2Key;
+                const v2Key = cache.keyOfEntity({ __typename: "ENSv2Domain", id: by.id });
+                if (v2Key && cache.resolve(v2Key, "id")) return v2Key;
+              }
 
-              return undefined;
+              return passthrough(args, cache, info);
             },
             account(parent, args, cache, info) {
-              const address = args.address as string | undefined;
-              if (!address) return undefined;
-
+              const address = args.address as Address;
               return { __typename: "Account", id: address };
             },
             registry(parent, args, cache, info) {
-              const by = args.by as { id?: string; contract?: unknown } | undefined;
-              if (!by?.id) return undefined;
+              const by = args.by as { id?: RegistryId; contract?: AccountId };
 
-              return { __typename: "Registry", id: by.id };
+              if (by.id) return { __typename: "Registry", id: by.id };
+              if (by.contract) return { __typename: "Registry", id: makeRegistryId(by.contract) };
+
+              throw new Error("never");
             },
             resolver(parent, args, cache, info) {
-              const by = args.by as { id?: string; contract?: unknown } | undefined;
-              if (!by?.id) return undefined;
+              const by = args.by as { id?: ResolverId; contract?: AccountId };
 
-              return { __typename: "Resolver", id: by.id };
+              if (by.id) return { __typename: "Resolver", id: by.id };
+              if (by.contract) return { __typename: "Resolver", id: makeResolverId(by.contract) };
+
+              throw new Error("never");
             },
             permissions(parent, args, cache, info) {
-              const forArg = args.for as AccountId | undefined;
-              if (!forArg) return undefined;
+              const by = args.by as { id?: PermissionsId; contract?: AccountId };
 
-              return { __typename: "Permissions", id: makePermissionsId(forArg) };
+              if (by.id) return { __typename: "Permissions", id: by.id };
+              if (by.contract)
+                return { __typename: "Permissions", id: makePermissionsId(by.contract) };
+
+              throw new Error("never");
             },
           },
         },

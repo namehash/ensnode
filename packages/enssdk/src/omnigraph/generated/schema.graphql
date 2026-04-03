@@ -698,6 +698,12 @@ type PermissionsEventsConnectionEdge {
 """PermissionsId represents a @ensnode/ensnode-sdk#PermissionsId."""
 scalar PermissionsId
 
+"""Address Permissions by ID or AccountId."""
+input PermissionsIdInput @oneOf {
+  contract: AccountIdInput
+  id: PermissionsId
+}
+
 """PermissionsResource"""
 type PermissionsResource {
   """The contract within which these Permissions are granted."""
@@ -774,8 +780,8 @@ type Query {
   """Find Domains by Name."""
   domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: DomainsWhereInput!): QueryDomainsConnection
 
-  """Find Permissions in a contract by AccountId."""
-  permissions(for: AccountIdInput!): Permissions
+  """Identify Permissions by ID or AccountId."""
+  permissions(by: PermissionsIdInput!): Permissions
 
   """TODO"""
   registrations(after: String, before: String, first: Int, last: Int): QueryRegistrationsConnection

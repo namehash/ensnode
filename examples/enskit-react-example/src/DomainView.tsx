@@ -47,7 +47,7 @@ export function DomainView() {
     variables: { name: name as InterpretedName },
   });
 
-  const { data, fetching, error } = result;
+  const { data, fetching, error, stale } = result;
 
   if (fetching) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
