@@ -184,7 +184,7 @@ type MapToNamedRegistrarActionArgs = Awaited<ReturnType<typeof _findRegistrarAct
  */
 function _mapToNamedRegistrarAction(record: MapToNamedRegistrarActionArgs): NamedRegistrarAction {
   // Invariant: The FQDN `name` of the Domain associated with the `node` must exist.
-  if (!record.domain.name === null) {
+  if (record.domain.name === null) {
     throw new Error(`Domain 'name' must exists for '${record.registrationLifecycles.node}' node.`);
   }
 
