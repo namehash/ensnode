@@ -10,13 +10,19 @@ const logger = makeLogger("write-graphql-schema");
 
 const MONOREPO_ROOT = resolve(import.meta.dirname, "../../../../../");
 const ENSSDK_ROOT = resolve(MONOREPO_ROOT, "packages/enssdk/");
-const OUTPUT_PATH = resolve(ENSSDK_ROOT, "src/omnigraph/generated/schema.graphql");
+const GENERATED_DIR = resolve(ENSSDK_ROOT, "src/omnigraph/generated");
 
 async function _writeGraphQLSchema() {
   const { schema } = await import("@/omnigraph-api/schema");
-  const schemaAsString = printSchema(lexicographicSortSchema(schema));
+  const sdl = printSchema(lexicographicSortSchema(schema));
 
-  await writeFile(OUTPUT_PATH, schemaAsString);
+  await Promise.all([
+    writeFile(resolve(GENERATED_DIR, "schema.graphql"), sdl),
+    writeFile(
+      resolve(GENERATED_DIR, "schema-sdl.ts"),
+      `export const sdl = ${JSON.stringify(sdl)};\n`,
+    ),
+  ]);
 }
 
 /**
@@ -25,9 +31,9 @@ async function _writeGraphQLSchema() {
 export async function writeGraphQLSchema() {
   try {
     await _writeGraphQLSchema();
-    logger.info(`Wrote SDL to ${OUTPUT_PATH}`);
+    logger.info(`Wrote SDL to ${GENERATED_DIR}`);
   } catch (error) {
-    logger.warn(error, `Unable to write SDL to ${OUTPUT_PATH}`);
+    logger.warn(error, `Unable to write SDL to ${GENERATED_DIR}`);
   }
 }
 
@@ -35,7 +41,7 @@ export async function writeGraphQLSchema() {
 if (resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
     await _writeGraphQLSchema();
-    console.log(`Wrote SDL to ${OUTPUT_PATH}`);
+    console.log(`Wrote SDL to ${GENERATED_DIR}`);
     process.exit(0);
   } catch (error) {
     console.error(error);

@@ -10,6 +10,5 @@ export default defineProject({
   },
   test: {
     include: ["src/**/*.integration.test.ts"],
-    globalSetup: "./src/test/integration/global-setup.ts",
   },
 });

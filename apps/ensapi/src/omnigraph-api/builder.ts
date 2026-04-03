@@ -78,6 +78,9 @@ export const builder = new SchemaBuilder<{
   Connection: {
     totalCount: MaybePromise<number>;
   };
+
+  DefaultEdgesNullability: false;
+  DefaultNodeNullability: false;
 }>({
   plugins: [TracingPlugin, DataloaderPlugin, RelayPlugin],
   tracing: {
@@ -104,5 +107,9 @@ export const builder = new SchemaBuilder<{
     // disable the Query.node & Query.nodes methods
     nodeQueryOptions: false,
     nodesQueryOptions: false,
+
+    // globally configures Edge and Node types to be non-nullable
+    edgesFieldOptions: { nullable: false },
+    nodeFieldOptions: { nullable: false },
   },
 });

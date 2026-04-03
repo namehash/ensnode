@@ -2,7 +2,7 @@ import { parse } from "graphql";
 import { describe, expect, it, vi } from "vitest";
 
 import { createEnsNodeClient } from "../core/index";
-import { omnigraph } from "./index";
+import { omnigraph } from "./module";
 
 function createMockClient(mockFetch: ReturnType<typeof vi.fn>) {
   return createEnsNodeClient({
