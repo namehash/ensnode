@@ -41,17 +41,21 @@ const schemaPonderAppLoggerMethod = z.function({
 });
 
 /**
- * Represents the logger provided by the Ponder runtime to a local Ponder app.
+ * Represents the "raw" logger provided by the Ponder runtime to a local Ponder app.
  */
-const schemaPonderAppLogger = z
-  .looseObject({
-    error: schemaPonderAppLoggerMethod,
-    warn: schemaPonderAppLoggerMethod,
-    info: schemaPonderAppLoggerMethod,
-    debug: schemaPonderAppLoggerMethod,
-    trace: schemaPonderAppLoggerMethod,
-  })
-  .transform(wrapPonderAppLogger);
+const schemaRawPonderAppLogger = z.looseObject({
+  error: schemaPonderAppLoggerMethod,
+  warn: schemaPonderAppLoggerMethod,
+  info: schemaPonderAppLoggerMethod,
+  debug: schemaPonderAppLoggerMethod,
+  trace: schemaPonderAppLoggerMethod,
+});
+
+/**
+ * Represents the "wrapper" logger that formats log parameters
+ * before passing to the underlying logger.
+ */
+const schemaPonderAppLogger = schemaRawPonderAppLogger.transform(wrapPonderAppLogger);
 
 /**
  * Type representing the "raw" context of a local Ponder app.
@@ -61,7 +65,7 @@ const schemaRawPonderAppContext = z.object({
     command: z.enum(PonderAppCommands),
     port: schemaPortNumber,
   }),
-  logger: schemaPonderAppLogger,
+  logger: schemaRawPonderAppLogger,
 });
 
 /**
