@@ -85,8 +85,8 @@ input AccountEventsWhereInput {
 
 """A CAIP-10 Account ID including chainId and address."""
 type AccountId {
-  address: Address
-  chainId: ChainId
+  address: Address!
+  chainId: ChainId!
 }
 
 """A CAIP-10 Account ID including chainId and address."""

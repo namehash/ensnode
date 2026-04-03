@@ -3,9 +3,10 @@ import { createEnsNodeClient } from "enssdk/core";
 import { omnigraph } from "enssdk/omnigraph";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router";
+import { BrowserRouter, Route, Routes } from "react-router";
 
 import { DomainView } from "./DomainView";
+import { RegistryView } from "./RegistryView";
 
 const ENSNODE_URL = "http://localhost:4334";
 const client = createEnsNodeClient({ url: ENSNODE_URL }).extend(omnigraph);
@@ -19,8 +20,16 @@ createRoot(document.getElementById("root")!).render(
       </h1>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Navigate to="/domain/eth" replace />} />
+          <Route
+            path="/"
+            element={
+              <nav>
+                <a href="/domain/eth">Domains</a> | <a href="/registry">Registry Cache Demo</a>
+              </nav>
+            }
+          />
           <Route path="/domain/*" element={<DomainView />} />
+          <Route path="/registry" element={<RegistryView />} />
         </Routes>
       </BrowserRouter>
     </OmnigraphProvider>

@@ -6,8 +6,8 @@ export const AccountIdRef = builder.objectRef<AccountId>("AccountId");
 AccountIdRef.implement({
   description: "A CAIP-10 Account ID including chainId and address.",
   fields: (t) => ({
-    chainId: t.expose("chainId", { type: "ChainId" }),
-    address: t.expose("address", { type: "Address" }),
+    chainId: t.expose("chainId", { type: "ChainId", nullable: false }),
+    address: t.expose("address", { type: "Address", nullable: false }),
   }),
 });
 
