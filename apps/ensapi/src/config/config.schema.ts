@@ -14,7 +14,7 @@ import {
 } from "@ensnode/ensnode-sdk/internal";
 
 import { ENSApi_DEFAULT_PORT } from "@/config/defaults";
-import { EnsDbConfigSchema } from "@/config/ensdb-config.schema";
+import ensDbConfig from "@/config/ensdb-config";
 import type { EnsApiEnvironment } from "@/config/environment";
 import { invariant_ensIndexerPublicConfigVersionInfo } from "@/config/validations";
 import { ensDbClient } from "@/lib/ensdb/singleton";
@@ -48,7 +48,14 @@ const EnsApiConfigSchema = z
     ensIndexerPublicConfig: makeENSIndexerPublicConfigSchema("ensIndexerPublicConfig"),
     customReferralProgramEditionConfigSetUrl: CustomReferralProgramEditionConfigSetUrlSchema,
   })
-  .extend(EnsDbConfigSchema.shape)
+  // include the validated ENSDb config params
+  .transform(function includeEnsDbConfig(config) {
+    return {
+      ...config,
+      ensDbUrl: ensDbConfig.ensDbUrl,
+      ensIndexerSchemaName: ensDbConfig.ensIndexerSchemaName,
+    };
+  })
   .check(invariant_rpcConfigsSpecifiedForRootChain)
   .check(invariant_ensIndexerPublicConfigVersionInfo);
 
