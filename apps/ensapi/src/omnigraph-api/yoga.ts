@@ -14,6 +14,8 @@ export const yoga = createYoga({
   graphqlEndpoint: "*",
   schema,
   context,
+  // CORS is handled by the Hono middleware in app.ts
+  cors: false,
   graphiql: {
     defaultQuery: `query DomainsByOwner {
   account(address: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266") {

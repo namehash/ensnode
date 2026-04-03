@@ -2,7 +2,8 @@ import { writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { lexicographicSortSchema, printSchema } from "graphql";
+import { minifyIntrospectionQuery } from "@urql/introspection";
+import { introspectionFromSchema, lexicographicSortSchema, printSchema } from "graphql";
 
 import { makeLogger } from "@/lib/logger";
 
@@ -13,14 +14,16 @@ const ENSSDK_ROOT = resolve(MONOREPO_ROOT, "packages/enssdk/");
 const GENERATED_DIR = resolve(ENSSDK_ROOT, "src/omnigraph/generated");
 
 async function _writeGraphQLSchema() {
-  const { schema } = await import("@/omnigraph-api/schema");
-  const sdl = printSchema(lexicographicSortSchema(schema));
+  const { schema: unsortedSchema } = await import("@/omnigraph-api/schema");
+  const schema = lexicographicSortSchema(unsortedSchema);
+  const sdl = printSchema(schema);
+  const introspection = minifyIntrospectionQuery(introspectionFromSchema(schema));
 
   await Promise.all([
     writeFile(resolve(GENERATED_DIR, "schema.graphql"), sdl),
     writeFile(
-      resolve(GENERATED_DIR, "schema-sdl.ts"),
-      `export const sdl = ${JSON.stringify(sdl)};\n`,
+      resolve(GENERATED_DIR, "introspection.ts"),
+      `export const introspection = ${JSON.stringify(introspection)} as const;\n`,
     ),
   ]);
 }
