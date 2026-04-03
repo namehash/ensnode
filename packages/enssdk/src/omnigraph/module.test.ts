@@ -79,6 +79,22 @@ describe("omnigraph module", () => {
     expect(mockFetch.mock.calls[0][1].signal).toBe(controller.signal);
   });
 
+  it("throws on non-2xx response with body included", async () => {
+    const errorBody = JSON.stringify({ errors: [{ message: "Unauthorized" }] });
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 401,
+      statusText: "Unauthorized",
+      text: () => Promise.resolve(errorBody),
+    });
+
+    const client = createMockClient(mockFetch);
+
+    await expect(
+      client.omnigraph.query({ query: 'query { domain(by: { name: "eth" }) { name } }' }),
+    ).rejects.toThrow(`Omnigraph query failed: 401 Unauthorized\n${errorBody}`);
+  });
+
   it("prints DocumentNode queries to string", async () => {
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,

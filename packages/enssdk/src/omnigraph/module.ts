@@ -53,7 +53,10 @@ export function omnigraph(client: EnsNodeClient): OmnigraphModule {
         });
 
         if (!response.ok) {
-          throw new Error(`Omnigraph query failed: ${response.status} ${response.statusText}`);
+          const body = await response.text().catch(() => "");
+          throw new Error(
+            `Omnigraph query failed: ${response.status} ${response.statusText}${body ? `\n${body}` : ""}`,
+          );
         }
 
         return response.json() as Promise<QueryResult<R>>;
