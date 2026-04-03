@@ -14,8 +14,8 @@ import {
   type PonderAppCommand,
   PonderAppCommands,
   type PonderAppContext,
-  type PonderAppLogger,
 } from "../ponder-app-context";
+import { wrapPonderAppLogger } from "./ponder-app-logger";
 import type { Unvalidated } from "./utils";
 
 /**
@@ -34,7 +34,7 @@ const schemaPonderAppLoggerMethod = z.function({
   input: [
     z.looseObject({
       msg: z.string({ error: "Log message must be a string." }),
-      error: z.optional(z.instanceof(Error, { error: "Error must be an instance of Error." })),
+      error: z.optional(z.unknown()),
     }),
   ],
   output: z.void(),
@@ -51,7 +51,7 @@ const schemaPonderAppLogger = z
     debug: schemaPonderAppLoggerMethod,
     trace: schemaPonderAppLoggerMethod,
   })
-  .transform((logger) => logger as PonderAppLogger);
+  .transform(wrapPonderAppLogger);
 
 /**
  * Type representing the "raw" context of a local Ponder app.
