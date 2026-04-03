@@ -96,7 +96,7 @@ const ENSIndexerConfigSchema = z
     ensRainbowUrl: EnsRainbowUrlSchema,
     labelSet: LabelSetSchema,
 
-    // include the ENSDbConfig params in the EnsApiConfigSchema
+    // include the ENSDbConfig params in the ENSIndexerConfigSchema
     ensDbUrl: z.string(),
     ensIndexerSchemaName: z.string(),
   })
@@ -182,7 +182,7 @@ export function buildConfigFromEnvironment(_env: ENSIndexerEnvironment): EnsInde
         labelSetVersion: env.LABEL_SET_VERSION,
       },
 
-      // include the validated ENSDb config values in the parsed EnsApiConfig
+      // include the validated ENSDb config values in the parsed EnsIndexerConfig
       ensDbUrl: ensDbConfig.ensDbUrl,
       ensIndexerSchemaName: ensDbConfig.ensIndexerSchemaName,
     });
