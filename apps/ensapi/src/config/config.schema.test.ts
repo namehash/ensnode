@@ -11,6 +11,13 @@ vi.mock("@/lib/ensdb/singleton", () => ({
   },
 }));
 
+vi.mock("@/config/ensdb-config", () => ({
+  default: {
+    ensDbUrl: "postgresql://user:password@localhost:5432/mydb",
+    ensIndexerSchemaName: "ensindexer_0",
+  },
+}));
+
 import { buildConfigFromEnvironment, buildEnsApiPublicConfig } from "@/config/config.schema";
 import { ENSApi_DEFAULT_PORT } from "@/config/defaults";
 import type { EnsApiEnvironment } from "@/config/environment";
@@ -97,9 +104,7 @@ describe("buildConfigFromEnvironment", () => {
       mockExit.mockClear();
     });
 
-    const TEST_ENV: EnsApiEnvironment = {
-      ENSDB_URL: BASE_ENV.ENSDB_URL,
-    };
+    const TEST_ENV: EnsApiEnvironment = structuredClone(BASE_ENV);
 
     it("logs error and exits when CUSTOM_REFERRAL_PROGRAM_EDITIONS is not a valid URL", async () => {
       await buildConfigFromEnvironment({
