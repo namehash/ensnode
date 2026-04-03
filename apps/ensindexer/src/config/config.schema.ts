@@ -1,11 +1,9 @@
-import { parse as parseConnectionString } from "pg-connection-string";
 import { prettifyError, ZodError, z } from "zod/v4";
 
 import { buildBlockNumberRange, PluginName, uniq } from "@ensnode/ensnode-sdk";
 import {
   buildRpcConfigsFromEnv,
   ENSNamespaceSchema,
-  EnsIndexerSchemaNameSchema,
   invariant_isSubgraphCompatibleRequirements,
   invariant_rpcConfigsSpecifiedForRootChain,
   makeFullyPinnedLabelSetSchema,
@@ -14,6 +12,7 @@ import {
 } from "@ensnode/ensnode-sdk/internal";
 
 import { DEFAULT_SUBGRAPH_COMPAT } from "@/config/defaults";
+import ensDbConfig from "@/config/ensdb-config";
 import type { ENSIndexerEnvironment } from "@/config/environment";
 import { applyDefaults, EnvironmentDefaults } from "@/config/environment-defaults";
 
@@ -26,24 +25,6 @@ import {
   invariant_rpcConfigsSpecifiedForIndexedChains,
   invariant_validContractConfigs,
 } from "./validations";
-
-export const EnsDbUrlSchema = z.string().refine(
-  (url) => {
-    try {
-      if (!url.startsWith("postgresql://") && !url.startsWith("postgres://")) {
-        return false;
-      }
-      const config = parseConnectionString(url);
-      return !!(config.host && config.port && config.database);
-    } catch {
-      return false;
-    }
-  },
-  {
-    error:
-      "Invalid PostgreSQL connection string for ENSDb. Expected format: postgresql://username:password@host:port/database",
-  },
-);
 
 // parses an env string bool with strict requirement of 'true' or 'false'
 const makeEnvStringBoolSchema = (envVarKey: string) =>
@@ -106,8 +87,6 @@ const IsSubgraphCompatibleSchema =
 
 const ENSIndexerConfigSchema = z
   .object({
-    ensDbUrl: EnsDbUrlSchema,
-    ensIndexerSchemaName: EnsIndexerSchemaNameSchema,
     rpcConfigs: RpcConfigsSchema,
 
     namespace: ENSNamespaceSchema,
@@ -116,6 +95,14 @@ const ENSIndexerConfigSchema = z
     globalBlockrange: BlockrangeSchema,
     ensRainbowUrl: EnsRainbowUrlSchema,
     labelSet: LabelSetSchema,
+  })
+  // include the validated ENSDb config params
+  .transform(function includeEnsDbConfig(config) {
+    return {
+      ...config,
+      ensDbUrl: ensDbConfig.ensDbUrl,
+      ensIndexerSchemaName: ensDbConfig.ensIndexerSchemaName,
+    };
   })
   /**
    * Derived configuration
