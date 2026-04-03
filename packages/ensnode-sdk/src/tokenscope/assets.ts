@@ -1,17 +1,16 @@
-import type {
-  AccountId,
-  AssetId,
-  AssetIdString,
-  AssetNamespace,
-  ChainId,
-  Node,
-  TokenId,
+import {
+  type AccountId,
+  type AssetId,
+  type AssetIdString,
+  type AssetNamespace,
+  type ChainId,
+  type Node,
+  stringifyAssetId,
+  type TokenId,
 } from "enssdk";
-import { stringifyAssetId } from "enssdk";
 import { type Address, type Hex, isAddressEqual, zeroAddress } from "viem";
 import { prettifyError } from "zod/v4";
 
-import { uint256ToHex32 } from "../ens";
 import { makeAssetIdSchema, makeAssetIdStringSchema } from "./zod-schemas";
 
 /**
@@ -33,7 +32,7 @@ export function serializeAssetId(assetId: AssetId): SerializedAssetId {
   return {
     assetNamespace: assetId.assetNamespace,
     contract: assetId.contract,
-    tokenId: uint256ToHex32(assetId.tokenId),
+    tokenId: assetId.tokenId.toString(),
   };
 }
 

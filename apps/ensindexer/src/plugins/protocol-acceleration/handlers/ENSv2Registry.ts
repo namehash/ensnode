@@ -1,4 +1,4 @@
-import { getStorageId, makeENSv2DomainId } from "enssdk";
+import { makeENSv2DomainId, makeStorageId } from "enssdk";
 import type { Address } from "viem";
 
 import { PluginName } from "@ensnode/ensnode-sdk";
@@ -27,7 +27,7 @@ export default function () {
       const { tokenId, resolver } = event.args;
 
       const registry = getThisAccountId(context, event);
-      const storageId = getStorageId(tokenId);
+      const storageId = makeStorageId(tokenId);
       const domainId = makeENSv2DomainId(registry, storageId);
 
       await ensureDomainResolverRelation(context, registry, domainId, resolver);

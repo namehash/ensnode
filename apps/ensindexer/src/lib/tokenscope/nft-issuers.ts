@@ -1,3 +1,5 @@
+import { interpretTokenIdAsLabelHash, interpretTokenIdAsNode } from "enssdk";
+
 import { type DatasourceName, DatasourceNames, type ENSNamespaceId } from "@ensnode/datasources";
 import {
   type AccountId,
@@ -8,8 +10,6 @@ import {
   type DomainAssetId,
   ETH_NODE,
   getDatasourceContract,
-  interpretTokenIdAsLabelHash,
-  interpretTokenIdAsNode,
   LINEANAMES_NODE,
   makeSubdomainNode,
   maybeGetDatasourceContract,

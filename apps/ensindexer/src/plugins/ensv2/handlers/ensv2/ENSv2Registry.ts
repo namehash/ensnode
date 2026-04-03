@@ -1,9 +1,9 @@
 import {
   type AccountId,
-  getStorageId,
   type LabelHash,
   makeENSv2DomainId,
   makeRegistryId,
+  makeStorageId,
 } from "enssdk";
 import { type Address, hexToBigInt, labelhash } from "viem";
 
@@ -59,7 +59,7 @@ export default function () {
 
     const registry = getThisAccountId(context, event);
     const registryId = makeRegistryId(registry);
-    const storageId = getStorageId(tokenId);
+    const storageId = makeStorageId(tokenId);
     const domainId = makeENSv2DomainId(registry, storageId);
 
     // Sanity Check: LabelHash must match Label
@@ -67,10 +67,10 @@ export default function () {
       throw new Error(`Sanity Check: labelHash !== labelhash(label)\n${toJson(event.args)}`);
     }
 
-    // Sanity Check: StorageId must match LabelHash
-    if (storageId !== getStorageId(hexToBigInt(labelHash))) {
+    // Sanity Check: StorageId derived from tokenId must match StorageId derived from LabelHash
+    if (storageId !== makeStorageId(hexToBigInt(labelHash))) {
       throw new Error(
-        `Sanity Check: storageId !== getStorageId(hexToBigInt(labelHash))\n${toJson(event.args)}`,
+        `Sanity Check: storageId !== makeStorageId(hexToBigInt(labelHash))\n${toJson(event.args)}`,
       );
     }
 
@@ -162,7 +162,7 @@ export default function () {
       const { tokenId, sender: unregistrant } = event.args;
 
       const registry = getThisAccountId(context, event);
-      const storageId = getStorageId(tokenId);
+      const storageId = makeStorageId(tokenId);
       const domainId = makeENSv2DomainId(registry, storageId);
 
       const registration = await getLatestRegistration(context, domainId);
@@ -212,7 +212,7 @@ export default function () {
       const { tokenId, newExpiry: expiry, sender } = event.args;
 
       const registry = getThisAccountId(context, event);
-      const storageId = getStorageId(tokenId);
+      const storageId = makeStorageId(tokenId);
       const domainId = makeENSv2DomainId(registry, storageId);
 
       const registration = await getLatestRegistration(context, domainId);
@@ -255,7 +255,7 @@ export default function () {
       const subregistry = interpretAddress(_subregistry);
 
       const registryAccountId = getThisAccountId(context, event);
-      const storageId = getStorageId(tokenId);
+      const storageId = makeStorageId(tokenId);
       const domainId = makeENSv2DomainId(registryAccountId, storageId);
 
       // update domain's subregistry
@@ -310,11 +310,11 @@ export default function () {
       const { oldTokenId, newTokenId } = event.args;
 
       // Invariant: StorageIds must match
-      if (getStorageId(oldTokenId) !== getStorageId(newTokenId)) {
+      if (makeStorageId(oldTokenId) !== makeStorageId(newTokenId)) {
         throw new Error(`Invariant(ENSv2Registry:TokenRegenerated): Storage Id Malformed.`);
       }
 
-      const storageId = getStorageId(oldTokenId);
+      const storageId = makeStorageId(oldTokenId);
       const registryAccountId = getThisAccountId(context, event);
       const domainId = makeENSv2DomainId(registryAccountId, storageId);
 
@@ -336,7 +336,7 @@ export default function () {
   }) {
     const { id: tokenId, to: owner } = event.args;
 
-    const storageId = getStorageId(tokenId);
+    const storageId = makeStorageId(tokenId);
     const registry = getThisAccountId(context, event);
     const domainId = makeENSv2DomainId(registry, storageId);
 

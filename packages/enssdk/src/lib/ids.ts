@@ -1,11 +1,8 @@
-import { AccountId as CaipAccountId, AssetId as CaipAssetId } from "caip";
-import { type Address, type Hex, hexToBigInt, toHex } from "viem";
+import { type Address, hexToBigInt } from "viem";
 
+import { stringifyAccountId, stringifyAssetId } from "./caip";
 import type {
   AccountId,
-  AccountIdString,
-  AssetId,
-  AssetIdString,
   DomainId,
   ENSv1DomainId,
   ENSv2DomainId,
@@ -24,35 +21,9 @@ import type {
 import { AssetNamespaces } from "./types";
 
 /**
- * Stringify an {@link AccountId} as a fully lowercase CAIP-10 AccountId string.
- *
- * @see https://chainagnostic.org/CAIPs/caip-10
+ * Masks the lower 32 bits of `num`.
  */
-export function stringifyAccountId(accountId: AccountId): AccountIdString {
-  return CaipAccountId.format({
-    chainId: { namespace: "eip155", reference: accountId.chainId.toString() },
-    address: accountId.address,
-  }).toLowerCase();
-}
-
-/**
- * Stringify an {@link AssetId} as a fully lowercase CAIP-19 AssetId string.
- *
- * @see https://chainagnostic.org/CAIPs/caip-19
- */
-export function stringifyAssetId({
-  assetNamespace,
-  contract: { chainId, address },
-  tokenId,
-}: AssetId): AssetIdString {
-  const uint256ToHex32 = (num: bigint): Hex => toHex(num, { size: 32 });
-
-  return CaipAssetId.format({
-    chainId: { namespace: "eip155", reference: chainId.toString() },
-    assetName: { namespace: assetNamespace, reference: address },
-    tokenId: uint256ToHex32(tokenId),
-  }).toLowerCase();
-}
+const maskLower32Bits = (num: bigint) => num ^ (num & 0xffffffffn);
 
 export const makeRegistryId = (accountId: AccountId) => stringifyAccountId(accountId) as RegistryId;
 
@@ -71,16 +42,11 @@ export const makeENSv2DomainId = (registry: AccountId, storageId: StorageId) =>
   }) as ENSv2DomainId;
 
 /**
- * Masks the lower 32 bits of `num`.
- */
-const maskLower32Bits = (num: bigint) => num ^ (num & 0xffffffffn);
-
-/**
  * Computes a Label's {@link StorageId} given its tokenId or LabelHash as `input`.
  */
-export const getStorageId = (input: bigint | LabelHash): StorageId => {
+export const makeStorageId = (input: bigint | LabelHash): StorageId => {
   if (typeof input === "bigint") return maskLower32Bits(input);
-  return getStorageId(hexToBigInt(input));
+  return makeStorageId(hexToBigInt(input));
 };
 
 export const makePermissionsResourceId = (contract: AccountId, resource: bigint) =>
