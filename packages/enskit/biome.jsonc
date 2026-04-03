@@ -2,9 +2,9 @@
   "$schema": "https://biomejs.dev/schemas/2.3.2/schema.json",
   "extends": "//",
   "overrides": [
-    // ignore unused resolver args in client
+    // ignore unused resolver args
     {
-      "includes": ["src/react/omnigraph/client.ts"],
+      "includes": ["src/react/omnigraph/lib/cache-exchange.ts"],
       "linter": {
         "rules": {
           "correctness": {
