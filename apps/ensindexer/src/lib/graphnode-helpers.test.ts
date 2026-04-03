@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { LabelHash } from "@ensnode/ensnode-sdk";
 
 import { setupConfigMock, setupEnsDbConfigMock } from "@/lib/__test__/mockConfig";
+import "@/lib/__test__/mockLogger";
 
 // Setup mocks before any imports that depend on them
 setupEnsDbConfigMock();
@@ -21,6 +22,8 @@ vi.mock("p-retry", async () => {
 
 // Mock fetch globally to prevent real network calls
 global.fetch = vi.fn();
+
+import { logger } from "@/lib/logger";
 
 import { labelByLabelHash } from "./graphnode-helpers";
 
@@ -155,7 +158,7 @@ describe("labelByLabelHash", () => {
     // carrying over cacheable responses (HealSuccess, HealNotFoundError) and bypassing fetch.
 
     it("retries on network/fetch failure and succeeds on a later attempt", async () => {
-      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const warnSpy = vi.spyOn(logger, "warn").mockImplementation(() => {});
 
       (fetch as any)
         .mockRejectedValueOnce(new Error("network error"))
@@ -175,7 +178,7 @@ describe("labelByLabelHash", () => {
     });
 
     it("retries on HealServerError and succeeds on a later attempt", async () => {
-      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const warnSpy = vi.spyOn(logger, "warn").mockImplementation(() => {});
 
       (fetch as any)
         .mockResolvedValueOnce({
@@ -231,7 +234,7 @@ describe("labelByLabelHash", () => {
     });
 
     it("throws after exhausting retries on persistent network/fetch failures", async () => {
-      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const warnSpy = vi.spyOn(logger, "warn").mockImplementation(() => {});
 
       (fetch as any).mockRejectedValue(new Error("network error"));
 
@@ -247,7 +250,7 @@ describe("labelByLabelHash", () => {
     });
 
     it("throws after exhausting retries on persistent HealServerError responses", async () => {
-      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const warnSpy = vi.spyOn(logger, "warn").mockImplementation(() => {});
 
       (fetch as any).mockResolvedValue({
         ok: true,

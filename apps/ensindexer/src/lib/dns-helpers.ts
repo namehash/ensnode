@@ -14,6 +14,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 import { interpretTextRecordKey, interpretTextRecordValue } from "@ensnode/ensnode-sdk/internal";
 
+import { logger } from "@/lib/logger";
 import { isLabelSubgraphIndexable } from "@/lib/subgraph/is-label-subgraph-indexable";
 
 /**
@@ -111,15 +112,16 @@ export function decodeTXTData(data: Buffer[]): string | null {
 
   // soft-invariant: we never receive 0 data results in a TXT record
   if (decoded.length === 0) {
-    console.warn(`decodeTXTData zero 'data' results, this is unexpected.`);
+    logger.warn({ msg: `decodeTXTData zero 'data' results, this is unexpected.` });
     return null;
   }
 
   // soft-invariant: we never receive more than 1 data result in a TXT record
   if (decoded.length > 1) {
-    console.warn(
-      `decodeTXTData received multiple 'data' results, this is unexpected. data = '${decoded.join(",")}'`,
-    );
+    logger.warn({
+      msg: `decodeTXTData received multiple 'data' results, this is unexpected.`,
+      data: decoded,
+    });
   }
 
   // biome-ignore lint/style/noNonNullAssertion: guaranteed to exist due to length check above
@@ -166,16 +168,23 @@ export function parseDnsTxtRecordArgs({
     });
 
   if (txtDatas.length === 0) {
-    console.warn(`parseDNSRecordArgs: No TXT answers found in DNS record for key '${key}'`);
+    logger.warn({
+      msg: "No TXT answers found in DNS record",
+      fn: "parseDnsTxtRecordArgs",
+      textRecordKey: key,
+    });
 
     // no text answers? interpret as deletion
     return { key, value: null };
   }
 
   if (txtDatas.length > 1) {
-    console.warn(
-      `parseDNSRecordArgs: received multiple TXT answers, this is unexpected. answers = '${txtDatas.join(",")}'. Only using the first one.`,
-    );
+    logger.warn({
+      msg: `Received multiple TXT answers, this is unexpected. Only using the first one.`,
+      fn: "parseDnsTxtRecordArgs",
+      textRecordKey: key,
+      answers: txtDatas,
+    });
   }
 
   // biome-ignore lint/style/noNonNullAssertion: ok due to checks above

@@ -1,3 +1,5 @@
+import type { PonderAppLogger } from "./ponder-app-logger";
+
 /**
  * Ponder app commands
  *
@@ -25,4 +27,9 @@ export interface PonderAppContext {
    * URL of the local Ponder app.
    */
   localPonderAppUrl: URL;
+
+  /**
+   * Logger provided by the Ponder runtime
+   */
+  logger: PonderAppLogger;
 }

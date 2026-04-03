@@ -4,6 +4,7 @@ import type { LabelHash, LiteralLabel } from "@ensnode/ensnode-sdk";
 import { type EnsRainbow, ErrorCode, isHealError } from "@ensnode/ensrainbow-sdk";
 
 import { ensRainbowClient } from "@/lib/ensrainbow/singleton";
+import { logger } from "@/lib/logger";
 
 /**
  * Attempt to heal a labelHash to its original label.
@@ -61,10 +62,12 @@ export async function labelByLabelHash(labelHash: LabelHash): Promise<LiteralLab
         retries: 3,
         minTimeout: 1_000,
         maxTimeout: 30_000,
-        onFailedAttempt({ error, attemptNumber, retriesLeft }) {
-          console.warn(
-            `ENSRainbow heal failed (attempt ${attemptNumber}): ${error.message}. ${retriesLeft} retries left.`,
-          );
+        onFailedAttempt({ attemptNumber, retriesLeft }) {
+          logger.warn({
+            msg: `ENSRainbow "heal" request failed`,
+            attempt: attemptNumber,
+            retriesLeft,
+          });
         },
       },
     );
