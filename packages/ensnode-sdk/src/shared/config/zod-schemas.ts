@@ -12,15 +12,6 @@ import {
   invariant_rpcEndpointConfigIncludesAtMostOneWebSocketsProtocolURL,
 } from "./validatons";
 
-export const EnsIndexerSchemaNameSchema = z
-  .string({
-    error: "ENSINDEXER_SCHEMA_NAME is required.",
-  })
-  .trim()
-  .min(1, {
-    error: "ENSINDEXER_SCHEMA_NAME is required and cannot be an empty string.",
-  });
-
 const RpcConfigSchema = z
   .string()
   .transform((val) => val.split(","))
