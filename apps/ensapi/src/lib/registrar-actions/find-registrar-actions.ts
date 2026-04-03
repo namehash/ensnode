@@ -106,22 +106,33 @@ export async function _countRegistrarActions(
     "registrarActions.count",
     { filterCount: filters?.length ?? 0 },
     async () => {
-      const result = await ensDb
+      let query = ensDb
         .select({ count: count() })
         .from(ensIndexerSchema.registrarActions)
-        .innerJoin(
-          ensIndexerSchema.registrationLifecycles,
-          eq(ensIndexerSchema.registrarActions.node, ensIndexerSchema.registrationLifecycles.node),
-        )
-        .innerJoin(
-          ensIndexerSchema.subregistries,
-          eq(
-            ensIndexerSchema.registrationLifecycles.subregistryId,
-            ensIndexerSchema.subregistries.subregistryId,
-          ),
-        )
-        .where(and(...buildWhereClause(filters)));
+        .$dynamic();
 
+      const needsSubregistryJoin = filters?.some(
+        (f) => f.filterType === RegistrarActionsFilterTypes.BySubregistryNode,
+      );
+      if (needsSubregistryJoin) {
+        query = query
+          .innerJoin(
+            ensIndexerSchema.registrationLifecycles,
+            eq(
+              ensIndexerSchema.registrarActions.node,
+              ensIndexerSchema.registrationLifecycles.node,
+            ),
+          )
+          .innerJoin(
+            ensIndexerSchema.subregistries,
+            eq(
+              ensIndexerSchema.registrationLifecycles.subregistryId,
+              ensIndexerSchema.subregistries.subregistryId,
+            ),
+          );
+      }
+
+      const result = await query.where(and(...buildWhereClause(filters)));
       return result[0].count;
     },
   );
