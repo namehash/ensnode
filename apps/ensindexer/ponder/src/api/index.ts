@@ -7,7 +7,7 @@ import type { ErrorResponse } from "@ensnode/ensnode-sdk";
 
 import { migrateEnsNodeSchema } from "@/lib/ensdb/migrate-ensnode-schema";
 import { startEnsDbWriterWorker } from "@/lib/ensdb-writer-worker/singleton";
-import { buildLogError, formatLogParam, logger } from "@/lib/logger";
+import { logger } from "@/lib/logger";
 
 import ensNodeApi from "./handlers/ensnode-api";
 
@@ -22,8 +22,8 @@ migrateEnsNodeSchema()
   .catch((error) => {
     logger.error({
       msg: "Failed to initialize ENSNode metadata",
-      error: buildLogError(error),
-      module: formatLogParam("ponder-api"),
+      error,
+      module: "ponder-api",
     });
     process.exit(1);
   });
@@ -46,9 +46,9 @@ app.route("/api", ensNodeApi);
 app.onError((error, ctx) => {
   logger.error({
     msg: "Internal server error",
-    error: buildLogError(error),
-    path: formatLogParam(ctx.req.path),
-    module: formatLogParam("ponder-api"),
+    error,
+    path: ctx.req.path,
+    module: "ponder-api",
   });
   return ctx.json({ message: "Internal Server Error" } satisfies ErrorResponse, 500);
 });

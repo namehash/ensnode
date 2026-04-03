@@ -14,7 +14,7 @@ import {
 import type { LocalPonderClient } from "@ensnode/ponder-sdk";
 
 import type { IndexingStatusBuilder } from "@/lib/indexing-status-builder/indexing-status-builder";
-import { buildLogError, formatLogParam, logger } from "@/lib/logger";
+import { logger } from "@/lib/logger";
 import type { PublicConfigBuilder } from "@/lib/public-config-builder/public-config-builder";
 
 /**
@@ -101,23 +101,23 @@ export class EnsDbWriterWorker {
     const inMemoryConfig = await this.getValidatedEnsIndexerPublicConfig();
 
     // Task 1: upsert ENSDb version into ENSDb.
-    logger.debug({ msg: "Upserting ENSDb version", module: formatLogParam("EnsDbWriterWorker") });
+    logger.debug({ msg: "Upserting ENSDb version", module: "EnsDbWriterWorker" });
     await this.ensDbClient.upsertEnsDbVersion(inMemoryConfig.versionInfo.ensDb);
     logger.info({
       msg: "Upserted ENSDb version",
-      ensDbVersion: formatLogParam(inMemoryConfig.versionInfo.ensDb),
-      module: formatLogParam("EnsDbWriterWorker"),
+      ensDbVersion: inMemoryConfig.versionInfo.ensDb,
+      module: "EnsDbWriterWorker",
     });
 
     // Task 2: upsert of EnsIndexerPublicConfig into ENSDb.
     logger.debug({
       msg: "Upserting ENSIndexer public config",
-      module: formatLogParam("EnsDbWriterWorker"),
+      module: "EnsDbWriterWorker",
     });
     await this.ensDbClient.upsertEnsIndexerPublicConfig(inMemoryConfig);
     logger.info({
       msg: "Upserted ENSIndexer public config",
-      module: formatLogParam("EnsDbWriterWorker"),
+      module: "EnsDbWriterWorker",
     });
 
     // Task 3: recurring upsert of Indexing Status Snapshot into ENSDb.
@@ -177,7 +177,7 @@ export class EnsDbWriterWorker {
     logger.debug({
       msg: "Fetching ENSIndexer public config",
       retries: configFetchRetries,
-      module: formatLogParam("EnsDbWriterWorker"),
+      module: "EnsDbWriterWorker",
     });
 
     const inMemoryConfigPromise = pRetry(() => this.publicConfigBuilder.getPublicConfig(), {
@@ -187,7 +187,7 @@ export class EnsDbWriterWorker {
           msg: "Config fetch attempt failed",
           attempt: attemptNumber,
           retriesLeft,
-          module: formatLogParam("EnsDbWriterWorker"),
+          module: "EnsDbWriterWorker",
         });
       },
     });
@@ -202,16 +202,16 @@ export class EnsDbWriterWorker {
       ]);
       logger.info({
         msg: "Fetched ENSIndexer public config",
-        module: formatLogParam("EnsDbWriterWorker"),
-        config: formatLogParam(inMemoryConfig),
+        module: "EnsDbWriterWorker",
+        config: inMemoryConfig,
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
 
       logger.error({
         msg: "Failed to fetch ENSIndexer public config",
-        error: buildLogError(error),
-        module: formatLogParam("EnsDbWriterWorker"),
+        error,
+        module: "EnsDbWriterWorker",
       });
 
       // Throw the error to terminate the ENSIndexer process due to failed fetch of critical dependency
@@ -234,8 +234,8 @@ export class EnsDbWriterWorker {
 
         logger.error({
           msg: "In-memory config incompatible with stored config",
-          error: buildLogError(error),
-          module: formatLogParam("EnsDbWriterWorker"),
+          error,
+          module: "EnsDbWriterWorker",
         });
 
         // Throw the error to terminate the ENSIndexer process due to
@@ -271,8 +271,8 @@ export class EnsDbWriterWorker {
     } catch (error) {
       logger.error({
         msg: "Failed to upsert indexing status snapshot",
-        error: buildLogError(error),
-        module: formatLogParam("EnsDbWriterWorker"),
+        error,
+        module: "EnsDbWriterWorker",
       });
       // Do not throw the error, as failure to retrieve the Indexing Status
       // should not cause the ENSDb Writer Worker to stop functioning.

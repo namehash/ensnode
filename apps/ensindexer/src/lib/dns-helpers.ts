@@ -14,7 +14,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 import { interpretTextRecordKey, interpretTextRecordValue } from "@ensnode/ensnode-sdk/internal";
 
-import { formatLogParam, logger } from "@/lib/logger";
+import { logger } from "@/lib/logger";
 import { isLabelSubgraphIndexable } from "@/lib/subgraph/is-label-subgraph-indexable";
 
 /**
@@ -120,7 +120,7 @@ export function decodeTXTData(data: Buffer[]): string | null {
   if (decoded.length > 1) {
     logger.warn({
       msg: `decodeTXTData received multiple 'data' results, this is unexpected.`,
-      data: formatLogParam(decoded),
+      data: decoded,
     });
   }
 
@@ -171,7 +171,7 @@ export function parseDnsTxtRecordArgs({
     logger.warn({
       msg: "No TXT answers found in DNS record",
       fn: "parseDnsTxtRecordArgs",
-      textRecordKey: formatLogParam(key),
+      textRecordKey: key,
     });
 
     // no text answers? interpret as deletion
@@ -182,8 +182,8 @@ export function parseDnsTxtRecordArgs({
     logger.warn({
       msg: `Received multiple TXT answers, this is unexpected. Only using the first one.`,
       fn: "parseDnsTxtRecordArgs",
-      textRecordKey: formatLogParam(key),
-      answers: formatLogParam(txtDatas),
+      textRecordKey: key,
+      answers: txtDatas,
     });
   }
 

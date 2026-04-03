@@ -1,7 +1,7 @@
 import { ensDbClient } from "@/lib/ensdb/singleton";
 import { indexingStatusBuilder } from "@/lib/indexing-status-builder/singleton";
 import { localPonderClient } from "@/lib/local-ponder-client";
-import { buildLogError, logger } from "@/lib/logger";
+import { logger } from "@/lib/logger";
 import { publicConfigBuilder } from "@/lib/public-config-builder/singleton";
 
 import { EnsDbWriterWorker } from "./ensdb-writer-worker";
@@ -38,7 +38,7 @@ export function startEnsDbWriterWorker() {
 
       logger.error({
         msg: "EnsDbWriterWorker encountered an error",
-        error: buildLogError(error),
+        error,
       });
 
       // Re-throw the error to ensure the application shuts down with a non-zero exit code.

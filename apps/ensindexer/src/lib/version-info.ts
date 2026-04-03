@@ -4,7 +4,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { buildLogError, logger } from "@/lib/logger";
+import { logger } from "@/lib/logger";
 
 /**
  * Get ENSIndexer version
@@ -66,7 +66,7 @@ export function getPackageVersion(packageName: string) {
   } catch (error) {
     logger.error({
       msg: `Could not find version for ${packageName}`,
-      error: buildLogError(error),
+      error,
     });
 
     return "unknown";

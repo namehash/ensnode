@@ -1,7 +1,7 @@
 import { createRequire } from "node:module";
 import { join } from "node:path";
 
-import { formatLogParam, logger } from "@/lib/logger";
+import { logger } from "@/lib/logger";
 
 import { ensDbClient } from "./singleton";
 
@@ -17,11 +17,11 @@ const migrationsDirPath = join(
 export async function migrateEnsNodeSchema(): Promise<void> {
   logger.debug({
     msg: "Started database migrations",
-    module: formatLogParam("migrate-ensnode-schema"),
+    module: "migrate-ensnode-schema",
   });
   await ensDbClient.migrateEnsNodeSchema(migrationsDirPath);
   logger.info({
     msg: "Completed database migrations",
-    module: formatLogParam("migrate-ensnode-schema"),
+    module: "migrate-ensnode-schema",
   });
 }

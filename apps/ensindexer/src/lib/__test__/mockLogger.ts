@@ -2,6 +2,7 @@ import { vi } from "vitest";
 
 // Set up the global PONDER_COMMON.logger before mocking to allow importOriginal to work
 const mockLogger = {
+  trace: vi.fn(),
   debug: vi.fn(),
   info: vi.fn(),
   warn: vi.fn(),
@@ -12,14 +13,9 @@ const mockLogger = {
 
 /**
  * Mock the logger module to avoid the globalThis.PONDER_COMMON check.
- * Uses real implementations for formatLogParam and buildLogError.
  */
-vi.mock("@/lib/logger", async (importOriginal) => {
-  const { buildLogError, formatLogParam } = await importOriginal<typeof import("@/lib/logger")>();
-
+vi.mock("@/lib/logger", async () => {
   return {
     logger: mockLogger,
-    formatLogParam,
-    buildLogError,
   };
 });
