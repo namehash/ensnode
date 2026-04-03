@@ -842,10 +842,11 @@ importers:
   packages/enscli: {}
 
   packages/ensdb-sdk:
-    devDependencies:
+    dependencies:
       '@ensnode/ensnode-sdk':
         specifier: workspace:*
         version: link:../ensnode-sdk
+    devDependencies:
       '@ensnode/shared-configs':
         specifier: workspace:*
         version: link:../shared-configs
