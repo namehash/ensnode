@@ -1,4 +1,5 @@
-import { graphql, useOmnigraphQuery } from "enskit/react/omnigraph";
+import { graphql, type UseOmnigraphQueryResult, useOmnigraphQuery } from "enskit/react/omnigraph";
+import { cache, useMemo } from "react";
 
 const RootRegistryQuery = graphql(`
   query RootRegistry {
@@ -21,27 +22,28 @@ const RegistryByContractQuery = graphql(`
   }
 `);
 
-function CacheStatus({ fetching, stale }: { fetching: boolean; stale: boolean }) {
-  if (fetching) return <span style={{ color: "orange" }}>[fetching]</span>;
-  if (stale) return <span style={{ color: "gray" }}>[stale]</span>;
-  return <span style={{ color: "green" }}>[cache hit]</span>;
+function CacheStatus({ result }: { result: UseOmnigraphQueryResult[0] }) {
+  const cacheOutcome = result.operation?.context.meta?.cacheOutcome;
+  if (!cacheOutcome) return <span style={{ color: "orange" }}>[uncached]</span>;
+  return <span style={{ color: "green" }}>[{cacheOutcome ?? "unknown"}]</span>;
 }
 
 export function RegistryView() {
-  const [rootResult] = useOmnigraphQuery({
+  const [rootResult, reloadRoot] = useOmnigraphQuery({
     query: RootRegistryQuery,
-    // context: { requestPolicy: "network-only" },
+    // NOTE: urql `context` args _must_ be memoized to avoid infinite re-renders
+    context: useMemo(() => ({ requestPolicy: "network-only" }), []),
   });
 
   const root = rootResult.data?.root;
 
-  const [byIdResult] = useOmnigraphQuery({
+  const [byIdResult, reloadById] = useOmnigraphQuery({
     query: RegistryByIdQuery,
     variables: root ? { id: root.id } : undefined,
     pause: !root,
   });
 
-  const [byContractResult] = useOmnigraphQuery({
+  const [byContractResult, reloadByContract] = useOmnigraphQuery({
     query: RegistryByContractQuery,
     variables: root ? { contract: root.contract } : undefined,
     pause: !root,
@@ -62,28 +64,34 @@ export function RegistryView() {
       </p>
 
       <section>
-        <h3>1. Query.root (network-only)</h3>
+        <h3>
+          1. Query.root (network-only) — <CacheStatus result={rootResult} />
+        </h3>
         <pre>
           id: {root.id}
           {"\n"}contract: {root.contract.chainId}:{root.contract.address}
         </pre>
+        <button type="button" onClick={() => reloadRoot()}>
+          Refresh
+        </button>
       </section>
 
       <section>
         <h3>
-          2. registry(by: {"{ id }"}){" "}
-          <CacheStatus fetching={byIdResult.fetching} stale={byIdResult.stale} />
+          2. registry(by: {"{ id }"}) — <CacheStatus result={byIdResult} />
         </h3>
         <p>
           Same entity looked up by <code>id: "{root.id}"</code>
         </p>
         <pre>id: ${byIdResult.data?.registry?.id ?? "-"}</pre>
+        <button type="button" onClick={() => reloadById()}>
+          Refresh
+        </button>
       </section>
 
       <section>
         <h3>
-          3. registry(by: {"{ contract }"}){" "}
-          <CacheStatus fetching={byContractResult.fetching} stale={byContractResult.stale} />
+          3. registry(by: {"{ contract }"}) — <CacheStatus result={byContractResult} />
         </h3>
         <p>
           Same entity looked up by{" "}
@@ -91,9 +99,10 @@ export function RegistryView() {
             contract: {root.contract.chainId}:{root.contract.address}
           </code>
         </p>
-        <pre>
-          <pre>id: ${byContractResult.data?.registry?.id ?? "-"}</pre>
-        </pre>
+        <pre>id: ${byContractResult.data?.registry?.id ?? "-"}</pre>
+        <button type="button" onClick={() => reloadByContract()}>
+          Refresh
+        </button>
       </section>
     </div>
   );
