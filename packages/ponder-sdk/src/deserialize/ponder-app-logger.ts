@@ -17,6 +17,7 @@ function isPrimitive(value: unknown): value is Primitive {
 
 /**
  * JSON replacer function that handles special types for serialization.
+ * - bigints are converted to strings
  * - URL objects are converted to their href string
  * - Map objects are converted to plain objects
  * - Set objects are converted to arrays
@@ -24,6 +25,9 @@ function isPrimitive(value: unknown): value is Primitive {
  * Used with {@link formatLogValue}.
  */
 function replacer(_key: string, value: unknown): unknown {
+  // stringify bigints
+  if (typeof value === "bigint") return value.toString();
+
   // stringify a URL object
   if (value instanceof URL) return value.href;
 
@@ -53,7 +57,12 @@ function formatLogValue(value: unknown): unknown {
   if (value instanceof Error) return value;
 
   // Otherwise JSON stringify with replacer
-  return JSON.stringify(value, replacer);
+  try {
+    return JSON.stringify(value, replacer);
+  } catch {
+    // And if JSON.stringify throws, fall back to String()
+    return String(value);
+  }
 }
 
 /**
@@ -84,7 +93,7 @@ function wrapLogMethod<Log extends PonderAppLog>(fn: (options: Log) => void) {
  *
  * - Primitives are passed through as-is
  * - Error instances are passed through as-is (and handled specially by the logger)
- * - Objects are JSON stringified (with special handling for URL, Map, Set)
+ * - Objects are JSON stringified (with special handling for bigint, URL, Map, Set)
  * - Non-Error `error` values are automatically filtered out
  *
  * This maintains full compatibility with the {@link PonderAppLogger} interface.

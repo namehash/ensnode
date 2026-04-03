@@ -20,7 +20,14 @@ export type PonderAppLog = {
    * If provided, the logger will log the error's stack trace and message.
    */
   error?: unknown;
-} & Record<string, unknown>;
+
+  /**
+   * Optional additional properties.
+   *
+   * If provided, they will be included in the log output.
+   */
+  [key: string]: unknown;
+};
 
 /**
  * Ponder app logger
