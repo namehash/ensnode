@@ -1,5 +1,5 @@
 import { graphql, type UseOmnigraphQueryResult, useOmnigraphQuery } from "enskit/react/omnigraph";
-import { cache, useMemo } from "react";
+import { useMemo } from "react";
 
 const RootRegistryQuery = graphql(`
   query RootRegistry {

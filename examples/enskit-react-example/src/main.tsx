@@ -6,6 +6,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes } from "react-router";
 
 import { DomainView } from "./DomainView";
+import { PaginationView } from "./PaginationView";
 import { RegistryView } from "./RegistryView";
 
 const ENSNODE_URL = "http://localhost:4334";
@@ -16,7 +17,7 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <OmnigraphProvider client={client}>
       <h1>
-        <code>enskit</code> Namegraph Explorer
+        <code>enskit</code> Example App
       </h1>
       <BrowserRouter>
         <Routes>
@@ -24,11 +25,13 @@ createRoot(document.getElementById("root")!).render(
             path="/"
             element={
               <nav>
-                <a href="/domain/eth">Domains</a> | <a href="/registry">Registry Cache Demo</a>
+                <a href="/domain/eth">Domains</a> | <a href="/registry">Registry Cache Demo</a> |{" "}
+                <a href="/pagination">Pagination Demo</a>
               </nav>
             }
           />
           <Route path="/domain/*" element={<DomainView />} />
+          <Route path="/pagination" element={<PaginationView />} />
           <Route path="/registry" element={<RegistryView />} />
         </Routes>
       </BrowserRouter>
