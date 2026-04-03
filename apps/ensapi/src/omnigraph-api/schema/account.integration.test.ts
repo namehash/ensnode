@@ -34,7 +34,7 @@ describe("Account.domains", () => {
 
   const AccountDomains = gql`
     query AccountDomains($address: Address!) {
-      account(address: $address) {
+      account(by: { address: $address }) {
         domains(order: { by: NAME, dir: ASC }) { edges { node { name } } }
       }
     }
@@ -90,7 +90,7 @@ describe("Account.events", () => {
 
   const AccountEvents = gql`
     query AccountEvents($address: Address!) {
-      account(address: $address) { events { edges { node { ...EventFragment } } } }
+      account(by: { address: $address }) { events { edges { node { ...EventFragment } } } }
     }
     ${EventFragment}
   `;
@@ -124,7 +124,7 @@ describe("Account.events filtering (AccountEventsWhereInput)", () => {
 
   const AccountEventsFiltered = gql`
     query AccountEventsFiltered($address: Address!, $where: AccountEventsWhereInput, $first: Int) {
-      account(address: $address) { events(where: $where, first: $first) { edges { node { ...EventFragment } } } }
+      account(by: { address: $address }) { events(where: $where, first: $first) { edges { node { ...EventFragment } } } }
     }
     ${EventFragment}
   `;

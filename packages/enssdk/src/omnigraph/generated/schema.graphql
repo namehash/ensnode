@@ -26,6 +26,12 @@ type Account {
   resolverPermissions(after: String, before: String, first: Int, last: Int): AccountResolverPermissionsConnection
 }
 
+"""Address an Account by ID or Address."""
+input AccountByInput @oneOf {
+  address: Address
+  id: Address
+}
+
 type AccountDomainsConnection {
   edges: [AccountDomainsConnectionEdge!]!
   pageInfo: PageInfo!
@@ -771,8 +777,8 @@ type PermissionsUser {
 scalar PermissionsUserId
 
 type Query {
-  """Identify an Account by Address."""
-  account(address: Address!): Account
+  """Identify an Account by ID or Address."""
+  account(by: AccountByInput!): Account
 
   """Identify a Domain by Name or DomainId"""
   domain(by: DomainIdInput!): Domain

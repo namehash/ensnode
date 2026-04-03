@@ -17,7 +17,7 @@ import {
 } from "@/omnigraph-api/lib/find-domains/layers";
 import { getDomainIdByInterpretedName } from "@/omnigraph-api/lib/get-domain-by-interpreted-name";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
-import { AccountRef } from "@/omnigraph-api/schema/account";
+import { AccountByInput, AccountRef } from "@/omnigraph-api/schema/account";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
 import {
   DomainIdInput,
@@ -159,20 +159,20 @@ builder.queryType({
       type: DomainInterfaceRef,
       args: { by: t.arg({ type: DomainIdInput, required: true }) },
       nullable: true,
-      resolve: async (parent, args, ctx, info) => {
+      resolve: (parent, args, ctx, info) => {
         if (args.by.id !== undefined) return args.by.id;
         return getDomainIdByInterpretedName(args.by.name);
       },
     }),
 
-    //////////////////////////
-    // Get Account by address
-    //////////////////////////
+    /////////////////////////////////////
+    // Get Account by Id or Address
+    /////////////////////////////////////
     account: t.field({
-      description: "Identify an Account by Address.",
+      description: "Identify an Account by ID or Address.",
       type: AccountRef,
-      args: { address: t.arg({ type: "Address", required: true }) },
-      resolve: async (parent, args, context, info) => args.address,
+      args: { by: t.arg({ type: AccountByInput, required: true }) },
+      resolve: (parent, args, context, info) => args.by.id ?? args.by.address,
     }),
 
     ///////////////////////////////////
@@ -182,7 +182,7 @@ builder.queryType({
       description: "Identify a Registry by ID or AccountId.",
       type: RegistryRef,
       args: { by: t.arg({ type: RegistryIdInput, required: true }) },
-      resolve: async (parent, args, context, info) => {
+      resolve: (parent, args, context, info) => {
         if (args.by.id !== undefined) return args.by.id;
         return makeRegistryId(args.by.contract);
       },
@@ -195,7 +195,7 @@ builder.queryType({
       description: "Identify a Resolver by ID or AccountId.",
       type: ResolverRef,
       args: { by: t.arg({ type: ResolverIdInput, required: true }) },
-      resolve: async (parent, args, context, info) => {
+      resolve: (parent, args, context, info) => {
         if (args.by.id !== undefined) return args.by.id;
         return makeResolverId(args.by.contract);
       },

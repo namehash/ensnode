@@ -74,8 +74,12 @@ export function createOmnigraphUrqlClient(ensNodeUrl: string): Client {
               return passthrough(args, cache, info);
             },
             account(parent, args, cache, info) {
-              const address = args.address as Address;
-              return { __typename: "Account", id: address };
+              const by = args.by as { id?: Address; address?: Address };
+
+              if (by.id) return { __typename: "Account", id: by.id };
+              if (by.address) return { __typename: "Account", id: by.address };
+
+              throw new Error("never");
             },
             registry(parent, args, cache, info) {
               const by = args.by as { id?: RegistryId; contract?: AccountId };

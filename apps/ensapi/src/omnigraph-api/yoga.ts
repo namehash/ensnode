@@ -18,7 +18,7 @@ export const yoga = createYoga({
   cors: false,
   graphiql: {
     defaultQuery: `query DomainsByOwner {
-  account(address: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266") {
+  account(by: { address: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" }) {
     domains {
       edges {
         node {

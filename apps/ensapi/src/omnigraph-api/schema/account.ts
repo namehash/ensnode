@@ -214,3 +214,16 @@ AccountRef.implement({
     }),
   }),
 });
+
+//////////
+// Inputs
+//////////
+
+export const AccountByInput = builder.inputType("AccountByInput", {
+  description: "Address an Account by ID or Address.",
+  isOneOf: true,
+  fields: (t) => ({
+    id: t.field({ type: "Address" }),
+    address: t.field({ type: "Address" }),
+  }),
+});

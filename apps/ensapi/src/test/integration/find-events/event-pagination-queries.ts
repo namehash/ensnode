@@ -71,7 +71,7 @@ export const AccountEventsPaginated = gql`
     $last: Int
     $before: String
   ) {
-    account(address: $address) {
+    account(by: { address: $address }) {
       events(first: $first, after: $after, last: $last, before: $before) {
         edges { cursor node { ...EventFragment } }
         pageInfo { ...PageInfoFragment }

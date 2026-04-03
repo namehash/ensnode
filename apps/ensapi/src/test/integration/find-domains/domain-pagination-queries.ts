@@ -87,7 +87,7 @@ export const AccountDomainsPaginated = gql`
     $last: Int
     $before: String
   ) {
-    account(address: $address) {
+    account(by: { address: $address }) {
       domains(order: $order, first: $first, after: $after, last: $last, before: $before) {
         edges { cursor node { ...PaginatedDomainFragment } }
         pageInfo { ...PageInfoFragment }

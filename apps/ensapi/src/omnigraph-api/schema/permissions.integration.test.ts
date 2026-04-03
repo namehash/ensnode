@@ -215,7 +215,7 @@ describe("Account.permissions and Account.registryPermissions", () => {
 
   const AccountPermissions = gql`
     query AccountPermissions($address: Address!) {
-      account(address: $address) {
+      account(by: { address: $address }) {
         permissions { edges { node { id resource user { address } roles } } }
       }
     }
@@ -223,7 +223,7 @@ describe("Account.permissions and Account.registryPermissions", () => {
 
   const AccountRegistryPermissions = gql`
     query AccountRegistryPermissions($address: Address!) {
-      account(address: $address) {
+      account(by: { address: $address }) {
         registryPermissions { edges { node { id registry { id } resource user { address } roles } } }
       }
     }
