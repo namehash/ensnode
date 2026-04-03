@@ -182,7 +182,7 @@ export function buildConfigFromEnvironment(_env: ENSIndexerEnvironment): EnsInde
         labelSetVersion: env.LABEL_SET_VERSION,
       },
 
-      // include the validated ENSDb config params in the parsed EnsApiConfig
+      // include the validated ENSDb config values in the parsed EnsApiConfig
       ensDbUrl: ensDbConfig.ensDbUrl,
       ensIndexerSchemaName: ensDbConfig.ensIndexerSchemaName,
     });

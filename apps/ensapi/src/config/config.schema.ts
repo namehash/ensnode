@@ -98,7 +98,7 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
       rpcConfigs,
       customReferralProgramEditionConfigSetUrl: env.CUSTOM_REFERRAL_PROGRAM_EDITIONS,
 
-      // include the validated ENSDb config params in the parsed EnsApiConfig
+      // include the validated ENSDb config values in the parsed EnsApiConfig
       ensDbUrl: ensDbConfig.ensDbUrl,
       ensIndexerSchemaName: ensDbConfig.ensIndexerSchemaName,
     });
