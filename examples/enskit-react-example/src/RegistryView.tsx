@@ -24,8 +24,9 @@ const RegistryByContractQuery = graphql(`
 
 function CacheStatus({ result }: { result: UseOmnigraphQueryResult[0] }) {
   const cacheOutcome = result.operation?.context.meta?.cacheOutcome;
-  if (!cacheOutcome) return <span style={{ color: "orange" }}>[uncached]</span>;
-  return <span style={{ color: "green" }}>[{cacheOutcome ?? "unknown"}]</span>;
+  if (cacheOutcome === "hit") return <span style={{ color: "green" }}>[hit]</span>;
+  if (cacheOutcome === "partial") return <span style={{ color: "orange" }}>[partial]</span>;
+  return <span style={{ color: "orange" }}>[uncached]</span>;
 }
 
 export function RegistryView() {
@@ -83,7 +84,7 @@ export function RegistryView() {
         <p>
           Same entity looked up by <code>id: "{root.id}"</code>
         </p>
-        <pre>id: ${byIdResult.data?.registry?.id ?? "-"}</pre>
+        <pre>id: {byIdResult.data?.registry?.id ?? "-"}</pre>
         <button type="button" onClick={() => reloadById()}>
           Refresh
         </button>
@@ -99,7 +100,7 @@ export function RegistryView() {
             contract: {root.contract.chainId}:{root.contract.address}
           </code>
         </p>
-        <pre>id: ${byContractResult.data?.registry?.id ?? "-"}</pre>
+        <pre>id: {byContractResult.data?.registry?.id ?? "-"}</pre>
         <button type="button" onClick={() => reloadByContract()}>
           Refresh
         </button>

@@ -61,7 +61,7 @@ describe("Permissions", () => {
 
   const PermissionsQuery = gql`
     query Permissions($contract: AccountIdInput!) {
-      permissions(for: $contract) {
+      permissions(by: { contract: $contract }) {
         id
         contract { chainId address }
         root {
@@ -207,7 +207,7 @@ describe("Domain.permissions", () => {
 describe("Account.permissions and Account.registryPermissions", () => {
   const PermissionsRootUsers = gql`
     query PermissionsRootUsers($contract: AccountIdInput!) {
-      permissions(for: $contract) {
+      permissions(by: { contract: $contract }) {
         root { users { edges { node { user { address } } } } }
       }
     }
@@ -321,7 +321,7 @@ describe("Permissions.events", () => {
 
   const PermissionsEvents = gql`
     query PermissionsEvents($contract: AccountIdInput!, $first: Int) {
-      permissions(for: $contract) { events(first: $first) { edges { node { ...EventFragment } } } }
+      permissions(by: { contract: $contract }) { events(first: $first) { edges { node { ...EventFragment } } } }
     }
     ${EventFragment}
   `;
@@ -368,7 +368,7 @@ describe("Permissions.events filtering (EventsWhereInput)", () => {
 
   const PermissionsEventsFiltered = gql`
     query PermissionsEventsFiltered($contract: AccountIdInput!, $where: EventsWhereInput, $first: Int) {
-      permissions(for: $contract) { events(where: $where, first: $first) { edges { node { ...EventFragment } } } }
+      permissions(by: { contract: $contract }) { events(where: $where, first: $first) { edges { node { ...EventFragment } } } }
     }
     ${EventFragment}
   `;

@@ -113,7 +113,7 @@ export const PermissionsEventsPaginated = gql`
     $last: Int
     $before: String
   ) {
-    permissions(for: $contract) {
+    permissions(by: { contract: $contract }) {
       events(first: $first, after: $after, last: $last, before: $before) {
         edges { cursor node { ...EventFragment } }
         pageInfo { ...PageInfoFragment }
