@@ -22,6 +22,7 @@ describe("omnigraph module", () => {
   it("sends a POST request with string query", async () => {
     const mockResponse = { data: { domain: { name: "nick.eth" } } };
     const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
       json: () => Promise.resolve(mockResponse),
     });
 
@@ -46,6 +47,7 @@ describe("omnigraph module", () => {
 
   it("sends variables when provided", async () => {
     const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
       json: () => Promise.resolve({ data: null }),
     });
 
@@ -62,6 +64,7 @@ describe("omnigraph module", () => {
 
   it("passes signal for abort support", async () => {
     const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
       json: () => Promise.resolve({ data: null }),
     });
     const controller = new AbortController();
@@ -78,6 +81,7 @@ describe("omnigraph module", () => {
 
   it("prints DocumentNode queries to string", async () => {
     const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
       json: () => Promise.resolve({ data: null }),
     });
 
