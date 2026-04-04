@@ -1012,8 +1012,8 @@
           {
             "schema": {
               "type": "boolean",
-              "default": false,
-              "description": "Include detailed resolution trace information in the response."
+              "description": "Include detailed resolution trace information in the response.",
+              "default": false
             },
             "required": false,
             "description": "Include detailed resolution trace information in the response.",
@@ -1023,8 +1023,8 @@
           {
             "schema": {
               "type": "boolean",
-              "default": false,
-              "description": "Attempt accelerated CCIP-Read resolution using L1 data."
+              "description": "Attempt accelerated CCIP-Read resolution using L1 data.",
+              "default": false
             },
             "required": false,
             "description": "Attempt accelerated CCIP-Read resolution using L1 data.",
@@ -1105,8 +1105,8 @@
           {
             "schema": {
               "type": "boolean",
-              "default": false,
-              "description": "Include detailed resolution trace information in the response."
+              "description": "Include detailed resolution trace information in the response.",
+              "default": false
             },
             "required": false,
             "description": "Include detailed resolution trace information in the response.",
@@ -1116,8 +1116,8 @@
           {
             "schema": {
               "type": "boolean",
-              "default": false,
-              "description": "Attempt accelerated CCIP-Read resolution using L1 data."
+              "description": "Attempt accelerated CCIP-Read resolution using L1 data.",
+              "default": false
             },
             "required": false,
             "description": "Attempt accelerated CCIP-Read resolution using L1 data.",
@@ -1181,8 +1181,8 @@
           {
             "schema": {
               "type": "boolean",
-              "default": false,
-              "description": "Include detailed resolution trace information in the response."
+              "description": "Include detailed resolution trace information in the response.",
+              "default": false
             },
             "required": false,
             "description": "Include detailed resolution trace information in the response.",
@@ -1192,8 +1192,8 @@
           {
             "schema": {
               "type": "boolean",
-              "default": false,
-              "description": "Attempt accelerated CCIP-Read resolution using L1 data."
+              "description": "Attempt accelerated CCIP-Read resolution using L1 data.",
+              "default": false
             },
             "required": false,
             "description": "Attempt accelerated CCIP-Read resolution using L1 data.",

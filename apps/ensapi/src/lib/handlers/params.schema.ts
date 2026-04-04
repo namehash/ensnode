@@ -43,16 +43,15 @@ const name = z
 const trace = z
   .optional(boolstring)
   .default(false)
-  .openapi({
-    default: false,
-    description: "Include detailed resolution trace information in the response.",
-  });
+  .describe("Include detailed resolution trace information in the response.")
+  .openapi({ default: false });
+
 const accelerate = z
   .optional(boolstring)
   .default(false)
+  .describe("Attempt accelerated CCIP-Read resolution using L1 data.")
   .openapi({
     default: false,
-    description: "Attempt accelerated CCIP-Read resolution using L1 data.",
   });
 const address = makeLowercaseAddressSchema().describe(
   "EVM wallet address (e.g. '0xd8da6bf26964af9d7eed9e03e53415d37aa96045').",
@@ -72,9 +71,9 @@ const rawSelectionParams = z.object({
   nameRecord: z
     .string()
     .optional()
+    .describe("Whether to include the ENS name record in the response.")
     .openapi({
       type: "boolean",
-      description: "Whether to include the ENS name record in the response.",
     }),
   addresses: z
     .string()
