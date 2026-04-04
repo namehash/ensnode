@@ -37,33 +37,68 @@ const stringarray = z
 const name = z
   .string()
   .refine(isNormalizedName, "Must be normalized, see https://docs.ens.domains/resolution/names/")
-  .transform((val) => val as Name);
+  .transform((val) => val as Name)
+  .describe("ENS name to resolve (e.g. 'vitalik.eth'). Must be normalized per ENSIP-15.");
 
-const trace = z.optional(boolstring).default(false).openapi({ default: false });
-const accelerate = z.optional(boolstring).default(false).openapi({ default: false });
-const address = makeLowercaseAddressSchema();
-const defaultableChainId = makeDefaultableChainIdStringSchema();
+const trace = z
+  .optional(boolstring)
+  .default(false)
+  .openapi({
+    default: false,
+    description: "Include detailed resolution trace information in the response.",
+  });
+const accelerate = z
+  .optional(boolstring)
+  .default(false)
+  .openapi({
+    default: false,
+    description: "Attempt accelerated CCIP-Read resolution using L1 data.",
+  });
+const address = makeLowercaseAddressSchema().describe(
+  "EVM wallet address (e.g. '0xd8da6bf26964af9d7eed9e03e53415d37aa96045').",
+);
+const defaultableChainId = makeDefaultableChainIdStringSchema().describe(
+  "Chain ID as a string (e.g. '1' for Ethereum mainnet). Use '0' for the default EVM chain.",
+);
 const coinType = makeCoinTypeStringSchema();
 
-const chainIdsWithoutDefaultChainId = z.optional(
-  stringarray.pipe(z.array(defaultableChainId.pipe(excludingDefaultChainId))),
-);
+const chainIdsWithoutDefaultChainId = z
+  .optional(stringarray.pipe(z.array(defaultableChainId.pipe(excludingDefaultChainId))))
+  .describe(
+    "Comma-separated list of chain IDs to resolve primary names for (e.g. '1,10,8453'). The default EVM chain ID (0) is not allowed.",
+  );
 
 const rawSelectionParams = z.object({
-  name: z.string().optional(),
-  addresses: z.string().optional(),
-  texts: z.string().optional(),
+  nameRecord: z
+    .string()
+    .optional()
+    .openapi({
+      type: "boolean",
+      description: "Whether to include the ENS name record in the response.",
+    }),
+  addresses: z
+    .string()
+    .optional()
+    .describe(
+      "Comma-separated list of coin types to resolve addresses for (e.g. '60' for ETH, '2147483658' for OP).",
+    ),
+  texts: z
+    .string()
+    .optional()
+    .describe(
+      "Comma-separated list of text record keys to resolve (e.g. 'avatar,description,url').",
+    ),
 });
 
 const selection = z
   .object({
-    name: z.optional(boolstring),
+    nameRecord: z.optional(boolstring),
     addresses: z.optional(stringarray.pipe(z.array(coinType))),
     texts: z.optional(stringarray),
   })
   .transform((value, ctx) => {
     const selection: ResolverRecordsSelection = {
-      ...(value.name && { name: true }),
+      ...(value.nameRecord && { name: true }),
       ...(value.addresses && { addresses: value.addresses }),
       ...(value.texts && { texts: value.texts }),
     };

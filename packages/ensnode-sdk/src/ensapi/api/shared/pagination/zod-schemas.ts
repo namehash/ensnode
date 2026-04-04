@@ -36,8 +36,6 @@ export const makeResponsePageContextSchemaWithNoRecords = (
       totalPages: z.literal(1),
       hasNext: z.literal(false),
       hasPrev: z.literal(false),
-      startIndex: z.undefined(),
-      endIndex: z.undefined(),
     })
     .extend(makeRequestPageParamsSchema(valueLabel).shape);
 

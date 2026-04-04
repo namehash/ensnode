@@ -3,10 +3,13 @@ import {
   type NamedRegistrarAction,
   type RegistrarActionsResponse,
   RegistrarActionsResponseCodes,
+  type RegistrarActionsResponseError,
+  type RegistrarActionsResponseOk,
 } from "./response";
 import type {
   SerializedNamedRegistrarAction,
   SerializedRegistrarActionsResponse,
+  SerializedRegistrarActionsResponseError,
   SerializedRegistrarActionsResponseOk,
 } from "./serialized-response";
 
@@ -20,6 +23,12 @@ export function serializeNamedRegistrarAction({
   };
 }
 
+export function serializeRegistrarActionsResponse(
+  response: RegistrarActionsResponseOk,
+): SerializedRegistrarActionsResponseOk;
+export function serializeRegistrarActionsResponse(
+  response: RegistrarActionsResponseError,
+): SerializedRegistrarActionsResponseError;
 export function serializeRegistrarActionsResponse(
   response: RegistrarActionsResponse,
 ): SerializedRegistrarActionsResponse {

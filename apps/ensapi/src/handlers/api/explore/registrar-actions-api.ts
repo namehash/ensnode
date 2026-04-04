@@ -95,6 +95,7 @@ app.openapi(getRegistrarActionsRoute, async (c) => {
         registrarActions,
         pageContext,
       } satisfies RegistrarActionsResponseOk),
+      200,
     );
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
@@ -166,6 +167,7 @@ app.openapi(getRegistrarActionsByParentNodeRoute, async (c) => {
         pageContext,
         accurateAsOf,
       } satisfies RegistrarActionsResponseOk),
+      200,
     );
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";

@@ -2,7 +2,10 @@ import { namehash } from "viem/ens";
 import { z } from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
-import { makeRegistrarActionSchema } from "../../../registrars/zod-schemas";
+import {
+  makeRegistrarActionSchema,
+  makeSerializedRegistrarActionSchema,
+} from "../../../registrars/zod-schemas";
 import { makeReinterpretedNameSchema, makeUnixTimestampSchema } from "../../../shared/zod-schemas";
 import { ErrorResponseSchema } from "../shared/errors/zod-schemas";
 import { makeResponsePageContextSchema } from "../shared/pagination/zod-schemas";
@@ -32,6 +35,17 @@ export const makeNamedRegistrarActionSchema = (valueLabel: string = "Named Regis
       name: makeReinterpretedNameSchema(valueLabel),
     })
     .check(invariant_registrationLifecycleNodeMatchesName);
+
+/**
+ * Schema for serialized {@link NamedRegistrarAction}.
+ */
+export const makeSerializedNamedRegistrarActionSchema = (
+  valueLabel: string = "Serialized Named Registrar Action",
+) =>
+  z.object({
+    action: makeSerializedRegistrarActionSchema(valueLabel),
+    name: makeReinterpretedNameSchema(valueLabel),
+  });
 
 /**
  * Schema for {@link RegistrarActionsResponseOk}
@@ -65,5 +79,29 @@ export const makeRegistrarActionsResponseSchema = (
 ) =>
   z.discriminatedUnion("responseCode", [
     makeRegistrarActionsResponseOkSchema(valueLabel),
+    makeRegistrarActionsResponseErrorSchema(valueLabel),
+  ]);
+
+/**
+ * Schema for serialized {@link RegistrarActionsResponseOk}
+ */
+export const makeSerializedRegistrarActionsResponseOkSchema = (
+  valueLabel: string = "Serialized Registrar Actions Response OK",
+) =>
+  z.object({
+    responseCode: z.literal(RegistrarActionsResponseCodes.Ok),
+    registrarActions: z.array(makeSerializedNamedRegistrarActionSchema(valueLabel)),
+    pageContext: makeResponsePageContextSchema(`${valueLabel}.pageContext`),
+    accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`).optional(),
+  });
+
+/**
+ * Schema for serialized {@link RegistrarActionsResponse}
+ */
+export const makeSerializedRegistrarActionsResponseSchema = (
+  valueLabel: string = "Serialized Registrar Actions Response",
+) =>
+  z.discriminatedUnion("responseCode", [
+    makeSerializedRegistrarActionsResponseOkSchema(valueLabel),
     makeRegistrarActionsResponseErrorSchema(valueLabel),
   ]);
