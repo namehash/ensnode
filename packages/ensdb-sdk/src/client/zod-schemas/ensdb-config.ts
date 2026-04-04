@@ -25,11 +25,11 @@ export const EnsDbUrlSchema = z
 
 const EnsIndexerSchemaNameSchema = z
   .string({
-    error: "ENSIndexer Schema Name is required.",
+    error: "ENV variable ENSINDEXER_SCHEMA_NAME is required.",
   })
   .trim()
   .nonempty({
-    error: "ENSIndexer Schema Name cannot be an empty string.",
+    error: "ENV variable ENSINDEXER_SCHEMA_NAME cannot be an empty string.",
   });
 
 export const EnsDbConfigSchema = z.object({
