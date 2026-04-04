@@ -73,7 +73,7 @@ const rawSelectionParams = z.object({
     .optional()
     .describe("Whether to include the ENS name record in the response.")
     .openapi({
-      type: "boolean",
+      enum: ["true", "false"],
     }),
   addresses: z
     .string()

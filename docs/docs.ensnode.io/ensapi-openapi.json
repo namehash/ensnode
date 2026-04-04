@@ -981,8 +981,9 @@
           },
           {
             "schema": {
-              "type": "boolean",
-              "description": "Whether to include the ENS name record in the response."
+              "type": "string",
+              "description": "Whether to include the ENS name record in the response.",
+              "enum": ["true", "false"]
             },
             "required": false,
             "description": "Whether to include the ENS name record in the response.",
