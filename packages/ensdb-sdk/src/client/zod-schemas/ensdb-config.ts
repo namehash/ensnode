@@ -3,7 +3,7 @@ import { z } from "zod/v4";
 
 export const EnsDbUrlSchema = z
   .string({
-    error: "ENV variavle ENSDB_URL is required.",
+    error: "ENV variable ENSDB_URL is required.",
   })
   .refine(
     (url) => {
