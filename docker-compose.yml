@@ -1,7 +1,10 @@
 services:
   ensindexer:
     container_name: ensindexer
-    image: ghcr.io/namehash/ensnode/ensindexer:latest
+    image: ghcr.io/namehash/ensnode/ensindexer:${ENSNODE_VERSION:-latest}
+    build:
+      context: .
+      dockerfile: apps/ensindexer/Dockerfile
     ports:
       - "42069:42069"
     environment:
@@ -9,6 +12,7 @@ services:
       ENSDB_URL: postgresql://postgres:password@postgres:5432/postgres
       ENSINDEXER_SCHEMA_NAME: docker_compose_ensindexer_schema
       ENSRAINBOW_URL: http://ensrainbow:3223
+      RPC_URL_15658733: http://devnet:8545
     env_file:
       # NOTE: must define apps/ensindexer/.env.local (see apps/ensindexer/.env.local.example)
       # Copy .env.local.example to .env.local and configure all required values
@@ -29,7 +33,10 @@ services:
 
   ensapi:
     container_name: ensapi
-    image: ghcr.io/namehash/ensnode/ensapi:latest
+    image: ghcr.io/namehash/ensnode/ensapi:${ENSNODE_VERSION:-latest}
+    build:
+      context: .
+      dockerfile: apps/ensapi/Dockerfile
     ports:
       - "4334:4334"
     environment:
@@ -54,7 +61,10 @@ services:
 
   ensrainbow:
     container_name: ensrainbow
-    image: ghcr.io/namehash/ensnode/ensrainbow:latest
+    image: ghcr.io/namehash/ensnode/ensrainbow:${ENSNODE_VERSION:-latest}
+    build:
+      context: .
+      dockerfile: apps/ensrainbow/Dockerfile
     ports:
       - "3223:3223"
     env_file:
@@ -74,7 +84,10 @@ services:
 
   ensadmin:
     container_name: ensadmin
-    image: ghcr.io/namehash/ensnode/ensadmin:latest
+    image: ghcr.io/namehash/ensnode/ensadmin:${ENSNODE_VERSION:-latest}
+    build:
+      context: .
+      dockerfile: apps/ensadmin/Dockerfile
     ports:
       - "4173:4173"
     environment:
@@ -105,7 +118,7 @@ services:
 
   devnet:
     container_name: devnet
-    image: ghcr.io/ensdomains/contracts-v2:main-e8696c6
+    image: ghcr.io/ensdomains/contracts-v2:${DEVNET_VERSION:-main-e8696c6}
     command: ./script/runDevnet.ts --testNames
     pull_policy: always
     ports:
