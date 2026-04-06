@@ -300,4 +300,4 @@ apps/ensdb-cli/
 
 1. **Snapshot ID format**: Should snapshot IDs be auto-generated (e.g. `ensdb-2026-04-06-abc123`) or user-specified? Auto-generated is safer for avoiding collisions.
 2. **Retention policy**: Should `snapshot list` show all snapshots ever, or should there be a TTL/cleanup mechanism (e.g. `snapshot delete`)?
-
+3. **Streaming upload mode**: Should v1 support a direct "snapshot and push" flow that uploads artifacts to S3 as they are produced, or should v1 stay local-first (`snapshot create` then `snapshot push`)? True end-to-end streaming likely conflicts with the chosen `pg_dump --format=directory` approach, so supporting it may require either a different dump format or a hybrid design where each completed schema archive is uploaded immediately after local creation.
