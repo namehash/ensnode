@@ -12,7 +12,7 @@ const DomainFragment = graphql(`
 
 const DomainByNameQuery = graphql(
   `
-  query DomainByName($name: Name!) {
+  query DomainByName($name: InterpretedName!) {
     domain(by: { name: $name }) {
       ...DomainFragment
       subdomains(first: 20) {

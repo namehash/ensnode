@@ -70,7 +70,7 @@ export async function handleRegistrarEventRegistration(
 
   // Invariant: subregistry record must exist
   if (!subregistry) {
-    throw new Error(`Subregistry record must exists for '${stringifyAccountId(subregistryId)}.'`);
+    throw new Error(`Subregistry record must exist for '${stringifyAccountId(subregistryId)}.'`);
   }
 
   // 3. Calculate incremental duration
@@ -132,7 +132,7 @@ export async function handleRegistrarEventRenewal(
 
   // Invariant: subregistry record must exist
   if (!subregistry) {
-    throw new Error(`Subregistry record must exists for '${stringifyAccountId(subregistryId)}.'`);
+    throw new Error(`Subregistry record must exist for '${stringifyAccountId(subregistryId)}.'`);
   }
 
   // 2. Get the current registration lifecycle before this registrar action

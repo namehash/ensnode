@@ -16,7 +16,7 @@ ENSNODE_URL=https://api.alpha.ensnode.io pnpm -F enskit-react-example dev
 
 ## Usage (with Local ENSNode)
 
-First, follow the [ENSNode Contributing Documentation](https://ensnode.io/docs/contributing) to get ENSNode running on your local machine. At the end of this, ENSApi should be avilable on port `:4334`.
+First, follow the [ENSNode Contributing Documentation](https://ensnode.io/docs/contributing) to get ENSNode running on your local machine. At the end of this, ENSApi should be available on port `:4334`.
 
 ```sh
 # from the ENSNode monorepo root
