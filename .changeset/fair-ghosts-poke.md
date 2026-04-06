@@ -2,4 +2,4 @@
 "ensapi": patch
 ---
 
-fix handling error on latest server step and some minor bug fixes
+Fixes error handling in app.onError to return correct HTTP status codes and resolves OpenAPI schema generation issue

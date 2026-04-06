@@ -2009,367 +2009,332 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "oneOf": [
-                    {
-                      "type": "object",
-                      "properties": {
-                        "responseCode": { "type": "string", "enum": ["ok"] },
-                        "registrarActions": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "action": {
-                                "oneOf": [
-                                  {
+                  "type": "object",
+                  "properties": {
+                    "responseCode": { "type": "string", "enum": ["ok"] },
+                    "registrarActions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "action": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": { "type": "string", "minLength": 1 },
+                                  "incrementalDuration": { "type": "number" },
+                                  "registrant": { "type": "string" },
+                                  "registrationLifecycle": {
                                     "type": "object",
                                     "properties": {
-                                      "id": { "type": "string", "minLength": 1 },
-                                      "incrementalDuration": { "type": "number" },
-                                      "registrant": { "type": "string" },
-                                      "registrationLifecycle": {
+                                      "subregistry": {
                                         "type": "object",
                                         "properties": {
-                                          "subregistry": {
+                                          "subregistryId": {
                                             "type": "object",
                                             "properties": {
-                                              "subregistryId": {
-                                                "type": "object",
-                                                "properties": {
-                                                  "chainId": {
-                                                    "type": "integer",
-                                                    "exclusiveMinimum": 0
-                                                  },
-                                                  "address": { "type": "string" }
-                                                },
-                                                "required": ["chainId", "address"],
-                                                "additionalProperties": false
+                                              "chainId": {
+                                                "type": "integer",
+                                                "exclusiveMinimum": 0
                                               },
-                                              "node": { "type": "string" }
+                                              "address": { "type": "string" }
                                             },
-                                            "required": ["subregistryId", "node"]
+                                            "required": ["chainId", "address"],
+                                            "additionalProperties": false
                                           },
-                                          "node": { "type": "string" },
-                                          "expiresAt": { "type": "integer" }
+                                          "node": { "type": "string" }
                                         },
-                                        "required": ["subregistry", "node", "expiresAt"]
+                                        "required": ["subregistryId", "node"]
                                       },
-                                      "pricing": {
-                                        "anyOf": [
-                                          {
-                                            "type": "object",
-                                            "properties": {
-                                              "baseCost": {
-                                                "type": "object",
-                                                "properties": {
-                                                  "amount": {
-                                                    "type": "string",
-                                                    "pattern": "^\\d+$"
-                                                  },
-                                                  "currency": { "type": "string", "enum": ["ETH"] }
-                                                },
-                                                "required": ["amount", "currency"]
-                                              },
-                                              "premium": {
-                                                "type": "object",
-                                                "properties": {
-                                                  "amount": {
-                                                    "type": "string",
-                                                    "pattern": "^\\d+$"
-                                                  },
-                                                  "currency": { "type": "string", "enum": ["ETH"] }
-                                                },
-                                                "required": ["amount", "currency"]
-                                              },
-                                              "total": {
-                                                "type": "object",
-                                                "properties": {
-                                                  "amount": {
-                                                    "type": "string",
-                                                    "pattern": "^\\d+$"
-                                                  },
-                                                  "currency": { "type": "string", "enum": ["ETH"] }
-                                                },
-                                                "required": ["amount", "currency"]
-                                              }
-                                            },
-                                            "required": ["baseCost", "premium", "total"]
-                                          },
-                                          {
-                                            "type": "object",
-                                            "properties": {
-                                              "baseCost": { "type": "null" },
-                                              "premium": { "type": "null" },
-                                              "total": { "type": "null" }
-                                            },
-                                            "required": ["baseCost", "premium", "total"]
-                                          }
-                                        ]
-                                      },
-                                      "referral": {
-                                        "anyOf": [
-                                          {
-                                            "type": "object",
-                                            "properties": {
-                                              "encodedReferrer": { "type": "string" },
-                                              "decodedReferrer": { "type": "string" }
-                                            },
-                                            "required": ["encodedReferrer", "decodedReferrer"]
-                                          },
-                                          {
-                                            "type": "object",
-                                            "properties": {
-                                              "encodedReferrer": { "type": "null" },
-                                              "decodedReferrer": { "type": "null" }
-                                            },
-                                            "required": ["encodedReferrer", "decodedReferrer"]
-                                          }
-                                        ]
-                                      },
-                                      "block": {
-                                        "type": "object",
-                                        "properties": {
-                                          "timestamp": { "type": "integer" },
-                                          "number": { "type": "integer", "minimum": 0 }
-                                        },
-                                        "required": ["timestamp", "number"],
-                                        "additionalProperties": false
-                                      },
-                                      "transactionHash": { "type": "string" },
-                                      "eventIds": {
-                                        "type": "array",
-                                        "items": { "type": "string", "minLength": 1 },
-                                        "minItems": 1
-                                      },
-                                      "type": { "type": "string", "enum": ["registration"] }
+                                      "node": { "type": "string" },
+                                      "expiresAt": { "type": "integer" }
                                     },
-                                    "required": [
-                                      "id",
-                                      "incrementalDuration",
-                                      "registrant",
-                                      "registrationLifecycle",
-                                      "pricing",
-                                      "referral",
-                                      "block",
-                                      "transactionHash",
-                                      "eventIds",
-                                      "type"
+                                    "required": ["subregistry", "node", "expiresAt"]
+                                  },
+                                  "pricing": {
+                                    "anyOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "baseCost": {
+                                            "type": "object",
+                                            "properties": {
+                                              "amount": { "type": "string", "pattern": "^\\d+$" },
+                                              "currency": { "type": "string", "enum": ["ETH"] }
+                                            },
+                                            "required": ["amount", "currency"]
+                                          },
+                                          "premium": {
+                                            "type": "object",
+                                            "properties": {
+                                              "amount": { "type": "string", "pattern": "^\\d+$" },
+                                              "currency": { "type": "string", "enum": ["ETH"] }
+                                            },
+                                            "required": ["amount", "currency"]
+                                          },
+                                          "total": {
+                                            "type": "object",
+                                            "properties": {
+                                              "amount": { "type": "string", "pattern": "^\\d+$" },
+                                              "currency": { "type": "string", "enum": ["ETH"] }
+                                            },
+                                            "required": ["amount", "currency"]
+                                          }
+                                        },
+                                        "required": ["baseCost", "premium", "total"]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "baseCost": { "type": "null" },
+                                          "premium": { "type": "null" },
+                                          "total": { "type": "null" }
+                                        },
+                                        "required": ["baseCost", "premium", "total"]
+                                      }
                                     ]
                                   },
-                                  {
+                                  "referral": {
+                                    "anyOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "encodedReferrer": { "type": "string" },
+                                          "decodedReferrer": { "type": "string" }
+                                        },
+                                        "required": ["encodedReferrer", "decodedReferrer"]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "encodedReferrer": { "type": "null" },
+                                          "decodedReferrer": { "type": "null" }
+                                        },
+                                        "required": ["encodedReferrer", "decodedReferrer"]
+                                      }
+                                    ]
+                                  },
+                                  "block": {
                                     "type": "object",
                                     "properties": {
-                                      "id": { "type": "string", "minLength": 1 },
-                                      "incrementalDuration": { "type": "number" },
-                                      "registrant": { "type": "string" },
-                                      "registrationLifecycle": {
-                                        "type": "object",
-                                        "properties": {
-                                          "subregistry": {
-                                            "type": "object",
-                                            "properties": {
-                                              "subregistryId": {
-                                                "type": "object",
-                                                "properties": {
-                                                  "chainId": {
-                                                    "type": "integer",
-                                                    "exclusiveMinimum": 0
-                                                  },
-                                                  "address": { "type": "string" }
-                                                },
-                                                "required": ["chainId", "address"],
-                                                "additionalProperties": false
-                                              },
-                                              "node": { "type": "string" }
-                                            },
-                                            "required": ["subregistryId", "node"]
-                                          },
-                                          "node": { "type": "string" },
-                                          "expiresAt": { "type": "integer" }
-                                        },
-                                        "required": ["subregistry", "node", "expiresAt"]
-                                      },
-                                      "pricing": {
-                                        "anyOf": [
-                                          {
-                                            "type": "object",
-                                            "properties": {
-                                              "baseCost": {
-                                                "type": "object",
-                                                "properties": {
-                                                  "amount": {
-                                                    "type": "string",
-                                                    "pattern": "^\\d+$"
-                                                  },
-                                                  "currency": { "type": "string", "enum": ["ETH"] }
-                                                },
-                                                "required": ["amount", "currency"]
-                                              },
-                                              "premium": {
-                                                "type": "object",
-                                                "properties": {
-                                                  "amount": {
-                                                    "type": "string",
-                                                    "pattern": "^\\d+$"
-                                                  },
-                                                  "currency": { "type": "string", "enum": ["ETH"] }
-                                                },
-                                                "required": ["amount", "currency"]
-                                              },
-                                              "total": {
-                                                "type": "object",
-                                                "properties": {
-                                                  "amount": {
-                                                    "type": "string",
-                                                    "pattern": "^\\d+$"
-                                                  },
-                                                  "currency": { "type": "string", "enum": ["ETH"] }
-                                                },
-                                                "required": ["amount", "currency"]
-                                              }
-                                            },
-                                            "required": ["baseCost", "premium", "total"]
-                                          },
-                                          {
-                                            "type": "object",
-                                            "properties": {
-                                              "baseCost": { "type": "null" },
-                                              "premium": { "type": "null" },
-                                              "total": { "type": "null" }
-                                            },
-                                            "required": ["baseCost", "premium", "total"]
-                                          }
-                                        ]
-                                      },
-                                      "referral": {
-                                        "anyOf": [
-                                          {
-                                            "type": "object",
-                                            "properties": {
-                                              "encodedReferrer": { "type": "string" },
-                                              "decodedReferrer": { "type": "string" }
-                                            },
-                                            "required": ["encodedReferrer", "decodedReferrer"]
-                                          },
-                                          {
-                                            "type": "object",
-                                            "properties": {
-                                              "encodedReferrer": { "type": "null" },
-                                              "decodedReferrer": { "type": "null" }
-                                            },
-                                            "required": ["encodedReferrer", "decodedReferrer"]
-                                          }
-                                        ]
-                                      },
-                                      "block": {
-                                        "type": "object",
-                                        "properties": {
-                                          "timestamp": { "type": "integer" },
-                                          "number": { "type": "integer", "minimum": 0 }
-                                        },
-                                        "required": ["timestamp", "number"],
-                                        "additionalProperties": false
-                                      },
-                                      "transactionHash": { "type": "string" },
-                                      "eventIds": {
-                                        "type": "array",
-                                        "items": { "type": "string", "minLength": 1 },
-                                        "minItems": 1
-                                      },
-                                      "type": { "type": "string", "enum": ["renewal"] }
+                                      "timestamp": { "type": "integer" },
+                                      "number": { "type": "integer", "minimum": 0 }
                                     },
-                                    "required": [
-                                      "id",
-                                      "incrementalDuration",
-                                      "registrant",
-                                      "registrationLifecycle",
-                                      "pricing",
-                                      "referral",
-                                      "block",
-                                      "transactionHash",
-                                      "eventIds",
-                                      "type"
-                                    ]
-                                  }
+                                    "required": ["timestamp", "number"],
+                                    "additionalProperties": false
+                                  },
+                                  "transactionHash": { "type": "string" },
+                                  "eventIds": {
+                                    "type": "array",
+                                    "items": { "type": "string", "minLength": 1 },
+                                    "minItems": 1
+                                  },
+                                  "type": { "type": "string", "enum": ["registration"] }
+                                },
+                                "required": [
+                                  "id",
+                                  "incrementalDuration",
+                                  "registrant",
+                                  "registrationLifecycle",
+                                  "pricing",
+                                  "referral",
+                                  "block",
+                                  "transactionHash",
+                                  "eventIds",
+                                  "type"
                                 ]
                               },
-                              "name": { "type": "string" }
-                            },
-                            "required": ["action", "name"]
-                          }
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": { "type": "string", "minLength": 1 },
+                                  "incrementalDuration": { "type": "number" },
+                                  "registrant": { "type": "string" },
+                                  "registrationLifecycle": {
+                                    "type": "object",
+                                    "properties": {
+                                      "subregistry": {
+                                        "type": "object",
+                                        "properties": {
+                                          "subregistryId": {
+                                            "type": "object",
+                                            "properties": {
+                                              "chainId": {
+                                                "type": "integer",
+                                                "exclusiveMinimum": 0
+                                              },
+                                              "address": { "type": "string" }
+                                            },
+                                            "required": ["chainId", "address"],
+                                            "additionalProperties": false
+                                          },
+                                          "node": { "type": "string" }
+                                        },
+                                        "required": ["subregistryId", "node"]
+                                      },
+                                      "node": { "type": "string" },
+                                      "expiresAt": { "type": "integer" }
+                                    },
+                                    "required": ["subregistry", "node", "expiresAt"]
+                                  },
+                                  "pricing": {
+                                    "anyOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "baseCost": {
+                                            "type": "object",
+                                            "properties": {
+                                              "amount": { "type": "string", "pattern": "^\\d+$" },
+                                              "currency": { "type": "string", "enum": ["ETH"] }
+                                            },
+                                            "required": ["amount", "currency"]
+                                          },
+                                          "premium": {
+                                            "type": "object",
+                                            "properties": {
+                                              "amount": { "type": "string", "pattern": "^\\d+$" },
+                                              "currency": { "type": "string", "enum": ["ETH"] }
+                                            },
+                                            "required": ["amount", "currency"]
+                                          },
+                                          "total": {
+                                            "type": "object",
+                                            "properties": {
+                                              "amount": { "type": "string", "pattern": "^\\d+$" },
+                                              "currency": { "type": "string", "enum": ["ETH"] }
+                                            },
+                                            "required": ["amount", "currency"]
+                                          }
+                                        },
+                                        "required": ["baseCost", "premium", "total"]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "baseCost": { "type": "null" },
+                                          "premium": { "type": "null" },
+                                          "total": { "type": "null" }
+                                        },
+                                        "required": ["baseCost", "premium", "total"]
+                                      }
+                                    ]
+                                  },
+                                  "referral": {
+                                    "anyOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "encodedReferrer": { "type": "string" },
+                                          "decodedReferrer": { "type": "string" }
+                                        },
+                                        "required": ["encodedReferrer", "decodedReferrer"]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "encodedReferrer": { "type": "null" },
+                                          "decodedReferrer": { "type": "null" }
+                                        },
+                                        "required": ["encodedReferrer", "decodedReferrer"]
+                                      }
+                                    ]
+                                  },
+                                  "block": {
+                                    "type": "object",
+                                    "properties": {
+                                      "timestamp": { "type": "integer" },
+                                      "number": { "type": "integer", "minimum": 0 }
+                                    },
+                                    "required": ["timestamp", "number"],
+                                    "additionalProperties": false
+                                  },
+                                  "transactionHash": { "type": "string" },
+                                  "eventIds": {
+                                    "type": "array",
+                                    "items": { "type": "string", "minLength": 1 },
+                                    "minItems": 1
+                                  },
+                                  "type": { "type": "string", "enum": ["renewal"] }
+                                },
+                                "required": [
+                                  "id",
+                                  "incrementalDuration",
+                                  "registrant",
+                                  "registrationLifecycle",
+                                  "pricing",
+                                  "referral",
+                                  "block",
+                                  "transactionHash",
+                                  "eventIds",
+                                  "type"
+                                ]
+                              }
+                            ]
+                          },
+                          "name": { "type": "string" }
                         },
-                        "pageContext": {
-                          "anyOf": [
-                            {
-                              "type": "object",
-                              "properties": {
-                                "totalRecords": { "type": "number", "enum": [0] },
-                                "totalPages": { "type": "number", "enum": [1] },
-                                "hasNext": { "type": "boolean", "enum": [false] },
-                                "hasPrev": { "type": "boolean", "enum": [false] },
-                                "page": { "type": "integer", "exclusiveMinimum": 0 },
-                                "recordsPerPage": {
-                                  "type": "integer",
-                                  "exclusiveMinimum": 0,
-                                  "maximum": 100
-                                }
-                              },
-                              "required": [
-                                "totalRecords",
-                                "totalPages",
-                                "hasNext",
-                                "hasPrev",
-                                "page",
-                                "recordsPerPage"
-                              ]
-                            },
-                            {
-                              "type": "object",
-                              "properties": {
-                                "totalRecords": { "type": "integer", "exclusiveMinimum": 0 },
-                                "totalPages": { "type": "integer", "exclusiveMinimum": 0 },
-                                "hasNext": { "type": "boolean" },
-                                "hasPrev": { "type": "boolean" },
-                                "startIndex": { "type": "integer", "minimum": 0 },
-                                "endIndex": { "type": "integer", "minimum": 0 },
-                                "page": { "type": "integer", "exclusiveMinimum": 0 },
-                                "recordsPerPage": {
-                                  "type": "integer",
-                                  "exclusiveMinimum": 0,
-                                  "maximum": 100
-                                }
-                              },
-                              "required": [
-                                "totalRecords",
-                                "totalPages",
-                                "hasNext",
-                                "hasPrev",
-                                "startIndex",
-                                "endIndex",
-                                "page",
-                                "recordsPerPage"
-                              ]
+                        "required": ["action", "name"]
+                      }
+                    },
+                    "pageContext": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "totalRecords": { "type": "number", "enum": [0] },
+                            "totalPages": { "type": "number", "enum": [1] },
+                            "hasNext": { "type": "boolean", "enum": [false] },
+                            "hasPrev": { "type": "boolean", "enum": [false] },
+                            "page": { "type": "integer", "exclusiveMinimum": 0 },
+                            "recordsPerPage": {
+                              "type": "integer",
+                              "exclusiveMinimum": 0,
+                              "maximum": 100
                             }
+                          },
+                          "required": [
+                            "totalRecords",
+                            "totalPages",
+                            "hasNext",
+                            "hasPrev",
+                            "page",
+                            "recordsPerPage"
                           ]
                         },
-                        "accurateAsOf": { "type": "integer" }
-                      },
-                      "required": ["responseCode", "registrarActions", "pageContext"]
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "responseCode": { "type": "string", "enum": ["error"] },
-                        "error": {
+                        {
                           "type": "object",
-                          "properties": { "message": { "type": "string" }, "details": {} },
-                          "required": ["message"]
+                          "properties": {
+                            "totalRecords": { "type": "integer", "exclusiveMinimum": 0 },
+                            "totalPages": { "type": "integer", "exclusiveMinimum": 0 },
+                            "hasNext": { "type": "boolean" },
+                            "hasPrev": { "type": "boolean" },
+                            "startIndex": { "type": "integer", "minimum": 0 },
+                            "endIndex": { "type": "integer", "minimum": 0 },
+                            "page": { "type": "integer", "exclusiveMinimum": 0 },
+                            "recordsPerPage": {
+                              "type": "integer",
+                              "exclusiveMinimum": 0,
+                              "maximum": 100
+                            }
+                          },
+                          "required": [
+                            "totalRecords",
+                            "totalPages",
+                            "hasNext",
+                            "hasPrev",
+                            "startIndex",
+                            "endIndex",
+                            "page",
+                            "recordsPerPage"
+                          ]
                         }
-                      },
-                      "required": ["responseCode", "error"],
-                      "additionalProperties": false
-                    }
-                  ],
+                      ]
+                    },
+                    "accurateAsOf": { "type": "integer" }
+                  },
+                  "required": ["responseCode", "registrarActions", "pageContext"],
                   "example": {
                     "responseCode": "ok",
                     "registrarActions": [
@@ -2555,367 +2520,332 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "oneOf": [
-                    {
-                      "type": "object",
-                      "properties": {
-                        "responseCode": { "type": "string", "enum": ["ok"] },
-                        "registrarActions": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "action": {
-                                "oneOf": [
-                                  {
+                  "type": "object",
+                  "properties": {
+                    "responseCode": { "type": "string", "enum": ["ok"] },
+                    "registrarActions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "action": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": { "type": "string", "minLength": 1 },
+                                  "incrementalDuration": { "type": "number" },
+                                  "registrant": { "type": "string" },
+                                  "registrationLifecycle": {
                                     "type": "object",
                                     "properties": {
-                                      "id": { "type": "string", "minLength": 1 },
-                                      "incrementalDuration": { "type": "number" },
-                                      "registrant": { "type": "string" },
-                                      "registrationLifecycle": {
+                                      "subregistry": {
                                         "type": "object",
                                         "properties": {
-                                          "subregistry": {
+                                          "subregistryId": {
                                             "type": "object",
                                             "properties": {
-                                              "subregistryId": {
-                                                "type": "object",
-                                                "properties": {
-                                                  "chainId": {
-                                                    "type": "integer",
-                                                    "exclusiveMinimum": 0
-                                                  },
-                                                  "address": { "type": "string" }
-                                                },
-                                                "required": ["chainId", "address"],
-                                                "additionalProperties": false
+                                              "chainId": {
+                                                "type": "integer",
+                                                "exclusiveMinimum": 0
                                               },
-                                              "node": { "type": "string" }
+                                              "address": { "type": "string" }
                                             },
-                                            "required": ["subregistryId", "node"]
+                                            "required": ["chainId", "address"],
+                                            "additionalProperties": false
                                           },
-                                          "node": { "type": "string" },
-                                          "expiresAt": { "type": "integer" }
+                                          "node": { "type": "string" }
                                         },
-                                        "required": ["subregistry", "node", "expiresAt"]
+                                        "required": ["subregistryId", "node"]
                                       },
-                                      "pricing": {
-                                        "anyOf": [
-                                          {
-                                            "type": "object",
-                                            "properties": {
-                                              "baseCost": {
-                                                "type": "object",
-                                                "properties": {
-                                                  "amount": {
-                                                    "type": "string",
-                                                    "pattern": "^\\d+$"
-                                                  },
-                                                  "currency": { "type": "string", "enum": ["ETH"] }
-                                                },
-                                                "required": ["amount", "currency"]
-                                              },
-                                              "premium": {
-                                                "type": "object",
-                                                "properties": {
-                                                  "amount": {
-                                                    "type": "string",
-                                                    "pattern": "^\\d+$"
-                                                  },
-                                                  "currency": { "type": "string", "enum": ["ETH"] }
-                                                },
-                                                "required": ["amount", "currency"]
-                                              },
-                                              "total": {
-                                                "type": "object",
-                                                "properties": {
-                                                  "amount": {
-                                                    "type": "string",
-                                                    "pattern": "^\\d+$"
-                                                  },
-                                                  "currency": { "type": "string", "enum": ["ETH"] }
-                                                },
-                                                "required": ["amount", "currency"]
-                                              }
-                                            },
-                                            "required": ["baseCost", "premium", "total"]
-                                          },
-                                          {
-                                            "type": "object",
-                                            "properties": {
-                                              "baseCost": { "type": "null" },
-                                              "premium": { "type": "null" },
-                                              "total": { "type": "null" }
-                                            },
-                                            "required": ["baseCost", "premium", "total"]
-                                          }
-                                        ]
-                                      },
-                                      "referral": {
-                                        "anyOf": [
-                                          {
-                                            "type": "object",
-                                            "properties": {
-                                              "encodedReferrer": { "type": "string" },
-                                              "decodedReferrer": { "type": "string" }
-                                            },
-                                            "required": ["encodedReferrer", "decodedReferrer"]
-                                          },
-                                          {
-                                            "type": "object",
-                                            "properties": {
-                                              "encodedReferrer": { "type": "null" },
-                                              "decodedReferrer": { "type": "null" }
-                                            },
-                                            "required": ["encodedReferrer", "decodedReferrer"]
-                                          }
-                                        ]
-                                      },
-                                      "block": {
-                                        "type": "object",
-                                        "properties": {
-                                          "timestamp": { "type": "integer" },
-                                          "number": { "type": "integer", "minimum": 0 }
-                                        },
-                                        "required": ["timestamp", "number"],
-                                        "additionalProperties": false
-                                      },
-                                      "transactionHash": { "type": "string" },
-                                      "eventIds": {
-                                        "type": "array",
-                                        "items": { "type": "string", "minLength": 1 },
-                                        "minItems": 1
-                                      },
-                                      "type": { "type": "string", "enum": ["registration"] }
+                                      "node": { "type": "string" },
+                                      "expiresAt": { "type": "integer" }
                                     },
-                                    "required": [
-                                      "id",
-                                      "incrementalDuration",
-                                      "registrant",
-                                      "registrationLifecycle",
-                                      "pricing",
-                                      "referral",
-                                      "block",
-                                      "transactionHash",
-                                      "eventIds",
-                                      "type"
+                                    "required": ["subregistry", "node", "expiresAt"]
+                                  },
+                                  "pricing": {
+                                    "anyOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "baseCost": {
+                                            "type": "object",
+                                            "properties": {
+                                              "amount": { "type": "string", "pattern": "^\\d+$" },
+                                              "currency": { "type": "string", "enum": ["ETH"] }
+                                            },
+                                            "required": ["amount", "currency"]
+                                          },
+                                          "premium": {
+                                            "type": "object",
+                                            "properties": {
+                                              "amount": { "type": "string", "pattern": "^\\d+$" },
+                                              "currency": { "type": "string", "enum": ["ETH"] }
+                                            },
+                                            "required": ["amount", "currency"]
+                                          },
+                                          "total": {
+                                            "type": "object",
+                                            "properties": {
+                                              "amount": { "type": "string", "pattern": "^\\d+$" },
+                                              "currency": { "type": "string", "enum": ["ETH"] }
+                                            },
+                                            "required": ["amount", "currency"]
+                                          }
+                                        },
+                                        "required": ["baseCost", "premium", "total"]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "baseCost": { "type": "null" },
+                                          "premium": { "type": "null" },
+                                          "total": { "type": "null" }
+                                        },
+                                        "required": ["baseCost", "premium", "total"]
+                                      }
                                     ]
                                   },
-                                  {
+                                  "referral": {
+                                    "anyOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "encodedReferrer": { "type": "string" },
+                                          "decodedReferrer": { "type": "string" }
+                                        },
+                                        "required": ["encodedReferrer", "decodedReferrer"]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "encodedReferrer": { "type": "null" },
+                                          "decodedReferrer": { "type": "null" }
+                                        },
+                                        "required": ["encodedReferrer", "decodedReferrer"]
+                                      }
+                                    ]
+                                  },
+                                  "block": {
                                     "type": "object",
                                     "properties": {
-                                      "id": { "type": "string", "minLength": 1 },
-                                      "incrementalDuration": { "type": "number" },
-                                      "registrant": { "type": "string" },
-                                      "registrationLifecycle": {
-                                        "type": "object",
-                                        "properties": {
-                                          "subregistry": {
-                                            "type": "object",
-                                            "properties": {
-                                              "subregistryId": {
-                                                "type": "object",
-                                                "properties": {
-                                                  "chainId": {
-                                                    "type": "integer",
-                                                    "exclusiveMinimum": 0
-                                                  },
-                                                  "address": { "type": "string" }
-                                                },
-                                                "required": ["chainId", "address"],
-                                                "additionalProperties": false
-                                              },
-                                              "node": { "type": "string" }
-                                            },
-                                            "required": ["subregistryId", "node"]
-                                          },
-                                          "node": { "type": "string" },
-                                          "expiresAt": { "type": "integer" }
-                                        },
-                                        "required": ["subregistry", "node", "expiresAt"]
-                                      },
-                                      "pricing": {
-                                        "anyOf": [
-                                          {
-                                            "type": "object",
-                                            "properties": {
-                                              "baseCost": {
-                                                "type": "object",
-                                                "properties": {
-                                                  "amount": {
-                                                    "type": "string",
-                                                    "pattern": "^\\d+$"
-                                                  },
-                                                  "currency": { "type": "string", "enum": ["ETH"] }
-                                                },
-                                                "required": ["amount", "currency"]
-                                              },
-                                              "premium": {
-                                                "type": "object",
-                                                "properties": {
-                                                  "amount": {
-                                                    "type": "string",
-                                                    "pattern": "^\\d+$"
-                                                  },
-                                                  "currency": { "type": "string", "enum": ["ETH"] }
-                                                },
-                                                "required": ["amount", "currency"]
-                                              },
-                                              "total": {
-                                                "type": "object",
-                                                "properties": {
-                                                  "amount": {
-                                                    "type": "string",
-                                                    "pattern": "^\\d+$"
-                                                  },
-                                                  "currency": { "type": "string", "enum": ["ETH"] }
-                                                },
-                                                "required": ["amount", "currency"]
-                                              }
-                                            },
-                                            "required": ["baseCost", "premium", "total"]
-                                          },
-                                          {
-                                            "type": "object",
-                                            "properties": {
-                                              "baseCost": { "type": "null" },
-                                              "premium": { "type": "null" },
-                                              "total": { "type": "null" }
-                                            },
-                                            "required": ["baseCost", "premium", "total"]
-                                          }
-                                        ]
-                                      },
-                                      "referral": {
-                                        "anyOf": [
-                                          {
-                                            "type": "object",
-                                            "properties": {
-                                              "encodedReferrer": { "type": "string" },
-                                              "decodedReferrer": { "type": "string" }
-                                            },
-                                            "required": ["encodedReferrer", "decodedReferrer"]
-                                          },
-                                          {
-                                            "type": "object",
-                                            "properties": {
-                                              "encodedReferrer": { "type": "null" },
-                                              "decodedReferrer": { "type": "null" }
-                                            },
-                                            "required": ["encodedReferrer", "decodedReferrer"]
-                                          }
-                                        ]
-                                      },
-                                      "block": {
-                                        "type": "object",
-                                        "properties": {
-                                          "timestamp": { "type": "integer" },
-                                          "number": { "type": "integer", "minimum": 0 }
-                                        },
-                                        "required": ["timestamp", "number"],
-                                        "additionalProperties": false
-                                      },
-                                      "transactionHash": { "type": "string" },
-                                      "eventIds": {
-                                        "type": "array",
-                                        "items": { "type": "string", "minLength": 1 },
-                                        "minItems": 1
-                                      },
-                                      "type": { "type": "string", "enum": ["renewal"] }
+                                      "timestamp": { "type": "integer" },
+                                      "number": { "type": "integer", "minimum": 0 }
                                     },
-                                    "required": [
-                                      "id",
-                                      "incrementalDuration",
-                                      "registrant",
-                                      "registrationLifecycle",
-                                      "pricing",
-                                      "referral",
-                                      "block",
-                                      "transactionHash",
-                                      "eventIds",
-                                      "type"
-                                    ]
-                                  }
+                                    "required": ["timestamp", "number"],
+                                    "additionalProperties": false
+                                  },
+                                  "transactionHash": { "type": "string" },
+                                  "eventIds": {
+                                    "type": "array",
+                                    "items": { "type": "string", "minLength": 1 },
+                                    "minItems": 1
+                                  },
+                                  "type": { "type": "string", "enum": ["registration"] }
+                                },
+                                "required": [
+                                  "id",
+                                  "incrementalDuration",
+                                  "registrant",
+                                  "registrationLifecycle",
+                                  "pricing",
+                                  "referral",
+                                  "block",
+                                  "transactionHash",
+                                  "eventIds",
+                                  "type"
                                 ]
                               },
-                              "name": { "type": "string" }
-                            },
-                            "required": ["action", "name"]
-                          }
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": { "type": "string", "minLength": 1 },
+                                  "incrementalDuration": { "type": "number" },
+                                  "registrant": { "type": "string" },
+                                  "registrationLifecycle": {
+                                    "type": "object",
+                                    "properties": {
+                                      "subregistry": {
+                                        "type": "object",
+                                        "properties": {
+                                          "subregistryId": {
+                                            "type": "object",
+                                            "properties": {
+                                              "chainId": {
+                                                "type": "integer",
+                                                "exclusiveMinimum": 0
+                                              },
+                                              "address": { "type": "string" }
+                                            },
+                                            "required": ["chainId", "address"],
+                                            "additionalProperties": false
+                                          },
+                                          "node": { "type": "string" }
+                                        },
+                                        "required": ["subregistryId", "node"]
+                                      },
+                                      "node": { "type": "string" },
+                                      "expiresAt": { "type": "integer" }
+                                    },
+                                    "required": ["subregistry", "node", "expiresAt"]
+                                  },
+                                  "pricing": {
+                                    "anyOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "baseCost": {
+                                            "type": "object",
+                                            "properties": {
+                                              "amount": { "type": "string", "pattern": "^\\d+$" },
+                                              "currency": { "type": "string", "enum": ["ETH"] }
+                                            },
+                                            "required": ["amount", "currency"]
+                                          },
+                                          "premium": {
+                                            "type": "object",
+                                            "properties": {
+                                              "amount": { "type": "string", "pattern": "^\\d+$" },
+                                              "currency": { "type": "string", "enum": ["ETH"] }
+                                            },
+                                            "required": ["amount", "currency"]
+                                          },
+                                          "total": {
+                                            "type": "object",
+                                            "properties": {
+                                              "amount": { "type": "string", "pattern": "^\\d+$" },
+                                              "currency": { "type": "string", "enum": ["ETH"] }
+                                            },
+                                            "required": ["amount", "currency"]
+                                          }
+                                        },
+                                        "required": ["baseCost", "premium", "total"]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "baseCost": { "type": "null" },
+                                          "premium": { "type": "null" },
+                                          "total": { "type": "null" }
+                                        },
+                                        "required": ["baseCost", "premium", "total"]
+                                      }
+                                    ]
+                                  },
+                                  "referral": {
+                                    "anyOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "encodedReferrer": { "type": "string" },
+                                          "decodedReferrer": { "type": "string" }
+                                        },
+                                        "required": ["encodedReferrer", "decodedReferrer"]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "encodedReferrer": { "type": "null" },
+                                          "decodedReferrer": { "type": "null" }
+                                        },
+                                        "required": ["encodedReferrer", "decodedReferrer"]
+                                      }
+                                    ]
+                                  },
+                                  "block": {
+                                    "type": "object",
+                                    "properties": {
+                                      "timestamp": { "type": "integer" },
+                                      "number": { "type": "integer", "minimum": 0 }
+                                    },
+                                    "required": ["timestamp", "number"],
+                                    "additionalProperties": false
+                                  },
+                                  "transactionHash": { "type": "string" },
+                                  "eventIds": {
+                                    "type": "array",
+                                    "items": { "type": "string", "minLength": 1 },
+                                    "minItems": 1
+                                  },
+                                  "type": { "type": "string", "enum": ["renewal"] }
+                                },
+                                "required": [
+                                  "id",
+                                  "incrementalDuration",
+                                  "registrant",
+                                  "registrationLifecycle",
+                                  "pricing",
+                                  "referral",
+                                  "block",
+                                  "transactionHash",
+                                  "eventIds",
+                                  "type"
+                                ]
+                              }
+                            ]
+                          },
+                          "name": { "type": "string" }
                         },
-                        "pageContext": {
-                          "anyOf": [
-                            {
-                              "type": "object",
-                              "properties": {
-                                "totalRecords": { "type": "number", "enum": [0] },
-                                "totalPages": { "type": "number", "enum": [1] },
-                                "hasNext": { "type": "boolean", "enum": [false] },
-                                "hasPrev": { "type": "boolean", "enum": [false] },
-                                "page": { "type": "integer", "exclusiveMinimum": 0 },
-                                "recordsPerPage": {
-                                  "type": "integer",
-                                  "exclusiveMinimum": 0,
-                                  "maximum": 100
-                                }
-                              },
-                              "required": [
-                                "totalRecords",
-                                "totalPages",
-                                "hasNext",
-                                "hasPrev",
-                                "page",
-                                "recordsPerPage"
-                              ]
-                            },
-                            {
-                              "type": "object",
-                              "properties": {
-                                "totalRecords": { "type": "integer", "exclusiveMinimum": 0 },
-                                "totalPages": { "type": "integer", "exclusiveMinimum": 0 },
-                                "hasNext": { "type": "boolean" },
-                                "hasPrev": { "type": "boolean" },
-                                "startIndex": { "type": "integer", "minimum": 0 },
-                                "endIndex": { "type": "integer", "minimum": 0 },
-                                "page": { "type": "integer", "exclusiveMinimum": 0 },
-                                "recordsPerPage": {
-                                  "type": "integer",
-                                  "exclusiveMinimum": 0,
-                                  "maximum": 100
-                                }
-                              },
-                              "required": [
-                                "totalRecords",
-                                "totalPages",
-                                "hasNext",
-                                "hasPrev",
-                                "startIndex",
-                                "endIndex",
-                                "page",
-                                "recordsPerPage"
-                              ]
+                        "required": ["action", "name"]
+                      }
+                    },
+                    "pageContext": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "totalRecords": { "type": "number", "enum": [0] },
+                            "totalPages": { "type": "number", "enum": [1] },
+                            "hasNext": { "type": "boolean", "enum": [false] },
+                            "hasPrev": { "type": "boolean", "enum": [false] },
+                            "page": { "type": "integer", "exclusiveMinimum": 0 },
+                            "recordsPerPage": {
+                              "type": "integer",
+                              "exclusiveMinimum": 0,
+                              "maximum": 100
                             }
+                          },
+                          "required": [
+                            "totalRecords",
+                            "totalPages",
+                            "hasNext",
+                            "hasPrev",
+                            "page",
+                            "recordsPerPage"
                           ]
                         },
-                        "accurateAsOf": { "type": "integer" }
-                      },
-                      "required": ["responseCode", "registrarActions", "pageContext"]
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "responseCode": { "type": "string", "enum": ["error"] },
-                        "error": {
+                        {
                           "type": "object",
-                          "properties": { "message": { "type": "string" }, "details": {} },
-                          "required": ["message"]
+                          "properties": {
+                            "totalRecords": { "type": "integer", "exclusiveMinimum": 0 },
+                            "totalPages": { "type": "integer", "exclusiveMinimum": 0 },
+                            "hasNext": { "type": "boolean" },
+                            "hasPrev": { "type": "boolean" },
+                            "startIndex": { "type": "integer", "minimum": 0 },
+                            "endIndex": { "type": "integer", "minimum": 0 },
+                            "page": { "type": "integer", "exclusiveMinimum": 0 },
+                            "recordsPerPage": {
+                              "type": "integer",
+                              "exclusiveMinimum": 0,
+                              "maximum": 100
+                            }
+                          },
+                          "required": [
+                            "totalRecords",
+                            "totalPages",
+                            "hasNext",
+                            "hasPrev",
+                            "startIndex",
+                            "endIndex",
+                            "page",
+                            "recordsPerPage"
+                          ]
                         }
-                      },
-                      "required": ["responseCode", "error"],
-                      "additionalProperties": false
-                    }
-                  ],
+                      ]
+                    },
+                    "accurateAsOf": { "type": "integer" }
+                  },
+                  "required": ["responseCode", "registrarActions", "pageContext"],
                   "example": {
                     "responseCode": "ok",
                     "registrarActions": [

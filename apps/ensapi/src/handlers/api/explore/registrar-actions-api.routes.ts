@@ -11,7 +11,7 @@ import {
   makeNodeSchema,
   makePositiveIntegerSchema,
   makeRegistrarActionsResponseErrorSchema,
-  makeSerializedRegistrarActionsResponseSchema,
+  makeSerializedRegistrarActionsResponseOkSchema,
   makeUnixTimestampSchema,
   registrarActionsResponseOkExample,
 } from "@ensnode/ensnode-sdk/internal";
@@ -104,7 +104,7 @@ export const getRegistrarActionsRoute = createRoute({
       description: "Successfully retrieved registrar actions",
       content: {
         "application/json": {
-          schema: makeSerializedRegistrarActionsResponseSchema(
+          schema: makeSerializedRegistrarActionsResponseOkSchema(
             "Registrar Actions Response",
           ).openapi({
             example: registrarActionsResponseOkExample,
@@ -148,7 +148,7 @@ export const getRegistrarActionsByParentNodeRoute = createRoute({
       description: "Successfully retrieved registrar actions",
       content: {
         "application/json": {
-          schema: makeSerializedRegistrarActionsResponseSchema(
+          schema: makeSerializedRegistrarActionsResponseOkSchema(
             "Registrar Actions By ParentNode Response",
           ).openapi({
             example: registrarActionsResponseOkExample,
