@@ -1,9 +1,11 @@
 import { type Address, hexToBigInt } from "viem";
 
+import { maskLower32Bits } from "../_lib/maskLower32Bits";
 import { stringifyAccountId, stringifyAssetId } from "./caip";
 import type {
   AccountId,
   DomainId,
+  EACResource,
   ENSv1DomainId,
   ENSv2DomainId,
   LabelHash,
@@ -17,18 +19,11 @@ import type {
   ResolverId,
   ResolverRecordsId,
   StorageId,
+  TokenId,
 } from "./types";
 import { AssetNamespaces } from "./types";
 
-/**
- * Masks the lower 32 bits of `num`.
- */
-const maskLower32Bits = (num: bigint) => num ^ (num & 0xffffffffn);
-
 export const makeRegistryId = (accountId: AccountId) => stringifyAccountId(accountId) as RegistryId;
-
-export const makePermissionsId = (contract: AccountId) =>
-  stringifyAccountId(contract) as PermissionsId;
 
 export const makeResolverId = (contract: AccountId) => stringifyAccountId(contract) as ResolverId;
 
@@ -42,24 +37,27 @@ export const makeENSv2DomainId = (registry: AccountId, storageId: StorageId) =>
   }) as ENSv2DomainId;
 
 /**
- * Computes a Label's {@link StorageId} given its tokenId or LabelHash as `input`.
+ * Computes a Label's {@link StorageId} given its TokenId or LabelHash.
  */
-export const makeStorageId = (input: bigint | LabelHash): StorageId => {
-  if (typeof input === "bigint") return maskLower32Bits(input);
-  return makeStorageId(hexToBigInt(input));
+export const makeStorageId = (labelRef: TokenId | LabelHash): StorageId => {
+  if (typeof labelRef === "bigint") return maskLower32Bits(labelRef) as StorageId;
+  return maskLower32Bits(hexToBigInt(labelRef)) as StorageId;
 };
 
-export const makePermissionsResourceId = (contract: AccountId, resource: bigint) =>
+export const makePermissionsId = (contract: AccountId) =>
+  stringifyAccountId(contract) as PermissionsId;
+
+export const makePermissionsResourceId = (contract: AccountId, resource: EACResource) =>
   `${makePermissionsId(contract)}/${resource}` as PermissionsResourceId;
 
-export const makePermissionsUserId = (contract: AccountId, resource: bigint, user: Address) =>
-  `${makePermissionsId(contract)}/${resource}/${user}` as PermissionsUserId;
+export const makePermissionsUserId = (contract: AccountId, resource: EACResource, user: Address) =>
+  `${makePermissionsResourceId(contract, resource)}/${user}` as PermissionsUserId;
 
 export const makeResolverRecordsId = (resolver: AccountId, node: Node) =>
   `${makeResolverId(resolver)}/${node}` as ResolverRecordsId;
 
-export const makeRegistrationId = (domainId: DomainId, index: number) =>
-  `${domainId}/${index}` as RegistrationId;
+export const makeRegistrationId = (domainId: DomainId, registrationIndex: number) =>
+  `${domainId}/${registrationIndex}` as RegistrationId;
 
 export const makeRenewalId = (domainId: DomainId, registrationIndex: number, index: number) =>
   `${makeRegistrationId(domainId, registrationIndex)}/${index}` as RenewalId;

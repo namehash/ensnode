@@ -8,6 +8,6 @@ import { ensDb } from "@/lib/ensdb/singleton";
 export async function getLatestRegistration(domainId: DomainId) {
   return await ensDb.query.registration.findFirst({
     where: (t, { eq }) => eq(t.domainId, domainId),
-    orderBy: (t, { desc }) => desc(t.index),
+    orderBy: (t, { desc }) => desc(t.registrationIndex),
   });
 }

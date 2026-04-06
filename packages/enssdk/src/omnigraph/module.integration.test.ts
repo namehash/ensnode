@@ -25,7 +25,7 @@ describe("omnigraph module (integration)", () => {
 
     expect(result.errors).toBeUndefined();
 
-    // look our semantic types!
+    // look, our semantic types!
     expectTypeOf(result.data!.domain!.id).toEqualTypeOf<DomainId>();
     expectTypeOf(result.data!.domain!.name).toEqualTypeOf<InterpretedName | null>();
     expectTypeOf(result.data!.domain!.owner!.address).toEqualTypeOf<Address>();

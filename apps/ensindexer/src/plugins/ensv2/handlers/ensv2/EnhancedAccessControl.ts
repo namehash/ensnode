@@ -1,4 +1,10 @@
-import { makePermissionsId, makePermissionsResourceId, makePermissionsUserId } from "enssdk";
+import {
+  type EACResource,
+  type EACRoleBitmap,
+  makePermissionsId,
+  makePermissionsResourceId,
+  makePermissionsUserId,
+} from "enssdk";
 import { type Address, isAddressEqual, zeroAddress } from "viem";
 
 import { PluginName } from "@ensnode/ensnode-sdk";
@@ -25,7 +31,7 @@ type PermissionsCompositeKey = Pick<
 const ensurePermissionsResource = async (
   context: IndexingEngineContext,
   contract: PermissionsCompositeKey,
-  resource: bigint,
+  resource: EACResource,
 ) => {
   const permissionsId = makePermissionsId(contract);
   const permissionsResourceId = makePermissionsResourceId(contract, resource);
@@ -43,7 +49,7 @@ const ensurePermissionsResource = async (
     .onConflictDoNothing();
 };
 
-const isZeroRoles = (roles: bigint) => roles === 0n;
+const isZeroRoles = (roles: EACRoleBitmap) => roles === 0n;
 
 export default function () {
   addOnchainEventListener(
@@ -54,10 +60,10 @@ export default function () {
     }: {
       context: IndexingEngineContext;
       event: EventWithArgs<{
-        resource: bigint;
+        resource: EACResource;
         account: Address;
-        oldRoleBitmap: bigint;
-        newRoleBitmap: bigint;
+        oldRoleBitmap: EACRoleBitmap;
+        newRoleBitmap: EACRoleBitmap;
       }>;
     }) => {
       // biome-ignore lint/correctness/noUnusedVariables: TODO: use oldRoleBitmap at all?

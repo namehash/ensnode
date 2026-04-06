@@ -130,7 +130,7 @@ export default function () {
       );
     }
 
-    const renewal = await getLatestRenewal(context, domainId, registration.index);
+    const renewal = await getLatestRenewal(context, domainId, registration.registrationIndex);
     if (!renewal) {
       throw new Error(
         `Invariant(RegistrarController:NameRenewed): NameRenewed but no Renewal for Registration\n${toJson(

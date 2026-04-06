@@ -12,7 +12,7 @@ export type RegistryId = string & { __brand: "RegistryContractId" };
  * In ENSv2, the rightmost 32 bits of a TokenId is used for version management, and it is the leftmost
  * 224 bits that are a stable identifier for a Label within a Registry.
  */
-export type StorageId = bigint;
+export type StorageId = bigint & { __brand: "StorageId" };
 
 /**
  * The node that uniquely identifies an ENSv1 name.

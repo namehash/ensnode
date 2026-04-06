@@ -5,7 +5,7 @@ import {
   type Variables,
 } from "@urql/exchange-graphcache";
 import type { AccountId, PermissionsId, RegistryId, ResolverId } from "enssdk";
-import { makePermissionsId, makeRegistryId, makeResolverId } from "enssdk";
+import { makePermissionsId, makeRegistryId, makeResolverId, stringifyAccountId } from "enssdk";
 import { introspection } from "enssdk/omnigraph";
 import type { Address } from "viem";
 
@@ -39,14 +39,8 @@ export const omnigraphCacheExchange = cacheExchange({
     // them as keyable by `id`. if it encounters an Entity with no `id` field and no other
     // special handling here in the cacheExchange.keys definitions, it will issue a warning.
 
-    // AccountIds are keyable by (chainId, address)
-    AccountId: (data) => {
-      // TODO: expose some validation and serialization logic from enssdk
-      const accountId = data as unknown as AccountId;
-
-      // TODO: format this as a CAIP AccountId rather than this simple key
-      return `${accountId.chainId}-${accountId.address}`;
-    },
+    // AccountIds are keyable by stringifying them
+    AccountId: (data) => stringifyAccountId(data as unknown as AccountId),
 
     // These entities are Embedded Data and don't have a relevant key
     Label: EMBEDDED_DATA,
