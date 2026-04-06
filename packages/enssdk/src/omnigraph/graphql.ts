@@ -5,6 +5,7 @@ import type {
   ChainId,
   CoinType,
   DomainId,
+  InterpretedLabel,
   InterpretedName,
   Node,
   PermissionsId,
@@ -31,7 +32,8 @@ export const graphql = initGraphQLTada<{
     Hex: Hex;
     ChainId: ChainId;
     CoinType: CoinType;
-    Name: InterpretedName;
+    InterpretedName: InterpretedName;
+    InterpretedLabel: InterpretedLabel;
     Node: Node;
     DomainId: DomainId;
     RegistryId: RegistryId;

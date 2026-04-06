@@ -57,6 +57,7 @@ const createSpan = createOpenTelemetryWrapper(tracer, {
 export const builder = new SchemaBuilder<{
   Context: ReturnType<typeof context>;
   Scalars: {
+    // make sure to keep these scalars up to date with packages/enssdk/src/omnigraph/graphql.ts !
     BigInt: { Input: bigint; Output: bigint };
     Address: { Input: Address; Output: Address };
     Hex: { Input: Hex; Output: Hex };

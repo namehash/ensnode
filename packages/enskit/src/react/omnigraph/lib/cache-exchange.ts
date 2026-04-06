@@ -20,8 +20,8 @@ import { localConnectionResolvers } from "./local-connection-resolvers";
 const EMBEDDED_DATA = () => null;
 
 /**
- * Many of our resolvers allow for exact match lookups by passing all args through to the cache.
- * This resolver delegates to graphcache's built-in cache resolution with the full argument set.
+ * This local resolver delegates to graphcache's built-in cache resolution with the full argument set,
+ * effectively telling urql 'not found locally' and to fetch from the network.
  */
 const passthrough = (args: Variables, cache: Cache, info: ResolveInfo) =>
   cache.resolve(info.parentTypeName, info.fieldName, args);
