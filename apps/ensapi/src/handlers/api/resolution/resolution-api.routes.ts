@@ -4,6 +4,9 @@ import {
   makeResolvePrimaryNameResponseSchema,
   makeResolvePrimaryNamesResponseSchema,
   makeResolveRecordsResponseSchema,
+  resolvePrimaryNameResponseExample,
+  resolvePrimaryNamesResponseExample,
+  resolveRecordsResponseExample,
 } from "@ensnode/ensnode-sdk/internal";
 
 import { params } from "@/lib/handlers/params.schema";
@@ -38,7 +41,9 @@ export const resolveRecordsRoute = createRoute({
       description: "Successfully resolved records",
       content: {
         "application/json": {
-          schema: makeResolveRecordsResponseSchema(),
+          schema: makeResolveRecordsResponseSchema().openapi({
+            example: resolveRecordsResponseExample,
+          }),
         },
       },
     },
@@ -67,7 +72,9 @@ export const resolvePrimaryNameRoute = createRoute({
       description: "Successfully resolved name",
       content: {
         "application/json": {
-          schema: makeResolvePrimaryNameResponseSchema(),
+          schema: makeResolvePrimaryNameResponseSchema().openapi({
+            example: resolvePrimaryNameResponseExample,
+          }),
         },
       },
     },
@@ -96,11 +103,11 @@ export const resolvePrimaryNamesRoute = createRoute({
       description: "Successfully resolved records",
       content: {
         "application/json": {
-          schema: makeResolvePrimaryNamesResponseSchema(),
+          schema: makeResolvePrimaryNamesResponseSchema().openapi({
+            example: resolvePrimaryNamesResponseExample,
+          }),
         },
       },
     },
   },
 });
-
-export const routes = [resolveRecordsRoute, resolvePrimaryNameRoute, resolvePrimaryNamesRoute];

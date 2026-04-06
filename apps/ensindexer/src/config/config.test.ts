@@ -193,17 +193,17 @@ describe("config (with base env)", () => {
 
     it("throws an error when ENSINDEXER_SCHEMA_NAME is not set", async () => {
       vi.stubEnv("ENSINDEXER_SCHEMA_NAME", undefined);
-      await expect(getConfig()).rejects.toThrow(/ENSIndexer Schema Name is required/);
+      await expect(getConfig()).rejects.toThrow(/ENSINDEXER_SCHEMA_NAME is required/);
     });
 
     it("throws an error when ENSINDEXER_SCHEMA_NAME is empty", async () => {
       vi.stubEnv("ENSINDEXER_SCHEMA_NAME", "");
-      await expect(getConfig()).rejects.toThrow(/ENSIndexer Schema Name cannot be an empty string/);
+      await expect(getConfig()).rejects.toThrow(/ENSINDEXER_SCHEMA_NAME cannot be an empty string/);
     });
 
     it("throws an error when ENSINDEXER_SCHEMA_NAME is only whitespace", async () => {
       vi.stubEnv("ENSINDEXER_SCHEMA_NAME", "   ");
-      await expect(getConfig()).rejects.toThrow(/ENSIndexer Schema Name cannot be an empty string/);
+      await expect(getConfig()).rejects.toThrow(/ENSINDEXER_SCHEMA_NAME cannot be an empty string/);
     });
   });
 
@@ -423,27 +423,27 @@ describe("config (with base env)", () => {
 
     it("throws an error if ENSDB_URL is not set", async () => {
       vi.stubEnv("ENSDB_URL", undefined);
-      await expect(getConfig()).rejects.toThrow(/Invalid input/);
+      await expect(getConfig()).rejects.toThrow(/ENSDB_URL is required/);
     });
 
     it("throws an error if ENSDB_URL is empty", async () => {
       vi.stubEnv("ENSDB_URL", "");
-      await expect(getConfig()).rejects.toThrow(/Invalid PostgreSQL connection string/);
+      await expect(getConfig()).rejects.toThrow(/Invalid connection string/);
     });
 
     it("throws an error if ENSDB_URL is not a valid postgres connection string", async () => {
       vi.stubEnv("ENSDB_URL", "not-a-postgres-connection-string");
-      await expect(getConfig()).rejects.toThrow(/Invalid PostgreSQL connection string/);
+      await expect(getConfig()).rejects.toThrow(/Invalid connection string/);
     });
 
     it("throws an error if ENSDB_URL uses the wrong protocol", async () => {
       vi.stubEnv("ENSDB_URL", "mysql://user:password@localhost:3306/mydb");
-      await expect(getConfig()).rejects.toThrow(/Invalid PostgreSQL connection string/);
+      await expect(getConfig()).rejects.toThrow(/Invalid connection string/);
     });
 
     it("throws an error if ENSDB_URL is missing required components", async () => {
       vi.stubEnv("ENSDB_URL", "postgresql://localhost:5432");
-      await expect(getConfig()).rejects.toThrow(/Invalid PostgreSQL connection string/);
+      await expect(getConfig()).rejects.toThrow(/Invalid connection string/);
     });
 
     it("accepts postgres:// protocol", async () => {
