@@ -70,7 +70,7 @@ export interface RankedReferrerMetricsRevShareLimit extends ReferrerMetricsRevSh
   rank: ReferrerRank;
 
   /**
-   * Identifies if the referrer meets the qualifications of the {@link ReferralProgramRulesRevShareLimit} to receive a non-zero `awardPoolShare`.
+   * Identifies if the referrer meets the qualifications of the {@link ReferralProgramRulesRevShareLimit} to receive a non-zero `cappedAwardValue`.
    *
    * @invariant true if and only if `totalBaseRevenueContribution` is greater than or equal to
    *   {@link ReferralProgramRulesRevShareLimit.minBaseRevenueContribution} AND

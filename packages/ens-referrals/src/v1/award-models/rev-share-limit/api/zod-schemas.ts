@@ -136,13 +136,14 @@ export const makeUnrankedReferrerMetricsRevShareLimitSchema = (
         .min(1, `${valueLabel}.adminDisqualificationReason must not be empty`)
         .nullable(),
     })
-    .refine(
-      (data) => data.uncappedAwardValue.amount === 0n && data.cappedAwardValue.amount === 0n,
-      {
-        message: `${valueLabel}.uncappedAwardValue and cappedAwardValue must both be 0 for unranked referrers`,
-        path: ["uncappedAwardValue", "cappedAwardValue"],
-      },
-    )
+    .refine((data) => data.uncappedAwardValue.amount === 0n, {
+      message: `${valueLabel}.uncappedAwardValue must be 0 for unranked referrers`,
+      path: ["uncappedAwardValue"],
+    })
+    .refine((data) => data.cappedAwardValue.amount === 0n, {
+      message: `${valueLabel}.cappedAwardValue must be 0 for unranked referrers`,
+      path: ["cappedAwardValue"],
+    })
     .refine((data) => data.isAdminDisqualified === (data.adminDisqualificationReason !== null), {
       message: `${valueLabel}.adminDisqualificationReason must be non-null iff isAdminDisqualified is true`,
       path: ["adminDisqualificationReason"],
