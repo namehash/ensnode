@@ -146,7 +146,7 @@ export const buildReferrerLeaderboardRevShareLimit = (
       // Compute from aggregated totals to match the single-division used in final output.
       const accumulatedStandardAwardAmount = scalePrice(
         priceUsdc(totalBaseRevenueAmount),
-        rules.qualifiedRevenueShare,
+        rules.maxBaseRevenueShare,
       ).amount;
       const claimAmount =
         accumulatedStandardAwardAmount < poolRemainingAmount
@@ -162,7 +162,7 @@ export const buildReferrerLeaderboardRevShareLimit = (
         BigInt(SECONDS_PER_YEAR);
       const incrementalStandardAwardAmount = scalePrice(
         priceUsdc(incrementalBaseRevenueAmount),
-        rules.qualifiedRevenueShare,
+        rules.maxBaseRevenueShare,
       ).amount;
       const claimAmount =
         incrementalStandardAwardAmount < poolRemainingAmount
@@ -175,7 +175,7 @@ export const buildReferrerLeaderboardRevShareLimit = (
   }
 
   // 3. Sort referrers to assign ranks:
-  //    1. qualifiedAwardValue (awardPoolApproxValue) desc — actual pool claims, race winners first
+  //    1. qualifiedAwardValue (cappedAwardValue) desc — actual pool claims, race winners first
   //    2. totalIncrementalDuration desc — tie-break for pool-depleted referrers
   //    3. referrer address desc — deterministic tie-break
   // Both `a` and `b` are keys from `referrerStates`, so lookups are always defined.
@@ -221,14 +221,14 @@ export const buildReferrerLeaderboardRevShareLimit = (
         rules,
       );
 
-      const standardAwardValue = scalePrice(
+      const uncappedAwardValue = scalePrice(
         revShareMetrics.totalBaseRevenueContribution,
-        rules.qualifiedRevenueShare,
+        rules.maxBaseRevenueShare,
       );
 
       return buildAwardedReferrerMetricsRevShareLimit(
         rankedMetrics,
-        standardAwardValue,
+        uncappedAwardValue,
         priceUsdc(state.qualifiedAwardValueAmount),
         rules,
       );

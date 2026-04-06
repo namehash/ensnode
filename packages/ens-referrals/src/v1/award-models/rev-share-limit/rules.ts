@@ -60,14 +60,14 @@ export interface ReferralProgramRulesRevShareLimit extends BaseReferralProgramRu
   /**
    * The minimum base revenue contribution required for a referrer to qualify.
    */
-  minQualifiedRevenueContribution: PriceUsdc;
+  minBaseRevenueContribution: PriceUsdc;
 
   /**
    * The fraction of the referrer's base revenue contribution that constitutes their potential award.
    *
    * @invariant Guaranteed to be a number between 0 and 1 (inclusive)
    */
-  qualifiedRevenueShare: number;
+  maxBaseRevenueShare: number;
 
   /**
    * Admin-imposed disqualifications for this edition.
@@ -85,17 +85,17 @@ export const validateReferralProgramRulesRevShareLimit = (
     rules.totalAwardPoolValue,
   );
 
-  makePriceUsdcSchema("ReferralProgramRulesRevShareLimit.minQualifiedRevenueContribution").parse(
-    rules.minQualifiedRevenueContribution,
+  makePriceUsdcSchema("ReferralProgramRulesRevShareLimit.minBaseRevenueContribution").parse(
+    rules.minBaseRevenueContribution,
   );
 
   if (
-    !Number.isFinite(rules.qualifiedRevenueShare) ||
-    rules.qualifiedRevenueShare < 0 ||
-    rules.qualifiedRevenueShare > 1
+    !Number.isFinite(rules.maxBaseRevenueShare) ||
+    rules.maxBaseRevenueShare < 0 ||
+    rules.maxBaseRevenueShare > 1
   ) {
     throw new Error(
-      `ReferralProgramRulesRevShareLimit: qualifiedRevenueShare must be between 0 and 1 (inclusive), got ${rules.qualifiedRevenueShare}.`,
+      `ReferralProgramRulesRevShareLimit: maxBaseRevenueShare must be between 0 and 1 (inclusive), got ${rules.maxBaseRevenueShare}.`,
     );
   }
 
@@ -121,8 +121,8 @@ export const validateReferralProgramRulesRevShareLimit = (
 
 export const buildReferralProgramRulesRevShareLimit = (
   totalAwardPoolValue: PriceUsdc,
-  minQualifiedRevenueContribution: PriceUsdc,
-  qualifiedRevenueShare: number,
+  minBaseRevenueContribution: PriceUsdc,
+  maxBaseRevenueShare: number,
   startTime: UnixTimestamp,
   endTime: UnixTimestamp,
   subregistryId: AccountId,
@@ -133,8 +133,8 @@ export const buildReferralProgramRulesRevShareLimit = (
   const result = {
     awardModel: ReferralProgramAwardModels.RevShareLimit,
     totalAwardPoolValue,
-    minQualifiedRevenueContribution,
-    qualifiedRevenueShare,
+    minBaseRevenueContribution,
+    maxBaseRevenueShare,
     startTime,
     endTime,
     subregistryId,
@@ -167,7 +167,7 @@ export function isReferrerQualifiedRevShareLimit(
     (d) => d.referrer === normalizedReferrer,
   );
   return (
-    totalBaseRevenueContribution.amount >= rules.minQualifiedRevenueContribution.amount &&
+    totalBaseRevenueContribution.amount >= rules.minBaseRevenueContribution.amount &&
     !isAdminDisqualified
   );
 }

@@ -41,12 +41,11 @@ export const makeReferralProgramRulesRevShareLimitSchema = (
   makeBaseReferralProgramRulesSchema(valueLabel).safeExtend({
     awardModel: z.literal(ReferralProgramAwardModels.RevShareLimit),
     totalAwardPoolValue: makePriceUsdcSchema(`${valueLabel}.totalAwardPoolValue`),
-    minQualifiedRevenueContribution: makePriceUsdcSchema(
-      `${valueLabel}.minQualifiedRevenueContribution`,
+    minBaseRevenueContribution: makePriceUsdcSchema(`${valueLabel}.minBaseRevenueContribution`),
+    maxBaseRevenueShare: makeFiniteNonNegativeNumberSchema(`${valueLabel}.maxBaseRevenueShare`).max(
+      1,
+      `${valueLabel}.maxBaseRevenueShare must be <= 1`,
     ),
-    qualifiedRevenueShare: makeFiniteNonNegativeNumberSchema(
-      `${valueLabel}.qualifiedRevenueShare`,
-    ).max(1, `${valueLabel}.qualifiedRevenueShare must be <= 1`),
     disqualifications: z
       .array(
         makeReferralProgramEditionDisqualificationSchema(`${valueLabel}.disqualifications[item]`),
@@ -80,8 +79,8 @@ export const makeAwardedReferrerMetricsRevShareLimitSchema = (
       ),
       rank: makePositiveIntegerSchema(`${valueLabel}.rank`),
       isQualified: z.boolean(),
-      standardAwardValue: makePriceUsdcSchema(`${valueLabel}.standardAwardValue`),
-      awardPoolApproxValue: makePriceUsdcSchema(`${valueLabel}.awardPoolApproxValue`),
+      uncappedAwardValue: makePriceUsdcSchema(`${valueLabel}.uncappedAwardValue`),
+      cappedAwardValue: makePriceUsdcSchema(`${valueLabel}.cappedAwardValue`),
       isAdminDisqualified: z.boolean(),
       adminDisqualificationReason: z
         .string()
@@ -89,16 +88,16 @@ export const makeAwardedReferrerMetricsRevShareLimitSchema = (
         .min(1, `${valueLabel}.adminDisqualificationReason must not be empty`)
         .nullable(),
     })
-    .refine((data) => data.awardPoolApproxValue.amount <= data.standardAwardValue.amount, {
-      message: `${valueLabel}.awardPoolApproxValue must be <= ${valueLabel}.standardAwardValue`,
-      path: ["awardPoolApproxValue"],
+    .refine((data) => data.cappedAwardValue.amount <= data.uncappedAwardValue.amount, {
+      message: `${valueLabel}.cappedAwardValue must be <= ${valueLabel}.uncappedAwardValue`,
+      path: ["cappedAwardValue"],
     })
     .refine(
       (data) =>
         !data.isAdminDisqualified ||
-        (data.isQualified === false && data.awardPoolApproxValue.amount === 0n),
+        (data.isQualified === false && data.cappedAwardValue.amount === 0n),
       {
-        message: `When ${valueLabel}.isAdminDisqualified is true, isQualified must be false and awardPoolApproxValue.amount must be 0`,
+        message: `When ${valueLabel}.isAdminDisqualified is true, isQualified must be false and cappedAwardValue.amount must be 0`,
         path: ["isAdminDisqualified"],
       },
     )
@@ -124,8 +123,8 @@ export const makeUnrankedReferrerMetricsRevShareLimitSchema = (
       ),
       rank: z.null(),
       isQualified: z.literal(false),
-      standardAwardValue: makePriceUsdcSchema(`${valueLabel}.standardAwardValue`),
-      awardPoolApproxValue: makePriceUsdcSchema(`${valueLabel}.awardPoolApproxValue`),
+      uncappedAwardValue: makePriceUsdcSchema(`${valueLabel}.uncappedAwardValue`),
+      cappedAwardValue: makePriceUsdcSchema(`${valueLabel}.cappedAwardValue`),
       isAdminDisqualified: z.boolean(),
       adminDisqualificationReason: z
         .string()
@@ -133,9 +132,9 @@ export const makeUnrankedReferrerMetricsRevShareLimitSchema = (
         .min(1, `${valueLabel}.adminDisqualificationReason must not be empty`)
         .nullable(),
     })
-    .refine((data) => data.awardPoolApproxValue.amount <= data.standardAwardValue.amount, {
-      message: `${valueLabel}.awardPoolApproxValue must be <= ${valueLabel}.standardAwardValue`,
-      path: ["awardPoolApproxValue"],
+    .refine((data) => data.cappedAwardValue.amount <= data.uncappedAwardValue.amount, {
+      message: `${valueLabel}.cappedAwardValue must be <= ${valueLabel}.uncappedAwardValue`,
+      path: ["cappedAwardValue"],
     })
     .refine((data) => data.isAdminDisqualified === (data.adminDisqualificationReason !== null), {
       message: `${valueLabel}.adminDisqualificationReason must be non-null iff isAdminDisqualified is true`,

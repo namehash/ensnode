@@ -35,8 +35,8 @@ export function serializeReferralProgramRulesRevShareLimit(
   return {
     awardModel: rules.awardModel,
     totalAwardPoolValue: serializePriceUsdc(rules.totalAwardPoolValue),
-    minQualifiedRevenueContribution: serializePriceUsdc(rules.minQualifiedRevenueContribution),
-    qualifiedRevenueShare: rules.qualifiedRevenueShare,
+    minBaseRevenueContribution: serializePriceUsdc(rules.minBaseRevenueContribution),
+    maxBaseRevenueShare: rules.maxBaseRevenueShare,
     startTime: rules.startTime,
     endTime: rules.endTime,
     subregistryId: rules.subregistryId,
@@ -74,8 +74,8 @@ export function serializeAwardedReferrerMetricsRevShareLimit(
     totalBaseRevenueContribution: serializePriceUsdc(metrics.totalBaseRevenueContribution),
     rank: metrics.rank,
     isQualified: metrics.isQualified,
-    standardAwardValue: serializePriceUsdc(metrics.standardAwardValue),
-    awardPoolApproxValue: serializePriceUsdc(metrics.awardPoolApproxValue),
+    uncappedAwardValue: serializePriceUsdc(metrics.uncappedAwardValue),
+    cappedAwardValue: serializePriceUsdc(metrics.cappedAwardValue),
     isAdminDisqualified: metrics.isAdminDisqualified,
     adminDisqualificationReason: metrics.adminDisqualificationReason,
   };
@@ -95,8 +95,8 @@ export function serializeUnrankedReferrerMetricsRevShareLimit(
     totalBaseRevenueContribution: serializePriceUsdc(metrics.totalBaseRevenueContribution),
     rank: metrics.rank,
     isQualified: metrics.isQualified,
-    standardAwardValue: serializePriceUsdc(metrics.standardAwardValue),
-    awardPoolApproxValue: serializePriceUsdc(metrics.awardPoolApproxValue),
+    uncappedAwardValue: serializePriceUsdc(metrics.uncappedAwardValue),
+    cappedAwardValue: serializePriceUsdc(metrics.cappedAwardValue),
     isAdminDisqualified: metrics.isAdminDisqualified,
     adminDisqualificationReason: metrics.adminDisqualificationReason,
   };

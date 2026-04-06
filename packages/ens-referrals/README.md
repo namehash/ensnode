@@ -98,11 +98,11 @@ if (response.responseCode === ReferrerLeaderboardPageResponseCodes.Ok) {
 
     if (leaderboardPage.awardModel === ReferralProgramAwardModels.RevShareLimit) {
       console.log(
-        `Min Qualified Revenue Contribution: ${leaderboardPage.rules.minQualifiedRevenueContribution}`,
+        `Min Base Revenue Contribution: ${leaderboardPage.rules.minBaseRevenueContribution}`,
       );
-      console.log(`Qualified Revenue Share: ${leaderboardPage.rules.qualifiedRevenueShare}`);
+      console.log(`Max Base Revenue Share: ${leaderboardPage.rules.maxBaseRevenueShare}`);
       console.log(
-        `Tentative award for the best referrer: ${firstReferrer !== null ? firstReferrer.awardPoolApproxValue : noReferrersFallback}`,
+        `Tentative award for the best referrer: ${firstReferrer !== null ? firstReferrer.cappedAwardValue : noReferrersFallback}`,
       );
     }
   }
@@ -146,7 +146,7 @@ if (response.responseCode === ReferrerMetricsEditionsResponseCodes.Ok) {
       console.log(
         `Referrer's total base revenue contribution: ${detail.referrer.totalBaseRevenueContribution}`,
       );
-      console.log(`Referrer's standard award value: ${detail.referrer.standardAwardValue}`);
+      console.log(`Referrer's uncapped award value: ${detail.referrer.uncappedAwardValue}`);
     }
   }
 }

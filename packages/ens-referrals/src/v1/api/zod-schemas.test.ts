@@ -44,8 +44,8 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
     rules: {
       awardModel: ReferralProgramAwardModels.RevShareLimit,
       totalAwardPoolValue: parseUsdc("500"),
-      minQualifiedRevenueContribution: parseUsdc("10"),
-      qualifiedRevenueShare: 0.5,
+      minBaseRevenueContribution: parseUsdc("10"),
+      maxBaseRevenueShare: 0.5,
       startTime: 1000000,
       endTime: 2000000,
       subregistryId,
@@ -93,13 +93,13 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
     const rules = revShareLimit!.rules as {
       awardModel: typeof ReferralProgramAwardModels.RevShareLimit;
       totalAwardPoolValue: { amount: bigint; currency: string };
-      minQualifiedRevenueContribution: { amount: bigint; currency: string };
-      qualifiedRevenueShare: number;
+      minBaseRevenueContribution: { amount: bigint; currency: string };
+      maxBaseRevenueShare: number;
     };
     expect(rules.totalAwardPoolValue).toBeDefined();
-    expect(rules.minQualifiedRevenueContribution).toBeDefined();
-    expect(typeof rules.qualifiedRevenueShare).toBe("number");
-    expect(rules.qualifiedRevenueShare).toBe(0.5);
+    expect(rules.minBaseRevenueContribution).toBeDefined();
+    expect(typeof rules.maxBaseRevenueShare).toBe("number");
+    expect(rules.maxBaseRevenueShare).toBe(0.5);
     expect(revShareLimit!.rules.areAwardsDistributed).toBe(
       revShareLimitEdition.rules.areAwardsDistributed,
     );
@@ -215,8 +215,8 @@ describe("makeReferrerLeaderboardPageSchema", () => {
     rules: {
       awardModel: ReferralProgramAwardModels.RevShareLimit,
       totalAwardPoolValue: parseUsdc("2000"),
-      minQualifiedRevenueContribution: parseUsdc("10"),
-      qualifiedRevenueShare: 0.5,
+      minBaseRevenueContribution: parseUsdc("10"),
+      maxBaseRevenueShare: 0.5,
       startTime: 1000000,
       endTime: 2000000,
       subregistryId,
@@ -325,8 +325,8 @@ describe("makeReferralProgramEditionSummarySchema", () => {
     rules: {
       awardModel: ReferralProgramAwardModels.RevShareLimit,
       totalAwardPoolValue: parseUsdc("2000"),
-      minQualifiedRevenueContribution: parseUsdc("10"),
-      qualifiedRevenueShare: 0.5,
+      minBaseRevenueContribution: parseUsdc("10"),
+      maxBaseRevenueShare: 0.5,
       startTime: 1000000,
       endTime: 2000000,
       subregistryId,
@@ -507,8 +507,8 @@ describe("makeReferrerEditionMetricsSchema", () => {
       rules: {
         awardModel: ReferralProgramAwardModels.RevShareLimit,
         totalAwardPoolValue: parseUsdc("2000"),
-        minQualifiedRevenueContribution: parseUsdc("10"),
-        qualifiedRevenueShare: 0.5,
+        minBaseRevenueContribution: parseUsdc("10"),
+        maxBaseRevenueShare: 0.5,
         startTime: 1000000,
         endTime: 2000000,
         subregistryId,
@@ -523,8 +523,8 @@ describe("makeReferrerEditionMetricsSchema", () => {
         totalBaseRevenueContribution: parseUsdc("150"),
         rank: 1,
         isQualified: true,
-        standardAwardValue: parseUsdc("200"),
-        awardPoolApproxValue: parseUsdc("200"),
+        uncappedAwardValue: parseUsdc("200"),
+        cappedAwardValue: parseUsdc("200"),
         isAdminDisqualified: false,
         adminDisqualificationReason: null,
       },

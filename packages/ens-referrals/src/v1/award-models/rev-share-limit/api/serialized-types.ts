@@ -20,10 +20,10 @@ import type { ReferralProgramRulesRevShareLimit } from "../rules";
 export interface SerializedReferralProgramRulesRevShareLimit
   extends Omit<
     ReferralProgramRulesRevShareLimit,
-    "totalAwardPoolValue" | "minQualifiedRevenueContribution" | "rulesUrl"
+    "totalAwardPoolValue" | "minBaseRevenueContribution" | "rulesUrl"
   > {
   totalAwardPoolValue: SerializedPriceUsdc;
-  minQualifiedRevenueContribution: SerializedPriceUsdc;
+  minBaseRevenueContribution: SerializedPriceUsdc;
   rulesUrl: string;
 }
 
@@ -47,13 +47,13 @@ export interface SerializedAwardedReferrerMetricsRevShareLimit
     AwardedReferrerMetricsRevShareLimit,
     | "totalRevenueContribution"
     | "totalBaseRevenueContribution"
-    | "standardAwardValue"
-    | "awardPoolApproxValue"
+    | "uncappedAwardValue"
+    | "cappedAwardValue"
   > {
   totalRevenueContribution: SerializedPriceEth;
   totalBaseRevenueContribution: SerializedPriceUsdc;
-  standardAwardValue: SerializedPriceUsdc;
-  awardPoolApproxValue: SerializedPriceUsdc;
+  uncappedAwardValue: SerializedPriceUsdc;
+  cappedAwardValue: SerializedPriceUsdc;
 }
 
 /**
@@ -64,13 +64,13 @@ export interface SerializedUnrankedReferrerMetricsRevShareLimit
     UnrankedReferrerMetricsRevShareLimit,
     | "totalRevenueContribution"
     | "totalBaseRevenueContribution"
-    | "standardAwardValue"
-    | "awardPoolApproxValue"
+    | "uncappedAwardValue"
+    | "cappedAwardValue"
   > {
   totalRevenueContribution: SerializedPriceEth;
   totalBaseRevenueContribution: SerializedPriceUsdc;
-  standardAwardValue: SerializedPriceUsdc;
-  awardPoolApproxValue: SerializedPriceUsdc;
+  uncappedAwardValue: SerializedPriceUsdc;
+  cappedAwardValue: SerializedPriceUsdc;
 }
 
 /**

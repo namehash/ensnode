@@ -37,22 +37,22 @@ const CHECKPOINT_PREFIX =
  * Build test rules.
  *
  * - BASE_REVENUE_CONTRIBUTION_PER_YEAR = $5 USDC
- * - qualifiedRevenueShare = 0.5
+ * - maxBaseRevenueShare = 0.5
  * - 1 year of duration → $5 base revenue → $2.50 standard award
- * - minQualifiedRevenueContribution = $5 → need exactly 1 year to qualify
+ * - minBaseRevenueContribution = $5 → need exactly 1 year to qualify
  *
  * @param totalAwardPoolValue - USDC amount for the pool (default: $1000)
- * @param minQualifiedRevenueContribution - USDC threshold (default: $5 = 1 year)
+ * @param minBaseRevenueContribution - USDC threshold (default: $5 = 1 year)
  */
 function buildTestRules(
   totalAwardPoolValue = parseUsdc("1000"),
-  minQualifiedRevenueContribution = parseUsdc("5"),
+  minBaseRevenueContribution = parseUsdc("5"),
   disqualifications: ReferralProgramEditionDisqualification[] = [],
 ) {
   return buildReferralProgramRulesRevShareLimit(
     totalAwardPoolValue,
-    minQualifiedRevenueContribution,
-    0.5, // qualifiedRevenueShare
+    minBaseRevenueContribution,
+    0.5, // maxBaseRevenueShare
     parseTimestamp("2026-01-01T00:00:00Z"),
     parseTimestamp("2026-12-31T23:59:59Z"),
     { chainId: 1, address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85" },
@@ -114,7 +114,7 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
   });
 
   describe("Scenario A — unqualified referrer: no award claimed", () => {
-    it("accumulates standard award but awardPoolApproxValue is $0 when not qualified", () => {
+    it("accumulates standard award but cappedAwardValue is $0 when not qualified", () => {
       // Half a year of duration → base revenue = $2.50 (< $5 threshold)
       const events = [makeEvent(ADDR_A, 1000, Math.floor(SECONDS_PER_YEAR / 2))];
       const rules = buildTestRules();
@@ -124,9 +124,9 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
 
       expect(referrer).toBeDefined();
       expect(referrer.isQualified).toBe(false);
-      // standardAwardValue = 0.5 × ($5 × 0.5 years) = 0.5 × $2.50 = $1.25
-      expect(referrer.standardAwardValue.amount).toBe(parseUsdc("1.25").amount);
-      expect(referrer.awardPoolApproxValue.amount).toBe(0n);
+      // uncappedAwardValue = 0.5 × ($5 × 0.5 years) = 0.5 × $2.50 = $1.25
+      expect(referrer.uncappedAwardValue.amount).toBe(parseUsdc("1.25").amount);
+      expect(referrer.cappedAwardValue.amount).toBe(0n);
 
       // Pool should be fully intact
       expect(result.aggregatedMetrics.awardPoolRemaining.amount).toBe(
@@ -150,14 +150,14 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       const referrer = result.referrers.get(ADDR_A)!;
 
       expect(referrer.isQualified).toBe(true);
-      expect(referrer.standardAwardValue.amount).toBe(STANDARD_AWARD_1Y.amount);
+      expect(referrer.uncappedAwardValue.amount).toBe(STANDARD_AWARD_1Y.amount);
       // Claims all accumulated: 2 × $1.25 = $2.50
-      expect(referrer.awardPoolApproxValue.amount).toBe(STANDARD_AWARD_1Y.amount);
+      expect(referrer.cappedAwardValue.amount).toBe(STANDARD_AWARD_1Y.amount);
     });
   });
 
   describe("Scenario B-2 — just qualifies, but pool is too small to cover full accumulated award", () => {
-    it("awardPoolApproxValue is capped by remaining pool when qualifying", () => {
+    it("cappedAwardValue is capped by remaining pool when qualifying", () => {
       // Same as Scenario B but pool only has $1.50
       const poolAmount = parseUsdc("1.5");
       const rules = buildTestRules(poolAmount);
@@ -170,10 +170,10 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       const referrer = result.referrers.get(ADDR_A)!;
 
       expect(referrer.isQualified).toBe(true);
-      // standardAwardValue = $2.50 (uncapped)
-      expect(referrer.standardAwardValue.amount).toBe(STANDARD_AWARD_1Y.amount);
-      // awardPoolApproxValue capped at $1.50 (pool limit)
-      expect(referrer.awardPoolApproxValue.amount).toBe(poolAmount.amount);
+      // uncappedAwardValue = $2.50 (uncapped)
+      expect(referrer.uncappedAwardValue.amount).toBe(STANDARD_AWARD_1Y.amount);
+      // cappedAwardValue capped at $1.50 (pool limit)
+      expect(referrer.cappedAwardValue.amount).toBe(poolAmount.amount);
       // Pool fully depleted
       expect(result.aggregatedMetrics.awardPoolRemaining.amount).toBe(0n);
     });
@@ -194,15 +194,15 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       const referrer = result.referrers.get(ADDR_A)!;
 
       expect(referrer.isQualified).toBe(true);
-      // standardAwardValue = 0.5 × (2 × $5) = $5.00
-      expect(referrer.standardAwardValue.amount).toBe(parseUsdc("5").amount);
-      // awardPoolApproxValue = $2.50 (qualifying) + $2.50 (incremental) = $5.00
-      expect(referrer.awardPoolApproxValue.amount).toBe(parseUsdc("5").amount);
+      // uncappedAwardValue = 0.5 × (2 × $5) = $5.00
+      expect(referrer.uncappedAwardValue.amount).toBe(parseUsdc("5").amount);
+      // cappedAwardValue = $2.50 (qualifying) + $2.50 (incremental) = $5.00
+      expect(referrer.cappedAwardValue.amount).toBe(parseUsdc("5").amount);
     });
   });
 
   describe("Scenario C-2 — already qualified, pool only partially covers incremental award", () => {
-    it("awardPoolApproxValue is partially truncated on subsequent event when pool is nearly empty", () => {
+    it("cappedAwardValue is partially truncated on subsequent event when pool is nearly empty", () => {
       // Pool = $3.00
       // Event 1 at t=1000: 1 year → qualifies, claim min($2.50, $3.00) = $2.50, pool = $0.50
       // Event 2 at t=2000: 1 year → already qualified, incremental $2.50, claim min($2.50, $0.50) = $0.50, pool = $0
@@ -216,10 +216,10 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       const referrer = result.referrers.get(ADDR_A)!;
 
       expect(referrer.isQualified).toBe(true);
-      // standardAwardValue = 0.5 × $10 = $5.00 (uncapped)
-      expect(referrer.standardAwardValue.amount).toBe(parseUsdc("5").amount);
-      // awardPoolApproxValue = $2.50 + $0.50 = $3.00 (capped at pool)
-      expect(referrer.awardPoolApproxValue.amount).toBe(parseUsdc("3").amount);
+      // uncappedAwardValue = 0.5 × $10 = $5.00 (uncapped)
+      expect(referrer.uncappedAwardValue.amount).toBe(parseUsdc("5").amount);
+      // cappedAwardValue = $2.50 + $0.50 = $3.00 (capped at pool)
+      expect(referrer.cappedAwardValue.amount).toBe(parseUsdc("3").amount);
       // Pool fully depleted
       expect(result.aggregatedMetrics.awardPoolRemaining.amount).toBe(0n);
     });
@@ -235,8 +235,8 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       const referrer = result.referrers.get(ADDR_A)!;
 
       expect(referrer.isQualified).toBe(true);
-      expect(referrer.standardAwardValue.amount).toBe(STANDARD_AWARD_1Y.amount);
-      expect(referrer.awardPoolApproxValue.amount).toBe(0n);
+      expect(referrer.uncappedAwardValue.amount).toBe(STANDARD_AWARD_1Y.amount);
+      expect(referrer.cappedAwardValue.amount).toBe(0n);
     });
   });
 
@@ -256,16 +256,16 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       const referrerB = result.referrers.get(ADDR_B)!;
 
       expect(referrerA.isQualified).toBe(true);
-      expect(referrerA.awardPoolApproxValue.amount).toBe(STANDARD_AWARD_1Y.amount); // $2.50
+      expect(referrerA.cappedAwardValue.amount).toBe(STANDARD_AWARD_1Y.amount); // $2.50
 
       expect(referrerB.isQualified).toBe(true);
-      expect(referrerB.awardPoolApproxValue.amount).toBe(parseUsdc("1.5").amount); // $1.50 (only remaining)
+      expect(referrerB.cappedAwardValue.amount).toBe(parseUsdc("1.5").amount); // $1.50 (only remaining)
 
       // Pool fully depleted
       expect(result.aggregatedMetrics.awardPoolRemaining.amount).toBe(0n);
     });
 
-    it("referrer who qualifies after pool is empty gets $0 awardPoolApproxValue", () => {
+    it("referrer who qualifies after pool is empty gets $0 cappedAwardValue", () => {
       // Pool = $2.50 (only enough for 1 qualifying referrer)
       // ReferrerA qualifies at t=1000, claims $2.50, pool = $0
       // ReferrerB qualifies at t=2000, claims min($2.50, $0) = $0
@@ -279,8 +279,8 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       const referrerA = result.referrers.get(ADDR_A)!;
       const referrerB = result.referrers.get(ADDR_B)!;
 
-      expect(referrerA.awardPoolApproxValue.amount).toBe(STANDARD_AWARD_1Y.amount); // $2.50
-      expect(referrerB.awardPoolApproxValue.amount).toBe(0n); // $0 — pool empty
+      expect(referrerA.cappedAwardValue.amount).toBe(STANDARD_AWARD_1Y.amount); // $2.50
+      expect(referrerB.cappedAwardValue.amount).toBe(0n); // $0 — pool empty
       expect(result.aggregatedMetrics.awardPoolRemaining.amount).toBe(0n);
     });
 
@@ -302,12 +302,12 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       const referrerC = result.referrers.get(ADDR_C)!;
 
       // Non-truncated: full standard award
-      expect(referrerA.awardPoolApproxValue.amount).toBe(STANDARD_AWARD_1Y.amount);
+      expect(referrerA.cappedAwardValue.amount).toBe(STANDARD_AWARD_1Y.amount);
       // Partially truncated: less than standard but > 0
-      expect(referrerB.awardPoolApproxValue.amount).toBeGreaterThan(0n);
-      expect(referrerB.awardPoolApproxValue.amount).toBeLessThan(STANDARD_AWARD_1Y.amount);
+      expect(referrerB.cappedAwardValue.amount).toBeGreaterThan(0n);
+      expect(referrerB.cappedAwardValue.amount).toBeLessThan(STANDARD_AWARD_1Y.amount);
       // Fully truncated: pool empty
-      expect(referrerC.awardPoolApproxValue.amount).toBe(0n);
+      expect(referrerC.cappedAwardValue.amount).toBe(0n);
       expect(result.aggregatedMetrics.awardPoolRemaining.amount).toBe(0n);
     });
   });
@@ -329,15 +329,13 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
 
       // ADDR_A has the lower (earlier) id, should claim the pool first
-      expect(result.referrers.get(ADDR_A)!.awardPoolApproxValue.amount).toBe(
-        STANDARD_AWARD_1Y.amount,
-      );
-      expect(result.referrers.get(ADDR_B)!.awardPoolApproxValue.amount).toBe(0n);
+      expect(result.referrers.get(ADDR_A)!.cappedAwardValue.amount).toBe(STANDARD_AWARD_1Y.amount);
+      expect(result.referrers.get(ADDR_B)!.cappedAwardValue.amount).toBe(0n);
     });
   });
 
   describe("Ranking", () => {
-    it("ranks referrers by qualifiedAwardValue desc, then standardAwardValue desc", () => {
+    it("ranks referrers by qualifiedAwardValue desc, then uncappedAwardValue desc", () => {
       // Pool = $1000 (unlimited for this test)
       // ADDR_A: 1 year → qualifies at t=1000, qualifiedAward = $2.50, standardAward = $2.50
       // ADDR_B: 2 years → qualifies at t=2000, qualifiedAward = $5.00, standardAward = $5.00
@@ -359,7 +357,7 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       expect(result.referrers.get(ADDR_C)!.rank).toBe(3);
     });
 
-    it("two fully-truncated referrers are ranked by standardAwardValue desc", () => {
+    it("two fully-truncated referrers are ranked by uncappedAwardValue desc", () => {
       // Pool = $0 — nobody gets pool money
       // ADDR_A: 2 years → qualifies, standardAward = $5.00, qualifiedAward = $0
       // ADDR_B: 1 year → qualifies, standardAward = $2.50, qualifiedAward = $0
@@ -438,14 +436,14 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       expect(referrerA.isQualified).toBe(true);
       expect(referrerA.isAdminDisqualified).toBe(false);
       expect(referrerA.adminDisqualificationReason).toBe(null);
-      expect(referrerA.awardPoolApproxValue.amount).toBe(STANDARD_AWARD_1Y.amount);
+      expect(referrerA.cappedAwardValue.amount).toBe(STANDARD_AWARD_1Y.amount);
 
       expect(referrerB.isQualified).toBe(true);
       expect(referrerB.isAdminDisqualified).toBe(false);
       expect(referrerB.adminDisqualificationReason).toBe(null);
     });
 
-    it("disqualified referrer who met threshold: awardPoolApproxValue = 0, pool preserved for next", () => {
+    it("disqualified referrer who met threshold: cappedAwardValue = 0, pool preserved for next", () => {
       // ADDR_A qualifies by revenue but is admin-disqualified → pool claim = 0
       // ADDR_B qualifies later → gets the full pool share
       const rules = buildTestRules(parseUsdc("1000"), parseUsdc("5"), [
@@ -463,12 +461,12 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       expect(referrerA.isAdminDisqualified).toBe(true);
       expect(referrerA.adminDisqualificationReason).toBe("self-referral");
       expect(referrerA.isQualified).toBe(false);
-      expect(referrerA.awardPoolApproxValue.amount).toBe(0n);
+      expect(referrerA.cappedAwardValue.amount).toBe(0n);
 
       // Pool was not consumed by ADDR_A, so ADDR_B gets the full award
       expect(referrerB.isQualified).toBe(true);
       expect(referrerB.isAdminDisqualified).toBe(false);
-      expect(referrerB.awardPoolApproxValue.amount).toBe(STANDARD_AWARD_1Y.amount);
+      expect(referrerB.cappedAwardValue.amount).toBe(STANDARD_AWARD_1Y.amount);
     });
 
     it("disqualified referrer who never met the revenue threshold: pool unchanged", () => {
@@ -484,7 +482,7 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       expect(referrerA.isAdminDisqualified).toBe(true);
       expect(referrerA.adminDisqualificationReason).toBe("promoting discounts");
       expect(referrerA.isQualified).toBe(false);
-      expect(referrerA.awardPoolApproxValue.amount).toBe(0n);
+      expect(referrerA.cappedAwardValue.amount).toBe(0n);
       // Pool fully intact
       expect(result.aggregatedMetrics.awardPoolRemaining.amount).toBe(parseUsdc("1000").amount);
     });
@@ -515,18 +513,18 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       expect(referrerB.rank).toBe(1);
       expect(referrerB.isQualified).toBe(true);
       expect(referrerB.isAdminDisqualified).toBe(false);
-      expect(referrerB.awardPoolApproxValue.amount).toBe(STANDARD_AWARD_1Y.amount);
+      expect(referrerB.cappedAwardValue.amount).toBe(STANDARD_AWARD_1Y.amount);
 
       expect(referrerA.rank).toBe(2);
       expect(referrerA.isAdminDisqualified).toBe(true);
       expect(referrerA.adminDisqualificationReason).toBe("cheating");
       expect(referrerA.isQualified).toBe(false);
-      expect(referrerA.awardPoolApproxValue.amount).toBe(0n);
+      expect(referrerA.cappedAwardValue.amount).toBe(0n);
 
       expect(referrerC.rank).toBe(3);
       expect(referrerC.isQualified).toBe(false);
       expect(referrerC.isAdminDisqualified).toBe(false);
-      expect(referrerC.awardPoolApproxValue.amount).toBe(0n);
+      expect(referrerC.cappedAwardValue.amount).toBe(0n);
     });
 
     it("multiple disqualifications: all disqualified referrers get isAdminDisqualified=true", () => {
@@ -548,17 +546,17 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       expect(referrerA.isAdminDisqualified).toBe(true);
       expect(referrerA.adminDisqualificationReason).toBe("reason-a");
       expect(referrerA.isQualified).toBe(false);
-      expect(referrerA.awardPoolApproxValue.amount).toBe(0n);
+      expect(referrerA.cappedAwardValue.amount).toBe(0n);
 
       expect(referrerB.isAdminDisqualified).toBe(true);
       expect(referrerB.adminDisqualificationReason).toBe("reason-b");
       expect(referrerB.isQualified).toBe(false);
-      expect(referrerB.awardPoolApproxValue.amount).toBe(0n);
+      expect(referrerB.cappedAwardValue.amount).toBe(0n);
 
       expect(referrerC.isAdminDisqualified).toBe(false);
       expect(referrerC.adminDisqualificationReason).toBe(null);
       expect(referrerC.isQualified).toBe(true);
-      expect(referrerC.awardPoolApproxValue.amount).toBe(STANDARD_AWARD_1Y.amount);
+      expect(referrerC.cappedAwardValue.amount).toBe(STANDARD_AWARD_1Y.amount);
     });
 
     it("duplicate address in disqualifications: buildReferralProgramRulesRevShareLimit throws", () => {
