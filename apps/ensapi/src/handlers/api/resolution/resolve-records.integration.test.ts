@@ -219,7 +219,9 @@ describe("GET /api/resolve/records/:name", () => {
     },
   ])("$description", async ({ name, query, expectedStatus, expectedBody }) => {
     const encodedName = encodeURIComponent(name);
-    const response = await fetch(`${BASE_URL}/api/resolve/records/${encodedName}?${query}`);
+    const response = await fetch(
+      `${BASE_URL}/api/resolve/records/${encodedName}${query ? `?${query}` : ""}`,
+    );
     const body = await response.json();
 
     expect(response.status).toBe(expectedStatus);

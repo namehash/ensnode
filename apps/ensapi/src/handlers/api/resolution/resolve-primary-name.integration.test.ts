@@ -75,8 +75,9 @@ describe("GET /api/resolve/primary-name/:address/:chainId", () => {
       },
     },
   ])("$description", async ({ address, chainId, query, expectedStatus, expectedBody }) => {
-    const url = `${BASE_URL}/api/resolve/primary-name/${address}/${chainId}${query ? `?${query}` : ""}`;
-    const response = await fetch(url);
+    const response = await fetch(
+      `${BASE_URL}/api/resolve/primary-name/${address}/${chainId}${query ? `?${query}` : ""}`,
+    );
     const body = await response.json();
 
     expect(response.status).toBe(expectedStatus);
