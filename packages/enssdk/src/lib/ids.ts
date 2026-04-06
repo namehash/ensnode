@@ -1,6 +1,6 @@
 import { type Address, hexToBigInt } from "viem";
 
-import { maskLower32Bits } from "../_lib/maskLower32Bits";
+import { zeroLower32Bits } from "../_lib/zeroLower32Bits";
 import { stringifyAccountId, stringifyAssetId } from "./caip";
 import type {
   AccountId,
@@ -40,8 +40,8 @@ export const makeENSv2DomainId = (registry: AccountId, storageId: StorageId) =>
  * Computes a Label's {@link StorageId} given its TokenId or LabelHash.
  */
 export const makeStorageId = (labelRef: TokenId | LabelHash): StorageId => {
-  if (typeof labelRef === "bigint") return maskLower32Bits(labelRef) as StorageId;
-  return maskLower32Bits(hexToBigInt(labelRef)) as StorageId;
+  if (typeof labelRef === "bigint") return zeroLower32Bits(labelRef) as StorageId;
+  return zeroLower32Bits(hexToBigInt(labelRef)) as StorageId;
 };
 
 export const makePermissionsId = (contract: AccountId) =>
