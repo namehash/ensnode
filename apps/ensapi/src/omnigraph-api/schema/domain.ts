@@ -136,7 +136,7 @@ DomainInterfaceRef.implement({
       description:
         "The Canonical Name for this Domain. If the Domain is not Canonical, then `name` will be null.",
       tracing: true,
-      type: "Name",
+      type: "InterpretedName",
       nullable: true,
       resolve: async (domain, args, context) => {
         const canonicalPath = isENSv1Domain(domain)
@@ -429,7 +429,7 @@ export const DomainIdInput = builder.inputType("DomainIdInput", {
   description: "Reference a specific Domain.",
   isOneOf: true,
   fields: (t) => ({
-    name: t.field({ type: "Name" }),
+    name: t.field({ type: "InterpretedName" }),
     id: t.field({ type: "DomainId" }),
   }),
 });

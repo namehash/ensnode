@@ -8,6 +8,7 @@ import type {
   ChainId,
   CoinType,
   DomainId,
+  InterpretedLabel,
   InterpretedName,
   Node,
   PermissionsId,
@@ -62,7 +63,8 @@ export const builder = new SchemaBuilder<{
     ChainId: { Input: ChainId; Output: ChainId };
     CoinType: { Input: CoinType; Output: CoinType };
     Node: { Input: Node; Output: Node };
-    Name: { Input: InterpretedName; Output: InterpretedName };
+    InterpretedName: { Input: InterpretedName; Output: InterpretedName };
+    InterpretedLabel: { Input: InterpretedLabel; Output: InterpretedLabel };
     DomainId: { Input: DomainId; Output: DomainId };
     RegistryId: { Input: RegistryId; Output: RegistryId };
     ResolverId: { Input: ResolverId; Output: ResolverId };

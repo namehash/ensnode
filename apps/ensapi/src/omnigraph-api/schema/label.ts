@@ -22,7 +22,7 @@ LabelRef.implement({
     interpreted: t.field({
       description:
         "The Label represented as an Interpreted Label. This is either a normalized Literal Label or an Encoded LabelHash. \n(@see https://ensnode.io/docs/reference/terminology#interpreted-label)",
-      type: "String",
+      type: "InterpretedLabel",
       nullable: false,
       resolve: (parent) => parent.interpreted,
     }),
