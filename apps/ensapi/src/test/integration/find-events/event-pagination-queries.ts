@@ -45,7 +45,7 @@ export type EventResult = {
 
 export const DomainEventsPaginated = gql`
   query DomainEventsPaginated(
-    $name: Name!
+    $name: InterpretedName!
     $first: Int
     $after: String
     $last: Int
@@ -85,7 +85,7 @@ export const AccountEventsPaginated = gql`
 
 export const ResolverEventsPaginated = gql`
   query ResolverEventsPaginated(
-    $name: Name!
+    $name: InterpretedName!
     $first: Int
     $after: String
     $last: Int

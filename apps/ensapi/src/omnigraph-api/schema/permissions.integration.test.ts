@@ -148,7 +148,7 @@ describe("Domain.permissions", () => {
   };
 
   const DomainPermissions = gql`
-    query DomainPermissions($name: Name!) {
+    query DomainPermissions($name: InterpretedName!) {
       domain(by: { name: $name }) {
         ... on ENSv2Domain {
           permissions { edges { node { id resource user { address } roles } } }
@@ -180,7 +180,7 @@ describe("Domain.permissions", () => {
 
   it("filters permissions by user address", async () => {
     const DomainPermissionsFiltered = gql`
-      query DomainPermissionsFiltered($name: Name!, $user: Address!) {
+      query DomainPermissionsFiltered($name: InterpretedName!, $user: Address!) {
         domain(by: { name: $name }) {
           ... on ENSv2Domain {
             permissions(where: { user: $user }) { edges { node { id resource user { address } roles } } }
@@ -288,7 +288,7 @@ describe("Account.permissions and Account.registryPermissions", () => {
 
 describe("Resolver.permissions", () => {
   const ResolverPermissions = gql`
-    query ResolverPermissions($name: Name!) {
+    query ResolverPermissions($name: InterpretedName!) {
       domain(by: { name: $name }) {
         resolver { permissions { id contract { chainId address } } }
       }

@@ -96,7 +96,7 @@ query FindDomains(
   ///////////////////
   {
     query: `
-query DomainByName($name: Name!) {
+query DomainByName($name: InterpretedName!) {
   domain(by: {name: $name}) {
     __typename
     id
@@ -123,7 +123,7 @@ query DomainByName($name: Name!) {
   //////////////////////
   {
     query: `
-query DomainSubdomains($name: Name!) {
+query DomainSubdomains($name: InterpretedName!) {
   domain(by: {name: $name}) {
     name
     subdomains(first: 10) {
@@ -143,7 +143,7 @@ query DomainSubdomains($name: Name!) {
   /////////////////
   {
     query: `
-query DomainEvents($name: Name!) {
+query DomainEvents($name: InterpretedName!) {
   domain(by: {name: $name}) {
     events {
       totalCount
@@ -323,7 +323,7 @@ query AccountResolverPermissions($address: Address!) {
   //////////////////////////////
   {
     query: `
-query DomainResolver($name: Name!) {
+query DomainResolver($name: InterpretedName!) {
   domain(by: { name: $name }) {
     resolver {
       records { edges { node { node keys coinTypes } } }

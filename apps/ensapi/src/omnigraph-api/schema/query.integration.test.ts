@@ -114,7 +114,7 @@ describe("Query.domains", () => {
 
 describe("Query.domain", () => {
   const DomainByName = gql`
-    query DomainByName($name: Name!) {
+    query DomainByName($name: InterpretedName!) {
       domain(by: { name: $name }) {
         name
       }
