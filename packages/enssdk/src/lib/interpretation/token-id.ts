@@ -1,4 +1,4 @@
-import { uint256ToHex32 } from "../helpers";
+import { uint256ToHex32 } from "../../_lib/uint256ToHex32";
 import type { LabelHash, Node } from "../types";
 
 /**

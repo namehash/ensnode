@@ -1,7 +1,7 @@
 import { IntegerOutOfRangeError, zeroHash } from "viem";
 import { describe, expect, it } from "vitest";
 
-import { uint256ToHex32 } from "./helpers";
+import { uint256ToHex32 } from "./uint256ToHex32";
 
 describe("uint256ToHex32", () => {
   it("should convert bigint to hex string", () => {

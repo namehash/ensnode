@@ -43,18 +43,20 @@
     "enssdk": "workspace:*",
     "@urql/core": "^6.0.0",
     "@urql/exchange-graphcache": "^9.0.0",
-    "gql.tada": "^1.8.10",
-    "graphql": "^16.11.0",
     "urql": "^5.0.1"
   },
   "peerDependencies": {
+    "gql.tada": "^1.8.10",
+    "graphql": "^16",
     "react": "^18.0.0 || ^19.0.0",
     "viem": "^2"
   },
   "devDependencies": {
     "@ensnode/shared-configs": "workspace:*",
-    "@types/react": "19.2.7",
-    "react": "19.2.1",
+    "@types/react": "catalog:",
+    "gql.tada": "^1.8.10",
+    "graphql": "^16.11.0",
+    "react": "catalog:",
     "tsup": "catalog:",
     "typescript": "catalog:",
     "viem": "catalog:",

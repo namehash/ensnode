@@ -12,7 +12,7 @@ export interface OmnigraphProviderProps {
 }
 
 export function OmnigraphProvider({ client, children }: OmnigraphProviderProps) {
-  const urqlClient = useMemo(() => createOmnigraphUrqlClient(client.config), [client.config]);
+  const urqlClient = useMemo(() => createOmnigraphUrqlClient(client.config), [client]);
 
   return createElement(Provider, { value: urqlClient }, children);
 }
