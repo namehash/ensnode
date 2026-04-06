@@ -104,6 +104,10 @@ export const makeAwardedReferrerMetricsRevShareLimitSchema = (
     .refine((data) => data.isAdminDisqualified === (data.adminDisqualificationReason !== null), {
       message: `${valueLabel}.adminDisqualificationReason must be non-null iff isAdminDisqualified is true`,
       path: ["adminDisqualificationReason"],
+    })
+    .refine((data) => data.isQualified || data.cappedAwardValue.amount === 0n, {
+      message: `${valueLabel}.cappedAwardValue must be 0 when isQualified is false`,
+      path: ["cappedAwardValue"],
     });
 
 /**

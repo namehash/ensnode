@@ -175,6 +175,7 @@ export interface AwardedReferrerMetricsRevShareLimit extends RankedReferrerMetri
    * @invariant Guaranteed to be a valid PriceUsdc with amount between 0 and {@link ReferralProgramRulesRevShareLimit.totalAwardPoolValue.amount} (inclusive)
    * @invariant Always <= uncappedAwardValue.amount
    * @invariant Amount equal to 0 when {@link isAdminDisqualified} is true.
+   * @invariant Amount equal to 0 when {@link isQualified} is false.
    */
   cappedAwardValue: PriceUsdc;
 }
@@ -196,6 +197,12 @@ export const validateAwardedReferrerMetricsRevShareLimit = (
   if (metrics.isAdminDisqualified && metrics.cappedAwardValue.amount !== 0n) {
     throw new Error(
       `AwardedReferrerMetricsRevShareLimit: cappedAwardValue.amount must be 0n for admin-disqualified referrers, got ${metrics.cappedAwardValue.amount.toString()}.`,
+    );
+  }
+
+  if (!metrics.isQualified && metrics.cappedAwardValue.amount !== 0n) {
+    throw new Error(
+      `AwardedReferrerMetricsRevShareLimit: cappedAwardValue.amount must be 0n for unqualified referrers, got ${metrics.cappedAwardValue.amount.toString()}.`,
     );
   }
 
