@@ -399,5 +399,18 @@ This is explicitly **out of scope for v1** but the plan ensures the CLI's databa
 ## Open Questions for Stakeholders
 
 1. **Snapshot ID format**: Should snapshot IDs be auto-generated (e.g. `ensdb-2026-04-06-abc123`) or user-specified? Auto-generated is safer for avoiding collisions.
-2. **Streaming upload mode**: Should v1 support a direct "snapshot and push" flow that uploads artifacts to S3 as they are produced, or should v1 stay local-first (`snapshot create` then `snapshot push`)? True end-to-end streaming likely conflicts with the chosen `pg_dump --format=directory` approach, so supporting it may require either a different dump format or a hybrid design where each completed schema archive is uploaded immediately after local creation.
+2. **Streaming upload mode**: Should v1 support a direct "snapshot and push" flow that uploads artifacts to S3 as they are produced, or should v1 stay local-first (`snapshot create` then `snapshot push`)?
+
+   **Why `pg_dump --format=directory` complicates streaming:** directory format writes many files under a tree; you normally archive that tree to a single blob (e.g. `.dump.tar.zst`) before upload. That implies at least one local staging step per schema unless you stream `tar` output directly to S3 multipart (possible but more moving parts).
+
+   **Other `pg_dump` formats do not remove all constraints:**
+   - **`--format=custom`**: single-file output and can be streamed (e.g. `pg_dump -Fc ...` piped into multipart upload). Loses parallel `pg_restore` compared to directory format unless you accept those trade-offs at 50-100GB scale.
+   - **`--format=plain`**: single SQL stream; stream-friendly, but restore is typically slower and less suited to huge DBs than the directory workflow already chosen for this plan.
+
+   **Checksums and manifest:** The plan includes `checksums.sha256` and a `manifest.json` with per-artifact sizes. For **end-to-end streaming** without a local file:
+   - Per-artifact SHA-256 can still be computed by hashing bytes **as they pass through** the upload pipeline (running a digest alongside the stream), then writing the digest into `checksums.sha256` and the manifest **after** that artifact finishes.
+   - Alternatively, **S3 object checksums** (multipart part ETags, or `ChecksumSHA256` on `PutObject` where supported) can supplement or replace client-side files, but the manifest must state what is verified (client hash vs object checksum).
+   - The **full snapshot manifest** cannot be finalized until all artifacts are complete, so uploads can be incremental, but **manifest upload is always last** (or use a two-phase manifest: provisional then final).
+
+   **Conclusion for stakeholders:** Decide between (a) v1 local-first only, (b) **hybrid** -- each schema completes locally, then upload (simplest integrity story), or (c) true pipe-to-S3 with streaming hash and deferred manifest.
 
