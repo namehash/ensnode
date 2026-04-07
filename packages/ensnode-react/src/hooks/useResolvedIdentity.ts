@@ -61,7 +61,7 @@ export function useResolvedIdentity(parameters: UseResolvedIdentityParameters) {
       ...ASSUME_IMMUTABLE_QUERY, // identity changes very rarely
       refetchInterval: false, // not covered by ASSUME_IMMUTABLE_QUERY
       ..._query,
-      enabled: true, // just for testing
+      enabled: (_query.enabled ?? true) && namespace !== undefined,
     },
   });
 
