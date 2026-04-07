@@ -89,7 +89,7 @@ jobs:
   build-and-publish-ghcr:
     name: Build & Publish Snapshot Docker Images to GHCR
     runs-on: blacksmith-4vcpu-ubuntu-2204
-    if: github.repository == 'namehash/ensnode' && !contains(github.event.head_commit.message, 'changeset-release/main') && needs.snapshot.outputs.hasChanges == 'true'
+    if: github.repository == 'namehash/ensnode' && !contains(github.event.head_commit.message, 'changeset-release/main') && needs.build-and-publish-npm.outputs.hasChanges == 'true'
     needs: [build-and-publish-npm]
     permissions:
       contents: read
@@ -127,7 +127,7 @@ jobs:
   build-and-publish-lambdas:
     name: Build & Publish Snapshot Lambdas
     runs-on: blacksmith-4vcpu-ubuntu-2204
-    if: github.repository == 'namehash/ensnode' && !contains(github.event.head_commit.message, 'changeset-release/main') && needs.snapshot.outputs.hasChanges == 'true'
+    if: github.repository == 'namehash/ensnode' && !contains(github.event.head_commit.message, 'changeset-release/main') && needs.build-and-publish-npm.outputs.hasChanges == 'true'
     needs: [build-and-publish-npm]
     strategy:
       fail-fast: false
