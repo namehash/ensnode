@@ -48,6 +48,7 @@ export function getDefaultReferralProgramEditionConfigSet(
     rules: buildReferralProgramRulesRevShareLimit(
       parseUsdc("10000"),
       parseUsdc("500"),
+      parseUsdc("5"),
       0.5,
       parseTimestamp("2026-03-01T00:00:00Z"),
       parseTimestamp("2026-03-31T23:59:59Z"),

@@ -31,7 +31,7 @@ export function serializeReferralProgramRulesPieSplit(
 ): SerializedReferralProgramRulesPieSplit {
   return {
     awardModel: rules.awardModel,
-    totalAwardPoolValue: serializePriceUsdc(rules.totalAwardPoolValue),
+    awardPool: serializePriceUsdc(rules.awardPool),
     maxQualifiedReferrers: rules.maxQualifiedReferrers,
     startTime: rules.startTime,
     endTime: rules.endTime,

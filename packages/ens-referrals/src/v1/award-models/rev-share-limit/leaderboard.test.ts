@@ -36,22 +36,23 @@ const CHECKPOINT_PREFIX =
 /**
  * Build test rules.
  *
- * - BASE_REVENUE_CONTRIBUTION_PER_YEAR = $5 USDC
+ * - baseAnnualRevenueContribution = $5 USDC
  * - maxBaseRevenueShare = 0.5
  * - 1 year of duration → $5 base revenue → $2.50 standard award
  * - minBaseRevenueContribution = $5 → need exactly 1 year to qualify
  *
- * @param totalAwardPoolValue - USDC amount for the pool (default: $1000)
+ * @param awardPool - USDC amount for the pool (default: $1000)
  * @param minBaseRevenueContribution - USDC threshold (default: $5 = 1 year)
  */
 function buildTestRules(
-  totalAwardPoolValue = parseUsdc("1000"),
+  awardPool = parseUsdc("1000"),
   minBaseRevenueContribution = parseUsdc("5"),
   disqualifications: ReferralProgramEditionDisqualification[] = [],
 ) {
   return buildReferralProgramRulesRevShareLimit(
-    totalAwardPoolValue,
+    awardPool,
     minBaseRevenueContribution,
+    parseUsdc("5"), // baseAnnualRevenueContribution
     0.5, // maxBaseRevenueShare
     parseTimestamp("2026-01-01T00:00:00Z"),
     parseTimestamp("2026-12-31T23:59:59Z"),
@@ -109,7 +110,7 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       grandTotalReferrals: 0,
       grandTotalIncrementalDuration: 0,
       grandTotalRevenueContribution: ZERO_ETH,
-      awardPoolRemaining: rules.totalAwardPoolValue,
+      awardPoolRemaining: rules.awardPool,
     });
   });
 
@@ -129,9 +130,7 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       expect(referrer.cappedAwardValue.amount).toBe(0n);
 
       // Pool should be fully intact
-      expect(result.aggregatedMetrics.awardPoolRemaining.amount).toBe(
-        rules.totalAwardPoolValue.amount,
-      );
+      expect(result.aggregatedMetrics.awardPoolRemaining.amount).toBe(rules.awardPool.amount);
     });
   });
 

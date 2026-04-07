@@ -1,11 +1,6 @@
 import type { Address } from "viem";
 
-import {
-  type AccountId,
-  type PriceUsdc,
-  parseUsdc,
-  type UnixTimestamp,
-} from "@ensnode/ensnode-sdk";
+import type { AccountId, PriceUsdc, UnixTimestamp } from "@ensnode/ensnode-sdk";
 import { makePriceUsdcSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { normalizeAddress, validateLowercaseAddress } from "../../address";
@@ -34,36 +29,37 @@ export interface ReferralProgramEditionDisqualification {
   reason: string;
 }
 
-/**
- * Base revenue contribution per year of incremental duration.
- *
- * Used in `rev-share-limit` qualification and award calculations:
- * 1 year of incremental duration = $5 in base revenue (base-fee-only, excluding premiums).
- */
-export const BASE_REVENUE_CONTRIBUTION_PER_YEAR: PriceUsdc = parseUsdc("5");
-
 export interface ReferralProgramRulesRevShareLimit extends BaseReferralProgramRules {
   /**
    * Discriminant: identifies this as a "rev-share-limit" award model edition.
    *
    * In rev-share-limit, each qualified referrer receives a share of their base revenue
-   * contribution (base-fee-only: $5 × years of incremental duration), subject to a
-   * pool cap and a minimum qualification threshold.
+   * contribution (base-fee-only: `baseAnnualRevenueContribution` × years of incremental duration),
+   * subject to a pool cap and a minimum qualification threshold.
    */
   awardModel: typeof ReferralProgramAwardModels.RevShareLimit;
 
   /**
-   * The total value of the award pool in USDC (acts as a cap on total payouts).
+   * The award pool in USDC (acts as a cap on total payouts).
    */
-  totalAwardPoolValue: PriceUsdc;
+  awardPool: PriceUsdc;
 
   /**
-   * The minimum base revenue contribution required for a referrer to qualify.
+   * The minimum base revenue contribution required for a referrer to qualify for awards.
    */
   minBaseRevenueContribution: PriceUsdc;
 
   /**
-   * The fraction of the referrer's base revenue contribution that constitutes their potential award.
+   * Base revenue contribution per year of incremental duration in USDC.
+   *
+   * Used in `rev-share-limit` qualification and award calculations:
+   * 1 year of incremental duration → this many USDC of base revenue (base-fee-only, excluding premiums).
+   */
+  baseAnnualRevenueContribution: PriceUsdc;
+
+  /**
+   * The fraction of the referrer's base revenue contribution that constitutes their max potential award.
+   * This is the max that ignores the possibility of the award pool becoming exhausted.
    *
    * @invariant Guaranteed to be a number between 0 and 1 (inclusive)
    */
@@ -81,12 +77,14 @@ export interface ReferralProgramRulesRevShareLimit extends BaseReferralProgramRu
 export const validateReferralProgramRulesRevShareLimit = (
   rules: ReferralProgramRulesRevShareLimit,
 ): void => {
-  makePriceUsdcSchema("ReferralProgramRulesRevShareLimit.totalAwardPoolValue").parse(
-    rules.totalAwardPoolValue,
-  );
+  makePriceUsdcSchema("ReferralProgramRulesRevShareLimit.awardPool").parse(rules.awardPool);
 
   makePriceUsdcSchema("ReferralProgramRulesRevShareLimit.minBaseRevenueContribution").parse(
     rules.minBaseRevenueContribution,
+  );
+
+  makePriceUsdcSchema("ReferralProgramRulesRevShareLimit.baseAnnualRevenueContribution").parse(
+    rules.baseAnnualRevenueContribution,
   );
 
   if (
@@ -120,8 +118,9 @@ export const validateReferralProgramRulesRevShareLimit = (
 };
 
 export const buildReferralProgramRulesRevShareLimit = (
-  totalAwardPoolValue: PriceUsdc,
+  awardPool: PriceUsdc,
   minBaseRevenueContribution: PriceUsdc,
+  baseAnnualRevenueContribution: PriceUsdc,
   maxBaseRevenueShare: number,
   startTime: UnixTimestamp,
   endTime: UnixTimestamp,
@@ -132,8 +131,9 @@ export const buildReferralProgramRulesRevShareLimit = (
 ): ReferralProgramRulesRevShareLimit => {
   const result = {
     awardModel: ReferralProgramAwardModels.RevShareLimit,
-    totalAwardPoolValue,
+    awardPool,
     minBaseRevenueContribution,
+    baseAnnualRevenueContribution,
     maxBaseRevenueShare,
     startTime,
     endTime,

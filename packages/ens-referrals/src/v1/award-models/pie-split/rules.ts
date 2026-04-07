@@ -18,11 +18,11 @@ export interface ReferralProgramRulesPieSplit extends BaseReferralProgramRules {
   awardModel: typeof ReferralProgramAwardModels.PieSplit;
 
   /**
-   * The total value of the award pool in USDC.
+   * The award pool in USDC.
    *
    * NOTE: Awards will actually be distributed in $ENS tokens.
    */
-  totalAwardPoolValue: PriceUsdc;
+  awardPool: PriceUsdc;
 
   /**
    * The maximum number of referrers that will qualify to receive a non-zero `awardPoolShare`.
@@ -33,9 +33,7 @@ export interface ReferralProgramRulesPieSplit extends BaseReferralProgramRules {
 }
 
 export const validateReferralProgramRulesPieSplit = (rules: ReferralProgramRulesPieSplit): void => {
-  makePriceUsdcSchema("ReferralProgramRulesPieSplit.totalAwardPoolValue").parse(
-    rules.totalAwardPoolValue,
-  );
+  makePriceUsdcSchema("ReferralProgramRulesPieSplit.awardPool").parse(rules.awardPool);
 
   validateNonNegativeInteger(rules.maxQualifiedReferrers);
 
@@ -43,7 +41,7 @@ export const validateReferralProgramRulesPieSplit = (rules: ReferralProgramRules
 };
 
 export const buildReferralProgramRulesPieSplit = (
-  totalAwardPoolValue: PriceUsdc,
+  awardPool: PriceUsdc,
   maxQualifiedReferrers: number,
   startTime: UnixTimestamp,
   endTime: UnixTimestamp,
@@ -53,7 +51,7 @@ export const buildReferralProgramRulesPieSplit = (
 ): ReferralProgramRulesPieSplit => {
   const result = {
     awardModel: ReferralProgramAwardModels.PieSplit,
-    totalAwardPoolValue,
+    awardPool,
     maxQualifiedReferrers,
     startTime,
     endTime,

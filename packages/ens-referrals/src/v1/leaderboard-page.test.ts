@@ -23,7 +23,7 @@ describe("buildReferrerLeaderboardPageContext", () => {
       awardModel: ReferralProgramAwardModels.PieSplit,
       rules: {
         awardModel: ReferralProgramAwardModels.PieSplit,
-        totalAwardPoolValue: priceUsdc(10000n),
+        awardPool: priceUsdc(10000n),
         maxQualifiedReferrers: 10,
         startTime: 1764547200,
         endTime: 1767225599,
@@ -112,7 +112,7 @@ describe("buildReferrerLeaderboardPageContext", () => {
       awardModel: ReferralProgramAwardModels.PieSplit,
       rules: {
         awardModel: ReferralProgramAwardModels.PieSplit,
-        totalAwardPoolValue: priceUsdc(10000n),
+        awardPool: priceUsdc(10000n),
         maxQualifiedReferrers: 10,
         startTime: 1764547200,
         endTime: 1767225599,

@@ -28,7 +28,7 @@ export const makeReferralProgramRulesPieSplitSchema = (
 ) =>
   makeBaseReferralProgramRulesSchema(valueLabel).safeExtend({
     awardModel: z.literal(ReferralProgramAwardModels.PieSplit),
-    totalAwardPoolValue: makePriceUsdcSchema(`${valueLabel}.totalAwardPoolValue`),
+    awardPool: makePriceUsdcSchema(`${valueLabel}.awardPool`),
     maxQualifiedReferrers: makeNonNegativeIntegerSchema(`${valueLabel}.maxQualifiedReferrers`),
   });
 

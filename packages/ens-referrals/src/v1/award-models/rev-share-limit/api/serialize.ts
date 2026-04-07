@@ -34,8 +34,9 @@ export function serializeReferralProgramRulesRevShareLimit(
 ): SerializedReferralProgramRulesRevShareLimit {
   return {
     awardModel: rules.awardModel,
-    totalAwardPoolValue: serializePriceUsdc(rules.totalAwardPoolValue),
+    awardPool: serializePriceUsdc(rules.awardPool),
     minBaseRevenueContribution: serializePriceUsdc(rules.minBaseRevenueContribution),
+    baseAnnualRevenueContribution: serializePriceUsdc(rules.baseAnnualRevenueContribution),
     maxBaseRevenueShare: rules.maxBaseRevenueShare,
     startTime: rules.startTime,
     endTime: rules.endTime,

@@ -102,7 +102,7 @@ if (response.responseCode === ReferrerLeaderboardPageResponseCodes.Ok) {
       );
       console.log(`Max Base Revenue Share: ${leaderboardPage.rules.maxBaseRevenueShare}`);
       console.log(
-        `Tentative award for the best referrer: ${firstReferrer !== null ? firstReferrer.cappedAwardValue : noReferrersFallback}`,
+        `Tentative award for the top ranked referrer: ${firstReferrer !== null ? firstReferrer.cappedAwardValue : noReferrersFallback}`,
       );
     }
   }

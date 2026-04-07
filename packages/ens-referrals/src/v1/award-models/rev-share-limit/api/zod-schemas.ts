@@ -40,8 +40,11 @@ export const makeReferralProgramRulesRevShareLimitSchema = (
 ) =>
   makeBaseReferralProgramRulesSchema(valueLabel).safeExtend({
     awardModel: z.literal(ReferralProgramAwardModels.RevShareLimit),
-    totalAwardPoolValue: makePriceUsdcSchema(`${valueLabel}.totalAwardPoolValue`),
+    awardPool: makePriceUsdcSchema(`${valueLabel}.awardPool`),
     minBaseRevenueContribution: makePriceUsdcSchema(`${valueLabel}.minBaseRevenueContribution`),
+    baseAnnualRevenueContribution: makePriceUsdcSchema(
+      `${valueLabel}.baseAnnualRevenueContribution`,
+    ),
     maxBaseRevenueShare: makeFiniteNonNegativeNumberSchema(`${valueLabel}.maxBaseRevenueShare`).max(
       1,
       `${valueLabel}.maxBaseRevenueShare must be <= 1`,
@@ -135,6 +138,22 @@ export const makeUnrankedReferrerMetricsRevShareLimitSchema = (
         .trim()
         .min(1, `${valueLabel}.adminDisqualificationReason must not be empty`)
         .nullable(),
+    })
+    .refine((data) => data.totalReferrals === 0, {
+      message: `${valueLabel}.totalReferrals must be 0 for unranked referrers`,
+      path: ["totalReferrals"],
+    })
+    .refine((data) => data.totalIncrementalDuration === 0, {
+      message: `${valueLabel}.totalIncrementalDuration must be 0 for unranked referrers`,
+      path: ["totalIncrementalDuration"],
+    })
+    .refine((data) => data.totalRevenueContribution.amount === 0n, {
+      message: `${valueLabel}.totalRevenueContribution must be 0 for unranked referrers`,
+      path: ["totalRevenueContribution"],
+    })
+    .refine((data) => data.totalBaseRevenueContribution.amount === 0n, {
+      message: `${valueLabel}.totalBaseRevenueContribution must be 0 for unranked referrers`,
+      path: ["totalBaseRevenueContribution"],
     })
     .refine((data) => data.uncappedAwardValue.amount === 0n, {
       message: `${valueLabel}.uncappedAwardValue must be 0 for unranked referrers`,

@@ -20,10 +20,11 @@ import type { ReferralProgramRulesRevShareLimit } from "../rules";
 export interface SerializedReferralProgramRulesRevShareLimit
   extends Omit<
     ReferralProgramRulesRevShareLimit,
-    "totalAwardPoolValue" | "minBaseRevenueContribution" | "rulesUrl"
+    "awardPool" | "minBaseRevenueContribution" | "baseAnnualRevenueContribution" | "rulesUrl"
   > {
-  totalAwardPoolValue: SerializedPriceUsdc;
+  awardPool: SerializedPriceUsdc;
   minBaseRevenueContribution: SerializedPriceUsdc;
+  baseAnnualRevenueContribution: SerializedPriceUsdc;
   rulesUrl: string;
 }
 

@@ -179,7 +179,7 @@ export const emptyReferralLeaderboard: ReferrerLeaderboardPieSplit = {
   awardModel: ReferralProgramAwardModels.PieSplit,
   rules: {
     awardModel: ReferralProgramAwardModels.PieSplit,
-    totalAwardPoolValue: parseUsdc("10000"),
+    awardPool: parseUsdc("10000"),
     maxQualifiedReferrers: 10,
     startTime: 1735689600,
     endTime: 1767225599,
@@ -205,7 +205,7 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboardPieSplit = {
   awardModel: ReferralProgramAwardModels.PieSplit,
   rules: {
     awardModel: ReferralProgramAwardModels.PieSplit,
-    totalAwardPoolValue: parseUsdc("10000"),
+    awardPool: parseUsdc("10000"),
     maxQualifiedReferrers: 10,
     startTime: 1735689600,
     endTime: 1767225599,
@@ -698,7 +698,7 @@ export const referrerLeaderboardPageResponseOk = {
     awardModel: ReferralProgramAwardModels.PieSplit,
     rules: {
       awardModel: ReferralProgramAwardModels.PieSplit,
-      totalAwardPoolValue: parseUsdc("10000"),
+      awardPool: parseUsdc("10000"),
       maxQualifiedReferrers: 10,
       startTime: 1735689600,
       endTime: 1767225599,

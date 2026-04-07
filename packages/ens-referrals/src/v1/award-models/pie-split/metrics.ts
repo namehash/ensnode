@@ -174,10 +174,10 @@ export interface AwardedReferrerMetricsPieSplit extends RankedReferrerMetricsPie
   awardPoolShare: number;
 
   /**
-   * The approximate USDC value of the referrer's share of the {@link ReferralProgramRulesPieSplit.totalAwardPoolValue}.
+   * The approximate USDC value of the referrer's share of the {@link ReferralProgramRulesPieSplit.awardPool}.
    *
-   * @invariant Guaranteed to be a valid PriceUsdc with amount between 0 and {@link ReferralProgramRulesPieSplit.totalAwardPoolValue.amount} (inclusive)
-   * @invariant Calculated as: `awardPoolShare` * {@link ReferralProgramRulesPieSplit.totalAwardPoolValue.amount}
+   * @invariant Guaranteed to be a valid PriceUsdc with amount between 0 and {@link ReferralProgramRulesPieSplit.awardPool.amount} (inclusive)
+   * @invariant Calculated as: `awardPoolShare` * {@link ReferralProgramRulesPieSplit.awardPool.amount}
    */
   awardPoolApproxValue: PriceUsdc;
 }
@@ -197,9 +197,9 @@ export const validateAwardedReferrerMetricsPieSplit = (
     referrer.awardPoolApproxValue,
   );
 
-  if (referrer.awardPoolApproxValue.amount > rules.totalAwardPoolValue.amount) {
+  if (referrer.awardPoolApproxValue.amount > rules.awardPool.amount) {
     throw new Error(
-      `AwardedReferrerMetricsPieSplit: awardPoolApproxValue.amount ${referrer.awardPoolApproxValue.amount.toString()} exceeds totalAwardPoolValue.amount ${rules.totalAwardPoolValue.amount.toString()}.`,
+      `AwardedReferrerMetricsPieSplit: awardPoolApproxValue.amount ${referrer.awardPoolApproxValue.amount.toString()} exceeds awardPool.amount ${rules.awardPool.amount.toString()}.`,
     );
   }
 };
@@ -211,8 +211,8 @@ export const buildAwardedReferrerMetricsPieSplit = (
 ): AwardedReferrerMetricsPieSplit => {
   const awardPoolShare = calcReferrerAwardPoolSharePieSplit(referrer, aggregatedMetrics);
 
-  // Calculate the approximate USDC value by multiplying the share by the total award pool value
-  const awardPoolApproxValue = scalePrice(rules.totalAwardPoolValue, awardPoolShare);
+  // Calculate the approximate USDC value by multiplying the share by the award pool
+  const awardPoolApproxValue = scalePrice(rules.awardPool, awardPoolShare);
 
   const result = {
     ...referrer,

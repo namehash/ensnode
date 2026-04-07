@@ -28,7 +28,7 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
     displayName: "December 2025",
     rules: {
       awardModel: ReferralProgramAwardModels.PieSplit,
-      totalAwardPoolValue: parseUsdc("1000"),
+      awardPool: parseUsdc("1000"),
       maxQualifiedReferrers: 100,
       startTime: 1000000,
       endTime: 2000000,
@@ -43,8 +43,9 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
     displayName: "January 2026",
     rules: {
       awardModel: ReferralProgramAwardModels.RevShareLimit,
-      totalAwardPoolValue: parseUsdc("500"),
+      awardPool: parseUsdc("500"),
       minBaseRevenueContribution: parseUsdc("10"),
+      baseAnnualRevenueContribution: parseUsdc("5"),
       maxBaseRevenueShare: 0.5,
       startTime: 1000000,
       endTime: 2000000,
@@ -92,12 +93,14 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
 
     const rules = revShareLimit!.rules as {
       awardModel: typeof ReferralProgramAwardModels.RevShareLimit;
-      totalAwardPoolValue: { amount: bigint; currency: string };
+      awardPool: { amount: bigint; currency: string };
       minBaseRevenueContribution: { amount: bigint; currency: string };
+      baseAnnualRevenueContribution: { amount: bigint; currency: string };
       maxBaseRevenueShare: number;
     };
-    expect(rules.totalAwardPoolValue).toBeDefined();
+    expect(rules.awardPool).toBeDefined();
     expect(rules.minBaseRevenueContribution).toBeDefined();
+    expect(rules.baseAnnualRevenueContribution).toBeDefined();
     expect(typeof rules.maxBaseRevenueShare).toBe("number");
     expect(rules.maxBaseRevenueShare).toBe(0.5);
     expect(revShareLimit!.rules.areAwardsDistributed).toBe(
@@ -189,7 +192,7 @@ describe("makeReferrerLeaderboardPageSchema", () => {
     awardModel: ReferralProgramAwardModels.PieSplit,
     rules: {
       awardModel: ReferralProgramAwardModels.PieSplit,
-      totalAwardPoolValue: parseUsdc("1000"),
+      awardPool: parseUsdc("1000"),
       maxQualifiedReferrers: 100,
       startTime: 1000000,
       endTime: 2000000,
@@ -214,8 +217,9 @@ describe("makeReferrerLeaderboardPageSchema", () => {
     awardModel: ReferralProgramAwardModels.RevShareLimit,
     rules: {
       awardModel: ReferralProgramAwardModels.RevShareLimit,
-      totalAwardPoolValue: parseUsdc("2000"),
+      awardPool: parseUsdc("2000"),
       minBaseRevenueContribution: parseUsdc("10"),
+      baseAnnualRevenueContribution: parseUsdc("5"),
       maxBaseRevenueShare: 0.5,
       startTime: 1000000,
       endTime: 2000000,
@@ -275,7 +279,7 @@ describe("makeReferrerLeaderboardPageSchema", () => {
       ...pieSplitLeaderboardPage,
       rules: {
         ...pieSplitLeaderboardPage.rules,
-        totalAwardPoolValue: { amount: "not-a-number", currency: CurrencyIds.USDC },
+        awardPool: { amount: "not-a-number", currency: CurrencyIds.USDC },
       },
     };
 
@@ -307,7 +311,7 @@ describe("makeReferralProgramEditionSummarySchema", () => {
     status: ReferralProgramEditionStatuses.Active,
     rules: {
       awardModel: ReferralProgramAwardModels.PieSplit,
-      totalAwardPoolValue: parseUsdc("1000"),
+      awardPool: parseUsdc("1000"),
       maxQualifiedReferrers: 100,
       startTime: 1000000,
       endTime: 2000000,
@@ -324,8 +328,9 @@ describe("makeReferralProgramEditionSummarySchema", () => {
     status: ReferralProgramEditionStatuses.Active,
     rules: {
       awardModel: ReferralProgramAwardModels.RevShareLimit,
-      totalAwardPoolValue: parseUsdc("2000"),
+      awardPool: parseUsdc("2000"),
       minBaseRevenueContribution: parseUsdc("10"),
+      baseAnnualRevenueContribution: parseUsdc("5"),
       maxBaseRevenueShare: 0.5,
       startTime: 1000000,
       endTime: 2000000,
@@ -423,7 +428,7 @@ describe("makeReferrerEditionMetricsSchema", () => {
 
   const pieSplitRules = {
     awardModel: ReferralProgramAwardModels.PieSplit,
-    totalAwardPoolValue: parseUsdc("1000"),
+    awardPool: parseUsdc("1000"),
     maxQualifiedReferrers: 100,
     startTime: 1000000,
     endTime: 2000000,
@@ -506,8 +511,9 @@ describe("makeReferrerEditionMetricsSchema", () => {
       type: ReferrerEditionMetricsTypeIds.Ranked,
       rules: {
         awardModel: ReferralProgramAwardModels.RevShareLimit,
-        totalAwardPoolValue: parseUsdc("2000"),
+        awardPool: parseUsdc("2000"),
         minBaseRevenueContribution: parseUsdc("10"),
+        baseAnnualRevenueContribution: parseUsdc("5"),
         maxBaseRevenueShare: 0.5,
         startTime: 1000000,
         endTime: 2000000,

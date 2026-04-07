@@ -15,8 +15,8 @@ import type { ReferralProgramRulesPieSplit } from "../rules";
  * Serialized representation of {@link ReferralProgramRulesPieSplit}.
  */
 export interface SerializedReferralProgramRulesPieSplit
-  extends Omit<ReferralProgramRulesPieSplit, "totalAwardPoolValue" | "rulesUrl"> {
-  totalAwardPoolValue: SerializedPriceUsdc;
+  extends Omit<ReferralProgramRulesPieSplit, "awardPool" | "rulesUrl"> {
+  awardPool: SerializedPriceUsdc;
   rulesUrl: string;
 }
 
