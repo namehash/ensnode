@@ -17,6 +17,7 @@ import {
   paginateBy,
   paginateByInt,
 } from "@/omnigraph-api/lib/connection-helpers";
+import { cursors } from "@/omnigraph-api/lib/cursors";
 import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domains-resolver";
 import {
   domainsBase,
@@ -33,7 +34,8 @@ import { rejectAnyErrors } from "@/omnigraph-api/lib/reject-any-errors";
 import { AccountRef } from "@/omnigraph-api/schema/account";
 import {
   ID_PAGINATED_CONNECTION_ARGS,
-  INDEX_PAGINATED_CONNECTION_ARGS,
+  PAGINATION_DEFAULT_MAX_SIZE,
+  PAGINATION_DEFAULT_PAGE_SIZE,
 } from "@/omnigraph-api/schema/constants";
 import { EventRef, EventsWhereInput } from "@/omnigraph-api/schema/event";
 import { LabelRef } from "@/omnigraph-api/schema/label";
@@ -134,7 +136,7 @@ DomainInterfaceRef.implement({
       description:
         "The Canonical Name for this Domain. If the Domain is not Canonical, then `name` will be null.",
       tracing: true,
-      type: "Name",
+      type: "InterpretedName",
       nullable: true,
       resolve: async (domain, args, context) => {
         const canonicalPath = isENSv1Domain(domain)
@@ -228,15 +230,25 @@ DomainInterfaceRef.implement({
           totalCount: () => ensDb.$count(ensIndexerSchema.registration, scope),
           connection: () =>
             resolveCursorConnection(
-              { ...INDEX_PAGINATED_CONNECTION_ARGS, args },
+              {
+                toCursor: (model) => cursors.encode(String(model.registrationIndex)),
+                defaultSize: PAGINATION_DEFAULT_PAGE_SIZE,
+                maxSize: PAGINATION_DEFAULT_MAX_SIZE,
+                args,
+              },
               ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
                 ensDb
                   .select()
                   .from(ensIndexerSchema.registration)
                   .where(
-                    and(scope, paginateByInt(ensIndexerSchema.registration.index, before, after)),
+                    and(
+                      scope,
+                      paginateByInt(ensIndexerSchema.registration.registrationIndex, before, after),
+                    ),
                   )
-                  .orderBy(orderPaginationBy(ensIndexerSchema.registration.index, inverted))
+                  .orderBy(
+                    orderPaginationBy(ensIndexerSchema.registration.registrationIndex, inverted),
+                  )
                   .limit(limit),
             ),
         });
@@ -417,7 +429,7 @@ export const DomainIdInput = builder.inputType("DomainIdInput", {
   description: "Reference a specific Domain.",
   isOneOf: true,
   fields: (t) => ({
-    name: t.field({ type: "Name" }),
+    name: t.field({ type: "InterpretedName" }),
     id: t.field({ type: "DomainId" }),
   }),
 });

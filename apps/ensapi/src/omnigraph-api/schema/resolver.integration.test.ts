@@ -28,7 +28,7 @@ describe("Resolver.events", () => {
   };
 
   const ResolverEvents = gql`
-    query ResolverEvents($name: Name!) {
+    query ResolverEvents($name: InterpretedName!) {
       domain(by: { name: $name }) {
         resolver {
           events {

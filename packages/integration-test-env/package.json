@@ -2,6 +2,7 @@
   "name": "@ensnode/integration-test-env",
   "version": "0.0.3",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "description": "Integration test environment orchestration for ENSNode",
   "scripts": {

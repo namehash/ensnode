@@ -45,7 +45,7 @@ export type EventResult = {
 
 export const DomainEventsPaginated = gql`
   query DomainEventsPaginated(
-    $name: Name!
+    $name: InterpretedName!
     $first: Int
     $after: String
     $last: Int
@@ -71,7 +71,7 @@ export const AccountEventsPaginated = gql`
     $last: Int
     $before: String
   ) {
-    account(address: $address) {
+    account(by: { address: $address }) {
       events(first: $first, after: $after, last: $last, before: $before) {
         edges { cursor node { ...EventFragment } }
         pageInfo { ...PageInfoFragment }
@@ -85,7 +85,7 @@ export const AccountEventsPaginated = gql`
 
 export const ResolverEventsPaginated = gql`
   query ResolverEventsPaginated(
-    $name: Name!
+    $name: InterpretedName!
     $first: Int
     $after: String
     $last: Int
@@ -113,7 +113,7 @@ export const PermissionsEventsPaginated = gql`
     $last: Int
     $before: String
   ) {
-    permissions(for: $contract) {
+    permissions(by: { contract: $contract }) {
       events(first: $first, after: $after, last: $last, before: $before) {
         edges { cursor node { ...EventFragment } }
         pageInfo { ...PageInfoFragment }

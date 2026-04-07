@@ -1,13 +1,6 @@
-import { resolve } from "node:path";
+import { configDefaults, defineConfig } from "vitest/config";
 
-import { configDefaults, defineProject } from "vitest/config";
-
-export default defineProject({
-  resolve: {
-    alias: {
-      "@": resolve(__dirname, "./src"),
-    },
-  },
+export default defineConfig({
   test: {
     environment: "node",
     exclude: [...configDefaults.exclude, "**/*.integration.test.ts"],

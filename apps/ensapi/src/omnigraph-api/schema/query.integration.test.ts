@@ -6,10 +6,10 @@ import {
   type DomainId,
   getDatasourceContract,
   getENSv2RootRegistryId,
-  getStorageId,
   type InterpretedLabel,
   makeENSv1DomainId,
   makeENSv2DomainId,
+  makeStorageId,
   type Name,
 } from "@ensnode/ensnode-sdk";
 
@@ -37,7 +37,7 @@ const V2_ROOT_REGISTRY = getDatasourceContract(
 
 const V1_ETH_DOMAIN_ID = makeENSv1DomainId(namehash("eth"));
 
-const V2_ETH_STORAGE_ID = getStorageId(labelhash("eth"));
+const V2_ETH_STORAGE_ID = makeStorageId(labelhash("eth"));
 const V2_ETH_DOMAIN_ID = makeENSv2DomainId(V2_ROOT_REGISTRY, V2_ETH_STORAGE_ID);
 
 describe("Query.root", () => {
@@ -114,7 +114,7 @@ describe("Query.domains", () => {
 
 describe("Query.domain", () => {
   const DomainByName = gql`
-    query DomainByName($name: Name!) {
+    query DomainByName($name: InterpretedName!) {
       domain(by: { name: $name }) {
         name
       }

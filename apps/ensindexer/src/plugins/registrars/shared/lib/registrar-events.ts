@@ -2,15 +2,13 @@
  * This file contains handlers used in event handlers for a Registrar contract.
  */
 
+import { type AccountId, type Node, stringifyAccountId } from "enssdk";
 import type { Address, Hash } from "viem";
 
 import {
-  type AccountId,
   type BlockRef,
   bigIntToNumber,
   durationBetween,
-  formatAccountId,
-  type Node,
   RegistrarActionTypes,
   type UnixTimestamp,
 } from "@ensnode/ensnode-sdk";
@@ -72,7 +70,7 @@ export async function handleRegistrarEventRegistration(
 
   // Invariant: subregistry record must exist
   if (!subregistry) {
-    throw new Error(`Subregistry record must exists for '${formatAccountId(subregistryId)}.'`);
+    throw new Error(`Subregistry record must exist for '${stringifyAccountId(subregistryId)}.'`);
   }
 
   // 3. Calculate incremental duration
@@ -134,7 +132,7 @@ export async function handleRegistrarEventRenewal(
 
   // Invariant: subregistry record must exist
   if (!subregistry) {
-    throw new Error(`Subregistry record must exists for '${formatAccountId(subregistryId)}.'`);
+    throw new Error(`Subregistry record must exist for '${stringifyAccountId(subregistryId)}.'`);
   }
 
   // 2. Get the current registration lifecycle before this registrar action

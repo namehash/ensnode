@@ -8,6 +8,7 @@ import type {
   ChainId,
   CoinType,
   DomainId,
+  InterpretedLabel,
   InterpretedName,
   Node,
   PermissionsId,
@@ -56,13 +57,15 @@ const createSpan = createOpenTelemetryWrapper(tracer, {
 export const builder = new SchemaBuilder<{
   Context: ReturnType<typeof context>;
   Scalars: {
+    // make sure to keep these scalars up to date with packages/enssdk/src/omnigraph/graphql.ts !
     BigInt: { Input: bigint; Output: bigint };
     Address: { Input: Address; Output: Address };
     Hex: { Input: Hex; Output: Hex };
     ChainId: { Input: ChainId; Output: ChainId };
     CoinType: { Input: CoinType; Output: CoinType };
     Node: { Input: Node; Output: Node };
-    Name: { Input: InterpretedName; Output: InterpretedName };
+    InterpretedName: { Input: InterpretedName; Output: InterpretedName };
+    InterpretedLabel: { Input: InterpretedLabel; Output: InterpretedLabel };
     DomainId: { Input: DomainId; Output: DomainId };
     RegistryId: { Input: RegistryId; Output: RegistryId };
     ResolverId: { Input: ResolverId; Output: ResolverId };
@@ -78,6 +81,9 @@ export const builder = new SchemaBuilder<{
   Connection: {
     totalCount: MaybePromise<number>;
   };
+
+  DefaultEdgesNullability: false;
+  DefaultNodeNullability: false;
 }>({
   plugins: [TracingPlugin, DataloaderPlugin, RelayPlugin],
   tracing: {
@@ -104,5 +110,9 @@ export const builder = new SchemaBuilder<{
     // disable the Query.node & Query.nodes methods
     nodeQueryOptions: false,
     nodesQueryOptions: false,
+
+    // globally configures Edge and Node types to be non-nullable
+    edgesFieldOptions: { nullable: false },
+    nodeFieldOptions: { nullable: false },
   },
 });

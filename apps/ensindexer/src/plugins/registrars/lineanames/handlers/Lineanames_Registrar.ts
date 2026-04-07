@@ -1,7 +1,8 @@
+import { interpretTokenIdAsLabelHash } from "enssdk";
+
 import {
   type BlockRef,
   bigIntToNumber,
-  interpretTokenIdAsLabelHash,
   makeSubdomainNode,
   PluginName,
   type Subregistry,

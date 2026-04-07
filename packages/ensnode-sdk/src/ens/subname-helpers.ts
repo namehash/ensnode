@@ -1,5 +1,5 @@
 import type { LabelHash, Node } from "enssdk";
-import { concat, type Hex, keccak256, toHex } from "viem";
+import { concat, keccak256 } from "viem";
 
 /**
  * Implements one step of the namehash algorithm, combining `labelHash` with `node` to produce
@@ -8,10 +8,3 @@ import { concat, type Hex, keccak256, toHex } from "viem";
  */
 export const makeSubdomainNode = (labelHash: LabelHash, node: Node): Node =>
   keccak256(concat([node, labelHash]));
-/**
- * Encodes a uint256 bigint as hex string sized to 32 bytes.
- * Uses include, in the context of ENS, decoding the uint256-encoded tokenId of NFT-issuing contracts
- * into Node or LabelHash, which is a common behavior in the ENS ecosystem.
- * (see NameWrapper, ETHRegistrarController)
- */
-export const uint256ToHex32 = (num: bigint): Hex => toHex(num, { size: 32 });

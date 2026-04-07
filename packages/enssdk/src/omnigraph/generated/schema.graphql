@@ -26,15 +26,21 @@ type Account {
   resolverPermissions(after: String, before: String, first: Int, last: Int): AccountResolverPermissionsConnection
 }
 
+"""Address an Account by ID or Address."""
+input AccountByInput @oneOf {
+  address: Address
+  id: Address
+}
+
 type AccountDomainsConnection {
-  edges: [AccountDomainsConnectionEdge]
+  edges: [AccountDomainsConnectionEdge!]!
   pageInfo: PageInfo!
   totalCount: Int!
 }
 
 type AccountDomainsConnectionEdge {
   cursor: String!
-  node: Domain
+  node: Domain!
 }
 
 """Filter for Account.domains query."""
@@ -51,14 +57,14 @@ input AccountDomainsWhereInput {
 }
 
 type AccountEventsConnection {
-  edges: [AccountEventsConnectionEdge]
+  edges: [AccountEventsConnectionEdge!]!
   pageInfo: PageInfo!
   totalCount: Int!
 }
 
 type AccountEventsConnectionEdge {
   cursor: String!
-  node: Event
+  node: Event!
 }
 
 """
@@ -79,8 +85,8 @@ input AccountEventsWhereInput {
 
 """A CAIP-10 Account ID including chainId and address."""
 type AccountId {
-  address: Address
-  chainId: ChainId
+  address: Address!
+  chainId: ChainId!
 }
 
 """A CAIP-10 Account ID including chainId and address."""
@@ -90,36 +96,36 @@ input AccountIdInput {
 }
 
 type AccountPermissionsConnection {
-  edges: [AccountPermissionsConnectionEdge]
+  edges: [AccountPermissionsConnectionEdge!]!
   pageInfo: PageInfo!
   totalCount: Int!
 }
 
 type AccountPermissionsConnectionEdge {
   cursor: String!
-  node: PermissionsUser
+  node: PermissionsUser!
 }
 
 type AccountRegistryPermissionsConnection {
-  edges: [AccountRegistryPermissionsConnectionEdge]
+  edges: [AccountRegistryPermissionsConnectionEdge!]!
   pageInfo: PageInfo!
   totalCount: Int!
 }
 
 type AccountRegistryPermissionsConnectionEdge {
   cursor: String!
-  node: RegistryPermissionsUser
+  node: RegistryPermissionsUser!
 }
 
 type AccountResolverPermissionsConnection {
-  edges: [AccountResolverPermissionsConnectionEdge]
+  edges: [AccountResolverPermissionsConnectionEdge!]!
   pageInfo: PageInfo!
   totalCount: Int!
 }
 
 type AccountResolverPermissionsConnectionEdge {
   cursor: String!
-  node: ResolverPermissionsUser
+  node: ResolverPermissionsUser!
 }
 
 """Address represents a lowercase (unchecksummed) viem#Address."""
@@ -208,7 +214,7 @@ interface Domain {
   """
   The Canonical Name for this Domain. If the Domain is not Canonical, then `name` will be null.
   """
-  name: Name
+  name: InterpretedName
 
   """The owner of this Domain."""
   owner: Account
@@ -236,14 +242,14 @@ interface Domain {
 }
 
 type DomainEventsConnection {
-  edges: [DomainEventsConnectionEdge]
+  edges: [DomainEventsConnectionEdge!]!
   pageInfo: PageInfo!
   totalCount: Int!
 }
 
 type DomainEventsConnectionEdge {
   cursor: String!
-  node: Event
+  node: Event!
 }
 
 """DomainId represents a @ensnode/ensnode-sdk#DomainId."""
@@ -252,7 +258,7 @@ scalar DomainId
 """Reference a specific Domain."""
 input DomainIdInput @oneOf {
   id: DomainId
-  name: Name
+  name: InterpretedName
 }
 
 """Filter Permissions over this Domain by a specific User address."""
@@ -261,25 +267,25 @@ input DomainPermissionsWhereInput {
 }
 
 type DomainRegistrationsConnection {
-  edges: [DomainRegistrationsConnectionEdge]
+  edges: [DomainRegistrationsConnectionEdge!]!
   pageInfo: PageInfo!
   totalCount: Int!
 }
 
 type DomainRegistrationsConnectionEdge {
   cursor: String!
-  node: Registration
+  node: Registration!
 }
 
 type DomainSubdomainsConnection {
-  edges: [DomainSubdomainsConnectionEdge]
+  edges: [DomainSubdomainsConnectionEdge!]!
   pageInfo: PageInfo!
   totalCount: Int!
 }
 
 type DomainSubdomainsConnectionEdge {
   cursor: String!
-  node: Domain
+  node: Domain!
 }
 
 """Fields by which domains can be ordered"""
@@ -324,7 +330,7 @@ type ENSv1Domain implements Domain {
   """
   The Canonical Name for this Domain. If the Domain is not Canonical, then `name` will be null.
   """
-  name: Name
+  name: InterpretedName
 
   """The owner of this Domain."""
   owner: Account
@@ -373,7 +379,7 @@ type ENSv2Domain implements Domain {
   """
   The Canonical Name for this Domain. If the Domain is not Canonical, then `name` will be null.
   """
-  name: Name
+  name: InterpretedName
 
   """The owner of this Domain."""
   owner: Account
@@ -415,14 +421,14 @@ type ENSv2Domain implements Domain {
 }
 
 type ENSv2DomainPermissionsConnection {
-  edges: [ENSv2DomainPermissionsConnectionEdge]
+  edges: [ENSv2DomainPermissionsConnectionEdge!]!
   pageInfo: PageInfo!
   totalCount: Int!
 }
 
 type ENSv2DomainPermissionsConnectionEdge {
   cursor: String!
-  node: PermissionsUser
+  node: PermissionsUser!
 }
 
 """
@@ -579,6 +585,12 @@ input EventsWhereInput {
 """Hex represents viem#Hex."""
 scalar Hex
 
+"""InterpretedLabel represents a @ensnode/ensnode-sdk#InterpretedLabel."""
+scalar InterpretedLabel
+
+"""InterpretedName represents a @ensnode/ensnode-sdk#InterpretedName."""
+scalar InterpretedName
+
 """
 Represents a Label within ENS, providing its hash and interpreted representation.
 """
@@ -593,15 +605,12 @@ type Label {
   The Label represented as an Interpreted Label. This is either a normalized Literal Label or an Encoded LabelHash. 
   (@see https://ensnode.io/docs/reference/terminology#interpreted-label)
   """
-  interpreted: String!
+  interpreted: InterpretedLabel!
 }
-
-"""Name represents a @ensnode/ensnode-sdk#InterpretedName."""
-scalar Name
 
 """Constructs a reference to a specific Node via one of `name` or `node`."""
 input NameOrNodeInput @oneOf {
-  name: Name
+  name: InterpretedName
   node: Node
 }
 
@@ -685,18 +694,24 @@ type Permissions {
 }
 
 type PermissionsEventsConnection {
-  edges: [PermissionsEventsConnectionEdge]
+  edges: [PermissionsEventsConnectionEdge!]!
   pageInfo: PageInfo!
   totalCount: Int!
 }
 
 type PermissionsEventsConnectionEdge {
   cursor: String!
-  node: Event
+  node: Event!
 }
 
 """PermissionsId represents a @ensnode/ensnode-sdk#PermissionsId."""
 scalar PermissionsId
+
+"""Address Permissions by ID or AccountId."""
+input PermissionsIdInput @oneOf {
+  contract: AccountIdInput
+  id: PermissionsId
+}
 
 """PermissionsResource"""
 type PermissionsResource {
@@ -722,25 +737,25 @@ PermissionsResourceId represents a @ensnode/ensnode-sdk#PermissionsResourceId.
 scalar PermissionsResourceId
 
 type PermissionsResourceUsersConnection {
-  edges: [PermissionsResourceUsersConnectionEdge]
+  edges: [PermissionsResourceUsersConnectionEdge!]!
   pageInfo: PageInfo!
   totalCount: Int!
 }
 
 type PermissionsResourceUsersConnectionEdge {
   cursor: String!
-  node: PermissionsUser
+  node: PermissionsUser!
 }
 
 type PermissionsResourcesConnection {
-  edges: [PermissionsResourcesConnectionEdge]
+  edges: [PermissionsResourcesConnectionEdge!]!
   pageInfo: PageInfo!
   totalCount: Int!
 }
 
 type PermissionsResourcesConnectionEdge {
   cursor: String!
-  node: PermissionsResource
+  node: PermissionsResource!
 }
 
 """PermissionsUser"""
@@ -765,8 +780,8 @@ type PermissionsUser {
 scalar PermissionsUserId
 
 type Query {
-  """Identify an Account by Address."""
-  account(address: Address!): Account
+  """Identify an Account by ID or Address."""
+  account(by: AccountByInput!): Account
 
   """Identify a Domain by Name or DomainId"""
   domain(by: DomainIdInput!): Domain
@@ -774,8 +789,8 @@ type Query {
   """Find Domains by Name."""
   domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: DomainsWhereInput!): QueryDomainsConnection
 
-  """Find Permissions in a contract by AccountId."""
-  permissions(for: AccountIdInput!): Permissions
+  """Identify Permissions by ID or AccountId."""
+  permissions(by: PermissionsIdInput!): Permissions
 
   """TODO"""
   registrations(after: String, before: String, first: Int, last: Int): QueryRegistrationsConnection
@@ -800,58 +815,58 @@ type Query {
 }
 
 type QueryDomainsConnection {
-  edges: [QueryDomainsConnectionEdge]
+  edges: [QueryDomainsConnectionEdge!]!
   pageInfo: PageInfo!
   totalCount: Int!
 }
 
 type QueryDomainsConnectionEdge {
   cursor: String!
-  node: Domain
+  node: Domain!
 }
 
 type QueryRegistrationsConnection {
-  edges: [QueryRegistrationsConnectionEdge]
+  edges: [QueryRegistrationsConnectionEdge!]!
   pageInfo: PageInfo!
   totalCount: Int!
 }
 
 type QueryRegistrationsConnectionEdge {
   cursor: String!
-  node: Registration
+  node: Registration!
 }
 
 type QueryResolversConnection {
-  edges: [QueryResolversConnectionEdge]
+  edges: [QueryResolversConnectionEdge!]!
   pageInfo: PageInfo!
   totalCount: Int!
 }
 
 type QueryResolversConnectionEdge {
   cursor: String!
-  node: Resolver
+  node: Resolver!
 }
 
 type QueryV1DomainsConnection {
-  edges: [QueryV1DomainsConnectionEdge]
+  edges: [QueryV1DomainsConnectionEdge!]!
   pageInfo: PageInfo!
   totalCount: Int!
 }
 
 type QueryV1DomainsConnectionEdge {
   cursor: String!
-  node: ENSv1Domain
+  node: ENSv1Domain!
 }
 
 type QueryV2DomainsConnection {
-  edges: [QueryV2DomainsConnectionEdge]
+  edges: [QueryV2DomainsConnectionEdge!]!
   pageInfo: PageInfo!
   totalCount: Int!
 }
 
 type QueryV2DomainsConnectionEdge {
   cursor: String!
-  node: ENSv2Domain
+  node: ENSv2Domain!
 }
 
 """
@@ -900,14 +915,14 @@ interface Registration {
 scalar RegistrationId
 
 type RegistrationRenewalsConnection {
-  edges: [RegistrationRenewalsConnectionEdge]
+  edges: [RegistrationRenewalsConnectionEdge!]!
   pageInfo: PageInfo!
   totalCount: Int!
 }
 
 type RegistrationRenewalsConnectionEdge {
   cursor: String!
-  node: Renewal
+  node: Renewal!
 }
 
 """A Registry represents an ENSv2 Registry contract."""
@@ -929,14 +944,14 @@ type Registry {
 }
 
 type RegistryDomainsConnection {
-  edges: [RegistryDomainsConnectionEdge]
+  edges: [RegistryDomainsConnectionEdge!]!
   pageInfo: PageInfo!
   totalCount: Int!
 }
 
 type RegistryDomainsConnectionEdge {
   cursor: String!
-  node: Domain
+  node: Domain!
 }
 
 """Filter for Registry.domains query."""
@@ -957,14 +972,14 @@ input RegistryIdInput @oneOf {
 }
 
 type RegistryParentsConnection {
-  edges: [RegistryParentsConnectionEdge]
+  edges: [RegistryParentsConnectionEdge!]!
   pageInfo: PageInfo!
   totalCount: Int!
 }
 
 type RegistryParentsConnectionEdge {
   cursor: String!
-  node: ENSv2Domain
+  node: ENSv2Domain!
 }
 
 type RegistryPermissionsUser {
@@ -1033,14 +1048,14 @@ type Resolver {
 }
 
 type ResolverEventsConnection {
-  edges: [ResolverEventsConnectionEdge]
+  edges: [ResolverEventsConnectionEdge!]!
   pageInfo: PageInfo!
   totalCount: Int!
 }
 
 type ResolverEventsConnectionEdge {
   cursor: String!
-  node: Event
+  node: Event!
 }
 
 """ResolverId represents a @ensnode/ensnode-sdk#ResolverId."""
@@ -1088,14 +1103,14 @@ type ResolverRecords {
 }
 
 type ResolverRecordsConnection {
-  edges: [ResolverRecordsConnectionEdge]
+  edges: [ResolverRecordsConnectionEdge!]!
   pageInfo: PageInfo!
   totalCount: Int!
 }
 
 type ResolverRecordsConnectionEdge {
   cursor: String!
-  node: ResolverRecords
+  node: ResolverRecords!
 }
 
 """ResolverRecordsId represents a @ensnode/ensnode-sdk#ResolverRecordsId."""

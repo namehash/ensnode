@@ -1,6 +1,8 @@
 import config from "@/config";
 
-import { formatAssetId, PluginName } from "@ensnode/ensnode-sdk";
+import { stringifyAssetId } from "enssdk";
+
+import { PluginName } from "@ensnode/ensnode-sdk";
 
 import { addOnchainEventListener, ensIndexerSchema } from "@/lib/indexing-engines/ponder";
 import { namespaceContract } from "@/lib/plugin-helpers";
@@ -39,7 +41,7 @@ export default function () {
       await upsertAccount(context, sale.seller);
       await upsertAccount(context, sale.buyer);
 
-      const assetIdString = formatAssetId(sale.nft);
+      const assetIdString = stringifyAssetId(sale.nft);
 
       // insert NameSale entity
       await context.ensDb.insert(ensIndexerSchema.nameSales).values({

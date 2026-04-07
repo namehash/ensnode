@@ -333,11 +333,11 @@ export const registrationType = onchainEnum("RegistrationType", [
 export const registration = onchainTable(
   "registrations",
   (t) => ({
-    // keyed by (domainId, index)
+    // keyed by (domainId, registrationIndex)
     id: t.text().primaryKey().$type<RegistrationId>(),
 
     domainId: t.text().notNull().$type<DomainId>(),
-    index: t.integer().notNull(),
+    registrationIndex: t.integer().notNull(),
 
     // has a type
     type: registrationType().notNull(),
@@ -380,13 +380,13 @@ export const registration = onchainTable(
     eventId: t.text().notNull(),
   }),
   (t) => ({
-    byId: uniqueIndex().on(t.domainId, t.index),
+    byId: uniqueIndex().on(t.domainId, t.registrationIndex),
   }),
 );
 
 export const latestRegistrationIndex = onchainTable("latest_registration_indexes", (t) => ({
   domainId: t.text().primaryKey().$type<DomainId>(),
-  index: t.integer().notNull(),
+  registrationIndex: t.integer().notNull(),
 }));
 
 export const registration_relations = relations(registration, ({ one, many }) => ({
@@ -436,7 +436,7 @@ export const renewal = onchainTable(
 
     domainId: t.text().notNull().$type<DomainId>(),
     registrationIndex: t.integer().notNull(),
-    index: t.integer().notNull(),
+    renewalIndex: t.integer().notNull(),
 
     // all renewals have a duration
     duration: t.bigint().notNull(),
@@ -456,7 +456,7 @@ export const renewal = onchainTable(
     eventId: t.text().notNull(),
   }),
   (t) => ({
-    byId: uniqueIndex().on(t.domainId, t.registrationIndex, t.index),
+    byId: uniqueIndex().on(t.domainId, t.registrationIndex, t.renewalIndex),
   }),
 );
 
@@ -464,7 +464,7 @@ export const renewal_relations = relations(renewal, ({ one }) => ({
   // belongs to registration
   registration: one(registration, {
     fields: [renewal.domainId, renewal.registrationIndex],
-    references: [registration.domainId, registration.index],
+    references: [registration.domainId, registration.registrationIndex],
   }),
 
   // has an event
@@ -479,7 +479,7 @@ export const latestRenewalIndex = onchainTable(
   (t) => ({
     domainId: t.text().notNull().$type<DomainId>(),
     registrationIndex: t.integer().notNull(),
-    index: t.integer().notNull(),
+    renewalIndex: t.integer().notNull(),
   }),
   (t) => ({ pk: primaryKey({ columns: [t.domainId, t.registrationIndex] }) }),
 );

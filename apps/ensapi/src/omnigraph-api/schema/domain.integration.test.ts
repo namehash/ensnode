@@ -35,7 +35,7 @@ describe("Domain.subdomains", () => {
   };
 
   const DomainSubdomains = gql`
-    query DomainSubdomains($name: Name!) {
+    query DomainSubdomains($name: InterpretedName!) {
       domain(by: { name: $name }) {
         subdomains { edges { node { name label { interpreted } } } }
       }
@@ -68,7 +68,7 @@ describe("Domain.events", () => {
   };
 
   const DomainEvents = gql`
-    query DomainEvents($name: Name!) {
+    query DomainEvents($name: InterpretedName!) {
       domain(by: { name: $name }) { events { edges { node { ...EventFragment } } } }
     }
     ${EventFragment}
@@ -107,7 +107,7 @@ describe("Domain.events filtering (EventsWhereInput)", () => {
   };
 
   const DomainEventsFiltered = gql`
-    query DomainEventsFiltered($name: Name!, $where: EventsWhereInput, $first: Int) {
+    query DomainEventsFiltered($name: InterpretedName!, $where: EventsWhereInput, $first: Int) {
       domain(by: { name: $name }) { events(where: $where, first: $first) { edges { node { ...EventFragment } } } }
     }
     ${EventFragment}

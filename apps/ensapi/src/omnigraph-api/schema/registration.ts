@@ -13,11 +13,15 @@ import {
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { builder } from "@/omnigraph-api/builder";
 import { orderPaginationBy, paginateByInt } from "@/omnigraph-api/lib/connection-helpers";
+import { cursors } from "@/omnigraph-api/lib/cursors";
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
 import { AccountRef } from "@/omnigraph-api/schema/account";
 import { AccountIdRef } from "@/omnigraph-api/schema/account-id";
-import { INDEX_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
+import {
+  PAGINATION_DEFAULT_MAX_SIZE,
+  PAGINATION_DEFAULT_PAGE_SIZE,
+} from "@/omnigraph-api/schema/constants";
 import { DomainInterfaceRef } from "@/omnigraph-api/schema/domain";
 import { EventRef } from "@/omnigraph-api/schema/event";
 import { RenewalRef } from "@/omnigraph-api/schema/renewal";
@@ -37,7 +41,7 @@ export type RegistrationInterface = Pick<
   Registration,
   | "id"
   | "type"
-  | "index"
+  | "registrationIndex"
   | "domainId"
   | "expiry"
   | "registrarChainId"
@@ -163,20 +167,27 @@ RegistrationInterfaceRef.implement({
       resolve: (parent, args) => {
         const scope = and(
           eq(ensIndexerSchema.renewal.domainId, parent.domainId),
-          eq(ensIndexerSchema.renewal.registrationIndex, parent.index),
+          eq(ensIndexerSchema.renewal.registrationIndex, parent.registrationIndex),
         );
 
         return lazyConnection({
           totalCount: () => ensDb.$count(ensIndexerSchema.renewal, scope),
           connection: () =>
             resolveCursorConnection(
-              { ...INDEX_PAGINATED_CONNECTION_ARGS, args },
+              {
+                toCursor: (model) => cursors.encode(String(model.renewalIndex)),
+                defaultSize: PAGINATION_DEFAULT_PAGE_SIZE,
+                maxSize: PAGINATION_DEFAULT_MAX_SIZE,
+                args,
+              },
               ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
                 ensDb
                   .select()
                   .from(ensIndexerSchema.renewal)
-                  .where(and(scope, paginateByInt(ensIndexerSchema.renewal.index, before, after)))
-                  .orderBy(orderPaginationBy(ensIndexerSchema.renewal.index, inverted))
+                  .where(
+                    and(scope, paginateByInt(ensIndexerSchema.renewal.renewalIndex, before, after)),
+                  )
+                  .orderBy(orderPaginationBy(ensIndexerSchema.renewal.renewalIndex, inverted))
                   .limit(limit),
             ),
         });

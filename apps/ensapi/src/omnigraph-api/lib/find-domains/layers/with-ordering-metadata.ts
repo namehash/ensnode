@@ -56,7 +56,10 @@ export function withOrderingMetadata(base: BaseDomainSet) {
       ensIndexerSchema.registration,
       and(
         eq(ensIndexerSchema.registration.domainId, base.domainId),
-        eq(ensIndexerSchema.registration.index, ensIndexerSchema.latestRegistrationIndex.index),
+        eq(
+          ensIndexerSchema.registration.registrationIndex,
+          ensIndexerSchema.latestRegistrationIndex.registrationIndex,
+        ),
       ),
     );
 

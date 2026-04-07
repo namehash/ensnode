@@ -1,14 +1,14 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, eq } from "drizzle-orm";
-
 import {
   makePermissionsId,
   makePermissionsResourceId,
   type PermissionsId,
   type PermissionsResourceId,
   type PermissionsUserId,
-  ROOT_RESOURCE,
-} from "@ensnode/ensnode-sdk";
+} from "enssdk";
+
+import { ROOT_RESOURCE } from "@ensnode/ensnode-sdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { builder } from "@/omnigraph-api/builder";
@@ -17,7 +17,7 @@ import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-r
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
 import { AccountRef } from "@/omnigraph-api/schema/account";
-import { AccountIdRef } from "@/omnigraph-api/schema/account-id";
+import { AccountIdInput, AccountIdRef } from "@/omnigraph-api/schema/account-id";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
 import { EventRef, EventsWhereInput } from "@/omnigraph-api/schema/event";
 
@@ -276,5 +276,18 @@ PermissionsUserRef.implement({
       nullable: false,
       resolve: (parent) => parent.roles,
     }),
+  }),
+});
+
+//////////
+// Inputs
+//////////
+
+export const PermissionsIdInput = builder.inputType("PermissionsIdInput", {
+  description: "Address Permissions by ID or AccountId.",
+  isOneOf: true,
+  fields: (t) => ({
+    id: t.field({ type: "PermissionsId" }),
+    contract: t.field({ type: AccountIdInput }),
   }),
 });

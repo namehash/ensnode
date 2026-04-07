@@ -1,12 +1,12 @@
 /** biome-ignore-all lint/correctness/noUnusedVariables: ignore for now */
 
+import { type LabelHash, makeENSv1DomainId } from "enssdk";
+
 import {
   type EncodedReferrer,
   type Label,
-  type LabelHash,
   type LiteralLabel,
   labelhashLiteralLabel,
-  makeENSv1DomainId,
   makeSubdomainNode,
   PluginName,
 } from "@ensnode/ensnode-sdk";
@@ -130,7 +130,7 @@ export default function () {
       );
     }
 
-    const renewal = await getLatestRenewal(context, domainId, registration.index);
+    const renewal = await getLatestRenewal(context, domainId, registration.registrationIndex);
     if (!renewal) {
       throw new Error(
         `Invariant(RegistrarController:NameRenewed): NameRenewed but no Renewal for Registration\n${toJson(

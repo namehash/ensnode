@@ -10,9 +10,9 @@ Learn more about [ENSNode](https://ensnode.io/) from [the ENSNode docs](https://
 npm install @ensnode/ensnode-sdk
 ```
 
-## ENSNode Client
+## EnsApiClient
 
-The `ENSNodeClient` provides a unified interface for the supported ENSNode APIs:
+The `EnsApiClient` provides a unified interface for the ENSApi REST APIs:
 - Resolution API (Protocol Accelerated Forward/Reverse Resolution)
 - Indexing Status API
 - Configuration API
@@ -20,10 +20,10 @@ The `ENSNodeClient` provides a unified interface for the supported ENSNode APIs:
 ### Basic Usage
 
 ```typescript
-import { ENSNodeClient, evmChainIdToCoinType } from "@ensnode/ensnode-sdk";
-import { mainnet } from 'viem/chains';
+import { EnsApiClient, evmChainIdToCoinType } from "@ensnode/ensnode-sdk";
+import { mainnet } from "viem/chains";
 
-const client = new ENSNodeClient();
+const client = new EnsApiClient();
 
 // Resolution API: Records Resolution
 const { records } = await client.resolveRecords("jesse.base.eth", {
@@ -186,7 +186,7 @@ console.log(status);
 ### Configuration
 
 ```typescript
-const client = new ENSNodeClient({
+const client = new EnsApiClient({
   url: new URL("https://my-ensnode-instance.com"),
 });
 ```

@@ -61,7 +61,7 @@ describe("Permissions", () => {
 
   const PermissionsQuery = gql`
     query Permissions($contract: AccountIdInput!) {
-      permissions(for: $contract) {
+      permissions(by: { contract: $contract }) {
         id
         contract { chainId address }
         root {
@@ -148,7 +148,7 @@ describe("Domain.permissions", () => {
   };
 
   const DomainPermissions = gql`
-    query DomainPermissions($name: Name!) {
+    query DomainPermissions($name: InterpretedName!) {
       domain(by: { name: $name }) {
         ... on ENSv2Domain {
           permissions { edges { node { id resource user { address } roles } } }
@@ -180,7 +180,7 @@ describe("Domain.permissions", () => {
 
   it("filters permissions by user address", async () => {
     const DomainPermissionsFiltered = gql`
-      query DomainPermissionsFiltered($name: Name!, $user: Address!) {
+      query DomainPermissionsFiltered($name: InterpretedName!, $user: Address!) {
         domain(by: { name: $name }) {
           ... on ENSv2Domain {
             permissions(where: { user: $user }) { edges { node { id resource user { address } roles } } }
@@ -207,7 +207,7 @@ describe("Domain.permissions", () => {
 describe("Account.permissions and Account.registryPermissions", () => {
   const PermissionsRootUsers = gql`
     query PermissionsRootUsers($contract: AccountIdInput!) {
-      permissions(for: $contract) {
+      permissions(by: { contract: $contract }) {
         root { users { edges { node { user { address } } } } }
       }
     }
@@ -215,7 +215,7 @@ describe("Account.permissions and Account.registryPermissions", () => {
 
   const AccountPermissions = gql`
     query AccountPermissions($address: Address!) {
-      account(address: $address) {
+      account(by: { address: $address }) {
         permissions { edges { node { id resource user { address } roles } } }
       }
     }
@@ -223,7 +223,7 @@ describe("Account.permissions and Account.registryPermissions", () => {
 
   const AccountRegistryPermissions = gql`
     query AccountRegistryPermissions($address: Address!) {
-      account(address: $address) {
+      account(by: { address: $address }) {
         registryPermissions { edges { node { id registry { id } resource user { address } roles } } }
       }
     }
@@ -288,7 +288,7 @@ describe("Account.permissions and Account.registryPermissions", () => {
 
 describe("Resolver.permissions", () => {
   const ResolverPermissions = gql`
-    query ResolverPermissions($name: Name!) {
+    query ResolverPermissions($name: InterpretedName!) {
       domain(by: { name: $name }) {
         resolver { permissions { id contract { chainId address } } }
       }
@@ -321,7 +321,7 @@ describe("Permissions.events", () => {
 
   const PermissionsEvents = gql`
     query PermissionsEvents($contract: AccountIdInput!, $first: Int) {
-      permissions(for: $contract) { events(first: $first) { edges { node { ...EventFragment } } } }
+      permissions(by: { contract: $contract }) { events(first: $first) { edges { node { ...EventFragment } } } }
     }
     ${EventFragment}
   `;
@@ -368,7 +368,7 @@ describe("Permissions.events filtering (EventsWhereInput)", () => {
 
   const PermissionsEventsFiltered = gql`
     query PermissionsEventsFiltered($contract: AccountIdInput!, $where: EventsWhereInput, $first: Int) {
-      permissions(for: $contract) { events(where: $where, first: $first) { edges { node { ...EventFragment } } } }
+      permissions(by: { contract: $contract }) { events(where: $where, first: $first) { edges { node { ...EventFragment } } } }
     }
     ${EventFragment}
   `;

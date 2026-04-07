@@ -96,7 +96,7 @@ query FindDomains(
   ///////////////////
   {
     query: `
-query DomainByName($name: Name!) {
+query DomainByName($name: InterpretedName!) {
   domain(by: {name: $name}) {
     __typename
     id
@@ -123,7 +123,7 @@ query DomainByName($name: Name!) {
   //////////////////////
   {
     query: `
-query DomainSubdomains($name: Name!) {
+query DomainSubdomains($name: InterpretedName!) {
   domain(by: {name: $name}) {
     name
     subdomains(first: 10) {
@@ -143,7 +143,7 @@ query DomainSubdomains($name: Name!) {
   /////////////////
   {
     query: `
-query DomainEvents($name: Name!) {
+query DomainEvents($name: InterpretedName!) {
   domain(by: {name: $name}) {
     events {
       totalCount
@@ -171,7 +171,7 @@ query DomainEvents($name: Name!) {
 query AccountDomains(
   $address: Address!
 ) {
-  account(address: $address) {
+  account(by: { address: $address }) {
     domains {
       edges {
         node {
@@ -196,7 +196,7 @@ query AccountDomains(
 query AccountEvents(
   $address: Address!
 ) {
-  account(address: $address) {
+  account(by: { address: $address }) {
     events { totalCount edges { node { topics data timestamp } } }
   }
 }`,
@@ -240,7 +240,7 @@ query RegistryDomains(
 query PermissionsByContract(
   $contract: AccountIdInput!
 ) {
-  permissions(for: $contract) {
+  permissions(by: { contract: $contract }) {
     resources {
       edges {
         node {
@@ -273,7 +273,7 @@ query PermissionsByContract(
   {
     query: `
 query PermissionsByUser($address: Address!) {
-  account(address: $address) {
+  account(by: { address: $address }) {
     permissions {
       edges {
         node {
@@ -297,7 +297,7 @@ query PermissionsByUser($address: Address!) {
   {
     query: `
 query AccountResolverPermissions($address: Address!) {
-  account(address: $address) {
+  account(by: { address: $address }) {
     resolverPermissions {
       edges {
         node {
@@ -323,7 +323,7 @@ query AccountResolverPermissions($address: Address!) {
   //////////////////////////////
   {
     query: `
-query DomainResolver($name: Name!) {
+query DomainResolver($name: InterpretedName!) {
   domain(by: { name: $name }) {
     resolver {
       records { edges { node { node keys coinTypes } } }

@@ -1,3 +1,5 @@
+import { trace } from "@opentelemetry/api";
+
 import {
   buildPageContext,
   type Node,
@@ -10,6 +12,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { createApp } from "@/lib/hono-factory";
+import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
 import { makeLogger } from "@/lib/logger";
 import { findRegistrarActions } from "@/lib/registrar-actions/find-registrar-actions";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
@@ -24,56 +27,69 @@ import {
 const app = createApp({ middlewares: [indexingStatusMiddleware, registrarActionsApiMiddleware] });
 
 const logger = makeLogger("registrar-actions-api");
+const tracer = trace.getTracer("registrar-actions-api");
 
 // Shared business logic for fetching registrar actions
 async function fetchRegistrarActions(parentNode: Node | undefined, query: RegistrarActionsQuery) {
-  const {
-    orderBy,
-    page,
-    recordsPerPage,
-    withReferral,
-    decodedReferrer,
-    beginTimestamp,
-    endTimestamp,
-  } = query;
+  return withActiveSpanAsync(
+    tracer,
+    "fetchRegistrarActions",
+    {
+      parentNode: parentNode ?? "undefined",
+      page: query.page,
+      recordsPerPage: query.recordsPerPage,
+      orderBy: query.orderBy,
+    },
+    async () => {
+      const {
+        orderBy,
+        page,
+        recordsPerPage,
+        withReferral,
+        decodedReferrer,
+        beginTimestamp,
+        endTimestamp,
+      } = query;
 
-  const filters: RegistrarActionsFilter[] = [];
+      const filters: RegistrarActionsFilter[] = [];
 
-  if (parentNode) {
-    filters.push(registrarActionsFilter.byParentNode(parentNode));
-  }
+      if (parentNode) {
+        filters.push(registrarActionsFilter.byParentNode(parentNode));
+      }
 
-  if (withReferral) {
-    filters.push(registrarActionsFilter.withReferral(true));
-  }
+      if (withReferral) {
+        filters.push(registrarActionsFilter.withReferral(true));
+      }
 
-  if (decodedReferrer) {
-    filters.push(registrarActionsFilter.byDecodedReferrer(decodedReferrer));
-  }
+      if (decodedReferrer) {
+        filters.push(registrarActionsFilter.byDecodedReferrer(decodedReferrer));
+      }
 
-  if (beginTimestamp) {
-    filters.push(registrarActionsFilter.beginTimestamp(beginTimestamp));
-  }
+      if (beginTimestamp) {
+        filters.push(registrarActionsFilter.beginTimestamp(beginTimestamp));
+      }
 
-  if (endTimestamp) {
-    filters.push(registrarActionsFilter.endTimestamp(endTimestamp));
-  }
+      if (endTimestamp) {
+        filters.push(registrarActionsFilter.endTimestamp(endTimestamp));
+      }
 
-  // Calculate offset from page and recordsPerPage
-  const offset = (page - 1) * recordsPerPage;
+      // Calculate offset from page and recordsPerPage
+      const offset = (page - 1) * recordsPerPage;
 
-  // Find the latest "logical registrar actions" with pagination
-  const { registrarActions, totalRecords } = await findRegistrarActions({
-    filters,
-    orderBy,
-    limit: recordsPerPage,
-    offset,
-  });
+      // Find the latest "logical registrar actions" with pagination
+      const { registrarActions, totalRecords } = await findRegistrarActions({
+        filters,
+        orderBy,
+        limit: recordsPerPage,
+        offset,
+      });
 
-  // Build page context
-  const pageContext = buildPageContext(page, recordsPerPage, totalRecords);
+      // Build page context
+      const pageContext = buildPageContext(page, recordsPerPage, totalRecords);
 
-  return { registrarActions, pageContext };
+      return { registrarActions, pageContext };
+    },
+  );
 }
 
 /**

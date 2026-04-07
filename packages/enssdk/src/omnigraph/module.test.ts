@@ -2,7 +2,7 @@ import { parse } from "graphql";
 import { describe, expect, it, vi } from "vitest";
 
 import { createEnsNodeClient } from "../core/index";
-import { omnigraph } from "./index";
+import { omnigraph } from "./module";
 
 function createMockClient(mockFetch: ReturnType<typeof vi.fn>) {
   return createEnsNodeClient({
@@ -22,6 +22,7 @@ describe("omnigraph module", () => {
   it("sends a POST request with string query", async () => {
     const mockResponse = { data: { domain: { name: "nick.eth" } } };
     const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
       json: () => Promise.resolve(mockResponse),
     });
 
@@ -46,6 +47,7 @@ describe("omnigraph module", () => {
 
   it("sends variables when provided", async () => {
     const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
       json: () => Promise.resolve({ data: null }),
     });
 
@@ -62,6 +64,7 @@ describe("omnigraph module", () => {
 
   it("passes signal for abort support", async () => {
     const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
       json: () => Promise.resolve({ data: null }),
     });
     const controller = new AbortController();
@@ -76,8 +79,25 @@ describe("omnigraph module", () => {
     expect(mockFetch.mock.calls[0][1].signal).toBe(controller.signal);
   });
 
+  it("throws on non-2xx response with body included", async () => {
+    const errorBody = JSON.stringify({ errors: [{ message: "Unauthorized" }] });
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 401,
+      statusText: "Unauthorized",
+      text: () => Promise.resolve(errorBody),
+    });
+
+    const client = createMockClient(mockFetch);
+
+    await expect(
+      client.omnigraph.query({ query: 'query { domain(by: { name: "eth" }) { name } }' }),
+    ).rejects.toThrow(`Omnigraph query failed: 401 Unauthorized\n${errorBody}`);
+  });
+
   it("prints DocumentNode queries to string", async () => {
     const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
       json: () => Promise.resolve({ data: null }),
     });
 

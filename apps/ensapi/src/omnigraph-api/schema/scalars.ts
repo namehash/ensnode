@@ -5,7 +5,9 @@ import {
   type ChainId,
   type CoinType,
   type DomainId,
+  type InterpretedLabel,
   type InterpretedName,
+  isInterpetedLabel,
   isInterpretedName,
   type Name,
   type Node,
@@ -88,8 +90,8 @@ builder.scalarType("Node", {
       .parse(value),
 });
 
-builder.scalarType("Name", {
-  description: "Name represents a @ensnode/ensnode-sdk#InterpretedName.",
+builder.scalarType("InterpretedName", {
+  description: "InterpretedName represents a @ensnode/ensnode-sdk#InterpretedName.",
   serialize: (value: Name) => value,
   parseValue: (value) =>
     z.coerce
@@ -98,12 +100,32 @@ builder.scalarType("Name", {
         if (!isInterpretedName(ctx.value)) {
           ctx.issues.push({
             code: "custom",
-            message: "Name must consist exclusively of Encoded LabelHashes or normalized labels.",
+            message:
+              "InterpretedName must consist exclusively of Encoded LabelHashes or normalized labels.",
             input: ctx.value,
           });
         }
       })
       .transform((val) => val as InterpretedName)
+      .parse(value),
+});
+
+builder.scalarType("InterpretedLabel", {
+  description: "InterpretedLabel represents a @ensnode/ensnode-sdk#InterpretedLabel.",
+  serialize: (value: Name) => value,
+  parseValue: (value) =>
+    z.coerce
+      .string()
+      .check((ctx) => {
+        if (!isInterpetedLabel(ctx.value)) {
+          ctx.issues.push({
+            code: "custom",
+            message: "InterpretedLabel must be an Encoded LabelHash or normalized.",
+            input: ctx.value,
+          });
+        }
+      })
+      .transform((val) => val as InterpretedLabel)
       .parse(value),
 });
 
