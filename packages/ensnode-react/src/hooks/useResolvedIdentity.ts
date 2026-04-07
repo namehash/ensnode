@@ -59,6 +59,8 @@ export function useResolvedIdentity(parameters: UseResolvedIdentityParameters) {
     accelerate,
     query: {
       ...ASSUME_IMMUTABLE_QUERY, // identity changes very rarely
+      refetchOnMount: true, // necessary due to namespace-dependent enabled state
+      refetchInterval: false, // not covered by ASSUME_IMMUTABLE_QUERY
       ..._query,
       enabled: (_query.enabled ?? true) && namespace !== undefined,
     },

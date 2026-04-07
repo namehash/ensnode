@@ -21,7 +21,7 @@ The `EnsApiClient` provides a unified interface for the ENSApi REST APIs:
 
 ```typescript
 import { EnsApiClient, evmChainIdToCoinType } from "@ensnode/ensnode-sdk";
-import { mainnet } from 'viem/chains';
+import { mainnet } from "viem/chains";
 
 const client = new EnsApiClient();
 
