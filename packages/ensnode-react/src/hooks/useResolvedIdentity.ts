@@ -14,7 +14,6 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import type { UseResolvedIdentityParameters } from "../types";
-import { ASSUME_IMMUTABLE_QUERY } from "../utils/query";
 import { useENSNodeConfig } from "./useENSNodeConfig";
 import { usePrimaryName } from "./usePrimaryName";
 
@@ -57,10 +56,11 @@ export function useResolvedIdentity(parameters: UseResolvedIdentityParameters) {
       namespace ?? ENSNamespaceIds.Mainnet,
     ),
     accelerate,
+    // NOTE: We do not use ASSUME_IMMUTABLE_QUERY here
+    // because `gcTime: Infinity` causes issues when enabled option changes
     query: {
-      ...ASSUME_IMMUTABLE_QUERY, // identity changes very rarely
-      refetchOnMount: true, // necessary due to namespace-dependent enabled state
-      refetchInterval: false, // not covered by ASSUME_IMMUTABLE_QUERY
+      staleTime: Infinity,
+      refetchInterval: false, // identity changes very rarely
       ..._query,
       enabled: (_query.enabled ?? true) && namespace !== undefined,
     },
