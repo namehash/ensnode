@@ -1,5 +1,4 @@
-import type { ChainId, Name } from "enssdk";
-import type { Address } from "viem";
+import type { Address, ChainId, Name } from "enssdk";
 
 import type { ResolverRecordsResponse } from "./resolver-records-response";
 import type { ResolverRecordsSelection } from "./resolver-records-selection";

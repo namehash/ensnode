@@ -1,4 +1,5 @@
-import type { Address, Hash } from "viem";
+import type { Address } from "enssdk";
+import type { Hash } from "viem";
 
 import type { EncodedReferrer } from "./encoded-referrer";
 

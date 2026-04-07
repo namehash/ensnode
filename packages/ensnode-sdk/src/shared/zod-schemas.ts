@@ -3,13 +3,15 @@ import { AccountId as CaipAccountId } from "caip";
 import type {
   AccountId,
   AccountIdString,
+  Address,
   ChainId,
   DefaultableChainId,
+  Hex,
   InterpretedName,
   Node,
 } from "enssdk";
 import { asLowerCaseAddress } from "enssdk";
-import { type Address, type Hex, isAddress, isHex, size } from "viem";
+import { isAddress, isHex, size } from "viem";
 /**
  * All zod schemas we define must remain internal implementation details.
  * We want the freedom to move away from zod in the future without impacting

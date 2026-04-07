@@ -1,4 +1,5 @@
-import { type Address, getAddress, type Hex, pad, size, slice, zeroAddress } from "viem";
+import type { Address, Hex } from "enssdk";
+import { getAddress, pad, size, slice, zeroAddress } from "viem";
 
 /**
  * Encoded Referrer
