@@ -14,7 +14,9 @@ import { RegistryView } from "./RegistryView";
  * To override, provide ENSNODE_URL in your environment like:
  * ENSNODE_URL=https://api.alpha.ensnode.io pnpm dev
  */
-const ENSNODE_URL = import.meta.env.ENSNODE_URL ?? "http://localhost:4334";
+const ENSNODE_URL = import.meta.env.VITE_ENSNODE_URL ?? "http://localhost:4334";
+
+console.log(`Connecting to ENSNode at ${ENSNODE_URL}`);
 
 /**
  * Constructs an EnsNodeClient and extends it with the Omnigraph module, for use with `enskit`.
