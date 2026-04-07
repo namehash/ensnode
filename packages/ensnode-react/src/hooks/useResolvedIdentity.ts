@@ -14,6 +14,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import type { UseResolvedIdentityParameters } from "../types";
+import { ASSUME_IMMUTABLE_QUERY } from "../utils/query";
 import { useENSNodeConfig } from "./useENSNodeConfig";
 import { usePrimaryName } from "./usePrimaryName";
 
@@ -57,8 +58,7 @@ export function useResolvedIdentity(parameters: UseResolvedIdentityParameters) {
     ),
     accelerate,
     query: {
-      staleTime: 5 * 60 * 1000,
-      refetchInterval: 5 * 60 * 1000, // 5 minutes - identities change rarely
+      ...ASSUME_IMMUTABLE_QUERY, // identity changes very rarely
       ..._query,
       enabled: (_query.enabled ?? true) && namespace !== undefined,
     },

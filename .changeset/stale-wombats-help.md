@@ -2,4 +2,4 @@
 "@ensnode/ensnode-react": minor
 ---
 
-Added default `staleTime` and `refetchInterval` (5 min) to `useResolvedIdentity` to prevent redundant refetches.
+Applied `ASSUME_IMMUTABLE_QUERY` options to `useResolvedIdentity` to prevent redundant refetches.

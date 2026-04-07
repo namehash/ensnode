@@ -678,10 +678,3 @@ export class EnsApiClient {
     return deserializedNameTokensResponse(responseData as SerializedNameTokensResponse);
   }
 }
-
-/**
- * ENSNode Client
- *
- * @deprecated use {@link EnsApiClient} instead
- */
-export class ENSNodeClient extends EnsApiClient {}

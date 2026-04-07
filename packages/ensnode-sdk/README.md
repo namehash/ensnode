@@ -10,9 +10,9 @@ Learn more about [ENSNode](https://ensnode.io/) from [the ENSNode docs](https://
 npm install @ensnode/ensnode-sdk
 ```
 
-## ENS API Client
+## EnsApiClient
 
-The `EnsApiClient` provides a unified interface for the supported ENSNode APIs:
+The `EnsApiClient` provides a unified interface for the ENSApi REST APIs:
 - Resolution API (Protocol Accelerated Forward/Reverse Resolution)
 - Indexing Status API
 - Configuration API
