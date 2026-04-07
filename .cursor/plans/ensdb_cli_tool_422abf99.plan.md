@@ -18,7 +18,7 @@ todos:
     content: "Implement snapshot create: dump discovered indexer schemas + ponder_sync + full ensnode schema + ensnode_metadata.json, then generate manifest + checksums"
     status: pending
   - id: snapshot-restore
-    content: "Implement snapshot restore: unpack selected archives, validate manifest, pg_restore with parallel jobs, and restore filtered metadata rows into a fresh or isolated database"
+    content: "Implement snapshot restore: preflight-restore checks, unpack archives, validate manifest, pg_restore + filtered metadata upsert"
     status: pending
   - id: s3-client
     content: Implement S3 client layer with multipart upload/download support
@@ -78,24 +78,46 @@ The goal is to enable fast ENSNode bootstrap (hours instead of 2-3 days) by snap
 
 A full snapshot contains **separate pg_dump archives** for:
 
-1. **Every indexer deployment schema** currently present in the database (e.g. `mainnetSchema1.9.0`, `alphaSchema1.9.0`). The CLI discovers these by enumerating non-system schemas and **excluding** `ponder_sync`, `ensnode`, and PostgreSQL system schemas. If unrelated application schemas exist in the same database, add `**--exclude-schemas`** (or an allowlist flag) so they are not dumped by mistake.
-2. The `**ponder_sync`** schema (full)
-3. The `**ensnode**` schema (full), not only the `metadata` table
+1. **Every indexer deployment schema** currently present in the database (e.g. `mainnetSchema1.9.0`, `alphaSchema1.9.0`). The CLI discovers these by enumerating non-system schemas and **excluding** `ponder_sync`, `ensnode`, and PostgreSQL system schemas. If unrelated application schemas exist in the same database, add `--exclude-schemas` (or an allowlist flag) so they are not dumped by mistake.
+2. The `ponder_sync` schema (full)
+3. The `ensnode` schema (full), not only the `metadata` table
 
-Additionally, the snapshot includes `**ensnode_metadata.json**`: a JSON export of all rows from `ensnode.metadata`. This supports manifest enrichment, `snapshot list` summaries, and **selective restore** (replay only the metadata rows for chosen indexer schema names without requiring a second full `ensnode` download when operators use the slim pull path).
+Additionally, the snapshot includes `ensnode_metadata.json`: a JSON export of all rows from `ensnode.metadata`. This supports manifest enrichment, `snapshot list` summaries, and **selective restore** (replay only the metadata rows for chosen indexer schema names without requiring a second full `ensnode` download when operators use the slim pull path).
 
 Selective workflows:
 
 1. `snapshot pull --schemas ...` downloads the selected indexer archives + `ponder_sync` + `ensnode_metadata.json` (+ optionally full `ensnode.dump.tar.zst` when a full `ensnode` restore is required -- see implementation note below)
 2. `snapshot restore --schemas ...` restores the selected indexer schema dumps + `ponder_sync`, then applies **filtered** `ensnode.metadata` rows (from JSON or from a partial upsert strategy) so other indexers' metadata rows are not overwritten incorrectly
 
-Because `ponder_sync` is shared state, `snapshot restore` is intended for **fresh or isolated target databases only**. Restoring a partial snapshot into an already-used shared database is out of scope for the first version.
+Because `ponder_sync` is shared state, `snapshot restore` is intended for **fresh or isolated target databases only**. The CLI enforces that with **preflight checks** (below) instead of relying on operator discipline alone.
 
 **Implementation note:** For a **full** restore of everything, restore `ponder_sync`, `ensnode` (from `ensnode.dump.tar.zst`), and each indexer schema. For **selective** restore, the CLI may restore indexer schema(s) + `ponder_sync` and upsert only the relevant metadata rows from `ensnode_metadata.json` instead of replacing the entire `ensnode` schema, to avoid clobbering metadata for indexers not being restored. Exact mechanics should be validated against how Drizzle/Ponder expect `ensnode` to look after restore.
 
+### Preflight checks (`snapshot restore`)
+
+Runs in the **restore command handler** immediately after validating CLI args and loading the manifest, and **before** any `pg_restore` and **before** evaluating `--drop-existing` for target indexer schemas.
+
+**Checks (fail closed by default):**
+
+1. **ponder_sync non-empty:** If schema `ponder_sync` exists, detect any user data (e.g. `SELECT EXISTS (SELECT 1 FROM ponder_sync.<representative_table> LIMIT 1)` or sum `n_live_tup` from `pg_stat_user_tables` for `ponder_sync`). If non-empty, fail with identifier `ENSDB_CLI_ERR_PREFLIGHT_PONDER_SYNC_NONEMPTY` (human-readable message explains shared sync state would be overwritten).
+2. **ensnode.metadata conflicts:** Query `ensnode.metadata` if the schema exists. For **selective** restore (`--schemas`), fail if any row exists whose `ens_indexer_schema_name` is **not** in the target schema set (`ENSDB_CLI_ERR_PREFLIGHT_ENSNODE_METADATA_CONFLICT`). For **full** restore (all indexer schemas + full `ensnode` from dump), fail if **any** metadata rows exist (`ENSDB_CLI_ERR_PREFLIGHT_ENSNODE_METADATA_NONEMPTY`) — distinct message from selective conflict so operators know which case fired.
+3. **Unexpected non-system schemas / objects:** Enumerate schemas outside PostgreSQL system namespaces (`pg_*`, `information_schema`, etc.). For the intended restore set, fail if a **non-target indexer schema** already exists (tables present or schema present) (`ENSDB_CLI_ERR_PREFLIGHT_UNEXPECTED_SCHEMA`). Optionally extend with a stricter mode: fail if `public` (or other default) contains unexpected user tables — keep the rule deterministic in code and documented.
+
+**Override:** Pass `--force-or-confirm` to skip these preflight failures and proceed (operator asserts the target is disposable or they accept clobbering). Implementation may require interactive confirmation when TTY is available; non-interactive mode requires the flag. This is separate from `--drop-existing`, which only governs dropping **named target indexer schemas** (and optionally `ponder_sync` / `ensnode` if explicitly documented) **after** preflight passes or is overridden.
+
+**Order of operations:**
+
+1. Preflight (unless skipped via `--force-or-confirm`)
+2. If restoring indexer schemas and targets exist: apply `--drop-existing` drops for those schemas only (as today)
+3. `pg_restore` / metadata upsert
+
+**Surfacing errors:** Print distinct messages per failure class; include the `ENSDB_CLI_ERR_PREFLIGHT_*` identifier in the message (and optionally `process.exit` with dedicated codes, e.g. `2` / `3` / `4`, if the team wants scriptable CI — document in README).
+
+**Selective restore:** Preflight must ensure metadata upsert will not clobber other indexers: the `ensnode.metadata` row check above is mandatory before replaying filtered `ensnode_metadata.json`.
+
 ### Snapshot Format
 
-Use `**pg_dump --format=directory`** with `**--jobs=N`** for parallel dump/restore. This is the only format that supports parallelism, which is critical for 50-100GB databases. Each directory-format dump is then archived as a `**.dump.tar.zst`** artifact for storage and transfer, and unpacked to a temporary directory before restore.
+Use `pg_dump` with `--format=directory` and `--jobs=N` for parallel dump/restore. This is the only format that supports parallelism, which is critical for 50-100GB databases. Each directory-format dump is then archived as a `<schema>.dump.tar.zst` file for storage and transfer, and unpacked to a temporary directory before restore.
 
 - Dump: `pg_dump --format=directory --jobs=4 --schema=<name> --file <tmp>/<schema>.dumpdir`
 - Archive: `tar --zstd -cf <snapshot>/<schema>.dump.tar.zst -C <tmp> <schema>.dumpdir`
@@ -121,7 +143,7 @@ Discovery via `ListObjects` on `{prefix}/` -- each snapshot is a prefix containi
 ```
 
 - `snapshot list` uses `ListObjectsV2` with delimiter `/` to enumerate snapshot prefixes, then fetches each `manifest.json` for metadata display.
-- `snapshot pull --schemas ...` downloads the selected indexer dump(s) + `ponder_sync.dump.tar.zst` + `ensnode_metadata.json`. Downloading `**ensnode.dump.tar.zst**` is optional for selective restore if metadata replay from JSON is sufficient; include it when doing a full `ensnode` schema restore.
+- `snapshot pull --schemas ...` downloads the selected indexer dump(s) + `ponder_sync.dump.tar.zst` + `ensnode_metadata.json`. Downloading `ensnode.dump.tar.zst` is optional for selective restore if metadata replay from JSON is sufficient; include it when doing a full `ensnode` schema restore.
 
 ### Technology
 
@@ -158,38 +180,41 @@ ensdb-cli snapshot create --database-url <url> --output <path> [--exclude-schema
   Export all discovered indexer schemas + ponder_sync + full ensnode schema + ensnode.metadata JSON.
   Runs pg_dump with parallel jobs for each schema. Use --exclude-schemas to skip unrelated app schemas.
 
-ensdb-cli snapshot restore --database-url <url> --input <path> --schemas <name,...> [--drop-existing]
+ensdb-cli snapshot restore --database-url <url> --input <path> --schemas <name,...> [--drop-existing] [--force-or-confirm]
   Restore selected schema(s) from a local snapshot into a fresh or isolated database.
   Restores the selected indexer schema dump(s) + ponder_sync + filtered ensnode.metadata rows.
-  Fails if target schema already exists unless --drop-existing is passed.
+  Runs preflight (see above) before pg_restore; fails if shared state or metadata conflicts unless --force-or-confirm.
+  Fails if target indexer schema already exists unless --drop-existing is passed (after preflight).
   Unpacks `.dump.tar.zst` archives to temp storage, then runs pg_restore with parallel jobs.
 
-ensdb-cli snapshot restore --database-url <url> --input <path> --ponder-sync-only [--drop-existing]
+ensdb-cli snapshot restore --database-url <url> --input <path> --ponder-sync-only [--drop-existing] [--force-or-confirm]
   Restore only ponder_sync (no indexer schemas, no ensnode.metadata).
+  Preflight still applies to non-empty ponder_sync unless --force-or-confirm.
   Enables the developer workflow described in #833: quickly bootstrap a local ponder_sync
   so a new indexer can skip RPC re-fetching.
 
 ensdb-cli snapshot push --input <path> --bucket <bucket> [--endpoint <url>] [--prefix <prefix>]
   Upload a local snapshot to S3-compatible storage. Uses multipart upload.
 
-ensdb-cli snapshot pull --snapshot-id <id> --output <path> --bucket <bucket> [--endpoint <url>] [--schemas <name,...>] [--with-ensnode-schema]
+ensdb-cli snapshot pull --snapshot-id <id> --output <path> --bucket <bucket> [--endpoint <url>] [--prefix <prefix>] [--schemas <name,...>] [--with-ensnode-schema]
   Download from S3. If --schemas specified, downloads those indexer dumps + ponder_sync + ensnode_metadata.json;
   pass --with-ensnode-schema to also fetch ensnode.dump.tar.zst for a full ensnode pg_restore.
   If --schemas omitted, downloads the full snapshot (all artifacts).
+  --prefix scopes all keys to `{prefix}/{snapshot-id}/...` (same as list/push/info/delete).
 
-ensdb-cli snapshot pull --snapshot-id <id> --output <path> --bucket <bucket> [--endpoint <url>] --ponder-sync-only
+ensdb-cli snapshot pull --snapshot-id <id> --output <path> --bucket <bucket> [--endpoint <url>] [--prefix <prefix>] --ponder-sync-only
   Download only ponder_sync.dump.tar.zst from a remote snapshot (#833).
   Skips all indexer schema dumps and ensnode_metadata.json.
 
 ensdb-cli snapshot list --bucket <bucket> [--endpoint <url>] [--prefix <prefix>]
   List available snapshots from S3 with metadata summary (uses ListObjects + manifest.json).
 
-ensdb-cli snapshot info --snapshot-id <id> --bucket <bucket> [--endpoint <url>]
-  Show detailed metadata for a specific remote snapshot (fetches and displays manifest.json).
+ensdb-cli snapshot info --snapshot-id <id> --bucket <bucket> [--endpoint <url>] [--prefix <prefix>]
+  Show detailed metadata for a specific remote snapshot (fetches and displays manifest.json under `{prefix}/{snapshot-id}/`).
 
-ensdb-cli snapshot delete --snapshot-id <id> --bucket <bucket> [--endpoint <url>] [--force]
+ensdb-cli snapshot delete --snapshot-id <id> --bucket <bucket> [--endpoint <url>] [--prefix <prefix>] [--force]
   Delete a snapshot and all its artifacts from S3. Requires --force or interactive confirmation.
-  Removes all objects under the snapshot prefix ({prefix}/{snapshot-id}/).
+  Removes all objects under `{prefix}/{snapshot-id}/`.
 ```
 
 ### Common Options
@@ -198,6 +223,8 @@ ensdb-cli snapshot delete --snapshot-id <id> --bucket <bucket> [--endpoint <url>
 - `--jobs` / `-j` -- parallelism for pg_dump/pg_restore (default: 4)
 - `--bucket` / `ENSDB_SNAPSHOT_BUCKET` -- S3 bucket name
 - `--endpoint` / `ENSDB_SNAPSHOT_ENDPOINT` -- S3-compatible endpoint (for R2, MinIO)
+- `--prefix` / `ENSDB_SNAPSHOT_PREFIX` -- key prefix inside the bucket (default empty). All snapshot S3 commands (`push`, `pull`, `list`, `info`, `delete`) must resolve object keys as `{prefix}/{snapshot-id}/...` so behavior matches when omitted (empty prefix) or when a shared prefix is used.
+- `--force-or-confirm` -- snapshot restore only: skip preflight failures (non-empty `ponder_sync`, `ensnode.metadata` conflicts, unexpected schemas). Use only when the operator accepts overwriting shared state.
 - `--verbose` / `-v` -- detailed output
 
 ## Manifest Schema
@@ -284,6 +311,7 @@ apps/ensdb-cli/
       snapshot-delete.ts            # delete remote snapshot prefix
     lib/
       database.ts                   # pg connection, schema queries
+      preflight-restore.ts          # fresh/isolated DB checks before pg_restore
       pgdump.ts                     # pg_dump/pg_restore wrapper
       s3.ts                         # S3 client, multipart upload/download
       manifest.ts                   # manifest read/write, validation
@@ -305,13 +333,14 @@ apps/ensdb-cli/
 - Implement `pg_dump` wrapper with parallel jobs and progress reporting
 - Implement `snapshot create` (dump all indexer schemas + ponder_sync + full metadata extraction)
 - Implement archive packaging and unpacking for directory-format dumps
-- Implement `snapshot restore` (fresh or isolated database only, pg_restore with parallel jobs)
+- Implement `snapshot restore` (preflight in `preflight-restore.ts`, then pg_restore with parallel jobs)
 - Manifest generation and validation
 - Checksum generation and verification
 
 ### Phase 3: S3 Push + Pull + List + Delete
 
 - S3 client with multipart upload support
+- Shared helper: resolve `{prefix}/{snapshot-id}/` from `--prefix` / `ENSDB_SNAPSHOT_PREFIX` for every snapshot S3 command (`push`, `pull`, `list`, `info`, `delete`)
 - `snapshot push` with manifest and artifact upload only
 - `snapshot pull` with integrity verification
 - `snapshot list` and `snapshot info` for browsing remote snapshots
@@ -363,7 +392,7 @@ The `snapshot list` and `snapshot info` commands can also be used in CI to disco
 
 ### Analytical Queries (#279)
 
-[#279](https://github.com/namehash/ensnode/issues/279) requires counting Unknown Names and Unknown Labels by iterating through domain data. This will be a **separate `analyze` command**, not part of `inspect`.
+[#279](https://github.com/namehash/ensnode/issues/279) requires counting Unknown Names and Unknown Labels by iterating through domain data. This will be a separate **`analyze`** command, not part of **`inspect`**.
 
 **Why separate from `inspect`:**
 
@@ -392,8 +421,8 @@ This is explicitly **out of scope for v1** but the plan ensures the CLI's databa
 
 1. **Discovery**: No shared `index.json`. Use S3 `ListObjects` to discover snapshots by reading `manifest.json` from each snapshot prefix. Most robust -- no concurrent writer races, no stale index.
 2. **Snapshot granularity**: `snapshot create` dumps all discovered indexer deployment schemas + `ponder_sync` + full `ensnode` schema + `ensnode_metadata.json`, with optional `--exclude-schemas` for unrelated app schemas. `snapshot pull` and `snapshot restore` let the user select which indexer schema(s) they want from that full snapshot; full `ensnode` schema archive is optional on pull when metadata JSON replay is enough.
-3. **Restore safety**: `snapshot restore` targets a fresh or isolated database only because `ponder_sync` is shared state. Partial restore into an already-used shared database is not supported in v1.
-4. **Restore behavior**: Fail by default if a target schema already exists. Pass `--drop-existing` to drop and replace. Prevents accidental data loss while keeping the convenient path available.
+3. **Restore safety**: `snapshot restore` assumes a fresh or isolated database; **preflight** enforces this (non-empty `ponder_sync`, conflicting `ensnode.metadata` rows, unexpected schemas) unless `--force-or-confirm` is passed.
+4. **Restore behavior**: Preflight runs first, then fail if a target indexer schema already exists unless `--drop-existing` is passed. `--drop-existing` does not bypass preflight; only `--force-or-confirm` does. Prevents accidental data loss while keeping an explicit escape hatch.
 5. **Retention policy**: `snapshot delete` command added for manual cleanup. `snapshot list` shows all snapshots; operators manage retention manually.
 
 ## Open Questions for Stakeholders
@@ -401,16 +430,18 @@ This is explicitly **out of scope for v1** but the plan ensures the CLI's databa
 1. **Snapshot ID format**: Should snapshot IDs be auto-generated (e.g. `ensdb-2026-04-06-abc123`) or user-specified? Auto-generated is safer for avoiding collisions.
 2. **Streaming upload mode**: Should v1 support a direct "snapshot and push" flow that uploads artifacts to S3 as they are produced, or should v1 stay local-first (`snapshot create` then `snapshot push`)?
 
-   **Why `pg_dump --format=directory` complicates streaming:** directory format writes many files under a tree; you normally archive that tree to a single blob (e.g. `.dump.tar.zst`) before upload. That implies at least one local staging step per schema unless you stream `tar` output directly to S3 multipart (possible but more moving parts).
+   **Why directory format complicates streaming:** `pg_dump --format=directory` writes many files under a tree; you normally archive that tree to a single blob (e.g. `.dump.tar.zst`) before upload. That implies at least one local staging step per schema unless you stream `tar` output directly to S3 multipart (possible but more moving parts).
 
    **Other `pg_dump` formats do not remove all constraints:**
-   - **`--format=custom`**: single-file output and can be streamed (e.g. `pg_dump -Fc ...` piped into multipart upload). Loses parallel `pg_restore` compared to directory format unless you accept those trade-offs at 50-100GB scale.
-   - **`--format=plain`**: single SQL stream; stream-friendly, but restore is typically slower and less suited to huge DBs than the directory workflow already chosen for this plan.
+
+   - **Custom** (`pg_dump --format=custom` / `-Fc`): single-file output and can be streamed (e.g. piped into multipart upload). Loses parallel `pg_restore` compared to directory format unless you accept those trade-offs at 50-100GB scale.
+   - **Plain** (`pg_dump --format=plain`): single SQL stream; stream-friendly, but restore is typically slower and less suited to huge DBs than the directory workflow already chosen for this plan.
 
    **Checksums and manifest:** The plan includes `checksums.sha256` and a `manifest.json` with per-artifact sizes. For **end-to-end streaming** without a local file:
+
    - Per-artifact SHA-256 can still be computed by hashing bytes **as they pass through** the upload pipeline (running a digest alongside the stream), then writing the digest into `checksums.sha256` and the manifest **after** that artifact finishes.
    - Alternatively, **S3 object checksums** (multipart part ETags, or `ChecksumSHA256` on `PutObject` where supported) can supplement or replace client-side files, but the manifest must state what is verified (client hash vs object checksum).
    - The **full snapshot manifest** cannot be finalized until all artifacts are complete, so uploads can be incremental, but **manifest upload is always last** (or use a two-phase manifest: provisional then final).
 
-   **Conclusion for stakeholders:** Decide between (a) v1 local-first only, (b) **hybrid** -- each schema completes locally, then upload (simplest integrity story), or (c) true pipe-to-S3 with streaming hash and deferred manifest.
+   **Conclusion for stakeholders:** Decide between (a) v1 local-first only, (b) **hybrid** — each schema completes locally, then upload (simplest integrity story), or (c) true pipe-to-S3 with streaming hash and deferred manifest.
 
