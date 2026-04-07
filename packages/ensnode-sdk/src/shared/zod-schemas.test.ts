@@ -1,5 +1,4 @@
-import { encodeLabelHash } from "enssdk";
-import { labelhash } from "viem";
+import { encodeLabelHash, labelhash } from "enssdk";
 import { describe, expect, it } from "vitest";
 import { prettifyError, type ZodSafeParseResult } from "zod/v4";
 

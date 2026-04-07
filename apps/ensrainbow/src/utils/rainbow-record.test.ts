@@ -1,5 +1,4 @@
-import type { LabelHash } from "enssdk";
-import { labelhash } from "viem";
+import { type LabelHash, labelhash } from "enssdk";
 import { describe, expect, it } from "vitest";
 
 import { labelHashToBytes } from "@ensnode/ensnode-sdk";

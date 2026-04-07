@@ -3,11 +3,12 @@ import {
   type Address,
   type LabelHash,
   type LiteralLabel,
+  labelhash,
   makeENSv2DomainId,
   makeRegistryId,
   makeStorageId,
 } from "enssdk";
-import { hexToBigInt, labelhash } from "viem";
+import { hexToBigInt } from "viem";
 
 import { interpretAddress, isRegistrationFullyExpired, PluginName } from "@ensnode/ensnode-sdk";
 

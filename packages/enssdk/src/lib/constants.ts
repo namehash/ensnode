@@ -1,5 +1,6 @@
-import { namehash, zeroHash } from "viem";
+import { zeroHash } from "viem";
 
+import { namehash } from "./namehash";
 import type { Node } from "./types";
 
 export const ROOT_NODE: Node = namehash("");

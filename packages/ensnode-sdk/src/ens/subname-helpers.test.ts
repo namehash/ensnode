@@ -1,4 +1,4 @@
-import { labelhash, namehash } from "viem";
+import { labelhash, namehash } from "enssdk";
 import { describe, expect, it } from "vitest";
 
 import { makeSubdomainNode } from "./subname-helpers";

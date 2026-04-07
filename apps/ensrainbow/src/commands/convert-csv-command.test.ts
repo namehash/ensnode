@@ -2,7 +2,7 @@ import { mkdtemp, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { labelhash } from "viem";
+import { labelhash } from "enssdk";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { type LabelSetId, labelHashToBytes } from "@ensnode/ensnode-sdk";

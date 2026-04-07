@@ -3,9 +3,9 @@ import {
   type InterpretedLabel,
   type LabelHash,
   type LiteralLabel,
+  labelhash,
   literalLabelToInterpretedLabel,
 } from "enssdk";
-import { labelhash } from "viem";
 
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";

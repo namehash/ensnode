@@ -1,8 +1,7 @@
 import { isHex } from "viem";
-import { labelhash } from "viem/ens";
 
 import { isNormalizedLabel } from "./is-normalized";
-import { encodeLabelHash, labelhashLiteralLabel } from "./labelhash";
+import { encodeLabelHash, labelhash, labelhashLiteralLabel } from "./labelhash";
 import type {
   InterpretedLabel,
   InterpretedName,

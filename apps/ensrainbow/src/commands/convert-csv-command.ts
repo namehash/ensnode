@@ -12,8 +12,8 @@ import { finished } from "node:stream/promises";
 
 import { parse } from "@fast-csv/parse";
 import { ClassicLevel } from "classic-level";
+import { labelhash } from "enssdk";
 import ProgressBar from "progress";
-import { labelhash } from "viem";
 
 import { type LabelSetId, labelHashToBytes } from "@ensnode/ensnode-sdk";
 

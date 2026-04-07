@@ -1,6 +1,6 @@
 import { ClassicLevel } from "classic-level";
-import type { Hex } from "enssdk";
-import { type ByteArray, labelhash } from "viem";
+import { type Hex, labelhash } from "enssdk";
+import type { ByteArray } from "viem";
 
 import {
   buildLabelSetId,

@@ -15,6 +15,17 @@ import type { EncodedLabelHash, Label, LabelHash, LiteralLabel } from "./types";
 export const labelhash = (label: Label): LabelHash => viemLabelhash(label);
 
 /**
+ * Implements the ENS `labelhash` function for Literal Labels.
+ * @see https://docs.ens.domains/ensip/1
+ *
+ * @param label the Literal Label to hash
+ * @returns the hash of the provided label
+ * @dev This function is viem/ens#labelhash but without the special-case handling of Encoded LabelHashes.
+ */
+export const labelhashLiteralLabel = (label: LiteralLabel): LabelHash =>
+  keccak256(stringToBytes(label));
+
+/**
  * Checks if the input is a {@link LabelHash}.
  *
  * @see https://ensnode.io/docs/reference/terminology#label-processing-and-classification
@@ -28,17 +39,6 @@ export function isLabelHash(maybeLabelHash: string): maybeLabelHash is LabelHash
 }
 
 /**
- * Implements the ENS `labelhash` function for Literal Labels.
- * @see https://docs.ens.domains/ensip/1
- *
- * @param label the Literal Label to hash
- * @returns the hash of the provided label
- * @dev This function is viem/ens#labelhash but without the special-case handling of Encoded LabelHashes.
- */
-export const labelhashLiteralLabel = (label: LiteralLabel): LabelHash =>
-  keccak256(stringToBytes(label));
-
-/**
  * Formats a LabelHash as an Encoded LabelHash.
  *
  * @see https://ensnode.io/docs/reference/terminology#encoded-labelhash
@@ -50,14 +50,11 @@ export const encodeLabelHash = (labelHash: LabelHash): EncodedLabelHash =>
   `[${labelHash.slice(2)}]`;
 
 /**
- * Checks if the input value is an {@link EncodedLabelHash}.
+ * Checks if the value is an {@link EncodedLabelHash}.
  */
-export function isEncodedLabelHash(
-  maybeEncodedLabelHash: string,
-): maybeEncodedLabelHash is EncodedLabelHash {
-  const expectedFormatting =
-    maybeEncodedLabelHash.startsWith("[") && maybeEncodedLabelHash.endsWith("]");
-  const includesLabelHash = isLabelHash(`0x${maybeEncodedLabelHash.slice(1, -1)}`);
+export function isEncodedLabelHash(value: string): value is EncodedLabelHash {
+  const expectedFormatting = value.startsWith("[") && value.endsWith("]");
+  const includesLabelHash = isLabelHash(`0x${value.slice(1, -1)}`);
 
   return expectedFormatting && includesLabelHash;
 }

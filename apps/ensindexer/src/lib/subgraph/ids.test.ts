@@ -11,7 +11,8 @@ import {
 setupEnsDbConfigMock();
 setupConfigMock();
 
-import { labelhash, namehash, zeroAddress } from "viem";
+import { labelhash, namehash } from "enssdk";
+import { zeroAddress } from "viem";
 
 import { makeEventId, makeRegistrationId, makeResolverId } from "./ids";
 

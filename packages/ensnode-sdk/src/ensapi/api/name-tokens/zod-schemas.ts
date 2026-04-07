@@ -1,4 +1,4 @@
-import { namehash } from "viem";
+import { namehash } from "enssdk";
 import { z } from "zod/v4";
 
 import {

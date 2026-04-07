@@ -1,7 +1,6 @@
 import config from "@/config";
 
-import type { AccountId, Name, Node } from "enssdk";
-import { namehash } from "viem";
+import { type AccountId, type Name, type Node, namehash } from "enssdk";
 
 import { DatasourceNames, type ENSNamespaceId } from "@ensnode/datasources";
 import {
