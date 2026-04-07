@@ -1,20 +1,23 @@
-import { interpretTokenIdAsLabelHash, interpretTokenIdAsNode } from "enssdk";
-
-import { type DatasourceName, DatasourceNames, type ENSNamespaceId } from "@ensnode/datasources";
 import {
   type AccountId,
   type AssetNamespace,
   AssetNamespaces,
-  accountIdEqual,
   BASENAMES_NODE,
-  type DomainAssetId,
   ETH_NODE,
-  getDatasourceContract,
+  interpretTokenIdAsLabelHash,
+  interpretTokenIdAsNode,
   LINEANAMES_NODE,
-  makeSubdomainNode,
-  maybeGetDatasourceContract,
   type Node,
   type TokenId,
+} from "enssdk";
+
+import { type DatasourceName, DatasourceNames, type ENSNamespaceId } from "@ensnode/datasources";
+import {
+  accountIdEqual,
+  type DomainAssetId,
+  getDatasourceContract,
+  makeSubdomainNode,
+  maybeGetDatasourceContract,
 } from "@ensnode/ensnode-sdk";
 
 /**

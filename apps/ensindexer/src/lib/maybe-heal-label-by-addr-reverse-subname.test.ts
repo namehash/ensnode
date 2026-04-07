@@ -1,7 +1,6 @@
-import { type Address, labelhash } from "viem";
+import { type Address, addrReverseLabel } from "enssdk";
+import { labelhash } from "viem";
 import { describe, expect, it } from "vitest";
-
-import { addrReverseLabel } from "@ensnode/ensnode-sdk";
 
 import { maybeHealLabelByAddrReverseSubname } from "./maybe-heal-label-by-addr-reverse-subname";
 

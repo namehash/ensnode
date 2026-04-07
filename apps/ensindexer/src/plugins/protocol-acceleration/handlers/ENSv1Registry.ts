@@ -1,7 +1,6 @@
 import config from "@/config";
 
-import { type LabelHash, makeENSv1DomainId, type Node } from "enssdk";
-import type { Address } from "viem";
+import { type Address, type LabelHash, makeENSv1DomainId, type Node } from "enssdk";
 
 import { getENSRootChainId } from "@ensnode/datasources";
 import { makeSubdomainNode, PluginName } from "@ensnode/ensnode-sdk";

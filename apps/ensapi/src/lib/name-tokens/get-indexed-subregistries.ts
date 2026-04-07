@@ -1,4 +1,4 @@
-import { namehash } from "viem";
+import { namehash } from "enssdk";
 
 import type { ENSNamespaceId } from "@ensnode/datasources";
 import {

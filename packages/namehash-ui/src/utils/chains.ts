@@ -1,3 +1,4 @@
+import type { ChainId } from "enssdk";
 import {
   arbitrum,
   arbitrumSepolia,
@@ -14,7 +15,6 @@ import {
 } from "viem/chains";
 
 import { ensTestEnvChain } from "@ensnode/datasources";
-import type { ChainId } from "@ensnode/ensnode-sdk";
 
 export const SUPPORTED_CHAINS = [
   ensTestEnvChain,

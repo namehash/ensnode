@@ -53,6 +53,7 @@
     "generate:gqlschema": "gql.tada generate-output"
   },
   "dependencies": {
+    "@adraffy/ens-normalize": "catalog:",
     "@ensdomains/address-encoder": "^1.1.2",
     "caip": "catalog:"
   },

@@ -1,4 +1,7 @@
-import type { Address } from "viem";
+import type { Address as ViemAddress } from "viem";
+
+export type { Hex } from "viem";
+export type Address = ViemAddress;
 
 /**
  * Chain ID

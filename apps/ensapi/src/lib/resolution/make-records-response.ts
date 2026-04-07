@@ -1,8 +1,9 @@
-import {
-  bigintToCoinType,
-  type ResolverRecordsResponse,
-  type ResolverRecordsResponseBase,
-  type ResolverRecordsSelection,
+import { bigintToCoinType } from "enssdk";
+
+import type {
+  ResolverRecordsResponse,
+  ResolverRecordsResponseBase,
+  ResolverRecordsSelection,
 } from "@ensnode/ensnode-sdk";
 
 import type { ResolveCallsAndResults } from "./resolve-calls-and-results";

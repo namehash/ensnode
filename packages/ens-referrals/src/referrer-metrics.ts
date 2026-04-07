@@ -1,4 +1,4 @@
-import type { Address } from "viem";
+import type { Address } from "enssdk";
 
 import type { Duration } from "@ensnode/ensnode-sdk";
 

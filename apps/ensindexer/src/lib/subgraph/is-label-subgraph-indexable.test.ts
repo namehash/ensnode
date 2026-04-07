@@ -1,6 +1,5 @@
+import type { LiteralLabel } from "enssdk";
 import { describe, expect, it } from "vitest";
-
-import type { LiteralLabel } from "@ensnode/ensnode-sdk";
 
 import { isLabelSubgraphIndexable } from "./is-label-subgraph-indexable";
 

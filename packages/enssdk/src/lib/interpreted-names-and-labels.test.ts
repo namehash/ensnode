@@ -1,20 +1,14 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  encodeLabelHash,
-  type InterpretedLabel,
-  type InterpretedName,
-  type LiteralLabel,
-  type Name,
-} from "../../ens";
-import { labelhashLiteralLabel } from "../labelhash";
-import {
   constructSubInterpretedName,
   interpretedLabelsToInterpretedName,
   literalLabelsToInterpretedName,
   literalLabelToInterpretedLabel,
   parsePartialInterpretedName,
 } from "./interpreted-names-and-labels";
+import { encodeLabelHash, labelhashLiteralLabel } from "./labelhash";
+import type { InterpretedLabel, InterpretedName, LiteralLabel, Name } from "./types";
 
 const ENCODED_LABELHASH_LABEL = /^\[[\da-f]{64}\]$/;
 
@@ -24,9 +18,9 @@ const NORMALIZED_LABELS = [
   "test",
   "eth",
   "base",
-  "🔥",
-  "test🎂",
-  "café",
+  "\u{1F525}",
+  "test\u{1F382}",
+  "caf\u00E9",
   "sub",
   "a".repeat(512), // Long normalized
 ] as LiteralLabel[];
@@ -135,7 +129,7 @@ describe("interpretation", () => {
       ["t", [], "t"],
       ["test", [], "test"],
       ["exam", [], "exam"],
-      ["🔥", [], "🔥"],
+      ["\u{1F525}", [], "\u{1F525}"],
       // concrete TLD with empty partial
       ["eth.", ["eth"], ""],
       ["base.", ["base"], ""],
@@ -204,8 +198,8 @@ describe("interpretation", () => {
       // with encoded labelhash in parent
       ["sub", `${EXAMPLE_ENCODED_LABEL_HASH}.eth`, `sub.${EXAMPLE_ENCODED_LABEL_HASH}.eth`],
       // emoji labels
-      ["🔥", "eth", "🔥.eth"],
-      ["wallet", "🔥.eth", "wallet.🔥.eth"],
+      ["\u{1F525}", "eth", "\u{1F525}.eth"],
+      ["wallet", "\u{1F525}.eth", "wallet.\u{1F525}.eth"],
     ] as [InterpretedLabel, InterpretedName | undefined, InterpretedName][])(
       "constructSubInterpretedName(%j, %j) → %j",
       (label, parent, expected) => {

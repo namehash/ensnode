@@ -1,15 +1,14 @@
 /** biome-ignore-all lint/correctness/noUnusedVariables: ignore for now */
 
-import { type LabelHash, makeENSv1DomainId } from "enssdk";
-
 import {
-  type EncodedReferrer,
   type Label,
+  type LabelHash,
   type LiteralLabel,
   labelhashLiteralLabel,
-  makeSubdomainNode,
-  PluginName,
-} from "@ensnode/ensnode-sdk";
+  makeENSv1DomainId,
+} from "enssdk";
+
+import { type EncodedReferrer, makeSubdomainNode, PluginName } from "@ensnode/ensnode-sdk";
 
 import { ensureDomainEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel, ensureUnknownLabel } from "@/lib/ensv2/label-db-helpers";

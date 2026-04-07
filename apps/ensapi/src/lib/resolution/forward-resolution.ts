@@ -2,20 +2,16 @@ import config from "@/config";
 
 import { trace } from "@opentelemetry/api";
 import { replaceBigInts } from "@ponder/utils";
-import { namehash } from "viem";
+import { type AccountId, isNormalizedName, type Node, namehash, parseReverseName } from "enssdk";
 import { normalize } from "viem/ens";
 
 import {
-  type AccountId,
   type ForwardResolutionArgs,
   ForwardResolutionProtocolStep,
   type ForwardResolutionResult,
   getENSv1Registry,
-  isNormalizedName,
   isSelectionEmpty,
-  type Node,
   PluginName,
-  parseReverseName,
   type ResolverRecordsResponse,
   type ResolverRecordsSelection,
   TraceableENSProtocol,

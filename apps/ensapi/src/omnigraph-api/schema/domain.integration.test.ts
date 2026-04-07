@@ -1,6 +1,5 @@
+import type { InterpretedLabel, Name } from "enssdk";
 import { beforeAll, describe, expect, it } from "vitest";
-
-import type { InterpretedLabel, Name } from "@ensnode/ensnode-sdk";
 
 import { DEVNET_ETH_LABELS } from "@/test/integration/devnet-names";
 import {

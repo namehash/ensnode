@@ -1,7 +1,7 @@
-import type { Address } from "viem";
+import type { Address, Name } from "enssdk";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ENSNamespaceIds, type Name } from "../ens";
+import { ENSNamespaceIds } from "../ens";
 import { PluginName } from "../ensindexer/config/types";
 import { ChainIndexingStatusIds } from "../indexing-status/chain-indexing-status-snapshot";
 import { CrossChainIndexingStrategyIds } from "../indexing-status/cross-chain-indexing-status-snapshot";

@@ -1,4 +1,4 @@
-import type { Address } from "viem";
+import type { Address } from "enssdk";
 import { toEventSelector } from "viem";
 import { beforeAll, describe, expect, it } from "vitest";
 

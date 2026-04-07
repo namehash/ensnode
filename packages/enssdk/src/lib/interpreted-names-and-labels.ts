@@ -1,3 +1,8 @@
+import { isHex } from "viem";
+import { labelhash } from "viem/ens";
+
+import { isNormalizedLabel } from "./is-normalized";
+import { encodeLabelHash, labelhashLiteralLabel } from "./labelhash";
 import type {
   InterpretedLabel,
   InterpretedName,
@@ -7,12 +12,7 @@ import type {
   LiteralLabel,
   LiteralName,
   Name,
-} from "enssdk";
-import { isHex } from "viem";
-import { labelhash } from "viem/ens";
-
-import { encodeLabelHash, isNormalizedLabel } from "../../ens";
-import { labelhashLiteralLabel } from "../labelhash";
+} from "./types";
 
 /**
  * Interprets a Literal Label, producing an Interpreted Label.

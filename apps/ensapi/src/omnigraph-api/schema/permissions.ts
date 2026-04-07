@@ -6,9 +6,8 @@ import {
   type PermissionsId,
   type PermissionsResourceId,
   type PermissionsUserId,
+  ROOT_RESOURCE,
 } from "enssdk";
-
-import { ROOT_RESOURCE } from "@ensnode/ensnode-sdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { builder } from "@/omnigraph-api/builder";

@@ -1,11 +1,10 @@
 "use client";
 
 import { getEnsManagerNameDetailsUrl } from "@namehash/namehash-ui";
+import type { Name } from "enssdk";
 import { ScanSearch } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-
-import type { Name } from "@ensnode/ensnode-sdk";
 
 import { ExternalLinkWithIcon } from "@/components/link";
 import { getRecordResolutionRelativePath } from "@/components/name-links";

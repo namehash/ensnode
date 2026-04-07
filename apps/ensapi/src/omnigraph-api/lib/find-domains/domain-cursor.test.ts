@@ -1,6 +1,5 @@
+import type { DomainId } from "enssdk";
 import { describe, expect, it } from "vitest";
-
-import type { DomainId } from "@ensnode/ensnode-sdk";
 
 import { type DomainCursor, DomainCursors } from "./domain-cursor";
 

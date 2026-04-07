@@ -1,21 +1,22 @@
 import config from "@/config";
 
-import { type Address, isAddressEqual, zeroAddress } from "viem";
-
-import { getENSRootChainId } from "@ensnode/datasources";
 import {
   ADDR_REVERSE_NODE,
+  type Address,
   encodeLabelHash,
   type InterpretedLabel,
   type InterpretedName,
   type LabelHash,
   type LiteralLabel,
   literalLabelToInterpretedLabel,
-  makeSubdomainNode,
   type Node,
   type SubgraphInterpretedLabel,
   type SubgraphInterpretedName,
-} from "@ensnode/ensnode-sdk";
+} from "enssdk";
+import { isAddressEqual, zeroAddress } from "viem";
+
+import { getENSRootChainId } from "@ensnode/datasources";
+import { makeSubdomainNode } from "@ensnode/ensnode-sdk";
 
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { healAddrReverseSubnameLabel } from "@/lib/heal-addr-reverse-subname-label";

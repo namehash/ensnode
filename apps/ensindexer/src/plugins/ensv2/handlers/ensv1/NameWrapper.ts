@@ -1,17 +1,22 @@
-import { interpretTokenIdAsNode, makeENSv1DomainId, type Node } from "enssdk";
-import { type Address, isAddressEqual, zeroAddress } from "viem";
-
 import {
+  type Address,
   type DNSEncodedLiteralName,
   type DNSEncodedName,
   decodeDNSEncodedLiteralName,
+  interpretTokenIdAsNode,
+  type LiteralLabel,
+  labelhashLiteralLabel,
+  makeENSv1DomainId,
+  type Node,
+} from "enssdk";
+import { isAddressEqual, zeroAddress } from "viem";
+
+import {
   interpretAddress,
   isPccFuseSet,
   isRegistrationExpired,
   isRegistrationFullyExpired,
   isRegistrationInGracePeriod,
-  type LiteralLabel,
-  labelhashLiteralLabel,
   makeSubdomainNode,
   PluginName,
 } from "@ensnode/ensnode-sdk";

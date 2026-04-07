@@ -1,7 +1,5 @@
-import type { Address } from "viem";
+import type { Address, Name } from "enssdk";
 import { beforeAll, describe, expect, it } from "vitest";
-
-import type { Name } from "@ensnode/ensnode-sdk";
 
 import {
   AccountDomainsPaginated,

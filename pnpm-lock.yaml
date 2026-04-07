@@ -256,6 +256,9 @@ importers:
       date-fns:
         specifier: 'catalog:'
         version: 4.1.0
+      enssdk:
+        specifier: workspace:*
+        version: link:../../packages/enssdk
       graphiql:
         specifier: 5.2.0
         version: 5.2.0(@types/node@24.10.9)(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(graphql@16.11.0)(immer@9.0.21)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(use-sync-external-store@1.6.0(react@19.2.1))
@@ -577,6 +580,9 @@ importers:
       classic-level:
         specifier: ^1.4.1
         version: 1.4.1
+      enssdk:
+        specifier: workspace:*
+        version: link:../../packages/enssdk
       hono:
         specifier: 'catalog:'
         version: 4.12.7
@@ -867,6 +873,9 @@ importers:
       '@ensnode/ensnode-sdk':
         specifier: workspace:*
         version: link:../ensnode-sdk
+      enssdk:
+        specifier: workspace:*
+        version: link:../enssdk
       zod:
         specifier: 'catalog:'
         version: 4.3.6
@@ -897,6 +906,9 @@ importers:
       '@ensnode/ensnode-sdk':
         specifier: workspace:*
         version: link:../ensnode-sdk
+      enssdk:
+        specifier: workspace:*
+        version: link:../enssdk
       pg-connection-string:
         specifier: 'catalog:'
         version: 2.9.1
@@ -977,6 +989,9 @@ importers:
       '@ensnode/ensnode-sdk':
         specifier: workspace:*
         version: link:../ensnode-sdk
+      enssdk:
+        specifier: workspace:*
+        version: link:../enssdk
     devDependencies:
       '@ensnode/shared-configs':
         specifier: workspace:*
@@ -1051,6 +1066,9 @@ importers:
 
   packages/ensrainbow-sdk:
     dependencies:
+      enssdk:
+        specifier: workspace:*
+        version: link:../enssdk
       viem:
         specifier: 'catalog:'
         version: 2.38.5(typescript@5.9.3)(zod@4.3.6)
@@ -1073,6 +1091,9 @@ importers:
 
   packages/enssdk:
     dependencies:
+      '@adraffy/ens-normalize':
+        specifier: 1.11.1
+        version: 1.11.1
       '@ensdomains/address-encoder':
         specifier: ^1.1.2
         version: 1.1.4
@@ -1163,6 +1184,9 @@ importers:
       date-fns:
         specifier: 'catalog:'
         version: 4.1.0
+      enssdk:
+        specifier: workspace:*
+        version: link:../enssdk
       lucide-react:
         specifier: 'catalog:'
         version: 0.548.0(react@19.2.1)

@@ -1,9 +1,9 @@
+import { DEFAULT_EVM_CHAIN_ID } from "enssdk";
 import { CheckIcon, CopyIcon } from "lucide-react";
 import type { PropsWithChildren } from "react";
 
 import type { ENSNamespaceId, Identity } from "@ensnode/ensnode-sdk";
 import {
-  DEFAULT_EVM_CHAIN_ID,
   isResolvedIdentity,
   ResolutionStatusIds,
   translateDefaultableChainIdToChainId,

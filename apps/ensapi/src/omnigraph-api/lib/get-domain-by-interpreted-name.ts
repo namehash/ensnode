@@ -2,8 +2,6 @@ import config from "@/config";
 
 import { trace } from "@opentelemetry/api";
 import { Param, sql } from "drizzle-orm";
-import { namehash } from "viem";
-
 import {
   type DomainId,
   type ENSv2DomainId,
@@ -12,9 +10,11 @@ import {
   interpretedNameToInterpretedLabels,
   type LabelHash,
   makeENSv1DomainId,
-  maybeGetENSv2RootRegistryId,
+  namehash,
   type RegistryId,
-} from "@ensnode/ensnode-sdk";
+} from "enssdk";
+
+import { maybeGetENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";

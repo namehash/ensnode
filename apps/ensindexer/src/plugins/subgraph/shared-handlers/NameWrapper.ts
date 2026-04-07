@@ -15,21 +15,20 @@ import config from "@/config";
  * Related GitHub issue: https://github.com/ensdomains/ens-subgraph/issues/88
  */
 import { checkPccBurned as isPccFuseUnset } from "@ensdomains/ensjs/utils";
-import { interpretTokenIdAsNode } from "enssdk";
-import type { Address } from "viem";
-
 import {
+  type Address,
   type DNSEncodedLiteralName,
   type DNSEncodedName,
   decodeDNSEncodedLiteralName,
   type InterpretedLabel,
   type InterpretedName,
+  interpretTokenIdAsNode,
   literalLabelsToInterpretedName,
   literalLabelToInterpretedLabel,
   type Node,
   type SubgraphInterpretedLabel,
   type SubgraphInterpretedName,
-} from "@ensnode/ensnode-sdk";
+} from "enssdk";
 
 import { subgraph_decodeDNSEncodedLiteralName } from "@/lib/dns-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";

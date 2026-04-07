@@ -1,6 +1,6 @@
+import type { InterpretedLabel } from "enssdk";
 import { describe, expect, it } from "vitest";
 
-import type { InterpretedLabel } from "../../ens";
 import { reinterpretLabel } from "./reinterpretation";
 
 describe("Reinterpretation", () => {

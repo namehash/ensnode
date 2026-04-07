@@ -1,6 +1,5 @@
 import { and, eq, sql } from "drizzle-orm";
-
-import type { DomainId } from "@ensnode/ensnode-sdk";
+import type { DomainId } from "enssdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 

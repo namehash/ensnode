@@ -1,6 +1,5 @@
-import { type Address, isAddressEqual, zeroAddress, zeroHash } from "viem";
-
 import {
+  type Address,
   type DNSEncodedLiteralName,
   type DNSEncodedName,
   decodeDNSEncodedLiteralName,
@@ -12,9 +11,11 @@ import {
   type LabelHash,
   labelhashLiteralLabel,
   literalLabelToInterpretedLabel,
-  makeSubdomainNode,
   type Node,
-} from "@ensnode/ensnode-sdk";
+} from "enssdk";
+import { isAddressEqual, zeroAddress, zeroHash } from "viem";
+
+import { makeSubdomainNode } from "@ensnode/ensnode-sdk";
 
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";

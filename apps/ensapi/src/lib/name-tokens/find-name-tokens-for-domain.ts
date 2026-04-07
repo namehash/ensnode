@@ -1,16 +1,14 @@
 import config from "@/config";
 
 import { eq } from "drizzle-orm/sql";
+import type { AccountId, InterpretedName, Node } from "enssdk";
 
 import {
-  type AccountId,
   bigIntToNumber,
   getNameTokenOwnership,
-  type InterpretedName,
   type NameToken,
   type NameTokenOwnership,
   type NFTMintStatus,
-  type Node,
   parseAssetId,
   type RegisteredNameTokens,
   type UnixTimestamp,

@@ -1,8 +1,7 @@
-import { labelhash, zeroAddress } from "viem";
+import { DEFAULT_EVM_CHAIN_ID, labelhash } from "enssdk";
+import { zeroAddress } from "viem";
 import { describe, expect, it } from "vitest";
 import { ZodError } from "zod/v4";
-
-import { DEFAULT_EVM_CHAIN_ID } from "@ensnode/ensnode-sdk";
 
 import { params } from "./params.schema";
 

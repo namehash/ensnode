@@ -1,15 +1,13 @@
 import config from "@/config";
 
+import type { AccountId, Name, Node } from "enssdk";
 import { namehash } from "viem";
 
 import { DatasourceNames, type ENSNamespaceId } from "@ensnode/datasources";
 import {
-  type AccountId,
   accountIdEqual,
   getDatasourceContract,
   maybeGetDatasourceContract,
-  type Name,
-  type Node,
 } from "@ensnode/ensnode-sdk";
 
 import { toJson } from "@/lib/json-stringify-with-bigints";

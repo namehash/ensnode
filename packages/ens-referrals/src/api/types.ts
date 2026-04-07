@@ -1,4 +1,4 @@
-import type { Address } from "viem";
+import type { Address } from "enssdk";
 
 import type { ReferrerLeaderboardPage, ReferrerLeaderboardPageParams } from "../leaderboard-page";
 import type { ReferrerDetail } from "../referrer-detail";

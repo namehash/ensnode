@@ -1,6 +1,6 @@
 import { trace } from "@opentelemetry/api";
+import type { Address, Name, Node } from "enssdk";
 import {
-  type Address,
   ContractFunctionExecutionError,
   decodeAbiParameters,
   encodeFunctionData,
@@ -12,7 +12,7 @@ import {
 import { packetToBytes } from "viem/ens";
 
 import { ResolverABI } from "@ensnode/datasources";
-import type { Name, Node, ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
+import type { ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 import {
   interpretAddressRecordValue,
   interpretNameRecordValue,

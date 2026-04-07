@@ -1,17 +1,18 @@
-import { type Address, labelhash, namehash } from "viem";
-import { describe, expect, it } from "vitest";
-
-import { DatasourceNames } from "@ensnode/datasources";
 import {
+  type Address,
   type DomainId,
-  getDatasourceContract,
-  getENSv2RootRegistryId,
   type InterpretedLabel,
+  labelhash,
   makeENSv1DomainId,
   makeENSv2DomainId,
   makeStorageId,
   type Name,
-} from "@ensnode/ensnode-sdk";
+  namehash,
+} from "enssdk";
+import { describe, expect, it } from "vitest";
+
+import { DatasourceNames } from "@ensnode/datasources";
+import { getDatasourceContract, getENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
 
 import { DEVNET_NAMES } from "@/test/integration/devnet-names";
 import {

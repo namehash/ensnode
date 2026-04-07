@@ -1,15 +1,12 @@
 import config from "@/config";
 
-import { namehash } from "viem";
+import { ENS_ROOT, getParentNameFQDN, type Node, namehash } from "enssdk";
 
 import {
-  ENS_ROOT,
-  getParentNameFQDN,
   type NameTokensRequest,
   NameTokensResponseCodes,
   NameTokensResponseErrorCodes,
   type NameTokensResponseErrorNameTokensNotIndexed,
-  type Node,
   type PluginName,
   serializeNameTokensResponse,
 } from "@ensnode/ensnode-sdk";

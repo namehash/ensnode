@@ -3,27 +3,20 @@ import config from "@/config";
 import { bytesToPacket } from "@ensdomains/ensjs/utils";
 import { SpanStatusCode, trace } from "@opentelemetry/api";
 import {
-  type Address,
-  isAddressEqual,
-  namehash,
-  type PublicClient,
-  toHex,
-  zeroAddress,
-} from "viem";
-import { packetToBytes } from "viem/ens";
-
-import { DatasourceNames, getDatasource } from "@ensnode/datasources";
-import {
   type AccountId,
-  accountIdEqual,
+  type Address,
   type DomainId,
-  getDatasourceContract,
   getNameHierarchy,
-  isENSv1Registry,
   type Name,
   type Node,
   type NormalizedName,
-} from "@ensnode/ensnode-sdk";
+  namehash,
+} from "enssdk";
+import { isAddressEqual, type PublicClient, toHex, zeroAddress } from "viem";
+import { packetToBytes } from "viem/ens";
+
+import { DatasourceNames, getDatasource } from "@ensnode/datasources";
+import { accountIdEqual, getDatasourceContract, isENSv1Registry } from "@ensnode/ensnode-sdk";
 
 import { ensDb } from "@/lib/ensdb/singleton";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/instrumentation/auto-span";

@@ -1,10 +1,9 @@
-import { type Address, type Hex, isHex, size } from "viem";
-import { z } from "zod/v4";
-
 import {
+  type Address,
   type ChainId,
   type CoinType,
   type DomainId,
+  type Hex,
   type InterpretedLabel,
   type InterpretedName,
   isInterpetedLabel,
@@ -19,7 +18,10 @@ import {
   type RenewalId,
   type ResolverId,
   type ResolverRecordsId,
-} from "@ensnode/ensnode-sdk";
+} from "enssdk";
+import { isHex, size } from "viem";
+import { z } from "zod/v4";
+
 import {
   makeChainIdSchema,
   makeCoinTypeSchema,

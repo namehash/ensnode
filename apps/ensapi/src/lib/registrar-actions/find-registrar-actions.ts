@@ -1,10 +1,10 @@
 import { trace } from "@opentelemetry/api";
 import { and, count, desc, eq, gte, isNotNull, lte, not, type SQL } from "drizzle-orm/sql";
+import type { InterpretedName } from "enssdk";
 
 import {
   type BlockRef,
   bigIntToNumber,
-  type InterpretedName,
   type NamedRegistrarAction,
   parseAccountId,
   priceEth,

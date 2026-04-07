@@ -1,8 +1,9 @@
+import type { AccountId } from "enssdk";
 import { namehash, zeroAddress } from "viem";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { DatasourceNames } from "@ensnode/datasources";
-import { type AccountId, ENSNamespaceIds, getDatasourceContract } from "@ensnode/ensnode-sdk";
+import { ENSNamespaceIds, getDatasourceContract } from "@ensnode/ensnode-sdk";
 
 import { getManagedName } from "./managed-names";
 

@@ -1,14 +1,12 @@
 import { SpanStatusCode, trace } from "@opentelemetry/api";
+import { coinTypeReverseLabel, evmChainIdToCoinType, reverseName } from "enssdk";
 import { isAddress, isAddressEqual } from "viem";
 
 import {
-  coinTypeReverseLabel,
-  evmChainIdToCoinType,
   type ResolverRecordsSelection,
   type ReverseResolutionArgs,
   ReverseResolutionProtocolStep,
   type ReverseResolutionResult,
-  reverseName,
   TraceableENSProtocol,
 } from "@ensnode/ensnode-sdk";
 

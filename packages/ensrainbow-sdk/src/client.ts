@@ -1,14 +1,13 @@
+import type { EncodedLabelHash, Label, LabelHash } from "enssdk";
+import { parseLabelHashOrEncodedLabelHash } from "enssdk";
+
 import {
   buildEnsRainbowClientLabelSet,
   type Cache,
-  type EncodedLabelHash,
   type EnsRainbowClientLabelSet,
   type EnsRainbowPublicConfig,
   type EnsRainbowServerLabelSet,
-  type Label,
-  type LabelHash,
   LruCache,
-  parseLabelHashOrEncodedLabelHash,
 } from "@ensnode/ensnode-sdk";
 
 import { DEFAULT_ENSRAINBOW_URL, ErrorCode, StatusCode } from "./consts";

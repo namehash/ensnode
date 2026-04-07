@@ -1,4 +1,4 @@
-import type { Address } from "viem";
+import type { Address } from "enssdk";
 import { describe, expect, it, vi } from "vitest";
 
 import type { ReferrerLeaderboard } from "./leaderboard";

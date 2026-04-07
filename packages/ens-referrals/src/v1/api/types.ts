@@ -1,4 +1,4 @@
-import type { Address } from "viem";
+import type { Address } from "enssdk";
 
 import type { ReferrerLeaderboardPageParams } from "../award-models/shared/leaderboard-page";
 import type { ReferralProgramEditionSlug } from "../edition";

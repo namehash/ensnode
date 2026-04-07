@@ -1,4 +1,6 @@
-import { Duration, InterpretedName, NamedRegistrarAction } from "@ensnode/ensnode-sdk";
+import type { InterpretedName } from "enssdk";
+
+import { type Duration, type NamedRegistrarAction } from "@ensnode/ensnode-sdk";
 
 export const registrationWithReferral = {
   action: {

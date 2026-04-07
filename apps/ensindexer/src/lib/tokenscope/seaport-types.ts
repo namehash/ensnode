@@ -1,4 +1,4 @@
-import type { Address, Hex } from "viem";
+import type { Address, Hex } from "enssdk";
 
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 

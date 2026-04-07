@@ -1,9 +1,9 @@
+import type { Address, DefaultableChainId } from "enssdk";
 import { Info as InfoIcon, CircleQuestionMark as QuestionmarkIcon } from "lucide-react";
 import { memo, type PropsWithChildren, type ReactNode } from "react";
-import { type Address, zeroAddress } from "viem";
+import { zeroAddress } from "viem";
 
 import type {
-  DefaultableChainId,
   ENSNamespaceId,
   NamedRegistrarAction,
   RegistrarActionReferral,

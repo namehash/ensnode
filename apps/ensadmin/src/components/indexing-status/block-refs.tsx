@@ -3,9 +3,10 @@
  */
 
 import { getBlockExplorerBlockUrl, RelativeTime } from "@namehash/namehash-ui";
+import type { ChainId } from "enssdk";
 import { ExternalLink as ExternalLinkIcon } from "lucide-react";
 
-import type { BlockRef, ChainId } from "@ensnode/ensnode-sdk";
+import type { BlockRef } from "@ensnode/ensnode-sdk";
 
 interface BlockNumberProps {
   chainId: ChainId;

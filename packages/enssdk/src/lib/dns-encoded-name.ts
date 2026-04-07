@@ -1,5 +1,6 @@
-import type { DNSEncodedLiteralName, DNSEncodedName, LiteralLabel } from "enssdk";
 import { bytesToString, hexToBytes } from "viem";
+
+import type { DNSEncodedLiteralName, DNSEncodedName, LiteralLabel } from "./types";
 
 /**
  * Decodes a DNS-Encoded name consisting of Literal Labels into an ordered list of Literal Labels.

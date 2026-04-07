@@ -1,17 +1,17 @@
 import dnsPacket, { type Answer } from "dns-packet";
-import type { Hex } from "viem";
-
 import {
   type DNSEncodedLiteralName,
   type DNSEncodedName,
   decodeDNSEncodedLiteralName,
   decodeDNSEncodedName,
+  type Hex,
   type Label,
   literalLabelsToLiteralName,
   type Name,
   type SubgraphInterpretedLabel,
   type SubgraphInterpretedName,
-} from "@ensnode/ensnode-sdk";
+} from "enssdk";
+
 import { interpretTextRecordKey, interpretTextRecordValue } from "@ensnode/ensnode-sdk/internal";
 
 import { logger } from "@/lib/logger";

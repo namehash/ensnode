@@ -1,4 +1,4 @@
-import { bigintToCoinType, type ResolverRecordsId } from "@ensnode/ensnode-sdk";
+import { bigintToCoinType, type ResolverRecordsId } from "enssdk";
 
 import { ensDb } from "@/lib/ensdb/singleton";
 import { builder } from "@/omnigraph-api/builder";

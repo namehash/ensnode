@@ -1,8 +1,7 @@
 import config from "@/config";
 
-import type { Address } from "viem";
-
 import {
+  type Address,
   encodeLabelHash,
   type InterpretedLabel,
   type InterpretedName,
@@ -10,11 +9,11 @@ import {
   type LabelHash,
   type LiteralLabel,
   literalLabelToInterpretedLabel,
-  makeSubdomainNode,
-  type PluginName,
   type SubgraphInterpretedLabel,
   type SubgraphInterpretedName,
-} from "@ensnode/ensnode-sdk";
+} from "enssdk";
+
+import { makeSubdomainNode, type PluginName } from "@ensnode/ensnode-sdk";
 
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";

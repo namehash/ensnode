@@ -1,18 +1,15 @@
 import {
   type AccountId,
+  type Address,
   type LabelHash,
+  type LiteralLabel,
   makeENSv2DomainId,
   makeRegistryId,
   makeStorageId,
 } from "enssdk";
-import { type Address, hexToBigInt, labelhash } from "viem";
+import { hexToBigInt, labelhash } from "viem";
 
-import {
-  interpretAddress,
-  isRegistrationFullyExpired,
-  type LiteralLabel,
-  PluginName,
-} from "@ensnode/ensnode-sdk";
+import { interpretAddress, isRegistrationFullyExpired, PluginName } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { ensureDomainEvent, ensureEvent } from "@/lib/ensv2/event-db-helpers";

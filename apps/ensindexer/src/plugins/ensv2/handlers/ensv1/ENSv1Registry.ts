@@ -1,15 +1,20 @@
 import config from "@/config";
 
-import { type LabelHash, makeENSv1DomainId, type Node } from "enssdk";
-import { type Address, isAddressEqual, zeroAddress } from "viem";
-
 import {
   ADDR_REVERSE_NODE,
+  type Address,
+  type LabelHash,
+  makeENSv1DomainId,
+  type Node,
+  ROOT_NODE,
+} from "enssdk";
+import { isAddressEqual, zeroAddress } from "viem";
+
+import {
   getENSRootChainId,
   interpretAddress,
   makeSubdomainNode,
   PluginName,
-  ROOT_NODE,
 } from "@ensnode/ensnode-sdk";
 
 import { materializeENSv1DomainEffectiveOwner } from "@/lib/ensv2/domain-db-helpers";

@@ -1,5 +1,4 @@
-import { makeENSv2DomainId, makeStorageId } from "enssdk";
-import type { Address } from "viem";
+import { type Address, makeENSv2DomainId, makeStorageId } from "enssdk";
 
 import { PluginName } from "@ensnode/ensnode-sdk";
 

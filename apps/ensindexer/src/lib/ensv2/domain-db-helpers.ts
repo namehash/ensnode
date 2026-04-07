@@ -1,6 +1,6 @@
-import type { Address } from "viem";
+import type { Address, ENSv1DomainId } from "enssdk";
 
-import { type ENSv1DomainId, interpretAddress } from "@ensnode/ensnode-sdk";
+import { interpretAddress } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";

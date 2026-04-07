@@ -1,6 +1,6 @@
 import { GRACE_PERIOD_SECONDS } from "@ensdomains/ensjs/utils";
-import { interpretTokenIdAsLabelHash, makeENSv1DomainId } from "enssdk";
-import { type Address, isAddressEqual, zeroAddress } from "viem";
+import { type Address, interpretTokenIdAsLabelHash, makeENSv1DomainId } from "enssdk";
+import { isAddressEqual, zeroAddress } from "viem";
 
 import {
   interpretAddress,

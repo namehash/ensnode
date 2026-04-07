@@ -1,12 +1,11 @@
-import { labelhash } from "viem";
-
 import {
   encodeLabelHash,
   type InterpretedLabel,
   type LabelHash,
   type LiteralLabel,
   literalLabelToInterpretedLabel,
-} from "@ensnode/ensnode-sdk";
+} from "enssdk";
+import { labelhash } from "viem";
 
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";

@@ -25,6 +25,7 @@
     "@ensnode/datasources": "workspace:*",
     "@ensnode/ensnode-react": "workspace:*",
     "@ensnode/ensnode-sdk": "workspace:*",
+    "enssdk": "workspace:*",
     "@formkit/auto-animate": "^0.9.0",
     "@graphiql/plugin-explorer": "5.1.1",
     "@graphiql/react": "0.37.1",

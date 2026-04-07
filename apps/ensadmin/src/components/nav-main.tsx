@@ -1,10 +1,9 @@
 "use client";
 
+import type { UrlString } from "enssdk";
 import { ChevronRight, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
-import type { UrlString } from "@ensnode/ensnode-sdk";
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {

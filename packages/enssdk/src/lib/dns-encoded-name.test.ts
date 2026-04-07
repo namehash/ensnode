@@ -1,13 +1,14 @@
-import type { DNSEncodedName, LiteralLabel } from "enssdk";
 import { bytesToHex, stringToHex } from "viem";
 import { packetToBytes } from "viem/ens";
 import { describe, expect, it } from "vitest";
 
-import { labelhashLiteralLabel } from "../shared/labelhash";
 import { decodeDNSEncodedName } from "./dns-encoded-name";
-import { encodeLabelHash } from "./encode-labelhash";
+import { encodeLabelHash, labelhashLiteralLabel } from "./labelhash";
+import type { DNSEncodedName, LiteralLabel } from "./types";
 
-const MULTI_BYTE_UNICODE_NAMES = ["👩🏼‍❤‍💋‍👨🏼.eth"];
+const MULTI_BYTE_UNICODE_NAMES = [
+  "\u{1F469}\u{1F3FC}\u200D\u2764\u200D\u{1F48B}\u200D\u{1F468}\u{1F3FC}.eth",
+];
 
 describe("decodeDNSEncodedName", () => {
   it("handles root node", () => {

@@ -1,4 +1,5 @@
-import { type Address, type Hash, type Hex, isAddress } from "viem";
+import type { Address, Hex } from "enssdk";
+import { type Hash, isAddress } from "viem";
 
 import { asLowerCaseAddress } from "@ensnode/ensnode-sdk";
 

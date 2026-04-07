@@ -1,4 +1,5 @@
-import { type Address, isAddress } from "viem";
+import type { Address } from "enssdk";
+import { isAddress } from "viem";
 
 import { type DatasourceName, type ENSNamespace, getENSNamespace } from "@ensnode/datasources";
 import { asLowerCaseAddress, PluginName } from "@ensnode/ensnode-sdk";

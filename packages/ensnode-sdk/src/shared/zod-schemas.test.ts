@@ -1,8 +1,8 @@
+import { encodeLabelHash } from "enssdk";
 import { labelhash } from "viem";
 import { describe, expect, it } from "vitest";
 import { prettifyError, type ZodSafeParseResult } from "zod/v4";
 
-import { encodeLabelHash } from "../ens";
 import { CurrencyIds, priceDai, priceEth, priceUsdc, type SerializedPrice } from "./currencies";
 import {
   makeBooleanStringSchema,

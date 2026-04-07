@@ -1,4 +1,5 @@
-import { type Address, isAddress } from "viem";
+import type { Address } from "enssdk";
+import { isAddress } from "viem";
 
 export const validateLowercaseAddress = (address: Address): void => {
   if (!isAddress(address, { strict: false })) {
