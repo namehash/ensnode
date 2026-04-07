@@ -1,3 +1,4 @@
+export * from "./address";
 export * from "./caip";
 export * from "./coin-type";
 export * from "./constants";

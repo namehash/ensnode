@@ -6,13 +6,12 @@ import {
   getEnsManagerAddressDetailsUrl,
 } from "@namehash/namehash-ui";
 import type { Address, ChainId, DefaultableChainId, Name } from "enssdk";
-import { DEFAULT_EVM_CHAIN_ID } from "enssdk";
+import { asLowerCaseAddress, DEFAULT_EVM_CHAIN_ID } from "enssdk";
 import { useState } from "react";
 import { isAddress } from "viem";
 
 import { getENSNamespace, getENSRootChainId } from "@ensnode/datasources";
 import {
-  asLowerCaseAddress,
   type ENSNamespaceId,
   ENSNamespaceIds,
   type Identity,

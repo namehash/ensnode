@@ -8,6 +8,7 @@ import type {
   InterpretedName,
   Node,
 } from "enssdk";
+import { asLowerCaseAddress } from "enssdk";
 import { type Address, type Hex, isAddress, isHex, size } from "viem";
 /**
  * All zod schemas we define must remain internal implementation details.
@@ -20,7 +21,6 @@ import { type Address, type Hex, isAddress, isHex, size } from "viem";
 import { z } from "zod/v4";
 
 import { ENSNamespaceIds } from "../ens";
-import { asLowerCaseAddress } from "./address";
 import {
   type CurrencyId,
   CurrencyIds,

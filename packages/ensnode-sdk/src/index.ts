@@ -13,7 +13,6 @@ export * from "./omnigraph-api/prerequisites";
 export * from "./registrars";
 export * from "./resolution";
 export * from "./shared/account-id";
-export * from "./shared/address";
 export * from "./shared/blockrange";
 export * from "./shared/cache";
 export * from "./shared/collections";

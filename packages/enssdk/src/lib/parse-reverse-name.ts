@@ -1,7 +1,8 @@
-import { type Address, hexToBigInt, isAddress } from "viem";
+import { hexToBigInt, isAddress } from "viem";
 
+import { asLowerCaseAddress } from "./address";
 import { bigintToCoinType, DEFAULT_EVM_COIN_TYPE, ETH_COIN_TYPE } from "./coin-type";
-import type { CoinType, Label, Name } from "./types";
+import type { Address, CoinType, Label, Name } from "./types";
 
 /**
  * Matches an ENSIP-19 Reverse Name
@@ -24,7 +25,7 @@ const parseAddressLabel = (addressLabel: Label): Address => {
     throw new Error(`Invalid EVM address "${maybeAddress}"`);
   }
 
-  return maybeAddress.toLowerCase() as Address;
+  return asLowerCaseAddress(maybeAddress);
 };
 
 /**

@@ -1,8 +1,7 @@
 import type { NormalizedName } from "enssdk";
-import { isNormalizedName } from "enssdk";
+import { asLowerCaseAddress, isNormalizedName } from "enssdk";
 import { isAddress, isAddressEqual, zeroAddress } from "viem";
 
-import { asLowerCaseAddress } from "../address";
 import { hasNullByte } from "../null-bytes";
 
 /**
