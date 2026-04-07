@@ -57,8 +57,11 @@ export function useResolvedIdentity(parameters: UseResolvedIdentityParameters) {
       namespace ?? ENSNamespaceIds.Mainnet,
     ),
     accelerate,
+    // NOTE: Overriding `gcTime` to prevent unbounded memory growth
+    // in long-running sessions with many identities.
     query: {
       ...ASSUME_IMMUTABLE_QUERY, // identity changes very rarely
+      gcTime: 60 * 60 * 1000, // 1 hour
       refetchInterval: false, // not covered by ASSUME_IMMUTABLE_QUERY
       ..._query,
       enabled: (_query.enabled ?? true) && namespace !== undefined,
