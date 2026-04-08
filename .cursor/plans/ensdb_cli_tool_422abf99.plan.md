@@ -159,35 +159,35 @@ Discovery via `ListObjects` on `{prefix}/` -- each snapshot is a prefix containi
 ### Inspect
 
 ```
-ensdb-cli inspect --database-url <url>
+ensdb-cli inspect [--ensdb-url <url>]
   List all schemas with type classification and size info.
 
-ensdb-cli inspect --database-url <url> --schema <name>
+ensdb-cli inspect [--ensdb-url <url>] --schema <name>
   Show detailed info for a specific schema (tables, row counts, sizes).
 ```
 
 ### Schema Management
 
 ```
-ensdb-cli schema drop --database-url <url> --schema <name> [--force]
+ensdb-cli schema drop [--ensdb-url <url>] --schema <name> [--force]
   Drop a schema. Requires --force or interactive confirmation.
 ```
 
 ### Snapshot Operations
 
 ```
-ensdb-cli snapshot create --database-url <url> --output <path> [--exclude-schemas <name,...>]
+ensdb-cli snapshot create [--ensdb-url <url>] --output <path> [--exclude-schemas <name,...>]
   Export all discovered indexer schemas + ponder_sync + full ensnode schema + ensnode.metadata JSON.
   Runs pg_dump with parallel jobs for each schema. Use --exclude-schemas to skip unrelated app schemas.
 
-ensdb-cli snapshot restore --database-url <url> --input <path> --schemas <name,...> [--drop-existing] [--force-or-confirm]
+ensdb-cli snapshot restore [--ensdb-url <url>] --input <path> --schemas <name,...> [--drop-existing] [--force-or-confirm]
   Restore selected schema(s) from a local snapshot into a fresh or isolated database.
   Restores the selected indexer schema dump(s) + ponder_sync + filtered ensnode.metadata rows.
   Runs preflight (see above) before pg_restore; fails if shared state or metadata conflicts unless --force-or-confirm.
   Fails if target indexer schema already exists unless --drop-existing is passed (after preflight).
   Unpacks `.dump.tar.zst` archives to temp storage, then runs pg_restore with parallel jobs.
 
-ensdb-cli snapshot restore --database-url <url> --input <path> --ponder-sync-only [--drop-existing] [--force-or-confirm]
+ensdb-cli snapshot restore [--ensdb-url <url>] --input <path> --ponder-sync-only [--drop-existing] [--force-or-confirm]
   Restore only ponder_sync (no indexer schemas, no ensnode.metadata).
   Preflight still applies to non-empty ponder_sync unless --force-or-confirm.
   Enables the developer workflow described in #833: quickly bootstrap a local ponder_sync
@@ -219,7 +219,7 @@ ensdb-cli snapshot delete --snapshot-id <id> --bucket <bucket> [--endpoint <url>
 
 ### Common Options
 
-- `--database-url` / `ENSDB_URL` -- PostgreSQL connection string
+- `--ensdb-url` / `ENSDB_URL` -- PostgreSQL connection string for the source/target ENSDb. Optional; defaults to `process.env.ENSDB_URL`.
 - `--jobs` / `-j` -- parallelism for pg_dump/pg_restore (default: 4)
 - `--bucket` / `ENSDB_SNAPSHOT_BUCKET` -- S3 bucket name
 - `--endpoint` / `ENSDB_SNAPSHOT_ENDPOINT` -- S3-compatible endpoint (for R2, MinIO)
@@ -376,7 +376,7 @@ ensdb-cli snapshot pull \
 
 # 2. Restore into an isolated test database
 ensdb-cli snapshot restore \
-  --database-url $TEST_DB_URL \
+  --ensdb-url $TEST_DB_URL \
   --input /tmp/snapshot \
   --schemas mainnetSchema1.9.0
 
@@ -406,7 +406,7 @@ The `snapshot list` and `snapshot info` commands can also be used in CI to disco
 **Future command:**
 
 ```
-ensdb-cli analyze unknown-labels --database-url <url> --schema <name> [--top-n 100] [--output-format table|csv|json]
+ensdb-cli analyze unknown-labels [--ensdb-url <url>] --schema <name> [--top-n 100] [--output-format table|csv|json]
   Count unknown names, unknown labels (distinct and non-distinct),
   and return the top-N most frequent unknown labels with occurrence counts.
   Uses @ensnode/ensdb-sdk typed access to domain tables.
@@ -424,24 +424,21 @@ This is explicitly **out of scope for v1** but the plan ensures the CLI's databa
 3. **Restore safety**: `snapshot restore` assumes a fresh or isolated database; **preflight** enforces this (non-empty `ponder_sync`, conflicting `ensnode.metadata` rows, unexpected schemas) unless `--force-or-confirm` is passed.
 4. **Restore behavior**: Preflight runs first, then fail if a target indexer schema already exists unless `--drop-existing` is passed. `--drop-existing` does not bypass preflight; only `--force-or-confirm` does. Prevents accidental data loss while keeping an explicit escape hatch.
 5. **Retention policy**: `snapshot delete` command added for manual cleanup. `snapshot list` shows all snapshots; operators manage retention manually.
+6. **Snapshot IDs**: Snapshot IDs are auto-generated and immutable in v1 (no operator override).
+7. **Streaming uploads**: v1 stays local-first (`snapshot create` then `snapshot push`). No streaming/pipe-to-S3 mode in v1.
+
+   **Rationale (kept for future roadmap):**
+
+   - **Why directory format complicates streaming:** `pg_dump --format=directory` writes many files under a tree; you normally archive that tree to a single blob (e.g. `.dump.tar.zst`) before upload. That implies at least one local staging step per schema unless you stream `tar` output directly to S3 multipart (possible but more moving parts).
+   - **Other `pg_dump` formats do not remove all constraints:**
+     - **Custom** (`pg_dump --format=custom` / `-Fc`): single-file output and can be streamed (e.g. piped into multipart upload). Loses parallel `pg_restore` compared to directory format unless you accept those trade-offs at 50-100GB scale.
+     - **Plain** (`pg_dump --format=plain`): single SQL stream; stream-friendly, but restore is typically slower and less suited to huge DBs than the directory workflow already chosen for this plan.
+   - **Checksums and manifest:** The plan includes `checksums.sha256` and a `manifest.json` with per-artifact sizes. For end-to-end streaming without a local file:
+     - Per-artifact SHA-256 can still be computed by hashing bytes as they pass through the upload pipeline (digest alongside the stream), then writing the digest into `checksums.sha256` and the manifest after that artifact finishes.
+     - Alternatively, S3 object checksums (multipart part ETags, or `ChecksumSHA256` on `PutObject` where supported) can supplement or replace client-side files, but the manifest must state what is verified (client hash vs object checksum).
+     - The full snapshot manifest cannot be finalized until all artifacts are complete, so uploads can be incremental, but manifest upload is always last (or use a two-phase manifest: provisional then final).
 
 ## Open Questions for Stakeholders
 
-1. **Snapshot ID format**: Should snapshot IDs be auto-generated (e.g. `ensdb-2026-04-06-abc123`) or user-specified? Auto-generated is safer for avoiding collisions.
-2. **Streaming upload mode**: Should v1 support a direct "snapshot and push" flow that uploads artifacts to S3 as they are produced, or should v1 stay local-first (`snapshot create` then `snapshot push`)?
-
-   **Why directory format complicates streaming:** `pg_dump --format=directory` writes many files under a tree; you normally archive that tree to a single blob (e.g. `.dump.tar.zst`) before upload. That implies at least one local staging step per schema unless you stream `tar` output directly to S3 multipart (possible but more moving parts).
-
-   **Other `pg_dump` formats do not remove all constraints:**
-
-   - **Custom** (`pg_dump --format=custom` / `-Fc`): single-file output and can be streamed (e.g. piped into multipart upload). Loses parallel `pg_restore` compared to directory format unless you accept those trade-offs at 50-100GB scale.
-   - **Plain** (`pg_dump --format=plain`): single SQL stream; stream-friendly, but restore is typically slower and less suited to huge DBs than the directory workflow already chosen for this plan.
-
-   **Checksums and manifest:** The plan includes `checksums.sha256` and a `manifest.json` with per-artifact sizes. For **end-to-end streaming** without a local file:
-
-   - Per-artifact SHA-256 can still be computed by hashing bytes **as they pass through** the upload pipeline (running a digest alongside the stream), then writing the digest into `checksums.sha256` and the manifest **after** that artifact finishes.
-   - Alternatively, **S3 object checksums** (multipart part ETags, or `ChecksumSHA256` on `PutObject` where supported) can supplement or replace client-side files, but the manifest must state what is verified (client hash vs object checksum).
-   - The **full snapshot manifest** cannot be finalized until all artifacts are complete, so uploads can be incremental, but **manifest upload is always last** (or use a two-phase manifest: provisional then final).
-
-   **Conclusion for stakeholders:** Decide between (a) v1 local-first only, (b) **hybrid** — each schema completes locally, then upload (simplest integrity story), or (c) true pipe-to-S3 with streaming hash and deferred manifest.
+1. **Snapshot ID format**: Confirm the exact auto-generated format (e.g. `ensdb-YYYY-MM-DDTHHMMSSZ-<shortHash>` vs `{primarySchemaName}-...`). v1 does not allow overriding the generated ID.
 
