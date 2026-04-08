@@ -69,7 +69,11 @@ export interface RankedReferrerMetricsRevShareLimit extends ReferrerMetricsRevSh
   rank: ReferrerRank;
 
   /**
-   * Identifies if the referrer meets the qualifications of the {@link ReferralProgramRulesRevShareLimit} to receive a non-zero `cappedAwardValue`.
+   * Identifies if the referrer is eligible for an award under the {@link ReferralProgramRulesRevShareLimit}.
+   *
+   * Note: this is a purely rule-based eligibility predicate and does NOT guarantee
+   * `cappedAwardValue.amount > 0n` — a qualified referrer may still receive $0 if the
+   * award pool is already depleted by earlier referrers in the race.
    *
    * @invariant true if and only if `totalBaseRevenueContribution` is greater than or equal to
    *   {@link ReferralProgramRulesRevShareLimit.minBaseRevenueContribution} AND

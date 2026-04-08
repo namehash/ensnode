@@ -206,6 +206,10 @@ export const makeReferrerEditionMetricsRankedRevShareLimitSchema = (
     .refine((data) => data.awardModel === data.rules.awardModel, {
       message: `${valueLabel}.awardModel must equal ${valueLabel}.rules.awardModel`,
       path: ["awardModel"],
+    })
+    .refine((data) => data.referrer.cappedAwardValue.amount <= data.rules.awardPool.amount, {
+      message: `${valueLabel}.referrer.cappedAwardValue must be <= ${valueLabel}.rules.awardPool`,
+      path: ["referrer", "cappedAwardValue", "amount"],
     });
 
 /**
@@ -280,4 +284,12 @@ export const makeReferrerLeaderboardPageRevShareLimitSchema = (
     .refine((data) => data.awardModel === data.rules.awardModel, {
       message: `${valueLabel}.awardModel must equal ${valueLabel}.rules.awardModel`,
       path: ["awardModel"],
-    });
+    })
+    .refine(
+      (data) =>
+        data.referrers.every((r) => r.cappedAwardValue.amount <= data.rules.awardPool.amount),
+      {
+        message: `${valueLabel}.referrers[].cappedAwardValue must be <= ${valueLabel}.rules.awardPool`,
+        path: ["referrers"],
+      },
+    );
