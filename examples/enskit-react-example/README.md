@@ -10,8 +10,8 @@ The app connects to a local ENSNode instance and includes demos for browsing dom
 # from the ENSNode monorepo root
 pnpm install
 
-# set the ENSNODE_URL to a NameHash Hosted Instance and run this example in dev mode
-ENSNODE_URL=https://api.alpha.ensnode.io pnpm -F enskit-react-example dev
+# set the VITE_ENSNODE_URL to a NameHash Hosted Instance and run this example in dev mode
+VITE_ENSNODE_URL=https://api.alpha.ensnode.io pnpm -F enskit-react-example dev
 ```
 
 ## Usage (with Local ENSNode)

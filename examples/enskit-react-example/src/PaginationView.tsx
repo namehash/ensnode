@@ -45,6 +45,11 @@ export function PaginationView() {
         This showcases trivial cursor-based pagination (inc. infinite-scroll) for resources in the
         Omnigraph API.
       </p>
+      <p>
+        Note that if you've viewed the <Link to="/domain/eth">Domain Browser</Link>, many subdomains
+        of 'eth' here will show up <b>instantly</b> — that's the cache at work! Refresh the page to
+        clear the urql cache and see pagination in action.
+      </p>
 
       <ul>
         {subdomains?.edges.map((edge) => (
