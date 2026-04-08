@@ -42,7 +42,7 @@ export function App() {
                 </nav>
               }
             />
-            <Route path="/domain/*" element={<DomainView />} />
+            <Route path="/domain/:name" element={<DomainView />} />
             <Route path="/pagination" element={<PaginationView />} />
             <Route path="/registry" element={<RegistryView />} />
           </Routes>
