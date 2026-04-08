@@ -75,8 +75,8 @@ export function serializeAwardedReferrerMetricsRevShareLimit(
     totalBaseRevenueContribution: serializePriceUsdc(metrics.totalBaseRevenueContribution),
     rank: metrics.rank,
     isQualified: metrics.isQualified,
-    uncappedAwardValue: serializePriceUsdc(metrics.uncappedAwardValue),
-    cappedAwardValue: serializePriceUsdc(metrics.cappedAwardValue),
+    uncappedAward: serializePriceUsdc(metrics.uncappedAward),
+    cappedAward: serializePriceUsdc(metrics.cappedAward),
     isAdminDisqualified: metrics.isAdminDisqualified,
     adminDisqualificationReason: metrics.adminDisqualificationReason,
   };
@@ -96,8 +96,8 @@ export function serializeUnrankedReferrerMetricsRevShareLimit(
     totalBaseRevenueContribution: serializePriceUsdc(metrics.totalBaseRevenueContribution),
     rank: metrics.rank,
     isQualified: metrics.isQualified,
-    uncappedAwardValue: serializePriceUsdc(metrics.uncappedAwardValue),
-    cappedAwardValue: serializePriceUsdc(metrics.cappedAwardValue),
+    uncappedAward: serializePriceUsdc(metrics.uncappedAward),
+    cappedAward: serializePriceUsdc(metrics.cappedAward),
     isAdminDisqualified: metrics.isAdminDisqualified,
     adminDisqualificationReason: metrics.adminDisqualificationReason,
   };

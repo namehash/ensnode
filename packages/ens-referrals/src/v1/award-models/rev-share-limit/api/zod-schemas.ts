@@ -82,8 +82,8 @@ export const makeAwardedReferrerMetricsRevShareLimitSchema = (
       ),
       rank: makePositiveIntegerSchema(`${valueLabel}.rank`),
       isQualified: z.boolean(),
-      uncappedAwardValue: makePriceUsdcSchema(`${valueLabel}.uncappedAwardValue`),
-      cappedAwardValue: makePriceUsdcSchema(`${valueLabel}.cappedAwardValue`),
+      uncappedAward: makePriceUsdcSchema(`${valueLabel}.uncappedAward`),
+      cappedAward: makePriceUsdcSchema(`${valueLabel}.cappedAward`),
       isAdminDisqualified: z.boolean(),
       adminDisqualificationReason: z
         .string()
@@ -91,16 +91,15 @@ export const makeAwardedReferrerMetricsRevShareLimitSchema = (
         .min(1, `${valueLabel}.adminDisqualificationReason must not be empty`)
         .nullable(),
     })
-    .refine((data) => data.cappedAwardValue.amount <= data.uncappedAwardValue.amount, {
-      message: `${valueLabel}.cappedAwardValue must be <= ${valueLabel}.uncappedAwardValue`,
-      path: ["cappedAwardValue"],
+    .refine((data) => data.cappedAward.amount <= data.uncappedAward.amount, {
+      message: `${valueLabel}.cappedAward must be <= ${valueLabel}.uncappedAward`,
+      path: ["cappedAward"],
     })
     .refine(
       (data) =>
-        !data.isAdminDisqualified ||
-        (data.isQualified === false && data.cappedAwardValue.amount === 0n),
+        !data.isAdminDisqualified || (data.isQualified === false && data.cappedAward.amount === 0n),
       {
-        message: `When ${valueLabel}.isAdminDisqualified is true, isQualified must be false and cappedAwardValue.amount must be 0`,
+        message: `When ${valueLabel}.isAdminDisqualified is true, isQualified must be false and cappedAward.amount must be 0`,
         path: ["isAdminDisqualified"],
       },
     )
@@ -108,9 +107,9 @@ export const makeAwardedReferrerMetricsRevShareLimitSchema = (
       message: `${valueLabel}.adminDisqualificationReason must be non-null iff isAdminDisqualified is true`,
       path: ["adminDisqualificationReason"],
     })
-    .refine((data) => data.isQualified || data.cappedAwardValue.amount === 0n, {
-      message: `${valueLabel}.cappedAwardValue must be 0 when isQualified is false`,
-      path: ["cappedAwardValue"],
+    .refine((data) => data.isQualified || data.cappedAward.amount === 0n, {
+      message: `${valueLabel}.cappedAward must be 0 when isQualified is false`,
+      path: ["cappedAward"],
     });
 
 /**
@@ -130,8 +129,8 @@ export const makeUnrankedReferrerMetricsRevShareLimitSchema = (
       ),
       rank: z.null(),
       isQualified: z.literal(false),
-      uncappedAwardValue: makePriceUsdcSchema(`${valueLabel}.uncappedAwardValue`),
-      cappedAwardValue: makePriceUsdcSchema(`${valueLabel}.cappedAwardValue`),
+      uncappedAward: makePriceUsdcSchema(`${valueLabel}.uncappedAward`),
+      cappedAward: makePriceUsdcSchema(`${valueLabel}.cappedAward`),
       isAdminDisqualified: z.boolean(),
       adminDisqualificationReason: z
         .string()
@@ -155,13 +154,13 @@ export const makeUnrankedReferrerMetricsRevShareLimitSchema = (
       message: `${valueLabel}.totalBaseRevenueContribution must be 0 for unranked referrers`,
       path: ["totalBaseRevenueContribution"],
     })
-    .refine((data) => data.uncappedAwardValue.amount === 0n, {
-      message: `${valueLabel}.uncappedAwardValue must be 0 for unranked referrers`,
-      path: ["uncappedAwardValue"],
+    .refine((data) => data.uncappedAward.amount === 0n, {
+      message: `${valueLabel}.uncappedAward must be 0 for unranked referrers`,
+      path: ["uncappedAward"],
     })
-    .refine((data) => data.cappedAwardValue.amount === 0n, {
-      message: `${valueLabel}.cappedAwardValue must be 0 for unranked referrers`,
-      path: ["cappedAwardValue"],
+    .refine((data) => data.cappedAward.amount === 0n, {
+      message: `${valueLabel}.cappedAward must be 0 for unranked referrers`,
+      path: ["cappedAward"],
     })
     .refine((data) => data.isAdminDisqualified === (data.adminDisqualificationReason !== null), {
       message: `${valueLabel}.adminDisqualificationReason must be non-null iff isAdminDisqualified is true`,
@@ -207,9 +206,9 @@ export const makeReferrerEditionMetricsRankedRevShareLimitSchema = (
       message: `${valueLabel}.awardModel must equal ${valueLabel}.rules.awardModel`,
       path: ["awardModel"],
     })
-    .refine((data) => data.referrer.cappedAwardValue.amount <= data.rules.awardPool.amount, {
-      message: `${valueLabel}.referrer.cappedAwardValue must be <= ${valueLabel}.rules.awardPool`,
-      path: ["referrer", "cappedAwardValue", "amount"],
+    .refine((data) => data.referrer.cappedAward.amount <= data.rules.awardPool.amount, {
+      message: `${valueLabel}.referrer.cappedAward must be <= ${valueLabel}.rules.awardPool`,
+      path: ["referrer", "cappedAward", "amount"],
     });
 
 /**
@@ -286,10 +285,9 @@ export const makeReferrerLeaderboardPageRevShareLimitSchema = (
       path: ["awardModel"],
     })
     .refine(
-      (data) =>
-        data.referrers.every((r) => r.cappedAwardValue.amount <= data.rules.awardPool.amount),
+      (data) => data.referrers.every((r) => r.cappedAward.amount <= data.rules.awardPool.amount),
       {
-        message: `${valueLabel}.referrers[].cappedAwardValue must be <= ${valueLabel}.rules.awardPool`,
+        message: `${valueLabel}.referrers[].cappedAward must be <= ${valueLabel}.rules.awardPool`,
         path: ["referrers"],
       },
     );

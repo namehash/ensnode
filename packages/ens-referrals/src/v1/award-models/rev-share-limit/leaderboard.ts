@@ -167,7 +167,7 @@ export const buildReferrerLeaderboardRevShareLimit = (
   }
 
   // 3. Sort referrers to assign ranks:
-  //    1. cappedAwardValue desc — actual pool claims, race winners first
+  //    1. cappedAward desc — actual pool claims, race winners first
   //    2. totalIncrementalDuration desc — tie-break for pool-depleted referrers
   //    3. referrer address desc — deterministic tie-break
   // Both `a` and `b` are keys from `referrerStates`, so lookups are always defined.
@@ -175,7 +175,7 @@ export const buildReferrerLeaderboardRevShareLimit = (
     const stateA = referrerStates.get(a) as ReferrerRaceState;
     const stateB = referrerStates.get(b) as ReferrerRaceState;
 
-    // Primary: cappedAwardValue desc (bigint comparison)
+    // Primary: cappedAward desc (bigint comparison)
     if (stateB.cappedAwardAmount !== stateA.cappedAwardAmount) {
       return stateB.cappedAwardAmount > stateA.cappedAwardAmount ? 1 : -1;
     }
@@ -213,14 +213,14 @@ export const buildReferrerLeaderboardRevShareLimit = (
         rules,
       );
 
-      const uncappedAwardValue = scalePrice(
+      const uncappedAward = scalePrice(
         revShareMetrics.totalBaseRevenueContribution,
         rules.maxBaseRevenueShare,
       );
 
       return buildAwardedReferrerMetricsRevShareLimit(
         rankedMetrics,
-        uncappedAwardValue,
+        uncappedAward,
         priceUsdc(state.cappedAwardAmount),
         rules,
       );

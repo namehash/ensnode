@@ -31,7 +31,7 @@ export interface AggregatedReferrerMetricsRevShareLimit {
   grandTotalRevenueContribution: PriceEth;
 
   /**
-   * The remaining amount in the award pool after subtracting all qualified awards
+   * The remaining amount in the award pool after subtracting all capped awards
    * claimed during the sequential race processing.
    *
    * @invariant Guaranteed to be a valid PriceUsdc with non-negative amount (>= 0n)

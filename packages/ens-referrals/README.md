@@ -102,7 +102,7 @@ if (response.responseCode === ReferrerLeaderboardPageResponseCodes.Ok) {
       );
       console.log(`Max Base Revenue Share: ${leaderboardPage.rules.maxBaseRevenueShare}`);
       console.log(
-        `Tentative award for the top ranked referrer: ${firstReferrer !== null ? firstReferrer.cappedAwardValue : noReferrersFallback}`,
+        `Tentative award for the top ranked referrer: ${firstReferrer !== null ? firstReferrer.cappedAward : noReferrersFallback}`,
       );
     }
   }
@@ -146,7 +146,7 @@ if (response.responseCode === ReferrerMetricsEditionsResponseCodes.Ok) {
       console.log(
         `Referrer's total base revenue contribution: ${detail.referrer.totalBaseRevenueContribution}`,
       );
-      console.log(`Referrer's uncapped award value: ${detail.referrer.uncappedAwardValue}`);
+      console.log(`Referrer's uncapped award value: ${detail.referrer.uncappedAward}`);
     }
   }
 }

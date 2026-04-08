@@ -72,7 +72,7 @@ export interface RankedReferrerMetricsRevShareLimit extends ReferrerMetricsRevSh
    * Identifies if the referrer is eligible for an award under the {@link ReferralProgramRulesRevShareLimit}.
    *
    * Note: this is a purely rule-based eligibility predicate and does NOT guarantee
-   * `cappedAwardValue.amount > 0n` — a qualified referrer may still receive $0 if the
+   * `cappedAward.amount > 0n` — a qualified referrer may still receive $0 if the
    * award pool is already depleted by earlier referrers in the race.
    *
    * @invariant true if and only if `totalBaseRevenueContribution` is greater than or equal to
@@ -157,30 +157,30 @@ export const buildRankedReferrerMetricsRevShareLimit = (
 };
 
 /**
- * Extends {@link RankedReferrerMetricsRevShareLimit} with approximate award value.
+ * Extends {@link RankedReferrerMetricsRevShareLimit} with the referrer's uncapped and capped awards.
  */
 export interface AwardedReferrerMetricsRevShareLimit extends RankedReferrerMetricsRevShareLimit {
   /**
-   * The uncapped USDC award value for this referrer, computed as
+   * The uncapped USDC award for this referrer, computed as
    * `maxBaseRevenueShare × totalBaseRevenueContribution`.
    *
    * Represents what the referrer would receive if the pool were unlimited and the referrer were qualified.
    * Independent of the pool state, qualification status, and admin disqualification status.
    */
-  uncappedAwardValue: PriceUsdc;
+  uncappedAward: PriceUsdc;
 
   /**
-   * The USDC value of the referrer's (tentative) award.
+   * The referrer's (tentative) capped USDC award.
    *
    * This is the amount actually claimed from the pool by this referrer, capped by
    * the remaining pool at the time of their qualifying referrals.
    *
    * @invariant Guaranteed to be a valid PriceUsdc with amount between 0 and {@link ReferralProgramRulesRevShareLimit.awardPool.amount} (inclusive)
-   * @invariant Always <= uncappedAwardValue.amount
+   * @invariant Always <= uncappedAward.amount
    * @invariant Amount equal to 0 when {@link isAdminDisqualified} is true.
    * @invariant Amount equal to 0 when {@link isQualified} is false.
    */
-  cappedAwardValue: PriceUsdc;
+  cappedAward: PriceUsdc;
 }
 
 export const validateAwardedReferrerMetricsRevShareLimit = (
@@ -189,49 +189,47 @@ export const validateAwardedReferrerMetricsRevShareLimit = (
 ): void => {
   validateRankedReferrerMetricsRevShareLimit(metrics, rules);
 
-  makePriceUsdcSchema("AwardedReferrerMetricsRevShareLimit.uncappedAwardValue").parse(
-    metrics.uncappedAwardValue,
+  makePriceUsdcSchema("AwardedReferrerMetricsRevShareLimit.uncappedAward").parse(
+    metrics.uncappedAward,
   );
 
-  makePriceUsdcSchema("AwardedReferrerMetricsRevShareLimit.cappedAwardValue").parse(
-    metrics.cappedAwardValue,
-  );
+  makePriceUsdcSchema("AwardedReferrerMetricsRevShareLimit.cappedAward").parse(metrics.cappedAward);
 
-  if (metrics.isAdminDisqualified && metrics.cappedAwardValue.amount !== 0n) {
+  if (metrics.isAdminDisqualified && metrics.cappedAward.amount !== 0n) {
     throw new Error(
-      `AwardedReferrerMetricsRevShareLimit: cappedAwardValue.amount must be 0n for admin-disqualified referrers, got ${metrics.cappedAwardValue.amount.toString()}.`,
+      `AwardedReferrerMetricsRevShareLimit: cappedAward.amount must be 0n for admin-disqualified referrers, got ${metrics.cappedAward.amount.toString()}.`,
     );
   }
 
-  if (!metrics.isQualified && metrics.cappedAwardValue.amount !== 0n) {
+  if (!metrics.isQualified && metrics.cappedAward.amount !== 0n) {
     throw new Error(
-      `AwardedReferrerMetricsRevShareLimit: cappedAwardValue.amount must be 0n for unqualified referrers, got ${metrics.cappedAwardValue.amount.toString()}.`,
+      `AwardedReferrerMetricsRevShareLimit: cappedAward.amount must be 0n for unqualified referrers, got ${metrics.cappedAward.amount.toString()}.`,
     );
   }
 
-  if (metrics.cappedAwardValue.amount > rules.awardPool.amount) {
+  if (metrics.cappedAward.amount > rules.awardPool.amount) {
     throw new Error(
-      `AwardedReferrerMetricsRevShareLimit: cappedAwardValue.amount ${metrics.cappedAwardValue.amount.toString()} exceeds awardPool.amount ${rules.awardPool.amount.toString()}.`,
+      `AwardedReferrerMetricsRevShareLimit: cappedAward.amount ${metrics.cappedAward.amount.toString()} exceeds awardPool.amount ${rules.awardPool.amount.toString()}.`,
     );
   }
 
-  if (metrics.cappedAwardValue.amount > metrics.uncappedAwardValue.amount) {
+  if (metrics.cappedAward.amount > metrics.uncappedAward.amount) {
     throw new Error(
-      `AwardedReferrerMetricsRevShareLimit: cappedAwardValue.amount ${metrics.cappedAwardValue.amount.toString()} exceeds uncappedAwardValue.amount ${metrics.uncappedAwardValue.amount.toString()}.`,
+      `AwardedReferrerMetricsRevShareLimit: cappedAward.amount ${metrics.cappedAward.amount.toString()} exceeds uncappedAward.amount ${metrics.uncappedAward.amount.toString()}.`,
     );
   }
 };
 
 export const buildAwardedReferrerMetricsRevShareLimit = (
   referrer: RankedReferrerMetricsRevShareLimit,
-  uncappedAwardValue: PriceUsdc,
-  cappedAwardValue: PriceUsdc,
+  uncappedAward: PriceUsdc,
+  cappedAward: PriceUsdc,
   rules: ReferralProgramRulesRevShareLimit,
 ): AwardedReferrerMetricsRevShareLimit => {
   const result = {
     ...referrer,
-    uncappedAwardValue,
-    cappedAwardValue,
+    uncappedAward,
+    cappedAward,
   } satisfies AwardedReferrerMetricsRevShareLimit;
 
   validateAwardedReferrerMetricsRevShareLimit(result, rules);
@@ -317,21 +315,21 @@ export const validateUnrankedReferrerMetricsRevShareLimit = (
     );
   }
 
-  makePriceUsdcSchema("UnrankedReferrerMetricsRevShareLimit.uncappedAwardValue").parse(
-    metrics.uncappedAwardValue,
+  makePriceUsdcSchema("UnrankedReferrerMetricsRevShareLimit.uncappedAward").parse(
+    metrics.uncappedAward,
   );
-  if (metrics.uncappedAwardValue.amount !== 0n) {
+  if (metrics.uncappedAward.amount !== 0n) {
     throw new Error(
-      `Invalid UnrankedReferrerMetricsRevShareLimit: uncappedAwardValue.amount must be 0n, got: ${metrics.uncappedAwardValue.amount.toString()}.`,
+      `Invalid UnrankedReferrerMetricsRevShareLimit: uncappedAward.amount must be 0n, got: ${metrics.uncappedAward.amount.toString()}.`,
     );
   }
 
-  makePriceUsdcSchema("UnrankedReferrerMetricsRevShareLimit.cappedAwardValue").parse(
-    metrics.cappedAwardValue,
+  makePriceUsdcSchema("UnrankedReferrerMetricsRevShareLimit.cappedAward").parse(
+    metrics.cappedAward,
   );
-  if (metrics.cappedAwardValue.amount !== 0n) {
+  if (metrics.cappedAward.amount !== 0n) {
     throw new Error(
-      `Invalid UnrankedReferrerMetricsRevShareLimit: cappedAwardValue.amount must be 0n, got: ${metrics.cappedAwardValue.amount.toString()}.`,
+      `Invalid UnrankedReferrerMetricsRevShareLimit: cappedAward.amount must be 0n, got: ${metrics.cappedAward.amount.toString()}.`,
     );
   }
 };
@@ -353,8 +351,8 @@ export const buildUnrankedReferrerMetricsRevShareLimit = (
     totalBaseRevenueContribution: priceUsdc(0n),
     rank: null,
     isQualified: false,
-    uncappedAwardValue: priceUsdc(0n),
-    cappedAwardValue: priceUsdc(0n),
+    uncappedAward: priceUsdc(0n),
+    cappedAward: priceUsdc(0n),
     isAdminDisqualified: disqualification !== null,
     adminDisqualificationReason: disqualification?.reason ?? null,
   } satisfies UnrankedReferrerMetricsRevShareLimit;

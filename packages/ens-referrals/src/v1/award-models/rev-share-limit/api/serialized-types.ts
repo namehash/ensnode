@@ -46,15 +46,12 @@ export interface SerializedAggregatedReferrerMetricsRevShareLimit
 export interface SerializedAwardedReferrerMetricsRevShareLimit
   extends Omit<
     AwardedReferrerMetricsRevShareLimit,
-    | "totalRevenueContribution"
-    | "totalBaseRevenueContribution"
-    | "uncappedAwardValue"
-    | "cappedAwardValue"
+    "totalRevenueContribution" | "totalBaseRevenueContribution" | "uncappedAward" | "cappedAward"
   > {
   totalRevenueContribution: SerializedPriceEth;
   totalBaseRevenueContribution: SerializedPriceUsdc;
-  uncappedAwardValue: SerializedPriceUsdc;
-  cappedAwardValue: SerializedPriceUsdc;
+  uncappedAward: SerializedPriceUsdc;
+  cappedAward: SerializedPriceUsdc;
 }
 
 /**
@@ -63,15 +60,12 @@ export interface SerializedAwardedReferrerMetricsRevShareLimit
 export interface SerializedUnrankedReferrerMetricsRevShareLimit
   extends Omit<
     UnrankedReferrerMetricsRevShareLimit,
-    | "totalRevenueContribution"
-    | "totalBaseRevenueContribution"
-    | "uncappedAwardValue"
-    | "cappedAwardValue"
+    "totalRevenueContribution" | "totalBaseRevenueContribution" | "uncappedAward" | "cappedAward"
   > {
   totalRevenueContribution: SerializedPriceEth;
   totalBaseRevenueContribution: SerializedPriceUsdc;
-  uncappedAwardValue: SerializedPriceUsdc;
-  cappedAwardValue: SerializedPriceUsdc;
+  uncappedAward: SerializedPriceUsdc;
+  cappedAward: SerializedPriceUsdc;
 }
 
 /**
