@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { asInterpretedName } from "./interpreted-names-and-labels";
 import { beautifyName, ENS_ROOT, getNameHierarchy, getParentNameFQDN } from "./names";
 import type { Name, NormalizedName } from "./types";
 
@@ -38,15 +39,15 @@ describe("names", () => {
     });
 
     it("returns ENS Root for top-level name", () => {
-      expect(getParentNameFQDN("eth")).toStrictEqual(ENS_ROOT);
+      expect(getParentNameFQDN(asInterpretedName("eth"))).toStrictEqual(ENS_ROOT);
     });
 
     it("returns FQDN for 2nd-level name", () => {
-      expect(getParentNameFQDN("base.eth")).toStrictEqual("eth");
+      expect(getParentNameFQDN(asInterpretedName("base.eth"))).toStrictEqual("eth");
     });
 
     it("returns FQDN for 3rd-level name", () => {
-      expect(getParentNameFQDN("test.base.eth")).toStrictEqual("base.eth");
+      expect(getParentNameFQDN(asInterpretedName("test.base.eth"))).toStrictEqual("base.eth");
     });
   });
 
