@@ -8,9 +8,9 @@ const NORMALIZED_LABELS = [
   "test",
   "eth",
   "base",
-  "\u{1F525}",
-  "test\u{1F382}",
-  "caf\u00E9",
+  "🔥",
+  "test🎂",
+  "café",
   "sub",
   "a".repeat(512), // Long normalized
 ];
@@ -19,8 +19,8 @@ const UNNORMALIZED_LABELS = [
   "VITALIK", // normalizable but not normalized
   "", // empty string
   "abc.123", // contains full-stop
-  "\u0435thchina", // \u0435thchina
-  "\u0435thgold", // same situation
+  "еthchina", // \u0435thchina
+  "еthgold", // same situation
   "Vitalik", // Uppercase
   "Example", // Uppercase
   "TEST", // Uppercase

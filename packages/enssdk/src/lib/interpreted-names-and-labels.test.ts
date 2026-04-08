@@ -10,7 +10,7 @@ import {
   parsePartialInterpretedName,
 } from "./interpreted-names-and-labels";
 import { encodeLabelHash, labelhashLiteralLabel } from "./labelhash";
-import type { InterpretedLabel, InterpretedName, Name } from "./types";
+import type { InterpretedLabel, InterpretedName, LiteralLabel, Name } from "./types";
 
 const ENCODED_LABELHASH_LABEL = /^\[[\da-f]{64}\]$/;
 
@@ -20,9 +20,9 @@ const NORMALIZED_LABELS = [
   "test",
   "eth",
   "base",
-  "\u{1F525}",
-  "test\u{1F382}",
-  "caf\u00E9",
+  "🔥",
+  "test🎂",
+  "café",
   "sub",
   "a".repeat(512), // Long normalized
 ].map(asLiteralLabel);
@@ -91,15 +91,13 @@ describe("interpretation", () => {
     });
 
     it("correctly interprets an empty array of labels", () => {
-      expect(literalLabelsToInterpretedName(([] as string[]).map(asLiteralLabel))).toEqual("");
+      expect(literalLabelsToInterpretedName([] as LiteralLabel[])).toEqual("");
     });
   });
 
   describe("interpretedLabelsToInterpretedName", () => {
     it("correctly interprets an empty array of labels", () => {
-      expect(interpretedLabelsToInterpretedName(([] as string[]).map(asInterpretedLabel))).toEqual(
-        "",
-      );
+      expect(interpretedLabelsToInterpretedName([] as InterpretedLabel[])).toEqual("");
     });
 
     it("correctly interprets a single label", () => {
@@ -111,12 +109,9 @@ describe("interpretation", () => {
       const interpretedLabelThatLooksLikeALabelHash = literalLabelToInterpretedLabel(literalLabel);
 
       expect(
-        interpretedLabelsToInterpretedName([
-          asInterpretedLabel("a"),
-          asInterpretedLabel("b"),
-          asInterpretedLabel("c"),
-          interpretedLabelThatLooksLikeALabelHash,
-        ]),
+        interpretedLabelsToInterpretedName(
+          ["a", "b", "c", interpretedLabelThatLooksLikeALabelHash].map(asInterpretedLabel),
+        ),
       ).toEqual(`a.b.c.${interpretedLabelThatLooksLikeALabelHash}`);
     });
   });
@@ -129,7 +124,7 @@ describe("interpretation", () => {
       ["t", [], "t"],
       ["test", [], "test"],
       ["exam", [], "exam"],
-      ["\u{1F525}", [], "\u{1F525}"],
+      ["🔥", [], "🔥"],
       // concrete TLD with empty partial
       ["eth.", ["eth"], ""],
       ["base.", ["base"], ""],
@@ -198,8 +193,8 @@ describe("interpretation", () => {
       // with encoded labelhash in parent
       ["sub", `${EXAMPLE_ENCODED_LABEL_HASH}.eth`, `sub.${EXAMPLE_ENCODED_LABEL_HASH}.eth`],
       // emoji labels
-      ["\u{1F525}", "eth", "\u{1F525}.eth"],
-      ["wallet", "\u{1F525}.eth", "wallet.\u{1F525}.eth"],
+      ["🔥", "eth", "🔥.eth"],
+      ["wallet", "🔥.eth", "wallet.🔥.eth"],
     ] as [InterpretedLabel, InterpretedName | undefined, InterpretedName][])(
       "constructSubInterpretedName(%j, %j) → %j",
       (label, parent, expected) => {

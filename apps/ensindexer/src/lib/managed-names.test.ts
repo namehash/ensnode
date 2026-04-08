@@ -1,4 +1,4 @@
-import { type AccountId, asInterpretedName, namehashInterpretedName } from "enssdk";
+import { type AccountId, ETH_NODE } from "enssdk";
 import { zeroAddress } from "viem";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -36,8 +36,6 @@ const controller = getDatasourceContract(
   DatasourceNames.ENSRoot,
   "LegacyEthRegistrarController",
 );
-
-const ETH_NODE = namehashInterpretedName(asInterpretedName("eth"));
 
 describe("managed-names", () => {
   beforeEach(() => {

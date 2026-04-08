@@ -7,9 +7,7 @@ import { asLiteralLabel } from "./interpreted-names-and-labels";
 import { encodeLabelHash, labelhashLiteralLabel } from "./labelhash";
 import type { DNSEncodedName } from "./types";
 
-const MULTI_BYTE_UNICODE_NAMES = [
-  "\u{1F469}\u{1F3FC}\u200D\u2764\u200D\u{1F48B}\u200D\u{1F468}\u{1F3FC}.eth",
-];
+const MULTI_BYTE_UNICODE_NAMES = ["👩🏼‍❤‍💋‍👨🏼.eth"];
 
 describe("decodeDNSEncodedName", () => {
   it("handles root node", () => {

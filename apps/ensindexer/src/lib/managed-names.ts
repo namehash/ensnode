@@ -152,7 +152,9 @@ export const getManagedName = (contract: AccountId): { name: InterpretedName; no
       const namespaceSpecific = MANAGED_NAME_BY_NAMESPACE[config.namespace]?.[managedName];
 
       // use the namespace-specific Managed Name if specified, otherwise use the default from CONTRACTS_BY_MANAGED_NAME
-      const name = asInterpretedName(namespaceSpecific ?? managedName);
+      // NOTE: we cast to InterpretedName directly to avoid the overhead of asInterpretedName and
+      // both namespaceSpecific and managedName are guaranteed to be InterpretedName (see above)
+      const name = (namespaceSpecific ?? managedName) as InterpretedName;
       const node = cachedNamehash(name);
 
       return { name, node };

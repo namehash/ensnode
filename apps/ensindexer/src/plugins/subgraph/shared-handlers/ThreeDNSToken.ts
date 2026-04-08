@@ -80,7 +80,7 @@ function decodeFQDN(fqdn: DNSEncodedLiteralName): {
   }
 
   // due the invariant above, we know that all of the labels are normalized (and therefore Interpreted Labels)
-  const interpretedLabels = literalLabels.map((l) => asInterpretedLabel(l));
+  const interpretedLabels = literalLabels.map(asInterpretedLabel);
 
   return {
     // biome-ignore lint/style/noNonNullAssertion: ok due to length invariant above
