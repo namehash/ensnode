@@ -342,8 +342,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/ponder-subgraph
       '@hono/node-server':
-        specifier: ^1.19.10
-        version: 1.19.11(hono@4.12.7)
+        specifier: ^1.19.13
+        version: 1.19.13(hono@4.12.7)
       '@hono/otel':
         specifier: ^0.2.2
         version: 0.2.2(hono@4.12.7)
@@ -572,8 +572,8 @@ importers:
         specifier: ^5.0.0
         version: 5.0.5
       '@hono/node-server':
-        specifier: ^1.19.10
-        version: 1.19.11(hono@4.12.7)
+        specifier: ^1.19.13
+        version: 1.19.13(hono@4.12.7)
       classic-level:
         specifier: ^1.4.1
         version: 1.4.1
@@ -643,8 +643,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/shared-configs
       '@hono/node-server':
-        specifier: ^1.19.10
-        version: 1.19.11(hono@4.12.7)
+        specifier: ^1.19.13
+        version: 1.19.13(hono@4.12.7)
       '@types/node':
         specifier: 'catalog:'
         version: 24.10.9
@@ -2728,8 +2728,8 @@ packages:
     peerDependencies:
       react: '>= 16 || ^19.0.0-rc'
 
-  '@hono/node-server@1.19.11':
-    resolution: {integrity: sha512-dr8/3zEaB+p0D2n/IUrlPF1HZm586qgJNXK1a9fhg/PzdtkK7Ksd5l312tJX2yBuALqDYBlG20QEbayqPyxn+g==}
+  '@hono/node-server@1.19.13':
+    resolution: {integrity: sha512-TsQLe4i2gvoTtrHje625ngThGBySOgSK3Xo2XRYOdqGN1teR8+I7vchQC46uLJi8OF62YTYA3AhSpumtkhsaKQ==}
     engines: {node: '>=18.14.1'}
     peerDependencies:
       hono: ^4
@@ -11390,7 +11390,7 @@ snapshots:
     dependencies:
       react: 19.2.1
 
-  '@hono/node-server@1.19.11(hono@4.12.7)':
+  '@hono/node-server@1.19.13(hono@4.12.7)':
     dependencies:
       hono: 4.12.7
 
@@ -13774,6 +13774,14 @@ snapshots:
       '@vitest/utils': 4.0.5
       chai: 6.2.0
       tinyrainbow: 3.0.3
+
+  '@vitest/mocker@4.0.5(vite@6.4.2(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.3))':
+    dependencies:
+      '@vitest/spy': 4.0.5
+      estree-walker: 3.0.3
+      magic-string: 0.30.21
+    optionalDependencies:
+      vite: 6.4.2(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.3)
 
   '@vitest/mocker@4.0.5(vite@6.4.2(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.3))':
     dependencies:
@@ -17365,7 +17373,7 @@ snapshots:
       '@escape.tech/graphql-armor-max-aliases': 2.6.2
       '@escape.tech/graphql-armor-max-depth': 2.4.2
       '@escape.tech/graphql-armor-max-tokens': 2.5.1
-      '@hono/node-server': 1.19.11(hono@4.12.7)
+      '@hono/node-server': 1.19.13(hono@4.12.7)
       '@ponder/utils': 0.2.17(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))
       abitype: 0.10.3(typescript@5.9.3)(zod@4.3.6)
       ansi-escapes: 7.1.1
@@ -18984,7 +18992,7 @@ snapshots:
   vitest@4.0.5(@types/debug@4.1.12)(@types/node@24.10.9)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.3):
     dependencies:
       '@vitest/expect': 4.0.5
-      '@vitest/mocker': 4.0.5(vite@6.4.2(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.3))
+      '@vitest/mocker': 4.0.5(vite@6.4.2(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.3))
       '@vitest/pretty-format': 4.0.5
       '@vitest/runner': 4.0.5
       '@vitest/snapshot': 4.0.5
