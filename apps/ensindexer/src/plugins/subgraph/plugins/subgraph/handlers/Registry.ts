@@ -1,6 +1,6 @@
-import { type Node, ROOT_NODE } from "enssdk";
+import { makeSubdomainNode, type Node, ROOT_NODE } from "enssdk";
 
-import { makeSubdomainNode, PluginName } from "@ensnode/ensnode-sdk";
+import { PluginName } from "@ensnode/ensnode-sdk";
 
 import {
   addOnchainEventListener,

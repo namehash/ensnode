@@ -1,4 +1,4 @@
-import { DEFAULT_EVM_CHAIN_ID, labelhash } from "enssdk";
+import { asInterpretedLabel, DEFAULT_EVM_CHAIN_ID, labelhashInterpretedLabel } from "enssdk";
 import { zeroAddress } from "viem";
 import { describe, expect, it } from "vitest";
 import { ZodError } from "zod/v4";
@@ -17,7 +17,9 @@ describe("params.name", () => {
   it("requires normalized name", () => {
     expect(() => params.name.parse("Vitalik.eth")).toThrow(ZodError);
     expect(() => params.name.parse("unnormalizable|name.eth")).toThrow(ZodError);
-    expect(() => params.name.parse(`[${labelhash("vitalik")}].eth`)).toThrow(ZodError);
+    expect(() =>
+      params.name.parse(`[${labelhashInterpretedLabel(asInterpretedLabel("vitalik"))}].eth`),
+    ).toThrow(ZodError);
   });
 });
 

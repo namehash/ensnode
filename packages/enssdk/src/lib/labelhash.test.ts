@@ -1,6 +1,7 @@
 import { keccak256, labelhash, stringToBytes } from "viem";
 import { describe, expect, it } from "vitest";
 
+import { asLiteralLabel } from "./interpreted-names-and-labels";
 import { encodeLabelHash, isLabelHash, labelhashLiteralLabel } from "./labelhash";
 import type { LiteralLabel } from "./types";
 
@@ -50,11 +51,11 @@ describe("labelhashLiteralLabel", () => {
   });
 
   it("labelhashes literal label correctly", () => {
-    expect(labelhashLiteralLabel("example" as LiteralLabel)).toEqual(labelhash("example"));
+    expect(labelhashLiteralLabel(asLiteralLabel("example"))).toEqual(labelhash("example"));
   });
 
   it("labelhashes encoded-labelhash-looking-strings as literal labels", () => {
-    const encodedLabelHashLookingLabel = encodeLabelHash(labelhash("whatever")) as LiteralLabel;
+    const encodedLabelHashLookingLabel = asLiteralLabel(encodeLabelHash(labelhash("whatever")));
     expect(labelhashLiteralLabel(encodedLabelHashLookingLabel)).not.toEqual(
       labelhash(encodedLabelHashLookingLabel),
     );

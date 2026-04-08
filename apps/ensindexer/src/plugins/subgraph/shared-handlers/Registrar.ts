@@ -2,6 +2,9 @@ import config from "@/config";
 
 import {
   type Address,
+  asInterpretedLabel,
+  asLiteralLabel,
+  constructSubInterpretedName,
   encodeLabelHash,
   type InterpretedLabel,
   type InterpretedName,
@@ -9,11 +12,12 @@ import {
   type LabelHash,
   type LiteralLabel,
   literalLabelToInterpretedLabel,
+  makeSubdomainNode,
   type SubgraphInterpretedLabel,
   type SubgraphInterpretedName,
 } from "enssdk";
 
-import { makeSubdomainNode, type PluginName } from "@ensnode/ensnode-sdk";
+import type { PluginName } from "@ensnode/ensnode-sdk";
 
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
@@ -55,7 +59,7 @@ export const makeRegistrarHandlers = ({ pluginName }: { pluginName: PluginName }
         // see https://ensnode.io/docs/reference/terminology#interpreted-label
         literalLabelToInterpretedLabel(label);
 
-    const { node: managedNode, name: managedName } = getManagedName(
+    const { name: managedName, node: managedNode } = getManagedName(
       getThisAccountId(context, event),
     );
     const node = makeSubdomainNode(labelHash, managedNode);
@@ -173,14 +177,14 @@ export const makeRegistrarHandlers = ({ pluginName }: { pluginName: PluginName }
         // Interpret the `healedLabel` Literal Label into an Interpreted Label
         // see https://ensnode.io/docs/reference/terminology#literal-label
         // see https://ensnode.io/docs/reference/terminology#interpreted-label
-        label = (
+        label = asInterpretedLabel(
           healedLabel !== null
             ? literalLabelToInterpretedLabel(healedLabel)
-            : encodeLabelHash(labelHash)
-        ) as InterpretedLabel;
+            : encodeLabelHash(labelHash),
+        );
 
-        // a name constructed of Interpreted Labels is Interpreted
-        name = `${label}.${managedName}` as InterpretedName;
+        // construct the InterpretedName with InterpretedLabel and parent's InterpretedName
+        name = constructSubInterpretedName(label, managedName);
       }
 
       // update Domain
@@ -224,8 +228,8 @@ export const makeRegistrarHandlers = ({ pluginName }: { pluginName: PluginName }
         cost: bigint;
       }>;
     }) {
-      const { label: _label, labelHash, cost } = event.args;
-      const label = _label as LiteralLabel; // NameRegistered emits Literal Labels
+      const { labelHash, cost } = event.args;
+      const label = asLiteralLabel(event.args.label); // NameRegistered emits Literal Labels
 
       await setNamePreimage(context, { ...event, args: { label, labelHash, cost } });
     },
@@ -241,8 +245,8 @@ export const makeRegistrarHandlers = ({ pluginName }: { pluginName: PluginName }
         cost: bigint;
       }>;
     }) {
-      const { label: _label, labelHash, cost } = event.args;
-      const label = _label as LiteralLabel; // NameRenewed emits Literal Labels
+      const { labelHash, cost } = event.args;
+      const label = asLiteralLabel(event.args.label); // NameRenewed emits Literal Labels
 
       await setNamePreimage(context, { ...event, args: { label, labelHash, cost } });
     },

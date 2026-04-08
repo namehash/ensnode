@@ -1,7 +1,7 @@
 import { isHex } from "viem";
 
-import { isNormalizedLabel } from "./is-normalized";
-import { encodeLabelHash, labelhash, labelhashLiteralLabel } from "./labelhash";
+import { encodeLabelHash, labelhashInterpretedLabel, labelhashLiteralLabel } from "./labelhash";
+import { isNormalizedLabel } from "./normalization";
 import type {
   InterpretedLabel,
   InterpretedName,
@@ -99,7 +99,15 @@ export function isInterpetedLabel(label: Label): label is InterpretedLabel {
   return isNormalizedLabel(label);
 }
 
+/**
+ * Determines whether `name` is an {@link InterpretedName}.
+ * The root name ("") is a valid InterpretedName.
+ *
+ * @param name
+ * @returns
+ */
 export function isInterpretedName(name: Name): name is InterpretedName {
+  if (name === "") return true;
   return name.split(".").every(isInterpetedLabel);
 }
 
@@ -120,7 +128,7 @@ export function interpretedLabelsToLabelHashPath(labels: InterpretedLabel[]): La
       if (maybeLabelHash !== null) return maybeLabelHash;
 
       // otherwise, labelhash it
-      return labelhash(label);
+      return labelhashInterpretedLabel(label);
     })
     .toReversed();
 }
@@ -172,4 +180,44 @@ export function parsePartialInterpretedName(partialInterpretedName: Name): {
   }
 
   return { concrete, partial };
+}
+
+/**
+ * Validates and casts a string to an {@link InterpretedLabel}.
+ * An InterpretedLabel is either a normalized label or an EncodedLabelHash.
+ *
+ * @throws if the input is not a valid InterpretedLabel
+ */
+export function asInterpretedLabel(label: string): InterpretedLabel {
+  if (!isInterpetedLabel(label as Label)) {
+    throw new Error(`Not a valid InterpretedLabel: '${label}'`);
+  }
+
+  return label as InterpretedLabel;
+}
+
+/**
+ * Validates and casts a string to an {@link InterpretedName}.
+ * An InterpretedName is composed entirely of InterpretedLabels joined by dots.
+ *
+ * @throws if the input is not a valid InterpretedName
+ */
+export function asInterpretedName(name: string): InterpretedName {
+  if (!isInterpretedName(name as Name)) {
+    throw new Error(`Not a valid InterpretedName: '${name}'`);
+  }
+
+  return name as InterpretedName;
+}
+
+/**
+ * Validates and casts a string to a {@link LiteralLabel}.
+ * A LiteralLabel is a label as it literally appears onchain.
+ *
+ * @throws if the input is empty
+ */
+export function asLiteralLabel(label: string): LiteralLabel {
+  if (label === "") throw new Error("LiteralLabel must not be empty");
+
+  return label as LiteralLabel;
 }

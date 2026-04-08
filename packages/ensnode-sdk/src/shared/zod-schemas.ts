@@ -10,7 +10,7 @@ import type {
   InterpretedName,
   Node,
 } from "enssdk";
-import { asLowerCaseAddress } from "enssdk";
+import { asLowerCaseAddress, reinterpretName } from "enssdk";
 import { isAddress, isHex, size } from "viem";
 /**
  * All zod schemas we define must remain internal implementation details.
@@ -30,7 +30,6 @@ import {
   type PriceEth,
   type PriceUsdc,
 } from "./currencies";
-import { reinterpretName } from "./interpretation/reinterpretation";
 import type { BlockRef, Datetime, Duration, UnixTimestamp } from "./types";
 
 /**

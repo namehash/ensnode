@@ -1,4 +1,4 @@
-import type { LabelHash, LiteralLabel } from "enssdk";
+import { asLiteralLabel, type LabelHash, type LiteralLabel } from "enssdk";
 import pRetry from "p-retry";
 
 import { type EnsRainbow, ErrorCode, isHealError } from "@ensnode/ensrainbow-sdk";
@@ -97,5 +97,5 @@ export async function labelByLabelHash(labelHash: LabelHash): Promise<LiteralLab
     );
   }
 
-  return response.label as LiteralLabel;
+  return asLiteralLabel(response.label);
 }

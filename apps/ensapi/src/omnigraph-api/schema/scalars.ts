@@ -1,11 +1,11 @@
 import {
   type Address,
+  asInterpretedLabel,
+  asInterpretedName,
   type ChainId,
   type CoinType,
   type DomainId,
   type Hex,
-  type InterpretedLabel,
-  type InterpretedName,
   isInterpetedLabel,
   isInterpretedName,
   type Name,
@@ -108,7 +108,7 @@ builder.scalarType("InterpretedName", {
           });
         }
       })
-      .transform((val) => val as InterpretedName)
+      .transform((val) => asInterpretedName(val))
       .parse(value),
 });
 
@@ -127,7 +127,7 @@ builder.scalarType("InterpretedLabel", {
           });
         }
       })
-      .transform((val) => val as InterpretedLabel)
+      .transform((val) => asInterpretedLabel(val))
       .parse(value),
 });
 

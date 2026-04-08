@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  asInterpretedLabel,
+  asLiteralLabel,
   constructSubInterpretedName,
   interpretedLabelsToInterpretedName,
   literalLabelsToInterpretedName,
@@ -8,7 +10,7 @@ import {
   parsePartialInterpretedName,
 } from "./interpreted-names-and-labels";
 import { encodeLabelHash, labelhashLiteralLabel } from "./labelhash";
-import type { InterpretedLabel, InterpretedName, LiteralLabel, Name } from "./types";
+import type { InterpretedLabel, InterpretedName, Name } from "./types";
 
 const ENCODED_LABELHASH_LABEL = /^\[[\da-f]{64}\]$/;
 
@@ -23,7 +25,7 @@ const NORMALIZED_LABELS = [
   "caf\u00E9",
   "sub",
   "a".repeat(512), // Long normalized
-] as LiteralLabel[];
+].map(asLiteralLabel);
 
 const UNNORMALIZED_LABELS = [
   "", // Empty string
@@ -45,14 +47,14 @@ const UNNORMALIZED_LABELS = [
   "test\u200B", // Zero-width space
   "test\u202E", // RTL override
   "A".repeat(300), // Long non-normalized
-] as LiteralLabel[];
+].map(asLiteralLabel);
 
 const EXAMPLE_ENCODED_LABEL_HASH = encodeLabelHash(
-  labelhashLiteralLabel("example" as LiteralLabel),
+  labelhashLiteralLabel(asLiteralLabel("example")),
 );
 
 describe("interpretation", () => {
-  describe("interpretLiteralLabel", () => {
+  describe("literalLabelToInterpretedLabel", () => {
     it("should return normalized labels unchanged", () => {
       NORMALIZED_LABELS.forEach((label) =>
         expect(literalLabelToInterpretedLabel(label)).toBe(label),
@@ -66,57 +68,56 @@ describe("interpretation", () => {
     });
   });
 
-  describe("interpretLiteralLabelsIntoInterpretedName", () => {
+  describe("literalLabelsToInterpretedName", () => {
     it("correctly interprets labels with period", () => {
-      expect(literalLabelsToInterpretedName(["a.b", "c"] as LiteralLabel[])).toEqual(
-        `${encodeLabelHash(labelhashLiteralLabel("a.b" as LiteralLabel))}.c`,
+      expect(literalLabelsToInterpretedName(["a.b", "c"].map(asLiteralLabel))).toEqual(
+        `${encodeLabelHash(labelhashLiteralLabel(asLiteralLabel("a.b")))}.c`,
       );
     });
 
     it("correctly interprets labels with NULL", () => {
-      expect(literalLabelsToInterpretedName(["\0", "c"] as LiteralLabel[])).toEqual(
-        `${encodeLabelHash(labelhashLiteralLabel("\0" as LiteralLabel))}.c`,
+      expect(literalLabelsToInterpretedName(["\0", "c"].map(asLiteralLabel))).toEqual(
+        `${encodeLabelHash(labelhashLiteralLabel(asLiteralLabel("\0")))}.c`,
       );
     });
 
     it("correctly interprets encoded-labelhash-looking-strings", () => {
-      const literalLabelThatLooksLikeALabelHash = encodeLabelHash(
-        labelhashLiteralLabel("test" as LiteralLabel),
-      ) as LiteralLabel;
+      const literalLabelThatLooksLikeALabelHash = asLiteralLabel(
+        encodeLabelHash(labelhashLiteralLabel(asLiteralLabel("test"))),
+      );
 
       expect(
-        literalLabelsToInterpretedName([
-          literalLabelThatLooksLikeALabelHash,
-          "c",
-        ] as LiteralLabel[]),
+        literalLabelsToInterpretedName([literalLabelThatLooksLikeALabelHash, asLiteralLabel("c")]),
       ).toEqual(`${encodeLabelHash(labelhashLiteralLabel(literalLabelThatLooksLikeALabelHash))}.c`);
     });
 
     it("correctly interprets an empty array of labels", () => {
-      expect(literalLabelsToInterpretedName([] as LiteralLabel[])).toEqual("");
+      expect(literalLabelsToInterpretedName(([] as string[]).map(asLiteralLabel))).toEqual("");
     });
   });
 
   describe("interpretedLabelsToInterpretedName", () => {
     it("correctly interprets an empty array of labels", () => {
-      expect(interpretedLabelsToInterpretedName([] as InterpretedLabel[])).toEqual("");
+      expect(interpretedLabelsToInterpretedName(([] as string[]).map(asInterpretedLabel))).toEqual(
+        "",
+      );
     });
 
     it("correctly interprets a single label", () => {
-      expect(interpretedLabelsToInterpretedName(["a"] as InterpretedLabel[])).toEqual("a");
+      expect(interpretedLabelsToInterpretedName(["a"].map(asInterpretedLabel))).toEqual("a");
     });
 
     it("correctly interprets a multiple labels, including encoded labelhashes", () => {
-      const literalLabel = "unnormalized.label" as LiteralLabel;
+      const literalLabel = asLiteralLabel("unnormalized.label");
       const interpretedLabelThatLooksLikeALabelHash = literalLabelToInterpretedLabel(literalLabel);
 
       expect(
         interpretedLabelsToInterpretedName([
-          "a",
-          "b",
-          "c",
+          asInterpretedLabel("a"),
+          asInterpretedLabel("b"),
+          asInterpretedLabel("c"),
           interpretedLabelThatLooksLikeALabelHash,
-        ] as InterpretedLabel[]),
+        ]),
       ).toEqual(`a.b.c.${interpretedLabelThatLooksLikeALabelHash}`);
     });
   });

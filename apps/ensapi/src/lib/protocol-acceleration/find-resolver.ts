@@ -5,12 +5,13 @@ import { SpanStatusCode, trace } from "@opentelemetry/api";
 import {
   type AccountId,
   type Address,
+  asInterpretedName,
   type DomainId,
   getNameHierarchy,
   type Name,
   type Node,
   type NormalizedName,
-  namehash,
+  namehashInterpretedName,
 } from "enssdk";
 import { isAddressEqual, type PublicClient, toHex, zeroAddress } from "viem";
 import { packetToBytes } from "viem/ens";
@@ -193,7 +194,7 @@ async function findResolverWithIndex(
 
       // 2. compute domainId of each node
       // NOTE: this is currently ENSv1-specific
-      const nodes = names.map((name) => namehash(name) as Node);
+      const nodes = names.map((name) => namehashInterpretedName(asInterpretedName(name)) as Node);
       const domainIds = nodes as DomainId[];
 
       // 3. for each domain, find its associated resolver in the selected registry

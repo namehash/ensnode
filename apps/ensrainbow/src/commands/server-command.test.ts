@@ -1,7 +1,7 @@
 import { promises as fs } from "node:fs";
 
 import { serve } from "@hono/node-server";
-import { labelhash } from "enssdk";
+import { asLiteralLabel, labelhashLiteralLabel } from "enssdk";
 import type { Hono } from "hono";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
@@ -67,8 +67,8 @@ describe("Server Command Tests", () => {
 
   describe("GET /v1/heal/:labelHash", () => {
     it("should return the label for a valid labelHash", async () => {
-      const validLabel = "test-label";
-      const validLabelHash = labelhash(validLabel);
+      const validLabel = asLiteralLabel("test-label");
+      const validLabelHash = labelhashLiteralLabel(validLabel);
 
       // Add test data
       await db.addRainbowRecord(validLabel, 0);
@@ -208,7 +208,7 @@ describe("Server Command Tests", () => {
   describe("CORS headers for /v1/* routes", () => {
     it("should return CORS headers for /v1/* routes", async () => {
       const validLabel = "test-label";
-      const validLabelHash = labelhash(validLabel);
+      const validLabelHash = labelhashLiteralLabel(asLiteralLabel(validLabel));
 
       // Add test data
       await db.addRainbowRecord(validLabel, 0);

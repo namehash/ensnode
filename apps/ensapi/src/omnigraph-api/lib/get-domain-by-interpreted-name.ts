@@ -10,7 +10,7 @@ import {
   interpretedNameToInterpretedLabels,
   type LabelHash,
   makeENSv1DomainId,
-  namehash,
+  namehashInterpretedName,
   type RegistryId,
 } from "enssdk";
 
@@ -93,13 +93,12 @@ export async function getDomainIdByInterpretedName(
  * Retrieves the ENSv1DomainId for the provided `name`, if exists.
  */
 async function v1_getDomainIdByInterpretedName(name: InterpretedName): Promise<DomainId | null> {
-  const node = namehash(name);
-  const domainId = makeENSv1DomainId(node);
+  const domainId = makeENSv1DomainId(namehashInterpretedName(name));
 
   const domain = await ensDb.query.v1Domain.findFirst({ where: (t, { eq }) => eq(t.id, domainId) });
   const exists = domain !== undefined;
 
-  v1Logger.debug({ node, exists });
+  v1Logger.debug({ domainId, exists });
 
   return exists ? domainId : null;
 }

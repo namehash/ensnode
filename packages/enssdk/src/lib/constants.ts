@@ -1,20 +1,10 @@
-import { zeroHash } from "viem";
-
-import { namehash } from "./namehash";
+import { asInterpretedName } from "./interpreted-names-and-labels";
+import { namehashInterpretedName } from "./namehash";
 import type { Node } from "./types";
 
-export const ROOT_NODE: Node = namehash("");
-export const ETH_NODE: Node = namehash("eth");
-export const BASENAMES_NODE: Node = namehash("base.eth");
-export const LINEANAMES_NODE: Node = namehash("linea.eth");
-export const ADDR_REVERSE_NODE: Node = namehash("addr.reverse");
-
-/**
- * NODE_ANY is a placeholder Node used in the context of DedicatedResolvers — IResolver events are
- * emitted with NODE_ANY as the `node` for which the records are issued, but the DedicatedResolver
- * returns those records regardless of the name used for record resolution.
- */
-export const NODE_ANY: Node = zeroHash;
+export const ROOT_NODE: Node = namehashInterpretedName(asInterpretedName(""));
+export const ETH_NODE: Node = namehashInterpretedName(asInterpretedName("eth"));
+export const ADDR_REVERSE_NODE: Node = namehashInterpretedName(asInterpretedName("addr.reverse"));
 
 /**
  * ROOT_RESOURCE represents the 'root' resource in an EnhancedAccessControl contract.

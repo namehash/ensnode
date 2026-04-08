@@ -2,12 +2,13 @@ import {
   type AccountId,
   type AssetNamespace,
   AssetNamespaces,
-  BASENAMES_NODE,
+  asInterpretedName,
   ETH_NODE,
   interpretTokenIdAsLabelHash,
   interpretTokenIdAsNode,
-  LINEANAMES_NODE,
+  makeSubdomainNode,
   type Node,
+  namehashInterpretedName,
   type TokenId,
 } from "enssdk";
 
@@ -16,9 +17,11 @@ import {
   accountIdEqual,
   type DomainAssetId,
   getDatasourceContract,
-  makeSubdomainNode,
   maybeGetDatasourceContract,
 } from "@ensnode/ensnode-sdk";
+
+export const BASENAMES_NODE: Node = namehashInterpretedName(asInterpretedName("base.eth"));
+export const LINEANAMES_NODE: Node = namehashInterpretedName(asInterpretedName("linea.eth"));
 
 /**
  * A contract that issues tokenized ENS names in a manner that is supported by

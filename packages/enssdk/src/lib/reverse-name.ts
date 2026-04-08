@@ -1,6 +1,7 @@
 import type { Address } from "viem";
 
 import { DEFAULT_EVM_COIN_TYPE, ETH_COIN_TYPE } from "./coin-type";
+import { asLiteralLabel } from "./interpreted-names-and-labels";
 import type { CoinType, Label, LiteralLabel, Name } from "./types";
 
 /**
@@ -9,7 +10,7 @@ import type { CoinType, Label, LiteralLabel, Name } from "./types";
  * @see https://docs.ens.domains/ensip/19/#reverse-resolution
  */
 export const addrReverseLabel = (address: Address): LiteralLabel =>
-  address.slice(2) as LiteralLabel; // address is guaranteed to be fully lowercase
+  asLiteralLabel(address.slice(2)); // address is guaranteed to be fully lowercase
 
 /**
  * Converts `coinType` to prefix-free hex string.

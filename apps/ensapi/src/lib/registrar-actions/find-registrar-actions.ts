@@ -1,6 +1,6 @@
 import { trace } from "@opentelemetry/api";
 import { and, count, desc, eq, gte, isNotNull, lte, not, type SQL } from "drizzle-orm/sql";
-import type { InterpretedName } from "enssdk";
+import { asInterpretedName } from "enssdk";
 
 import {
   type BlockRef,
@@ -248,7 +248,8 @@ function _mapToNamedRegistrarAction(record: MapToNamedRegistrarActionArgs): Name
     eventIds: record.registrarActions.eventIds as [string, ...string[]],
   } satisfies RegistrarAction;
 
-  const name = record.domain.name as InterpretedName;
+  // biome-ignore lint/style/noNonNullAssertion: domain.name guarnateed to exist
+  const name = asInterpretedName(record.domain.name!);
 
   return {
     action,

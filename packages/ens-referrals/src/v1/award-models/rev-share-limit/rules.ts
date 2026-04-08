@@ -1,6 +1,6 @@
-import type { AccountId, Address } from "enssdk";
+import type { AccountId, Address, UnixTimestamp } from "enssdk";
 
-import { type PriceUsdc, parseUsdc, type UnixTimestamp } from "@ensnode/ensnode-sdk";
+import { type PriceUsdc, parseUsdc } from "@ensnode/ensnode-sdk";
 import { makePriceUsdcSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { normalizeAddress, validateLowercaseAddress } from "../../address";

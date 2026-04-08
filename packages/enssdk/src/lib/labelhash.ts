@@ -1,10 +1,11 @@
 import { isHex, keccak256, stringToBytes } from "viem";
 import { labelhash as viemLabelhash } from "viem/ens";
 
-import type { EncodedLabelHash, Label, LabelHash, LiteralLabel } from "./types";
+import type { EncodedLabelHash, InterpretedLabel, LabelHash, LiteralLabel } from "./types";
 
 /**
- * Typed wrapper around viem's `labelhash` that returns a branded {@link LabelHash}.
+ * Typed wrapper around viem's `labelhash` that returns a branded {@link LabelHash},
+ * requiring an {@link InterpretedLabel} input.
  *
  * Note: viem's labelhash has special-case handling for Encoded LabelHashes (e.g. `[hash]`).
  * Use {@link labelhashLiteralLabel} if you need to hash a label's literal bytes without
@@ -12,7 +13,8 @@ import type { EncodedLabelHash, Label, LabelHash, LiteralLabel } from "./types";
  *
  * @see https://docs.ens.domains/ensip/1
  */
-export const labelhash = (label: Label): LabelHash => viemLabelhash(label);
+export const labelhashInterpretedLabel = (label: InterpretedLabel): LabelHash =>
+  viemLabelhash(label);
 
 /**
  * Implements the ENS `labelhash` function for Literal Labels.

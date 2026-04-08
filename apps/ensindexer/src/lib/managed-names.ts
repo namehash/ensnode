@@ -1,6 +1,13 @@
 import config from "@/config";
 
-import { type AccountId, type Name, type Node, namehash } from "enssdk";
+import {
+  type AccountId,
+  asInterpretedName,
+  type InterpretedName,
+  type Name,
+  type Node,
+  namehashInterpretedName,
+} from "enssdk";
 
 import { DatasourceNames, type ENSNamespaceId } from "@ensnode/datasources";
 import {
@@ -128,7 +135,7 @@ const cachedNamehash = (name: Name): Node => {
   const cached = namehashCache.get(name);
   if (cached !== undefined) return cached;
 
-  const node = namehash(name);
+  const node = namehashInterpretedName(asInterpretedName(name));
   namehashCache.set(name, node);
   return node;
 };
@@ -138,14 +145,14 @@ const cachedNamehash = (name: Name): Node => {
  *
  * @dev Caches the result of namehash(name).
  */
-export const getManagedName = (contract: AccountId): { name: Name; node: Node } => {
+export const getManagedName = (contract: AccountId): { name: InterpretedName; node: Node } => {
   for (const [managedName, contracts] of Object.entries(CONTRACTS_BY_MANAGED_NAME)) {
     const isAnyOfTheContracts = contracts.some((_contract) => accountIdEqual(_contract, contract));
     if (isAnyOfTheContracts) {
       const namespaceSpecific = MANAGED_NAME_BY_NAMESPACE[config.namespace]?.[managedName];
 
       // use the namespace-specific Managed Name if specified, otherwise use the default from CONTRACTS_BY_MANAGED_NAME
-      const name = namespaceSpecific ?? managedName;
+      const name = asInterpretedName(namespaceSpecific ?? managedName);
       const node = cachedNamehash(name);
 
       return { name, node };

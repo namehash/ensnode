@@ -1,12 +1,12 @@
-import type { InterpretedLabel, InterpretedName, LiteralLabel } from "enssdk";
 import {
-  encodeLabelHash,
+  asInterpretedLabel,
+  asLiteralLabel,
   interpretedLabelsToInterpretedName,
   interpretedNameToInterpretedLabels,
-  isEncodedLabelHash,
-  isNormalizedLabel,
-  labelhashLiteralLabel,
-} from "enssdk";
+} from "./interpreted-names-and-labels";
+import { encodeLabelHash, isEncodedLabelHash, labelhashLiteralLabel } from "./labelhash";
+import { isNormalizedLabel } from "./normalization";
+import type { InterpretedLabel, InterpretedName } from "./types";
 
 /**
  * Reinterpret Label
@@ -39,8 +39,8 @@ export function reinterpretLabel(label: InterpretedLabel): InterpretedLabel {
   if (isNormalizedLabel(label)) return label;
 
   // the provided `label` is an unnormalized literal label, encode it
-  const labelHash = labelhashLiteralLabel(label as string as LiteralLabel);
-  return encodeLabelHash(labelHash) as InterpretedLabel;
+  const labelHash = labelhashLiteralLabel(asLiteralLabel(label as string));
+  return asInterpretedLabel(encodeLabelHash(labelHash));
 }
 
 /**

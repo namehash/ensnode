@@ -5,17 +5,13 @@ import {
   type Address,
   type LabelHash,
   makeENSv1DomainId,
+  makeSubdomainNode,
   type Node,
   ROOT_NODE,
 } from "enssdk";
 import { isAddressEqual, zeroAddress } from "viem";
 
-import {
-  getENSRootChainId,
-  interpretAddress,
-  makeSubdomainNode,
-  PluginName,
-} from "@ensnode/ensnode-sdk";
+import { getENSRootChainId, interpretAddress, PluginName } from "@ensnode/ensnode-sdk";
 
 import { materializeENSv1DomainEffectiveOwner } from "@/lib/ensv2/domain-db-helpers";
 import { ensureDomainEvent } from "@/lib/ensv2/event-db-helpers";

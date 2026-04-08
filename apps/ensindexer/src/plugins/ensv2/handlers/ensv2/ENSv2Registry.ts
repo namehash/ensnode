@@ -1,9 +1,9 @@
 import {
   type AccountId,
   type Address,
+  asLiteralLabel,
   type LabelHash,
-  type LiteralLabel,
-  labelhash,
+  labelhashLiteralLabel,
   makeENSv2DomainId,
   makeRegistryId,
   makeStorageId,
@@ -51,8 +51,8 @@ export default function () {
       sender: Address;
     }>;
   }) {
-    const { tokenId, labelHash, label: _label, owner, expiry, sender: registrant } = event.args;
-    const label = _label as LiteralLabel;
+    const { tokenId, labelHash, owner, expiry, sender: registrant } = event.args;
+    const label = asLiteralLabel(event.args.label);
     const isReservation = owner === undefined;
 
     const registry = getThisAccountId(context, event);
@@ -61,8 +61,10 @@ export default function () {
     const domainId = makeENSv2DomainId(registry, storageId);
 
     // Sanity Check: LabelHash must match Label
-    if (labelHash !== labelhash(label)) {
-      throw new Error(`Sanity Check: labelHash !== labelhash(label)\n${toJson(event.args)}`);
+    if (labelHash !== labelhashLiteralLabel(label)) {
+      throw new Error(
+        `Sanity Check: labelHash !== labelhashLiteralLabel(label)\n${toJson(event.args)}`,
+      );
     }
 
     // Sanity Check: StorageId derived from tokenId must match StorageId derived from LabelHash

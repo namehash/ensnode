@@ -410,7 +410,7 @@ export class EnsApiClient {
    *   registrarActionsFilter,
    *   EnsApiClient,
    * } from "@ensnode/ensnode-sdk";
-   * import { namehash } from "enssdk";
+   * import { namehashInterpretedName } from "enssdk";
    *
    * const client: EnsApiClient;
    *
@@ -622,7 +622,7 @@ export class EnsApiClient {
    * import {
    *   EnsApiClient,
    * } from "@ensnode/ensnode-sdk";
-   * import { namehash } from "enssdk";
+   * import { namehashInterpretedName } from "enssdk";
    *
    * const client: EnsApiClient;
    *

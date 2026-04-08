@@ -7,6 +7,7 @@ import {
   type LiteralLabel,
   labelhashLiteralLabel,
   makeENSv1DomainId,
+  makeSubdomainNode,
   type Node,
 } from "enssdk";
 import { isAddressEqual, zeroAddress } from "viem";
@@ -17,7 +18,6 @@ import {
   isRegistrationExpired,
   isRegistrationFullyExpired,
   isRegistrationInGracePeriod,
-  makeSubdomainNode,
   PluginName,
 } from "@ensnode/ensnode-sdk";
 

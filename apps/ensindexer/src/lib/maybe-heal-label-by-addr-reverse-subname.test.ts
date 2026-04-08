@@ -1,4 +1,10 @@
-import { type Address, addrReverseLabel, labelhash } from "enssdk";
+import {
+  type Address,
+  addrReverseLabel,
+  type InterpretedLabel,
+  labelhashInterpretedLabel,
+  labelhashLiteralLabel,
+} from "enssdk";
 import { describe, expect, it } from "vitest";
 
 import { maybeHealLabelByAddrReverseSubname } from "./maybe-heal-label-by-addr-reverse-subname";
@@ -6,8 +12,8 @@ import { maybeHealLabelByAddrReverseSubname } from "./maybe-heal-label-by-addr-r
 describe("maybeHealLabelByAddrReverseSubname", () => {
   const address: Address = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
   const reverseAddressSubname = addrReverseLabel(address);
-  const labelHash = labelhash(reverseAddressSubname);
-  const notMatchingLabelHash = labelhash("test.eth");
+  const labelHash = labelhashLiteralLabel(reverseAddressSubname);
+  const notMatchingLabelHash = labelhashInterpretedLabel("test.eth" as InterpretedLabel);
 
   it("should return null if the label cannot be healed", () => {
     expect(maybeHealLabelByAddrReverseSubname(notMatchingLabelHash, address)).toBe(null);

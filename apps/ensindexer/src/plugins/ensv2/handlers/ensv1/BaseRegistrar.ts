@@ -1,13 +1,13 @@
 import { GRACE_PERIOD_SECONDS } from "@ensdomains/ensjs/utils";
-import { type Address, interpretTokenIdAsLabelHash, makeENSv1DomainId } from "enssdk";
+import {
+  type Address,
+  interpretTokenIdAsLabelHash,
+  makeENSv1DomainId,
+  makeSubdomainNode,
+} from "enssdk";
 import { isAddressEqual, zeroAddress } from "viem";
 
-import {
-  interpretAddress,
-  isRegistrationFullyExpired,
-  makeSubdomainNode,
-  PluginName,
-} from "@ensnode/ensnode-sdk";
+import { interpretAddress, isRegistrationFullyExpired, PluginName } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { materializeENSv1DomainEffectiveOwner } from "@/lib/ensv2/domain-db-helpers";

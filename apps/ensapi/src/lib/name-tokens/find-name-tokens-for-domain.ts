@@ -1,7 +1,7 @@
 import config from "@/config";
 
 import { eq } from "drizzle-orm/sql";
-import type { AccountId, InterpretedName, Node } from "enssdk";
+import { type AccountId, asInterpretedName, type Node } from "enssdk";
 
 import {
   bigIntToNumber,
@@ -102,7 +102,8 @@ function _recordsToRegisteredNameTokens(
       chainId: record.nameTokens.chainId,
       address: record.nameTokens.owner,
     } satisfies AccountId;
-    const name = record.domains.name as InterpretedName;
+    // biome-ignore lint/style/noNonNullAssertion: domain.name guaranteed to exist
+    const name = asInterpretedName(record.domains.name!);
     const ownership = getNameTokenOwnership(config.namespace, name, owner);
     const token = _recordToNameToken(record, ownership);
     const expiresAt = bigIntToNumber(record.registrationLifecycles.expiresAt);
