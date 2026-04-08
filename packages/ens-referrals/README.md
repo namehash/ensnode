@@ -158,7 +158,7 @@ More examples are available in [`packages/ens-referrals/src/v1/client.ts`](https
 
 If you want to launch a custom referral program, you can host your own ENSApi instance and point it to a customized set of referral program editions.
 
-See our [production `editions.json`](https://ensawards.org/production-editions.json) for a working example of the config.
+See our [`production-editions.json`](https://ensawards.org/production-editions.json) for a working example of the config.
 
 
 ## Other Utilities
