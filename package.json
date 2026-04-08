@@ -50,7 +50,7 @@
       "minimatch@<10.2.3": ">=10.2.3",
       "rollup@>=4.0.0 <4.59.0": ">=4.59.0",
       "svgo@>=3.0.0 <3.3.3": "^3.3.3",
-      "ponder>@hono/node-server@<1.19.10": "^1.19.10",
+      "ponder>@hono/node-server@<1.19.13": "catalog:",
       "devalue@<5.6.4": "^5.6.4",
       "undici@>=7.0.0 <7.24.0": "^7.24.0",
       "undici@>=6.0.0 <6.24.0": "^6.24.0",
@@ -65,6 +65,11 @@
       "brace-expansion@>=4.0.0 <5.0.5": ">=5.0.5",
       "defu@<=6.1.4": "^6.1.5",
       "vite@>=5.0.0 <=6.4.1": "^6.4.2"
+    },
+    "auditConfig": {
+      "ignoreCves": [
+        "CVE-2026-39356"
+      ]
     },
     "ignoredBuiltDependencies": [
       "bun"

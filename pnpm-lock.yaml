@@ -12,12 +12,15 @@ catalogs:
     '@astrojs/tailwind':
       specifier: ^6.0.2
       version: 6.0.2
+    '@hono/node-server':
+      specifier: ^1.19.13
+      version: 1.19.13
     '@ponder/client':
-      specifier: 0.16.3
-      version: 0.16.3
+      specifier: 0.16.6
+      version: 0.16.6
     '@ponder/utils':
-      specifier: 0.2.16
-      version: 0.2.16
+      specifier: 0.2.18
+      version: 0.2.18
     '@testing-library/react':
       specifier: ^16.3.0
       version: 16.3.0
@@ -49,8 +52,8 @@ catalogs:
       specifier: 0.41.0
       version: 0.41.0
     hono:
-      specifier: ^4.12.7
-      version: 4.12.7
+      specifier: ^4.12.12
+      version: 4.12.12
     lucide-react:
       specifier: ^0.548.0
       version: 0.548.0
@@ -64,8 +67,8 @@ catalogs:
       specifier: 10.1.0
       version: 10.1.0
     ponder:
-      specifier: 0.16.3
-      version: 0.16.3
+      specifier: 0.16.6
+      version: 0.16.6
     react:
       specifier: 19.2.1
       version: 19.2.1
@@ -111,7 +114,7 @@ overrides:
   minimatch@<10.2.3: '>=10.2.3'
   rollup@>=4.0.0 <4.59.0: '>=4.59.0'
   svgo@>=3.0.0 <3.3.3: ^3.3.3
-  ponder>@hono/node-server@<1.19.10: ^1.19.10
+  ponder>@hono/node-server@<1.19.13: ^1.19.13
   devalue@<5.6.4: ^5.6.4
   undici@>=7.0.0 <7.24.0: ^7.24.0
   undici@>=6.0.0 <6.24.0: ^6.24.0
@@ -198,7 +201,7 @@ importers:
         version: link:../../packages/namehash-ui
       '@ponder/utils':
         specifier: 'catalog:'
-        version: 0.2.16(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))
+        version: 0.2.18(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))
       '@radix-ui/react-avatar':
         specifier: ^1.1.3
         version: 1.1.10(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -345,14 +348,14 @@ importers:
         specifier: workspace:*
         version: link:../../packages/ponder-subgraph
       '@hono/node-server':
-        specifier: ^1.19.10
-        version: 1.19.11(hono@4.12.7)
+        specifier: 'catalog:'
+        version: 1.19.13(hono@4.12.12)
       '@hono/otel':
         specifier: ^0.2.2
-        version: 0.2.2(hono@4.12.7)
+        version: 0.2.2(hono@4.12.12)
       '@hono/zod-openapi':
         specifier: ^1.2.2
-        version: 1.2.2(hono@4.12.7)(zod@4.3.6)
+        version: 1.2.2(hono@4.12.12)(zod@4.3.6)
       '@namehash/ens-referrals':
         specifier: workspace:*
         version: link:../../packages/ens-referrals
@@ -388,10 +391,10 @@ importers:
         version: 1.37.0
       '@ponder/client':
         specifier: 'catalog:'
-        version: 0.16.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/pg@8.16.0)(kysely@0.28.14)(pg@8.16.3)(typescript@5.9.3)
+        version: 0.16.6(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/pg@8.16.0)(kysely@0.28.14)(pg@8.16.3)(typescript@5.9.3)
       '@ponder/utils':
         specifier: 'catalog:'
-        version: 0.2.16(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))
+        version: 0.2.18(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))
       '@pothos/core':
         specifier: ^4.10.0
         version: 4.10.0(graphql@16.11.0)
@@ -430,7 +433,7 @@ importers:
         version: 5.16.0(graphql@16.11.0)
       hono:
         specifier: 'catalog:'
-        version: 4.12.7
+        version: 4.12.12
       p-memoize:
         specifier: ^8.0.0
         version: 8.0.0
@@ -442,7 +445,7 @@ importers:
         version: 10.1.0
       ponder-enrich-gql-docs-middleware:
         specifier: ^0.1.3
-        version: 0.1.3(graphql@16.11.0)(hono@4.12.7)
+        version: 0.1.3(graphql@16.11.0)(hono@4.12.12)
       superjson:
         specifier: ^2.2.6
         version: 2.2.6
@@ -509,7 +512,7 @@ importers:
         version: link:../../packages/ponder-sdk
       '@ponder/client':
         specifier: 'catalog:'
-        version: 0.16.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/pg@8.16.0)(kysely@0.28.14)(pg@8.16.3)(typescript@5.9.3)
+        version: 0.16.6(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/pg@8.16.0)(kysely@0.28.14)(pg@8.16.3)(typescript@5.9.3)
       caip:
         specifier: 'catalog:'
         version: 1.1.1
@@ -530,13 +533,13 @@ importers:
         version: link:../../packages/enssdk
       hono:
         specifier: 'catalog:'
-        version: 4.12.7
+        version: 4.12.12
       p-retry:
         specifier: 'catalog:'
         version: 7.1.1
       ponder:
         specifier: 'catalog:'
-        version: 0.16.3(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@24.10.9)(@types/pg@8.16.0)(hono@4.12.7)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))(yaml@2.8.3)(zod@4.3.6)
+        version: 0.16.6(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@24.10.9)(@types/pg@8.16.0)(hono@4.12.12)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))(yaml@2.8.3)(zod@4.3.6)
       viem:
         specifier: 'catalog:'
         version: 2.38.5(typescript@5.9.3)(zod@4.3.6)
@@ -575,8 +578,8 @@ importers:
         specifier: ^5.0.0
         version: 5.0.5
       '@hono/node-server':
-        specifier: ^1.19.10
-        version: 1.19.11(hono@4.12.7)
+        specifier: 'catalog:'
+        version: 1.19.13(hono@4.12.12)
       classic-level:
         specifier: ^1.4.1
         version: 1.4.1
@@ -585,7 +588,7 @@ importers:
         version: link:../../packages/enssdk
       hono:
         specifier: 'catalog:'
-        version: 4.12.7
+        version: 4.12.12
       pino:
         specifier: 'catalog:'
         version: 10.1.0
@@ -643,14 +646,14 @@ importers:
         version: link:../../packages/ensnode-sdk
       hono:
         specifier: 'catalog:'
-        version: 4.12.7
+        version: 4.12.12
     devDependencies:
       '@ensnode/shared-configs':
         specifier: workspace:*
         version: link:../../packages/shared-configs
       '@hono/node-server':
-        specifier: ^1.19.10
-        version: 1.19.11(hono@4.12.7)
+        specifier: 'catalog:'
+        version: 1.19.13(hono@4.12.12)
       '@types/node':
         specifier: 'catalog:'
         version: 24.10.9
@@ -847,7 +850,7 @@ importers:
     dependencies:
       '@ponder/utils':
         specifier: 'catalog:'
-        version: 0.2.16(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))
+        version: 0.2.18(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))
     devDependencies:
       '@ensnode/shared-configs':
         specifier: workspace:*
@@ -927,7 +930,7 @@ importers:
         version: 0.41.0(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/pg@8.16.0)(kysely@0.28.14)(pg@8.16.3)
       ponder:
         specifier: 'catalog:'
-        version: 0.16.3(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@24.10.9)(@types/pg@8.16.0)(hono@4.12.7)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))(yaml@2.8.3)(zod@4.3.6)
+        version: 0.16.6(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@24.10.9)(@types/pg@8.16.0)(hono@4.12.12)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))(yaml@2.8.3)(zod@4.3.6)
       tsup:
         specifier: 'catalog:'
         version: 8.5.0(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)
@@ -1023,9 +1026,6 @@ importers:
 
   packages/ensnode-sdk:
     dependencies:
-      '@adraffy/ens-normalize':
-        specifier: 1.11.1
-        version: 1.11.1
       '@ensdomains/address-encoder':
         specifier: ^1.1.2
         version: 1.1.4
@@ -1290,7 +1290,7 @@ importers:
         version: 2.5.1
       '@ponder/client':
         specifier: 'catalog:'
-        version: 0.16.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/pg@8.16.0)(kysely@0.28.14)(pg@8.16.3)(typescript@5.9.3)
+        version: 0.16.6(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/pg@8.16.0)(kysely@0.28.14)(pg@8.16.3)(typescript@5.9.3)
       dataloader:
         specifier: ^2.2.3
         version: 2.2.3
@@ -1315,7 +1315,7 @@ importers:
         version: 24.10.9
       hono:
         specifier: 'catalog:'
-        version: 4.12.7
+        version: 4.12.12
       tsup:
         specifier: 'catalog:'
         version: 8.5.0(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)
@@ -2752,8 +2752,8 @@ packages:
     peerDependencies:
       react: '>= 16 || ^19.0.0-rc'
 
-  '@hono/node-server@1.19.11':
-    resolution: {integrity: sha512-dr8/3zEaB+p0D2n/IUrlPF1HZm586qgJNXK1a9fhg/PzdtkK7Ksd5l312tJX2yBuALqDYBlG20QEbayqPyxn+g==}
+  '@hono/node-server@1.19.13':
+    resolution: {integrity: sha512-TsQLe4i2gvoTtrHje625ngThGBySOgSK3Xo2XRYOdqGN1teR8+I7vchQC46uLJi8OF62YTYA3AhSpumtkhsaKQ==}
     engines: {node: '>=18.14.1'}
     peerDependencies:
       hono: ^4
@@ -3460,25 +3460,16 @@ packages:
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
 
-  '@ponder/client@0.16.3':
-    resolution: {integrity: sha512-mA+OdntRTO4LMWyy9zFUaUFyIInyiN4FFxQjnFku4p0KWe1nBojIzGGuRLpsgrnqGQyvu8+6XGNUfleqQvYh3w==}
+  '@ponder/client@0.16.6':
+    resolution: {integrity: sha512-bpoGzfaFtWtP6DE/HbPaaPGs6KK2DmEM5DJxHMSph1jyh0qqxxOuaEh+2k/mbDyQyjRT3/CmLe9PPuxRpmy2Aw==}
     peerDependencies:
       typescript: '>=5.0.4'
     peerDependenciesMeta:
       typescript:
         optional: true
 
-  '@ponder/utils@0.2.16':
-    resolution: {integrity: sha512-Q2TpJ1BywdZhGDjtWe6mDQXn/jF2YDfMwdblDytwGjQ6zuFyuujP+o/liVbuHfqSYmeUOPHugxk5yKAhHwWfJw==}
-    peerDependencies:
-      typescript: '>=5.0.4'
-      viem: '>=2'
-    peerDependenciesMeta:
-      typescript:
-        optional: true
-
-  '@ponder/utils@0.2.17':
-    resolution: {integrity: sha512-ins3XXzm+2jMGa0aTc1N10JG0Sau9Vvk71llOatkEOkncMne9m/mMYxJsV6WfRaZGlo4FB8OoRM6DVPHZlRGHA==}
+  '@ponder/utils@0.2.18':
+    resolution: {integrity: sha512-pWacQuohfKlKO440zC39C1l6AH+Vx18mca0cPkxM0YnrB70px5hEwLKrc3fU4DMu72j4pljy/Mvfm95FBouYjw==}
     peerDependencies:
       typescript: '>=5.0.4'
       viem: '>=2'
@@ -6708,8 +6699,8 @@ packages:
   help-me@5.0.0:
     resolution: {integrity: sha512-7xgomUX6ADmcYzFik0HzAxh/73YlKR9bmFzf51CZwR+b6YtzU2m0u49hQCqV6SvlqIqsaxovfwdvbnsw3b/zpg==}
 
-  hono@4.12.7:
-    resolution: {integrity: sha512-jq9l1DM0zVIvsm3lv9Nw9nlJnMNPOcAtsbsgiUhWcFzPE99Gvo6yRTlszSLLYacMeQ6quHD6hMfId8crVHvexw==}
+  hono@4.12.12:
+    resolution: {integrity: sha512-p1JfQMKaceuCbpJKAPKVqyqviZdS0eUxH9v82oWo1kb9xjQ5wA6iP3FNVAPDFlz5/p7d45lO+BpSk1tuSZMF4Q==}
     engines: {node: '>=16.9.0'}
 
   html-encoding-sniffer@4.0.0:
@@ -7932,8 +7923,8 @@ packages:
       graphql: ^16.10.0
       hono: ^4.6.19
 
-  ponder@0.16.3:
-    resolution: {integrity: sha512-QwAg5eFUujWR87ZMeTTKmF17q9IVTew26tpdaTfQrrtJVf/oU8ZN1qu7ZcP2SPtK5oScblJMWQm9zfwst6tJcg==}
+  ponder@0.16.6:
+    resolution: {integrity: sha512-y4JusgnLZ9uACTr9pj0DjfPSqlsaSLJ7Gxpe/ByfwR5fHuwoPOoolix+Y+9EPqs0cr1KxrG35aVBCR0kT+LJew==}
     engines: {node: '>=18.14'}
     hasBin: true
     peerDependencies:
@@ -11414,27 +11405,27 @@ snapshots:
     dependencies:
       react: 19.2.1
 
-  '@hono/node-server@1.19.11(hono@4.12.7)':
+  '@hono/node-server@1.19.13(hono@4.12.12)':
     dependencies:
-      hono: 4.12.7
+      hono: 4.12.12
 
-  '@hono/otel@0.2.2(hono@4.12.7)':
+  '@hono/otel@0.2.2(hono@4.12.12)':
     dependencies:
       '@opentelemetry/api': 1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a)
       '@opentelemetry/semantic-conventions': 1.37.0
-      hono: 4.12.7
+      hono: 4.12.12
 
-  '@hono/zod-openapi@1.2.2(hono@4.12.7)(zod@4.3.6)':
+  '@hono/zod-openapi@1.2.2(hono@4.12.12)(zod@4.3.6)':
     dependencies:
       '@asteasolutions/zod-to-openapi': 8.4.1(zod@4.3.6)
-      '@hono/zod-validator': 0.7.6(hono@4.12.7)(zod@4.3.6)
-      hono: 4.12.7
+      '@hono/zod-validator': 0.7.6(hono@4.12.12)(zod@4.3.6)
+      hono: 4.12.12
       openapi3-ts: 4.5.0
       zod: 4.3.6
 
-  '@hono/zod-validator@0.7.6(hono@4.12.7)(zod@4.3.6)':
+  '@hono/zod-validator@0.7.6(hono@4.12.12)(zod@4.3.6)':
     dependencies:
-      hono: 4.12.7
+      hono: 4.12.12
       zod: 4.3.6
 
   '@iconify-json/lucide@1.2.71':
@@ -12163,7 +12154,7 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
-  '@ponder/client@0.16.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/pg@8.16.0)(kysely@0.28.14)(pg@8.16.3)(typescript@5.9.3)':
+  '@ponder/client@0.16.6(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/pg@8.16.0)(kysely@0.28.14)(pg@8.16.3)(typescript@5.9.3)':
     dependencies:
       drizzle-orm: 0.41.0(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/pg@8.16.0)(kysely@0.28.14)(pg@8.16.3)
       eventsource: 3.0.7
@@ -12200,13 +12191,7 @@ snapshots:
       - sql.js
       - sqlite3
 
-  '@ponder/utils@0.2.16(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))':
-    dependencies:
-      viem: 2.38.5(typescript@5.9.3)(zod@4.3.6)
-    optionalDependencies:
-      typescript: 5.9.3
-
-  '@ponder/utils@0.2.17(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))':
+  '@ponder/utils@0.2.18(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))':
     dependencies:
       viem: 2.38.5(typescript@5.9.3)(zod@4.3.6)
     optionalDependencies:
@@ -15947,7 +15932,7 @@ snapshots:
 
   help-me@5.0.0: {}
 
-  hono@4.12.7: {}
+  hono@4.12.12: {}
 
   html-encoding-sniffer@4.0.0:
     dependencies:
@@ -17376,12 +17361,12 @@ snapshots:
       path-data-parser: 0.1.0
       points-on-curve: 0.2.0
 
-  ponder-enrich-gql-docs-middleware@0.1.3(graphql@16.11.0)(hono@4.12.7):
+  ponder-enrich-gql-docs-middleware@0.1.3(graphql@16.11.0)(hono@4.12.12):
     dependencies:
       graphql: 16.11.0
-      hono: 4.12.7
+      hono: 4.12.12
 
-  ponder@0.16.3(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@24.10.9)(@types/pg@8.16.0)(hono@4.12.7)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))(yaml@2.8.3)(zod@4.3.6):
+  ponder@0.16.6(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@24.10.9)(@types/pg@8.16.0)(hono@4.12.12)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))(yaml@2.8.3)(zod@4.3.6):
     dependencies:
       '@babel/code-frame': 7.29.0
       '@commander-js/extra-typings': 12.1.0(commander@12.1.0)
@@ -17389,8 +17374,8 @@ snapshots:
       '@escape.tech/graphql-armor-max-aliases': 2.6.2
       '@escape.tech/graphql-armor-max-depth': 2.4.2
       '@escape.tech/graphql-armor-max-tokens': 2.5.1
-      '@hono/node-server': 1.19.11(hono@4.12.7)
-      '@ponder/utils': 0.2.17(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))
+      '@hono/node-server': 1.19.13(hono@4.12.12)
+      '@ponder/utils': 0.2.18(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))
       abitype: 0.10.3(typescript@5.9.3)(zod@4.3.6)
       ansi-escapes: 7.1.1
       commander: 12.1.0
@@ -17402,7 +17387,7 @@ snapshots:
       glob: 10.5.0
       graphql: 16.8.2
       graphql-yoga: 5.17.1(graphql@16.8.2)
-      hono: 4.12.7
+      hono: 4.12.12
       http-terminator: 3.2.0
       kysely: 0.28.14
       pg: 8.16.3
