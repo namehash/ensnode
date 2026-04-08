@@ -20,7 +20,7 @@ catalog:
   caip: 1.1.1
   date-fns: 4.1.0
   drizzle-orm: 0.41.0
-  hono: ^4.12.7
+  hono: ^4.12.12
   lucide-react: ^0.548.0
   p-retry: 7.1.1
   pg-connection-string: ^2.9.1
