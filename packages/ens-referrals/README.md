@@ -154,6 +154,13 @@ if (response.responseCode === ReferrerMetricsEditionsResponseCodes.Ok) {
 
 More examples are available in [`packages/ens-referrals/src/v1/client.ts`](https://github.com/namehash/ensnode/tree/main/packages/ens-referrals/src/v1/client.ts).
 
+## Run your own referral program
+
+If you want to launch a custom referral program, you can host your own ENSApi instance and point it to a customized set of referral program editions.
+
+See our [production `editions.json`](https://ensawards.org/production-editions.json) for a working example of the config.
+
+
 ## Other Utilities
 
 The package also includes helpers for building referral links.

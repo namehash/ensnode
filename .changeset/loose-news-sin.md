@@ -2,4 +2,4 @@
 "@namehash/ens-referrals": minor
 ---
 
-Added unit tests for Referral Program edition defaults.
+Added a README section showcasing a working example of defining referral program edition configs via JSON files.
