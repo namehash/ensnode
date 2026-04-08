@@ -8,6 +8,20 @@
       "when": 1773743108514,
       "tag": "0000_cultured_captain_cross",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1775668778695,
+      "tag": "0001_enable_ext_pg_trgm",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1775668818089,
+      "tag": "0002_manage_orphaned_ensnode_metadata",
+      "breakpoints": true
     }
   ]
 }
