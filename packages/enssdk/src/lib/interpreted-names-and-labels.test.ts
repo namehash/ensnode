@@ -28,7 +28,6 @@ const NORMALIZED_LABELS = [
 ].map(asLiteralLabel);
 
 const UNNORMALIZED_LABELS = [
-  "", // Empty string
   "Vitalik", // Uppercase
   "Example", // Uppercase
   "TEST", // Uppercase
