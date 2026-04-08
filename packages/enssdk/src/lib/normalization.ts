@@ -1,22 +1,23 @@
 import { ens_normalize } from "@adraffy/ens-normalize";
 
-import type { Label, Name, NormalizedName } from "./types";
+import type { InterpretedLabel, InterpretedName, Label, Name, NormalizedName } from "./types";
 
 /**
- * Normalizes a Name according to ENS normalization rules (ENSIP-15).
+ * Normalizes a Name according to ENS normalization rules (ENSIP-15), returning an InterpretedName.
  *
  * @throws if the Name is not normalizable
  * @see https://docs.ens.domains/ensip/15
  */
-export const normalizeName = (name: Name): Name => ens_normalize(name);
+export const normalizeName = (name: Name): InterpretedName =>
+  ens_normalize(name) as InterpretedName;
 
 /**
- * Normalizes a Label according to ENS normalization rules (ENSIP-15).
+ * Normalizes a Label according to ENS normalization rules (ENSIP-15), returning an InterpretedLabel.
  *
  * @throws if the Label is not normalizable
  * @see https://docs.ens.domains/ensip/15
  */
-export const normalizeLabel = (label: Label): Label => {
+export const normalizeLabel = (label: Label): InterpretedLabel => {
   // empty string cannot be a label
   if (label === "") throw new Error("Empty string is not a valid Label.");
 
@@ -27,7 +28,7 @@ export const normalizeLabel = (label: Label): Label => {
 
   // NOTE: the ens_normalize function accepts _names_ not labels, and so we must include our own
   // invariants above to ensure that the `label` input here can be safely normalized
-  return ens_normalize(label);
+  return ens_normalize(label) as InterpretedLabel;
 };
 
 /**
