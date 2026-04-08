@@ -1,16 +1,10 @@
 import config from "@/config";
 
+import { type LabelHash, makeENSv1DomainId, type Node } from "enssdk";
 import type { Address } from "viem";
 
 import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
-import {
-  type ChainId,
-  type LabelHash,
-  makeENSv1DomainId,
-  makeSubdomainNode,
-  type Node,
-  PluginName,
-} from "@ensnode/ensnode-sdk";
+import { type ChainId, makeSubdomainNode, PluginName } from "@ensnode/ensnode-sdk";
 
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { addOnchainEventListener, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";

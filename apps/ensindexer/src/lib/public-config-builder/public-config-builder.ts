@@ -8,7 +8,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
 
-import { getEnsIndexerVersion, getNodeJsVersion, getPackageVersion } from "@/lib/version-info";
+import { getEnsIndexerVersion, getPackageVersion } from "@/lib/version-info";
 
 export class PublicConfigBuilder {
   /**
@@ -51,7 +51,7 @@ export class PublicConfigBuilder {
       ]);
 
       this.immutablePublicConfig = validateEnsIndexerPublicConfig({
-        databaseSchemaName: config.databaseSchemaName,
+        ensIndexerSchemaName: config.ensIndexerSchemaName,
         ensRainbowPublicConfig,
         labelSet: config.labelSet,
         indexedChainIds: config.indexedChainIds,
@@ -80,7 +80,6 @@ export class PublicConfigBuilder {
     const ensDbVersion = ensIndexerVersion;
 
     return validateEnsIndexerVersionInfo({
-      nodejs: getNodeJsVersion(),
       ponder: getPackageVersion("ponder"),
       ensDb: ensDbVersion,
       ensIndexer: ensIndexerVersion,

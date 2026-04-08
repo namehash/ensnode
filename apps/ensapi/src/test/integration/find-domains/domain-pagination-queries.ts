@@ -1,6 +1,6 @@
 import type { InterpretedLabel, Name } from "@ensnode/ensnode-sdk";
 
-import { gql } from "@/test/integration/ensnode-graphql-api-client";
+import { gql } from "@/test/integration/omnigraph-api-client";
 
 const PageInfoFragment = gql`
   fragment PageInfoFragment on PageInfo {
@@ -87,7 +87,7 @@ export const AccountDomainsPaginated = gql`
     $last: Int
     $before: String
   ) {
-    account(address: $address) {
+    account(by: { address: $address }) {
       domains(order: $order, first: $first, after: $after, last: $last, before: $before) {
         edges { cursor node { ...PaginatedDomainFragment } }
         pageInfo { ...PageInfoFragment }

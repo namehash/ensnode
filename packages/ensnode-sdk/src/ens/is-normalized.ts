@@ -1,6 +1,5 @@
+import type { Label, Name, NormalizedName } from "enssdk";
 import { normalize } from "viem/ens";
-
-import type { Label, Name, NormalizedName } from "./types";
 
 /**
  * Determines whether the Name is normalized.

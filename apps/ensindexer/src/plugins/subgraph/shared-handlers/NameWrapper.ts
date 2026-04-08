@@ -15,6 +15,7 @@ import config from "@/config";
  * Related GitHub issue: https://github.com/ensdomains/ens-subgraph/issues/88
  */
 import { checkPccBurned as isPccFuseUnset } from "@ensdomains/ensjs/utils";
+import { interpretTokenIdAsNode } from "enssdk";
 import type { Address } from "viem";
 
 import {
@@ -23,7 +24,6 @@ import {
   decodeDNSEncodedLiteralName,
   type InterpretedLabel,
   type InterpretedName,
-  interpretTokenIdAsNode,
   literalLabelsToInterpretedName,
   literalLabelToInterpretedLabel,
   type Node,

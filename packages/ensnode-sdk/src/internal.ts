@@ -20,7 +20,7 @@ export * from "./ensapi/api/shared/errors/zod-schemas";
 export * from "./ensapi/api/shared/pagination/zod-schemas";
 export * from "./ensapi/config/zod-schemas";
 export * from "./ensindexer/config/zod-schemas";
-export * from "./graphql-api/example-queries";
+export * from "./omnigraph-api/example-queries";
 export * from "./registrars/zod-schemas";
 export * from "./rpc";
 export * from "./shared/config/build-rpc-urls";

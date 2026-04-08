@@ -58,14 +58,17 @@
     "typecheck": "tsgo --noEmit",
     "drizzle-kit:generate": "drizzle-kit generate"
   },
-  "peerDependencies": {
+  "dependencies": {
     "@ensnode/ensnode-sdk": "workspace:*",
+    "pg-connection-string": "catalog:",
+    "zod": "catalog:"
+  },
+  "peerDependencies": {
     "drizzle-orm": "catalog:",
     "ponder": "catalog:",
     "viem": "catalog:"
   },
   "devDependencies": {
-    "@ensnode/ensnode-sdk": "workspace:*",
     "@ensnode/shared-configs": "workspace:*",
     "drizzle-kit": "0.31.10",
     "drizzle-orm": "catalog:",

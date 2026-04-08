@@ -11,10 +11,18 @@ vi.mock("@/lib/ensdb/singleton", () => ({
   },
 }));
 
+vi.mock("@/config/ensdb-config", () => ({
+  default: {
+    ensDbUrl: "postgresql://user:password@localhost:5432/mydb",
+    ensIndexerSchemaName: "ensindexer_0",
+  },
+}));
+
 import { buildConfigFromEnvironment, buildEnsApiPublicConfig } from "@/config/config.schema";
 import { ENSApi_DEFAULT_PORT } from "@/config/defaults";
 import type { EnsApiEnvironment } from "@/config/environment";
 import logger from "@/lib/logger";
+import { ensApiVersionInfo } from "@/lib/version-info";
 
 vi.mock("@/lib/logger", () => ({
   default: {
@@ -26,13 +34,13 @@ vi.mock("@/lib/logger", () => ({
 const VALID_RPC_URL = "https://eth-sepolia.g.alchemy.com/v2/1234";
 
 const BASE_ENV = {
-  DATABASE_URL: "postgresql://user:password@localhost:5432/mydb",
+  ENSDB_URL: "postgresql://user:password@localhost:5432/mydb",
   RPC_URL_1: VALID_RPC_URL,
 } satisfies EnsApiEnvironment;
 
 const ENSINDEXER_PUBLIC_CONFIG = {
   namespace: "mainnet",
-  databaseSchemaName: "ensapi",
+  ensIndexerSchemaName: "ensindexer_0",
   ensRainbowPublicConfig: {
     version: packageJson.version,
     labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
@@ -45,9 +53,8 @@ const ENSINDEXER_PUBLIC_CONFIG = {
   versionInfo: {
     ensDb: packageJson.version,
     ensIndexer: packageJson.version,
-    ensNormalize: "1.1.1",
-    nodejs: "1.1.1",
-    ponder: "1.1.1",
+    ensNormalize: ensApiVersionInfo.ensNormalize,
+    ponder: "0.8.0",
   },
 } satisfies ENSIndexerPublicConfig;
 
@@ -55,12 +62,12 @@ describe("buildConfigFromEnvironment", () => {
   it("returns a valid config object using environment variables", async () => {
     await expect(buildConfigFromEnvironment(BASE_ENV)).resolves.toStrictEqual({
       port: ENSApi_DEFAULT_PORT,
-      databaseUrl: BASE_ENV.DATABASE_URL,
+      ensDbUrl: BASE_ENV.ENSDB_URL,
       theGraphApiKey: undefined,
 
       ensIndexerPublicConfig: ENSINDEXER_PUBLIC_CONFIG,
       namespace: ENSINDEXER_PUBLIC_CONFIG.namespace,
-      ensIndexerSchemaName: ENSINDEXER_PUBLIC_CONFIG.databaseSchemaName,
+      ensIndexerSchemaName: ENSINDEXER_PUBLIC_CONFIG.ensIndexerSchemaName,
       rpcConfigs: new Map([
         [
           1,
@@ -97,9 +104,7 @@ describe("buildConfigFromEnvironment", () => {
       mockExit.mockClear();
     });
 
-    const TEST_ENV: EnsApiEnvironment = {
-      DATABASE_URL: BASE_ENV.DATABASE_URL,
-    };
+    const TEST_ENV: EnsApiEnvironment = structuredClone(BASE_ENV);
 
     it("logs error and exits when CUSTOM_REFERRAL_PROGRAM_EDITIONS is not a valid URL", async () => {
       await buildConfigFromEnvironment({
@@ -149,10 +154,10 @@ describe("buildEnsApiPublicConfig", () => {
   it("returns a valid ENSApi public config with correct structure", () => {
     const mockConfig = {
       port: ENSApi_DEFAULT_PORT,
-      databaseUrl: BASE_ENV.DATABASE_URL,
+      ensDbUrl: BASE_ENV.ENSDB_URL,
       ensIndexerPublicConfig: ENSINDEXER_PUBLIC_CONFIG,
       namespace: ENSINDEXER_PUBLIC_CONFIG.namespace,
-      ensIndexerSchemaName: ENSINDEXER_PUBLIC_CONFIG.databaseSchemaName,
+      ensIndexerSchemaName: ENSINDEXER_PUBLIC_CONFIG.ensIndexerSchemaName,
       rpcConfigs: new Map([
         [
           1,
@@ -168,7 +173,7 @@ describe("buildEnsApiPublicConfig", () => {
     const result = buildEnsApiPublicConfig(mockConfig);
 
     expect(result).toStrictEqual({
-      version: packageJson.version,
+      versionInfo: ensApiVersionInfo,
       theGraphFallback: {
         canFallback: false,
         reason: "not-subgraph-compatible",
@@ -180,10 +185,10 @@ describe("buildEnsApiPublicConfig", () => {
   it("preserves the complete ENSIndexer public config structure", () => {
     const mockConfig = {
       port: ENSApi_DEFAULT_PORT,
-      databaseUrl: BASE_ENV.DATABASE_URL,
+      ensDbUrl: BASE_ENV.ENSDB_URL,
       ensIndexerPublicConfig: ENSINDEXER_PUBLIC_CONFIG,
       namespace: ENSINDEXER_PUBLIC_CONFIG.namespace,
-      ensIndexerSchemaName: ENSINDEXER_PUBLIC_CONFIG.databaseSchemaName,
+      ensIndexerSchemaName: ENSINDEXER_PUBLIC_CONFIG.ensIndexerSchemaName,
       rpcConfigs: new Map(),
       customReferralProgramEditionConfigSetUrl: undefined,
     };
@@ -201,22 +206,22 @@ describe("buildEnsApiPublicConfig", () => {
       ENSINDEXER_PUBLIC_CONFIG.isSubgraphCompatible,
     );
     expect(result.ensIndexerPublicConfig.labelSet).toEqual(ENSINDEXER_PUBLIC_CONFIG.labelSet);
-    expect(result.ensIndexerPublicConfig.databaseSchemaName).toBe(
-      ENSINDEXER_PUBLIC_CONFIG.databaseSchemaName,
+    expect(result.ensIndexerPublicConfig.ensIndexerSchemaName).toBe(
+      ENSINDEXER_PUBLIC_CONFIG.ensIndexerSchemaName,
     );
   });
 
   it("includes the theGraphFallback and redacts api key", () => {
     const mockConfig = {
       port: ENSApi_DEFAULT_PORT,
-      databaseUrl: BASE_ENV.DATABASE_URL,
+      ensDbUrl: BASE_ENV.ENSDB_URL,
       ensIndexerPublicConfig: {
         ...ENSINDEXER_PUBLIC_CONFIG,
         plugins: ["subgraph"],
         isSubgraphCompatible: true,
       },
       namespace: ENSINDEXER_PUBLIC_CONFIG.namespace,
-      ensIndexerSchemaName: ENSINDEXER_PUBLIC_CONFIG.databaseSchemaName,
+      ensIndexerSchemaName: ENSINDEXER_PUBLIC_CONFIG.ensIndexerSchemaName,
       rpcConfigs: new Map(),
       customReferralProgramEditionConfigSetUrl: undefined,
       theGraphApiKey: "secret-api-key",

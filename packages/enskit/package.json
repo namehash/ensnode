@@ -1,12 +1,65 @@
 {
   "name": "enskit",
   "version": "1.9.0",
-  "description": "Reserved for the ENSNode project by NameHash Labs. See https://ensnode.io",
+  "type": "module",
+  "description": "The ENS toolkit for React applications",
+  "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/namehash/ensnode.git",
+    "url": "git+https://github.com/namehash/ensnode.git",
     "directory": "packages/enskit"
   },
-  "license": "MIT",
-  "homepage": "https://ensnode.io"
+  "homepage": "https://ensnode.io",
+  "keywords": [
+    "ENS",
+    "ENSNode",
+    "React",
+    "Omnigraph"
+  ],
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    "./react/omnigraph": "./src/react/omnigraph/index.ts"
+  },
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      "./react/omnigraph": {
+        "types": "./dist/react/omnigraph/index.d.ts",
+        "default": "./dist/react/omnigraph/index.js"
+      }
+    }
+  },
+  "sideEffects": false,
+  "scripts": {
+    "prepublish": "tsup",
+    "lint": "biome check --write .",
+    "lint:ci": "biome ci",
+    "test": "vitest",
+    "typecheck": "tsgo --noEmit"
+  },
+  "dependencies": {
+    "enssdk": "workspace:*",
+    "@urql/core": "^6.0.0",
+    "@urql/exchange-graphcache": "^9.0.0",
+    "urql": "^5.0.1"
+  },
+  "peerDependencies": {
+    "gql.tada": "^1.8.10",
+    "graphql": "^16",
+    "react": "^18.0.0 || ^19.0.0",
+    "viem": "^2"
+  },
+  "devDependencies": {
+    "@ensnode/shared-configs": "workspace:*",
+    "@types/react": "catalog:",
+    "gql.tada": "^1.8.10",
+    "graphql": "^16.11.0",
+    "react": "catalog:",
+    "tsup": "catalog:",
+    "typescript": "catalog:",
+    "viem": "catalog:",
+    "vitest": "catalog:"
+  }
 }

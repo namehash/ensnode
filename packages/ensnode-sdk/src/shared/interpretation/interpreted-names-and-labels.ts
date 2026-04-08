@@ -1,18 +1,17 @@
+import type {
+  InterpretedLabel,
+  InterpretedName,
+  Label,
+  LabelHash,
+  LabelHashPath,
+  LiteralLabel,
+  LiteralName,
+  Name,
+} from "enssdk";
 import { isHex } from "viem";
 import { labelhash } from "viem/ens";
 
-import {
-  encodeLabelHash,
-  type InterpretedLabel,
-  type InterpretedName,
-  isNormalizedLabel,
-  type Label,
-  type LabelHash,
-  type LabelHashPath,
-  type LiteralLabel,
-  type LiteralName,
-  type Name,
-} from "../../ens";
+import { encodeLabelHash, isNormalizedLabel } from "../../ens";
 import { labelhashLiteralLabel } from "../labelhash";
 
 /**

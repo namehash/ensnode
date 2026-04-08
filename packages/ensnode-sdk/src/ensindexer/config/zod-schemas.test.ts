@@ -5,7 +5,6 @@ import { buildUnvalidatedEnsIndexerPublicConfig } from "./deserialize";
 import type { SerializedEnsIndexerPublicConfig } from "./serialized-types";
 import { type EnsIndexerVersionInfo, PluginName } from "./types";
 import {
-  makeDatabaseSchemaNameSchema,
   makeEnsIndexerPublicConfigSchema,
   makeEnsIndexerVersionInfoSchema,
   makeFullyPinnedLabelSetSchema,
@@ -20,16 +19,6 @@ describe("ENSIndexer: Config", () => {
       prettifyError(zodParseError.error!);
 
     describe("Parsing", () => {
-      it("can parse database schema name values", () => {
-        expect(makeDatabaseSchemaNameSchema().parse("public")).toBe("public");
-        expect(makeDatabaseSchemaNameSchema().parse("the_schema")).toBe("the_schema");
-        expect(makeDatabaseSchemaNameSchema().parse("theSchema")).toBe("theSchema");
-
-        expect(formatParseError(makeDatabaseSchemaNameSchema().safeParse(1))).toContain(
-          "Database schema name must be a string",
-        );
-      });
-
       it("can parse a list of plugin name values", () => {
         expect(
           makePluginsListSchema().parse([
@@ -105,14 +94,12 @@ describe("ENSIndexer: Config", () => {
       it("can parse version info values", () => {
         expect(
           makeEnsIndexerVersionInfoSchema().parse({
-            nodejs: "v22.22.22",
             ponder: "0.11.25",
             ensDb: "0.32.0",
             ensIndexer: "0.32.0",
             ensNormalize: "1.11.1",
           } satisfies EnsIndexerVersionInfo),
         ).toStrictEqual({
-          nodejs: "v22.22.22",
           ponder: "0.11.25",
           ensDb: "0.32.0",
           ensIndexer: "0.32.0",
@@ -122,7 +109,6 @@ describe("ENSIndexer: Config", () => {
         expect(
           formatParseError(
             makeEnsIndexerVersionInfoSchema().safeParse({
-              nodejs: "",
               ponder: "",
               ensDb: "",
               ensIndexer: "",
@@ -130,8 +116,6 @@ describe("ENSIndexer: Config", () => {
             } satisfies EnsIndexerVersionInfo),
           ),
         ).toStrictEqual(`✖ Value must be a non-empty string.
-  → at nodejs
-✖ Value must be a non-empty string.
   → at ponder
 ✖ Value must be a non-empty string.
   → at ensDb
@@ -145,7 +129,6 @@ describe("ENSIndexer: Config", () => {
         expect(
           formatParseError(
             makeEnsIndexerVersionInfoSchema().safeParse({
-              nodejs: "v22.22.22",
               ponder: "0.11.25",
               ensDb: "0.32.0",
               ensIndexer: "0.33.0", // Different from ensDb
@@ -169,9 +152,8 @@ describe("ENSIndexer: Config", () => {
           isSubgraphCompatible: false, // Set to false to bypass isSubgraphCompatible invariant
           namespace: "mainnet" as const,
           plugins: [PluginName.Subgraph, PluginName.Registrars], // Multiple plugins allowed when not subgraph compatible
-          databaseSchemaName: "test_schema",
+          ensIndexerSchemaName: "ensindexer_0",
           versionInfo: {
-            nodejs: "v22.22.22",
             ponder: "0.11.25",
             ensDb: "0.32.0",
             ensIndexer: "0.32.0",
@@ -224,9 +206,8 @@ describe("ENSIndexer: Config", () => {
           isSubgraphCompatible: true,
           namespace: "mainnet" as const,
           plugins: [PluginName.Subgraph],
-          databaseSchemaName: "test_schema",
+          ensIndexerSchemaName: "ensindexer_0",
           versionInfo: {
-            nodejs: "v22.22.22",
             ponder: "0.11.25",
             ensDb: "0.32.0",
             ensIndexer: "0.32.0",
@@ -270,13 +251,6 @@ describe("ENSIndexer: Config", () => {
 
     describe("Useful error messages", () => {
       it("can apply custom value labels", () => {
-        expect(
-          formatParseError(makeDatabaseSchemaNameSchema("databaseSchema").safeParse("")),
-        ).toContain("databaseSchema is required and must be a non-empty string.");
-        expect(
-          formatParseError(makeDatabaseSchemaNameSchema("DATABASE_SCHEMA env var").safeParse("")),
-        ).toContain("DATABASE_SCHEMA env var is required and must be a non-empty string.");
-
         expect(
           formatParseError(
             makePluginsListSchema("PLUGINS env var").safeParse([

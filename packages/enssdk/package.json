@@ -16,16 +16,23 @@
     "Omnigraph"
   ],
   "files": [
-    "dist"
+    "dist",
+    "src/omnigraph/generated/schema.graphql"
   ],
   "exports": {
+    ".": "./src/index.ts",
     "./core": "./src/core/index.ts",
-    "./omnigraph": "./src/omnigraph/index.ts"
+    "./omnigraph": "./src/omnigraph/index.ts",
+    "./omnigraph/schema.graphql": "./src/omnigraph/generated/schema.graphql"
   },
   "sideEffects": false,
   "publishConfig": {
     "access": "public",
     "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
       "./core": {
         "types": "./dist/core/index.d.ts",
         "default": "./dist/core/index.js"
@@ -33,7 +40,8 @@
       "./omnigraph": {
         "types": "./dist/omnigraph/index.d.ts",
         "default": "./dist/omnigraph/index.js"
-      }
+      },
+      "./omnigraph/schema.graphql": "./src/omnigraph/generated/schema.graphql"
     }
   },
   "scripts": {
@@ -45,13 +53,22 @@
     "generate:gqlschema": "gql.tada generate-output"
   },
   "dependencies": {
+    "@ensdomains/address-encoder": "^1.1.2",
+    "caip": "catalog:"
+  },
+  "peerDependencies": {
     "gql.tada": "^1.8.10",
-    "graphql": "^16.11.0"
+    "graphql": "^16",
+    "viem": "^2"
   },
   "devDependencies": {
     "@ensnode/shared-configs": "workspace:*",
+    "@types/node": "catalog:",
+    "gql.tada": "^1.8.10",
+    "graphql": "^16.11.0",
     "tsup": "catalog:",
     "typescript": "catalog:",
+    "viem": "catalog:",
     "vitest": "catalog:"
   }
 }

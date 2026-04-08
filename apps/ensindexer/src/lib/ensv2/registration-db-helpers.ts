@@ -1,4 +1,4 @@
-import { type DomainId, makeRegistrationId, makeRenewalId } from "@ensnode/ensnode-sdk";
+import { type DomainId, makeRegistrationId, makeRenewalId } from "enssdk";
 
 import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 
@@ -26,7 +26,7 @@ export async function getLatestRegistration(context: IndexingEngineContext, doma
   if (!pointer) return null;
 
   return context.ensDb.find(ensIndexerSchema.registration, {
-    id: makeRegistrationId(domainId, pointer.index),
+    id: makeRegistrationId(domainId, pointer.registrationIndex),
   });
 }
 
@@ -35,26 +35,26 @@ export async function getLatestRegistration(context: IndexingEngineContext, doma
  */
 export async function insertLatestRegistration(
   context: IndexingEngineContext,
-  values: Omit<typeof ensIndexerSchema.registration.$inferInsert, "id" | "index">,
+  values: Omit<typeof ensIndexerSchema.registration.$inferInsert, "id" | "registrationIndex">,
 ) {
   const { domainId } = values;
 
   // derive new Registration's index from previous, if exists
   const previous = await getLatestRegistration(context, domainId);
-  const index = previous ? previous.index + 1 : 0;
+  const registrationIndex = previous ? previous.registrationIndex + 1 : 0;
 
   // insert new Registration
   await context.ensDb.insert(ensIndexerSchema.registration).values({
-    id: makeRegistrationId(domainId, index),
-    index,
+    id: makeRegistrationId(domainId, registrationIndex),
+    registrationIndex,
     ...values,
   });
 
   // ensure this Registration is the latest
   await context.ensDb
     .insert(ensIndexerSchema.latestRegistrationIndex)
-    .values({ domainId, index })
-    .onConflictDoUpdate({ index });
+    .values({ domainId, registrationIndex })
+    .onConflictDoUpdate({ registrationIndex });
 }
 
 /**
@@ -72,7 +72,7 @@ export async function getLatestRenewal(
   if (!pointer) return null;
 
   return context.ensDb.find(ensIndexerSchema.renewal, {
-    id: makeRenewalId(domainId, registrationIndex, pointer.index),
+    id: makeRenewalId(domainId, registrationIndex, pointer.renewalIndex),
   });
 }
 
@@ -81,27 +81,30 @@ export async function getLatestRenewal(
  */
 export async function insertLatestRenewal(
   context: IndexingEngineContext,
-  registration: Pick<typeof ensIndexerSchema.registration.$inferInsert, "index">,
-  values: Omit<typeof ensIndexerSchema.renewal.$inferInsert, "id" | "registrationIndex" | "index">,
+  registration: Pick<typeof ensIndexerSchema.registration.$inferInsert, "registrationIndex">,
+  values: Omit<
+    typeof ensIndexerSchema.renewal.$inferInsert,
+    "id" | "registrationIndex" | "renewalIndex"
+  >,
 ) {
-  const { index: registrationIndex } = registration;
+  const { registrationIndex } = registration;
   const { domainId } = values;
 
   // derive new Renewal's index from previous, if exists
   const previous = await getLatestRenewal(context, domainId, registrationIndex);
-  const index = previous ? previous.index + 1 : 0;
+  const renewalIndex = previous ? previous.renewalIndex + 1 : 0;
 
   // insert new Renewal
   await context.ensDb.insert(ensIndexerSchema.renewal).values({
-    id: makeRenewalId(domainId, registrationIndex, index),
+    id: makeRenewalId(domainId, registrationIndex, renewalIndex),
     registrationIndex,
-    index,
+    renewalIndex,
     ...values,
   });
 
   // ensure this Renewal is the latest
   await context.ensDb
     .insert(ensIndexerSchema.latestRenewalIndex)
-    .values({ domainId, registrationIndex, index })
-    .onConflictDoUpdate({ index });
+    .values({ domainId, registrationIndex, renewalIndex })
+    .onConflictDoUpdate({ renewalIndex });
 }

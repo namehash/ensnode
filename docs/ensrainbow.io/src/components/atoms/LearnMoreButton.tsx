@@ -1,6 +1,7 @@
-import { Button, Link } from "@namehash/namekit-react";
+import { legacyButtonVariants } from "@namehash/namehash-ui/legacy";
 
 import { ExternalLinkIcon } from "./icons/ExternalLinkIcon.tsx";
+import cc from "classcat";
 
 export type LearnMoreButtonProps = {
   text: string;
@@ -9,13 +10,25 @@ export type LearnMoreButtonProps = {
   styles?: string;
 };
 
-export const LearnMoreButton = (props: LearnMoreButtonProps) => {
+export const LearnMoreButton = ({
+  text,
+  source,
+  iconFillColor = "fill-gray-400",
+  styles,
+}: LearnMoreButtonProps) => {
   return (
-    <Button variant="secondary" className="max-w-full overflow-x-hidden" size="medium" asChild>
-      <Link href={props.source}>
-        {props.text}
-        <ExternalLinkIcon fillColor="fill-gray-400" />
-      </Link>
-    </Button>
+    <a
+      href={source}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={legacyButtonVariants({
+        variant: "secondary",
+        size: "medium",
+        className: cc("max-w-full overflow-x-hidden", styles),
+      })}
+    >
+      {text}
+      <ExternalLinkIcon fillColor={iconFillColor} />
+    </a>
   );
 };

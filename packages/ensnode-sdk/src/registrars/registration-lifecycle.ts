@@ -1,4 +1,5 @@
-import type { Node } from "../ens";
+import type { Node } from "enssdk";
+
 import type { UnixTimestamp } from "../shared/types";
 import type { Subregistry } from "./subregistry";
 

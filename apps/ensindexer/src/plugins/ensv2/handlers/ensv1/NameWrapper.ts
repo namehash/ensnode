@@ -1,3 +1,4 @@
+import { interpretTokenIdAsNode, makeENSv1DomainId, type Node } from "enssdk";
 import { type Address, isAddressEqual, zeroAddress } from "viem";
 
 import {
@@ -5,16 +6,13 @@ import {
   type DNSEncodedName,
   decodeDNSEncodedLiteralName,
   interpretAddress,
-  interpretTokenIdAsNode,
   isPccFuseSet,
   isRegistrationExpired,
   isRegistrationFullyExpired,
   isRegistrationInGracePeriod,
   type LiteralLabel,
   labelhashLiteralLabel,
-  makeENSv1DomainId,
   makeSubdomainNode,
-  type Node,
   PluginName,
 } from "@ensnode/ensnode-sdk";
 
@@ -34,6 +32,7 @@ import {
   type IndexingEngineContext,
 } from "@/lib/indexing-engines/ponder";
 import { toJson } from "@/lib/json-stringify-with-bigints";
+import { logger } from "@/lib/logger";
 import { getManagedName } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
@@ -172,7 +171,7 @@ export default function () {
         }
       } catch {
         // NameWrapper emitted malformed name? just warn and move on
-        console.warn(`NameWrapper emitted malformed DNSEncodedName: '${name}'`);
+        logger.warn({ msg: `NameWrapper emitted malformed DNSEncodedName: '${name}'` });
       }
 
       const registration = await getLatestRegistration(context, domainId);

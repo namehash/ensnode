@@ -1,12 +1,10 @@
+import { type AccountId, makeENSv2DomainId, makeStorageId } from "enssdk";
 import type { Address } from "viem";
 
 import {
-  type AccountId,
   type EncodedReferrer,
-  getCanonicalId,
   interpretAddress,
   isRegistrationFullyExpired,
-  makeENSv2DomainId,
   PluginName,
   type TokenId,
 } from "@ensnode/ensnode-sdk";
@@ -70,8 +68,8 @@ export default function () {
       // _before_ this event. This event upserts the latest Registration with payment info.
 
       const { registrar, registry } = await getRegistrarAndRegistry(context, event);
-      const canonicalId = getCanonicalId(tokenId);
-      const domainId = makeENSv2DomainId(registry, canonicalId);
+      const storageId = makeStorageId(tokenId);
+      const domainId = makeENSv2DomainId(registry, storageId);
 
       const registration = await getLatestRegistration(context, domainId);
 
@@ -145,8 +143,8 @@ export default function () {
       // update Registration.expiry, it just needs to update the latest Renewal
 
       const { registry } = await getRegistrarAndRegistry(context, event);
-      const canonicalId = getCanonicalId(tokenId);
-      const domainId = makeENSv2DomainId(registry, canonicalId);
+      const storageId = makeStorageId(tokenId);
+      const domainId = makeENSv2DomainId(registry, storageId);
 
       const registration = await getLatestRegistration(context, domainId);
 

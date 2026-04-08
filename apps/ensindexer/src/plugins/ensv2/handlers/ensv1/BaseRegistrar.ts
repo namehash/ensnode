@@ -1,11 +1,10 @@
 import { GRACE_PERIOD_SECONDS } from "@ensdomains/ensjs/utils";
+import { interpretTokenIdAsLabelHash, makeENSv1DomainId } from "enssdk";
 import { type Address, isAddressEqual, zeroAddress } from "viem";
 
 import {
   interpretAddress,
-  interpretTokenIdAsLabelHash,
   isRegistrationFullyExpired,
-  makeENSv1DomainId,
   makeSubdomainNode,
   PluginName,
 } from "@ensnode/ensnode-sdk";

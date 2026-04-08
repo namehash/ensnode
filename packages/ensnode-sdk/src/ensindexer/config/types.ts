@@ -1,7 +1,8 @@
+import type { ChainId } from "enssdk";
+
 import type { ENSNamespaceId } from "@ensnode/datasources";
 
 import type { EnsRainbowClientLabelSet, EnsRainbowPublicConfig } from "../../ensrainbow";
-import type { ChainId } from "../../shared/types";
 
 /**
  * A PluginName is a unique id for a 'plugin': we use the notion of
@@ -22,13 +23,6 @@ export enum PluginName {
  * Version info about ENSIndexer and its dependencies.
  */
 export interface EnsIndexerVersionInfo {
-  /**
-   * Node.js runtime version
-   *
-   * @see https://nodejs.org/en/about/previous-releases
-   **/
-  nodejs: string;
-
   /**
    * Ponder framework version
    *
@@ -87,14 +81,14 @@ export interface EnsIndexerPublicConfig {
   labelSet: Required<EnsRainbowClientLabelSet>;
 
   /**
-   * A Postgres database schema name. This instance of ENSIndexer will write
-   * indexed data to the tables in this schema.
+   * The name of the ENSIndexer Schema in the ENSDb instance,
+   * where the ENSIndexer instance writes indexed data.
    *
    * Invariants:
    * - Must be a non-empty string that is a valid Postgres database schema
    *   identifier.
    */
-  databaseSchemaName: string;
+  ensIndexerSchemaName: string;
 
   /**
    * ENSRainbow public config

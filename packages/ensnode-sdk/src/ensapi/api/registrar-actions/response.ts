@@ -1,4 +1,5 @@
-import type { InterpretedName } from "../../../ens/types";
+import type { InterpretedName } from "enssdk";
+
 import type { RegistrarAction } from "../../../registrars/registrar-action";
 import type { UnixTimestamp } from "../../../shared/types";
 import type { IndexingStatusResponseCodes } from "../indexing-status/response";

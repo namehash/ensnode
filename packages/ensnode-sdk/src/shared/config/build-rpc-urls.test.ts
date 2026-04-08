@@ -1,3 +1,4 @@
+import type { ChainId } from "enssdk";
 import { lineaSepolia } from "viem/chains";
 import { describe, expect, it } from "vitest";
 
@@ -8,7 +9,6 @@ import {
   getENSNamespace,
 } from "@ensnode/datasources";
 
-import type { ChainId } from "../types";
 import { buildAlchemyBaseUrl, buildDRPCUrl, buildQuickNodeURL } from "./build-rpc-urls";
 
 const KEY = "whatever";

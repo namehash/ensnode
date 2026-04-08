@@ -1,0 +1,51 @@
+// import { maxAliasesPlugin } from "@escape.tech/graphql-armor-max-aliases";
+// import { maxDepthPlugin } from "@escape.tech/graphql-armor-max-depth";
+// import { maxTokensPlugin } from "@escape.tech/graphql-armor-max-tokens";
+
+import { createYoga } from "graphql-yoga";
+
+import { makeLogger } from "@/lib/logger";
+import { context } from "@/omnigraph-api/context";
+import { schema } from "@/omnigraph-api/schema";
+
+const logger = makeLogger("omnigraph");
+
+export const yoga = createYoga({
+  graphqlEndpoint: "*",
+  schema,
+  context,
+  // CORS is handled by the Hono middleware in app.ts
+  cors: false,
+  graphiql: {
+    defaultQuery: `query DomainsByOwner {
+  account(by: { address: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" }) {
+    domains {
+      edges {
+        node {
+          id
+          label
+          owner { address }
+          registration { expiry }
+          ... on ENSv1Domain {
+            parent { label }
+          }
+          ... on ENSv2Domain {
+            registry { contract {chainId address}}
+          }
+        }
+      }
+    }
+  }
+}`,
+  },
+
+  // integrate logging with pino
+  logging: logger,
+
+  plugins: [
+    // TODO: plugins
+    // maxTokensPlugin({ n: maxOperationTokens }),
+    // maxDepthPlugin({ n: maxOperationDepth, ignoreIntrospection: false }),
+    // maxAliasesPlugin({ n: maxOperationAliases, allowList: [] }),
+  ],
+});

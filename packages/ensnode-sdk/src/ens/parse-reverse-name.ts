@@ -1,8 +1,8 @@
+import type { CoinType, Label, Name } from "enssdk";
 import { type Address, hexToBigInt, isAddress } from "viem";
 
 import { asLowerCaseAddress } from "../shared/address";
-import { bigintToCoinType, type CoinType, DEFAULT_EVM_COIN_TYPE, ETH_COIN_TYPE } from "./coin-type";
-import type { Label, Name } from "./types";
+import { bigintToCoinType, DEFAULT_EVM_COIN_TYPE, ETH_COIN_TYPE } from "./coin-type";
 
 /**
  * Matches an ENSIP-19 Reverse Name

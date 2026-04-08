@@ -1,7 +1,6 @@
+import { AssetNamespaces, type InterpretedName } from "enssdk";
 import { describe, expect, it } from "vitest";
 
-import type { InterpretedName } from "../../../ens/types";
-import { AssetNamespaces } from "../../../shared/types";
 import { NFTMintStatuses } from "../../../tokenscope/assets";
 import { NameTokenOwnershipTypes } from "../../../tokenscope/name-token";
 import { NameTokensResponseCodes, type NameTokensResponseOk } from "./response";

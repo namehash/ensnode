@@ -59,7 +59,7 @@ app.use(subgraphMetaMiddleware);
 // imported without env vars being present (e.g. during OpenAPI generation).
 const getSubgraphMiddleware = lazy(() =>
   subgraphGraphQLMiddleware({
-    databaseUrl: config.databaseUrl,
+    databaseUrl: config.ensDbUrl,
     databaseSchema: config.ensIndexerSchemaName,
     schema: subgraphSchema,
     // describes the polymorphic (interface) relationships in the schema
