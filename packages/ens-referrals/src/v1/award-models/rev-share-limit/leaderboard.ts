@@ -86,8 +86,8 @@ interface ReferrerRaceState {
  * race algorithm over individual referral events.
  *
  * Events are processed in chronological order. When a referrer first crosses the qualification
- * threshold, they claim ALL accumulated standard award value at once (capped by remaining pool).
- * After qualifying, each subsequent event claims that event's incremental standard award (also
+ * threshold, they claim ALL accumulated uncapped award at once (capped by remaining pool).
+ * After qualifying, each subsequent event claims that event's incremental uncapped award (also
  * capped). Once the pool reaches $0, no further awards are issued to anyone.
  *
  * @param events - Raw referral events from the database (unsorted; will be sorted internally).

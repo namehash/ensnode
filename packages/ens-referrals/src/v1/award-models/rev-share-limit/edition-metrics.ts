@@ -39,7 +39,7 @@ export interface ReferrerEditionMetricsRankedRevShareLimit {
    * The awarded referrer metrics from the leaderboard.
    *
    * Contains all calculated metrics including rank, qualification status,
-   * standard award value, and award pool approximate value.
+   * uncapped award value, and capped award value.
    */
   referrer: AwardedReferrerMetricsRevShareLimit;
 
