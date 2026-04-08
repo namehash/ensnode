@@ -627,7 +627,7 @@ export class EnsApiClient {
    * import { namehashInterpretedName, asInterpretedName } from "enssdk";
    *
    * const VITALIK_NAME = asInterpretedName("vitalik.eth");
-   * const VITALIK_DOMAIN_ID = namehashInterpretedName(vitalik);
+   * const VITALIK_DOMAIN_ID = namehashInterpretedName(VITALIK_NAME);
    *
    * const client: EnsApiClient;
    *

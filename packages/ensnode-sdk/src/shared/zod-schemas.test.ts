@@ -1,4 +1,4 @@
-import { encodeLabelHash, type InterpretedLabel, labelhashInterpretedLabel } from "enssdk";
+import { asLiteralLabel, encodeLabelHash, labelhashLiteralLabel } from "enssdk";
 import { describe, expect, it } from "vitest";
 import { prettifyError, type ZodSafeParseResult } from "zod/v4";
 
@@ -171,7 +171,7 @@ describe("ENSIndexer: Shared", () => {
     describe("ReinterpretedName", () => {
       const nameWithNormalizedLabels = "tko.basetest.eth";
       const nameWithUnnormalizedLabels = "TKO.basetest.eth";
-      const reinterpretedNameFromUnnormalizedLabels = `${encodeLabelHash(labelhashInterpretedLabel("TKO" as InterpretedLabel))}.basetest.eth`;
+      const reinterpretedNameFromUnnormalizedLabels = `${encodeLabelHash(labelhashLiteralLabel(asLiteralLabel("TKO")))}.basetest.eth`;
 
       it("can reinterpret a name which includes normalized labels", () => {
         expect(makeReinterpretedNameSchema().parse(nameWithNormalizedLabels)).toBe(
