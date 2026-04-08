@@ -284,10 +284,14 @@ export const makeReferrerLeaderboardPageRevShareLimitSchema = (
       message: `${valueLabel}.awardModel must equal ${valueLabel}.rules.awardModel`,
       path: ["awardModel"],
     })
-    .refine(
-      (data) => data.referrers.every((r) => r.cappedAward.amount <= data.rules.awardPool.amount),
-      {
-        message: `${valueLabel}.referrers[].cappedAward must be <= ${valueLabel}.rules.awardPool`,
-        path: ["referrers"],
-      },
-    );
+    .superRefine((data, ctx) => {
+      data.referrers.forEach((referrer, index) => {
+        if (referrer.cappedAward.amount > data.rules.awardPool.amount) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `${valueLabel}.referrers[${index}].cappedAward must be <= ${valueLabel}.rules.awardPool`,
+            path: ["referrers", index, "cappedAward", "amount"],
+          });
+        }
+      });
+    });
