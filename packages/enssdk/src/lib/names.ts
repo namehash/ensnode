@@ -66,13 +66,14 @@ export const getParentNameFQDN = (name: Name): Name => {
  * @param name - The name to beautify.
  * @returns The beautified name.
  */
-export const beautifyName = (name: Name): Name => {
-  const beautifiedLabels = name.split(".").map((label: Label) => {
-    if (isNormalizedLabel(label)) {
-      return ens_beautify(label);
-    } else {
-      return label;
-    }
-  });
-  return beautifiedLabels.join(".");
-};
+export const beautifyName = (name: Name): Name =>
+  name
+    .split(".")
+    .map((label: Label) => {
+      if (isNormalizedLabel(label)) {
+        return ens_beautify(label);
+      } else {
+        return label;
+      }
+    })
+    .join(".");
