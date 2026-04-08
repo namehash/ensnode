@@ -32,7 +32,7 @@
   "dependencies": {
     "@ensnode/ensrainbow-sdk": "workspace:*",
     "@ensnode/ensnode-sdk": "workspace:*",
-    "@hono/node-server": "^1.19.13",
+    "@hono/node-server": "catalog:",
     "classic-level": "^1.4.1",
     "hono": "catalog:",
     "pino": "catalog:",

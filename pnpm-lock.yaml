@@ -12,6 +12,9 @@ catalogs:
     '@astrojs/tailwind':
       specifier: ^6.0.2
       version: 6.0.2
+    '@hono/node-server':
+      specifier: ^1.19.13
+      version: 1.19.13
     '@ponder/client':
       specifier: 0.16.6
       version: 0.16.6
@@ -342,7 +345,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/ponder-subgraph
       '@hono/node-server':
-        specifier: ^1.19.13
+        specifier: 'catalog:'
         version: 1.19.13(hono@4.12.12)
       '@hono/otel':
         specifier: ^0.2.2
@@ -572,7 +575,7 @@ importers:
         specifier: ^5.0.0
         version: 5.0.5
       '@hono/node-server':
-        specifier: ^1.19.13
+        specifier: 'catalog:'
         version: 1.19.13(hono@4.12.12)
       classic-level:
         specifier: ^1.4.1
@@ -643,7 +646,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/shared-configs
       '@hono/node-server':
-        specifier: ^1.19.13
+        specifier: 'catalog:'
         version: 1.19.13(hono@4.12.12)
       '@types/node':
         specifier: 'catalog:'
