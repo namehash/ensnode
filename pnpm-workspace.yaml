@@ -19,7 +19,7 @@ catalog:
   astro-seo: ^0.8.4
   caip: 1.1.1
   date-fns: 4.1.0
-  drizzle-orm: 0.41.0
+  drizzle-orm: 0.45.2
   hono: ^4.12.7
   lucide-react: ^0.548.0
   p-retry: 7.1.1
