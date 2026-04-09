@@ -126,7 +126,7 @@ describe("ENSNode API Schema", () => {
     });
 
     it("rejects ResponseOk object missing required accurateAsOf", () => {
-      const { accurateAsOf, ...invalidResponseOk } = validResponseOk;
+      const { accurateAsOf: _accurateAsOf, ...invalidResponseOk } = validResponseOk;
 
       expect(() => makeRegistrarActionsResponseSchema().parse(invalidResponseOk)).toThrowError();
     });
