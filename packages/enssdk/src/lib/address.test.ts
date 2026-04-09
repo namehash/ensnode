@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { asNormalizedAddress, isNormalizedAddress, toNormalizedAddress } from "./address";
+import type { Address } from "./types";
 
 describe("isNormalizedAddress", () => {
   it("should return true for a lowercase address", () => {
@@ -20,7 +21,7 @@ describe("isNormalizedAddress", () => {
   });
 
   it("should return false for a non-hex string", () => {
-    expect(isNormalizedAddress("not-an-address")).toBe(false);
+    expect(isNormalizedAddress("not-an-address" as Address)).toBe(false);
   });
 });
 
@@ -48,7 +49,7 @@ describe("toNormalizedAddress", () => {
   });
 
   it("should throw for a non-hex string", () => {
-    expect(() => toNormalizedAddress("not-an-address")).toThrow(/does not/);
+    expect(() => toNormalizedAddress("not-an-address" as Address)).toThrow(/does not/);
   });
 });
 
