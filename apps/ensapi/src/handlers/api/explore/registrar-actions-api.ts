@@ -101,8 +101,15 @@ async function fetchRegistrarActions(parentNode: Node | undefined, query: Regist
  */
 app.openapi(getRegistrarActionsRoute, async (c) => {
   try {
+    if (c.var.indexingStatus instanceof Error) {
+      throw new Error("Indexing status has not been loaded yet");
+    }
+
     const query = c.req.valid("query");
     const { registrarActions, pageContext } = await fetchRegistrarActions(undefined, query);
+
+    // Get the accurateAsOf timestamp from the slowest chain indexing cursor
+    const accurateAsOf = c.var.indexingStatus.snapshot.slowestChainIndexingCursor;
 
     // respond with success response
     return c.json(
@@ -110,6 +117,7 @@ app.openapi(getRegistrarActionsRoute, async (c) => {
         responseCode: RegistrarActionsResponseCodes.Ok,
         registrarActions,
         pageContext,
+        accurateAsOf,
       } satisfies RegistrarActionsResponseOk),
     );
   } catch (error) {

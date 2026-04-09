@@ -43,7 +43,7 @@ export const makeRegistrarActionsResponseOkSchema = (
     responseCode: z.literal(RegistrarActionsResponseCodes.Ok),
     registrarActions: z.array(makeNamedRegistrarActionSchema(valueLabel)),
     pageContext: makeResponsePageContextSchema(`${valueLabel}.pageContext`),
-    accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`).optional(),
+    accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
   });
 
 /**
