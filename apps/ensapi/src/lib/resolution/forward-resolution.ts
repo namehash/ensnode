@@ -5,7 +5,6 @@ import { replaceBigInts } from "@ponder/utils";
 import {
   type AccountId,
   asInterpretedName,
-  isNormalizedName,
   type Node,
   namehashInterpretedName,
   normalizeName,
@@ -108,10 +107,13 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
  * `registry`.
  */
 async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
-  name: ForwardResolutionArgs<SELECTION>["name"],
+  _name: ForwardResolutionArgs<SELECTION>["name"],
   selection: ForwardResolutionArgs<SELECTION>["selection"],
   options: { registry: AccountId; accelerate: boolean; canAccelerate: boolean },
 ): Promise<ForwardResolutionResult<SELECTION>> {
+  // Invariant: Name must be an InterpretedName
+  const name = asInterpretedName(_name);
+
   const {
     registry: { chainId },
     accelerate = false,
@@ -141,12 +143,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           // Validate Input
           //////////////////////////////////////////////////
 
-          // Invariant: Name must be normalized
-          if (!isNormalizedName(name)) {
-            throw new Error(`Invariant: Name "${name}" must be normalized.`);
-          }
-
-          const node: Node = namehashInterpretedName(asInterpretedName(name));
+          const node: Node = namehashInterpretedName(name);
           span.setAttribute("node", node);
 
           // if selection is empty, give them what they asked for

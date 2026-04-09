@@ -1,6 +1,6 @@
 import { ens_normalize } from "@adraffy/ens-normalize";
 
-import type { InterpretedLabel, InterpretedName, Label, Name, NormalizedName } from "./types";
+import type { InterpretedLabel, InterpretedName, Label, Name } from "./types";
 
 /**
  * Normalizes a Name according to ENS normalization rules (ENSIP-15), returning an InterpretedName.
@@ -34,13 +34,14 @@ export const normalizeLabel = (label: Label): InterpretedLabel => {
 /**
  * Determines whether the Name is normalized according to ENSIP-15 normalization rules.
  */
-export function isNormalizedName(name: Name): name is NormalizedName {
+export function isNormalizedName(name: Name): boolean {
   try {
     return name === normalizeName(name);
   } catch {
     return false;
   }
 }
+
 /**
  * Determines whether the Label is normalized according to ENSIP-15 normalization rules.
  */

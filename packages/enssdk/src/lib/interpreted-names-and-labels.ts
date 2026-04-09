@@ -213,11 +213,7 @@ export function asInterpretedName(name: string): InterpretedName {
 /**
  * Validates and casts a string to a {@link LiteralLabel}.
  * A LiteralLabel is a label as it literally appears onchain.
- *
- * @throws if the input is empty
  */
 export function asLiteralLabel(label: string): LiteralLabel {
-  if (label === "") throw new Error("LiteralLabel must not be empty");
-
   return label as LiteralLabel;
 }

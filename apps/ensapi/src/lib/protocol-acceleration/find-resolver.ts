@@ -8,9 +8,9 @@ import {
   asInterpretedName,
   type DomainId,
   getNameHierarchy,
+  type InterpretedName,
   type Name,
   type Node,
-  type NormalizedName,
   namehashInterpretedName,
 } from "enssdk";
 import { isAddressEqual, type PublicClient, toHex, zeroAddress } from "viem";
@@ -62,7 +62,7 @@ export async function findResolver({
   publicClient,
 }: {
   registry: AccountId;
-  name: NormalizedName;
+  name: InterpretedName;
   accelerate: boolean;
   canAccelerate: boolean;
   publicClient: PublicClient;
@@ -175,7 +175,7 @@ async function findResolverWithUniversalResolver(
  */
 async function findResolverWithIndex(
   registry: AccountId,
-  name: NormalizedName,
+  name: InterpretedName,
 ): Promise<FindResolverResult> {
   return withActiveSpanAsync(
     tracer,
@@ -194,7 +194,7 @@ async function findResolverWithIndex(
 
       // 2. compute domainId of each node
       // NOTE: this is currently ENSv1-specific
-      const nodes = names.map((name) => namehashInterpretedName(asInterpretedName(name)) as Node);
+      const nodes = names.map((name) => namehashInterpretedName(name));
       const domainIds = nodes as DomainId[];
 
       // 3. for each domain, find its associated resolver in the selected registry

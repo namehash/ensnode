@@ -6,21 +6,20 @@ import {
   interpretedNameToInterpretedLabels,
 } from "./interpreted-names-and-labels";
 import { isNormalizedLabel } from "./normalization";
-import type { InterpretedName, Label, Name, NormalizedName } from "./types";
+import type { InterpretedName, Label, Name } from "./types";
 
 /**
- * Constructs a name hierarchy from a given NormalizedName.
+ * Constructs a name hierarchy from a given InterpretedName.
  *
  * @example
  * ```
  * getNameHierarchy("sub.example.eth") -> ["sub.example.eth", "example.eth", "eth"]
  * ```
- *
- * @dev by restricting the input type to NormalizedName we guarantee that we can split and join
- * on '.' and receive NormalizedNames as a result
  */
-export const getNameHierarchy = (name: NormalizedName): NormalizedName[] =>
-  name.split(".").map((_, i, labels) => labels.slice(i).join(".")) as NormalizedName[];
+export const getNameHierarchy = (name: InterpretedName): InterpretedName[] =>
+  interpretedNameToInterpretedLabels(name).map((_, i, labels) =>
+    interpretedLabelsToInterpretedName(labels.slice(i)),
+  );
 
 /**
  * Derives the parent's {@link InterpretedName} of the provided `name`, or null if there is none.
