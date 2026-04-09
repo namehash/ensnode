@@ -1,15 +1,12 @@
 "use client";
 
 import { NameDisplay } from "@namehash/namehash-ui";
+import type { Name } from "enssdk";
 import { useRouter, useSearchParams } from "next/navigation";
 import { type ChangeEvent, useMemo, useState } from "react";
 
 import { ENSNamespaceIds } from "@ensnode/datasources";
-import {
-  getNamespaceSpecificValue,
-  type Name,
-  type NamespaceSpecificValue,
-} from "@ensnode/ensnode-sdk";
+import { getNamespaceSpecificValue, type NamespaceSpecificValue } from "@ensnode/ensnode-sdk";
 
 import { getNameDetailsRelativePath, NameLink } from "@/components/name-links";
 import { Button } from "@/components/ui/button";

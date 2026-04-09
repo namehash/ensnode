@@ -3,12 +3,15 @@ import { AccountId as CaipAccountId } from "caip";
 import type {
   AccountId,
   AccountIdString,
+  Address,
   ChainId,
   DefaultableChainId,
+  Hex,
   InterpretedName,
   Node,
 } from "enssdk";
-import { type Address, type Hex, isAddress, isHex, size } from "viem";
+import { asLowerCaseAddress, reinterpretName } from "enssdk";
+import { isAddress, isHex, size } from "viem";
 /**
  * All zod schemas we define must remain internal implementation details.
  * We want the freedom to move away from zod in the future without impacting
@@ -20,7 +23,6 @@ import { type Address, type Hex, isAddress, isHex, size } from "viem";
 import { z } from "zod/v4";
 
 import { ENSNamespaceIds } from "../ens";
-import { asLowerCaseAddress } from "./address";
 import {
   type CurrencyId,
   CurrencyIds,
@@ -28,7 +30,6 @@ import {
   type PriceEth,
   type PriceUsdc,
 } from "./currencies";
-import { reinterpretName } from "./interpretation/reinterpretation";
 import type { BlockRef, Datetime, Duration, UnixTimestamp } from "./types";
 
 /**

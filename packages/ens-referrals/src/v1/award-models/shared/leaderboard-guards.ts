@@ -1,4 +1,4 @@
-import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
+import type { UnixTimestamp } from "enssdk";
 
 import type { ReferrerMetrics } from "../../referrer-metrics";
 import type { BaseReferralProgramRules } from "./rules";

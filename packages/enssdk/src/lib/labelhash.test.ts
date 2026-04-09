@@ -1,6 +1,9 @@
+import { keccak256, labelhash, stringToBytes } from "viem";
 import { describe, expect, it } from "vitest";
 
-import { isLabelHash } from "./labelhash";
+import { asLiteralLabel } from "./interpreted-names-and-labels";
+import { encodeLabelHash, isLabelHash, labelhashLiteralLabel } from "./labelhash";
+import type { LiteralLabel } from "./types";
 
 describe("isLabelHash", () => {
   // Test case: valid labelHash
@@ -39,5 +42,22 @@ describe("isLabelHash", () => {
   it("should throw error when labelHash is 67 hex digits", () => {
     const hash67 = "0x0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdefa";
     expect(isLabelHash(hash67)).toBe(false);
+  });
+});
+
+describe("labelhashLiteralLabel", () => {
+  it("labelhashes empty string correctly", () => {
+    expect(labelhashLiteralLabel("" as LiteralLabel)).toEqual(keccak256(stringToBytes("")));
+  });
+
+  it("labelhashes literal label correctly", () => {
+    expect(labelhashLiteralLabel(asLiteralLabel("example"))).toEqual(labelhash("example"));
+  });
+
+  it("labelhashes encoded-labelhash-looking-strings as literal labels", () => {
+    const encodedLabelHashLookingLabel = asLiteralLabel(encodeLabelHash(labelhash("whatever")));
+    expect(labelhashLiteralLabel(encodedLabelHashLookingLabel)).not.toEqual(
+      labelhash(encodedLabelHashLookingLabel),
+    );
   });
 });

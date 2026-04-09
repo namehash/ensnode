@@ -1,5 +1,6 @@
-import type { LabelHash } from "enssdk";
 import { isHex } from "viem";
+
+import type { LabelHash } from "./types";
 
 /**
  * Parses a labelHash string and normalizes it to a canonical `LabelHash`.

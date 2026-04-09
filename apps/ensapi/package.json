@@ -26,7 +26,7 @@
     "@ensnode/ensdb-sdk": "workspace:*",
     "@ensnode/ensnode-sdk": "workspace:*",
     "@ensnode/ponder-subgraph": "workspace:*",
-    "@hono/node-server": "^1.19.10",
+    "@hono/node-server": "catalog:",
     "@hono/otel": "^0.2.2",
     "@hono/zod-openapi": "^1.2.2",
     "@namehash/ens-referrals": "workspace:*",

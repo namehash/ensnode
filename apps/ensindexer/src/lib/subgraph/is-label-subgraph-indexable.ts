@@ -1,4 +1,4 @@
-import type { LiteralLabel } from "@ensnode/ensnode-sdk";
+import type { LiteralLabel } from "enssdk";
 
 /**
  * The following 4 characters are classified as "unindexable" in emitted labels by the ENS Subgraph.

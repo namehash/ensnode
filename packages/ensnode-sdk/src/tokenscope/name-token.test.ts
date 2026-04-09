@@ -1,4 +1,4 @@
-import type { AccountId, InterpretedName } from "enssdk";
+import { type AccountId, asInterpretedName } from "enssdk";
 import { zeroAddress } from "viem";
 import { describe, expect, it } from "vitest";
 
@@ -39,9 +39,9 @@ describe("Name Token", () => {
     } as const;
 
     const names = {
-      TestEth: "test.eth" as InterpretedName,
-      TestBaseEth: "test.base.eth" as InterpretedName,
-      TestLineaEth: "test.linea.eth" as InterpretedName,
+      TestEth: asInterpretedName("test.eth"),
+      TestBaseEth: asInterpretedName("test.base.eth"),
+      TestLineaEth: asInterpretedName("test.linea.eth"),
     } as const;
 
     it("returns 'NameWrapper' ownership type when NameWrapper account owns the name token", () => {

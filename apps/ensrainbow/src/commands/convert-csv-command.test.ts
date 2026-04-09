@@ -2,7 +2,7 @@ import { mkdtemp, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { labelhash } from "viem";
+import { asLiteralLabel, labelhashLiteralLabel } from "enssdk";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { type LabelSetId, labelHashToBytes } from "@ensnode/ensnode-sdk";
@@ -56,10 +56,18 @@ describe("convert-csv-command", () => {
       expect(await db.validate()).toBe(true);
       const recordsCount = await db.getPrecalculatedRainbowRecordCount();
       expect(recordsCount).toBe(11);
-      expect((await db.getVersionedRainbowRecord(labelHashToBytes(labelhash("123"))))?.label).toBe(
-        "123",
-      );
-      expect(await db.getVersionedRainbowRecord(labelHashToBytes(labelhash("1234")))).toBe(null);
+      expect(
+        (
+          await db.getVersionedRainbowRecord(
+            labelHashToBytes(labelhashLiteralLabel(asLiteralLabel("123"))),
+          )
+        )?.label,
+      ).toBe("123");
+      expect(
+        await db.getVersionedRainbowRecord(
+          labelHashToBytes(labelhashLiteralLabel(asLiteralLabel("1234"))),
+        ),
+      ).toBe(null);
       await db.close();
     });
 
@@ -94,13 +102,18 @@ describe("convert-csv-command", () => {
         'special"quotes"inside',
         "label with newline\n character", // new line
         "label-with-null\0byte", // null byte
-      ];
+      ].map(asLiteralLabel);
       for (const label of labels) {
         expect(
-          (await db.getVersionedRainbowRecord(labelHashToBytes(labelhash(label))))?.label,
+          (await db.getVersionedRainbowRecord(labelHashToBytes(labelhashLiteralLabel(label))))
+            ?.label,
         ).toBe(label);
       }
-      expect(await db.getVersionedRainbowRecord(labelHashToBytes(labelhash("1234")))).toBe(null);
+      expect(
+        await db.getVersionedRainbowRecord(
+          labelHashToBytes(labelhashLiteralLabel(asLiteralLabel("1234"))),
+        ),
+      ).toBe(null);
       await db.close();
     });
   });
@@ -246,16 +259,32 @@ describe("convert-csv-command", () => {
 
       // Verify specific labels exist
       expect(
-        (await db.getVersionedRainbowRecord(labelHashToBytes(labelhash("label1"))))?.label,
+        (
+          await db.getVersionedRainbowRecord(
+            labelHashToBytes(labelhashLiteralLabel(asLiteralLabel("label1"))),
+          )
+        )?.label,
       ).toBe("label1");
       expect(
-        (await db.getVersionedRainbowRecord(labelHashToBytes(labelhash("label2"))))?.label,
+        (
+          await db.getVersionedRainbowRecord(
+            labelHashToBytes(labelhashLiteralLabel(asLiteralLabel("label2"))),
+          )
+        )?.label,
       ).toBe("label2");
       expect(
-        (await db.getVersionedRainbowRecord(labelHashToBytes(labelhash("label3"))))?.label,
+        (
+          await db.getVersionedRainbowRecord(
+            labelHashToBytes(labelhashLiteralLabel(asLiteralLabel("label3"))),
+          )
+        )?.label,
       ).toBe("label3");
       expect(
-        (await db.getVersionedRainbowRecord(labelHashToBytes(labelhash("label4"))))?.label,
+        (
+          await db.getVersionedRainbowRecord(
+            labelHashToBytes(labelhashLiteralLabel(asLiteralLabel("label4"))),
+          )
+        )?.label,
       ).toBe("label4");
 
       await db.close();
@@ -581,12 +610,20 @@ describe("convert-csv-command", () => {
       // Verify the labels were stored correctly
       const label1 = "label,with,commas";
       const label2 = "another,label";
-      expect((await db.getVersionedRainbowRecord(labelHashToBytes(labelhash(label1))))?.label).toBe(
-        label1,
-      );
-      expect((await db.getVersionedRainbowRecord(labelHashToBytes(labelhash(label2))))?.label).toBe(
-        label2,
-      );
+      expect(
+        (
+          await db.getVersionedRainbowRecord(
+            labelHashToBytes(labelhashLiteralLabel(asLiteralLabel(label1))),
+          )
+        )?.label,
+      ).toBe(label1);
+      expect(
+        (
+          await db.getVersionedRainbowRecord(
+            labelHashToBytes(labelhashLiteralLabel(asLiteralLabel(label2))),
+          )
+        )?.label,
+      ).toBe(label2);
       await db.close();
     });
 

@@ -2,7 +2,8 @@ import {
   coinTypeToEvmChainId as _coinTypeToEvmChainId,
   evmChainIdToCoinType as _evmChainIdToCoinType,
 } from "@ensdomains/address-encoder/utils";
-import type { ChainId, CoinType, EvmCoinType } from "enssdk";
+
+import type { ChainId, CoinType, EvmCoinType } from "./types";
 
 /**
  * The ETH coinType.

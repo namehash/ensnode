@@ -1,6 +1,7 @@
+import { makeSubdomainNode } from "enssdk";
+
 import {
   decodeEncodedReferrer,
-  makeSubdomainNode,
   PluginName,
   type RegistrarActionReferralAvailable,
 } from "@ensnode/ensnode-sdk";

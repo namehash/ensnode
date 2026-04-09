@@ -1,4 +1,4 @@
-import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
+import type { UnixTimestamp } from "enssdk";
 
 import type { AggregatedReferrerMetrics } from "./aggregations";
 import type { ReferrerLeaderboard } from "./leaderboard";

@@ -1,5 +1,4 @@
-import type { DefaultableChainId } from "enssdk";
-import type { Address } from "viem";
+import type { Address, DefaultableChainId } from "enssdk";
 
 import { type ENSNamespaceId, getENSRootChainId } from "@ensnode/datasources";
 

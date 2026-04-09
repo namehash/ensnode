@@ -1,11 +1,8 @@
 import config from "@/config";
 
-import {
-  type AccountId,
-  DEFAULT_EVM_COIN_TYPE,
-  type Node,
-  type ResolverRecordsSelection,
-} from "@ensnode/ensnode-sdk";
+import { type AccountId, DEFAULT_EVM_COIN_TYPE, type Node } from "enssdk";
+
+import type { ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 import { staticResolverImplementsAddressRecordDefaulting } from "@ensnode/ensnode-sdk/internal";
 
 import { ensDb } from "@/lib/ensdb/singleton";

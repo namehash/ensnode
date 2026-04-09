@@ -2,8 +2,12 @@ import config from "@/config";
 
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, eq } from "drizzle-orm";
-import { makePermissionsId, makeResolverRecordsId, type ResolverId } from "enssdk";
-import { namehash } from "viem";
+import {
+  makePermissionsId,
+  makeResolverRecordsId,
+  namehashInterpretedName,
+  type ResolverId,
+} from "enssdk";
 
 import { isBridgedResolver } from "@ensnode/ensnode-sdk/internal";
 
@@ -109,7 +113,7 @@ ResolverRef.implement({
       args: { for: t.arg({ type: NameOrNodeInput, required: true }) },
       nullable: true,
       resolve: async ({ chainId, address }, args) => {
-        const node = args.for.node ?? namehash(args.for.name);
+        const node = args.for.node ?? namehashInterpretedName(args.for.name);
         return makeResolverRecordsId({ chainId, address }, node);
       },
     }),

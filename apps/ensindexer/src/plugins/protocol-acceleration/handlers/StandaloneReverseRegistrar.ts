@@ -1,7 +1,9 @@
 import config from "@/config";
 
+import { DEFAULT_EVM_COIN_TYPE, evmChainIdToCoinType } from "enssdk";
+
 import { getENSRootChainId } from "@ensnode/datasources";
-import { DEFAULT_EVM_COIN_TYPE, evmChainIdToCoinType, PluginName } from "@ensnode/ensnode-sdk";
+import { PluginName } from "@ensnode/ensnode-sdk";
 import { interpretNameRecordValue } from "@ensnode/ensnode-sdk/internal";
 
 import { addOnchainEventListener, ensIndexerSchema } from "@/lib/indexing-engines/ponder";

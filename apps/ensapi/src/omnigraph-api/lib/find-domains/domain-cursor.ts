@@ -1,4 +1,4 @@
-import type { DomainId } from "@ensnode/ensnode-sdk";
+import type { DomainId } from "enssdk";
 
 import { cursors } from "@/omnigraph-api/lib/cursors";
 import type { DomainOrderValue } from "@/omnigraph-api/lib/find-domains/types";

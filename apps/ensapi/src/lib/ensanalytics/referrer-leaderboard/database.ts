@@ -4,8 +4,8 @@ import {
   type ReferrerMetrics,
 } from "@namehash/ens-referrals";
 import { and, count, desc, eq, gte, isNotNull, lte, ne, sql, sum } from "drizzle-orm";
-import { stringifyAccountId } from "enssdk";
-import { type Address, zeroAddress } from "viem";
+import { type Address, stringifyAccountId } from "enssdk";
+import { zeroAddress } from "viem";
 
 import { deserializeDuration } from "@ensnode/ensnode-sdk";
 

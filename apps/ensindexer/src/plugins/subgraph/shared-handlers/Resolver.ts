@@ -1,8 +1,9 @@
 import config from "@/config";
 
-import type { Address, Hash, Hex } from "viem";
+import type { Address, Hex, Node } from "enssdk";
+import type { Hash } from "viem";
 
-import { hasNullByte, type Node, stripNullBytes, uniq } from "@ensnode/ensnode-sdk";
+import { hasNullByte, stripNullBytes, uniq } from "@ensnode/ensnode-sdk";
 
 import { parseDnsTxtRecordArgs } from "@/lib/dns-helpers";
 import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";

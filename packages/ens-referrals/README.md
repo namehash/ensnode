@@ -118,7 +118,7 @@ Returns referrer metrics for a specified referrer across one or more editions.
 ```typescript
 const response = await client.getReferrerMetricsEditions({
   referrer: "0x1234567890123456789012345678901234567890",
-  editions: ["2025-12", "2026-01"],
+  editions: ["2025-12", "2026-04"],
 });
 
 if (response.responseCode === ReferrerMetricsEditionsResponseCodes.Ok) {
@@ -153,6 +153,11 @@ if (response.responseCode === ReferrerMetricsEditionsResponseCodes.Ok) {
 ```
 
 More examples are available in [`packages/ens-referrals/src/v1/client.ts`](https://github.com/namehash/ensnode/tree/main/packages/ens-referrals/src/v1/client.ts).
+
+## See how current Referral Program Editions are configured
+
+Check out [`production-editions.json`](https://ensawards.org/production-editions.json) — the live config file powering our production deployment.
+
 
 ## Other Utilities
 

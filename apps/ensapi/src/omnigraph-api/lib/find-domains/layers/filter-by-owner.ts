@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import type { Address } from "viem";
+import type { Address } from "enssdk";
 
 import { ensDb } from "@/lib/ensdb/singleton";
 

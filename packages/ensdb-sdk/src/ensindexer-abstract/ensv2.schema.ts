@@ -1,12 +1,9 @@
-import { index, onchainEnum, onchainTable, primaryKey, relations, sql, uniqueIndex } from "ponder";
-import type { Address, BlockNumber, Hash } from "viem";
-
 import type {
+  Address,
   ChainId,
   DomainId,
   ENSv1DomainId,
   ENSv2DomainId,
-  EncodedReferrer,
   InterpretedLabel,
   LabelHash,
   PermissionsId,
@@ -16,7 +13,11 @@ import type {
   RegistryId,
   RenewalId,
   ResolverId,
-} from "@ensnode/ensnode-sdk";
+} from "enssdk";
+import { index, onchainEnum, onchainTable, primaryKey, relations, sql, uniqueIndex } from "ponder";
+import type { BlockNumber, Hash } from "viem";
+
+import type { EncodedReferrer } from "@ensnode/ensnode-sdk";
 
 /**
  * The ENSv2 Schema

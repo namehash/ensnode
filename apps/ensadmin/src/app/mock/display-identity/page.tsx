@@ -5,19 +5,16 @@ import {
   getChainName,
   getEnsManagerAddressDetailsUrl,
 } from "@namehash/namehash-ui";
+import type { Address, ChainId, DefaultableChainId, Name } from "enssdk";
+import { asLowerCaseAddress, DEFAULT_EVM_CHAIN_ID } from "enssdk";
 import { useState } from "react";
-import { type Address, isAddress } from "viem";
+import { isAddress } from "viem";
 
 import { getENSNamespace, getENSRootChainId } from "@ensnode/datasources";
 import {
-  asLowerCaseAddress,
-  type ChainId,
-  DEFAULT_EVM_CHAIN_ID,
-  type DefaultableChainId,
   type ENSNamespaceId,
   ENSNamespaceIds,
   type Identity,
-  type Name,
   type NamedIdentity,
   type ResolutionStatusId,
   ResolutionStatusIds,

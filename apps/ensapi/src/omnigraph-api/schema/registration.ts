@@ -1,12 +1,11 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, eq } from "drizzle-orm";
+import type { ENSv1DomainId, RegistrationId } from "enssdk";
 import { hexToBigInt } from "viem";
 
 import {
-  type ENSv1DomainId,
   isRegistrationFullyExpired,
   isRegistrationInGracePeriod,
-  type RegistrationId,
   type RequiredAndNotNull,
 } from "@ensnode/ensnode-sdk";
 

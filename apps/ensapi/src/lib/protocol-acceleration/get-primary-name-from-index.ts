@@ -1,12 +1,11 @@
 import { trace } from "@opentelemetry/api";
-import type { Address } from "viem";
-
 import {
+  type Address,
   type CoinType,
   coinTypeReverseLabel,
   DEFAULT_EVM_COIN_TYPE,
   type Name,
-} from "@ensnode/ensnode-sdk";
+} from "enssdk";
 
 import { ensDb } from "@/lib/ensdb/singleton";
 import { withSpanAsync } from "@/lib/instrumentation/auto-span";

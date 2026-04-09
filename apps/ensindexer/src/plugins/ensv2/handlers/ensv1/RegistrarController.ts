@@ -1,15 +1,15 @@
 /** biome-ignore-all lint/correctness/noUnusedVariables: ignore for now */
 
-import { type LabelHash, makeENSv1DomainId } from "enssdk";
-
 import {
-  type EncodedReferrer,
+  asLiteralLabel,
   type Label,
-  type LiteralLabel,
+  type LabelHash,
   labelhashLiteralLabel,
+  makeENSv1DomainId,
   makeSubdomainNode,
-  PluginName,
-} from "@ensnode/ensnode-sdk";
+} from "enssdk";
+
+import { type EncodedReferrer, PluginName } from "@ensnode/ensnode-sdk";
 
 import { ensureDomainEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel, ensureUnknownLabel } from "@/lib/ensv2/label-db-helpers";
@@ -41,8 +41,8 @@ export default function () {
       referrer?: EncodedReferrer;
     }>;
   }) {
-    const { label: _label, labelHash, baseCost: base, premium, referrer } = event.args;
-    const label = _label as LiteralLabel | undefined;
+    const { labelHash, baseCost: base, premium, referrer } = event.args;
+    const label = event.args.label ? asLiteralLabel(event.args.label) : undefined;
 
     // Invariant: If emitted, label must align with labelHash
     if (label !== undefined && labelHash !== labelhashLiteralLabel(label)) {
@@ -94,8 +94,8 @@ export default function () {
       referrer?: EncodedReferrer;
     }>;
   }) {
-    const { label: _label, labelHash, baseCost: base, premium, referrer } = event.args;
-    const label = _label as LiteralLabel;
+    const { labelHash, baseCost: base, premium, referrer } = event.args;
+    const label = event.args.label ? asLiteralLabel(event.args.label) : undefined;
 
     // Invariant: If emitted, label must align with labelHash
     if (label !== undefined && labelHash !== labelhashLiteralLabel(label)) {

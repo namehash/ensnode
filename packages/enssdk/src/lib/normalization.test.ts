@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { isNormalizedLabel, isNormalizedName } from "./is-normalized";
+import { isNormalizedLabel, isNormalizedName } from "./normalization";
 
 const NORMALIZED_LABELS = [
   "vitalik",
@@ -52,7 +52,7 @@ const UNNORMALIZED_NAMES = [
   "invalid|name.eth", // unnormalizable
 ];
 
-describe("is-normalized", () => {
+describe("normalization", () => {
   describe("isNormalizedLabel", () => {
     NORMALIZED_LABELS.forEach((label) => {
       it(`correctly identifies '${label}' as normalized`, () => {

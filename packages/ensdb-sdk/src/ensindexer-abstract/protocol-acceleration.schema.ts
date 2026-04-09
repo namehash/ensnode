@@ -2,10 +2,8 @@
  * Schema Definitions that power Protocol Acceleration in the Resolution API.
  */
 
+import type { Address, ChainId, DomainId, Node, ResolverId, ResolverRecordsId } from "enssdk";
 import { onchainTable, primaryKey, relations, uniqueIndex } from "ponder";
-import type { Address } from "viem";
-
-import type { ChainId, DomainId, Node, ResolverId, ResolverRecordsId } from "@ensnode/ensnode-sdk";
 
 /**
  * Tracks an Account's ENSIP-19 Reverse Name Records by CoinType.

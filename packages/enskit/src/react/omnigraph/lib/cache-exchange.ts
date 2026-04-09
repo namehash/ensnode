@@ -4,10 +4,9 @@ import {
   type ResolveInfo,
   type Variables,
 } from "@urql/exchange-graphcache";
-import type { AccountId, PermissionsId, RegistryId, ResolverId } from "enssdk";
+import type { AccountId, Address, PermissionsId, RegistryId, ResolverId } from "enssdk";
 import { makePermissionsId, makeRegistryId, makeResolverId, stringifyAccountId } from "enssdk";
 import { introspection } from "enssdk/omnigraph";
-import type { Address } from "viem";
 
 import { localConnectionResolvers } from "./local-connection-resolvers";
 

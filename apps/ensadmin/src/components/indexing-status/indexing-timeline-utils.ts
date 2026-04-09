@@ -1,6 +1,5 @@
 import { getUnixTime } from "date-fns";
-
-import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
+import type { UnixTimestamp } from "enssdk";
 
 /**
  * Calculate the position of a date in a timeline.

@@ -1,7 +1,12 @@
-import type { InterpretedLabel, InterpretedName } from "enssdk";
-import { labelhash as labelToLabelHash } from "viem";
-
-import { encodeLabelHash, isEncodedLabelHash, isNormalizedLabel } from "../../ens";
+import {
+  asInterpretedLabel,
+  asLiteralLabel,
+  interpretedLabelsToInterpretedName,
+  interpretedNameToInterpretedLabels,
+} from "./interpreted-names-and-labels";
+import { encodeLabelHash, isEncodedLabelHash, labelhashLiteralLabel } from "./labelhash";
+import { isNormalizedLabel } from "./normalization";
+import type { InterpretedLabel, InterpretedName } from "./types";
 
 /**
  * Reinterpret Label
@@ -33,9 +38,9 @@ export function reinterpretLabel(label: InterpretedLabel): InterpretedLabel {
   // no change required for NormalizedLabel
   if (isNormalizedLabel(label)) return label;
 
-  // the provided `label` is unnormalized,
-  // turn into an EncodedLabelHash
-  return encodeLabelHash(labelToLabelHash(label)) as InterpretedLabel;
+  // the provided `label` is an unnormalized literal label, encode it
+  const labelHash = labelhashLiteralLabel(asLiteralLabel(label as string));
+  return asInterpretedLabel(encodeLabelHash(labelHash));
 }
 
 /**
@@ -53,9 +58,6 @@ export function reinterpretLabel(label: InterpretedLabel): InterpretedLabel {
 export function reinterpretName(name: InterpretedName): InterpretedName {
   if (name === "") return name;
 
-  const interpretedLabels = name.split(".") as InterpretedLabel[];
-  const reinterpretedLabels = interpretedLabels.map(reinterpretLabel);
-  const reinterpretedName = reinterpretedLabels.join(".") as InterpretedName;
-
-  return reinterpretedName;
+  const labels = interpretedNameToInterpretedLabels(name);
+  return interpretedLabelsToInterpretedName(labels.map(reinterpretLabel));
 }

@@ -1,6 +1,5 @@
+import type { UnixTimestamp } from "enssdk";
 import { type AccountId, type Node, stringifyAccountId } from "enssdk";
-
-import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
 
 import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 

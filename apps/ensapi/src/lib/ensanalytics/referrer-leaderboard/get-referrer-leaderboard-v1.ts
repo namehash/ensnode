@@ -5,8 +5,7 @@ import {
   type ReferralProgramRules,
   type ReferrerLeaderboard,
 } from "@namehash/ens-referrals/v1";
-
-import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
+import type { UnixTimestamp } from "enssdk";
 
 import { getReferralEvents, getReferrerMetrics } from "./database-v1";
 

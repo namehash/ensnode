@@ -1,8 +1,6 @@
 import { and, eq, sql } from "drizzle-orm";
 import { alias, unionAll } from "drizzle-orm/pg-core";
-import type { Address } from "viem";
-
-import type { DomainId } from "@ensnode/ensnode-sdk";
+import type { Address, DomainId } from "enssdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 

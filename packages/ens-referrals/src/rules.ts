@@ -1,4 +1,4 @@
-import type { AccountId, UnixTimestamp } from "@ensnode/ensnode-sdk";
+import type { AccountId, UnixTimestamp } from "enssdk";
 
 import { type USDQuantity, validateUSDQuantity } from "./currency";
 import { validateNonNegativeInteger } from "./number";

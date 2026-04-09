@@ -1,6 +1,7 @@
-import { type Address, isAddressEqual, zeroAddress, zeroHash } from "viem";
-
 import {
+  type Address,
+  asInterpretedLabel,
+  constructSubInterpretedName,
   type DNSEncodedLiteralName,
   type DNSEncodedName,
   decodeDNSEncodedLiteralName,
@@ -14,7 +15,8 @@ import {
   literalLabelToInterpretedLabel,
   makeSubdomainNode,
   type Node,
-} from "@ensnode/ensnode-sdk";
+} from "enssdk";
+import { isAddressEqual, zeroAddress, zeroHash } from "viem";
 
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
@@ -78,7 +80,7 @@ function decodeFQDN(fqdn: DNSEncodedLiteralName): {
   }
 
   // due the invariant above, we know that all of the labels are normalized (and therefore Interpreted Labels)
-  const interpretedLabels = literalLabels as string[] as InterpretedLabel[];
+  const interpretedLabels = literalLabels.map(asInterpretedLabel);
 
   return {
     // biome-ignore lint/style/noNonNullAssertion: ok due to length invariant above
@@ -176,17 +178,18 @@ export async function handleNewOwner({
     // Interpret the `healedLabel` Literal Label into an Interpreted Label
     // see https://ensnode.io/docs/reference/terminology#literal-label
     // see https://ensnode.io/docs/reference/terminology#interpreted-label
-    const interpretedLabel = (
+    const interpretedLabel = asInterpretedLabel(
       healedLabel !== null
         ? literalLabelToInterpretedLabel(healedLabel)
-        : encodeLabelHash(labelHash)
-    ) as InterpretedLabel;
+        : encodeLabelHash(labelHash),
+    );
 
     // to construct `Domain.name` use the parent's Name and the Interpreted Label
     // NOTE: for a TLD, the parent is null, so we just use the Label value as is
-    const interpretedName = (
-      parent?.name ? `${interpretedLabel}.${parent.name}` : interpretedLabel
-    ) as InterpretedName;
+    const interpretedName = constructSubInterpretedName(
+      interpretedLabel,
+      parent?.name as InterpretedName | undefined,
+    );
 
     await context.ensDb
       .update(ensIndexerSchema.subgraph_domain, { id: node })

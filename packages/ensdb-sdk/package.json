@@ -60,6 +60,7 @@
   },
   "dependencies": {
     "@ensnode/ensnode-sdk": "workspace:*",
+    "enssdk": "workspace:*",
     "pg-connection-string": "catalog:",
     "zod": "catalog:"
   },

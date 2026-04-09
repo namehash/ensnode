@@ -1,16 +1,16 @@
 import config from "@/config";
 
 import { sql } from "drizzle-orm";
-
 import {
   type CanonicalPath,
   type DomainId,
   type ENSv1DomainId,
   type ENSv2DomainId,
-  maybeGetENSv2RootRegistryId,
   type RegistryId,
   ROOT_NODE,
-} from "@ensnode/ensnode-sdk";
+} from "enssdk";
+
+import { maybeGetENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { lazy } from "@/lib/lazy";

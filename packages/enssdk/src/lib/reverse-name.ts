@@ -1,7 +1,8 @@
-import type { CoinType, Label, LiteralLabel, Name } from "enssdk";
 import type { Address } from "viem";
 
 import { DEFAULT_EVM_COIN_TYPE, ETH_COIN_TYPE } from "./coin-type";
+import { asLiteralLabel } from "./interpreted-names-and-labels";
+import type { CoinType, Label, LiteralLabel, Name } from "./types";
 
 /**
  * Gets the Label used for the reverse names of subnames as per ENSIP-11 & ENSIP-19.
@@ -9,7 +10,7 @@ import { DEFAULT_EVM_COIN_TYPE, ETH_COIN_TYPE } from "./coin-type";
  * @see https://docs.ens.domains/ensip/19/#reverse-resolution
  */
 export const addrReverseLabel = (address: Address): LiteralLabel =>
-  address.slice(2) as LiteralLabel; // address is guaranteed to be fully lowercase
+  asLiteralLabel(address.slice(2)); // address is guaranteed to be fully lowercase
 
 /**
  * Converts `coinType` to prefix-free hex string.

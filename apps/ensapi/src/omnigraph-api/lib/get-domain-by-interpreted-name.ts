@@ -2,8 +2,6 @@ import config from "@/config";
 
 import { trace } from "@opentelemetry/api";
 import { Param, sql } from "drizzle-orm";
-import { namehash } from "viem";
-
 import {
   type DomainId,
   type ENSv2DomainId,
@@ -12,9 +10,11 @@ import {
   interpretedNameToInterpretedLabels,
   type LabelHash,
   makeENSv1DomainId,
-  maybeGetENSv2RootRegistryId,
+  namehashInterpretedName,
   type RegistryId,
-} from "@ensnode/ensnode-sdk";
+} from "enssdk";
+
+import { maybeGetENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
@@ -93,13 +93,12 @@ export async function getDomainIdByInterpretedName(
  * Retrieves the ENSv1DomainId for the provided `name`, if exists.
  */
 async function v1_getDomainIdByInterpretedName(name: InterpretedName): Promise<DomainId | null> {
-  const node = namehash(name);
-  const domainId = makeENSv1DomainId(node);
+  const domainId = makeENSv1DomainId(namehashInterpretedName(name));
 
   const domain = await ensDb.query.v1Domain.findFirst({ where: (t, { eq }) => eq(t.id, domainId) });
   const exists = domain !== undefined;
 
-  v1Logger.debug({ node, exists });
+  v1Logger.debug({ domainId, exists });
 
   return exists ? domainId : null;
 }

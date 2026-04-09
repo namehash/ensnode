@@ -1,6 +1,5 @@
-import type { AccountId } from "enssdk";
+import type { AccountId, Address } from "enssdk";
 import { stringifyAccountId } from "enssdk";
-import type { Address } from "viem";
 import { describe, expect, it } from "vitest";
 
 import { parseAccountId } from "./deserialize";

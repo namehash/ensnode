@@ -1,5 +1,7 @@
+import type { AccountId } from "enssdk";
+
 import { DatasourceNames } from "@ensnode/datasources";
-import { type AccountId, type ENSNamespaceId, makeContractMatcher } from "@ensnode/ensnode-sdk";
+import { type ENSNamespaceId, makeContractMatcher } from "@ensnode/ensnode-sdk";
 
 /**
  * Returns whether `resolver` is an Static Resolver.

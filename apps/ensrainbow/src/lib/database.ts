@@ -1,5 +1,6 @@
 import { ClassicLevel } from "classic-level";
-import { type ByteArray, type Hex, labelhash } from "viem";
+import { asLiteralLabel, type Hex, labelhashLiteralLabel } from "enssdk";
+import type { ByteArray } from "viem";
 
 import {
   buildLabelSetId,
@@ -657,7 +658,9 @@ export class ENSRainbowDB {
         }
 
         // Key-Value Validation (Hash Match)
-        const computedHash = labelHashToBytes(labelhash(versionedRainbowRecord.label));
+        const computedHash = labelHashToBytes(
+          labelhashLiteralLabel(asLiteralLabel(versionedRainbowRecord.label)),
+        );
         if (!byteArraysEqual(computedHash, key)) {
           logger.error(
             `Hash mismatch for label "${value}": stored=${keyHex}, computed=0x${Buffer.from(
@@ -780,7 +783,7 @@ export class ENSRainbowDB {
    */
   public async addRainbowRecord(label: string, labelSetVersion: LabelSetVersion): Promise<void> {
     const encodedValue = buildEncodedVersionedRainbowRecord(label, labelSetVersion);
-    await this.db.put(labelHashToBytes(labelhash(label)), encodedValue);
+    await this.db.put(labelHashToBytes(labelhashLiteralLabel(asLiteralLabel(label))), encodedValue);
   }
 }
 

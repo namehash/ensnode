@@ -1,9 +1,8 @@
 import config from "@/config";
 
-import type { Address } from "viem";
+import type { Address, LabelHash, LiteralLabel } from "enssdk";
 
 import { getENSRootChainId } from "@ensnode/datasources";
-import type { LabelHash, LiteralLabel } from "@ensnode/ensnode-sdk";
 
 import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import { toJson } from "@/lib/json-stringify-with-bigints";

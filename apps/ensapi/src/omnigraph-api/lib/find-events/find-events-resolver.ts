@@ -1,6 +1,6 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, count, eq, getTableColumns, gte, inArray, lte, type SQL, sql } from "drizzle-orm";
-import type { Address, Hex } from "viem";
+import type { Address, Hex } from "enssdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";

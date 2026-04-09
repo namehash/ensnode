@@ -1,4 +1,4 @@
-import { namehash } from "viem/ens";
+import { namehashInterpretedName } from "enssdk";
 import { z } from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
@@ -11,7 +11,7 @@ import { type NamedRegistrarAction, RegistrarActionsResponseCodes } from "./resp
 function invariant_registrationLifecycleNodeMatchesName(ctx: ParsePayload<NamedRegistrarAction>) {
   const { name, action } = ctx.value;
   const expectedNode = action.registrationLifecycle.node;
-  const actualNode = namehash(name);
+  const actualNode = namehashInterpretedName(name);
 
   if (actualNode !== expectedNode) {
     ctx.issues.push({

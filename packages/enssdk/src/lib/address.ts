@@ -1,4 +1,4 @@
-import type { Address } from "viem";
+import type { Address } from "./types";
 
 /**
  * Converts an EVM address to its lowercase representation.

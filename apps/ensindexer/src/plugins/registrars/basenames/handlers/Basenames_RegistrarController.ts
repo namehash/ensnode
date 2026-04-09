@@ -1,5 +1,6 @@
+import { makeSubdomainNode } from "enssdk";
+
 import {
-  makeSubdomainNode,
   PluginName,
   type RegistrarActionPricingUnknown,
   type RegistrarActionReferralNotApplicable,

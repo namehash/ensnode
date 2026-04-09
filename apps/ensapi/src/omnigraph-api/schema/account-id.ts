@@ -1,4 +1,4 @@
-import type { AccountId } from "@ensnode/ensnode-sdk";
+import type { AccountId } from "enssdk";
 
 import { builder } from "@/omnigraph-api/builder";
 

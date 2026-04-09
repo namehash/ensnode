@@ -1,8 +1,7 @@
 import config from "@/config";
 
+import { type Node, ROOT_NODE } from "enssdk";
 import { isAddressEqual, zeroAddress } from "viem";
-
-import { type Node, ROOT_NODE } from "@ensnode/ensnode-sdk";
 
 import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import { upsertAccount } from "@/lib/subgraph/db-helpers";

@@ -1,12 +1,7 @@
 import { z } from "@hono/zod-openapi";
+import { DEFAULT_EVM_CHAIN_ID, isNormalizedName, type Name } from "enssdk";
 
-import {
-  DEFAULT_EVM_CHAIN_ID,
-  isNormalizedName,
-  isSelectionEmpty,
-  type Name,
-  type ResolverRecordsSelection,
-} from "@ensnode/ensnode-sdk";
+import { isSelectionEmpty, type ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 import {
   makeCoinTypeStringSchema,
   makeDefaultableChainIdStringSchema,

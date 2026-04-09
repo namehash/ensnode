@@ -1,3 +1,4 @@
+import type { ChainId } from "enssdk";
 import {
   arbitrum,
   arbitrumSepolia,
@@ -12,8 +13,6 @@ import {
   scrollSepolia,
   sepolia,
 } from "viem/chains";
-
-import type { ChainId } from "@ensnode/ensnode-sdk";
 
 /**
  * Builds a Alchemy RPC base URL for the specified chain ID.

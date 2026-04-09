@@ -176,12 +176,6 @@ jobs:
             echo "Finished setting $variable_name"
           }
 
-          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "ALPHA_DATABASE_SCHEMA" "alphaSchema${TAG}"
-          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "MAINNET_DATABASE_SCHEMA" "mainnetSchema${TAG}"
-          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "ALPHA-SEPOLIA_DATABASE_SCHEMA" "alphaSepoliaSchema${TAG}"
-          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "V2-SEPOLIA_DATABASE_SCHEMA" "v2SepoliaSchema${TAG}"
-          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "SEPOLIA_DATABASE_SCHEMA" "sepoliaSchema${TAG}"
-
           set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "ALPHA_ENSINDEXER_SCHEMA_NAME" "alphaSchema${TAG}"
           set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "MAINNET_ENSINDEXER_SCHEMA_NAME" "mainnetSchema${TAG}"
           set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "ALPHA-SEPOLIA_ENSINDEXER_SCHEMA_NAME" "alphaSepoliaSchema${TAG}"

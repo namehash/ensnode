@@ -1,12 +1,11 @@
-import { type Address, type Hex, isHex, size } from "viem";
-import { z } from "zod/v4";
-
 import {
+  type Address,
+  asInterpretedLabel,
+  asInterpretedName,
   type ChainId,
   type CoinType,
   type DomainId,
-  type InterpretedLabel,
-  type InterpretedName,
+  type Hex,
   isInterpetedLabel,
   isInterpretedName,
   type Name,
@@ -19,7 +18,10 @@ import {
   type RenewalId,
   type ResolverId,
   type ResolverRecordsId,
-} from "@ensnode/ensnode-sdk";
+} from "enssdk";
+import { isHex, size } from "viem";
+import { z } from "zod/v4";
+
 import {
   makeChainIdSchema,
   makeCoinTypeSchema,
@@ -106,7 +108,7 @@ builder.scalarType("InterpretedName", {
           });
         }
       })
-      .transform((val) => val as InterpretedName)
+      .transform((val) => asInterpretedName(val))
       .parse(value),
 });
 
@@ -125,7 +127,7 @@ builder.scalarType("InterpretedLabel", {
           });
         }
       })
-      .transform((val) => val as InterpretedLabel)
+      .transform((val) => asInterpretedLabel(val))
       .parse(value),
 });
 

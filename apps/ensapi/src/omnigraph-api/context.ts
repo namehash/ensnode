@@ -1,7 +1,6 @@
 import DataLoader from "dataloader";
 import { getUnixTime } from "date-fns";
-
-import type { CanonicalPath, ENSv1DomainId, ENSv2DomainId } from "@ensnode/ensnode-sdk";
+import type { CanonicalPath, ENSv1DomainId, ENSv2DomainId } from "enssdk";
 
 import { getV1CanonicalPath, getV2CanonicalPath } from "./lib/get-canonical-path";
 

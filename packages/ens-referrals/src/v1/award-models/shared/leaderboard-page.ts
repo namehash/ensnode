@@ -1,6 +1,4 @@
-import type { Address } from "viem";
-
-import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
+import type { Address, UnixTimestamp } from "enssdk";
 
 import type { ReferrerLeaderboard } from "../../leaderboard";
 import { isNonNegativeInteger, isPositiveInteger } from "../../number";

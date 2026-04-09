@@ -1,7 +1,8 @@
 import config from "@/config";
 
+import type { Node } from "enssdk";
+
 import { getENSRootChainId } from "@ensnode/datasources";
-import type { Node } from "@ensnode/ensnode-sdk";
 
 import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 

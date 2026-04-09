@@ -1,4 +1,6 @@
-import { buildLabelSetVersion, type Label, type LabelSetVersion } from "@ensnode/ensnode-sdk";
+import type { Label } from "enssdk";
+
+import { buildLabelSetVersion, type LabelSetVersion } from "@ensnode/ensnode-sdk";
 
 import { getErrorMessage } from "@/utils/error-utils";
 

@@ -1,4 +1,5 @@
-import type { AccountId, UnixTimestamp } from "@ensnode/ensnode-sdk";
+import type { AccountId, UnixTimestamp } from "enssdk";
+
 import { makeAccountIdSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { validateUnixTimestamp } from "../../time";

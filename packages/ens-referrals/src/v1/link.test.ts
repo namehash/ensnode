@@ -1,4 +1,5 @@
-import { type Address, getAddress } from "viem";
+import type { Address } from "enssdk";
+import { getAddress } from "viem";
 import { describe, expect, it } from "vitest";
 
 import { buildEnsReferralUrl } from "./link";

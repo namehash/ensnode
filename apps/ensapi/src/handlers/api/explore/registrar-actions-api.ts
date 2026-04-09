@@ -1,8 +1,8 @@
 import { trace } from "@opentelemetry/api";
+import type { Node } from "enssdk";
 
 import {
   buildPageContext,
-  type Node,
   type RegistrarActionsFilter,
   RegistrarActionsResponseCodes,
   type RegistrarActionsResponseError,

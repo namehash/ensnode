@@ -1,4 +1,4 @@
-import { AssetNamespaces, type InterpretedName } from "enssdk";
+import { AssetNamespaces, asInterpretedName } from "enssdk";
 import { describe, expect, it } from "vitest";
 
 import { NFTMintStatuses } from "../../../tokenscope/assets";
@@ -11,7 +11,7 @@ const responseOk = {
   responseCode: NameTokensResponseCodes.Ok,
   registeredNameTokens: {
     domainId: "0xe02070fb6710555cd44b79b55959e9a89f47b4029d44bde5a4f7b5fe13fe4688",
-    name: "texasprivacy.eth" as InterpretedName,
+    name: asInterpretedName("texasprivacy.eth"),
     tokens: [
       {
         token: {
@@ -65,7 +65,7 @@ describe("Name Tokens: Zod Schemas", () => {
         accurateAsOf: 1765283111,
         domainId: "0xe02070fb6710555cd44b79b55959e9a89f47b4029d44bde5a4f7b5fe13fe4688",
         expiresAt: 1796524355,
-        name: "texasprivacy.eth" as InterpretedName,
+        name: asInterpretedName("texasprivacy.eth"),
         tokens: [
           {
             token: {
