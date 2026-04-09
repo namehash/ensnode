@@ -22,9 +22,9 @@ import logger from "@/lib/logger";
 import { ensApiVersionInfo } from "@/lib/version-info";
 
 /**
- * Schema for validating custom referral program edition config set URL.
+ * Schema for validating the referral program edition config set URL.
  */
-const CustomReferralProgramEditionConfigSetUrlSchema = z
+const ReferralProgramEditionConfigSetUrlSchema = z
   .string()
   .transform((val, ctx) => {
     try {
@@ -32,7 +32,7 @@ const CustomReferralProgramEditionConfigSetUrlSchema = z
     } catch {
       ctx.addIssue({
         code: "custom",
-        message: `CUSTOM_REFERRAL_PROGRAM_EDITIONS is not a valid URL: ${val}`,
+        message: `REFERRAL_PROGRAM_EDITIONS is not a valid URL: ${val}`,
       });
       return z.NEVER;
     }
@@ -46,7 +46,7 @@ const EnsApiConfigSchema = z
     namespace: ENSNamespaceSchema,
     rpcConfigs: RpcConfigsSchema,
     ensIndexerPublicConfig: makeENSIndexerPublicConfigSchema("ensIndexerPublicConfig"),
-    customReferralProgramEditionConfigSetUrl: CustomReferralProgramEditionConfigSetUrlSchema,
+    referralProgramEditionConfigSetUrl: ReferralProgramEditionConfigSetUrlSchema,
 
     // include the ENSDbConfig params in the EnsApiConfigSchema
     ensDbUrl: z.string(),
@@ -96,7 +96,7 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
       ensIndexerPublicConfig,
       namespace: ensIndexerPublicConfig.namespace,
       rpcConfigs,
-      customReferralProgramEditionConfigSetUrl: env.CUSTOM_REFERRAL_PROGRAM_EDITIONS,
+      referralProgramEditionConfigSetUrl: env.REFERRAL_PROGRAM_EDITIONS,
 
       // include the validated ENSDb config values in the parsed EnsApiConfig
       ensDbUrl: ensDbConfig.ensDbUrl,

@@ -9,7 +9,7 @@ export function redactEnsApiConfig(config: EnsApiConfig) {
   return {
     port: config.port,
     namespace: config.namespace,
-    customReferralProgramEditionConfigSetUrl: config.customReferralProgramEditionConfigSetUrl,
+    referralProgramEditionConfigSetUrl: config.referralProgramEditionConfigSetUrl,
     ensIndexerPublicConfig: config.ensIndexerPublicConfig,
     ensDbUrl: redactString(config.ensDbUrl),
     rpcConfigs: redactRpcConfigs(config.rpcConfigs),
