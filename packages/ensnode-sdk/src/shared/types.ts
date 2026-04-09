@@ -1,3 +1,5 @@
+import type { UnixTimestamp } from "enssdk";
+
 /**
  * Block Number
  *
@@ -9,10 +11,6 @@ export type BlockNumber = number;
  * Datetime value
  */
 export type Datetime = Date;
-
-import type { UnixTimestamp } from "enssdk";
-
-export type { UnixTimestamp } from "enssdk";
 
 /**
  * Represents a URL that is used for RPC endpoints.

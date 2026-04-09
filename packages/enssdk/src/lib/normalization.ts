@@ -18,8 +18,8 @@ export const normalizeName = (name: Name): InterpretedName =>
  * @see https://docs.ens.domains/ensip/15
  */
 export const normalizeLabel = (label: Label): InterpretedLabel => {
-  // empty string cannot be a label
-  if (label === "") throw new Error("Empty string is not a valid Label.");
+  // empty string cannot be a normalized label
+  if (label === "") throw new Error("Empty string cannot be normalized.");
 
   // normalized labels do not contain periods
   if (label.includes(".")) {

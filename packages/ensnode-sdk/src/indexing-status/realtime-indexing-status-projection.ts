@@ -1,4 +1,6 @@
-import type { Duration, UnixTimestamp } from "../shared/types";
+import type { UnixTimestamp } from "enssdk";
+
+import type { Duration } from "../shared/types";
 import type { CrossChainIndexingStatusSnapshot } from "./cross-chain-indexing-status-snapshot";
 
 /**
