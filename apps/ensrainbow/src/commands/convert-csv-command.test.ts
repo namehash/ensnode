@@ -12,6 +12,11 @@ import { ENSRainbowDB } from "@/lib/database";
 
 import { convertCsvCommand } from "./convert-csv-command";
 
+/** Shorthand: compute the labelhash bytes for a given label string. */
+function hashLabel(label: string) {
+  return labelHashToBytes(labelhashLiteralLabel(asLiteralLabel(label)));
+}
+
 // Path to test fixtures
 const TEST_FIXTURES_DIR = join(__dirname, "..", "..", "test", "fixtures");
 
@@ -53,21 +58,12 @@ describe("convert-csv-command", () => {
       await cli.parse(["ingest-ensrainbow", "--input-file", outputFile, "--data-dir", dataDir]);
 
       const db = await ENSRainbowDB.open(dataDir);
-      expect(await db.validate()).toBe(true);
-      const recordsCount = await db.getPrecalculatedRainbowRecordCount();
-      expect(recordsCount).toBe(11);
-      expect(
-        (
-          await db.getVersionedRainbowRecord(
-            labelHashToBytes(labelhashLiteralLabel(asLiteralLabel("123"))),
-          )
-        )?.label,
-      ).toBe("123");
-      expect(
-        await db.getVersionedRainbowRecord(
-          labelHashToBytes(labelhashLiteralLabel(asLiteralLabel("1234"))),
-        ),
-      ).toBe(null);
+      await expect(db.validate()).resolves.toBe(true);
+      await expect(db.getPrecalculatedRainbowRecordCount()).resolves.toBe(11);
+      await expect(db.getVersionedRainbowRecord(hashLabel("123"))).resolves.toMatchObject({
+        label: "123",
+      });
+      await expect(db.getVersionedRainbowRecord(hashLabel("1234"))).resolves.toBe(null);
       await db.close();
     });
 
@@ -94,9 +90,8 @@ describe("convert-csv-command", () => {
       await cli.parse(["ingest-ensrainbow", "--input-file", outputFile, "--data-dir", dataDir]);
 
       const db = await ENSRainbowDB.open(dataDir);
-      expect(await db.validate()).toBe(true);
-      const recordsCount = await db.getPrecalculatedRainbowRecordCount();
-      expect(recordsCount).toBe(10);
+      await expect(db.validate()).resolves.toBe(true);
+      await expect(db.getPrecalculatedRainbowRecordCount()).resolves.toBe(10);
       const labels = [
         "🔥emoji-label🚀",
         'special"quotes"inside',
@@ -104,16 +99,11 @@ describe("convert-csv-command", () => {
         "label-with-null\0byte", // null byte
       ].map(asLiteralLabel);
       for (const label of labels) {
-        expect(
-          (await db.getVersionedRainbowRecord(labelHashToBytes(labelhashLiteralLabel(label))))
-            ?.label,
-        ).toBe(label);
+        await expect(db.getVersionedRainbowRecord(hashLabel(label))).resolves.toMatchObject({
+          label,
+        });
       }
-      expect(
-        await db.getVersionedRainbowRecord(
-          labelHashToBytes(labelhashLiteralLabel(asLiteralLabel("1234"))),
-        ),
-      ).toBe(null);
+      await expect(db.getVersionedRainbowRecord(hashLabel("1234"))).resolves.toBe(null);
       await db.close();
     });
   });
@@ -193,9 +183,8 @@ describe("convert-csv-command", () => {
 
       // Verify initial database
       const db = await ENSRainbowDB.open(dataDir);
-      expect(await db.validate()).toBe(true);
-      const initialCount = await db.getPrecalculatedRainbowRecordCount();
-      expect(initialCount).toBe(11);
+      await expect(db.validate()).resolves.toBe(true);
+      await expect(db.getPrecalculatedRainbowRecordCount()).resolves.toBe(11);
       await db.close();
 
       // Now convert the same CSV file again, but with filtering enabled
@@ -251,41 +240,14 @@ describe("convert-csv-command", () => {
       await cli.parse(["ingest-ensrainbow", "--input-file", outputFile, "--data-dir", dataDir]);
 
       const db = await ENSRainbowDB.open(dataDir);
-      expect(await db.validate()).toBe(true);
+      await expect(db.validate()).resolves.toBe(true);
+      await expect(db.getPrecalculatedRainbowRecordCount()).resolves.toBe(4);
 
-      // Should have 4 unique labels (label1, label2, label3, label4)
-      const recordsCount = await db.getPrecalculatedRainbowRecordCount();
-      expect(recordsCount).toBe(4);
-
-      // Verify specific labels exist
-      expect(
-        (
-          await db.getVersionedRainbowRecord(
-            labelHashToBytes(labelhashLiteralLabel(asLiteralLabel("label1"))),
-          )
-        )?.label,
-      ).toBe("label1");
-      expect(
-        (
-          await db.getVersionedRainbowRecord(
-            labelHashToBytes(labelhashLiteralLabel(asLiteralLabel("label2"))),
-          )
-        )?.label,
-      ).toBe("label2");
-      expect(
-        (
-          await db.getVersionedRainbowRecord(
-            labelHashToBytes(labelhashLiteralLabel(asLiteralLabel("label3"))),
-          )
-        )?.label,
-      ).toBe("label3");
-      expect(
-        (
-          await db.getVersionedRainbowRecord(
-            labelHashToBytes(labelhashLiteralLabel(asLiteralLabel("label4"))),
-          )
-        )?.label,
-      ).toBe("label4");
+      for (const label of ["label1", "label2", "label3", "label4"]) {
+        await expect(db.getVersionedRainbowRecord(hashLabel(label))).resolves.toMatchObject({
+          label,
+        });
+      }
 
       await db.close();
     });
@@ -332,9 +294,8 @@ describe("convert-csv-command", () => {
 
       // Verify initial database was created
       const db = await ENSRainbowDB.open(dataDir);
-      expect(await db.validate()).toBe(true);
-      const labelSet = await db.getLabelSet();
-      expect(labelSet.labelSetId).toBe("test-label-set-a");
+      await expect(db.validate()).resolves.toBe(true);
+      await expect(db.getLabelSet()).resolves.toMatchObject({ labelSetId: "test-label-set-a" });
       await db.close();
 
       // Now try to convert with a different label set ID and the existing database path
@@ -501,9 +462,8 @@ describe("convert-csv-command", () => {
       await cli.parse(["ingest-ensrainbow", "--input-file", outputFile, "--data-dir", dataDir]);
 
       const db = await ENSRainbowDB.open(dataDir);
-      expect(await db.validate()).toBe(true);
-      const recordsCount = await db.getPrecalculatedRainbowRecordCount();
-      expect(recordsCount).toBe(0);
+      await expect(db.validate()).resolves.toBe(true);
+      await expect(db.getPrecalculatedRainbowRecordCount()).resolves.toBe(0);
       await db.close();
     });
 
@@ -550,10 +510,9 @@ describe("convert-csv-command", () => {
       await cli.parse(["ingest-ensrainbow", "--input-file", outputFile, "--data-dir", dataDir]);
 
       const db = await ENSRainbowDB.open(dataDir);
-      expect(await db.validate()).toBe(true);
-      const recordsCount = await db.getPrecalculatedRainbowRecordCount();
+      await expect(db.validate()).resolves.toBe(true);
       // Should have 3 records: "label", "label1", "label2"
-      expect(recordsCount).toBe(3);
+      await expect(db.getPrecalculatedRainbowRecordCount()).resolves.toBe(3);
       await db.close();
     });
 
@@ -603,27 +562,14 @@ describe("convert-csv-command", () => {
       await cli.parse(["ingest-ensrainbow", "--input-file", outputFile, "--data-dir", dataDir]);
 
       const db = await ENSRainbowDB.open(dataDir);
-      expect(await db.validate()).toBe(true);
-      const recordsCount = await db.getPrecalculatedRainbowRecordCount();
-      expect(recordsCount).toBe(2);
+      await expect(db.validate()).resolves.toBe(true);
+      await expect(db.getPrecalculatedRainbowRecordCount()).resolves.toBe(2);
 
-      // Verify the labels were stored correctly
-      const label1 = "label,with,commas";
-      const label2 = "another,label";
-      expect(
-        (
-          await db.getVersionedRainbowRecord(
-            labelHashToBytes(labelhashLiteralLabel(asLiteralLabel(label1))),
-          )
-        )?.label,
-      ).toBe(label1);
-      expect(
-        (
-          await db.getVersionedRainbowRecord(
-            labelHashToBytes(labelhashLiteralLabel(asLiteralLabel(label2))),
-          )
-        )?.label,
-      ).toBe(label2);
+      for (const label of ["label,with,commas", "another,label"]) {
+        await expect(db.getVersionedRainbowRecord(hashLabel(label))).resolves.toMatchObject({
+          label,
+        });
+      }
       await db.close();
     });
 
