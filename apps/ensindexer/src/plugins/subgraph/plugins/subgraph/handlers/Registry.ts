@@ -1,4 +1,4 @@
-import { makeSubdomainNode, type Node, ROOT_NODE } from "enssdk";
+import { ENS_ROOT_NODE, makeSubdomainNode, type Node } from "enssdk";
 
 import { PluginName } from "@ensnode/ensnode-sdk";
 
@@ -56,7 +56,7 @@ export default function () {
     namespaceContract(pluginName, "ENSv1RegistryOld:NewResolver"),
     async ({ context, event }) => {
       const shouldIgnoreEvent = await shouldIgnoreRegistryOldEvents(context, event.args.node);
-      const isRootNode = event.args.node === ROOT_NODE;
+      const isRootNode = event.args.node === ENS_ROOT_NODE;
 
       // inverted logic of https://github.com/ensdomains/ens-subgraph/blob/c844791/src/ensRegistry.ts#L246
       // NOTE: the subgraph must include an exception here for the root node because it starts out

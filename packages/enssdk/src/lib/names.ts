@@ -1,17 +1,12 @@
 import { ens_beautify } from "@adraffy/ens-normalize";
 
+import { ENS_ROOT_NAME } from "./constants";
 import {
-  asInterpretedName,
   interpretedLabelsToInterpretedName,
   interpretedNameToInterpretedLabels,
 } from "./interpreted-names-and-labels";
 import { isNormalizedLabel } from "./normalization";
 import type { InterpretedName, Label, Name, NormalizedName } from "./types";
-
-/**
- * Name for the ENS Root
- */
-export const ENS_ROOT = asInterpretedName("");
 
 /**
  * Constructs a name hierarchy from a given NormalizedName.
@@ -28,16 +23,15 @@ export const getNameHierarchy = (name: NormalizedName): NormalizedName[] =>
   name.split(".").map((_, i, labels) => labels.slice(i).join(".")) as NormalizedName[];
 
 /**
- * Get FQDN of parent for a name.
+ * Derives the parent's {@link InterpretedName} of the provided `name`, or null if there is none.
  */
-export const getParentNameFQDN = (name: InterpretedName): InterpretedName => {
-  // Invariant: name is not ENS root.
-  if (name === ENS_ROOT) throw new Error("There is no parent name for ENS Root.");
+export const getParentInterpretedName = (name: InterpretedName): InterpretedName | null => {
+  if (name === ENS_ROOT_NAME) return null;
 
   const labels = interpretedNameToInterpretedLabels(name);
 
-  // For TLDs, return ENS_ROOT
-  if (labels.length === 1) return ENS_ROOT;
+  // For TLDs, return ENS_ROOT_NAME
+  if (labels.length === 1) return ENS_ROOT_NAME;
 
   // Strip off the child-most label in the name to get the FQDN of the parent
   return interpretedLabelsToInterpretedName(labels.slice(1));

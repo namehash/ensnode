@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
+import { ENS_ROOT_NAME } from "./constants";
 import { asInterpretedName } from "./interpreted-names-and-labels";
-import { beautifyName, ENS_ROOT, getNameHierarchy, getParentNameFQDN } from "./names";
+import { beautifyName, getNameHierarchy, getParentInterpretedName } from "./names";
 import type { Name, NormalizedName } from "./types";
 
 describe("names", () => {
@@ -31,23 +32,23 @@ describe("names", () => {
     });
   });
 
-  describe("getParentNameFQDN", () => {
-    it("throws error for ENS Root", () => {
-      expect(() => getParentNameFQDN(ENS_ROOT)).toThrowError(
-        /There is no parent name for ENS Root/i,
-      );
+  describe("getParentInterpretedName", () => {
+    it("returns null for ENS Root", () => {
+      expect(getParentInterpretedName(ENS_ROOT_NAME)).toBeNull();
     });
 
     it("returns ENS Root for top-level name", () => {
-      expect(getParentNameFQDN(asInterpretedName("eth"))).toStrictEqual(ENS_ROOT);
+      expect(getParentInterpretedName(asInterpretedName("eth"))).toStrictEqual(ENS_ROOT_NAME);
     });
 
     it("returns FQDN for 2nd-level name", () => {
-      expect(getParentNameFQDN(asInterpretedName("base.eth"))).toStrictEqual("eth");
+      expect(getParentInterpretedName(asInterpretedName("base.eth"))).toStrictEqual("eth");
     });
 
     it("returns FQDN for 3rd-level name", () => {
-      expect(getParentNameFQDN(asInterpretedName("test.base.eth"))).toStrictEqual("base.eth");
+      expect(getParentInterpretedName(asInterpretedName("test.base.eth"))).toStrictEqual(
+        "base.eth",
+      );
     });
   });
 
