@@ -9,7 +9,7 @@
 
 import z from "zod/v4";
 
-import { makeLowercaseAddressSchema } from "@ensnode/ensnode-sdk/internal";
+import { makeNormalizedAddressSchema } from "@ensnode/ensnode-sdk/internal";
 
 import {
   makeReferralProgramEditionSummaryPieSplitSchema,
@@ -243,7 +243,7 @@ export const makeReferrerMetricsEditionsRequestSchema = (
   valueLabel: string = "ReferrerMetricsEditionsRequest",
 ) =>
   z.object({
-    referrer: makeLowercaseAddressSchema(`${valueLabel}.referrer`),
+    referrer: makeNormalizedAddressSchema(`${valueLabel}.referrer`),
     editions: makeReferrerMetricsEditionsArraySchema(`${valueLabel}.editions`),
   });
 

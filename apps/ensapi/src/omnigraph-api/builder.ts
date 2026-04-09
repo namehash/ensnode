@@ -13,6 +13,7 @@ import type {
   InterpretedLabel,
   InterpretedName,
   Node,
+  NormalizedAddress,
   PermissionsId,
   PermissionsResourceId,
   PermissionsUserId,
@@ -60,7 +61,7 @@ export const builder = new SchemaBuilder<{
   Scalars: {
     // make sure to keep these scalars up to date with packages/enssdk/src/omnigraph/graphql.ts !
     BigInt: { Input: bigint; Output: bigint };
-    Address: { Input: Address; Output: Address };
+    Address: { Input: Address; Output: NormalizedAddress };
     Hex: { Input: Hex; Output: Hex };
     ChainId: { Input: ChainId; Output: ChainId };
     CoinType: { Input: CoinType; Output: CoinType };

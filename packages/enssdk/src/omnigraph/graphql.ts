@@ -1,13 +1,14 @@
 import { initGraphQLTada } from "gql.tada";
-import type { Address, Hex } from "viem";
 
 import type {
   ChainId,
   CoinType,
   DomainId,
+  Hex,
   InterpretedLabel,
   InterpretedName,
   Node,
+  NormalizedAddress,
   PermissionsId,
   PermissionsResourceId,
   PermissionsUserId,
@@ -28,7 +29,7 @@ export const graphql = initGraphQLTada<{
     BigInt: `${bigint}`;
     // NOTE: keep these semantic scalar types in sync with the scalars in apps/ensapi/src/omnigraph-api/builder.ts
     // (i.e. excluding the BigInt scalar, which we handle above)
-    Address: Address;
+    Address: NormalizedAddress;
     Hex: Hex;
     ChainId: ChainId;
     CoinType: CoinType;

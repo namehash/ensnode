@@ -1,8 +1,8 @@
 import {
   type AccountId,
-  type Address,
   makeENSv2DomainId,
   makeStorageId,
+  type NormalizedAddress,
   type TokenId,
 } from "enssdk";
 
@@ -54,12 +54,12 @@ export default function () {
       event: EventWithArgs<{
         tokenId: TokenId;
         label: string;
-        owner: Address;
-        subregistry: Address;
-        resolver: Address;
+        owner: NormalizedAddress;
+        subregistry: NormalizedAddress;
+        resolver: NormalizedAddress;
         duration: bigint;
         referrer: EncodedReferrer;
-        paymentToken: Address;
+        paymentToken: NormalizedAddress;
         base: bigint;
         premium: bigint;
       }>;
@@ -136,7 +136,7 @@ export default function () {
         duration: bigint;
         newExpiry: bigint;
         referrer: EncodedReferrer;
-        paymentToken: Address;
+        paymentToken: NormalizedAddress;
         base: bigint;
       }>;
     }) => {

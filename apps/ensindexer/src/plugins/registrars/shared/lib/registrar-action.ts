@@ -18,6 +18,8 @@ export type LogicalEventKey = string;
 
 /**
  * Make a logical event key for a "logical registrar action".
+ *
+ * @dev the .toLowerCase() is just a sanity check
  */
 export function makeLogicalEventKey({
   node,

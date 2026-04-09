@@ -1,6 +1,6 @@
 import { hexToBigInt, isAddress } from "viem";
 
-import { asLowerCaseAddress } from "./address";
+import { toNormalizedAddress } from "./address";
 import { bigintToCoinType, DEFAULT_EVM_COIN_TYPE, ETH_COIN_TYPE } from "./coin-type";
 import type { Address, CoinType, Label, Name } from "./types";
 
@@ -23,7 +23,7 @@ const parseAddressLabel = (addressLabel: Label): Address => {
 
   if (!isAddress(maybeAddress)) throw new Error(`Invalid EVM address "${maybeAddress}"`);
 
-  return asLowerCaseAddress(maybeAddress);
+  return toNormalizedAddress(maybeAddress);
 };
 
 /**

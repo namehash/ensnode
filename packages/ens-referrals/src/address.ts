@@ -10,7 +10,3 @@ export const validateLowercaseAddress = (address: Address): void => {
     throw new Error(`Invalid address: ${address}. Address must be in lowercase format.`);
   }
 };
-
-export const normalizeAddress = (address: Address): Address => {
-  return address.toLowerCase() as Address;
-};

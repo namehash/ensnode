@@ -2,5 +2,6 @@
 export type { FragmentOf, ResultOf, VariablesOf } from "enssdk/omnigraph";
 export { graphql, readFragment } from "enssdk/omnigraph";
 
+export * from "./components";
 export * from "./hooks";
 export * from "./provider";

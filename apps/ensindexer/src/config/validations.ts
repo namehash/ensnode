@@ -1,5 +1,5 @@
 import type { Address } from "enssdk";
-import { asLowerCaseAddress } from "enssdk";
+import { isNormalizedAddress } from "enssdk";
 import { isAddress } from "viem";
 
 import { type DatasourceName, type ENSNamespace, getENSNamespace } from "@ensnode/datasources";
@@ -129,7 +129,7 @@ export function invariant_validContractConfigs(
         // only ContractConfigs with `address` defined
         const isValidAddress =
           isAddress(contractConfig.address as Address, { strict: false }) && // must be a valid `Address`
-          contractConfig.address === asLowerCaseAddress(contractConfig.address); // and in lowercase format
+          isNormalizedAddress(contractConfig.address as Address); // and in lowercase format
 
         if (!isValidAddress) {
           throw new Error(

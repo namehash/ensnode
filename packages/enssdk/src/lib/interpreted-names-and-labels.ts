@@ -1,6 +1,11 @@
 import { isHex } from "viem";
 
-import { encodeLabelHash, labelhashInterpretedLabel, labelhashLiteralLabel } from "./labelhash";
+import {
+  encodeLabelHash,
+  isEncodedLabelHash,
+  labelhashInterpretedLabel,
+  labelhashLiteralLabel,
+} from "./labelhash";
 import { isNormalizedLabel } from "./normalization";
 import type {
   InterpretedLabel,
@@ -12,6 +17,27 @@ import type {
   LiteralName,
   Name,
 } from "./types";
+
+/**
+ * Interprets a Name as an InterpretedName.
+ * @throws if the provided `name` cannot conform to InterpretedName.
+ *
+ * @dev encodes unnormalized labels in `name` to make it InterpretedName.
+ * @dev this is similar to the concept of Reinterpretation (packages/enssdk/src/lib/reinterpretation.ts)
+ *   but is distinct.
+ */
+export function nameToInterpretedName(name: Name): InterpretedName {
+  return interpretedLabelsToInterpretedName(
+    name
+      .split(".")
+      .map((label) => {
+        if (isEncodedLabelHash(label)) return label;
+        if (isNormalizedLabel(label)) return label;
+        return encodeLabelHash(labelhashLiteralLabel(asLiteralLabel(label)));
+      })
+      .map(asInterpretedLabel),
+  );
+}
 
 /**
  * Interprets a Literal Label, producing an Interpreted Label.
@@ -161,6 +187,12 @@ export function ensureInterpretedLabel(
 /**
  * Parses a Partial InterpretedName into concrete InterpretedLabels and the partial Label.
  *
+ * @example
+ * ```ts
+ * const result = parsePartialInterpretedName("example.et")
+ * // { concrete: ["example"], partial: "et" }
+ * ```
+ *
  * @throws if the provided `partialInterpretedName` is not composed of concrete InterpretedLabels.
  */
 export function parsePartialInterpretedName(partialInterpretedName: Name): {
@@ -170,6 +202,7 @@ export function parsePartialInterpretedName(partialInterpretedName: Name): {
   if (partialInterpretedName === "") return { concrete: [], partial: "" };
 
   const concrete = partialInterpretedName.split(".");
+  // note that the concrete.pop mutates `concrete` to exclude the last element
   // biome-ignore lint/style/noNonNullAssertion: there's always at least one element after a .split
   const partial = concrete.pop()!;
 
@@ -183,37 +216,33 @@ export function parsePartialInterpretedName(partialInterpretedName: Name): {
 }
 
 /**
+ * Validates and casts a string to a {@link LiteralLabel}.
+ * A LiteralLabel is a label as it literally appears onchain.
+ */
+export function asLiteralLabel(label: Label): LiteralLabel {
+  return label as LiteralLabel;
+}
+
+/**
  * Validates and casts a string to an {@link InterpretedLabel}.
  * An InterpretedLabel is either a normalized label or an EncodedLabelHash.
  *
  * @throws if the input is not a valid InterpretedLabel
  */
-export function asInterpretedLabel(label: string): InterpretedLabel {
-  if (!isInterpetedLabel(label as Label)) {
-    throw new Error(`Not a valid InterpretedLabel: '${label}'`);
-  }
+export function asInterpretedLabel(label: Label): InterpretedLabel {
+  if (isInterpetedLabel(label)) return label;
 
-  return label as InterpretedLabel;
+  throw new Error(`Not a valid InterpretedLabel: '${label}'`);
 }
 
 /**
  * Validates and casts a string to an {@link InterpretedName}.
  * An InterpretedName is composed entirely of InterpretedLabels joined by dots.
  *
- * @throws if the input is not a valid InterpretedName
+ * @throws if the input cannot be interpreted into an InterpretedName
  */
-export function asInterpretedName(name: string): InterpretedName {
-  if (!isInterpretedName(name as Name)) {
-    throw new Error(`Not a valid InterpretedName: '${name}'`);
-  }
+export function asInterpretedName(name: Name): InterpretedName {
+  if (isInterpretedName(name)) return name;
 
-  return name as InterpretedName;
-}
-
-/**
- * Validates and casts a string to a {@link LiteralLabel}.
- * A LiteralLabel is a label as it literally appears onchain.
- */
-export function asLiteralLabel(label: string): LiteralLabel {
-  return label as LiteralLabel;
+  throw new Error(`Not a valid InterpretedName: '${name}'`);
 }

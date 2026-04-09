@@ -1,7 +1,7 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import { REFERRERS_PER_LEADERBOARD_PAGE_MAX } from "@namehash/ens-referrals";
 
-import { makeLowercaseAddressSchema } from "@ensnode/ensnode-sdk/internal";
+import { makeNormalizedAddressSchema } from "@ensnode/ensnode-sdk/internal";
 
 export const basePath = "/ensanalytics";
 
@@ -28,7 +28,7 @@ const paginationQuerySchema = z.object({
 
 // Referrer address parameter schema
 const referrerAddressSchema = z.object({
-  referrer: makeLowercaseAddressSchema("Referrer address").describe("Referrer Ethereum address"),
+  referrer: makeNormalizedAddressSchema("Referrer address").describe("Referrer Ethereum address"),
 });
 
 export const getReferrerLeaderboardRoute = createRoute({

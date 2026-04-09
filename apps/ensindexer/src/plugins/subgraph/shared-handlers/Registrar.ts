@@ -1,7 +1,6 @@
 import config from "@/config";
 
 import {
-  type Address,
   asInterpretedLabel,
   asLiteralLabel,
   constructSubInterpretedName,
@@ -13,6 +12,7 @@ import {
   type LiteralLabel,
   literalLabelToInterpretedLabel,
   makeSubdomainNode,
+  type NormalizedAddress,
   type SubgraphInterpretedLabel,
   type SubgraphInterpretedName,
 } from "enssdk";
@@ -94,7 +94,7 @@ export const makeRegistrarHandlers = ({ pluginName }: { pluginName: PluginName }
       context: IndexingEngineContext;
       event: EventWithArgs<{
         labelHash: LabelHash;
-        owner: Address;
+        owner: NormalizedAddress;
         expires: bigint;
       }>;
     }) {
@@ -287,7 +287,11 @@ export const makeRegistrarHandlers = ({ pluginName }: { pluginName: PluginName }
       event,
     }: {
       context: IndexingEngineContext;
-      event: EventWithArgs<{ labelHash: LabelHash; from: Address; to: Address }>;
+      event: EventWithArgs<{
+        labelHash: LabelHash;
+        from: NormalizedAddress;
+        to: NormalizedAddress;
+      }>;
     }) {
       const { labelHash, to } = event.args;
 

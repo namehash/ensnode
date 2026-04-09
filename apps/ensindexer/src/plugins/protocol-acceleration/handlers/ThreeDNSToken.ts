@@ -7,6 +7,7 @@ import {
   makeENSv1DomainId,
   makeSubdomainNode,
   type Node,
+  type NormalizedAddress,
 } from "enssdk";
 
 import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
@@ -50,7 +51,7 @@ export default function () {
         node: Node;
         // NOTE: `label` event arg represents a `LabelHash` for the sub-node under `node`
         label: LabelHash;
-        owner: Address;
+        owner: NormalizedAddress;
       }>;
     }) => {
       const { label: labelHash, node: parentNode } = event.args;

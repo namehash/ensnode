@@ -1,4 +1,4 @@
-import type { Address, Name } from "enssdk";
+import { type InterpretedName, toNormalizedAddress } from "enssdk";
 import { beforeAll, describe, expect, it } from "vitest";
 
 import {
@@ -21,13 +21,13 @@ import {
 import { gql } from "@/test/integration/omnigraph-api-client";
 
 // via devnet
-const DEVNET_DEPLOYER: Address = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266";
-const DEFAULT_OWNER: Address = "0x70997970c51812dc3a010c7d01b50e0d17dc79c8";
-const NEW_OWNER_OWNER: Address = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC";
+const DEVNET_DEPLOYER = toNormalizedAddress("0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266");
+const DEFAULT_OWNER = toNormalizedAddress("0x70997970c51812dc3a010c7d01b50e0d17dc79c8");
+const NEW_OWNER_OWNER = toNormalizedAddress("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC");
 
 describe("Account.domains", () => {
   type AccountDomainsResult = {
-    account: { domains: GraphQLConnection<{ name: Name | null }> };
+    account: { domains: GraphQLConnection<{ name: InterpretedName | null }> };
   };
 
   const AccountDomains = gql`
@@ -101,9 +101,8 @@ describe("Account.events", () => {
 
     expect(events.length).toBeGreaterThan(0);
 
-    // all events should have from === deployer address (case-insensitive)
     for (const event of events) {
-      expect(event.from.toLowerCase()).toBe(DEVNET_DEPLOYER.toLowerCase());
+      expect(event.from).toBe(DEVNET_DEPLOYER);
     }
   });
 });
@@ -150,7 +149,7 @@ describe("Account.events filtering (AccountEventsWhereInput)", () => {
 
     expect(events.length).toBeGreaterThan(0);
     for (const event of events) {
-      expect(event.topics[0]?.toLowerCase()).toBe(targetSelector.toLowerCase());
+      expect(event.topics[0]).toBe(targetSelector);
     }
   });
 
@@ -236,7 +235,7 @@ describe("Account.events filtering (AccountEventsWhereInput)", () => {
     expect(events.length).toBeGreaterThan(0);
     expect(events.length).toBeLessThanOrEqual(allEvents.length);
     for (const event of events) {
-      expect(event.topics[0]?.toLowerCase()).toBe(targetSelector.toLowerCase());
+      expect(event.topics[0]).toBe(targetSelector);
       expect(BigInt(event.timestamp)).toBeGreaterThanOrEqual(BigInt(midTimestamp));
     }
   });

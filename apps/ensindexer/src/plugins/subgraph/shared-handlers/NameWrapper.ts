@@ -26,6 +26,7 @@ import {
   literalLabelsToInterpretedName,
   literalLabelToInterpretedLabel,
   type Node,
+  type NormalizedAddress,
   type SubgraphInterpretedLabel,
   type SubgraphInterpretedName,
 } from "enssdk";
@@ -174,7 +175,7 @@ export const makeNameWrapperHandlers = () => {
       context: IndexingEngineContext;
       event: EventWithArgs<{
         node: Node;
-        owner: Address;
+        owner: NormalizedAddress;
         fuses: number;
         expiry: bigint;
         name: DNSEncodedName;
@@ -237,7 +238,7 @@ export const makeNameWrapperHandlers = () => {
       event,
     }: {
       context: IndexingEngineContext;
-      event: EventWithArgs<{ node: Node; owner: Address }>;
+      event: EventWithArgs<{ node: Node; owner: NormalizedAddress }>;
     }) {
       const { node, owner } = event.args;
 
@@ -334,7 +335,7 @@ export const makeNameWrapperHandlers = () => {
       event,
     }: {
       context: IndexingEngineContext;
-      event: EventWithArgs<{ id: bigint; to: Address }>;
+      event: EventWithArgs<{ id: bigint; to: NormalizedAddress }>;
     }) {
       const { id: tokenId, to } = event.args;
 
@@ -356,7 +357,7 @@ export const makeNameWrapperHandlers = () => {
       event,
     }: {
       context: IndexingEngineContext;
-      event: EventWithArgs<{ ids: readonly bigint[]; to: Address }>;
+      event: EventWithArgs<{ ids: readonly bigint[]; to: NormalizedAddress }>;
     }) {
       const { ids: tokenIds, to } = event.args;
 

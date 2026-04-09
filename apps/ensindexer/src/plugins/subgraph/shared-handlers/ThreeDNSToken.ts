@@ -15,6 +15,7 @@ import {
   literalLabelToInterpretedLabel,
   makeSubdomainNode,
   type Node,
+  type NormalizedAddress,
 } from "enssdk";
 import { isAddressEqual, zeroAddress, zeroHash } from "viem";
 
@@ -110,7 +111,7 @@ export async function handleNewOwner({
     node: Node;
     // NOTE: `label` event arg represents a `LabelHash` for the sub-node under `node`
     label: LabelHash;
-    owner: Address;
+    owner: NormalizedAddress;
   }>;
 }) {
   const { label: labelHash, node: parentNode, owner } = event.args;
@@ -210,7 +211,7 @@ export async function handleTransfer({
   event,
 }: {
   context: IndexingEngineContext;
-  event: EventWithArgs<{ node: Node; owner: Address }>;
+  event: EventWithArgs<{ node: Node; owner: NormalizedAddress }>;
 }) {
   const { node, owner } = event.args;
 
@@ -245,7 +246,7 @@ export async function handleRegistrationCreated({
     // NOTE: `tld` event arg represents a `Node` that is the parent of `node`
     tld: Node;
     fqdn: DNSEncodedName;
-    registrant: Address;
+    registrant: NormalizedAddress;
     controlBitmap: number;
     expiry: bigint;
   }>;

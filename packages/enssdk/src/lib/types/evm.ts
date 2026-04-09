@@ -1,8 +1,25 @@
 import type { Address as ViemAddress, Hex as ViemHex } from "viem";
 
-// re-export viem Address/Hex for consistency
+/**
+ * Represents an Hex string, in the format `0x{string}`.
+ */
 export type Hex = ViemHex;
+
+/**
+ * Represents an EVM Address, in the format `0x{string}`, which may or may not be checksummed.
+ */
 export type Address = ViemAddress;
+
+/**
+ * Represents a normalized (non-checksummed) EVM Address, in the format `0x{string}`, where all
+ * characters are lowercase and length is exactly 42.
+ *
+ * @dev because the Address type is so widely used, nominally typing it would involve a _ton_ of
+ *      asNormalizedAddress() casts across the codebase. By avoiding the __brand, we can easily use
+ *      EventWithArgs<{ address: NormalizedAddress }> in all of the Ponder event handler args to
+ *      declare that the incoming event.args.address is a NormalizedAddress.
+ */
+export type NormalizedAddress = Address;
 
 /**
  * Chain ID

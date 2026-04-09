@@ -1,5 +1,5 @@
 import type { InterpretedName } from "enssdk";
-import { asLowerCaseAddress, isInterpretedName } from "enssdk";
+import { isInterpretedName, toNormalizedAddress } from "enssdk";
 import { isAddress, isAddressEqual, zeroAddress } from "viem";
 
 import { hasNullByte } from "../null-bytes";
@@ -60,8 +60,8 @@ export function interpretAddressRecordValue(value: string): string | null {
   // interpret zeroAddress as deletion
   if (isAddressEqual(value, zeroAddress)) return null;
 
-  // otherwise convert to lowercase
-  return asLowerCaseAddress(value);
+  // otherwise normalize and return
+  return toNormalizedAddress(value);
 }
 
 /**

@@ -13,8 +13,8 @@ import {
   makeAccountIdSchema,
   makeDurationSchema,
   makeFiniteNonNegativeNumberSchema,
-  makeLowercaseAddressSchema,
   makeNonNegativeIntegerSchema,
+  makeNormalizedAddressSchema,
   makePositiveIntegerSchema,
   makeUnixTimestampSchema,
 } from "@ensnode/ensnode-sdk/internal";
@@ -53,7 +53,7 @@ export const makeReferralProgramRulesSchema = (valueLabel: string = "ReferralPro
  */
 export const makeAwardedReferrerMetricsSchema = (valueLabel: string = "AwardedReferrerMetrics") =>
   z.object({
-    referrer: makeLowercaseAddressSchema(`${valueLabel}.referrer`),
+    referrer: makeNormalizedAddressSchema(`${valueLabel}.referrer`),
     totalReferrals: makeNonNegativeIntegerSchema(`${valueLabel}.totalReferrals`),
     totalIncrementalDuration: makeDurationSchema(`${valueLabel}.totalIncrementalDuration`),
     totalRevenueContribution: makeRevenueContributionSchema(
@@ -79,7 +79,7 @@ export const makeAwardedReferrerMetricsSchema = (valueLabel: string = "AwardedRe
  */
 export const makeUnrankedReferrerMetricsSchema = (valueLabel: string = "UnrankedReferrerMetrics") =>
   z.object({
-    referrer: makeLowercaseAddressSchema(`${valueLabel}.referrer`),
+    referrer: makeNormalizedAddressSchema(`${valueLabel}.referrer`),
     totalReferrals: makeNonNegativeIntegerSchema(`${valueLabel}.totalReferrals`),
     totalIncrementalDuration: makeDurationSchema(`${valueLabel}.totalIncrementalDuration`),
     totalRevenueContribution: makeRevenueContributionSchema(

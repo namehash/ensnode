@@ -1,9 +1,9 @@
 import { GRACE_PERIOD_SECONDS } from "@ensdomains/ensjs/utils";
 import {
-  type Address,
   interpretTokenIdAsLabelHash,
   makeENSv1DomainId,
   makeSubdomainNode,
+  type NormalizedAddress,
 } from "enssdk";
 import { isAddressEqual, zeroAddress } from "viem";
 
@@ -52,8 +52,8 @@ export default function () {
     }: {
       context: IndexingEngineContext;
       event: EventWithArgs<{
-        from: Address;
-        to: Address;
+        from: NormalizedAddress;
+        to: NormalizedAddress;
         tokenId: bigint;
       }>;
     }) => {
@@ -98,7 +98,7 @@ export default function () {
     context: IndexingEngineContext;
     event: EventWithArgs<{
       id: bigint;
-      owner: Address;
+      owner: NormalizedAddress;
       expires: bigint;
     }>;
   }) {

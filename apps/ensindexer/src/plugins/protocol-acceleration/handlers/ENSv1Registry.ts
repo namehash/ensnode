@@ -1,11 +1,11 @@
 import config from "@/config";
 
 import {
-  type Address,
   type LabelHash,
   makeENSv1DomainId,
   makeSubdomainNode,
   type Node,
+  type NormalizedAddress,
 } from "enssdk";
 
 import { getENSRootChainId } from "@ensnode/datasources";
@@ -33,7 +33,7 @@ export default function () {
     event,
   }: {
     context: IndexingEngineContext;
-    event: EventWithArgs<{ node: Node; resolver: Address }>;
+    event: EventWithArgs<{ node: Node; resolver: NormalizedAddress }>;
   }) {
     const { node, resolver } = event.args;
 
@@ -59,7 +59,7 @@ export default function () {
         node: Node;
         // NOTE: `label` event arg represents a `LabelHash` for the sub-node under `node`
         label: LabelHash;
-        owner: Address;
+        owner: NormalizedAddress;
       }>;
     }) => {
       // no-op because we only track registry migration status on ENS Root Chain
@@ -82,7 +82,7 @@ export default function () {
       event,
     }: {
       context: IndexingEngineContext;
-      event: EventWithArgs<{ node: Node; resolver: Address }>;
+      event: EventWithArgs<{ node: Node; resolver: NormalizedAddress }>;
     }) => {
       // ignore the event on ENSv1RegistryOld if node is migrated to new Registry
       const shouldIgnoreEvent = await nodeIsMigrated(context, event.args.node);

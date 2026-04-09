@@ -1,12 +1,12 @@
 import {
   type AccountId,
-  type Address,
   asLiteralLabel,
   type LabelHash,
   labelhashLiteralLabel,
   makeENSv2DomainId,
   makeRegistryId,
   makeStorageId,
+  type NormalizedAddress,
 } from "enssdk";
 import { hexToBigInt } from "viem";
 
@@ -46,9 +46,9 @@ export default function () {
       labelHash: LabelHash;
       label: string;
       // NOTE: marking `owner` as optional to handle both LabelRegistered and LabelReserved events
-      owner?: Address;
+      owner?: NormalizedAddress;
       expiry: bigint;
-      sender: Address;
+      sender: NormalizedAddress;
     }>;
   }) {
     const { tokenId, labelHash, owner, expiry, sender: registrant } = event.args;
@@ -156,7 +156,7 @@ export default function () {
       context: IndexingEngineContext;
       event: EventWithArgs<{
         tokenId: bigint;
-        sender: Address;
+        sender: NormalizedAddress;
       }>;
     }) => {
       const { tokenId, sender: unregistrant } = event.args;
@@ -205,7 +205,7 @@ export default function () {
       event: EventWithArgs<{
         tokenId: bigint;
         newExpiry: bigint;
-        sender: Address;
+        sender: NormalizedAddress;
       }>;
     }) => {
       // biome-ignore lint/correctness/noUnusedVariables: not sure if we care to index sender
@@ -248,7 +248,7 @@ export default function () {
       context: IndexingEngineContext;
       event: EventWithArgs<{
         tokenId: bigint;
-        subregistry: Address;
+        subregistry: NormalizedAddress;
       }>;
     }) => {
       const { tokenId, subregistry: _subregistry } = event.args;
@@ -332,7 +332,7 @@ export default function () {
     event,
   }: {
     context: IndexingEngineContext;
-    event: EventWithArgs<{ id: bigint; to: Address }>;
+    event: EventWithArgs<{ id: bigint; to: NormalizedAddress }>;
   }) {
     const { id: tokenId, to: owner } = event.args;
 

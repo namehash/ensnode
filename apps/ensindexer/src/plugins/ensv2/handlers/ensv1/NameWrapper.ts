@@ -1,5 +1,4 @@
 import {
-  type Address,
   type DNSEncodedLiteralName,
   type DNSEncodedName,
   decodeDNSEncodedLiteralName,
@@ -9,6 +8,7 @@ import {
   makeENSv1DomainId,
   makeSubdomainNode,
   type Node,
+  type NormalizedAddress,
 } from "enssdk";
 import { isAddressEqual, zeroAddress } from "viem";
 
@@ -98,9 +98,9 @@ export default function () {
   }: {
     context: IndexingEngineContext;
     event: EventWithArgs<{
-      operator: Address;
-      from: Address;
-      to: Address;
+      operator: NormalizedAddress;
+      from: NormalizedAddress;
+      to: NormalizedAddress;
       id: bigint;
     }>;
   }) {
@@ -155,7 +155,7 @@ export default function () {
       event: EventWithArgs<{
         node: Node;
         name: DNSEncodedName;
-        owner: Address;
+        owner: NormalizedAddress;
         fuses: number;
         expiry: bigint;
       }>;
@@ -272,7 +272,7 @@ export default function () {
       event,
     }: {
       context: IndexingEngineContext;
-      event: EventWithArgs<{ node: Node; owner: Address }>;
+      event: EventWithArgs<{ node: Node; owner: NormalizedAddress }>;
     }) => {
       const { node } = event.args;
 

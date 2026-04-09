@@ -1,8 +1,8 @@
 import type { Address, UnixTimestamp } from "enssdk";
+import { toNormalizedAddress } from "enssdk";
 
 import { type Duration, priceEth, priceUsdc, scalePrice } from "@ensnode/ensnode-sdk";
 
-import { normalizeAddress } from "../../address";
 import { buildReferrerMetrics } from "../../referrer-metrics";
 import { SECONDS_PER_YEAR } from "../../time";
 import type { ReferralProgramAwardModels } from "../shared/rules";
@@ -101,7 +101,7 @@ export const buildReferrerLeaderboardRevShareLimit = (
   let awardPoolRemaining = rules.awardPool.amount;
 
   for (const event of sortedEvents) {
-    const referrer = normalizeAddress(event.referrer);
+    const referrer = toNormalizedAddress(event.referrer);
 
     let state = referrerStates.get(referrer);
     if (!state) {
