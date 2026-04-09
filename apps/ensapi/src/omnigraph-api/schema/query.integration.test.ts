@@ -1,17 +1,20 @@
-import { type Address, labelhash, namehash } from "viem";
-import { describe, expect, it } from "vitest";
-
-import { DatasourceNames } from "@ensnode/datasources";
 import {
+  type Address,
+  asInterpretedLabel,
+  asInterpretedName,
   type DomainId,
-  getDatasourceContract,
-  getENSv2RootRegistryId,
   type InterpretedLabel,
+  labelhashInterpretedLabel,
   makeENSv1DomainId,
   makeENSv2DomainId,
   makeStorageId,
   type Name,
-} from "@ensnode/ensnode-sdk";
+  namehashInterpretedName,
+} from "enssdk";
+import { describe, expect, it } from "vitest";
+
+import { DatasourceNames } from "@ensnode/datasources";
+import { getDatasourceContract, getENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
 
 import { DEVNET_NAMES } from "@/test/integration/devnet-names";
 import {
@@ -35,9 +38,8 @@ const V2_ROOT_REGISTRY = getDatasourceContract(
   "RootRegistry",
 );
 
-const V1_ETH_DOMAIN_ID = makeENSv1DomainId(namehash("eth"));
-
-const V2_ETH_STORAGE_ID = makeStorageId(labelhash("eth"));
+const V1_ETH_DOMAIN_ID = makeENSv1DomainId(namehashInterpretedName(asInterpretedName("eth")));
+const V2_ETH_STORAGE_ID = makeStorageId(labelhashInterpretedLabel(asInterpretedLabel("eth")));
 const V2_ETH_DOMAIN_ID = makeENSv2DomainId(V2_ROOT_REGISTRY, V2_ETH_STORAGE_ID);
 
 describe("Query.root", () => {

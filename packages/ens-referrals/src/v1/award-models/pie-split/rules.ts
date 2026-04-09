@@ -1,4 +1,6 @@
-import type { AccountId, PriceUsdc, UnixTimestamp } from "@ensnode/ensnode-sdk";
+import type { AccountId, UnixTimestamp } from "enssdk";
+
+import type { PriceUsdc } from "@ensnode/ensnode-sdk";
 import { makePriceUsdcSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { validateNonNegativeInteger } from "../../number";

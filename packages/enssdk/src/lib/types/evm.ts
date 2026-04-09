@@ -1,4 +1,8 @@
-import type { Address } from "viem";
+import type { Address as ViemAddress, Hex as ViemHex } from "viem";
+
+// re-export viem Address/Hex for consistency
+export type Hex = ViemHex;
+export type Address = ViemAddress;
 
 /**
  * Chain ID
@@ -43,6 +47,17 @@ export const AssetNamespaces = {
 } as const;
 
 export type AssetNamespace = (typeof AssetNamespaces)[keyof typeof AssetNamespaces];
+
+/**
+ * Unix timestamp value
+ *
+ * Represents the number of seconds that have elapsed
+ * since January 1, 1970 (midnight UTC/GMT).
+ *
+ * Guaranteed to be an integer. May be zero or negative to represent a time at or
+ * before Jan 1, 1970.
+ */
+export type UnixTimestamp = number;
 
 /**
  * A uint256 value that identifies a specific NFT within a NFT contract.

@@ -1,7 +1,9 @@
-import { type Address, isAddress } from "viem";
+import type { Address } from "enssdk";
+import { asLowerCaseAddress } from "enssdk";
+import { isAddress } from "viem";
 
 import { type DatasourceName, type ENSNamespace, getENSNamespace } from "@ensnode/datasources";
-import { asLowerCaseAddress, PluginName } from "@ensnode/ensnode-sdk";
+import { PluginName } from "@ensnode/ensnode-sdk";
 import type { ZodCheckFnInput } from "@ensnode/ensnode-sdk/internal";
 
 import { getPlugin } from "@/plugins";

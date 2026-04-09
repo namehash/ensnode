@@ -61,6 +61,7 @@
   },
   "dependencies": {
     "@ensnode/ensnode-sdk": "workspace:*",
+    "enssdk": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {

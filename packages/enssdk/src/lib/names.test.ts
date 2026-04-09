@@ -1,7 +1,8 @@
-import type { Name, NormalizedName } from "enssdk";
 import { describe, expect, it } from "vitest";
 
+import { asInterpretedName } from "./interpreted-names-and-labels";
 import { beautifyName, ENS_ROOT, getNameHierarchy, getParentNameFQDN } from "./names";
+import type { Name, NormalizedName } from "./types";
 
 describe("names", () => {
   describe("getNameHierarchy", () => {
@@ -38,15 +39,15 @@ describe("names", () => {
     });
 
     it("returns ENS Root for top-level name", () => {
-      expect(getParentNameFQDN("eth")).toStrictEqual(ENS_ROOT);
+      expect(getParentNameFQDN(asInterpretedName("eth"))).toStrictEqual(ENS_ROOT);
     });
 
     it("returns FQDN for 2nd-level name", () => {
-      expect(getParentNameFQDN("base.eth")).toStrictEqual("eth");
+      expect(getParentNameFQDN(asInterpretedName("base.eth"))).toStrictEqual("eth");
     });
 
     it("returns FQDN for 3rd-level name", () => {
-      expect(getParentNameFQDN("test.base.eth")).toStrictEqual("base.eth");
+      expect(getParentNameFQDN(asInterpretedName("test.base.eth"))).toStrictEqual("base.eth");
     });
   });
 
@@ -58,8 +59,8 @@ describe("names", () => {
     });
 
     it("should beautify normalized labels", () => {
-      const name = "1⃣2⃣.eth" as NormalizedName;
-      const expected = "1️⃣2️⃣.eth";
+      const name = "1\u20E32\u20E3.eth" as NormalizedName;
+      const expected = "1\uFE0F\u20E32\uFE0F\u20E3.eth";
       expect(beautifyName(name)).toEqual(expected);
     });
 
@@ -70,8 +71,8 @@ describe("names", () => {
     });
 
     it("should selectively beautify labels where possible", () => {
-      const name = "1⃣2⃣.ABC.eth" as Name;
-      const expected = "1️⃣2️⃣.ABC.eth";
+      const name = "1\u20E32\u20E3.ABC.eth" as Name;
+      const expected = "1\uFE0F\u20E32\uFE0F\u20E3.ABC.eth";
       expect(beautifyName(name)).toEqual(expected);
     });
 

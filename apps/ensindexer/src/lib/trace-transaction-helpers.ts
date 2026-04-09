@@ -1,6 +1,5 @@
-import { type Address, type Hash, type Hex, isAddress } from "viem";
-
-import { asLowerCaseAddress } from "@ensnode/ensnode-sdk";
+import { type Address, asLowerCaseAddress, type Hex } from "enssdk";
+import { type Hash, isAddress } from "viem";
 
 /**
  * Options for the `callTracer` tracer. This tracer is used to enlist

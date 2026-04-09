@@ -1,5 +1,5 @@
-import { stringifyAssetId } from "enssdk";
-import { type Address, zeroAddress } from "viem";
+import { type Address, stringifyAssetId } from "enssdk";
+import { zeroAddress } from "viem";
 
 import {
   type DomainAssetId,

@@ -1,8 +1,7 @@
-import { labelhash } from "viem";
+import { asLiteralLabel, encodeLabelHash, labelhashLiteralLabel } from "enssdk";
 import { describe, expect, it } from "vitest";
 import { prettifyError, type ZodSafeParseResult } from "zod/v4";
 
-import { encodeLabelHash } from "../ens";
 import { CurrencyIds, priceDai, priceEth, priceUsdc, type SerializedPrice } from "./currencies";
 import {
   makeBooleanStringSchema,
@@ -172,7 +171,7 @@ describe("ENSIndexer: Shared", () => {
     describe("ReinterpretedName", () => {
       const nameWithNormalizedLabels = "tko.basetest.eth";
       const nameWithUnnormalizedLabels = "TKO.basetest.eth";
-      const reinterpretedNameFromUnnormalizedLabels = `${encodeLabelHash(labelhash("TKO"))}.basetest.eth`;
+      const reinterpretedNameFromUnnormalizedLabels = `${encodeLabelHash(labelhashLiteralLabel(asLiteralLabel("TKO")))}.basetest.eth`;
 
       it("can reinterpret a name which includes normalized labels", () => {
         expect(makeReinterpretedNameSchema().parse(nameWithNormalizedLabels)).toBe(

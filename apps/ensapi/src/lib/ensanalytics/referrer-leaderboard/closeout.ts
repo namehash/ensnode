@@ -1,7 +1,8 @@
 import type { ReferralProgramRules } from "@namehash/ens-referrals/v1";
 import { minutesToSeconds } from "date-fns";
+import type { UnixTimestamp } from "enssdk";
 
-import { addDuration, type Duration, type UnixTimestamp } from "@ensnode/ensnode-sdk";
+import { addDuration, type Duration } from "@ensnode/ensnode-sdk";
 
 /**
  * Duration after which we assume a closed edition is safe from chain reorganizations.

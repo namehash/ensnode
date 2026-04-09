@@ -1,3 +1,4 @@
+import type { Address, Hex } from "enssdk";
 import {
   type AccountId,
   type AssetId,
@@ -8,7 +9,7 @@ import {
   stringifyAssetId,
   type TokenId,
 } from "enssdk";
-import { type Address, type Hex, isAddressEqual, zeroAddress } from "viem";
+import { isAddressEqual, zeroAddress } from "viem";
 import { prettifyError } from "zod/v4";
 
 import { makeAssetIdSchema, makeAssetIdStringSchema } from "./zod-schemas";

@@ -41,14 +41,14 @@ Example:
 First, let's prepare the name for querying by normalizing it and calculating its node:
 
 ```typescript
-import { namehash, normalize } from "viem/ens";
+import { namehashInterpretedName, normalizeName, asInterpretedName } from "enssdk";
 
 // 1. Normalize the user input according to ENSIP-15
 const userInput = "Vitalik.eth";
-const normalizedName = normalize(userInput);
+const normalizedName = normalizeName(userInput);
 
 // 2. Calculate the node from the normalized name
-const node = namehash(normalizedName);
+const node = namehashInterpretedName(asInterpretedName(normalizedName));
 ```
 
 Now use this node to query the domain id in the ENSNode API:
@@ -86,15 +86,15 @@ The query will return the domain information:
 Here's a complete example showing how to put it all together using a GraphQL client:
 
 ```typescript
-import { namehash, normalize } from "viem/ens";
+import { namehashInterpretedName, normalizeName, asInterpretedName } from "enssdk";
 import { createClient } from "graphql-request";
 
 async function queryENSName(userInput: string) {
   // 1. Normalize the user input
-  const normalizedName = normalize(userInput);
+  const normalizedName = normalizeName(userInput);
 
   // 2. Calculate the node
-  const node = namehash(normalizedName);
+  const node = namehashInterpretedName(asInterpretedName(normalizedName));
 
   // 3. Set up the GraphQL client
   const client = createClient({

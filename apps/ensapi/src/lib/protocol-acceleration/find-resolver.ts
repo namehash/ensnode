@@ -3,27 +3,21 @@ import config from "@/config";
 import { bytesToPacket } from "@ensdomains/ensjs/utils";
 import { SpanStatusCode, trace } from "@opentelemetry/api";
 import {
-  type Address,
-  isAddressEqual,
-  namehash,
-  type PublicClient,
-  toHex,
-  zeroAddress,
-} from "viem";
-import { packetToBytes } from "viem/ens";
-
-import { DatasourceNames, getDatasource } from "@ensnode/datasources";
-import {
   type AccountId,
-  accountIdEqual,
+  type Address,
+  asInterpretedName,
   type DomainId,
-  getDatasourceContract,
   getNameHierarchy,
-  isENSv1Registry,
   type Name,
   type Node,
   type NormalizedName,
-} from "@ensnode/ensnode-sdk";
+  namehashInterpretedName,
+} from "enssdk";
+import { isAddressEqual, type PublicClient, toHex, zeroAddress } from "viem";
+import { packetToBytes } from "viem/ens";
+
+import { DatasourceNames, getDatasource } from "@ensnode/datasources";
+import { accountIdEqual, getDatasourceContract, isENSv1Registry } from "@ensnode/ensnode-sdk";
 
 import { ensDb } from "@/lib/ensdb/singleton";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/instrumentation/auto-span";
@@ -200,7 +194,7 @@ async function findResolverWithIndex(
 
       // 2. compute domainId of each node
       // NOTE: this is currently ENSv1-specific
-      const nodes = names.map((name) => namehash(name) as Node);
+      const nodes = names.map((name) => namehashInterpretedName(asInterpretedName(name)) as Node);
       const domainIds = nodes as DomainId[];
 
       // 3. for each domain, find its associated resolver in the selected registry

@@ -1,4 +1,4 @@
-import type { DomainId } from "@ensnode/ensnode-sdk";
+import type { DomainId } from "enssdk";
 
 import { ensDb } from "@/lib/ensdb/singleton";
 

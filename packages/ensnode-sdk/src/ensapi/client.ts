@@ -410,7 +410,9 @@ export class EnsApiClient {
    *   registrarActionsFilter,
    *   EnsApiClient,
    * } from "@ensnode/ensnode-sdk";
-   * import { namehash } from "viem/ens";
+   * import { ETH_NODE, namehashInterpretedName, asInterpretedName } from "enssdk";
+   *
+   * const BASE_NODE = namehashInterpretedName(asInterpretedName("base.eth"));
    *
    * const client: EnsApiClient;
    *
@@ -432,7 +434,7 @@ export class EnsApiClient {
    * // get latest registrar action records associated with
    * // subregistry managing `eth` name
    * await client.registrarActions({
-   *   filters: [registrarActionsFilter.byParentNode(namehash('eth'))],
+   *   filters: [registrarActionsFilter.byParentNode(ETH_NODE)],
    * });
    *
    * // get latest registrar action records which include referral info
@@ -448,7 +450,7 @@ export class EnsApiClient {
    * // get latest 10 registrar action records associated with
    * // subregistry managing `base.eth` name
    * await client.registrarActions({
-   *   filters: [registrarActionsFilter.byParentNode(namehash('base.eth'))],
+   *   filters: [registrarActionsFilter.byParentNode(BASE_NODE)],
    *   recordsPerPage: 10
    * });
    *
@@ -622,17 +624,20 @@ export class EnsApiClient {
    * import {
    *   EnsApiClient,
    * } from "@ensnode/ensnode-sdk";
-   * import { namehash } from "viem/ens";
+   * import { namehashInterpretedName, asInterpretedName } from "enssdk";
+   *
+   * const VITALIK_NAME = asInterpretedName("vitalik.eth");
+   * const VITALIK_DOMAIN_ID = namehashInterpretedName(VITALIK_NAME);
    *
    * const client: EnsApiClient;
    *
    * // get latest name token records from the indexed subregistry based on the requested name
    * const response = await client.nameTokens({
-   *   name: "vitalik.eth"
+   *   name: VITALIK_NAME,
    * });
    *
    * const response = await client.nameTokens({
-   *   domainId: "0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835" // namehash('vitalik.eth')
+   *   domainId: VITALIK_DOMAIN_ID,
    * })
    * ```
    */

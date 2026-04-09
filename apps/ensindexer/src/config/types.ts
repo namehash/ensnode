@@ -1,6 +1,8 @@
+import type { ChainId } from "enssdk";
+
 import type { ENSNamespaceId } from "@ensnode/datasources";
 import type { EnsDbConfig } from "@ensnode/ensdb-sdk";
-import type { BlockNumberRange, ChainId, PluginName } from "@ensnode/ensnode-sdk";
+import type { BlockNumberRange, PluginName } from "@ensnode/ensnode-sdk";
 import { RpcConfig, type RpcConfigs } from "@ensnode/ensnode-sdk/internal";
 import type { EnsRainbowClientLabelSet } from "@ensnode/ensrainbow-sdk";
 

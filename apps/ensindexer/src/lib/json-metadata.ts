@@ -1,4 +1,4 @@
-import type { LiteralLabel, LiteralName } from "@ensnode/ensnode-sdk";
+import type { LiteralLabel, LiteralName } from "enssdk";
 
 const POSSIBLE_PREFIXES = [
   "data:application/json;base64,",

@@ -1,7 +1,8 @@
+import type { InterpretedLabel } from "enssdk";
 import { describe, expect, it } from "vitest";
 
 import { DatasourceNames } from "@ensnode/datasources";
-import { getDatasourceContract, type InterpretedLabel } from "@ensnode/ensnode-sdk";
+import { getDatasourceContract } from "@ensnode/ensnode-sdk";
 
 import { DEVNET_ETH_LABELS } from "@/test/integration/devnet-names";
 import {

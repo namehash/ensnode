@@ -1,12 +1,6 @@
-import { interpretTokenIdAsLabelHash } from "enssdk";
+import { interpretTokenIdAsLabelHash, makeSubdomainNode } from "enssdk";
 
-import {
-  type BlockRef,
-  bigIntToNumber,
-  makeSubdomainNode,
-  PluginName,
-  type Subregistry,
-} from "@ensnode/ensnode-sdk";
+import { type BlockRef, bigIntToNumber, PluginName, type Subregistry } from "@ensnode/ensnode-sdk";
 
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";

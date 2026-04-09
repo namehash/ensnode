@@ -1,5 +1,6 @@
 import config from "@/config";
 
+import type { Name } from "enssdk";
 import {
   bytesToHex,
   ContractFunctionExecutionError,
@@ -15,7 +16,6 @@ import { DatasourceNames, ResolverABI, UniversalResolverABI } from "@ensnode/dat
 import {
   getDatasourceContract,
   maybeGetDatasourceContract,
-  type Name,
   type ResolverRecordsSelection,
 } from "@ensnode/ensnode-sdk";
 

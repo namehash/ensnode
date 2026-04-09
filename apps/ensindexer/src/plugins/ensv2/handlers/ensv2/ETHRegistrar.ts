@@ -1,12 +1,16 @@
-import { type AccountId, makeENSv2DomainId, makeStorageId } from "enssdk";
-import type { Address } from "viem";
+import {
+  type AccountId,
+  type Address,
+  makeENSv2DomainId,
+  makeStorageId,
+  type TokenId,
+} from "enssdk";
 
 import {
   type EncodedReferrer,
   interpretAddress,
   isRegistrationFullyExpired,
   PluginName,
-  type TokenId,
 } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";

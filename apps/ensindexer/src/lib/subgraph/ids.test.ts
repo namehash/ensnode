@@ -11,7 +11,13 @@ import {
 setupEnsDbConfigMock();
 setupConfigMock();
 
-import { labelhash, namehash, zeroAddress } from "viem";
+import {
+  asInterpretedLabel,
+  asInterpretedName,
+  labelhashInterpretedLabel,
+  namehashInterpretedName,
+} from "enssdk";
+import { zeroAddress } from "viem";
 
 import { makeEventId, makeRegistrationId, makeResolverId } from "./ids";
 
@@ -29,7 +35,7 @@ describe("ids", () => {
           makeResolverId(
             CHAIN_ID,
             "0x2aaecbf301b736859333be66942cb6dbd3e9cafe",
-            namehash("vitalik.eth"),
+            namehashInterpretedName(asInterpretedName("vitalik.eth")),
           ),
         ).toEqual(
           "1337-0x2aaecbf301b736859333be66942cb6dbd3e9cafe-0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
@@ -52,7 +58,13 @@ describe("ids", () => {
 
     describe("makeResolverId", () => {
       it("should not include chain id", () => {
-        expect(makeResolverId(CHAIN_ID, zeroAddress, namehash("vitalik.eth"))).toEqual(
+        expect(
+          makeResolverId(
+            CHAIN_ID,
+            zeroAddress,
+            namehashInterpretedName(asInterpretedName("vitalik.eth")),
+          ),
+        ).toEqual(
           "0x0000000000000000000000000000000000000000-0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
         );
       });
@@ -66,9 +78,12 @@ describe("ids", () => {
 
     describe("makeRegistrationId", () => {
       it("should use the labelHash of the registered name", () => {
-        expect(makeRegistrationId(labelhash("vitalik"), namehash("vitalik.eth"))).toEqual(
-          labelhash("vitalik"),
-        );
+        expect(
+          makeRegistrationId(
+            labelhashInterpretedLabel(asInterpretedLabel("vitalik")),
+            namehashInterpretedName(asInterpretedName("vitalik.eth")),
+          ),
+        ).toEqual(labelhashInterpretedLabel(asInterpretedLabel("vitalik")));
       });
     });
   });
@@ -76,7 +91,13 @@ describe("ids", () => {
   describe("not in subgraph compatibility mode", () => {
     describe("makeResolverId", () => {
       it("should include chain id", () => {
-        expect(makeResolverId(CHAIN_ID, zeroAddress, namehash("vitalik.eth"))).toEqual(
+        expect(
+          makeResolverId(
+            CHAIN_ID,
+            zeroAddress,
+            namehashInterpretedName(asInterpretedName("vitalik.eth")),
+          ),
+        ).toEqual(
           "1337-0x0000000000000000000000000000000000000000-0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
         );
       });
@@ -90,9 +111,12 @@ describe("ids", () => {
 
     describe("makeRegistrationId", () => {
       it("should use the node of the registered name", () => {
-        expect(makeRegistrationId(labelhash("vitalik"), namehash("vitalik.linea.eth"))).toEqual(
-          namehash("vitalik.linea.eth"),
-        );
+        expect(
+          makeRegistrationId(
+            labelhashInterpretedLabel(asInterpretedLabel("vitalik")),
+            namehashInterpretedName(asInterpretedName("vitalik.linea.eth")),
+          ),
+        ).toEqual(namehashInterpretedName(asInterpretedName("vitalik.linea.eth")));
       });
     });
   });

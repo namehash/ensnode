@@ -5,9 +5,11 @@ import RelayPlugin from "@pothos/plugin-relay";
 import TracingPlugin, { isRootField } from "@pothos/plugin-tracing";
 import { AttributeNames, createOpenTelemetryWrapper } from "@pothos/tracing-opentelemetry";
 import type {
+  Address,
   ChainId,
   CoinType,
   DomainId,
+  Hex,
   InterpretedLabel,
   InterpretedName,
   Node,
@@ -22,7 +24,6 @@ import type {
 } from "enssdk";
 import { getNamedType } from "graphql";
 import superjson from "superjson";
-import type { Address, Hex } from "viem";
 
 import type { context } from "@/omnigraph-api/context";
 

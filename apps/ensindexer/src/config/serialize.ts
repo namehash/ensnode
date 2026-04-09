@@ -1,9 +1,6 @@
-import {
-  serializeChainId,
-  serializeIndexedChainIds,
-  serializeUrl,
-  type UrlString,
-} from "@ensnode/ensnode-sdk";
+import type { UrlString } from "enssdk";
+
+import { serializeChainId, serializeIndexedChainIds, serializeUrl } from "@ensnode/ensnode-sdk";
 
 import { redactENSIndexerConfig } from "@/config/redact";
 

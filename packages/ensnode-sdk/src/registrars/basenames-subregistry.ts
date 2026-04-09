@@ -1,4 +1,5 @@
-import type { AccountId, Name } from "enssdk";
+import type { AccountId, InterpretedName } from "enssdk";
+import { asInterpretedName } from "enssdk";
 
 import {
   DatasourceNames,
@@ -26,10 +27,7 @@ export function getBasenamesSubregistryId(namespace: ENSNamespaceId): AccountId 
     throw new Error(`BaseRegistrar contract not found or has multiple addresses for ${namespace}`);
   }
 
-  return {
-    chainId: datasource.chain.id,
-    address,
-  };
+  return { chainId: datasource.chain.id, address };
 }
 
 /**
@@ -39,13 +37,13 @@ export function getBasenamesSubregistryId(namespace: ENSNamespaceId): AccountId 
  * @returns registrar managed name
  * @throws an error when no registrar managed name could be returned
  */
-export function getBasenamesSubregistryManagedName(namespaceId: ENSNamespaceId): Name {
+export function getBasenamesSubregistryManagedName(namespaceId: ENSNamespaceId): InterpretedName {
   switch (namespaceId) {
     case ENSNamespaceIds.Mainnet:
-      return "base.eth";
+      return asInterpretedName("base.eth");
     case ENSNamespaceIds.Sepolia:
     case ENSNamespaceIds.SepoliaV2:
-      return "basetest.eth";
+      return asInterpretedName("basetest.eth");
     case ENSNamespaceIds.EnsTestEnv:
       throw new Error(
         `No registrar managed name is known for the 'basenames' subregistry within the "${namespaceId}" namespace.`,

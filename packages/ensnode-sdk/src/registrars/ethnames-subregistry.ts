@@ -1,4 +1,5 @@
-import type { AccountId, Name } from "enssdk";
+import type { AccountId, InterpretedName } from "enssdk";
+import { asInterpretedName } from "enssdk";
 
 import {
   DatasourceNames,
@@ -26,10 +27,7 @@ export function getEthnamesSubregistryId(namespace: ENSNamespaceId): AccountId {
     throw new Error(`BaseRegistrar contract not found or has multiple addresses for ${namespace}`);
   }
 
-  return {
-    chainId: datasource.chain.id,
-    address,
-  };
+  return { chainId: datasource.chain.id, address };
 }
 
 /**
@@ -38,12 +36,12 @@ export function getEthnamesSubregistryId(namespace: ENSNamespaceId): AccountId {
  * @param namespaceId
  * @returns registrar managed name
  */
-export function getEthnamesSubregistryManagedName(namespaceId: ENSNamespaceId): Name {
+export function getEthnamesSubregistryManagedName(namespaceId: ENSNamespaceId): InterpretedName {
   switch (namespaceId) {
     case ENSNamespaceIds.Mainnet:
     case ENSNamespaceIds.Sepolia:
     case ENSNamespaceIds.SepoliaV2:
     case ENSNamespaceIds.EnsTestEnv:
-      return "eth";
+      return asInterpretedName("eth");
   }
 }

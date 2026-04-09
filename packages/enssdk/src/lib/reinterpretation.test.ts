@@ -1,25 +1,30 @@
 import { describe, expect, it } from "vitest";
 
-import type { InterpretedLabel } from "../../ens";
+import { asInterpretedLabel } from "./interpreted-names-and-labels";
+import { encodeLabelHash, labelhashLiteralLabel } from "./labelhash";
 import { reinterpretLabel } from "./reinterpretation";
+import type { InterpretedLabel, LiteralLabel } from "./types";
+
+const UNNORMALIZED_LABEL = "Eth";
+const NORMALIZED_LABEL = asInterpretedLabel("eth");
 
 describe("Reinterpretation", () => {
   describe("reinterpretLabel()", () => {
-    const unnormalizedLabel = "Eth";
-    const normalizedLabel = "eth" as InterpretedLabel;
-    const encodedLabelHash =
-      "[4c10068c4e8f0b2905447ed0a679a3934513092c8a965b7a3d1ea67ea1cd0698]" as InterpretedLabel;
+    const encodedLabelHash = asInterpretedLabel(
+      encodeLabelHash(labelhashLiteralLabel(UNNORMALIZED_LABEL as LiteralLabel)),
+    );
 
     it("can reinterpret EncodedLabelHash", () => {
       expect(reinterpretLabel(encodedLabelHash)).toBe(encodedLabelHash);
     });
 
     it("can reinterpret NormalizedLabel", () => {
-      expect(reinterpretLabel(normalizedLabel)).toBe(normalizedLabel);
+      expect(reinterpretLabel(NORMALIZED_LABEL)).toBe(NORMALIZED_LABEL);
     });
 
     it("can reinterpret UnnormalizedLabel", () => {
-      expect(reinterpretLabel(unnormalizedLabel as InterpretedLabel)).toBe(encodedLabelHash);
+      // directly cast the unnormalized label to avoid asInterpretedLabel validity checks
+      expect(reinterpretLabel(UNNORMALIZED_LABEL as InterpretedLabel)).toBe(encodedLabelHash);
     });
 
     it("refuses to reinterpret an empty Label", () => {

@@ -1,4 +1,6 @@
-import { Duration, InterpretedName, NamedRegistrarAction } from "@ensnode/ensnode-sdk";
+import { asInterpretedName } from "enssdk";
+
+import { type Duration, type NamedRegistrarAction } from "@ensnode/ensnode-sdk";
 
 export const registrationWithReferral = {
   action: {
@@ -45,7 +47,7 @@ export const registrationWithReferral = {
       "176209761600000000111551110000000009545322000000000000006750000000000000071",
     ],
   },
-  name: "nh35.eth" as InterpretedName,
+  name: asInterpretedName("nh35.eth"),
 } satisfies NamedRegistrarAction;
 
 export const renewalWithNoReferral = {
@@ -78,7 +80,7 @@ export const renewalWithNoReferral = {
       "176304520800000000111551110000000009621987000000000000011350000000000000259",
     ],
   },
-  name: "user1-extend.eth" as InterpretedName,
+  name: asInterpretedName("user1-extend.eth"),
 } satisfies NamedRegistrarAction;
 
 export const registrationWithNoReferralAndEncodedLabelHashes = {
@@ -115,7 +117,7 @@ export const registrationWithNoReferralAndEncodedLabelHashes = {
     eventIds: ["176234701200000000111551110000000009566045000000000000014150000000000000198"],
   },
 
-  name: "[e4310bf4547cb18b16b5348881d24a66d61fa94a013e5636b730b86ee64a3923].eth" as InterpretedName,
+  name: asInterpretedName("[e4310bf4547cb18b16b5348881d24a66d61fa94a013e5636b730b86ee64a3923].eth"),
 } satisfies NamedRegistrarAction;
 
 export const registrationWithZeroEncodedReferrer = {
@@ -151,7 +153,7 @@ export const registrationWithZeroEncodedReferrer = {
       "176304488400000000111551110000000009621960000000000000003350000000000000031",
     ],
   },
-  name: "alix407.eth" as InterpretedName,
+  name: asInterpretedName("alix407.eth"),
 } satisfies NamedRegistrarAction;
 
 export const registrationWithReferrerNotMatchingENSHolidayAwardsFormat = {
@@ -199,7 +201,7 @@ export const registrationWithReferrerNotMatchingENSHolidayAwardsFormat = {
       "176305292400000000111551110000000009622628000000000000002750000000000000053",
     ],
   },
-  name: "sonu100.eth" as InterpretedName,
+  name: asInterpretedName("sonu100.eth"),
 } satisfies NamedRegistrarAction;
 
 function registrarActionWithUpdatedIncrementalDuration(
@@ -209,7 +211,7 @@ function registrarActionWithUpdatedIncrementalDuration(
   return {
     ...registrarAction,
     action: { ...registrarAction.action, incrementalDuration },
-    name: `incrementalDuration-${incrementalDuration}.${registrarAction.name}` as InterpretedName,
+    name: asInterpretedName(`incrementalDuration-${incrementalDuration}.${registrarAction.name}`),
   } satisfies NamedRegistrarAction;
 }
 

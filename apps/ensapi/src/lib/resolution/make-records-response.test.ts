@@ -1,6 +1,7 @@
+import type { CoinType } from "enssdk";
 import { describe, expect, it } from "vitest";
 
-import type { CoinType, ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
+import type { ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 
 import {
   type IndexedResolverRecords,

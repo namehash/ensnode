@@ -1,11 +1,12 @@
 import {
+  type Address,
   type EACResource,
   type EACRoleBitmap,
   makePermissionsId,
   makePermissionsResourceId,
   makePermissionsUserId,
 } from "enssdk";
-import { type Address, isAddressEqual, zeroAddress } from "viem";
+import { isAddressEqual, zeroAddress } from "viem";
 
 import { PluginName } from "@ensnode/ensnode-sdk";
 

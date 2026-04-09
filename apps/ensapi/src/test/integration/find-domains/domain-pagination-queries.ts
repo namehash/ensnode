@@ -1,4 +1,4 @@
-import type { InterpretedLabel, Name } from "@ensnode/ensnode-sdk";
+import type { InterpretedLabel, Name } from "enssdk";
 
 import { gql } from "@/test/integration/omnigraph-api-client";
 

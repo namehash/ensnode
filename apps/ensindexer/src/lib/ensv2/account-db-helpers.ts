@@ -1,4 +1,4 @@
-import type { Address } from "viem";
+import type { Address } from "enssdk";
 
 import { interpretAddress } from "@ensnode/ensnode-sdk";
 

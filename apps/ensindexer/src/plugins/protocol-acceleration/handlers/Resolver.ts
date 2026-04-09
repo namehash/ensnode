@@ -1,5 +1,7 @@
+import { bigintToCoinType, type CoinType, ETH_COIN_TYPE } from "enssdk";
+
 import { ResolverABI } from "@ensnode/datasources";
-import { bigintToCoinType, type CoinType, ETH_COIN_TYPE, PluginName } from "@ensnode/ensnode-sdk";
+import { PluginName } from "@ensnode/ensnode-sdk";
 
 import { parseDnsTxtRecordArgs } from "@/lib/dns-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";

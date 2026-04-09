@@ -1,4 +1,4 @@
-import type { ChainId } from "@ensnode/ensnode-sdk";
+import type { ChainId } from "enssdk";
 
 import { getChainName } from "../../utils/chains";
 

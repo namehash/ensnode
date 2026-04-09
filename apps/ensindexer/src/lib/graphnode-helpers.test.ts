@@ -1,6 +1,5 @@
+import type { LabelHash } from "enssdk";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-
-import type { LabelHash } from "@ensnode/ensnode-sdk";
 
 import { setupConfigMock, setupEnsDbConfigMock } from "@/lib/__test__/mockConfig";
 import "@/lib/__test__/mockLogger";

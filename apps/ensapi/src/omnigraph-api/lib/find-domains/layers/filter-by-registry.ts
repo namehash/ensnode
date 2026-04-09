@@ -1,6 +1,5 @@
 import { eq } from "drizzle-orm";
-
-import type { RegistryId } from "@ensnode/ensnode-sdk";
+import type { RegistryId } from "enssdk";
 
 import { ensDb } from "@/lib/ensdb/singleton";
 

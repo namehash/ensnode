@@ -2,8 +2,8 @@
  * This file contains handlers used in event handlers for a Registrar contract.
  */
 
-import { type AccountId, type Node, stringifyAccountId } from "enssdk";
-import type { Address, Hash } from "viem";
+import { type AccountId, type Address, type Node, stringifyAccountId } from "enssdk";
+import type { Hash } from "viem";
 
 import {
   type BlockRef,

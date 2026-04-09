@@ -1,6 +1,7 @@
+import type { AccountId } from "enssdk";
+
 import { DatasourceNames } from "@ensnode/datasources";
 import {
-  type AccountId,
   type ENSNamespaceId,
   getDatasourceContract,
   makeContractMatcher,

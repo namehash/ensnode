@@ -1,11 +1,11 @@
-import type { DNSEncodedName, LiteralLabel } from "enssdk";
 import { bytesToHex, stringToHex } from "viem";
 import { packetToBytes } from "viem/ens";
 import { describe, expect, it } from "vitest";
 
-import { labelhashLiteralLabel } from "../shared/labelhash";
 import { decodeDNSEncodedName } from "./dns-encoded-name";
-import { encodeLabelHash } from "./encode-labelhash";
+import { asLiteralLabel } from "./interpreted-names-and-labels";
+import { encodeLabelHash, labelhashLiteralLabel } from "./labelhash";
+import type { DNSEncodedName } from "./types";
 
 const MULTI_BYTE_UNICODE_NAMES = ["👩🏼‍❤‍💋‍👨🏼.eth"];
 
@@ -51,9 +51,9 @@ describe("decodeDNSEncodedName", () => {
   });
 
   it("correctly decodes encoded-labelhash-looking-strings", () => {
-    const literalLabelThatLooksLikeALabelHash = encodeLabelHash(
-      labelhashLiteralLabel("test" as LiteralLabel),
-    ) as LiteralLabel;
+    const literalLabelThatLooksLikeALabelHash = asLiteralLabel(
+      encodeLabelHash(labelhashLiteralLabel(asLiteralLabel("test"))),
+    );
 
     expect(
       decodeDNSEncodedName(stringToHex(`\x42${literalLabelThatLooksLikeALabelHash}\x00`)),

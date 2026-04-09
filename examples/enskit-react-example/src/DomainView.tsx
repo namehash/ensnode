@@ -1,5 +1,5 @@
 import { type FragmentOf, graphql, readFragment, useOmnigraphQuery } from "enskit/react/omnigraph";
-import type { InterpretedName } from "enssdk";
+import { asInterpretedName } from "enssdk";
 import { Link, useParams } from "react-router";
 
 const DomainFragment = graphql(`
@@ -40,11 +40,12 @@ function SubdomainLink({ data }: { data: FragmentOf<typeof DomainFragment> }) {
 }
 
 export function DomainView() {
-  const { "*": name = "eth" } = useParams();
+  const params = useParams();
+  const name = asInterpretedName(params.name ?? "eth");
 
   const [result] = useOmnigraphQuery({
     query: DomainByNameQuery,
-    variables: { name: name as InterpretedName },
+    variables: { name },
   });
 
   const { data, fetching, error } = result;

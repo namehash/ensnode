@@ -1,5 +1,7 @@
-import type { DNSEncodedLiteralName, DNSEncodedName, LiteralLabel } from "enssdk";
 import { bytesToString, hexToBytes } from "viem";
+
+import { asLiteralLabel } from "./interpreted-names-and-labels";
+import type { DNSEncodedLiteralName, DNSEncodedName, LiteralLabel } from "./types";
 
 /**
  * Decodes a DNS-Encoded name consisting of Literal Labels into an ordered list of Literal Labels.
@@ -15,7 +17,7 @@ import { bytesToString, hexToBytes } from "viem";
  * @dev This is just `decodeDNSEncodedName` with semantic input/output
  */
 export function decodeDNSEncodedLiteralName(packet: DNSEncodedLiteralName): LiteralLabel[] {
-  return decodeDNSEncodedName(packet) as LiteralLabel[];
+  return decodeDNSEncodedName(packet).map(asLiteralLabel);
 }
 
 /**

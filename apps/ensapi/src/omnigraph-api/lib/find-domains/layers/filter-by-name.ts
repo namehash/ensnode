@@ -1,12 +1,13 @@
 import { eq, like, Param, sql } from "drizzle-orm";
 import { alias, unionAll } from "drizzle-orm/pg-core";
-
-import type { ENSv1DomainId, ENSv2DomainId, LabelHashPath } from "@ensnode/ensnode-sdk";
 import {
   type DomainId,
+  type ENSv1DomainId,
+  type ENSv2DomainId,
   interpretedLabelsToLabelHashPath,
+  type LabelHashPath,
   parsePartialInterpretedName,
-} from "@ensnode/ensnode-sdk";
+} from "enssdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 

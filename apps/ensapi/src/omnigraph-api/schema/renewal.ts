@@ -1,4 +1,4 @@
-import type { RenewalId } from "@ensnode/ensnode-sdk";
+import type { RenewalId } from "enssdk";
 
 import { ensDb } from "@/lib/ensdb/singleton";
 import { builder } from "@/omnigraph-api/builder";

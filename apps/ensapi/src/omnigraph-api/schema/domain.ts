@@ -1,13 +1,12 @@
 import { trace } from "@opentelemetry/api";
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, count, eq, getTableColumns } from "drizzle-orm";
-
 import {
   type DomainId,
   type ENSv1DomainId,
   type ENSv2DomainId,
   interpretedLabelsToInterpretedName,
-} from "@ensnode/ensnode-sdk";
+} from "enssdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { withSpanAsync } from "@/lib/instrumentation/auto-span";
