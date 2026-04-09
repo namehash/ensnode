@@ -9,8 +9,6 @@ import {
   type DomainId,
   getNameHierarchy,
   type InterpretedName,
-  type Name,
-  type Node,
   namehashInterpretedName,
 } from "enssdk";
 import { isAddressEqual, type PublicClient, toHex, zeroAddress } from "viem";
@@ -29,7 +27,7 @@ type FindResolverResult =
       activeResolver: null;
       requiresWildcardSupport: undefined;
     }
-  | { activeName: Name; requiresWildcardSupport: boolean; activeResolver: Address };
+  | { activeName: InterpretedName; requiresWildcardSupport: boolean; activeResolver: Address };
 
 const NULL_RESULT: FindResolverResult = {
   activeName: null,
@@ -94,7 +92,7 @@ export async function findResolver({
  */
 async function findResolverWithUniversalResolver(
   publicClient: PublicClient,
-  name: Name,
+  name: InterpretedName,
 ): Promise<FindResolverResult> {
   return withActiveSpanAsync(
     tracer,
@@ -147,7 +145,8 @@ async function findResolverWithUniversalResolver(
       }
 
       // UniversalResolver returns the offset in bytes within the DNS Encoded Name where the activeName begins
-      const activeName: Name = bytesToPacket(dnsEncodedNameBytes.slice(offset));
+      // Invariant: the decoded name must be an InterpretedName
+      const activeName = asInterpretedName(bytesToPacket(dnsEncodedNameBytes.slice(offset)));
 
       return {
         activeName,

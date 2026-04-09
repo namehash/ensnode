@@ -1,6 +1,6 @@
 import config from "@/config";
 
-import type { Name } from "enssdk";
+import type { InterpretedName } from "enssdk";
 import {
   bytesToHex,
   ContractFunctionExecutionError,
@@ -45,7 +45,7 @@ export async function executeResolveCallsWithUniversalResolver<
   calls,
   publicClient,
 }: {
-  name: Name;
+  name: InterpretedName;
   calls: ResolveCalls<SELECTION>;
   publicClient: PublicClient;
 }): Promise<ResolveCallsAndRawResults<SELECTION>> {

@@ -7,7 +7,6 @@ import {
   asInterpretedName,
   type Node,
   namehashInterpretedName,
-  normalizeName,
   parseReverseName,
 } from "enssdk";
 
@@ -55,10 +54,6 @@ import {
 
 const logger = makeLogger("forward-resolution");
 const tracer = trace.getTracer("forward-resolution");
-
-// NOTE: normalize generic name to force the normalization lib to lazy-load itself (otherwise the
-// first trace generated here would be unusually slow)
-normalizeName("example.eth");
 
 /**
  * Implements Forward Resolution of record values for a specified ENS Name.
@@ -147,9 +142,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           span.setAttribute("node", node);
 
           // if selection is empty, give them what they asked for
-          if (isSelectionEmpty(selection)) {
-            return makeEmptyResolverRecordsResponse(selection);
-          }
+          if (isSelectionEmpty(selection)) return makeEmptyResolverRecordsResponse(selection);
 
           // construct the set of resolve() calls indicated by selection
           const calls = makeResolveCalls(node, selection);
@@ -221,9 +214,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
             !!activeResolver,
           );
           // we're unable to find an active resolver for this name, return empty response
-          if (!activeResolver) {
-            return makeEmptyResolverRecordsResponse(selection);
-          }
+          if (!activeResolver) return makeEmptyResolverRecordsResponse(selection);
 
           // set some attributes on the span for easy reference
           span.setAttribute("activeResolver", activeResolver);
