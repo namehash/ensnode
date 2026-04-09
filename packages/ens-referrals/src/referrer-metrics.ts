@@ -3,7 +3,7 @@ import { toNormalizedAddress } from "enssdk";
 
 import type { Duration } from "@ensnode/ensnode-sdk";
 
-import { validateLowercaseAddress } from "./address";
+import { validateAddress } from "./address";
 import type { AggregatedReferrerMetrics } from "./aggregations";
 import type { USDQuantity } from "./currency";
 import { validateNonNegativeInteger } from "./number";
@@ -75,7 +75,7 @@ export const buildReferrerMetrics = (
 };
 
 export const validateReferrerMetrics = (metrics: ReferrerMetrics): void => {
-  validateLowercaseAddress(metrics.referrer);
+  validateAddress(metrics.referrer);
   validateNonNegativeInteger(metrics.totalReferrals);
   validateDuration(metrics.totalIncrementalDuration);
   validateRevenueContribution(metrics.totalRevenueContribution);

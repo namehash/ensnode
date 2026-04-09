@@ -85,7 +85,8 @@ function RenderDomain({ name }: { name: InterpretedName }) {
 export function DomainView() {
   const params = useParams();
 
-  // if a user accesses /domain directly, redirec to /domain/etc
+  // if a user accesses '/domain' directly, redirect to '/domain/eth'
+  // TODO: render the set of tlds
   if (params.name === undefined || params.name === "") return <Navigate to="/domain/eth" replace />;
 
   // here we ensure that the provided /domain/:name parameter is an InterpretedName

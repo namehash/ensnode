@@ -4,7 +4,7 @@ import { toNormalizedAddress } from "enssdk";
 import type { PriceUsdc } from "@ensnode/ensnode-sdk";
 import { makePriceUsdcSchema } from "@ensnode/ensnode-sdk/internal";
 
-import { validateLowercaseAddress } from "../../address";
+import { validateAddress } from "../../address";
 import {
   type BaseReferralProgramRules,
   ReferralProgramAwardModels,
@@ -99,7 +99,7 @@ export const validateReferralProgramRulesRevShareLimit = (
   }
 
   for (const d of rules.disqualifications) {
-    validateLowercaseAddress(d.referrer);
+    validateAddress(d.referrer);
     if (d.reason.trim().length === 0) {
       throw new Error(
         "ReferralProgramRulesRevShareLimit: disqualification reason must not be empty.",

@@ -24,7 +24,8 @@ import type {
  *
  * @dev encodes unnormalized labels in `name` to make it InterpretedName.
  * @dev this is similar to the concept of Reinterpretation (packages/enssdk/src/lib/reinterpretation.ts)
- *   but is distinct.
+ *   but is distinct in that we're interpreting a Name (i.e. from user input) rather than a previously
+ *   interpreted InterpretedName.
  */
 export function nameToInterpretedName(name: Name): InterpretedName {
   return interpretedLabelsToInterpretedName(

@@ -5,6 +5,7 @@ import { replaceBigInts } from "@ponder/utils";
 import {
   type AccountId,
   asInterpretedName,
+  type InterpretedName,
   type Node,
   namehashInterpretedName,
   parseReverseName,
@@ -89,9 +90,12 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
   selection: ForwardResolutionArgs<SELECTION>["selection"],
   options: Omit<Parameters<typeof _resolveForward>[2], "registry">,
 ): Promise<ForwardResolutionResult<SELECTION>> {
+  // Invariant: Name must be an InterpretedName
+  const interpretedName = asInterpretedName(name);
+
   // NOTE: `resolveForward` is just `_resolveForward` with the enforcement that `registry` must
-  // initially be ENS Root Chain's Registry: see `_resolveForward` for additional context.
-  return _resolveForward(name, selection, {
+  // initially be ENS Root Registry: see `_resolveForward` for additional context.
+  return _resolveForward(interpretedName, selection, {
     ...options,
     registry: getENSv1Registry(config.namespace),
   });
@@ -102,13 +106,10 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
  * `registry`.
  */
 async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
-  _name: ForwardResolutionArgs<SELECTION>["name"],
+  name: InterpretedName,
   selection: ForwardResolutionArgs<SELECTION>["selection"],
   options: { registry: AccountId; accelerate: boolean; canAccelerate: boolean },
 ): Promise<ForwardResolutionResult<SELECTION>> {
-  // Invariant: Name must be an InterpretedName
-  const name = asInterpretedName(_name);
-
   const {
     registry: { chainId },
     accelerate = false,
