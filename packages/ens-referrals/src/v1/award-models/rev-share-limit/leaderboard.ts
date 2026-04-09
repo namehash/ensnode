@@ -86,11 +86,11 @@ interface ReferrerRaceState {
  * race algorithm over individual referral events.
  *
  * Events are processed in chronological order. When a referrer first crosses the qualification
- * threshold, they claim ALL accumulated uncapped award at once (capped by remaining pool).
- * After qualifying, each subsequent event claims that event's incremental uncapped award (also
- * capped). Once the pool reaches $0, no further awards are issued to anyone.
+ * threshold, they claim ALL accumulated uncapped awards at once (capped by remaining award pool).
+ * After qualifying, each referrer's subsequent referrals claim that event's incremental capped award.
+ * Once the award pool is exhausted, no further awards are issued to anyone.
  *
- * @param events - Raw referral events from the database (unsorted; will be sorted internally).
+ * @param events - Raw referral events from ENSDb (unsorted; will be sorted internally).
  * @param rules - The {@link ReferralProgramRulesRevShareLimit} defining the program parameters.
  * @param accurateAsOf - Timestamp indicating data freshness.
  */
@@ -104,7 +104,7 @@ export const buildReferrerLeaderboardRevShareLimit = (
 
   // 2. Process events sequentially to run the race.
   const referrerStates = new Map<Address, ReferrerRaceState>();
-  let poolRemainingAmount = rules.awardPool.amount;
+  let awardPoolRemaining = rules.awardPool.amount;
 
   for (const event of sortedEvents) {
     const referrer = normalizeAddress(event.referrer);
@@ -146,9 +146,9 @@ export const buildReferrerLeaderboardRevShareLimit = (
         priceUsdc(totalBaseRevenueAmount),
         rules.maxBaseRevenueShare,
       ).amount;
-      const incrementalCappedAward = bigintMin(accumulatedUncappedAward, poolRemainingAmount);
+      const incrementalCappedAward = bigintMin(accumulatedUncappedAward, awardPoolRemaining);
       state.cappedAwardAmount += incrementalCappedAward;
-      poolRemainingAmount -= incrementalCappedAward;
+      awardPoolRemaining -= incrementalCappedAward;
       state.wasQualified = true;
     } else if (state.wasQualified) {
       // Already qualified: claim this event's incremental uncapped award.
@@ -159,9 +159,9 @@ export const buildReferrerLeaderboardRevShareLimit = (
         priceUsdc(incrementalBaseRevenueAmount),
         rules.maxBaseRevenueShare,
       ).amount;
-      const incrementalCappedAward = bigintMin(incrementalUncappedAward, poolRemainingAmount);
+      const incrementalCappedAward = bigintMin(incrementalUncappedAward, awardPoolRemaining);
       state.cappedAwardAmount += incrementalCappedAward;
-      poolRemainingAmount -= incrementalCappedAward;
+      awardPoolRemaining -= incrementalCappedAward;
     }
     // If not yet qualified, nothing is claimed from the pool.
   }
@@ -170,11 +170,7 @@ export const buildReferrerLeaderboardRevShareLimit = (
   //    1. cappedAward desc — actual pool claims, race winners first
   //    2. totalIncrementalDuration desc — tie-break for pool-depleted referrers
   //    3. referrer address desc — deterministic tie-break
-  // Both `a` and `b` are keys from `referrerStates`, so lookups are always defined.
-  const sortedAddresses = [...referrerStates.keys()].sort((a, b) => {
-    const stateA = referrerStates.get(a) as ReferrerRaceState;
-    const stateB = referrerStates.get(b) as ReferrerRaceState;
-
+  const sortedEntries = [...referrerStates.entries()].sort(([a, stateA], [b, stateB]) => {
     // Primary: cappedAward desc (bigint comparison)
     if (stateB.cappedAwardAmount !== stateA.cappedAwardAmount) {
       return stateB.cappedAwardAmount > stateA.cappedAwardAmount ? 1 : -1;
@@ -192,12 +188,8 @@ export const buildReferrerLeaderboardRevShareLimit = (
   });
 
   // 4. Build AwardedReferrerMetricsRevShareLimit for each referrer.
-  const awardedReferrers: AwardedReferrerMetricsRevShareLimit[] = sortedAddresses.map(
-    (referrerAddr, index) => {
-      // `sortedAddresses` is derived directly from `referrerStates.keys()`, so
-      // the state entry is always present.
-      const state = referrerStates.get(referrerAddr) as ReferrerRaceState;
-
+  const awardedReferrers: AwardedReferrerMetricsRevShareLimit[] = sortedEntries.map(
+    ([referrerAddr, state], index) => {
       const baseMetrics = buildReferrerMetrics(
         referrerAddr,
         state.totalReferrals,
@@ -227,11 +219,9 @@ export const buildReferrerLeaderboardRevShareLimit = (
     },
   );
 
-  const awardPoolRemaining = priceUsdc(poolRemainingAmount);
-
   const aggregatedMetrics = buildAggregatedReferrerMetricsRevShareLimit(
     awardedReferrers,
-    awardPoolRemaining,
+    priceUsdc(awardPoolRemaining),
   );
 
   const referrers = new Map(awardedReferrers.map((r) => [r.referrer, r]));

@@ -35,7 +35,7 @@ export interface ReferralProgramRulesRevShareLimit extends BaseReferralProgramRu
    *
    * In rev-share-limit, each qualified referrer receives a share of their base revenue
    * contribution (base-fee-only: `baseAnnualRevenueContribution` × years of incremental duration),
-   * subject to a pool cap and a minimum qualification threshold.
+   * subject to the award pool cap and a minimum qualification threshold.
    */
   awardModel: typeof ReferralProgramAwardModels.RevShareLimit;
 
@@ -50,7 +50,7 @@ export interface ReferralProgramRulesRevShareLimit extends BaseReferralProgramRu
   minBaseRevenueContribution: PriceUsdc;
 
   /**
-   * Base revenue contribution per year of incremental duration in USDC.
+   * Base revenue contribution in USDC per year of incremental duration from referred registrations and renewals.
    *
    * Used in `rev-share-limit` qualification and award calculations:
    * 1 year of incremental duration → this many USDC of base revenue (base-fee-only, excluding premiums).
@@ -58,8 +58,8 @@ export interface ReferralProgramRulesRevShareLimit extends BaseReferralProgramRu
   baseAnnualRevenueContribution: PriceUsdc;
 
   /**
-   * The fraction of the referrer's base revenue contribution that constitutes their max potential award.
-   * This is the max that ignores the possibility of the award pool becoming exhausted.
+   * The fraction of the referrer's base revenue contribution that constitutes their max potential award for each referral.
+   * This is the max for a referral that ignores the possibility of the referrer not having achieved qualification for awards yet, the referrer being disqualified from awards, or the award pool being exhausted.
    *
    * @invariant Guaranteed to be a number between 0 and 1 (inclusive)
    */

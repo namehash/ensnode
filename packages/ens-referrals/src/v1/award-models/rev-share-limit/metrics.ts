@@ -16,7 +16,7 @@ import { isReferrerQualifiedRevShareLimit, type ReferralProgramRulesRevShareLimi
 export interface ReferrerMetricsRevShareLimit extends ReferrerMetrics {
   /**
    * The referrer's base revenue contribution
-   * (base-fee-only: `rules.baseAnnualRevenueContribution` × years of incremental duration).
+   * (`rules.baseAnnualRevenueContribution` × years of incremental duration).
    * Used for qualification and award calculation in the rev-share-limit model.
    *
    * @invariant Guaranteed to be `priceUsdc(rules.baseAnnualRevenueContribution.amount * BigInt(totalIncrementalDuration) / BigInt(SECONDS_PER_YEAR))`
@@ -73,7 +73,7 @@ export interface RankedReferrerMetricsRevShareLimit extends ReferrerMetricsRevSh
    *
    * Note: this is a purely rule-based eligibility predicate and does NOT guarantee
    * `cappedAward.amount > 0n` — a qualified referrer may still receive $0 if the
-   * award pool is already depleted by earlier referrers in the race.
+   * capped award pool is already exhausted by earlier referrers in the race.
    *
    * @invariant true if and only if `totalBaseRevenueContribution` is greater than or equal to
    *   {@link ReferralProgramRulesRevShareLimit.minBaseRevenueContribution} AND
@@ -164,7 +164,7 @@ export interface AwardedReferrerMetricsRevShareLimit extends RankedReferrerMetri
    * The uncapped USDC award for this referrer, computed as
    * `maxBaseRevenueShare × totalBaseRevenueContribution`.
    *
-   * Represents what the referrer would receive if the pool were unlimited and the referrer were qualified.
+   * Represents what the referrer would receive if the pool were uncapped and the referrer were qualified.
    * Independent of the pool state, qualification status, and admin disqualification status.
    */
   uncappedAward: PriceUsdc;
@@ -172,8 +172,8 @@ export interface AwardedReferrerMetricsRevShareLimit extends RankedReferrerMetri
   /**
    * The referrer's (tentative) capped USDC award.
    *
-   * This is the amount actually claimed from the pool by this referrer, capped by
-   * the remaining pool at the time of their qualifying referrals.
+   * This is the amount (tentatively) claimed from the award pool by this referrer, capped by
+   * the remaining award pool at the time of their qualifying referrals.
    *
    * @invariant Guaranteed to be a valid PriceUsdc with amount between 0 and {@link ReferralProgramRulesRevShareLimit.awardPool.amount} (inclusive)
    * @invariant Always <= uncappedAward.amount
