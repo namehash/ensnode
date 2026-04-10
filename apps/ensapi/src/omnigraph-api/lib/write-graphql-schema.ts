@@ -17,7 +17,13 @@ async function _writeGraphQLSchema() {
   const { schema: unsortedSchema } = await import("@/omnigraph-api/schema");
   const schema = lexicographicSortSchema(unsortedSchema);
   const sdl = printSchema(schema);
-  const introspection = minifyIntrospectionQuery(introspectionFromSchema(schema));
+  const introspection = minifyIntrospectionQuery(introspectionFromSchema(schema), {
+    /**
+     * We include Scalar types in the introspection in order to power automatic bigint deserialization
+     * within the Omnigraph's urql GraphCache.
+     */
+    includeScalars: true,
+  });
 
   await Promise.all([
     writeFile(resolve(GENERATED_DIR, "schema.graphql"), sdl),
