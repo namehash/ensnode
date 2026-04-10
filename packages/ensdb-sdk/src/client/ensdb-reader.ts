@@ -13,6 +13,7 @@ import {
   buildIndividualEnsDbSchemas,
   type EnsDbDrizzleClient,
   type EnsNodeSchema,
+  getDrizzleSchemaChecksum,
 } from "../lib/drizzle";
 import { EnsNodeMetadataKeys } from "./ensnode-metadata";
 import type {
@@ -92,6 +93,23 @@ export class EnsDbReader<
    */
   get ensDb(): EnsDbDrizzleClient<ConcreteEnsIndexerSchema> {
     return this.drizzleClient;
+  }
+
+  /**
+   * Getter for the ENSDb Schema Checksum
+   *
+   * The Schema Checksum is a hash based on the "concrete" ENSIndexer Schema and
+   * the ENSNode Schema definitions used in the Drizzle client for ENSDb.
+   *
+   * It can be used to verify that the {@link ensDb} Drizzle client
+   * is using the expected schema definitions while interacting with
+   * the ENSDb instance.
+   */
+  get ensDbSchemaChecksum(): string {
+    return getDrizzleSchemaChecksum({
+      ...this._concreteEnsIndexerSchema,
+      ...this._ensNodeSchema,
+    });
   }
 
   /**

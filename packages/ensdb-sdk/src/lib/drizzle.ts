@@ -1,6 +1,9 @@
 /**
  * Utilities for Drizzle ORM integration with ENSDb.
  */
+
+import { createHash } from "node:crypto";
+
 import type { Logger as DrizzleLogger } from "drizzle-orm/logger";
 import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
 import { isPgEnum } from "drizzle-orm/pg-core";
@@ -168,4 +171,40 @@ export function buildEnsDbDrizzleClient<ConcreteEnsIndexerSchema extends Abstrac
     casing: "snake_case",
     logger,
   });
+}
+
+/**
+ * Safely stringify a Drizzle schema definition.
+ *
+ * Handles circular references in the Drizzle schema definition by replacing
+ * them with the string "[circular]". Thanks to this, we can safely stringify
+ * any Drizzle schema definition without running into errors due to inability
+ * of {@link JSON.stringify} to handle circular references by default.
+ *
+ * @param schema - The Drizzle schema definition to stringify.
+ * @returns A JSON string representation of the schema, with circular
+ *          references replaced by "[circular]".
+ */
+function safeStringifyDrizzleSchema(schema: Record<string, unknown>): string {
+  const seen = new WeakSet();
+
+  return JSON.stringify(schema, (_key, value) => {
+    if (typeof value === "object" && value !== null) {
+      if (seen.has(value)) return "[circular]";
+      seen.add(value);
+    }
+
+    return value;
+  });
+}
+
+/**
+ * Get a checksum for a Drizzle schema definition.
+ * @param schema - The Drizzle schema definition.
+ * @returns A 10-character checksum string for the schema.
+ */
+export function getDrizzleSchemaChecksum(schema: Record<string, unknown>): string {
+  const stringifiedSchema = safeStringifyDrizzleSchema(schema);
+
+  return createHash("sha256").update(stringifiedSchema).digest("hex").slice(0, 10);
 }
