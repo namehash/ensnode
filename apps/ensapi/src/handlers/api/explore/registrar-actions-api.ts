@@ -101,6 +101,16 @@ async function fetchRegistrarActions(parentNode: Node | undefined, query: Regist
  */
 app.openapi(getRegistrarActionsRoute, async (c) => {
   try {
+    // Defensive: `registrarActionsApiMiddleware` already short-circuits with a
+    // serialized 503 when indexingStatus is an Error, so this branch is
+    // unreachable at runtime — kept only for TypeScript type narrowing.
+    if (c.var.indexingStatus instanceof Error) {
+      throw new Error("Indexing status has not been loaded yet");
+    }
+
+    // Get the accurateAsOf timestamp from the omnichain indexing cursor
+    const accurateAsOf = c.var.indexingStatus.snapshot.omnichainSnapshot.omnichainIndexingCursor;
+
     const query = c.req.valid("query");
     const { registrarActions, pageContext } = await fetchRegistrarActions(undefined, query);
 
@@ -110,6 +120,7 @@ app.openapi(getRegistrarActionsRoute, async (c) => {
         responseCode: RegistrarActionsResponseCodes.Ok,
         registrarActions,
         pageContext,
+        accurateAsOf,
       } satisfies RegistrarActionsResponseOk),
     );
   } catch (error) {
@@ -163,16 +174,19 @@ app.openapi(getRegistrarActionsRoute, async (c) => {
  */
 app.openapi(getRegistrarActionsByParentNodeRoute, async (c) => {
   try {
+    // Defensive: `registrarActionsApiMiddleware` already short-circuits with a
+    // serialized 503 when indexingStatus is an Error, so this branch is
+    // unreachable at runtime — kept only for TypeScript type narrowing.
     if (c.var.indexingStatus instanceof Error) {
       throw new Error("Indexing status has not been loaded yet");
     }
 
+    // Get the accurateAsOf timestamp from the omnichain indexing cursor
+    const accurateAsOf = c.var.indexingStatus.snapshot.omnichainSnapshot.omnichainIndexingCursor;
+
     const { parentNode } = c.req.valid("param");
     const query = c.req.valid("query");
     const { registrarActions, pageContext } = await fetchRegistrarActions(parentNode, query);
-
-    // Get the accurateAsOf timestamp from the slowest chain indexing cursor
-    const accurateAsOf = c.var.indexingStatus.snapshot.slowestChainIndexingCursor;
 
     // respond with success response
     return c.json(
