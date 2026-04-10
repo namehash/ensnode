@@ -1,3 +1,7 @@
+import * as abstractEnsIndexerSchema from "../ensindexer-abstract";
+import * as ensNodeSchema from "../ensnode";
+import { getDrizzleSchemaChecksum } from "../lib/drizzle";
+
 /**
  * ENSDb Config
  */
@@ -19,3 +23,19 @@ export interface EnsDbConfig {
    */
   ensIndexerSchemaName: string;
 }
+
+/**
+ * ENSDb Schema Checksum
+ *
+ * Checksum representing the ENSDb Schema definition, which is a combination of
+ * - the ENSIndexer Schema definition, and
+ * - the ENSNode Schema definition.
+ *
+ * This checksum can be used to verify compatibility between
+ * the ENSDb Schema definition expected by any client app connecting to ENSDb
+ * instance and the actual ENSDb Schema definition present in ENSDb SDK.
+ */
+export const ENSDB_SCHEMA_CHECKSUM = getDrizzleSchemaChecksum({
+  ...abstractEnsIndexerSchema,
+  ...ensNodeSchema,
+});
