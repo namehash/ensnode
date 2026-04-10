@@ -49,13 +49,14 @@ export type TheGraphEnvironment = {
 /**
  * Environment variables for referral program editions configuration.
  *
- * If CUSTOM_REFERRAL_PROGRAM_EDITIONS is set, it should be a URL that returns
- * the JSON for a valid serialized custom referral program editions definition.
+ * If REFERRAL_PROGRAM_EDITIONS is set, it should be a URL that returns
+ * the JSON for a valid serialized referral program editions definition.
  */
 export interface ReferralProgramEditionsEnvironment {
   /**
-   * Optional URL that returns the JSON for a valid serialized custom referral program editions definition.
-   * If not set, the default edition set will be used.
+   * Optional URL that returns the JSON for a valid serialized referral program editions definition.
+   * If not set, ENSApi treats the referral program as having zero configured editions and
+   * performs no referral-related work against ENSDb.
    */
-  CUSTOM_REFERRAL_PROGRAM_EDITIONS?: string;
+  REFERRAL_PROGRAM_EDITIONS?: string;
 }

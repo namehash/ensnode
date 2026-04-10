@@ -29,7 +29,6 @@ export * from "./award-models/shared/score";
 export * from "./award-models/shared/status";
 export * from "./client";
 export * from "./edition";
-export * from "./edition-defaults";
 export * from "./edition-metrics";
 export * from "./edition-summary";
 export * from "./leaderboard";
