@@ -1,8 +1,9 @@
 import config from "@/config";
 
-import type { ENSIndexerConfig } from "@/config/types";
 import { mergePonderConfigs } from "@/lib/merge-ponder-configs";
 import { ALL_PLUGINS, type AllPluginsMergedConfig } from "@/plugins";
+
+import { IndexingBehaviorInjectionContract } from "./indexing-behavior-injection-contract";
 
 ////////
 // Merge the active plugins' configs into a single ponder config.
@@ -19,29 +20,20 @@ const ponderConfig = activePlugins.reduce(
   {},
 ) as AllPluginsMergedConfig;
 
-// NOTE: here we inject all values from the ENSIndexerConfig that alter the indexing behavior of the
-// Ponder config in order to alter the ponder-generated build id when these options change.
-//
-// This ensures that running ENSIndexer with different configurations maintains compatibility with
-// Ponder's default crash recovery behavior.
-//
-// https://ponder.sh/docs/api-reference/ponder/database#build-id-and-crash-recovery
-(ponderConfig as any).indexingBehaviorDependencies = {
-  // while technically not necessary, since these configuration properties are reflected in the
-  // generated ponderConfig, we include them here for clarity
-  namespace: config.namespace,
-  plugins: config.plugins,
-  globalBlockrange: config.globalBlockrange,
-
-  // these config properties don't explicitly affect the generated ponderConfig and need to be
-  // injected here to ensure that, if they are configured differently, ponder generates a unique
-  // build id to differentiate between runs with otherwise-identical configs (see above).
-  isSubgraphCompatible: config.isSubgraphCompatible,
-  labelSet: config.labelSet,
-} satisfies Pick<
-  ENSIndexerConfig,
-  "namespace" | "plugins" | "globalBlockrange" | "isSubgraphCompatible" | "labelSet"
->;
+/**
+ * NOTE: By injecting the {@link IndexingBehaviorInjectionContract} into
+ * the `contracts` field of the Ponder Config, we ensure that any changes to
+ * the indexing behavior dependencies defined in
+ * {@link IndexingBehaviorInjectionContract.indexingBehaviorDependencies} will
+ * result in a different Ponder Build ID. This ensures that running ENSIndexer
+ * with different configurations maintains compatibility with Ponder's default
+ * crash recovery behavior.
+ *
+ * @see https://ponder.sh/docs/api-reference/ponder/database#build-id-and-crash-recovery
+ */
+ponderConfig.contracts = Object.assign({}, ponderConfig.contracts, {
+  IndexingBehaviorInjectionContract,
+});
 
 ////////
 // Set indexing order strategy
