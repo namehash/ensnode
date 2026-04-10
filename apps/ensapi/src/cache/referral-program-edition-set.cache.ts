@@ -16,6 +16,14 @@ import { makeLogger } from "@/lib/logger";
 const logger = makeLogger("referral-program-edition-set-cache");
 
 /**
+ * Returns `origin + pathname`, stripping any credentials or query params
+ * so the URL is safe to include in log messages and error strings.
+ */
+function safeHref(url: URL): string {
+  return `${url.origin}${url.pathname}`;
+}
+
+/**
  * Loads the referral program edition config set from the configured URL.
  *
  * If no URL is configured, the referral program is treated as having zero configured editions
@@ -32,9 +40,9 @@ async function loadReferralProgramEditionConfigSet(
     return buildReferralProgramEditionConfigSet([]);
   }
 
-  logger.info(
-    `Loading referral program edition config set from: ${config.referralProgramEditionConfigSetUrl.href}`,
-  );
+  const logSafeUrl = safeHref(config.referralProgramEditionConfigSetUrl);
+
+  logger.info(`Loading referral program edition config set from: ${logSafeUrl}`);
   try {
     const editionConfigSet = await ENSReferralsClient.getReferralProgramEditionConfigSet(
       config.referralProgramEditionConfigSetUrl,
@@ -59,7 +67,7 @@ async function loadReferralProgramEditionConfigSet(
     const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error(error, "Error occurred while loading referral program edition config set");
     throw new Error(
-      `Failed to load referral program edition config set from ${config.referralProgramEditionConfigSetUrl.href}: ${errorMessage}`,
+      `Failed to load referral program edition config set from ${logSafeUrl}: ${errorMessage}`,
     );
   }
 }
