@@ -1,4 +1,24 @@
 /**
+ * Unix timestamp value
+ *
+ * Represents the number of seconds that have elapsed
+ * since January 1, 1970 (midnight UTC/GMT).
+ *
+ * Guaranteed to be an integer. May be zero or negative to represent a time at or
+ * before Jan 1, 1970.
+ */
+export type UnixTimestamp = number;
+
+/**
+ * Duration
+ *
+ * Representing a duration in seconds.
+ *
+ * Guaranteed to be a non-negative integer.
+ */
+export type Duration = number;
+
+/**
  * Serialized representation of {@link ChainId}.
  **/
 export type ChainIdString = string;

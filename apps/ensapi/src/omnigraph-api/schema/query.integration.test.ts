@@ -8,8 +8,8 @@ import {
   makeENSv2DomainId,
   makeStorageId,
   type Name,
-  namehashInterpretedName,
   type NormalizedAddress,
+  namehashInterpretedName,
 } from "enssdk";
 import { describe, expect, it } from "vitest";
 

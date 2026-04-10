@@ -1,7 +1,7 @@
-import type { Address, UnixTimestamp } from "enssdk";
+import type { Address, Duration, UnixTimestamp } from "enssdk";
 import { toNormalizedAddress } from "enssdk";
 
-import { type Duration, priceEth, priceUsdc, scalePrice } from "@ensnode/ensnode-sdk";
+import { priceEth, priceUsdc, scalePrice } from "@ensnode/ensnode-sdk";
 
 import { buildReferrerMetrics } from "../../referrer-metrics";
 import { SECONDS_PER_YEAR } from "../../time";

@@ -4,6 +4,7 @@ import {
   constructSubInterpretedName,
   type DNSEncodedLiteralName,
   type DNSEncodedName,
+  type DurationBigInt,
   decodeDNSEncodedLiteralName,
   encodeLabelHash,
   type InterpretedLabel,
@@ -16,6 +17,7 @@ import {
   makeSubdomainNode,
   type Node,
   type NormalizedAddress,
+  type UnixTimestampBigInt,
 } from "enssdk";
 import { isAddressEqual, zeroAddress, zeroHash } from "viem";
 
@@ -248,7 +250,7 @@ export async function handleRegistrationCreated({
     fqdn: DNSEncodedName;
     registrant: NormalizedAddress;
     controlBitmap: number;
-    expiry: bigint;
+    expiry: UnixTimestampBigInt;
   }>;
 }) {
   const { node, tld, fqdn, registrant, expiry } = event.args;
@@ -307,7 +309,7 @@ export async function handleRegistrationExtended({
   event,
 }: {
   context: IndexingEngineContext;
-  event: EventWithArgs<{ node: Node; duration: bigint; newExpiry: bigint }>;
+  event: EventWithArgs<{ node: Node; duration: DurationBigInt; newExpiry: UnixTimestampBigInt }>;
 }) {
   const { node, newExpiry } = event.args;
 

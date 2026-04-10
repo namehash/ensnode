@@ -1,7 +1,5 @@
-import type { Address } from "enssdk";
+import type { Address, Duration } from "enssdk";
 import { toNormalizedAddress } from "enssdk";
-
-import type { Duration } from "@ensnode/ensnode-sdk";
 
 import { validateAddress } from "./address";
 import type { AggregatedReferrerMetrics } from "./aggregations";

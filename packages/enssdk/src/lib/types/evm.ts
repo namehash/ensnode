@@ -22,6 +22,31 @@ export type Address = ViemAddress;
 export type NormalizedAddress = Address;
 
 /**
+ * Unix timestamp value as bigint.
+ *
+ * Represents the number of seconds that have elapsed
+ * since January 1, 1970 (midnight UTC/GMT).
+ *
+ * Guaranteed to be an integer. May be zero or negative to represent a time at or
+ * before Jan 1, 1970.
+ */
+export type UnixTimestampBigInt = bigint;
+
+/**
+ * Duration value as bigint.
+ *
+ * Representing a duration in seconds.
+ *
+ * Guaranteed to be a non-negative integer.
+ */
+export type DurationBigInt = bigint;
+
+/**
+ * A value denominated in wei, the smallest unit of Ether (1 ETH = 10^18 wei).
+ */
+export type Wei = bigint;
+
+/**
  * Chain ID
  *
  * Represents a unique identifier for a chain.
@@ -64,17 +89,6 @@ export const AssetNamespaces = {
 } as const;
 
 export type AssetNamespace = (typeof AssetNamespaces)[keyof typeof AssetNamespaces];
-
-/**
- * Unix timestamp value
- *
- * Represents the number of seconds that have elapsed
- * since January 1, 1970 (midnight UTC/GMT).
- *
- * Guaranteed to be an integer. May be zero or negative to represent a time at or
- * before Jan 1, 1970.
- */
-export type UnixTimestamp = number;
 
 /**
  * A uint256 value that identifies a specific NFT within a NFT contract.

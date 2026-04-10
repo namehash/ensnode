@@ -1,7 +1,6 @@
 import { formatDistanceStrict, fromUnixTime } from "date-fns";
+import type { Duration } from "enssdk";
 import { useEffect, useState } from "react";
-
-import type { Duration } from "@ensnode/ensnode-sdk";
 
 /**
  * Display Duration component

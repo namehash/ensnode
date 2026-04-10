@@ -7,6 +7,8 @@ import {
   makeRegistryId,
   makeStorageId,
   type NormalizedAddress,
+  type TokenId,
+  type UnixTimestampBigInt,
 } from "enssdk";
 import { hexToBigInt } from "viem";
 
@@ -42,12 +44,12 @@ export default function () {
   }: {
     context: IndexingEngineContext;
     event: EventWithArgs<{
-      tokenId: bigint;
+      tokenId: TokenId;
       labelHash: LabelHash;
       label: string;
       // NOTE: marking `owner` as optional to handle both LabelRegistered and LabelReserved events
       owner?: NormalizedAddress;
-      expiry: bigint;
+      expiry: UnixTimestampBigInt;
       sender: NormalizedAddress;
     }>;
   }) {
@@ -155,7 +157,7 @@ export default function () {
     }: {
       context: IndexingEngineContext;
       event: EventWithArgs<{
-        tokenId: bigint;
+        tokenId: TokenId;
         sender: NormalizedAddress;
       }>;
     }) => {
@@ -203,8 +205,8 @@ export default function () {
     }: {
       context: IndexingEngineContext;
       event: EventWithArgs<{
-        tokenId: bigint;
-        newExpiry: bigint;
+        tokenId: TokenId;
+        newExpiry: UnixTimestampBigInt;
         sender: NormalizedAddress;
       }>;
     }) => {
@@ -247,7 +249,7 @@ export default function () {
     }: {
       context: IndexingEngineContext;
       event: EventWithArgs<{
-        tokenId: bigint;
+        tokenId: TokenId;
         subregistry: NormalizedAddress;
       }>;
     }) => {
@@ -303,8 +305,8 @@ export default function () {
     }: {
       context: IndexingEngineContext;
       event: EventWithArgs<{
-        oldTokenId: bigint;
-        newTokenId: bigint;
+        oldTokenId: TokenId;
+        newTokenId: TokenId;
       }>;
     }) => {
       const { oldTokenId, newTokenId } = event.args;
@@ -332,7 +334,7 @@ export default function () {
     event,
   }: {
     context: IndexingEngineContext;
-    event: EventWithArgs<{ id: bigint; to: NormalizedAddress }>;
+    event: EventWithArgs<{ id: TokenId; to: NormalizedAddress }>;
   }) {
     const { id: tokenId, to: owner } = event.args;
 

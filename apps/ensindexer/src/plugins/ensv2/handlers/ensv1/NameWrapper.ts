@@ -9,6 +9,8 @@ import {
   makeSubdomainNode,
   type Node,
   type NormalizedAddress,
+  type TokenId,
+  type UnixTimestampBigInt,
 } from "enssdk";
 import { isAddressEqual, zeroAddress } from "viem";
 
@@ -47,7 +49,8 @@ const pluginName = PluginName.ENSv2;
 /**
  * NameWrapper emits expiry as 0 to mean 'doesn't expire', so we interpret as null.
  */
-const interpretExpiry = (expiry: bigint): bigint | null => (expiry === 0n ? null : expiry);
+const interpretExpiry = (expiry: UnixTimestampBigInt): UnixTimestampBigInt | null =>
+  expiry === 0n ? null : expiry;
 
 // registrar is source of truth for expiry if eth 2LD
 // otherwise namewrapper is registrar and source of truth for expiry
@@ -101,7 +104,7 @@ export default function () {
       operator: NormalizedAddress;
       from: NormalizedAddress;
       to: NormalizedAddress;
-      id: bigint;
+      id: TokenId;
     }>;
   }) {
     const { from, to, id: tokenId } = event.args;
@@ -157,7 +160,7 @@ export default function () {
         name: DNSEncodedName;
         owner: NormalizedAddress;
         fuses: number;
-        expiry: bigint;
+        expiry: UnixTimestampBigInt;
       }>;
     }) => {
       const { node, name: _name, owner, fuses, expiry: _expiry } = event.args;
@@ -349,7 +352,7 @@ export default function () {
       event,
     }: {
       context: IndexingEngineContext;
-      event: EventWithArgs<{ node: Node; expiry: bigint }>;
+      event: EventWithArgs<{ node: Node; expiry: UnixTimestampBigInt }>;
     }) => {
       const { node, expiry: _expiry } = event.args;
       const expiry = interpretExpiry(_expiry);

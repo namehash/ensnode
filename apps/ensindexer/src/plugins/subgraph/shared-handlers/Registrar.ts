@@ -15,6 +15,8 @@ import {
   type NormalizedAddress,
   type SubgraphInterpretedLabel,
   type SubgraphInterpretedName,
+  type UnixTimestampBigInt,
+  type Wei,
 } from "enssdk";
 
 import type { PluginName } from "@ensnode/ensnode-sdk";
@@ -43,7 +45,7 @@ export const makeRegistrarHandlers = ({ pluginName }: { pluginName: PluginName }
     event: EventWithArgs<{
       label: LiteralLabel;
       labelHash: LabelHash;
-      cost: bigint;
+      cost: Wei;
     }>,
   ) {
     const { label, labelHash, cost } = event.args;
@@ -95,7 +97,7 @@ export const makeRegistrarHandlers = ({ pluginName }: { pluginName: PluginName }
       event: EventWithArgs<{
         labelHash: LabelHash;
         owner: NormalizedAddress;
-        expires: bigint;
+        expires: UnixTimestampBigInt;
       }>;
     }) {
       const { labelHash, owner, expires } = event.args;
@@ -225,7 +227,7 @@ export const makeRegistrarHandlers = ({ pluginName }: { pluginName: PluginName }
       event: EventWithArgs<{
         label: Label;
         labelHash: LabelHash;
-        cost: bigint;
+        cost: Wei;
       }>;
     }) {
       const { labelHash, cost } = event.args;
@@ -242,7 +244,7 @@ export const makeRegistrarHandlers = ({ pluginName }: { pluginName: PluginName }
       event: EventWithArgs<{
         label: Label;
         labelHash: LabelHash;
-        cost: bigint;
+        cost: Wei;
       }>;
     }) {
       const { labelHash, cost } = event.args;
@@ -256,7 +258,7 @@ export const makeRegistrarHandlers = ({ pluginName }: { pluginName: PluginName }
       event,
     }: {
       context: IndexingEngineContext;
-      event: EventWithArgs<{ labelHash: LabelHash; expires: bigint }>;
+      event: EventWithArgs<{ labelHash: LabelHash; expires: UnixTimestampBigInt }>;
     }) {
       const { labelHash, expires } = event.args;
 

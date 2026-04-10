@@ -1,9 +1,8 @@
 import { secondsToMilliseconds } from "date-fns";
 import { getUnixTime } from "date-fns/getUnixTime";
-import type { UnixTimestamp } from "enssdk";
+import type { Duration, UnixTimestamp } from "enssdk";
 
 import { durationBetween } from "../datetime";
-import type { Duration } from "../types";
 
 /**
  * Data structure for a single cached result.

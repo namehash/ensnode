@@ -29,6 +29,8 @@ import {
   type NormalizedAddress,
   type SubgraphInterpretedLabel,
   type SubgraphInterpretedName,
+  type TokenId,
+  type UnixTimestampBigInt,
 } from "enssdk";
 
 import { subgraph_decodeDNSEncodedLiteralName } from "@/lib/dns-helpers";
@@ -177,7 +179,7 @@ export const makeNameWrapperHandlers = () => {
         node: Node;
         owner: NormalizedAddress;
         fuses: number;
-        expiry: bigint;
+        expiry: UnixTimestampBigInt;
         name: DNSEncodedName;
       }>;
     }) {
@@ -304,7 +306,7 @@ export const makeNameWrapperHandlers = () => {
       event,
     }: {
       context: IndexingEngineContext;
-      event: EventWithArgs<{ node: Node; expiry: bigint }>;
+      event: EventWithArgs<{ node: Node; expiry: UnixTimestampBigInt }>;
     }) {
       const { node, expiry } = event.args;
 
@@ -335,7 +337,7 @@ export const makeNameWrapperHandlers = () => {
       event,
     }: {
       context: IndexingEngineContext;
-      event: EventWithArgs<{ id: bigint; to: NormalizedAddress }>;
+      event: EventWithArgs<{ id: TokenId; to: NormalizedAddress }>;
     }) {
       const { id: tokenId, to } = event.args;
 
@@ -357,7 +359,7 @@ export const makeNameWrapperHandlers = () => {
       event,
     }: {
       context: IndexingEngineContext;
-      event: EventWithArgs<{ ids: readonly bigint[]; to: NormalizedAddress }>;
+      event: EventWithArgs<{ ids: readonly TokenId[]; to: NormalizedAddress }>;
     }) {
       const { ids: tokenIds, to } = event.args;
 

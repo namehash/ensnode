@@ -1,9 +1,12 @@
 import {
   type AccountId,
+  type DurationBigInt,
   makeENSv2DomainId,
   makeStorageId,
   type NormalizedAddress,
   type TokenId,
+  type UnixTimestampBigInt,
+  type Wei,
 } from "enssdk";
 
 import {
@@ -57,11 +60,11 @@ export default function () {
         owner: NormalizedAddress;
         subregistry: NormalizedAddress;
         resolver: NormalizedAddress;
-        duration: bigint;
+        duration: DurationBigInt;
         referrer: EncodedReferrer;
         paymentToken: NormalizedAddress;
-        base: bigint;
-        premium: bigint;
+        base: Wei;
+        premium: Wei;
       }>;
     }) => {
       // biome-ignore lint/correctness/noUnusedVariables: TODO(paymentToken)
@@ -133,11 +136,11 @@ export default function () {
       event: EventWithArgs<{
         tokenId: TokenId;
         label: string;
-        duration: bigint;
-        newExpiry: bigint;
+        duration: DurationBigInt;
+        newExpiry: UnixTimestampBigInt;
         referrer: EncodedReferrer;
         paymentToken: NormalizedAddress;
-        base: bigint;
+        base: Wei;
       }>;
     }) => {
       // biome-ignore lint/correctness/noUnusedVariables: TODO(paymentToken)

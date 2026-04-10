@@ -1,7 +1,5 @@
-import type { UnixTimestamp } from "enssdk";
+import type { Duration, UnixTimestamp } from "enssdk";
 import { useEffect, useState } from "react";
-
-import type { Duration } from "@ensnode/ensnode-sdk";
 
 import { useSystemClock } from "./useSystemClock";
 

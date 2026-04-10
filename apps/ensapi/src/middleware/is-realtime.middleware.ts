@@ -1,4 +1,4 @@
-import type { Duration } from "@ensnode/ensnode-sdk";
+import type { Duration } from "enssdk";
 
 import { factory, producing } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";

@@ -6,6 +6,7 @@ import type {
   Address,
   ChainId,
   DefaultableChainId,
+  Duration,
   Hex,
   InterpretedName,
   Node,
@@ -30,7 +31,7 @@ import {
   type PriceEth,
   type PriceUsdc,
 } from "./currencies";
-import type { BlockRef, Datetime, Duration } from "./types";
+import type { BlockRef, Datetime } from "./types";
 
 /**
  * Parses a string value as a boolean.

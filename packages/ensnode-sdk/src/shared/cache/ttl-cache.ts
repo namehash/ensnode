@@ -1,8 +1,7 @@
 import { getUnixTime } from "date-fns/getUnixTime";
-import type { UnixTimestamp } from "enssdk";
+import type { Duration, UnixTimestamp } from "enssdk";
 
 import { addDuration } from "../datetime";
-import type { Duration } from "../types";
 import type { Cache } from "./cache";
 
 interface CacheEntry<ValueType> {

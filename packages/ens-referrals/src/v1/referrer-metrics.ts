@@ -1,7 +1,7 @@
-import type { Address } from "enssdk";
+import type { Address, Duration } from "enssdk";
 import { toNormalizedAddress } from "enssdk";
 
-import type { Duration, PriceEth } from "@ensnode/ensnode-sdk";
+import type { PriceEth } from "@ensnode/ensnode-sdk";
 import { makePriceEthSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { validateAddress } from "./address";

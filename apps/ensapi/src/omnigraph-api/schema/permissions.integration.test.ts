@@ -135,7 +135,10 @@ describe("Registry.permissions", () => {
   it("resolves permissions from a registry", async () => {
     const result = await request<{
       registry: {
-        permissions: { id: PermissionsId; contract: { chainId: ChainId; address: NormalizedAddress } };
+        permissions: {
+          id: PermissionsId;
+          contract: { chainId: ChainId; address: NormalizedAddress };
+        };
       };
     }>(RegistryPermissions, { contract: V2_ETH_REGISTRY });
 
@@ -313,7 +316,10 @@ describe("Resolver.permissions", () => {
     const result = await request<{
       domain: {
         resolver: {
-          permissions: { id: PermissionsId; contract: { chainId: ChainId; address: NormalizedAddress } };
+          permissions: {
+            id: PermissionsId;
+            contract: { chainId: ChainId; address: NormalizedAddress };
+          };
         };
       };
     }>(ResolverPermissions, { name: NAME_WITH_RESOLVER });

@@ -1,8 +1,8 @@
-import type { AccountId, ChainId, ChainIdString, UrlString } from "enssdk";
+import type { AccountId, ChainId, ChainIdString, Duration, UrlString } from "enssdk";
 import z, { prettifyError } from "zod/v4";
 
 import type { PriceDai, PriceEth, PriceUsdc } from "./currencies";
-import type { BlockNumber, BlockRef, Datetime, Duration } from "./types";
+import type { BlockNumber, BlockRef, Datetime } from "./types";
 import {
   makeAccountIdStringSchema,
   makeBlockNumberSchema,

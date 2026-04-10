@@ -34,15 +34,6 @@ export interface BlockRef {
 }
 
 /**
- * Duration
- *
- * Representing a duration in seconds.
- *
- * Guaranteed to be a non-negative integer.
- */
-export type Duration = number;
-
-/**
  * A utility type that makes all properties of a type optional recursively,
  * including nested objects and arrays.
  *

@@ -1,11 +1,11 @@
 import { getUnixTime, secondsToMilliseconds } from "date-fns";
+import type { Duration } from "enssdk";
 import pRetry from "p-retry";
 
 import type { EnsDbWriter } from "@ensnode/ensdb-sdk";
 import {
   buildCrossChainIndexingStatusSnapshotOmnichain,
   type CrossChainIndexingStatusSnapshot,
-  type Duration,
   type EnsIndexerPublicConfig,
   OmnichainIndexingStatusIds,
   type OmnichainIndexingStatusSnapshot,
