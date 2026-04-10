@@ -56,7 +56,7 @@ export type RegistrarActionsResponseOk = {
    * The {@link UnixTimestamp} of when the data used to build the list of {@link NamedRegistrarAction} was accurate as of.
    *
    * @remarks
-   * **Note:** This value represents the `slowestChainIndexingCursor` from the latest omnichain indexing status
+   * **Note:** This value represents the `omnichainIndexingCursor` from the latest omnichain indexing status
    * snapshot captured by ENSApi. The state returned in the response is guaranteed to be accurate as of this
    * timestamp but may be from a timestamp higher than this value.
    */
