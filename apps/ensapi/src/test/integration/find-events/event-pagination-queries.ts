@@ -1,3 +1,5 @@
+import type { ChainId, Hex, NormalizedAddress } from "enssdk";
+
 import { gql } from "@/test/integration/omnigraph-api-client";
 
 const PageInfoFragment = gql`
@@ -29,18 +31,18 @@ export const EventFragment = gql`
 
 export type EventResult = {
   id: string;
-  chainId: number;
+  chainId: ChainId;
   blockNumber: string;
-  blockHash: string;
+  blockHash: Hex;
   timestamp: string;
-  transactionHash: string;
+  transactionHash: Hex;
   transactionIndex: number;
-  from: string;
-  to: string | null;
-  address: string;
+  from: NormalizedAddress;
+  to: NormalizedAddress | null;
+  address: NormalizedAddress;
   logIndex: number;
-  topics: string[];
-  data: string;
+  topics: Hex[];
+  data: Hex;
 };
 
 export const DomainEventsPaginated = gql`

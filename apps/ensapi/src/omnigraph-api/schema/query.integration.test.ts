@@ -1,5 +1,4 @@
 import {
-  type Address,
   asInterpretedLabel,
   asInterpretedName,
   type DomainId,
@@ -10,6 +9,7 @@ import {
   makeStorageId,
   type Name,
   namehashInterpretedName,
+  type NormalizedAddress,
 } from "enssdk";
 import { describe, expect, it } from "vitest";
 
@@ -59,7 +59,7 @@ describe("Query.domains", () => {
       id: DomainId;
       name: Name;
       label: { interpreted: InterpretedLabel };
-      owner: { address: Address };
+      owner: { address: NormalizedAddress };
     }>;
   };
 

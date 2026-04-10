@@ -1,4 +1,11 @@
-import type { NormalizedAddress } from "enssdk";
+import type {
+  ChainId,
+  NormalizedAddress,
+  PermissionsId,
+  PermissionsResourceId,
+  PermissionsUserId,
+  RegistryId,
+} from "enssdk";
 import { toEventSelector } from "viem";
 import { beforeAll, describe, expect, it } from "vitest";
 
@@ -36,23 +43,23 @@ const EAC_ROLES_CHANGED_SELECTOR = toEventSelector(
 describe("Permissions", () => {
   type PermissionsResult = {
     permissions: {
-      id: string;
-      contract: { chainId: number; address: NormalizedAddress };
+      id: PermissionsId;
+      contract: { chainId: ChainId; address: NormalizedAddress };
       root: {
-        id: string;
+        id: PermissionsResourceId;
         resource: string;
         users: GraphQLConnection<{
-          id: string;
+          id: PermissionsUserId;
           resource: string;
           user: { address: NormalizedAddress };
           roles: string;
         }>;
       };
       resources: GraphQLConnection<{
-        id: string;
+        id: PermissionsResourceId;
         resource: string;
         users: GraphQLConnection<{
-          id: string;
+          id: PermissionsUserId;
           resource: string;
           user: { address: NormalizedAddress };
           roles: string;
@@ -128,7 +135,7 @@ describe("Registry.permissions", () => {
   it("resolves permissions from a registry", async () => {
     const result = await request<{
       registry: {
-        permissions: { id: string; contract: { chainId: number; address: NormalizedAddress } };
+        permissions: { id: PermissionsId; contract: { chainId: ChainId; address: NormalizedAddress } };
       };
     }>(RegistryPermissions, { contract: V2_ETH_REGISTRY });
 
@@ -141,7 +148,7 @@ describe("Domain.permissions", () => {
   type DomainPermissionsResult = {
     domain: {
       permissions: GraphQLConnection<{
-        id: string;
+        id: PermissionsUserId;
         resource: string;
         user: { address: NormalizedAddress };
         roles: string;
@@ -160,7 +167,7 @@ describe("Domain.permissions", () => {
   `;
 
   let allUsers: {
-    id: string;
+    id: PermissionsUserId;
     resource: string;
     user: { address: NormalizedAddress };
     roles: string;
@@ -254,7 +261,7 @@ describe("Account.permissions and Account.registryPermissions", () => {
     const result = await request<{
       account: {
         permissions: GraphQLConnection<{
-          id: string;
+          id: PermissionsUserId;
           resource: string;
           user: { address: NormalizedAddress };
           roles: string;
@@ -274,8 +281,8 @@ describe("Account.permissions and Account.registryPermissions", () => {
     const result = await request<{
       account: {
         registryPermissions: GraphQLConnection<{
-          id: string;
-          registry: { id: string };
+          id: PermissionsUserId;
+          registry: { id: RegistryId };
           resource: string;
           user: { address: NormalizedAddress };
           roles: string;
@@ -306,7 +313,7 @@ describe("Resolver.permissions", () => {
     const result = await request<{
       domain: {
         resolver: {
-          permissions: { id: string; contract: { chainId: number; address: NormalizedAddress } };
+          permissions: { id: PermissionsId; contract: { chainId: ChainId; address: NormalizedAddress } };
         };
       };
     }>(ResolverPermissions, { name: NAME_WITH_RESOLVER });
