@@ -80,9 +80,9 @@ export default function () {
   addOnchainEventListener(
     namespaceContract(pluginName, "ENSv1RegistryOld:Transfer"),
     async ({ context, event }) => {
-      // NOTE: this logic derived from the subgraph introduces a bug for queries with a blockheight
+      // NOTE: this logic derived from the subgraph introduces a minor bug for queries with a blockheight
       // below 9380380, when the new Registry was deployed, as it implicitly ignores Transfer events
-      // of the ROOT_NODE. as a result, the root node's owner is always zeroAddress until the new
+      // of the ENS_ROOT_NODE. as a result, the root node's owner is always zeroAddress until the new
       // Registry events are picked up. for backwards compatibility this beahvior is re-implemented
       // here.
 
