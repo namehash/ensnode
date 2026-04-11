@@ -1,5 +1,33 @@
 # ensapi
 
+## 1.10.0
+
+### Minor Changes
+
+- [#1857](https://github.com/namehash/ensnode/pull/1857) [`abc535f`](https://github.com/namehash/ensnode/commit/abc535f9bec8c5c7fb2443aa6ad4bbbc14fbcc7d) Thanks [@shrugs](https://github.com/shrugs)! - Omnigraph API (BREAKING): Removed `ENSv2Domain.canonicalId`.
+
+- [#1857](https://github.com/namehash/ensnode/pull/1857) [`abc535f`](https://github.com/namehash/ensnode/commit/abc535f9bec8c5c7fb2443aa6ad4bbbc14fbcc7d) Thanks [@shrugs](https://github.com/shrugs)! - Omnigraph API (BREAKING): API route path changed from `/api/graphql` to `/api/omnigraph`.
+
+- [#1907](https://github.com/namehash/ensnode/pull/1907) [`b2481d6`](https://github.com/namehash/ensnode/commit/b2481d6dae6f704493140aa63cd4ad1bfd3e3301) Thanks [@Goader](https://github.com/Goader)! - Made `accurateAsOf` a required field in the Registrar Actions API response (`RegistrarActionsResponseOk`).
+
+- [#1828](https://github.com/namehash/ensnode/pull/1828) [`4c99177`](https://github.com/namehash/ensnode/commit/4c991777ac13ffd2cc1fb947e5a47bd7733b112b) Thanks [@tk-o](https://github.com/tk-o)! - Renamed environment variable: `DATABASE_URL` to `ENSDB_URL`.
+
+- [#1845](https://github.com/namehash/ensnode/pull/1845) [`a983e4d`](https://github.com/namehash/ensnode/commit/a983e4d0279942553826bec957d71cae1543398f) Thanks [@shrugs](https://github.com/shrugs)! - Omnigraph API (BREAKING): Removed `Resolver.dedicated` field in advance of PermissionedResolver integration.
+
+- [#1867](https://github.com/namehash/ensnode/pull/1867) [`536149c`](https://github.com/namehash/ensnode/commit/536149c1c214eb01648e13354a57d6caea791499) Thanks [@shrugs](https://github.com/shrugs)! - Change `Query.permissions` to accept `by: { id, contract }` and `Query.account` to accept `by: { id, address }`, matching the `by` input pattern of `Query.registry` and `Query.resolver`.
+
+### Patch Changes
+
+- [#1854](https://github.com/namehash/ensnode/pull/1854) [`90eeaea`](https://github.com/namehash/ensnode/commit/90eeaea559b073f031197026336636cc43d48550) Thanks [@tk-o](https://github.com/tk-o)! - Updated `ensIndexerSchema` value that is passed into `subgraphGraphQLMiddleware` function.
+
+- Updated dependencies [[`b781245`](https://github.com/namehash/ensnode/commit/b781245036e67479ded836df3916ab9675a38285), [`29afaa6`](https://github.com/namehash/ensnode/commit/29afaa6ad8a3f3c8133241cf1a9324980498ded4), [`7fca45d`](https://github.com/namehash/ensnode/commit/7fca45d09dc6e3456fec2cae0827e9d2c54827a6), [`29fcfc7`](https://github.com/namehash/ensnode/commit/29fcfc7a1ab01c3214b5c16fc0e4a349010e9360), [`c336c79`](https://github.com/namehash/ensnode/commit/c336c79b08e46ce53caa536ebf6158eba9f3e017), [`5c2dc68`](https://github.com/namehash/ensnode/commit/5c2dc687a6b6e6dd31c1f1aeab08e89d3a9a5e36), [`4c99177`](https://github.com/namehash/ensnode/commit/4c991777ac13ffd2cc1fb947e5a47bd7733b112b), [`4c51c75`](https://github.com/namehash/ensnode/commit/4c51c75ec8b3807d0aa988618893b2da07e11a83), [`b2481d6`](https://github.com/namehash/ensnode/commit/b2481d6dae6f704493140aa63cd4ad1bfd3e3301), [`ed6ee96`](https://github.com/namehash/ensnode/commit/ed6ee9641bfa6f42ddc95955cf8b013c93bf2f4a), [`677db8b`](https://github.com/namehash/ensnode/commit/677db8b67effc6d530716c0a1902244dba56d787)]:
+  - @namehash/ens-referrals@1.10.0
+  - @ensnode/ensnode-sdk@1.10.0
+  - enssdk@1.10.0
+  - @ensnode/ensdb-sdk@1.10.0
+  - @ensnode/datasources@1.10.0
+  - @ensnode/ponder-subgraph@1.10.0
+
 ## 1.9.0
 
 ### Minor Changes
