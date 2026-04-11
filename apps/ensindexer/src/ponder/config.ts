@@ -31,9 +31,13 @@ const ponderConfig = activePlugins.reduce(
  *
  * @see https://ponder.sh/docs/api-reference/ponder/database#build-id-and-crash-recovery
  */
-ponderConfig.contracts = Object.assign({}, ponderConfig.contracts, {
+ponderConfig.contracts = {
+  ...ponderConfig.contracts,
+  // @ts-expect-error - `ponderConfig.contracts` is a constant type, so the type system
+  // doesn't allow us to add new properties to it, but we have to inject the
+  // IndexingBehaviorInjectionContract here.
   IndexingBehaviorInjectionContract,
-});
+};
 
 ////////
 // Set indexing order strategy

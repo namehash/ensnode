@@ -179,6 +179,12 @@ export function buildEnsDbDrizzleClient<ConcreteEnsIndexerSchema extends Abstrac
  * any Drizzle schema definition without running into errors due to inability
  * of {@link JSON.stringify} to handle circular references by default.
  *
+ * Note: {@link JSON.stringify} omits function-valued properties, so
+ * column-level attributes such as `.$defaultFn()` or `.$onUpdateFn()` will not
+ * be included in the stringified output and will not affect the checksum.
+ * Schema changes that only modify such function-valued properties may go
+ * undetected.
+ *
  * @param schema - A Drizzle schema definition to stringify.
  * @returns A JSON string representation of the schema, with circular
  *          references replaced by "[circular]".

@@ -98,10 +98,15 @@ function buildContractConfigPlaceholder(): ContractConfig {
  * Indexing Behavior Dependencies
  */
 const indexingBehaviorDependencies = {
-  // while technically not necessary, since these configuration properties are reflected in the
+  // while technically not necessary, since these config properties are reflected in the
   // generated ponderConfig, we include them here for clarity
   namespace: config.namespace,
-  plugins: config.plugins,
+  // Sort plugins to ensure canonical checksum regardless of config order.
+  // The actual indexing behavior does not depend on plugin order since:
+  // 1. All plugin checks use Array.includes() which is order-independent
+  // 2. Plugin execution order is determined by `ALL_PLUGINS`, not config.plugins
+  // Sorting ensures consistent Build IDs for semantically identical config.
+  plugins: [...config.plugins].sort(),
   globalBlockrange: config.globalBlockrange,
   // these config properties don't explicitly affect the generated ponderConfig and need to be
   // injected here to ensure that, if they are configured differently, ponder generates a unique
