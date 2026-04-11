@@ -1,5 +1,19 @@
 # @namehash/ens-referrals
 
+## 1.10.0
+
+### Minor Changes
+
+- [#1874](https://github.com/namehash/ensnode/pull/1874) [`b781245`](https://github.com/namehash/ensnode/commit/b781245036e67479ded836df3916ab9675a38285) Thanks [@Goader](https://github.com/Goader)! - Rename rev-share-limit API fields for clarity: `minQualifiedRevenueContribution` → `minBaseRevenueContribution`, `qualifiedRevenueShare` → `maxBaseRevenueShare`, `standardAwardValue` → `uncappedAward`, `awardPoolApproxValue` → `cappedAward`. Rename `totalAwardPoolValue` → `awardPool` for both rev-share-limit and pie-split rules. Extract the previously hardcoded `BASE_REVENUE_CONTRIBUTION_PER_YEAR` constant into a per-edition `baseAnnualRevenueContribution` rule field.
+
+- [#1849](https://github.com/namehash/ensnode/pull/1849) [`5c2dc68`](https://github.com/namehash/ensnode/commit/5c2dc687a6b6e6dd31c1f1aeab08e89d3a9a5e36) Thanks [@Y3drk](https://github.com/Y3drk)! - Added a README section showcasing a working example of defining referral program edition configs via JSON files.
+
+### Patch Changes
+
+- Updated dependencies [[`29afaa6`](https://github.com/namehash/ensnode/commit/29afaa6ad8a3f3c8133241cf1a9324980498ded4), [`7fca45d`](https://github.com/namehash/ensnode/commit/7fca45d09dc6e3456fec2cae0827e9d2c54827a6), [`29fcfc7`](https://github.com/namehash/ensnode/commit/29fcfc7a1ab01c3214b5c16fc0e4a349010e9360), [`4c99177`](https://github.com/namehash/ensnode/commit/4c991777ac13ffd2cc1fb947e5a47bd7733b112b), [`b2481d6`](https://github.com/namehash/ensnode/commit/b2481d6dae6f704493140aa63cd4ad1bfd3e3301), [`ed6ee96`](https://github.com/namehash/ensnode/commit/ed6ee9641bfa6f42ddc95955cf8b013c93bf2f4a), [`677db8b`](https://github.com/namehash/ensnode/commit/677db8b67effc6d530716c0a1902244dba56d787)]:
+  - @ensnode/ensnode-sdk@1.10.0
+  - enssdk@1.10.0
+
 ## 1.9.0
 
 ### Minor Changes
