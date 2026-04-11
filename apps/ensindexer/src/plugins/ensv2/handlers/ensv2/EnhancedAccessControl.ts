@@ -1,10 +1,10 @@
 import {
-  type Address,
   type EACResource,
   type EACRoleBitmap,
   makePermissionsId,
   makePermissionsResourceId,
   makePermissionsUserId,
+  type NormalizedAddress,
 } from "enssdk";
 import { isAddressEqual, zeroAddress } from "viem";
 
@@ -62,7 +62,7 @@ export default function () {
       context: IndexingEngineContext;
       event: EventWithArgs<{
         resource: EACResource;
-        account: Address;
+        account: NormalizedAddress;
         oldRoleBitmap: EACRoleBitmap;
         newRoleBitmap: EACRoleBitmap;
       }>;

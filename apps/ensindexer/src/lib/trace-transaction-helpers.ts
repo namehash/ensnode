@@ -1,4 +1,4 @@
-import { type Address, asLowerCaseAddress, type Hex } from "enssdk";
+import { type Address, type Hex, toNormalizedAddress } from "enssdk";
 import { type Hash, isAddress } from "viem";
 
 /**
@@ -86,7 +86,7 @@ export function getAddressesFromTrace(trace: Trace): Set<Address> {
       for (const maybeAddress of matches) {
         if (isAddress(maybeAddress)) {
           // Normalize the address
-          const normalizedAddr = asLowerCaseAddress(maybeAddress);
+          const normalizedAddr = toNormalizedAddress(maybeAddress);
           // Add the normalized address to the set
           uniqueAddresses.add(normalizedAddr);
         } else {
@@ -118,7 +118,7 @@ export function getAddressesFromTrace(trace: Trace): Set<Address> {
 
       if (isAddress(maybeAddress)) {
         // Add 0x prefix and normalize the address
-        const normalizedAddr = asLowerCaseAddress(maybeAddress);
+        const normalizedAddr = toNormalizedAddress(maybeAddress);
         // Add the normalized address to the set
         uniqueAddresses.add(normalizedAddr);
       } else {

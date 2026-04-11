@@ -1,17 +1,17 @@
+import { toNormalizedAddress } from "enssdk";
 import z from "zod/v4";
 
 import {
   makeDurationSchema,
   makeFiniteNonNegativeNumberSchema,
-  makeLowercaseAddressSchema,
   makeNonNegativeIntegerSchema,
+  makeNormalizedAddressSchema,
   makePositiveIntegerSchema,
   makePriceEthSchema,
   makePriceUsdcSchema,
   makeUnixTimestampSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
-import { normalizeAddress } from "../../../address";
 import {
   makeBaseReferralProgramEditionSummarySchema,
   makeBaseReferralProgramRulesSchema,
@@ -28,7 +28,7 @@ export const makeReferralProgramEditionDisqualificationSchema = (
   valueLabel = "ReferralProgramEditionDisqualification",
 ) =>
   z.object({
-    referrer: makeLowercaseAddressSchema(`${valueLabel}.referrer`),
+    referrer: makeNormalizedAddressSchema(`${valueLabel}.referrer`),
     reason: z.string().trim().min(1, `${valueLabel}.reason must not be empty`),
   });
 
@@ -55,7 +55,7 @@ export const makeReferralProgramRulesRevShareLimitSchema = (
       )
       .refine(
         (items) => {
-          const addresses = items.map((item) => normalizeAddress(item.referrer));
+          const addresses = items.map((item) => toNormalizedAddress(item.referrer));
           return new Set(addresses).size === addresses.length;
         },
         {
@@ -73,7 +73,7 @@ export const makeAwardedReferrerMetricsRevShareLimitSchema = (
 ) =>
   z
     .object({
-      referrer: makeLowercaseAddressSchema(`${valueLabel}.referrer`),
+      referrer: makeNormalizedAddressSchema(`${valueLabel}.referrer`),
       totalReferrals: makeNonNegativeIntegerSchema(`${valueLabel}.totalReferrals`),
       totalIncrementalDuration: makeDurationSchema(`${valueLabel}.totalIncrementalDuration`),
       totalRevenueContribution: makePriceEthSchema(`${valueLabel}.totalRevenueContribution`),
@@ -120,7 +120,7 @@ export const makeUnrankedReferrerMetricsRevShareLimitSchema = (
 ) =>
   z
     .object({
-      referrer: makeLowercaseAddressSchema(`${valueLabel}.referrer`),
+      referrer: makeNormalizedAddressSchema(`${valueLabel}.referrer`),
       totalReferrals: makeNonNegativeIntegerSchema(`${valueLabel}.totalReferrals`),
       totalIncrementalDuration: makeDurationSchema(`${valueLabel}.totalIncrementalDuration`),
       totalRevenueContribution: makePriceEthSchema(`${valueLabel}.totalRevenueContribution`),

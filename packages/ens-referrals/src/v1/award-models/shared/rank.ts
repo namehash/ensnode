@@ -1,6 +1,4 @@
-import type { Address } from "enssdk";
-
-import type { Duration } from "@ensnode/ensnode-sdk";
+import type { Address, Duration } from "enssdk";
 
 import { isPositiveInteger } from "../../number";
 import type { ReferrerMetrics } from "../../referrer-metrics";

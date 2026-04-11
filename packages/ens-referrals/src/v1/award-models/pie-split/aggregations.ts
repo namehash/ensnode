@@ -1,4 +1,6 @@
-import { type Duration, type PriceEth, priceEth } from "@ensnode/ensnode-sdk";
+import type { Duration } from "enssdk";
+
+import { type PriceEth, priceEth } from "@ensnode/ensnode-sdk";
 import { makePriceEthSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { validateNonNegativeInteger } from "../../number";

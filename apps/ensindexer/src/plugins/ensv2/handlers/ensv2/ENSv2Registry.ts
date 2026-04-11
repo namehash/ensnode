@@ -1,12 +1,14 @@
 import {
   type AccountId,
-  type Address,
   asLiteralLabel,
   type LabelHash,
   labelhashLiteralLabel,
   makeENSv2DomainId,
   makeRegistryId,
   makeStorageId,
+  type NormalizedAddress,
+  type TokenId,
+  type UnixTimestampBigInt,
 } from "enssdk";
 import { hexToBigInt } from "viem";
 
@@ -42,13 +44,13 @@ export default function () {
   }: {
     context: IndexingEngineContext;
     event: EventWithArgs<{
-      tokenId: bigint;
+      tokenId: TokenId;
       labelHash: LabelHash;
       label: string;
       // NOTE: marking `owner` as optional to handle both LabelRegistered and LabelReserved events
-      owner?: Address;
-      expiry: bigint;
-      sender: Address;
+      owner?: NormalizedAddress;
+      expiry: UnixTimestampBigInt;
+      sender: NormalizedAddress;
     }>;
   }) {
     const { tokenId, labelHash, owner, expiry, sender: registrant } = event.args;
@@ -155,8 +157,8 @@ export default function () {
     }: {
       context: IndexingEngineContext;
       event: EventWithArgs<{
-        tokenId: bigint;
-        sender: Address;
+        tokenId: TokenId;
+        sender: NormalizedAddress;
       }>;
     }) => {
       const { tokenId, sender: unregistrant } = event.args;
@@ -203,9 +205,9 @@ export default function () {
     }: {
       context: IndexingEngineContext;
       event: EventWithArgs<{
-        tokenId: bigint;
-        newExpiry: bigint;
-        sender: Address;
+        tokenId: TokenId;
+        newExpiry: UnixTimestampBigInt;
+        sender: NormalizedAddress;
       }>;
     }) => {
       // biome-ignore lint/correctness/noUnusedVariables: not sure if we care to index sender
@@ -247,8 +249,8 @@ export default function () {
     }: {
       context: IndexingEngineContext;
       event: EventWithArgs<{
-        tokenId: bigint;
-        subregistry: Address;
+        tokenId: TokenId;
+        subregistry: NormalizedAddress;
       }>;
     }) => {
       const { tokenId, subregistry: _subregistry } = event.args;
@@ -303,8 +305,8 @@ export default function () {
     }: {
       context: IndexingEngineContext;
       event: EventWithArgs<{
-        oldTokenId: bigint;
-        newTokenId: bigint;
+        oldTokenId: TokenId;
+        newTokenId: TokenId;
       }>;
     }) => {
       const { oldTokenId, newTokenId } = event.args;
@@ -332,7 +334,7 @@ export default function () {
     event,
   }: {
     context: IndexingEngineContext;
-    event: EventWithArgs<{ id: bigint; to: Address }>;
+    event: EventWithArgs<{ id: TokenId; to: NormalizedAddress }>;
   }) {
     const { id: tokenId, to: owner } = event.args;
 

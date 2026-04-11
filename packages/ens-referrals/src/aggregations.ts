@@ -1,4 +1,4 @@
-import type { Duration } from "@ensnode/ensnode-sdk";
+import type { Duration } from "enssdk";
 
 import { validateNonNegativeInteger } from "./number";
 import type { RankedReferrerMetrics } from "./referrer-metrics";

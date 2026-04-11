@@ -1,9 +1,10 @@
 import type { AccountId, Address, UnixTimestamp } from "enssdk";
+import { toNormalizedAddress } from "enssdk";
 
 import type { PriceUsdc } from "@ensnode/ensnode-sdk";
 import { makePriceUsdcSchema } from "@ensnode/ensnode-sdk/internal";
 
-import { normalizeAddress, validateLowercaseAddress } from "../../address";
+import { validateAddress } from "../../address";
 import {
   type BaseReferralProgramRules,
   ReferralProgramAwardModels,
@@ -98,7 +99,7 @@ export const validateReferralProgramRulesRevShareLimit = (
   }
 
   for (const d of rules.disqualifications) {
-    validateLowercaseAddress(d.referrer);
+    validateAddress(d.referrer);
     if (d.reason.trim().length === 0) {
       throw new Error(
         "ReferralProgramRulesRevShareLimit: disqualification reason must not be empty.",
@@ -162,7 +163,7 @@ export function isReferrerQualifiedRevShareLimit(
   totalBaseRevenueContribution: PriceUsdc,
   rules: ReferralProgramRulesRevShareLimit,
 ): boolean {
-  const normalizedReferrer = normalizeAddress(referrer);
+  const normalizedReferrer = toNormalizedAddress(referrer);
   const isAdminDisqualified = rules.disqualifications.some(
     (d) => d.referrer === normalizedReferrer,
   );

@@ -8,7 +8,7 @@ import {
   makeReferrerMetricsEditionsArraySchema,
 } from "@namehash/ens-referrals/v1/internal";
 
-import { makeLowercaseAddressSchema } from "@ensnode/ensnode-sdk/internal";
+import { makeNormalizedAddressSchema } from "@ensnode/ensnode-sdk/internal";
 
 export const basePath = "/v1/ensanalytics";
 
@@ -39,7 +39,7 @@ const referrerLeaderboardPageQuerySchema = z.object({
 
 // Referrer address parameter schema
 const referrerAddressSchema = z.object({
-  referrer: makeLowercaseAddressSchema("Referrer address").describe("Referrer Ethereum address"),
+  referrer: makeNormalizedAddressSchema("Referrer address").describe("Referrer Ethereum address"),
 });
 
 // Editions query parameter schema

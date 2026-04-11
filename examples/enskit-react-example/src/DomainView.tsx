@@ -1,6 +1,12 @@
-import { type FragmentOf, graphql, readFragment, useOmnigraphQuery } from "enskit/react/omnigraph";
-import { asInterpretedName } from "enssdk";
-import { Link, useParams } from "react-router";
+import {
+  EnsureInterpretedName,
+  type FragmentOf,
+  graphql,
+  readFragment,
+  useOmnigraphQuery,
+} from "enskit/react/omnigraph";
+import { getParentInterpretedName, type InterpretedName } from "enssdk";
+import { Link, Navigate, useParams } from "react-router";
 
 const DomainFragment = graphql(`
   fragment DomainFragment on Domain {
@@ -39,10 +45,7 @@ function SubdomainLink({ data }: { data: FragmentOf<typeof DomainFragment> }) {
   );
 }
 
-export function DomainView() {
-  const params = useParams();
-  const name = asInterpretedName(params.name ?? "eth");
-
+function RenderDomain({ name }: { name: InterpretedName }) {
   const [result] = useOmnigraphQuery({
     query: DomainByNameQuery,
     variables: { name },
@@ -52,14 +55,14 @@ export function DomainView() {
 
   if (fetching) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
-  if (!data?.domain) return <p>Not found</p>;
+  if (!data?.domain) return <p>A Domain with InterpretedName '{name}' was not found.</p>;
 
   const domain = readFragment(DomainFragment, data.domain);
-  const parentName = name.includes(".") ? name.slice(name.indexOf(".") + 1) : null;
+  const parentName = getParentInterpretedName(name);
 
   return (
     <div>
-      <h2>{domain.name}</h2>
+      <h2>{domain.name ?? name}</h2>
       <p>Owner: {domain.owner?.address ?? "none"}</p>
 
       {parentName && (
@@ -76,5 +79,31 @@ export function DomainView() {
         })}
       </ul>
     </div>
+  );
+}
+
+export function DomainView() {
+  const params = useParams();
+
+  // if a user accesses '/domain' directly, redirect to '/domain/eth'
+  // TODO: render the set of tlds
+  if (params.name === undefined || params.name === "") return <Navigate to="/domain/eth" replace />;
+
+  // here we ensure that the provided /domain/:name parameter is an InterpretedName
+  return (
+    <EnsureInterpretedName
+      name={params.name}
+      // this isn't an InterpretedName, but it can conform to InterpretedName: redirect the user
+      interpreted={(name) => <Navigate to={`/domain/${name}`} replace />}
+      // this name can't conform to InterpretedName: it is malformed or contains unnormalizable Labels
+      malformed={(name) => (
+        <div>
+          <h2>{name} is malformed</h2>
+          <Link to="/domain/eth">Back to 'eth' Domain.</Link>
+        </div>
+      )}
+    >
+      {(name) => <RenderDomain name={name} />}
+    </EnsureInterpretedName>
   );
 }

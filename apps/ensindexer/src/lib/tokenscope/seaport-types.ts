@@ -1,4 +1,4 @@
-import type { Address, Hex } from "enssdk";
+import type { Address, Hex, NormalizedAddress } from "enssdk";
 
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 
@@ -33,7 +33,7 @@ export type OrderFulfilledEvent = EventWithArgs<{
    * The address of the account that created and signed the original order.
    * This is the party offering items for trade.
    */
-  offerer: Address;
+  offerer: NormalizedAddress;
 
   /**
    * The address of the zone contract that implements custom validation rules.
@@ -41,13 +41,13 @@ export type OrderFulfilledEvent = EventWithArgs<{
    * or other custom logic before order fulfillment. Can be zero address if
    * no additional validation is required.
    */
-  zone: Address;
+  zone: NormalizedAddress;
 
   /**
    * The address that receives the offered items from the order.
    * This is typically the order fulfiller or their designated recipient.
    */
-  recipient: Address;
+  recipient: NormalizedAddress;
 
   /**
    * Array of items that the offerer is giving up in this order.

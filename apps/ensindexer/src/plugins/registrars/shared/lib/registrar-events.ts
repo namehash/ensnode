@@ -2,7 +2,13 @@
  * This file contains handlers used in event handlers for a Registrar contract.
  */
 
-import { type AccountId, type Address, type Node, stringifyAccountId } from "enssdk";
+import {
+  type AccountId,
+  type Address,
+  type Node,
+  stringifyAccountId,
+  type UnixTimestamp,
+} from "enssdk";
 import type { Hash } from "viem";
 
 import {
@@ -10,7 +16,6 @@ import {
   bigIntToNumber,
   durationBetween,
   RegistrarActionTypes,
-  type UnixTimestamp,
 } from "@ensnode/ensnode-sdk";
 
 import type { IndexingEngineContext, IndexingEngineEvent } from "@/lib/indexing-engines/ponder";

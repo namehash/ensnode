@@ -6,8 +6,8 @@ import {
   RegistrarActionsOrders,
 } from "@ensnode/ensnode-sdk";
 import {
-  makeLowercaseAddressSchema,
   makeNodeSchema,
+  makeNormalizedAddressSchema,
   makePositiveIntegerSchema,
   makeUnixTimestampSchema,
 } from "@ensnode/ensnode-sdk/internal";
@@ -51,7 +51,7 @@ export const registrarActionsQuerySchema = z
       .describe("Filter to only include actions with referrals")
       .openapi({ default: false }),
 
-    decodedReferrer: makeLowercaseAddressSchema("decodedReferrer")
+    decodedReferrer: makeNormalizedAddressSchema("decodedReferrer")
       .optional()
       .describe("Filter by decoded referrer address"),
 

@@ -1,5 +1,5 @@
-import type { NormalizedName } from "enssdk";
-import { asLowerCaseAddress, isNormalizedName } from "enssdk";
+import type { InterpretedName } from "enssdk";
+import { isInterpretedName, toNormalizedAddress } from "enssdk";
 import { isAddress, isAddressEqual, zeroAddress } from "viem";
 
 import { hasNullByte } from "../null-bytes";
@@ -9,20 +9,20 @@ import { hasNullByte } from "../null-bytes";
  *
  * The interpreted record value is either:
  * a) null, representing a non-existant or deletion of the record, or
- * b) a normalized, non-empty-string Name.
+ * b) an {@link InterpretedName}.
  *
  * @param value - The name record value string to interpret.
  * @returns The interpreted name string, or null if deleted.
  */
-export function interpretNameRecordValue(value: string): NormalizedName | null {
-  // empty string is technically a normalized name, representing the ens root node, but in the
+export function interpretNameRecordValue(value: string): InterpretedName | null {
+  // empty string is technically an InterpretedName, representing the ens root node, but in the
   // context of a name record value, empty string is emitted when the user un-sets the record (this
   // is because the abi of this event is only capable of expressing string values, so empty string
   // canonically represents the non-existence or deletion of the record value)
   if (value === "") return null;
 
   // if not normalized, is not valid `name` record value
-  if (!isNormalizedName(value)) return null;
+  if (!isInterpretedName(value)) return null;
 
   // otherwise, this is a non-empty-string normalized Name that can be used as a name() record value
   return value;
@@ -60,8 +60,8 @@ export function interpretAddressRecordValue(value: string): string | null {
   // interpret zeroAddress as deletion
   if (isAddressEqual(value, zeroAddress)) return null;
 
-  // otherwise convert to lowercase
-  return asLowerCaseAddress(value);
+  // otherwise normalize and return
+  return toNormalizedAddress(value);
 }
 
 /**

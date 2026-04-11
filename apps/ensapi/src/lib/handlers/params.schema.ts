@@ -5,7 +5,7 @@ import { isSelectionEmpty, type ResolverRecordsSelection } from "@ensnode/ensnod
 import {
   makeCoinTypeStringSchema,
   makeDefaultableChainIdStringSchema,
-  makeLowercaseAddressSchema,
+  makeNormalizedAddressSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
 const excludingDefaultChainId = z
@@ -36,7 +36,7 @@ const name = z
 
 const trace = z.optional(boolstring).default(false).openapi({ default: false });
 const accelerate = z.optional(boolstring).default(false).openapi({ default: false });
-const address = makeLowercaseAddressSchema();
+const address = makeNormalizedAddressSchema();
 const defaultableChainId = makeDefaultableChainIdStringSchema();
 const coinType = makeCoinTypeStringSchema();
 

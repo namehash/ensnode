@@ -1,9 +1,9 @@
+import type { UnixTimestamp } from "enssdk";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   type CrossChainIndexingStatusSnapshot,
   createRealtimeIndexingStatusProjection,
-  type UnixTimestamp,
 } from "@ensnode/ensnode-sdk";
 
 import { createApp } from "@/lib/hono-factory";

@@ -1,9 +1,10 @@
-import type { Address } from "enssdk";
+import type { Address, Duration } from "enssdk";
+import { toNormalizedAddress } from "enssdk";
 
-import type { Duration, PriceEth } from "@ensnode/ensnode-sdk";
+import type { PriceEth } from "@ensnode/ensnode-sdk";
 import { makePriceEthSchema } from "@ensnode/ensnode-sdk/internal";
 
-import { normalizeAddress, validateLowercaseAddress } from "./address";
+import { validateAddress } from "./address";
 import { validateNonNegativeInteger } from "./number";
 import { ReferralProgramRules } from "./rules";
 import { validateDuration } from "./time";
@@ -52,7 +53,7 @@ export const buildReferrerMetrics = (
   totalRevenueContribution: PriceEth,
 ): ReferrerMetrics => {
   const result = {
-    referrer: normalizeAddress(referrer),
+    referrer: toNormalizedAddress(referrer),
     totalReferrals,
     totalIncrementalDuration,
     totalRevenueContribution,
@@ -63,7 +64,7 @@ export const buildReferrerMetrics = (
 };
 
 export const validateReferrerMetrics = (metrics: ReferrerMetrics): void => {
-  validateLowercaseAddress(metrics.referrer);
+  validateAddress(metrics.referrer);
   validateNonNegativeInteger(metrics.totalReferrals);
   validateDuration(metrics.totalIncrementalDuration);
 

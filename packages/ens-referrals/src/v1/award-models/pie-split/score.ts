@@ -1,4 +1,4 @@
-import type { Duration } from "@ensnode/ensnode-sdk";
+import type { Duration } from "enssdk";
 
 import { SECONDS_PER_YEAR } from "../../time";
 import type { ReferrerScore } from "../shared/score";

@@ -1,9 +1,11 @@
 import { GRACE_PERIOD_SECONDS } from "@ensdomains/ensjs/utils";
 import {
-  type Address,
   interpretTokenIdAsLabelHash,
   makeENSv1DomainId,
   makeSubdomainNode,
+  type NormalizedAddress,
+  type TokenId,
+  type UnixTimestampBigInt,
 } from "enssdk";
 import { isAddressEqual, zeroAddress } from "viem";
 
@@ -52,9 +54,9 @@ export default function () {
     }: {
       context: IndexingEngineContext;
       event: EventWithArgs<{
-        from: Address;
-        to: Address;
-        tokenId: bigint;
+        from: NormalizedAddress;
+        to: NormalizedAddress;
+        tokenId: TokenId;
       }>;
     }) => {
       const { from, to, tokenId } = event.args;
@@ -97,9 +99,9 @@ export default function () {
   }: {
     context: IndexingEngineContext;
     event: EventWithArgs<{
-      id: bigint;
-      owner: Address;
-      expires: bigint;
+      id: TokenId;
+      owner: NormalizedAddress;
+      expires: UnixTimestampBigInt;
     }>;
   }) {
     const { id: tokenId, owner, expires: expiry } = event.args;
@@ -161,7 +163,7 @@ export default function () {
       event,
     }: {
       context: IndexingEngineContext;
-      event: EventWithArgs<{ id: bigint; expires: bigint }>;
+      event: EventWithArgs<{ id: TokenId; expires: UnixTimestampBigInt }>;
     }) => {
       const { id: tokenId, expires: expiry } = event.args;
 

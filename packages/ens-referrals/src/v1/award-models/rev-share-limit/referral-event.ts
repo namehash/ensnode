@@ -1,6 +1,6 @@
-import type { Address, UnixTimestamp } from "enssdk";
+import type { Address, Duration, UnixTimestamp } from "enssdk";
 
-import type { Duration, PriceEth } from "@ensnode/ensnode-sdk";
+import type { PriceEth } from "@ensnode/ensnode-sdk";
 
 /**
  * Represents a single raw referral event.

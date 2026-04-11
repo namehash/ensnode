@@ -6,11 +6,12 @@ import type {
   Address,
   ChainId,
   DefaultableChainId,
+  Duration,
   Hex,
   InterpretedName,
   Node,
 } from "enssdk";
-import { asLowerCaseAddress, reinterpretName } from "enssdk";
+import { reinterpretName, toNormalizedAddress } from "enssdk";
 import { isAddress, isHex, size } from "viem";
 /**
  * All zod schemas we define must remain internal implementation details.
@@ -30,7 +31,7 @@ import {
   type PriceEth,
   type PriceUsdc,
 } from "./currencies";
-import type { BlockRef, Datetime, Duration, UnixTimestamp } from "./types";
+import type { BlockRef, Datetime } from "./types";
 
 /**
  * Parses a string value as a boolean.
@@ -149,9 +150,9 @@ export const makeCoinTypeStringSchema = (valueLabel: string = "Coin Type String"
     .pipe(makeCoinTypeSchema(`The numeric value represented by ${valueLabel}`));
 
 /**
- * Parses a serialized representation of an EVM address into a lowercase Address.
+ * Parses a serialized representation of an EVM address into a {@link NormalizedAddress}.
  */
-export const makeLowercaseAddressSchema = (valueLabel: string = "EVM address") =>
+export const makeNormalizedAddressSchema = (valueLabel: string = "EVM address") =>
   z
     .string()
     .check((ctx) => {
@@ -163,7 +164,7 @@ export const makeLowercaseAddressSchema = (valueLabel: string = "EVM address") =
         });
       }
     })
-    .transform((val) => asLowerCaseAddress(val as Address));
+    .transform((val) => toNormalizedAddress(val as Address));
 
 /**
  * Parses an ISO 8601 string representations of {@link Datetime}
@@ -290,7 +291,7 @@ export const makePriceDaiSchema = (valueLabel: string = "Price DAI") =>
 export const makeAccountIdSchema = (valueLabel: string = "AccountId") =>
   z.strictObject({
     chainId: makeChainIdSchema(`${valueLabel} chain ID`),
-    address: makeLowercaseAddressSchema(`${valueLabel} address`),
+    address: makeNormalizedAddressSchema(`${valueLabel} address`),
   });
 
 /**

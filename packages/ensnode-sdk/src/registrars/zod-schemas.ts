@@ -8,8 +8,8 @@ import {
   makeBlockRefSchema,
   makeDurationSchema,
   makeHexStringSchema,
-  makeLowercaseAddressSchema,
   makeNodeSchema,
+  makeNormalizedAddressSchema,
   makePriceEthSchema,
   makeTransactionHashSchema,
   makeUnixTimestampSchema,
@@ -127,7 +127,7 @@ const makeRegistrarActionReferralSchema = (valueLabel: string = "Registrar Actio
           { bytesCount: ENCODED_REFERRER_BYTE_LENGTH },
           `${valueLabel} Encoded Referrer`,
         ),
-        decodedReferrer: makeLowercaseAddressSchema(`${valueLabel} Decoded Referrer`),
+        decodedReferrer: makeNormalizedAddressSchema(`${valueLabel} Decoded Referrer`),
       })
       .check(invariant_registrarActionDecodedReferrerBasedOnRawReferrer),
 
@@ -164,7 +164,7 @@ export const makeBaseRegistrarActionSchema = (valueLabel: string = "Base Registr
     .object({
       id: EventIdSchema,
       incrementalDuration: makeDurationSchema(`${valueLabel} Incremental Duration`),
-      registrant: makeLowercaseAddressSchema(`${valueLabel} Registrant`),
+      registrant: makeNormalizedAddressSchema(`${valueLabel} Registrant`),
       registrationLifecycle: makeRegistrationLifecycleSchema(
         `${valueLabel} Registration Lifecycle`,
       ),

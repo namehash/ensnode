@@ -19,8 +19,9 @@ describe("datasource invariants", () => {
               `The ContractConfig '${namespace}' > '${datasourceName}' > '${contractName}' > '${contractConfig.address}' is not a viem#Address. This occurs if the address property of any ContractConfig in the Datasource is malformed (i.e. not a viem#Address).`,
             ).toBe(true);
 
-            // must be lowercase adddress
+            // must be lowercase
             expect(
+              // TODO: could use enssdk#isNormalizedAddress here
               contractConfig.address === contractConfig.address.toLowerCase(),
               `The ContractConfig '${namespace}' > '${datasourceName}' > '${contractName}' > '${contractConfig.address}' is not is lowercase format.`,
             ).toBe(true);

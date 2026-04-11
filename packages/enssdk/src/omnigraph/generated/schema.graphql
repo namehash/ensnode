@@ -128,7 +128,7 @@ type AccountResolverPermissionsConnectionEdge {
   node: ResolverPermissionsUser!
 }
 
-"""Address represents a lowercase (unchecksummed) viem#Address."""
+"""Address represents an EVM Address in all lowercase."""
 scalar Address
 
 """
@@ -192,10 +192,10 @@ type BaseRegistrarRegistration implements Registration {
 """BigInt represents non-fractional signed whole numeric values."""
 scalar BigInt
 
-"""ChainId represents a @ensnode/ensnode-sdk#ChainId."""
+"""ChainId represents a enssdk#ChainId."""
 scalar ChainId
 
-"""CoinType represents a @ensnode/ensnode-sdk#CoinType."""
+"""CoinType represents a enssdk#CoinType."""
 scalar CoinType
 
 """
@@ -252,7 +252,7 @@ type DomainEventsConnectionEdge {
   node: Event!
 }
 
-"""DomainId represents a @ensnode/ensnode-sdk#DomainId."""
+"""DomainId represents a enssdk#DomainId."""
 scalar DomainId
 
 """Reference a specific Domain."""
@@ -585,10 +585,10 @@ input EventsWhereInput {
 """Hex represents viem#Hex."""
 scalar Hex
 
-"""InterpretedLabel represents a @ensnode/ensnode-sdk#InterpretedLabel."""
+"""InterpretedLabel represents a enssdk#InterpretedLabel."""
 scalar InterpretedLabel
 
-"""InterpretedName represents a @ensnode/ensnode-sdk#InterpretedName."""
+"""InterpretedName represents a enssdk#InterpretedName."""
 scalar InterpretedName
 
 """
@@ -659,7 +659,7 @@ type NameWrapperRegistration implements Registration {
   unregistrant: Account
 }
 
-"""Node represents a @ensnode/ensnode-sdk#Node."""
+"""Node represents a enssdk#Node."""
 scalar Node
 
 """Sort direction"""
@@ -704,7 +704,7 @@ type PermissionsEventsConnectionEdge {
   node: Event!
 }
 
-"""PermissionsId represents a @ensnode/ensnode-sdk#PermissionsId."""
+"""PermissionsId represents a enssdk#PermissionsId."""
 scalar PermissionsId
 
 """Address Permissions by ID or AccountId."""
@@ -731,9 +731,7 @@ type PermissionsResource {
   users(after: String, before: String, first: Int, last: Int): PermissionsResourceUsersConnection
 }
 
-"""
-PermissionsResourceId represents a @ensnode/ensnode-sdk#PermissionsResourceId.
-"""
+"""PermissionsResourceId represents a enssdk#PermissionsResourceId."""
 scalar PermissionsResourceId
 
 type PermissionsResourceUsersConnection {
@@ -776,7 +774,7 @@ type PermissionsUser {
   user: Account!
 }
 
-"""PermissionsUserId represents a @ensnode/ensnode-sdk#PermissionsUserId."""
+"""PermissionsUserId represents a enssdk#PermissionsUserId."""
 scalar PermissionsUserId
 
 type Query {
@@ -911,7 +909,7 @@ interface Registration {
   unregistrant: Account
 }
 
-"""RegistrationId represents a @ensnode/ensnode-sdk#RegistrationId."""
+"""RegistrationId represents a enssdk#RegistrationId."""
 scalar RegistrationId
 
 type RegistrationRenewalsConnection {
@@ -962,7 +960,7 @@ input RegistryDomainsWhereInput {
   name: String
 }
 
-"""RegistryId represents a @ensnode/ensnode-sdk#RegistryId."""
+"""RegistryId represents a enssdk#RegistryId."""
 scalar RegistryId
 
 """Address a Registry by ID or AccountId."""
@@ -1020,7 +1018,7 @@ type Renewal {
   referrer: Hex
 }
 
-"""RenewalId represents a @ensnode/ensnode-sdk#RenewalId."""
+"""RenewalId represents a enssdk#RenewalId."""
 scalar RenewalId
 
 """A Resolver represents a Resolver contract on-chain."""
@@ -1058,7 +1056,7 @@ type ResolverEventsConnectionEdge {
   node: Event!
 }
 
-"""ResolverId represents a @ensnode/ensnode-sdk#ResolverId."""
+"""ResolverId represents a enssdk#ResolverId."""
 scalar ResolverId
 
 """Address a Resolver by ID or AccountId."""
@@ -1113,7 +1111,7 @@ type ResolverRecordsConnectionEdge {
   node: ResolverRecords!
 }
 
-"""ResolverRecordsId represents a @ensnode/ensnode-sdk#ResolverRecordsId."""
+"""ResolverRecordsId represents a enssdk#ResolverRecordsId."""
 scalar ResolverRecordsId
 
 """Filter for Domain.subdomains query."""
