@@ -7,6 +7,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 import {
   ErrorResponseSchema,
+  errorResponseBadRequestExample,
   makeLowercaseAddressSchema,
   makeNodeSchema,
   makePositiveIntegerSchema,
@@ -111,7 +112,11 @@ export const getRegistrarActionsRoute = createRoute({
     },
     400: {
       description: "Invalid query",
-      content: { "application/json": { schema: ErrorResponseSchema } },
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema.openapi({ example: errorResponseBadRequestExample }),
+        },
+      },
     },
     500: {
       description: "Internal server error",
@@ -157,7 +162,11 @@ export const getRegistrarActionsByParentNodeRoute = createRoute({
     },
     400: {
       description: "Invalid input",
-      content: { "application/json": { schema: ErrorResponseSchema } },
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema.openapi({ example: errorResponseBadRequestExample }),
+        },
+      },
     },
     500: {
       description: "Internal server error",

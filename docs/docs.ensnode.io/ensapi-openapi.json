@@ -1062,7 +1062,6 @@
                   "required": ["records", "accelerationRequested", "accelerationAttempted"],
                   "example": {
                     "records": {
-                      "name": "vitalik.eth",
                       "addresses": { "60": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045" },
                       "texts": { "description": "mi pinxe lo crino tcati" }
                     },
@@ -2340,7 +2339,7 @@
                     },
                     "accurateAsOf": { "type": "integer" }
                   },
-                  "required": ["responseCode", "registrarActions", "pageContext"],
+                  "required": ["responseCode", "registrarActions", "pageContext", "accurateAsOf"],
                   "example": {
                     "responseCode": "ok",
                     "registrarActions": [
@@ -2399,7 +2398,10 @@
                 "schema": {
                   "type": "object",
                   "properties": { "message": { "type": "string" }, "details": {} },
-                  "required": ["message"]
+                  "required": ["message"],
+                  "example": {
+                    "message": "endTimestamp must be greater than or equal to beginTimestamp"
+                  }
                 }
               }
             }
@@ -2838,7 +2840,7 @@
                     },
                     "accurateAsOf": { "type": "integer" }
                   },
-                  "required": ["responseCode", "registrarActions", "pageContext"],
+                  "required": ["responseCode", "registrarActions", "pageContext", "accurateAsOf"],
                   "example": {
                     "responseCode": "ok",
                     "registrarActions": [
@@ -2897,7 +2899,10 @@
                 "schema": {
                   "type": "object",
                   "properties": { "message": { "type": "string" }, "details": {} },
-                  "required": ["message"]
+                  "required": ["message"],
+                  "example": {
+                    "message": "endTimestamp must be greater than or equal to beginTimestamp"
+                  }
                 }
               }
             }
