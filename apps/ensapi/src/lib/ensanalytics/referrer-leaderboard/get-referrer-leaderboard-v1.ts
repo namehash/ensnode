@@ -10,7 +10,7 @@ import type { UnixTimestamp } from "enssdk";
 import { getReferralEvents, getReferrerMetrics } from "./database-v1";
 
 /**
- * Builds a `ReferralLeaderboard` from the database using the provided referral program rules (V1 API).
+ * Builds a {@link ReferrerLeaderboard} from the database using the provided referral program rules (V1 API).
  *
  * Dispatches to the appropriate model-specific builder based on `rules.awardModel`:
  * - PieSplit: uses aggregated referrer metrics (GROUP BY query).
@@ -18,7 +18,6 @@ import { getReferralEvents, getReferrerMetrics } from "./database-v1";
  *
  * @param rules - The referral program rules for filtering registrar actions
  * @param accurateAsOf - The {@link UnixTimestamp} of when the data used to build the {@link ReferrerLeaderboard} was accurate as of.
- * @returns A promise that resolves to a {@link ReferrerLeaderboard}
  * @throws Error if the database query fails
  */
 export async function getReferrerLeaderboard(

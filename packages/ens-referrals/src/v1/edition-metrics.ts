@@ -41,7 +41,6 @@ export type ReferrerEditionMetrics =
  *
  * @param referrer - The referrer address to look up
  * @param leaderboard - The referrer leaderboard to query
- * @returns The appropriate {@link ReferrerEditionMetrics}
  */
 export const getReferrerEditionMetrics = (
   referrer: Address,
