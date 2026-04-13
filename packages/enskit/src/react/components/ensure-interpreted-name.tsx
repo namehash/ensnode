@@ -1,32 +1,59 @@
-import { type InterpretedName, isInterpretedName, type Name, nameToInterpretedName } from "enssdk";
+import {
+  type InterpretedName,
+  isInterpretedName,
+  type LiteralName,
+  literalNameToInterpretedName,
+} from "enssdk";
 import type { ReactNode } from "react";
 
 type MalformedNameRenderer = (name: string) => ReactNode;
 type InterpretedNameRenderer = (name: InterpretedName) => ReactNode;
 
 /**
- * Renders a Name by ensuring it is an InterpretedName. If the name is already
- * interpreted, renders via `children`. If not, attempts to interpret it and
- * renders via `interpreted` (enabling e.g. a redirect). If interpretation
- * fails (malformed or unnormalizable), renders via `malformed`.
+ * Renders a {@link LiteralName} by ensuring it is an {@link InterpretedName}. This is useful for
+ * ensuring that downstream components get the guarantees of an {@link InterpretedName}, while
+ *
+ *
+ * @param name - The user-provided {@link LiteralName} to render.
+ * @param children - Render prop called with the {@link InterpretedName} when `name` is already interpreted.
+ * @param coerced - Render prop called with the coerced {@link InterpretedName} when `name` was not already
+ *   interpreted but could be successfully coerced under `options`. Typically used to redirect the user to the
+ *   canonical URL.
+ * @param malformed - Render prop called with the original literal string when `name` cannot be coerced into an
+ *   {@link InterpretedName} under `options`.
+ * @param options - Forwarded to {@link literalNameToInterpretedName}. Controls how the interpretation handles edge
+ *   cases. When `options.allowENSRootName` is `true`, an empty `name` is accepted and rendered via `children`; when
+ *   `false` (default), an empty `name` falls through to `malformed`. When `options.allowEncodedLabelHashes` is
+ *   `true`, a Label already formatted as an EncodedLabelHash is preserved verbatim; when `false` (default), such a
+ *   Label is treated like any other input and passed through normalization, which will fail and fall through to the
+ *   unnormalizable-Label handling. When `options.coerceUnnormalizedLabelsToNormalizedLabels` is `true` (default), an
+ *   unnormalized Label is passed through ENSIP-15 normalization (e.g. `"Vitalik"` → `"vitalik"`); when `false`, any
+ *   unnormalized Label causes `malformed` to be invoked — no normalization is attempted and
+ *   `coerceUnnormalizableLabelsToEncodedLabelHashes` is not consulted. When
+ *   `options.coerceUnnormalizableLabelsToEncodedLabelHashes` is `true`, a Label that cannot be normalized is replaced
+ *   with the EncodedLabelHash of its literal bytes and `coerced` is invoked; when `false` (default), encountering
+ *   such a Label causes `malformed` to be invoked. Only consulted when
+ *   `coerceUnnormalizedLabelsToNormalizedLabels` is `true`.
  */
 export function EnsureInterpretedName({
   name,
   children,
-  interpreted,
+  coerced,
   malformed,
+  options,
 }: {
-  name: Name;
+  name: LiteralName;
   children: InterpretedNameRenderer;
-  interpreted: InterpretedNameRenderer;
+  coerced: InterpretedNameRenderer;
   malformed: MalformedNameRenderer;
+  options?: Parameters<typeof literalNameToInterpretedName>[1];
 }) {
   if (isInterpretedName(name)) return children(name);
 
   try {
     // this isn't an InterpretedName, let's try to redirect the user to the InterpretedName
     // which ensures that our app only ever operates on InterpretedNames
-    return interpreted(nameToInterpretedName(name));
+    return coerced(literalNameToInterpretedName(name, options));
   } catch {
     // this name can't conform to InterpretedName: it is malformed or contains unnormalizable Labels
     return malformed(name);

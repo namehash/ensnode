@@ -92,7 +92,6 @@ export type EncodedLabelHash = `[${string}]`;
  * - containing other unnormalized characters such as null bytes or other characters
  *   not suitable for display.
  *
- *
  * @see https://ensnode.io/docs/reference/terminology#literal-label
  * @dev nominally typed to enforce usage & enhance codebase clarity
  */
