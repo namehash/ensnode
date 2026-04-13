@@ -1,5 +1,4 @@
-import type { Address, Duration } from "enssdk";
-import { toNormalizedAddress } from "enssdk";
+import type { Duration, NormalizedAddress } from "enssdk";
 
 import type { PriceEth } from "@ensnode/ensnode-sdk";
 import { makePriceEthSchema } from "@ensnode/ensnode-sdk/internal";
@@ -19,7 +18,7 @@ export interface ReferrerMetrics {
    *
    * @invariant Guaranteed to be a valid EVM address in lowercase format
    */
-  referrer: Address;
+  referrer: NormalizedAddress;
 
   /**
    * The total number of referrals made by the referrer within the {@link ReferralProgramRules}.
@@ -47,13 +46,13 @@ export interface ReferrerMetrics {
 }
 
 export const buildReferrerMetrics = (
-  referrer: Address,
+  referrer: NormalizedAddress,
   totalReferrals: number,
   totalIncrementalDuration: Duration,
   totalRevenueContribution: PriceEth,
 ): ReferrerMetrics => {
   const result = {
-    referrer: toNormalizedAddress(referrer),
+    referrer,
     totalReferrals,
     totalIncrementalDuration,
     totalRevenueContribution,

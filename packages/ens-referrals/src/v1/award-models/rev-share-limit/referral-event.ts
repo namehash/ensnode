@@ -1,4 +1,4 @@
-import type { Address, Duration, UnixTimestamp } from "enssdk";
+import type { Duration, NormalizedAddress, UnixTimestamp } from "enssdk";
 
 import type { PriceEth } from "@ensnode/ensnode-sdk";
 
@@ -12,7 +12,7 @@ export interface ReferralEvent {
   /**
    * The fully lowercase Ethereum address of the referrer.
    */
-  referrer: Address;
+  referrer: NormalizedAddress;
 
   /**
    * Unix seconds block timestamp.
