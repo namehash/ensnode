@@ -27,7 +27,7 @@ describe("params.selection", () => {
   it("parses selection", () => {
     expect(
       params.selection.parse({
-        name: "true",
+        reverseName: "true",
         addresses: "60,0",
         texts: "example,hello",
       }),
