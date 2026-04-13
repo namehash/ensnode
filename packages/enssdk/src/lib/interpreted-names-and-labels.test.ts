@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { ENS_ROOT_NAME } from "./constants";
 import {
   asInterpretedLabel,
   asLiteralLabel,
@@ -7,6 +8,7 @@ import {
   interpretedLabelsToInterpretedName,
   literalLabelsToInterpretedName,
   literalLabelToInterpretedLabel,
+  nameToInterpretedName,
   parsePartialInterpretedName,
 } from "./interpreted-names-and-labels";
 import { encodeLabelHash, labelhashLiteralLabel } from "./labelhash";
@@ -201,5 +203,34 @@ describe("interpretation", () => {
         expect(constructSubInterpretedName(label, parent)).toEqual(expected);
       },
     );
+  });
+
+  describe("nameToInterpretedName", () => {
+    it("returns ENS_ROOT_NAME unchanged", () => {
+      expect(nameToInterpretedName(ENS_ROOT_NAME)).toBe(ENS_ROOT_NAME);
+    });
+
+    it("works for tlds", () => {
+      expect(nameToInterpretedName("eth")).toBe("eth");
+    });
+
+    it("throws for a name with an empty label segment", () => {
+      expect(() => nameToInterpretedName("example..eth")).toThrow(/empty label segment/);
+    });
+
+    it("preserves a pre-encoded labelhash label", () => {
+      expect(nameToInterpretedName(`${EXAMPLE_ENCODED_LABEL_HASH}.eth`)).toEqual(
+        `${EXAMPLE_ENCODED_LABEL_HASH}.eth`,
+      );
+    });
+
+    it("preserves a normalized label", () => {
+      expect(nameToInterpretedName("vitalik.eth")).toEqual("vitalik.eth");
+    });
+
+    it("encodes a non-normalized label as an encoded labelhash", () => {
+      const expectedEncoded = encodeLabelHash(labelhashLiteralLabel(asLiteralLabel("Vitalik")));
+      expect(nameToInterpretedName("Vitalik.eth")).toEqual(`${expectedEncoded}.eth`);
+    });
   });
 });

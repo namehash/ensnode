@@ -1,5 +1,6 @@
 import { isHex } from "viem";
 
+import { ENS_ROOT_NAME } from "./constants";
 import {
   encodeLabelHash,
   isEncodedLabelHash,
@@ -28,10 +29,18 @@ import type {
  *   interpreted InterpretedName.
  */
 export function nameToInterpretedName(name: Name): InterpretedName {
+  if (name === ENS_ROOT_NAME) return ENS_ROOT_NAME;
+
   return interpretedLabelsToInterpretedName(
     name
       .split(".")
       .map((label) => {
+        if (label === "") {
+          throw new Error(
+            `Name '${name}' cannot conform to InterpretedName because it contains an empty label segment, which is not a valid label.`,
+          );
+        }
+
         if (isEncodedLabelHash(label)) return label;
         if (isNormalizedLabel(label)) return label;
         return encodeLabelHash(labelhashLiteralLabel(asLiteralLabel(label)));
@@ -217,7 +226,7 @@ export function parsePartialInterpretedName(partialInterpretedName: Name): {
 }
 
 /**
- * Validates and casts a string to a {@link LiteralLabel}.
+ * Casts a string to a {@link LiteralLabel}.
  * A LiteralLabel is a label as it literally appears onchain.
  */
 export function asLiteralLabel(label: Label): LiteralLabel {
