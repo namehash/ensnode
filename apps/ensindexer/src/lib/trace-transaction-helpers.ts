@@ -84,7 +84,7 @@ export function getAddressesFromTrace(trace: Trace): Set<Address> {
     // if matches are found, normalize them and return unique addresses
     if (matches) {
       for (const maybeAddress of matches) {
-        if (isAddress(maybeAddress)) {
+        if (isAddress(maybeAddress, { strict: false })) {
           // Add the normalized address to the set
           uniqueAddresses.add(toNormalizedAddress(maybeAddress));
         } else {
@@ -114,11 +114,9 @@ export function getAddressesFromTrace(trace: Trace): Set<Address> {
 
       const maybeAddress = `0x${maybePartialAddress}`;
 
-      if (isAddress(maybeAddress)) {
-        // Add 0x prefix and normalize the address
-        const normalizedAddr = toNormalizedAddress(maybeAddress);
+      if (isAddress(maybeAddress, { strict: false })) {
         // Add the normalized address to the set
-        uniqueAddresses.add(normalizedAddr);
+        uniqueAddresses.add(toNormalizedAddress(maybeAddress));
       } else {
         // Ignore invalid addresses
       }

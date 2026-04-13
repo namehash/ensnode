@@ -127,7 +127,7 @@ export function invariant_validContractConfigs(
       if ("address" in contractConfig && typeof contractConfig.address === "string") {
         if (!isNormalizedAddress(contractConfig.address)) {
           throw new Error(
-            `The '${config.namespace}' namespace's '${datasourceName}' Datasource does not define a valid address for ${contractName}: '${contractConfig.address}'. This occurs if the address property of any ContractConfig in the Datasource is malformed (i.e. not a enssdk#NormalizedAddress). This is only likely to occur if you are actively editing the Datasource and typo'd an address.`,
+            `The '${config.namespace}' namespace's '${datasourceName}' Datasource does not define a valid address for ${contractName}: '${contractConfig.address}'. This occurs if the address property of any ContractConfig in the Datasource is malformed (i.e. not an enssdk#NormalizedAddress). This is only likely to occur if you are actively editing the Datasource and typo'd an address.`,
           );
         }
       }

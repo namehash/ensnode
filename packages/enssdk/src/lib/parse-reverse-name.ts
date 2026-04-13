@@ -21,7 +21,9 @@ const REVERSE_NAME_REGEX = /^([0-9a-fA-F]+)\.([0-9a-f]{1,64}|addr|default)\.reve
 const parseAddressLabel = (addressLabel: Label): Address => {
   const maybeAddress = `0x${addressLabel}`;
 
-  if (!isAddress(maybeAddress)) throw new Error(`Invalid EVM address "${maybeAddress}"`);
+  if (!isAddress(maybeAddress, { strict: false })) {
+    throw new Error(`Invalid EVM address "${maybeAddress}"`);
+  }
 
   return toNormalizedAddress(maybeAddress);
 };

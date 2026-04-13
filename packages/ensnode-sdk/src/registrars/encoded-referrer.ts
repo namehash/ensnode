@@ -1,5 +1,11 @@
-import { type Address, type Hex, type NormalizedAddress, toNormalizedAddress } from "enssdk";
-import { getAddress, pad, size, slice, zeroAddress } from "viem";
+import {
+  type Address,
+  type Hex,
+  isNormalizedAddress,
+  type NormalizedAddress,
+  toNormalizedAddress,
+} from "enssdk";
+import { pad, size, slice, zeroAddress } from "viem";
 
 /**
  * Encoded Referrer
@@ -53,6 +59,8 @@ export const ZERO_ENCODED_REFERRER: EncodedReferrer = pad("0x", {
  * according to the referrer encoding with left-zero-padding.
  */
 export function buildEncodedReferrer(address: NormalizedAddress): EncodedReferrer {
+  if (!isNormalizedAddress(address)) throw new Error(`Address '${address}' is not normalized.`);
+
   return pad(address, { size: ENCODED_REFERRER_BYTE_LENGTH, dir: "left" });
 }
 

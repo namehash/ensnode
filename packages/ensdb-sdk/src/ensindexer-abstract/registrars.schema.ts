@@ -2,6 +2,7 @@
  * Schema Definitions for tracking of ENS registrars.
  */
 
+import type { NormalizedAddress } from "enssdk";
 import { index, onchainEnum, onchainTable, relations, uniqueIndex } from "ponder";
 
 /**
@@ -353,7 +354,7 @@ export const registrarActions = onchainTable(
      * 3) May be the "zero address" to represent that an `encodedReferrer` is
      *    defined but that it is interpreted as no referrer.
      */
-    decodedReferrer: t.hex(),
+    decodedReferrer: t.hex().$type<NormalizedAddress>(),
 
     /**
      * Number of the block that includes the "logical registrar action".

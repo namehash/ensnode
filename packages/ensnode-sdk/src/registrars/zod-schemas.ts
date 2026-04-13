@@ -1,4 +1,3 @@
-import type { Address } from "enssdk";
 import { z } from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 

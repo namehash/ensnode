@@ -24,7 +24,7 @@ describe("encoded referrer", () => {
       const result = decodeEncodedReferrer(input);
 
       // assert
-      expect(result).toEqual(vitalikEthAddressChecksummed);
+      expect(result).toEqual(vitalikEthAddressLowercase);
     });
 
     it("returns a zeroAddress value when initial bytes were not all zeroes", () => {
@@ -63,17 +63,19 @@ describe("encoded referrer", () => {
       { addressFormat: "lowercase", address: vitalikEthAddressLowercase },
       { addressFormat: "checksummed", address: vitalikEthAddressChecksummed },
     ])("returns encoded referrer for a $addressFormat EVM address", ({ address }) => {
+      // encoding should operate as expected
       const expectedEncodedReferrer = pad(address.toLowerCase() as Address, {
         size: ENCODED_REFERRER_BYTE_LENGTH,
         dir: "left",
-      }); // all lowercase hex
-      const expectedDecodedReferrer = toNormalizedAddress(address);
+      });
 
-      const encodedReferrer = buildEncodedReferrer(address);
-      const decodedReferrer = decodeEncodedReferrer(encodedReferrer);
-
-      expect(decodedReferrer).toStrictEqual(expectedDecodedReferrer);
+      const encodedReferrer = buildEncodedReferrer(toNormalizedAddress(address));
       expect(encodedReferrer).toEqual(expectedEncodedReferrer);
+
+      // decoding should operate as expected
+      const expectedDecodedReferrer = toNormalizedAddress(address);
+      const decodedReferrer = decodeEncodedReferrer(encodedReferrer);
+      expect(decodedReferrer).toStrictEqual(expectedDecodedReferrer);
     });
   });
 });

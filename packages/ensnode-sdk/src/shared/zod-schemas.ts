@@ -11,7 +11,7 @@ import type {
   InterpretedName,
   Node,
 } from "enssdk";
-import { isNormalizedAddress, reinterpretName, toNormalizedAddress } from "enssdk";
+import { reinterpretName, toNormalizedAddress } from "enssdk";
 import { isAddress, isHex, size } from "viem";
 /**
  * All zod schemas we define must remain internal implementation details.
@@ -156,7 +156,9 @@ export const makeNormalizedAddressSchema = (valueLabel: string = "EVM address") 
   z
     .string()
     .check((ctx) => {
-      if (!isNormalizedAddress(ctx.value as Address)) {
+      // NOTE: we intentionally use isAddress here instead of isNormalizedAddress, which allows this
+      // schema to transform (via toNormalizedAddress) the input into a normalized address.
+      if (!isAddress(ctx.value, { strict: false })) {
         ctx.issues.push({
           code: "custom",
           message: `${valueLabel} must be a valid EVM address`,

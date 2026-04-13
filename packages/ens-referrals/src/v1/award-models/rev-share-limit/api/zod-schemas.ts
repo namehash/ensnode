@@ -1,4 +1,3 @@
-import { toNormalizedAddress } from "enssdk";
 import z from "zod/v4";
 
 import {

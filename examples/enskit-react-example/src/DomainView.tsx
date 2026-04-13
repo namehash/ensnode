@@ -55,7 +55,7 @@ function RenderDomain({ name }: { name: InterpretedName }) {
 
   if (fetching) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
-  if (!data?.domain) return <p>A Domain with InterpretedName '{name}' was not found.</p>;
+  if (!data?.domain) return <p>A Domain with name '{name}' was not found.</p>;
 
   const domain = readFragment(DomainFragment, data.domain);
   const parentName = getParentInterpretedName(name);

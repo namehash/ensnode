@@ -55,7 +55,7 @@ export function interpretAddressRecordValue(value: string): string | null {
   if (value === "0x") return null;
 
   // if it's not an EVM address, return as-is
-  if (!isAddress(value)) return value;
+  if (!isAddress(value, { strict: false })) return value;
 
   // interpret zeroAddress as deletion
   if (isAddressEqual(value, zeroAddress)) return null;

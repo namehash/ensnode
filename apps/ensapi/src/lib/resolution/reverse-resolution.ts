@@ -126,7 +126,7 @@ export async function resolveReverse(
           span.setAttribute("resolvedAddress", resolvedAddress);
 
           // Step 8.2 — if the resolvedAddress is not an EVM address, no Primary Name
-          const resolvedAddressIsEVMAddress = isAddress(resolvedAddress);
+          const resolvedAddressIsEVMAddress = isAddress(resolvedAddress, { strict: false });
           if (!resolvedAddressIsEVMAddress) {
             addProtocolStepEvent(
               protocolTracingSpan,
