@@ -1,5 +1,5 @@
 import { trace } from "@opentelemetry/api";
-import type { Address, Name, Node } from "enssdk";
+import { type Address, asLiteralName, type Name, type Node } from "enssdk";
 import {
   ContractFunctionExecutionError,
   decodeAbiParameters,
@@ -227,7 +227,7 @@ export function interpretRawCallsAndResults<SELECTION extends ResolverRecordsSel
       }
       case "name": {
         // interpret name records (see `interpretNameRecordValue` for specific guarantees)
-        return { call, result: interpretNameRecordValue(result) };
+        return { call, result: interpretNameRecordValue(asLiteralName(result)) };
       }
       case "text": {
         // interpret text records (see `interpretTextRecordValue` for specific guarantees)

@@ -2,6 +2,7 @@ import {
   type AccountId,
   type Address,
   type CoinType,
+  type LiteralName,
   makeResolverId,
   makeResolverRecordsId,
   type Node,
@@ -82,7 +83,7 @@ export async function ensureResolverRecords(
 export async function handleResolverNameUpdate(
   context: IndexingEngineContext,
   resolverRecordsKey: ResolverRecordsCompositeKey,
-  name: string,
+  name: LiteralName,
 ) {
   const resolverRecordsId = makeResolverRecordsId(
     { chainId: resolverRecordsKey.chainId, address: resolverRecordsKey.address },

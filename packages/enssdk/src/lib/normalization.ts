@@ -19,7 +19,7 @@ export const normalizeName = (name: Name): InterpretedName =>
  */
 export const normalizeLabel = (label: Label): InterpretedLabel => {
   // empty string cannot be a normalized label
-  if (label === "") throw new Error("Empty string cannot be normalized.");
+  if (label === "") throw new Error("Empty label cannot be normalized.");
 
   // normalized labels do not contain periods
   if (label.includes(".")) {

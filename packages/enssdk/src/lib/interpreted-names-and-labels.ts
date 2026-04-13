@@ -226,6 +226,14 @@ export function parsePartialInterpretedName(partialInterpretedName: Name): {
 }
 
 /**
+ * Casts a string to a {@link LiteralName}.
+ * A LiteralName is a name as it literally appears onchain.
+ */
+export function asLiteralName(name: Name): LiteralName {
+  return name as LiteralName;
+}
+
+/**
  * Casts a string to a {@link LiteralLabel}.
  * A LiteralLabel is a label as it literally appears onchain.
  */

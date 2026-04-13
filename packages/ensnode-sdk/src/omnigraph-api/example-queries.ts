@@ -1,4 +1,4 @@
-import { toNormalizedAddress } from "enssdk";
+import { asInterpretedName, toNormalizedAddress } from "enssdk";
 
 import { DatasourceNames, ENSNamespaceIds } from "@ensnode/datasources";
 
@@ -37,7 +37,7 @@ const DEVNET_USER = toNormalizedAddress("0x3C44CdDdB6a900fa2b585dd299e03d12FA429
 
 const VITALIK_ADDRESS = toNormalizedAddress("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045");
 
-const DEVNET_NAME_WITH_OWNED_RESOLVER = "example.eth";
+const DEVNET_NAME_WITH_OWNED_RESOLVER = asInterpretedName("example.eth");
 
 export const GRAPHQL_API_EXAMPLE_QUERIES: Array<{
   query: string;

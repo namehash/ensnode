@@ -1,7 +1,7 @@
 import type { Address as ViemAddress, Hex as ViemHex } from "viem";
 
 /**
- * Represents an Hex string, in the format `0x{string}`.
+ * Represents a Hex string, in the format `0x{string}`.
  */
 export type Hex = ViemHex;
 

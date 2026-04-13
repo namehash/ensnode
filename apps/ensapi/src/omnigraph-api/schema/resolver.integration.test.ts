@@ -1,3 +1,4 @@
+import { asInterpretedName } from "enssdk";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -16,7 +17,7 @@ import { gql } from "@/test/integration/omnigraph-api-client";
 
 // TODO: once the devnet has deterministic resolver addresses, we can resolver(by: { contract })
 // but until then we'll access by a domain's assigned resolver
-const DEVNET_NAME_WITH_OWNED_RESOLVER = "example.eth";
+const DEVNET_NAME_WITH_OWNED_RESOLVER = asInterpretedName("example.eth");
 
 describe("Resolver.events", () => {
   type ResolverEventsResult = {

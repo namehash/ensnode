@@ -145,7 +145,7 @@ async function findResolverWithUniversalResolver(
       }
 
       // UniversalResolver returns the offset in bytes within the DNS Encoded Name where the activeName begins
-      // Invariant: the decoded name must be an InterpretedName
+      // Invariant: the decoded name is a LiteralName that must conform to InterpretedName
       const activeName = asInterpretedName(bytesToPacket(dnsEncodedNameBytes.slice(offset)));
 
       return {

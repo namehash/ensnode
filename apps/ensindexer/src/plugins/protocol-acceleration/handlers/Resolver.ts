@@ -1,4 +1,4 @@
-import { bigintToCoinType, type CoinType, ETH_COIN_TYPE } from "enssdk";
+import { asLiteralName, bigintToCoinType, type CoinType, ETH_COIN_TYPE } from "enssdk";
 
 import { ResolverABI } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
@@ -64,7 +64,7 @@ export default function () {
   addOnchainEventListener(
     namespaceContract(pluginName, "Resolver:NameChanged"),
     async ({ context, event }) => {
-      const { name } = event.args;
+      const name = asLiteralName(event.args.name);
 
       const resolver = getThisAccountId(context, event);
       await ensureResolver(context, resolver);
