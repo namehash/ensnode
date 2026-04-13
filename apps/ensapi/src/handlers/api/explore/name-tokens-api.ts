@@ -2,7 +2,6 @@ import config from "@/config";
 
 import {
   asInterpretedName,
-  ENS_ROOT_NAME,
   getParentInterpretedName,
   type Node,
   namehashInterpretedName,
@@ -70,9 +69,10 @@ app.openapi(getNameTokensRoute, async (c) => {
 
   if (request.name !== undefined) {
     const name = asInterpretedName(request.name);
+    const parentName = getParentInterpretedName(name);
 
-    // return 404 when the requested name was the ENS Root
-    if (name === ENS_ROOT_NAME) {
+    // return 404 when the requested name was the ENS Root (which does not have a parent)
+    if (parentName === null) {
       return c.json(
         serializeNameTokensResponse(
           makeNameTokensNotIndexedResponse(
@@ -83,8 +83,6 @@ app.openapi(getNameTokensRoute, async (c) => {
       );
     }
 
-    // biome-ignore lint/style/noNonNullAssertion: getParentInterpretedName only throws if name === ENS_ROOT_NAME but we handle that case above
-    const parentName = getParentInterpretedName(name)!;
     const parentNode = namehashInterpretedName(parentName);
     const subregistry = indexedSubregistries.find((s) => s.node === parentNode);
 
