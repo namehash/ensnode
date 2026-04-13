@@ -8,7 +8,9 @@ import {
 
 // graphcache's ResolverResult type doesn't include bigint, but the value is stored
 // in the normalized cache and returned to the consumer as-is, so bigint works at runtime
-// the load-bearing piece of
+// the load-bearing piece of type inference is in packages/enskit/src/react/omnigraph/graphql.ts where
+// the GraphQL BigInt Scalar is mapped to the `bigint` primitive, which is only supported by these
+// runtime local resolvers.
 const toBigInt: Resolver = (parent, args, cache, info) => {
   const value = parent[info.fieldName];
   if (value == null) return value;
