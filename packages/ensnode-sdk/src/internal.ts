@@ -19,6 +19,7 @@ export * from "./ensapi/api/registrar-actions/examples";
 export * from "./ensapi/api/registrar-actions/zod-schemas";
 export * from "./ensapi/api/resolution/examples";
 export * from "./ensapi/api/resolution/zod-schemas";
+export * from "./ensapi/api/shared/errors/examples";
 export * from "./ensapi/api/shared/errors/zod-schemas";
 export * from "./ensapi/api/shared/pagination/zod-schemas";
 export * from "./ensapi/config/zod-schemas";
