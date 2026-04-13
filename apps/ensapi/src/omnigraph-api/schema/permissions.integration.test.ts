@@ -1,5 +1,5 @@
 import type {
-  ChainId,
+  AccountId,
   NormalizedAddress,
   PermissionsId,
   PermissionsResourceId,
@@ -40,30 +40,28 @@ const EAC_ROLES_CHANGED_SELECTOR = toEventSelector(
   )!,
 );
 
+// the type of the PermissionUser returned by the omnigraph, to DRY up the types below
+type PermissionUser = {
+  id: PermissionsUserId;
+  resource: string;
+  user: { address: NormalizedAddress };
+  roles: string;
+};
+
 describe("Permissions", () => {
   type PermissionsResult = {
     permissions: {
       id: PermissionsId;
-      contract: { chainId: ChainId; address: NormalizedAddress };
+      contract: AccountId;
       root: {
         id: PermissionsResourceId;
         resource: string;
-        users: GraphQLConnection<{
-          id: PermissionsUserId;
-          resource: string;
-          user: { address: NormalizedAddress };
-          roles: string;
-        }>;
+        users: GraphQLConnection<PermissionUser>;
       };
       resources: GraphQLConnection<{
         id: PermissionsResourceId;
         resource: string;
-        users: GraphQLConnection<{
-          id: PermissionsUserId;
-          resource: string;
-          user: { address: NormalizedAddress };
-          roles: string;
-        }>;
+        users: GraphQLConnection<PermissionUser>;
       }>;
     };
   };
@@ -137,7 +135,7 @@ describe("Registry.permissions", () => {
       registry: {
         permissions: {
           id: PermissionsId;
-          contract: { chainId: ChainId; address: NormalizedAddress };
+          contract: AccountId;
         };
       };
     }>(RegistryPermissions, { contract: V2_ETH_REGISTRY });
@@ -150,12 +148,7 @@ describe("Registry.permissions", () => {
 describe("Domain.permissions", () => {
   type DomainPermissionsResult = {
     domain: {
-      permissions: GraphQLConnection<{
-        id: PermissionsUserId;
-        resource: string;
-        user: { address: NormalizedAddress };
-        roles: string;
-      }>;
+      permissions: GraphQLConnection<PermissionUser>;
     };
   };
 
@@ -169,12 +162,7 @@ describe("Domain.permissions", () => {
     }
   `;
 
-  let allUsers: {
-    id: PermissionsUserId;
-    resource: string;
-    user: { address: NormalizedAddress };
-    roles: string;
-  }[];
+  let allUsers: PermissionUser[];
 
   beforeAll(async () => {
     const result = await request<DomainPermissionsResult>(DomainPermissions, {
@@ -263,12 +251,7 @@ describe("Account.permissions and Account.registryPermissions", () => {
   it("resolves permissions for an account with known roles", async () => {
     const result = await request<{
       account: {
-        permissions: GraphQLConnection<{
-          id: PermissionsUserId;
-          resource: string;
-          user: { address: NormalizedAddress };
-          roles: string;
-        }>;
+        permissions: GraphQLConnection<PermissionUser>;
       };
     }>(AccountPermissions, { address: targetAddress });
 
@@ -283,13 +266,7 @@ describe("Account.permissions and Account.registryPermissions", () => {
   it("resolves registry-scoped permissions for an account", async () => {
     const result = await request<{
       account: {
-        registryPermissions: GraphQLConnection<{
-          id: PermissionsUserId;
-          registry: { id: RegistryId };
-          resource: string;
-          user: { address: NormalizedAddress };
-          roles: string;
-        }>;
+        registryPermissions: GraphQLConnection<PermissionUser & { registry: { id: RegistryId } }>;
       };
     }>(AccountRegistryPermissions, { address: targetAddress });
 
@@ -318,7 +295,7 @@ describe("Resolver.permissions", () => {
         resolver: {
           permissions: {
             id: PermissionsId;
-            contract: { chainId: ChainId; address: NormalizedAddress };
+            contract: AccountId;
           };
         };
       };

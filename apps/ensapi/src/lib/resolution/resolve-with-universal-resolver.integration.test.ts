@@ -35,7 +35,6 @@ const NAME_WITH_ENCODED_LABELHASHES = interpretedLabelsToInterpretedName([
 
 const EXPECTED_DESCRIPTION = "example.eth";
 
-const CALLS = makeResolveCalls(namehashInterpretedName(NAME), { texts: ["description"] });
 const publicClient = getPublicClient(ensTestEnvChain.id);
 
 describe("executeResolveCallsWithUniversalResolver", () => {
@@ -43,7 +42,7 @@ describe("executeResolveCallsWithUniversalResolver", () => {
     await expect(
       executeResolveCallsWithUniversalResolver({
         name: NAME,
-        calls: CALLS,
+        calls: makeResolveCalls(namehashInterpretedName(NAME), { texts: ["description"] }),
         publicClient,
       }),
     ).resolves.toMatchObject([{ result: EXPECTED_DESCRIPTION }]);
@@ -64,7 +63,9 @@ describe("executeResolveCallsWithUniversalResolver", () => {
     await expect(
       executeResolveCallsWithUniversalResolver({
         name: NAME_WITH_ENCODED_LABELHASHES,
-        calls: CALLS,
+        calls: makeResolveCalls(namehashInterpretedName(NAME_WITH_ENCODED_LABELHASHES), {
+          texts: ["description"],
+        }),
         publicClient,
       }),
     ).resolves.toMatchObject([{ result: null }]);

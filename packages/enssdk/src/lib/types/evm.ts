@@ -75,7 +75,7 @@ export type DefaultableChainId = 0 | ChainId;
  */
 export interface AccountId {
   chainId: ChainId;
-  address: Address;
+  address: NormalizedAddress;
 }
 
 /**
