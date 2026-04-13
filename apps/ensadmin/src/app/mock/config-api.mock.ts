@@ -10,7 +10,15 @@ const serializedEnsIndexerPublicConfig = {
     labelSetVersion: 0,
   },
   indexedChainIds: [1, 8453, 59144, 10, 42161, 534352, 567],
-  databaseSchemaName: "alphaSchema0.34.0",
+  ensIndexerSchemaName: "alphaSchema0.34.0",
+  ensRainbowPublicConfig: {
+    version: "0.34.0",
+    labelSet: {
+      labelSetId: "subgraph",
+      highestLabelSetVersion: 0,
+    },
+    recordsCount: 100,
+  },
   isSubgraphCompatible: false,
   namespace: "mainnet",
   plugins: [
@@ -23,12 +31,9 @@ const serializedEnsIndexerPublicConfig = {
     "tokenscope",
   ],
   versionInfo: {
-    nodejs: "22.18.0",
     ponder: "0.11.43",
     ensIndexer: "0.35.0",
     ensDb: "0.35.0",
-    ensRainbow: "0.34.0",
-    ensRainbowSchema: 3,
     ensNormalize: "1.11.1",
   },
 } satisfies SerializedEnsIndexerConfigResponse;
@@ -43,5 +48,8 @@ export const serializedEnsApiPublicConfig = {
     canFallback: true,
     url: "https://api.thegraph.com/subgraphs/name/ensdomains/ens",
   },
-  version: "0.35.0",
+  versionInfo: {
+    ensApi: "0.35.0",
+    ensNormalize: "1.11.1",
+  },
 } satisfies SerializedEnsApiConfigResponse;

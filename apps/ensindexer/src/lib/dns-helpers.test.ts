@@ -3,8 +3,11 @@ import { bytesToHex, decodeEventLog, stringToHex, zeroHash } from "viem";
 import { packetToBytes } from "viem/ens";
 import { describe, expect, it } from "vitest";
 
+import "@/lib/__test__/mockLogger";
+
+import type { DNSEncodedLiteralName } from "enssdk";
+
 import { getDatasource } from "@ensnode/datasources";
-import type { DNSEncodedLiteralName } from "@ensnode/ensnode-sdk";
 
 import {
   decodeTXTData,

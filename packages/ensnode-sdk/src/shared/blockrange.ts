@@ -148,8 +148,9 @@ export function buildBlockNumberRange(
  * Merge multiple block number ranges into a single range.
  *
  * The resulting range is a union that covers all input ranges:
- * - Uses the minimum defined start block (undefined if no ranges define a start block)
- * - Uses the maximum defined end block (undefined if no ranges define an end block)
+ * - Uses the minimum start block when every input range has a start block
+ * - Uses the maximum end block when every input range has an end block
+ * - Leaves a side unbounded when any input range is unbounded on that side
  *
  * Returns an unbounded range if no ranges are provided.
  *
@@ -163,21 +164,38 @@ export function mergeBlockNumberRanges(...ranges: BlockNumberRange[]): BlockNumb
 
   let minStartBlock: BlockNumber | undefined;
   let maxEndBlock: BlockNumber | undefined;
+  let hasUnboundedStart = false;
+  let hasUnboundedEnd = false;
 
   for (const range of ranges) {
-    // Update min start block (lower values win, undefined is ignored)
-    if (range.startBlock !== undefined) {
-      if (minStartBlock === undefined || range.startBlock < minStartBlock) {
-        minStartBlock = range.startBlock;
-      }
+    if (range.startBlock === undefined) {
+      hasUnboundedStart = true;
+    } else if (minStartBlock === undefined || range.startBlock < minStartBlock) {
+      minStartBlock = range.startBlock;
     }
 
-    // Update max end block (higher values win, undefined is ignored)
-    if (range.endBlock !== undefined) {
-      if (maxEndBlock === undefined || range.endBlock > maxEndBlock) {
-        maxEndBlock = range.endBlock;
-      }
+    if (range.endBlock === undefined) {
+      hasUnboundedEnd = true;
+    } else if (maxEndBlock === undefined || range.endBlock > maxEndBlock) {
+      maxEndBlock = range.endBlock;
     }
+
+    // Early return if the merged range is already unbounded
+    if (hasUnboundedStart && hasUnboundedEnd) {
+      return buildBlockNumberRange(undefined, undefined);
+    }
+  }
+
+  // The merged range has an unbounded start if any input range has
+  // an unbounded start
+  if (hasUnboundedStart) {
+    minStartBlock = undefined;
+  }
+
+  // The merged range has an unbounded end if any input range has
+  // an unbounded end
+  if (hasUnboundedEnd) {
+    maxEndBlock = undefined;
   }
 
   return buildBlockNumberRange(minStartBlock, maxEndBlock);

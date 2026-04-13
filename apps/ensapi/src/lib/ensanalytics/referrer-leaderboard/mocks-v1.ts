@@ -1,8 +1,10 @@
 import {
-  ReferralProgramStatuses,
-  type ReferrerLeaderboard,
+  ReferralProgramAwardModels,
+  ReferralProgramEditionStatuses,
+  type ReferrerLeaderboardPagePieSplit,
   ReferrerLeaderboardPageResponseCodes,
   type ReferrerLeaderboardPageResponseOk,
+  type ReferrerLeaderboardPieSplit,
   type ReferrerMetrics,
 } from "@namehash/ens-referrals/v1";
 
@@ -173,9 +175,11 @@ export const dbResultsReferrerLeaderboard: ReferrerMetrics[] = [
   },
 ];
 
-export const emptyReferralLeaderboard: ReferrerLeaderboard = {
+export const emptyReferralLeaderboard: ReferrerLeaderboardPieSplit = {
+  awardModel: ReferralProgramAwardModels.PieSplit,
   rules: {
-    totalAwardPoolValue: parseUsdc("10000"),
+    awardModel: ReferralProgramAwardModels.PieSplit,
+    awardPool: parseUsdc("10000"),
     maxQualifiedReferrers: 10,
     startTime: 1735689600,
     endTime: 1767225599,
@@ -184,6 +188,7 @@ export const emptyReferralLeaderboard: ReferrerLeaderboard = {
       address: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
     },
     rulesUrl: new URL("https://example.com/rules"),
+    areAwardsDistributed: false,
   },
   aggregatedMetrics: {
     grandTotalReferrals: 0,
@@ -196,9 +201,11 @@ export const emptyReferralLeaderboard: ReferrerLeaderboard = {
   accurateAsOf: 1735689600,
 };
 
-export const populatedReferrerLeaderboard: ReferrerLeaderboard = {
+export const populatedReferrerLeaderboard: ReferrerLeaderboardPieSplit = {
+  awardModel: ReferralProgramAwardModels.PieSplit,
   rules: {
-    totalAwardPoolValue: parseUsdc("10000"),
+    awardModel: ReferralProgramAwardModels.PieSplit,
+    awardPool: parseUsdc("10000"),
     maxQualifiedReferrers: 10,
     startTime: 1735689600,
     endTime: 1767225599,
@@ -207,6 +214,7 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboard = {
       address: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
     },
     rulesUrl: new URL("https://example.com/rules"),
+    areAwardsDistributed: false,
   },
   aggregatedMetrics: {
     grandTotalReferrals: 68,
@@ -684,11 +692,13 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboard = {
   accurateAsOf: 1735689600,
 };
 
-export const referrerLeaderboardPageResponseOk: ReferrerLeaderboardPageResponseOk = {
+export const referrerLeaderboardPageResponseOk = {
   responseCode: ReferrerLeaderboardPageResponseCodes.Ok,
   data: {
+    awardModel: ReferralProgramAwardModels.PieSplit,
     rules: {
-      totalAwardPoolValue: parseUsdc("10000"),
+      awardModel: ReferralProgramAwardModels.PieSplit,
+      awardPool: parseUsdc("10000"),
       maxQualifiedReferrers: 10,
       startTime: 1735689600,
       endTime: 1767225599,
@@ -697,6 +707,7 @@ export const referrerLeaderboardPageResponseOk: ReferrerLeaderboardPageResponseO
         address: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
       },
       rulesUrl: new URL("https://example.com/rules"),
+      areAwardsDistributed: false,
     },
     referrers: [
       {
@@ -1094,7 +1105,7 @@ export const referrerLeaderboardPageResponseOk: ReferrerLeaderboardPageResponseO
       startIndex: 0,
       endIndex: 28,
     },
-    status: ReferralProgramStatuses.Active,
+    status: ReferralProgramEditionStatuses.Active,
     accurateAsOf: 1735689600,
-  },
-};
+  } satisfies ReferrerLeaderboardPagePieSplit,
+} satisfies ReferrerLeaderboardPageResponseOk;

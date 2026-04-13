@@ -1,12 +1,9 @@
-import { parse as parseConnectionString } from "pg-connection-string";
 import { prettifyError, ZodError, z } from "zod/v4";
 
 import { buildBlockNumberRange, PluginName, uniq } from "@ensnode/ensnode-sdk";
 import {
   buildRpcConfigsFromEnv,
-  DatabaseSchemaNameSchema,
   ENSNamespaceSchema,
-  EnsIndexerUrlSchema,
   invariant_isSubgraphCompatibleRequirements,
   invariant_rpcConfigsSpecifiedForRootChain,
   makeFullyPinnedLabelSetSchema,
@@ -15,35 +12,19 @@ import {
 } from "@ensnode/ensnode-sdk/internal";
 
 import { DEFAULT_SUBGRAPH_COMPAT } from "@/config/defaults";
+import ensDbConfig from "@/config/ensdb-config";
 import type { ENSIndexerEnvironment } from "@/config/environment";
 import { applyDefaults, EnvironmentDefaults } from "@/config/environment-defaults";
 
 import { derive_indexedChainIds } from "./derived-params";
-import type { ENSIndexerConfig } from "./types";
+import type { EnsIndexerConfig } from "./types";
 import {
   invariant_globalBlockrange,
   invariant_requiredDatasources,
+  invariant_requiredDatasourcesSubsetOfAll,
   invariant_rpcConfigsSpecifiedForIndexedChains,
   invariant_validContractConfigs,
 } from "./validations";
-
-export const DatabaseUrlSchema = z.string().refine(
-  (url) => {
-    try {
-      if (!url.startsWith("postgresql://") && !url.startsWith("postgres://")) {
-        return false;
-      }
-      const config = parseConnectionString(url);
-      return !!(config.host && config.port && config.database);
-    } catch {
-      return false;
-    }
-  },
-  {
-    error:
-      "Invalid PostgreSQL connection string. Expected format: postgresql://username:password@host:port/database",
-  },
-);
 
 // parses an env string bool with strict requirement of 'true' or 'false'
 const makeEnvStringBoolSchema = (envVarKey: string) =>
@@ -106,10 +87,7 @@ const IsSubgraphCompatibleSchema =
 
 const ENSIndexerConfigSchema = z
   .object({
-    databaseUrl: DatabaseUrlSchema,
-    databaseSchemaName: DatabaseSchemaNameSchema,
     rpcConfigs: RpcConfigsSchema,
-    ensIndexerUrl: EnsIndexerUrlSchema,
 
     namespace: ENSNamespaceSchema,
     plugins: PluginsSchema,
@@ -117,29 +95,11 @@ const ENSIndexerConfigSchema = z
     globalBlockrange: BlockrangeSchema,
     ensRainbowUrl: EnsRainbowUrlSchema,
     labelSet: LabelSetSchema,
+
+    // include the ENSDbConfig params in the ENSIndexerConfigSchema
+    ensDbUrl: z.string(),
+    ensIndexerSchemaName: z.string(),
   })
-  /**
-   * Invariant enforcement
-   *
-   * We enforce invariants across multiple values parsed with `ENSIndexerConfigSchema`
-   * by calling `.check()` function with relevant invariant-enforcing logic.
-   * Each such function has access to config values that were already parsed.
-   * If you need to ensure certain config value permutation, say across `namespace`
-   * and `plugins` values, you can define the `.check()` function callback with the following
-   * input param:
-   *
-   * ```ts
-   * ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "namespace" | "plugins">>
-   * ```
-   *
-   * This way, the invariant logic can access all information it needs, while keeping room
-   * for the derived values of ENSIndexerConfig to be computed after all `.check()`s.
-   */
-  .check(invariant_requiredDatasources)
-  .check(invariant_rpcConfigsSpecifiedForRootChain)
-  .check(invariant_rpcConfigsSpecifiedForIndexedChains)
-  .check(invariant_validContractConfigs)
-  .check(invariant_isSubgraphCompatibleRequirements)
   /**
    * Derived configuration
    *
@@ -152,7 +112,26 @@ const ENSIndexerConfigSchema = z
    * See {@link derive_indexedChainIds} for example.
    */
   .transform(derive_indexedChainIds)
-  // `invariant_globalBlockrange` has dependency on `derive_indexedChainIds`
+  /**
+   * Invariant enforcement
+   *
+   * We enforce invariants across the parsed and derived config values by calling
+   * `.check()`. Each check function has access to all parsed values plus derived properties
+   * (e.g. `indexedChainIds`).
+   *
+   * To constrain specific config value permutations, define the `.check()` callback
+   * with a `Pick` of the relevant properties:
+   *
+   * ```ts
+   * ctx: ZodCheckFnInput<Pick<EnsIndexerConfig, "namespace" | "plugins">>
+   * ```
+   */
+  .check(invariant_requiredDatasourcesSubsetOfAll)
+  .check(invariant_requiredDatasources)
+  .check(invariant_rpcConfigsSpecifiedForRootChain)
+  .check(invariant_validContractConfigs)
+  .check(invariant_isSubgraphCompatibleRequirements)
+  .check(invariant_rpcConfigsSpecifiedForIndexedChains)
   .check(invariant_globalBlockrange);
 
 /**
@@ -169,7 +148,7 @@ const ENSIndexerConfigSchema = z
  * @returns A validated ENSIndexerConfig object
  * @throws Error with formatted validation messages if environment parsing fails
  */
-export function buildConfigFromEnvironment(_env: ENSIndexerEnvironment): ENSIndexerConfig {
+export function buildConfigFromEnvironment(_env: ENSIndexerEnvironment): EnsIndexerConfig {
   try {
     // first parse the SUBGRAPH_COMPAT and NAMESPACE env variables
     const isSubgraphCompatible = IsSubgraphCompatibleSchema.parse(_env.SUBGRAPH_COMPAT);
@@ -188,9 +167,6 @@ export function buildConfigFromEnvironment(_env: ENSIndexerEnvironment): ENSInde
 
     // parse/validate with ENSIndexerConfigSchema
     return ENSIndexerConfigSchema.parse({
-      databaseUrl: env.DATABASE_URL,
-      databaseSchemaName: env.DATABASE_SCHEMA,
-      ensIndexerUrl: env.ENSINDEXER_URL,
       namespace: env.NAMESPACE,
       rpcConfigs,
 
@@ -205,6 +181,10 @@ export function buildConfigFromEnvironment(_env: ENSIndexerEnvironment): ENSInde
         labelSetId: env.LABEL_SET_ID,
         labelSetVersion: env.LABEL_SET_VERSION,
       },
+
+      // include the validated ENSDb config values in the parsed EnsIndexerConfig
+      ensDbUrl: ensDbConfig.ensDbUrl,
+      ensIndexerSchemaName: ensDbConfig.ensIndexerSchemaName,
     });
   } catch (error) {
     if (error instanceof ZodError) {

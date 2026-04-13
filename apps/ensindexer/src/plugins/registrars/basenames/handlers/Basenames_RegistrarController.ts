@@ -1,13 +1,13 @@
-import { ponder } from "ponder:registry";
+import { makeSubdomainNode } from "enssdk";
 
 import {
-  makeSubdomainNode,
   PluginName,
   type RegistrarActionPricingUnknown,
   type RegistrarActionReferralNotApplicable,
 } from "@ensnode/ensnode-sdk";
 
 import { getThisAccountId } from "@/lib/get-this-account-id";
+import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";
 import { getManagedName } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
 
@@ -45,7 +45,7 @@ export default function () {
    * Basenames_EARegistrarController Event Handlers
    */
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "Basenames_EARegistrarController:NameRegistered"),
     async ({ context, event }) => {
       const {
@@ -75,7 +75,7 @@ export default function () {
    * Basenames_RegistrarController Event Handlers
    */
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "Basenames_RegistrarController:NameRegistered"),
     async ({ context, event }) => {
       const {
@@ -101,7 +101,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "Basenames_RegistrarController:NameRenewed"),
     async ({ context, event }) => {
       const {
@@ -131,7 +131,7 @@ export default function () {
    * Basenames_UpgradeableRegistrarController Event Handlers
    */
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "Basenames_UpgradeableRegistrarController:NameRegistered"),
     async ({ context, event }) => {
       const {
@@ -157,7 +157,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "Basenames_UpgradeableRegistrarController:NameRenewed"),
     async ({ context, event }) => {
       const {

@@ -1,4 +1,5 @@
-import { type Address, concat, getAddress, pad, zeroAddress } from "viem";
+import type { Address } from "enssdk";
+import { concat, getAddress, pad, zeroAddress } from "viem";
 import { describe, expect, it } from "vitest";
 
 import {

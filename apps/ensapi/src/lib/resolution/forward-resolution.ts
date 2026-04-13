@@ -2,20 +2,23 @@ import config from "@/config";
 
 import { trace } from "@opentelemetry/api";
 import { replaceBigInts } from "@ponder/utils";
-import { namehash } from "viem";
-import { normalize } from "viem/ens";
-
 import {
   type AccountId,
+  asInterpretedName,
+  isNormalizedName,
+  type Node,
+  namehashInterpretedName,
+  normalizeName,
+  parseReverseName,
+} from "enssdk";
+
+import {
   type ForwardResolutionArgs,
   ForwardResolutionProtocolStep,
   type ForwardResolutionResult,
   getENSv1Registry,
-  isNormalizedName,
   isSelectionEmpty,
-  type Node,
   PluginName,
-  parseReverseName,
   type ResolverRecordsResponse,
   type ResolverRecordsSelection,
   TraceableENSProtocol,
@@ -43,6 +46,7 @@ import {
   executeResolveCalls,
   interpretRawCallsAndResults,
   makeResolveCalls,
+  tablifyCallResults,
 } from "@/lib/resolution/resolve-calls-and-results";
 import { executeResolveCallsWithUniversalResolver } from "@/lib/resolution/resolve-with-universal-resolver";
 import {
@@ -55,7 +59,7 @@ const tracer = trace.getTracer("forward-resolution");
 
 // NOTE: normalize generic name to force the normalization lib to lazy-load itself (otherwise the
 // first trace generated here would be unusually slow)
-normalize("example.eth");
+normalizeName("example.eth");
 
 /**
  * Implements Forward Resolution of record values for a specified ENS Name.
@@ -142,7 +146,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
             throw new Error(`Invariant: Name "${name}" must be normalized.`);
           }
 
-          const node: Node = namehash(name);
+          const node: Node = namehashInterpretedName(asInterpretedName(name));
           span.setAttribute("node", node);
 
           // if selection is empty, give them what they asked for
@@ -168,7 +172,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           ////////////////////////////
           // TODO: re-enable protocol acceleration for ENSv2
           if (config.ensIndexerPublicConfig.plugins.includes(PluginName.ENSv2)) {
-            // execute each record's call against the UniversalResolver
+            // execute each record's call against the UniversalResolverV2
             const rawResults = await withEnsProtocolStep(
               TraceableENSProtocol.ForwardResolution,
               ForwardResolutionProtocolStep.ExecuteResolveCalls,
@@ -181,11 +185,14 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
                 }),
             );
 
-            span.setAttribute("rawResults", JSON.stringify(replaceBigInts(rawResults, String)));
-
             // additional semantic interpretation of the raw results from the chain
             const results = interpretRawCallsAndResults(rawResults);
-            span.setAttribute("results", JSON.stringify(replaceBigInts(results, String)));
+
+            if (process.env.NODE_ENV !== "production") {
+              console.table(tablifyCallResults(rawResults, results));
+            } else {
+              logger.debug({ rawResults, results });
+            }
 
             // return record values
             return makeRecordsResponseFromResolveResults(selection, results);
@@ -408,11 +415,14 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
               }),
           );
 
-          span.setAttribute("rawResults", JSON.stringify(replaceBigInts(rawResults, String)));
-
           // additional semantic interpretation of the raw results from the chain
           const results = interpretRawCallsAndResults(rawResults);
-          span.setAttribute("results", JSON.stringify(replaceBigInts(results, String)));
+
+          if (process.env.NODE_ENV !== "production") {
+            console.table(tablifyCallResults(rawResults, results));
+          } else {
+            logger.debug({ rawResults, results });
+          }
 
           // return record values
           return makeRecordsResponseFromResolveResults(selection, results);

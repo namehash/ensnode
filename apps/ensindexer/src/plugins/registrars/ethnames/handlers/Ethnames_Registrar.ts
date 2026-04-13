@@ -1,15 +1,9 @@
-import { ponder } from "ponder:registry";
+import { interpretTokenIdAsLabelHash, makeSubdomainNode } from "enssdk";
 
-import {
-  type BlockRef,
-  bigIntToNumber,
-  interpretTokenIdAsLabelHash,
-  makeSubdomainNode,
-  PluginName,
-  type Subregistry,
-} from "@ensnode/ensnode-sdk";
+import { type BlockRef, bigIntToNumber, PluginName, type Subregistry } from "@ensnode/ensnode-sdk";
 
 import { getThisAccountId } from "@/lib/get-this-account-id";
+import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";
 import { getManagedName } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
 
@@ -25,7 +19,7 @@ import { upsertSubregistry } from "../../shared/lib/subregistry";
 export default function () {
   const pluginName = PluginName.Registrars;
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "Ethnames_BaseRegistrar:NameRegistered"),
     async ({ context, event }) => {
       const id = event.id;
@@ -58,7 +52,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "Ethnames_BaseRegistrar:NameRenewed"),
     async ({ context, event }) => {
       const id = event.id;

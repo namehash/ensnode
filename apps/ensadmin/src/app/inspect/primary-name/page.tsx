@@ -1,22 +1,21 @@
 "use client";
 
-import { getChainName } from "@namehash/namehash-ui";
-import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { AddressDisplay, getChainName } from "@namehash/namehash-ui";
+import type { Address, DefaultableChainId } from "enssdk";
+import { DEFAULT_EVM_CHAIN_ID } from "enssdk";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { useDebouncedValue } from "rooks";
-import { type Address, isAddress } from "viem";
+import { isAddress } from "viem";
 
-import {
-  DatasourceNames,
-  type ENSNamespaceId,
-  ENSNamespaceIds,
-  maybeGetDatasource,
-} from "@ensnode/datasources";
+import { getENSRootChainId } from "@ensnode/datasources";
 import { usePrimaryName } from "@ensnode/ensnode-react";
+import { getNamespaceSpecificValue } from "@ensnode/ensnode-sdk";
+import { makeDefaultableChainIdStringSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { RenderRequestsOutput } from "@/app/inspect/_components/render-requests-output";
+import { ResolveButton } from "@/app/inspect/_components/resolve-button";
 import { Pill } from "@/components/pill";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,45 +26,69 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
+import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
+import { getENSIP19SupportedChainIds } from "@/lib/get-ensip19-supported-chain-ids";
 
-const EXAMPLE_INPUT = [
-  { address: "0x179A862703a4adfb29896552DF9e307980D19285", chainId: "1" }, // greg mainnet
-  { address: "0x179A862703a4adfb29896552DF9e307980D19285", chainId: "8453" }, // greg base
-  { address: "0xe7a863d7cdC48Cc0CcB135c9c0B4c1fafA3a2e69", chainId: "1" }, // katzman mainnet
-];
+import { EXAMPLE_ADDRESSES } from "../_lib/example-addresses";
 
-const getENSIP19SupportedChainIds = (namespace: ENSNamespaceId) =>
-  [
-    maybeGetDatasource(namespace, DatasourceNames.ReverseResolverBase),
-    maybeGetDatasource(namespace, DatasourceNames.ReverseResolverLinea),
-    maybeGetDatasource(namespace, DatasourceNames.ReverseResolverOptimism),
-    maybeGetDatasource(namespace, DatasourceNames.ReverseResolverArbitrum),
-    maybeGetDatasource(namespace, DatasourceNames.ReverseResolverScroll),
-  ]
-    .filter((ds) => ds !== undefined)
-    .map((ds) => ds.chain.id);
+const defaultableChainIdStringSchema = makeDefaultableChainIdStringSchema("chainId");
 
 // TODO: showcase current ENSNode configuration and viable acceleration pathways?
 // TODO: use shadcn/form, react-hook-form, and zod to make all of this nicer aross the board
 // TODO: sync form state to query params, current just defaulting is supported
 export default function ResolvePrimaryNameInspector() {
+  const router = useRouter();
   const searchParams = useSearchParams();
+  const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
 
-  const [address, setAddress] = useState(searchParams.get("address") || EXAMPLE_INPUT[0].address);
-  const [chainId, setChainId] = useState(searchParams.get("chainId") || EXAMPLE_INPUT[0].chainId);
+  const namespace = useActiveNamespace();
+  const exampleAddresses = useMemo(
+    () => getNamespaceSpecificValue(namespace, EXAMPLE_ADDRESSES),
+    [namespace],
+  );
+
+  const addressFromQuery = searchParams.get("address")?.trim() || null;
+  const chainIdParam = searchParams.get("chainId");
+  const defaultChainId = getENSRootChainId(namespace) as DefaultableChainId;
+  const chainIdFromQuery: DefaultableChainId = chainIdParam
+    ? (defaultableChainIdStringSchema.safeParse(chainIdParam).data ?? defaultChainId)
+    : defaultChainId;
+
+  const [address, setAddress] = useState(addressFromQuery || exampleAddresses[0].address);
+  const [chainId, setChainId] = useState<DefaultableChainId>(chainIdFromQuery);
   const [debouncedAddress] = useDebouncedValue(address, 150);
 
-  const additionalChainIds = getENSIP19SupportedChainIds(ENSNamespaceIds.Mainnet);
+  useEffect(() => {
+    setAddress(addressFromQuery ?? exampleAddresses[0].address);
+  }, [addressFromQuery, exampleAddresses]);
 
-  const canQuery = !!debouncedAddress && isAddress(debouncedAddress);
+  useEffect(() => {
+    setChainId(chainIdFromQuery);
+  }, [chainIdFromQuery]);
+
+  const navigateToAddress = (addr: Address, chain: DefaultableChainId) => {
+    setAddress(addr);
+    setChainId(chain);
+    const path = `/inspect/primary-name?address=${encodeURIComponent(
+      addr,
+    )}&chainId=${encodeURIComponent(String(chain))}`;
+    const href = retainCurrentRawConnectionUrlParam(path);
+    router.push(href);
+  };
+
+  const additionalChainIds = getENSIP19SupportedChainIds(namespace);
+
+  const validAddress: Address | null =
+    debouncedAddress && isAddress(debouncedAddress) ? debouncedAddress : null;
 
   const accelerated = usePrimaryName({
-    address: debouncedAddress as Address,
-    chainId: Number(chainId),
+    address: validAddress,
+    chainId,
     accelerate: true,
     trace: true,
     query: {
-      enabled: canQuery,
+      enabled: !!validAddress,
       staleTime: 0,
       refetchInterval: 0,
       refetchOnMount: false,
@@ -76,12 +99,12 @@ export default function ResolvePrimaryNameInspector() {
   });
 
   const unaccelerated = usePrimaryName({
-    address: debouncedAddress as Address,
-    chainId: Number(chainId),
+    address: validAddress,
+    chainId,
     accelerate: false,
     trace: true,
     query: {
-      enabled: canQuery,
+      enabled: !!validAddress,
       staleTime: 0,
       refetchInterval: 0,
       refetchOnMount: false,
@@ -104,11 +127,11 @@ export default function ResolvePrimaryNameInspector() {
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <div className="flex flex-row gap-4">
-            <Label htmlFor="name" className="flex-[2] flex flex-col gap-1">
+            <Label htmlFor="name" className="flex-2 flex flex-col gap-1">
               EVM Address
               <Input
                 id="name"
-                placeholder={EXAMPLE_INPUT[0].address}
+                placeholder={exampleAddresses[0].address}
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 autoComplete="off"
@@ -118,13 +141,20 @@ export default function ResolvePrimaryNameInspector() {
             </Label>
             <Label htmlFor="chainId" className="flex-1 flex flex-col gap-1">
               ENSIP-19 Chain ID
-              <Select value={chainId} onValueChange={setChainId}>
+              <Select
+                value={String(chainId)}
+                onValueChange={(val) => setChainId(defaultableChainIdStringSchema.parse(val))}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="0">0 (Default EVM Chain Address)</SelectItem>
-                  <SelectItem value="1">1 (Mainnet)</SelectItem>
+                  <SelectItem value={String(DEFAULT_EVM_CHAIN_ID)}>
+                    {DEFAULT_EVM_CHAIN_ID} (Default EVM Chain Address)
+                  </SelectItem>
+                  <SelectItem value={String(defaultChainId)}>
+                    {defaultChainId} ({getChainName(defaultChainId)} — ENS Root Chain)
+                  </SelectItem>
                   {additionalChainIds.map((chainId) => (
                     <SelectItem key={chainId} value={chainId.toString()}>
                       {chainId} ({getChainName(chainId)})
@@ -138,23 +168,25 @@ export default function ResolvePrimaryNameInspector() {
             <span className="text-sm font-medium leading-none">Examples:</span>
             {/* -mx-6 px-6 insets the scroll container against card for prettier scrolling */}
             <div className="flex flex-row overflow-x-scroll gap-2 no-scrollbar -mx-6 px-6">
-              {EXAMPLE_INPUT.map(({ address, chainId }) => (
+              {exampleAddresses.map(({ address: exampleAddress, name }) => (
                 <Pill
-                  key={`${address}-${chainId}`}
-                  onClick={() => {
-                    setAddress(address);
-                    setChainId(chainId);
-                  }}
+                  key={exampleAddress}
+                  onClick={() => navigateToAddress(exampleAddress, chainId)}
                   className="font-mono"
                 >
-                  {address} ({getChainName(Number(chainId))})
+                  <AddressDisplay address={exampleAddress} /> ({name})
                 </Pill>
               ))}
             </div>
           </div>
         </CardContent>
         <CardFooter>
-          <Button onClick={() => refetch()}>Refresh</Button>
+          <ResolveButton
+            canResolve={isAddress(address.trim())}
+            hasChanged={address.trim() !== addressFromQuery || chainId !== chainIdFromQuery}
+            onRefetch={refetch}
+            onNavigate={() => navigateToAddress(address.trim() as Address, chainId)}
+          />
         </CardFooter>
       </Card>
 

@@ -1,15 +1,16 @@
-import type { Address } from "viem";
+import type { Address } from "enssdk";
 import { describe, expect, it, vi } from "vitest";
 
 import { priceEth, priceUsdc } from "@ensnode/ensnode-sdk";
 
-import type { ReferrerLeaderboard } from "./leaderboard";
+import type { ReferrerLeaderboardPieSplit } from "./award-models/pie-split/leaderboard";
+import type { AwardedReferrerMetricsPieSplit } from "./award-models/pie-split/metrics";
 import {
   buildReferrerLeaderboardPageContext,
   type ReferrerLeaderboardPageContext,
   type ReferrerLeaderboardPageParams,
-} from "./leaderboard-page";
-import type { AwardedReferrerMetrics } from "./referrer-metrics";
+} from "./award-models/shared/leaderboard-page";
+import { ReferralProgramAwardModels } from "./award-models/shared/rules";
 
 describe("buildReferrerLeaderboardPageContext", () => {
   const pageParams: ReferrerLeaderboardPageParams = {
@@ -18,9 +19,11 @@ describe("buildReferrerLeaderboardPageContext", () => {
   };
 
   it("correctly evaluates `hasNext` when `leaderboard.referrers.size` and `recordsPerPage` are equal", () => {
-    const leaderboard: ReferrerLeaderboard = {
+    const leaderboard: ReferrerLeaderboardPieSplit = {
+      awardModel: ReferralProgramAwardModels.PieSplit,
       rules: {
-        totalAwardPoolValue: priceUsdc(10000n),
+        awardModel: ReferralProgramAwardModels.PieSplit,
+        awardPool: priceUsdc(10000n),
         maxQualifiedReferrers: 10,
         startTime: 1764547200,
         endTime: 1767225599,
@@ -29,6 +32,7 @@ describe("buildReferrerLeaderboardPageContext", () => {
           address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
         },
         rulesUrl: new URL("https://example.com/rules"),
+        areAwardsDistributed: false,
       },
       aggregatedMetrics: {
         grandTotalReferrals: 17,
@@ -37,7 +41,7 @@ describe("buildReferrerLeaderboardPageContext", () => {
         grandTotalQualifiedReferrersFinalScore: 28.05273061366773,
         minFinalScoreToQualify: 0,
       },
-      referrers: new Map<Address, AwardedReferrerMetrics>([
+      referrers: new Map<Address, AwardedReferrerMetricsPieSplit>([
         [
           "0x03c098d2bed4609e6ed9beb2c4877741f45f290d",
           {
@@ -104,9 +108,11 @@ describe("buildReferrerLeaderboardPageContext", () => {
   });
 
   it("Correctly builds the pagination context when `leaderboard.referrers.size` is 0", () => {
-    const leaderboard: ReferrerLeaderboard = {
+    const leaderboard: ReferrerLeaderboardPieSplit = {
+      awardModel: ReferralProgramAwardModels.PieSplit,
       rules: {
-        totalAwardPoolValue: priceUsdc(10000n),
+        awardModel: ReferralProgramAwardModels.PieSplit,
+        awardPool: priceUsdc(10000n),
         maxQualifiedReferrers: 10,
         startTime: 1764547200,
         endTime: 1767225599,
@@ -115,6 +121,7 @@ describe("buildReferrerLeaderboardPageContext", () => {
           address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
         },
         rulesUrl: new URL("https://example.com/rules"),
+        areAwardsDistributed: false,
       },
       aggregatedMetrics: {
         grandTotalReferrals: 17,
@@ -123,7 +130,7 @@ describe("buildReferrerLeaderboardPageContext", () => {
         grandTotalQualifiedReferrersFinalScore: 28.05273061366773,
         minFinalScoreToQualify: 0,
       },
-      referrers: new Map<Address, AwardedReferrerMetrics>(),
+      referrers: new Map<Address, AwardedReferrerMetricsPieSplit>(),
       accurateAsOf: 1764580368,
     };
 

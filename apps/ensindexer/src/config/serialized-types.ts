@@ -1,4 +1,5 @@
-import type { ChainId, ChainIdString, UrlString } from "@ensnode/ensnode-sdk";
+import type { ChainId, ChainIdString, UrlString } from "enssdk";
+
 import type { RpcConfig } from "@ensnode/ensnode-sdk/internal";
 import type { EnsRainbowClientLabelSet } from "@ensnode/ensrainbow-sdk";
 
@@ -25,15 +26,7 @@ export interface SerializedRpcConfig extends Omit<RpcConfig, "httpRPCs" | "webso
  * Serialized representation of {@link ENSIndexerConfig}
  */
 export interface SerializedENSIndexerConfig
-  extends Omit<
-    ENSIndexerConfig,
-    "ensIndexerUrl" | "ensRainbowUrl" | "indexedChainIds" | "rpcConfigs" | "plugins"
-  > {
-  /**
-   * Serialized representation of {@link ENSIndexerConfig.ensIndexerUrl}.
-   */
-  ensIndexerUrl: UrlString;
-
+  extends Omit<ENSIndexerConfig, "ensRainbowUrl" | "indexedChainIds" | "rpcConfigs" | "plugins"> {
   /**
    * Serialized representation of {@link ENSIndexerConfig.ensRainbowUrl}.
    */

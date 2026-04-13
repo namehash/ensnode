@@ -1,19 +1,25 @@
-import type { SerializedPriceEth, SerializedPriceUsdc } from "@ensnode/ensnode-sdk";
-
-import type { AggregatedReferrerMetrics } from "../aggregations";
-import type { ReferralProgramEditionConfig, ReferralProgramEditionSlug } from "../edition";
 import type {
-  ReferrerEditionMetricsRanked,
-  ReferrerEditionMetricsUnranked,
-} from "../edition-metrics";
+  SerializedReferralProgramEditionSummaryPieSplit,
+  SerializedReferralProgramRulesPieSplit,
+  SerializedReferrerEditionMetricsPieSplit,
+  SerializedReferrerLeaderboardPagePieSplit,
+} from "../award-models/pie-split/api/serialized-types";
+import type {
+  SerializedReferralProgramEditionSummaryRevShareLimit,
+  SerializedReferralProgramRulesRevShareLimit,
+  SerializedReferrerEditionMetricsRevShareLimit,
+  SerializedReferrerLeaderboardPageRevShareLimit,
+} from "../award-models/rev-share-limit/api/serialized-types";
+import type { ReferralProgramEditionSlug } from "../edition";
+import type { ReferrerEditionMetrics } from "../edition-metrics";
+import type { ReferralProgramEditionSummary } from "../edition-summary";
 import type { ReferrerLeaderboardPage } from "../leaderboard-page";
-import type { AwardedReferrerMetrics, UnrankedReferrerMetrics } from "../referrer-metrics";
 import type { ReferralProgramRules } from "../rules";
 import type {
-  ReferralProgramEditionConfigSetData,
-  ReferralProgramEditionConfigSetResponse,
-  ReferralProgramEditionConfigSetResponseError,
-  ReferralProgramEditionConfigSetResponseOk,
+  ReferralProgramEditionSummariesData,
+  ReferralProgramEditionSummariesResponse,
+  ReferralProgramEditionSummariesResponseError,
+  ReferralProgramEditionSummariesResponseOk,
   ReferrerLeaderboardPageResponse,
   ReferrerLeaderboardPageResponseError,
   ReferrerLeaderboardPageResponseOk,
@@ -25,74 +31,23 @@ import type {
 /**
  * Serialized representation of {@link ReferralProgramRules}.
  */
-export interface SerializedReferralProgramRules
-  extends Omit<ReferralProgramRules, "totalAwardPoolValue" | "rulesUrl"> {
-  totalAwardPoolValue: SerializedPriceUsdc;
-  rulesUrl: string;
-}
-
-/**
- * Serialized representation of {@link AwardedReferrerMetrics}.
- */
-export interface SerializedAwardedReferrerMetrics
-  extends Omit<AwardedReferrerMetrics, "totalRevenueContribution" | "awardPoolApproxValue"> {
-  totalRevenueContribution: SerializedPriceEth;
-  awardPoolApproxValue: SerializedPriceUsdc;
-}
-
-/**
- * Serialized representation of {@link UnrankedReferrerMetrics}.
- */
-export interface SerializedUnrankedReferrerMetrics
-  extends Omit<UnrankedReferrerMetrics, "totalRevenueContribution" | "awardPoolApproxValue"> {
-  totalRevenueContribution: SerializedPriceEth;
-  awardPoolApproxValue: SerializedPriceUsdc;
-}
-
-/**
- * Serialized representation of {@link AggregatedReferrerMetrics}.
- */
-export interface SerializedAggregatedReferrerMetrics
-  extends Omit<AggregatedReferrerMetrics, "grandTotalRevenueContribution"> {
-  grandTotalRevenueContribution: SerializedPriceEth;
-}
+export type SerializedReferralProgramRules =
+  | SerializedReferralProgramRulesPieSplit
+  | SerializedReferralProgramRulesRevShareLimit;
 
 /**
  * Serialized representation of {@link ReferrerLeaderboardPage}.
  */
-export interface SerializedReferrerLeaderboardPage
-  extends Omit<ReferrerLeaderboardPage, "rules" | "referrers" | "aggregatedMetrics"> {
-  rules: SerializedReferralProgramRules;
-  referrers: SerializedAwardedReferrerMetrics[];
-  aggregatedMetrics: SerializedAggregatedReferrerMetrics;
-}
+export type SerializedReferrerLeaderboardPage =
+  | SerializedReferrerLeaderboardPagePieSplit
+  | SerializedReferrerLeaderboardPageRevShareLimit;
 
 /**
- * Serialized representation of {@link ReferrerEditionMetricsRanked}.
- */
-export interface SerializedReferrerEditionMetricsRanked
-  extends Omit<ReferrerEditionMetricsRanked, "rules" | "referrer" | "aggregatedMetrics"> {
-  rules: SerializedReferralProgramRules;
-  referrer: SerializedAwardedReferrerMetrics;
-  aggregatedMetrics: SerializedAggregatedReferrerMetrics;
-}
-
-/**
- * Serialized representation of {@link ReferrerEditionMetricsUnranked}.
- */
-export interface SerializedReferrerEditionMetricsUnranked
-  extends Omit<ReferrerEditionMetricsUnranked, "rules" | "referrer" | "aggregatedMetrics"> {
-  rules: SerializedReferralProgramRules;
-  referrer: SerializedUnrankedReferrerMetrics;
-  aggregatedMetrics: SerializedAggregatedReferrerMetrics;
-}
-
-/**
- * Serialized representation of {@link ReferrerEditionMetrics} (union of ranked and unranked).
+ * Serialized representation of {@link ReferrerEditionMetrics}.
  */
 export type SerializedReferrerEditionMetrics =
-  | SerializedReferrerEditionMetricsRanked
-  | SerializedReferrerEditionMetricsUnranked;
+  | SerializedReferrerEditionMetricsPieSplit
+  | SerializedReferrerEditionMetricsRevShareLimit;
 
 /**
  * Serialized representation of {@link ReferrerLeaderboardPageResponseError}.
@@ -117,12 +72,11 @@ export type SerializedReferrerLeaderboardPageResponse =
   | SerializedReferrerLeaderboardPageResponseError;
 
 /**
- * Serialized representation of {@link ReferralProgramEditionConfig}.
+ * Serialized representation of {@link ReferralProgramEditionSummary}.
  */
-export interface SerializedReferralProgramEditionConfig
-  extends Omit<ReferralProgramEditionConfig, "rules"> {
-  rules: SerializedReferralProgramRules;
-}
+export type SerializedReferralProgramEditionSummary =
+  | SerializedReferralProgramEditionSummaryPieSplit
+  | SerializedReferralProgramEditionSummaryRevShareLimit;
 
 /**
  * Serialized representation of referrer metrics data for requested editions.
@@ -157,32 +111,32 @@ export type SerializedReferrerMetricsEditionsResponse =
   | SerializedReferrerMetricsEditionsResponseError;
 
 /**
- * Serialized representation of {@link ReferralProgramEditionConfigSetData}.
+ * Serialized representation of {@link ReferralProgramEditionSummariesData}.
  */
-export interface SerializedReferralProgramEditionConfigSetData
-  extends Omit<ReferralProgramEditionConfigSetData, "editions"> {
-  editions: SerializedReferralProgramEditionConfig[];
+export interface SerializedReferralProgramEditionSummariesData
+  extends Omit<ReferralProgramEditionSummariesData, "editions"> {
+  editions: SerializedReferralProgramEditionSummary[];
 }
 
 /**
- * Serialized representation of {@link ReferralProgramEditionConfigSetResponseOk}.
+ * Serialized representation of {@link ReferralProgramEditionSummariesResponseOk}.
  */
-export interface SerializedReferralProgramEditionConfigSetResponseOk
-  extends Omit<ReferralProgramEditionConfigSetResponseOk, "data"> {
-  data: SerializedReferralProgramEditionConfigSetData;
+export interface SerializedReferralProgramEditionSummariesResponseOk
+  extends Omit<ReferralProgramEditionSummariesResponseOk, "data"> {
+  data: SerializedReferralProgramEditionSummariesData;
 }
 
 /**
- * Serialized representation of {@link ReferralProgramEditionConfigSetResponseError}.
+ * Serialized representation of {@link ReferralProgramEditionSummariesResponseError}.
  *
  * Note: All fields are already serializable, so this type is identical to the source type.
  */
-export type SerializedReferralProgramEditionConfigSetResponseError =
-  ReferralProgramEditionConfigSetResponseError;
+export type SerializedReferralProgramEditionSummariesResponseError =
+  ReferralProgramEditionSummariesResponseError;
 
 /**
- * Serialized representation of {@link ReferralProgramEditionConfigSetResponse}.
+ * Serialized representation of {@link ReferralProgramEditionSummariesResponse}.
  */
-export type SerializedReferralProgramEditionConfigSetResponse =
-  | SerializedReferralProgramEditionConfigSetResponseOk
-  | SerializedReferralProgramEditionConfigSetResponseError;
+export type SerializedReferralProgramEditionSummariesResponse =
+  | SerializedReferralProgramEditionSummariesResponseOk
+  | SerializedReferralProgramEditionSummariesResponseError;

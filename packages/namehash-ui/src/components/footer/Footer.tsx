@@ -22,7 +22,7 @@ const footerProducts = [
   },
   {
     name: "ENS Referral Program",
-    href: "/ens-referral-awards",
+    href: "https://ensawards.org/ens-referral-program",
   },
   {
     name: "ENSAwards",

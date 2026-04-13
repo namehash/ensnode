@@ -1,10 +1,9 @@
 "use client";
 
+import type { UrlString } from "enssdk";
 import { ChevronRight, type LucideIcon } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
-
-import type { UrlString } from "@ensnode/ensnode-sdk";
+import { usePathname } from "next/navigation";
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
@@ -17,6 +16,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
+import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 
 export function NavMain({
   items,
@@ -32,30 +32,8 @@ export function NavMain({
     }[];
   }[];
 }) {
-  const searchParams = useSearchParams();
+  const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
   const pathname = usePathname();
-
-  const appendQueryParams = (url: UrlString) => {
-    if (pathname.startsWith("/inspector") && !url.startsWith("/inspector")) {
-      const params = new URLSearchParams(searchParams.toString());
-      params.delete("strategy");
-      params.delete("name");
-
-      if (params.toString()) {
-        const separator = url.includes("?") ? "&" : "?";
-        return `${url}${separator}${params.toString()}`;
-      }
-
-      return url;
-    }
-
-    if (searchParams?.toString()) {
-      const separator = url.includes("?") ? "&" : "?";
-      return `${url}${separator}${searchParams.toString()}`;
-    }
-
-    return url;
-  };
 
   const isActive = (url: UrlString): boolean => {
     const urlPathname = url.split("?")[0];
@@ -69,7 +47,7 @@ export function NavMain({
       <SidebarMenu>
         {items.map((item) => {
           const hasItems = item.items && item.items.length > 0;
-          const itemUrl = appendQueryParams(item.url);
+          const itemUrl = retainCurrentRawConnectionUrlParam(item.url);
           const isItemActive = isActive(item.url);
 
           if (!hasItems)
@@ -105,7 +83,7 @@ export function NavMain({
                 <CollapsibleContent>
                   <SidebarMenuSub>
                     {item.items?.map((subItem) => {
-                      const subItemUrl = appendQueryParams(subItem.url);
+                      const subItemUrl = retainCurrentRawConnectionUrlParam(subItem.url);
                       const isSubItemActive = isActive(subItem.url);
 
                       return (

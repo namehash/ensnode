@@ -1,15 +1,16 @@
 import {
   buildReferrerMetrics,
+  type ReferralEvent,
   type ReferralProgramRules,
   type ReferrerMetrics,
 } from "@namehash/ens-referrals/v1";
-import { and, count, desc, eq, gte, isNotNull, lte, ne, sql, sum } from "drizzle-orm";
-import { type Address, zeroAddress } from "viem";
+import { and, asc, count, desc, eq, gte, isNotNull, lte, ne, sql, sum } from "drizzle-orm";
+import { type Address, stringifyAccountId } from "enssdk";
+import { zeroAddress } from "viem";
 
-import * as schema from "@ensnode/ensnode-schema";
-import { deserializeDuration, formatAccountId, priceEth } from "@ensnode/ensnode-sdk";
+import { deserializeDuration, priceEth } from "@ensnode/ensnode-sdk";
 
-import { db } from "@/lib/db";
+import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import logger from "@/lib/logger";
 
 /**
@@ -37,35 +38,38 @@ export const getReferrerMetrics = async (
    */
 
   try {
-    const records = await db
+    const records = await ensDb
       .select({
-        referrer: schema.registrarActions.decodedReferrer,
+        referrer: ensIndexerSchema.registrarActions.decodedReferrer,
         totalReferrals: count().as("total_referrals"),
-        totalIncrementalDuration: sum(schema.registrarActions.incrementalDuration).as(
+        totalIncrementalDuration: sum(ensIndexerSchema.registrarActions.incrementalDuration).as(
           "total_incremental_duration",
         ),
         // Note: Using raw SQL for COALESCE because Drizzle doesn't natively support it yet.
         // See: https://github.com/drizzle-team/drizzle-orm/issues/3708
         totalRevenueContribution:
-          sql<string>`COALESCE(SUM(${schema.registrarActions.total}), 0)`.as(
+          sql<string>`COALESCE(SUM(${ensIndexerSchema.registrarActions.total}), 0)`.as(
             "total_revenue_contribution",
           ),
       })
-      .from(schema.registrarActions)
+      .from(ensIndexerSchema.registrarActions)
       .where(
         and(
           // Filter by timestamp range
-          gte(schema.registrarActions.timestamp, BigInt(rules.startTime)),
-          lte(schema.registrarActions.timestamp, BigInt(rules.endTime)),
+          gte(ensIndexerSchema.registrarActions.timestamp, BigInt(rules.startTime)),
+          lte(ensIndexerSchema.registrarActions.timestamp, BigInt(rules.endTime)),
           // Filter by decodedReferrer not null
-          isNotNull(schema.registrarActions.decodedReferrer),
+          isNotNull(ensIndexerSchema.registrarActions.decodedReferrer),
           // Filter by decodedReferrer not zero address
-          ne(schema.registrarActions.decodedReferrer, zeroAddress),
+          ne(ensIndexerSchema.registrarActions.decodedReferrer, zeroAddress),
           // Filter by subregistryId matching the provided subregistryId
-          eq(schema.registrarActions.subregistryId, formatAccountId(rules.subregistryId)),
+          eq(
+            ensIndexerSchema.registrarActions.subregistryId,
+            stringifyAccountId(rules.subregistryId),
+          ),
         ),
       )
-      .groupBy(schema.registrarActions.decodedReferrer)
+      .groupBy(ensIndexerSchema.registrarActions.decodedReferrer)
       .orderBy(desc(sql`total_incremental_duration`));
 
     // Type assertion: The WHERE clause in the query above guarantees non-null values for:
@@ -91,5 +95,71 @@ export const getReferrerMetrics = async (
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     logger.error({ error }, "Failed to fetch referrer metrics from database");
     throw new Error(`Failed to fetch referrer metrics from database: ${errorMessage}`);
+  }
+};
+
+/**
+ * Get raw referral events from the database for the sequential race algorithm (V1 API).
+ *
+ * Returns individual rows (no GROUP BY) ordered chronologically for deterministic race processing.
+ *
+ * @param rules - The referral program rules for filtering registrar actions
+ * @returns A promise that resolves to an array of {@link ReferralEvent} values.
+ * @throws Error if the database query fails.
+ */
+export const getReferralEvents = async (rules: ReferralProgramRules): Promise<ReferralEvent[]> => {
+  try {
+    const records = await ensDb
+      .select({
+        id: ensIndexerSchema.registrarActions.id,
+        referrer: ensIndexerSchema.registrarActions.decodedReferrer,
+        timestamp: ensIndexerSchema.registrarActions.timestamp,
+        incrementalDuration: ensIndexerSchema.registrarActions.incrementalDuration,
+        // Note: Using raw SQL for COALESCE because Drizzle doesn't natively support it yet.
+        // See: https://github.com/drizzle-team/drizzle-orm/issues/3708
+        total: sql<string>`COALESCE(${ensIndexerSchema.registrarActions.total}, 0)`.as("total"),
+      })
+      .from(ensIndexerSchema.registrarActions)
+      .where(
+        and(
+          // Filter by timestamp range
+          gte(ensIndexerSchema.registrarActions.timestamp, BigInt(rules.startTime)),
+          lte(ensIndexerSchema.registrarActions.timestamp, BigInt(rules.endTime)),
+          // Filter by decodedReferrer not null
+          isNotNull(ensIndexerSchema.registrarActions.decodedReferrer),
+          // Filter by decodedReferrer not zero address
+          ne(ensIndexerSchema.registrarActions.decodedReferrer, zeroAddress),
+          // Filter by subregistryId matching the provided subregistryId
+          eq(
+            ensIndexerSchema.registrarActions.subregistryId,
+            stringifyAccountId(rules.subregistryId),
+          ),
+        ),
+      )
+      .orderBy(asc(ensIndexerSchema.registrarActions.id));
+
+    // Type assertion: All fields in NonNullRecord are guaranteed non-null:
+    // 1. `referrer` is guaranteed non-null by isNotNull WHERE filter
+    // 2. `timestamp`, `incrementalDuration` are guaranteed non-null by database schema constraints (NOT NULL columns)
+    // 3. `total` is guaranteed non-null by COALESCE with 0
+    interface NonNullRecord {
+      id: string;
+      referrer: Address;
+      timestamp: bigint;
+      incrementalDuration: bigint;
+      total: string;
+    }
+
+    return (records as NonNullRecord[]).map((record) => ({
+      id: record.id,
+      referrer: record.referrer,
+      timestamp: Number(record.timestamp),
+      incrementalDuration: Number(record.incrementalDuration),
+      incrementalRevenueContribution: priceEth(BigInt(record.total)),
+    }));
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    logger.error({ error }, "Failed to fetch referral events from database");
+    throw new Error(`Failed to fetch referral events from database: ${errorMessage}`);
   }
 };

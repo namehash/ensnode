@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/ensnode-react",
-  "version": "1.5.1",
+  "version": "1.9.0",
   "type": "module",
   "description": "React hooks and providers for ENSNode",
   "license": "MIT",
@@ -49,13 +49,14 @@
     "@tanstack/react-query": "^5.62.14",
     "@testing-library/react": "catalog:",
     "@types/node": "catalog:",
-    "@types/react": "19.2.7",
-    "react": "19.2.1",
+    "@types/react": "catalog:",
+    "react": "catalog:",
     "tsup": "^8.3.6",
     "typescript": "catalog:",
     "vitest": "catalog:"
   },
   "dependencies": {
-    "@ensnode/ensnode-sdk": "workspace:*"
+    "@ensnode/ensnode-sdk": "workspace:*",
+    "enssdk": "workspace:*"
   }
 }

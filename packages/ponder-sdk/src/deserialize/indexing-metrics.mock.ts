@@ -1,10 +1,10 @@
 import {
   type ChainIndexingMetricsRealtime,
   ChainIndexingStates,
-  PonderAppCommands,
   type PonderIndexingMetrics,
   PonderIndexingOrderings,
 } from "../indexing-metrics";
+import { PonderAppCommands } from "../ponder-app-context";
 
 export const indexingMetricsMockValid = {
   text: `

@@ -1,12 +1,12 @@
 import config from "@/config";
 
-import type { Context } from "ponder:registry";
-import schema from "ponder:schema";
-import type { Address, Hash, Hex } from "viem";
+import type { Address, Hex, Node } from "enssdk";
+import type { Hash } from "viem";
 
-import { hasNullByte, type Node, stripNullBytes, uniq } from "@ensnode/ensnode-sdk";
+import { hasNullByte, stripNullBytes, uniq } from "@ensnode/ensnode-sdk";
 
 import { parseDnsTxtRecordArgs } from "@/lib/dns-helpers";
+import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import { sharedEventValues, upsertAccount, upsertResolver } from "@/lib/subgraph/db-helpers";
 import { makeResolverId } from "@/lib/subgraph/ids";
@@ -25,7 +25,7 @@ export async function handleAddrChanged({
   context,
   event,
 }: {
-  context: Context;
+  context: IndexingEngineContext;
   event: EventWithArgs<{ node: Node; a: Address }>;
 }) {
   const { a: address, node } = event.args;
@@ -40,15 +40,15 @@ export async function handleAddrChanged({
   });
 
   // materialize the Domain's resolvedAddress field iff exists and is set to this Resolver
-  const domain = await context.db.find(schema.subgraph_domain, { id: node });
+  const domain = await context.ensDb.find(ensIndexerSchema.subgraph_domain, { id: node });
   if (domain?.resolverId === id) {
-    await context.db
-      .update(schema.subgraph_domain, { id: node })
+    await context.ensDb
+      .update(ensIndexerSchema.subgraph_domain, { id: node })
       .set({ resolvedAddressId: address });
   }
 
   // log ResolverEvent
-  await context.db.insert(schema.subgraph_addrChanged).values({
+  await context.ensDb.insert(ensIndexerSchema.subgraph_addrChanged).values({
     ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     addrId: address,
@@ -59,7 +59,7 @@ export async function handleAddressChanged({
   context,
   event,
 }: {
-  context: Context;
+  context: IndexingEngineContext;
   event: EventWithArgs<{ node: Node; coinType: bigint; newAddress: Address }>;
 }) {
   const { node, coinType, newAddress } = event.args;
@@ -72,12 +72,12 @@ export async function handleAddressChanged({
   });
 
   // upsert the new coinType
-  await context.db
-    .update(schema.subgraph_resolver, { id })
+  await context.ensDb
+    .update(ensIndexerSchema.subgraph_resolver, { id })
     .set({ coinTypes: uniq([...(resolver.coinTypes ?? []), coinType]) });
 
   // log ResolverEvent
-  await context.db.insert(schema.subgraph_multicoinAddrChanged).values({
+  await context.ensDb.insert(ensIndexerSchema.subgraph_multicoinAddrChanged).values({
     ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     coinType,
@@ -89,7 +89,7 @@ export async function handleNameChanged({
   context,
   event,
 }: {
-  context: Context;
+  context: IndexingEngineContext;
   event: EventWithArgs<{ node: Node; name: string }>;
 }) {
   const { node, name } = event.args;
@@ -103,7 +103,7 @@ export async function handleNameChanged({
   });
 
   // log ResolverEvent
-  await context.db.insert(schema.subgraph_nameChanged).values({
+  await context.ensDb.insert(ensIndexerSchema.subgraph_nameChanged).values({
     ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     name,
@@ -114,7 +114,7 @@ export async function handleABIChanged({
   context,
   event,
 }: {
-  context: Context;
+  context: IndexingEngineContext;
   event: EventWithArgs<{ node: Node; contentType: bigint }>;
 }) {
   const { node, contentType } = event.args;
@@ -129,7 +129,7 @@ export async function handleABIChanged({
   });
 
   // log ResolverEvent
-  await context.db.insert(schema.subgraph_abiChanged).values({
+  await context.ensDb.insert(ensIndexerSchema.subgraph_abiChanged).values({
     ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     contentType,
@@ -140,7 +140,7 @@ export async function handlePubkeyChanged({
   context,
   event,
 }: {
-  context: Context;
+  context: IndexingEngineContext;
   event: EventWithArgs<{ node: Node; x: Hex; y: Hex }>;
 }) {
   const { node, x, y } = event.args;
@@ -154,7 +154,7 @@ export async function handlePubkeyChanged({
   });
 
   // log ResolverEvent
-  await context.db.insert(schema.subgraph_pubkeyChanged).values({
+  await context.ensDb.insert(ensIndexerSchema.subgraph_pubkeyChanged).values({
     ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     x,
@@ -166,7 +166,7 @@ export async function handleTextChanged({
   context,
   event,
 }: {
-  context: Context;
+  context: IndexingEngineContext;
   event: EventWithArgs<{
     node: Node;
     indexedKey: string;
@@ -197,12 +197,12 @@ export async function handleTextChanged({
   // upsert new key
   // NOTE(subgraph-compat): we insert sanitized key even if it's empty string to match subgraph behavior
   // of implicitly stripping null bytes
-  await context.db
-    .update(schema.subgraph_resolver, { id })
+  await context.ensDb
+    .update(ensIndexerSchema.subgraph_resolver, { id })
     .set({ texts: uniq([...(resolver.texts ?? []), sanitizedKey]) });
 
   // log ResolverEvent
-  await context.db.insert(schema.subgraph_textChanged).values({
+  await context.ensDb.insert(ensIndexerSchema.subgraph_textChanged).values({
     ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     key: sanitizedKey,
@@ -214,7 +214,7 @@ export async function handleContenthashChanged({
   context,
   event,
 }: {
-  context: Context;
+  context: IndexingEngineContext;
   event: EventWithArgs<{ node: Node; hash: Hash }>;
 }) {
   const { node, hash } = event.args;
@@ -227,7 +227,7 @@ export async function handleContenthashChanged({
   });
 
   // log ResolverEvent
-  await context.db.insert(schema.subgraph_contenthashChanged).values({
+  await context.ensDb.insert(ensIndexerSchema.subgraph_contenthashChanged).values({
     ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     hash,
@@ -238,7 +238,7 @@ export async function handleInterfaceChanged({
   context,
   event,
 }: {
-  context: Context;
+  context: IndexingEngineContext;
   event: EventWithArgs<{ node: Node; interfaceID: Hex; implementer: Hex }>;
 }) {
   const { node, interfaceID, implementer } = event.args;
@@ -250,7 +250,7 @@ export async function handleInterfaceChanged({
   });
 
   // log ResolverEvent
-  await context.db.insert(schema.subgraph_interfaceChanged).values({
+  await context.ensDb.insert(ensIndexerSchema.subgraph_interfaceChanged).values({
     ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     interfaceID,
@@ -262,7 +262,7 @@ export async function handleAuthorisationChanged({
   context,
   event,
 }: {
-  context: Context;
+  context: IndexingEngineContext;
   event: EventWithArgs<{
     node: Node;
     owner: Address;
@@ -280,7 +280,7 @@ export async function handleAuthorisationChanged({
   });
 
   // log ResolverEvent
-  await context.db.insert(schema.subgraph_authorisationChanged).values({
+  await context.ensDb.insert(ensIndexerSchema.subgraph_authorisationChanged).values({
     ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     owner,
@@ -294,16 +294,18 @@ export async function handleVersionChanged({
   context,
   event,
 }: {
-  context: Context;
+  context: IndexingEngineContext;
   event: EventWithArgs<{ node: Node; newVersion: bigint }>;
 }) {
   const { node, newVersion } = event.args;
   const id = makeResolverId(context.chain.id, event.log.address, node);
 
   // materialize the Domain's resolvedAddress field iff exists and is set to this Resolver
-  const domain = await context.db.find(schema.subgraph_domain, { id: node });
+  const domain = await context.ensDb.find(ensIndexerSchema.subgraph_domain, { id: node });
   if (domain?.resolverId === id) {
-    await context.db.update(schema.subgraph_domain, { id: node }).set({ resolvedAddressId: null });
+    await context.ensDb
+      .update(ensIndexerSchema.subgraph_domain, { id: node })
+      .set({ resolvedAddressId: null });
   }
 
   await upsertResolver(context, {
@@ -319,7 +321,7 @@ export async function handleVersionChanged({
   });
 
   // log ResolverEvent
-  await context.db.insert(schema.subgraph_versionChanged).values({
+  await context.ensDb.insert(ensIndexerSchema.subgraph_versionChanged).values({
     ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     version: newVersion,
@@ -333,7 +335,7 @@ export async function handleDNSRecordChanged({
   context,
   event,
 }: {
-  context: Context;
+  context: IndexingEngineContext;
   event: EventWithArgs<{
     node: Node;
     name: Hex;
@@ -365,12 +367,12 @@ export async function handleDNSRecordChanged({
   });
 
   // upsert new key
-  await context.db
-    .update(schema.subgraph_resolver, { id })
+  await context.ensDb
+    .update(ensIndexerSchema.subgraph_resolver, { id })
     .set({ texts: uniq([...(resolver.texts ?? []), key]) });
 
   // log ResolverEvent
-  await context.db.insert(schema.subgraph_textChanged).values({
+  await context.ensDb.insert(ensIndexerSchema.subgraph_textChanged).values({
     ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     key,
@@ -382,7 +384,7 @@ export async function handleDNSRecordDeleted({
   context,
   event,
 }: {
-  context: Context;
+  context: IndexingEngineContext;
   event: EventWithArgs<{
     node: Node;
     name: Hex;
@@ -407,12 +409,12 @@ export async function handleDNSRecordDeleted({
   });
 
   // remove relevant key
-  await context.db
-    .update(schema.subgraph_resolver, { id })
+  await context.ensDb
+    .update(ensIndexerSchema.subgraph_resolver, { id })
     .set({ texts: (resolver.texts ?? []).filter((text) => text !== key) });
 
   // log ResolverEvent
-  await context.db.insert(schema.subgraph_textChanged).values({
+  await context.ensDb.insert(ensIndexerSchema.subgraph_textChanged).values({
     ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     key,
@@ -426,7 +428,7 @@ export async function handleDNSZonehashChanged({
   // biome-ignore lint/correctness/noUnusedFunctionParameters: explicitly ignored
   event,
 }: {
-  context: Context;
+  context: IndexingEngineContext;
   event: EventWithArgs<{ node: Node; zonehash: Hash }>;
 }) {
   // explicitly ignored / not implemented
@@ -438,7 +440,7 @@ export async function handleZoneCreated({
   // biome-ignore lint/correctness/noUnusedFunctionParameters: explicitly ignored
   event,
 }: {
-  context: Context;
+  context: IndexingEngineContext;
   event: EventWithArgs<{ node: Node; version: bigint }>;
 }) {
   // explicitly ignored / not implemented

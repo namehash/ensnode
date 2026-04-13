@@ -13,7 +13,15 @@ export const configResponseMock = {
     labelSetVersion: 0,
   },
   indexedChainIds: [1, 8453, 59144, 10, 42161, 534352],
-  databaseSchemaName: "alphaSchema0.31.0",
+  ensIndexerSchemaName: "alphaSchema0.31.0",
+  ensRainbowPublicConfig: {
+    version: "0.31.0",
+    labelSet: {
+      labelSetId: "subgraph",
+      highestLabelSetVersion: 0,
+    },
+    recordsCount: 100,
+  },
   isSubgraphCompatible: false,
   namespace: "mainnet",
   plugins: [
@@ -25,13 +33,10 @@ export const configResponseMock = {
     PluginName.Registrars,
   ],
   versionInfo: {
-    nodejs: "22.18.0",
     ponder: "0.11.43",
     ensDb: "0.32.0",
     ensIndexer: "0.32.0",
     ensNormalize: "1.11.1",
-    ensRainbow: "0.31.0",
-    ensRainbowSchema: 2,
   },
 } satisfies SerializedEnsIndexerConfigResponse;
 

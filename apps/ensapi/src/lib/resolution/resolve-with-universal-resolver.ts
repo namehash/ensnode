@@ -1,5 +1,6 @@
 import config from "@/config";
 
+import type { Name } from "enssdk";
 import {
   bytesToHex,
   ContractFunctionExecutionError,
@@ -11,15 +12,28 @@ import {
 } from "viem";
 import { packetToBytes } from "viem/ens";
 
-import { DatasourceNames, getDatasource, ResolverABI } from "@ensnode/datasources";
-import type { Name, ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
+import { DatasourceNames, ResolverABI, UniversalResolverABI } from "@ensnode/datasources";
+import {
+  getDatasourceContract,
+  maybeGetDatasourceContract,
+  type ResolverRecordsSelection,
+} from "@ensnode/ensnode-sdk";
 
+import { lazy, lazyProxy } from "@/lib/lazy";
 import type {
   ResolveCalls,
   ResolveCallsAndRawResults,
 } from "@/lib/resolution/resolve-calls-and-results";
 
-const ensroot = getDatasource(config.namespace, DatasourceNames.ENSRoot);
+// lazyProxy defers construction until first use so that this module can be
+// imported without env vars being present (e.g. during OpenAPI generation).
+const universalResolver = lazyProxy(() =>
+  getDatasourceContract(config.namespace, DatasourceNames.ENSRoot, "UniversalResolver"),
+);
+
+const getUniversalResolverV2 = lazy(() =>
+  maybeGetDatasourceContract(config.namespace, DatasourceNames.ENSRoot, "UniversalResolverV2"),
+);
 
 /**
  * Execute a set of ResolveCalls for `name` against the UniversalResolver.
@@ -43,8 +57,10 @@ export async function executeResolveCallsWithUniversalResolver<
         const encodedMethod = encodeFunctionData({ abi: ResolverABI, ...call });
 
         const [value] = await publicClient.readContract({
-          abi: ensroot.contracts.UniversalResolver.abi,
-          address: ensroot.contracts.UniversalResolver.address,
+          abi: UniversalResolverABI,
+          // NOTE(ensv2-transition): if UniversalResolverV2 is defined, prefer it over UniversalResolver
+          // TODO(ensv2-transition): confirm this is correct
+          address: getUniversalResolverV2()?.address ?? universalResolver.address,
           functionName: "resolve",
           args: [encodedName, encodedMethod],
         });
@@ -63,16 +79,12 @@ export async function executeResolveCallsWithUniversalResolver<
         // NOTE: results is type-guaranteed to have at least 1 result (because each abi item's outputs.length >= 1)
         const result = results[0];
 
-        console.log(`.resolve(${call.functionName}, ${call.args}) -> ${result}`);
-
         return {
           call,
           result: result,
           reason: `.resolve(${call.functionName}, ${call.args})`,
         };
       } catch (error) {
-        console.log(`.resolve(${call.functionName}, ${call.args}) -> ${error}`);
-
         // in general, reverts are expected behavior
         if (error instanceof ContractFunctionExecutionError) {
           return { call, result: null, reason: error.shortMessage };

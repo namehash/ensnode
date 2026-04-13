@@ -1,6 +1,5 @@
-import type { Address } from "viem";
+import type { Address, Node } from "enssdk";
 
-import type { Node } from "../../../ens/types";
 import type { UnixTimestamp } from "../../../shared/types";
 import type { RequestPageParams } from "../shared/pagination";
 
@@ -53,6 +52,14 @@ export type RegistrarActionsFilter =
  * Records Orders
  */
 export const RegistrarActionsOrders = {
+  /**
+   * Returns registrar actions newest-first.
+   *
+   * Sorts by block timestamp descending. Because each action's identifier encodes
+   * all ordering-relevant onchain properties, this also correctly orders actions
+   * that share the same block timestamp by the chronological order in which they
+   * were executed within the block.
+   */
   LatestRegistrarActions: "orderBy[timestamp]=desc",
 } as const;
 

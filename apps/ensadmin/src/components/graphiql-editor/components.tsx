@@ -4,64 +4,9 @@ import "graphiql/setup-workers/webpack";
 import "graphiql/style.css";
 import "@graphiql/plugin-explorer/style.css";
 
-// import { AiQueryGeneratorForm } from "@/components/ai-query-generator";
 import { explorerPlugin } from "@graphiql/plugin-explorer";
 import { createGraphiQLFetcher } from "@graphiql/toolkit";
 import { GraphiQL, type GraphiQLProps, HISTORY_PLUGIN } from "graphiql";
-import { useSearchParams } from "next/navigation";
-
-const defaultQuery = `#
-# Welcome to this interactive playground for
-# ENSNode's GraphQL API!
-#
-# You can get started by typing your query here or by using
-# the Explorer on the left to select the data
-# you want to query.
-#
-# When you are ready to execute your query,
-# press the pink Play icon -->
-#
-`;
-
-/**
- * A GraphiQL editor for Ponder API page.
- */
-export function PonderGraphiQLEditor(props: GraphiQLPropsWithUrl) {
-  const searchParams = useSearchParams();
-
-  const initialQuery = searchParams.get("query") || defaultQuery;
-  const initialVariables = searchParams.get("variables") || "";
-
-  return (
-    <section className="flex flex-col flex-1">
-      <GraphiQLEditor {...props} initialQuery={initialQuery} initialVariables={initialVariables} />
-    </section>
-  );
-}
-
-/**
- * A GraphiQL editor for Subgraph API page.
- */
-export function SubgraphGraphiQLEditor(props: GraphiQLPropsWithUrl) {
-  const searchParams = useSearchParams();
-
-  const initialQuery = searchParams.get("query") || defaultQuery;
-  const initialVariables = searchParams.get("variables") || "";
-
-  return (
-    <section className="flex flex-col flex-1">
-      {/*<AiQueryGeneratorForm
-        onResult={({ query, variables }) => {
-          // TODO: Implement GraphiQLProvider to update the query and variables via context provider when AI is re-enabled
-
-        }}
-        url={props.url}
-      />*/}
-
-      <GraphiQLEditor {...props} initialQuery={initialQuery} initialVariables={initialVariables} />
-    </section>
-  );
-}
 
 interface GraphiQLPropsWithUrl extends Omit<GraphiQLProps, "fetcher"> {
   /** The URL of the GraphQL endpoint */
@@ -70,10 +15,9 @@ interface GraphiQLPropsWithUrl extends Omit<GraphiQLProps, "fetcher"> {
 
 /**
  * The GraphiQL editor component used to render the generic GraphiQL editor UI.
- * We use this component to render the Ponder and Subgraph GraphiQL editors
- * that are exported from this file.
+ * We use this component to render GraphiQL editors.
  */
-function GraphiQLEditor({ url, plugins = [], ...props }: GraphiQLPropsWithUrl) {
+export function GraphiQLEditor({ url, plugins = [], ...props }: GraphiQLPropsWithUrl) {
   if (!url || typeof window === "undefined") {
     return null;
   }

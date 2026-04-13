@@ -1,28 +1,29 @@
-import { type Context, ponder } from "ponder:registry";
-import schema from "ponder:schema";
-import { type Address, isAddressEqual, zeroAddress } from "viem";
-
 import {
+  type Address,
   type DNSEncodedLiteralName,
   type DNSEncodedName,
   decodeDNSEncodedLiteralName,
-  interpretAddress,
   interpretTokenIdAsNode,
-  isPccFuseSet,
-  isRegistrationExpired,
-  isRegistrationFullyExpired,
-  isRegistrationInGracePeriod,
   type LiteralLabel,
   labelhashLiteralLabel,
   makeENSv1DomainId,
   makeSubdomainNode,
   type Node,
+} from "enssdk";
+import { isAddressEqual, zeroAddress } from "viem";
+
+import {
+  interpretAddress,
+  isPccFuseSet,
+  isRegistrationExpired,
+  isRegistrationFullyExpired,
+  isRegistrationInGracePeriod,
   PluginName,
 } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { materializeENSv1DomainEffectiveOwner } from "@/lib/ensv2/domain-db-helpers";
-import { ensureEvent } from "@/lib/ensv2/event-db-helpers";
+import { ensureDomainEvent, ensureEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel } from "@/lib/ensv2/label-db-helpers";
 import {
   getLatestRegistration,
@@ -30,7 +31,13 @@ import {
   insertLatestRenewal,
 } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
+import {
+  addOnchainEventListener,
+  ensIndexerSchema,
+  type IndexingEngineContext,
+} from "@/lib/indexing-engines/ponder";
 import { toJson } from "@/lib/json-stringify-with-bigints";
+import { logger } from "@/lib/logger";
 import { getManagedName } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
@@ -89,7 +96,7 @@ export default function () {
     context,
     event,
   }: {
-    context: Context;
+    context: IndexingEngineContext;
     event: EventWithArgs<{
       operator: Address;
       from: Address;
@@ -133,15 +140,18 @@ export default function () {
     // now guaranteed to be an unexpired transferrable Registration
     // so materialize domain owner
     await materializeENSv1DomainEffectiveOwner(context, domainId, to);
+
+    // push event to domain history
+    await ensureDomainEvent(context, event, domainId);
   }
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "NameWrapper:NameWrapped"),
     async ({
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{
         node: Node;
         name: DNSEncodedName;
@@ -166,7 +176,7 @@ export default function () {
         }
       } catch {
         // NameWrapper emitted malformed name? just warn and move on
-        console.warn(`NameWrapper emitted malformed DNSEncodedName: '${name}'`);
+        logger.warn({ msg: `NameWrapper emitted malformed DNSEncodedName: '${name}'` });
       }
 
       const registration = await getLatestRegistration(context, domainId);
@@ -218,7 +228,7 @@ export default function () {
           throw new Error("Wrapper expiry exceeds registrar expiry + grace period");
         }
 
-        await context.db.update(schema.registration, { id: registration.id }).set({
+        await context.ensDb.update(ensIndexerSchema.registration, { id: registration.id }).set({
           wrapped: true,
           fuses,
           // expiry, // TODO: NameWrapper expiry logic
@@ -244,20 +254,24 @@ export default function () {
           registrarAddress: registrar.address,
           registrantId: interpretAddress(registrant),
           fuses,
+          start: event.block.timestamp,
           expiry,
           eventId: await ensureEvent(context, event),
         });
       }
+
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "NameWrapper:NameUnwrapped"),
     async ({
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{ node: Node; owner: Address }>;
     }) => {
       const { node } = event.args;
@@ -270,18 +284,21 @@ export default function () {
       }
 
       if (registration.type === "BaseRegistrar") {
-        // if this is a wrapped BaseRegisrar Registration, unwrap it
-        await context.db.update(schema.registration, { id: registration.id }).set({
+        // if this is a wrapped BaseRegistrar Registration, unwrap it
+        await context.ensDb.update(ensIndexerSchema.registration, { id: registration.id }).set({
           wrapped: false,
           fuses: null,
           // expiry: null // TODO: NameWrapper expiry logic? maybe nothing to do here
         });
       } else {
         // otherwise, deactivate the latest registration by setting its expiry to this block
-        await context.db.update(schema.registration, { id: registration.id }).set({
+        await context.ensDb.update(ensIndexerSchema.registration, { id: registration.id }).set({
           expiry: event.block.timestamp,
         });
       }
+
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
 
       // NOTE: we don't need to adjust Domain.ownerId because NameWrapper always calls ens.setOwner
     },
@@ -290,13 +307,13 @@ export default function () {
   /**
    * FusesSet can occur for expired or unexpired Registrations.
    */
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "NameWrapper:FusesSet"),
     async ({
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{ node: Node; fuses: number }>;
     }) => {
       const { node, fuses } = event.args;
@@ -312,23 +329,26 @@ export default function () {
       }
 
       // upsert fuses
-      await context.db.update(schema.registration, { id: registration.id }).set({
+      await context.ensDb.update(ensIndexerSchema.registration, { id: registration.id }).set({
         fuses,
         // expiry: // TODO: NameWrapper expiry logic ?
       });
+
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
     },
   );
 
   /**
    * ExpiryExtended can occur for expired or unexpired Registrations.
    */
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "NameWrapper:ExpiryExtended"),
     async ({
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{ node: Node; expiry: bigint }>;
     }) => {
       const { node, expiry: _expiry } = event.args;
@@ -344,7 +364,12 @@ export default function () {
         );
       }
 
-      await context.db.update(schema.registration, { id: registration.id }).set({ expiry });
+      await context.ensDb
+        .update(ensIndexerSchema.registration, { id: registration.id })
+        .set({ expiry });
+
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
 
       // if this is a NameWrapper Registration, this is a Renewal event. otherwise, this is a wrapped
       // BaseRegistrar Registration, and the Renewal is already being managed
@@ -376,8 +401,11 @@ export default function () {
     },
   );
 
-  ponder.on(namespaceContract(pluginName, "NameWrapper:TransferSingle"), handleTransfer);
-  ponder.on(
+  addOnchainEventListener(
+    namespaceContract(pluginName, "NameWrapper:TransferSingle"),
+    handleTransfer,
+  );
+  addOnchainEventListener(
     namespaceContract(pluginName, "NameWrapper:TransferBatch"),
     async ({ context, event }) => {
       for (const id of event.args.ids) {

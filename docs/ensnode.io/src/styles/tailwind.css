@@ -1,2 +1,2 @@
+@import "@namehash/namehash-ui/styles.css";
 @import "tailwindcss";
-@import "@namehash/namekit-react/styles.css" layer(utilities);

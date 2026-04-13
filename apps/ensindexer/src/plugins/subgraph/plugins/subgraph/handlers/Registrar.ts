@@ -1,7 +1,8 @@
-import { ponder } from "ponder:registry";
+import { interpretTokenIdAsLabelHash } from "enssdk";
 
-import { interpretTokenIdAsLabelHash, PluginName } from "@ensnode/ensnode-sdk";
+import { PluginName } from "@ensnode/ensnode-sdk";
 
+import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { makeRegistrarHandlers } from "@/plugins/subgraph/shared-handlers/Registrar";
 
@@ -24,7 +25,7 @@ export default function () {
   // https://docs.ens.domains/registry/eth/#baseregistrar-vs-controller
   ///////////////////////////////
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "BaseRegistrar:NameRegistered"),
     async ({ context, event }) => {
       await handleNameRegistered({
@@ -40,7 +41,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "BaseRegistrar:NameRenewed"),
     async ({ context, event }) => {
       await handleNameRenewed({
@@ -56,26 +57,29 @@ export default function () {
     },
   );
 
-  ponder.on(namespaceContract(pluginName, "BaseRegistrar:Transfer"), async ({ context, event }) => {
-    const { tokenId, from, to } = event.args;
-    await handleNameTransferred({
-      context,
-      event: {
-        ...event,
-        args: {
-          from,
-          to,
-          labelHash: interpretTokenIdAsLabelHash(tokenId),
+  addOnchainEventListener(
+    namespaceContract(pluginName, "BaseRegistrar:Transfer"),
+    async ({ context, event }) => {
+      const { tokenId, from, to } = event.args;
+      await handleNameTransferred({
+        context,
+        event: {
+          ...event,
+          args: {
+            from,
+            to,
+            labelHash: interpretTokenIdAsLabelHash(tokenId),
+          },
         },
-      },
-    });
-  });
+      });
+    },
+  );
 
   ///////////////////////////////
   // LegacyEthRegistrarController
   ///////////////////////////////
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "LegacyEthRegistrarController:NameRegistered"),
     async ({ context, event }) => {
       await handleNameRegisteredByController({
@@ -93,7 +97,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "LegacyEthRegistrarController:NameRenewed"),
     async ({ context, event }) => {
       await handleNameRenewedByController({
@@ -115,7 +119,7 @@ export default function () {
   // WrappedEthRegistrarController
   ////////////////////////////////
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "WrappedEthRegistrarController:NameRegistered"),
     async ({ context, event }) => {
       await handleNameRegisteredByController({
@@ -134,7 +138,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "WrappedEthRegistrarController:NameRenewed"),
     async ({ context, event }) => {
       await handleNameRenewedByController({
@@ -156,7 +160,7 @@ export default function () {
   // UnwrappedEthRegistrarController
   //////////////////////////////////
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "UnwrappedEthRegistrarController:NameRegistered"),
     async ({ context, event }) => {
       await handleNameRegisteredByController({
@@ -175,7 +179,7 @@ export default function () {
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "UnwrappedEthRegistrarController:NameRenewed"),
     async ({ context, event }) => {
       await handleNameRenewedByController({

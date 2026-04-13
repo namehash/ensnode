@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/ensrainbow-sdk",
-  "version": "1.5.1",
+  "version": "1.9.0",
   "type": "module",
   "description": "ENSRainbow SDK for interacting with the ENSRainbow API.",
   "license": "MIT",
@@ -52,6 +52,9 @@
   },
   "peerDependencies": {
     "viem": "catalog:"
+  },
+  "dependencies": {
+    "enssdk": "workspace:*"
   },
   "devDependencies": {
     "@ensnode/shared-configs": "workspace:*",

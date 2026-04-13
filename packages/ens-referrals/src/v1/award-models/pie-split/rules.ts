@@ -1,0 +1,68 @@
+import type { AccountId, UnixTimestamp } from "enssdk";
+
+import type { PriceUsdc } from "@ensnode/ensnode-sdk";
+import { makePriceUsdcSchema } from "@ensnode/ensnode-sdk/internal";
+
+import { validateNonNegativeInteger } from "../../number";
+import {
+  type BaseReferralProgramRules,
+  ReferralProgramAwardModels,
+  validateBaseReferralProgramRules,
+} from "../shared/rules";
+
+export interface ReferralProgramRulesPieSplit extends BaseReferralProgramRules {
+  /**
+   * Discriminant: identifies this as a "pie-split" award model edition.
+   *
+   * In pie-split, the top-N referrers split an award pool proportionally
+   * based on their scored duration (with rank-based boost).
+   */
+  awardModel: typeof ReferralProgramAwardModels.PieSplit;
+
+  /**
+   * The award pool in USDC.
+   *
+   * NOTE: Awards will actually be distributed in $ENS tokens.
+   */
+  awardPool: PriceUsdc;
+
+  /**
+   * The maximum number of referrers that will qualify to receive a non-zero `awardPoolShare`.
+   *
+   * @invariant Guaranteed to be a non-negative integer (>= 0)
+   */
+  maxQualifiedReferrers: number;
+}
+
+export const validateReferralProgramRulesPieSplit = (rules: ReferralProgramRulesPieSplit): void => {
+  makePriceUsdcSchema("ReferralProgramRulesPieSplit.awardPool").parse(rules.awardPool);
+
+  validateNonNegativeInteger(rules.maxQualifiedReferrers);
+
+  validateBaseReferralProgramRules(rules);
+};
+
+export const buildReferralProgramRulesPieSplit = (
+  awardPool: PriceUsdc,
+  maxQualifiedReferrers: number,
+  startTime: UnixTimestamp,
+  endTime: UnixTimestamp,
+  subregistryId: AccountId,
+  rulesUrl: URL,
+  areAwardsDistributed: boolean,
+): ReferralProgramRulesPieSplit => {
+  const result = {
+    awardModel: ReferralProgramAwardModels.PieSplit,
+    awardPool,
+    maxQualifiedReferrers,
+    startTime,
+    endTime,
+    subregistryId,
+    rulesUrl,
+    areAwardsDistributed,
+  } satisfies ReferralProgramRulesPieSplit;
+
+  validateReferralProgramRulesPieSplit(result);
+
+  return result;
+};

@@ -3,13 +3,9 @@
  */
 
 import { AbsoluteTime, ChainIcon, getChainName } from "@namehash/namehash-ui";
+import type { ChainId, UnixTimestamp } from "enssdk";
 
-import {
-  type BlockRef,
-  type ChainId,
-  ChainIndexingStatusIds,
-  type UnixTimestamp,
-} from "@ensnode/ensnode-sdk";
+import { type BlockRef, ChainIndexingStatusIds } from "@ensnode/ensnode-sdk";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatChainStatus } from "@/lib/indexing-status";

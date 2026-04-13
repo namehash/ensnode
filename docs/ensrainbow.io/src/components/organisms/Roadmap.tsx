@@ -1,6 +1,6 @@
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
-import { Link } from "@namehash/namekit-react";
 import cc from "classcat";
+import { legacyLinkVariants } from "@namehash/namehash-ui/legacy";
 
 import { RainbowIcon } from "../atoms/icons/RainbowIcon.tsx";
 import { RocketIcon } from "../atoms/icons/RocketIcon.tsx";
@@ -81,9 +81,18 @@ export default function RoadMap() {
       commentSentences: [
         <span key="AutoHealReverseLookupFragment">
           Description with a{" "}
-          <Link href="" target="_blank" className="!text-black" variant="underline" size="small">
+          <a
+            href=""
+            target="_blank"
+            rel="noopener noreferrer"
+            className={legacyLinkVariants({
+              variant: "underline",
+              size: "small",
+              className: "!text-black",
+            })}
+          >
             hyperlink
-          </Link>
+          </a>
         </span>,
       ],
     },
@@ -93,9 +102,18 @@ export default function RoadMap() {
       commentSentences: [
         <span key="BulkLabelHealingFragment">
           Description with a{" "}
-          <Link href="" target="_blank" className="!text-black" variant="underline" size="small">
+          <a
+            href=""
+            target="_blank"
+            rel="noopener noreferrer"
+            className={legacyLinkVariants({
+              variant: "underline",
+              size: "small",
+              className: "!text-black",
+            })}
+          >
             hyperlink
-          </Link>
+          </a>
         </span>,
       ],
     },
@@ -105,9 +123,18 @@ export default function RoadMap() {
       commentSentences: [
         <span key="AutomatedLabelCrackingFragment">
           Description with a{" "}
-          <Link href="" target="_blank" className="!text-black" variant="underline" size="small">
+          <a
+            href=""
+            target="_blank"
+            rel="noopener noreferrer"
+            className={legacyLinkVariants({
+              variant: "underline",
+              size: "small",
+              className: "!text-black",
+            })}
+          >
             hyperlink
-          </Link>
+          </a>
         </span>,
       ],
     },
@@ -133,8 +160,8 @@ export default function RoadMap() {
   ];
 
   return (
-    <section className="bg-gradient-to-b to-white from-[#F9FAFB] w-full h-fit px-5 pt-[60px] pb-5 md:pt-24 md:pb-12 md:px-10 flex flex-row items-center justify-center z-10 gap-10">
-      <div className="hidden w-1/5 h-full relative -top-20 md:flex flex-col justify-start items-center gap-[10.5rem]">
+    <section className="bg-linear-to-b to-white from-[#F9FAFB] w-full h-fit px-5 pt-[60px] pb-5 md:pt-24 md:pb-12 md:px-10 flex flex-row items-center justify-center z-10 gap-10">
+      <div className="hidden w-1/5 h-full relative -top-20 md:flex flex-col justify-start items-center gap-42">
         {leftSideRainbows.map((rainbow, idx) => (
           <div
             key={`left-${idx}-Rainbow`}
@@ -170,7 +197,7 @@ export default function RoadMap() {
           </p>
         </div>
         <div className="h-fit w-full max-w-[1050px]">
-          <ul className="space-y-4 w-full h-full flex-shrink-0">
+          <ul className="space-y-4 w-full h-full shrink-0">
             {roadMapElements.map((roadmapElement, idx) => (
               <li key={idx} className="relative flex gap-x-4">
                 <div
@@ -226,7 +253,7 @@ export default function RoadMap() {
           </ul>
         </div>
       </div>
-      <div className="hidden w-1/5 h-full relative -top-2 md:flex flex-col justify-center items-center gap-[10.5rem]">
+      <div className="hidden w-1/5 h-full relative -top-2 md:flex flex-col justify-center items-center gap-42">
         {rightSideRainbows.map((rainbow, idx) => (
           <div
             key={`left-${idx}-Rainbow`}

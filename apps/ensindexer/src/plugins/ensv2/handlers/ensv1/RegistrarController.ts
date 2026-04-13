@@ -1,21 +1,25 @@
 /** biome-ignore-all lint/correctness/noUnusedVariables: ignore for now */
-import { type Context, ponder } from "ponder:registry";
-import schema from "ponder:schema";
 
 import {
-  type EncodedReferrer,
+  asLiteralLabel,
   type Label,
   type LabelHash,
-  type LiteralLabel,
   labelhashLiteralLabel,
   makeENSv1DomainId,
   makeSubdomainNode,
-  PluginName,
-} from "@ensnode/ensnode-sdk";
+} from "enssdk";
 
+import { type EncodedReferrer, PluginName } from "@ensnode/ensnode-sdk";
+
+import { ensureDomainEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel, ensureUnknownLabel } from "@/lib/ensv2/label-db-helpers";
 import { getLatestRegistration, getLatestRenewal } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
+import {
+  addOnchainEventListener,
+  ensIndexerSchema,
+  type IndexingEngineContext,
+} from "@/lib/indexing-engines/ponder";
 import { toJson } from "@/lib/json-stringify-with-bigints";
 import { getManagedName } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
@@ -28,7 +32,7 @@ export default function () {
     context,
     event,
   }: {
-    context: Context;
+    context: IndexingEngineContext;
     event: EventWithArgs<{
       label?: Label;
       labelHash: LabelHash;
@@ -37,8 +41,8 @@ export default function () {
       referrer?: EncodedReferrer;
     }>;
   }) {
-    const { label: _label, labelHash, baseCost: base, premium, referrer } = event.args;
-    const label = _label as LiteralLabel | undefined;
+    const { labelHash, baseCost: base, premium, referrer } = event.args;
+    const label = event.args.label ? asLiteralLabel(event.args.label) : undefined;
 
     // Invariant: If emitted, label must align with labelHash
     if (label !== undefined && labelHash !== labelhashLiteralLabel(label)) {
@@ -69,16 +73,19 @@ export default function () {
 
     // update registration's base/premium
     // TODO(paymentToken): add payment token tracking here
-    await context.db
-      .update(schema.registration, { id: registration.id })
+    await context.ensDb
+      .update(ensIndexerSchema.registration, { id: registration.id })
       .set({ base, premium, referrer });
+
+    // push event to domain history
+    await ensureDomainEvent(context, event, domainId);
   }
 
   async function handleNameRenewedByController({
     context,
     event,
   }: {
-    context: Context;
+    context: IndexingEngineContext;
     event: EventWithArgs<{
       label?: string;
       labelHash: LabelHash;
@@ -87,8 +94,8 @@ export default function () {
       referrer?: EncodedReferrer;
     }>;
   }) {
-    const { label: _label, labelHash, baseCost: base, premium, referrer } = event.args;
-    const label = _label as LiteralLabel;
+    const { labelHash, baseCost: base, premium, referrer } = event.args;
+    const label = event.args.label ? asLiteralLabel(event.args.label) : undefined;
 
     // Invariant: If emitted, label must align with labelHash
     if (label !== undefined && labelHash !== labelhashLiteralLabel(label)) {
@@ -123,7 +130,7 @@ export default function () {
       );
     }
 
-    const renewal = await getLatestRenewal(context, domainId, registration.index);
+    const renewal = await getLatestRenewal(context, domainId, registration.registrationIndex);
     if (!renewal) {
       throw new Error(
         `Invariant(RegistrarController:NameRenewed): NameRenewed but no Renewal for Registration\n${toJson(
@@ -141,13 +148,18 @@ export default function () {
 
     // update renewal info
     // TODO(paymentToken): add payment token tracking here
-    await context.db.update(schema.renewal, { id: renewal.id }).set({ base, premium, referrer });
+    await context.ensDb
+      .update(ensIndexerSchema.renewal, { id: renewal.id })
+      .set({ base, premium, referrer });
+
+    // push event to domain history
+    await ensureDomainEvent(context, event, domainId);
   }
 
   //////////////////////////////////////
   // RegistrarController:NameRegistered
   //////////////////////////////////////
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(
       pluginName,
       "RegistrarController:NameRegistered(string label, bytes32 indexed labelhash, address indexed owner, uint256 baseCost, uint256 premium, uint256 expires, bytes32 referrer)",
@@ -161,7 +173,7 @@ export default function () {
         },
       }),
   );
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(
       pluginName,
       "RegistrarController:NameRegistered(string name, bytes32 indexed label, address indexed owner, uint256 baseCost, uint256 premium, uint256 expires)",
@@ -175,7 +187,7 @@ export default function () {
         },
       }),
   );
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(
       pluginName,
       "RegistrarController:NameRegistered(string name, bytes32 indexed label, address indexed owner, uint256 cost, uint256 expires)",
@@ -189,7 +201,7 @@ export default function () {
         },
       }),
   );
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(
       pluginName,
       "RegistrarController:NameRegistered(string name, bytes32 indexed label, address indexed owner, uint256 expires)",
@@ -207,7 +219,7 @@ export default function () {
   ///////////////////////////////////
   // RegistrarController:NameRenewed
   ///////////////////////////////////
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(
       pluginName,
       "RegistrarController:NameRenewed(string label, bytes32 indexed labelhash, uint256 cost, uint256 expires, bytes32 referrer)",
@@ -221,7 +233,7 @@ export default function () {
         },
       }),
   );
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(
       pluginName,
       "RegistrarController:NameRenewed(string name, bytes32 indexed label, uint256 cost, uint256 expires)",
@@ -241,7 +253,7 @@ export default function () {
         },
       }),
   );
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(
       pluginName,
       "RegistrarController:NameRenewed(string name, bytes32 indexed label, uint256 expires)",

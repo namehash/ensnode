@@ -1,3 +1,5 @@
+import type { Abi } from "viem";
+
 export const ReverseRegistrar = [
   {
     inputs: [
@@ -242,4 +244,4 @@ export const ReverseRegistrar = [
     stateMutability: "payable",
     type: "function",
   },
-] as const;
+] as const satisfies Abi;

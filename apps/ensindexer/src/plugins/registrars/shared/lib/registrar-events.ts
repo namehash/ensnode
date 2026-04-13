@@ -2,19 +2,18 @@
  * This file contains handlers used in event handlers for a Registrar contract.
  */
 
-import type { Context, Event } from "ponder:registry";
-import type { Address, Hash } from "viem";
+import { type AccountId, type Address, type Node, stringifyAccountId } from "enssdk";
+import type { Hash } from "viem";
 
 import {
-  type AccountId,
   type BlockRef,
   bigIntToNumber,
   durationBetween,
-  formatAccountId,
-  type Node,
   RegistrarActionTypes,
   type UnixTimestamp,
 } from "@ensnode/ensnode-sdk";
+
+import type { IndexingEngineContext, IndexingEngineEvent } from "@/lib/indexing-engines/ponder";
 
 import { insertRegistrarAction } from "./registrar-action";
 import {
@@ -28,7 +27,7 @@ import { getSubregistry } from "./subregistry";
  * Handle Registrar Event: Registration
  */
 export async function handleRegistrarEventRegistration(
-  context: Context,
+  context: IndexingEngineContext,
   {
     id,
     subregistryId,
@@ -38,7 +37,7 @@ export async function handleRegistrarEventRegistration(
     block,
     transactionHash,
   }: {
-    id: Event["id"];
+    id: IndexingEngineEvent["id"];
     subregistryId: AccountId;
     node: Node;
     registrant: Address;
@@ -71,7 +70,7 @@ export async function handleRegistrarEventRegistration(
 
   // Invariant: subregistry record must exist
   if (!subregistry) {
-    throw new Error(`Subregistry record must exists for '${formatAccountId(subregistryId)}.'`);
+    throw new Error(`Subregistry record must exist for '${stringifyAccountId(subregistryId)}.'`);
   }
 
   // 3. Calculate incremental duration
@@ -104,7 +103,7 @@ export async function handleRegistrarEventRegistration(
  * Handle Registrar Event: Renewal
  */
 export async function handleRegistrarEventRenewal(
-  context: Context,
+  context: IndexingEngineContext,
   {
     id,
     subregistryId,
@@ -114,7 +113,7 @@ export async function handleRegistrarEventRenewal(
     block,
     transactionHash,
   }: {
-    id: Event["id"];
+    id: IndexingEngineEvent["id"];
     subregistryId: AccountId;
     node: Node;
     registrant: Address;
@@ -133,7 +132,7 @@ export async function handleRegistrarEventRenewal(
 
   // Invariant: subregistry record must exist
   if (!subregistry) {
-    throw new Error(`Subregistry record must exists for '${formatAccountId(subregistryId)}.'`);
+    throw new Error(`Subregistry record must exist for '${stringifyAccountId(subregistryId)}.'`);
   }
 
   // 2. Get the current registration lifecycle before this registrar action

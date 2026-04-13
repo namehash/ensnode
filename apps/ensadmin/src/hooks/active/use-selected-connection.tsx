@@ -27,3 +27,21 @@ export function useSelectedConnection(): SelectedConnectionResult {
 
   return selectedConnection;
 }
+
+/**
+ * Hook to retrieve the current validated `SelectedConnectionResult`'s URL.
+ *
+ * @throws if `useSelectedConnection` throws
+ * @throws if the `validatedSelectedConnection` is not valid
+ * @returns validated `SelectedConnectionResult`'s URL
+ */
+export function useValidatedSelectedConnection(): URL {
+  const { validatedSelectedConnection } = useSelectedConnection();
+  if (!validatedSelectedConnection.isValid) {
+    throw new Error(
+      `Invariant: Expected validated selected connection and/or to be child of <SelectedENSNodeProvider />`,
+    );
+  }
+
+  return validatedSelectedConnection.url;
+}

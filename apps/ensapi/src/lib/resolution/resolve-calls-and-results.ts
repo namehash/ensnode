@@ -1,6 +1,6 @@
 import { trace } from "@opentelemetry/api";
+import type { Address, Name, Node } from "enssdk";
 import {
-  type Address,
   ContractFunctionExecutionError,
   decodeAbiParameters,
   encodeFunctionData,
@@ -12,7 +12,7 @@ import {
 import { packetToBytes } from "viem/ens";
 
 import { ResolverABI } from "@ensnode/datasources";
-import type { Name, Node, ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
+import type { ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 import {
   interpretAddressRecordValue,
   interpretNameRecordValue,
@@ -239,5 +239,23 @@ export function interpretRawCallsAndResults<SELECTION extends ResolverRecordsSel
         return { call, result };
       }
     }
+  });
+}
+
+/**
+ * Organizes the results of executing and interpreting resolve calls, for debug logging.
+ */
+export function tablifyCallResults<SELECTION extends ResolverRecordsSelection>(
+  rawResults: ResolveCallsAndRawResults<SELECTION>,
+  results: ResolveCallsAndResults<SELECTION>,
+) {
+  return rawResults.map(({ call, result: rawResult }, i) => {
+    const interpreted = results[i].result;
+
+    return {
+      Call: `.resolve(${call.functionName}, ${call.args.join(", ")})`,
+      "Raw Result": rawResult,
+      Result: interpreted,
+    };
   });
 }

@@ -1,10 +1,10 @@
+import { trace } from "@opentelemetry/api";
 import { and, count, desc, eq, gte, isNotNull, lte, not, type SQL } from "drizzle-orm/sql";
+import { asInterpretedName } from "enssdk";
 
-import * as schema from "@ensnode/ensnode-schema";
 import {
   type BlockRef,
   bigIntToNumber,
-  type InterpretedName,
   type NamedRegistrarAction,
   parseAccountId,
   priceEth,
@@ -21,7 +21,10 @@ import {
   ZERO_ENCODED_REFERRER,
 } from "@ensnode/ensnode-sdk";
 
-import { db } from "@/lib/db";
+import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+import { withSpanAsync } from "@/lib/instrumentation/auto-span";
+
+const tracer = trace.getTracer("registrar-actions");
 
 /**
  * Build SQL for order clause from provided order param.
@@ -29,7 +32,7 @@ import { db } from "@/lib/db";
 function buildOrderByClause(order: RegistrarActionsOrder): SQL {
   switch (order) {
     case RegistrarActionsOrders.LatestRegistrarActions:
-      return desc(schema.registrarActions.timestamp);
+      return desc(ensIndexerSchema.registrarActions.id);
   }
 }
 
@@ -42,13 +45,13 @@ function buildWhereClause(filters: RegistrarActionsFilter[] | undefined): SQL[] 
       switch (filter.filterType) {
         case RegistrarActionsFilterTypes.BySubregistryNode:
           // apply subregistry node equality filter
-          return eq(schema.subregistries.node, filter.value);
+          return eq(ensIndexerSchema.subregistries.node, filter.value);
 
         case RegistrarActionsFilterTypes.WithEncodedReferral: {
           // apply referral encoded referrer inclusion filter
           const filterSql = and(
-            isNotNull(schema.registrarActions.encodedReferrer),
-            not(eq(schema.registrarActions.encodedReferrer, ZERO_ENCODED_REFERRER)),
+            isNotNull(ensIndexerSchema.registrarActions.encodedReferrer),
+            not(eq(ensIndexerSchema.registrarActions.encodedReferrer, ZERO_ENCODED_REFERRER)),
           );
 
           // Invariant: filterSql is `SQL` object - should never occur
@@ -63,15 +66,15 @@ function buildWhereClause(filters: RegistrarActionsFilter[] | undefined): SQL[] 
 
         case RegistrarActionsFilterTypes.ByDecodedReferrer:
           // apply decoded referrer equality filter
-          return eq(schema.registrarActions.decodedReferrer, filter.value);
+          return eq(ensIndexerSchema.registrarActions.decodedReferrer, filter.value);
 
         case RegistrarActionsFilterTypes.BeginTimestamp:
           // apply begin timestamp filter (inclusive)
-          return gte(schema.registrarActions.timestamp, BigInt(filter.value));
+          return gte(ensIndexerSchema.registrarActions.timestamp, BigInt(filter.value));
 
         case RegistrarActionsFilterTypes.EndTimestamp:
           // apply end timestamp filter (inclusive)
-          return lte(schema.registrarActions.timestamp, BigInt(filter.value));
+          return lte(ensIndexerSchema.registrarActions.timestamp, BigInt(filter.value));
 
         default:
           // Invariant: Unknown filter type — should never occur
@@ -98,30 +101,30 @@ interface FindRegistrarActionsOptions {
 export async function _countRegistrarActions(
   filters: RegistrarActionsFilter[] | undefined,
 ): Promise<number> {
-  const countQuery = db
-    .select({
-      count: count(),
-    })
-    .from(schema.registrarActions)
-    // join Registration Lifecycles associated with Registrar Actions
-    .innerJoin(
-      schema.registrationLifecycles,
-      eq(schema.registrarActions.node, schema.registrationLifecycles.node),
-    )
-    // join Domains associated with Registration Lifecycles
-    .innerJoin(
-      schema.subgraph_domain,
-      eq(schema.registrationLifecycles.node, schema.subgraph_domain.id),
-    )
-    // join Subregistries associated with Registration Lifecycles
-    .innerJoin(
-      schema.subregistries,
-      eq(schema.registrationLifecycles.subregistryId, schema.subregistries.subregistryId),
-    )
-    .where(and(...buildWhereClause(filters)));
+  return withSpanAsync(
+    tracer,
+    "registrarActions.count",
+    { filterCount: filters?.length ?? 0 },
+    async () => {
+      const result = await ensDb
+        .select({ count: count() })
+        .from(ensIndexerSchema.registrarActions)
+        .innerJoin(
+          ensIndexerSchema.registrationLifecycles,
+          eq(ensIndexerSchema.registrarActions.node, ensIndexerSchema.registrationLifecycles.node),
+        )
+        .innerJoin(
+          ensIndexerSchema.subregistries,
+          eq(
+            ensIndexerSchema.registrationLifecycles.subregistryId,
+            ensIndexerSchema.subregistries.subregistryId,
+          ),
+        )
+        .where(and(...buildWhereClause(filters)));
 
-  const result = await countQuery;
-  return result[0].count;
+      return result[0].count;
+    },
+  );
 }
 
 /**
@@ -129,37 +132,47 @@ export async function _countRegistrarActions(
  * build a list of {@link NamedRegistrarAction} objects.
  */
 export async function _findRegistrarActions(options: FindRegistrarActionsOptions) {
-  const query = db
-    .select({
-      registrarActions: schema.registrarActions,
-      registrationLifecycles: schema.registrationLifecycles,
-      subregistries: schema.subregistries,
-      domain: schema.subgraph_domain,
-    })
-    .from(schema.registrarActions)
-    // join Registration Lifecycles associated with Registrar Actions
-    .innerJoin(
-      schema.registrationLifecycles,
-      eq(schema.registrarActions.node, schema.registrationLifecycles.node),
-    )
-    // join Domains associated with Registration Lifecycles
-    .innerJoin(
-      schema.subgraph_domain,
-      eq(schema.registrationLifecycles.node, schema.subgraph_domain.id),
-    )
-    // join Subregistries associated with Registration Lifecycles
-    .innerJoin(
-      schema.subregistries,
-      eq(schema.registrationLifecycles.subregistryId, schema.subregistries.subregistryId),
-    )
-    .where(and(...buildWhereClause(options.filters)))
-    .orderBy(buildOrderByClause(options.orderBy))
-    .limit(options.limit)
-    .offset(options.offset);
-
-  const records = await query;
-
-  return records;
+  return withSpanAsync(
+    tracer,
+    "registrarActions.find",
+    {
+      filterCount: options.filters?.length ?? 0,
+      orderBy: options.orderBy,
+      limit: options.limit,
+      offset: options.offset,
+    },
+    () =>
+      ensDb
+        .select({
+          registrarActions: ensIndexerSchema.registrarActions,
+          registrationLifecycles: ensIndexerSchema.registrationLifecycles,
+          subregistries: ensIndexerSchema.subregistries,
+          domain: ensIndexerSchema.subgraph_domain,
+        })
+        .from(ensIndexerSchema.registrarActions)
+        // join Registration Lifecycles associated with Registrar Actions
+        .innerJoin(
+          ensIndexerSchema.registrationLifecycles,
+          eq(ensIndexerSchema.registrarActions.node, ensIndexerSchema.registrationLifecycles.node),
+        )
+        // join Domains associated with Registration Lifecycles
+        .innerJoin(
+          ensIndexerSchema.subgraph_domain,
+          eq(ensIndexerSchema.registrationLifecycles.node, ensIndexerSchema.subgraph_domain.id),
+        )
+        // join Subregistries associated with Registration Lifecycles
+        .innerJoin(
+          ensIndexerSchema.subregistries,
+          eq(
+            ensIndexerSchema.registrationLifecycles.subregistryId,
+            ensIndexerSchema.subregistries.subregistryId,
+          ),
+        )
+        .where(and(...buildWhereClause(options.filters)))
+        .orderBy(buildOrderByClause(options.orderBy))
+        .limit(options.limit)
+        .offset(options.offset),
+  );
 }
 
 type MapToNamedRegistrarActionArgs = Awaited<ReturnType<typeof _findRegistrarActions>>[0];
@@ -171,8 +184,8 @@ type MapToNamedRegistrarActionArgs = Awaited<ReturnType<typeof _findRegistrarAct
  */
 function _mapToNamedRegistrarAction(record: MapToNamedRegistrarActionArgs): NamedRegistrarAction {
   // Invariant: The FQDN `name` of the Domain associated with the `node` must exist.
-  if (!record.domain.name === null) {
-    throw new Error(`Domain 'name' must exists for '${record.registrationLifecycles.node}' node.`);
+  if (record.domain.name === null) {
+    throw new Error(`Domain 'name' must exist for '${record.registrationLifecycles.node}' node.`);
   }
 
   // build Registration Lifecycle object
@@ -235,7 +248,8 @@ function _mapToNamedRegistrarAction(record: MapToNamedRegistrarActionArgs): Name
     eventIds: record.registrarActions.eventIds as [string, ...string[]],
   } satisfies RegistrarAction;
 
-  const name = record.domain.name as InterpretedName;
+  // biome-ignore lint/style/noNonNullAssertion: domain.name guarnateed to exist
+  const name = asInterpretedName(record.domain.name!);
 
   return {
     action,

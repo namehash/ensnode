@@ -1,8 +1,9 @@
-import type { Context } from "ponder:registry";
-import schema from "ponder:schema";
+import { type Node, stringifyAccountId } from "enssdk";
 import type { Hash } from "viem";
 
-import { formatAccountId, type Node, type RegistrarAction } from "@ensnode/ensnode-sdk";
+import type { RegistrarAction } from "@ensnode/ensnode-sdk";
+
+import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 
 /**
  * Logical Event Key
@@ -32,7 +33,7 @@ export function makeLogicalEventKey({
  * Insert a record for the "logical registrar action".
  */
 export async function insertRegistrarAction(
-  context: Context,
+  context: IndexingEngineContext,
   {
     id,
     type,
@@ -58,8 +59,8 @@ export async function insertRegistrarAction(
   //          we update it to point to the current logical event key and id.
   //          This ensures that there is always at most one record in ENSDb
   //          for the current "logical registrar action".
-  await context.db
-    .insert(schema.internal_registrarActionMetadata)
+  await context.ensDb
+    .insert(ensIndexerSchema.internal_registrarActionMetadata)
     .values({
       metadataType: "CURRENT_LOGICAL_REGISTRAR_ACTION",
       logicalEventKey,
@@ -71,10 +72,10 @@ export async function insertRegistrarAction(
     }));
 
   // 3. Store initial record for the "logical registrar action"
-  await context.db.insert(schema.registrarActions).values({
+  await context.ensDb.insert(ensIndexerSchema.registrarActions).values({
     id,
     type,
-    subregistryId: formatAccountId(subregistryId),
+    subregistryId: stringifyAccountId(subregistryId),
     node,
     incrementalDuration: BigInt(incrementalDuration),
     registrant,

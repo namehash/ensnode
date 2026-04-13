@@ -5,17 +5,26 @@ import { ENSNamespaceIds } from "@ensnode/datasources";
 import { PluginName } from "../../ensindexer/config/types";
 import { deserializeEnsApiPublicConfig } from "./deserialize";
 import { serializeEnsApiPublicConfig } from "./serialize";
+import type { SerializedEnsApiPublicConfig } from "./serialized-types";
 import type { EnsApiPublicConfig } from "./types";
 
 const MOCK_ENSAPI_PUBLIC_CONFIG = {
-  version: "0.36.0",
+  versionInfo: {
+    ensApi: "1.9.0",
+    ensNormalize: "1.11.1",
+  },
   theGraphFallback: {
     canFallback: false,
     reason: "no-api-key",
   },
   ensIndexerPublicConfig: {
     namespace: ENSNamespaceIds.Mainnet,
-    databaseSchemaName: "ensapi",
+    ensIndexerSchemaName: "ensindexer_0",
+    ensRainbowPublicConfig: {
+      version: "0.36.0",
+      labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+      recordsCount: 100,
+    },
     indexedChainIds: new Set([1]),
     isSubgraphCompatible: false,
     labelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
@@ -23,10 +32,7 @@ const MOCK_ENSAPI_PUBLIC_CONFIG = {
     versionInfo: {
       ensDb: "0.36.0",
       ensIndexer: "0.36.0",
-      ensRainbow: "0.36.0",
-      ensRainbowSchema: 1,
       ensNormalize: "1.1.1",
-      nodejs: "20.0.0",
       ponder: "0.5.0",
     },
   },
@@ -40,14 +46,22 @@ describe("ENSApi Config Serialization/Deserialization", () => {
       const result = serializeEnsApiPublicConfig(MOCK_ENSAPI_PUBLIC_CONFIG);
 
       expect(result).toEqual({
-        version: "0.36.0",
+        versionInfo: {
+          ensApi: "1.9.0",
+          ensNormalize: "1.11.1",
+        },
         theGraphFallback: {
           canFallback: false,
           reason: "no-api-key",
         },
         ensIndexerPublicConfig: {
           namespace: ENSNamespaceIds.Mainnet,
-          databaseSchemaName: "ensapi",
+          ensIndexerSchemaName: "ensindexer_0",
+          ensRainbowPublicConfig: {
+            version: "0.36.0",
+            labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+            recordsCount: 100,
+          },
           indexedChainIds: [1],
           isSubgraphCompatible: false,
           labelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
@@ -55,14 +69,11 @@ describe("ENSApi Config Serialization/Deserialization", () => {
           versionInfo: {
             ensDb: "0.36.0",
             ensIndexer: "0.36.0",
-            ensRainbow: "0.36.0",
-            ensRainbowSchema: 1,
             ensNormalize: "1.1.1",
-            nodejs: "20.0.0",
             ponder: "0.5.0",
           },
         },
-      });
+      } satisfies SerializedEnsApiPublicConfig);
     });
   });
 
@@ -77,11 +88,14 @@ describe("ENSApi Config Serialization/Deserialization", () => {
     it("handles validation errors with custom value label", () => {
       const invalidConfig = {
         ...MOCK_SERIALIZED_ENSAPI_PUBLIC_CONFIG,
-        version: "", // Invalid: empty string
+        versionInfo: {
+          ensApi: "",
+          ensNormalize: "",
+        },
       };
 
       expect(() => deserializeEnsApiPublicConfig(invalidConfig, "testConfig")).toThrow(
-        /testConfig.version/,
+        /testConfig.versionInfo.ensApi/,
       );
     });
   });

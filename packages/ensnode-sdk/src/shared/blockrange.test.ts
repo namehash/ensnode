@@ -168,7 +168,31 @@ describe("Blockrange", () => {
       });
     });
 
-    it("ignores unbounded range when other bounds exist", () => {
+    it("keeps start unbounded when any merged range has no start block", () => {
+      const result = mergeBlockNumberRanges(
+        buildBlockNumberRange(undefined, 200),
+        buildBlockNumberRange(80, 250),
+      );
+
+      expect(result).toStrictEqual({
+        rangeType: RangeTypeIds.RightBounded,
+        endBlock: 250,
+      });
+    });
+
+    it("keeps end unbounded when any merged range has no end block", () => {
+      const result = mergeBlockNumberRanges(
+        buildBlockNumberRange(100, 200),
+        buildBlockNumberRange(80, undefined),
+      );
+
+      expect(result).toStrictEqual({
+        rangeType: RangeTypeIds.LeftBounded,
+        startBlock: 80,
+      });
+    });
+
+    it("returns unbounded range when any merged range is fully unbounded", () => {
       const result = mergeBlockNumberRanges(
         buildBlockNumberRange(100, 200),
         buildBlockNumberRange(undefined, undefined),
@@ -176,9 +200,7 @@ describe("Blockrange", () => {
       );
 
       expect(result).toStrictEqual({
-        rangeType: RangeTypeIds.Bounded,
-        startBlock: 100,
-        endBlock: 200,
+        rangeType: RangeTypeIds.Unbounded,
       });
     });
   });

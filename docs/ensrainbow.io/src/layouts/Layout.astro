@@ -1,10 +1,10 @@
 ---
 import { AstroFont } from "astro-font";
 import { SEO } from "astro-seo";
-import Footer from "../components/organisms/Footer";
 import Header from "../components/organisms/Header";
 import "../styles/global.css";
-import "@namehash/namekit-react/styles.css";
+
+import { Footer } from "@namehash/namehash-ui";
 ---
 
 <!doctype html>
@@ -61,7 +61,7 @@ import "@namehash/namekit-react/styles.css";
 <body>
 <Header client:only="react"/>
 <slot/>
-<Footer client:load/>
+<Footer />
 </body>
 </html>
 

@@ -38,18 +38,10 @@ PID=$!
 
 echo "ENSIndexer started with PID: $PID"
 
-# Require ENSINDEXER_URL to be set
-if [ -z "$ENSINDEXER_URL" ]; then
-  echo "Error: ENSINDEXER_URL environment variable must be set"
-  kill -9 $PID 2>/dev/null || true
-  wait $PID 2>/dev/null || true
-  rm -f "$LOG_FILE"
-  [ -f "$ENV_FILE" ] && rm -f "$ENV_FILE"
-  exit 1
-fi
+ENSINDEXER_HEALTHCHECK="http://localhost:42069/health"
 
 # Wait for health check to pass
-echo "Waiting for health check to pass at ${ENSINDEXER_URL}/health (up to $HEALTH_CHECK_TIMEOUT seconds)..."
+echo "Waiting for health check to pass at ${ENSINDEXER_HEALTHCHECK} (up to $HEALTH_CHECK_TIMEOUT seconds)..."
 health_check_start=$(date +%s)
 last_log_check=0
 
@@ -76,7 +68,7 @@ while true; do
   fi
 
   # Check health endpoint
-  if curl -sf "${ENSINDEXER_URL}/health" >/dev/null 2>&1; then
+  if curl -sf "${ENSINDEXER_HEALTHCHECK}" >/dev/null 2>&1; then
     echo "Health check passed! ENSIndexer is up and running."
     echo "Test successful - terminating ENSIndexer"
     # Force kill the ENSIndexer process

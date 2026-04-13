@@ -9,9 +9,9 @@ ENSNode is a multichain ENS indexer monorepo. It indexes ENS names across multip
 - `apps/ensadmin` — Dashboard for navigating indexed ENS state (Next.js)
 - `apps/ensrainbow` — Label healing service: recovers labels from labelHashes (Hono)
 - `apps/fallback-ensapi` — AWS Lambda fallback that proxies ENS Subgraph requests when ENSApi is unhealthy
+- `packages/ensdb-sdk` — SDK for interacting with data in ENSDb
 - `packages/ensnode-sdk` — SDK for interacting with ENSNode
 - `packages/ensnode-react` — React hooks and providers for ENSNode API
-- `packages/ensnode-schema` — Shared Drizzle schema definitions
 - `packages/ensrainbow-sdk` — SDK for interacting with ENSRainbow
 - `packages/datasources` — Catalog of chain datasources (contracts, start blocks, event filters)
 - `packages/ponder-subgraph` — Hono middleware for Subgraph-compatible GraphQL
@@ -42,7 +42,7 @@ Runnable commands for validating changes; lint and format with Biome.
 - Run tests for a single package/app: `pnpm --filter <package-name> test` (e.g. `pnpm --filter ensapi test`)
 - Lint and format: `pnpm lint` (fixes where applicable); CI lint: `pnpm lint:ci`
 - Type checking: `pnpm typecheck` (runs typecheck in all workspaces)
-- Build (validate tsup/tsx bundling for the package you changed): `pnpm --filter <package-name> build`
+  - Always prefer `pnpm -F <package-name> typecheck` over `tsc`
 
 ## Testing
 
@@ -75,4 +75,8 @@ Fail fast and loudly on invalid inputs.
 
 ## Workflow
 
-- Add a changeset when your PR includes a logical change that should bump versions or be communicated in release notes: https://ensnode.io/docs/contributing/prs/#changesets
+- Add a changeset when your PR includes a logical change that should bump versions or be communicated in release notes: https://ensnode.io/docs/contributing/prs#changesets
+- Before declaring work complete, run validation in the affected packages:
+  1. `pnpm -F <affected-packages> typecheck`
+  2. `pnpm lint`
+  3. `pnpm -F <affected-packages> test`

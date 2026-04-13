@@ -1,12 +1,7 @@
-import { z } from "zod/v4";
+import { z } from "@hono/zod-openapi";
+import { DEFAULT_EVM_CHAIN_ID, isNormalizedName, type Name } from "enssdk";
 
-import {
-  DEFAULT_EVM_CHAIN_ID,
-  isNormalizedName,
-  isSelectionEmpty,
-  type Name,
-  type ResolverRecordsSelection,
-} from "@ensnode/ensnode-sdk";
+import { isSelectionEmpty, type ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 import {
   makeCoinTypeStringSchema,
   makeDefaultableChainIdStringSchema,
@@ -23,7 +18,8 @@ const excludingDefaultChainId = z
 const boolstring = z
   .string()
   .pipe(z.enum(["true", "false"]))
-  .transform((val) => val === "true");
+  .transform((val) => val === "true")
+  .openapi({ type: "boolean" });
 
 const stringarray = z
   .string()
@@ -38,8 +34,8 @@ const name = z
   .refine(isNormalizedName, "Must be normalized, see https://docs.ens.domains/resolution/names/")
   .transform((val) => val as Name);
 
-const trace = z.optional(boolstring).default(false);
-const accelerate = z.optional(boolstring).default(false);
+const trace = z.optional(boolstring).default(false).openapi({ default: false });
+const accelerate = z.optional(boolstring).default(false).openapi({ default: false });
 const address = makeLowercaseAddressSchema();
 const defaultableChainId = makeDefaultableChainIdStringSchema();
 const coinType = makeCoinTypeStringSchema();

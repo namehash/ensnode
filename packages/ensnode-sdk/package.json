@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/ensnode-sdk",
-  "version": "1.5.1",
+  "version": "1.9.0",
   "type": "module",
   "description": "A utility library for interacting with ENSNode and ENS data",
   "license": "MIT",
@@ -59,11 +59,11 @@
     "vitest": "catalog:"
   },
   "dependencies": {
-    "@adraffy/ens-normalize": "catalog:",
     "@ensdomains/address-encoder": "^1.1.2",
     "@ensnode/datasources": "workspace:*",
     "caip": "catalog:",
     "date-fns": "catalog:",
+    "enssdk": "workspace:*",
     "zod": "catalog:"
   }
 }

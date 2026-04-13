@@ -1,7 +1,6 @@
+import type { Name } from "enssdk";
 import type { PropsWithChildren } from "react";
 import * as React from "react";
-
-import { type Name } from "@ensnode/ensnode-sdk";
 
 import { InternalLink } from "@/components/link";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
@@ -11,6 +10,13 @@ import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
  */
 export function getNameDetailsRelativePath(name: Name): string {
   return `/name?name=${encodeURIComponent(name)}`;
+}
+
+/**
+ * Gets the relative path of the record resolution inspector page for a given name.
+ */
+export function getRecordResolutionRelativePath(name: Name): string {
+  return `/inspect/records?name=${encodeURIComponent(name)}`;
 }
 
 interface NameLinkProps {

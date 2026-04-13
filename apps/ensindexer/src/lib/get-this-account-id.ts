@@ -1,8 +1,7 @@
-import type { Context } from "ponder:registry";
+import type { AccountId } from "enssdk";
 
-import type { AccountId } from "@ensnode/ensnode-sdk";
-
-import type { LogEvent } from "@/lib/ponder-helpers";
+import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
+import type { LogEventBase } from "@/lib/ponder-helpers";
 
 /**
  * Retrieves the AccountId representing the contract on this chain under which `event` was emitted.
@@ -10,5 +9,7 @@ import type { LogEvent } from "@/lib/ponder-helpers";
  * @example
  * const { chainId, address } = getThisAccountId(context, event);
  */
-export const getThisAccountId = (context: Context, event: Pick<LogEvent, "log">) =>
-  ({ chainId: context.chain.id, address: event.log.address }) satisfies AccountId;
+export const getThisAccountId = (
+  context: IndexingEngineContext,
+  event: Pick<LogEventBase, "log">,
+) => ({ chainId: context.chain.id, address: event.log.address }) satisfies AccountId;

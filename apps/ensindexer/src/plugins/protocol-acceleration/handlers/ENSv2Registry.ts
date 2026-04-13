@@ -1,9 +1,9 @@
-import { type Context, ponder } from "ponder:registry";
-import type { Address } from "viem";
+import { type Address, makeENSv2DomainId, makeStorageId } from "enssdk";
 
-import { getCanonicalId, makeENSv2DomainId, PluginName } from "@ensnode/ensnode-sdk";
+import { PluginName } from "@ensnode/ensnode-sdk";
 
 import { getThisAccountId } from "@/lib/get-this-account-id";
+import { addOnchainEventListener, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import { ensureDomainResolverRelation } from "@/lib/protocol-acceleration/domain-resolver-relationship-db-helpers";
@@ -11,13 +11,13 @@ import { ensureDomainResolverRelation } from "@/lib/protocol-acceleration/domain
 const pluginName = PluginName.ProtocolAcceleration;
 
 export default function () {
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "ENSv2Registry:ResolverUpdated"),
     async ({
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{
         tokenId: bigint;
         resolver: Address;
@@ -26,8 +26,8 @@ export default function () {
       const { tokenId, resolver } = event.args;
 
       const registry = getThisAccountId(context, event);
-      const canonicalId = getCanonicalId(tokenId);
-      const domainId = makeENSv2DomainId(registry, canonicalId);
+      const storageId = makeStorageId(tokenId);
+      const domainId = makeENSv2DomainId(registry, storageId);
 
       await ensureDomainResolverRelation(context, registry, domainId, resolver);
     },

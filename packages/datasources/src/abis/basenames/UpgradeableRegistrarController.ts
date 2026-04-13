@@ -1,3 +1,5 @@
+import type { Abi } from "viem";
+
 export const UpgradeableRegistrarController = [
   { inputs: [], stateMutability: "nonpayable", type: "constructor" },
   {
@@ -479,4 +481,4 @@ export const UpgradeableRegistrarController = [
     type: "function",
   },
   { inputs: [], name: "withdrawETH", outputs: [], stateMutability: "nonpayable", type: "function" },
-] as const;
+] as const satisfies Abi;

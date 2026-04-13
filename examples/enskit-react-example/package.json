@@ -1,0 +1,27 @@
+{
+  "name": "@ensnode/enskit-react-example",
+  "private": true,
+  "version": "0.0.0",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsgo --noEmit"
+  },
+  "dependencies": {
+    "enskit": "workspace:*",
+    "enssdk": "workspace:*",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-router": "^7.6.1"
+  },
+  "devDependencies": {
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "^4.5.2",
+    "typescript": "catalog:",
+    "vite": "catalog:"
+  }
+}

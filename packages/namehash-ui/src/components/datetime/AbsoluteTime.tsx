@@ -1,7 +1,6 @@
 import { fromUnixTime, intlFormat } from "date-fns";
+import type { UnixTimestamp } from "enssdk";
 import { useEffect, useState } from "react";
-
-import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
 
 /**
  * Client-only absolute time component

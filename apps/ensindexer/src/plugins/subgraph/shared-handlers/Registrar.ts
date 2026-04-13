@@ -1,10 +1,10 @@
 import config from "@/config";
 
-import type { Context } from "ponder:registry";
-import schema from "ponder:schema";
-import type { Address } from "viem";
-
 import {
+  type Address,
+  asInterpretedLabel,
+  asLiteralLabel,
+  constructSubInterpretedName,
   encodeLabelHash,
   type InterpretedLabel,
   type InterpretedName,
@@ -13,13 +13,15 @@ import {
   type LiteralLabel,
   literalLabelToInterpretedLabel,
   makeSubdomainNode,
-  type PluginName,
   type SubgraphInterpretedLabel,
   type SubgraphInterpretedName,
-} from "@ensnode/ensnode-sdk";
+} from "enssdk";
+
+import type { PluginName } from "@ensnode/ensnode-sdk";
 
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
+import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import { getManagedName } from "@/lib/managed-names";
 import { pluginSupportsPremintedNames } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
@@ -37,7 +39,7 @@ const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
  */
 export const makeRegistrarHandlers = ({ pluginName }: { pluginName: PluginName }) => {
   async function setNamePreimage(
-    context: Context,
+    context: IndexingEngineContext,
     event: EventWithArgs<{
       label: LiteralLabel;
       labelHash: LabelHash;
@@ -57,11 +59,11 @@ export const makeRegistrarHandlers = ({ pluginName }: { pluginName: PluginName }
         // see https://ensnode.io/docs/reference/terminology#interpreted-label
         literalLabelToInterpretedLabel(label);
 
-    const { node: managedNode, name: managedName } = getManagedName(
+    const { name: managedName, node: managedNode } = getManagedName(
       getThisAccountId(context, event),
     );
     const node = makeSubdomainNode(labelHash, managedNode);
-    const domain = await context.db.find(schema.subgraph_domain, { id: node });
+    const domain = await context.ensDb.find(ensIndexerSchema.subgraph_domain, { id: node });
 
     // encode the runtime assertion here https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L101
     if (!domain) throw new Error("domain expected in setNamePreimage but not found");
@@ -73,14 +75,14 @@ export const makeRegistrarHandlers = ({ pluginName }: { pluginName: PluginName }
         | InterpretedName
         | SubgraphInterpretedName;
 
-      await context.db
-        .update(schema.subgraph_domain, { id: node })
+      await context.ensDb
+        .update(ensIndexerSchema.subgraph_domain, { id: node })
         .set({ labelName: interpretedLabel, name: interpretedName });
     }
 
     // update the registration's labelName
-    await context.db
-      .update(schema.subgraph_registration, { id: makeRegistrationId(labelHash, node) })
+    await context.ensDb
+      .update(ensIndexerSchema.subgraph_registration, { id: makeRegistrationId(labelHash, node) })
       .set({ labelName: interpretedLabel, cost });
   }
 
@@ -89,7 +91,7 @@ export const makeRegistrarHandlers = ({ pluginName }: { pluginName: PluginName }
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{
         labelHash: LabelHash;
         owner: Address;
@@ -129,7 +131,7 @@ export const makeRegistrarHandlers = ({ pluginName }: { pluginName: PluginName }
       // Therefore, if a Domain does not exist in Registrar#NameRegistered, it _must_ be a 'preminted'
       // name, tracked only in the Registrar. If/when these 'preminted' names are _actually_ registered
       // in the future, they will emit NewOwner as expected.
-      const domain = await context.db.find(schema.subgraph_domain, { id: node });
+      const domain = await context.ensDb.find(ensIndexerSchema.subgraph_domain, { id: node });
       if (!domain) {
         // invariant: if the domain does not exist and the plugin does not support preminted names, panic
         if (!pluginSupportsPremintedNames(pluginName)) {
@@ -175,18 +177,18 @@ export const makeRegistrarHandlers = ({ pluginName }: { pluginName: PluginName }
         // Interpret the `healedLabel` Literal Label into an Interpreted Label
         // see https://ensnode.io/docs/reference/terminology#literal-label
         // see https://ensnode.io/docs/reference/terminology#interpreted-label
-        label = (
+        label = asInterpretedLabel(
           healedLabel !== null
             ? literalLabelToInterpretedLabel(healedLabel)
-            : encodeLabelHash(labelHash)
-        ) as InterpretedLabel;
+            : encodeLabelHash(labelHash),
+        );
 
-        // a name constructed of Interpreted Labels is Interpreted
-        name = `${label}.${managedName}` as InterpretedName;
+        // construct the InterpretedName with InterpretedLabel and parent's InterpretedName
+        name = constructSubInterpretedName(label, managedName);
       }
 
       // update Domain
-      await context.db.update(schema.subgraph_domain, { id: node }).set({
+      await context.ensDb.update(ensIndexerSchema.subgraph_domain, { id: node }).set({
         registrantId: owner,
         expiryDate: expires + GRACE_PERIOD_SECONDS,
         labelName: label,
@@ -207,7 +209,7 @@ export const makeRegistrarHandlers = ({ pluginName }: { pluginName: PluginName }
       });
 
       // log RegistrationEvent
-      await context.db.insert(schema.subgraph_nameRegistered).values({
+      await context.ensDb.insert(ensIndexerSchema.subgraph_nameRegistered).values({
         ...sharedEventValues(context.chain.id, event),
         registrationId,
         registrantId: owner,
@@ -219,15 +221,15 @@ export const makeRegistrarHandlers = ({ pluginName }: { pluginName: PluginName }
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{
         label: Label;
         labelHash: LabelHash;
         cost: bigint;
       }>;
     }) {
-      const { label: _label, labelHash, cost } = event.args;
-      const label = _label as LiteralLabel; // NameRegistered emits Literal Labels
+      const { labelHash, cost } = event.args;
+      const label = asLiteralLabel(event.args.label); // NameRegistered emits Literal Labels
 
       await setNamePreimage(context, { ...event, args: { label, labelHash, cost } });
     },
@@ -236,15 +238,15 @@ export const makeRegistrarHandlers = ({ pluginName }: { pluginName: PluginName }
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{
         label: Label;
         labelHash: LabelHash;
         cost: bigint;
       }>;
     }) {
-      const { label: _label, labelHash, cost } = event.args;
-      const label = _label as LiteralLabel; // NameRenewed emits Literal Labels
+      const { labelHash, cost } = event.args;
+      const label = asLiteralLabel(event.args.label); // NameRenewed emits Literal Labels
 
       await setNamePreimage(context, { ...event, args: { label, labelHash, cost } });
     },
@@ -253,7 +255,7 @@ export const makeRegistrarHandlers = ({ pluginName }: { pluginName: PluginName }
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{ labelHash: LabelHash; expires: bigint }>;
     }) {
       const { labelHash, expires } = event.args;
@@ -263,15 +265,17 @@ export const makeRegistrarHandlers = ({ pluginName }: { pluginName: PluginName }
       const id = makeRegistrationId(labelHash, node);
 
       // update Registration expiry
-      await context.db.update(schema.subgraph_registration, { id }).set({ expiryDate: expires });
+      await context.ensDb
+        .update(ensIndexerSchema.subgraph_registration, { id })
+        .set({ expiryDate: expires });
 
       // update Domain expiry
-      await context.db
-        .update(schema.subgraph_domain, { id: node })
+      await context.ensDb
+        .update(ensIndexerSchema.subgraph_domain, { id: node })
         .set({ expiryDate: expires + GRACE_PERIOD_SECONDS });
 
       // log RegistrationEvent
-      await context.db.insert(schema.subgraph_nameRenewed).values({
+      await context.ensDb.insert(ensIndexerSchema.subgraph_nameRenewed).values({
         ...sharedEventValues(context.chain.id, event),
         registrationId: id,
         expiryDate: expires,
@@ -282,7 +286,7 @@ export const makeRegistrarHandlers = ({ pluginName }: { pluginName: PluginName }
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{ labelHash: LabelHash; from: Address; to: Address }>;
     }) {
       const { labelHash, to } = event.args;
@@ -296,17 +300,21 @@ export const makeRegistrarHandlers = ({ pluginName }: { pluginName: PluginName }
 
       // if the Transfer event occurs before the Registration entity exists (i.e. the initial
       // registration, which is Transfer -> NewOwner -> NameRegistered), no-op
-      const registration = await context.db.find(schema.subgraph_registration, { id });
+      const registration = await context.ensDb.find(ensIndexerSchema.subgraph_registration, { id });
       if (!registration) return;
 
       // update registration registrant
-      await context.db.update(schema.subgraph_registration, { id }).set({ registrantId: to });
+      await context.ensDb
+        .update(ensIndexerSchema.subgraph_registration, { id })
+        .set({ registrantId: to });
 
       // update domain registrant
-      await context.db.update(schema.subgraph_domain, { id: node }).set({ registrantId: to });
+      await context.ensDb
+        .update(ensIndexerSchema.subgraph_domain, { id: node })
+        .set({ registrantId: to });
 
       // log RegistrationEvent
-      await context.db.insert(schema.subgraph_nameTransferred).values({
+      await context.ensDb.insert(ensIndexerSchema.subgraph_nameTransferred).values({
         ...sharedEventValues(context.chain.id, event),
         registrationId: id,
         newOwnerId: to,

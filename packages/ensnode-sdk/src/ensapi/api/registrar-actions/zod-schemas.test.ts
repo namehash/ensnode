@@ -1,7 +1,6 @@
+import { asInterpretedName } from "enssdk";
 import { describe, expect, it } from "vitest";
 
-import type { InterpretedName } from "../../../ens/types";
-import { registrarActionsPrerequisites } from "../registrar-actions/prerequisites";
 import { RegistrarActionsResponseCodes, type RegistrarActionsResponseError } from "./response";
 import type {
   SerializedNamedRegistrarAction,
@@ -57,7 +56,7 @@ describe("ENSNode API Schema", () => {
           "176209761600000000111551110000000009545322000000000000006750000000000000071",
         ],
       },
-      name: "nh35.eth" as InterpretedName,
+      name: asInterpretedName("nh35.eth"),
     } satisfies SerializedNamedRegistrarAction;
 
     const validNamedRegistrarActionEncodedLabelHash = {
@@ -93,7 +92,9 @@ describe("ENSNode API Schema", () => {
         transactionHash: "0xa71cf08102ae1f634b22349dac8dc158fe96ae74008b5e24cfcda8587e056d53",
         eventIds: ["176234701200000000111551110000000009566045000000000000014150000000000000198"],
       },
-      name: "[e4310bf4547cb18b16b5348881d24a66d61fa94a013e5636b730b86ee64a3923].eth" as InterpretedName,
+      name: asInterpretedName(
+        "[e4310bf4547cb18b16b5348881d24a66d61fa94a013e5636b730b86ee64a3923].eth",
+      ),
     } satisfies SerializedNamedRegistrarAction;
 
     const validResponseOk = {
@@ -117,14 +118,17 @@ describe("ENSNode API Schema", () => {
 
     const validResponseError = {
       responseCode: RegistrarActionsResponseCodes.Error,
-      error: {
-        message: "Registrar Actions API is not available",
-        details: `The cached omnichain indexing status of the Connected ENSIndexer must be one of the following ${registrarActionsPrerequisites.supportedIndexingStatusIds.map((statusId) => `"${statusId}"`).join(", ")}.`,
-      },
+      error: { message: "any message", details: "any details" },
     } satisfies SerializedRegistrarActionsResponseError;
 
     it("can parse valid ResponseOk object", () => {
       expect(() => makeRegistrarActionsResponseSchema().parse(validResponseOk)).not.toThrowError();
+    });
+
+    it("rejects ResponseOk object missing required accurateAsOf", () => {
+      const { accurateAsOf: _accurateAsOf, ...invalidResponseOk } = validResponseOk;
+
+      expect(() => makeRegistrarActionsResponseSchema().parse(invalidResponseOk)).toThrowError();
     });
 
     it("can parse valid ResponseError object", () => {

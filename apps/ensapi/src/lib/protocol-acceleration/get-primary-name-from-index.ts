@@ -1,14 +1,13 @@
 import { trace } from "@opentelemetry/api";
-import type { Address } from "viem";
-
 import {
+  type Address,
   type CoinType,
   coinTypeReverseLabel,
   DEFAULT_EVM_COIN_TYPE,
   type Name,
-} from "@ensnode/ensnode-sdk";
+} from "enssdk";
 
-import { db } from "@/lib/db";
+import { ensDb } from "@/lib/ensdb/singleton";
 import { withSpanAsync } from "@/lib/instrumentation/auto-span";
 
 const tracer = trace.getTracer("get-primary-name");
@@ -27,7 +26,7 @@ export async function getENSIP19ReverseNameRecordFromIndex(
     "reverseNameRecord.findMany",
     { address, coinType: coinTypeReverseLabel(coinType) },
     () =>
-      db.query.reverseNameRecord.findMany({
+      ensDb.query.reverseNameRecord.findMany({
         where: (t, { and, inArray, eq }) =>
           and(
             // address = address

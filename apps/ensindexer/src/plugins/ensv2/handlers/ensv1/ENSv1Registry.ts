@@ -1,24 +1,27 @@
 import config from "@/config";
 
-import { type Context, ponder } from "ponder:registry";
-import schema from "ponder:schema";
-import { type Address, isAddressEqual, zeroAddress } from "viem";
-
 import {
   ADDR_REVERSE_NODE,
-  getENSRootChainId,
-  interpretAddress,
+  type Address,
   type LabelHash,
   makeENSv1DomainId,
   makeSubdomainNode,
   type Node,
-  PluginName,
   ROOT_NODE,
-} from "@ensnode/ensnode-sdk";
+} from "enssdk";
+import { isAddressEqual, zeroAddress } from "viem";
+
+import { getENSRootChainId, interpretAddress, PluginName } from "@ensnode/ensnode-sdk";
 
 import { materializeENSv1DomainEffectiveOwner } from "@/lib/ensv2/domain-db-helpers";
+import { ensureDomainEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel, ensureUnknownLabel } from "@/lib/ensv2/label-db-helpers";
 import { healAddrReverseSubnameLabel } from "@/lib/heal-addr-reverse-subname-label";
+import {
+  addOnchainEventListener,
+  ensIndexerSchema,
+  type IndexingEngineContext,
+} from "@/lib/indexing-engines/ponder";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import { nodeIsMigrated } from "@/lib/protocol-acceleration/registry-migration-status";
@@ -37,7 +40,7 @@ export default function () {
     context,
     event,
   }: {
-    context: Context;
+    context: IndexingEngineContext;
     event: EventWithArgs<{
       // NOTE: `node` event arg represents a `Node` that is the _parent_ of the node the NewOwner event is about
       node: Node;
@@ -74,14 +77,15 @@ export default function () {
     }
 
     // upsert domain
-    await context.db
-      .insert(schema.v1Domain)
-      .values({
-        id: domainId,
-        parentId,
-        labelHash,
-      })
+    await context.ensDb
+      .insert(ensIndexerSchema.v1Domain)
+      .values({ id: domainId, parentId, labelHash })
       .onConflictDoNothing();
+
+    // update rootRegistryOwner
+    await context.ensDb
+      .update(ensIndexerSchema.v1Domain, { id: domainId })
+      .set({ rootRegistryOwnerId: interpretAddress(owner) });
 
     // materialize domain owner
     // NOTE: despite Domain.ownerId being materialized from other sources of truth (i.e. Registrars
@@ -90,41 +94,84 @@ export default function () {
     // owner changes to that of the NameWrapper but then the NameWrapper emits NameWrapped, and this
     // indexing code re-materializes the Domain.ownerId to the NameWraper-emitted value.
     await materializeENSv1DomainEffectiveOwner(context, domainId, owner);
+
+    // push event to domain history
+    await ensureDomainEvent(context, event, domainId);
   }
 
   async function handleTransfer({
     context,
     event,
   }: {
-    context: Context;
+    context: IndexingEngineContext;
     event: EventWithArgs<{ node: Node; owner: Address }>;
   }) {
-    const { node, owner: _owner } = event.args;
-    const owner = interpretAddress(_owner);
+    const { node, owner } = event.args;
 
     // ENSv2 model does not include root node, no-op
     if (node === ROOT_NODE) return;
 
     const domainId = makeENSv1DomainId(node);
 
-    if (owner === null) {
-      await context.db.delete(schema.v1Domain, { id: domainId });
-    } else {
-      // materialize domain owner
-      // NOTE: despite Domain.ownerId being materialized from other sources of truth (i.e. Registrars
-      // like BaseRegistrars & NameWrapper) it's ok to always set it here because the Registrar-emitted
-      // events occur _after_ the Registry events. So when a name is wrapped, for example, the Registry's
-      // owner changes to that of the NameWrapper but then the NameWrapper emits NameWrapped, and this
-      // indexing code re-materializes the Domain.ownerId to the NameWraper-emitted value.
-      await materializeENSv1DomainEffectiveOwner(context, domainId, owner);
-    }
+    // set the domain's rootRegistryOwner to `owner`
+    await context.ensDb
+      .update(ensIndexerSchema.v1Domain, { id: domainId })
+      .set({ rootRegistryOwnerId: interpretAddress(owner) });
+
+    // materialize domain owner
+    // NOTE: despite Domain.ownerId being materialized from other sources of truth (i.e. Registrars
+    // like BaseRegistrars & NameWrapper) it's ok to always set it here because the Registrar-emitted
+    // events occur _after_ the Registry events. So when a name is wrapped, for example, the Registry's
+    // owner changes to that of the NameWrapper but then the NameWrapper emits NameWrapped, and this
+    // indexing code re-materializes the Domain.ownerId to the NameWraper-emitted value.
+    await materializeENSv1DomainEffectiveOwner(context, domainId, owner);
+
+    // push event to domain history
+    await ensureDomainEvent(context, event, domainId);
+  }
+
+  async function handleNewTTL({
+    context,
+    event,
+  }: {
+    context: IndexingEngineContext;
+    event: EventWithArgs<{ node: Node }>;
+  }) {
+    const { node } = event.args;
+    const domainId = makeENSv1DomainId(node);
+
+    // ENSv2 model does not include root node, no-op
+    if (node === ROOT_NODE) return;
+
+    // push event to domain history
+    await ensureDomainEvent(context, event, domainId);
+  }
+
+  async function handleNewResolver({
+    context,
+    event,
+  }: {
+    context: IndexingEngineContext;
+    event: EventWithArgs<{ node: Node }>;
+  }) {
+    const { node } = event.args;
+    const domainId = makeENSv1DomainId(node);
+
+    // ENSv2 model does not include root node, no-op
+    if (node === ROOT_NODE) return;
+
+    // NOTE: Domain-Resolver relations are handled by the protocol-acceleration plugin and are not
+    // directly indexed here
+
+    // push event to domain history
+    await ensureDomainEvent(context, event, domainId);
   }
 
   /**
    * Handles Registry#NewOwner for:
    * - ENS Root Chain's ENSv1RegistryOld
    */
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "ENSv1RegistryOld:NewOwner"),
     async ({ context, event }) => {
       const { label: labelHash, node: parentNode } = event.args;
@@ -142,7 +189,7 @@ export default function () {
    * Handles Registry#Transfer for:
    * - ENS Root Chain's ENSv1RegistryOld
    */
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "ENSv1RegistryOld:Transfer"),
     async ({ context, event }) => {
       const shouldIgnoreEvent = await nodeIsMigrated(context, event.args.node);
@@ -153,11 +200,44 @@ export default function () {
   );
 
   /**
+   * Handles Registry#NewTTL for:
+   * - ENS Root Chain's ENSv1RegistryOld
+   */
+  addOnchainEventListener(
+    namespaceContract(pluginName, "ENSv1RegistryOld:NewTTL"),
+    async ({ context, event }) => {
+      const shouldIgnoreEvent = await nodeIsMigrated(context, event.args.node);
+      if (shouldIgnoreEvent) return;
+
+      return handleNewTTL({ context, event });
+    },
+  );
+
+  /**
+   * Handles Registry#NewResolver for:
+   * - ENS Root Chain's ENSv1RegistryOld
+   */
+  addOnchainEventListener(
+    namespaceContract(pluginName, "ENSv1RegistryOld:NewResolver"),
+    async ({ context, event }) => {
+      const shouldIgnoreEvent = await nodeIsMigrated(context, event.args.node);
+      if (shouldIgnoreEvent) return;
+
+      return handleNewResolver({ context, event });
+    },
+  );
+
+  /**
    * Handles Registry events for:
    * - ENS Root Chain's (new) Registry
    * - Basenames Registry
    * - Lineanames Registry
    */
-  ponder.on(namespaceContract(pluginName, "ENSv1Registry:NewOwner"), handleNewOwner);
-  ponder.on(namespaceContract(pluginName, "ENSv1Registry:Transfer"), handleTransfer);
+  addOnchainEventListener(namespaceContract(pluginName, "ENSv1Registry:NewOwner"), handleNewOwner);
+  addOnchainEventListener(namespaceContract(pluginName, "ENSv1Registry:Transfer"), handleTransfer);
+  addOnchainEventListener(namespaceContract(pluginName, "ENSv1Registry:NewTTL"), handleNewTTL);
+  addOnchainEventListener(
+    namespaceContract(pluginName, "ENSv1Registry:NewResolver"),
+    handleNewResolver,
+  );
 }

@@ -1,547 +1,1144 @@
+import type { Abi } from "viem";
+
 export const ETHRegistrar = [
   {
+    type: "constructor",
+    inputs: [
+      {
+        name: "registry",
+        type: "address",
+        internalType: "contract IPermissionedRegistry",
+      },
+      {
+        name: "hcaFactory",
+        type: "address",
+        internalType: "contract IHCAFactoryBasic",
+      },
+      {
+        name: "beneficiary",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "minCommitmentAge",
+        type: "uint64",
+        internalType: "uint64",
+      },
+      {
+        name: "maxCommitmentAge",
+        type: "uint64",
+        internalType: "uint64",
+      },
+      {
+        name: "minRegisterDuration",
+        type: "uint64",
+        internalType: "uint64",
+      },
+      {
+        name: "rentPriceOracle_",
+        type: "address",
+        internalType: "contract IRentPriceOracle",
+      },
+    ],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "BENEFICIARY",
     inputs: [],
-    name: "REGISTRY",
     outputs: [
       {
-        internalType: "contract IPermissionedRegistry",
         name: "",
         type: "address",
+        internalType: "address",
       },
     ],
     stateMutability: "view",
+  },
+  {
     type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes32",
-        name: "commitment",
-        type: "bytes32",
-      },
-      {
-        internalType: "uint64",
-        name: "validFrom",
-        type: "uint64",
-      },
-      {
-        internalType: "uint64",
-        name: "blockTimestamp",
-        type: "uint64",
-      },
-    ],
-    name: "CommitmentTooNew",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes32",
-        name: "commitment",
-        type: "bytes32",
-      },
-      {
-        internalType: "uint64",
-        name: "validTo",
-        type: "uint64",
-      },
-      {
-        internalType: "uint64",
-        name: "blockTimestamp",
-        type: "uint64",
-      },
-    ],
-    name: "CommitmentTooOld",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint64",
-        name: "duration",
-        type: "uint64",
-      },
-      {
-        internalType: "uint64",
-        name: "minDuration",
-        type: "uint64",
-      },
-    ],
-    name: "DurationTooShort",
-    type: "error",
-  },
-  {
+    name: "HCA_FACTORY",
     inputs: [],
-    name: "MaxCommitmentAgeTooLow",
-    type: "error",
-  },
-  {
-    inputs: [
+    outputs: [
       {
-        internalType: "string",
-        name: "label",
-        type: "string",
-      },
-    ],
-    name: "NameAlreadyRegistered",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "string",
-        name: "label",
-        type: "string",
-      },
-    ],
-    name: "NameNotRegistered",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "string",
-        name: "label",
-        type: "string",
-      },
-    ],
-    name: "NotValid",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "contract IERC20",
-        name: "paymentToken",
+        name: "",
         type: "address",
+        internalType: "contract IHCAFactoryBasic",
       },
     ],
-    name: "PaymentTokenNotSupported",
-    type: "error",
+    stateMutability: "view",
   },
   {
-    inputs: [
+    type: "function",
+    name: "MAX_COMMITMENT_AGE",
+    inputs: [],
+    outputs: [
       {
-        internalType: "bytes32",
-        name: "commitment",
-        type: "bytes32",
-      },
-    ],
-    name: "UnexpiredCommitmentExists",
-    type: "error",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "bytes32",
-        name: "commitment",
-        type: "bytes32",
-      },
-    ],
-    name: "CommitmentMade",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "uint256",
-        name: "tokenId",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "string",
-        name: "label",
-        type: "string",
-      },
-      {
-        indexed: false,
-        internalType: "address",
-        name: "owner",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "contract IRegistry",
-        name: "subregistry",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "address",
-        name: "resolver",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint64",
-        name: "duration",
+        name: "",
         type: "uint64",
-      },
-      {
-        indexed: false,
-        internalType: "contract IERC20",
-        name: "paymentToken",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "bytes32",
-        name: "referrer",
-        type: "bytes32",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "base",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "premium",
-        type: "uint256",
-      },
-    ],
-    name: "NameRegistered",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "uint256",
-        name: "tokenId",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "string",
-        name: "label",
-        type: "string",
-      },
-      {
-        indexed: false,
         internalType: "uint64",
-        name: "duration",
-        type: "uint64",
       },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "MIN_COMMITMENT_AGE",
+    inputs: [],
+    outputs: [
       {
-        indexed: false,
+        name: "",
+        type: "uint64",
         internalType: "uint64",
-        name: "newExpiry",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "MIN_REGISTER_DURATION",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
         type: "uint64",
+        internalType: "uint64",
       },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "REGISTRY",
+    inputs: [],
+    outputs: [
       {
-        indexed: false,
-        internalType: "contract IERC20",
-        name: "paymentToken",
+        name: "",
         type: "address",
+        internalType: "contract IPermissionedRegistry",
       },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "ROOT_RESOURCE",
+    inputs: [],
+    outputs: [
       {
-        indexed: false,
-        internalType: "bytes32",
-        name: "referrer",
-        type: "bytes32",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "base",
+        name: "",
         type: "uint256",
+        internalType: "uint256",
       },
     ],
-    name: "NameRenewed",
-    type: "event",
+    stateMutability: "view",
   },
   {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "contract IERC20",
-        name: "paymentToken",
-        type: "address",
-      },
-    ],
-    name: "PaymentTokenAdded",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "contract IERC20",
-        name: "paymentToken",
-        type: "address",
-      },
-    ],
-    name: "PaymentTokenRemoved",
-    type: "event",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes32",
-        name: "commitment",
-        type: "bytes32",
-      },
-    ],
+    type: "function",
     name: "commit",
+    inputs: [
+      {
+        name: "commitment",
+        type: "bytes32",
+        internalType: "bytes32",
+      },
+    ],
     outputs: [],
     stateMutability: "nonpayable",
-    type: "function",
   },
   {
+    type: "function",
+    name: "commitmentAt",
     inputs: [
       {
-        internalType: "bytes32",
         name: "commitment",
         type: "bytes32",
+        internalType: "bytes32",
       },
     ],
-    name: "commitmentAt",
     outputs: [
       {
-        internalType: "uint64",
-        name: "",
+        name: "commitTime",
         type: "uint64",
+        internalType: "uint64",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
+    type: "function",
+    name: "getAssigneeCount",
     inputs: [
       {
-        internalType: "string",
-        name: "label",
-        type: "string",
+        name: "resource",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "roleBitmap",
+        type: "uint256",
+        internalType: "uint256",
       },
     ],
-    name: "isAvailable",
     outputs: [
       {
-        internalType: "bool",
+        name: "counts",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "mask",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "grantRoles",
+    inputs: [
+      {
+        name: "resource",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "roleBitmap",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "account",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
         name: "",
         type: "bool",
+        internalType: "bool",
+      },
+    ],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "grantRootRoles",
+    inputs: [
+      {
+        name: "roleBitmap",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "account",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "bool",
+        internalType: "bool",
+      },
+    ],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "hasAssignees",
+    inputs: [
+      {
+        name: "resource",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "roleBitmap",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "bool",
+        internalType: "bool",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
+    type: "function",
+    name: "hasRoles",
     inputs: [
       {
-        internalType: "contract IERC20",
+        name: "resource",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "roleBitmap",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "account",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "bool",
+        internalType: "bool",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "hasRootRoles",
+    inputs: [
+      {
+        name: "roleBitmap",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "account",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "bool",
+        internalType: "bool",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "isAvailable",
+    inputs: [
+      {
+        name: "label",
+        type: "string",
+        internalType: "string",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "bool",
+        internalType: "bool",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "isPaymentToken",
+    inputs: [
+      {
         name: "paymentToken",
         type: "address",
+        internalType: "contract IERC20",
       },
     ],
-    name: "isPaymentToken",
     outputs: [
       {
-        internalType: "bool",
         name: "",
         type: "bool",
+        internalType: "bool",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "string",
-        name: "label",
-        type: "string",
-      },
-    ],
+    type: "function",
     name: "isValid",
+    inputs: [
+      {
+        name: "label",
+        type: "string",
+        internalType: "string",
+      },
+    ],
     outputs: [
       {
-        internalType: "bool",
         name: "",
         type: "bool",
+        internalType: "bool",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
+    type: "function",
+    name: "makeCommitment",
     inputs: [
       {
-        internalType: "string",
         name: "label",
         type: "string",
+        internalType: "string",
       },
       {
-        internalType: "address",
         name: "owner",
         type: "address",
+        internalType: "address",
       },
       {
-        internalType: "bytes32",
         name: "secret",
         type: "bytes32",
+        internalType: "bytes32",
       },
       {
-        internalType: "contract IRegistry",
         name: "subregistry",
         type: "address",
+        internalType: "contract IRegistry",
       },
       {
-        internalType: "address",
         name: "resolver",
         type: "address",
+        internalType: "address",
       },
       {
-        internalType: "uint64",
         name: "duration",
         type: "uint64",
+        internalType: "uint64",
       },
       {
-        internalType: "bytes32",
         name: "referrer",
         type: "bytes32",
+        internalType: "bytes32",
       },
     ],
-    name: "makeCommitment",
     outputs: [
       {
-        internalType: "bytes32",
         name: "",
         type: "bytes32",
+        internalType: "bytes32",
       },
     ],
     stateMutability: "pure",
-    type: "function",
   },
   {
+    type: "function",
+    name: "register",
     inputs: [
       {
-        internalType: "string",
         name: "label",
         type: "string",
+        internalType: "string",
       },
       {
-        internalType: "address",
         name: "owner",
         type: "address",
+        internalType: "address",
       },
       {
-        internalType: "bytes32",
         name: "secret",
         type: "bytes32",
+        internalType: "bytes32",
       },
       {
-        internalType: "contract IRegistry",
         name: "subregistry",
         type: "address",
+        internalType: "contract IRegistry",
       },
       {
-        internalType: "address",
         name: "resolver",
         type: "address",
+        internalType: "address",
       },
       {
-        internalType: "uint64",
         name: "duration",
         type: "uint64",
+        internalType: "uint64",
       },
       {
-        internalType: "contract IERC20",
         name: "paymentToken",
         type: "address",
+        internalType: "contract IERC20",
       },
       {
-        internalType: "bytes32",
         name: "referrer",
         type: "bytes32",
+        internalType: "bytes32",
       },
     ],
-    name: "register",
     outputs: [
       {
-        internalType: "uint256",
-        name: "",
+        name: "tokenId",
         type: "uint256",
+        internalType: "uint256",
       },
     ],
     stateMutability: "nonpayable",
-    type: "function",
   },
   {
+    type: "function",
+    name: "renew",
     inputs: [
       {
-        internalType: "string",
         name: "label",
         type: "string",
+        internalType: "string",
       },
       {
-        internalType: "uint64",
         name: "duration",
         type: "uint64",
+        internalType: "uint64",
       },
       {
-        internalType: "contract IERC20",
         name: "paymentToken",
         type: "address",
+        internalType: "contract IERC20",
       },
       {
-        internalType: "bytes32",
         name: "referrer",
         type: "bytes32",
+        internalType: "bytes32",
       },
     ],
-    name: "renew",
     outputs: [],
     stateMutability: "nonpayable",
-    type: "function",
   },
   {
+    type: "function",
+    name: "rentPrice",
     inputs: [
       {
-        internalType: "string",
         name: "label",
         type: "string",
+        internalType: "string",
       },
       {
-        internalType: "address",
         name: "owner",
         type: "address",
+        internalType: "address",
       },
       {
-        internalType: "uint64",
         name: "duration",
         type: "uint64",
+        internalType: "uint64",
       },
       {
-        internalType: "contract IERC20",
         name: "paymentToken",
         type: "address",
+        internalType: "contract IERC20",
       },
     ],
-    name: "rentPrice",
     outputs: [
       {
-        internalType: "uint256",
         name: "base",
         type: "uint256",
+        internalType: "uint256",
       },
       {
-        internalType: "uint256",
         name: "premium",
         type: "uint256",
+        internalType: "uint256",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
-] as const;
+  {
+    type: "function",
+    name: "rentPriceOracle",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "contract IRentPriceOracle",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "revokeRoles",
+    inputs: [
+      {
+        name: "resource",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "roleBitmap",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "account",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "bool",
+        internalType: "bool",
+      },
+    ],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "revokeRootRoles",
+    inputs: [
+      {
+        name: "roleBitmap",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "account",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "bool",
+        internalType: "bool",
+      },
+    ],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "roleCount",
+    inputs: [
+      {
+        name: "resource",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "roles",
+    inputs: [
+      {
+        name: "resource",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "account",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "setRentPriceOracle",
+    inputs: [
+      {
+        name: "oracle",
+        type: "address",
+        internalType: "contract IRentPriceOracle",
+      },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "supportsInterface",
+    inputs: [
+      {
+        name: "interfaceId",
+        type: "bytes4",
+        internalType: "bytes4",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "bool",
+        internalType: "bool",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "event",
+    name: "CommitmentMade",
+    inputs: [
+      {
+        name: "commitment",
+        type: "bytes32",
+        indexed: false,
+        internalType: "bytes32",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "EACRolesChanged",
+    inputs: [
+      {
+        name: "resource",
+        type: "uint256",
+        indexed: true,
+        internalType: "uint256",
+      },
+      {
+        name: "account",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "oldRoleBitmap",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "newRoleBitmap",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "NameRegistered",
+    inputs: [
+      {
+        name: "tokenId",
+        type: "uint256",
+        indexed: true,
+        internalType: "uint256",
+      },
+      {
+        name: "label",
+        type: "string",
+        indexed: false,
+        internalType: "string",
+      },
+      {
+        name: "owner",
+        type: "address",
+        indexed: false,
+        internalType: "address",
+      },
+      {
+        name: "subregistry",
+        type: "address",
+        indexed: false,
+        internalType: "contract IRegistry",
+      },
+      {
+        name: "resolver",
+        type: "address",
+        indexed: false,
+        internalType: "address",
+      },
+      {
+        name: "duration",
+        type: "uint64",
+        indexed: false,
+        internalType: "uint64",
+      },
+      {
+        name: "paymentToken",
+        type: "address",
+        indexed: false,
+        internalType: "contract IERC20",
+      },
+      {
+        name: "referrer",
+        type: "bytes32",
+        indexed: false,
+        internalType: "bytes32",
+      },
+      {
+        name: "base",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "premium",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "NameRenewed",
+    inputs: [
+      {
+        name: "tokenId",
+        type: "uint256",
+        indexed: true,
+        internalType: "uint256",
+      },
+      {
+        name: "label",
+        type: "string",
+        indexed: false,
+        internalType: "string",
+      },
+      {
+        name: "duration",
+        type: "uint64",
+        indexed: false,
+        internalType: "uint64",
+      },
+      {
+        name: "newExpiry",
+        type: "uint64",
+        indexed: false,
+        internalType: "uint64",
+      },
+      {
+        name: "paymentToken",
+        type: "address",
+        indexed: false,
+        internalType: "contract IERC20",
+      },
+      {
+        name: "referrer",
+        type: "bytes32",
+        indexed: false,
+        internalType: "bytes32",
+      },
+      {
+        name: "base",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "PaymentTokenAdded",
+    inputs: [
+      {
+        name: "paymentToken",
+        type: "address",
+        indexed: true,
+        internalType: "contract IERC20",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "PaymentTokenRemoved",
+    inputs: [
+      {
+        name: "paymentToken",
+        type: "address",
+        indexed: true,
+        internalType: "contract IERC20",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "RentPriceOracleChanged",
+    inputs: [
+      {
+        name: "oracle",
+        type: "address",
+        indexed: false,
+        internalType: "contract IRentPriceOracle",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "error",
+    name: "CommitmentTooNew",
+    inputs: [
+      {
+        name: "commitment",
+        type: "bytes32",
+        internalType: "bytes32",
+      },
+      {
+        name: "validFrom",
+        type: "uint64",
+        internalType: "uint64",
+      },
+      {
+        name: "blockTimestamp",
+        type: "uint64",
+        internalType: "uint64",
+      },
+    ],
+  },
+  {
+    type: "error",
+    name: "CommitmentTooOld",
+    inputs: [
+      {
+        name: "commitment",
+        type: "bytes32",
+        internalType: "bytes32",
+      },
+      {
+        name: "validTo",
+        type: "uint64",
+        internalType: "uint64",
+      },
+      {
+        name: "blockTimestamp",
+        type: "uint64",
+        internalType: "uint64",
+      },
+    ],
+  },
+  {
+    type: "error",
+    name: "DurationTooShort",
+    inputs: [
+      {
+        name: "duration",
+        type: "uint64",
+        internalType: "uint64",
+      },
+      {
+        name: "minDuration",
+        type: "uint64",
+        internalType: "uint64",
+      },
+    ],
+  },
+  {
+    type: "error",
+    name: "EACCannotGrantRoles",
+    inputs: [
+      {
+        name: "resource",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "roleBitmap",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "account",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+  },
+  {
+    type: "error",
+    name: "EACCannotRevokeRoles",
+    inputs: [
+      {
+        name: "resource",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "roleBitmap",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "account",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+  },
+  {
+    type: "error",
+    name: "EACInvalidAccount",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "EACInvalidRoleBitmap",
+    inputs: [
+      {
+        name: "roleBitmap",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+  },
+  {
+    type: "error",
+    name: "EACMaxAssignees",
+    inputs: [
+      {
+        name: "resource",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "role",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+  },
+  {
+    type: "error",
+    name: "EACMinAssignees",
+    inputs: [
+      {
+        name: "resource",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "role",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+  },
+  {
+    type: "error",
+    name: "EACRootResourceNotAllowed",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "EACUnauthorizedAccountRoles",
+    inputs: [
+      {
+        name: "resource",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "roleBitmap",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "account",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+  },
+  {
+    type: "error",
+    name: "InvalidOwner",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "MaxCommitmentAgeTooLow",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "NameIsAvailable",
+    inputs: [
+      {
+        name: "label",
+        type: "string",
+        internalType: "string",
+      },
+    ],
+  },
+  {
+    type: "error",
+    name: "NameNotAvailable",
+    inputs: [
+      {
+        name: "label",
+        type: "string",
+        internalType: "string",
+      },
+    ],
+  },
+  {
+    type: "error",
+    name: "NotValid",
+    inputs: [
+      {
+        name: "label",
+        type: "string",
+        internalType: "string",
+      },
+    ],
+  },
+  {
+    type: "error",
+    name: "PaymentTokenNotSupported",
+    inputs: [
+      {
+        name: "paymentToken",
+        type: "address",
+        internalType: "contract IERC20",
+      },
+    ],
+  },
+  {
+    type: "error",
+    name: "SafeERC20FailedOperation",
+    inputs: [
+      {
+        name: "token",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+  },
+  {
+    type: "error",
+    name: "UnexpiredCommitmentExists",
+    inputs: [
+      {
+        name: "commitment",
+        type: "bytes32",
+        internalType: "bytes32",
+      },
+    ],
+  },
+] as const satisfies Abi;

@@ -1,10 +1,11 @@
+import type { ChainId } from "enssdk";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import * as datasources from "@ensnode/datasources";
 import { type DatasourceName, DatasourceNames, ENSNamespaceIds } from "@ensnode/datasources";
 
 import { PluginName } from "../../ensindexer/config/types";
-import { buildBlockNumberRange } from "../blockrange";
+import { type BlockNumberRangeWithStartBlock, buildBlockNumberRange } from "../blockrange";
 import { buildIndexedBlockranges } from "./indexed-blockranges";
 
 vi.mock("@ensnode/datasources", async () => {
@@ -69,13 +70,13 @@ describe("buildIndexedBlockranges()", () => {
     // Act
     const result = buildIndexedBlockranges(ENSNamespaceIds.Mainnet, pluginsRequiredDatasourceNames);
 
+    const expectedEntries = new Map<ChainId, BlockNumberRangeWithStartBlock>([
+      [1, buildBlockNumberRange(80, undefined)],
+      [8453, buildBlockNumberRange(5, 260)],
+    ]);
+
     // Assert
-    expect(result).toStrictEqual(
-      new Map([
-        [1, buildBlockNumberRange(80, 200)],
-        [8453, buildBlockNumberRange(5, 260)],
-      ]),
-    );
+    expect(result).toStrictEqual(expectedEntries);
   });
 
   it("keeps endBlock undefined when no contracts define it", () => {
@@ -110,21 +111,48 @@ describe("buildIndexedBlockranges()", () => {
     expect(result).toStrictEqual(new Map([[1, buildBlockNumberRange(90, undefined)]]));
   });
 
-  it("throws when a required datasource is missing", () => {
+  it("keeps endBlock undefined when only some contracts define it", () => {
+    // Arrange
+    const basenamesDatasourceConfig: unknown = {
+      chain: { id: 8453 },
+      contracts: {
+        registry: { startBlock: 17571480 },
+        reverseRegistrar: { startBlock: 18619035, endBlock: 35936564 },
+        registrarController: { startBlock: 17575714 },
+      },
+    };
+
+    const datasourcesByName: Partial<
+      Record<DatasourceName, ReturnType<typeof datasources.maybeGetDatasource>>
+    > = {
+      [DatasourceNames.Basenames]: datasourceMock(basenamesDatasourceConfig),
+    };
+
+    maybeGetDatasourceMock.mockImplementation(
+      (_namespace, datasourceName) => datasourcesByName[datasourceName as DatasourceName],
+    );
+
+    const pluginsRequiredDatasourceNames = new Map([
+      [PluginName.Basenames, [DatasourceNames.Basenames]],
+    ]);
+
+    // Act
+    const result = buildIndexedBlockranges(ENSNamespaceIds.Mainnet, pluginsRequiredDatasourceNames);
+
+    // Assert
+    expect(result).toStrictEqual(new Map([[8453, buildBlockNumberRange(17571480, undefined)]]));
+  });
+
+  it("skips datasources that do not exist in the namespace", () => {
     // Arrange
     maybeGetDatasourceMock.mockReturnValue(undefined);
 
-    const pluginsRequiredDatasourceNames = new Map([
-      [PluginName.Subgraph, [DatasourceNames.Seaport]],
-    ]);
+    const pluginsDatasourceNames = new Map([[PluginName.Subgraph, [DatasourceNames.Seaport]]]);
 
-    // Act + Assert
-    expect(() =>
-      buildIndexedBlockranges(ENSNamespaceIds.Mainnet, pluginsRequiredDatasourceNames),
-    ).toThrow(
-      new RegExp(
-        `Datasource ${DatasourceNames.Seaport} required by plugin ${PluginName.Subgraph} is not defined in namespace ${ENSNamespaceIds.Mainnet}`,
-      ),
-    );
+    // Act
+    const result = buildIndexedBlockranges(ENSNamespaceIds.Mainnet, pluginsDatasourceNames);
+
+    // Assert
+    expect(result).toStrictEqual(new Map());
   });
 });

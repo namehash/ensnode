@@ -1,3 +1,5 @@
+import { Fragment } from "react";
+
 interface BarChartData {
   label: React.ReactNode;
   value: number;
@@ -22,7 +24,7 @@ export default function BarChart({ data, title, subtitle, footnote }: BarChartPr
 
         <div className="w-full flex flex-col gap-4 md:gap-6">
           {data.map((item: BarChartData, index: number) => (
-            <>
+            <Fragment key={`barChartFragment#${index}`}>
               <div key={`barChartFull#${index}`} className="flex flex-col gap-2">
                 <div
                   key={`barChartLabel#${index}`}
@@ -62,8 +64,8 @@ export default function BarChart({ data, title, subtitle, footnote }: BarChartPr
                   />
                 </div>
               </div>
-              {index < data.length - 1 && <div className="bg-gray-200 h-[1px] self-stretch" />}
-            </>
+              {index < data.length - 1 && <div className="bg-gray-200 h-px self-stretch" />}
+            </Fragment>
           ))}
         </div>
       </div>

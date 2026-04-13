@@ -1,13 +1,13 @@
+import type { EncodedLabelHash, Label, LabelHash } from "enssdk";
+import { parseLabelHashOrEncodedLabelHash } from "enssdk";
+
 import {
   buildEnsRainbowClientLabelSet,
   type Cache,
-  type EncodedLabelHash,
   type EnsRainbowClientLabelSet,
+  type EnsRainbowPublicConfig,
   type EnsRainbowServerLabelSet,
-  type Label,
-  type LabelHash,
   LruCache,
-  parseLabelHashOrEncodedLabelHash,
 } from "@ensnode/ensnode-sdk";
 
 import { DEFAULT_ENSRAINBOW_URL, ErrorCode, StatusCode } from "./consts";
@@ -168,24 +168,7 @@ export namespace EnsRainbow {
    * Contains all public configuration information about the ENSRainbow service instance,
    * including version, label set information, and record counts.
    */
-  export interface ENSRainbowPublicConfig {
-    /**
-     * ENSRainbow service version
-     *
-     * @see https://ghcr.io/namehash/ensnode/ensrainbow
-     */
-    version: string;
-
-    /**
-     * The label set reference managed by the ENSRainbow server.
-     */
-    labelSet: EnsRainbowServerLabelSet;
-
-    /**
-     * The total count of records managed by the ENSRainbow service.
-     */
-    recordsCount: number;
-  }
+  export type ENSRainbowPublicConfig = EnsRainbowPublicConfig;
 }
 
 export interface EnsRainbowApiClientOptions {
@@ -416,10 +399,7 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
     const response = await fetch(new URL("/v1/config", this.options.endpointUrl));
 
     if (!response.ok) {
-      const errorData = (await response.json()) as { error?: string; errorCode?: number };
-      throw new Error(
-        errorData.error ?? `Failed to fetch ENSRainbow config: ${response.statusText}`,
-      );
+      throw new Error(`Failed to fetch ENSRainbow config: ${response.statusText}`);
     }
 
     return response.json() as Promise<EnsRainbow.ENSRainbowPublicConfig>;

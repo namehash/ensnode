@@ -1,32 +1,3 @@
-/**
- * TODO
- * - root can be inserted on setup or could be discovered naturally — see how that affects traversal/graphql api
- *   - probably easier to just insert it ahead of time like previously?
- * - RequiredAndNotNull opposite type: RequiredToBeNull<T, keys> for constraining polymorphic entities in graphql schema
- * - re-asses NameWrapper expiry logic — compare to subgraph implementation & see if we can simplify
- * - indexes based on graphql queries, ask claude to compile recommendations
- * - ThreeDNS
- * - Migration status/state
- * - custom wrapper for resolveCursorConnection with typesafety that applies defaults and auto-decodes cursors to the indicated type
- * - Pothos envelop plugins (aliases, depth, tokens, whatever)
- *
- * PENDING ENS TEAM
- * - Canonical Domain tracking
- * - Signal Pattern for Registry contracts
- *  - depends on: ens team implementing in v2 contracts
- *
- * MAYBE DO LATER?
- * - ? better typechecking for polymorphic entities in drizzle schema
- *   - could do polymorphic resolver/registration metadata
- *   - would map well to resolver extensions in graphql
- * - ? move all entity ids to opaque base58 encoded IDs? kinda nice since they're just supposed to be opaque, useful for relay purposes, allows the scalar types to all be ID and then casted. but nice to use CAIP identifiers for resolvers and permissions etc. so just for domains and registries?
- *
- * TODO MUCH LATER
- * - after moving protocol-tracing away from otel we can use otel for ourselves
- *  https://pothos-graphql.dev/docs/plugins/tracing
- *
- */
-
 import { createConfig } from "ponder";
 
 import {
@@ -36,14 +7,19 @@ import {
   EnhancedAccessControlABI,
   ETHRegistrarABI,
   RegistryABI,
+  ResolverABI,
 } from "@ensnode/datasources";
-import { PluginName } from "@ensnode/ensnode-sdk";
-import { getDatasourcesWithENSv2Contracts } from "@ensnode/ensnode-sdk/internal";
+import { buildBlockNumberRange, PluginName } from "@ensnode/ensnode-sdk";
+import {
+  getDatasourcesWithENSv2Contracts,
+  getDatasourcesWithResolvers,
+} from "@ensnode/ensnode-sdk/internal";
 
 import { createPlugin, namespaceContract } from "@/lib/plugin-helpers";
 import {
   chainConfigForContract,
   chainsConnectionConfigForDatasources,
+  constrainBlockrange,
   getRequiredDatasources,
   maybeGetDatasources,
 } from "@/lib/ponder-helpers";
@@ -64,6 +40,7 @@ const ALL_DATASOURCE_NAMES = [
 export default createPlugin({
   name: pluginName,
   requiredDatasourceNames: REQUIRED_DATASOURCE_NAMES,
+  allDatasourceNames: ALL_DATASOURCE_NAMES,
   createPonderConfig(config) {
     const {
       ensroot, //
@@ -291,6 +268,26 @@ export default createPlugin({
                 lineanames.contracts.EthRegistrarController,
               )),
           },
+        },
+
+        //////////////////////
+        // Resolver Contracts
+        //////////////////////
+        [namespaceContract(pluginName, "Resolver")]: {
+          abi: ResolverABI,
+          chain: getDatasourcesWithResolvers(config.namespace).reduce(
+            (memo, datasource) => ({
+              ...memo,
+              [datasource.chain.id.toString()]: constrainBlockrange(
+                config.globalBlockrange,
+                buildBlockNumberRange(
+                  datasource.contracts.Resolver.startBlock,
+                  datasource.contracts.Resolver.endBlock,
+                ),
+              ),
+            }),
+            {},
+          ),
         },
       },
     });

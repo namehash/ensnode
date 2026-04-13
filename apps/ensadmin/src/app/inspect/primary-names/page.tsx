@@ -1,44 +1,65 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { AddressDisplay } from "@namehash/namehash-ui";
+import type { Address } from "enssdk";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { useDebouncedValue } from "rooks";
-import type { Address } from "viem";
+import { isAddress } from "viem";
 
 import { usePrimaryNames } from "@ensnode/ensnode-react";
+import { getNamespaceSpecificValue } from "@ensnode/ensnode-sdk";
 
 import { RenderRequestsOutput } from "@/app/inspect/_components/render-requests-output";
+import { ResolveButton } from "@/app/inspect/_components/resolve-button";
 import { Pill } from "@/components/pill";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
+import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 
-const EXAMPLE_INPUT = [
-  "0x179A862703a4adfb29896552DF9e307980D19285", // greg
-  "0xe7a863d7cdC48Cc0CcB135c9c0B4c1fafA3a2e69", // katzman
-  "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045", // vitalik
-  "0x2211d1D0020DAEA8039E46Cf1367962070d77DA9", // jesse
-];
+import { EXAMPLE_ADDRESSES } from "../_lib/example-addresses";
 
 // TODO: showcase current ENSNode configuration and viable acceleration pathways?
 // TODO: use shadcn/form, react-hook-form, and zod to make all of this nicer aross the board
 // TODO: sync form state to query params, current just defaulting is supported
 export default function ResolvePrimaryNameInspector() {
+  const router = useRouter();
   const searchParams = useSearchParams();
+  const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
 
-  const [address, setAddress] = useState(searchParams.get("address") || EXAMPLE_INPUT[0]);
+  const namespace = useActiveNamespace();
+  const exampleAddresses = useMemo(
+    () => getNamespaceSpecificValue(namespace, EXAMPLE_ADDRESSES),
+    [namespace],
+  );
+
+  const addressFromQuery = searchParams.get("address")?.trim() || null;
+
+  const [address, setAddress] = useState(addressFromQuery || exampleAddresses[0].address);
   const [debouncedAddress] = useDebouncedValue(address, 150);
 
-  const canQuery =
-    !!debouncedAddress && debouncedAddress.length > 0 && debouncedAddress.startsWith("0x");
+  useEffect(() => {
+    setAddress(addressFromQuery ?? exampleAddresses[0].address);
+  }, [addressFromQuery, exampleAddresses]);
+
+  const navigateToAddress = (addr: Address) => {
+    setAddress(addr);
+    const path = `/inspect/primary-names?address=${encodeURIComponent(addr)}`;
+    const href = retainCurrentRawConnectionUrlParam(path);
+    router.push(href);
+  };
+
+  const validAddress: Address | null =
+    debouncedAddress && isAddress(debouncedAddress) ? debouncedAddress : null;
 
   const accelerated = usePrimaryNames({
-    address: debouncedAddress as Address,
+    address: validAddress,
     accelerate: true,
     trace: true,
     query: {
-      enabled: canQuery,
+      enabled: !!validAddress,
       staleTime: 0,
       refetchInterval: 0,
       refetchOnMount: false,
@@ -49,11 +70,11 @@ export default function ResolvePrimaryNameInspector() {
   });
 
   const unaccelerated = usePrimaryNames({
-    address: debouncedAddress as Address,
+    address: validAddress,
     accelerate: false,
     trace: true,
     query: {
-      enabled: canQuery,
+      enabled: !!validAddress,
       staleTime: 0,
       refetchInterval: 0,
       refetchOnMount: false,
@@ -76,11 +97,11 @@ export default function ResolvePrimaryNameInspector() {
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <div className="flex flex-row gap-4">
-            <Label htmlFor="name" className="flex-[2] flex flex-col gap-1">
+            <Label htmlFor="name" className="flex-2 flex flex-col gap-1">
               EVM Address
               <Input
                 id="name"
-                placeholder={EXAMPLE_INPUT[0]}
+                placeholder={exampleAddresses[0].address}
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 autoComplete="off"
@@ -93,16 +114,25 @@ export default function ResolvePrimaryNameInspector() {
             <span className="text-sm font-medium leading-none">Examples:</span>
             {/* -mx-6 px-6 insets the scroll container against card for prettier scrolling */}
             <div className="flex flex-row overflow-x-scroll gap-2 no-scrollbar -mx-6 px-6">
-              {EXAMPLE_INPUT.map((address) => (
-                <Pill key={address} onClick={() => setAddress(address)} className="font-mono">
-                  {address}
+              {exampleAddresses.map(({ address: exampleAddress, name }) => (
+                <Pill
+                  key={exampleAddress}
+                  onClick={() => navigateToAddress(exampleAddress)}
+                  className="font-mono"
+                >
+                  <AddressDisplay address={exampleAddress} /> ({name})
                 </Pill>
               ))}
             </div>
           </div>
         </CardContent>
         <CardFooter>
-          <Button onClick={() => refetch()}>Refresh</Button>
+          <ResolveButton
+            canResolve={isAddress(address.trim())}
+            hasChanged={address.trim() !== addressFromQuery}
+            onRefetch={refetch}
+            onNavigate={() => navigateToAddress(address.trim() as Address)}
+          />
         </CardFooter>
       </Card>
 

@@ -1,7 +1,7 @@
-import type { Address } from "viem";
+import type { Address, Name } from "enssdk";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ENSNamespaceIds, type Name } from "../ens";
+import { ENSNamespaceIds } from "../ens";
 import { PluginName } from "../ensindexer/config/types";
 import { ChainIndexingStatusIds } from "../indexing-status/chain-indexing-status-snapshot";
 import { CrossChainIndexingStrategyIds } from "../indexing-status/cross-chain-indexing-status-snapshot";
@@ -58,18 +58,26 @@ const EXAMPLE_PRIMARY_NAMES_RESPONSE = {
 const EXAMPLE_ERROR_RESPONSE: ErrorResponse = { message: "error" };
 
 const EXAMPLE_CONFIG_RESPONSE = {
-  version: "0.32.0",
+  versionInfo: {
+    ensApi: "1.9.0",
+    ensNormalize: "1.11.1",
+  },
   theGraphFallback: {
     canFallback: false,
     reason: "no-api-key",
   },
   ensIndexerPublicConfig: {
+    ensRainbowPublicConfig: {
+      version: "0.31.0",
+      labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+      recordsCount: 100,
+    },
     labelSet: {
       labelSetId: "subgraph",
       labelSetVersion: 0,
     },
     indexedChainIds: [1, 8453, 59144, 10, 42161, 534352],
-    databaseSchemaName: "alphaSchema0.31.0",
+    ensIndexerSchemaName: "alphaSchema0.31.0",
     isSubgraphCompatible: false,
     namespace: "mainnet",
     plugins: [
@@ -81,13 +89,10 @@ const EXAMPLE_CONFIG_RESPONSE = {
       PluginName.Registrars,
     ],
     versionInfo: {
-      nodejs: "22.18.0",
       ponder: "0.11.43",
       ensDb: "0.32.0",
       ensIndexer: "0.32.0",
       ensNormalize: "1.11.1",
-      ensRainbow: "0.31.0",
-      ensRainbowSchema: 2,
     },
   },
 } satisfies SerializedEnsApiPublicConfig;

@@ -2,7 +2,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { labelhash } from "viem";
+import { asLiteralLabel, labelhashLiteralLabel } from "enssdk";
 import { afterEach, beforeEach, describe, expect, it, test, vi } from "vitest";
 
 import { labelHashToBytes, parseNonNegativeInteger } from "@ensnode/ensnode-sdk";
@@ -102,7 +102,7 @@ describe("Database", () => {
         const batch = db.batch();
         // Add rainbow record with mismatched labelHash
         const label = "vitalik";
-        const wrongLabelHash = labelhash("ethereum");
+        const wrongLabelHash = labelhashLiteralLabel(asLiteralLabel("ethereum"));
         batch.put(labelHashToBytes(wrongLabelHash), label);
         await batch.write();
 
@@ -253,7 +253,7 @@ describe("Database", () => {
       try {
         // Add rainbow record with mismatched labelHash (would fail in full validation)
         const label = "vitalik";
-        const wrongLabelHash = labelhash("ethereum");
+        const wrongLabelHash = labelhashLiteralLabel(asLiteralLabel("ethereum"));
         const batch = db.batch();
         batch.put(labelHashToBytes(wrongLabelHash), label);
         await batch.write();
@@ -330,7 +330,7 @@ describe("Database", () => {
       const db = await ENSRainbowDB.create(tempDir);
       try {
         const labelWithNull = "test\0label";
-        const labelWithNullLabelHash = labelhash(labelWithNull);
+        const labelWithNullLabelHash = labelhashLiteralLabel(asLiteralLabel(labelWithNull));
         const labelHashBytes = labelHashToBytes(labelWithNullLabelHash);
 
         // Add record

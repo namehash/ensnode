@@ -1,3 +1,5 @@
+import type { Abi } from "viem";
+
 export const EarlyAccessRegistrarController = [
   {
     inputs: [
@@ -565,4 +567,4 @@ export const EarlyAccessRegistrarController = [
     stateMutability: "nonpayable",
     type: "function",
   },
-] as const;
+] as const satisfies Abi;

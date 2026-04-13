@@ -204,7 +204,7 @@ function ENSNodeConfigCardContent({
       "Interpreted Labels" and "Interpreted Names". Therefore apps integrating with this ENSNode
       don't need to worry about receiving unnormalized labels from ENSNode that are not encoded
       labelhashes.{" "}
-      <ExternalLinkWithIcon href="https://ensnode.io/docs/reference/terminology/#interpreted-label">
+      <ExternalLinkWithIcon href="https://ensnode.io/docs/reference/terminology#interpreted-label">
         Learn more.
       </ExternalLinkWithIcon>
     </p>
@@ -293,20 +293,19 @@ function ENSNodeConfigCardContent({
         icon={<ENSApiIcon width={24} height={24} />}
         version={
           <p className="text-sm leading-normal font-normal text-muted-foreground">
-            v{ensApiPublicConfig.version}
+            v{ensApiPublicConfig.versionInfo.ensApi}
           </p>
         }
-        docsLink={new URL("https://ensnode.io/ensapi/")}
+        docsLink={new URL("https://ensnode.io/ensapi")}
       >
         <InfoCardItems>
-          <InfoCardItem label="Database" value={<p className={cardItemValueStyles}>Postgres</p>} />
           <InfoCardItem
-            label="Database Schema"
+            label="ENSIndexer Schema"
             value={
-              <p className={cardItemValueStyles}>{ensIndexerPublicConfig.databaseSchemaName}</p>
+              <p className={cardItemValueStyles}>{ensIndexerPublicConfig.ensIndexerSchemaName}</p>
             }
             additionalInfo={
-              <p>ENSApi reads indexed data from tables within this Postgres database schema.</p>
+              <p>ENSApi reads indexed data from tables within this ENSIndexer Schema in ENSDb.</p>
             }
           />
           <InfoCardItem
@@ -335,6 +334,23 @@ function ENSNodeConfigCardContent({
               <p>
                 This ENS Root Chain RPC is used to power the Resolution API, in situations where
                 Protocol Acceleration is not possible.
+              </p>
+            }
+          />
+          <InfoCardItem
+            label="ens-normalize.js"
+            value={
+              <p className={cardItemValueStyles}>{ensApiPublicConfig.versionInfo.ensNormalize}</p>
+            }
+            additionalInfo={
+              <p>
+                Version of the{" "}
+                <ExternalLinkWithIcon
+                  href={`https://www.npmjs.com/package/@adraffy/ens-normalize/v/${ensApiPublicConfig.versionInfo.ensNormalize}`}
+                >
+                  @adraffy/ens-normalize
+                </ExternalLinkWithIcon>{" "}
+                package used for ENS name normalization.
               </p>
             }
           />
@@ -382,17 +398,42 @@ function ENSNodeConfigCardContent({
             v{ensIndexerPublicConfig.versionInfo.ensDb}
           </p>
         }
-        docsLink={new URL("https://ensnode.io/ensdb/")}
+        docsLink={new URL("https://ensnode.io/ensdb")}
       >
         <InfoCardItems>
           <InfoCardItem label="Database" value={<p className={cardItemValueStyles}>Postgres</p>} />
           <InfoCardItem
-            label="Database Schema"
+            label="ENSIndexer Schema"
             value={
-              <p className={cardItemValueStyles}>{ensIndexerPublicConfig.databaseSchemaName}</p>
+              <p className={cardItemValueStyles}>{ensIndexerPublicConfig.ensIndexerSchemaName}</p>
             }
             additionalInfo={
-              <p>ENSIndexer writes indexed data to tables within this Postgres database schema.</p>
+              <p>
+                ENSDb enables devs to build custom services and APIs on top of indexed ENS data in
+                this schema using{" "}
+                <ExternalLinkWithIcon href="https://www.npmjs.com/package/@ensnode/ensdb-sdk">
+                  ensdb-sdk
+                </ExternalLinkWithIcon>
+                .
+              </p>
+            }
+          />
+          <InfoCardItem
+            label="ENSNode Schema"
+            value={<p className={cardItemValueStyles}>ensnode</p>}
+            additionalInfo={
+              <p>This database schema stores Metadata about each ENSIndexer schema in ENSDb.</p>
+            }
+          />
+
+          <InfoCardItem
+            label="Ponder Schema"
+            value={<p className={cardItemValueStyles}>ponder_sync</p>}
+            additionalInfo={
+              <p>
+                Ponder manages this database schema to store cached RPC results and is shared across
+                all ENSIndexer instances using this ENSDb.
+              </p>
             }
           />
         </InfoCardItems>
@@ -409,17 +450,19 @@ function ENSNodeConfigCardContent({
             v{ensIndexerPublicConfig.versionInfo.ensIndexer}
           </p>
         }
-        docsLink={new URL("https://ensnode.io/ensindexer/")}
+        docsLink={new URL("https://ensnode.io/ensindexer")}
       >
         <InfoCardItems>
-          <InfoCardItem label="Database" value={<p className={cardItemValueStyles}>Postgres</p>} />
           <InfoCardItem
-            label="Database Schema"
+            label="ENSIndexer Schema"
             value={
-              <p className={cardItemValueStyles}>{ensIndexerPublicConfig.databaseSchemaName}</p>
+              <p className={cardItemValueStyles}>{ensIndexerPublicConfig.ensIndexerSchemaName}</p>
             }
             additionalInfo={
-              <p>ENSIndexer writes indexed data to tables within this Postgres database schema.</p>
+              <p>
+                ENSIndexer is the exclusive writer of indexed data to tables within this ENSIndexer
+                Schema in ENSDb.
+              </p>
             }
           />
           <InfoCardItem
@@ -447,23 +490,6 @@ function ENSNodeConfigCardContent({
                   </Tooltip>
                 ))}
               </div>
-            }
-          />
-          <InfoCardItem
-            label="Node.js"
-            value={
-              <p className={cardItemValueStyles}>{ensIndexerPublicConfig.versionInfo.nodejs}</p>
-            }
-            additionalInfo={
-              <p>
-                Version of the{" "}
-                <ExternalLinkWithIcon
-                  href={`https://nodejs.org/en/download/archive/v${ensIndexerPublicConfig.versionInfo.nodejs}`}
-                >
-                  Node.js
-                </ExternalLinkWithIcon>{" "}
-                runtime.
-              </p>
             }
           />
           <InfoCardItem
@@ -509,7 +535,7 @@ function ENSNodeConfigCardContent({
                 {ensIndexerPublicConfig.plugins.map((plugin) => (
                   <span
                     key={`${plugin}-plugin-badge`}
-                    className="flex justify-start items-start py-[2px] px-[10px] rounded-full bg-secondary text-sm leading-normal font-semibold text-black cursor-default whitespace-nowrap"
+                    className="flex justify-start items-start py-0.5 px-2.5 rounded-full bg-secondary text-sm leading-normal font-semibold text-black cursor-default whitespace-nowrap"
                   >
                     {plugin}
                   </span>
@@ -545,7 +571,7 @@ function ENSNodeConfigCardContent({
                 labels across time. The label set version may be equal to or less than the highest
                 label set version offered by the connected ENSRainbow server.{" "}
                 <ExternalLinkWithIcon
-                  href={`https://ensnode.io/ensrainbow/concepts/label-sets-and-versioning/#client-behavior`}
+                  href={`https://ensnode.io/ensrainbow/concepts/label-sets-and-versioning#client-behavior`}
                 >
                   Learn more.
                 </ExternalLinkWithIcon>
@@ -563,25 +589,44 @@ function ENSNodeConfigCardContent({
         icon={<ENSRainbowIcon width={24} height={24} />}
         version={
           <p className="text-sm leading-normal font-normal text-muted-foreground">
-            v{ensIndexerPublicConfig.versionInfo.ensRainbow}
+            v{ensIndexerPublicConfig.ensRainbowPublicConfig.version}
           </p>
         }
-        docsLink={new URL("https://ensnode.io/ensrainbow/")}
+        docsLink={new URL("https://ensnode.io/ensrainbow")}
       >
         <InfoCardItems>
           <InfoCardItem
             label="Server LabelSet"
             value={
               <p className={cardItemValueStyles}>
-                {ensIndexerPublicConfig.labelSet.labelSetId}:
-                {ensIndexerPublicConfig.labelSet.labelSetVersion}
+                {ensIndexerPublicConfig.ensRainbowPublicConfig.labelSet.labelSetId}:
+                {ensIndexerPublicConfig.ensRainbowPublicConfig.labelSet.highestLabelSetVersion}
               </p>
             }
             additionalInfo={
               <p>
                 The labelset id and highest labelset version offered by the ENSRainbow server.{" "}
                 <ExternalLinkWithIcon
-                  href={`https://ensnode.io/ensrainbow/concepts/label-sets-and-versioning/`}
+                  href={`https://ensnode.io/ensrainbow/concepts/label-sets-and-versioning`}
+                >
+                  Learn more.
+                </ExternalLinkWithIcon>
+              </p>
+            }
+          />
+
+          <InfoCardItem
+            label="Records Count"
+            value={
+              <p className={cardItemValueStyles}>
+                {ensIndexerPublicConfig.ensRainbowPublicConfig.recordsCount.toLocaleString()}
+              </p>
+            }
+            additionalInfo={
+              <p>
+                The total number of Rainbow Records.{" "}
+                <ExternalLinkWithIcon
+                  href={`https://ensnode.io/ensrainbow/concepts/glossary#rainbow-record`}
                 >
                   Learn more.
                 </ExternalLinkWithIcon>

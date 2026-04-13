@@ -1,29 +1,34 @@
-import { type Context, ponder } from "ponder:registry";
-import schema from "ponder:schema";
-import type { Address } from "viem";
-
 import {
   type AccountId,
+  type Address,
+  makeENSv2DomainId,
+  makeStorageId,
+  type TokenId,
+} from "enssdk";
+
+import {
   type EncodedReferrer,
-  getCanonicalId,
   interpretAddress,
   isRegistrationFullyExpired,
-  makeENSv2DomainId,
   PluginName,
-  type TokenId,
 } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
-import { ensureEvent } from "@/lib/ensv2/event-db-helpers";
+import { ensureDomainEvent, ensureEvent } from "@/lib/ensv2/event-db-helpers";
 import { getLatestRegistration, insertLatestRenewal } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
+import {
+  addOnchainEventListener,
+  ensIndexerSchema,
+  type IndexingEngineContext,
+} from "@/lib/indexing-engines/ponder";
 import { toJson } from "@/lib/json-stringify-with-bigints";
 import { namespaceContract } from "@/lib/plugin-helpers";
-import type { EventWithArgs, LogEvent } from "@/lib/ponder-helpers";
+import type { EventWithArgs, LogEventBase } from "@/lib/ponder-helpers";
 
 const pluginName = PluginName.ENSv2;
 
-async function getRegistrarAndRegistry(context: Context, event: LogEvent) {
+async function getRegistrarAndRegistry(context: IndexingEngineContext, event: LogEventBase) {
   const registrar = getThisAccountId(context, event);
   const registry: AccountId = {
     chainId: context.chain.id,
@@ -39,13 +44,13 @@ async function getRegistrarAndRegistry(context: Context, event: LogEvent) {
 }
 
 export default function () {
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "ETHRegistrar:NameRegistered"),
     async ({
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{
         tokenId: TokenId;
         label: string;
@@ -67,8 +72,8 @@ export default function () {
       // _before_ this event. This event upserts the latest Registration with payment info.
 
       const { registrar, registry } = await getRegistrarAndRegistry(context, event);
-      const canonicalId = getCanonicalId(tokenId);
-      const domainId = makeENSv2DomainId(registry, canonicalId);
+      const storageId = makeStorageId(tokenId);
+      const domainId = makeENSv2DomainId(registry, storageId);
 
       const registration = await getLatestRegistration(context, domainId);
 
@@ -80,7 +85,7 @@ export default function () {
       }
 
       // Invariant: must be ENSv2Registry Registration
-      if (registration.type !== "ENSv2Registry") {
+      if (registration.type !== "ENSv2RegistryRegistration") {
         throw new Error(
           `Invariant(ETHRegistrar:NameRegistered): Registration found but not ENSv2Registry Registration:\n${toJson(registration)}`,
         );
@@ -98,7 +103,7 @@ export default function () {
       await ensureAccount(context, owner);
 
       // update latest Registration
-      await context.db.update(schema.registration, { id: registration.id }).set({
+      await context.ensDb.update(ensIndexerSchema.registration, { id: registration.id }).set({
         // TODO: reconsider 'Registration.registrant' if ENSv2 doesn't provide explicit 'registrant'
         registrantId: interpretAddress(owner),
 
@@ -112,16 +117,19 @@ export default function () {
         base,
         premium,
       });
+
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
     },
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "ETHRegistrar:NameRenewed"),
     async ({
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{
         tokenId: TokenId;
         label: string;
@@ -139,8 +147,8 @@ export default function () {
       // update Registration.expiry, it just needs to update the latest Renewal
 
       const { registry } = await getRegistrarAndRegistry(context, event);
-      const canonicalId = getCanonicalId(tokenId);
-      const domainId = makeENSv2DomainId(registry, canonicalId);
+      const storageId = makeStorageId(tokenId);
+      const domainId = makeENSv2DomainId(registry, storageId);
 
       const registration = await getLatestRegistration(context, domainId);
 
@@ -150,7 +158,7 @@ export default function () {
       }
 
       // Invariant: Must be ENSv2Registry Registration
-      if (registration.type !== "ENSv2Registry") {
+      if (registration.type !== "ENSv2RegistryRegistration") {
         throw new Error(
           `Invariant(ETHRegistrar:NameRenewed): Registration found but not ENSv2Registry Registration:\n${toJson(registration)}`,
         );
@@ -166,6 +174,9 @@ export default function () {
         // TODO(paymentToken)
         base,
       });
+
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
     },
   );
 }

@@ -1,9 +1,9 @@
 /**
- * Environment variables for database configuration.
+ * Environment variables for ENSDb configuration.
  */
-export interface DatabaseEnvironment {
-  DATABASE_URL?: string;
-  DATABASE_SCHEMA?: string;
+export interface EnsDbEnvironment {
+  ENSDB_URL?: string;
+  ENSINDEXER_SCHEMA_NAME?: string;
 }
 
 /**
@@ -15,13 +15,7 @@ export interface RpcEnvironment {
   QUICKNODE_API_KEY?: string;
   QUICKNODE_ENDPOINT_NAME?: string;
   DRPC_API_KEY?: string;
-}
-
-/**
- * Environment variables for ENSIndexer URL configuration.
- */
-export interface EnsIndexerUrlEnvironment {
-  ENSINDEXER_URL?: string;
+  RPC_AUTO_GEN_MODE?: string;
 }
 
 /**
@@ -55,13 +49,14 @@ export type TheGraphEnvironment = {
 /**
  * Environment variables for referral program editions configuration.
  *
- * If CUSTOM_REFERRAL_PROGRAM_EDITIONS is set, it should be a URL that returns
- * the JSON for a valid serialized custom referral program editions definition.
+ * If REFERRAL_PROGRAM_EDITIONS is set, it should be a URL that returns
+ * the JSON for a valid serialized referral program editions definition.
  */
 export interface ReferralProgramEditionsEnvironment {
   /**
-   * Optional URL that returns the JSON for a valid serialized custom referral program editions definition.
-   * If not set, the default edition set will be used.
+   * Optional URL that returns the JSON for a valid serialized referral program editions definition.
+   * If not set, ENSApi treats the referral program as having zero configured editions and
+   * performs no referral-related work against ENSDb.
    */
-  CUSTOM_REFERRAL_PROGRAM_EDITIONS?: string;
+  REFERRAL_PROGRAM_EDITIONS?: string;
 }

@@ -1,6 +1,6 @@
 {
   "name": "@namehash/namehash-ui",
-  "version": "1.5.1",
+  "version": "1.9.0",
   "type": "module",
   "description": "Opinionated UI components for use in apps published by NameHash Labs",
   "license": "MIT",
@@ -20,7 +20,8 @@
   ],
   "exports": {
     ".": "./src/index.ts",
-    "./styles.css": "./dist/index.css"
+    "./styles.css": "./dist/index.css",
+    "./legacy": "./src/components/legacy/index.ts"
   },
   "sideEffects": false,
   "publishConfig": {
@@ -29,6 +30,10 @@
       ".": {
         "default": "./dist/index.js",
         "types": "./dist/index.d.ts"
+      },
+      "./legacy": {
+        "default": "./dist/components/legacy/index.js",
+        "types": "./dist/components/legacy/index.d.ts"
       },
       "./styles.css": {
         "import": "./dist/index.css",
@@ -61,11 +66,11 @@
     "@tailwindcss/postcss": "^4.1.18",
     "@testing-library/react": "catalog:",
     "@types/node": "catalog:",
-    "@types/react": "19.2.7",
-    "@types/react-dom": "19.2.3",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
     "postcss": "^8.5.6",
     "postcss-cli": "^11.0.1",
-    "react": "19.2.1",
+    "react": "catalog:",
     "tailwindcss": "catalog:",
     "tsup": "^8.3.6",
     "typescript": "catalog:",
@@ -75,6 +80,7 @@
   "dependencies": {
     "@ensnode/datasources": "workspace:*",
     "@ensnode/ensnode-sdk": "workspace:*",
+    "enssdk": "workspace:*",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tooltip": "^1.2.8",

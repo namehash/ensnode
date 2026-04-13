@@ -23,7 +23,7 @@ jobs:
       ENSADMIN_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensadmin:${{ inputs.tag }}"
       # Terraform related envs
 
-      # AWS_REGION is required for aws-actions/configure-aws-credentials@v4
+      # AWS_REGION is required for aws-actions/configure-aws-credentials@v6
       # Terraform keeps it's state inside S3 bucket. This bucket needs to be created before running Terraform apply.
       # AWS_REGION should be the same as Terraform S3 bucket state region.
       AWS_REGION: us-east-1
@@ -46,7 +46,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
 
@@ -58,12 +58,12 @@ jobs:
           docker manifest inspect ${{ env.ENSADMIN_DOCKER_IMAGE }} || { echo "Given docker image does not exist: ${{ env.ENSADMIN_DOCKER_IMAGE }}"; exit 1; }
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: 1.6.0
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_ROLE}}
           aws-region: ${{ env.AWS_REGION }}

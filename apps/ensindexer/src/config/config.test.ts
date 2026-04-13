@@ -1,10 +1,39 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ensTestEnvChain } from "@ensnode/datasources";
+// For config.test.ts, we need a mock that validates env vars without providing defaults,
+// because this test file specifically tests validation failures.
+vi.mock("@/config/ensdb-config", async () => {
+  const { validateEnsDbConfig } =
+    await vi.importActual<typeof import("@ensnode/ensdb-sdk")>("@ensnode/ensdb-sdk");
+  return {
+    default: {
+      get ensDbUrl() {
+        const url = process.env.ENSDB_URL;
+        const schema = process.env.ENSINDEXER_SCHEMA_NAME;
+        validateEnsDbConfig({ ensDbUrl: url, ensIndexerSchemaName: schema });
+        return url;
+      },
+      get ensIndexerSchemaName() {
+        const url = process.env.ENSDB_URL;
+        const schema = process.env.ENSINDEXER_SCHEMA_NAME;
+        validateEnsDbConfig({ ensDbUrl: url, ensIndexerSchemaName: schema });
+        return schema;
+      },
+    },
+  };
+});
+
+import {
+  type ENSNamespaceId,
+  ensTestEnvChain,
+  getENSNamespace,
+  maybeGetDatasource,
+} from "@ensnode/datasources";
 import { buildBlockNumberRange, ENSNamespaceIds, PluginName } from "@ensnode/ensnode-sdk";
 import type { RpcConfig } from "@ensnode/ensnode-sdk/internal";
 
 import { buildConfigFromEnvironment } from "@/config/config.schema";
+import { getPlugin } from "@/plugins";
 
 import type { ENSIndexerEnvironment } from "./environment";
 import { EnvironmentDefaults } from "./environment-defaults";
@@ -17,9 +46,8 @@ const VALID_RPC_WS_URL_ALT = "wss://lb.drpc.org/ethereum/987";
 const BASE_ENV: ENSIndexerEnvironment = {
   NAMESPACE: "mainnet",
   PLUGINS: "subgraph",
-  DATABASE_SCHEMA: "ensnode",
-  DATABASE_URL: "postgresql://user:password@localhost:5432/mydb",
-  ENSINDEXER_URL: "http://localhost:42069",
+  ENSINDEXER_SCHEMA_NAME: "ensindexer_test",
+  ENSDB_URL: "postgresql://user:password@localhost:5432/mydb",
   ENSRAINBOW_URL: "http://localhost:3223",
   LABEL_SET_ID: "ens-test-env",
   LABEL_SET_VERSION: "0",
@@ -36,6 +64,17 @@ async function stubEnv(env: ENSIndexerEnvironment) {
   Object.entries(env).forEach(([key, value]) => vi.stubEnv(key, value));
 }
 
+/**
+ * Stubs RPC_URL env vars for all chains defined in the given namespace's datasources.
+ */
+function stubRpcUrlsForNamespace(namespace: ENSNamespaceId) {
+  const datasources = getENSNamespace(namespace);
+  const chainIds = new Set(Object.values(datasources).map((ds) => ds.chain.id));
+  for (const chainId of chainIds) {
+    vi.stubEnv(`RPC_URL_${chainId}`, VALID_RPC_URL);
+  }
+}
+
 describe("config (with base env)", () => {
   beforeEach(() => {
     stubEnv(BASE_ENV);
@@ -50,7 +89,7 @@ describe("config (with base env)", () => {
       const config = await getConfig();
       expect(config.namespace).toBe("mainnet");
       expect(config.globalBlockrange).toEqual(buildBlockNumberRange(undefined, undefined));
-      expect(config.databaseSchemaName).toBe("ensnode");
+      expect(config.ensIndexerSchemaName).toBe("ensindexer_test");
       expect(config.plugins).toEqual(["subgraph"]);
       expect(config.ensRainbowUrl).toStrictEqual(new URL("http://localhost:3223"));
     });
@@ -127,34 +166,6 @@ describe("config (with base env)", () => {
     });
   });
 
-  describe(".ensIndexerUrl", () => {
-    it("throws an error if ENSINDEXER_URL is not a valid URL", async () => {
-      vi.stubEnv("ENSINDEXER_URL", "invalid url");
-      await expect(getConfig()).rejects.toThrow(/ENSINDEXER_URL must be a valid URL string/i);
-    });
-
-    it("throws an error if ENSINDEXER_URL is empty", async () => {
-      vi.stubEnv("ENSINDEXER_URL", "");
-      await expect(getConfig()).rejects.toThrow(/ENSINDEXER_URL must be a valid URL string/i);
-    });
-
-    it("throws an error if ENSINDEXER_URL is undefined", async () => {
-      vi.stubEnv("ENSINDEXER_URL", undefined);
-      await expect(getConfig()).rejects.toThrow(/ENSINDEXER_URL must be a valid URL string/i);
-    });
-
-    it("returns the ENSINDEXER_URL if it is a valid URL", async () => {
-      const config = await getConfig();
-      expect(config.ensIndexerUrl).toStrictEqual(new URL("http://localhost:42069"));
-    });
-
-    it("returns a different valid ENSINDEXER_URL if set", async () => {
-      vi.stubEnv("ENSINDEXER_URL", "https://someotherurl.com");
-      const config = await getConfig();
-      expect(config.ensIndexerUrl).toStrictEqual(new URL("https://someotherurl.com"));
-    });
-  });
-
   describe(".ensRainbowUrl", () => {
     it("throws an error if ENSRAINBOW_URL is not a valid URL", async () => {
       vi.stubEnv("ENSRAINBOW_URL", "invalid url");
@@ -173,37 +184,33 @@ describe("config (with base env)", () => {
     });
   });
 
-  describe(".databaseSchemaName", () => {
-    it("returns the DATABASE_SCHEMA if set", async () => {
-      vi.stubEnv("DATABASE_SCHEMA", "someschema");
+  describe(".ensIndexerSchemaName", () => {
+    it("returns the ENSINDEXER_SCHEMA_NAME if set", async () => {
+      vi.stubEnv("ENSINDEXER_SCHEMA_NAME", "ensindexer_test_1");
       const config = await getConfig();
-      expect(config.databaseSchemaName).toBe("someschema");
+      expect(config.ensIndexerSchemaName).toBe("ensindexer_test_1");
     });
 
-    it("throws an error when DATABASE_SCHEMA is not set", async () => {
-      vi.stubEnv("DATABASE_SCHEMA", undefined);
-      await expect(getConfig()).rejects.toThrow(/DATABASE_SCHEMA is required/);
+    it("throws an error when ENSINDEXER_SCHEMA_NAME is not set", async () => {
+      vi.stubEnv("ENSINDEXER_SCHEMA_NAME", undefined);
+      await expect(getConfig()).rejects.toThrow(/ENSIndexer Schema Name is required/);
     });
 
-    it("throws an error when DATABASE_SCHEMA is empty", async () => {
-      vi.stubEnv("DATABASE_SCHEMA", "");
-      await expect(getConfig()).rejects.toThrow(
-        /DATABASE_SCHEMA is required and cannot be an empty string/,
-      );
+    it("throws an error when ENSINDEXER_SCHEMA_NAME is empty", async () => {
+      vi.stubEnv("ENSINDEXER_SCHEMA_NAME", "");
+      await expect(getConfig()).rejects.toThrow(/ENSIndexer Schema Name cannot be an empty string/);
     });
 
-    it("throws an error when DATABASE_SCHEMA is only whitespace", async () => {
-      vi.stubEnv("DATABASE_SCHEMA", "   ");
-      await expect(getConfig()).rejects.toThrow(
-        /DATABASE_SCHEMA is required and cannot be an empty string/,
-      );
+    it("throws an error when ENSINDEXER_SCHEMA_NAME is only whitespace", async () => {
+      vi.stubEnv("ENSINDEXER_SCHEMA_NAME", "   ");
+      await expect(getConfig()).rejects.toThrow(/ENSIndexer Schema Name cannot be an empty string/);
     });
   });
 
   describe(".namespace", () => {
     it("returns the NAMESPACE if set", async () => {
       vi.stubEnv("NAMESPACE", "sepolia");
-      vi.stubEnv("RPC_URL_11155111", VALID_RPC_URL);
+      stubRpcUrlsForNamespace("sepolia");
       const config = await getConfig();
       expect(config.namespace).toBe("sepolia");
     });
@@ -243,10 +250,7 @@ describe("config (with base env)", () => {
 
       it("has default plugins", async () => {
         vi.stubEnv("PLUGINS", undefined);
-        vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
-        vi.stubEnv("RPC_URL_59144", VALID_RPC_URL);
-        vi.stubEnv("RPC_URL_10", VALID_RPC_URL);
-        vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
+        stubRpcUrlsForNamespace("mainnet");
 
         await expect(getConfig()).resolves.toMatchObject({
           plugins: EnvironmentDefaults.alpha.PLUGINS.split(","),
@@ -256,14 +260,14 @@ describe("config (with base env)", () => {
 
     it("returns the PLUGINS if it is a valid array", async () => {
       vi.stubEnv("PLUGINS", "subgraph,basenames");
-      vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
+      stubRpcUrlsForNamespace("mainnet");
       const config = await getConfig();
       expect(config.plugins).toEqual(["subgraph", "basenames"]);
     });
 
     it("returns a single plugin if only one is provided", async () => {
       vi.stubEnv("PLUGINS", "basenames");
-      vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
+      stubRpcUrlsForNamespace("mainnet");
       const config = await getConfig();
       expect(config.plugins).toEqual(["basenames"]);
     });
@@ -402,56 +406,56 @@ describe("config (with base env)", () => {
     });
   });
 
-  describe(".databaseUrl", () => {
+  describe(".ensDbUrl", () => {
     it("accepts a valid PostgreSQL connection string", async () => {
-      vi.stubEnv("DATABASE_URL", "postgresql://user:password@localhost:5432/mydb");
+      vi.stubEnv("ENSDB_URL", "postgresql://user:password@localhost:5432/mydb");
       const config = await getConfig();
-      expect(config.databaseUrl).toBe("postgresql://user:password@localhost:5432/mydb");
+      expect(config.ensDbUrl).toBe("postgresql://user:password@localhost:5432/mydb");
     });
 
     it("accepts a connection string with additional parameters", async () => {
-      vi.stubEnv("DATABASE_URL", "postgresql://user:password@localhost:5432/mydb?sslmode=require");
+      vi.stubEnv("ENSDB_URL", "postgresql://user:password@localhost:5432/mydb?sslmode=require");
       const config = await getConfig();
-      expect(config.databaseUrl).toBe(
+      expect(config.ensDbUrl).toBe(
         "postgresql://user:password@localhost:5432/mydb?sslmode=require",
       );
     });
 
-    it("throws an error if DATABASE_URL is not set", async () => {
-      vi.stubEnv("DATABASE_URL", undefined);
+    it("throws an error if ENSDB_URL is not set", async () => {
+      vi.stubEnv("ENSDB_URL", undefined);
       await expect(getConfig()).rejects.toThrow(/Invalid input/);
     });
 
-    it("throws an error if DATABASE_URL is empty", async () => {
-      vi.stubEnv("DATABASE_URL", "");
+    it("throws an error if ENSDB_URL is empty", async () => {
+      vi.stubEnv("ENSDB_URL", "");
       await expect(getConfig()).rejects.toThrow(/Invalid PostgreSQL connection string/);
     });
 
-    it("throws an error if DATABASE_URL is not a valid postgres connection string", async () => {
-      vi.stubEnv("DATABASE_URL", "not-a-postgres-connection-string");
+    it("throws an error if ENSDB_URL is not a valid postgres connection string", async () => {
+      vi.stubEnv("ENSDB_URL", "not-a-postgres-connection-string");
       await expect(getConfig()).rejects.toThrow(/Invalid PostgreSQL connection string/);
     });
 
-    it("throws an error if DATABASE_URL uses the wrong protocol", async () => {
-      vi.stubEnv("DATABASE_URL", "mysql://user:password@localhost:3306/mydb");
+    it("throws an error if ENSDB_URL uses the wrong protocol", async () => {
+      vi.stubEnv("ENSDB_URL", "mysql://user:password@localhost:3306/mydb");
       await expect(getConfig()).rejects.toThrow(/Invalid PostgreSQL connection string/);
     });
 
-    it("throws an error if DATABASE_URL is missing required components", async () => {
-      vi.stubEnv("DATABASE_URL", "postgresql://localhost:5432");
+    it("throws an error if ENSDB_URL is missing required components", async () => {
+      vi.stubEnv("ENSDB_URL", "postgresql://localhost:5432");
       await expect(getConfig()).rejects.toThrow(/Invalid PostgreSQL connection string/);
     });
 
     it("accepts postgres:// protocol", async () => {
-      vi.stubEnv("DATABASE_URL", "postgres://user:password@localhost:5432/mydb");
+      vi.stubEnv("ENSDB_URL", "postgres://user:password@localhost:5432/mydb");
       const config = await getConfig();
-      expect(config.databaseUrl).toBe("postgres://user:password@localhost:5432/mydb");
+      expect(config.ensDbUrl).toBe("postgres://user:password@localhost:5432/mydb");
     });
 
     it("accepts postgresql:// protocol", async () => {
-      vi.stubEnv("DATABASE_URL", "postgresql://user:password@localhost:5432/mydb");
+      vi.stubEnv("ENSDB_URL", "postgresql://user:password@localhost:5432/mydb");
       const config = await getConfig();
-      expect(config.databaseUrl).toBe("postgresql://user:password@localhost:5432/mydb");
+      expect(config.ensDbUrl).toBe("postgresql://user:password@localhost:5432/mydb");
     });
   });
 
@@ -469,20 +473,80 @@ describe("config (with base env)", () => {
 
     it("throws when PLUGINS does not include subgraph", async () => {
       vi.stubEnv("PLUGINS", "basenames");
-      vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
+      stubRpcUrlsForNamespace("mainnet");
 
       await expect(getConfig()).rejects.toThrow(/isSubgraphCompatible/);
     });
 
     it("throws when PLUGINS includes subgraph along with other plugins", async () => {
       vi.stubEnv("PLUGINS", "subgraph,basenames");
-      vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
+      stubRpcUrlsForNamespace("mainnet");
 
       await expect(getConfig()).rejects.toThrow(/isSubgraphCompatible/);
     });
   });
 
+  describe(".indexedChainIds", () => {
+    it("derives chain id 1 for subgraph plugin on mainnet", async () => {
+      vi.stubEnv("PLUGINS", "subgraph");
+      const config = await getConfig();
+      expect(config.indexedChainIds).toEqual(new Set([1]));
+    });
+
+    it("derives chain ids 1 and 8453 for subgraph,basenames on mainnet", async () => {
+      vi.stubEnv("PLUGINS", "subgraph,basenames");
+      stubRpcUrlsForNamespace("mainnet");
+      const config = await getConfig();
+      expect(config.indexedChainIds).toEqual(new Set([1, 8453]));
+    });
+
+    it("derives all expected chain ids for protocol-acceleration on mainnet", async () => {
+      vi.stubEnv("PLUGINS", "protocol-acceleration");
+      stubRpcUrlsForNamespace("mainnet");
+      const config = await getConfig();
+
+      const plugin = getPlugin(PluginName.ProtocolAcceleration);
+      const expected = new Set(
+        plugin.allDatasourceNames
+          .map((name) => maybeGetDatasource(ENSNamespaceIds.Mainnet, name)?.chain.id)
+          .filter((id) => id !== undefined),
+      );
+
+      expect(config.indexedChainIds).toEqual(expected);
+    });
+
+    // This test asserts that protocol-acceleration derives different chain ids per namespace,
+    // because available datasources differ (e.g. sepolia has no ThreeDNS datasources).
+    // If this test fails after updating datasources for a namespace, update the expected
+    // chain ids or remove this test if the distinction no longer holds.
+    it("derives different chain ids for protocol-acceleration on sepolia vs mainnet", async () => {
+      vi.stubEnv("PLUGINS", "protocol-acceleration");
+
+      stubRpcUrlsForNamespace("mainnet");
+      const mainnetConfig = await getConfig();
+
+      vi.stubEnv("NAMESPACE", "sepolia");
+      stubRpcUrlsForNamespace("sepolia");
+      const sepoliaConfig = await getConfig();
+
+      expect(mainnetConfig.indexedChainIds).not.toEqual(sepoliaConfig.indexedChainIds);
+    });
+  });
+
   describe("additional checks", () => {
+    it("all plugins have requiredDatasourceNames as a subset of allDatasourceNames", () => {
+      for (const pluginName of Object.values(PluginName)) {
+        const plugin = getPlugin(pluginName);
+        const allSet = new Set(plugin.allDatasourceNames);
+        for (const required of plugin.requiredDatasourceNames) {
+          expect(
+            allSet.has(required),
+            `${pluginName}: requiredDatasourceName '${required}' missing from allDatasourceNames`,
+          ).toBe(true);
+        }
+      }
+    });
+
     it("requires available datasources", async () => {
       vi.stubEnv("NAMESPACE", "ens-test-env");
       vi.stubEnv("PLUGINS", "basenames");
@@ -491,12 +555,12 @@ describe("config (with base env)", () => {
 
     it("requires rpc url for indexed chains", async () => {
       vi.stubEnv("PLUGINS", "subgraph,basenames");
-      await expect(getConfig()).rejects.toThrow(/RPC_URL_\d+ is not specified/i);
+      await expect(getConfig()).rejects.toThrow(/RPC_URL_\d+/i);
     });
 
     it("cannot constrain blockrange with multiple chains", async () => {
       vi.stubEnv("PLUGINS", "subgraph,basenames");
-      vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
+      stubRpcUrlsForNamespace("mainnet");
       vi.stubEnv("END_BLOCK", "1");
       await expect(getConfig()).rejects.toThrow(/multiple chains/i);
     });
@@ -602,14 +666,12 @@ describe("config (with base env)", () => {
  */
 describe("config (minimal base env)", () => {
   beforeEach(() => {
-    const { NAMESPACE, ENSINDEXER_URL, ENSRAINBOW_URL, DATABASE_URL, DATABASE_SCHEMA, RPC_URL_1 } =
-      BASE_ENV;
+    const { NAMESPACE, ENSRAINBOW_URL, ENSDB_URL, ENSINDEXER_SCHEMA_NAME, RPC_URL_1 } = BASE_ENV;
     stubEnv({
       NAMESPACE,
-      ENSINDEXER_URL,
       ENSRAINBOW_URL,
-      DATABASE_URL,
-      DATABASE_SCHEMA,
+      ENSDB_URL,
+      ENSINDEXER_SCHEMA_NAME,
       RPC_URL_1,
     });
   });
@@ -628,11 +690,7 @@ describe("config (minimal base env)", () => {
     });
 
     it("provides default plugins", async () => {
-      stubEnv({
-        RPC_URL_8453: VALID_RPC_URL,
-        RPC_URL_59144: VALID_RPC_URL,
-        RPC_URL_10: VALID_RPC_URL,
-      });
+      stubRpcUrlsForNamespace("mainnet");
 
       await expect(getConfig()).resolves.toMatchObject({
         plugins: EnvironmentDefaults.alpha.PLUGINS.split(","),
@@ -640,12 +698,8 @@ describe("config (minimal base env)", () => {
     });
 
     it("allows override of default plugins", async () => {
-      stubEnv({
-        PLUGINS: "tokenscope",
-        RPC_URL_8453: VALID_RPC_URL,
-        RPC_URL_59144: VALID_RPC_URL,
-        RPC_URL_10: VALID_RPC_URL,
-      });
+      stubEnv({ PLUGINS: "tokenscope" });
+      stubRpcUrlsForNamespace("mainnet");
 
       await expect(getConfig()).resolves.toMatchObject({ plugins: [PluginName.TokenScope] });
     });
@@ -673,11 +727,73 @@ describe("config (minimal base env)", () => {
           rpcConfigs.every((rpcConfig) => rpcConfig.httpRPCs.length >= 1),
           "must have http rpc url",
         ).toBe(true);
+      });
 
+      it("should not generate WS RPCs by default (http-only mode)", async () => {
+        const config = await getConfig();
+        const rpcConfigs = [...config.rpcConfigs.values()];
+
+        expect(rpcConfigs.length, "should have some configs").toBeGreaterThan(0);
         expect(
-          rpcConfigs.every((rpcConfig) => rpcConfig.websocketRPC !== undefined),
-          "must have ws rpc url",
+          rpcConfigs.every((rpcConfig) => rpcConfig.websocketRPC === undefined),
+          "must not have ws rpc url",
         ).toBe(true);
+      });
+    });
+
+    describe("with ALCHEMY_API_KEY and RPC_AUTO_GEN_MODE=http-and-ws", () => {
+      beforeEach(() => {
+        stubEnv({
+          ALCHEMY_API_KEY: "anything",
+          RPC_URL_1: undefined,
+          RPC_AUTO_GEN_MODE: "http-and-ws",
+        });
+      });
+
+      it("should generate WS RPCs for chains that support them", async () => {
+        const config = await getConfig();
+        const rpcConfigs = [...config.rpcConfigs.values()];
+
+        expect(rpcConfigs.length, "should have some configs").toBeGreaterThan(0);
+        expect(
+          rpcConfigs.some((rpcConfig) => rpcConfig.websocketRPC !== undefined),
+          "should have at least one ws rpc url",
+        ).toBe(true);
+      });
+    });
+
+    describe("with ALCHEMY_API_KEY and RPC_AUTO_GEN_MODE=http-only", () => {
+      beforeEach(() => {
+        stubEnv({
+          ALCHEMY_API_KEY: "anything",
+          RPC_URL_1: undefined,
+          RPC_AUTO_GEN_MODE: "http-only",
+        });
+      });
+
+      it("should not generate WS RPCs", async () => {
+        const config = await getConfig();
+        const rpcConfigs = [...config.rpcConfigs.values()];
+
+        expect(rpcConfigs.length, "should have some configs").toBeGreaterThan(0);
+        expect(
+          rpcConfigs.every((rpcConfig) => rpcConfig.websocketRPC === undefined),
+          "must not have ws rpc url",
+        ).toBe(true);
+      });
+    });
+
+    describe("with ALCHEMY_API_KEY and RPC_AUTO_GEN_MODE=invalid", () => {
+      beforeEach(() => {
+        stubEnv({
+          ALCHEMY_API_KEY: "anything",
+          RPC_URL_1: undefined,
+          RPC_AUTO_GEN_MODE: "invalid",
+        });
+      });
+
+      it("throws an error for invalid RPC_AUTO_GEN_MODE", async () => {
+        await expect(getConfig()).rejects.toThrow(/Invalid RPC_AUTO_GEN_MODE env var/i);
       });
     });
 

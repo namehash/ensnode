@@ -1,17 +1,6 @@
 import type { BlockRef } from "./blocks";
 import type { ChainId } from "./chains";
-
-/**
- * Ponder Application Commands
- *
- * Represents the commands that can be used to start a Ponder app.
- */
-export const PonderAppCommands = {
-  Dev: "dev",
-  Start: "start",
-} as const;
-
-export type PonderAppCommand = (typeof PonderAppCommands)[keyof typeof PonderAppCommands];
+import type { PonderAppCommand } from "./ponder-app-context";
 
 /**
  * Ponder Indexing Orderings

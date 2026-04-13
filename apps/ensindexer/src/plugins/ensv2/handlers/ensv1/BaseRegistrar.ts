@@ -1,26 +1,28 @@
-import { type Context, ponder } from "ponder:registry";
-import schema from "ponder:schema";
 import { GRACE_PERIOD_SECONDS } from "@ensdomains/ensjs/utils";
-import { type Address, isAddressEqual, zeroAddress } from "viem";
-
 import {
-  interpretAddress,
+  type Address,
   interpretTokenIdAsLabelHash,
-  isRegistrationFullyExpired,
   makeENSv1DomainId,
   makeSubdomainNode,
-  PluginName,
-} from "@ensnode/ensnode-sdk";
+} from "enssdk";
+import { isAddressEqual, zeroAddress } from "viem";
+
+import { interpretAddress, isRegistrationFullyExpired, PluginName } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { materializeENSv1DomainEffectiveOwner } from "@/lib/ensv2/domain-db-helpers";
-import { ensureEvent } from "@/lib/ensv2/event-db-helpers";
+import { ensureDomainEvent, ensureEvent } from "@/lib/ensv2/event-db-helpers";
 import {
   getLatestRegistration,
   insertLatestRegistration,
   insertLatestRenewal,
 } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
+import {
+  addOnchainEventListener,
+  ensIndexerSchema,
+  type IndexingEngineContext,
+} from "@/lib/indexing-engines/ponder";
 import { toJson } from "@/lib/json-stringify-with-bigints";
 import { getManagedName } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
@@ -42,13 +44,13 @@ const pluginName = PluginName.ENSv2;
  * exists and materialize its effective owner correctly.
  */
 export default function () {
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "BaseRegistrar:Transfer"),
     async ({
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{
         from: Address;
         to: Address;
@@ -81,8 +83,11 @@ export default function () {
       }
 
       // materialize Domain owner if exists
-      const domain = await context.db.find(schema.v1Domain, { id: domainId });
+      const domain = await context.ensDb.find(ensIndexerSchema.v1Domain, { id: domainId });
       if (domain) await materializeENSv1DomainEffectiveOwner(context, domainId, to);
+
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
     },
   );
 
@@ -90,7 +95,7 @@ export default function () {
     context,
     event,
   }: {
-    context: Context;
+    context: IndexingEngineContext;
     event: EventWithArgs<{
       id: bigint;
       owner: Address;
@@ -125,6 +130,7 @@ export default function () {
       registrarChainId: registrar.chainId,
       registrarAddress: registrar.address,
       registrantId: interpretAddress(registrant),
+      start: event.block.timestamp,
       expiry,
       // all BaseRegistrar-derived Registrars use the same GRACE_PERIOD
       gracePeriod: BigInt(GRACE_PERIOD_SECONDS),
@@ -132,23 +138,29 @@ export default function () {
     });
 
     // materialize Domain owner if exists
-    const domain = await context.db.find(schema.v1Domain, { id: domainId });
+    const domain = await context.ensDb.find(ensIndexerSchema.v1Domain, { id: domainId });
     if (domain) await materializeENSv1DomainEffectiveOwner(context, domainId, owner);
+
+    // push event to domain history
+    await ensureDomainEvent(context, event, domainId);
   }
 
-  ponder.on(namespaceContract(pluginName, "BaseRegistrar:NameRegistered"), handleNameRegistered);
-  ponder.on(
+  addOnchainEventListener(
+    namespaceContract(pluginName, "BaseRegistrar:NameRegistered"),
+    handleNameRegistered,
+  );
+  addOnchainEventListener(
     namespaceContract(pluginName, "BaseRegistrar:NameRegisteredWithRecord"),
     handleNameRegistered,
   );
 
-  ponder.on(
+  addOnchainEventListener(
     namespaceContract(pluginName, "BaseRegistrar:NameRenewed"),
     async ({
       context,
       event,
     }: {
-      context: Context;
+      context: IndexingEngineContext;
       event: EventWithArgs<{ id: bigint; expires: bigint }>;
     }) => {
       const { id: tokenId, expires: expiry } = event.args;
@@ -213,7 +225,9 @@ export default function () {
       const duration = expiry - registration.expiry;
 
       // update the registration
-      await context.db.update(schema.registration, { id: registration.id }).set({ expiry });
+      await context.ensDb
+        .update(ensIndexerSchema.registration, { id: registration.id })
+        .set({ expiry });
 
       // insert Renewal
       await insertLatestRenewal(context, registration, {
@@ -223,6 +237,9 @@ export default function () {
         // NOTE: no pricing information from BaseRegistrar#NameRenewed. in ENSv1, this info is
         // indexed from the Registrar Controllers, see apps/ensindexer/src/plugins/ensv2/handlers/ensv1/RegistrarController.ts
       });
+
+      // push event to domain history
+      await ensureDomainEvent(context, event, domainId);
     },
   );
 }

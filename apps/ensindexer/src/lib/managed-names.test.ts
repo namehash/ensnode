@@ -1,8 +1,9 @@
-import { namehash, zeroAddress } from "viem";
+import { type AccountId, ETH_NODE } from "enssdk";
+import { zeroAddress } from "viem";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { DatasourceNames } from "@ensnode/datasources";
-import { type AccountId, ENSNamespaceIds, getDatasourceContract } from "@ensnode/ensnode-sdk";
+import { ENSNamespaceIds, getDatasourceContract } from "@ensnode/ensnode-sdk";
 
 import { getManagedName } from "./managed-names";
 
@@ -35,8 +36,6 @@ const controller = getDatasourceContract(
   DatasourceNames.ENSRoot,
   "LegacyEthRegistrarController",
 );
-
-const ETH_NODE = namehash("eth");
 
 describe("managed-names", () => {
   beforeEach(() => {

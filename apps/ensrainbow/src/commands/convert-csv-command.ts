@@ -12,8 +12,8 @@ import { finished } from "node:stream/promises";
 
 import { parse } from "@fast-csv/parse";
 import { ClassicLevel } from "classic-level";
+import { asLiteralLabel, labelhashLiteralLabel } from "enssdk";
 import ProgressBar from "progress";
-import { labelhash } from "viem";
 
 import { type LabelSetId, labelHashToBytes } from "@ensnode/ensnode-sdk";
 
@@ -333,12 +333,10 @@ type SingleColumnRow = [string];
  * Labelhashes are always computed deterministically from labels.
  */
 function createRainbowRecord(row: SingleColumnRow): RainbowRecord {
-  const label = row[0];
-  const labelHashBytes = labelHashToBytes(labelhash(label));
-  return {
-    labelHash: labelHashBytes,
-    label,
-  };
+  const label = asLiteralLabel(row[0]);
+  const labelHashBytes = labelHashToBytes(labelhashLiteralLabel(label));
+
+  return { label, labelHash: labelHashBytes };
 }
 
 /**
@@ -594,6 +592,7 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
     // an unhandled 'error' event that would crash the process and bypass the
     // finally-block cleanup.
     const streamErrorPromise = new Promise<never>((_, reject) => {
+      // biome-ignore lint/style/noNonNullAssertion: guaranteed
       outputStream!.once("error", reject);
     });
 

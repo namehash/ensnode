@@ -5,18 +5,16 @@ import { publicClients } from "ponder:api";
 import { buildIndexedBlockranges } from "@ensnode/ensnode-sdk";
 import { LocalPonderClient } from "@ensnode/ponder-sdk";
 
-import { getPluginsRequiredDatasourceNames } from "@/lib/plugin-helpers";
+import { getPluginsAllDatasourceNames } from "@/lib/plugin-helpers";
 
-const pluginsRequiredDatasourceNames = getPluginsRequiredDatasourceNames(config.plugins);
+import { localPonderContext } from "./local-ponder-context";
 
-const indexedBlockranges = buildIndexedBlockranges(
-  config.namespace,
-  pluginsRequiredDatasourceNames,
-);
+const pluginsAllDatasourceNames = getPluginsAllDatasourceNames(config.plugins);
+const indexedBlockranges = buildIndexedBlockranges(config.namespace, pluginsAllDatasourceNames);
 
 export const localPonderClient = new LocalPonderClient(
-  config.ensIndexerUrl,
   config.indexedChainIds,
   indexedBlockranges,
   publicClients,
+  localPonderContext,
 );

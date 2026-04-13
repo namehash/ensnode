@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "fallback-ensapi",
-  "version": "1.5.1",
+  "version": "1.9.0",
   "type": "module",
   "description": "Infrastructure-level Fallback for ENSApi",
   "license": "MIT",
@@ -24,14 +24,14 @@
     "typecheck": "tsgo --noEmit"
   },
   "dependencies": {
-    "@aws-sdk/client-secrets-manager": "^3.955.0",
+    "@aws-sdk/client-secrets-manager": "^3.1002.0",
     "@ensnode/datasources": "workspace:*",
     "@ensnode/ensnode-sdk": "workspace:*",
     "hono": "catalog:"
   },
   "devDependencies": {
     "@ensnode/shared-configs": "workspace:*",
-    "@hono/node-server": "^1.19.7",
+    "@hono/node-server": "catalog:",
     "@types/node": "catalog:",
     "esbuild": "^0.27.2",
     "tsx": "^4.7.1",
