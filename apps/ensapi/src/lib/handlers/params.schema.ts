@@ -44,7 +44,7 @@ const trace = z
 const accelerate = z
   .optional(boolstring)
   .default(false)
-  .describe("Attempt accelerated CCIP-Read resolution using L1 data.")
+  .describe("Attempt Protocol Acceleration using indexed data.")
   .openapi({
     default: false,
   });
@@ -63,10 +63,12 @@ const chainIdsWithoutDefaultChainId = z
   );
 
 const rawSelectionParams = z.object({
-  nameRecord: z
+  reverseName: z
     .string()
     .optional()
-    .describe("Whether to include the ENS name record in the response.")
+    .describe(
+      "Whether to include the reverse name record in the response, see ENSIP-19 (https://docs.ens.domains/ensip/19/#reverse-resolution)",
+    )
     .openapi({
       enum: ["true", "false"],
     }),
@@ -86,13 +88,13 @@ const rawSelectionParams = z.object({
 
 const selection = z
   .object({
-    nameRecord: z.optional(boolstring),
+    reverseName: z.optional(boolstring),
     addresses: z.optional(stringarray.pipe(z.array(coinType))),
     texts: z.optional(stringarray),
   })
   .transform((value, ctx) => {
     const selection: ResolverRecordsSelection = {
-      ...(value.nameRecord && { name: true }),
+      ...(value.reverseName && { name: true }),
       ...(value.addresses && { addresses: value.addresses }),
       ...(value.texts && { texts: value.texts }),
     };

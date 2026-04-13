@@ -982,12 +982,12 @@
           {
             "schema": {
               "type": "string",
-              "description": "Whether to include the ENS name record in the response.",
+              "description": "Whether to include the reverse name record in the response, see ENSIP-19 (https://docs.ens.domains/ensip/19/#reverse-resolution)",
               "enum": ["true", "false"]
             },
             "required": false,
-            "description": "Whether to include the ENS name record in the response.",
-            "name": "nameRecord",
+            "description": "Whether to include the reverse name record in the response, see ENSIP-19 (https://docs.ens.domains/ensip/19/#reverse-resolution)",
+            "name": "reverseName",
             "in": "query"
           },
           {
@@ -1024,11 +1024,11 @@
           {
             "schema": {
               "type": "boolean",
-              "description": "Attempt accelerated CCIP-Read resolution using L1 data.",
+              "description": "Attempt Protocol Acceleration using indexed data.",
               "default": false
             },
             "required": false,
-            "description": "Attempt accelerated CCIP-Read resolution using L1 data.",
+            "description": "Attempt Protocol Acceleration using indexed data.",
             "name": "accelerate",
             "in": "query"
           }
@@ -1117,11 +1117,11 @@
           {
             "schema": {
               "type": "boolean",
-              "description": "Attempt accelerated CCIP-Read resolution using L1 data.",
+              "description": "Attempt Protocol Acceleration using indexed data.",
               "default": false
             },
             "required": false,
-            "description": "Attempt accelerated CCIP-Read resolution using L1 data.",
+            "description": "Attempt Protocol Acceleration using indexed data.",
             "name": "accelerate",
             "in": "query"
           }
@@ -1193,11 +1193,11 @@
           {
             "schema": {
               "type": "boolean",
-              "description": "Attempt accelerated CCIP-Read resolution using L1 data.",
+              "description": "Attempt Protocol Acceleration using indexed data.",
               "default": false
             },
             "required": false,
-            "description": "Attempt accelerated CCIP-Read resolution using L1 data.",
+            "description": "Attempt Protocol Acceleration using indexed data.",
             "name": "accelerate",
             "in": "query"
           }
