@@ -46,5 +46,3 @@ export const realtimeGetMeta = createRoute({
     },
   },
 });
-
-export const routes = [realtimeGetMeta];

@@ -4,6 +4,7 @@ import {
   ErrorResponseSchema,
   makeNameTokensResponseSchema,
   makeNodeSchema,
+  nameTokensResponseOkExample,
 } from "@ensnode/ensnode-sdk/internal";
 
 import { params } from "@/lib/handlers/params.schema";
@@ -42,7 +43,9 @@ export const getNameTokensRoute = createRoute({
       description: "Name tokens known",
       content: {
         "application/json": {
-          schema: makeNameTokensResponseSchema("Name Tokens Response", true),
+          schema: makeNameTokensResponseSchema("Name Tokens Response", true).openapi({
+            example: nameTokensResponseOkExample,
+          }),
         },
       },
     },
@@ -81,5 +84,3 @@ export const getNameTokensRoute = createRoute({
     },
   },
 });
-
-export const routes = [getNameTokensRoute];

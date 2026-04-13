@@ -5,7 +5,7 @@ import { isSelectionEmpty, type ResolverRecordsSelection } from "@ensnode/ensnod
 import {
   makeCoinTypeStringSchema,
   makeDefaultableChainIdStringSchema,
-  makeNormalizedAddressSchema,
+  makeLowercaseAddressSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
 const excludingDefaultChainId = z
@@ -32,58 +32,82 @@ const stringarray = z
 const name = z
   .string()
   .refine(isNormalizedName, "Must be normalized, see https://docs.ens.domains/resolution/names/")
-  .transform((val) => val as Name);
+  .transform((val) => val as Name)
+  .describe("ENS name to resolve (e.g. 'vitalik.eth'). Must be normalized per ENSIP-15.");
 
-const trace = z.optional(boolstring).default(false).openapi({ default: false });
-const accelerate = z.optional(boolstring).default(false).openapi({ default: false });
-const address = makeNormalizedAddressSchema();
-const defaultableChainId = makeDefaultableChainIdStringSchema();
+const trace = z
+  .optional(boolstring)
+  .default(false)
+  .describe("Include detailed resolution trace information in the response.")
+  .openapi({ default: false });
+
+const accelerate = z
+  .optional(boolstring)
+  .default(false)
+  .describe("Attempt accelerated CCIP-Read resolution using L1 data.")
+  .openapi({
+    default: false,
+  });
+const address = makeLowercaseAddressSchema().describe(
+  "EVM wallet address (e.g. '0xd8da6bf26964af9d7eed9e03e53415d37aa96045').",
+);
+const defaultableChainId = makeDefaultableChainIdStringSchema().describe(
+  "Chain ID as a string (e.g. '1' for Ethereum mainnet). Use '0' for the default EVM chain.",
+);
 const coinType = makeCoinTypeStringSchema();
 
-const chainIdsWithoutDefaultChainId = z.optional(
-  stringarray.pipe(z.array(defaultableChainId.pipe(excludingDefaultChainId))),
-);
+const chainIdsWithoutDefaultChainId = z
+  .optional(stringarray.pipe(z.array(defaultableChainId.pipe(excludingDefaultChainId))))
+  .describe(
+    "Comma-separated list of chain IDs to resolve primary names for (e.g. '1,10,8453'). The default EVM chain ID (0) is not allowed.",
+  );
 
 const rawSelectionParams = z.object({
-  name: z.string().optional(),
-  addresses: z.string().optional(),
-  texts: z.string().optional(),
+  nameRecord: z
+    .string()
+    .optional()
+    .describe("Whether to include the ENS name record in the response.")
+    .openapi({
+      enum: ["true", "false"],
+    }),
+  addresses: z
+    .string()
+    .optional()
+    .describe(
+      "Comma-separated list of coin types to resolve addresses for (e.g. '60' for ETH, '2147483658' for OP).",
+    ),
+  texts: z
+    .string()
+    .optional()
+    .describe(
+      "Comma-separated list of text record keys to resolve (e.g. 'avatar,description,url').",
+    ),
 });
 
-const selectionFields = z.object({
-  name: z.optional(boolstring),
-  addresses: z.optional(stringarray.pipe(z.array(coinType))),
-  texts: z.optional(stringarray),
-});
+const selection = z
+  .object({
+    nameRecord: z.optional(boolstring),
+    addresses: z.optional(stringarray.pipe(z.array(coinType))),
+    texts: z.optional(stringarray),
+  })
+  .transform((value, ctx) => {
+    const selection: ResolverRecordsSelection = {
+      ...(value.nameRecord && { name: true }),
+      ...(value.addresses && { addresses: value.addresses }),
+      ...(value.texts && { texts: value.texts }),
+    };
 
-type SelectionFields = z.output<typeof selectionFields>;
+    if (isSelectionEmpty(selection)) {
+      ctx.issues.push({
+        code: "custom",
+        message: "Selection cannot be empty.",
+        input: selection,
+      });
 
-function toSelection(
-  fields: SelectionFields,
-  ctx: z.RefinementCtx,
-): ResolverRecordsSelection | typeof z.NEVER {
-  const sel: ResolverRecordsSelection = {
-    ...(fields.name && { name: true }),
-    ...(fields.addresses && { addresses: fields.addresses }),
-    ...(fields.texts && { texts: fields.texts }),
-  };
+      return z.NEVER;
+    }
 
-  if (isSelectionEmpty(sel)) {
-    ctx.issues.push({ code: "custom", message: "Selection cannot be empty.", input: sel });
-    return z.NEVER;
-  }
-
-  return sel;
-}
-
-const selection = selectionFields.transform(toSelection);
-
-const resolveRecordsQuery = z
-  .object({ ...selectionFields.shape, trace, accelerate })
-  .transform(({ trace, accelerate, ...fields }, ctx) => {
-    const sel = toSelection(fields, ctx);
-    if (sel === z.NEVER) return z.NEVER;
-    return { selection: sel, trace, accelerate };
+    return selection;
   });
 
 /**
@@ -117,7 +141,6 @@ export const params = {
   coinType,
   selectionParams: rawSelectionParams,
   selection,
-  resolveRecordsQuery,
   chainIdsWithoutDefaultChainId,
   queryParam,
 };
