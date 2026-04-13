@@ -1,10 +1,5 @@
-import {
-  EnsureInterpretedName,
-  type FragmentOf,
-  graphql,
-  readFragment,
-  useOmnigraphQuery,
-} from "enskit/react/omnigraph";
+import { EnsureInterpretedName } from "enskit/react";
+import { type FragmentOf, graphql, readFragment, useOmnigraphQuery } from "enskit/react/omnigraph";
 import { getParentInterpretedName, type InterpretedName } from "enssdk";
 import { Link, Navigate, useParams } from "react-router";
 

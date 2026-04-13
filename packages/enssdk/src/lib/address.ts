@@ -6,8 +6,8 @@ import type { Address, NormalizedAddress } from "./types";
  * Determines whether an {@link Address} is a {@link NormalizedAddress}.
  */
 export function isNormalizedAddress(address: Address): address is NormalizedAddress {
-  const isNormalized = address === address.toLowerCase();
-  return isNormalized && isAddress(address, { strict: false });
+  const isLowerCase = address === address.toLowerCase();
+  return isLowerCase && isAddress(address, { strict: false });
 }
 
 /**
