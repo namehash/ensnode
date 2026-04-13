@@ -24,7 +24,12 @@ export const omnigraphCacheExchange = cacheExchange({
     // special handling here in the cacheExchange.keys definitions, it will issue a warning.
 
     // AccountIds are keyable by stringifying them
-    AccountId: (data) => stringifyAccountId(data as unknown as AccountId),
+    AccountId: (data) => {
+      if (!data.address) return null;
+      if (!data.chainId) return null;
+
+      return stringifyAccountId(data as unknown as AccountId);
+    },
 
     // These entities are Embedded Data and don't have a relevant key
     Label: EMBEDDED_DATA,
