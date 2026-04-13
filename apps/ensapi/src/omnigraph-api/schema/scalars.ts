@@ -1,5 +1,4 @@
 import {
-  type Address,
   asInterpretedLabel,
   asInterpretedName,
   type ChainId,
@@ -10,6 +9,7 @@ import {
   isInterpretedName,
   type Name,
   type Node,
+  type NormalizedAddress,
   type PermissionsId,
   type PermissionsResourceId,
   type PermissionsUserId,
@@ -38,13 +38,13 @@ builder.scalarType("BigInt", {
 
 builder.scalarType("Address", {
   description: "Address represents an EVM Address in all lowercase.",
-  serialize: (value: Address) => value.toString(),
+  serialize: (value: NormalizedAddress) => value,
   parseValue: (value) => makeNormalizedAddressSchema("Address").parse(value),
 });
 
 builder.scalarType("Hex", {
   description: "Hex represents viem#Hex.",
-  serialize: (value: Hex) => value.toString(),
+  serialize: (value: Hex) => value,
   parseValue: (value) =>
     z.coerce
       .string()

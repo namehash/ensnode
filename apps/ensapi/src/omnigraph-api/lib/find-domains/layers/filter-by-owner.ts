@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import type { Address } from "enssdk";
+import type { NormalizedAddress } from "enssdk";
 
 import { ensDb } from "@/lib/ensdb/singleton";
 
@@ -8,7 +8,7 @@ import { type BaseDomainSet, selectBase } from "./base-domain-set";
 /**
  * Filter a base domain set by owner address.
  */
-export function filterByOwner(base: BaseDomainSet, owner: Address) {
+export function filterByOwner(base: BaseDomainSet, owner: NormalizedAddress) {
   return ensDb //
     .select(selectBase(base))
     .from(base)
