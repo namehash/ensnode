@@ -6,10 +6,13 @@ import {
   RegistrarActionsOrders,
 } from "@ensnode/ensnode-sdk";
 import {
+  ErrorResponseSchema,
   makeLowercaseAddressSchema,
   makeNodeSchema,
   makePositiveIntegerSchema,
+  makeRegistrarActionsResponseOkSchema,
   makeUnixTimestampSchema,
+  registrarActionsResponseOkExample,
 } from "@ensnode/ensnode-sdk/internal";
 
 import { params } from "@/lib/handlers/params.schema";
@@ -59,12 +62,14 @@ export const registrarActionsQuerySchema = z
       .pipe(z.coerce.number())
       .pipe(makeUnixTimestampSchema("beginTimestamp"))
       .optional()
+      .openapi({ type: "integer" })
       .describe("Filter actions at or after this Unix timestamp"),
 
     endTimestamp: params.queryParam
       .pipe(z.coerce.number())
       .pipe(makeUnixTimestampSchema("endTimestamp"))
       .optional()
+      .openapi({ type: "integer" })
       .describe("Filter actions at or before this Unix timestamp"),
   })
   .refine(
@@ -96,12 +101,27 @@ export const getRegistrarActionsRoute = createRoute({
   responses: {
     200: {
       description: "Successfully retrieved registrar actions",
+      content: {
+        "application/json": {
+          schema: makeRegistrarActionsResponseOkSchema().openapi({
+            example: registrarActionsResponseOkExample,
+          }),
+        },
+      },
     },
     400: {
       description: "Invalid query",
+      content: { "application/json": { schema: ErrorResponseSchema } },
     },
     500: {
       description: "Internal server error",
+      // TODO: fix the problem with typechecking.
+      // Throws error ```Type '{ currency: "ETH"; amount: string; }' is not assignable to type 'null'.```
+      // content: {
+      //   "application/json": {
+      //     schema: makeRegistrarActionsResponseErrorSchema("Registrar Actions Error Response"),
+      //   },
+      // },
     },
   },
 });
@@ -125,14 +145,31 @@ export const getRegistrarActionsByParentNodeRoute = createRoute({
   responses: {
     200: {
       description: "Successfully retrieved registrar actions",
+      content: {
+        "application/json": {
+          schema: makeRegistrarActionsResponseOkSchema(
+            "Registrar Actions By ParentNode Response",
+          ).openapi({
+            example: registrarActionsResponseOkExample,
+          }),
+        },
+      },
     },
     400: {
       description: "Invalid input",
+      content: { "application/json": { schema: ErrorResponseSchema } },
     },
     500: {
       description: "Internal server error",
+      // TODO: fix the problem with typechecking.
+      // Throws error ```Type '{ currency: "ETH"; amount: string; }' is not assignable to type 'null'.```
+      // content: {
+      //   "application/json": {
+      //     schema: makeRegistrarActionsResponseErrorSchema(
+      //       "Registrar Actions By ParentNode Error Response",
+      //     ),
+      //   },
+      // },
     },
   },
 });
-
-export const routes = [getRegistrarActionsRoute, getRegistrarActionsByParentNodeRoute];
