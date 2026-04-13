@@ -45,11 +45,13 @@ describe("toNormalizedAddress", () => {
   });
 
   it("should throw for a partial address", () => {
-    expect(() => toNormalizedAddress("0xdeaf")).toThrow(/does not/);
+    expect(() => toNormalizedAddress("0xdeaf")).toThrow(/does not represent an EVM Address/);
   });
 
   it("should throw for a non-hex string", () => {
-    expect(() => toNormalizedAddress("not-an-address" as Address)).toThrow(/does not/);
+    expect(() => toNormalizedAddress("not-an-address" as Address)).toThrow(
+      /does not represent an EVM Address/,
+    );
   });
 });
 
