@@ -6,6 +6,7 @@ import {
   type AccountId,
   asInterpretedName,
   type InterpretedName,
+  isNormalizedName,
   type Node,
   namehashInterpretedName,
   parseReverseName,
@@ -138,6 +139,14 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           //////////////////////////////////////////////////
           // Validate Input
           //////////////////////////////////////////////////
+
+          // TODO: technically InterpretedNames are not resolvable, since ENS contracts are not
+          // encoded-labelhash-aware; so we add a temporary additional constraint on name that it
+          // must be fully normalized (and therefore not contain encoded labelhash segments)
+          // (this will be improved in a future pr)
+          if (!isNormalizedName(name)) {
+            throw new Error(`'${name} must be normalized to be resolvable.'`);
+          }
 
           const node: Node = namehashInterpretedName(name);
           span.setAttribute("node", node);
