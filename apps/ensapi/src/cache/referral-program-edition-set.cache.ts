@@ -17,9 +17,9 @@ const logger = makeLogger("referral-program-edition-set-cache");
 
 /**
  * Returns `origin + pathname`, stripping any credentials or query params
- * so the URL is safe to include in log messages and error strings.
+ * so the URL is theoretically safer to include in log messages and error strings.
  */
-function safeHref(url: URL): string {
+function partiallyRedactUrl(url: URL): string {
   return `${url.origin}${url.pathname}`;
 }
 
@@ -40,7 +40,7 @@ async function loadReferralProgramEditionConfigSet(
     return buildReferralProgramEditionConfigSet([]);
   }
 
-  const logSafeUrl = safeHref(config.referralProgramEditionConfigSetUrl);
+  const logSafeUrl = partiallyRedactUrl(config.referralProgramEditionConfigSetUrl);
 
   logger.info(`Loading referral program edition config set from: ${logSafeUrl}`);
   try {
