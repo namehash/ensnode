@@ -23,7 +23,7 @@ describe("datasource invariants", () => {
             expect(
               // TODO: could use enssdk#isNormalizedAddress here
               contractConfig.address === contractConfig.address.toLowerCase(),
-              `The ContractConfig '${namespace}' > '${datasourceName}' > '${contractName}' > '${contractConfig.address}' is not is lowercase format.`,
+              `The Address '${namespace}' > '${datasourceName}' > '${contractName}' > '${contractConfig.address}' is not a enssdk#NormalizedAddress (i.e. is not fully lowercase).`,
             ).toBe(true);
           }
         }

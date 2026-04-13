@@ -1,4 +1,4 @@
-import type { Address } from "enssdk";
+import { type Address, toNormalizedAddress } from "enssdk";
 import { concat, getAddress, pad, zeroAddress } from "viem";
 import { describe, expect, it } from "vitest";
 
@@ -67,7 +67,7 @@ describe("encoded referrer", () => {
         size: ENCODED_REFERRER_BYTE_LENGTH,
         dir: "left",
       }); // all lowercase hex
-      const expectedDecodedReferrer = getAddress(address); // checksummed EVM address
+      const expectedDecodedReferrer = toNormalizedAddress(address);
 
       const encodedReferrer = buildEncodedReferrer(address);
       const decodedReferrer = decodeEncodedReferrer(encodedReferrer);

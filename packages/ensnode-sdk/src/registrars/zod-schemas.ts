@@ -94,9 +94,7 @@ function invariant_registrarActionDecodedReferrerBasedOnRawReferrer(
   const { encodedReferrer, decodedReferrer } = ctx.value;
 
   try {
-    // decodeEncodedReferrer returns checksummed address, but ENSNode work on lowercase address values
-    // so we lowercase the result before using for checks
-    const expectedDecodedReferrer = decodeEncodedReferrer(encodedReferrer).toLowerCase() as Address;
+    const expectedDecodedReferrer = decodeEncodedReferrer(encodedReferrer);
 
     if (decodedReferrer !== expectedDecodedReferrer) {
       ctx.issues.push({
