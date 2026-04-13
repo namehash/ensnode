@@ -38,7 +38,7 @@ export const byIdLookupResolvers: Record<string, Record<string, Resolver>> = {
       if (by.id) return { __typename: "Account", id: by.id };
       if (by.address) return { __typename: "Account", id: by.address };
 
-      throw new Error("never");
+      return passthrough(args, cache, info);
     },
     registry(parent, args, cache, info) {
       const by = args.by as { id?: RegistryId; contract?: AccountId };
@@ -46,7 +46,7 @@ export const byIdLookupResolvers: Record<string, Record<string, Resolver>> = {
       if (by.id) return { __typename: "Registry", id: by.id };
       if (by.contract) return { __typename: "Registry", id: makeRegistryId(by.contract) };
 
-      throw new Error("never");
+      return passthrough(args, cache, info);
     },
     resolver(parent, args, cache, info) {
       const by = args.by as { id?: ResolverId; contract?: AccountId };
@@ -54,7 +54,7 @@ export const byIdLookupResolvers: Record<string, Record<string, Resolver>> = {
       if (by.id) return { __typename: "Resolver", id: by.id };
       if (by.contract) return { __typename: "Resolver", id: makeResolverId(by.contract) };
 
-      throw new Error("never");
+      return passthrough(args, cache, info);
     },
     permissions(parent, args, cache, info) {
       const by = args.by as { id?: PermissionsId; contract?: AccountId };
@@ -62,7 +62,7 @@ export const byIdLookupResolvers: Record<string, Record<string, Resolver>> = {
       if (by.id) return { __typename: "Permissions", id: by.id };
       if (by.contract) return { __typename: "Permissions", id: makePermissionsId(by.contract) };
 
-      throw new Error("never");
+      return passthrough(args, cache, info);
     },
   },
 };
