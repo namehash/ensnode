@@ -2,6 +2,7 @@ import { describe, expect, expectTypeOf, it, vi } from "vitest";
 
 import { createOmnigraphUrqlClient } from "../client";
 import { graphql } from "../graphql";
+import { localBigIntResolvers } from "./local-bigint-resolvers";
 
 const mockFetch = vi.fn();
 const client = createOmnigraphUrqlClient({ url: "http://whatever", fetch: mockFetch });
@@ -50,5 +51,44 @@ describe("localBigIntResolvers", () => {
 
     expect(data!.domain!.registration!.start).toEqual(BIGINT_VALUE);
     expectTypeOf(data!.domain!.registration!.start).toEqualTypeOf<bigint>();
+  });
+
+  it("element-wise deserializes list-wrapped BigInt scalars", () => {
+    // synthetic introspection with a [BigInt!]! field, since no current schema field is list-wrapped BigInt
+    const schema = {
+      __schema: {
+        types: [
+          {
+            kind: "OBJECT",
+            name: "Thing",
+            fields: [
+              {
+                name: "values",
+                type: {
+                  kind: "NON_NULL",
+                  ofType: {
+                    kind: "LIST",
+                    ofType: {
+                      kind: "NON_NULL",
+                      ofType: { kind: "SCALAR", name: "BigInt" },
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    };
+
+    const resolvers = localBigIntResolvers(schema);
+    const resolver = resolvers.Thing!.values!;
+    const result = resolver(
+      { values: ["1", "2", "3"] },
+      {},
+      {} as never,
+      { fieldName: "values" } as never,
+    );
+    expect(result).toEqual([1n, 2n, 3n]);
   });
 });
