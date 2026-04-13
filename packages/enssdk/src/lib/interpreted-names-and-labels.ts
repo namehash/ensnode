@@ -1,7 +1,6 @@
-import { isHex } from "viem";
-
 import { ENS_ROOT_NAME } from "./constants";
 import {
+  decodeEncodedLabelHash,
   encodeLabelHash,
   isEncodedLabelHash,
   labelhashInterpretedLabel,
@@ -72,16 +71,11 @@ export function literalNameToInterpretedName(
     coerceUnnormalizedLabelsToNormalizedLabels = true,
     coerceUnnormalizableLabelsToEncodedLabelHashes = false,
   }: {
-    allowENSRootName?: boolean;
-    allowEncodedLabelHashes?: boolean;
-    coerceUnnormalizedLabelsToNormalizedLabels?: boolean;
-    coerceUnnormalizableLabelsToEncodedLabelHashes?: boolean;
-  } = {
-    allowENSRootName: false,
-    allowEncodedLabelHashes: false,
-    coerceUnnormalizedLabelsToNormalizedLabels: true,
-    coerceUnnormalizableLabelsToEncodedLabelHashes: false,
-  },
+    allowENSRootName?: boolean | undefined;
+    allowEncodedLabelHashes?: boolean | undefined;
+    coerceUnnormalizedLabelsToNormalizedLabels?: boolean | undefined;
+    coerceUnnormalizableLabelsToEncodedLabelHashes?: boolean | undefined;
+  } = {},
 ): InterpretedName {
   if (name === "") {
     if (allowENSRootName) return ENS_ROOT_NAME;
@@ -209,25 +203,8 @@ export function interpretedNameToInterpretedLabels(name: InterpretedName): Inter
   return name.split(".") as InterpretedLabel[];
 }
 
-// https://github.com/wevm/viem/blob/main/src/utils/ens/encodedLabelToLabelhash.ts
-export function encodedLabelToLabelhash(label: string): LabelHash | null {
-  if (label.length !== 66) return null;
-  if (label.indexOf("[") !== 0) return null;
-  if (label.indexOf("]") !== 65) return null;
-  const hash = `0x${label.slice(1, 65)}`;
-  if (!isHex(hash)) return null;
-  return hash;
-}
-
 export function isInterpetedLabel(label: Label): label is InterpretedLabel {
-  // if it looks like an encoded labelhash, it must be one
-  if (label.startsWith("[")) {
-    const labelHash = encodedLabelToLabelhash(label);
-    return labelHash != null;
-  }
-
-  // otherwise label must be normalized
-  return isNormalizedLabel(label);
+  return isEncodedLabelHash(label) || isNormalizedLabel(label);
 }
 
 /**
@@ -238,7 +215,7 @@ export function isInterpetedLabel(label: Label): label is InterpretedLabel {
  * @returns
  */
 export function isInterpretedName(name: Name): name is InterpretedName {
-  if (name === "") return true;
+  if (name === ENS_ROOT_NAME) return true;
   return name.split(".").every(isInterpetedLabel);
 }
 
@@ -248,18 +225,13 @@ export function isInterpretedName(name: Name): name is InterpretedName {
 export function interpretedLabelsToLabelHashPath(labels: InterpretedLabel[]): LabelHashPath {
   return labels
     .map((label) => {
-      if (!isInterpetedLabel(label)) {
-        throw new Error(
-          `Invariant(interpretedLabelsToLabelHashPath): Expected InterpretedLabel, received '${label}'.`,
-        );
+      try {
+        // attempt to decode label as an encoded labelhash
+        return decodeEncodedLabelHash(label);
+      } catch {
+        // but if that failed, this must be a normalized label, so labelhash it
+        return labelhashInterpretedLabel(label);
       }
-
-      // if it looks like an encoded labelhash, return it
-      const maybeLabelHash = encodedLabelToLabelhash(label);
-      if (maybeLabelHash !== null) return maybeLabelHash;
-
-      // otherwise, labelhash it
-      return labelhashInterpretedLabel(label);
     })
     .toReversed();
 }

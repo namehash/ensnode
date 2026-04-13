@@ -52,6 +52,44 @@ export const encodeLabelHash = (labelHash: LabelHash): EncodedLabelHash =>
   `[${labelHash.slice(2)}]`;
 
 /**
+ * Decodes an Encoded LabelHash as a LabelHash.
+ *
+ * @throws if a valid LabelHash cannot be decoded
+ *
+ * @see https://ensnode.io/docs/reference/terminology#encoded-labelhash
+ * @see https://github.com/wevm/viem/blob/main/src/utils/ens/encodedLabelToLabelhash.ts
+ *
+ * @param maybeEncodedLabelHash The encoded label hash in format `[hash_without_0x_prefix]`
+ * @returns A 32-byte lowercase hash string starting with '0x'
+ */
+export const decodeEncodedLabelHash = (maybeEncodedLabelHash: string): LabelHash => {
+  if (maybeEncodedLabelHash.length !== 66) {
+    throw new Error(
+      `EncodedLabelHash '${maybeEncodedLabelHash}' is malformed: must have length 66.`,
+    );
+  }
+
+  if (maybeEncodedLabelHash.indexOf("[") !== 0) {
+    throw new Error(
+      `EncodedLabelHash '${maybeEncodedLabelHash}' is malformed: must begin with '['.`,
+    );
+  }
+
+  if (maybeEncodedLabelHash.indexOf("]") !== 65) {
+    throw new Error(`EncodedLabelHash '${maybeEncodedLabelHash}' is malformed: must end with ']'.`);
+  }
+
+  const hash = `0x${maybeEncodedLabelHash.slice(1, 65)}`;
+  if (!isLabelHash(hash)) {
+    throw new Error(
+      `EncodedLabelHash '${maybeEncodedLabelHash}' is malformed: must contain a valid LabelHash.`,
+    );
+  }
+
+  return hash;
+};
+
+/**
  * Checks if the value is an {@link EncodedLabelHash}.
  */
 export function isEncodedLabelHash(value: string): value is EncodedLabelHash {
