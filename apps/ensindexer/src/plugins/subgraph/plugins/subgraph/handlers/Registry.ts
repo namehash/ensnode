@@ -83,7 +83,7 @@ export default function () {
       // NOTE: this logic derived from the subgraph introduces a minor bug for queries with a blockheight
       // below 9380380, when the new Registry was deployed, as it implicitly ignores Transfer events
       // of the ENS_ROOT_NODE. as a result, the root node's owner is always zeroAddress until the new
-      // Registry events are picked up. for backwards compatibility this beahvior is re-implemented
+      // Registry events are picked up. for backwards compatibility this behavior is re-implemented
       // here.
 
       const shouldIgnoreEvent = await shouldIgnoreRegistryOldEvents(context, event.args.node);
