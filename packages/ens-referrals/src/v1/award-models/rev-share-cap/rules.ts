@@ -77,6 +77,12 @@ export interface ReferralProgramRulesRevShareCap extends BaseReferralProgramRule
 export const validateReferralProgramRulesRevShareCap = (
   rules: ReferralProgramRulesRevShareCap,
 ): void => {
+  if (rules.awardModel !== ReferralProgramAwardModels.RevShareCap) {
+    throw new Error(
+      `ReferralProgramRulesRevShareCap: awardModel must be "${ReferralProgramAwardModels.RevShareCap}", got "${rules.awardModel}".`,
+    );
+  }
+
   makePriceUsdcSchema("ReferralProgramRulesRevShareCap.awardPool").parse(rules.awardPool);
 
   makePriceUsdcSchema("ReferralProgramRulesRevShareCap.minBaseRevenueContribution").parse(

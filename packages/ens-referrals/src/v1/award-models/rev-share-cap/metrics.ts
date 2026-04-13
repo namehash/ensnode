@@ -30,6 +30,10 @@ export const validateReferrerMetricsRevShareCap = (
 ): void => {
   validateReferrerMetrics(metrics);
 
+  makePriceUsdcSchema("ReferrerMetricsRevShareCap.totalBaseRevenueContribution").parse(
+    metrics.totalBaseRevenueContribution,
+  );
+
   const expectedTotalBaseRevenueContribution = priceUsdc(
     (rules.baseAnnualRevenueContribution.amount * BigInt(metrics.totalIncrementalDuration)) /
       BigInt(SECONDS_PER_YEAR),
