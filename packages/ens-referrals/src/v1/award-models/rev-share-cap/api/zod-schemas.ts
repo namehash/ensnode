@@ -33,13 +33,13 @@ export const makeReferralProgramEditionDisqualificationSchema = (
   });
 
 /**
- * Schema for {@link ReferralProgramRulesRevShareLimit}.
+ * Schema for {@link ReferralProgramRulesRevShareCap}.
  */
-export const makeReferralProgramRulesRevShareLimitSchema = (
-  valueLabel: string = "ReferralProgramRulesRevShareLimit",
+export const makeReferralProgramRulesRevShareCapSchema = (
+  valueLabel: string = "ReferralProgramRulesRevShareCap",
 ) =>
   makeBaseReferralProgramRulesSchema(valueLabel).safeExtend({
-    awardModel: z.literal(ReferralProgramAwardModels.RevShareLimit),
+    awardModel: z.literal(ReferralProgramAwardModels.RevShareCap),
     awardPool: makePriceUsdcSchema(`${valueLabel}.awardPool`),
     minBaseRevenueContribution: makePriceUsdcSchema(`${valueLabel}.minBaseRevenueContribution`),
     baseAnnualRevenueContribution: makePriceUsdcSchema(
@@ -66,10 +66,10 @@ export const makeReferralProgramRulesRevShareLimitSchema = (
   });
 
 /**
- * Schema for {@link AwardedReferrerMetricsRevShareLimit} (with numeric rank).
+ * Schema for {@link AwardedReferrerMetricsRevShareCap} (with numeric rank).
  */
-export const makeAwardedReferrerMetricsRevShareLimitSchema = (
-  valueLabel: string = "AwardedReferrerMetricsRevShareLimit",
+export const makeAwardedReferrerMetricsRevShareCapSchema = (
+  valueLabel: string = "AwardedReferrerMetricsRevShareCap",
 ) =>
   z
     .object({
@@ -113,10 +113,10 @@ export const makeAwardedReferrerMetricsRevShareLimitSchema = (
     });
 
 /**
- * Schema for {@link UnrankedReferrerMetricsRevShareLimit} (with null rank).
+ * Schema for {@link UnrankedReferrerMetricsRevShareCap} (with null rank).
  */
-export const makeUnrankedReferrerMetricsRevShareLimitSchema = (
-  valueLabel: string = "UnrankedReferrerMetricsRevShareLimit",
+export const makeUnrankedReferrerMetricsRevShareCapSchema = (
+  valueLabel: string = "UnrankedReferrerMetricsRevShareCap",
 ) =>
   z
     .object({
@@ -168,10 +168,10 @@ export const makeUnrankedReferrerMetricsRevShareLimitSchema = (
     });
 
 /**
- * Schema for {@link AggregatedReferrerMetricsRevShareLimit}.
+ * Schema for {@link AggregatedReferrerMetricsRevShareCap}.
  */
-export const makeAggregatedReferrerMetricsRevShareLimitSchema = (
-  valueLabel: string = "AggregatedReferrerMetricsRevShareLimit",
+export const makeAggregatedReferrerMetricsRevShareCapSchema = (
+  valueLabel: string = "AggregatedReferrerMetricsRevShareCap",
 ) =>
   z.object({
     grandTotalReferrals: makeNonNegativeIntegerSchema(`${valueLabel}.grandTotalReferrals`),
@@ -185,18 +185,18 @@ export const makeAggregatedReferrerMetricsRevShareLimitSchema = (
   });
 
 /**
- * Schema for {@link ReferrerEditionMetricsRankedRevShareLimit}.
+ * Schema for {@link ReferrerEditionMetricsRankedRevShareCap}.
  */
-export const makeReferrerEditionMetricsRankedRevShareLimitSchema = (
-  valueLabel: string = "ReferrerEditionMetricsRankedRevShareLimit",
+export const makeReferrerEditionMetricsRankedRevShareCapSchema = (
+  valueLabel: string = "ReferrerEditionMetricsRankedRevShareCap",
 ) =>
   z
     .object({
-      awardModel: z.literal(ReferralProgramAwardModels.RevShareLimit),
+      awardModel: z.literal(ReferralProgramAwardModels.RevShareCap),
       type: z.literal(ReferrerEditionMetricsTypeIds.Ranked),
-      rules: makeReferralProgramRulesRevShareLimitSchema(`${valueLabel}.rules`),
-      referrer: makeAwardedReferrerMetricsRevShareLimitSchema(`${valueLabel}.referrer`),
-      aggregatedMetrics: makeAggregatedReferrerMetricsRevShareLimitSchema(
+      rules: makeReferralProgramRulesRevShareCapSchema(`${valueLabel}.rules`),
+      referrer: makeAwardedReferrerMetricsRevShareCapSchema(`${valueLabel}.referrer`),
+      aggregatedMetrics: makeAggregatedReferrerMetricsRevShareCapSchema(
         `${valueLabel}.aggregatedMetrics`,
       ),
       status: makeReferralProgramStatusSchema(`${valueLabel}.status`),
@@ -212,18 +212,18 @@ export const makeReferrerEditionMetricsRankedRevShareLimitSchema = (
     });
 
 /**
- * Schema for {@link ReferrerEditionMetricsUnrankedRevShareLimit}.
+ * Schema for {@link ReferrerEditionMetricsUnrankedRevShareCap}.
  */
-export const makeReferrerEditionMetricsUnrankedRevShareLimitSchema = (
-  valueLabel: string = "ReferrerEditionMetricsUnrankedRevShareLimit",
+export const makeReferrerEditionMetricsUnrankedRevShareCapSchema = (
+  valueLabel: string = "ReferrerEditionMetricsUnrankedRevShareCap",
 ) =>
   z
     .object({
-      awardModel: z.literal(ReferralProgramAwardModels.RevShareLimit),
+      awardModel: z.literal(ReferralProgramAwardModels.RevShareCap),
       type: z.literal(ReferrerEditionMetricsTypeIds.Unranked),
-      rules: makeReferralProgramRulesRevShareLimitSchema(`${valueLabel}.rules`),
-      referrer: makeUnrankedReferrerMetricsRevShareLimitSchema(`${valueLabel}.referrer`),
-      aggregatedMetrics: makeAggregatedReferrerMetricsRevShareLimitSchema(
+      rules: makeReferralProgramRulesRevShareCapSchema(`${valueLabel}.rules`),
+      referrer: makeUnrankedReferrerMetricsRevShareCapSchema(`${valueLabel}.referrer`),
+      aggregatedMetrics: makeAggregatedReferrerMetricsRevShareCapSchema(
         `${valueLabel}.aggregatedMetrics`,
       ),
       status: makeReferralProgramStatusSchema(`${valueLabel}.status`),
@@ -235,27 +235,27 @@ export const makeReferrerEditionMetricsUnrankedRevShareLimitSchema = (
     });
 
 /**
- * Schema for all {@link ReferrerEditionMetrics} variants of the rev-share-limit award model
+ * Schema for all {@link ReferrerEditionMetrics} variants of the rev-share-cap award model
  * (both ranked and unranked).
  */
-export const makeReferrerEditionMetricsRevShareLimitSchema = (
-  valueLabel: string = "ReferrerEditionMetricsRevShareLimit",
+export const makeReferrerEditionMetricsRevShareCapSchema = (
+  valueLabel: string = "ReferrerEditionMetricsRevShareCap",
 ) =>
   z.discriminatedUnion("type", [
-    makeReferrerEditionMetricsRankedRevShareLimitSchema(valueLabel),
-    makeReferrerEditionMetricsUnrankedRevShareLimitSchema(valueLabel),
+    makeReferrerEditionMetricsRankedRevShareCapSchema(valueLabel),
+    makeReferrerEditionMetricsUnrankedRevShareCapSchema(valueLabel),
   ]);
 
 /**
- * Schema for {@link ReferralProgramEditionSummaryRevShareLimit}.
+ * Schema for {@link ReferralProgramEditionSummaryRevShareCap}.
  */
-export const makeReferralProgramEditionSummaryRevShareLimitSchema = (
-  valueLabel: string = "ReferralProgramEditionSummaryRevShareLimit",
+export const makeReferralProgramEditionSummaryRevShareCapSchema = (
+  valueLabel: string = "ReferralProgramEditionSummaryRevShareCap",
 ) =>
   makeBaseReferralProgramEditionSummarySchema(valueLabel)
     .safeExtend({
-      awardModel: z.literal(ReferralProgramAwardModels.RevShareLimit),
-      rules: makeReferralProgramRulesRevShareLimitSchema(`${valueLabel}.rules`),
+      awardModel: z.literal(ReferralProgramAwardModels.RevShareCap),
+      rules: makeReferralProgramRulesRevShareCapSchema(`${valueLabel}.rules`),
       awardPoolRemaining: makePriceUsdcSchema(`${valueLabel}.awardPoolRemaining`),
     })
     .refine((data) => data.awardModel === data.rules.awardModel, {
@@ -264,19 +264,19 @@ export const makeReferralProgramEditionSummaryRevShareLimitSchema = (
     });
 
 /**
- * Schema for {@link ReferrerLeaderboardPageRevShareLimit}.
+ * Schema for {@link ReferrerLeaderboardPageRevShareCap}.
  */
-export const makeReferrerLeaderboardPageRevShareLimitSchema = (
-  valueLabel: string = "ReferrerLeaderboardPageRevShareLimit",
+export const makeReferrerLeaderboardPageRevShareCapSchema = (
+  valueLabel: string = "ReferrerLeaderboardPageRevShareCap",
 ) =>
   makeBaseReferrerLeaderboardPageSchema(valueLabel)
     .safeExtend({
-      awardModel: z.literal(ReferralProgramAwardModels.RevShareLimit),
-      rules: makeReferralProgramRulesRevShareLimitSchema(`${valueLabel}.rules`),
+      awardModel: z.literal(ReferralProgramAwardModels.RevShareCap),
+      rules: makeReferralProgramRulesRevShareCapSchema(`${valueLabel}.rules`),
       referrers: z.array(
-        makeAwardedReferrerMetricsRevShareLimitSchema(`${valueLabel}.referrers[record]`),
+        makeAwardedReferrerMetricsRevShareCapSchema(`${valueLabel}.referrers[record]`),
       ),
-      aggregatedMetrics: makeAggregatedReferrerMetricsRevShareLimitSchema(
+      aggregatedMetrics: makeAggregatedReferrerMetricsRevShareCapSchema(
         `${valueLabel}.aggregatedMetrics`,
       ),
     })

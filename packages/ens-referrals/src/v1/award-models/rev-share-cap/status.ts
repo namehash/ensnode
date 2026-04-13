@@ -5,23 +5,23 @@ import {
   ReferralProgramEditionStatuses,
   type ReferralProgramEditionStatusId,
 } from "../shared/status";
-import type { AggregatedReferrerMetricsRevShareLimit } from "./aggregations";
-import type { ReferralProgramRulesRevShareLimit } from "./rules";
+import type { AggregatedReferrerMetricsRevShareCap } from "./aggregations";
+import type { ReferralProgramRulesRevShareCap } from "./rules";
 
 /**
- * Calculate the status of a `rev-share-limit` referral program.
+ * Calculate the status of a `rev-share-cap` referral program.
  *
  * Returns `Exhausted` when the program is `Active` but its award pool has been fully consumed
  * (`awardPoolRemaining.amount === 0n`). Otherwise delegates to {@link calcBaseReferralProgramEditionStatus}.
  *
- * @param rules - The rev-share-limit rules for the edition.
+ * @param rules - The rev-share-cap rules for the edition.
  * @param now - Current date in {@link UnixTimestamp} format.
  * @param aggregatedMetrics - The aggregated leaderboard metrics, used to check `awardPoolRemaining`.
  */
-export const calcReferralProgramEditionStatusRevShareLimit = (
-  rules: ReferralProgramRulesRevShareLimit,
+export const calcReferralProgramEditionStatusRevShareCap = (
+  rules: ReferralProgramRulesRevShareCap,
   now: UnixTimestamp,
-  aggregatedMetrics: AggregatedReferrerMetricsRevShareLimit,
+  aggregatedMetrics: AggregatedReferrerMetricsRevShareCap,
 ): ReferralProgramEditionStatusId => {
   const base = calcBaseReferralProgramEditionStatus(rules, now);
   if (

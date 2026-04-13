@@ -5,11 +5,11 @@ import {
   serializeReferrerLeaderboardPagePieSplit,
 } from "../award-models/pie-split/api/serialize";
 import {
-  serializeReferralProgramEditionSummaryRevShareLimit,
-  serializeReferralProgramRulesRevShareLimit,
-  serializeReferrerEditionMetricsRevShareLimit,
-  serializeReferrerLeaderboardPageRevShareLimit,
-} from "../award-models/rev-share-limit/api/serialize";
+  serializeReferralProgramEditionSummaryRevShareCap,
+  serializeReferralProgramRulesRevShareCap,
+  serializeReferrerEditionMetricsRevShareCap,
+  serializeReferrerLeaderboardPageRevShareCap,
+} from "../award-models/rev-share-cap/api/serialize";
 import type { ReferrerEditionMetricsUnrecognized } from "../award-models/shared/edition-metrics";
 import type { ReferralProgramEditionSummaryUnrecognized } from "../award-models/shared/edition-summary";
 import type { ReferrerLeaderboardPageUnrecognized } from "../award-models/shared/leaderboard-page";
@@ -51,8 +51,8 @@ export function serializeReferralProgramRules(
     case ReferralProgramAwardModels.PieSplit:
       return serializeReferralProgramRulesPieSplit(rules);
 
-    case ReferralProgramAwardModels.RevShareLimit:
-      return serializeReferralProgramRulesRevShareLimit(rules);
+    case ReferralProgramAwardModels.RevShareCap:
+      return serializeReferralProgramRulesRevShareCap(rules);
 
     case ReferralProgramAwardModels.Unrecognized: {
       const unrecognized = rules as ReferralProgramRulesUnrecognized;
@@ -82,8 +82,8 @@ function serializeReferrerLeaderboardPage(
   switch (page.awardModel) {
     case ReferralProgramAwardModels.PieSplit:
       return serializeReferrerLeaderboardPagePieSplit(page);
-    case ReferralProgramAwardModels.RevShareLimit:
-      return serializeReferrerLeaderboardPageRevShareLimit(page);
+    case ReferralProgramAwardModels.RevShareCap:
+      return serializeReferrerLeaderboardPageRevShareCap(page);
     case ReferralProgramAwardModels.Unrecognized: {
       const unrecognized = page as ReferrerLeaderboardPageUnrecognized;
       throw new Error(
@@ -111,8 +111,8 @@ function serializeReferrerEditionMetrics(
   switch (detail.awardModel) {
     case ReferralProgramAwardModels.PieSplit:
       return serializeReferrerEditionMetricsPieSplit(detail);
-    case ReferralProgramAwardModels.RevShareLimit:
-      return serializeReferrerEditionMetricsRevShareLimit(detail);
+    case ReferralProgramAwardModels.RevShareCap:
+      return serializeReferrerEditionMetricsRevShareCap(detail);
     case ReferralProgramAwardModels.Unrecognized: {
       const unrecognized = detail as ReferrerEditionMetricsUnrecognized;
       throw new Error(
@@ -141,8 +141,8 @@ export function serializeReferralProgramEditionSummary(
     case ReferralProgramAwardModels.PieSplit:
       return serializeReferralProgramEditionSummaryPieSplit(summary);
 
-    case ReferralProgramAwardModels.RevShareLimit:
-      return serializeReferralProgramEditionSummaryRevShareLimit(summary);
+    case ReferralProgramAwardModels.RevShareCap:
+      return serializeReferralProgramEditionSummaryRevShareCap(summary);
 
     case ReferralProgramAwardModels.Unrecognized: {
       const unrecognized = summary as ReferralProgramEditionSummaryUnrecognized;

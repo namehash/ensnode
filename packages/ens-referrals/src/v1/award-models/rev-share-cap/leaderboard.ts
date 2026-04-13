@@ -12,43 +12,43 @@ import { normalizeAddress } from "../../address";
 import { buildReferrerMetrics } from "../../referrer-metrics";
 import { SECONDS_PER_YEAR } from "../../time";
 import type { ReferralProgramAwardModels } from "../shared/rules";
-import type { AggregatedReferrerMetricsRevShareLimit } from "./aggregations";
-import { buildAggregatedReferrerMetricsRevShareLimit } from "./aggregations";
-import type { AwardedReferrerMetricsRevShareLimit } from "./metrics";
+import type { AggregatedReferrerMetricsRevShareCap } from "./aggregations";
+import { buildAggregatedReferrerMetricsRevShareCap } from "./aggregations";
+import type { AwardedReferrerMetricsRevShareCap } from "./metrics";
 import {
-  buildAwardedReferrerMetricsRevShareLimit,
-  buildRankedReferrerMetricsRevShareLimit,
-  buildReferrerMetricsRevShareLimit,
+  buildAwardedReferrerMetricsRevShareCap,
+  buildRankedReferrerMetricsRevShareCap,
+  buildReferrerMetricsRevShareCap,
 } from "./metrics";
 import type { ReferralEvent } from "./referral-event";
-import { isReferrerQualifiedRevShareLimit, type ReferralProgramRulesRevShareLimit } from "./rules";
+import { isReferrerQualifiedRevShareCap, type ReferralProgramRulesRevShareCap } from "./rules";
 import { sortReferralEvents } from "./sort-referral-events";
 
 const bigintMin = (a: bigint, b: bigint): bigint => (a < b ? a : b);
 
 /**
- * Represents a leaderboard with the rev-share-limit award model for any number of referrers.
+ * Represents a leaderboard with the rev-share-cap award model for any number of referrers.
  */
-export interface ReferrerLeaderboardRevShareLimit {
+export interface ReferrerLeaderboardRevShareCap {
   /**
-   * Discriminant identifying this as a rev-share-limit leaderboard.
+   * Discriminant identifying this as a rev-share-cap leaderboard.
    *
-   * @invariant Always equals `rules.awardModel` ({@link ReferralProgramAwardModels.RevShareLimit}).
+   * @invariant Always equals `rules.awardModel` ({@link ReferralProgramAwardModels.RevShareCap}).
    */
-  awardModel: typeof ReferralProgramAwardModels.RevShareLimit;
+  awardModel: typeof ReferralProgramAwardModels.RevShareCap;
 
   /**
-   * The rules of the referral program that generated the {@link ReferrerLeaderboardRevShareLimit}.
+   * The rules of the referral program that generated the {@link ReferrerLeaderboardRevShareCap}.
    */
-  rules: ReferralProgramRulesRevShareLimit;
+  rules: ReferralProgramRulesRevShareCap;
 
   /**
-   * The {@link AggregatedReferrerMetricsRevShareLimit} for all {@link AwardedReferrerMetricsRevShareLimit} values in `referrers`.
+   * The {@link AggregatedReferrerMetricsRevShareCap} for all {@link AwardedReferrerMetricsRevShareCap} values in `referrers`.
    */
-  aggregatedMetrics: AggregatedReferrerMetricsRevShareLimit;
+  aggregatedMetrics: AggregatedReferrerMetricsRevShareCap;
 
   /**
-   * Ordered map containing {@link AwardedReferrerMetricsRevShareLimit} for all referrers with 1 or more
+   * Ordered map containing {@link AwardedReferrerMetricsRevShareCap} for all referrers with 1 or more
    * `totalReferrals` within the `rules` as of `accurateAsOf`.
    *
    * @invariant Map entries are ordered by `rank` (ascending).
@@ -60,10 +60,10 @@ export interface ReferrerLeaderboardRevShareLimit {
    * @invariant Each value in this map is guaranteed to have a non-zero
    *            `totalReferrals` and `totalIncrementalDuration`.
    */
-  referrers: Map<Address, AwardedReferrerMetricsRevShareLimit>;
+  referrers: Map<Address, AwardedReferrerMetricsRevShareCap>;
 
   /**
-   * The {@link UnixTimestamp} of when the data used to build the {@link ReferrerLeaderboardRevShareLimit} was accurate as of.
+   * The {@link UnixTimestamp} of when the data used to build the {@link ReferrerLeaderboardRevShareCap} was accurate as of.
    */
   accurateAsOf: UnixTimestamp;
 }
@@ -82,7 +82,7 @@ interface ReferrerRaceState {
 }
 
 /**
- * Builds a {@link ReferrerLeaderboardRevShareLimit} using a sequential "first-come, first-served"
+ * Builds a {@link ReferrerLeaderboardRevShareCap} using a sequential "first-come, first-served"
  * race algorithm over individual referral events.
  *
  * Events are processed in chronological order. When a referrer first crosses the qualification
@@ -91,14 +91,14 @@ interface ReferrerRaceState {
  * Once the award pool is exhausted, no further awards are issued to anyone.
  *
  * @param events - Raw referral events from ENSDb (unsorted; will be sorted internally).
- * @param rules - The {@link ReferralProgramRulesRevShareLimit} defining the program parameters.
+ * @param rules - The {@link ReferralProgramRulesRevShareCap} defining the program parameters.
  * @param accurateAsOf - Timestamp indicating data freshness.
  */
-export const buildReferrerLeaderboardRevShareLimit = (
+export const buildReferrerLeaderboardRevShareCap = (
   events: ReferralEvent[],
-  rules: ReferralProgramRulesRevShareLimit,
+  rules: ReferralProgramRulesRevShareCap,
   accurateAsOf: UnixTimestamp,
-): ReferrerLeaderboardRevShareLimit => {
+): ReferrerLeaderboardRevShareCap => {
   // 1. Sort events into chronological order by onchain execution order.
   const sortedEvents = sortReferralEvents(events);
 
@@ -133,7 +133,7 @@ export const buildReferrerLeaderboardRevShareLimit = (
       BigInt(SECONDS_PER_YEAR);
 
     // Determine if newly qualifying or already qualified.
-    const isNowQualified = isReferrerQualifiedRevShareLimit(
+    const isNowQualified = isReferrerQualifiedRevShareCap(
       referrer,
       priceUsdc(totalBaseRevenueAmount),
       rules,
@@ -187,8 +187,8 @@ export const buildReferrerLeaderboardRevShareLimit = (
     return 0;
   });
 
-  // 4. Build AwardedReferrerMetricsRevShareLimit for each referrer.
-  const awardedReferrers: AwardedReferrerMetricsRevShareLimit[] = sortedEntries.map(
+  // 4. Build AwardedReferrerMetricsRevShareCap for each referrer.
+  const awardedReferrers: AwardedReferrerMetricsRevShareCap[] = sortedEntries.map(
     ([referrerAddr, state], index) => {
       const baseMetrics = buildReferrerMetrics(
         referrerAddr,
@@ -197,9 +197,9 @@ export const buildReferrerLeaderboardRevShareLimit = (
         priceEth(state.totalRevenueContributionAmount),
       );
 
-      const revShareMetrics = buildReferrerMetricsRevShareLimit(baseMetrics, rules);
+      const revShareMetrics = buildReferrerMetricsRevShareCap(baseMetrics, rules);
 
-      const rankedMetrics = buildRankedReferrerMetricsRevShareLimit(
+      const rankedMetrics = buildRankedReferrerMetricsRevShareCap(
         revShareMetrics,
         index + 1,
         rules,
@@ -210,7 +210,7 @@ export const buildReferrerLeaderboardRevShareLimit = (
         rules.maxBaseRevenueShare,
       );
 
-      return buildAwardedReferrerMetricsRevShareLimit(
+      return buildAwardedReferrerMetricsRevShareCap(
         rankedMetrics,
         uncappedAward,
         priceUsdc(state.cappedAwardAmount),
@@ -219,7 +219,7 @@ export const buildReferrerLeaderboardRevShareLimit = (
     },
   );
 
-  const aggregatedMetrics = buildAggregatedReferrerMetricsRevShareLimit(
+  const aggregatedMetrics = buildAggregatedReferrerMetricsRevShareCap(
     awardedReferrers,
     priceUsdc(awardPoolRemaining),
   );

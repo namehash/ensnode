@@ -96,7 +96,7 @@ if (response.responseCode === ReferrerLeaderboardPageResponseCodes.Ok) {
       );
     }
 
-    if (leaderboardPage.awardModel === ReferralProgramAwardModels.RevShareLimit) {
+    if (leaderboardPage.awardModel === ReferralProgramAwardModels.RevShareCap) {
       console.log(
         `Min Base Revenue Contribution: ${leaderboardPage.rules.minBaseRevenueContribution}`,
       );
@@ -142,7 +142,7 @@ if (response.responseCode === ReferrerMetricsEditionsResponseCodes.Ok) {
       console.log(`Referrer's Award Pool Share: ${detail.referrer.awardPoolShare * 100}%`);
     }
 
-    if (detail.awardModel === ReferralProgramAwardModels.RevShareLimit) {
+    if (detail.awardModel === ReferralProgramAwardModels.RevShareCap) {
       console.log(
         `Referrer's total base revenue contribution: ${detail.referrer.totalBaseRevenueContribution}`,
       );

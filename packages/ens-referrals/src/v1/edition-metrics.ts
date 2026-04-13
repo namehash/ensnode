@@ -8,12 +8,12 @@ import type {
 import { buildUnrankedReferrerMetricsPieSplit } from "./award-models/pie-split/metrics";
 import { calcReferralProgramEditionStatusPieSplit } from "./award-models/pie-split/status";
 import type {
-  ReferrerEditionMetricsRankedRevShareLimit,
-  ReferrerEditionMetricsRevShareLimit,
-  ReferrerEditionMetricsUnrankedRevShareLimit,
-} from "./award-models/rev-share-limit/edition-metrics";
-import { buildUnrankedReferrerMetricsRevShareLimit } from "./award-models/rev-share-limit/metrics";
-import { calcReferralProgramEditionStatusRevShareLimit } from "./award-models/rev-share-limit/status";
+  ReferrerEditionMetricsRankedRevShareCap,
+  ReferrerEditionMetricsRevShareCap,
+  ReferrerEditionMetricsUnrankedRevShareCap,
+} from "./award-models/rev-share-cap/edition-metrics";
+import { buildUnrankedReferrerMetricsRevShareCap } from "./award-models/rev-share-cap/metrics";
+import { calcReferralProgramEditionStatusRevShareCap } from "./award-models/rev-share-cap/status";
 import {
   ReferrerEditionMetricsTypeIds,
   type ReferrerEditionMetricsUnrecognized,
@@ -30,13 +30,13 @@ import type { ReferrerLeaderboard } from "./leaderboard";
  */
 export type ReferrerEditionMetrics =
   | ReferrerEditionMetricsPieSplit
-  | ReferrerEditionMetricsRevShareLimit
+  | ReferrerEditionMetricsRevShareCap
   | ReferrerEditionMetricsUnrecognized;
 
 /**
  * Get the edition metrics for a specific referrer from the leaderboard.
  *
- * Returns a {@link ReferrerEditionMetricsPieSplit} or {@link ReferrerEditionMetricsRevShareLimit}
+ * Returns a {@link ReferrerEditionMetricsPieSplit} or {@link ReferrerEditionMetricsRevShareCap}
  * with `type: "ranked"` if the referrer is on the leaderboard, or `type: "unranked"` otherwise.
  *
  * @param referrer - The referrer address to look up
@@ -76,8 +76,8 @@ export const getReferrerEditionMetrics = (
       } satisfies ReferrerEditionMetricsUnrankedPieSplit;
     }
 
-    case ReferralProgramAwardModels.RevShareLimit: {
-      const status = calcReferralProgramEditionStatusRevShareLimit(
+    case ReferralProgramAwardModels.RevShareCap: {
+      const status = calcReferralProgramEditionStatusRevShareCap(
         leaderboard.rules,
         leaderboard.accurateAsOf,
         leaderboard.aggregatedMetrics,
@@ -92,17 +92,17 @@ export const getReferrerEditionMetrics = (
           aggregatedMetrics: leaderboard.aggregatedMetrics,
           status,
           accurateAsOf: leaderboard.accurateAsOf,
-        } satisfies ReferrerEditionMetricsRankedRevShareLimit;
+        } satisfies ReferrerEditionMetricsRankedRevShareCap;
       }
       return {
         awardModel: leaderboard.awardModel,
         type: ReferrerEditionMetricsTypeIds.Unranked,
         rules: leaderboard.rules,
-        referrer: buildUnrankedReferrerMetricsRevShareLimit(referrer, leaderboard.rules),
+        referrer: buildUnrankedReferrerMetricsRevShareCap(referrer, leaderboard.rules),
         aggregatedMetrics: leaderboard.aggregatedMetrics,
         status,
         accurateAsOf: leaderboard.accurateAsOf,
-      } satisfies ReferrerEditionMetricsUnrankedRevShareLimit;
+      } satisfies ReferrerEditionMetricsUnrankedRevShareCap;
     }
 
     default: {

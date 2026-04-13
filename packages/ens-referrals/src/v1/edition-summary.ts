@@ -3,9 +3,9 @@ import {
   type ReferralProgramEditionSummaryPieSplit,
 } from "./award-models/pie-split/edition-summary";
 import {
-  buildEditionSummaryRevShareLimit,
-  type ReferralProgramEditionSummaryRevShareLimit,
-} from "./award-models/rev-share-limit/edition-summary";
+  buildEditionSummaryRevShareCap,
+  type ReferralProgramEditionSummaryRevShareCap,
+} from "./award-models/rev-share-cap/edition-summary";
 import type { ReferralProgramEditionSummaryUnrecognized } from "./award-models/shared/edition-summary";
 import { ReferralProgramAwardModels } from "./award-models/shared/rules";
 import type { ReferralProgramEditionConfig } from "./edition";
@@ -18,7 +18,7 @@ import type { ReferrerLeaderboard } from "./leaderboard";
  */
 export type ReferralProgramEditionSummary =
   | ReferralProgramEditionSummaryPieSplit
-  | ReferralProgramEditionSummaryRevShareLimit
+  | ReferralProgramEditionSummaryRevShareCap
   | ReferralProgramEditionSummaryUnrecognized;
 
 /**
@@ -38,8 +38,8 @@ export function buildEditionSummary(
     case ReferralProgramAwardModels.PieSplit:
       return buildEditionSummaryPieSplit(slug, displayName, leaderboard.rules, leaderboard);
 
-    case ReferralProgramAwardModels.RevShareLimit:
-      return buildEditionSummaryRevShareLimit(slug, displayName, leaderboard.rules, leaderboard);
+    case ReferralProgramAwardModels.RevShareCap:
+      return buildEditionSummaryRevShareCap(slug, displayName, leaderboard.rules, leaderboard);
 
     default: {
       const _exhaustiveCheck: never = leaderboard;

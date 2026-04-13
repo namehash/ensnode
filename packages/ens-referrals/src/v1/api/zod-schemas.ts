@@ -18,11 +18,11 @@ import {
   makeReferrerLeaderboardPagePieSplitSchema,
 } from "../award-models/pie-split/api/zod-schemas";
 import {
-  makeReferralProgramEditionSummaryRevShareLimitSchema,
-  makeReferralProgramRulesRevShareLimitSchema,
-  makeReferrerEditionMetricsRevShareLimitSchema,
-  makeReferrerLeaderboardPageRevShareLimitSchema,
-} from "../award-models/rev-share-limit/api/zod-schemas";
+  makeReferralProgramEditionSummaryRevShareCapSchema,
+  makeReferralProgramRulesRevShareCapSchema,
+  makeReferrerEditionMetricsRevShareCapSchema,
+  makeReferrerLeaderboardPageRevShareCapSchema,
+} from "../award-models/rev-share-cap/api/zod-schemas";
 import {
   makeBaseReferralProgramEditionSummarySchema,
   makeBaseReferralProgramRulesSchema,
@@ -50,7 +50,7 @@ import {
 export const makeReferralProgramRulesSchema = (valueLabel: string = "ReferralProgramRules") =>
   z.discriminatedUnion("awardModel", [
     makeReferralProgramRulesPieSplitSchema(valueLabel),
-    makeReferralProgramRulesRevShareLimitSchema(valueLabel),
+    makeReferralProgramRulesRevShareCapSchema(valueLabel),
   ]);
 
 /**
@@ -73,7 +73,7 @@ export const makeReferrerLeaderboardPageSchema = (
   // Schema for known award models — dispatch is handled automatically by discriminatedUnion.
   const knownSchema = z.discriminatedUnion("awardModel", [
     makeReferrerLeaderboardPagePieSplitSchema(valueLabel),
-    makeReferrerLeaderboardPageRevShareLimitSchema(valueLabel),
+    makeReferrerLeaderboardPageRevShareCapSchema(valueLabel),
   ]);
 
   // Base schema for fields present on all leaderboard page variants (used for Unrecognized).
@@ -167,7 +167,7 @@ export const makeReferrerEditionMetricsSchema = (valueLabel: string = "ReferrerE
   // Schema for known award models — dispatch is handled automatically by discriminatedUnion.
   const knownSchema = z.discriminatedUnion("awardModel", [
     makeReferrerEditionMetricsPieSplitSchema(valueLabel),
-    makeReferrerEditionMetricsRevShareLimitSchema(valueLabel),
+    makeReferrerEditionMetricsRevShareCapSchema(valueLabel),
   ]);
 
   return looseSchema.transform((data, ctx): ReferrerEditionMetrics => {
@@ -421,7 +421,7 @@ export const makeReferralProgramEditionSummarySchema = (
   // Schema for known award models — dispatch handled automatically by discriminatedUnion.
   const knownSchema = z.discriminatedUnion("awardModel", [
     makeReferralProgramEditionSummaryPieSplitSchema(valueLabel),
-    makeReferralProgramEditionSummaryRevShareLimitSchema(valueLabel),
+    makeReferralProgramEditionSummaryRevShareCapSchema(valueLabel),
   ]);
 
   // Base schema for fields present on all edition summary variants (used for Unrecognized).

@@ -38,11 +38,11 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
     },
   };
 
-  const revShareLimitEdition = {
+  const revShareCapEdition = {
     slug: "2026-01",
     displayName: "January 2026",
     rules: {
-      awardModel: ReferralProgramAwardModels.RevShareLimit,
+      awardModel: ReferralProgramAwardModels.RevShareCap,
       awardPool: parseUsdc("500"),
       minBaseRevenueContribution: parseUsdc("10"),
       baseAnnualRevenueContribution: parseUsdc("5"),
@@ -84,15 +84,15 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
     expect(pieSplit!.rules.areAwardsDistributed).toBe(pieSplitEdition.rules.areAwardsDistributed);
   });
 
-  it("parses the recognized rev-share-limit edition correctly", () => {
-    const result = schema.parse([pieSplitEdition, revShareLimitEdition]);
-    const revShareLimit = result.find((e) => e.slug === "2026-01");
+  it("parses the recognized rev-share-cap edition correctly", () => {
+    const result = schema.parse([pieSplitEdition, revShareCapEdition]);
+    const revShareCap = result.find((e) => e.slug === "2026-01");
 
-    expect(revShareLimit).toBeDefined();
-    expect(revShareLimit!.rules.awardModel).toBe(ReferralProgramAwardModels.RevShareLimit);
+    expect(revShareCap).toBeDefined();
+    expect(revShareCap!.rules.awardModel).toBe(ReferralProgramAwardModels.RevShareCap);
 
-    const rules = revShareLimit!.rules as {
-      awardModel: typeof ReferralProgramAwardModels.RevShareLimit;
+    const rules = revShareCap!.rules as {
+      awardModel: typeof ReferralProgramAwardModels.RevShareCap;
       awardPool: { amount: bigint; currency: string };
       minBaseRevenueContribution: { amount: bigint; currency: string };
       baseAnnualRevenueContribution: { amount: bigint; currency: string };
@@ -103,8 +103,8 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
     expect(rules.baseAnnualRevenueContribution).toBeDefined();
     expect(typeof rules.maxBaseRevenueShare).toBe("number");
     expect(rules.maxBaseRevenueShare).toBe(0.5);
-    expect(revShareLimit!.rules.areAwardsDistributed).toBe(
-      revShareLimitEdition.rules.areAwardsDistributed,
+    expect(revShareCap!.rules.areAwardsDistributed).toBe(
+      revShareCapEdition.rules.areAwardsDistributed,
     );
   });
 
@@ -219,10 +219,10 @@ describe("makeReferrerLeaderboardPageSchema", () => {
     accurateAsOf: 500000,
   };
 
-  const revShareLimitLeaderboardPage = {
-    awardModel: ReferralProgramAwardModels.RevShareLimit,
+  const revShareCapLeaderboardPage = {
+    awardModel: ReferralProgramAwardModels.RevShareCap,
     rules: {
-      awardModel: ReferralProgramAwardModels.RevShareLimit,
+      awardModel: ReferralProgramAwardModels.RevShareCap,
       awardPool: parseUsdc("2000"),
       minBaseRevenueContribution: parseUsdc("10"),
       baseAnnualRevenueContribution: parseUsdc("5"),
@@ -254,10 +254,10 @@ describe("makeReferrerLeaderboardPageSchema", () => {
     expect(result.pageContext.page).toBe(1);
   });
 
-  it("parses a known rev-share-limit leaderboard page correctly", () => {
-    const result = schema.parse(revShareLimitLeaderboardPage);
+  it("parses a known rev-share-cap leaderboard page correctly", () => {
+    const result = schema.parse(revShareCapLeaderboardPage);
 
-    expect(result.awardModel).toBe(ReferralProgramAwardModels.RevShareLimit);
+    expect(result.awardModel).toBe(ReferralProgramAwardModels.RevShareCap);
     expect(result.status).toBe(ReferralProgramEditionStatuses.Active);
     expect(result.accurateAsOf).toBe(1500000);
   });
@@ -327,13 +327,13 @@ describe("makeReferralProgramEditionSummarySchema", () => {
     },
   };
 
-  const revShareLimitSummary = {
-    awardModel: ReferralProgramAwardModels.RevShareLimit,
+  const revShareCapSummary = {
+    awardModel: ReferralProgramAwardModels.RevShareCap,
     slug: "2026-01",
     displayName: "January 2026",
     status: ReferralProgramEditionStatuses.Active,
     rules: {
-      awardModel: ReferralProgramAwardModels.RevShareLimit,
+      awardModel: ReferralProgramAwardModels.RevShareCap,
       awardPool: parseUsdc("2000"),
       minBaseRevenueContribution: parseUsdc("10"),
       baseAnnualRevenueContribution: parseUsdc("5"),
@@ -356,18 +356,18 @@ describe("makeReferralProgramEditionSummarySchema", () => {
     expect(result.rules.awardModel).toBe(ReferralProgramAwardModels.PieSplit);
   });
 
-  it("parses a known rev-share-limit edition summary correctly, including awardPoolRemaining", () => {
-    const result = schema.parse(revShareLimitSummary);
+  it("parses a known rev-share-cap edition summary correctly, including awardPoolRemaining", () => {
+    const result = schema.parse(revShareCapSummary);
 
-    expect(result.awardModel).toBe(ReferralProgramAwardModels.RevShareLimit);
-    if (result.awardModel !== ReferralProgramAwardModels.RevShareLimit) throw new Error();
+    expect(result.awardModel).toBe(ReferralProgramAwardModels.RevShareCap);
+    if (result.awardModel !== ReferralProgramAwardModels.RevShareCap) throw new Error();
     expect(result.awardPoolRemaining.amount).toBe(parseUsdc("2000").amount);
     expect(result.status).toBe(ReferralProgramEditionStatuses.Active);
   });
 
-  it("parses Exhausted status on a rev-share-limit edition summary", () => {
+  it("parses Exhausted status on a rev-share-cap edition summary", () => {
     const result = schema.parse({
-      ...revShareLimitSummary,
+      ...revShareCapSummary,
       status: ReferralProgramEditionStatuses.Exhausted,
       awardPoolRemaining: parseUsdc("0"),
     });
@@ -511,12 +511,12 @@ describe("makeReferrerEditionMetricsSchema", () => {
     expect(result.type).toBe(ReferrerEditionMetricsTypeIds.Unranked);
   });
 
-  it("parses a known rev-share-limit ranked edition metrics correctly", () => {
+  it("parses a known rev-share-cap ranked edition metrics correctly", () => {
     const input = {
-      awardModel: ReferralProgramAwardModels.RevShareLimit,
+      awardModel: ReferralProgramAwardModels.RevShareCap,
       type: ReferrerEditionMetricsTypeIds.Ranked,
       rules: {
-        awardModel: ReferralProgramAwardModels.RevShareLimit,
+        awardModel: ReferralProgramAwardModels.RevShareCap,
         awardPool: parseUsdc("2000"),
         minBaseRevenueContribution: parseUsdc("10"),
         baseAnnualRevenueContribution: parseUsdc("5"),
@@ -552,8 +552,8 @@ describe("makeReferrerEditionMetricsSchema", () => {
 
     const result = schema.parse(input);
 
-    expect(result.awardModel).toBe(ReferralProgramAwardModels.RevShareLimit);
-    if (result.awardModel !== ReferralProgramAwardModels.RevShareLimit) throw new Error();
+    expect(result.awardModel).toBe(ReferralProgramAwardModels.RevShareCap);
+    if (result.awardModel !== ReferralProgramAwardModels.RevShareCap) throw new Error();
     expect(result.type).toBe(ReferrerEditionMetricsTypeIds.Ranked);
   });
 

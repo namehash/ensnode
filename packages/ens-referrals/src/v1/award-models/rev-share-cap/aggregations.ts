@@ -3,12 +3,12 @@ import { makePriceEthSchema, makePriceUsdcSchema } from "@ensnode/ensnode-sdk/in
 
 import { validateNonNegativeInteger } from "../../number";
 import { validateDuration } from "../../time";
-import type { AwardedReferrerMetricsRevShareLimit } from "./metrics";
+import type { AwardedReferrerMetricsRevShareCap } from "./metrics";
 
 /**
- * Represents aggregated metrics for a list of referrers on a rev-share-limit leaderboard.
+ * Represents aggregated metrics for a list of referrers on a rev-share-cap leaderboard.
  */
-export interface AggregatedReferrerMetricsRevShareLimit {
+export interface AggregatedReferrerMetricsRevShareCap {
   /**
    * @invariant The sum of `totalReferrals` across all referrers in the list.
    * @invariant Guaranteed to be a non-negative integer (>= 0)
@@ -39,23 +39,23 @@ export interface AggregatedReferrerMetricsRevShareLimit {
   awardPoolRemaining: PriceUsdc;
 }
 
-export const validateAggregatedReferrerMetricsRevShareLimit = (
-  metrics: AggregatedReferrerMetricsRevShareLimit,
+export const validateAggregatedReferrerMetricsRevShareCap = (
+  metrics: AggregatedReferrerMetricsRevShareCap,
 ): void => {
   validateNonNegativeInteger(metrics.grandTotalReferrals);
   validateDuration(metrics.grandTotalIncrementalDuration);
 
-  makePriceEthSchema("AggregatedReferrerMetricsRevShareLimit.grandTotalRevenueContribution").parse(
+  makePriceEthSchema("AggregatedReferrerMetricsRevShareCap.grandTotalRevenueContribution").parse(
     metrics.grandTotalRevenueContribution,
   );
 
-  makePriceUsdcSchema("AggregatedReferrerMetricsRevShareLimit.awardPoolRemaining").parse(
+  makePriceUsdcSchema("AggregatedReferrerMetricsRevShareCap.awardPoolRemaining").parse(
     metrics.awardPoolRemaining,
   );
 };
 
 /**
- * Builds aggregated rev-share-limit metrics from a complete list of referrers and
+ * Builds aggregated rev-share-cap metrics from a complete list of referrers and
  * the award pool remaining after sequential race processing.
  *
  * **IMPORTANT: This function expects a complete list of all referrers.**
@@ -68,10 +68,10 @@ export const validateAggregatedReferrerMetricsRevShareLimit = (
  *
  * @returns Aggregated metrics including totals across all referrers and the award pool remaining.
  */
-export const buildAggregatedReferrerMetricsRevShareLimit = (
-  referrers: AwardedReferrerMetricsRevShareLimit[],
+export const buildAggregatedReferrerMetricsRevShareCap = (
+  referrers: AwardedReferrerMetricsRevShareCap[],
   awardPoolRemaining: PriceUsdc,
-): AggregatedReferrerMetricsRevShareLimit => {
+): AggregatedReferrerMetricsRevShareCap => {
   let grandTotalReferrals = 0;
   let grandTotalIncrementalDuration = 0;
   let grandTotalRevenueContributionAmount = 0n;
@@ -87,9 +87,9 @@ export const buildAggregatedReferrerMetricsRevShareLimit = (
     grandTotalIncrementalDuration,
     grandTotalRevenueContribution: priceEth(grandTotalRevenueContributionAmount),
     awardPoolRemaining,
-  } satisfies AggregatedReferrerMetricsRevShareLimit;
+  } satisfies AggregatedReferrerMetricsRevShareCap;
 
-  validateAggregatedReferrerMetricsRevShareLimit(aggregatedMetrics);
+  validateAggregatedReferrerMetricsRevShareCap(aggregatedMetrics);
 
   return aggregatedMetrics;
 };

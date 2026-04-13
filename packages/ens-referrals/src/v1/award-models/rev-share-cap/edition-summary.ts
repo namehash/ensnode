@@ -5,30 +5,30 @@ import type { ReferralProgramEditionSlug } from "../../edition";
 import type { BaseReferralProgramEditionSummary } from "../shared/edition-summary";
 import { validateBaseReferralProgramEditionSummary } from "../shared/edition-summary";
 import type { ReferralProgramAwardModels } from "../shared/rules";
-import type { ReferrerLeaderboardRevShareLimit } from "./leaderboard";
-import type { ReferralProgramRulesRevShareLimit } from "./rules";
-import { validateReferralProgramRulesRevShareLimit } from "./rules";
-import { calcReferralProgramEditionStatusRevShareLimit } from "./status";
+import type { ReferrerLeaderboardRevShareCap } from "./leaderboard";
+import type { ReferralProgramRulesRevShareCap } from "./rules";
+import { validateReferralProgramRulesRevShareCap } from "./rules";
+import { calcReferralProgramEditionStatusRevShareCap } from "./status";
 
 /**
- * Edition summary for a `rev-share-limit` referral program edition.
+ * Edition summary for a `rev-share-cap` referral program edition.
  *
  * Includes `awardPoolRemaining` so consumers can display pool exhaustion state
  * without needing to fetch the full leaderboard.
  */
-export interface ReferralProgramEditionSummaryRevShareLimit
+export interface ReferralProgramEditionSummaryRevShareCap
   extends BaseReferralProgramEditionSummary {
   /**
-   * Discriminant — always `"rev-share-limit"`.
+   * Discriminant — always `"rev-share-cap"`.
    *
-   * @invariant Always equals `rules.awardModel` ({@link ReferralProgramAwardModels.RevShareLimit}).
+   * @invariant Always equals `rules.awardModel` ({@link ReferralProgramAwardModels.RevShareCap}).
    */
-  awardModel: typeof ReferralProgramAwardModels.RevShareLimit;
+  awardModel: typeof ReferralProgramAwardModels.RevShareCap;
 
   /**
-   * The rev-share-limit rules for this edition.
+   * The rev-share-cap rules for this edition.
    */
-  rules: ReferralProgramRulesRevShareLimit;
+  rules: ReferralProgramRulesRevShareCap;
 
   /**
    * The remaining award pool after sequential race processing.
@@ -39,12 +39,12 @@ export interface ReferralProgramEditionSummaryRevShareLimit
   awardPoolRemaining: PriceUsdc;
 }
 
-export const validateEditionSummaryRevShareLimit = (
-  summary: ReferralProgramEditionSummaryRevShareLimit,
+export const validateEditionSummaryRevShareCap = (
+  summary: ReferralProgramEditionSummaryRevShareCap,
 ): void => {
-  validateReferralProgramRulesRevShareLimit(summary.rules);
+  validateReferralProgramRulesRevShareCap(summary.rules);
 
-  makePriceUsdcSchema("ReferralProgramEditionSummaryRevShareLimit.awardPoolRemaining").parse(
+  makePriceUsdcSchema("ReferralProgramEditionSummaryRevShareCap.awardPoolRemaining").parse(
     summary.awardPoolRemaining,
   );
 
@@ -52,16 +52,16 @@ export const validateEditionSummaryRevShareLimit = (
 };
 
 /**
- * Build a {@link ReferralProgramEditionSummaryRevShareLimit} from a rev-share-limit edition
+ * Build a {@link ReferralProgramEditionSummaryRevShareCap} from a rev-share-cap edition
  * config and the edition's leaderboard.
  */
-export function buildEditionSummaryRevShareLimit(
+export function buildEditionSummaryRevShareCap(
   slug: ReferralProgramEditionSlug,
   displayName: string,
-  rules: ReferralProgramRulesRevShareLimit,
-  leaderboard: ReferrerLeaderboardRevShareLimit,
-): ReferralProgramEditionSummaryRevShareLimit {
-  const status = calcReferralProgramEditionStatusRevShareLimit(
+  rules: ReferralProgramRulesRevShareCap,
+  leaderboard: ReferrerLeaderboardRevShareCap,
+): ReferralProgramEditionSummaryRevShareCap {
+  const status = calcReferralProgramEditionStatusRevShareCap(
     rules,
     leaderboard.accurateAsOf,
     leaderboard.aggregatedMetrics,
@@ -75,7 +75,7 @@ export function buildEditionSummaryRevShareLimit(
     awardPoolRemaining: leaderboard.aggregatedMetrics.awardPoolRemaining,
   };
 
-  validateEditionSummaryRevShareLimit(result);
+  validateEditionSummaryRevShareCap(result);
 
   return result;
 }

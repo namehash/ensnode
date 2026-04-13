@@ -5,7 +5,7 @@ import type { Duration, PriceEth } from "@ensnode/ensnode-sdk";
 /**
  * Represents a single raw referral event.
  *
- * Used as input to the sequential race algorithm for the rev-share-limit award model.
+ * Used as input to the sequential race algorithm for the rev-share-cap award model.
  * Events are processed in chronological order to determine award claims from the pool.
  */
 export interface ReferralEvent {
