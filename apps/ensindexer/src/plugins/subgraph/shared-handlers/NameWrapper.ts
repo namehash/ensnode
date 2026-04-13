@@ -16,7 +16,6 @@ import config from "@/config";
  */
 import { checkPccBurned as isPccFuseUnset } from "@ensdomains/ensjs/utils";
 import {
-  type Address,
   type DNSEncodedLiteralName,
   type DNSEncodedName,
   decodeDNSEncodedLiteralName,
@@ -123,8 +122,8 @@ export const makeNameWrapperHandlers = () => {
     context: IndexingEngineContext,
     event: EventWithArgs,
     eventId: string,
-    tokenId: bigint,
-    to: Address,
+    tokenId: TokenId,
+    to: NormalizedAddress,
   ) {
     await upsertAccount(context, to);
 
