@@ -21,8 +21,7 @@ describe("names", () => {
 
     it("should handle empty string (root node)", () => {
       const name = asInterpretedName("");
-      const expected = [];
-      expect(getNameHierarchy(name)).toEqual(expected);
+      expect(getNameHierarchy(name)).toEqual([]);
     });
 
     it("should handle names with different TLDs", () => {
