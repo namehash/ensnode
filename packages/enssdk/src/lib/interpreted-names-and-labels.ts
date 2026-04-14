@@ -205,7 +205,7 @@ export function interpretedNameToInterpretedLabels(name: InterpretedName): Inter
   return name.split(".") as InterpretedLabel[];
 }
 
-export function isInterpetedLabel(label: Label): label is InterpretedLabel {
+export function isInterpretedLabel(label: Label): label is InterpretedLabel {
   return isEncodedLabelHash(label) || isNormalizedLabel(label);
 }
 
@@ -218,7 +218,7 @@ export function isInterpetedLabel(label: Label): label is InterpretedLabel {
  */
 export function isInterpretedName(name: Name): name is InterpretedName {
   if (name === ENS_ROOT_NAME) return true;
-  return name.split(".").every(isInterpetedLabel);
+  return name.split(".").every(isInterpretedLabel);
 }
 
 /**
@@ -285,7 +285,7 @@ export function parsePartialInterpretedName(partialInterpretedName: Name): {
   // biome-ignore lint/style/noNonNullAssertion: there's always at least one element after a .split
   const partial = concrete.pop()!;
 
-  if (!concrete.every(isInterpetedLabel)) {
+  if (!concrete.every(isInterpretedLabel)) {
     throw new Error(
       `Invariant(parsePartialInterpretedName): Concrete portion of Partial InterpretedName contains segments that are not InterpretedLabels.\n${JSON.stringify(concrete)}`,
     );
@@ -323,7 +323,7 @@ export function asLiteralLabel(label: Label): LiteralLabel {
  * @throws if the input is not a valid InterpretedLabel
  */
 export function asInterpretedLabel(label: Label): InterpretedLabel {
-  if (isInterpetedLabel(label)) return label;
+  if (isInterpretedLabel(label)) return label;
 
   throw new Error(`Not a valid InterpretedLabel: '${label}'`);
 }

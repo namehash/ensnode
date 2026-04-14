@@ -5,7 +5,7 @@ import {
   type CoinType,
   type DomainId,
   type Hex,
-  isInterpetedLabel,
+  isInterpretedLabel,
   isInterpretedName,
   type Name,
   type Node,
@@ -119,7 +119,7 @@ builder.scalarType("InterpretedLabel", {
     z.coerce
       .string()
       .check((ctx) => {
-        if (!isInterpetedLabel(ctx.value)) {
+        if (!isInterpretedLabel(ctx.value)) {
           ctx.issues.push({
             code: "custom",
             message: "InterpretedLabel must be an Encoded LabelHash or normalized.",

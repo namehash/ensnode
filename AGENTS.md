@@ -77,7 +77,7 @@ Fail fast and loudly on invalid inputs.
 ## Workflow
 
 - Add a changeset when your PR includes a logical change that should bump versions or be communicated in release notes: https://ensnode.io/docs/contributing/prs#changesets
-- Before declaring work complete, run validation in the affected packages:
+- Before declaring work complete, run validation in the affected project(s):
   1. `pnpm -F <affected-project> typecheck`
   2. `pnpm lint`
   3. `pnpm test --project <affected-project> [--project <other-affected-project>]`
