@@ -110,7 +110,7 @@ export function DomainView() {
       // this name can't conform to InterpretedName nor can it be coerced: it is malformed: show an error
       malformed={(name) => (
         <div>
-          <h2>{name} could not be understood</h2>
+          <h2>Invalid name: '{name}'</h2>
           <Link to="/domain/eth">Back to 'eth' Domain.</Link>
         </div>
       )}

@@ -5,7 +5,6 @@ import { replaceBigInts } from "@ponder/utils";
 import {
   type AccountId,
   asInterpretedName,
-  asLiteralName,
   type InterpretedName,
   isNormalizedName,
   type Node,
@@ -281,7 +280,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
                   }
 
                   // Invariant: the name in question should be an ENSIP-19 Reverse Name that we're able to parse
-                  const parsed = parseReverseName(asLiteralName(name));
+                  const parsed = parseReverseName(name);
                   if (!parsed) {
                     throw new Error(
                       `Invariant(ENSIP-19 Reverse Resolvers Protocol Acceleration): expected a valid ENSIP-19 Reverse Name but recieved '${name}'.`,
