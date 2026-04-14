@@ -8,7 +8,7 @@ import { hasNullByte } from "../null-bytes";
  * Interprets a name record value string and returns null if the value is interpreted as a deletion.
  *
  * The interpreted record value is either:
- * a) null, representing a non-existant or deletion of the record, or
+ * a) null, representing a non-existent or deletion of the record, or
  * b) an {@link InterpretedName}.
  *
  * @param value - The name record value string to interpret.
@@ -32,7 +32,7 @@ export function interpretNameRecordValue(value: LiteralName): InterpretedName | 
  * Interprets an address record value string and returns null if the value is interpreted as a deletion.
  *
  * The interpreted record value is either:
- * a) null, representing a non-existant or deletion of the record, or
+ * a) null, representing a non-existent or deletion of the record, or
  *   i. contains null bytes
  *   ii. empty string
  *   iii. empty hex (0x)
@@ -92,7 +92,7 @@ export function interpretTextRecordKey(key: string): string | null {
  * Interprets a text record value string and returns null if the value is interpreted as a deletion.
  *
  * The interpreted record value is either:
- * a) null, representing a non-existant or deletion of the record, or
+ * a) null, representing a non-existent or deletion of the record, or
  *   i. contains null bytes
  *   ii. empty string
  * b) a text record value that
