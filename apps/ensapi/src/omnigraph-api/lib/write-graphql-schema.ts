@@ -2,8 +2,7 @@ import { writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { minifyIntrospectionQuery } from "@urql/introspection";
-import { introspectionFromSchema, lexicographicSortSchema, printSchema } from "graphql";
+import { lexicographicSortSchema, printSchema } from "graphql";
 
 import { makeLogger } from "@/lib/logger";
 
@@ -17,21 +16,8 @@ async function _writeGraphQLSchema() {
   const { schema: unsortedSchema } = await import("@/omnigraph-api/schema");
   const schema = lexicographicSortSchema(unsortedSchema);
   const sdl = printSchema(schema);
-  const introspection = minifyIntrospectionQuery(introspectionFromSchema(schema), {
-    /**
-     * We include Scalar types in the introspection in order to power automatic bigint deserialization
-     * within the Omnigraph's urql GraphCache.
-     */
-    includeScalars: true,
-  });
 
-  await Promise.all([
-    writeFile(resolve(GENERATED_DIR, "schema.graphql"), sdl),
-    writeFile(
-      resolve(GENERATED_DIR, "introspection.ts"),
-      `export const introspection = ${JSON.stringify(introspection)} as const;\n`,
-    ),
-  ]);
+  await writeFile(resolve(GENERATED_DIR, "schema.graphql"), sdl);
 }
 
 /**

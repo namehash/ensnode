@@ -18,7 +18,12 @@ import type {
   ResolverId,
   ResolverRecordsId,
 } from "../lib/types";
-import type { introspection } from "./generated/graphql-env";
+import type { introspection } from "./generated/introspection";
+
+/**
+ * Export the introspection for use with clients, especially urql in enskit.
+ */
+export { introspection } from "./generated/introspection";
 
 /**
  * Scalar type mappings for the Omnigraph schema, representing the type of the serialized response

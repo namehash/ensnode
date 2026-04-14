@@ -67,7 +67,6 @@
     "@ensnode/shared-configs": "workspace:*",
     "@types/node": "catalog:",
     "@types/prismjs": "^1.26.6",
-    "@urql/introspection": "^1.2.1",
     "chalk": "^5.6.2",
     "graphql-request": "^7.4.0",
     "pino-pretty": "^13.1.2",
