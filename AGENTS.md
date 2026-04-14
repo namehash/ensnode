@@ -39,8 +39,8 @@ Runnable commands for validating changes; lint and format with Biome.
 
 - Install dependencies: `pnpm install`
 - Run all tests: `pnpm test`
-  - Run tests for a single project: `pnpm test --project [:project]` (e.g. `pnpm test --project ensapi`)
-  - Run tests for a single file: `pnpm test [:path]`
+  - Run tests for a single project: `pnpm test --project <project>` (e.g. `pnpm test --project ensapi`)
+  - Run tests for a single file: `pnpm test <path>`
 - Lint and format: `pnpm lint` (fixes where applicable); CI lint: `pnpm lint:ci`
 - Type checking: `pnpm typecheck` (runs typecheck in all workspaces)
   - Always use `pnpm -F <package-name> typecheck`, never call `tsc` or `tsgo` directly

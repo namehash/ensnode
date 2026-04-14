@@ -1,10 +1,12 @@
 import { vi } from "vitest";
 
+import { ENSNamespaceIds, ensTestEnvChain } from "@ensnode/datasources";
+
 // we're testing a function specifically, not fetching through the running ensapi instance, so
 // we need to mock the config when this worker process attempts to import ./resolve-with-universal-resolver
 vi.mock("@/config", () => ({
   default: {
-    namespace: "ens-test-env",
+    namespace: ENSNamespaceIds.EnsTestEnv,
     rpcConfigs: new Map([[ensTestEnvChain.id, { httpRPCs: [new URL("http://localhost:8545")] }]]),
   },
 }));
@@ -19,8 +21,6 @@ import {
   namehashInterpretedName,
 } from "enssdk";
 import { describe, expect, it } from "vitest";
-
-import { ensTestEnvChain } from "@ensnode/datasources";
 
 import { getPublicClient } from "@/lib/public-client";
 import { makeResolveCalls } from "@/lib/resolution/resolve-calls-and-results";

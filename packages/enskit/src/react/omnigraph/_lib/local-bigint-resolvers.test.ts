@@ -11,7 +11,7 @@ const BIGINT_VALUE = 1234567890n;
 const BIGINT_STRING = BIGINT_VALUE.toString();
 
 describe("localBigIntResolvers", () => {
-  it("deserialized BigInt scalars as bigint", async () => {
+  it("deserializes BigInt scalars as bigint", async () => {
     mockFetch.mockResolvedValueOnce(
       new Response(
         JSON.stringify({
