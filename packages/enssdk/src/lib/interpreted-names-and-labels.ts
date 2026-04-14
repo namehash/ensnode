@@ -298,8 +298,8 @@ export function parsePartialInterpretedName(partialInterpretedName: Name): {
  * Casts a string to a {@link LiteralName}.
  *
  * A LiteralName is a name that should be interpreted as a string literal. It may or may not be
- * normalized or normalizable. It may also include labels formatted as an encoded labelhash, but that
- * does not mean it should be interpreted as perhaps containing encoded labelhashes.
+ * normalized or normalizable. It may also include labels formatted as an EncodedLabelHash, but that
+ * such labels must be interpreted literally and not as an EncodedLabelHash.
  */
 export function asLiteralName(name: Name): LiteralName {
   return name as LiteralName;
@@ -309,8 +309,8 @@ export function asLiteralName(name: Name): LiteralName {
  * Casts a string to a {@link LiteralLabel}.
  *
  * A LiteralLabel is a label that should be interpreted as a string literal. It may or may not be
- * normalized or normalizable. It may also be formatted as an encoded labelhash, but that does not
- * mean it should be interpreted as an encoded labelhash.
+ * normalized or normalizable. It may also be formatted as an EncodedLabelHash, but such labels must
+ * be interpreted literally and not as an EncodedLabelHash.
  */
 export function asLiteralLabel(label: Label): LiteralLabel {
   return label as LiteralLabel;
