@@ -138,7 +138,7 @@ describe("buildReferrerLeaderboardRevShareCap", () => {
   });
 
   describe("Scenario B — referrer just qualifies, claims all accumulated uncapped award", () => {
-    it("claims all accumulated uncapped award when qualifying (non-binding pool cap)", () => {
+    it("claims all accumulated uncapped award when qualifying (uncapped)", () => {
       // Event 1: half year → base revenue = $2.50 (not qualified)
       // Event 2: half year → base revenue = $5.00 (just qualified!)
       // Accumulated uncapped award = 2 × $1.25 = $2.50
@@ -182,7 +182,7 @@ describe("buildReferrerLeaderboardRevShareCap", () => {
   });
 
   describe("Scenario C — already qualified, claims incremental uncapped award per event", () => {
-    it("qualified referrer claims incremental award on subsequent events (non-binding pool cap)", () => {
+    it("qualified referrer claims incremental award on subsequent events (uncapped)", () => {
       // Event 1: 1 year → base revenue = $5 (just qualifies), accumulated uncapped = $2.50, claim $2.50
       // Event 2: 1 year → already qualified, incremental uncapped = $2.50, claim $2.50
       // Total: $5.00
