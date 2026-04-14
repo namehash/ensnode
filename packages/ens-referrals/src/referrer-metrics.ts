@@ -39,7 +39,6 @@ export interface ReferrerMetrics {
    * This is the sum of the total cost paid by registrants for all registrar actions
    * where this address was the referrer.
    *
-   * @invariant Guaranteed to be a valid PriceEth with non-negative amount (>= 0n)
    * @invariant Never null (records with null `total` in the database are treated as 0 when summing)
    */
   totalRevenueContribution: PriceEth;

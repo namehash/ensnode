@@ -89,8 +89,7 @@ export class ENSReferralsClient {
    * @remarks Editions whose `rules.awardModel` is not recognized by this client version are
    * preserved as {@link ReferralProgramRulesUnrecognized}. The returned map includes all
    * editions — recognized and unrecognized alike. Callers should check `editionConfig.rules.awardModel`
-   * and skip editions with `"unrecognized"` as appropriate. At least one edition of any kind must
-   * be present, otherwise deserialization throws.
+   * and skip editions with `"unrecognized"` as appropriate. The returned map may be empty.
    *
    * @throws if the fetch fails
    * @throws if the response is not valid JSON
@@ -189,8 +188,8 @@ export class ENSReferralsClient {
     const url = new URL(`/v1/ensanalytics/referral-leaderboard`, this.options.url);
 
     url.searchParams.set("edition", request.edition);
-    if (request.page) url.searchParams.set("page", request.page.toString());
-    if (request.recordsPerPage)
+    if (request.page !== undefined) url.searchParams.set("page", request.page.toString());
+    if (request.recordsPerPage !== undefined)
       url.searchParams.set("recordsPerPage", request.recordsPerPage.toString());
 
     const response = await fetch(url);
@@ -348,8 +347,7 @@ export class ENSReferralsClient {
    * @remarks Editions whose `rules.awardModel` is not recognized by this client version are
    * preserved as {@link ReferralProgramEditionSummaryUnrecognized}. The returned response includes all
    * editions — recognized and unrecognized alike. Callers should check `edition.awardModel`
-   * and skip editions with `"unrecognized"` as appropriate. At least one edition of any kind must
-   * be present, otherwise deserialization throws.
+   * and skip editions with `"unrecognized"` as appropriate. The returned editions list may be empty.
    *
    * @example
    * ```typescript

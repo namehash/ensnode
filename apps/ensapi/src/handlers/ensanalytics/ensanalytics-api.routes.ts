@@ -65,6 +65,9 @@ export const getReferralLeaderboardRoute = createRoute({
     200: {
       description: "Successfully retrieved referrer leaderboard page",
     },
+    400: {
+      description: "Invalid request",
+    },
     404: {
       description: "Unknown edition slug",
     },
