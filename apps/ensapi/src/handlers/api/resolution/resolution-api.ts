@@ -63,7 +63,7 @@ app.openapi(resolveRecordsRoute, async (c) => {
     ...(showTrace && { trace }),
   } satisfies ResolveRecordsResponse<typeof selection>;
 
-  return c.json(response);
+  return c.json(response, 200);
 });
 
 /**
@@ -95,7 +95,7 @@ app.openapi(resolvePrimaryNameRoute, async (c) => {
     ...(showTrace && { trace }),
   } satisfies ResolvePrimaryNameResponse;
 
-  return c.json(response);
+  return c.json(response, 200);
 });
 
 /**
@@ -111,7 +111,6 @@ app.openapi(resolvePrimaryNamesRoute, async (c) => {
   const { address } = c.req.valid("param");
   const { chainIds, trace: showTrace, accelerate } = c.req.valid("query");
   const canAccelerate = c.var.canAccelerate;
-
   const { result, trace } = await runWithTrace(() =>
     resolvePrimaryNames(address, chainIds, { accelerate, canAccelerate }),
   );
@@ -124,7 +123,7 @@ app.openapi(resolvePrimaryNamesRoute, async (c) => {
     ...(showTrace && { trace }),
   } satisfies ResolvePrimaryNamesResponse;
 
-  return c.json(response);
+  return c.json(response, 200);
 });
 
 export default app;
