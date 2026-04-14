@@ -1105,7 +1105,7 @@
                   "type": "object",
                   "properties": { "message": { "type": "string" }, "details": {} },
                   "required": ["message"],
-                  "example": { "message": "Internal server error" }
+                  "example": { "message": "Internal Server Error" }
                 }
               }
             }
@@ -1215,7 +1215,7 @@
                   "type": "object",
                   "properties": { "message": { "type": "string" }, "details": {} },
                   "required": ["message"],
-                  "example": { "message": "Internal server error" }
+                  "example": { "message": "Internal Server Error" }
                 }
               }
             }
@@ -1243,10 +1243,10 @@
           {
             "schema": {
               "type": "string",
-              "description": "Comma-separated list of chain IDs to resolve primary names for (e.g. '1,10,8453'). The default EVM chain ID (0) is not allowed."
+              "description": "Comma-separated list of chain IDs to resolve primary names for (e.g. '1,10,8453')."
             },
             "required": false,
-            "description": "Comma-separated list of chain IDs to resolve primary names for (e.g. '1,10,8453'). The default EVM chain ID (0) is not allowed.",
+            "description": "Comma-separated list of chain IDs to resolve primary names for (e.g. '1,10,8453').",
             "name": "chainIds",
             "in": "query"
           },
@@ -1335,7 +1335,7 @@
                   "type": "object",
                   "properties": { "message": { "type": "string" }, "details": {} },
                   "required": ["message"],
-                  "example": { "message": "Internal server error" }
+                  "example": { "message": "Internal Server Error" }
                 }
               }
             }
@@ -1614,198 +1614,26 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "oneOf": [
-                    {
+                  "type": "object",
+                  "properties": {
+                    "responseCode": { "type": "string", "enum": ["error"] },
+                    "errorCode": { "type": "string", "enum": ["name-tokens-not-indexed"] },
+                    "error": {
                       "type": "object",
-                      "properties": {
-                        "responseCode": { "type": "string", "enum": ["ok"] },
-                        "registeredNameTokens": {
-                          "type": "object",
-                          "properties": {
-                            "domainId": { "type": "string" },
-                            "name": { "type": "string" },
-                            "tokens": {
-                              "type": "array",
-                              "items": {
-                                "type": "object",
-                                "properties": {
-                                  "token": {
-                                    "type": "object",
-                                    "properties": {
-                                      "assetNamespace": {
-                                        "type": "string",
-                                        "enum": ["erc721", "erc1155"]
-                                      },
-                                      "contract": {
-                                        "type": "object",
-                                        "properties": {
-                                          "chainId": { "type": "integer", "exclusiveMinimum": 0 },
-                                          "address": { "type": "string" }
-                                        },
-                                        "required": ["chainId", "address"],
-                                        "additionalProperties": false
-                                      },
-                                      "tokenId": { "type": "string" }
-                                    },
-                                    "required": ["assetNamespace", "contract", "tokenId"]
-                                  },
-                                  "ownership": {
-                                    "oneOf": [
-                                      {
-                                        "type": "object",
-                                        "properties": {
-                                          "ownershipType": {
-                                            "type": "string",
-                                            "enum": ["namewrapper"]
-                                          },
-                                          "owner": {
-                                            "type": "object",
-                                            "properties": {
-                                              "chainId": {
-                                                "type": "integer",
-                                                "exclusiveMinimum": 0
-                                              },
-                                              "address": { "type": "string" }
-                                            },
-                                            "required": ["chainId", "address"],
-                                            "additionalProperties": false
-                                          }
-                                        },
-                                        "required": ["ownershipType", "owner"]
-                                      },
-                                      {
-                                        "type": "object",
-                                        "properties": {
-                                          "ownershipType": {
-                                            "type": "string",
-                                            "enum": ["fully-onchain"]
-                                          },
-                                          "owner": {
-                                            "type": "object",
-                                            "properties": {
-                                              "chainId": {
-                                                "type": "integer",
-                                                "exclusiveMinimum": 0
-                                              },
-                                              "address": { "type": "string" }
-                                            },
-                                            "required": ["chainId", "address"],
-                                            "additionalProperties": false
-                                          }
-                                        },
-                                        "required": ["ownershipType", "owner"]
-                                      },
-                                      {
-                                        "type": "object",
-                                        "properties": {
-                                          "ownershipType": { "type": "string", "enum": ["burned"] },
-                                          "owner": {
-                                            "type": "object",
-                                            "properties": {
-                                              "chainId": {
-                                                "type": "integer",
-                                                "exclusiveMinimum": 0
-                                              },
-                                              "address": { "type": "string" }
-                                            },
-                                            "required": ["chainId", "address"],
-                                            "additionalProperties": false
-                                          }
-                                        },
-                                        "required": ["ownershipType", "owner"]
-                                      },
-                                      {
-                                        "type": "object",
-                                        "properties": {
-                                          "ownershipType": {
-                                            "type": "string",
-                                            "enum": ["unknown"]
-                                          },
-                                          "owner": {
-                                            "type": "object",
-                                            "properties": {
-                                              "chainId": {
-                                                "type": "integer",
-                                                "exclusiveMinimum": 0
-                                              },
-                                              "address": { "type": "string" }
-                                            },
-                                            "required": ["chainId", "address"],
-                                            "additionalProperties": false
-                                          }
-                                        },
-                                        "required": ["ownershipType", "owner"]
-                                      }
-                                    ]
-                                  },
-                                  "mintStatus": { "type": "string", "enum": ["minted", "burned"] }
-                                },
-                                "required": ["token", "ownership", "mintStatus"]
-                              },
-                              "minItems": 1
-                            },
-                            "expiresAt": { "type": "integer" },
-                            "accurateAsOf": { "type": "integer" }
-                          },
-                          "required": ["domainId", "name", "tokens", "expiresAt", "accurateAsOf"]
-                        }
-                      },
-                      "required": ["responseCode", "registeredNameTokens"],
-                      "additionalProperties": false
-                    },
-                    {
-                      "oneOf": [
-                        {
-                          "type": "object",
-                          "properties": {
-                            "responseCode": { "type": "string", "enum": ["error"] },
-                            "errorCode": { "type": "string", "enum": ["name-tokens-not-indexed"] },
-                            "error": {
-                              "type": "object",
-                              "properties": { "message": { "type": "string" }, "details": {} },
-                              "required": ["message"]
-                            }
-                          },
-                          "required": ["responseCode", "errorCode", "error"],
-                          "additionalProperties": false
-                        },
-                        {
-                          "type": "object",
-                          "properties": {
-                            "responseCode": { "type": "string", "enum": ["error"] },
-                            "errorCode": {
-                              "type": "string",
-                              "enum": ["unsupported-ensindexer-config"]
-                            },
-                            "error": {
-                              "type": "object",
-                              "properties": { "message": { "type": "string" }, "details": {} },
-                              "required": ["message"]
-                            }
-                          },
-                          "required": ["responseCode", "errorCode", "error"],
-                          "additionalProperties": false
-                        },
-                        {
-                          "type": "object",
-                          "properties": {
-                            "responseCode": { "type": "string", "enum": ["error"] },
-                            "errorCode": {
-                              "type": "string",
-                              "enum": ["unsupported-indexing-status"]
-                            },
-                            "error": {
-                              "type": "object",
-                              "properties": { "message": { "type": "string" }, "details": {} },
-                              "required": ["message"]
-                            }
-                          },
-                          "required": ["responseCode", "errorCode", "error"],
-                          "additionalProperties": false
-                        }
-                      ]
+                      "properties": { "message": { "type": "string" }, "details": {} },
+                      "required": ["message"]
                     }
-                  ]
+                  },
+                  "required": ["responseCode", "errorCode", "error"],
+                  "additionalProperties": false,
+                  "example": {
+                    "responseCode": "error",
+                    "errorCode": "name-tokens-not-indexed",
+                    "error": {
+                      "message": "No indexed Name Tokens found",
+                      "details": "This ENSNode instance has not been configured to index tokens for the requested name: 'vitalik.eth'"
+                    }
+                  }
                 }
               }
             }
@@ -1818,7 +1646,7 @@
                   "type": "object",
                   "properties": { "message": { "type": "string" }, "details": {} },
                   "required": ["message"],
-                  "example": { "message": "Internal server error" }
+                  "example": { "message": "Internal Server Error" }
                 }
               }
             }
@@ -1832,194 +1660,57 @@
                     {
                       "type": "object",
                       "properties": {
-                        "responseCode": { "type": "string", "enum": ["ok"] },
-                        "registeredNameTokens": {
+                        "responseCode": { "type": "string", "enum": ["error"] },
+                        "errorCode": { "type": "string", "enum": ["name-tokens-not-indexed"] },
+                        "error": {
                           "type": "object",
-                          "properties": {
-                            "domainId": { "type": "string" },
-                            "name": { "type": "string" },
-                            "tokens": {
-                              "type": "array",
-                              "items": {
-                                "type": "object",
-                                "properties": {
-                                  "token": {
-                                    "type": "object",
-                                    "properties": {
-                                      "assetNamespace": {
-                                        "type": "string",
-                                        "enum": ["erc721", "erc1155"]
-                                      },
-                                      "contract": {
-                                        "type": "object",
-                                        "properties": {
-                                          "chainId": { "type": "integer", "exclusiveMinimum": 0 },
-                                          "address": { "type": "string" }
-                                        },
-                                        "required": ["chainId", "address"],
-                                        "additionalProperties": false
-                                      },
-                                      "tokenId": { "type": "string" }
-                                    },
-                                    "required": ["assetNamespace", "contract", "tokenId"]
-                                  },
-                                  "ownership": {
-                                    "oneOf": [
-                                      {
-                                        "type": "object",
-                                        "properties": {
-                                          "ownershipType": {
-                                            "type": "string",
-                                            "enum": ["namewrapper"]
-                                          },
-                                          "owner": {
-                                            "type": "object",
-                                            "properties": {
-                                              "chainId": {
-                                                "type": "integer",
-                                                "exclusiveMinimum": 0
-                                              },
-                                              "address": { "type": "string" }
-                                            },
-                                            "required": ["chainId", "address"],
-                                            "additionalProperties": false
-                                          }
-                                        },
-                                        "required": ["ownershipType", "owner"]
-                                      },
-                                      {
-                                        "type": "object",
-                                        "properties": {
-                                          "ownershipType": {
-                                            "type": "string",
-                                            "enum": ["fully-onchain"]
-                                          },
-                                          "owner": {
-                                            "type": "object",
-                                            "properties": {
-                                              "chainId": {
-                                                "type": "integer",
-                                                "exclusiveMinimum": 0
-                                              },
-                                              "address": { "type": "string" }
-                                            },
-                                            "required": ["chainId", "address"],
-                                            "additionalProperties": false
-                                          }
-                                        },
-                                        "required": ["ownershipType", "owner"]
-                                      },
-                                      {
-                                        "type": "object",
-                                        "properties": {
-                                          "ownershipType": { "type": "string", "enum": ["burned"] },
-                                          "owner": {
-                                            "type": "object",
-                                            "properties": {
-                                              "chainId": {
-                                                "type": "integer",
-                                                "exclusiveMinimum": 0
-                                              },
-                                              "address": { "type": "string" }
-                                            },
-                                            "required": ["chainId", "address"],
-                                            "additionalProperties": false
-                                          }
-                                        },
-                                        "required": ["ownershipType", "owner"]
-                                      },
-                                      {
-                                        "type": "object",
-                                        "properties": {
-                                          "ownershipType": {
-                                            "type": "string",
-                                            "enum": ["unknown"]
-                                          },
-                                          "owner": {
-                                            "type": "object",
-                                            "properties": {
-                                              "chainId": {
-                                                "type": "integer",
-                                                "exclusiveMinimum": 0
-                                              },
-                                              "address": { "type": "string" }
-                                            },
-                                            "required": ["chainId", "address"],
-                                            "additionalProperties": false
-                                          }
-                                        },
-                                        "required": ["ownershipType", "owner"]
-                                      }
-                                    ]
-                                  },
-                                  "mintStatus": { "type": "string", "enum": ["minted", "burned"] }
-                                },
-                                "required": ["token", "ownership", "mintStatus"]
-                              },
-                              "minItems": 1
-                            },
-                            "expiresAt": { "type": "integer" },
-                            "accurateAsOf": { "type": "integer" }
-                          },
-                          "required": ["domainId", "name", "tokens", "expiresAt", "accurateAsOf"]
+                          "properties": { "message": { "type": "string" }, "details": {} },
+                          "required": ["message"]
                         }
                       },
-                      "required": ["responseCode", "registeredNameTokens"],
+                      "required": ["responseCode", "errorCode", "error"],
                       "additionalProperties": false
                     },
                     {
-                      "oneOf": [
-                        {
-                          "type": "object",
-                          "properties": {
-                            "responseCode": { "type": "string", "enum": ["error"] },
-                            "errorCode": { "type": "string", "enum": ["name-tokens-not-indexed"] },
-                            "error": {
-                              "type": "object",
-                              "properties": { "message": { "type": "string" }, "details": {} },
-                              "required": ["message"]
-                            }
-                          },
-                          "required": ["responseCode", "errorCode", "error"],
-                          "additionalProperties": false
+                      "type": "object",
+                      "properties": {
+                        "responseCode": { "type": "string", "enum": ["error"] },
+                        "errorCode": {
+                          "type": "string",
+                          "enum": ["unsupported-ensindexer-config"]
                         },
-                        {
+                        "error": {
                           "type": "object",
-                          "properties": {
-                            "responseCode": { "type": "string", "enum": ["error"] },
-                            "errorCode": {
-                              "type": "string",
-                              "enum": ["unsupported-ensindexer-config"]
-                            },
-                            "error": {
-                              "type": "object",
-                              "properties": { "message": { "type": "string" }, "details": {} },
-                              "required": ["message"]
-                            }
-                          },
-                          "required": ["responseCode", "errorCode", "error"],
-                          "additionalProperties": false
-                        },
-                        {
-                          "type": "object",
-                          "properties": {
-                            "responseCode": { "type": "string", "enum": ["error"] },
-                            "errorCode": {
-                              "type": "string",
-                              "enum": ["unsupported-indexing-status"]
-                            },
-                            "error": {
-                              "type": "object",
-                              "properties": { "message": { "type": "string" }, "details": {} },
-                              "required": ["message"]
-                            }
-                          },
-                          "required": ["responseCode", "errorCode", "error"],
-                          "additionalProperties": false
+                          "properties": { "message": { "type": "string" }, "details": {} },
+                          "required": ["message"]
                         }
-                      ]
+                      },
+                      "required": ["responseCode", "errorCode", "error"],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "responseCode": { "type": "string", "enum": ["error"] },
+                        "errorCode": { "type": "string", "enum": ["unsupported-indexing-status"] },
+                        "error": {
+                          "type": "object",
+                          "properties": { "message": { "type": "string" }, "details": {} },
+                          "required": ["message"]
+                        }
+                      },
+                      "required": ["responseCode", "errorCode", "error"],
+                      "additionalProperties": false
                     }
-                  ]
+                  ],
+                  "example": {
+                    "responseCode": "error",
+                    "errorCode": "unsupported-ensindexer-config",
+                    "error": {
+                      "message": "Name Tokens API is not available",
+                      "details": "Connected ENSIndexer must have all following plugins active: registrars, tokenscope"
+                    }
+                  }
                 }
               }
             }
