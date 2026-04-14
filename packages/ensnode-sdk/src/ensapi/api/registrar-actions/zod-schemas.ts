@@ -4,7 +4,7 @@ import type { ParsePayload } from "zod/v4/core";
 
 import { makeRegistrarActionSchema } from "../../../registrars/zod-schemas";
 import { makeReinterpretedNameSchema, makeUnixTimestampSchema } from "../../../shared/zod-schemas";
-import { ErrorResponseSchema } from "../shared/errors/zod-schemas";
+import { makeErrorResponseSchema } from "../shared/errors/zod-schemas";
 import { makeResponsePageContextSchema } from "../shared/pagination/zod-schemas";
 import { type NamedRegistrarAction, RegistrarActionsResponseCodes } from "./response";
 
@@ -54,7 +54,7 @@ export const makeRegistrarActionsResponseErrorSchema = (
 ) =>
   z.strictObject({
     responseCode: z.literal(RegistrarActionsResponseCodes.Error),
-    error: ErrorResponseSchema,
+    error: makeErrorResponseSchema(),
   });
 
 /**

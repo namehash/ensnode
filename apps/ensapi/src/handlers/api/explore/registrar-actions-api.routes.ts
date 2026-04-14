@@ -6,8 +6,8 @@ import {
   RegistrarActionsOrders,
 } from "@ensnode/ensnode-sdk";
 import {
-  ErrorResponseSchema,
   errorResponseBadRequestExample,
+  makeErrorResponseSchema,
   makeLowercaseAddressSchema,
   makeNodeSchema,
   makePositiveIntegerSchema,
@@ -114,7 +114,7 @@ export const getRegistrarActionsRoute = createRoute({
       description: "Invalid query",
       content: {
         "application/json": {
-          schema: ErrorResponseSchema.openapi({ example: errorResponseBadRequestExample }),
+          schema: makeErrorResponseSchema().openapi({ example: errorResponseBadRequestExample }),
         },
       },
     },
@@ -164,7 +164,7 @@ export const getRegistrarActionsByParentNodeRoute = createRoute({
       description: "Invalid input",
       content: {
         "application/json": {
-          schema: ErrorResponseSchema.openapi({ example: errorResponseBadRequestExample }),
+          schema: makeErrorResponseSchema().openapi({ example: errorResponseBadRequestExample }),
         },
       },
     },

@@ -1071,6 +1071,44 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid name or query parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "message": { "type": "string" }, "details": {} },
+                  "required": ["message"],
+                  "example": {
+                    "message": "Invalid Input",
+                    "details": {
+                      "errors": [],
+                      "properties": {
+                        "name": {
+                          "errors": [
+                            "Must be normalized, see https://docs.ens.domains/resolution/names/"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "message": { "type": "string" }, "details": {} },
+                  "required": ["message"],
+                  "example": { "message": "Internal server error" }
+                }
+              }
+            }
           }
         }
       }
@@ -1144,6 +1182,40 @@
                     "accelerationRequested": false,
                     "accelerationAttempted": false
                   }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid address or chain ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "message": { "type": "string" }, "details": {} },
+                  "required": ["message"],
+                  "example": {
+                    "message": "Invalid Input",
+                    "details": {
+                      "errors": [],
+                      "properties": {
+                        "address": { "errors": ["EVM address must be a valid EVM address"] }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "message": { "type": "string" }, "details": {} },
+                  "required": ["message"],
+                  "example": { "message": "Internal server error" }
                 }
               }
             }
@@ -1230,6 +1302,40 @@
                     "accelerationRequested": false,
                     "accelerationAttempted": false
                   }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid address or chain IDs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "message": { "type": "string" }, "details": {} },
+                  "required": ["message"],
+                  "example": {
+                    "message": "Invalid Input",
+                    "details": {
+                      "errors": [],
+                      "properties": {
+                        "address": { "errors": ["EVM address must be a valid EVM address"] }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "message": { "type": "string" }, "details": {} },
+                  "required": ["message"],
+                  "example": { "message": "Internal server error" }
                 }
               }
             }
@@ -1497,7 +1603,8 @@
                 "schema": {
                   "type": "object",
                   "properties": { "message": { "type": "string" }, "details": {} },
-                  "required": ["message"]
+                  "required": ["message"],
+                  "example": { "message": "Error occured" }
                 }
               }
             }
@@ -1710,7 +1817,8 @@
                 "schema": {
                   "type": "object",
                   "properties": { "message": { "type": "string" }, "details": {} },
-                  "required": ["message"]
+                  "required": ["message"],
+                  "example": { "message": "Internal server error" }
                 }
               }
             }
@@ -2399,9 +2507,7 @@
                   "type": "object",
                   "properties": { "message": { "type": "string" }, "details": {} },
                   "required": ["message"],
-                  "example": {
-                    "message": "endTimestamp must be greater than or equal to beginTimestamp"
-                  }
+                  "example": { "message": "Error occured" }
                 }
               }
             }
@@ -2900,9 +3006,7 @@
                   "type": "object",
                   "properties": { "message": { "type": "string" }, "details": {} },
                   "required": ["message"],
-                  "example": {
-                    "message": "endTimestamp must be greater than or equal to beginTimestamp"
-                  }
+                  "example": { "message": "Error occured" }
                 }
               }
             }

@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import { errorResponseBadRequestExample } from "./examples";
-import { ErrorResponseSchema } from "./zod-schemas";
+import { makeErrorResponseSchema } from "./zod-schemas";
 
-describe("ErrorResponseSchema", () => {
+describe("makeErrorResponseSchema", () => {
   it("errorResponseBadRequestExample passes schema", () => {
-    expect(ErrorResponseSchema.safeParse(errorResponseBadRequestExample).success).toBe(true);
+    expect(makeErrorResponseSchema().safeParse(errorResponseBadRequestExample).success).toBe(true);
   });
 });
