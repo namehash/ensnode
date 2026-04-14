@@ -39,10 +39,11 @@ Runnable commands for validating changes; lint and format with Biome.
 
 - Install dependencies: `pnpm install`
 - Run all tests: `pnpm test`
-- Run tests for a single package/app: `pnpm --filter <package-name> test` (e.g. `pnpm --filter ensapi test`)
+  - Run tests for a single project: `pnpm test --project <project>` (e.g. `pnpm test --project ensapi`)
+  - Run tests for a single file: `pnpm test <path>`
 - Lint and format: `pnpm lint` (fixes where applicable); CI lint: `pnpm lint:ci`
 - Type checking: `pnpm typecheck` (runs typecheck in all workspaces)
-  - Always prefer `pnpm -F <package-name> typecheck` over `tsc`
+  - Always use `pnpm -F <package-name> typecheck`, never call `tsc` or `tsgo` directly
 
 ## Testing
 
@@ -76,7 +77,7 @@ Fail fast and loudly on invalid inputs.
 ## Workflow
 
 - Add a changeset when your PR includes a logical change that should bump versions or be communicated in release notes: https://ensnode.io/docs/contributing/prs#changesets
-- Before declaring work complete, run validation in the affected packages:
-  1. `pnpm -F <affected-packages> typecheck`
+- Before declaring work complete, run validation in the affected project(s):
+  1. `pnpm -F <affected-project> typecheck`
   2. `pnpm lint`
-  3. `pnpm -F <affected-packages> test`
+  3. `pnpm test --project <affected-project> [--project <other-affected-project>]`

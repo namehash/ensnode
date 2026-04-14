@@ -1,6 +1,6 @@
 import config from "@/config";
 
-import type { Name } from "enssdk";
+import type { InterpretedName } from "enssdk";
 import {
   bytesToHex,
   ContractFunctionExecutionError,
@@ -19,15 +19,13 @@ import {
   type ResolverRecordsSelection,
 } from "@ensnode/ensnode-sdk";
 
-import { lazy, lazyProxy } from "@/lib/lazy";
+import { lazy } from "@/lib/lazy";
 import type {
   ResolveCalls,
   ResolveCallsAndRawResults,
 } from "@/lib/resolution/resolve-calls-and-results";
 
-// lazyProxy defers construction until first use so that this module can be
-// imported without env vars being present (e.g. during OpenAPI generation).
-const universalResolver = lazyProxy(() =>
+const getUniversalResolverV1 = lazy(() =>
   getDatasourceContract(config.namespace, DatasourceNames.ENSRoot, "UniversalResolver"),
 );
 
@@ -45,7 +43,7 @@ export async function executeResolveCallsWithUniversalResolver<
   calls,
   publicClient,
 }: {
-  name: Name;
+  name: InterpretedName;
   calls: ResolveCalls<SELECTION>;
   publicClient: PublicClient;
 }): Promise<ResolveCallsAndRawResults<SELECTION>> {
@@ -60,7 +58,7 @@ export async function executeResolveCallsWithUniversalResolver<
           abi: UniversalResolverABI,
           // NOTE(ensv2-transition): if UniversalResolverV2 is defined, prefer it over UniversalResolver
           // TODO(ensv2-transition): confirm this is correct
-          address: getUniversalResolverV2()?.address ?? universalResolver.address,
+          address: getUniversalResolverV2()?.address ?? getUniversalResolverV1().address,
           functionName: "resolve",
           args: [encodedName, encodedMethod],
         });

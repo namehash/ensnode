@@ -13,6 +13,7 @@ import type {
   InterpretedLabel,
   InterpretedName,
   Node,
+  NormalizedAddress,
   PermissionsId,
   PermissionsResourceId,
   PermissionsUserId,
@@ -55,28 +56,30 @@ const createSpan = createOpenTelemetryWrapper(tracer, {
   },
 });
 
+export type BuilderScalars = {
+  ID: { Input: string; Output: string };
+  BigInt: { Input: bigint; Output: bigint };
+  Address: { Input: Address; Output: NormalizedAddress };
+  Hex: { Input: Hex; Output: Hex };
+  ChainId: { Input: ChainId; Output: ChainId };
+  CoinType: { Input: CoinType; Output: CoinType };
+  Node: { Input: Node; Output: Node };
+  InterpretedName: { Input: InterpretedName; Output: InterpretedName };
+  InterpretedLabel: { Input: InterpretedLabel; Output: InterpretedLabel };
+  DomainId: { Input: DomainId; Output: DomainId };
+  RegistryId: { Input: RegistryId; Output: RegistryId };
+  ResolverId: { Input: ResolverId; Output: ResolverId };
+  PermissionsId: { Input: PermissionsId; Output: PermissionsId };
+  PermissionsResourceId: { Input: PermissionsResourceId; Output: PermissionsResourceId };
+  PermissionsUserId: { Input: PermissionsUserId; Output: PermissionsUserId };
+  RegistrationId: { Input: RegistrationId; Output: RegistrationId };
+  RenewalId: { Input: RenewalId; Output: RenewalId };
+  ResolverRecordsId: { Input: ResolverRecordsId; Output: ResolverRecordsId };
+};
+
 export const builder = new SchemaBuilder<{
   Context: ReturnType<typeof context>;
-  Scalars: {
-    // make sure to keep these scalars up to date with packages/enssdk/src/omnigraph/graphql.ts !
-    BigInt: { Input: bigint; Output: bigint };
-    Address: { Input: Address; Output: Address };
-    Hex: { Input: Hex; Output: Hex };
-    ChainId: { Input: ChainId; Output: ChainId };
-    CoinType: { Input: CoinType; Output: CoinType };
-    Node: { Input: Node; Output: Node };
-    InterpretedName: { Input: InterpretedName; Output: InterpretedName };
-    InterpretedLabel: { Input: InterpretedLabel; Output: InterpretedLabel };
-    DomainId: { Input: DomainId; Output: DomainId };
-    RegistryId: { Input: RegistryId; Output: RegistryId };
-    ResolverId: { Input: ResolverId; Output: ResolverId };
-    PermissionsId: { Input: PermissionsId; Output: PermissionsId };
-    PermissionsResourceId: { Input: PermissionsResourceId; Output: PermissionsResourceId };
-    PermissionsUserId: { Input: PermissionsUserId; Output: PermissionsUserId };
-    RegistrationId: { Input: RegistrationId; Output: RegistrationId };
-    RenewalId: { Input: RenewalId; Output: RenewalId };
-    ResolverRecordsId: { Input: ResolverRecordsId; Output: ResolverRecordsId };
-  };
+  Scalars: BuilderScalars;
 
   // the following ensures via typechecker that every t.connection returns a totalCount field
   Connection: {

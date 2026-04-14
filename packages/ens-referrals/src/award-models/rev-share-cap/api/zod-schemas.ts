@@ -3,15 +3,14 @@ import z from "zod/v4";
 import {
   makeDurationSchema,
   makeFiniteNonNegativeNumberSchema,
-  makeLowercaseAddressSchema,
   makeNonNegativeIntegerSchema,
+  makeNormalizedAddressSchema,
   makePositiveIntegerSchema,
   makePriceEthSchema,
   makePriceUsdcSchema,
   makeUnixTimestampSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
-import { normalizeAddress } from "../../../address";
 import {
   makeBaseReferralProgramEditionSummarySchema,
   makeBaseReferralProgramRulesSchema,
@@ -28,7 +27,7 @@ export const makeReferralProgramEditionDisqualificationSchema = (
   valueLabel = "ReferralProgramEditionDisqualification",
 ) =>
   z.object({
-    referrer: makeLowercaseAddressSchema(`${valueLabel}.referrer`),
+    referrer: makeNormalizedAddressSchema(`${valueLabel}.referrer`),
     reason: z.string().trim().min(1, `${valueLabel}.reason must not be empty`),
   });
 
@@ -53,10 +52,11 @@ export const makeReferralProgramRulesRevShareCapSchema = (
       .array(
         makeReferralProgramEditionDisqualificationSchema(`${valueLabel}.disqualifications[item]`),
       )
+      // NOTE: addresses are already normalized, so string equivalence here is accurate
       .refine(
         (items) => {
-          const addresses = items.map((item) => normalizeAddress(item.referrer));
-          return new Set(addresses).size === addresses.length;
+          const referrers = items.map((d) => d.referrer);
+          return new Set(referrers).size === referrers.length;
         },
         {
           message: `${valueLabel}.disqualifications must not contain duplicate referrer addresses`,
@@ -73,7 +73,7 @@ export const makeAwardedReferrerMetricsRevShareCapSchema = (
 ) =>
   z
     .object({
-      referrer: makeLowercaseAddressSchema(`${valueLabel}.referrer`),
+      referrer: makeNormalizedAddressSchema(`${valueLabel}.referrer`),
       totalReferrals: makeNonNegativeIntegerSchema(`${valueLabel}.totalReferrals`),
       totalIncrementalDuration: makeDurationSchema(`${valueLabel}.totalIncrementalDuration`),
       totalRevenueContribution: makePriceEthSchema(`${valueLabel}.totalRevenueContribution`),
@@ -120,7 +120,7 @@ export const makeUnrankedReferrerMetricsRevShareCapSchema = (
 ) =>
   z
     .object({
-      referrer: makeLowercaseAddressSchema(`${valueLabel}.referrer`),
+      referrer: makeNormalizedAddressSchema(`${valueLabel}.referrer`),
       totalReferrals: makeNonNegativeIntegerSchema(`${valueLabel}.totalReferrals`),
       totalIncrementalDuration: makeDurationSchema(`${valueLabel}.totalIncrementalDuration`),
       totalRevenueContribution: makePriceEthSchema(`${valueLabel}.totalRevenueContribution`),

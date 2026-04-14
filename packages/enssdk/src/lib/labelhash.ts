@@ -46,17 +46,50 @@ export function isLabelHash(maybeLabelHash: string): maybeLabelHash is LabelHash
  * @see https://ensnode.io/docs/reference/terminology#encoded-labelhash
  *
  * @param labelHash - A 32-byte lowercase hash string starting with '0x'
- * @returns The encoded label hash in format `[hash_without_0x_prefix]`
+ * @returns The encoded label hash in format `[labelhash_without_0x_prefix]`
  */
 export const encodeLabelHash = (labelHash: LabelHash): EncodedLabelHash =>
   `[${labelHash.slice(2)}]`;
 
 /**
+ * Parses an Encoded LabelHash (`[labelhash_without_0x_prefix]`) as a {@link LabelHash},
+ * returning `null` if the input does not match the expected format.
+ */
+function parseEncodedLabelHash(value: string): LabelHash | null {
+  if (value.length !== 66) return null;
+  if (value[0] !== "[") return null;
+  if (value[65] !== "]") return null;
+
+  const hash = `0x${value.slice(1, 65)}`;
+  if (!isLabelHash(hash)) return null;
+
+  return hash;
+}
+
+/**
+ * Decodes an Encoded LabelHash as a LabelHash.
+ *
+ * @throws if a valid LabelHash cannot be decoded
+ *
+ * @see https://ensnode.io/docs/reference/terminology#encoded-labelhash
+ * @see https://github.com/wevm/viem/blob/main/src/utils/ens/encodedLabelToLabelhash.ts
+ *
+ * @param maybeEncodedLabelHash The encoded label hash in format `[labelhash_without_0x_prefix]`
+ * @returns A 32-byte lowercase hash string starting with '0x'
+ */
+export const decodeEncodedLabelHash = (maybeEncodedLabelHash: string): LabelHash => {
+  const parsed = parseEncodedLabelHash(maybeEncodedLabelHash);
+  if (parsed === null) {
+    throw new Error(
+      `EncodedLabelHash '${maybeEncodedLabelHash}' is malformed: expected format '[<64-char lowercase hex>]'.`,
+    );
+  }
+  return parsed;
+};
+
+/**
  * Checks if the value is an {@link EncodedLabelHash}.
  */
 export function isEncodedLabelHash(value: string): value is EncodedLabelHash {
-  const expectedFormatting = value.startsWith("[") && value.endsWith("]");
-  const includesLabelHash = isLabelHash(`0x${value.slice(1, -1)}`);
-
-  return expectedFormatting && includesLabelHash;
+  return parseEncodedLabelHash(value) !== null;
 }

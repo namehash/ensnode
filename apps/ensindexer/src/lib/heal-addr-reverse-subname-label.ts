@@ -1,6 +1,6 @@
 import config from "@/config";
 
-import type { Address, LabelHash, LiteralLabel } from "enssdk";
+import type { LabelHash, LiteralLabel, NormalizedAddress } from "enssdk";
 
 import { getENSRootChainId } from "@ensnode/datasources";
 
@@ -21,7 +21,7 @@ import {
  */
 export async function healAddrReverseSubnameLabel(
   context: IndexingEngineContext,
-  event: EventWithArgs<{ owner: Address }>,
+  event: EventWithArgs<{ owner: NormalizedAddress }>,
   labelHash: LabelHash,
 ): Promise<LiteralLabel> {
   if (context.chain.id !== getENSRootChainId(config.namespace)) {

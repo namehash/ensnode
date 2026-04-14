@@ -1,6 +1,4 @@
-import type { Address } from "enssdk";
-
-import type { Duration } from "@ensnode/ensnode-sdk";
+import type { Duration, NormalizedAddress } from "enssdk";
 
 import { isPositiveInteger } from "../../number";
 import type { ReferrerMetrics } from "../../referrer-metrics";
@@ -27,11 +25,9 @@ export interface ReferrerMetricsForComparison {
   totalIncrementalDuration: Duration;
 
   /**
-   * The fully lowercase Ethereum address of the referrer.
-   *
-   * @invariant Guaranteed to be a valid EVM address in lowercase format.
+   * The Ethereum address of the referrer, as a {@link NormalizedAddress}.
    */
-  referrer: Address;
+  referrer: NormalizedAddress;
 }
 
 export const compareReferrerMetrics = (

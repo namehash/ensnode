@@ -8,9 +8,7 @@ import {
   asInterpretedName,
   type DomainId,
   getNameHierarchy,
-  type Name,
-  type Node,
-  type NormalizedName,
+  type InterpretedName,
   namehashInterpretedName,
 } from "enssdk";
 import { isAddressEqual, type PublicClient, toHex, zeroAddress } from "viem";
@@ -29,7 +27,7 @@ type FindResolverResult =
       activeResolver: null;
       requiresWildcardSupport: undefined;
     }
-  | { activeName: Name; requiresWildcardSupport: boolean; activeResolver: Address };
+  | { activeName: InterpretedName; requiresWildcardSupport: boolean; activeResolver: Address };
 
 const NULL_RESULT: FindResolverResult = {
   activeName: null,
@@ -62,7 +60,7 @@ export async function findResolver({
   publicClient,
 }: {
   registry: AccountId;
-  name: NormalizedName;
+  name: InterpretedName;
   accelerate: boolean;
   canAccelerate: boolean;
   publicClient: PublicClient;
@@ -94,7 +92,7 @@ export async function findResolver({
  */
 async function findResolverWithUniversalResolver(
   publicClient: PublicClient,
-  name: Name,
+  name: InterpretedName,
 ): Promise<FindResolverResult> {
   return withActiveSpanAsync(
     tracer,
@@ -147,7 +145,8 @@ async function findResolverWithUniversalResolver(
       }
 
       // UniversalResolver returns the offset in bytes within the DNS Encoded Name where the activeName begins
-      const activeName: Name = bytesToPacket(dnsEncodedNameBytes.slice(offset));
+      // Invariant: the decoded name is a LiteralName that must conform to InterpretedName
+      const activeName = asInterpretedName(bytesToPacket(dnsEncodedNameBytes.slice(offset)));
 
       return {
         activeName,
@@ -175,7 +174,7 @@ async function findResolverWithUniversalResolver(
  */
 async function findResolverWithIndex(
   registry: AccountId,
-  name: NormalizedName,
+  name: InterpretedName,
 ): Promise<FindResolverResult> {
   return withActiveSpanAsync(
     tracer,
@@ -194,7 +193,7 @@ async function findResolverWithIndex(
 
       // 2. compute domainId of each node
       // NOTE: this is currently ENSv1-specific
-      const nodes = names.map((name) => namehashInterpretedName(asInterpretedName(name)) as Node);
+      const nodes = names.map((name) => namehashInterpretedName(name));
       const domainIds = nodes as DomainId[];
 
       // 3. for each domain, find its associated resolver in the selected registry

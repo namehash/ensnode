@@ -1,7 +1,7 @@
 import config from "@/config";
 
 import { eq } from "drizzle-orm/sql";
-import { type AccountId, asInterpretedName, type Node } from "enssdk";
+import { type AccountId, asInterpretedName, type Node, type UnixTimestamp } from "enssdk";
 
 import {
   bigIntToNumber,
@@ -11,7 +11,6 @@ import {
   type NFTMintStatus,
   parseAssetId,
   type RegisteredNameTokens,
-  type UnixTimestamp,
 } from "@ensnode/ensnode-sdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";

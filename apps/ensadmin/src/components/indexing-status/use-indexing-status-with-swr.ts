@@ -2,6 +2,7 @@
 
 import { useNow } from "@namehash/namehash-ui";
 import { secondsToMilliseconds } from "date-fns";
+import type { Duration } from "enssdk";
 import { useCallback, useMemo } from "react";
 
 import {
@@ -15,7 +16,6 @@ import {
 import {
   CrossChainIndexingStatusSnapshotOmnichain,
   createRealtimeIndexingStatusProjection,
-  Duration,
   type IndexingStatusRequest,
   IndexingStatusResponseCodes,
   IndexingStatusResponseOk,

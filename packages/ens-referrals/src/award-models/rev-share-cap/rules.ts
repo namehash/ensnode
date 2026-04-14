@@ -1,9 +1,9 @@
-import type { AccountId, Address, UnixTimestamp } from "enssdk";
+import type { AccountId, NormalizedAddress, UnixTimestamp } from "enssdk";
 
 import type { PriceUsdc } from "@ensnode/ensnode-sdk";
 import { makePriceUsdcSchema } from "@ensnode/ensnode-sdk/internal";
 
-import { normalizeAddress, validateLowercaseAddress } from "../../address";
+import { validateAddress } from "../../address";
 import {
   type BaseReferralProgramRules,
   ReferralProgramAwardModels,
@@ -15,11 +15,9 @@ import {
  */
 export interface ReferralProgramEditionDisqualification {
   /**
-   * The address of the disqualified referrer.
-   *
-   * @invariant Guaranteed to be a valid EVM address in lowercase format.
+   * The Ethereum address of the disqualified referrer, as a {@link NormalizedAddress}.
    */
-  referrer: Address;
+  referrer: NormalizedAddress;
 
   /**
    * A human-readable explanation of why the referrer was disqualified.
@@ -104,7 +102,7 @@ export const validateReferralProgramRulesRevShareCap = (
   }
 
   for (const d of rules.disqualifications) {
-    validateLowercaseAddress(d.referrer);
+    validateAddress(d.referrer);
     if (d.reason.trim().length === 0) {
       throw new Error(
         "ReferralProgramRulesRevShareCap: disqualification reason must not be empty.",
@@ -164,14 +162,11 @@ export const buildReferralProgramRulesRevShareCap = (
  * @param rules - The rev-share-cap rules of the referral program.
  */
 export function isReferrerQualifiedRevShareCap(
-  referrer: Address,
+  referrer: NormalizedAddress,
   totalBaseRevenueContribution: PriceUsdc,
   rules: ReferralProgramRulesRevShareCap,
 ): boolean {
-  const normalizedReferrer = normalizeAddress(referrer);
-  const isAdminDisqualified = rules.disqualifications.some(
-    (d) => d.referrer === normalizedReferrer,
-  );
+  const isAdminDisqualified = rules.disqualifications.some((d) => d.referrer === referrer);
   return (
     totalBaseRevenueContribution.amount >= rules.minBaseRevenueContribution.amount &&
     !isAdminDisqualified

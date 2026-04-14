@@ -1,5 +1,5 @@
-import type { Address, Hex } from "enssdk";
-import { getAddress, pad, size, slice, zeroAddress } from "viem";
+import { type Hex, isNormalizedAddress, type NormalizedAddress, toNormalizedAddress } from "enssdk";
+import { pad, size, slice, zeroAddress } from "viem";
 
 /**
  * Encoded Referrer
@@ -49,26 +49,26 @@ export const ZERO_ENCODED_REFERRER: EncodedReferrer = pad("0x", {
 });
 
 /**
- * Build an {@link EncodedReferrer} value for the given {@link Address}
+ * Build an {@link EncodedReferrer} value for the given {@link NormalizedAddress}
  * according to the referrer encoding with left-zero-padding.
  */
-export function buildEncodedReferrer(address: Address): EncodedReferrer {
-  const lowercaseAddress = address.toLowerCase() as Address;
+export function buildEncodedReferrer(address: NormalizedAddress): EncodedReferrer {
+  if (!isNormalizedAddress(address)) throw new Error(`Address '${address}' is not normalized.`);
 
-  return pad(lowercaseAddress, { size: ENCODED_REFERRER_BYTE_LENGTH, dir: "left" });
+  return pad(address, { size: ENCODED_REFERRER_BYTE_LENGTH, dir: "left" });
 }
 
 /**
- * Decode an {@link EncodedReferrer} value into a checksummed {@link Address}
+ * Decode an {@link EncodedReferrer} value into a {@link NormalizedAddress}
  * according to the referrer encoding with left-zero-padding.
  *
  * @param encodedReferrer - The "raw" {@link EncodedReferrer} value to decode.
- * @returns The decoded referrer checksummed address.
+ * @returns The decoded referrer address.
  * @throws when encodedReferrer value is not represented by
  *         {@link ENCODED_REFERRER_BYTE_LENGTH} bytes.
  * @throws when decodedReferrer is not a valid EVM address.
  */
-export function decodeEncodedReferrer(encodedReferrer: EncodedReferrer): Address {
+export function decodeEncodedReferrer(encodedReferrer: EncodedReferrer): NormalizedAddress {
   // Invariant: encoded referrer must be of expected size
   if (size(encodedReferrer) !== ENCODED_REFERRER_BYTE_LENGTH) {
     throw new Error(
@@ -80,15 +80,13 @@ export function decodeEncodedReferrer(encodedReferrer: EncodedReferrer): Address
 
   // strict validation: padding must be all zeros
   // if any byte in the padding is non-zero, treat as Zero Encoded Referrer
-  if (padding !== EXPECTED_ENCODED_REFERRER_PADDING) {
-    return zeroAddress;
-  }
+  if (padding !== EXPECTED_ENCODED_REFERRER_PADDING) return zeroAddress;
 
   const decodedReferrer = slice(encodedReferrer, ENCODED_REFERRER_BYTE_OFFSET);
 
   try {
-    // return checksummed address
-    return getAddress(decodedReferrer);
+    // return normalized address
+    return toNormalizedAddress(decodedReferrer);
   } catch {
     throw new Error(`Decoded referrer value must be a valid EVM address.`);
   }

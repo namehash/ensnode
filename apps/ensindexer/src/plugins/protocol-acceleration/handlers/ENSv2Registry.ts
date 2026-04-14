@@ -1,4 +1,4 @@
-import { type Address, makeENSv2DomainId, makeStorageId } from "enssdk";
+import { makeENSv2DomainId, makeStorageId, type NormalizedAddress } from "enssdk";
 
 import { PluginName } from "@ensnode/ensnode-sdk";
 
@@ -20,7 +20,7 @@ export default function () {
       context: IndexingEngineContext;
       event: EventWithArgs<{
         tokenId: bigint;
-        resolver: Address;
+        resolver: NormalizedAddress;
       }>;
     }) => {
       const { tokenId, resolver } = event.args;

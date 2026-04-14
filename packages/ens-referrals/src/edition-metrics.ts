@@ -1,4 +1,4 @@
-import type { Address } from "enssdk";
+import type { NormalizedAddress } from "enssdk";
 
 import type {
   ReferrerEditionMetricsPieSplit,
@@ -43,7 +43,7 @@ export type ReferrerEditionMetrics =
  * @param leaderboard - The referrer leaderboard to query
  */
 export const getReferrerEditionMetrics = (
-  referrer: Address,
+  referrer: NormalizedAddress,
   leaderboard: ReferrerLeaderboard,
 ): ReferrerEditionMetrics => {
   switch (leaderboard.awardModel) {

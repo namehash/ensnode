@@ -1,4 +1,4 @@
-import type { Address } from "enssdk";
+import { type Address, asNormalizedAddress, toNormalizedAddress } from "enssdk";
 import { concat, getAddress, pad, zeroAddress } from "viem";
 import { describe, expect, it } from "vitest";
 
@@ -9,7 +9,10 @@ import {
   ENCODED_REFERRER_BYTE_OFFSET,
 } from "./encoded-referrer";
 
-const vitalikEthAddressLowercase: Address = "0xd8da6bf26964af9d7eed9e03e53415d37aa96045";
+const vitalikEthAddressLowercase = asNormalizedAddress(
+  "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+);
+
 const vitalikEthAddressChecksummed: Address = getAddress(
   "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
 );
@@ -24,7 +27,7 @@ describe("encoded referrer", () => {
       const result = decodeEncodedReferrer(input);
 
       // assert
-      expect(result).toEqual(vitalikEthAddressChecksummed);
+      expect(result).toEqual(vitalikEthAddressLowercase);
     });
 
     it("returns a zeroAddress value when initial bytes were not all zeroes", () => {
@@ -63,17 +66,19 @@ describe("encoded referrer", () => {
       { addressFormat: "lowercase", address: vitalikEthAddressLowercase },
       { addressFormat: "checksummed", address: vitalikEthAddressChecksummed },
     ])("returns encoded referrer for a $addressFormat EVM address", ({ address }) => {
+      // encoding should operate as expected
       const expectedEncodedReferrer = pad(address.toLowerCase() as Address, {
         size: ENCODED_REFERRER_BYTE_LENGTH,
         dir: "left",
-      }); // all lowercase hex
-      const expectedDecodedReferrer = getAddress(address); // checksummed EVM address
+      });
 
-      const encodedReferrer = buildEncodedReferrer(address);
-      const decodedReferrer = decodeEncodedReferrer(encodedReferrer);
-
-      expect(decodedReferrer).toStrictEqual(expectedDecodedReferrer);
+      const encodedReferrer = buildEncodedReferrer(toNormalizedAddress(address));
       expect(encodedReferrer).toEqual(expectedEncodedReferrer);
+
+      // decoding should operate as expected
+      const expectedDecodedReferrer = toNormalizedAddress(address);
+      const decodedReferrer = decodeEncodedReferrer(encodedReferrer);
+      expect(decodedReferrer).toStrictEqual(expectedDecodedReferrer);
     });
   });
 });

@@ -1,6 +1,6 @@
-import type { ChainId } from "enssdk";
+import type { ChainId, UnixTimestamp } from "enssdk";
 
-import type { UnixTimestamp, Unvalidated } from "../shared/types";
+import type { Unvalidated } from "../shared/types";
 import {
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshot,

@@ -1,9 +1,9 @@
-import type { Address } from "enssdk";
+import type { Duration, NormalizedAddress } from "enssdk";
 
-import type { Duration, PriceEth } from "@ensnode/ensnode-sdk";
+import type { PriceEth } from "@ensnode/ensnode-sdk";
 import { makePriceEthSchema } from "@ensnode/ensnode-sdk/internal";
 
-import { normalizeAddress, validateLowercaseAddress } from "./address";
+import { validateAddress } from "./address";
 import { validateNonNegativeInteger } from "./number";
 import { ReferralProgramRules } from "./rules";
 import { validateDuration } from "./time";
@@ -14,11 +14,9 @@ import { validateDuration } from "./time";
  */
 export interface ReferrerMetrics {
   /**
-   * The fully lowercase Ethereum address of the referrer.
-   *
-   * @invariant Guaranteed to be a valid EVM address in lowercase format
+   * The Ethereum address of the referrer, as a {@link NormalizedAddress}.
    */
-  referrer: Address;
+  referrer: NormalizedAddress;
 
   /**
    * The total number of referrals made by the referrer within the {@link ReferralProgramRules}.
@@ -45,13 +43,13 @@ export interface ReferrerMetrics {
 }
 
 export const buildReferrerMetrics = (
-  referrer: Address,
+  referrer: NormalizedAddress,
   totalReferrals: number,
   totalIncrementalDuration: Duration,
   totalRevenueContribution: PriceEth,
 ): ReferrerMetrics => {
   const result = {
-    referrer: normalizeAddress(referrer),
+    referrer,
     totalReferrals,
     totalIncrementalDuration,
     totalRevenueContribution,
@@ -62,7 +60,7 @@ export const buildReferrerMetrics = (
 };
 
 export const validateReferrerMetrics = (metrics: ReferrerMetrics): void => {
-  validateLowercaseAddress(metrics.referrer);
+  validateAddress(metrics.referrer);
   validateNonNegativeInteger(metrics.totalReferrals);
   validateDuration(metrics.totalIncrementalDuration);
 

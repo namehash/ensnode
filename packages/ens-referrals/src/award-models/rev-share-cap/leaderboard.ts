@@ -1,14 +1,7 @@
-import type { Address } from "enssdk";
+import type { Duration, NormalizedAddress, UnixTimestamp } from "enssdk";
 
-import {
-  type Duration,
-  priceEth,
-  priceUsdc,
-  scalePrice,
-  type UnixTimestamp,
-} from "@ensnode/ensnode-sdk";
+import { priceEth, priceUsdc, scalePrice } from "@ensnode/ensnode-sdk";
 
-import { normalizeAddress } from "../../address";
 import { buildReferrerMetrics } from "../../referrer-metrics";
 import { SECONDS_PER_YEAR } from "../../time";
 import type { ReferralProgramAwardModels } from "../shared/rules";
@@ -60,7 +53,7 @@ export interface ReferrerLeaderboardRevShareCap {
    * @invariant Each value in this map is guaranteed to have a non-zero
    *            `totalReferrals` and `totalIncrementalDuration`.
    */
-  referrers: Map<Address, AwardedReferrerMetricsRevShareCap>;
+  referrers: Map<NormalizedAddress, AwardedReferrerMetricsRevShareCap>;
 
   /**
    * The {@link UnixTimestamp} of when the data used to build the {@link ReferrerLeaderboardRevShareCap} was accurate as of.
@@ -103,11 +96,11 @@ export const buildReferrerLeaderboardRevShareCap = (
   const sortedEvents = sortReferralEvents(events);
 
   // 2. Process events sequentially to run the race.
-  const referrerStates = new Map<Address, ReferrerRaceState>();
+  const referrerStates = new Map<NormalizedAddress, ReferrerRaceState>();
   let awardPoolRemaining = rules.awardPool.amount;
 
   for (const event of sortedEvents) {
-    const referrer = normalizeAddress(event.referrer);
+    const referrer = event.referrer;
 
     let state = referrerStates.get(referrer);
     if (!state) {

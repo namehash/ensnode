@@ -5,10 +5,10 @@ import { replaceBigInts } from "@ponder/utils";
 import {
   type AccountId,
   asInterpretedName,
+  type InterpretedName,
   isNormalizedName,
   type Node,
   namehashInterpretedName,
-  normalizeName,
   parseReverseName,
 } from "enssdk";
 
@@ -57,10 +57,6 @@ import {
 const logger = makeLogger("forward-resolution");
 const tracer = trace.getTracer("forward-resolution");
 
-// NOTE: normalize generic name to force the normalization lib to lazy-load itself (otherwise the
-// first trace generated here would be unusually slow)
-normalizeName("example.eth");
-
 /**
  * Implements Forward Resolution of record values for a specified ENS Name.
  *
@@ -95,9 +91,12 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
   selection: ForwardResolutionArgs<SELECTION>["selection"],
   options: Omit<Parameters<typeof _resolveForward>[2], "registry">,
 ): Promise<ForwardResolutionResult<SELECTION>> {
+  // Invariant: Name must be an InterpretedName
+  const interpretedName = asInterpretedName(name);
+
   // NOTE: `resolveForward` is just `_resolveForward` with the enforcement that `registry` must
-  // initially be ENS Root Chain's Registry: see `_resolveForward` for additional context.
-  return _resolveForward(name, selection, {
+  // initially be ENS Root Registry: see `_resolveForward` for additional context.
+  return _resolveForward(interpretedName, selection, {
     ...options,
     registry: getENSv1Registry(config.namespace),
   });
@@ -108,7 +107,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
  * `registry`.
  */
 async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
-  name: ForwardResolutionArgs<SELECTION>["name"],
+  name: InterpretedName,
   selection: ForwardResolutionArgs<SELECTION>["selection"],
   options: { registry: AccountId; accelerate: boolean; canAccelerate: boolean },
 ): Promise<ForwardResolutionResult<SELECTION>> {
@@ -141,18 +140,19 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           // Validate Input
           //////////////////////////////////////////////////
 
-          // Invariant: Name must be normalized
+          // TODO: technically InterpretedNames are not resolvable, since ENS contracts are not
+          // encoded-labelhash-aware; so we add a temporary additional constraint on name that it
+          // must be fully normalized (and therefore not contain encoded labelhash segments)
+          // (this will be improved in a future pr https://github.com/namehash/ensnode/issues/1920)
           if (!isNormalizedName(name)) {
-            throw new Error(`Invariant: Name "${name}" must be normalized.`);
+            throw new Error(`'${name}' must be normalized to be resolvable.`);
           }
 
-          const node: Node = namehashInterpretedName(asInterpretedName(name));
+          const node: Node = namehashInterpretedName(name);
           span.setAttribute("node", node);
 
           // if selection is empty, give them what they asked for
-          if (isSelectionEmpty(selection)) {
-            return makeEmptyResolverRecordsResponse(selection);
-          }
+          if (isSelectionEmpty(selection)) return makeEmptyResolverRecordsResponse(selection);
 
           // construct the set of resolve() calls indicated by selection
           const calls = makeResolveCalls(node, selection);
@@ -224,9 +224,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
             !!activeResolver,
           );
           // we're unable to find an active resolver for this name, return empty response
-          if (!activeResolver) {
-            return makeEmptyResolverRecordsResponse(selection);
-          }
+          if (!activeResolver) return makeEmptyResolverRecordsResponse(selection);
 
           // set some attributes on the span for easy reference
           span.setAttribute("activeResolver", activeResolver);

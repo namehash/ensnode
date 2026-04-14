@@ -20,11 +20,16 @@
     "dist"
   ],
   "exports": {
+    "./react": "./src/react/index.ts",
     "./react/omnigraph": "./src/react/omnigraph/index.ts"
   },
   "publishConfig": {
     "access": "public",
     "exports": {
+      "./react": {
+        "types": "./dist/react/index.d.ts",
+        "default": "./dist/react/index.js"
+      },
       "./react/omnigraph": {
         "types": "./dist/react/omnigraph/index.d.ts",
         "default": "./dist/react/omnigraph/index.js"

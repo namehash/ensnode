@@ -2,6 +2,7 @@ import { defineConfig } from "tsup";
 
 export default defineConfig({
   entry: {
+    "react/index": "src/react/index.ts",
     "react/omnigraph/index": "src/react/omnigraph/index.ts",
   },
   platform: "browser",

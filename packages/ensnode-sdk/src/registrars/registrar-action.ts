@@ -1,4 +1,4 @@
-import type { Address } from "enssdk";
+import type { Address, Duration } from "enssdk";
 import type { Hash } from "viem";
 
 import type { EncodedReferrer } from "./encoded-referrer";
@@ -8,7 +8,7 @@ export { decodeEncodedReferrer, ZERO_ENCODED_REFERRER } from "./encoded-referrer
 
 import type { PriceEth, SerializedPriceEth } from "../shared/currencies";
 import { serializePriceEth } from "../shared/serialize";
-import type { BlockRef, Duration } from "../shared/types";
+import type { BlockRef } from "../shared/types";
 import type { RegistrationLifecycle } from "./registration-lifecycle";
 
 /**

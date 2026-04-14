@@ -2,7 +2,6 @@ import config from "@/config";
 
 import {
   ADDR_REVERSE_NODE,
-  type Address,
   asInterpretedLabel,
   constructSubInterpretedName,
   encodeLabelHash,
@@ -12,6 +11,7 @@ import {
   literalLabelToInterpretedLabel,
   makeSubdomainNode,
   type Node,
+  type NormalizedAddress,
   type SubgraphInterpretedLabel,
   type SubgraphInterpretedName,
 } from "enssdk";
@@ -44,7 +44,7 @@ export const handleNewOwner =
       node: Node;
       // NOTE: `label` event arg represents a `LabelHash` for the sub-node under `node`
       label: LabelHash;
-      owner: Address;
+      owner: NormalizedAddress;
     }>;
   }) => {
     const { label: labelHash, node: parentNode, owner } = event.args;
@@ -178,7 +178,7 @@ export async function handleTransfer({
   event,
 }: {
   context: IndexingEngineContext;
-  event: EventWithArgs<{ node: Node; owner: Address }>;
+  event: EventWithArgs<{ node: Node; owner: NormalizedAddress }>;
 }) {
   const { node, owner } = event.args;
 
@@ -231,7 +231,7 @@ export async function handleNewResolver({
   event,
 }: {
   context: IndexingEngineContext;
-  event: EventWithArgs<{ node: Node; resolver: Address }>;
+  event: EventWithArgs<{ node: Node; resolver: NormalizedAddress }>;
 }) {
   const { node, resolver: resolverAddress } = event.args;
 

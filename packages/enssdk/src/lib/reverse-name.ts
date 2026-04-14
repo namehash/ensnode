@@ -1,23 +1,26 @@
-import type { Address } from "viem";
-
 import { DEFAULT_EVM_COIN_TYPE, ETH_COIN_TYPE } from "./coin-type";
-import { asLiteralLabel } from "./interpreted-names-and-labels";
-import type { CoinType, Label, LiteralLabel, Name } from "./types";
+import { asLiteralLabel, literalLabelsToLiteralName } from "./interpreted-names-and-labels";
+import type { CoinType, LiteralLabel, LiteralName, NormalizedAddress } from "./types";
+
+const ADDR_LABEL = asLiteralLabel("addr");
+const DEFAULT_LABEL = asLiteralLabel("default");
+const REVERSE_LABEL = asLiteralLabel("reverse");
 
 /**
  * Gets the Label used for the reverse names of subnames as per ENSIP-11 & ENSIP-19.
  *
  * @see https://docs.ens.domains/ensip/19/#reverse-resolution
  */
-export const addrReverseLabel = (address: Address): LiteralLabel =>
-  asLiteralLabel(address.slice(2)); // address is guaranteed to be fully lowercase
+export const addrReverseLabel = (address: NormalizedAddress): LiteralLabel =>
+  address.slice(2) as LiteralLabel;
 
 /**
  * Converts `coinType` to prefix-free hex string.
  *
  * @see https://docs.ens.domains/ensip/19
  */
-export const coinTypeReverseLabel = (coinType: CoinType): Label => coinType.toString(16);
+export const coinTypeReverseLabel = (coinType: CoinType): LiteralLabel =>
+  coinType.toString(16) as LiteralLabel;
 
 /**
  * Gets the reverse name for an address according to ENSIP-11 & ENSIP-19.
@@ -36,19 +39,19 @@ export const coinTypeReverseLabel = (coinType: CoinType): Label => coinType.toSt
  * reverseName("0x1234", BigInt(0x5678)) // "1234.5678.reverse"
  * ```
  */
-export function reverseName(address: Address, coinType: CoinType): Name {
+export function reverseName(address: NormalizedAddress, coinType: CoinType): LiteralName {
   const label = addrReverseLabel(address);
 
-  const middle = (() => {
+  const middle = ((): LiteralLabel => {
     switch (coinType) {
       case ETH_COIN_TYPE:
-        return "addr";
+        return ADDR_LABEL;
       case DEFAULT_EVM_COIN_TYPE:
-        return "default";
+        return DEFAULT_LABEL;
       default:
         return coinTypeReverseLabel(coinType);
     }
   })();
 
-  return `${label}.${middle}.reverse`;
+  return literalLabelsToLiteralName([label, middle, REVERSE_LABEL]);
 }

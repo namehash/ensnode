@@ -1,4 +1,4 @@
-import type { InterpretedLabel, Name } from "enssdk";
+import type { InterpretedLabel, InterpretedName } from "enssdk";
 import { beforeAll, describe, expect, it } from "vitest";
 
 import { DEVNET_ETH_LABELS } from "@/test/integration/devnet-names";
@@ -27,7 +27,7 @@ describe("Domain.subdomains", () => {
   type SubdomainsResult = {
     domain: {
       subdomains: GraphQLConnection<{
-        name: Name | null;
+        name: InterpretedName | null;
         label: { interpreted: InterpretedLabel };
       }>;
     };
@@ -135,7 +135,7 @@ describe("Domain.events filtering (EventsWhereInput)", () => {
 
     expect(events.length).toBeGreaterThan(0);
     for (const event of events) {
-      expect(event.topics[0]?.toLowerCase()).toBe(targetSelector.toLowerCase());
+      expect(event.topics[0]).toBe(targetSelector);
     }
   });
 
@@ -215,7 +215,7 @@ describe("Domain.events filtering (EventsWhereInput)", () => {
 
     expect(events.length).toBeGreaterThan(0);
     for (const event of events) {
-      expect(event.from.toLowerCase()).toBe(targetFrom.toLowerCase());
+      expect(event.from).toBe(targetFrom);
     }
   });
 
@@ -236,7 +236,7 @@ describe("Domain.events filtering (EventsWhereInput)", () => {
     expect(events.length).toBeGreaterThan(0);
     expect(events.length).toBeLessThanOrEqual(allEvents.length);
     for (const event of events) {
-      expect(event.topics[0]?.toLowerCase()).toBe(targetSelector.toLowerCase());
+      expect(event.topics[0]).toBe(targetSelector);
       expect(BigInt(event.timestamp)).toBeGreaterThanOrEqual(BigInt(midTimestamp));
     }
   });

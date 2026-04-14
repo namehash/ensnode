@@ -6,7 +6,7 @@ import {
   getEnsManagerAddressDetailsUrl,
 } from "@namehash/namehash-ui";
 import type { Address, ChainId, DefaultableChainId, Name } from "enssdk";
-import { asLowerCaseAddress, DEFAULT_EVM_CHAIN_ID } from "enssdk";
+import { DEFAULT_EVM_CHAIN_ID, toNormalizedAddress } from "enssdk";
 import { useState } from "react";
 import { isAddress } from "viem";
 
@@ -76,7 +76,7 @@ export default function MockDisplayIdentityPage() {
   }
 
   // at a data-model level, we always represent addresses fully in lowercase.
-  selectedAddress = asLowerCaseAddress(selectedAddress);
+  selectedAddress = toNormalizedAddress(selectedAddress);
 
   // fallback to selecting the default name if
   // selectedRawName is an empty string

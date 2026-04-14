@@ -1,4 +1,4 @@
-import { makeSubdomainNode, type Node, ROOT_NODE } from "enssdk";
+import { ENS_ROOT_NODE, makeSubdomainNode, type Node } from "enssdk";
 
 import { PluginName } from "@ensnode/ensnode-sdk";
 
@@ -56,7 +56,7 @@ export default function () {
     namespaceContract(pluginName, "ENSv1RegistryOld:NewResolver"),
     async ({ context, event }) => {
       const shouldIgnoreEvent = await shouldIgnoreRegistryOldEvents(context, event.args.node);
-      const isRootNode = event.args.node === ROOT_NODE;
+      const isRootNode = event.args.node === ENS_ROOT_NODE;
 
       // inverted logic of https://github.com/ensdomains/ens-subgraph/blob/c844791/src/ensRegistry.ts#L246
       // NOTE: the subgraph must include an exception here for the root node because it starts out
@@ -80,10 +80,10 @@ export default function () {
   addOnchainEventListener(
     namespaceContract(pluginName, "ENSv1RegistryOld:Transfer"),
     async ({ context, event }) => {
-      // NOTE: this logic derived from the subgraph introduces a bug for queries with a blockheight
+      // NOTE: this logic derived from the subgraph introduces a minor bug for queries with a blockheight
       // below 9380380, when the new Registry was deployed, as it implicitly ignores Transfer events
-      // of the ROOT_NODE. as a result, the root node's owner is always zeroAddress until the new
-      // Registry events are picked up. for backwards compatibility this beahvior is re-implemented
+      // of the ENS_ROOT_NODE. as a result, the root node's owner is always zeroAddress until the new
+      // Registry events are picked up. for backwards compatibility this behavior is re-implemented
       // here.
 
       const shouldIgnoreEvent = await shouldIgnoreRegistryOldEvents(context, event.args.node);

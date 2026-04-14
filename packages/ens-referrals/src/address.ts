@@ -1,16 +1,8 @@
-import type { Address } from "enssdk";
-import { isAddress } from "viem";
+import type { NormalizedAddress } from "enssdk";
+import { isNormalizedAddress } from "enssdk";
 
-export const validateLowercaseAddress = (address: Address): void => {
-  if (!isAddress(address, { strict: false })) {
-    throw new Error(`Invalid address: ${address}. Address must be a valid EVM address.`);
+export const validateAddress = (address: NormalizedAddress): void => {
+  if (!isNormalizedAddress(address)) {
+    throw new Error(`Invalid address: '${address}'. Address must be a lowercase EVM Address.`);
   }
-
-  if (address !== address.toLowerCase()) {
-    throw new Error(`Invalid address: ${address}. Address must be in lowercase format.`);
-  }
-};
-
-export const normalizeAddress = (address: Address): Address => {
-  return address.toLowerCase() as Address;
 };

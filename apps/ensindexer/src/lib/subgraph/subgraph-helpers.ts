@@ -1,6 +1,6 @@
 import config from "@/config";
 
-import { type Node, ROOT_NODE } from "enssdk";
+import { ENS_ROOT_NODE, type Node } from "enssdk";
 import { isAddressEqual, zeroAddress } from "viem";
 
 import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
@@ -26,7 +26,7 @@ export async function setupRootNode({ context }: { context: IndexingEngineContex
   await context.ensDb
     .insert(ensIndexerSchema.subgraph_domain)
     .values({
-      id: ROOT_NODE,
+      id: ENS_ROOT_NODE,
       ownerId: zeroAddress,
       createdAt: 0n,
 

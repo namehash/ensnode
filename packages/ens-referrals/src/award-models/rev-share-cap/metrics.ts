@@ -1,4 +1,4 @@
-import type { Address } from "enssdk";
+import type { NormalizedAddress } from "enssdk";
 
 import { type PriceUsdc, priceEth, priceUsdc } from "@ensnode/ensnode-sdk";
 import { makePriceEthSchema, makePriceUsdcSchema } from "@ensnode/ensnode-sdk/internal";
@@ -340,7 +340,7 @@ export const validateUnrankedReferrerMetricsRevShareCap = (
  * Build an unranked zero-metrics rev-share-cap referrer record for an address not on the leaderboard.
  */
 export const buildUnrankedReferrerMetricsRevShareCap = (
-  referrer: Address,
+  referrer: NormalizedAddress,
   rules: ReferralProgramRulesRevShareCap,
 ): UnrankedReferrerMetricsRevShareCap => {
   const metrics = buildReferrerMetrics(referrer, 0, 0, priceEth(0n));

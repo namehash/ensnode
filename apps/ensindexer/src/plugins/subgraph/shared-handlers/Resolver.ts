@@ -1,6 +1,6 @@
 import config from "@/config";
 
-import type { Address, Hex, Node } from "enssdk";
+import type { Hex, Node, NormalizedAddress } from "enssdk";
 import type { Hash } from "viem";
 
 import { hasNullByte, stripNullBytes, uniq } from "@ensnode/ensnode-sdk";
@@ -26,7 +26,7 @@ export async function handleAddrChanged({
   event,
 }: {
   context: IndexingEngineContext;
-  event: EventWithArgs<{ node: Node; a: Address }>;
+  event: EventWithArgs<{ node: Node; a: NormalizedAddress }>;
 }) {
   const { a: address, node } = event.args;
   await upsertAccount(context, address);
@@ -60,7 +60,7 @@ export async function handleAddressChanged({
   event,
 }: {
   context: IndexingEngineContext;
-  event: EventWithArgs<{ node: Node; coinType: bigint; newAddress: Address }>;
+  event: EventWithArgs<{ node: Node; coinType: bigint; newAddress: NormalizedAddress }>;
 }) {
   const { node, coinType, newAddress } = event.args;
 
@@ -265,7 +265,7 @@ export async function handleAuthorisationChanged({
   context: IndexingEngineContext;
   event: EventWithArgs<{
     node: Node;
-    owner: Address;
+    owner: NormalizedAddress;
     target: Hex;
     isAuthorised: boolean;
   }>;

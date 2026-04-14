@@ -1,4 +1,4 @@
-import type { Duration } from "@ensnode/ensnode-sdk";
+import type { Duration } from "enssdk";
 
 import type { ReferrerRank } from "../shared/rank";
 import type { ReferrerScore } from "../shared/score";

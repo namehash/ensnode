@@ -4,10 +4,10 @@ import { sql } from "drizzle-orm";
 import {
   type CanonicalPath,
   type DomainId,
+  ENS_ROOT_NODE,
   type ENSv1DomainId,
   type ENSv2DomainId,
   type RegistryId,
-  ROOT_NODE,
 } from "enssdk";
 
 import { maybeGetENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
@@ -61,9 +61,9 @@ export async function getV1CanonicalPath(domainId: ENSv1DomainId): Promise<Canon
     throw new Error(`Invariant(getCanonicalPath): DomainId '${domainId}' did not exist.`);
   }
 
-  // v1Domains are canonical if the TLD's parent is ROOT_NODE (ROOT_NODE itself does not exist in the index)
+  // v1Domains are canonical if the TLD's parent is ENS_ROOT_NODE (ENS_ROOT_NODE itself does not exist in the index)
   const tld = rows[rows.length - 1];
-  const isCanonical = tld.parent_id === ROOT_NODE;
+  const isCanonical = tld.parent_id === ENS_ROOT_NODE;
 
   if (!isCanonical) return null;
 
