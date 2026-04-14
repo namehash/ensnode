@@ -11,8 +11,8 @@ import type { InterpretedLabel, InterpretedName, Label, Name } from "./types";
 export const normalizeName = (name: Name): InterpretedName => {
   try {
     return ens_normalize(name) as InterpretedName;
-  } catch {
-    throw new Error(`Name '${name}' cannot be normalized.`);
+  } catch (cause) {
+    throw new Error(`Name '${name}' cannot be normalized.`, { cause });
   }
 };
 
@@ -35,8 +35,8 @@ export const normalizeLabel = (label: Label): InterpretedLabel => {
     // NOTE: the ens_normalize function accepts _names_ not labels, and so we must include our own
     // invariants above to ensure that the `label` input here can be safely normalized
     return ens_normalize(label) as InterpretedLabel;
-  } catch {
-    throw new Error(`Label '${label}' cannot be normalized.`);
+  } catch (cause) {
+    throw new Error(`Label '${label}' cannot be normalized.`, { cause });
   }
 };
 
