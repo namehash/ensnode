@@ -68,9 +68,9 @@ describe("Name Tokens: Zod Schemas", () => {
   });
 
   it("nameTokensNotIndexedExample passes error schema", () => {
-    expect(
-      makeNameTokensResponseErrorSchema().safeParse(nameTokensNotIndexedExample).success,
-    ).toBe(true);
+    expect(makeNameTokensResponseErrorSchema().safeParse(nameTokensNotIndexedExample).success).toBe(
+      true,
+    );
   });
 
   it("nameTokensResponseOkExample passes schema", () => {
