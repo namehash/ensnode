@@ -14,10 +14,8 @@ import {
 import { describe, expect, it } from "vitest";
 
 import { DEFAULT_EVM_CHAIN_ID, evmChainIdToCoinType } from "./coin-type";
-import { asInterpretedName } from "./interpreted-names-and-labels";
 import { parseReverseName } from "./parse-reverse-name";
 import { reverseName } from "./reverse-name";
-import type { InterpretedName } from "./types";
 
 const EXAMPLE_ADDRESS = "0x51050ec063d393217b436747617ad1c2285aeeee";
 const CHAIN_IDS = [
@@ -134,14 +132,13 @@ const negativeCases: string[] = [
 describe("parseReverseName", () => {
   positiveCases.forEach(([input, expected]) => {
     it(`parses "${input}"`, () => {
-      expect(parseReverseName(asInterpretedName(input))).toEqual(expected);
+      expect(parseReverseName(input)).toEqual(expected);
     });
   });
 
   negativeCases.forEach((input) => {
     it(`does not parse "${input}"`, () => {
-      // NOTE: directly cast to avoid running asInterpretedName validation
-      expect(parseReverseName(input as InterpretedName)).toBeNull();
+      expect(parseReverseName(input)).toBeNull();
     });
   });
 
