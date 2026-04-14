@@ -3,7 +3,7 @@ import {
   type ReferralEvent,
   type ReferralProgramRules,
   type ReferrerMetrics,
-} from "@namehash/ens-referrals/v1";
+} from "@namehash/ens-referrals";
 import { and, asc, count, desc, eq, gte, isNotNull, lte, ne, sql, sum } from "drizzle-orm";
 import { type Address, stringifyAccountId } from "enssdk";
 import { zeroAddress } from "viem";
@@ -14,7 +14,7 @@ import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import logger from "@/lib/logger";
 
 /**
- * Get Referrer Metrics from the database (V1 API).
+ * Get Referrer Metrics from the database.
  *
  * @param rules - The referral program rules for filtering registrar actions
  * @returns A promise that resolves to an array of {@link ReferrerMetrics} values.
@@ -99,7 +99,7 @@ export const getReferrerMetrics = async (
 };
 
 /**
- * Get raw referral events from the database for the sequential race algorithm (V1 API).
+ * Get raw referral events from the database for the sequential race algorithm.
  *
  * Returns individual rows (no GROUP BY) ordered chronologically for deterministic race processing.
  *

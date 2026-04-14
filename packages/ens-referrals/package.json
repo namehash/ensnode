@@ -18,24 +18,27 @@
     "dist"
   ],
   "exports": {
-    "./v1": "./src/v1/index.ts",
-    "./v1/internal": "./src/v1/internal.ts"
+    ".": "./src/index.ts",
+    "./internal": "./src/internal.ts"
   },
   "publishConfig": {
     "access": "public",
     "exports": {
-      "./v1": {
+      ".": {
         "import": {
-          "types": "./dist/v1/index.d.ts",
-          "default": "./dist/v1/index.js"
+          "types": "./dist/index.d.ts",
+          "default": "./dist/index.js"
         },
         "require": {
-          "types": "./dist/v1/index.d.cts",
-          "default": "./dist/v1/index.cjs"
+          "types": "./dist/index.d.cts",
+          "default": "./dist/index.cjs"
         }
       }
     }
   },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "prepublish": "tsup",
     "test": "vitest",

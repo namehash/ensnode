@@ -6,7 +6,7 @@ import {
   type ReferrerLeaderboardPageResponseOk,
   type ReferrerLeaderboardPieSplit,
   type ReferrerMetrics,
-} from "@namehash/ens-referrals/v1";
+} from "@namehash/ens-referrals";
 
 import { parseEth, parseUsdc } from "@ensnode/ensnode-sdk";
 

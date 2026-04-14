@@ -2,17 +2,17 @@ import {
   buildReferralProgramRulesPieSplit,
   ReferralProgramAwardModels,
   type ReferrerLeaderboard,
-} from "@namehash/ens-referrals/v1";
+} from "@namehash/ens-referrals";
 import { describe, expect, it, vi } from "vitest";
 
 import { parseTimestamp, parseUsdc } from "@ensnode/ensnode-sdk";
 
-import * as database from "./database-v1";
-import { getReferrerLeaderboard } from "./get-referrer-leaderboard-v1";
-import { dbResultsReferrerLeaderboard } from "./mocks-v1";
+import * as database from "./database";
+import { getReferrerLeaderboard } from "./get-referrer-leaderboard";
+import { dbResultsReferrerLeaderboard } from "./mocks";
 
 // Mock the database module
-vi.mock("./database-v1", () => ({
+vi.mock("./database", () => ({
   getReferrerMetrics: vi.fn(),
 }));
 

@@ -2,11 +2,11 @@ import { createRoute, z } from "@hono/zod-openapi";
 import {
   MAX_EDITIONS_PER_REQUEST,
   REFERRERS_PER_LEADERBOARD_PAGE_MAX,
-} from "@namehash/ens-referrals/v1";
+} from "@namehash/ens-referrals";
 import {
   makeReferralProgramEditionSlugSchema,
   makeReferrerMetricsEditionsArraySchema,
-} from "@namehash/ens-referrals/v1/internal";
+} from "@namehash/ens-referrals/internal";
 
 import { makeLowercaseAddressSchema } from "@ensnode/ensnode-sdk/internal";
 
@@ -54,9 +54,9 @@ const editionsQuerySchema = z.object({
 export const getReferralLeaderboardRoute = createRoute({
   method: "get",
   path: "/referral-leaderboard",
-  operationId: "getReferralLeaderboard_v1",
+  operationId: "getReferralLeaderboard",
   tags: ["ENSAwards"],
-  summary: "Get Referrer Leaderboard (v1)",
+  summary: "Get Referrer Leaderboard",
   description: "Returns a paginated page from the referrer leaderboard for a specific edition",
   request: {
     query: referrerLeaderboardPageQuerySchema,
@@ -80,9 +80,9 @@ export const getReferralLeaderboardRoute = createRoute({
 export const getReferrerDetailRoute = createRoute({
   method: "get",
   path: "/referrer/{referrer}",
-  operationId: "getReferrerDetail_v1",
+  operationId: "getReferrerDetail",
   tags: ["ENSAwards"],
-  summary: "Get Referrer Detail for Editions (v1)",
+  summary: "Get Referrer Detail for Editions",
   description: `Returns detailed information for a specific referrer for the requested editions. Requires 1-${MAX_EDITIONS_PER_REQUEST} distinct edition slugs. All requested editions must be recognized and have cached data, or the request fails.`,
   request: {
     params: referrerAddressSchema,
@@ -110,9 +110,9 @@ export const getReferrerDetailRoute = createRoute({
 export const getEditionsRoute = createRoute({
   method: "get",
   path: "/editions",
-  operationId: "getEditions_v1",
+  operationId: "getEditions",
   tags: ["ENSAwards"],
-  summary: "Get Edition Summaries (v1)",
+  summary: "Get Edition Summaries",
   description:
     "Returns a summary for each configured referral program edition, including its current status and award-model-specific runtime data. Editions are sorted in descending order by start timestamp (most recent first).",
   responses: {

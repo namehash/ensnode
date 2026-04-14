@@ -39,7 +39,7 @@ import {
   type ReferrerLeaderboardPageResponseOk,
   ReferrerMetricsEditionsResponseCodes,
   type ReferrerMetricsEditionsResponseOk,
-} from "@namehash/ens-referrals/v1";
+} from "@namehash/ens-referrals";
 
 import { parseTimestamp, parseUsdc, type SWRCache } from "@ensnode/ensnode-sdk";
 
@@ -47,9 +47,9 @@ import {
   emptyReferralLeaderboard,
   populatedReferrerLeaderboard,
   referrerLeaderboardPageResponseOk,
-} from "@/lib/ensanalytics/referrer-leaderboard/mocks-v1";
+} from "@/lib/ensanalytics/referrer-leaderboard/mocks";
 
-import app from "./ensanalytics-api-v1";
+import app from "./ensanalytics-api";
 
 describe("/v1/ensanalytics", () => {
   describe("/referral-leaderboard", () => {

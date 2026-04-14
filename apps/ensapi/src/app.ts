@@ -11,7 +11,7 @@ import { generateOpenApi31Document } from "@/openapi-document";
 
 import realtimeApi from "./handlers/api/meta/realtime-api";
 import apiRouter from "./handlers/api/router";
-import ensanalyticsApiV1 from "./handlers/ensanalytics/ensanalytics-api-v1";
+import ensanalyticsApi from "./handlers/ensanalytics/ensanalytics-api";
 import subgraphApi from "./handlers/subgraph/subgraph-api";
 
 const app = createApp();
@@ -52,8 +52,8 @@ app.route("/api", apiRouter);
 // use Subgraph GraphQL API at /subgraph
 app.route("/subgraph", subgraphApi);
 
-// use ENSAnalytics API v1 at /v1/ensanalytics
-app.route("/v1/ensanalytics", ensanalyticsApiV1);
+// use ENSAnalytics API at /v1/ensanalytics
+app.route("/v1/ensanalytics", ensanalyticsApi);
 
 // use Am I Realtime API at /amirealtime
 // NOTE: this is legacy endpoint and will be deleted in future. one should use /api/realtime instead

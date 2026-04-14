@@ -4,7 +4,7 @@ import {
   type ReferralProgramEditionSlug,
   type ReferrerLeaderboard,
   serializeReferralProgramRules,
-} from "@namehash/ens-referrals/v1";
+} from "@namehash/ens-referrals";
 import { minutesToSeconds } from "date-fns";
 
 import {
@@ -16,7 +16,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { assumeReferralProgramEditionImmutablyClosed } from "@/lib/ensanalytics/referrer-leaderboard/closeout";
-import { getReferrerLeaderboard } from "@/lib/ensanalytics/referrer-leaderboard/get-referrer-leaderboard-v1";
+import { getReferrerLeaderboard } from "@/lib/ensanalytics/referrer-leaderboard/get-referrer-leaderboard";
 import { makeLogger } from "@/lib/logger";
 
 import { indexingStatusCache } from "./indexing-status.cache";

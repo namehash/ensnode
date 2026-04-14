@@ -14,7 +14,7 @@ import {
   serializeReferralProgramEditionSummariesResponse,
   serializeReferrerLeaderboardPageResponse,
   serializeReferrerMetricsEditionsResponse,
-} from "@namehash/ens-referrals/v1";
+} from "@namehash/ens-referrals";
 
 import { createApp } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
@@ -25,9 +25,9 @@ import {
   getEditionsRoute,
   getReferralLeaderboardRoute,
   getReferrerDetailRoute,
-} from "./ensanalytics-api-v1.routes";
+} from "./ensanalytics-api.routes";
 
-const logger = makeLogger("ensanalytics-api-v1");
+const logger = makeLogger("ensanalytics-api");
 
 const app = createApp({
   middlewares: [

@@ -1,4 +1,4 @@
-import type { ReferralProgramRules } from "@namehash/ens-referrals/v1";
+import type { ReferralProgramRules } from "@namehash/ens-referrals";
 import { minutesToSeconds } from "date-fns";
 import type { UnixTimestamp } from "enssdk";
 

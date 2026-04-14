@@ -4,13 +4,13 @@ import {
   ReferralProgramAwardModels,
   type ReferralProgramRules,
   type ReferrerLeaderboard,
-} from "@namehash/ens-referrals/v1";
+} from "@namehash/ens-referrals";
 import type { UnixTimestamp } from "enssdk";
 
-import { getReferralEvents, getReferrerMetrics } from "./database-v1";
+import { getReferralEvents, getReferrerMetrics } from "./database";
 
 /**
- * Builds a {@link ReferrerLeaderboard} from the database using the provided referral program rules (V1 API).
+ * Builds a {@link ReferrerLeaderboard} from the database using the provided referral program rules.
  *
  * Dispatches to the appropriate model-specific builder based on `rules.awardModel`:
  * - PieSplit: uses aggregated referrer metrics (GROUP BY query).

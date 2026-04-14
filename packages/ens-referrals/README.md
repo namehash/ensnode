@@ -2,8 +2,6 @@
 
 Utilities for working with ENS Referrals data. This package is intended for developers who want to build referral dashboards, stats pages, or other integrations on top of ENS Referrals APIs.
 
-The main entry point today is [`v1`](https://github.com/namehash/ensnode/tree/main/packages/ens-referrals/src/v1), which includes the current client and response types for the latest ENS Referrals program format.
-
 ## Installation
 
 ```bash
@@ -12,17 +10,12 @@ npm install @namehash/ens-referrals viem
 
 ## Quick Start
 
-`v1` is the recommended version for new integrations.
-
-- [`v1`](https://github.com/namehash/ensnode/tree/main/packages/ens-referrals/src/v1) is the actively supported version that reflects the current ENS Referrals program rules and awards.
-- The root [`@namehash/ens-referrals`](https://github.com/namehash/ensnode/tree/main/packages/ens-referrals/src/client.ts) import is deprecated and is planned to be removed soon.
-
 ### Set up `ENSReferralsClient`
 
 `ENSReferralsClient` is the main way to read referral data from ENSNode.
 
 ```typescript
-import { ENSReferralsClient } from "@namehash/ens-referrals/v1";
+import { ENSReferralsClient } from "@namehash/ens-referrals";
 
 // Create a client with the default ENSNode API URL
 const client = new ENSReferralsClient();
@@ -36,7 +29,7 @@ const client = new ENSReferralsClient({
 });
 ```
 
-## Use ENS Referrals API (`v1`)
+## Use ENS Referrals API
 
 ### Get all referral program editions &rarr; `getEditionSummaries()`
 
@@ -56,7 +49,7 @@ if (response.responseCode === ReferralProgramEditionSummariesResponseCodes.Ok) {
 }
 ```
 
-More examples are available in [`packages/ens-referrals/src/v1/client.ts`](https://github.com/namehash/ensnode/tree/main/packages/ens-referrals/src/v1/client.ts).
+More examples are available in [`packages/ens-referrals/src/client.ts`](https://github.com/namehash/ensnode/tree/main/packages/ens-referrals/src/client.ts).
 
 ### Get a referrer leaderboard page &rarr; `getReferrerLeaderboardPage()`
 
@@ -109,7 +102,7 @@ if (response.responseCode === ReferrerLeaderboardPageResponseCodes.Ok) {
 }
 ```
 
-More examples are available in [`packages/ens-referrals/src/v1/client.ts`](https://github.com/namehash/ensnode/tree/main/packages/ens-referrals/src/v1/client.ts).
+More examples are available in [`packages/ens-referrals/src/client.ts`](https://github.com/namehash/ensnode/tree/main/packages/ens-referrals/src/client.ts).
 
 ### Get a referrer's metrics across editions &rarr; `getReferrerMetricsEditions()`
 
@@ -152,7 +145,7 @@ if (response.responseCode === ReferrerMetricsEditionsResponseCodes.Ok) {
 }
 ```
 
-More examples are available in [`packages/ens-referrals/src/v1/client.ts`](https://github.com/namehash/ensnode/tree/main/packages/ens-referrals/src/v1/client.ts).
+More examples are available in [`packages/ens-referrals/src/client.ts`](https://github.com/namehash/ensnode/tree/main/packages/ens-referrals/src/client.ts).
 
 ## See how current Referral Program Editions are configured
 
@@ -164,7 +157,7 @@ Check out [`production-editions.json`](https://ensawards.org/production-editions
 The package also includes helpers for building referral links.
 
 ```typescript
-import { buildEnsReferralUrl } from "@namehash/ens-referrals/v1";
+import { buildEnsReferralUrl } from "@namehash/ens-referrals";
 import type { Address } from "viem";
 
 const referrerAddress: Address = "0xd8da6bf26964af9d7eed9e03e53415d37aa96045";
