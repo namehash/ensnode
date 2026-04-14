@@ -45,6 +45,24 @@ import {
 } from "./types";
 
 /**
+ * Re-emit issues from a nested safeParse into the outer transform context.
+ * Optionally prefixes each issue's path (used when the outer schema is an array).
+ */
+const reemitIssues = (
+  ctx: z.RefinementCtx,
+  issues: readonly z.core.$ZodIssue[],
+  pathPrefix: PropertyKey[] = [],
+) => {
+  for (const issue of issues) {
+    ctx.addIssue({
+      code: "custom",
+      path: [...pathPrefix, ...(issue.path as PropertyKey[])],
+      message: issue.message,
+    });
+  }
+};
+
+/**
  * Schema for {@link ReferralProgramRules}
  */
 export const makeReferralProgramRulesSchema = (valueLabel: string = "ReferralProgramRules") =>
@@ -68,7 +86,7 @@ export const makeReferrerLeaderboardPageSchema = (
   ) as string[];
 
   // Loose schema used only to peek at awardModel before full validation.
-  const looseSchema = z.object({ awardModel: z.string() }).passthrough();
+  const looseSchema = z.looseObject({ awardModel: z.string() });
 
   // Schema for known award models — dispatch is handled automatically by discriminatedUnion.
   const knownSchema = z.discriminatedUnion("awardModel", [
@@ -83,13 +101,7 @@ export const makeReferrerLeaderboardPageSchema = (
     if (knownAwardModels.includes(data.awardModel)) {
       const parsed = knownSchema.safeParse(data);
       if (!parsed.success) {
-        for (const issue of parsed.error.issues) {
-          ctx.addIssue({
-            code: "custom",
-            path: issue.path as PropertyKey[],
-            message: issue.message,
-          });
-        }
+        reemitIssues(ctx, parsed.error.issues);
         return z.NEVER;
       }
       return parsed.data;
@@ -98,13 +110,7 @@ export const makeReferrerLeaderboardPageSchema = (
     // Unknown awardModel — preserve as ReferrerLeaderboardPageUnrecognized using base fields.
     const parsed = baseSchema.safeParse(data);
     if (!parsed.success) {
-      for (const issue of parsed.error.issues) {
-        ctx.addIssue({
-          code: "custom",
-          path: issue.path as PropertyKey[],
-          message: issue.message,
-        });
-      }
+      reemitIssues(ctx, parsed.error.issues);
       return z.NEVER;
     }
     return {
@@ -162,7 +168,7 @@ export const makeReferrerEditionMetricsSchema = (valueLabel: string = "ReferrerE
   ) as string[];
 
   // Loose schema used only to peek at awardModel before full validation.
-  const looseSchema = z.object({ awardModel: z.string() }).passthrough();
+  const looseSchema = z.looseObject({ awardModel: z.string() });
 
   // Schema for known award models — dispatch is handled automatically by discriminatedUnion.
   const knownSchema = z.discriminatedUnion("awardModel", [
@@ -174,13 +180,7 @@ export const makeReferrerEditionMetricsSchema = (valueLabel: string = "ReferrerE
     if (knownAwardModels.includes(data.awardModel)) {
       const parsed = knownSchema.safeParse(data);
       if (!parsed.success) {
-        for (const issue of parsed.error.issues) {
-          ctx.addIssue({
-            code: "custom",
-            path: issue.path as PropertyKey[],
-            message: issue.message,
-          });
-        }
+        reemitIssues(ctx, parsed.error.issues);
         return z.NEVER;
       }
       return parsed.data;
@@ -198,9 +198,6 @@ export const makeReferrerEditionMetricsSchema = (valueLabel: string = "ReferrerE
 
 /**
  * Schema for validating a {@link ReferralProgramEditionSlug}.
- *
- * Enforces the slug format invariant: lowercase letters (a-z), digits (0-9),
- * and hyphens (-) only. Must not start or end with a hyphen.
  *
  * Runtime validation against configured editions happens at the business logic level.
  */
@@ -330,9 +327,9 @@ export const makeReferralProgramEditionConfigSetArraySchema = (
   const configSchema = makeReferralProgramEditionConfigSchema(`${valueLabel}[edition]`);
 
   // Loose schema used only to peek at rules.awardModel before full validation.
-  const looseItemSchema = z
-    .object({ rules: z.object({ awardModel: z.string() }).passthrough() })
-    .passthrough();
+  const looseItemSchema = z.looseObject({
+    rules: z.looseObject({ awardModel: z.string() }),
+  });
 
   // Schema for extracting base fields from an unrecognized edition.
   const unrecognizedBaseSchema = makeReferralProgramEditionConfigBaseSchema(
@@ -349,13 +346,7 @@ export const makeReferralProgramEditionConfigSetArraySchema = (
         // Known award model — fully validate.
         const parsed = configSchema.safeParse(item);
         if (!parsed.success) {
-          for (const issue of parsed.error.issues) {
-            ctx.addIssue({
-              code: "custom",
-              path: [i, ...(issue.path as PropertyKey[])],
-              message: issue.message,
-            });
-          }
+          reemitIssues(ctx, parsed.error.issues, [i]);
         } else {
           result.push(parsed.data);
         }
@@ -363,13 +354,7 @@ export const makeReferralProgramEditionConfigSetArraySchema = (
         // Unknown award model — preserve as ReferralProgramRulesUnrecognized using base fields.
         const parsed = unrecognizedBaseSchema.safeParse(item);
         if (!parsed.success) {
-          for (const issue of parsed.error.issues) {
-            ctx.addIssue({
-              code: "custom",
-              path: [i, ...(issue.path as PropertyKey[])],
-              message: issue.message,
-            });
-          }
+          reemitIssues(ctx, parsed.error.issues, [i]);
           continue;
         }
 
@@ -416,7 +401,7 @@ export const makeReferralProgramEditionSummarySchema = (
   ) as string[];
 
   // Loose schema used only to peek at awardModel before full validation.
-  const looseSchema = z.object({ awardModel: z.string() }).passthrough();
+  const looseSchema = z.looseObject({ awardModel: z.string() });
 
   // Schema for known award models — dispatch handled automatically by discriminatedUnion.
   const knownSchema = z.discriminatedUnion("awardModel", [
@@ -431,13 +416,7 @@ export const makeReferralProgramEditionSummarySchema = (
     if (knownAwardModels.includes(data.awardModel)) {
       const parsed = knownSchema.safeParse(data);
       if (!parsed.success) {
-        for (const issue of parsed.error.issues) {
-          ctx.addIssue({
-            code: "custom",
-            path: issue.path as PropertyKey[],
-            message: issue.message,
-          });
-        }
+        reemitIssues(ctx, parsed.error.issues);
         return z.NEVER;
       }
       return parsed.data;
@@ -446,13 +425,7 @@ export const makeReferralProgramEditionSummarySchema = (
     // Unknown awardModel — preserve as ReferralProgramEditionSummaryUnrecognized using base fields.
     const parsed = baseSchema.safeParse(data);
     if (!parsed.success) {
-      for (const issue of parsed.error.issues) {
-        ctx.addIssue({
-          code: "custom",
-          path: issue.path as PropertyKey[],
-          message: issue.message,
-        });
-      }
+      reemitIssues(ctx, parsed.error.issues);
       return z.NEVER;
     }
     return {
