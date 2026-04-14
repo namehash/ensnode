@@ -5,11 +5,11 @@ import { parseTimestamp, parseUsdc, priceEth, priceUsdc } from "@ensnode/ensnode
 import { SECONDS_PER_YEAR } from "../../time";
 import { buildReferrerLeaderboardPageContext } from "../shared/leaderboard-page";
 import { ReferralProgramEditionStatuses } from "../shared/status";
-import { buildReferrerLeaderboardRevShareLimit } from "./leaderboard";
-import { buildLeaderboardPageRevShareLimit } from "./leaderboard-page";
+import { buildReferrerLeaderboardRevShareCap } from "./leaderboard";
+import { buildLeaderboardPageRevShareCap } from "./leaderboard-page";
 import type { ReferralEvent } from "./referral-event";
 import type { ReferralProgramEditionDisqualification } from "./rules";
-import { buildReferralProgramRulesRevShareLimit } from "./rules";
+import { buildReferralProgramRulesRevShareCap } from "./rules";
 
 // ─── Test fixtures ───────────────────────────────────────────────────────────
 
@@ -52,7 +52,7 @@ function buildTestRules(
   disqualifications: ReferralProgramEditionDisqualification[] = [],
   baseAnnualRevenueContribution = parseUsdc("5"),
 ) {
-  return buildReferralProgramRulesRevShareLimit(
+  return buildReferralProgramRulesRevShareCap(
     awardPool,
     minBaseRevenueContribution,
     baseAnnualRevenueContribution,
@@ -96,14 +96,14 @@ const UNCAPPED_AWARD_1Y = parseUsdc("2.5");
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
-describe("buildReferrerLeaderboardRevShareLimit", () => {
+describe("buildReferrerLeaderboardRevShareCap", () => {
   beforeEach(() => {
     eventIdCounter = 0;
   });
 
   it("returns empty leaderboard when events list is empty", () => {
     const rules = buildTestRules();
-    const result = buildReferrerLeaderboardRevShareLimit([], rules, accurateAsOf);
+    const result = buildReferrerLeaderboardRevShareCap([], rules, accurateAsOf);
 
     expect(result.awardModel).toBe(rules.awardModel);
     expect(result.rules).toBe(rules);
@@ -123,7 +123,7 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       const events = [makeEvent(ADDR_A, 1000, Math.floor(SECONDS_PER_YEAR / 2))];
       const rules = buildTestRules();
 
-      const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
+      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
       const referrer = result.referrers.get(ADDR_A)!;
 
       expect(referrer).toBeDefined();
@@ -138,7 +138,7 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
   });
 
   describe("Scenario B — referrer just qualifies, claims all accumulated uncapped award", () => {
-    it("claims all accumulated uncapped award when qualifying (unlimited pool)", () => {
+    it("claims all accumulated uncapped award when qualifying (uncapped)", () => {
       // Event 1: half year → base revenue = $2.50 (not qualified)
       // Event 2: half year → base revenue = $5.00 (just qualified!)
       // Accumulated uncapped award = 2 × $1.25 = $2.50
@@ -148,7 +148,7 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
         makeEvent(ADDR_A, 2000, Math.floor(SECONDS_PER_YEAR / 2)),
       ];
 
-      const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
+      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
       const referrer = result.referrers.get(ADDR_A)!;
 
       expect(referrer.isQualified).toBe(true);
@@ -168,13 +168,13 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
         makeEvent(ADDR_A, 2000, Math.floor(SECONDS_PER_YEAR / 2)),
       ];
 
-      const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
+      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
       const referrer = result.referrers.get(ADDR_A)!;
 
       expect(referrer.isQualified).toBe(true);
       // uncappedAward = $2.50 (uncapped)
       expect(referrer.uncappedAward.amount).toBe(UNCAPPED_AWARD_1Y.amount);
-      // cappedAward capped at $1.50 (pool limit)
+      // cappedAward capped at $1.50 (pool cap)
       expect(referrer.cappedAward.amount).toBe(poolAmount.amount);
       // Pool fully depleted
       expect(result.aggregatedMetrics.awardPoolRemaining.amount).toBe(0n);
@@ -182,7 +182,7 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
   });
 
   describe("Scenario C — already qualified, claims incremental uncapped award per event", () => {
-    it("qualified referrer claims incremental award on subsequent events (unlimited pool)", () => {
+    it("qualified referrer claims incremental award on subsequent events (uncapped)", () => {
       // Event 1: 1 year → base revenue = $5 (just qualifies), accumulated uncapped = $2.50, claim $2.50
       // Event 2: 1 year → already qualified, incremental uncapped = $2.50, claim $2.50
       // Total: $5.00
@@ -192,7 +192,7 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
         makeEvent(ADDR_A, 2000, SECONDS_PER_YEAR),
       ];
 
-      const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
+      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
       const referrer = result.referrers.get(ADDR_A)!;
 
       expect(referrer.isQualified).toBe(true);
@@ -214,7 +214,7 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
         makeEvent(ADDR_A, 2000, SECONDS_PER_YEAR),
       ];
 
-      const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
+      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
       const referrer = result.referrers.get(ADDR_A)!;
 
       expect(referrer.isQualified).toBe(true);
@@ -233,7 +233,7 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       const rules = buildTestRules(priceUsdc(0n));
       const events = [makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR)];
 
-      const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
+      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
       const referrer = result.referrers.get(ADDR_A)!;
 
       expect(referrer.isQualified).toBe(true);
@@ -253,7 +253,7 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
         makeEvent(ADDR_B, 2000, SECONDS_PER_YEAR),
       ];
 
-      const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
+      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
       const referrerA = result.referrers.get(ADDR_A)!;
       const referrerB = result.referrers.get(ADDR_B)!;
 
@@ -277,7 +277,7 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
         makeEvent(ADDR_B, 2000, SECONDS_PER_YEAR),
       ];
 
-      const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
+      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
       const referrerA = result.referrers.get(ADDR_A)!;
       const referrerB = result.referrers.get(ADDR_B)!;
 
@@ -298,7 +298,7 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
         makeEvent(ADDR_C, 3000, SECONDS_PER_YEAR),
       ];
 
-      const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
+      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
       const referrerA = result.referrers.get(ADDR_A)!;
       const referrerB = result.referrers.get(ADDR_B)!;
       const referrerC = result.referrers.get(ADDR_C)!;
@@ -328,7 +328,7 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
         }),
       ];
 
-      const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
+      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
 
       // ADDR_A has the lower (earlier) id, should claim the pool first
       expect(result.referrers.get(ADDR_A)!.cappedAward.amount).toBe(UNCAPPED_AWARD_1Y.amount);
@@ -338,7 +338,7 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
 
   describe("Ranking", () => {
     it("ranks referrers by cappedAward desc, then uncappedAward desc", () => {
-      // Pool = $1000 (unlimited for this test)
+      // Pool = $1000 (uncapped for this test)
       // ADDR_A: 1 year → qualifies at t=1000, cappedAward = $2.50, uncappedAward = $2.50
       // ADDR_B: 2 years → qualifies at t=2000, cappedAward = $5.00, uncappedAward = $5.00
       // ADDR_C: 0.5 years → never qualifies, cappedAward = $0, uncappedAward = $1.25
@@ -349,7 +349,7 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
         makeEvent(ADDR_C, 3000, Math.floor(SECONDS_PER_YEAR / 2)),
       ];
 
-      const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
+      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
 
       // ADDR_B: cappedAward $5.00 → rank 1 (highest pool claim)
       // ADDR_A: cappedAward $2.50 → rank 2
@@ -369,7 +369,7 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
         makeEvent(ADDR_B, 2000, SECONDS_PER_YEAR),
       ];
 
-      const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
+      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
 
       // Both have $0 cappedAward; ADDR_A has higher uncappedAward (longer duration) → rank 1
       expect(result.referrers.get(ADDR_A)!.rank).toBe(1);
@@ -383,7 +383,7 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
         makeEvent(ADDR_B, 2000, SECONDS_PER_YEAR * 2),
       ];
 
-      const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
+      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
       const ranks = [...result.referrers.values()].map((r) => r.rank);
       expect(ranks).toEqual([1, 2]);
     });
@@ -397,11 +397,11 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       const rules = buildTestRules(parseUsdc("2.5"));
       const events = [makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR)];
 
-      const leaderboard = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
+      const leaderboard = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
       expect(leaderboard.aggregatedMetrics.awardPoolRemaining.amount).toBe(0n);
 
       const pageContext = buildReferrerLeaderboardPageContext({ page: 1 }, leaderboard);
-      const page = buildLeaderboardPageRevShareLimit(pageContext, leaderboard);
+      const page = buildLeaderboardPageRevShareCap(pageContext, leaderboard);
 
       expect(page.status).toBe(ReferralProgramEditionStatuses.Exhausted);
     });
@@ -425,7 +425,7 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
         makeEvent(ADDR_B, 2000, Math.floor(SECONDS_PER_YEAR / 2)), // below threshold: $5 base
       ];
 
-      const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
+      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
       const referrerA = result.referrers.get(ADDR_A)!;
       const referrerB = result.referrers.get(ADDR_B)!;
 
@@ -454,7 +454,7 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
         makeEvent(ADDR_B, 3000, SECONDS_PER_YEAR),
       ];
 
-      const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
+      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
 
       expect(result.aggregatedMetrics.grandTotalReferrals).toBe(3);
       expect(result.aggregatedMetrics.grandTotalIncrementalDuration).toBe(3 * SECONDS_PER_YEAR);
@@ -469,7 +469,7 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
         makeEvent(ADDR_B, 2000, SECONDS_PER_YEAR),
       ];
 
-      const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
+      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
       const referrerA = result.referrers.get(ADDR_A)!;
       const referrerB = result.referrers.get(ADDR_B)!;
 
@@ -494,7 +494,7 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
         makeEvent(ADDR_B, 2000, SECONDS_PER_YEAR), // qualifies normally
       ];
 
-      const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
+      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
       const referrerA = result.referrers.get(ADDR_A)!;
       const referrerB = result.referrers.get(ADDR_B)!;
 
@@ -516,7 +516,7 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       ]);
       const events = [makeEvent(ADDR_A, 1000, Math.floor(SECONDS_PER_YEAR / 2))];
 
-      const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
+      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
       const referrerA = result.referrers.get(ADDR_A)!;
 
       expect(referrerA.isAdminDisqualified).toBe(true);
@@ -545,7 +545,7 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
         makeEvent(ADDR_C, 3000, Math.floor(SECONDS_PER_YEAR / 2)),
       ];
 
-      const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
+      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
       const referrerA = result.referrers.get(ADDR_A)!;
       const referrerB = result.referrers.get(ADDR_B)!;
       const referrerC = result.referrers.get(ADDR_C)!;
@@ -578,7 +578,7 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
         makeEvent(ADDR_C, 3000, SECONDS_PER_YEAR), // only C qualifies and claims
       ];
 
-      const result = buildReferrerLeaderboardRevShareLimit(events, rules, accurateAsOf);
+      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
       const referrerA = result.referrers.get(ADDR_A)!;
       const referrerB = result.referrers.get(ADDR_B)!;
       const referrerC = result.referrers.get(ADDR_C)!;
@@ -599,14 +599,14 @@ describe("buildReferrerLeaderboardRevShareLimit", () => {
       expect(referrerC.cappedAward.amount).toBe(UNCAPPED_AWARD_1Y.amount);
     });
 
-    it("duplicate address in disqualifications: buildReferralProgramRulesRevShareLimit throws", () => {
+    it("duplicate address in disqualifications: buildReferralProgramRulesRevShareCap throws", () => {
       expect(() =>
         buildTestRules(parseUsdc("1000"), parseUsdc("5"), [
           { referrer: ADDR_A, reason: "first" },
           { referrer: ADDR_A, reason: "duplicate" },
         ]),
       ).toThrow(
-        "ReferralProgramRulesRevShareLimit: disqualifications must not contain duplicate referrer addresses.",
+        "ReferralProgramRulesRevShareCap: disqualifications must not contain duplicate referrer addresses.",
       );
     });
   });

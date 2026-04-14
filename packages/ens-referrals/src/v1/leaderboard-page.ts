@@ -3,9 +3,9 @@ import {
   type ReferrerLeaderboardPagePieSplit,
 } from "./award-models/pie-split/leaderboard-page";
 import {
-  buildLeaderboardPageRevShareLimit,
-  type ReferrerLeaderboardPageRevShareLimit,
-} from "./award-models/rev-share-limit/leaderboard-page";
+  buildLeaderboardPageRevShareCap,
+  type ReferrerLeaderboardPageRevShareCap,
+} from "./award-models/rev-share-cap/leaderboard-page";
 import {
   buildReferrerLeaderboardPageContext,
   type ReferrerLeaderboardPageParams,
@@ -24,7 +24,7 @@ import type { ReferrerLeaderboard } from "./leaderboard";
  */
 export type ReferrerLeaderboardPage =
   | ReferrerLeaderboardPagePieSplit
-  | ReferrerLeaderboardPageRevShareLimit
+  | ReferrerLeaderboardPageRevShareCap
   | ReferrerLeaderboardPageUnrecognized;
 
 export const getReferrerLeaderboardPage = (
@@ -36,8 +36,8 @@ export const getReferrerLeaderboardPage = (
   switch (leaderboard.awardModel) {
     case ReferralProgramAwardModels.PieSplit:
       return buildLeaderboardPagePieSplit(pageContext, leaderboard);
-    case ReferralProgramAwardModels.RevShareLimit:
-      return buildLeaderboardPageRevShareLimit(pageContext, leaderboard);
+    case ReferralProgramAwardModels.RevShareCap:
+      return buildLeaderboardPageRevShareCap(pageContext, leaderboard);
 
     default: {
       const _exhaustiveCheck: never = leaderboard;

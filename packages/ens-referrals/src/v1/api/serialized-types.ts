@@ -5,11 +5,11 @@ import type {
   SerializedReferrerLeaderboardPagePieSplit,
 } from "../award-models/pie-split/api/serialized-types";
 import type {
-  SerializedReferralProgramEditionSummaryRevShareLimit,
-  SerializedReferralProgramRulesRevShareLimit,
-  SerializedReferrerEditionMetricsRevShareLimit,
-  SerializedReferrerLeaderboardPageRevShareLimit,
-} from "../award-models/rev-share-limit/api/serialized-types";
+  SerializedReferralProgramEditionSummaryRevShareCap,
+  SerializedReferralProgramRulesRevShareCap,
+  SerializedReferrerEditionMetricsRevShareCap,
+  SerializedReferrerLeaderboardPageRevShareCap,
+} from "../award-models/rev-share-cap/api/serialized-types";
 import type { ReferralProgramEditionSlug } from "../edition";
 import type { ReferrerEditionMetrics } from "../edition-metrics";
 import type { ReferralProgramEditionSummary } from "../edition-summary";
@@ -33,21 +33,21 @@ import type {
  */
 export type SerializedReferralProgramRules =
   | SerializedReferralProgramRulesPieSplit
-  | SerializedReferralProgramRulesRevShareLimit;
+  | SerializedReferralProgramRulesRevShareCap;
 
 /**
  * Serialized representation of {@link ReferrerLeaderboardPage}.
  */
 export type SerializedReferrerLeaderboardPage =
   | SerializedReferrerLeaderboardPagePieSplit
-  | SerializedReferrerLeaderboardPageRevShareLimit;
+  | SerializedReferrerLeaderboardPageRevShareCap;
 
 /**
  * Serialized representation of {@link ReferrerEditionMetrics}.
  */
 export type SerializedReferrerEditionMetrics =
   | SerializedReferrerEditionMetricsPieSplit
-  | SerializedReferrerEditionMetricsRevShareLimit;
+  | SerializedReferrerEditionMetricsRevShareCap;
 
 /**
  * Serialized representation of {@link ReferrerLeaderboardPageResponseError}.
@@ -76,7 +76,7 @@ export type SerializedReferrerLeaderboardPageResponse =
  */
 export type SerializedReferralProgramEditionSummary =
   | SerializedReferralProgramEditionSummaryPieSplit
-  | SerializedReferralProgramEditionSummaryRevShareLimit;
+  | SerializedReferralProgramEditionSummaryRevShareCap;
 
 /**
  * Serialized representation of referrer metrics data for requested editions.

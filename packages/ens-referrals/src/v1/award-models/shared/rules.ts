@@ -15,7 +15,7 @@ import { validateUnixTimestamp } from "../../time";
  */
 export const ReferralProgramAwardModels = {
   PieSplit: "pie-split",
-  RevShareLimit: "rev-share-limit",
+  RevShareCap: "rev-share-cap",
   Unrecognized: "unrecognized",
 } as const;
 
@@ -25,7 +25,7 @@ export type ReferralProgramAwardModel =
 /**
  * Base fields shared across all referral program rule types.
  *
- * Both `ReferralProgramRulesPieSplit` and `ReferralProgramRulesRevShareLimit` are structurally
+ * Both `ReferralProgramRulesPieSplit` and `ReferralProgramRulesRevShareCap` are structurally
  * compatible with this interface, so it can be used wherever only the common fields are needed
  * (e.g., `assertLeaderboardInputs`).
  */

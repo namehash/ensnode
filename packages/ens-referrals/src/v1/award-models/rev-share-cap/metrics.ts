@@ -8,27 +8,31 @@ import { buildReferrerMetrics, validateReferrerMetrics } from "../../referrer-me
 import { SECONDS_PER_YEAR } from "../../time";
 import type { ReferrerRank } from "../shared/rank";
 import { validateReferrerRank } from "../shared/rank";
-import { isReferrerQualifiedRevShareLimit, type ReferralProgramRulesRevShareLimit } from "./rules";
+import { isReferrerQualifiedRevShareCap, type ReferralProgramRulesRevShareCap } from "./rules";
 
 /**
  * Extends {@link ReferrerMetrics} with computed base revenue contribution.
  */
-export interface ReferrerMetricsRevShareLimit extends ReferrerMetrics {
+export interface ReferrerMetricsRevShareCap extends ReferrerMetrics {
   /**
    * The referrer's base revenue contribution
    * (`rules.baseAnnualRevenueContribution` × years of incremental duration).
-   * Used for qualification and award calculation in the rev-share-limit model.
+   * Used for qualification and award calculation in the rev-share-cap model.
    *
    * @invariant Guaranteed to be `priceUsdc(rules.baseAnnualRevenueContribution.amount * BigInt(totalIncrementalDuration) / BigInt(SECONDS_PER_YEAR))`
    */
   totalBaseRevenueContribution: PriceUsdc;
 }
 
-export const validateReferrerMetricsRevShareLimit = (
-  metrics: ReferrerMetricsRevShareLimit,
-  rules: ReferralProgramRulesRevShareLimit,
+export const validateReferrerMetricsRevShareCap = (
+  metrics: ReferrerMetricsRevShareCap,
+  rules: ReferralProgramRulesRevShareCap,
 ): void => {
   validateReferrerMetrics(metrics);
+
+  makePriceUsdcSchema("ReferrerMetricsRevShareCap.totalBaseRevenueContribution").parse(
+    metrics.totalBaseRevenueContribution,
+  );
 
   const expectedTotalBaseRevenueContribution = priceUsdc(
     (rules.baseAnnualRevenueContribution.amount * BigInt(metrics.totalIncrementalDuration)) /
@@ -36,15 +40,15 @@ export const validateReferrerMetricsRevShareLimit = (
   );
   if (metrics.totalBaseRevenueContribution.amount !== expectedTotalBaseRevenueContribution.amount) {
     throw new Error(
-      `ReferrerMetricsRevShareLimit: Invalid totalBaseRevenueContribution: ${metrics.totalBaseRevenueContribution.amount.toString()}, expected: ${expectedTotalBaseRevenueContribution.amount.toString()}.`,
+      `ReferrerMetricsRevShareCap: Invalid totalBaseRevenueContribution: ${metrics.totalBaseRevenueContribution.amount.toString()}, expected: ${expectedTotalBaseRevenueContribution.amount.toString()}.`,
     );
   }
 };
 
-export const buildReferrerMetricsRevShareLimit = (
+export const buildReferrerMetricsRevShareCap = (
   metrics: ReferrerMetrics,
-  rules: ReferralProgramRulesRevShareLimit,
-): ReferrerMetricsRevShareLimit => {
+  rules: ReferralProgramRulesRevShareCap,
+): ReferrerMetricsRevShareCap => {
   const totalBaseRevenueContribution = priceUsdc(
     (rules.baseAnnualRevenueContribution.amount * BigInt(metrics.totalIncrementalDuration)) /
       BigInt(SECONDS_PER_YEAR),
@@ -53,30 +57,30 @@ export const buildReferrerMetricsRevShareLimit = (
   const result = {
     ...metrics,
     totalBaseRevenueContribution,
-  } satisfies ReferrerMetricsRevShareLimit;
+  } satisfies ReferrerMetricsRevShareCap;
 
-  validateReferrerMetricsRevShareLimit(result, rules);
+  validateReferrerMetricsRevShareCap(result, rules);
   return result;
 };
 
 /**
- * Extends {@link ReferrerMetricsRevShareLimit} with rank, qualification status, and admin disqualification.
+ * Extends {@link ReferrerMetricsRevShareCap} with rank, qualification status, and admin disqualification.
  */
-export interface RankedReferrerMetricsRevShareLimit extends ReferrerMetricsRevShareLimit {
+export interface RankedReferrerMetricsRevShareCap extends ReferrerMetricsRevShareCap {
   /**
-   * The referrer's rank on the {@link ReferrerLeaderboardRevShareLimit} relative to all other referrers.
+   * The referrer's rank on the {@link ReferrerLeaderboardRevShareCap} relative to all other referrers.
    */
   rank: ReferrerRank;
 
   /**
-   * Identifies if the referrer is eligible for an award under the {@link ReferralProgramRulesRevShareLimit}.
+   * Identifies if the referrer is eligible for an award under the {@link ReferralProgramRulesRevShareCap}.
    *
    * Note: this is a purely rule-based eligibility predicate and does NOT guarantee
    * `cappedAward.amount > 0n` — a qualified referrer may still receive $0 if the
    * capped award pool is already exhausted by earlier referrers in the race.
    *
    * @invariant true if and only if `totalBaseRevenueContribution` is greater than or equal to
-   *   {@link ReferralProgramRulesRevShareLimit.minBaseRevenueContribution} AND
+   *   {@link ReferralProgramRulesRevShareCap.minBaseRevenueContribution} AND
    *   {@link isAdminDisqualified} is false.
    */
   isQualified: boolean;
@@ -97,21 +101,21 @@ export interface RankedReferrerMetricsRevShareLimit extends ReferrerMetricsRevSh
   adminDisqualificationReason: string | null;
 }
 
-export const validateRankedReferrerMetricsRevShareLimit = (
-  metrics: RankedReferrerMetricsRevShareLimit,
-  rules: ReferralProgramRulesRevShareLimit,
+export const validateRankedReferrerMetricsRevShareCap = (
+  metrics: RankedReferrerMetricsRevShareCap,
+  rules: ReferralProgramRulesRevShareCap,
 ): void => {
-  validateReferrerMetricsRevShareLimit(metrics, rules);
+  validateReferrerMetricsRevShareCap(metrics, rules);
   validateReferrerRank(metrics.rank);
 
-  const expectedIsQualified = isReferrerQualifiedRevShareLimit(
+  const expectedIsQualified = isReferrerQualifiedRevShareCap(
     metrics.referrer,
     metrics.totalBaseRevenueContribution,
     rules,
   );
   if (metrics.isQualified !== expectedIsQualified) {
     throw new Error(
-      `RankedReferrerMetricsRevShareLimit: Invalid isQualified: ${metrics.isQualified}, expected: ${expectedIsQualified}.`,
+      `RankedReferrerMetricsRevShareCap: Invalid isQualified: ${metrics.isQualified}, expected: ${expectedIsQualified}.`,
     );
   }
 
@@ -120,46 +124,46 @@ export const validateRankedReferrerMetricsRevShareLimit = (
 
   if (metrics.isAdminDisqualified !== (disqualification !== null)) {
     throw new Error(
-      `RankedReferrerMetricsRevShareLimit: Invalid isAdminDisqualified: ${metrics.isAdminDisqualified}, expected: ${disqualification !== null}.`,
+      `RankedReferrerMetricsRevShareCap: Invalid isAdminDisqualified: ${metrics.isAdminDisqualified}, expected: ${disqualification !== null}.`,
     );
   }
 
   const expectedReason = disqualification?.reason ?? null;
   if (metrics.adminDisqualificationReason !== expectedReason) {
     throw new Error(
-      `RankedReferrerMetricsRevShareLimit: Invalid adminDisqualificationReason: ${metrics.adminDisqualificationReason}, expected: ${expectedReason}.`,
+      `RankedReferrerMetricsRevShareCap: Invalid adminDisqualificationReason: ${metrics.adminDisqualificationReason}, expected: ${expectedReason}.`,
     );
   }
 };
 
-export const buildRankedReferrerMetricsRevShareLimit = (
-  referrer: ReferrerMetricsRevShareLimit,
+export const buildRankedReferrerMetricsRevShareCap = (
+  referrer: ReferrerMetricsRevShareCap,
   rank: ReferrerRank,
-  rules: ReferralProgramRulesRevShareLimit,
-): RankedReferrerMetricsRevShareLimit => {
+  rules: ReferralProgramRulesRevShareCap,
+): RankedReferrerMetricsRevShareCap => {
   const disqualification =
     rules.disqualifications.find((d) => d.referrer === referrer.referrer) ?? null;
 
   const result = {
     ...referrer,
     rank,
-    isQualified: isReferrerQualifiedRevShareLimit(
+    isQualified: isReferrerQualifiedRevShareCap(
       referrer.referrer,
       referrer.totalBaseRevenueContribution,
       rules,
     ),
     isAdminDisqualified: disqualification !== null,
     adminDisqualificationReason: disqualification?.reason ?? null,
-  } satisfies RankedReferrerMetricsRevShareLimit;
+  } satisfies RankedReferrerMetricsRevShareCap;
 
-  validateRankedReferrerMetricsRevShareLimit(result, rules);
+  validateRankedReferrerMetricsRevShareCap(result, rules);
   return result;
 };
 
 /**
- * Extends {@link RankedReferrerMetricsRevShareLimit} with the referrer's uncapped and capped awards.
+ * Extends {@link RankedReferrerMetricsRevShareCap} with the referrer's uncapped and capped awards.
  */
-export interface AwardedReferrerMetricsRevShareLimit extends RankedReferrerMetricsRevShareLimit {
+export interface AwardedReferrerMetricsRevShareCap extends RankedReferrerMetricsRevShareCap {
   /**
    * The uncapped USDC award for this referrer, computed as
    * `maxBaseRevenueShare × totalBaseRevenueContribution`.
@@ -175,7 +179,7 @@ export interface AwardedReferrerMetricsRevShareLimit extends RankedReferrerMetri
    * This is the amount (tentatively) claimed from the award pool by this referrer, capped by
    * the remaining award pool at the time of their qualifying referrals.
    *
-   * @invariant Guaranteed to be a valid PriceUsdc with amount between 0 and {@link ReferralProgramRulesRevShareLimit.awardPool.amount} (inclusive)
+   * @invariant Guaranteed to be a valid PriceUsdc with amount between 0 and {@link ReferralProgramRulesRevShareCap.awardPool.amount} (inclusive)
    * @invariant Always <= uncappedAward.amount
    * @invariant Amount equal to 0 when {@link isAdminDisqualified} is true.
    * @invariant Amount equal to 0 when {@link isQualified} is false.
@@ -183,65 +187,65 @@ export interface AwardedReferrerMetricsRevShareLimit extends RankedReferrerMetri
   cappedAward: PriceUsdc;
 }
 
-export const validateAwardedReferrerMetricsRevShareLimit = (
-  metrics: AwardedReferrerMetricsRevShareLimit,
-  rules: ReferralProgramRulesRevShareLimit,
+export const validateAwardedReferrerMetricsRevShareCap = (
+  metrics: AwardedReferrerMetricsRevShareCap,
+  rules: ReferralProgramRulesRevShareCap,
 ): void => {
-  validateRankedReferrerMetricsRevShareLimit(metrics, rules);
+  validateRankedReferrerMetricsRevShareCap(metrics, rules);
 
-  makePriceUsdcSchema("AwardedReferrerMetricsRevShareLimit.uncappedAward").parse(
+  makePriceUsdcSchema("AwardedReferrerMetricsRevShareCap.uncappedAward").parse(
     metrics.uncappedAward,
   );
 
-  makePriceUsdcSchema("AwardedReferrerMetricsRevShareLimit.cappedAward").parse(metrics.cappedAward);
+  makePriceUsdcSchema("AwardedReferrerMetricsRevShareCap.cappedAward").parse(metrics.cappedAward);
 
   if (metrics.isAdminDisqualified && metrics.cappedAward.amount !== 0n) {
     throw new Error(
-      `AwardedReferrerMetricsRevShareLimit: cappedAward.amount must be 0n for admin-disqualified referrers, got ${metrics.cappedAward.amount.toString()}.`,
+      `AwardedReferrerMetricsRevShareCap: cappedAward.amount must be 0n for admin-disqualified referrers, got ${metrics.cappedAward.amount.toString()}.`,
     );
   }
 
   if (!metrics.isQualified && metrics.cappedAward.amount !== 0n) {
     throw new Error(
-      `AwardedReferrerMetricsRevShareLimit: cappedAward.amount must be 0n for unqualified referrers, got ${metrics.cappedAward.amount.toString()}.`,
+      `AwardedReferrerMetricsRevShareCap: cappedAward.amount must be 0n for unqualified referrers, got ${metrics.cappedAward.amount.toString()}.`,
     );
   }
 
   if (metrics.cappedAward.amount > rules.awardPool.amount) {
     throw new Error(
-      `AwardedReferrerMetricsRevShareLimit: cappedAward.amount ${metrics.cappedAward.amount.toString()} exceeds awardPool.amount ${rules.awardPool.amount.toString()}.`,
+      `AwardedReferrerMetricsRevShareCap: cappedAward.amount ${metrics.cappedAward.amount.toString()} exceeds awardPool.amount ${rules.awardPool.amount.toString()}.`,
     );
   }
 
   if (metrics.cappedAward.amount > metrics.uncappedAward.amount) {
     throw new Error(
-      `AwardedReferrerMetricsRevShareLimit: cappedAward.amount ${metrics.cappedAward.amount.toString()} exceeds uncappedAward.amount ${metrics.uncappedAward.amount.toString()}.`,
+      `AwardedReferrerMetricsRevShareCap: cappedAward.amount ${metrics.cappedAward.amount.toString()} exceeds uncappedAward.amount ${metrics.uncappedAward.amount.toString()}.`,
     );
   }
 };
 
-export const buildAwardedReferrerMetricsRevShareLimit = (
-  referrer: RankedReferrerMetricsRevShareLimit,
+export const buildAwardedReferrerMetricsRevShareCap = (
+  referrer: RankedReferrerMetricsRevShareCap,
   uncappedAward: PriceUsdc,
   cappedAward: PriceUsdc,
-  rules: ReferralProgramRulesRevShareLimit,
-): AwardedReferrerMetricsRevShareLimit => {
+  rules: ReferralProgramRulesRevShareCap,
+): AwardedReferrerMetricsRevShareCap => {
   const result = {
     ...referrer,
     uncappedAward,
     cappedAward,
-  } satisfies AwardedReferrerMetricsRevShareLimit;
+  } satisfies AwardedReferrerMetricsRevShareCap;
 
-  validateAwardedReferrerMetricsRevShareLimit(result, rules);
+  validateAwardedReferrerMetricsRevShareCap(result, rules);
   return result;
 };
 
 /**
- * Extends {@link AwardedReferrerMetricsRevShareLimit} but with rank set to null to represent
+ * Extends {@link AwardedReferrerMetricsRevShareCap} but with rank set to null to represent
  * a referrer who is not on the leaderboard (has zero referrals within the rules associated with the leaderboard).
  */
-export interface UnrankedReferrerMetricsRevShareLimit
-  extends Omit<AwardedReferrerMetricsRevShareLimit, "rank" | "isQualified"> {
+export interface UnrankedReferrerMetricsRevShareCap
+  extends Omit<AwardedReferrerMetricsRevShareCap, "rank" | "isQualified"> {
   /**
    * The referrer is not on the leaderboard and therefore has no rank.
    */
@@ -253,20 +257,20 @@ export interface UnrankedReferrerMetricsRevShareLimit
   isQualified: false;
 }
 
-export const validateUnrankedReferrerMetricsRevShareLimit = (
-  metrics: UnrankedReferrerMetricsRevShareLimit,
-  rules: ReferralProgramRulesRevShareLimit,
+export const validateUnrankedReferrerMetricsRevShareCap = (
+  metrics: UnrankedReferrerMetricsRevShareCap,
+  rules: ReferralProgramRulesRevShareCap,
 ): void => {
   validateReferrerMetrics(metrics);
 
   if (metrics.rank !== null) {
     throw new Error(
-      `Invalid UnrankedReferrerMetricsRevShareLimit: rank must be null, got: ${metrics.rank}.`,
+      `Invalid UnrankedReferrerMetricsRevShareCap: rank must be null, got: ${metrics.rank}.`,
     );
   }
   if (metrics.isQualified !== false) {
     throw new Error(
-      `Invalid UnrankedReferrerMetricsRevShareLimit: isQualified must be false, got: ${metrics.isQualified}.`,
+      `Invalid UnrankedReferrerMetricsRevShareCap: isQualified must be false, got: ${metrics.isQualified}.`,
     );
   }
 
@@ -275,72 +279,70 @@ export const validateUnrankedReferrerMetricsRevShareLimit = (
 
   if (metrics.isAdminDisqualified !== (disqualification !== null)) {
     throw new Error(
-      `Invalid UnrankedReferrerMetricsRevShareLimit: isAdminDisqualified: ${metrics.isAdminDisqualified}, expected: ${disqualification !== null}.`,
+      `Invalid UnrankedReferrerMetricsRevShareCap: isAdminDisqualified: ${metrics.isAdminDisqualified}, expected: ${disqualification !== null}.`,
     );
   }
 
   const expectedReason = disqualification?.reason ?? null;
   if (metrics.adminDisqualificationReason !== expectedReason) {
     throw new Error(
-      `Invalid UnrankedReferrerMetricsRevShareLimit: adminDisqualificationReason: ${metrics.adminDisqualificationReason}, expected: ${expectedReason}.`,
+      `Invalid UnrankedReferrerMetricsRevShareCap: adminDisqualificationReason: ${metrics.adminDisqualificationReason}, expected: ${expectedReason}.`,
     );
   }
 
   if (metrics.totalReferrals !== 0) {
     throw new Error(
-      `Invalid UnrankedReferrerMetricsRevShareLimit: totalReferrals must be 0, got: ${metrics.totalReferrals}.`,
+      `Invalid UnrankedReferrerMetricsRevShareCap: totalReferrals must be 0, got: ${metrics.totalReferrals}.`,
     );
   }
   if (metrics.totalIncrementalDuration !== 0) {
     throw new Error(
-      `Invalid UnrankedReferrerMetricsRevShareLimit: totalIncrementalDuration must be 0, got: ${metrics.totalIncrementalDuration}.`,
+      `Invalid UnrankedReferrerMetricsRevShareCap: totalIncrementalDuration must be 0, got: ${metrics.totalIncrementalDuration}.`,
     );
   }
 
-  makePriceEthSchema("UnrankedReferrerMetricsRevShareLimit.totalRevenueContribution").parse(
+  makePriceEthSchema("UnrankedReferrerMetricsRevShareCap.totalRevenueContribution").parse(
     metrics.totalRevenueContribution,
   );
   if (metrics.totalRevenueContribution.amount !== 0n) {
     throw new Error(
-      `Invalid UnrankedReferrerMetricsRevShareLimit: totalRevenueContribution.amount must be 0n, got: ${metrics.totalRevenueContribution.amount.toString()}.`,
+      `Invalid UnrankedReferrerMetricsRevShareCap: totalRevenueContribution.amount must be 0n, got: ${metrics.totalRevenueContribution.amount.toString()}.`,
     );
   }
 
-  makePriceUsdcSchema("UnrankedReferrerMetricsRevShareLimit.totalBaseRevenueContribution").parse(
+  makePriceUsdcSchema("UnrankedReferrerMetricsRevShareCap.totalBaseRevenueContribution").parse(
     metrics.totalBaseRevenueContribution,
   );
   if (metrics.totalBaseRevenueContribution.amount !== 0n) {
     throw new Error(
-      `Invalid UnrankedReferrerMetricsRevShareLimit: totalBaseRevenueContribution.amount must be 0n, got: ${metrics.totalBaseRevenueContribution.amount.toString()}.`,
+      `Invalid UnrankedReferrerMetricsRevShareCap: totalBaseRevenueContribution.amount must be 0n, got: ${metrics.totalBaseRevenueContribution.amount.toString()}.`,
     );
   }
 
-  makePriceUsdcSchema("UnrankedReferrerMetricsRevShareLimit.uncappedAward").parse(
+  makePriceUsdcSchema("UnrankedReferrerMetricsRevShareCap.uncappedAward").parse(
     metrics.uncappedAward,
   );
   if (metrics.uncappedAward.amount !== 0n) {
     throw new Error(
-      `Invalid UnrankedReferrerMetricsRevShareLimit: uncappedAward.amount must be 0n, got: ${metrics.uncappedAward.amount.toString()}.`,
+      `Invalid UnrankedReferrerMetricsRevShareCap: uncappedAward.amount must be 0n, got: ${metrics.uncappedAward.amount.toString()}.`,
     );
   }
 
-  makePriceUsdcSchema("UnrankedReferrerMetricsRevShareLimit.cappedAward").parse(
-    metrics.cappedAward,
-  );
+  makePriceUsdcSchema("UnrankedReferrerMetricsRevShareCap.cappedAward").parse(metrics.cappedAward);
   if (metrics.cappedAward.amount !== 0n) {
     throw new Error(
-      `Invalid UnrankedReferrerMetricsRevShareLimit: cappedAward.amount must be 0n, got: ${metrics.cappedAward.amount.toString()}.`,
+      `Invalid UnrankedReferrerMetricsRevShareCap: cappedAward.amount must be 0n, got: ${metrics.cappedAward.amount.toString()}.`,
     );
   }
 };
 
 /**
- * Build an unranked zero-metrics rev-share-limit referrer record for an address not on the leaderboard.
+ * Build an unranked zero-metrics rev-share-cap referrer record for an address not on the leaderboard.
  */
-export const buildUnrankedReferrerMetricsRevShareLimit = (
+export const buildUnrankedReferrerMetricsRevShareCap = (
   referrer: NormalizedAddress,
-  rules: ReferralProgramRulesRevShareLimit,
-): UnrankedReferrerMetricsRevShareLimit => {
+  rules: ReferralProgramRulesRevShareCap,
+): UnrankedReferrerMetricsRevShareCap => {
   const metrics = buildReferrerMetrics(referrer, 0, 0, priceEth(0n));
 
   const disqualification =
@@ -355,8 +357,8 @@ export const buildUnrankedReferrerMetricsRevShareLimit = (
     cappedAward: priceUsdc(0n),
     isAdminDisqualified: disqualification !== null,
     adminDisqualificationReason: disqualification?.reason ?? null,
-  } satisfies UnrankedReferrerMetricsRevShareLimit;
+  } satisfies UnrankedReferrerMetricsRevShareCap;
 
-  validateUnrankedReferrerMetricsRevShareLimit(result, rules);
+  validateUnrankedReferrerMetricsRevShareCap(result, rules);
   return result;
 };

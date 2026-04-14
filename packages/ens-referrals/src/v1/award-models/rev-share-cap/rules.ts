@@ -27,15 +27,15 @@ export interface ReferralProgramEditionDisqualification {
   reason: string;
 }
 
-export interface ReferralProgramRulesRevShareLimit extends BaseReferralProgramRules {
+export interface ReferralProgramRulesRevShareCap extends BaseReferralProgramRules {
   /**
-   * Discriminant: identifies this as a "rev-share-limit" award model edition.
+   * Discriminant: identifies this as a "rev-share-cap" award model edition.
    *
-   * In rev-share-limit, each qualified referrer receives a share of their base revenue
+   * In rev-share-cap, each qualified referrer receives a share of their base revenue
    * contribution (base-fee-only: `baseAnnualRevenueContribution` × years of incremental duration),
    * subject to the award pool cap and a minimum qualification threshold.
    */
-  awardModel: typeof ReferralProgramAwardModels.RevShareLimit;
+  awardModel: typeof ReferralProgramAwardModels.RevShareCap;
 
   /**
    * The award pool in USDC (acts as a cap on total payouts).
@@ -50,7 +50,7 @@ export interface ReferralProgramRulesRevShareLimit extends BaseReferralProgramRu
   /**
    * Base revenue contribution in USDC per year of incremental duration from referred registrations and renewals.
    *
-   * Used in `rev-share-limit` qualification and award calculations:
+   * Used in `rev-share-cap` qualification and award calculations:
    * 1 year of incremental duration → this many USDC of base revenue (base-fee-only, excluding premiums).
    */
   baseAnnualRevenueContribution: PriceUsdc;
@@ -72,16 +72,22 @@ export interface ReferralProgramRulesRevShareLimit extends BaseReferralProgramRu
   disqualifications: ReferralProgramEditionDisqualification[];
 }
 
-export const validateReferralProgramRulesRevShareLimit = (
-  rules: ReferralProgramRulesRevShareLimit,
+export const validateReferralProgramRulesRevShareCap = (
+  rules: ReferralProgramRulesRevShareCap,
 ): void => {
-  makePriceUsdcSchema("ReferralProgramRulesRevShareLimit.awardPool").parse(rules.awardPool);
+  if (rules.awardModel !== ReferralProgramAwardModels.RevShareCap) {
+    throw new Error(
+      `ReferralProgramRulesRevShareCap: awardModel must be "${ReferralProgramAwardModels.RevShareCap}", got "${rules.awardModel}".`,
+    );
+  }
 
-  makePriceUsdcSchema("ReferralProgramRulesRevShareLimit.minBaseRevenueContribution").parse(
+  makePriceUsdcSchema("ReferralProgramRulesRevShareCap.awardPool").parse(rules.awardPool);
+
+  makePriceUsdcSchema("ReferralProgramRulesRevShareCap.minBaseRevenueContribution").parse(
     rules.minBaseRevenueContribution,
   );
 
-  makePriceUsdcSchema("ReferralProgramRulesRevShareLimit.baseAnnualRevenueContribution").parse(
+  makePriceUsdcSchema("ReferralProgramRulesRevShareCap.baseAnnualRevenueContribution").parse(
     rules.baseAnnualRevenueContribution,
   );
 
@@ -91,7 +97,7 @@ export const validateReferralProgramRulesRevShareLimit = (
     rules.maxBaseRevenueShare > 1
   ) {
     throw new Error(
-      `ReferralProgramRulesRevShareLimit: maxBaseRevenueShare must be between 0 and 1 (inclusive), got ${rules.maxBaseRevenueShare}.`,
+      `ReferralProgramRulesRevShareCap: maxBaseRevenueShare must be between 0 and 1 (inclusive), got ${rules.maxBaseRevenueShare}.`,
     );
   }
 
@@ -99,7 +105,7 @@ export const validateReferralProgramRulesRevShareLimit = (
     validateAddress(d.referrer);
     if (d.reason.trim().length === 0) {
       throw new Error(
-        "ReferralProgramRulesRevShareLimit: disqualification reason must not be empty.",
+        "ReferralProgramRulesRevShareCap: disqualification reason must not be empty.",
       );
     }
   }
@@ -108,14 +114,14 @@ export const validateReferralProgramRulesRevShareLimit = (
   const uniqueDisqualificationAddresses = new Set(disqualificationAddresses);
   if (uniqueDisqualificationAddresses.size !== disqualificationAddresses.length) {
     throw new Error(
-      "ReferralProgramRulesRevShareLimit: disqualifications must not contain duplicate referrer addresses.",
+      "ReferralProgramRulesRevShareCap: disqualifications must not contain duplicate referrer addresses.",
     );
   }
 
   validateBaseReferralProgramRules(rules);
 };
 
-export const buildReferralProgramRulesRevShareLimit = (
+export const buildReferralProgramRulesRevShareCap = (
   awardPool: PriceUsdc,
   minBaseRevenueContribution: PriceUsdc,
   baseAnnualRevenueContribution: PriceUsdc,
@@ -126,9 +132,9 @@ export const buildReferralProgramRulesRevShareLimit = (
   rulesUrl: URL,
   areAwardsDistributed: boolean,
   disqualifications: ReferralProgramEditionDisqualification[] = [],
-): ReferralProgramRulesRevShareLimit => {
+): ReferralProgramRulesRevShareCap => {
   const result = {
-    awardModel: ReferralProgramAwardModels.RevShareLimit,
+    awardModel: ReferralProgramAwardModels.RevShareCap,
     awardPool,
     minBaseRevenueContribution,
     baseAnnualRevenueContribution,
@@ -139,26 +145,26 @@ export const buildReferralProgramRulesRevShareLimit = (
     rulesUrl,
     areAwardsDistributed,
     disqualifications,
-  } satisfies ReferralProgramRulesRevShareLimit;
+  } satisfies ReferralProgramRulesRevShareCap;
 
-  validateReferralProgramRulesRevShareLimit(result);
+  validateReferralProgramRulesRevShareCap(result);
 
   return result;
 };
 
 /**
- * Determine if a referrer is qualified under rev-share-limit rules.
+ * Determine if a referrer is qualified under rev-share-cap rules.
  *
  * A referrer is qualified if they meet the revenue threshold AND are not admin-disqualified.
  *
  * @param referrer - The referrer's address.
  * @param totalBaseRevenueContribution - The referrer's total base revenue contribution.
- * @param rules - The rev-share-limit rules of the referral program.
+ * @param rules - The rev-share-cap rules of the referral program.
  */
-export function isReferrerQualifiedRevShareLimit(
+export function isReferrerQualifiedRevShareCap(
   referrer: NormalizedAddress,
   totalBaseRevenueContribution: PriceUsdc,
-  rules: ReferralProgramRulesRevShareLimit,
+  rules: ReferralProgramRulesRevShareCap,
 ): boolean {
   const isAdminDisqualified = rules.disqualifications.some((d) => d.referrer === referrer);
   return (
