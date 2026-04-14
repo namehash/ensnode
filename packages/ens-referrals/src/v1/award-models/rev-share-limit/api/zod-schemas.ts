@@ -53,9 +53,15 @@ export const makeReferralProgramRulesRevShareLimitSchema = (
         makeReferralProgramEditionDisqualificationSchema(`${valueLabel}.disqualifications[item]`),
       )
       // NOTE: addresses are already normalized, so string equivalence here is accurate
-      .refine((addresses) => new Set(addresses).size === addresses.length, {
-        message: `${valueLabel}.disqualifications must not contain duplicate referrer addresses`,
-      })
+      .refine(
+        (items) => {
+          const referrers = items.map((d) => d.referrer);
+          return new Set(referrers).size === referrers.length;
+        },
+        {
+          message: `${valueLabel}.disqualifications must not contain duplicate referrer addresses`,
+        },
+      )
       .default([]),
   });
 
