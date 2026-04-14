@@ -1,5 +1,4 @@
-import type { AccountId, Address, UnixTimestamp } from "enssdk";
-import { toNormalizedAddress } from "enssdk";
+import type { AccountId, NormalizedAddress, UnixTimestamp } from "enssdk";
 
 import type { PriceUsdc } from "@ensnode/ensnode-sdk";
 import { makePriceUsdcSchema } from "@ensnode/ensnode-sdk/internal";
@@ -17,10 +16,8 @@ import {
 export interface ReferralProgramEditionDisqualification {
   /**
    * The address of the disqualified referrer.
-   *
-   * @invariant Guaranteed to be a valid EVM address in lowercase format.
    */
-  referrer: Address;
+  referrer: NormalizedAddress;
 
   /**
    * A human-readable explanation of why the referrer was disqualified.
@@ -159,14 +156,11 @@ export const buildReferralProgramRulesRevShareLimit = (
  * @param rules - The rev-share-limit rules of the referral program.
  */
 export function isReferrerQualifiedRevShareLimit(
-  referrer: Address,
+  referrer: NormalizedAddress,
   totalBaseRevenueContribution: PriceUsdc,
   rules: ReferralProgramRulesRevShareLimit,
 ): boolean {
-  const normalizedReferrer = toNormalizedAddress(referrer);
-  const isAdminDisqualified = rules.disqualifications.some(
-    (d) => d.referrer === normalizedReferrer,
-  );
+  const isAdminDisqualified = rules.disqualifications.some((d) => d.referrer === referrer);
   return (
     totalBaseRevenueContribution.amount >= rules.minBaseRevenueContribution.amount &&
     !isAdminDisqualified

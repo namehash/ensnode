@@ -1,4 +1,4 @@
-import type { Address } from "enssdk";
+import type { NormalizedAddress } from "enssdk";
 
 import { type PriceUsdc, priceEth, priceUsdc, scalePrice } from "@ensnode/ensnode-sdk";
 import { makePriceEthSchema, makePriceUsdcSchema } from "@ensnode/ensnode-sdk/internal";
@@ -316,7 +316,7 @@ export const validateUnrankedReferrerMetricsPieSplit = (
  * @returns An {@link UnrankedReferrerMetricsPieSplit} with zero values for all metrics and null rank
  */
 export const buildUnrankedReferrerMetricsPieSplit = (
-  referrer: Address,
+  referrer: NormalizedAddress,
 ): UnrankedReferrerMetricsPieSplit => {
   const metrics = buildReferrerMetrics(referrer, 0, 0, priceEth(0n));
   const scoredMetrics = buildScoredReferrerMetricsPieSplit(metrics);

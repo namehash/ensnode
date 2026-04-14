@@ -1,5 +1,5 @@
 import { type Hex, type NormalizedAddress, toNormalizedAddress } from "enssdk";
-import { type Address, type Hash, isAddress } from "viem";
+import type { Address, Hash } from "viem";
 
 /**
  * Options for the `callTracer` tracer. This tracer is used to enlist
@@ -39,10 +39,10 @@ interface Trace {
   type: "CALL" | "STATICCALL" | "DELEGATECALL" | "CREATE" | "CREATE2";
 
   // Caller address
-  from: NormalizedAddress;
+  from: Address;
 
   // Recipient address
-  to: NormalizedAddress;
+  to: Address;
 
   // Amount of gas provided for the call
   gas: Hex;

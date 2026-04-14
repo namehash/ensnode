@@ -5,7 +5,7 @@ import {
   type ReferrerMetrics,
 } from "@namehash/ens-referrals/v1";
 import { and, asc, count, desc, eq, gte, isNotNull, lte, ne, sql, sum } from "drizzle-orm";
-import { type Address, stringifyAccountId } from "enssdk";
+import { type NormalizedAddress, stringifyAccountId } from "enssdk";
 import { zeroAddress } from "viem";
 
 import { deserializeDuration, priceEth } from "@ensnode/ensnode-sdk";
@@ -77,7 +77,7 @@ export const getReferrerMetrics = async (
     // 2. `totalIncrementalDuration` is guaranteed to be non-null as it is the sum of non-null bigint values
     // 3. `totalRevenueContribution` is guaranteed to be non-null due to COALESCE with 0
     interface NonNullRecord {
-      referrer: Address;
+      referrer: NormalizedAddress;
       totalReferrals: number;
       totalIncrementalDuration: string;
       totalRevenueContribution: string;
@@ -144,7 +144,7 @@ export const getReferralEvents = async (rules: ReferralProgramRules): Promise<Re
     // 3. `total` is guaranteed non-null by COALESCE with 0
     interface NonNullRecord {
       id: string;
-      referrer: Address;
+      referrer: NormalizedAddress;
       timestamp: bigint;
       incrementalDuration: bigint;
       total: string;

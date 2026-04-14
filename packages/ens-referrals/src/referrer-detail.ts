@@ -1,4 +1,4 @@
-import type { Address, UnixTimestamp } from "enssdk";
+import type { NormalizedAddress, UnixTimestamp } from "enssdk";
 
 import type { AggregatedReferrerMetrics } from "./aggregations";
 import type { ReferrerLeaderboard } from "./leaderboard";
@@ -128,7 +128,7 @@ export type ReferrerDetail = ReferrerDetailRanked | ReferrerDetailUnranked;
  * @returns The appropriate {@link ReferrerDetail} (ranked or unranked)
  */
 export const getReferrerDetail = (
-  referrer: Address,
+  referrer: NormalizedAddress,
   leaderboard: ReferrerLeaderboard,
 ): ReferrerDetail => {
   const awardedReferrerMetrics = leaderboard.referrers.get(referrer);

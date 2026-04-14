@@ -10,6 +10,7 @@ import type {
   ENSv2DomainId,
   LabelHash,
   Node,
+  NormalizedAddress,
   PermissionsId,
   PermissionsResourceId,
   PermissionsUserId,
@@ -50,8 +51,11 @@ export const makePermissionsId = (contract: AccountId) =>
 export const makePermissionsResourceId = (contract: AccountId, resource: EACResource) =>
   `${makePermissionsId(contract)}/${resource}` as PermissionsResourceId;
 
-export const makePermissionsUserId = (contract: AccountId, resource: EACResource, user: Address) =>
-  `${makePermissionsResourceId(contract, resource)}/${user}` as PermissionsUserId;
+export const makePermissionsUserId = (
+  contract: AccountId,
+  resource: EACResource,
+  user: NormalizedAddress,
+) => `${makePermissionsResourceId(contract, resource)}/${user}` as PermissionsUserId;
 
 export const makeResolverRecordsId = (resolver: AccountId, node: Node) =>
   `${makeResolverId(resolver)}/${node}` as ResolverRecordsId;

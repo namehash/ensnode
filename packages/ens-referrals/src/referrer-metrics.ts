@@ -1,5 +1,4 @@
-import type { Address, Duration } from "enssdk";
-import { toNormalizedAddress } from "enssdk";
+import type { Duration, NormalizedAddress } from "enssdk";
 
 import { validateAddress } from "./address";
 import type { AggregatedReferrerMetrics } from "./aggregations";
@@ -28,7 +27,7 @@ export interface ReferrerMetrics {
    *
    * @invariant Guaranteed to be a valid EVM address in lowercase format
    */
-  referrer: Address;
+  referrer: NormalizedAddress;
 
   /**
    * The total number of referrals made by the referrer within the {@link ReferralProgramRules}.
@@ -56,13 +55,13 @@ export interface ReferrerMetrics {
 }
 
 export const buildReferrerMetrics = (
-  referrer: Address,
+  referrer: NormalizedAddress,
   totalReferrals: number,
   totalIncrementalDuration: Duration,
   totalRevenueContribution: RevenueContribution,
 ): ReferrerMetrics => {
   const result = {
-    referrer: toNormalizedAddress(referrer),
+    referrer,
     totalReferrals,
     totalIncrementalDuration,
     totalRevenueContribution,
@@ -372,7 +371,9 @@ export const validateUnrankedReferrerMetrics = (metrics: UnrankedReferrerMetrics
  * @param referrer - The referrer address
  * @returns An {@link UnrankedReferrerMetrics} with zero values for all metrics and null rank
  */
-export const buildUnrankedReferrerMetrics = (referrer: Address): UnrankedReferrerMetrics => {
+export const buildUnrankedReferrerMetrics = (
+  referrer: NormalizedAddress,
+): UnrankedReferrerMetrics => {
   const baseMetrics = buildReferrerMetrics(referrer, 0, 0, 0n);
   const scoredMetrics = buildScoredReferrerMetrics(baseMetrics);
 
