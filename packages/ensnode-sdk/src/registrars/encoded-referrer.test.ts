@@ -1,4 +1,4 @@
-import { type Address, toNormalizedAddress } from "enssdk";
+import { type Address, asNormalizedAddress, toNormalizedAddress } from "enssdk";
 import { concat, getAddress, pad, zeroAddress } from "viem";
 import { describe, expect, it } from "vitest";
 
@@ -9,7 +9,10 @@ import {
   ENCODED_REFERRER_BYTE_OFFSET,
 } from "./encoded-referrer";
 
-const vitalikEthAddressLowercase: Address = "0xd8da6bf26964af9d7eed9e03e53415d37aa96045";
+const vitalikEthAddressLowercase = asNormalizedAddress(
+  "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+);
+
 const vitalikEthAddressChecksummed: Address = getAddress(
   "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
 );

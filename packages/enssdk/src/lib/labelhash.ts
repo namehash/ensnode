@@ -46,13 +46,13 @@ export function isLabelHash(maybeLabelHash: string): maybeLabelHash is LabelHash
  * @see https://ensnode.io/docs/reference/terminology#encoded-labelhash
  *
  * @param labelHash - A 32-byte lowercase hash string starting with '0x'
- * @returns The encoded label hash in format `[hash_without_0x_prefix]`
+ * @returns The encoded label hash in format `[labelhash_without_0x_prefix]`
  */
 export const encodeLabelHash = (labelHash: LabelHash): EncodedLabelHash =>
   `[${labelHash.slice(2)}]`;
 
 /**
- * Parses an Encoded LabelHash (`[hash_without_0x_prefix]`) as a {@link LabelHash},
+ * Parses an Encoded LabelHash (`[labelhash_without_0x_prefix]`) as a {@link LabelHash},
  * returning `null` if the input does not match the expected format.
  */
 function parseEncodedLabelHash(value: string): LabelHash | null {
@@ -74,7 +74,7 @@ function parseEncodedLabelHash(value: string): LabelHash | null {
  * @see https://ensnode.io/docs/reference/terminology#encoded-labelhash
  * @see https://github.com/wevm/viem/blob/main/src/utils/ens/encodedLabelToLabelhash.ts
  *
- * @param maybeEncodedLabelHash The encoded label hash in format `[hash_without_0x_prefix]`
+ * @param maybeEncodedLabelHash The encoded label hash in format `[labelhash_without_0x_prefix]`
  * @returns A 32-byte lowercase hash string starting with '0x'
  */
 export const decodeEncodedLabelHash = (maybeEncodedLabelHash: string): LabelHash => {
