@@ -50,12 +50,15 @@ export function EnsureInterpretedName({
 }) {
   if (isInterpretedName(name)) return children(name);
 
+  // this isn't an InterpretedName, let's try to redirect the user to the InterpretedName
+  // which ensures that our app only ever operates on InterpretedNames
+  let interpreted: InterpretedName;
   try {
-    // this isn't an InterpretedName, let's try to redirect the user to the InterpretedName
-    // which ensures that our app only ever operates on InterpretedNames
-    return coerced(literalNameToInterpretedName(name, options));
+    interpreted = literalNameToInterpretedName(name, options);
   } catch {
     // this name can't conform to InterpretedName: it is malformed or contains unnormalizable Labels
     return malformed(name);
   }
+
+  return coerced(interpreted);
 }
