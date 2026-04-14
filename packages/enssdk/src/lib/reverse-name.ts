@@ -1,6 +1,6 @@
 import { DEFAULT_EVM_COIN_TYPE, ETH_COIN_TYPE } from "./coin-type";
 import { asLiteralLabel } from "./interpreted-names-and-labels";
-import type { CoinType, Label, LiteralLabel, Name, NormalizedAddress } from "./types";
+import type { CoinType, InterpretedName, Label, LiteralLabel, NormalizedAddress } from "./types";
 
 /**
  * Gets the Label used for the reverse names of subnames as per ENSIP-11 & ENSIP-19.
@@ -34,7 +34,7 @@ export const coinTypeReverseLabel = (coinType: CoinType): Label => coinType.toSt
  * reverseName("0x1234", BigInt(0x5678)) // "1234.5678.reverse"
  * ```
  */
-export function reverseName(address: NormalizedAddress, coinType: CoinType): Name {
+export function reverseName(address: NormalizedAddress, coinType: CoinType): InterpretedName {
   const label = addrReverseLabel(address);
 
   const middle = (() => {
@@ -48,5 +48,5 @@ export function reverseName(address: NormalizedAddress, coinType: CoinType): Nam
     }
   })();
 
-  return `${label}.${middle}.reverse`;
+  return `${label}.${middle}.reverse` as InterpretedName;
 }

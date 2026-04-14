@@ -14,6 +14,7 @@ import {
 import { describe, expect, it } from "vitest";
 
 import { DEFAULT_EVM_CHAIN_ID, evmChainIdToCoinType } from "./coin-type";
+import { asLiteralName } from "./interpreted-names-and-labels";
 import { parseReverseName } from "./parse-reverse-name";
 import { reverseName } from "./reverse-name";
 
@@ -132,20 +133,20 @@ const negativeCases: string[] = [
 describe("parseReverseName", () => {
   positiveCases.forEach(([input, expected]) => {
     it(`parses "${input}"`, () => {
-      expect(parseReverseName(input)).toEqual(expected);
+      expect(parseReverseName(asLiteralName(input))).toEqual(expected);
     });
   });
 
   negativeCases.forEach((input) => {
     it(`does not parse "${input}"`, () => {
-      expect(parseReverseName(input)).toBeNull();
+      expect(parseReverseName(asLiteralName(input))).toBeNull();
     });
   });
 
   it("parses constructed names", () => {
     CHAIN_IDS.forEach((chainId) => {
       const coinType = evmChainIdToCoinType(chainId);
-      expect(parseReverseName(reverseName(EXAMPLE_ADDRESS, coinType))).toEqual({
+      expect(parseReverseName(asLiteralName(reverseName(EXAMPLE_ADDRESS, coinType)))).toEqual({
         address: EXAMPLE_ADDRESS,
         coinType,
       });

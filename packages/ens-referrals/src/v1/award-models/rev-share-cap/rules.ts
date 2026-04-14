@@ -15,7 +15,7 @@ import {
  */
 export interface ReferralProgramEditionDisqualification {
   /**
-   * The address of the disqualified referrer.
+   * The Ethereum address of the disqualified referrer, as a {@link NormalizedAddress}.
    */
   referrer: NormalizedAddress;
 

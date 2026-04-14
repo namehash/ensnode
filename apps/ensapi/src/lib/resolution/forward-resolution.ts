@@ -5,6 +5,7 @@ import { replaceBigInts } from "@ponder/utils";
 import {
   type AccountId,
   asInterpretedName,
+  asLiteralName,
   type InterpretedName,
   isNormalizedName,
   type Node,
@@ -143,7 +144,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           // TODO: technically InterpretedNames are not resolvable, since ENS contracts are not
           // encoded-labelhash-aware; so we add a temporary additional constraint on name that it
           // must be fully normalized (and therefore not contain encoded labelhash segments)
-          // (this will be improved in a future pr)
+          // (this will be improved in a future pr https://github.com/namehash/ensnode/issues/1920)
           if (!isNormalizedName(name)) {
             throw new Error(`'${name}' must be normalized to be resolvable.`);
           }
@@ -280,7 +281,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
                   }
 
                   // Invariant: the name in question should be an ENSIP-19 Reverse Name that we're able to parse
-                  const parsed = parseReverseName(name);
+                  const parsed = parseReverseName(asLiteralName(name));
                   if (!parsed) {
                     throw new Error(
                       `Invariant(ENSIP-19 Reverse Resolvers Protocol Acceleration): expected a valid ENSIP-19 Reverse Name but recieved '${name}'.`,

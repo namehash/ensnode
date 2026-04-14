@@ -23,9 +23,7 @@ import { validateDuration } from "./time";
  */
 export interface ReferrerMetrics {
   /**
-   * The fully lowercase Ethereum address of the referrer.
-   *
-   * @invariant Guaranteed to be a valid EVM address in lowercase format
+   * The Ethereum address of the referrer, as a {@link NormalizedAddress}.
    */
   referrer: NormalizedAddress;
 

@@ -10,7 +10,7 @@ import type { PriceEth } from "@ensnode/ensnode-sdk";
  */
 export interface ReferralEvent {
   /**
-   * The fully lowercase Ethereum address of the referrer.
+   * The Ethereum address of the referrer, as a {@link NormalizedAddress}.
    */
   referrer: NormalizedAddress;
 

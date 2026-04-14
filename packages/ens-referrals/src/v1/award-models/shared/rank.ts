@@ -25,7 +25,7 @@ export interface ReferrerMetricsForComparison {
   totalIncrementalDuration: Duration;
 
   /**
-   * The Ethereum address of the referrer.
+   * The Ethereum address of the referrer, as a {@link NormalizedAddress}.
    */
   referrer: NormalizedAddress;
 }

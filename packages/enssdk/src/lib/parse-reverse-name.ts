@@ -3,7 +3,7 @@ import { hexToBigInt } from "viem";
 import { toNormalizedAddress } from "./address";
 import { bigintToCoinType, DEFAULT_EVM_COIN_TYPE, ETH_COIN_TYPE } from "./coin-type";
 import { asLiteralLabel } from "./interpreted-names-and-labels";
-import type { CoinType, LiteralLabel, Name, NormalizedAddress } from "./types";
+import type { CoinType, LiteralLabel, LiteralName, NormalizedAddress } from "./types";
 
 /**
  * Matches an ENSIP-19 Reverse Name
@@ -38,7 +38,7 @@ const parseCoinTypeLabel = (coinTypeLabel: LiteralLabel): CoinType => {
 /**
  * Parse the address and coinType out of an ENSIP-19 reverse name.
  */
-export function parseReverseName(name: Name): {
+export function parseReverseName(name: LiteralName): {
   address: NormalizedAddress;
   coinType: CoinType;
 } | null {
