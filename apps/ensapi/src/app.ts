@@ -75,8 +75,7 @@ app.get("/health", async (c) => {
 // log hono errors to console
 app.onError((error, ctx) => {
   logger.error(error);
-  //return errorResponse(ctx, "Internal Server Error");
-  return errorResponse(ctx, error);
+  return errorResponse(ctx, "Internal Server Error");
 });
 
 export default app;

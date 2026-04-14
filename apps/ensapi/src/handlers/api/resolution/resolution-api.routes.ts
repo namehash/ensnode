@@ -21,17 +21,7 @@ export const resolveRecordsRoute = createRoute({
     params: z.object({
       name: params.name,
     }),
-    query: z
-      .object({
-        ...params.selectionParams.shape,
-        trace: params.trace,
-        accelerate: params.accelerate,
-      })
-      .transform((value) => {
-        const { trace, accelerate, ...selectionParams } = value;
-        const selection = params.selection.parse(selectionParams);
-        return { selection, trace, accelerate };
-      }),
+    query: params.resolveRecordsQuery,
   },
   responses: {
     200: {
