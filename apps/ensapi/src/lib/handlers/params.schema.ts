@@ -58,9 +58,7 @@ const coinType = makeCoinTypeStringSchema();
 
 const chainIdsWithoutDefaultChainId = z
   .optional(stringarray.pipe(z.array(defaultableChainId.pipe(excludingDefaultChainId))))
-  .describe(
-    "Comma-separated list of chain IDs to resolve primary names for (e.g. '1,10,8453'). The default EVM chain ID (0) is not allowed.",
-  );
+  .describe("Comma-separated list of chain IDs to resolve primary names for (e.g. '1,10,8453').");
 
 const rawSelectionParams = z.object({
   reverseName: z
