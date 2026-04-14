@@ -21,7 +21,7 @@ describe("names", () => {
 
     it("should handle empty string (root node)", () => {
       const name = asInterpretedName("");
-      const expected = [""];
+      const expected = [];
       expect(getNameHierarchy(name)).toEqual(expected);
     });
 
