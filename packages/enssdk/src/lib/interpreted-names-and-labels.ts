@@ -201,6 +201,7 @@ export function literalNameToLiteralLabels(name: LiteralName): LiteralLabel[] {
  * Converts an Interpreted Name into a list of Interpreted Labels.
  */
 export function interpretedNameToInterpretedLabels(name: InterpretedName): InterpretedLabel[] {
+  if (name === "") return [];
   return name.split(".") as InterpretedLabel[];
 }
 
