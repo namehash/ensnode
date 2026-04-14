@@ -4,9 +4,13 @@ import {
   errorResponseBadRequestExample,
   errorResponseInternalServerErrorExample,
   makeErrorResponseSchema,
+  makeNameTokensResponseErrorNameTokensNotIndexedSchema,
+  makeNameTokensResponseErrorSchema,
   makeNameTokensResponseSchema,
   makeNodeSchema,
+  nameTokensNotIndexedExample,
   nameTokensResponseOkExample,
+  nameTokensServiceUnavailableExample,
 } from "@ensnode/ensnode-sdk/internal";
 
 import { params } from "@/lib/handlers/params.schema";
@@ -63,7 +67,9 @@ export const getNameTokensRoute = createRoute({
       description: "Name tokens not indexed",
       content: {
         "application/json": {
-          schema: makeNameTokensResponseSchema("Name Tokens Response", true),
+          schema: makeNameTokensResponseErrorNameTokensNotIndexedSchema().openapi({
+            example: nameTokensNotIndexedExample,
+          }),
         },
       },
     },
@@ -82,7 +88,9 @@ export const getNameTokensRoute = createRoute({
         "Service unavailable - Name Tokens API prerequisites not met (indexing status not ready or required plugins not activated)",
       content: {
         "application/json": {
-          schema: makeNameTokensResponseSchema("Name Tokens Response", true),
+          schema: makeNameTokensResponseErrorSchema().openapi({
+            example: nameTokensServiceUnavailableExample,
+          }),
         },
       },
     },
