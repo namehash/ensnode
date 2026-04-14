@@ -1,6 +1,9 @@
 import type { InterpretedName } from "enssdk";
 
-import type { SerializedNameTokensResponseOk } from "./serialized-response";
+import type {
+  SerializedNameTokensResponseError,
+  SerializedNameTokensResponseOk,
+} from "./serialized-response";
 
 /**
  * Example value for {@link SerializedNameTokensResponseOk}, for use in OpenAPI documentation.
@@ -37,3 +40,30 @@ export const nameTokensResponseOkExample = {
     accurateAsOf: 1700000000,
   },
 } satisfies SerializedNameTokensResponseOk;
+
+/**
+ * Example value for {@link SerializedNameTokensResponseError} representing a 503 Service Unavailable
+ * when the Name Tokens API prerequisites are not met, for use in OpenAPI documentation.
+ */
+export const nameTokensServiceUnavailableExample = {
+  responseCode: "error",
+  errorCode: "unsupported-ensindexer-config",
+  error: {
+    message: "Name Tokens API is not available",
+    details: "Connected ENSIndexer must have all following plugins active: registrars, tokenscope",
+  },
+} satisfies SerializedNameTokensResponseError;
+
+/**
+ * Example value for {@link NameTokensResponseErrorNameTokensNotIndexed} representing a 404 Not Found
+ * when no name tokens are indexed for the requested name or domainId, for use in OpenAPI documentation.
+ */
+export const nameTokensNotIndexedExample = {
+  responseCode: "error",
+  errorCode: "name-tokens-not-indexed",
+  error: {
+    message: "No indexed Name Tokens found",
+    details:
+      "This ENSNode instance has not been configured to index tokens for the requested name: 'vitalik.eth'",
+  },
+} satisfies SerializedNameTokensResponseError;

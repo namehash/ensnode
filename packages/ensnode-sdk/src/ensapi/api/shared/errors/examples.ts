@@ -37,5 +37,6 @@ export const errorResponseInvalidAddressExample = {
  * Example value for {@link ErrorResponse} representing a 500 Internal Server Error, for use in OpenAPI documentation.
  */
 export const errorResponseInternalServerErrorExample = {
-  message: "Internal server error",
+  message: "Internal Server Error",
 } satisfies ErrorResponse;
+

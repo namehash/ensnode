@@ -1604,7 +1604,7 @@
                   "type": "object",
                   "properties": { "message": { "type": "string" }, "details": {} },
                   "required": ["message"],
-                  "example": { "message": "Error occured" }
+                  "example": { "message": "Invalid Input" }
                 }
               }
             }
@@ -2507,7 +2507,7 @@
                   "type": "object",
                   "properties": { "message": { "type": "string" }, "details": {} },
                   "required": ["message"],
-                  "example": { "message": "Error occured" }
+                  "example": { "message": "Invalid Input" }
                 }
               }
             }
@@ -3006,7 +3006,7 @@
                   "type": "object",
                   "properties": { "message": { "type": "string" }, "details": {} },
                   "required": ["message"],
-                  "example": { "message": "Error occured" }
+                  "example": { "message": "Invalid Input" }
                 }
               }
             }
