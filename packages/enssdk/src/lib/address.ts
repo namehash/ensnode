@@ -15,12 +15,12 @@ export function isNormalizedAddress(address: Address): address is NormalizedAddr
  *
  * @throws if `address` does not represent an EVM Address
  */
-export function toNormalizedAddress(address: Address): NormalizedAddress {
-  if (!isAddress(address, { strict: false })) {
-    throw new Error(`'${address}' does not represent an EVM Address.`);
+export function toNormalizedAddress(maybeAddress: string): NormalizedAddress {
+  if (!isAddress(maybeAddress, { strict: false })) {
+    throw new Error(`'${maybeAddress}' does not represent an EVM Address.`);
   }
 
-  return address.toLowerCase() as NormalizedAddress;
+  return maybeAddress.toLowerCase() as NormalizedAddress;
 }
 
 /**

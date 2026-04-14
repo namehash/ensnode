@@ -49,7 +49,7 @@ describe("toNormalizedAddress", () => {
   });
 
   it("should throw for a non-hex string", () => {
-    expect(() => toNormalizedAddress("not-an-address" as Address)).toThrow(
+    expect(() => toNormalizedAddress("not-an-address")).toThrow(
       /does not represent an EVM Address/,
     );
   });

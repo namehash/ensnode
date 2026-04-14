@@ -1,9 +1,9 @@
-import { hexToBigInt, isAddress } from "viem";
+import { hexToBigInt } from "viem";
 
 import { toNormalizedAddress } from "./address";
 import { bigintToCoinType, DEFAULT_EVM_COIN_TYPE, ETH_COIN_TYPE } from "./coin-type";
 import { asLiteralLabel } from "./interpreted-names-and-labels";
-import type { Address, CoinType, LiteralLabel, Name } from "./types";
+import type { CoinType, LiteralLabel, Name, NormalizedAddress } from "./types";
 
 /**
  * Matches an ENSIP-19 Reverse Name
@@ -19,14 +19,8 @@ const REVERSE_NAME_REGEX = /^([0-9a-fA-F]+)\.([0-9a-f]{1,64}|addr|default)\.reve
  * @throws if address is invalid
  * @see https://docs.ens.domains/ensip/19#reverse-resolution
  */
-const parseAddressLabel = (addressLabel: LiteralLabel): Address => {
-  const maybeAddress = `0x${addressLabel}`;
-
-  if (!isAddress(maybeAddress, { strict: false })) {
-    throw new Error(`Invalid EVM address "${maybeAddress}"`);
-  }
-
-  return toNormalizedAddress(maybeAddress);
+const parseAddressLabel = (addressLabel: LiteralLabel): NormalizedAddress => {
+  return toNormalizedAddress(`0x${addressLabel}`);
 };
 
 /**
@@ -44,7 +38,10 @@ const parseCoinTypeLabel = (coinTypeLabel: LiteralLabel): CoinType => {
 /**
  * Parse the address and coinType out of an ENSIP-19 reverse name.
  */
-export function parseReverseName(name: Name): { address: Address; coinType: CoinType } | null {
+export function parseReverseName(name: Name): {
+  address: NormalizedAddress;
+  coinType: CoinType;
+} | null {
   const match = name.match(REVERSE_NAME_REGEX);
   if (!match) return null;
 

@@ -3,7 +3,6 @@ import { AccountId as CaipAccountId } from "caip";
 import type {
   AccountId,
   AccountIdString,
-  Address,
   ChainId,
   DefaultableChainId,
   Duration,
@@ -166,7 +165,7 @@ export const makeNormalizedAddressSchema = (valueLabel: string = "EVM address") 
         });
       }
     })
-    .transform((val) => toNormalizedAddress(val as Address));
+    .transform((val) => toNormalizedAddress(val));
 
 /**
  * Parses an ISO 8601 string representations of {@link Datetime}
