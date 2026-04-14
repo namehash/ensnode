@@ -52,6 +52,21 @@ export const encodeLabelHash = (labelHash: LabelHash): EncodedLabelHash =>
   `[${labelHash.slice(2)}]`;
 
 /**
+ * Parses an Encoded LabelHash (`[hash_without_0x_prefix]`) as a {@link LabelHash},
+ * returning `null` if the input does not match the expected format.
+ */
+function parseEncodedLabelHash(value: string): LabelHash | null {
+  if (value.length !== 66) return null;
+  if (value[0] !== "[") return null;
+  if (value[65] !== "]") return null;
+
+  const hash = `0x${value.slice(1, 65)}`;
+  if (!isLabelHash(hash)) return null;
+
+  return hash;
+}
+
+/**
  * Decodes an Encoded LabelHash as a LabelHash.
  *
  * @throws if a valid LabelHash cannot be decoded
@@ -63,38 +78,18 @@ export const encodeLabelHash = (labelHash: LabelHash): EncodedLabelHash =>
  * @returns A 32-byte lowercase hash string starting with '0x'
  */
 export const decodeEncodedLabelHash = (maybeEncodedLabelHash: string): LabelHash => {
-  if (maybeEncodedLabelHash.length !== 66) {
+  const parsed = parseEncodedLabelHash(maybeEncodedLabelHash);
+  if (parsed === null) {
     throw new Error(
-      `EncodedLabelHash '${maybeEncodedLabelHash}' is malformed: must have length 66.`,
+      `EncodedLabelHash '${maybeEncodedLabelHash}' is malformed: expected format '[<64-char lowercase hex>]'.`,
     );
   }
-
-  if (maybeEncodedLabelHash.indexOf("[") !== 0) {
-    throw new Error(
-      `EncodedLabelHash '${maybeEncodedLabelHash}' is malformed: must begin with '['.`,
-    );
-  }
-
-  if (maybeEncodedLabelHash.indexOf("]") !== 65) {
-    throw new Error(`EncodedLabelHash '${maybeEncodedLabelHash}' is malformed: must end with ']'.`);
-  }
-
-  const hash = `0x${maybeEncodedLabelHash.slice(1, 65)}`;
-  if (!isLabelHash(hash)) {
-    throw new Error(
-      `EncodedLabelHash '${maybeEncodedLabelHash}' is malformed: must contain a valid LabelHash.`,
-    );
-  }
-
-  return hash;
+  return parsed;
 };
 
 /**
  * Checks if the value is an {@link EncodedLabelHash}.
  */
 export function isEncodedLabelHash(value: string): value is EncodedLabelHash {
-  const expectedFormatting = value.startsWith("[") && value.endsWith("]");
-  const includesLabelHash = isLabelHash(`0x${value.slice(1, -1)}`);
-
-  return expectedFormatting && includesLabelHash;
+  return parseEncodedLabelHash(value) !== null;
 }
