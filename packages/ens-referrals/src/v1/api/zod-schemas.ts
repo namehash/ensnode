@@ -312,14 +312,14 @@ export const makeReferralProgramEditionConfigSchema = (
  * Downstream code (e.g., leaderboard cache setup) is responsible for skipping unrecognized
  * editions with a warning log rather than crashing.
  *
- * The list must not be empty after processing all items. Duplicate slugs are not allowed.
+ * The list may be empty. Duplicate slugs are not allowed.
  *
  * Two-pass approach:
  *  1. Each item is loosely parsed (based on `rules.awardModel` field).
  *     - Known award models are fully validated with {@link makeReferralProgramEditionConfigSchema}.
  *     - Unknown award models are parsed with {@link makeBaseReferralProgramRulesSchema} and wrapped as
  *       `ReferralProgramRulesUnrecognized`.
- *  2. After processing all items, the result must be non-empty and have no duplicate slugs.
+ *  2. After processing all items, the result must have no duplicate slugs.
  */
 export const makeReferralProgramEditionConfigSetArraySchema = (
   valueLabel: string = "ReferralProgramEditionConfigSetArray",
@@ -382,15 +382,6 @@ export const makeReferralProgramEditionConfigSetArraySchema = (
           } satisfies ReferralProgramRulesUnrecognized,
         });
       }
-    }
-
-    if (result.length === 0) {
-      ctx.addIssue({
-        code: "custom",
-        message: `${valueLabel} must contain at least one edition`,
-      });
-      // Issue above causes the overall parse to fail; this value is never used.
-      return [];
     }
 
     const slugs = new Set<string>();

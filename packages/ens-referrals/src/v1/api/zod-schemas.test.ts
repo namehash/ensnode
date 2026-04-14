@@ -148,7 +148,13 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
     expect(() => schema.parse([pieSplitEdition, malformedUnrecognized])).toThrow();
   });
 
-  it("fails when the result list would be empty", () => {
+  it("accepts an empty array", () => {
+    const result = schema.parse([]);
+
+    expect(result).toEqual([]);
+  });
+
+  it("fails when an unrecognized edition has entirely missing base fields", () => {
     const malformedUnrecognized = {
       slug: "2026-03",
       displayName: "March 2026",

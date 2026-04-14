@@ -77,19 +77,19 @@ describe("buildConfigFromEnvironment", () => {
           } satisfies RpcConfig,
         ],
       ]),
-      customReferralProgramEditionConfigSetUrl: undefined,
+      referralProgramEditionConfigSetUrl: undefined,
     });
   });
 
-  it("parses CUSTOM_REFERRAL_PROGRAM_EDITIONS as a URL object", async () => {
-    const customUrl = "https://example.com/editions.json";
+  it("parses REFERRAL_PROGRAM_EDITIONS as a URL object", async () => {
+    const editionsUrl = "https://example.com/editions.json";
 
     const config = await buildConfigFromEnvironment({
       ...BASE_ENV,
-      CUSTOM_REFERRAL_PROGRAM_EDITIONS: customUrl,
+      REFERRAL_PROGRAM_EDITIONS: editionsUrl,
     });
 
-    expect(config.customReferralProgramEditionConfigSetUrl).toEqual(new URL(customUrl));
+    expect(config.referralProgramEditionConfigSetUrl).toEqual(new URL(editionsUrl));
   });
 
   describe("Useful error messages", () => {
@@ -106,14 +106,14 @@ describe("buildConfigFromEnvironment", () => {
 
     const TEST_ENV: EnsApiEnvironment = structuredClone(BASE_ENV);
 
-    it("logs error and exits when CUSTOM_REFERRAL_PROGRAM_EDITIONS is not a valid URL", async () => {
+    it("logs error and exits when REFERRAL_PROGRAM_EDITIONS is not a valid URL", async () => {
       await buildConfigFromEnvironment({
         ...TEST_ENV,
-        CUSTOM_REFERRAL_PROGRAM_EDITIONS: "not-a-url",
+        REFERRAL_PROGRAM_EDITIONS: "not-a-url",
       });
 
       expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining("CUSTOM_REFERRAL_PROGRAM_EDITIONS is not a valid URL: not-a-url"),
+        expect.stringContaining("REFERRAL_PROGRAM_EDITIONS is not a valid URL: not-a-url"),
       );
       expect(process.exit).toHaveBeenCalledWith(1);
     });
@@ -167,7 +167,7 @@ describe("buildEnsApiPublicConfig", () => {
           } satisfies RpcConfig,
         ],
       ]),
-      customReferralProgramEditionConfigSetUrl: undefined,
+      referralProgramEditionConfigSetUrl: undefined,
     };
 
     const result = buildEnsApiPublicConfig(mockConfig);
@@ -190,7 +190,7 @@ describe("buildEnsApiPublicConfig", () => {
       namespace: ENSINDEXER_PUBLIC_CONFIG.namespace,
       ensIndexerSchemaName: ENSINDEXER_PUBLIC_CONFIG.ensIndexerSchemaName,
       rpcConfigs: new Map(),
-      customReferralProgramEditionConfigSetUrl: undefined,
+      referralProgramEditionConfigSetUrl: undefined,
     };
 
     const result = buildEnsApiPublicConfig(mockConfig);
@@ -223,7 +223,7 @@ describe("buildEnsApiPublicConfig", () => {
       namespace: ENSINDEXER_PUBLIC_CONFIG.namespace,
       ensIndexerSchemaName: ENSINDEXER_PUBLIC_CONFIG.ensIndexerSchemaName,
       rpcConfigs: new Map(),
-      customReferralProgramEditionConfigSetUrl: undefined,
+      referralProgramEditionConfigSetUrl: undefined,
       theGraphApiKey: "secret-api-key",
     };
 

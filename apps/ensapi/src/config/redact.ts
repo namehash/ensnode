@@ -1,4 +1,4 @@
-import { redactRpcConfigs, redactString } from "@ensnode/ensnode-sdk/internal";
+import { redactRpcConfigs, redactString, redactUrl } from "@ensnode/ensnode-sdk/internal";
 
 import type { EnsApiConfig } from "@/config/config.schema";
 
@@ -9,7 +9,9 @@ export function redactEnsApiConfig(config: EnsApiConfig) {
   return {
     port: config.port,
     namespace: config.namespace,
-    customReferralProgramEditionConfigSetUrl: config.customReferralProgramEditionConfigSetUrl,
+    referralProgramEditionConfigSetUrl: config.referralProgramEditionConfigSetUrl
+      ? redactUrl(config.referralProgramEditionConfigSetUrl)
+      : undefined,
     ensIndexerPublicConfig: config.ensIndexerPublicConfig,
     ensDbUrl: redactString(config.ensDbUrl),
     rpcConfigs: redactRpcConfigs(config.rpcConfigs),

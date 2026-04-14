@@ -1,8 +1,8 @@
 import config from "@/config";
 
 import {
+  buildReferralProgramEditionConfigSet,
   ENSReferralsClient,
-  getDefaultReferralProgramEditionConfigSet,
   ReferralProgramAwardModels,
   type ReferralProgramEditionConfigSet,
 } from "@namehash/ens-referrals/v1";
@@ -16,52 +16,60 @@ import { makeLogger } from "@/lib/logger";
 const logger = makeLogger("referral-program-edition-set-cache");
 
 /**
- * Loads the referral program edition config set from custom URL or defaults.
+ * Returns `origin + pathname`, stripping any credentials or query params
+ * so the URL is theoretically safer to include in log messages and error strings.
+ */
+function partiallyRedactUrl(url: URL): string {
+  return `${url.origin}${url.pathname}`;
+}
+
+/**
+ * Loads the referral program edition config set from the configured URL.
+ *
+ * If no URL is configured, the referral program is treated as having zero configured editions
+ * and no network or ENSDb work is performed.
  */
 async function loadReferralProgramEditionConfigSet(
   _cachedResult?: CachedResult<ReferralProgramEditionConfigSet>,
 ): Promise<ReferralProgramEditionConfigSet> {
-  // Check if custom URL is configured
-  if (config.customReferralProgramEditionConfigSetUrl) {
+  // If no URL is configured, treat the referral program as having zero editions.
+  if (!config.referralProgramEditionConfigSetUrl) {
     logger.info(
-      `Loading custom referral program edition config set from: ${config.customReferralProgramEditionConfigSetUrl.href}`,
+      "REFERRAL_PROGRAM_EDITIONS is not set; referral program edition config set is empty",
     );
-    try {
-      const editionConfigSet = await ENSReferralsClient.getReferralProgramEditionConfigSet(
-        config.customReferralProgramEditionConfigSetUrl,
-      );
-
-      // Strip any unrecognized editions immediately — they are client-side forward-compatibility
-      // placeholders that must never enter the server's operational config set (they can't be
-      // serialized and would cause API handlers to crash).
-      for (const [slug, editionConfig] of editionConfigSet) {
-        if (editionConfig.rules.awardModel === ReferralProgramAwardModels.Unrecognized) {
-          logger.warn(
-            { editionSlug: slug, originalAwardModel: editionConfig.rules.originalAwardModel },
-            `Skipping custom edition with unrecognized award model`,
-          );
-          editionConfigSet.delete(slug);
-        }
-      }
-
-      logger.info(`Successfully loaded ${editionConfigSet.size} custom referral program editions`);
-      return editionConfigSet;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error(error, "Error occurred while loading referral program edition config set");
-      throw new Error(
-        `Failed to load custom referral program edition config set from ${config.customReferralProgramEditionConfigSetUrl.href}: ${errorMessage}`,
-      );
-    }
+    return buildReferralProgramEditionConfigSet([]);
   }
 
-  // Use default edition config set for the namespace
-  logger.info(
-    `Loading default referral program edition config set for namespace: ${config.namespace}`,
-  );
-  const editionConfigSet = getDefaultReferralProgramEditionConfigSet(config.namespace);
-  logger.info(`Successfully loaded ${editionConfigSet.size} default referral program editions`);
-  return editionConfigSet;
+  const logSafeUrl = partiallyRedactUrl(config.referralProgramEditionConfigSetUrl);
+
+  logger.info(`Loading referral program edition config set from: ${logSafeUrl}`);
+  try {
+    const editionConfigSet = await ENSReferralsClient.getReferralProgramEditionConfigSet(
+      config.referralProgramEditionConfigSetUrl,
+    );
+
+    // Strip any unrecognized editions immediately — they are client-side forward-compatibility
+    // placeholders that must never enter the server's operational config set (they can't be
+    // serialized and would cause API handlers to crash).
+    for (const [slug, editionConfig] of editionConfigSet) {
+      if (editionConfig.rules.awardModel === ReferralProgramAwardModels.Unrecognized) {
+        logger.warn(
+          { editionSlug: slug, originalAwardModel: editionConfig.rules.originalAwardModel },
+          `Skipping edition with unrecognized award model`,
+        );
+        editionConfigSet.delete(slug);
+      }
+    }
+
+    logger.info(`Successfully loaded ${editionConfigSet.size} referral program editions`);
+    return editionConfigSet;
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logger.error(error, "Error occurred while loading referral program edition config set");
+    throw new Error(
+      `Failed to load referral program edition config set from ${logSafeUrl}: ${errorMessage}`,
+    );
+  }
 }
 
 type ReferralProgramEditionConfigSetCache = SWRCache<ReferralProgramEditionConfigSet>;
