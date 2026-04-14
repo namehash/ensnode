@@ -1,21 +1,29 @@
 import { DEFAULT_EVM_COIN_TYPE, ETH_COIN_TYPE } from "./coin-type";
-import { asLiteralLabel } from "./interpreted-names-and-labels";
-import type { CoinType, InterpretedName, Label, LiteralLabel, NormalizedAddress } from "./types";
+import {
+  asInterpretedLabel,
+  interpretedLabelsToInterpretedName,
+} from "./interpreted-names-and-labels";
+import type { CoinType, InterpretedLabel, InterpretedName, NormalizedAddress } from "./types";
+
+const ADDR_LABEL = asInterpretedLabel("addr");
+const DEFAULT_LABEL = asInterpretedLabel("default");
+const REVERSE_LABEL = asInterpretedLabel("reverse");
 
 /**
  * Gets the Label used for the reverse names of subnames as per ENSIP-11 & ENSIP-19.
  *
  * @see https://docs.ens.domains/ensip/19/#reverse-resolution
  */
-export const addrReverseLabel = (address: NormalizedAddress): LiteralLabel =>
-  asLiteralLabel(address.slice(2));
+export const addrReverseLabel = (address: NormalizedAddress): InterpretedLabel =>
+  address.slice(2) as InterpretedLabel;
 
 /**
  * Converts `coinType` to prefix-free hex string.
  *
  * @see https://docs.ens.domains/ensip/19
  */
-export const coinTypeReverseLabel = (coinType: CoinType): Label => coinType.toString(16);
+export const coinTypeReverseLabel = (coinType: CoinType): InterpretedLabel =>
+  coinType.toString(16) as InterpretedLabel;
 
 /**
  * Gets the reverse name for an address according to ENSIP-11 & ENSIP-19.
@@ -37,16 +45,16 @@ export const coinTypeReverseLabel = (coinType: CoinType): Label => coinType.toSt
 export function reverseName(address: NormalizedAddress, coinType: CoinType): InterpretedName {
   const label = addrReverseLabel(address);
 
-  const middle = (() => {
+  const middle = ((): InterpretedLabel => {
     switch (coinType) {
       case ETH_COIN_TYPE:
-        return "addr";
+        return ADDR_LABEL;
       case DEFAULT_EVM_COIN_TYPE:
-        return "default";
+        return DEFAULT_LABEL;
       default:
         return coinTypeReverseLabel(coinType);
     }
   })();
 
-  return `${label}.${middle}.reverse` as InterpretedName;
+  return interpretedLabelsToInterpretedName([label, middle, REVERSE_LABEL]);
 }

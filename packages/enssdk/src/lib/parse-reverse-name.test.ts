@@ -148,7 +148,7 @@ describe("parseReverseName", () => {
   it("parses constructed names", () => {
     CHAIN_IDS.forEach((chainId) => {
       const coinType = evmChainIdToCoinType(chainId);
-      expect(parseReverseName(asInterpretedName(reverseName(EXAMPLE_ADDRESS, coinType)))).toEqual({
+      expect(parseReverseName(reverseName(EXAMPLE_ADDRESS, coinType))).toEqual({
         address: EXAMPLE_ADDRESS,
         coinType,
       });
