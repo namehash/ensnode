@@ -94,7 +94,9 @@ export const resolvePrimaryNameRoute = createRoute({
       description: "Invalid address or chain ID",
       content: {
         "application/json": {
-          schema: makeErrorResponseSchema().openapi({ example: errorResponseInvalidAddressExample }),
+          schema: makeErrorResponseSchema().openapi({
+            example: errorResponseInvalidAddressExample,
+          }),
         },
       },
     },
@@ -143,7 +145,9 @@ export const resolvePrimaryNamesRoute = createRoute({
       description: "Invalid address or chain IDs",
       content: {
         "application/json": {
-          schema: makeErrorResponseSchema().openapi({ example: errorResponseInvalidAddressExample }),
+          schema: makeErrorResponseSchema().openapi({
+            example: errorResponseInvalidAddressExample,
+          }),
         },
       },
     },

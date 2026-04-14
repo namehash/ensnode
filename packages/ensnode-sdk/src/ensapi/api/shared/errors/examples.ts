@@ -39,4 +39,3 @@ export const errorResponseInvalidAddressExample = {
 export const errorResponseInternalServerErrorExample = {
   message: "Internal Server Error",
 } satisfies ErrorResponse;
-
