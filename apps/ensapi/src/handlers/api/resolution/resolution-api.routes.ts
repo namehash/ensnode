@@ -1,6 +1,10 @@
 import { createRoute, z } from "@hono/zod-openapi";
 
 import {
+  errorResponseInternalServerErrorExample,
+  errorResponseInvalidAddressExample,
+  errorResponseInvalidNameExample,
+  makeErrorResponseSchema,
   makeResolvePrimaryNameResponseSchema,
   makeResolvePrimaryNamesResponseSchema,
   makeResolveRecordsResponseSchema,
@@ -37,6 +41,24 @@ export const resolveRecordsRoute = createRoute({
         },
       },
     },
+    400: {
+      description: "Invalid name or query parameters",
+      content: {
+        "application/json": {
+          schema: makeErrorResponseSchema().openapi({ example: errorResponseInvalidNameExample }),
+        },
+      },
+    },
+    500: {
+      description: "Internal server error",
+      content: {
+        "application/json": {
+          schema: makeErrorResponseSchema().openapi({
+            example: errorResponseInternalServerErrorExample,
+          }),
+        },
+      },
+    },
   },
 });
 
@@ -68,6 +90,24 @@ export const resolvePrimaryNameRoute = createRoute({
         },
       },
     },
+    400: {
+      description: "Invalid address or chain ID",
+      content: {
+        "application/json": {
+          schema: makeErrorResponseSchema().openapi({ example: errorResponseInvalidAddressExample }),
+        },
+      },
+    },
+    500: {
+      description: "Internal server error",
+      content: {
+        "application/json": {
+          schema: makeErrorResponseSchema().openapi({
+            example: errorResponseInternalServerErrorExample,
+          }),
+        },
+      },
+    },
   },
 });
 
@@ -95,6 +135,24 @@ export const resolvePrimaryNamesRoute = createRoute({
         "application/json": {
           schema: makeResolvePrimaryNamesResponseSchema().openapi({
             example: resolvePrimaryNamesResponseExample,
+          }),
+        },
+      },
+    },
+    400: {
+      description: "Invalid address or chain IDs",
+      content: {
+        "application/json": {
+          schema: makeErrorResponseSchema().openapi({ example: errorResponseInvalidAddressExample }),
+        },
+      },
+    },
+    500: {
+      description: "Internal server error",
+      content: {
+        "application/json": {
+          schema: makeErrorResponseSchema().openapi({
+            example: errorResponseInternalServerErrorExample,
           }),
         },
       },

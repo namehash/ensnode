@@ -1,7 +1,9 @@
 import { createRoute, z } from "@hono/zod-openapi";
 
 import {
-  ErrorResponseSchema,
+  errorResponseBadRequestExample,
+  errorResponseInternalServerErrorExample,
+  makeErrorResponseSchema,
   makeNameTokensResponseSchema,
   makeNodeSchema,
   nameTokensResponseOkExample,
@@ -53,7 +55,7 @@ export const getNameTokensRoute = createRoute({
       description: "Invalid input",
       content: {
         "application/json": {
-          schema: ErrorResponseSchema,
+          schema: makeErrorResponseSchema().openapi({ example: errorResponseBadRequestExample }),
         },
       },
     },
@@ -69,7 +71,9 @@ export const getNameTokensRoute = createRoute({
       description: "Internal server error",
       content: {
         "application/json": {
-          schema: ErrorResponseSchema,
+          schema: makeErrorResponseSchema().openapi({
+            example: errorResponseInternalServerErrorExample,
+          }),
         },
       },
     },
