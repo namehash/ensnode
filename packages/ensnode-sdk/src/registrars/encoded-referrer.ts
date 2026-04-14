@@ -1,10 +1,4 @@
-import {
-  type Address,
-  type Hex,
-  isNormalizedAddress,
-  type NormalizedAddress,
-  toNormalizedAddress,
-} from "enssdk";
+import { type Hex, isNormalizedAddress, type NormalizedAddress, toNormalizedAddress } from "enssdk";
 import { pad, size, slice, zeroAddress } from "viem";
 
 /**
@@ -74,7 +68,7 @@ export function buildEncodedReferrer(address: NormalizedAddress): EncodedReferre
  *         {@link ENCODED_REFERRER_BYTE_LENGTH} bytes.
  * @throws when decodedReferrer is not a valid EVM address.
  */
-export function decodeEncodedReferrer(encodedReferrer: EncodedReferrer): Address {
+export function decodeEncodedReferrer(encodedReferrer: EncodedReferrer): NormalizedAddress {
   // Invariant: encoded referrer must be of expected size
   if (size(encodedReferrer) !== ENCODED_REFERRER_BYTE_LENGTH) {
     throw new Error(
