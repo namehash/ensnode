@@ -145,7 +145,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           // must be fully normalized (and therefore not contain encoded labelhash segments)
           // (this will be improved in a future pr)
           if (!isNormalizedName(name)) {
-            throw new Error(`'${name} must be normalized to be resolvable.'`);
+            throw new Error(`'${name}' must be normalized to be resolvable.`);
           }
 
           const node: Node = namehashInterpretedName(name);

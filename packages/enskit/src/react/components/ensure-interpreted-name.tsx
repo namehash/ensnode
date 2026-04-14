@@ -11,8 +11,7 @@ type InterpretedNameRenderer = (name: InterpretedName) => ReactNode;
 
 /**
  * Renders a {@link LiteralName} by ensuring it is an {@link InterpretedName}. This is useful for
- * ensuring that downstream components get the guarantees of an {@link InterpretedName}, while
- *
+ * ensuring that downstream components get the guarantees of an {@link InterpretedName}.
  *
  * @param name - The user-provided {@link LiteralName} to render.
  * @param children - Render prop called with the {@link InterpretedName} when `name` is already interpreted.

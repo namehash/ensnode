@@ -16,10 +16,13 @@ import type { InterpretedName, Label, Name } from "./types";
  * getNameHierarchy("sub.example.eth") -> ["sub.example.eth", "example.eth", "eth"]
  * ```
  */
-export const getNameHierarchy = (name: InterpretedName): InterpretedName[] =>
-  interpretedNameToInterpretedLabels(name).map((_, i, labels) =>
+export const getNameHierarchy = (name: InterpretedName): InterpretedName[] => {
+  if (name === ENS_ROOT_NAME) return [];
+
+  return interpretedNameToInterpretedLabels(name).map((_, i, labels) =>
     interpretedLabelsToInterpretedName(labels.slice(i)),
   );
+};
 
 /**
  * Derives the parent's {@link InterpretedName} of the provided `name`, or null if there is none.
