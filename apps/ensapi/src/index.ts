@@ -5,7 +5,6 @@ import { serve } from "@hono/node-server";
 import { indexingStatusCache } from "@/cache/indexing-status.cache";
 import { getReferralLeaderboardEditionsCaches } from "@/cache/referral-leaderboard-editions.cache";
 import { referralProgramEditionConfigSetCache } from "@/cache/referral-program-edition-set.cache";
-import { referrerLeaderboardCache } from "@/cache/referrer-leaderboard.cache";
 import { redactEnsApiConfig } from "@/config/redact";
 import { sdk } from "@/lib/instrumentation";
 import logger from "@/lib/logger";
@@ -49,9 +48,6 @@ const gracefulShutdown = async () => {
   try {
     await sdk.shutdown();
     logger.info("Destroyed tracing instrumentation");
-
-    referrerLeaderboardCache.destroy();
-    logger.info("Destroyed referrerLeaderboardCache");
 
     // Destroy referral program edition config set cache
     referralProgramEditionConfigSetCache.destroy();

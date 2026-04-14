@@ -11,7 +11,6 @@ import { generateOpenApi31Document } from "@/openapi-document";
 
 import realtimeApi from "./handlers/api/meta/realtime-api";
 import apiRouter from "./handlers/api/router";
-import ensanalyticsApi from "./handlers/ensanalytics/ensanalytics-api";
 import ensanalyticsApiV1 from "./handlers/ensanalytics/ensanalytics-api-v1";
 import subgraphApi from "./handlers/subgraph/subgraph-api";
 
@@ -52,9 +51,6 @@ app.route("/api", apiRouter);
 
 // use Subgraph GraphQL API at /subgraph
 app.route("/subgraph", subgraphApi);
-
-// use ENSAnalytics API at /ensanalytics (v0, implicit)
-app.route("/ensanalytics", ensanalyticsApi);
 
 // use ENSAnalytics API v1 at /v1/ensanalytics
 app.route("/v1/ensanalytics", ensanalyticsApiV1);
