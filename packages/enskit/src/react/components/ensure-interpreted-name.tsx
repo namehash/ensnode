@@ -1,9 +1,4 @@
-import {
-  type InterpretedName,
-  isInterpretedName,
-  type LiteralName,
-  literalNameToInterpretedName,
-} from "enssdk";
+import { type InterpretedName, type LiteralName, literalNameToInterpretedName } from "enssdk";
 import type { ReactNode } from "react";
 
 type MalformedNameRenderer = (name: string) => ReactNode;
@@ -47,10 +42,7 @@ export function EnsureInterpretedName({
   malformed: MalformedNameRenderer;
   options?: Parameters<typeof literalNameToInterpretedName>[1];
 }) {
-  if (isInterpretedName(name)) return children(name);
-
-  // this isn't an InterpretedName, let's try to redirect the user to the InterpretedName
-  // which ensures that our app only ever operates on InterpretedNames
+  // attempt to convert the LiteralName to an InterpretedName
   let interpreted: InterpretedName;
   try {
     interpreted = literalNameToInterpretedName(name, options);
@@ -59,5 +51,9 @@ export function EnsureInterpretedName({
     return malformed(name);
   }
 
-  return coerced(interpreted);
+  // from here, the name is either already interpreted or was coerced; check with string equality
+  if ((name as string) !== (interpreted as string)) return coerced(interpreted);
+
+  // the name was already interpreted, render the happy path
+  return children(interpreted);
 }
