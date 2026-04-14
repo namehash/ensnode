@@ -1,8 +1,14 @@
+// NOTE: These integration tests target an ENSNode instance running against the ens-test-env ENS namespace.
+// The ens-test-env is a deterministic deployment of the ENS protocol to a local Anvil chain — it is
+// NOT Ethereum Mainnet or any public testnet. Therefore, chainId 1 referenced in these tests refers
+// to the local Anvil chain used by ens-test-env, not Ethereum Mainnet.
+// See: https://github.com/ensdomains/ens-test-env
+
 import { describe, expect, it } from "vitest";
 
-const BASE_URL = process.env.ENSNODE_URL || "http://localhost:4334";
+import { DEVNET_OWNER } from "@ensnode/ensnode-sdk/internal";
 
-const OWNER = "0x70997970c51812dc3a010c7d01b50e0d17dc79c8";
+const BASE_URL = process.env.ENSNODE_URL!;
 
 describe("GET /api/resolve/records/:name", () => {
   it.each([
@@ -12,7 +18,7 @@ describe("GET /api/resolve/records/:name", () => {
       query: "addresses=60",
       expectedStatus: 200,
       expectedBody: {
-        records: { addresses: { 60: OWNER } },
+        records: { addresses: { 60: DEVNET_OWNER } },
         accelerationRequested: false,
         accelerationAttempted: false,
       },
@@ -24,7 +30,7 @@ describe("GET /api/resolve/records/:name", () => {
       query: "addresses=60",
       expectedStatus: 200,
       expectedBody: {
-        records: { addresses: { 60: OWNER } },
+        records: { addresses: { 60: DEVNET_OWNER } },
         accelerationRequested: false,
         accelerationAttempted: false,
       },
@@ -59,7 +65,7 @@ describe("GET /api/resolve/records/:name", () => {
       expectedStatus: 200,
       expectedBody: {
         records: {
-          addresses: { 60: OWNER },
+          addresses: { 60: DEVNET_OWNER },
           texts: { description: "example.eth" },
         },
         accelerationRequested: false,
@@ -84,7 +90,7 @@ describe("GET /api/resolve/records/:name", () => {
       query: "addresses=60",
       expectedStatus: 200,
       expectedBody: {
-        records: { addresses: { 60: OWNER } },
+        records: { addresses: { 60: DEVNET_OWNER } },
         accelerationRequested: false,
         accelerationAttempted: false,
       },
@@ -106,7 +112,7 @@ describe("GET /api/resolve/records/:name", () => {
       query: "addresses=60",
       expectedStatus: 200,
       expectedBody: {
-        records: { addresses: { 60: OWNER } },
+        records: { addresses: { 60: DEVNET_OWNER } },
         accelerationRequested: false,
         accelerationAttempted: false,
       },
@@ -118,7 +124,7 @@ describe("GET /api/resolve/records/:name", () => {
       query: "addresses=60",
       expectedStatus: 200,
       expectedBody: {
-        records: { addresses: { 60: OWNER } },
+        records: { addresses: { 60: DEVNET_OWNER } },
         accelerationRequested: false,
         accelerationAttempted: false,
       },
@@ -129,7 +135,7 @@ describe("GET /api/resolve/records/:name", () => {
       query: "addresses=60&accelerate=true",
       expectedStatus: 200,
       expectedBody: {
-        records: { addresses: { 60: OWNER } },
+        records: { addresses: { 60: DEVNET_OWNER } },
         accelerationRequested: true,
         accelerationAttempted: false,
       },

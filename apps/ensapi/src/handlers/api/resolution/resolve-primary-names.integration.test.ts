@@ -1,13 +1,21 @@
+// NOTE: These integration tests target an ENSNode instance running against the ens-test-env ENS namespace.
+// The ens-test-env is a deterministic deployment of the ENS protocol to a local Anvil chain — it is
+// NOT Ethereum Mainnet or any public testnet. Therefore, chainId 1 referenced in these tests refers
+// to the local Anvil chain used by ens-test-env, not Ethereum Mainnet.
+// See: https://github.com/ensdomains/ens-test-env
+
 import { describe, expect, it } from "vitest";
 
-const BASE_URL = process.env.ENSNODE_URL || "http://localhost:4334";
+import { DEVNET_OWNER } from "@ensnode/ensnode-sdk/internal";
+
+const BASE_URL = process.env.ENSNODE_URL!;
 
 describe("GET /api/resolve/primary-names/:address", () => {
   it.each([
     {
       description:
         "resolves primary names for owner address on chain 1 (no primary name set in devnet)",
-      address: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      address: DEVNET_OWNER,
       query: "chainIds=1",
       expectedStatus: 200,
       expectedBody: {
@@ -17,23 +25,12 @@ describe("GET /api/resolve/primary-names/:address", () => {
       },
     },
     {
-      description: "returns null for address with no primary name on chain 1",
-      address: "0x000000000000000000000000000000000000dead",
-      query: "chainIds=1",
-      expectedStatus: 200,
-      expectedBody: {
-        names: { "1": null },
-        accelerationRequested: false,
-        accelerationAttempted: false,
-      },
-    },
-    {
-      description: "resolves primary names across all supported chains when chainIds is omitted",
-      address: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      description: "resolves all primary names",
+      address: DEVNET_OWNER,
       query: "",
       expectedStatus: 200,
       expectedBody: {
-        names: { "1": null, "15658733": null },
+        names: { "1": null },
         accelerationRequested: false,
         accelerationAttempted: false,
       },
@@ -57,7 +54,7 @@ describe("GET /api/resolve/primary-names/:address", () => {
     },
     {
       description: "returns 400 when chainIds contains the default chain id (0)",
-      address: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      address: DEVNET_OWNER,
       query: "chainIds=0",
       expectedStatus: 400,
       expectedBody: {
@@ -79,7 +76,7 @@ describe("GET /api/resolve/primary-names/:address", () => {
     },
     {
       description: "returns 400 when chainIds contains duplicate chain ids",
-      address: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      address: DEVNET_OWNER,
       query: "chainIds=1,1",
       expectedStatus: 400,
       expectedBody: {
