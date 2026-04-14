@@ -16,6 +16,7 @@ import {
 } from "ponder:registry";
 
 import { waitForEnsRainbowToBeReady } from "@/lib/ensrainbow/singleton";
+import { fileChecksum } from "@/ponder/logical-checksum";
 
 /**
  * Context passed to event handlers registered with
@@ -173,6 +174,18 @@ async function initializeIndexingSetup(): Promise<void> {
  * ```
  */
 async function initializeIndexingActivation(): Promise<void> {
+  const ponderConfigChecksum = fileChecksum("ponder/ponder.config.ts");
+  const ponderSchemaChecksum = fileChecksum("ponder/ponder.schema.ts");
+  const ponderLogicChecksum = fileChecksum("ponder/src/register-handlers.ts");
+
+  console.log(`Logical checksum`, {
+    ponderConfig: ponderConfigChecksum,
+    ponderSchema: ponderSchemaChecksum,
+    ponderLogic: ponderLogicChecksum,
+  });
+
+  // TODO: calculate the ENSIndexer Build ID from the checksums above
+
   await waitForEnsRainbowToBeReady();
 }
 
