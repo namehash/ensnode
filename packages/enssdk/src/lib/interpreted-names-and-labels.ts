@@ -193,6 +193,7 @@ export function literalLabelsToLiteralName(labels: LiteralLabel[]): LiteralName 
  * Converts an LiteralName into a list of LiteralLabels.
  */
 export function literalNameToLiteralLabels(name: LiteralName): LiteralLabel[] {
+  if (name === "") return [];
   return name.split(".") as LiteralLabel[];
 }
 
