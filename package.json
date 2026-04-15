@@ -9,7 +9,7 @@
     "test": "vitest --silent passed-only",
     "test:integration": "vitest --config vitest.integration.config.ts --silent passed-only",
     "test:integration:ci": "pnpm -F @ensnode/integration-test-env start",
-    "audit": "osv-scanner scan source .",
+    "audit:osv": "osv-scanner scan source --lockfile pnpm-lock.yaml",
     "typecheck": "pnpm -r --parallel --aggregate-output typecheck",
     "changeset": "changeset",
     "changeset:next": "changeset version --snapshot next",
