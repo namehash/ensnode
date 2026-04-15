@@ -77,14 +77,17 @@ export async function startEnsDbWriterWorker(): Promise<void> {
     .run(abortSignal)
     // Handle any uncaught errors from the worker
     .catch(async (error) => {
-      // Treat as a clean stop only when BOTH the captured shutdown signal
-      // is aborted AND the error is an AbortError. Either condition alone
-      // could mask a real failure: a non-AbortError thrown after Ponder
-      // killed the signal is still a bug worth surfacing, and an
-      // AbortError without our signal aborted means it came from
-      // somewhere else (e.g. a reactive-getter race) and shouldn't be
-      // silently swallowed.
-      if (abortSignal.aborted && isAbortError(error)) {
+      // Treat as a clean stop when the error is an AbortError AND the
+      // worker was intentionally stopped — either because Ponder aborted
+      // the captured shutdown signal, or because this worker has been
+      // superseded in the singleton (the defensive stale-instance
+      // cleanup path inside `startEnsDbWriterWorker` calls
+      // `worker.stop()` on the old worker, which causes its `run()` to
+      // throw AbortError without `abortSignal.aborted` necessarily
+      // being true). Requiring `isAbortError(error)` keeps unrelated
+      // failures from being silently swallowed.
+      const intentionallyStopped = abortSignal.aborted || ensDbWriterWorker !== worker;
+      if (intentionallyStopped && isAbortError(error)) {
         await gracefulShutdown(worker, "API shutdown (run aborted)");
         return;
       }
