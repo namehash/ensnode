@@ -5,7 +5,7 @@ import {
 } from "@namehash/ens-referrals";
 import { describe, expect, it, vi } from "vitest";
 
-import { parseTimestamp, parseUsdc } from "@ensnode/ensnode-sdk";
+import { parseEth, parseTimestamp, parseUsdc } from "@ensnode/ensnode-sdk";
 
 import * as database from "./database";
 import { getReferrerLeaderboard } from "./get-referrer-leaderboard";
@@ -100,9 +100,7 @@ describe("ENSAnalytics Referrer Leaderboard", () => {
         qualifiedReferrers.every(([_, referrer]) => referrer.awardPoolApproxValue.amount > 0),
       ).toBe(true);
       expect(
-        unqualifiedReferrers.every(
-          ([_, referrer]) => referrer.awardPoolApproxValue.amount === BigInt(0),
-        ),
+        unqualifiedReferrers.every(([_, referrer]) => referrer.awardPoolApproxValue.amount === 0n),
       ).toBe(true);
     });
 
@@ -115,10 +113,7 @@ describe("ENSAnalytics Referrer Leaderboard", () => {
         awardModel: rules.awardModel,
         aggregatedMetrics: {
           grandTotalIncrementalDuration: 0,
-          grandTotalRevenueContribution: {
-            currency: "ETH" as const,
-            amount: 0n,
-          },
+          grandTotalRevenueContribution: parseEth("0"),
           grandTotalQualifiedReferrersFinalScore: 0,
           grandTotalReferrals: 0,
           minFinalScoreToQualify: 0,
