@@ -5,9 +5,19 @@ import type { PonderIndexingStatus } from "./indexing-status";
 
 /**
  * PonderClient for fetching data from Ponder apps.
+ *
+ * The optional `getAbortSignal` is invoked at fetch time so each request
+ * uses the current `AbortSignal`. Passing a getter (instead of a captured
+ * `AbortSignal`) is required for consumers that need to track signals
+ * which change identity over the client's lifetime — e.g. signals derived
+ * from Ponder's `apiShutdown` manager, which Ponder kills and replaces on
+ * every dev-mode hot reload.
  */
 export class PonderClient {
-  constructor(private readonly baseUrl: URL) {}
+  constructor(
+    private readonly baseUrl: URL,
+    private readonly getAbortSignal?: () => AbortSignal | undefined,
+  ) {}
 
   /**
    * Check Ponder Health
@@ -18,7 +28,7 @@ export class PonderClient {
    */
   async health(): Promise<void> {
     const requestUrl = new URL("/health", this.baseUrl);
-    const response = await fetch(requestUrl);
+    const response = await fetch(requestUrl, { signal: this.getAbortSignal?.() });
 
     if (!response.ok) {
       throw new Error(
@@ -35,7 +45,7 @@ export class PonderClient {
    */
   async metrics(): Promise<PonderIndexingMetrics> {
     const requestUrl = new URL("/metrics", this.baseUrl);
-    const response = await fetch(requestUrl);
+    const response = await fetch(requestUrl, { signal: this.getAbortSignal?.() });
 
     if (!response.ok) {
       throw new Error(
@@ -56,7 +66,7 @@ export class PonderClient {
    */
   async status(): Promise<PonderIndexingStatus> {
     const requestUrl = new URL("/status", this.baseUrl);
-    const response = await fetch(requestUrl);
+    const response = await fetch(requestUrl, { signal: this.getAbortSignal?.() });
 
     if (!response.ok) {
       throw new Error(

@@ -1,40 +1,86 @@
 import { ensDbClient } from "@/lib/ensdb/singleton";
 import { indexingStatusBuilder } from "@/lib/indexing-status-builder/singleton";
 import { localPonderClient } from "@/lib/local-ponder-client";
+import { localPonderContext } from "@/lib/local-ponder-context";
 import { logger } from "@/lib/logger";
 import { publicConfigBuilder } from "@/lib/public-config-builder/singleton";
 
 import { EnsDbWriterWorker } from "./ensdb-writer-worker";
 
-let ensDbWriterWorker: EnsDbWriterWorker;
+let ensDbWriterWorker: EnsDbWriterWorker | undefined;
+
+function isAbortError(error: unknown): boolean {
+  return error instanceof Error && error.name === "AbortError";
+}
 
 /**
- * Starts the EnsDbWriterWorker in a new asynchronous context.
+ * Start (or restart) the EnsDbWriterWorker.
  *
- * The worker will run indefinitely until it is stopped via {@link EnsDbWriterWorker.stop},
- * for example in response to a process termination signal or an internal error, at
- * which point it will attempt to gracefully shut down.
+ * Called from `apps/ensindexer/ponder/src/api/index.ts` on every Ponder
+ * API exec. Ponder re-executes the API entry file on hot reload, but this
+ * module is cached by vite-node, so module-level state survives across
+ * reloads. This function therefore must:
  *
- * @throws Error if the worker is already running when this function is called.
+ *   1. Be idempotent — treat a re-call as "the previous instance is dead,
+ *      replace it" rather than throwing.
+ *   2. Re-bind reload-scoped resources (e.g. `apiShutdown`) fresh from
+ *      `localPonderContext` on every call. Never hoist them to module
+ *      scope. See `local-ponder-context.ts` for the staleness contract.
  */
-export function startEnsDbWriterWorker() {
-  if (typeof ensDbWriterWorker !== "undefined") {
-    throw new Error("EnsDbWriterWorker has already been initialized");
+export async function startEnsDbWriterWorker(): Promise<void> {
+  // Defensively reset any prior instance. The apiShutdown.add() callback
+  // from the previous API exec is the primary cleanup path on hot reload;
+  // this is a safety net for cases where the callback didn't run (e.g.
+  // unexpected shutdown ordering).
+  if (ensDbWriterWorker) {
+    await ensDbWriterWorker.stop();
+    ensDbWriterWorker = undefined;
   }
 
-  ensDbWriterWorker = new EnsDbWriterWorker(
+  const worker = new EnsDbWriterWorker(
     ensDbClient,
     publicConfigBuilder,
     indexingStatusBuilder,
     localPonderClient,
   );
+  ensDbWriterWorker = worker;
 
-  ensDbWriterWorker
+  // Read apiShutdown FRESH from the reactive context. Ponder kills and
+  // replaces this on every dev-mode hot reload, so this read MUST happen
+  // inside the function call (not at module scope).
+  const apiShutdown = localPonderContext.apiShutdown;
+
+  apiShutdown.add(async () => {
+    logger.info({
+      msg: "Stopping EnsDbWriterWorker due to API shutdown",
+      module: "EnsDbWriterWorker",
+    });
+    await worker.stop();
+    if (ensDbWriterWorker === worker) {
+      ensDbWriterWorker = undefined;
+    }
+  });
+
+  worker
     .run()
     // Handle any uncaught errors from the worker
-    .catch((error) => {
-      // Abort the worker on error to trigger cleanup
-      ensDbWriterWorker.stop();
+    .catch(async (error) => {
+      // If Ponder has begun shutting down our API instance (hot reload or
+      // graceful shutdown), the abort propagates through in-flight fetches
+      // as an AbortError. Treat that as a clean stop, not a worker failure.
+      if (apiShutdown.abortController.signal.aborted || isAbortError(error)) {
+        logger.info({
+          msg: "EnsDbWriterWorker stopped due to API shutdown",
+          module: "EnsDbWriterWorker",
+        });
+        return;
+      }
+
+      // Real worker error — clean up and trigger non-zero exit.
+      await worker.stop();
+      if (ensDbWriterWorker === worker) {
+        ensDbWriterWorker = undefined;
+      }
 
       logger.error({
         msg: "EnsDbWriterWorker encountered an error",

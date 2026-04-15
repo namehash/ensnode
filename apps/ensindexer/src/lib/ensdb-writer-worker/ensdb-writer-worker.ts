@@ -38,6 +38,12 @@ export class EnsDbWriterWorker {
   private indexingStatusInterval: ReturnType<typeof setInterval> | null = null;
 
   /**
+   * Tracks the most recently launched snapshot upsert so that {@link stop}
+   * can wait for any in-flight work to settle before returning.
+   */
+  private inFlightSnapshot: Promise<unknown> | undefined;
+
+  /**
    * ENSDb Client instance used by the worker to interact with ENSDb.
    */
   private ensDbClient: EnsDbWriter;
@@ -121,10 +127,9 @@ export class EnsDbWriterWorker {
     });
 
     // Task 3: recurring upsert of Indexing Status Snapshot into ENSDb.
-    this.indexingStatusInterval = setInterval(
-      () => this.upsertIndexingStatusSnapshot(),
-      secondsToMilliseconds(INDEXING_STATUS_RECORD_UPDATE_INTERVAL),
-    );
+    this.indexingStatusInterval = setInterval(() => {
+      this.inFlightSnapshot = this.upsertIndexingStatusSnapshot();
+    }, secondsToMilliseconds(INDEXING_STATUS_RECORD_UPDATE_INTERVAL));
   }
 
   /**
@@ -137,12 +142,18 @@ export class EnsDbWriterWorker {
   /**
    * Stop the ENSDb Writer Worker
    *
-   * Stops all recurring tasks in the worker.
+   * Stops all recurring tasks in the worker and waits for any in-flight
+   * snapshot upsert to settle. Safe to call when not running.
    */
-  public stop(): void {
+  public async stop(): Promise<void> {
     if (this.indexingStatusInterval) {
       clearInterval(this.indexingStatusInterval);
       this.indexingStatusInterval = null;
+    }
+    if (this.inFlightSnapshot) {
+      // Errors are already logged inside upsertIndexingStatusSnapshot; swallow here.
+      await this.inFlightSnapshot.catch(() => {});
+      this.inFlightSnapshot = undefined;
     }
   }
 

@@ -82,14 +82,16 @@ export class LocalPonderClient extends PonderClient {
    * @param ponderPublicClients All cached public clients provided by the local Ponder app
    *                            (may include non-indexed chains).
    * @param ponderAppContext The internal context of the local Ponder app.
+   * @param getAbortSignal Optional getter invoked at fetch time to attach an `AbortSignal` to outgoing HTTP requests. Use a getter (not a captured signal) when the underlying signal can change identity over time — e.g. across Ponder dev-mode hot reloads.
    */
   constructor(
     indexedChainIds: Set<ChainId>,
     indexedBlockranges: Map<ChainId, BlockNumberRangeWithStartBlock>,
     ponderPublicClients: Record<ChainIdString, CachedPublicClient>,
     ponderAppContext: PonderAppContext,
+    getAbortSignal?: () => AbortSignal | undefined,
   ) {
-    super(ponderAppContext.localPonderAppUrl);
+    super(ponderAppContext.localPonderAppUrl, getAbortSignal);
 
     this.indexedChainIds = indexedChainIds;
 
