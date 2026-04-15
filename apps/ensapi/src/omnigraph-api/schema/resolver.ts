@@ -110,10 +110,10 @@ ResolverRef.implement({
     records_: t.field({
       description: "Identify a ResolverRecord by `name` or `node`.",
       type: ResolverRecordsRef,
-      args: { for: t.arg({ type: NameOrNodeInput, required: true }) },
+      args: { by: t.arg({ type: NameOrNodeInput, required: true }) },
       nullable: true,
       resolve: async ({ chainId, address }, args) => {
-        const node = args.for.node ?? namehashInterpretedName(args.for.name);
+        const node = args.by.node ?? namehashInterpretedName(args.by.name);
         return makeResolverRecordsId({ chainId, address }, node);
       },
     }),
