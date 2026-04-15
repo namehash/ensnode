@@ -58,7 +58,10 @@ const selectionFields = z.object({
 
 type SelectionFields = z.output<typeof selectionFields>;
 
-function toSelection(fields: SelectionFields, ctx: z.RefinementCtx): ResolverRecordsSelection | typeof z.NEVER {
+function toSelection(
+  fields: SelectionFields,
+  ctx: z.RefinementCtx,
+): ResolverRecordsSelection | typeof z.NEVER {
   const sel: ResolverRecordsSelection = {
     ...(fields.name && { name: true }),
     ...(fields.addresses && { addresses: fields.addresses }),

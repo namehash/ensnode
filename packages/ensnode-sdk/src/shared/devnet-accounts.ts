@@ -1,7 +1,7 @@
 /**
  * Named accounts from the ens-test-env devnet.
  * They are NOT real Ethereum Mainnet or testnet addresses.
- * You can user `docker compose up devnet` to see actual data in devnet
+ * You can use `docker compose up devnet` to see actual data in devnet
  *
  * @see https://github.com/ensdomains/ens-test-env
  */
