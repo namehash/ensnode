@@ -5,6 +5,7 @@ import { replaceBigInts } from "@ponder/utils";
 import {
   type AccountId,
   asInterpretedName,
+  ENS_ROOT_NAME,
   type InterpretedName,
   isNormalizedName,
   type Node,
@@ -146,6 +147,15 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           // (this will be improved in a future pr https://github.com/namehash/ensnode/issues/1920)
           if (!isNormalizedName(name)) {
             throw new Error(`'${name}' must be normalized to be resolvable.`);
+          }
+
+          // TODO: technically we could support resolving records for the root node, but because there
+          // are so many edge cases, this is something we should explicitly declare support for
+          // after we have test cases
+          if (name === ENS_ROOT_NAME) {
+            throw new Error(
+              `Resolving records for the ENS Root Node ('') is not currently supported.`,
+            );
           }
 
           const node: Node = namehashInterpretedName(name);

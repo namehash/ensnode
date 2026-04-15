@@ -5,7 +5,6 @@ import RelayPlugin from "@pothos/plugin-relay";
 import TracingPlugin, { isRootField } from "@pothos/plugin-tracing";
 import { AttributeNames, createOpenTelemetryWrapper } from "@pothos/tracing-opentelemetry";
 import type {
-  Address,
   ChainId,
   CoinType,
   DomainId,
@@ -59,7 +58,7 @@ const createSpan = createOpenTelemetryWrapper(tracer, {
 export type BuilderScalars = {
   ID: { Input: string; Output: string };
   BigInt: { Input: bigint; Output: bigint };
-  Address: { Input: Address; Output: NormalizedAddress };
+  Address: { Input: NormalizedAddress; Output: NormalizedAddress };
   Hex: { Input: Hex; Output: Hex };
   ChainId: { Input: ChainId; Output: ChainId };
   CoinType: { Input: CoinType; Output: CoinType };
