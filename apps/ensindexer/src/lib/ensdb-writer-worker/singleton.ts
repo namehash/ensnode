@@ -14,6 +14,21 @@ function isAbortError(error: unknown): boolean {
 }
 
 /**
+ * Stop the given worker (if it is still the active singleton) and clear the
+ * singleton reference. Safe to call multiple times.
+ */
+async function gracefulShutdown(worker: EnsDbWriterWorker, reason: string): Promise<void> {
+  logger.info({
+    msg: `Stopping EnsDbWriterWorker: ${reason}`,
+    module: "EnsDbWriterWorker",
+  });
+  await worker.stop();
+  if (ensDbWriterWorker === worker) {
+    ensDbWriterWorker = undefined;
+  }
+}
+
+/**
  * Start (or restart) the EnsDbWriterWorker.
  *
  * Called from `apps/ensindexer/ponder/src/api/index.ts` on every Ponder
@@ -33,8 +48,7 @@ export async function startEnsDbWriterWorker(): Promise<void> {
   // this is a safety net for cases where the callback didn't run (e.g.
   // unexpected shutdown ordering).
   if (ensDbWriterWorker) {
-    await ensDbWriterWorker.stop();
-    ensDbWriterWorker = undefined;
+    await gracefulShutdown(ensDbWriterWorker, "stale instance from previous API exec");
   }
 
   const worker = new EnsDbWriterWorker(
@@ -49,38 +63,25 @@ export async function startEnsDbWriterWorker(): Promise<void> {
   // replaces this on every dev-mode hot reload, so this read MUST happen
   // inside the function call (not at module scope).
   const apiShutdown = localPonderContext.apiShutdown;
+  const abortSignal = apiShutdown.abortController.signal;
 
-  apiShutdown.add(async () => {
-    logger.info({
-      msg: "Stopping EnsDbWriterWorker due to API shutdown",
-      module: "EnsDbWriterWorker",
-    });
-    await worker.stop();
-    if (ensDbWriterWorker === worker) {
-      ensDbWriterWorker = undefined;
-    }
-  });
+  apiShutdown.add(() => gracefulShutdown(worker, "API shutdown"));
 
   worker
-    .run()
+    .run(abortSignal)
     // Handle any uncaught errors from the worker
     .catch(async (error) => {
       // If Ponder has begun shutting down our API instance (hot reload or
       // graceful shutdown), the abort propagates through in-flight fetches
-      // as an AbortError. Treat that as a clean stop, not a worker failure.
-      if (apiShutdown.abortController.signal.aborted || isAbortError(error)) {
-        logger.info({
-          msg: "EnsDbWriterWorker stopped due to API shutdown",
-          module: "EnsDbWriterWorker",
-        });
+      // (or `signal.throwIfAborted()`) as an AbortError. Treat that as a
+      // clean stop, not a worker failure.
+      if (abortSignal.aborted || isAbortError(error)) {
+        await gracefulShutdown(worker, "API shutdown (run aborted)");
         return;
       }
 
       // Real worker error — clean up and trigger non-zero exit.
-      await worker.stop();
-      if (ensDbWriterWorker === worker) {
-        ensDbWriterWorker = undefined;
-      }
+      await gracefulShutdown(worker, "uncaught error");
 
       logger.error({
         msg: "EnsDbWriterWorker encountered an error",

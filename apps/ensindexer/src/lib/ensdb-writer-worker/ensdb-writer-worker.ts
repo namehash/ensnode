@@ -93,22 +93,32 @@ export class EnsDbWriterWorker {
    * 3) A recurring attempt to upsert serialized representation of
    *    {@link CrossChainIndexingStatusSnapshot} into ENSDb.
    *
+   * @param signal Optional AbortSignal that, if aborted, causes `run` to bail
+   *               between its async setup steps. Use this to prevent the worker
+   *               from finishing initialization (and starting the recurring
+   *               interval) after the surrounding API instance has begun
+   *               shutting down.
    * @throws Error if the worker is already running, or
    *         if the in-memory ENSIndexer Public Config could not be fetched, or
-   *         if the in-memory ENSIndexer Public Config is incompatible with the stored config in ENSDb.
+   *         if the in-memory ENSIndexer Public Config is incompatible with the stored config in ENSDb, or
+   *         if `signal` is aborted before the recurring interval is scheduled.
    */
-  public async run(): Promise<void> {
+  public async run(signal?: AbortSignal): Promise<void> {
     // Do not allow multiple concurrent runs of the worker
     if (this.isRunning) {
       throw new Error("EnsDbWriterWorker is already running");
     }
 
+    signal?.throwIfAborted();
+
     // Fetch data required for task 1 and task 2.
     const inMemoryConfig = await this.getValidatedEnsIndexerPublicConfig();
+    signal?.throwIfAborted();
 
     // Task 1: upsert ENSDb version into ENSDb.
     logger.debug({ msg: "Upserting ENSDb version", module: "EnsDbWriterWorker" });
     await this.ensDbClient.upsertEnsDbVersion(inMemoryConfig.versionInfo.ensDb);
+    signal?.throwIfAborted();
     logger.info({
       msg: "Upserted ENSDb version",
       ensDbVersion: inMemoryConfig.versionInfo.ensDb,
@@ -121,14 +131,21 @@ export class EnsDbWriterWorker {
       module: "EnsDbWriterWorker",
     });
     await this.ensDbClient.upsertEnsIndexerPublicConfig(inMemoryConfig);
+    signal?.throwIfAborted();
     logger.info({
       msg: "Upserted ENSIndexer public config",
       module: "EnsDbWriterWorker",
     });
 
     // Task 3: recurring upsert of Indexing Status Snapshot into ENSDb.
+    // Skip overlapping ticks so a slow upsert can't pile up concurrent
+    // ENSDb writes. With skip-overlap there is at most one in-flight
+    // upsert at a time, which `stop()` then has a single promise to await.
     this.indexingStatusInterval = setInterval(() => {
-      this.inFlightSnapshot = this.upsertIndexingStatusSnapshot();
+      if (this.inFlightSnapshot) return;
+      this.inFlightSnapshot = this.upsertIndexingStatusSnapshot().finally(() => {
+        this.inFlightSnapshot = undefined;
+      });
     }, secondsToMilliseconds(INDEXING_STATUS_RECORD_UPDATE_INTERVAL));
   }
 

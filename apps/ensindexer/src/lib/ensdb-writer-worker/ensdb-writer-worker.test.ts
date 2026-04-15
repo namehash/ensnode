@@ -78,7 +78,7 @@ describe("EnsDbWriterWorker", () => {
       );
 
       // cleanup
-      worker.stop();
+      await worker.stop();
     });
 
     it("throws when stored config is incompatible", async () => {
@@ -129,7 +129,7 @@ describe("EnsDbWriterWorker", () => {
       expect(ensDbClient.upsertEnsIndexerPublicConfig).toHaveBeenCalledWith(mockPublicConfig);
 
       // cleanup
-      worker.stop();
+      await worker.stop();
     });
 
     it("throws error when worker is already running", async () => {
@@ -143,7 +143,7 @@ describe("EnsDbWriterWorker", () => {
       await expect(worker.run()).rejects.toThrow("EnsDbWriterWorker is already running");
 
       // cleanup
-      worker.stop();
+      await worker.stop();
     });
 
     it("throws error when config fetch fails", async () => {
@@ -193,7 +193,7 @@ describe("EnsDbWriterWorker", () => {
       expect(publicConfigBuilder.getPublicConfig).toHaveBeenCalledTimes(1);
 
       // cleanup
-      worker.stop();
+      await worker.stop();
     });
 
     it("calls pRetry for config fetch with retry logic", async () => {
@@ -213,7 +213,7 @@ describe("EnsDbWriterWorker", () => {
       expect(ensDbClient.upsertEnsIndexerPublicConfig).toHaveBeenCalledWith(mockPublicConfig);
 
       // cleanup
-      worker.stop();
+      await worker.stop();
     });
   });
 
@@ -230,7 +230,7 @@ describe("EnsDbWriterWorker", () => {
 
       const callCountBeforeStop = upsertIndexingStatusSnapshot.mock.calls.length;
 
-      worker.stop();
+      await worker.stop();
 
       // advance time after stop
       await vi.advanceTimersByTimeAsync(2000);
@@ -255,7 +255,7 @@ describe("EnsDbWriterWorker", () => {
       expect(worker.isRunning).toBe(true);
 
       // act - stop worker
-      worker.stop();
+      await worker.stop();
 
       // assert - not running after stop
       expect(worker.isRunning).toBe(false);
@@ -303,7 +303,7 @@ describe("EnsDbWriterWorker", () => {
       expect(ensDbClient.upsertIndexingStatusSnapshot).toHaveBeenCalledWith(crossChainSnapshot);
 
       // cleanup
-      worker.stop();
+      await worker.stop();
     });
 
     it("recovers from errors and continues upserting snapshots", async () => {
@@ -361,7 +361,7 @@ describe("EnsDbWriterWorker", () => {
       expect(ensDbClient.upsertIndexingStatusSnapshot).toHaveBeenCalledTimes(3);
 
       // cleanup
-      worker.stop();
+      await worker.stop();
     });
   });
 });
