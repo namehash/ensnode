@@ -22,7 +22,11 @@ export type PonderAppCommand = (typeof PonderAppCommands)[keyof typeof PonderApp
  * a captured reference.
  */
 export interface PonderAppShutdownManager {
-  add: (callback: () => undefined | Promise<unknown>) => void;
+  // Ponder awaits the callback's return value internally, so any value
+  // (sync or async) is accepted. Typed as `unknown` to keep callbacks
+  // that return `void` assignable without a Biome `noConfusingVoidType`
+  // violation.
+  add: (callback: () => unknown) => void;
   isKilled: boolean;
   abortController: AbortController;
 }

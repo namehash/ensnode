@@ -77,11 +77,14 @@ export async function startEnsDbWriterWorker(): Promise<void> {
     .run(abortSignal)
     // Handle any uncaught errors from the worker
     .catch(async (error) => {
-      // If Ponder has begun shutting down our API instance (hot reload or
-      // graceful shutdown), the abort propagates through in-flight fetches
-      // (or `signal.throwIfAborted()`) as an AbortError. Treat that as a
-      // clean stop, not a worker failure.
-      if (abortSignal.aborted || isAbortError(error)) {
+      // Treat as a clean stop only when BOTH the captured shutdown signal
+      // is aborted AND the error is an AbortError. Either condition alone
+      // could mask a real failure: a non-AbortError thrown after Ponder
+      // killed the signal is still a bug worth surfacing, and an
+      // AbortError without our signal aborted means it came from
+      // somewhere else (e.g. a reactive-getter race) and shouldn't be
+      // silently swallowed.
+      if (abortSignal.aborted && isAbortError(error)) {
         await gracefulShutdown(worker, "API shutdown (run aborted)");
         return;
       }
@@ -94,8 +97,9 @@ export async function startEnsDbWriterWorker(): Promise<void> {
         error,
       });
 
-      // Re-throw the error to ensure the application shuts down with a non-zero exit code.
+      // Set a non-zero exit code so the process terminates with failure.
+      // Don't rethrow — this catch handler is on a fire-and-forget promise,
+      // so a rethrow becomes an unhandled rejection.
       process.exitCode = 1;
-      throw error;
     });
 }
