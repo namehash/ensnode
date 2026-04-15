@@ -3,7 +3,7 @@ import type { AccountId, NormalizedAddress, UnixTimestamp } from "enssdk";
 import type { PriceUsdc } from "@ensnode/ensnode-sdk";
 import { makePriceUsdcSchema } from "@ensnode/ensnode-sdk/internal";
 
-import { validateAddress } from "../../address";
+import { validateNormalizedAddress } from "../../address";
 import {
   type BaseReferralProgramRules,
   ReferralProgramAwardModels,
@@ -102,7 +102,7 @@ export const validateReferralProgramRulesRevShareCap = (
   }
 
   for (const d of rules.disqualifications) {
-    validateAddress(d.referrer);
+    validateNormalizedAddress(d.referrer);
     if (d.reason.trim().length === 0) {
       throw new Error(
         "ReferralProgramRulesRevShareCap: disqualification reason must not be empty.",

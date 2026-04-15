@@ -1,4 +1,4 @@
-import type { Address, UnixTimestamp } from "enssdk";
+import type { NormalizedAddress, UnixTimestamp } from "enssdk";
 
 import type { ReferrerLeaderboard } from "../../leaderboard";
 import { isNonNegativeInteger, isPositiveInteger } from "../../number";
@@ -309,7 +309,7 @@ export interface ReferrerLeaderboardPageUnrecognized extends BaseReferrerLeaderb
  * Generic over the referrer type so each model variant retains its specific type.
  */
 export function sliceReferrers<T>(
-  referrers: Map<Address, T>,
+  referrers: Map<NormalizedAddress, T>,
   pageContext: ReferrerLeaderboardPageContext,
 ): T[] {
   // pageContext invariants: startIndex and endIndex are defined iff totalRecords > 0

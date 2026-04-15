@@ -1,4 +1,4 @@
-import type { Address, UnixTimestamp } from "enssdk";
+import type { NormalizedAddress, UnixTimestamp } from "enssdk";
 
 import type { ReferrerMetrics } from "../../referrer-metrics";
 import { assertLeaderboardInputs } from "../shared/leaderboard-guards";
@@ -42,13 +42,13 @@ export interface ReferrerLeaderboardPieSplit {
    * @invariant Map entries are ordered by `rank` (ascending).
    * @invariant Map is empty if there are no referrers with 1 or more `totalReferrals`
    *            within the `rules` as of `accurateAsOf`.
-   * @invariant If a fully-lowercase `Address` is not a key in this map then that `Address` had
+   * @invariant If a `NormalizedAddress` is not a key in this map then that `NormalizedAddress` had
    *            0 `totalReferrals`, `totalIncrementalDuration`, and `score` within the
    *            `rules` as of `accurateAsOf`.
    * @invariant Each value in this map is guaranteed to have a non-zero
    *            `totalReferrals`, `totalIncrementalDuration`, and `score`.
    */
-  referrers: Map<Address, AwardedReferrerMetricsPieSplit>;
+  referrers: Map<NormalizedAddress, AwardedReferrerMetricsPieSplit>;
 
   /**
    * The {@link UnixTimestamp} of when the data used to build the {@link ReferrerLeaderboardPieSplit} was accurate as of.
