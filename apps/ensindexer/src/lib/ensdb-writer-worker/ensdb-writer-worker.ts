@@ -109,8 +109,9 @@ export class EnsDbWriterWorker {
    *               shutting down.
    * @throws Error if the worker is already running, or
    *         if the in-memory ENSIndexer Public Config could not be fetched, or
-   *         if the in-memory ENSIndexer Public Config is incompatible with the stored config in ENSDb, or
-   *         if `signal` is aborted before the recurring interval is scheduled.
+   *         if the in-memory ENSIndexer Public Config is incompatible with the stored config in ENSDb.
+   * @throws DOMException with `name === "AbortError"` if `signal` is aborted
+   *         or if {@link stop} is called before the recurring interval is scheduled.
    */
   public async run(signal?: AbortSignal): Promise<void> {
     // Do not allow multiple concurrent runs of the worker
