@@ -193,6 +193,10 @@ export class EnsDbWriterWorker {
   private checkCancellation(signal?: AbortSignal): void {
     signal?.throwIfAborted();
     if (this.stopRequested) {
+      // Match what `AbortSignal.throwIfAborted()` throws — a DOMException
+      // with `name === "AbortError"` — so callers' `isAbortError` checks
+      // treat both abort sources (external signal and internal stop)
+      // identically.
       throw new DOMException("Worker stop requested", "AbortError");
     }
   }
