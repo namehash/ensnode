@@ -89,7 +89,13 @@ export async function startEnsDbWriterWorker(): Promise<void> {
         return;
       }
 
-      // Real worker error — clean up and trigger non-zero exit.
+      // Real worker error — clean up and fail-fast. The worker is a startup
+      // invariant for the API layer; leaving the process half-alive (just
+      // setting `process.exitCode`) would let ensindexer keep serving with a
+      // dead writer. We can't rethrow because this `.catch()` is on a
+      // fire-and-forget promise, so a rethrow becomes an unhandled rejection
+      // instead of reaching a top-level handler — call `process.exit(1)` to
+      // terminate immediately.
       await gracefulShutdown(worker, "uncaught error");
 
       logger.error({
@@ -97,9 +103,6 @@ export async function startEnsDbWriterWorker(): Promise<void> {
         error,
       });
 
-      // Set a non-zero exit code so the process terminates with failure.
-      // Don't rethrow — this catch handler is on a fire-and-forget promise,
-      // so a rethrow becomes an unhandled rejection.
-      process.exitCode = 1;
+      process.exit(1);
     });
 }

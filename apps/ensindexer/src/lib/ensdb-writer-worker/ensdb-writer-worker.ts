@@ -44,6 +44,15 @@ export class EnsDbWriterWorker {
   private inFlightSnapshot: Promise<unknown> | undefined;
 
   /**
+   * Set by {@link stop} to signal an in-progress {@link run} that it should
+   * bail before scheduling the recurring interval. Required because the
+   * external `signal` parameter to `run` may not be aborted in every
+   * cancellation path (e.g. a defensive caller-driven `stop()` in singleton
+   * cleanup).
+   */
+  private stopRequested = false;
+
+  /**
    * ENSDb Client instance used by the worker to interact with ENSDb.
    */
   private ensDbClient: EnsDbWriter;
@@ -109,16 +118,17 @@ export class EnsDbWriterWorker {
       throw new Error("EnsDbWriterWorker is already running");
     }
 
-    signal?.throwIfAborted();
+    this.stopRequested = false;
+    this.checkCancellation(signal);
 
     // Fetch data required for task 1 and task 2.
     const inMemoryConfig = await this.getValidatedEnsIndexerPublicConfig();
-    signal?.throwIfAborted();
+    this.checkCancellation(signal);
 
     // Task 1: upsert ENSDb version into ENSDb.
     logger.debug({ msg: "Upserting ENSDb version", module: "EnsDbWriterWorker" });
     await this.ensDbClient.upsertEnsDbVersion(inMemoryConfig.versionInfo.ensDb);
-    signal?.throwIfAborted();
+    this.checkCancellation(signal);
     logger.info({
       msg: "Upserted ENSDb version",
       ensDbVersion: inMemoryConfig.versionInfo.ensDb,
@@ -131,7 +141,7 @@ export class EnsDbWriterWorker {
       module: "EnsDbWriterWorker",
     });
     await this.ensDbClient.upsertEnsIndexerPublicConfig(inMemoryConfig);
-    signal?.throwIfAborted();
+    this.checkCancellation(signal);
     logger.info({
       msg: "Upserted ENSIndexer public config",
       module: "EnsDbWriterWorker",
@@ -159,10 +169,12 @@ export class EnsDbWriterWorker {
   /**
    * Stop the ENSDb Writer Worker
    *
-   * Stops all recurring tasks in the worker and waits for any in-flight
-   * snapshot upsert to settle. Safe to call when not running.
+   * Cancels any in-progress {@link run} startup, stops all recurring tasks,
+   * and waits for any in-flight snapshot upsert to settle. Safe to call when
+   * not running.
    */
   public async stop(): Promise<void> {
+    this.stopRequested = true;
     if (this.indexingStatusInterval) {
       clearInterval(this.indexingStatusInterval);
       this.indexingStatusInterval = null;
@@ -171,6 +183,17 @@ export class EnsDbWriterWorker {
       // Errors are already logged inside upsertIndexingStatusSnapshot; swallow here.
       await this.inFlightSnapshot.catch(() => {});
       this.inFlightSnapshot = undefined;
+    }
+  }
+
+  /**
+   * Throw an `AbortError` if cancellation has been requested either via the
+   * caller's `AbortSignal` or via an internal {@link stop} call.
+   */
+  private checkCancellation(signal?: AbortSignal): void {
+    signal?.throwIfAborted();
+    if (this.stopRequested) {
+      throw new DOMException("Worker stop requested", "AbortError");
     }
   }
 
