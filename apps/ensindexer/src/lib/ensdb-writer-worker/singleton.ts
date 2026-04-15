@@ -10,7 +10,13 @@ import { EnsDbWriterWorker } from "./ensdb-writer-worker";
 let ensDbWriterWorker: EnsDbWriterWorker | undefined;
 
 function isAbortError(error: unknown): boolean {
-  return error instanceof Error && error.name === "AbortError";
+  // `fetch` aborts reject with a `DOMException` whose `name === "AbortError"`,
+  // which is not always `instanceof Error` across runtimes. Check by name.
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    (error as { name?: unknown }).name === "AbortError"
+  );
 }
 
 /**

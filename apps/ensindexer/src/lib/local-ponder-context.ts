@@ -1,4 +1,9 @@
-import { deserializePonderAppContext, type PonderAppContext } from "@ensnode/ponder-sdk";
+import {
+  deserializePonderAppContext,
+  isPonderAppShutdownManager,
+  type PonderAppContext,
+  type PonderAppShutdownManager,
+} from "@ensnode/ponder-sdk";
 
 /**
  * Local Ponder Context — reactive wrapper over Ponder's runtime globals.
@@ -29,28 +34,6 @@ import { deserializePonderAppContext, type PonderAppContext } from "@ensnode/pon
 
 if (!globalThis.PONDER_COMMON) {
   throw new Error("PONDER_COMMON must be defined by Ponder at runtime as a global variable.");
-}
-
-/**
- * Ponder shutdown manager runtime shape.
- *
- * Mirrors `ponder/src/internal/shutdown.ts` — the object Ponder publishes
- * on `globalThis.PONDER_COMMON.{shutdown,apiShutdown}`.
- */
-export interface PonderAppShutdownManager {
-  add: (callback: () => undefined | Promise<unknown>) => void;
-  isKilled: boolean;
-  abortController: AbortController;
-}
-
-function isPonderAppShutdownManager(value: unknown): value is PonderAppShutdownManager {
-  if (typeof value !== "object" || value === null) return false;
-  const obj = value as Record<string, unknown>;
-  return (
-    typeof obj.add === "function" &&
-    typeof obj.isKilled === "boolean" &&
-    obj.abortController instanceof AbortController
-  );
 }
 
 function readShutdownManager(field: "apiShutdown" | "shutdown"): PonderAppShutdownManager {
@@ -94,6 +77,7 @@ export interface LocalPonderContext extends PonderAppContext {
 
 export const localPonderContext: LocalPonderContext = new Proxy({} as LocalPonderContext, {
   get(_target, prop) {
+    if (typeof prop === "symbol") return undefined;
     if (prop === "apiShutdown") return readShutdownManager("apiShutdown");
     if (prop === "shutdown") return readShutdownManager("shutdown");
     return getStableContext()[prop as keyof PonderAppContext];

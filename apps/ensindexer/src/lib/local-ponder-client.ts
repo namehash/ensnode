@@ -17,7 +17,6 @@ export const localPonderClient = new LocalPonderClient(
   indexedBlockranges,
   publicClients,
   localPonderContext,
-  // Reload-scoped: read fresh on every fetch via the reactive proxy. See
-  // local-ponder-context.ts for the staleness contract.
+  // See local-ponder-context.ts for the staleness contract.
   () => localPonderContext.apiShutdown.abortController.signal,
 );

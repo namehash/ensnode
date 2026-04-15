@@ -4,19 +4,22 @@ import type { PonderIndexingMetrics } from "./indexing-metrics";
 import type { PonderIndexingStatus } from "./indexing-status";
 
 /**
- * PonderClient for fetching data from Ponder apps.
+ * Returns the current `AbortSignal` to attach to outgoing requests.
  *
- * The optional `getAbortSignal` is invoked at fetch time so each request
- * uses the current `AbortSignal`. Passing a getter (instead of a captured
- * `AbortSignal`) is required for consumers that need to track signals
- * which change identity over the client's lifetime — e.g. signals derived
+ * Consumers must use a getter (not a captured `AbortSignal`) when the
+ * underlying signal can change identity over time — e.g. signals derived
  * from Ponder's `apiShutdown` manager, which Ponder kills and replaces on
  * every dev-mode hot reload.
+ */
+export type AbortSignalGetter = () => AbortSignal | undefined;
+
+/**
+ * PonderClient for fetching data from Ponder apps.
  */
 export class PonderClient {
   constructor(
     private readonly baseUrl: URL,
-    private readonly getAbortSignal?: () => AbortSignal | undefined,
+    private readonly getAbortSignal?: AbortSignalGetter,
   ) {}
 
   /**
