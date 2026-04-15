@@ -192,6 +192,7 @@ jobs:
     needs: [changesets, build-and-push-ensnode]
     permissions:
       contents: write
+      pull-requests: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
