@@ -1,7 +1,7 @@
 import { ensDbClient } from "@/lib/ensdb/singleton";
 import { indexingStatusBuilder } from "@/lib/indexing-status-builder/singleton";
 import { localPonderClient } from "@/lib/local-ponder-client";
-import { localPonderContext } from "@/lib/local-ponder-context";
+import { getApiShutdown } from "@/lib/local-ponder-context";
 import { logger } from "@/lib/logger";
 import { publicConfigBuilder } from "@/lib/public-config-builder/singleton";
 
@@ -65,10 +65,10 @@ export async function startEnsDbWriterWorker(): Promise<void> {
   );
   ensDbWriterWorker = worker;
 
-  // Read apiShutdown FRESH from the reactive context. Ponder kills and
+  // Read apiShutdown FRESH via getApiShutdown(). Ponder kills and
   // replaces this on every dev-mode hot reload, so this read MUST happen
   // inside the function call (not at module scope).
-  const apiShutdown = localPonderContext.apiShutdown;
+  const apiShutdown = getApiShutdown();
   const abortSignal = apiShutdown.abortController.signal;
 
   apiShutdown.add(() => gracefulShutdown(worker, "API shutdown"));
