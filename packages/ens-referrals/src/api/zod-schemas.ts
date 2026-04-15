@@ -46,7 +46,8 @@ import {
 
 /**
  * Re-emit issues from a nested safeParse into the outer transform context.
- * Optionally prefixes each issue's path (used when the outer schema is an array).
+ * Preserves the original issue's code, expected/received, params and other metadata;
+ * only the path is rewritten (optionally prefixed — used when the outer schema is an array).
  */
 const reemitIssues = (
   ctx: z.RefinementCtx,
@@ -55,9 +56,8 @@ const reemitIssues = (
 ) => {
   for (const issue of issues) {
     ctx.addIssue({
-      code: "custom",
+      ...issue,
       path: [...pathPrefix, ...(issue.path as PropertyKey[])],
-      message: issue.message,
     });
   }
 };
