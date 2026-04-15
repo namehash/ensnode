@@ -38,6 +38,9 @@
 
 name: Release Snapshot (@next)
 
+permissions:
+  contents: read
+
 on:
   push:
     branches:
@@ -129,6 +132,8 @@ jobs:
     runs-on: blacksmith-4vcpu-ubuntu-2204
     if: github.repository == 'namehash/ensnode' && !contains(github.event.head_commit.message, 'changeset-release/main') && needs.build-and-publish-npm.outputs.hasChanges == 'true'
     needs: [build-and-publish-npm]
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:

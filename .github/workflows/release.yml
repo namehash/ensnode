@@ -31,6 +31,9 @@
 
 name: Release
 
+permissions:
+  contents: read
+
 on:
   push:
     branches:
@@ -129,6 +132,9 @@ jobs:
     needs: changesets
     if: needs.changesets.outputs.published == 'true' && needs.changesets.outputs.publishedApps != '[]'
     runs-on: blacksmith-4vcpu-ubuntu-2204
+    permissions:
+      contents: read
+      packages: write
     strategy:
       fail-fast: false
       matrix:
@@ -158,6 +164,8 @@ jobs:
     needs: changesets
     if: needs.changesets.outputs.published == 'true' && needs.changesets.outputs.publishedLambdas != '[]'
     runs-on: blacksmith-4vcpu-ubuntu-2204
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -182,6 +190,8 @@ jobs:
     if: needs.changesets.outputs.published == 'true'
     # (2) we built and pushed the docker images
     needs: [changesets, build-and-push-ensnode]
+    permissions:
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6

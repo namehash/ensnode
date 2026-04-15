@@ -1,5 +1,8 @@
 name: "Deploy: Switch ENSNode Environment"
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:

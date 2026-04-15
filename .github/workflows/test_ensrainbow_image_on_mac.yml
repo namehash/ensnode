@@ -1,5 +1,9 @@
 name: "Test: ENSRainbow Test Image on macOS"
 
+permissions:
+  contents: read
+  packages: read
+
 on:
   workflow_dispatch:
 
