@@ -1,4 +1,4 @@
-import { type Address, hexToBigInt } from "viem";
+import { hexToBigInt } from "viem";
 
 import { zeroLower32Bits } from "../_lib/zeroLower32Bits";
 import { stringifyAccountId, stringifyAssetId } from "./caip";
