@@ -5205,7 +5205,7 @@ const introspection = {
             },
             "args": [
               {
-                "name": "for",
+                "name": "by",
                 "type": {
                   "kind": "NON_NULL",
                   "ofType": {
