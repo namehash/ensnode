@@ -42,7 +42,7 @@ export interface AdminActionDisqualification {
   /**
    * A human-readable explanation of why the action was imposed.
    *
-   * @invariant Must be a non-empty string.
+   * @invariant Must be a trimmed, non-empty string.
    */
   reason: string;
 }
@@ -62,7 +62,7 @@ export interface AdminActionWarning {
   /**
    * A human-readable explanation of why the action was imposed.
    *
-   * @invariant Must be a non-empty string.
+   * @invariant Must be a trimmed, non-empty string.
    */
   reason: string;
 }
@@ -148,8 +148,10 @@ export const validateReferralProgramRulesRevShareCap = (
 
   for (const action of rules.adminActions) {
     validateNormalizedAddress(action.referrer);
-    if (action.reason.trim().length === 0) {
-      throw new Error("ReferralProgramRulesRevShareCap: admin action reason must not be empty.");
+    if (action.reason.trim().length === 0 || action.reason !== action.reason.trim()) {
+      throw new Error(
+        "ReferralProgramRulesRevShareCap: admin action reason must be a trimmed, non-empty string.",
+      );
     }
   }
 

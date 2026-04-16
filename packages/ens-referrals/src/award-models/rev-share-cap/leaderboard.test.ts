@@ -575,7 +575,7 @@ describe("buildReferrerLeaderboardRevShareCap", () => {
       expect(referrerC.cappedAward.amount).toBe(0n);
     });
 
-    it("multiple disqualifications: all disqualified referrers get isAdminDisqualified=true", () => {
+    it("multiple admin actions: all disqualified referrers get isAdminDisqualified=true", () => {
       const rules = buildTestRules(parseUsdc("1000"), parseUsdc("5"), [
         disqualification(ADDR_A, "reason-a"),
         disqualification(ADDR_B, "reason-b"),
