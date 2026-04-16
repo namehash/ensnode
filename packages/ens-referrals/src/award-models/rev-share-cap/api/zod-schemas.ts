@@ -128,6 +128,10 @@ export const makeAwardedReferrerMetricsRevShareCapSchema = (
     .refine((data) => data.isQualified || data.cappedAward.amount === 0n, {
       message: `${valueLabel}.cappedAward must be 0 when isQualified is false`,
       path: ["cappedAward"],
+    })
+    .refine((data) => data.adminAction === null || data.adminAction.referrer === data.referrer, {
+      message: `${valueLabel}.adminAction.referrer must match ${valueLabel}.referrer`,
+      path: ["adminAction", "referrer"],
     });
 
 /**
@@ -184,7 +188,11 @@ export const makeUnrankedReferrerMetricsRevShareCapSchema = (
         message: `${valueLabel}.isAdminDisqualified must be true iff adminAction.actionType is Disqualification`,
         path: ["isAdminDisqualified"],
       },
-    );
+    )
+    .refine((data) => data.adminAction === null || data.adminAction.referrer === data.referrer, {
+      message: `${valueLabel}.adminAction.referrer must match ${valueLabel}.referrer`,
+      path: ["adminAction", "referrer"],
+    });
 
 /**
  * Schema for {@link AggregatedReferrerMetricsRevShareCap}.
