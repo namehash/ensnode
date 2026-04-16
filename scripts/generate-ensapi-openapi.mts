@@ -3,7 +3,7 @@
  *
  * Usage: pnpm generate:openapi
  *
- * Output: docs/docs.ensnode.io/ensapi-openapi.json
+ * Output: docs/ensnode.io/ensapi-openapi.json
  *
  * This script calls generateOpenApi31Document() which uses the real app routes
  * and static metadata. Lazy initialization enables this script to run without config initialization.
@@ -18,7 +18,7 @@ import app from "@/app";
 import { generateOpenApi31Document } from "@/openapi-document";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const outputPath = resolve(__dirname, "..", "docs", "docs.ensnode.io", "ensapi-openapi.json");
+const outputPath = resolve(__dirname, "..", "docs", "ensnode.io", "ensapi-openapi.json");
 
 // Generate the document (no additional servers for the static spec)
 const document = generateOpenApi31Document(app);
