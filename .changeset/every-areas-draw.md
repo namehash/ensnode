@@ -2,4 +2,4 @@
 "@namehash/ens-referrals": patch
 ---
 
-Tighten referral program types to use `NormalizedAddress` instead of `Address` in the remaining public surfaces. No runtime behavior change.
+Tighten referral program types to use `NormalizedAddress` instead of `Address` in internal leaderboard map keys (pie-split, shared `sliceReferrers`) and related JSDoc. No runtime behavior change.

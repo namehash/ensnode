@@ -1,4 +1,4 @@
-import type { NormalizedAddress } from "enssdk";
+import type { Address } from "enssdk";
 
 import type { ReferrerLeaderboardPageParams } from "../award-models/shared/leaderboard-page";
 import type { ReferralProgramEditionSlug } from "../edition";
@@ -72,7 +72,7 @@ export const MAX_EDITIONS_PER_REQUEST = 20;
  */
 export interface ReferrerMetricsEditionsRequest {
   /** The Ethereum address of the referrer to query */
-  referrer: NormalizedAddress;
+  referrer: Address;
   /** Array of edition slugs to query (min 1, max {@link MAX_EDITIONS_PER_REQUEST}, must be distinct) */
   editions: ReferralProgramEditionSlug[];
 }
