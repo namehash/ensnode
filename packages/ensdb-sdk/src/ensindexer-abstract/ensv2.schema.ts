@@ -1,12 +1,9 @@
-import { index, onchainEnum, onchainTable, primaryKey, relations, sql, uniqueIndex } from "ponder";
-import type { Address, BlockNumber, Hash } from "viem";
-
 import type {
+  Address,
   ChainId,
   DomainId,
   ENSv1DomainId,
   ENSv2DomainId,
-  EncodedReferrer,
   InterpretedLabel,
   LabelHash,
   PermissionsId,
@@ -16,7 +13,11 @@ import type {
   RegistryId,
   RenewalId,
   ResolverId,
-} from "@ensnode/ensnode-sdk";
+} from "enssdk";
+import { index, onchainEnum, onchainTable, primaryKey, relations, sql, uniqueIndex } from "ponder";
+import type { BlockNumber, Hash } from "viem";
+
+import type { EncodedReferrer } from "@ensnode/ensnode-sdk";
 
 /**
  * The ENSv2 Schema
@@ -326,17 +327,18 @@ export const registrationType = onchainEnum("RegistrationType", [
   "NameWrapper",
   "BaseRegistrar",
   "ThreeDNS",
-  "ENSv2Registry",
+  "ENSv2RegistryRegistration",
+  "ENSv2RegistryReservation",
 ]);
 
 export const registration = onchainTable(
   "registrations",
   (t) => ({
-    // keyed by (domainId, index)
+    // keyed by (domainId, registrationIndex)
     id: t.text().primaryKey().$type<RegistrationId>(),
 
     domainId: t.text().notNull().$type<DomainId>(),
-    index: t.integer().notNull(),
+    registrationIndex: t.integer().notNull(),
 
     // has a type
     type: registrationType().notNull(),
@@ -352,10 +354,13 @@ export const registration = onchainTable(
     registrarChainId: t.integer().notNull().$type<ChainId>(),
     registrarAddress: t.hex().notNull().$type<Address>(),
 
-    // references registrant
+    // may reference a registrant
     registrantId: t.hex().$type<Address>(),
 
-    // may have a referrer
+    // may reference an unregistrant
+    unregistrantId: t.hex().$type<Address>(),
+
+    // may have referrer data
     referrer: t.hex().$type<EncodedReferrer>(),
 
     // may have fuses (NameWrapper, Wrapped BaseRegistrar)
@@ -376,13 +381,13 @@ export const registration = onchainTable(
     eventId: t.text().notNull(),
   }),
   (t) => ({
-    byId: uniqueIndex().on(t.domainId, t.index),
+    byId: uniqueIndex().on(t.domainId, t.registrationIndex),
   }),
 );
 
 export const latestRegistrationIndex = onchainTable("latest_registration_indexes", (t) => ({
   domainId: t.text().primaryKey().$type<DomainId>(),
-  index: t.integer().notNull(),
+  registrationIndex: t.integer().notNull(),
 }));
 
 export const registration_relations = relations(registration, ({ one, many }) => ({
@@ -401,6 +406,13 @@ export const registration_relations = relations(registration, ({ one, many }) =>
     fields: [registration.registrantId],
     references: [account.id],
     relationName: "registrant",
+  }),
+
+  // has one unregistrant
+  unregistrant: one(account, {
+    fields: [registration.unregistrantId],
+    references: [account.id],
+    relationName: "unregistrant",
   }),
 
   // has many renewals
@@ -425,7 +437,7 @@ export const renewal = onchainTable(
 
     domainId: t.text().notNull().$type<DomainId>(),
     registrationIndex: t.integer().notNull(),
-    index: t.integer().notNull(),
+    renewalIndex: t.integer().notNull(),
 
     // all renewals have a duration
     duration: t.bigint().notNull(),
@@ -445,7 +457,7 @@ export const renewal = onchainTable(
     eventId: t.text().notNull(),
   }),
   (t) => ({
-    byId: uniqueIndex().on(t.domainId, t.registrationIndex, t.index),
+    byId: uniqueIndex().on(t.domainId, t.registrationIndex, t.renewalIndex),
   }),
 );
 
@@ -453,7 +465,7 @@ export const renewal_relations = relations(renewal, ({ one }) => ({
   // belongs to registration
   registration: one(registration, {
     fields: [renewal.domainId, renewal.registrationIndex],
-    references: [registration.domainId, registration.index],
+    references: [registration.domainId, registration.registrationIndex],
   }),
 
   // has an event
@@ -468,7 +480,7 @@ export const latestRenewalIndex = onchainTable(
   (t) => ({
     domainId: t.text().notNull().$type<DomainId>(),
     registrationIndex: t.integer().notNull(),
-    index: t.integer().notNull(),
+    renewalIndex: t.integer().notNull(),
   }),
   (t) => ({ pk: primaryKey({ columns: [t.domainId, t.registrationIndex] }) }),
 );

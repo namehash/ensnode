@@ -1,7 +1,9 @@
 "use client";
 
+import type { Name } from "enssdk";
+
 import { ASSUME_IMMUTABLE_QUERY, useRecords } from "@ensnode/ensnode-react";
-import { type Name, type ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
+import type { ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { useActiveNamespace } from "@/hooks/active/use-active-namespace";

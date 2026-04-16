@@ -1,12 +1,12 @@
+import type { AccountId, InterpretedName } from "enssdk";
+import { asInterpretedName } from "enssdk";
+
 import {
   DatasourceNames,
   type ENSNamespaceId,
   ENSNamespaceIds,
   maybeGetDatasource,
 } from "@ensnode/datasources";
-
-import type { Name } from "../ens";
-import type { AccountId } from "../shared/types";
 
 /**
  * Gets the SubregistryId (an AccountId) of the Lineanames Subregistry contract (this is the
@@ -27,10 +27,7 @@ export function getLineanamesSubregistryId(namespace: ENSNamespaceId): AccountId
     throw new Error(`BaseRegistrar contract not found or has multiple addresses for ${namespace}`);
   }
 
-  return {
-    chainId: datasource.chain.id,
-    address,
-  };
+  return { chainId: datasource.chain.id, address };
 }
 
 /**
@@ -40,13 +37,13 @@ export function getLineanamesSubregistryId(namespace: ENSNamespaceId): AccountId
  * @returns registrar managed name
  * @throws an error when no registrar managed name could be returned
  */
-export function getLineanamesSubregistryManagedName(namespaceId: ENSNamespaceId): Name {
+export function getLineanamesSubregistryManagedName(namespaceId: ENSNamespaceId): InterpretedName {
   switch (namespaceId) {
     case ENSNamespaceIds.Mainnet:
-      return "linea.eth";
+      return asInterpretedName("linea.eth");
     case ENSNamespaceIds.Sepolia:
     case ENSNamespaceIds.SepoliaV2:
-      return "linea-sepolia.eth";
+      return asInterpretedName("linea-sepolia.eth");
     case ENSNamespaceIds.EnsTestEnv:
       throw new Error(
         `No registrar managed name is known for the 'Lineanames' subregistry within the "${namespaceId}" namespace.`,

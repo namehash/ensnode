@@ -1,5 +1,5 @@
-import type { InterpretedName, Node } from "../../../ens/types";
-import type { UnixTimestamp } from "../../../shared/types";
+import type { InterpretedName, Node, UnixTimestamp } from "enssdk";
+
 import type { NameToken, NameTokenOwnershipTypes } from "../../../tokenscope/name-token";
 import type { ErrorResponse } from "../shared/errors";
 

@@ -1,9 +1,9 @@
 "use client";
 
 import { NameDisplay } from "@namehash/namehash-ui";
+import type { Name } from "enssdk";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-
-import type { Name } from "@ensnode/ensnode-sdk";
 
 import {
   BreadcrumbItem,
@@ -24,7 +24,9 @@ export default function Page() {
     return (
       <>
         <BreadcrumbItem>
-          <BreadcrumbLink href={recordsBaseHref}>Record Resolution</BreadcrumbLink>
+          <BreadcrumbLink asChild>
+            <Link href={recordsBaseHref}>Record Resolution</Link>
+          </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>

@@ -1,14 +1,19 @@
-import type { Address } from "viem";
-
 import {
   type AccountId,
+  type DurationBigInt,
+  makeENSv2DomainId,
+  makeStorageId,
+  type NormalizedAddress,
+  type TokenId,
+  type UnixTimestampBigInt,
+  type Wei,
+} from "enssdk";
+
+import {
   type EncodedReferrer,
-  getCanonicalId,
   interpretAddress,
   isRegistrationFullyExpired,
-  makeENSv2DomainId,
   PluginName,
-  type TokenId,
 } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
@@ -52,14 +57,14 @@ export default function () {
       event: EventWithArgs<{
         tokenId: TokenId;
         label: string;
-        owner: Address;
-        subregistry: Address;
-        resolver: Address;
-        duration: bigint;
+        owner: NormalizedAddress;
+        subregistry: NormalizedAddress;
+        resolver: NormalizedAddress;
+        duration: DurationBigInt;
         referrer: EncodedReferrer;
-        paymentToken: Address;
-        base: bigint;
-        premium: bigint;
+        paymentToken: NormalizedAddress;
+        base: Wei;
+        premium: Wei;
       }>;
     }) => {
       // biome-ignore lint/correctness/noUnusedVariables: TODO(paymentToken)
@@ -70,8 +75,8 @@ export default function () {
       // _before_ this event. This event upserts the latest Registration with payment info.
 
       const { registrar, registry } = await getRegistrarAndRegistry(context, event);
-      const canonicalId = getCanonicalId(tokenId);
-      const domainId = makeENSv2DomainId(registry, canonicalId);
+      const storageId = makeStorageId(tokenId);
+      const domainId = makeENSv2DomainId(registry, storageId);
 
       const registration = await getLatestRegistration(context, domainId);
 
@@ -83,7 +88,7 @@ export default function () {
       }
 
       // Invariant: must be ENSv2Registry Registration
-      if (registration.type !== "ENSv2Registry") {
+      if (registration.type !== "ENSv2RegistryRegistration") {
         throw new Error(
           `Invariant(ETHRegistrar:NameRegistered): Registration found but not ENSv2Registry Registration:\n${toJson(registration)}`,
         );
@@ -131,11 +136,11 @@ export default function () {
       event: EventWithArgs<{
         tokenId: TokenId;
         label: string;
-        duration: bigint;
-        newExpiry: bigint;
+        duration: DurationBigInt;
+        newExpiry: UnixTimestampBigInt;
         referrer: EncodedReferrer;
-        paymentToken: Address;
-        base: bigint;
+        paymentToken: NormalizedAddress;
+        base: Wei;
       }>;
     }) => {
       // biome-ignore lint/correctness/noUnusedVariables: TODO(paymentToken)
@@ -145,8 +150,8 @@ export default function () {
       // update Registration.expiry, it just needs to update the latest Renewal
 
       const { registry } = await getRegistrarAndRegistry(context, event);
-      const canonicalId = getCanonicalId(tokenId);
-      const domainId = makeENSv2DomainId(registry, canonicalId);
+      const storageId = makeStorageId(tokenId);
+      const domainId = makeENSv2DomainId(registry, storageId);
 
       const registration = await getLatestRegistration(context, domainId);
 
@@ -156,7 +161,7 @@ export default function () {
       }
 
       // Invariant: Must be ENSv2Registry Registration
-      if (registration.type !== "ENSv2Registry") {
+      if (registration.type !== "ENSv2RegistryRegistration") {
         throw new Error(
           `Invariant(ETHRegistrar:NameRenewed): Registration found but not ENSv2Registry Registration:\n${toJson(registration)}`,
         );

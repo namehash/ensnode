@@ -31,7 +31,7 @@
   },
   "devDependencies": {
     "@ensnode/shared-configs": "workspace:*",
-    "@hono/node-server": "^1.19.10",
+    "@hono/node-server": "catalog:",
     "@types/node": "catalog:",
     "esbuild": "^0.27.2",
     "tsx": "^4.7.1",

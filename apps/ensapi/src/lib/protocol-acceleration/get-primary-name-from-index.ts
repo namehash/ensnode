@@ -1,12 +1,11 @@
 import { trace } from "@opentelemetry/api";
-import type { Address } from "viem";
-
 import {
   type CoinType,
   coinTypeReverseLabel,
   DEFAULT_EVM_COIN_TYPE,
   type Name,
-} from "@ensnode/ensnode-sdk";
+  type NormalizedAddress,
+} from "enssdk";
 
 import { ensDb } from "@/lib/ensdb/singleton";
 import { withSpanAsync } from "@/lib/instrumentation/auto-span";
@@ -16,7 +15,7 @@ const tracer = trace.getTracer("get-primary-name");
 const DEFAULT_EVM_COIN_TYPE_BIGINT = BigInt(DEFAULT_EVM_COIN_TYPE);
 
 export async function getENSIP19ReverseNameRecordFromIndex(
-  address: Address,
+  address: NormalizedAddress,
   coinType: CoinType,
 ): Promise<Name | null> {
   const _coinType = BigInt(coinType);

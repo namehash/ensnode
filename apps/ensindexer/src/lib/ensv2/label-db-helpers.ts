@@ -1,12 +1,11 @@
-import { labelhash } from "viem";
-
 import {
+  asInterpretedLabel,
   encodeLabelHash,
-  type InterpretedLabel,
   type LabelHash,
   type LiteralLabel,
+  labelhashLiteralLabel,
   literalLabelToInterpretedLabel,
-} from "@ensnode/ensnode-sdk";
+} from "enssdk";
 
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
@@ -15,7 +14,7 @@ import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-eng
  * Ensures that the LiteralLabel `label` is interpreted and upserted into the Label rainbow table.
  */
 export async function ensureLabel(context: IndexingEngineContext, label: LiteralLabel) {
-  const labelHash = labelhash(label);
+  const labelHash = labelhashLiteralLabel(label);
   const interpreted = literalLabelToInterpretedLabel(label);
 
   await context.ensDb
@@ -40,7 +39,7 @@ export async function ensureUnknownLabel(context: IndexingEngineContext, labelHa
   if (healedLabel) return await ensureLabel(context, healedLabel);
 
   // otherwise upsert label entity
-  const interpreted = encodeLabelHash(labelHash) as InterpretedLabel;
+  const interpreted = asInterpretedLabel(encodeLabelHash(labelHash));
   await context.ensDb
     .insert(ensIndexerSchema.label)
     .values({ labelHash, interpreted })

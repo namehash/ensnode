@@ -2,7 +2,7 @@ import type { EnsIndexerPublicConfig } from "./types";
 
 export type EnsIndexerPublicConfigCompatibilityCheck = Omit<
   EnsIndexerPublicConfig,
-  "databaseSchemaName" | "ensRainbowPublicConfig" | "versionInfo"
+  "ensIndexerSchemaName" | "ensRainbowPublicConfig" | "versionInfo"
 >;
 
 /**

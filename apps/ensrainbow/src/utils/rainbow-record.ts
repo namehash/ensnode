@@ -1,6 +1,6 @@
+import type { LabelHash } from "enssdk";
 import type { ByteArray } from "viem";
 
-import type { LabelHash } from "@ensnode/ensnode-sdk";
 import { labelHashToBytes } from "@ensnode/ensnode-sdk";
 
 /**

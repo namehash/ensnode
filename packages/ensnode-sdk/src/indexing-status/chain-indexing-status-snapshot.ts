@@ -1,10 +1,12 @@
+import type { ChainId, UnixTimestamp } from "enssdk";
+
 import {
   type BlockRefRangeBounded,
   type BlockRefRangeLeftBounded,
   type BlockRefRangeWithStartBlock,
   RangeTypeIds,
 } from "../shared/blockrange";
-import type { BlockRef, ChainId, UnixTimestamp } from "../shared/types";
+import type { BlockRef } from "../shared/types";
 
 /**
  * The status of indexing a chain at the time an indexing status snapshot

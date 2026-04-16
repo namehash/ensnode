@@ -1,16 +1,17 @@
 import config from "@/config";
 
-import type { Address } from "viem";
-
-import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
 import {
+  type Address,
   type ChainId,
   type LabelHash,
   makeENSv1DomainId,
   makeSubdomainNode,
   type Node,
-  PluginName,
-} from "@ensnode/ensnode-sdk";
+  type NormalizedAddress,
+} from "enssdk";
+
+import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
+import { PluginName } from "@ensnode/ensnode-sdk";
 
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { addOnchainEventListener, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
@@ -50,7 +51,7 @@ export default function () {
         node: Node;
         // NOTE: `label` event arg represents a `LabelHash` for the sub-node under `node`
         label: LabelHash;
-        owner: Address;
+        owner: NormalizedAddress;
       }>;
     }) => {
       const { label: labelHash, node: parentNode } = event.args;

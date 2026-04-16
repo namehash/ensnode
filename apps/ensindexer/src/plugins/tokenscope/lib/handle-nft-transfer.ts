@@ -1,8 +1,8 @@
-import { type Address, zeroAddress } from "viem";
+import { type Address, stringifyAssetId } from "enssdk";
+import { zeroAddress } from "viem";
 
 import {
   type DomainAssetId,
-  formatAssetId,
   formatNFTTransferEventMetadata,
   getNFTTransferType,
   NFTMintStatuses,
@@ -41,7 +41,7 @@ export const handleNFTTransfer = async (
   nft: DomainAssetId,
   metadata: NFTTransferEventMetadata,
 ): Promise<void> => {
-  const assetIdString = formatAssetId(nft);
+  const assetIdString = stringifyAssetId(nft);
 
   // get the previously indexed record for the assetId (if it exists)
   const previous = await context.ensDb.find(ensIndexerSchema.nameTokens, { id: assetIdString });

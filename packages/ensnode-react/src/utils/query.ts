@@ -3,7 +3,7 @@
 import type { UndefinedInitialDataOptions } from "@tanstack/react-query";
 
 import {
-  ENSNodeClient,
+  EnsApiClient,
   type NameTokensRequest,
   type RegistrarActionsRequest,
   type ResolvePrimaryNameRequest,
@@ -76,7 +76,7 @@ export function createRecordsQueryOptions<SELECTION extends ResolverRecordsSelec
     enabled: true,
     queryKey: queryKeys.records(config.client.url.href, args),
     queryFn: async () => {
-      const client = new ENSNodeClient(config.client);
+      const client = new EnsApiClient(config.client);
       return client.resolveRecords(args.name, args.selection, args);
     },
   };
@@ -93,7 +93,7 @@ export function createPrimaryNameQueryOptions(
     enabled: true,
     queryKey: queryKeys.primaryName(config.client.url.href, args),
     queryFn: async () => {
-      const client = new ENSNodeClient(config.client);
+      const client = new EnsApiClient(config.client);
       return client.resolvePrimaryName(args.address, args.chainId, args);
     },
   };
@@ -110,7 +110,7 @@ export function createPrimaryNamesQueryOptions(
     enabled: true,
     queryKey: queryKeys.primaryNames(config.client.url.href, args),
     queryFn: async () => {
-      const client = new ENSNodeClient(config.client);
+      const client = new EnsApiClient(config.client);
       return client.resolvePrimaryNames(args.address, args);
     },
   };
@@ -124,7 +124,7 @@ export function createConfigQueryOptions(config: ENSNodeSDKConfig) {
     enabled: true,
     queryKey: queryKeys.config(config.client.url.href),
     queryFn: async () => {
-      const client = new ENSNodeClient(config.client);
+      const client = new EnsApiClient(config.client);
       return client.config();
     },
   };
@@ -138,7 +138,7 @@ export function createIndexingStatusQueryOptions(config: ENSNodeSDKConfig) {
     enabled: true,
     queryKey: queryKeys.indexingStatus(config.client.url.href),
     queryFn: async () => {
-      const client = new ENSNodeClient(config.client);
+      const client = new EnsApiClient(config.client);
       return client.indexingStatus();
     },
   };
@@ -155,7 +155,7 @@ export function createRegistrarActionsQueryOptions(
     enabled: true,
     queryKey: queryKeys.registrarActions(config.client.url.href, args),
     queryFn: async () => {
-      const client = new ENSNodeClient(config.client);
+      const client = new EnsApiClient(config.client);
 
       return client.registrarActions(args);
     },
@@ -170,7 +170,7 @@ export function createNameTokensQueryOptions(config: ENSNodeSDKConfig, args: Nam
     enabled: true,
     queryKey: queryKeys.nameTokens(config.client.url.href, args),
     queryFn: async () => {
-      const client = new ENSNodeClient(config.client);
+      const client = new EnsApiClient(config.client);
 
       return client.nameTokens(args);
     },

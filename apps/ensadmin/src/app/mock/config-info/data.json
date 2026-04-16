@@ -11,7 +11,7 @@
         "labelSetVersion": 0
       },
       "indexedChainIds": [1, 8453, 59144, 10, 42161, 534352, 567],
-      "databaseSchemaName": "alphaSchema0.34.0",
+      "ensIndexerSchemaName": "alphaSchema0.34.0",
       "ensRainbowPublicConfig": {
         "version": "0.34.0",
         "labelSet": {
@@ -68,7 +68,7 @@
         "protocol-acceleration",
         "registrars"
       ],
-      "databaseSchemaName": "alphaSepoliaSchema0.34.0",
+      "ensIndexerSchemaName": "alphaSepoliaSchema0.34.0",
       "ensRainbowPublicConfig": {
         "version": "0.34.0",
         "labelSet": {
@@ -101,7 +101,7 @@
       "indexedChainIds": [1],
       "namespace": "mainnet",
       "plugins": ["subgraph"],
-      "databaseSchemaName": "mainnetSchema0.34.0",
+      "ensIndexerSchemaName": "mainnetSchema0.34.0",
       "ensRainbowPublicConfig": {
         "version": "0.34.0",
         "labelSet": {
@@ -134,7 +134,7 @@
       "indexedChainIds": [11155111],
       "namespace": "sepolia",
       "plugins": ["subgraph"],
-      "databaseSchemaName": "sepoliaSchema0.34.0",
+      "ensIndexerSchemaName": "sepoliaSchema0.34.0",
       "ensRainbowPublicConfig": {
         "version": "0.34.0",
         "labelSet": {
@@ -167,7 +167,7 @@
       "indexedChainIds": [11155111],
       "namespace": "sepolia",
       "plugins": ["subgraph"],
-      "databaseSchemaName": "DeserializationSchema0.34.0",
+      "ensIndexerSchemaName": "DeserializationSchema0.34.0",
       "ensRainbowPublicConfig": {
         "version": "",
         "labelSet": {

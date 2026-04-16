@@ -4,18 +4,13 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { logger } from "@/lib/logger";
+
 /**
  * Get ENSIndexer version
  */
 export function getEnsIndexerVersion(): string {
   return packageJson.version;
-}
-
-/**
- * Get Node.js version
- */
-export function getNodeJsVersion(): string {
-  return process.versions.node;
 }
 
 /**
@@ -69,9 +64,10 @@ export function getPackageVersion(packageName: string) {
       searchDir = parentDir;
     }
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-
-    console.warn(`Could not find version for ${packageName}:`, errorMessage);
+    logger.error({
+      msg: `Could not find version for ${packageName}`,
+      error,
+    });
 
     return "unknown";
   }

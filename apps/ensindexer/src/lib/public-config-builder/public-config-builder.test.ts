@@ -14,7 +14,7 @@ import { PublicConfigBuilder } from "./public-config-builder";
 // Mock the config module
 vi.mock("@/config", () => ({
   default: {
-    databaseSchemaName: "public",
+    ensIndexerSchemaName: "ensindexer_0",
     labelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
     indexedChainIds: new Set([1, 8453]),
     isSubgraphCompatible: true,
@@ -26,7 +26,6 @@ vi.mock("@/config", () => ({
 // Mock the version-info module
 vi.mock("@/lib/version-info", () => ({
   getEnsIndexerVersion: vi.fn(),
-  getNodeJsVersion: vi.fn(),
   getPackageVersion: vi.fn(),
 }));
 
@@ -48,7 +47,7 @@ import {
   validateEnsIndexerVersionInfo,
 } from "@ensnode/ensnode-sdk";
 
-import { getEnsIndexerVersion, getNodeJsVersion, getPackageVersion } from "@/lib/version-info";
+import { getEnsIndexerVersion, getPackageVersion } from "@/lib/version-info";
 
 // Test fixtures
 const mockEnsRainbowConfig: EnsRainbowPublicConfig = {
@@ -58,7 +57,6 @@ const mockEnsRainbowConfig: EnsRainbowPublicConfig = {
 };
 
 const mockVersionInfo: EnsIndexerVersionInfo = {
-  nodejs: "20.0.0",
   ponder: "0.9.0",
   ensDb: "1.0.0",
   ensIndexer: "1.0.0",
@@ -68,7 +66,7 @@ const mockVersionInfo: EnsIndexerVersionInfo = {
 // Helper to create unique mock config objects for each call
 function createMockPublicConfig(overrides: Partial<EnsIndexerPublicConfig> = {}) {
   return {
-    databaseSchemaName: "public",
+    ensIndexerSchemaName: "ensindexer_0",
     labelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
     ensRainbowPublicConfig: mockEnsRainbowConfig,
     indexedChainIds: new Set([1, 8453]),
@@ -83,7 +81,6 @@ function createMockPublicConfig(overrides: Partial<EnsIndexerPublicConfig> = {})
 // Helper to setup standard mocks
 function setupStandardMocks() {
   vi.mocked(getEnsIndexerVersion).mockReturnValue("1.0.0");
-  vi.mocked(getNodeJsVersion).mockReturnValue("20.0.0");
   vi.mocked(getPackageVersion).mockReturnValue("0.9.0");
   vi.mocked(validateEnsIndexerVersionInfo).mockReturnValue(mockVersionInfo);
 }
@@ -112,12 +109,10 @@ describe("PublicConfigBuilder", () => {
       // Assert
       expect(ensRainbowClientMock.config).toHaveBeenCalledTimes(1);
       expect(getEnsIndexerVersion).toHaveBeenCalledTimes(1);
-      expect(getNodeJsVersion).toHaveBeenCalledTimes(1);
       expect(getPackageVersion).toHaveBeenCalledWith("ponder");
       expect(getPackageVersion).toHaveBeenCalledWith("@adraffy/ens-normalize");
 
       expect(validateEnsIndexerVersionInfo).toHaveBeenCalledWith({
-        nodejs: "20.0.0",
         ponder: "0.9.0",
         ensDb: "1.0.0",
         ensIndexer: "1.0.0",
@@ -125,7 +120,7 @@ describe("PublicConfigBuilder", () => {
       });
 
       expect(validateEnsIndexerPublicConfig).toHaveBeenCalledWith({
-        databaseSchemaName: config.databaseSchemaName,
+        ensIndexerSchemaName: config.ensIndexerSchemaName,
         ensRainbowPublicConfig: mockEnsRainbowConfig,
         labelSet: config.labelSet,
         indexedChainIds: config.indexedChainIds,
@@ -158,7 +153,6 @@ describe("PublicConfigBuilder", () => {
       // Assert
       expect(ensRainbowClientMock.config).toHaveBeenCalledTimes(1);
       expect(getEnsIndexerVersion).toHaveBeenCalledTimes(1);
-      expect(getNodeJsVersion).toHaveBeenCalledTimes(1);
       expect(getPackageVersion).toHaveBeenCalledTimes(2);
       expect(validateEnsIndexerVersionInfo).toHaveBeenCalledTimes(1);
       expect(validateEnsIndexerPublicConfig).toHaveBeenCalledTimes(1);
@@ -183,11 +177,9 @@ describe("PublicConfigBuilder", () => {
       } as unknown as EnsRainbow.ApiClient;
 
       vi.mocked(getEnsIndexerVersion).mockReturnValue("2.0.0");
-      vi.mocked(getNodeJsVersion).mockReturnValue("22.0.0");
       vi.mocked(getPackageVersion).mockReturnValue("1.0.0");
 
       const customVersionInfo: EnsIndexerVersionInfo = {
-        nodejs: "22.0.0",
         ponder: "1.0.0",
         ensDb: "2.0.0",
         ensIndexer: "2.0.0",
@@ -301,8 +293,8 @@ describe("PublicConfigBuilder", () => {
   describe("Caching behavior", () => {
     it("each builder instance has its own independent cache", async () => {
       // Arrange - create unique config objects for each builder
-      const config1 = createMockPublicConfig({ databaseSchemaName: "schema1" });
-      const config2 = createMockPublicConfig({ databaseSchemaName: "schema2" });
+      const config1 = createMockPublicConfig({ ensIndexerSchemaName: "schema1" });
+      const config2 = createMockPublicConfig({ ensIndexerSchemaName: "schema2" });
 
       let callCount = 0;
       const ensRainbowClientMock = {
@@ -331,8 +323,8 @@ describe("PublicConfigBuilder", () => {
       expect(result1).toBe(config1);
       expect(result2).toBe(config2);
       expect(result1).not.toBe(result2);
-      expect(result1.databaseSchemaName).toBe("schema1");
-      expect(result2.databaseSchemaName).toBe("schema2");
+      expect(result1.ensIndexerSchemaName).toBe("schema1");
+      expect(result2.ensIndexerSchemaName).toBe("schema2");
     });
 
     it("retries building config on subsequent calls after failure", async () => {

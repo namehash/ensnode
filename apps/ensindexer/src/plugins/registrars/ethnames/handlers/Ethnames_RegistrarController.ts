@@ -1,7 +1,8 @@
+import { makeSubdomainNode } from "enssdk";
+
 import {
   addPrices,
   decodeEncodedReferrer,
-  makeSubdomainNode,
   PluginName,
   priceEth,
   type RegistrarActionPricingAvailable,

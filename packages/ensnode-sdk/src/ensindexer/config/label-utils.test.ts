@@ -1,6 +1,6 @@
+import type { LabelHash } from "enssdk";
 import { describe, expect, it } from "vitest";
 
-import type { LabelHash } from "../../ens";
 import { labelHashToBytes } from "./label-utils";
 
 describe("labelHashToBytes", () => {

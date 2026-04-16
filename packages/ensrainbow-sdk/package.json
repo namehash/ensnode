@@ -53,6 +53,9 @@
   "peerDependencies": {
     "viem": "catalog:"
   },
+  "dependencies": {
+    "enssdk": "workspace:*"
+  },
   "devDependencies": {
     "@ensnode/shared-configs": "workspace:*",
     "@ensnode/ensnode-sdk": "workspace:*",

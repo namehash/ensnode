@@ -1,5 +1,5 @@
 import type {
-  EnsApiDatabaseEnvironment,
+  EnsDbEnvironment,
   LogLevelEnvironment,
   PortEnvironment,
   ReferralProgramEditionsEnvironment,
@@ -14,7 +14,7 @@ import type {
  * their state in `process.env`. This interface is intended to be the source type which then gets
  * mapped/parsed into a structured configuration object like `EnsApiConfig`.
  */
-export type EnsApiEnvironment = EnsApiDatabaseEnvironment &
+export type EnsApiEnvironment = EnsDbEnvironment &
   RpcEnvironment &
   PortEnvironment &
   LogLevelEnvironment &

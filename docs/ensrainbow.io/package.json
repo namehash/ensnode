@@ -2,6 +2,7 @@
   "name": "@docs/ensrainbow",
   "type": "module",
   "version": "1.9.0",
+  "license": "MIT",
   "packageManager": "pnpm@10.28.0",
   "private": true,
   "scripts": {
@@ -16,21 +17,19 @@
   "dependencies": {
     "@astrojs/react": "catalog:",
     "@heroicons/react": "^2.2.0",
-    "@namehash/ens-webfont": "^0.7.0",
-    "@namehash/namekit-react": "catalog:",
     "@namehash/namehash-ui": "workspace:*",
     "@tailwindcss/vite": "^4.1.15",
     "astro": "catalog:",
     "astro-font": "catalog:",
     "astro-seo": "catalog:",
     "classcat": "5.0.5",
-    "react": "^18",
-    "react-dom": "^18",
+    "react": "catalog:",
+    "react-dom": "catalog:",
     "react-wrap-balancer": "^1.1.1",
     "tailwindcss": "4.2.2"
   },
   "devDependencies": {
-    "@types/react": "^18",
-    "@types/react-dom": "^18"
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:"
   }
 }

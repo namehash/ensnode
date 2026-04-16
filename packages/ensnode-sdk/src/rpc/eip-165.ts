@@ -1,4 +1,4 @@
-import type { Address, Hex } from "viem";
+import type { Address, Hex } from "enssdk";
 
 /**
  * EIP-165 ABI

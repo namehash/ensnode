@@ -1,4 +1,4 @@
-import type { Duration, UnixTimestamp } from "@ensnode/ensnode-sdk";
+import type { Duration, UnixTimestamp } from "enssdk";
 
 import { isInteger, isNonNegativeInteger } from "./number";
 

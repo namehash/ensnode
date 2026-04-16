@@ -1,7 +1,5 @@
-import type { Address } from "viem";
+import type { Address, Node, UnixTimestamp } from "enssdk";
 
-import type { Node } from "../../../ens/types";
-import type { UnixTimestamp } from "../../../shared/types";
 import type { RequestPageParams } from "../shared/pagination";
 
 /**

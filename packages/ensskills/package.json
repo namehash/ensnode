@@ -1,0 +1,12 @@
+{
+  "name": "ensskills",
+  "version": "1.9.0",
+  "description": "Reserved for the ENSNode project by NameHash Labs. See https://ensnode.io",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/namehash/ensnode.git",
+    "directory": "packages/ensskills"
+  },
+  "license": "MIT",
+  "homepage": "https://ensnode.io"
+}

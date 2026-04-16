@@ -34,7 +34,7 @@ export default function Appreciation() {
           <p className={textStyles}>
             Created the original rainbow tables used in the ENS Subgraph.
           </p>
-          <LearnMoreButton source="https://thegraph.com/" iconFillColor="black" text="Learn more" />
+          <LearnMoreButton source="https://thegraph.com/" text="Learn more" />
         </div>
         <div className={verticalDividerStyles} />
         <div className={horizontalDividerStyles} />
@@ -44,11 +44,7 @@ export default function Appreciation() {
           </div>
           <h3 className={smallerHeaderStyles}>ENS Labs</h3>
           <p className={textStyles}>Developed and maintained the ENS Subgraph.</p>
-          <LearnMoreButton
-            source="https://www.enslabs.org/"
-            iconFillColor="black"
-            text="Learn more"
-          />
+          <LearnMoreButton source="https://www.enslabs.org/" text="Learn more" />
         </div>
       </div>
     </section>

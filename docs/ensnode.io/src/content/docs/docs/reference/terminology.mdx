@@ -94,8 +94,8 @@ In this terminology reference, we say that the **LabelHash** of a **Label** is t
 That is, `0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc` is the **LabelHash** of `vitalik`, which is the result of calling the **`labelhash` function** like so:
 
 ```ts
-import { labelhash } from 'viem';
-const labelHash = labelhash("vitalik");
+import { labelhashInterpretedLabel, asInterpretedLabel } from 'enssdk';
+const labelHash = labelhashInterpretedLabel(asInterpretedLabel("vitalik"));
 ```
 
 :::caution[LabelHash Terminology Outside of this Reference]

@@ -1,4 +1,4 @@
-import { namehash } from "viem";
+import { namehashInterpretedName } from "enssdk";
 import { z } from "zod/v4";
 
 import {
@@ -39,7 +39,7 @@ export const makeRegisteredNameTokenSchema = <const SerializableType extends boo
     .check(function invariant_nameIsAssociatedWithDomainId(ctx) {
       const { name, domainId } = ctx.value;
 
-      if (namehash(name) !== domainId) {
+      if (namehashInterpretedName(name) !== domainId) {
         ctx.issues.push({
           code: "custom",
           input: ctx.value,

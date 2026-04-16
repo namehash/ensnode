@@ -1,9 +1,8 @@
 import config from "@/config";
 
-import type { Address } from "viem";
+import type { LabelHash, LiteralLabel, NormalizedAddress } from "enssdk";
 
 import { getENSRootChainId } from "@ensnode/datasources";
-import type { LabelHash, LiteralLabel } from "@ensnode/ensnode-sdk";
 
 import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import { toJson } from "@/lib/json-stringify-with-bigints";
@@ -22,7 +21,7 @@ import {
  */
 export async function healAddrReverseSubnameLabel(
   context: IndexingEngineContext,
-  event: EventWithArgs<{ owner: Address }>,
+  event: EventWithArgs<{ owner: NormalizedAddress }>,
   labelHash: LabelHash,
 ): Promise<LiteralLabel> {
   if (context.chain.id !== getENSRootChainId(config.namespace)) {

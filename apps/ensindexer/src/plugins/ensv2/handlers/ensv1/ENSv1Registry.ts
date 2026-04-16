@@ -1,18 +1,17 @@
 import config from "@/config";
 
-import { type Address, isAddressEqual, zeroAddress } from "viem";
-
 import {
   ADDR_REVERSE_NODE,
-  getENSRootChainId,
-  interpretAddress,
+  ENS_ROOT_NODE,
   type LabelHash,
   makeENSv1DomainId,
   makeSubdomainNode,
   type Node,
-  PluginName,
-  ROOT_NODE,
-} from "@ensnode/ensnode-sdk";
+  type NormalizedAddress,
+} from "enssdk";
+import { isAddressEqual, zeroAddress } from "viem";
+
+import { getENSRootChainId, interpretAddress, PluginName } from "@ensnode/ensnode-sdk";
 
 import { materializeENSv1DomainEffectiveOwner } from "@/lib/ensv2/domain-db-helpers";
 import { ensureDomainEvent } from "@/lib/ensv2/event-db-helpers";
@@ -47,7 +46,7 @@ export default function () {
       node: Node;
       // NOTE: `label` event arg represents a `LabelHash` for the sub-node under `node`
       label: LabelHash;
-      owner: Address;
+      owner: NormalizedAddress;
     }>;
   }) {
     const { label: labelHash, node: parentNode, owner } = event.args;
@@ -105,12 +104,12 @@ export default function () {
     event,
   }: {
     context: IndexingEngineContext;
-    event: EventWithArgs<{ node: Node; owner: Address }>;
+    event: EventWithArgs<{ node: Node; owner: NormalizedAddress }>;
   }) {
     const { node, owner } = event.args;
 
     // ENSv2 model does not include root node, no-op
-    if (node === ROOT_NODE) return;
+    if (node === ENS_ROOT_NODE) return;
 
     const domainId = makeENSv1DomainId(node);
 
@@ -142,7 +141,7 @@ export default function () {
     const domainId = makeENSv1DomainId(node);
 
     // ENSv2 model does not include root node, no-op
-    if (node === ROOT_NODE) return;
+    if (node === ENS_ROOT_NODE) return;
 
     // push event to domain history
     await ensureDomainEvent(context, event, domainId);
@@ -159,7 +158,7 @@ export default function () {
     const domainId = makeENSv1DomainId(node);
 
     // ENSv2 model does not include root node, no-op
-    if (node === ROOT_NODE) return;
+    if (node === ENS_ROOT_NODE) return;
 
     // NOTE: Domain-Resolver relations are handled by the protocol-acceleration plugin and are not
     // directly indexed here

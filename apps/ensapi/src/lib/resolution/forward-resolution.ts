@@ -2,20 +2,24 @@ import config from "@/config";
 
 import { trace } from "@opentelemetry/api";
 import { replaceBigInts } from "@ponder/utils";
-import { namehash } from "viem";
-import { normalize } from "viem/ens";
-
 import {
   type AccountId,
+  asInterpretedName,
+  ENS_ROOT_NAME,
+  type InterpretedName,
+  isNormalizedName,
+  type Node,
+  namehashInterpretedName,
+  parseReverseName,
+} from "enssdk";
+
+import {
   type ForwardResolutionArgs,
   ForwardResolutionProtocolStep,
   type ForwardResolutionResult,
   getENSv1Registry,
-  isNormalizedName,
   isSelectionEmpty,
-  type Node,
   PluginName,
-  parseReverseName,
   type ResolverRecordsResponse,
   type ResolverRecordsSelection,
   TraceableENSProtocol,
@@ -54,10 +58,6 @@ import {
 const logger = makeLogger("forward-resolution");
 const tracer = trace.getTracer("forward-resolution");
 
-// NOTE: normalize generic name to force the normalization lib to lazy-load itself (otherwise the
-// first trace generated here would be unusually slow)
-normalize("example.eth");
-
 /**
  * Implements Forward Resolution of record values for a specified ENS Name.
  *
@@ -92,9 +92,12 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
   selection: ForwardResolutionArgs<SELECTION>["selection"],
   options: Omit<Parameters<typeof _resolveForward>[2], "registry">,
 ): Promise<ForwardResolutionResult<SELECTION>> {
+  // Invariant: Name must be an InterpretedName
+  const interpretedName = asInterpretedName(name);
+
   // NOTE: `resolveForward` is just `_resolveForward` with the enforcement that `registry` must
-  // initially be ENS Root Chain's Registry: see `_resolveForward` for additional context.
-  return _resolveForward(name, selection, {
+  // initially be ENS Root Registry: see `_resolveForward` for additional context.
+  return _resolveForward(interpretedName, selection, {
     ...options,
     registry: getENSv1Registry(config.namespace),
   });
@@ -105,7 +108,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
  * `registry`.
  */
 async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
-  name: ForwardResolutionArgs<SELECTION>["name"],
+  name: InterpretedName,
   selection: ForwardResolutionArgs<SELECTION>["selection"],
   options: { registry: AccountId; accelerate: boolean; canAccelerate: boolean },
 ): Promise<ForwardResolutionResult<SELECTION>> {
@@ -138,18 +141,28 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           // Validate Input
           //////////////////////////////////////////////////
 
-          // Invariant: Name must be normalized
+          // TODO: technically InterpretedNames are not resolvable, since ENS contracts are not
+          // encoded-labelhash-aware; so we add a temporary additional constraint on name that it
+          // must be fully normalized (and therefore not contain encoded labelhash segments)
+          // (this will be improved in a future pr https://github.com/namehash/ensnode/issues/1920)
           if (!isNormalizedName(name)) {
-            throw new Error(`Invariant: Name "${name}" must be normalized.`);
+            throw new Error(`'${name}' must be normalized to be resolvable.`);
           }
 
-          const node: Node = namehash(name);
+          // TODO: technically we could support resolving records for the root node, but because there
+          // are so many edge cases, this is something we should explicitly declare support for
+          // after we have test cases
+          if (name === ENS_ROOT_NAME) {
+            throw new Error(
+              `Resolving records for the ENS Root Node ('') is not currently supported.`,
+            );
+          }
+
+          const node: Node = namehashInterpretedName(name);
           span.setAttribute("node", node);
 
           // if selection is empty, give them what they asked for
-          if (isSelectionEmpty(selection)) {
-            return makeEmptyResolverRecordsResponse(selection);
-          }
+          if (isSelectionEmpty(selection)) return makeEmptyResolverRecordsResponse(selection);
 
           // construct the set of resolve() calls indicated by selection
           const calls = makeResolveCalls(node, selection);
@@ -221,9 +234,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
             !!activeResolver,
           );
           // we're unable to find an active resolver for this name, return empty response
-          if (!activeResolver) {
-            return makeEmptyResolverRecordsResponse(selection);
-          }
+          if (!activeResolver) return makeEmptyResolverRecordsResponse(selection);
 
           // set some attributes on the span for easy reference
           span.setAttribute("activeResolver", activeResolver);

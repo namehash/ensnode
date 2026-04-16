@@ -1,10 +1,7 @@
+import type { LabelHash } from "enssdk";
 import type { ByteArray } from "viem";
 
-import {
-  type LabelHash,
-  labelHashToBytes,
-  validateSupportedLabelSetAndVersion,
-} from "@ensnode/ensnode-sdk";
+import { labelHashToBytes, validateSupportedLabelSetAndVersion } from "@ensnode/ensnode-sdk";
 import {
   type EnsRainbow,
   type EnsRainbowClientLabelSet,

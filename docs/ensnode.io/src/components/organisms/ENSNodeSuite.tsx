@@ -1,6 +1,4 @@
-import ButtonIsland, {
-  type ButtonIslandProps,
-} from "@workspace/docs/ensnode.io/src/components/atoms/ButtonIsland.tsx";
+import { legacyButtonVariants } from "@namehash/namehash-ui/legacy";
 import { StarIcon } from "@workspace/docs/ensnode.io/src/components/atoms/icons/StarIcon.tsx";
 import cc from "classcat";
 import { Fragment } from "react";
@@ -15,7 +13,7 @@ const appsSuite: {
   visual: React.ReactNode;
   name: string;
   description: string;
-  buttonData: ButtonIslandProps;
+  docsLinkHref: string;
 }[] = [
   {
     visual: (
@@ -27,15 +25,7 @@ const appsSuite: {
     ),
     name: "ENSAdmin",
     description: "Explore the ENS protocol like never before",
-    buttonData: {
-      text: "View documentation",
-      size: "medium",
-      variant: "secondary",
-      linkData: {
-        link: "/ensadmin/",
-        target: "_blank",
-      },
-    },
+    docsLinkHref: "/ensadmin",
   },
   {
     visual: (
@@ -47,15 +37,7 @@ const appsSuite: {
     ),
     name: "ENSIndexer",
     description: "Powerful multichain indexer for ENSv2",
-    buttonData: {
-      text: "View documentation",
-      size: "medium",
-      variant: "secondary",
-      linkData: {
-        link: "/ensindexer/",
-        target: "_blank",
-      },
-    },
+    docsLinkHref: "/ensindexer",
   },
   {
     visual: (
@@ -67,15 +49,7 @@ const appsSuite: {
     ),
     name: "ENSRainbow",
     description: 'Heal millions of "unknown" ENS names',
-    buttonData: {
-      text: "View documentation",
-      size: "medium",
-      variant: "secondary",
-      linkData: {
-        link: "/ensrainbow/",
-        target: "_blank",
-      },
-    },
+    docsLinkHref: "/ensrainbow",
   },
 ];
 
@@ -117,12 +91,14 @@ export default function ENSNodeSuite() {
                     {namehashApp.description}
                   </Balancer>
                 </div>
-                <ButtonIsland
-                  text={namehashApp.buttonData.text}
-                  size={namehashApp.buttonData.size}
-                  variant={namehashApp.buttonData.variant}
-                  linkData={namehashApp.buttonData.linkData}
-                />
+                <a
+                  href={namehashApp.docsLinkHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={legacyButtonVariants({ variant: "secondary", size: "medium" })}
+                >
+                  View documentation
+                </a>
               </div>
             </div>
             {idx < appsSuite.length - 1 && (

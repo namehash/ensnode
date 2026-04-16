@@ -1,4 +1,6 @@
-import { gql } from "@/test/integration/ensnode-graphql-api-client";
+import type { ChainId, Hex, NormalizedAddress } from "enssdk";
+
+import { gql } from "@/test/integration/omnigraph-api-client";
 
 const PageInfoFragment = gql`
   fragment PageInfoFragment on PageInfo {
@@ -29,23 +31,23 @@ export const EventFragment = gql`
 
 export type EventResult = {
   id: string;
-  chainId: number;
+  chainId: ChainId;
   blockNumber: string;
-  blockHash: string;
+  blockHash: Hex;
   timestamp: string;
-  transactionHash: string;
+  transactionHash: Hex;
   transactionIndex: number;
-  from: string;
-  to: string | null;
-  address: string;
+  from: NormalizedAddress;
+  to: NormalizedAddress | null;
+  address: NormalizedAddress;
   logIndex: number;
-  topics: string[];
-  data: string;
+  topics: Hex[];
+  data: Hex;
 };
 
 export const DomainEventsPaginated = gql`
   query DomainEventsPaginated(
-    $name: Name!
+    $name: InterpretedName!
     $first: Int
     $after: String
     $last: Int
@@ -71,7 +73,7 @@ export const AccountEventsPaginated = gql`
     $last: Int
     $before: String
   ) {
-    account(address: $address) {
+    account(by: { address: $address }) {
       events(first: $first, after: $after, last: $last, before: $before) {
         edges { cursor node { ...EventFragment } }
         pageInfo { ...PageInfoFragment }
@@ -85,7 +87,7 @@ export const AccountEventsPaginated = gql`
 
 export const ResolverEventsPaginated = gql`
   query ResolverEventsPaginated(
-    $name: Name!
+    $name: InterpretedName!
     $first: Int
     $after: String
     $last: Int
@@ -113,7 +115,7 @@ export const PermissionsEventsPaginated = gql`
     $last: Int
     $before: String
   ) {
-    permissions(for: $contract) {
+    permissions(by: { contract: $contract }) {
       events(first: $first, after: $after, last: $last, before: $before) {
         edges { cursor node { ...EventFragment } }
         pageInfo { ...PageInfoFragment }

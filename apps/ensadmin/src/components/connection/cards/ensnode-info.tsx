@@ -291,20 +291,19 @@ function ENSNodeConfigCardContent({
         icon={<ENSApiIcon width={24} height={24} />}
         version={
           <p className="text-sm leading-normal font-normal text-muted-foreground">
-            v{ensApiPublicConfig.version}
+            v{ensApiPublicConfig.versionInfo.ensApi}
           </p>
         }
         docsLink={new URL("https://ensnode.io/ensapi")}
       >
         <InfoCardItems>
-          <InfoCardItem label="Database" value={<p className={cardItemValueStyles}>Postgres</p>} />
           <InfoCardItem
-            label="Database Schema"
+            label="ENSIndexer Schema"
             value={
-              <p className={cardItemValueStyles}>{ensIndexerPublicConfig.databaseSchemaName}</p>
+              <p className={cardItemValueStyles}>{ensIndexerPublicConfig.ensIndexerSchemaName}</p>
             }
             additionalInfo={
-              <p>ENSApi reads indexed data from tables within this Postgres database schema.</p>
+              <p>ENSApi reads indexed data from tables within this ENSIndexer Schema in ENSDb.</p>
             }
           />
           <InfoCardItem
@@ -333,6 +332,23 @@ function ENSNodeConfigCardContent({
               <p>
                 This ENS Root Chain RPC is used to power the Resolution API, in situations where
                 Protocol Acceleration is not possible.
+              </p>
+            }
+          />
+          <InfoCardItem
+            label="ens-normalize.js"
+            value={
+              <p className={cardItemValueStyles}>{ensApiPublicConfig.versionInfo.ensNormalize}</p>
+            }
+            additionalInfo={
+              <p>
+                Version of the{" "}
+                <ExternalLinkWithIcon
+                  href={`https://www.npmjs.com/package/@adraffy/ens-normalize/v/${ensApiPublicConfig.versionInfo.ensNormalize}`}
+                >
+                  @adraffy/ens-normalize
+                </ExternalLinkWithIcon>{" "}
+                package used for ENS name normalization.
               </p>
             }
           />
@@ -385,12 +401,37 @@ function ENSNodeConfigCardContent({
         <InfoCardItems>
           <InfoCardItem label="Database" value={<p className={cardItemValueStyles}>Postgres</p>} />
           <InfoCardItem
-            label="Database Schema"
+            label="ENSIndexer Schema"
             value={
-              <p className={cardItemValueStyles}>{ensIndexerPublicConfig.databaseSchemaName}</p>
+              <p className={cardItemValueStyles}>{ensIndexerPublicConfig.ensIndexerSchemaName}</p>
             }
             additionalInfo={
-              <p>ENSIndexer writes indexed data to tables within this Postgres database schema.</p>
+              <p>
+                ENSDb enables devs to build custom services and APIs on top of indexed ENS data in
+                this schema using{" "}
+                <ExternalLinkWithIcon href="https://www.npmjs.com/package/@ensnode/ensdb-sdk">
+                  ensdb-sdk
+                </ExternalLinkWithIcon>
+                .
+              </p>
+            }
+          />
+          <InfoCardItem
+            label="ENSNode Schema"
+            value={<p className={cardItemValueStyles}>ensnode</p>}
+            additionalInfo={
+              <p>This database schema stores Metadata about each ENSIndexer schema in ENSDb.</p>
+            }
+          />
+
+          <InfoCardItem
+            label="Ponder Schema"
+            value={<p className={cardItemValueStyles}>ponder_sync</p>}
+            additionalInfo={
+              <p>
+                Ponder manages this database schema to store cached RPC results and is shared across
+                all ENSIndexer instances using this ENSDb.
+              </p>
             }
           />
         </InfoCardItems>
@@ -410,14 +451,16 @@ function ENSNodeConfigCardContent({
         docsLink={new URL("https://ensnode.io/ensindexer")}
       >
         <InfoCardItems>
-          <InfoCardItem label="Database" value={<p className={cardItemValueStyles}>Postgres</p>} />
           <InfoCardItem
-            label="Database Schema"
+            label="ENSIndexer Schema"
             value={
-              <p className={cardItemValueStyles}>{ensIndexerPublicConfig.databaseSchemaName}</p>
+              <p className={cardItemValueStyles}>{ensIndexerPublicConfig.ensIndexerSchemaName}</p>
             }
             additionalInfo={
-              <p>ENSIndexer writes indexed data to tables within this Postgres database schema.</p>
+              <p>
+                ENSIndexer is the exclusive writer of indexed data to tables within this ENSIndexer
+                Schema in ENSDb.
+              </p>
             }
           />
           <InfoCardItem
@@ -445,23 +488,6 @@ function ENSNodeConfigCardContent({
                   </Tooltip>
                 ))}
               </div>
-            }
-          />
-          <InfoCardItem
-            label="Node.js"
-            value={
-              <p className={cardItemValueStyles}>{ensIndexerPublicConfig.versionInfo.nodejs}</p>
-            }
-            additionalInfo={
-              <p>
-                Version of the{" "}
-                <ExternalLinkWithIcon
-                  href={`https://nodejs.org/en/download/archive/v${ensIndexerPublicConfig.versionInfo.nodejs}`}
-                >
-                  Node.js
-                </ExternalLinkWithIcon>{" "}
-                runtime.
-              </p>
             }
           />
           <InfoCardItem

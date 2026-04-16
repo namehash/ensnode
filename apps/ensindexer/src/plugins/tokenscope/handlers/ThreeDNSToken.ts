@@ -1,9 +1,10 @@
 import config from "@/config";
 
+import type { ChainId } from "enssdk";
 import { base, optimism } from "viem/chains";
 
 import { type DatasourceName, DatasourceNames } from "@ensnode/datasources";
-import { type ChainId, type NFTTransferEventMetadata, PluginName } from "@ensnode/ensnode-sdk";
+import { type NFTTransferEventMetadata, PluginName } from "@ensnode/ensnode-sdk";
 
 import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";
 import { namespaceContract } from "@/lib/plugin-helpers";

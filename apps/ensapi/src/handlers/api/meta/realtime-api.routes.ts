@@ -1,7 +1,7 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import { minutesToSeconds } from "date-fns";
+import type { Duration } from "enssdk";
 
-import type { Duration } from "@ensnode/ensnode-sdk";
 import { makeDurationSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { params } from "@/lib/handlers/params.schema";

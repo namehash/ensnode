@@ -2,10 +2,16 @@
  * Schema Definitions that power Protocol Acceleration in the Resolution API.
  */
 
+import type {
+  Address,
+  ChainId,
+  DomainId,
+  InterpretedName,
+  Node,
+  ResolverId,
+  ResolverRecordsId,
+} from "enssdk";
 import { onchainTable, primaryKey, relations, uniqueIndex } from "ponder";
-import type { Address } from "viem";
-
-import type { ChainId, DomainId, Node, ResolverId, ResolverRecordsId } from "@ensnode/ensnode-sdk";
 
 /**
  * Tracks an Account's ENSIP-19 Reverse Name Records by CoinType.
@@ -30,13 +36,9 @@ export const reverseNameRecord = onchainTable(
     /**
      * Represents the ENSIP-19 Reverse Name Record for a given (address, coinType).
      *
-     * The value of this field is guaranteed to be a non-empty-string normalized ENS name (see
-     * `interpretNameRecordValue` for additional context and specific guarantees). Unnormalized
-     * names and empty string values are interpreted as a deletion of the associated Reverse Name
-     * Record entity (represented in the schema as the _absence_ of a relevant Reverse Name Record
-     * entity).
+     * The value of this field is guaranteed to be a non-empty {@link InterpretedName}.
      */
-    value: t.text().notNull(),
+    value: t.text().notNull().$type<InterpretedName>(),
   }),
   (t) => ({
     pk: primaryKey({ columns: [t.address, t.coinType] }),
@@ -126,14 +128,9 @@ export const resolverRecords = onchainTable(
     /**
      * Represents the value of the reverse-resolution (ENSIP-3) name() record, used for Reverse Resolution.
      *
-     * The emitted record values are interpreted according to `interpretNameRecordValue` — unnormalized
-     * names and empty string values are interpreted as a deletion of the associated record (represented
-     * here as `null`).
-     *
-     * If set, the value of this field is guaranteed to be a non-empty-string normalized ENS name
-     * (see `interpretNameRecordValue` for additional context and specific guarantees).
+     * If present, the value of this field is guaranteed to be a non-empty {@link InterpretedName}.
      */
-    name: t.text(),
+    name: t.text().$type<InterpretedName>(),
   }),
   (t) => ({
     byId: uniqueIndex().on(t.chainId, t.address, t.node),
@@ -259,5 +256,5 @@ export const resolverTextRecordRelations = relations(resolverTextRecord, ({ one 
  * Registry migration logic.
  */
 export const migratedNode = onchainTable("migrated_nodes", (t) => ({
-  node: t.hex().primaryKey(),
+  node: t.hex().primaryKey().$type<Node>(),
 }));

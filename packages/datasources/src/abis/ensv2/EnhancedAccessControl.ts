@@ -2,437 +2,450 @@ import type { Abi } from "viem";
 
 export const EnhancedAccessControl = [
   {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "resource",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "roleBitmap",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-    ],
-    name: "EACCannotGrantRoles",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "resource",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "roleBitmap",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-    ],
-    name: "EACCannotRevokeRoles",
-    type: "error",
-  },
-  {
+    type: "function",
+    name: "HCA_FACTORY",
     inputs: [],
-    name: "EACInvalidAccount",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "roleBitmap",
-        type: "uint256",
-      },
-    ],
-    name: "EACInvalidRoleBitmap",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "resource",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "role",
-        type: "uint256",
-      },
-    ],
-    name: "EACMaxAssignees",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "resource",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "role",
-        type: "uint256",
-      },
-    ],
-    name: "EACMinAssignees",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "EACRootResourceNotAllowed",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "resource",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "roleBitmap",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-    ],
-    name: "EACUnauthorizedAccountRoles",
-    type: "error",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "uint256",
-        name: "resource",
-        type: "uint256",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "oldRoleBitmap",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "newRoleBitmap",
-        type: "uint256",
-      },
-    ],
-    name: "EACRolesChanged",
-    type: "event",
-  },
-  {
-    inputs: [],
-    name: "ROOT_RESOURCE",
     outputs: [
       {
-        internalType: "uint256",
         name: "",
-        type: "uint256",
+        type: "address",
+        internalType: "contract IHCAFactoryBasic",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "resource",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "roleBitmap",
-        type: "uint256",
-      },
-    ],
-    name: "getAssigneeCount",
+    type: "function",
+    name: "ROOT_RESOURCE",
+    inputs: [],
     outputs: [
       {
+        name: "",
+        type: "uint256",
         internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getAssigneeCount",
+    inputs: [
+      {
+        name: "resource",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "roleBitmap",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [
+      {
         name: "counts",
         type: "uint256",
+        internalType: "uint256",
       },
       {
-        internalType: "uint256",
         name: "mask",
         type: "uint256",
+        internalType: "uint256",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "resource",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "roleBitmap",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-    ],
+    type: "function",
     name: "grantRoles",
+    inputs: [
+      {
+        name: "resource",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "roleBitmap",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "account",
+        type: "address",
+        internalType: "address",
+      },
+    ],
     outputs: [
       {
-        internalType: "bool",
         name: "",
         type: "bool",
+        internalType: "bool",
       },
     ],
     stateMutability: "nonpayable",
-    type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "roleBitmap",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-    ],
+    type: "function",
     name: "grantRootRoles",
+    inputs: [
+      {
+        name: "roleBitmap",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "account",
+        type: "address",
+        internalType: "address",
+      },
+    ],
     outputs: [
       {
-        internalType: "bool",
         name: "",
         type: "bool",
+        internalType: "bool",
       },
     ],
     stateMutability: "nonpayable",
-    type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "resource",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "roleBitmap",
-        type: "uint256",
-      },
-    ],
+    type: "function",
     name: "hasAssignees",
+    inputs: [
+      {
+        name: "resource",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "roleBitmap",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
     outputs: [
       {
-        internalType: "bool",
         name: "",
         type: "bool",
+        internalType: "bool",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "resource",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "roleBitmap",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-    ],
+    type: "function",
     name: "hasRoles",
+    inputs: [
+      {
+        name: "resource",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "roleBitmap",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "account",
+        type: "address",
+        internalType: "address",
+      },
+    ],
     outputs: [
       {
-        internalType: "bool",
         name: "",
         type: "bool",
+        internalType: "bool",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "roleBitmap",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-    ],
+    type: "function",
     name: "hasRootRoles",
+    inputs: [
+      {
+        name: "roleBitmap",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "account",
+        type: "address",
+        internalType: "address",
+      },
+    ],
     outputs: [
       {
-        internalType: "bool",
         name: "",
         type: "bool",
+        internalType: "bool",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "resource",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "roleBitmap",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-    ],
+    type: "function",
     name: "revokeRoles",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
     inputs: [
       {
+        name: "resource",
+        type: "uint256",
         internalType: "uint256",
+      },
+      {
         name: "roleBitmap",
         type: "uint256",
+        internalType: "uint256",
       },
       {
-        internalType: "address",
         name: "account",
         type: "address",
+        internalType: "address",
       },
     ],
-    name: "revokeRootRoles",
     outputs: [
       {
-        internalType: "bool",
         name: "",
         type: "bool",
+        internalType: "bool",
       },
     ],
     stateMutability: "nonpayable",
-    type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "resource",
-        type: "uint256",
-      },
-    ],
-    name: "roleCount",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
     type: "function",
-  },
-  {
+    name: "revokeRootRoles",
     inputs: [
       {
-        internalType: "uint256",
-        name: "resource",
+        name: "roleBitmap",
         type: "uint256",
+        internalType: "uint256",
       },
       {
-        internalType: "address",
         name: "account",
         type: "address",
+        internalType: "address",
       },
     ],
-    name: "roles",
     outputs: [
       {
+        name: "",
+        type: "bool",
+        internalType: "bool",
+      },
+    ],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "roleCount",
+    inputs: [
+      {
+        name: "resource",
+        type: "uint256",
         internalType: "uint256",
+      },
+    ],
+    outputs: [
+      {
         name: "",
         type: "uint256",
+        internalType: "uint256",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
+    type: "function",
+    name: "roles",
     inputs: [
       {
-        internalType: "bytes4",
+        name: "resource",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "account",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "supportsInterface",
+    inputs: [
+      {
         name: "interfaceId",
         type: "bytes4",
+        internalType: "bytes4",
       },
     ],
-    name: "supportsInterface",
     outputs: [
       {
-        internalType: "bool",
         name: "",
         type: "bool",
+        internalType: "bool",
       },
     ],
     stateMutability: "view",
-    type: "function",
+  },
+  {
+    type: "event",
+    name: "EACRolesChanged",
+    inputs: [
+      {
+        name: "resource",
+        type: "uint256",
+        indexed: true,
+        internalType: "uint256",
+      },
+      {
+        name: "account",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "oldRoleBitmap",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "newRoleBitmap",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "error",
+    name: "EACCannotGrantRoles",
+    inputs: [
+      {
+        name: "resource",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "roleBitmap",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "account",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+  },
+  {
+    type: "error",
+    name: "EACCannotRevokeRoles",
+    inputs: [
+      {
+        name: "resource",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "roleBitmap",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "account",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+  },
+  {
+    type: "error",
+    name: "EACInvalidAccount",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "EACInvalidRoleBitmap",
+    inputs: [
+      {
+        name: "roleBitmap",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+  },
+  {
+    type: "error",
+    name: "EACMaxAssignees",
+    inputs: [
+      {
+        name: "resource",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "role",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+  },
+  {
+    type: "error",
+    name: "EACMinAssignees",
+    inputs: [
+      {
+        name: "resource",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "role",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+  },
+  {
+    type: "error",
+    name: "EACRootResourceNotAllowed",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "EACUnauthorizedAccountRoles",
+    inputs: [
+      {
+        name: "resource",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "roleBitmap",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "account",
+        type: "address",
+        internalType: "address",
+      },
+    ],
   },
 ] as const satisfies Abi;

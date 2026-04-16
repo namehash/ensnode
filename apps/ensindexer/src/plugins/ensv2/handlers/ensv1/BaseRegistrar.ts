@@ -1,14 +1,15 @@
 import { GRACE_PERIOD_SECONDS } from "@ensdomains/ensjs/utils";
-import { type Address, isAddressEqual, zeroAddress } from "viem";
-
 import {
-  interpretAddress,
   interpretTokenIdAsLabelHash,
-  isRegistrationFullyExpired,
   makeENSv1DomainId,
   makeSubdomainNode,
-  PluginName,
-} from "@ensnode/ensnode-sdk";
+  type NormalizedAddress,
+  type TokenId,
+  type UnixTimestampBigInt,
+} from "enssdk";
+import { isAddressEqual, zeroAddress } from "viem";
+
+import { interpretAddress, isRegistrationFullyExpired, PluginName } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { materializeENSv1DomainEffectiveOwner } from "@/lib/ensv2/domain-db-helpers";
@@ -53,9 +54,9 @@ export default function () {
     }: {
       context: IndexingEngineContext;
       event: EventWithArgs<{
-        from: Address;
-        to: Address;
-        tokenId: bigint;
+        from: NormalizedAddress;
+        to: NormalizedAddress;
+        tokenId: TokenId;
       }>;
     }) => {
       const { from, to, tokenId } = event.args;
@@ -98,9 +99,9 @@ export default function () {
   }: {
     context: IndexingEngineContext;
     event: EventWithArgs<{
-      id: bigint;
-      owner: Address;
-      expires: bigint;
+      id: TokenId;
+      owner: NormalizedAddress;
+      expires: UnixTimestampBigInt;
     }>;
   }) {
     const { id: tokenId, owner, expires: expiry } = event.args;
@@ -162,7 +163,7 @@ export default function () {
       event,
     }: {
       context: IndexingEngineContext;
-      event: EventWithArgs<{ id: bigint; expires: bigint }>;
+      event: EventWithArgs<{ id: TokenId; expires: UnixTimestampBigInt }>;
     }) => {
       const { id: tokenId, expires: expiry } = event.args;
 

@@ -1,7 +1,8 @@
 locals {
   common_variables = {
     # Common configuration
-    "DATABASE_URL"            = { value = var.ensdb_url },
+    "ENSDB_URL"               = { value = var.ensdb_url },
+    "ENSINDEXER_SCHEMA_NAME"  = { value = var.ensindexer_schema_name },
     "ALCHEMY_API_KEY"         = { value = var.alchemy_api_key }
     "QUICKNODE_API_KEY"       = { value = var.quicknode_api_key }
     "QUICKNODE_ENDPOINT_NAME" = { value = var.quicknode_endpoint_name }
@@ -28,7 +29,6 @@ resource "render_web_service" "ensindexer" {
   }
 
   env_vars = merge(local.common_variables, {
-    "DATABASE_SCHEMA"   = { value = var.database_schema },
     "ENSRAINBOW_URL"    = { value = var.ensrainbow_url },
     "LABEL_SET_ID"      = { value = var.ensindexer_label_set_id },
     "LABEL_SET_VERSION" = { value = var.ensindexer_label_set_version },
@@ -59,9 +59,7 @@ resource "render_web_service" "ensapi" {
     }
   }
 
-  env_vars = merge(local.common_variables, {
-    "ENSINDEXER_SCHEMA_NAME" = { value = var.database_schema },
-  })
+  env_vars = local.common_variables
 
   # See https://render.com/docs/custom-domains
   custom_domains = [

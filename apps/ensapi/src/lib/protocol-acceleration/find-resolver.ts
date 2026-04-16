@@ -3,27 +3,19 @@ import config from "@/config";
 import { bytesToPacket } from "@ensdomains/ensjs/utils";
 import { SpanStatusCode, trace } from "@opentelemetry/api";
 import {
+  type AccountId,
   type Address,
-  isAddressEqual,
-  namehash,
-  type PublicClient,
-  toHex,
-  zeroAddress,
-} from "viem";
+  asInterpretedName,
+  type DomainId,
+  getNameHierarchy,
+  type InterpretedName,
+  namehashInterpretedName,
+} from "enssdk";
+import { isAddressEqual, type PublicClient, toHex, zeroAddress } from "viem";
 import { packetToBytes } from "viem/ens";
 
 import { DatasourceNames, getDatasource } from "@ensnode/datasources";
-import {
-  type AccountId,
-  accountIdEqual,
-  type DomainId,
-  getDatasourceContract,
-  getNameHierarchy,
-  isENSv1Registry,
-  type Name,
-  type Node,
-  type NormalizedName,
-} from "@ensnode/ensnode-sdk";
+import { accountIdEqual, getDatasourceContract, isENSv1Registry } from "@ensnode/ensnode-sdk";
 
 import { ensDb } from "@/lib/ensdb/singleton";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/instrumentation/auto-span";
@@ -35,7 +27,7 @@ type FindResolverResult =
       activeResolver: null;
       requiresWildcardSupport: undefined;
     }
-  | { activeName: Name; requiresWildcardSupport: boolean; activeResolver: Address };
+  | { activeName: InterpretedName; requiresWildcardSupport: boolean; activeResolver: Address };
 
 const NULL_RESULT: FindResolverResult = {
   activeName: null,
@@ -68,7 +60,7 @@ export async function findResolver({
   publicClient,
 }: {
   registry: AccountId;
-  name: NormalizedName;
+  name: InterpretedName;
   accelerate: boolean;
   canAccelerate: boolean;
   publicClient: PublicClient;
@@ -100,7 +92,7 @@ export async function findResolver({
  */
 async function findResolverWithUniversalResolver(
   publicClient: PublicClient,
-  name: Name,
+  name: InterpretedName,
 ): Promise<FindResolverResult> {
   return withActiveSpanAsync(
     tracer,
@@ -153,7 +145,8 @@ async function findResolverWithUniversalResolver(
       }
 
       // UniversalResolver returns the offset in bytes within the DNS Encoded Name where the activeName begins
-      const activeName: Name = bytesToPacket(dnsEncodedNameBytes.slice(offset));
+      // Invariant: the decoded name is a LiteralName that must conform to InterpretedName
+      const activeName = asInterpretedName(bytesToPacket(dnsEncodedNameBytes.slice(offset)));
 
       return {
         activeName,
@@ -181,7 +174,7 @@ async function findResolverWithUniversalResolver(
  */
 async function findResolverWithIndex(
   registry: AccountId,
-  name: NormalizedName,
+  name: InterpretedName,
 ): Promise<FindResolverResult> {
   return withActiveSpanAsync(
     tracer,
@@ -200,7 +193,7 @@ async function findResolverWithIndex(
 
       // 2. compute domainId of each node
       // NOTE: this is currently ENSv1-specific
-      const nodes = names.map((name) => namehash(name) as Node);
+      const nodes = names.map((name) => namehashInterpretedName(name));
       const domainIds = nodes as DomainId[];
 
       // 3. for each domain, find its associated resolver in the selected registry

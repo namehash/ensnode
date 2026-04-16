@@ -1,4 +1,4 @@
-import type { AccountId } from "@ensnode/ensnode-sdk";
+import type { AccountId } from "enssdk";
 
 import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import type { LogEventBase } from "@/lib/ponder-helpers";

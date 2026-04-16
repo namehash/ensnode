@@ -1,10 +1,8 @@
-import { parse as parseConnectionString } from "pg-connection-string";
 import { prettifyError, ZodError, z } from "zod/v4";
 
 import { buildBlockNumberRange, PluginName, uniq } from "@ensnode/ensnode-sdk";
 import {
   buildRpcConfigsFromEnv,
-  DatabaseSchemaNameSchema,
   ENSNamespaceSchema,
   invariant_isSubgraphCompatibleRequirements,
   invariant_rpcConfigsSpecifiedForRootChain,
@@ -14,6 +12,7 @@ import {
 } from "@ensnode/ensnode-sdk/internal";
 
 import { DEFAULT_SUBGRAPH_COMPAT } from "@/config/defaults";
+import ensDbConfig from "@/config/ensdb-config";
 import type { ENSIndexerEnvironment } from "@/config/environment";
 import { applyDefaults, EnvironmentDefaults } from "@/config/environment-defaults";
 
@@ -26,24 +25,6 @@ import {
   invariant_rpcConfigsSpecifiedForIndexedChains,
   invariant_validContractConfigs,
 } from "./validations";
-
-export const DatabaseUrlSchema = z.string().refine(
-  (url) => {
-    try {
-      if (!url.startsWith("postgresql://") && !url.startsWith("postgres://")) {
-        return false;
-      }
-      const config = parseConnectionString(url);
-      return !!(config.host && config.port && config.database);
-    } catch {
-      return false;
-    }
-  },
-  {
-    error:
-      "Invalid PostgreSQL connection string. Expected format: postgresql://username:password@host:port/database",
-  },
-);
 
 // parses an env string bool with strict requirement of 'true' or 'false'
 const makeEnvStringBoolSchema = (envVarKey: string) =>
@@ -106,8 +87,6 @@ const IsSubgraphCompatibleSchema =
 
 const ENSIndexerConfigSchema = z
   .object({
-    databaseUrl: DatabaseUrlSchema,
-    databaseSchemaName: DatabaseSchemaNameSchema,
     rpcConfigs: RpcConfigsSchema,
 
     namespace: ENSNamespaceSchema,
@@ -116,6 +95,10 @@ const ENSIndexerConfigSchema = z
     globalBlockrange: BlockrangeSchema,
     ensRainbowUrl: EnsRainbowUrlSchema,
     labelSet: LabelSetSchema,
+
+    // include the ENSDbConfig params in the ENSIndexerConfigSchema
+    ensDbUrl: z.string(),
+    ensIndexerSchemaName: z.string(),
   })
   /**
    * Derived configuration
@@ -184,8 +167,6 @@ export function buildConfigFromEnvironment(_env: ENSIndexerEnvironment): EnsInde
 
     // parse/validate with ENSIndexerConfigSchema
     return ENSIndexerConfigSchema.parse({
-      databaseUrl: env.DATABASE_URL,
-      databaseSchemaName: env.DATABASE_SCHEMA,
       namespace: env.NAMESPACE,
       rpcConfigs,
 
@@ -200,6 +181,10 @@ export function buildConfigFromEnvironment(_env: ENSIndexerEnvironment): EnsInde
         labelSetId: env.LABEL_SET_ID,
         labelSetVersion: env.LABEL_SET_VERSION,
       },
+
+      // include the validated ENSDb config values in the parsed EnsIndexerConfig
+      ensDbUrl: ensDbConfig.ensDbUrl,
+      ensIndexerSchemaName: ensDbConfig.ensIndexerSchemaName,
     });
   } catch (error) {
     if (error instanceof ZodError) {

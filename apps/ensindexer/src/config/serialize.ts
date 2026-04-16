@@ -1,9 +1,6 @@
-import {
-  serializeChainId,
-  serializeIndexedChainIds,
-  serializeUrl,
-  type UrlString,
-} from "@ensnode/ensnode-sdk";
+import type { UrlString } from "enssdk";
+
+import { serializeChainId, serializeIndexedChainIds, serializeUrl } from "@ensnode/ensnode-sdk";
 
 import { redactENSIndexerConfig } from "@/config/redact";
 
@@ -44,8 +41,8 @@ export function serializeRedactedENSIndexerConfig(
   const redactedConfig = redactENSIndexerConfig(config);
 
   return {
-    databaseSchemaName: redactedConfig.databaseSchemaName,
-    databaseUrl: redactedConfig.databaseUrl,
+    ensIndexerSchemaName: redactedConfig.ensIndexerSchemaName,
+    ensDbUrl: redactedConfig.ensDbUrl,
     ensRainbowUrl: serializeUrl(redactedConfig.ensRainbowUrl),
     labelSet: redactedConfig.labelSet,
     globalBlockrange: redactedConfig.globalBlockrange,

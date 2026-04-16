@@ -43,7 +43,7 @@ export default function HeaderButtons({ isScrollable }: HeaderButtonsProps) {
         </a>
 
         <a
-          href="http://t.me/ensnode"
+          href="https://t.me/ensnode"
           target="_blank"
           rel="noopener noreferrer"
           className="text-black border-transparent hover:bg-black/5 transition text-base rounded-lg border font-medium inline-flex gap-2 items-center whitespace-nowrap no-underline py-2 px-4"

@@ -1,15 +1,17 @@
 import config from "@/config";
 
-import { namehash } from "viem";
+import {
+  asInterpretedName,
+  getParentInterpretedName,
+  type Node,
+  namehashInterpretedName,
+} from "enssdk";
 
 import {
-  ENS_ROOT,
-  getParentNameFQDN,
   type NameTokensRequest,
   NameTokensResponseCodes,
   NameTokensResponseErrorCodes,
   type NameTokensResponseErrorNameTokensNotIndexed,
-  type Node,
   type PluginName,
   serializeNameTokensResponse,
 } from "@ensnode/ensnode-sdk";
@@ -66,10 +68,11 @@ app.openapi(getNameTokensRoute, async (c) => {
   let domainId: Node;
 
   if (request.name !== undefined) {
-    const { name } = request;
+    const name = asInterpretedName(request.name);
+    const parentName = getParentInterpretedName(name);
 
-    // return 404 when the requested name was the ENS Root
-    if (name === ENS_ROOT) {
+    // return 404 when the requested name was the ENS Root (which does not have a parent)
+    if (parentName === null) {
       return c.json(
         serializeNameTokensResponse(
           makeNameTokensNotIndexedResponse(
@@ -80,7 +83,7 @@ app.openapi(getNameTokensRoute, async (c) => {
       );
     }
 
-    const parentNode = namehash(getParentNameFQDN(name));
+    const parentNode = namehashInterpretedName(parentName);
     const subregistry = indexedSubregistries.find((s) => s.node === parentNode);
 
     // Return 404 response with error code for Name Tokens Not Indexed when
@@ -97,7 +100,7 @@ app.openapi(getNameTokensRoute, async (c) => {
       );
     }
 
-    domainId = namehash(name);
+    domainId = namehashInterpretedName(name);
   } else if (request.domainId !== undefined) {
     domainId = request.domainId;
   } else {

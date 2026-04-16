@@ -1,4 +1,4 @@
-import { namehash } from "viem";
+import { namehashInterpretedName } from "enssdk";
 
 import type { ENSNamespaceId } from "@ensnode/datasources";
 import {
@@ -24,20 +24,21 @@ export function getIndexedSubregistries(
   if (activePlugins.includes(PluginName.Subgraph)) {
     indexedSubregistries.push({
       subregistryId: getEthnamesSubregistryId(namespaceId),
-      node: namehash(getEthnamesSubregistryManagedName(namespaceId)),
+      node: namehashInterpretedName(getEthnamesSubregistryManagedName(namespaceId)),
     });
   }
+
   if (activePlugins.includes(PluginName.Basenames)) {
     indexedSubregistries.push({
       subregistryId: getBasenamesSubregistryId(namespaceId),
-      node: namehash(getBasenamesSubregistryManagedName(namespaceId)),
+      node: namehashInterpretedName(getBasenamesSubregistryManagedName(namespaceId)),
     });
   }
 
   if (activePlugins.includes(PluginName.Lineanames)) {
     indexedSubregistries.push({
       subregistryId: getLineanamesSubregistryId(namespaceId),
-      node: namehash(getLineanamesSubregistryManagedName(namespaceId)),
+      node: namehashInterpretedName(getLineanamesSubregistryManagedName(namespaceId)),
     });
   }
 

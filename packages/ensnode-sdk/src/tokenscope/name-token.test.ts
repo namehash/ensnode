@@ -1,10 +1,9 @@
+import { type AccountId, asInterpretedName } from "enssdk";
 import { zeroAddress } from "viem";
 import { describe, expect, it } from "vitest";
 
 import { ENSNamespaceIds } from "@ensnode/datasources";
 
-import type { InterpretedName } from "../ens";
-import type { AccountId } from "../shared/types";
 import {
   getNameTokenOwnership,
   type NameTokenOwnershipBurned,
@@ -40,9 +39,9 @@ describe("Name Token", () => {
     } as const;
 
     const names = {
-      TestEth: "test.eth" as InterpretedName,
-      TestBaseEth: "test.base.eth" as InterpretedName,
-      TestLineaEth: "test.linea.eth" as InterpretedName,
+      TestEth: asInterpretedName("test.eth"),
+      TestBaseEth: asInterpretedName("test.base.eth"),
+      TestLineaEth: asInterpretedName("test.linea.eth"),
     } as const;
 
     it("returns 'NameWrapper' ownership type when NameWrapper account owns the name token", () => {

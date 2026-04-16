@@ -1,12 +1,13 @@
 "use client";
 
+import type { Name } from "enssdk";
 import { User } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import { useRecords } from "@ensnode/ensnode-react";
-import { getNamespaceSpecificValue, type Name } from "@ensnode/ensnode-sdk";
+import { getNamespaceSpecificValue } from "@ensnode/ensnode-sdk";
 
 import { RenderRequestsOutput } from "@/app/inspect/_components/render-requests-output";
 import { ResolveButton } from "@/app/inspect/_components/resolve-button";

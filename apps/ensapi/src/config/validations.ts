@@ -3,6 +3,8 @@ import packageJson from "@/../package.json" with { type: "json" };
 import type { ENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
 import type { ZodCheckFnInput } from "@ensnode/ensnode-sdk/internal";
 
+import { ensApiVersionInfo } from "@/lib/version-info";
+
 // Invariant: ENSIndexerPublicConfig VersionInfo must match ENSApi
 export function invariant_ensIndexerPublicConfigVersionInfo(
   ctx: ZodCheckFnInput<{
@@ -40,6 +42,16 @@ export function invariant_ensIndexerPublicConfigVersionInfo(
       path: ["ensIndexerPublicConfig.ensRainbowPublicConfig.version"],
       input: ensIndexerPublicConfig.ensRainbowPublicConfig.version,
       message: `Version Mismatch: ENSRainbow@${ensIndexerPublicConfig.ensRainbowPublicConfig.version} !== ENSApi@${packageJson.version}`,
+    });
+  }
+
+  // Invariant: `@adraffy/ens-normalize` package version must match between ENSApi & ENSIndexer
+  if (ensIndexerPublicConfig.versionInfo.ensNormalize !== ensApiVersionInfo.ensNormalize) {
+    ctx.issues.push({
+      code: "custom",
+      path: ["ensIndexerPublicConfig.versionInfo.ensNormalize"],
+      input: ensIndexerPublicConfig.versionInfo.ensNormalize,
+      message: `Dependency Version Mismatch: '@adraffy/ens-normalize' version must be the same between ENSIndexer and ENSApi. Found ENSApi@${ensApiVersionInfo.ensNormalize} and ENSIndexer@${ensIndexerPublicConfig.versionInfo.ensNormalize}`,
     });
   }
 }

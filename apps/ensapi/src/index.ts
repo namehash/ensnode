@@ -5,10 +5,10 @@ import { serve } from "@hono/node-server";
 import { indexingStatusCache } from "@/cache/indexing-status.cache";
 import { getReferralLeaderboardEditionsCaches } from "@/cache/referral-leaderboard-editions.cache";
 import { referralProgramEditionConfigSetCache } from "@/cache/referral-program-edition-set.cache";
-import { referrerLeaderboardCache } from "@/cache/referrer-leaderboard.cache";
 import { redactEnsApiConfig } from "@/config/redact";
 import { sdk } from "@/lib/instrumentation";
 import logger from "@/lib/logger";
+import { writeGraphQLSchema } from "@/omnigraph-api/lib/write-graphql-schema";
 
 import app from "./app";
 
@@ -26,12 +26,11 @@ const server = serve(
   async (info) => {
     logger.info({ config: redactEnsApiConfig(config) }, `ENSApi listening on port ${info.port}`);
 
-    // Trigger proactive initialization of the indexing status cache at startup.
-    // SWRCache with proactivelyInitialize: true starts fetching immediately upon
-    // construction, but construction is deferred via the lazy proxy until first
-    // access — so we access it explicitly here rather than waiting for the first
-    // user request.
-    indexingStatusCache.read();
+    // Write the generated graphql schema in the background
+    void writeGraphQLSchema();
+
+    // proactively read the indexing status to warm cache
+    void indexingStatusCache.read();
   },
 );
 
@@ -49,9 +48,6 @@ const gracefulShutdown = async () => {
   try {
     await sdk.shutdown();
     logger.info("Destroyed tracing instrumentation");
-
-    referrerLeaderboardCache.destroy();
-    logger.info("Destroyed referrerLeaderboardCache");
 
     // Destroy referral program edition config set cache
     referralProgramEditionConfigSetCache.destroy();

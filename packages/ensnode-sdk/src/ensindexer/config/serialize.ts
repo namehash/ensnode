@@ -1,4 +1,5 @@
-import type { ChainId } from "../../shared/types";
+import type { ChainId } from "enssdk";
+
 import type {
   SerializedEnsIndexerPublicConfig,
   SerializedIndexedChainIds,
@@ -19,7 +20,7 @@ export function serializeEnsIndexerPublicConfig(
   config: EnsIndexerPublicConfig,
 ): SerializedEnsIndexerPublicConfig {
   const {
-    databaseSchemaName,
+    ensIndexerSchemaName,
     ensRainbowPublicConfig,
     indexedChainIds,
     isSubgraphCompatible,
@@ -30,7 +31,7 @@ export function serializeEnsIndexerPublicConfig(
   } = config;
 
   return {
-    databaseSchemaName,
+    ensIndexerSchemaName,
     ensRainbowPublicConfig,
     indexedChainIds: serializeIndexedChainIds(indexedChainIds),
     isSubgraphCompatible,
