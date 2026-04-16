@@ -61,7 +61,11 @@
       "picomatch@>=4.0.0 <4.0.4": ">=4.0.4",
       "smol-toml@<1.6.1": ">=1.6.1",
       "brace-expansion@>=4.0.0 <5.0.5": ">=5.0.5",
-      "dompurify@<3.3.2": ">=3.3.2"
+      "dompurify@<3.3.2": ">=3.3.2",
+      "defu@<=6.1.4": "^6.1.5",
+      "vite@>=5.0.0 <=6.4.1": "^6.4.2",
+      "axios@<1.15.0": ">=1.15.0",
+      "follow-redirects@<1.16.0": "^1.16.0"
     },
     "ignoredBuiltDependencies": [
       "bun"
@@ -70,6 +74,11 @@
       "@opentelemetry/api": "patches/@opentelemetry__api.patch",
       "@opentelemetry/otlp-exporter-base": "patches/@opentelemetry__otlp-exporter-base.patch",
       "@changesets/assemble-release-plan@6.0.9": "patches/@changesets__assemble-release-plan@6.0.9.patch"
+    },
+    "auditConfig": {
+      "ignoreCves": [
+        "CVE-2026-39356"
+      ]
     }
   }
 }
