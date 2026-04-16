@@ -1,0 +1,452 @@
+---
+title: Build a Custom Writer
+description: Build an indexer that writes ENS data to ENSDb following the open standard. Learn the ENSNode Schema requirements, ENSIndexer Schema structure, and indexing lifecycle.
+sidebar:
+  label: Build a Writer
+  order: 2
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+A **writer** indexes onchain ENS data and writes it to an ENSDb instance. This guide explains how to build a custom writer that follows the ENSDb open standard.
+
+## What a Writer Does
+
+```mermaid
+flowchart LR
+    Onchain["Onchain ENS State<br/>(Ethereum)"]
+    Writer["Your Writer<br/>(Custom Indexer)"]
+    ENSDb["ENSDb Instance<br/>(PostgreSQL)"]
+    
+    Onchain -->|1. Read Events| Writer
+    Writer -->|2. Transform| Writer
+    Writer -->|3. Write Data| ENSDb
+    Writer -->|4. Update Metadata| ENSDb
+```
+
+1. **Read** — Connect to an Ethereum node and subscribe to ENS-related events
+2. **Transform** — Convert onchain data to ENSDb schema format
+3. **Write** — Insert data into ENSIndexer Schema tables
+4. **Metadata** — Update ENSNode Schema with indexing status and configuration
+
+## Architecture Overview
+
+Your writer will interact with two schemas:
+
+```mermaid
+erDiagram
+    WRITER["Your Writer"] ||--o{ ENSNODE_METADATA : "updates"
+    WRITER ||--|| ENSINDEXER_SCHEMA : "creates & writes"
+    
+    ENSNODE_METADATA {
+        text ens_indexer_schema_name PK
+        text key PK
+        text value_version
+        jsonb value
+    }
+    
+    ENSINDEXER_SCHEMA["ensindexer_* Schema"] {
+        text schema_name
+        timestamp created_at
+    }
+```
+
+### ENSNode Schema Interactions
+
+Your writer must:
+- **Create** the ENSNode Schema on first run (if it doesn't exist)
+- **Register** itself in the `metadata` table with:
+  - `ensdb_version`: Your schema version
+  - `ensindexer_public_config`: Your public configuration
+  - `ensindexer_indexing_status`: Current indexing state
+
+### ENSIndexer Schema Interactions
+
+Your writer must:
+- **Create** a schema with a unique name (e.g., `ensindexer_mycustom`)
+- **Create** all tables defined in the 5 sub-schemas
+- **Maintain** indexes appropriately (dropped during backfill, created during following)
+
+## Implementation Guide
+
+### Step 1: Set Up Your Project
+
+Create a new project with PostgreSQL connectivity:
+
+<Tabs>
+<TabItem label="TypeScript">
+```bash
+mkdir my-ensdb-writer
+cd my-ensdb-writer
+npm init -y
+npm install pg @ensnode/ensdb-sdk viem
+```
+</TabItem>
+<TabItem label="Python">
+```bash
+mkdir my-ensdb-writer
+cd my-ensdb-writer
+python -m venv venv
+source venv/bin/activate
+pip install psycopg2-binary web3
+```
+</TabItem>
+<TabItem label="Go">
+```bash
+mkdir my-ensdb-writer
+cd my-ensdb-writer
+go mod init my-ensdb-writer
+go get github.com/jackc/pgx/v5
+go get github.com/ethereum/go-ethereum
+```
+</TabItem>
+</Tabs>
+
+### Step 2: Connect to PostgreSQL
+
+<Tabs>
+<TabItem label="TypeScript">
+```typescript
+import { Pool } from 'pg';
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
+
+// Or use ENSDb SDK
+import { EnsDbWriter } from '@ensnode/ensdb-sdk';
+
+const writer = new EnsDbWriter(
+  process.env.DATABASE_URL!,
+  'ensindexer_mycustom' // Your schema name
+);
+```
+</TabItem>
+<TabItem label="Python">
+```python
+import psycopg2
+from psycopg2.extras import RealDictCursor
+
+conn = psycopg2.connect(
+    host="localhost",
+    database="ensdb",
+    user="postgres",
+    password="password"
+)
+```
+</TabItem>
+<TabItem label="Go">
+```go
+import (
+    "context"
+    "github.com/jackc/pgx/v5/pgxpool"
+)
+
+pool, err := pgxpool.New(context.Background(), "postgresql://user:pass@localhost/ensdb")
+if err != nil {
+    log.Fatal(err)
+}
+defer pool.Close()
+```
+</TabItem>
+</Tabs>
+
+### Step 3: Initialize ENSNode Schema
+
+Create the ENSNode Schema and migrations table if they don't exist:
+
+<Tabs>
+<TabItem label="TypeScript (with SDK)">
+```typescript
+// Using SDK - handles migrations automatically
+await writer.migrateEnsNodeSchema('./migrations/ensnode');
+```
+</TabItem>
+<TabItem label="SQL">
+```sql
+-- Create ENSNode schema
+CREATE SCHEMA IF NOT EXISTS ensnode;
+
+-- Create metadata table
+CREATE TABLE IF NOT EXISTS ensnode.metadata (
+    ens_indexer_schema_name TEXT NOT NULL,
+    key TEXT NOT NULL,
+    value_version TEXT NOT NULL,
+    value JSONB NOT NULL,
+    PRIMARY KEY (ens_indexer_schema_name, key)
+);
+```
+</TabItem>
+</Tabs>
+
+### Step 4: Create ENSIndexer Schema
+
+Create your dynamic schema with all required tables:
+
+```sql
+-- Create your schema
+CREATE SCHEMA IF NOT EXISTS ensindexer_mycustom;
+
+-- Create tables from all 5 sub-schemas (ensv2, protocol-acceleration, registrars, subgraph, tokenscope)
+-- See Database Schemas reference for complete DDL: /ensdb/concepts/database-schemas/
+```
+
+<Aside type="note">
+The ENSIndexer Schema contains 5 sub-schemas with 50+ tables. Use the [Database Schemas reference](/ensdb/concepts/database-schemas/) for complete table definitions.
+</Aside>
+
+### Step 5: Register Your Writer
+
+Insert metadata about your indexer:
+
+```sql
+-- Register schema version
+INSERT INTO ensnode.metadata (ens_indexer_schema_name, key, value_version, value)
+VALUES (
+    'ensindexer_mycustom',
+    'ensdb_version',
+    '1.0.0',
+    '"1.0.0"'::jsonb
+);
+
+-- Register public configuration
+INSERT INTO ensnode.metadata (ens_indexer_schema_name, key, value_version, value)
+VALUES (
+    'ensindexer_mycustom',
+    'ensindexer_public_config',
+    '1.0.0',
+    '{
+        "chains": ["mainnet"],
+        "plugins": ["ensv2"],
+        "version": "1.0.0"
+    }'::jsonb
+);
+
+-- Register initial indexing status
+INSERT INTO ensnode.metadata (ens_indexer_schema_name, key, value_version, value)
+VALUES (
+    'ensindexer_mycustom',
+    'ensindexer_indexing_status',
+    '1.0.0',
+    '{
+        "status": "backfill",
+        "progress": 0,
+        "chains": {}
+    }'::jsonb
+);
+```
+
+### Step 6: Implement Indexing Logic
+
+Connect to an Ethereum node and process events:
+
+<Tabs>
+<TabItem label="TypeScript">
+```typescript
+import { createPublicClient, http, parseAbi } from 'viem';
+import { mainnet } from 'viem/chains';
+
+const client = createPublicClient({
+  chain: mainnet,
+  transport: http(process.env.ETHEREUM_RPC_URL),
+});
+
+// Example: Index ENS Registry events
+const ensRegistryAbi = parseAbi([
+  'event NewOwner(bytes32 indexed node, bytes32 indexed label, address owner)',
+]);
+
+// Get historical logs
+const logs = await client.getLogs({
+  address: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
+  event: ensRegistryAbi[0],
+  fromBlock: 0n,
+  toBlock: 'latest',
+});
+
+// Transform and insert
+for (const log of logs) {
+  const node = log.args.node;
+  const label = log.args.label;
+  const owner = log.args.owner;
+  
+  // Transform to ENSDb format
+  const domainId = `${node}`;
+  const labelHash = `${label}`;
+  
+  // Insert into your schema
+  await pool.query(`
+    INSERT INTO ensindexer_mycustom.v1_domains (id, parent_id, owner_id, label_hash)
+    VALUES ($1, $2, $3, $4)
+    ON CONFLICT (id) DO UPDATE SET
+      owner_id = EXCLUDED.owner_id
+  `, [domainId, node, owner, labelHash]);
+}
+```
+</TabItem>
+</Tabs>
+
+### Step 7: Update Indexing Status
+
+Periodically update the metadata with progress:
+
+```sql
+UPDATE ensnode.metadata
+SET value = '{
+    "status": "backfill",
+    "progress": 45,
+    "chains": {
+        "1": {
+            "latestIndexedBlock": 18500000,
+            "targetBlock": 21000000
+        }
+    }
+}'::jsonb
+WHERE ens_indexer_schema_name = 'ensindexer_mycustom'
+  AND key = 'ensindexer_indexing_status';
+```
+
+When caught up to chain head:
+
+```sql
+UPDATE ensnode.metadata
+SET value = '{
+    "status": "following",
+    "progress": 100,
+    "chains": {
+        "1": {
+            "latestIndexedBlock": 21000000
+        }
+    }
+}'::jsonb
+WHERE ens_indexer_schema_name = 'ensindexer_mycustom'
+  AND key = 'ensindexer_indexing_status';
+```
+
+### Step 8: Handle Index Management
+
+Drop indexes during backfill for performance:
+
+```sql
+-- During backfill
+DROP INDEX IF EXISTS ensindexer_mycustom.v1_domains_by_owner;
+```
+
+Create indexes when following for query performance:
+
+```sql
+-- When following
+CREATE INDEX v1_domains_by_owner 
+ON ensindexer_mycustom.v1_domains(owner_id);
+```
+
+## Schema Versioning
+
+Your writer must track schema versions:
+
+1. **Compute a checksum** of your schema definition
+2. **Store it** in ENSNode metadata
+3. **Validate** on startup that the database matches expected version
+
+<Tabs>
+<TabItem label="TypeScript (with SDK)">
+```typescript
+import { getDrizzleSchemaChecksum } from '@ensnode/ensdb-sdk';
+import * as schema from '@ensnode/ensdb-sdk/ensindexer-abstract';
+
+const checksum = getDrizzleSchemaChecksum(schema);
+// Store in metadata
+await writer.upsertEnsDbVersion(checksum);
+```
+</TabItem>
+</Tabs>
+
+## Best Practices
+
+### Error Handling
+
+- Use transactions for multi-table writes
+- Implement idempotent inserts (ON CONFLICT)
+- Log errors but continue indexing when possible
+
+### Performance
+
+- Batch inserts when possible (100-1000 rows per batch)
+- Drop indexes during backfill
+- Use prepared statements for repeated queries
+
+### State Management
+
+- Persist last indexed block to survive restarts
+- Handle chain reorganizations by rewinding and re-indexing
+- Update indexing status frequently enough for monitoring
+
+## Complete Example
+
+Here's a minimal but complete writer example in TypeScript:
+
+```typescript
+import { EnsDbWriter } from '@ensnode/ensdb-sdk';
+import { createPublicClient, http } from 'viem';
+import { mainnet } from 'viem/chains';
+
+class CustomEnsDbWriter {
+  private writer: EnsDbWriter;
+  private client: ReturnType<typeof createPublicClient>;
+  
+  constructor(ensDbUrl: string, schemaName: string, rpcUrl: string) {
+    this.writer = new EnsDbWriter(ensDbUrl, schemaName);
+    this.client = createPublicClient({
+      chain: mainnet,
+      transport: http(rpcUrl),
+    });
+  }
+  
+  async initialize(): Promise<void> {
+    // Run ENSNode Schema migrations
+    await this.writer.migrateEnsNodeSchema('./migrations');
+    
+    // Register configuration
+    await this.writer.upsertEnsIndexerPublicConfig({
+      chains: ['mainnet'],
+      plugins: ['custom'],
+    });
+    
+    // Set initial status
+    await this.writer.upsertIndexingStatusSnapshot({
+      status: 'backfill',
+      progress: 0,
+    });
+  }
+  
+  async run(): Promise<void> {
+    // Start indexing...
+    // (Implementation depends on your specific requirements)
+  }
+}
+
+// Usage
+const writer = new CustomEnsDbWriter(
+  'postgresql://localhost/ensdb',
+  'ensindexer_mycustom',
+  'https://mainnet.example.com'
+);
+
+await writer.initialize();
+await writer.run();
+```
+
+## Testing Your Writer
+
+Verify your writer follows the standard:
+
+1. **Schema creation** — ENSIndexer Schema exists with all tables
+2. **Metadata registration** — ENSNode metadata has your entries
+3. **Data insertion** — Data appears in correct tables
+4. **Reader compatibility** — Existing readers can query your data
+
+## Related Documentation
+
+- **[Database Schemas](/ensdb/concepts/database-schemas/)** — Complete schema reference
+- **[Indexing Lifecycle](/ensdb/concepts/indexing-lifecycle/)** — How indexing phases work
+- **[ENSIndexer Contributing](/ensindexer/contributing/)** — Reference implementation

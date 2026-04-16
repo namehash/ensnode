@@ -1,0 +1,146 @@
+---
+title: ENSDb Writer
+description: Write interface for ENSDb initialization and metadata updates.
+sidebar:
+  label: ENSDb Writer
+  order: 4
+---
+
+The [ENSDb Writer](/ensdb/concepts/glossary#ensdb-writer) provides an interface for writing to ENSDb. It extends [ENSDb Reader](/ensdb/usage/ensdb-sdk/reader/) with write capabilities, and is primarily used by [ENSIndexer instances](/ensdb/concepts/glossary#ensindexer-instance).
+
+For terminology definitions, see the [Glossary](/ensdb/concepts/glossary).
+
+## Purpose
+
+The [ENSDb Writer](/ensdb/concepts/glossary#ensdb-writer):
+
+- Runs database migrations for [ENSNode Schema](/ensdb/concepts/glossary#ensnode-schema)
+- Updates [ENSNode Metadata Table](/ensdb/concepts/glossary#ensnode-metadata-table) records
+- Inherits all read capabilities from [ENSDb Reader](/ensdb/usage/ensdb-sdk/reader/)
+
+:::caution
+The ENSDb Writer is intended for use by [ENSIndexer instances](/ensdb/concepts/glossary#ensindexer-instance). Most ENSDb consumers only need the [ENSDb Reader](/ensdb/usage/ensdb-sdk/reader/).
+:::
+
+## Constructor
+
+```typescript
+import { EnsDbWriter } from '@ensnode/ensdb-sdk';
+
+const writer = new EnsDbWriter(
+  'postgresql://user:password@host:5432/ensdb', // ENSDb connection string
+  'ensindexer_mainnet'                          // ENSIndexer Schema Name
+);
+```
+
+Parameters:
+- `ensDbUrl` — PostgreSQL connection string for the [ENSDb instance](/ensdb/concepts/glossary#ensdb-instance)
+- `ensIndexerSchemaName` — The [ENSIndexer Schema Name](/ensdb/concepts/glossary#ensindexer-schema-name) for this instance
+
+:::note
+EnsDbWriter extends EnsDbReader, so you can use all reader methods like `getEnsDbVersion()`, `getEnsIndexerPublicConfig()`, and `getIndexingStatusSnapshot()` on a writer instance.
+:::
+
+## Methods
+
+### `migrateEnsNodeSchema(migrationsDirPath)`
+
+Execute pending database migrations for [ENSNode Schema](/ensdb/concepts/glossary#ensnode-schema):
+
+```typescript
+await writer.migrateEnsNodeSchema('./migrations/ensnode');
+```
+
+Parameters:
+- `migrationsDirPath` — File path to the directory containing database migration files
+
+This creates or updates the [ENSNode Schema](/ensdb/concepts/glossary#ensnode-schema) and its tables.
+
+### `upsertEnsDbVersion(ensDbVersion)`
+
+Upsert the ENSDb version for this [ENSIndexer instance](/ensdb/concepts/glossary#ensindexer-instance):
+
+```typescript
+await writer.upsertEnsDbVersion('1.2.3');
+```
+
+Creates or updates the record with key `ensdb_version` in [ENSNode Metadata Table](/ensdb/concepts/glossary#ensnode-metadata-table).
+
+### `upsertEnsIndexerPublicConfig(config)`
+
+Upsert the public configuration for this [ENSIndexer instance](/ensdb/concepts/glossary#ensindexer-instance):
+
+```typescript
+await writer.upsertEnsIndexerPublicConfig({
+  chains: ['mainnet', 'base'],
+  // ... other config
+});
+```
+
+Creates or updates the record with key `ensindexer_public_config` in [ENSNode Metadata Table](/ensdb/concepts/glossary#ensnode-metadata-table).
+
+### `upsertIndexingStatusSnapshot(status)`
+
+Upsert the [Indexing Status](/ensdb/concepts/glossary#indexing-status) snapshot:
+
+```typescript
+await writer.upsertIndexingStatusSnapshot({
+  status: 'following',
+  progress: 100,
+  // ... other status fields
+});
+```
+
+Creates or updates the record with key `ensindexer_indexing_status` in [ENSNode Metadata Table](/ensdb/concepts/glossary#ensnode-metadata-table).
+
+## ENSNode Metadata Keys
+
+The [ENSNode Metadata Table](/ensdb/concepts/glossary#ensnode-metadata-table) uses these keys:
+
+| Key | Method | Description |
+|-----|--------|-------------|
+| `ensdb_version` | `upsertEnsDbVersion()` | ENSDb version string |
+| `ensindexer_public_config` | `upsertEnsIndexerPublicConfig()` | ENSIndexer public configuration |
+| `ensindexer_indexing_status` | `upsertIndexingStatusSnapshot()` | [Indexing Status](/ensdb/concepts/glossary#indexing-status) snapshot |
+
+## Use by ENSIndexer
+
+[ENSIndexer instances](/ensdb/concepts/glossary#ensindexer-instance) use the ENSDb Writer during:
+
+1. **Startup** — Run migrations for [ENSNode Schema](/ensdb/concepts/glossary#ensnode-schema)
+2. **Registration** — Upsert public config to [ENSNode Metadata Table](/ensdb/concepts/glossary#ensnode-metadata-table)
+3. **Indexing** — Update [Indexing Status](/ensdb/concepts/glossary#indexing-status) periodically
+4. **Completion** — Record final status
+
+## Migration Pattern
+
+```typescript
+import { EnsDbWriter } from '@ensnode/ensdb-sdk';
+
+const writer = new EnsDbWriter(ensDbUrl, mySchemaName);
+
+// Run ENSNode Schema migrations
+await writer.migrateEnsNodeSchema('./migrations/ensnode');
+
+// Register this ENSIndexer instance
+await writer.upsertEnsIndexerPublicConfig(myPublicConfig);
+
+// During indexing - update status periodically
+await writer.upsertIndexingStatusSnapshot({
+  status: 'backfill',
+  progress: 50,
+});
+
+// When following
+await writer.upsertIndexingStatusSnapshot({
+  status: 'following',
+  progress: 100,
+});
+```
+
+## Related Documentation
+
+- **[ENSDb Reader](/ensdb/usage/ensdb-sdk/reader/)** — Read interface (inherited by Writer)
+- **[ENSNode Schema](/ensdb/concepts/glossary#ensnode-schema)** — Schema structure
+- **[ENSNode Metadata Table](/ensdb/concepts/glossary#ensnode-metadata-table)** — Metadata storage
+- **[Indexing Lifecycle](/ensdb/concepts/indexing-lifecycle)** — Status transitions

@@ -1,0 +1,137 @@
+---
+title: Using ENSDb
+description: Practical guides for querying and integrating with ENSDb.
+sidebar:
+  label: Usage
+  order: 4
+---
+
+import { LinkCard } from '@astrojs/starlight/components';
+
+This section provides practical guides for working with ENSDb. Since ENSDb is a standard PostgreSQL database, you can use any PostgreSQL client in any programming language.
+
+For terminology definitions, see the [Glossary](/ensdb/concepts/glossary).
+
+## Querying ENSDb
+
+<LinkCard
+  title="Querying Guide"
+  description="SQL examples for discovering schemas and querying indexed data"
+  href="/ensdb/usage/querying/"
+/>
+
+## TypeScript SDK
+
+<LinkCard
+  title="ENSDb SDK"
+  description="TypeScript utilities for typing-safe ENSDb access"
+  href="/ensdb/usage/ensdb-sdk/"
+/>
+
+## Language Examples
+
+ENSDb works with any PostgreSQL client. Here are connection examples for common languages:
+
+### Python
+
+```python
+import psycopg2
+
+conn = psycopg2.connect(
+    host="localhost",
+    database="ensdb",
+    user="postgres",
+    password="password"
+)
+
+cursor = conn.cursor()
+
+# Discover [ENSIndexer Schemas](/ensdb/concepts/glossary#ensindexer-schema)
+cursor.execute("""
+    SELECT DISTINCT ens_indexer_schema_name
+    FROM ensnode.metadata
+""")
+schemas = cursor.fetchall()
+
+# Query indexed data
+cursor.execute("""
+    SELECT * FROM ensindexer_abc123.v1_domains
+    LIMIT 10
+""")
+domains = cursor.fetchall()
+```
+
+### JavaScript (Node.js)
+
+```javascript
+const { Pool } = require('pg');
+
+const pool = new Pool({
+  host: 'localhost',
+  database: 'ensdb',
+  user: 'postgres',
+  password: 'password',
+});
+
+// Discover ENSIndexer Schemas
+const { rows: schemas } = await pool.query(`
+  SELECT DISTINCT ens_indexer_schema_name
+  FROM ensnode.metadata
+`);
+
+// Query indexed data
+const { rows: domains } = await pool.query(`
+  SELECT * FROM ensindexer_abc123.v1_domains
+  LIMIT 10
+`);
+```
+
+### Go
+
+```go
+package main
+
+import (
+    "database/sql"
+    "fmt"
+    _ "github.com/lib/pq"
+)
+
+func main() {
+    connStr := "host=localhost dbname=ensdb user=postgres password=password sslmode=disable"
+    db, err := sql.Open("postgres", connStr)
+    if err != nil {
+        panic(err)
+    }
+    defer db.Close()
+
+    // Discover ENSIndexer Schemas
+    rows, err := db.Query(`
+        SELECT DISTINCT ens_indexer_schema_name
+        FROM ensnode.metadata
+    `)
+    // ...
+}
+```
+
+### Rust
+
+```rust
+use postgres::{Client, NoTls};
+
+fn main() {
+    let mut client = Client::connect(
+        "host=localhost dbname=ensdb user=postgres password=password",
+        NoTls,
+    ).unwrap();
+
+    // Discover ENSIndexer Schemas
+    for row in client.query(
+        "SELECT DISTINCT ens_indexer_schema_name FROM ensnode.metadata",
+        &[],
+    ).unwrap() {
+        let schema_name: String = row.get(0);
+        println!("{}", schema_name);
+    }
+}
+```

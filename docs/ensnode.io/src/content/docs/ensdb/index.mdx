@@ -1,7 +1,260 @@
 ---
-title: ENSDb Overview
+title: Getting started with ENSDb
+description: ENSDb is an open standard for bi-directional ENS integration. An ENSDb instance is a PostgreSQL database served from a PostgreSQL server — and a single server can serve multiple ENSDb instances.
+sidebar:
+  label: Overview
+  order: 1
 ---
 
-:::caution[Work in Progress]
-This documentation is under active development.
-:::
+import { LinkCard, Aside, Card, CardGrid } from '@astrojs/starlight/components';
+
+## Vision
+
+Getting the whole onchain state of ENS in your database.
+
+## Core Philosophy
+
+### Open Standard
+
+ENSDb is an open standard for bi-directional ENS integration. It defines a carefully crafted set of database schema designs, rules, and constraints for storing the entire ENS onchain state in a PostgreSQL database — making the data accessible from any programming language.
+
+Any app following the standard can:
+- Perform write operations to produce an ENSDb instance.
+- Perform read operations against the ENSDb instance.
+
+<Aside type="tip" title="Build in Any Language">
+Each ENSDb instance is a standard PostgreSQL database, so to interact with it, you can use **any programming language** that has a PostgreSQL driver. Python, Go, Rust, JavaScript, Ruby, Java, C# — the choice is yours.
+</Aside>
+
+### Reference Implementation
+
+ENSNode is the reference implementation of the ENSDb standard, providing a complete ecosystem of tools and services for building with ENSDb. Each ENSNode instance includes:
+- [ENSDb instance](/ensdb/concepts/glossary#ensdb-instance) — The PostgreSQL database following the ENSDb standard
+- [ENSIndexer instance](/ensdb/concepts/glossary#ensindexer-instance) — The reference ENSDb Writer implementation that indexes onchain ENS data
+- [ENSApi instance](/ensdb/concepts/glossary#ensapi-instance) — The reference ENSDb Reader implementation that serves GraphQL and REST APIs
+
+```mermaid
+flowchart LR
+    subgraph ENSNode["ENSNode Environment"]
+        subgraph ENSNodeMainnet["ENSNode 'Mainnet' instance"]
+            direction LR
+            ENSIndexerMainnet[ENSIndexer 'Mainnet' instance]
+            ENSApiMainnet@{ shape: procs, label: "ENSApi Sepolia instances" }
+        end
+
+        subgraph ENSNodeSepolia["ENSNode 'Sepolia' instance"]
+            direction LR
+            ENSIndexerSepolia[ENSIndexer 'Sepolia' instance]
+            ENSApiSepolia[ENSApi 'Sepolia' instance]
+        end
+    end
+
+    subgraph PostgreSQLServer["PostgreSQL Server instance"]
+        ENSDbMainnet[(ENSDb 'Mainnet' instance)]
+        PSMainnet(Ponder Schema)
+        NSMainnet(ENSNode Schema)
+        EISMainnet@{ shape: procs, label: "ENSIndexer Schema" }
+
+        ENSDbMainnet -->|1..1| PSMainnet
+        ENSDbMainnet -->|1..1| NSMainnet
+        ENSDbMainnet -->|1..*| EISMainnet
+
+
+        ENSDbSepolia[(ENSDb 'Sepolia' instance)]
+        PSSepolia(Ponder Schema)
+        NSSepolia(ENSNode Schema)
+        EISSepolia@{ shape: procs, label: "ENSIndexer Schema" }
+
+        ENSDbSepolia -->|1..1| PSSepolia
+        ENSDbSepolia -->|1..1| NSSepolia
+        ENSDbSepolia -->|1..*| EISSepolia
+    end
+    
+    ENSIndexerMainnet -->|Write| ENSDbMainnet
+    ENSIndexerSepolia -->|Write| ENSDbSepolia
+    ENSApiMainnet -->|Read| ENSDbMainnet
+    ENSApiSepolia -->|Read| ENSDbSepolia
+
+```
+
+<Aside type="note" title="Build Your Own">
+You can build custom writers, readers, or both. The standard is implementation-agnostic.
+</Aside>
+
+## What is an ENSDb Instance?
+
+An **ENSDb instance** is a PostgreSQL database that follows the ENSDb open standard. Key characteristics:
+
+| Aspect | Description |
+|--------|-------------|
+| **What it is** | A PostgreSQL database (logical database within a server) |
+| **Where it runs** | Served from a PostgreSQL server |
+| **Multi-tenancy** | One ENSDb instance can store data from multiple ENSIndexer instances (tenants) |
+| **Contains** | Complete indexed ENS state |
+
+### Example: Multi-Instance Server
+
+A single PostgreSQL server can serve multiple ENSDb instances for different environments:
+
+```mermaid
+flowchart TB
+    subgraph PGServer["PostgreSQL Server (localhost:5432)"]
+        direction TB
+        Mainnet["ensdb_mainnet<br/>← Production environment (mainnet data)"]
+        Testnet["ensdb_testnet<br/>← Pre-production environment (testnet data)"]
+        Devnet["ensdb_devnet<br/>← Staging / local development environment"]
+    end
+```
+
+Each ENSDb instance is an independent database containing complete ENS data for its respective environment.
+
+## What You Get
+
+### Complete ENS State
+
+ENSDb contains the **entire onchain state of ENS**:
+
+- All domains (ENSv1 and ENSv2)
+- All registrations and renewals
+- All resolver records and text records
+- All events and ownership history
+- All NFT/token data for names
+
+
+### PostgreSQL Benefits
+
+By building on a PostgreSQL database, ENSDb inherits world-class capabilities:
+
+- **ACID transactions** — Data integrity guarantees
+- **Complex queries** — Joins, aggregations, window functions
+- **Scalability** — Replication, sharding, connection pooling
+- **Ecosystem** — Mature tools, ORMs, dashboards, analytics platforms
+- **Reliability** — Decades of production-proven technology
+
+## What You Can Build
+
+ENSDb unlocks a new universe of ENS applications:
+
+<CardGrid>
+<Card title="Custom APIs" icon="seti:graphql">
+Build specialized GraphQL or REST APIs tailored to your use case. Query exactly the data you need with full SQL power.
+</Card>
+<Card title="Analytics & Dashboards" icon="seti:html">
+Create real-time dashboards and analytics pipelines. Better than Dune — you have the full ENS state locally with sub-second query latency.
+</Card>
+<Card title="CLIs & Developer Tools" icon="seti:shell">
+Build command-line tools for ENS operations. Query domains, check expiration, analyze name patterns — all from your terminal.
+</Card>
+<Card title="Event-Based Engines" icon="seti:github">
+Build reactive systems that respond to ENS state changes. Monitor registration lifecycles, ownership transfers, resolver updates.
+</Card>
+<Card title="Data Pipelines" icon="seti:csv">
+Feed ENS data into your existing data infrastructure. Sync to data warehouses, trigger webhooks, populate search indexes.
+</Card>
+<Card title="AI & ML Models" icon="seti:python">
+Train machine learning models on complete ENS datasets. Predict name values, detect patterns, analyze market trends.
+</Card>
+</CardGrid>
+
+## Quick Start
+
+### Connect with Any PostgreSQL Client
+
+Connect to an ENSDb instance (a PostgreSQL database). The examples below assume you that ENSDb instances are served from a PostgreSQL server at `host:5432` with databases named `ensdb_mainnet`, `ensdb_testnet`, and `ensdb_devnet`:
+
+```bash
+# Production environment (mainnet data)
+psql postgresql://user:password@host:5432/ensdb_mainnet
+
+# Pre-production environment (testnet data)
+psql postgresql://user:password@host:5432/ensdb_testnet
+
+# Staging / local development environment
+psql postgresql://user:password@host:5432/ensdb_devnet
+```
+
+### Discover Available Schemas
+
+Once connected to an ENSDb instance, discover its ENSIndexer Schemas:
+
+```sql
+SELECT DISTINCT ens_indexer_schema_name
+FROM ensnode.metadata;
+```
+
+### Query Indexed Data
+
+Query data from a specific ENSIndexer Schema within your ENSDb instance:
+
+```sql
+-- Get domains from the ENSIndexer instance using the `ensindexer_mainnet` ENSIndexer Schema Name
+SELECT * FROM ensindexer_mainnet.v1_domains LIMIT 10;
+
+-- Get indexing status for the ENSIndexer instance using the `ensindexer_mainnet` ENSIndexer Schema Name
+SELECT * FROM "ensnode"."metadata"
+WHERE ens_indexer_schema_name = 'ensindexer_mainnet'
+AND key = 'ensindexer_indexing_status'
+AND value -> 'data' -> 'omnichainSnapshot' ->> 'omnichainStatus' = 'omnichain-following';
+
+```
+
+### Use the TypeScript SDK
+
+For TypeScript projects, the [ENSDb SDK](/ensdb/concepts/glossary#ensdb-sdk) provides typed access:
+
+```typescript
+import { EnsDbReader } from '@ensnode/ensdb-sdk';
+
+// Connect to a specific ENSDb instance by providing its connection string and the ENSIndexer Schema Name you want to query
+const ensDbReader =  new EnsDbReader(ensDbConnectionString, ensIndexerSchemaName);
+const v1Domains = await
+ ensDbReader.ensDb.select()
+  .from(ensDbReader.ensIndexerSchema.v1Domain)
+  .limit(10);
+  .limit(10);
+```
+
+## Documentation Structure
+
+<LinkCard
+  title="Concepts"
+  description="Understand ENSDb architecture, schemas, and data flow"
+  href="/ensdb/concepts/"
+/>
+
+<LinkCard
+  title="Database Schemas"
+  description="Deep dive into Ponder, ENSNode, and ENSIndexer schemas with complete table reference"
+  href="/ensdb/concepts/database-schemas/"
+/>
+
+<LinkCard
+  title="Usage Guides"
+  description="SQL examples, SDK usage, and language-specific integration patterns"
+  href="/ensdb/usage/"
+/>
+
+<LinkCard
+  title="Building Integrations"
+  description="Build custom writers and readers following the ENSDb standard"
+  href="/ensdb/integrations/"
+/>
+
+<LinkCard
+  title="Use Cases"
+  description="Real-world examples: analytics, dashboards, CLIs, and more"
+  href="/ensdb/use-cases/"
+/>
+
+## Get Started
+
+- **[Query ENSDb with SQL](/ensdb/usage/querying)** — Language-agnostic SQL examples
+- **[Use the TypeScript SDK](/ensdb/usage/ensdb-sdk/)** — Type-safe database access
+- **[Learn the Architecture](/ensdb/concepts/architecture)** — How schemas relate and data flows
+- **[Build an Integration](/ensdb/integrations/)** — Create custom writers or readers
+
+## Related Projects
+
+- **[ENSIndexer](/ensindexer/)** — The reference writer implementation
+- **[ENSApi](/ensapi/)** — The reference reader implementation
+- **[ENSRainbow](/ensrainbow/)** — Label healing service for ENSIndexer
