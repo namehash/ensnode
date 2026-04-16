@@ -364,4 +364,69 @@ describe("EnsDbWriterWorker", () => {
       await worker.stop();
     });
   });
+
+  describe("cancellation - stopRequested and skip-overlap", () => {
+    it("stop() during run() startup causes run() to reject with AbortError", async () => {
+      // arrange — make upsertEnsDbVersion block until we release it
+      let resolveUpsert!: () => void;
+      const upsertPromise = new Promise<void>((resolve) => {
+        resolveUpsert = resolve;
+      });
+      const ensDbClient = createMockEnsDbWriter({
+        upsertEnsDbVersion: vi.fn().mockReturnValue(upsertPromise),
+      });
+      const worker = createMockEnsDbWriterWorker({ ensDbClient });
+
+      // act — start run, then stop while it's blocked on upsertEnsDbVersion
+      const runPromise = worker.run();
+      await worker.stop();
+      resolveUpsert();
+
+      // assert — run rejects with AbortError
+      await expect(runPromise).rejects.toThrow("Worker stop requested");
+
+      // the interval was never armed
+      expect(worker.isRunning).toBe(false);
+    });
+
+    it("skips overlapping snapshot ticks when a prior upsert is still in flight", async () => {
+      // arrange — make upsertIndexingStatusSnapshot block until released
+      let resolveSnapshot!: () => void;
+      const snapshotPromise = new Promise<void>((resolve) => {
+        resolveSnapshot = resolve;
+      });
+      const omnichainSnapshot = createMockOmnichainSnapshot();
+      const crossChainSnapshot = createMockCrossChainSnapshot({ omnichainSnapshot });
+      vi.mocked(buildCrossChainIndexingStatusSnapshotOmnichain).mockReturnValue(crossChainSnapshot);
+
+      const ensDbClient = createMockEnsDbWriter({
+        upsertIndexingStatusSnapshot: vi.fn().mockReturnValueOnce(snapshotPromise),
+      });
+      const worker = createMockEnsDbWriterWorker({
+        ensDbClient,
+        indexingStatusBuilder: createMockIndexingStatusBuilder(omnichainSnapshot),
+      });
+
+      await worker.run();
+
+      // act — first tick starts the slow upsert
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(ensDbClient.upsertIndexingStatusSnapshot).toHaveBeenCalledTimes(1);
+
+      // second + third ticks should be skipped (still in flight)
+      await vi.advanceTimersByTimeAsync(2000);
+      expect(ensDbClient.upsertIndexingStatusSnapshot).toHaveBeenCalledTimes(1);
+
+      // release the slow upsert
+      resolveSnapshot();
+      await vi.advanceTimersByTimeAsync(0);
+
+      // next tick should fire again
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(ensDbClient.upsertIndexingStatusSnapshot).toHaveBeenCalledTimes(2);
+
+      // cleanup
+      await worker.stop();
+    });
+  });
 });

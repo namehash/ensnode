@@ -20,18 +20,22 @@ function isAbortError(error: unknown): boolean {
 }
 
 /**
- * Stop the given worker (if it is still the active singleton) and clear the
- * singleton reference. Safe to call multiple times.
+ * Stop the given worker and, if it is still the active singleton, clear the
+ * singleton reference BEFORE awaiting shutdown. Clearing first ensures that
+ * if `stop()` causes an in-progress `run()` to reject with AbortError, the
+ * catch discriminator immediately sees `ensDbWriterWorker !== worker` and
+ * classifies it as an intentional stop rather than a fatal error.
+ * Safe to call multiple times.
  */
 async function gracefulShutdown(worker: EnsDbWriterWorker, reason: string): Promise<void> {
   logger.info({
     msg: `Stopping EnsDbWriterWorker: ${reason}`,
     module: "EnsDbWriterWorker",
   });
-  await worker.stop();
   if (ensDbWriterWorker === worker) {
     ensDbWriterWorker = undefined;
   }
+  await worker.stop();
 }
 
 /**
