@@ -8,7 +8,12 @@ import { buildReferrerMetrics, validateReferrerMetrics } from "../../referrer-me
 import { SECONDS_PER_YEAR } from "../../time";
 import type { ReferrerRank } from "../shared/rank";
 import { validateReferrerRank } from "../shared/rank";
-import { isReferrerQualifiedRevShareCap, type ReferralProgramRulesRevShareCap } from "./rules";
+import {
+  type AdminAction,
+  AdminActionTypes,
+  isReferrerQualifiedRevShareCap,
+  type ReferralProgramRulesRevShareCap,
+} from "./rules";
 
 /**
  * Extends {@link ReferrerMetrics} with computed base revenue contribution.
@@ -89,16 +94,17 @@ export interface RankedReferrerMetricsRevShareCap extends ReferrerMetricsRevShar
    * Whether this referrer has been admin-disqualified from the edition.
    *
    * @invariant When true, {@link isQualified} is false.
+   * @invariant true if and only if {@link adminAction} has `actionType === "Disqualification"`.
    */
   isAdminDisqualified: boolean;
 
   /**
-   * The reason for admin disqualification, or null if not disqualified.
+   * The admin action imposed on this referrer, or null if no action exists.
    *
-   * @invariant null when {@link isAdminDisqualified} is false.
-   * @invariant Non-empty string when {@link isAdminDisqualified} is true.
+   * @invariant null when no admin action exists for this referrer.
+   * @invariant Must match the corresponding entry in {@link ReferralProgramRulesRevShareCap.adminActions}.
    */
-  adminDisqualificationReason: string | null;
+  adminAction: AdminAction | null;
 }
 
 export const validateRankedReferrerMetricsRevShareCap = (
@@ -119,19 +125,33 @@ export const validateRankedReferrerMetricsRevShareCap = (
     );
   }
 
-  const disqualification =
-    rules.disqualifications.find((d) => d.referrer === metrics.referrer) ?? null;
+  const expectedAdminAction =
+    rules.adminActions.find((a) => a.referrer === metrics.referrer) ?? null;
 
-  if (metrics.isAdminDisqualified !== (disqualification !== null)) {
+  if (expectedAdminAction === null && metrics.adminAction !== null) {
     throw new Error(
-      `RankedReferrerMetricsRevShareCap: Invalid isAdminDisqualified: ${metrics.isAdminDisqualified}, expected: ${disqualification !== null}.`,
+      `RankedReferrerMetricsRevShareCap: Invalid adminAction: expected null, got actionType="${metrics.adminAction.actionType}".`,
     );
   }
 
-  const expectedReason = disqualification?.reason ?? null;
-  if (metrics.adminDisqualificationReason !== expectedReason) {
+  if (expectedAdminAction !== null) {
+    if (
+      metrics.adminAction === null ||
+      metrics.adminAction.actionType !== expectedAdminAction.actionType ||
+      metrics.adminAction.referrer !== expectedAdminAction.referrer ||
+      metrics.adminAction.reason !== expectedAdminAction.reason
+    ) {
+      throw new Error(
+        `RankedReferrerMetricsRevShareCap: Invalid adminAction: does not match expected action from rules.`,
+      );
+    }
+  }
+
+  const expectedIsAdminDisqualified =
+    metrics.adminAction?.actionType === AdminActionTypes.Disqualification;
+  if (metrics.isAdminDisqualified !== expectedIsAdminDisqualified) {
     throw new Error(
-      `RankedReferrerMetricsRevShareCap: Invalid adminDisqualificationReason: ${metrics.adminDisqualificationReason}, expected: ${expectedReason}.`,
+      `RankedReferrerMetricsRevShareCap: Invalid isAdminDisqualified: ${metrics.isAdminDisqualified}, expected: ${expectedIsAdminDisqualified}.`,
     );
   }
 };
@@ -141,8 +161,7 @@ export const buildRankedReferrerMetricsRevShareCap = (
   rank: ReferrerRank,
   rules: ReferralProgramRulesRevShareCap,
 ): RankedReferrerMetricsRevShareCap => {
-  const disqualification =
-    rules.disqualifications.find((d) => d.referrer === referrer.referrer) ?? null;
+  const adminAction = rules.adminActions.find((a) => a.referrer === referrer.referrer) ?? null;
 
   const result = {
     ...referrer,
@@ -152,8 +171,8 @@ export const buildRankedReferrerMetricsRevShareCap = (
       referrer.totalBaseRevenueContribution,
       rules,
     ),
-    isAdminDisqualified: disqualification !== null,
-    adminDisqualificationReason: disqualification?.reason ?? null,
+    isAdminDisqualified: adminAction?.actionType === AdminActionTypes.Disqualification,
+    adminAction,
   } satisfies RankedReferrerMetricsRevShareCap;
 
   validateRankedReferrerMetricsRevShareCap(result, rules);
@@ -274,19 +293,33 @@ export const validateUnrankedReferrerMetricsRevShareCap = (
     );
   }
 
-  const disqualification =
-    rules.disqualifications.find((d) => d.referrer === metrics.referrer) ?? null;
+  const expectedAdminAction =
+    rules.adminActions.find((a) => a.referrer === metrics.referrer) ?? null;
 
-  if (metrics.isAdminDisqualified !== (disqualification !== null)) {
+  if (expectedAdminAction === null && metrics.adminAction !== null) {
     throw new Error(
-      `Invalid UnrankedReferrerMetricsRevShareCap: isAdminDisqualified: ${metrics.isAdminDisqualified}, expected: ${disqualification !== null}.`,
+      `Invalid UnrankedReferrerMetricsRevShareCap: adminAction: expected null, got actionType="${metrics.adminAction.actionType}".`,
     );
   }
 
-  const expectedReason = disqualification?.reason ?? null;
-  if (metrics.adminDisqualificationReason !== expectedReason) {
+  if (expectedAdminAction !== null) {
+    if (
+      metrics.adminAction === null ||
+      metrics.adminAction.actionType !== expectedAdminAction.actionType ||
+      metrics.adminAction.referrer !== expectedAdminAction.referrer ||
+      metrics.adminAction.reason !== expectedAdminAction.reason
+    ) {
+      throw new Error(
+        `Invalid UnrankedReferrerMetricsRevShareCap: adminAction does not match expected action from rules.`,
+      );
+    }
+  }
+
+  const expectedIsAdminDisqualified =
+    metrics.adminAction?.actionType === AdminActionTypes.Disqualification;
+  if (metrics.isAdminDisqualified !== expectedIsAdminDisqualified) {
     throw new Error(
-      `Invalid UnrankedReferrerMetricsRevShareCap: adminDisqualificationReason: ${metrics.adminDisqualificationReason}, expected: ${expectedReason}.`,
+      `Invalid UnrankedReferrerMetricsRevShareCap: isAdminDisqualified: ${metrics.isAdminDisqualified}, expected: ${expectedIsAdminDisqualified}.`,
     );
   }
 
@@ -345,8 +378,7 @@ export const buildUnrankedReferrerMetricsRevShareCap = (
 ): UnrankedReferrerMetricsRevShareCap => {
   const metrics = buildReferrerMetrics(referrer, 0, 0, priceEth(0n));
 
-  const disqualification =
-    rules.disqualifications.find((d) => d.referrer === metrics.referrer) ?? null;
+  const adminAction = rules.adminActions.find((a) => a.referrer === metrics.referrer) ?? null;
 
   const result = {
     ...metrics,
@@ -355,8 +387,8 @@ export const buildUnrankedReferrerMetricsRevShareCap = (
     isQualified: false,
     uncappedAward: priceUsdc(0n),
     cappedAward: priceUsdc(0n),
-    isAdminDisqualified: disqualification !== null,
-    adminDisqualificationReason: disqualification?.reason ?? null,
+    isAdminDisqualified: adminAction?.actionType === AdminActionTypes.Disqualification,
+    adminAction,
   } satisfies UnrankedReferrerMetricsRevShareCap;
 
   validateUnrankedReferrerMetricsRevShareCap(result, rules);

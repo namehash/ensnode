@@ -11,21 +11,66 @@ import {
 } from "../shared/rules";
 
 /**
- * An admin-imposed disqualification entry of a specific referrer in an edition.
+ * The types of admin actions that can be imposed on a referrer in a rev-share-cap edition.
  */
-export interface ReferralProgramEditionDisqualification {
+export const AdminActionTypes = {
   /**
-   * The Ethereum address of the disqualified referrer, as a {@link NormalizedAddress}.
+   * The referrer is ineligible for awards.
+   */
+  Disqualification: "Disqualification",
+
+  /**
+   * The referrer is flagged but still eligible for awards.
+   */
+  Warning: "Warning",
+} as const;
+
+export type AdminActionType = (typeof AdminActionTypes)[keyof typeof AdminActionTypes];
+
+/**
+ * An admin-imposed disqualification of a specific referrer in an edition.
+ * Disqualified referrers receive no awards.
+ */
+export interface AdminActionDisqualification {
+  actionType: typeof AdminActionTypes.Disqualification;
+
+  /**
+   * The Ethereum address of the affected referrer, as a {@link NormalizedAddress}.
    */
   referrer: NormalizedAddress;
 
   /**
-   * A human-readable explanation of why the referrer was disqualified.
+   * A human-readable explanation of why the action was imposed.
    *
    * @invariant Must be a non-empty string.
    */
   reason: string;
 }
+
+/**
+ * An admin-imposed warning for a specific referrer in an edition.
+ * Warned referrers are still eligible for awards.
+ */
+export interface AdminActionWarning {
+  actionType: typeof AdminActionTypes.Warning;
+
+  /**
+   * The Ethereum address of the affected referrer, as a {@link NormalizedAddress}.
+   */
+  referrer: NormalizedAddress;
+
+  /**
+   * A human-readable explanation of why the action was imposed.
+   *
+   * @invariant Must be a non-empty string.
+   */
+  reason: string;
+}
+
+/**
+ * A discriminated union of all admin action types.
+ */
+export type AdminAction = AdminActionDisqualification | AdminActionWarning;
 
 export interface ReferralProgramRulesRevShareCap extends BaseReferralProgramRules {
   /**
@@ -64,12 +109,12 @@ export interface ReferralProgramRulesRevShareCap extends BaseReferralProgramRule
   maxBaseRevenueShare: number;
 
   /**
-   * Admin-imposed disqualifications for this edition.
-   * Disqualified referrers receive no awards.
+   * Admin-imposed actions for this edition.
+   * Disqualified referrers receive no awards. Warned referrers are still eligible.
    *
-   * @invariant No duplicate referrer addresses.
+   * @invariant No duplicate referrer addresses (a referrer can have at most one admin action).
    */
-  disqualifications: ReferralProgramEditionDisqualification[];
+  adminActions: AdminAction[];
 }
 
 export const validateReferralProgramRulesRevShareCap = (
@@ -101,20 +146,18 @@ export const validateReferralProgramRulesRevShareCap = (
     );
   }
 
-  for (const d of rules.disqualifications) {
-    validateNormalizedAddress(d.referrer);
-    if (d.reason.trim().length === 0) {
-      throw new Error(
-        "ReferralProgramRulesRevShareCap: disqualification reason must not be empty.",
-      );
+  for (const action of rules.adminActions) {
+    validateNormalizedAddress(action.referrer);
+    if (action.reason.trim().length === 0) {
+      throw new Error("ReferralProgramRulesRevShareCap: admin action reason must not be empty.");
     }
   }
 
-  const disqualificationAddresses = rules.disqualifications.map((d) => d.referrer);
-  const uniqueDisqualificationAddresses = new Set(disqualificationAddresses);
-  if (uniqueDisqualificationAddresses.size !== disqualificationAddresses.length) {
+  const adminActionAddresses = rules.adminActions.map((a) => a.referrer);
+  const uniqueAdminActionAddresses = new Set(adminActionAddresses);
+  if (uniqueAdminActionAddresses.size !== adminActionAddresses.length) {
     throw new Error(
-      "ReferralProgramRulesRevShareCap: disqualifications must not contain duplicate referrer addresses.",
+      "ReferralProgramRulesRevShareCap: adminActions must not contain duplicate referrer addresses.",
     );
   }
 
@@ -131,7 +174,7 @@ export const buildReferralProgramRulesRevShareCap = (
   subregistryId: AccountId,
   rulesUrl: URL,
   areAwardsDistributed: boolean,
-  disqualifications: ReferralProgramEditionDisqualification[] = [],
+  adminActions: AdminAction[] = [],
 ): ReferralProgramRulesRevShareCap => {
   const result = {
     awardModel: ReferralProgramAwardModels.RevShareCap,
@@ -144,7 +187,7 @@ export const buildReferralProgramRulesRevShareCap = (
     subregistryId,
     rulesUrl,
     areAwardsDistributed,
-    disqualifications,
+    adminActions,
   } satisfies ReferralProgramRulesRevShareCap;
 
   validateReferralProgramRulesRevShareCap(result);
@@ -166,7 +209,9 @@ export function isReferrerQualifiedRevShareCap(
   totalBaseRevenueContribution: PriceUsdc,
   rules: ReferralProgramRulesRevShareCap,
 ): boolean {
-  const isAdminDisqualified = rules.disqualifications.some((d) => d.referrer === referrer);
+  const isAdminDisqualified = rules.adminActions.some(
+    (a) => a.referrer === referrer && a.actionType === AdminActionTypes.Disqualification,
+  );
   return (
     totalBaseRevenueContribution.amount >= rules.minBaseRevenueContribution.amount &&
     !isAdminDisqualified

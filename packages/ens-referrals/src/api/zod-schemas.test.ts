@@ -538,7 +538,7 @@ describe("makeReferrerEditionMetricsSchema", () => {
         uncappedAward: parseUsdc("200"),
         cappedAward: parseUsdc("200"),
         isAdminDisqualified: false,
-        adminDisqualificationReason: null,
+        adminAction: null,
       },
       aggregatedMetrics: {
         grandTotalReferrals: 3,

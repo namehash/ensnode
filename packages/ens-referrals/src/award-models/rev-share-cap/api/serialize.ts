@@ -43,7 +43,7 @@ export function serializeReferralProgramRulesRevShareCap(
     subregistryId: rules.subregistryId,
     rulesUrl: rules.rulesUrl.toString(),
     areAwardsDistributed: rules.areAwardsDistributed,
-    disqualifications: rules.disqualifications,
+    adminActions: rules.adminActions,
   };
 }
 
@@ -78,7 +78,7 @@ export function serializeAwardedReferrerMetricsRevShareCap(
     uncappedAward: serializePriceUsdc(metrics.uncappedAward),
     cappedAward: serializePriceUsdc(metrics.cappedAward),
     isAdminDisqualified: metrics.isAdminDisqualified,
-    adminDisqualificationReason: metrics.adminDisqualificationReason,
+    adminAction: metrics.adminAction,
   };
 }
 
@@ -99,7 +99,7 @@ export function serializeUnrankedReferrerMetricsRevShareCap(
     uncappedAward: serializePriceUsdc(metrics.uncappedAward),
     cappedAward: serializePriceUsdc(metrics.cappedAward),
     isAdminDisqualified: metrics.isAdminDisqualified,
-    adminDisqualificationReason: metrics.adminDisqualificationReason,
+    adminAction: metrics.adminAction,
   };
 }
 
