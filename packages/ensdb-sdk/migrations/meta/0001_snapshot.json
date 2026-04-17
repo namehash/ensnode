@@ -32,10 +32,7 @@
       "compositePrimaryKeys": {
         "metadata_pkey": {
           "name": "metadata_pkey",
-          "columns": [
-            "ens_indexer_schema_name",
-            "key"
-          ]
+          "columns": ["ens_indexer_schema_name", "key"]
         }
       },
       "uniqueConstraints": {},
