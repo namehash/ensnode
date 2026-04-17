@@ -7,6 +7,8 @@ const { mockPonderOn } = vi.hoisted(() => ({ mockPonderOn: vi.fn() }));
 
 const mockWaitForEnsRainbow = vi.hoisted(() => vi.fn());
 
+const mockEnsDbExecute = vi.hoisted(() => vi.fn());
+
 vi.mock("ponder:registry", () => ({
   ponder: {
     on: (...args: unknown[]) => mockPonderOn(...args),
@@ -21,10 +23,28 @@ vi.mock("@/lib/ensrainbow/singleton", () => ({
   waitForEnsRainbowToBeReady: mockWaitForEnsRainbow,
 }));
 
+vi.mock("@/lib/ensdb/singleton", () => ({
+  ensDbClient: {
+    ensDb: {
+      execute: (...args: unknown[]) => mockEnsDbExecute(...args),
+    },
+  },
+}));
+
+vi.mock("@/lib/logger", () => ({
+  logger: {
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  },
+}));
+
 describe("addOnchainEventListener", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     mockWaitForEnsRainbow.mockResolvedValue(undefined);
+    mockEnsDbExecute.mockResolvedValue(undefined);
     // Reset module state to test idempotent behavior correctly
     vi.resetModules();
   });
@@ -347,7 +367,7 @@ describe("addOnchainEventListener", () => {
     });
   });
 
-  describe("setup events (no preconditions)", () => {
+  describe("setup events (ENSRainbow wait skipped)", () => {
     it("skips ENSRainbow wait for :setup events", async () => {
       const { addOnchainEventListener } = await getPonderModule();
       const handler = vi.fn().mockResolvedValue(undefined);
@@ -384,6 +404,69 @@ describe("addOnchainEventListener", () => {
         expect(mockWaitForEnsRainbow).not.toHaveBeenCalled();
         expect(handler).toHaveBeenCalled();
       }
+    });
+  });
+
+  describe("Postgres extension preconditions (setup events)", () => {
+    it("installs the pg_trgm extension before the setup handler runs", async () => {
+      const { addOnchainEventListener } = await getPonderModule();
+      const handler = vi.fn().mockResolvedValue(undefined);
+
+      addOnchainEventListener("Registry:setup" as EventNames, handler);
+      await getRegisteredCallback()({
+        context: { db: vi.fn() } as unknown as Context<EventNames>,
+        event: {} as IndexingEngineEvent<EventNames>,
+      });
+
+      expect(mockEnsDbExecute).toHaveBeenCalledTimes(1);
+      const sqlArg = mockEnsDbExecute.mock.calls[0]![0] as {
+        queryChunks: { value: string[] }[];
+      };
+      // Drizzle `sql` template produces a SQL object whose first queryChunk is a
+      // StringChunk with a `value: string[]` holding the raw static SQL fragments.
+      expect(sqlArg.queryChunks[0]!.value.join("")).toContain(
+        "CREATE EXTENSION IF NOT EXISTS pg_trgm",
+      );
+      expect(handler).toHaveBeenCalled();
+    });
+
+    it("runs the extension install only once across multiple setup events (idempotent)", async () => {
+      const { addOnchainEventListener } = await getPonderModule();
+      const handler1 = vi.fn().mockResolvedValue(undefined);
+      const handler2 = vi.fn().mockResolvedValue(undefined);
+
+      addOnchainEventListener("Registry:setup" as EventNames, handler1);
+      addOnchainEventListener("PublicResolver:setup" as EventNames, handler2);
+
+      await getRegisteredCallback(0)({
+        context: { db: vi.fn() } as unknown as Context<EventNames>,
+        event: {} as IndexingEngineEvent<EventNames>,
+      });
+      await getRegisteredCallback(1)({
+        context: { db: vi.fn() } as unknown as Context<EventNames>,
+        event: {} as IndexingEngineEvent<EventNames>,
+      });
+
+      expect(mockEnsDbExecute).toHaveBeenCalledTimes(1);
+      expect(handler1).toHaveBeenCalledTimes(1);
+      expect(handler2).toHaveBeenCalledTimes(1);
+    });
+
+    it("propagates errors from the extension install", async () => {
+      const { addOnchainEventListener } = await getPonderModule();
+      mockEnsDbExecute.mockRejectedValueOnce(new Error("permission denied"));
+      const handler = vi.fn().mockResolvedValue(undefined);
+
+      addOnchainEventListener("Registry:setup" as EventNames, handler);
+
+      await expect(
+        getRegisteredCallback()({
+          context: { db: vi.fn() } as unknown as Context<EventNames>,
+          event: {} as IndexingEngineEvent<EventNames>,
+        }),
+      ).rejects.toThrow("permission denied");
+
+      expect(handler).not.toHaveBeenCalled();
     });
   });
 

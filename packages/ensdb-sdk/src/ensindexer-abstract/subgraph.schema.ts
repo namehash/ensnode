@@ -95,6 +95,10 @@ export const subgraph_domain = onchainTable(
   (t) => ({
     // uses a hash index because some name values exceed the btree max row size (8191 bytes)
     byExactName: index().using("hash", t.name),
+    // GIN trigram index for partial-match filters (_contains, _starts_with, _ends_with).
+    // Requires the `pg_trgm` extension, installed by the ENSIndexer setup hook
+    // (see `initializeIndexingSetup` in `apps/ensindexer/src/lib/indexing-engines/ponder.ts`).
+    byFuzzyName: index().using("gin", t.name.op("gin_trgm_ops")),
 
     byLabelhash: index().on(t.labelhash),
     byParentId: index().on(t.parentId),

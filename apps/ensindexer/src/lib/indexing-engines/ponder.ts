@@ -14,8 +14,11 @@ import {
   type Event as PonderIndexingEvent,
   ponder,
 } from "ponder:registry";
+import { sql } from "drizzle-orm";
 
+import { ensDbClient } from "@/lib/ensdb/singleton";
 import { waitForEnsRainbowToBeReady } from "@/lib/ensrainbow/singleton";
+import { logger } from "@/lib/logger";
 
 /**
  * Context passed to event handlers registered with
@@ -146,6 +149,24 @@ async function initializeIndexingSetup(): Promise<void> {
    * ENSIndexer relies on these indexing metrics being immediately available on startup to build and
    * store the current Indexing Status in ENSDb.
    */
+
+  // Ensure all required Postgres extensions are installed before Ponder
+  // creates indexes that depend on them. `pg_trgm` provides the `gin_trgm_ops`
+  // operator class used by the GIN trigram index on `subgraph_domain.name`,
+  // which backs the Subgraph GraphQL partial-match filters
+  // (`_contains`, `_starts_with`, `_ends_with`).
+  // `CREATE EXTENSION IF NOT EXISTS` is idempotent and fast when the
+  // extension is already installed, so this satisfies the
+  // "no long-running preconditions" constraint documented above.
+  logger.debug({
+    msg: "Ensuring required Postgres extensions are installed",
+    module: "IndexingEngine",
+  });
+  await ensDbClient.ensDb.execute(sql`CREATE EXTENSION IF NOT EXISTS pg_trgm`);
+  logger.info({
+    msg: "Ensured required Postgres extensions are installed",
+    module: "IndexingEngine",
+  });
 }
 
 /**
