@@ -129,24 +129,18 @@ export function starlight(): AstroIntegration {
               autogenerate: { directory: "ensdb/concepts" },
             },
             {
-              label: "Usage",
+              label: "Using ENSDb",
               collapsed: false,
               autogenerate: { directory: "ensdb/usage" },
             },
             {
-              label: "Use Cases",
-              collapsed: false,
-              autogenerate: { directory: "ensdb/use-cases" },
-            },
-            {
               label: "Integrations",
-              collapsed: true,
+              collapsed: false,
               autogenerate: { directory: "ensdb/integrations" },
             },
             {
-              label: "Operations",
-              collapsed: true,
-              autogenerate: { directory: "ensdb/operations" },
+              label: "FAQ",
+              link: "/ensdb/faq",
             },
           ],
         },

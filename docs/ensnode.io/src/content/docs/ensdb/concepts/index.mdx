@@ -1,51 +1,12 @@
 ---
-title: ENSDb Concepts
+title: Overview
 description: Understanding the fundamentals of ENSDb architecture, schemas, and data flow.
 sidebar:
-  label: Concepts
-  order: 3
+  label: Overview
+  order: 1
 ---
 
 import { LinkCard } from '@astrojs/starlight/components';
-
-This section explains the core concepts of ENSDb. Understanding these fundamentals will help you work effectively with ENSDb, whether you're querying data, integrating with third-party services, or operating an ENSNode instance.
-
-## Core Concepts
-
-<LinkCard
-  title="Glossary"
-  description="Terminology and definitions used throughout ENSDb documentation"
-  href="/ensdb/concepts/glossary/"
-/>
-
-<LinkCard
-  title="Architecture"
-  description="How ENSDb works as a bi-directional open standard, including the writer/reader pattern and data flow"
-  href="/ensdb/concepts/architecture/"
-/>
-
-<LinkCard
-  title="Database Schemas"
-  description="Detailed explanation of all schemas: Ponder Schema, ENSNode Schema, and the 5 modular sub-schemas of ENSIndexer Schema"
-  href="/ensdb/concepts/database-schemas/"
-/>
-
-<LinkCard
-  title="Indexing Lifecycle"
-  description="How indexing works, from Backfill to Following, and how it affects database behavior"
-  href="/ensdb/concepts/indexing-lifecycle/"
-/>
-
-## What is ENSDb?
-
-ENSDb is an **open standard** for bi-directional ENS integration. It represents a new category of integration point for building on ENS:
-
-- **Open Standard** — Anyone can build writers or readers following the schema specifications
-- **Bi-Directional** — Write operations produce an ENSDb, read operations consume it
-- **Language Agnostic** — Any programming language with PostgreSQL support
-- **Complete State** — The entire onchain ENS state, in your database
-
-Read the [What is ENSDb?](/ensdb/) overview for the full vision.
 
 ## Who Should Read This
 
@@ -53,11 +14,31 @@ Read the [What is ENSDb?](/ensdb/) overview for the full vision.
 - **DevOps operators running ENSNode** — Understand how ENSDb behaves during different indexing phases
 - **Anyone building custom writers or readers** — Learn the architecture for implementing the standard
 
+## Core Concepts
+
+Understanding these fundamentals will help you work effectively with ENSDb, whether you're querying data, integrating with third-party services, or operating an ENSNode instance.
+
+<LinkCard
+  title="Glossary"
+  description="Terminology and definitions used throughout ENSDb documentation."
+  href="/ensdb/concepts/glossary"
+/>
+
+<LinkCard
+  title="Architecture"
+  description="How ENSDb works as a bi-directional open standard, including the writer/reader pattern and data flow."
+  href="/ensdb/concepts/architecture"
+/>
+
+<LinkCard
+  title="Database Schemas"
+  description="Detailed explanation of database schemas: Ponder Schema, ENSNode Schema, and the ENSIndexer Schema."
+  href="/ensdb/concepts/database-schemas"
+/>
+
 ## Next Steps
 
 After understanding these concepts:
 
-1. **[Query ENSDb with SQL](/ensdb/usage/querying)** — Language-agnostic SQL examples
-2. **[Use the TypeScript SDK](/ensdb/usage/ensdb-sdk/)** — Type-safe database access
-3. **[Build an Integration](/ensdb/integrations/)** — Create custom writers or readers
-4. **[Explore Use Cases](/ensdb/use-cases/)** — See what others are building
+1. **[Query ENSDb with SQL](/ensdb/usage/sql)** — Language-agnostic SQL examples
+2. **[Use the TypeScript SDK](/ensdb/usage/sdk)** — Type-safe database access
