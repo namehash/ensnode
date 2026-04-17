@@ -9,6 +9,7 @@ import { OmnichainIndexingStatusIds } from "../indexing-status/omnichain-indexin
 import type { SerializedOmnichainIndexingStatusSnapshotFollowing } from "../indexing-status/serialize/omnichain-indexing-status-snapshot";
 import type { ResolverRecordsSelection } from "../resolution";
 import { RangeTypeIds } from "../shared/blockrange";
+import type { SerializedEnsNodeStackInfo } from "../stack-info/serialize/ensnode-stack-info";
 import { deserializeEnsApiIndexingStatusResponse } from "./api/indexing-status/deserialize";
 import {
   type EnsApiIndexingStatusResponse,
@@ -96,6 +97,15 @@ const EXAMPLE_CONFIG_RESPONSE = {
   },
 } satisfies SerializedEnsApiPublicConfig;
 
+const serializedStackInfo = {
+  ensApi: EXAMPLE_CONFIG_RESPONSE,
+  ensDb: {
+    postgreSqlVersion: "16",
+  },
+  ensIndexer: EXAMPLE_CONFIG_RESPONSE.ensIndexerPublicConfig,
+  ensRainbow: EXAMPLE_CONFIG_RESPONSE.ensIndexerPublicConfig.ensRainbowPublicConfig,
+} satisfies SerializedEnsNodeStackInfo;
+
 const EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE = deserializeEnsApiIndexingStatusResponse({
   realtimeProjection: {
     projectedAt: 1755182604,
@@ -140,7 +150,7 @@ const EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE = deserializeEnsApiIndexingStatu
       },
     },
   },
-  ensApiPublicConfig: EXAMPLE_CONFIG_RESPONSE,
+  stackInfo: serializedStackInfo,
   responseCode: EnsApiIndexingStatusResponseCodes.Ok,
 } satisfies SerializedEnsApiIndexingStatusResponseOk);
 
@@ -198,7 +208,7 @@ const _EXAMPLE_INDEXING_STATUS_FOLLOWING_RESPONSE: EnsApiIndexingStatusResponse 
         } satisfies SerializedOmnichainIndexingStatusSnapshotFollowing,
       },
     },
-    ensApiPublicConfig: EXAMPLE_CONFIG_RESPONSE,
+    stackInfo: serializedStackInfo,
     responseCode: EnsApiIndexingStatusResponseCodes.Ok,
   });
 

@@ -2,7 +2,7 @@ import { prettifyError } from "zod/v4";
 
 import { buildUnvalidatedRealtimeIndexingStatusProjection } from "../../../indexing-status/deserialize/realtime-indexing-status-projection";
 import type { Unvalidated } from "../../../shared/types";
-import { buildUnvalidatedEnsApiPublicConfig } from "../../config/deserialize";
+import { buildUnvalidatedEnsNodeStackInfo } from "../../../stack-info/deserialize/ensnode-stack-info";
 import {
   type EnsApiIndexingStatusResponse,
   EnsApiIndexingStatusResponseCodes,
@@ -33,12 +33,12 @@ function buildUnvalidatedEnsApiIndexingStatusResponse(
     return serializedResponse;
   }
 
+  const { realtimeProjection, stackInfo, ...rest } = serializedResponse;
+
   return {
-    ...serializedResponse,
-    realtimeProjection: buildUnvalidatedRealtimeIndexingStatusProjection(
-      serializedResponse.realtimeProjection,
-    ),
-    ensApiPublicConfig: buildUnvalidatedEnsApiPublicConfig(serializedResponse.ensApiPublicConfig),
+    realtimeProjection: buildUnvalidatedRealtimeIndexingStatusProjection(realtimeProjection),
+    stackInfo: buildUnvalidatedEnsNodeStackInfo(stackInfo),
+    ...rest,
   };
 }
 

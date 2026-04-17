@@ -4,7 +4,10 @@ import {
   makeRealtimeIndexingStatusProjectionSchema,
   makeSerializedRealtimeIndexingStatusProjectionSchema,
 } from "../../../indexing-status/zod-schema/realtime-indexing-status-projection";
-import { makeEnsApiPublicConfigSchema, makeSerializedEnsApiPublicConfigSchema } from "../../config";
+import {
+  makeEnsNodeStackInfoSchema,
+  makeSerializedEnsNodeStackInfoSchema,
+} from "../../../stack-info/zod-schemas/ensnode-stack-info";
 import {
   type EnsApiIndexingStatusResponse,
   EnsApiIndexingStatusResponseCodes,
@@ -25,7 +28,7 @@ export const makeEnsApiIndexingStatusResponseOkSchema = (
   z.strictObject({
     responseCode: z.literal(EnsApiIndexingStatusResponseCodes.Ok),
     realtimeProjection: makeRealtimeIndexingStatusProjectionSchema(valueLabel),
-    ensApiPublicConfig: makeEnsApiPublicConfigSchema(valueLabel),
+    stackInfo: makeEnsNodeStackInfoSchema(valueLabel),
   });
 
 /**
@@ -64,7 +67,7 @@ export const makeSerializedEnsApiIndexingStatusResponseOkSchema = (
   z.object({
     responseCode: z.literal(EnsApiIndexingStatusResponseCodes.Ok),
     realtimeProjection: makeSerializedRealtimeIndexingStatusProjectionSchema(valueLabel),
-    ensApiPublicConfig: makeSerializedEnsApiPublicConfigSchema(valueLabel),
+    stackInfo: makeSerializedEnsNodeStackInfoSchema(valueLabel),
   });
 
 /**

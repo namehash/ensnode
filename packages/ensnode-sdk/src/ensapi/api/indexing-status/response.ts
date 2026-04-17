@@ -1,5 +1,5 @@
 import type { RealtimeIndexingStatusProjection } from "../../../indexing-status/realtime-indexing-status-projection";
-import type { EnsApiPublicConfig } from "../../config";
+import type { EnsNodeStackInfo } from "../../../stack-info/ensnode-stack-info";
 
 /**
  * A status code for indexing status responses.
@@ -42,7 +42,7 @@ export type IndexingStatusResponseCode = EnsApiIndexingStatusResponseCode;
 export type EnsApiIndexingStatusResponseOk = {
   responseCode: typeof EnsApiIndexingStatusResponseCodes.Ok;
   realtimeProjection: RealtimeIndexingStatusProjection;
-  ensApiPublicConfig: EnsApiPublicConfig;
+  stackInfo: EnsNodeStackInfo;
 };
 
 /**
