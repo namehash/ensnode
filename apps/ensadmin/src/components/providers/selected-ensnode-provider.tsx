@@ -20,18 +20,17 @@ import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
 export function SelectedEnsApiProvider({ children }: PropsWithChildren) {
   const selectedConnection = useSelectedConnection();
 
-  if (selectedConnection.validatedSelectedConnection.isValid) {
-    const selectedConenctionUrl = selectedConnection.validatedSelectedConnection.url;
-    const options = useMemo(
-      () =>
-        createEnsApiOptions({
-          url: selectedConenctionUrl,
-        }),
-      [selectedConenctionUrl],
-    );
+  const options = useMemo(() => {
+    if (!selectedConnection.validatedSelectedConnection.isValid) {
+      return undefined;
+    }
 
-    return <EnsApiProvider options={options}>{children}</EnsApiProvider>;
-  } else {
+    return createEnsApiOptions({
+      url: selectedConnection.validatedSelectedConnection.url,
+    });
+  }, [selectedConnection.validatedSelectedConnection]);
+
+  if (!selectedConnection.validatedSelectedConnection.isValid) {
     // TODO: Logic here needs a deeper refactor to recognize the difference
     // between the selected connection being in a valid format or not.
     // This logic will throw and an error and break if the selected connection
@@ -44,4 +43,11 @@ export function SelectedEnsApiProvider({ children }: PropsWithChildren) {
       </div>
     );
   }
+
+  // invariant to satisfy the type system - this is guaranteed by the logic above
+  if (!options) {
+    throw new Error("Options must be defined if the selected connection is valid");
+  }
+
+  return <EnsApiProvider options={options}>{children}</EnsApiProvider>;
 }
