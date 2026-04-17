@@ -779,10 +779,140 @@
                       },
                       "required": ["snapshot", "projectedAt", "worstCaseDistance"]
                     },
-                    "ensApiPublicConfig": {
+                    "stackInfo": {
                       "type": "object",
                       "properties": {
-                        "ensIndexerPublicConfig": {
+                        "ensApi": {
+                          "type": "object",
+                          "properties": {
+                            "ensIndexerPublicConfig": {
+                              "type": "object",
+                              "properties": {
+                                "ensIndexerSchemaName": { "type": "string", "minLength": 1 },
+                                "ensRainbowPublicConfig": {
+                                  "type": "object",
+                                  "properties": {
+                                    "version": { "type": "string", "minLength": 1 },
+                                    "labelSet": {
+                                      "type": "object",
+                                      "properties": {
+                                        "labelSetId": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "maxLength": 50,
+                                          "pattern": "^[a-z-]+$"
+                                        },
+                                        "highestLabelSetVersion": { "type": ["number", "null"] }
+                                      },
+                                      "required": ["labelSetId", "highestLabelSetVersion"]
+                                    },
+                                    "recordsCount": { "type": "integer", "minimum": 0 }
+                                  },
+                                  "required": ["version", "labelSet", "recordsCount"]
+                                },
+                                "indexedChainIds": {
+                                  "type": "array",
+                                  "items": { "type": "integer", "exclusiveMinimum": 0 },
+                                  "minItems": 1
+                                },
+                                "isSubgraphCompatible": { "type": "boolean" },
+                                "labelSet": {
+                                  "type": "object",
+                                  "properties": {
+                                    "labelSetId": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 50,
+                                      "pattern": "^[a-z-]+$"
+                                    },
+                                    "labelSetVersion": { "type": ["number", "null"] }
+                                  },
+                                  "required": ["labelSetId", "labelSetVersion"]
+                                },
+                                "namespace": {
+                                  "type": "string",
+                                  "enum": ["mainnet", "sepolia", "sepolia-v2", "ens-test-env"]
+                                },
+                                "plugins": {
+                                  "type": "array",
+                                  "items": { "type": "string" },
+                                  "minItems": 1
+                                },
+                                "versionInfo": {
+                                  "type": "object",
+                                  "properties": {
+                                    "ponder": { "type": "string", "minLength": 1 },
+                                    "ensDb": { "type": "string", "minLength": 1 },
+                                    "ensIndexer": { "type": "string", "minLength": 1 },
+                                    "ensNormalize": { "type": "string", "minLength": 1 }
+                                  },
+                                  "required": ["ponder", "ensDb", "ensIndexer", "ensNormalize"]
+                                }
+                              },
+                              "required": [
+                                "ensIndexerSchemaName",
+                                "ensRainbowPublicConfig",
+                                "indexedChainIds",
+                                "isSubgraphCompatible",
+                                "labelSet",
+                                "namespace",
+                                "plugins",
+                                "versionInfo"
+                              ]
+                            },
+                            "theGraphFallback": {
+                              "oneOf": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "canFallback": { "type": "boolean", "enum": [true] },
+                                    "url": { "type": "string" }
+                                  },
+                                  "required": ["canFallback", "url"],
+                                  "additionalProperties": false
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "canFallback": { "type": "boolean", "enum": [false] },
+                                    "reason": {
+                                      "type": "string",
+                                      "enum": [
+                                        "not-subgraph-compatible",
+                                        "no-api-key",
+                                        "no-subgraph-url"
+                                      ]
+                                    }
+                                  },
+                                  "required": ["canFallback", "reason"],
+                                  "additionalProperties": false
+                                }
+                              ]
+                            },
+                            "versionInfo": {
+                              "type": "object",
+                              "properties": {
+                                "ensApi": { "type": "string", "minLength": 1 },
+                                "ensNormalize": { "type": "string", "minLength": 1 }
+                              },
+                              "required": ["ensApi", "ensNormalize"]
+                            }
+                          },
+                          "required": ["ensIndexerPublicConfig", "theGraphFallback", "versionInfo"]
+                        },
+                        "ensDb": {
+                          "type": "object",
+                          "properties": {
+                            "postgreSqlVersion": {
+                              "type": "string",
+                              "minLength": 1,
+                              "description": "Version of the PostgreSQL server hosting the ENSDb instance."
+                            }
+                          },
+                          "required": ["postgreSqlVersion"],
+                          "description": "Serialized Indexing Status Response OK.ensDb"
+                        },
+                        "ensIndexer": {
                           "type": "object",
                           "properties": {
                             "ensIndexerSchemaName": { "type": "string", "minLength": 1 },
@@ -857,48 +987,32 @@
                             "versionInfo"
                           ]
                         },
-                        "theGraphFallback": {
-                          "oneOf": [
-                            {
-                              "type": "object",
-                              "properties": {
-                                "canFallback": { "type": "boolean", "enum": [true] },
-                                "url": { "type": "string" }
-                              },
-                              "required": ["canFallback", "url"],
-                              "additionalProperties": false
-                            },
-                            {
-                              "type": "object",
-                              "properties": {
-                                "canFallback": { "type": "boolean", "enum": [false] },
-                                "reason": {
-                                  "type": "string",
-                                  "enum": [
-                                    "not-subgraph-compatible",
-                                    "no-api-key",
-                                    "no-subgraph-url"
-                                  ]
-                                }
-                              },
-                              "required": ["canFallback", "reason"],
-                              "additionalProperties": false
-                            }
-                          ]
-                        },
-                        "versionInfo": {
+                        "ensRainbow": {
                           "type": "object",
                           "properties": {
-                            "ensApi": { "type": "string", "minLength": 1 },
-                            "ensNormalize": { "type": "string", "minLength": 1 }
+                            "version": { "type": "string", "minLength": 1 },
+                            "labelSet": {
+                              "type": "object",
+                              "properties": {
+                                "labelSetId": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 50,
+                                  "pattern": "^[a-z-]+$"
+                                },
+                                "highestLabelSetVersion": { "type": ["number", "null"] }
+                              },
+                              "required": ["labelSetId", "highestLabelSetVersion"]
+                            },
+                            "recordsCount": { "type": "integer", "minimum": 0 }
                           },
-                          "required": ["ensApi", "ensNormalize"]
+                          "required": ["version", "labelSet", "recordsCount"]
                         }
                       },
-                      "required": ["ensIndexerPublicConfig", "theGraphFallback", "versionInfo"]
+                      "required": ["ensApi", "ensDb", "ensIndexer"]
                     }
                   },
-                  "required": ["responseCode", "realtimeProjection", "ensApiPublicConfig"]
+                  "required": ["responseCode", "realtimeProjection", "stackInfo"]
                 }
               }
             }
