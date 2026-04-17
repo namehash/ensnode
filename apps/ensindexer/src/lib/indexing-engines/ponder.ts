@@ -14,11 +14,8 @@ import {
   type Event as PonderIndexingEvent,
   ponder,
 } from "ponder:registry";
-import { sql } from "drizzle-orm";
 
-import { ensDbClient } from "@/lib/ensdb/singleton";
 import { waitForEnsRainbowToBeReady } from "@/lib/ensrainbow/singleton";
-import { logger } from "@/lib/logger";
 
 /**
  * Context passed to event handlers registered with
@@ -149,35 +146,6 @@ async function initializeIndexingSetup(): Promise<void> {
    * ENSIndexer relies on these indexing metrics being immediately available on startup to build and
    * store the current Indexing Status in ENSDb.
    */
-
-  // Ensure all required Postgres extensions are installed before Ponder
-  // creates indexes that depend on them.
-  logger.debug({
-    msg: "Ensuring required Postgres extensions are installed",
-    module: "IndexingEngine",
-  });
-
-  try {
-    // `pg_trgm` necessary for GIN trigram indexes (partial string matching)
-    await ensDbClient.ensDb.execute(sql`CREATE EXTENSION IF NOT EXISTS pg_trgm`);
-  } catch (cause) {
-    // Log the underlying Postgres error so ops can see it without walking the
-    // Error#cause chain (some log formatters don't surface `cause` by default).
-    logger.error({
-      msg: "Failed to install the `pg_trgm` Postgres extension",
-      error: cause,
-      module: "IndexingEngine",
-    });
-    throw new Error(
-      `Unable to create the pg_trgm extension in the connected Postgres: ensure the database user has permission to install extensions and that the 'pg_trgm' extension is available.`,
-      { cause },
-    );
-  }
-
-  logger.info({
-    msg: "Ensured required Postgres extensions are installed",
-    module: "IndexingEngine",
-  });
 }
 
 /**

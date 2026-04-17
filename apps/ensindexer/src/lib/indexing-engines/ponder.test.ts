@@ -1,15 +1,11 @@
 import type { Context, EventNames } from "ponder:registry";
 import { beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest";
 
-import "@/lib/__test__/mockLogger";
-
 import type { IndexingEngineContext, IndexingEngineEvent } from "./ponder";
 
 const { mockPonderOn } = vi.hoisted(() => ({ mockPonderOn: vi.fn() }));
 
 const mockWaitForEnsRainbow = vi.hoisted(() => vi.fn());
-
-const mockEnsDbExecute = vi.hoisted(() => vi.fn());
 
 vi.mock("ponder:registry", () => ({
   ponder: {
@@ -25,19 +21,10 @@ vi.mock("@/lib/ensrainbow/singleton", () => ({
   waitForEnsRainbowToBeReady: mockWaitForEnsRainbow,
 }));
 
-vi.mock("@/lib/ensdb/singleton", () => ({
-  ensDbClient: {
-    ensDb: {
-      execute: (...args: unknown[]) => mockEnsDbExecute(...args),
-    },
-  },
-}));
-
 describe("addOnchainEventListener", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     mockWaitForEnsRainbow.mockResolvedValue(undefined);
-    mockEnsDbExecute.mockResolvedValue(undefined);
     // Reset module state to test idempotent behavior correctly
     vi.resetModules();
   });
@@ -360,7 +347,7 @@ describe("addOnchainEventListener", () => {
     });
   });
 
-  describe("setup events (ENSRainbow wait skipped)", () => {
+  describe("setup events (no preconditions)", () => {
     it("skips ENSRainbow wait for :setup events", async () => {
       const { addOnchainEventListener } = await getPonderModule();
       const handler = vi.fn().mockResolvedValue(undefined);
