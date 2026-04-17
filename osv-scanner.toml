@@ -1,0 +1,3 @@
+[[IgnoredVulns]]
+id = "GHSA-gpj5-g38j-94v9"
+reason = "drizzle-orm SQL injection via dynamic identifiers (CVE-2026-39356). Not exploitable in ENSNode: we use only static Ponder schema objects, never pass user input to sql.identifier() or .as(). Avoids a fragile drizzle version bump that breaks ponder-subgraph DTS generation."

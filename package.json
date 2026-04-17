@@ -2,13 +2,14 @@
   "name": "ensnode-monorepo",
   "version": "0.0.1",
   "private": true,
-  "packageManager": "pnpm@10.28.0",
+  "packageManager": "pnpm@10.33.0",
   "scripts": {
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
     "test": "vitest --silent passed-only",
     "test:integration": "vitest --config vitest.integration.config.ts --silent passed-only",
     "test:integration:ci": "pnpm -F @ensnode/integration-test-env start",
+    "audit:osv": "osv-scanner scan source --lockfile pnpm-lock.yaml",
     "typecheck": "pnpm -r --parallel --aggregate-output typecheck",
     "changeset": "changeset",
     "changeset:next": "changeset version --snapshot next",
@@ -67,11 +68,6 @@
       "vite@>=5.0.0 <=6.4.1": "^6.4.2",
       "axios@<1.15.0": ">=1.15.0",
       "follow-redirects@<1.16.0": "^1.16.0"
-    },
-    "auditConfig": {
-      "ignoreCves": [
-        "CVE-2026-39356"
-      ]
     },
     "ignoredBuiltDependencies": [
       "bun"

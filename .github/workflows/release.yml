@@ -31,6 +31,11 @@
 
 name: Release
 
+permissions:
+  contents: write
+  pull-requests: write
+  packages: write
+
 on:
   push:
     branches:
@@ -43,9 +48,6 @@ jobs:
     name: Changesets
     if: github.repository == 'namehash/ensnode'
     runs-on: blacksmith-4vcpu-ubuntu-2204
-    permissions:
-      contents: write
-      pull-requests: write
     outputs:
       published: ${{ steps.changesets.outputs.published }}
       publishedApps: ${{ steps.publishedApps.outputs.output }}
