@@ -152,12 +152,23 @@ async function initializeIndexingSetup(): Promise<void> {
 
   // Ensure all required Postgres extensions are installed before Ponder
   // creates indexes that depend on them.
-  // - `pg_trgm` necessary for GIN trigram indexes (partial string matching)
   logger.debug({
     msg: "Ensuring required Postgres extensions are installed",
     module: "IndexingEngine",
   });
-  await ensDbClient.ensDb.execute(sql`CREATE EXTENSION IF NOT EXISTS pg_trgm`);
+
+  try {
+    // `pg_trgm` necessary for GIN trigram indexes (partial string matching).
+    // Install into `public` so `gin_trgm_ops` is on the default search_path
+    // when Ponder issues the unqualified `CREATE INDEX ... USING gin (name gin_trgm_ops)`.
+    await ensDbClient.ensDb.execute(sql`CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA public`);
+  } catch (cause) {
+    throw new Error(
+      `Unable to create the pg_trgm extension in the connected Postgres: ensure the database user has permission to install extensions and that the 'pg_trgm' extension is available.`,
+      { cause },
+    );
+  }
+
   logger.info({
     msg: "Ensured required Postgres extensions are installed",
     module: "IndexingEngine",
