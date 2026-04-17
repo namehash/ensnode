@@ -2,7 +2,7 @@ import {
   ChainIndexingStatusIds,
   CrossChainIndexingStrategyIds,
   deserializeIndexingStatusResponse,
-  type IndexingStatusResponse,
+  EnsApiIndexingStatusResponseOk,
   IndexingStatusResponseCodes,
   type IndexingStatusResponseError,
   type OmnichainIndexingStatusId,
@@ -26,7 +26,7 @@ export const indexingStatusResponseError: IndexingStatusResponseError = {
 
 export const indexingStatusResponseOkOmnichain: Record<
   OmnichainIndexingStatusId,
-  IndexingStatusResponse
+  EnsApiIndexingStatusResponseOk
 > = {
   [OmnichainIndexingStatusIds.Unstarted]: deserializeIndexingStatusResponse({
     responseCode: IndexingStatusResponseCodes.Ok,

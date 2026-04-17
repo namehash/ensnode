@@ -3,8 +3,17 @@ import { prettifyError } from "zod/v4";
 import { buildUnvalidatedRealtimeIndexingStatusProjection } from "../../../indexing-status/deserialize/realtime-indexing-status-projection";
 import type { Unvalidated } from "../../../shared/types";
 import { buildUnvalidatedEnsApiPublicConfig } from "../../config/deserialize";
-import { type EnsApiIndexingStatusResponse, EnsApiIndexingStatusResponseCodes } from "./response";
-import type { SerializedEnsApiIndexingStatusResponse } from "./serialized-response";
+import {
+  type EnsApiIndexingStatusResponse,
+  EnsApiIndexingStatusResponseCodes,
+  type EnsApiIndexingStatusResponseError,
+  type EnsApiIndexingStatusResponseOk,
+} from "./response";
+import type {
+  SerializedEnsApiIndexingStatusResponse,
+  SerializedEnsApiIndexingStatusResponseError,
+  SerializedEnsApiIndexingStatusResponseOk,
+} from "./serialized-response";
 import {
   makeEnsApiIndexingStatusResponseSchema,
   makeSerializedEnsApiIndexingStatusResponseSchema,
@@ -36,6 +45,15 @@ function buildUnvalidatedEnsApiIndexingStatusResponse(
 /**
  * Deserialize a {@link EnsApiIndexingStatusResponse} object.
  */
+export function deserializeEnsApiIndexingStatusResponse(
+  maybeResponse: Unvalidated<SerializedEnsApiIndexingStatusResponseOk>,
+): EnsApiIndexingStatusResponseOk;
+export function deserializeEnsApiIndexingStatusResponse(
+  maybeResponse: Unvalidated<SerializedEnsApiIndexingStatusResponseError>,
+): EnsApiIndexingStatusResponseError;
+export function deserializeEnsApiIndexingStatusResponse(
+  maybeResponse: Unvalidated<SerializedEnsApiIndexingStatusResponse>,
+): EnsApiIndexingStatusResponse;
 export function deserializeEnsApiIndexingStatusResponse(
   maybeResponse: Unvalidated<SerializedEnsApiIndexingStatusResponse>,
 ): EnsApiIndexingStatusResponse {

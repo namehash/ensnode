@@ -50,9 +50,7 @@ async function fetchMockedIndexingStatus(
     case OmnichainIndexingStatusIds.Backfill:
     case OmnichainIndexingStatusIds.Following:
     case OmnichainIndexingStatusIds.Completed: {
-      const response = indexingStatusResponseOkOmnichain[
-        selectedVariant
-      ] as IndexingStatusResponseOk;
+      const response = indexingStatusResponseOkOmnichain[selectedVariant];
 
       return response;
     }
