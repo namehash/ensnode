@@ -151,13 +151,8 @@ async function initializeIndexingSetup(): Promise<void> {
    */
 
   // Ensure all required Postgres extensions are installed before Ponder
-  // creates indexes that depend on them. `pg_trgm` provides the `gin_trgm_ops`
-  // operator class used by the GIN trigram index on `subgraph_domain.name`,
-  // which backs the Subgraph GraphQL partial-match filters
-  // (`_contains`, `_starts_with`, `_ends_with`).
-  // `CREATE EXTENSION IF NOT EXISTS` is idempotent and fast when the
-  // extension is already installed, so this satisfies the
-  // "no long-running preconditions" constraint documented above.
+  // creates indexes that depend on them.
+  // - `pg_trgm` necessary for GIN trigram indexes (partial string matching)
   logger.debug({
     msg: "Ensuring required Postgres extensions are installed",
     module: "IndexingEngine",
