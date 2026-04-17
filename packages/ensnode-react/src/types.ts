@@ -78,5 +78,5 @@ export interface UseResolvedIdentityParameters
   extends QueryParameter<ResolvePrimaryNameResponse>,
     AcceleratableRequest {
   identity: UnresolvedIdentity;
-  namespace?: ENSNamespaceId;
+  namespace: ENSNamespaceId;
 }

@@ -14,10 +14,10 @@ type UseNameTokensParameters = NameTokensRequest & QueryParameter<NameTokensResp
  * Query ENSNode Name Tokens API.
  */
 export function useNameTokens(parameters: WithEnsApiProviderOptions & UseNameTokensParameters) {
-  const { options, query = {} } = parameters;
+  const { options, query = {}, ...request } = parameters;
   const providerOptions = useEnsApiProviderOptions(options);
 
-  const queryOptions = createNameTokensQueryOptions(providerOptions, parameters);
+  const queryOptions = createNameTokensQueryOptions(providerOptions, request);
 
   return useQuery({
     ...queryOptions,

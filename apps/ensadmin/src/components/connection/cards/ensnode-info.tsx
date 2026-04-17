@@ -149,19 +149,19 @@ export function ENSNodeConfigInfoView({
 export function ENSNodeConfigInfo() {
   const ensApiConfig = useEnsApiConfig();
 
-  if (ensApiConfig.isPending) {
-    return <ENSNodeConfigInfoView isLoading={true} />;
-  }
-
   if (ensApiConfig.isError) {
     return (
       <ENSNodeConfigInfoView
         error={{
-          title: "Failed to Load ENSNode Configuration",
+          title: "Error loading ENSNode Configuration",
           description: ensApiConfig.error.message,
         }}
       />
     );
+  }
+
+  if (ensApiConfig.isPending) {
+    return <ENSNodeConfigInfoView isLoading={true} />;
   }
 
   return <ENSNodeConfigInfoView ensApiPublicConfig={ensApiConfig.data} />;

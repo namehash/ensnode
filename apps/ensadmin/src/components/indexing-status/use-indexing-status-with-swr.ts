@@ -26,14 +26,17 @@ const DEFAULT_REFETCH_INTERVAL = secondsToMilliseconds(10);
 
 const REALTIME_PROJECTION_REFRESH_RATE: Duration = 1;
 
-interface CachableIndexingStatus {
+/**
+ * Data model for the object cached in SWR for indexing status query results.
+ */
+interface CacheableIndexingStatus {
   crossChainIndexingStatusSnapshot: CrossChainIndexingStatusSnapshotOmnichain;
   config: EnsApiPublicConfig;
 }
 
 interface UseIndexingStatusParameters
   extends EnsApiIndexingStatusRequest,
-    QueryParameter<CachableIndexingStatus> {}
+    QueryParameter<CacheableIndexingStatus> {}
 
 /**
  * A proxy hook for {@link useIndexingStatus} which applies
@@ -63,7 +66,7 @@ export function useIndexingStatusWithSwr(
           );
         }
 
-        // The indexing status snapshot, including ENSApi public config,
+        // The object including the Indexing Status snapshot, and the ENSApi Public Config,
         // has been fetched and successfully validated for caching.
         // Therefore, return it so that query cache for `queryOptions.queryKey` will:
         // - Replace the currently cached value (if any) with this new value.
@@ -71,7 +74,7 @@ export function useIndexingStatusWithSwr(
         return {
           crossChainIndexingStatusSnapshot: response.realtimeProjection.snapshot,
           config: response.config,
-        } satisfies CachableIndexingStatus;
+        } satisfies CacheableIndexingStatus;
       }),
     [queryOptions.queryFn],
   );
@@ -79,7 +82,7 @@ export function useIndexingStatusWithSwr(
   // Call select function to `createRealtimeIndexingStatusProjection` each time
   // `now` is updated.
   const select = useCallback(
-    (cachedResult: CachableIndexingStatus): EnsApiIndexingStatusResponseOk => {
+    (cachedResult: CacheableIndexingStatus): EnsApiIndexingStatusResponseOk => {
       const realtimeProjection = createRealtimeIndexingStatusProjection(
         cachedResult.crossChainIndexingStatusSnapshot,
         now,

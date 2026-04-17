@@ -18,10 +18,10 @@ interface UseRegistrarActionsParameters
 export function useRegistrarActions(
   parameters: WithEnsApiProviderOptions & UseRegistrarActionsParameters = {},
 ) {
-  const { options, query = {} } = parameters;
+  const { options, query = {}, ...request } = parameters;
   const providerOptions = useEnsApiProviderOptions(options);
 
-  const queryOptions = createRegistrarActionsQueryOptions(providerOptions, parameters);
+  const queryOptions = createRegistrarActionsQueryOptions(providerOptions, request);
 
   return useQuery({
     ...queryOptions,
