@@ -8,10 +8,10 @@ import { useCallback, useMemo } from "react";
 import {
   createIndexingStatusQueryOptions,
   QueryParameter,
-  useEnsApiProviderOptions,
+  useEnsNodeProviderOptions,
   type useIndexingStatus,
   useSwrQuery,
-  WithEnsApiProviderOptions,
+  WithEnsNodeProviderOptions,
 } from "@ensnode/ensnode-react";
 import {
   CrossChainIndexingStatusSnapshotOmnichain,
@@ -43,10 +43,10 @@ interface UseIndexingStatusParameters
  * stale-while-revalidate cache for successful responses.
  */
 export function useIndexingStatusWithSwr(
-  parameters: WithEnsApiProviderOptions & UseIndexingStatusParameters = {},
+  parameters: WithEnsNodeProviderOptions & UseIndexingStatusParameters = {},
 ) {
   const { options, query = {} } = parameters;
-  const providerOptions = useEnsApiProviderOptions(options);
+  const providerOptions = useEnsNodeProviderOptions(options);
   const now = useNow({ timeToRefresh: REALTIME_PROJECTION_REFRESH_RATE });
 
   const queryOptions = useMemo(

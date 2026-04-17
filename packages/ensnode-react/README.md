@@ -16,18 +16,18 @@ Note: `@tanstack/react-query` is a peer dependency but you don't need to interac
 
 ### 1. Setup the Provider
 
-Wrap your app with the `EnsApiProvider`:
+Wrap your app with the `EnsNodeProvider`:
 
 ```tsx
-import { EnsApiProvider, createEnsApiOptions } from "@ensnode/ensnode-react";
+import { EnsNodeProvider, createEnsNodeOptions } from "@ensnode/ensnode-react";
 
-const options = createEnsApiOptions({ url: "https://api.alpha.ensnode.io" });
+const options = createEnsNodeOptions({ url: "https://api.alpha.ensnode.io" });
 
 function App() {
   return (
-    <EnsApiProvider options={options}>
+    <EnsNodeProvider options={options}>
       <YourApp />
-    </EnsApiProvider>
+    </EnsNodeProvider>
   );
 }
 ```
@@ -124,13 +124,13 @@ function DisplayPrimaryNames() {
 
 ## API Reference
 
-### EnsApiProvider
+### EnsNodeProvider
 
 The provider component that supplies ENSApi options to all child components.
 
 ```tsx
-interface EnsApiProviderProps {
-  options: EnsApiProviderOptions;
+interface EnsNodeProviderProps {
+  options: EnsNodeProviderOptions;
   queryClient?: QueryClient;
   queryClientOptions?: QueryClientOptions;
 }
@@ -142,12 +142,12 @@ interface EnsApiProviderProps {
 - `queryClient`: Optional TanStack Query client instance (requires manual QueryClientProvider setup)
 - `queryClientOptions`: Optional Custom options for auto-created QueryClient (only used when queryClient is not provided)
 
-### createEnsApiOptions
+### createEnsNodeOptions
 
 Helper function to create ENSApi options with defaults.
 
 ```tsx
-const options = createEnsApiOptions({
+const options = createEnsNodeOptions({
   url: "https://api.alpha.ensnode.io",
 });
 ```
@@ -230,11 +230,11 @@ const { data, isLoading, error, refetch } = usePrimaryNames({
 
 ### Custom Query Configuration
 
-The `EnsApiProvider` automatically creates and manages a QueryClient for you. Cache keys include the ENSNode endpoint URL, so different endpoints (mainnet vs testnet) maintain separate caches. You can customize the QueryClient without importing TanStack Query:
+The `EnsNodeProvider` automatically creates and manages a QueryClient for you. Cache keys include the ENSNode endpoint URL, so different endpoints (mainnet vs testnet) maintain separate caches. You can customize the QueryClient without importing TanStack Query:
 
 ```tsx
 // Simple setup - no TanStack Query knowledge needed
-<EnsApiProvider
+<EnsNodeProvider
   options={options}
   queryClientOptions={{
     defaultOptions: {
@@ -247,7 +247,7 @@ The `EnsApiProvider` automatically creates and manages a QueryClient for you. Ca
   }}
 >
   <App />
-</EnsApiProvider>
+</EnsNodeProvider>
 ```
 
 ### Advanced: Bring Your Own QueryClient
@@ -268,9 +268,9 @@ const queryClient = new QueryClient({
 });
 
 <QueryClientProvider client={queryClient}>
-  <EnsApiProvider options={options} queryClient={queryClient}>
+  <EnsNodeProvider options={options} queryClient={queryClient}>
     <App />
-  </EnsApiProvider>
+  </EnsNodeProvider>
 </QueryClientProvider>;
 ```
 

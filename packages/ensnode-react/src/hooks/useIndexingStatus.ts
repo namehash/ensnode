@@ -5,19 +5,19 @@ import type {
   EnsApiIndexingStatusResponse,
 } from "@ensnode/ensnode-sdk";
 
-import type { QueryParameter, WithEnsApiProviderOptions } from "../types";
+import type { QueryParameter, WithEnsNodeProviderOptions } from "../types";
 import { createIndexingStatusQueryOptions } from "../utils/query";
-import { useEnsApiProviderOptions } from "./useEnsApiProviderOptions";
+import { useEnsNodeProviderOptions } from "./useEnsNodeProviderOptions";
 
 interface UseIndexingStatusParameters
   extends EnsApiIndexingStatusRequest,
     QueryParameter<EnsApiIndexingStatusResponse> {}
 
 export function useIndexingStatus(
-  parameters: WithEnsApiProviderOptions & UseIndexingStatusParameters = {},
+  parameters: WithEnsNodeProviderOptions & UseIndexingStatusParameters = {},
 ) {
   const { options, query = {} } = parameters;
-  const providerOptions = useEnsApiProviderOptions(options);
+  const providerOptions = useEnsNodeProviderOptions(options);
   const queryOptions = createIndexingStatusQueryOptions(providerOptions);
 
   return useQuery({

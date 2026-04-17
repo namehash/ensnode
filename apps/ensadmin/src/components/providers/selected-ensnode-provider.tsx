@@ -2,22 +2,22 @@
 
 import { type PropsWithChildren, useMemo } from "react";
 
-import { createEnsApiOptions, EnsApiProvider } from "@ensnode/ensnode-react";
+import { createEnsNodeOptions, EnsNodeProvider } from "@ensnode/ensnode-react";
 
 import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
 
 /**
- * Provider component that configures EnsApiProvider with the currently
+ * Provider component that configures EnsNodeProvider with the currently
  * selected ENSNode connection.
  *
- * This component wraps the EnsApiProvider from @ensnode/ensnode-react and
+ * This component wraps the EnsNodeProvider from @ensnode/ensnode-react and
  * automatically configures it with the URL from the currently selected ENSNode
  * connection URL. It serves as a bridge between the connection management
  * system and the ENSNode React hooks.
  *
  * @param children - React children to render within the provider context
  */
-export function SelectedEnsApiProvider({ children }: PropsWithChildren) {
+export function SelectedEnsNodeProvider({ children }: PropsWithChildren) {
   const selectedConnection = useSelectedConnection();
 
   const options = useMemo(() => {
@@ -25,7 +25,7 @@ export function SelectedEnsApiProvider({ children }: PropsWithChildren) {
       return undefined;
     }
 
-    return createEnsApiOptions({
+    return createEnsNodeOptions({
       url: selectedConnection.validatedSelectedConnection.url,
     });
   }, [selectedConnection.validatedSelectedConnection]);
@@ -49,5 +49,5 @@ export function SelectedEnsApiProvider({ children }: PropsWithChildren) {
     throw new Error("Options must be defined if the selected connection is valid");
   }
 
-  return <EnsApiProvider options={options}>{children}</EnsApiProvider>;
+  return <EnsNodeProvider options={options}>{children}</EnsNodeProvider>;
 }

@@ -6,16 +6,16 @@ import { createElement, useMemo } from "react";
 
 import { EnsApiClient } from "@ensnode/ensnode-sdk";
 
-import { EnsApiContext } from "./context";
-import type { EnsApiProviderOptions } from "./types";
+import { EnsNodeContext } from "./context";
+import type { EnsNodeProviderOptions } from "./types";
 
-export interface EnsApiProviderProps {
+export interface EnsNodeProviderProps {
   /** ENSApi options */
-  options: EnsApiProviderOptions;
+  options: EnsNodeProviderOptions;
 
   /**
    * Optional QueryClient instance. If provided, you must wrap your app with QueryClientProvider yourself.
-   * If not provided, EnsApiProvider will create and manage its own QueryClient internally.
+   * If not provided, EnsNodeProvider will create and manage its own QueryClient internally.
    */
   queryClient?: QueryClient;
 
@@ -31,12 +31,12 @@ function EnsApiInternalProvider({
   options,
 }: {
   children?: React.ReactNode;
-  options: EnsApiProviderOptions;
+  options: EnsNodeProviderOptions;
 }) {
-  return createElement(EnsApiContext.Provider, { value: options }, children);
+  return createElement(EnsNodeContext.Provider, { value: options }, children);
 }
 
-export function EnsApiProvider(parameters: React.PropsWithChildren<EnsApiProviderProps>) {
+export function EnsNodeProvider(parameters: React.PropsWithChildren<EnsNodeProviderProps>) {
   const { children, options, queryClient, queryClientOptions } = parameters;
 
   // Check if we're already inside a QueryClientProvider
@@ -91,7 +91,7 @@ export function EnsApiProvider(parameters: React.PropsWithChildren<EnsApiProvide
 /**
  * Helper function to create ENSApi options
  */
-export function createEnsApiOptions(options?: { url?: string | URL }): EnsApiProviderOptions {
+export function createEnsNodeOptions(options?: { url?: string | URL }): EnsNodeProviderOptions {
   const url = options?.url ? new URL(options.url) : EnsApiClient.defaultOptions().url;
 
   return {

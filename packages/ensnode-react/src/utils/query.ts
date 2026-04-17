@@ -12,7 +12,7 @@ import {
   type ResolverRecordsSelection,
 } from "@ensnode/ensnode-sdk";
 
-import type { EnsApiProviderOptions } from "../types";
+import type { EnsNodeProviderOptions } from "../types";
 
 /**
  * Immutable query options for data that is assumed to be immutable and should only be fetched once per full page refresh per unique key.
@@ -67,7 +67,7 @@ export const queryKeys = {
  * Creates query options for Records Resolution
  */
 export function createRecordsQueryOptions<SELECTION extends ResolverRecordsSelection>(
-  config: EnsApiProviderOptions,
+  config: EnsNodeProviderOptions,
   args: ResolveRecordsRequest<SELECTION>,
 ) {
   return {
@@ -84,7 +84,7 @@ export function createRecordsQueryOptions<SELECTION extends ResolverRecordsSelec
  * Creates query options for Primary Name Resolution
  */
 export function createPrimaryNameQueryOptions(
-  config: EnsApiProviderOptions,
+  config: EnsNodeProviderOptions,
   args: ResolvePrimaryNameRequest,
 ) {
   return {
@@ -101,7 +101,7 @@ export function createPrimaryNameQueryOptions(
  * Creates query options for Primary Name Resolution
  */
 export function createPrimaryNamesQueryOptions(
-  config: EnsApiProviderOptions,
+  config: EnsNodeProviderOptions,
   args: ResolvePrimaryNamesRequest,
 ) {
   return {
@@ -117,7 +117,7 @@ export function createPrimaryNamesQueryOptions(
 /**
  * Creates query options for ENSNode Indexing Status API
  */
-export function createIndexingStatusQueryOptions(config: EnsApiProviderOptions) {
+export function createIndexingStatusQueryOptions(config: EnsNodeProviderOptions) {
   return {
     enabled: true,
     queryKey: queryKeys.indexingStatus(config.client.url.href),
@@ -132,7 +132,7 @@ export function createIndexingStatusQueryOptions(config: EnsApiProviderOptions) 
  * Creates query options for ENSNode Registrar Actions API
  */
 export function createRegistrarActionsQueryOptions(
-  config: EnsApiProviderOptions,
+  config: EnsNodeProviderOptions,
   args: RegistrarActionsRequest,
 ) {
   return {
@@ -150,7 +150,7 @@ export function createRegistrarActionsQueryOptions(
  * Creates query options for Name Tokens API
  */
 export function createNameTokensQueryOptions(
-  config: EnsApiProviderOptions,
+  config: EnsNodeProviderOptions,
   args: NameTokensRequest,
 ) {
   return {

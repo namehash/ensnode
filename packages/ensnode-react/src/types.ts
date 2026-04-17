@@ -17,7 +17,7 @@ import type {
 /**
  * Configuration options for the ENSApi provider
  */
-export interface EnsApiProviderOptions {
+export interface EnsNodeProviderOptions {
   /** The ENSApi client configuration */
   client: EnsApiClientOptions;
 }
@@ -32,8 +32,8 @@ export interface QueryParameter<TData = unknown, TError = Error> {
 /**
  * Configuration parameter for hooks that need access to config
  */
-export interface WithEnsApiProviderOptions<
-  TOptions extends EnsApiProviderOptions = EnsApiProviderOptions,
+export interface WithEnsNodeProviderOptions<
+  TOptions extends EnsNodeProviderOptions = EnsNodeProviderOptions,
 > {
   options?: TOptions | undefined;
 }

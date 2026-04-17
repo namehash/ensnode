@@ -2,9 +2,9 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import type { UsePrimaryNamesParameters, WithEnsApiProviderOptions } from "../types";
+import type { UsePrimaryNamesParameters, WithEnsNodeProviderOptions } from "../types";
 import { createPrimaryNamesQueryOptions } from "../utils/query";
-import { useEnsApiProviderOptions } from "./useEnsApiProviderOptions";
+import { useEnsNodeProviderOptions } from "./useEnsNodeProviderOptions";
 
 /**
  * Resolves the primary names of a specified address across multiple chains.
@@ -40,9 +40,11 @@ import { useEnsApiProviderOptions } from "./useEnsApiProviderOptions";
  * }
  * ```
  */
-export function usePrimaryNames(parameters: UsePrimaryNamesParameters & WithEnsApiProviderOptions) {
+export function usePrimaryNames(
+  parameters: UsePrimaryNamesParameters & WithEnsNodeProviderOptions,
+) {
   const { options, query = {}, address, ...args } = parameters;
-  const providerOptions = useEnsApiProviderOptions(options);
+  const providerOptions = useEnsNodeProviderOptions(options);
 
   const canEnable = address !== null;
 

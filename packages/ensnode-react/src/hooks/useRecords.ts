@@ -4,9 +4,9 @@ import { useQuery } from "@tanstack/react-query";
 
 import type { ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 
-import type { UseRecordsParameters, WithEnsApiProviderOptions } from "../types";
+import type { UseRecordsParameters, WithEnsNodeProviderOptions } from "../types";
 import { createRecordsQueryOptions } from "../utils/query";
-import { useEnsApiProviderOptions } from "./useEnsApiProviderOptions";
+import { useEnsNodeProviderOptions } from "./useEnsNodeProviderOptions";
 
 /**
  * Resolves records for an ENS name (Forward Resolution).
@@ -51,10 +51,10 @@ import { useEnsApiProviderOptions } from "./useEnsApiProviderOptions";
  * ```
  */
 export function useRecords<SELECTION extends ResolverRecordsSelection>(
-  parameters: UseRecordsParameters<SELECTION> & WithEnsApiProviderOptions,
+  parameters: UseRecordsParameters<SELECTION> & WithEnsNodeProviderOptions,
 ) {
   const { options, query = {}, name, ...args } = parameters;
-  const _config = useEnsApiProviderOptions(options);
+  const _config = useEnsNodeProviderOptions(options);
 
   const canEnable = name !== null;
 

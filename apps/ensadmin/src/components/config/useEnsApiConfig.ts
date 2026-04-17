@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { useEnsApiProviderOptions } from "@ensnode/ensnode-react";
+import { useEnsNodeProviderOptions } from "@ensnode/ensnode-react";
 
 import { useIndexingStatusWithSwr } from "@/components/indexing-status";
 
@@ -12,12 +12,12 @@ import { useIndexingStatusWithSwr } from "@/components/indexing-status";
  * the ENSApi config for the currently selected connection.
  */
 export function useEnsApiConfig() {
-  const ensApiProviderOptions = useEnsApiProviderOptions();
+  const EnsNodeProviderOptions = useEnsNodeProviderOptions();
   const indexingStatus = useIndexingStatusWithSwr();
 
   return useQuery({
     enabled: indexingStatus.isFetched,
-    queryKey: ["swr", ensApiProviderOptions.client.url.href, "config"],
+    queryKey: ["swr", EnsNodeProviderOptions.client.url.href, "config"],
     queryFn: async () => {
       if (!indexingStatus.data) {
         throw new Error("Indexing status wasn't fetched successfully");

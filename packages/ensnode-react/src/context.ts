@@ -1,13 +1,13 @@
 import { createContext } from "react";
 
-import type { EnsApiProviderOptions } from "./types";
+import type { EnsNodeProviderOptions } from "./types";
 
 /**
- * React context for ENSApi configuration
+ * React context for ENSNodeProvider options
  */
-export const EnsApiContext = createContext<EnsApiProviderOptions | undefined>(undefined);
+export const EnsNodeContext = createContext<EnsNodeProviderOptions | undefined>(undefined);
 
 /**
  * Display name for debugging
  */
-EnsApiContext.displayName = "EnsApiContext";
+EnsNodeContext.displayName = "EnsNodeContext";
