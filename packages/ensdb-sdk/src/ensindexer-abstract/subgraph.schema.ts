@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import type { Address } from "enssdk";
 import { index, onchainTable, relations } from "ponder";
 
@@ -95,8 +96,10 @@ export const subgraph_domain = onchainTable(
   (t) => ({
     // uses a hash index because some name values exceed the btree max row size (8191 bytes)
     byExactName: index().using("hash", t.name),
-    // GIN trigram index for partial-match filters (_contains, _starts_with, _ends_with)
-    byFuzzyName: index().using("gin", t.name.op("gin_trgm_ops")),
+    // GIN trigram index for partial-match filters (_contains, _starts_with, _ends_with).
+    // Inline `gin_trgm_ops` via `sql` because passing it through `.op()` gets dropped
+    // by Ponder's index-emission layer, producing `USING gin (name)` with no opclass.
+    byFuzzyName: index().using("gin", sql`${t.name} gin_trgm_ops`),
 
     byLabelhash: index().on(t.labelhash),
     byParentId: index().on(t.parentId),
