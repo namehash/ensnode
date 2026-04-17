@@ -1,4 +1,4 @@
-import type { Address } from "enssdk";
+import type { NormalizedAddress } from "enssdk";
 import { describe, expect, it, vi } from "vitest";
 
 import { priceEth, priceUsdc } from "@ensnode/ensnode-sdk";
@@ -41,7 +41,7 @@ describe("buildReferrerLeaderboardPageContext", () => {
         grandTotalQualifiedReferrersFinalScore: 28.05273061366773,
         minFinalScoreToQualify: 0,
       },
-      referrers: new Map<Address, AwardedReferrerMetricsPieSplit>([
+      referrers: new Map<NormalizedAddress, AwardedReferrerMetricsPieSplit>([
         [
           "0x03c098d2bed4609e6ed9beb2c4877741f45f290d",
           {
@@ -130,7 +130,7 @@ describe("buildReferrerLeaderboardPageContext", () => {
         grandTotalQualifiedReferrersFinalScore: 28.05273061366773,
         minFinalScoreToQualify: 0,
       },
-      referrers: new Map<Address, AwardedReferrerMetricsPieSplit>(),
+      referrers: new Map<NormalizedAddress, AwardedReferrerMetricsPieSplit>(),
       accurateAsOf: 1764580368,
     };
 
