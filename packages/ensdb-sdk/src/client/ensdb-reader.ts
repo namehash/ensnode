@@ -4,6 +4,7 @@ import {
   type CrossChainIndexingStatusSnapshot,
   deserializeCrossChainIndexingStatusSnapshot,
   deserializeEnsIndexerPublicConfig,
+  type EnsDbPublicConfig,
   type EnsIndexerPublicConfig,
 } from "@ensnode/ensnode-sdk";
 
@@ -157,6 +158,17 @@ export class EnsDbReader<
   }
 
   /**
+   * Build ENSDb Public Config
+   */
+  async buildEnsDbPublicConfig(): Promise<EnsDbPublicConfig> {
+    const postgreSqlVersion = await this.getPostgreSqlVersion();
+
+    return {
+      postgreSqlVersion,
+    };
+  }
+
+  /**
    * Get Indexing Status Snapshot
    *
    * @returns the existing record, or `undefined`.
@@ -207,5 +219,36 @@ export class EnsDbReader<
     throw new Error(
       `There must be exactly one ENSNodeMetadata record for ('${this.ensIndexerSchemaName}', '${metadata.key}') composite key`,
     );
+  }
+
+  /**
+   * Get PostgreSQL version for the server hosting the ENSDb instance.
+   *
+   * @throws when the version cannot be retrieved or parsed from the query result.
+   */
+  private async getPostgreSqlVersion(): Promise<string> {
+    const result = await this.ensDb.execute<{ version: string }>("SELECT version();");
+
+    // result will be in the form of [{ version: "PostgreSQL 15.5 (Ubuntu 15.5-0ubuntu0.22.04.1) ..." }]
+    const versionString = result.rows[0]?.version;
+
+    if (!versionString) {
+      throw new Error("Failed to get PostgreSQL version from ENSDb instance");
+    }
+
+    // extract the version number using regex
+    const match = versionString.match(/PostgreSQL (\d+\.\d+)/);
+
+    if (!match) {
+      throw new Error(`Failed to parse PostgreSQL version from version string: '${versionString}'`);
+    }
+
+    const parsedVersion = match[1];
+
+    if (typeof parsedVersion !== "string") {
+      throw new Error(`Parsed PostgreSQL version is not a string: '${parsedVersion}'`);
+    }
+
+    return parsedVersion;
   }
 }
