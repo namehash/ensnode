@@ -1,6 +1,5 @@
-import { sql } from "drizzle-orm";
 import type { Address } from "enssdk";
-import { index, onchainTable, relations } from "ponder";
+import { index, onchainTable, relations, sql } from "ponder";
 
 import { monkeypatchCollate } from "../lib/collate";
 
