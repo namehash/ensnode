@@ -4,7 +4,7 @@
 import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import { createElement, useMemo } from "react";
 
-import { EnsApiClient } from "@ensnode/ensnode-sdk";
+import { EnsNodeClient } from "@ensnode/ensnode-sdk";
 
 import { EnsNodeContext } from "./context";
 import type { EnsNodeProviderOptions } from "./types";
@@ -94,11 +94,11 @@ export function EnsNodeProvider(parameters: React.PropsWithChildren<EnsNodeProvi
 export function createEnsNodeProviderOptions(options?: {
   url?: string | URL;
 }): EnsNodeProviderOptions {
-  const url = options?.url ? new URL(options.url) : EnsApiClient.defaultOptions().url;
+  const url = options?.url ? new URL(options.url) : EnsNodeClient.defaultOptions().url;
 
   return {
     client: {
-      ...EnsApiClient.defaultOptions(),
+      ...EnsNodeClient.defaultOptions(),
       url,
     },
   };

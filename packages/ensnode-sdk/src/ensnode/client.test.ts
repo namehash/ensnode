@@ -2,6 +2,7 @@ import type { Address, Name } from "enssdk";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ENSNamespaceIds } from "../ens";
+import type { SerializedEnsApiPublicConfig } from "../ensapi/config/serialized-types";
 import { PluginName } from "../ensindexer/config/types";
 import { ChainIndexingStatusIds } from "../indexing-status/chain-indexing-status-snapshot";
 import { CrossChainIndexingStrategyIds } from "../indexing-status/cross-chain-indexing-status-snapshot";
@@ -22,9 +23,8 @@ import type {
   ResolvePrimaryNamesResponse,
 } from "./api/resolution/types";
 import type { ErrorResponse } from "./api/shared/errors/response";
-import { EnsApiClient } from "./client";
+import { EnsNodeClient } from "./client";
 import { ClientError } from "./client-error";
-import type { SerializedEnsApiPublicConfig } from "./config/serialized-types";
 import { DEFAULT_ENSNODE_API_URL_MAINNET, getDefaultEnsNodeUrl } from "./deployments";
 
 const EXAMPLE_NAME: Name = "example.eth";
@@ -216,14 +216,14 @@ const _EXAMPLE_INDEXING_STATUS_FOLLOWING_RESPONSE: EnsApiIndexingStatusResponse 
 const mockFetch = vi.fn();
 vi.stubGlobal("fetch", mockFetch);
 
-describe("EnsApiClient", () => {
+describe("EnsNodeClient", () => {
   beforeEach(() => {
     mockFetch.mockClear();
   });
 
   describe("constructor and options", () => {
     it("should use default options when none provided", () => {
-      const client = new EnsApiClient();
+      const client = new EnsNodeClient();
       const options = client.getOptions();
 
       expect(options).toEqual({ url: getDefaultEnsNodeUrl(ENSNamespaceIds.Mainnet) });
@@ -231,14 +231,14 @@ describe("EnsApiClient", () => {
 
     it("should merge provided options with defaults", () => {
       const customUrl = new URL("https://custom.api.com");
-      const client = new EnsApiClient({ url: customUrl });
+      const client = new EnsNodeClient({ url: customUrl });
       const options = client.getOptions();
 
       expect(options).toEqual({ url: customUrl });
     });
 
     it("should return frozen options object", () => {
-      const client = new EnsApiClient();
+      const client = new EnsNodeClient();
       const options = client.getOptions();
 
       expect(Object.isFrozen(options)).toBe(true);
@@ -251,7 +251,7 @@ describe("EnsApiClient", () => {
       const mockResponse = { records: EXAMPLE_RECORDS_RESPONSE };
       mockFetch.mockResolvedValueOnce({ ok: true, json: async () => mockResponse });
 
-      const client = new EnsApiClient();
+      const client = new EnsNodeClient();
       const response = await client.resolveRecords(EXAMPLE_NAME, EXAMPLE_SELECTION);
 
       const expectedUrl = new URL(
@@ -269,7 +269,7 @@ describe("EnsApiClient", () => {
       const mockResponse = { records: EXAMPLE_RECORDS_RESPONSE, trace: [] };
       mockFetch.mockResolvedValueOnce({ ok: true, json: async () => mockResponse });
 
-      const client = new EnsApiClient();
+      const client = new EnsNodeClient();
       const response = await client.resolveRecords(EXAMPLE_NAME, EXAMPLE_SELECTION, {
         trace: true,
       });
@@ -289,7 +289,7 @@ describe("EnsApiClient", () => {
     it("should throw error when API returns error", async () => {
       mockFetch.mockResolvedValueOnce({ ok: false, json: async () => EXAMPLE_ERROR_RESPONSE });
 
-      const client = new EnsApiClient();
+      const client = new EnsNodeClient();
       await expect(client.resolveRecords(EXAMPLE_NAME, EXAMPLE_SELECTION)).rejects.toThrowError(
         ClientError,
       );
@@ -303,7 +303,7 @@ describe("EnsApiClient", () => {
         json: async () => EXAMPLE_PRIMARY_NAME_RESPONSE,
       });
 
-      const client = new EnsApiClient();
+      const client = new EnsNodeClient();
       const response = await client.resolvePrimaryName(EXAMPLE_ADDRESS, 1);
 
       const expectedUrl = new URL(
@@ -319,7 +319,7 @@ describe("EnsApiClient", () => {
       const mockResponse = { name: EXAMPLE_NAME, trace: [] };
       mockFetch.mockResolvedValueOnce({ ok: true, json: async () => mockResponse });
 
-      const client = new EnsApiClient();
+      const client = new EnsNodeClient();
       const response = await client.resolvePrimaryName(EXAMPLE_ADDRESS, 1, { trace: true });
 
       const expectedUrl = new URL(
@@ -338,7 +338,7 @@ describe("EnsApiClient", () => {
         json: async () => EXAMPLE_PRIMARY_NAME_RESPONSE,
       });
 
-      const client = new EnsApiClient();
+      const client = new EnsNodeClient();
       await client.resolvePrimaryName(EXAMPLE_ADDRESS, 1, { accelerate: true });
 
       const expectedUrl = new URL(
@@ -353,7 +353,7 @@ describe("EnsApiClient", () => {
     it("should throw error when API returns error", async () => {
       mockFetch.mockResolvedValueOnce({ ok: false, json: async () => EXAMPLE_ERROR_RESPONSE });
 
-      const client = new EnsApiClient();
+      const client = new EnsNodeClient();
       await expect(client.resolvePrimaryName(EXAMPLE_ADDRESS, 1)).rejects.toThrowError(ClientError);
     });
   });
@@ -365,7 +365,7 @@ describe("EnsApiClient", () => {
         json: async () => EXAMPLE_PRIMARY_NAMES_RESPONSE,
       });
 
-      const client = new EnsApiClient();
+      const client = new EnsNodeClient();
       const response = await client.resolvePrimaryNames(EXAMPLE_ADDRESS);
 
       const expectedUrl = new URL(
@@ -383,7 +383,7 @@ describe("EnsApiClient", () => {
         json: async () => EXAMPLE_PRIMARY_NAMES_RESPONSE,
       });
 
-      const client = new EnsApiClient();
+      const client = new EnsNodeClient();
       await client.resolvePrimaryNames(EXAMPLE_ADDRESS, { chainIds: [1, 10] });
 
       const expectedUrl = new URL(
@@ -399,7 +399,7 @@ describe("EnsApiClient", () => {
       const mockResponse = { ...EXAMPLE_PRIMARY_NAMES_RESPONSE, trace: [] };
       mockFetch.mockResolvedValueOnce({ ok: true, json: async () => mockResponse });
 
-      const client = new EnsApiClient();
+      const client = new EnsNodeClient();
       const response = await client.resolvePrimaryNames(EXAMPLE_ADDRESS, { trace: true });
 
       const expectedUrl = new URL(
@@ -418,7 +418,7 @@ describe("EnsApiClient", () => {
         json: async () => EXAMPLE_PRIMARY_NAMES_RESPONSE,
       });
 
-      const client = new EnsApiClient();
+      const client = new EnsNodeClient();
       await client.resolvePrimaryNames(EXAMPLE_ADDRESS, { accelerate: true });
 
       const expectedUrl = new URL(
@@ -433,7 +433,7 @@ describe("EnsApiClient", () => {
     it("should throw error when API returns error", async () => {
       mockFetch.mockResolvedValueOnce({ ok: false, json: async () => EXAMPLE_ERROR_RESPONSE });
 
-      const client = new EnsApiClient();
+      const client = new EnsNodeClient();
       await expect(client.resolvePrimaryNames(EXAMPLE_ADDRESS)).rejects.toThrowError(ClientError);
     });
   });
@@ -444,7 +444,7 @@ describe("EnsApiClient", () => {
       const requestUrl = new URL(`/api/indexing-status`, DEFAULT_ENSNODE_API_URL_MAINNET);
       const mockedResponse = EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE;
 
-      const client = new EnsApiClient();
+      const client = new EnsNodeClient();
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
@@ -458,7 +458,7 @@ describe("EnsApiClient", () => {
 
     it("should throw error when API returns error other than 503 error", async () => {
       // arrange
-      const client = new EnsApiClient();
+      const client = new EnsNodeClient();
 
       mockFetch.mockResolvedValueOnce({ ok: false, json: async () => EXAMPLE_ERROR_RESPONSE });
 

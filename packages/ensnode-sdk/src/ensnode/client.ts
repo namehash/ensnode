@@ -30,7 +30,7 @@ import { getDefaultEnsNodeUrl } from "./deployments";
 /**
  * Configuration options for ENSNode API client
  */
-export interface EnsApiClientOptions {
+export interface EnsNodeClientOptions {
   /** The ENSNode API URL */
   url: URL;
 }
@@ -38,12 +38,12 @@ export interface EnsApiClientOptions {
 /**
  * Configuration options for ENSNode API client
  *
- * @deprecated Use {@link EnsApiClientOptions} instead.
+ * @deprecated Use {@link EnsNodeClientOptions} instead.
  */
-export type ClientOptions = EnsApiClientOptions;
+export type ClientOptions = EnsNodeClientOptions;
 
 /**
- * EnsApi Client
+ * ENSNode API Client
  *
  * Provides access to the following ENSNode APIs:
  * - Resolution API
@@ -54,10 +54,10 @@ export type ClientOptions = EnsApiClientOptions;
  *
  * @example
  * ```typescript
- * import { EnsApiClient } from "@ensnode/ensnode-sdk";
+ * import { EnsNodeClient } from "@ensnode/ensnode-sdk";
  *
  * // Create client with default options
- * const client = new EnsApiClient();
+ * const client = new EnsNodeClient();
  *
  * // Use resolution methods
  * const { records } = await client.resolveRecords("jesse.base.eth", {
@@ -68,51 +68,51 @@ export type ClientOptions = EnsApiClientOptions;
  *
  * @example
  * ```typescript
- * import { ENSNamespaceIds, EnsApiClient, getDefaultEnsNodeUrl } from "@ensnode/ensnode-sdk";
+ * import { ENSNamespaceIds, EnsNodeClient, getDefaultEnsNodeUrl } from "@ensnode/ensnode-sdk";
  *
  * // Use default ENSNode API URL for Mainnet
- * const client = new EnsApiClient({
+ * const client = new EnsNodeClient({
  *   url: getDefaultEnsNodeUrl(ENSNamespaceIds.Mainnet),
  * });
  * ```
  *
  * @example
  * ```typescript
- * import { ENSNamespaceIds, EnsApiClient, getDefaultEnsNodeUrl } from "@ensnode/ensnode-sdk";
+ * import { ENSNamespaceIds, EnsNodeClient, getDefaultEnsNodeUrl } from "@ensnode/ensnode-sdk";
  *
  * // Use default ENSNode API URL for Sepolia
- * const client = new EnsApiClient({
+ * const client = new EnsNodeClient({
  *   url: getDefaultEnsNodeUrl(ENSNamespaceIds.Sepolia),
  * });
  * ```
  *
  * @example
  * ```typescript
- * import { EnsApiClient } from "@ensnode/ensnode-sdk";
+ * import { EnsNodeClient } from "@ensnode/ensnode-sdk";
  *
  * // Custom configuration
- * const client = new EnsApiClient({
+ * const client = new EnsNodeClient({
  *   url: new URL("https://my-ensnode-instance.com"),
  * });
  * ```
  */
-export class EnsApiClient {
-  private readonly options: EnsApiClientOptions;
+export class EnsNodeClient {
+  private readonly options: EnsNodeClientOptions;
 
-  static defaultOptions(): EnsApiClientOptions {
+  static defaultOptions(): EnsNodeClientOptions {
     return {
       url: getDefaultEnsNodeUrl(),
     };
   }
 
-  constructor(options: Partial<EnsApiClientOptions> = {}) {
+  constructor(options: Partial<EnsNodeClientOptions> = {}) {
     this.options = {
-      ...EnsApiClient.defaultOptions(),
+      ...EnsNodeClient.defaultOptions(),
       ...options,
     };
   }
 
-  getOptions(): Readonly<EnsApiClientOptions> {
+  getOptions(): Readonly<EnsNodeClientOptions> {
     return Object.freeze({
       url: new URL(this.options.url.href),
     });
@@ -372,13 +372,13 @@ export class EnsApiClient {
    * ```ts
    * import {
    *   registrarActionsFilter,
-   *   EnsApiClient,
+   *   EnsNodeClient,
    * } from "@ensnode/ensnode-sdk";
    * import { ETH_NODE, namehashInterpretedName, asInterpretedName } from "enssdk";
    *
    * const BASE_NODE = namehashInterpretedName(asInterpretedName("base.eth"));
    *
-   * const client: EnsApiClient;
+   * const client: EnsNodeClient;
    *
    * // Get first page with default page size (10 records)
    * const response = await client.registrarActions();
@@ -586,14 +586,14 @@ export class EnsApiClient {
    * @example
    * ```ts
    * import {
-   *   EnsApiClient,
+   *   EnsNodeClient,
    * } from "@ensnode/ensnode-sdk";
    * import { namehashInterpretedName, asInterpretedName } from "enssdk";
    *
    * const VITALIK_NAME = asInterpretedName("vitalik.eth");
    * const VITALIK_DOMAIN_ID = namehashInterpretedName(VITALIK_NAME);
    *
-   * const client: EnsApiClient;
+   * const client: EnsNodeClient;
    *
    * // get latest name token records from the indexed subregistry based on the requested name
    * const response = await client.nameTokens({

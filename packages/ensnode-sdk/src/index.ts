@@ -7,6 +7,7 @@ export * from "./ens";
 export * from "./ensapi";
 export * from "./ensdb";
 export * from "./ensindexer";
+export * from "./ensnode";
 export * from "./ensrainbow";
 export * from "./identity";
 export * from "./indexing-status";

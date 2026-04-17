@@ -12,14 +12,14 @@
  * app/package in the monorepo which requires `@ensnode/ensnode-sdk` dependency.
  */
 
-export * from "./ensapi/api/indexing-status/zod-schemas";
-export * from "./ensapi/api/name-tokens/zod-schemas";
-export * from "./ensapi/api/registrar-actions/zod-schemas";
-export * from "./ensapi/api/resolution/zod-schemas";
-export * from "./ensapi/api/shared/errors/zod-schemas";
-export * from "./ensapi/api/shared/pagination/zod-schemas";
 export * from "./ensapi/config/zod-schemas";
 export * from "./ensindexer/config/zod-schemas";
+export * from "./ensnode/api/indexing-status/zod-schemas";
+export * from "./ensnode/api/name-tokens/zod-schemas";
+export * from "./ensnode/api/registrar-actions/zod-schemas";
+export * from "./ensnode/api/resolution/zod-schemas";
+export * from "./ensnode/api/shared/errors/zod-schemas";
+export * from "./ensnode/api/shared/pagination/zod-schemas";
 export * from "./omnigraph-api/example-queries";
 export * from "./registrars/zod-schemas";
 export * from "./rpc";

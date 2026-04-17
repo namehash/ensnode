@@ -3,7 +3,7 @@ import type { QueryObserverOptions } from "@tanstack/react-query";
 import type {
   AcceleratableRequest,
   ENSNamespaceId,
-  EnsApiClientOptions,
+  EnsNodeClientOptions,
   ResolvePrimaryNameRequest,
   ResolvePrimaryNameResponse,
   ResolvePrimaryNamesRequest,
@@ -19,7 +19,7 @@ import type {
  */
 export interface EnsNodeProviderOptions {
   /** The ENSApi client configuration */
-  client: EnsApiClientOptions;
+  client: EnsNodeClientOptions;
 }
 
 /**
