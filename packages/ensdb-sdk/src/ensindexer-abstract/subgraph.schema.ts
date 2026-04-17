@@ -97,13 +97,9 @@ export const subgraph_domain = onchainTable(
     // uses a hash index because some name values exceed the btree max row size (8191 bytes)
     byExactName: index().using("hash", t.name),
     // GIN trigram index for partial-match filters (_contains, _starts_with, _ends_with).
-    // - Inline `gin_trgm_ops` via `sql` because passing it through `.op()` gets dropped
-    //   by Ponder's index-emission layer, producing `USING gin (name)` with no opclass.
-    // - Qualify with `public.` because Ponder pins its connection's search_path to the
-    //   ENSIndexer schema only (`SET search_path = "<namespace>"`), so unqualified
-    //   `gin_trgm_ops` can't be resolved. ENSIndexer installs `pg_trgm` into `public`
-    //   on startup (see `initializeIndexingSetup`), so the qualifier matches.
-    byFuzzyName: index().using("gin", sql`${t.name} public.gin_trgm_ops`),
+    // (inline `gin_trgm_ops` via `sql` because passing it through `.op()` gets dropped by Ponder,
+    // producing `USING gin (name)` with no opclass)
+    byFuzzyName: index().using("gin", sql`${t.name} gin_trgm_ops`),
 
     byLabelhash: index().on(t.labelhash),
     byParentId: index().on(t.parentId),

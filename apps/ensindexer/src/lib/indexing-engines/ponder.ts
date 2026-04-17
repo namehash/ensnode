@@ -158,10 +158,8 @@ async function initializeIndexingSetup(): Promise<void> {
   });
 
   try {
-    // `pg_trgm` necessary for GIN trigram indexes (partial string matching).
-    // Install into `public` so `gin_trgm_ops` is on the default search_path
-    // when Ponder issues the unqualified `CREATE INDEX ... USING gin (name gin_trgm_ops)`.
-    await ensDbClient.ensDb.execute(sql`CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA public`);
+    // `pg_trgm` necessary for GIN trigram indexes (partial string matching)
+    await ensDbClient.ensDb.execute(sql`CREATE EXTENSION IF NOT EXISTS pg_trgm`);
   } catch (cause) {
     // Log the underlying Postgres error so ops can see it without walking the
     // Error#cause chain (some log formatters don't surface `cause` by default).
