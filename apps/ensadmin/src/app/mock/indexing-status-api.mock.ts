@@ -2,7 +2,6 @@ import {
   ChainIndexingStatusIds,
   CrossChainIndexingStrategyIds,
   deserializeEnsApiIndexingStatusResponse,
-  deserializeIndexingStatusResponse,
   EnsApiIndexingStatusResponseOk,
   IndexingStatusResponseCodes,
   type IndexingStatusResponseError,
@@ -13,8 +12,9 @@ import {
   type SerializedChainIndexingStatusSnapshotCompleted,
   type SerializedChainIndexingStatusSnapshotFollowing,
   type SerializedChainIndexingStatusSnapshotQueued,
-  SerializedEnsApiPublicConfig,
-  SerializedEnsIndexerPublicConfig,
+  type SerializedEnsApiPublicConfig,
+  type SerializedEnsIndexerPublicConfig,
+  type SerializedEnsNodeStackInfo,
   type SerializedOmnichainIndexingStatusSnapshotBackfill,
   type SerializedOmnichainIndexingStatusSnapshotCompleted,
   type SerializedOmnichainIndexingStatusSnapshotFollowing,
@@ -66,6 +66,15 @@ export const serializedEnsApiPublicConfig = {
     ensNormalize: "1.11.1",
   },
 } satisfies SerializedEnsApiPublicConfig;
+
+const serializedStackInfo = {
+  ensApi: serializedEnsApiPublicConfig,
+  ensDb: {
+    postgreSqlVersion: "16",
+  },
+  ensIndexer: serializedEnsIndexerPublicConfig,
+  ensRainbow: serializedEnsIndexerPublicConfig.ensRainbowPublicConfig,
+} satisfies SerializedEnsNodeStackInfo;
 
 export const indexingStatusResponseError: IndexingStatusResponseError = {
   responseCode: IndexingStatusResponseCodes.Error,
@@ -134,7 +143,7 @@ export const indexingStatusResponseOkOmnichain: Record<
         } satisfies SerializedOmnichainIndexingStatusSnapshotUnstarted,
       },
     },
-    ensApiPublicConfig: serializedEnsApiPublicConfig,
+    stackInfo: serializedStackInfo,
   }),
 
   [OmnichainIndexingStatusIds.Backfill]: deserializeEnsApiIndexingStatusResponse({
@@ -213,7 +222,7 @@ export const indexingStatusResponseOkOmnichain: Record<
         } satisfies SerializedOmnichainIndexingStatusSnapshotBackfill,
       },
     },
-    ensApiPublicConfig: serializedEnsApiPublicConfig,
+    stackInfo: serializedStackInfo,
   }),
 
   [OmnichainIndexingStatusIds.Following]: deserializeEnsApiIndexingStatusResponse({
@@ -307,7 +316,7 @@ export const indexingStatusResponseOkOmnichain: Record<
         } satisfies SerializedOmnichainIndexingStatusSnapshotFollowing,
       },
     },
-    ensApiPublicConfig: serializedEnsApiPublicConfig,
+    stackInfo: serializedStackInfo,
   }),
 
   [OmnichainIndexingStatusIds.Completed]: deserializeEnsApiIndexingStatusResponse({
@@ -345,6 +354,6 @@ export const indexingStatusResponseOkOmnichain: Record<
         } satisfies SerializedOmnichainIndexingStatusSnapshotCompleted,
       },
     },
-    ensApiPublicConfig: serializedEnsApiPublicConfig,
+    stackInfo: serializedStackInfo,
   }),
 };

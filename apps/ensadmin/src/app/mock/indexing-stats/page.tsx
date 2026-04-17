@@ -76,14 +76,14 @@ export default function MockIndexingStatusPage() {
   const mockedIndexingStatus = useQuery({
     queryKey: ["mock", "useIndexingStatus", selectedVariant],
     queryFn: () => fetchMockedIndexingStatus(selectedVariant),
-    select: (response) => {
+    select: ({ responseCode, realtimeProjection, stackInfo }) => {
       return {
-        responseCode: IndexingStatusResponseCodes.Ok,
+        responseCode,
         realtimeProjection: createRealtimeIndexingStatusProjection(
-          response.realtimeProjection.snapshot,
+          realtimeProjection.snapshot,
           now,
         ),
-        ensApiPublicConfig: response.ensApiPublicConfig,
+        stackInfo,
       } satisfies IndexingStatusResponseOk;
     },
     retry: false, // allows loading error to be observed immediately
