@@ -1,4 +1,4 @@
-import { useEnsNodeStackInfo } from "@/components/stack-info/use-ensnode-stack-info";
+import { useEnsNodeStackInfo } from "@/hooks/use-ensnode-stack-info";
 
 /**
  * Hook to get the namespace ID from the active ENSNode connection.

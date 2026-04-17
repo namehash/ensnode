@@ -1,6 +1,6 @@
 "use client";
 
-import { useEnsNodeStackInfo } from "@/components/stack-info/use-ensnode-stack-info";
+import { useEnsNodeStackInfo } from "@/hooks/use-ensnode-stack-info";
 
 /**
  * Hook to get the currently active ENSNode Config synchronously.

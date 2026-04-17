@@ -4,7 +4,7 @@ import type { PropsWithChildren } from "react";
 
 import { ErrorInfo } from "@/components/error-info";
 import { LoadingSpinner } from "@/components/loading-spinner";
-import { useEnsNodeStackInfo } from "@/components/stack-info/use-ensnode-stack-info";
+import { useEnsNodeStackInfo } from "@/hooks/use-ensnode-stack-info";
 
 /**
  * Allows consumers to use `useActiveConnection` by blocking rendering until it is available.

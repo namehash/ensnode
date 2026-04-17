@@ -21,10 +21,10 @@ import { IconGraphNetwork } from "@/components/icons/graph-network";
 import { HealIcon } from "@/components/icons/HealIcon";
 import { IndexAdditionalRecordsIcon } from "@/components/icons/IndexAdditionalRecordsIcon";
 import { ExternalLinkWithIcon } from "@/components/link";
-import { useEnsNodeStackInfo } from "@/components/stack-info/use-ensnode-stack-info";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useEnsNodeStackInfo } from "@/hooks/use-ensnode-stack-info";
 import { cn } from "@/lib/utils";
 
 import {
