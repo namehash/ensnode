@@ -1,4 +1,4 @@
-import type { Address, Node } from "enssdk";
+import type { Node, NormalizedAddress } from "enssdk";
 import type { Hash } from "viem";
 
 import {
@@ -99,7 +99,7 @@ export async function handleRegistrarControllerEvent(
 
   // 4. Prepare referral info
   let encodedReferrer: EncodedReferrer | null;
-  let decodedReferrer: Address | null;
+  let decodedReferrer: NormalizedAddress | null;
 
   if (isRegistrarActionReferralAvailable(referral)) {
     encodedReferrer = referral.encodedReferrer;

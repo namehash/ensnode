@@ -1,4 +1,4 @@
-import type { Address, DefaultableChainId } from "enssdk";
+import type { Address, DefaultableChainId, UnixTimestamp } from "enssdk";
 import { Info as InfoIcon, CircleQuestionMark as QuestionmarkIcon } from "lucide-react";
 import { memo, type PropsWithChildren, type ReactNode } from "react";
 import { zeroAddress } from "viem";
@@ -7,7 +7,6 @@ import type {
   ENSNamespaceId,
   NamedRegistrarAction,
   RegistrarActionReferral,
-  UnixTimestamp,
 } from "@ensnode/ensnode-sdk";
 import {
   buildUnresolvedIdentity,

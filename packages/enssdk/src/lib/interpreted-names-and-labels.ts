@@ -1,7 +1,12 @@
-import { isHex } from "viem";
-
-import { encodeLabelHash, labelhashInterpretedLabel, labelhashLiteralLabel } from "./labelhash";
-import { isNormalizedLabel } from "./normalization";
+import { ENS_ROOT_NAME } from "./constants";
+import {
+  decodeEncodedLabelHash,
+  encodeLabelHash,
+  isEncodedLabelHash,
+  labelhashInterpretedLabel,
+  labelhashLiteralLabel,
+} from "./labelhash";
+import { isNormalizedLabel, normalizeLabel } from "./normalization";
 import type {
   InterpretedLabel,
   InterpretedName,
@@ -12,6 +17,119 @@ import type {
   LiteralName,
   Name,
 } from "./types";
+
+/**
+ * Interprets a user-provided {@link LiteralName} as an {@link InterpretedName}.
+ *
+ * A {@link LiteralName} may be any arbitrary string. The ENS Root Name ('') ({@link ENS_ROOT_NAME})
+ * is only accepted when `options.allowENSRootName` is `true`, and is returned as-is.
+ *
+ * This function walks each LiteralLabel of `name` and maps it to an {@link InterpretedLabel}
+ * according to the provided `options`:
+ *
+ * 0. If the LiteralLabel is an empty string (''), this function throws: an empty Label is not a valid
+ *    {@link InterpretedLabel}.
+ * 1. If the LiteralLabel is already a normalized LiteralLabel, it is kept as-is.
+ * 2. Otherwise, if the LiteralLabel looks like an {@link EncodedLabelHash} (e.g. `[abcd…]`) and
+ *    `options.allowEncodedLabelHashes` is `true`, it is kept as-is.
+ * 3. Otherwise, the LiteralLabel is unnormalized. If `options.coerceUnnormalizedLabelsToNormalizedLabels` is `false`,
+ *    this function throws. Otherwise (default), the LiteralLabel is passed through ENSIP-15 normalization
+ *    ({@link normalizeLabel}). If normalization succeeds, the normalized form is used (e.g. `"Vitalik"` →
+ *    `"vitalik"`).
+ * 4. Otherwise, the LiteralLabel is unnormalizable. If `options.coerceUnnormalizableLabelsToEncodedLabelHashes`
+ *    is `true`, the Label is replaced with the EncodedLabelHash of its literal bytes. Otherwise, this
+ *    function throws.
+ *
+ * Note that step 3 gates step 4: if `options.coerceUnnormalizedLabelsToNormalizedLabels` is `false`, the
+ * function throws immediately for any unnormalized Label, regardless of whether the Label would have been
+ * normalizable and regardless of `options.coerceUnnormalizableLabelsToEncodedLabelHashes`.
+ *
+ * @param name - The user-provided {@link LiteralName} to interpret.
+ * @param options - Controls how the interpretation handles edge cases.
+ * @param options.allowENSRootName - When `true`, an empty `name` is accepted and returned as the ENS Root Name.
+ *   When `false` (default), an empty `name` throws.
+ * @param options.allowEncodedLabelHashes - When `true`, a Label that is already formatted as an
+ *   {@link EncodedLabelHash} is preserved verbatim. When `false` (default), such a Label is treated like any other
+ *   input and passed through normalization, which will fail and fall through to the unnormalizable-Label handling.
+ * @param options.coerceUnnormalizedLabelsToNormalizedLabels - When `true` (default), a Label that is not already
+ *   normalized is passed through ENSIP-15 normalization (e.g. `"Vitalik"` → `"vitalik"`). When `false`, any
+ *   unnormalized Label causes this function to throw — no normalization is attempted and
+ *   `coerceUnnormalizableLabelsToEncodedLabelHashes` is not consulted.
+ * @param options.coerceUnnormalizableLabelsToEncodedLabelHashes - When `true`, a Label that cannot be normalized is
+ *   replaced with the EncodedLabelHash of its literal bytes. When `false` (default), encountering such a Label causes
+ *   this function to throw. Only consulted when `coerceUnnormalizedLabelsToNormalizedLabels` is `true`.
+ *
+ * @throws if `name` cannot be coerced into an {@link InterpretedName} under the provided `options`.
+ *
+ * @dev casts to {@link InterpretedLabel} to avoid an additional unnecessary `asInterpretedLabel` pass.
+ */
+export function literalNameToInterpretedName(
+  name: LiteralName,
+  {
+    allowENSRootName = false,
+    allowEncodedLabelHashes = false,
+    coerceUnnormalizedLabelsToNormalizedLabels = true,
+    coerceUnnormalizableLabelsToEncodedLabelHashes = false,
+  }: {
+    allowENSRootName?: boolean | undefined;
+    allowEncodedLabelHashes?: boolean | undefined;
+    coerceUnnormalizedLabelsToNormalizedLabels?: boolean | undefined;
+    coerceUnnormalizableLabelsToEncodedLabelHashes?: boolean | undefined;
+  } = {},
+): InterpretedName {
+  if (name === "") {
+    if (allowENSRootName) return ENS_ROOT_NAME;
+
+    throw new Error(
+      `The ENS Root Name ('') cannot conform to InterpretedName when allowENSRootName is false.`,
+    );
+  }
+
+  return interpretedLabelsToInterpretedName(
+    literalNameToLiteralLabels(name).map((label) => {
+      // Sanity Check: No empty Labels
+      if (label === "") {
+        throw new Error(
+          `Name '${name}' cannot conform to InterpretedName because it contains an empty Label segment, which is not a normalized Label.`,
+        );
+      }
+
+      // if it's already normalized, good to go
+      if (isNormalizedLabel(label)) {
+        return label as Label as InterpretedLabel;
+      }
+
+      // special case: if it's an EncodedLabelHash, and the consumer allows, good to go
+      if (allowEncodedLabelHashes && isEncodedLabelHash(label)) {
+        return label as Label as InterpretedLabel;
+      }
+
+      // if the consumer does not want to allow coercion of unnormalized labels, then there's nothing to do
+      if (!coerceUnnormalizedLabelsToNormalizedLabels) {
+        throw new Error(
+          `Name '${name}' cannot conform to InterpretedName because Label '${label}' is unnormalized and coercion is disabled.`,
+        );
+      }
+
+      try {
+        // attempt to normalize it and pass the normalized Label along
+        return normalizeLabel(label);
+      } catch {
+        // but the label is unnormalizable, so:
+
+        // if the consumer wants to interpret unnormalizable Labels as an EncodedLabelHash, do so
+        if (coerceUnnormalizableLabelsToEncodedLabelHashes) {
+          return encodeLabelHash(labelhashLiteralLabel(label)) as InterpretedLabel;
+        }
+
+        // otherwise, cannot conform
+        throw new Error(
+          `Name '${name}' cannot conform to InterpretedName because Label '${label}' is unnormalized and cannot be normalized.`,
+        );
+      }
+    }),
+  );
+}
 
 /**
  * Interprets a Literal Label, producing an Interpreted Label.
@@ -72,31 +190,23 @@ export function literalLabelsToLiteralName(labels: LiteralLabel[]): LiteralName 
 }
 
 /**
+ * Converts an LiteralName into a list of LiteralLabels.
+ */
+export function literalNameToLiteralLabels(name: LiteralName): LiteralLabel[] {
+  if (name === "") return [];
+  return name.split(".") as LiteralLabel[];
+}
+
+/**
  * Converts an Interpreted Name into a list of Interpreted Labels.
  */
 export function interpretedNameToInterpretedLabels(name: InterpretedName): InterpretedLabel[] {
+  if (name === "") return [];
   return name.split(".") as InterpretedLabel[];
 }
 
-// https://github.com/wevm/viem/blob/main/src/utils/ens/encodedLabelToLabelhash.ts
-export function encodedLabelToLabelhash(label: string): LabelHash | null {
-  if (label.length !== 66) return null;
-  if (label.indexOf("[") !== 0) return null;
-  if (label.indexOf("]") !== 65) return null;
-  const hash = `0x${label.slice(1, 65)}`;
-  if (!isHex(hash)) return null;
-  return hash;
-}
-
-export function isInterpetedLabel(label: Label): label is InterpretedLabel {
-  // if it looks like an encoded labelhash, it must be one
-  if (label.startsWith("[")) {
-    const labelHash = encodedLabelToLabelhash(label);
-    return labelHash != null;
-  }
-
-  // otherwise label must be normalized
-  return isNormalizedLabel(label);
+export function isInterpretedLabel(label: Label): label is InterpretedLabel {
+  return isEncodedLabelHash(label) || isNormalizedLabel(label);
 }
 
 /**
@@ -107,8 +217,8 @@ export function isInterpetedLabel(label: Label): label is InterpretedLabel {
  * @returns
  */
 export function isInterpretedName(name: Name): name is InterpretedName {
-  if (name === "") return true;
-  return name.split(".").every(isInterpetedLabel);
+  if (name === ENS_ROOT_NAME) return true;
+  return name.split(".").every(isInterpretedLabel);
 }
 
 /**
@@ -117,18 +227,13 @@ export function isInterpretedName(name: Name): name is InterpretedName {
 export function interpretedLabelsToLabelHashPath(labels: InterpretedLabel[]): LabelHashPath {
   return labels
     .map((label) => {
-      if (!isInterpetedLabel(label)) {
-        throw new Error(
-          `Invariant(interpretedLabelsToLabelHashPath): Expected InterpretedLabel, received '${label}'.`,
-        );
+      try {
+        // attempt to decode label as an encoded labelhash
+        return decodeEncodedLabelHash(label);
+      } catch {
+        // but if that failed, this must be a normalized label, so labelhash it
+        return labelhashInterpretedLabel(label);
       }
-
-      // if it looks like an encoded labelhash, return it
-      const maybeLabelHash = encodedLabelToLabelhash(label);
-      if (maybeLabelHash !== null) return maybeLabelHash;
-
-      // otherwise, labelhash it
-      return labelhashInterpretedLabel(label);
     })
     .toReversed();
 }
@@ -161,6 +266,12 @@ export function ensureInterpretedLabel(
 /**
  * Parses a Partial InterpretedName into concrete InterpretedLabels and the partial Label.
  *
+ * @example
+ * ```ts
+ * const result = parsePartialInterpretedName("example.et")
+ * // { concrete: ["example"], partial: "et" }
+ * ```
+ *
  * @throws if the provided `partialInterpretedName` is not composed of concrete InterpretedLabels.
  */
 export function parsePartialInterpretedName(partialInterpretedName: Name): {
@@ -170,10 +281,11 @@ export function parsePartialInterpretedName(partialInterpretedName: Name): {
   if (partialInterpretedName === "") return { concrete: [], partial: "" };
 
   const concrete = partialInterpretedName.split(".");
+  // note that the concrete.pop mutates `concrete` to exclude the last element
   // biome-ignore lint/style/noNonNullAssertion: there's always at least one element after a .split
   const partial = concrete.pop()!;
 
-  if (!concrete.every(isInterpetedLabel)) {
+  if (!concrete.every(isInterpretedLabel)) {
     throw new Error(
       `Invariant(parsePartialInterpretedName): Concrete portion of Partial InterpretedName contains segments that are not InterpretedLabels.\n${JSON.stringify(concrete)}`,
     );
@@ -183,41 +295,48 @@ export function parsePartialInterpretedName(partialInterpretedName: Name): {
 }
 
 /**
+ * Casts a string to a {@link LiteralName}.
+ *
+ * A LiteralName is a name that should be interpreted as a string literal. It may or may not be
+ * normalized or normalizable. It may also include labels formatted as an EncodedLabelHash, but
+ * such labels must be interpreted literally and not as an EncodedLabelHash.
+ */
+export function asLiteralName(name: Name): LiteralName {
+  return name as LiteralName;
+}
+
+/**
+ * Casts a string to a {@link LiteralLabel}.
+ *
+ * A LiteralLabel is a label that should be interpreted as a string literal. It may or may not be
+ * normalized or normalizable. It may also be formatted as an EncodedLabelHash, but such labels must
+ * be interpreted literally and not as an EncodedLabelHash.
+ */
+export function asLiteralLabel(label: Label): LiteralLabel {
+  return label as LiteralLabel;
+}
+
+/**
  * Validates and casts a string to an {@link InterpretedLabel}.
  * An InterpretedLabel is either a normalized label or an EncodedLabelHash.
  *
  * @throws if the input is not a valid InterpretedLabel
  */
-export function asInterpretedLabel(label: string): InterpretedLabel {
-  if (!isInterpetedLabel(label as Label)) {
-    throw new Error(`Not a valid InterpretedLabel: '${label}'`);
-  }
+export function asInterpretedLabel(label: Label): InterpretedLabel {
+  if (isInterpretedLabel(label)) return label;
 
-  return label as InterpretedLabel;
+  throw new Error(`Not a valid InterpretedLabel: '${label}'`);
 }
 
 /**
  * Validates and casts a string to an {@link InterpretedName}.
- * An InterpretedName is composed entirely of InterpretedLabels joined by dots.
+ * An InterpretedName is either the ENS Root Name ('') or a name made up of InterpretedLabels (which
+ * are either normalized Labels or EncodedLabelHashes).
  *
- * @throws if the input is not a valid InterpretedName
+ * @throws if the input cannot be interpreted into an InterpretedName
  */
-export function asInterpretedName(name: string): InterpretedName {
-  if (!isInterpretedName(name as Name)) {
-    throw new Error(`Not a valid InterpretedName: '${name}'`);
-  }
+export function asInterpretedName(name: Name): InterpretedName {
+  if (isInterpretedName(name)) return name;
 
-  return name as InterpretedName;
-}
-
-/**
- * Validates and casts a string to a {@link LiteralLabel}.
- * A LiteralLabel is a label as it literally appears onchain.
- *
- * @throws if the input is empty
- */
-export function asLiteralLabel(label: string): LiteralLabel {
-  if (label === "") throw new Error("LiteralLabel must not be empty");
-
-  return label as LiteralLabel;
+  throw new Error(`Not a valid InterpretedName: '${name}'`);
 }

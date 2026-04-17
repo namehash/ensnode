@@ -1,4 +1,11 @@
-import type { Address } from "enssdk";
+import type {
+  AccountId,
+  NormalizedAddress,
+  PermissionsId,
+  PermissionsResourceId,
+  PermissionsUserId,
+  RegistryId,
+} from "enssdk";
 import { toEventSelector } from "viem";
 import { beforeAll, describe, expect, it } from "vitest";
 
@@ -19,9 +26,11 @@ import {
 } from "@/test/integration/graphql-utils";
 import { gql } from "@/test/integration/omnigraph-api-client";
 
-const namespace = "ens-test-env";
-
-const V2_ETH_REGISTRY = getDatasourceContract(namespace, DatasourceNames.ENSv2Root, "ETHRegistry");
+const V2_ETH_REGISTRY = getDatasourceContract(
+  "ens-test-env",
+  DatasourceNames.ENSv2Root,
+  "ETHRegistry",
+);
 
 const NAME_WITH_RESOLVER = "example.eth";
 
@@ -31,30 +40,28 @@ const EAC_ROLES_CHANGED_SELECTOR = toEventSelector(
   )!,
 );
 
+// the type of the PermissionUser returned by the omnigraph, to DRY up the types below
+type PermissionUser = {
+  id: PermissionsUserId;
+  resource: string;
+  user: { address: NormalizedAddress };
+  roles: string;
+};
+
 describe("Permissions", () => {
   type PermissionsResult = {
     permissions: {
-      id: string;
-      contract: { chainId: number; address: Address };
+      id: PermissionsId;
+      contract: AccountId;
       root: {
-        id: string;
+        id: PermissionsResourceId;
         resource: string;
-        users: GraphQLConnection<{
-          id: string;
-          resource: string;
-          user: { address: Address };
-          roles: string;
-        }>;
+        users: GraphQLConnection<PermissionUser>;
       };
       resources: GraphQLConnection<{
-        id: string;
+        id: PermissionsResourceId;
         resource: string;
-        users: GraphQLConnection<{
-          id: string;
-          resource: string;
-          user: { address: Address };
-          roles: string;
-        }>;
+        users: GraphQLConnection<PermissionUser>;
       }>;
     };
   };
@@ -126,7 +133,10 @@ describe("Registry.permissions", () => {
   it("resolves permissions from a registry", async () => {
     const result = await request<{
       registry: {
-        permissions: { id: string; contract: { chainId: number; address: Address } };
+        permissions: {
+          id: PermissionsId;
+          contract: AccountId;
+        };
       };
     }>(RegistryPermissions, { contract: V2_ETH_REGISTRY });
 
@@ -138,12 +148,7 @@ describe("Registry.permissions", () => {
 describe("Domain.permissions", () => {
   type DomainPermissionsResult = {
     domain: {
-      permissions: GraphQLConnection<{
-        id: string;
-        resource: string;
-        user: { address: Address };
-        roles: string;
-      }>;
+      permissions: GraphQLConnection<PermissionUser>;
     };
   };
 
@@ -157,7 +162,7 @@ describe("Domain.permissions", () => {
     }
   `;
 
-  let allUsers: { id: string; resource: string; user: { address: Address }; roles: string }[];
+  let allUsers: PermissionUser[];
 
   beforeAll(async () => {
     const result = await request<DomainPermissionsResult>(DomainPermissions, {
@@ -199,7 +204,7 @@ describe("Domain.permissions", () => {
 
     expect(filteredUsers.length).toBeGreaterThan(0);
     for (const user of filteredUsers) {
-      expect(user.user.address.toLowerCase()).toBe(targetUser.toLowerCase());
+      expect(user.user.address).toBe(targetUser);
     }
   });
 });
@@ -229,12 +234,12 @@ describe("Account.permissions and Account.registryPermissions", () => {
     }
   `;
 
-  let targetAddress: Address;
+  let targetAddress: NormalizedAddress;
 
   beforeAll(async () => {
     const rootResult = await request<{
       permissions: {
-        root: { users: GraphQLConnection<{ user: { address: Address } }> };
+        root: { users: GraphQLConnection<{ user: { address: NormalizedAddress } }> };
       };
     }>(PermissionsRootUsers, { contract: V2_ETH_REGISTRY });
 
@@ -246,12 +251,7 @@ describe("Account.permissions and Account.registryPermissions", () => {
   it("resolves permissions for an account with known roles", async () => {
     const result = await request<{
       account: {
-        permissions: GraphQLConnection<{
-          id: string;
-          resource: string;
-          user: { address: Address };
-          roles: string;
-        }>;
+        permissions: GraphQLConnection<PermissionUser>;
       };
     }>(AccountPermissions, { address: targetAddress });
 
@@ -259,20 +259,14 @@ describe("Account.permissions and Account.registryPermissions", () => {
     expect(permissions.length).toBeGreaterThan(0);
 
     for (const p of permissions) {
-      expect(p.user.address.toLowerCase()).toBe(targetAddress.toLowerCase());
+      expect(p.user.address).toBe(targetAddress);
     }
   });
 
   it("resolves registry-scoped permissions for an account", async () => {
     const result = await request<{
       account: {
-        registryPermissions: GraphQLConnection<{
-          id: string;
-          registry: { id: string };
-          resource: string;
-          user: { address: Address };
-          roles: string;
-        }>;
+        registryPermissions: GraphQLConnection<PermissionUser & { registry: { id: RegistryId } }>;
       };
     }>(AccountRegistryPermissions, { address: targetAddress });
 
@@ -281,7 +275,7 @@ describe("Account.permissions and Account.registryPermissions", () => {
 
     for (const p of permissions) {
       expect(p.registry.id).toBeTruthy();
-      expect(p.user.address.toLowerCase()).toBe(targetAddress.toLowerCase());
+      expect(p.user.address).toBe(targetAddress);
     }
   });
 });
@@ -299,7 +293,10 @@ describe("Resolver.permissions", () => {
     const result = await request<{
       domain: {
         resolver: {
-          permissions: { id: string; contract: { chainId: number; address: Address } };
+          permissions: {
+            id: PermissionsId;
+            contract: AccountId;
+          };
         };
       };
     }>(ResolverPermissions, { name: NAME_WITH_RESOLVER });
@@ -340,14 +337,12 @@ describe("Permissions.events", () => {
 
   it("returns events scoped to the ETHRegistry contract", () => {
     for (const event of allEvents) {
-      expect(event.address.toLowerCase()).toBe(V2_ETH_REGISTRY.address);
+      expect(event.address).toBe(V2_ETH_REGISTRY.address);
     }
   });
 
   it("includes EACRolesChanged events", () => {
-    const rolesChangedEvents = allEvents.filter(
-      (e) => e.topics[0]?.toLowerCase() === EAC_ROLES_CHANGED_SELECTOR,
-    );
+    const rolesChangedEvents = allEvents.filter((e) => e.topics[0] === EAC_ROLES_CHANGED_SELECTOR);
     expect(rolesChangedEvents.length).toBeGreaterThan(0);
   });
 });
@@ -394,7 +389,7 @@ describe("Permissions.events filtering (EventsWhereInput)", () => {
 
     expect(events.length).toBeGreaterThan(0);
     for (const event of events) {
-      expect(event.topics[0]?.toLowerCase()).toBe(EAC_ROLES_CHANGED_SELECTOR);
+      expect(event.topics[0]).toBe(EAC_ROLES_CHANGED_SELECTOR);
     }
   });
 
@@ -476,7 +471,7 @@ describe("Permissions.events filtering (EventsWhereInput)", () => {
 
     expect(events.length).toBeGreaterThan(0);
     for (const event of events) {
-      expect(event.from.toLowerCase()).toBe(targetFrom.toLowerCase());
+      expect(event.from).toBe(targetFrom);
     }
   });
 
@@ -492,7 +487,7 @@ describe("Permissions.events filtering (EventsWhereInput)", () => {
     expect(events.length).toBeGreaterThan(0);
     expect(events.length).toBeLessThanOrEqual(allEvents.length);
     for (const event of events) {
-      expect(event.topics[0]?.toLowerCase()).toBe(EAC_ROLES_CHANGED_SELECTOR);
+      expect(event.topics[0]).toBe(EAC_ROLES_CHANGED_SELECTOR);
       expect(BigInt(event.timestamp)).toBeGreaterThanOrEqual(BigInt(midTimestamp));
     }
   });

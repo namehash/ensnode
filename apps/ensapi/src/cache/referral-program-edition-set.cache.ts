@@ -5,7 +5,7 @@ import {
   ENSReferralsClient,
   ReferralProgramAwardModels,
   type ReferralProgramEditionConfigSet,
-} from "@namehash/ens-referrals/v1";
+} from "@namehash/ens-referrals";
 import { minutesToSeconds } from "date-fns";
 
 import { type CachedResult, SWRCache } from "@ensnode/ensnode-sdk";

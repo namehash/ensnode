@@ -1,6 +1,4 @@
-import type { Address } from "enssdk";
-import { asLowerCaseAddress } from "enssdk";
-import { isAddress } from "viem";
+import { isNormalizedAddress } from "enssdk";
 
 import { type DatasourceName, type ENSNamespace, getENSNamespace } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
@@ -125,15 +123,11 @@ export function invariant_validContractConfigs(
 
     // Invariant: `contracts` must provide valid addresses if a filter is not provided
     for (const [contractName, contractConfig] of Object.entries(datasource.contracts)) {
+      // only ContractConfigs with `address` defined
       if ("address" in contractConfig && typeof contractConfig.address === "string") {
-        // only ContractConfigs with `address` defined
-        const isValidAddress =
-          isAddress(contractConfig.address as Address, { strict: false }) && // must be a valid `Address`
-          contractConfig.address === asLowerCaseAddress(contractConfig.address); // and in lowercase format
-
-        if (!isValidAddress) {
+        if (!isNormalizedAddress(contractConfig.address)) {
           throw new Error(
-            `The '${config.namespace}' namespace's '${datasourceName}' Datasource does not define a valid address for ${contractName}: '${contractConfig.address}'. This occurs if the address property of any ContractConfig in the Datasource is malformed (i.e. not a lowercase viem#Address). This is only likely to occur if you are actively editing the Datasource and typo'd an address.`,
+            `The '${config.namespace}' namespace's '${datasourceName}' Datasource does not define a valid address for ${contractName}: '${contractConfig.address}'. This occurs if the address property of any ContractConfig in the Datasource is malformed (i.e. not an enssdk#NormalizedAddress). This is only likely to occur if you are actively editing the Datasource and typo'd an address.`,
           );
         }
       }

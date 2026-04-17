@@ -1,0 +1,53 @@
+---
+title: ENSApi API Reference
+description: Interactive API reference documentation for ENSApi endpoints.
+sidebar:
+  label: API Reference
+tableOfContents:
+  minHeadingLevel: 6
+  maxHeadingLevel: 6
+---
+
+import { ScalarComponent } from "@scalar/astro";
+import openapiSpec from "@workspace/docs/docs.ensnode.io/ensapi-openapi.json";
+
+<ScalarComponent
+  configuration={{
+    content: openapiSpec,
+    theme: "none",
+    agent: { disabled: true },
+    hideDownloadButton: true,
+    hiddenClients: true,
+    telemetry: false,
+    defaultOpenAllTags: true,
+    expandAllResponses: true,
+    hideClientButton: true,
+    hideSearch: true,
+    showOperationId: true,
+    showSidebar: false,
+    showDeveloperTools: "never",
+    isEditable: false,
+    isLoading: false,
+    hideTestRequestButton: false,
+    forceDarkModeState: "light",
+    hideDarkModeToggle: true,
+    withDefaultFonts: true,
+    expandAllModelSections: true,
+    customCss: `
+      .light-mode {
+        --scalar-color-1: #121212;
+        --scalar-color-2: rgba(0, 0, 0, 0.6);
+        --scalar-color-3: rgba(0, 0, 0, 0.4);
+        --scalar-color-accent: var(--color-primary);
+        --scalar-background-1: var(--color-background);
+        --scalar-background-2: #f6f5f4;
+        --scalar-background-3: #f1ede9;
+        --scalar-background-accent: color-mix(in srgb, var(--color-primary) 6%, transparent);
+        --scalar-border-color: var(--color-border-light);
+      }
+      .scalar-mcp-layer { display: none !important; }
+      .section { padding-inline: 0 !important; }
+      .main-pane { isolation: auto !important; }
+    `,
+  }}
+/>

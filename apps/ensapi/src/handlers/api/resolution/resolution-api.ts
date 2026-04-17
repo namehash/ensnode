@@ -1,5 +1,6 @@
+import type { Duration } from "enssdk";
+
 import type {
-  Duration,
   ResolvePrimaryNameResponse,
   ResolvePrimaryNamesResponse,
   ResolveRecordsResponse,

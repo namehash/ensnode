@@ -10,6 +10,7 @@ import {
   makeDatetimeSchema,
   makeIntegerSchema,
   makeNonNegativeIntegerSchema,
+  makeNormalizedAddressSchema,
   makePositiveIntegerSchema,
   makePriceSchema,
   makeReinterpretedNameSchema,
@@ -166,6 +167,20 @@ describe("ENSIndexer: Shared", () => {
           } satisfies SerializedPrice),
         ),
       ).toMatch(/Price currency must be one of ETH, USDC, DAI/i);
+    });
+
+    describe("NormalizedAddress", () => {
+      const validAddress = "0x1234567890AbcdEF1234567890aBcdef12345678";
+
+      it("normalizes a valid address", () => {
+        expect(makeNormalizedAddressSchema().parse(validAddress)).toBe(validAddress.toLowerCase());
+      });
+
+      it("rejects invalid input with a useful error", () => {
+        expect(
+          formatParseError(makeNormalizedAddressSchema().safeParse("not-an-address")),
+        ).toContain("EVM address must be a valid EVM address");
+      });
     });
 
     describe("ReinterpretedName", () => {

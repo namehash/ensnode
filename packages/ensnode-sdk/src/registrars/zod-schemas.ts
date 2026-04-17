@@ -1,4 +1,3 @@
-import type { Address } from "enssdk";
 import { z } from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
@@ -8,8 +7,8 @@ import {
   makeBlockRefSchema,
   makeDurationSchema,
   makeHexStringSchema,
-  makeLowercaseAddressSchema,
   makeNodeSchema,
+  makeNormalizedAddressSchema,
   makePriceEthSchema,
   makeTransactionHashSchema,
   makeUnixTimestampSchema,
@@ -94,9 +93,7 @@ function invariant_registrarActionDecodedReferrerBasedOnRawReferrer(
   const { encodedReferrer, decodedReferrer } = ctx.value;
 
   try {
-    // decodeEncodedReferrer returns checksummed address, but ENSNode work on lowercase address values
-    // so we lowercase the result before using for checks
-    const expectedDecodedReferrer = decodeEncodedReferrer(encodedReferrer).toLowerCase() as Address;
+    const expectedDecodedReferrer = decodeEncodedReferrer(encodedReferrer);
 
     if (decodedReferrer !== expectedDecodedReferrer) {
       ctx.issues.push({
@@ -127,7 +124,7 @@ const makeRegistrarActionReferralSchema = (valueLabel: string = "Registrar Actio
           { bytesCount: ENCODED_REFERRER_BYTE_LENGTH },
           `${valueLabel} Encoded Referrer`,
         ),
-        decodedReferrer: makeLowercaseAddressSchema(`${valueLabel} Decoded Referrer`),
+        decodedReferrer: makeNormalizedAddressSchema(`${valueLabel} Decoded Referrer`),
       })
       .check(invariant_registrarActionDecodedReferrerBasedOnRawReferrer),
 
@@ -164,7 +161,7 @@ export const makeBaseRegistrarActionSchema = (valueLabel: string = "Base Registr
     .object({
       id: EventIdSchema,
       incrementalDuration: makeDurationSchema(`${valueLabel} Incremental Duration`),
-      registrant: makeLowercaseAddressSchema(`${valueLabel} Registrant`),
+      registrant: makeNormalizedAddressSchema(`${valueLabel} Registrant`),
       registrationLifecycle: makeRegistrationLifecycleSchema(
         `${valueLabel} Registration Lifecycle`,
       ),

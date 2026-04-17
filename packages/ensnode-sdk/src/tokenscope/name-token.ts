@@ -1,5 +1,5 @@
 import type { AccountId, AssetId, InterpretedName } from "enssdk";
-import { getParentNameFQDN } from "enssdk";
+import { getParentInterpretedName } from "enssdk";
 import { isAddressEqual, zeroAddress } from "viem";
 
 import { DatasourceNames, type ENSNamespaceId } from "@ensnode/datasources";
@@ -219,7 +219,8 @@ export function getNameTokenOwnership(
     } satisfies NameTokenOwnershipBurned;
   }
 
-  const parentName = getParentNameFQDN(name);
+  const parentName = getParentInterpretedName(name);
+  if (parentName === null) throw new Error(`Invariant: '${name}' has no parent Name.`);
 
   // set ownershipType as 'fully-onchain' if `name` is a direct subname of .eth
   if (parentName === "eth") {

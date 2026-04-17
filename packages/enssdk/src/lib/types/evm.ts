@@ -1,8 +1,50 @@
 import type { Address as ViemAddress, Hex as ViemHex } from "viem";
 
-// re-export viem Address/Hex for consistency
+/**
+ * Represents a Hex string, in the format `0x{string}`.
+ */
 export type Hex = ViemHex;
+
+/**
+ * Represents an EVM Address, in the format `0x{string}`, which may or may not be checksummed.
+ */
 export type Address = ViemAddress;
+
+/**
+ * Represents a normalized (non-checksummed) EVM Address, in the format `0x{string}`, where all
+ * characters are lowercase and length is exactly 42.
+ *
+ * @dev because the Address type is so widely used, nominally typing it would involve a _ton_ of
+ *      asNormalizedAddress() casts across the codebase. By avoiding the __brand, we can easily use
+ *      EventWithArgs<{ address: NormalizedAddress }> in all of the Ponder event handler args to
+ *      declare that the incoming event.args.address is a NormalizedAddress.
+ */
+export type NormalizedAddress = Address;
+
+/**
+ * Unix timestamp value as bigint.
+ *
+ * Represents the number of seconds that have elapsed
+ * since January 1, 1970 (midnight UTC/GMT).
+ *
+ * Guaranteed to be an integer. May be zero or negative to represent a time at or
+ * before Jan 1, 1970.
+ */
+export type UnixTimestampBigInt = bigint;
+
+/**
+ * Duration value as bigint.
+ *
+ * Representing a duration in seconds.
+ *
+ * Guaranteed to be a non-negative integer.
+ */
+export type DurationBigInt = bigint;
+
+/**
+ * A value denominated in wei, the smallest unit of Ether (1 ETH = 10^18 wei).
+ */
+export type Wei = bigint;
 
 /**
  * Chain ID
@@ -33,7 +75,7 @@ export type DefaultableChainId = 0 | ChainId;
  */
 export interface AccountId {
   chainId: ChainId;
-  address: Address;
+  address: NormalizedAddress;
 }
 
 /**
@@ -47,17 +89,6 @@ export const AssetNamespaces = {
 } as const;
 
 export type AssetNamespace = (typeof AssetNamespaces)[keyof typeof AssetNamespaces];
-
-/**
- * Unix timestamp value
- *
- * Represents the number of seconds that have elapsed
- * since January 1, 1970 (midnight UTC/GMT).
- *
- * Guaranteed to be an integer. May be zero or negative to represent a time at or
- * before Jan 1, 1970.
- */
-export type UnixTimestamp = number;
 
 /**
  * A uint256 value that identifies a specific NFT within a NFT contract.

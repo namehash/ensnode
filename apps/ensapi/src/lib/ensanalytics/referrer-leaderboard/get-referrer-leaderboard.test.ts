@@ -1,11 +1,11 @@
 import {
-  buildReferralProgramRules,
-  ENS_HOLIDAY_AWARDS_MAX_QUALIFIED_REFERRERS,
-  ENS_HOLIDAY_AWARDS_TOTAL_AWARD_POOL_VALUE,
+  buildReferralProgramRulesPieSplit,
+  ReferralProgramAwardModels,
   type ReferrerLeaderboard,
 } from "@namehash/ens-referrals";
-import { getUnixTime } from "date-fns";
 import { describe, expect, it, vi } from "vitest";
+
+import { parseEth, parseTimestamp, parseUsdc } from "@ensnode/ensnode-sdk";
 
 import * as database from "./database";
 import { getReferrerLeaderboard } from "./get-referrer-leaderboard";
@@ -16,18 +16,20 @@ vi.mock("./database", () => ({
   getReferrerMetrics: vi.fn(),
 }));
 
-const rules = buildReferralProgramRules(
-  ENS_HOLIDAY_AWARDS_TOTAL_AWARD_POOL_VALUE,
-  ENS_HOLIDAY_AWARDS_MAX_QUALIFIED_REFERRERS,
-  getUnixTime("2025-01-01T00:00:00Z"),
-  getUnixTime("2025-12-31T23:59:59Z"),
+const rules = buildReferralProgramRulesPieSplit(
+  parseUsdc("10000"),
+  10, // maxQualifiedReferrers
+  parseTimestamp("2025-01-01T00:00:00Z"),
+  parseTimestamp("2025-12-31T23:59:59Z"),
   {
     chainId: 1,
     address: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
   },
+  new URL("https://example.com/rules"),
+  false,
 );
 
-const accurateAsOf = getUnixTime("2025-11-30T23:59:59Z");
+const accurateAsOf = parseTimestamp("2025-11-30T23:59:59Z");
 
 describe("ENSAnalytics Referrer Leaderboard", () => {
   describe("getReferrerLeaderboard", () => {
@@ -36,13 +38,19 @@ describe("ENSAnalytics Referrer Leaderboard", () => {
 
       const result = await getReferrerLeaderboard(rules, accurateAsOf);
 
+      expect(result.awardModel).toBe(ReferralProgramAwardModels.PieSplit);
+      if (result.awardModel !== ReferralProgramAwardModels.PieSplit) {
+        throw new Error("Expected PieSplit leaderboard");
+      }
+
       expect(result).toMatchObject({
         rules,
       });
 
-      const referrers = result.referrers.entries();
-      const qualifiedReferrers = referrers.take(rules.maxQualifiedReferrers);
-      const unqualifiedReferrers = referrers.drop(rules.maxQualifiedReferrers);
+      // result.referrers is expected to be in rank order (rank 1 first), matching Map insertion order
+      const referrerEntries = Array.from(result.referrers.entries());
+      const qualifiedReferrers = referrerEntries.slice(0, rules.maxQualifiedReferrers);
+      const unqualifiedReferrers = referrerEntries.slice(rules.maxQualifiedReferrers);
 
       /**
        * Assert {@link RankedReferrerMetrics}.
@@ -60,38 +68,39 @@ describe("ENSAnalytics Referrer Leaderboard", () => {
       expect(qualifiedReferrers.every(([_, referrer]) => referrer.isQualified)).toBe(true);
       expect(unqualifiedReferrers.every(([_, referrer]) => !referrer.isQualified)).toBe(true);
 
-      // Assert `finalScoreBoost`
-      expect(qualifiedReferrers.every(([_, referrer]) => referrer.finalScoreBoost > 0)).toBe(true);
-      expect(unqualifiedReferrers.every(([_, referrer]) => referrer.finalScoreBoost === 0)).toBe(
-        true,
-      );
+      // Assert `finalScoreBoost` (pie-split specific)
+      // All qualified referrers except the last have boost > 0; the last qualified referrer
+      // receives boost === 0 by design (formula: 1 - (rank-1)/(maxQualifiedReferrers-1)),
+      // but only when the qualified slots are fully filled (length === maxQualifiedReferrers).
+      // With fewer referrers, the last qualified referrer is below the cutoff rank and has boost > 0.
+      const topQualifiedReferrers = qualifiedReferrers.slice(0, -1);
+      const lastQualifiedReferrer = qualifiedReferrers.at(-1);
+      expect(topQualifiedReferrers.every(([_, r]) => r.finalScoreBoost > 0)).toBe(true);
+      if (qualifiedReferrers.length === rules.maxQualifiedReferrers) {
+        expect(lastQualifiedReferrer![1].finalScoreBoost).toBe(0);
+      }
+      expect(unqualifiedReferrers.every(([_, r]) => r.finalScoreBoost === 0)).toBe(true);
 
-      // Assert `finalScore`
+      // Assert `finalScore` (pie-split specific)
       expect(
-        qualifiedReferrers.every(
-          ([_, referrer]) => referrer.finalScore === referrer.score * referrer.finalScoreBoost,
-        ),
+        qualifiedReferrers.every(([_, r]) => r.finalScore === r.score * (1 + r.finalScoreBoost)),
       ).toBe(true);
-      expect(
-        unqualifiedReferrers.every(([_, referrer]) => referrer.finalScore === referrer.score),
-      ).toBe(true);
+      expect(unqualifiedReferrers.every(([_, r]) => r.finalScore === r.score)).toBe(true);
 
       /**
        * Assert {@link AwardedReferrerMetrics}.
        */
 
-      // Assert `awardPoolShare`
-      expect(qualifiedReferrers.every(([_, referrer]) => referrer.awardPoolShare > 0)).toBe(true);
-      expect(unqualifiedReferrers.every(([_, referrer]) => referrer.awardPoolShare === 0)).toBe(
-        true,
-      );
+      // Assert `awardPoolShare` (pie-split specific)
+      expect(qualifiedReferrers.every(([_, r]) => r.awardPoolShare > 0)).toBe(true);
+      expect(unqualifiedReferrers.every(([_, r]) => r.awardPoolShare === 0)).toBe(true);
 
       // Assert `awardPoolApproxValue`
-      expect(qualifiedReferrers.every(([_, referrer]) => referrer.awardPoolApproxValue > 0)).toBe(
-        true,
-      );
       expect(
-        unqualifiedReferrers.every(([_, referrer]) => referrer.awardPoolApproxValue === 0),
+        qualifiedReferrers.every(([_, referrer]) => referrer.awardPoolApproxValue.amount > 0),
+      ).toBe(true);
+      expect(
+        unqualifiedReferrers.every(([_, referrer]) => referrer.awardPoolApproxValue.amount === 0n),
       ).toBe(true);
     });
 
@@ -101,9 +110,10 @@ describe("ENSAnalytics Referrer Leaderboard", () => {
       const result = await getReferrerLeaderboard(rules, accurateAsOf);
 
       expect(result).toMatchObject({
+        awardModel: rules.awardModel,
         aggregatedMetrics: {
           grandTotalIncrementalDuration: 0,
-          grandTotalRevenueContribution: 0n,
+          grandTotalRevenueContribution: parseEth("0"),
           grandTotalQualifiedReferrersFinalScore: 0,
           grandTotalReferrals: 0,
           minFinalScoreToQualify: 0,

@@ -1,5 +1,5 @@
-import { type Address, asLowerCaseAddress, type Hex } from "enssdk";
-import { type Hash, isAddress } from "viem";
+import { type Hex, type NormalizedAddress, toNormalizedAddress } from "enssdk";
+import type { Address, Hash } from "viem";
 
 /**
  * Options for the `callTracer` tracer. This tracer is used to enlist
@@ -69,9 +69,9 @@ interface Trace {
  * @param trace The transaction trace to extract addresses from
  * @returns An array of unique addresses found in the trace.
  */
-export function getAddressesFromTrace(trace: Trace): Set<Address> {
+export function getAddressesFromTrace(trace: Trace): Set<NormalizedAddress> {
   const text = JSON.stringify(trace);
-  const uniqueAddresses = new Set<Address>();
+  const uniqueAddresses = new Set<NormalizedAddress>();
 
   // Helper function to search for plain addresses (0x followed by 40 hex characters)
   const searchForPlainAddresses = (text: string) => {
@@ -84,12 +84,10 @@ export function getAddressesFromTrace(trace: Trace): Set<Address> {
     // if matches are found, normalize them and return unique addresses
     if (matches) {
       for (const maybeAddress of matches) {
-        if (isAddress(maybeAddress)) {
-          // Normalize the address
-          const normalizedAddr = asLowerCaseAddress(maybeAddress);
+        try {
           // Add the normalized address to the set
-          uniqueAddresses.add(normalizedAddr);
-        } else {
+          uniqueAddresses.add(toNormalizedAddress(maybeAddress));
+        } catch {
           // Ignore invalid addresses
         }
       }
@@ -109,19 +107,13 @@ export function getAddressesFromTrace(trace: Trace): Set<Address> {
       // match[1] contains the extracted address part (without the 24 zeroes)
       const maybePartialAddress = match[1];
 
-      if (!maybePartialAddress) {
-        // If no address part is found, skip this match
-        continue;
-      }
+      // If no address part is found, skip this match
+      if (!maybePartialAddress) continue;
 
-      const maybeAddress = `0x${maybePartialAddress}`;
-
-      if (isAddress(maybeAddress)) {
-        // Add 0x prefix and normalize the address
-        const normalizedAddr = asLowerCaseAddress(maybeAddress);
+      try {
         // Add the normalized address to the set
-        uniqueAddresses.add(normalizedAddr);
-      } else {
+        uniqueAddresses.add(toNormalizedAddress(`0x${maybePartialAddress}`));
+      } catch {
         // Ignore invalid addresses
       }
     }

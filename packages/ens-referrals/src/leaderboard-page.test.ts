@@ -1,13 +1,16 @@
-import type { Address } from "enssdk";
+import type { NormalizedAddress } from "enssdk";
 import { describe, expect, it, vi } from "vitest";
 
-import type { ReferrerLeaderboard } from "./leaderboard";
+import { priceEth, priceUsdc } from "@ensnode/ensnode-sdk";
+
+import type { ReferrerLeaderboardPieSplit } from "./award-models/pie-split/leaderboard";
+import type { AwardedReferrerMetricsPieSplit } from "./award-models/pie-split/metrics";
 import {
   buildReferrerLeaderboardPageContext,
   type ReferrerLeaderboardPageContext,
   type ReferrerLeaderboardPageParams,
-} from "./leaderboard-page";
-import type { AwardedReferrerMetrics } from "./referrer-metrics";
+} from "./award-models/shared/leaderboard-page";
+import { ReferralProgramAwardModels } from "./award-models/shared/rules";
 
 describe("buildReferrerLeaderboardPageContext", () => {
   const pageParams: ReferrerLeaderboardPageParams = {
@@ -16,9 +19,11 @@ describe("buildReferrerLeaderboardPageContext", () => {
   };
 
   it("correctly evaluates `hasNext` when `leaderboard.referrers.size` and `recordsPerPage` are equal", () => {
-    const leaderboard: ReferrerLeaderboard = {
+    const leaderboard: ReferrerLeaderboardPieSplit = {
+      awardModel: ReferralProgramAwardModels.PieSplit,
       rules: {
-        totalAwardPoolValue: 10000,
+        awardModel: ReferralProgramAwardModels.PieSplit,
+        awardPool: priceUsdc(10000n),
         maxQualifiedReferrers: 10,
         startTime: 1764547200,
         endTime: 1767225599,
@@ -26,29 +31,31 @@ describe("buildReferrerLeaderboardPageContext", () => {
           chainId: 1,
           address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
         },
+        rulesUrl: new URL("https://example.com/rules"),
+        areAwardsDistributed: false,
       },
       aggregatedMetrics: {
         grandTotalReferrals: 17,
         grandTotalIncrementalDuration: 464554733,
-        grandTotalRevenueContribution: 60_000_000_000_000_000n, // 0.06 ETH
+        grandTotalRevenueContribution: priceEth(60_000_000_000_000_000n), // 0.06 ETH
         grandTotalQualifiedReferrersFinalScore: 28.05273061366773,
         minFinalScoreToQualify: 0,
       },
-      referrers: new Map<Address, AwardedReferrerMetrics>([
+      referrers: new Map<NormalizedAddress, AwardedReferrerMetricsPieSplit>([
         [
           "0x03c098d2bed4609e6ed9beb2c4877741f45f290d",
           {
             referrer: "0x6837047f46da1d5d9a79846b25810b92adf456f6",
             totalReferrals: 1,
             totalIncrementalDuration: 189302400,
-            totalRevenueContribution: 20_000_000_000_000_000n, // 0.02 ETH
+            totalRevenueContribution: priceEth(20_000_000_000_000_000n), // 0.02 ETH
             score: 5.99875425231182,
             rank: 1,
             isQualified: true,
             finalScoreBoost: 1,
             finalScore: 11.9975085046236,
             awardPoolShare: 0.333854103435154,
-            awardPoolApproxValue: 3338.54103435154,
+            awardPoolApproxValue: priceUsdc(3338n),
           },
         ],
         [
@@ -57,14 +64,14 @@ describe("buildReferrerLeaderboardPageContext", () => {
             referrer: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
             totalReferrals: 10,
             totalIncrementalDuration: 155847533,
-            totalRevenueContribution: 25_000_000_000_000_000n, // 0.025 ETH
+            totalRevenueContribution: priceEth(25_000_000_000_000_000n), // 0.025 ETH
             score: 4.93861172016867,
             rank: 2,
             isQualified: true,
             finalScoreBoost: 0.888888888888889,
             finalScore: 9.32848880476303,
             awardPoolShare: 0.259583418100418,
-            awardPoolApproxValue: 2595.83418100418,
+            awardPoolApproxValue: priceUsdc(2595n),
           },
         ],
         [
@@ -73,14 +80,14 @@ describe("buildReferrerLeaderboardPageContext", () => {
             referrer: "0x7e491cde0fbf08e51f54c4fb6b9e24afbd18966d",
             totalReferrals: 6,
             totalIncrementalDuration: 119404800,
-            totalRevenueContribution: 15_000_000_000_000_000n, // 0.015 ETH
+            totalRevenueContribution: priceEth(15_000_000_000_000_000n), // 0.015 ETH
             score: 3.78378748365812,
             rank: 3,
             isQualified: true,
             finalScoreBoost: 0.777777777777778,
             finalScore: 6.7267333042811,
             awardPoolShare: 0.187184490470057,
-            awardPoolApproxValue: 1871.84490470057,
+            awardPoolApproxValue: priceUsdc(1871n),
           },
         ],
       ]),
@@ -101,9 +108,11 @@ describe("buildReferrerLeaderboardPageContext", () => {
   });
 
   it("Correctly builds the pagination context when `leaderboard.referrers.size` is 0", () => {
-    const leaderboard: ReferrerLeaderboard = {
+    const leaderboard: ReferrerLeaderboardPieSplit = {
+      awardModel: ReferralProgramAwardModels.PieSplit,
       rules: {
-        totalAwardPoolValue: 10000,
+        awardModel: ReferralProgramAwardModels.PieSplit,
+        awardPool: priceUsdc(10000n),
         maxQualifiedReferrers: 10,
         startTime: 1764547200,
         endTime: 1767225599,
@@ -111,15 +120,17 @@ describe("buildReferrerLeaderboardPageContext", () => {
           chainId: 1,
           address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
         },
+        rulesUrl: new URL("https://example.com/rules"),
+        areAwardsDistributed: false,
       },
       aggregatedMetrics: {
         grandTotalReferrals: 17,
         grandTotalIncrementalDuration: 464554733,
-        grandTotalRevenueContribution: 50_000_000_000_000_000n, // 0.05 ETH
+        grandTotalRevenueContribution: priceEth(50_000_000_000_000_000n), // 0.05 ETH
         grandTotalQualifiedReferrersFinalScore: 28.05273061366773,
         minFinalScoreToQualify: 0,
       },
-      referrers: new Map<Address, AwardedReferrerMetrics>(),
+      referrers: new Map<NormalizedAddress, AwardedReferrerMetricsPieSplit>(),
       accurateAsOf: 1764580368,
     };
 

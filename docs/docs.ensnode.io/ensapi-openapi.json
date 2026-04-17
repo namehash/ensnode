@@ -1926,70 +1926,11 @@
         }
       }
     },
-    "/ensanalytics/referrers": {
-      "get": {
-        "operationId": "getReferrerLeaderboard",
-        "tags": ["ENSAwards"],
-        "summary": "Get Referrer Leaderboard",
-        "description": "Returns a paginated page from the referrer leaderboard",
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "description": "Page number for pagination"
-            },
-            "required": false,
-            "description": "Page number for pagination",
-            "name": "page",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 100,
-              "description": "Number of referrers per page"
-            },
-            "required": false,
-            "description": "Number of referrers per page",
-            "name": "recordsPerPage",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": { "description": "Successfully retrieved referrer leaderboard page" },
-          "500": { "description": "Internal server error" }
-        }
-      }
-    },
-    "/ensanalytics/referrers/{referrer}": {
-      "get": {
-        "operationId": "getReferrerDetail",
-        "tags": ["ENSAwards"],
-        "summary": "Get Referrer Detail",
-        "description": "Returns detailed information for a specific referrer by address",
-        "parameters": [
-          {
-            "schema": { "type": "string", "description": "Referrer Ethereum address" },
-            "required": true,
-            "description": "Referrer Ethereum address",
-            "name": "referrer",
-            "in": "path"
-          }
-        ],
-        "responses": {
-          "200": { "description": "Successfully retrieved referrer detail" },
-          "500": { "description": "Internal server error" },
-          "503": { "description": "Service unavailable - referrer leaderboard data not yet cached" }
-        }
-      }
-    },
     "/v1/ensanalytics/referral-leaderboard": {
       "get": {
-        "operationId": "getReferralLeaderboard_v1",
+        "operationId": "getReferralLeaderboard",
         "tags": ["ENSAwards"],
-        "summary": "Get Referrer Leaderboard (v1)",
+        "summary": "Get Referrer Leaderboard",
         "description": "Returns a paginated page from the referrer leaderboard for a specific edition",
         "parameters": [
           {
@@ -2024,6 +1965,7 @@
         ],
         "responses": {
           "200": { "description": "Successfully retrieved referrer leaderboard page" },
+          "400": { "description": "Invalid request" },
           "404": { "description": "Unknown edition slug" },
           "500": { "description": "Internal server error" },
           "503": { "description": "Service unavailable" }
@@ -2032,9 +1974,9 @@
     },
     "/v1/ensanalytics/referrer/{referrer}": {
       "get": {
-        "operationId": "getReferrerDetail_v1",
+        "operationId": "getReferrerDetail",
         "tags": ["ENSAwards"],
-        "summary": "Get Referrer Detail for Editions (v1)",
+        "summary": "Get Referrer Detail for Editions",
         "description": "Returns detailed information for a specific referrer for the requested editions. Requires 1-20 distinct edition slugs. All requested editions must be recognized and have cached data, or the request fails.",
         "parameters": [
           {
@@ -2063,9 +2005,9 @@
     },
     "/v1/ensanalytics/editions": {
       "get": {
-        "operationId": "getEditions_v1",
+        "operationId": "getEditions",
         "tags": ["ENSAwards"],
-        "summary": "Get Edition Summaries (v1)",
+        "summary": "Get Edition Summaries",
         "description": "Returns a summary for each configured referral program edition, including its current status and award-model-specific runtime data. Editions are sorted in descending order by start timestamp (most recent first).",
         "responses": {
           "200": { "description": "Successfully retrieved edition summaries." },

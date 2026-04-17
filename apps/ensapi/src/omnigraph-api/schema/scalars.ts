@@ -1,15 +1,15 @@
 import {
-  type Address,
   asInterpretedLabel,
   asInterpretedName,
   type ChainId,
   type CoinType,
   type DomainId,
   type Hex,
-  isInterpetedLabel,
+  isInterpretedLabel,
   isInterpretedName,
   type Name,
   type Node,
+  type NormalizedAddress,
   type PermissionsId,
   type PermissionsResourceId,
   type PermissionsUserId,
@@ -25,7 +25,7 @@ import { z } from "zod/v4";
 import {
   makeChainIdSchema,
   makeCoinTypeSchema,
-  makeLowercaseAddressSchema,
+  makeNormalizedAddressSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
 import { builder } from "@/omnigraph-api/builder";
@@ -37,14 +37,14 @@ builder.scalarType("BigInt", {
 });
 
 builder.scalarType("Address", {
-  description: "Address represents a lowercase (unchecksummed) viem#Address.",
-  serialize: (value: Address) => value.toString(),
-  parseValue: (value) => makeLowercaseAddressSchema("Address").parse(value),
+  description: "Address represents an EVM Address in all lowercase.",
+  serialize: (value: NormalizedAddress) => value,
+  parseValue: (value) => makeNormalizedAddressSchema("Address").parse(value),
 });
 
 builder.scalarType("Hex", {
   description: "Hex represents viem#Hex.",
-  serialize: (value: Hex) => value.toString(),
+  serialize: (value: Hex) => value,
   parseValue: (value) =>
     z.coerce
       .string()
@@ -62,19 +62,19 @@ builder.scalarType("Hex", {
 });
 
 builder.scalarType("ChainId", {
-  description: "ChainId represents a @ensnode/ensnode-sdk#ChainId.",
+  description: "ChainId represents a enssdk#ChainId.",
   serialize: (value: ChainId) => value,
   parseValue: (value) => makeChainIdSchema("ChainId").parse(value),
 });
 
 builder.scalarType("CoinType", {
-  description: "CoinType represents a @ensnode/ensnode-sdk#CoinType.",
+  description: "CoinType represents a enssdk#CoinType.",
   serialize: (value: CoinType) => value,
   parseValue: (value) => makeCoinTypeSchema("CoinType").parse(value),
 });
 
 builder.scalarType("Node", {
-  description: "Node represents a @ensnode/ensnode-sdk#Node.",
+  description: "Node represents a enssdk#Node.",
   serialize: (value: Node) => value,
   parseValue: (value) =>
     z.coerce
@@ -93,7 +93,7 @@ builder.scalarType("Node", {
 });
 
 builder.scalarType("InterpretedName", {
-  description: "InterpretedName represents a @ensnode/ensnode-sdk#InterpretedName.",
+  description: "InterpretedName represents a enssdk#InterpretedName.",
   serialize: (value: Name) => value,
   parseValue: (value) =>
     z.coerce
@@ -113,13 +113,13 @@ builder.scalarType("InterpretedName", {
 });
 
 builder.scalarType("InterpretedLabel", {
-  description: "InterpretedLabel represents a @ensnode/ensnode-sdk#InterpretedLabel.",
+  description: "InterpretedLabel represents a enssdk#InterpretedLabel.",
   serialize: (value: Name) => value,
   parseValue: (value) =>
     z.coerce
       .string()
       .check((ctx) => {
-        if (!isInterpetedLabel(ctx.value)) {
+        if (!isInterpretedLabel(ctx.value)) {
           ctx.issues.push({
             code: "custom",
             message: "InterpretedLabel must be an Encoded LabelHash or normalized.",
@@ -132,7 +132,7 @@ builder.scalarType("InterpretedLabel", {
 });
 
 builder.scalarType("DomainId", {
-  description: "DomainId represents a @ensnode/ensnode-sdk#DomainId.",
+  description: "DomainId represents a enssdk#DomainId.",
   serialize: (value: DomainId) => value,
   parseValue: (value) =>
     z.coerce
@@ -142,7 +142,7 @@ builder.scalarType("DomainId", {
 });
 
 builder.scalarType("RegistryId", {
-  description: "RegistryId represents a @ensnode/ensnode-sdk#RegistryId.",
+  description: "RegistryId represents a enssdk#RegistryId.",
   serialize: (value: RegistryId) => value,
   parseValue: (value) =>
     z.coerce
@@ -152,7 +152,7 @@ builder.scalarType("RegistryId", {
 });
 
 builder.scalarType("ResolverId", {
-  description: "ResolverId represents a @ensnode/ensnode-sdk#ResolverId.",
+  description: "ResolverId represents a enssdk#ResolverId.",
   serialize: (value: ResolverId) => value,
   parseValue: (value) =>
     z.coerce
@@ -162,7 +162,7 @@ builder.scalarType("ResolverId", {
 });
 
 builder.scalarType("PermissionsId", {
-  description: "PermissionsId represents a @ensnode/ensnode-sdk#PermissionsId.",
+  description: "PermissionsId represents a enssdk#PermissionsId.",
   serialize: (value: PermissionsId) => value,
   parseValue: (value) =>
     z.coerce
@@ -172,7 +172,7 @@ builder.scalarType("PermissionsId", {
 });
 
 builder.scalarType("PermissionsResourceId", {
-  description: "PermissionsResourceId represents a @ensnode/ensnode-sdk#PermissionsResourceId.",
+  description: "PermissionsResourceId represents a enssdk#PermissionsResourceId.",
   serialize: (value: PermissionsResourceId) => value,
   parseValue: (value) =>
     z.coerce
@@ -182,7 +182,7 @@ builder.scalarType("PermissionsResourceId", {
 });
 
 builder.scalarType("PermissionsUserId", {
-  description: "PermissionsUserId represents a @ensnode/ensnode-sdk#PermissionsUserId.",
+  description: "PermissionsUserId represents a enssdk#PermissionsUserId.",
   serialize: (value: PermissionsUserId) => value,
   parseValue: (value) =>
     z.coerce
@@ -192,7 +192,7 @@ builder.scalarType("PermissionsUserId", {
 });
 
 builder.scalarType("RegistrationId", {
-  description: "RegistrationId represents a @ensnode/ensnode-sdk#RegistrationId.",
+  description: "RegistrationId represents a enssdk#RegistrationId.",
   serialize: (value: RegistrationId) => value,
   parseValue: (value) =>
     z.coerce
@@ -202,7 +202,7 @@ builder.scalarType("RegistrationId", {
 });
 
 builder.scalarType("RenewalId", {
-  description: "RenewalId represents a @ensnode/ensnode-sdk#RenewalId.",
+  description: "RenewalId represents a enssdk#RenewalId.",
   serialize: (value: RenewalId) => value,
   parseValue: (value) =>
     z.coerce
@@ -212,7 +212,7 @@ builder.scalarType("RenewalId", {
 });
 
 builder.scalarType("ResolverRecordsId", {
-  description: "ResolverRecordsId represents a @ensnode/ensnode-sdk#ResolverRecordsId.",
+  description: "ResolverRecordsId represents a enssdk#ResolverRecordsId.",
   serialize: (value: ResolverRecordsId) => value,
   parseValue: (value) =>
     z.coerce

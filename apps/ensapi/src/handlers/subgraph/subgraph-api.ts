@@ -1,5 +1,6 @@
 import config from "@/config";
 
+import type { Duration } from "enssdk";
 import { createDocumentationMiddleware } from "ponder-enrich-gql-docs-middleware";
 
 // FIXME: use the import from:
@@ -7,7 +8,7 @@ import { createDocumentationMiddleware } from "ponder-enrich-gql-docs-middleware
 // Once the lazy proxy implemented for `ensIndexerSchema` export is improved
 // to support Drizzle ORM in `ponder-subgraph` package.
 import * as ensIndexerSchema from "@ensnode/ensdb-sdk/ensindexer-abstract";
-import { type Duration, hasSubgraphApiConfigSupport } from "@ensnode/ensnode-sdk";
+import { hasSubgraphApiConfigSupport } from "@ensnode/ensnode-sdk";
 import { subgraphGraphQLMiddleware } from "@ensnode/ponder-subgraph";
 
 import { createApp } from "@/lib/hono-factory";

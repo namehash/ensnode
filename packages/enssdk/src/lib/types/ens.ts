@@ -23,16 +23,6 @@ export type Node = Hex;
 export type Name = string;
 
 /**
- * A Normalized Name is an ENS Name that is guaranteed to be normalized.
- *
- * @example vitalik.eth
- * @see https://ensnode.io/docs/reference/terminology#name-node-namehash
- * @see https://docs.ens.domains/ensip/15
- * @dev nominally typed to enforce usage & enhance codebase clarity
- */
-export type NormalizedName = Name & { __brand: "NormalizedName" };
-
-/**
  * A LabelHash is the result of the labelhash function (which is just keccak256) on a Label.
  *
  * @example
@@ -101,7 +91,6 @@ export type EncodedLabelHash = `[${string}]`;
  *   represent the encoding of a LabelHash literal, or
  * - containing other unnormalized characters such as null bytes or other characters
  *   not suitable for display.
- *
  *
  * @see https://ensnode.io/docs/reference/terminology#literal-label
  * @dev nominally typed to enforce usage & enhance codebase clarity

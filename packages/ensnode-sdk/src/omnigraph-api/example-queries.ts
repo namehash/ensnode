@@ -1,3 +1,5 @@
+import { asInterpretedName, toNormalizedAddress } from "enssdk";
+
 import { DatasourceNames, ENSNamespaceIds } from "@ensnode/datasources";
 
 import { maybeGetDatasourceContract } from "../shared/datasource-contract";
@@ -28,14 +30,14 @@ const ENS_TEST_ENV_V2_ETH_REGISTRAR = maybeGetDatasourceContract(
 );
 
 // these addresses are from the devnet accounts output
-const DEVNET_DEPLOYER = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
-const DEVNET_OWNER = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8";
+const DEVNET_DEPLOYER = toNormalizedAddress("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266");
+const DEVNET_OWNER = toNormalizedAddress("0x70997970C51812dc3A010C7d01b50e0d17dc79C8");
 // biome-ignore lint/correctness/noUnusedVariables: keeping it around for the future
-const DEVNET_USER = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC";
+const DEVNET_USER = toNormalizedAddress("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC");
 
-const VITALIK_ADDRESS = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
+const VITALIK_ADDRESS = toNormalizedAddress("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045");
 
-const DEVNET_NAME_WITH_OWNED_RESOLVER = "example.eth";
+const DEVNET_NAME_WITH_OWNED_RESOLVER = asInterpretedName("example.eth");
 
 export const GRAPHQL_API_EXAMPLE_QUERIES: Array<{
   query: string;

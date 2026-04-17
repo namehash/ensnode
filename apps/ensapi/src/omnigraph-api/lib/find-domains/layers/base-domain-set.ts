@@ -1,6 +1,6 @@
 import { and, eq, sql } from "drizzle-orm";
 import { alias, unionAll } from "drizzle-orm/pg-core";
-import type { Address, DomainId } from "enssdk";
+import type { DomainId, NormalizedAddress } from "enssdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 
@@ -30,7 +30,7 @@ export function domainsBase() {
     ensDb
       .select({
         domainId: sql<DomainId>`${ensIndexerSchema.v1Domain.id}`.as("domainId"),
-        ownerId: sql<Address | null>`${ensIndexerSchema.v1Domain.ownerId}`.as("ownerId"),
+        ownerId: sql<NormalizedAddress | null>`${ensIndexerSchema.v1Domain.ownerId}`.as("ownerId"),
         registryId: sql<string | null>`NULL::text`.as("registryId"),
         parentId: sql<DomainId | null>`${ensIndexerSchema.v1Domain.parentId}`.as("parentId"),
         labelHash: sql<string>`${ensIndexerSchema.v1Domain.labelHash}`.as("labelHash"),
@@ -46,7 +46,7 @@ export function domainsBase() {
     ensDb
       .select({
         domainId: sql<DomainId>`${ensIndexerSchema.v2Domain.id}`.as("domainId"),
-        ownerId: sql<Address | null>`${ensIndexerSchema.v2Domain.ownerId}`.as("ownerId"),
+        ownerId: sql<NormalizedAddress | null>`${ensIndexerSchema.v2Domain.ownerId}`.as("ownerId"),
         registryId: sql<string | null>`${ensIndexerSchema.v2Domain.registryId}`.as("registryId"),
         parentId: sql<DomainId | null>`${v2ParentDomain.id}`.as("parentId"),
         labelHash: sql<string>`${ensIndexerSchema.v2Domain.labelHash}`.as("labelHash"),

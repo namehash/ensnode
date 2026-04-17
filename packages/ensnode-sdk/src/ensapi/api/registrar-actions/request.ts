@@ -1,6 +1,5 @@
-import type { Address, Node } from "enssdk";
+import type { Address, Node, UnixTimestamp } from "enssdk";
 
-import type { UnixTimestamp } from "../../../shared/types";
 import type { RequestPageParams } from "../shared/pagination";
 
 /**

@@ -1,5 +1,5 @@
 import { trace } from "@opentelemetry/api";
-import type { Address, Name, Node } from "enssdk";
+import { type Address, asLiteralName, type Name, type Node } from "enssdk";
 import {
   ContractFunctionExecutionError,
   decodeAbiParameters,
@@ -96,9 +96,7 @@ export function makeResolveCalls<SELECTION extends ResolverRecordsSelection>(
 /**
  * Execute a set of ResolveCalls against the provided `resolverAddress`.
  *
- * NOTE: viem#readContract implements CCIP-Read, so we get that behavior for free
- * NOTE: viem#multicall _doesn't_ implement CCIP-Read so maybe this can be optimized further
- *
+ * @dev viem#readContract implements CCIP-Read, so we get that behavior for free
  * TODO: CCIP-Read Gateways can fail, should likely implement retries?
  */
 export async function executeResolveCalls<SELECTION extends ResolverRecordsSelection>({
@@ -194,14 +192,15 @@ export async function executeResolveCalls<SELECTION extends ResolverRecordsSelec
             }
           });
         } catch (error) {
-          if (error instanceof Error) span.recordException(error);
-
           // in general, reverts are expected behavior
           if (error instanceof ContractFunctionExecutionError) {
             return { call, result: null, reason: error.shortMessage };
           }
 
-          // otherwise, rethrow
+          // log the error if it wasn't a ContractFunctionExecutionError
+          if (error instanceof Error) span.recordException(error);
+
+          // then rethrow
           throw error;
         }
       }),
@@ -228,7 +227,7 @@ export function interpretRawCallsAndResults<SELECTION extends ResolverRecordsSel
       }
       case "name": {
         // interpret name records (see `interpretNameRecordValue` for specific guarantees)
-        return { call, result: interpretNameRecordValue(result) };
+        return { call, result: interpretNameRecordValue(asLiteralName(result)) };
       }
       case "text": {
         // interpret text records (see `interpretTextRecordValue` for specific guarantees)
