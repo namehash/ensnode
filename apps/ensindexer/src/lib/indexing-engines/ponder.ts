@@ -163,6 +163,13 @@ async function initializeIndexingSetup(): Promise<void> {
     // when Ponder issues the unqualified `CREATE INDEX ... USING gin (name gin_trgm_ops)`.
     await ensDbClient.ensDb.execute(sql`CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA public`);
   } catch (cause) {
+    // Log the underlying Postgres error so ops can see it without walking the
+    // Error#cause chain (some log formatters don't surface `cause` by default).
+    logger.error({
+      msg: "Failed to install the `pg_trgm` Postgres extension",
+      error: cause,
+      module: "IndexingEngine",
+    });
     throw new Error(
       `Unable to create the pg_trgm extension in the connected Postgres: ensure the database user has permission to install extensions and that the 'pg_trgm' extension is available.`,
       { cause },

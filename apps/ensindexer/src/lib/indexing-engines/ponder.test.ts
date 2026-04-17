@@ -1,6 +1,8 @@
 import type { Context, EventNames } from "ponder:registry";
 import { beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest";
 
+import "@/lib/__test__/mockLogger";
+
 import type { IndexingEngineContext, IndexingEngineEvent } from "./ponder";
 
 const { mockPonderOn } = vi.hoisted(() => ({ mockPonderOn: vi.fn() }));
@@ -28,15 +30,6 @@ vi.mock("@/lib/ensdb/singleton", () => ({
     ensDb: {
       execute: (...args: unknown[]) => mockEnsDbExecute(...args),
     },
-  },
-}));
-
-vi.mock("@/lib/logger", () => ({
-  logger: {
-    debug: vi.fn(),
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
   },
 }));
 
