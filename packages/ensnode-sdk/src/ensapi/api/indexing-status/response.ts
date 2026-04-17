@@ -42,7 +42,7 @@ export type IndexingStatusResponseCode = EnsApiIndexingStatusResponseCode;
 export type EnsApiIndexingStatusResponseOk = {
   responseCode: typeof EnsApiIndexingStatusResponseCodes.Ok;
   realtimeProjection: RealtimeIndexingStatusProjection;
-  config: EnsApiPublicConfig;
+  ensApiPublicConfig: EnsApiPublicConfig;
 };
 
 /**

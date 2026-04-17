@@ -30,8 +30,15 @@ const REALTIME_PROJECTION_REFRESH_RATE: Duration = 1;
  * Data model for the object cached in SWR for indexing status query results.
  */
 interface CacheableIndexingStatus {
+  /**
+   * The snapshot of the Cross-Chain Indexing Status.
+   */
   crossChainIndexingStatusSnapshot: CrossChainIndexingStatusSnapshotOmnichain;
-  config: EnsApiPublicConfig;
+
+  /**
+   * The Public Config for the connected ENSApi.
+   */
+  ensApiPublicConfig: EnsApiPublicConfig;
 }
 
 interface UseIndexingStatusParameters
@@ -73,7 +80,7 @@ export function useIndexingStatusWithSwr(
         // - Return this non-null value.
         return {
           crossChainIndexingStatusSnapshot: response.realtimeProjection.snapshot,
-          config: response.config,
+          ensApiPublicConfig: response.ensApiPublicConfig,
         } satisfies CacheableIndexingStatus;
       }),
     [queryOptions.queryFn],
@@ -94,7 +101,7 @@ export function useIndexingStatusWithSwr(
       return {
         responseCode: EnsApiIndexingStatusResponseCodes.Ok,
         realtimeProjection,
-        config: cachedResult.config,
+        ensApiPublicConfig: cachedResult.ensApiPublicConfig,
       } satisfies EnsApiIndexingStatusResponseOk;
     },
     [now],

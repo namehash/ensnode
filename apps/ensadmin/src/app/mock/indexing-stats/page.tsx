@@ -83,7 +83,7 @@ export default function MockIndexingStatusPage() {
           response.realtimeProjection.snapshot,
           now,
         ),
-        config: response.config,
+        ensApiPublicConfig: response.ensApiPublicConfig,
       } satisfies IndexingStatusResponseOk;
     },
     retry: false, // allows loading error to be observed immediately

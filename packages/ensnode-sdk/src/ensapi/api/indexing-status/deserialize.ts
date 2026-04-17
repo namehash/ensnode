@@ -38,7 +38,7 @@ function buildUnvalidatedEnsApiIndexingStatusResponse(
     realtimeProjection: buildUnvalidatedRealtimeIndexingStatusProjection(
       serializedResponse.realtimeProjection,
     ),
-    config: buildUnvalidatedEnsApiPublicConfig(serializedResponse.config),
+    ensApiPublicConfig: buildUnvalidatedEnsApiPublicConfig(serializedResponse.ensApiPublicConfig),
   };
 }
 

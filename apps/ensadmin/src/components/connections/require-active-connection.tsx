@@ -2,7 +2,7 @@
 
 import type { PropsWithChildren } from "react";
 
-import { useEnsApiConfig } from "@/components/config/useEnsApiConfig";
+import { useEnsApiPublicConfig } from "@/components/config/use-ens-api-public-config";
 import { ErrorInfo } from "@/components/error-info";
 import { LoadingSpinner } from "@/components/loading-spinner";
 
@@ -10,7 +10,7 @@ import { LoadingSpinner } from "@/components/loading-spinner";
  * Allows consumers to use `useActiveConnection` by blocking rendering until it is available.
  */
 export function RequireActiveConnection({ children }: PropsWithChildren) {
-  const ensApiConfig = useEnsApiConfig();
+  const ensApiConfig = useEnsApiPublicConfig();
 
   if (ensApiConfig.status === "pending") return <Loading />;
 

@@ -32,7 +32,7 @@ app.openapi(getIndexingStatusRoute, async (c) => {
     serializeEnsApiIndexingStatusResponse({
       responseCode: EnsApiIndexingStatusResponseCodes.Ok,
       realtimeProjection: c.var.indexingStatus,
-      config: ensApiPublicConfig,
+      ensApiPublicConfig: ensApiPublicConfig,
     } satisfies EnsApiIndexingStatusResponseOk),
     200,
   );

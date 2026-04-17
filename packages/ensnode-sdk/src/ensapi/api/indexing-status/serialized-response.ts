@@ -22,9 +22,9 @@ export type SerializedIndexingStatusResponseError = SerializedEnsApiIndexingStat
  * Serialized representation of {@link EnsApiIndexingStatusResponseOk}.
  */
 export interface SerializedEnsApiIndexingStatusResponseOk
-  extends Omit<EnsApiIndexingStatusResponseOk, "realtimeProjection" | "config"> {
+  extends Omit<EnsApiIndexingStatusResponseOk, "realtimeProjection" | "ensApiPublicConfig"> {
   realtimeProjection: SerializedRealtimeIndexingStatusProjection;
-  config: SerializedEnsApiPublicConfig;
+  ensApiPublicConfig: SerializedEnsApiPublicConfig;
 }
 
 /**

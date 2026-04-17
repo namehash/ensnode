@@ -32,7 +32,7 @@ export function serializeEnsApiIndexingStatusResponse(
       return {
         responseCode: response.responseCode,
         realtimeProjection: serializeRealtimeIndexingStatusProjection(response.realtimeProjection),
-        config: serializeEnsApiPublicConfig(response.config),
+        ensApiPublicConfig: serializeEnsApiPublicConfig(response.ensApiPublicConfig),
       } satisfies SerializedEnsApiIndexingStatusResponseOk;
 
     case EnsApiIndexingStatusResponseCodes.Error:

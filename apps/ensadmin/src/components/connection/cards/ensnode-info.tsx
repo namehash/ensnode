@@ -11,7 +11,7 @@ import { Fragment, ReactNode } from "react";
 
 import { type EnsApiPublicConfig, getENSRootChainId } from "@ensnode/ensnode-sdk";
 
-import { useEnsApiConfig } from "@/components/config/useEnsApiConfig";
+import { useEnsApiPublicConfig } from "@/components/config/use-ens-api-public-config";
 import { ErrorInfo, type ErrorInfoProps } from "@/components/error-info";
 import { ENSApiIcon } from "@/components/icons/ensnode-apps/ensapi-icon";
 import { ENSDbIcon } from "@/components/icons/ensnode-apps/ensdb-icon";
@@ -147,7 +147,7 @@ export function ENSNodeConfigInfoView({
  * ENSNodeConfigInfo component - fetches and displays ENSNode configuration data
  */
 export function ENSNodeConfigInfo() {
-  const ensApiConfig = useEnsApiConfig();
+  const ensApiConfig = useEnsApiPublicConfig();
 
   if (ensApiConfig.isError) {
     return (

@@ -25,7 +25,7 @@ export const makeEnsApiIndexingStatusResponseOkSchema = (
   z.strictObject({
     responseCode: z.literal(EnsApiIndexingStatusResponseCodes.Ok),
     realtimeProjection: makeRealtimeIndexingStatusProjectionSchema(valueLabel),
-    config: makeEnsApiPublicConfigSchema(valueLabel),
+    ensApiPublicConfig: makeEnsApiPublicConfigSchema(valueLabel),
   });
 
 /**
@@ -64,7 +64,7 @@ export const makeSerializedEnsApiIndexingStatusResponseOkSchema = (
   z.object({
     responseCode: z.literal(EnsApiIndexingStatusResponseCodes.Ok),
     realtimeProjection: makeSerializedRealtimeIndexingStatusProjectionSchema(valueLabel),
-    config: makeSerializedEnsApiPublicConfigSchema(valueLabel),
+    ensApiPublicConfig: makeSerializedEnsApiPublicConfigSchema(valueLabel),
   });
 
 /**
