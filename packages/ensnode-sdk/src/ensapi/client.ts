@@ -1,11 +1,9 @@
 import type { ResolverRecordsSelection } from "../resolution";
 import {
   deserializedNameTokensResponse,
-  deserializeEnsApiConfigResponse,
   deserializeEnsApiIndexingStatusResponse,
   deserializeErrorResponse,
   deserializeRegistrarActionsResponse,
-  type EnsApiConfigResponse,
   type EnsApiIndexingStatusResponse,
   type ErrorResponse,
   type NameTokensRequest,
@@ -22,7 +20,6 @@ import {
   type ResolvePrimaryNamesResponse,
   type ResolveRecordsRequest,
   type ResolveRecordsResponse,
-  type SerializedEnsApiConfigResponse,
   type SerializedEnsApiIndexingStatusResponse,
   type SerializedNameTokensResponse,
   type SerializedRegistrarActionsResponse,
@@ -308,39 +305,6 @@ export class EnsApiClient {
 
     const data = await response.json();
     return data as ResolvePrimaryNamesResponse;
-  }
-
-  /**
-   * Fetch ENSApi Config
-   *
-   * Fetch the ENSApi's configuration.
-   *
-   * @returns {EnsApiConfigResponse}
-   *
-   * @throws if the ENSApi request fails
-   * @throws if the ENSApi returns a non-ok response
-   * @throws if the ENSApi response breaks required invariants
-   */
-  async config(): Promise<EnsApiConfigResponse> {
-    const url = new URL(`/api/config`, this.options.url);
-
-    const response = await fetch(url);
-
-    // ENSApi should always allow parsing a response as JSON object.
-    // If for some reason it's not the case, throw an error.
-    let responseData: unknown;
-    try {
-      responseData = await response.json();
-    } catch {
-      throw new Error("Malformed response data: invalid JSON");
-    }
-
-    if (!response.ok) {
-      const errorResponse = deserializeErrorResponse(responseData);
-      throw new Error(`Fetching ENSApi Config Failed: ${errorResponse.message}`);
-    }
-
-    return deserializeEnsApiConfigResponse(responseData as SerializedEnsApiConfigResponse);
   }
 
   /**

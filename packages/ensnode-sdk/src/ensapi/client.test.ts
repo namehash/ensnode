@@ -23,7 +23,6 @@ import type {
 import type { ErrorResponse } from "./api/shared/errors/response";
 import { EnsApiClient } from "./client";
 import { ClientError } from "./client-error";
-import { deserializeEnsApiPublicConfig } from "./config/deserialize";
 import type { SerializedEnsApiPublicConfig } from "./config/serialized-types";
 import { DEFAULT_ENSNODE_API_URL_MAINNET, getDefaultEnsNodeUrl } from "./deployments";
 
@@ -141,7 +140,7 @@ const EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE = deserializeEnsApiIndexingStatu
       },
     },
   },
-  config: EXAMPLE_CONFIG_RESPONSE,
+  ensApiPublicConfig: EXAMPLE_CONFIG_RESPONSE,
   responseCode: EnsApiIndexingStatusResponseCodes.Ok,
 } satisfies SerializedEnsApiIndexingStatusResponseOk);
 
@@ -199,7 +198,7 @@ const _EXAMPLE_INDEXING_STATUS_FOLLOWING_RESPONSE: EnsApiIndexingStatusResponse 
         } satisfies SerializedOmnichainIndexingStatusSnapshotFollowing,
       },
     },
-    config: EXAMPLE_CONFIG_RESPONSE,
+    ensApiPublicConfig: EXAMPLE_CONFIG_RESPONSE,
     responseCode: EnsApiIndexingStatusResponseCodes.Ok,
   });
 
@@ -426,33 +425,6 @@ describe("EnsApiClient", () => {
 
       const client = new EnsApiClient();
       await expect(client.resolvePrimaryNames(EXAMPLE_ADDRESS)).rejects.toThrowError(ClientError);
-    });
-  });
-
-  describe("Config API", () => {
-    it("can fetch config object successfully", async () => {
-      // arrange
-      const requestUrl = new URL(`/api/config`, DEFAULT_ENSNODE_API_URL_MAINNET);
-      const serializedMockedResponse = EXAMPLE_CONFIG_RESPONSE;
-      const mockedResponse = deserializeEnsApiPublicConfig(serializedMockedResponse);
-      const client = new EnsApiClient();
-
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => serializedMockedResponse,
-      });
-
-      // act & assert
-      await expect(client.config()).resolves.toStrictEqual(mockedResponse);
-      expect(mockFetch).toHaveBeenCalledWith(requestUrl);
-    });
-
-    it("should throw error when API returns error", async () => {
-      mockFetch.mockResolvedValueOnce({ ok: false, json: async () => EXAMPLE_ERROR_RESPONSE });
-
-      const client = new EnsApiClient();
-
-      await expect(client.config()).rejects.toThrow(/Fetching ENSApi Config Failed/i);
     });
   });
 
