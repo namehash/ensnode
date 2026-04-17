@@ -779,7 +779,7 @@
                       },
                       "required": ["snapshot", "projectedAt", "worstCaseDistance"]
                     },
-                    "config": {
+                    "ensApiPublicConfig": {
                       "type": "object",
                       "properties": {
                         "ensIndexerPublicConfig": {
@@ -898,7 +898,7 @@
                       "required": ["ensIndexerPublicConfig", "theGraphFallback", "versionInfo"]
                     }
                   },
-                  "required": ["responseCode", "realtimeProjection", "config"]
+                  "required": ["responseCode", "realtimeProjection", "ensApiPublicConfig"]
                 }
               }
             }
