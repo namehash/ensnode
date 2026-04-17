@@ -14,13 +14,12 @@ import {
   WithEnsNodeProviderOptions,
 } from "@ensnode/ensnode-react";
 import {
-  CrossChainIndexingStatusSnapshotOmnichain,
+  type CrossChainIndexingStatusSnapshotOmnichain,
   createRealtimeIndexingStatusProjection,
-  EnsApiIndexingStatusRequest,
+  type EnsApiIndexingStatusRequest,
   EnsApiIndexingStatusResponseCodes,
-  EnsApiIndexingStatusResponseOk,
-  EnsApiPublicConfig,
-  EnsNodeStackInfo,
+  type EnsApiIndexingStatusResponseOk,
+  type EnsNodeStackInfo,
 } from "@ensnode/ensnode-sdk";
 
 const DEFAULT_REFETCH_INTERVAL = secondsToMilliseconds(10);

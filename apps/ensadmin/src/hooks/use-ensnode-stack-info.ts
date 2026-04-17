@@ -1,7 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
-
-import { useEnsNodeProviderOptions } from "@ensnode/ensnode-react";
-
 import { useIndexingStatusWithSwr } from "@/components/indexing-status";
 
 /**
