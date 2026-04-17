@@ -9,9 +9,8 @@ import { ChainIcon, getChainName } from "@namehash/namehash-ui";
 import { History, Replace } from "lucide-react";
 import { Fragment, ReactNode } from "react";
 
-import { type EnsApiPublicConfig, getENSRootChainId } from "@ensnode/ensnode-sdk";
+import { EnsNodeStackInfo, getENSRootChainId } from "@ensnode/ensnode-sdk";
 
-import { useEnsApiPublicConfig } from "@/components/config/use-ens-api-public-config";
 import { ErrorInfo, type ErrorInfoProps } from "@/components/error-info";
 import { ENSApiIcon } from "@/components/icons/ensnode-apps/ensapi-icon";
 import { ENSDbIcon } from "@/components/icons/ensnode-apps/ensdb-icon";
@@ -22,6 +21,7 @@ import { IconGraphNetwork } from "@/components/icons/graph-network";
 import { HealIcon } from "@/components/icons/HealIcon";
 import { IndexAdditionalRecordsIcon } from "@/components/icons/IndexAdditionalRecordsIcon";
 import { ExternalLinkWithIcon } from "@/components/link";
+import { useEnsNodeStackInfo } from "@/components/stack-info/use-ensnode-stack-info";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -96,16 +96,16 @@ function ENSNodeCardLoadingSkeleton() {
  * Props for ENSNodeConfigCardDisplay - display component that accepts props for testing/mocking
  */
 export interface ENSNodeConfigCardDisplayProps {
-  ensApiPublicConfig: EnsApiPublicConfig;
+  ensNodeStackInfo: EnsNodeStackInfo;
 }
 
 /**
  * Display component that receives props - used for reusable/mockable presentation
  */
-export function ENSNodeConfigCardDisplay({ ensApiPublicConfig }: ENSNodeConfigCardDisplayProps) {
+export function ENSNodeConfigCardDisplay({ ensNodeStackInfo }: ENSNodeConfigCardDisplayProps) {
   return (
     <ENSNodeCard>
-      <ENSNodeConfigCardContent ensApiPublicConfig={ensApiPublicConfig} />
+      <ENSNodeConfigCardContent ensNodeStackInfo={ensNodeStackInfo} />
     </ENSNodeCard>
   );
 }
@@ -114,7 +114,7 @@ export function ENSNodeConfigCardDisplay({ ensApiPublicConfig }: ENSNodeConfigCa
  * Props for ENSNodeConfigInfoView - internal component that accepts props for testing/mocking
  */
 export interface ENSNodeConfigInfoViewProps {
-  ensApiPublicConfig?: EnsApiPublicConfig;
+  ensNodeStackInfo?: EnsNodeStackInfo;
   error?: ErrorInfoProps;
   isLoading?: boolean;
 }
@@ -123,7 +123,7 @@ export interface ENSNodeConfigInfoViewProps {
  * Internal view component that accepts props - used by both the main component and mock pages
  */
 export function ENSNodeConfigInfoView({
-  ensApiPublicConfig,
+  ensNodeStackInfo,
   error,
   isLoading = false,
 }: ENSNodeConfigInfoViewProps) {
@@ -132,7 +132,7 @@ export function ENSNodeConfigInfoView({
   }
 
   // Show ENSNode card - shell with skeleton while loading, or content when ready
-  if (isLoading || !ensApiPublicConfig) {
+  if (isLoading || !ensNodeStackInfo) {
     return (
       <ENSNodeCard>
         <ENSNodeCardLoadingSkeleton />
@@ -140,41 +140,42 @@ export function ENSNodeConfigInfoView({
     );
   }
 
-  return <ENSNodeConfigCardDisplay ensApiPublicConfig={ensApiPublicConfig} />;
+  return <ENSNodeConfigCardDisplay ensNodeStackInfo={ensNodeStackInfo} />;
 }
 
 /**
  * ENSNodeConfigInfo component - fetches and displays ENSNode configuration data
  */
 export function ENSNodeConfigInfo() {
-  const ensApiConfig = useEnsApiPublicConfig();
+  const ensNodeStackInfo = useEnsNodeStackInfo();
 
-  if (ensApiConfig.isError) {
+  if (ensNodeStackInfo.isError) {
     return (
       <ENSNodeConfigInfoView
         error={{
-          title: "Error loading ENSNode Configuration",
-          description: ensApiConfig.error.message,
+          title: "Error loading ENSNode Stack Info",
+          description: ensNodeStackInfo.error.message,
         }}
       />
     );
   }
 
-  if (ensApiConfig.isPending) {
+  if (ensNodeStackInfo.isPending) {
     return <ENSNodeConfigInfoView isLoading={true} />;
   }
 
-  return <ENSNodeConfigInfoView ensApiPublicConfig={ensApiConfig.data} />;
+  return <ENSNodeConfigInfoView ensNodeStackInfo={ensNodeStackInfo.data} />;
 }
 
-function ENSNodeConfigCardContent({
-  ensApiPublicConfig,
-}: {
-  ensApiPublicConfig: EnsApiPublicConfig;
-}) {
+function ENSNodeConfigCardContent({ ensNodeStackInfo }: { ensNodeStackInfo: EnsNodeStackInfo }) {
   const cardItemValueStyles = "text-sm leading-6 font-normal text-black";
 
-  const { ensIndexerPublicConfig } = ensApiPublicConfig;
+  const {
+    ensApi: ensApiPublicConfig,
+    ensIndexer: ensIndexerPublicConfig,
+    ensDb: ensDbPublicConfig,
+    ensRainbow: ensRainbowPublicConfig,
+  } = ensNodeStackInfo;
 
   const healReverseAddressesActivated = !ensIndexerPublicConfig.isSubgraphCompatible;
   const indexAdditionalRecordsActivated = !ensIndexerPublicConfig.isSubgraphCompatible;
@@ -401,7 +402,12 @@ function ENSNodeConfigCardContent({
         docsLink={new URL("https://ensnode.io/ensdb")}
       >
         <InfoCardItems>
-          <InfoCardItem label="Database" value={<p className={cardItemValueStyles}>Postgres</p>} />
+          <InfoCardItem
+            label="Database server"
+            value={
+              <p className={cardItemValueStyles}>Postgres {ensDbPublicConfig.postgreSqlVersion}</p>
+            }
+          />
           <InfoCardItem
             label="ENSIndexer Schema"
             value={

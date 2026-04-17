@@ -2,7 +2,7 @@
 
 import { type PropsWithChildren, useMemo } from "react";
 
-import { createEnsNodeOptions, EnsNodeProvider } from "@ensnode/ensnode-react";
+import { createEnsNodeProviderOptions, EnsNodeProvider } from "@ensnode/ensnode-react";
 
 import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
 
@@ -12,8 +12,8 @@ import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
  *
  * This component wraps the EnsNodeProvider from @ensnode/ensnode-react and
  * automatically configures it with the URL from the currently selected ENSNode
- * connection URL. It serves as a bridge between the connection management
- * system and the ENSNode React hooks.
+ * connection URL. It serves as a bridge between the ENSAdmin connection
+ * management system and the ENSNode React hooks.
  *
  * @param children - React children to render within the provider context
  */
@@ -25,7 +25,7 @@ export function SelectedEnsNodeProvider({ children }: PropsWithChildren) {
       return undefined;
     }
 
-    return createEnsNodeOptions({
+    return createEnsNodeProviderOptions({
       url: selectedConnection.validatedSelectedConnection.url,
     });
   }, [selectedConnection.validatedSelectedConnection]);

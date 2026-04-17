@@ -20,6 +20,7 @@ import {
   EnsApiIndexingStatusResponseCodes,
   EnsApiIndexingStatusResponseOk,
   EnsApiPublicConfig,
+  EnsNodeStackInfo,
 } from "@ensnode/ensnode-sdk";
 
 const DEFAULT_REFETCH_INTERVAL = secondsToMilliseconds(10);
@@ -36,9 +37,9 @@ interface CacheableIndexingStatus {
   crossChainIndexingStatusSnapshot: CrossChainIndexingStatusSnapshotOmnichain;
 
   /**
-   * The Public Config for the connected ENSApi.
+   * Stack info of the connected ENSNode.
    */
-  ensApiPublicConfig: EnsApiPublicConfig;
+  stackInfo: EnsNodeStackInfo;
 }
 
 interface UseIndexingStatusParameters
@@ -80,7 +81,7 @@ export function useIndexingStatusWithSwr(
         // - Return this non-null value.
         return {
           crossChainIndexingStatusSnapshot: response.realtimeProjection.snapshot,
-          ensApiPublicConfig: response.ensApiPublicConfig,
+          stackInfo: response.stackInfo,
         } satisfies CacheableIndexingStatus;
       }),
     [queryOptions.queryFn],
@@ -101,7 +102,7 @@ export function useIndexingStatusWithSwr(
       return {
         responseCode: EnsApiIndexingStatusResponseCodes.Ok,
         realtimeProjection,
-        ensApiPublicConfig: cachedResult.ensApiPublicConfig,
+        stackInfo: cachedResult.stackInfo,
       } satisfies EnsApiIndexingStatusResponseOk;
     },
     [now],

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEnsApiPublicConfig } from "@/components/config/use-ens-api-public-config";
+import { useEnsNodeStackInfo } from "@/components/stack-info/use-ensnode-stack-info";
 
 /**
  * Hook to get the currently active ENSNode Config synchronously.
@@ -16,7 +16,7 @@ import { useEnsApiPublicConfig } from "@/components/config/use-ens-api-public-co
  * @throws Error if no active ENSNode connection is available
  */
 export function useActiveENSNodeConfig() {
-  const { data } = useEnsApiPublicConfig();
+  const { data } = useEnsNodeStackInfo();
 
   if (data === undefined) {
     throw new Error(`Invariant(useActiveENSNodeConfig): Expected an active ENSNode Config`);

@@ -1,4 +1,4 @@
-import { useEnsApiPublicConfig } from "@/components/config/use-ens-api-public-config";
+import { useEnsNodeStackInfo } from "@/components/stack-info/use-ensnode-stack-info";
 
 /**
  * Hook to get the namespace ID from the active ENSNode connection.
@@ -22,10 +22,10 @@ import { useEnsApiPublicConfig } from "@/components/config/use-ens-api-public-co
  * ```
  */
 export function useNamespace() {
-  const query = useEnsApiPublicConfig();
+  const query = useEnsNodeStackInfo();
 
   return {
     ...query,
-    data: query.data?.ensIndexerPublicConfig.namespace ?? null,
+    data: query.data?.ensIndexer.namespace ?? null,
   };
 }

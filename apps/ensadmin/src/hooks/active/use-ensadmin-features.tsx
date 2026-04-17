@@ -59,10 +59,8 @@ export function useENSAdminFeatures(): ENSAdminFeatures {
     if (indexingStatusQuery.status === "error") return INDEXING_STATUS_ERROR_STATUS;
     if (indexingStatusQuery.status === "pending") return CONNECTING_STATUS;
 
-    const { ensApiPublicConfig } = indexingStatusQuery.data;
-    const configSupportResult = hasRegistrarActionsConfigSupport(
-      ensApiPublicConfig.ensIndexerPublicConfig,
-    );
+    const { ensIndexer: ensIndexerPublicConfig } = indexingStatusQuery.data.stackInfo;
+    const configSupportResult = hasRegistrarActionsConfigSupport(ensIndexerPublicConfig);
     if (!configSupportResult.supported)
       return prerequisiteResultToFeatureStatus(configSupportResult);
 
@@ -81,7 +79,7 @@ export function useENSAdminFeatures(): ENSAdminFeatures {
     if (indexingStatusQuery.status === "error") return INDEXING_STATUS_ERROR_STATUS;
     if (indexingStatusQuery.status === "pending") return CONNECTING_STATUS;
 
-    const { ensIndexerPublicConfig } = indexingStatusQuery.data.ensApiPublicConfig;
+    const { ensIndexer: ensIndexerPublicConfig } = indexingStatusQuery.data.stackInfo;
     return prerequisiteResultToFeatureStatus(hasSubgraphApiConfigSupport(ensIndexerPublicConfig));
   }, [indexingStatusQuery]);
 
@@ -89,7 +87,7 @@ export function useENSAdminFeatures(): ENSAdminFeatures {
     if (indexingStatusQuery.status === "error") return INDEXING_STATUS_ERROR_STATUS;
     if (indexingStatusQuery.status === "pending") return CONNECTING_STATUS;
 
-    const { ensIndexerPublicConfig } = indexingStatusQuery.data.ensApiPublicConfig;
+    const { ensIndexer: ensIndexerPublicConfig } = indexingStatusQuery.data.stackInfo;
     return prerequisiteResultToFeatureStatus(hasOmnigraphApiConfigSupport(ensIndexerPublicConfig));
   }, [indexingStatusQuery]);
 

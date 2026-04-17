@@ -2,22 +2,25 @@
 
 import type { PropsWithChildren } from "react";
 
-import { useEnsApiPublicConfig } from "@/components/config/use-ens-api-public-config";
 import { ErrorInfo } from "@/components/error-info";
 import { LoadingSpinner } from "@/components/loading-spinner";
+import { useEnsNodeStackInfo } from "@/components/stack-info/use-ensnode-stack-info";
 
 /**
  * Allows consumers to use `useActiveConnection` by blocking rendering until it is available.
  */
 export function RequireActiveConnection({ children }: PropsWithChildren) {
-  const ensApiConfig = useEnsApiPublicConfig();
+  const ensNodeStackInfo = useEnsNodeStackInfo();
 
-  if (ensApiConfig.status === "pending") return <Loading />;
+  if (ensNodeStackInfo.status === "pending") return <Loading />;
 
-  if (ensApiConfig.status === "error") {
+  if (ensNodeStackInfo.status === "error") {
     return (
       <section className="p-6">
-        <ErrorInfo title="Failed to connect to ENSApi" description={ensApiConfig.error.message} />
+        <ErrorInfo
+          title="Failed to connect to ENSApi"
+          description={ensNodeStackInfo.error.message}
+        />
       </section>
     );
   }
