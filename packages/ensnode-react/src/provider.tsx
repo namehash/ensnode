@@ -10,7 +10,7 @@ import { EnsNodeContext } from "./context";
 import type { EnsNodeProviderOptions } from "./types";
 
 export interface EnsNodeProviderProps {
-  /** ENSApi options */
+  /** ENSNode Provider Options */
   options: EnsNodeProviderOptions;
 
   /**
@@ -89,9 +89,11 @@ export function EnsNodeProvider(parameters: React.PropsWithChildren<EnsNodeProvi
 }
 
 /**
- * Helper function to create ENSApi options
+ * Helper function to create ENSNode Provider Options
  */
-export function createEnsNodeOptions(options?: { url?: string | URL }): EnsNodeProviderOptions {
+export function createEnsNodeProviderOptions(options?: {
+  url?: string | URL;
+}): EnsNodeProviderOptions {
   const url = options?.url ? new URL(options.url) : EnsApiClient.defaultOptions().url;
 
   return {

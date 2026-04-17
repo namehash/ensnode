@@ -19,9 +19,9 @@ Note: `@tanstack/react-query` is a peer dependency but you don't need to interac
 Wrap your app with the `EnsNodeProvider`:
 
 ```tsx
-import { EnsNodeProvider, createEnsNodeOptions } from "@ensnode/ensnode-react";
+import { EnsNodeProvider, createEnsNodeProviderOptions } from "@ensnode/ensnode-react";
 
-const options = createEnsNodeOptions({ url: "https://api.alpha.ensnode.io" });
+const options = createEnsNodeProviderOptions({ url: "https://api.alpha.ensnode.io" });
 
 function App() {
   return (
@@ -126,7 +126,7 @@ function DisplayPrimaryNames() {
 
 ### EnsNodeProvider
 
-The provider component that supplies ENSApi options to all child components.
+The provider component that supplies ENSApi Provider Options to all child components.
 
 ```tsx
 interface EnsNodeProviderProps {
@@ -138,16 +138,16 @@ interface EnsNodeProviderProps {
 
 #### Props
 
-- `options`: ENSApi options object
+- `options`: ENSNode Provider Options object
 - `queryClient`: Optional TanStack Query client instance (requires manual QueryClientProvider setup)
 - `queryClientOptions`: Optional Custom options for auto-created QueryClient (only used when queryClient is not provided)
 
-### createEnsNodeOptions
+### createEnsNodeProviderOptions
 
-Helper function to create ENSApi options with defaults.
+Helper function to create ENSNode Provider Options with defaults.
 
 ```tsx
-const options = createEnsNodeOptions({
+const options = createEnsNodeProviderOptions({
   url: "https://api.alpha.ensnode.io",
 });
 ```
@@ -230,7 +230,7 @@ const { data, isLoading, error, refetch } = usePrimaryNames({
 
 ### Custom Query Configuration
 
-The `EnsNodeProvider` automatically creates and manages a QueryClient for you. Cache keys include the ENSNode endpoint URL, so different endpoints (mainnet vs testnet) maintain separate caches. You can customize the QueryClient without importing TanStack Query:
+The `EnsNodeProvider` automatically creates and manages a QueryClient for you. Cache keys include the ENSNode endpoint URL, so different ENSNode endpoints that may have different configurations (ex: mainnet vs sepolia) maintain separate caches. You can customize the QueryClient without importing TanStack Query:
 
 ```tsx
 // Simple setup - no TanStack Query knowledge needed
