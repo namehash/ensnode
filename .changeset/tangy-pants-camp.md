@@ -2,4 +2,4 @@
 "ensadmin": patch
 ---
 
-Added interactive REST API Reference page (`/api/rest`) powered by Scalar, loading the OpenAPI spec from the connected ENSApi instance. Introduced `@ensnode/scalar-react` wrapper package.
+Introduced interactive REST API Reference playground (`/api/rest`) powered by Scalar, enabling discovery and testing of all REST APIs published by a connected ENSApi instance. Added `@ensnode/scalar-react` wrapper package.
