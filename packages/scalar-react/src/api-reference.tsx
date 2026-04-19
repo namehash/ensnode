@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReferenceProps, ApiReferenceReact } from "@scalar/api-reference-react";
+import { ApiReferenceReact, type ReferenceProps } from "@scalar/api-reference-react";
 import "@scalar/api-reference-react/style.css";
 
 interface ScalarApiReferenceProps {
