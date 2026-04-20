@@ -11,7 +11,8 @@ import {
   makeLowercaseAddressSchema,
   makeNodeSchema,
   makePositiveIntegerSchema,
-  makeRegistrarActionsResponseOkSchema,
+  makeRegistrarActionsResponseErrorSchema,
+  makeSerializedRegistrarActionsResponseOkSchema,
   makeUnixTimestampSchema,
   registrarActionsResponseOkExample,
 } from "@ensnode/ensnode-sdk/internal";
@@ -104,7 +105,7 @@ export const getRegistrarActionsRoute = createRoute({
       description: "Successfully retrieved registrar actions",
       content: {
         "application/json": {
-          schema: makeRegistrarActionsResponseOkSchema().openapi({
+          schema: makeSerializedRegistrarActionsResponseOkSchema().openapi({
             example: registrarActionsResponseOkExample,
           }),
         },
@@ -120,13 +121,11 @@ export const getRegistrarActionsRoute = createRoute({
     },
     500: {
       description: "Internal server error",
-      // TODO: fix the problem with typechecking.
-      // Throws error ```Type '{ currency: "ETH"; amount: string; }' is not assignable to type 'null'.```
-      // content: {
-      //   "application/json": {
-      //     schema: makeRegistrarActionsResponseErrorSchema("Registrar Actions Error Response"),
-      //   },
-      // },
+      content: {
+        "application/json": {
+          schema: makeRegistrarActionsResponseErrorSchema("Registrar Actions Error Response"),
+        },
+      },
     },
   },
 });
@@ -152,7 +151,7 @@ export const getRegistrarActionsByParentNodeRoute = createRoute({
       description: "Successfully retrieved registrar actions",
       content: {
         "application/json": {
-          schema: makeRegistrarActionsResponseOkSchema(
+          schema: makeSerializedRegistrarActionsResponseOkSchema(
             "Registrar Actions By ParentNode Response",
           ).openapi({
             example: registrarActionsResponseOkExample,
@@ -170,15 +169,13 @@ export const getRegistrarActionsByParentNodeRoute = createRoute({
     },
     500: {
       description: "Internal server error",
-      // TODO: fix the problem with typechecking.
-      // Throws error ```Type '{ currency: "ETH"; amount: string; }' is not assignable to type 'null'.```
-      // content: {
-      //   "application/json": {
-      //     schema: makeRegistrarActionsResponseErrorSchema(
-      //       "Registrar Actions By ParentNode Error Response",
-      //     ),
-      //   },
-      // },
+      content: {
+        "application/json": {
+          schema: makeRegistrarActionsResponseErrorSchema(
+            "Registrar Actions By ParentNode Error Response",
+          ),
+        },
+      },
     },
   },
 });

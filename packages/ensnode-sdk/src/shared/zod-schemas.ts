@@ -29,6 +29,7 @@ import {
   type PriceDai,
   type PriceEth,
   type PriceUsdc,
+  type SerializedPriceEth,
 } from "./currencies";
 import type { BlockRef, Datetime, Duration, UnixTimestamp } from "./types";
 
@@ -240,12 +241,27 @@ const makePriceAmountSchema = (valueLabel: string = "Amount") =>
       error: `${valueLabel} must not be negative.`,
     });
 
+const makeSerializedCurrencyAmountSchema = (valueLabel: string = "Serialized Currency Amount") =>
+  z.string({ error: `${valueLabel} must be a string.` });
+
 export const makePriceCurrencySchema = (
   currency: CurrencyId,
   valueLabel: string = "Price Currency",
 ) =>
   z.strictObject({
     amount: makePriceAmountSchema(`${valueLabel} amount`),
+
+    currency: z.literal(currency, {
+      error: `${valueLabel} currency must be set to '${currency}'.`,
+    }),
+  });
+
+export const makeSerializedPriceCurrencySchema = (
+  currency: CurrencyId,
+  valueLabel: string = "Price Currency",
+) =>
+  z.strictObject({
+    amount: makeSerializedCurrencyAmountSchema(`${valueLabel} amount`),
 
     currency: z.literal(currency, {
       error: `${valueLabel} currency must be set to '${currency}'.`,
@@ -271,6 +287,11 @@ export const makePriceSchema = (valueLabel: string = "Price") =>
  */
 export const makePriceEthSchema = (valueLabel: string = "Price ETH") =>
   makePriceCurrencySchema(CurrencyIds.ETH, valueLabel).transform((v) => v as PriceEth);
+
+export const makeSerializedPriceEthSchema = (valueLabel: string = "Serialized Price ETH") =>
+  makeSerializedPriceCurrencySchema(CurrencyIds.ETH, valueLabel).transform(
+    (v) => v as SerializedPriceEth,
+  );
 
 /**
  * Schema for {@link PriceUsdc} type.
