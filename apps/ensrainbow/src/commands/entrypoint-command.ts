@@ -200,19 +200,42 @@ async function runDbBootstrap(
     logger.info(
       `Found existing ENSRainbow marker at ${markerFile}; attempting to open existing database at ${dbSubdir}`,
     );
+    // Track the opened DB and whether ownership has transferred to the server so the catch
+    // block below can release the correct resources before falling back to re-download.
+    let existingDb: ENSRainbowDB | undefined;
+    let existingDbAttached = false;
     try {
       throwIfAborted(signal);
-      const db = await ENSRainbowDB.open(dbSubdir);
+      existingDb = await ENSRainbowDB.open(dbSubdir);
       if (signal.aborted) {
-        await safeClose(db);
+        await safeClose(existingDb);
         throw new BootstrapAbortedError();
       }
-      await ensRainbowServer.attachDb(db);
+      await ensRainbowServer.attachDb(existingDb);
+      existingDbAttached = true;
       return buildEnsRainbowPublicConfig(await buildDbConfig(ensRainbowServer));
     } catch (error) {
       if (error instanceof BootstrapAbortedError || signal.aborted) {
         throw error;
       }
+      // Release the DB handle (so the LevelDB LOCK is freed before we re-extract into the
+      // same path), and wipe the stale on-disk files so the tar re-extraction starts from a
+      // clean state. If attach succeeded, ownership has transferred to the server, so route
+      // the close through `ensRainbowServer.close()` which also resets its internal state so
+      // the re-downloaded DB can be re-attached below.
+      if (existingDbAttached) {
+        try {
+          await ensRainbowServer.close();
+        } catch (closeError) {
+          logger.warn(
+            closeError,
+            "Failed to close server while falling back to re-download; continuing",
+          );
+        }
+      } else if (existingDb !== undefined) {
+        await safeClose(existingDb);
+      }
+      rmSync(dbSubdir, { recursive: true, force: true });
       logger.warn(
         error,
         "Existing ENSRainbow database failed to open or validate; re-downloading from scratch",
