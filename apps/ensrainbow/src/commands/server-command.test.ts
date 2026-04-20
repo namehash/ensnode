@@ -35,7 +35,7 @@ describe("Server Command Tests", () => {
       const ensRainbowServer = await ENSRainbowServer.init(db);
       const dbConfig = await buildDbConfig(ensRainbowServer);
       const publicConfig = buildEnsRainbowPublicConfig(dbConfig);
-      app = createApi(ensRainbowServer, publicConfig);
+      app = createApi(ensRainbowServer, () => publicConfig);
 
       // Start the server on a different port than what ENSRainbow defaults to
       server = serve({
@@ -128,6 +128,15 @@ describe("Server Command Tests", () => {
     });
   });
 
+  describe("GET /ready", () => {
+    it("should return ok status when the server has an attached database", async () => {
+      const response = await fetch(`http://localhost:${nonDefaultPort}/ready`);
+      expect(response.status).toBe(200);
+      const data = (await response.json()) as EnsRainbow.ReadyResponse;
+      expect(data).toEqual({ status: "ok" } satisfies EnsRainbow.ReadyResponse);
+    });
+  });
+
   describe("GET /v1/labels/count", () => {
     it("should return count snapshot from startup (same as /v1/config)", async () => {
       // Count is fixed at server start; changing the DB does not affect the response
@@ -202,6 +211,105 @@ describe("Server Command Tests", () => {
       expect(data.labelSet.highestLabelSetVersion).toBe(0);
       // Config is built on startup with count = 0, so changing the DB doesn't affect it
       expect(data.recordsCount).toBe(0);
+    });
+  });
+
+  describe("Pending server (no DB attached yet)", () => {
+    const pendingPort = 3225;
+    let pendingApp: Hono;
+    let pendingServer: ReturnType<typeof serve>;
+    let pendingEnsRainbowServer: ENSRainbowServer;
+    let pendingPublicConfig: EnsRainbow.ENSRainbowPublicConfig | null;
+
+    beforeAll(async () => {
+      pendingEnsRainbowServer = ENSRainbowServer.createPending();
+      pendingPublicConfig = null;
+      pendingApp = createApi(pendingEnsRainbowServer, () => pendingPublicConfig);
+      pendingServer = serve({
+        fetch: pendingApp.fetch,
+        port: pendingPort,
+      });
+    });
+
+    afterAll(async () => {
+      try {
+        if (pendingServer) await pendingServer.close();
+        await pendingEnsRainbowServer.close();
+      } catch (error) {
+        console.error("Pending server cleanup failed:", error);
+      }
+    });
+
+    it("GET /health returns 200 immediately without a DB", async () => {
+      const response = await fetch(`http://localhost:${pendingPort}/health`);
+      expect(response.status).toBe(200);
+      const data = (await response.json()) as EnsRainbow.HealthResponse;
+      expect(data).toEqual({ status: "ok" } satisfies EnsRainbow.HealthResponse);
+    });
+
+    it("GET /ready returns 503 while the DB is not attached", async () => {
+      const response = await fetch(`http://localhost:${pendingPort}/ready`);
+      expect(response.status).toBe(503);
+      const data = (await response.json()) as EnsRainbow.ServiceUnavailableError;
+      expect(data.status).toBe(StatusCode.Error);
+      expect(data.errorCode).toBe(ErrorCode.ServiceUnavailable);
+    });
+
+    it("GET /v1/heal/:labelhash returns 503 while the DB is not attached", async () => {
+      const someLabelhash = labelhashLiteralLabel(asLiteralLabel("test"));
+      const response = await fetch(`http://localhost:${pendingPort}/v1/heal/${someLabelhash}`);
+      expect(response.status).toBe(503);
+      const data = (await response.json()) as EnsRainbow.ServiceUnavailableError;
+      expect(data.errorCode).toBe(ErrorCode.ServiceUnavailable);
+    });
+
+    it("GET /v1/labels/count and /v1/config return 503 while the DB is not attached", async () => {
+      const [countRes, configRes] = await Promise.all([
+        fetch(`http://localhost:${pendingPort}/v1/labels/count`),
+        fetch(`http://localhost:${pendingPort}/v1/config`),
+      ]);
+      expect(countRes.status).toBe(503);
+      expect(configRes.status).toBe(503);
+    });
+
+    it("After attachDb, /ready returns 200 and /v1/heal serves labels", async () => {
+      const attachDataDir = "test-data-server-pending-attach";
+      await fs.rm(attachDataDir, { recursive: true, force: true });
+
+      const attachDb = await ENSRainbowDB.create(attachDataDir);
+      try {
+        await attachDb.setPrecalculatedRainbowRecordCount(1);
+        await attachDb.markIngestionFinished();
+        await attachDb.setLabelSetId("pending-test");
+        await attachDb.setHighestLabelSetVersion(0);
+        await attachDb.addRainbowRecord("pending-label", 0);
+
+        await pendingEnsRainbowServer.attachDb(attachDb);
+        pendingPublicConfig = buildEnsRainbowPublicConfig(
+          await buildDbConfig(pendingEnsRainbowServer),
+        );
+
+        const readyRes = await fetch(`http://localhost:${pendingPort}/ready`);
+        expect(readyRes.status).toBe(200);
+
+        const labelhash = labelhashLiteralLabel(asLiteralLabel("pending-label"));
+        const healRes = await fetch(`http://localhost:${pendingPort}/v1/heal/${labelhash}`);
+        expect(healRes.status).toBe(200);
+        const healData = (await healRes.json()) as EnsRainbow.HealResponse;
+        expect(healData).toEqual({
+          status: StatusCode.Success,
+          label: "pending-label",
+        } satisfies EnsRainbow.HealSuccess);
+
+        const configRes = await fetch(`http://localhost:${pendingPort}/v1/config`);
+        expect(configRes.status).toBe(200);
+        const configData = (await configRes.json()) as EnsRainbow.ENSRainbowPublicConfig;
+        expect(configData.recordsCount).toBe(1);
+        expect(configData.labelSet.labelSetId).toBe("pending-test");
+      } finally {
+        await pendingEnsRainbowServer.close();
+        await fs.rm(attachDataDir, { recursive: true, force: true });
+      }
     });
   });
 

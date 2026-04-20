@@ -11,11 +11,12 @@ import type { ArgumentsCamelCase, Argv } from "yargs";
 import { hideBin } from "yargs/helpers";
 import yargs from "yargs/yargs";
 
-import { buildLabelSetId } from "@ensnode/ensnode-sdk";
+import { buildLabelSetId, buildLabelSetVersion } from "@ensnode/ensnode-sdk";
 import { PortNumberSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { type ConvertSqlCommandCliArgs, convertCommand } from "@/commands/convert-command-sql";
 import { type ConvertCsvCommandCliArgs, convertCsvCommand } from "@/commands/convert-csv-command";
+import { entrypointCommand } from "@/commands/entrypoint-command";
 import {
   type IngestProtobufCommandCliArgs,
   ingestProtobufCommand,
@@ -26,6 +27,22 @@ import { type ValidateCommandCliArgs, validateCommand } from "@/commands/validat
 
 export interface CLIOptions {
   exitProcess?: boolean;
+}
+
+/**
+ * yargs-parsed argument shape for the `entrypoint` command.
+ *
+ * `label-set-id` and `label-set-version` are coerced to their branded types via
+ * `buildLabelSetId` / `buildLabelSetVersion`, so the CLI layer works with primitive types
+ * and hands branded values to {@link entrypointCommand}.
+ */
+interface EntrypointCommandCliArgs {
+  port: number;
+  "data-dir": string;
+  "db-schema-version": number;
+  "label-set-id": string;
+  "label-set-version": number;
+  "download-temp-dir"?: string;
 }
 
 export function createCLI(options: CLIOptions = {}) {
@@ -109,6 +126,71 @@ export function createCLI(options: CLIOptions = {}) {
         async (argv: ArgumentsCamelCase<ServeCommandCliArgs>) => {
           const serveCommandConfig = buildServeCommandConfig(argv);
           await serverCommand(serveCommandConfig);
+        },
+      )
+      .command(
+        "entrypoint",
+        "Start the ENS Rainbow API server immediately and bootstrap the database in the background",
+        (yargs: Argv) => {
+          return yargs
+            .option("port", {
+              type: "number",
+              description: "Port to listen on (overrides PORT env var if both are set)",
+              default: envConfig.port,
+              coerce: (port: number) => {
+                const result = PortNumberSchema.safeParse(port);
+                if (!result.success) {
+                  const firstError = result.error.issues[0];
+                  throw new Error(`Invalid port: ${firstError?.message ?? "invalid port number"}`);
+                }
+                return result.data;
+              },
+            })
+            .option("data-dir", {
+              type: "string",
+              description: "Directory containing LevelDB data",
+              default: envConfig.dataDir,
+            })
+            .option("db-schema-version", {
+              type: "number",
+              description:
+                "Expected database schema version (falls back to DB_SCHEMA_VERSION env var)",
+              default: envConfig.dbSchemaVersion,
+            })
+            .option("label-set-id", {
+              type: "string",
+              description: "Label set id to download (falls back to LABEL_SET_ID env var)",
+              default: process.env.LABEL_SET_ID,
+              demandOption: !process.env.LABEL_SET_ID,
+            })
+            .coerce("label-set-id", buildLabelSetId)
+            .option("label-set-version", {
+              type: "string",
+              description:
+                "Label set version to download (falls back to LABEL_SET_VERSION env var)",
+              default: process.env.LABEL_SET_VERSION,
+              demandOption: !process.env.LABEL_SET_VERSION,
+            })
+            .coerce("label-set-version", buildLabelSetVersion)
+            .option("download-temp-dir", {
+              type: "string",
+              description:
+                "Temporary directory used to stage downloaded archives before extraction " +
+                "(defaults to <data-dir>/.download-temp)",
+              default: process.env.DOWNLOAD_TEMP_DIR,
+            });
+        },
+        async (argv: ArgumentsCamelCase<EntrypointCommandCliArgs>) => {
+          const dataDir = parseDataDirFromCli(argv["data-dir"]);
+          await entrypointCommand({
+            port: argv.port,
+            dataDir,
+            dbSchemaVersion: argv["db-schema-version"],
+            labelSetId: argv["label-set-id"],
+            labelSetVersion: argv["label-set-version"],
+            downloadTempDir: argv["download-temp-dir"],
+            labelsetServerUrl: process.env.ENSRAINBOW_LABELSET_SERVER_URL,
+          });
         },
       )
       .command(

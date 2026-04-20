@@ -18,9 +18,15 @@ import { logger } from "@/utils/logger";
 
 /**
  * Reads label set and record count from an initialized ENSRainbowServer.
- * @throws Error if the record count cannot be read from the database.
+ * @throws Error if the server is not ready or the record count cannot be read from the database.
  */
 export async function buildDbConfig(server: ENSRainbowServer): Promise<DbConfig> {
+  if (!server.isReady()) {
+    throw new Error(
+      "Cannot build DB config: ENSRainbowServer has no database attached yet (still bootstrapping)",
+    );
+  }
+
   const countResult = await server.labelCount();
   if (countResult.status === StatusCode.Error) {
     throw new Error(
@@ -28,25 +34,52 @@ export async function buildDbConfig(server: ENSRainbowServer): Promise<DbConfig>
     );
   }
 
+  // isReady() was true so serverLabelSet is defined.
   return {
-    labelSet: server.serverLabelSet,
+    labelSet: server.serverLabelSet as EnsRainbowServerLabelSet,
     recordsCount: countResult.count,
   };
 }
 
-export class ENSRainbowServer {
-  private readonly db: ENSRainbowDB;
-  public readonly serverLabelSet: EnsRainbowServerLabelSet;
+/**
+ * Thrown when a handler needs the database but the server has not finished bootstrapping yet.
+ *
+ * HTTP routes map this to a 503 Service Unavailable response so that clients polling `/ready`
+ * can retry instead of treating it as a fatal server error.
+ */
+export class DbNotReadyError extends Error {
+  constructor(message = "ENSRainbow is still bootstrapping its database") {
+    super(message);
+    this.name = "DbNotReadyError";
+    Object.setPrototypeOf(this, DbNotReadyError.prototype);
+  }
+}
 
-  private constructor(db: ENSRainbowDB, serverLabelSet: EnsRainbowServerLabelSet) {
+export class ENSRainbowServer {
+  private db: ENSRainbowDB | undefined;
+  private _serverLabelSet: EnsRainbowServerLabelSet | undefined;
+
+  private constructor(db?: ENSRainbowDB, serverLabelSet?: EnsRainbowServerLabelSet) {
     this.db = db;
-    this.serverLabelSet = serverLabelSet;
+    this._serverLabelSet = serverLabelSet;
   }
 
   /**
-   * Creates a new ENSRainbowServer instance
-   * @param db The ENSRainbowDB instance
-   * @param logLevel Optional log level
+   * The label set of the attached database. Only defined once the server is ready.
+   */
+  public get serverLabelSet(): EnsRainbowServerLabelSet | undefined {
+    return this._serverLabelSet;
+  }
+
+  /**
+   * Whether the server has an attached, validated database and is ready to heal labels.
+   */
+  public isReady(): boolean {
+    return this.db !== undefined && this._serverLabelSet !== undefined;
+  }
+
+  /**
+   * Creates a new ENSRainbowServer instance with an already-opened database.
    * @throws Error if a "lite" validation of the database fails
    */
   public static async init(db: ENSRainbowDB): Promise<ENSRainbowServer> {
@@ -60,6 +93,45 @@ export class ENSRainbowServer {
     const serverLabelSet = await db.getLabelSet();
 
     return new ENSRainbowServer(db, serverLabelSet);
+  }
+
+  /**
+   * Creates a new ENSRainbowServer in a "pending" state without a database attached.
+   *
+   * The HTTP server can start serving `/health` and `/ready` immediately while a background task
+   * downloads and validates the database. Once ready, call {@link attachDb} to transition the
+   * server into its ready state.
+   */
+  public static createPending(): ENSRainbowServer {
+    return new ENSRainbowServer();
+  }
+
+  /**
+   * Attaches a validated database to a previously-pending server instance, making it ready.
+   *
+   * @throws Error if the server already has a database attached or if the database fails lite validation.
+   */
+  public async attachDb(db: ENSRainbowDB): Promise<void> {
+    if (this.db !== undefined) {
+      throw new Error("ENSRainbowServer already has a database attached");
+    }
+
+    if (!(await db.validate({ lite: true }))) {
+      throw new Error("Database is in an invalid state");
+    }
+
+    this._serverLabelSet = await db.getLabelSet();
+    this.db = db;
+  }
+
+  /**
+   * Returns the attached database or throws {@link DbNotReadyError} if not yet ready.
+   */
+  private requireDb(): ENSRainbowDB {
+    if (this.db === undefined) {
+      throw new DbNotReadyError();
+    }
+    return this.db;
   }
 
   /**
@@ -81,6 +153,9 @@ export class ENSRainbowServer {
     labelHash: LabelHash,
     clientLabelSet: EnsRainbowClientLabelSet,
   ): Promise<EnsRainbow.HealResponse> {
+    const db = this.requireDb();
+    const serverLabelSet = this._serverLabelSet as EnsRainbowServerLabelSet;
+
     let labelHashBytes: ByteArray;
     try {
       labelHashBytes = labelHashToBytes(labelHash);
@@ -94,7 +169,7 @@ export class ENSRainbowServer {
     }
 
     try {
-      validateSupportedLabelSetAndVersion(this.serverLabelSet, clientLabelSet);
+      validateSupportedLabelSetAndVersion(serverLabelSet, clientLabelSet);
     } catch (error) {
       logger.info(getErrorMessage(error));
       return {
@@ -105,7 +180,7 @@ export class ENSRainbowServer {
     }
 
     try {
-      const versionedRainbowRecord = await this.db.getVersionedRainbowRecord(labelHashBytes);
+      const versionedRainbowRecord = await db.getVersionedRainbowRecord(labelHashBytes);
       if (
         versionedRainbowRecord === null ||
         ENSRainbowServer.needToSimulateAsUnhealable(versionedRainbowRecord, clientLabelSet)
@@ -138,8 +213,9 @@ export class ENSRainbowServer {
   }
 
   async labelCount(): Promise<EnsRainbow.CountResponse> {
+    const db = this.requireDb();
     try {
-      const precalculatedCount = await this.db.getPrecalculatedRainbowRecordCount();
+      const precalculatedCount = await db.getPrecalculatedRainbowRecordCount();
       return {
         status: StatusCode.Success,
         count: precalculatedCount,
@@ -160,6 +236,17 @@ export class ENSRainbowServer {
         error: "Label count not initialized. Check the validate command.",
         errorCode: ErrorCode.ServerError,
       } satisfies EnsRainbow.CountServerError;
+    }
+  }
+
+  /**
+   * Closes the attached database (if any). Safe to call on a pending server.
+   */
+  async close(): Promise<void> {
+    if (this.db) {
+      await this.db.close();
+      this.db = undefined;
+      this._serverLabelSet = undefined;
     }
   }
 }

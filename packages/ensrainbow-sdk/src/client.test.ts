@@ -271,6 +271,36 @@ describe("EnsRainbowApiClient", () => {
     } satisfies EnsRainbow.HealthResponse);
   });
 
+  describe("ready", () => {
+    it("should resolve when the server is ready (HTTP 200)", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: () =>
+          Promise.resolve({
+            status: "ok",
+          } satisfies EnsRainbow.ReadyResponse),
+      });
+
+      const response = await client.ready();
+
+      expect(mockFetch).toHaveBeenCalledWith(new URL("/ready", DEFAULT_ENSRAINBOW_URL));
+      expect(response).toEqual({
+        status: "ok",
+      } satisfies EnsRainbow.ReadyResponse);
+    });
+
+    it("should throw when the server is not ready yet (HTTP 503)", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 503,
+        statusText: "Service Unavailable",
+      });
+
+      await expect(client.ready()).rejects.toThrow(/503/);
+    });
+  });
+
   it("should return version information", async () => {
     mockFetch.mockResolvedValueOnce({
       json: () =>

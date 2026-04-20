@@ -56,18 +56,18 @@ export function waitForEnsRainbowToBeReady(): Promise<void> {
     ensRainbowInstance: ensRainbowUrl.href,
   });
 
-  waitForEnsRainbowToBeReadyPromise = pRetry(async () => ensRainbowClient.health(), {
+  waitForEnsRainbowToBeReadyPromise = pRetry(async () => ensRainbowClient.ready(), {
     retries: 60, // This allows for a total of over 1 hour of retries with 1 minute between attempts.
     minTimeout: secondsToMilliseconds(60),
     maxTimeout: secondsToMilliseconds(60),
     onFailedAttempt: ({ error, attemptNumber, retriesLeft }) => {
       logger.warn({
-        msg: `ENSRainbow health check failed`,
+        msg: `ENSRainbow readiness check failed`,
         attempt: attemptNumber,
         retriesLeft,
         error: retriesLeft === 0 ? error : undefined,
         ensRainbowInstance: ensRainbowUrl.href,
-        advice: `This might be due to ENSRainbow having a cold start, which can take 30+ minutes.`,
+        advice: `This might be due to ENSRainbow still bootstrapping its database, which can take 30+ minutes during a cold start.`,
       });
     },
   })
@@ -81,12 +81,12 @@ export function waitForEnsRainbowToBeReady(): Promise<void> {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
 
       logger.error({
-        msg: `ENSRainbow health check failed after multiple attempts`,
+        msg: `ENSRainbow readiness check failed after multiple attempts`,
         error,
         ensRainbowInstance: ensRainbowUrl.href,
       });
 
-      // Throw the error to terminate the ENSIndexer process due to the failed health check of a critical dependency
+      // Throw the error to terminate the ENSIndexer process due to the failed readiness check of a critical dependency
       throw new Error(errorMessage, {
         cause: error instanceof Error ? error : undefined,
       });

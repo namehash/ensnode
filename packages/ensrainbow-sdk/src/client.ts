@@ -34,6 +34,14 @@ export namespace EnsRainbow {
     health(): Promise<HealthResponse>;
 
     /**
+     * Check whether the ENSRainbow service has finished bootstrapping and is ready to serve requests.
+     *
+     * Throws when the service is not ready (e.g. 503 while the database is still being downloaded
+     * or validated) so callers can retry.
+     */
+    ready(): Promise<ReadyResponse>;
+
+    /**
      * Get the version information of the ENSRainbow service
      *
      * @deprecated Use {@link ApiClient.config} instead. This method will be removed in a future version.
@@ -49,6 +57,23 @@ export namespace EnsRainbow {
 
   export interface HealthResponse {
     status: "ok";
+  }
+
+  /**
+   * Response returned by `GET /ready` when the ENSRainbow service is ready to serve requests.
+   */
+  export interface ReadyResponse {
+    status: "ok";
+  }
+
+  /**
+   * Generic error shape used by endpoints that return 503 Service Unavailable while the
+   * database is still bootstrapping (downloading, extracting, or validating).
+   */
+  export interface ServiceUnavailableError {
+    status: typeof StatusCode.Error;
+    error: string;
+    errorCode: typeof ErrorCode.ServiceUnavailable;
   }
 
   export interface BaseHealResponse<Status extends StatusCode, Error extends ErrorCode> {
@@ -89,17 +114,29 @@ export namespace EnsRainbow {
     errorCode: typeof ErrorCode.BadRequest;
   }
 
+  export interface HealServiceUnavailableError
+    extends BaseHealResponse<typeof StatusCode.Error, typeof ErrorCode.ServiceUnavailable> {
+    status: typeof StatusCode.Error;
+    label?: never;
+    error: string;
+    errorCode: typeof ErrorCode.ServiceUnavailable;
+  }
+
   export type HealResponse =
     | HealSuccess
     | HealNotFoundError
     | HealServerError
-    | HealBadRequestError;
+    | HealBadRequestError
+    | HealServiceUnavailableError;
   export type HealError = Exclude<HealResponse, HealSuccess>;
 
   /**
-   * Server errors should not be cached.
+   * Server errors and transient bootstrap errors should not be cached.
    */
-  export type CacheableHealResponse = Exclude<HealResponse, HealServerError>;
+  export type CacheableHealResponse = Exclude<
+    HealResponse,
+    HealServerError | HealServiceUnavailableError
+  >;
 
   export interface BaseCountResponse<Status extends StatusCode, Error extends ErrorCode> {
     status: Status;
@@ -128,7 +165,19 @@ export namespace EnsRainbow {
     errorCode: typeof ErrorCode.ServerError;
   }
 
-  export type CountResponse = CountSuccess | CountServerError;
+  export interface CountServiceUnavailableError
+    extends BaseCountResponse<typeof StatusCode.Error, typeof ErrorCode.ServiceUnavailable> {
+    status: typeof StatusCode.Error;
+    count?: never;
+    timestamp?: never;
+    error: string;
+    errorCode: typeof ErrorCode.ServiceUnavailable;
+  }
+
+  export type CountResponse =
+    | CountSuccess
+    | CountServerError
+    | CountServiceUnavailableError;
 
   /**
    * ENSRainbow version information.
@@ -393,6 +442,31 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
   }
 
   /**
+   * Check whether the ENSRainbow service is ready (database is downloaded, validated, and open).
+   *
+   * Unlike {@link EnsRainbowApiClient.health}, which is a pure liveness probe that succeeds as soon
+   * as the HTTP server is accepting requests, `ready()` only resolves once the service has finished
+   * bootstrapping its database. Clients that require a usable database (e.g. ENSIndexer) should
+   * poll this method instead of `health()` during startup.
+   *
+   * @throws if the server is not ready yet (HTTP 503) or the request otherwise fails — callers are
+   * expected to retry with backoff.
+   */
+  async ready(): Promise<EnsRainbow.ReadyResponse> {
+    const response = await fetch(new URL("/ready", this.options.endpointUrl));
+
+    if (!response.ok) {
+      throw new Error(
+        `ENSRainbow is not ready yet (HTTP ${response.status}${
+          response.statusText ? ` ${response.statusText}` : ""
+        })`,
+      );
+    }
+
+    return response.json() as Promise<EnsRainbow.ReadyResponse>;
+  }
+
+  /**
    * Get the public configuration of the ENSRainbow service.
    */
   async config(): Promise<EnsRainbow.ENSRainbowPublicConfig> {
@@ -477,5 +551,9 @@ export const isHealError = (
 export const isCacheableHealResponse = (
   response: EnsRainbow.HealResponse,
 ): response is EnsRainbow.CacheableHealResponse => {
-  return response.status === StatusCode.Success || response.errorCode !== ErrorCode.ServerError;
+  if (response.status === StatusCode.Success) return true;
+  return (
+    response.errorCode !== ErrorCode.ServerError &&
+    response.errorCode !== ErrorCode.ServiceUnavailable
+  );
 };
