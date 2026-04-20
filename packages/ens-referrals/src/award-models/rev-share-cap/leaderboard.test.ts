@@ -482,12 +482,10 @@ describe("buildReferrerLeaderboardRevShareCap", () => {
       const referrerB = result.referrers.get(ADDR_B)!;
 
       expect(referrerA.isQualified).toBe(true);
-      expect(referrerA.isAdminDisqualified).toBe(false);
       expect(referrerA.adminAction).toBe(null);
       expect(referrerA.cappedAward.amount).toBe(UNCAPPED_AWARD_1Y.amount);
 
       expect(referrerB.isQualified).toBe(true);
-      expect(referrerB.isAdminDisqualified).toBe(false);
       expect(referrerB.adminAction).toBe(null);
     });
 
@@ -506,14 +504,13 @@ describe("buildReferrerLeaderboardRevShareCap", () => {
       const referrerA = result.referrers.get(ADDR_A)!;
       const referrerB = result.referrers.get(ADDR_B)!;
 
-      expect(referrerA.isAdminDisqualified).toBe(true);
       expect(referrerA.adminAction).toEqual(disqualification(ADDR_A, "self-referral"));
       expect(referrerA.isQualified).toBe(false);
       expect(referrerA.cappedAward.amount).toBe(0n);
 
       // Pool was not consumed by ADDR_A, so ADDR_B gets the full award
       expect(referrerB.isQualified).toBe(true);
-      expect(referrerB.isAdminDisqualified).toBe(false);
+      expect(referrerB.adminAction).toBe(null);
       expect(referrerB.cappedAward.amount).toBe(UNCAPPED_AWARD_1Y.amount);
     });
 
@@ -527,7 +524,7 @@ describe("buildReferrerLeaderboardRevShareCap", () => {
       const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
       const referrerA = result.referrers.get(ADDR_A)!;
 
-      expect(referrerA.isAdminDisqualified).toBe(true);
+      expect(referrerA.adminAction?.actionType).toBe(AdminActionTypes.Disqualification);
       expect(referrerA.adminAction?.reason).toBe("promoting discounts");
       expect(referrerA.isQualified).toBe(false);
       expect(referrerA.cappedAward.amount).toBe(0n);
@@ -560,22 +557,22 @@ describe("buildReferrerLeaderboardRevShareCap", () => {
 
       expect(referrerB.rank).toBe(1);
       expect(referrerB.isQualified).toBe(true);
-      expect(referrerB.isAdminDisqualified).toBe(false);
+      expect(referrerB.adminAction).toBe(null);
       expect(referrerB.cappedAward.amount).toBe(UNCAPPED_AWARD_1Y.amount);
 
       expect(referrerA.rank).toBe(2);
-      expect(referrerA.isAdminDisqualified).toBe(true);
+      expect(referrerA.adminAction?.actionType).toBe(AdminActionTypes.Disqualification);
       expect(referrerA.adminAction?.reason).toBe("cheating");
       expect(referrerA.isQualified).toBe(false);
       expect(referrerA.cappedAward.amount).toBe(0n);
 
       expect(referrerC.rank).toBe(3);
       expect(referrerC.isQualified).toBe(false);
-      expect(referrerC.isAdminDisqualified).toBe(false);
+      expect(referrerC.adminAction).toBe(null);
       expect(referrerC.cappedAward.amount).toBe(0n);
     });
 
-    it("multiple admin actions: all disqualified referrers get isAdminDisqualified=true", () => {
+    it("multiple admin actions: all disqualified referrers have Disqualification adminAction", () => {
       const rules = buildTestRules(parseUsdc("1000"), parseUsdc("5"), [
         disqualification(ADDR_A, "reason-a"),
         disqualification(ADDR_B, "reason-b"),
@@ -591,17 +588,16 @@ describe("buildReferrerLeaderboardRevShareCap", () => {
       const referrerB = result.referrers.get(ADDR_B)!;
       const referrerC = result.referrers.get(ADDR_C)!;
 
-      expect(referrerA.isAdminDisqualified).toBe(true);
+      expect(referrerA.adminAction?.actionType).toBe(AdminActionTypes.Disqualification);
       expect(referrerA.adminAction?.reason).toBe("reason-a");
       expect(referrerA.isQualified).toBe(false);
       expect(referrerA.cappedAward.amount).toBe(0n);
 
-      expect(referrerB.isAdminDisqualified).toBe(true);
+      expect(referrerB.adminAction?.actionType).toBe(AdminActionTypes.Disqualification);
       expect(referrerB.adminAction?.reason).toBe("reason-b");
       expect(referrerB.isQualified).toBe(false);
       expect(referrerB.cappedAward.amount).toBe(0n);
 
-      expect(referrerC.isAdminDisqualified).toBe(false);
       expect(referrerC.adminAction).toBe(null);
       expect(referrerC.isQualified).toBe(true);
       expect(referrerC.cappedAward.amount).toBe(UNCAPPED_AWARD_1Y.amount);
@@ -632,13 +628,11 @@ describe("buildReferrerLeaderboardRevShareCap", () => {
       const referrerB = result.referrers.get(ADDR_B)!;
 
       // Warned referrer is NOT disqualified — they still qualify and get awards
-      expect(referrerA.isAdminDisqualified).toBe(false);
       expect(referrerA.adminAction).toEqual(warning(ADDR_A, "suspicious activity"));
       expect(referrerA.isQualified).toBe(true);
       expect(referrerA.cappedAward.amount).toBe(UNCAPPED_AWARD_1Y.amount);
 
       expect(referrerB.isQualified).toBe(true);
-      expect(referrerB.isAdminDisqualified).toBe(false);
       expect(referrerB.adminAction).toBe(null);
     });
 
@@ -651,7 +645,6 @@ describe("buildReferrerLeaderboardRevShareCap", () => {
       const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
       const referrerA = result.referrers.get(ADDR_A)!;
 
-      expect(referrerA.isAdminDisqualified).toBe(false);
       expect(referrerA.adminAction?.actionType).toBe(AdminActionTypes.Warning);
       expect(referrerA.isQualified).toBe(false); // below threshold, not because of warning
       expect(referrerA.cappedAward.amount).toBe(0n);

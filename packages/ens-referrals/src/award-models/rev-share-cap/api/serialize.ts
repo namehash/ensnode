@@ -77,7 +77,6 @@ export function serializeAwardedReferrerMetricsRevShareCap(
     isQualified: metrics.isQualified,
     uncappedAward: serializePriceUsdc(metrics.uncappedAward),
     cappedAward: serializePriceUsdc(metrics.cappedAward),
-    isAdminDisqualified: metrics.isAdminDisqualified,
     adminAction: metrics.adminAction,
   };
 }
@@ -98,7 +97,6 @@ export function serializeUnrankedReferrerMetricsRevShareCap(
     isQualified: metrics.isQualified,
     uncappedAward: serializePriceUsdc(metrics.uncappedAward),
     cappedAward: serializePriceUsdc(metrics.cappedAward),
-    isAdminDisqualified: metrics.isAdminDisqualified,
     adminAction: metrics.adminAction,
   };
 }

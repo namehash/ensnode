@@ -86,22 +86,14 @@ export interface RankedReferrerMetricsRevShareCap extends ReferrerMetricsRevShar
    *
    * @invariant true if and only if `totalBaseRevenueContribution` is greater than or equal to
    *   {@link ReferralProgramRulesRevShareCap.minBaseRevenueContribution} AND
-   *   {@link isAdminDisqualified} is false.
+   *   {@link adminAction} does not have `actionType` of {@link AdminActionTypes.Disqualification}.
    */
   isQualified: boolean;
 
   /**
-   * Whether this referrer has been admin-disqualified from the edition.
+   * The admin action taken on this referrer, or null if no admin action has been taken.
    *
-   * @invariant When true, {@link isQualified} is false.
-   * @invariant true if and only if {@link adminAction} has `actionType === "Disqualification"`.
-   */
-  isAdminDisqualified: boolean;
-
-  /**
-   * The admin action imposed on this referrer, or null if no action exists.
-   *
-   * @invariant null when no admin action exists for this referrer.
+   * @invariant null when no admin action has been taken on this referrer.
    * @invariant Must match the corresponding entry in {@link ReferralProgramRulesRevShareCap.adminActions}.
    */
   adminAction: AdminAction | null;
@@ -146,14 +138,6 @@ export const validateRankedReferrerMetricsRevShareCap = (
       );
     }
   }
-
-  const expectedIsAdminDisqualified =
-    metrics.adminAction?.actionType === AdminActionTypes.Disqualification;
-  if (metrics.isAdminDisqualified !== expectedIsAdminDisqualified) {
-    throw new Error(
-      `RankedReferrerMetricsRevShareCap: Invalid isAdminDisqualified: ${metrics.isAdminDisqualified}, expected: ${expectedIsAdminDisqualified}.`,
-    );
-  }
 };
 
 export const buildRankedReferrerMetricsRevShareCap = (
@@ -171,7 +155,6 @@ export const buildRankedReferrerMetricsRevShareCap = (
       referrer.totalBaseRevenueContribution,
       rules,
     ),
-    isAdminDisqualified: adminAction?.actionType === AdminActionTypes.Disqualification,
     adminAction,
   } satisfies RankedReferrerMetricsRevShareCap;
 
@@ -200,7 +183,7 @@ export interface AwardedReferrerMetricsRevShareCap extends RankedReferrerMetrics
    *
    * @invariant Guaranteed to be a valid PriceUsdc with amount between 0 and {@link ReferralProgramRulesRevShareCap.awardPool.amount} (inclusive)
    * @invariant Always <= uncappedAward.amount
-   * @invariant Amount equal to 0 when {@link isAdminDisqualified} is true.
+   * @invariant Amount equal to 0 when {@link adminAction} has `actionType` of {@link AdminActionTypes.Disqualification}.
    * @invariant Amount equal to 0 when {@link isQualified} is false.
    */
   cappedAward: PriceUsdc;
@@ -218,7 +201,10 @@ export const validateAwardedReferrerMetricsRevShareCap = (
 
   makePriceUsdcSchema("AwardedReferrerMetricsRevShareCap.cappedAward").parse(metrics.cappedAward);
 
-  if (metrics.isAdminDisqualified && metrics.cappedAward.amount !== 0n) {
+  if (
+    metrics.adminAction?.actionType === AdminActionTypes.Disqualification &&
+    metrics.cappedAward.amount !== 0n
+  ) {
     throw new Error(
       `AwardedReferrerMetricsRevShareCap: cappedAward.amount must be 0n for admin-disqualified referrers, got ${metrics.cappedAward.amount.toString()}.`,
     );
@@ -315,14 +301,6 @@ export const validateUnrankedReferrerMetricsRevShareCap = (
     }
   }
 
-  const expectedIsAdminDisqualified =
-    metrics.adminAction?.actionType === AdminActionTypes.Disqualification;
-  if (metrics.isAdminDisqualified !== expectedIsAdminDisqualified) {
-    throw new Error(
-      `Invalid UnrankedReferrerMetricsRevShareCap: isAdminDisqualified: ${metrics.isAdminDisqualified}, expected: ${expectedIsAdminDisqualified}.`,
-    );
-  }
-
   if (metrics.totalReferrals !== 0) {
     throw new Error(
       `Invalid UnrankedReferrerMetricsRevShareCap: totalReferrals must be 0, got: ${metrics.totalReferrals}.`,
@@ -387,7 +365,6 @@ export const buildUnrankedReferrerMetricsRevShareCap = (
     isQualified: false,
     uncappedAward: priceUsdc(0n),
     cappedAward: priceUsdc(0n),
-    isAdminDisqualified: adminAction?.actionType === AdminActionTypes.Disqualification,
     adminAction,
   } satisfies UnrankedReferrerMetricsRevShareCap;
 

@@ -11,16 +11,16 @@ import {
 } from "../shared/rules";
 
 /**
- * The types of admin actions that can be imposed on a referrer in a rev-share-cap edition.
+ * The types of admin actions that can be taken upon a referrer in a rev-share-cap edition.
  */
 export const AdminActionTypes = {
   /**
-   * The referrer is ineligible for awards.
+   * The referrer is disqualified for awards.
    */
   Disqualification: "Disqualification",
 
   /**
-   * The referrer is flagged but still eligible for awards.
+   * The referrer is warned about a potential disqualification but may still be qualified for awards.
    */
   Warning: "Warning",
 } as const;
@@ -28,8 +28,7 @@ export const AdminActionTypes = {
 export type AdminActionType = (typeof AdminActionTypes)[keyof typeof AdminActionTypes];
 
 /**
- * An admin-imposed disqualification of a specific referrer in an edition.
- * Disqualified referrers receive no awards.
+ * An admin action to disqualify a referrer from receiving awards for an edition.
  */
 export interface AdminActionDisqualification {
   actionType: typeof AdminActionTypes.Disqualification;
@@ -40,7 +39,7 @@ export interface AdminActionDisqualification {
   referrer: NormalizedAddress;
 
   /**
-   * A human-readable explanation of why the action was imposed.
+   * A short message explaining the disqualification.
    *
    * @invariant Must be a trimmed, non-empty string.
    */
@@ -48,8 +47,8 @@ export interface AdminActionDisqualification {
 }
 
 /**
- * An admin-imposed warning for a specific referrer in an edition.
- * Warned referrers are still eligible for awards.
+ * An admin action to warn a referrer that their eligibility for receiving awards for an edition
+ * is at risk unless the referrer takes corrective actions.
  */
 export interface AdminActionWarning {
   actionType: typeof AdminActionTypes.Warning;
@@ -60,7 +59,7 @@ export interface AdminActionWarning {
   referrer: NormalizedAddress;
 
   /**
-   * A human-readable explanation of why the action was imposed.
+   * A short message explaining the warning.
    *
    * @invariant Must be a trimmed, non-empty string.
    */
@@ -109,8 +108,7 @@ export interface ReferralProgramRulesRevShareCap extends BaseReferralProgramRule
   maxBaseRevenueShare: number;
 
   /**
-   * Admin-imposed actions for this edition.
-   * Disqualified referrers receive no awards. Warned referrers are still eligible.
+   * Admin actions for this edition.
    *
    * @invariant No duplicate referrer addresses (a referrer can have at most one admin action).
    */

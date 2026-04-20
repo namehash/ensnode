@@ -538,7 +538,6 @@ describe("makeReferrerEditionMetricsSchema", () => {
         isQualified: true,
         uncappedAward: parseUsdc("200"),
         cappedAward: parseUsdc("200"),
-        isAdminDisqualified: false,
         adminAction: null,
       },
       aggregatedMetrics: {
@@ -591,7 +590,6 @@ describe("makeReferrerEditionMetricsSchema", () => {
         isQualified: false,
         uncappedAward: parseUsdc("200"),
         cappedAward: parseUsdc("0"),
-        isAdminDisqualified: true,
         adminAction: {
           actionType: AdminActionTypes.Disqualification,
           referrer: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
@@ -645,7 +643,6 @@ describe("makeReferrerEditionMetricsSchema", () => {
         isQualified: true,
         uncappedAward: parseUsdc("200"),
         cappedAward: parseUsdc("200"),
-        isAdminDisqualified: false,
         adminAction: {
           actionType: AdminActionTypes.Warning,
           referrer: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
@@ -666,7 +663,7 @@ describe("makeReferrerEditionMetricsSchema", () => {
     expect(result.awardModel).toBe(ReferralProgramAwardModels.RevShareCap);
   });
 
-  it("fails when isAdminDisqualified mismatches adminAction.actionType", () => {
+  it("fails when Disqualification adminAction has isQualified=true or non-zero cappedAward", () => {
     const input = {
       awardModel: ReferralProgramAwardModels.RevShareCap,
       type: ReferrerEditionMetricsTypeIds.Ranked,
@@ -692,7 +689,6 @@ describe("makeReferrerEditionMetricsSchema", () => {
         isQualified: true,
         uncappedAward: parseUsdc("200"),
         cappedAward: parseUsdc("200"),
-        isAdminDisqualified: false,
         adminAction: {
           actionType: AdminActionTypes.Disqualification,
           referrer: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
@@ -738,7 +734,6 @@ describe("makeReferrerEditionMetricsSchema", () => {
         isQualified: true,
         uncappedAward: parseUsdc("200"),
         cappedAward: parseUsdc("200"),
-        isAdminDisqualified: false,
         adminAction: {
           actionType: AdminActionTypes.Warning,
           referrer: "0x0000000000000000000000000000000000000001",

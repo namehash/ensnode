@@ -101,7 +101,6 @@ export const makeAwardedReferrerMetricsRevShareCapSchema = (
       isQualified: z.boolean(),
       uncappedAward: makePriceUsdcSchema(`${valueLabel}.uncappedAward`),
       cappedAward: makePriceUsdcSchema(`${valueLabel}.cappedAward`),
-      isAdminDisqualified: z.boolean(),
       adminAction: makeAdminActionSchema(`${valueLabel}.adminAction`).nullable(),
     })
     .refine((data) => data.cappedAward.amount <= data.uncappedAward.amount, {
@@ -110,19 +109,11 @@ export const makeAwardedReferrerMetricsRevShareCapSchema = (
     })
     .refine(
       (data) =>
-        !data.isAdminDisqualified || (data.isQualified === false && data.cappedAward.amount === 0n),
+        data.adminAction?.actionType !== AdminActionTypes.Disqualification ||
+        (data.isQualified === false && data.cappedAward.amount === 0n),
       {
-        message: `When ${valueLabel}.isAdminDisqualified is true, isQualified must be false and cappedAward.amount must be 0`,
-        path: ["isAdminDisqualified"],
-      },
-    )
-    .refine(
-      (data) =>
-        data.isAdminDisqualified ===
-        (data.adminAction?.actionType === AdminActionTypes.Disqualification),
-      {
-        message: `${valueLabel}.isAdminDisqualified must be true iff adminAction.actionType is Disqualification`,
-        path: ["isAdminDisqualified"],
+        message: `When ${valueLabel}.adminAction.actionType is Disqualification, isQualified must be false and cappedAward.amount must be 0`,
+        path: ["adminAction"],
       },
     )
     .refine((data) => data.isQualified || data.cappedAward.amount === 0n, {
@@ -153,7 +144,6 @@ export const makeUnrankedReferrerMetricsRevShareCapSchema = (
       isQualified: z.literal(false),
       uncappedAward: makePriceUsdcSchema(`${valueLabel}.uncappedAward`),
       cappedAward: makePriceUsdcSchema(`${valueLabel}.cappedAward`),
-      isAdminDisqualified: z.boolean(),
       adminAction: makeAdminActionSchema(`${valueLabel}.adminAction`).nullable(),
     })
     .refine((data) => data.totalReferrals === 0, {
@@ -180,15 +170,6 @@ export const makeUnrankedReferrerMetricsRevShareCapSchema = (
       message: `${valueLabel}.cappedAward must be 0 for unranked referrers`,
       path: ["cappedAward"],
     })
-    .refine(
-      (data) =>
-        data.isAdminDisqualified ===
-        (data.adminAction?.actionType === AdminActionTypes.Disqualification),
-      {
-        message: `${valueLabel}.isAdminDisqualified must be true iff adminAction.actionType is Disqualification`,
-        path: ["isAdminDisqualified"],
-      },
-    )
     .refine((data) => data.adminAction === null || data.adminAction.referrer === data.referrer, {
       message: `${valueLabel}.adminAction.referrer must match ${valueLabel}.referrer`,
       path: ["adminAction", "referrer"],
