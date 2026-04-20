@@ -16,6 +16,19 @@ import { ENSRainbowDB } from "@/lib/database";
 import { buildDbConfig, ENSRainbowServer } from "@/lib/server";
 import { logger } from "@/utils/logger";
 
+/**
+ * Grace period given to a spawned child process after SIGTERM before we escalate to SIGKILL
+ * during shutdown.
+ */
+const CHILD_PROCESS_KILL_GRACE_MS = 5_000;
+
+class BootstrapAbortedError extends Error {
+  constructor() {
+    super("ENSRainbow bootstrap aborted due to shutdown");
+    this.name = "BootstrapAbortedError";
+  }
+}
+
 export interface EntrypointCommandOptions {
   port: number;
   dataDir: AbsolutePath;
@@ -70,7 +83,9 @@ export const DB_READY_MARKER_FILENAME = "ensrainbow_db_ready";
  *    database archive, extracts it, validates it (lite), opens LevelDB, and attaches it to the
  *    server. Any failure in this pipeline calls `process.exit(1)` so the orchestrator restarts
  *    the container.
- * 3. Wires SIGTERM/SIGINT handlers for graceful shutdown (HTTP server + DB).
+ * 3. Wires SIGTERM/SIGINT handlers for graceful shutdown. On shutdown the bootstrap is aborted
+ *    (spawned children are killed and any partially-opened LevelDB handle is released) before
+ *    the HTTP server and DB-backed server are closed, so we don't leak locks or prolong exit.
  */
 export async function entrypointCommand(
   options: EntrypointCommandOptions,
@@ -93,12 +108,29 @@ export async function entrypointCommand(
     port: options.port,
   });
 
+  // Shared between close() and the bootstrap pipeline. `close()` aborts this to kill any
+  // in-flight spawned child processes and make the bootstrap bail out as soon as possible.
+  const bootstrapAborter = new AbortController();
+
+  // Resolves as soon as the bootstrap task has settled (success, failure, or abort). Used by
+  // close() to wait for cleanup of in-flight children and partially-opened DB handles before
+  // returning. Distinct from `bootstrapComplete`, which only resolves on successful bootstrap.
+  let signalBootstrapSettled!: () => void;
+  const bootstrapSettled = new Promise<void>((resolvePromise) => {
+    signalBootstrapSettled = resolvePromise;
+  });
+
   let alreadyClosed = false;
   const close = async () => {
     if (alreadyClosed) return;
     alreadyClosed = true;
     logger.info("Shutting down server...");
+    bootstrapAborter.abort();
     try {
+      // Wait for the bootstrap pipeline to settle (including spawned child cleanup and any
+      // partially-opened DB being closed) before shutting down the HTTP server and DB, so
+      // we don't leave child processes or LevelDB locks behind.
+      await bootstrapSettled;
       await httpServer.close();
       await ensRainbowServer.close();
       logger.info("Server shutdown complete");
@@ -116,7 +148,7 @@ export async function entrypointCommand(
   const bootstrapComplete = new Promise<void>((resolvePromise) => {
     // Schedule the bootstrap on the next tick so the HTTP server can accept connections first.
     setTimeout(() => {
-      runDbBootstrap(options, ensRainbowServer)
+      runDbBootstrap(options, ensRainbowServer, bootstrapAborter.signal)
         .then((publicConfig) => {
           cachedPublicConfig = publicConfig;
           logger.info(
@@ -125,8 +157,15 @@ export async function entrypointCommand(
           resolvePromise();
         })
         .catch((error) => {
+          if (error instanceof BootstrapAbortedError || bootstrapAborter.signal.aborted) {
+            logger.info("ENSRainbow database bootstrap aborted due to shutdown");
+            return;
+          }
           logger.error(error, "ENSRainbow database bootstrap failed - exiting");
           process.exit(1);
+        })
+        .finally(() => {
+          signalBootstrapSettled();
         });
     }, 0);
   });
@@ -138,11 +177,16 @@ export async function entrypointCommand(
  * Full database bootstrap pipeline. Idempotent: if the marker file already exists and the
  * on-disk database passes lite validation, the download and extraction steps are skipped.
  *
+ * Honors `signal`: between steps we check for abort and, if a DB has been opened but not yet
+ * attached to the server, close it so the LevelDB lock is released promptly. Once the DB is
+ * attached to `ensRainbowServer`, its close is owned by `ENSRainbowServer.close()`.
+ *
  * @returns the `ENSRainbowPublicConfig` for the attached database.
  */
 async function runDbBootstrap(
   options: EntrypointCommandOptions,
   ensRainbowServer: ENSRainbowServer,
+  signal: AbortSignal,
 ): Promise<EnsRainbow.ENSRainbowPublicConfig> {
   const { dataDir, dbSchemaVersion, labelSetId, labelSetVersion } = options;
   const downloadTempDir = options.downloadTempDir ?? join(dataDir, ".download-temp");
@@ -156,10 +200,18 @@ async function runDbBootstrap(
       `Found existing ENSRainbow marker at ${markerFile}; attempting to open existing database at ${dbSubdir}`,
     );
     try {
+      throwIfAborted(signal);
       const db = await ENSRainbowDB.open(dbSubdir);
+      if (signal.aborted) {
+        await safeClose(db);
+        throw new BootstrapAbortedError();
+      }
       await ensRainbowServer.attachDb(db);
       return buildEnsRainbowPublicConfig(await buildDbConfig(ensRainbowServer));
     } catch (error) {
+      if (error instanceof BootstrapAbortedError || signal.aborted) {
+        throw error;
+      }
       logger.warn(
         error,
         "Existing ENSRainbow database failed to open or validate; re-downloading from scratch",
@@ -168,6 +220,7 @@ async function runDbBootstrap(
     }
   }
 
+  throwIfAborted(signal);
   await downloadAndExtractDatabase({
     dataDir,
     dbSchemaVersion,
@@ -175,10 +228,16 @@ async function runDbBootstrap(
     labelSetVersion,
     downloadTempDir,
     labelsetServerUrl: options.labelsetServerUrl,
+    signal,
   });
+  throwIfAborted(signal);
 
   logger.info(`Opening newly extracted database at ${dbSubdir}`);
   const db = await ENSRainbowDB.open(dbSubdir);
+  if (signal.aborted) {
+    await safeClose(db);
+    throw new BootstrapAbortedError();
+  }
 
   await ensRainbowServer.attachDb(db);
 
@@ -188,6 +247,20 @@ async function runDbBootstrap(
   return buildEnsRainbowPublicConfig(await buildDbConfig(ensRainbowServer));
 }
 
+function throwIfAborted(signal: AbortSignal): void {
+  if (signal.aborted) {
+    throw new BootstrapAbortedError();
+  }
+}
+
+async function safeClose(db: ENSRainbowDB): Promise<void> {
+  try {
+    await db.close();
+  } catch (error) {
+    logger.warn(error, "Failed to close partially-opened ENSRainbow database during shutdown");
+  }
+}
+
 interface DownloadAndExtractParams {
   dataDir: string;
   dbSchemaVersion: DbSchemaVersion;
@@ -195,10 +268,12 @@ interface DownloadAndExtractParams {
   labelSetVersion: number;
   downloadTempDir: string;
   labelsetServerUrl?: string | undefined;
+  signal: AbortSignal;
 }
 
 async function downloadAndExtractDatabase(params: DownloadAndExtractParams): Promise<void> {
-  const { dataDir, dbSchemaVersion, labelSetId, labelSetVersion, downloadTempDir } = params;
+  const { dataDir, dbSchemaVersion, labelSetId, labelSetVersion, downloadTempDir, signal } =
+    params;
 
   // Clean up any stale state from a previous aborted bootstrap attempt.
   rmSync(downloadTempDir, { recursive: true, force: true });
@@ -211,18 +286,14 @@ async function downloadAndExtractDatabase(params: DownloadAndExtractParams): Pro
 
   await spawnChild(
     "bash",
-    [
-      downloadScript,
-      String(dbSchemaVersion),
-      labelSetId,
-      String(labelSetVersion),
-    ],
+    [downloadScript, String(dbSchemaVersion), labelSetId, String(labelSetVersion)],
     {
       OUT_DIR: downloadTempDir,
       ...(params.labelsetServerUrl
         ? { ENSRAINBOW_LABELSET_SERVER_URL: params.labelsetServerUrl }
         : {}),
     },
+    signal,
   );
 
   const archivePath = join(
@@ -239,7 +310,12 @@ async function downloadAndExtractDatabase(params: DownloadAndExtractParams): Pro
 
   logger.info(`Extracting ${archivePath} into ${dataDir}`);
   mkdirSync(dataDir, { recursive: true });
-  await spawnChild("tar", ["-xzf", archivePath, "-C", dataDir, "--strip-components=1"], {});
+  await spawnChild(
+    "tar",
+    ["-xzf", archivePath, "-C", dataDir, "--strip-components=1"],
+    {},
+    signal,
+  );
 
   rmSync(downloadTempDir, { recursive: true, force: true });
 }
@@ -261,15 +337,50 @@ function spawnChild(
   command: string,
   args: string[],
   extraEnv: Record<string, string>,
+  signal: AbortSignal,
 ): Promise<void> {
   return new Promise((resolvePromise, reject) => {
+    if (signal.aborted) {
+      reject(new BootstrapAbortedError());
+      return;
+    }
+
     const child = spawn(command, args, {
       stdio: "inherit",
       env: { ...process.env, ...extraEnv },
     });
 
-    child.on("error", reject);
-    child.on("exit", (code, signal) => {
+    // On abort: send SIGTERM for a graceful exit, and escalate to SIGKILL after a grace period
+    // if the child is still alive. The `unref`'d timeout ensures we don't hold the event loop
+    // open if the child exits cleanly before the grace period elapses.
+    let killTimer: NodeJS.Timeout | undefined;
+    const onAbort = () => {
+      if (child.exitCode !== null || child.signalCode !== null) return;
+      child.kill("SIGTERM");
+      killTimer = setTimeout(() => {
+        if (child.exitCode === null && child.signalCode === null) {
+          child.kill("SIGKILL");
+        }
+      }, CHILD_PROCESS_KILL_GRACE_MS);
+      killTimer.unref();
+    };
+    signal.addEventListener("abort", onAbort, { once: true });
+
+    const cleanup = () => {
+      signal.removeEventListener("abort", onAbort);
+      if (killTimer) clearTimeout(killTimer);
+    };
+
+    child.on("error", (err) => {
+      cleanup();
+      reject(err);
+    });
+    child.on("exit", (code, exitSignal) => {
+      cleanup();
+      if (signal.aborted) {
+        reject(new BootstrapAbortedError());
+        return;
+      }
       if (code === 0) {
         resolvePromise();
         return;
@@ -277,7 +388,7 @@ function spawnChild(
       reject(
         new Error(
           `Command '${command} ${args.join(" ")}' exited with ${
-            signal ? `signal ${signal}` : `code ${code}`
+            exitSignal ? `signal ${exitSignal}` : `code ${code}`
           }`,
         ),
       );
