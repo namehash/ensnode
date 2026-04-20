@@ -13,7 +13,7 @@ sidebar:
 | `GET /health` | Liveness probe for orchestration | `{ status: "ok" }` |
 | `GET /v1/heal/{labelhash}` | Heal a single labelhash | `HealSuccess`, `HealError` |
 | `GET /v1/labels/count` | Current healable label count | `CountSuccess`, `CountServerError` |
-| `GET /v1/config` | Public service config (version, label set, records count) | `ENSRainbowPublicConfig` |
+| `GET /v1/config` | Public service config (version, label set, records count) | `EnsRainbowPublicConfig` |
 
 :::tip[Deterministic Results]
 Pin `labelSetVersion` in your client if you need **deterministic results** across time. See the [Label Sets & Versioning guide](/ensrainbow/concepts/label-sets-and-versioning/) for details.
