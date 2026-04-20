@@ -1,3 +1,4 @@
+import { replaceBigInts } from "@ponder/utils";
 import type { Duration } from "enssdk";
 
 import type {
@@ -64,7 +65,8 @@ app.openapi(resolveRecordsRoute, async (c) => {
     ...(showTrace && { trace }),
   } satisfies ResolveRecordsResponse<typeof selection>;
 
-  return c.json(response);
+  // serialize bigints (e.g. `records.version`, `records.abi.contentType`) as strings
+  return c.json(replaceBigInts(response, String));
 });
 
 /**

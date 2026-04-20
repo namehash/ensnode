@@ -44,16 +44,58 @@ const chainIdsWithoutDefaultChainId = z.optional(
   stringarray.pipe(z.array(defaultableChainId.pipe(excludingDefaultChainId))),
 );
 
+const contentTypeBitmask = z
+  .string()
+  .transform((val, ctx) => {
+    try {
+      const n = BigInt(val);
+      if (n <= 0n) {
+        ctx.issues.push({
+          code: "custom",
+          message: "Must be a positive integer.",
+          input: val,
+        });
+        return z.NEVER;
+      }
+      return n;
+    } catch {
+      ctx.issues.push({
+        code: "custom",
+        message: "Must be a valid positive integer string.",
+        input: val,
+      });
+      return z.NEVER;
+    }
+  })
+  .openapi({ type: "string", example: "1" });
+
+const interfaceId = z
+  .string()
+  .regex(/^0x[0-9a-f]{8}$/i, "Must be a 4-byte hex (0x + 8 hex chars)")
+  .transform((val) => val.toLowerCase() as `0x${string}`);
+
 const rawSelectionParams = z.object({
   name: z.string().optional(),
   addresses: z.string().optional(),
   texts: z.string().optional(),
+  contenthash: z.string().optional(),
+  pubkey: z.string().optional(),
+  dnszonehash: z.string().optional(),
+  version: z.string().optional(),
+  abi: z.string().optional(),
+  interfaces: z.string().optional(),
 });
 
 const selectionFields = z.object({
   name: z.optional(boolstring),
   addresses: z.optional(stringarray.pipe(z.array(coinType))),
   texts: z.optional(stringarray),
+  contenthash: z.optional(boolstring),
+  pubkey: z.optional(boolstring),
+  dnszonehash: z.optional(boolstring),
+  version: z.optional(boolstring),
+  abi: z.optional(contentTypeBitmask),
+  interfaces: z.optional(stringarray.pipe(z.array(interfaceId))),
 });
 
 type SelectionFields = z.output<typeof selectionFields>;
@@ -66,6 +108,12 @@ function toSelection(
     ...(fields.name && { name: true }),
     ...(fields.addresses && { addresses: fields.addresses }),
     ...(fields.texts && { texts: fields.texts }),
+    ...(fields.contenthash && { contenthash: true }),
+    ...(fields.pubkey && { pubkey: true }),
+    ...(fields.dnszonehash && { dnszonehash: true }),
+    ...(fields.version && { version: true }),
+    ...(fields.abi !== undefined && { abi: fields.abi }),
+    ...(fields.interfaces && { interfaces: fields.interfaces }),
   };
 
   if (isSelectionEmpty(sel)) {

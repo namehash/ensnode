@@ -162,9 +162,12 @@ export class EnsApiClient {
     const url = new URL(`/api/resolve/records/${encodeURIComponent(name)}`, this.options.url);
 
     // Add query parameters based on selection
-    if (selection.name) {
-      url.searchParams.set("name", "true");
-    }
+    if (selection.name) url.searchParams.set("name", "true");
+    if (selection.contenthash) url.searchParams.set("contenthash", "true");
+    if (selection.pubkey) url.searchParams.set("pubkey", "true");
+    if (selection.dnszonehash) url.searchParams.set("dnszonehash", "true");
+    if (selection.version) url.searchParams.set("version", "true");
+    if (selection.abi !== undefined) url.searchParams.set("abi", selection.abi.toString());
 
     if (selection.addresses && selection.addresses.length > 0) {
       url.searchParams.set("addresses", selection.addresses.join(","));
@@ -172,6 +175,10 @@ export class EnsApiClient {
 
     if (selection.texts && selection.texts.length > 0) {
       url.searchParams.set("texts", selection.texts.join(","));
+    }
+
+    if (selection.interfaces && selection.interfaces.length > 0) {
+      url.searchParams.set("interfaces", selection.interfaces.join(","));
     }
 
     if (options?.trace) url.searchParams.set("trace", "true");

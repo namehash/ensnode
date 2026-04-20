@@ -142,7 +142,8 @@ export default function () {
   // NOTE: ABIChanged and InterfaceChanged are intentionally NOT registered.
   // - ABIChanged event omits data (would require a follow-up readContract per event).
   // - InterfaceChanged has an ERC-165 fallback that cannot be replicated offline.
-  // Both remain selectable via the hybrid RPC tail in the Resolution API.
+  // Both remain selectable via the Resolution API but are always resolved via RPC.
+  // Protocol Acceleration support can be added as desired.
 
   addOnchainEventListener(
     namespaceContract(pluginName, "Resolver:ContenthashChanged"),
