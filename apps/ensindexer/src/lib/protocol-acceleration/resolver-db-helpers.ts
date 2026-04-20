@@ -1,4 +1,3 @@
-import { and, eq } from "drizzle-orm";
 import {
   type Address,
   type CoinType,
@@ -7,7 +6,6 @@ import {
   makeResolverId,
   makeResolverRecordsId,
   type Node,
-  type RecordVersion,
 } from "enssdk";
 
 import {
@@ -195,49 +193,4 @@ export async function handleResolverDnszonehashUpdate(
   await context.ensDb
     .update(ensIndexerSchema.resolverRecords, { id })
     .set({ dnszonehash: interpretDnszonehashValue(rawHash) });
-}
-
-/**
- * IVersionableResolver VersionChanged: deletes all child records for (chainId, address, node)
- * and resets scalar columns.
- *
- * Uses raw drizzle via `context.ensDb.sql` to perform a bulk delete — this flushes Ponder's
- * in-memory cache to Postgres, accepted because VersionChanged is rare.
- */
-export async function handleResolverVersionChange(
-  context: IndexingEngineContext,
-  resolverRecordsKey: ResolverRecordsCompositeKey,
-  newVersion: RecordVersion,
-) {
-  const { chainId, address, node } = resolverRecordsKey;
-
-  await context.ensDb.sql
-    .delete(ensIndexerSchema.resolverAddressRecord)
-    .where(
-      and(
-        eq(ensIndexerSchema.resolverAddressRecord.chainId, chainId),
-        eq(ensIndexerSchema.resolverAddressRecord.address, address),
-        eq(ensIndexerSchema.resolverAddressRecord.node, node),
-      ),
-    );
-
-  await context.ensDb.sql
-    .delete(ensIndexerSchema.resolverTextRecord)
-    .where(
-      and(
-        eq(ensIndexerSchema.resolverTextRecord.chainId, chainId),
-        eq(ensIndexerSchema.resolverTextRecord.address, address),
-        eq(ensIndexerSchema.resolverTextRecord.node, node),
-      ),
-    );
-
-  const id = makeResolverRecordsId({ chainId, address }, node);
-  await context.ensDb.update(ensIndexerSchema.resolverRecords, { id }).set({
-    name: null,
-    contenthash: null,
-    pubkeyX: null,
-    pubkeyY: null,
-    dnszonehash: null,
-    version: newVersion,
-  });
 }

@@ -1,10 +1,17 @@
-import { asLiteralName, bigintToCoinType, type CoinType, ETH_COIN_TYPE } from "enssdk";
+import { and, eq } from "drizzle-orm";
+import {
+  asLiteralName,
+  bigintToCoinType,
+  type CoinType,
+  ETH_COIN_TYPE,
+  makeResolverRecordsId,
+} from "enssdk";
 
 import { ResolverABI } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 import { parseDnsTxtRecordArgs } from "@/lib/dns-helpers";
-import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";
+import { addOnchainEventListener, ensIndexerSchema } from "@/lib/indexing-engines/ponder";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import {
   ensureResolverAndRecords,
@@ -14,7 +21,6 @@ import {
   handleResolverNameUpdate,
   handleResolverPubkeyUpdate,
   handleResolverTextRecordUpdate,
-  handleResolverVersionChange,
 } from "@/lib/protocol-acceleration/resolver-db-helpers";
 
 const pluginName = PluginName.ProtocolAcceleration;
@@ -170,11 +176,46 @@ export default function () {
     },
   );
 
+  // IVersionableResolver VersionChanged: delete all child records for (chainId, address, node)
+  // and reset scalar columns. Uses raw drizzle via `context.ensDb.sql` to bulk-delete —
+  // this flushes ponder's in-memory cache to Postgres, accepted because VersionChanged is rare.
   addOnchainEventListener(
     namespaceContract(pluginName, "Resolver:VersionChanged"),
     async ({ context, event }) => {
-      const key = await ensureResolverAndRecords(context, event);
-      await handleResolverVersionChange(context, key, event.args.newVersion);
+      const { chainId, address, node } = await ensureResolverAndRecords(context, event);
+
+      await context.ensDb.sql
+        .delete(ensIndexerSchema.resolverAddressRecord)
+        .where(
+          and(
+            eq(ensIndexerSchema.resolverAddressRecord.chainId, chainId),
+            eq(ensIndexerSchema.resolverAddressRecord.address, address),
+            eq(ensIndexerSchema.resolverAddressRecord.node, node),
+          ),
+        );
+
+      await context.ensDb.sql
+        .delete(ensIndexerSchema.resolverTextRecord)
+        .where(
+          and(
+            eq(ensIndexerSchema.resolverTextRecord.chainId, chainId),
+            eq(ensIndexerSchema.resolverTextRecord.address, address),
+            eq(ensIndexerSchema.resolverTextRecord.node, node),
+          ),
+        );
+
+      await context.ensDb
+        .update(ensIndexerSchema.resolverRecords, {
+          id: makeResolverRecordsId({ chainId, address }, node),
+        })
+        .set({
+          name: null,
+          contenthash: null,
+          pubkeyX: null,
+          pubkeyY: null,
+          dnszonehash: null,
+          version: event.args.newVersion,
+        });
     },
   );
 }

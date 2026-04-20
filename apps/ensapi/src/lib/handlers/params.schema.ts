@@ -1,5 +1,11 @@
 import { z } from "@hono/zod-openapi";
-import { DEFAULT_EVM_CHAIN_ID, isNormalizedName, type Name } from "enssdk";
+import {
+  type ContentType,
+  DEFAULT_EVM_CHAIN_ID,
+  type InterfaceId,
+  isNormalizedName,
+  type Name,
+} from "enssdk";
 
 import { isSelectionEmpty, type ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 import {
@@ -49,21 +55,15 @@ const contentTypeBitmask = z
   .transform((val, ctx) => {
     try {
       const n = BigInt(val);
-      if (n <= 0n) {
-        ctx.issues.push({
-          code: "custom",
-          message: "Must be a positive integer.",
-          input: val,
-        });
-        return z.NEVER;
-      }
-      return n;
+      if (n <= 0n) throw new Error("nope");
+      return n as ContentType;
     } catch {
       ctx.issues.push({
         code: "custom",
         message: "Must be a valid positive integer string.",
         input: val,
       });
+
       return z.NEVER;
     }
   })
@@ -72,7 +72,7 @@ const contentTypeBitmask = z
 const interfaceId = z
   .string()
   .regex(/^0x[0-9a-f]{8}$/i, "Must be a 4-byte hex (0x + 8 hex chars)")
-  .transform((val) => val.toLowerCase() as `0x${string}`);
+  .transform((val) => val.toLowerCase() as InterfaceId);
 
 const rawSelectionParams = z.object({
   name: z.string().optional(),

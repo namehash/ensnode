@@ -5,7 +5,7 @@ import { parseReverseName } from "enssdk";
 import type { ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 
 import { getENSIP19ReverseNameRecordFromIndex } from "@/lib/protocol-acceleration/get-primary-name-from-index";
-import { isOperationResolved, type Operation } from "@/lib/resolution/operations";
+import type { Operation } from "@/lib/resolution/operations";
 
 /**
  * Acceleration pass for a Known ENSIP-19 Reverse Resolver, retrieving the Primary Name from
@@ -28,7 +28,7 @@ export async function accelerateENSIP19ReverseResolver({
     );
   }
 
-  // parse once up-front — a reverse-resolver selection only ever produces one `name` op
+  // parse the Reverse Name into { address, coinType }
   const parsed = parseReverseName(name);
   if (!parsed) {
     throw new Error(
@@ -36,13 +36,13 @@ export async function accelerateENSIP19ReverseResolver({
     );
   }
 
+  const result = await getENSIP19ReverseNameRecordFromIndex(parsed.address, parsed.coinType);
+
+  // resolve the 'name' operation with the indexed result, passing other along as-is
   return Promise.all(
     operations.map(async (op) => {
-      if (isOperationResolved(op)) return op;
-      if (op.functionName !== "name") return op;
-
-      const result = await getENSIP19ReverseNameRecordFromIndex(parsed.address, parsed.coinType);
-      return { ...op, result };
+      if (op.functionName === "name") return { ...op, result };
+      return op;
     }),
   );
 }
