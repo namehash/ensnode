@@ -184,16 +184,12 @@ const EventIdsSchema = z
   .transform((v) => v as [RegistrarActionEventId, ...RegistrarActionEventId[]]);
 
 // Base schema without refinements - can be extended
-const makeBaseRegistrarActionSchemaWithoutCheck = (
-  valueLabel: string = "Base Registrar Action",
-) =>
+const makeBaseRegistrarActionSchemaWithoutCheck = (valueLabel: string = "Base Registrar Action") =>
   z.object({
     id: EventIdSchema,
     incrementalDuration: makeDurationSchema(`${valueLabel} Incremental Duration`),
     registrant: makeLowercaseAddressSchema(`${valueLabel} Registrant`),
-    registrationLifecycle: makeRegistrationLifecycleSchema(
-      `${valueLabel} Registration Lifecycle`,
-    ),
+    registrationLifecycle: makeRegistrationLifecycleSchema(`${valueLabel} Registration Lifecycle`),
     pricing: makeRegistrarActionPricingSchema(`${valueLabel} Pricing`),
     referral: makeRegistrarActionReferralSchema(`${valueLabel} Referral`),
     block: makeBlockRefSchema(`${valueLabel} Block`),
@@ -251,6 +247,7 @@ const makeSerializedRegistrarActionRenewalSchema = (valueLabel: string = "Serial
 export const makeSerializedRegistrarActionSchema = (
   valueLabel: string = "Serialized Registrar Action",
 ) =>
-  makeSerializedRegistrarActionRegistrationSchema(`${valueLabel} Registration`).or(
+  z.discriminatedUnion("type", [
+    makeSerializedRegistrarActionRegistrationSchema(`${valueLabel} Registration`),
     makeSerializedRegistrarActionRenewalSchema(`${valueLabel} Renewal`),
-  );
+  ]);

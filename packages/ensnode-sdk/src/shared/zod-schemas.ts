@@ -242,7 +242,9 @@ const makePriceAmountSchema = (valueLabel: string = "Amount") =>
     });
 
 const makeSerializedCurrencyAmountSchema = (valueLabel: string = "Serialized Currency Amount") =>
-  z.string({ error: `${valueLabel} must be a string.` });
+  z.string({ error: `${valueLabel} must be a string.` }).regex(/^\d+$/, {
+    error: `${valueLabel} can only contain digits (0-9) and must represent a non-negative integer.`,
+  });
 
 export const makePriceCurrencySchema = (
   currency: CurrencyId,
