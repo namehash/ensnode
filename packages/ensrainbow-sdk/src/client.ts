@@ -6,7 +6,6 @@ import {
   type Cache,
   type EnsRainbowClientLabelSet,
   type EnsRainbowPublicConfig,
-  type EnsRainbowServerLabelSet,
   LruCache,
 } from "@ensnode/ensnode-sdk";
 
@@ -40,13 +39,6 @@ export namespace EnsRainbow {
      * or validated) so callers can retry.
      */
     ready(): Promise<ReadyResponse>;
-
-    /**
-     * Get the version information of the ENSRainbow service
-     *
-     * @deprecated Use {@link ApiClient.config} instead. This method will be removed in a future version.
-     */
-    version(): Promise<VersionResponse>;
 
     getOptions(): Readonly<EnsRainbowApiClientOptions>;
   }
@@ -178,38 +170,6 @@ export namespace EnsRainbow {
     | CountSuccess
     | CountServerError
     | CountServiceUnavailableError;
-
-  /**
-   * ENSRainbow version information.
-   *
-   * @deprecated Use {@link ENSRainbowPublicConfig} instead. This type will be removed in a future version.
-   */
-  export interface VersionInfo {
-    /**
-     * ENSRainbow version.
-     */
-    version: string;
-
-    /**
-     * ENSRainbow database schema version.
-     */
-    dbSchemaVersion: number;
-
-    /**
-     * The EnsRainbowServerLabelSet managed by the ENSRainbow server.
-     */
-    labelSet: EnsRainbowServerLabelSet;
-  }
-
-  /**
-   * Interface for the version endpoint response
-   *
-   * @deprecated Use {@link ENSRainbowPublicConfig} instead. This type will be removed in a future version.
-   */
-  export interface VersionResponse {
-    status: typeof StatusCode.Success;
-    versionInfo: VersionInfo;
-  }
 
   /**
    * Complete public configuration object for ENSRainbow.
@@ -477,38 +437,6 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
     }
 
     return response.json() as Promise<EnsRainbow.ENSRainbowPublicConfig>;
-  }
-
-  /**
-   * Get the version information of the ENSRainbow service
-   *
-   * @deprecated Use {@link EnsRainbowApiClient.config} instead. This method will be removed in a future version.
-   * @returns the version information of the ENSRainbow service
-   * @throws if the request fails due to network failures, DNS lookup failures, request
-   * timeouts, CORS violations, or invalid URLs
-   * @example
-   * ```typescript
-   * const response = await client.version();
-   *
-   * console.log(response);
-   *
-   * // {
-   * //   "status": "success",
-   * //   "versionInfo": {
-   * //     "version": "0.1.0",
-   * //     "dbSchemaVersion": 2,
-   * //     "labelSet": {
-   * //       "labelSetId": "subgraph",
-   * //       "labelSetVersion": 0
-   * //     }
-   * //   }
-   * // }
-   * ```
-   */
-  async version(): Promise<EnsRainbow.VersionResponse> {
-    const response = await fetch(new URL("/v1/version", this.options.endpointUrl));
-
-    return response.json() as Promise<EnsRainbow.VersionResponse>;
   }
 
   /**

@@ -8,7 +8,12 @@ import { buildReferrerMetrics, validateReferrerMetrics } from "../../referrer-me
 import { SECONDS_PER_YEAR } from "../../time";
 import type { ReferrerRank } from "../shared/rank";
 import { validateReferrerRank } from "../shared/rank";
-import { isReferrerQualifiedRevShareCap, type ReferralProgramRulesRevShareCap } from "./rules";
+import {
+  type AdminAction,
+  AdminActionTypes,
+  isReferrerQualifiedRevShareCap,
+  type ReferralProgramRulesRevShareCap,
+} from "./rules";
 
 /**
  * Extends {@link ReferrerMetrics} with computed base revenue contribution.
@@ -81,25 +86,49 @@ export interface RankedReferrerMetricsRevShareCap extends ReferrerMetricsRevShar
    *
    * @invariant true if and only if `totalBaseRevenueContribution` is greater than or equal to
    *   {@link ReferralProgramRulesRevShareCap.minBaseRevenueContribution} AND
-   *   {@link isAdminDisqualified} is false.
+   *   {@link adminAction} does not have `actionType` of {@link AdminActionTypes.Disqualification}.
    */
   isQualified: boolean;
 
   /**
-   * Whether this referrer has been admin-disqualified from the edition.
+   * The admin action taken on this referrer, or null if no admin action has been taken.
    *
-   * @invariant When true, {@link isQualified} is false.
+   * @invariant null when no admin action has been taken on this referrer.
+   * @invariant Must match the corresponding entry in {@link ReferralProgramRulesRevShareCap.adminActions}.
    */
-  isAdminDisqualified: boolean;
-
-  /**
-   * The reason for admin disqualification, or null if not disqualified.
-   *
-   * @invariant null when {@link isAdminDisqualified} is false.
-   * @invariant Non-empty string when {@link isAdminDisqualified} is true.
-   */
-  adminDisqualificationReason: string | null;
+  adminAction: AdminAction | null;
 }
+
+/**
+ * Validates that `metricsAdminAction` matches the admin action (or absence thereof) recorded for
+ * `referrer` in `rules.adminActions`. Errors are prefixed with `context` so callers can preserve
+ * their existing message format.
+ */
+const validateAdminActionConsistency = (
+  metricsAdminAction: AdminAction | null,
+  referrer: NormalizedAddress,
+  rules: ReferralProgramRulesRevShareCap,
+  context: string,
+): void => {
+  const expected = rules.adminActions.find((a) => a.referrer === referrer) ?? null;
+
+  if (expected === null && metricsAdminAction !== null) {
+    throw new Error(
+      `${context}: expected null, got actionType="${metricsAdminAction.actionType}".`,
+    );
+  }
+
+  if (expected !== null) {
+    if (
+      metricsAdminAction === null ||
+      metricsAdminAction.actionType !== expected.actionType ||
+      metricsAdminAction.referrer !== expected.referrer ||
+      metricsAdminAction.reason !== expected.reason
+    ) {
+      throw new Error(`${context}: does not match expected action from rules.`);
+    }
+  }
+};
 
 export const validateRankedReferrerMetricsRevShareCap = (
   metrics: RankedReferrerMetricsRevShareCap,
@@ -119,21 +148,12 @@ export const validateRankedReferrerMetricsRevShareCap = (
     );
   }
 
-  const disqualification =
-    rules.disqualifications.find((d) => d.referrer === metrics.referrer) ?? null;
-
-  if (metrics.isAdminDisqualified !== (disqualification !== null)) {
-    throw new Error(
-      `RankedReferrerMetricsRevShareCap: Invalid isAdminDisqualified: ${metrics.isAdminDisqualified}, expected: ${disqualification !== null}.`,
-    );
-  }
-
-  const expectedReason = disqualification?.reason ?? null;
-  if (metrics.adminDisqualificationReason !== expectedReason) {
-    throw new Error(
-      `RankedReferrerMetricsRevShareCap: Invalid adminDisqualificationReason: ${metrics.adminDisqualificationReason}, expected: ${expectedReason}.`,
-    );
-  }
+  validateAdminActionConsistency(
+    metrics.adminAction,
+    metrics.referrer,
+    rules,
+    "RankedReferrerMetricsRevShareCap: Invalid adminAction",
+  );
 };
 
 export const buildRankedReferrerMetricsRevShareCap = (
@@ -141,8 +161,7 @@ export const buildRankedReferrerMetricsRevShareCap = (
   rank: ReferrerRank,
   rules: ReferralProgramRulesRevShareCap,
 ): RankedReferrerMetricsRevShareCap => {
-  const disqualification =
-    rules.disqualifications.find((d) => d.referrer === referrer.referrer) ?? null;
+  const adminAction = rules.adminActions.find((a) => a.referrer === referrer.referrer) ?? null;
 
   const result = {
     ...referrer,
@@ -152,8 +171,7 @@ export const buildRankedReferrerMetricsRevShareCap = (
       referrer.totalBaseRevenueContribution,
       rules,
     ),
-    isAdminDisqualified: disqualification !== null,
-    adminDisqualificationReason: disqualification?.reason ?? null,
+    adminAction,
   } satisfies RankedReferrerMetricsRevShareCap;
 
   validateRankedReferrerMetricsRevShareCap(result, rules);
@@ -181,7 +199,7 @@ export interface AwardedReferrerMetricsRevShareCap extends RankedReferrerMetrics
    *
    * @invariant Guaranteed to be a valid PriceUsdc with amount between 0 and {@link ReferralProgramRulesRevShareCap.awardPool.amount} (inclusive)
    * @invariant Always <= uncappedAward.amount
-   * @invariant Amount equal to 0 when {@link isAdminDisqualified} is true.
+   * @invariant Amount equal to 0 when {@link adminAction} has `actionType` of {@link AdminActionTypes.Disqualification}.
    * @invariant Amount equal to 0 when {@link isQualified} is false.
    */
   cappedAward: PriceUsdc;
@@ -199,7 +217,10 @@ export const validateAwardedReferrerMetricsRevShareCap = (
 
   makePriceUsdcSchema("AwardedReferrerMetricsRevShareCap.cappedAward").parse(metrics.cappedAward);
 
-  if (metrics.isAdminDisqualified && metrics.cappedAward.amount !== 0n) {
+  if (
+    metrics.adminAction?.actionType === AdminActionTypes.Disqualification &&
+    metrics.cappedAward.amount !== 0n
+  ) {
     throw new Error(
       `AwardedReferrerMetricsRevShareCap: cappedAward.amount must be 0n for admin-disqualified referrers, got ${metrics.cappedAward.amount.toString()}.`,
     );
@@ -274,21 +295,12 @@ export const validateUnrankedReferrerMetricsRevShareCap = (
     );
   }
 
-  const disqualification =
-    rules.disqualifications.find((d) => d.referrer === metrics.referrer) ?? null;
-
-  if (metrics.isAdminDisqualified !== (disqualification !== null)) {
-    throw new Error(
-      `Invalid UnrankedReferrerMetricsRevShareCap: isAdminDisqualified: ${metrics.isAdminDisqualified}, expected: ${disqualification !== null}.`,
-    );
-  }
-
-  const expectedReason = disqualification?.reason ?? null;
-  if (metrics.adminDisqualificationReason !== expectedReason) {
-    throw new Error(
-      `Invalid UnrankedReferrerMetricsRevShareCap: adminDisqualificationReason: ${metrics.adminDisqualificationReason}, expected: ${expectedReason}.`,
-    );
-  }
+  validateAdminActionConsistency(
+    metrics.adminAction,
+    metrics.referrer,
+    rules,
+    "Invalid UnrankedReferrerMetricsRevShareCap: adminAction",
+  );
 
   if (metrics.totalReferrals !== 0) {
     throw new Error(
@@ -345,8 +357,7 @@ export const buildUnrankedReferrerMetricsRevShareCap = (
 ): UnrankedReferrerMetricsRevShareCap => {
   const metrics = buildReferrerMetrics(referrer, 0, 0, priceEth(0n));
 
-  const disqualification =
-    rules.disqualifications.find((d) => d.referrer === metrics.referrer) ?? null;
+  const adminAction = rules.adminActions.find((a) => a.referrer === metrics.referrer) ?? null;
 
   const result = {
     ...metrics,
@@ -355,8 +366,7 @@ export const buildUnrankedReferrerMetricsRevShareCap = (
     isQualified: false,
     uncappedAward: priceUsdc(0n),
     cappedAward: priceUsdc(0n),
-    isAdminDisqualified: disqualification !== null,
-    adminDisqualificationReason: disqualification?.reason ?? null,
+    adminAction,
   } satisfies UnrankedReferrerMetricsRevShareCap;
 
   validateUnrankedReferrerMetricsRevShareCap(result, rules);

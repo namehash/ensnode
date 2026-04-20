@@ -1,5 +1,3 @@
-import packageJson from "@/../package.json" with { type: "json" };
-
 import type { Context as HonoContext } from "hono";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
@@ -14,7 +12,6 @@ import {
 } from "@ensnode/ensnode-sdk";
 import { type EnsRainbow, ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk";
 
-import { DB_SCHEMA_VERSION } from "@/lib/database";
 import { DbNotReadyError, type ENSRainbowServer } from "@/lib/server";
 import { getErrorMessage } from "@/utils/error-utils";
 import { logger } from "@/utils/logger";
@@ -156,25 +153,6 @@ export function createApi(
       return c.json(buildServiceUnavailableBody(), ErrorCode.ServiceUnavailable);
     }
     return c.json(publicConfig);
-  });
-
-  /**
-   * @deprecated Use GET /v1/config instead. This endpoint will be removed in a future version.
-   */
-  api.get("/v1/version", (c: HonoContext) => {
-    if (!server.isReady() || server.serverLabelSet === undefined) {
-      return c.json(buildServiceUnavailableBody(), ErrorCode.ServiceUnavailable);
-    }
-
-    const result: EnsRainbow.VersionResponse = {
-      status: StatusCode.Success,
-      versionInfo: {
-        version: packageJson.version,
-        dbSchemaVersion: DB_SCHEMA_VERSION,
-        labelSet: server.serverLabelSet,
-      },
-    };
-    return c.json(result);
   });
 
   return api;

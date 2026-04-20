@@ -11,6 +11,10 @@ import dockercompose from '@workspace/docker-compose.yml?raw';
 
 The Docker images are the easiest way to run or deploy the ENSNode suite of services, both locally and in the cloud.
 
+:::note[Postgres Requirement]
+ENSIndexer runs `CREATE EXTENSION IF NOT EXISTS pg_trgm` at startup to back partial-name search indexes. If you're swapping out the bundled `postgres:17` image for a managed or custom Postgres, make sure the [`pg_trgm`](https://www.postgresql.org/docs/current/pgtrgm.html) extension is available for installation (it ships with stock Postgres contrib and is available for installation on most managed providers).
+:::
+
 <LinkCard
   title="Configure Environment Variables"
   href="/ensindexer/usage/configuration"

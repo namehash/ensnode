@@ -15,7 +15,7 @@ This guide covers running ENSNode locally for development and contributions.
 ### Prerequisites
 
 - [Git](https://git-scm.com/)
-- [Postgres 17](https://www.postgresql.org/)
+- [Postgres 17](https://www.postgresql.org/) with the [`pg_trgm`](https://www.postgresql.org/docs/current/pgtrgm.html) extension available for installation (ships with stock Postgres contrib; ENSIndexer runs `CREATE EXTENSION IF NOT EXISTS pg_trgm` at startup to back partial-name search indexes)
 - [Node.js](https://nodejs.org/)
   - It's recommended you install Node.js through [nvm](https://github.com/nvm-sh/nvm) or [asdf](https://asdf-vm.com/).
   - see `.nvmrc` and `.tool-versions` for the specific version of Node.js
