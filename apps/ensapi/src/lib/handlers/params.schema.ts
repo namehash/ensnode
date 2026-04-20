@@ -61,7 +61,7 @@ const chainIdsWithoutDefaultChainId = z
   .describe("Comma-separated list of chain IDs to resolve primary names for (e.g. '1,10,8453').");
 
 const rawSelectionParams = z.object({
-  reverseName: z
+  name: z
     .string()
     .optional()
     .describe(
@@ -84,30 +84,40 @@ const rawSelectionParams = z.object({
     ),
 });
 
-const selection = z
-  .object({
-    reverseName: z.optional(boolstring),
-    addresses: z.optional(stringarray.pipe(z.array(coinType))),
-    texts: z.optional(stringarray),
-  })
-  .transform((value, ctx) => {
-    const selection: ResolverRecordsSelection = {
-      ...(value.reverseName && { name: true }),
-      ...(value.addresses && { addresses: value.addresses }),
-      ...(value.texts && { texts: value.texts }),
-    };
+const selectionFields = z.object({
+  name: z.optional(boolstring),
+  addresses: z.optional(stringarray.pipe(z.array(coinType))),
+  texts: z.optional(stringarray),
+});
 
-    if (isSelectionEmpty(selection)) {
-      ctx.issues.push({
-        code: "custom",
-        message: "Selection cannot be empty.",
-        input: selection,
-      });
+type SelectionFields = z.output<typeof selectionFields>;
 
-      return z.NEVER;
-    }
+function toSelection(
+  fields: SelectionFields,
+  ctx: z.RefinementCtx,
+): ResolverRecordsSelection | typeof z.NEVER {
+  const sel: ResolverRecordsSelection = {
+    ...(fields.name && { name: true }),
+    ...(fields.addresses && { addresses: fields.addresses }),
+    ...(fields.texts && { texts: fields.texts }),
+  };
 
-    return selection;
+  if (isSelectionEmpty(sel)) {
+    ctx.issues.push({ code: "custom", message: "Selection cannot be empty.", input: sel });
+    return z.NEVER;
+  }
+
+  return sel;
+}
+
+const selection = selectionFields.transform(toSelection);
+
+const resolveRecordsQuery = z
+  .object({ ...selectionFields.shape, trace, accelerate })
+  .transform(({ trace, accelerate, ...fields }, ctx) => {
+    const sel = toSelection(fields, ctx);
+    if (sel === z.NEVER) return z.NEVER;
+    return { selection: sel, trace, accelerate };
   });
 
 /**
@@ -129,29 +139,6 @@ const selection = z
  * other specialized Zod schemas.
  */
 const queryParam = z.preprocess((v) => (v === "" ? undefined : v), z.unknown());
-
-const resolveRecordsQuery = z
-  .object({
-    reverseName: z.optional(boolstring),
-    addresses: z.optional(stringarray.pipe(z.array(coinType))),
-    texts: z.optional(stringarray),
-    trace,
-    accelerate,
-  })
-  .transform(({ trace, accelerate, ...selectionFields }, ctx) => {
-    const sel: ResolverRecordsSelection = {
-      ...(selectionFields.reverseName && { name: true }),
-      ...(selectionFields.addresses && { addresses: selectionFields.addresses }),
-      ...(selectionFields.texts && { texts: selectionFields.texts }),
-    };
-
-    if (isSelectionEmpty(sel)) {
-      ctx.issues.push({ code: "custom", message: "Selection cannot be empty.", input: sel });
-      return z.NEVER;
-    }
-
-    return { selection: sel, trace, accelerate };
-  });
 
 export const params = {
   boolstring,
