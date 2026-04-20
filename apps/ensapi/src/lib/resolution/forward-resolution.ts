@@ -12,11 +12,14 @@ import {
   namehashInterpretedName,
 } from "enssdk";
 
+import { DatasourceNames } from "@ensnode/datasources";
 import {
   type ForwardResolutionArgs,
   ForwardResolutionProtocolStep,
   type ForwardResolutionResult,
+  getDatasourceContract,
   getENSv1Registry,
+  maybeGetDatasourceContract,
   PluginName,
   type ResolverRecordsSelection,
   TraceableENSProtocol,
@@ -29,6 +32,7 @@ import {
 } from "@ensnode/ensnode-sdk/internal";
 
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/instrumentation/auto-span";
+import { lazy } from "@/lib/lazy";
 import { makeLogger } from "@/lib/logger";
 import { findResolver } from "@/lib/protocol-acceleration/find-resolver";
 import { areResolverRecordsIndexedByProtocolAccelerationPluginOnChainId } from "@/lib/protocol-acceleration/resolver-records-indexed-on-chain";
@@ -36,7 +40,6 @@ import { getPublicClient } from "@/lib/public-client";
 import { accelerateENSIP19ReverseResolver } from "@/lib/resolution/accelerate-ensip19-reverse-resolver";
 import { accelerateKnownOnchainStaticResolver } from "@/lib/resolution/accelerate-known-onchain-static-resolver";
 import { executeOperations } from "@/lib/resolution/execute-operations";
-import { executeOperationsWithUniversalResolver } from "@/lib/resolution/execute-operations-with-universal-resolver";
 import { makeRecordsResponse } from "@/lib/resolution/make-records-response";
 import { isOperationResolved, logOperations, makeOperations } from "@/lib/resolution/operations";
 import {
@@ -46,6 +49,14 @@ import {
 
 const logger = makeLogger("forward-resolution");
 const tracer = trace.getTracer("forward-resolution");
+
+const getUniversalResolverV1 = lazy(() =>
+  getDatasourceContract(config.namespace, DatasourceNames.ENSRoot, "UniversalResolver"),
+);
+
+const getUniversalResolverV2 = lazy(() =>
+  maybeGetDatasourceContract(config.namespace, DatasourceNames.ENSRoot, "UniversalResolverV2"),
+);
 
 /**
  * Implements Forward Resolution of record values for a specified ENS Name.
@@ -141,20 +152,23 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           ////////////////////////////
           // TODO: re-enable protocol acceleration for ENSv2
           if (config.ensIndexerPublicConfig.plugins.includes(PluginName.ENSv2)) {
+            const UniversalResolverAddress =
+              getUniversalResolverV2()?.address ?? getUniversalResolverV1().address;
             operations = await withEnsProtocolStep(
               TraceableENSProtocol.ForwardResolution,
               ForwardResolutionProtocolStep.ExecuteResolveCalls,
               {},
               () =>
-                executeOperationsWithUniversalResolver<SELECTION>({
+                executeOperations({
                   name,
+                  resolverAddress: UniversalResolverAddress,
                   operations,
                   publicClient,
+                  useENSIP10Resolve: true,
                 }),
             );
 
             logOperations(operations, logger);
-
             return makeRecordsResponse<SELECTION>(operations);
           }
 

@@ -66,6 +66,9 @@ app.openapi(resolveRecordsRoute, async (c) => {
   } satisfies ResolveRecordsResponse<typeof selection>;
 
   // serialize bigints (e.g. `records.version`, `records.abi.contentType`) as strings
+  // NOTE: this matches the openapi wire format
+  // NOTE: the ts client, which uses the ResolverRecordsResponse type, must parse the bigint fields
+  // into native bigints (see packages/ensnode-sdk/src/ensapi/client.ts)
   return c.json(replaceBigInts(response, String));
 });
 
