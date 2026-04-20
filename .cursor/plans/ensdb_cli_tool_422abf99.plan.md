@@ -18,7 +18,7 @@ todos:
     content: "Implement snapshot create (whole DB only): dump every indexer schema + ponder_sync + full ensnode schema + ensnode_metadata.json; manifest enrichment + checksums"
     status: pending
   - id: snapshot-restore
-    content: "Implement snapshot restore (empty DB only): single freshness preflight, then full or selective indexer-schema restore (selective always restores ensnode + full ponder_sync, then prunes ensnode.metadata)"
+    content: "Implement snapshot restore (empty DB only): single freshness preflight, then full or selective indexer-schema restore (selective always restores ensnode; restores ponder_sync by default; then prunes ensnode.metadata)"
     status: pending
   - id: s3-client
     content: Implement S3-compatible client layer with multipart upload/download support
@@ -107,7 +107,7 @@ To keep v1 small and safe, the CLI commits to two scope reductions:
 
 These two constraints eliminate large families of failure modes (Drizzle / version skew on an existing `ensnode`, metadata conflicts, partial overwrites of `ponder_sync`, scope of `--drop-existing`, version compatibility checks against live target state) and let v1 ship with very few flags.
 
-Selective **restore** of a subset of indexer schemas from a whole-DB snapshot is still supported, because that is the workflow CI matrix tests (#1127) need. In selective restore, **`ponder_sync` is always fully restored** and `ensnode` is always restored from the snapshot dump (since the target DB is empty, there is nothing else to bootstrap migrations from). After restore, `ensnode.metadata` is **pruned** to keep only rows whose `ens_indexer_schema_name` is in the chosen schema set.
+Selective **restore** of a subset of indexer schemas from a whole-DB snapshot is still supported, because that is the workflow CI matrix tests (#1127) need. In selective restore, `ensnode` is always restored from the snapshot dump (since the target DB is empty, there is nothing else to bootstrap migrations from). `ponder_sync` is restored **by default** (in full) to preserve RPC cache / sync state; pass `--without-ponder-sync` for read-only consumers (e.g. ENSApi-only setups) that will not run ENSIndexer and do not need it. After restore, `ensnode.metadata` is **pruned** to keep only rows whose `ens_indexer_schema_name` is in the chosen schema set.
 
 ## Architecture Decisions
 
@@ -116,7 +116,7 @@ Selective **restore** of a subset of indexer schemas from a whole-DB snapshot is
 - **Snapshot create is always whole-DB.** The result is a directory of per-schema dumps + `ponder_sync` + the full `ensnode` schema dump + an `ensnode_metadata.json` export, plus `manifest.json` and `checksums.sha256`.
 - **Snapshot restore always targets an empty database** and supports three modes:
   - **Full restore** (no `--schemas`, no `--ponder-sync-only`): restore every dump in the snapshot.
-  - **Selective restore** (`--schemas A,B`): restore only the named indexer schema dumps; **also always** restore `ensnode` (so `__drizzle_migrations` exists) and **always fully** restore `ponder_sync`. After dumps come back, prune `ensnode.metadata` to rows in the chosen schema set. An optional `--without-ponder-sync` flag is provided for read-only consumers (e.g. ENSApi-only setups) that will not run ENSIndexer and do not need `ponder_sync`.
+  - **Selective restore** (`--schemas A,B`): restore only the named indexer schema dumps; **also always** restore `ensnode` (so `__drizzle_migrations` exists) and restore `ponder_sync` **by default** (in full). Pass `--without-ponder-sync` for read-only consumers (e.g. ENSApi-only setups) that will not run ENSIndexer and do not need `ponder_sync`. After dumps come back, prune `ensnode.metadata` to rows in the chosen schema set.
   - **`ponder_sync`-only** (`--ponder-sync-only`): restore only `ponder_sync.dump.tar.zst`. Useful for #833 (developer wants to bootstrap `ponder_sync` and start indexing fresh schemas on top).
 - **No `--drop-existing`, no `--skip-preflight`, no `--bootstrap-ensnode`.** Empty-DB-only means there is nothing to drop, no preflight to skip, and `ensnode` is always bootstrapped from the snapshot dump (because the DB is empty when restore starts).
 - **Manifest-driven tooling**: `manifest.json` is the source of truth for:
@@ -272,7 +272,7 @@ ensdb-cli snapshot restore [--ensdb-url <url>] --input <path> [--jobs <n>]
 
 ensdb-cli snapshot restore [--ensdb-url <url>] --input <path> --schemas <name,...> [--without-ponder-sync] [--jobs <n>]
   SELECTIVE restore into an EMPTY database.
-  Restores: chosen indexer schemas + ensnode (always, from ensnode.dump.tar.zst) + ponder_sync (always, in full).
+  Restores: chosen indexer schemas + ensnode (always, from ensnode.dump.tar.zst) + ponder_sync (by default, in full).
   After restore, prunes ensnode.metadata to rows whose ens_indexer_schema_name is in --schemas.
   --without-ponder-sync: opt out of restoring ponder_sync (read-only consumers like ENSApi-only setups).
   Aborts if the target DB is not empty.
@@ -329,7 +329,7 @@ Each snapshot has a `manifest.json`. The CLI auto-populates `indexerConfig` by r
 
 ### Deriving capabilities for UI
 
-ENSDb should compute "what this snapshot enables" dynamically at display time from:
+`ensdb-cli` should compute "what this snapshot enables" dynamically at display time from:
 
 - the manifest's artifact list (which dump files are present)
 - each schema's `indexerConfig` (plugins, namespace, `isSubgraphCompatible`, etc.)
@@ -563,7 +563,7 @@ This is explicitly **out of scope for v1** but the plan ensures the CLI's databa
 1. **Production deployment uses two physically separate ENSDbs** -- one for mainnet, one for testnets -- to keep `ponder_sync` (and therefore each snapshot) small. The CLI itself operates on one DB at a time; mainnet vs. testnets is encoded by `--ensdb-url` and S3 `--prefix`.
 2. **`snapshot create` is whole-DB only in v1.** No partial / per-schema dumps. `--ignore-schemas` remains for defensively skipping unrelated app schemas, recorded in `manifest.ignoredSchemas`.
 3. **`snapshot restore` only targets an empty target database in v1.** Single deterministic preflight: refuse to run if any user schemas / objects exist. No `--drop-existing`, no `--skip-preflight`, no `--bootstrap-ensnode` flags.
-4. **Selective restore is supported (and required for the CI matrix).** It always restores `ensnode` from the snapshot dump (only viable source of `__drizzle_migrations` in an empty DB) and **always fully restores `ponder_sync`**. Read-only consumers can opt out with `--without-ponder-sync`. After restore, `ensnode.metadata` is pruned to rows whose `ens_indexer_schema_name` is in `--schemas`.
+4. **Selective restore is supported (and required for the CI matrix).** It always restores `ensnode` from the snapshot dump (only viable source of `__drizzle_migrations` in an empty DB) and restores `ponder_sync` **by default** (in full). Read-only consumers can opt out with `--without-ponder-sync`. After restore, `ensnode.metadata` is pruned to rows whose `ens_indexer_schema_name` is in `--schemas`.
 5. **`--ponder-sync-only` restore mode is supported** for the developer workflow in #833 (bootstrap a local `ponder_sync`, then run ENSIndexer fresh on top).
 6. **`ensnode.dump.tar.zst` is the source of truth for `ensnode` on every restore.** `ensnode_metadata.json` is auxiliary (drives listing, summaries, and lets selective restore know which schemas a snapshot covers without unpacking the dump).
 7. **Discovery**: No shared `index.json`. Use S3-compatible `ListObjects` to discover snapshots by reading `manifest.json` from each snapshot prefix. Most robust -- no concurrent writer races, no stale index.
