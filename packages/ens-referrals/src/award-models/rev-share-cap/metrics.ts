@@ -99,6 +99,37 @@ export interface RankedReferrerMetricsRevShareCap extends ReferrerMetricsRevShar
   adminAction: AdminAction | null;
 }
 
+/**
+ * Validates that `metricsAdminAction` matches the admin action (or absence thereof) recorded for
+ * `referrer` in `rules.adminActions`. Errors are prefixed with `context` so callers can preserve
+ * their existing message format.
+ */
+const validateAdminActionConsistency = (
+  metricsAdminAction: AdminAction | null,
+  referrer: NormalizedAddress,
+  rules: ReferralProgramRulesRevShareCap,
+  context: string,
+): void => {
+  const expected = rules.adminActions.find((a) => a.referrer === referrer) ?? null;
+
+  if (expected === null && metricsAdminAction !== null) {
+    throw new Error(
+      `${context}: expected null, got actionType="${metricsAdminAction.actionType}".`,
+    );
+  }
+
+  if (expected !== null) {
+    if (
+      metricsAdminAction === null ||
+      metricsAdminAction.actionType !== expected.actionType ||
+      metricsAdminAction.referrer !== expected.referrer ||
+      metricsAdminAction.reason !== expected.reason
+    ) {
+      throw new Error(`${context}: does not match expected action from rules.`);
+    }
+  }
+};
+
 export const validateRankedReferrerMetricsRevShareCap = (
   metrics: RankedReferrerMetricsRevShareCap,
   rules: ReferralProgramRulesRevShareCap,
@@ -117,27 +148,12 @@ export const validateRankedReferrerMetricsRevShareCap = (
     );
   }
 
-  const expectedAdminAction =
-    rules.adminActions.find((a) => a.referrer === metrics.referrer) ?? null;
-
-  if (expectedAdminAction === null && metrics.adminAction !== null) {
-    throw new Error(
-      `RankedReferrerMetricsRevShareCap: Invalid adminAction: expected null, got actionType="${metrics.adminAction.actionType}".`,
-    );
-  }
-
-  if (expectedAdminAction !== null) {
-    if (
-      metrics.adminAction === null ||
-      metrics.adminAction.actionType !== expectedAdminAction.actionType ||
-      metrics.adminAction.referrer !== expectedAdminAction.referrer ||
-      metrics.adminAction.reason !== expectedAdminAction.reason
-    ) {
-      throw new Error(
-        `RankedReferrerMetricsRevShareCap: Invalid adminAction: does not match expected action from rules.`,
-      );
-    }
-  }
+  validateAdminActionConsistency(
+    metrics.adminAction,
+    metrics.referrer,
+    rules,
+    "RankedReferrerMetricsRevShareCap: Invalid adminAction",
+  );
 };
 
 export const buildRankedReferrerMetricsRevShareCap = (
@@ -279,27 +295,12 @@ export const validateUnrankedReferrerMetricsRevShareCap = (
     );
   }
 
-  const expectedAdminAction =
-    rules.adminActions.find((a) => a.referrer === metrics.referrer) ?? null;
-
-  if (expectedAdminAction === null && metrics.adminAction !== null) {
-    throw new Error(
-      `Invalid UnrankedReferrerMetricsRevShareCap: adminAction: expected null, got actionType="${metrics.adminAction.actionType}".`,
-    );
-  }
-
-  if (expectedAdminAction !== null) {
-    if (
-      metrics.adminAction === null ||
-      metrics.adminAction.actionType !== expectedAdminAction.actionType ||
-      metrics.adminAction.referrer !== expectedAdminAction.referrer ||
-      metrics.adminAction.reason !== expectedAdminAction.reason
-    ) {
-      throw new Error(
-        `Invalid UnrankedReferrerMetricsRevShareCap: adminAction does not match expected action from rules.`,
-      );
-    }
-  }
+  validateAdminActionConsistency(
+    metrics.adminAction,
+    metrics.referrer,
+    rules,
+    "Invalid UnrankedReferrerMetricsRevShareCap: adminAction",
+  );
 
   if (metrics.totalReferrals !== 0) {
     throw new Error(

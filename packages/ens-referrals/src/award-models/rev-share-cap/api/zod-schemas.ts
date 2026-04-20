@@ -1,3 +1,4 @@
+import type { NormalizedAddress } from "enssdk";
 import z from "zod/v4";
 
 import {
@@ -19,7 +20,7 @@ import {
 } from "../../shared/api/zod-schemas";
 import { ReferrerEditionMetricsTypeIds } from "../../shared/edition-metrics";
 import { ReferralProgramAwardModels } from "../../shared/rules";
-import { AdminActionTypes } from "../rules";
+import { type AdminAction, AdminActionTypes } from "../rules";
 
 /**
  * Schema for {@link AdminActionDisqualification}.
@@ -193,6 +194,43 @@ export const makeAggregatedReferrerMetricsRevShareCapSchema = (
   });
 
 /**
+ * Adds {@link z.RefinementCtx} issues when `metricsAdminAction` does not match the entry for
+ * `referrer` in `rulesAdminActions`.
+ */
+const addAdminActionConsistencyIssues = (
+  ctx: z.RefinementCtx,
+  metricsAdminAction: AdminAction | null,
+  referrer: NormalizedAddress,
+  rulesAdminActions: AdminAction[],
+  path: (string | number)[],
+): void => {
+  const expected = rulesAdminActions.find((a) => a.referrer === referrer) ?? null;
+
+  if (expected === null && metricsAdminAction !== null) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `adminAction expected null, got actionType="${metricsAdminAction.actionType}"`,
+      path,
+    });
+    return;
+  }
+
+  if (
+    expected !== null &&
+    (metricsAdminAction === null ||
+      metricsAdminAction.actionType !== expected.actionType ||
+      metricsAdminAction.referrer !== expected.referrer ||
+      metricsAdminAction.reason !== expected.reason)
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `adminAction does not match the corresponding entry in rules.adminActions`,
+      path,
+    });
+  }
+};
+
+/**
  * Schema for {@link ReferrerEditionMetricsRankedRevShareCap}.
  */
 export const makeReferrerEditionMetricsRankedRevShareCapSchema = (
@@ -217,6 +255,15 @@ export const makeReferrerEditionMetricsRankedRevShareCapSchema = (
     .refine((data) => data.referrer.cappedAward.amount <= data.rules.awardPool.amount, {
       message: `${valueLabel}.referrer.cappedAward must be <= ${valueLabel}.rules.awardPool`,
       path: ["referrer", "cappedAward", "amount"],
+    })
+    .superRefine((data, ctx) => {
+      addAdminActionConsistencyIssues(
+        ctx,
+        data.referrer.adminAction,
+        data.referrer.referrer,
+        data.rules.adminActions,
+        ["referrer", "adminAction"],
+      );
     });
 
 /**
@@ -240,6 +287,15 @@ export const makeReferrerEditionMetricsUnrankedRevShareCapSchema = (
     .refine((data) => data.awardModel === data.rules.awardModel, {
       message: `${valueLabel}.awardModel must equal ${valueLabel}.rules.awardModel`,
       path: ["awardModel"],
+    })
+    .superRefine((data, ctx) => {
+      addAdminActionConsistencyIssues(
+        ctx,
+        data.referrer.adminAction,
+        data.referrer.referrer,
+        data.rules.adminActions,
+        ["referrer", "adminAction"],
+      );
     });
 
 /**
@@ -301,5 +357,12 @@ export const makeReferrerLeaderboardPageRevShareCapSchema = (
             path: ["referrers", index, "cappedAward", "amount"],
           });
         }
+        addAdminActionConsistencyIssues(
+          ctx,
+          referrer.adminAction,
+          referrer.referrer,
+          data.rules.adminActions,
+          ["referrers", index, "adminAction"],
+        );
       });
     });
