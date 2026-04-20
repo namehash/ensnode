@@ -50,30 +50,40 @@ const rawSelectionParams = z.object({
   texts: z.string().optional(),
 });
 
-const selection = z
-  .object({
-    name: z.optional(boolstring),
-    addresses: z.optional(stringarray.pipe(z.array(coinType))),
-    texts: z.optional(stringarray),
-  })
-  .transform((value, ctx) => {
-    const selection: ResolverRecordsSelection = {
-      ...(value.name && { name: true }),
-      ...(value.addresses && { addresses: value.addresses }),
-      ...(value.texts && { texts: value.texts }),
-    };
+const selectionFields = z.object({
+  name: z.optional(boolstring),
+  addresses: z.optional(stringarray.pipe(z.array(coinType))),
+  texts: z.optional(stringarray),
+});
 
-    if (isSelectionEmpty(selection)) {
-      ctx.issues.push({
-        code: "custom",
-        message: "Selection cannot be empty.",
-        input: selection,
-      });
+type SelectionFields = z.output<typeof selectionFields>;
 
-      return z.NEVER;
-    }
+function toSelection(
+  fields: SelectionFields,
+  ctx: z.RefinementCtx,
+): ResolverRecordsSelection | typeof z.NEVER {
+  const sel: ResolverRecordsSelection = {
+    ...(fields.name && { name: true }),
+    ...(fields.addresses && { addresses: fields.addresses }),
+    ...(fields.texts && { texts: fields.texts }),
+  };
 
-    return selection;
+  if (isSelectionEmpty(sel)) {
+    ctx.issues.push({ code: "custom", message: "Selection cannot be empty.", input: sel });
+    return z.NEVER;
+  }
+
+  return sel;
+}
+
+const selection = selectionFields.transform(toSelection);
+
+const resolveRecordsQuery = z
+  .object({ ...selectionFields.shape, trace, accelerate })
+  .transform(({ trace, accelerate, ...fields }, ctx) => {
+    const sel = toSelection(fields, ctx);
+    if (sel === z.NEVER) return z.NEVER;
+    return { selection: sel, trace, accelerate };
   });
 
 /**
@@ -107,6 +117,7 @@ export const params = {
   coinType,
   selectionParams: rawSelectionParams,
   selection,
+  resolveRecordsQuery,
   chainIdsWithoutDefaultChainId,
   queryParam,
 };

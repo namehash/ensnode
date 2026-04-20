@@ -1,5 +1,7 @@
-import { type InterpretedName, toNormalizedAddress } from "enssdk";
+import type { InterpretedName } from "enssdk";
 import { beforeAll, describe, expect, it } from "vitest";
+
+import { DEVNET_DEPLOYER, DEVNET_OWNER, DEVNET_USER } from "@ensnode/ensnode-sdk/internal";
 
 import {
   AccountDomainsPaginated,
@@ -20,11 +22,6 @@ import {
 } from "@/test/integration/graphql-utils";
 import { gql } from "@/test/integration/omnigraph-api-client";
 
-// via devnet
-const DEVNET_DEPLOYER = toNormalizedAddress("0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266");
-const DEFAULT_OWNER = toNormalizedAddress("0x70997970c51812dc3a010c7d01b50e0d17dc79c8");
-const NEW_OWNER_OWNER = toNormalizedAddress("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC");
-
 describe("Account.domains", () => {
   type AccountDomainsResult = {
     account: { domains: GraphQLConnection<{ name: InterpretedName | null }> };
@@ -38,8 +35,8 @@ describe("Account.domains", () => {
     }
   `;
 
-  it("returns domains owned by the default owner", async () => {
-    const result = await request<AccountDomainsResult>(AccountDomains, { address: DEFAULT_OWNER });
+  it("returns domains owned by the devnet owner", async () => {
+    const result = await request<AccountDomainsResult>(AccountDomains, { address: DEVNET_OWNER });
     const domains = flattenConnection(result.account.domains);
     const names = domains.map((d) => d.name);
 
@@ -65,7 +62,7 @@ describe("Account.domains", () => {
 
   it("returns domains owned by the new owner", async () => {
     const result = await request<AccountDomainsResult>(AccountDomains, {
-      address: NEW_OWNER_OWNER,
+      address: DEVNET_USER,
     });
     const domains = flattenConnection(result.account.domains);
     const names = domains.map((d) => d.name);
@@ -78,7 +75,7 @@ describe("Account.domains pagination", () => {
   testDomainPagination(async (variables) => {
     const result = await request<{
       account: { domains: PaginatedGraphQLConnection<PaginatedDomainResult> };
-    }>(AccountDomainsPaginated, { address: DEFAULT_OWNER, ...variables });
+    }>(AccountDomainsPaginated, { address: DEVNET_OWNER, ...variables });
     return result.account.domains;
   });
 });
