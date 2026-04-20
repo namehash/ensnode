@@ -165,7 +165,7 @@ export function createCLI(options: CLIOptions = {}) {
             })
             .coerce("label-set-id", buildLabelSetId)
             .option("label-set-version", {
-              type: "string",
+              type: "number",
               description:
                 "Label set version to download (falls back to LABEL_SET_VERSION env var)",
               default: process.env.LABEL_SET_VERSION,

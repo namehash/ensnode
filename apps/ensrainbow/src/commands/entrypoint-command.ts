@@ -45,7 +45,7 @@ export interface EntrypointCommandOptions {
 export interface EntrypointCommandHandle {
   /**
    * Resolves once the background bootstrap has completed successfully. Never rejects: on
-   * failure the process is terminated via `process.exit(1)` (or the caller's exit-like hook).
+   * failure the process is terminated via `process.exit(1)`.
    */
   readonly bootstrapComplete: Promise<void>;
   /**
