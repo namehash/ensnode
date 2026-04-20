@@ -6,11 +6,11 @@
 **Selectable but always RPC'd:** `abi`, `interfaces`
 **Special:** `VersionChanged` invalidates all indexed child records for the node
 
-**Constraint:** Changes limited to protocol-acceleration plugin handlers, Resolution API, SDK types, and ensdb-sdk schema. Subgraph shared-handlers are NOT touched.
+**Constraint:** Changes limited to protocol-acceleration plugin handlers, Resolution API, SDK types, and ensdb-sdk schema. Subgraph shared-handlers and assocaited subgraph.schema.ts are NOT touched.
 
 ## Design decisions
 
-- **Versioning (Option A):** on `VersionChanged`, delete all child records for the node and reset scalar columns. Bulk delete via raw drizzle forces a Ponder cache flush — accepted because `VersionChanged` is rare. If ENSv2 emits it frequently, revisit (migrate to version-keyed child PKs).
+- **Versioning (Option A):** on `VersionChanged`, delete all child records for the node and reset scalar columns. Bulk delete via raw drizzle forces a Ponder cache flush — accepted because `VersionChanged` is rare.
 - **Hybrid acceleration:** `resolveCallByIndex(call, indexed)` returns `{ accelerated: true, result } | { accelerated: false }`. Accelerated results flow through; unaccelerated calls batch-RPC'd in one round trip. `makeRecordsResponseFromResolveResults` shapes the merged result.
 - **ABI / interfaces not indexed.** ABI event omits data (would require follow-up readContract), interface getter has ERC-165 fallback that can't be replicated offline. Selection-level support preserved via the RPC tail of the hybrid path.
 - **Pubkey:** flat `pubkeyX` / `pubkeyY` columns in DB, invariant both-null-or-both-set, `{ x, y } | null` shape in API.
@@ -20,20 +20,34 @@
 
 ## 1. Semantic types (`packages/enssdk/src/lib/types/`)
 
-Create `content-type.ts`:
-```ts
-/** Power-of-2 ABI content type per ENSIP-4 (1=JSON, 2=zlib-JSON, 4=CBOR, 8=URI). */
-export type ContentType = bigint;
-```
-
-Create `interface-id.ts`:
+Create `resolver.ts`:
 ```ts
 import type { Hex } from "viem";
-/** ERC-165 4-byte interface selector. */
+
+/**
+ * ABI content type per ENSIP-4.
+ *
+ * Single-bit values (1=JSON, 2=zlib-JSON, 4=CBOR, 8=URI) identify a stored ABI encoding.
+ * `setABI` requires a power-of-2 value.
+ *
+ * Bitmask unions of those bits are used when reading via `ABI(node, contentTypes)`; the
+ * resolver returns the first stored ABI whose bit is present in the mask (lowest bit first).
+ *
+ * @see https://github.com/ensdomains/ens-contracts/blob/91c966febd7b55494269df830fc6775f040b927b/contracts/resolvers/profiles/ABIResolver.sol
+ */
+export type ContentType = bigint;
+
+/**
+ * ERC-165 4-byte interface selector.
+ *
+ * @see https://github.com/ensdomains/ens-contracts/blob/91c966febd7b55494269df830fc6775f040b927b/contracts/resolvers/profiles/InterfaceResolver.sol
+ */
 export type InterfaceId = Hex;
 ```
 
-Re-export both from `types/index.ts`.
+Re-export from `types/index.ts`.
+
+Update `packages/ensnode-sdk/src/rpc/eip-165.ts` and `apps/ensindexer/src/plugins/subgraph/shared-handlers/Resolver.ts` (`handleInterfaceChanged`) to use the new `InterfaceId` type.
 
 ---
 
@@ -50,28 +64,30 @@ export const resolverRecords = onchainTable(
     address: t.hex().notNull().$type<Address>(),
     node: t.hex().notNull().$type<Node>(),
 
-    /** ENSIP-3 name() record, InterpretedName. */
+    /**
+     * ENSIP-3 name() record, guaranteed to be an InterpretedName or null if not set.
+     */
     name: t.text().$type<InterpretedName>(),
 
-    /** ENSIP-7 contenthash raw bytes. Null iff unset (empty bytes sentinel normalized). */
+    /**
+     * ENSIP-7 contenthash raw bytes or null if not set.
+     */
     contenthash: t.hex(),
 
     /**
-     * PubkeyResolver (x, y) pair.
-     * INVARIANT: both null together, or both set together.
-     * (0x00…, 0x00…) sentinel stored as (null, null). Exposed to API as { x, y } | null.
+     * PubkeyResolver (x, y) pair, or null if not set.
+     * Invariant: both null together, or both set together.
      */
     pubkeyX: t.hex(),
     pubkeyY: t.hex(),
 
-    /** IDNSZoneResolver zonehash. Null iff unset. */
+    /**
+     * IDNSZoneResolver zonehash or null if not set.
+     */
     dnszonehash: t.hex(),
 
     /**
-     * IVersionableResolver version. Default 0.
-     * Strategy: on VersionChanged, delete all child records for (chainId, address, node)
-     * and reset scalars. Future: may migrate to version-keyed child PKs if ENSv2 emits
-     * VersionChanged frequently.
+     * IVersionableResolver version, defaulting to 0.
      */
     version: t.bigint().notNull().default(0n),
   }),
@@ -88,18 +104,17 @@ export const resolverRecords = onchainTable(
 Add to existing interpretation module:
 
 ```ts
-export function interpretContenthashValue(raw: Hex): Hex | null {
-  return raw === "0x" ? null : raw;
+export function interpretContenthashValue(value: Hex): Hex | null {
+  return value === "0x" ? null : value;
 }
 
 export function interpretPubkeyValue(x: Hex, y: Hex): { x: Hex; y: Hex } | null {
-  const ZERO = "0x" + "00".repeat(32);
-  if (x === ZERO && y === ZERO) return null;
+  if (x === zeroHash && y === zeroHash) return null;
   return { x, y };
 }
 
-export function interpretDnszonehashValue(raw: Hex): Hex | null {
-  return raw === "0x" ? null : raw;
+export function interpretDnszonehashValue(value: Hex): Hex | null {
+  return value === "0x" ? null : value;
 }
 ```
 
@@ -253,9 +268,7 @@ export interface ResolverRecordsSelection {
   texts?: string[];
   contenthash?: boolean;
   pubkey?: boolean;
-  /** Always resolved via RPC (never accelerated). */
-  abis?: ContentType[];
-  /** Always resolved via RPC (never accelerated). */
+  abi?: ContentType;
   interfaces?: InterfaceId[];
   dnszonehash?: boolean;
   version?: boolean;
@@ -268,7 +281,7 @@ export const isSelectionEmpty = (s: ResolverRecordsSelection) =>
   && !s.contenthash
   && !s.pubkey
   && !s.dnszonehash
-  && !s.abis?.length
+  && !s.abi
   && !s.interfaces?.length
   && !s.version;
 ```
@@ -279,19 +292,15 @@ Extend `ResolverRecordsResponseBase`:
 ```ts
 contenthash: Hex | null;
 pubkey: { x: Hex; y: Hex } | null;
-/** Keyed by stringified bigint ContentType at the API surface (Record<string, ...>). */
-abis: Record<string, Hex | null>;
+abi: { contentType: ContentType; data: Hex } | null;
 interfaces: Record<InterfaceId, Address | null>;
 dnszonehash: Hex | null;
 version: bigint;
 ```
 
 Extend `ResolverRecordsResponse<T>` mapped type with branches:
-- `K extends "abis"` → `Record<\`${T["abis"][number]}\`, Hex | null>`
 - `K extends "interfaces"` → `Record<T["interfaces"][number], Address | null>`
-- `contenthash` / `pubkey` / `dnszonehash` / `version` pass through from base.
-
-Internal module types may use `Record<ContentType, ...>` where convenient, but the API response type uses `Record<string, ...>` for bigint keys.
+- `contenthash` / `pubkey` / `abi` / `dnszonehash` / `version` pass through from base.
 
 ---
 
@@ -305,9 +314,9 @@ return [
   selection.pubkey       && ({ functionName: "pubkey",         args: [node] } as const),
   selection.dnszonehash  && ({ functionName: "zonehash",       args: [node] } as const),
   selection.version      && ({ functionName: "recordVersions", args: [node] } as const),
+  selection.abi          && ({ functionName: "ABI",            args: [node, selection.abi] } as const),
   ...(selection.addresses  ?? []).map(ct => ({ functionName: "addr",                 args: [node, BigInt(ct)] } as const)),
   ...(selection.texts      ?? []).map(k  => ({ functionName: "text",                 args: [node, k]          } as const)),
-  ...(selection.abis       ?? []).map(ct => ({ functionName: "ABI",                  args: [node, ct]         } as const)),
   ...(selection.interfaces ?? []).map(id => ({ functionName: "interfaceImplementer", args: [node, id]         } as const)),
 ].filter((c): c is Exclude<typeof c, undefined | null | false> => !!c);
 ```
@@ -322,19 +331,15 @@ case "pubkey": {
 case "zonehash":     return { call, result: interpretDnszonehashValue(result as Hex) };
 case "recordVersions": return { call, result: result as bigint };
 case "ABI": {
-  const [contentType, data] = result as [bigint, Hex];
+  const [contentType, data] = result as [ContentType, Hex];
   return { call, result: data === "0x" ? null : { contentType, data } };
 }
 case "interfaceImplementer": {
-  return { call, result: result === "0x0000000000000000000000000000000000000000" ? null : result };
+  return { call, result: interpretAddress(result) };
 }
 ```
 
 Update `ResolveCallsAndRawResults<SELECTION>` / `ResolveCallsAndResults<SELECTION>` conditional type tables to include every new function-name → result-shape mapping.
-
-### ABI semantics
-
-On-chain `ABI(node, contentTypes)` takes a bitmask and returns the first matching ABI. Our API treats each selected `ContentType` as a single-bit mask, producing one call per selection entry. Predictable, wire-compatible for the common "query single content type" case. Document in selection JSDoc.
 
 ---
 
@@ -345,34 +350,33 @@ import { bigintToCoinType } from "enssdk";
 import type { IndexedResolverRecords } from "./make-records-response";
 import type { ResolveCall } from "./resolve-calls-and-results";
 
-type ResolveByIndex<C extends ResolveCall> =
-  | { call: C; accelerated: true; result: unknown }
-  | { call: C; accelerated: false };
-
+/**
+ * (undefined means not accelerated)
+ */
 export function resolveCallByIndex<C extends ResolveCall>(
   call: C,
-  indexed: IndexedResolverRecords | null,
-): ResolveByIndex<C> {
+  records: IndexedResolverRecords | null,
+): unknown | null | undefined {
   switch (call.functionName) {
     case "name":
-      return { call, accelerated: true, result: indexed?.name ?? null };
+      return records?.name ?? null;
     case "addr": {
       const ct = bigintToCoinType(call.args[1] as bigint);
-      const found = indexed?.addressRecords.find(r => bigintToCoinType(r.coinType) === ct);
-      return { call, accelerated: true, result: found?.value ?? null };
+      const found = records?.addressRecords.find(r => bigintToCoinType(r.coinType) === ct);
+      return found?.value ?? null;
     }
     case "text": {
       const key = call.args[1] as string;
-      const found = indexed?.textRecords.find(r => r.key === key);
-      return { call, accelerated: true, result: found?.value ?? null };
+      const found = records?.textRecords.find(r => r.key === key);
+      return found?.value ?? null
     }
-    case "contenthash":    return { call, accelerated: true, result: indexed?.contenthash ?? null };
-    case "pubkey":         return { call, accelerated: true, result: indexed?.pubkey ?? null };
-    case "zonehash":       return { call, accelerated: true, result: indexed?.dnszonehash ?? null };
-    case "recordVersions": return { call, accelerated: true, result: indexed?.version ?? 0n };
+    case "contenthash":    return records?.contenthash ?? null;
+    case "pubkey":         return (records?.pubkeyX && records?.pubkeyY) ? {x: records.pubkeyX, y: records.pubkeyY} : null;
+    case "zonehash":       return records?.dnszonehash ?? null;
+    case "recordVersions": return records?.version ?? 0n;
     case "ABI":
     case "interfaceImplementer":
-      return { call, accelerated: false };
+      return undefined;
   }
 }
 ```
@@ -384,7 +388,7 @@ export function resolveCallByIndex<C extends ResolveCall>(
 Shape-only change. Existing address-record defaulting logic preserved.
 
 ```ts
-const row = await ensDb.query.resolverRecords.findFirst({
+const row = (await ensDb.query.resolverRecords.findFirst({
   where: (t, { and, eq }) => and(
     eq(t.chainId, resolver.chainId),
     eq(t.address, resolver.address),
@@ -399,18 +403,9 @@ const row = await ensDb.query.resolverRecords.findFirst({
     version: true,
   },
   with: { addressRecords: true, textRecords: true },
-});
-if (!row) return null;
+})) as IndexedResolverRecords | undefined;
 
-const records: IndexedResolverRecords = {
-  name: row.name,
-  addressRecords: row.addressRecords,
-  textRecords: row.textRecords,
-  contenthash: row.contenthash,
-  pubkey: row.pubkeyX && row.pubkeyY ? { x: row.pubkeyX, y: row.pubkeyY } : null,
-  dnszonehash: row.dnszonehash,
-  version: row.version,
-};
+if (!row) return null;
 
 // existing address-record defaulting block unchanged
 
@@ -428,7 +423,8 @@ export interface IndexedResolverRecords {
   addressRecords: { coinType: bigint; value: string }[];
   textRecords: { key: string; value: string }[];
   contenthash: Hex | null;
-  pubkey: { x: Hex; y: Hex } | null;
+  pubkeyX: Hex;
+  pubkeyY: Hex;
   dnszonehash: Hex | null;
   version: bigint;
 }
@@ -448,54 +444,212 @@ Extend `makeRecordsResponseFromResolveResults` with branches per new selection f
 - `selection.pubkey` → find `functionName === "pubkey"`; null if absent.
 - `selection.dnszonehash` → find `functionName === "zonehash"`; null if absent.
 - `selection.version` → find `functionName === "recordVersions"`; default `0n` if absent.
-- `selection.abis` → for each selected `ContentType`, find `ABI` result where `args[1] === ct`. Key response by `String(ct)`.
+- `selection.abi` → find `functionName === "ABI"`; the interpreted result is already `{ contentType, data } | null`. Pass through.
 - `selection.interfaces` → for each selected `InterfaceId`, find `interfaceImplementer` result where `args[1] === id`. Key by `id`.
 
 ---
 
-## 11. Hybrid acceleration (`apps/ensapi/src/lib/resolution/forward-resolution.ts`)
+## 11. Linear flow with a single RPC callsite (`apps/ensapi/src/lib/resolution/forward-resolution.ts`)
 
-Rework the accelerated branch (current lines 257–375):
+Restructure `_resolveForward` into a linear pipeline of **passes over an `operations` array**. Each entry is either unresolved (`{ call }`) or resolved (`{ call, result }`). Each pass takes `operations`, touches only unresolved entries, and returns the new `operations`. The terminal RPC pass resolves anything still unresolved.
 
-- ENSIP-19 reverse acceleration: unchanged.
-- Bridged resolver acceleration: unchanged.
-- **Hoist `isExtendedResolver` check** above the static-resolver acceleration block so `extended` is available to both the hybrid-RPC tail and the downstream pure-RPC path. Remove the duplicated block below.
-- Static-resolver accelerated branch → hybrid flow:
+1. **Identify resolver** (findResolver).
+2. **Accelerate** — one pass per strategy, each layering onto `operations`.
+3. **RPC anything left** — single `executeResolveCalls` callsite resolves unresolved entries.
+
+Early returns (kept — distinct resolution models, not per-call passes):
+- ENSv2 UniversalResolver bailout (unchanged; uses `executeResolveCallsWithUniversalResolver`; TODO to re-integrate once acceleration supports ENSv2).
+- Empty selection → `makeEmptyResolverRecordsResponse`.
+- No active resolver → `makeEmptyResolverRecordsResponse`.
+- Bridged resolver → recursive `_resolveForward` with redirected registry (still one RPC per outer frame).
+
+### Operation type
+
+Shared across passes. Lives next to `ResolveCall` (e.g. `resolve-calls-and-results.ts`):
 
 ```ts
-if (resolverRecordsAreIndexed && isStaticResolver(config.namespace, resolver)) {
-  return withEnsProtocolStep(
-    TraceableENSProtocol.ForwardResolution,
-    ForwardResolutionProtocolStep.AccelerateKnownOnchainStaticResolver,
-    {},
-    async () => {
-      const indexed = await getRecordsFromIndex({ resolver, node, selection });
-      const resolved = calls.map(c => resolveCallByIndex(c, indexed));
+export type Operation = { call: ResolveCall; result?: unknown };
+// `result === undefined` (or absent) = unresolved; any other value (including null) = resolved.
+```
 
-      const acceleratedResults = resolved
-        .filter((r): r is Extract<typeof r, { accelerated: true }> => r.accelerated)
-        .map(({ call, result }) => ({ call, result }));
+### Skeleton
 
-      const rpcCalls = resolved.filter(r => !r.accelerated).map(r => r.call);
-      const rpcResults = rpcCalls.length
-        ? interpretRawCallsAndResults(
-            await executeResolveCalls({
-              name, resolverAddress: activeResolver, useENSIP10Resolve: extended,
-              calls: rpcCalls, publicClient,
-            }),
-          )
-        : [];
+```ts
+// (validation, empty-selection short-circuit, ENSv2 bailout — unchanged)
 
-      return makeRecordsResponseFromResolveResults(
-        selection,
-        [...acceleratedResults, ...rpcResults],
+// 1. Identify resolver
+const { activeName, activeResolver, requiresWildcardSupport } = await findResolver(...);
+if (!activeResolver) return makeEmptyResolverRecordsResponse(selection);
+
+// Bridged resolver → redirect
+if (accelerate && canAccelerate) {
+  const bridgesTo = isBridgedResolver(config.namespace, { chainId, address: activeResolver });
+  if (bridgesTo) {
+    return withEnsProtocolStep(
+      TraceableENSProtocol.ForwardResolution,
+      ForwardResolutionProtocolStep.AccelerateKnownOffchainLookupResolver,
+      {},
+      () => _resolveForward(name, selection, { ...options, registry: bridgesTo }),
+    );
+  }
+}
+
+// Initialize operations as unresolved
+let operations: Operation[] = calls.map(call => ({ call }));
+
+// 2. Accelerate if possible — each strategy is its own pass
+if (accelerate && canAccelerate) {
+  const resolver = { chainId, address: activeResolver };
+
+  // Pass: ENSIP-19 Reverse Resolver
+  if (isKnownENSIP19ReverseResolver(config.namespace, resolver)) {
+    operations = await withEnsProtocolStep(
+      TraceableENSProtocol.ForwardResolution,
+      ForwardResolutionProtocolStep.AccelerateENSIP19ReverseResolver,
+      {},
+      () => accelerateENSIP19ReverseResolver({ operations, name, selection }),
+    );
+  }
+
+  // Pass: Known On-Chain Static Resolver with indexed records
+  const resolverRecordsAreIndexed =
+    areResolverRecordsIndexedByProtocolAccelerationPluginOnChainId(config.namespace, chainId);
+  if (resolverRecordsAreIndexed && isStaticResolver(config.namespace, resolver)) {
+    operations = await withEnsProtocolStep(
+      TraceableENSProtocol.ForwardResolution,
+      ForwardResolutionProtocolStep.AccelerateKnownOnchainStaticResolver,
+      {},
+      () => accelerateKnownOnchainStaticResolver({ operations, resolver, node, selection }),
+    );
+  }
+}
+
+// Early return if every operation is resolved — no RPC needed
+if (operations.every(op => op.result !== undefined)) {
+  return makeRecordsResponseFromResolveResults(selection, operations);
+}
+
+// 3. Determine Resolver ENSIP-10 support + requirement
+const extended = await withEnsProtocolStep(
+  TraceableENSProtocol.ForwardResolution,
+  ForwardResolutionProtocolStep.RequireResolver,
+  { chainId, activeResolver, requiresWildcardSupport },
+  () => isExtendedResolver({ address: activeResolver, publicClient }),
+);
+if (requiresWildcardSupport && !extended) return makeEmptyResolverRecordsResponse(selection);
+
+// 4. Resolve remaining unresolved operations via RPC
+operations = await withEnsProtocolStep(
+  TraceableENSProtocol.ForwardResolution,
+  ForwardResolutionProtocolStep.ExecuteResolveCalls,
+  {},
+  () => executeResolveCalls({
+    name,
+    resolverAddress: activeResolver,
+    useENSIP10Resolve: extended,
+    operations,
+    publicClient,
+  }),
+);
+
+return makeRecordsResponseFromResolveResults(selection, operations);
+```
+
+### `executeResolveCalls` (updated signature)
+
+Now a pass over `operations` — only RPCs entries that remain unresolved.
+
+```ts
+return Promise.all(operations.map(async (op) => {
+  if (op.result !== undefined) return op;
+
+  // existing rpc logic for op.call, producing raw result
+  const rawResult = await /* ... */;
+
+  return interpretRawRpcCallAndResult(op.call, rawResult);
+}));
+```
+
+`interpretRawRpcCallAndResult(call, raw): Operation` is a per-call interpreter — split from the existing batch `interpretRawCallsAndResults` so it fits naturally inside the per-operation `Promise.all`.
+
+### New helper: `apps/ensapi/src/lib/resolution/accelerate-ensip19-reverse-resolver.ts`
+
+```ts
+export async function accelerateENSIP19ReverseResolver({
+  operations, name, selection,
+}: {
+  operations: Operation[];
+  name: InterpretedName;
+  selection: ResolverRecordsSelection;
+}): Promise<Operation[]> {
+  // Invariant: ENSIP-19 reverse resolvers only answer `name`.
+  if (selection.name !== true) {
+    throw new Error(
+      `Invariant(ENSIP-19 Reverse Resolver): expected 'name: true', got ${JSON.stringify(selection)}.`,
+    );
+  }
+
+  // Sanity: any non-`name` selection would fail on a reverse resolver anyway.
+  const { name: _n, ...extras } = selection;
+  if (!isSelectionEmpty(extras)) {
+    logger.warn(
+      `Sanity Check(ENSIP-19 Reverse Resolver): expected '{ name: true }' only, got ${JSON.stringify(selection)}.`,
+    );
+  }
+
+  return Promise.all(operations.map(async (op) => {
+    // Passthrough resolved entries and non-`name` calls.
+    if (op.result !== undefined) return op;
+    if (op.call.functionName !== "name") return op;
+
+    // Parse + index lookup happen only for the `name` call.
+    const parsed = parseReverseName(name);
+    if (!parsed) {
+      throw new Error(
+        `Invariant(ENSIP-19 Reverse Resolver): expected a valid reverse name, got '${name}'.`,
       );
-    },
-  );
+    }
+
+    const result = await getENSIP19ReverseNameRecordFromIndex(parsed.address, parsed.coinType);
+    return { call: op.call, result };
+  }));
 }
 ```
 
-Tracing events: preserve the existing `AccelerateKnownOnchainStaticResolver` step around the hybrid block (success when we enter it, false when we fall through).
+### New helper: `apps/ensapi/src/lib/resolution/accelerate-known-onchain-static-resolver.ts`
+
+```ts
+export async function accelerateKnownOnchainStaticResolver({
+  operations, resolver, node, selection,
+}: {
+  operations: Operation[];
+  resolver: AccountId;
+  node: Node;
+  selection: ResolverRecordsSelection;
+}): Promise<Operation[]> {
+  const records = await getRecordsFromIndex({ resolver, node, selection });
+
+  return operations.map(op => {
+    // Passthrough resolved entries.
+    if (op.result !== undefined) return op;
+
+    const result = resolveCallByIndex(op.call, records);
+    // `undefined` means this call type isn't accelerable (e.g. ABI, interfaceImplementer).
+    return result === undefined ? op : { call: op.call, result };
+  });
+}
+```
+
+### Properties
+
+- **One RPC callsite** in `_resolveForward` (excluding the ENSv2 bailout).
+- **Composable passes**: adding a new acceleration strategy = one more `operations = await <strategy>(operations, ...)` line. No partitioning bookkeeping.
+- **Tracing preserved**: `AccelerateENSIP19ReverseResolver`, `AccelerateKnownOnchainStaticResolver`, `AccelerateKnownOffchainLookupResolver`, `RequireResolver`, `ExecuteResolveCalls` steps fire in positions equivalent to today.
+- **No acceleration possible**: every operation stays unresolved through the accel passes and flows to the single RPC callsite — same behavior as today's pure-fallback branch.
+
+### Future (out of scope)
+
+The ENSv2 `executeResolveCallsWithUniversalResolver` bailout can be collapsed into the same linear flow as another terminal `Operation[]`-shaped pass (UniversalResolverV2 vs direct resolver calls). Follow-up once ENSv2 acceleration re-lands.
 
 ---
 
@@ -512,10 +666,10 @@ Add one changeset:
 "enssdk": minor
 ---
 
-Resolution API: support contenthash, pubkey, abis, interfaces, dnszonehash, and version
+Resolution API: support contenthash, pubkey, abi, interfaces, dnszonehash, and version
 selection. Protocol acceleration indexes contenthash, pubkey, dnszonehash, and handles
-VersionChanged (clears records for the node, bumps version). ABI and interface records
-are selectable but always resolved via RPC.
+VersionChanged (clears records for the node, bumps version). ABI (bitmask query,
+contract-equivalent) and interface records are selectable but always resolved via RPC.
 ```
 
 ---
@@ -524,14 +678,12 @@ are selectable but always resolved via RPC.
 
 ### Unit
 - `packages/ensnode-sdk/src/internal/interpret-*.test.ts` — sentinel → null for contenthash, pubkey, dnszonehash.
-- `apps/ensapi/src/lib/resolution/resolve-call-by-index.test.ts` — every `functionName` returns correct `accelerated` tagging, correct result shape from indexed data, correct null fallbacks when `indexed === null` or fields missing.
-- `apps/ensapi/src/lib/resolution/resolve-calls-and-results.test.ts` — `makeResolveCalls` emits correct calls for every new selection field; `interpretRawCallsAndResults` covers every new case.
 - `apps/ensapi/src/lib/resolution/make-records-response.test.ts` — `makeRecordsResponseFromResolveResults` shapes match every selection combination; `makeEmptyResolverRecordsResponse` returns correct nulls.
 
 ### Integration
 - Indexer: fixture resolver emitting `ContenthashChanged` / `PubkeyChanged` / `DNSZonehashChanged` / `AddressChanged` / `TextChanged` / `VersionChanged` in order. Assert final DB state including reset scalars, cleared child rows, bumped version.
 - Resolution API: real static resolver with records set for each type. Run with `{ accelerate: true }` and `{ accelerate: false }`. Assert identical responses (parity).
-- Resolution API: mixed selection `{ name, addresses, texts, contenthash, abis, interfaces }` exercises both legs of hybrid path in one request.
+- Resolution API: mixed selection `{ name, addresses, texts, contenthash, abi, interfaces }` exercises both legs of hybrid path in one request. ABI-specific case: set JSON + CBOR for a node, query with `abi: 1n | 4n`, assert the returned `contentType` is `1n` (lowest matching bit wins).
 
 ### Commands
 ```
@@ -549,7 +701,7 @@ pnpm test:integration
 2. Interpreters in `@ensnode/ensnode-sdk/internal` (§3).
 3. SDK selection + response types (§6).
 4. Schema update (§2) + indexer DB helpers (§4) + handler registrations (§5).
-5. Resolution API plumbing: `resolve-calls-and-results` (§7), `resolve-call-by-index` (§8), `get-records-from-index` (§9), `make-records-response` (§10), `forward-resolution` (§11).
+5. Resolution API plumbing: `resolve-calls-and-results` (§7, includes new `Operation` type + split `interpretRawRpcCallAndResult`), `resolve-call-by-index` (§8), `get-records-from-index` (§9), `make-records-response` (§10), new `accelerate-ensip19-reverse-resolver.ts` + `accelerate-known-onchain-static-resolver.ts` + restructured `forward-resolution.ts` with `let operations` passes (§11).
 6. Delete `makeRecordsResponseFromIndexedRecords` once no callers remain.
 7. Tests (§13), changeset (§12).
 
