@@ -974,6 +974,32 @@
           { "schema": { "type": "string" }, "required": false, "name": "addresses", "in": "query" },
           { "schema": { "type": "string" }, "required": false, "name": "texts", "in": "query" },
           {
+            "schema": { "type": "boolean" },
+            "required": false,
+            "name": "contenthash",
+            "in": "query"
+          },
+          { "schema": { "type": "boolean" }, "required": false, "name": "pubkey", "in": "query" },
+          {
+            "schema": { "type": "boolean" },
+            "required": false,
+            "name": "dnszonehash",
+            "in": "query"
+          },
+          { "schema": { "type": "boolean" }, "required": false, "name": "version", "in": "query" },
+          {
+            "schema": { "type": "string", "example": "1" },
+            "required": false,
+            "name": "abi",
+            "in": "query"
+          },
+          {
+            "schema": { "type": "string" },
+            "required": false,
+            "name": "interfaces",
+            "in": "query"
+          },
+          {
             "schema": { "type": "boolean", "default": false },
             "required": false,
             "name": "trace",
@@ -1003,6 +1029,26 @@
                           "additionalProperties": { "type": ["string", "null"] }
                         },
                         "texts": {
+                          "type": "object",
+                          "additionalProperties": { "type": ["string", "null"] }
+                        },
+                        "contenthash": { "type": ["string", "null"] },
+                        "pubkey": {
+                          "type": ["object", "null"],
+                          "properties": { "x": { "type": "string" }, "y": { "type": "string" } },
+                          "required": ["x", "y"]
+                        },
+                        "dnszonehash": { "type": ["string", "null"] },
+                        "version": { "type": ["string", "null"] },
+                        "abi": {
+                          "type": ["object", "null"],
+                          "properties": {
+                            "contentType": { "type": "string" },
+                            "data": { "type": "string" }
+                          },
+                          "required": ["contentType", "data"]
+                        },
+                        "interfaces": {
                           "type": "object",
                           "additionalProperties": { "type": ["string", "null"] }
                         }
