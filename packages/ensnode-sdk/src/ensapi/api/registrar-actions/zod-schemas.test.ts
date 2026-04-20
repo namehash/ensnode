@@ -8,7 +8,10 @@ import type {
   SerializedRegistrarActionsResponseError,
   SerializedRegistrarActionsResponseOk,
 } from "./serialized-response";
-import { makeRegistrarActionsResponseSchema } from "./zod-schemas";
+import {
+  makeRegistrarActionsResponseSchema,
+  makeSerializedRegistrarActionsResponseOkSchema,
+} from "./zod-schemas";
 
 describe("ENSNode API Schema", () => {
   describe("Registrar Actions API", () => {
@@ -153,6 +156,25 @@ describe("ENSNode API Schema", () => {
         responseCode: RegistrarActionsResponseCodes.Error,
         error: validResponseError.error,
       } satisfies RegistrarActionsResponseError);
+    });
+
+    describe("makeSerializedRegistrarActionsResponseOkSchema", () => {
+      it("registrarActionsResponseOkExample passes schema", () => {
+        expect(
+          makeSerializedRegistrarActionsResponseOkSchema().safeParse(
+            registrarActionsResponseOkExample,
+          ).success,
+        ).toBe(true);
+      });
+
+      it("rejects ResponseOk object missing required accurateAsOf", () => {
+        const { accurateAsOf: _accurateAsOf, ...invalidResponseOk } =
+          registrarActionsResponseOkExample;
+
+        expect(
+          makeSerializedRegistrarActionsResponseOkSchema().safeParse(invalidResponseOk).success,
+        ).toBe(false);
+      });
     });
   });
 });
