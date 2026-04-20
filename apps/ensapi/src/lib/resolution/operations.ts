@@ -14,7 +14,7 @@ import type { ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 /**
  * Canonical mapping from a Resolver function name to its argument tuple and semantically
  * interpreted result type. Add a record type here and `Operation`, `makeOperations`, and
- * `interpretRawRpcCallAndResult` will force you to handle it.
+ * `interpretOperationWithRawResult` will force you to handle it.
  */
 type OperationMap = {
   name: { args: readonly [Node]; result: InterpretedName | null };

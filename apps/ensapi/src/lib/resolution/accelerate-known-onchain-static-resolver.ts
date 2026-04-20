@@ -1,4 +1,4 @@
-import { type AccountId, bigintToCoinType, type Node } from "enssdk";
+import type { AccountId, Node } from "enssdk";
 
 import type { ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 import { interpretPubkeyValue } from "@ensnode/ensnode-sdk/internal";
@@ -49,8 +49,8 @@ function resolveOperationWithIndex(op: Operation, records: IndexedRecords): Oper
     case "name":
       return { ...op, result: records?.name ?? null };
     case "addr": {
-      const ct = bigintToCoinType(op.args[1]);
-      const found = records?.addressRecords.find((r) => bigintToCoinType(r.coinType) === ct);
+      const coinType = op.args[1];
+      const found = records?.addressRecords.find((r) => r.coinType === coinType);
       return { ...op, result: found?.value ?? null };
     }
     case "text": {

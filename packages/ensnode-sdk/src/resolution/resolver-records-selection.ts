@@ -61,6 +61,6 @@ export const isSelectionEmpty = (selection: ResolverRecordsSelection) =>
   !selection.contenthash &&
   !selection.pubkey &&
   !selection.dnszonehash &&
-  !selection.abi &&
+  selection.abi === undefined &&
   !selection.interfaces?.length &&
   !selection.version;

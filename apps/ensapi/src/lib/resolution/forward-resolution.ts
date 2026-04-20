@@ -87,7 +87,8 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
     canAccelerate = false,
   } = options;
 
-  const selectionString = JSON.stringify(selection);
+  // `selection` may contain bigints (e.g. `abi: ContentType`); stringify safely for tracing.
+  const selectionString = JSON.stringify(replaceBigInts(selection, String));
 
   // trace for external consumers
   return withEnsProtocolStep(
@@ -315,7 +316,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           // Invariant: all operations must be resolved
           if (!operations.every(isOperationResolved)) {
             throw new Error(
-              `Invariant(foward-resolution): Not all operations were resolved at the end of resolution!\n${JSON.stringify(operations)}`,
+              `Invariant(forward-resolution): Not all operations were resolved at the end of resolution!\n${JSON.stringify(replaceBigInts(operations, String))}`,
             );
           }
 

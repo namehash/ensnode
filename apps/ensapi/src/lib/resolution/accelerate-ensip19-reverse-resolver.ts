@@ -1,3 +1,4 @@
+import { replaceBigInts } from "@ponder/utils";
 import type { InterpretedName } from "enssdk";
 import { parseReverseName } from "enssdk";
 
@@ -19,10 +20,19 @@ export async function accelerateENSIP19ReverseResolver({
   name: InterpretedName;
   selection: ResolverRecordsSelection;
 }): Promise<Operation[]> {
-  // Invariant: consumer must be selecting the `name` record at this point
+  // Invariant: consumer must be selecting the `name` record at this point.
+  // `selection` may contain bigints (e.g. `abi: ContentType`); stringify safely.
   if (selection.name !== true) {
     throw new Error(
-      `Invariant(ENSIP-19 Reverse Resolver): expected 'name: true', got ${JSON.stringify(selection)}.`,
+      `Invariant(ENSIP-19 Reverse Resolver): expected 'name: true', got ${JSON.stringify(replaceBigInts(selection, String))}.`,
+    );
+  }
+
+  // parse once up-front — a reverse-resolver selection only ever produces one `name` op
+  const parsed = parseReverseName(name);
+  if (!parsed) {
+    throw new Error(
+      `Invariant(ENSIP-19 Reverse Resolver): expected a valid reverse name, got '${name}'.`,
     );
   }
 
@@ -30,13 +40,6 @@ export async function accelerateENSIP19ReverseResolver({
     operations.map(async (op) => {
       if (isOperationResolved(op)) return op;
       if (op.functionName !== "name") return op;
-
-      const parsed = parseReverseName(name);
-      if (!parsed) {
-        throw new Error(
-          `Invariant(ENSIP-19 Reverse Resolver): expected a valid reverse name, got '${name}'.`,
-        );
-      }
 
       const result = await getENSIP19ReverseNameRecordFromIndex(parsed.address, parsed.coinType);
       return { ...op, result };
