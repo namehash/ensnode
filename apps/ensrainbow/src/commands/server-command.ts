@@ -39,20 +39,32 @@ export async function serverCommand(options: ServerCommandOptions): Promise<void
     });
 
     // Handle graceful shutdown
+    let shutdownPromise: Promise<void> | undefined;
     const shutdown = async () => {
-      logger.info("Shutting down server...");
-      try {
-        await closeHttpServer(httpServer);
-        await db.close();
-        logger.info("Server shutdown complete");
-      } catch (error) {
-        logger.error(error, "Error during shutdown:");
-        throw error;
+      if (shutdownPromise) {
+        return shutdownPromise;
       }
+
+      logger.info("Shutting down server...");
+      shutdownPromise = (async () => {
+        try {
+          await closeHttpServer(httpServer);
+          await db.close();
+          logger.info("Server shutdown complete");
+        } catch (error) {
+          logger.error(error, "Error during shutdown:");
+        }
+      })();
+
+      return shutdownPromise;
     };
 
-    process.on("SIGTERM", shutdown);
-    process.on("SIGINT", shutdown);
+    process.on("SIGTERM", () => {
+      void shutdown();
+    });
+    process.on("SIGINT", () => {
+      void shutdown();
+    });
   } catch (error) {
     await db.close();
     throw error;

@@ -58,8 +58,9 @@ export interface EntrypointCommandOptions {
  */
 export interface EntrypointCommandHandle {
   /**
-   * Resolves once the background bootstrap has completed successfully. Never rejects: on
-   * failure the process is terminated via `process.exit(1)`.
+   * Resolves once the background bootstrap has either completed successfully or been aborted
+   * during shutdown. Never rejects: on non-abort failure the process is terminated via
+   * `process.exit(1)`.
    */
   readonly bootstrapComplete: Promise<void>;
   /**
@@ -160,6 +161,7 @@ export async function entrypointCommand(
         .catch((error) => {
           if (error instanceof BootstrapAbortedError || bootstrapAborter.signal.aborted) {
             logger.info("ENSRainbow database bootstrap aborted due to shutdown");
+            resolvePromise();
             return;
           }
           logger.error(error, "ENSRainbow database bootstrap failed - exiting");

@@ -17,6 +17,12 @@ export function closeHttpServer(
   return new Promise((resolve, reject) => {
     server.close((error) => {
       if (error) {
+        // `server.close()` is idempotent from a lifecycle perspective. If shutdown races with
+        // another close path and the server is already stopped, treat this as a no-op.
+        if ("code" in error && error.code === "ERR_SERVER_NOT_RUNNING") {
+          resolve();
+          return;
+        }
         reject(error);
         return;
       }
