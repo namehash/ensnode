@@ -42,6 +42,7 @@ import { ENSNamespaceIds } from "@ensnode/datasources";
 import { OmnichainIndexingStatusIds } from "@ensnode/ensnode-sdk";
 
 const MONOREPO_ROOT = resolve(import.meta.dirname, "../../..");
+const DOCKER_DIR = resolve(MONOREPO_ROOT, "docker");
 const ENSRAINBOW_DIR = resolve(MONOREPO_ROOT, "apps/ensrainbow");
 const ENSINDEXER_DIR = resolve(MONOREPO_ROOT, "apps/ensindexer");
 const ENSAPI_DIR = resolve(MONOREPO_ROOT, "apps/ensapi");
@@ -238,7 +239,10 @@ async function main() {
 
   // Phase 1: Start Postgres + Devnet via docker-compose
   log("Starting Postgres and devnet...");
-  composeEnvironment = await new DockerComposeEnvironment(MONOREPO_ROOT, "docker-compose.yml")
+  composeEnvironment = await new DockerComposeEnvironment(
+    DOCKER_DIR,
+    "docker-compose.orchestrator.yml",
+  )
     .withWaitStrategy("devnet", Wait.forHealthCheck())
     .withWaitStrategy("postgres", Wait.forListeningPorts())
     .withStartupTimeout(120_000)

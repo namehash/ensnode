@@ -1,0 +1,17 @@
+services:
+  ensadmin:
+    container_name: ensadmin
+    image: ghcr.io/namehash/ensnode/ensadmin:latest
+    build:
+      dockerfile: ./apps/ensadmin/Dockerfile
+      context: ../..
+    ports:
+      - "4173:4173"
+    environment:
+      # NOTE: must be host-accessible (i.e. http://localhost)
+      ENSADMIN_PUBLIC_URL: http://localhost:4173
+      # NOTE: must be host-accessible (i.e. http://localhost)
+      NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY: http://localhost:4334
+    depends_on:
+      ensapi:
+        condition: service_started

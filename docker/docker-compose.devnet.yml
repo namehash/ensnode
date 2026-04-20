@@ -1,0 +1,75 @@
+services:
+  ensindexer:
+    extends:
+      file: services/ensindexer.yml
+      service: ensindexer
+    environment:
+      # This is strange but RPC_URL_1 and RPC_URL_1337 doesnt work.
+      # Only this chain id will replace localhost:8545 with correct domain
+      RPC_URL_15658733: http://devnet:8545
+      ENSINDEXER_SCHEMA_NAME: docker_devnet_v1
+      LABEL_SET_ID: ens-test-env
+      LABEL_SET_VERSION: 0
+      PLUGINS: subgraph,ensv2
+      NAMESPACE: ens-test-env
+    env_file:
+      - path: ./.env.docker-compose
+        required: true
+    depends_on:
+      ensrainbow:
+        condition: service_healthy
+      postgres:
+        condition: service_started
+      devnet:
+        condition: service_healthy
+
+  ensapi:
+    extends:
+      file: services/ensapi.yml
+      service: ensapi
+    environment:
+      ENSINDEXER_SCHEMA_NAME: docker_devnet_v1
+    env_file:
+      - path: ./.env.docker-compose
+        required: true
+
+  ensrainbow:
+    extends:
+      file: services/ensrainbow.yml
+      service: ensrainbow
+    environment:
+      LABEL_SET_ID: ens-test-env
+      LABEL_SET_VERSION: 0
+      DB_SCHEMA_VERSION: 3
+    env_file:
+      - path: ./.env.docker-compose
+        required: true
+
+  ensadmin:
+    extends:
+      file: services/ensadmin.yml
+      service: ensadmin
+    env_file:
+      - path: ./.env.docker-compose
+        required: true
+
+  postgres:
+    extends:
+      file: services/postgres.yml
+      service: postgres
+    env_file:
+      - path: ./.env.docker-compose
+        required: true
+
+  devnet:
+    extends:
+      file: services/devnet.yml
+      service: devnet
+
+volumes:
+  # Docker Compose requires volumes used by services to be declared in each
+  # compose file that references them — they cannot be inherited via `extends`.
+  postgres_data:
+    driver: local
+  ensrainbow_data:
+    driver: local

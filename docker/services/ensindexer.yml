@@ -1,0 +1,21 @@
+services:
+  ensindexer:
+    container_name: ensindexer
+    image: ghcr.io/namehash/ensnode/ensindexer:latest
+    build:
+      dockerfile: ./apps/ensindexer/Dockerfile
+      context: ../..
+    ports:
+      - "42069:42069"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "-s", "http://localhost:42069/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+      start_interval: 1s
+    depends_on:
+      ensrainbow:
+        condition: service_healthy
+      postgres:
+        condition: service_started

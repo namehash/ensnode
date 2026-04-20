@@ -1,0 +1,67 @@
+services:
+  ensindexer:
+    extends:
+      file: services/ensindexer.yml
+      service: ensindexer
+    environment:
+      ENSINDEXER_SCHEMA_NAME: docker_ensindexer_v1
+    env_file:
+      # NOTE: must define apps/ensindexer/.env.local (see apps/ensindexer/.env.local.example)
+      - path: ../apps/ensindexer/.env.local
+        required: true
+      # Loaded last so docker-compose values (ENSDB_URL, etc.) override .env.local
+      - path: ./.env.docker-compose
+        required: true
+
+  ensapi:
+    extends:
+      file: services/ensapi.yml
+      service: ensapi
+    environment:
+      ENSINDEXER_SCHEMA_NAME: docker_ensindexer_v1
+    env_file:
+      # NOTE: must define apps/ensapi/.env.local (see apps/ensapi/.env.local.example)
+      - path: ../apps/ensapi/.env.local
+        required: true
+      # Loaded last so docker-compose values (ENSDB_URL, etc.) override .env.local
+      - path: ./.env.docker-compose
+        required: true
+
+  ensrainbow:
+    extends:
+      file: services/ensrainbow.yml
+      service: ensrainbow
+    env_file:
+      # NOTE: Optionally define apps/ensrainbow/.env.local (see apps/ensrainbow/.env.local.example)
+      - path: ../apps/ensrainbow/.env.local
+        required: false
+      # Loaded last so docker-compose values override .env.local
+      - path: ./.env.docker-compose
+        required: true
+
+  ensadmin:
+    extends:
+      file: services/ensadmin.yml
+      service: ensadmin
+    env_file:
+      # NOTE: Optionally define apps/ensadmin/.env.local (see apps/ensadmin/.env.local.example)
+      - path: ../apps/ensadmin/.env.local
+        required: false
+      - path: ./.env.docker-compose
+        required: true
+
+  postgres:
+    extends:
+      file: services/postgres.yml
+      service: postgres
+    env_file:
+      - path: ./.env.docker-compose
+        required: true
+
+volumes:
+  # Docker Compose requires volumes used by services to be declared in each
+  # compose file that references them — they cannot be inherited via `extends`.
+  postgres_data:
+    driver: local
+  ensrainbow_data:
+    driver: local
