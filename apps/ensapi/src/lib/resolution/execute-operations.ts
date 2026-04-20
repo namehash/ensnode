@@ -132,14 +132,12 @@ export async function executeOperations({
 /**
  * Interprets a single raw RPC result into its semantic value, producing a resolved Operation.
  *
- * A `null` raw is interpreted as "no record" for record-style calls; `recordVersions` defaults to
- * `0n` because IVersionableResolver treats an uninitialized version as zero.
+ * A `null` raw maps to `result: null` for all call types — including `recordVersions`, where
+ * revert (resolver doesn't implement `IVersionableResolver`) is surfaced to callers rather than
+ * conflated with an explicit `0n`.
  */
 export function interpretOperationWithRawResult(call: Operation, raw: unknown): Operation {
-  if (raw === null) {
-    if (call.functionName === "recordVersions") return { ...call, result: 0n };
-    return { ...call, result: null } as Operation;
-  }
+  if (raw === null) return { ...call, result: null } as Operation;
 
   switch (call.functionName) {
     case "name":

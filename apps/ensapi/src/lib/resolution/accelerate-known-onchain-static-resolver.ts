@@ -68,8 +68,8 @@ function resolveOperationWithIndex(op: Operation, records: IndexedRecords): Oper
     case "zonehash":
       return { ...op, result: records?.dnszonehash ?? null };
     case "recordVersions":
-      // NOTE: recordVersions defaults to 0
-      return { ...op, result: records?.version ?? 0n };
+      // null when no `VersionChanged` event has been seen for this node
+      return { ...op, result: records?.version ?? null };
     /**
      * The following return the Operation as-is, instructing forward-resolution to resolve them via RPC.
      */

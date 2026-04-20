@@ -90,7 +90,7 @@ describe("makeRecordsResponse", () => {
       contenthash: null,
       pubkey: null,
       dnszonehash: null,
-      version: 0n,
+      version: null,
       abi: null,
       interfaces: { [id]: null },
     });

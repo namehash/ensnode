@@ -66,6 +66,26 @@ const getUniversalResolverV2 = lazy(() =>
  * @param options Optional settings
  * @param options.accelerate Whether acceleration is requested (default: true)
  * @param options.canAccelerate Whether acceleration is currently possible (default: false)
+ *
+ * @example
+ * await resolveForward("jesse.base.eth", {
+ *   name: true,
+ *   addresses: [evmChainIdToCoinType(mainnet.id), evmChainIdToCoinType(base.id)],
+ *   texts: ["com.twitter", "description"],
+ * })
+ *
+ * // results in
+ * {
+ *   name: 'jesse.base.eth',
+ *   addresses: {
+ *     60: '0x849151d7D0bF1F34b70d5caD5149D28CC2308bf1',
+ *     2147492101: null
+ *   },
+ *   texts: {
+ *     'com.twitter': 'jessepollak',
+ *     description: 'base.eth builder #001'
+ *   }
+ * }
  */
 export async function resolveForward<SELECTION extends ResolverRecordsSelection>(
   name: ForwardResolutionArgs<SELECTION>["name"],
@@ -125,10 +145,14 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           // TODO: technically InterpretedNames are not resolvable, since ENS contracts are not
           // encoded-labelhash-aware; so we add a temporary additional constraint on name that it
           // must be fully normalized (and therefore not contain encoded labelhash segments)
+          // (this will be improved in a future pr https://github.com/namehash/ensnode/issues/1920)
           if (!isNormalizedName(name)) {
             throw new Error(`'${name}' must be normalized to be resolvable.`);
           }
 
+          // TODO: technically we could support resolving records for the root node, but because there
+          // are so many edge cases, this is something we should explicitly declare support for
+          // after we have test cases
           if (name === ENS_ROOT_NAME) {
             throw new Error(
               `Resolving records for the ENS Root Node ('') is not currently supported.`,

@@ -152,9 +152,11 @@ export const resolverRecords = onchainTable(
     dnszonehash: t.hex(),
 
     /**
-     * IVersionableResolver version, defaulting to 0.
+     * IVersionableResolver version. Null when no `VersionChanged` event has been seen for this
+     * (chainId, address, node) — the resolver may not implement `IVersionableResolver`, or simply
+     * may never have been version-bumped. Consumers should treat null as "unknown" rather than 0.
      */
-    version: t.bigint().notNull().default(0n).$type<RecordVersion>(),
+    version: t.bigint().$type<RecordVersion>(),
   }),
   (t) => ({
     byId: uniqueIndex().on(t.chainId, t.address, t.node),

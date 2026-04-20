@@ -32,8 +32,7 @@ export function makeRecordsResponse<SELECTION extends ResolverRecordsSelection>(
         memo.dnszonehash = op.result ?? null;
         break;
       case "recordVersions":
-        // NOTE: recordVersions defaults to 0n
-        memo.version = op.result ?? 0n;
+        memo.version = op.result ?? null;
         break;
       case "ABI":
         memo.abi = op.result ?? null;

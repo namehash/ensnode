@@ -23,7 +23,7 @@ type OperationMap = {
   contenthash: { args: readonly [Node]; result: Hex | null };
   pubkey: { args: readonly [Node]; result: { x: Hex; y: Hex } | null };
   zonehash: { args: readonly [Node]; result: Hex | null };
-  recordVersions: { args: readonly [Node]; result: RecordVersion };
+  recordVersions: { args: readonly [Node]; result: RecordVersion | null };
   ABI: {
     args: readonly [Node, ContentType];
     result: { contentType: ContentType; data: Hex } | null;

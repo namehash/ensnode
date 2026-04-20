@@ -58,9 +58,12 @@ export type ResolverRecordsResponseBase = {
   dnszonehash: Hex | null;
 
   /**
-   * The IVersionableResolver version, defaulting to 0n.
+   * The IVersionableResolver version. Null when we don't have a value — the resolver may not
+   * implement `IVersionableResolver` (RPC revert), or (on the accelerated path) no
+   * `VersionChanged` event has ever been seen for this node. `0n` is only returned when the
+   * resolver explicitly emitted `VersionChanged(node, 0)`.
    */
-  version: RecordVersion;
+  version: RecordVersion | null;
 };
 
 /**

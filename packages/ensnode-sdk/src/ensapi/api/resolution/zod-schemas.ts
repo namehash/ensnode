@@ -15,7 +15,7 @@ const makeResolverRecordsResponseSchema = () =>
     contenthash: z.string().nullable().optional(),
     pubkey: z.object({ x: z.string(), y: z.string() }).nullable().optional(),
     dnszonehash: z.string().nullable().optional(),
-    version: z.string().optional(),
+    version: z.string().nullable().optional(),
     abi: z.object({ contentType: z.string(), data: z.string() }).nullable().optional(),
     interfaces: z.record(z.string(), z.string().nullable()).optional(),
   });

@@ -21,8 +21,8 @@ export type ContentType = bigint;
 export type InterfaceId = Hex;
 
 /**
- * IVersionableResolver record version. `0n` is the uninitialized default; `VersionChanged`
- * bumps this value and invalidates all prior records for the node.
+ * IVersionableResolver record version. Bumped by `VersionChanged`, which invalidates all prior
+ * records for the node.
  *
  * @see https://github.com/ensdomains/ens-contracts/blob/91c966febd7b55494269df830fc6775f040b927b/contracts/resolvers/profiles/IVersionableResolver.sol
  */
