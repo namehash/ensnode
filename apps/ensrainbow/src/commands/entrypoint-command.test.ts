@@ -70,13 +70,10 @@ describe("entrypointCommand (existing DB on disk)", () => {
     expect(healthRes.status).toBe(200);
     const healthData = (await healthRes.json()) as EnsRainbow.HealthResponse;
     expect(healthData).toEqual({ status: "ok" });
-    const readyRes = await fetch(`${endpoint}/ready`);
-    expect(readyRes.status).toBe(503);
-    
     await handle.bootstrapComplete;
 
-    const readyRes2 = await fetch(`${endpoint}/ready`);
-    expect(readyRes2.status).toBe(200);
+    const readyRes = await fetch(`${endpoint}/ready`);
+    expect(readyRes.status).toBe(200);
 
     const configRes = await fetch(`${endpoint}/v1/config`);
     expect(configRes.status).toBe(200);

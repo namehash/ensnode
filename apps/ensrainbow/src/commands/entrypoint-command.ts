@@ -14,6 +14,7 @@ import type { AbsolutePath, DbSchemaVersion } from "@/config/types";
 import { createApi } from "@/lib/api";
 import { ENSRainbowDB } from "@/lib/database";
 import { buildDbConfig, ENSRainbowServer } from "@/lib/server";
+import { closeHttpServer } from "@/utils/http-server";
 import { logger } from "@/utils/logger";
 
 /**
@@ -131,7 +132,7 @@ export async function entrypointCommand(
       // partially-opened DB being closed) before shutting down the HTTP server and DB, so
       // we don't leave child processes or LevelDB locks behind.
       await bootstrapSettled;
-      await httpServer.close();
+      await closeHttpServer(httpServer);
       await ensRainbowServer.close();
       logger.info("Server shutdown complete");
     } catch (error) {

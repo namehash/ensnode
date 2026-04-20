@@ -8,6 +8,7 @@ import { buildEnsRainbowPublicConfig } from "@/config/public";
 import { createApi } from "@/lib/api";
 import { ENSRainbowDB } from "@/lib/database";
 import { buildDbConfig, ENSRainbowServer } from "@/lib/server";
+import { closeHttpServer } from "@/utils/http-server";
 import { logger } from "@/utils/logger";
 
 export type ServerCommandOptions = ServeCommandConfig;
@@ -41,7 +42,7 @@ export async function serverCommand(options: ServerCommandOptions): Promise<void
     const shutdown = async () => {
       logger.info("Shutting down server...");
       try {
-        await httpServer.close();
+        await closeHttpServer(httpServer);
         await db.close();
         logger.info("Server shutdown complete");
       } catch (error) {
