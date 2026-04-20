@@ -452,6 +452,40 @@ describe("makeReferrerEditionMetricsSchema", () => {
     minFinalScoreToQualify: 0,
   };
 
+  const revShareCapReferrerAddress = "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85";
+
+  const revShareCapRules = {
+    awardModel: ReferralProgramAwardModels.RevShareCap,
+    awardPool: parseUsdc("2000"),
+    minBaseRevenueContribution: parseUsdc("10"),
+    baseAnnualRevenueContribution: parseUsdc("5"),
+    maxBaseRevenueShare: 0.5,
+    startTime: 1000000,
+    endTime: 2000000,
+    subregistryId,
+    rulesUrl: "https://ensawards.org/rules",
+    areAwardsDistributed: false,
+  };
+
+  const revShareCapAggregatedMetrics = {
+    grandTotalReferrals: 3,
+    grandTotalIncrementalDuration: 60,
+    grandTotalRevenueContribution: parseEth("300"),
+    awardPoolRemaining: parseUsdc("1800"),
+  };
+
+  const disqualificationAction = {
+    actionType: AdminActionTypes.Disqualification,
+    referrer: revShareCapReferrerAddress,
+    reason: "Self-referral",
+  };
+
+  const warningAction = {
+    actionType: AdminActionTypes.Warning,
+    referrer: revShareCapReferrerAddress,
+    reason: "Suspicious activity",
+  };
+
   it("parses a known pie-split ranked edition metrics correctly", () => {
     const input = {
       awardModel: ReferralProgramAwardModels.PieSplit,
@@ -516,20 +550,9 @@ describe("makeReferrerEditionMetricsSchema", () => {
     const input = {
       awardModel: ReferralProgramAwardModels.RevShareCap,
       type: ReferrerEditionMetricsTypeIds.Ranked,
-      rules: {
-        awardModel: ReferralProgramAwardModels.RevShareCap,
-        awardPool: parseUsdc("2000"),
-        minBaseRevenueContribution: parseUsdc("10"),
-        baseAnnualRevenueContribution: parseUsdc("5"),
-        maxBaseRevenueShare: 0.5,
-        startTime: 1000000,
-        endTime: 2000000,
-        subregistryId,
-        rulesUrl: "https://ensawards.org/rules",
-        areAwardsDistributed: false,
-      },
+      rules: revShareCapRules,
       referrer: {
-        referrer: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
+        referrer: revShareCapReferrerAddress,
         totalReferrals: 3,
         totalIncrementalDuration: 60,
         totalRevenueContribution: parseEth("300"),
@@ -540,12 +563,7 @@ describe("makeReferrerEditionMetricsSchema", () => {
         cappedAward: parseUsdc("200"),
         adminAction: null,
       },
-      aggregatedMetrics: {
-        grandTotalReferrals: 3,
-        grandTotalIncrementalDuration: 60,
-        grandTotalRevenueContribution: parseEth("300"),
-        awardPoolRemaining: parseUsdc("1800"),
-      },
+      aggregatedMetrics: revShareCapAggregatedMetrics,
       status: ReferralProgramEditionStatuses.Active,
       accurateAsOf: 1500000,
     };
@@ -561,27 +579,9 @@ describe("makeReferrerEditionMetricsSchema", () => {
     const input = {
       awardModel: ReferralProgramAwardModels.RevShareCap,
       type: ReferrerEditionMetricsTypeIds.Ranked,
-      rules: {
-        awardModel: ReferralProgramAwardModels.RevShareCap,
-        awardPool: parseUsdc("2000"),
-        minBaseRevenueContribution: parseUsdc("10"),
-        baseAnnualRevenueContribution: parseUsdc("5"),
-        maxBaseRevenueShare: 0.5,
-        startTime: 1000000,
-        endTime: 2000000,
-        subregistryId,
-        rulesUrl: "https://ensawards.org/rules",
-        areAwardsDistributed: false,
-        adminActions: [
-          {
-            actionType: AdminActionTypes.Disqualification,
-            referrer: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
-            reason: "Self-referral",
-          },
-        ],
-      },
+      rules: { ...revShareCapRules, adminActions: [disqualificationAction] },
       referrer: {
-        referrer: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
+        referrer: revShareCapReferrerAddress,
         totalReferrals: 3,
         totalIncrementalDuration: 60,
         totalRevenueContribution: parseEth("300"),
@@ -590,18 +590,9 @@ describe("makeReferrerEditionMetricsSchema", () => {
         isQualified: false,
         uncappedAward: parseUsdc("200"),
         cappedAward: parseUsdc("0"),
-        adminAction: {
-          actionType: AdminActionTypes.Disqualification,
-          referrer: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
-          reason: "Self-referral",
-        },
+        adminAction: disqualificationAction,
       },
-      aggregatedMetrics: {
-        grandTotalReferrals: 3,
-        grandTotalIncrementalDuration: 60,
-        grandTotalRevenueContribution: parseEth("300"),
-        awardPoolRemaining: parseUsdc("2000"),
-      },
+      aggregatedMetrics: { ...revShareCapAggregatedMetrics, awardPoolRemaining: parseUsdc("2000") },
       status: ReferralProgramEditionStatuses.Active,
       accurateAsOf: 1500000,
     };
@@ -614,27 +605,9 @@ describe("makeReferrerEditionMetricsSchema", () => {
     const input = {
       awardModel: ReferralProgramAwardModels.RevShareCap,
       type: ReferrerEditionMetricsTypeIds.Ranked,
-      rules: {
-        awardModel: ReferralProgramAwardModels.RevShareCap,
-        awardPool: parseUsdc("2000"),
-        minBaseRevenueContribution: parseUsdc("10"),
-        baseAnnualRevenueContribution: parseUsdc("5"),
-        maxBaseRevenueShare: 0.5,
-        startTime: 1000000,
-        endTime: 2000000,
-        subregistryId,
-        rulesUrl: "https://ensawards.org/rules",
-        areAwardsDistributed: false,
-        adminActions: [
-          {
-            actionType: AdminActionTypes.Warning,
-            referrer: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
-            reason: "Suspicious activity",
-          },
-        ],
-      },
+      rules: { ...revShareCapRules, adminActions: [warningAction] },
       referrer: {
-        referrer: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
+        referrer: revShareCapReferrerAddress,
         totalReferrals: 3,
         totalIncrementalDuration: 60,
         totalRevenueContribution: parseEth("300"),
@@ -643,18 +616,9 @@ describe("makeReferrerEditionMetricsSchema", () => {
         isQualified: true,
         uncappedAward: parseUsdc("200"),
         cappedAward: parseUsdc("200"),
-        adminAction: {
-          actionType: AdminActionTypes.Warning,
-          referrer: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
-          reason: "Suspicious activity",
-        },
+        adminAction: warningAction,
       },
-      aggregatedMetrics: {
-        grandTotalReferrals: 3,
-        grandTotalIncrementalDuration: 60,
-        grandTotalRevenueContribution: parseEth("300"),
-        awardPoolRemaining: parseUsdc("1800"),
-      },
+      aggregatedMetrics: revShareCapAggregatedMetrics,
       status: ReferralProgramEditionStatuses.Active,
       accurateAsOf: 1500000,
     };
@@ -667,20 +631,9 @@ describe("makeReferrerEditionMetricsSchema", () => {
     const input = {
       awardModel: ReferralProgramAwardModels.RevShareCap,
       type: ReferrerEditionMetricsTypeIds.Ranked,
-      rules: {
-        awardModel: ReferralProgramAwardModels.RevShareCap,
-        awardPool: parseUsdc("2000"),
-        minBaseRevenueContribution: parseUsdc("10"),
-        baseAnnualRevenueContribution: parseUsdc("5"),
-        maxBaseRevenueShare: 0.5,
-        startTime: 1000000,
-        endTime: 2000000,
-        subregistryId,
-        rulesUrl: "https://ensawards.org/rules",
-        areAwardsDistributed: false,
-      },
+      rules: { ...revShareCapRules, adminActions: [disqualificationAction] },
       referrer: {
-        referrer: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
+        referrer: revShareCapReferrerAddress,
         totalReferrals: 3,
         totalIncrementalDuration: 60,
         totalRevenueContribution: parseEth("300"),
@@ -689,43 +642,32 @@ describe("makeReferrerEditionMetricsSchema", () => {
         isQualified: true,
         uncappedAward: parseUsdc("200"),
         cappedAward: parseUsdc("200"),
-        adminAction: {
-          actionType: AdminActionTypes.Disqualification,
-          referrer: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
-          reason: "Self-referral",
-        },
+        adminAction: disqualificationAction,
       },
-      aggregatedMetrics: {
-        grandTotalReferrals: 3,
-        grandTotalIncrementalDuration: 60,
-        grandTotalRevenueContribution: parseEth("300"),
-        awardPoolRemaining: parseUsdc("1800"),
-      },
+      aggregatedMetrics: revShareCapAggregatedMetrics,
       status: ReferralProgramEditionStatuses.Active,
       accurateAsOf: 1500000,
     };
 
-    expect(() => schema.parse(input)).toThrow();
+    const result = schema.safeParse(input);
+    expect(result.success).toBe(false);
+    expect(result.error?.issues).toContainEqual(
+      expect.objectContaining({
+        path: ["referrer", "adminAction"],
+        message: expect.stringContaining(
+          "isQualified must be false and cappedAward.amount must be 0",
+        ),
+      }),
+    );
   });
 
   it("fails when adminAction.referrer does not match outer referrer", () => {
     const input = {
       awardModel: ReferralProgramAwardModels.RevShareCap,
       type: ReferrerEditionMetricsTypeIds.Ranked,
-      rules: {
-        awardModel: ReferralProgramAwardModels.RevShareCap,
-        awardPool: parseUsdc("2000"),
-        minBaseRevenueContribution: parseUsdc("10"),
-        baseAnnualRevenueContribution: parseUsdc("5"),
-        maxBaseRevenueShare: 0.5,
-        startTime: 1000000,
-        endTime: 2000000,
-        subregistryId,
-        rulesUrl: "https://ensawards.org/rules",
-        areAwardsDistributed: false,
-      },
+      rules: { ...revShareCapRules, adminActions: [warningAction] },
       referrer: {
-        referrer: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
+        referrer: revShareCapReferrerAddress,
         totalReferrals: 3,
         totalIncrementalDuration: 60,
         totalRevenueContribution: parseEth("300"),
@@ -735,22 +677,23 @@ describe("makeReferrerEditionMetricsSchema", () => {
         uncappedAward: parseUsdc("200"),
         cappedAward: parseUsdc("200"),
         adminAction: {
-          actionType: AdminActionTypes.Warning,
+          ...warningAction,
           referrer: "0x0000000000000000000000000000000000000001",
-          reason: "Wrong address",
         },
       },
-      aggregatedMetrics: {
-        grandTotalReferrals: 3,
-        grandTotalIncrementalDuration: 60,
-        grandTotalRevenueContribution: parseEth("300"),
-        awardPoolRemaining: parseUsdc("1800"),
-      },
+      aggregatedMetrics: revShareCapAggregatedMetrics,
       status: ReferralProgramEditionStatuses.Active,
       accurateAsOf: 1500000,
     };
 
-    expect(() => schema.parse(input)).toThrow();
+    const result = schema.safeParse(input);
+    expect(result.success).toBe(false);
+    expect(result.error?.issues).toContainEqual(
+      expect.objectContaining({
+        path: ["referrer", "adminAction", "referrer"],
+        message: expect.stringContaining("adminAction.referrer must match"),
+      }),
+    );
   });
 
   it("fails when a known awardModel has invalid fields", () => {
