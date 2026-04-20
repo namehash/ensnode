@@ -5,7 +5,7 @@ import { isSelectionEmpty, type ResolverRecordsSelection } from "@ensnode/ensnod
 import {
   makeCoinTypeStringSchema,
   makeDefaultableChainIdStringSchema,
-  makeLowercaseAddressSchema,
+  makeNormalizedAddressSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
 const excludingDefaultChainId = z
@@ -48,7 +48,7 @@ const accelerate = z
   .openapi({
     default: false,
   });
-const address = makeLowercaseAddressSchema().describe(
+const address = makeNormalizedAddressSchema().describe(
   "EVM wallet address (e.g. '0xd8da6bf26964af9d7eed9e03e53415d37aa96045').",
 );
 const defaultableChainId = makeDefaultableChainIdStringSchema().describe(
@@ -130,6 +130,29 @@ const selection = z
  */
 const queryParam = z.preprocess((v) => (v === "" ? undefined : v), z.unknown());
 
+const resolveRecordsQuery = z
+  .object({
+    reverseName: z.optional(boolstring),
+    addresses: z.optional(stringarray.pipe(z.array(coinType))),
+    texts: z.optional(stringarray),
+    trace,
+    accelerate,
+  })
+  .transform(({ trace, accelerate, ...selectionFields }, ctx) => {
+    const sel: ResolverRecordsSelection = {
+      ...(selectionFields.reverseName && { name: true }),
+      ...(selectionFields.addresses && { addresses: selectionFields.addresses }),
+      ...(selectionFields.texts && { texts: selectionFields.texts }),
+    };
+
+    if (isSelectionEmpty(sel)) {
+      ctx.issues.push({ code: "custom", message: "Selection cannot be empty.", input: sel });
+      return z.NEVER;
+    }
+
+    return { selection: sel, trace, accelerate };
+  });
+
 export const params = {
   boolstring,
   stringarray,
@@ -141,6 +164,7 @@ export const params = {
   coinType,
   selectionParams: rawSelectionParams,
   selection,
+  resolveRecordsQuery,
   chainIdsWithoutDefaultChainId,
   queryParam,
 };

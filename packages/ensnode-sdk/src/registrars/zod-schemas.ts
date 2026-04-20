@@ -185,7 +185,7 @@ const makeBaseRegistrarActionSchemaWithoutCheck = (valueLabel: string = "Base Re
   z.object({
     id: EventIdSchema,
     incrementalDuration: makeDurationSchema(`${valueLabel} Incremental Duration`),
-    registrant: makeLowercaseAddressSchema(`${valueLabel} Registrant`),
+    registrant: makeNormalizedAddressSchema(`${valueLabel} Registrant`),
     registrationLifecycle: makeRegistrationLifecycleSchema(`${valueLabel} Registration Lifecycle`),
     pricing: makeRegistrarActionPricingSchema(`${valueLabel} Pricing`),
     referral: makeRegistrarActionReferralSchema(`${valueLabel} Referral`),

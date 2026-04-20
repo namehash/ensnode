@@ -8,8 +8,8 @@ import {
 import {
   errorResponseBadRequestExample,
   makeErrorResponseSchema,
-  makeLowercaseAddressSchema,
   makeNodeSchema,
+  makeNormalizedAddressSchema,
   makePositiveIntegerSchema,
   makeRegistrarActionsResponseErrorSchema,
   makeSerializedRegistrarActionsResponseOkSchema,
@@ -56,7 +56,7 @@ export const registrarActionsQuerySchema = z
       .describe("Filter to only include actions with referrals")
       .openapi({ default: false }),
 
-    decodedReferrer: makeLowercaseAddressSchema("decodedReferrer")
+    decodedReferrer: makeNormalizedAddressSchema("decodedReferrer")
       .optional()
       .describe("Filter by decoded referrer address"),
 
