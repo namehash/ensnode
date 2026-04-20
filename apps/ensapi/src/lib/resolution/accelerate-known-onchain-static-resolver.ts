@@ -1,7 +1,6 @@
 import type { AccountId, Node } from "enssdk";
 
 import type { ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
-import { interpretPubkeyValue } from "@ensnode/ensnode-sdk/internal";
 
 import { getRecordsFromIndex } from "@/lib/protocol-acceleration/get-records-from-index";
 import { isOperationResolved, type Operation } from "@/lib/resolution/operations";
@@ -69,7 +68,11 @@ function resolveOperationWithIndex(op: Operation, records: IndexedRecords): Oper
     case "zonehash":
       return { ...op, result: records?.dnszonehash ?? null };
     case "recordVersions":
+      // NOTE: recordVersions defaults to 0
       return { ...op, result: records?.version ?? 0n };
+    /**
+     * The following return the Operation as-is, instructing forward-resolution to resolve them via RPC.
+     */
     case "ABI":
     case "interfaceImplementer":
       return op;

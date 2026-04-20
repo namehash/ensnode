@@ -5,8 +5,6 @@ import type { InterfaceId } from "./types";
 /**
  * Whether `maybeInterfaceId` is a valid ERC-165 {@link InterfaceId} — a 4-byte hex selector.
  */
-export function isInterfaceId(maybeInterfaceId: unknown): maybeInterfaceId is InterfaceId {
-  return (
-    typeof maybeInterfaceId === "string" && isHex(maybeInterfaceId) && size(maybeInterfaceId) === 4
-  );
+export function isInterfaceId(maybeInterfaceId: string): maybeInterfaceId is InterfaceId {
+  return isHex(maybeInterfaceId) && size(maybeInterfaceId) === 4;
 }
