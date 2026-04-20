@@ -183,22 +183,29 @@ const EventIdsSchema = z
   .min(1)
   .transform((v) => v as [RegistrarActionEventId, ...RegistrarActionEventId[]]);
 
+// Base schema without refinements - can be extended
+const makeBaseRegistrarActionSchemaWithoutCheck = (
+  valueLabel: string = "Base Registrar Action",
+) =>
+  z.object({
+    id: EventIdSchema,
+    incrementalDuration: makeDurationSchema(`${valueLabel} Incremental Duration`),
+    registrant: makeLowercaseAddressSchema(`${valueLabel} Registrant`),
+    registrationLifecycle: makeRegistrationLifecycleSchema(
+      `${valueLabel} Registration Lifecycle`,
+    ),
+    pricing: makeRegistrarActionPricingSchema(`${valueLabel} Pricing`),
+    referral: makeRegistrarActionReferralSchema(`${valueLabel} Referral`),
+    block: makeBlockRefSchema(`${valueLabel} Block`),
+    transactionHash: makeTransactionHashSchema(`${valueLabel} Transaction Hash`),
+    eventIds: EventIdsSchema,
+  });
+
+// Base schema with refinements - used for parsing/validation
 export const makeBaseRegistrarActionSchema = (valueLabel: string = "Base Registrar Action") =>
-  z
-    .object({
-      id: EventIdSchema,
-      incrementalDuration: makeDurationSchema(`${valueLabel} Incremental Duration`),
-      registrant: makeLowercaseAddressSchema(`${valueLabel} Registrant`),
-      registrationLifecycle: makeRegistrationLifecycleSchema(
-        `${valueLabel} Registration Lifecycle`,
-      ),
-      pricing: makeRegistrarActionPricingSchema(`${valueLabel} Pricing`),
-      referral: makeRegistrarActionReferralSchema(`${valueLabel} Referral`),
-      block: makeBlockRefSchema(`${valueLabel} Block`),
-      transactionHash: makeTransactionHashSchema(`${valueLabel} Transaction Hash`),
-      eventIds: EventIdsSchema,
-    })
-    .check(invariant_eventIdsInitialElementIsTheActionId);
+  makeBaseRegistrarActionSchemaWithoutCheck(valueLabel).check(
+    invariant_eventIdsInitialElementIsTheActionId,
+  );
 
 export const makeRegistrarActionRegistrationSchema = (valueLabel: string = "Registration ") =>
   makeBaseRegistrarActionSchema(valueLabel).extend({
@@ -222,7 +229,7 @@ export const makeRegistrarActionSchema = (valueLabel: string = "Registrar Action
 const makeSerializedBaseRegistrarActionSchema = (
   valueLabel: string = "Serialized Base Registrar Action",
 ) =>
-  makeBaseRegistrarActionSchema(valueLabel).extend({
+  makeBaseRegistrarActionSchemaWithoutCheck(valueLabel).extend({
     pricing: makeSerializedRegistrarActionPricingSchema(`${valueLabel} Pricing`),
   });
 
