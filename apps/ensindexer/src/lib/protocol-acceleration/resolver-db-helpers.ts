@@ -1,6 +1,5 @@
 import { and, eq } from "drizzle-orm";
 import {
-  type AccountId,
   type Address,
   type CoinType,
   type Hex,
@@ -21,6 +20,7 @@ import {
   interpretTextRecordValue,
 } from "@ensnode/ensnode-sdk/internal";
 
+import { getThisAccountId } from "@/lib/get-this-account-id";
 import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 
@@ -33,54 +33,27 @@ type ResolverRecordsCompositeKey = Pick<
 >;
 
 /**
- * Constructs a ResolverRecordsCompositeKey from a provided Resolver event.
- *
- * @returns ResolverRecordsCompositeKey
+ * Ensures the Resolver + ResolverRecords entities exist for the given Resolver event, and returns
+ * the ResolverRecords key for further per-record updates.
  */
-export function makeResolverRecordsCompositeKey(
-  resolver: AccountId,
+export async function ensureResolverAndRecords(
+  context: IndexingEngineContext,
   event: EventWithArgs<{ node: Node }>,
-): ResolverRecordsCompositeKey {
-  return {
-    ...resolver,
-    node: event.args.node,
-  };
-}
+): Promise<ResolverRecordsCompositeKey> {
+  const resolver = getThisAccountId(context, event);
+  const key: ResolverRecordsCompositeKey = { ...resolver, node: event.args.node };
 
-/**
- * Ensures that the Resolver contract described by `resolver` exists.
- */
-export async function ensureResolver(context: IndexingEngineContext, resolver: AccountId) {
   await context.ensDb
     .insert(ensIndexerSchema.resolver)
-    .values({
-      id: makeResolverId(resolver),
-      ...resolver,
-    })
+    .values({ id: makeResolverId(resolver), ...resolver })
     .onConflictDoNothing();
-}
 
-/**
- * Ensures that the ResolverRecords entity described by `resolverRecordsKey` exists.
- */
-export async function ensureResolverRecords(
-  context: IndexingEngineContext,
-  resolverRecordsKey: ResolverRecordsCompositeKey,
-) {
-  const resolver: AccountId = {
-    chainId: resolverRecordsKey.chainId,
-    address: resolverRecordsKey.address,
-  };
-  const resolverRecordsId = makeResolverRecordsId(resolver, resolverRecordsKey.node);
-
-  // ensure ResolverRecords
   await context.ensDb
     .insert(ensIndexerSchema.resolverRecords)
-    .values({
-      id: resolverRecordsId,
-      ...resolverRecordsKey,
-    })
+    .values({ id: makeResolverRecordsId(resolver, event.args.node), ...key })
     .onConflictDoNothing();
+
+  return key;
 }
 
 /**
