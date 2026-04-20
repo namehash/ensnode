@@ -1858,7 +1858,7 @@
                                           "baseCost": {
                                             "type": "object",
                                             "properties": {
-                                              "amount": { "type": "string", "pattern": "^d+$" },
+                                              "amount": { "type": "string", "pattern": "^\\d+$" },
                                               "currency": { "type": "string", "enum": ["ETH"] }
                                             },
                                             "required": ["amount", "currency"],
@@ -1867,7 +1867,7 @@
                                           "premium": {
                                             "type": "object",
                                             "properties": {
-                                              "amount": { "type": "string", "pattern": "^d+$" },
+                                              "amount": { "type": "string", "pattern": "^\\d+$" },
                                               "currency": { "type": "string", "enum": ["ETH"] }
                                             },
                                             "required": ["amount", "currency"],
@@ -1876,7 +1876,7 @@
                                           "total": {
                                             "type": "object",
                                             "properties": {
-                                              "amount": { "type": "string", "pattern": "^d+$" },
+                                              "amount": { "type": "string", "pattern": "^\\d+$" },
                                               "currency": { "type": "string", "enum": ["ETH"] }
                                             },
                                             "required": ["amount", "currency"],
@@ -1987,7 +1987,7 @@
                                           "baseCost": {
                                             "type": "object",
                                             "properties": {
-                                              "amount": { "type": "string", "pattern": "^d+$" },
+                                              "amount": { "type": "string", "pattern": "^\\d+$" },
                                               "currency": { "type": "string", "enum": ["ETH"] }
                                             },
                                             "required": ["amount", "currency"],
@@ -1996,7 +1996,7 @@
                                           "premium": {
                                             "type": "object",
                                             "properties": {
-                                              "amount": { "type": "string", "pattern": "^d+$" },
+                                              "amount": { "type": "string", "pattern": "^\\d+$" },
                                               "currency": { "type": "string", "enum": ["ETH"] }
                                             },
                                             "required": ["amount", "currency"],
@@ -2005,7 +2005,7 @@
                                           "total": {
                                             "type": "object",
                                             "properties": {
-                                              "amount": { "type": "string", "pattern": "^d+$" },
+                                              "amount": { "type": "string", "pattern": "^\\d+$" },
                                               "currency": { "type": "string", "enum": ["ETH"] }
                                             },
                                             "required": ["amount", "currency"],
@@ -2203,7 +2203,26 @@
               }
             }
           },
-          "500": { "description": "Internal server error" }
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "responseCode": { "type": "string", "enum": ["error"] },
+                    "error": {
+                      "type": "object",
+                      "properties": { "message": { "type": "string" }, "details": {} },
+                      "required": ["message"]
+                    }
+                  },
+                  "required": ["responseCode", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -2357,7 +2376,7 @@
                                           "baseCost": {
                                             "type": "object",
                                             "properties": {
-                                              "amount": { "type": "string", "pattern": "^d+$" },
+                                              "amount": { "type": "string", "pattern": "^\\d+$" },
                                               "currency": { "type": "string", "enum": ["ETH"] }
                                             },
                                             "required": ["amount", "currency"],
@@ -2366,7 +2385,7 @@
                                           "premium": {
                                             "type": "object",
                                             "properties": {
-                                              "amount": { "type": "string", "pattern": "^d+$" },
+                                              "amount": { "type": "string", "pattern": "^\\d+$" },
                                               "currency": { "type": "string", "enum": ["ETH"] }
                                             },
                                             "required": ["amount", "currency"],
@@ -2375,7 +2394,7 @@
                                           "total": {
                                             "type": "object",
                                             "properties": {
-                                              "amount": { "type": "string", "pattern": "^d+$" },
+                                              "amount": { "type": "string", "pattern": "^\\d+$" },
                                               "currency": { "type": "string", "enum": ["ETH"] }
                                             },
                                             "required": ["amount", "currency"],
@@ -2486,7 +2505,7 @@
                                           "baseCost": {
                                             "type": "object",
                                             "properties": {
-                                              "amount": { "type": "string", "pattern": "^d+$" },
+                                              "amount": { "type": "string", "pattern": "^\\d+$" },
                                               "currency": { "type": "string", "enum": ["ETH"] }
                                             },
                                             "required": ["amount", "currency"],
@@ -2495,7 +2514,7 @@
                                           "premium": {
                                             "type": "object",
                                             "properties": {
-                                              "amount": { "type": "string", "pattern": "^d+$" },
+                                              "amount": { "type": "string", "pattern": "^\\d+$" },
                                               "currency": { "type": "string", "enum": ["ETH"] }
                                             },
                                             "required": ["amount", "currency"],
@@ -2504,7 +2523,7 @@
                                           "total": {
                                             "type": "object",
                                             "properties": {
-                                              "amount": { "type": "string", "pattern": "^d+$" },
+                                              "amount": { "type": "string", "pattern": "^\\d+$" },
                                               "currency": { "type": "string", "enum": ["ETH"] }
                                             },
                                             "required": ["amount", "currency"],
@@ -2702,7 +2721,26 @@
               }
             }
           },
-          "500": { "description": "Internal server error" }
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "responseCode": { "type": "string", "enum": ["error"] },
+                    "error": {
+                      "type": "object",
+                      "properties": { "message": { "type": "string" }, "details": {} },
+                      "required": ["message"]
+                    }
+                  },
+                  "required": ["responseCode", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
         }
       }
     },
