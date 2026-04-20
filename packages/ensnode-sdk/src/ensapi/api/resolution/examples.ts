@@ -1,3 +1,10 @@
+import type { ResolverRecordsSelection } from "../../../resolution";
+import type {
+  ResolvePrimaryNameResponse,
+  ResolvePrimaryNamesResponse,
+  ResolveRecordsResponse,
+} from "./types";
+
 /**
  * Example values for {@link ResolveRecordsResponse}, for use in OpenAPI documentation.
  */
@@ -10,7 +17,7 @@ export const resolveRecordsResponseExample = {
   },
   accelerationRequested: false,
   accelerationAttempted: false,
-};
+} satisfies ResolveRecordsResponse<ResolverRecordsSelection>;
 
 /**
  * Example values for {@link ResolvePrimaryNameResponse}, for use in OpenAPI documentation.
@@ -19,7 +26,7 @@ export const resolvePrimaryNameResponseExample = {
   name: "jesse.base.eth",
   accelerationRequested: false,
   accelerationAttempted: false,
-};
+} satisfies ResolvePrimaryNameResponse;
 
 /**
  * Example values for {@link ResolvePrimaryNamesResponse}, for use in OpenAPI documentation.
@@ -35,4 +42,4 @@ export const resolvePrimaryNamesResponseExample = {
   },
   accelerationRequested: false,
   accelerationAttempted: false,
-};
+} satisfies ResolvePrimaryNamesResponse;
