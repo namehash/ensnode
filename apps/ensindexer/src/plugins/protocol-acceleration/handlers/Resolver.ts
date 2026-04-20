@@ -11,8 +11,12 @@ import {
   ensureResolver,
   ensureResolverRecords,
   handleResolverAddressRecordUpdate,
+  handleResolverContenthashUpdate,
+  handleResolverDnszonehashUpdate,
   handleResolverNameUpdate,
+  handleResolverPubkeyUpdate,
   handleResolverTextRecordUpdate,
+  handleResolverVersionChange,
   makeResolverRecordsCompositeKey,
 } from "@/lib/protocol-acceleration/resolver-db-helpers";
 
@@ -180,6 +184,65 @@ export default function () {
       await ensureResolverRecords(context, resolverRecordsKey);
 
       await handleResolverTextRecordUpdate(context, resolverRecordsKey, key, null);
+    },
+  );
+
+  // NOTE: ABIChanged and InterfaceChanged are intentionally NOT registered.
+  // - ABIChanged event omits data (would require a follow-up readContract per event).
+  // - InterfaceChanged has an ERC-165 fallback that cannot be replicated offline.
+  // Both remain selectable via the hybrid RPC tail in the Resolution API.
+
+  addOnchainEventListener(
+    namespaceContract(pluginName, "Resolver:ContenthashChanged"),
+    async ({ context, event }) => {
+      const resolver = getThisAccountId(context, event);
+      await ensureResolver(context, resolver);
+
+      const resolverRecordsKey = makeResolverRecordsCompositeKey(resolver, event);
+      await ensureResolverRecords(context, resolverRecordsKey);
+
+      await handleResolverContenthashUpdate(context, resolverRecordsKey, event.args.hash);
+    },
+  );
+
+  addOnchainEventListener(
+    namespaceContract(pluginName, "Resolver:PubkeyChanged"),
+    async ({ context, event }) => {
+      const { x, y } = event.args;
+
+      const resolver = getThisAccountId(context, event);
+      await ensureResolver(context, resolver);
+
+      const resolverRecordsKey = makeResolverRecordsCompositeKey(resolver, event);
+      await ensureResolverRecords(context, resolverRecordsKey);
+
+      await handleResolverPubkeyUpdate(context, resolverRecordsKey, x, y);
+    },
+  );
+
+  addOnchainEventListener(
+    namespaceContract(pluginName, "Resolver:DNSZonehashChanged"),
+    async ({ context, event }) => {
+      const resolver = getThisAccountId(context, event);
+      await ensureResolver(context, resolver);
+
+      const resolverRecordsKey = makeResolverRecordsCompositeKey(resolver, event);
+      await ensureResolverRecords(context, resolverRecordsKey);
+
+      await handleResolverDnszonehashUpdate(context, resolverRecordsKey, event.args.zonehash);
+    },
+  );
+
+  addOnchainEventListener(
+    namespaceContract(pluginName, "Resolver:VersionChanged"),
+    async ({ context, event }) => {
+      const resolver = getThisAccountId(context, event);
+      await ensureResolver(context, resolver);
+
+      const resolverRecordsKey = makeResolverRecordsCompositeKey(resolver, event);
+      await ensureResolverRecords(context, resolverRecordsKey);
+
+      await handleResolverVersionChange(context, resolverRecordsKey, event.args.newVersion);
     },
   );
 }

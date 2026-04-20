@@ -193,6 +193,8 @@ function safeStringifyDrizzleSchema(schema: Record<string, unknown>): string {
   const seen = new WeakSet();
 
   return JSON.stringify(schema, (_key, value) => {
+    if (typeof value === "bigint") return `${value}n`;
+
     if (typeof value === "object" && value !== null) {
       if (seen.has(value)) return "[circular]";
       seen.add(value);

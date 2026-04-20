@@ -8,6 +8,7 @@ import type {
   DomainId,
   InterpretedName,
   Node,
+  RecordVersion,
   ResolverId,
   ResolverRecordsId,
 } from "enssdk";
@@ -131,6 +132,29 @@ export const resolverRecords = onchainTable(
      * If present, the value of this field is guaranteed to be a non-empty {@link InterpretedName}.
      */
     name: t.text().$type<InterpretedName>(),
+
+    /**
+     * ENSIP-7 contenthash raw bytes or null if not set.
+     */
+    contenthash: t.hex(),
+
+    /**
+     * PubkeyResolver (x, y) pair, or null if not set.
+     *
+     * Invariant: both null together, or both set together.
+     */
+    pubkeyX: t.hex(),
+    pubkeyY: t.hex(),
+
+    /**
+     * IDNSZoneResolver zonehash or null if not set.
+     */
+    dnszonehash: t.hex(),
+
+    /**
+     * IVersionableResolver version, defaulting to 0.
+     */
+    version: t.bigint().notNull().default(0n).$type<RecordVersion>(),
   }),
   (t) => ({
     byId: uniqueIndex().on(t.chainId, t.address, t.node),

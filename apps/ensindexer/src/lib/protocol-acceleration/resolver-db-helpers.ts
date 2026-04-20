@@ -1,16 +1,22 @@
+import { and, eq } from "drizzle-orm";
 import {
   type AccountId,
   type Address,
   type CoinType,
+  type Hex,
   type LiteralName,
   makeResolverId,
   makeResolverRecordsId,
   type Node,
+  type RecordVersion,
 } from "enssdk";
 
 import {
   interpretAddressRecordValue,
+  interpretContenthashValue,
+  interpretDnszonehashValue,
   interpretNameRecordValue,
+  interpretPubkeyValue,
   interpretTextRecordKey,
   interpretTextRecordValue,
 } from "@ensnode/ensnode-sdk/internal";
@@ -158,4 +164,107 @@ export async function handleResolverTextRecordUpdate(
       .values({ ...id, value: interpretedValue })
       .onConflictDoUpdate({ value: interpretedValue });
   }
+}
+
+/**
+ * Updates the `contenthash` record value for the ResolverRecords described by `resolverRecordsKey`.
+ */
+export async function handleResolverContenthashUpdate(
+  context: IndexingEngineContext,
+  resolverRecordsKey: ResolverRecordsCompositeKey,
+  rawHash: Hex,
+) {
+  const id = makeResolverRecordsId(
+    { chainId: resolverRecordsKey.chainId, address: resolverRecordsKey.address },
+    resolverRecordsKey.node,
+  );
+
+  await context.ensDb
+    .update(ensIndexerSchema.resolverRecords, { id })
+    .set({ contenthash: interpretContenthashValue(rawHash) });
+}
+
+/**
+ * Updates the PubkeyResolver (x, y) pair for the ResolverRecords described by `resolverRecordsKey`.
+ */
+export async function handleResolverPubkeyUpdate(
+  context: IndexingEngineContext,
+  resolverRecordsKey: ResolverRecordsCompositeKey,
+  x: Hex,
+  y: Hex,
+) {
+  const id = makeResolverRecordsId(
+    { chainId: resolverRecordsKey.chainId, address: resolverRecordsKey.address },
+    resolverRecordsKey.node,
+  );
+
+  const pubkey = interpretPubkeyValue(x, y);
+
+  await context.ensDb
+    .update(ensIndexerSchema.resolverRecords, { id })
+    .set({ pubkeyX: pubkey?.x ?? null, pubkeyY: pubkey?.y ?? null });
+}
+
+/**
+ * Updates the IDNSZoneResolver `zonehash` record value for the ResolverRecords described
+ * by `resolverRecordsKey`.
+ */
+export async function handleResolverDnszonehashUpdate(
+  context: IndexingEngineContext,
+  resolverRecordsKey: ResolverRecordsCompositeKey,
+  rawHash: Hex,
+) {
+  const id = makeResolverRecordsId(
+    { chainId: resolverRecordsKey.chainId, address: resolverRecordsKey.address },
+    resolverRecordsKey.node,
+  );
+
+  await context.ensDb
+    .update(ensIndexerSchema.resolverRecords, { id })
+    .set({ dnszonehash: interpretDnszonehashValue(rawHash) });
+}
+
+/**
+ * IVersionableResolver VersionChanged: deletes all child records for (chainId, address, node)
+ * and resets scalar columns.
+ *
+ * Uses raw drizzle via `context.ensDb.sql` to perform a bulk delete — this flushes Ponder's
+ * in-memory cache to Postgres, accepted because VersionChanged is rare.
+ */
+export async function handleResolverVersionChange(
+  context: IndexingEngineContext,
+  resolverRecordsKey: ResolverRecordsCompositeKey,
+  newVersion: RecordVersion,
+) {
+  const { chainId, address, node } = resolverRecordsKey;
+
+  await context.ensDb.sql
+    .delete(ensIndexerSchema.resolverAddressRecord)
+    .where(
+      and(
+        eq(ensIndexerSchema.resolverAddressRecord.chainId, chainId),
+        eq(ensIndexerSchema.resolverAddressRecord.address, address),
+        eq(ensIndexerSchema.resolverAddressRecord.node, node),
+      ),
+    );
+
+  await context.ensDb.sql
+    .delete(ensIndexerSchema.resolverTextRecord)
+    .where(
+      and(
+        eq(ensIndexerSchema.resolverTextRecord.chainId, chainId),
+        eq(ensIndexerSchema.resolverTextRecord.address, address),
+        eq(ensIndexerSchema.resolverTextRecord.node, node),
+      ),
+    );
+
+  const id = makeResolverRecordsId({ chainId, address }, node);
+  await context.ensDb.update(ensIndexerSchema.resolverRecords, { id }).set({
+    name: null,
+    contenthash: null,
+    pubkeyX: null,
+    pubkeyY: null,
+    dnszonehash: null,
+    version: newVersion,
+  });
 }

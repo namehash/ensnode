@@ -1,4 +1,4 @@
-import type { CoinType, Name } from "enssdk";
+import type { Address, CoinType, ContentType, Hex, InterfaceId, Name, RecordVersion } from "enssdk";
 
 import type { ResolverRecordsSelection } from "./resolver-records-selection";
 
@@ -29,6 +29,38 @@ export type ResolverRecordsResponseBase = {
    * Value is null if no record for the specified key is set.
    */
   texts: Record<string, string | null>;
+
+  /**
+   * The ENSIP-7 contenthash record raw bytes, or null if not set.
+   */
+  contenthash: Hex | null;
+
+  /**
+   * The PubkeyResolver (x, y) pair, or null if not set.
+   */
+  pubkey: { x: Hex; y: Hex } | null;
+
+  /**
+   * The first stored ABI matching the requested content-type bitmask, or null if no ABI is set
+   * for any matching content type.
+   */
+  abi: { contentType: ContentType; data: Hex } | null;
+
+  /**
+   * Interface implementers keyed by InterfaceId.
+   * Value is null if no implementer is set for the given InterfaceId.
+   */
+  interfaces: Record<InterfaceId, Address | null>;
+
+  /**
+   * The IDNSZoneResolver zonehash raw bytes, or null if not set.
+   */
+  dnszonehash: Hex | null;
+
+  /**
+   * The IVersionableResolver version, defaulting to 0n.
+   */
+  version: RecordVersion;
 };
 
 /**
@@ -54,12 +86,17 @@ export type ResolverRecordsResponseBase = {
  */
 export type ResolverRecordsResponse<T extends ResolverRecordsSelection = ResolverRecordsSelection> =
   {
-    [K in keyof T as T[K] extends true | any[] ? K : never]: K extends "addresses"
+    [K in keyof T as T[K] extends true | any[] | bigint ? K : never]: K extends "addresses"
       ? Record<
           `${T["addresses"] extends readonly CoinType[] ? T["addresses"][number] : never}`,
           string | null
         >
       : K extends "texts"
         ? Record<T["texts"] extends readonly string[] ? T["texts"][number] : never, string | null>
-        : ResolverRecordsResponseBase[K & keyof ResolverRecordsResponseBase];
+        : K extends "interfaces"
+          ? Record<
+              T["interfaces"] extends readonly InterfaceId[] ? T["interfaces"][number] : never,
+              Address | null
+            >
+          : ResolverRecordsResponseBase[K & keyof ResolverRecordsResponseBase];
   };

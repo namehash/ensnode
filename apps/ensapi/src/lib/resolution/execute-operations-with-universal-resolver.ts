@@ -20,10 +20,8 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { lazy } from "@/lib/lazy";
-import type {
-  ResolveCalls,
-  ResolveCallsAndRawResults,
-} from "@/lib/resolution/resolve-calls-and-results";
+import { interpretOperationWithRawResult } from "@/lib/resolution/execute-operations";
+import { isOperationResolved, type Operations } from "@/lib/resolution/operations";
 
 const getUniversalResolverV1 = lazy(() =>
   getDatasourceContract(config.namespace, DatasourceNames.ENSRoot, "UniversalResolver"),
@@ -34,25 +32,36 @@ const getUniversalResolverV2 = lazy(() =>
 );
 
 /**
- * Execute a set of ResolveCalls for `name` against the UniversalResolver.
+ * Execute a set of Operations for `name` against the UniversalResolver.
+ *
+ * NOTE: this exists just for the ENSv2 bailout, will be removed once forward-resolution is updated
+ * for ENSv2 (and interpretOperationWithRawResult can be un-exported).
  */
-export async function executeResolveCallsWithUniversalResolver<
+export async function executeOperationsWithUniversalResolver<
   SELECTION extends ResolverRecordsSelection,
 >({
   name,
-  calls,
+  operations,
   publicClient,
 }: {
   name: InterpretedName;
-  calls: ResolveCalls<SELECTION>;
+  operations: Operations<SELECTION>;
   publicClient: PublicClient;
-}): Promise<ResolveCallsAndRawResults<SELECTION>> {
+}): Promise<Operations<SELECTION>> {
   // NOTE: automatically multicalled by viem
   return await Promise.all(
-    calls.map(async (call) => {
+    operations.map(async (op) => {
+      if (isOperationResolved(op)) return op;
+
       try {
         const encodedName = bytesToHex(packetToBytes(name)); // DNS-encode `name` for resolve()
-        const encodedMethod = encodeFunctionData({ abi: ResolverABI, ...call });
+        // NOTE: cast through unknown — viem cannot narrow our Operation union back into its
+        // generic EncodeFunctionDataParameters constraint.
+        const encodedMethod = encodeFunctionData({
+          abi: ResolverABI,
+          functionName: op.functionName,
+          args: op.args,
+        } as unknown as Parameters<typeof encodeFunctionData>[0]);
 
         const [value] = await publicClient.readContract({
           abi: UniversalResolverABI,
@@ -63,32 +72,20 @@ export async function executeResolveCallsWithUniversalResolver<
           args: [encodedName, encodedMethod],
         });
 
-        // if resolve() returned empty bytes or reverted, coalece to null
-        if (size(value) === 0) {
-          return { call, result: null, reason: "returned empty response" };
-        }
+        if (size(value) === 0) return interpretOperationWithRawResult(op, null);
 
         // ENSIP-10 — resolve() always returns bytes that need to be decoded
         const results = decodeAbiParameters(
-          getAbiItem({ abi: ResolverABI, name: call.functionName, args: call.args }).outputs,
+          getAbiItem({ abi: ResolverABI, name: op.functionName, args: op.args }).outputs,
           value,
         );
-
-        // NOTE: results is type-guaranteed to have at least 1 result (because each abi item's outputs.length >= 1)
-        const result = results[0];
-
-        return {
-          call,
-          result: result,
-          reason: `.resolve(${call.functionName}, ${call.args})`,
-        };
+        // Some calls (ABI, pubkey) return a tuple; single-output calls unwrap.
+        const raw = results.length === 1 ? results[0] : results;
+        return interpretOperationWithRawResult(op, raw);
       } catch (error) {
-        // in general, reverts are expected behavior
         if (error instanceof ContractFunctionExecutionError) {
-          return { call, result: null, reason: error.shortMessage };
+          return interpretOperationWithRawResult(op, null);
         }
-
-        // otherwise, rethrow
         throw error;
       }
     }),
