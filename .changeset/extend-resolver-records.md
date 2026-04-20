@@ -10,4 +10,4 @@ Resolution API: support `contenthash`, `pubkey`, `abi`, `interfaces`, `dnszoneha
 selection. Protocol acceleration indexes `contenthash`, `pubkey`, `dnszonehash`, and handles
 `VersionChanged` (clears records for the node, bumps version). `ABI` (bitmask query, contract-
 equivalent) and `interface` records are selectable but always resolved via RPC. Adds
-`ContentType` / `InterfaceId` semantic types to `enssdk`.
+`ContentType` / `InterfaceId` / `RecordVersion` semantic types to `enssdk`.
