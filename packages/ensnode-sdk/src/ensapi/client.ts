@@ -191,8 +191,20 @@ export class EnsApiClient {
       throw ClientError.fromErrorResponse(error);
     }
 
-    const data = await response.json();
-    return data as ResolveRecordsResponse<SELECTION>;
+    const data = (await response.json()) as ResolveRecordsResponse<SELECTION>;
+
+    // server serializes bigints as strings to keep the wire plain JSON — coerce back here so
+    // `version` and `abi.contentType` match their SDK `bigint` types.
+    const records = data.records as {
+      version?: unknown;
+      abi?: { contentType: unknown; data: string } | null;
+    };
+    if (typeof records.version === "string") records.version = BigInt(records.version);
+    if (records.abi && typeof records.abi.contentType === "string") {
+      records.abi.contentType = BigInt(records.abi.contentType);
+    }
+
+    return data;
   }
 
   /**

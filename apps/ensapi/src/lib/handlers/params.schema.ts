@@ -3,6 +3,7 @@ import {
   type ContentType,
   DEFAULT_EVM_CHAIN_ID,
   type InterfaceId,
+  isInterfaceId,
   isNormalizedName,
   type Name,
 } from "enssdk";
@@ -71,7 +72,7 @@ const contentTypeBitmask = z
 
 const interfaceId = z
   .string()
-  .regex(/^0x[0-9a-f]{8}$/i, "Must be a 4-byte hex (0x + 8 hex chars)")
+  .refine(isInterfaceId, "Must be a 4-byte hex (0x + 8 hex chars)")
   .transform((val) => val.toLowerCase() as InterfaceId);
 
 const rawSelectionParams = z.object({

@@ -64,9 +64,7 @@ function resolveOperationWithIndex(op: Operation, records: IndexedRecords): Oper
       return {
         ...op,
         result:
-          records?.pubkeyX && records?.pubkeyY
-            ? interpretPubkeyValue(records.pubkeyX, records.pubkeyY)
-            : null,
+          records?.pubkeyX && records?.pubkeyY ? { x: records.pubkeyX, y: records.pubkeyY } : null,
       };
     case "zonehash":
       return { ...op, result: records?.dnszonehash ?? null };
