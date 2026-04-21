@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildEncodedReferrer,
-  decodeEncodedReferrer,
+  decodeReferrer,
   ENCODED_REFERRER_BYTE_LENGTH,
   ENCODED_REFERRER_BYTE_OFFSET,
 } from "./encoded-referrer";
@@ -24,7 +24,7 @@ describe("encoded referrer", () => {
       const input = pad(vitalikEthAddressLowercase);
 
       // act
-      const result = decodeEncodedReferrer(input);
+      const result = decodeReferrer(input);
 
       // assert
       expect(result).toEqual(vitalikEthAddressLowercase);
@@ -37,7 +37,7 @@ describe("encoded referrer", () => {
       const input = concat([initialBytes, vitalikEthAddressLowercase]);
 
       // act
-      const result = decodeEncodedReferrer(input);
+      const result = decodeReferrer(input);
       // & assert
       expect(result).toStrictEqual(zeroAddress);
     });
@@ -47,7 +47,7 @@ describe("encoded referrer", () => {
       const input = pad("0xzzzzzzzzzzzzzzzzzzzz");
 
       // act & assert
-      expect(() => decodeEncodedReferrer(input)).toThrowError(
+      expect(() => decodeReferrer(input)).toThrowError(
         /Decoded referrer value must be a valid EVM address/i,
       );
     });
@@ -55,7 +55,7 @@ describe("encoded referrer", () => {
 
   describe("decoding a non-32-byte value", () => {
     it("throws an error", () => {
-      expect(() => decodeEncodedReferrer("0x")).toThrowError(
+      expect(() => decodeReferrer("0x")).toThrowError(
         /Encoded referrer value must be represented by 32 bytes/i,
       );
     });
@@ -72,13 +72,19 @@ describe("encoded referrer", () => {
         dir: "left",
       });
 
-      const encodedReferrer = buildEncodedReferrer(toNormalizedAddress(address));
+      const encodedReferrer = buildEncodedReferrer(address);
       expect(encodedReferrer).toEqual(expectedEncodedReferrer);
 
       // decoding should operate as expected
       const expectedDecodedReferrer = toNormalizedAddress(address);
-      const decodedReferrer = decodeEncodedReferrer(encodedReferrer);
+      const decodedReferrer = decodeReferrer(encodedReferrer);
       expect(decodedReferrer).toStrictEqual(expectedDecodedReferrer);
     });
+  });
+
+  it("throws an error when building encoded referrer with invalid EVM address", () => {
+    expect(() => buildEncodedReferrer("0xnotavalidaddress" as Address)).toThrowError(
+      /'0xnotavalidaddress' does not represent an EVM Address/i,
+    );
   });
 });

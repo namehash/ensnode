@@ -154,7 +154,9 @@ Check out [`production-editions.json`](https://ensawards.org/production-editions
 
 ## Other Utilities
 
-The package also includes helpers for building referral links.
+The package also includes helpers.
+
+### Building referral links
 
 ```typescript
 import { buildEnsReferralUrl } from "@namehash/ens-referrals";
@@ -165,4 +167,17 @@ const referrerAddress: Address = "0xd8da6bf26964af9d7eed9e03e53415d37aa96045";
 // Build a referrer URL to the official ENS manager app
 const referrerUrl = buildEnsReferralUrl(referrerAddress).toString();
 // https://app.ens.domains/?referrer=0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
+```
+
+### Building encoded referrer
+
+```typescript
+import { buildEncodedReferrer } from "@namehash/ens-referrals";
+import type { Address } from "enssdk";
+
+const referrerAddress: Address = "0xd8da6bf26964af9d7eed9e03e53415d37aa96045";
+
+// Build an encoded referrer value
+const encodedReferrer = buildEncodedReferrer(referrerAddress);
+// 0x000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa96045
 ```
