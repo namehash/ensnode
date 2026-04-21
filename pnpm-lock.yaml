@@ -511,6 +511,9 @@ importers:
       '@ensnode/ponder-sdk':
         specifier: workspace:*
         version: link:../../packages/ponder-sdk
+      '@namehash/ens-referrals':
+        specifier: workspace:*
+        version: link:../../packages/ens-referrals
       '@ponder/client':
         specifier: 'catalog:'
         version: 0.16.6(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/pg@8.16.0)(kysely@0.28.14)(pg@8.16.3)(typescript@5.9.3)
@@ -1165,6 +1168,9 @@ importers:
       '@ensnode/ensnode-sdk':
         specifier: workspace:*
         version: link:../ensnode-sdk
+      '@namehash/ens-referrals':
+        specifier: workspace:*
+        version: link:../ens-referrals
       '@radix-ui/react-avatar':
         specifier: ^1.1.10
         version: 1.1.10(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
