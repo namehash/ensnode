@@ -12,7 +12,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "lint": "biome check --write",
-    "lint:ci": "biome ci"
+    "lint:ci": "biome ci",
+    "generate:openapi": "pnpm --filter ensapi exec tsx --tsconfig tsconfig.json ../../scripts/generate-ensapi-openapi.mts"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.9",
