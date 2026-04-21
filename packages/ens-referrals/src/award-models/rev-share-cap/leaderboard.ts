@@ -47,7 +47,7 @@ export interface ReferrerLeaderboardRevShareCap {
    * @invariant Map entries are ordered by `rank` (ascending).
    * @invariant Map is empty if there are no referrers with 1 or more `totalReferrals`
    *            within the `rules` as of `accurateAsOf`.
-   * @invariant If a fully-lowercase `Address` is not a key in this map then that `Address` had
+   * @invariant If a `NormalizedAddress` is not a key in this map then that `NormalizedAddress` had
    *            0 `totalReferrals`, `totalIncrementalDuration`, and `totalRevenueContribution` within the
    *            `rules` as of `accurateAsOf`.
    * @invariant Each value in this map is guaranteed to have a non-zero

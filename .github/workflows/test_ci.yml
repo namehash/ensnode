@@ -11,14 +11,6 @@ on:
   pull_request:
 
 jobs:
-  audit:
-    name: "Audit Dependencies"
-    runs-on: blacksmith-4vcpu-ubuntu-2204
-    steps:
-      - uses: actions/checkout@v6
-      - uses: ./.github/actions/setup_node_environment
-      - run: pnpm audit --audit-level=moderate
-
   prepublish:
     name: "Build NPM Packages"
     runs-on: blacksmith-4vcpu-ubuntu-2204

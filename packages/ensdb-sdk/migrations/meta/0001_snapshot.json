@@ -1,0 +1,55 @@
+{
+  "id": "7a9206c1-c22e-460d-8314-efa9b4cd64bc",
+  "prevId": "d661dcae-f64d-4ecd-a4da-3d5783e17e2c",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "ensnode.metadata": {
+      "name": "metadata",
+      "schema": "ensnode",
+      "columns": {
+        "ens_indexer_schema_name": {
+          "name": "ens_indexer_schema_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "value": {
+          "name": "value",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "metadata_pkey": {
+          "name": "metadata_pkey",
+          "columns": ["ens_indexer_schema_name", "key"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "views": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

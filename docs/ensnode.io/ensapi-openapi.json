@@ -970,7 +970,7 @@
         "description": "Resolves ENS records for a given name",
         "parameters": [
           { "schema": { "type": "string" }, "required": true, "name": "name", "in": "path" },
-          { "schema": { "type": "string" }, "required": false, "name": "name", "in": "query" },
+          { "schema": { "type": "boolean" }, "required": false, "name": "name", "in": "query" },
           { "schema": { "type": "string" }, "required": false, "name": "addresses", "in": "query" },
           { "schema": { "type": "string" }, "required": false, "name": "texts", "in": "query" },
           {
