@@ -18,9 +18,6 @@ catalogs:
     '@ponder/client':
       specifier: 0.16.6
       version: 0.16.6
-    '@ponder/utils':
-      specifier: 0.2.18
-      version: 0.2.18
     '@testing-library/react':
       specifier: ^16.3.0
       version: 16.3.0
@@ -121,13 +118,13 @@ overrides:
   yauzl@<3.2.1: ^3.2.1
   fast-xml-parser@>=5.0.0 <5.5.7: '>=5.5.7'
   kysely@>=0.26.0 <0.28.14: '>=0.28.14'
-  defu@<=6.1.4: ^6.1.5
   h3@<1.15.9: '>=1.15.9'
   yaml@>=2.0.0 <2.8.3: '>=2.8.3'
   picomatch@<2.3.2: ^2.3.2
   picomatch@>=4.0.0 <4.0.4: '>=4.0.4'
   smol-toml@<1.6.1: '>=1.6.1'
   brace-expansion@>=4.0.0 <5.0.5: '>=5.0.5'
+  defu@<=6.1.4: ^6.1.5
   vite@>=5.0.0 <=6.4.1: ^6.4.2
   axios@<1.15.0: '>=1.15.0'
   follow-redirects@<1.16.0: ^1.16.0
@@ -203,9 +200,6 @@ importers:
       '@namehash/namehash-ui':
         specifier: workspace:*
         version: link:../../packages/namehash-ui
-      '@ponder/utils':
-        specifier: 'catalog:'
-        version: 0.2.18(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))
       '@radix-ui/react-avatar':
         specifier: ^1.1.3
         version: 1.1.10(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -846,14 +840,13 @@ importers:
         version: 7.3.2(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/datasources:
-    dependencies:
-      '@ponder/utils':
-        specifier: 'catalog:'
-        version: 0.2.18(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))
     devDependencies:
       '@ensnode/shared-configs':
         specifier: workspace:*
         version: link:../shared-configs
+      '@ponder/utils':
+        specifier: ^0.2.18
+        version: 0.2.18(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))
       '@types/node':
         specifier: 'catalog:'
         version: 24.10.9
