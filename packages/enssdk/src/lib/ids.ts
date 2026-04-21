@@ -7,7 +7,10 @@ import type {
   DomainId,
   EACResource,
   ENSv1DomainId,
+  ENSv1RegistryId,
+  ENSv1VirtualRegistryId,
   ENSv2DomainId,
+  ENSv2RegistryId,
   LabelHash,
   Node,
   NormalizedAddress,
@@ -24,11 +27,27 @@ import type {
 } from "./types";
 import { AssetNamespaces } from "./types";
 
+export const makeENSv1RegistryId = (accountId: AccountId) =>
+  stringifyAccountId(accountId) as ENSv1RegistryId;
+
+export const makeENSv2RegistryId = (accountId: AccountId) =>
+  stringifyAccountId(accountId) as ENSv2RegistryId;
+
+export const makeENSv1VirtualRegistryId = (accountId: AccountId, node: Node) =>
+  `${makeENSv1RegistryId(accountId)}/${node}` as ENSv1VirtualRegistryId;
+
+/**
+ * Stringifies an {@link AccountId} as a {@link RegistryId} union without narrowing to the
+ * v1 vs. v2 variant. Use when callsite context cannot determine which concrete variant is
+ * appropriate (e.g. client-side cache key reconstruction or polymorphic GraphQL inputs);
+ * prefer {@link makeENSv1RegistryId} or {@link makeENSv2RegistryId} when the variant is known.
+ */
 export const makeRegistryId = (accountId: AccountId) => stringifyAccountId(accountId) as RegistryId;
 
 export const makeResolverId = (contract: AccountId) => stringifyAccountId(contract) as ResolverId;
 
-export const makeENSv1DomainId = (node: Node) => node as ENSv1DomainId;
+export const makeENSv1DomainId = (accountId: AccountId, node: Node) =>
+  `${makeENSv1RegistryId(accountId)}/${node}` as ENSv1DomainId;
 
 export const makeENSv2DomainId = (registry: AccountId, storageId: StorageId) =>
   stringifyAssetId({
