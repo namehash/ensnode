@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { CurrencyIds, parseEth, parseUsdc } from "@ensnode/ensnode-sdk";
 
+import { AdminActionTypes } from "../award-models/rev-share-cap/rules";
 import type { ReferrerEditionMetricsUnrecognized } from "../award-models/shared/edition-metrics";
 import { ReferrerEditionMetricsTypeIds } from "../award-models/shared/edition-metrics";
 import type { ReferralProgramEditionSummaryUnrecognized } from "../award-models/shared/edition-summary";
@@ -451,6 +452,40 @@ describe("makeReferrerEditionMetricsSchema", () => {
     minFinalScoreToQualify: 0,
   };
 
+  const revShareCapReferrerAddress = "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85";
+
+  const revShareCapRules = {
+    awardModel: ReferralProgramAwardModels.RevShareCap,
+    awardPool: parseUsdc("2000"),
+    minBaseRevenueContribution: parseUsdc("10"),
+    baseAnnualRevenueContribution: parseUsdc("5"),
+    maxBaseRevenueShare: 0.5,
+    startTime: 1000000,
+    endTime: 2000000,
+    subregistryId,
+    rulesUrl: "https://ensawards.org/rules",
+    areAwardsDistributed: false,
+  };
+
+  const revShareCapAggregatedMetrics = {
+    grandTotalReferrals: 3,
+    grandTotalIncrementalDuration: 60,
+    grandTotalRevenueContribution: parseEth("300"),
+    awardPoolRemaining: parseUsdc("1800"),
+  };
+
+  const disqualificationAction = {
+    actionType: AdminActionTypes.Disqualification,
+    referrer: revShareCapReferrerAddress,
+    reason: "Self-referral",
+  };
+
+  const warningAction = {
+    actionType: AdminActionTypes.Warning,
+    referrer: revShareCapReferrerAddress,
+    reason: "Suspicious activity",
+  };
+
   it("parses a known pie-split ranked edition metrics correctly", () => {
     const input = {
       awardModel: ReferralProgramAwardModels.PieSplit,
@@ -515,20 +550,9 @@ describe("makeReferrerEditionMetricsSchema", () => {
     const input = {
       awardModel: ReferralProgramAwardModels.RevShareCap,
       type: ReferrerEditionMetricsTypeIds.Ranked,
-      rules: {
-        awardModel: ReferralProgramAwardModels.RevShareCap,
-        awardPool: parseUsdc("2000"),
-        minBaseRevenueContribution: parseUsdc("10"),
-        baseAnnualRevenueContribution: parseUsdc("5"),
-        maxBaseRevenueShare: 0.5,
-        startTime: 1000000,
-        endTime: 2000000,
-        subregistryId,
-        rulesUrl: "https://ensawards.org/rules",
-        areAwardsDistributed: false,
-      },
+      rules: revShareCapRules,
       referrer: {
-        referrer: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
+        referrer: revShareCapReferrerAddress,
         totalReferrals: 3,
         totalIncrementalDuration: 60,
         totalRevenueContribution: parseEth("300"),
@@ -537,15 +561,9 @@ describe("makeReferrerEditionMetricsSchema", () => {
         isQualified: true,
         uncappedAward: parseUsdc("200"),
         cappedAward: parseUsdc("200"),
-        isAdminDisqualified: false,
-        adminDisqualificationReason: null,
+        adminAction: null,
       },
-      aggregatedMetrics: {
-        grandTotalReferrals: 3,
-        grandTotalIncrementalDuration: 60,
-        grandTotalRevenueContribution: parseEth("300"),
-        awardPoolRemaining: parseUsdc("1800"),
-      },
+      aggregatedMetrics: revShareCapAggregatedMetrics,
       status: ReferralProgramEditionStatuses.Active,
       accurateAsOf: 1500000,
     };
@@ -555,6 +573,127 @@ describe("makeReferrerEditionMetricsSchema", () => {
     expect(result.awardModel).toBe(ReferralProgramAwardModels.RevShareCap);
     if (result.awardModel !== ReferralProgramAwardModels.RevShareCap) throw new Error();
     expect(result.type).toBe(ReferrerEditionMetricsTypeIds.Ranked);
+  });
+
+  it("parses rev-share-cap ranked with Disqualification adminAction", () => {
+    const input = {
+      awardModel: ReferralProgramAwardModels.RevShareCap,
+      type: ReferrerEditionMetricsTypeIds.Ranked,
+      rules: { ...revShareCapRules, adminActions: [disqualificationAction] },
+      referrer: {
+        referrer: revShareCapReferrerAddress,
+        totalReferrals: 3,
+        totalIncrementalDuration: 60,
+        totalRevenueContribution: parseEth("300"),
+        totalBaseRevenueContribution: parseUsdc("150"),
+        rank: 3,
+        isQualified: false,
+        uncappedAward: parseUsdc("200"),
+        cappedAward: parseUsdc("0"),
+        adminAction: disqualificationAction,
+      },
+      aggregatedMetrics: { ...revShareCapAggregatedMetrics, awardPoolRemaining: parseUsdc("2000") },
+      status: ReferralProgramEditionStatuses.Active,
+      accurateAsOf: 1500000,
+    };
+
+    const result = schema.parse(input);
+    expect(result.awardModel).toBe(ReferralProgramAwardModels.RevShareCap);
+  });
+
+  it("parses rev-share-cap ranked with Warning adminAction", () => {
+    const input = {
+      awardModel: ReferralProgramAwardModels.RevShareCap,
+      type: ReferrerEditionMetricsTypeIds.Ranked,
+      rules: { ...revShareCapRules, adminActions: [warningAction] },
+      referrer: {
+        referrer: revShareCapReferrerAddress,
+        totalReferrals: 3,
+        totalIncrementalDuration: 60,
+        totalRevenueContribution: parseEth("300"),
+        totalBaseRevenueContribution: parseUsdc("150"),
+        rank: 1,
+        isQualified: true,
+        uncappedAward: parseUsdc("200"),
+        cappedAward: parseUsdc("200"),
+        adminAction: warningAction,
+      },
+      aggregatedMetrics: revShareCapAggregatedMetrics,
+      status: ReferralProgramEditionStatuses.Active,
+      accurateAsOf: 1500000,
+    };
+
+    const result = schema.parse(input);
+    expect(result.awardModel).toBe(ReferralProgramAwardModels.RevShareCap);
+  });
+
+  it("fails when Disqualification adminAction has isQualified=true or non-zero cappedAward", () => {
+    const input = {
+      awardModel: ReferralProgramAwardModels.RevShareCap,
+      type: ReferrerEditionMetricsTypeIds.Ranked,
+      rules: { ...revShareCapRules, adminActions: [disqualificationAction] },
+      referrer: {
+        referrer: revShareCapReferrerAddress,
+        totalReferrals: 3,
+        totalIncrementalDuration: 60,
+        totalRevenueContribution: parseEth("300"),
+        totalBaseRevenueContribution: parseUsdc("150"),
+        rank: 1,
+        isQualified: true,
+        uncappedAward: parseUsdc("200"),
+        cappedAward: parseUsdc("200"),
+        adminAction: disqualificationAction,
+      },
+      aggregatedMetrics: revShareCapAggregatedMetrics,
+      status: ReferralProgramEditionStatuses.Active,
+      accurateAsOf: 1500000,
+    };
+
+    const result = schema.safeParse(input);
+    expect(result.success).toBe(false);
+    expect(result.error?.issues).toContainEqual(
+      expect.objectContaining({
+        path: ["referrer", "adminAction"],
+        message: expect.stringContaining(
+          "isQualified must be false and cappedAward.amount must be 0",
+        ),
+      }),
+    );
+  });
+
+  it("fails when adminAction.referrer does not match outer referrer", () => {
+    const input = {
+      awardModel: ReferralProgramAwardModels.RevShareCap,
+      type: ReferrerEditionMetricsTypeIds.Ranked,
+      rules: { ...revShareCapRules, adminActions: [warningAction] },
+      referrer: {
+        referrer: revShareCapReferrerAddress,
+        totalReferrals: 3,
+        totalIncrementalDuration: 60,
+        totalRevenueContribution: parseEth("300"),
+        totalBaseRevenueContribution: parseUsdc("150"),
+        rank: 1,
+        isQualified: true,
+        uncappedAward: parseUsdc("200"),
+        cappedAward: parseUsdc("200"),
+        adminAction: {
+          ...warningAction,
+          referrer: "0x0000000000000000000000000000000000000001",
+        },
+      },
+      aggregatedMetrics: revShareCapAggregatedMetrics,
+      status: ReferralProgramEditionStatuses.Active,
+      accurateAsOf: 1500000,
+    };
+
+    const result = schema.safeParse(input);
+    expect(result.success).toBe(false);
+    expect(result.error?.issues).toContainEqual(
+      expect.objectContaining({
+        path: ["referrer", "adminAction", "referrer"],
+        message: expect.stringContaining("adminAction.referrer must match"),
+      }),
+    );
   });
 
   it("fails when a known awardModel has invalid fields", () => {

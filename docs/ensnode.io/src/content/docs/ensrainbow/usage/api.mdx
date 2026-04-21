@@ -13,7 +13,7 @@ sidebar:
 | `GET /health` | Liveness probe for orchestration | `{ status: "ok" }` |
 | `GET /v1/heal/{labelhash}` | Heal a single labelhash | `HealSuccess`, `HealError` |
 | `GET /v1/labels/count` | Current healable label count | `CountSuccess`, `CountServerError` |
-| `GET /v1/version` | Server & database schema info plus label set details | `VersionInfo` |
+| `GET /v1/config` | Public service config (version, label set, records count) | `EnsRainbowPublicConfig` |
 
 :::tip[Deterministic Results]
 Pin `labelSetVersion` in your client if you need **deterministic results** across time. See the [Label Sets & Versioning guide](/ensrainbow/concepts/label-sets-and-versioning/) for details.
@@ -148,29 +148,28 @@ Success Response:
 }
 ```
 
-## Get Version Information
+## Get Public Config
 
 ```bash
-curl https://api.ensrainbow.io/v1/version
+curl https://api.ensrainbow.io/v1/config
 ```
 
 Success Response:
 
 ```json
 {
-  "status": "success",
   "version": "0.1.0",
-  "dbSchemaVersion": 3,
   "labelSet": {
     "labelSetId": "subgraph",
     "highestLabelSetVersion": 0
-  }
+  },
+  "recordsCount": 133856894
 }
 ```
 
 The response contains:
 - `version`: The current version of ENSRainbow
-- `dbSchemaVersion`: The current schema version of the database
 - `labelSet`: The label set of the loaded database
   - `labelSetId`: The label set ID of the loaded database
   - `highestLabelSetVersion`: The highest label set version available in the database
+- `recordsCount`: The total count of labels that can be healed by the ENSRainbow instance
