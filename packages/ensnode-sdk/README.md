@@ -155,7 +155,7 @@ console.log(names);
 
 ##### `indexingStatus()`
 
-Fetches the ENSNode's multichain indexing status.
+Fetches the ENSNode's omnichain indexing status.
 
 - Returns: `IndexingStatusResponse` - The indexing status data for all indexed chains
 - Throws: Error if the request fails or the ENSNode API returns an error response
@@ -163,7 +163,14 @@ Fetches the ENSNode's multichain indexing status.
 ```ts
 // Get current indexing status
 const indexingStatusResponse = await client.indexingStatus();
-console.log(indexingStatusResponse); // Includes indexing status for all indexed chains
+
+if (indexingStatusResponse.responseCode === EnsApiIndexingStatusResponseCodes.Ok) {
+  const { realtimeProjection, stackInfo } = indexingStatusResponse;
+  console.log("RealtimeIndexingStatusProjection:", realtimeProjection);
+  console.log("EnsNodeStackInfo:", stackInfo);
+} else {
+  console.error("Error while fetching Indexing Status");
+}
 ```
 
 ### Configuration
