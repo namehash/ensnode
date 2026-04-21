@@ -339,9 +339,7 @@ export const makeReferralProgramEditionConfigSetArraySchema = (
   return z.array(looseItemSchema).transform((items, ctx): ReferralProgramEditionConfig[] => {
     const result: ReferralProgramEditionConfig[] = [];
 
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
-
+    for (const [i, item] of items.entries()) {
       if (knownAwardModels.includes(item.rules.awardModel)) {
         // Known award model — fully validate.
         const parsed = configSchema.safeParse(item);
