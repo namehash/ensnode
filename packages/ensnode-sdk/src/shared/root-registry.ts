@@ -1,4 +1,4 @@
-import { type AccountId, makeRegistryId } from "enssdk";
+import { type AccountId, makeENSv1RegistryId, makeENSv2RegistryId } from "enssdk";
 
 import { DatasourceNames, type ENSNamespaceId } from "@ensnode/datasources";
 import {
@@ -16,6 +16,29 @@ import {
  */
 export const getENSv1Registry = (namespace: ENSNamespaceId) =>
   getDatasourceContract(namespace, DatasourceNames.ENSRoot, "ENSv1Registry");
+
+/**
+ * Gets the ENSv1RegistryId representing the ENSv1 Root Registry in the selected `namespace`.
+ */
+export const getENSv1RootRegistryId = (namespace: ENSNamespaceId) =>
+  makeENSv1RegistryId(getENSv1Registry(namespace));
+
+/**
+ * Gets the AccountId representing the ENSv1 Registry in the selected `namespace` if defined,
+ * otherwise `undefined`.
+ */
+export const maybeGetENSv1Registry = (namespace: ENSNamespaceId) =>
+  maybeGetDatasourceContract(namespace, DatasourceNames.ENSRoot, "ENSv1Registry");
+
+/**
+ * Gets the ENSv1RegistryId representing the ENSv1 Root Registry in the selected `namespace` if
+ * defined, otherwise `undefined`.
+ */
+export const maybeGetENSv1RootRegistryId = (namespace: ENSNamespaceId) => {
+  const root = maybeGetENSv1Registry(namespace);
+  if (!root) return undefined;
+  return makeENSv1RegistryId(root);
+};
 
 /**
  * Determines whether `contract` is the ENSv1 Registry in `namespace`.
@@ -41,7 +64,7 @@ export const getENSv2RootRegistry = (namespace: ENSNamespaceId) =>
  * @throws if the ENSv2Root Datasource or the RootRegistry contract are not defined
  */
 export const getENSv2RootRegistryId = (namespace: ENSNamespaceId) =>
-  makeRegistryId(getENSv2RootRegistry(namespace));
+  makeENSv2RegistryId(getENSv2RootRegistry(namespace));
 
 /**
  * Determines whether `contract` is the ENSv2 Root Registry in `namespace`.
@@ -69,5 +92,5 @@ export const maybeGetENSv2RootRegistry = (namespace: ENSNamespaceId) =>
 export const maybeGetENSv2RootRegistryId = (namespace: ENSNamespaceId) => {
   const root = maybeGetENSv2RootRegistry(namespace);
   if (!root) return undefined;
-  return makeRegistryId(root);
+  return makeENSv2RegistryId(root);
 };
