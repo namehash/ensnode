@@ -1,3 +1,4 @@
+import { ZERO_ENCODED_REFERRER } from "@namehash/ens-referrals";
 import type { Address, DefaultableChainId, UnixTimestamp } from "enssdk";
 import { Info as InfoIcon, CircleQuestionMark as QuestionmarkIcon } from "lucide-react";
 import { memo, type PropsWithChildren, type ReactNode } from "react";
@@ -12,7 +13,6 @@ import {
   buildUnresolvedIdentity,
   isRegistrarActionReferralAvailable,
   RegistrarActionTypes,
-  ZERO_ENCODED_REFERRER,
 } from "@ensnode/ensnode-sdk";
 
 import { useIsMobile } from "../../hooks/useIsMobile";
