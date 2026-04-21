@@ -89,7 +89,7 @@ export type ResolverRecordsResponseBase = {
  */
 export type ResolverRecordsResponse<T extends ResolverRecordsSelection = ResolverRecordsSelection> =
   {
-    [K in keyof T as T[K] extends true | any[] | bigint ? K : never]: K extends "addresses"
+    [K in keyof T as T[K] extends true | readonly any[] | bigint ? K : never]: K extends "addresses"
       ? Record<
           `${T["addresses"] extends readonly CoinType[] ? T["addresses"][number] : never}`,
           string | null
