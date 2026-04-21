@@ -1,16 +1,19 @@
-import type { SerializedEnsApiPublicConfig } from "../../ensapi";
 import { serializeEnsApiPublicConfig } from "../../ensapi/config/serialize";
-import { serializeEnsIndexerPublicConfig } from "../../ensindexer";
+import type { SerializedEnsApiPublicConfig } from "../../ensapi/config/serialized-types";
+import type { SerializedEnsDbPublicConfig } from "../../ensdb/serialize/config";
+import { serializeEnsIndexerPublicConfig } from "../../ensindexer/config/serialize";
 import type { SerializedEnsIndexerPublicConfig } from "../../ensindexer/config/serialized-types";
+import type { SerializedEnsRainbowPublicConfig } from "../../ensrainbow/serialize/config";
 import type { EnsNodeStackInfo } from "../ensnode-stack-info";
 
 /**
  * Serialized representation of {@link EnsNodeStackInfo}.
  */
-export interface SerializedEnsNodeStackInfo
-  extends Omit<EnsNodeStackInfo, "ensApi" | "ensIndexer"> {
+export interface SerializedEnsNodeStackInfo {
   ensApi: SerializedEnsApiPublicConfig;
+  ensDb: SerializedEnsDbPublicConfig;
   ensIndexer: SerializedEnsIndexerPublicConfig;
+  ensRainbow?: SerializedEnsRainbowPublicConfig;
 }
 
 /**
