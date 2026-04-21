@@ -40,12 +40,12 @@ pnpm install
 ## Running ENSNode
 
 :::note
-ENSNode is a suite of services, and some depend on others. Refer to the `docker-compose.yml` at the root of the monorepo for a full spec on the relationship between services.
+ENSNode is a suite of services, and some depend on others. Refer to the `docker/docker-compose.yml` in the docker directory for a full spec on the relationship between services.
 
 <LinkCard
   title="View docker-compose.yml on GitHub"
   description="See the Docker Compose configuration file defining service relationships"
-  href="https://github.com/namehash/ensnode/blob/main/docker-compose.yml"
+  href="https://github.com/namehash/ensnode/blob/main/docker/docker-compose.yml"
   target="_blank"
 />
 :::
@@ -132,32 +132,34 @@ Before you can use Docker Compose, ensure you have the following installed on yo
 
 ### Building the Docker Images
 
-Before running `docker compose` the images must be build with the latest changes: see the [Building Docker Images](/ensnode/contributing/building) guide.
+Before running `docker compose` the images must be built with the latest changes: see the [Building Docker Images](/ensnode/contributing/building) guide.
 
 If you make changes in the application code and wish to run those updates, you must build the relevant Docker container again.
 
 ### Running the Applications
 
-Run the built images with:
+Run the base stack with:
 
 ```bash
-docker compose up -d
+docker compose -f docker/docker-compose.yml up -d
 ```
 
 - **ENSIndexer**: Available at [http://localhost:42069](http://localhost:42069)
-- **ENSApi**: Available at [http://localhost:42069](http://localhost:4334)
+- **ENSApi**: Available at [http://localhost:4334](http://localhost:4334)
 - **ENSRainbow**: Available at [http://localhost:3223](http://localhost:3223)
 - **ENSAdmin**: Available at [http://localhost:4173](http://localhost:4173)
 - **PostgreSQL**: Available on port `5432`
 
+For more compose files (devnet, CI), configuration options, and all available commands, see the [Deploying with Docker](/ensnode/deploying/docker) guide and [`docker/README.md`](https://github.com/namehash/ensnode/blob/main/docker/README.md).
+
 ### Stopping the Applications
 
-To stop the running applications, you can press `Ctrl + C` in the terminal where Docker Compose is running. If you want to remove the containers and networks created by Docker Compose, you can run:
+To stop the running applications, you can press `Ctrl + C` in the terminal where Docker Compose is running. To remove the containers and networks:
 
 ```bash
-docker compose down
+docker compose -f docker/docker-compose.yml down
 ```
 
-:::note[Postgres Volume in this `docker-compose.yml`]
-`docker compoe down` will _not_ delete the Postgres data volume defined here, as it is a **named** volume. To fully delete the Postgres data volume and start from scratch, use `docker compose down -v`.
+:::note[Postgres Volume]
+`docker compose down` will _not_ delete the Postgres data volume, as it is a **named** volume. To fully delete it and start from scratch, use `docker compose -f docker/docker-compose.yml down -v`.
 :::

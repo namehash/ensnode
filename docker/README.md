@@ -58,7 +58,7 @@ docker compose -f docker/docker-compose.devnet.yml up -d devnet postgres ensrain
 # Start only devnet (quick local EVM node, also shows data information about devnet)
 docker compose -f docker/docker-compose.devnet.yml up devnet
 # or
-pnmp devnet
+pnpm devnet
 
 # Stop
 docker compose -f docker/docker-compose.devnet.yml down

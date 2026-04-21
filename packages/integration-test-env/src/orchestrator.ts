@@ -12,7 +12,7 @@
  *   5. Run `pnpm test:integration` at the monorepo root
  *
  * Design decisions:
- *   - Postgres and devnet are started from the root docker-compose.yml via
+ *   - Postgres and devnet are started from docker/docker-compose.orchestrator.yml via
  *     testcontainers DockerComposeEnvironment, ensuring the orchestrator always
  *     uses the same images and configuration defined there.
  *   - execa for child process management — automatic cleanup on parent exit,

@@ -10,7 +10,7 @@ The current devnet image is pinned to:
 ghcr.io/ensdomains/contracts-v2:main-e8696c6
 ```
 
-via the `docker-compose.yml` at the monorepo root.
+via the `docker/docker-compose.orchestrator.yml` file.
 
 ## How It Works
 

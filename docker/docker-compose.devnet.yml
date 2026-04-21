@@ -19,7 +19,7 @@ services:
       ensrainbow:
         condition: service_healthy
       postgres:
-        condition: service_started
+        condition: service_healthy
       devnet:
         condition: service_healthy
 
@@ -69,7 +69,11 @@ services:
 volumes:
   # Docker Compose requires volumes used by services to be declared in each
   # compose file that references them — they cannot be inherited via `extends`.
+  # Explicit `name:` prevents collision with the base stack's volumes when both
+  # are run from the same directory (same project name).
   postgres_data:
+    name: ensnode_devnet_postgres_data
     driver: local
   ensrainbow_data:
+    name: ensnode_devnet_ensrainbow_data
     driver: local

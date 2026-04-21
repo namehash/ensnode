@@ -6,8 +6,6 @@ sidebar:
 ---
 
 import { LinkCard } from '@astrojs/starlight/components';
-import { Code } from '@astrojs/starlight/components';
-import dockercompose from '@workspace/docker-compose.yml?raw';
 
 The Docker images are the easiest way to run or deploy the ENSNode suite of services, both locally and in the cloud.
 
@@ -20,16 +18,37 @@ ENSIndexer runs `CREATE EXTENSION IF NOT EXISTS pg_trgm` at startup to back part
   href="/ensindexer/usage/configuration"
 />
 
-Below is a sample [Docker Compose](https://docs.docker.com/compose/) file linking the various services together.
+ENSNode provides several [Docker Compose](https://docs.docker.com/compose/) files for different use cases:
 
-<Code code={dockercompose} lang="yaml" title="docker-compose.yml" />
+- **`docker/docker-compose.yml`** — base stack (mainnet by default): ensindexer, ensapi, ensrainbow, ensadmin, postgres
+- **`docker/docker-compose.devnet.yml`** — full stack against local devnet (ens-test-env), no `.env.local` files required
+
+Before running the base stack, configure the required environment files:
+
+```bash
+cp apps/ensindexer/.env.local.example apps/ensindexer/.env.local
+cp apps/ensapi/.env.local.example apps/ensapi/.env.local
+cp apps/ensrainbow/.env.local.example apps/ensrainbow/.env.local
+```
+
+Edit each `.env.local` to set your RPC URLs and any other required values, then run:
+
+```bash
+docker compose -f docker/docker-compose.yml up -d
+```
 
 <LinkCard
-  title="Example Docker Compose"
-  description="View the complete Docker Compose example on GitHub."
-  href="https://github.com/namehash/ensnode/tree/main/docker-compose.yml"
+  title="Docker Compose usage and commands"
+  description="See all use cases, commands, and configuration options in docker/README.md on GitHub."
+  href="https://github.com/namehash/ensnode/blob/main/docker/README.md"
+/>
+
+<LinkCard
+  title="View Docker Compose files on GitHub"
+  description="Browse the full docker/ directory including service definitions."
+  href="https://github.com/namehash/ensnode/blob/main/docker"
 />
 
 :::note[Port Mappings]
-Note that while this example `docker-compose.yml` exposes each container's port to the host machine, useful for development, you may only wish to expose ENSApi's `4334` and avoid exposing services like ENSRainbow, ENSAdmin, and your Postgres to the wider internet.
+Note that while the default `docker-compose.yml` exposes each container's port to the host machine (useful for development), you may only wish to expose ENSApi's `4334` and avoid exposing services like ENSRainbow, ENSAdmin, and Postgres to the wider internet.
 :::

@@ -16,4 +16,4 @@ services:
       start_interval: 1s
     depends_on:
       postgres:
-        condition: service_started
+        condition: service_healthy

@@ -18,4 +18,4 @@ services:
       ensrainbow:
         condition: service_healthy
       postgres:
-        condition: service_started
+        condition: service_healthy

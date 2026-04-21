@@ -11,6 +11,9 @@ services:
     extends:
       file: services/postgres.yml
       service: postgres
+    env_file:
+      - path: ./.env.docker-compose
+        required: true
 
 volumes:
   # Docker Compose requires volumes used by services to be declared in each
