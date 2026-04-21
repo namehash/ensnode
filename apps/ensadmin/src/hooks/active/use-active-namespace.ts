@@ -1,4 +1,4 @@
-import { useActiveENSNodeConfig } from "./use-active-ensnode-config";
+import { useActiveEnsNodeStackInfo } from "./use-active-ensnode-stack-info";
 
 /**
  * Hook to get the namespace from the currently active ENSNode configuration synchronously.
@@ -13,4 +13,4 @@ import { useActiveENSNodeConfig } from "./use-active-ensnode-config";
  * @returns The namespace from the active ENSNode configuration
  * @throws Error if no active ENSNode Config is available
  */
-export const useActiveNamespace = () => useActiveENSNodeConfig().ensIndexer.namespace;
+export const useActiveNamespace = () => useActiveEnsNodeStackInfo().ensIndexer.namespace;
