@@ -75,9 +75,9 @@ export default function () {
 
       const labelHash = interpretTokenIdAsLabelHash(tokenId);
       const registrar = getThisAccountId(context, event);
-      const { node: managedNode } = getManagedName(registrar);
+      const { node: managedNode, registry } = getManagedName(registrar);
       const node = makeSubdomainNode(labelHash, managedNode);
-      const domainId = makeENSv1DomainId(node);
+      const domainId = makeENSv1DomainId(registry, node);
 
       const registration = await getLatestRegistration(context, domainId);
       if (!registration) {
@@ -85,7 +85,7 @@ export default function () {
       }
 
       // materialize Domain owner if exists
-      const domain = await context.ensDb.find(ensIndexerSchema.v1Domain, { id: domainId });
+      const domain = await context.ensDb.find(ensIndexerSchema.domain, { id: domainId });
       if (domain) await materializeENSv1DomainEffectiveOwner(context, domainId, to);
 
       // push event to domain history
@@ -109,10 +109,10 @@ export default function () {
 
     const labelHash = interpretTokenIdAsLabelHash(tokenId);
     const registrar = getThisAccountId(context, event);
-    const { node: managedNode } = getManagedName(registrar);
+    const { node: managedNode, registry } = getManagedName(registrar);
     const node = makeSubdomainNode(labelHash, managedNode);
 
-    const domainId = makeENSv1DomainId(node);
+    const domainId = makeENSv1DomainId(registry, node);
     const registration = await getLatestRegistration(context, domainId);
     const isFullyExpired =
       registration && isRegistrationFullyExpired(registration, event.block.timestamp);
@@ -140,7 +140,7 @@ export default function () {
     });
 
     // materialize Domain owner if exists
-    const domain = await context.ensDb.find(ensIndexerSchema.v1Domain, { id: domainId });
+    const domain = await context.ensDb.find(ensIndexerSchema.domain, { id: domainId });
     if (domain) await materializeENSv1DomainEffectiveOwner(context, domainId, owner);
 
     // push event to domain history
@@ -169,9 +169,9 @@ export default function () {
 
       const labelHash = interpretTokenIdAsLabelHash(tokenId);
       const registrar = getThisAccountId(context, event);
-      const { node: managedNode } = getManagedName(registrar);
+      const { node: managedNode, registry } = getManagedName(registrar);
       const node = makeSubdomainNode(labelHash, managedNode);
-      const domainId = makeENSv1DomainId(node);
+      const domainId = makeENSv1DomainId(registry, node);
       const registration = await getLatestRegistration(context, domainId);
 
       // Invariant: There must be a Registration to renew.

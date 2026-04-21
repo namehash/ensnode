@@ -5,9 +5,12 @@ import {
   ENS_ROOT_NODE,
   type LabelHash,
   makeENSv1DomainId,
+  makeENSv1RegistryId,
+  makeENSv1VirtualRegistryId,
   makeSubdomainNode,
   type Node,
   type NormalizedAddress,
+  type RegistryId,
 } from "enssdk";
 import { isAddressEqual, zeroAddress } from "viem";
 
@@ -16,12 +19,14 @@ import { getENSRootChainId, interpretAddress, PluginName } from "@ensnode/ensnod
 import { materializeENSv1DomainEffectiveOwner } from "@/lib/ensv2/domain-db-helpers";
 import { ensureDomainEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel, ensureUnknownLabel } from "@/lib/ensv2/label-db-helpers";
+import { getThisAccountId } from "@/lib/get-this-account-id";
 import { healAddrReverseSubnameLabel } from "@/lib/heal-addr-reverse-subname-label";
 import {
   addOnchainEventListener,
   ensIndexerSchema,
   type IndexingEngineContext,
 } from "@/lib/indexing-engines/ponder";
+import { getManagedName } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import { nodeIsMigrated } from "@/lib/protocol-acceleration/registry-migration-status";
@@ -54,9 +59,53 @@ export default function () {
     // if someone mints a node to the zero address, nothing happens in the Registry, so no-op
     if (isAddressEqual(zeroAddress, owner)) return;
 
+    // Canonicalize ENSv1Registry vs. ENSv1RegistryOld via `getManagedName(...).registry`. Both
+    // Registries share a Managed Name (the ENS Root for mainnet) and write into the same
+    // namegraph; canonicalizing here ensures Old events that pass `nodeIsMigrated` don't fragment
+    // domains across two Registry IDs.
+    const { node: managedNode, registry } = getManagedName(getThisAccountId(context, event));
+
     const node = makeSubdomainNode(labelHash, parentNode);
-    const domainId = makeENSv1DomainId(node);
-    const parentId = makeENSv1DomainId(parentNode);
+    const domainId = makeENSv1DomainId(registry, node);
+    const parentDomainId = makeENSv1DomainId(registry, parentNode);
+
+    let parentRegistryId: RegistryId;
+
+    // if the parent is the Managed Name, the parent registry is the Manage Name's Registry
+    if (parentNode === managedNode) {
+      // parent is concrete
+      parentRegistryId = makeENSv1RegistryId(registry);
+
+      // ensure (concrete) ENSv1Registry
+      await context.ensDb
+        .insert(ensIndexerSchema.registry)
+        .values({ id: parentRegistryId, type: "ENSv1Registry", ...registry })
+        .onConflictDoNothing();
+
+      // NOTE: we explicitly do not set the Canonical Domain for (concrete) ENSv1Registries — this
+      // traversal logic is handled by the Bridged Resolver concept during resolution
+    } else {
+      // parent registry is virtual
+      parentRegistryId = makeENSv1VirtualRegistryId(registry, parentNode);
+
+      // ensure ENSv1VirtualRegistry for parent
+      await context.ensDb
+        .insert(ensIndexerSchema.registry)
+        .values({
+          id: parentRegistryId,
+          type: "ENSv1VirtualRegistry",
+          chainId: registry.chainId,
+          address: registry.address,
+          node: parentNode,
+        })
+        .onConflictDoNothing();
+
+      // ensure Canonical Domain reference
+      await context.ensDb
+        .insert(ensIndexerSchema.registryCanonicalDomain)
+        .values({ registryId: parentRegistryId, domainId: parentDomainId })
+        .onConflictDoUpdate({ domainId: parentDomainId });
+    }
 
     // If this is a direct subname of addr.reverse, we have 100% on-chain label discovery.
     //
@@ -76,16 +125,19 @@ export default function () {
       await ensureUnknownLabel(context, labelHash);
     }
 
-    // upsert domain
-    await context.ensDb
-      .insert(ensIndexerSchema.v1Domain)
-      .values({ id: domainId, parentId, labelHash })
-      .onConflictDoNothing();
+    const rootRegistryOwnerId = interpretAddress(owner);
 
-    // update rootRegistryOwner
+    // upsert domain, always updating rootRegistryOwner
     await context.ensDb
-      .update(ensIndexerSchema.v1Domain, { id: domainId })
-      .set({ rootRegistryOwnerId: interpretAddress(owner) });
+      .insert(ensIndexerSchema.domain)
+      .values({
+        id: domainId,
+        type: "ENSv1Domain",
+        registryId: parentRegistryId,
+        labelHash,
+        rootRegistryOwnerId,
+      })
+      .onConflictDoUpdate({ rootRegistryOwnerId });
 
     // materialize domain owner
     // NOTE: despite Domain.ownerId being materialized from other sources of truth (i.e. Registrars
@@ -111,11 +163,12 @@ export default function () {
     // ENSv2 model does not include root node, no-op
     if (node === ENS_ROOT_NODE) return;
 
-    const domainId = makeENSv1DomainId(node);
+    const { registry } = getManagedName(getThisAccountId(context, event));
+    const domainId = makeENSv1DomainId(registry, node);
 
     // set the domain's rootRegistryOwner to `owner`
     await context.ensDb
-      .update(ensIndexerSchema.v1Domain, { id: domainId })
+      .update(ensIndexerSchema.domain, { id: domainId })
       .set({ rootRegistryOwnerId: interpretAddress(owner) });
 
     // materialize domain owner
@@ -138,10 +191,12 @@ export default function () {
     event: EventWithArgs<{ node: Node }>;
   }) {
     const { node } = event.args;
-    const domainId = makeENSv1DomainId(node);
 
     // ENSv2 model does not include root node, no-op
     if (node === ENS_ROOT_NODE) return;
+
+    const { registry } = getManagedName(getThisAccountId(context, event));
+    const domainId = makeENSv1DomainId(registry, node);
 
     // push event to domain history
     await ensureDomainEvent(context, event, domainId);
@@ -155,10 +210,12 @@ export default function () {
     event: EventWithArgs<{ node: Node }>;
   }) {
     const { node } = event.args;
-    const domainId = makeENSv1DomainId(node);
 
     // ENSv2 model does not include root node, no-op
     if (node === ENS_ROOT_NODE) return;
+
+    const { registry } = getManagedName(getThisAccountId(context, event));
+    const domainId = makeENSv1DomainId(registry, node);
 
     // NOTE: Domain-Resolver relations are handled by the protocol-acceleration plugin and are not
     // directly indexed here

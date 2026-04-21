@@ -3,6 +3,7 @@ import config from "@/config";
 import {
   type AccountId,
   asInterpretedName,
+  ENS_ROOT_NAME,
   type InterpretedName,
   type Name,
   type Node,
@@ -36,12 +37,32 @@ import { toJson } from "@/lib/json-stringify-with-bigints";
  * wrapping direct subnames of specific Managed Names.
  */
 
+const ensRootRegistry = getDatasourceContract(
+  config.namespace,
+  DatasourceNames.ENSRoot,
+  "ENSv1Registry",
+);
+const ensRootRegistryOld = getDatasourceContract(
+  config.namespace,
+  DatasourceNames.ENSRoot,
+  "ENSv1RegistryOld",
+);
 const ethnamesNameWrapper = getDatasourceContract(
   config.namespace,
   DatasourceNames.ENSRoot,
   "NameWrapper",
 );
 
+const basenamesRegistry = maybeGetDatasourceContract(
+  config.namespace,
+  DatasourceNames.Basenames,
+  "Registry",
+);
+const lineanamesRegistry = maybeGetDatasourceContract(
+  config.namespace,
+  DatasourceNames.Lineanames,
+  "Registry",
+);
 const lineanamesNameWrapper = maybeGetDatasourceContract(
   config.namespace,
   DatasourceNames.Lineanames,
@@ -49,73 +70,98 @@ const lineanamesNameWrapper = maybeGetDatasourceContract(
 );
 
 /**
- * Mapping of a Managed Name to contracts that operate in the context of a (sub)Registry associated
- * with that Name.
+ * Each Managed Name group is associated with exactly one concrete ENSv1 Registry (the mainnet ENS
+ * Registry, the Basenames shadow Registry, or the Lineanames shadow Registry). The Registry is
+ * what `handleNewOwner` writes domains into and what every Registrar/Controller/NameWrapper under
+ * the same Managed Name contributes to.
  */
-const CONTRACTS_BY_MANAGED_NAME: Record<Name, AccountId[]> = {
-  eth: [
-    getDatasourceContract(
-      config.namespace, //
-      DatasourceNames.ENSRoot,
-      "BaseRegistrar",
-    ),
-    getDatasourceContract(
-      config.namespace,
-      DatasourceNames.ENSRoot,
-      "LegacyEthRegistrarController",
-    ),
-    getDatasourceContract(
-      config.namespace,
-      DatasourceNames.ENSRoot,
-      "WrappedEthRegistrarController",
-    ),
-    getDatasourceContract(
-      config.namespace,
-      DatasourceNames.ENSRoot,
-      "UnwrappedEthRegistrarController",
-    ),
-    getDatasourceContract(
-      config.namespace,
-      DatasourceNames.ENSRoot,
-      "UniversalRegistrarRenewalWithReferrer",
-    ),
-    ethnamesNameWrapper,
-  ],
-  "base.eth": [
-    maybeGetDatasourceContract(
-      config.namespace, //
-      DatasourceNames.Basenames,
-      "BaseRegistrar",
-    ),
-    maybeGetDatasourceContract(
-      config.namespace,
-      DatasourceNames.Basenames,
-      "EARegistrarController",
-    ),
-    maybeGetDatasourceContract(
-      config.namespace, //
-      DatasourceNames.Basenames,
-      "RegistrarController",
-    ),
-    maybeGetDatasourceContract(
-      config.namespace,
-      DatasourceNames.Basenames,
-      "UpgradeableRegistrarController",
-    ),
-  ].filter((c) => !!c),
-  "linea.eth": [
-    maybeGetDatasourceContract(
-      config.namespace, //
-      DatasourceNames.Lineanames,
-      "BaseRegistrar",
-    ),
-    maybeGetDatasourceContract(
-      config.namespace,
-      DatasourceNames.Lineanames,
-      "EthRegistrarController",
-    ),
-    lineanamesNameWrapper,
-  ].filter((c) => !!c),
+interface ManagedNameGroup {
+  registry: AccountId;
+  contracts: AccountId[];
+}
+
+/**
+ * Mapping of a Managed Name to its concrete Registry and the contracts that operate in its
+ * (sub)Registry context.
+ *
+ * The concrete ENSv1 Registry is included in `contracts` so that its own handlers resolve via the
+ * same {@link getManagedName} path. The mainnet ENSv1Registry's Managed Name is the ENS Root (""),
+ * so direct children of root (TLDs) point at the concrete Registry and everything below gets a
+ * virtual Registry.
+ *
+ * Groups for namespaces that don't ship a given shadow Registry are omitted entirely.
+ */
+const CONTRACTS_BY_MANAGED_NAME: Record<Name, ManagedNameGroup> = {
+  [ENS_ROOT_NAME]: {
+    registry: ensRootRegistry,
+    contracts: [ensRootRegistry, ensRootRegistryOld],
+  },
+  eth: {
+    registry: ensRootRegistry,
+    contracts: [
+      getDatasourceContract(config.namespace, DatasourceNames.ENSRoot, "BaseRegistrar"),
+      getDatasourceContract(
+        config.namespace,
+        DatasourceNames.ENSRoot,
+        "LegacyEthRegistrarController",
+      ),
+      getDatasourceContract(
+        config.namespace,
+        DatasourceNames.ENSRoot,
+        "WrappedEthRegistrarController",
+      ),
+      getDatasourceContract(
+        config.namespace,
+        DatasourceNames.ENSRoot,
+        "UnwrappedEthRegistrarController",
+      ),
+      getDatasourceContract(
+        config.namespace,
+        DatasourceNames.ENSRoot,
+        "UniversalRegistrarRenewalWithReferrer",
+      ),
+      ethnamesNameWrapper,
+    ],
+  },
+  ...(basenamesRegistry && {
+    "base.eth": {
+      registry: basenamesRegistry,
+      contracts: [
+        basenamesRegistry,
+        maybeGetDatasourceContract(config.namespace, DatasourceNames.Basenames, "BaseRegistrar"),
+        maybeGetDatasourceContract(
+          config.namespace,
+          DatasourceNames.Basenames,
+          "EARegistrarController",
+        ),
+        maybeGetDatasourceContract(
+          config.namespace,
+          DatasourceNames.Basenames,
+          "RegistrarController",
+        ),
+        maybeGetDatasourceContract(
+          config.namespace,
+          DatasourceNames.Basenames,
+          "UpgradeableRegistrarController",
+        ),
+      ].filter((c) => !!c),
+    } satisfies ManagedNameGroup,
+  }),
+  ...(lineanamesRegistry && {
+    "linea.eth": {
+      registry: lineanamesRegistry,
+      contracts: [
+        lineanamesRegistry,
+        maybeGetDatasourceContract(config.namespace, DatasourceNames.Lineanames, "BaseRegistrar"),
+        maybeGetDatasourceContract(
+          config.namespace,
+          DatasourceNames.Lineanames,
+          "EthRegistrarController",
+        ),
+        lineanamesNameWrapper,
+      ].filter((c) => !!c),
+    } satisfies ManagedNameGroup,
+  }),
 };
 
 /**
@@ -141,13 +187,18 @@ const cachedNamehash = (name: Name): Node => {
 };
 
 /**
- * Given a `contract`, identify its Managed Name and Node.
+ * Given a `contract`, identify its Managed Name, Node, and the concrete ENSv1 Registry whose
+ * namegraph it writes into.
  *
  * @dev Caches the result of namehash(name).
  */
-export const getManagedName = (contract: AccountId): { name: InterpretedName; node: Node } => {
-  for (const [managedName, contracts] of Object.entries(CONTRACTS_BY_MANAGED_NAME)) {
-    const isAnyOfTheContracts = contracts.some((_contract) => accountIdEqual(_contract, contract));
+export const getManagedName = (
+  contract: AccountId,
+): { name: InterpretedName; node: Node; registry: AccountId } => {
+  for (const [managedName, group] of Object.entries(CONTRACTS_BY_MANAGED_NAME)) {
+    const isAnyOfTheContracts = group.contracts.some((_contract) =>
+      accountIdEqual(_contract, contract),
+    );
     if (isAnyOfTheContracts) {
       const namespaceSpecific = MANAGED_NAME_BY_NAMESPACE[config.namespace]?.[managedName];
 
@@ -157,7 +208,7 @@ export const getManagedName = (contract: AccountId): { name: InterpretedName; no
       const name = (namespaceSpecific ?? managedName) as InterpretedName;
       const node = cachedNamehash(name);
 
-      return { name, node };
+      return { name, node, registry: group.registry };
     }
   }
 

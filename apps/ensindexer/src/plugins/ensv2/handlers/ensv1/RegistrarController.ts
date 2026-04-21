@@ -52,10 +52,10 @@ export default function () {
     }
 
     const controller = getThisAccountId(context, event);
-    const { node: managedNode } = getManagedName(controller);
+    const { node: managedNode, registry } = getManagedName(controller);
 
     const node = makeSubdomainNode(labelHash, managedNode);
-    const domainId = makeENSv1DomainId(node);
+    const domainId = makeENSv1DomainId(registry, node);
     const registration = await getLatestRegistration(context, domainId);
 
     if (!registration) {
@@ -113,9 +113,9 @@ export default function () {
     }
 
     const controller = getThisAccountId(context, event);
-    const { node: managedNode } = getManagedName(controller);
+    const { node: managedNode, registry } = getManagedName(controller);
     const node = makeSubdomainNode(labelHash, managedNode);
-    const domainId = makeENSv1DomainId(node);
+    const domainId = makeENSv1DomainId(registry, node);
     const registration = await getLatestRegistration(context, domainId);
 
     if (!registration) {
