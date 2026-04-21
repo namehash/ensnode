@@ -40,7 +40,7 @@ When developing, it's useful to run each service individually so you can restart
 #### 1. Start the devnet
 
 ```sh
-docker compose up devnet
+pnpm devnet
 ```
 
 Runs the ENS contracts-v2 devnet on port 8545.
@@ -56,7 +56,7 @@ brew services start postgresql@17
 or with the local docker compose:
 
 ```sh
-docker compose up postgres
+docker compose -f docker/docker-compose.yml up postgres
 ```
 
 #### 3. Start ENSRainbow
@@ -64,7 +64,7 @@ docker compose up postgres
 Run via docker compose:
 
 ```sh
-docker compose up ensrainbow
+docker compose -f docker/docker-compose.yml up ensrainbow
 ```
 
 Or run it on the host machine from the repo root:
