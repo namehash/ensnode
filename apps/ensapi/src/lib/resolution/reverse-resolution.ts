@@ -3,6 +3,7 @@ import { coinTypeReverseLabel, evmChainIdToCoinType, reverseName } from "enssdk"
 import { isAddress, isAddressEqual } from "viem";
 
 import {
+  type ENSNamespaceId,
   type ResolverRecordsSelection,
   type ReverseResolutionArgs,
   ReverseResolutionProtocolStep,
@@ -38,9 +39,11 @@ const tracer = trace.getTracer("reverse-resolution");
  * @param options.canAccelerate Whether acceleration is currently possible (default: false)
  */
 export async function resolveReverse(
+  namespace: ENSNamespaceId,
+  plugins: string[],
   address: ReverseResolutionArgs["address"],
   chainId: ReverseResolutionArgs["chainId"],
-  options: Parameters<typeof resolveForward>[2],
+  options: Parameters<typeof resolveForward>[4],
 ): Promise<ReverseResolutionResult> {
   const { accelerate = true } = options;
 
@@ -68,7 +71,14 @@ export async function resolveReverse(
             TraceableENSProtocol.ReverseResolution,
             ReverseResolutionProtocolStep.ResolveReverseName,
             { name: _reverseName },
-            () => resolveForward(_reverseName, REVERSE_RESOLUTION_SELECTION, options),
+            () =>
+              resolveForward(
+                namespace,
+                plugins,
+                _reverseName,
+                REVERSE_RESOLUTION_SELECTION,
+                options,
+              ),
           );
 
           // Step 4 — Determine if name record exists
@@ -98,7 +108,7 @@ export async function resolveReverse(
             TraceableENSProtocol.ReverseResolution,
             ReverseResolutionProtocolStep.ForwardResolveAddressRecord,
             { name },
-            () => resolveForward(name, { addresses: [coinType] }, options),
+            () => resolveForward(namespace, plugins, name, { addresses: [coinType] }, options),
           );
 
           const resolvedAddress = addresses[coinType];

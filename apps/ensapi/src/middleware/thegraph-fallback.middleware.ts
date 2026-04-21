@@ -6,6 +6,7 @@ import { canFallbackToTheGraph } from "@ensnode/ensnode-sdk/internal";
 
 import { factory } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
+import { ensureEnsNodeStackInfoAvailable } from "@/middleware/stack-info.middleware";
 
 const logger = makeLogger("thegraph-fallback.middleware");
 
@@ -18,6 +19,7 @@ let prevShouldFallback = false;
  * Middleware that proxies Subgraph requests to The Graph if possible & necessary.
  */
 export const thegraphFallbackMiddleware = factory.createMiddleware(async (c, next) => {
+  ensureEnsNodeStackInfoAvailable(c);
   const isRealtime = c.var.isRealtime;
 
   // context must be set by the required middleware
@@ -25,10 +27,12 @@ export const thegraphFallbackMiddleware = factory.createMiddleware(async (c, nex
     throw new Error(`Invariant(thegraphFallbackMiddleware): isRealtimeMiddleware expected`);
   }
 
+  const { namespace, isSubgraphCompatible } = c.var.stackInfo.ensIndexer;
+
   const fallback = canFallbackToTheGraph({
-    namespace: config.namespace,
+    namespace,
+    isSubgraphCompatible,
     theGraphApiKey: config.theGraphApiKey,
-    isSubgraphCompatible: config.ensIndexerPublicConfig.isSubgraphCompatible,
   });
 
   // log one warning to the console if !canFallback
@@ -46,7 +50,7 @@ export const thegraphFallbackMiddleware = factory.createMiddleware(async (c, nex
       }
       case "no-subgraph-url": {
         logger.warn(
-          `ENSApi can NOT fallback to The Graph: the connected ENSIndexer's namespace ('${config.namespace}') is not supported by The Graph.`,
+          `ENSApi can NOT fallback to The Graph: the connected ENSIndexer's namespace ('${namespace}') is not supported by The Graph.`,
         );
         break;
       }

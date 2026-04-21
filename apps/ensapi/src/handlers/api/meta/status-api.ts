@@ -7,14 +7,18 @@ import {
 
 import { createApp } from "@/lib/hono-factory";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
-import { stackInfoMiddleware } from "@/middleware/stack-info.middleware";
+import {
+  ensureEnsNodeStackInfoAvailable,
+  stackInfoMiddleware,
+} from "@/middleware/stack-info.middleware";
 
 import { getIndexingStatusRoute } from "./status-api.routes";
 
 const app = createApp({ middlewares: [stackInfoMiddleware, indexingStatusMiddleware] });
 
 app.openapi(getIndexingStatusRoute, async (c) => {
-  if (c.var.indexingStatus instanceof Error || c.var.stackInfo instanceof Error) {
+  ensureEnsNodeStackInfoAvailable(c);
+  if (c.var.indexingStatus instanceof Error) {
     return c.json(
       serializeEnsApiIndexingStatusResponse({
         responseCode: EnsApiIndexingStatusResponseCodes.Error,

@@ -1,5 +1,3 @@
-import config from "@/config";
-
 import { bytesToPacket } from "@ensdomains/ensjs/utils";
 import { SpanStatusCode, trace } from "@opentelemetry/api";
 import {
@@ -14,12 +12,11 @@ import {
 import { isAddressEqual, type PublicClient, toHex, zeroAddress } from "viem";
 import { packetToBytes } from "viem/ens";
 
-import { DatasourceNames, getDatasource } from "@ensnode/datasources";
+import { DatasourceNames, type ENSNamespaceId, getDatasource } from "@ensnode/datasources";
 import { accountIdEqual, getDatasourceContract, isENSv1Registry } from "@ensnode/ensnode-sdk";
 
 import { ensDb } from "@/lib/ensdb/singleton";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/instrumentation/auto-span";
-import { lazyProxy } from "@/lib/lazy";
 
 type FindResolverResult =
   | {
@@ -37,12 +34,6 @@ const NULL_RESULT: FindResolverResult = {
 
 const tracer = trace.getTracer("find-resolver");
 
-// lazyProxy defers construction until first use so that this module can be
-// imported without env vars being present (e.g. during OpenAPI generation).
-const ensv1RegistryOld = lazyProxy(() =>
-  getDatasourceContract(config.namespace, DatasourceNames.ENSRoot, "ENSv1RegistryOld"),
-);
-
 /**
  * Identifies `name`'s active resolver in `registry`.
  *
@@ -53,12 +44,14 @@ const ensv1RegistryOld = lazyProxy(() =>
  * - TODO: any ENSv2 Registry
  */
 export async function findResolver({
+  namespace,
   registry,
   name,
   accelerate,
   canAccelerate,
   publicClient,
 }: {
+  namespace: ENSNamespaceId;
   registry: AccountId;
   name: InterpretedName;
   accelerate: boolean;
@@ -73,24 +66,25 @@ export async function findResolver({
   //   then we can identify a node's active resolver via the indexed Domain-Resolver Relationships.
   //////////////////////////////////////////////////
   if (accelerate && canAccelerate) {
-    return findResolverWithIndex(registry, name);
+    return findResolverWithIndex(namespace, registry, name);
   }
 
   // Invariant: UniversalResolver#findResolver only works for ENS Root Registry
-  if (!isENSv1Registry(config.namespace, registry)) {
+  if (!isENSv1Registry(namespace, registry)) {
     throw new Error(
       `Invariant(findResolver): UniversalResolver#findResolver only identifies active resolvers agains the ENs Root Registry, but a different Registry contract was passed: ${JSON.stringify(registry)}.`,
     );
   }
 
   // query the UniversalResolver on the ENSRoot Chain (via RPC)
-  return findResolverWithUniversalResolver(publicClient, name);
+  return findResolverWithUniversalResolver(namespace, publicClient, name);
 }
 
 /**
  * Queries the resolverAddress for the specified `name` using the UniversalResolver via RPC.
  */
 async function findResolverWithUniversalResolver(
+  namespace: ENSNamespaceId,
   publicClient: PublicClient,
   name: InterpretedName,
 ): Promise<FindResolverResult> {
@@ -104,7 +98,7 @@ async function findResolverWithUniversalResolver(
         contracts: {
           UniversalResolver: { address, abi },
         },
-      } = getDatasource(config.namespace, DatasourceNames.ENSRoot);
+      } = getDatasource(namespace, DatasourceNames.ENSRoot);
 
       // 2. Call UniversalResolver#findResolver via RPC
       const dnsEncodedNameBytes = packetToBytes(name);
@@ -173,6 +167,7 @@ async function findResolverWithUniversalResolver(
  * ```
  */
 async function findResolverWithIndex(
+  namespace: ENSNamespaceId,
   registry: AccountId,
   name: InterpretedName,
 ): Promise<FindResolverResult> {
@@ -196,6 +191,12 @@ async function findResolverWithIndex(
       const nodes = names.map((name) => namehashInterpretedName(name));
       const domainIds = nodes as DomainId[];
 
+      const ensv1RegistryOld = getDatasourceContract(
+        namespace,
+        DatasourceNames.ENSRoot,
+        "ENSv1RegistryOld",
+      );
+
       // 3. for each domain, find its associated resolver in the selected registry
       const domainResolverRelations = await withSpanAsync(
         tracer,
@@ -213,7 +214,7 @@ async function findResolverWithIndex(
                   // filter for Domain-Resolver Relationship in the current Registry
                   and(eq(t.chainId, registry.chainId), eq(t.address, registry.address)),
                   // OR, if the registry is the ENS Root Registry, also include records from RegistryOld
-                  isENSv1Registry(config.namespace, registry)
+                  isENSv1Registry(namespace, registry)
                     ? and(
                         eq(t.chainId, ensv1RegistryOld.chainId),
                         eq(t.address, ensv1RegistryOld.address),

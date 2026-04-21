@@ -1,10 +1,7 @@
-import config from "@/config";
-
 import { trace } from "@opentelemetry/api";
-import type { ChainId } from "enssdk";
 import { mainnet } from "viem/chains";
 
-import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
+import { DatasourceNames, type ENSNamespaceId, maybeGetDatasource } from "@ensnode/datasources";
 import {
   type MultichainPrimaryNameResolutionArgs,
   type MultichainPrimaryNameResolutionResult,
@@ -12,12 +9,11 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
-import { lazy } from "@/lib/lazy";
 import { resolveReverse } from "@/lib/resolution/reverse-resolution";
 
 const tracer = trace.getTracer("multichain-primary-name-resolution");
 
-const getENSIP19SupportedChainIds = lazy<ChainId[]>(() => [
+const getENSIP19SupportedChainIds = (namespace: ENSNamespaceId) => [
   // always include Mainnet, because its chainId corresponds to the ENS Root Chain's coinType,
   // regardless of the current namespace
   mainnet.id,
@@ -25,23 +21,25 @@ const getENSIP19SupportedChainIds = lazy<ChainId[]>(() => [
   // then include any ENSIP-19 Supported Chains defined in this namespace
   ...uniq(
     [
-      maybeGetDatasource(config.namespace, DatasourceNames.ReverseResolverRoot),
-      maybeGetDatasource(config.namespace, DatasourceNames.ReverseResolverBase),
-      maybeGetDatasource(config.namespace, DatasourceNames.ReverseResolverLinea),
-      maybeGetDatasource(config.namespace, DatasourceNames.ReverseResolverOptimism),
-      maybeGetDatasource(config.namespace, DatasourceNames.ReverseResolverArbitrum),
-      maybeGetDatasource(config.namespace, DatasourceNames.ReverseResolverScroll),
+      maybeGetDatasource(namespace, DatasourceNames.ReverseResolverRoot),
+      maybeGetDatasource(namespace, DatasourceNames.ReverseResolverBase),
+      maybeGetDatasource(namespace, DatasourceNames.ReverseResolverLinea),
+      maybeGetDatasource(namespace, DatasourceNames.ReverseResolverOptimism),
+      maybeGetDatasource(namespace, DatasourceNames.ReverseResolverArbitrum),
+      maybeGetDatasource(namespace, DatasourceNames.ReverseResolverScroll),
     ]
       .filter((ds) => ds !== undefined)
       .map((ds) => ds.chain.id),
   ),
-]);
+];
 
 /**
  * Implements batch resolution of an address' Primary Name across the provided `chainIds`.
  *
  * @see https://docs.ens.domains/ensip/19
  *
+ * @param namespace the ENS namespace within which to resolve the address' Primary Names
+ * @param plugins the set of plugins to use for resolution
  * @param address the adddress whose Primary Names to resolve
  * @param chainIds the set of chainIds within which to resolve the address' Primary Name (default:
  * all ENSIP-19 supported chains)
@@ -50,17 +48,23 @@ const getENSIP19SupportedChainIds = lazy<ChainId[]>(() => [
  * @param options.canAccelerate Whether acceleration is currently possible (default: false)
  */
 export async function resolvePrimaryNames(
+  namespace: ENSNamespaceId,
+  plugins: string[],
   address: MultichainPrimaryNameResolutionArgs["address"],
-  chainIds: MultichainPrimaryNameResolutionArgs["chainIds"] = getENSIP19SupportedChainIds(),
-  options: Parameters<typeof resolveReverse>[2],
+  chainIds: MultichainPrimaryNameResolutionArgs["chainIds"],
+  options: Parameters<typeof resolveReverse>[4],
 ): Promise<MultichainPrimaryNameResolutionResult> {
+  const _chainIds = chainIds ?? getENSIP19SupportedChainIds(namespace);
+
   // parallel reverseResolve
   const names = await withActiveSpanAsync(tracer, "resolvePrimaryNames", { address }, () =>
-    Promise.all(chainIds.map((chainId) => resolveReverse(address, chainId, options))),
+    Promise.all(
+      _chainIds.map((chainId) => resolveReverse(namespace, plugins, address, chainId, options)),
+    ),
   );
 
   // key results by chainId
-  return chainIds.reduce((memo, chainId, i) => {
+  return _chainIds.reduce((memo, chainId, i) => {
     // biome-ignore lint/style/noNonNullAssertion: names[i] guaranteed to be defined
     memo[chainId] = names[i]!;
     return memo;

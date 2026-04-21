@@ -1,5 +1,3 @@
-import config from "@/config";
-
 import type { InterpretedName } from "enssdk";
 import {
   bytesToHex,
@@ -12,26 +10,22 @@ import {
 } from "viem";
 import { packetToBytes } from "viem/ens";
 
-import { DatasourceNames, ResolverABI, UniversalResolverABI } from "@ensnode/datasources";
+import {
+  DatasourceNames,
+  type ENSNamespaceId,
+  ResolverABI,
+  UniversalResolverABI,
+} from "@ensnode/datasources";
 import {
   getDatasourceContract,
   maybeGetDatasourceContract,
   type ResolverRecordsSelection,
 } from "@ensnode/ensnode-sdk";
 
-import { lazy } from "@/lib/lazy";
 import type {
   ResolveCalls,
   ResolveCallsAndRawResults,
 } from "@/lib/resolution/resolve-calls-and-results";
-
-const getUniversalResolverV1 = lazy(() =>
-  getDatasourceContract(config.namespace, DatasourceNames.ENSRoot, "UniversalResolver"),
-);
-
-const getUniversalResolverV2 = lazy(() =>
-  maybeGetDatasourceContract(config.namespace, DatasourceNames.ENSRoot, "UniversalResolverV2"),
-);
 
 /**
  * Execute a set of ResolveCalls for `name` against the UniversalResolver.
@@ -39,14 +33,28 @@ const getUniversalResolverV2 = lazy(() =>
 export async function executeResolveCallsWithUniversalResolver<
   SELECTION extends ResolverRecordsSelection,
 >({
+  namespace,
   name,
   calls,
   publicClient,
 }: {
+  namespace: ENSNamespaceId;
   name: InterpretedName;
   calls: ResolveCalls<SELECTION>;
   publicClient: PublicClient;
 }): Promise<ResolveCallsAndRawResults<SELECTION>> {
+  const getUniversalResolverV1 = getDatasourceContract(
+    namespace,
+    DatasourceNames.ENSRoot,
+    "UniversalResolver",
+  );
+
+  const getUniversalResolverV2 = maybeGetDatasourceContract(
+    namespace,
+    DatasourceNames.ENSRoot,
+    "UniversalResolverV2",
+  );
+
   // NOTE: automatically multicalled by viem
   return await Promise.all(
     calls.map(async (call) => {
@@ -58,7 +66,7 @@ export async function executeResolveCallsWithUniversalResolver<
           abi: UniversalResolverABI,
           // NOTE(ensv2-transition): if UniversalResolverV2 is defined, prefer it over UniversalResolver
           // TODO(ensv2-transition): confirm this is correct
-          address: getUniversalResolverV2()?.address ?? getUniversalResolverV1().address,
+          address: getUniversalResolverV2?.address ?? getUniversalResolverV1.address,
           functionName: "resolve",
           args: [encodedName, encodedMethod],
         });

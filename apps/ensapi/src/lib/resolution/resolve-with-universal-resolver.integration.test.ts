@@ -22,7 +22,7 @@ import {
 } from "enssdk";
 import { describe, expect, it } from "vitest";
 
-import { getPublicClient } from "@/lib/public-client";
+import { buildPublicClientForRootChain } from "@/lib/public-client";
 import { makeResolveCalls } from "@/lib/resolution/resolve-calls-and-results";
 
 import { executeResolveCallsWithUniversalResolver } from "./resolve-with-universal-resolver";
@@ -35,12 +35,13 @@ const NAME_WITH_ENCODED_LABELHASHES = interpretedLabelsToInterpretedName([
 
 const EXPECTED_DESCRIPTION = "example.eth";
 
-const publicClient = getPublicClient(ensTestEnvChain.id);
+const publicClient = buildPublicClientForRootChain(ENSNamespaceIds.EnsTestEnv);
 
 describe("executeResolveCallsWithUniversalResolver", () => {
   it("should resolve interpreted name without encoded labelhashes", async () => {
     await expect(
       executeResolveCallsWithUniversalResolver({
+        namespace: ENSNamespaceIds.EnsTestEnv,
         name: NAME,
         calls: makeResolveCalls(namehashInterpretedName(NAME), { texts: ["description"] }),
         publicClient,
@@ -62,6 +63,7 @@ describe("executeResolveCallsWithUniversalResolver", () => {
   it("should NOT resolve interpreted name with encoded labelhashes", async () => {
     await expect(
       executeResolveCallsWithUniversalResolver({
+        namespace: ENSNamespaceIds.EnsTestEnv,
         name: NAME_WITH_ENCODED_LABELHASHES,
         calls: makeResolveCalls(namehashInterpretedName(NAME_WITH_ENCODED_LABELHASHES), {
           texts: ["description"],

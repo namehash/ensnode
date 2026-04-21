@@ -1,10 +1,9 @@
-import config from "@/config";
-
 import { eq } from "drizzle-orm/sql";
 import { type AccountId, asInterpretedName, type Node, type UnixTimestamp } from "enssdk";
 
 import {
   bigIntToNumber,
+  type ENSNamespaceId,
   getNameTokenOwnership,
   type NameToken,
   type NameTokenOwnership,
@@ -80,6 +79,7 @@ function _recordToNameToken(
  * domain ID were found. Otherwise returns null.
  */
 function _recordsToRegisteredNameTokens(
+  namespace: ENSNamespaceId,
   domainId: Node,
   records: FindRegisteredNameTokensForDomainRecord[],
   accurateAsOf: UnixTimestamp,
@@ -103,7 +103,7 @@ function _recordsToRegisteredNameTokens(
     } satisfies AccountId;
     // biome-ignore lint/style/noNonNullAssertion: domain.name guaranteed to exist
     const name = asInterpretedName(record.domains.name!);
-    const ownership = getNameTokenOwnership(config.namespace, name, owner);
+    const ownership = getNameTokenOwnership(namespace, name, owner);
     const token = _recordToNameToken(record, ownership);
     const expiresAt = bigIntToNumber(record.registrationLifecycles.expiresAt);
 
@@ -144,10 +144,11 @@ function _recordsToRegisteredNameTokens(
  * the name associated with the domainId is not an actively indexed subregistry.
  */
 export async function findRegisteredNameTokensForDomain(
+  namespace: ENSNamespaceId,
   domainId: Node,
   accurateAsOf: UnixTimestamp,
 ): Promise<RegisteredNameTokens | null> {
   const records = await _findRegisteredNameTokensForDomain(domainId);
 
-  return _recordsToRegisteredNameTokens(domainId, records, accurateAsOf);
+  return _recordsToRegisteredNameTokens(namespace, domainId, records, accurateAsOf);
 }

@@ -25,7 +25,7 @@ import type {
 import { getNamedType } from "graphql";
 import superjson from "superjson";
 
-import type { context } from "@/omnigraph-api/context";
+import type { createYogaContextForNamespace } from "@/omnigraph-api/context";
 
 const tracer = trace.getTracer("graphql");
 const createSpan = createOpenTelemetryWrapper(tracer, {
@@ -77,7 +77,7 @@ export type BuilderScalars = {
 };
 
 export const builder = new SchemaBuilder<{
-  Context: ReturnType<typeof context>;
+  Context: ReturnType<typeof createYogaContextForNamespace>;
   Scalars: BuilderScalars;
 
   // the following ensures via typechecker that every t.connection returns a totalCount field

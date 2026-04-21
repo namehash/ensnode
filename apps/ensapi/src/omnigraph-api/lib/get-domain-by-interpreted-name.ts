@@ -1,5 +1,3 @@
-import config from "@/config";
-
 import { trace } from "@opentelemetry/api";
 import { Param, sql } from "drizzle-orm";
 import {
@@ -14,16 +12,11 @@ import {
   type RegistryId,
 } from "enssdk";
 
-import { maybeGetENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
+import { type ENSNamespaceId, maybeGetENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
-import { lazy } from "@/lib/lazy";
 import { makeLogger } from "@/lib/logger";
-
-// lazy() defers construction until first use so that this module can be
-// imported without env vars being present (e.g. during OpenAPI generation).
-const _maybeGetENSv2RootRegistryId = lazy(() => maybeGetENSv2RootRegistryId(config.namespace));
 
 const tracer = trace.getTracer("get-domain-by-interpreted-name");
 const logger = makeLogger("get-domain-by-interpreted-name");
@@ -64,11 +57,12 @@ const v2Logger = makeLogger("get-domain-by-interpreted-name:v2");
  * not the alias by which it was queried ('sub.alias.eth').
  */
 export async function getDomainIdByInterpretedName(
+  namespace: ENSNamespaceId,
   name: InterpretedName,
 ): Promise<DomainId | null> {
   return withActiveSpanAsync(tracer, "getDomainIdByInterpretedName", { name }, async () => {
     // Domains addressable in v2 are preferred, but v1 lookups are cheap, so just do them both ahead of time
-    const rootRegistryId = _maybeGetENSv2RootRegistryId();
+    const rootRegistryId = maybeGetENSv2RootRegistryId(namespace);
 
     const [v1DomainId, v2DomainId] = await Promise.all([
       withActiveSpanAsync(tracer, "v1_getDomainId", {}, () =>

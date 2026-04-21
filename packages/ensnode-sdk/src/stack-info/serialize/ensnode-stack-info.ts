@@ -1,4 +1,3 @@
-import { serializeEnsApiPublicConfig } from "../../ensapi/config/serialize";
 import type { SerializedEnsApiPublicConfig } from "../../ensapi/config/serialized-types";
 import type { SerializedEnsDbPublicConfig } from "../../ensdb/serialize/config";
 import { serializeEnsIndexerPublicConfig } from "../../ensindexer/config/serialize";
@@ -21,7 +20,7 @@ export interface SerializedEnsNodeStackInfo {
  */
 export function serializeEnsNodeStackInfo(stackInfo: EnsNodeStackInfo): SerializedEnsNodeStackInfo {
   return {
-    ensApi: serializeEnsApiPublicConfig(stackInfo.ensApi),
+    ensApi: stackInfo.ensApi,
     ensDb: stackInfo.ensDb,
     ensIndexer: serializeEnsIndexerPublicConfig(stackInfo.ensIndexer),
     ensRainbow: stackInfo.ensRainbow,

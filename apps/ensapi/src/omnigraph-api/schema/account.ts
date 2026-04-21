@@ -80,7 +80,8 @@ AccountRef.implement({
         const base = domainsBase();
         const owned = filterByOwner(base, parent.id);
         const named = filterByName(owned, where?.name);
-        const canonical = where?.canonical === true ? filterByCanonical(named) : named;
+        const canonical =
+          where?.canonical === true ? filterByCanonical(context.namespace, named) : named;
         const domains = withOrderingMetadata(canonical);
         return resolveFindDomains(context, { domains, order, ...connectionArgs });
       },

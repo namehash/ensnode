@@ -1,5 +1,3 @@
-import config from "@/config";
-
 import { sql } from "drizzle-orm";
 import {
   type CanonicalPath,
@@ -10,15 +8,11 @@ import {
   type RegistryId,
 } from "enssdk";
 
-import { maybeGetENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
+import { type ENSNamespaceId, maybeGetENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
-import { lazy } from "@/lib/lazy";
 
 const MAX_DEPTH = 16;
-// lazy() defers construction until first use so that this module can be
-// imported without env vars being present (e.g. during OpenAPI generation).
-const getENSv2RootRegistryId = lazy(() => maybeGetENSv2RootRegistryId(config.namespace));
 
 /**
  * Provide the canonical parents for an ENSv1 Domain.
@@ -75,8 +69,11 @@ export async function getV1CanonicalPath(domainId: ENSv1DomainId): Promise<Canon
  *
  * i.e. reverse traversal of the namegraph via registry_canonical_domains
  */
-export async function getV2CanonicalPath(domainId: ENSv2DomainId): Promise<CanonicalPath | null> {
-  const rootRegistryId = getENSv2RootRegistryId();
+export async function getV2CanonicalPath(
+  namespace: ENSNamespaceId,
+  domainId: ENSv2DomainId,
+): Promise<CanonicalPath | null> {
+  const rootRegistryId = maybeGetENSv2RootRegistryId(namespace);
 
   // if the ENSv2 Root Registry is not defined, null
   if (!rootRegistryId) return null;

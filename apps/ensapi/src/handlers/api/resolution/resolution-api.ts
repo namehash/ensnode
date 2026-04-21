@@ -14,6 +14,7 @@ import { runWithTrace } from "@/lib/tracing/tracing-api";
 import { canAccelerateMiddleware } from "@/middleware/can-accelerate.middleware";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 import { makeIsRealtimeMiddleware } from "@/middleware/is-realtime.middleware";
+import { ensureEnsNodeStackInfoAvailable } from "@/middleware/stack-info.middleware";
 
 import {
   resolvePrimaryNameRoute,
@@ -48,12 +49,14 @@ const app = createApp({
  * GET /records/example.eth&name=true&addresses=60,0&texts=avatar,com.twitter
  */
 app.openapi(resolveRecordsRoute, async (c) => {
+  ensureEnsNodeStackInfoAvailable(c);
   const { name } = c.req.valid("param");
   const { selection, trace: showTrace, accelerate } = c.req.valid("query");
   const canAccelerate = c.var.canAccelerate;
+  const { namespace, plugins } = c.var.stackInfo.ensIndexer;
 
   const { result, trace } = await runWithTrace(() =>
-    resolveForward(name, selection, { accelerate, canAccelerate }),
+    resolveForward(namespace, plugins, name, selection, { accelerate, canAccelerate }),
   );
 
   const response = {
@@ -80,12 +83,14 @@ app.openapi(resolveRecordsRoute, async (c) => {
  * GET /primary-name/0x1234...abcd/0
  */
 app.openapi(resolvePrimaryNameRoute, async (c) => {
+  ensureEnsNodeStackInfoAvailable(c);
   const { address, chainId } = c.req.valid("param");
   const { trace: showTrace, accelerate } = c.req.valid("query");
   const canAccelerate = c.var.canAccelerate;
+  const { namespace, plugins } = c.var.stackInfo.ensIndexer;
 
   const { result, trace } = await runWithTrace(() =>
-    resolveReverse(address, chainId, { accelerate, canAccelerate }),
+    resolveReverse(namespace, plugins, address, chainId, { accelerate, canAccelerate }),
   );
 
   const response = {
@@ -109,12 +114,14 @@ app.openapi(resolvePrimaryNameRoute, async (c) => {
  * GET /primary-names/0x1234...abcd?chainIds=1,10,8453
  */
 app.openapi(resolvePrimaryNamesRoute, async (c) => {
+  ensureEnsNodeStackInfoAvailable(c);
   const { address } = c.req.valid("param");
   const { chainIds, trace: showTrace, accelerate } = c.req.valid("query");
   const canAccelerate = c.var.canAccelerate;
+  const { namespace, plugins } = c.var.stackInfo.ensIndexer;
 
   const { result, trace } = await runWithTrace(() =>
-    resolvePrimaryNames(address, chainIds, { accelerate, canAccelerate }),
+    resolvePrimaryNames(namespace, plugins, address, chainIds, { accelerate, canAccelerate }),
   );
 
   const response = {

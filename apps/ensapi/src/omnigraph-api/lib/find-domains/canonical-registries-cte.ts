@@ -1,11 +1,8 @@
-import config from "@/config";
-
 import { sql } from "drizzle-orm";
 
-import { maybeGetENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
+import { type ENSNamespaceId, maybeGetENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
-import { lazy } from "@/lib/lazy";
 
 /**
  * The maximum depth to traverse the ENSv2 namegraph in order to construct the set of Canonical
@@ -22,10 +19,6 @@ import { lazy } from "@/lib/lazy";
  */
 const CANONICAL_REGISTRIES_MAX_DEPTH = 16;
 
-// lazy() defers construction until first use so that this module can be
-// imported without env vars being present (e.g. during OpenAPI generation).
-const getENSV2RootRegistryId = lazy(() => maybeGetENSv2RootRegistryId(config.namespace));
-
 /**
  * Builds a recursive CTE that traverses from the ENSv2 Root Registry to construct a set of all
  * Canonical Registries. A Canonical Registry is an ENSv2 Registry that is the Root Registry or the
@@ -33,9 +26,10 @@ const getENSV2RootRegistryId = lazy(() => maybeGetENSv2RootRegistryId(config.nam
  *
  * TODO: could this be optimized further, perhaps as a materialized view?
  */
-export const getCanonicalRegistriesCTE = () => {
+export const getCanonicalRegistriesCTE = (namespace: ENSNamespaceId) => {
+  const rootRegistryId = maybeGetENSv2RootRegistryId(namespace);
   // if ENSv2 is not defined, return an empty set with identical structure to below
-  if (!getENSV2RootRegistryId()) {
+  if (!rootRegistryId) {
     return ensDb
       .select({ id: sql<string>`registry_id`.as("id") })
       .from(sql`(SELECT NULL::text AS registry_id WHERE FALSE) AS canonical_registries_cte`)
@@ -53,7 +47,7 @@ export const getCanonicalRegistriesCTE = () => {
       sql`
       (
         WITH RECURSIVE canonical_registries AS (
-          SELECT ${getENSV2RootRegistryId()}::text AS registry_id, 0 AS depth
+          SELECT ${rootRegistryId}::text AS registry_id, 0 AS depth
           UNION ALL
           SELECT rcd.registry_id, cr.depth + 1
           FROM ${ensIndexerSchema.registryCanonicalDomain} rcd

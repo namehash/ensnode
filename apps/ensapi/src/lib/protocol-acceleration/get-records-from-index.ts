@@ -1,8 +1,6 @@
-import config from "@/config";
-
 import { type AccountId, DEFAULT_EVM_COIN_TYPE, type Node } from "enssdk";
 
-import type { ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
+import type { ENSNamespaceId, ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 import { staticResolverImplementsAddressRecordDefaulting } from "@ensnode/ensnode-sdk/internal";
 
 import { ensDb } from "@/lib/ensdb/singleton";
@@ -11,10 +9,12 @@ import type { IndexedResolverRecords } from "@/lib/resolution/make-records-respo
 const DEFAULT_EVM_COIN_TYPE_BIGINT = BigInt(DEFAULT_EVM_COIN_TYPE);
 
 export async function getRecordsFromIndex<SELECTION extends ResolverRecordsSelection>({
+  namespace,
   resolver,
   node,
   selection,
 }: {
+  namespace: ENSNamespaceId;
   resolver: AccountId;
   node: Node;
   selection: SELECTION;
@@ -36,7 +36,7 @@ export async function getRecordsFromIndex<SELECTION extends ResolverRecordsSelec
   if (!records) return null;
 
   // if the resolver doesn't implement address record defaulting, return records as-is
-  if (!staticResolverImplementsAddressRecordDefaulting(config.namespace, resolver)) return records;
+  if (!staticResolverImplementsAddressRecordDefaulting(namespace, resolver)) return records;
 
   // otherwise, materialize all selected address records that do not yet exist
   if (selection.addresses) {

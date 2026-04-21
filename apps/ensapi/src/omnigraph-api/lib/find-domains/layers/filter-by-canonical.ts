@@ -1,5 +1,7 @@
 import { eq, isNotNull, isNull, or } from "drizzle-orm";
 
+import type { ENSNamespaceId } from "@ensnode/datasources";
+
 import { ensDb } from "@/lib/ensdb/singleton";
 
 import { getCanonicalRegistriesCTE } from "../canonical-registries-cte";
@@ -14,8 +16,8 @@ import { type BaseDomainSet, selectBase } from "./base-domain-set";
  * Uses LEFT JOIN with canonical registries CTE: v1 domains pass through (registryId IS NULL),
  * v2 domains must match a canonical registry.
  */
-export function filterByCanonical(base: BaseDomainSet) {
-  const canonicalRegistries = getCanonicalRegistriesCTE();
+export function filterByCanonical(namespace: ENSNamespaceId, base: BaseDomainSet) {
+  const canonicalRegistries = getCanonicalRegistriesCTE(namespace);
 
   return ensDb
     .select(selectBase(base))

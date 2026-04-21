@@ -1,5 +1,3 @@
-import config from "@/config";
-
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { makePermissionsId, makeRegistryId, makeResolverId } from "enssdk";
 
@@ -144,7 +142,8 @@ builder.queryType({
       resolve: (_, { where, order, ...connectionArgs }, context) => {
         const base = domainsBase();
         const named = filterByName(base, where.name);
-        const canonical = where.canonical === true ? filterByCanonical(named) : named;
+        const canonical =
+          where.canonical === true ? filterByCanonical(context.namespace, named) : named;
         const domains = withOrderingMetadata(canonical);
 
         return resolveFindDomains(context, { domains, order, ...connectionArgs });
@@ -159,9 +158,9 @@ builder.queryType({
       type: DomainInterfaceRef,
       args: { by: t.arg({ type: DomainIdInput, required: true }) },
       nullable: true,
-      resolve: (parent, args, ctx, info) => {
+      resolve: (parent, args, context, info) => {
         if (args.by.id !== undefined) return args.by.id;
-        return getDomainIdByInterpretedName(args.by.name);
+        return getDomainIdByInterpretedName(context.namespace, args.by.name);
       },
     }),
 
@@ -222,7 +221,7 @@ builder.queryType({
       type: RegistryRef,
       // TODO: make this nullable: false after all namespaces define ENSv2Root
       nullable: true,
-      resolve: () => maybeGetENSv2RootRegistryId(config.namespace),
+      resolve: (parent, args, context, info) => maybeGetENSv2RootRegistryId(context.namespace),
     }),
   }),
 });

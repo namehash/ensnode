@@ -5,7 +5,7 @@ import { and, count } from "drizzle-orm";
 import { ensDb } from "@/lib/ensdb/singleton";
 import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
 import { makeLogger } from "@/lib/logger";
-import type { context as createContext } from "@/omnigraph-api/context";
+import type { createYogaContextForNamespace } from "@/omnigraph-api/context";
 import type {
   DomainsWithOrderingMetadata,
   DomainsWithOrderingMetadataResult,
@@ -77,7 +77,7 @@ function getOrderValueFromResult(
  * @param args - The domains CTE, optional ordering, and relay connection args
  */
 export function resolveFindDomains(
-  context: ReturnType<typeof createContext>,
+  context: ReturnType<typeof createYogaContextForNamespace>,
   {
     domains,
     order,

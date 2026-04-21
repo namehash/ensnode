@@ -1,5 +1,3 @@
-import config from "@/config";
-
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, eq } from "drizzle-orm";
 import {
@@ -125,7 +123,7 @@ ResolverRef.implement({
       description: "Whether Resolver is a BridgedResolver.",
       type: AccountIdRef,
       nullable: true,
-      resolve: (parent) => isBridgedResolver(config.namespace, parent),
+      resolve: (parent, args, context) => isBridgedResolver(context.namespace, parent),
     }),
 
     ////////////////////////

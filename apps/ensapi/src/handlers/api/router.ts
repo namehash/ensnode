@@ -1,4 +1,5 @@
 import { createApp } from "@/lib/hono-factory";
+import { stackInfoMiddleware } from "@/middleware/stack-info.middleware";
 
 import nameTokensApi from "./explore/name-tokens-api";
 import registrarActionsApi from "./explore/registrar-actions-api";
@@ -7,7 +8,9 @@ import statusApi from "./meta/status-api";
 import omnigraphApi from "./omnigraph/omnigraph-api";
 import resolutionApi from "./resolution/resolution-api";
 
-const app = createApp();
+const app = createApp({
+  middlewares: [stackInfoMiddleware],
+});
 
 app.route("/", statusApi);
 app.route("/realtime", realtimeApi);

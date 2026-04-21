@@ -1,9 +1,8 @@
-import config from "@/config";
-
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 import { factory, producing } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
+import { ensureEnsNodeStackInfoAvailable } from "@/middleware/stack-info.middleware";
 
 const logger = makeLogger("can-accelerate.middleware");
 
@@ -26,16 +25,19 @@ let prevCanAccelerate = false;
 export const canAccelerateMiddleware = producing(
   ["canAccelerate"],
   factory.createMiddleware(async (c, next) => {
+    ensureEnsNodeStackInfoAvailable(c);
     // context must be set by the required middleware
     if (c.var.isRealtime === undefined) {
       throw new Error(`Invariant(canAccelerateMiddleware): isRealtime middleware required`);
     }
 
+    const ensIndexerPublicConfig = c.var.stackInfo.ensIndexer;
+
     ////////////////////////////
     /// Temporary ENSv2 Bailout
     ////////////////////////////
     // TODO: re-enable acceleration for ensv2 once implemented
-    if (config.ensIndexerPublicConfig.plugins.includes(PluginName.ENSv2)) {
+    if (ensIndexerPublicConfig.plugins.includes(PluginName.ENSv2)) {
       if (!didWarnCannotAccelerateENSv2) {
         logger.warn(
           `ENSApi is temporarily unable to accelerate Resolution API requests while indexing ENSv2. Protocol Acceleration is DISABLED.`,
@@ -52,7 +54,7 @@ export const canAccelerateMiddleware = producing(
     /// Protocol Acceleration Plugin Availability
     //////////////////////////////////////////////
 
-    const hasProtocolAccelerationPlugin = config.ensIndexerPublicConfig.plugins.includes(
+    const hasProtocolAccelerationPlugin = ensIndexerPublicConfig.plugins.includes(
       PluginName.ProtocolAcceleration,
     );
 

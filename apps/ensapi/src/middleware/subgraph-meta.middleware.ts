@@ -4,6 +4,7 @@ import type { SubgraphMetaVariables } from "@ensnode/ponder-subgraph";
 
 import { indexingContextToSubgraphMeta } from "@/lib/subgraph/indexing-status-to-subgraph-meta";
 import type { IndexingStatusMiddlewareVariables } from "@/middleware/indexing-status.middleware";
+import { ensureEnsNodeStackInfoAvailable } from "@/middleware/stack-info.middleware";
 
 /**
  * Middleware that converts indexing status to subgraph metadata format.
@@ -15,11 +16,12 @@ import type { IndexingStatusMiddlewareVariables } from "@/middleware/indexing-st
 export const subgraphMetaMiddleware = createMiddleware<{
   Variables: IndexingStatusMiddlewareVariables & SubgraphMetaVariables;
 }>(async (c, next) => {
+  ensureEnsNodeStackInfoAvailable(c);
   // context must be set by the required middleware
   if (c.var.indexingStatus === undefined) {
     throw new Error(`Invariant(subgraphMetaMiddleware): indexingStatusMiddleware required`);
   }
 
-  c.set("_meta", indexingContextToSubgraphMeta(c.var.indexingStatus));
+  c.set("_meta", indexingContextToSubgraphMeta(c.var.indexingStatus, c.var.stackInfo.ensIndexer));
   await next();
 });
