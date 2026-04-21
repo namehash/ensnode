@@ -18,7 +18,7 @@ export function RequireActiveConnection({ children }: PropsWithChildren) {
     return (
       <section className="p-6">
         <ErrorInfo
-          title="Failed to connect to ENSApi"
+          title="Error connecting to your selected ENSNode instance"
           description={ensNodeStackInfo.error.message}
         />
       </section>

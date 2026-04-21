@@ -9,6 +9,16 @@ const logger = makeLogger("stack-info.middleware");
 export interface StackInfoMiddlewareVariables {
   /**
    * ENSNode Stack Info
+   *
+   * If there was an issue retrieving the Stack Info, it will be set to
+   * an `Error` so that downstream middlewares and handlers can handle
+   * the error appropriately.
+   *
+   * In the case of a successful retrieval, this will be
+   * the ENSNode Stack Info object, which is considered immutable for
+   * the lifecycle of the ENSApi instance. Therefore, once successfully loaded,
+   * the same Stack Info object will be returned for every request and
+   * cached indefinitely.
    */
   stackInfo: EnsNodeStackInfo | Error;
 }

@@ -14,11 +14,12 @@ import { ensDbClient } from "@/lib/ensdb/singleton";
 import { lazyProxy } from "@/lib/lazy";
 
 /**
- * Loads the ENS Node stack info, either from cache if available,
+ * Loads the ENSNode stack info, either from cache if available,
  * or by building it from the public configs of ENSApi and ENSDb.
  *
- * The ENSNode Stack Info object is considered immutable, so once
- * it is successfully loaded, it will be cached indefinitely.
+ * The ENSNode Stack Info object is considered immutable for
+ * the lifecycle of an ENSApi process instance, so once it is successfully
+ * loaded, it will be cached indefinitely.
  */
 async function loadEnsNodeStackInfo(
   cachedResult?: CachedResult<EnsNodeStackInfo>,
@@ -38,7 +39,7 @@ async function loadEnsNodeStackInfo(
 // SWRCache with proactivelyInitialize:true starts background polling immediately
 // on construction, which would trigger ensDbClient before env vars are available.
 /**
- * Cache for ENS Node stack info
+ * Cache for ENSNode stack info
  * Once successfully loaded, the ENSNode Stack Info is cached indefinitely and
  * never revalidated. This ensures the JSON is only fetched once during
  * the application lifecycle.
@@ -52,7 +53,7 @@ async function loadEnsNodeStackInfo(
 export const stackInfoCache = lazyProxy(
   () =>
     /**
-     * Cache for ENS Node stack info
+     * Cache for ENSNode stack info
      *
      * Once initialized successfully, this cache will always return
      * the same stack info for the lifecycle of the ENSApi instance.
