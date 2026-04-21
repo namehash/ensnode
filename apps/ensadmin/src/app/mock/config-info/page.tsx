@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import {
   buildEnsNodeStackInfo,
   deserializeENSApiPublicConfig,
+  type EnsDbPublicConfig,
   SerializedENSApiPublicConfig,
 } from "@ensnode/ensnode-sdk";
 
@@ -45,7 +46,7 @@ export default function MockConfigPage() {
             versionInfo: {
               postgresql: "18.1",
             },
-          };
+          } satisfies EnsDbPublicConfig;
           return {
             ensNodeStackInfo: buildEnsNodeStackInfo(ensApiPublicConfig, ensDbPublicConfig),
           } satisfies ENSNodeConfigInfoViewProps;

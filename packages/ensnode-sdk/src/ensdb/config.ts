@@ -9,7 +9,7 @@ export interface EnsDbVersionInfo {
 }
 
 /**
- * Complete public configuration object for ENSDb.
+ * The public configuration of an ENSDb instance.
  */
 export interface EnsDbPublicConfig {
   /**

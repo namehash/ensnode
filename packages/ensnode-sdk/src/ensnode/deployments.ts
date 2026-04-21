@@ -1,12 +1,12 @@
 import { type ENSNamespaceId, ENSNamespaceIds } from "@ensnode/datasources";
 
 /**
- * Default ENSNode API endpoint URL for Mainnet
+ * Default ENSNode URL for Mainnet
  */
 export const DEFAULT_ENSNODE_URL_MAINNET = "https://api.alpha.ensnode.io" as const;
 
 /**
- * Default ENSNode API endpoint URL for Sepolia
+ * Default ENSNode URL for Sepolia
  */
 export const DEFAULT_ENSNODE_URL_SEPOLIA = "https://api.alpha-sepolia.ensnode.io" as const;
 
