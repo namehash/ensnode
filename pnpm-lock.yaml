@@ -396,9 +396,6 @@ importers:
       '@ponder/client':
         specifier: 'catalog:'
         version: 0.16.6(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/pg@8.16.0)(kysely@0.28.14)(pg@8.16.3)(typescript@5.9.3)
-      '@ponder/utils':
-        specifier: 'catalog:'
-        version: 0.2.18(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))
       '@pothos/core':
         specifier: ^4.10.0
         version: 4.10.0(graphql@16.11.0)

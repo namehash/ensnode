@@ -1,7 +1,6 @@
 import config from "@/config";
 
 import { trace } from "@opentelemetry/api";
-import { replaceBigInts } from "@ponder/utils";
 import {
   type AccountId,
   asInterpretedName,
@@ -23,6 +22,7 @@ import {
   PluginName,
   type ResolverRecordsSelection,
   TraceableENSProtocol,
+  toJson,
 } from "@ensnode/ensnode-sdk";
 import {
   isBridgedResolver,
@@ -119,7 +119,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
   } = options;
 
   // `selection` may contain bigints (e.g. `abi: ContentType`); stringify safely for tracing.
-  const selectionString = JSON.stringify(replaceBigInts(selection, String));
+  const selectionString = toJson(selection);
 
   // trace for external consumers
   return withEnsProtocolStep(
@@ -164,7 +164,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
 
           // construct the set of resolve() operations indicated by node/selection
           let operations = makeOperations(node, selection);
-          span.setAttribute("operations", JSON.stringify(replaceBigInts(operations, String)));
+          span.setAttribute("operations", toJson(operations));
 
           // if no operations were generated, this was an empty selection; give them what they asked for
           if (operations.length === 0) return makeRecordsResponse<SELECTION>(operations);
@@ -354,7 +354,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           // Invariant: all operations must be resolved
           if (!operations.every(isOperationResolved)) {
             throw new Error(
-              `Invariant(forward-resolution): Not all operations were resolved at the end of resolution!\n${JSON.stringify(replaceBigInts(operations, String))}`,
+              `Invariant(forward-resolution): Not all operations were resolved at the end of resolution!\n${toJson(operations, { pretty: true })}`,
             );
           }
 
