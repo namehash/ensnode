@@ -32,14 +32,14 @@ import { Subregistry } from "./subregistry";
  *
  * The count of left-padded bytes in an {@link Referrer} value.
  */
-export const ENCODED_REFERRER_BYTE_OFFSET = 12;
+const ENCODED_REFERRER_BYTE_OFFSET = 12;
 
 /**
  * Encoded Referrer byte length
  *
  * The count of bytes the {@link Referrer} value consists of.
  */
-export const ENCODED_REFERRER_BYTE_LENGTH = 32;
+const ENCODED_REFERRER_BYTE_LENGTH = 32;
 
 /**
  * Expected padding for a valid encoded referrer
@@ -47,13 +47,13 @@ export const ENCODED_REFERRER_BYTE_LENGTH = 32;
  * Properly encoded referrers must have exactly 12 zero bytes of left padding
  * before the 20-byte Ethereum address.
  */
-export const EXPECTED_ENCODED_REFERRER_PADDING: Hex = pad("0x", {
+const EXPECTED_ENCODED_REFERRER_PADDING: Hex = pad("0x", {
   size: ENCODED_REFERRER_BYTE_OFFSET,
   dir: "left",
 });
 
 /**
- * Decode an {@link Referrer} value into a {@link NormalizedAddress}
+ * Decode a {@link Referrer} value into a {@link NormalizedAddress}
  * according to the referrer encoding with left-zero-padding.
  *
  * @param referrer - The "raw" {@link Referrer} value to decode.

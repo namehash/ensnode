@@ -17,19 +17,19 @@ export type EncodedReferrer = Referrer & { readonly __brand: "EncodedReferrer" }
 /**
  * Encoded Referrer byte offset
  *
- * The count of left-padded bytes in an {@link Referrer} value.
+ * The count of left-padded bytes in an {@link EncodedReferrer} value.
  */
 export const ENCODED_REFERRER_BYTE_OFFSET = 12;
 
 /**
  * Encoded Referrer byte length
  *
- * The count of bytes the {@link Referrer} value consists of.
+ * The count of bytes the {@link EncodedReferrer} value consists of.
  */
 export const ENCODED_REFERRER_BYTE_LENGTH = 32;
 
 /**
- * Expected padding for a valid encoded referrer
+ * Expected padding for a valid {@link EncodedReferrer}
  *
  * Properly encoded referrers must have exactly 12 zero bytes of left padding
  * before the 20-byte Ethereum address.
@@ -65,7 +65,7 @@ export function buildEncodedReferrer(address: Address): EncodedReferrer {
 }
 
 /**
- * Decode an {@link Referrer} value into a {@link NormalizedAddress}
+ * Decode a {@link Referrer} value into a {@link NormalizedAddress}
  * according to the referrer encoding with left-zero-padding.
  *
  * @param referrer - The "raw" {@link Referrer} value to decode.
