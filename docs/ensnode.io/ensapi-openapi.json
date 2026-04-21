@@ -1095,11 +1095,11 @@
           {
             "schema": {
               "type": "boolean",
-              "description": "Include detailed resolution trace information in the response.",
+              "description": "Include detailed OpenTelemetry trace information about the resolution in the response.",
               "default": false
             },
             "required": false,
-            "description": "Include detailed resolution trace information in the response.",
+            "description": "Include detailed OpenTelemetry trace information about the resolution in the response.",
             "name": "trace",
             "in": "query"
           },
@@ -1225,11 +1225,11 @@
           {
             "schema": {
               "type": "boolean",
-              "description": "Include detailed resolution trace information in the response.",
+              "description": "Include detailed OpenTelemetry trace information about the resolution in the response.",
               "default": false
             },
             "required": false,
-            "description": "Include detailed resolution trace information in the response.",
+            "description": "Include detailed OpenTelemetry trace information about the resolution in the response.",
             "name": "trace",
             "in": "query"
           },
@@ -1335,11 +1335,11 @@
           {
             "schema": {
               "type": "boolean",
-              "description": "Include detailed resolution trace information in the response.",
+              "description": "Include detailed OpenTelemetry trace information about the resolution in the response.",
               "default": false
             },
             "required": false,
-            "description": "Include detailed resolution trace information in the response.",
+            "description": "Include detailed OpenTelemetry trace information about the resolution in the response.",
             "name": "trace",
             "in": "query"
           },
