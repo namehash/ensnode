@@ -22,6 +22,15 @@ export type Address = ViemAddress;
 export type NormalizedAddress = Address;
 
 /**
+ * Referrer
+ *
+ * Represents a raw 32-byte onchain referrer value as emitted by ENS Registrar Controller contracts.
+ *
+ * @invariant Guaranteed to be a hex string representation of a 32-byte value.
+ */
+export type Referrer = Hex;
+
+/**
  * Unix timestamp value as bigint.
  *
  * Represents the number of seconds that have elapsed
