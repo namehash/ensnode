@@ -11,6 +11,7 @@ import "./schema/permissions";
 import "./schema/query";
 import "./schema/registry";
 import "./schema/renewal";
+import "./schema/resolution";
 import "./schema/resolver-records";
 import "./schema/scalars";
 
