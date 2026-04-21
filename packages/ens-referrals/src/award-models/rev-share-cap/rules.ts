@@ -197,15 +197,6 @@ export const buildReferralProgramRulesRevShareCap = (
 };
 
 /**
- * Determine if a referrer is qualified under rev-share-cap rules.
- *
- * A referrer is qualified if they meet the revenue threshold AND are not admin-disqualified.
- *
- * @param referrer - The referrer's address.
- * @param totalBaseRevenueContribution - The referrer's total base revenue contribution.
- * @param rules - The rev-share-cap rules of the referral program.
- */
-/**
  * Compute the base revenue contribution accrued over a given duration under
  * rev-share-cap rules: `rules.baseAnnualRevenueContribution × (duration / 1 year)`.
  *
@@ -222,6 +213,15 @@ export function computeBaseRevenueContribution(
   );
 }
 
+/**
+ * Determine if a referrer is qualified under rev-share-cap rules.
+ *
+ * A referrer is qualified if they meet the revenue threshold AND are not admin-disqualified.
+ *
+ * @param referrer - The referrer's address.
+ * @param totalBaseRevenueContribution - The referrer's total base revenue contribution.
+ * @param rules - The rev-share-cap rules of the referral program.
+ */
 export function isReferrerQualifiedRevShareCap(
   referrer: NormalizedAddress,
   totalBaseRevenueContribution: PriceUsdc,
