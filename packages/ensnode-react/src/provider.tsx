@@ -26,7 +26,7 @@ export interface EnsNodeProviderProps {
   queryClientOptions?: ConstructorParameters<typeof QueryClient>[0];
 }
 
-function EnsApiInternalProvider({
+function EnsNodeInternalProvider({
   children,
   options,
 }: {
@@ -56,12 +56,12 @@ export function EnsNodeProvider(parameters: React.PropsWithChildren<EnsNodeProvi
           "Either remove the queryClient prop to use auto-managed setup, or wrap with QueryClientProvider.",
       );
     }
-    return createElement(EnsApiInternalProvider, { options, children });
+    return createElement(EnsNodeInternalProvider, { options, children });
   }
 
   // If already inside a QueryClientProvider, just use that
   if (hasExistingQueryClient) {
-    return createElement(EnsApiInternalProvider, { options, children });
+    return createElement(EnsNodeInternalProvider, { options, children });
   }
 
   // Create our own QueryClient and QueryClientProvider
@@ -84,7 +84,7 @@ export function EnsNodeProvider(parameters: React.PropsWithChildren<EnsNodeProvi
   return createElement(
     QueryClientProvider,
     { client: defaultQueryClient },
-    createElement(EnsApiInternalProvider, { options, children }),
+    createElement(EnsNodeInternalProvider, { options, children }),
   );
 }
 

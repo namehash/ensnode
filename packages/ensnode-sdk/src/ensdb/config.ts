@@ -1,5 +1,5 @@
 /**
- * Version info about ENSIndexer and its dependencies.
+ * Version info about ENSDb and its dependencies.
  */
 export interface EnsDbVersionInfo {
   /**

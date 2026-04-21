@@ -126,7 +126,7 @@ function DisplayPrimaryNames() {
 
 ### EnsNodeProvider
 
-The provider component that supplies ENSApi Provider Options to all child components.
+The provider component that supplies ENSNode Provider Options to all child components.
 
 ```tsx
 interface EnsNodeProviderProps {
