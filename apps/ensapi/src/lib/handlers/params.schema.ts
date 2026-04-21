@@ -38,7 +38,9 @@ const name = z
 const trace = z
   .optional(boolstring)
   .default(false)
-  .describe("Include detailed resolution trace information in the response.")
+  .describe(
+    "Include detailed OpenTelemetry trace information about the resolution in the response.",
+  )
   .openapi({ default: false });
 
 const accelerate = z
@@ -60,13 +62,23 @@ const chainIdsWithoutDefaultChainId = z
   .optional(stringarray.pipe(z.array(defaultableChainId.pipe(excludingDefaultChainId))))
   .describe("Comma-separated list of chain IDs to resolve primary names for (e.g. '1,10,8453').");
 
+const nameParamDescription =
+  "Whether to include the reverse name record in the response," +
+  "see ENSIP-3 (https://docs.ens.domains/ensip/3#resolver-interface). " +
+  "Resolving the reverse 'name' resolver record is relevant as an internal implementation detail of the ENS reverse resolution process " +
+  "where the primary ENS name associated with an address is being determined through a multi-step resolution process. " +
+  "For example, querying the (unvalidated!) reverse 'name' resolver record for Vitalik's address (0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045) " +
+  "is achieved by resolving the reverse 'name' resolver record of the reverse name 'd8da6bf26964af9d7eed9e03e53415d37aa96045.addr.reverse' " +
+  "which (at the time of writing) returns 'vitalik.eth'. " +
+  "The ENS reverse resolution process requires that any reverse 'name' resolver record must also pass a forward-resolution validation " +
+  "to be represented as the primary name for an address. " +
+  "More details here: https://docs.ens.domains/web/reverse";
+
 const rawSelectionParams = z.object({
   name: z
     .string()
     .optional()
-    .describe(
-      "Whether to include the reverse name record in the response, see ENSIP-19 (https://docs.ens.domains/ensip/19/#reverse-resolution)",
-    )
+    .describe(nameParamDescription)
     .openapi({
       enum: ["true", "false"],
     }),
