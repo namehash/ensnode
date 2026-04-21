@@ -16,6 +16,7 @@ import {
   type EnsDbDrizzleClient,
   type EnsNodeSchema,
 } from "../lib/drizzle";
+import { parsePgVersionInfo } from "../lib/parse-pg-version-info";
 import { EnsNodeMetadataKeys } from "./ensnode-metadata";
 import type {
   SerializedEnsNodeMetadata,
@@ -233,24 +234,12 @@ export class EnsDbReader<
     // result will be in the form of [{ version: "PostgreSQL 15.5 (Ubuntu 15.5-0ubuntu0.22.04.1) ..." }]
     const versionString = result.rows[0]?.version;
 
-    if (!versionString) {
-      throw new Error("Failed to get PostgreSQL version from ENSDb instance");
+    try {
+      return parsePgVersionInfo(versionString);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      throw new Error(`Failed to get PostgreSQL version for the ENSDb instance: ${errorMessage}`);
     }
-
-    // extract the version number using regex
-    const match = versionString.match(/PostgreSQL (\d+\.\d+)/);
-
-    if (!match) {
-      throw new Error(`Failed to parse PostgreSQL version from version string: '${versionString}'`);
-    }
-
-    const parsedVersion = match[1];
-
-    if (typeof parsedVersion !== "string") {
-      throw new Error(`Parsed PostgreSQL version is not a string: '${parsedVersion}'`);
-    }
-
-    return parsedVersion;
   }
 
   /**
