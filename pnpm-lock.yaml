@@ -840,13 +840,14 @@ importers:
         version: 7.3.2(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/datasources:
+    dependencies:
+      '@ponder/utils':
+        specifier: ^0.2.18
+        version: 0.2.18(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))
     devDependencies:
       '@ensnode/shared-configs':
         specifier: workspace:*
         version: link:../shared-configs
-      '@ponder/utils':
-        specifier: ^0.2.18
-        version: 0.2.18(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))
       '@types/node':
         specifier: 'catalog:'
         version: 24.10.9

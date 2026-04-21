@@ -38,16 +38,17 @@
     "test": "vitest"
   },
   "peerDependencies": {
-    "@ponder/utils": "^0.2.18",
     "viem": "catalog:"
   },
   "devDependencies": {
     "@ensnode/shared-configs": "workspace:*",
-    "@ponder/utils": "^0.2.18",
     "@types/node": "catalog:",
     "tsup": "catalog:",
     "typescript": "catalog:",
     "viem": "catalog:",
     "vitest": "catalog:"
+  },
+  "dependencies": {
+    "@ponder/utils": "^0.2.18"
   }
 }
