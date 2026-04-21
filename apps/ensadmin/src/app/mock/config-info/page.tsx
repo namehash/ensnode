@@ -41,10 +41,13 @@ export default function MockConfigPage() {
       default:
         try {
           const ensApiPublicConfig = deserializeENSApiPublicConfig(mockConfigData[selectedConfig]);
+          const ensDbPublicConfig = {
+            versionInfo: {
+              postgresql: "18.1",
+            },
+          };
           return {
-            ensNodeStackInfo: buildEnsNodeStackInfo(ensApiPublicConfig, {
-              postgreSqlVersion: "18.1",
-            }),
+            ensNodeStackInfo: buildEnsNodeStackInfo(ensApiPublicConfig, ensDbPublicConfig),
           } satisfies ENSNodeConfigInfoViewProps;
         } catch (error) {
           const errorMessage =

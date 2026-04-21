@@ -13,8 +13,10 @@ import {
   type SerializedChainIndexingStatusSnapshotFollowing,
   type SerializedChainIndexingStatusSnapshotQueued,
   type SerializedEnsApiPublicConfig,
+  type SerializedEnsDbPublicConfig,
   type SerializedEnsIndexerPublicConfig,
   type SerializedEnsNodeStackInfo,
+  SerializedEnsRainbowPublicConfig,
   type SerializedOmnichainIndexingStatusSnapshotBackfill,
   type SerializedOmnichainIndexingStatusSnapshotCompleted,
   type SerializedOmnichainIndexingStatusSnapshotFollowing,
@@ -67,13 +69,20 @@ export const serializedEnsApiPublicConfig = {
   },
 } satisfies SerializedEnsApiPublicConfig;
 
+const serializedEnsDbPublicConfig = {
+  versionInfo: {
+    postgresql: "18.1",
+  },
+} satisfies SerializedEnsDbPublicConfig;
+
+const serializedEnsRainbowPublicConfig =
+  serializedEnsIndexerPublicConfig.ensRainbowPublicConfig satisfies SerializedEnsRainbowPublicConfig;
+
 const serializedStackInfo = {
   ensApi: serializedEnsApiPublicConfig,
-  ensDb: {
-    postgreSqlVersion: "16",
-  },
+  ensDb: serializedEnsDbPublicConfig,
   ensIndexer: serializedEnsIndexerPublicConfig,
-  ensRainbow: serializedEnsIndexerPublicConfig.ensRainbowPublicConfig,
+  ensRainbow: serializedEnsRainbowPublicConfig,
 } satisfies SerializedEnsNodeStackInfo;
 
 export const indexingStatusResponseError: IndexingStatusResponseError = {

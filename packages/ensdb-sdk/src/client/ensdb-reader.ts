@@ -5,6 +5,7 @@ import {
   deserializeCrossChainIndexingStatusSnapshot,
   deserializeEnsIndexerPublicConfig,
   type EnsDbPublicConfig,
+  type EnsDbVersionInfo,
   type EnsIndexerPublicConfig,
 } from "@ensnode/ensnode-sdk";
 
@@ -161,10 +162,10 @@ export class EnsDbReader<
    * Build ENSDb Public Config
    */
   async buildEnsDbPublicConfig(): Promise<EnsDbPublicConfig> {
-    const postgreSqlVersion = await this.getPostgreSqlVersion();
+    const versionInfo = await this.buildEnsDbVersionInfo();
 
     return {
-      postgreSqlVersion,
+      versionInfo,
     };
   }
 
@@ -226,7 +227,7 @@ export class EnsDbReader<
    *
    * @throws when the version cannot be retrieved or parsed from the query result.
    */
-  private async getPostgreSqlVersion(): Promise<string> {
+  private async getPostgresVersion(): Promise<string> {
     const result = await this.ensDb.execute<{ version: string }>("SELECT version();");
 
     // result will be in the form of [{ version: "PostgreSQL 15.5 (Ubuntu 15.5-0ubuntu0.22.04.1) ..." }]
@@ -250,5 +251,19 @@ export class EnsDbReader<
     }
 
     return parsedVersion;
+  }
+
+  /**
+   * Build ENSDb version info.
+   *
+   * @throws when version info cannot be retrieved or parsed from
+   *         the ENSDb instance.
+   */
+  private async buildEnsDbVersionInfo(): Promise<EnsDbVersionInfo> {
+    const postgresVersion = await this.getPostgresVersion();
+
+    return {
+      postgresql: postgresVersion,
+    };
   }
 }

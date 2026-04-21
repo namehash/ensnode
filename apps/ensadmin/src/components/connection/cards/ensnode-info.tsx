@@ -405,7 +405,9 @@ function ENSNodeConfigCardContent({ ensNodeStackInfo }: { ensNodeStackInfo: EnsN
           <InfoCardItem
             label="Database server"
             value={
-              <p className={cardItemValueStyles}>Postgres {ensDbPublicConfig.postgreSqlVersion}</p>
+              <p className={cardItemValueStyles}>
+                Postgres {ensDbPublicConfig.versionInfo.postgresql}
+              </p>
             }
           />
           <InfoCardItem

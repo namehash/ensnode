@@ -3,7 +3,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ENSNamespaceIds } from "../ens";
 import type { SerializedEnsApiPublicConfig } from "../ensapi/config/serialized-types";
+import type { SerializedEnsDbPublicConfig } from "../ensdb/serialize/config";
+import type { SerializedEnsIndexerPublicConfig } from "../ensindexer/config/serialized-types";
 import { PluginName } from "../ensindexer/config/types";
+import type { SerializedEnsRainbowPublicConfig } from "../ensrainbow/serialize/config";
 import { ChainIndexingStatusIds } from "../indexing-status/chain-indexing-status-snapshot";
 import { CrossChainIndexingStrategyIds } from "../indexing-status/cross-chain-indexing-status-snapshot";
 import { OmnichainIndexingStatusIds } from "../indexing-status/omnichain-indexing-status-snapshot";
@@ -57,7 +60,7 @@ const EXAMPLE_PRIMARY_NAMES_RESPONSE = {
 
 const EXAMPLE_ERROR_RESPONSE: ErrorResponse = { message: "error" };
 
-const EXAMPLE_CONFIG_RESPONSE = {
+const EXAMPLE_ENSAPI_CONFIG_RESPONSE = {
   versionInfo: {
     ensApi: "1.9.0",
     ensNormalize: "1.11.1",
@@ -97,13 +100,53 @@ const EXAMPLE_CONFIG_RESPONSE = {
   },
 } satisfies SerializedEnsApiPublicConfig;
 
-const serializedStackInfo = {
-  ensApi: EXAMPLE_CONFIG_RESPONSE,
-  ensDb: {
-    postgreSqlVersion: "16",
+const EXAMPLE_ENSDB_PUBLIC_RESPONSE = {
+  versionInfo: {
+    postgresql: "18.1",
   },
-  ensIndexer: EXAMPLE_CONFIG_RESPONSE.ensIndexerPublicConfig,
-  ensRainbow: EXAMPLE_CONFIG_RESPONSE.ensIndexerPublicConfig.ensRainbowPublicConfig,
+} satisfies SerializedEnsDbPublicConfig;
+
+const EXAMPLE_ENSINDEXER_PUBLIC_CONFIG = {
+  ensRainbowPublicConfig: {
+    version: "0.31.0",
+    labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+    recordsCount: 100,
+  },
+  labelSet: {
+    labelSetId: "subgraph",
+    labelSetVersion: 0,
+  },
+  indexedChainIds: [1, 8453, 59144, 10, 42161, 534352],
+  ensIndexerSchemaName: "alphaSchema0.31.0",
+  isSubgraphCompatible: false,
+  namespace: "mainnet",
+  plugins: [
+    PluginName.Subgraph,
+    PluginName.Basenames,
+    PluginName.Lineanames,
+    PluginName.ThreeDNS,
+    PluginName.ProtocolAcceleration,
+    PluginName.Registrars,
+  ],
+  versionInfo: {
+    ponder: "0.11.43",
+    ensDb: "0.32.0",
+    ensIndexer: "0.32.0",
+    ensNormalize: "1.11.1",
+  },
+} satisfies SerializedEnsIndexerPublicConfig;
+
+const EXAMPLE_ENSRAINBOW_PUBLIC_CONFIG = {
+  version: "0.31.0",
+  labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+  recordsCount: 100,
+} satisfies SerializedEnsRainbowPublicConfig;
+
+const serializedStackInfo = {
+  ensApi: EXAMPLE_ENSAPI_CONFIG_RESPONSE,
+  ensDb: EXAMPLE_ENSDB_PUBLIC_RESPONSE,
+  ensIndexer: EXAMPLE_ENSINDEXER_PUBLIC_CONFIG,
+  ensRainbow: EXAMPLE_ENSRAINBOW_PUBLIC_CONFIG,
 } satisfies SerializedEnsNodeStackInfo;
 
 const EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE = deserializeEnsApiIndexingStatusResponse({
