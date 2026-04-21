@@ -10,7 +10,7 @@ All commands are run from the **monorepo root**.
 | `docker/docker-compose.devnet.yml` | Full stack against local devnet (`ens-test-env`). Includes all base services + devnet. |
 | `docker/docker-compose.orchestrator.yml` | Minimal infra for CI — devnet + postgres only. Used by `orchestrator.ts`. |
 | `docker/services/*.yml` | Individual service definitions. Extended by the compose files above. |
-| `docker/.env.docker-compose` | Shared env defaults (postgres credentials, internal service URLs). Usually is placed after .env.local so wil override it by design |
+| `docker/.env.docker-compose` | Shared env defaults (postgres credentials, internal service URLs). Usually placed after `.env.local`, so it will override it by design. |
 
 > To inspect the fully resolved config for any compose file (resolves all `extends`):
 > ```bash
@@ -29,7 +29,7 @@ cp apps/ensapi/.env.local.example apps/ensapi/.env.local
 cp apps/ensrainbow/.env.local.example apps/ensrainbow/.env.local
 ```
 
-Edit both files and set your RPC endpoints (e.g. `RPC_URL_1`, `ALCHEMY_API_KEY`) and any other required values.
+Edit those files and set your RPC endpoints (e.g. `RPC_URL_1`, `ALCHEMY_API_KEY`) and any other required values.
 
 **2. Start/stop the stack:**
 
