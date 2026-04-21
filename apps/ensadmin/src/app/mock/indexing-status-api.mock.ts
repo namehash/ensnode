@@ -1,8 +1,8 @@
 import {
   ChainIndexingStatusIds,
   CrossChainIndexingStrategyIds,
-  deserializeIndexingStatusResponse,
-  type IndexingStatusResponse,
+  deserializeEnsApiIndexingStatusResponse,
+  EnsApiIndexingStatusResponseOk,
   IndexingStatusResponseCodes,
   type IndexingStatusResponseError,
   type OmnichainIndexingStatusId,
@@ -12,11 +12,78 @@ import {
   type SerializedChainIndexingStatusSnapshotCompleted,
   type SerializedChainIndexingStatusSnapshotFollowing,
   type SerializedChainIndexingStatusSnapshotQueued,
+  type SerializedEnsApiPublicConfig,
+  type SerializedEnsDbPublicConfig,
+  type SerializedEnsIndexerPublicConfig,
+  type SerializedEnsNodeStackInfo,
+  SerializedEnsRainbowPublicConfig,
   type SerializedOmnichainIndexingStatusSnapshotBackfill,
   type SerializedOmnichainIndexingStatusSnapshotCompleted,
   type SerializedOmnichainIndexingStatusSnapshotFollowing,
   type SerializedOmnichainIndexingStatusSnapshotUnstarted,
 } from "@ensnode/ensnode-sdk";
+
+const serializedEnsIndexerPublicConfig = {
+  labelSet: {
+    labelSetId: "subgraph",
+    labelSetVersion: 0,
+  },
+  indexedChainIds: [1, 8453, 59144, 10, 42161, 534352, 567],
+  ensIndexerSchemaName: "alphaSchema0.34.0",
+  ensRainbowPublicConfig: {
+    version: "0.34.0",
+    labelSet: {
+      labelSetId: "subgraph",
+      highestLabelSetVersion: 0,
+    },
+    recordsCount: 100,
+  },
+  isSubgraphCompatible: false,
+  namespace: "mainnet",
+  plugins: [
+    "subgraph",
+    "basenames",
+    "lineanames",
+    "threedns",
+    "protocol-acceleration",
+    "registrars",
+    "tokenscope",
+  ],
+  versionInfo: {
+    ponder: "0.11.43",
+    ensIndexer: "0.35.0",
+    ensDb: "0.35.0",
+    ensNormalize: "1.11.1",
+  },
+} satisfies SerializedEnsIndexerPublicConfig;
+
+export const serializedEnsApiPublicConfig = {
+  ensIndexerPublicConfig: serializedEnsIndexerPublicConfig,
+  theGraphFallback: {
+    canFallback: true,
+    url: "https://api.thegraph.com/subgraphs/name/ensdomains/ens",
+  },
+  versionInfo: {
+    ensApi: "0.35.0",
+    ensNormalize: "1.11.1",
+  },
+} satisfies SerializedEnsApiPublicConfig;
+
+const serializedEnsDbPublicConfig = {
+  versionInfo: {
+    postgresql: "18.1",
+  },
+} satisfies SerializedEnsDbPublicConfig;
+
+const serializedEnsRainbowPublicConfig =
+  serializedEnsIndexerPublicConfig.ensRainbowPublicConfig satisfies SerializedEnsRainbowPublicConfig;
+
+const serializedStackInfo = {
+  ensApi: serializedEnsApiPublicConfig,
+  ensDb: serializedEnsDbPublicConfig,
+  ensIndexer: serializedEnsIndexerPublicConfig,
+  ensRainbow: serializedEnsRainbowPublicConfig,
+} satisfies SerializedEnsNodeStackInfo;
 
 export const indexingStatusResponseError: IndexingStatusResponseError = {
   responseCode: IndexingStatusResponseCodes.Error,
@@ -24,9 +91,9 @@ export const indexingStatusResponseError: IndexingStatusResponseError = {
 
 export const indexingStatusResponseOkOmnichain: Record<
   OmnichainIndexingStatusId,
-  IndexingStatusResponse
+  EnsApiIndexingStatusResponseOk
 > = {
-  [OmnichainIndexingStatusIds.Unstarted]: deserializeIndexingStatusResponse({
+  [OmnichainIndexingStatusIds.Unstarted]: deserializeEnsApiIndexingStatusResponse({
     responseCode: IndexingStatusResponseCodes.Ok,
     realtimeProjection: {
       projectedAt: 1759409669,
@@ -85,9 +152,10 @@ export const indexingStatusResponseOkOmnichain: Record<
         } satisfies SerializedOmnichainIndexingStatusSnapshotUnstarted,
       },
     },
+    stackInfo: serializedStackInfo,
   }),
 
-  [OmnichainIndexingStatusIds.Backfill]: deserializeIndexingStatusResponse({
+  [OmnichainIndexingStatusIds.Backfill]: deserializeEnsApiIndexingStatusResponse({
     responseCode: IndexingStatusResponseCodes.Ok,
     realtimeProjection: {
       projectedAt: 1759409670,
@@ -163,9 +231,10 @@ export const indexingStatusResponseOkOmnichain: Record<
         } satisfies SerializedOmnichainIndexingStatusSnapshotBackfill,
       },
     },
+    stackInfo: serializedStackInfo,
   }),
 
-  [OmnichainIndexingStatusIds.Following]: deserializeIndexingStatusResponse({
+  [OmnichainIndexingStatusIds.Following]: deserializeEnsApiIndexingStatusResponse({
     responseCode: IndexingStatusResponseCodes.Ok,
     realtimeProjection: {
       projectedAt: 1755667460,
@@ -256,9 +325,10 @@ export const indexingStatusResponseOkOmnichain: Record<
         } satisfies SerializedOmnichainIndexingStatusSnapshotFollowing,
       },
     },
+    stackInfo: serializedStackInfo,
   }),
 
-  [OmnichainIndexingStatusIds.Completed]: deserializeIndexingStatusResponse({
+  [OmnichainIndexingStatusIds.Completed]: deserializeEnsApiIndexingStatusResponse({
     responseCode: IndexingStatusResponseCodes.Ok,
     realtimeProjection: {
       projectedAt: 1689337668,
@@ -293,5 +363,6 @@ export const indexingStatusResponseOkOmnichain: Record<
         } satisfies SerializedOmnichainIndexingStatusSnapshotCompleted,
       },
     },
+    stackInfo: serializedStackInfo,
   }),
 };
