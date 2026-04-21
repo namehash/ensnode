@@ -181,6 +181,80 @@ export function addPrices<const PriceType extends Price = Price>(
 }
 
 /**
+ * Subtract prices
+ *
+ * Computes `prices[0] - prices[1] - prices[2] - ...` left-associatively.
+ *
+ * @param prices at least two {@link Price} values; the first is the minuend,
+ *               all subsequent values are subtracted from it in order.
+ * @returns the resulting {@link Price} with the same currency as the inputs.
+ * @throws if not all prices have the same currency.
+ * @throws if the result would be negative ({@link CurrencyAmount} must be non-negative).
+ */
+export function subtractPrices<const PriceType extends Price = Price>(
+  ...prices: [PriceType, PriceType, ...PriceType[]]
+): PriceType {
+  const [minuend, ...subtrahends] = prices;
+  const allPricesInSameCurrency = subtrahends.every((price) =>
+    isPriceCurrencyEqual(minuend, price),
+  );
+
+  if (allPricesInSameCurrency === false) {
+    throw new Error("All prices must have the same currency to be subtracted.");
+  }
+
+  const resultAmount = subtrahends.reduce((acc, price) => acc - price.amount, minuend.amount);
+
+  if (resultAmount < 0n) {
+    throw new Error("subtractPrices result must be non-negative.");
+  }
+
+  return { amount: resultAmount, currency: minuend.currency } as PriceType;
+}
+
+/**
+ * Return the smallest of the given {@link Price} values.
+ *
+ * @param prices at least two {@link Price} values to compare.
+ * @returns the {@link Price} with the smallest amount. Ties return the first
+ *          such value in argument order.
+ * @throws if not all prices have the same currency.
+ */
+export function minPrices<const PriceType extends Price = Price>(
+  ...prices: [PriceType, PriceType, ...PriceType[]]
+): PriceType {
+  const firstPrice = prices[0];
+  const allPricesInSameCurrency = prices.every((price) => isPriceCurrencyEqual(firstPrice, price));
+
+  if (allPricesInSameCurrency === false) {
+    throw new Error("All prices must have the same currency to be compared.");
+  }
+
+  return prices.reduce((acc, price) => (price.amount < acc.amount ? price : acc));
+}
+
+/**
+ * Return the largest of the given {@link Price} values.
+ *
+ * @param prices at least two {@link Price} values to compare.
+ * @returns the {@link Price} with the largest amount. Ties return the first
+ *          such value in argument order.
+ * @throws if not all prices have the same currency.
+ */
+export function maxPrices<const PriceType extends Price = Price>(
+  ...prices: [PriceType, PriceType, ...PriceType[]]
+): PriceType {
+  const firstPrice = prices[0];
+  const allPricesInSameCurrency = prices.every((price) => isPriceCurrencyEqual(firstPrice, price));
+
+  if (allPricesInSameCurrency === false) {
+    throw new Error("All prices must have the same currency to be compared.");
+  }
+
+  return prices.reduce((acc, price) => (price.amount > acc.amount ? price : acc));
+}
+
+/**
  * Scales a Price object by a floating-point number while maintaining precision.
  *
  * **Important:** The precision of this method is bound to the precision of float
