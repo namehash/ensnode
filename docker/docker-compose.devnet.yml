@@ -29,6 +29,7 @@ services:
       service: ensapi
     environment:
       ENSINDEXER_SCHEMA_NAME: docker_devnet_v1
+      RPC_URL_15658733: http://devnet:8545
     env_file:
       - path: ./.env.docker-compose
         required: true
