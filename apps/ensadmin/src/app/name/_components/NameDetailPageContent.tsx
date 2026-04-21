@@ -6,7 +6,7 @@ import { ASSUME_IMMUTABLE_QUERY, useRecords } from "@ensnode/ensnode-react";
 import type { ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
+import { useActiveEnsNodeStackInfo } from "@/hooks/active/use-active-ensnode-stack-info";
 import { getCommonCoinTypes } from "@/lib/default-records-selection";
 
 import { AdditionalRecords } from "./AdditionalRecords";
@@ -45,7 +45,7 @@ interface NameDetailPageContentProps {
 }
 
 export function NameDetailPageContent({ name }: NameDetailPageContentProps) {
-  const namespace = useActiveNamespace();
+  const { namespace } = useActiveEnsNodeStackInfo().ensIndexer;
 
   const selection = {
     addresses: getCommonCoinTypes(namespace),

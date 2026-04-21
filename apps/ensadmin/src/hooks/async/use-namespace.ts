@@ -1,4 +1,4 @@
-import { useENSNodeConfig } from "@ensnode/ensnode-react";
+import { useEnsNodeStackInfo } from "@/hooks/use-ensnode-stack-info";
 
 /**
  * Hook to get the namespace ID from the active ENSNode connection.
@@ -22,10 +22,10 @@ import { useENSNodeConfig } from "@ensnode/ensnode-react";
  * ```
  */
 export function useNamespace() {
-  const query = useENSNodeConfig();
+  const query = useEnsNodeStackInfo();
 
   return {
     ...query,
-    data: query.data?.ensIndexerPublicConfig.namespace ?? null,
+    data: query.data?.ensIndexer.namespace ?? null,
   };
 }

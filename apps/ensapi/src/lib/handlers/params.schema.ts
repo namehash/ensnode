@@ -39,17 +39,47 @@ const stringarray = z
 const name = z
   .string()
   .refine(isNormalizedName, "Must be normalized, see https://docs.ens.domains/resolution/names/")
-  .transform((val) => val as Name);
+  .transform((val) => val as Name)
+  .describe("ENS name to resolve (e.g. 'vitalik.eth'). Must be normalized per ENSIP-15.");
 
-const trace = z.optional(boolstring).default(false).openapi({ default: false });
-const accelerate = z.optional(boolstring).default(false).openapi({ default: false });
-const address = makeNormalizedAddressSchema();
-const defaultableChainId = makeDefaultableChainIdStringSchema();
+const trace = z
+  .optional(boolstring)
+  .default(false)
+  .describe(
+    "Include detailed OpenTelemetry trace information about the resolution in the response.",
+  )
+  .openapi({ default: false });
+
+const accelerate = z
+  .optional(boolstring)
+  .default(false)
+  .describe("Attempt Protocol Acceleration using indexed data.")
+  .openapi({
+    default: false,
+  });
+const address = makeNormalizedAddressSchema().describe(
+  "EVM wallet address (e.g. '0xd8da6bf26964af9d7eed9e03e53415d37aa96045').",
+);
+const defaultableChainId = makeDefaultableChainIdStringSchema().describe(
+  "Chain ID as a string (e.g. '1' for Ethereum mainnet). Use '0' for the default EVM chain.",
+);
 const coinType = makeCoinTypeStringSchema();
 
-const chainIdsWithoutDefaultChainId = z.optional(
-  stringarray.pipe(z.array(defaultableChainId.pipe(excludingDefaultChainId))),
-);
+const chainIdsWithoutDefaultChainId = z
+  .optional(stringarray.pipe(z.array(defaultableChainId.pipe(excludingDefaultChainId))))
+  .describe("Comma-separated list of chain IDs to resolve primary names for (e.g. '1,10,8453').");
+
+const nameParamDescription =
+  "Whether to include the reverse name record in the response," +
+  "see ENSIP-3 (https://docs.ens.domains/ensip/3#resolver-interface). " +
+  "Resolving the reverse 'name' resolver record is relevant as an internal implementation detail of the ENS reverse resolution process " +
+  "where the primary ENS name associated with an address is being determined through a multi-step resolution process. " +
+  "For example, querying the (unvalidated!) reverse 'name' resolver record for Vitalik's address (0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045) " +
+  "is achieved by resolving the reverse 'name' resolver record of the reverse name 'd8da6bf26964af9d7eed9e03e53415d37aa96045.addr.reverse' " +
+  "which (at the time of writing) returns 'vitalik.eth'. " +
+  "The ENS reverse resolution process requires that any reverse 'name' resolver record must also pass a forward-resolution validation " +
+  "to be represented as the primary name for an address. " +
+  "More details here: https://docs.ens.domains/web/reverse";
 
 const contentTypeBitmask = z
   .string()
@@ -76,9 +106,25 @@ const interfaceId = z
   .transform((val) => val.toLowerCase() as InterfaceId);
 
 const rawSelectionParams = z.object({
-  name: z.string().optional(),
-  addresses: z.string().optional(),
-  texts: z.string().optional(),
+  name: z
+    .string()
+    .optional()
+    .describe(nameParamDescription)
+    .openapi({
+      enum: ["true", "false"],
+    }),
+  addresses: z
+    .string()
+    .optional()
+    .describe(
+      "Comma-separated list of coin types to resolve addresses for (e.g. '60' for ETH, '2147483658' for OP).",
+    ),
+  texts: z
+    .string()
+    .optional()
+    .describe(
+      "Comma-separated list of text record keys to resolve (e.g. 'avatar,description,url').",
+    ),
   contenthash: z.string().optional(),
   pubkey: z.string().optional(),
   dnszonehash: z.string().optional(),

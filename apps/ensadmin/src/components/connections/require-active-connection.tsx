@@ -2,23 +2,25 @@
 
 import type { PropsWithChildren } from "react";
 
-import { useENSNodeConfig } from "@ensnode/ensnode-react";
-
 import { ErrorInfo } from "@/components/error-info";
 import { LoadingSpinner } from "@/components/loading-spinner";
+import { useEnsNodeStackInfo } from "@/hooks/use-ensnode-stack-info";
 
 /**
  * Allows consumers to use `useActiveConnection` by blocking rendering until it is available.
  */
 export function RequireActiveConnection({ children }: PropsWithChildren) {
-  const { status, error } = useENSNodeConfig();
+  const ensNodeStackInfo = useEnsNodeStackInfo();
 
-  if (status === "pending") return <Loading />;
+  if (ensNodeStackInfo.status === "pending") return <Loading />;
 
-  if (status === "error") {
+  if (ensNodeStackInfo.status === "error") {
     return (
       <section className="p-6">
-        <ErrorInfo title="Unable to parse ENSNode Config" description={error.message} />
+        <ErrorInfo
+          title="Error connecting to your selected ENSNode instance"
+          description={ensNodeStackInfo.error.message}
+        />
       </section>
     );
   }

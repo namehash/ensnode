@@ -650,7 +650,7 @@ describe("config (with base env)", () => {
 
     it("throws an error when LABEL_SET_VERSION is not a number", async () => {
       vi.stubEnv("LABEL_SET_VERSION", "not-a-number");
-      await expect(getConfig()).rejects.toThrow(/LABEL_SET_VERSION must be an integer/);
+      await expect(getConfig()).rejects.toThrow(/LABEL_SET_VERSION must be a non-negative integer/);
     });
 
     it("accepts zero as a valid LABEL_SET_VERSION", async () => {
