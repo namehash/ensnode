@@ -27,11 +27,18 @@ export const makeLabelSetIdSchema = (valueLabel: string = "Label set ID") => {
  *
  * @param valueLabel - The label to use in error messages (e.g., "Label set version", "LABEL_SET_VERSION")
  */
-export const makeLabelSetVersionSchema = (valueLabel: string = "Label set version") => {
-  return z.coerce
-    .number<number>({ error: `${valueLabel} must be an integer.` })
-    .pipe(makeNonNegativeIntegerSchema(valueLabel));
-};
+export const makeLabelSetVersionSchema = (valueLabel: string = "Label set version") =>
+  makeNonNegativeIntegerSchema(valueLabel);
+
+/**
+ * Makes a schema for parsing a label set version string.
+ *
+ * @param valueLabel - The label to use in error messages (e.g., "Label set version", "LABEL_SET_VERSION")
+ */
+export const makeLabelSetVersionStringSchema = (valueLabel: string = "Label set version") =>
+  z.coerce
+    .number<number>({ error: `${valueLabel} must be a non-negative integer` })
+    .pipe(makeLabelSetVersionSchema(valueLabel));
 
 /**
  * Makes a schema for parsing the EnsRainbowPublicConfig object.

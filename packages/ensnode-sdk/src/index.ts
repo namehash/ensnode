@@ -5,7 +5,9 @@ export { ENSNamespaceIds } from "@ensnode/datasources";
 
 export * from "./ens";
 export * from "./ensapi";
+export * from "./ensdb";
 export * from "./ensindexer";
+export * from "./ensnode";
 export * from "./ensrainbow";
 export * from "./identity";
 export * from "./indexing-status";
@@ -30,6 +32,7 @@ export * from "./shared/root-registry";
 export * from "./shared/serialize";
 export * from "./shared/types";
 export * from "./shared/url";
+export * from "./stack-info";
 export * from "./subgraph-api/prerequisites";
 export * from "./tokenscope";
 export * from "./tracing";

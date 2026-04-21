@@ -3,11 +3,11 @@ import { Hono } from "hono";
 
 import {
   createRealtimeIndexingStatusProjection,
-  IndexingStatusResponseCodes,
-  type IndexingStatusResponseError,
-  type IndexingStatusResponseOk,
-  serializeENSIndexerPublicConfig,
-  serializeIndexingStatusResponse,
+  EnsIndexerIndexingStatusResponseCodes,
+  type EnsIndexerIndexingStatusResponseError,
+  type EnsIndexerIndexingStatusResponseOk,
+  serializeEnsIndexerIndexingStatusResponse,
+  serializeEnsIndexerPublicConfig,
 } from "@ensnode/ensnode-sdk";
 
 import { ensDbClient } from "@/lib/ensdb/singleton";
@@ -26,7 +26,7 @@ app.get("/config", async (c) => {
   }
 
   // respond with the serialized public config object
-  return c.json(serializeENSIndexerPublicConfig(publicConfig));
+  return c.json(serializeEnsIndexerPublicConfig(publicConfig));
 });
 
 app.get("/indexing-status", async (c) => {
@@ -50,10 +50,10 @@ app.get("/indexing-status", async (c) => {
     );
 
     return c.json(
-      serializeIndexingStatusResponse({
-        responseCode: IndexingStatusResponseCodes.Ok,
+      serializeEnsIndexerIndexingStatusResponse({
+        responseCode: EnsIndexerIndexingStatusResponseCodes.Ok,
         realtimeProjection,
-      } satisfies IndexingStatusResponseOk),
+      } satisfies EnsIndexerIndexingStatusResponseOk),
     );
   } catch (error) {
     logger.error({
@@ -64,9 +64,9 @@ app.get("/indexing-status", async (c) => {
     });
 
     return c.json(
-      serializeIndexingStatusResponse({
-        responseCode: IndexingStatusResponseCodes.Error,
-      } satisfies IndexingStatusResponseError),
+      serializeEnsIndexerIndexingStatusResponse({
+        responseCode: EnsIndexerIndexingStatusResponseCodes.Error,
+      } satisfies EnsIndexerIndexingStatusResponseError),
       500,
     );
   }
