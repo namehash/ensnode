@@ -28,6 +28,7 @@
     "@ensnode/ensnode-sdk": "workspace:*",
     "@ensnode/ensrainbow-sdk": "workspace:*",
     "@ensnode/ponder-sdk": "workspace:*",
+    "@namehash/ens-referrals": "workspace:*",
     "@ponder/client": "catalog:",
     "caip": "catalog:",
     "date-fns": "catalog:",

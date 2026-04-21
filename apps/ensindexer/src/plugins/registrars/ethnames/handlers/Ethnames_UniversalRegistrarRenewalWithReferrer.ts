@@ -1,10 +1,7 @@
+import { decodeReferrer } from "@namehash/ens-referrals";
 import { makeSubdomainNode } from "enssdk";
 
-import {
-  decodeEncodedReferrer,
-  PluginName,
-  type RegistrarActionReferralAvailable,
-} from "@ensnode/ensnode-sdk";
+import { PluginName, type RegistrarActionReferralAvailable } from "@ensnode/ensnode-sdk";
 
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";
@@ -36,7 +33,7 @@ export default function () {
        * emits a referrer in events.
        */
       const encodedReferrer = event.args.referrer;
-      const decodedReferrer = decodeEncodedReferrer(encodedReferrer);
+      const decodedReferrer = decodeReferrer(encodedReferrer);
 
       const referral = {
         encodedReferrer,

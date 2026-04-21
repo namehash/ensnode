@@ -1,8 +1,7 @@
-import type { Node, NormalizedAddress } from "enssdk";
+import type { Node, NormalizedAddress, Referrer } from "enssdk";
 import type { Hash } from "viem";
 
 import {
-  type EncodedReferrer,
   isRegistrarActionPricingAvailable,
   isRegistrarActionReferralAvailable,
   type RegistrarActionPricing,
@@ -98,7 +97,7 @@ export async function handleRegistrarControllerEvent(
   }
 
   // 4. Prepare referral info
-  let encodedReferrer: EncodedReferrer | null;
+  let encodedReferrer: Referrer | null;
   let decodedReferrer: NormalizedAddress | null;
 
   if (isRegistrarActionReferralAvailable(referral)) {

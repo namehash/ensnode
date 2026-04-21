@@ -1,8 +1,8 @@
+import { decodeReferrer } from "@namehash/ens-referrals";
 import { makeSubdomainNode } from "enssdk";
 
 import {
   addPrices,
-  decodeEncodedReferrer,
   PluginName,
   priceEth,
   type RegistrarActionPricingAvailable,
@@ -262,7 +262,7 @@ export default function () {
        * emits a referrer in events.
        */
       const encodedReferrer = event.args.referrer;
-      const decodedReferrer = decodeEncodedReferrer(encodedReferrer);
+      const decodedReferrer = decodeReferrer(encodedReferrer);
 
       const referral = {
         encodedReferrer,
@@ -314,7 +314,7 @@ export default function () {
        * emits a referrer in events.
        */
       const encodedReferrer = event.args.referrer;
-      const decodedReferrer = decodeEncodedReferrer(encodedReferrer);
+      const decodedReferrer = decodeReferrer(encodedReferrer);
 
       const referral = {
         encodedReferrer,
