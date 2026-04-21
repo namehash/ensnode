@@ -802,7 +802,10 @@
                                           "maxLength": 50,
                                           "pattern": "^[a-z-]+$"
                                         },
-                                        "highestLabelSetVersion": { "type": ["number", "null"] }
+                                        "highestLabelSetVersion": {
+                                          "type": "integer",
+                                          "minimum": 0
+                                        }
                                       },
                                       "required": ["labelSetId", "highestLabelSetVersion"]
                                     },
@@ -903,13 +906,20 @@
                         "ensDb": {
                           "type": "object",
                           "properties": {
-                            "postgreSqlVersion": {
-                              "type": "string",
-                              "minLength": 1,
-                              "description": "Version of the PostgreSQL server hosting the ENSDb instance."
+                            "versionInfo": {
+                              "type": "object",
+                              "properties": {
+                                "postgresql": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "description": "Version of the PostgreSQL server hosting the ENSDb instance."
+                                }
+                              },
+                              "required": ["postgresql"],
+                              "description": "Serialized Indexing Status Response OK.ensDb.versionInfo"
                             }
                           },
-                          "required": ["postgreSqlVersion"],
+                          "required": ["versionInfo"],
                           "description": "Serialized Indexing Status Response OK.ensDb"
                         },
                         "ensIndexer": {
@@ -929,7 +939,7 @@
                                       "maxLength": 50,
                                       "pattern": "^[a-z-]+$"
                                     },
-                                    "highestLabelSetVersion": { "type": ["number", "null"] }
+                                    "highestLabelSetVersion": { "type": "integer", "minimum": 0 }
                                   },
                                   "required": ["labelSetId", "highestLabelSetVersion"]
                                 },
@@ -1000,7 +1010,7 @@
                                   "maxLength": 50,
                                   "pattern": "^[a-z-]+$"
                                 },
-                                "highestLabelSetVersion": { "type": ["number", "null"] }
+                                "highestLabelSetVersion": { "type": "integer", "minimum": 0 }
                               },
                               "required": ["labelSetId", "highestLabelSetVersion"]
                             },
