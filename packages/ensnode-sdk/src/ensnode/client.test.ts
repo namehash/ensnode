@@ -28,7 +28,7 @@ import type {
 import type { ErrorResponse } from "./api/shared/errors/response";
 import { EnsNodeClient } from "./client";
 import { ClientError } from "./client-error";
-import { DEFAULT_ENSNODE_API_URL_MAINNET, getDefaultEnsNodeUrl } from "./deployments";
+import { DEFAULT_ENSNODE_URL_MAINNET, getDefaultEnsNodeUrl } from "./deployments";
 
 const EXAMPLE_NAME: Name = "example.eth";
 const EXAMPLE_ADDRESS: Address = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
@@ -299,7 +299,7 @@ describe("EnsNodeClient", () => {
 
       const expectedUrl = new URL(
         `/api/resolve/records/${EXAMPLE_NAME}`,
-        DEFAULT_ENSNODE_API_URL_MAINNET,
+        DEFAULT_ENSNODE_URL_MAINNET,
       );
       expectedUrl.searchParams.set("addresses", EXAMPLE_SELECTION.addresses.join(","));
       expectedUrl.searchParams.set("texts", EXAMPLE_SELECTION.texts.join(","));
@@ -319,7 +319,7 @@ describe("EnsNodeClient", () => {
 
       const expectedUrl = new URL(
         `/api/resolve/records/${EXAMPLE_NAME}`,
-        DEFAULT_ENSNODE_API_URL_MAINNET,
+        DEFAULT_ENSNODE_URL_MAINNET,
       );
       expectedUrl.searchParams.set("addresses", EXAMPLE_SELECTION.addresses.join(","));
       expectedUrl.searchParams.set("texts", EXAMPLE_SELECTION.texts.join(","));
@@ -351,7 +351,7 @@ describe("EnsNodeClient", () => {
 
       const expectedUrl = new URL(
         `/api/resolve/primary-name/${EXAMPLE_ADDRESS}/1`,
-        DEFAULT_ENSNODE_API_URL_MAINNET,
+        DEFAULT_ENSNODE_URL_MAINNET,
       );
 
       expect(mockFetch).toHaveBeenCalledWith(expectedUrl);
@@ -367,7 +367,7 @@ describe("EnsNodeClient", () => {
 
       const expectedUrl = new URL(
         `/api/resolve/primary-name/${EXAMPLE_ADDRESS}/1`,
-        DEFAULT_ENSNODE_API_URL_MAINNET,
+        DEFAULT_ENSNODE_URL_MAINNET,
       );
       expectedUrl.searchParams.set("trace", "true");
 
@@ -386,7 +386,7 @@ describe("EnsNodeClient", () => {
 
       const expectedUrl = new URL(
         `/api/resolve/primary-name/${EXAMPLE_ADDRESS}/1`,
-        DEFAULT_ENSNODE_API_URL_MAINNET,
+        DEFAULT_ENSNODE_URL_MAINNET,
       );
       expectedUrl.searchParams.set("accelerate", "true");
 
@@ -413,7 +413,7 @@ describe("EnsNodeClient", () => {
 
       const expectedUrl = new URL(
         `/api/resolve/primary-names/${EXAMPLE_ADDRESS}`,
-        DEFAULT_ENSNODE_API_URL_MAINNET,
+        DEFAULT_ENSNODE_URL_MAINNET,
       );
 
       expect(mockFetch).toHaveBeenCalledWith(expectedUrl);
@@ -431,7 +431,7 @@ describe("EnsNodeClient", () => {
 
       const expectedUrl = new URL(
         `/api/resolve/primary-names/${EXAMPLE_ADDRESS}`,
-        DEFAULT_ENSNODE_API_URL_MAINNET,
+        DEFAULT_ENSNODE_URL_MAINNET,
       );
       expectedUrl.searchParams.set("chainIds", "1,10");
 
@@ -447,7 +447,7 @@ describe("EnsNodeClient", () => {
 
       const expectedUrl = new URL(
         `/api/resolve/primary-names/${EXAMPLE_ADDRESS}`,
-        DEFAULT_ENSNODE_API_URL_MAINNET,
+        DEFAULT_ENSNODE_URL_MAINNET,
       );
       expectedUrl.searchParams.set("trace", "true");
 
@@ -466,7 +466,7 @@ describe("EnsNodeClient", () => {
 
       const expectedUrl = new URL(
         `/api/resolve/primary-names/${EXAMPLE_ADDRESS}`,
-        DEFAULT_ENSNODE_API_URL_MAINNET,
+        DEFAULT_ENSNODE_URL_MAINNET,
       );
       expectedUrl.searchParams.set("accelerate", "true");
 
@@ -484,7 +484,7 @@ describe("EnsNodeClient", () => {
   describe("Indexing Status API", () => {
     it("can fetch overall indexing 'backfill' status object successfully", async () => {
       // arrange
-      const requestUrl = new URL(`/api/indexing-status`, DEFAULT_ENSNODE_API_URL_MAINNET);
+      const requestUrl = new URL(`/api/indexing-status`, DEFAULT_ENSNODE_URL_MAINNET);
       const mockedResponse = EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE;
 
       const client = new EnsNodeClient();

@@ -28,26 +28,18 @@ import { ClientError } from "./client-error";
 import { getDefaultEnsNodeUrl } from "./deployments";
 
 /**
- * Configuration options for ENSNode API client
+ * Configuration options for an ENSNode client
  */
 export interface EnsNodeClientOptions {
-  /** The ENSNode API URL */
+  /** The ENSNode URL */
   url: URL;
 }
 
 /**
- * Configuration options for ENSNode API client
- *
- * @deprecated Use {@link EnsNodeClientOptions} instead.
- */
-export type ClientOptions = EnsNodeClientOptions;
-
-/**
- * ENSNode API Client
+ * ENSNode Client
  *
  * Provides access to the following ENSNode APIs:
  * - Resolution API
- * - Configuration API
  * - Indexing Status API
  * - Registrar Actions API
  * - Name Tokens API
@@ -70,7 +62,7 @@ export type ClientOptions = EnsNodeClientOptions;
  * ```typescript
  * import { ENSNamespaceIds, EnsNodeClient, getDefaultEnsNodeUrl } from "@ensnode/ensnode-sdk";
  *
- * // Use default ENSNode API URL for Mainnet
+ * // Use default ENSNode URL for Mainnet
  * const client = new EnsNodeClient({
  *   url: getDefaultEnsNodeUrl(ENSNamespaceIds.Mainnet),
  * });
@@ -80,7 +72,7 @@ export type ClientOptions = EnsNodeClientOptions;
  * ```typescript
  * import { ENSNamespaceIds, EnsNodeClient, getDefaultEnsNodeUrl } from "@ensnode/ensnode-sdk";
  *
- * // Use default ENSNode API URL for Sepolia
+ * // Use default ENSNode URL for Sepolia
  * const client = new EnsNodeClient({
  *   url: getDefaultEnsNodeUrl(ENSNamespaceIds.Sepolia),
  * });

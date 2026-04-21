@@ -20,6 +20,10 @@ import {
 export function buildUnvalidatedEnsNodeStackInfo(
   serializedStackInfo: SerializedEnsNodeStackInfo,
 ): Unvalidated<EnsNodeStackInfo> {
+  // Stack info for ENSApi and ENSIndexer requires deserialization,
+  // so we handle them separately here before returning
+  // the final stack info object. Stack info for ENSDb and ENSRainbow can be
+  // passed through directly since they don't require deserialization.
   const { ensApi, ensIndexer, ...rest } = serializedStackInfo;
 
   return {

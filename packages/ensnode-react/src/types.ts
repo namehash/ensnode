@@ -15,10 +15,10 @@ import type {
 } from "@ensnode/ensnode-sdk";
 
 /**
- * Configuration options for the ENSApi provider
+ * Configuration options for the ENSNode provider
  */
 export interface EnsNodeProviderOptions {
-  /** The ENSApi client configuration */
+  /** The ENSNode client configuration */
   client: EnsNodeClientOptions;
 }
 

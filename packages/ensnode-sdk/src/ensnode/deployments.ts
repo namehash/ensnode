@@ -3,12 +3,12 @@ import { type ENSNamespaceId, ENSNamespaceIds } from "@ensnode/datasources";
 /**
  * Default ENSNode API endpoint URL for Mainnet
  */
-export const DEFAULT_ENSNODE_API_URL_MAINNET = "https://api.alpha.ensnode.io" as const;
+export const DEFAULT_ENSNODE_URL_MAINNET = "https://api.alpha.ensnode.io" as const;
 
 /**
  * Default ENSNode API endpoint URL for Sepolia
  */
-export const DEFAULT_ENSNODE_API_URL_SEPOLIA = "https://api.alpha-sepolia.ensnode.io" as const;
+export const DEFAULT_ENSNODE_URL_SEPOLIA = "https://api.alpha-sepolia.ensnode.io" as const;
 
 /**
  * Gets the default ENSNode URL for the provided ENSNamespaceId.
@@ -23,9 +23,9 @@ export const getDefaultEnsNodeUrl = (namespace?: ENSNamespaceId): URL => {
   const effectiveNamespace = namespace ?? ENSNamespaceIds.Mainnet;
   switch (effectiveNamespace) {
     case ENSNamespaceIds.Mainnet:
-      return new URL(DEFAULT_ENSNODE_API_URL_MAINNET);
+      return new URL(DEFAULT_ENSNODE_URL_MAINNET);
     case ENSNamespaceIds.Sepolia:
-      return new URL(DEFAULT_ENSNODE_API_URL_SEPOLIA);
+      return new URL(DEFAULT_ENSNODE_URL_SEPOLIA);
     default:
       throw new Error(
         `ENSNamespaceId ${effectiveNamespace} does not have a default ENSNode URL defined`,

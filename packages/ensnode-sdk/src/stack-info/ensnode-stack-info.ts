@@ -4,7 +4,7 @@ import type { EnsIndexerPublicConfig } from "../ensindexer/config/types";
 import type { EnsRainbowPublicConfig } from "../ensrainbow/config";
 
 /**
- * Complete information about the ENSNode stack.
+ * Information about the stack of services inside an ENSNode instance.
  */
 export interface EnsNodeStackInfo {
   /**
@@ -25,7 +25,8 @@ export interface EnsNodeStackInfo {
   /**
    * ENSRainbow Public Config
    *
-   * Note: ENSRainbow Public Config might not be available during cold starts.
+   * If undefined, represents that ENSRainbow is currently undergoing
+   * a cold start and may take up to an hour to become ready.
    */
   ensRainbow?: EnsRainbowPublicConfig;
 }

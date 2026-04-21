@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { ENSNamespaceIds } from "../ens";
 import {
-  DEFAULT_ENSNODE_API_URL_MAINNET,
-  DEFAULT_ENSNODE_API_URL_SEPOLIA,
+  DEFAULT_ENSNODE_URL_MAINNET,
+  DEFAULT_ENSNODE_URL_SEPOLIA,
   getDefaultEnsNodeUrl,
 } from "./deployments";
 
@@ -11,19 +11,19 @@ describe("getDefaultEnsNodeUrl", () => {
   it("returns the mainnet default URL when no namespace is provided", () => {
     const url = getDefaultEnsNodeUrl();
 
-    expect(url.href).toBe(`${DEFAULT_ENSNODE_API_URL_MAINNET}/`);
+    expect(url.href).toBe(`${DEFAULT_ENSNODE_URL_MAINNET}/`);
   });
 
   it("returns the mainnet default URL", () => {
     const url = getDefaultEnsNodeUrl(ENSNamespaceIds.Mainnet);
 
-    expect(url.href).toBe(`${DEFAULT_ENSNODE_API_URL_MAINNET}/`);
+    expect(url.href).toBe(`${DEFAULT_ENSNODE_URL_MAINNET}/`);
   });
 
   it("returns the sepolia default URL", () => {
     const url = getDefaultEnsNodeUrl(ENSNamespaceIds.Sepolia);
 
-    expect(url.href).toBe(`${DEFAULT_ENSNODE_API_URL_SEPOLIA}/`);
+    expect(url.href).toBe(`${DEFAULT_ENSNODE_URL_SEPOLIA}/`);
   });
 
   it("throws for unsupported namespaces", () => {

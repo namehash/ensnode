@@ -12,10 +12,9 @@ npm install @ensnode/ensnode-sdk
 
 ## EnsNodeClient
 
-The `EnsNodeClient` provides a unified interface for the ENSApi REST APIs:
+The `EnsNodeClient` provides a unified interface for the ENSNode REST APIs:
 - Resolution API (Protocol Accelerated Forward/Reverse Resolution)
 - Indexing Status API
-- Configuration API
 
 ### Basic Usage
 
@@ -152,21 +151,6 @@ console.log(names);
 // }
 ```
 
-#### Configuration API
-
-##### `config()`
-
-Fetches the ENSNode's configuration.
-
-- Returns: `ConfigResponse` - The ENSNode configuration data
-- Throws: Error if the request fails or the ENSNode API returns an error response
-
-```ts
-const config = await client.config();
-console.log(config);
-// Returns the ENSNode configuration including indexed chains, etc.
-```
-
 #### Indexing Status API
 
 ##### `indexingStatus()`
@@ -178,9 +162,8 @@ Fetches the ENSNode's multichain indexing status.
 
 ```ts
 // Get current indexing status
-const status = await client.indexingStatus();
-console.log(status);
-// Returns indexing status for all indexed chains
+const indexingStatusResponse = await client.indexingStatus();
+console.log(indexingStatusResponse); // Includes indexing status for all indexed chains
 ```
 
 ### Configuration
