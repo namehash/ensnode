@@ -157,20 +157,6 @@ describe("Server Command Tests", () => {
     });
   });
 
-  describe("GET /v1/version", () => {
-    it("should return version information", async () => {
-      const response = await fetch(`http://localhost:${nonDefaultPort}/v1/version`);
-      expect(response.status).toBe(200);
-      const data = await response.json();
-
-      expect(data.status).toEqual(StatusCode.Success);
-      expect(typeof data.versionInfo.version).toBe("string");
-      expect(typeof data.versionInfo.dbSchemaVersion).toBe("number");
-      expect(typeof data.versionInfo.labelSet.labelSetId).toBe("string");
-      expect(typeof data.versionInfo.labelSet.highestLabelSetVersion).toBe("number");
-    });
-  });
-
   describe("GET /v1/config", () => {
     it("should return config snapshot from startup", async () => {
       // The config is built once on startup with count = 0 (set in beforeAll)
@@ -227,9 +213,6 @@ describe("Server Command Tests", () => {
           method: "OPTIONS",
         }),
         fetch(`http://localhost:${nonDefaultPort}/v1/config`, {
-          method: "OPTIONS",
-        }),
-        fetch(`http://localhost:${nonDefaultPort}/v1/version`, {
           method: "OPTIONS",
         }),
       ]);

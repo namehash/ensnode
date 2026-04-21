@@ -38,7 +38,7 @@
     "hono": "catalog:",
     "pino": "catalog:",
     "progress": "^2.0.3",
-    "protobufjs": "^7.4.0",
+    "protobufjs": "^7.5.5",
     "viem": "catalog:",
     "yargs": "^17.7.2",
     "@fast-csv/parse": "^5.0.0",

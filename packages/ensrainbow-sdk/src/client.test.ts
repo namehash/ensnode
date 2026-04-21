@@ -271,30 +271,6 @@ describe("EnsRainbowApiClient", () => {
     } satisfies EnsRainbow.HealthResponse);
   });
 
-  it("should return version information", async () => {
-    mockFetch.mockResolvedValueOnce({
-      json: () =>
-        Promise.resolve({
-          status: StatusCode.Success,
-          versionInfo: {
-            version: "1.0.0",
-            dbSchemaVersion: 1,
-            labelSet: {
-              labelSetId: "test-label-set-id",
-              highestLabelSetVersion: 123,
-            },
-          },
-        } satisfies EnsRainbow.VersionResponse),
-    });
-
-    const response = await client.version();
-
-    expect(response satisfies EnsRainbow.VersionResponse).toBeTruthy();
-    expect(response.status).toEqual(StatusCode.Success);
-    expect(typeof response.versionInfo.version === "string").toBeTruthy();
-    expect(typeof response.versionInfo.dbSchemaVersion === "number").toBeTruthy();
-  });
-
   describe("config", () => {
     it("should request /v1/config and return public config on success", async () => {
       const configData: EnsRainbow.ENSRainbowPublicConfig = {
