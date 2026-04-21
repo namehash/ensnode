@@ -55,6 +55,10 @@ const navItems = [
         title: "Omnigraph (ENS v1 + v2)",
         url: "/api/omnigraph",
       },
+      {
+        title: "REST API Reference",
+        url: "/api/rest",
+      },
     ],
   },
 ];
