@@ -2,4 +2,4 @@
 "@ensnode/ensnode-sdk": minor
 ---
 
-Fully removed the deprecated `ENSNodeClient` (use `EnsApiClient` instead).
+**Breaking**: Renamed `ENSNodeClient` to `EnsNodeClient`.

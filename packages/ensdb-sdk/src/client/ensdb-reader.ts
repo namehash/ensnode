@@ -4,6 +4,8 @@ import {
   type CrossChainIndexingStatusSnapshot,
   deserializeCrossChainIndexingStatusSnapshot,
   deserializeEnsIndexerPublicConfig,
+  type EnsDbPublicConfig,
+  type EnsDbVersionInfo,
   type EnsIndexerPublicConfig,
 } from "@ensnode/ensnode-sdk";
 
@@ -14,6 +16,7 @@ import {
   type EnsDbDrizzleClient,
   type EnsNodeSchema,
 } from "../lib/drizzle";
+import { parsePgVersionInfo } from "../lib/parse-pg-version-info";
 import { EnsNodeMetadataKeys } from "./ensnode-metadata";
 import type {
   SerializedEnsNodeMetadata,
@@ -157,6 +160,17 @@ export class EnsDbReader<
   }
 
   /**
+   * Build ENSDb Public Config
+   */
+  async buildEnsDbPublicConfig(): Promise<EnsDbPublicConfig> {
+    const versionInfo = await this.buildEnsDbVersionInfo();
+
+    return {
+      versionInfo,
+    };
+  }
+
+  /**
    * Get Indexing Status Snapshot
    *
    * @returns the existing record, or `undefined`.
@@ -207,5 +221,38 @@ export class EnsDbReader<
     throw new Error(
       `There must be exactly one ENSNodeMetadata record for ('${this.ensIndexerSchemaName}', '${metadata.key}') composite key`,
     );
+  }
+
+  /**
+   * Get PostgreSQL version for the server hosting the ENSDb instance.
+   *
+   * @throws when the version cannot be retrieved or parsed from the query result.
+   */
+  private async getPostgresVersion(): Promise<string> {
+    const result = await this.ensDb.execute<{ version: string }>("SELECT version();");
+
+    // result will be in the form of [{ version: "PostgreSQL 15.5 (Ubuntu 15.5-0ubuntu0.22.04.1) ..." }]
+    const versionString = result.rows[0]?.version;
+
+    try {
+      return parsePgVersionInfo(versionString);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      throw new Error(`Failed to get PostgreSQL version for the ENSDb instance: ${errorMessage}`);
+    }
+  }
+
+  /**
+   * Build ENSDb version info.
+   *
+   * @throws when version info cannot be retrieved or parsed from
+   *         the ENSDb instance.
+   */
+  private async buildEnsDbVersionInfo(): Promise<EnsDbVersionInfo> {
+    const postgresVersion = await this.getPostgresVersion();
+
+    return {
+      postgresql: postgresVersion,
+    };
   }
 }

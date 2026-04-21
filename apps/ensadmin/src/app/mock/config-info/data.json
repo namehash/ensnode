@@ -1,6 +1,9 @@
 {
   "Alpha Mainnet": {
-    "version": "0.35.0",
+    "versionInfo": {
+      "ensApi": "0.35.0",
+      "ensNormalize": "1.11.1"
+    },
     "theGraphFallback": {
       "canFallback": false,
       "reason": "no-api-key"
@@ -41,7 +44,10 @@
     }
   },
   "Alpha Sepolia": {
-    "version": "0.35.0",
+    "versionInfo": {
+      "ensApi": "0.35.0",
+      "ensNormalize": "1.11.1"
+    },
     "theGraphFallback": {
       "canFallback": true,
       "url": ""
@@ -81,7 +87,10 @@
     }
   },
   "Subgraph Mainnet": {
-    "version": "0.35.0",
+    "versionInfo": {
+      "ensApi": "0.35.0",
+      "ensNormalize": "1.11.1"
+    },
     "theGraphFallback": {
       "canFallback": false,
       "reason": "no-api-key"
@@ -114,7 +123,10 @@
     }
   },
   "Subgraph Sepolia": {
-    "version": "0.35.0",
+    "versionInfo": {
+      "ensApi": "0.35.0",
+      "ensNormalize": "1.11.1"
+    },
     "theGraphFallback": {
       "canFallback": false,
       "reason": "no-api-key"
@@ -147,7 +159,10 @@
     }
   },
   "Serialization Error": {
-    "version": "0.35.0",
+    "versionInfo": {
+      "ensApi": "0.35.0",
+      "ensNormalize": "1.11.1"
+    },
     "theGraphFallback": {
       "canFallback": false,
       "reason": "no-api-key"

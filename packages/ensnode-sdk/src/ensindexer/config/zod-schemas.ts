@@ -12,7 +12,7 @@ import type { EnsRainbowClientLabelSet, EnsRainbowServerLabelSet } from "../../e
 import {
   makeEnsRainbowPublicConfigSchema,
   makeLabelSetIdSchema,
-  makeLabelSetVersionSchema,
+  makeLabelSetVersionStringSchema,
 } from "../../ensrainbow/zod-schemas/config";
 import { uniq } from "../../shared/collections";
 import { makeChainIdSchema, makeENSNamespaceIdSchema } from "../../shared/zod-schemas";
@@ -88,7 +88,7 @@ export const makeFullyPinnedLabelSetSchema = (valueLabel: string = "Label set") 
   }
   return z.object({
     labelSetId: makeLabelSetIdSchema(valueLabelLabelSetId),
-    labelSetVersion: makeLabelSetVersionSchema(valueLabelLabelSetVersion),
+    labelSetVersion: makeLabelSetVersionStringSchema(valueLabelLabelSetVersion),
   });
 };
 
