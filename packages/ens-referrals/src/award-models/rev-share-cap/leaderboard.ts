@@ -138,10 +138,7 @@ export const buildReferrerLeaderboardRevShareCap = (
 
     // Compute totalBaseRevenue from aggregated duration (single division — avoids per-event
     // truncation that would compound into a sum lower than the correct aggregated value).
-    const totalBaseRevenue = computeBaseRevenueContribution(
-      rules,
-      state.totalIncrementalDuration,
-    );
+    const totalBaseRevenue = computeBaseRevenueContribution(rules, state.totalIncrementalDuration);
 
     // Determine if newly qualifying or already qualified.
     const isNowQualified = isReferrerQualifiedRevShareCap(referrer, totalBaseRevenue, rules);
