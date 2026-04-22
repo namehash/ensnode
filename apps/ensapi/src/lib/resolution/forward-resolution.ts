@@ -10,17 +10,17 @@ import {
   isNormalizedName,
   type Node,
   namehashInterpretedName,
-  parseReverseName,
 } from "enssdk";
 
+import { DatasourceNames } from "@ensnode/datasources";
 import {
   type ForwardResolutionArgs,
   ForwardResolutionProtocolStep,
   type ForwardResolutionResult,
+  getDatasourceContract,
   getENSv1Registry,
-  isSelectionEmpty,
+  maybeGetDatasourceContract,
   PluginName,
-  type ResolverRecordsResponse,
   type ResolverRecordsSelection,
   TraceableENSProtocol,
 } from "@ensnode/ensnode-sdk";
@@ -32,24 +32,16 @@ import {
 } from "@ensnode/ensnode-sdk/internal";
 
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/instrumentation/auto-span";
+import { lazy } from "@/lib/lazy";
 import { makeLogger } from "@/lib/logger";
 import { findResolver } from "@/lib/protocol-acceleration/find-resolver";
-import { getENSIP19ReverseNameRecordFromIndex } from "@/lib/protocol-acceleration/get-primary-name-from-index";
-import { getRecordsFromIndex } from "@/lib/protocol-acceleration/get-records-from-index";
 import { areResolverRecordsIndexedByProtocolAccelerationPluginOnChainId } from "@/lib/protocol-acceleration/resolver-records-indexed-on-chain";
 import { getPublicClient } from "@/lib/public-client";
-import {
-  makeEmptyResolverRecordsResponse,
-  makeRecordsResponseFromIndexedRecords,
-  makeRecordsResponseFromResolveResults,
-} from "@/lib/resolution/make-records-response";
-import {
-  executeResolveCalls,
-  interpretRawCallsAndResults,
-  makeResolveCalls,
-  tablifyCallResults,
-} from "@/lib/resolution/resolve-calls-and-results";
-import { executeResolveCallsWithUniversalResolver } from "@/lib/resolution/resolve-with-universal-resolver";
+import { accelerateENSIP19ReverseResolver } from "@/lib/resolution/accelerate-ensip19-reverse-resolver";
+import { accelerateKnownOnchainStaticResolver } from "@/lib/resolution/accelerate-known-onchain-static-resolver";
+import { executeOperations } from "@/lib/resolution/execute-operations";
+import { makeRecordsResponse } from "@/lib/resolution/make-records-response";
+import { isOperationResolved, logOperations, makeOperations } from "@/lib/resolution/operations";
 import {
   addEnsProtocolStepEvent,
   withEnsProtocolStep,
@@ -57,6 +49,14 @@ import {
 
 const logger = makeLogger("forward-resolution");
 const tracer = trace.getTracer("forward-resolution");
+
+const getUniversalResolverV1 = lazy(() =>
+  getDatasourceContract(config.namespace, DatasourceNames.ENSRoot, "UniversalResolver"),
+);
+
+const getUniversalResolverV2 = lazy(() =>
+  maybeGetDatasourceContract(config.namespace, DatasourceNames.ENSRoot, "UniversalResolverV2"),
+);
 
 /**
  * Implements Forward Resolution of record values for a specified ENS Name.
@@ -118,7 +118,8 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
     canAccelerate = false,
   } = options;
 
-  const selectionString = JSON.stringify(selection);
+  // `selection` may contain bigints (e.g. `abi: ContentType`); stringify safely for tracing.
+  const selectionString = JSON.stringify(replaceBigInts(selection, String));
 
   // trace for external consumers
   return withEnsProtocolStep(
@@ -161,57 +162,43 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           const node: Node = namehashInterpretedName(name);
           span.setAttribute("node", node);
 
-          // if selection is empty, give them what they asked for
-          if (isSelectionEmpty(selection)) return makeEmptyResolverRecordsResponse(selection);
+          // construct the set of resolve() operations indicated by node/selection
+          let operations = makeOperations(node, selection);
+          span.setAttribute("operations", JSON.stringify(replaceBigInts(operations, String)));
 
-          // construct the set of resolve() calls indicated by selection
-          const calls = makeResolveCalls(node, selection);
-          span.setAttribute("calls", JSON.stringify(replaceBigInts(calls, String)));
-
-          // Invariant: a non-empty selection must have generated some resolve calls
-          if (calls.length === 0) {
-            throw new Error(
-              `Invariant: Selection ${JSON.stringify(selection)} is not empty but resulted in no resolution calls.`,
-            );
-          }
+          // if no operations were generated, this was an empty selection; give them what they asked for
+          if (operations.length === 0) return makeRecordsResponse<SELECTION>(operations);
 
           const publicClient = getPublicClient(chainId);
 
           ////////////////////////////
-          /// Temporary ENSv2 Bailout
+          /// 0. Temporary ENSv2 Bailout
           ////////////////////////////
           // TODO: re-enable protocol acceleration for ENSv2
           if (config.ensIndexerPublicConfig.plugins.includes(PluginName.ENSv2)) {
-            // execute each record's call against the UniversalResolverV2
-            const rawResults = await withEnsProtocolStep(
+            const UniversalResolverAddress =
+              getUniversalResolverV2()?.address ?? getUniversalResolverV1().address;
+            operations = await withEnsProtocolStep(
               TraceableENSProtocol.ForwardResolution,
               ForwardResolutionProtocolStep.ExecuteResolveCalls,
               {},
               () =>
-                executeResolveCallsWithUniversalResolver<SELECTION>({
+                executeOperations({
                   name,
-                  calls,
+                  resolverAddress: UniversalResolverAddress,
+                  operations,
                   publicClient,
+                  useENSIP10Resolve: true,
                 }),
             );
 
-            // additional semantic interpretation of the raw results from the chain
-            const results = interpretRawCallsAndResults(rawResults);
-
-            if (process.env.NODE_ENV !== "production") {
-              console.table(tablifyCallResults(rawResults, results));
-            } else {
-              logger.debug({ rawResults, results });
-            }
-
-            // return record values
-            return makeRecordsResponseFromResolveResults(selection, results);
+            logOperations(operations, logger);
+            return makeRecordsResponse<SELECTION>(operations);
           }
 
-          //////////////////////////////////////////////////
-          // 1. Identify the active resolver for the name on the specified chain.
-          //////////////////////////////////////////////////
-
+          ///////////////////////////
+          // 1. Find Active Resolver
+          ///////////////////////////
           const { activeName, activeResolver, requiresWildcardSupport } = await withEnsProtocolStep(
             TraceableENSProtocol.ForwardResolution,
             ForwardResolutionProtocolStep.FindResolver,
@@ -234,7 +221,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
             !!activeResolver,
           );
           // we're unable to find an active resolver for this name, return empty response
-          if (!activeResolver) return makeEmptyResolverRecordsResponse(selection);
+          if (!activeResolver) return makeRecordsResponse<SELECTION>(operations);
 
           // set some attributes on the span for easy reference
           span.setAttribute("activeResolver", activeResolver);
@@ -247,73 +234,11 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
             requiresWildcardSupport,
           });
 
-          //////////////////////////////////////////////////
-          // 2. _resolveBatch with activeResolver, w/ ENSIP-10 Wildcard Resolution support
-          //////////////////////////////////////////////////
-
-          //////////////////////////////////////////////////
-          // Protocol Acceleration
-          //////////////////////////////////////////////////
+          /////////////////////////////////////
+          // 2. Bridged Resolver short-circuit
+          /////////////////////////////////////
           if (accelerate && canAccelerate) {
-            // NOTE: because Resolvers can exist without emitting events (and therefore may or may
-            // not actually exist in the index), we have to do runtime validation of the Resolver's
-            // metadata (i.e. whether it's an ENSIP-19 Reverse Resolver, a Bridged Resolver, etc)
-            // ex: BasenamesL1Resolver need not emit events to function properly
-            // https://etherscan.io/address/0xde9049636f4a1dfe0a64d1bfe3155c0a14c54f31#code
             const resolver = { chainId, address: activeResolver };
-
-            //////////////////////////////////////////////////
-            // Protocol Acceleration: ENSIP-19 Reverse Resolvers
-            //   If the activeResolver is a Known ENSIP-19 Reverse Resolver,
-            //   then we can just read the name record value directly from the index.
-            //////////////////////////////////////////////////
-            if (isKnownENSIP19ReverseResolver(config.namespace, resolver)) {
-              return withEnsProtocolStep(
-                TraceableENSProtocol.ForwardResolution,
-                ForwardResolutionProtocolStep.AccelerateENSIP19ReverseResolver,
-                {},
-                async () => {
-                  // Invariant: consumer must be selecting the `name` record at this point
-                  if (selection.name !== true) {
-                    throw new Error(
-                      `Invariant(ENSIP-19 Reverse Resolvers Protocol Acceleration): expected 'name' record in selection but instead received: ${JSON.stringify(selection)}.`,
-                    );
-                  }
-
-                  // Sanity Check: This should only happen in the context of Reverse Resolution, and
-                  // the selection should just be `{ name: true }`, but technically not prohibited to
-                  // select more records than just 'name', so just warn if that happens.
-                  if (selection.addresses !== undefined || selection.texts !== undefined) {
-                    logger.warn(
-                      `Sanity Check(ENSIP-19 Reverse Resolvers Protocol Acceleration): expected a selection of exactly '{ name: true }' but received ${JSON.stringify(selection)}.`,
-                    );
-                  }
-
-                  // Invariant: the name in question should be an ENSIP-19 Reverse Name that we're able to parse
-                  const parsed = parseReverseName(name);
-                  if (!parsed) {
-                    throw new Error(
-                      `Invariant(ENSIP-19 Reverse Resolvers Protocol Acceleration): expected a valid ENSIP-19 Reverse Name but recieved '${name}'.`,
-                    );
-                  }
-
-                  // retrieve the name record from the index
-                  const nameRecordValue = await getENSIP19ReverseNameRecordFromIndex(
-                    parsed.address,
-                    parsed.coinType,
-                  );
-
-                  // NOTE: typecast is ok because of sanity checks above
-                  return { name: nameRecordValue } as ResolverRecordsResponse<SELECTION>;
-                },
-              );
-            }
-
-            //////////////////////////////////////////////////
-            // Protocol Acceleration: Bridged Resolvers
-            //   If the activeResolver is a Bridged Resolver,
-            //   then we can short-circuit the CCIP-Read and defer resolution to the indicated (shadow)Registry.
-            //////////////////////////////////////////////////
             const bridgesTo = isBridgedResolver(config.namespace, resolver);
             if (bridgesTo) {
               return withEnsProtocolStep(
@@ -330,62 +255,63 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
               ForwardResolutionProtocolStep.AccelerateKnownOffchainLookupResolver,
               false,
             );
+          }
 
-            //////////////////////////////////////////////////
-            // Protocol Acceleration: Known On-Chain Static Resolvers
-            //   If:
-            //    1) the ProtocolAcceleration Plugin indexes records for all Resolver contracts on
-            //       this chain, and
-            //    2) the activeResolver is a Static Resolver,
-            //   then we can retrieve records directly from the database.
-            //////////////////////////////////////////////////
+          //////////////////////////////////////////////////
+          // 3. Accelerate if possible — each strategy is its own pass over operations.
+          //////////////////////////////////////////////////
+          if (accelerate && canAccelerate) {
+            const resolver = { chainId, address: activeResolver };
+
+            // Pass: ENSIP-19 Reverse Resolver
+            if (isKnownENSIP19ReverseResolver(config.namespace, resolver)) {
+              operations = await withEnsProtocolStep(
+                TraceableENSProtocol.ForwardResolution,
+                ForwardResolutionProtocolStep.AccelerateENSIP19ReverseResolver,
+                {},
+                () => accelerateENSIP19ReverseResolver({ operations, name, selection }),
+              );
+            }
+
+            // Pass: Known On-Chain Static Resolver with indexed records
             const resolverRecordsAreIndexed =
               areResolverRecordsIndexedByProtocolAccelerationPluginOnChainId(
                 config.namespace,
                 chainId,
               );
-
             if (resolverRecordsAreIndexed && isStaticResolver(config.namespace, resolver)) {
-              return withEnsProtocolStep(
+              operations = await withEnsProtocolStep(
                 TraceableENSProtocol.ForwardResolution,
                 ForwardResolutionProtocolStep.AccelerateKnownOnchainStaticResolver,
                 {},
-                async () => {
-                  const records = await getRecordsFromIndex({
-                    resolver: { chainId, address: activeResolver },
-                    node,
-                    selection,
-                  });
-
-                  // if resolver doesn't exist here, there are no records in the index
-                  if (!records) return makeEmptyResolverRecordsResponse(selection);
-
-                  // otherwise, format into RecordsResponse and return
-                  return makeRecordsResponseFromIndexedRecords(selection, records);
-                },
+                () =>
+                  accelerateKnownOnchainStaticResolver({ operations, resolver, node, selection }),
+              );
+            } else {
+              addEnsProtocolStepEvent(
+                protocolTracingSpan,
+                TraceableENSProtocol.ForwardResolution,
+                ForwardResolutionProtocolStep.AccelerateKnownOnchainStaticResolver,
+                false,
               );
             }
-
-            addEnsProtocolStepEvent(
-              protocolTracingSpan,
-              TraceableENSProtocol.ForwardResolution,
-              ForwardResolutionProtocolStep.AccelerateKnownOnchainStaticResolver,
-              false,
-            );
           }
 
-          //////////////////////////////////////////////////
-          // 3. Execute each record's call against the active Resolver.
-          //    NOTE: from here, MUST execute EVM code to be compliant with ENS Protocol.
-          //    i.e. must execute resolve() to retrieve active record values
-          //////////////////////////////////////////////////
+          // early return if every operation is resolved
+          if (operations.every(isOperationResolved)) {
+            logOperations(operations, logger);
+            return makeRecordsResponse<SELECTION>(operations);
+          }
 
-          // 3.1 requireResolver() — verifies that the resolver supports ENSIP-10 if necessary
+          ////////////////////////////////////////////////////////////////////////////
+          // 4. Determine Resolver ENSIP-10 support + requirement.
+          //    From here, we MUST execute EVM code to be compliant with ENS Protocol
+          ////////////////////////////////////////////////////////////////////////////
           const extended = await withEnsProtocolStep(
             TraceableENSProtocol.ForwardResolution,
             ForwardResolutionProtocolStep.RequireResolver,
             { chainId, activeResolver, requiresWildcardSupport },
-            async (span) => {
+            async (stepSpan) => {
               const extended = await withSpanAsync(
                 tracer,
                 "isExtendedResolver",
@@ -393,47 +319,48 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
                 () => isExtendedResolver({ address: activeResolver, publicClient }),
               );
 
-              span.setAttribute("isExtendedResolver", extended);
+              stepSpan.setAttribute("isExtendedResolver", extended);
 
               return extended;
             },
           );
 
-          // if we require wildcard support and this is NOT an extended resolver, the resolver is not
-          // valid, i.e. there is no active resolver for the name
+          // if we require wildcard support and this is NOT an extended resolver, the resolver is
+          // not valid, i.e. there is no active resolver for the name
           // https://docs.ens.domains/ensip/10/#specification
           if (requiresWildcardSupport && !extended) {
-            return makeEmptyResolverRecordsResponse(selection);
+            return makeRecordsResponse<SELECTION>(operations);
           }
 
-          // execute each record's call against the active Resolver
-          const rawResults = await withEnsProtocolStep(
+          ///////////////////////////////////////////
+          // 5. Resolve remaining operations via RPC
+          ///////////////////////////////////////////
+          operations = await withEnsProtocolStep(
             TraceableENSProtocol.ForwardResolution,
             ForwardResolutionProtocolStep.ExecuteResolveCalls,
             {},
             () =>
-              executeResolveCalls<SELECTION>({
+              executeOperations({
                 name,
                 resolverAddress: activeResolver,
                 // NOTE: ENSIP-10 specifies that if a resolver supports IExtendedResolver,
                 // the client MUST use the ENSIP-10 resolve() method over the legacy methods.
                 useENSIP10Resolve: extended,
-                calls,
+                operations,
                 publicClient,
               }),
           );
 
-          // additional semantic interpretation of the raw results from the chain
-          const results = interpretRawCallsAndResults(rawResults);
-
-          if (process.env.NODE_ENV !== "production") {
-            console.table(tablifyCallResults(rawResults, results));
-          } else {
-            logger.debug({ rawResults, results });
+          // Invariant: all operations must be resolved
+          if (!operations.every(isOperationResolved)) {
+            throw new Error(
+              `Invariant(forward-resolution): Not all operations were resolved at the end of resolution!\n${JSON.stringify(replaceBigInts(operations, String))}`,
+            );
           }
 
           // return record values
-          return makeRecordsResponseFromResolveResults(selection, results);
+          logOperations(operations, logger);
+          return makeRecordsResponse<SELECTION>(operations);
         },
       ),
   );

@@ -3,7 +3,7 @@ import {
   type CoinType,
   coinTypeReverseLabel,
   DEFAULT_EVM_COIN_TYPE,
-  type Name,
+  type InterpretedName,
   type NormalizedAddress,
 } from "enssdk";
 
@@ -17,7 +17,7 @@ const DEFAULT_EVM_COIN_TYPE_BIGINT = BigInt(DEFAULT_EVM_COIN_TYPE);
 export async function getENSIP19ReverseNameRecordFromIndex(
   address: NormalizedAddress,
   coinType: CoinType,
-): Promise<Name | null> {
+): Promise<InterpretedName | null> {
   const _coinType = BigInt(coinType);
 
   // retrieve from index

@@ -20,6 +20,7 @@
       "@ensnode/ensdb-sdk",
       "@ensnode/ensnode-react",
       "@ensnode/ensnode-sdk",
+      "@ensnode/integration-test-env",
       "@ensnode/ponder-sdk",
       "@ensnode/ponder-subgraph",
       "@ensnode/shared-configs",

@@ -33,5 +33,3 @@ export const getIndexingStatusRoute = createRoute({
     },
   },
 });
-
-export const routes = [getIndexingStatusRoute];

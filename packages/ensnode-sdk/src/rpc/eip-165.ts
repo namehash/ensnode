@@ -1,4 +1,4 @@
-import type { Address, Hex } from "enssdk";
+import type { Address, InterfaceId } from "enssdk";
 
 /**
  * EIP-165 ABI
@@ -37,7 +37,7 @@ async function supportsInterface<
       abi: typeof EIP_165_ABI;
       functionName: "supportsInterface";
       address: Address;
-      args: readonly [Hex];
+      args: readonly [InterfaceId];
     }) => Promise<boolean>;
   },
 >({
@@ -46,7 +46,7 @@ async function supportsInterface<
   address,
 }: {
   address: Address;
-  interfaceId: Hex;
+  interfaceId: InterfaceId;
   publicClient: TClient;
 }) {
   try {
@@ -63,7 +63,8 @@ async function supportsInterface<
 }
 
 export const makeSupportsInterfaceReader =
-  (interfaceId: Hex) => (args: Omit<Parameters<typeof supportsInterface>[0], "interfaceId">) =>
+  (interfaceId: InterfaceId) =>
+  (args: Omit<Parameters<typeof supportsInterface>[0], "interfaceId">) =>
     supportsInterface({
       ...args,
       interfaceId,
