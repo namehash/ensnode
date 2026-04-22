@@ -1,5 +1,11 @@
 # @ensnode/ponder-sdk
 
+## 1.10.0
+
+### Minor Changes
+
+- [#1864](https://github.com/namehash/ensnode/pull/1864) [`065ecbe`](https://github.com/namehash/ensnode/commit/065ecbecd02f3e438d1cc488001b7cd967f2be59) Thanks [@tk-o](https://github.com/tk-o)! - Added `logger` field to `PonderAppContext` data model.
+
 ## 1.9.0
 
 ### Minor Changes

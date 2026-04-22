@@ -1,5 +1,47 @@
 # @ensnode/ensnode-sdk
 
+## 1.10.0
+
+### Minor Changes
+
+- [#1671](https://github.com/namehash/ensnode/pull/1671) [`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5) Thanks [@tk-o](https://github.com/tk-o)! - **Breaking**: Replaced the `config()` method in the `EnsNodeClient` class with the extended data model returned from the `indexingStatus()` method.
+
+- [#1863](https://github.com/namehash/ensnode/pull/1863) [`29afaa6`](https://github.com/namehash/ensnode/commit/29afaa6ad8a3f3c8133241cf1a9324980498ded4) Thanks [@Y3drk](https://github.com/Y3drk)! - **Breaking**: Renamed `ENSNodeClient` to `EnsNodeClient`.
+
+- [#1671](https://github.com/namehash/ensnode/pull/1671) [`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5) Thanks [@tk-o](https://github.com/tk-o)! - Introduced `EnsNodeStackInfo` data model.
+
+- [#1858](https://github.com/namehash/ensnode/pull/1858) [`7fca45d`](https://github.com/namehash/ensnode/commit/7fca45d09dc6e3456fec2cae0827e9d2c54827a6) Thanks [@tk-o](https://github.com/tk-o)! - Removed `nodejs` field from `EnsIndexerVersionInfo` data model.
+
+- [#1889](https://github.com/namehash/ensnode/pull/1889) [`29fcfc7`](https://github.com/namehash/ensnode/commit/29fcfc7a1ab01c3214b5c16fc0e4a349010e9360) Thanks [@shrugs](https://github.com/shrugs)! - Migrated core ENS types and utilities from `ensnode-sdk` to `enssdk`:
+
+  - `UnixTimestamp` type moved to enssdk
+  - `normalizeName` function (wraps `@adraffy/ens-normalize`) added; `isNormalizedName`/`isNormalizedLabel` consolidated into `normalization.ts`
+  - `makeSubdomainNode` moved to enssdk
+  - `reinterpretLabel`/`reinterpretName` moved to enssdk
+  - `labelhash` renamed to `labelhashInterpretedLabel` (requires branded `InterpretedLabel` input)
+  - `namehash` renamed to `namehashInterpretedName` (requires branded `InterpretedName` input)
+  - Added `asInterpretedLabel`, `asInterpretedName`, `asLiteralLabel` validated cast helpers
+  - Subregistry managed name functions now return `InterpretedName`
+  - Removed `@adraffy/ens-normalize` dependency from ensnode-sdk (provided by enssdk)
+
+- [#1967](https://github.com/namehash/ensnode/pull/1967) [`5f341e1`](https://github.com/namehash/ensnode/commit/5f341e14420146db772fc01b1b3c0f4e2d4a3cb7) Thanks [@shrugs](https://github.com/shrugs)! - Resolution API: support `contenthash`, `pubkey`, `abi`, `interfaces`, `dnszonehash`, and `version` selection. Protocol acceleration indexes `contenthash`, `pubkey`, `dnszonehash`, and handles `VersionChanged` (clears records for the node, bumps version). `ABI` (bitmask query, contract-equivalent) and `interface` records are selectable but always resolved via RPC. Adds `ContentType` / `InterfaceId` / `RecordVersion` semantic types to `enssdk`.
+
+- [#1671](https://github.com/namehash/ensnode/pull/1671) [`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5) Thanks [@tk-o](https://github.com/tk-o)! - Replaced the `EnsApiConfigResponse` data model by adding `stackInfo` field to the `EnsApiIndexingStatusResponseOk` data model.
+
+- [#1828](https://github.com/namehash/ensnode/pull/1828) [`4c99177`](https://github.com/namehash/ensnode/commit/4c991777ac13ffd2cc1fb947e5a47bd7733b112b) Thanks [@tk-o](https://github.com/tk-o)! - Renamed the `databaseSchemaName` field on `EnsIndexerPublicConfig` type to `ensIndexerSchemaName`.
+
+- [#1907](https://github.com/namehash/ensnode/pull/1907) [`b2481d6`](https://github.com/namehash/ensnode/commit/b2481d6dae6f704493140aa63cd4ad1bfd3e3301) Thanks [@Goader](https://github.com/Goader)! - Made `accurateAsOf` a required field in the Registrar Actions API response (`RegistrarActionsResponseOk`).
+
+- [#1859](https://github.com/namehash/ensnode/pull/1859) [`ed6ee96`](https://github.com/namehash/ensnode/commit/ed6ee9641bfa6f42ddc95955cf8b013c93bf2f4a) Thanks [@tk-o](https://github.com/tk-o)! - Replaced `version` field with `versionInfo` field in the `EnsApiPublicConfig` data model. This change allows tracking the version of `@adraffy/ens-normalize` package used in ENSApi.
+
+### Patch Changes
+
+- [#1872](https://github.com/namehash/ensnode/pull/1872) [`9abb302`](https://github.com/namehash/ensnode/commit/9abb30238374f0847a68615827dddafb6dc05dad) Thanks [@sevenzing](https://github.com/sevenzing)! - Moved examples to separate file to reuse them in ensapi, such that we can test examples in ensnode-sdk with schema parsing and show them in openapi docs
+
+- Updated dependencies [[`29fcfc7`](https://github.com/namehash/ensnode/commit/29fcfc7a1ab01c3214b5c16fc0e4a349010e9360), [`5f341e1`](https://github.com/namehash/ensnode/commit/5f341e14420146db772fc01b1b3c0f4e2d4a3cb7), [`b8f5be7`](https://github.com/namehash/ensnode/commit/b8f5be761748f75c06ba4da81dd6098eec6ebb9a), [`677db8b`](https://github.com/namehash/ensnode/commit/677db8b67effc6d530716c0a1902244dba56d787)]:
+  - enssdk@1.10.0
+  - @ensnode/datasources@1.10.0
+
 ## 1.9.0
 
 ### Minor Changes
