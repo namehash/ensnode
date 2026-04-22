@@ -2,16 +2,11 @@
 
 import { CopyButton } from "@namehash/namehash-ui";
 import { CheckIcon, CopyIcon } from "lucide-react";
-import { useMemo } from "react";
 
-import { useValidatedSelectedConnection } from "@/hooks/active/use-selected-connection";
+import { useOpenApiUrl } from "@/hooks/active/use-openapi-url";
 
 export default function Actions() {
-  const selectedConnection = useValidatedSelectedConnection();
-  const url = useMemo(
-    () => new URL("/openapi.json", selectedConnection).toString(),
-    [selectedConnection],
-  );
+  const url = useOpenApiUrl();
 
   return (
     <div className="flex w-full max-w-md items-center space-x-2">

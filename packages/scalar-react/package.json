@@ -1,5 +1,6 @@
 {
   "name": "@ensnode/scalar-react",
+  "private": true,
   "version": "0.0.0",
   "type": "module",
   "description": "Scalar API Reference React component for ENSNode",
@@ -10,26 +11,10 @@
     "directory": "packages/scalar-react"
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/packages/scalar-react",
-  "files": [
-    "dist"
-  ],
   "exports": {
     ".": "./src/index.ts"
   },
-  "publishConfig": {
-    "exports": {
-      ".": {
-        "default": "./dist/index.js",
-        "types": "./dist/index.d.ts"
-      }
-    },
-    "main": "./dist/index.js",
-    "module": "./dist/index.mjs",
-    "types": "./dist/index.d.ts"
-  },
   "scripts": {
-    "prepublish": "tsup",
-    "dev": "tsup --watch",
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
     "typecheck": "tsgo --noEmit"
@@ -46,7 +31,6 @@
     "@types/react": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "tsup": "catalog:",
     "typescript": "catalog:"
   }
 }

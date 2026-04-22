@@ -23,7 +23,7 @@ const Header = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement>>(
         <header
           ref={ref}
           className={cn(
-            "flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 border-b",
+            "sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 bg-background transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 border-b",
             className,
           )}
           {...props}

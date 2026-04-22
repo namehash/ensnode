@@ -6,9 +6,32 @@ import "@scalar/api-reference-react/style.css";
 interface ScalarApiReferenceProps {
   /** URL to the OpenAPI spec (e.g. `https://api.alpha.ensnode.io/openapi.json`) */
   url: string;
+  /**
+   * Overrides the `servers` list in the OpenAPI spec so the playground targets
+   * this base URL instead (e.g. the currently active connection).
+   */
+  serverUrl?: string;
 }
 
 const CUSTOM_CSS = `
+  .scalar-api-reference { --scalar-y-offset: 0; }
+  .references-layout {
+    height: calc(100svh - 4rem) !important;
+    min-height: 0 !important;
+    max-height: calc(100svh - 4rem) !important;
+    --full-height: calc(100svh - 4rem) !important;
+    grid-template-rows: var(--scalar-header-height, 0px) 1fr auto !important;
+  }
+  .references-rendered {
+    overflow-y: auto !important;
+    min-height: 0 !important;
+  }
+  .references-navigation-list {
+    height: 100% !important;
+  }
+  .scalar-app, .scalar-api-reference {
+    --scalar-font: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
   .light-mode {
     --scalar-color-1: #121212;
     --scalar-color-2: rgba(0, 0, 0, 0.6);
@@ -22,13 +45,17 @@ const CUSTOM_CSS = `
   }
   .scalar-mcp-layer { display: none !important; }
   .section { padding-inline: 0 !important; }
+  .section-container:not(.section-container .section-container) {
+    padding-inline: clamp(16px, 4vw, 60px) !important;
+  }
 `;
 
-export function ScalarApiReference({ url }: ScalarApiReferenceProps) {
+export function ScalarApiReference({ url, serverUrl }: ScalarApiReferenceProps) {
   if (typeof window === "undefined") return null;
 
   const configuration: NonNullable<ReferenceProps["configuration"]> = {
     url,
+    servers: serverUrl ? [{ url: serverUrl }] : undefined,
     theme: "none",
     hideDownloadButton: true,
     hiddenClients: true,
@@ -40,9 +67,5 @@ export function ScalarApiReference({ url }: ScalarApiReferenceProps) {
     customCss: CUSTOM_CSS,
   };
 
-  return (
-    <div className="flex-1">
-      <ApiReferenceReact configuration={configuration} />
-    </div>
-  );
+  return <ApiReferenceReact configuration={configuration} />;
 }
