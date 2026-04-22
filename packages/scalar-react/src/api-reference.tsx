@@ -1,6 +1,7 @@
 "use client";
 
 import { ApiReferenceReact, type ReferenceProps } from "@scalar/api-reference-react";
+import { useEffect, useMemo, useState } from "react";
 import "@scalar/api-reference-react/style.css";
 
 interface ScalarApiReferenceProps {
@@ -16,10 +17,10 @@ interface ScalarApiReferenceProps {
 const CUSTOM_CSS = `
   .scalar-api-reference { --scalar-y-offset: 0; }
   .references-layout {
-    height: calc(100svh - 4rem) !important;
+    height: calc(100svh - var(--ensadmin-header-height, 4rem)) !important;
     min-height: 0 !important;
-    max-height: calc(100svh - 4rem) !important;
-    --full-height: calc(100svh - 4rem) !important;
+    max-height: calc(100svh - var(--ensadmin-header-height, 4rem)) !important;
+    --full-height: calc(100svh - var(--ensadmin-header-height, 4rem)) !important;
     grid-template-rows: var(--scalar-header-height, 0px) 1fr auto !important;
   }
   .references-rendered {
@@ -51,21 +52,29 @@ const CUSTOM_CSS = `
 `;
 
 export function ScalarApiReference({ url, serverUrl }: ScalarApiReferenceProps) {
-  if (typeof window === "undefined") return null;
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  const configuration: NonNullable<ReferenceProps["configuration"]> = {
-    url,
-    servers: serverUrl ? [{ url: serverUrl }] : undefined,
-    theme: "none",
-    hideDownloadButton: true,
-    hiddenClients: true,
-    defaultOpenAllTags: true,
-    forceDarkModeState: "light",
-    hideDarkModeToggle: true,
-    withDefaultFonts: false,
-    hideClientButton: true,
-    customCss: CUSTOM_CSS,
-  };
+  const configuration = useMemo<NonNullable<ReferenceProps["configuration"]>>(
+    () => ({
+      url,
+      servers: serverUrl ? [{ url: serverUrl }] : undefined,
+      theme: "none",
+      hideDownloadButton: true,
+      hiddenClients: true,
+      defaultOpenAllTags: true,
+      forceDarkModeState: "light",
+      hideDarkModeToggle: true,
+      withDefaultFonts: false,
+      hideClientButton: true,
+      customCss: CUSTOM_CSS,
+    }),
+    [url, serverUrl],
+  );
+
+  if (!mounted) return null;
 
   return <ApiReferenceReact configuration={configuration} />;
 }

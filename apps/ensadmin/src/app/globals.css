@@ -4,6 +4,8 @@
 
 @layer base {
   :root {
+    --ensadmin-header-height: 4rem;
+
     --background: 0 0% 100%;
 
     --foreground: 222.2 84% 4.9%;
@@ -73,6 +75,10 @@
 }
 
 @layer base {
+  :root:has([data-collapsible="icon"]) {
+    --ensadmin-header-height: 3rem;
+  }
+
   * {
     @apply border-border outline-ring/50;
   }
