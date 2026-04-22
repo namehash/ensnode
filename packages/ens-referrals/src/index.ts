@@ -31,6 +31,7 @@ export * from "./client";
 export * from "./edition";
 export * from "./edition-metrics";
 export * from "./edition-summary";
+export * from "./encoded-referrer";
 export * from "./leaderboard";
 export * from "./leaderboard-page";
 export * from "./link";

@@ -1,3 +1,4 @@
+import { ZERO_ENCODED_REFERRER } from "@namehash/ens-referrals";
 import { trace } from "@opentelemetry/api";
 import { and, count, desc, eq, gte, isNotNull, lte, not, type SQL } from "drizzle-orm/sql";
 import { asInterpretedName } from "enssdk";
@@ -18,7 +19,6 @@ import {
   type RegistrarActionsOrder,
   RegistrarActionsOrders,
   type RegistrationLifecycle,
-  ZERO_ENCODED_REFERRER,
 } from "@ensnode/ensnode-sdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";

@@ -1,10 +1,5 @@
-import type { Address, Duration } from "enssdk";
+import type { Address, Duration, NormalizedAddress, Referrer } from "enssdk";
 import type { Hash } from "viem";
-
-import type { EncodedReferrer } from "./encoded-referrer";
-
-export type { EncodedReferrer } from "./encoded-referrer";
-export { decodeEncodedReferrer, ZERO_ENCODED_REFERRER } from "./encoded-referrer";
 
 import type { PriceEth, SerializedPriceEth } from "../shared/currencies";
 import { serializePriceEth } from "../shared/serialize";
@@ -114,7 +109,7 @@ export interface RegistrarActionReferralAvailable {
    * Represents the "raw" 32-byte "referrer" value emitted onchain in
    * association with the registrar action.
    */
-  encodedReferrer: EncodedReferrer;
+  encodedReferrer: Referrer;
 
   /**
    * Decoded Referrer
@@ -129,7 +124,7 @@ export interface RegistrarActionReferralAvailable {
    * May be the "zero address" to represent that an `encodedReferrer` is
    * defined but that it is interpreted as no referrer.
    */
-  decodedReferrer: Address;
+  decodedReferrer: NormalizedAddress;
 }
 
 /**

@@ -9,6 +9,7 @@ import type {
   PermissionsId,
   PermissionsResourceId,
   PermissionsUserId,
+  Referrer,
   RegistrationId,
   RegistryId,
   RenewalId,
@@ -16,8 +17,6 @@ import type {
 } from "enssdk";
 import { index, onchainEnum, onchainTable, primaryKey, relations, sql, uniqueIndex } from "ponder";
 import type { BlockNumber, Hash } from "viem";
-
-import type { EncodedReferrer } from "@ensnode/ensnode-sdk";
 
 /**
  * The ENSv2 Schema
@@ -361,7 +360,7 @@ export const registration = onchainTable(
     unregistrantId: t.hex().$type<Address>(),
 
     // may have referrer data
-    referrer: t.hex().$type<EncodedReferrer>(),
+    referrer: t.hex().$type<Referrer>(),
 
     // may have fuses (NameWrapper, Wrapped BaseRegistrar)
     fuses: t.integer(),
@@ -443,7 +442,7 @@ export const renewal = onchainTable(
     duration: t.bigint().notNull(),
 
     // may have a referrer
-    referrer: t.hex().$type<EncodedReferrer>(),
+    referrer: t.hex().$type<Referrer>(),
 
     // TODO(paymentToken): add payment token tracking here
 

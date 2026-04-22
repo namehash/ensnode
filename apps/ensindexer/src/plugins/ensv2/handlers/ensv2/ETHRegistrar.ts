@@ -4,17 +4,13 @@ import {
   makeENSv2DomainId,
   makeStorageId,
   type NormalizedAddress,
+  type Referrer,
   type TokenId,
   type UnixTimestampBigInt,
   type Wei,
 } from "enssdk";
 
-import {
-  type EncodedReferrer,
-  interpretAddress,
-  isRegistrationFullyExpired,
-  PluginName,
-} from "@ensnode/ensnode-sdk";
+import { interpretAddress, isRegistrationFullyExpired, PluginName } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { ensureDomainEvent, ensureEvent } from "@/lib/ensv2/event-db-helpers";
@@ -61,7 +57,7 @@ export default function () {
         subregistry: NormalizedAddress;
         resolver: NormalizedAddress;
         duration: DurationBigInt;
-        referrer: EncodedReferrer;
+        referrer: Referrer;
         paymentToken: NormalizedAddress;
         base: Wei;
         premium: Wei;
@@ -138,7 +134,7 @@ export default function () {
         label: string;
         duration: DurationBigInt;
         newExpiry: UnixTimestampBigInt;
-        referrer: EncodedReferrer;
+        referrer: Referrer;
         paymentToken: NormalizedAddress;
         base: Wei;
       }>;

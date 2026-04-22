@@ -7,9 +7,10 @@ import {
   labelhashLiteralLabel,
   makeENSv1DomainId,
   makeSubdomainNode,
+  type Referrer,
 } from "enssdk";
 
-import { type EncodedReferrer, PluginName } from "@ensnode/ensnode-sdk";
+import { PluginName } from "@ensnode/ensnode-sdk";
 
 import { ensureDomainEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel, ensureUnknownLabel } from "@/lib/ensv2/label-db-helpers";
@@ -38,7 +39,7 @@ export default function () {
       labelHash: LabelHash;
       baseCost?: bigint;
       premium?: bigint;
-      referrer?: EncodedReferrer;
+      referrer?: Referrer;
     }>;
   }) {
     const { labelHash, baseCost: base, premium, referrer } = event.args;
@@ -91,7 +92,7 @@ export default function () {
       labelHash: LabelHash;
       baseCost?: bigint;
       premium?: bigint;
-      referrer?: EncodedReferrer;
+      referrer?: Referrer;
     }>;
   }) {
     const { labelHash, baseCost: base, premium, referrer } = event.args;

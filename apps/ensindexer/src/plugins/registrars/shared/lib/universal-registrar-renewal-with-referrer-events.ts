@@ -1,8 +1,7 @@
-import type { Address, Node } from "enssdk";
+import type { Node, NormalizedAddress, Referrer } from "enssdk";
 import type { Hash } from "viem";
 
 import {
-  type EncodedReferrer,
   isRegistrarActionReferralAvailable,
   type RegistrarActionReferral,
 } from "@ensnode/ensnode-sdk";
@@ -78,8 +77,8 @@ export async function handleUniversalRegistrarRenewalEvent(
   }
 
   // 3. Prepare referral info
-  let encodedReferrer: EncodedReferrer | null;
-  let decodedReferrer: Address | null;
+  let encodedReferrer: Referrer | null;
+  let decodedReferrer: NormalizedAddress | null;
 
   if (isRegistrarActionReferralAvailable(referral)) {
     encodedReferrer = referral.encodedReferrer;
