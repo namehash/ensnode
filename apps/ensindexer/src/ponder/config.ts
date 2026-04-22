@@ -1,5 +1,7 @@
 import config from "@/config";
 
+import { ENSDB_CONNECTION_OPTIONS } from "@ensnode/ensdb-sdk";
+
 import { mergePonderConfigs } from "@/lib/merge-ponder-configs";
 import { ALL_PLUGINS, type AllPluginsMergedConfig } from "@/plugins";
 
@@ -55,8 +57,9 @@ ponderConfig.ordering = "omnichain";
 // However, we want Ponder to always use the `ENSDB_URL` environment variable instead and so
 // we make explicit use of it here.
 ponderConfig.database = {
-  connectionString: config.ensDbUrl,
   kind: "postgres",
+  connectionString: config.ensDbUrl,
+  poolConfig: { options: ENSDB_CONNECTION_OPTIONS },
 };
 
 export default ponderConfig;

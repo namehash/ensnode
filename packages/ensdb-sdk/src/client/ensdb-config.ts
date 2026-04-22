@@ -39,3 +39,5 @@ export const ENSDB_SCHEMA_CHECKSUM = getDrizzleSchemaChecksum({
   ...abstractEnsIndexerSchema,
   ...ensNodeSchema,
 });
+
+export { ENSDB_CONNECTION_OPTIONS } from "../lib/drizzle";

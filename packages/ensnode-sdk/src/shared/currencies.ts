@@ -181,6 +181,74 @@ export function addPrices<const PriceType extends Price = Price>(
 }
 
 /**
+ * Subtract price B from price A.
+ *
+ * @param a the minuend {@link Price} value.
+ * @param b the subtrahend {@link Price} value.
+ * @returns the resulting {@link Price} (`a - b`) with the same currency as the inputs.
+ * @throws if the prices have different currencies.
+ * @throws if the result would be negative ({@link CurrencyAmount} must be non-negative).
+ */
+export function subtractPrice<const PriceType extends Price = Price>(
+  a: PriceType,
+  b: PriceType,
+): PriceType {
+  if (!isPriceCurrencyEqual(a, b)) {
+    throw new Error("All prices must have the same currency to be subtracted.");
+  }
+
+  const resultAmount = a.amount - b.amount;
+
+  if (resultAmount < 0n) {
+    throw new Error("subtractPrice result must be non-negative.");
+  }
+
+  return { amount: resultAmount, currency: a.currency } as PriceType;
+}
+
+/**
+ * Return the smallest of the given {@link Price} values.
+ *
+ * @param prices at least two {@link Price} values to compare.
+ * @returns the {@link Price} with the smallest amount. Ties return the first
+ *          such value in argument order.
+ * @throws if not all prices have the same currency.
+ */
+export function minPrice<const PriceType extends Price = Price>(
+  ...prices: [PriceType, PriceType, ...PriceType[]]
+): PriceType {
+  const firstPrice = prices[0];
+  const allPricesInSameCurrency = prices.every((price) => isPriceCurrencyEqual(firstPrice, price));
+
+  if (allPricesInSameCurrency === false) {
+    throw new Error("All prices must have the same currency to be compared.");
+  }
+
+  return prices.reduce((acc, price) => (price.amount < acc.amount ? price : acc));
+}
+
+/**
+ * Return the largest of the given {@link Price} values.
+ *
+ * @param prices at least two {@link Price} values to compare.
+ * @returns the {@link Price} with the largest amount. Ties return the first
+ *          such value in argument order.
+ * @throws if not all prices have the same currency.
+ */
+export function maxPrice<const PriceType extends Price = Price>(
+  ...prices: [PriceType, PriceType, ...PriceType[]]
+): PriceType {
+  const firstPrice = prices[0];
+  const allPricesInSameCurrency = prices.every((price) => isPriceCurrencyEqual(firstPrice, price));
+
+  if (allPricesInSameCurrency === false) {
+    throw new Error("All prices must have the same currency to be compared.");
+  }
+
+  return prices.reduce((acc, price) => (price.amount > acc.amount ? price : acc));
+}
+
+/**
  * Scales a Price object by a floating-point number while maintaining precision.
  *
  * **Important:** The precision of this method is bound to the precision of float
