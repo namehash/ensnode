@@ -100,6 +100,11 @@ export default function () {
         })
         .onConflictDoNothing();
 
+      // ensure parent domain's subregistry is the ENSv1VirtualRegistry
+      await context.ensDb
+        .update(ensIndexerSchema.domain, { id: parentDomainId })
+        .set({ subregistryId: parentRegistryId });
+
       // ensure Canonical Domain reference
       await context.ensDb
         .insert(ensIndexerSchema.registryCanonicalDomain)
@@ -134,6 +139,7 @@ export default function () {
         id: domainId,
         type: "ENSv1Domain",
         registryId: parentRegistryId,
+        node,
         labelHash,
         rootRegistryOwnerId,
       })

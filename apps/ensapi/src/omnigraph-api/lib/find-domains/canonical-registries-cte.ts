@@ -2,19 +2,18 @@ import config from "@/config";
 
 import { sql } from "drizzle-orm";
 
-import { maybeGetENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
+import { getENSv1RootRegistryId, maybeGetENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { lazy } from "@/lib/lazy";
 
 /**
- * The maximum depth to traverse the ENSv2 namegraph in order to construct the set of Canonical
- * Registries.
+ * The maximum depth to traverse the namegraph in order to construct the set of Canonical Registries.
  *
- * Note that the set of Canonical Registries in the ENSv2 Namegraph is a _tree_, enforced by the
- * requirement that each Registry maintain a reverse-pointer to its Canonical Domain, a form of
- * 'edge authentication': if the reverse-pointer doesn't agree with the forward-pointer, the edge
- * is not traversed, making cycles within the direced graph impossible.
+ * Note that the set of Canonical Registries is a _tree_ by construction: each Registry is reached
+ * via either `registryCanonicalDomain` (ENSv1 virtual / ENSv2) or the concrete ENSv1 root. For
+ * ENSv2, edge authentication (parent's `subregistryId` matches the child's `registryId`) prevents
+ * cycles in the declared namegraph; for ENSv1, each domain lives under exactly one Registry.
  *
  * So while technically not necessary, including the depth constraint avoids the possibility of an
  * infinite runaway query in the event that the indexed namegraph is somehow corrupted or otherwise
@@ -22,25 +21,30 @@ import { lazy } from "@/lib/lazy";
  */
 const CANONICAL_REGISTRIES_MAX_DEPTH = 16;
 
-// lazy() defers construction until first use so that this module can be
-// imported without env vars being present (e.g. during OpenAPI generation).
-const getENSV2RootRegistryId = lazy(() => maybeGetENSv2RootRegistryId(config.namespace));
+const getV1Root = lazy(() => getENSv1RootRegistryId(config.namespace));
+const getV2Root = lazy(() => maybeGetENSv2RootRegistryId(config.namespace));
 
 /**
- * Builds a recursive CTE that traverses from the ENSv2 Root Registry to construct a set of all
- * Canonical Registries. A Canonical Registry is an ENSv2 Registry that is the Root Registry or the
- * (sub)Registry of a Domain in a Canonical Registry.
+ * Builds a recursive CTE that traverses forward from the ENSv1 root Registry and (when defined)
+ * the ENSv2 root Registry to construct a set of all Canonical Registries.
+ *
+ * A Canonical Registry is either root, or a Registry declared as a Subregistry by a Domain living
+ * in another Canonical Registry. Both ENSv1 and ENSv2 Domains set `subregistryId` (ENSv1 Domains
+ * to their managed ENSv1 VirtualRegistry, ENSv2 Domains to their declared Subregistry), so a
+ * single recursive step over `domain.subregistryId` covers both lineages.
  *
  * TODO: could this be optimized further, perhaps as a materialized view?
  */
 export const getCanonicalRegistriesCTE = () => {
-  // if ENSv2 is not defined, return an empty set with identical structure to below
-  if (!getENSV2RootRegistryId()) {
-    return ensDb
-      .select({ id: sql<string>`registry_id`.as("id") })
-      .from(sql`(SELECT NULL::text AS registry_id WHERE FALSE) AS canonical_registries_cte`)
-      .as("canonical_registries");
-  }
+  const v1Root = getV1Root();
+  const v2Root = getV2Root();
+
+  // TODO: this can be streamlined into a single union once ENSv2Root is available in all namespaces
+  const rootsUnion = v2Root
+    ? sql`SELECT ${v1Root}::text AS registry_id, 0 AS depth
+          UNION ALL
+          SELECT ${v2Root}::text AS registry_id, 0 AS depth`
+    : sql`SELECT ${v1Root}::text AS registry_id, 0 AS depth`;
 
   return ensDb
     .select({
@@ -53,15 +57,14 @@ export const getCanonicalRegistriesCTE = () => {
       sql`
       (
         WITH RECURSIVE canonical_registries AS (
-          SELECT ${getENSV2RootRegistryId()}::text AS registry_id, 0 AS depth
+          ${rootsUnion}
           UNION ALL
-          SELECT rcd.registry_id, cr.depth + 1
-          FROM ${ensIndexerSchema.registryCanonicalDomain} rcd
-          JOIN ${ensIndexerSchema.v2Domain} parent ON parent.id = rcd.domain_id AND parent.subregistry_id = rcd.registry_id
-          JOIN canonical_registries cr ON cr.registry_id = parent.registry_id
+          SELECT d.subregistry_id AS registry_id, cr.depth + 1
+          FROM canonical_registries cr
+          JOIN ${ensIndexerSchema.domain} d ON d.registry_id = cr.registry_id
           WHERE cr.depth < ${CANONICAL_REGISTRIES_MAX_DEPTH}
         )
-        SELECT registry_id FROM canonical_registries
+        SELECT registry_id FROM canonical_registries WHERE registry_id IS NOT NULL
       ) AS canonical_registries_cte`,
     )
     .as("canonical_registries");

@@ -234,6 +234,9 @@ export const domain = onchainTable(
     // INVARIANT: non-null iff `type === "ENSv2Domain"`.
     tokenId: t.bigint(),
 
+    // INVARIANT: non-null iff `type === "ENSv1Domain"`. The domain's namehash.
+    node: t.hex().$type<Node>(),
+
     // represents a labelHash
     labelHash: t.hex().notNull().$type<LabelHash>(),
 

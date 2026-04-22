@@ -1,6 +1,6 @@
-import { and, eq, sql } from "drizzle-orm";
-import { alias, unionAll } from "drizzle-orm/pg-core";
-import type { DomainId, NormalizedAddress } from "enssdk";
+import { eq, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
+import type { DomainId, NormalizedAddress, RegistryId } from "enssdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 
@@ -10,73 +10,47 @@ import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 export type BaseDomainSet = ReturnType<typeof domainsBase>;
 
 /**
- * Universal base domain set: all v1 and v2 domains with consistent metadata.
+ * Universal base domain set: all ENSv1 and ENSv2 Domains with consistent metadata.
  *
- * Returns {domainId, ownerId, registryId, parentId, labelHash, sortableLabel} where:
- * - registryId is NULL for v1 domains (all v1 domains are canonical)
- * - v1 parentId comes directly from the v1Domain.parentId column
- * - v2 parentId is derived via canonical registry traversal: look up the canonical domain
- *   for this domain's registry (via registryCanonicalDomain), then verify the reverse pointer
- *   (parent.subregistryId = child.registryId). See getV2CanonicalPath for the recursive version.
- * - sortableLabel is the domain's own interpreted label, used for NAME ordering, which can be
- *   overridden by future layers.
+ * Returns `{ domainId, ownerId, registryId, parentId, labelHash, sortableLabel }` where `parentId`
+ * is derived via the domain's registry → canonical domain link (`registryCanonicalDomain`)
+ * and `sortableLabel` is the domain's own interpreted label, used for NAME ordering, and can be
+ * overridden by later layers.
  *
  * All downstream filters (owner, parent, registry, name, canonical) operate on this shape.
  */
 export function domainsBase() {
-  const v2ParentDomain = alias(ensIndexerSchema.v2Domain, "v2ParentDomain");
+  const parentDomain = alias(ensIndexerSchema.domain, "parentDomain");
 
-  return unionAll(
+  return (
     ensDb
       .select({
-        domainId: sql<DomainId>`${ensIndexerSchema.v1Domain.id}`.as("domainId"),
-        ownerId: sql<NormalizedAddress | null>`${ensIndexerSchema.v1Domain.ownerId}`.as("ownerId"),
-        registryId: sql<string | null>`NULL::text`.as("registryId"),
-        parentId: sql<DomainId | null>`${ensIndexerSchema.v1Domain.parentId}`.as("parentId"),
-        labelHash: sql<string>`${ensIndexerSchema.v1Domain.labelHash}`.as("labelHash"),
+        domainId: sql<DomainId>`${ensIndexerSchema.domain.id}`.as("domainId"),
+        ownerId: sql<NormalizedAddress | null>`${ensIndexerSchema.domain.ownerId}`.as("ownerId"),
+        registryId: sql<RegistryId>`${ensIndexerSchema.domain.registryId}`.as("registryId"),
+        parentId: sql<DomainId | null>`${parentDomain.id}`.as("parentId"),
+        labelHash: sql<string>`${ensIndexerSchema.domain.labelHash}`.as("labelHash"),
         sortableLabel: sql<string | null>`${ensIndexerSchema.label.interpreted}`.as(
           "sortableLabel",
         ),
       })
-      .from(ensIndexerSchema.v1Domain)
-      .leftJoin(
-        ensIndexerSchema.label,
-        eq(ensIndexerSchema.label.labelHash, ensIndexerSchema.v1Domain.labelHash),
-      ),
-    ensDb
-      .select({
-        domainId: sql<DomainId>`${ensIndexerSchema.v2Domain.id}`.as("domainId"),
-        ownerId: sql<NormalizedAddress | null>`${ensIndexerSchema.v2Domain.ownerId}`.as("ownerId"),
-        registryId: sql<string | null>`${ensIndexerSchema.v2Domain.registryId}`.as("registryId"),
-        parentId: sql<DomainId | null>`${v2ParentDomain.id}`.as("parentId"),
-        labelHash: sql<string>`${ensIndexerSchema.v2Domain.labelHash}`.as("labelHash"),
-        sortableLabel: sql<string | null>`${ensIndexerSchema.label.interpreted}`.as(
-          "sortableLabel",
-        ),
-      })
-      .from(ensIndexerSchema.v2Domain)
-      // derive v2 parentId via canonical registry traversal:
-      // 1. find the canonical domain for this domain's registry
+      .from(ensIndexerSchema.domain)
+      // parentId derivation: domain.registryId → canonical parent domain via registryCanonicalDomain
       .leftJoin(
         ensIndexerSchema.registryCanonicalDomain,
-        eq(
-          ensIndexerSchema.registryCanonicalDomain.registryId,
-          ensIndexerSchema.v2Domain.registryId,
-        ),
+        eq(ensIndexerSchema.registryCanonicalDomain.registryId, ensIndexerSchema.domain.registryId),
       )
-      // 2. verify the reverse pointer: parent.id = rcd.domainId AND parent.subregistryId = child.registryId
       .leftJoin(
-        v2ParentDomain,
-        and(
-          eq(v2ParentDomain.id, ensIndexerSchema.registryCanonicalDomain.domainId),
-          eq(v2ParentDomain.subregistryId, ensIndexerSchema.v2Domain.registryId),
-        ),
+        parentDomain,
+        eq(parentDomain.id, ensIndexerSchema.registryCanonicalDomain.domainId),
       )
+      // join label for labelHash/sortableLabel
       .leftJoin(
         ensIndexerSchema.label,
-        eq(ensIndexerSchema.label.labelHash, ensIndexerSchema.v2Domain.labelHash),
-      ),
-  ).as("baseDomains");
+        eq(ensIndexerSchema.label.labelHash, ensIndexerSchema.domain.labelHash),
+      )
+      .as("baseDomains")
+  );
 }
 
 /**

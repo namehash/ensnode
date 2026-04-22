@@ -4,31 +4,26 @@ import { trace } from "@opentelemetry/api";
 import { Param, sql } from "drizzle-orm";
 import {
   type DomainId,
-  type ENSv2DomainId,
   type InterpretedName,
   interpretedLabelsToLabelHashPath,
   interpretedNameToInterpretedLabels,
-  type LabelHash,
-  makeENSv1DomainId,
-  namehashInterpretedName,
   type RegistryId,
 } from "enssdk";
 
-import { maybeGetENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
+import { getENSv1RootRegistryId, maybeGetENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
 import { lazy } from "@/lib/lazy";
 import { makeLogger } from "@/lib/logger";
 
-// lazy() defers construction until first use so that this module can be
-// imported without env vars being present (e.g. during OpenAPI generation).
-const _maybeGetENSv2RootRegistryId = lazy(() => maybeGetENSv2RootRegistryId(config.namespace));
+// lazy() defers construction until first use so that this module can be imported without env vars
+// being present (e.g. during OpenAPI generation).
+const getV1Root = lazy(() => getENSv1RootRegistryId(config.namespace));
+const getV2Root = lazy(() => maybeGetENSv2RootRegistryId(config.namespace));
 
 const tracer = trace.getTracer("get-domain-by-interpreted-name");
 const logger = makeLogger("get-domain-by-interpreted-name");
-const v1Logger = makeLogger("get-domain-by-interpreted-name:v1");
-const v2Logger = makeLogger("get-domain-by-interpreted-name:v2");
 
 /**
  * Domain lookup by Interpreted Name via forward traversal of the namegraph.
@@ -67,47 +62,34 @@ export async function getDomainIdByInterpretedName(
   name: InterpretedName,
 ): Promise<DomainId | null> {
   return withActiveSpanAsync(tracer, "getDomainIdByInterpretedName", { name }, async () => {
-    // Domains addressable in v2 are preferred, but v1 lookups are cheap, so just do them both ahead of time
-    const rootRegistryId = _maybeGetENSv2RootRegistryId();
+    const v1Root = getV1Root();
+    const v2Root = getV2Root();
 
     const [v1DomainId, v2DomainId] = await Promise.all([
-      withActiveSpanAsync(tracer, "v1_getDomainId", {}, () =>
-        v1_getDomainIdByInterpretedName(name),
-      ),
-      // only resolve v2Domain if ENSv2 Root Registry is defined
-      rootRegistryId
-        ? withActiveSpanAsync(tracer, "v2_getDomainId", {}, () =>
-            v2_getDomainIdByInterpretedName(rootRegistryId, name),
-          )
+      withActiveSpanAsync(tracer, "v1_getDomainId", {}, () => traverseFromRoot(v1Root, name)),
+      // only resolve v2 Domain if ENSv2 Root Registry is defined
+      v2Root
+        ? withActiveSpanAsync(tracer, "v2_getDomainId", {}, () => traverseFromRoot(v2Root, name))
         : null,
     ]);
 
     logger.debug({ v1DomainId, v2DomainId });
 
-    // prefer v2Domain over v1Domain
+    // prefer v2 Domain over v1 Domain
     return v2DomainId || v1DomainId || null;
   });
 }
 
 /**
- * Retrieves the ENSv1DomainId for the provided `name`, if exists.
+ * Forward-traverses the namegraph from `rootRegistryId`, one label at a time, using the unified
+ * `domain.subregistryId` pointer to hop from a parent Domain to the Registry its subnames live in.
+ *
+ * Both ENSv1 and ENSv2 Domains set `subregistryId` — ENSv1 Domains to their managed ENSv1
+ * VirtualRegistry (set on first-child indexing), ENSv2 Domains to their declared Subregistry — so
+ * a single recursive CTE handles both lineages. The starting root picks which lineage: v1 and v2
+ * registry IDs are disjoint, so there is no cross-contamination.
  */
-async function v1_getDomainIdByInterpretedName(name: InterpretedName): Promise<DomainId | null> {
-  const domainId = makeENSv1DomainId(namehashInterpretedName(name));
-
-  const domain = await ensDb.query.v1Domain.findFirst({ where: (t, { eq }) => eq(t.id, domainId) });
-  const exists = domain !== undefined;
-
-  v1Logger.debug({ domainId, exists });
-
-  return exists ? domainId : null;
-}
-
-/**
- * Forward-traverses the ENSv2 namegraph from the specified root in order to identify the Domain
- * addressed by `name`.
- */
-async function v2_getDomainIdByInterpretedName(
+async function traverseFromRoot(
   rootRegistryId: RegistryId,
   name: InterpretedName,
 ): Promise<DomainId | null> {
@@ -121,23 +103,19 @@ async function v2_getDomainIdByInterpretedName(
   const result = await ensDb.execute(sql`
     WITH RECURSIVE path AS (
       SELECT
-        r.id AS registry_id,
+        ${rootRegistryId}::text AS next_registry_id,
         NULL::text AS domain_id,
-        NULL::text AS label_hash,
         0 AS depth
-      FROM ${ensIndexerSchema.registry} r
-      WHERE r.id = ${rootRegistryId}
 
       UNION ALL
 
       SELECT
-        d.subregistry_id AS registry_id,
+        d.subregistry_id AS next_registry_id,
         d.id AS domain_id,
-        d.label_hash,
         path.depth + 1
       FROM path
-      JOIN ${ensIndexerSchema.v2Domain} d
-        ON d.registry_id = path.registry_id
+      JOIN ${ensIndexerSchema.domain} d
+        ON d.registry_id = path.next_registry_id
       WHERE d.label_hash = (${rawLabelHashPathArray})[path.depth + 1]
         AND path.depth + 1 <= array_length(${rawLabelHashPathArray}, 1)
     )
@@ -147,30 +125,13 @@ async function v2_getDomainIdByInterpretedName(
     ORDER BY depth;
   `);
 
-  // couldn't for the life of me figure out how to type this result this correctly within drizzle...
-  const rows = result.rows as {
-    registry_id: RegistryId;
-    domain_id: ENSv2DomainId;
-    label_hash: LabelHash;
-    depth: number;
-  }[];
+  const rows = result.rows as { domain_id: DomainId; depth: number }[];
 
-  // this was a query for a TLD and it does not exist within the ENSv2 namegraph
-  if (rows.length === 0) {
-    v2Logger.debug({ labelHashPath, rows });
-    return null;
-  }
+  if (rows.length === 0) return null;
 
   // biome-ignore lint/style/noNonNullAssertion: length check above
   const leaf = rows[rows.length - 1]!;
-
-  // the v2Domain was found iff there is an exact match within the ENSv2 namegraph
   const exact = rows.length === labelHashPath.length;
 
-  v2Logger.debug({ labelHashPath, rows, exact });
-
-  if (exact) return leaf.domain_id;
-
-  // otherwise, the v2 domain was not found
-  return null;
+  return exact ? leaf.domain_id : null;
 }

@@ -1,6 +1,6 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, eq } from "drizzle-orm";
-import type { ENSv1DomainId, RegistrationId } from "enssdk";
+import type { RegistrationId } from "enssdk";
 import { hexToBigInt } from "viem";
 
 import {
@@ -21,7 +21,7 @@ import {
   PAGINATION_DEFAULT_MAX_SIZE,
   PAGINATION_DEFAULT_PAGE_SIZE,
 } from "@/omnigraph-api/schema/constants";
-import { DomainInterfaceRef } from "@/omnigraph-api/schema/domain";
+import { DomainInterfaceRef, type ENSv1Domain } from "@/omnigraph-api/schema/domain";
 import { EventRef } from "@/omnigraph-api/schema/event";
 import { RenewalRef } from "@/omnigraph-api/schema/renewal";
 
@@ -343,8 +343,13 @@ WrappedBaseRegistrarRegistrationRef.implement({
       description: "The TokenID for this Domain in the NameWrapper.",
       type: "BigInt",
       nullable: false,
-      // NOTE: only ENSv1 Domains can be wrapped, id is guaranteed to be ENSv1DomainId === Node
-      resolve: (parent) => hexToBigInt(parent.domainId as ENSv1DomainId),
+      // Only ENSv1 Domains can be wrapped; the NameWrapper's ERC1155 tokenId is the Domain's node.
+      resolve: async (parent, _args, ctx) => {
+        const domain = (await DomainInterfaceRef.getDataloader(ctx).load(
+          parent.domainId,
+        )) as ENSv1Domain;
+        return hexToBigInt(domain.node);
+      },
     }),
 
     /////////////////
