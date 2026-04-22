@@ -35,14 +35,14 @@ describe("replaceBigInts", () => {
     const out = replaceBigInts([5n], numberToHex);
 
     expect(out).toStrictEqual(["0x5"]);
-    expectTypeOf(out).toEqualTypeOf<readonly [Hex]>();
+    expectTypeOf(out).toEqualTypeOf<[Hex]>();
   });
 
   it("replaces bigints in a readonly (as const) array", () => {
     const out = replaceBigInts([5n] as const, numberToHex);
 
     expect(out).toStrictEqual(["0x5"]);
-    expectTypeOf(out).toEqualTypeOf<readonly [Hex]>();
+    expectTypeOf(out).toEqualTypeOf<[Hex]>();
   });
 
   it("replaces bigints in a mixed-type array", () => {
@@ -55,7 +55,7 @@ describe("replaceBigInts", () => {
     const out = replaceBigInts({ kevin: { kevin: 5n } }, numberToHex);
 
     expect(out).toStrictEqual({ kevin: { kevin: "0x5" } });
-    expectTypeOf(out).toEqualTypeOf<{ readonly kevin: { readonly kevin: Hex } }>();
+    expectTypeOf(out).toEqualTypeOf<{ kevin: { kevin: Hex } }>();
   });
 
   it("replaces bigints in an object whose value is a bigint array", () => {
@@ -68,6 +68,15 @@ describe("replaceBigInts", () => {
     const out = replaceBigInts([{ xs: [1n, { y: 2n }] }, { xs: [3n] }], String);
 
     expect(out).toStrictEqual([{ xs: ["1", { y: "2" }] }, { xs: ["3"] }]);
+    expectTypeOf(out).toEqualTypeOf<[{ xs: [string, { y: string }] }, { xs: [string] }]>();
+  });
+
+  it("maps general (non-tuple) arrays element-wise", () => {
+    const input: bigint[] = [1n, 2n];
+    const out = replaceBigInts(input, String);
+
+    expect(out).toStrictEqual(["1", "2"]);
+    expectTypeOf(out).toEqualTypeOf<string[]>();
   });
 
   it("supports an identity replacer", () => {
