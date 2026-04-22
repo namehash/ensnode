@@ -34,6 +34,9 @@ services:
       # need to update this line in that case
       RPC_URL_15658733: http://devnet:8545
       ENSINDEXER_SCHEMA_NAME: docker_devnet_v1
+    depends_on:
+      postgres:
+        condition: service_healthy
     env_file:
       - path: envs/.env.docker.common
         required: true
@@ -60,6 +63,9 @@ services:
     extends:
       file: services/ensadmin.yml
       service: ensadmin
+    depends_on:
+      ensapi:
+        condition: service_started
     env_file:
       - path: envs/.env.docker.common
         required: true

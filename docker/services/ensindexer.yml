@@ -14,8 +14,3 @@ services:
       retries: 3
       start_period: 5m
       start_interval: 1s
-    depends_on:
-      ensrainbow:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
