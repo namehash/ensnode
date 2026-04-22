@@ -12,7 +12,7 @@ services:
       file: services/postgres.yml
       service: postgres
     env_file:
-      - path: ./.env.docker-compose
+      - path: ./envs/.env.docker.common
         required: true
 
 volumes:

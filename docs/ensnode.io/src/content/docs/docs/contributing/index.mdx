@@ -138,7 +138,19 @@ If you make changes in the application code and wish to run those updates, you m
 
 ### Running the Applications
 
-Run the base stack with:
+For local development, use the devnet stack — no environment setup required:
+
+```bash
+docker compose -f docker/docker-compose.devnet.yml up -d
+```
+
+For mainnet/sepolia, first configure your environment:
+
+```bash
+cp docker/envs/.env.docker.example docker/envs/.env.docker.local
+```
+
+Edit `docker/envs/.env.docker.local` to set `NAMESPACE`, `PLUGINS`, and your RPC endpoints, then run:
 
 ```bash
 docker compose -f docker/docker-compose.yml up -d
@@ -150,7 +162,7 @@ docker compose -f docker/docker-compose.yml up -d
 - **ENSAdmin**: Available at [http://localhost:4173](http://localhost:4173)
 - **PostgreSQL**: Available on port `5432`
 
-For more compose files (devnet, CI), configuration options, and all available commands, see the [Deploying with Docker](/ensnode/deploying/docker) guide and [`docker/README.md`](https://github.com/namehash/ensnode/blob/main/docker/README.md).
+For all available commands and configuration options, see the [Deploying with Docker](/ensnode/deploying/docker) guide and [`docker/README.md`](https://github.com/namehash/ensnode/blob/main/docker/README.md).
 
 ### Stopping the Applications
 

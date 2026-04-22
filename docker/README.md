@@ -4,13 +4,16 @@ All commands are run from the **monorepo root**.
 
 ## Files
 
-| File | Purpose |
-|------|---------|
-| `docker/docker-compose.yml` | Base stack — ensindexer, ensapi, ensrainbow, ensadmin, postgres. Targets mainnet with default .env.local |
-| `docker/docker-compose.devnet.yml` | Full stack against local devnet (`ens-test-env`). Includes all base services + devnet. |
-| `docker/docker-compose.orchestrator.yml` | Minimal infra for CI — devnet + postgres only. Used by `orchestrator.ts`. |
-| `docker/services/*.yml` | Individual service definitions. Extended by the compose files above. |
-| `docker/.env.docker-compose` | Shared env defaults (postgres credentials, internal service URLs). Usually placed after `.env.local`, so it will override it by design. |
+| File                                     | Purpose                                                                                |
+| ---------------------------------------- | -------------------------------------------------------------------------------------- |
+| `docker/docker-compose.yml`              | Base stack — ensindexer, ensapi, ensrainbow, ensadmin, postgres. For mainnet/sepolia.  |
+| `docker/docker-compose.devnet.yml`       | Full stack against local devnet (`ens-test-env`). Includes all base services + devnet. |
+| `docker/docker-compose.orchestrator.yml` | Minimal infra for CI — devnet + postgres only. Used by `orchestrator.ts`.              |
+| `docker/services/*.yml`                  | Individual service definitions. Extended by the compose files above.                   |
+| `docker/envs/.env.docker.common`         | Shared env defaults (postgres credentials, internal service URLs). Committed.          |
+| `docker/envs/.env.docker.devnet`         | Devnet defaults (PLUGINS, etc.). Committed. Works out of the box.                      |
+| `docker/envs/.env.docker.example`        | Example for user-specific config. Copy to `.env.docker.local` for mainnet/sepolia.     |
+| `docker/envs/.env.docker.local`          | User config (gitignored). Required for base stack, optional for devnet overrides.      |
 
 > To inspect the fully resolved config for any compose file (resolves all `extends`):
 > ```bash
@@ -19,17 +22,15 @@ All commands are run from the **monorepo root**.
 
 ## Use cases
 
-### Mainnet
+### Mainnet / Sepolia
 
-**1. Configure environment files** (one-time setup):
+**1. Configure environment** (one-time setup):
 
 ```bash
-cp apps/ensindexer/.env.local.example apps/ensindexer/.env.local
-cp apps/ensapi/.env.local.example apps/ensapi/.env.local
-cp apps/ensrainbow/.env.local.example apps/ensrainbow/.env.local
+cp docker/envs/.env.docker.example docker/envs/.env.docker.local
 ```
 
-Edit those files and set your RPC endpoints (e.g. `RPC_URL_1`, `ALCHEMY_API_KEY`) and any other required values.
+Edit `docker/envs/.env.docker.local` and set `NAMESPACE`, `PLUGINS`, and your RPC endpoints (e.g. `ALCHEMY_API_KEY` or `RPC_URL_1`).
 
 **2. Start/stop the stack:**
 
@@ -46,7 +47,9 @@ docker compose -f docker/docker-compose.yml down -v
 
 ### Local devnet (for developers)
 
-All config is inlined — no `.env.local` files required.
+No setup required — devnet defaults are committed in `docker/envs/.env.docker.devnet`.
+
+To override defaults (e.g. change `PLUGINS`), create `docker/envs/.env.docker.local` with your values.
 
 ```bash
 # Start full stack against devnet

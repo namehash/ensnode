@@ -6,11 +6,10 @@ services:
     environment:
       ENSINDEXER_SCHEMA_NAME: docker_ensindexer_v1
     env_file:
-      # NOTE: must define apps/ensindexer/.env.local (see apps/ensindexer/.env.local.example)
-      - path: ../apps/ensindexer/.env.local
+      - path: envs/.env.docker.common
         required: true
-      # Loaded last so docker-compose values (ENSDB_URL, etc.) override .env.local
-      - path: ./.env.docker-compose
+      # Copy envs/.env.docker.example to envs/.env.docker.local and configure
+      - path: envs/.env.docker.local
         required: true
 
   ensapi:
@@ -20,11 +19,9 @@ services:
     environment:
       ENSINDEXER_SCHEMA_NAME: docker_ensindexer_v1
     env_file:
-      # NOTE: must define apps/ensapi/.env.local (see apps/ensapi/.env.local.example)
-      - path: ../apps/ensapi/.env.local
+      - path: envs/.env.docker.common
         required: true
-      # Loaded last so docker-compose values (ENSDB_URL, etc.) override .env.local
-      - path: ./.env.docker-compose
+      - path: envs/.env.docker.local
         required: true
 
   ensrainbow:
@@ -32,11 +29,9 @@ services:
       file: services/ensrainbow.yml
       service: ensrainbow
     env_file:
-      # NOTE: must define apps/ensrainbow/.env.local (see apps/ensrainbow/.env.local.example)
-      - path: ../apps/ensrainbow/.env.local
+      - path: envs/.env.docker.common
         required: true
-      # Loaded last so docker-compose values override .env.local
-      - path: ./.env.docker-compose
+      - path: envs/.env.docker.local
         required: true
 
   ensadmin:
@@ -44,10 +39,9 @@ services:
       file: services/ensadmin.yml
       service: ensadmin
     env_file:
-      # NOTE: Optionally define apps/ensadmin/.env.local (see apps/ensadmin/.env.local.example)
-      - path: ../apps/ensadmin/.env.local
-        required: false
-      - path: ./.env.docker-compose
+      - path: envs/.env.docker.common
+        required: true
+      - path: envs/.env.docker.local
         required: true
 
   postgres:
@@ -55,7 +49,7 @@ services:
       file: services/postgres.yml
       service: postgres
     env_file:
-      - path: ./.env.docker-compose
+      - path: envs/.env.docker.common
         required: true
 
 volumes:

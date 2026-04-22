@@ -20,22 +20,34 @@ ENSIndexer runs `CREATE EXTENSION IF NOT EXISTS pg_trgm` at startup to back part
 
 ENSNode provides several [Docker Compose](https://docs.docker.com/compose/) files for different use cases:
 
-- **`docker/docker-compose.yml`** — base stack (mainnet by default): ensindexer, ensapi, ensrainbow, ensadmin, postgres
-- **`docker/docker-compose.devnet.yml`** — full stack against local devnet (ens-test-env), no `.env.local` files required
+- **`docker/docker-compose.yml`** — base stack for mainnet/sepolia: ensindexer, ensapi, ensrainbow, ensadmin, postgres
+- **`docker/docker-compose.devnet.yml`** — full stack against local devnet (ens-test-env), works out of the box with no configuration required
 
-Before running the base stack, configure the required environment files:
+### Mainnet / Sepolia
+
+Copy the example env file and configure it:
 
 ```bash
-cp apps/ensindexer/.env.local.example apps/ensindexer/.env.local
-cp apps/ensapi/.env.local.example apps/ensapi/.env.local
-cp apps/ensrainbow/.env.local.example apps/ensrainbow/.env.local
+cp docker/envs/.env.docker.example docker/envs/.env.docker.local
 ```
 
-Edit each `.env.local` to set your RPC URLs and any other required values, then run:
+Edit `docker/envs/.env.docker.local` to set your `NAMESPACE`, `PLUGINS`, and RPC endpoints (e.g. `ALCHEMY_API_KEY` or `RPC_URL_1`), then run:
 
 ```bash
 docker compose -f docker/docker-compose.yml up -d
 ```
+
+
+### Local devnet
+
+Configuration is optional. To customize defaults (e.g. change `PLUGINS`), copy the example as in previous step and edit it.
+
+Otherwise, skip setup and run directly:
+
+```bash
+docker compose -f docker/docker-compose.devnet.yml up -d
+```
+
 
 <LinkCard
   title="Docker Compose usage and commands"

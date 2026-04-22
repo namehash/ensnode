@@ -4,17 +4,19 @@ services:
       file: services/ensindexer.yml
       service: ensindexer
     environment:
-      # This is strange but RPC_URL_1 and RPC_URL_1337 doesnt work.
-      # Only this chain id will replace localhost:8545 with correct domain
+      # TODO: in future we will migrate devnet to chain_id=1
+      # need to update this line in that case
       RPC_URL_15658733: http://devnet:8545
       ENSINDEXER_SCHEMA_NAME: docker_devnet_v1
       LABEL_SET_ID: ens-test-env
-      LABEL_SET_VERSION: 0
-      PLUGINS: subgraph,ensv2
       NAMESPACE: ens-test-env
     env_file:
-      - path: ./.env.docker-compose
+      - path: envs/.env.docker.common
         required: true
+      - path: envs/.env.docker.devnet
+        required: true
+      - path: envs/.env.docker.local
+        required: false
     depends_on:
       ensrainbow:
         condition: service_healthy
@@ -28,11 +30,17 @@ services:
       file: services/ensapi.yml
       service: ensapi
     environment:
-      ENSINDEXER_SCHEMA_NAME: docker_devnet_v1
+      # TODO: in future we will migrate devnet to chain_id=1
+      # need to update this line in that case
       RPC_URL_15658733: http://devnet:8545
+      ENSINDEXER_SCHEMA_NAME: docker_devnet_v1
     env_file:
-      - path: ./.env.docker-compose
+      - path: envs/.env.docker.common
         required: true
+      - path: envs/.env.docker.devnet
+        required: true
+      - path: envs/.env.docker.local
+        required: false
 
   ensrainbow:
     extends:
@@ -40,26 +48,32 @@ services:
       service: ensrainbow
     environment:
       LABEL_SET_ID: ens-test-env
-      LABEL_SET_VERSION: 0
-      DB_SCHEMA_VERSION: 3
     env_file:
-      - path: ./.env.docker-compose
+      - path: envs/.env.docker.common
         required: true
+      - path: envs/.env.docker.devnet
+        required: true
+      - path: envs/.env.docker.local
+        required: false
 
   ensadmin:
     extends:
       file: services/ensadmin.yml
       service: ensadmin
     env_file:
-      - path: ./.env.docker-compose
+      - path: envs/.env.docker.common
         required: true
+      - path: envs/.env.docker.devnet
+        required: true
+      - path: envs/.env.docker.local
+        required: false
 
   postgres:
     extends:
       file: services/postgres.yml
       service: postgres
     env_file:
-      - path: ./.env.docker-compose
+      - path: ./envs/.env.docker.common
         required: true
 
   devnet:
