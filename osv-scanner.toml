@@ -1,3 +1,7 @@
 [[IgnoredVulns]]
 id = "GHSA-gpj5-g38j-94v9"
 reason = "drizzle-orm SQL injection via dynamic identifiers (CVE-2026-39356). Not exploitable in ENSNode: we use only static Ponder schema objects, never pass user input to sql.identifier() or .as(). Avoids a fragile drizzle version bump that breaks ponder-subgraph DTS generation."
+
+[[IgnoredVulns]]
+id = "GHSA-j687-52p2-xcff"
+reason = "Astro XSS via define:vars on <script> tags. Not exploitable in ENSNode: docs sites are statically generated and do not pass user-controlled input to define:vars. Upgrading to the fixed version (astro 6.x) requires a major version bump that needs broader testing."
