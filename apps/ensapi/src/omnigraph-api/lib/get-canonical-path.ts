@@ -41,7 +41,8 @@ export async function getCanonicalPath(domainId: DomainId): Promise<CanonicalPat
 
       -- Step upward: domain -> current registry's canonical domain (parent).
       -- Recursion terminates naturally: roots have no registryCanonicalDomain entry, so the
-      -- JOIN on rcd fails when we reach one. MAX_DEPTH guards against corrupted state.
+      -- JOIN on rcd fails when we reach one. MAX_DEPTH guards against corrupted state. The
+      -- pd.subregistry_id = upward.registry_id clause performs edge authentication.
       SELECT
         pd.id AS domain_id,
         pd.registry_id,
@@ -50,7 +51,7 @@ export async function getCanonicalPath(domainId: DomainId): Promise<CanonicalPat
       JOIN ${ensIndexerSchema.registryCanonicalDomain} rcd
         ON rcd.registry_id = upward.registry_id
       JOIN ${ensIndexerSchema.domain} pd
-        ON pd.id = rcd.domain_id
+        ON pd.id = rcd.domain_id AND pd.subregistry_id = upward.registry_id
       WHERE upward.depth < ${MAX_DEPTH}
     )
     SELECT *

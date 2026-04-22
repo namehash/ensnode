@@ -21,7 +21,7 @@ import {
   PAGINATION_DEFAULT_MAX_SIZE,
   PAGINATION_DEFAULT_PAGE_SIZE,
 } from "@/omnigraph-api/schema/constants";
-import { DomainInterfaceRef, type ENSv1Domain } from "@/omnigraph-api/schema/domain";
+import { DomainInterfaceRef, isENSv1Domain } from "@/omnigraph-api/schema/domain";
 import { EventRef } from "@/omnigraph-api/schema/event";
 import { RenewalRef } from "@/omnigraph-api/schema/renewal";
 
@@ -345,9 +345,12 @@ WrappedBaseRegistrarRegistrationRef.implement({
       nullable: false,
       // Only ENSv1 Domains can be wrapped; the NameWrapper's ERC1155 tokenId is the Domain's node.
       resolve: async (parent, _args, ctx) => {
-        const domain = (await DomainInterfaceRef.getDataloader(ctx).load(
-          parent.domainId,
-        )) as ENSv1Domain;
+        const domain = await DomainInterfaceRef.getDataloader(ctx).load(parent.domainId);
+        if (!isENSv1Domain(domain)) {
+          throw new Error(
+            `Invariant(WrappedBaseRegistrarRegistration.tokenId): expected ENSv1Domain for domainId '${parent.domainId}', got ${domain.type}.`,
+          );
+        }
         return hexToBigInt(domain.node);
       },
     }),

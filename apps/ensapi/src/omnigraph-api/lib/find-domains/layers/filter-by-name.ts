@@ -64,29 +64,35 @@ function domainsByLabelHashPath(labelHashPath: LabelHashPath) {
     .from(
       sql`(
         WITH RECURSIVE upward_check AS (
-          -- Base case: find the deepest children (leaves of the concrete path)
-          -- and get their parent via registryCanonicalDomain
+          -- Base case: find the deepest children (leaves of the concrete path) and walk one step
+          -- up via registryCanonicalDomain. The parent.subregistry_id = d.registry_id clause
+          -- performs edge authentication.
           SELECT
             d.id AS leaf_id,
-            rcd.domain_id AS current_id,
+            parent.id AS current_id,
             1 AS depth
           FROM ${ensIndexerSchema.domain} d
           JOIN ${ensIndexerSchema.registryCanonicalDomain} rcd
             ON rcd.registry_id = d.registry_id
+          JOIN ${ensIndexerSchema.domain} parent
+            ON parent.id = rcd.domain_id AND parent.subregistry_id = d.registry_id
           WHERE d.label_hash = (${rawLabelHashPathArray})[${pathLength}]
 
           UNION ALL
 
-          -- Recursive step: traverse UP via registryCanonicalDomain, verifying each ancestor's labelHash
+          -- Recursive step: traverse UP via registryCanonicalDomain, verifying each ancestor's
+          -- labelHash. The np.subregistry_id = pd.registry_id clause performs edge authentication.
           SELECT
             upward_check.leaf_id,
-            rcd.domain_id AS current_id,
+            np.id AS current_id,
             upward_check.depth + 1
           FROM upward_check
           JOIN ${ensIndexerSchema.domain} pd
             ON pd.id = upward_check.current_id
           JOIN ${ensIndexerSchema.registryCanonicalDomain} rcd
             ON rcd.registry_id = pd.registry_id
+          JOIN ${ensIndexerSchema.domain} np
+            ON np.id = rcd.domain_id AND np.subregistry_id = pd.registry_id
           WHERE upward_check.depth < ${pathLength}
             AND pd.label_hash = (${rawLabelHashPathArray})[${pathLength} - upward_check.depth]
         )

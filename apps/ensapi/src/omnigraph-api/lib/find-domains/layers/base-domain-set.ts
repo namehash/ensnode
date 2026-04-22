@@ -1,4 +1,4 @@
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import type { DomainId, NormalizedAddress, RegistryId } from "enssdk";
 
@@ -35,14 +35,18 @@ export function domainsBase() {
         ),
       })
       .from(ensIndexerSchema.domain)
-      // parentId derivation: domain.registryId → canonical parent domain via registryCanonicalDomain
+      // parentId derivation: domain.registryId → canonical parent domain via registryCanonicalDomain.
+      // The `parentDomain.subregistryId = domain.registryId` clause performs edge authentication.
       .leftJoin(
         ensIndexerSchema.registryCanonicalDomain,
         eq(ensIndexerSchema.registryCanonicalDomain.registryId, ensIndexerSchema.domain.registryId),
       )
       .leftJoin(
         parentDomain,
-        eq(parentDomain.id, ensIndexerSchema.registryCanonicalDomain.domainId),
+        and(
+          eq(parentDomain.id, ensIndexerSchema.registryCanonicalDomain.domainId),
+          eq(parentDomain.subregistryId, ensIndexerSchema.domain.registryId),
+        ),
       )
       // join label for labelHash/sortableLabel
       .leftJoin(

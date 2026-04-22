@@ -67,10 +67,10 @@ export type ENSv1Domain = RequiredAndNotNull<Domain, "node"> &
 export type ENSv2Domain = RequiredAndNotNull<Domain, "tokenId"> &
   RequiredAndNull<Domain, "node" | "rootRegistryOwnerId"> & { type: "ENSv2Domain" };
 
-const isENSv1Domain = (domain: unknown): domain is ENSv1Domain =>
+export const isENSv1Domain = (domain: unknown): domain is ENSv1Domain =>
   (domain as DomainInterface).type === "ENSv1Domain";
 
-const isENSv2Domain = (domain: unknown): domain is ENSv2Domain =>
+export const isENSv2Domain = (domain: unknown): domain is ENSv2Domain =>
   (domain as DomainInterface).type === "ENSv2Domain";
 
 export const ENSv1DomainRef = builder.objectRef<ENSv1Domain>("ENSv1Domain");
@@ -114,7 +114,8 @@ DomainInterfaceRef.implement({
       nullable: true,
       resolve: async (domain, _args, context) => {
         const canonicalPath = await context.loaders.canonicalPath.load(domain.id);
-        if (!canonicalPath) return null;
+        if (canonicalPath instanceof Error) throw canonicalPath;
+        if (canonicalPath === null) return null;
 
         // TODO: this could be more efficient if getCanonicalPath included the label join for us.
         const domains = await rejectAnyErrors(
@@ -147,7 +148,8 @@ DomainInterfaceRef.implement({
       nullable: true,
       resolve: async (domain, _args, context) => {
         const canonicalPath = await context.loaders.canonicalPath.load(domain.id);
-        if (!canonicalPath) return null;
+        if (canonicalPath instanceof Error) throw canonicalPath;
+        if (canonicalPath === null) return null;
 
         return await rejectAnyErrors(
           DomainInterfaceRef.getDataloader(context).loadMany(canonicalPath),
@@ -165,6 +167,7 @@ DomainInterfaceRef.implement({
       nullable: true,
       resolve: async (domain, _args, context) => {
         const path = await context.loaders.canonicalPath.load(domain.id);
+        if (path instanceof Error) throw path;
         return path?.[1] ?? null;
       },
     }),

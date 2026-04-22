@@ -11,7 +11,7 @@ const errorAsValue = (error: unknown) =>
   error instanceof Error ? error : new Error(String(error));
 
 const createCanonicalPathLoader = () =>
-  new DataLoader<DomainId, CanonicalPath | null>(async (domainIds) =>
+  new DataLoader<DomainId, CanonicalPath | Error | null>(async (domainIds) =>
     Promise.all(domainIds.map((id) => getCanonicalPath(id).catch(errorAsValue))),
   );
 
