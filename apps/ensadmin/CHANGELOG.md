@@ -1,5 +1,26 @@
 # ensadmin
 
+## 1.10.0
+
+### Minor Changes
+
+- [#1671](https://github.com/namehash/ensnode/pull/1671) [`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5) Thanks [@tk-o](https://github.com/tk-o)! - Replaced the `useENSNodeConfig` hook with `useEnsNodeStackInfo` hook. The `useEnsNodeStackInfo` hook leverages the updated data model returned from the `useIndexingStatusWithSwr` hook.
+
+- [#1828](https://github.com/namehash/ensnode/pull/1828) [`4c99177`](https://github.com/namehash/ensnode/commit/4c991777ac13ffd2cc1fb947e5a47bd7733b112b) Thanks [@tk-o](https://github.com/tk-o)! - Updated the Connection view to reference "ENSIndexer Schema Name".
+
+### Patch Changes
+
+- [#1840](https://github.com/namehash/ensnode/pull/1840) [`52495c0`](https://github.com/namehash/ensnode/commit/52495c06883ee9a9667322079aba3e1bf763a1b3) Thanks [@notrab](https://github.com/notrab)! - Fix sidebar navigation to only preserve the connection query param, preventing page-specific params like name from leaking between routes.
+
+- [#1816](https://github.com/namehash/ensnode/pull/1816) [`ab1750c`](https://github.com/namehash/ensnode/commit/ab1750c1bf37756b85124a7c8ce07fcd0610b96f) Thanks [@notrab](https://github.com/notrab)! - Make the Record Resolution Inspector URL shareable by driving name state from query params, with cross-navigation links between name profiles and record inspection.
+
+- Updated dependencies [[`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5), [`29afaa6`](https://github.com/namehash/ensnode/commit/29afaa6ad8a3f3c8133241cf1a9324980498ded4), [`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5), [`7fca45d`](https://github.com/namehash/ensnode/commit/7fca45d09dc6e3456fec2cae0827e9d2c54827a6), [`29fcfc7`](https://github.com/namehash/ensnode/commit/29fcfc7a1ab01c3214b5c16fc0e4a349010e9360), [`5f341e1`](https://github.com/namehash/ensnode/commit/5f341e14420146db772fc01b1b3c0f4e2d4a3cb7), [`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5), [`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5), [`b8f5be7`](https://github.com/namehash/ensnode/commit/b8f5be761748f75c06ba4da81dd6098eec6ebb9a), [`4c99177`](https://github.com/namehash/ensnode/commit/4c991777ac13ffd2cc1fb947e5a47bd7733b112b), [`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5), [`b2481d6`](https://github.com/namehash/ensnode/commit/b2481d6dae6f704493140aa63cd4ad1bfd3e3301), [`9abb302`](https://github.com/namehash/ensnode/commit/9abb30238374f0847a68615827dddafb6dc05dad), [`ed6ee96`](https://github.com/namehash/ensnode/commit/ed6ee9641bfa6f42ddc95955cf8b013c93bf2f4a), [`29afaa6`](https://github.com/namehash/ensnode/commit/29afaa6ad8a3f3c8133241cf1a9324980498ded4), [`29afaa6`](https://github.com/namehash/ensnode/commit/29afaa6ad8a3f3c8133241cf1a9324980498ded4), [`677db8b`](https://github.com/namehash/ensnode/commit/677db8b67effc6d530716c0a1902244dba56d787), [`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5)]:
+  - @ensnode/ensnode-sdk@1.10.0
+  - enssdk@1.10.0
+  - @ensnode/ensnode-react@1.10.0
+  - @namehash/namehash-ui@1.10.0
+  - @ensnode/datasources@1.10.0
+
 ## 1.9.0
 
 ### Patch Changes

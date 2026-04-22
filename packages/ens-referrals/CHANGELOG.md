@@ -1,5 +1,31 @@
 # @namehash/ens-referrals
 
+## 1.10.0
+
+### Minor Changes
+
+- [#1925](https://github.com/namehash/ensnode/pull/1925) [`b5da4a6`](https://github.com/namehash/ensnode/commit/b5da4a6d78d6c4d0de83ea7928f561757eb8d7f4) Thanks [@Goader](https://github.com/Goader)! - Flatten the `@namehash/ens-referrals/v1` subpath export to the package root. Import from `@namehash/ens-referrals` instead of `@namehash/ens-referrals/v1` (and `@namehash/ens-referrals/internal` instead of `@namehash/ens-referrals/v1/internal`).
+
+- [#1874](https://github.com/namehash/ensnode/pull/1874) [`b781245`](https://github.com/namehash/ensnode/commit/b781245036e67479ded836df3916ab9675a38285) Thanks [@Goader](https://github.com/Goader)! - Rename rev-share-limit API fields for clarity: `minQualifiedRevenueContribution` → `minBaseRevenueContribution`, `qualifiedRevenueShare` → `maxBaseRevenueShare`, `standardAwardValue` → `uncappedAward`, `awardPoolApproxValue` → `cappedAward`. Rename `totalAwardPoolValue` → `awardPool` for both rev-share-limit and pie-split rules. Extract the previously hardcoded `BASE_REVENUE_CONTRIBUTION_PER_YEAR` constant into a per-edition `baseAnnualRevenueContribution` rule field.
+
+- [#1925](https://github.com/namehash/ensnode/pull/1925) [`b5da4a6`](https://github.com/namehash/ensnode/commit/b5da4a6d78d6c4d0de83ea7928f561757eb8d7f4) Thanks [@Goader](https://github.com/Goader)! - Remove v0 ENS Referrals API. The `/ensanalytics/*` routes are deleted — use `/v1/ensanalytics/*` instead.
+
+- [#1849](https://github.com/namehash/ensnode/pull/1849) [`5c2dc68`](https://github.com/namehash/ensnode/commit/5c2dc687a6b6e6dd31c1f1aeab08e89d3a9a5e36) Thanks [@Y3drk](https://github.com/Y3drk)! - Added a README section showcasing a working example of defining referral program edition configs via JSON files.
+
+- [#1912](https://github.com/namehash/ensnode/pull/1912) [`d5225c0`](https://github.com/namehash/ensnode/commit/d5225c00f4528b09826ca2a59f87271df6c7b330) Thanks [@Goader](https://github.com/Goader)! - Removed the hardcoded "default" referral program edition config set and renamed `CUSTOM_REFERRAL_PROGRAM_EDITIONS` to `REFERRAL_PROGRAM_EDITIONS`. An unset `REFERRAL_PROGRAM_EDITIONS` now means the referral program has zero configured editions, so ENSApi performs no referral-related work against ENSDb. The editions array may also now be empty.
+
+- [#1943](https://github.com/namehash/ensnode/pull/1943) [`49a0e75`](https://github.com/namehash/ensnode/commit/49a0e75e25d92c4e3ebb08e87abee3e33c0e8101) Thanks [@Goader](https://github.com/Goader)! - Generalize disqualifications into admin actions: introduce AdminAction discriminated union (Disqualification | Warning), rename `disqualifications` to `adminActions` in rev-share-cap rules, and replace `adminDisqualificationReason` with `adminAction` in referrer metrics.
+
+- [#1919](https://github.com/namehash/ensnode/pull/1919) [`319d619`](https://github.com/namehash/ensnode/commit/319d619f6259f7bda5813c685a993074acb259ba) Thanks [@Goader](https://github.com/Goader)! - Rename `rev-share-limit` award model to `rev-share-cap`.
+
+### Patch Changes
+
+- [#1938](https://github.com/namehash/ensnode/pull/1938) [`ab20d4d`](https://github.com/namehash/ensnode/commit/ab20d4ddf7233151bdf5ab78f4f04a5f77c72d87) Thanks [@Goader](https://github.com/Goader)! - Tighten referral program types to use `NormalizedAddress` instead of `Address` in internal leaderboard map keys (pie-split, shared `sliceReferrers`) and related JSDoc. No runtime behavior change.
+
+- Updated dependencies [[`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5), [`29afaa6`](https://github.com/namehash/ensnode/commit/29afaa6ad8a3f3c8133241cf1a9324980498ded4), [`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5), [`7fca45d`](https://github.com/namehash/ensnode/commit/7fca45d09dc6e3456fec2cae0827e9d2c54827a6), [`29fcfc7`](https://github.com/namehash/ensnode/commit/29fcfc7a1ab01c3214b5c16fc0e4a349010e9360), [`5f341e1`](https://github.com/namehash/ensnode/commit/5f341e14420146db772fc01b1b3c0f4e2d4a3cb7), [`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5), [`b8f5be7`](https://github.com/namehash/ensnode/commit/b8f5be761748f75c06ba4da81dd6098eec6ebb9a), [`4c99177`](https://github.com/namehash/ensnode/commit/4c991777ac13ffd2cc1fb947e5a47bd7733b112b), [`b2481d6`](https://github.com/namehash/ensnode/commit/b2481d6dae6f704493140aa63cd4ad1bfd3e3301), [`9abb302`](https://github.com/namehash/ensnode/commit/9abb30238374f0847a68615827dddafb6dc05dad), [`ed6ee96`](https://github.com/namehash/ensnode/commit/ed6ee9641bfa6f42ddc95955cf8b013c93bf2f4a), [`677db8b`](https://github.com/namehash/ensnode/commit/677db8b67effc6d530716c0a1902244dba56d787)]:
+  - @ensnode/ensnode-sdk@1.10.0
+  - enssdk@1.10.0
+
 ## 1.9.0
 
 ### Minor Changes

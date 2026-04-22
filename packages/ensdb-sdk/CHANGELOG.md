@@ -1,5 +1,23 @@
 # @ensnode/ensdb-sdk
 
+## 1.10.0
+
+### Minor Changes
+
+- [#1967](https://github.com/namehash/ensnode/pull/1967) [`5f341e1`](https://github.com/namehash/ensnode/commit/5f341e14420146db772fc01b1b3c0f4e2d4a3cb7) Thanks [@shrugs](https://github.com/shrugs)! - Resolution API: support `contenthash`, `pubkey`, `abi`, `interfaces`, `dnszonehash`, and `version` selection. Protocol acceleration indexes `contenthash`, `pubkey`, `dnszonehash`, and handles `VersionChanged` (clears records for the node, bumps version). `ABI` (bitmask query, contract-equivalent) and `interface` records are selectable but always resolved via RPC. Adds `ContentType` / `InterfaceId` / `RecordVersion` semantic types to `enssdk`.
+
+- [#1868](https://github.com/namehash/ensnode/pull/1868) [`c336c79`](https://github.com/namehash/ensnode/commit/c336c79b08e46ce53caa536ebf6158eba9f3e017) Thanks [@tk-o](https://github.com/tk-o)! - Added `validateEnsDbConfig` function to support validation for the `EnsDbConfig` data model.
+
+- [#1856](https://github.com/namehash/ensnode/pull/1856) [`fc88ee5`](https://github.com/namehash/ensnode/commit/fc88ee5f910de1a94ce2734776d4a5640f839641) Thanks [@shrugs](https://github.com/shrugs)! - Re-enable `subgraph_domain.name` indexes (originally disabled in #1819) by pairing a hash index for exact-match lookups with a GIN trigram index (`gin_trgm_ops`) for partial-match filters (`_contains`, `_starts_with`, `_ends_with`). The hash index avoids the btree 8191-byte row size limit triggered by spam names. The trigram index requires the `pg_trgm` Postgres extension, which ENSIndexer now installs automatically via a Drizzle migration (`0001_enable_ext_pg_trgm.sql`) that runs before Ponder starts.
+
+- [#1913](https://github.com/namehash/ensnode/pull/1913) [`4c51c75`](https://github.com/namehash/ensnode/commit/4c51c75ec8b3807d0aa988618893b2da07e11a83) Thanks [@tk-o](https://github.com/tk-o)! - Exported `ENSDB_SCHEMA_CHECKSUM` const which changes when ENSDb Schema definition changes.
+
+### Patch Changes
+
+- Updated dependencies [[`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5), [`29afaa6`](https://github.com/namehash/ensnode/commit/29afaa6ad8a3f3c8133241cf1a9324980498ded4), [`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5), [`7fca45d`](https://github.com/namehash/ensnode/commit/7fca45d09dc6e3456fec2cae0827e9d2c54827a6), [`29fcfc7`](https://github.com/namehash/ensnode/commit/29fcfc7a1ab01c3214b5c16fc0e4a349010e9360), [`5f341e1`](https://github.com/namehash/ensnode/commit/5f341e14420146db772fc01b1b3c0f4e2d4a3cb7), [`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5), [`b8f5be7`](https://github.com/namehash/ensnode/commit/b8f5be761748f75c06ba4da81dd6098eec6ebb9a), [`4c99177`](https://github.com/namehash/ensnode/commit/4c991777ac13ffd2cc1fb947e5a47bd7733b112b), [`b2481d6`](https://github.com/namehash/ensnode/commit/b2481d6dae6f704493140aa63cd4ad1bfd3e3301), [`9abb302`](https://github.com/namehash/ensnode/commit/9abb30238374f0847a68615827dddafb6dc05dad), [`ed6ee96`](https://github.com/namehash/ensnode/commit/ed6ee9641bfa6f42ddc95955cf8b013c93bf2f4a), [`677db8b`](https://github.com/namehash/ensnode/commit/677db8b67effc6d530716c0a1902244dba56d787)]:
+  - @ensnode/ensnode-sdk@1.10.0
+  - enssdk@1.10.0
+
 ## 1.9.0
 
 ### Minor Changes
