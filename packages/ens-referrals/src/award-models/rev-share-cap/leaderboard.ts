@@ -2,13 +2,13 @@ import type { Duration, NormalizedAddress, UnixTimestamp } from "enssdk";
 
 import {
   addPrices,
-  minPrices,
+  minPrice,
   type PriceEth,
   type PriceUsdc,
   priceEth,
   priceUsdc,
   scalePrice,
-  subtractPrices,
+  subtractPrice,
 } from "@ensnode/ensnode-sdk";
 
 import { buildReferrerMetrics } from "../../referrer-metrics";
@@ -23,7 +23,7 @@ import {
 } from "./metrics";
 import type { ReferralEvent } from "./referral-event";
 import {
-  computeBaseRevenueContribution,
+  calcBaseRevenueContribution,
   isReferrerQualifiedRevShareCap,
   type ReferralProgramRulesRevShareCap,
 } from "./rules";
@@ -84,7 +84,7 @@ interface ReferrerRaceState {
    * contribution met AND not admin-disqualified), and stays true thereafter.
    */
   hasQualified: boolean;
-  /** Amount actually claimed from the award pool (the capped award). */
+  /** Amount tentatively claimed from the award pool (capped by the available award pool). */
   cappedAward: PriceUsdc;
 }
 
@@ -114,56 +114,56 @@ export const buildReferrerLeaderboardRevShareCap = (
   let awardPoolRemaining: PriceUsdc = rules.awardPool;
 
   for (const event of sortedEvents) {
-    const referrer = event.referrer;
+    const referrerId = event.referrer;
 
-    let state = referrerStates.get(referrer);
-    if (!state) {
-      state = {
+    let referrerState = referrerStates.get(referrerId);
+    if (!referrerState) {
+      referrerState = {
         totalReferrals: 0,
         totalIncrementalDuration: 0,
         totalRevenueContribution: priceEth(0n),
         hasQualified: false,
         cappedAward: priceUsdc(0n),
       };
-      referrerStates.set(referrer, state);
+      referrerStates.set(referrerId, referrerState);
     }
 
     // Update raw totals.
-    state.totalReferrals += 1;
-    state.totalIncrementalDuration += event.incrementalDuration;
-    state.totalRevenueContribution = addPrices(
-      state.totalRevenueContribution,
+    referrerState.totalReferrals += 1;
+    referrerState.totalIncrementalDuration += event.incrementalDuration;
+    referrerState.totalRevenueContribution = addPrices(
+      referrerState.totalRevenueContribution,
       event.incrementalRevenueContribution,
     );
 
     // Compute totalBaseRevenue from aggregated duration (single division — avoids per-event
     // truncation that would compound into a sum lower than the correct aggregated value).
-    const totalBaseRevenue = computeBaseRevenueContribution(rules, state.totalIncrementalDuration);
+    const totalBaseRevenue = calcBaseRevenueContribution(
+      rules,
+      referrerState.totalIncrementalDuration,
+    );
 
     // Determine if newly qualifying or already qualified.
-    const isNowQualified = isReferrerQualifiedRevShareCap(referrer, totalBaseRevenue, rules);
+    const isNowQualified = isReferrerQualifiedRevShareCap(referrerId, totalBaseRevenue, rules);
 
-    if (isNowQualified && !state.hasQualified) {
+    if (isNowQualified && !referrerState.hasQualified) {
       // First time crossing the qualification threshold: claim all accumulated uncapped award.
       // Compute from aggregated totals to match the single-division used in final output.
       const accumulatedUncappedAward = scalePrice(totalBaseRevenue, rules.maxBaseRevenueShare);
-      const incrementalCappedAward = minPrices(accumulatedUncappedAward, awardPoolRemaining);
-      state.cappedAward = addPrices(state.cappedAward, incrementalCappedAward);
-      awardPoolRemaining = subtractPrices(awardPoolRemaining, incrementalCappedAward);
-      state.hasQualified = true;
-    } else if (state.hasQualified) {
+      const incrementalCappedAward = minPrice(accumulatedUncappedAward, awardPoolRemaining);
+      referrerState.cappedAward = addPrices(referrerState.cappedAward, incrementalCappedAward);
+      awardPoolRemaining = subtractPrice(awardPoolRemaining, incrementalCappedAward);
+      referrerState.hasQualified = true;
+    } else if (referrerState.hasQualified) {
       // Already qualified: claim this event's incremental uncapped award.
-      const incrementalBaseRevenue = computeBaseRevenueContribution(
-        rules,
-        event.incrementalDuration,
-      );
+      const incrementalBaseRevenue = calcBaseRevenueContribution(rules, event.incrementalDuration);
       const incrementalUncappedAward = scalePrice(
         incrementalBaseRevenue,
         rules.maxBaseRevenueShare,
       );
-      const incrementalCappedAward = minPrices(incrementalUncappedAward, awardPoolRemaining);
-      state.cappedAward = addPrices(state.cappedAward, incrementalCappedAward);
-      awardPoolRemaining = subtractPrices(awardPoolRemaining, incrementalCappedAward);
+      const incrementalCappedAward = minPrice(incrementalUncappedAward, awardPoolRemaining);
+      referrerState.cappedAward = addPrices(referrerState.cappedAward, incrementalCappedAward);
+      awardPoolRemaining = subtractPrice(awardPoolRemaining, incrementalCappedAward);
     }
     // If not yet qualified, nothing is claimed from the pool.
   }
@@ -172,31 +172,33 @@ export const buildReferrerLeaderboardRevShareCap = (
   //    1. cappedAward desc — actual pool claims, race winners first
   //    2. totalIncrementalDuration desc — tie-break for pool-depleted referrers
   //    3. referrer address desc — deterministic tie-break
-  const sortedEntries = [...referrerStates.entries()].sort(([a, stateA], [b, stateB]) => {
-    // Primary: cappedAward desc (bigint comparison)
-    if (stateB.cappedAward.amount !== stateA.cappedAward.amount) {
-      return stateB.cappedAward.amount > stateA.cappedAward.amount ? 1 : -1;
-    }
+  const sortedEntries = [...referrerStates.entries()].sort(
+    ([referrerIdA, referrerStateA], [referrerIdB, referrerStateB]) => {
+      // Primary: cappedAward desc (bigint comparison)
+      if (referrerStateB.cappedAward.amount !== referrerStateA.cappedAward.amount) {
+        return referrerStateB.cappedAward.amount > referrerStateA.cappedAward.amount ? 1 : -1;
+      }
 
-    // Secondary: totalIncrementalDuration desc (used directly as the tie-breaker).
-    if (stateB.totalIncrementalDuration !== stateA.totalIncrementalDuration) {
-      return stateB.totalIncrementalDuration - stateA.totalIncrementalDuration;
-    }
+      // Secondary: totalIncrementalDuration desc (used directly as the tie-breaker).
+      if (referrerStateB.totalIncrementalDuration !== referrerStateA.totalIncrementalDuration) {
+        return referrerStateB.totalIncrementalDuration - referrerStateA.totalIncrementalDuration;
+      }
 
-    // Tertiary: referrer address desc (lexicographic)
-    if (b > a) return 1;
-    if (b < a) return -1;
-    return 0;
-  });
+      // Tertiary: referrer address desc (lexicographic)
+      if (referrerIdB > referrerIdA) return 1;
+      if (referrerIdB < referrerIdA) return -1;
+      return 0;
+    },
+  );
 
   // 4. Build AwardedReferrerMetricsRevShareCap for each referrer.
   const awardedReferrers: AwardedReferrerMetricsRevShareCap[] = sortedEntries.map(
-    ([referrerAddr, state], index) => {
+    ([referrerId, referrerState], index) => {
       const baseMetrics = buildReferrerMetrics(
-        referrerAddr,
-        state.totalReferrals,
-        state.totalIncrementalDuration,
-        state.totalRevenueContribution,
+        referrerId,
+        referrerState.totalReferrals,
+        referrerState.totalIncrementalDuration,
+        referrerState.totalRevenueContribution,
       );
 
       const revShareMetrics = buildReferrerMetricsRevShareCap(baseMetrics, rules);
@@ -215,7 +217,7 @@ export const buildReferrerLeaderboardRevShareCap = (
       return buildAwardedReferrerMetricsRevShareCap(
         rankedMetrics,
         uncappedAward,
-        state.cappedAward,
+        referrerState.cappedAward,
         rules,
       );
     },

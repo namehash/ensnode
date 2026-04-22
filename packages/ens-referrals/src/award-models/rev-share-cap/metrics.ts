@@ -10,7 +10,7 @@ import { validateReferrerRank } from "../shared/rank";
 import {
   type AdminAction,
   AdminActionTypes,
-  computeBaseRevenueContribution,
+  calcBaseRevenueContribution,
   isReferrerQualifiedRevShareCap,
   type ReferralProgramRulesRevShareCap,
 } from "./rules";
@@ -24,7 +24,7 @@ export interface ReferrerMetricsRevShareCap extends ReferrerMetrics {
    * (`rules.baseAnnualRevenueContribution` × years of incremental duration).
    * Used for qualification and award calculation in the rev-share-cap model.
    *
-   * @invariant Guaranteed to equal `computeBaseRevenueContribution(rules, totalIncrementalDuration)`.
+   * @invariant Guaranteed to equal `calcBaseRevenueContribution(rules, totalIncrementalDuration)`.
    */
   totalBaseRevenueContribution: PriceUsdc;
 }
@@ -39,7 +39,7 @@ export const validateReferrerMetricsRevShareCap = (
     metrics.totalBaseRevenueContribution,
   );
 
-  const expectedTotalBaseRevenueContribution = computeBaseRevenueContribution(
+  const expectedTotalBaseRevenueContribution = calcBaseRevenueContribution(
     rules,
     metrics.totalIncrementalDuration,
   );
@@ -54,7 +54,7 @@ export const buildReferrerMetricsRevShareCap = (
   metrics: ReferrerMetrics,
   rules: ReferralProgramRulesRevShareCap,
 ): ReferrerMetricsRevShareCap => {
-  const totalBaseRevenueContribution = computeBaseRevenueContribution(
+  const totalBaseRevenueContribution = calcBaseRevenueContribution(
     rules,
     metrics.totalIncrementalDuration,
   );

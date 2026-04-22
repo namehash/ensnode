@@ -181,35 +181,29 @@ export function addPrices<const PriceType extends Price = Price>(
 }
 
 /**
- * Subtract prices
+ * Subtract price B from price A.
  *
- * Computes `prices[0] - prices[1] - prices[2] - ...` left-associatively.
- *
- * @param prices at least two {@link Price} values; the first is the minuend,
- *               all subsequent values are subtracted from it in order.
- * @returns the resulting {@link Price} with the same currency as the inputs.
- * @throws if not all prices have the same currency.
+ * @param a the minuend {@link Price} value.
+ * @param b the subtrahend {@link Price} value.
+ * @returns the resulting {@link Price} (`a - b`) with the same currency as the inputs.
+ * @throws if the prices have different currencies.
  * @throws if the result would be negative ({@link CurrencyAmount} must be non-negative).
  */
-export function subtractPrices<const PriceType extends Price = Price>(
-  ...prices: [PriceType, PriceType, ...PriceType[]]
+export function subtractPrice<const PriceType extends Price = Price>(
+  a: PriceType,
+  b: PriceType,
 ): PriceType {
-  const [minuend, ...subtrahends] = prices;
-  const allPricesInSameCurrency = subtrahends.every((price) =>
-    isPriceCurrencyEqual(minuend, price),
-  );
-
-  if (allPricesInSameCurrency === false) {
+  if (!isPriceCurrencyEqual(a, b)) {
     throw new Error("All prices must have the same currency to be subtracted.");
   }
 
-  const resultAmount = subtrahends.reduce((acc, price) => acc - price.amount, minuend.amount);
+  const resultAmount = a.amount - b.amount;
 
   if (resultAmount < 0n) {
-    throw new Error("subtractPrices result must be non-negative.");
+    throw new Error("subtractPrice result must be non-negative.");
   }
 
-  return { amount: resultAmount, currency: minuend.currency } as PriceType;
+  return { amount: resultAmount, currency: a.currency } as PriceType;
 }
 
 /**
@@ -220,7 +214,7 @@ export function subtractPrices<const PriceType extends Price = Price>(
  *          such value in argument order.
  * @throws if not all prices have the same currency.
  */
-export function minPrices<const PriceType extends Price = Price>(
+export function minPrice<const PriceType extends Price = Price>(
   ...prices: [PriceType, PriceType, ...PriceType[]]
 ): PriceType {
   const firstPrice = prices[0];
@@ -241,7 +235,7 @@ export function minPrices<const PriceType extends Price = Price>(
  *          such value in argument order.
  * @throws if not all prices have the same currency.
  */
-export function maxPrices<const PriceType extends Price = Price>(
+export function maxPrice<const PriceType extends Price = Price>(
   ...prices: [PriceType, PriceType, ...PriceType[]]
 ): PriceType {
   const firstPrice = prices[0];

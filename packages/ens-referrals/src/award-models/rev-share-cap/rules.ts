@@ -197,14 +197,14 @@ export const buildReferralProgramRulesRevShareCap = (
 };
 
 /**
- * Compute the base revenue contribution accrued over a given duration under
+ * Calculate the base revenue contribution accrued over a given duration under
  * rev-share-cap rules: `rules.baseAnnualRevenueContribution × (duration / 1 year)`.
  *
  * Uses exact integer bigint arithmetic (single floor division) so the result
  * matches the aggregate for the same duration — avoids per-event truncation
  * that would compound into a smaller sum than the aggregated value.
  */
-export function computeBaseRevenueContribution(
+export function calcBaseRevenueContribution(
   rules: ReferralProgramRulesRevShareCap,
   duration: Duration,
 ): PriceUsdc {

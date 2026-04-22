@@ -7,8 +7,8 @@ import {
   getCurrencyInfo,
   isPriceCurrencyEqual,
   isPriceEqual,
-  maxPrices,
-  minPrices,
+  maxPrice,
+  minPrice,
   type Price,
   type PriceDai,
   type PriceEth,
@@ -20,7 +20,7 @@ import {
   priceEth,
   priceUsdc,
   scalePrice,
-  subtractPrices,
+  subtractPrice,
 } from "./currencies";
 
 describe("Currencies", () => {
@@ -122,55 +122,55 @@ describe("Currencies", () => {
     });
   });
 
-  describe("subtractPrices", () => {
-    it("subtracts subsequent prices from the first (left-associative)", () => {
-      expect(subtractPrices(priceEth(10n), priceEth(2n), priceEth(3n))).toEqual(priceEth(5n));
+  describe("subtractPrice", () => {
+    it("returns a - b", () => {
+      expect(subtractPrice(priceEth(10n), priceEth(3n))).toEqual(priceEth(7n));
     });
     it("allows a zero result", () => {
-      expect(subtractPrices(priceUsdc(5n), priceUsdc(5n))).toEqual(priceUsdc(0n));
+      expect(subtractPrice(priceUsdc(5n), priceUsdc(5n))).toEqual(priceUsdc(0n));
     });
     it("throws if the result would be negative", () => {
-      expect(() => subtractPrices(priceUsdc(1n), priceUsdc(5n))).toThrowError(
-        /subtractPrices result must be non-negative/i,
+      expect(() => subtractPrice(priceUsdc(1n), priceUsdc(5n))).toThrowError(
+        /subtractPrice result must be non-negative/i,
       );
     });
     it("throws if prices have different currencies", () => {
       // @ts-expect-error
-      expect(() => subtractPrices(priceEth(5n), priceDai(1n))).toThrowError(
+      expect(() => subtractPrice(priceEth(5n), priceDai(1n))).toThrowError(
         /All prices must have the same currency to be subtracted/i,
       );
     });
   });
 
-  describe("minPrices", () => {
+  describe("minPrice", () => {
     it("returns the smallest price", () => {
-      expect(minPrices(priceEth(3n), priceEth(1n), priceEth(2n))).toEqual(priceEth(1n));
+      expect(minPrice(priceEth(3n), priceEth(1n), priceEth(2n))).toEqual(priceEth(1n));
     });
     it("returns the first argument on a tie", () => {
       const a = priceEth(1n);
       const b = priceEth(1n);
-      expect(minPrices(a, b)).toBe(a);
+      expect(minPrice(a, b)).toBe(a);
     });
     it("throws if prices have different currencies", () => {
       // @ts-expect-error
-      expect(() => minPrices(priceEth(1n), priceUsdc(1n))).toThrowError(
+      expect(() => minPrice(priceEth(1n), priceUsdc(1n))).toThrowError(
         /All prices must have the same currency to be compared/i,
       );
     });
   });
 
-  describe("maxPrices", () => {
+  describe("maxPrice", () => {
     it("returns the largest price", () => {
-      expect(maxPrices(priceEth(3n), priceEth(5n), priceEth(2n))).toEqual(priceEth(5n));
+      expect(maxPrice(priceEth(3n), priceEth(5n), priceEth(2n))).toEqual(priceEth(5n));
     });
     it("returns the first argument on a tie", () => {
       const a = priceEth(5n);
       const b = priceEth(5n);
-      expect(maxPrices(a, b)).toBe(a);
+      expect(maxPrice(a, b)).toBe(a);
     });
     it("throws if prices have different currencies", () => {
       // @ts-expect-error
-      expect(() => maxPrices(priceEth(1n), priceUsdc(1n))).toThrowError(
+      expect(() => maxPrice(priceEth(1n), priceUsdc(1n))).toThrowError(
         /All prices must have the same currency to be compared/i,
       );
     });
