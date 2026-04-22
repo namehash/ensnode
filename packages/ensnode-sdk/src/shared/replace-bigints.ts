@@ -5,19 +5,17 @@ type _ReplaceBigInts<
   arr extends readonly unknown[],
   type,
   result extends readonly unknown[] = [],
-> = arr extends [infer first, ...infer rest]
+> = arr extends readonly [infer first, ...infer rest]
   ? _ReplaceBigInts<rest, type, readonly [...result, first extends bigint ? type : first]>
   : result;
 
 export type ReplaceBigInts<obj, type> = obj extends bigint
   ? type
-  : obj extends unknown[]
-    ? _ReplaceBigInts<Readonly<obj>, type>
-    : obj extends readonly []
-      ? _ReplaceBigInts<obj, type>
-      : obj extends object
-        ? { [key in keyof obj]: ReplaceBigInts<obj[key], type> }
-        : obj;
+  : obj extends readonly unknown[]
+    ? _ReplaceBigInts<obj, type>
+    : obj extends object
+      ? { [key in keyof obj]: ReplaceBigInts<obj[key], type> }
+      : obj;
 
 export const replaceBigInts = <const T, const type>(
   obj: T,

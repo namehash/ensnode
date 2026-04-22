@@ -37,4 +37,10 @@ describe("toJson", () => {
     expect(toJson(true)).toBe("true");
     expect(toJson(null)).toBe("null");
   });
+
+  it("preserves native toJSON behavior (Date)", () => {
+    expect(toJson({ at: new Date("2020-01-01T00:00:00.000Z") })).toBe(
+      '{"at":"2020-01-01T00:00:00.000Z"}',
+    );
+  });
 });

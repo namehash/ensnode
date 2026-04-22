@@ -8,7 +8,7 @@ describe("replaceBigInts", () => {
     const out = replaceBigInts(5n, numberToHex);
 
     expect(out).toBe("0x5");
-    expectTypeOf<Hex>(out);
+    expectTypeOf(out).toEqualTypeOf<Hex>();
   });
 
   it("passes through non-bigint scalars", () => {
@@ -35,14 +35,14 @@ describe("replaceBigInts", () => {
     const out = replaceBigInts([5n], numberToHex);
 
     expect(out).toStrictEqual(["0x5"]);
-    expectTypeOf<readonly [Hex]>(out);
+    expectTypeOf(out).toEqualTypeOf<readonly [Hex]>();
   });
 
   it("replaces bigints in a readonly (as const) array", () => {
     const out = replaceBigInts([5n] as const, numberToHex);
 
     expect(out).toStrictEqual(["0x5"]);
-    expectTypeOf<readonly [Hex]>(out);
+    expectTypeOf(out).toEqualTypeOf<readonly [Hex]>();
   });
 
   it("replaces bigints in a mixed-type array", () => {
@@ -55,7 +55,7 @@ describe("replaceBigInts", () => {
     const out = replaceBigInts({ kevin: { kevin: 5n } }, numberToHex);
 
     expect(out).toStrictEqual({ kevin: { kevin: "0x5" } });
-    expectTypeOf<{ kevin: { kevin: Hex } }>(out);
+    expectTypeOf(out).toEqualTypeOf<{ readonly kevin: { readonly kevin: Hex } }>();
   });
 
   it("replaces bigints in an object whose value is a bigint array", () => {
