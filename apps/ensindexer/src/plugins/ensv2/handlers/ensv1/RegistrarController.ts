@@ -12,7 +12,7 @@ import {
 import { type EncodedReferrer, PluginName } from "@ensnode/ensnode-sdk";
 
 import { ensureDomainEvent } from "@/lib/ensv2/event-db-helpers";
-import { ensureLabel, ensureUnknownLabel } from "@/lib/ensv2/label-db-helpers";
+import { ensureLabel, ensureUnknownLabel, labelExists } from "@/lib/ensv2/label-db-helpers";
 import { getLatestRegistration, getLatestRenewal } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import {
@@ -64,11 +64,14 @@ export default function () {
       );
     }
 
-    // ensure label
-    if (label !== undefined) {
-      await ensureLabel(context, label);
-    } else {
-      await ensureUnknownLabel(context, labelHash);
+    // ensure label if exists
+    const exists = await labelExists(context, labelHash);
+    if (!exists) {
+      if (label !== undefined) {
+        await ensureLabel(context, label);
+      } else {
+        await ensureUnknownLabel(context, labelHash);
+      }
     }
 
     // update registration's base/premium
@@ -104,12 +107,15 @@ export default function () {
       );
     }
 
-    // ensure label
+    // ensure label if exists
     // NOTE: technically not necessary, as should be ensured by NameRegistered, but we include here anyway
-    if (label !== undefined) {
-      await ensureLabel(context, label);
-    } else {
-      await ensureUnknownLabel(context, labelHash);
+    const exists = await labelExists(context, labelHash);
+    if (!exists) {
+      if (label !== undefined) {
+        await ensureLabel(context, label);
+      } else {
+        await ensureUnknownLabel(context, labelHash);
+      }
     }
 
     const controller = getThisAccountId(context, event);
