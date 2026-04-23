@@ -59,10 +59,9 @@ import type { EncodedReferrer } from "@ensnode/ensnode-sdk";
  * For ENSv1, each domain that has children implicitly owns a "virtual" Registry (a row of type
  * `ENSv1VirtualRegistry`) whose sole parent is that domain; children of the parent then point their
  * `registryId` at the virtual registry. Concrete `ENSv1Registry` rows (e.g. the mainnet ENS Registry,
- * the Basenames Registry, the Lineanames Registry, ThreeDNS Registries) sit at the top. ENSv2
- * namegraphs are rooted in a single `ENSv2Registry` RootRegistry on the ENS Root Chain and are
- * possibly circular directed graphs. The canonical namegraph is never materialized, only _navigated_
- * at resolution-time.
+ * the Basenames Registry, the Lineanames Registry) sit at the top. ENSv2 namegraphs are rooted in
+ * a single `ENSv2Registry` RootRegistry on the ENS Root Chain and are possibly circular directed
+ * graphs. The canonical namegraph is never materialized, only _navigated_ at resolution-time.
  *
  * Note also that the Protocol Acceleration plugin is a hard requirement for the ENSv2 plugin. This
  * allows us to rely on the shared logic for indexing:

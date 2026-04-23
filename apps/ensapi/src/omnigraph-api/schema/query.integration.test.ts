@@ -162,6 +162,9 @@ describe("Query.domains", () => {
       expect(d.name, `expected canonical name for ${d.id}`).toBeTruthy();
     }
   });
+
+  // TODO: devnet fixture needs a known non-canonical Domain to assert exclusion against.
+  it.todo("excludes non-canonical domains when `canonical: true` is set");
 });
 
 describe("Query.domain", () => {

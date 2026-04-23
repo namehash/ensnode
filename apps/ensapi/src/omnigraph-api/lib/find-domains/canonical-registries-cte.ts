@@ -9,14 +9,14 @@ import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 /**
  * The maximum depth to traverse the namegraph in order to construct the set of Canonical Registries.
  *
- * Note that the set of Canonical Registries is a _tree_ by construction: each Registry is reached
- * via either `registryCanonicalDomain` (ENSv1 virtual / ENSv2) or the concrete ENSv1 root.
- * Edge authentication (parent's `subregistryId` matches the child's `registryId`) prevents
- * cycles in the declared namegraph.
+ * The CTE walks `domain.subregistryId` forward from every Root Registry. `subregistryId` is the
+ * source-of-truth forward pointer, so no separate edge-authentication is needed — a Registry is
+ * canonical iff it is reachable via a chain of live forward pointers from a Root.
  *
- * So while technically not necessary, including the depth constraint avoids the possibility of an
- * infinite runaway query in the event that the indexed namegraph is somehow corrupted or otherwise
- * introduces a canonical cycle.
+ * The reachable set is a DAG, not a tree: aliased subregistries let multiple parent Domains
+ * declare the same child Registry, so the same row can appear at multiple depths during recursion.
+ * The outer projection dedupes via `SELECT DISTINCT`; `MAX_DEPTH` bounds runaway recursion if the
+ * graph is corrupted.
  */
 const CANONICAL_REGISTRIES_MAX_DEPTH = 16;
 
@@ -64,7 +64,7 @@ export const getCanonicalRegistriesCTE = () => {
           WHERE cr.depth < ${CANONICAL_REGISTRIES_MAX_DEPTH}
             AND d.subregistry_id IS NOT NULL
         )
-        SELECT registry_id FROM canonical_registries
+        SELECT DISTINCT registry_id FROM canonical_registries
       ) AS canonical_registries_cte`,
     )
     .as("canonical_registries");

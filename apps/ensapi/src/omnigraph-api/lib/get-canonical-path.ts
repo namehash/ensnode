@@ -3,29 +3,23 @@ import config from "@/config";
 import { sql } from "drizzle-orm";
 import type { CanonicalPath, DomainId, RegistryId } from "enssdk";
 
-import { getENSv1RootRegistryId, maybeGetENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
+import { getRootRegistryIds } from "@ensnode/ensnode-sdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
-import { lazy } from "@/lib/lazy";
 
 const MAX_DEPTH = 16;
-
-// lazy() defers construction until first use so that this module can be imported without env vars
-// being present (e.g. during OpenAPI generation).
-const getV1Root = lazy(() => getENSv1RootRegistryId(config.namespace));
-const getV2Root = lazy(() => maybeGetENSv2RootRegistryId(config.namespace));
 
 /**
  * Provide the canonical parents for a Domain via reverse traversal of the namegraph.
  *
  * Traversal walks `domain → registry → canonical parent domain` via the
- * {@link registryCanonicalDomain} table and terminates at either the namespace's v1 root Registry
- * or its v2 root Registry. Returns `null` when the resulting path does not terminate at a
- * root Registry (i.e. the Domain is not canonical).
+ * {@link registryCanonicalDomain} table and terminates at any top-level Root Registry configured
+ * for the namespace (all concrete ENSv1Registries plus the ENSv2 Root when defined). Returns
+ * `null` when the resulting path does not terminate at a Root Registry (i.e. the Domain is not
+ * canonical).
  */
 export async function getCanonicalPath(domainId: DomainId): Promise<CanonicalPath | null> {
-  const v1Root = getV1Root();
-  const v2Root = getV2Root();
+  const rootRegistryIds = getRootRegistryIds(config.namespace);
 
   const result = await ensDb.execute(sql`
     WITH RECURSIVE upward AS (
@@ -65,10 +59,9 @@ export async function getCanonicalPath(domainId: DomainId): Promise<CanonicalPat
     throw new Error(`Invariant(getCanonicalPath): DomainId '${domainId}' did not exist.`);
   }
 
-  // Canonical iff the tip of the path terminates at a root Registry. When v2Root is undefined
-  // (namespace without ENSv2), the `=== v2Root` comparison is false and only v1 paths qualify.
+  // Canonical iff the tip of the path terminates at any of the namespace's Root Registries.
   const tld = rows[rows.length - 1];
-  const isCanonical = tld.registry_id === v1Root || tld.registry_id === v2Root;
+  const isCanonical = rootRegistryIds.includes(tld.registry_id);
 
   if (!isCanonical) return null;
 

@@ -45,14 +45,14 @@ export type ENSv1VirtualRegistry = RequiredAndNotNull<Registry, "node"> & {
 };
 export type ENSv2Registry = RequiredAndNull<Registry, "node"> & { type: "ENSv2Registry" };
 
-const isENSv1Registry = (registry: unknown): registry is ENSv1Registry =>
-  (registry as RegistryInterface).type === "ENSv1Registry";
+const isENSv1Registry = (registry: RegistryInterface): registry is ENSv1Registry =>
+  registry.type === "ENSv1Registry";
 
-const isENSv1VirtualRegistry = (registry: unknown): registry is ENSv1VirtualRegistry =>
-  (registry as RegistryInterface).type === "ENSv1VirtualRegistry";
+const isENSv1VirtualRegistry = (registry: RegistryInterface): registry is ENSv1VirtualRegistry =>
+  registry.type === "ENSv1VirtualRegistry";
 
-const isENSv2Registry = (registry: unknown): registry is ENSv2Registry =>
-  (registry as RegistryInterface).type === "ENSv2Registry";
+const isENSv2Registry = (registry: RegistryInterface): registry is ENSv2Registry =>
+  registry.type === "ENSv2Registry";
 
 export const ENSv1RegistryRef = builder.objectRef<ENSv1Registry>("ENSv1Registry");
 export const ENSv1VirtualRegistryRef =
@@ -148,9 +148,9 @@ RegistryInterfaceRef.implement({
 //////////////////////////////
 ENSv1RegistryRef.implement({
   description:
-    "An ENSv1Registry is a concrete ENSv1 Registry contract (the mainnet ENS Registry, the Basenames shadow Registry, the Lineanames shadow Registry, or a ThreeDNS Registry).",
+    "An ENSv1Registry is a concrete ENSv1 Registry contract (the mainnet ENS Registry, the Basenames shadow Registry, or the Lineanames shadow Registry).",
   interfaces: [RegistryInterfaceRef],
-  isTypeOf: (registry) => isENSv1Registry(registry),
+  isTypeOf: (registry) => isENSv1Registry(registry as RegistryInterface),
 });
 
 //////////////////////////////
@@ -160,7 +160,7 @@ ENSv1VirtualRegistryRef.implement({
   description:
     "An ENSv1VirtualRegistry is the virtual Registry managed by an ENSv1 Domain that has children. It is keyed by `(chainId, address, node)` where `(chainId, address)` identify the concrete Registry that houses the parent Domain, and `node` is the parent Domain's namehash.",
   interfaces: [RegistryInterfaceRef],
-  isTypeOf: (registry) => isENSv1VirtualRegistry(registry),
+  isTypeOf: (registry) => isENSv1VirtualRegistry(registry as RegistryInterface),
   fields: (t) => ({
     ///////////////////////////////
     // ENSv1VirtualRegistry.node
@@ -180,7 +180,7 @@ ENSv1VirtualRegistryRef.implement({
 ENSv2RegistryRef.implement({
   description: "An ENSv2Registry represents an ENSv2 Registry contract.",
   interfaces: [RegistryInterfaceRef],
-  isTypeOf: (registry) => isENSv2Registry(registry),
+  isTypeOf: (registry) => isENSv2Registry(registry as RegistryInterface),
 });
 
 //////////

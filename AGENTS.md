@@ -52,6 +52,8 @@ Runnable commands for validating changes; lint and format with Biome.
 - Use `describe`/`it` blocks with `expect` assertions.
 - Use `vi.mock()` for module mocking and `vi.fn()` for function stubs.
 - Each app and package has its own `vitest.config.ts`.
+- Prefer the `await expect(...).resolves.*` format over await-then-expect.
+- Prefer `await expect(...).resolves.toMatchObject({})` over expecting individual properties, if it is more concise.
 
 ## Documentation & DRY
 
@@ -83,8 +85,3 @@ Fail fast and loudly on invalid inputs.
   3. `pnpm test --project <affected-project> [--project <other-affected-project>]`
   4. If OpenAPI Specs were affected, run `pnpm generate:openapi`
   5. If the Omnigraph GraphQL Schema was affected, run `pnpm generate:gqlschema`
-
-## Testing
-
-- Prefer the `await expect(...).resolves.*` format over await-then-expect.
-- Prefer `await expect(...).resolves.toMatchObject({})` over expecting individual properties, if it is more concise.
