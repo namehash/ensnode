@@ -1,5 +1,15 @@
 # @ensnode/ensdb-sdk
 
+## 1.10.1
+
+### Patch Changes
+
+- [#1984](https://github.com/namehash/ensnode/pull/1984) [`e92fa4d`](https://github.com/namehash/ensnode/commit/e92fa4d28f183b62fb6d9665db3332b43a46f279) Thanks [@shrugs](https://github.com/shrugs)! - Hotfix: moved the pg_trgm extension into the ensnode schema to avoid implicit dependency on 'public' schema existing.
+
+- Updated dependencies [[`9d50f64`](https://github.com/namehash/ensnode/commit/9d50f647802fde286dfef2dc23c884801d06b228)]:
+  - @ensnode/ensnode-sdk@1.10.1
+  - enssdk@1.10.1
+
 ## 1.10.0
 
 ### Minor Changes

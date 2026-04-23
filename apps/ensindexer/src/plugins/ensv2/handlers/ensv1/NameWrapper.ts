@@ -21,6 +21,7 @@ import {
   isRegistrationFullyExpired,
   isRegistrationInGracePeriod,
   PluginName,
+  toJson,
 } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
@@ -38,7 +39,6 @@ import {
   ensIndexerSchema,
   type IndexingEngineContext,
 } from "@/lib/indexing-engines/ponder";
-import { toJson } from "@/lib/json-stringify-with-bigints";
 import { logger } from "@/lib/logger";
 import { getManagedName } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
@@ -129,7 +129,7 @@ export default function () {
     // Invariant: must have Registration
     if (!registration) {
       throw new Error(
-        `Invariant(NameWrapper:Transfer): Registration expected:\n${toJson(registration)}`,
+        `Invariant(NameWrapper:Transfer): Registration expected:\n${toJson(registration, { pretty: true })}`,
       );
     }
 
@@ -137,7 +137,7 @@ export default function () {
     const cannotTransferWhileExpired = registration.fuses && isPccFuseSet(registration.fuses);
     if (isExpired && cannotTransferWhileExpired) {
       throw new Error(
-        `Invariant(NameWrapper:Transfer): Transfer of expired Registration with PARENT_CANNOT_CONTROL set:\n${toJson(registration)} ${JSON.stringify({ isPccFuseSet: isPccFuseSet(registration.fuses ?? 0) })}`,
+        `Invariant(NameWrapper:Transfer): Transfer of expired Registration with PARENT_CANNOT_CONTROL set:\n${toJson(registration, { pretty: true })} ${JSON.stringify({ isPccFuseSet: isPccFuseSet(registration.fuses ?? 0) })}`,
       );
     }
 
@@ -203,21 +203,21 @@ export default function () {
         // Invariant: Cannot wrap grace period names
         if (isRegistrationInGracePeriod(registration, event.block.timestamp)) {
           throw new Error(
-            `Invariant(NameWrapper:NameWrapped): Cannot wrap direct-subname-of-registrar-managed-names in GRACE_PERIOD \n${toJson(registration)}`,
+            `Invariant(NameWrapper:NameWrapped): Cannot wrap direct-subname-of-registrar-managed-names in GRACE_PERIOD \n${toJson(registration, { pretty: true })}`,
           );
         }
 
         // Invariant: cannot re-wrap, right? NameWrapped -> NameUnwrapped -> NameWrapped
         if (registration.wrapped) {
           throw new Error(
-            `Invariant(NameWrapper:NameWrapped): Re-wrapping already wrapped BaseRegistrar registration\n${toJson(registration)}`,
+            `Invariant(NameWrapper:NameWrapped): Re-wrapping already wrapped BaseRegistrar registration\n${toJson(registration, { pretty: true })}`,
           );
         }
 
         // Invariant: BaseRegistrar always provides expiry
         if (expiry === null) {
           throw new Error(
-            `Invariant(NameWrapper:NameWrapped): Wrap of BaseRegistrar Registration does not include expiry!\n${toJson(registration)}`,
+            `Invariant(NameWrapper:NameWrapped): Wrap of BaseRegistrar Registration does not include expiry!\n${toJson(registration, { pretty: true })}`,
           );
         }
 
@@ -240,7 +240,7 @@ export default function () {
         // Invariant: If there's an existing Registration, it should be expired
         if (registration && !isFullyExpired) {
           throw new Error(
-            `Invariant(NameWrapper:NameWrapped): NameWrapped but there's an existing unexpired non-BaseRegistrar Registration:\n${toJson({ registration, timestamp: event.block.timestamp })}`,
+            `Invariant(NameWrapper:NameWrapped): NameWrapped but there's an existing unexpired non-BaseRegistrar Registration:\n${toJson({ registration, timestamp: event.block.timestamp }, { pretty: true })}`,
           );
         }
 
@@ -329,7 +329,7 @@ export default function () {
       // Invariant: must have a Registration
       if (!registration) {
         throw new Error(
-          `Invariant(NameWrapper:FusesSet): Registration expected:\n${toJson(registration)}`,
+          `Invariant(NameWrapper:FusesSet): Registration expected:\n${toJson(registration, { pretty: true })}`,
         );
       }
 
@@ -366,7 +366,7 @@ export default function () {
       // Invariant: must have Registration
       if (!registration) {
         throw new Error(
-          `Invariant(NameWrapper:ExpiryExtended): Registration expected\n${toJson(registration)}`,
+          `Invariant(NameWrapper:ExpiryExtended): Registration expected\n${toJson(registration, { pretty: true })}`,
         );
       }
 

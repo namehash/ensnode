@@ -178,7 +178,7 @@ describe("buildEnsDbDrizzleClient", () => {
     buildEnsDbDrizzleClient(connectionString, concreteEnsIndexerSchema);
 
     expect(drizzle).toHaveBeenCalledWith({
-      connection: connectionString,
+      connection: { connectionString, options: expect.stringContaining("search_path=ensnode") },
       schema: expect.objectContaining({
         metadata: expect.anything(),
       }),

@@ -15,9 +15,8 @@ import {
   accountIdEqual,
   getDatasourceContract,
   maybeGetDatasourceContract,
+  toJson,
 } from "@ensnode/ensnode-sdk";
-
-import { toJson } from "@/lib/json-stringify-with-bigints";
 
 /**
  * Many contracts within the ENSv1 Ecosystem are relative to a parent Name. For example,
@@ -213,7 +212,7 @@ export const getManagedName = (
   }
 
   throw new Error(
-    `The following contract ${toJson(contract)} does not have a configured Managed Name. See apps/ensindexer/src/lib/managed-names.ts.`,
+    `The following contract ${toJson(contract, { pretty: true })} does not have a configured Managed Name. See apps/ensindexer/src/lib/managed-names.ts.`,
   );
 };
 

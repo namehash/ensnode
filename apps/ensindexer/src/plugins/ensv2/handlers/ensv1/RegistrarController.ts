@@ -9,7 +9,7 @@ import {
   makeSubdomainNode,
 } from "enssdk";
 
-import { type EncodedReferrer, PluginName } from "@ensnode/ensnode-sdk";
+import { type EncodedReferrer, PluginName, toJson } from "@ensnode/ensnode-sdk";
 
 import { ensureDomainEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel, ensureUnknownLabel } from "@/lib/ensv2/label-db-helpers";
@@ -20,7 +20,6 @@ import {
   ensIndexerSchema,
   type IndexingEngineContext,
 } from "@/lib/indexing-engines/ponder";
-import { toJson } from "@/lib/json-stringify-with-bigints";
 import { getManagedName } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
@@ -120,13 +119,16 @@ export default function () {
 
     if (!registration) {
       throw new Error(
-        `Invariant(RegistrarController:NameRenewed): NameRenewed but no Registration.\n${toJson({
-          label,
-          labelHash,
-          managedNode,
-          node,
-          domainId,
-        })}`,
+        `Invariant(RegistrarController:NameRenewed): NameRenewed but no Registration.\n${toJson(
+          {
+            label,
+            labelHash,
+            managedNode,
+            node,
+            domainId,
+          },
+          { pretty: true },
+        )}`,
       );
     }
 
@@ -142,6 +144,7 @@ export default function () {
             domainId,
             registration,
           },
+          { pretty: true },
         )}`,
       );
     }

@@ -12,7 +12,12 @@ import {
 } from "enssdk";
 import { hexToBigInt } from "viem";
 
-import { interpretAddress, isRegistrationFullyExpired, PluginName } from "@ensnode/ensnode-sdk";
+import {
+  interpretAddress,
+  isRegistrationFullyExpired,
+  PluginName,
+  toJson,
+} from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { ensureDomainEvent, ensureEvent } from "@/lib/ensv2/event-db-helpers";
@@ -27,7 +32,6 @@ import {
   ensIndexerSchema,
   type IndexingEngineContext,
 } from "@/lib/indexing-engines/ponder";
-import { toJson } from "@/lib/json-stringify-with-bigints";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 
@@ -65,14 +69,14 @@ export default function () {
     // Sanity Check: LabelHash must match Label
     if (labelHash !== labelhashLiteralLabel(label)) {
       throw new Error(
-        `Sanity Check: labelHash !== labelhashLiteralLabel(label)\n${toJson(event.args)}`,
+        `Sanity Check: labelHash !== labelhashLiteralLabel(label)\n${toJson(event.args, { pretty: true })}`,
       );
     }
 
     // Sanity Check: StorageId derived from tokenId must match StorageId derived from LabelHash
     if (storageId !== makeStorageId(hexToBigInt(labelHash))) {
       throw new Error(
-        `Sanity Check: storageId !== makeStorageId(hexToBigInt(labelHash))\n${toJson(event.args)}`,
+        `Sanity Check: storageId !== makeStorageId(hexToBigInt(labelHash))\n${toJson(event.args, { pretty: true })}`,
       );
     }
 
@@ -91,7 +95,7 @@ export default function () {
       // Invariant: if this is a Reservation, any existing Registration should be fully expired
       if (registration && !isRegistrationFullyExpired(registration, event.block.timestamp)) {
         throw new Error(
-          `Invariant(ENSv2Registry:Label[Registered|Reserved]): Existing unexpired Registration found, expected none or expired.\n${toJson(registration)}`,
+          `Invariant(ENSv2Registry:Label[Registered|Reserved]): Existing unexpired Registration found, expected none or expired.\n${toJson(registration, { pretty: true })}`,
         );
       }
     } else {
@@ -102,7 +106,7 @@ export default function () {
         !isRegistrationFullyExpired(registration, event.block.timestamp)
       ) {
         throw new Error(
-          `Invariant(ENSv2Registry:Label[Registered|Reserved]): Existing unexpired Registration found, expected none or expired.\n${toJson(registration)}`,
+          `Invariant(ENSv2Registry:Label[Registered|Reserved]): Existing unexpired Registration found, expected none or expired.\n${toJson(registration, { pretty: true })}`,
         );
       }
     }
@@ -178,7 +182,7 @@ export default function () {
       // Invariant: The existing Registration must not be expired.
       if (isRegistrationFullyExpired(registration, event.block.timestamp)) {
         throw new Error(
-          `Invariant(ENSv2Registry:LabelUnregistered): Expected unexpired registration but got:\n${toJson(registration)}`,
+          `Invariant(ENSv2Registry:LabelUnregistered): Expected unexpired registration but got:\n${toJson(registration, { pretty: true })}`,
         );
       }
 
@@ -228,7 +232,7 @@ export default function () {
       // Invariant: The existing Registration must not be expired.
       if (isRegistrationFullyExpired(registration, event.block.timestamp)) {
         throw new Error(
-          `Invariant(ENSv2Registry:ExpiryUpdated): Expected unexpired Registration but got:\n${toJson(registration)}`,
+          `Invariant(ENSv2Registry:ExpiryUpdated): Expected unexpired Registration but got:\n${toJson(registration, { pretty: true })}`,
         );
       }
 
