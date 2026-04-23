@@ -9,6 +9,23 @@ import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-eng
 const ensRootChainId = getENSRootChainId(config.namespace);
 
 /**
+ * Process-local cache of node migration status.
+ *
+ * `nodeIsMigrated` is called as a precondition on every ENSv1RegistryOld event handler (NewOwner,
+ * Transfer, NewTTL, NewResolver) plus PA's registry handler. At scale that is millions of PK
+ * lookups against `migratedNode` over a backfill. The underlying state is process-stable because
+ * `migratedNode` is append-only (once inserted, always present) and all writes go through
+ * `migrateNode` below, which updates the cache in lockstep.
+ *
+ * Safety:
+ * - Restart-safe: both sets repopulate via DB reads on cache miss after a restart.
+ * - Correctness: `migrateNode` adds to `migratedNodes` and removes from `nonMigratedNodes` so a
+ *   cached "not migrated" result is invalidated when migration happens within the same process.
+ */
+const migratedNodes = new Set<Node>();
+const nonMigratedNodes = new Set<Node>();
+
+/**
  * Returns whether the `node` has migrated to the new Registry contract.
  */
 export async function nodeIsMigrated(context: IndexingEngineContext, node: Node) {
@@ -18,8 +35,16 @@ export async function nodeIsMigrated(context: IndexingEngineContext, node: Node)
     );
   }
 
+  if (migratedNodes.has(node)) return true;
+  if (nonMigratedNodes.has(node)) return false;
+
   const record = await context.ensDb.find(ensIndexerSchema.migratedNode, { node });
-  return !!record;
+  if (record) {
+    migratedNodes.add(node);
+    return true;
+  }
+  nonMigratedNodes.add(node);
+  return false;
 }
 
 /**
@@ -33,4 +58,6 @@ export async function migrateNode(context: IndexingEngineContext, node: Node) {
   }
 
   await context.ensDb.insert(ensIndexerSchema.migratedNode).values({ node }).onConflictDoNothing();
+  migratedNodes.add(node);
+  nonMigratedNodes.delete(node);
 }
