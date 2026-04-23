@@ -4301,8 +4301,11 @@ const introspection = {
           {
             "name": "root",
             "type": {
-              "kind": "INTERFACE",
-              "name": "Registry"
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "INTERFACE",
+                "name": "Registry"
+              }
             },
             "args": [],
             "isDeprecated": false
