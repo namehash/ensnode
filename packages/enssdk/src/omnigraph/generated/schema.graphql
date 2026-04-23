@@ -379,7 +379,9 @@ type ENSv1Domain implements Domain {
 An ENSv1Registry is a concrete ENSv1 Registry contract (the mainnet ENS Registry, the Basenames shadow Registry, or the Lineanames shadow Registry).
 """
 type ENSv1Registry implements Registry {
-  """Contract metadata for this Registry"""
+  """
+  Contract metadata for this Registry. If this is an ENSv1VirtualRegistry, this will reference the concrete Registry contract under which the parent Domain exists.
+  """
   contract: AccountId!
 
   """The Domains managed by this Registry."""
@@ -399,7 +401,9 @@ type ENSv1Registry implements Registry {
 An ENSv1VirtualRegistry is the virtual Registry managed by an ENSv1 Domain that has children. It is keyed by `(chainId, address, node)` where `(chainId, address)` identify the concrete Registry that houses the parent Domain, and `node` is the parent Domain's namehash.
 """
 type ENSv1VirtualRegistry implements Registry {
-  """Contract metadata for this Registry"""
+  """
+  Contract metadata for this Registry. If this is an ENSv1VirtualRegistry, this will reference the concrete Registry contract under which the parent Domain exists.
+  """
   contract: AccountId!
 
   """The Domains managed by this Registry."""
@@ -493,7 +497,9 @@ type ENSv2DomainPermissionsConnectionEdge {
 
 """An ENSv2Registry represents an ENSv2 Registry contract."""
 type ENSv2Registry implements Registry {
-  """Contract metadata for this Registry"""
+  """
+  Contract metadata for this Registry. If this is an ENSv1VirtualRegistry, this will reference the concrete Registry contract under which the parent Domain exists.
+  """
   contract: AccountId!
 
   """The Domains managed by this Registry."""
@@ -859,6 +865,9 @@ type Query {
   """Identify an Account by ID or Address."""
   account(by: AccountByInput!): Account
 
+  """TODO"""
+  allDomains(after: String, before: String, first: Int, last: Int): QueryAllDomainsConnection
+
   """Identify a Domain by Name or DomainId"""
   domain(by: DomainIdInput!): Domain
 
@@ -871,7 +880,9 @@ type Query {
   """TODO"""
   registrations(after: String, before: String, first: Int, last: Int): QueryRegistrationsConnection
 
-  """Identify a Registry by ID or AccountId."""
+  """
+  Identify a Registry by ID or AccountId. If querying by `contract`, only concrete Registries will be returned.
+  """
   registry(by: RegistryIdInput!): Registry
 
   """Identify a Resolver by ID or AccountId."""
@@ -881,15 +892,20 @@ type Query {
   resolvers(after: String, before: String, first: Int, last: Int): QueryResolversConnection
 
   """
-  The Root Registry for this namespace. Prefers the ENSv2 Root Registry when defined, falling back to the ENSv1 Root Registry. Matches ENS Forward Resolution preference.
+  The Root Registry for this namespace. It will be the ENSv2 Root Registry when defined or the ENSv1 Root Registry.
   """
   root: Registry!
+}
 
-  """TODO"""
-  v1Domains(after: String, before: String, first: Int, last: Int): QueryV1DomainsConnection
+type QueryAllDomainsConnection {
+  edges: [QueryAllDomainsConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
 
-  """TODO"""
-  v2Domains(after: String, before: String, first: Int, last: Int): QueryV2DomainsConnection
+type QueryAllDomainsConnectionEdge {
+  cursor: String!
+  node: Domain!
 }
 
 type QueryDomainsConnection {
@@ -923,28 +939,6 @@ type QueryResolversConnection {
 type QueryResolversConnectionEdge {
   cursor: String!
   node: Resolver!
-}
-
-type QueryV1DomainsConnection {
-  edges: [QueryV1DomainsConnectionEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type QueryV1DomainsConnectionEdge {
-  cursor: String!
-  node: ENSv1Domain!
-}
-
-type QueryV2DomainsConnection {
-  edges: [QueryV2DomainsConnectionEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type QueryV2DomainsConnectionEdge {
-  cursor: String!
-  node: ENSv2Domain!
 }
 
 """
@@ -1007,7 +1001,9 @@ type RegistrationRenewalsConnectionEdge {
 A Registry represents a Registry contract in the ENS namegraph. It may be an ENSv1Registry (a concrete ENSv1 Registry contract), an ENSv1VirtualRegistry (the virtual Registry managed by an ENSv1 domain that has children), or an ENSv2Registry.
 """
 interface Registry {
-  """Contract metadata for this Registry"""
+  """
+  Contract metadata for this Registry. If this is an ENSv1VirtualRegistry, this will reference the concrete Registry contract under which the parent Domain exists.
+  """
   contract: AccountId!
 
   """The Domains managed by this Registry."""

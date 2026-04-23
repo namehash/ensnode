@@ -12,6 +12,7 @@ import type {
   RegistryId,
   RenewalId,
   ResolverId,
+  TokenId,
 } from "enssdk";
 import { index, onchainEnum, onchainTable, primaryKey, relations, sql, uniqueIndex } from "ponder";
 import type { BlockNumber, Hash } from "viem";
@@ -34,19 +35,16 @@ import type { EncodedReferrer } from "@ensnode/ensnode-sdk";
  * it's more expensive for us to recursively traverse the namegraph (like evm code does) because our
  * individual roundtrips from the db are relatively more expensive.
  *
- * For the datamodel, this means a single polymorphic `domain` table captures both ENSv1 and ENSv2
- * Domains, discriminated by a `type` column. Domain polymorphism is exposed at the API layer via
- * GraphQL Interfaces to simplify queries.
- *
  * In general: the indexed schema should match on-chain state as closely as possible, and
  * resolution-time behavior within the ENS protocol should _also_ be implemented at resolution time
  * in ENSApi. The current obvious exception is that `domain.ownerId` for ENSv1 Domains is the
- * _materialized_ _effective_ owner. ENSv1 includes a mind-boggling number of ways to 'own' a domain,
+ * _materialized_ _effective_ owner. ENSv1 includes a diverse number of ways to 'own' a domain,
  * including the ENSv1 Registry, various Registrars, and the NameWrapper. The ENSv1 indexing logic
  * within this ENSv2 plugin materializes the effective owner to simplify this aspect of ENS and
  * enable efficient queries against `domain.ownerId`.
  *
- * Many datamodels are shared between ENSv1 and ENSv2, including Registrations, Renewals, and Resolvers.
+ * When necessary, all datamodels are shared or polymorphic between ENSv1 and ENSv2, including
+ * Domains, Registries, Registrations, Renewals, and Resolvers.
  *
  * Registrations are polymorphic between the defined RegistrationTypes, depending on the associated
  * guarantees (for example, ENSv1 BaseRegistrar Registrations may have a gracePeriod, but ENSv2
@@ -61,9 +59,10 @@ import type { EncodedReferrer } from "@ensnode/ensnode-sdk";
  * For ENSv1, each domain that has children implicitly owns a "virtual" Registry (a row of type
  * `ENSv1VirtualRegistry`) whose sole parent is that domain; children of the parent then point their
  * `registryId` at the virtual registry. Concrete `ENSv1Registry` rows (e.g. the mainnet ENS Registry,
- * the Basenames Registry, the Lineanames Registry) sit at the top. ENSv2 namegraphs are rooted in a
- * single `ENSv2Registry` RootRegistry on the ENS Root Chain and are possibly circular directed
- * graphs. The canonical namegraph is never materialized, only _navigated_ at resolution-time.
+ * the Basenames Registry, the Lineanames Registry, ThreeDNS Registries) sit at the top. ENSv2
+ * namegraphs are rooted in a single `ENSv2Registry` RootRegistry on the ENS Root Chain and are
+ * possibly circular directed graphs. The canonical namegraph is never materialized, only _navigated_
+ * at resolution-time.
  *
  * Note also that the Protocol Acceleration plugin is a hard requirement for the ENSv2 plugin. This
  * allows us to rely on the shared logic for indexing:
@@ -76,6 +75,9 @@ import type { EncodedReferrer } from "@ensnode/ensnode-sdk";
  * deeply nested entities by a straightforward string ID. In cases where an entity's `id` is composed
  * of multiple pieces of information (for example, a Registry is identified by (chainId, address)),
  * then that information is, as well, included in the entity's columns, not just encoded in the id.
+ * Nowhere in this application, nor in user applications, should an entity's id be parsed for its
+ * constituent parts; all should be available, with their various type guarantees, on the entity
+ * itself.
  *
  * Events are structured as a single "events" table which tracks EVM Event Metadata for any on-chain
  * Event. Then, join tables (DomainEvent, ResolverEvent, etc) track the relationship between an
@@ -182,18 +184,18 @@ export const registry = onchainTable(
     // see RegistryId for guarantees
     id: t.text().primaryKey().$type<RegistryId>(),
 
-    // discriminates concrete ENSv1 / virtual ENSv1 / ENSv2 Registries
+    // has a type
     type: registryType().notNull(),
 
     chainId: t.integer().notNull().$type<ChainId>(),
     address: t.hex().notNull().$type<Address>(),
 
-    // INVARIANT: non-null iff `type === "ENSv1VirtualRegistry"`.
-    // For a virtual registry, `node` is the namehash of the parent ENSv1 domain that owns it.
+    // If this is an ENSv1VirtualRegistry, `node` is the namehash of the parent ENSv1 domain that
+    // owns it, otherwise null.
     node: t.hex().$type<Node>(),
   }),
   (t) => ({
-    // plain (non-unique) index — multiple rows can share (chainId, address) across virtual registries
+    // NOTE: non-unique index because multiple rows can share (chainId, address) across virtual registries
     byChainAddress: index().on(t.chainId, t.address),
   }),
 );
@@ -201,7 +203,7 @@ export const registry = onchainTable(
 export const relations_registry = relations(registry, ({ one, many }) => ({
   // domains that declare this registry as their parent registry
   domains: many(domain, { relationName: "registry" }),
-  // domains that declare this registry as their subregistry (ENSv2 only)
+  // domains that declare this registry as their subregistry
   domainsAsSubregistry: many(domain, { relationName: "subregistry" }),
   permissions: one(permissions, {
     relationName: "permissions",
@@ -222,28 +224,28 @@ export const domain = onchainTable(
     // see DomainId for guarantees (ENSv1DomainId: `${ENSv1RegistryId}/${node}`, ENSv2DomainId: CAIP-19)
     id: t.text().primaryKey().$type<DomainId>(),
 
-    // discriminates ENSv1 / ENSv2 Domains
+    // has a type
     type: domainType().notNull(),
 
-    // belongs to a registry (concrete or virtual for ENSv1; concrete for ENSv2)
+    // belongs to a registry
     registryId: t.text().notNull().$type<RegistryId>(),
 
-    // may have a subregistry (ENSv2 only in practice; nullable for ENSv1 Domains)
+    // may have a subregistry
     subregistryId: t.text().$type<RegistryId>(),
 
-    // INVARIANT: non-null iff `type === "ENSv2Domain"`.
-    tokenId: t.bigint(),
+    // If this is an ENSv2Domain, the TokenId within the ENSv2Registry, otherwise null.
+    tokenId: t.bigint().$type<TokenId>(),
 
-    // INVARIANT: non-null iff `type === "ENSv1Domain"`. The domain's namehash.
+    // If this is an ENSv1Domain, The Domain's namehash, otherwise null.
     node: t.hex().$type<Node>(),
 
     // represents a labelHash
     labelHash: t.hex().notNull().$type<LabelHash>(),
 
-    // may have an owner (effective owner for ENSv1; materialized by the ENSv1 handlers)
+    // may have an owner
     ownerId: t.hex().$type<Address>(),
 
-    // ENSv1 only: may have a `rootRegistryOwner` (ENSv1Registry's owner()), zeroAddress → null
+    // If this is an ENSv1Domain, may have a `rootRegistryOwner`, otherwise null.
     rootRegistryOwnerId: t.hex().$type<Address>(),
 
     // NOTE: Domain-Resolver Relations tracked via Protocol Acceleration plugin

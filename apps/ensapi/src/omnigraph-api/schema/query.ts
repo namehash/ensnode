@@ -1,8 +1,7 @@
 import config from "@/config";
 
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
-import { and, eq, inArray } from "drizzle-orm";
-import { makePermissionsId, makeResolverId } from "enssdk";
+import { makeConcreteRegistryId, makePermissionsId, makeResolverId } from "enssdk";
 
 import { getRootRegistryId } from "@ensnode/ensnode-sdk";
 
@@ -25,10 +24,6 @@ import {
   DomainInterfaceRef,
   DomainsOrderInput,
   DomainsWhereInput,
-  type ENSv1Domain,
-  ENSv1DomainRef,
-  type ENSv2Domain,
-  ENSv2DomainRef,
 } from "@/omnigraph-api/schema/domain";
 import { PermissionsIdInput, PermissionsRef } from "@/omnigraph-api/schema/permissions";
 import { RegistrationInterfaceRef } from "@/omnigraph-api/schema/registration";
@@ -41,60 +36,27 @@ const INCLUDE_DEV_METHODS = process.env.NODE_ENV !== "production";
 builder.queryType({
   fields: (t) => ({
     ...(INCLUDE_DEV_METHODS && {
-      /////////////////////////////
-      // Query.v1Domains (Testing)
-      /////////////////////////////
-      v1Domains: t.connection({
+      //////////////////////////////
+      // Query.allDomains (Testing)
+      //////////////////////////////
+      allDomains: t.connection({
         description: "TODO",
-        type: ENSv1DomainRef,
-        resolve: (parent, args) => {
-          const scope = eq(ensIndexerSchema.domain.type, "ENSv1Domain");
-          return lazyConnection({
-            totalCount: () => ensDb.$count(ensIndexerSchema.domain, scope),
+        type: DomainInterfaceRef,
+        resolve: (parent, args) =>
+          lazyConnection({
+            totalCount: () => ensDb.$count(ensIndexerSchema.domain),
             connection: () =>
               resolveCursorConnection(
                 { ...ID_PAGINATED_CONNECTION_ARGS, args },
                 ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-                  ensDb.query.domain
-                    .findMany({
-                      where: (t, { and }) =>
-                        and(scope, paginateBy(ensIndexerSchema.domain.id, before, after)),
-                      orderBy: orderPaginationBy(ensIndexerSchema.domain.id, inverted),
-                      limit,
-                      with: { label: true },
-                    })
-                    .then((rows) => rows as ENSv1Domain[]),
+                  ensDb.query.domain.findMany({
+                    where: () => paginateBy(ensIndexerSchema.domain.id, before, after),
+                    orderBy: orderPaginationBy(ensIndexerSchema.domain.id, inverted),
+                    limit,
+                    with: { label: true },
+                  }),
               ),
-          });
-        },
-      }),
-
-      /////////////////////////////
-      // Query.v2Domains (Testing)
-      /////////////////////////////
-      v2Domains: t.connection({
-        description: "TODO",
-        type: ENSv2DomainRef,
-        resolve: (parent, args) => {
-          const scope = eq(ensIndexerSchema.domain.type, "ENSv2Domain");
-          return lazyConnection({
-            totalCount: () => ensDb.$count(ensIndexerSchema.domain, scope),
-            connection: () =>
-              resolveCursorConnection(
-                { ...ID_PAGINATED_CONNECTION_ARGS, args },
-                ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-                  ensDb.query.domain
-                    .findMany({
-                      where: (t, { and }) =>
-                        and(scope, paginateBy(ensIndexerSchema.domain.id, before, after)),
-                      orderBy: orderPaginationBy(ensIndexerSchema.domain.id, inverted),
-                      limit,
-                      with: { label: true },
-                    })
-                    .then((rows) => rows as ENSv2Domain[]),
-              ),
-          });
-        },
+          }),
       }),
 
       /////////////////////////////
@@ -192,29 +154,12 @@ builder.queryType({
     // Get Registry by Id or AccountId
     ///////////////////////////////////
     registry: t.field({
-      description: "Identify a Registry by ID or AccountId.",
+      description:
+        "Identify a Registry by ID or AccountId. If querying by `contract`, only concrete Registries will be returned.",
       type: RegistryInterfaceRef,
       nullable: true,
       args: { by: t.arg({ type: RegistryIdInput, required: true }) },
-      resolve: async (parent, args) => {
-        if (args.by.id !== undefined) return args.by.id;
-        // Look up the concrete Registry row by (chainId, address). Virtual Registries are excluded
-        // because they share (chainId, address) with their concrete parent and should not be
-        // addressable via AccountId alone.
-        const { chainId, address } = args.by.contract;
-        const [row] = await ensDb
-          .select({ id: ensIndexerSchema.registry.id })
-          .from(ensIndexerSchema.registry)
-          .where(
-            and(
-              eq(ensIndexerSchema.registry.chainId, chainId),
-              eq(ensIndexerSchema.registry.address, address),
-              inArray(ensIndexerSchema.registry.type, ["ENSv1Registry", "ENSv2Registry"]),
-            ),
-          )
-          .limit(1);
-        return row?.id ?? null;
-      },
+      resolve: (parent, args) => args.by.id ?? makeConcreteRegistryId(args.by.contract),
     }),
 
     ///////////////////////////////////

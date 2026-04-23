@@ -80,7 +80,8 @@ RegistryInterfaceRef.implement({
     // Registry.contract
     ///////////////////
     contract: t.field({
-      description: "Contract metadata for this Registry",
+      description:
+        "Contract metadata for this Registry. If this is an ENSv1VirtualRegistry, this will reference the concrete Registry contract under which the parent Domain exists.",
       type: AccountIdRef,
       nullable: false,
       resolve: ({ chainId, address }) => ({ chainId, address }),
@@ -147,7 +148,7 @@ RegistryInterfaceRef.implement({
 //////////////////////////////
 ENSv1RegistryRef.implement({
   description:
-    "An ENSv1Registry is a concrete ENSv1 Registry contract (the mainnet ENS Registry, the Basenames shadow Registry, or the Lineanames shadow Registry).",
+    "An ENSv1Registry is a concrete ENSv1 Registry contract (the mainnet ENS Registry, the Basenames shadow Registry, the Lineanames shadow Registry, or a ThreeDNS Registry).",
   interfaces: [RegistryInterfaceRef],
   isTypeOf: (registry) => isENSv1Registry(registry),
 });

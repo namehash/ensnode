@@ -44,6 +44,15 @@ export const makeENSv1VirtualRegistryId = (accountId: AccountId, node: Node) =>
  */
 export const makeRegistryId = (accountId: AccountId) => stringifyAccountId(accountId) as RegistryId;
 
+/**
+ * Stringifies an {@link AccountId} as the id of a concrete Registry — either an
+ * {@link ENSv1RegistryId} or an {@link ENSv2RegistryId}, but never an
+ * {@link ENSv1VirtualRegistryId} (whose id format includes a trailing `/node` suffix that cannot
+ * be produced from an AccountId alone).
+ */
+export const makeConcreteRegistryId = (accountId: AccountId) =>
+  stringifyAccountId(accountId) as ENSv1RegistryId | ENSv2RegistryId;
+
 export const makeResolverId = (contract: AccountId) => stringifyAccountId(contract) as ResolverId;
 
 export const makeENSv1DomainId = (accountId: AccountId, node: Node) =>

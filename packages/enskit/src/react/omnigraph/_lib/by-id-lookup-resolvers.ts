@@ -2,8 +2,8 @@ import type { Cache, ResolveInfo, Resolver, Variables } from "@urql/exchange-gra
 import {
   type AccountId,
   type Address,
+  makeConcreteRegistryId,
   makePermissionsId,
-  makeRegistryId,
   makeResolverId,
   type PermissionsId,
   type RegistryId,
@@ -44,7 +44,7 @@ export const byIdLookupResolvers: Record<string, Record<string, Resolver>> = {
       const by = args.by as { id?: RegistryId; contract?: AccountId };
 
       if (by.id) return { __typename: "Registry", id: by.id };
-      if (by.contract) return { __typename: "Registry", id: makeRegistryId(by.contract) };
+      if (by.contract) return { __typename: "Registry", id: makeConcreteRegistryId(by.contract) };
 
       return passthrough(args, cache, info);
     },
