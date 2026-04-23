@@ -123,10 +123,29 @@ export function starlight(): AstroIntegration {
               label: "Overview",
               items: [
                 {
-                  label: "Coming soon",
+                  label: "Getting started",
                   link: "/ensdb",
                 },
               ],
+            },
+            {
+              label: "Concepts",
+              collapsed: false,
+              autogenerate: { directory: "ensdb/concepts" },
+            },
+            {
+              label: "Using ENSDb",
+              collapsed: false,
+              autogenerate: { directory: "ensdb/usage" },
+            },
+            {
+              label: "Integrations",
+              collapsed: false,
+              autogenerate: { directory: "ensdb/integrations" },
+            },
+            {
+              label: "FAQ",
+              link: "/ensdb/faq",
             },
           ],
         },

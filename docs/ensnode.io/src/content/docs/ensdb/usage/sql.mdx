@@ -1,0 +1,50 @@
+---
+title: ENSDb SQL
+sidebar:
+  label: ENSDb SQL
+  order: 3
+---
+
+## Intro
+This page provides an overview of the ENSDb SQL interface and how to use it in your applications.
+
+## Example Queries
+
+### Connect with Any PostgreSQL Client
+
+Connect to an ENSDb instance (a PostgreSQL database). The examples below assume you that ENSDb instances are served from a PostgreSQL server at `host:5432` with databases named `ensdb_mainnet`, `ensdb_testnet`, and `ensdb_devnet`:
+
+```bash
+# Production environment (mainnet data)
+psql postgresql://user:password@host:5432/ensdb_mainnet
+
+# Pre-production environment (testnet data)
+psql postgresql://user:password@host:5432/ensdb_testnet
+
+# Staging / local development environment
+psql postgresql://user:password@host:5432/ensdb_devnet
+```
+
+### Discover Available Schemas
+
+Once connected to an ENSDb instance, discover its ENSIndexer Schemas:
+
+```sql
+SELECT DISTINCT ens_indexer_schema_name
+FROM ensnode.metadata;
+```
+
+### Query Data
+
+Query data from your ENSDb instance:
+
+```sql
+-- Get domains from the ENSIndexer Schema with the `ensindexer_mainnet` ENSIndexer Schema Name
+SELECT * FROM ensindexer_mainnet.v1_domains LIMIT 10;
+
+-- Get indexing status for the ENSNode Schema with the `ensindexer_mainnet` ENSIndexer Schema Name
+SELECT * FROM "ensnode"."metadata"
+WHERE ens_indexer_schema_name = 'ensindexer_mainnet'
+AND key = 'ensindexer_indexing_status'
+AND value -> 'data' -> 'omnichainSnapshot' ->> 'omnichainStatus' = 'omnichain-following';
+```

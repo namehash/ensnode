@@ -87,10 +87,12 @@
     max-width: var(--max-width-page);
     margin-inline: auto;
   }
+
   nav.sidebar .sidebar-pane {
     position: sticky;
     height: calc(100vh - var(--sl-nav-height));
   }
+
   div.main-frame {
     padding-inline-start: initial;
     flex: 1;
@@ -121,7 +123,7 @@ a[rel="prev"]:hover {
   color: var(--sl-color-accent);
 }
 
-.content-panel + .content-panel {
+.content-panel+.content-panel {
   border-top: 0;
   padding-top: 0;
 }
@@ -136,14 +138,15 @@ a[rel="prev"]:hover {
   color: var(--sl-color-accent-high);
 }
 
-.sl-markdown-content a:hover:not(:where(.not-content *)) > span {
+.sl-markdown-content a:hover:not(:where(.not-content *))>span {
   color: var(--sl-color-accent);
 }
 
-.sl-markdown-content :is(h1, h2, h3, h4, h5, h6) > a {
+.sl-markdown-content :is(h1, h2, h3, h4, h5, h6)>a {
   color: var(--sl-color-white);
   display: inline;
   text-decoration: none;
+
   &:hover {
     text-decoration: underline;
   }
@@ -156,11 +159,17 @@ a[rel="prev"]:hover {
 .sl-markdown-content ul {
   list-style: disc;
   color: var(--sl-color-text);
+  list-style-position: inside;
+}
+
+.sl-markdown-content ul ul {
+  margin-left: 1rem;
 }
 
 .sl-markdown-content ol {
   list-style: decimal;
   color: var(--sl-color-text);
+  list-style-position: inside;
 }
 
 .sl-markdown-content ol li::marker,
@@ -179,7 +188,7 @@ a[rel="prev"]:hover {
   justify-content: space-between;
   margin-top: 3rem;
 
-  & > a {
+  &>a {
     flex-basis: unset;
     flex-grow: unset;
     width: fit-content;
@@ -197,7 +206,7 @@ a[rel="prev"]:hover {
       margin-left: auto;
     }
 
-    & > span {
+    &>span {
       font-size: 0.75rem;
 
       .link-title {
@@ -205,7 +214,7 @@ a[rel="prev"]:hover {
       }
     }
 
-    & > svg {
+    &>svg {
       align-self: self-end;
       color: var(--pagination-arrow-color);
       font-size: 1.25rem;
@@ -213,7 +222,7 @@ a[rel="prev"]:hover {
     }
   }
 
-  & > a:hover > svg {
+  &>a:hover>svg {
     color: var(--sl-color-white);
   }
 }
@@ -225,20 +234,22 @@ a[rel="prev"]:hover {
 }
 
 /* Styling for the list items to prepare for lines */
-#starlight__sidebar > div > ul > li {
-  position: relative; /* For absolute positioning of ::before */
+#starlight__sidebar>div>ul>li {
+  position: relative;
+  /* For absolute positioning of ::before */
 }
 
 /*
  * Add padding-left only to items that will get a line, to make space for it.
  * Note, including :not(:last-child) to de-indent ENSAdmin.
  */
-#starlight__sidebar > div > ul > li:not(:first-child):not(:last-child) {
-  padding-left: 20px; /* Space for the line and content */
+#starlight__sidebar>div>ul>li:not(:first-child):not(:last-child) {
+  padding-left: 20px;
+  /* Space for the line and content */
 }
 
 /* Add margin-bottom for the gap to all LIs except the very last one in the UL */
-#starlight__sidebar > div > ul > li:not(:last-child) {
+#starlight__sidebar>div>ul>li:not(:last-child) {
   margin-bottom: var(--sidebar-item-gap);
 }
 
@@ -246,17 +257,21 @@ a[rel="prev"]:hover {
  * Vertical line segment for relevant list items
  * Note, including :not(:last-child) to de-indent ENSAdmin.
  */
-#starlight__sidebar > div > ul > li:not(:first-child):not(:last-child)::before {
+#starlight__sidebar>div>ul>li:not(:first-child):not(:last-child)::before {
   content: "";
   position: absolute;
-  left: 8px; /* X-position of the vertical line */
+  left: 8px;
+  /* X-position of the vertical line */
   top: 0;
-  width: 1px; /* Thickness of the vertical line */
-  background-color: var(--sl-color-hairline-light); /* Line color */
-  height: 100%; /* Default height, covers the item itself */
+  width: 1px;
+  /* Thickness of the vertical line */
+  background-color: var(--sl-color-hairline-light);
+  /* Line color */
+  height: 100%;
+  /* Default height, covers the item itself */
 }
 
-#starlight__sidebar > div > ul > li:not(:first-child):not(:last-child)::before {
+#starlight__sidebar>div>ul>li:not(:first-child):not(:last-child)::before {
   height: calc(100% + var(--sidebar-item-gap));
 }
 
@@ -265,7 +280,8 @@ a[rel="prev"]:hover {
 
 /* Styles to replace the default Starlight sidebar icon with a custom image */
 .starlight-sidebar-topics-icon svg {
-  display: none; /* Hide the default SVG icon */
+  display: none;
+  /* Hide the default SVG icon */
 }
 
 /* Default sidebar icon (parent) */

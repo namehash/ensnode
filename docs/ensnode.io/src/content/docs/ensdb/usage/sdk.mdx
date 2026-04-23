@@ -1,0 +1,41 @@
+---
+title: ENSDb SDK
+sidebar:
+  label: ENSDb SDK
+  order: 2
+---
+
+This page provides an overview of the ENSDb SDK and how to use it in your applications.
+
+## Intro
+
+For TypeScript projects, the [ENSDb SDK](/ensdb/concepts/glossary#ensdb-sdk) provides a convenient and efficient way to interact with your ENSDb instance.
+
+### Installation
+
+You can install the [`@ensnode/ensdb-sdk`](https://www.npmjs.com/package/@ensnode/ensdb-sdk) package from the NPM registry, using your preferred package manager:
+
+```bash
+npm install @ensnode/ensdb-sdk
+pnpm install @ensnode/ensdb-sdk
+yarn add @ensnode/ensdb-sdk
+```
+
+### Example Usage
+
+```typescript
+import { EnsDbReader } from '@ensnode/ensdb-sdk';
+
+// Connect to a specific ENSDb instance by providing its connection string and
+// the ENSIndexer Schema Name you want to query
+const ensDbReader =  new EnsDbReader(ensDbConnectionString, ensIndexerSchemaName);
+
+// Get domains from the ENSIndexer Schema 
+const v1Domains = await
+ ensDbReader.ensDb.select()
+  .from(ensDbReader.ensIndexerSchema.v1Domain)
+  .limit(10);
+
+// Get indexing status
+const indexingStatus = await ensDbReader.getIndexingStatusSnapshot()
+```
