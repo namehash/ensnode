@@ -4,7 +4,7 @@ import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@poth
 import { and, eq, inArray } from "drizzle-orm";
 import { makePermissionsId, makeResolverId } from "enssdk";
 
-import { getENSv1RootRegistryId, maybeGetENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
+import { getRootRegistryId } from "@ensnode/ensnode-sdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { builder } from "@/omnigraph-api/builder";
@@ -248,11 +248,10 @@ builder.queryType({
     /////////////////////
     root: t.field({
       description:
-        "The Root Registry for this namespace. Prefers the ENSv2 Root Registry when defined, falling back to the ENSv1 Root Registry. Matches ENS Forward Resolution preference.",
+        "The Root Registry for this namespace. It will be the ENSv2 Root Registry when defined or the ENSv1 Root Registry.",
       type: RegistryInterfaceRef,
       nullable: false,
-      resolve: () =>
-        maybeGetENSv2RootRegistryId(config.namespace) ?? getENSv1RootRegistryId(config.namespace),
+      resolve: () => getRootRegistryId(config.namespace),
     }),
   }),
 });

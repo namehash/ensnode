@@ -94,3 +94,19 @@ export const maybeGetENSv2RootRegistryId = (namespace: ENSNamespaceId) => {
   if (!root) return undefined;
   return makeENSv2RegistryId(root);
 };
+
+//////////////
+// Root
+//////////////
+
+/**
+ * Gets the RegistryId representing the primary Root Registry for the selected `namespace`: the
+ * ENSv2 Root Registry when defined, otherwise the ENSv1 Root Registry. Matches ENS Forward
+ * Resolution preference (v2 over v1) for display/resolution purposes.
+ *
+ * Not to be confused with the canonical-registries tree in the API layer, which is a union of
+ * both ENSv1 and ENSv2 subtrees because ENSv1 Domains remain resolvable via Universal Resolver
+ * v2's ENSv1 fallback.
+ */
+export const getRootRegistryId = (namespace: ENSNamespaceId) =>
+  maybeGetENSv2RootRegistryId(namespace) ?? getENSv1RootRegistryId(namespace);

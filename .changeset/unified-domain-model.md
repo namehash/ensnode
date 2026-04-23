@@ -1,9 +1,9 @@
 ---
-"enssdk": major
-"@ensnode/ensdb-sdk": major
-"@ensnode/ensnode-sdk": major
-"ensindexer": major
-"ensapi": major
+"enssdk": minor
+"@ensnode/ensdb-sdk": minor
+"@ensnode/ensnode-sdk": minor
+"ensindexer": minor
+"ensapi": minor
 ---
 
 Unify `v1Domain` + `v2Domain` into a single polymorphic `domain` table discriminated by a `type` enum (`"ENSv1Domain"` | `"ENSv2Domain"`), and make Registry polymorphic across concrete ENSv1 (mainnet Registry, Basenames Registry, Lineanames Registry), ENSv1 Virtual (per-parent-domain virtual Registry managed by each ENSv1 domain that has children), and ENSv2 Registries.
@@ -22,7 +22,3 @@ Unify `v1Domain` + `v2Domain` into a single polymorphic `domain` table discrimin
 - `Domain` interface gains `parent: Domain` (resolved via the canonical-path dataloader); `ENSv1Domain` exposes `node: Node!` and `rootRegistryOwner`; `ENSv2Domain` exposes `tokenId`, `registry`, `subregistry`, `permissions`.
 - `Query.registry(by: { contract })` now DB-looks up the concrete Registry by `(chainId, address, type IN (ENSv1Registry, ENSv2Registry))`. Virtual Registries are not addressable via `AccountId` alone.
 
-### Migration
-
-- Full reindex required. No in-place data migration.
-- Closes #205, #1511, #1877.

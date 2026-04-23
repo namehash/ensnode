@@ -28,9 +28,7 @@ const FILTER_BY_NAME_MAX_DEPTH = 8;
  *  - leafId: the deepest child (label "sub1") — the autocomplete result, for ownership check
  *  - headId: the parent of the path (whose label should match partial "paren")
  *
- * Algorithm: Start from the deepest child (leaf) and traverse UP via
- * {@link registryCanonicalDomain}. In the unified model, both ENSv1 and ENSv2 parent links flow
- * through `domain.registryId → registryCanonicalDomain.domainId`.
+ * Algorithm: Start from the deepest child (leaf) and traverse UP via {@link registryCanonicalDomain}.
  */
 function domainsByLabelHashPath(labelHashPath: LabelHashPath) {
   // If no concrete path, return all domains (leaf = head = self)
@@ -53,7 +51,8 @@ function domainsByLabelHashPath(labelHashPath: LabelHashPath) {
   // 1. Start with domains matching the leaf labelHash (deepest child)
   // 2. Recursively join parents via rcd, verifying each ancestor's labelHash
   // 3. Return both the leaf (for result/ownership) and head (for partial match)
-  // Note: JOIN (not LEFT JOIN) is intentional — we only match domains with a complete
+  //
+  // NOTE: JOIN (not LEFT JOIN) is intentional — we only match domains with a complete
   // canonical path to the searched FQDN.
   return ensDb
     .select({

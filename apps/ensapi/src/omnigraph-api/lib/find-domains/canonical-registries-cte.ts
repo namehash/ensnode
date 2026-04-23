@@ -11,9 +11,9 @@ import { lazy } from "@/lib/lazy";
  * The maximum depth to traverse the namegraph in order to construct the set of Canonical Registries.
  *
  * Note that the set of Canonical Registries is a _tree_ by construction: each Registry is reached
- * via either `registryCanonicalDomain` (ENSv1 virtual / ENSv2) or the concrete ENSv1 root. For
- * ENSv2, edge authentication (parent's `subregistryId` matches the child's `registryId`) prevents
- * cycles in the declared namegraph; for ENSv1, each domain lives under exactly one Registry.
+ * via either `registryCanonicalDomain` (ENSv1 virtual / ENSv2) or the concrete ENSv1 root.
+ * Edge authentication (parent's `subregistryId` matches the child's `registryId`) prevents
+ * cycles in the declared namegraph.
  *
  * So while technically not necessary, including the depth constraint avoids the possibility of an
  * infinite runaway query in the event that the indexed namegraph is somehow corrupted or otherwise
@@ -28,10 +28,14 @@ const getV2Root = lazy(() => maybeGetENSv2RootRegistryId(config.namespace));
  * Builds a recursive CTE that traverses forward from the ENSv1 root Registry and (when defined)
  * the ENSv2 root Registry to construct a set of all Canonical Registries.
  *
- * A Canonical Registry is either root, or a Registry declared as a Subregistry by a Domain living
- * in another Canonical Registry. Both ENSv1 and ENSv2 Domains set `subregistryId` (ENSv1 Domains
- * to their managed ENSv1 VirtualRegistry, ENSv2 Domains to their declared Subregistry), so a
- * single recursive step over `domain.subregistryId` covers both lineages.
+ * A Canonical Registry is one whose Domains are resolvable under the primary resolution pipeline.
+ * This includes both the ENSv2 subtree and the ENSv1 subtree: Universal Resolver v2 falls back to
+ * ENSv1 at resolution time for names not (yet) present in ENSv2, so ENSv1 Domains remain canonical
+ * from a resolution perspective.
+ *
+ * Both ENSv1 and ENSv2 Domains set `subregistryId` (ENSv1 Domains to their managed ENSv1
+ * VirtualRegistry, ENSv2 Domains to their declared Subregistry), so a single recursive step over
+ * `domain.subregistryId` covers both lineages.
  *
  * TODO: could this be optimized further, perhaps as a materialized view?
  */
