@@ -26,7 +26,7 @@ export function invariant_ensRainbowCompatibilityWithEnsIndexer(
     ctx.issues.push({
       code: "custom",
       input: ctx.value,
-      message: `ENSRainbow's label set (id: ${ensRainbow.labelSet.labelSetId}) must be same as ENSIndexer's label set (id: ${ensIndexer.labelSet.labelSetId}).`,
+      message: `ENSRainbow's label set (id: ${ensRainbow.labelSet.labelSetId}) must be same as the ENSIndexer's label set (id: ${ensIndexer.labelSet.labelSetId}).`,
     });
   }
 

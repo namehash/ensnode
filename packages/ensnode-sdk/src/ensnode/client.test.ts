@@ -71,7 +71,7 @@ const EXAMPLE_ENSAPI_CONFIG_RESPONSE = {
   },
   ensIndexerPublicConfig: {
     ensRainbowPublicConfig: {
-      version: "0.31.0",
+      version: "1.9.0",
       labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
       recordsCount: 100,
     },
@@ -80,7 +80,7 @@ const EXAMPLE_ENSAPI_CONFIG_RESPONSE = {
       labelSetVersion: 0,
     },
     indexedChainIds: [1, 8453, 59144, 10, 42161, 534352],
-    ensIndexerSchemaName: "alphaSchema0.31.0",
+    ensIndexerSchemaName: "alphaSchema1.9.0",
     isSubgraphCompatible: false,
     namespace: "mainnet",
     plugins: [
@@ -93,8 +93,8 @@ const EXAMPLE_ENSAPI_CONFIG_RESPONSE = {
     ],
     versionInfo: {
       ponder: "0.11.43",
-      ensDb: "0.32.0",
-      ensIndexer: "0.32.0",
+      ensDb: "1.9.0",
+      ensIndexer: "1.9.0",
       ensNormalize: "1.11.1",
     },
   },
@@ -108,7 +108,7 @@ const EXAMPLE_ENSDB_PUBLIC_RESPONSE = {
 
 const EXAMPLE_ENSINDEXER_PUBLIC_CONFIG = {
   ensRainbowPublicConfig: {
-    version: "0.31.0",
+    version: "1.9.0",
     labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
     recordsCount: 100,
   },
@@ -117,7 +117,7 @@ const EXAMPLE_ENSINDEXER_PUBLIC_CONFIG = {
     labelSetVersion: 0,
   },
   indexedChainIds: [1, 8453, 59144, 10, 42161, 534352],
-  ensIndexerSchemaName: "alphaSchema0.31.0",
+  ensIndexerSchemaName: "alphaSchema1.9.0",
   isSubgraphCompatible: false,
   namespace: "mainnet",
   plugins: [
@@ -130,14 +130,14 @@ const EXAMPLE_ENSINDEXER_PUBLIC_CONFIG = {
   ],
   versionInfo: {
     ponder: "0.11.43",
-    ensDb: "0.32.0",
-    ensIndexer: "0.32.0",
+    ensDb: "1.9.0",
+    ensIndexer: "1.9.0",
     ensNormalize: "1.11.1",
   },
 } satisfies SerializedEnsIndexerPublicConfig;
 
 const EXAMPLE_ENSRAINBOW_PUBLIC_CONFIG = {
-  version: "0.31.0",
+  version: "1.9.0",
   labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
   recordsCount: 100,
 } satisfies SerializedEnsRainbowPublicConfig;

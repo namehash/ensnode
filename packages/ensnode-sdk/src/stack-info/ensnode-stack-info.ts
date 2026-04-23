@@ -16,7 +16,7 @@ export interface EnsNodeStackInfo extends EnsDbStackInfo {
 
 /**
  * Build a complete {@link EnsNodeStackInfo} object from
- * the given public configs of ENSApi and ENSDb.
+ * the given public configs of ENSApi, ENSDb, ENSIndexer, and ENSRainbow.
  */
 export function buildEnsNodeStackInfo(
   ensApiPublicConfig: EnsApiPublicConfig,

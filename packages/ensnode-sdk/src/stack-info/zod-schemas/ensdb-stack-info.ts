@@ -8,7 +8,7 @@ import {
 export function makeSerializedEnsDbStackInfoSchema(valueLabel?: string) {
   const label = valueLabel ?? "EnsDbStackInfo";
 
-  return makeSerializedEnsIndexerStackInfoSchema(valueLabel).extend({
+  return makeSerializedEnsIndexerStackInfoSchema(label).extend({
     ensDb: makeEnsDbPublicConfigSchema(`${label}.ensDb`),
   });
 }
@@ -16,7 +16,7 @@ export function makeSerializedEnsDbStackInfoSchema(valueLabel?: string) {
 export function makeEnsDbStackInfoSchema(valueLabel?: string) {
   const label = valueLabel ?? "EnsDbStackInfo";
 
-  return makeEnsIndexerStackInfoSchema(valueLabel)
+  return makeEnsIndexerStackInfoSchema(label)
     .extend({
       ensDb: makeEnsDbPublicConfigSchema(`${label}.ensDb`),
     })
