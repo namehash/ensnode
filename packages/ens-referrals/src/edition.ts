@@ -1,3 +1,4 @@
+import type { BaseReferralProgramRules } from "./award-models/shared/rules";
 import type { ReferralProgramRules } from "./rules";
 
 /**
@@ -25,9 +26,9 @@ export type ReferralProgramEditionSlug = string;
 export const REFERRAL_PROGRAM_EDITION_SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 /**
- * Represents a referral program edition configuration.
+ * Base fields shared by all referral program edition configs.
  */
-export interface ReferralProgramEditionConfig {
+export interface BaseReferralProgramEditionConfig {
   /**
    * Unique slug identifier for the edition.
    */
@@ -39,6 +40,16 @@ export interface ReferralProgramEditionConfig {
    */
   displayName: string;
 
+  /**
+   * The base rules that govern this referral program edition.
+   */
+  rules: BaseReferralProgramRules;
+}
+
+/**
+ * Represents a referral program edition configuration.
+ */
+export interface ReferralProgramEditionConfig extends BaseReferralProgramEditionConfig {
   /**
    * The rules that govern this referral program edition.
    */
@@ -79,6 +90,68 @@ export function validateReferralProgramEditionConfigSet(
 }
 
 /**
+ * Returns the first pair of editions sharing a `subregistryId` whose time ranges overlap,
+ * or `null` if none do.
+ *
+ * `startTime` and `endTime` are inclusive, so ranges sharing a single instant
+ * (`A.endTime === B.startTime`) count as overlapping.
+ *
+ * @param editions - Array of editions to check
+ * @returns A `[a, b]` tuple of the first offending pair, or `null` if none
+ */
+export function findOverlappingEditionPair<T extends BaseReferralProgramEditionConfig>(
+  editions: readonly T[],
+): readonly [T, T] | null {
+  const byRegistry = new Map<string, T[]>();
+  for (const edition of editions) {
+    const key = `${edition.rules.subregistryId.chainId}:${edition.rules.subregistryId.address}`;
+    const group = byRegistry.get(key);
+    if (group) {
+      group.push(edition);
+    } else {
+      byRegistry.set(key, [edition]);
+    }
+  }
+
+  // Within each subregistry group, sort by startTime so any overlapping pair is also an
+  // overlap between adjacent editions in this order — one linear pass after the sort suffices.
+  for (const group of byRegistry.values()) {
+    if (group.length < 2) continue;
+    group.sort((a, b) => a.rules.startTime - b.rules.startTime);
+    for (let i = 1; i < group.length; i++) {
+      const prev = group[i - 1];
+      const curr = group[i];
+      if (curr.rules.startTime <= prev.rules.endTime) {
+        return [prev, curr] as const;
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Validates that no two editions sharing a `subregistryId` overlap in time.
+ *
+ * @param editions - Array of editions to validate
+ * @throws {Error} If any pair of editions overlap (start/end are inclusive)
+ */
+export function validateNonOverlappingEditionTimes<T extends BaseReferralProgramEditionConfig>(
+  editions: readonly T[],
+): void {
+  const overlap = findOverlappingEditionPair(editions);
+  if (!overlap) return;
+
+  const [a, b] = overlap;
+  throw new Error(
+    `Edition config set invariant violation: editions "${a.slug}" and "${b.slug}" ` +
+      `have overlapping time ranges for subregistryId ` +
+      `${a.rules.subregistryId.chainId}:${a.rules.subregistryId.address} ` +
+      `(startTime and endTime are inclusive)`,
+  );
+}
+
+/**
  * Builds a new ReferralProgramEditionConfigSet from an array of configs and validates the invariant.
  *
  * @param configs - Array of edition configurations to add to the set
@@ -101,6 +174,8 @@ export function buildReferralProgramEditionConfigSet(
   if (duplicates.length > 0) {
     throw new Error(`Duplicate edition config slugs detected: ${duplicates.join(", ")}`);
   }
+
+  validateNonOverlappingEditionTimes(configs);
 
   const configSet = new Map(configs.map((config) => [config.slug, config]));
   validateReferralProgramEditionConfigSet(configSet);
