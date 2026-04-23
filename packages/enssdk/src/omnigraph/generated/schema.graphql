@@ -376,7 +376,7 @@ type ENSv1Domain implements Domain {
 }
 
 """
-An ENSv1Registry is a concrete ENSv1 Registry contract (the mainnet ENS Registry, the Basenames shadow Registry, or the Lineanames shadow Registry).
+An ENSv1Registry is a concrete ENSv1 Registry contract (the mainnet ENS Registry, the Basenames shadow Registry, the Lineanames shadow Registry, or a ThreeDNS Registry).
 """
 type ENSv1Registry implements Registry {
   """
