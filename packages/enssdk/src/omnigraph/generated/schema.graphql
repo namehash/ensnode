@@ -880,8 +880,10 @@ type Query {
   """TODO"""
   resolvers(after: String, before: String, first: Int, last: Int): QueryResolversConnection
 
-  """The ENSv2 Root Registry, if exists."""
-  root: Registry
+  """
+  The Root Registry for this namespace. Prefers the ENSv2 Root Registry when defined, falling back to the ENSv1 Root Registry. Matches ENS Forward Resolution preference.
+  """
+  root: Registry!
 
   """TODO"""
   v1Domains(after: String, before: String, first: Int, last: Int): QueryV1DomainsConnection
