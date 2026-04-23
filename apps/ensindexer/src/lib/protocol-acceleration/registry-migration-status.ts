@@ -12,10 +12,7 @@ const ensRootChainId = getENSRootChainId(config.namespace);
  * Process-local cache of node migration status.
  *
  * `nodeIsMigrated` is called as a precondition on every ENSv1RegistryOld event handler (NewOwner,
- * Transfer, NewTTL, NewResolver) plus PA's registry handler. At scale that is millions of PK
- * lookups against `migratedNode` over a backfill. `migratedNode` is append-only (once inserted,
- * always present) and all writes go through `migrateNode` below, which updates the cache in
- * lockstep — so a cached entry is never stale.
+ * Transfer, NewTTL, NewResolver). At scale that is millions of lookups against `migratedNode`.
  *
  * Restart-safe: the Map repopulates via DB reads on cache miss.
  */
@@ -31,6 +28,7 @@ export async function nodeIsMigrated(context: IndexingEngineContext, node: Node)
     );
   }
 
+  // memoize the below operation by `node`
   const cached = migrationStatus.get(node);
   if (cached !== undefined) return cached;
 
@@ -50,6 +48,9 @@ export async function migrateNode(context: IndexingEngineContext, node: Node) {
     );
   }
 
-  await context.ensDb.insert(ensIndexerSchema.migratedNode).values({ node }).onConflictDoNothing();
+  // memoize the below operation by `node`
+  if (migrationStatus.get(node) === true) return;
   migrationStatus.set(node, true);
+
+  await context.ensDb.insert(ensIndexerSchema.migratedNode).values({ node }).onConflictDoNothing();
 }

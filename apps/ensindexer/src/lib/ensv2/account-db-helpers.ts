@@ -31,12 +31,12 @@ export async function ensureAccount(context: IndexingEngineContext, address: Add
   const interpreted = interpretAddress(address);
   if (interpreted === null) return;
 
+  // memoize the below operation by `interpreted`
   if (ensuredAccounts.has(interpreted)) return;
+  ensuredAccounts.add(interpreted);
 
   await context.ensDb
     .insert(ensIndexerSchema.account)
     .values({ id: interpreted })
     .onConflictDoNothing();
-
-  ensuredAccounts.add(interpreted);
 }
