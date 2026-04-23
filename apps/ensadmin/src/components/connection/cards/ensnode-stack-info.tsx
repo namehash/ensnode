@@ -93,27 +93,29 @@ function ENSNodeCardLoadingSkeleton() {
 }
 
 /**
- * Props for ENSNodeConfigCardDisplay - display component that accepts props for testing/mocking
+ * Props for EnsNodeStackInfoCardDisplay - display component that accepts props for testing/mocking
  */
-export interface ENSNodeConfigCardDisplayProps {
+export interface EnsNodeStackInfoCardDisplayProps {
   ensNodeStackInfo: EnsNodeStackInfo;
 }
 
 /**
  * Display component that receives props - used for reusable/mockable presentation
  */
-export function ENSNodeConfigCardDisplay({ ensNodeStackInfo }: ENSNodeConfigCardDisplayProps) {
+export function EnsNodeStackInfoCardDisplay({
+  ensNodeStackInfo,
+}: EnsNodeStackInfoCardDisplayProps) {
   return (
     <ENSNodeCard>
-      <ENSNodeConfigCardContent ensNodeStackInfo={ensNodeStackInfo} />
+      <EnsNodeStackInfoCardContent ensNodeStackInfo={ensNodeStackInfo} />
     </ENSNodeCard>
   );
 }
 
 /**
- * Props for ENSNodeConfigInfoView - internal component that accepts props for testing/mocking
+ * Props for DisplayEnsNodeStackInfo - internal component that accepts props for testing/mocking
  */
-export interface ENSNodeConfigInfoViewProps {
+export interface DisplayEnsNodeStackInfoProps {
   ensNodeStackInfo?: EnsNodeStackInfo;
   error?: ErrorInfoProps;
   isLoading?: boolean;
@@ -122,11 +124,11 @@ export interface ENSNodeConfigInfoViewProps {
 /**
  * Internal view component that accepts props - used by both the main component and mock pages
  */
-export function ENSNodeConfigInfoView({
+export function DisplayEnsNodeStackInfo({
   ensNodeStackInfo,
   error,
   isLoading = false,
-}: ENSNodeConfigInfoViewProps) {
+}: DisplayEnsNodeStackInfoProps) {
   if (error) {
     return <ErrorInfo title={error.title} description={error.description} />;
   }
@@ -140,18 +142,18 @@ export function ENSNodeConfigInfoView({
     );
   }
 
-  return <ENSNodeConfigCardDisplay ensNodeStackInfo={ensNodeStackInfo} />;
+  return <EnsNodeStackInfoCardDisplay ensNodeStackInfo={ensNodeStackInfo} />;
 }
 
 /**
- * ENSNodeConfigInfo component - fetches and displays ENSNode configuration data
+ * LoadAndDisplayEnsNodeStackInfo component - fetches and displays ENSNode configuration data
  */
-export function ENSNodeConfigInfo() {
+export function LoadAndDisplayEnsNodeStackInfo() {
   const ensNodeStackInfo = useEnsNodeStackInfo();
 
   if (ensNodeStackInfo.isError) {
     return (
-      <ENSNodeConfigInfoView
+      <DisplayEnsNodeStackInfo
         error={{
           title: "Error loading ENSNode Stack Info",
           description: ensNodeStackInfo.error.message,
@@ -161,13 +163,13 @@ export function ENSNodeConfigInfo() {
   }
 
   if (ensNodeStackInfo.isPending) {
-    return <ENSNodeConfigInfoView isLoading={true} />;
+    return <DisplayEnsNodeStackInfo isLoading={true} />;
   }
 
-  return <ENSNodeConfigInfoView ensNodeStackInfo={ensNodeStackInfo.data} />;
+  return <DisplayEnsNodeStackInfo ensNodeStackInfo={ensNodeStackInfo.data} />;
 }
 
-function ENSNodeConfigCardContent({ ensNodeStackInfo }: { ensNodeStackInfo: EnsNodeStackInfo }) {
+function EnsNodeStackInfoCardContent({ ensNodeStackInfo }: { ensNodeStackInfo: EnsNodeStackInfo }) {
   const cardItemValueStyles = "text-sm leading-6 font-normal text-black";
 
   const {
@@ -597,7 +599,7 @@ function ENSNodeConfigCardContent({ ensNodeStackInfo }: { ensNodeStackInfo: EnsN
         icon={<ENSRainbowIcon width={24} height={24} />}
         version={
           <p className="text-sm leading-normal font-normal text-muted-foreground">
-            v{ensIndexerPublicConfig.ensRainbowPublicConfig.version}
+            v{ensRainbowPublicConfig.version}
           </p>
         }
         docsLink={new URL("https://ensnode.io/ensrainbow")}
@@ -607,8 +609,8 @@ function ENSNodeConfigCardContent({ ensNodeStackInfo }: { ensNodeStackInfo: EnsN
             label="Server LabelSet"
             value={
               <p className={cardItemValueStyles}>
-                {ensIndexerPublicConfig.ensRainbowPublicConfig.labelSet.labelSetId}:
-                {ensIndexerPublicConfig.ensRainbowPublicConfig.labelSet.highestLabelSetVersion}
+                {ensRainbowPublicConfig.labelSet.labelSetId}:
+                {ensRainbowPublicConfig.labelSet.highestLabelSetVersion}
               </p>
             }
             additionalInfo={
@@ -627,7 +629,7 @@ function ENSNodeConfigCardContent({ ensNodeStackInfo }: { ensNodeStackInfo: EnsN
             label="Records Count"
             value={
               <p className={cardItemValueStyles}>
-                {ensIndexerPublicConfig.ensRainbowPublicConfig.recordsCount.toLocaleString()}
+                {ensRainbowPublicConfig.recordsCount.toLocaleString()}
               </p>
             }
             additionalInfo={
