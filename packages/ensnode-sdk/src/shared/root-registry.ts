@@ -1,4 +1,4 @@
-import { type AccountId, makeENSv1RegistryId, makeENSv2RegistryId } from "enssdk";
+import { type AccountId, makeENSv1RegistryId, makeENSv2RegistryId, type RegistryId } from "enssdk";
 
 import { DatasourceNames, type ENSNamespaceId } from "@ensnode/datasources";
 import {
@@ -110,3 +110,30 @@ export const maybeGetENSv2RootRegistryId = (namespace: ENSNamespaceId) => {
  */
 export const getRootRegistryId = (namespace: ENSNamespaceId) =>
   maybeGetENSv2RootRegistryId(namespace) ?? getENSv1RootRegistryId(namespace);
+
+/**
+ * Gets every top-level Root Registry configured for the namespace: all concrete ENSv1Registries
+ * (ENSRoot, Basenames, Lineanames) plus the ENSv2 Root Registry when defined. Used by consumers
+ * that need to walk the full set of canonical namegraph roots (forward traversal, canonical-set
+ * construction) rather than the single "primary" root returned by {@link getRootRegistryId}.
+ *
+ * Each concrete ENSv1Registry roots its own on-chain subtree (the mainnet ENSv1Registry,
+ * Basenames/Lineanames shadow Registries on their own chains) — they are not linked together at
+ * the indexed-namegraph level, so a traversal that starts from a single root cannot reach them all.
+ *
+ * TODO(ensv2-shadow): when CCIP-read ENSv2 shadow Registries are introduced, extend this helper to
+ * enumerate them. ENSv1 top-level registries are structurally identifiable (any `registry.type =
+ * "ENSv1Registry"` row is top-level); ENSv2 is not, so we rely on datasource configuration here.
+ */
+export const getRootRegistryIds = (namespace: ENSNamespaceId): RegistryId[] => {
+  const v1Registries = [
+    getENSv1Registry(namespace),
+    maybeGetDatasourceContract(namespace, DatasourceNames.Basenames, "Registry"),
+    maybeGetDatasourceContract(namespace, DatasourceNames.Lineanames, "Registry"),
+  ]
+    .filter((c): c is AccountId => c !== undefined)
+    .map(makeENSv1RegistryId);
+
+  const v2Root = maybeGetENSv2RootRegistryId(namespace);
+  return v2Root ? [...v1Registries, v2Root] : v1Registries;
+};

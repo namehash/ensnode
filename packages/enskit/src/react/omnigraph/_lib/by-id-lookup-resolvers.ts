@@ -43,8 +43,23 @@ export const byIdLookupResolvers: Record<string, Record<string, Resolver>> = {
     registry(parent, args, cache, info) {
       const by = args.by as { id?: RegistryId; contract?: AccountId };
 
-      if (by.id) return { __typename: "Registry", id: by.id };
-      if (by.contract) return { __typename: "Registry", id: makeConcreteRegistryId(by.contract) };
+      // `Registry` is a GraphQL interface; graphcache normalizes on the concrete typename, so we
+      // probe each implementation (ENSv1Registry, ENSv2Registry, ENSv1VirtualRegistry).
+      // Addressing by AccountId only reaches concrete registries — ENSv1VirtualRegistry ids carry
+      // a `/node` suffix that AccountId alone cannot produce.
+      const id = by.id ?? (by.contract ? makeConcreteRegistryId(by.contract) : undefined);
+      if (id) {
+        const v1Key = cache.keyOfEntity({ __typename: "ENSv1Registry", id });
+        if (v1Key && cache.resolve(v1Key, "id")) return v1Key;
+
+        const v2Key = cache.keyOfEntity({ __typename: "ENSv2Registry", id });
+        if (v2Key && cache.resolve(v2Key, "id")) return v2Key;
+
+        if (by.id) {
+          const virtualKey = cache.keyOfEntity({ __typename: "ENSv1VirtualRegistry", id });
+          if (virtualKey && cache.resolve(virtualKey, "id")) return virtualKey;
+        }
+      }
 
       return passthrough(args, cache, info);
     },

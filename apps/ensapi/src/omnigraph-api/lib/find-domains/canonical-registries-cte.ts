@@ -2,10 +2,9 @@ import config from "@/config";
 
 import { sql } from "drizzle-orm";
 
-import { getENSv1RootRegistryId, maybeGetENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
+import { getRootRegistryIds } from "@ensnode/ensnode-sdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
-import { lazy } from "@/lib/lazy";
 
 /**
  * The maximum depth to traverse the namegraph in order to construct the set of Canonical Registries.
@@ -21,17 +20,15 @@ import { lazy } from "@/lib/lazy";
  */
 const CANONICAL_REGISTRIES_MAX_DEPTH = 16;
 
-const getV1Root = lazy(() => getENSv1RootRegistryId(config.namespace));
-const getV2Root = lazy(() => maybeGetENSv2RootRegistryId(config.namespace));
-
 /**
- * Builds a recursive CTE that traverses forward from the ENSv1 root Registry and (when defined)
- * the ENSv2 root Registry to construct a set of all Canonical Registries.
+ * Builds a recursive CTE that traverses forward from every top-level Root Registry configured for
+ * the namespace (all concrete ENSv1Registries plus the ENSv2 Root when defined) to construct a
+ * set of all Canonical Registries.
  *
  * A Canonical Registry is one whose Domains are resolvable under the primary resolution pipeline.
- * This includes both the ENSv2 subtree and the ENSv1 subtree: Universal Resolver v2 falls back to
- * ENSv1 at resolution time for names not (yet) present in ENSv2, so ENSv1 Domains remain canonical
- * from a resolution perspective.
+ * This includes both the ENSv2 subtree and every ENSv1 subtree: Universal Resolver v2 falls back
+ * to ENSv1 at resolution time for names not (yet) present in ENSv2, so ENSv1 Domains remain
+ * canonical from a resolution perspective.
  *
  * Both ENSv1 and ENSv2 Domains set `subregistryId` (ENSv1 Domains to their managed ENSv1
  * VirtualRegistry, ENSv2 Domains to their declared Subregistry), so a single recursive step over
@@ -40,15 +37,11 @@ const getV2Root = lazy(() => maybeGetENSv2RootRegistryId(config.namespace));
  * TODO: could this be optimized further, perhaps as a materialized view?
  */
 export const getCanonicalRegistriesCTE = () => {
-  const v1Root = getV1Root();
-  const v2Root = getV2Root();
+  const roots = getRootRegistryIds(config.namespace);
 
-  // TODO: this can be streamlined into a single union once ENSv2Root is available in all namespaces
-  const rootsUnion = v2Root
-    ? sql`SELECT ${v1Root}::text AS registry_id, 0 AS depth
-          UNION ALL
-          SELECT ${v2Root}::text AS registry_id, 0 AS depth`
-    : sql`SELECT ${v1Root}::text AS registry_id, 0 AS depth`;
+  const rootsUnion = roots
+    .map((root) => sql`SELECT ${root}::text AS registry_id, 0 AS depth`)
+    .reduce((acc, part, i) => (i === 0 ? part : sql`${acc} UNION ALL ${part}`));
 
   return ensDb
     .select({

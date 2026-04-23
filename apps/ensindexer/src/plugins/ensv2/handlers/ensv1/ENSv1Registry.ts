@@ -71,7 +71,7 @@ export default function () {
 
     let parentRegistryId: RegistryId;
 
-    // if the parent is the Managed Name, the parent registry is the Manage Name's Registry
+    // if the parent is the Managed Name, the parent registry is the Managed Name's Registry
     if (parentNode === managedNode) {
       // parent is concrete
       parentRegistryId = makeENSv1RegistryId(registry);

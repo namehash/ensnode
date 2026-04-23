@@ -67,11 +67,11 @@ export type ENSv1Domain = RequiredAndNotNull<Domain, "node"> &
 export type ENSv2Domain = RequiredAndNotNull<Domain, "tokenId"> &
   RequiredAndNull<Domain, "node" | "rootRegistryOwnerId"> & { type: "ENSv2Domain" };
 
-export const isENSv1Domain = (domain: unknown): domain is ENSv1Domain =>
-  (domain as DomainInterface).type === "ENSv1Domain";
+export const isENSv1Domain = (domain: DomainInterface): domain is ENSv1Domain =>
+  domain.type === "ENSv1Domain";
 
-export const isENSv2Domain = (domain: unknown): domain is ENSv2Domain =>
-  (domain as DomainInterface).type === "ENSv2Domain";
+export const isENSv2Domain = (domain: DomainInterface): domain is ENSv2Domain =>
+  domain.type === "ENSv2Domain";
 
 export const ENSv1DomainRef = builder.objectRef<ENSv1Domain>("ENSv1Domain");
 export const ENSv2DomainRef = builder.objectRef<ENSv2Domain>("ENSv2Domain");
@@ -286,7 +286,7 @@ DomainInterfaceRef.implement({
 ENSv1DomainRef.implement({
   description: "An ENSv1Domain represents an ENSv1 Domain.",
   interfaces: [DomainInterfaceRef],
-  isTypeOf: (domain) => isENSv1Domain(domain),
+  isTypeOf: (domain) => isENSv1Domain(domain as DomainInterface),
   fields: (t) => ({
     ///////////////////
     // ENSv1Domain.node
@@ -317,7 +317,7 @@ ENSv1DomainRef.implement({
 ENSv2DomainRef.implement({
   description: "An ENSv2Domain represents an ENSv2 Domain.",
   interfaces: [DomainInterfaceRef],
-  isTypeOf: (domain) => isENSv2Domain(domain),
+  isTypeOf: (domain) => isENSv2Domain(domain as DomainInterface),
   fields: (t) => ({
     //////////////////////
     // ENSv2Domain.tokenId

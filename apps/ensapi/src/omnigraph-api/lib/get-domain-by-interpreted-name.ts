@@ -10,17 +10,11 @@ import {
   type RegistryId,
 } from "enssdk";
 
-import { getENSv1RootRegistryId, maybeGetENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
+import { getRootRegistryIds, maybeGetENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
-import { lazy } from "@/lib/lazy";
 import { makeLogger } from "@/lib/logger";
-
-// lazy() defers construction until first use so that this module can be imported without env vars
-// being present (e.g. during OpenAPI generation).
-const getV1Root = lazy(() => getENSv1RootRegistryId(config.namespace));
-const getV2Root = lazy(() => maybeGetENSv2RootRegistryId(config.namespace));
 
 const tracer = trace.getTracer("get-domain-by-interpreted-name");
 const logger = makeLogger("get-domain-by-interpreted-name");
@@ -62,21 +56,26 @@ export async function getDomainIdByInterpretedName(
   name: InterpretedName,
 ): Promise<DomainId | null> {
   return withActiveSpanAsync(tracer, "getDomainIdByInterpretedName", { name }, async () => {
-    const v1Root = getV1Root();
-    const v2Root = getV2Root();
+    // Traverse from every top-level Root Registry in parallel. ENSv1 is multi-rooted on disk —
+    // each concrete ENSv1Registry (ENSRoot, Basenames, Lineanames) owns its own subtree and is
+    // not linked to the others at the indexed-namegraph level.
+    const roots = getRootRegistryIds(config.namespace);
+    const v2Root = maybeGetENSv2RootRegistryId(config.namespace);
 
-    const [v1DomainId, v2DomainId] = await Promise.all([
-      withActiveSpanAsync(tracer, "v1_getDomainId", {}, () => traverseFromRoot(v1Root, name)),
-      // only resolve v2 Domain if ENSv2 Root Registry is defined
-      v2Root
-        ? withActiveSpanAsync(tracer, "v2_getDomainId", {}, () => traverseFromRoot(v2Root, name))
-        : null,
-    ]);
+    const results = await Promise.all(
+      roots.map((root) =>
+        withActiveSpanAsync(tracer, "traverseFromRoot", { root }, () =>
+          traverseFromRoot(root, name),
+        ),
+      ),
+    );
 
-    logger.debug({ v1DomainId, v2DomainId });
+    logger.debug({ roots, results });
 
-    // prefer v2 Domain over v1 Domain
-    return v2DomainId || v1DomainId || null;
+    // prefer the v2 Root's result when present, otherwise the first non-null hit from any v1 root.
+    const v2Index = v2Root ? roots.indexOf(v2Root) : -1;
+    const v2Hit = v2Index >= 0 ? results[v2Index] : null;
+    return v2Hit ?? results.find((r): r is DomainId => r !== null) ?? null;
   });
 }
 
@@ -97,8 +96,6 @@ async function traverseFromRoot(
 
   // https://github.com/drizzle-team/drizzle-orm/issues/1289#issuecomment-2688581070
   const rawLabelHashPathArray = sql`${new Param(labelHashPath)}::text[]`;
-
-  // TODO: need to join latest registration and confirm that it's not expired, if expired should treat the domain as not existing
 
   const result = await ensDb.execute(sql`
     WITH RECURSIVE path AS (
