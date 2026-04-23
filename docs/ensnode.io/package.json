@@ -3,7 +3,7 @@
   "private": true,
   "license": "MIT",
   "type": "module",
-  "version": "1.10.0",
+  "version": "1.10.1",
   "packageManager": "pnpm@10.33.0",
   "scripts": {
     "dev": "astro dev",

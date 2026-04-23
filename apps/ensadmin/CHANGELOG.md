@@ -1,5 +1,16 @@
 # ensadmin
 
+## 1.10.1
+
+### Patch Changes
+
+- Updated dependencies [[`9d50f64`](https://github.com/namehash/ensnode/commit/9d50f647802fde286dfef2dc23c884801d06b228)]:
+  - @ensnode/ensnode-sdk@1.10.1
+  - @ensnode/ensnode-react@1.10.1
+  - @namehash/namehash-ui@1.10.1
+  - enssdk@1.10.1
+  - @ensnode/datasources@1.10.1
+
 ## 1.10.0
 
 ### Minor Changes
