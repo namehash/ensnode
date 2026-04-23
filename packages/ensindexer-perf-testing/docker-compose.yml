@@ -1,9 +1,12 @@
 services:
   prometheus:
-    image: prom/prometheus:latest
+    # Pinned for reproducible perf runs; update deliberately after validating a newer release.
+    image: prom/prometheus:v2.55.1
     container_name: ensnode-prometheus
+    # Bound to loopback: the stack ships anonymous admin + --web.enable-admin-api (required for
+    # the `pnpm wipe` script) so must not be exposed on shared/remote hosts.
     ports:
-      - "9090:9090"
+      - "127.0.0.1:9090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
     command:
@@ -14,10 +17,12 @@ services:
       - "host.docker.internal:host-gateway"
 
   grafana:
-    image: grafana/grafana:latest
+    # Pinned for reproducible perf runs; update deliberately after validating a newer release.
+    image: grafana/grafana:11.3.0
     container_name: ensnode-grafana
+    # Bound to loopback: anonymous Admin role is enabled for zero-friction local editing.
     ports:
-      - "3001:3000"
+      - "127.0.0.1:3001:3000"
     environment:
       GF_AUTH_ANONYMOUS_ENABLED: "true"
       GF_AUTH_ANONYMOUS_ORG_ROLE: Admin

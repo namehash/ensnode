@@ -8,7 +8,7 @@
     "up": "docker compose up -d",
     "down": "docker compose down",
     "logs": "docker compose logs -f",
-    "wipe": "curl -sf -X POST 'http://localhost:9090/api/v1/admin/tsdb/delete_series?match%5B%5D=%7B__name__%3D~%22.%2B%22%7D' && curl -sf -X POST http://localhost:9090/api/v1/admin/tsdb/clean_tombstones",
+    "wipe": "curl --fail --show-error -X POST 'http://localhost:9090/api/v1/admin/tsdb/delete_series?match%5B%5D=%7B__name__%3D~%22.%2B%22%7D' && curl --fail --show-error -X POST http://localhost:9090/api/v1/admin/tsdb/clean_tombstones",
     "lint": "biome check --write .",
     "lint:ci": "biome ci"
   },

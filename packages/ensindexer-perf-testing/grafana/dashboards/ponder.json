@@ -1,6 +1,6 @@
 {
   "title": "Ponder / ensindexer",
-  "uid": "ponder-ensindexer",
+  "uid": "ensindexer",
   "schemaVersion": 39,
   "version": 1,
   "refresh": "5s",
@@ -81,7 +81,7 @@
       "id": 12,
       "title": "Total events per handler",
       "type": "bargauge",
-      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 28 },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 30 },
       "targets": [
         {
           "expr": "topk(25, ponder_indexing_completed_events)",
@@ -109,14 +109,14 @@
       "id": 5,
       "title": "Synced block per chain",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 38 },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 40 },
       "targets": [{ "expr": "ponder_sync_block", "legendFormat": "chain {{chain}}", "refId": "A" }]
     },
     {
       "id": 6,
       "title": "Blocks/sec per chain (historical)",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 38 },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 40 },
       "targets": [
         {
           "expr": "rate(ponder_historical_completed_blocks[1m])",
@@ -130,7 +130,7 @@
       "id": 7,
       "title": "RPC requests/sec by chain + method",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 46 },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 48 },
       "targets": [
         {
           "expr": "sum by (chain, method) (rate(ponder_indexing_rpc_requests_total[1m]))",
@@ -144,7 +144,7 @@
       "id": 8,
       "title": "RPC request duration p95 (ms)",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 46 },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 48 },
       "targets": [
         {
           "expr": "histogram_quantile(0.95, sum by (le, chain, method) (rate(ponder_rpc_request_duration_bucket[1m])))",
@@ -158,7 +158,7 @@
       "id": 9,
       "title": "Event loop lag p99",
       "type": "timeseries",
-      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 54 },
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 56 },
       "targets": [
         { "expr": "nodejs_eventloop_lag_p99_seconds", "legendFormat": "p99", "refId": "A" },
         { "expr": "nodejs_eventloop_lag_mean_seconds", "legendFormat": "mean", "refId": "B" }
@@ -169,7 +169,7 @@
       "id": 10,
       "title": "Postgres query queue size",
       "type": "timeseries",
-      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 54 },
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 56 },
       "targets": [
         { "expr": "ponder_postgres_query_queue_size", "legendFormat": "queue", "refId": "A" }
       ]
@@ -178,7 +178,7 @@
       "id": 11,
       "title": "DB store queries/sec",
       "type": "timeseries",
-      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 54 },
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 56 },
       "targets": [
         {
           "expr": "sum by (method) (rate(ponder_indexing_store_queries_total[1m]))",
