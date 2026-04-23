@@ -212,10 +212,12 @@ function recordEventForEps(): void {
  * Some event handlers may have preconditions that need to be met before
  * they can run.
  *
- * This function is idempotent and will only execute its logic once, even if
- * called multiple times. This is to ensure that we affect the "hot path" of
- * indexing as little as possible, since this function is called for every
- * "onchain" event.
+ * The Setup and Onchain preconditions are memoized and execute their logic only
+ * once per process, regardless of how often this function is called — essential
+ * because it's invoked for every indexed event. EPS accounting via
+ * {@link recordEventForEps} runs on every call, but its hot-path cost is a
+ * single Date.now() and a counter increment; structured logging is emitted at
+ * most once per {@link EPS_LOG_INTERVAL_MS}.
  */
 async function eventHandlerPreconditions(eventType: EventTypeId): Promise<void> {
   recordEventForEps();
