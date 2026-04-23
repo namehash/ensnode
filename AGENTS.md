@@ -81,3 +81,5 @@ Fail fast and loudly on invalid inputs.
   1. `pnpm -F <affected-project> typecheck`
   2. `pnpm lint`
   3. `pnpm test --project <affected-project> [--project <other-affected-project>]`
+  4. If OpenAPI Specs were affected, run `pnpm generate:openapi`
+  5. If the Omnigraph GraphQL Schema was affected, run `pnpm generate:gqlschema`
