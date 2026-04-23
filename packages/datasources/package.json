@@ -49,6 +49,6 @@
     "vitest": "catalog:"
   },
   "dependencies": {
-    "@ponder/utils": "catalog:"
+    "@ponder/utils": "^0.2.18"
   }
 }
