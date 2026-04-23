@@ -27,7 +27,9 @@
           "custom": { "drawStyle": "line", "lineWidth": 1, "fillOpacity": 10 }
         }
       },
-      "options": { "legend": { "displayMode": "table", "placement": "right", "calcs": ["mean", "max"] } }
+      "options": {
+        "legend": { "displayMode": "table", "placement": "right", "calcs": ["mean", "max"] }
+      }
     },
     {
       "id": 2,
@@ -42,7 +44,9 @@
         }
       ],
       "fieldConfig": { "defaults": { "unit": "ms" } },
-      "options": { "legend": { "displayMode": "table", "placement": "right", "calcs": ["mean", "max"] } }
+      "options": {
+        "legend": { "displayMode": "table", "placement": "right", "calcs": ["mean", "max"] }
+      }
     },
     {
       "id": 3,
@@ -106,9 +110,7 @@
       "title": "Synced block per chain",
       "type": "timeseries",
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 38 },
-      "targets": [
-        { "expr": "ponder_sync_block", "legendFormat": "chain {{chain}}", "refId": "A" }
-      ]
+      "targets": [{ "expr": "ponder_sync_block", "legendFormat": "chain {{chain}}", "refId": "A" }]
     },
     {
       "id": 6,
@@ -116,7 +118,11 @@
       "type": "timeseries",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 38 },
       "targets": [
-        { "expr": "rate(ponder_historical_completed_blocks[1m])", "legendFormat": "chain {{chain}}", "refId": "A" }
+        {
+          "expr": "rate(ponder_historical_completed_blocks[1m])",
+          "legendFormat": "chain {{chain}}",
+          "refId": "A"
+        }
       ],
       "fieldConfig": { "defaults": { "unit": "ops" } }
     },

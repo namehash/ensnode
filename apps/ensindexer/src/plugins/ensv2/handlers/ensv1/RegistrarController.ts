@@ -64,15 +64,13 @@ export default function () {
       );
     }
 
-    // If the controller emitted the plaintext `label`, always call ensureLabel: its
-    // onConflictDoUpdate upgrades a pre-existing hash-only row (written earlier by
-    // ensureUnknownLabel when ENSRainbow couldn't heal) to the plaintext value.
-    // Only call ensureUnknownLabel when plaintext isn't available and we haven't
-    // seen this labelHash yet.
+    // if the contract emitted a healed label, ensure that it is indexed
     if (label !== undefined) {
       await ensureLabel(context, label);
-    } else if (!(await labelExists(context, labelHash))) {
-      await ensureUnknownLabel(context, labelHash);
+    } else {
+      // otherwise, attempt a heal if not exists
+      const exists = await labelExists(context, labelHash);
+      if (!exists) await ensureUnknownLabel(context, labelHash);
     }
 
     // update registration's base/premium
@@ -108,15 +106,13 @@ export default function () {
       );
     }
 
-    // Same pattern as handleNameRegisteredByController: if plaintext is emitted,
-    // always ensureLabel so any hash-only row left by a prior ensureUnknownLabel
-    // is upgraded via onConflictDoUpdate. Otherwise only attempt a heal if the
-    // label hasn't been seen before.
-    // NOTE: technically not necessary, as should be ensured by NameRegistered, but we include here anyway
+    // if the contract emitted a healed label, ensure that it is indexed
     if (label !== undefined) {
       await ensureLabel(context, label);
-    } else if (!(await labelExists(context, labelHash))) {
-      await ensureUnknownLabel(context, labelHash);
+    } else {
+      // otherwise, attempt a heal if not exists
+      const exists = await labelExists(context, labelHash);
+      if (!exists) await ensureUnknownLabel(context, labelHash);
     }
 
     const controller = getThisAccountId(context, event);
