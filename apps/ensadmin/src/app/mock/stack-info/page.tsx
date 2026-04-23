@@ -27,8 +27,8 @@ export default function MockConfigPage() {
       case "Loading Error":
         return {
           error: {
-            title: "ENSNodeConfigInfo Error",
-            description: "Failed to fetch ENSIndexer Config.",
+            title: "EnsNodeStackInfo Error",
+            description: "Failed to fetch EnsNodeStackInfo.",
           },
         };
 
@@ -47,7 +47,7 @@ export default function MockConfigPage() {
               : "Unknown EnsNodeStackInfo deserialization error";
           return {
             error: {
-              title: "Deserialization Error",
+              title: "EnsNodeStackInfo Deserialization Error",
               description: errorMessage,
             },
           };
@@ -59,8 +59,8 @@ export default function MockConfigPage() {
     <section className="flex flex-col gap-6 p-6 max-sm:p-4">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl leading-normal">Mock: ENSNodeStackInfo</CardTitle>
-          <CardDescription>Select a mock ENSNodeStackInfo variant</CardDescription>
+          <CardTitle className="text-2xl leading-normal">Mock: EnsNodeStackInfo</CardTitle>
+          <CardDescription>Select a mock EnsNodeStackInfo variant</CardDescription>
         </CardHeader>
 
         <CardContent>
