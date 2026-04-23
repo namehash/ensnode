@@ -63,12 +63,15 @@ export const getCanonicalRegistriesCTE = () => {
         WITH RECURSIVE canonical_registries AS (
           ${rootsUnion}
           UNION ALL
+          -- Filter nulls at the recursive step so terminal Domains (no subregistry declared) don't
+          -- emit null rows into the CTE and don't spawn dead-end recursion branches.
           SELECT d.subregistry_id AS registry_id, cr.depth + 1
           FROM canonical_registries cr
           JOIN ${ensIndexerSchema.domain} d ON d.registry_id = cr.registry_id
           WHERE cr.depth < ${CANONICAL_REGISTRIES_MAX_DEPTH}
+            AND d.subregistry_id IS NOT NULL
         )
-        SELECT registry_id FROM canonical_registries WHERE registry_id IS NOT NULL
+        SELECT registry_id FROM canonical_registries
       ) AS canonical_registries_cte`,
     )
     .as("canonical_registries");
