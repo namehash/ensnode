@@ -12,11 +12,11 @@ const ensRootChainId = getENSRootChainId(config.namespace);
  * Process-local cache of node migration status.
  *
  * `nodeIsMigrated` is called as a precondition on every ENSv1RegistryOld event handler (NewOwner,
- * Transfer, NewTTL, NewResolver). At scale that is millions of lookups against `migratedNode`.
+ * Transfer, NewTTL, NewResolver).
  *
  * Restart-safe: the Map repopulates via DB reads on cache miss.
  */
-const migrationStatus = new Map<Node, boolean>();
+const cache = new Map<Node, boolean>();
 
 /**
  * Returns whether the `node` has migrated to the new Registry contract.
@@ -29,12 +29,12 @@ export async function nodeIsMigrated(context: IndexingEngineContext, node: Node)
   }
 
   // memoize the below operation by `node`
-  const cached = migrationStatus.get(node);
+  const cached = cache.get(node);
   if (cached !== undefined) return cached;
 
   const record = await context.ensDb.find(ensIndexerSchema.migratedNode, { node });
   const isMigrated = record !== null;
-  migrationStatus.set(node, isMigrated);
+  cache.set(node, isMigrated);
   return isMigrated;
 }
 
@@ -49,8 +49,8 @@ export async function migrateNode(context: IndexingEngineContext, node: Node) {
   }
 
   // memoize the below operation by `node`
-  if (migrationStatus.get(node) === true) return;
-  migrationStatus.set(node, true);
+  if (cache.get(node) === true) return;
+  cache.set(node, true);
 
   await context.ensDb.insert(ensIndexerSchema.migratedNode).values({ node }).onConflictDoNothing();
 }

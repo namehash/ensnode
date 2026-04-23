@@ -1,11 +1,11 @@
-import type { Address } from "enssdk";
+import type { Address, NormalizedAddress } from "enssdk";
 
 import { interpretAddress } from "@ensnode/ensnode-sdk";
 
 import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 
 /**
- * Process-local memo of account ids we have already upserted into `ensIndexerSchema.account`
+ * Process-local memo of addresses we have already upserted into `ensIndexerSchema.account`
  * within this indexer process.
  *
  * ensureAccount is called from many handlers on every event, but the set of distinct accounts
@@ -21,7 +21,7 @@ import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-eng
  *   insert is still idempotent, so this is still correct — it just costs one redundant DB op
  *   the first time each account is seen after a restart.
  */
-const ensuredAccounts = new Set<string>();
+const cache = new Set<NormalizedAddress>();
 
 /**
  * Ensures that the account identified by `address` exists.
@@ -32,8 +32,8 @@ export async function ensureAccount(context: IndexingEngineContext, address: Add
   if (interpreted === null) return;
 
   // memoize the below operation by `interpreted`
-  if (ensuredAccounts.has(interpreted)) return;
-  ensuredAccounts.add(interpreted);
+  if (cache.has(interpreted)) return;
+  cache.add(interpreted);
 
   await context.ensDb
     .insert(ensIndexerSchema.account)
