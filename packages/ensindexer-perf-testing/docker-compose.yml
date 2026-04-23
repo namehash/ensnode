@@ -1,10 +1,8 @@
 services:
   prometheus:
-    # Pinned for reproducible perf runs; update deliberately after validating a newer release.
     image: prom/prometheus:v2.55.1
     container_name: ensnode-prometheus
-    # Bound to loopback: the stack ships anonymous admin + --web.enable-admin-api (required for
-    # the `pnpm wipe` script) so must not be exposed on shared/remote hosts.
+    # bound to loopback to avoid exposing publically
     ports:
       - "127.0.0.1:9090:9090"
     volumes:
@@ -17,10 +15,9 @@ services:
       - "host.docker.internal:host-gateway"
 
   grafana:
-    # Pinned for reproducible perf runs; update deliberately after validating a newer release.
     image: grafana/grafana:11.3.0
     container_name: ensnode-grafana
-    # Bound to loopback: anonymous Admin role is enabled for zero-friction local editing.
+    # bound to loopback to avoid exposing publically
     ports:
       - "127.0.0.1:3001:3000"
     environment:
