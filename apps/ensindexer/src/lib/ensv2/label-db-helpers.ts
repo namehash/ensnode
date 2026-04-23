@@ -33,8 +33,8 @@ export async function ensureLabel(context: IndexingEngineContext, label: Literal
 
 /**
  * Ensures that the LabelHash `labelHash` is available in the Label rainbow table, also attempting
- * an ENSRainbow heal. To avoid duplicate ENSRainbow healing request, callers must conditionally call
- * this function based on the result of {@link ensureLabel}.
+ * an ENSRainbow heal. To avoid duplicate ENSRainbow healing requests, callers must gate this
+ * function on {@link labelExists} returning false.
  */
 export async function ensureUnknownLabel(context: IndexingEngineContext, labelHash: LabelHash) {
   // attempt ENSRainbow heal
