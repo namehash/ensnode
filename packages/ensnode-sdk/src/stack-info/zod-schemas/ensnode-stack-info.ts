@@ -18,7 +18,7 @@ export function makeSerializedEnsNodeStackInfoSchema(valueLabel?: string) {
     ensApi: makeSerializedEnsApiPublicConfigSchema(`${label}.ensApi`),
     ensDb: makeEnsDbPublicConfigSchema(`${label}.ensDb`),
     ensIndexer: makeSerializedEnsIndexerPublicConfigSchema(`${label}.ensIndexer`),
-    ensRainbow: makeEnsRainbowPublicConfigSchema(`${label}.ensRainbow`).optional(),
+    ensRainbow: makeEnsRainbowPublicConfigSchema(`${label}.ensRainbow`),
   });
 }
 
@@ -29,6 +29,6 @@ export function makeEnsNodeStackInfoSchema(valueLabel?: string) {
     ensApi: makeEnsApiPublicConfigSchema(`${label}.ensApi`),
     ensDb: makeEnsDbPublicConfigSchema(`${label}.ensDb`),
     ensIndexer: makeEnsIndexerPublicConfigSchema(`${label}.ensIndexer`),
-    ensRainbow: makeEnsRainbowPublicConfigSchema(`${label}.ensRainbow`).optional(),
+    ensRainbow: makeEnsRainbowPublicConfigSchema(`${label}.ensRainbow`),
   });
 }

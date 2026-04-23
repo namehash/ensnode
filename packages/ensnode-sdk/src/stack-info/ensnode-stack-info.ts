@@ -1,34 +1,17 @@
 import type { EnsApiPublicConfig } from "../ensapi/config/types";
 import type { EnsDbPublicConfig } from "../ensdb/config";
 import type { EnsIndexerPublicConfig } from "../ensindexer/config/types";
-import type { EnsRainbowPublicConfig } from "../ensrainbow/config";
+import type { EnsRainbowPublicConfig } from "../ensrainbow";
+import { buildEnsDbStackInfo, type EnsDbStackInfo } from "./ensdb-stack-info";
 
 /**
  * Information about the stack of services inside an ENSNode instance.
  */
-export interface EnsNodeStackInfo {
+export interface EnsNodeStackInfo extends EnsDbStackInfo {
   /**
    * ENSApi Public Config
    */
   ensApi: EnsApiPublicConfig;
-
-  /**
-   * ENSDb Public Config
-   */
-  ensDb: EnsDbPublicConfig;
-
-  /**
-   * ENSIndexer Public Config
-   */
-  ensIndexer: EnsIndexerPublicConfig;
-
-  /**
-   * ENSRainbow Public Config
-   *
-   * If undefined, represents that ENSRainbow is currently undergoing
-   * a cold start and may take up to an hour to become ready.
-   */
-  ensRainbow?: EnsRainbowPublicConfig;
 }
 
 /**
@@ -38,11 +21,11 @@ export interface EnsNodeStackInfo {
 export function buildEnsNodeStackInfo(
   ensApiPublicConfig: EnsApiPublicConfig,
   ensDbPublicConfig: EnsDbPublicConfig,
+  ensIndexerPublicConfig: EnsIndexerPublicConfig,
+  ensRainbowPublicConfig: EnsRainbowPublicConfig,
 ): EnsNodeStackInfo {
   return {
+    ...buildEnsDbStackInfo(ensDbPublicConfig, ensIndexerPublicConfig, ensRainbowPublicConfig),
     ensApi: ensApiPublicConfig,
-    ensDb: ensDbPublicConfig,
-    ensIndexer: ensApiPublicConfig.ensIndexerPublicConfig,
-    ensRainbow: ensApiPublicConfig.ensIndexerPublicConfig.ensRainbowPublicConfig,
   };
 }

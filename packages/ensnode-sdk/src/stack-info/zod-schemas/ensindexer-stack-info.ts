@@ -1,0 +1,51 @@
+import { z } from "zod/v4";
+
+import {
+  makeEnsIndexerPublicConfigSchema,
+  makeSerializedEnsIndexerPublicConfigSchema,
+} from "../../ensindexer/config/zod-schemas";
+import { makeEnsRainbowPublicConfigSchema } from "../../ensrainbow/zod-schemas/config";
+import type { ZodCheckFnInput } from "../../shared/zod-types";
+import type { EnsIndexerStackInfo } from "../ensindexer-stack-info";
+
+export function makeSerializedEnsIndexerStackInfoSchema(valueLabel?: string) {
+  const label = valueLabel ?? "ENSIndexerStackInfo";
+
+  return z.object({
+    ensIndexer: makeSerializedEnsIndexerPublicConfigSchema(`${label}.ensIndexer`),
+    ensRainbow: makeEnsRainbowPublicConfigSchema(`${label}.ensRainbow`),
+  });
+}
+
+export function invariant_ensRainbowCompatibilityWithEnsIndexer(
+  ctx: ZodCheckFnInput<EnsIndexerStackInfo>,
+) {
+  const { ensIndexer, ensRainbow } = ctx.value;
+
+  if (ensIndexer.labelSet.labelSetId !== ensRainbow.labelSet.labelSetId) {
+    ctx.issues.push({
+      code: "custom",
+      input: ctx.value,
+      message: `ENSRainbow's label set (id: ${ensRainbow.labelSet.labelSetId}) must be same as ENSIndexer's label set (id: ${ensIndexer.labelSet.labelSetId}).`,
+    });
+  }
+
+  if (ensIndexer.labelSet.labelSetVersion > ensRainbow.labelSet.highestLabelSetVersion) {
+    ctx.issues.push({
+      code: "custom",
+      input: ctx.value,
+      message: `ENSRainbow's label set version (highest: ${ensRainbow.labelSet.highestLabelSetVersion}) must be greater than or equal to ENSIndexer's label set version (current: ${ensIndexer.labelSet.labelSetVersion}).`,
+    });
+  }
+}
+
+export function makeEnsIndexerStackInfoSchema(valueLabel?: string) {
+  const label = valueLabel ?? "ENSIndexerStackInfo";
+
+  return z
+    .object({
+      ensIndexer: makeEnsIndexerPublicConfigSchema(`${label}.ensIndexer`),
+      ensRainbow: makeEnsRainbowPublicConfigSchema(`${label}.ensRainbow`),
+    })
+    .check(invariant_ensRainbowCompatibilityWithEnsIndexer);
+}
