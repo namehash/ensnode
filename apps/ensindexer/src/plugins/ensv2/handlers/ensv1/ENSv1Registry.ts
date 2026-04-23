@@ -142,14 +142,14 @@ export default function () {
         registryId: parentRegistryId,
         node,
         labelHash,
-        // NOTE: the includsion of ownerId here 'inlines' the logic of `materializeENSv1DomainEffectiveOwner`,
+        // NOTE: the inclusion of ownerId here 'inlines' the logic of `materializeENSv1DomainEffectiveOwner`,
         // saving a single db op in a hot path (lots of NewOwner events, unsurprisingly!)
         //
         // NOTE: despite Domain.ownerId being materialized from other sources of truth (i.e. Registrars
         // like BaseRegistrars & NameWrapper) it's ok to always set it here because the Registrar-emitted
         // events occur _after_ the Registry events. So when a name is registered, for example, the Registry's
         // owner changes to that of the NameWrapper but then the NameWrapper emits NameWrapped, and this
-        // indexing code re-materializes the Domain.ownerId to the NameWraper-emitted value.
+        // indexing code re-materializes the Domain.ownerId to the NameWrapper-emitted value.
         ownerId,
         rootRegistryOwnerId: ownerId,
       })
@@ -182,7 +182,7 @@ export default function () {
     // like BaseRegistrars & NameWrapper) it's ok to always set it here because the Registrar-emitted
     // events occur _after_ the Registry events. So when a name is wrapped, for example, the Registry's
     // owner changes to that of the NameWrapper but then the NameWrapper emits NameWrapped, and this
-    // indexing code re-materializes the Domain.ownerId to the NameWraper-emitted value.
+    // indexing code re-materializes the Domain.ownerId to the NameWrapper-emitted value.
     await context.ensDb
       .update(ensIndexerSchema.domain, { id: domainId })
       .set({ ownerId, rootRegistryOwnerId: ownerId });

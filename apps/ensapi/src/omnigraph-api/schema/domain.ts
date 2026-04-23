@@ -142,7 +142,7 @@ DomainInterfaceRef.implement({
     ///////////////
     path: t.field({
       description:
-        "The Canonical Path from the ENS Root to this Domain. `path` is null if the Domain is not Canonical.",
+        "The Canonical Path from this Domain to the ENS Root, in leaf→root order and inclusive of this Domain. `path` is null if the Domain is not Canonical.",
       tracing: true,
       type: [DomainInterfaceRef],
       nullable: true,
