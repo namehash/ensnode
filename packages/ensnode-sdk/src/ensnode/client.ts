@@ -151,9 +151,12 @@ export class EnsNodeClient {
     const url = new URL(`/api/resolve/records/${encodeURIComponent(name)}`, this.options.url);
 
     // Add query parameters based on selection
-    if (selection.name) {
-      url.searchParams.set("name", "true");
-    }
+    if (selection.name) url.searchParams.set("name", "true");
+    if (selection.contenthash) url.searchParams.set("contenthash", "true");
+    if (selection.pubkey) url.searchParams.set("pubkey", "true");
+    if (selection.dnszonehash) url.searchParams.set("dnszonehash", "true");
+    if (selection.version) url.searchParams.set("version", "true");
+    if (selection.abi !== undefined) url.searchParams.set("abi", selection.abi.toString());
 
     if (selection.addresses && selection.addresses.length > 0) {
       url.searchParams.set("addresses", selection.addresses.join(","));
@@ -161,6 +164,10 @@ export class EnsNodeClient {
 
     if (selection.texts && selection.texts.length > 0) {
       url.searchParams.set("texts", selection.texts.join(","));
+    }
+
+    if (selection.interfaces && selection.interfaces.length > 0) {
+      url.searchParams.set("interfaces", selection.interfaces.join(","));
     }
 
     if (options?.trace) url.searchParams.set("trace", "true");
@@ -173,8 +180,20 @@ export class EnsNodeClient {
       throw ClientError.fromErrorResponse(error);
     }
 
-    const data = await response.json();
-    return data as ResolveRecordsResponse<SELECTION>;
+    const data = (await response.json()) as ResolveRecordsResponse<SELECTION>;
+
+    // server serializes bigints as strings to keep the wire plain JSON — coerce back here so
+    // `version` and `abi.contentType` match their SDK `bigint` types.
+    const records = data.records as {
+      version?: unknown;
+      abi?: { contentType: unknown; data: string } | null;
+    };
+    if (typeof records.version === "string") records.version = BigInt(records.version);
+    if (records.abi && typeof records.abi.contentType === "string") {
+      records.abi.contentType = BigInt(records.abi.contentType);
+    }
+
+    return data;
   }
 
   /**

@@ -1,9 +1,16 @@
 import { createRoute, z } from "@hono/zod-openapi";
 
 import {
-  ErrorResponseSchema,
+  errorResponseBadRequestExample,
+  errorResponseInternalServerErrorExample,
+  makeErrorResponseSchema,
+  makeNameTokensResponseErrorNameTokensNotIndexedSchema,
+  makeNameTokensResponseErrorSchema,
   makeNameTokensResponseSchema,
   makeNodeSchema,
+  nameTokensNotIndexedExample,
+  nameTokensResponseOkExample,
+  nameTokensServiceUnavailableExample,
 } from "@ensnode/ensnode-sdk/internal";
 
 import { params } from "@/lib/handlers/params.schema";
@@ -42,7 +49,9 @@ export const getNameTokensRoute = createRoute({
       description: "Name tokens known",
       content: {
         "application/json": {
-          schema: makeNameTokensResponseSchema("Name Tokens Response", true),
+          schema: makeNameTokensResponseSchema("Name Tokens Response", true).openapi({
+            example: nameTokensResponseOkExample,
+          }),
         },
       },
     },
@@ -50,7 +59,7 @@ export const getNameTokensRoute = createRoute({
       description: "Invalid input",
       content: {
         "application/json": {
-          schema: ErrorResponseSchema,
+          schema: makeErrorResponseSchema().openapi({ example: errorResponseBadRequestExample }),
         },
       },
     },
@@ -58,7 +67,9 @@ export const getNameTokensRoute = createRoute({
       description: "Name tokens not indexed",
       content: {
         "application/json": {
-          schema: makeNameTokensResponseSchema("Name Tokens Response", true),
+          schema: makeNameTokensResponseErrorNameTokensNotIndexedSchema().openapi({
+            example: nameTokensNotIndexedExample,
+          }),
         },
       },
     },
@@ -66,7 +77,9 @@ export const getNameTokensRoute = createRoute({
       description: "Internal server error",
       content: {
         "application/json": {
-          schema: ErrorResponseSchema,
+          schema: makeErrorResponseSchema().openapi({
+            example: errorResponseInternalServerErrorExample,
+          }),
         },
       },
     },
@@ -75,11 +88,11 @@ export const getNameTokensRoute = createRoute({
         "Service unavailable - Name Tokens API prerequisites not met (indexing status not ready or required plugins not activated)",
       content: {
         "application/json": {
-          schema: makeNameTokensResponseSchema("Name Tokens Response", true),
+          schema: makeNameTokensResponseErrorSchema().openapi({
+            example: nameTokensServiceUnavailableExample,
+          }),
         },
       },
     },
   },
 });
-
-export const routes = [getNameTokensRoute];

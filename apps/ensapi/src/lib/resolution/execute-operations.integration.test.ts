@@ -3,7 +3,8 @@ import { vi } from "vitest";
 import { ENSNamespaceIds, ensTestEnvChain } from "@ensnode/datasources";
 
 // we're testing a function specifically, not fetching through the running ensapi instance, so
-// we need to mock the config when this worker process attempts to import ./resolve-with-universal-resolver
+// we need to mock the config when this worker process attempts to import ./execute-operations
+// (and this is an integration test because we want to RPC fetch against the running devnet)
 vi.mock("@/config", () => ({
   default: {
     namespace: ENSNamespaceIds.EnsTestEnv,
@@ -22,10 +23,12 @@ import {
 } from "enssdk";
 import { describe, expect, it } from "vitest";
 
-import { getPublicClient } from "@/lib/public-client";
-import { makeResolveCalls } from "@/lib/resolution/resolve-calls-and-results";
+import { DatasourceNames } from "@ensnode/datasources";
+import { getDatasourceContract } from "@ensnode/ensnode-sdk";
 
-import { executeResolveCallsWithUniversalResolver } from "./resolve-with-universal-resolver";
+import { getPublicClient } from "@/lib/public-client";
+import { executeOperations } from "@/lib/resolution/execute-operations";
+import { makeOperations } from "@/lib/resolution/operations";
 
 const NAME = asInterpretedName("example.eth");
 const NAME_WITH_ENCODED_LABELHASHES = interpretedLabelsToInterpretedName([
@@ -37,12 +40,21 @@ const EXPECTED_DESCRIPTION = "example.eth";
 
 const publicClient = getPublicClient(ensTestEnvChain.id);
 
-describe("executeResolveCallsWithUniversalResolver", () => {
+const UniversalResolverV2 = getDatasourceContract(
+  ENSNamespaceIds.EnsTestEnv,
+  DatasourceNames.ENSRoot,
+  "UniversalResolverV2",
+);
+
+describe("executeOperations against UniversalResolver", () => {
   it("should resolve interpreted name without encoded labelhashes", async () => {
+    const node = namehashInterpretedName(NAME);
     await expect(
-      executeResolveCallsWithUniversalResolver({
+      executeOperations({
         name: NAME,
-        calls: makeResolveCalls(namehashInterpretedName(NAME), { texts: ["description"] }),
+        resolverAddress: UniversalResolverV2.address,
+        useENSIP10Resolve: true,
+        operations: makeOperations(node, { texts: ["description"] }),
         publicClient,
       }),
     ).resolves.toMatchObject([{ result: EXPECTED_DESCRIPTION }]);
@@ -60,12 +72,13 @@ describe("executeResolveCallsWithUniversalResolver", () => {
    * Which likely doesn't have the appropriate records set.
    */
   it("should NOT resolve interpreted name with encoded labelhashes", async () => {
+    const node = namehashInterpretedName(NAME_WITH_ENCODED_LABELHASHES);
     await expect(
-      executeResolveCallsWithUniversalResolver({
+      executeOperations({
         name: NAME_WITH_ENCODED_LABELHASHES,
-        calls: makeResolveCalls(namehashInterpretedName(NAME_WITH_ENCODED_LABELHASHES), {
-          texts: ["description"],
-        }),
+        resolverAddress: UniversalResolverV2.address,
+        useENSIP10Resolve: true,
+        operations: makeOperations(node, { texts: ["description"] }),
         publicClient,
       }),
     ).resolves.toMatchObject([{ result: null }]);
