@@ -2,7 +2,7 @@ services:
   prometheus:
     image: prom/prometheus:v2.55.1
     container_name: ensnode-prometheus
-    # bound to loopback to avoid exposing publically
+    # bound to loopback to avoid exposing publicly
     ports:
       - "127.0.0.1:9090:9090"
     volumes:
@@ -17,7 +17,7 @@ services:
   grafana:
     image: grafana/grafana:11.3.0
     container_name: ensnode-grafana
-    # bound to loopback to avoid exposing publically
+    # bound to loopback to avoid exposing publicly
     ports:
       - "127.0.0.1:3001:3000"
     environment:
