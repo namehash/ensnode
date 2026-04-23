@@ -16,7 +16,7 @@ import { isAddressEqual, zeroAddress } from "viem";
 
 import { getENSRootChainId, interpretAddress, PluginName } from "@ensnode/ensnode-sdk";
 
-import { materializeENSv1DomainEffectiveOwner } from "@/lib/ensv2/domain-db-helpers";
+import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { ensureDomainEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel, ensureUnknownLabel } from "@/lib/ensv2/label-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
@@ -130,9 +130,10 @@ export default function () {
       await ensureUnknownLabel(context, labelHash);
     }
 
-    const rootRegistryOwnerId = interpretAddress(owner);
+    const ownerId = interpretAddress(owner);
+    await ensureAccount(context, owner);
 
-    // upsert domain, always updating rootRegistryOwner
+    // upsert domain, always updating ownerId and setting rootRegistryOwner to this explicit owner
     await context.ensDb
       .insert(ensIndexerSchema.domain)
       .values({
@@ -141,17 +142,18 @@ export default function () {
         registryId: parentRegistryId,
         node,
         labelHash,
-        rootRegistryOwnerId,
+        // NOTE: the includsion of ownerId here 'inlines' the logic of `materializeENSv1DomainEffectiveOwner`,
+        // saving a single db op in a hot path (lots of NewOwner events, unsurprisingly!)
+        //
+        // NOTE: despite Domain.ownerId being materialized from other sources of truth (i.e. Registrars
+        // like BaseRegistrars & NameWrapper) it's ok to always set it here because the Registrar-emitted
+        // events occur _after_ the Registry events. So when a name is registered, for example, the Registry's
+        // owner changes to that of the NameWrapper but then the NameWrapper emits NameWrapped, and this
+        // indexing code re-materializes the Domain.ownerId to the NameWraper-emitted value.
+        ownerId,
+        rootRegistryOwnerId: ownerId,
       })
-      .onConflictDoUpdate({ rootRegistryOwnerId });
-
-    // materialize domain owner
-    // NOTE: despite Domain.ownerId being materialized from other sources of truth (i.e. Registrars
-    // like BaseRegistrars & NameWrapper) it's ok to always set it here because the Registrar-emitted
-    // events occur _after_ the Registry events. So when a name is registered, for example, the Registry's
-    // owner changes to that of the NameWrapper but then the NameWrapper emits NameWrapped, and this
-    // indexing code re-materializes the Domain.ownerId to the NameWraper-emitted value.
-    await materializeENSv1DomainEffectiveOwner(context, domainId, owner);
+      .onConflictDoUpdate({ ownerId, rootRegistryOwnerId: ownerId });
 
     // push event to domain history
     await ensureDomainEvent(context, event, domainId);
@@ -172,18 +174,18 @@ export default function () {
     const { registry } = getManagedName(getThisAccountId(context, event));
     const domainId = makeENSv1DomainId(registry, node);
 
-    // set the domain's rootRegistryOwner to `owner`
-    await context.ensDb
-      .update(ensIndexerSchema.domain, { id: domainId })
-      .set({ rootRegistryOwnerId: interpretAddress(owner) });
+    const ownerId = interpretAddress(owner);
+    await ensureAccount(context, owner);
 
-    // materialize domain owner
+    // update domain, setting ownerId and rootRegistryOwner to the new owner
     // NOTE: despite Domain.ownerId being materialized from other sources of truth (i.e. Registrars
     // like BaseRegistrars & NameWrapper) it's ok to always set it here because the Registrar-emitted
     // events occur _after_ the Registry events. So when a name is wrapped, for example, the Registry's
     // owner changes to that of the NameWrapper but then the NameWrapper emits NameWrapped, and this
     // indexing code re-materializes the Domain.ownerId to the NameWraper-emitted value.
-    await materializeENSv1DomainEffectiveOwner(context, domainId, owner);
+    await context.ensDb
+      .update(ensIndexerSchema.domain, { id: domainId })
+      .set({ ownerId, rootRegistryOwnerId: ownerId });
 
     // push event to domain history
     await ensureDomainEvent(context, event, domainId);
