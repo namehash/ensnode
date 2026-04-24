@@ -33,10 +33,12 @@ const COMMON_CLIENT_LABEL_SET = {
 } as const;
 
 const COMMON_ENSRAINBOW_CONFIG = {
-  version: "1.9.0",
   serverLabelSet: {
     labelSetId: "subgraph",
     highestLabelSetVersion: 0,
+  },
+  versionInfo: {
+    ensRainbow: "1.9.0",
   },
 } as const;
 
@@ -213,10 +215,12 @@ function createDeserializationErrorVariant(): SerializedEnsNodeStackInfo {
         ensIndexerSchemaName: "DeserializationSchema1.9.0",
         isSubgraphCompatible: true,
         ensRainbowPublicConfig: {
-          version: "",
           serverLabelSet: {
             labelSetId: "",
             highestLabelSetVersion: -1,
+          },
+          versionInfo: {
+            ensRainbow: "",
           },
         },
       },
@@ -239,7 +243,9 @@ function createDeserializationErrorVariant(): SerializedEnsNodeStackInfo {
       ensIndexerSchemaName: "DeserializationSchema1.9.0",
       isSubgraphCompatible: true,
       ensRainbowPublicConfig: {
-        version: "",
+        versionInfo: {
+          ensRainbow: "",
+        },
         serverLabelSet: {
           labelSetId: "",
           highestLabelSetVersion: -1,
@@ -247,7 +253,9 @@ function createDeserializationErrorVariant(): SerializedEnsNodeStackInfo {
       },
     },
     ensRainbow: {
-      version: "",
+      versionInfo: {
+        ensRainbow: "",
+      },
       serverLabelSet: {
         labelSetId: "",
         highestLabelSetVersion: -1,

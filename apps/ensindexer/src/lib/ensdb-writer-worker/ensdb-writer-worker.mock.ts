@@ -20,8 +20,10 @@ import type { PublicConfigBuilder } from "@/lib/public-config-builder";
 
 // Test fixture for EnsRainbowPublicConfig
 export const mockEnsRainbowPublicConfig: EnsRainbowPublicConfig = {
-  version: "1.0.0",
   serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+  versionInfo: {
+    ensRainbow: "1.0.0",
+  },
 };
 
 // Test fixture for EnsIndexerVersionInfo

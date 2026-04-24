@@ -4,6 +4,8 @@ import { isAbsolute, resolve } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
+import type { EnsRainbowPublicConfig } from "@ensnode/ensnode-sdk";
+
 import { DB_SCHEMA_VERSION } from "@/lib/database";
 
 import {
@@ -396,8 +398,10 @@ describe("buildEnsRainbowPublicConfig", () => {
     const result = buildEnsRainbowPublicConfig(dbConfig);
 
     expect(result).toStrictEqual({
-      version: packageJson.version,
       serverLabelSet: dbConfig.serverLabelSet,
-    });
+      versionInfo: {
+        ensRainbow: packageJson.version,
+      },
+    } satisfies EnsRainbowPublicConfig);
   });
 });

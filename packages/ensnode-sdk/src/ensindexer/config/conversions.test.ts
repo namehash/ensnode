@@ -12,8 +12,10 @@ describe("ENSIndexer: Config", () => {
       const config = {
         ensIndexerSchemaName: "ensindexer_0",
         ensRainbowPublicConfig: {
-          version: "0.32.0",
           serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+          versionInfo: {
+            ensRainbow: "0.32.0",
+          },
         },
         clientLabelSet: {
           labelSetId: "subgraph",
@@ -53,8 +55,10 @@ describe("ENSIndexer: Config", () => {
     const correctSerializedConfig = {
       ensIndexerSchemaName: "ensindexer_0",
       ensRainbowPublicConfig: {
-        version: "0.32.0",
         serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+        versionInfo: {
+          ensRainbow: "0.32.0",
+        },
       },
       clientLabelSet: {
         labelSetId: "subgraph",

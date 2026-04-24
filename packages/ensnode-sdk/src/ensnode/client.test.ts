@@ -71,8 +71,10 @@ const EXAMPLE_ENSAPI_CONFIG_RESPONSE = {
   },
   ensIndexerPublicConfig: {
     ensRainbowPublicConfig: {
-      version: "1.9.0",
       serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+      versionInfo: {
+        ensRainbow: "1.9.0",
+      },
     },
     clientLabelSet: {
       labelSetId: "subgraph",
@@ -107,8 +109,10 @@ const EXAMPLE_ENSDB_PUBLIC_RESPONSE = {
 
 const EXAMPLE_ENSINDEXER_PUBLIC_CONFIG = {
   ensRainbowPublicConfig: {
-    version: "1.9.0",
     serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+    versionInfo: {
+      ensRainbow: "1.9.0",
+    },
   },
   clientLabelSet: {
     labelSetId: "subgraph",
@@ -135,8 +139,10 @@ const EXAMPLE_ENSINDEXER_PUBLIC_CONFIG = {
 } satisfies SerializedEnsIndexerPublicConfig;
 
 const EXAMPLE_ENSRAINBOW_PUBLIC_CONFIG = {
-  version: "1.9.0",
   serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+  versionInfo: {
+    ensRainbow: "1.9.0",
+  },
 } satisfies SerializedEnsRainbowPublicConfig;
 
 const serializedStackInfo = {

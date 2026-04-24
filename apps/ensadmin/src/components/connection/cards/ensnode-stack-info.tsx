@@ -599,7 +599,7 @@ function EnsNodeStackInfoCardContent({ ensNodeStackInfo }: { ensNodeStackInfo: E
         icon={<ENSRainbowIcon width={24} height={24} />}
         version={
           <p className="text-sm leading-normal font-normal text-muted-foreground">
-            v{ensRainbowPublicConfig.version}
+            v{ensRainbowPublicConfig.versionInfo.ensRainbow}
           </p>
         }
         docsLink={new URL("https://ensnode.io/ensrainbow")}

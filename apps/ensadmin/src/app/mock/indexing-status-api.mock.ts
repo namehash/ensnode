@@ -31,10 +31,12 @@ const serializedEnsIndexerPublicConfig = {
   indexedChainIds: [1, 8453, 59144, 10, 42161, 534352, 567],
   ensIndexerSchemaName: "alphaSchema1.9.0",
   ensRainbowPublicConfig: {
-    version: "1.9.0",
     serverLabelSet: {
       labelSetId: "subgraph",
       highestLabelSetVersion: 0,
+    },
+    versionInfo: {
+      ensRainbow: "1.9.0",
     },
   },
   isSubgraphCompatible: false,

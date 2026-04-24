@@ -154,8 +154,8 @@ describe("Server Command Tests", () => {
       expect(response.status).toBe(200);
       const data = (await response.json()) as EnsRainbow.ENSRainbowPublicConfig;
 
-      expect(typeof data.version).toBe("string");
-      expect(data.version.length).toBeGreaterThan(0);
+      expect(typeof data.versionInfo.ensRainbow).toBe("string");
+      expect(data.versionInfo.ensRainbow.length).toBeGreaterThan(0);
       expect(data.serverLabelSet.labelSetId).toBe("test-label-set-id");
       expect(data.serverLabelSet.highestLabelSetVersion).toBe(0);
     });
@@ -169,8 +169,8 @@ describe("Server Command Tests", () => {
       expect(response.status).toBe(200);
       const data = (await response.json()) as EnsRainbow.ENSRainbowPublicConfig;
 
-      expect(typeof data.version).toBe("string");
-      expect(data.version.length).toBeGreaterThan(0);
+      expect(typeof data.versionInfo.ensRainbow).toBe("string");
+      expect(data.versionInfo.ensRainbow.length).toBeGreaterThan(0);
       expect(data.serverLabelSet.labelSetId).toBe("test-label-set-id");
       expect(data.serverLabelSet.highestLabelSetVersion).toBe(0);
     });

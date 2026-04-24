@@ -30,7 +30,7 @@ export function invariant_ensRainbowCompatibilityWithEnsIndexer(
     ctx.issues.push({
       code: "custom",
       input: ctx.value,
-      message: `ENSRainbow's label set (id: ${serverLabelSet.labelSetId}) must be the same as the ENSIndexer's label set (id: ${clientLabelSet.labelSetId}).`,
+      message: `ENSRainbow's label set (id: ${serverLabelSet.labelSetId}) must be the same as ENSIndexer's label set (id: ${clientLabelSet.labelSetId}).`,
     });
   }
 

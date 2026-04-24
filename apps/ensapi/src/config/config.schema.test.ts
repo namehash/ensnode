@@ -42,8 +42,10 @@ const ENSINDEXER_PUBLIC_CONFIG = {
   namespace: "mainnet",
   ensIndexerSchemaName: "ensindexer_0",
   ensRainbowPublicConfig: {
-    version: packageJson.version,
     serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+    versionInfo: {
+      ensRainbow: packageJson.version,
+    },
   },
   indexedChainIds: new Set([1]),
   isSubgraphCompatible: false,

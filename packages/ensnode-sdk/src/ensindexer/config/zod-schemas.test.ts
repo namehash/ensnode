@@ -141,10 +141,12 @@ describe("ENSIndexer: Config", () => {
       it("validates ENSRainbow label set and version compatibility", () => {
         const baseConfig = {
           ensRainbowPublicConfig: {
-            version: "0.32.0",
             serverLabelSet: {
               labelSetId: "subgraph",
               highestLabelSetVersion: 0,
+            },
+            versionInfo: {
+              ensRainbow: "0.32.0",
             },
           },
           indexedChainIds: [1], // Use array for serialized config
@@ -190,10 +192,12 @@ describe("ENSIndexer: Config", () => {
       it("can parse full ENSIndexerPublicConfig with label set", () => {
         const validConfig = {
           ensRainbowPublicConfig: {
-            version: "0.32.0",
             serverLabelSet: {
               labelSetId: "subgraph",
               highestLabelSetVersion: 0,
+            },
+            versionInfo: {
+              ensRainbow: "0.32.0",
             },
           },
           clientLabelSet: {

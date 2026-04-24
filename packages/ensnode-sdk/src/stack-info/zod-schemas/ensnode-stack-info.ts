@@ -36,12 +36,12 @@ function invariant_ensApiCompatibilityWithEnsIndexerAndEnsRainbow(
   }
 
   // Invariant: ENSApi & ENSRainbow must match version numbers
-  if (ensRainbow.version !== ensApi.versionInfo.ensApi) {
+  if (ensRainbow.versionInfo.ensRainbow !== ensApi.versionInfo.ensApi) {
     ctx.issues.push({
       code: "custom",
-      path: ["ensRainbow.version"],
-      input: ensRainbow.version,
-      message: `Version Mismatch: ENSRainbow@${ensRainbow.version} !== ENSApi@${ensApi.versionInfo.ensApi}`,
+      path: ["ensRainbow.versionInfo.ensRainbow"],
+      input: ensRainbow.versionInfo.ensRainbow,
+      message: `Version Mismatch: ENSRainbow@${ensRainbow.versionInfo.ensRainbow} !== ENSApi@${ensApi.versionInfo.ensApi}`,
     });
   }
 

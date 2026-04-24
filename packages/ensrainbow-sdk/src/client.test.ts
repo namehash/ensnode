@@ -274,10 +274,12 @@ describe("EnsRainbowApiClient", () => {
   describe("config", () => {
     it("should request /v1/config and return public config on success", async () => {
       const configData: EnsRainbow.ENSRainbowPublicConfig = {
-        version: "2.0.0",
         serverLabelSet: {
           labelSetId: "subgraph",
           highestLabelSetVersion: 5,
+        },
+        versionInfo: {
+          ensRainbow: "2.0.0",
         },
       };
 
