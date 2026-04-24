@@ -23,20 +23,22 @@ export function invariant_ensRainbowCompatibilityWithEnsIndexer(
   ctx: ZodCheckFnInput<EnsIndexerStackInfo>,
 ) {
   const { ensIndexer, ensRainbow } = ctx.value;
+  const { clientLabelSet } = ensIndexer;
+  const { serverLabelSet } = ensRainbow;
 
-  if (ensIndexer.clientLabelSet.labelSetId !== ensRainbow.labelSet.labelSetId) {
+  if (clientLabelSet.labelSetId !== serverLabelSet.labelSetId) {
     ctx.issues.push({
       code: "custom",
       input: ctx.value,
-      message: `ENSRainbow's label set (id: ${ensRainbow.labelSet.labelSetId}) must be the same as the ENSIndexer's label set (id: ${ensIndexer.clientLabelSet.labelSetId}).`,
+      message: `ENSRainbow's label set (id: ${serverLabelSet.labelSetId}) must be the same as the ENSIndexer's label set (id: ${clientLabelSet.labelSetId}).`,
     });
   }
 
-  if (ensIndexer.clientLabelSet.labelSetVersion > ensRainbow.labelSet.highestLabelSetVersion) {
+  if (clientLabelSet.labelSetVersion > serverLabelSet.highestLabelSetVersion) {
     ctx.issues.push({
       code: "custom",
       input: ctx.value,
-      message: `ENSRainbow's server label set version (highest: ${ensRainbow.labelSet.highestLabelSetVersion}) must be greater than or equal to ENSIndexer's client label set version (current: ${ensIndexer.clientLabelSet.labelSetVersion}).`,
+      message: `ENSRainbow's server label set version (highest: ${serverLabelSet.highestLabelSetVersion}) must be greater than or equal to ENSIndexer's client label set version (current: ${clientLabelSet.labelSetVersion}).`,
     });
   }
 }

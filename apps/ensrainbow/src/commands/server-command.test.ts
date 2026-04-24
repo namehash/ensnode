@@ -167,8 +167,8 @@ describe("Server Command Tests", () => {
 
       expect(typeof data.version).toBe("string");
       expect(data.version.length).toBeGreaterThan(0);
-      expect(data.labelSet.labelSetId).toBe("test-label-set-id");
-      expect(data.labelSet.highestLabelSetVersion).toBe(0);
+      expect(data.serverLabelSet.labelSetId).toBe("test-label-set-id");
+      expect(data.serverLabelSet.highestLabelSetVersion).toBe(0);
       // Config is built on startup with count = 0, so it returns the startup value
       expect(data.recordsCount).toBe(0);
     });
@@ -184,8 +184,8 @@ describe("Server Command Tests", () => {
 
       expect(typeof data.version).toBe("string");
       expect(data.version.length).toBeGreaterThan(0);
-      expect(data.labelSet.labelSetId).toBe("test-label-set-id");
-      expect(data.labelSet.highestLabelSetVersion).toBe(0);
+      expect(data.serverLabelSet.labelSetId).toBe("test-label-set-id");
+      expect(data.serverLabelSet.highestLabelSetVersion).toBe(0);
       // Config is built on startup with count = 0, so changing the DB doesn't affect it
       expect(data.recordsCount).toBe(0);
     });

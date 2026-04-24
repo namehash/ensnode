@@ -29,7 +29,7 @@ export async function buildDbConfig(server: ENSRainbowServer): Promise<DbConfig>
   }
 
   return {
-    labelSet: server.serverLabelSet,
+    serverLabelSet: server.serverLabelSet,
     recordsCount: countResult.count,
   };
 }

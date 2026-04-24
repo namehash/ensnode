@@ -7,7 +7,7 @@ import type { DbConfig } from "./types";
 export function buildEnsRainbowPublicConfig(dbConfig: DbConfig): EnsRainbow.ENSRainbowPublicConfig {
   return {
     version: packageJson.version,
-    labelSet: dbConfig.labelSet,
+    serverLabelSet: dbConfig.serverLabelSet,
     recordsCount: dbConfig.recordsCount,
   };
 }

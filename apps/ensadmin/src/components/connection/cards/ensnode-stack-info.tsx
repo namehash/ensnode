@@ -609,8 +609,8 @@ function EnsNodeStackInfoCardContent({ ensNodeStackInfo }: { ensNodeStackInfo: E
             label="Server LabelSet"
             value={
               <p className={cardItemValueStyles}>
-                {ensRainbowPublicConfig.labelSet.labelSetId}:
-                {ensRainbowPublicConfig.labelSet.highestLabelSetVersion}
+                {ensRainbowPublicConfig.serverLabelSet.labelSetId}:
+                {ensRainbowPublicConfig.serverLabelSet.highestLabelSetVersion}
               </p>
             }
             additionalInfo={

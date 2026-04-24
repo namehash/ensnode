@@ -385,7 +385,7 @@ describe("parseDataDirFromCli", () => {
 
 describe("buildEnsRainbowPublicConfig", () => {
   const dbConfig: DbConfig = {
-    labelSet: {
+    serverLabelSet: {
       labelSetId: "subgraph",
       highestLabelSetVersion: 0,
     },
@@ -397,7 +397,7 @@ describe("buildEnsRainbowPublicConfig", () => {
 
     expect(result).toStrictEqual({
       version: packageJson.version,
-      labelSet: dbConfig.labelSet,
+      serverLabelSet: dbConfig.serverLabelSet,
       recordsCount: dbConfig.recordsCount,
     });
   });

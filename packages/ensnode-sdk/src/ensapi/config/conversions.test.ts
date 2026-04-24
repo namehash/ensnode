@@ -22,7 +22,7 @@ const MOCK_ENSAPI_PUBLIC_CONFIG = {
     ensIndexerSchemaName: "ensindexer_0",
     ensRainbowPublicConfig: {
       version: "0.36.0",
-      labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+      serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
       recordsCount: 100,
     },
     indexedChainIds: new Set([1]),
@@ -59,7 +59,7 @@ describe("ENSApi Config Serialization/Deserialization", () => {
           ensIndexerSchemaName: "ensindexer_0",
           ensRainbowPublicConfig: {
             version: "0.36.0",
-            labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+            serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
             recordsCount: 100,
           },
           indexedChainIds: [1],

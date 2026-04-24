@@ -8,7 +8,6 @@
  */
 import { z } from "zod/v4";
 
-import type { EnsRainbowClientLabelSet, EnsRainbowServerLabelSet } from "../../ensrainbow/types";
 import {
   makeEnsRainbowPublicConfigSchema,
   makeLabelSetIdSchema,
@@ -138,9 +137,8 @@ export function invariant_isSubgraphCompatibleRequirements(
 export function invariant_ensRainbowSupportedLabelSetAndVersion(
   ctx: ZodCheckFnInput<Pick<EnsIndexerPublicConfig, "clientLabelSet" | "ensRainbowPublicConfig">>,
 ) {
-  const clientLabelSet = ctx.value.clientLabelSet satisfies EnsRainbowClientLabelSet;
-  const serverLabelSet = ctx.value.ensRainbowPublicConfig
-    .labelSet satisfies EnsRainbowServerLabelSet;
+  const { clientLabelSet } = ctx.value;
+  const { serverLabelSet } = ctx.value.ensRainbowPublicConfig;
 
   try {
     validateSupportedLabelSetAndVersion(serverLabelSet, clientLabelSet);

@@ -32,7 +32,7 @@ const serializedEnsIndexerPublicConfig = {
   ensIndexerSchemaName: "alphaSchema1.9.0",
   ensRainbowPublicConfig: {
     version: "1.9.0",
-    labelSet: {
+    serverLabelSet: {
       labelSetId: "subgraph",
       highestLabelSetVersion: 0,
     },

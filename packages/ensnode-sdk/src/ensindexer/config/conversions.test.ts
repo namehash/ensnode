@@ -13,7 +13,7 @@ describe("ENSIndexer: Config", () => {
         ensIndexerSchemaName: "ensindexer_0",
         ensRainbowPublicConfig: {
           version: "0.32.0",
-          labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+          serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
           recordsCount: 100,
         },
         clientLabelSet: {
@@ -55,7 +55,7 @@ describe("ENSIndexer: Config", () => {
       ensIndexerSchemaName: "ensindexer_0",
       ensRainbowPublicConfig: {
         version: "0.32.0",
-        labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+        serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
         recordsCount: 100,
       },
       clientLabelSet: {

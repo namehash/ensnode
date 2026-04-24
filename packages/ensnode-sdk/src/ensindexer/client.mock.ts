@@ -16,7 +16,7 @@ export const configResponseMock = {
   ensIndexerSchemaName: "alphaSchema0.31.0",
   ensRainbowPublicConfig: {
     version: "0.31.0",
-    labelSet: {
+    serverLabelSet: {
       labelSetId: "subgraph",
       highestLabelSetVersion: 0,
     },

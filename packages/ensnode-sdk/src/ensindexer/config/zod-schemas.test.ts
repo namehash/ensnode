@@ -142,7 +142,7 @@ describe("ENSIndexer: Config", () => {
         const baseConfig = {
           ensRainbowPublicConfig: {
             version: "0.32.0",
-            labelSet: {
+            serverLabelSet: {
               labelSetId: "subgraph",
               highestLabelSetVersion: 0,
             },
@@ -192,7 +192,7 @@ describe("ENSIndexer: Config", () => {
         const validConfig = {
           ensRainbowPublicConfig: {
             version: "0.32.0",
-            labelSet: {
+            serverLabelSet: {
               labelSetId: "subgraph",
               highestLabelSetVersion: 0,
             },

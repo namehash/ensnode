@@ -43,7 +43,7 @@ const ENSINDEXER_PUBLIC_CONFIG = {
   ensIndexerSchemaName: "ensindexer_0",
   ensRainbowPublicConfig: {
     version: packageJson.version,
-    labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+    serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
     recordsCount: 100,
   },
   indexedChainIds: new Set([1]),

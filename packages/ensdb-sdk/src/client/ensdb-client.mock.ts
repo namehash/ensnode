@@ -27,7 +27,7 @@ export const publicConfig = {
   ensIndexerSchemaName,
   ensRainbowPublicConfig: {
     version: "0.32.0",
-    labelSet: {
+    serverLabelSet: {
       labelSetId: "subgraph",
       highestLabelSetVersion: 0,
     },

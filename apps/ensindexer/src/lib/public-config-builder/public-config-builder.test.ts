@@ -52,7 +52,7 @@ import { getEnsIndexerVersion, getPackageVersion } from "@/lib/version-info";
 // Test fixtures
 const mockEnsRainbowConfig: EnsRainbowPublicConfig = {
   version: "1.0.0",
-  labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+  serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
   recordsCount: 1000,
 };
 
@@ -208,7 +208,7 @@ describe("PublicConfigBuilder", () => {
 
       const customEnsRainbowConfig: EnsRainbowPublicConfig = {
         version: "1.0.0",
-        labelSet: { labelSetId: "custom", highestLabelSetVersion: 1 },
+        serverLabelSet: { labelSetId: "custom", highestLabelSetVersion: 1 },
         recordsCount: 2000,
       };
 
