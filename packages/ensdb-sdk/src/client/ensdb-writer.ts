@@ -41,31 +41,19 @@ export class EnsDbWriter extends EnsDbReader {
    * @throws error when migration execution fails.
    */
   async migrateEnsNodeSchema(migrationsDirPath: string): Promise<void> {
-    // Acquire advisory lock to only allow one ENSIndexer instance to execute
-    // migrations at a time across all ENSIndexer instances that share
-    // the same ENSDb instance.
-    await this.drizzleClient.execute(sql`SELECT pg_advisory_lock(${this.MIGRATION_LOCK_ID})`);
-
-    try {
-      // Run any pending migrations for ENSNode Schema.
-      // If there were any pending migrations that have not been run before,
-      // they will be executed by the ENSIndexer instance that acquired the lock,
-      // while other instances will wait for the lock to be released before
-      // they can run migrations, but since the function is idempotent,
-      // they will simply skip running any migrations that have already been run
-      // by the first ENSIndexer instance.
-      await migrate(this.drizzleClient, {
+    // `pg_advisory_xact_lock` is transaction-scoped, and is automatically released
+    // when the transaction ends, with no explicit unlock needed. Running it inside
+    // a Drizzle transaction also guarantees that the lock acquisition, all
+    // migration queries, and the lock release all run on the same physical
+    // connection — which is required for advisory locks to work correctly with a
+    // connection pool.
+    await this.drizzleClient.transaction(async (tx) => {
+      await tx.execute(sql`SELECT pg_advisory_xact_lock(${this.MIGRATION_LOCK_ID})`);
+      await migrate(tx, {
         migrationsFolder: migrationsDirPath,
         migrationsSchema: "ensnode",
       });
-    } finally {
-      // Release advisory lock after migrations execution is completed,
-      // regardless of success or failure, to prevent deadlocks.
-      // Note: this is optional since Postgres automatically releases
-      // all advisory locks held by a session when it ends, but it's
-      // a good practice to release locks as soon as they're no longer needed.
-      await this.drizzleClient.execute(sql`SELECT pg_advisory_unlock(${this.MIGRATION_LOCK_ID})`);
-    }
+    });
   }
 
   /**
