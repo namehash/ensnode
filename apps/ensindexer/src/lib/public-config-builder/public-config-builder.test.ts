@@ -228,9 +228,49 @@ describe("PublicConfigBuilder", () => {
       expect(result).toBe(customConfig);
       expect(result.isSubgraphCompatible).toBe(false);
     });
+
+    it("awaits readiness before fetching ENSRainbow config", async () => {
+      const callOrder: string[] = [];
+      const ensRainbowClientMock = {
+        config: vi.fn().mockImplementation(async () => {
+          callOrder.push("config");
+          return mockEnsRainbowConfig;
+        }),
+      } as unknown as EnsRainbow.ApiClient;
+      const waitForReady = vi.fn().mockImplementation(async () => {
+        callOrder.push("wait");
+      });
+
+      setupStandardMocks();
+      const mockPublicConfig = createMockPublicConfig();
+      vi.mocked(validateEnsIndexerPublicConfig).mockReturnValue(mockPublicConfig);
+
+      const builder = new PublicConfigBuilder(ensRainbowClientMock, waitForReady);
+      const result = await builder.getPublicConfig();
+
+      expect(waitForReady).toHaveBeenCalledTimes(1);
+      expect(ensRainbowClientMock.config).toHaveBeenCalledTimes(1);
+      expect(callOrder).toEqual(["wait", "config"]);
+      expect(result).toBe(mockPublicConfig);
+    });
   });
 
   describe("getPublicConfig() - error handling", () => {
+    it("throws when readiness check fails and does not call config()", async () => {
+      const readinessError = new Error("ENSRainbow not ready");
+      const ensRainbowClientMock = {
+        config: vi.fn(),
+      } as unknown as EnsRainbow.ApiClient;
+      const waitForReady = vi.fn().mockRejectedValue(readinessError);
+
+      const builder = new PublicConfigBuilder(ensRainbowClientMock, waitForReady);
+
+      await expect(builder.getPublicConfig()).rejects.toThrow(readinessError);
+      expect(waitForReady).toHaveBeenCalledTimes(1);
+      expect(ensRainbowClientMock.config).not.toHaveBeenCalled();
+      expect(validateEnsIndexerPublicConfig).not.toHaveBeenCalled();
+    });
+
     it("throws when ENSRainbow client config() fails", async () => {
       // Arrange
       const ensRainbowError = new Error("ENSRainbow service unavailable");

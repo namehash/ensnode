@@ -12,16 +12,42 @@ import {
 } from "@ensnode/ensnode-sdk";
 import { type EnsRainbow, ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk";
 
-import type { ENSRainbowServer } from "@/lib/server";
+import { DbNotReadyError, type ENSRainbowServer } from "@/lib/server";
 import { getErrorMessage } from "@/utils/error-utils";
 import { logger } from "@/utils/logger";
 
 /**
+ * Supplier of the current public config for the API.
+ *
+ * Returns `null` while the server is still bootstrapping its database. Once the database is
+ * attached, the supplier returns the final `ENSRainbowPublicConfig` (cached by the caller).
+ */
+export type PublicConfigSupplier = () => EnsRainbow.ENSRainbowPublicConfig | null;
+
+/**
+ * Shared 503 response body for endpoints that require the database to be ready.
+ */
+const BOOTSTRAPPING_MESSAGE = "ENSRainbow is still bootstrapping its database";
+
+function buildServiceUnavailableBody(
+  message: string = BOOTSTRAPPING_MESSAGE,
+): EnsRainbow.ServiceUnavailableError {
+  return {
+    status: StatusCode.Error,
+    error: message,
+    errorCode: ErrorCode.ServiceUnavailable,
+  };
+}
+
+/**
  * Creates and configures the ENS Rainbow API routes.
+ *
+ * When `publicConfigSupplier` returns `null`, routes that depend on the database respond with
+ * HTTP 503 so that clients polling `/ready` can wait for the bootstrap to complete.
  */
 export function createApi(
   server: ENSRainbowServer,
-  publicConfig: EnsRainbow.ENSRainbowPublicConfig,
+  publicConfigSupplier: PublicConfigSupplier,
 ): Hono {
   const api = new Hono();
 
@@ -37,6 +63,10 @@ export function createApi(
   );
 
   api.get("/v1/heal/:labelhash", async (c: HonoContext) => {
+    if (!server.isReady()) {
+      return c.json(buildServiceUnavailableBody(), ErrorCode.ServiceUnavailable);
+    }
+
     const labelhash = c.req.param("labelhash") as `0x${string}`;
 
     const labelSetVersionParam = c.req.query("label_set_version");
@@ -77,8 +107,16 @@ export function createApi(
       );
     }
 
-    const result = await server.heal(labelhash, clientLabelSet);
-    return c.json(result, result.errorCode);
+    try {
+      const result = await server.heal(labelhash, clientLabelSet);
+      return c.json(result, result.errorCode);
+    } catch (error) {
+      // Handle readiness races during shutdown.
+      if (error instanceof DbNotReadyError) {
+        return c.json(buildServiceUnavailableBody(), ErrorCode.ServiceUnavailable);
+      }
+      throw error;
+    }
   });
 
   api.get("/health", (c: HonoContext) => {
@@ -86,7 +124,21 @@ export function createApi(
     return c.json(result);
   });
 
+  api.get("/ready", (c: HonoContext) => {
+    // Require both DB attach and config publication to avoid a transient false-ready state.
+    if (!server.isReady() || publicConfigSupplier() === null) {
+      return c.json(buildServiceUnavailableBody(), ErrorCode.ServiceUnavailable);
+    }
+    const result: EnsRainbow.ReadyResponse = { status: "ok" };
+    return c.json(result);
+  });
+
   api.get("/v1/labels/count", (c: HonoContext) => {
+    const publicConfig = publicConfigSupplier();
+    if (publicConfig === null) {
+      return c.json(buildServiceUnavailableBody(), ErrorCode.ServiceUnavailable);
+    }
+
     const countResponse: EnsRainbow.CountSuccess = {
       status: StatusCode.Success,
       count: publicConfig.recordsCount,
@@ -96,6 +148,10 @@ export function createApi(
   });
 
   api.get("/v1/config", (c: HonoContext) => {
+    const publicConfig = publicConfigSupplier();
+    if (publicConfig === null) {
+      return c.json(buildServiceUnavailableBody(), ErrorCode.ServiceUnavailable);
+    }
     return c.json(publicConfig);
   });
 

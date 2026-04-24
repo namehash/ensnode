@@ -258,6 +258,9 @@ describe("EnsRainbowApiClient", () => {
 
   it("should return a positive health check", async () => {
     mockFetch.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      statusText: "OK",
       json: () =>
         Promise.resolve({
           status: "ok",
@@ -269,6 +272,36 @@ describe("EnsRainbowApiClient", () => {
     expect(response).toEqual({
       status: "ok",
     } satisfies EnsRainbow.HealthResponse);
+  });
+
+  describe("ready", () => {
+    it("should resolve when the server is ready (HTTP 200)", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: () =>
+          Promise.resolve({
+            status: "ok",
+          } satisfies EnsRainbow.ReadyResponse),
+      });
+
+      const response = await client.ready();
+
+      expect(mockFetch).toHaveBeenCalledWith(new URL("/ready", DEFAULT_ENSRAINBOW_URL));
+      expect(response).toEqual({
+        status: "ok",
+      } satisfies EnsRainbow.ReadyResponse);
+    });
+
+    it("should throw when the server is not ready yet (HTTP 503)", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 503,
+        statusText: "Service Unavailable",
+      });
+
+      await expect(client.ready()).rejects.toThrow(/503/);
+    });
   });
 
   describe("config", () => {
@@ -377,6 +410,16 @@ describe("HealResponse cacheability", () => {
       status: StatusCode.Error,
       error: "Server error",
       errorCode: ErrorCode.ServerError,
+    };
+
+    expect(isCacheableHealResponse(response)).toBe(false);
+  });
+
+  it("should consider HealServiceUnavailableError responses not cacheable", async () => {
+    const response: EnsRainbow.HealServiceUnavailableError = {
+      status: StatusCode.Error,
+      error: "ENSRainbow is still bootstrapping its database",
+      errorCode: ErrorCode.ServiceUnavailable,
     };
 
     expect(isCacheableHealResponse(response)).toBe(false);
