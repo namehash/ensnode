@@ -53,7 +53,6 @@ import { getEnsIndexerVersion, getPackageVersion } from "@/lib/version-info";
 const mockEnsRainbowConfig: EnsRainbowPublicConfig = {
   version: "1.0.0",
   serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
-  recordsCount: 1000,
 };
 
 const mockVersionInfo: EnsIndexerVersionInfo = {
@@ -209,7 +208,6 @@ describe("PublicConfigBuilder", () => {
       const customEnsRainbowConfig: EnsRainbowPublicConfig = {
         version: "1.0.0",
         serverLabelSet: { labelSetId: "custom", highestLabelSetVersion: 1 },
-        recordsCount: 2000,
       };
 
       const ensRainbowClientMock = {

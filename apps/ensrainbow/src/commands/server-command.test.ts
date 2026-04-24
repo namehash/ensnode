@@ -35,7 +35,7 @@ describe("Server Command Tests", () => {
       const ensRainbowServer = await ENSRainbowServer.init(db);
       const dbConfig = await buildDbConfig(ensRainbowServer);
       const publicConfig = buildEnsRainbowPublicConfig(dbConfig);
-      app = createApi(ensRainbowServer, publicConfig);
+      app = createApi(ensRainbowServer, publicConfig, dbConfig);
 
       // Start the server on a different port than what ENSRainbow defaults to
       server = serve({
@@ -144,17 +144,6 @@ describe("Server Command Tests", () => {
       expect(data).toEqual(expectedData);
       expect(() => new Date(data.timestamp as string)).not.toThrow();
     });
-
-    it("should match recordsCount in /v1/config", async () => {
-      const [countRes, configRes] = await Promise.all([
-        fetch(`http://localhost:${nonDefaultPort}/v1/labels/count`),
-        fetch(`http://localhost:${nonDefaultPort}/v1/config`),
-      ]);
-      const countData = (await countRes.json()) as EnsRainbow.CountSuccess;
-      const configData = (await configRes.json()) as EnsRainbow.ENSRainbowPublicConfig;
-      expect(countData.status).toBe(StatusCode.Success);
-      expect(countData.count).toBe(configData.recordsCount);
-    });
   });
 
   describe("GET /v1/config", () => {
@@ -169,8 +158,6 @@ describe("Server Command Tests", () => {
       expect(data.version.length).toBeGreaterThan(0);
       expect(data.serverLabelSet.labelSetId).toBe("test-label-set-id");
       expect(data.serverLabelSet.highestLabelSetVersion).toBe(0);
-      // Config is built on startup with count = 0, so it returns the startup value
-      expect(data.recordsCount).toBe(0);
     });
 
     it("should return same config even if database count changes", async () => {
@@ -186,8 +173,6 @@ describe("Server Command Tests", () => {
       expect(data.version.length).toBeGreaterThan(0);
       expect(data.serverLabelSet.labelSetId).toBe("test-label-set-id");
       expect(data.serverLabelSet.highestLabelSetVersion).toBe(0);
-      // Config is built on startup with count = 0, so changing the DB doesn't affect it
-      expect(data.recordsCount).toBe(0);
     });
   });
 

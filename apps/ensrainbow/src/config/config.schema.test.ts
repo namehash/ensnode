@@ -398,7 +398,6 @@ describe("buildEnsRainbowPublicConfig", () => {
     expect(result).toStrictEqual({
       version: packageJson.version,
       serverLabelSet: dbConfig.serverLabelSet,
-      recordsCount: dbConfig.recordsCount,
     });
   });
 });

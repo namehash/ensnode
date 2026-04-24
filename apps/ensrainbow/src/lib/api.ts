@@ -12,6 +12,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 import { type EnsRainbow, ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk";
 
+import type { DbConfig } from "@/config/types";
 import type { ENSRainbowServer } from "@/lib/server";
 import { getErrorMessage } from "@/utils/error-utils";
 import { logger } from "@/utils/logger";
@@ -22,6 +23,7 @@ import { logger } from "@/utils/logger";
 export function createApi(
   server: ENSRainbowServer,
   publicConfig: EnsRainbow.ENSRainbowPublicConfig,
+  dbConfig: DbConfig,
 ): Hono {
   const api = new Hono();
 
@@ -89,7 +91,7 @@ export function createApi(
   api.get("/v1/labels/count", (c: HonoContext) => {
     const countResponse: EnsRainbow.CountSuccess = {
       status: StatusCode.Success,
-      count: publicConfig.recordsCount,
+      count: dbConfig.recordsCount,
       timestamp: new Date().toISOString(),
     };
     return c.json(countResponse);

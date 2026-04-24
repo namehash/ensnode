@@ -52,5 +52,4 @@ export const makeEnsRainbowPublicConfigSchema = (valueLabel: string = "EnsRainbo
         `${valueLabel}.serverLabelSet.highestLabelSetVersion`,
       ),
     }),
-    recordsCount: makeNonNegativeIntegerSchema(`${valueLabel}.recordsCount`),
   });

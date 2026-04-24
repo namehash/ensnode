@@ -146,7 +146,6 @@ describe("ENSIndexer: Config", () => {
               labelSetId: "subgraph",
               highestLabelSetVersion: 0,
             },
-            recordsCount: 100,
           },
           indexedChainIds: [1], // Use array for serialized config
           isSubgraphCompatible: false, // Set to false to bypass isSubgraphCompatible invariant
@@ -196,7 +195,6 @@ describe("ENSIndexer: Config", () => {
               labelSetId: "subgraph",
               highestLabelSetVersion: 0,
             },
-            recordsCount: 100,
           },
           clientLabelSet: {
             labelSetId: "subgraph",

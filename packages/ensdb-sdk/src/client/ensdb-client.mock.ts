@@ -31,7 +31,6 @@ export const publicConfig = {
       labelSetId: "subgraph",
       highestLabelSetVersion: 0,
     },
-    recordsCount: 100,
   },
   clientLabelSet: {
     labelSetId: "subgraph",

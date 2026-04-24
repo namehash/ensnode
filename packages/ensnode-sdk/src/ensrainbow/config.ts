@@ -18,9 +18,4 @@ export interface EnsRainbowPublicConfig {
    * The label set reference managed by the ENSRainbow server.
    */
   serverLabelSet: EnsRainbowServerLabelSet;
-
-  /**
-   * The total count of records managed by the ENSRainbow service.
-   */
-  recordsCount: number;
 }

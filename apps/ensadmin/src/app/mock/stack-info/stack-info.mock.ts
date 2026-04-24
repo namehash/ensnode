@@ -38,7 +38,6 @@ const COMMON_ENSRAINBOW_CONFIG = {
     labelSetId: "subgraph",
     highestLabelSetVersion: 0,
   },
-  recordsCount: 100,
 } as const;
 
 const THE_GRAPH_FALLBACK_DISABLED: TheGraphFallback = {
@@ -219,7 +218,6 @@ function createDeserializationErrorVariant(): SerializedEnsNodeStackInfo {
             labelSetId: "",
             highestLabelSetVersion: -1,
           },
-          recordsCount: -1,
         },
       },
     },
@@ -246,7 +244,6 @@ function createDeserializationErrorVariant(): SerializedEnsNodeStackInfo {
           labelSetId: "",
           highestLabelSetVersion: -1,
         },
-        recordsCount: -1,
       },
     },
     ensRainbow: {
@@ -255,7 +252,6 @@ function createDeserializationErrorVariant(): SerializedEnsNodeStackInfo {
         labelSetId: "",
         highestLabelSetVersion: -1,
       },
-      recordsCount: -1,
     },
   };
 }

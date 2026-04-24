@@ -20,7 +20,6 @@ export const configResponseMock = {
       labelSetId: "subgraph",
       highestLabelSetVersion: 0,
     },
-    recordsCount: 100,
   },
   isSubgraphCompatible: false,
   namespace: "mainnet",

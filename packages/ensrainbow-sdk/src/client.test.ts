@@ -279,7 +279,6 @@ describe("EnsRainbowApiClient", () => {
           labelSetId: "subgraph",
           highestLabelSetVersion: 5,
         },
-        recordsCount: 133856894,
       };
 
       mockFetch.mockResolvedValueOnce({

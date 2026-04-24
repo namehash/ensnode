@@ -624,25 +624,6 @@ function EnsNodeStackInfoCardContent({ ensNodeStackInfo }: { ensNodeStackInfo: E
               </p>
             }
           />
-
-          <InfoCardItem
-            label="Records Count"
-            value={
-              <p className={cardItemValueStyles}>
-                {ensRainbowPublicConfig.recordsCount.toLocaleString()}
-              </p>
-            }
-            additionalInfo={
-              <p>
-                The total number of Rainbow Records.{" "}
-                <ExternalLinkWithIcon
-                  href={`https://ensnode.io/ensrainbow/concepts/glossary#rainbow-record`}
-                >
-                  Learn more.
-                </ExternalLinkWithIcon>
-              </p>
-            }
-          />
         </InfoCardItems>
       </InfoCard>
     </div>
