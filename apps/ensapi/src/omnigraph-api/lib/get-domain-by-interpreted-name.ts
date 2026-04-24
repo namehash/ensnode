@@ -4,31 +4,20 @@ import { trace } from "@opentelemetry/api";
 import { Param, sql } from "drizzle-orm";
 import {
   type DomainId,
-  type ENSv2DomainId,
   type InterpretedName,
   interpretedLabelsToLabelHashPath,
   interpretedNameToInterpretedLabels,
-  type LabelHash,
-  makeENSv1DomainId,
-  namehashInterpretedName,
   type RegistryId,
 } from "enssdk";
 
-import { maybeGetENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
+import { getRootRegistryIds, maybeGetENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
-import { lazy } from "@/lib/lazy";
 import { makeLogger } from "@/lib/logger";
-
-// lazy() defers construction until first use so that this module can be
-// imported without env vars being present (e.g. during OpenAPI generation).
-const _maybeGetENSv2RootRegistryId = lazy(() => maybeGetENSv2RootRegistryId(config.namespace));
 
 const tracer = trace.getTracer("get-domain-by-interpreted-name");
 const logger = makeLogger("get-domain-by-interpreted-name");
-const v1Logger = makeLogger("get-domain-by-interpreted-name:v1");
-const v2Logger = makeLogger("get-domain-by-interpreted-name:v2");
 
 /**
  * Domain lookup by Interpreted Name via forward traversal of the namegraph.
@@ -67,47 +56,35 @@ export async function getDomainIdByInterpretedName(
   name: InterpretedName,
 ): Promise<DomainId | null> {
   return withActiveSpanAsync(tracer, "getDomainIdByInterpretedName", { name }, async () => {
-    // Domains addressable in v2 are preferred, but v1 lookups are cheap, so just do them both ahead of time
-    const rootRegistryId = _maybeGetENSv2RootRegistryId();
+    // Traverse from every top-level Root Registry in parallel. ENSv1 is multi-rooted on disk —
+    // each concrete ENSv1Registry (ENSRoot, Basenames, Lineanames) owns its own subtree and is
+    // not linked to the others at the indexed-namegraph level.
+    const roots = getRootRegistryIds(config.namespace);
+    const v2Root = maybeGetENSv2RootRegistryId(config.namespace);
 
-    const [v1DomainId, v2DomainId] = await Promise.all([
-      withActiveSpanAsync(tracer, "v1_getDomainId", {}, () =>
-        v1_getDomainIdByInterpretedName(name),
+    const results = await Promise.all(
+      roots.map((root) =>
+        withActiveSpanAsync(tracer, "traverseFromRoot", { root }, () =>
+          traverseFromRoot(root, name),
+        ),
       ),
-      // only resolve v2Domain if ENSv2 Root Registry is defined
-      rootRegistryId
-        ? withActiveSpanAsync(tracer, "v2_getDomainId", {}, () =>
-            v2_getDomainIdByInterpretedName(rootRegistryId, name),
-          )
-        : null,
-    ]);
+    );
 
-    logger.debug({ v1DomainId, v2DomainId });
+    logger.debug({ roots, results });
 
-    // prefer v2Domain over v1Domain
-    return v2DomainId || v1DomainId || null;
+    // prefer the v2 Root's result when present, otherwise the first non-null hit from any v1 root.
+    const v2Index = v2Root ? roots.indexOf(v2Root) : -1;
+    const v2Hit = v2Index >= 0 ? results[v2Index] : null;
+    // TODO: need to implement some resolution logic here to correctly choose which v1 domain ?
+    // i.e. differentiating between bridge.linea.eth on L1 and bridge.linea.eth on L2 requires Bridged Resolver logic...
+    return v2Hit ?? results.find((r): r is DomainId => r !== null) ?? null;
   });
 }
 
 /**
- * Retrieves the ENSv1DomainId for the provided `name`, if exists.
+ * Forward-traverses the namegraph from `rootRegistryId` to retrieve the DomainId addressed by `name`.
  */
-async function v1_getDomainIdByInterpretedName(name: InterpretedName): Promise<DomainId | null> {
-  const domainId = makeENSv1DomainId(namehashInterpretedName(name));
-
-  const domain = await ensDb.query.v1Domain.findFirst({ where: (t, { eq }) => eq(t.id, domainId) });
-  const exists = domain !== undefined;
-
-  v1Logger.debug({ domainId, exists });
-
-  return exists ? domainId : null;
-}
-
-/**
- * Forward-traverses the ENSv2 namegraph from the specified root in order to identify the Domain
- * addressed by `name`.
- */
-async function v2_getDomainIdByInterpretedName(
+async function traverseFromRoot(
   rootRegistryId: RegistryId,
   name: InterpretedName,
 ): Promise<DomainId | null> {
@@ -116,28 +93,22 @@ async function v2_getDomainIdByInterpretedName(
   // https://github.com/drizzle-team/drizzle-orm/issues/1289#issuecomment-2688581070
   const rawLabelHashPathArray = sql`${new Param(labelHashPath)}::text[]`;
 
-  // TODO: need to join latest registration and confirm that it's not expired, if expired should treat the domain as not existing
-
   const result = await ensDb.execute(sql`
     WITH RECURSIVE path AS (
       SELECT
-        r.id AS registry_id,
+        ${rootRegistryId}::text AS next_registry_id,
         NULL::text AS domain_id,
-        NULL::text AS label_hash,
         0 AS depth
-      FROM ${ensIndexerSchema.registry} r
-      WHERE r.id = ${rootRegistryId}
 
       UNION ALL
 
       SELECT
-        d.subregistry_id AS registry_id,
+        d.subregistry_id AS next_registry_id,
         d.id AS domain_id,
-        d.label_hash,
         path.depth + 1
       FROM path
-      JOIN ${ensIndexerSchema.v2Domain} d
-        ON d.registry_id = path.registry_id
+      JOIN ${ensIndexerSchema.domain} d
+        ON d.registry_id = path.next_registry_id
       WHERE d.label_hash = (${rawLabelHashPathArray})[path.depth + 1]
         AND path.depth + 1 <= array_length(${rawLabelHashPathArray}, 1)
     )
@@ -147,30 +118,13 @@ async function v2_getDomainIdByInterpretedName(
     ORDER BY depth;
   `);
 
-  // couldn't for the life of me figure out how to type this result this correctly within drizzle...
-  const rows = result.rows as {
-    registry_id: RegistryId;
-    domain_id: ENSv2DomainId;
-    label_hash: LabelHash;
-    depth: number;
-  }[];
+  const rows = result.rows as { domain_id: DomainId; depth: number }[];
 
-  // this was a query for a TLD and it does not exist within the ENSv2 namegraph
-  if (rows.length === 0) {
-    v2Logger.debug({ labelHashPath, rows });
-    return null;
-  }
+  if (rows.length === 0) return null;
 
   // biome-ignore lint/style/noNonNullAssertion: length check above
   const leaf = rows[rows.length - 1]!;
-
-  // the v2Domain was found iff there is an exact match within the ENSv2 namegraph
   const exact = rows.length === labelHashPath.length;
 
-  v2Logger.debug({ labelHashPath, rows, exact });
-
-  if (exact) return leaf.domain_id;
-
-  // otherwise, the v2 domain was not found
-  return null;
+  return exact ? leaf.domain_id : null;
 }

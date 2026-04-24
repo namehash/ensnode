@@ -120,8 +120,9 @@ export default function () {
 
     // otherwise is transfer of existing registration
 
+    const { registry } = getManagedName(getThisAccountId(context, event));
     // the NameWrapper's ERC1155 TokenIds are the ENSv1Domain's Node so we `interpretTokenIdAsNode`
-    const domainId = makeENSv1DomainId(interpretTokenIdAsNode(tokenId));
+    const domainId = makeENSv1DomainId(registry, interpretTokenIdAsNode(tokenId));
     const registration = await getLatestRegistration(context, domainId);
     const isExpired = registration && isRegistrationExpired(registration, event.block.timestamp);
 
@@ -169,7 +170,8 @@ export default function () {
       const registrant = owner;
 
       const registrar = getThisAccountId(context, event);
-      const domainId = makeENSv1DomainId(node);
+      const { node: managedNode, registry } = getManagedName(registrar);
+      const domainId = makeENSv1DomainId(registry, node);
 
       // decode name and discover labels
       try {
@@ -191,8 +193,6 @@ export default function () {
 
       // handle wraps of direct-subname-of-registrar-managed-names
       if (registration && !isFullyExpired && registration.type === "BaseRegistrar") {
-        const { node: managedNode } = getManagedName(getThisAccountId(context, event));
-
         // Invariant: Emitted name is a direct subname of the Managed Name
         if (!isDirectSubnameOfManagedName(managedNode, name, node)) {
           throw new Error(
@@ -279,7 +279,8 @@ export default function () {
     }) => {
       const { node } = event.args;
 
-      const domainId = makeENSv1DomainId(node);
+      const { registry } = getManagedName(getThisAccountId(context, event));
+      const domainId = makeENSv1DomainId(registry, node);
       const registration = await getLatestRegistration(context, domainId);
 
       if (!registration) {
@@ -321,7 +322,8 @@ export default function () {
     }) => {
       const { node, fuses } = event.args;
 
-      const domainId = makeENSv1DomainId(node);
+      const { registry } = getManagedName(getThisAccountId(context, event));
+      const domainId = makeENSv1DomainId(registry, node);
       const registration = await getLatestRegistration(context, domainId);
 
       // Invariant: must have a Registration
@@ -357,7 +359,8 @@ export default function () {
       const { node, expiry: _expiry } = event.args;
       const expiry = interpretExpiry(_expiry);
 
-      const domainId = makeENSv1DomainId(node);
+      const { registry } = getManagedName(getThisAccountId(context, event));
+      const domainId = makeENSv1DomainId(registry, node);
       const registration = await getLatestRegistration(context, domainId);
 
       // Invariant: must have Registration

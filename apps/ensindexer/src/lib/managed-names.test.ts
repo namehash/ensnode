@@ -37,6 +37,12 @@ const controller = getDatasourceContract(
   "LegacyEthRegistrarController",
 );
 
+const ensv1Registry = getDatasourceContract(
+  ENSNamespaceIds.Mainnet,
+  DatasourceNames.ENSRoot,
+  "ENSv1Registry",
+);
+
 describe("managed-names", () => {
   beforeEach(() => {
     vi.resetAllMocks();
@@ -48,19 +54,23 @@ describe("managed-names", () => {
     it("should cache the result of viem#namehash", () => {
       expect(spy.mock.calls).toHaveLength(0);
 
-      expect(getManagedName(registrar)).toStrictEqual({ name: "eth", node: ETH_NODE });
+      expect(getManagedName(registrar)).toMatchObject({ name: "eth", node: ETH_NODE });
 
       // first call should invoke namehash
       expect(spy.mock.calls).toHaveLength(1);
 
-      expect(getManagedName(controller)).toStrictEqual({ name: "eth", node: ETH_NODE });
+      expect(getManagedName(controller)).toMatchObject({ name: "eth", node: ETH_NODE });
 
       // second call should not invoke namehash
       expect(spy.mock.calls).toHaveLength(1);
     });
 
-    it("should return the managed name and node for the BaseRegistrar contract", () => {
-      expect(getManagedName(registrar)).toStrictEqual({ name: "eth", node: ETH_NODE });
+    it("should return the managed name, node, and registry for the BaseRegistrar contract", () => {
+      expect(getManagedName(registrar)).toStrictEqual({
+        name: "eth",
+        node: ETH_NODE,
+        registry: ensv1Registry,
+      });
     });
 
     it("should throw an error for a contract without a managed name", () => {

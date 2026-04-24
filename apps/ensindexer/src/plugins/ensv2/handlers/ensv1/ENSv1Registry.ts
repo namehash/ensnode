@@ -5,6 +5,8 @@ import {
   ENS_ROOT_NODE,
   type LabelHash,
   makeENSv1DomainId,
+  makeENSv1RegistryId,
+  makeENSv1VirtualRegistryId,
   makeSubdomainNode,
   type Node,
   type NormalizedAddress,
@@ -13,15 +15,17 @@ import { isAddressEqual, zeroAddress } from "viem";
 
 import { getENSRootChainId, interpretAddress, PluginName } from "@ensnode/ensnode-sdk";
 
-import { materializeENSv1DomainEffectiveOwner } from "@/lib/ensv2/domain-db-helpers";
+import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { ensureDomainEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel, ensureUnknownLabel } from "@/lib/ensv2/label-db-helpers";
+import { getThisAccountId } from "@/lib/get-this-account-id";
 import { healAddrReverseSubnameLabel } from "@/lib/heal-addr-reverse-subname-label";
 import {
   addOnchainEventListener,
   ensIndexerSchema,
   type IndexingEngineContext,
 } from "@/lib/indexing-engines/ponder";
+import { getManagedName } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import { nodeIsMigrated } from "@/lib/protocol-acceleration/registry-migration-status";
@@ -29,7 +33,7 @@ import { nodeIsMigrated } from "@/lib/protocol-acceleration/registry-migration-s
 const pluginName = PluginName.ENSv2;
 
 /**
- * Handler functions for ENSv1 Regsitry contracts.
+ * Handler functions for ENSv1 Registry contracts.
  * - piggybacks Protocol Resolution plugin's Node Migration status
  */
 export default function () {
@@ -54,10 +58,86 @@ export default function () {
     // if someone mints a node to the zero address, nothing happens in the Registry, so no-op
     if (isAddressEqual(zeroAddress, owner)) return;
 
-    const node = makeSubdomainNode(labelHash, parentNode);
-    const domainId = makeENSv1DomainId(node);
-    const parentId = makeENSv1DomainId(parentNode);
+    // NOTE: Canonicalize ENSv1Registry vs. ENSv1RegistryOld via `getManagedName(...).registry`.
+    // Both Registries share a Managed Name (the ENS Root for mainnet) and write into the same
+    // namegraph; canonicalizing here ensures Old events that pass `nodeIsMigrated` don't fragment
+    // domains across two Registry IDs. This is why we use getManagedName over just `getThisAccountId`.
+    const { registry } = getManagedName(getThisAccountId(context, event));
+    const concreteRegistryId = makeENSv1RegistryId(registry);
 
+    const isTLD = parentNode === ENS_ROOT_NODE;
+    const node = makeSubdomainNode(labelHash, parentNode);
+    const domainId = makeENSv1DomainId(registry, node);
+
+    // this ENSv1Domain's (parent) Registry is either:
+    // a) if this is a TLD, the (concrete) ENSv1Registry identified by (chainId, address), or
+    // b) the ENSv1VirtualRegistry identified by (chainId, address, parentNode)
+    const parentRegistryId = isTLD
+      ? concreteRegistryId
+      : makeENSv1VirtualRegistryId(registry, parentNode);
+
+    // this ENSv1Domain's (sub) Registry is always an ENSv1VirtualRegistry identified by
+    // (chainId, address, node)
+    const subregistryId = makeENSv1VirtualRegistryId(registry, node);
+
+    // ensure (concrete) ENSv1Registry
+    // Optimization: only if the following is a TLD (reduces the db calls that would be useless if
+    // we ran this on _every_ NewOwner event)
+    if (isTLD) {
+      await context.ensDb
+        .insert(ensIndexerSchema.registry)
+        .values({ id: concreteRegistryId, type: "ENSv1Registry", ...registry })
+        .onConflictDoNothing();
+    }
+
+    // every ENSv1 Domain receives a virtual registry w/ Canonical Domain reference
+    // NOTE: we eagerly upsert the ENSv1VirtualRegistry here, rather than lazily on child name creation
+    // to pay the cost per-parent-domain-event rather than per-child-domain(s)-events
+    await context.ensDb
+      .insert(ensIndexerSchema.registry)
+      .values({
+        id: subregistryId,
+        type: "ENSv1VirtualRegistry",
+        chainId: registry.chainId,
+        address: registry.address,
+        node,
+      })
+      .onConflictDoNothing();
+
+    // ensure Canonical Domain reference
+    await context.ensDb
+      .insert(ensIndexerSchema.registryCanonicalDomain)
+      .values({ registryId: subregistryId, domainId })
+      .onConflictDoNothing();
+
+    const ownerId = interpretAddress(owner);
+    await ensureAccount(context, owner);
+
+    // upsert domain
+    await context.ensDb
+      .insert(ensIndexerSchema.domain)
+      .values({
+        id: domainId,
+        type: "ENSv1Domain",
+        registryId: parentRegistryId,
+        node,
+        labelHash,
+        // NOTE: the inclusion of ownerId here 'inlines' the logic of `materializeENSv1DomainEffectiveOwner`,
+        // saving a single db op in a hot path (lots of NewOwner events, unsurprisingly!)
+        //
+        // NOTE: despite Domain.ownerId being materialized from other sources of truth (i.e. Registrars
+        // like BaseRegistrars & NameWrapper) it's ok to always set it here because the Registrar-emitted
+        // events occur _after_ the Registry events. So when a name is registered, for example, the Registry's
+        // owner changes to that of the NameWrapper but then the NameWrapper emits NameWrapped, and this
+        // indexing code re-materializes the Domain.ownerId to the NameWrapper-emitted value.
+        ownerId,
+        rootRegistryOwnerId: ownerId,
+        subregistryId,
+      })
+      .onConflictDoUpdate({ ownerId, rootRegistryOwnerId: ownerId });
+
+    // Label Healing
+    //
     // If this is a direct subname of addr.reverse, we have 100% on-chain label discovery.
     //
     // Note: Per ENSIP-19, only the ENS Root chain may record primary names under the `addr.reverse`
@@ -76,25 +156,6 @@ export default function () {
       await ensureUnknownLabel(context, labelHash);
     }
 
-    // upsert domain
-    await context.ensDb
-      .insert(ensIndexerSchema.v1Domain)
-      .values({ id: domainId, parentId, labelHash })
-      .onConflictDoNothing();
-
-    // update rootRegistryOwner
-    await context.ensDb
-      .update(ensIndexerSchema.v1Domain, { id: domainId })
-      .set({ rootRegistryOwnerId: interpretAddress(owner) });
-
-    // materialize domain owner
-    // NOTE: despite Domain.ownerId being materialized from other sources of truth (i.e. Registrars
-    // like BaseRegistrars & NameWrapper) it's ok to always set it here because the Registrar-emitted
-    // events occur _after_ the Registry events. So when a name is registered, for example, the Registry's
-    // owner changes to that of the NameWrapper but then the NameWrapper emits NameWrapped, and this
-    // indexing code re-materializes the Domain.ownerId to the NameWraper-emitted value.
-    await materializeENSv1DomainEffectiveOwner(context, domainId, owner);
-
     // push event to domain history
     await ensureDomainEvent(context, event, domainId);
   }
@@ -111,20 +172,21 @@ export default function () {
     // ENSv2 model does not include root node, no-op
     if (node === ENS_ROOT_NODE) return;
 
-    const domainId = makeENSv1DomainId(node);
+    const { registry } = getManagedName(getThisAccountId(context, event));
+    const domainId = makeENSv1DomainId(registry, node);
 
-    // set the domain's rootRegistryOwner to `owner`
-    await context.ensDb
-      .update(ensIndexerSchema.v1Domain, { id: domainId })
-      .set({ rootRegistryOwnerId: interpretAddress(owner) });
+    const ownerId = interpretAddress(owner);
+    await ensureAccount(context, owner);
 
-    // materialize domain owner
+    // update domain, setting ownerId and rootRegistryOwner to the new owner
     // NOTE: despite Domain.ownerId being materialized from other sources of truth (i.e. Registrars
     // like BaseRegistrars & NameWrapper) it's ok to always set it here because the Registrar-emitted
     // events occur _after_ the Registry events. So when a name is wrapped, for example, the Registry's
     // owner changes to that of the NameWrapper but then the NameWrapper emits NameWrapped, and this
-    // indexing code re-materializes the Domain.ownerId to the NameWraper-emitted value.
-    await materializeENSv1DomainEffectiveOwner(context, domainId, owner);
+    // indexing code re-materializes the Domain.ownerId to the NameWrapper-emitted value.
+    await context.ensDb
+      .update(ensIndexerSchema.domain, { id: domainId })
+      .set({ ownerId, rootRegistryOwnerId: ownerId });
 
     // push event to domain history
     await ensureDomainEvent(context, event, domainId);
@@ -138,10 +200,12 @@ export default function () {
     event: EventWithArgs<{ node: Node }>;
   }) {
     const { node } = event.args;
-    const domainId = makeENSv1DomainId(node);
 
     // ENSv2 model does not include root node, no-op
     if (node === ENS_ROOT_NODE) return;
+
+    const { registry } = getManagedName(getThisAccountId(context, event));
+    const domainId = makeENSv1DomainId(registry, node);
 
     // push event to domain history
     await ensureDomainEvent(context, event, domainId);
@@ -155,10 +219,12 @@ export default function () {
     event: EventWithArgs<{ node: Node }>;
   }) {
     const { node } = event.args;
-    const domainId = makeENSv1DomainId(node);
 
     // ENSv2 model does not include root node, no-op
     if (node === ENS_ROOT_NODE) return;
+
+    const { registry } = getManagedName(getThisAccountId(context, event));
+    const domainId = makeENSv1DomainId(registry, node);
 
     // NOTE: Domain-Resolver relations are handled by the protocol-acceleration plugin and are not
     // directly indexed here

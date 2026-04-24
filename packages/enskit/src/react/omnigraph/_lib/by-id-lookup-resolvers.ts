@@ -2,8 +2,8 @@ import type { Cache, ResolveInfo, Resolver, Variables } from "@urql/exchange-gra
 import {
   type AccountId,
   type Address,
+  makeConcreteRegistryId,
   makePermissionsId,
-  makeRegistryId,
   makeResolverId,
   type PermissionsId,
   type RegistryId,
@@ -43,8 +43,22 @@ export const byIdLookupResolvers: Record<string, Record<string, Resolver>> = {
     registry(parent, args, cache, info) {
       const by = args.by as { id?: RegistryId; contract?: AccountId };
 
-      if (by.id) return { __typename: "Registry", id: by.id };
-      if (by.contract) return { __typename: "Registry", id: makeRegistryId(by.contract) };
+      // see if we have an ENSv1VirtualRegistry by id
+      if (by.id !== undefined) {
+        const virtualKey = cache.keyOfEntity({ __typename: "ENSv1VirtualRegistry", id: by.id });
+        if (virtualKey && cache.resolve(virtualKey, "id")) return virtualKey;
+      }
+
+      // otherwise, fall back to concrete by id or contract
+
+      const id = by.id ?? (by.contract ? makeConcreteRegistryId(by.contract) : undefined);
+      if (id) {
+        const v1Key = cache.keyOfEntity({ __typename: "ENSv1Registry", id });
+        if (v1Key && cache.resolve(v1Key, "id")) return v1Key;
+
+        const v2Key = cache.keyOfEntity({ __typename: "ENSv2Registry", id });
+        if (v2Key && cache.resolve(v2Key, "id")) return v2Key;
+      }
 
       return passthrough(args, cache, info);
     },
