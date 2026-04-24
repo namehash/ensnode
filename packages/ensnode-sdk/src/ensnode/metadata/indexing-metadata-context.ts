@@ -10,13 +10,13 @@ export const IndexingMetadataContextStatusCodes = {
    * Represents that the no indexing metadata context has been initialized
    * for the ENSIndexer Schema Name in the ENSNode Metadata table in ENSDb.
    */
-  Uninitialized: "Uninitialized",
+  Uninitialized: "uninitialized",
 
   /**
    * Represents that the indexing metadata context has been initialized
    * for the ENSIndexer Schema Name in the ENSNode Metadata table in ENSDb.
    */
-  Initialized: "Initialized",
+  Initialized: "initialized",
 } as const;
 
 /**
