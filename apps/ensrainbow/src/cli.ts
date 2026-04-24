@@ -32,9 +32,9 @@ export interface CLIOptions {
 /**
  * yargs-parsed argument shape for the `entrypoint` command.
  *
- * `label-set-id` and `label-set-version` are coerced to their branded types via
- * `buildLabelSetId` / `buildLabelSetVersion`, so the CLI layer works with primitive types
- * and hands branded values to {@link entrypointCommand}.
+ * This interface represents the post-coercion values consumed by the handler.
+ * Runtime coercion is performed by yargs via `buildLabelSetId` and
+ * `buildLabelSetVersion`.
  */
 interface EntrypointCommandCliArgs {
   port: number;

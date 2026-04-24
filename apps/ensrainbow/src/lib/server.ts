@@ -242,12 +242,8 @@ export class ENSRainbowServer {
   /**
    * Closes the attached database (if any). Safe to call on a pending server.
    *
-   * Flips readiness (`this.db`/`this._serverLabelSet` → `undefined`) BEFORE awaiting the
-   * underlying DB close so concurrent handlers checking `isReady()` or calling `requireDb()`
-   * see the "not ready" state immediately and don't obtain a handle to a DB that is being
-   * torn down. Handlers already past `requireDb()` still hold their local reference, but new
-   * ones get a clean `DbNotReadyError` (mapped to 503 at the API layer) instead of racing
-   * LevelDB mid-close.
+   * Resets readiness before awaiting DB close so new handlers fail fast with
+   * `DbNotReadyError` instead of racing an in-progress teardown.
    */
   async close(): Promise<void> {
     const capturedDb = this.db;

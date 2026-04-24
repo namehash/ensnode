@@ -40,8 +40,8 @@ let waitForEnsRainbowToBeReadyPromise: Promise<void> | undefined;
  *
  * Note: It may take 30+ minutes for the ENSRainbow instance to become ready in
  * a cold start scenario. We use retries with a fixed interval between attempts
- * for the ENSRainbow health check to allow for ample time for ENSRainbow to
- * become ready.
+ * for the ENSRainbow readiness check to allow for ample time for bootstrap to
+ * complete.
  *
  * @throws When ENSRainbow fails to become ready after all configured retry attempts.
  *         This error will trigger termination of the ENSIndexer process.

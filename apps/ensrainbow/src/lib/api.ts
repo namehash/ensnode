@@ -111,8 +111,7 @@ export function createApi(
       const result = await server.heal(labelhash, clientLabelSet);
       return c.json(result, result.errorCode);
     } catch (error) {
-      // Handles the race where isReady() was true at route entry but the server transitioned
-      // out of ready (e.g. during shutdown).
+      // Handle readiness races during shutdown.
       if (error instanceof DbNotReadyError) {
         return c.json(buildServiceUnavailableBody(), ErrorCode.ServiceUnavailable);
       }
@@ -126,11 +125,7 @@ export function createApi(
   });
 
   api.get("/ready", (c: HonoContext) => {
-    // Require both the database to be attached AND the public config to be populated so that
-    // `/ready === 200` is a true gate for `/v1/heal`, `/v1/labels/count`, and `/v1/config`.
-    // Without the publicConfigSupplier check there is a brief window inside the entrypoint
-    // bootstrap where attachDb() has flipped isReady() to true but cachedPublicConfig is still
-    // null, so /ready would report ok while /v1/config still returns 503.
+    // Require both DB attach and config publication to avoid a transient false-ready state.
     if (!server.isReady() || publicConfigSupplier() === null) {
       return c.json(buildServiceUnavailableBody(), ErrorCode.ServiceUnavailable);
     }

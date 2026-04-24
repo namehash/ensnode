@@ -53,14 +53,12 @@ export interface EntrypointCommandOptions {
 }
 
 /**
- * Handle returned by {@link entrypointCommand} so callers (tests, embeddings) can close the
- * HTTP server and DB, and observe when the background bootstrap pipeline has finished.
+ * Handle returned by {@link entrypointCommand}.
  */
 export interface EntrypointCommandHandle {
   /**
-   * Resolves once the background bootstrap has either completed successfully or been aborted
-   * during shutdown. Never rejects: on non-abort failure the process is terminated via
-   * `process.exit(1)`.
+   * Resolves when bootstrap finishes or is aborted by shutdown.
+   * Never rejects: non-abort failures terminate the process via `process.exit(1)`.
    */
   readonly bootstrapComplete: Promise<void>;
   /**
@@ -77,17 +75,7 @@ export interface EntrypointCommandHandle {
 export const DB_READY_MARKER_FILENAME = "ensrainbow_db_ready";
 
 /**
- * Runs the full ENSRainbow container lifecycle:
- *
- * 1. Starts the Hono HTTP server immediately with an unattached database (so `/health` and
- *    `/ready` respond right away, and orchestrator health checks don't kill the container).
- * 2. Schedules a background bootstrap via `setTimeout(..., 0)` that downloads the pre-built
- *    database archive, extracts it, validates it (lite), opens LevelDB, and attaches it to the
- *    server. Any failure in this pipeline calls `process.exit(1)` so the orchestrator restarts
- *    the container.
- * 3. Wires SIGTERM/SIGINT handlers for graceful shutdown. On shutdown the bootstrap is aborted
- *    (spawned children are killed and any partially-opened LevelDB handle is released) before
- *    the HTTP server and DB-backed server are closed, so we don't leak locks or prolong exit.
+ * Starts HTTP immediately, bootstraps DB in the background, and wires graceful shutdown.
  */
 export async function entrypointCommand(
   options: EntrypointCommandOptions,
@@ -110,13 +98,10 @@ export async function entrypointCommand(
     port: options.port,
   });
 
-  // Shared between close() and the bootstrap pipeline. `close()` aborts this to kill any
-  // in-flight spawned child processes and make the bootstrap bail out as soon as possible.
+  // Shared abort signal for `close()` and bootstrap work.
   const bootstrapAborter = new AbortController();
 
-  // Resolves as soon as the bootstrap task has settled (success, failure, or abort). Used by
-  // close() to wait for cleanup of in-flight children and partially-opened DB handles before
-  // returning. Distinct from `bootstrapComplete`, which only resolves on successful bootstrap.
+  // Tracks bootstrap task settlement so `close()` can await cleanup.
   let signalBootstrapSettled!: () => void;
   const bootstrapSettled = new Promise<void>((resolvePromise) => {
     signalBootstrapSettled = resolvePromise;
@@ -129,9 +114,7 @@ export async function entrypointCommand(
     logger.info("Shutting down server...");
     bootstrapAborter.abort();
     try {
-      // Wait for the bootstrap pipeline to settle (including spawned child cleanup and any
-      // partially-opened DB being closed) before shutting down the HTTP server and DB, so
-      // we don't leave child processes or LevelDB locks behind.
+      // Wait for bootstrap cleanup before closing shared resources.
       await bootstrapSettled;
       await closeHttpServer(httpServer);
       await ensRainbowServer.close();
@@ -144,8 +127,7 @@ export async function entrypointCommand(
 
   if (options.registerSignalHandlers !== false) {
     const closeFromSignal = () => {
-      // Node does not await signal handlers; never allow shutdown errors to become
-      // unhandled promise rejections during process teardown.
+      // Node does not await signal handlers; swallow errors to avoid unhandled rejections.
       void close().catch(() => {});
     };
 
@@ -154,7 +136,7 @@ export async function entrypointCommand(
   }
 
   const bootstrapComplete = new Promise<void>((resolvePromise) => {
-    // Schedule the bootstrap on the next tick so the HTTP server can accept connections first.
+    // Defer bootstrap so the HTTP server starts accepting requests first.
     setTimeout(() => {
       runDbBootstrap(options, ensRainbowServer, bootstrapAborter.signal)
         .then((publicConfig) => {
@@ -183,14 +165,10 @@ export async function entrypointCommand(
 }
 
 /**
- * Full database bootstrap pipeline. Idempotent: if the marker file already exists and the
- * on-disk database passes lite validation, the download and extraction steps are skipped.
+ * Idempotent DB bootstrap pipeline.
  *
- * Honors `signal`: between steps we check for abort and, if a DB has been opened but not yet
- * attached to the server, close it so the LevelDB lock is released promptly. Once the DB is
- * attached to `ensRainbowServer`, its close is owned by `ENSRainbowServer.close()`.
- *
- * @returns the `ENSRainbowPublicConfig` for the attached database.
+ * If marker + DB are present, reuse them; otherwise download + extract.
+ * Returns the public config for the attached DB.
  */
 async function runDbBootstrap(
   options: EntrypointCommandOptions,
@@ -208,8 +186,7 @@ async function runDbBootstrap(
     logger.info(
       `Found existing ENSRainbow marker at ${markerFile}; attempting to open existing database at ${dbSubdir}`,
     );
-    // Track the opened DB and whether ownership has transferred to the server so the catch
-    // block below can release the correct resources before falling back to re-download.
+    // Track DB ownership so cleanup chooses the correct close path.
     let existingDb: ENSRainbowDB | undefined;
     let existingDbAttached = false;
     try {
@@ -226,11 +203,7 @@ async function runDbBootstrap(
       if (error instanceof BootstrapAbortedError || signal.aborted) {
         throw error;
       }
-      // Release the DB handle (so the LevelDB LOCK is freed before we re-extract into the
-      // same path), and wipe the stale on-disk files so the tar re-extraction starts from a
-      // clean state. If attach succeeded, ownership has transferred to the server, so route
-      // the close through `ensRainbowServer.close()` which also resets its internal state so
-      // the re-downloaded DB can be re-attached below.
+      // Ensure LevelDB lock is released before fallback re-extract.
       if (existingDbAttached) {
         try {
           await ensRainbowServer.close();
@@ -248,7 +221,7 @@ async function runDbBootstrap(
         error,
         "Existing ENSRainbow database failed to open or validate; re-downloading from scratch",
       );
-      // Fall through to re-download below.
+      // Fall through to re-download.
     }
   }
 
@@ -279,7 +252,7 @@ async function runDbBootstrap(
       throw new BootstrapAbortedError();
     }
 
-    // Write marker after a successful attach so restarts can skip the download step.
+    // Write marker only after a successful attach.
     await writeFile(markerFile, "");
 
     return buildEnsRainbowPublicConfig(await buildDbConfig(ensRainbowServer));
@@ -327,7 +300,7 @@ interface DownloadAndExtractParams {
 async function downloadAndExtractDatabase(params: DownloadAndExtractParams): Promise<void> {
   const { dataDir, dbSchemaVersion, labelSetId, labelSetVersion, downloadTempDir, signal } = params;
 
-  // Clean up any stale state from a previous aborted bootstrap attempt.
+  // Clean stale state from previous aborted attempts.
   rmSync(downloadTempDir, { recursive: true, force: true });
   mkdirSync(downloadTempDir, { recursive: true });
 
@@ -362,8 +335,7 @@ async function downloadAndExtractDatabase(params: DownloadAndExtractParams): Pro
 
   logger.info(`Extracting ${archivePath} into ${dataDir}`);
   mkdirSync(dataDir, { recursive: true });
-  // If a previous bootstrap attempt was aborted mid-extraction, tar won't remove already-written
-  // files and a partial database can remain permanently corrupt. Clear the target before extract.
+  // Ensure extraction target is clean; tar does not delete stale partial files.
   const dbSubdir = join(dataDir, `data-${labelSetId}_${labelSetVersion}`);
   rmSync(dbSubdir, { recursive: true, force: true });
   await spawnChild("tar", ["-xzf", archivePath, "-C", dataDir, "--strip-components=1"], {}, signal);
@@ -376,15 +348,11 @@ export const __TESTING__ = {
 };
 
 /**
- * Resolve the absolute path to `download-prebuilt-database.sh`.
- *
- * The compiled command lives at `apps/ensrainbow/src/commands/entrypoint-command.ts` in source
- * and at `dist/commands/entrypoint-command.js` at runtime; in both cases the sibling `scripts`
- * directory is two levels up.
+ * Resolve absolute path to `download-prebuilt-database.sh`.
  */
 function resolveDownloadScriptPath(): string {
   const here = dirname(fileURLToPath(import.meta.url));
-  // From `src/commands/` or `dist/commands/` go up two levels to reach the app root.
+  // From `src/commands` or `dist/commands`, go up two levels to app root.
   return resolve(here, "..", "..", "scripts", "download-prebuilt-database.sh");
 }
 
@@ -405,9 +373,7 @@ function spawnChild(
       env: { ...process.env, ...extraEnv },
     });
 
-    // On abort: send SIGTERM for a graceful exit, and escalate to SIGKILL after a grace period
-    // if the child is still alive. The `unref`'d timeout ensures we don't hold the event loop
-    // open if the child exits cleanly before the grace period elapses.
+    // On abort: SIGTERM first, then SIGKILL after a grace period.
     let killTimer: NodeJS.Timeout | undefined;
     const onAbort = () => {
       if (child.exitCode !== null || child.signalCode !== null) return;
