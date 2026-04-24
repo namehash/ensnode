@@ -322,4 +322,82 @@ describe("Ponder Client", () => {
       });
     });
   });
+
+  describe("getAbortSignal getter", () => {
+    it("invokes getAbortSignal on every fetch and forwards the signal", async () => {
+      // Arrange
+      mockFetch.mockResolvedValue(new Response(null, { status: 200 }));
+      const signal = new AbortController().signal;
+      const getAbortSignal = vi.fn(() => signal);
+      const ponderClient = new PonderClient(new URL("http://localhost:3000"), getAbortSignal);
+
+      // Act
+      await ponderClient.health();
+      await ponderClient.health();
+
+      // Assert
+      expect(getAbortSignal).toHaveBeenCalledTimes(2);
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+      expect(mockFetch).toHaveBeenNthCalledWith(1, expect.any(URL), { signal });
+      expect(mockFetch).toHaveBeenNthCalledWith(2, expect.any(URL), { signal });
+    });
+
+    it("re-reads the signal between fetches so callers get fresh identity", async () => {
+      // Arrange
+      mockFetch.mockResolvedValue(new Response(null, { status: 200 }));
+      const firstSignal = new AbortController().signal;
+      const secondSignal = new AbortController().signal;
+      const getAbortSignal = vi
+        .fn<() => AbortSignal | undefined>()
+        .mockReturnValueOnce(firstSignal)
+        .mockReturnValueOnce(secondSignal);
+      const ponderClient = new PonderClient(new URL("http://localhost:3000"), getAbortSignal);
+
+      // Act
+      await ponderClient.health();
+      await ponderClient.health();
+
+      // Assert
+      expect(mockFetch).toHaveBeenNthCalledWith(1, expect.any(URL), { signal: firstSignal });
+      expect(mockFetch).toHaveBeenNthCalledWith(2, expect.any(URL), { signal: secondSignal });
+    });
+
+    it("aborting the signal cancels in-flight fetches", async () => {
+      // Arrange
+      const abortController = new AbortController();
+      mockFetch.mockImplementation(
+        (_input, init) =>
+          new Promise((_resolve, reject) => {
+            init?.signal?.addEventListener("abort", () => {
+              const error = new Error("aborted");
+              error.name = "AbortError";
+              reject(error);
+            });
+          }),
+      );
+      const ponderClient = new PonderClient(
+        new URL("http://localhost:3000"),
+        () => abortController.signal,
+      );
+
+      // Act
+      const pending = ponderClient.health();
+      abortController.abort();
+
+      // Assert
+      await expect(pending).rejects.toThrowError(/aborted/);
+    });
+
+    it("treats getAbortSignal as optional (undefined signal → no abort)", async () => {
+      // Arrange
+      mockFetch.mockResolvedValueOnce(new Response(null, { status: 200 }));
+      const ponderClient = new PonderClient(new URL("http://localhost:3000"));
+
+      // Act
+      await ponderClient.health();
+
+      // Assert
+      expect(mockFetch).toHaveBeenCalledWith(expect.any(URL), { signal: undefined });
+    });
+  });
 });

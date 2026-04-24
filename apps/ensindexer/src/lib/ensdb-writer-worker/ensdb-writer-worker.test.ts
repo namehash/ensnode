@@ -78,7 +78,7 @@ describe("EnsDbWriterWorker", () => {
       );
 
       // cleanup
-      worker.stop();
+      await worker.stop();
     });
 
     it("throws when stored config is incompatible", async () => {
@@ -129,7 +129,7 @@ describe("EnsDbWriterWorker", () => {
       expect(ensDbClient.upsertEnsIndexerPublicConfig).toHaveBeenCalledWith(mockPublicConfig);
 
       // cleanup
-      worker.stop();
+      await worker.stop();
     });
 
     it("throws error when worker is already running", async () => {
@@ -143,7 +143,7 @@ describe("EnsDbWriterWorker", () => {
       await expect(worker.run()).rejects.toThrow("EnsDbWriterWorker is already running");
 
       // cleanup
-      worker.stop();
+      await worker.stop();
     });
 
     it("throws error when config fetch fails", async () => {
@@ -193,7 +193,7 @@ describe("EnsDbWriterWorker", () => {
       expect(publicConfigBuilder.getPublicConfig).toHaveBeenCalledTimes(1);
 
       // cleanup
-      worker.stop();
+      await worker.stop();
     });
 
     it("calls pRetry for config fetch with retry logic", async () => {
@@ -213,7 +213,7 @@ describe("EnsDbWriterWorker", () => {
       expect(ensDbClient.upsertEnsIndexerPublicConfig).toHaveBeenCalledWith(mockPublicConfig);
 
       // cleanup
-      worker.stop();
+      await worker.stop();
     });
   });
 
@@ -230,7 +230,7 @@ describe("EnsDbWriterWorker", () => {
 
       const callCountBeforeStop = upsertIndexingStatusSnapshot.mock.calls.length;
 
-      worker.stop();
+      await worker.stop();
 
       // advance time after stop
       await vi.advanceTimersByTimeAsync(2000);
@@ -255,7 +255,7 @@ describe("EnsDbWriterWorker", () => {
       expect(worker.isRunning).toBe(true);
 
       // act - stop worker
-      worker.stop();
+      await worker.stop();
 
       // assert - not running after stop
       expect(worker.isRunning).toBe(false);
@@ -303,7 +303,7 @@ describe("EnsDbWriterWorker", () => {
       expect(ensDbClient.upsertIndexingStatusSnapshot).toHaveBeenCalledWith(crossChainSnapshot);
 
       // cleanup
-      worker.stop();
+      await worker.stop();
     });
 
     it("recovers from errors and continues upserting snapshots", async () => {
@@ -361,7 +361,72 @@ describe("EnsDbWriterWorker", () => {
       expect(ensDbClient.upsertIndexingStatusSnapshot).toHaveBeenCalledTimes(3);
 
       // cleanup
-      worker.stop();
+      await worker.stop();
+    });
+  });
+
+  describe("cancellation - stopRequested and skip-overlap", () => {
+    it("stop() during run() startup causes run() to reject with AbortError", async () => {
+      // arrange — make upsertEnsDbVersion block until we release it
+      let resolveUpsert!: () => void;
+      const upsertPromise = new Promise<void>((resolve) => {
+        resolveUpsert = resolve;
+      });
+      const ensDbClient = createMockEnsDbWriter({
+        upsertEnsDbVersion: vi.fn().mockReturnValue(upsertPromise),
+      });
+      const worker = createMockEnsDbWriterWorker({ ensDbClient });
+
+      // act — start run, then stop while it's blocked on upsertEnsDbVersion
+      const runPromise = worker.run();
+      await worker.stop();
+      resolveUpsert();
+
+      // assert — run rejects with AbortError
+      await expect(runPromise).rejects.toThrow("Worker stop requested");
+
+      // the interval was never armed
+      expect(worker.isRunning).toBe(false);
+    });
+
+    it("skips overlapping snapshot ticks when a prior upsert is still in flight", async () => {
+      // arrange — make upsertIndexingStatusSnapshot block until released
+      let resolveSnapshot!: () => void;
+      const snapshotPromise = new Promise<void>((resolve) => {
+        resolveSnapshot = resolve;
+      });
+      const omnichainSnapshot = createMockOmnichainSnapshot();
+      const crossChainSnapshot = createMockCrossChainSnapshot({ omnichainSnapshot });
+      vi.mocked(buildCrossChainIndexingStatusSnapshotOmnichain).mockReturnValue(crossChainSnapshot);
+
+      const ensDbClient = createMockEnsDbWriter({
+        upsertIndexingStatusSnapshot: vi.fn().mockReturnValueOnce(snapshotPromise),
+      });
+      const worker = createMockEnsDbWriterWorker({
+        ensDbClient,
+        indexingStatusBuilder: createMockIndexingStatusBuilder(omnichainSnapshot),
+      });
+
+      await worker.run();
+
+      // act — first tick starts the slow upsert
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(ensDbClient.upsertIndexingStatusSnapshot).toHaveBeenCalledTimes(1);
+
+      // second + third ticks should be skipped (still in flight)
+      await vi.advanceTimersByTimeAsync(2000);
+      expect(ensDbClient.upsertIndexingStatusSnapshot).toHaveBeenCalledTimes(1);
+
+      // release the slow upsert
+      resolveSnapshot();
+      await vi.advanceTimersByTimeAsync(0);
+
+      // next tick should fire again
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(ensDbClient.upsertIndexingStatusSnapshot).toHaveBeenCalledTimes(2);
+
+      // cleanup
+      await worker.stop();
     });
   });
 });

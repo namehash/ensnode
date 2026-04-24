@@ -1,7 +1,7 @@
 import type { BlockNumberRangeWithStartBlock } from "./blockrange";
 import type { CachedPublicClient } from "./cached-public-client";
 import type { ChainId, ChainIdString } from "./chains";
-import { PonderClient } from "./client";
+import { type AbortSignalGetter, PonderClient } from "./client";
 import { deserializeChainId } from "./deserialize/chains";
 import {
   type ChainIndexingMetrics,
@@ -82,14 +82,16 @@ export class LocalPonderClient extends PonderClient {
    * @param ponderPublicClients All cached public clients provided by the local Ponder app
    *                            (may include non-indexed chains).
    * @param ponderAppContext The internal context of the local Ponder app.
+   * @param getAbortSignal Optional {@link AbortSignalGetter} invoked at fetch time. See its docs for the staleness contract.
    */
   constructor(
     indexedChainIds: Set<ChainId>,
     indexedBlockranges: Map<ChainId, BlockNumberRangeWithStartBlock>,
     ponderPublicClients: Record<ChainIdString, CachedPublicClient>,
     ponderAppContext: PonderAppContext,
+    getAbortSignal?: AbortSignalGetter,
   ) {
-    super(ponderAppContext.localPonderAppUrl);
+    super(ponderAppContext.localPonderAppUrl, getAbortSignal);
 
     this.indexedChainIds = indexedChainIds;
 
