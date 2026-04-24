@@ -15,9 +15,6 @@ import {
   ponder,
 } from "ponder:registry";
 
-import { initIndexingOnchainEvents } from "./init-indexing-onchain-events";
-import { initIndexingSetup } from "./init-indexing-setup";
-
 /**
  * Context passed to event handlers registered with
  * {@link addOnchainEventListener}.
@@ -159,6 +156,7 @@ async function eventHandlerPreconditions(eventType: EventTypeId): Promise<void> 
   switch (eventType) {
     case EventTypeIds.Setup: {
       if (indexingSetupPromise === null) {
+        const { initIndexingSetup } = await import("./init-indexing-setup");
         // Init the indexing setup just once. There will be multiple
         // setup events executed during Ponder startup, but they will
         // run sequentially, so we can just check if we have already
@@ -171,6 +169,7 @@ async function eventHandlerPreconditions(eventType: EventTypeId): Promise<void> 
 
     case EventTypeIds.OnchainEvent: {
       if (indexingOnchainEventsPromise === null) {
+        const { initIndexingOnchainEvents } = await import("./init-indexing-onchain-events");
         // Init the indexing of "onchain" events just once in order to
         // optimize the indexing "hot path", since these events are much
         // more frequent than setup events.
