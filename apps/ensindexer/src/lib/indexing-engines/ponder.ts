@@ -15,7 +15,8 @@ import {
   ponder,
 } from "ponder:registry";
 
-import { waitForEnsRainbowToBeReady } from "@/lib/ensrainbow/singleton";
+import { initIndexingOnchainEvents } from "./init-indexing-onchain-events";
+import { initIndexingSetup } from "./init-indexing-setup";
 
 /**
  * Context passed to event handlers registered with
@@ -113,7 +114,7 @@ const EventTypeIds = {
    *
    * Driven by an onchain event emitted by an indexed contract.
    */
-  Onchain: "Onchain",
+  OnchainEvent: "OnchainEvent",
 } as const;
 
 /**
@@ -125,59 +126,13 @@ function buildEventTypeId(eventName: EventNames): EventTypeId {
   if (eventName.endsWith(":setup")) {
     return EventTypeIds.Setup;
   } else {
-    return EventTypeIds.Onchain;
+    return EventTypeIds.OnchainEvent;
   }
 }
 
-/**
- * Prepare for executing the "setup" event handlers.
- *
- * During Ponder startup, the "setup" event handlers are executed:
- * - After Ponder completed database migrations for ENSIndexer Schema in ENSDb.
- * - Before Ponder starts processing any onchain events for indexed chains.
- *
- * This function is useful to make sure ENSDb is ready for writes, for example,
- * by ensuring all required Postgres extensions are installed, etc.
- */
-async function initializeIndexingSetup(): Promise<void> {
-  /**
-   * Setup event handlers should not have any *long-running* preconditions. This is because
-   * Ponder populates the indexing metrics for all indexed chains only after all setup handlers have run.
-   * ENSIndexer relies on these indexing metrics being immediately available on startup to build and
-   * store the current Indexing Status in ENSDb.
-   */
-}
-
-/**
- * Prepare for executing the "onchain" event handlers.
- *
- * During Ponder startup, the "onchain" event handlers are executed
- * after all "setup" event handlers have completed.
- *
- * This function is useful to make sure any long-running preconditions for
- * onchain event handlers are met, for example, waiting for
- * the ENSRainbow instance to be ready before processing any onchain events
- * that require data from ENSRainbow.
- *
- * @example A single blocking precondition
- * ```ts
- * await waitForEnsRainbowToBeReady();
- * ```
- *
- * @example Multiple blocking preconditions
- * ```ts
- * await Promise.all([
- *   waitForEnsRainbowToBeReady(),
- *   waitForAnotherPrecondition(),
- * ]);
- * ```
- */
-async function initializeIndexingActivation(): Promise<void> {
-  await waitForEnsRainbowToBeReady();
-}
-
+let eventHandlerPreconditionsFullyExecuted = false;
 let indexingSetupPromise: Promise<void> | null = null;
-let indexingActivationPromise: Promise<void> | null = null;
+let indexingOnchainEventsPromise: Promise<void> | null = null;
 
 /**
  * Execute any necessary preconditions before running an event handler
@@ -192,25 +147,42 @@ let indexingActivationPromise: Promise<void> | null = null;
  * "onchain" event.
  */
 async function eventHandlerPreconditions(eventType: EventTypeId): Promise<void> {
+  if (eventHandlerPreconditionsFullyExecuted) {
+    // Preconditions have already been fully executed, so we can skip executing them again.
+    // We can also reset the promises for indexing setup and onchain events to free up memory,
+    // since they will never be used again after the preconditions have been fully executed.
+    indexingSetupPromise = null;
+    indexingOnchainEventsPromise = null;
+    return;
+  }
+
   switch (eventType) {
     case EventTypeIds.Setup: {
       if (indexingSetupPromise === null) {
-        // Initialize the indexing setup just once.
-        indexingSetupPromise = initializeIndexingSetup();
+        // Init the indexing setup just once. There will be multiple
+        // setup events executed during Ponder startup, but they will
+        // run sequentially, so we can just check if we have already
+        // initialized the indexing setup or not.
+        indexingSetupPromise = initIndexingSetup();
       }
 
       return await indexingSetupPromise;
     }
 
-    case EventTypeIds.Onchain: {
-      if (indexingActivationPromise === null) {
-        // Initialize the indexing activation just once in order to
-        // optimize the "hot path" of indexing onchain events, since these are
-        // much more frequent than setup events.
-        indexingActivationPromise = initializeIndexingActivation();
+    case EventTypeIds.OnchainEvent: {
+      if (indexingOnchainEventsPromise === null) {
+        // Init the indexing of "onchain" events just once in order to
+        // optimize the indexing "hot path", since these events are much
+        // more frequent than setup events.
+        indexingOnchainEventsPromise = initIndexingOnchainEvents().then(() => {
+          // Mark the preconditions as fully executed after the first time we execute
+          // the preconditions for onchain events, since that's the "hot path" and we want to
+          // minimize the overhead of this function in the long run.
+          eventHandlerPreconditionsFullyExecuted = true;
+        });
       }
 
-      return await indexingActivationPromise;
+      return await indexingOnchainEventsPromise;
     }
   }
 }
