@@ -42,9 +42,9 @@ interface EnsRainbowClientLabelSet {
 
 #### Usage Guidelines
 
-1. **Neither field** → accept any labelset and use the latest version (default behaviour).
-2. **Only `labelSetId`** → insist on a specific labelset and use the latest version.
-3. **Both fields** → insist on a specific labelset and version, locking the client to an exact snapshot.
+1. **Neither field** → accept any client labelset and use the latest version (default behaviour).
+2. **Only `labelSetId`** → insist on a specific client labelset and use the latest version.
+3. **Both fields** → insist on a specific client labelset and version, locking the client to an exact snapshot.
 
 This handshake that occurs when **both fields** are set ensures both client and server interpret every heal operation against the **same logical labelset snapshot**, enabling deterministic and reproducible healing results across time.
 
@@ -63,13 +63,13 @@ const client1 = new EnsRainbowApiClient({
 // Pin to subgraph labelset, use latest version
 const client2 = new EnsRainbowApiClient({
   baseUrl: 'https://api.ensrainbow.io',
-  labelSet: { labelSetId: 'subgraph' }
+  clientLabelSet: { labelSetId: 'subgraph' }
 });
 
 // Pin to exact labelset snapshot for deterministic results across time
 const client3 = new EnsRainbowApiClient({
   baseUrl: 'https://api.ensrainbow.io',
-  labelSet: { 
+  clientLabelSet: { 
     labelSetId: 'subgraph', 
     labelSetVersion: 0 
   }

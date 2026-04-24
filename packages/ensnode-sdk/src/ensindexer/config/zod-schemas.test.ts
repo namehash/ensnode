@@ -167,7 +167,7 @@ describe("ENSIndexer: Config", () => {
             makeEnsIndexerPublicConfigSchema().safeParse(
               buildUnvalidatedEnsIndexerPublicConfig({
                 ...baseConfig,
-                labelSet: { labelSetId: "custom-labels", labelSetVersion: 0 },
+                clientLabelSet: { labelSetId: "custom-labels", labelSetVersion: 0 },
               }),
             ),
           ),
@@ -181,7 +181,7 @@ describe("ENSIndexer: Config", () => {
             makeEnsIndexerPublicConfigSchema().safeParse(
               buildUnvalidatedEnsIndexerPublicConfig({
                 ...baseConfig,
-                labelSet: { labelSetId: "subgraph", labelSetVersion: 5 },
+                clientLabelSet: { labelSetId: "subgraph", labelSetVersion: 5 },
               }),
             ),
           ),
@@ -198,7 +198,7 @@ describe("ENSIndexer: Config", () => {
             },
             recordsCount: 100,
           },
-          labelSet: {
+          clientLabelSet: {
             labelSetId: "subgraph",
             labelSetVersion: 0,
           },
@@ -226,11 +226,11 @@ describe("ENSIndexer: Config", () => {
             makeEnsIndexerPublicConfigSchema().safeParse(
               buildUnvalidatedEnsIndexerPublicConfig({
                 ...validConfig,
-                labelSet: { ...validConfig.labelSet, labelSetId: "" },
+                clientLabelSet: { ...validConfig.clientLabelSet, labelSetId: "" },
               }),
             ),
           ),
-        ).toContain("labelSet.labelSetId must be 1-50 characters long");
+        ).toContain("clientLabelSet.labelSetId must be 1-50 characters long");
 
         // Test invalid labelSetVersion
         expect(
@@ -238,14 +238,14 @@ describe("ENSIndexer: Config", () => {
             makeEnsIndexerPublicConfigSchema().safeParse(
               buildUnvalidatedEnsIndexerPublicConfig({
                 ...validConfig,
-                labelSet: {
-                  ...validConfig.labelSet,
+                clientLabelSet: {
+                  ...validConfig.clientLabelSet,
                   labelSetVersion: "not-a-number" as unknown as number,
                 },
               }),
             ),
           ),
-        ).toContain("labelSet.labelSetVersion must be a non-negative integer");
+        ).toContain("clientLabelSet.labelSetVersion must be a non-negative integer");
       });
     });
 

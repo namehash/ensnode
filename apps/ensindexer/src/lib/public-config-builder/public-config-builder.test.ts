@@ -15,7 +15,7 @@ import { PublicConfigBuilder } from "./public-config-builder";
 vi.mock("@/config", () => ({
   default: {
     ensIndexerSchemaName: "ensindexer_0",
-    labelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
+    clientLabelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
     indexedChainIds: new Set([1, 8453]),
     isSubgraphCompatible: true,
     namespace: ENSNamespaceIds.Mainnet,
@@ -67,7 +67,7 @@ const mockVersionInfo: EnsIndexerVersionInfo = {
 function createMockPublicConfig(overrides: Partial<EnsIndexerPublicConfig> = {}) {
   return {
     ensIndexerSchemaName: "ensindexer_0",
-    labelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
+    clientLabelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
     ensRainbowPublicConfig: mockEnsRainbowConfig,
     indexedChainIds: new Set([1, 8453]),
     isSubgraphCompatible: true,
@@ -122,7 +122,7 @@ describe("PublicConfigBuilder", () => {
       expect(validateEnsIndexerPublicConfig).toHaveBeenCalledWith({
         ensIndexerSchemaName: config.ensIndexerSchemaName,
         ensRainbowPublicConfig: mockEnsRainbowConfig,
-        labelSet: config.labelSet,
+        clientLabelSet: config.clientLabelSet,
         indexedChainIds: config.indexedChainIds,
         isSubgraphCompatible: config.isSubgraphCompatible,
         namespace: config.namespace,
@@ -203,7 +203,7 @@ describe("PublicConfigBuilder", () => {
       // Arrange
       const customConfig = createMockPublicConfig({
         isSubgraphCompatible: false,
-        labelSet: { labelSetId: "custom", labelSetVersion: 1 },
+        clientLabelSet: { labelSetId: "custom", labelSetVersion: 1 },
       });
 
       const customEnsRainbowConfig: EnsRainbowPublicConfig = {

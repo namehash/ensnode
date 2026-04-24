@@ -570,8 +570,8 @@ function EnsNodeStackInfoCardContent({ ensNodeStackInfo }: { ensNodeStackInfo: E
             value={
               <ul className={cardItemValueStyles}>
                 <li>
-                  {ensIndexerPublicConfig.labelSet.labelSetId}:
-                  {ensIndexerPublicConfig.labelSet.labelSetVersion}
+                  {ensIndexerPublicConfig.clientLabelSet.labelSetId}:
+                  {ensIndexerPublicConfig.clientLabelSet.labelSetVersion}
                 </li>
               </ul>
             }

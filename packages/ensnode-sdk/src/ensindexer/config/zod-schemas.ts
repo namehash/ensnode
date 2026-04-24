@@ -118,7 +118,10 @@ export const makeENSIndexerVersionInfoSchema = makeEnsIndexerVersionInfoSchema;
 // Invariant: If config.isSubgraphCompatible, the config must pass isSubgraphCompatible(config)
 export function invariant_isSubgraphCompatibleRequirements(
   ctx: ZodCheckFnInput<
-    Pick<EnsIndexerPublicConfig, "namespace" | "plugins" | "isSubgraphCompatible" | "labelSet">
+    Pick<
+      EnsIndexerPublicConfig,
+      "namespace" | "plugins" | "isSubgraphCompatible" | "clientLabelSet"
+    >
   >,
 ) {
   const { value: config } = ctx;
@@ -127,15 +130,15 @@ export function invariant_isSubgraphCompatibleRequirements(
     ctx.issues.push({
       code: "custom",
       input: config,
-      message: `'isSubgraphCompatible' requires only the '${PluginName.Subgraph}' plugin to be active and labelSet must be {labelSetId: "subgraph", labelSetVersion: 0}`,
+      message: `'isSubgraphCompatible' requires only the '${PluginName.Subgraph}' plugin to be active and 'clientLabelSet' must be {labelSetId: "subgraph", labelSetVersion: 0}`,
     });
   }
 }
 
 export function invariant_ensRainbowSupportedLabelSetAndVersion(
-  ctx: ZodCheckFnInput<Pick<EnsIndexerPublicConfig, "labelSet" | "ensRainbowPublicConfig">>,
+  ctx: ZodCheckFnInput<Pick<EnsIndexerPublicConfig, "clientLabelSet" | "ensRainbowPublicConfig">>,
 ) {
-  const clientLabelSet = ctx.value.labelSet satisfies EnsRainbowClientLabelSet;
+  const clientLabelSet = ctx.value.clientLabelSet satisfies EnsRainbowClientLabelSet;
   const serverLabelSet = ctx.value.ensRainbowPublicConfig
     .labelSet satisfies EnsRainbowServerLabelSet;
 
@@ -169,7 +172,7 @@ export const makeEnsIndexerPublicConfigSchema = (valueLabel: string = "ENSIndexe
       isSubgraphCompatible: z.boolean({
         error: `${valueLabel}.isSubgraphCompatible must be a boolean value.`,
       }),
-      labelSet: makeFullyPinnedLabelSetSchema(`${valueLabel}.labelSet`),
+      clientLabelSet: makeFullyPinnedLabelSetSchema(`${valueLabel}.clientLabelSet`),
       namespace: makeENSNamespaceIdSchema(`${valueLabel}.namespace`),
       plugins: makePluginsListSchema(`${valueLabel}.plugins`),
       versionInfo: makeEnsIndexerVersionInfoSchema(`${valueLabel}.versionInfo`),
@@ -201,7 +204,7 @@ export const makeSerializedEnsIndexerPublicConfigSchema = (
     isSubgraphCompatible: z.boolean({
       error: `${valueLabel}.isSubgraphCompatible must be a boolean value.`,
     }),
-    labelSet: makeFullyPinnedLabelSetSchema(`${valueLabel}.labelSet`),
+    clientLabelSet: makeFullyPinnedLabelSetSchema(`${valueLabel}.clientLabelSet`),
     namespace: makeENSNamespaceIdSchema(`${valueLabel}.namespace`),
     plugins: makePluginsListSchema(`${valueLabel}.plugins`),
     versionInfo: makeEnsIndexerVersionInfoSchema(`${valueLabel}.versionInfo`),

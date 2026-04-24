@@ -48,7 +48,7 @@ const ENSINDEXER_PUBLIC_CONFIG = {
   },
   indexedChainIds: new Set([1]),
   isSubgraphCompatible: false,
-  labelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
+  clientLabelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
   plugins: [PluginName.Subgraph],
   versionInfo: {
     ensDb: packageJson.version,
@@ -196,19 +196,7 @@ describe("buildEnsApiPublicConfig", () => {
     const result = buildEnsApiPublicConfig(mockConfig);
 
     // Verify that all ENSIndexer public config fields are preserved
-    expect(result.ensIndexerPublicConfig.namespace).toBe(ENSINDEXER_PUBLIC_CONFIG.namespace);
-    expect(result.ensIndexerPublicConfig.plugins).toEqual(ENSINDEXER_PUBLIC_CONFIG.plugins);
-    expect(result.ensIndexerPublicConfig.versionInfo).toEqual(ENSINDEXER_PUBLIC_CONFIG.versionInfo);
-    expect(result.ensIndexerPublicConfig.indexedChainIds).toEqual(
-      ENSINDEXER_PUBLIC_CONFIG.indexedChainIds,
-    );
-    expect(result.ensIndexerPublicConfig.isSubgraphCompatible).toBe(
-      ENSINDEXER_PUBLIC_CONFIG.isSubgraphCompatible,
-    );
-    expect(result.ensIndexerPublicConfig.labelSet).toEqual(ENSINDEXER_PUBLIC_CONFIG.labelSet);
-    expect(result.ensIndexerPublicConfig.ensIndexerSchemaName).toBe(
-      ENSINDEXER_PUBLIC_CONFIG.ensIndexerSchemaName,
-    );
+    expect(result.ensIndexerPublicConfig).toStrictEqual(ENSINDEXER_PUBLIC_CONFIG);
   });
 
   it("includes the theGraphFallback and redacts api key", () => {

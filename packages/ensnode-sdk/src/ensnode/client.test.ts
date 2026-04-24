@@ -75,7 +75,7 @@ const EXAMPLE_ENSAPI_CONFIG_RESPONSE = {
       labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
       recordsCount: 100,
     },
-    labelSet: {
+    clientLabelSet: {
       labelSetId: "subgraph",
       labelSetVersion: 0,
     },
@@ -112,7 +112,7 @@ const EXAMPLE_ENSINDEXER_PUBLIC_CONFIG = {
     labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
     recordsCount: 100,
   },
-  labelSet: {
+  clientLabelSet: {
     labelSetId: "subgraph",
     labelSetVersion: 0,
   },

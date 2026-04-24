@@ -24,19 +24,19 @@ export function invariant_ensRainbowCompatibilityWithEnsIndexer(
 ) {
   const { ensIndexer, ensRainbow } = ctx.value;
 
-  if (ensIndexer.labelSet.labelSetId !== ensRainbow.labelSet.labelSetId) {
+  if (ensIndexer.clientLabelSet.labelSetId !== ensRainbow.labelSet.labelSetId) {
     ctx.issues.push({
       code: "custom",
       input: ctx.value,
-      message: `ENSRainbow's label set (id: ${ensRainbow.labelSet.labelSetId}) must be the same as the ENSIndexer's label set (id: ${ensIndexer.labelSet.labelSetId}).`,
+      message: `ENSRainbow's label set (id: ${ensRainbow.labelSet.labelSetId}) must be the same as the ENSIndexer's label set (id: ${ensIndexer.clientLabelSet.labelSetId}).`,
     });
   }
 
-  if (ensIndexer.labelSet.labelSetVersion > ensRainbow.labelSet.highestLabelSetVersion) {
+  if (ensIndexer.clientLabelSet.labelSetVersion > ensRainbow.labelSet.highestLabelSetVersion) {
     ctx.issues.push({
       code: "custom",
       input: ctx.value,
-      message: `ENSRainbow's server label set version (highest: ${ensRainbow.labelSet.highestLabelSetVersion}) must be greater than or equal to ENSIndexer's client label set version (current: ${ensIndexer.labelSet.labelSetVersion}).`,
+      message: `ENSRainbow's server label set version (highest: ${ensRainbow.labelSet.highestLabelSetVersion}) must be greater than or equal to ENSIndexer's client label set version (current: ${ensIndexer.clientLabelSet.labelSetVersion}).`,
     });
   }
 }

@@ -28,7 +28,7 @@ describe("EnsRainbowApiClient", () => {
     expect(client.getOptions()).toEqual({
       endpointUrl: new URL(DEFAULT_ENSRAINBOW_URL),
       cacheCapacity: EnsRainbowApiClient.DEFAULT_CACHE_CAPACITY,
-      labelSet: {
+      clientLabelSet: {
         labelSetId: undefined,
         labelSetVersion: undefined,
       },
@@ -45,7 +45,7 @@ describe("EnsRainbowApiClient", () => {
     expect(client.getOptions()).toEqual({
       endpointUrl: customEndpointUrl,
       cacheCapacity: 0,
-      labelSet: {
+      clientLabelSet: {
         labelSetId: undefined,
         labelSetVersion: undefined,
       },
@@ -57,7 +57,7 @@ describe("EnsRainbowApiClient", () => {
     client = new EnsRainbowApiClient({
       endpointUrl: customEndpointUrl,
       cacheCapacity: 0,
-      labelSet: {
+      clientLabelSet: {
         labelSetId: "subgraph",
         labelSetVersion: undefined,
       },
@@ -66,7 +66,7 @@ describe("EnsRainbowApiClient", () => {
     expect(client.getOptions()).toEqual({
       endpointUrl: customEndpointUrl,
       cacheCapacity: 0,
-      labelSet: {
+      clientLabelSet: {
         labelSetId: "subgraph",
         labelSetVersion: undefined,
       },
@@ -97,7 +97,7 @@ describe("EnsRainbowApiClient", () => {
         new EnsRainbowApiClient({
           endpointUrl: customEndpointUrl,
           cacheCapacity: 0,
-          labelSet: {
+          clientLabelSet: {
             labelSetId: undefined,
             labelSetVersion: 0,
           },
@@ -275,7 +275,7 @@ describe("EnsRainbowApiClient", () => {
     it("should request /v1/config and return public config on success", async () => {
       const configData: EnsRainbow.ENSRainbowPublicConfig = {
         version: "2.0.0",
-        labelSet: {
+        serverLabelSet: {
           labelSetId: "subgraph",
           highestLabelSetVersion: 5,
         },

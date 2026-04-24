@@ -100,7 +100,7 @@ function createEnsIndexerConfig(
   isSubgraphCompatible: boolean,
 ): SerializedEnsIndexerPublicConfig {
   return {
-    labelSet: { ...COMMON_CLIENT_LABEL_SET },
+    clientLabelSet: { ...COMMON_CLIENT_LABEL_SET },
     indexedChainIds,
     ensIndexerSchemaName,
     isSubgraphCompatible,
@@ -198,7 +198,7 @@ function createDeserializationErrorVariant(): SerializedEnsNodeStackInfo {
       versionInfo: { ...COMMON_ENSAPI_VERSION_INFO },
       theGraphFallback: { ...THE_GRAPH_FALLBACK_DISABLED },
       ensIndexerPublicConfig: {
-        labelSet: {
+        clientLabelSet: {
           labelSetId: "",
           labelSetVersion: 0,
         },
@@ -225,7 +225,7 @@ function createDeserializationErrorVariant(): SerializedEnsNodeStackInfo {
     },
     ensDb: createEnsDbConfig(),
     ensIndexer: {
-      labelSet: {
+      clientLabelSet: {
         labelSetId: "",
         labelSetVersion: 0,
       },

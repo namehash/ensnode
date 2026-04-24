@@ -19,9 +19,14 @@ import {
 export function buildUnvalidatedEnsIndexerStackInfo(
   serializedStackInfo: SerializedEnsIndexerStackInfo,
 ): Unvalidated<EnsIndexerStackInfo> {
+  // `ensDb` and `ensRainbow` are already in a deserialized form, so we can include them directly
+  const { ensDb, ensRainbow } = serializedStackInfo;
+  const ensIndexer = buildUnvalidatedEnsIndexerPublicConfig(serializedStackInfo.ensIndexer);
+
   return {
-    ensIndexer: buildUnvalidatedEnsIndexerPublicConfig(serializedStackInfo.ensIndexer),
-    ensRainbow: serializedStackInfo.ensRainbow, // ENSRainbow Public Config is already in a serialized form, so we can include it directly
+    ensDb,
+    ensIndexer,
+    ensRainbow,
   };
 }
 

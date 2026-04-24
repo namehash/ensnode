@@ -33,7 +33,7 @@ export const publicConfig = {
     },
     recordsCount: 100,
   },
-  labelSet: {
+  clientLabelSet: {
     labelSetId: "subgraph",
     labelSetVersion: 0,
   },

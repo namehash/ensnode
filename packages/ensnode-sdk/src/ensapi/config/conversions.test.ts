@@ -27,7 +27,7 @@ const MOCK_ENSAPI_PUBLIC_CONFIG = {
     },
     indexedChainIds: new Set([1]),
     isSubgraphCompatible: false,
-    labelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
+    clientLabelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
     plugins: [PluginName.Subgraph],
     versionInfo: {
       ensDb: "0.36.0",
@@ -64,7 +64,7 @@ describe("ENSApi Config Serialization/Deserialization", () => {
           },
           indexedChainIds: [1],
           isSubgraphCompatible: false,
-          labelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
+          clientLabelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
           plugins: [PluginName.Subgraph],
           versionInfo: {
             ensDb: "0.36.0",

@@ -16,7 +16,7 @@ describe("ENSIndexer: Config", () => {
           labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
           recordsCount: 100,
         },
-        labelSet: {
+        clientLabelSet: {
           labelSetId: "subgraph",
           labelSetVersion: 0,
         },
@@ -58,7 +58,7 @@ describe("ENSIndexer: Config", () => {
         labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
         recordsCount: 100,
       },
-      labelSet: {
+      clientLabelSet: {
         labelSetId: "subgraph",
         labelSetVersion: 0,
       },

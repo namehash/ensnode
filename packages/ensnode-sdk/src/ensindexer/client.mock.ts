@@ -8,7 +8,7 @@ import type { SerializedEnsIndexerIndexingStatusResponse } from "./api/indexing-
 import { PluginName } from "./config/types";
 
 export const configResponseMock = {
-  labelSet: {
+  clientLabelSet: {
     labelSetId: "subgraph",
     labelSetVersion: 0,
   },

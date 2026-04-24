@@ -24,14 +24,14 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 const serializedEnsIndexerPublicConfig = {
-  labelSet: {
+  clientLabelSet: {
     labelSetId: "subgraph",
     labelSetVersion: 0,
   },
   indexedChainIds: [1, 8453, 59144, 10, 42161, 534352, 567],
-  ensIndexerSchemaName: "alphaSchema0.34.0",
+  ensIndexerSchemaName: "alphaSchema1.9.0",
   ensRainbowPublicConfig: {
-    version: "0.34.0",
+    version: "1.9.0",
     labelSet: {
       labelSetId: "subgraph",
       highestLabelSetVersion: 0,
@@ -51,8 +51,8 @@ const serializedEnsIndexerPublicConfig = {
   ],
   versionInfo: {
     ponder: "0.11.43",
-    ensIndexer: "0.35.0",
-    ensDb: "0.35.0",
+    ensIndexer: "1.9.0",
+    ensDb: "1.9.0",
     ensNormalize: "1.11.1",
   },
 } satisfies SerializedEnsIndexerPublicConfig;
@@ -64,7 +64,7 @@ export const serializedEnsApiPublicConfig = {
     url: "https://api.thegraph.com/subgraphs/name/ensdomains/ens",
   },
   versionInfo: {
-    ensApi: "0.35.0",
+    ensApi: "1.9.0",
     ensNormalize: "1.11.1",
   },
 } satisfies SerializedEnsApiPublicConfig;
