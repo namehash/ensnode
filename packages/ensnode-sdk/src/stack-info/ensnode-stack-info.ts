@@ -1,48 +1,32 @@
-import type { EnsApiPublicConfig } from "../ensapi/config/types";
+import type { EnsApiPublicConfig } from "../ensapi/config";
 import type { EnsDbPublicConfig } from "../ensdb/config";
-import type { EnsIndexerPublicConfig } from "../ensindexer/config/types";
-import type { EnsRainbowPublicConfig } from "../ensrainbow/config";
+import type { EnsIndexerPublicConfig } from "../ensindexer/config";
+import type { EnsRainbowPublicConfig } from "../ensrainbow";
+import { buildEnsIndexerStackInfo, type EnsIndexerStackInfo } from "./ensindexer-stack-info";
+import { validateEnsNodeStackInfo } from "./validate/ensnode-stack-info";
 
 /**
  * Information about the stack of services inside an ENSNode instance.
  */
-export interface EnsNodeStackInfo {
+export interface EnsNodeStackInfo extends EnsIndexerStackInfo {
   /**
    * ENSApi Public Config
    */
   ensApi: EnsApiPublicConfig;
-
-  /**
-   * ENSDb Public Config
-   */
-  ensDb: EnsDbPublicConfig;
-
-  /**
-   * ENSIndexer Public Config
-   */
-  ensIndexer: EnsIndexerPublicConfig;
-
-  /**
-   * ENSRainbow Public Config
-   *
-   * If undefined, represents that ENSRainbow is currently undergoing
-   * a cold start and may take up to an hour to become ready.
-   */
-  ensRainbow?: EnsRainbowPublicConfig;
 }
 
 /**
  * Build a complete {@link EnsNodeStackInfo} object from
- * the given public configs of ENSApi and ENSDb.
+ * the given public configs of ENSApi, ENSDb, ENSIndexer, and ENSRainbow.
  */
 export function buildEnsNodeStackInfo(
   ensApiPublicConfig: EnsApiPublicConfig,
   ensDbPublicConfig: EnsDbPublicConfig,
+  ensIndexerPublicConfig: EnsIndexerPublicConfig,
+  ensRainbowPublicConfig: EnsRainbowPublicConfig,
 ): EnsNodeStackInfo {
-  return {
+  return validateEnsNodeStackInfo({
+    ...buildEnsIndexerStackInfo(ensDbPublicConfig, ensIndexerPublicConfig, ensRainbowPublicConfig),
     ensApi: ensApiPublicConfig,
-    ensDb: ensDbPublicConfig,
-    ensIndexer: ensApiPublicConfig.ensIndexerPublicConfig,
-    ensRainbow: ensApiPublicConfig.ensIndexerPublicConfig.ensRainbowPublicConfig,
-  };
+  });
 }

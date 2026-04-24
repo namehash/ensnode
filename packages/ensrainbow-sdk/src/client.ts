@@ -145,7 +145,7 @@ export interface EnsRainbowApiClientOptions {
   endpointUrl: URL;
 
   /**
-   * Optional label set preferences that the ENSRainbow server at endpointUrl is expected to
+   * Optional client label set preferences that the ENSRainbow server at endpointUrl is expected to
    * support. If provided, enables deterministic heal results across time, such that only
    * labels from label sets with versions less than or equal to this value will be returned.
    * Therefore, even if the ENSRainbow server later ingests label sets with greater versions
@@ -159,7 +159,7 @@ export interface EnsRainbowApiClientOptions {
    * will be returned.
    * When `labelSetVersion` is defined, `labelSetId` must also be defined.
    */
-  labelSet?: EnsRainbowClientLabelSet;
+  clientLabelSet?: EnsRainbowClientLabelSet;
 }
 
 /**
@@ -178,7 +178,7 @@ export interface EnsRainbowApiClientOptions {
 export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
   private readonly options: EnsRainbowApiClientOptions;
   private readonly cache: Cache<LabelHash, EnsRainbow.CacheableHealResponse>;
-  private readonly labelSetSearchParams: URLSearchParams;
+  private readonly clientLabelSetSearchParams: URLSearchParams;
 
   public static readonly DEFAULT_CACHE_CAPACITY = 1000;
 
@@ -191,23 +191,23 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
     return {
       endpointUrl: new URL(DEFAULT_ENSRAINBOW_URL),
       cacheCapacity: EnsRainbowApiClient.DEFAULT_CACHE_CAPACITY,
-      labelSet: buildEnsRainbowClientLabelSet(),
+      clientLabelSet: buildEnsRainbowClientLabelSet(),
     };
   }
 
   constructor(options: Partial<EnsRainbow.ApiClientOptions> = {}) {
-    const { labelSet: optionsLabelSet, ...rest } = options;
+    const { clientLabelSet: optionsClientLabelSet, ...rest } = options;
     const defaultOptions = EnsRainbowApiClient.defaultOptions();
 
     const copiedLabelSet = buildEnsRainbowClientLabelSet(
-      optionsLabelSet?.labelSetId,
-      optionsLabelSet?.labelSetVersion,
+      optionsClientLabelSet?.labelSetId,
+      optionsClientLabelSet?.labelSetVersion,
     );
 
     this.options = {
       ...defaultOptions,
       ...rest,
-      labelSet: copiedLabelSet,
+      clientLabelSet: copiedLabelSet,
     };
 
     this.cache = new LruCache<LabelHash, EnsRainbow.CacheableHealResponse>(
@@ -215,14 +215,17 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
     );
 
     // Pre-compute query parameters for label set options
-    this.labelSetSearchParams = new URLSearchParams();
-    if (this.options.labelSet?.labelSetId !== undefined) {
-      this.labelSetSearchParams.append("label_set_id", this.options.labelSet.labelSetId);
+    this.clientLabelSetSearchParams = new URLSearchParams();
+    if (this.options.clientLabelSet?.labelSetId !== undefined) {
+      this.clientLabelSetSearchParams.append(
+        "label_set_id",
+        this.options.clientLabelSet.labelSetId,
+      );
     }
-    if (this.options.labelSet?.labelSetVersion !== undefined) {
-      this.labelSetSearchParams.append(
+    if (this.options.clientLabelSet?.labelSetVersion !== undefined) {
+      this.clientLabelSetSearchParams.append(
         "label_set_version",
-        this.options.labelSet.labelSetVersion.toString(),
+        this.options.clientLabelSet.labelSetVersion.toString(),
       );
     }
   }
@@ -291,7 +294,7 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
     const url = new URL(`/v1/heal/${normalizedLabelHash}`, this.options.endpointUrl);
 
     // Apply pre-computed label set query parameters
-    this.labelSetSearchParams.forEach((value, key) => {
+    this.clientLabelSetSearchParams.forEach((value, key) => {
       url.searchParams.append(key, value);
     });
 
@@ -375,7 +378,7 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
     const deepCopy = {
       cacheCapacity: this.options.cacheCapacity,
       endpointUrl: new URL(this.options.endpointUrl.href),
-      labelSet: this.options.labelSet ? { ...this.options.labelSet } : undefined,
+      clientLabelSet: this.options.clientLabelSet ? { ...this.options.clientLabelSet } : undefined,
     } satisfies EnsRainbowApiClientOptions;
 
     return Object.freeze(deepCopy);

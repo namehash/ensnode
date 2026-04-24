@@ -15,7 +15,7 @@ import { PublicConfigBuilder } from "./public-config-builder";
 vi.mock("@/config", () => ({
   default: {
     ensIndexerSchemaName: "ensindexer_0",
-    labelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
+    clientLabelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
     indexedChainIds: new Set([1, 8453]),
     isSubgraphCompatible: true,
     namespace: ENSNamespaceIds.Mainnet,
@@ -51,9 +51,10 @@ import { getEnsIndexerVersion, getPackageVersion } from "@/lib/version-info";
 
 // Test fixtures
 const mockEnsRainbowConfig: EnsRainbowPublicConfig = {
-  version: "1.0.0",
-  labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
-  recordsCount: 1000,
+  serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+  versionInfo: {
+    ensRainbow: "1.0.0",
+  },
 };
 
 const mockVersionInfo: EnsIndexerVersionInfo = {
@@ -67,7 +68,7 @@ const mockVersionInfo: EnsIndexerVersionInfo = {
 function createMockPublicConfig(overrides: Partial<EnsIndexerPublicConfig> = {}) {
   return {
     ensIndexerSchemaName: "ensindexer_0",
-    labelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
+    clientLabelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
     ensRainbowPublicConfig: mockEnsRainbowConfig,
     indexedChainIds: new Set([1, 8453]),
     isSubgraphCompatible: true,
@@ -122,7 +123,7 @@ describe("PublicConfigBuilder", () => {
       expect(validateEnsIndexerPublicConfig).toHaveBeenCalledWith({
         ensIndexerSchemaName: config.ensIndexerSchemaName,
         ensRainbowPublicConfig: mockEnsRainbowConfig,
-        labelSet: config.labelSet,
+        clientLabelSet: config.clientLabelSet,
         indexedChainIds: config.indexedChainIds,
         isSubgraphCompatible: config.isSubgraphCompatible,
         namespace: config.namespace,
@@ -203,13 +204,14 @@ describe("PublicConfigBuilder", () => {
       // Arrange
       const customConfig = createMockPublicConfig({
         isSubgraphCompatible: false,
-        labelSet: { labelSetId: "custom", labelSetVersion: 1 },
+        clientLabelSet: { labelSetId: "custom", labelSetVersion: 1 },
       });
 
       const customEnsRainbowConfig: EnsRainbowPublicConfig = {
-        version: "1.0.0",
-        labelSet: { labelSetId: "custom", highestLabelSetVersion: 1 },
-        recordsCount: 2000,
+        serverLabelSet: { labelSetId: "custom", highestLabelSetVersion: 1 },
+        versionInfo: {
+          ensRainbow: "1.0.0",
+        },
       };
 
       const ensRainbowClientMock = {
