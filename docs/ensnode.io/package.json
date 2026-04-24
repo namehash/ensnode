@@ -3,7 +3,7 @@
   "private": true,
   "license": "MIT",
   "type": "module",
-  "version": "1.9.0",
+  "version": "1.10.1",
   "packageManager": "pnpm@10.33.0",
   "scripts": {
     "dev": "astro dev",
@@ -12,7 +12,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "lint": "biome check --write",
-    "lint:ci": "biome ci"
+    "lint:ci": "biome ci",
+    "generate:openapi": "pnpm --filter ensapi exec tsx --tsconfig tsconfig.json ../../scripts/generate-ensapi-openapi.mts"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.9",

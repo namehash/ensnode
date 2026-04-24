@@ -1,9 +1,10 @@
-import type { AccountId, NormalizedAddress, UnixTimestamp } from "enssdk";
+import type { AccountId, Duration, NormalizedAddress, UnixTimestamp } from "enssdk";
 
-import type { PriceUsdc } from "@ensnode/ensnode-sdk";
+import { type PriceUsdc, priceUsdc } from "@ensnode/ensnode-sdk";
 import { makePriceUsdcSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { validateNormalizedAddress } from "../../address";
+import { SECONDS_PER_YEAR } from "../../time";
 import {
   type BaseReferralProgramRules,
   ReferralProgramAwardModels,
@@ -194,6 +195,23 @@ export const buildReferralProgramRulesRevShareCap = (
 
   return result;
 };
+
+/**
+ * Calculate the base revenue contribution accrued over a given duration under
+ * rev-share-cap rules: `rules.baseAnnualRevenueContribution × (duration / 1 year)`.
+ *
+ * Uses exact integer bigint arithmetic (single floor division) so the result
+ * matches the aggregate for the same duration — avoids per-event truncation
+ * that would compound into a smaller sum than the aggregated value.
+ */
+export function calcBaseRevenueContribution(
+  rules: ReferralProgramRulesRevShareCap,
+  duration: Duration,
+): PriceUsdc {
+  return priceUsdc(
+    (rules.baseAnnualRevenueContribution.amount * BigInt(duration)) / BigInt(SECONDS_PER_YEAR),
+  );
+}
 
 /**
  * Determine if a referrer is qualified under rev-share-cap rules.

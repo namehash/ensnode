@@ -62,11 +62,15 @@ describe("buildLabelSetVersion", () => {
   });
 
   it("should throw an error for NaN", () => {
-    expect(() => buildLabelSetVersion(NaN)).toThrow("LabelSetVersion must be an integer");
+    expect(() => buildLabelSetVersion(NaN)).toThrow(
+      "LabelSetVersion must be a non-negative integer",
+    );
   });
 
   it("should throw an error for Infinity", () => {
-    expect(() => buildLabelSetVersion(Infinity)).toThrow("LabelSetVersion must be an integer");
+    expect(() => buildLabelSetVersion(Infinity)).toThrow(
+      "LabelSetVersion must be a non-negative integer",
+    );
   });
 
   it("should return a valid label set version for a string input", () => {

@@ -160,7 +160,7 @@ When querying ENSNode's Subgraph-compatible GraphQL API or the legacy ENS Subgra
 
 **ENSNode's Resolution API:**
 
-ENSNode's Resolution API (accessed via the `EnsApiClient` SDK) accepts names directly without requiring you to compute the node (namehash) yourself. However, you must still normalize the name before passing it to the API. The key difference is that you don't need to manually compute the namehash - you can call methods like `resolveRecords(normalizedName, selection)` directly with the name string.
+ENSNode's Resolution API (accessed via the `EnsNodeClient` SDK) accepts names directly without requiring you to compute the node (namehash) yourself. However, you must still normalize the name before passing it to the API. The key difference is that you don't need to manually compute the namehash - you can call methods like `resolveRecords(normalizedName, selection)` directly with the name string.
 
 ## The Solution: How ENSRainbow Works
 

@@ -245,7 +245,7 @@ describe("ENSIndexer: Config", () => {
               }),
             ),
           ),
-        ).toContain("labelSet.labelSetVersion must be an integer");
+        ).toContain("labelSet.labelSetVersion must be a non-negative integer");
       });
     });
 

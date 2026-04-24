@@ -1,6 +1,6 @@
 import config from "@/config";
 
-import type { Hex, Node, NormalizedAddress } from "enssdk";
+import type { Hex, InterfaceId, Node, NormalizedAddress, RecordVersion } from "enssdk";
 import type { Hash } from "viem";
 
 import { hasNullByte, stripNullBytes, uniq } from "@ensnode/ensnode-sdk";
@@ -239,7 +239,7 @@ export async function handleInterfaceChanged({
   event,
 }: {
   context: IndexingEngineContext;
-  event: EventWithArgs<{ node: Node; interfaceID: Hex; implementer: Hex }>;
+  event: EventWithArgs<{ node: Node; interfaceID: InterfaceId; implementer: Hex }>;
 }) {
   const { node, interfaceID, implementer } = event.args;
   const id = makeResolverId(context.chain.id, event.log.address, node);
@@ -295,7 +295,7 @@ export async function handleVersionChanged({
   event,
 }: {
   context: IndexingEngineContext;
-  event: EventWithArgs<{ node: Node; newVersion: bigint }>;
+  event: EventWithArgs<{ node: Node; newVersion: RecordVersion }>;
 }) {
   const { node, newVersion } = event.args;
   const id = makeResolverId(context.chain.id, event.log.address, node);
@@ -441,7 +441,7 @@ export async function handleZoneCreated({
   event,
 }: {
   context: IndexingEngineContext;
-  event: EventWithArgs<{ node: Node; version: bigint }>;
+  event: EventWithArgs<{ node: Node; version: RecordVersion }>;
 }) {
   // explicitly ignored / not implemented
 }

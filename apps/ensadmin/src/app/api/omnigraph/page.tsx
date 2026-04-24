@@ -8,7 +8,7 @@ import { GRAPHQL_API_EXAMPLE_QUERIES } from "@ensnode/ensnode-sdk/internal";
 
 import { GraphiQLEditor } from "@/components/graphiql-editor";
 import { RequireENSAdminFeature } from "@/components/require-ensadmin-feature";
-import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
+import { useActiveEnsNodeStackInfo } from "@/hooks/active/use-active-ensnode-stack-info";
 import { useValidatedSelectedConnection } from "@/hooks/active/use-selected-connection";
 
 function GraphQLPage() {
@@ -16,7 +16,7 @@ function GraphQLPage() {
   const initialQuery = searchParams.get("query");
   const initialVariables = searchParams.get("variables");
 
-  const namespace = useActiveNamespace();
+  const { namespace } = useActiveEnsNodeStackInfo().ensIndexer;
   const selectedConnection = useValidatedSelectedConnection();
   const url = useMemo(
     () => new URL(`/api/omnigraph`, selectedConnection).toString(),
