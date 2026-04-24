@@ -5,8 +5,10 @@ import pRetry from "p-retry";
 import type { EnsDbWriter } from "@ensnode/ensdb-sdk";
 import {
   buildCrossChainIndexingStatusSnapshotOmnichain,
+  buildIndexingMetadataContextInitialized,
   type CrossChainIndexingStatusSnapshot,
   type EnsIndexerPublicConfig,
+  IndexingMetadataContextStatusCodes,
   OmnichainIndexingStatusIds,
   type OmnichainIndexingStatusSnapshot,
   validateEnsIndexerPublicConfigCompatibility,
@@ -97,32 +99,9 @@ export class EnsDbWriterWorker {
       throw new Error("EnsDbWriterWorker is already running");
     }
 
-    // Fetch data required for task 1 and task 2.
-    const inMemoryConfig = await this.getValidatedEnsIndexerPublicConfig();
-
-    // Task 1: upsert ENSDb version into ENSDb.
-    logger.debug({ msg: "Upserting ENSDb version", module: "EnsDbWriterWorker" });
-    await this.ensDbClient.upsertEnsDbVersion(inMemoryConfig.versionInfo.ensDb);
-    logger.info({
-      msg: "Upserted ENSDb version",
-      ensDbVersion: inMemoryConfig.versionInfo.ensDb,
-      module: "EnsDbWriterWorker",
-    });
-
-    // Task 2: upsert of EnsIndexerPublicConfig into ENSDb.
-    logger.debug({
-      msg: "Upserting ENSIndexer public config",
-      module: "EnsDbWriterWorker",
-    });
-    await this.ensDbClient.upsertEnsIndexerPublicConfig(inMemoryConfig);
-    logger.info({
-      msg: "Upserted ENSIndexer public config",
-      module: "EnsDbWriterWorker",
-    });
-
-    // Task 3: recurring upsert of Indexing Status Snapshot into ENSDb.
+    // Task 1: recurring upsert of Indexing Metadata Context into ENSDb.
     this.indexingStatusInterval = setInterval(
-      () => this.upsertIndexingStatusSnapshot(),
+      () => this.upsertIndexingMetadataContext(),
       secondsToMilliseconds(INDEXING_STATUS_RECORD_UPDATE_INTERVAL),
     );
   }
@@ -147,155 +126,40 @@ export class EnsDbWriterWorker {
   }
 
   /**
-   * Get validated ENSIndexer Public Config object for the ENSDb Writer Worker.
-   *
-   * The function retrieves the ENSIndexer Public Config object from both:
-   * - stored config in ENSDb, if available, and
-   * - in-memory config from ENSIndexer Client.
-   *
-   * If a stored config exists **and** the local Ponder app is **not** in dev
-   * mode, the in-memory config is validated for compatibility against the
-   * stored one. Validation is skipped if the local Ponder app is in dev mode,
-   * allowing to override the stored config in ENSDb with the current in-memory
-   * config, without having to keep them compatible.
-   *
-   * @returns The in-memory config when validation passes or no stored config
-   *          exists.
-   * @throws Error if either fetch fails, or if the in-memory config is
-   *         incompatible with the stored config.
-   */
-  private async getValidatedEnsIndexerPublicConfig(): Promise<EnsIndexerPublicConfig> {
-    /**
-     * Fetch the in-memory config with retries, to handle potential transient errors
-     * in the ENSIndexer Public Config Builder (e.g. due to network issues).
-     * If the fetch fails after the defined number of retries, the error
-     * will be thrown and the worker will not start, as the ENSIndexer Public Config
-     * is a critical dependency for the worker's tasks.
-     */
-    const configFetchRetries = 3;
-
-    logger.debug({
-      msg: "Fetching ENSIndexer public config",
-      retries: configFetchRetries,
-      module: "EnsDbWriterWorker",
-    });
-
-    const inMemoryConfigPromise = pRetry(() => this.publicConfigBuilder.getPublicConfig(), {
-      retries: configFetchRetries,
-      onFailedAttempt: ({ attemptNumber, retriesLeft }) => {
-        logger.warn({
-          msg: "Config fetch attempt failed",
-          attempt: attemptNumber,
-          retriesLeft,
-          module: "EnsDbWriterWorker",
-        });
-      },
-    });
-
-    let storedConfig: EnsIndexerPublicConfig | undefined;
-    let inMemoryConfig: EnsIndexerPublicConfig;
-
-    try {
-      [storedConfig, inMemoryConfig] = await Promise.all([
-        this.ensDbClient.getEnsIndexerPublicConfig(),
-        inMemoryConfigPromise,
-      ]);
-      logger.info({
-        msg: "Fetched ENSIndexer public config",
-        module: "EnsDbWriterWorker",
-        config: inMemoryConfig,
-      });
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-
-      logger.error({
-        msg: "Failed to fetch ENSIndexer public config",
-        error,
-        module: "EnsDbWriterWorker",
-      });
-
-      // Throw the error to terminate the ENSIndexer process due to failed fetch of critical dependency
-      throw new Error(errorMessage, {
-        cause: error,
-      });
-    }
-
-    // Validate in-memory config object compatibility with the stored one,
-    // if the stored one is available.
-    // The validation is skipped if the local Ponder app is running in dev mode.
-    // This is to improve the development experience during ENSIndexer
-    // development, by allowing to override the stored config in ENSDb with
-    // the current in-memory config, without having to keep them compatible.
-    if (storedConfig && !this.localPonderClient.isInDevMode) {
-      try {
-        validateEnsIndexerPublicConfigCompatibility(storedConfig, inMemoryConfig);
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "Unknown error";
-
-        logger.error({
-          msg: "In-memory config incompatible with stored config",
-          error,
-          module: "EnsDbWriterWorker",
-        });
-
-        // Throw the error to terminate the ENSIndexer process due to
-        // found config incompatibility
-        throw new Error(errorMessage, {
-          cause: error,
-        });
-      }
-    }
-
-    return inMemoryConfig;
-  }
-
-  /**
    * Upsert the current Indexing Status Snapshot into ENSDb.
    *
    * This method is called by the scheduler at regular intervals.
    * Errors are logged but not thrown, to keep the worker running.
    */
-  private async upsertIndexingStatusSnapshot(): Promise<void> {
+  private async upsertIndexingMetadataContext(): Promise<void> {
     try {
       // get system timestamp for the current iteration
       const snapshotTime = getUnixTime(new Date());
+      const indexingMetadataContext = await this.ensDbClient.getIndexingMetadataContext();
 
-      const omnichainSnapshot = await this.getValidatedIndexingStatusSnapshot();
+      if (indexingMetadataContext.statusCode === IndexingMetadataContextStatusCodes.Uninitialized) {
+        throw new Error(
+          `Cannot upsert Indexing Status Snapshot into ENSDb because Indexing Metadata Context should be be initialized first`,
+        );
+      }
 
-      const crossChainSnapshot = buildCrossChainIndexingStatusSnapshotOmnichain(
-        omnichainSnapshot,
-        snapshotTime,
+      const omnichainSnapshot =
+        await this.indexingStatusBuilder.getOmnichainIndexingStatusSnapshot();
+
+      const updatedIndexingMetadataContext = buildIndexingMetadataContextInitialized(
+        buildCrossChainIndexingStatusSnapshotOmnichain(omnichainSnapshot, snapshotTime),
+        indexingMetadataContext.stackInfo,
       );
 
-      await this.ensDbClient.upsertIndexingStatusSnapshot(crossChainSnapshot);
+      await this.ensDbClient.upsertIndexingMetadataContext(updatedIndexingMetadataContext);
     } catch (error) {
       logger.error({
-        msg: "Failed to upsert indexing status snapshot",
+        msg: "Failed to upsert indexing metadata context",
         error,
         module: "EnsDbWriterWorker",
       });
       // Do not throw the error, as failure to retrieve the Indexing Status
       // should not cause the ENSDb Writer Worker to stop functioning.
     }
-  }
-
-  /**
-   * Get validated Omnichain Indexing Status Snapshot
-   *
-   * @returns Validated Omnichain Indexing Status Snapshot.
-   * @throws Error if the Omnichain Indexing Status is not in expected status yet.
-   */
-  private async getValidatedIndexingStatusSnapshot(): Promise<OmnichainIndexingStatusSnapshot> {
-    const omnichainSnapshot = await this.indexingStatusBuilder.getOmnichainIndexingStatusSnapshot();
-
-    // It only makes sense to write Indexing Status Snapshots into ENSDb once
-    // the indexing process has started, as before that there is no meaningful
-    // status to record.
-    // Invariant: the Omnichain Status must indicate that indexing has started already.
-    if (omnichainSnapshot.omnichainStatus === OmnichainIndexingStatusIds.Unstarted) {
-      throw new Error("Omnichain Status must not be 'Unstarted'.");
-    }
-
-    return omnichainSnapshot;
   }
 }

@@ -5,13 +5,9 @@ import { cors } from "hono/cors";
 
 import type { ErrorResponse } from "@ensnode/ensnode-sdk";
 
-import { startEnsDbWriterWorker } from "@/lib/ensdb-writer-worker/singleton";
 import { logger } from "@/lib/logger";
 
 import ensNodeApi from "./handlers/ensnode-api";
-
-// The entry point for the ENSDb Writer Worker.
-startEnsDbWriterWorker();
 
 const app = new Hono();
 
