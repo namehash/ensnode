@@ -101,6 +101,15 @@ describe("EnsDbWriter", () => {
       await createEnsDbWriter().migrateEnsNodeSchema(migrationsDirPath);
 
       expect(transactionMock).toHaveBeenCalled();
+      expect(executeMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          queryChunks: expect.arrayContaining([
+            expect.objectContaining({ value: ["SELECT pg_advisory_xact_lock("] }),
+            expect.any(BigInt),
+            expect.objectContaining({ value: [")"] }),
+          ]),
+        }),
+      );
       expect(vi.mocked(migrate)).toHaveBeenCalledWith(
         expect.objectContaining({ execute: executeMock }),
         {

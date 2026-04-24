@@ -1,5 +1,5 @@
 ---
-"@ensnode/ensdb-sdk": minor
+"@ensnode/ensdb-sdk": patch
 ---
 
 Made `EnsDbWriter.migrateEnsNodeSchema` race-condition safe.

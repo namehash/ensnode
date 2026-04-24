@@ -25,7 +25,9 @@ export class EnsDbWriter extends EnsDbReader {
    * Stable arbitrary lock ID for ENSNode Schema migrations to
    * prevent concurrent migration execution across multiple ENSIndexer instances.
    */
-  private readonly MIGRATION_LOCK_ID: bigint = advisoryLockId("ensnode-schema-migration-lock");
+  private static readonly MIGRATION_LOCK_ID: bigint = advisoryLockId(
+    "ensnode-schema-migration-lock",
+  );
 
   /**
    * Execute pending database migrations for ENSNode Schema in ENSDb.
@@ -48,7 +50,7 @@ export class EnsDbWriter extends EnsDbReader {
     // connection — which is required for advisory locks to work correctly with a
     // connection pool.
     await this.drizzleClient.transaction(async (tx) => {
-      await tx.execute(sql`SELECT pg_advisory_xact_lock(${this.MIGRATION_LOCK_ID})`);
+      await tx.execute(sql`SELECT pg_advisory_xact_lock(${EnsDbWriter.MIGRATION_LOCK_ID})`);
       await migrate(tx, {
         migrationsFolder: migrationsDirPath,
         migrationsSchema: "ensnode",
