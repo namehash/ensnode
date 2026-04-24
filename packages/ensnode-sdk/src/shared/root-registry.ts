@@ -105,8 +105,8 @@ export const getRootRegistryId = (namespace: ENSNamespaceId) =>
  * plus the ENSv2 Root Registry when defined. Used by consumers that need to walk the full set of
  * canonical namegraph roots (forward traversal, canonical-set construction) rather than the single
  * "primary" root returned by {@link getRootRegistryId}. Note that for the Lineanames and Basenames
- * Shadow Registries, we consider the Managed Name's ENSv1VirtualRegistry as the root, negating
- * canonicality for any names under other names managed by said Shadow Regsitry
+ * Shadow Registries, we consider the Managed Name's ENSv1VirtualRegistry as the root, which
+ * negates canonicality for any names managed by said Shadow Registry under a different Managed Name.
  *
  * Each Registry roots its own on-chain subtree (the mainnet ENSv1Registry, Basenames/Lineanames
  * shadow Registries on their own chains) — they are not linked together at the indexed-namegraph
@@ -124,29 +124,25 @@ export const getRootRegistryIds = (namespace: ENSNamespaceId): RegistryId[] => {
     DatasourceNames.Basenames,
     "Registry",
   );
-  const basenamesRegistryId = basenamesRegistry
-    ? makeENSv1VirtualRegistryId(
-        basenamesRegistry,
-        getManagedName(namespace, basenamesRegistry).node,
-      )
-    : null;
 
   const lineanamesRegistry = maybeGetDatasourceContract(
     namespace,
     DatasourceNames.Lineanames,
     "Registry",
   );
-  const lineanamesRegistryId = lineanamesRegistry
-    ? makeENSv1VirtualRegistryId(
-        lineanamesRegistry,
-        getManagedName(namespace, lineanamesRegistry).node,
-      )
-    : null;
 
   return [
-    v1RootRegistryId, //
-    basenamesRegistryId,
-    lineanamesRegistryId,
+    v1RootRegistryId,
+    basenamesRegistry &&
+      makeENSv1VirtualRegistryId(
+        basenamesRegistry,
+        getManagedName(namespace, basenamesRegistry).node,
+      ),
+    lineanamesRegistry &&
+      makeENSv1VirtualRegistryId(
+        lineanamesRegistry,
+        getManagedName(namespace, lineanamesRegistry).node,
+      ),
     v2RootRegistryId,
   ].filter((id): id is RegistryId => !!id);
 };

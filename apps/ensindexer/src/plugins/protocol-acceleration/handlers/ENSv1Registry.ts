@@ -22,7 +22,7 @@ import { migrateNode, nodeIsMigrated } from "@/lib/protocol-acceleration/registr
 const ensRootChainId = getENSRootChainId(config.namespace);
 
 /**
- * Handler functions for Regsitry contracts in the Protocol Acceleration plugin.
+ * Handler functions for Registry contracts in the Protocol Acceleration plugin.
  * - indexes ENS Root Chain Registry migration status
  * - indexes Node-Resolver Relationships for all Registry contracts
  *

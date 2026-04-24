@@ -33,7 +33,7 @@ import { nodeIsMigrated } from "@/lib/protocol-acceleration/registry-migration-s
 const pluginName = PluginName.ENSv2;
 
 /**
- * Handler functions for ENSv1 Regsitry contracts.
+ * Handler functions for ENSv1 Registry contracts.
  * - piggybacks Protocol Resolution plugin's Node Migration status
  */
 export default function () {
@@ -65,7 +65,7 @@ export default function () {
     const { registry } = getManagedName(getThisAccountId(context, event));
     const concreteRegistryId = makeENSv1RegistryId(registry);
 
-    const isTLD = isAddressEqual(zeroAddress, parentNode);
+    const isTLD = parentNode === ENS_ROOT_NODE;
     const node = makeSubdomainNode(labelHash, parentNode);
     const domainId = makeENSv1DomainId(registry, node);
 

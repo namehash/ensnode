@@ -55,7 +55,7 @@ const MANAGED_NAME_BY_NAMESPACE: Partial<Record<ENSNamespaceId, Record<Name, Nam
 
 /**
  * Produces a mapping of a Managed Name to its concrete Registry and the contracts that operate in
- * its (sub)Registry context, memoized per namespace.
+ * its (sub)Registry context.
  *
  * The concrete ENSv1 Registry is included in `contracts` so that its own handlers resolve via the
  * same {@link getManagedName} path.
@@ -166,7 +166,7 @@ const cachedNamehash = (name: Name): Node => {
  * Given a `contract` in a `namespace`, identify its Managed Name, Node, and the concrete ENSv1
  * Registry whose namegraph it writes into.
  *
- * @dev Caches the result of namehash(name) and the contracts-by-managed-name map per namespace.
+ * @dev Caches the result of namehash(name).
  * @throws if `contract` is not configured under any Managed Name for `namespace`.
  */
 export const getManagedName = (
