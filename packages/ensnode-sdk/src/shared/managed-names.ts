@@ -21,8 +21,8 @@ import { toJson } from "./to-json";
  * they manage in order to index them correctly.
  *
  * Because we use shared indexing logic for each instance of these contracts (BaseRegistrar,
- * RegistrarControllers, NameWrapper), the concept of "which name is this contract operating in the
- * context of" must be generalizable: this is the contract's 'Managed Name'.
+ * RegistrarControllers, NameWrapper), the concept of "which name is this contract operating in
+ * the context of" must be generalizable: this is the contract's 'Managed Name'.
  *
  * Concretely, a .eth RegistrarController will emit a _LabelHash_ indicating a new Registration, but
  * correlating that LabelHash with the NameHash of the Name requires knowing the NameHash of the
@@ -54,22 +54,13 @@ const MANAGED_NAME_BY_NAMESPACE: Partial<Record<ENSNamespaceId, Record<Name, Nam
 };
 
 /**
- * Mapping of a Managed Name to its concrete Registry and the contracts that operate in its
- * (sub)Registry context, memoized per namespace.
+ * Produces a mapping of a Managed Name to its concrete Registry and the contracts that operate in
+ * its (sub)Registry context, memoized per namespace.
  *
  * The concrete ENSv1 Registry is included in `contracts` so that its own handlers resolve via the
- * same {@link getManagedName} path. The mainnet ENSv1Registry's Managed Name is the ENS Root (""),
- * so direct children of root (TLDs) point at the concrete Registry and everything below gets a
- * virtual Registry.
- *
- * Groups for namespaces that don't ship a given shadow Registry are omitted entirely.
+ * same {@link getManagedName} path.
  */
-const contractsByManagedNameCache = new Map<ENSNamespaceId, Record<Name, ManagedNameGroup>>();
-
-const getContractsByManagedName = (namespace: ENSNamespaceId): Record<Name, ManagedNameGroup> => {
-  const cached = contractsByManagedNameCache.get(namespace);
-  if (cached) return cached;
-
+const getContractsByManagedName = (namespace: ENSNamespaceId) => {
   const ensRootRegistry = getDatasourceContract(
     namespace,
     DatasourceNames.ENSRoot,
@@ -102,7 +93,7 @@ const getContractsByManagedName = (namespace: ENSNamespaceId): Record<Name, Mana
     "NameWrapper",
   );
 
-  const groups: Record<Name, ManagedNameGroup> = {
+  return {
     [ENS_ROOT_NAME]: {
       registry: ensRootRegistry,
       contracts: [ensRootRegistry, ensRootRegistryOld],
@@ -140,7 +131,7 @@ const getContractsByManagedName = (namespace: ENSNamespaceId): Record<Name, Mana
             "UpgradeableRegistrarController",
           ),
         ].filter((c): c is AccountId => !!c),
-      } satisfies ManagedNameGroup,
+      },
     }),
     ...(lineanamesRegistry && {
       "linea.eth": {
@@ -155,12 +146,9 @@ const getContractsByManagedName = (namespace: ENSNamespaceId): Record<Name, Mana
           ),
           lineanamesNameWrapper,
         ].filter((c): c is AccountId => !!c),
-      } satisfies ManagedNameGroup,
+      },
     }),
-  };
-
-  contractsByManagedNameCache.set(namespace, groups);
-  return groups;
+  } satisfies Record<Name, ManagedNameGroup>;
 };
 
 // Cache of namehash(name) — interpreted names namehash identically regardless of namespace.
@@ -175,8 +163,8 @@ const cachedNamehash = (name: Name): Node => {
 };
 
 /**
- * Given a `contract`, identify its Managed Name, Node, and the concrete ENSv1 Registry whose
- * namegraph it writes into.
+ * Given a `contract` in a `namespace`, identify its Managed Name, Node, and the concrete ENSv1
+ * Registry whose namegraph it writes into.
  *
  * @dev Caches the result of namehash(name) and the contracts-by-managed-name map per namespace.
  * @throws if `contract` is not configured under any Managed Name for `namespace`.

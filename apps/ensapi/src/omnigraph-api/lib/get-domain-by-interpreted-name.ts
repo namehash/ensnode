@@ -75,18 +75,14 @@ export async function getDomainIdByInterpretedName(
     // prefer the v2 Root's result when present, otherwise the first non-null hit from any v1 root.
     const v2Index = v2Root ? roots.indexOf(v2Root) : -1;
     const v2Hit = v2Index >= 0 ? results[v2Index] : null;
+    // TODO: need to implement some resolution logic here to correctly choose which v1 domain ?
+    // i.e. differentiating between bridge.linea.eth on L1 and bridge.linea.eth on L2 requires Bridged Resolver logic...
     return v2Hit ?? results.find((r): r is DomainId => r !== null) ?? null;
   });
 }
 
 /**
- * Forward-traverses the namegraph from `rootRegistryId`, one label at a time, using the unified
- * `domain.subregistryId` pointer to hop from a parent Domain to the Registry its subnames live in.
- *
- * Both ENSv1 and ENSv2 Domains set `subregistryId` — ENSv1 Domains to their managed ENSv1
- * VirtualRegistry (set on first-child indexing), ENSv2 Domains to their declared Subregistry — so
- * a single recursive CTE handles both lineages. The starting root picks which lineage: v1 and v2
- * registry IDs are disjoint, so there is no cross-contamination.
+ * Forward-traverses the namegraph from `rootRegistryId` to retrieve the DomainId addressed by `name`.
  */
 async function traverseFromRoot(
   rootRegistryId: RegistryId,
