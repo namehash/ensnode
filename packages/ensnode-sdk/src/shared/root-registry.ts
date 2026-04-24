@@ -1,11 +1,16 @@
-import { type AccountId, makeENSv1RegistryId, makeENSv2RegistryId, type RegistryId } from "enssdk";
+import {
+  type AccountId,
+  makeENSv1RegistryId,
+  makeENSv1VirtualRegistryId,
+  makeENSv2RegistryId,
+  type RegistryId,
+} from "enssdk";
 
 import { DatasourceNames, type ENSNamespaceId } from "@ensnode/datasources";
-import {
-  accountIdEqual,
-  getDatasourceContract,
-  maybeGetDatasourceContract,
-} from "@ensnode/ensnode-sdk";
+
+import { accountIdEqual } from "./account-id";
+import { getDatasourceContract, maybeGetDatasourceContract } from "./datasource-contract";
+import { getManagedName } from "./managed-names";
 
 //////////////
 // ENSv1
@@ -22,23 +27,6 @@ export const getENSv1Registry = (namespace: ENSNamespaceId) =>
  */
 export const getENSv1RootRegistryId = (namespace: ENSNamespaceId) =>
   makeENSv1RegistryId(getENSv1Registry(namespace));
-
-/**
- * Gets the AccountId representing the ENSv1 Registry in the selected `namespace` if defined,
- * otherwise `undefined`.
- */
-export const maybeGetENSv1Registry = (namespace: ENSNamespaceId) =>
-  maybeGetDatasourceContract(namespace, DatasourceNames.ENSRoot, "ENSv1Registry");
-
-/**
- * Gets the ENSv1RegistryId representing the ENSv1 Root Registry in the selected `namespace` if
- * defined, otherwise `undefined`.
- */
-export const maybeGetENSv1RootRegistryId = (namespace: ENSNamespaceId) => {
-  const root = maybeGetENSv1Registry(namespace);
-  if (!root) return undefined;
-  return makeENSv1RegistryId(root);
-};
 
 /**
  * Determines whether `contract` is the ENSv1 Registry in `namespace`.
@@ -112,28 +100,53 @@ export const getRootRegistryId = (namespace: ENSNamespaceId) =>
   maybeGetENSv2RootRegistryId(namespace) ?? getENSv1RootRegistryId(namespace);
 
 /**
- * Gets every top-level Root Registry configured for the namespace: all concrete ENSv1Registries
- * (ENSRoot, Basenames, Lineanames) plus the ENSv2 Root Registry when defined. Used by consumers
- * that need to walk the full set of canonical namegraph roots (forward traversal, canonical-set
- * construction) rather than the single "primary" root returned by {@link getRootRegistryId}.
+ * Gets every top-level Root Registry configured for the namespace: all ENSv1Registries
+ * (ENSRoot ENSv1Registry, Basenames base.eth ENSv1VirtualRegistry, Lineanames linea.eth ENSv1VirtualRegistry)
+ * plus the ENSv2 Root Registry when defined. Used by consumers that need to walk the full set of
+ * canonical namegraph roots (forward traversal, canonical-set construction) rather than the single
+ * "primary" root returned by {@link getRootRegistryId}. Note that for the Lineanames and Basenames
+ * Shadow Registries, we consider the Managed Name's ENSv1VirtualRegistry as the root, negating
+ * canonicality for any names under other names managed by said Shadow Regsitry
  *
- * Each concrete ENSv1Registry roots its own on-chain subtree (the mainnet ENSv1Registry,
- * Basenames/Lineanames shadow Registries on their own chains) — they are not linked together at
- * the indexed-namegraph level, so a traversal that starts from a single root cannot reach them all.
+ * Each Registry roots its own on-chain subtree (the mainnet ENSv1Registry, Basenames/Lineanames
+ * shadow Registries on their own chains) — they are not linked together at the indexed-namegraph
+ * level, so a traversal that starts from a single root cannot reach them all.
  *
- * TODO(ensv2-shadow): when CCIP-read ENSv2 shadow Registries are introduced, extend this helper to
- * enumerate them. ENSv1 top-level registries are structurally identifiable (any `registry.type =
- * "ENSv1Registry"` row is top-level); ENSv2 is not, so we rely on datasource configuration here.
+ * TODO(ensv2-shadow): when well-known CCIP-read ENSv2 Registries are introduced, extend this helper to
+ * enumerate them.
  */
 export const getRootRegistryIds = (namespace: ENSNamespaceId): RegistryId[] => {
-  const v1Registries = [
-    getENSv1Registry(namespace),
-    maybeGetDatasourceContract(namespace, DatasourceNames.Basenames, "Registry"),
-    maybeGetDatasourceContract(namespace, DatasourceNames.Lineanames, "Registry"),
-  ]
-    .filter((c): c is AccountId => c !== undefined)
-    .map(makeENSv1RegistryId);
+  const v1RootRegistryId = getENSv1RootRegistryId(namespace);
+  const v2RootRegistryId = maybeGetENSv2RootRegistryId(namespace);
 
-  const v2Root = maybeGetENSv2RootRegistryId(namespace);
-  return v2Root ? [...v1Registries, v2Root] : v1Registries;
+  const basenamesRegistry = maybeGetDatasourceContract(
+    namespace,
+    DatasourceNames.Basenames,
+    "Registry",
+  );
+  const basenamesRegistryId = basenamesRegistry
+    ? makeENSv1VirtualRegistryId(
+        basenamesRegistry,
+        getManagedName(namespace, basenamesRegistry).node,
+      )
+    : null;
+
+  const lineanamesRegistry = maybeGetDatasourceContract(
+    namespace,
+    DatasourceNames.Lineanames,
+    "Registry",
+  );
+  const lineanamesRegistryId = lineanamesRegistry
+    ? makeENSv1VirtualRegistryId(
+        lineanamesRegistry,
+        getManagedName(namespace, lineanamesRegistry).node,
+      )
+    : null;
+
+  return [
+    v1RootRegistryId, //
+    basenamesRegistryId,
+    lineanamesRegistryId,
+    v2RootRegistryId,
+  ].filter((id): id is RegistryId => !!id);
 };

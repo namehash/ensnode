@@ -1,13 +1,9 @@
-import { namehashInterpretedName } from "enssdk";
+import type { AccountId } from "enssdk";
 
-import type { ENSNamespaceId } from "@ensnode/datasources";
+import { DatasourceNames, type ENSNamespaceId } from "@ensnode/datasources";
 import {
-  getBasenamesSubregistryId,
-  getBasenamesSubregistryManagedName,
-  getEthnamesSubregistryId,
-  getEthnamesSubregistryManagedName,
-  getLineanamesSubregistryId,
-  getLineanamesSubregistryManagedName,
+  getManagedName,
+  maybeGetDatasourceContract,
   PluginName,
   type Subregistry,
 } from "@ensnode/ensnode-sdk";
@@ -19,28 +15,22 @@ export function getIndexedSubregistries(
   namespaceId: ENSNamespaceId,
   activePlugins: PluginName[],
 ): Subregistry[] {
-  const indexedSubregistries: Subregistry[] = [];
+  // Each entry: the plugin whose activation implies the subregistry is indexed, and the datasource
+  // whose BaseRegistrar contract is that subregistry's SubregistryId.
+  const entries = [
+    { plugin: PluginName.Subgraph, datasource: DatasourceNames.ENSRoot },
+    { plugin: PluginName.Basenames, datasource: DatasourceNames.Basenames },
+    { plugin: PluginName.Lineanames, datasource: DatasourceNames.Lineanames },
+  ] as const;
 
-  if (activePlugins.includes(PluginName.Subgraph)) {
-    indexedSubregistries.push({
-      subregistryId: getEthnamesSubregistryId(namespaceId),
-      node: namehashInterpretedName(getEthnamesSubregistryManagedName(namespaceId)),
-    });
-  }
+  return entries.flatMap(({ plugin, datasource }): Subregistry[] => {
+    if (!activePlugins.includes(plugin)) return [];
 
-  if (activePlugins.includes(PluginName.Basenames)) {
-    indexedSubregistries.push({
-      subregistryId: getBasenamesSubregistryId(namespaceId),
-      node: namehashInterpretedName(getBasenamesSubregistryManagedName(namespaceId)),
-    });
-  }
+    const baseRegistrar = maybeGetDatasourceContract(namespaceId, datasource, "BaseRegistrar");
+    if (!baseRegistrar) return [];
 
-  if (activePlugins.includes(PluginName.Lineanames)) {
-    indexedSubregistries.push({
-      subregistryId: getLineanamesSubregistryId(namespaceId),
-      node: namehashInterpretedName(getLineanamesSubregistryManagedName(namespaceId)),
-    });
-  }
-
-  return indexedSubregistries;
+    // Reverse-lookup the BaseRegistrar's Managed Name to get its node.
+    const { node } = getManagedName(namespaceId, baseRegistrar satisfies AccountId);
+    return [{ subregistryId: baseRegistrar, node }];
+  });
 }
