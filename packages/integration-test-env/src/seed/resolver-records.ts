@@ -140,13 +140,3 @@ async function setInterfaceImplementer(
   });
   console.log(`[seed] setInterface(interfaceId=${interfaceId}) tx: ${hash}`);
 }
-
-// async function clearResolverRecords(walletClient: DevnetWalletClient, node: Hex): Promise<void> {
-//   const hash = await walletClient.writeContract({
-//     address: PUBLIC_RESOLVER,
-//     abi: publicResolverAbi,
-//     functionName: "clearRecords",
-//     args: [node],
-//   });
-//   console.log(`[seed] clearRecords() tx: ${hash}`);
-// }
