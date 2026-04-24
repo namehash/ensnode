@@ -4,6 +4,8 @@ import { isAbsolute, resolve } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
+import type { EnsRainbowPublicConfig } from "@ensnode/ensnode-sdk";
+
 import { DB_SCHEMA_VERSION } from "@/lib/database";
 
 import {
@@ -385,7 +387,7 @@ describe("parseDataDirFromCli", () => {
 
 describe("buildEnsRainbowPublicConfig", () => {
   const dbConfig: DbConfig = {
-    labelSet: {
+    serverLabelSet: {
       labelSetId: "subgraph",
       highestLabelSetVersion: 0,
     },
@@ -396,9 +398,10 @@ describe("buildEnsRainbowPublicConfig", () => {
     const result = buildEnsRainbowPublicConfig(dbConfig);
 
     expect(result).toStrictEqual({
-      version: packageJson.version,
-      labelSet: dbConfig.labelSet,
-      recordsCount: dbConfig.recordsCount,
-    });
+      serverLabelSet: dbConfig.serverLabelSet,
+      versionInfo: {
+        ensRainbow: packageJson.version,
+      },
+    } satisfies EnsRainbowPublicConfig);
   });
 });

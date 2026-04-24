@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/ensdb-sdk",
-  "version": "1.10.0",
+  "version": "1.10.1",
   "type": "module",
   "description": "SDK for interacting with data in ENSDb",
   "license": "MIT",

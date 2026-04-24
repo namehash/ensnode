@@ -1,5 +1,15 @@
 # @ensnode/ensnode-sdk
 
+## 1.10.1
+
+### Patch Changes
+
+- [#1973](https://github.com/namehash/ensnode/pull/1973) [`9d50f64`](https://github.com/namehash/ensnode/commit/9d50f647802fde286dfef2dc23c884801d06b228) Thanks [@Goader](https://github.com/Goader)! - Add `subtractPrice`, `minPrice`, and `maxPrice` helpers to `@ensnode/ensnode-sdk`.
+
+- Updated dependencies []:
+  - enssdk@1.10.1
+  - @ensnode/datasources@1.10.1
+
 ## 1.10.0
 
 ### Minor Changes

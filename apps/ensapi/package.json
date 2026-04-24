@@ -1,6 +1,6 @@
 {
   "name": "ensapi",
-  "version": "1.10.0",
+  "version": "1.10.1",
   "private": true,
   "type": "module",
   "description": "ENSNode's ENS API",
@@ -41,7 +41,6 @@
     "@opentelemetry/sdk-trace-node": "^2.0.1",
     "@opentelemetry/semantic-conventions": "^1.34.0",
     "@ponder/client": "catalog:",
-    "@ponder/utils": "catalog:",
     "@pothos/core": "^4.10.0",
     "@pothos/plugin-dataloader": "^4.4.3",
     "@pothos/plugin-relay": "^4.6.2",

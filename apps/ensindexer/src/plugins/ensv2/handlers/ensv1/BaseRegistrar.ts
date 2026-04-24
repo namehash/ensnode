@@ -9,7 +9,12 @@ import {
 } from "enssdk";
 import { isAddressEqual, zeroAddress } from "viem";
 
-import { interpretAddress, isRegistrationFullyExpired, PluginName } from "@ensnode/ensnode-sdk";
+import {
+  interpretAddress,
+  isRegistrationFullyExpired,
+  PluginName,
+  toJson,
+} from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { materializeENSv1DomainEffectiveOwner } from "@/lib/ensv2/domain-db-helpers";
@@ -25,7 +30,6 @@ import {
   ensIndexerSchema,
   type IndexingEngineContext,
 } from "@/lib/indexing-engines/ponder";
-import { toJson } from "@/lib/json-stringify-with-bigints";
 import { getManagedName } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
@@ -120,7 +124,7 @@ export default function () {
     // Invariant: If there is an existing Registration, it must be fully expired.
     if (registration && !isFullyExpired) {
       throw new Error(
-        `Invariant(BaseRegistrar:NameRegistered): Existing unexpired registration found in NameRegistered, expected none or expired.\n${toJson(registration)}`,
+        `Invariant(BaseRegistrar:NameRegistered): Existing unexpired registration found in NameRegistered, expected none or expired.\n${toJson(registration, { pretty: true })}`,
       );
     }
 
@@ -184,6 +188,7 @@ export default function () {
               node,
               domainId,
             },
+            { pretty: true },
           )}`,
         );
       }
@@ -193,6 +198,7 @@ export default function () {
         throw new Error(
           `Invariant(BaseRegistrar:NameRenewed): NameRenewed emitted for a non-BaseRegistrar registration:\n${toJson(
             { labelHash, managedNode, node, domainId, registration },
+            { pretty: true },
           )}`,
         );
       }
@@ -202,6 +208,7 @@ export default function () {
         throw new Error(
           `Invariant(BaseRegistrar:NameRenewed): NameRenewed emitted for a BaseRegistrar registration that has a null expiry:\n${toJson(
             { labelHash, managedNode, node, domainId, registration },
+            { pretty: true },
           )}`,
         );
       }
@@ -219,6 +226,7 @@ export default function () {
               registration,
               timestamp: event.block.timestamp,
             },
+            { pretty: true },
           )}`,
         );
       }

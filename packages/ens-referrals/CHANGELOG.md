@@ -1,5 +1,15 @@
 # @namehash/ens-referrals
 
+## 1.10.1
+
+### Patch Changes
+
+- [#1973](https://github.com/namehash/ensnode/pull/1973) [`9d50f64`](https://github.com/namehash/ensnode/commit/9d50f647802fde286dfef2dc23c884801d06b228) Thanks [@Goader](https://github.com/Goader)! - Refine internal `ReferrerRaceState` fields in the rev-share-cap race algorithm: rename `totalRevenueContributionAmount`/`cappedAwardAmount`/`wasQualified` to `totalRevenueContribution` (`PriceEth`) / `cappedAward` (`PriceUsdc`) / `hasQualified`, and rewrite the loop body to operate on `Price` objects end-to-end. Extract the repeated `baseAnnualRevenueContribution × (duration / 1 year)` formula into a `calcBaseRevenueContribution` domain helper and apply it at all rev-share-cap call sites.
+
+- Updated dependencies [[`9d50f64`](https://github.com/namehash/ensnode/commit/9d50f647802fde286dfef2dc23c884801d06b228)]:
+  - @ensnode/ensnode-sdk@1.10.1
+  - enssdk@1.10.1
+
 ## 1.10.0
 
 ### Minor Changes

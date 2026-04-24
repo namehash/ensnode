@@ -7,7 +7,7 @@ import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 
 import { logger } from "@/lib/logger";
 
-const { ensRainbowUrl, labelSet } = config;
+const { ensRainbowUrl, clientLabelSet } = config;
 
 if (ensRainbowUrl.href === EnsRainbowApiClient.defaultOptions().endpointUrl.href) {
   logger.warn({
@@ -21,7 +21,7 @@ if (ensRainbowUrl.href === EnsRainbowApiClient.defaultOptions().endpointUrl.href
  */
 export const ensRainbowClient = new EnsRainbowApiClient({
   endpointUrl: ensRainbowUrl,
-  labelSet,
+  clientLabelSet,
 });
 
 /**

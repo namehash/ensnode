@@ -15,6 +15,18 @@ import * as ensNodeSchema from "../ensnode";
 import { createChecksum } from "./checksum";
 
 /**
+ * PostgreSQL startup `options` string for ENSDb connections.
+ *
+ * Sets `search_path` so unqualified references (notably the `gin_trgm_ops`
+ * opclass from the pg_trgm extension, installed in the `ensnode` schema by
+ * migration 0001) resolve correctly at query and index-creation time.
+ *
+ * Pass via node-postgres `PoolConfig.options` (e.g. Ponder's
+ * `database.poolConfig.options`) or Drizzle's connection config.
+ */
+export const ENSDB_CONNECTION_OPTIONS = "-c search_path=ensnode,public";
+
+/**
  * Abstract ENSIndexer Schema
  *
  * Represents the "abstract" ENSIndexer Schema definition, where tables do not reference
@@ -164,7 +176,7 @@ export function buildEnsDbDrizzleClient<ConcreteEnsIndexerSchema extends Abstrac
   const ensDbSchema = buildEnsDbSchema<ConcreteEnsIndexerSchema>(concreteEnsIndexerSchema);
 
   return drizzle({
-    connection: connectionString,
+    connection: { connectionString, options: ENSDB_CONNECTION_OPTIONS },
     schema: ensDbSchema,
     casing: "snake_case",
     logger,

@@ -1,6 +1,6 @@
 {
   "name": "enssdk",
-  "version": "1.10.0",
+  "version": "1.10.1",
   "type": "module",
   "description": "The foundational ENS development library",
   "license": "MIT",

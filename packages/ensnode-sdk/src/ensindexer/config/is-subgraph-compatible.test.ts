@@ -6,7 +6,7 @@ import { isSubgraphCompatible } from "./is-subgraph-compatible";
 import { PluginName } from "./types";
 
 describe("isSubgraphCompatible", () => {
-  const subgraphCompatibleLabelSet = {
+  const subgraphCompatibleClientLabelSet = {
     labelSetId: "subgraph" as const,
     labelSetVersion: 0,
   };
@@ -16,7 +16,7 @@ describe("isSubgraphCompatible", () => {
       isSubgraphCompatible({
         namespace: ENSNamespaceIds.Mainnet,
         plugins: [PluginName.Subgraph],
-        labelSet: subgraphCompatibleLabelSet,
+        clientLabelSet: subgraphCompatibleClientLabelSet,
       }),
     ).toBe(true);
   });
@@ -26,7 +26,7 @@ describe("isSubgraphCompatible", () => {
       isSubgraphCompatible({
         namespace: ENSNamespaceIds.Mainnet,
         plugins: [],
-        labelSet: subgraphCompatibleLabelSet,
+        clientLabelSet: subgraphCompatibleClientLabelSet,
       }),
     ).toBe(false);
 
@@ -34,7 +34,7 @@ describe("isSubgraphCompatible", () => {
       isSubgraphCompatible({
         namespace: ENSNamespaceIds.Mainnet,
         plugins: [PluginName.Subgraph, PluginName.Lineanames],
-        labelSet: subgraphCompatibleLabelSet,
+        clientLabelSet: subgraphCompatibleClientLabelSet,
       }),
     ).toBe(false);
   });
@@ -44,7 +44,7 @@ describe("isSubgraphCompatible", () => {
       isSubgraphCompatible({
         namespace: ENSNamespaceIds.Mainnet,
         plugins: [PluginName.Subgraph],
-        labelSet: {
+        clientLabelSet: {
           labelSetId: "other-label-set",
           labelSetVersion: 0,
         },
@@ -57,7 +57,7 @@ describe("isSubgraphCompatible", () => {
       isSubgraphCompatible({
         namespace: ENSNamespaceIds.Mainnet,
         plugins: [PluginName.Subgraph],
-        labelSet: {
+        clientLabelSet: {
           labelSetId: "subgraph",
           labelSetVersion: 1,
         },
@@ -70,7 +70,7 @@ describe("isSubgraphCompatible", () => {
       isSubgraphCompatible({
         namespace: ENSNamespaceIds.EnsTestEnv,
         plugins: [PluginName.Subgraph],
-        labelSet: {
+        clientLabelSet: {
           labelSetId: "ens-test-env",
           labelSetVersion: 0,
         },

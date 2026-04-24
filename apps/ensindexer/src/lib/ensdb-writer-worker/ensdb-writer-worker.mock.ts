@@ -20,9 +20,10 @@ import type { PublicConfigBuilder } from "@/lib/public-config-builder";
 
 // Test fixture for EnsRainbowPublicConfig
 export const mockEnsRainbowPublicConfig: EnsRainbowPublicConfig = {
-  version: "1.0.0",
-  labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
-  recordsCount: 1000,
+  serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+  versionInfo: {
+    ensRainbow: "1.0.0",
+  },
 };
 
 // Test fixture for EnsIndexerVersionInfo
@@ -36,7 +37,7 @@ export const mockVersionInfo: EnsIndexerVersionInfo = {
 // Test fixture for EnsIndexerPublicConfig
 export const mockPublicConfig: EnsIndexerPublicConfig = {
   ensIndexerSchemaName: "ensindexer_0",
-  labelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
+  clientLabelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
   ensRainbowPublicConfig: mockEnsRainbowPublicConfig,
   indexedChainIds: new Set([1, 8453]),
   isSubgraphCompatible: true,
