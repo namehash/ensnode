@@ -4,7 +4,7 @@ import type { EnsRainbowPublicConfig } from "../ensrainbow/config";
 import { validateEnsIndexerStackInfo } from "./validate/ensindexer-stack-info";
 
 /**
- * Information about the stack of services inside an ENSIndexer instance.
+ * Information about the stack of services associated with an ENSIndexer instance.
  */
 export interface EnsIndexerStackInfo {
   /**

@@ -9,39 +9,30 @@ import type {
 // Shared Constants
 // ============================================================================
 
-const COMMON_ENS_DB = {
+const COMMON_ENSDB_CONFIG = {
   versionInfo: {
     postgresql: "18.1",
   },
 } as const;
 
-const COMMON_VERSION_INFO = {
+const COMMON_ENSINDEXER_VERSION_INFO = {
   ponder: "0.11.43",
   ensDb: "1.9.0",
   ensIndexer: "1.9.0",
   ensNormalize: "1.11.1",
 } as const;
 
-const COMMON_ENS_API_VERSION_INFO = {
+const COMMON_ENSAPI_VERSION_INFO = {
   ensApi: "1.9.0",
   ensNormalize: "1.11.1",
 } as const;
 
-const COMMON_LABEL_SET = {
+const COMMON_CLIENT_LABEL_SET = {
   labelSetId: "subgraph",
   labelSetVersion: 0,
 } as const;
 
-const COMMON_ENS_RAINBOW = {
-  version: "1.9.0",
-  labelSet: {
-    labelSetId: "subgraph",
-    highestLabelSetVersion: 0,
-  },
-  recordsCount: 100,
-} as const;
-
-const ENS_RAINBOW_PUBLIC_CONFIG = {
+const COMMON_ENSRAINBOW_CONFIG = {
   version: "1.9.0",
   labelSet: {
     labelSetId: "subgraph",
@@ -93,11 +84,15 @@ const SUBGRAPH_SEPOLIA_CHAINS: SerializedEnsIndexerPublicConfig["indexedChainIds
 // Helper Functions for Creating Variants
 // ============================================================================
 
-function createEnsRainbow() {
-  return { ...COMMON_ENS_RAINBOW };
+function createEnsDbConfig() {
+  return { ...COMMON_ENSDB_CONFIG };
 }
 
-function createEnsIndexer(
+function createEnsRainbowConfig() {
+  return { ...COMMON_ENSRAINBOW_CONFIG };
+}
+
+function createEnsIndexerConfig(
   namespace: SerializedEnsIndexerPublicConfig["namespace"],
   indexedChainIds: SerializedEnsIndexerPublicConfig["indexedChainIds"],
   plugins: SerializedEnsIndexerPublicConfig["plugins"],
@@ -105,18 +100,18 @@ function createEnsIndexer(
   isSubgraphCompatible: boolean,
 ): SerializedEnsIndexerPublicConfig {
   return {
-    labelSet: { ...COMMON_LABEL_SET },
+    labelSet: { ...COMMON_CLIENT_LABEL_SET },
     indexedChainIds,
     ensIndexerSchemaName,
     isSubgraphCompatible,
     namespace,
     plugins,
-    versionInfo: { ...COMMON_VERSION_INFO },
-    ensRainbowPublicConfig: { ...ENS_RAINBOW_PUBLIC_CONFIG },
+    versionInfo: { ...COMMON_ENSINDEXER_VERSION_INFO },
+    ensRainbowPublicConfig: createEnsRainbowConfig(),
   };
 }
 
-function createEnsApi(
+function createEnsApiConfig(
   namespace: SerializedEnsIndexerPublicConfig["namespace"],
   indexedChainIds: SerializedEnsIndexerPublicConfig["indexedChainIds"],
   plugins: SerializedEnsIndexerPublicConfig["plugins"],
@@ -125,26 +120,24 @@ function createEnsApi(
   theGraphFallback: TheGraphFallback,
 ): SerializedEnsApiPublicConfig {
   return {
-    versionInfo: { ...COMMON_ENS_API_VERSION_INFO },
+    versionInfo: { ...COMMON_ENSAPI_VERSION_INFO },
     theGraphFallback,
     ensIndexerPublicConfig: {
-      labelSet: { ...COMMON_LABEL_SET },
-      versionInfo: { ...COMMON_VERSION_INFO },
-      indexedChainIds,
-      namespace,
-      plugins,
-      ensIndexerSchemaName,
-      isSubgraphCompatible,
-      ensRainbowPublicConfig: { ...ENS_RAINBOW_PUBLIC_CONFIG },
+      ...createEnsIndexerConfig(
+        namespace,
+        indexedChainIds,
+        plugins,
+        ensIndexerSchemaName,
+        isSubgraphCompatible,
+      ),
     },
   };
 }
-
-function createAlphaEnsIndexer(
+function createAlphaEnsIndexerConfig(
   namespace: "mainnet" | "sepolia",
   isMainnet: boolean,
 ): SerializedEnsIndexerPublicConfig {
-  return createEnsIndexer(
+  return createEnsIndexerConfig(
     namespace,
     isMainnet ? ALPHA_MAINNET_CHAINS : ALPHA_SEPOLIA_CHAINS,
     [...(isMainnet ? ALPHA_PLUGINS : ALPHA_SEPOLIA_PLUGINS)],
@@ -153,12 +146,12 @@ function createAlphaEnsIndexer(
   );
 }
 
-function createAlphaEnsApi(
+function createAlphaEnsApiConfig(
   namespace: "mainnet" | "sepolia",
   isMainnet: boolean,
   theGraphFallback: TheGraphFallback,
 ): SerializedEnsApiPublicConfig {
-  return createEnsApi(
+  return createEnsApiConfig(
     namespace,
     isMainnet ? ALPHA_MAINNET_CHAINS : ALPHA_SEPOLIA_CHAINS,
     [...(isMainnet ? ALPHA_PLUGINS : ALPHA_SEPOLIA_PLUGINS)],
@@ -168,11 +161,11 @@ function createAlphaEnsApi(
   );
 }
 
-function createSubgraphEnsIndexer(
+function createSubgraphEnsIndexerConfig(
   namespace: "mainnet" | "sepolia",
   isMainnet: boolean,
 ): SerializedEnsIndexerPublicConfig {
-  return createEnsIndexer(
+  return createEnsIndexerConfig(
     namespace,
     isMainnet ? SUBGRAPH_MAINNET_CHAINS : SUBGRAPH_SEPOLIA_CHAINS,
     [...SUBGRAPH_PLUGINS],
@@ -181,11 +174,11 @@ function createSubgraphEnsIndexer(
   );
 }
 
-function createSubgraphEnsApi(
+function createSubgraphEnsApiConfig(
   namespace: "mainnet" | "sepolia",
   isMainnet: boolean,
 ): SerializedEnsApiPublicConfig {
-  return createEnsApi(
+  return createEnsApiConfig(
     namespace,
     isMainnet ? SUBGRAPH_MAINNET_CHAINS : SUBGRAPH_SEPOLIA_CHAINS,
     [...SUBGRAPH_PLUGINS],
@@ -202,7 +195,7 @@ function createSubgraphEnsApi(
 function createDeserializationErrorVariant(): SerializedEnsNodeStackInfo {
   return {
     ensApi: {
-      versionInfo: { ...COMMON_ENS_API_VERSION_INFO },
+      versionInfo: { ...COMMON_ENSAPI_VERSION_INFO },
       theGraphFallback: { ...THE_GRAPH_FALLBACK_DISABLED },
       ensIndexerPublicConfig: {
         labelSet: {
@@ -230,7 +223,7 @@ function createDeserializationErrorVariant(): SerializedEnsNodeStackInfo {
         },
       },
     },
-    ensDb: { ...COMMON_ENS_DB },
+    ensDb: createEnsDbConfig(),
     ensIndexer: {
       labelSet: {
         labelSetId: "",
@@ -277,28 +270,28 @@ function createDeserializationErrorVariant(): SerializedEnsNodeStackInfo {
  */
 export const mockSerializedEnsNodeStackInfo = {
   "Alpha Mainnet": {
-    ensApi: createAlphaEnsApi("mainnet", true, { ...THE_GRAPH_FALLBACK_DISABLED }),
-    ensDb: { ...COMMON_ENS_DB },
-    ensIndexer: createAlphaEnsIndexer("mainnet", true),
-    ensRainbow: createEnsRainbow(),
+    ensApi: createAlphaEnsApiConfig("mainnet", true, { ...THE_GRAPH_FALLBACK_DISABLED }),
+    ensDb: createEnsDbConfig(),
+    ensIndexer: createAlphaEnsIndexerConfig("mainnet", true),
+    ensRainbow: createEnsRainbowConfig(),
   },
   "Alpha Sepolia": {
-    ensApi: createAlphaEnsApi("sepolia", false, { canFallback: true, url: "" }),
-    ensDb: { ...COMMON_ENS_DB },
-    ensIndexer: createAlphaEnsIndexer("sepolia", false),
-    ensRainbow: createEnsRainbow(),
+    ensApi: createAlphaEnsApiConfig("sepolia", false, { canFallback: true, url: "" }),
+    ensDb: createEnsDbConfig(),
+    ensIndexer: createAlphaEnsIndexerConfig("sepolia", false),
+    ensRainbow: createEnsRainbowConfig(),
   },
   "Subgraph Mainnet": {
-    ensApi: createSubgraphEnsApi("mainnet", true),
-    ensDb: { ...COMMON_ENS_DB },
-    ensIndexer: createSubgraphEnsIndexer("mainnet", true),
-    ensRainbow: createEnsRainbow(),
+    ensApi: createSubgraphEnsApiConfig("mainnet", true),
+    ensDb: createEnsDbConfig(),
+    ensIndexer: createSubgraphEnsIndexerConfig("mainnet", true),
+    ensRainbow: createEnsRainbowConfig(),
   },
   "Subgraph Sepolia": {
-    ensApi: createSubgraphEnsApi("sepolia", false),
-    ensDb: { ...COMMON_ENS_DB },
-    ensIndexer: createSubgraphEnsIndexer("sepolia", false),
-    ensRainbow: createEnsRainbow(),
+    ensApi: createSubgraphEnsApiConfig("sepolia", false),
+    ensDb: createEnsDbConfig(),
+    ensIndexer: createSubgraphEnsIndexerConfig("sepolia", false),
+    ensRainbow: createEnsRainbowConfig(),
   },
   "Deserialization Error": createDeserializationErrorVariant(),
 } as const satisfies Record<string, SerializedEnsNodeStackInfo>;
