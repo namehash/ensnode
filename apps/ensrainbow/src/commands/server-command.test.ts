@@ -11,6 +11,7 @@ import { buildEnsRainbowPublicConfig } from "@/config/public";
 import { createApi } from "@/lib/api";
 import { ENSRainbowDB } from "@/lib/database";
 import { buildDbConfig, ENSRainbowServer } from "@/lib/server";
+import { closeHttpServer } from "@/utils/http-server";
 
 describe("Server Command Tests", () => {
   let db: ENSRainbowDB;
@@ -57,7 +58,7 @@ describe("Server Command Tests", () => {
   afterAll(async () => {
     // Cleanup
     try {
-      if (server) await server.close();
+      if (server) await closeHttpServer(server);
       if (db) await db.close();
       await fs.rm(TEST_DB_DIR, { recursive: true, force: true });
     } catch (error) {
@@ -219,7 +220,7 @@ describe("Server Command Tests", () => {
 
     afterAll(async () => {
       try {
-        if (pendingServer) await pendingServer.close();
+        if (pendingServer) await closeHttpServer(pendingServer);
         await pendingEnsRainbowServer.close();
       } catch (error) {
         console.error("Pending server cleanup failed:", error);

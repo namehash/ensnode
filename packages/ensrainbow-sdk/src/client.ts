@@ -398,6 +398,14 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
   async health(): Promise<EnsRainbow.HealthResponse> {
     const response = await fetch(new URL("/health", this.options.endpointUrl));
 
+    if (!response.ok) {
+      throw new Error(
+        `ENSRainbow health check failed (HTTP ${response.status}${
+          response.statusText ? ` ${response.statusText}` : ""
+        })`,
+      );
+    }
+
     return response.json() as Promise<EnsRainbow.HealthResponse>;
   }
 

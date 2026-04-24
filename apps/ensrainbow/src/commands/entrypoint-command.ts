@@ -143,8 +143,14 @@ export async function entrypointCommand(
   };
 
   if (options.registerSignalHandlers !== false) {
-    process.on("SIGTERM", close);
-    process.on("SIGINT", close);
+    const closeFromSignal = () => {
+      // Node does not await signal handlers; never allow shutdown errors to become
+      // unhandled promise rejections during process teardown.
+      void close().catch(() => {});
+    };
+
+    process.once("SIGTERM", closeFromSignal);
+    process.once("SIGINT", closeFromSignal);
   }
 
   const bootstrapComplete = new Promise<void>((resolvePromise) => {
@@ -336,6 +342,10 @@ async function downloadAndExtractDatabase(params: DownloadAndExtractParams): Pro
 
   logger.info(`Extracting ${archivePath} into ${dataDir}`);
   mkdirSync(dataDir, { recursive: true });
+  // If a previous bootstrap attempt was aborted mid-extraction, tar won't remove already-written
+  // files and a partial database can remain permanently corrupt. Clear the target before extract.
+  const dbSubdir = join(dataDir, `data-${labelSetId}_${labelSetVersion}`);
+  rmSync(dbSubdir, { recursive: true, force: true });
   await spawnChild(
     "tar",
     ["-xzf", archivePath, "-C", dataDir, "--strip-components=1"],
@@ -345,6 +355,10 @@ async function downloadAndExtractDatabase(params: DownloadAndExtractParams): Pro
 
   rmSync(downloadTempDir, { recursive: true, force: true });
 }
+
+export const __TESTING__ = {
+  downloadAndExtractDatabase,
+};
 
 /**
  * Resolve the absolute path to `download-prebuilt-database.sh`.
