@@ -6,7 +6,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { DEVNET_OWNER } from "@ensnode/ensnode-sdk/internal";
+import { DEVNET_ACCOUNTS } from "@ensnode/ensnode-sdk/internal";
 
 const BASE_URL = process.env.ENSNODE_URL!;
 
@@ -15,22 +15,22 @@ describe("GET /api/resolve/primary-names/:address", () => {
     {
       description:
         "resolves primary names for owner address on chain 1 (no primary name set in devnet)",
-      address: DEVNET_OWNER,
+      address: DEVNET_ACCOUNTS.owner,
       query: "chainIds=1",
       expectedStatus: 200,
       expectedBody: {
-        names: { "1": null },
+        names: { "1": "test.eth" },
         accelerationRequested: false,
         accelerationAttempted: false,
       },
     },
     {
       description: "resolves all primary names",
-      address: DEVNET_OWNER,
+      address: DEVNET_ACCOUNTS.owner,
       query: "",
       expectedStatus: 200,
       expectedBody: {
-        names: { "1": null },
+        names: { "1": "test.eth" },
         accelerationRequested: false,
         accelerationAttempted: false,
       },
@@ -54,7 +54,7 @@ describe("GET /api/resolve/primary-names/:address", () => {
     },
     {
       description: "returns 400 when chainIds contains the default chain id (0)",
-      address: DEVNET_OWNER,
+      address: DEVNET_ACCOUNTS.owner,
       query: "chainIds=0",
       expectedStatus: 400,
       expectedBody: {
@@ -76,7 +76,7 @@ describe("GET /api/resolve/primary-names/:address", () => {
     },
     {
       description: "returns 400 when chainIds contains duplicate chain ids",
-      address: DEVNET_OWNER,
+      address: DEVNET_ACCOUNTS.owner,
       query: "chainIds=1,1",
       expectedStatus: 400,
       expectedBody: {

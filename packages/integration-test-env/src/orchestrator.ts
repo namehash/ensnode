@@ -41,6 +41,8 @@ import {
 import { ENSNamespaceIds } from "@ensnode/datasources";
 import { OmnichainIndexingStatusIds } from "@ensnode/ensnode-sdk";
 
+import { seedDevnet } from "./seed/index";
+
 const MONOREPO_ROOT = resolve(import.meta.dirname, "../../..");
 const ENSRAINBOW_DIR = resolve(MONOREPO_ROOT, "apps/ensrainbow");
 const ENSINDEXER_DIR = resolve(MONOREPO_ROOT, "apps/ensindexer");
@@ -248,7 +250,15 @@ async function main() {
   const postgresPort = postgresContainer.getMappedPort(5432);
   const ENSDB_URL = `postgresql://postgres:password@localhost:${postgresPort}/postgres`;
   log(`Postgres is ready (port ${postgresPort})`);
-  log("Devnet is ready");
+  const devnetContainer = composeEnvironment.getContainer("devnet");
+  const devnetPort = devnetContainer.getMappedPort(8545);
+  const devnetRpcUrl = `http://localhost:${devnetPort}`;
+  log(`Devnet is ready (port ${devnetPort})`);
+
+  // Phase 1.5: Seed devnet with test data (before indexing starts)
+  log("Seeding devnet...");
+  await seedDevnet(devnetRpcUrl);
+  log("Devnet seeded");
 
   // Phase 2: Download ENSRainbow database and start from source
   const DB_SCHEMA_VERSION = "3";
