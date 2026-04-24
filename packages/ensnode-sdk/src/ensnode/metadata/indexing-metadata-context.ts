@@ -1,5 +1,5 @@
 import type { CrossChainIndexingStatusSnapshot } from "../../indexing-status";
-import type { EnsNodeStackInfo } from "../../stack-info";
+import type { EnsIndexerStackInfo } from "../../stack-info";
 import { validateIndexingMetadataContextInitialized } from "./validate/indexing-metadata-context";
 
 /**
@@ -32,7 +32,7 @@ export interface IndexingMetadataContextUninitialized {
 export interface IndexingMetadataContextInitialized {
   statusCode: typeof IndexingMetadataContextStatusCodes.Initialized;
   indexingStatus: CrossChainIndexingStatusSnapshot;
-  stackInfo: EnsNodeStackInfo;
+  stackInfo: EnsIndexerStackInfo;
 }
 
 /**
@@ -62,7 +62,7 @@ export function buildIndexingMetadataContextUninitialized(): IndexingMetadataCon
  */
 export function buildIndexingMetadataContextInitialized(
   indexingStatus: CrossChainIndexingStatusSnapshot,
-  stackInfo: EnsNodeStackInfo,
+  stackInfo: EnsIndexerStackInfo,
 ): IndexingMetadataContextInitialized {
   return validateIndexingMetadataContextInitialized({
     statusCode: IndexingMetadataContextStatusCodes.Initialized,

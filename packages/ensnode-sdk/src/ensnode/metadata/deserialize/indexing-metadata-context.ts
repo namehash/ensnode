@@ -2,7 +2,7 @@ import { prettifyError } from "zod/v4";
 
 import { buildUnvalidatedCrossChainIndexingStatusSnapshot } from "../../../indexing-status";
 import type { Unvalidated } from "../../../shared/types";
-import { buildUnvalidatedEnsNodeStackInfo } from "../../../stack-info";
+import { buildUnvalidatedEnsIndexerStackInfo } from "../../../stack-info";
 import {
   type IndexingMetadataContext,
   type IndexingMetadataContextInitialized,
@@ -28,7 +28,7 @@ function buildUnvalidatedIndexingMetadataContextInitializedSchema(
     indexingStatus: buildUnvalidatedCrossChainIndexingStatusSnapshot(
       serializedIndexingMetadataContext.indexingStatus,
     ),
-    stackInfo: buildUnvalidatedEnsNodeStackInfo(serializedIndexingMetadataContext.stackInfo),
+    stackInfo: buildUnvalidatedEnsIndexerStackInfo(serializedIndexingMetadataContext.stackInfo),
   };
 }
 

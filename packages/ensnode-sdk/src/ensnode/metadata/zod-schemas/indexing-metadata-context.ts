@@ -5,9 +5,9 @@ import {
   makeSerializedCrossChainIndexingStatusSnapshotSchema,
 } from "../../../indexing-status/zod-schema/cross-chain-indexing-status-snapshot";
 import {
-  makeEnsNodeStackInfoSchema,
-  makeSerializedEnsNodeStackInfoSchema,
-} from "../../../stack-info/zod-schemas/ensnode-stack-info";
+  makeEnsIndexerStackInfoSchema,
+  makeSerializedEnsIndexerStackInfoSchema,
+} from "../../../stack-info/zod-schemas/ensindexer-stack-info";
 import { IndexingMetadataContextStatusCodes } from "../indexing-metadata-context";
 
 const makeSerializedIndexingMetadataContextUninitializedSchema = (_valueLabel?: string) => {
@@ -22,7 +22,7 @@ export const makeSerializedIndexingMetadataContextInitializedSchema = (valueLabe
   return z.object({
     statusCode: z.literal(IndexingMetadataContextStatusCodes.Initialized),
     indexingStatus: makeSerializedCrossChainIndexingStatusSnapshotSchema(`${label}.indexingStatus`),
-    stackInfo: makeSerializedEnsNodeStackInfoSchema(`${label}.stackInfo`),
+    stackInfo: makeSerializedEnsIndexerStackInfoSchema(`${label}.stackInfo`),
   });
 };
 
@@ -44,7 +44,7 @@ export const makeIndexingMetadataContextInitializedSchema = (valueLabel?: string
   return z.object({
     statusCode: z.literal(IndexingMetadataContextStatusCodes.Initialized),
     indexingStatus: makeCrossChainIndexingStatusSnapshotSchema(`${label}.indexingStatus`),
-    stackInfo: makeEnsNodeStackInfoSchema(`${label}.stackInfo`),
+    stackInfo: makeEnsIndexerStackInfoSchema(`${label}.stackInfo`),
   });
 };
 

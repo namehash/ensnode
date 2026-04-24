@@ -3,9 +3,9 @@ import {
   serializeCrossChainIndexingStatusSnapshot,
 } from "../../../indexing-status/serialize/cross-chain-indexing-status-snapshot";
 import {
-  type SerializedEnsNodeStackInfo,
-  serializeEnsNodeStackInfo,
-} from "../../../stack-info/serialize/ensnode-stack-info";
+  type SerializedEnsIndexerStackInfo,
+  serializeEnsIndexerStackInfo,
+} from "../../../stack-info/serialize/ensindexer-stack-info";
 import {
   type IndexingMetadataContext,
   type IndexingMetadataContextInitialized,
@@ -24,7 +24,7 @@ export type SerializedIndexingMetadataContextUninitialized = IndexingMetadataCon
 export interface SerializedIndexingMetadataContextInitialized
   extends Omit<IndexingMetadataContextInitialized, "indexingStatus" | "stackInfo"> {
   indexingStatus: SerializedCrossChainIndexingStatusSnapshot;
-  stackInfo: SerializedEnsNodeStackInfo;
+  stackInfo: SerializedEnsIndexerStackInfo;
 }
 
 /**
@@ -44,10 +44,16 @@ export function serializeIndexingMetadataContextInitialized(
   return {
     statusCode,
     indexingStatus: serializeCrossChainIndexingStatusSnapshot(indexingStatus),
-    stackInfo: serializeEnsNodeStackInfo(stackInfo),
+    stackInfo: serializeEnsIndexerStackInfo(stackInfo),
   };
 }
 
+export function serializeIndexingMetadataContext(
+  context: IndexingMetadataContextUninitialized,
+): SerializedIndexingMetadataContextUninitialized;
+export function serializeIndexingMetadataContext(
+  context: IndexingMetadataContextInitialized,
+): SerializedIndexingMetadataContextInitialized;
 export function serializeIndexingMetadataContext(
   context: IndexingMetadataContext,
 ): SerializedIndexingMetadataContext {
