@@ -9,7 +9,6 @@ catalog:
   "@astrojs/react": ^4.4.2
   "@astrojs/tailwind": ^6.0.2
   "@ponder/client": 0.16.6
-  "@ponder/utils": 0.2.18
   "@testing-library/react": ^16.3.0
   "@types/node": 24.10.9
   "@types/react": 19.2.7
