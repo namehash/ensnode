@@ -47,13 +47,29 @@ export async function serverCommand(options: ServerCommandOptions): Promise<void
 
       logger.info("Shutting down server...");
       shutdownPromise = (async () => {
+        let hadShutdownError = false;
+
         try {
           await closeHttpServer(httpServer);
-          await db.close();
-          logger.info("Server shutdown complete");
         } catch (error) {
-          logger.error(error, "Error during shutdown:");
+          hadShutdownError = true;
+          logger.error(error, "Failed to close HTTP server during shutdown");
+        } finally {
+          try {
+            await db.close();
+          } catch (error) {
+            hadShutdownError = true;
+            logger.error(error, "Failed to close database during shutdown");
+          }
         }
+
+        if (hadShutdownError) {
+          process.exitCode = 1;
+          logger.error("Server shutdown completed with errors");
+          return;
+        }
+
+        logger.info("Server shutdown complete");
       })();
 
       return shutdownPromise;

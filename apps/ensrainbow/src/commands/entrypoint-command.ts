@@ -113,16 +113,32 @@ export async function entrypointCommand(
     alreadyClosed = true;
     logger.info("Shutting down server...");
     bootstrapAborter.abort();
+    // Wait for bootstrap cleanup before closing shared resources.
+    await bootstrapSettled;
+
+    let shutdownError: unknown;
+
     try {
-      // Wait for bootstrap cleanup before closing shared resources.
-      await bootstrapSettled;
       await closeHttpServer(httpServer);
-      await ensRainbowServer.close();
-      logger.info("Server shutdown complete");
     } catch (error) {
-      logger.error(error, "Error during shutdown:");
-      throw error;
+      shutdownError = error;
+      logger.error(error, "Failed to close HTTP server during shutdown");
     }
+
+    try {
+      await ensRainbowServer.close();
+    } catch (error) {
+      if (shutdownError === undefined) {
+        shutdownError = error;
+      }
+      logger.error(error, "Failed to close ENSRainbow server/database during shutdown");
+    }
+
+    if (shutdownError !== undefined) {
+      throw shutdownError;
+    }
+
+    logger.info("Server shutdown complete");
   };
 
   if (options.registerSignalHandlers !== false) {

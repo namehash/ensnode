@@ -21,11 +21,7 @@ import { logger } from "@/utils/logger";
  * @throws Error if the server is not ready or the record count cannot be read from the database.
  */
 export async function buildDbConfig(server: ENSRainbowServer): Promise<DbConfig> {
-  if (!server.isReady()) {
-    throw new Error(
-      "Cannot build DB config: ENSRainbowServer has no database attached yet (still bootstrapping)",
-    );
-  }
+  const { serverLabelSet } = server.requireReady();
 
   const countResult = await server.labelCount();
   if (countResult.status === StatusCode.Error) {
@@ -34,9 +30,8 @@ export async function buildDbConfig(server: ENSRainbowServer): Promise<DbConfig>
     );
   }
 
-  // isReady() was true so serverLabelSet is defined.
   return {
-    labelSet: server.serverLabelSet as EnsRainbowServerLabelSet,
+    labelSet: serverLabelSet,
     recordsCount: countResult.count,
   };
 }
@@ -135,6 +130,22 @@ export class ENSRainbowServer {
   }
 
   /**
+   * Returns both ready-state values or throws if the server is not ready.
+   *
+   * Centralizes the invariant established by {@link attachDb}: once `db` is attached,
+   * `_serverLabelSet` must also be present.
+   */
+  public requireReady(): { db: ENSRainbowDB; serverLabelSet: EnsRainbowServerLabelSet } {
+    const db = this.requireDb();
+    if (this._serverLabelSet === undefined) {
+      throw new Error(
+        "ENSRainbowServer invariant violation: database is attached but server label set is missing",
+      );
+    }
+    return { db, serverLabelSet: this._serverLabelSet };
+  }
+
+  /**
    * Determines if a versioned rainbow record should be treated as unhealable
    * based on the client's label set version requirements, ignoring the label set ID.
    */
@@ -153,8 +164,7 @@ export class ENSRainbowServer {
     labelHash: LabelHash,
     clientLabelSet: EnsRainbowClientLabelSet,
   ): Promise<EnsRainbow.HealResponse> {
-    const db = this.requireDb();
-    const serverLabelSet = this._serverLabelSet as EnsRainbowServerLabelSet;
+    const { db, serverLabelSet } = this.requireReady();
 
     let labelHashBytes: ByteArray;
     try {

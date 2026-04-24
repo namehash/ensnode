@@ -18,6 +18,7 @@ export class PublicConfigBuilder {
    * the ENSIndexer Public Config.
    */
   private ensRainbowClient: EnsRainbow.ApiClient;
+  private waitForEnsRainbowReady: () => Promise<void>;
 
   /**
    * Immutable ENSIndexer Public Config
@@ -30,8 +31,12 @@ export class PublicConfigBuilder {
   /**
    * @param ensRainbowClient ENSRainbow Client instance used to fetch ENSRainbow Public Config
    */
-  constructor(ensRainbowClient: EnsRainbow.ApiClient) {
+  constructor(
+    ensRainbowClient: EnsRainbow.ApiClient,
+    waitForEnsRainbowReady: () => Promise<void> = async () => {},
+  ) {
     this.ensRainbowClient = ensRainbowClient;
+    this.waitForEnsRainbowReady = waitForEnsRainbowReady;
   }
 
   /**
@@ -45,6 +50,8 @@ export class PublicConfigBuilder {
    */
   async getPublicConfig(): Promise<EnsIndexerPublicConfig> {
     if (typeof this.immutablePublicConfig === "undefined") {
+      await this.waitForEnsRainbowReady();
+
       const [versionInfo, ensRainbowPublicConfig] = await Promise.all([
         this.getEnsIndexerVersionInfo(),
         this.ensRainbowClient.config(),

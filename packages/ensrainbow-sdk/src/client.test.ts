@@ -414,4 +414,14 @@ describe("HealResponse cacheability", () => {
 
     expect(isCacheableHealResponse(response)).toBe(false);
   });
+
+  it("should consider HealServiceUnavailableError responses not cacheable", async () => {
+    const response: EnsRainbow.HealServiceUnavailableError = {
+      status: StatusCode.Error,
+      error: "ENSRainbow is still bootstrapping its database",
+      errorCode: ErrorCode.ServiceUnavailable,
+    };
+
+    expect(isCacheableHealResponse(response)).toBe(false);
+  });
 });
