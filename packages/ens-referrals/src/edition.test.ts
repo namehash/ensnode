@@ -7,7 +7,6 @@ import {
   buildReferralProgramEditionConfigSet,
   findOverlappingEditionPair,
   type ReferralProgramEditionConfig,
-  validateNonOverlappingEditionTimes,
 } from "./edition";
 
 const subregistry = {
@@ -68,24 +67,6 @@ describe("findOverlappingEditionPair", () => {
   });
 });
 
-describe("validateNonOverlappingEditionTimes", () => {
-  it("is a no-op when no overlap exists", () => {
-    const a = makePieSplitEdition("a", 1000, 1999);
-    const b = makePieSplitEdition("b", 2000, 3000);
-
-    expect(() => validateNonOverlappingEditionTimes([a, b])).not.toThrow();
-  });
-
-  it("throws naming both slugs and the subregistry when editions overlap", () => {
-    const a = makePieSplitEdition("a", 1000, 2000);
-    const b = makePieSplitEdition("b", 1500, 2500);
-
-    expect(() => validateNonOverlappingEditionTimes([a, b])).toThrow(
-      /"a".*"b".*subregistryId 1:0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85/s,
-    );
-  });
-});
-
 describe("buildReferralProgramEditionConfigSet — overlap invariant", () => {
   it("builds a set from non-overlapping editions", () => {
     const a = makePieSplitEdition("a", 1000, 1999);
@@ -95,7 +76,16 @@ describe("buildReferralProgramEditionConfigSet — overlap invariant", () => {
     expect(set.size).toBe(2);
   });
 
-  it("throws when two editions share a subregistry and overlap in time", () => {
+  it("throws naming both slugs and the subregistry when editions overlap", () => {
+    const a = makePieSplitEdition("a", 1000, 2000);
+    const b = makePieSplitEdition("b", 1500, 2500);
+
+    expect(() => buildReferralProgramEditionConfigSet([a, b])).toThrow(
+      /"a".*"b".*subregistryId 1:0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85/s,
+    );
+  });
+
+  it("throws when two editions share a subregistry and have touching edges", () => {
     const a = makePieSplitEdition("a", 1000, 2000);
     const b = makePieSplitEdition("b", 2000, 3000);
 

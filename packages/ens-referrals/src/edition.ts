@@ -70,11 +70,13 @@ export type ReferralProgramEditionConfigSet = Map<
 >;
 
 /**
- * Validates that a ReferralProgramEditionConfigSet maintains the invariant
- * that each map key equals the corresponding config's slug.
+ * Validates the invariants of a {@link ReferralProgramEditionConfigSet}.
  *
  * @param configSet - The edition config set to validate
- * @throws {Error} If any entry violates the invariant (key !== value.slug)
+ * @throws {Error} If any entry violates the invariant that each map key equals the
+ *   corresponding config's slug
+ * @throws {Error} If any pair of editions sharing a `subregistryId` overlap in time
+ *   (`startTime` and `endTime` are inclusive — touching edges count as overlap)
  */
 export function validateReferralProgramEditionConfigSet(
   configSet: ReferralProgramEditionConfigSet,
@@ -85,6 +87,17 @@ export function validateReferralProgramEditionConfigSet(
     const [key, config] = violation;
     throw new Error(
       `Edition config set invariant violation: map key "${key}" does not match config.slug "${config.slug}"`,
+    );
+  }
+
+  const overlap = findOverlappingEditionPair(Array.from(configSet.values()));
+  if (overlap) {
+    const [a, b] = overlap;
+    throw new Error(
+      `Edition config set invariant violation: editions "${a.slug}" and "${b.slug}" ` +
+        `have overlapping time ranges for subregistryId ` +
+        `${a.rules.subregistryId.chainId}:${a.rules.subregistryId.address} ` +
+        `(startTime and endTime are inclusive)`,
     );
   }
 }
@@ -131,27 +144,6 @@ export function findOverlappingEditionPair<T extends BaseReferralProgramEditionC
 }
 
 /**
- * Validates that no two editions sharing a `subregistryId` overlap in time.
- *
- * @param editions - Array of editions to validate
- * @throws {Error} If any pair of editions overlap (start/end are inclusive)
- */
-export function validateNonOverlappingEditionTimes<T extends BaseReferralProgramEditionConfig>(
-  editions: readonly T[],
-): void {
-  const overlap = findOverlappingEditionPair(editions);
-  if (!overlap) return;
-
-  const [a, b] = overlap;
-  throw new Error(
-    `Edition config set invariant violation: editions "${a.slug}" and "${b.slug}" ` +
-      `have overlapping time ranges for subregistryId ` +
-      `${a.rules.subregistryId.chainId}:${a.rules.subregistryId.address} ` +
-      `(startTime and endTime are inclusive)`,
-  );
-}
-
-/**
  * Builds a new ReferralProgramEditionConfigSet from an array of configs and validates the invariant.
  *
  * @param configs - Array of edition configurations to add to the set
@@ -174,8 +166,6 @@ export function buildReferralProgramEditionConfigSet(
   if (duplicates.length > 0) {
     throw new Error(`Duplicate edition config slugs detected: ${duplicates.join(", ")}`);
   }
-
-  validateNonOverlappingEditionTimes(configs);
 
   const configSet = new Map(configs.map((config) => [config.slug, config]));
   validateReferralProgramEditionConfigSet(configSet);
