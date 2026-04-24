@@ -57,18 +57,18 @@ import { EnsRainbowApiClient } from '@ensnode/ensrainbow-sdk';
 
 // Default: use latest version of any labelset
 const client1 = new EnsRainbowApiClient({
-  baseUrl: 'https://api.ensrainbow.io'
+  endpointUrl: 'https://api.ensrainbow.io'
 });
 
 // Pin to subgraph labelset, use latest version
 const client2 = new EnsRainbowApiClient({
-  baseUrl: 'https://api.ensrainbow.io',
+  endpointUrl: 'https://api.ensrainbow.io',
   clientLabelSet: { labelSetId: 'subgraph' }
 });
 
 // Pin to exact labelset snapshot for deterministic results across time
 const client3 = new EnsRainbowApiClient({
-  baseUrl: 'https://api.ensrainbow.io',
+  endpointUrl: 'https://api.ensrainbow.io',
   clientLabelSet: { 
     labelSetId: 'subgraph', 
     labelSetVersion: 0 
