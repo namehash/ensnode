@@ -39,5 +39,15 @@ import { logger } from "@/lib/logger";
  * @throws Error if any precondition is not satisfied.
  */
 export async function initIndexingSetup(): Promise<void> {
-  // Execute any necessary preconditions for the indexing setup here.
+  const { migrateEnsNodeSchema } = await import("@/lib/ensdb/migrate-ensnode-schema");
+  // Ensure the ENSNode Schema in ENSDb is up to date by running any pending migrations.
+  await migrateEnsNodeSchema().catch((error) => {
+    logger.error({
+      msg: "Failed to initialize ENSNode metadata",
+      error,
+      module: "ponder-api",
+    });
+    process.exitCode = 1;
+    throw error;
+  });
 }

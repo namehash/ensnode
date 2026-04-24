@@ -7,6 +7,25 @@ const { mockPonderOn } = vi.hoisted(() => ({ mockPonderOn: vi.fn() }));
 
 const mockWaitForEnsRainbow = vi.hoisted(() => vi.fn());
 
+const mockMigrateEnsNodeSchema = vi.hoisted(() => vi.fn());
+
+// Set up PONDER_COMMON global before any imports that depend on it
+vi.hoisted(() => {
+  (globalThis as any).PONDER_COMMON = {
+    options: {
+      command: "start",
+      port: 42069,
+    },
+    logger: {
+      trace: vi.fn(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+    },
+  };
+});
+
 vi.mock("ponder:registry", () => ({
   ponder: {
     on: (...args: unknown[]) => mockPonderOn(...args),
@@ -21,10 +40,15 @@ vi.mock("@/lib/ensrainbow/singleton", () => ({
   waitForEnsRainbowToBeReady: mockWaitForEnsRainbow,
 }));
 
+vi.mock("@/lib/ensdb/migrate-ensnode-schema", () => ({
+  migrateEnsNodeSchema: mockMigrateEnsNodeSchema,
+}));
+
 describe("addOnchainEventListener", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     mockWaitForEnsRainbow.mockResolvedValue(undefined);
+    mockMigrateEnsNodeSchema.mockResolvedValue(undefined);
     // Reset module state to test idempotent behavior correctly
     vi.resetModules();
   });
