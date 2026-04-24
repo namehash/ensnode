@@ -1,12 +1,15 @@
 import { and, eq } from "drizzle-orm/sql";
 
 import {
+  buildIndexingMetadataContextUninitialized,
   type CrossChainIndexingStatusSnapshot,
   deserializeCrossChainIndexingStatusSnapshot,
   deserializeEnsIndexerPublicConfig,
+  deserializeIndexingMetadataContext,
   type EnsDbPublicConfig,
   type EnsDbVersionInfo,
   type EnsIndexerPublicConfig,
+  type IndexingMetadataContext,
 } from "@ensnode/ensnode-sdk";
 
 import {
@@ -23,6 +26,7 @@ import type {
   SerializedEnsNodeMetadataEnsDbVersion,
   SerializedEnsNodeMetadataEnsIndexerIndexingStatus,
   SerializedEnsNodeMetadataEnsIndexerPublicConfig,
+  SerializedEnsNodeMetadataIndexingMetadataContext,
 } from "./serialize/ensnode-metadata";
 
 /**
@@ -187,6 +191,23 @@ export class EnsDbReader<
     }
 
     return deserializeCrossChainIndexingStatusSnapshot(record);
+  }
+
+  /**
+   * Get Indexing Metadata Context
+   *
+   * @returns the initialized record, or a default uninitialized one if no record exists in ENSDb.
+   */
+  async getIndexingMetadataContext(): Promise<IndexingMetadataContext> {
+    const record = await this.getEnsNodeMetadata<SerializedEnsNodeMetadataIndexingMetadataContext>({
+      key: EnsNodeMetadataKeys.IndexingMetadataContext,
+    });
+
+    if (!record) {
+      return buildIndexingMetadataContextUninitialized();
+    }
+
+    return deserializeIndexingMetadataContext(record);
   }
 
   /**

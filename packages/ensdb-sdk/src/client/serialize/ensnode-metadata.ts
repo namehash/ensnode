@@ -1,6 +1,7 @@
 import type {
   SerializedCrossChainIndexingStatusSnapshot,
   SerializedEnsIndexerPublicConfig,
+  SerializedIndexingMetadataContextInitialized,
 } from "@ensnode/ensnode-sdk";
 
 import type {
@@ -32,10 +33,16 @@ export interface SerializedEnsNodeMetadataEnsIndexerIndexingStatus {
   value: SerializedCrossChainIndexingStatusSnapshot;
 }
 
+export interface SerializedEnsNodeMetadataIndexingMetadataContext {
+  key: typeof EnsNodeMetadataKeys.IndexingMetadataContext;
+  value: SerializedIndexingMetadataContextInitialized;
+}
+
 /**
  * Serialized representation of {@link EnsNodeMetadata}
  */
 export type SerializedEnsNodeMetadata =
   | SerializedEnsNodeMetadataEnsDbVersion
   | SerializedEnsNodeMetadataEnsIndexerPublicConfig
-  | SerializedEnsNodeMetadataEnsIndexerIndexingStatus;
+  | SerializedEnsNodeMetadataEnsIndexerIndexingStatus
+  | SerializedEnsNodeMetadataIndexingMetadataContext;
