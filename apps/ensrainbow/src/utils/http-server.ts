@@ -1,5 +1,5 @@
 import type { Server as HttpServer } from "node:http";
-import type { Http2Server, Http2SecureServer } from "node:http2";
+import type { Http2SecureServer, Http2Server } from "node:http2";
 
 /**
  * Promisified wrapper around Node's callback-based `http.Server.close()`.

@@ -1,11 +1,12 @@
+import { EventEmitter } from "node:events";
 import { existsSync } from "node:fs";
 import { mkdir, rm, writeFile } from "node:fs/promises";
-import { EventEmitter } from "node:events";
 import { dirname, join, resolve } from "node:path";
+
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { buildLabelSetId, buildLabelSetVersion } from "@ensnode/ensnode-sdk";
 import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { AbsolutePath, DbSchemaVersion } from "@/config/types";
 import { DB_SCHEMA_VERSION, ENSRainbowDB } from "@/lib/database";
@@ -24,9 +25,9 @@ vi.mock("@/utils/http-server", async () => {
 });
 
 import {
+  __TESTING__,
   DB_READY_MARKER_FILENAME,
   type EntrypointCommandHandle,
-  __TESTING__,
   entrypointCommand,
 } from "./entrypoint-command";
 
@@ -156,35 +157,42 @@ describe("entrypointCommand (signal handlers)", () => {
     };
 
     let sigtermHandler: undefined | (() => void);
-    const onceSpy = vi
-      .spyOn(process, "once")
-      .mockImplementation(((event: string, listener: (...args: any[]) => void) => {
-        if (event === "SIGTERM") sigtermHandler = listener as () => void;
-        // Delegate to the original implementation so other listeners still work.
-        return EventEmitter.prototype.once.call(process, event, listener);
-      }) as typeof process.once);
+    const onceSpy = vi.spyOn(process, "once").mockImplementation(((
+      event: string,
+      listener: (...args: any[]) => void,
+    ) => {
+      if (event === "SIGTERM") sigtermHandler = listener as () => void;
+      // Delegate to the original implementation so other listeners still work.
+      return EventEmitter.prototype.once.call(process, event, listener);
+    }) as typeof process.once);
 
     const unhandledRejection = vi.fn();
     process.once("unhandledRejection", unhandledRejection);
 
-    const localHandle = await entrypointCommand({
-      port,
-      dataDir: testDataDir as AbsolutePath,
-      dbSchemaVersion: DB_SCHEMA_VERSION as DbSchemaVersion,
-      labelSetId,
-      labelSetVersion,
-      // Leave registerSignalHandlers enabled (default true)
-    });
+    let localHandle: EntrypointCommandHandle | undefined;
+    try {
+      localHandle = await entrypointCommand({
+        port,
+        dataDir: testDataDir as AbsolutePath,
+        dbSchemaVersion: DB_SCHEMA_VERSION as DbSchemaVersion,
+        labelSetId,
+        labelSetVersion,
+        // Leave registerSignalHandlers enabled (default true)
+      });
 
-    expect(sigtermHandler).toBeTypeOf("function");
-    sigtermHandler?.();
-    await new Promise((r) => setTimeout(r, 0));
+      expect(sigtermHandler).toBeTypeOf("function");
+      sigtermHandler?.();
+      // Ensure shutdown chain has settled before asserting on unhandled rejections.
+      await localHandle.close().catch(() => {});
 
-    expect(unhandledRejection).not.toHaveBeenCalled();
-
-    onceSpy.mockRestore();
-    // Cleanup (may still throw due to closeHttpServerImpl); swallow for this test.
-    await localHandle.close().catch(() => {});
+      expect(unhandledRejection).not.toHaveBeenCalled();
+    } finally {
+      process.removeListener("unhandledRejection", unhandledRejection);
+      onceSpy.mockRestore();
+      if (localHandle) {
+        await localHandle.close().catch(() => {});
+      }
+    }
   });
 });
 
@@ -267,4 +275,3 @@ describe("downloadAndExtractDatabase (stale dbSubdir cleanup)", () => {
     expect(tarSawDbSubdir).toBe(false);
   });
 });
-

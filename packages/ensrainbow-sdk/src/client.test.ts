@@ -258,6 +258,9 @@ describe("EnsRainbowApiClient", () => {
 
   it("should return a positive health check", async () => {
     mockFetch.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      statusText: "OK",
       json: () =>
         Promise.resolve({
           status: "ok",

@@ -92,8 +92,8 @@ export const DB_READY_MARKER_FILENAME = "ensrainbow_db_ready";
 export async function entrypointCommand(
   options: EntrypointCommandOptions,
 ): Promise<EntrypointCommandHandle> {
-  console.log("ENSRainbow running with config:");
-  console.log(stringifyConfig(options, { pretty: true }));
+  logger.info("ENSRainbow running with config:");
+  logger.info(stringifyConfig(options, { pretty: true }));
 
   logger.info(
     `ENSRainbow entrypoint starting HTTP server on port ${options.port} ` +
@@ -266,17 +266,38 @@ async function runDbBootstrap(
 
   logger.info(`Opening newly extracted database at ${dbSubdir}`);
   const db = await ENSRainbowDB.open(dbSubdir);
-  if (signal.aborted) {
-    await safeClose(db);
-    throw new BootstrapAbortedError();
+  let dbAttached = false;
+  try {
+    if (signal.aborted) {
+      throw new BootstrapAbortedError();
+    }
+
+    await ensRainbowServer.attachDb(db);
+    dbAttached = true;
+
+    if (signal.aborted) {
+      throw new BootstrapAbortedError();
+    }
+
+    // Write marker after a successful attach so restarts can skip the download step.
+    await writeFile(markerFile, "");
+
+    return buildEnsRainbowPublicConfig(await buildDbConfig(ensRainbowServer));
+  } catch (error) {
+    if (!dbAttached) {
+      await safeClose(db);
+    } else if (error instanceof BootstrapAbortedError || signal.aborted) {
+      try {
+        await ensRainbowServer.close();
+      } catch (closeError) {
+        logger.warn(
+          closeError,
+          "Failed to close server while aborting after DB attach; continuing",
+        );
+      }
+    }
+    throw error;
   }
-
-  await ensRainbowServer.attachDb(db);
-
-  // Write marker after a successful attach so restarts can skip the download step.
-  await writeFile(markerFile, "");
-
-  return buildEnsRainbowPublicConfig(await buildDbConfig(ensRainbowServer));
 }
 
 function throwIfAborted(signal: AbortSignal): void {
@@ -304,8 +325,7 @@ interface DownloadAndExtractParams {
 }
 
 async function downloadAndExtractDatabase(params: DownloadAndExtractParams): Promise<void> {
-  const { dataDir, dbSchemaVersion, labelSetId, labelSetVersion, downloadTempDir, signal } =
-    params;
+  const { dataDir, dbSchemaVersion, labelSetId, labelSetVersion, downloadTempDir, signal } = params;
 
   // Clean up any stale state from a previous aborted bootstrap attempt.
   rmSync(downloadTempDir, { recursive: true, force: true });
@@ -346,12 +366,7 @@ async function downloadAndExtractDatabase(params: DownloadAndExtractParams): Pro
   // files and a partial database can remain permanently corrupt. Clear the target before extract.
   const dbSubdir = join(dataDir, `data-${labelSetId}_${labelSetVersion}`);
   rmSync(dbSubdir, { recursive: true, force: true });
-  await spawnChild(
-    "tar",
-    ["-xzf", archivePath, "-C", dataDir, "--strip-components=1"],
-    {},
-    signal,
-  );
+  await spawnChild("tar", ["-xzf", archivePath, "-C", dataDir, "--strip-components=1"], {}, signal);
 
   rmSync(downloadTempDir, { recursive: true, force: true });
 }

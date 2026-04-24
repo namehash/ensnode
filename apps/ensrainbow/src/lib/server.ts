@@ -251,9 +251,9 @@ export class ENSRainbowServer {
    */
   async close(): Promise<void> {
     const capturedDb = this.db;
-    if (capturedDb === undefined) return;
     this.db = undefined;
     this._serverLabelSet = undefined;
+    if (capturedDb === undefined) return;
     await capturedDb.close();
   }
 }

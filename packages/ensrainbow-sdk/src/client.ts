@@ -166,10 +166,7 @@ export namespace EnsRainbow {
     errorCode: typeof ErrorCode.ServiceUnavailable;
   }
 
-  export type CountResponse =
-    | CountSuccess
-    | CountServerError
-    | CountServiceUnavailableError;
+  export type CountResponse = CountSuccess | CountServerError | CountServiceUnavailableError;
 
   /**
    * Complete public configuration object for ENSRainbow.
@@ -417,17 +414,24 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
    * bootstrapping its database. Clients that require a usable database (e.g. ENSIndexer) should
    * poll this method instead of `health()` during startup.
    *
-   * @throws if the server is not ready yet (HTTP 503) or the request otherwise fails — callers are
-   * expected to retry with backoff.
+   * @throws if the server is not ready yet (HTTP 503) or if the readiness check otherwise fails
+   * (e.g. misrouting/404, server error/500). Callers that treat this as a retryable probe should
+   * retry with backoff.
    */
   async ready(): Promise<EnsRainbow.ReadyResponse> {
     const response = await fetch(new URL("/ready", this.options.endpointUrl));
 
     if (!response.ok) {
+      const statusSuffix = `HTTP ${response.status}${
+        response.statusText ? ` ${response.statusText}` : ""
+      }`;
+
+      if (response.status === 503) {
+        throw new Error(`ENSRainbow readiness check: service not ready yet (${statusSuffix})`);
+      }
+
       throw new Error(
-        `ENSRainbow is not ready yet (HTTP ${response.status}${
-          response.statusText ? ` ${response.statusText}` : ""
-        })`,
+        `ENSRainbow readiness check failed (${statusSuffix}). This usually indicates a non-readiness issue (e.g. wrong base URL, misrouting, or a server error).`,
       );
     }
 
