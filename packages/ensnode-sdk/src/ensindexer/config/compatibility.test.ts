@@ -67,7 +67,7 @@ describe("EnsIndexerConfig compatibility", () => {
       );
     });
 
-    it("throws error when 'configA.labelSet.labelSetId' is not same as 'configB.labelSet.labelSetId'", () => {
+    it("throws error when 'configA.clientLabelSet.labelSetId' is not same as 'configB.clientLabelSet.labelSetId'", () => {
       const configA = structuredClone(config);
 
       const configB = {

@@ -129,7 +129,7 @@ describe("Server Command Tests", () => {
   });
 
   describe("GET /v1/labels/count", () => {
-    it("should return count snapshot from startup (same as /v1/config)", async () => {
+    it("should return count snapshot from startup (from dbConfig.recordsCount)", async () => {
       // Count is fixed at server start; changing the DB does not affect the response
       await db.setPrecalculatedRainbowRecordCount(42);
 

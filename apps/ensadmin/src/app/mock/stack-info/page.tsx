@@ -16,8 +16,8 @@ import { mockSerializedEnsNodeStackInfo } from "./stack-info.mock";
 type LoadingVariant = "Loading" | "Loading Error";
 type Variants = keyof typeof mockSerializedEnsNodeStackInfo | LoadingVariant;
 
-const DEFAULT_VARIANT = "Alpha Mainnet";
-export default function MockConfigPage() {
+const DEFAULT_VARIANT: Variants = "Alpha Mainnet";
+export default function MockEnsNodeStackInfoPage() {
   const [selectedConfig, setSelectedConfig] = useState<Variants>(DEFAULT_VARIANT);
   const props: DisplayEnsNodeStackInfoProps = useMemo(() => {
     switch (selectedConfig) {

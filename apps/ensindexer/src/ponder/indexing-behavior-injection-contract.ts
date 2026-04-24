@@ -49,7 +49,7 @@ interface IndexingBehaviorDependencies {
   /**
    * Label Set for ENSIndexer client requests to ENSRainbow
    *
-   * When `labelSet` changes, the label "healing" results may change during indexing,
+   * When `clientLabelSet` changes, the label "healing" results may change during indexing,
    * which influences the indexing behavior.
    */
   clientLabelSet: EnsIndexerConfig["clientLabelSet"];

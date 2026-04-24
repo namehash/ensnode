@@ -127,7 +127,7 @@ export interface EnsIndexerPublicConfig {
    *
    * If {@link isSubgraphCompatible} is true, the following invariants are true for the ENSIndexerConfig:
    * 1. only the 'subgraph' plugin is enabled, and
-   * 2. the labelSet must be { labelSetId: 'subgraph', labelSetVersion: 0 }
+   * 2. the {@link clientLabelSet} must be { labelSetId: 'subgraph', labelSetVersion: 0 }
    *
    * If {@link isSubgraphCompatible} is false, ENSIndexer will additionally:
    *

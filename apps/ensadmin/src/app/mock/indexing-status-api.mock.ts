@@ -16,7 +16,7 @@ import {
   type SerializedEnsDbPublicConfig,
   type SerializedEnsIndexerPublicConfig,
   type SerializedEnsNodeStackInfo,
-  SerializedEnsRainbowPublicConfig,
+  type SerializedEnsRainbowPublicConfig,
   type SerializedOmnichainIndexingStatusSnapshotBackfill,
   type SerializedOmnichainIndexingStatusSnapshotCompleted,
   type SerializedOmnichainIndexingStatusSnapshotFollowing,

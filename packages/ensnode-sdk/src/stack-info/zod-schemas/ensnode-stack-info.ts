@@ -19,7 +19,7 @@ function invariant_ensApiCompatibilityWithEnsIndexerAndEnsRainbow(
   if (ensIndexer.versionInfo.ensDb !== ensApi.versionInfo.ensApi) {
     ctx.issues.push({
       code: "custom",
-      path: ["ensIndexer.versionInfo.ensDb"],
+      path: ["ensIndexer", "versionInfo", "ensDb"],
       input: ensIndexer.versionInfo.ensDb,
       message: `Version Mismatch: ENSDB@${ensIndexer.versionInfo.ensDb} !== ENSApi@${ensApi.versionInfo.ensApi}`,
     });
@@ -29,7 +29,7 @@ function invariant_ensApiCompatibilityWithEnsIndexerAndEnsRainbow(
   if (ensIndexer.versionInfo.ensIndexer !== ensApi.versionInfo.ensApi) {
     ctx.issues.push({
       code: "custom",
-      path: ["ensIndexer.versionInfo.ensIndexer"],
+      path: ["ensIndexer", "versionInfo", "ensIndexer"],
       input: ensIndexer.versionInfo.ensIndexer,
       message: `Version Mismatch: ENSIndexer@${ensIndexer.versionInfo.ensIndexer} !== ENSApi@${ensApi.versionInfo.ensApi}`,
     });
@@ -39,7 +39,7 @@ function invariant_ensApiCompatibilityWithEnsIndexerAndEnsRainbow(
   if (ensRainbow.versionInfo.ensRainbow !== ensApi.versionInfo.ensApi) {
     ctx.issues.push({
       code: "custom",
-      path: ["ensRainbow.versionInfo.ensRainbow"],
+      path: ["ensRainbow", "versionInfo", "ensRainbow"],
       input: ensRainbow.versionInfo.ensRainbow,
       message: `Version Mismatch: ENSRainbow@${ensRainbow.versionInfo.ensRainbow} !== ENSApi@${ensApi.versionInfo.ensApi}`,
     });
@@ -49,7 +49,7 @@ function invariant_ensApiCompatibilityWithEnsIndexerAndEnsRainbow(
   if (ensIndexer.versionInfo.ensNormalize !== ensApi.versionInfo.ensNormalize) {
     ctx.issues.push({
       code: "custom",
-      path: ["ensIndexer.versionInfo.ensNormalize"],
+      path: ["ensIndexer", "versionInfo", "ensNormalize"],
       input: ensIndexer.versionInfo.ensNormalize,
       message: `Dependency Version Mismatch: '@adraffy/ens-normalize' version must be the same between ENSIndexer and ENSApi. Found ENSApi@${ensApi.versionInfo.ensNormalize} and ENSIndexer@${ensIndexer.versionInfo.ensNormalize}`,
     });

@@ -577,9 +577,9 @@ function EnsNodeStackInfoCardContent({ ensNodeStackInfo }: { ensNodeStackInfo: E
             }
             additionalInfo={
               <p>
-                The "fully pinned" labelset id and version used for deterministic healing of unknown
-                labels across time. The label set version may be equal to or less than the highest
-                label set version offered by the connected ENSRainbow server.{" "}
+                The "fully pinned" label set id and version used for deterministic healing of
+                unknown labels across time. The label set version may be equal to or less than the
+                highest label set version offered by the connected ENSRainbow server.{" "}
                 <ExternalLinkWithIcon
                   href={`https://ensnode.io/ensrainbow/concepts/label-sets-and-versioning#client-behavior`}
                 >
@@ -615,7 +615,7 @@ function EnsNodeStackInfoCardContent({ ensNodeStackInfo }: { ensNodeStackInfo: E
             }
             additionalInfo={
               <p>
-                The labelset id and highest labelset version offered by the ENSRainbow server.{" "}
+                The label set id and highest label set version offered by the ENSRainbow server.{" "}
                 <ExternalLinkWithIcon
                   href={`https://ensnode.io/ensrainbow/concepts/label-sets-and-versioning`}
                 >
