@@ -1,5 +1,6 @@
 import { z } from "zod/v4";
 
+import { makeEnsDbPublicConfigSchema } from "../../ensdb/zod-schemas/config";
 import {
   makeEnsIndexerPublicConfigSchema,
   makeSerializedEnsIndexerPublicConfigSchema,
@@ -12,6 +13,7 @@ export function makeSerializedEnsIndexerStackInfoSchema(valueLabel?: string) {
   const label = valueLabel ?? "ENSIndexerStackInfo";
 
   return z.object({
+    ensDb: makeEnsDbPublicConfigSchema(`${label}.ensDb`),
     ensIndexer: makeSerializedEnsIndexerPublicConfigSchema(`${label}.ensIndexer`),
     ensRainbow: makeEnsRainbowPublicConfigSchema(`${label}.ensRainbow`),
   });
@@ -44,6 +46,7 @@ export function makeEnsIndexerStackInfoSchema(valueLabel?: string) {
 
   return z
     .object({
+      ensDb: makeEnsDbPublicConfigSchema(`${label}.ensDb`),
       ensIndexer: makeEnsIndexerPublicConfigSchema(`${label}.ensIndexer`),
       ensRainbow: makeEnsRainbowPublicConfigSchema(`${label}.ensRainbow`),
     })

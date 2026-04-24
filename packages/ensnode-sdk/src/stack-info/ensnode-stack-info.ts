@@ -1,13 +1,14 @@
-import type { EnsApiPublicConfig } from "../ensapi/config/types";
+import type { EnsApiPublicConfig } from "../ensapi/config";
 import type { EnsDbPublicConfig } from "../ensdb/config";
-import type { EnsIndexerPublicConfig } from "../ensindexer/config/types";
+import type { EnsIndexerPublicConfig } from "../ensindexer/config";
 import type { EnsRainbowPublicConfig } from "../ensrainbow";
-import { buildEnsDbStackInfo, type EnsDbStackInfo } from "./ensdb-stack-info";
+import { buildEnsIndexerStackInfo, type EnsIndexerStackInfo } from "./ensindexer-stack-info";
+import { validateEnsNodeStackInfo } from "./validate/ensnode-stack-info";
 
 /**
  * Information about the stack of services inside an ENSNode instance.
  */
-export interface EnsNodeStackInfo extends EnsDbStackInfo {
+export interface EnsNodeStackInfo extends EnsIndexerStackInfo {
   /**
    * ENSApi Public Config
    */
@@ -24,8 +25,8 @@ export function buildEnsNodeStackInfo(
   ensIndexerPublicConfig: EnsIndexerPublicConfig,
   ensRainbowPublicConfig: EnsRainbowPublicConfig,
 ): EnsNodeStackInfo {
-  return {
-    ...buildEnsDbStackInfo(ensDbPublicConfig, ensIndexerPublicConfig, ensRainbowPublicConfig),
+  return validateEnsNodeStackInfo({
+    ...buildEnsIndexerStackInfo(ensDbPublicConfig, ensIndexerPublicConfig, ensRainbowPublicConfig),
     ensApi: ensApiPublicConfig,
-  };
+  });
 }

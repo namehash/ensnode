@@ -1,12 +1,15 @@
 import { serializeEnsApiPublicConfig } from "../../ensapi/config/serialize";
 import type { SerializedEnsApiPublicConfig } from "../../ensapi/config/serialized-types";
 import type { EnsNodeStackInfo } from "../ensnode-stack-info";
-import { type SerializedEnsDbStackInfo, serializeEnsDbStackInfo } from "./ensdb-stack-info";
+import {
+  type SerializedEnsIndexerStackInfo,
+  serializeEnsIndexerStackInfo,
+} from "./ensindexer-stack-info";
 
 /**
  * Serialized representation of {@link EnsNodeStackInfo}.
  */
-export interface SerializedEnsNodeStackInfo extends SerializedEnsDbStackInfo {
+export interface SerializedEnsNodeStackInfo extends SerializedEnsIndexerStackInfo {
   ensApi: SerializedEnsApiPublicConfig;
 }
 
@@ -15,7 +18,7 @@ export interface SerializedEnsNodeStackInfo extends SerializedEnsDbStackInfo {
  */
 export function serializeEnsNodeStackInfo(stackInfo: EnsNodeStackInfo): SerializedEnsNodeStackInfo {
   return {
-    ...serializeEnsDbStackInfo(stackInfo),
+    ...serializeEnsIndexerStackInfo(stackInfo),
     ensApi: serializeEnsApiPublicConfig(stackInfo.ensApi),
   };
 }

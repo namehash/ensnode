@@ -4,8 +4,11 @@ import {
 } from "../../ensapi/config/zod-schemas";
 import type { ZodCheckFnInput } from "../../shared/zod-types";
 import type { EnsNodeStackInfo } from "../ensnode-stack-info";
-import { makeEnsDbStackInfoSchema, makeSerializedEnsDbStackInfoSchema } from "./ensdb-stack-info";
-import { invariant_ensRainbowCompatibilityWithEnsIndexer } from "./ensindexer-stack-info";
+import {
+  invariant_ensRainbowCompatibilityWithEnsIndexer,
+  makeEnsIndexerStackInfoSchema,
+  makeSerializedEnsIndexerStackInfoSchema,
+} from "./ensindexer-stack-info";
 
 function invariant_ensApiCompatibilityWithEnsIndexerAndEnsRainbow(
   ctx: ZodCheckFnInput<EnsNodeStackInfo>,
@@ -56,7 +59,7 @@ function invariant_ensApiCompatibilityWithEnsIndexerAndEnsRainbow(
 export function makeSerializedEnsNodeStackInfoSchema(valueLabel?: string) {
   const label = valueLabel ?? "ENSNodeStackInfo";
 
-  return makeSerializedEnsDbStackInfoSchema(label).extend({
+  return makeSerializedEnsIndexerStackInfoSchema(label).extend({
     ensApi: makeSerializedEnsApiPublicConfigSchema(`${label}.ensApi`),
   });
 }
@@ -64,7 +67,7 @@ export function makeSerializedEnsNodeStackInfoSchema(valueLabel?: string) {
 export function makeEnsNodeStackInfoSchema(valueLabel?: string) {
   const label = valueLabel ?? "ENSNodeStackInfo";
 
-  return makeEnsDbStackInfoSchema(label)
+  return makeEnsIndexerStackInfoSchema(label)
     .extend({
       ensApi: makeEnsApiPublicConfigSchema(`${label}.ensApi`),
     })

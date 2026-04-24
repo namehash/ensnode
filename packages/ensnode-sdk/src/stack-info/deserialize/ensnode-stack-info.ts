@@ -8,7 +8,7 @@ import {
   makeEnsNodeStackInfoSchema,
   makeSerializedEnsNodeStackInfoSchema,
 } from "../zod-schemas/ensnode-stack-info";
-import { buildUnvalidatedEnsDbStackInfo } from "./ensdb-stack-info";
+import { buildUnvalidatedEnsIndexerStackInfo } from "./ensindexer-stack-info";
 
 /**
  * Builds an unvalidated {@link EnsNodeStackInfo} object to be
@@ -20,10 +20,9 @@ import { buildUnvalidatedEnsDbStackInfo } from "./ensdb-stack-info";
 export function buildUnvalidatedEnsNodeStackInfo(
   serializedStackInfo: SerializedEnsNodeStackInfo,
 ): Unvalidated<EnsNodeStackInfo> {
-  const { ensApi, ...serializedEnsDbStackInfo } = serializedStackInfo;
   return {
-    ...buildUnvalidatedEnsDbStackInfo(serializedEnsDbStackInfo),
-    ensApi: buildUnvalidatedEnsApiPublicConfig(ensApi),
+    ...buildUnvalidatedEnsIndexerStackInfo(serializedStackInfo),
+    ensApi: buildUnvalidatedEnsApiPublicConfig(serializedStackInfo.ensApi),
   };
 }
 
