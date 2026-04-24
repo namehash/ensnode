@@ -12,6 +12,7 @@ import { ensTestEnvChain } from "@ensnode/datasources";
 import { DEVNET_MNEMONIC } from "@ensnode/ensnode-sdk/internal";
 
 import { seedPrimaryNameRecords } from "./primary-names";
+import { seedResolverRecords } from "./resolver-records";
 
 export type DevnetWalletClient = WalletClient<Transport, Chain, Account>;
 
@@ -41,4 +42,5 @@ function createDevnetWalletClients(rpcUrl: string): DevnetWalletClients {
 export async function seedDevnet(rpcUrl: string): Promise<void> {
   const clients = createDevnetWalletClients(rpcUrl);
   await seedPrimaryNameRecords(clients);
+  await seedResolverRecords(clients);
 }

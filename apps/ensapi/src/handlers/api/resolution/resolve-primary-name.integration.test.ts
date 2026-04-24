@@ -18,7 +18,11 @@ describe("GET /api/resolve/primary-name/:address/:chainId", () => {
       chainId: "1",
       query: "",
       expectedStatus: 200,
-      expectedBody: { name: "test.eth", accelerationRequested: false, accelerationAttempted: false },
+      expectedBody: {
+        name: "test.eth",
+        accelerationRequested: false,
+        accelerationAttempted: false,
+      },
     },
     {
       description:

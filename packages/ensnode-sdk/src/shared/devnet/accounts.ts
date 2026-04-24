@@ -23,4 +23,5 @@ export const DEVNET_ACCOUNTS = {
   user: toNormalizedAddress("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"),
   /** Account index 3 */
   user2: toNormalizedAddress("0x90F79bf6EB2c4f870365E785982E1f101E93b906"),
+  one: toNormalizedAddress(`0x${"1".repeat(40)}`),
 } as const;

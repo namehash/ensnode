@@ -6,7 +6,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { DEVNET_ACCOUNTS } from "@ensnode/ensnode-sdk/internal";
+import { DEVNET_ACCOUNTS, DEVNET_BYTES } from "@ensnode/ensnode-sdk/internal";
 
 const BASE_URL = process.env.ENSNODE_URL!;
 
@@ -129,6 +129,97 @@ describe("GET /api/resolve/records/:name", () => {
         accelerationAttempted: false,
       },
     },
+    // -- Text records (seeded in devnet) --
+    {
+      description: "resolves avatar text record for test.eth",
+      name: "test.eth",
+      query: "texts=avatar",
+      expectedStatus: 200,
+      expectedBody: {
+        records: { texts: { avatar: "https://example.com/avatar.png" } },
+        accelerationRequested: false,
+        accelerationAttempted: false,
+      },
+    },
+    {
+      description: "returns null for unset text record",
+      name: "test.eth",
+      query: "texts=nonexistent.key",
+      expectedStatus: 200,
+      expectedBody: {
+        records: { texts: { "nonexistent.key": null } },
+        accelerationRequested: false,
+        accelerationAttempted: false,
+      },
+    },
+    // -- Multi-coin addresses (seeded in devnet) --
+    {
+      description: "resolves multiple coin types at once for test.eth",
+      name: "test.eth",
+      query: "addresses=60,0,2,777777",
+      expectedStatus: 200,
+      expectedBody: {
+        records: {
+          addresses: {
+            60: DEVNET_ACCOUNTS.owner,
+            0: DEVNET_BYTES.bitcoinAddress,
+            2: DEVNET_BYTES.litecoinAddress,
+            777777: null,
+          },
+        },
+        accelerationRequested: false,
+        accelerationAttempted: false,
+      },
+    },
+    // -- Combined records --
+    {
+      description: "resolves every supported record type for test.eth",
+      name: "test.eth",
+      query: [
+        "name=true",
+        "addresses=60,0,2",
+        "texts=avatar,description,url,email,com.twitter,com.github",
+        "contenthash=true",
+        "pubkey=true",
+        "version=true",
+        "abi=1",
+        `interfaces=${DEVNET_BYTES.fourBytesInterface}`,
+      ].join("&"),
+      expectedStatus: 200,
+      expectedBody: {
+        records: {
+          addresses: {
+            60: DEVNET_ACCOUNTS.owner,
+            0: DEVNET_BYTES.bitcoinAddress,
+            2: DEVNET_BYTES.litecoinAddress,
+          },
+          texts: {
+            avatar: "https://example.com/avatar.png",
+            description: "test.eth",
+            url: "https://ens.domains",
+            email: "test@ens.domains",
+            "com.twitter": "ensdomains",
+            "com.github": "ensdomains",
+          },
+          contenthash: DEVNET_BYTES.contenthash,
+          pubkey: {
+            x: DEVNET_BYTES.publicKeyX,
+            y: DEVNET_BYTES.publicKeyY,
+          },
+          version: expect.any(String),
+          abi: {
+            contentType: "1",
+            data: DEVNET_BYTES.abiBytes,
+          },
+          interfaces: {
+            [DEVNET_BYTES.fourBytesInterface]: DEVNET_ACCOUNTS.one,
+          },
+        },
+        accelerationRequested: false,
+        accelerationAttempted: false,
+      },
+    },
+    // -- Acceleration --
     {
       description: "test.eth with accelerate=true returns accelerationRequested: true",
       name: "test.eth",

@@ -41,6 +41,7 @@ export * from "./shared/datasources-with-ensv2-contracts";
 export * from "./shared/datasources-with-resolvers";
 export * from "./shared/devnet/accounts";
 export * from "./shared/devnet/addresses";
+export * from "./shared/devnet/data";
 export * from "./shared/interpretation/interpret-address";
 export * from "./shared/interpretation/interpret-record-values";
 export * from "./shared/interpretation/interpret-resolver-values";

@@ -36,7 +36,9 @@ describe("Account.domains", () => {
   `;
 
   it("returns domains owned by the devnet owner", async () => {
-    const result = await request<AccountDomainsResult>(AccountDomains, { address: DEVNET_ACCOUNTS.owner });
+    const result = await request<AccountDomainsResult>(AccountDomains, {
+      address: DEVNET_ACCOUNTS.owner,
+    });
     const domains = flattenConnection(result.account.domains);
     const names = domains.map((d) => d.name);
 

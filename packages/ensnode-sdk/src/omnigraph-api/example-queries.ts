@@ -30,7 +30,6 @@ const ENS_TEST_ENV_V2_ETH_REGISTRAR = maybeGetDatasourceContract(
   "ETHRegistrar",
 );
 
-
 const VITALIK_ADDRESS = toNormalizedAddress("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045");
 
 const DEVNET_NAME_WITH_OWNED_RESOLVER = asInterpretedName("example.eth");
