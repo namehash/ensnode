@@ -10,7 +10,6 @@ import {
   makeSubdomainNode,
   type Node,
   type NormalizedAddress,
-  type RegistryId,
 } from "enssdk";
 import { isAddressEqual, zeroAddress } from "viem";
 
@@ -59,81 +58,62 @@ export default function () {
     // if someone mints a node to the zero address, nothing happens in the Registry, so no-op
     if (isAddressEqual(zeroAddress, owner)) return;
 
-    // Canonicalize ENSv1Registry vs. ENSv1RegistryOld via `getManagedName(...).registry`. Both
-    // Registries share a Managed Name (the ENS Root for mainnet) and write into the same
+    // NOTE: Canonicalize ENSv1Registry vs. ENSv1RegistryOld via `getManagedName(...).registry`.
+    // Both Registries share a Managed Name (the ENS Root for mainnet) and write into the same
     // namegraph; canonicalizing here ensures Old events that pass `nodeIsMigrated` don't fragment
-    // domains across two Registry IDs.
-    const { node: managedNode, registry } = getManagedName(getThisAccountId(context, event));
+    // domains across two Registry IDs. This is why we use getManagedName over just `getThisAccountId`.
+    const { registry } = getManagedName(getThisAccountId(context, event));
+    const concreteRegistryId = makeENSv1RegistryId(registry);
 
+    const isTLD = isAddressEqual(zeroAddress, parentNode);
     const node = makeSubdomainNode(labelHash, parentNode);
     const domainId = makeENSv1DomainId(registry, node);
-    const parentDomainId = makeENSv1DomainId(registry, parentNode);
 
-    let parentRegistryId: RegistryId;
+    // this ENSv1Domain's (parent) Registry is either:
+    // a) if this is a TLD, the (concrete) ENSv1Registry identified by (chainId, address), or
+    // b) the ENSv1VirtualRegistry identified by (chainId, address, parentNode)
+    const parentRegistryId = isTLD
+      ? concreteRegistryId
+      : makeENSv1VirtualRegistryId(registry, parentNode);
 
-    // if the parent is the Managed Name, the parent registry is the Managed Name's Registry
-    if (parentNode === managedNode) {
-      // parent is concrete
-      parentRegistryId = makeENSv1RegistryId(registry);
+    // this ENSv1Domain's (sub) Registry is always an ENSv1VirtualRegistry identified by
+    // (chainId, address, node)
+    const subregistryId = makeENSv1VirtualRegistryId(registry, node);
 
-      // ensure (concrete) ENSv1Registry
+    // ensure (concrete) ENSv1Registry
+    // Optimization: only if the following is a TLD (reduces the db calls that would be useless if
+    // we ran this on _every_ NewOwner event)
+    if (isTLD) {
       await context.ensDb
         .insert(ensIndexerSchema.registry)
-        .values({ id: parentRegistryId, type: "ENSv1Registry", ...registry })
+        .values({ id: concreteRegistryId, type: "ENSv1Registry", ...registry })
         .onConflictDoNothing();
-
-      // NOTE: we explicitly do not set the Canonical Domain for (concrete) ENSv1Registries — this
-      // traversal logic is handled by the Bridged Resolver concept during resolution
-    } else {
-      // parent registry is virtual
-      parentRegistryId = makeENSv1VirtualRegistryId(registry, parentNode);
-
-      // ensure ENSv1VirtualRegistry for parent
-      await context.ensDb
-        .insert(ensIndexerSchema.registry)
-        .values({
-          id: parentRegistryId,
-          type: "ENSv1VirtualRegistry",
-          chainId: registry.chainId,
-          address: registry.address,
-          node: parentNode,
-        })
-        .onConflictDoNothing();
-
-      // ensure parent domain's subregistry is the ENSv1VirtualRegistry
-      await context.ensDb
-        .update(ensIndexerSchema.domain, { id: parentDomainId })
-        .set({ subregistryId: parentRegistryId });
-
-      // ensure Canonical Domain reference
-      await context.ensDb
-        .insert(ensIndexerSchema.registryCanonicalDomain)
-        .values({ registryId: parentRegistryId, domainId: parentDomainId })
-        .onConflictDoUpdate({ domainId: parentDomainId });
     }
 
-    // If this is a direct subname of addr.reverse, we have 100% on-chain label discovery.
-    //
-    // Note: Per ENSIP-19, only the ENS Root chain may record primary names under the `addr.reverse`
-    // subname. Also per ENSIP-19 no Reverse Names need exist in (shadow)Registries on non-root
-    // chains, so we explicitly only support Root chain addr.reverse-based Reverse Names: ENSIP-19
-    // CoinType-specific Reverse Names (ex: [address].[coinType].reverse) don't actually exist in
-    // the ENS Registry: wildcard resolution is used, so this NewOwner event will never be emitted
-    // with a domain created as a child of a Coin-Type specific Reverse Node (ex: [coinType].reverse).
-    if (
-      parentNode === ADDR_REVERSE_NODE &&
-      context.chain.id === getENSRootChainId(config.namespace)
-    ) {
-      const label = await healAddrReverseSubnameLabel(context, event, labelHash);
-      await ensureLabel(context, label);
-    } else {
-      await ensureUnknownLabel(context, labelHash);
-    }
+    // every ENSv1 Domain receives a virtual registry w/ Canonical Domain reference
+    // NOTE: we eagerly upsert the ENSv1VirtualRegistry here, rather than lazily on child name creation
+    // to pay the cost per-parent-domain-event rather than per-child-domain(s)-events
+    await context.ensDb
+      .insert(ensIndexerSchema.registry)
+      .values({
+        id: subregistryId,
+        type: "ENSv1VirtualRegistry",
+        chainId: registry.chainId,
+        address: registry.address,
+        node,
+      })
+      .onConflictDoNothing();
+
+    // ensure Canonical Domain reference
+    await context.ensDb
+      .insert(ensIndexerSchema.registryCanonicalDomain)
+      .values({ registryId: subregistryId, domainId })
+      .onConflictDoNothing();
 
     const ownerId = interpretAddress(owner);
     await ensureAccount(context, owner);
 
-    // upsert domain, always updating ownerId and setting rootRegistryOwner to this explicit owner
+    // upsert domain
     await context.ensDb
       .insert(ensIndexerSchema.domain)
       .values({
@@ -152,8 +132,29 @@ export default function () {
         // indexing code re-materializes the Domain.ownerId to the NameWrapper-emitted value.
         ownerId,
         rootRegistryOwnerId: ownerId,
+        subregistryId,
       })
       .onConflictDoUpdate({ ownerId, rootRegistryOwnerId: ownerId });
+
+    // Label Healing
+    //
+    // If this is a direct subname of addr.reverse, we have 100% on-chain label discovery.
+    //
+    // Note: Per ENSIP-19, only the ENS Root chain may record primary names under the `addr.reverse`
+    // subname. Also per ENSIP-19 no Reverse Names need exist in (shadow)Registries on non-root
+    // chains, so we explicitly only support Root chain addr.reverse-based Reverse Names: ENSIP-19
+    // CoinType-specific Reverse Names (ex: [address].[coinType].reverse) don't actually exist in
+    // the ENS Registry: wildcard resolution is used, so this NewOwner event will never be emitted
+    // with a domain created as a child of a Coin-Type specific Reverse Node (ex: [coinType].reverse).
+    if (
+      parentNode === ADDR_REVERSE_NODE &&
+      context.chain.id === getENSRootChainId(config.namespace)
+    ) {
+      const label = await healAddrReverseSubnameLabel(context, event, labelHash);
+      await ensureLabel(context, label);
+    } else {
+      await ensureUnknownLabel(context, labelHash);
+    }
 
     // push event to domain history
     await ensureDomainEvent(context, event, domainId);
