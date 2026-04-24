@@ -782,6 +782,23 @@
                     "stackInfo": {
                       "type": "object",
                       "properties": {
+                        "ensDb": {
+                          "type": "object",
+                          "properties": {
+                            "versionInfo": {
+                              "type": "object",
+                              "properties": {
+                                "postgresql": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "description": "Version of the PostgreSQL server hosting the ENSDb instance."
+                                }
+                              },
+                              "required": ["postgresql"]
+                            }
+                          },
+                          "required": ["versionInfo"]
+                        },
                         "ensIndexer": {
                           "type": "object",
                           "properties": {
@@ -789,8 +806,7 @@
                             "ensRainbowPublicConfig": {
                               "type": "object",
                               "properties": {
-                                "version": { "type": "string", "minLength": 1 },
-                                "labelSet": {
+                                "serverLabelSet": {
                                   "type": "object",
                                   "properties": {
                                     "labelSetId": {
@@ -803,9 +819,15 @@
                                   },
                                   "required": ["labelSetId", "highestLabelSetVersion"]
                                 },
-                                "recordsCount": { "type": "integer", "minimum": 0 }
+                                "versionInfo": {
+                                  "type": "object",
+                                  "properties": {
+                                    "ensRainbow": { "type": "string", "minLength": 1 }
+                                  },
+                                  "required": ["ensRainbow"]
+                                }
                               },
-                              "required": ["version", "labelSet", "recordsCount"]
+                              "required": ["serverLabelSet", "versionInfo"]
                             },
                             "indexedChainIds": {
                               "type": "array",
@@ -813,7 +835,7 @@
                               "minItems": 1
                             },
                             "isSubgraphCompatible": { "type": "boolean" },
-                            "labelSet": {
+                            "clientLabelSet": {
                               "type": "object",
                               "properties": {
                                 "labelSetId": {
@@ -851,7 +873,7 @@
                             "ensRainbowPublicConfig",
                             "indexedChainIds",
                             "isSubgraphCompatible",
-                            "labelSet",
+                            "clientLabelSet",
                             "namespace",
                             "plugins",
                             "versionInfo"
@@ -860,8 +882,7 @@
                         "ensRainbow": {
                           "type": "object",
                           "properties": {
-                            "version": { "type": "string", "minLength": 1 },
-                            "labelSet": {
+                            "serverLabelSet": {
                               "type": "object",
                               "properties": {
                                 "labelSetId": {
@@ -874,28 +895,13 @@
                               },
                               "required": ["labelSetId", "highestLabelSetVersion"]
                             },
-                            "recordsCount": { "type": "integer", "minimum": 0 }
-                          },
-                          "required": ["version", "labelSet", "recordsCount"]
-                        },
-                        "ensDb": {
-                          "type": "object",
-                          "properties": {
                             "versionInfo": {
                               "type": "object",
-                              "properties": {
-                                "postgresql": {
-                                  "type": "string",
-                                  "minLength": 1,
-                                  "description": "Version of the PostgreSQL server hosting the ENSDb instance."
-                                }
-                              },
-                              "required": ["postgresql"],
-                              "description": "Serialized Indexing Status Response OK.ensDb.versionInfo"
+                              "properties": { "ensRainbow": { "type": "string", "minLength": 1 } },
+                              "required": ["ensRainbow"]
                             }
                           },
-                          "required": ["versionInfo"],
-                          "description": "Serialized Indexing Status Response OK.ensDb"
+                          "required": ["serverLabelSet", "versionInfo"]
                         },
                         "ensApi": {
                           "type": "object",
@@ -907,8 +913,7 @@
                                 "ensRainbowPublicConfig": {
                                   "type": "object",
                                   "properties": {
-                                    "version": { "type": "string", "minLength": 1 },
-                                    "labelSet": {
+                                    "serverLabelSet": {
                                       "type": "object",
                                       "properties": {
                                         "labelSetId": {
@@ -924,9 +929,15 @@
                                       },
                                       "required": ["labelSetId", "highestLabelSetVersion"]
                                     },
-                                    "recordsCount": { "type": "integer", "minimum": 0 }
+                                    "versionInfo": {
+                                      "type": "object",
+                                      "properties": {
+                                        "ensRainbow": { "type": "string", "minLength": 1 }
+                                      },
+                                      "required": ["ensRainbow"]
+                                    }
                                   },
-                                  "required": ["version", "labelSet", "recordsCount"]
+                                  "required": ["serverLabelSet", "versionInfo"]
                                 },
                                 "indexedChainIds": {
                                   "type": "array",
@@ -934,7 +945,7 @@
                                   "minItems": 1
                                 },
                                 "isSubgraphCompatible": { "type": "boolean" },
-                                "labelSet": {
+                                "clientLabelSet": {
                                   "type": "object",
                                   "properties": {
                                     "labelSetId": {
@@ -972,7 +983,7 @@
                                 "ensRainbowPublicConfig",
                                 "indexedChainIds",
                                 "isSubgraphCompatible",
-                                "labelSet",
+                                "clientLabelSet",
                                 "namespace",
                                 "plugins",
                                 "versionInfo"
@@ -1019,7 +1030,7 @@
                           "required": ["ensIndexerPublicConfig", "theGraphFallback", "versionInfo"]
                         }
                       },
-                      "required": ["ensIndexer", "ensRainbow", "ensDb", "ensApi"]
+                      "required": ["ensDb", "ensIndexer", "ensRainbow", "ensApi"]
                     }
                   },
                   "required": ["responseCode", "realtimeProjection", "stackInfo"]
