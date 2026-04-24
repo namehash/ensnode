@@ -3,8 +3,10 @@ import { migrate } from "drizzle-orm/node-postgres/migrator";
 import {
   type CrossChainIndexingStatusSnapshot,
   type EnsIndexerPublicConfig,
+  type IndexingMetadataContextInitialized,
   serializeCrossChainIndexingStatusSnapshot,
   serializeEnsIndexerPublicConfig,
+  serializeIndexingMetadataContext,
 } from "@ensnode/ensnode-sdk";
 
 import { EnsDbReader } from "./ensdb-reader";
@@ -70,6 +72,20 @@ export class EnsDbWriter extends EnsDbReader {
     await this.upsertEnsNodeMetadata({
       key: EnsNodeMetadataKeys.EnsIndexerIndexingStatus,
       value: serializeCrossChainIndexingStatusSnapshot(indexingStatus),
+    });
+  }
+
+  /**
+   * Upsert Indexing Metadata Context Initialized
+   *
+   * @throws when upsert operation failed.
+   */
+  async upsertIndexingMetadataContext(
+    indexingMetadataContext: IndexingMetadataContextInitialized,
+  ): Promise<void> {
+    await this.upsertEnsNodeMetadata({
+      key: EnsNodeMetadataKeys.IndexingMetadataContext,
+      value: serializeIndexingMetadataContext(indexingMetadataContext),
     });
   }
 
