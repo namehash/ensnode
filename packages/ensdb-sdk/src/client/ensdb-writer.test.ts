@@ -2,9 +2,10 @@ import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
+  buildEnsIndexerStackInfo,
+  buildIndexingMetadataContextInitialized,
   deserializeCrossChainIndexingStatusSnapshot,
-  serializeCrossChainIndexingStatusSnapshot,
-  serializeEnsIndexerPublicConfig,
+  serializeIndexingMetadataContext,
 } from "@ensnode/ensnode-sdk";
 
 import * as ensDbClientMock from "./ensdb-client.mock";
@@ -32,59 +33,46 @@ describe("EnsDbWriter", () => {
     vi.mocked(migrate).mockClear();
   });
 
-  describe("upsertEnsDbVersion", () => {
-    it("writes the database version metadata", async () => {
-      const ensDbClient = createEnsDbWriter();
-      const { ensNodeSchema } = ensDbClient;
+  describe("upsertIndexingMetadataContext", () => {
+    it("serializes and writes the indexing metadata context", async () => {
+      const ensDbWriter = createEnsDbWriter();
+      const { ensNodeSchema } = ensDbWriter;
 
-      await ensDbClient.upsertEnsDbVersion("0.2.0");
+      const indexingStatus = deserializeCrossChainIndexingStatusSnapshot(
+        ensDbClientMock.serializedSnapshot,
+      );
+      const ensDbPublicConfig = {
+        versionInfo: { postgresql: "17.4" },
+      };
+      const ensRainbowPublicConfig = {
+        serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+        versionInfo: { ensRainbow: "1.9.0" },
+      };
+      const stackInfo = buildEnsIndexerStackInfo(
+        ensDbPublicConfig,
+        ensDbClientMock.publicConfig,
+        ensRainbowPublicConfig,
+      );
+      const context = buildIndexingMetadataContextInitialized(indexingStatus, stackInfo);
+      const expectedValue = serializeIndexingMetadataContext(context);
+
+      await ensDbWriter.upsertIndexingMetadataContext(context);
 
       expect(insertMock).toHaveBeenCalledWith(ensNodeSchema.metadata);
       expect(valuesMock).toHaveBeenCalledWith({
         ensIndexerSchemaName: ensDbClientMock.ensIndexerSchemaName,
-        key: EnsNodeMetadataKeys.EnsDbVersion,
-        value: "0.2.0",
+        key: EnsNodeMetadataKeys.IndexingMetadataContext,
+        value: expectedValue,
       });
       expect(onConflictDoUpdateMock).toHaveBeenCalledWith({
         target: [ensNodeSchema.metadata.ensIndexerSchemaName, ensNodeSchema.metadata.key],
-        set: { value: "0.2.0" },
-      });
-    });
-  });
-
-  describe("upsertEnsIndexerPublicConfig", () => {
-    it("serializes and writes the public config", async () => {
-      const expectedValue = serializeEnsIndexerPublicConfig(ensDbClientMock.publicConfig);
-
-      await createEnsDbWriter().upsertEnsIndexerPublicConfig(ensDbClientMock.publicConfig);
-
-      expect(valuesMock).toHaveBeenCalledWith({
-        ensIndexerSchemaName: ensDbClientMock.ensIndexerSchemaName,
-        key: EnsNodeMetadataKeys.EnsIndexerPublicConfig,
-        value: expectedValue,
-      });
-    });
-  });
-
-  describe("upsertIndexingStatusSnapshot", () => {
-    it("serializes and writes the indexing status snapshot", async () => {
-      const snapshot = deserializeCrossChainIndexingStatusSnapshot(
-        ensDbClientMock.serializedSnapshot,
-      );
-      const expectedValue = serializeCrossChainIndexingStatusSnapshot(snapshot);
-
-      await createEnsDbWriter().upsertIndexingStatusSnapshot(snapshot);
-
-      expect(valuesMock).toHaveBeenCalledWith({
-        ensIndexerSchemaName: ensDbClientMock.ensIndexerSchemaName,
-        key: EnsNodeMetadataKeys.EnsIndexerIndexingStatus,
-        value: expectedValue,
+        set: { value: expectedValue },
       });
     });
   });
 
   describe("migrateEnsNodeSchema", () => {
-    it("calls drizzle-orm migrateEnsNodeSchema with the correct parameters", async () => {
+    it("calls drizzle-orm migrate with the correct parameters", async () => {
       const migrationsDirPath = "/path/to/migrations";
 
       await createEnsDbWriter().migrateEnsNodeSchema(migrationsDirPath);
@@ -95,7 +83,7 @@ describe("EnsDbWriter", () => {
       });
     });
 
-    it("propagates errors from the migrateEnsNodeSchema function", async () => {
+    it("propagates errors from the migrate function", async () => {
       const migrationsDirPath = "/path/to/migrations";
       vi.mocked(migrate).mockRejectedValueOnce(new Error("Migration failed"));
 

@@ -5,7 +5,26 @@ import type { IndexingEngineContext, IndexingEngineEvent } from "./ponder";
 
 const { mockPonderOn } = vi.hoisted(() => ({ mockPonderOn: vi.fn() }));
 
-const mockWaitForEnsRainbow = vi.hoisted(() => vi.fn());
+const { mockInitIndexingOnchainEvents } = vi.hoisted(() => ({
+  mockInitIndexingOnchainEvents: vi.fn(),
+}));
+
+// Set up PONDER_COMMON global before any imports that depend on it
+vi.hoisted(() => {
+  (globalThis as any).PONDER_COMMON = {
+    options: {
+      command: "start",
+      port: 42069,
+    },
+    logger: {
+      trace: vi.fn(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+    },
+  };
+});
 
 vi.mock("ponder:registry", () => ({
   ponder: {
@@ -17,14 +36,14 @@ vi.mock("ponder:schema", () => ({
   ensIndexerSchema: {},
 }));
 
-vi.mock("@/lib/ensrainbow/singleton", () => ({
-  waitForEnsRainbowToBeReady: mockWaitForEnsRainbow,
+vi.mock("./init-indexing-onchain-events", () => ({
+  initIndexingOnchainEvents: mockInitIndexingOnchainEvents,
 }));
 
 describe("addOnchainEventListener", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
-    mockWaitForEnsRainbow.mockResolvedValue(undefined);
+    mockInitIndexingOnchainEvents.mockResolvedValue(undefined);
     // Reset module state to test idempotent behavior correctly
     vi.resetModules();
   });
@@ -221,8 +240,8 @@ describe("addOnchainEventListener", () => {
     });
   });
 
-  describe("ENSRainbow preconditions (onchain events)", () => {
-    it("waits for ENSRainbow before executing the handler", async () => {
+  describe("onchain event preconditions", () => {
+    it("runs onchain event initialization before executing the handler", async () => {
       const { addOnchainEventListener } = await getPonderModule();
       const handler = vi.fn().mockResolvedValue(undefined);
 
@@ -232,14 +251,16 @@ describe("addOnchainEventListener", () => {
         event: {} as IndexingEngineEvent<EventNames>,
       });
 
-      expect(mockWaitForEnsRainbow).toHaveBeenCalledTimes(1);
+      expect(mockInitIndexingOnchainEvents).toHaveBeenCalledTimes(1);
       expect(handler).toHaveBeenCalled();
     });
 
-    it("prevents handler execution if ENSRainbow is not ready", async () => {
+    it("prevents handler execution if onchain event initialization fails", async () => {
       const { addOnchainEventListener } = await getPonderModule();
       const handler = vi.fn().mockResolvedValue(undefined);
-      mockWaitForEnsRainbow.mockRejectedValue(new Error("ENSRainbow not ready"));
+      mockInitIndexingOnchainEvents.mockRejectedValue(
+        new Error("Onchain event initialization failed"),
+      );
 
       addOnchainEventListener("Resolver:AddrChanged" as EventNames, handler);
 
@@ -248,12 +269,12 @@ describe("addOnchainEventListener", () => {
           context: { db: vi.fn() } as unknown as Context<EventNames>,
           event: {} as IndexingEngineEvent<EventNames>,
         }),
-      ).rejects.toThrow("ENSRainbow not ready");
+      ).rejects.toThrow("Onchain event initialization failed");
 
       expect(handler).not.toHaveBeenCalled();
     });
 
-    it("calls waitForEnsRainbowToBeReady only once across multiple onchain events (idempotent)", async () => {
+    it("calls initIndexingOnchainEvents only once across multiple onchain events (idempotent)", async () => {
       const { addOnchainEventListener } = await getPonderModule();
       const handler1 = vi.fn().mockResolvedValue(undefined);
       const handler2 = vi.fn().mockResolvedValue(undefined);
@@ -267,7 +288,7 @@ describe("addOnchainEventListener", () => {
         context: { db: vi.fn() } as unknown as Context<EventNames>,
         event: { args: { a: "1" } } as unknown as IndexingEngineEvent<EventNames>,
       });
-      expect(mockWaitForEnsRainbow).toHaveBeenCalledTimes(1);
+      expect(mockInitIndexingOnchainEvents).toHaveBeenCalledTimes(1);
 
       // Trigger the second event handler
       await getRegisteredCallback(1)({
@@ -276,19 +297,19 @@ describe("addOnchainEventListener", () => {
       });
 
       // Should still only have been called once (idempotent behavior)
-      expect(mockWaitForEnsRainbow).toHaveBeenCalledTimes(1);
+      expect(mockInitIndexingOnchainEvents).toHaveBeenCalledTimes(1);
       expect(handler1).toHaveBeenCalledTimes(1);
       expect(handler2).toHaveBeenCalledTimes(1);
     });
 
-    it("calls waitForEnsRainbowToBeReady only once when two onchain callbacks fire concurrently before the readiness promise resolves", async () => {
+    it("calls initIndexingOnchainEvents only once when two onchain callbacks fire concurrently before the initialization promise resolves", async () => {
       const { addOnchainEventListener } = await getPonderModule();
       const handler1 = vi.fn().mockResolvedValue(undefined);
       const handler2 = vi.fn().mockResolvedValue(undefined);
       let resolveReadiness: (() => void) | undefined;
 
       // Create a promise that won't resolve until we manually trigger it
-      mockWaitForEnsRainbow.mockImplementation(() => {
+      mockInitIndexingOnchainEvents.mockImplementation(() => {
         return new Promise<void>((resolve) => {
           resolveReadiness = resolve;
         });
@@ -308,8 +329,8 @@ describe("addOnchainEventListener", () => {
         event: { args: { a: "2" } } as unknown as IndexingEngineEvent<EventNames>,
       });
 
-      // Should only have been called once despite concurrent execution
-      expect(mockWaitForEnsRainbow).toHaveBeenCalledTimes(1);
+      // Allow the dynamic import to settle before asserting
+      await vi.waitFor(() => expect(mockInitIndexingOnchainEvents).toHaveBeenCalledTimes(1));
 
       // Neither handler should have executed yet
       expect(handler1).not.toHaveBeenCalled();
@@ -326,12 +347,12 @@ describe("addOnchainEventListener", () => {
       expect(handler2).toHaveBeenCalledTimes(1);
     });
 
-    it("resolves ENSRainbow before calling the handler", async () => {
+    it("resolves onchain event initialization before calling the handler", async () => {
       const { addOnchainEventListener } = await getPonderModule();
       const handler = vi.fn().mockResolvedValue(undefined);
       let preconditionResolved = false;
 
-      mockWaitForEnsRainbow.mockImplementation(async () => {
+      mockInitIndexingOnchainEvents.mockImplementation(async () => {
         await new Promise((resolve) => setTimeout(resolve, 10));
         preconditionResolved = true;
       });
@@ -348,7 +369,7 @@ describe("addOnchainEventListener", () => {
   });
 
   describe("setup events (no preconditions)", () => {
-    it("skips ENSRainbow wait for :setup events", async () => {
+    it("skips onchain event initialization for :setup events", async () => {
       const { addOnchainEventListener } = await getPonderModule();
       const handler = vi.fn().mockResolvedValue(undefined);
 
@@ -358,7 +379,7 @@ describe("addOnchainEventListener", () => {
         event: {} as IndexingEngineEvent<EventNames>,
       });
 
-      expect(mockWaitForEnsRainbow).not.toHaveBeenCalled();
+      expect(mockInitIndexingOnchainEvents).not.toHaveBeenCalled();
       expect(handler).toHaveBeenCalled();
     });
 
@@ -381,7 +402,7 @@ describe("addOnchainEventListener", () => {
           event: {} as IndexingEngineEvent<EventNames>,
         });
 
-        expect(mockWaitForEnsRainbow).not.toHaveBeenCalled();
+        expect(mockInitIndexingOnchainEvents).not.toHaveBeenCalled();
         expect(handler).toHaveBeenCalled();
       }
     });
@@ -396,20 +417,20 @@ describe("addOnchainEventListener", () => {
       addOnchainEventListener("PublicResolver:setup" as EventNames, setupHandler);
       addOnchainEventListener("PublicResolver:AddrChanged" as EventNames, onchainHandler);
 
-      // Setup event - no ENSRainbow wait
+      // Setup event - no onchain event initialization
       await getRegisteredCallback(0)({
         context: { db: vi.fn() } as unknown as Context<EventNames>,
         event: {} as IndexingEngineEvent<EventNames>,
       });
-      expect(mockWaitForEnsRainbow).not.toHaveBeenCalled();
+      expect(mockInitIndexingOnchainEvents).not.toHaveBeenCalled();
       expect(setupHandler).toHaveBeenCalled();
 
-      // Onchain event - ENSRainbow wait required
+      // Onchain event - initialization required
       await getRegisteredCallback(1)({
         context: { db: vi.fn() } as unknown as Context<EventNames>,
         event: {} as IndexingEngineEvent<EventNames>,
       });
-      expect(mockWaitForEnsRainbow).toHaveBeenCalledTimes(1);
+      expect(mockInitIndexingOnchainEvents).toHaveBeenCalledTimes(1);
       expect(onchainHandler).toHaveBeenCalled();
     });
 
@@ -434,7 +455,7 @@ describe("addOnchainEventListener", () => {
           event: {} as IndexingEngineEvent<EventNames>,
         });
 
-        expect(mockWaitForEnsRainbow).toHaveBeenCalled();
+        expect(mockInitIndexingOnchainEvents).toHaveBeenCalled();
         expect(handler).toHaveBeenCalled();
       }
     });
