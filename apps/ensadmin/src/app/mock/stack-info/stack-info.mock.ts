@@ -112,26 +112,10 @@ function createEnsIndexerConfig(
   };
 }
 
-function createEnsApiConfig(
-  namespace: SerializedEnsIndexerPublicConfig["namespace"],
-  indexedChainIds: SerializedEnsIndexerPublicConfig["indexedChainIds"],
-  plugins: SerializedEnsIndexerPublicConfig["plugins"],
-  ensIndexerSchemaName: string,
-  isSubgraphCompatible: boolean,
-  theGraphFallback: TheGraphFallback,
-): SerializedEnsApiPublicConfig {
+function createEnsApiConfig(theGraphFallback: TheGraphFallback): SerializedEnsApiPublicConfig {
   return {
     versionInfo: { ...COMMON_ENSAPI_VERSION_INFO },
     theGraphFallback,
-    ensIndexerPublicConfig: {
-      ...createEnsIndexerConfig(
-        namespace,
-        indexedChainIds,
-        plugins,
-        ensIndexerSchemaName,
-        isSubgraphCompatible,
-      ),
-    },
   };
 }
 function createAlphaEnsIndexerConfig(
@@ -147,19 +131,8 @@ function createAlphaEnsIndexerConfig(
   );
 }
 
-function createAlphaEnsApiConfig(
-  namespace: "mainnet" | "sepolia",
-  isMainnet: boolean,
-  theGraphFallback: TheGraphFallback,
-): SerializedEnsApiPublicConfig {
-  return createEnsApiConfig(
-    namespace,
-    isMainnet ? ALPHA_MAINNET_CHAINS : ALPHA_SEPOLIA_CHAINS,
-    [...(isMainnet ? ALPHA_PLUGINS : ALPHA_SEPOLIA_PLUGINS)],
-    isMainnet ? "alphaSchema1.9.0" : "alphaSepoliaSchema1.9.0",
-    false,
-    theGraphFallback,
-  );
+function createAlphaEnsApiConfig(theGraphFallback: TheGraphFallback): SerializedEnsApiPublicConfig {
+  return createEnsApiConfig(theGraphFallback);
 }
 
 function createSubgraphEnsIndexerConfig(
@@ -175,18 +148,8 @@ function createSubgraphEnsIndexerConfig(
   );
 }
 
-function createSubgraphEnsApiConfig(
-  namespace: "mainnet" | "sepolia",
-  isMainnet: boolean,
-): SerializedEnsApiPublicConfig {
-  return createEnsApiConfig(
-    namespace,
-    isMainnet ? SUBGRAPH_MAINNET_CHAINS : SUBGRAPH_SEPOLIA_CHAINS,
-    [...SUBGRAPH_PLUGINS],
-    isMainnet ? "mainnetSchema1.9.0" : "sepoliaSchema1.9.0",
-    true,
-    { ...THE_GRAPH_FALLBACK_DISABLED },
-  );
+function createSubgraphEnsApiConfig(): SerializedEnsApiPublicConfig {
+  return createEnsApiConfig({ ...THE_GRAPH_FALLBACK_DISABLED });
 }
 
 // ============================================================================
@@ -198,32 +161,6 @@ function createDeserializationErrorVariant(): SerializedEnsNodeStackInfo {
     ensApi: {
       versionInfo: { ...COMMON_ENSAPI_VERSION_INFO },
       theGraphFallback: { ...THE_GRAPH_FALLBACK_DISABLED },
-      ensIndexerPublicConfig: {
-        clientLabelSet: {
-          labelSetId: "",
-          labelSetVersion: 0,
-        },
-        versionInfo: {
-          ponder: "",
-          ensDb: "",
-          ensIndexer: "",
-          ensNormalize: "",
-        },
-        indexedChainIds: [11155111],
-        namespace: "sepolia",
-        plugins: ["subgraph"],
-        ensIndexerSchemaName: "DeserializationSchema1.9.0",
-        isSubgraphCompatible: true,
-        ensRainbowPublicConfig: {
-          serverLabelSet: {
-            labelSetId: "",
-            highestLabelSetVersion: -1,
-          },
-          versionInfo: {
-            ensRainbow: "",
-          },
-        },
-      },
     },
     ensDb: createEnsDbConfig(),
     ensIndexer: {
@@ -274,25 +211,25 @@ function createDeserializationErrorVariant(): SerializedEnsNodeStackInfo {
  */
 export const mockSerializedEnsNodeStackInfo = {
   "Alpha Mainnet": {
-    ensApi: createAlphaEnsApiConfig("mainnet", true, { ...THE_GRAPH_FALLBACK_DISABLED }),
+    ensApi: createAlphaEnsApiConfig({ ...THE_GRAPH_FALLBACK_DISABLED }),
     ensDb: createEnsDbConfig(),
     ensIndexer: createAlphaEnsIndexerConfig("mainnet", true),
     ensRainbow: createEnsRainbowConfig(),
   },
   "Alpha Sepolia": {
-    ensApi: createAlphaEnsApiConfig("sepolia", false, { canFallback: true, url: "" }),
+    ensApi: createAlphaEnsApiConfig({ canFallback: true, url: "" }),
     ensDb: createEnsDbConfig(),
     ensIndexer: createAlphaEnsIndexerConfig("sepolia", false),
     ensRainbow: createEnsRainbowConfig(),
   },
   "Subgraph Mainnet": {
-    ensApi: createSubgraphEnsApiConfig("mainnet", true),
+    ensApi: createSubgraphEnsApiConfig(),
     ensDb: createEnsDbConfig(),
     ensIndexer: createSubgraphEnsIndexerConfig("mainnet", true),
     ensRainbow: createEnsRainbowConfig(),
   },
   "Subgraph Sepolia": {
-    ensApi: createSubgraphEnsApiConfig("sepolia", false),
+    ensApi: createSubgraphEnsApiConfig(),
     ensDb: createEnsDbConfig(),
     ensIndexer: createSubgraphEnsIndexerConfig("sepolia", false),
     ensRainbow: createEnsRainbowConfig(),

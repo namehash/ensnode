@@ -1,6 +1,10 @@
 import config from "@/config";
 
-import { ChainIndexingStatusIds, getENSRootChainId } from "@ensnode/ensnode-sdk";
+import {
+  ChainIndexingStatusIds,
+  type EnsIndexerPublicConfig,
+  getENSRootChainId,
+} from "@ensnode/ensnode-sdk";
 import type { SubgraphMeta } from "@ensnode/ponder-subgraph";
 
 import type { IndexingStatusMiddlewareVariables } from "@/middleware/indexing-status.middleware";
@@ -14,17 +18,19 @@ import type { IndexingStatusMiddlewareVariables } from "@/middleware/indexing-st
  * indexing status for the ENS root chain is not available.
  *
  * @param indexingStatus - The indexing context from the indexing status middleware
+ * @param ensIndexerPublicConfig - The ENSIndexer Public Config
  * @returns SubgraphMeta object or null if conversion is not possible
  */
 export function indexingContextToSubgraphMeta(
   indexingStatus: IndexingStatusMiddlewareVariables["indexingStatus"],
+  ensIndexerPublicConfig: EnsIndexerPublicConfig,
 ): SubgraphMeta {
   // indexing status middleware has never successfully fetched (and cached) an indexing status snapshot
   // for the lifetime of this service instance.
   if (indexingStatus instanceof Error) return null;
 
   const rootChain = indexingStatus.snapshot.omnichainSnapshot.chains.get(
-    getENSRootChainId(config.namespace),
+    getENSRootChainId(ensIndexerPublicConfig.namespace),
   );
   if (!rootChain) return null;
 
@@ -36,7 +42,7 @@ export function indexingContextToSubgraphMeta(
     case ChainIndexingStatusIds.Backfill:
     case ChainIndexingStatusIds.Following: {
       return {
-        deployment: config.ensIndexerPublicConfig.versionInfo.ensIndexer,
+        deployment: ensIndexerPublicConfig.versionInfo.ensIndexer,
         hasIndexingErrors: false,
         block: {
           hash: null,

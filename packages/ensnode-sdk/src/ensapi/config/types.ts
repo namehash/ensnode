@@ -1,4 +1,3 @@
-import type { EnsIndexerPublicConfig } from "../../ensindexer/config/types";
 import type { TheGraphCannotFallbackReason, TheGraphFallback } from "../../shared/config/thegraph";
 
 export type { TheGraphCannotFallbackReason, TheGraphFallback };
@@ -35,14 +34,6 @@ export interface EnsApiPublicConfig {
    * The Graph Fallback-related info.
    */
   theGraphFallback: TheGraphFallback;
-
-  /**
-   * Complete ENSIndexer public configuration
-   *
-   * Contains all ENSIndexer public configuration including
-   * namespace, plugins, version info, etc.
-   */
-  ensIndexerPublicConfig: EnsIndexerPublicConfig;
 
   /**
    * Version info about ENSApi.

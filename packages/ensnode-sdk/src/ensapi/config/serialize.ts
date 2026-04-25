@@ -1,4 +1,3 @@
-import { serializeEnsIndexerPublicConfig } from "../../ensindexer/config/serialize";
 import type { SerializedEnsApiPublicConfig } from "./serialized-types";
 import type { EnsApiPublicConfig } from "./types";
 
@@ -8,13 +7,7 @@ import type { EnsApiPublicConfig } from "./types";
 export function serializeEnsApiPublicConfig(
   config: EnsApiPublicConfig,
 ): SerializedEnsApiPublicConfig {
-  const { ensIndexerPublicConfig, theGraphFallback, versionInfo } = config;
-
-  return {
-    ensIndexerPublicConfig: serializeEnsIndexerPublicConfig(ensIndexerPublicConfig),
-    theGraphFallback,
-    versionInfo,
-  } satisfies SerializedEnsApiPublicConfig;
+  return config;
 }
 
 /**

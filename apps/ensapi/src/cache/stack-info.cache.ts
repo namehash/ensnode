@@ -1,17 +1,9 @@
-import config from "@/config";
-
 import { minutesToSeconds } from "date-fns";
 
-import {
-  buildEnsNodeStackInfo,
-  type CachedResult,
-  type EnsNodeStackInfo,
-  SWRCache,
-} from "@ensnode/ensnode-sdk";
+import { type CachedResult, type EnsNodeStackInfo, SWRCache } from "@ensnode/ensnode-sdk";
 
-import { buildEnsApiPublicConfig } from "@/config/config.schema";
-import { ensDbClient } from "@/lib/ensdb/singleton";
 import { lazyProxy } from "@/lib/lazy";
+import { stackInfoBuilder } from "@/lib/stack-info-builder/singleton";
 
 /**
  * Loads the ENSNode stack info, either from cache if available,
@@ -28,17 +20,7 @@ async function loadEnsNodeStackInfo(
     return cachedResult.result;
   }
 
-  const ensApiPublicConfig = buildEnsApiPublicConfig(config);
-  const ensDbPublicConfig = await ensDbClient.buildEnsDbPublicConfig();
-  const ensIndexerPublicConfig = ensApiPublicConfig.ensIndexerPublicConfig;
-  const ensRainbowPublicConfig = ensIndexerPublicConfig.ensRainbowPublicConfig;
-
-  return buildEnsNodeStackInfo(
-    ensApiPublicConfig,
-    ensDbPublicConfig,
-    ensIndexerPublicConfig,
-    ensRainbowPublicConfig,
-  );
+  return stackInfoBuilder.buildStackInfo();
 }
 
 // lazyProxy defers construction until first use so that this module can be

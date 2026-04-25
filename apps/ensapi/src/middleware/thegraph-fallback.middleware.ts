@@ -25,10 +25,18 @@ export const thegraphFallbackMiddleware = factory.createMiddleware(async (c, nex
     throw new Error(`Invariant(thegraphFallbackMiddleware): isRealtimeMiddleware expected`);
   }
 
+  const stackInfo = c.var.stackInfo;
+
+  if (!stackInfo || stackInfo instanceof Error) {
+    throw new Error();
+  }
+
+  const { ensIndexer: ensIndexerPublicConfig } = stackInfo;
+
   const fallback = canFallbackToTheGraph({
-    namespace: config.namespace,
     theGraphApiKey: config.theGraphApiKey,
-    isSubgraphCompatible: config.ensIndexerPublicConfig.isSubgraphCompatible,
+    namespace: ensIndexerPublicConfig.namespace,
+    isSubgraphCompatible: ensIndexerPublicConfig.isSubgraphCompatible,
   });
 
   // log one warning to the console if !canFallback
@@ -46,7 +54,7 @@ export const thegraphFallbackMiddleware = factory.createMiddleware(async (c, nex
       }
       case "no-subgraph-url": {
         logger.warn(
-          `ENSApi can NOT fallback to The Graph: the connected ENSIndexer's namespace ('${config.namespace}') is not supported by The Graph.`,
+          `ENSApi can NOT fallback to The Graph: the connected ENSIndexer's namespace ('${ensIndexerPublicConfig.namespace}') is not supported by The Graph.`,
         );
         break;
       }

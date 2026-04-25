@@ -18,6 +18,7 @@ import { filterSchemaByPrefix } from "@/lib/subgraph/filter-schema-by-prefix";
 import { fixContentLengthMiddleware } from "@/middleware/fix-content-length.middleware";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 import { makeIsRealtimeMiddleware } from "@/middleware/is-realtime.middleware";
+import { stackInfoMiddleware } from "@/middleware/stack-info.middleware";
 import { subgraphMetaMiddleware } from "@/middleware/subgraph-meta.middleware";
 import { thegraphFallbackMiddleware } from "@/middleware/thegraph-fallback.middleware";
 
@@ -26,11 +27,20 @@ const MAX_REALTIME_DISTANCE_TO_RESOLVE: Duration = 10 * 60; // 10 minutes in sec
 // generate a subgraph-specific subset of the schema
 const subgraphSchema = filterSchemaByPrefix("subgraph_", ensIndexerSchema);
 
-const app = createApp();
+const app = createApp({ middlewares: [stackInfoMiddleware] });
 
 // 503 if subgraph plugin not available
 app.use(async (c, next) => {
-  const prerequisite = hasSubgraphApiConfigSupport(config.ensIndexerPublicConfig);
+  const stackInfo = c.var.stackInfo;
+
+  if (stackInfo instanceof Error) {
+    return c.text(
+      `Service Unavailable: stack info is unavailable due to error: ${stackInfo.message}`,
+      503,
+    );
+  }
+
+  const prerequisite = hasSubgraphApiConfigSupport(stackInfo.ensIndexer);
   if (!prerequisite.supported) {
     return c.text(`Service Unavailable: ${prerequisite.reason}`, 503);
   }

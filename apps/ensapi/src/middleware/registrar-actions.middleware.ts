@@ -1,5 +1,3 @@
-import config from "@/config";
-
 import {
   hasRegistrarActionsConfigSupport,
   hasRegistrarActionsIndexingStatusSupport,
@@ -35,7 +33,13 @@ export const registrarActionsApiMiddleware = factory.createMiddleware(
       throw new Error(`Invariant(registrar-actions.middleware): indexingStatusMiddleware required`);
     }
 
-    const configSupport = hasRegistrarActionsConfigSupport(config.ensIndexerPublicConfig);
+    if (!c.var.stackInfo || c.var.stackInfo instanceof Error) {
+      throw new Error();
+    }
+
+    const { ensIndexer: ensIndexerPublicConfig } = c.var.stackInfo;
+
+    const configSupport = hasRegistrarActionsConfigSupport(ensIndexerPublicConfig);
     if (!configSupport.supported) {
       return c.json(
         serializeRegistrarActionsResponse({

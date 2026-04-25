@@ -69,36 +69,6 @@ const EXAMPLE_ENSAPI_CONFIG_RESPONSE = {
     canFallback: false,
     reason: "no-api-key",
   },
-  ensIndexerPublicConfig: {
-    ensRainbowPublicConfig: {
-      serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
-      versionInfo: {
-        ensRainbow: "1.9.0",
-      },
-    },
-    clientLabelSet: {
-      labelSetId: "subgraph",
-      labelSetVersion: 0,
-    },
-    indexedChainIds: [1, 8453, 59144, 10, 42161, 534352],
-    ensIndexerSchemaName: "alphaSchema1.9.0",
-    isSubgraphCompatible: false,
-    namespace: "mainnet",
-    plugins: [
-      PluginName.Subgraph,
-      PluginName.Basenames,
-      PluginName.Lineanames,
-      PluginName.ThreeDNS,
-      PluginName.ProtocolAcceleration,
-      PluginName.Registrars,
-    ],
-    versionInfo: {
-      ponder: "0.11.43",
-      ensDb: "1.9.0",
-      ensIndexer: "1.9.0",
-      ensNormalize: "1.11.1",
-    },
-  },
 } satisfies SerializedEnsApiPublicConfig;
 
 const EXAMPLE_ENSDB_PUBLIC_RESPONSE = {

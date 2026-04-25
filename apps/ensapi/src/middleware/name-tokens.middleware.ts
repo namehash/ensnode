@@ -1,5 +1,3 @@
-import config from "@/config";
-
 import {
   NameTokensResponseCodes,
   NameTokensResponseErrorCodes,
@@ -36,7 +34,13 @@ export const nameTokensApiMiddleware = factory.createMiddleware(
       throw new Error(`Invariant(name-tokens.middleware): indexingStatusMiddleware required`);
     }
 
-    if (!nameTokensPrerequisites.hasEnsIndexerConfigSupport(config.ensIndexerPublicConfig)) {
+    if (!c.var.stackInfo || c.var.stackInfo instanceof Error) {
+      throw new Error();
+    }
+
+    const { ensIndexer: ensIndexerPublicConfig } = c.var.stackInfo;
+
+    if (!nameTokensPrerequisites.hasEnsIndexerConfigSupport(ensIndexerPublicConfig)) {
       return c.json(
         serializeNameTokensResponse({
           responseCode: NameTokensResponseCodes.Error,

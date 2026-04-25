@@ -2,23 +2,38 @@ import packageJson from "@/../package.json" with { type: "json" };
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { type ENSIndexerPublicConfig, PluginName } from "@ensnode/ensnode-sdk";
-import type { RpcConfig } from "@ensnode/ensnode-sdk/internal";
+import {
+  ChainIndexingStatusIds,
+  CrossChainIndexingStrategyIds,
+  deserializeEnsIndexerPublicConfig,
+  type EnsApiPublicConfig,
+  IndexingMetadataContextStatusCodes,
+  OmnichainIndexingStatusIds,
+  PluginName,
+  RangeTypeIds,
+  type SerializedChainIndexingStatusSnapshotQueued,
+  type SerializedCrossChainIndexingStatusSnapshot,
+  type SerializedEnsIndexerPublicConfig,
+  type SerializedIndexingMetadataContextInitialized,
+} from "@ensnode/ensnode-sdk";
 
 vi.mock("@/lib/ensdb/singleton", () => ({
   ensDbClient: {
-    getEnsIndexerPublicConfig: vi.fn(async () => ENSINDEXER_PUBLIC_CONFIG),
+    getIndexingMetadataContext: vi.fn(async () => INDEXING_METADATA_CONTEXT),
   },
 }));
 
 vi.mock("@/config/ensdb-config", () => ({
-  default: {
-    ensDbUrl: "postgresql://user:password@localhost:5432/mydb",
-    ensIndexerSchemaName: "ensindexer_0",
-  },
+  default: ENSDB_CONFIG,
 }));
 
-import { buildConfigFromEnvironment, buildEnsApiPublicConfig } from "@/config/config.schema";
+import type { EnsDbConfig } from "@ensnode/ensdb-sdk";
+
+import {
+  buildConfigFromEnvironment,
+  buildEnsApiPublicConfig,
+  type EnsApiConfig,
+} from "@/config/config.schema";
 import { ENSApi_DEFAULT_PORT } from "@/config/defaults";
 import type { EnsApiEnvironment } from "@/config/environment";
 import logger from "@/lib/logger";
@@ -35,8 +50,68 @@ const VALID_RPC_URL = "https://eth-sepolia.g.alchemy.com/v2/1234";
 
 const BASE_ENV = {
   ENSDB_URL: "postgresql://user:password@localhost:5432/mydb",
+  ENSINDEXER_SCHEMA_NAME: "ensindexer_0",
   RPC_URL_1: VALID_RPC_URL,
 } satisfies EnsApiEnvironment;
+
+const ENSDB_CONFIG = {
+  ensDbUrl: "postgresql://user:password@localhost:5432/mydb",
+  ensIndexerSchemaName: "ensindexer_0",
+} satisfies EnsDbConfig;
+
+const CROSS_CHAIN_INDEXING_STATUS_SNAPSHOT = {
+  strategy: CrossChainIndexingStrategyIds.Omnichain,
+  slowestChainIndexingCursor: 1720768991,
+  snapshotTime: 1759409667,
+  omnichainSnapshot: {
+    omnichainStatus: OmnichainIndexingStatusIds.Unstarted,
+    omnichainIndexingCursor: 1720768991,
+    chains: {
+      "1": {
+        chainStatus: ChainIndexingStatusIds.Queued,
+        config: {
+          rangeType: RangeTypeIds.LeftBounded,
+          startBlock: {
+            timestamp: 1759409665,
+            number: 3327417,
+          },
+        },
+      } satisfies SerializedChainIndexingStatusSnapshotQueued,
+
+      "10": {
+        chainStatus: ChainIndexingStatusIds.Queued,
+        config: {
+          rangeType: RangeTypeIds.LeftBounded,
+          startBlock: {
+            timestamp: 1731834595,
+            number: 110393959,
+          },
+        },
+      } satisfies SerializedChainIndexingStatusSnapshotQueued,
+      "8453": {
+        chainStatus: ChainIndexingStatusIds.Queued,
+        config: {
+          rangeType: RangeTypeIds.LeftBounded,
+          startBlock: {
+            timestamp: 1721834595,
+            number: 17522624,
+          },
+        },
+      } satisfies SerializedChainIndexingStatusSnapshotQueued,
+
+      "59144": {
+        chainStatus: ChainIndexingStatusIds.Queued,
+        config: {
+          rangeType: RangeTypeIds.LeftBounded,
+          startBlock: {
+            timestamp: 1720768992,
+            number: 6682888,
+          },
+        },
+      } satisfies SerializedChainIndexingStatusSnapshotQueued,
+    },
+  },
+} satisfies SerializedCrossChainIndexingStatusSnapshot;
 
 const ENSINDEXER_PUBLIC_CONFIG = {
   namespace: "mainnet",
@@ -47,7 +122,7 @@ const ENSINDEXER_PUBLIC_CONFIG = {
       ensRainbow: packageJson.version,
     },
   },
-  indexedChainIds: new Set([1]),
+  indexedChainIds: [1, 10, 8453, 59144],
   isSubgraphCompatible: false,
   clientLabelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
   plugins: [PluginName.Subgraph],
@@ -57,27 +132,27 @@ const ENSINDEXER_PUBLIC_CONFIG = {
     ensNormalize: ensApiVersionInfo.ensNormalize,
     ponder: "0.8.0",
   },
-} satisfies ENSIndexerPublicConfig;
+} satisfies SerializedEnsIndexerPublicConfig;
+
+const ensIndexerPublicConfig = deserializeEnsIndexerPublicConfig(ENSINDEXER_PUBLIC_CONFIG);
+
+const INDEXING_METADATA_CONTEXT = {
+  statusCode: IndexingMetadataContextStatusCodes.Initialized,
+  indexingStatus: CROSS_CHAIN_INDEXING_STATUS_SNAPSHOT,
+  stackInfo: {
+    ensDb: { versionInfo: { postgresql: "16.0" } },
+    ensIndexer: ENSINDEXER_PUBLIC_CONFIG,
+    ensRainbow: ENSINDEXER_PUBLIC_CONFIG.ensRainbowPublicConfig,
+  },
+} satisfies SerializedIndexingMetadataContextInitialized;
 
 describe("buildConfigFromEnvironment", () => {
   it("returns a valid config object using environment variables", async () => {
     await expect(buildConfigFromEnvironment(BASE_ENV)).resolves.toStrictEqual({
       port: ENSApi_DEFAULT_PORT,
       ensDbUrl: BASE_ENV.ENSDB_URL,
+      ensIndexerSchemaName: BASE_ENV.ENSINDEXER_SCHEMA_NAME,
       theGraphApiKey: undefined,
-
-      ensIndexerPublicConfig: ENSINDEXER_PUBLIC_CONFIG,
-      namespace: ENSINDEXER_PUBLIC_CONFIG.namespace,
-      ensIndexerSchemaName: ENSINDEXER_PUBLIC_CONFIG.ensIndexerSchemaName,
-      rpcConfigs: new Map([
-        [
-          1,
-          {
-            httpRPCs: [new URL(BASE_ENV.RPC_URL_1)],
-            websocketRPC: undefined,
-          } satisfies RpcConfig,
-        ],
-      ]),
       referralProgramEditionConfigSetUrl: undefined,
     });
   });
@@ -153,25 +228,14 @@ describe("buildConfigFromEnvironment", () => {
 
 describe("buildEnsApiPublicConfig", () => {
   it("returns a valid ENSApi public config with correct structure", () => {
-    const mockConfig = {
+    const mockEnsApiConfig = {
       port: ENSApi_DEFAULT_PORT,
       ensDbUrl: BASE_ENV.ENSDB_URL,
-      ensIndexerPublicConfig: ENSINDEXER_PUBLIC_CONFIG,
-      namespace: ENSINDEXER_PUBLIC_CONFIG.namespace,
-      ensIndexerSchemaName: ENSINDEXER_PUBLIC_CONFIG.ensIndexerSchemaName,
-      rpcConfigs: new Map([
-        [
-          1,
-          {
-            httpRPCs: [new URL(VALID_RPC_URL)],
-            websocketRPC: undefined,
-          } satisfies RpcConfig,
-        ],
-      ]),
+      ensIndexerSchemaName: BASE_ENV.ENSINDEXER_SCHEMA_NAME,
       referralProgramEditionConfigSetUrl: undefined,
-    };
+    } satisfies EnsApiConfig;
 
-    const result = buildEnsApiPublicConfig(mockConfig);
+    const result = buildEnsApiPublicConfig(mockEnsApiConfig, ensIndexerPublicConfig);
 
     expect(result).toStrictEqual({
       versionInfo: ensApiVersionInfo,
@@ -179,44 +243,19 @@ describe("buildEnsApiPublicConfig", () => {
         canFallback: false,
         reason: "not-subgraph-compatible",
       },
-      ensIndexerPublicConfig: ENSINDEXER_PUBLIC_CONFIG,
-    });
-  });
-
-  it("preserves the complete ENSIndexer public config structure", () => {
-    const mockConfig = {
-      port: ENSApi_DEFAULT_PORT,
-      ensDbUrl: BASE_ENV.ENSDB_URL,
-      ensIndexerPublicConfig: ENSINDEXER_PUBLIC_CONFIG,
-      namespace: ENSINDEXER_PUBLIC_CONFIG.namespace,
-      ensIndexerSchemaName: ENSINDEXER_PUBLIC_CONFIG.ensIndexerSchemaName,
-      rpcConfigs: new Map(),
-      referralProgramEditionConfigSetUrl: undefined,
-    };
-
-    const result = buildEnsApiPublicConfig(mockConfig);
-
-    // Verify that all ENSIndexer public config fields are preserved
-    expect(result.ensIndexerPublicConfig).toStrictEqual(ENSINDEXER_PUBLIC_CONFIG);
+    } satisfies EnsApiPublicConfig);
   });
 
   it("includes the theGraphFallback and redacts api key", () => {
-    const mockConfig = {
+    const mockEnsApiConfig = {
       port: ENSApi_DEFAULT_PORT,
       ensDbUrl: BASE_ENV.ENSDB_URL,
-      ensIndexerPublicConfig: {
-        ...ENSINDEXER_PUBLIC_CONFIG,
-        plugins: ["subgraph"],
-        isSubgraphCompatible: true,
-      },
-      namespace: ENSINDEXER_PUBLIC_CONFIG.namespace,
-      ensIndexerSchemaName: ENSINDEXER_PUBLIC_CONFIG.ensIndexerSchemaName,
-      rpcConfigs: new Map(),
+      ensIndexerSchemaName: BASE_ENV.ENSINDEXER_SCHEMA_NAME,
       referralProgramEditionConfigSetUrl: undefined,
       theGraphApiKey: "secret-api-key",
     };
 
-    const result = buildEnsApiPublicConfig(mockConfig);
+    const result = buildEnsApiPublicConfig(mockEnsApiConfig, ensIndexerPublicConfig);
 
     expect(result.theGraphFallback.canFallback).toBe(true);
     // discriminate the type...

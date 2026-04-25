@@ -1,13 +1,11 @@
 import { z } from "zod/v4";
 
 import {
-  makeEnsIndexerPublicConfigSchema,
-  makeSerializedEnsIndexerPublicConfigSchema,
-} from "../../ensindexer/config/zod-schemas";
-import {
   TheGraphCannotFallbackReasonSchema,
   TheGraphFallbackSchema,
 } from "../../shared/config/thegraph";
+import type { SerializedEnsApiPublicConfig } from "./serialized-types";
+import type { EnsApiPublicConfig } from "./types";
 
 export { TheGraphCannotFallbackReasonSchema, TheGraphFallbackSchema };
 
@@ -18,7 +16,7 @@ const makeEnsApiVersionInfoSchema = (valueLabel: string = "ENS API version info"
   });
 
 /**
- * Create a Zod schema for validating ENSApiPublicConfig.
+ * Create a Zod schema for validating {@link EnsApiPublicConfig}.
  *
  * @param valueLabel - Optional label for the value being validated (used in error messages)
  */
@@ -27,26 +25,11 @@ export function makeEnsApiPublicConfigSchema(valueLabel?: string) {
 
   return z.object({
     theGraphFallback: TheGraphFallbackSchema,
-    ensIndexerPublicConfig: makeEnsIndexerPublicConfigSchema(`${label}.ensIndexerPublicConfig`),
     versionInfo: makeEnsApiVersionInfoSchema(`${label}.versionInfo`),
   });
 }
 
 /**
- * Create a Zod schema for validating a serialized ENSApiPublicConfig.
- *
- * @deprecated Use {@link makeEnsApiPublicConfigSchema} instead.
+ * Create a Zod schema for validating {@link SerializedEnsApiPublicConfig}.
  */
-export const makeENSApiPublicConfigSchema = makeEnsApiPublicConfigSchema;
-
-export function makeSerializedEnsApiPublicConfigSchema(valueLabel?: string) {
-  const label = valueLabel ?? "ENSApiPublicConfig";
-
-  return z.object({
-    ensIndexerPublicConfig: makeSerializedEnsIndexerPublicConfigSchema(
-      `${label}.ensIndexerPublicConfig`,
-    ),
-    theGraphFallback: TheGraphFallbackSchema,
-    versionInfo: makeEnsApiVersionInfoSchema(`${label}.versionInfo`),
-  });
-}
+export const makeSerializedEnsApiPublicConfigSchema = makeEnsApiPublicConfigSchema;

@@ -1,23 +1,15 @@
-import pRetry from "p-retry";
 import { prettifyError, ZodError, z } from "zod/v4";
 
-import { type EnsApiPublicConfig, IndexingMetadataContextStatusCodes } from "@ensnode/ensnode-sdk";
+import type { EnsApiPublicConfig, EnsIndexerPublicConfig } from "@ensnode/ensnode-sdk";
 import {
-  buildRpcConfigsFromEnv,
   canFallbackToTheGraph,
-  ENSNamespaceSchema,
-  invariant_rpcConfigsSpecifiedForRootChain,
-  makeENSIndexerPublicConfigSchema,
   OptionalPortNumberSchema,
-  RpcConfigsSchema,
   TheGraphApiKeySchema,
 } from "@ensnode/ensnode-sdk/internal";
 
 import { ENSApi_DEFAULT_PORT } from "@/config/defaults";
 import ensDbConfig from "@/config/ensdb-config";
 import type { EnsApiEnvironment } from "@/config/environment";
-import { invariant_ensIndexerPublicConfigVersionInfo } from "@/config/validations";
-import { ensDbClient } from "@/lib/ensdb/singleton";
 import logger from "@/lib/logger";
 import { ensApiVersionInfo } from "@/lib/version-info";
 
@@ -39,21 +31,17 @@ const ReferralProgramEditionConfigSetUrlSchema = z
   })
   .optional();
 
-const EnsApiConfigSchema = z
-  .object({
-    port: OptionalPortNumberSchema.default(ENSApi_DEFAULT_PORT),
-    theGraphApiKey: TheGraphApiKeySchema,
-    namespace: ENSNamespaceSchema,
-    rpcConfigs: RpcConfigsSchema,
-    ensIndexerPublicConfig: makeENSIndexerPublicConfigSchema("ensIndexerPublicConfig"),
-    referralProgramEditionConfigSetUrl: ReferralProgramEditionConfigSetUrlSchema,
+const EnsApiConfigSchema = z.object({
+  port: OptionalPortNumberSchema.default(ENSApi_DEFAULT_PORT),
+  theGraphApiKey: TheGraphApiKeySchema,
+  referralProgramEditionConfigSetUrl: ReferralProgramEditionConfigSetUrlSchema,
 
-    // include the ENSDbConfig params in the EnsApiConfigSchema
-    ensDbUrl: z.string(),
-    ensIndexerSchemaName: z.string(),
-  })
-  .check(invariant_rpcConfigsSpecifiedForRootChain)
-  .check(invariant_ensIndexerPublicConfigVersionInfo);
+  // include the ENSDbConfig params in the EnsApiConfigSchema
+  ensDbUrl: z.string(),
+  ensIndexerSchemaName: z.string(),
+});
+// .check(invariant_rpcConfigsSpecifiedForRootChain)
+// .check(invariant_ensIndexerPublicConfigVersionInfo);
 
 export type EnsApiConfig = z.infer<typeof EnsApiConfigSchema>;
 
@@ -63,39 +51,11 @@ export type EnsApiConfig = z.infer<typeof EnsApiConfigSchema>;
  * @returns A validated EnsApiConfig object
  * @throws Error with formatted validation messages if environment parsing fails
  */
-export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promise<EnsApiConfig> {
+export function buildConfigFromEnvironment(env: EnsApiEnvironment): EnsApiConfig {
   try {
-    // TODO: transfer the responsibility of fetching
-    // the ENSIndexer Public Config to a middleware layer, as per:
-    // https://github.com/namehash/ensnode/issues/1806
-    const ensIndexerPublicConfig = await pRetry(
-      async () => {
-        const indexingMetadataContext = await ensDbClient.getIndexingMetadataContext();
-
-        if (indexingMetadataContext.statusCode !== IndexingMetadataContextStatusCodes.Initialized) {
-          throw new Error("Indexing metadata context is uninitialized in ENSDb.");
-        }
-
-        return indexingMetadataContext.stackInfo.ensIndexer;
-      },
-      {
-        retries: 13, // This allows for a total of over 1 hour of retries with the exponential backoff strategy
-        onFailedAttempt: ({ error, attemptNumber, retriesLeft }) => {
-          logger.info(
-            `ENSIndexer Public Config fetch attempt ${attemptNumber} failed (${error.message}). ${retriesLeft} retries left.`,
-          );
-        },
-      },
-    );
-
-    const rpcConfigs = buildRpcConfigsFromEnv(env, ensIndexerPublicConfig.namespace);
-
     return EnsApiConfigSchema.parse({
       port: env.PORT,
       theGraphApiKey: env.THEGRAPH_API_KEY,
-      ensIndexerPublicConfig,
-      namespace: ensIndexerPublicConfig.namespace,
-      rpcConfigs,
       referralProgramEditionConfigSetUrl: env.REFERRAL_PROGRAM_EDITIONS,
 
       // include the validated ENSDb config values in the parsed EnsApiConfig
@@ -118,20 +78,23 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
 /**
  * Builds the ENSApi public configuration from an EnsApiConfig object.
  *
- * @param config - The validated EnsApiConfig object
+ * @param ensApiConfig - The validated EnsApiConfig object
+ * @param ensIndexerPublicConfig - The validated ENSIndexerPublicConfig object
  * @returns A complete ENSApiPublicConfig object
  */
-export function buildEnsApiPublicConfig(config: EnsApiConfig): EnsApiPublicConfig {
+export function buildEnsApiPublicConfig(
+  ensApiConfig: EnsApiConfig,
+  ensIndexerPublicConfig: EnsIndexerPublicConfig,
+): EnsApiPublicConfig {
   return {
     versionInfo: ensApiVersionInfo,
     theGraphFallback: canFallbackToTheGraph({
-      namespace: config.namespace,
+      namespace: ensIndexerPublicConfig.namespace,
       // NOTE: very important here that we replace the actual server-side api key with a placeholder
       // so that it's not sent to clients as part of the `theGraphFallback.url`. The placeholder must
       // pass validation, of course, but the only validation necessary is that it is a string.
-      theGraphApiKey: config.theGraphApiKey ? "<API_KEY>" : undefined,
-      isSubgraphCompatible: config.ensIndexerPublicConfig.isSubgraphCompatible,
+      theGraphApiKey: ensApiConfig.theGraphApiKey ? "<API_KEY>" : undefined,
+      isSubgraphCompatible: ensIndexerPublicConfig.isSubgraphCompatible,
     }),
-    ensIndexerPublicConfig: config.ensIndexerPublicConfig,
   };
 }

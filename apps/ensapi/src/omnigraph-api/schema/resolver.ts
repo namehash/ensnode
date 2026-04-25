@@ -12,6 +12,7 @@ import {
 import { isBridgedResolver } from "@ensnode/ensnode-sdk/internal";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+import { stackInfoBuilder } from "@/lib/stack-info-builder/singleton";
 import { builder } from "@/omnigraph-api/builder";
 import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
 import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-resolver";
@@ -125,7 +126,8 @@ ResolverRef.implement({
       description: "Whether Resolver is a BridgedResolver.",
       type: AccountIdRef,
       nullable: true,
-      resolve: (parent) => isBridgedResolver(config.namespace, parent),
+      resolve: (parent) =>
+        isBridgedResolver(stackInfoBuilder.getCachedStackInfo().ensIndexer.namespace, parent),
     }),
 
     ////////////////////////
