@@ -39,7 +39,6 @@ export * from "./shared/config/zod-schemas";
 export * from "./shared/config-templates";
 export * from "./shared/datasources-with-ensv2-contracts";
 export * from "./shared/datasources-with-resolvers";
-export * from "./shared/devnet/accounts";
 export * from "./shared/devnet/addresses";
 export * from "./shared/devnet/data";
 export * from "./shared/interpretation/interpret-address";

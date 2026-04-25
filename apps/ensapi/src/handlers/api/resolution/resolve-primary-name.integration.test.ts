@@ -14,7 +14,7 @@ describe("GET /api/resolve/primary-name/:address/:chainId", () => {
   it.each([
     {
       description: "resolves primary name for owner address on chain 1",
-      address: DEVNET_ACCOUNTS.owner,
+      address: DEVNET_ACCOUNTS.owner.address,
       chainId: "1",
       query: "",
       expectedStatus: 200,
@@ -25,9 +25,8 @@ describe("GET /api/resolve/primary-name/:address/:chainId", () => {
       },
     },
     {
-      description:
-        "resolves primary name for user address on chain 1 (no primary name set in devnet)",
-      address: DEVNET_ACCOUNTS.user,
+      description: "returns null for user without a primary name",
+      address: DEVNET_ACCOUNTS.user.address,
       chainId: "1",
       query: "",
       expectedStatus: 200,
@@ -35,7 +34,7 @@ describe("GET /api/resolve/primary-name/:address/:chainId", () => {
     },
     {
       description: "owner address with accelerate=true returns accelerationRequested: true",
-      address: DEVNET_ACCOUNTS.owner,
+      address: DEVNET_ACCOUNTS.owner.address,
       chainId: "1",
       query: "accelerate=true",
       expectedStatus: 200,
@@ -61,7 +60,7 @@ describe("GET /api/resolve/primary-name/:address/:chainId", () => {
     },
     {
       description: "returns 400 for non-numeric chainId",
-      address: DEVNET_ACCOUNTS.owner,
+      address: DEVNET_ACCOUNTS.owner.address,
       chainId: "notachainid",
       query: "",
       expectedStatus: 400,

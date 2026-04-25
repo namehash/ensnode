@@ -6,7 +6,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { DEVNET_ACCOUNTS, DEVNET_BYTES } from "@ensnode/ensnode-sdk/internal";
+import { DEVNET_ACCOUNTS, DEVNET_ADDRESSES, DEVNET_BYTES } from "@ensnode/ensnode-sdk/internal";
 
 const BASE_URL = process.env.ENSNODE_URL!;
 
@@ -18,7 +18,7 @@ describe("GET /api/resolve/records/:name", () => {
       query: "addresses=60",
       expectedStatus: 200,
       expectedBody: {
-        records: { addresses: { 60: DEVNET_ACCOUNTS.owner } },
+        records: { addresses: { 60: DEVNET_ACCOUNTS.owner.address } },
         accelerationRequested: false,
         accelerationAttempted: false,
       },
@@ -30,7 +30,7 @@ describe("GET /api/resolve/records/:name", () => {
       query: "addresses=60",
       expectedStatus: 200,
       expectedBody: {
-        records: { addresses: { 60: DEVNET_ACCOUNTS.owner } },
+        records: { addresses: { 60: DEVNET_ACCOUNTS.owner.address } },
         accelerationRequested: false,
         accelerationAttempted: false,
       },
@@ -65,7 +65,7 @@ describe("GET /api/resolve/records/:name", () => {
       expectedStatus: 200,
       expectedBody: {
         records: {
-          addresses: { 60: DEVNET_ACCOUNTS.owner },
+          addresses: { 60: DEVNET_ACCOUNTS.owner.address },
           texts: { description: "example.eth" },
         },
         accelerationRequested: false,
@@ -90,7 +90,7 @@ describe("GET /api/resolve/records/:name", () => {
       query: "addresses=60",
       expectedStatus: 200,
       expectedBody: {
-        records: { addresses: { 60: DEVNET_ACCOUNTS.owner } },
+        records: { addresses: { 60: DEVNET_ACCOUNTS.owner.address } },
         accelerationRequested: false,
         accelerationAttempted: false,
       },
@@ -112,7 +112,7 @@ describe("GET /api/resolve/records/:name", () => {
       query: "addresses=60",
       expectedStatus: 200,
       expectedBody: {
-        records: { addresses: { 60: DEVNET_ACCOUNTS.owner } },
+        records: { addresses: { 60: DEVNET_ACCOUNTS.owner.address } },
         accelerationRequested: false,
         accelerationAttempted: false,
       },
@@ -124,7 +124,7 @@ describe("GET /api/resolve/records/:name", () => {
       query: "addresses=60",
       expectedStatus: 200,
       expectedBody: {
-        records: { addresses: { 60: DEVNET_ACCOUNTS.owner } },
+        records: { addresses: { 60: DEVNET_ACCOUNTS.owner.address } },
         accelerationRequested: false,
         accelerationAttempted: false,
       },
@@ -161,7 +161,7 @@ describe("GET /api/resolve/records/:name", () => {
       expectedBody: {
         records: {
           addresses: {
-            60: DEVNET_ACCOUNTS.owner,
+            60: DEVNET_ACCOUNTS.owner.address,
             0: DEVNET_BYTES.bitcoinAddress,
             2: DEVNET_BYTES.litecoinAddress,
             777777: null,
@@ -189,7 +189,7 @@ describe("GET /api/resolve/records/:name", () => {
       expectedBody: {
         records: {
           addresses: {
-            60: DEVNET_ACCOUNTS.owner,
+            60: DEVNET_ACCOUNTS.owner.address,
             0: DEVNET_BYTES.bitcoinAddress,
             2: DEVNET_BYTES.litecoinAddress,
           },
@@ -212,7 +212,7 @@ describe("GET /api/resolve/records/:name", () => {
             data: DEVNET_BYTES.abiBytes,
           },
           interfaces: {
-            [DEVNET_BYTES.fourBytesInterface]: DEVNET_ACCOUNTS.one,
+            [DEVNET_BYTES.fourBytesInterface]: DEVNET_ADDRESSES.one,
           },
         },
         accelerationRequested: false,
@@ -226,7 +226,7 @@ describe("GET /api/resolve/records/:name", () => {
       query: "addresses=60&accelerate=true",
       expectedStatus: 200,
       expectedBody: {
-        records: { addresses: { 60: DEVNET_ACCOUNTS.owner } },
+        records: { addresses: { 60: DEVNET_ACCOUNTS.owner.address } },
         accelerationRequested: true,
         accelerationAttempted: false,
       },

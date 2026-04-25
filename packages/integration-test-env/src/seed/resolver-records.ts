@@ -1,65 +1,83 @@
-import { type Address, createPublicClient, type Hex, http, namehash, toHex } from "viem";
+import { type Address, type Hex, namehash, toHex } from "viem";
 import { packetToBytes } from "viem/ens";
 
-import { ensTestEnvChain } from "@ensnode/datasources";
-import { DEVNET_ACCOUNTS, DEVNET_BYTES, DEVNET_CONTRACTS } from "@ensnode/ensnode-sdk/internal";
+import { DEVNET_ADDRESSES, DEVNET_BYTES, DEVNET_CONTRACTS } from "@ensnode/ensnode-sdk/internal";
 
 import { publicResolverAbi, universalResolverV2Abi } from "./abi";
-import type { DevnetWalletClient, DevnetWalletClients } from "./index";
+import type { DevnetReadClient, DevnetWalletClient, DevnetWalletClients } from "./index";
 
-const RESOLVER = DEVNET_CONTRACTS.permissionedResolver;
-
-export async function seedResolverRecords(clients: DevnetWalletClients): Promise<void> {
-  const node = namehash("test.eth");
-  await assertTestEthResolver(clients.owner.transport.url);
-
-  // Text records
-  await setTextRecord(clients.owner, node, "avatar", "https://example.com/avatar.png");
-  await setTextRecord(clients.owner, node, "com.twitter", "ensdomains");
-  await setTextRecord(clients.owner, node, "com.github", "ensdomains");
-  await setTextRecord(clients.owner, node, "url", "https://ens.domains");
-  await setTextRecord(clients.owner, node, "email", "test@ens.domains");
-  await setTextRecord(clients.owner, node, "description", "test.eth");
-
-  // Multi-coin addresses
-  // Coin 0 = Bitcoin
-  await setMulticoinAddress(clients.owner, node, 0n, DEVNET_BYTES.bitcoinAddress);
-  // Coin 2 = Litecoin
-  await setMulticoinAddress(clients.owner, node, 2n, DEVNET_BYTES.litecoinAddress);
-
-  // Scalar resolver records
-  await setContenthash(clients.owner, node, DEVNET_BYTES.contenthash);
-  await setPubkey(clients.owner, node, DEVNET_BYTES.publicKeyX, DEVNET_BYTES.publicKeyY);
-  await setAbi(clients.owner, node, 1n, DEVNET_BYTES.abiBytes);
-  await setInterfaceImplementer(
-    clients.owner,
-    node,
-    DEVNET_BYTES.fourBytesInterface,
-    DEVNET_ACCOUNTS.one,
+export async function seedResolverRecords(
+  clients: DevnetWalletClients,
+  readClient: DevnetReadClient,
+): Promise<void> {
+  await seedResolverRecordsForName(
+    clients,
+    readClient,
+    "test.eth",
+    DEVNET_CONTRACTS.permissionedResolver,
   );
 }
 
-async function assertTestEthResolver(rpcUrl: string): Promise<void> {
-  const publicClient = createPublicClient({ chain: ensTestEnvChain, transport: http(rpcUrl) });
-  const [activeResolver] = await publicClient.readContract({
+async function seedResolverRecordsForName(
+  clients: DevnetWalletClients,
+  readClient: DevnetReadClient,
+  name: string,
+  resolver: Address,
+): Promise<void> {
+  const node = namehash(name);
+  const actualResolver = await findResolver(readClient, name);
+  if (actualResolver.toLowerCase() !== resolver.toLowerCase()) {
+    throw new Error(
+      `${name} resolver mismatch: active=${actualResolver}, expected=${resolver}. Either resolver has been changed or something else is wrong.`,
+    );
+  }
+
+  // Text records
+  await setTextRecord(clients.owner, resolver, node, "avatar", "https://example.com/avatar.png");
+  await setTextRecord(clients.owner, resolver, node, "com.twitter", "ensdomains");
+  await setTextRecord(clients.owner, resolver, node, "com.github", "ensdomains");
+  await setTextRecord(clients.owner, resolver, node, "url", "https://ens.domains");
+  await setTextRecord(clients.owner, resolver, node, "email", "test@ens.domains");
+  await setTextRecord(clients.owner, resolver, node, "description", "test.eth");
+
+  // Multi-coin addresses
+  // Coin 0 = Bitcoin
+  await setMulticoinAddress(clients.owner, resolver, node, 0n, DEVNET_BYTES.bitcoinAddress);
+  // Coin 2 = Litecoin
+  await setMulticoinAddress(clients.owner, resolver, node, 2n, DEVNET_BYTES.litecoinAddress);
+
+  // Scalar resolver records
+  await setContenthash(clients.owner, resolver, node, DEVNET_BYTES.contenthash);
+  await setPubkey(clients.owner, resolver, node, DEVNET_BYTES.publicKeyX, DEVNET_BYTES.publicKeyY);
+  await setAbi(clients.owner, resolver, node, 1n, DEVNET_BYTES.abiBytes);
+  await setInterfaceImplementer(
+    clients.owner,
+    resolver,
+    node,
+    DEVNET_BYTES.fourBytesInterface,
+    DEVNET_ADDRESSES.one,
+  );
+}
+
+async function findResolver(readClient: DevnetReadClient, name: string): Promise<Address> {
+  const [resolver] = await readClient.readContract({
     address: DEVNET_CONTRACTS.universalResolverV2,
     abi: universalResolverV2Abi,
     functionName: "findResolver",
-    args: [toHex(packetToBytes("test.eth"))],
+    args: [toHex(packetToBytes(name))],
   });
-  if (activeResolver.toLowerCase() !== RESOLVER.toLowerCase()) {
-    throw new Error(`test.eth resolver mismatch: active=${activeResolver}, expected=${RESOLVER}`);
-  }
+  return resolver;
 }
 
 async function setTextRecord(
   walletClient: DevnetWalletClient,
+  resolver: Address,
   node: Hex,
   key: string,
   value: string,
 ): Promise<void> {
   const hash = await walletClient.writeContract({
-    address: RESOLVER,
+    address: resolver,
     abi: publicResolverAbi,
     functionName: "setText",
     args: [node, key, value],
@@ -69,12 +87,13 @@ async function setTextRecord(
 
 async function setMulticoinAddress(
   walletClient: DevnetWalletClient,
+  resolver: Address,
   node: Hex,
   coinType: bigint,
   addressBytes: Hex,
 ): Promise<void> {
   const hash = await walletClient.writeContract({
-    address: RESOLVER,
+    address: resolver,
     abi: publicResolverAbi,
     functionName: "setAddr",
     args: [node, coinType, addressBytes],
@@ -84,11 +103,12 @@ async function setMulticoinAddress(
 
 async function setContenthash(
   walletClient: DevnetWalletClient,
+  resolver: Address,
   node: Hex,
   hashValue: Hex,
 ): Promise<void> {
   const hash = await walletClient.writeContract({
-    address: RESOLVER,
+    address: resolver,
     abi: publicResolverAbi,
     functionName: "setContenthash",
     args: [node, hashValue],
@@ -98,12 +118,13 @@ async function setContenthash(
 
 async function setPubkey(
   walletClient: DevnetWalletClient,
+  resolver: Address,
   node: Hex,
   x: Hex,
   y: Hex,
 ): Promise<void> {
   const hash = await walletClient.writeContract({
-    address: RESOLVER,
+    address: resolver,
     abi: publicResolverAbi,
     functionName: "setPubkey",
     args: [node, x, y],
@@ -113,12 +134,13 @@ async function setPubkey(
 
 async function setAbi(
   walletClient: DevnetWalletClient,
+  resolver: Address,
   node: Hex,
   contentType: bigint,
   data: Hex,
 ): Promise<void> {
   const hash = await walletClient.writeContract({
-    address: RESOLVER,
+    address: resolver,
     abi: publicResolverAbi,
     functionName: "setABI",
     args: [node, contentType, data],
@@ -128,12 +150,13 @@ async function setAbi(
 
 async function setInterfaceImplementer(
   walletClient: DevnetWalletClient,
+  resolver: Address,
   node: Hex,
   interfaceId: Hex,
   implementer: Address,
 ): Promise<void> {
   const hash = await walletClient.writeContract({
-    address: RESOLVER,
+    address: resolver,
     abi: publicResolverAbi,
     functionName: "setInterface",
     args: [node, interfaceId, implementer],

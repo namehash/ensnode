@@ -37,7 +37,7 @@ describe("Account.domains", () => {
 
   it("returns domains owned by the devnet owner", async () => {
     const result = await request<AccountDomainsResult>(AccountDomains, {
-      address: DEVNET_ACCOUNTS.owner,
+      address: DEVNET_ACCOUNTS.owner.address,
     });
     const domains = flattenConnection(result.account.domains);
     const names = domains.map((d) => d.name);
@@ -64,7 +64,7 @@ describe("Account.domains", () => {
 
   it("returns domains owned by the new owner", async () => {
     const result = await request<AccountDomainsResult>(AccountDomains, {
-      address: DEVNET_ACCOUNTS.user,
+      address: DEVNET_ACCOUNTS.user.address,
     });
     const domains = flattenConnection(result.account.domains);
     const names = domains.map((d) => d.name);
@@ -77,7 +77,7 @@ describe("Account.domains pagination", () => {
   testDomainPagination(async (variables) => {
     const result = await request<{
       account: { domains: PaginatedGraphQLConnection<PaginatedDomainResult> };
-    }>(AccountDomainsPaginated, { address: DEVNET_ACCOUNTS.owner, ...variables });
+    }>(AccountDomainsPaginated, { address: DEVNET_ACCOUNTS.owner.address, ...variables });
     return result.account.domains;
   });
 });
@@ -94,14 +94,14 @@ describe("Account.events", () => {
 
   it("returns events for the devnet deployer", async () => {
     const result = await request<AccountEventsResult>(AccountEvents, {
-      address: DEVNET_ACCOUNTS.deployer,
+      address: DEVNET_ACCOUNTS.deployer.address,
     });
     const events = flattenConnection(result.account.events);
 
     expect(events.length).toBeGreaterThan(0);
 
     for (const event of events) {
-      expect(event.from).toBe(DEVNET_ACCOUNTS.deployer);
+      expect(event.from).toBe(DEVNET_ACCOUNTS.deployer.address);
     }
   });
 });
@@ -110,7 +110,7 @@ describe("Account.events pagination", () => {
   testEventPagination(async (variables) => {
     const result = await request<{
       account: { events: PaginatedGraphQLConnection<EventResult> };
-    }>(AccountEventsPaginated, { address: DEVNET_ACCOUNTS.deployer, ...variables });
+    }>(AccountEventsPaginated, { address: DEVNET_ACCOUNTS.deployer.address, ...variables });
     return result.account.events;
   });
 });
@@ -129,7 +129,7 @@ describe("Account.events filtering (AccountEventsWhereInput)", () => {
 
   beforeAll(async () => {
     const result = await request<AccountEventsResult>(AccountEventsFiltered, {
-      address: DEVNET_ACCOUNTS.deployer,
+      address: DEVNET_ACCOUNTS.deployer.address,
       first: 1000,
     });
     // events are returned in ascending order, so first/last access yields min/max values
@@ -141,7 +141,7 @@ describe("Account.events filtering (AccountEventsWhereInput)", () => {
     const targetSelector = allEvents[0].topics[0];
 
     const result = await request<AccountEventsResult>(AccountEventsFiltered, {
-      address: DEVNET_ACCOUNTS.deployer,
+      address: DEVNET_ACCOUNTS.deployer.address,
       where: { selector_in: [targetSelector] },
     });
     const events = flattenConnection(result.account.events);
@@ -154,7 +154,7 @@ describe("Account.events filtering (AccountEventsWhereInput)", () => {
 
   it("filters by selector_in with unknown topic returns no results", async () => {
     const result = await request<AccountEventsResult>(AccountEventsFiltered, {
-      address: DEVNET_ACCOUNTS.deployer,
+      address: DEVNET_ACCOUNTS.deployer.address,
       where: {
         selector_in: ["0x0000000000000000000000000000000000000000000000000000000000000001"],
       },
@@ -165,7 +165,7 @@ describe("Account.events filtering (AccountEventsWhereInput)", () => {
 
   it("filters by empty selector_in returns no results", async () => {
     const result = await request<AccountEventsResult>(AccountEventsFiltered, {
-      address: DEVNET_ACCOUNTS.deployer,
+      address: DEVNET_ACCOUNTS.deployer.address,
       where: { selector_in: [] },
     });
     const events = flattenConnection(result.account.events);
@@ -176,7 +176,7 @@ describe("Account.events filtering (AccountEventsWhereInput)", () => {
     const midTimestamp = allEvents[Math.floor(allEvents.length / 2)].timestamp;
 
     const result = await request<AccountEventsResult>(AccountEventsFiltered, {
-      address: DEVNET_ACCOUNTS.deployer,
+      address: DEVNET_ACCOUNTS.deployer.address,
       where: { timestamp_gte: midTimestamp },
     });
     const events = flattenConnection(result.account.events);
@@ -192,7 +192,7 @@ describe("Account.events filtering (AccountEventsWhereInput)", () => {
     const midTimestamp = allEvents[Math.floor(allEvents.length / 2)].timestamp;
 
     const result = await request<AccountEventsResult>(AccountEventsFiltered, {
-      address: DEVNET_ACCOUNTS.deployer,
+      address: DEVNET_ACCOUNTS.deployer.address,
       where: { timestamp_lte: midTimestamp },
     });
     const events = flattenConnection(result.account.events);
@@ -209,7 +209,7 @@ describe("Account.events filtering (AccountEventsWhereInput)", () => {
     const maxTs = allEvents[allEvents.length - 1].timestamp;
 
     const result = await request<AccountEventsResult>(AccountEventsFiltered, {
-      address: DEVNET_ACCOUNTS.deployer,
+      address: DEVNET_ACCOUNTS.deployer.address,
       where: { timestamp_gte: minTs, timestamp_lte: maxTs },
       first: 1000,
     });
@@ -226,7 +226,7 @@ describe("Account.events filtering (AccountEventsWhereInput)", () => {
     const midTimestamp = seedEvent.timestamp;
 
     const result = await request<AccountEventsResult>(AccountEventsFiltered, {
-      address: DEVNET_ACCOUNTS.deployer,
+      address: DEVNET_ACCOUNTS.deployer.address,
       where: { selector_in: [targetSelector], timestamp_gte: midTimestamp },
     });
     const events = flattenConnection(result.account.events);
@@ -243,7 +243,7 @@ describe("Account.events filtering (AccountEventsWhereInput)", () => {
     const maxTimestamp = BigInt(allEvents[allEvents.length - 1].timestamp);
 
     const result = await request<AccountEventsResult>(AccountEventsFiltered, {
-      address: DEVNET_ACCOUNTS.deployer,
+      address: DEVNET_ACCOUNTS.deployer.address,
       where: { timestamp_gte: (maxTimestamp + 1n).toString() },
     });
     const events = flattenConnection(result.account.events);

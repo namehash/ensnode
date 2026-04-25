@@ -1,3 +1,6 @@
+import { toNormalizedAddress } from "enssdk";
+import { mnemonicToAccount } from "viem/accounts";
+
 /**
  * Deterministic contract addresses from the ens-test-env devnet.
  * These addresses are produced by the Hardhat/Anvil deploy scripts in contracts-v2
@@ -94,4 +97,28 @@ export const DEVNET_CONTRACTS = {
   // -- Mock Tokens --
   mockUsdc: "0xFD471836031dc5108809D173A067e8486B9047A3",
   mockDai: "0xcbEAF3BDe82155F56486Fb5a1072cb8baAf547cc",
+} as const;
+
+/**
+ * Standard Hardhat/Anvil mnemonic used by the ens-test-env devnet.
+ */
+const DEVNET_MNEMONIC = "test test test test test test test test test test test junk";
+
+/**
+ * Named signer accounts from the ens-test-env devnet.
+ * Derived from the standard Hardhat mnemonic at account indices 0-3.
+ */
+export const DEVNET_ACCOUNTS = {
+  deployer: mnemonicToAccount(DEVNET_MNEMONIC, { addressIndex: 0 }),
+  owner: mnemonicToAccount(DEVNET_MNEMONIC, { addressIndex: 1 }),
+  user: mnemonicToAccount(DEVNET_MNEMONIC, { addressIndex: 2 }),
+  user2: mnemonicToAccount(DEVNET_MNEMONIC, { addressIndex: 3 }),
+} as const;
+
+/**
+ * Non-signer helper addresses for tests.
+ */
+export const DEVNET_ADDRESSES = {
+  /** Non-signer placeholder address (0x11...11) used where only an address literal is needed. */
+  one: toNormalizedAddress(`0x${"1".repeat(40)}`),
 } as const;

@@ -1,46 +1,53 @@
 import {
   type Account,
   type Chain,
+  createPublicClient,
   createWalletClient,
   http,
+  type PublicClient,
+  publicActions,
   type Transport,
   type WalletClient,
 } from "viem";
-import { mnemonicToAccount } from "viem/accounts";
 
 import { ensTestEnvChain } from "@ensnode/datasources";
-import { DEVNET_MNEMONIC } from "@ensnode/ensnode-sdk/internal";
+import { DEVNET_ACCOUNTS } from "@ensnode/ensnode-sdk/internal";
 
 import { seedPrimaryNameRecords } from "./primary-names";
 import { seedResolverRecords } from "./resolver-records";
 
 export type DevnetWalletClient = WalletClient<Transport, Chain, Account>;
+export type DevnetReadClient = PublicClient<Transport, Chain>;
 
 export type DevnetWalletClients = {
-  deployer: DevnetWalletClient; // index 0 — has REGISTRAR role on ETHRegistry
-  owner: DevnetWalletClient; // index 1 — DEVNET_OWNER, owns test.eth
-  user: DevnetWalletClient; // index 2 — DEVNET_USER
-  user2: DevnetWalletClient; // index 3 — DEVNET_USER2
+  deployer: DevnetWalletClient; // index 0
+  owner: DevnetWalletClient; // index 1
+  user: DevnetWalletClient; // index 2
+  user2: DevnetWalletClient; // index 3
 };
 
 function createDevnetWalletClients(rpcUrl: string): DevnetWalletClients {
   const transport = http(rpcUrl);
-  const mkClient = (addressIndex: number) =>
+  const makeClient = (account: Account) =>
     createWalletClient({
       chain: ensTestEnvChain,
       transport,
-      account: mnemonicToAccount(DEVNET_MNEMONIC, { addressIndex }),
-    });
+      account,
+    }).extend(publicActions);
   return {
-    deployer: mkClient(0),
-    owner: mkClient(1),
-    user: mkClient(2),
-    user2: mkClient(3),
+    deployer: makeClient(DEVNET_ACCOUNTS.deployer),
+    owner: makeClient(DEVNET_ACCOUNTS.owner),
+    user: makeClient(DEVNET_ACCOUNTS.user),
+    user2: makeClient(DEVNET_ACCOUNTS.user2),
   };
 }
 
 export async function seedDevnet(rpcUrl: string): Promise<void> {
+  const readClient = createPublicClient({
+    chain: ensTestEnvChain,
+    transport: http(rpcUrl),
+  });
   const clients = createDevnetWalletClients(rpcUrl);
   await seedPrimaryNameRecords(clients);
-  await seedResolverRecords(clients);
+  await seedResolverRecords(clients, readClient);
 }
