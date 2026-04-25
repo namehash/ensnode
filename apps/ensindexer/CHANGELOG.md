@@ -1,5 +1,19 @@
 # ensindexer
 
+## 1.11.0
+
+### Patch Changes
+
+- [#1978](https://github.com/namehash/ensnode/pull/1978) [`0d64d9e`](https://github.com/namehash/ensnode/commit/0d64d9e0c97c48e37f87d2abaaff50ff08df06e4) Thanks [@shrugs](https://github.com/shrugs)! - Added `replaceBigInts` (sourced from `@ponder/utils`) and `toJson` helpers to `@ensnode/ensnode-sdk`. `toJson` now takes an options object (`{ pretty?: boolean }`) with `pretty` defaulting to `false` — pass `{ pretty: true }` for indented output. Migrated all in-repo call sites and dropped the `@ponder/utils` dependency from `ensapi`.
+
+- Updated dependencies [[`0d8a4b4`](https://github.com/namehash/ensnode/commit/0d8a4b4b7c8c70be904652e2132e7c67fd9e39ef), [`0d8a4b4`](https://github.com/namehash/ensnode/commit/0d8a4b4b7c8c70be904652e2132e7c67fd9e39ef), [`0d64d9e`](https://github.com/namehash/ensnode/commit/0d64d9e0c97c48e37f87d2abaaff50ff08df06e4)]:
+  - @ensnode/ensrainbow-sdk@1.11.0
+  - @ensnode/ensnode-sdk@1.11.0
+  - @ensnode/ensdb-sdk@1.11.0
+  - enssdk@1.11.0
+  - @ensnode/datasources@1.11.0
+  - @ensnode/ponder-sdk@1.11.0
+
 ## 1.10.1
 
 ### Patch Changes

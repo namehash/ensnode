@@ -1,5 +1,25 @@
 # @ensnode/ensrainbow-sdk
 
+## 1.11.0
+
+### Minor Changes
+
+- [#1988](https://github.com/namehash/ensnode/pull/1988) [`0d8a4b4`](https://github.com/namehash/ensnode/commit/0d8a4b4b7c8c70be904652e2132e7c67fd9e39ef) Thanks [@tk-o](https://github.com/tk-o)! - **Breaking**: Updated core ENSNode data models.
+
+  - `EnsIndexerPublicConfig`
+    - Renamed `labelSet` field to `clientLabelSet`.
+  - `EnsRainbowApiClientOptions`
+    - Renamed `labelSet` field to `clientLabelSet`.
+  - `EnsRainbowPublicConfig`
+    - Replaced `version: string` field with `versionInfo: EnsRainbowVersionInfo`.
+    - Renamed `labelSet` field to `serverLabelSet`.
+    - Removed `recordsCount` field from `EnsRainbowPublicConfig`.
+
+### Patch Changes
+
+- Updated dependencies []:
+  - enssdk@1.11.0
+
 ## 1.10.1
 
 ### Patch Changes
