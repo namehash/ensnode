@@ -108,11 +108,16 @@ const DEVNET_MNEMONIC = "test test test test test test test test test test test 
  * Named signer accounts from the ens-test-env devnet.
  * Derived from the standard Hardhat mnemonic at account indices 0-3.
  */
+function deriveNormalizedAccount(addressIndex: number) {
+  const account = mnemonicToAccount(DEVNET_MNEMONIC, { addressIndex });
+  return { ...account, address: toNormalizedAddress(account.address) };
+}
+
 export const DEVNET_ACCOUNTS = {
-  deployer: mnemonicToAccount(DEVNET_MNEMONIC, { addressIndex: 0 }),
-  owner: mnemonicToAccount(DEVNET_MNEMONIC, { addressIndex: 1 }),
-  user: mnemonicToAccount(DEVNET_MNEMONIC, { addressIndex: 2 }),
-  user2: mnemonicToAccount(DEVNET_MNEMONIC, { addressIndex: 3 }),
+  deployer: deriveNormalizedAccount(0),
+  owner: deriveNormalizedAccount(1),
+  user: deriveNormalizedAccount(2),
+  user2: deriveNormalizedAccount(3),
 } as const;
 
 /**
