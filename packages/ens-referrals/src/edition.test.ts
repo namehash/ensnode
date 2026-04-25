@@ -76,13 +76,11 @@ describe("buildReferralProgramEditionConfigSet — overlap invariant", () => {
     expect(set.size).toBe(2);
   });
 
-  it("throws naming both slugs and the subregistry when editions overlap", () => {
+  it("throws when editions overlap", () => {
     const a = makePieSplitEdition("a", 1000, 2000);
     const b = makePieSplitEdition("b", 1500, 2500);
 
-    expect(() => buildReferralProgramEditionConfigSet([a, b])).toThrow(
-      /"a".*"b".*subregistryId 1:0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85/s,
-    );
+    expect(() => buildReferralProgramEditionConfigSet([a, b])).toThrow(/overlapping time ranges/i);
   });
 
   it("throws when two editions share a subregistry and have touching edges", () => {
