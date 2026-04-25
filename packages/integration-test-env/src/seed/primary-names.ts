@@ -7,10 +7,7 @@ export async function seedPrimaryNameRecords(clients: DevnetWalletClients): Prom
   await setPrimaryNameRecord(clients.owner, "test.eth");
 }
 
-async function setPrimaryNameRecord(
-  walletClient: DevnetWalletClient,
-  name: string,
-): Promise<void> {
+async function setPrimaryNameRecord(walletClient: DevnetWalletClient, name: string): Promise<void> {
   const hash = await walletClient.writeContract({
     address: DEVNET_CONTRACTS.ethReverseRegistrar,
     abi: ethReverseRegistrarAbi,

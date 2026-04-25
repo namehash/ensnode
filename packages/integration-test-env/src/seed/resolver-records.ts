@@ -7,11 +7,7 @@ import { publicResolverAbi, universalResolverV2Abi } from "./abi";
 import type { DevnetWalletClient, DevnetWalletClients } from "./index";
 
 export async function seedResolverRecords(clients: DevnetWalletClients): Promise<void> {
-  await seedResolverRecordsForName(
-    clients,
-    "test.eth",
-    DEVNET_CONTRACTS.permissionedResolver,
-  );
+  await seedResolverRecordsForName(clients, "test.eth", DEVNET_CONTRACTS.permissionedResolver);
 }
 
 async function seedResolverRecordsForName(
@@ -37,31 +33,13 @@ async function seedResolverRecordsForName(
 
   // Multi-coin addresses
   // Coin 0 = Bitcoin
-  await setMulticoinAddress(
-    clients.owner,
-    resolver,
-    node,
-    0n,
-    DEVNET_BYTES.bitcoinAddress,
-  );
+  await setMulticoinAddress(clients.owner, resolver, node, 0n, DEVNET_BYTES.bitcoinAddress);
   // Coin 2 = Litecoin
-  await setMulticoinAddress(
-    clients.owner,
-    resolver,
-    node,
-    2n,
-    DEVNET_BYTES.litecoinAddress,
-  );
+  await setMulticoinAddress(clients.owner, resolver, node, 2n, DEVNET_BYTES.litecoinAddress);
 
   // Scalar resolver records
   await setContenthash(clients.owner, resolver, node, DEVNET_BYTES.contenthash);
-  await setPubkey(
-    clients.owner,
-    resolver,
-    node,
-    DEVNET_BYTES.publicKeyX,
-    DEVNET_BYTES.publicKeyY,
-  );
+  await setPubkey(clients.owner, resolver, node, DEVNET_BYTES.publicKeyX, DEVNET_BYTES.publicKeyY);
   await setAbi(clients.owner, resolver, node, 1n, DEVNET_BYTES.abiBytes);
   await setInterfaceImplementer(
     clients.owner,

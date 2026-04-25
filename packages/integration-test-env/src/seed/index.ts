@@ -3,8 +3,8 @@ import {
   type Chain,
   createWalletClient,
   http,
-  publicActions,
   type PublicActions,
+  publicActions,
   type Transport,
   type WalletClient,
 } from "viem";
