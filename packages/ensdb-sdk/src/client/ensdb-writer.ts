@@ -1,11 +1,7 @@
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 
 import {
-  type CrossChainIndexingStatusSnapshot,
-  type EnsIndexerPublicConfig,
   type IndexingMetadataContextInitialized,
-  serializeCrossChainIndexingStatusSnapshot,
-  serializeEnsIndexerPublicConfig,
   serializeIndexingMetadataContext,
 } from "@ensnode/ensnode-sdk";
 
@@ -32,46 +28,6 @@ export class EnsDbWriter extends EnsDbReader {
     return migrate(this.drizzleClient, {
       migrationsFolder: migrationsDirPath,
       migrationsSchema: "ensnode",
-    });
-  }
-
-  /**
-   * Upsert ENSDb Version
-   *
-   * @throws when upsert operation failed.
-   */
-  async upsertEnsDbVersion(ensDbVersion: string): Promise<void> {
-    await this.upsertEnsNodeMetadata({
-      key: EnsNodeMetadataKeys.EnsDbVersion,
-      value: ensDbVersion,
-    });
-  }
-
-  /**
-   * Upsert ENSIndexer Public Config
-   *
-   * @throws when upsert operation failed.
-   */
-  async upsertEnsIndexerPublicConfig(
-    ensIndexerPublicConfig: EnsIndexerPublicConfig,
-  ): Promise<void> {
-    await this.upsertEnsNodeMetadata({
-      key: EnsNodeMetadataKeys.EnsIndexerPublicConfig,
-      value: serializeEnsIndexerPublicConfig(ensIndexerPublicConfig),
-    });
-  }
-
-  /**
-   * Upsert Indexing Status Snapshot
-   *
-   * @throws when upsert operation failed.
-   */
-  async upsertIndexingStatusSnapshot(
-    indexingStatus: CrossChainIndexingStatusSnapshot,
-  ): Promise<void> {
-    await this.upsertEnsNodeMetadata({
-      key: EnsNodeMetadataKeys.EnsIndexerIndexingStatus,
-      value: serializeCrossChainIndexingStatusSnapshot(indexingStatus),
     });
   }
 

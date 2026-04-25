@@ -1,37 +1,6 @@
-import type {
-  SerializedCrossChainIndexingStatusSnapshot,
-  SerializedEnsIndexerPublicConfig,
-  SerializedIndexingMetadataContextInitialized,
-} from "@ensnode/ensnode-sdk";
+import type { SerializedIndexingMetadataContextInitialized } from "@ensnode/ensnode-sdk";
 
-import type {
-  EnsNodeMetadata,
-  EnsNodeMetadataEnsDbVersion,
-  EnsNodeMetadataEnsIndexerIndexingStatus,
-  EnsNodeMetadataEnsIndexerPublicConfig,
-  EnsNodeMetadataKeys,
-} from "../ensnode-metadata";
-
-/**
- * Serialized representation of {@link EnsNodeMetadataEnsDbVersion}.
- */
-export type SerializedEnsNodeMetadataEnsDbVersion = EnsNodeMetadataEnsDbVersion;
-
-/**
- * Serialized representation of {@link EnsNodeMetadataEnsIndexerPublicConfig}.
- */
-export interface SerializedEnsNodeMetadataEnsIndexerPublicConfig {
-  key: typeof EnsNodeMetadataKeys.EnsIndexerPublicConfig;
-  value: SerializedEnsIndexerPublicConfig;
-}
-
-/**
- * Serialized representation of {@link EnsNodeMetadataEnsIndexerIndexingStatus}.
- */
-export interface SerializedEnsNodeMetadataEnsIndexerIndexingStatus {
-  key: typeof EnsNodeMetadataKeys.EnsIndexerIndexingStatus;
-  value: SerializedCrossChainIndexingStatusSnapshot;
-}
+import type { EnsNodeMetadata, EnsNodeMetadataKeys } from "../ensnode-metadata";
 
 export interface SerializedEnsNodeMetadataIndexingMetadataContext {
   key: typeof EnsNodeMetadataKeys.IndexingMetadataContext;
@@ -41,8 +10,4 @@ export interface SerializedEnsNodeMetadataIndexingMetadataContext {
 /**
  * Serialized representation of {@link EnsNodeMetadata}
  */
-export type SerializedEnsNodeMetadata =
-  | SerializedEnsNodeMetadataEnsDbVersion
-  | SerializedEnsNodeMetadataEnsIndexerPublicConfig
-  | SerializedEnsNodeMetadataEnsIndexerIndexingStatus
-  | SerializedEnsNodeMetadataIndexingMetadataContext;
+export type SerializedEnsNodeMetadata = SerializedEnsNodeMetadataIndexingMetadataContext;

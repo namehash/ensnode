@@ -2,13 +2,9 @@ import { and, eq } from "drizzle-orm/sql";
 
 import {
   buildIndexingMetadataContextUninitialized,
-  type CrossChainIndexingStatusSnapshot,
-  deserializeCrossChainIndexingStatusSnapshot,
-  deserializeEnsIndexerPublicConfig,
   deserializeIndexingMetadataContext,
   type EnsDbPublicConfig,
   type EnsDbVersionInfo,
-  type EnsIndexerPublicConfig,
   type IndexingMetadataContext,
 } from "@ensnode/ensnode-sdk";
 
@@ -23,9 +19,6 @@ import { parsePgVersionInfo } from "../lib/parse-pg-version-info";
 import { EnsNodeMetadataKeys } from "./ensnode-metadata";
 import type {
   SerializedEnsNodeMetadata,
-  SerializedEnsNodeMetadataEnsDbVersion,
-  SerializedEnsNodeMetadataEnsIndexerIndexingStatus,
-  SerializedEnsNodeMetadataEnsIndexerPublicConfig,
   SerializedEnsNodeMetadataIndexingMetadataContext,
 } from "./serialize/ensnode-metadata";
 
@@ -134,36 +127,6 @@ export class EnsDbReader<
   }
 
   /**
-   * Get ENSDb Version
-   *
-   * @returns the existing record, or `undefined`.
-   */
-  async getEnsDbVersion(): Promise<string | undefined> {
-    const record = await this.getEnsNodeMetadata<SerializedEnsNodeMetadataEnsDbVersion>({
-      key: EnsNodeMetadataKeys.EnsDbVersion,
-    });
-
-    return record;
-  }
-
-  /**
-   * Get ENSIndexer Public Config
-   *
-   * @returns the existing record, or `undefined`.
-   */
-  async getEnsIndexerPublicConfig(): Promise<EnsIndexerPublicConfig | undefined> {
-    const record = await this.getEnsNodeMetadata<SerializedEnsNodeMetadataEnsIndexerPublicConfig>({
-      key: EnsNodeMetadataKeys.EnsIndexerPublicConfig,
-    });
-
-    if (!record) {
-      return undefined;
-    }
-
-    return deserializeEnsIndexerPublicConfig(record);
-  }
-
-  /**
    * Build ENSDb Public Config
    */
   async buildEnsDbPublicConfig(): Promise<EnsDbPublicConfig> {
@@ -172,25 +135,6 @@ export class EnsDbReader<
     return {
       versionInfo,
     };
-  }
-
-  /**
-   * Get Indexing Status Snapshot
-   *
-   * @returns the existing record, or `undefined`.
-   */
-  async getIndexingStatusSnapshot(): Promise<CrossChainIndexingStatusSnapshot | undefined> {
-    const record = await this.getEnsNodeMetadata<SerializedEnsNodeMetadataEnsIndexerIndexingStatus>(
-      {
-        key: EnsNodeMetadataKeys.EnsIndexerIndexingStatus,
-      },
-    );
-
-    if (!record) {
-      return undefined;
-    }
-
-    return deserializeCrossChainIndexingStatusSnapshot(record);
   }
 
   /**
