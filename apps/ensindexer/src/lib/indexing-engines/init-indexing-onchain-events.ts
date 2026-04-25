@@ -1,4 +1,4 @@
-import { getUnixTime } from "date-fns/fp/getUnixTime";
+import { getUnixTime } from "date-fns";
 
 import {
   buildCrossChainIndexingStatusSnapshotOmnichain,
@@ -6,12 +6,18 @@ import {
   buildIndexingMetadataContextInitialized,
   IndexingMetadataContextStatusCodes,
   OmnichainIndexingStatusIds,
+  validateEnsIndexerPublicConfigCompatibility,
 } from "@ensnode/ensnode-sdk";
 
 import { ensDbClient } from "@/lib/ensdb/singleton";
 import { startEnsDbWriterWorker } from "@/lib/ensdb-writer-worker/singleton";
-import { ensRainbowClient, waitForEnsRainbowToBeReady } from "@/lib/ensrainbow/singleton";
+import {
+  ensRainbowClient,
+  waitForEnsRainbowToBeHealthy,
+  waitForEnsRainbowToBeReady,
+} from "@/lib/ensrainbow/singleton";
 import { indexingStatusBuilder } from "@/lib/indexing-status-builder/singleton";
+import { logger } from "@/lib/logger";
 import { publicConfigBuilder } from "@/lib/public-config-builder/singleton";
 
 /**
@@ -39,56 +45,117 @@ import { publicConfigBuilder } from "@/lib/public-config-builder/singleton";
  * ```
  */
 export async function initIndexingOnchainEvents(): Promise<void> {
-  try {
-    const indexingMetadataContext = await ensDbClient.getIndexingMetadataContext();
-    console.log("Indexing Metadata Context:", indexingMetadataContext);
-    const indexingStatus = await indexingStatusBuilder.getOmnichainIndexingStatusSnapshot();
-    const ensIndexerPublicConfig = await publicConfigBuilder.getPublicConfig();
-    const ensDbPublicConfig = await ensDbClient.buildEnsDbPublicConfig();
+  // Before calling `ensRainbowClient.config()`, we want to make sure that
+  // the ENSRainbow instance is healthy and ready to serve requests.
+  // This is a quick check, as we expect the ENSRainbow instance to be healthy
+  // by the time ENSIndexer instance executes `initIndexingOnchainEvents`.
+  await waitForEnsRainbowToBeHealthy();
 
-    if (indexingMetadataContext.statusCode === IndexingMetadataContextStatusCodes.Uninitialized) {
-      // Invariant: indexing status must be "unstarted"
-      if (indexingStatus.omnichainStatus !== OmnichainIndexingStatusIds.Unstarted) {
+  try {
+    const [
+      inMemoryIndexingStatusSnapshot,
+      inMemoryEnsDbPublicConfig,
+      inMemoryEnsIndexerPublicConfig,
+      inMemoryEnsRainbowPublicConfig,
+      storedIndexingMetadataContext,
+    ] = await Promise.all([
+      indexingStatusBuilder.getOmnichainIndexingStatusSnapshot(),
+      ensDbClient.buildEnsDbPublicConfig(),
+      publicConfigBuilder.getPublicConfig(),
+      ensRainbowClient.config(),
+      ensDbClient.getIndexingMetadataContext(),
+    ]);
+
+    if (
+      storedIndexingMetadataContext.statusCode === IndexingMetadataContextStatusCodes.Uninitialized
+    ) {
+      logger.info({
+        msg: `Indexing Metadata Context is "uninitialized"`,
+      });
+
+      // Invariant: indexing status must be "unstarted" when the indexing metadata context is uninitialized,
+      // since we haven't started processing any onchain events yet
+      if (inMemoryIndexingStatusSnapshot.omnichainStatus !== OmnichainIndexingStatusIds.Unstarted) {
         throw new Error(
-          `Invariant violation: expected omnichain indexing status to be "unstarted" when initializing indexing of onchain events for the first time, but got "${indexingStatus.omnichainStatus}" instead`,
+          `Omnichain indexing status must be "unstarted" for "uninitialized" Indexing Metadata Context. Provided omnichain indexing status "${inMemoryIndexingStatusSnapshot.omnichainStatus}".`,
         );
       }
     } else {
-      // if (ensIndexerPublicConfig.ensIndexerBuildId !== indexingMetadataContext.stackInfo.ensIndexer.ensIndexerBuildId) {
-      // TODO: store the `ensIndexerPublicConfig` object in ENSDb so `indexingMetadataContext.stackInfo.ensIndexer` is updated
+      logger.info({
+        msg: `Indexing Metadata Context is "initialized"`,
+      });
+      logger.debug({
+        msg: `Indexing Metadata Context`,
+        indexingStatus: storedIndexingMetadataContext.indexingStatus,
+        stackInfo: storedIndexingMetadataContext.stackInfo,
+      });
+      // if (ensIndexerPublicConfig.ensIndexerBuildId !== storedIndexingMetadataContext.stackInfo.ensIndexer.ensIndexerBuildId) {
+      // TODO: store the `ensIndexerPublicConfig` object in ENSDb so `storedIndexingMetadataContext.stackInfo.ensIndexer` is updated
       // }
-    }
-
-    await waitForEnsRainbowToBeReady();
-
-    const ensRainbowPublicConfig = await ensRainbowClient.config();
-    const now = getUnixTime(new Date());
-    const updatedIndexingMetadataContext = buildIndexingMetadataContextInitialized(
-      buildCrossChainIndexingStatusSnapshotOmnichain(indexingStatus, now),
-      buildEnsIndexerStackInfo(ensDbPublicConfig, ensIndexerPublicConfig, ensRainbowPublicConfig),
-    );
-
-    // TODO: check ENSRainbow compatibility
-    if (
-      ensRainbowPublicConfig.serverLabelSet.labelSetId <
-      ensIndexerPublicConfig.clientLabelSet.labelSetId
-    ) {
-      throw new Error(
-        `ENSRainbow instance is not compatible with the current ENSIndexer instance: ENSRainbow serverLabelSetId (${ensRainbowPublicConfig.serverLabelSet.labelSetId}) is less than ENSIndexer clientLabelSetId (${ensIndexerPublicConfig.clientLabelSet.labelSetId})`,
+      const { ensIndexer: storedEnsIndexerPublicConfig } = storedIndexingMetadataContext.stackInfo;
+      validateEnsIndexerPublicConfigCompatibility(
+        inMemoryEnsIndexerPublicConfig,
+        storedEnsIndexerPublicConfig,
       );
     }
 
+    // Build the {@link CrossChainIndexingStatusSnapshot} with the current snapshot time.
+    // This is important to make sure the `snapshotTime` is always up to date in
+    // the indexing status snapshot stored in ENSDb.
+    const now = getUnixTime(new Date());
+    const crossChainIndexingStatusSnapshot = buildCrossChainIndexingStatusSnapshotOmnichain(
+      inMemoryIndexingStatusSnapshot,
+      now,
+    );
+
+    // Build EnsIndexerStackInfo based on the current state of in-memory public
+    // config objects. It's unlikely, but possible, that after the ENSIndexer
+    // instance restarts, some values in the public config objects have changed
+    // compared to the previous instance before the restart. For example,
+    // if the ENSIndexer instance is redeployed with a new version of the code that has different default values for some config parameters, or if there are changes in the environment variables used to build the public config objects.
+    const updatedStackInfo = buildEnsIndexerStackInfo(
+      inMemoryEnsDbPublicConfig,
+      inMemoryEnsIndexerPublicConfig,
+      inMemoryEnsRainbowPublicConfig,
+    );
+
+    const updatedIndexingMetadataContext = buildIndexingMetadataContextInitialized(
+      crossChainIndexingStatusSnapshot,
+      updatedStackInfo,
+    );
+
+    logger.info({
+      msg: `Upserting Indexing Metadata Context Initialized`,
+    });
+    logger.debug({
+      msg: `Indexing Metadata Context`,
+      indexingStatus: updatedIndexingMetadataContext.indexingStatus,
+      stackInfo: updatedIndexingMetadataContext.stackInfo,
+    });
     await ensDbClient.upsertIndexingMetadataContext(updatedIndexingMetadataContext);
+    logger.info({
+      msg: `Successfully upserted Indexing Metadata Context Initialized`,
+    });
+
+    // Before starting to process onchain events, we want to make sure that
+    // ENSRainbow is ready and ready to serve the "heal" requests.
+    await waitForEnsRainbowToBeReady();
 
     // TODO: start Indexing Status Sync worker
     // It will be responsible for keeping the indexing status stored within Indexing Metadata Context record in ENSDb up to date
     // await indexingStatusSyncWorker.start();
     startEnsDbWriterWorker();
   } catch (error) {
-    // If any error happens during the execution of the preconditions for onchain events,
+    // If any error happens during the initialization of indexing of onchain events,
     // we want to log the error and exit the process with a non-zero exit code,
     // since this is a critical failure that prevents the ENSIndexer instance from functioning properly.
-    console.error("Failed to execute preconditions for onchain events:", error);
-    process.exit(1);
+    logger.error({
+      msg: "Failed to initialize the onchain events indexing",
+      module: "init-indexing-onchain-events",
+      error,
+    });
+
+    process.exitCode = 1;
+    throw error;
   }
 }

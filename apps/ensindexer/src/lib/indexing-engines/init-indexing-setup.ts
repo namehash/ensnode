@@ -39,15 +39,22 @@ import { logger } from "@/lib/logger";
  * @throws Error if any precondition is not satisfied.
  */
 export async function initIndexingSetup(): Promise<void> {
-  const { migrateEnsNodeSchema } = await import("@/lib/ensdb/migrate-ensnode-schema");
-  // Ensure the ENSNode Schema in ENSDb is up to date by running any pending migrations.
-  await migrateEnsNodeSchema().catch((error) => {
+  try {
+    // TODO: wait for ENSDb instance to be healthy
+    const { migrateEnsNodeSchema } = await import("@/lib/ensdb/migrate-ensnode-schema");
+    // Ensure the ENSNode Schema in ENSDb is up to date by running any pending migrations.
+    await migrateEnsNodeSchema();
+  } catch (error) {
+    // If any error happens during the initialization of indexing of onchain events,
+    // we want to log the error and exit the process with a non-zero exit code,
+    // since this is a critical failure that prevents the ENSIndexer instance from functioning properly.
     logger.error({
-      msg: "Failed to initialize ENSNode metadata",
+      msg: "Failed to initialize the indexing setup",
+      module: "init-indexing-setup",
       error,
-      module: "ponder-api",
     });
+
     process.exitCode = 1;
     throw error;
-  });
+  }
 }

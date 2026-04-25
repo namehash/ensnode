@@ -15,6 +15,8 @@ import {
   ponder,
 } from "ponder:registry";
 
+import { initIndexingSetup } from "@/lib/indexing-engines/init-indexing-setup";
+
 /**
  * Context passed to event handlers registered with
  * {@link addOnchainEventListener}.
@@ -156,7 +158,6 @@ async function eventHandlerPreconditions(eventType: EventTypeId): Promise<void> 
   switch (eventType) {
     case EventTypeIds.Setup: {
       if (indexingSetupPromise === null) {
-        const { initIndexingSetup } = await import("./init-indexing-setup");
         // Init the indexing setup just once. There will be multiple
         // setup events executed during Ponder startup, but they will
         // run sequentially, so we can just check if we have already
@@ -169,6 +170,10 @@ async function eventHandlerPreconditions(eventType: EventTypeId): Promise<void> 
 
     case EventTypeIds.OnchainEvent: {
       if (indexingOnchainEventsPromise === null) {
+        // We need to work around the Ponder limitation for importing modules,
+        // since Ponder would not allow us to use static imports for modules
+        // that internally rely on `ponder:api`. Using dynamic imports solves
+        // this issue.
         const { initIndexingOnchainEvents } = await import("./init-indexing-onchain-events");
         // Init the indexing of "onchain" events just once in order to
         // optimize the indexing "hot path", since these events are much

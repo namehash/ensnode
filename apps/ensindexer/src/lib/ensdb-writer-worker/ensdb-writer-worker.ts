@@ -1,6 +1,5 @@
 import { getUnixTime, secondsToMilliseconds } from "date-fns";
 import type { Duration } from "enssdk";
-import pRetry from "p-retry";
 
 import type { EnsDbWriter } from "@ensnode/ensdb-sdk";
 import {
@@ -8,16 +7,12 @@ import {
   buildIndexingMetadataContextInitialized,
   type CrossChainIndexingStatusSnapshot,
   type EnsIndexerPublicConfig,
+  type IndexingMetadataContext,
   IndexingMetadataContextStatusCodes,
-  OmnichainIndexingStatusIds,
-  type OmnichainIndexingStatusSnapshot,
-  validateEnsIndexerPublicConfigCompatibility,
 } from "@ensnode/ensnode-sdk";
-import type { LocalPonderClient } from "@ensnode/ponder-sdk";
 
 import type { IndexingStatusBuilder } from "@/lib/indexing-status-builder/indexing-status-builder";
 import { logger } from "@/lib/logger";
-import type { PublicConfigBuilder } from "@/lib/public-config-builder/public-config-builder";
 
 /**
  * Interval in seconds between two consecutive attempts to upsert
@@ -28,10 +23,8 @@ const INDEXING_STATUS_RECORD_UPDATE_INTERVAL: Duration = 1;
 /**
  * ENSDb Writer Worker
  *
- * A worker responsible for writing ENSIndexer-related metadata into ENSDb, including:
- * - ENSDb version
- * - ENSIndexer Public Config
- * - ENSIndexer Indexing Status Snapshots
+ * A worker responsible for writing the current {@link CrossChainIndexingStatusSnapshot} into
+ * the {@link IndexingMetadataContext} record in ENSDb.
  */
 export class EnsDbWriterWorker {
   /**
@@ -50,33 +43,12 @@ export class EnsDbWriterWorker {
   private indexingStatusBuilder: IndexingStatusBuilder;
 
   /**
-   * ENSIndexer Public Config Builder instance used by the worker to read ENSIndexer Public Config.
-   */
-  private publicConfigBuilder: PublicConfigBuilder;
-
-  /**
-   * Local Ponder Client instance
-   *
-   * Used to get local Ponder app command.
-   */
-  private localPonderClient: LocalPonderClient;
-
-  /**
    * @param ensDbClient ENSDb Writer instance used by the worker to interact with ENSDb.
-   * @param publicConfigBuilder ENSIndexer Public Config Builder instance used by the worker to read ENSIndexer Public Config.
    * @param indexingStatusBuilder Indexing Status Builder instance used by the worker to read ENSIndexer Indexing Status.
-   * @param localPonderClient Local Ponder Client instance, used to get local Ponder app command.
    */
-  constructor(
-    ensDbClient: EnsDbWriter,
-    publicConfigBuilder: PublicConfigBuilder,
-    indexingStatusBuilder: IndexingStatusBuilder,
-    localPonderClient: LocalPonderClient,
-  ) {
+  constructor(ensDbClient: EnsDbWriter, indexingStatusBuilder: IndexingStatusBuilder) {
     this.ensDbClient = ensDbClient;
-    this.publicConfigBuilder = publicConfigBuilder;
     this.indexingStatusBuilder = indexingStatusBuilder;
-    this.localPonderClient = localPonderClient;
   }
 
   /**
