@@ -9,6 +9,16 @@ import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-eng
 const ensRootChainId = getENSRootChainId(config.namespace);
 
 /**
+ * Process-local cache of node migration status.
+ *
+ * `nodeIsMigrated` is called as a precondition on every ENSv1RegistryOld event handler (NewOwner,
+ * Transfer, NewTTL, NewResolver).
+ *
+ * Restart-safe: the Map repopulates via DB reads on cache miss.
+ */
+const cache = new Map<Node, boolean>();
+
+/**
  * Returns whether the `node` has migrated to the new Registry contract.
  */
 export async function nodeIsMigrated(context: IndexingEngineContext, node: Node) {
@@ -18,8 +28,14 @@ export async function nodeIsMigrated(context: IndexingEngineContext, node: Node)
     );
   }
 
+  // memoize the below operation by `node`
+  const cached = cache.get(node);
+  if (cached !== undefined) return cached;
+
   const record = await context.ensDb.find(ensIndexerSchema.migratedNode, { node });
-  return !!record;
+  const isMigrated = record !== null;
+  cache.set(node, isMigrated);
+  return isMigrated;
 }
 
 /**
@@ -31,6 +47,10 @@ export async function migrateNode(context: IndexingEngineContext, node: Node) {
       `Invariant(migrateNode): Node migration status is only relevant on the ENS Root Chain, and this function was called in the context of ${context.chain.id}.`,
     );
   }
+
+  // memoize the below operation by `node`
+  if (cache.get(node) === true) return;
+  cache.set(node, true);
 
   await context.ensDb.insert(ensIndexerSchema.migratedNode).values({ node }).onConflictDoNothing();
 }
