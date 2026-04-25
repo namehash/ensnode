@@ -36,7 +36,7 @@ vi.mock("ponder:schema", () => ({
   ensIndexerSchema: {},
 }));
 
-vi.mock("@/lib/indexing-engines/init-indexing-onchain-events", () => ({
+vi.mock("./init-indexing-onchain-events", () => ({
   initIndexingOnchainEvents: mockInitIndexingOnchainEvents,
 }));
 
