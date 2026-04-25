@@ -1,5 +1,17 @@
 # @ensnode/integration-test-env
 
+## 1.11.0
+
+### Patch Changes
+
+- [#1965](https://github.com/namehash/ensnode/pull/1965) [`3facf20`](https://github.com/namehash/ensnode/commit/3facf206d7cb144593257cc9cd4e98059e29d792) Thanks [@sevenzing](https://github.com/sevenzing)! - Moved docker-compose.yml file to separate `docker` directory, updates docs and cicd-tests
+
+- Updated dependencies [[`0d8a4b4`](https://github.com/namehash/ensnode/commit/0d8a4b4b7c8c70be904652e2132e7c67fd9e39ef), [`0d8a4b4`](https://github.com/namehash/ensnode/commit/0d8a4b4b7c8c70be904652e2132e7c67fd9e39ef), [`0d64d9e`](https://github.com/namehash/ensnode/commit/0d64d9e0c97c48e37f87d2abaaff50ff08df06e4)]:
+  - @ensnode/ensnode-sdk@1.11.0
+  - @ensnode/ensdb-sdk@1.11.0
+  - @ensnode/datasources@1.11.0
+  - @ensnode/shared-configs@1.11.0
+
 ## 1.10.1
 
 ### Patch Changes

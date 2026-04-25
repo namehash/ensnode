@@ -1,5 +1,14 @@
 # @docs/ensnode
 
+## 1.11.0
+
+### Patch Changes
+
+- [#1965](https://github.com/namehash/ensnode/pull/1965) [`3facf20`](https://github.com/namehash/ensnode/commit/3facf206d7cb144593257cc9cd4e98059e29d792) Thanks [@sevenzing](https://github.com/sevenzing)! - Moved docker-compose.yml file to separate `docker` directory, updates docs and cicd-tests
+
+- Updated dependencies []:
+  - @namehash/namehash-ui@1.11.0
+
 ## 1.10.1
 
 ### Patch Changes
