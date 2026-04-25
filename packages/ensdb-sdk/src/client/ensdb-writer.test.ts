@@ -11,10 +11,19 @@ import * as ensDbClientMock from "./ensdb-client.mock";
 import { EnsDbWriter } from "./ensdb-writer";
 import { EnsNodeMetadataKeys } from "./ensnode-metadata";
 
+const executeMock = vi.fn(async () => undefined);
 const onConflictDoUpdateMock = vi.fn(async () => undefined);
 const valuesMock = vi.fn(() => ({ onConflictDoUpdate: onConflictDoUpdateMock }));
 const insertMock = vi.fn(() => ({ values: valuesMock }));
-const drizzleClientMock = { insert: insertMock } as any;
+const transactionMock = vi.fn(async (callback: (tx: any) => Promise<void>) => {
+  const tx = { execute: executeMock, insert: insertMock };
+  return callback(tx);
+});
+const drizzleClientMock = {
+  insert: insertMock,
+  transaction: transactionMock,
+  execute: executeMock,
+} as any;
 
 vi.mock("drizzle-orm/node-postgres", () => ({
   drizzle: vi.fn(() => drizzleClientMock),
@@ -26,9 +35,11 @@ describe("EnsDbWriter", () => {
     new EnsDbWriter(ensDbClientMock.ensDbUrl, ensDbClientMock.ensIndexerSchemaName);
 
   beforeEach(() => {
+    executeMock.mockClear();
     onConflictDoUpdateMock.mockClear();
     valuesMock.mockClear();
     insertMock.mockClear();
+    transactionMock.mockClear();
     vi.mocked(migrate).mockClear();
   });
 
@@ -84,18 +95,31 @@ describe("EnsDbWriter", () => {
   });
 
   describe("migrateEnsNodeSchema", () => {
-    it("calls drizzle-orm migrateEnsNodeSchema with the correct parameters", async () => {
+    it("calls drizzle-orm migrate with the correct parameters inside a transaction", async () => {
       const migrationsDirPath = "/path/to/migrations";
 
       await createEnsDbWriter().migrateEnsNodeSchema(migrationsDirPath);
 
-      expect(vi.mocked(migrate)).toHaveBeenCalledWith(drizzleClientMock, {
-        migrationsFolder: migrationsDirPath,
-        migrationsSchema: "ensnode",
-      });
+      expect(transactionMock).toHaveBeenCalled();
+      expect(executeMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          queryChunks: expect.arrayContaining([
+            expect.objectContaining({ value: ["SELECT pg_advisory_xact_lock("] }),
+            expect.any(BigInt),
+            expect.objectContaining({ value: [")"] }),
+          ]),
+        }),
+      );
+      expect(vi.mocked(migrate)).toHaveBeenCalledWith(
+        expect.objectContaining({ execute: executeMock }),
+        {
+          migrationsFolder: migrationsDirPath,
+          migrationsSchema: "ensnode",
+        },
+      );
     });
 
-    it("propagates errors from the migrateEnsNodeSchema function", async () => {
+    it("propagates errors from the migrate function", async () => {
       const migrationsDirPath = "/path/to/migrations";
       vi.mocked(migrate).mockRejectedValueOnce(new Error("Migration failed"));
 
