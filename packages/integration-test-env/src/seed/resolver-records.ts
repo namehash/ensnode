@@ -4,15 +4,11 @@ import { packetToBytes } from "viem/ens";
 import { DEVNET_ADDRESSES, DEVNET_BYTES, DEVNET_CONTRACTS } from "@ensnode/ensnode-sdk/internal";
 
 import { publicResolverAbi, universalResolverV2Abi } from "./abi";
-import type { DevnetReadClient, DevnetWalletClient, DevnetWalletClients } from "./index";
+import type { DevnetWalletClient, DevnetWalletClients } from "./index";
 
-export async function seedResolverRecords(
-  clients: DevnetWalletClients,
-  readClient: DevnetReadClient,
-): Promise<void> {
+export async function seedResolverRecords(clients: DevnetWalletClients): Promise<void> {
   await seedResolverRecordsForName(
     clients,
-    readClient,
     "test.eth",
     DEVNET_CONTRACTS.permissionedResolver,
   );
@@ -20,12 +16,11 @@ export async function seedResolverRecords(
 
 async function seedResolverRecordsForName(
   clients: DevnetWalletClients,
-  readClient: DevnetReadClient,
   name: string,
   resolver: Address,
 ): Promise<void> {
   const node = namehash(name);
-  const actualResolver = await findResolver(readClient, name);
+  const actualResolver = await findResolver(clients.owner, name);
   if (actualResolver.toLowerCase() !== resolver.toLowerCase()) {
     throw new Error(
       `${name} resolver mismatch: active=${actualResolver}, expected=${resolver}. Either resolver has been changed or something else is wrong.`,
@@ -42,13 +37,31 @@ async function seedResolverRecordsForName(
 
   // Multi-coin addresses
   // Coin 0 = Bitcoin
-  await setMulticoinAddress(clients.owner, resolver, node, 0n, DEVNET_BYTES.bitcoinAddress);
+  await setMulticoinAddress(
+    clients.owner,
+    resolver,
+    node,
+    0n,
+    DEVNET_BYTES.bitcoinAddress,
+  );
   // Coin 2 = Litecoin
-  await setMulticoinAddress(clients.owner, resolver, node, 2n, DEVNET_BYTES.litecoinAddress);
+  await setMulticoinAddress(
+    clients.owner,
+    resolver,
+    node,
+    2n,
+    DEVNET_BYTES.litecoinAddress,
+  );
 
   // Scalar resolver records
   await setContenthash(clients.owner, resolver, node, DEVNET_BYTES.contenthash);
-  await setPubkey(clients.owner, resolver, node, DEVNET_BYTES.publicKeyX, DEVNET_BYTES.publicKeyY);
+  await setPubkey(
+    clients.owner,
+    resolver,
+    node,
+    DEVNET_BYTES.publicKeyX,
+    DEVNET_BYTES.publicKeyY,
+  );
   await setAbi(clients.owner, resolver, node, 1n, DEVNET_BYTES.abiBytes);
   await setInterfaceImplementer(
     clients.owner,
@@ -59,8 +72,8 @@ async function seedResolverRecordsForName(
   );
 }
 
-async function findResolver(readClient: DevnetReadClient, name: string): Promise<Address> {
-  const [resolver] = await readClient.readContract({
+async function findResolver(client: DevnetWalletClient, name: string): Promise<Address> {
+  const [resolver] = await client.readContract({
     address: DEVNET_CONTRACTS.universalResolverV2,
     abi: universalResolverV2Abi,
     functionName: "findResolver",
@@ -82,6 +95,7 @@ async function setTextRecord(
     functionName: "setText",
     args: [node, key, value],
   });
+  await walletClient.waitForTransactionReceipt({ hash });
   console.log(`[seed] setText("${key}", "${value}") tx: ${hash}`);
 }
 
@@ -98,6 +112,7 @@ async function setMulticoinAddress(
     functionName: "setAddr",
     args: [node, coinType, addressBytes],
   });
+  await walletClient.waitForTransactionReceipt({ hash });
   console.log(`[seed] setAddr(coinType=${coinType}) tx: ${hash}`);
 }
 
@@ -113,6 +128,7 @@ async function setContenthash(
     functionName: "setContenthash",
     args: [node, hashValue],
   });
+  await walletClient.waitForTransactionReceipt({ hash });
   console.log(`[seed] setContenthash() tx: ${hash}`);
 }
 
@@ -129,6 +145,7 @@ async function setPubkey(
     functionName: "setPubkey",
     args: [node, x, y],
   });
+  await walletClient.waitForTransactionReceipt({ hash });
   console.log(`[seed] setPubkey() tx: ${hash}`);
 }
 
@@ -145,6 +162,7 @@ async function setAbi(
     functionName: "setABI",
     args: [node, contentType, data],
   });
+  await walletClient.waitForTransactionReceipt({ hash });
   console.log(`[seed] setABI(contentType=${contentType}) tx: ${hash}`);
 }
 
@@ -161,5 +179,6 @@ async function setInterfaceImplementer(
     functionName: "setInterface",
     args: [node, interfaceId, implementer],
   });
+  await walletClient.waitForTransactionReceipt({ hash });
   console.log(`[seed] setInterface(interfaceId=${interfaceId}) tx: ${hash}`);
 }

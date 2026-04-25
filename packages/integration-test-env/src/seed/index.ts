@@ -1,11 +1,10 @@
 import {
   type Account,
   type Chain,
-  createPublicClient,
   createWalletClient,
   http,
-  type PublicClient,
   publicActions,
+  type PublicActions,
   type Transport,
   type WalletClient,
 } from "viem";
@@ -16,8 +15,15 @@ import { DEVNET_ACCOUNTS } from "@ensnode/ensnode-sdk/internal";
 import { seedPrimaryNameRecords } from "./primary-names";
 import { seedResolverRecords } from "./resolver-records";
 
-export type DevnetWalletClient = WalletClient<Transport, Chain, Account>;
-export type DevnetReadClient = PublicClient<Transport, Chain>;
+function createDevnetWalletClient(transport: Transport, account: Account) {
+  return createWalletClient({
+    chain: ensTestEnvChain,
+    transport,
+    account,
+  }).extend(publicActions);
+}
+
+export type DevnetWalletClient = WalletClient<Transport, Chain, Account> & PublicActions;
 
 export type DevnetWalletClients = {
   deployer: DevnetWalletClient; // index 0
@@ -28,12 +34,8 @@ export type DevnetWalletClients = {
 
 function createDevnetWalletClients(rpcUrl: string): DevnetWalletClients {
   const transport = http(rpcUrl);
-  const makeClient = (account: Account) =>
-    createWalletClient({
-      chain: ensTestEnvChain,
-      transport,
-      account,
-    }).extend(publicActions);
+  const makeClient = (account: Account): DevnetWalletClient =>
+    createDevnetWalletClient(transport, account);
   return {
     deployer: makeClient(DEVNET_ACCOUNTS.deployer),
     owner: makeClient(DEVNET_ACCOUNTS.owner),
@@ -43,11 +45,7 @@ function createDevnetWalletClients(rpcUrl: string): DevnetWalletClients {
 }
 
 export async function seedDevnet(rpcUrl: string): Promise<void> {
-  const readClient = createPublicClient({
-    chain: ensTestEnvChain,
-    transport: http(rpcUrl),
-  });
   const clients = createDevnetWalletClients(rpcUrl);
   await seedPrimaryNameRecords(clients);
-  await seedResolverRecords(clients, readClient);
+  await seedResolverRecords(clients);
 }
