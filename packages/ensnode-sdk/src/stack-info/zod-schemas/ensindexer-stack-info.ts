@@ -1,0 +1,56 @@
+import { z } from "zod/v4";
+
+import { makeEnsDbPublicConfigSchema } from "../../ensdb/zod-schemas/config";
+import {
+  makeEnsIndexerPublicConfigSchema,
+  makeSerializedEnsIndexerPublicConfigSchema,
+} from "../../ensindexer/config/zod-schemas";
+import { makeEnsRainbowPublicConfigSchema } from "../../ensrainbow/zod-schemas/config";
+import type { ZodCheckFnInput } from "../../shared/zod-types";
+import type { EnsIndexerStackInfo } from "../ensindexer-stack-info";
+
+export function makeSerializedEnsIndexerStackInfoSchema(valueLabel?: string) {
+  const label = valueLabel ?? "ENSIndexerStackInfo";
+
+  return z.object({
+    ensDb: makeEnsDbPublicConfigSchema(`${label}.ensDb`),
+    ensIndexer: makeSerializedEnsIndexerPublicConfigSchema(`${label}.ensIndexer`),
+    ensRainbow: makeEnsRainbowPublicConfigSchema(`${label}.ensRainbow`),
+  });
+}
+
+export function invariant_ensRainbowCompatibilityWithEnsIndexer(
+  ctx: ZodCheckFnInput<EnsIndexerStackInfo>,
+) {
+  const { ensIndexer, ensRainbow } = ctx.value;
+  const { clientLabelSet } = ensIndexer;
+  const { serverLabelSet } = ensRainbow;
+
+  if (clientLabelSet.labelSetId !== serverLabelSet.labelSetId) {
+    ctx.issues.push({
+      code: "custom",
+      input: ctx.value,
+      message: `ENSRainbow's label set (id: ${serverLabelSet.labelSetId}) must be the same as ENSIndexer's label set (id: ${clientLabelSet.labelSetId}).`,
+    });
+  }
+
+  if (clientLabelSet.labelSetVersion > serverLabelSet.highestLabelSetVersion) {
+    ctx.issues.push({
+      code: "custom",
+      input: ctx.value,
+      message: `ENSRainbow's server label set version (highest: ${serverLabelSet.highestLabelSetVersion}) must be greater than or equal to ENSIndexer's client label set version (current: ${clientLabelSet.labelSetVersion}).`,
+    });
+  }
+}
+
+export function makeEnsIndexerStackInfoSchema(valueLabel?: string) {
+  const label = valueLabel ?? "ENSIndexerStackInfo";
+
+  return z
+    .object({
+      ensDb: makeEnsDbPublicConfigSchema(`${label}.ensDb`),
+      ensIndexer: makeEnsIndexerPublicConfigSchema(`${label}.ensIndexer`),
+      ensRainbow: makeEnsRainbowPublicConfigSchema(`${label}.ensRainbow`),
+    })
+    .check(invariant_ensRainbowCompatibilityWithEnsIndexer);
+}

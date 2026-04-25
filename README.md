@@ -89,6 +89,14 @@ ENSNode is a modern, multichain indexer for ENS. It supports backwards-compatibl
 
 Documentation for the ENSNode suite of apps is available at [ensnode.io](https://ensnode.io).
 
+## Running with Docker
+
+```bash
+docker compose -f docker/docker-compose.yml up -d
+```
+
+See [`docker/README.md`](docker/README.md) for all use cases and commands.
+
 ## Contributions
 
 We welcome community contributions and feedback—please see [CONTRIBUTING.md](CONTRIBUTING.md) for more information.

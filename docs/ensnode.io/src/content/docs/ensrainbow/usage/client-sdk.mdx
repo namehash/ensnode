@@ -29,8 +29,8 @@ pnpm add @ensnode/ensrainbow-sdk
 import { EnsRainbowApiClient } from '@ensnode/ensrainbow-sdk';
 
 const client = new EnsRainbowApiClient({
-  baseUrl: 'https://api.ensrainbow.io',
-  labelSet: { labelSetId: 'subgraph', labelSetVersion: 0 }
+  endpointUrl: 'https://api.ensrainbow.io',
+  clientLabelSet: { labelSetId: 'subgraph', labelSetVersion: 0 }
 });
 
 const res = await client.healLabel('0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc');

@@ -1,0 +1,9 @@
+services:
+  ensadmin:
+    container_name: ensadmin
+    image: ghcr.io/namehash/ensnode/ensadmin:latest
+    build:
+      dockerfile: ./apps/ensadmin/Dockerfile
+      context: ../..
+    ports:
+      - "4173:4173"
