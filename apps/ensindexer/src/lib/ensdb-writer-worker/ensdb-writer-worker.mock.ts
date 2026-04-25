@@ -4,47 +4,26 @@ import type { EnsDbWriter } from "@ensnode/ensdb-sdk";
 import {
   type CrossChainIndexingStatusSnapshot,
   CrossChainIndexingStrategyIds,
-  ENSNamespaceIds,
-  type EnsIndexerPublicConfig,
-  type EnsIndexerVersionInfo,
-  type EnsRainbowPublicConfig,
+  type IndexingMetadataContext,
+  IndexingMetadataContextStatusCodes,
   OmnichainIndexingStatusIds,
   type OmnichainIndexingStatusSnapshot,
-  PluginName,
 } from "@ensnode/ensnode-sdk";
-import type { LocalPonderClient } from "@ensnode/ponder-sdk";
 
 import { EnsDbWriterWorker } from "@/lib/ensdb-writer-worker/ensdb-writer-worker";
 import type { IndexingStatusBuilder } from "@/lib/indexing-status-builder";
-import type { PublicConfigBuilder } from "@/lib/public-config-builder";
 
-// Test fixture for EnsRainbowPublicConfig
-export const mockEnsRainbowPublicConfig: EnsRainbowPublicConfig = {
-  serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
-  versionInfo: {
-    ensRainbow: "1.0.0",
+// Test fixture for stack info - minimal valid structure for tests
+export const mockStackInfo = {
+  ensDb: { version: "1.0.0" },
+  ensIndexer: {
+    clientLabelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
   },
-};
-
-// Test fixture for EnsIndexerVersionInfo
-export const mockVersionInfo: EnsIndexerVersionInfo = {
-  ponder: "0.9.0",
-  ensDb: "1.0.0",
-  ensIndexer: "1.0.0",
-  ensNormalize: "1.10.0",
-};
-
-// Test fixture for EnsIndexerPublicConfig
-export const mockPublicConfig: EnsIndexerPublicConfig = {
-  ensIndexerSchemaName: "ensindexer_0",
-  clientLabelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
-  ensRainbowPublicConfig: mockEnsRainbowPublicConfig,
-  indexedChainIds: new Set([1, 8453]),
-  isSubgraphCompatible: true,
-  namespace: ENSNamespaceIds.Mainnet,
-  plugins: [PluginName.Subgraph],
-  versionInfo: mockVersionInfo,
-};
+  ensRainbow: {
+    serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+    versionInfo: { ensRainbow: "1.0.0" },
+  },
+} as any;
 
 // Helper to create mock objects with consistent typing
 export function createMockEnsDbWriter(
@@ -58,21 +37,26 @@ export function createMockEnsDbWriter(
 
 export function baseEnsDbWriter() {
   return {
-    getEnsDbVersion: vi.fn().mockResolvedValue(undefined),
-    getEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
-    getIndexingStatusSnapshot: vi.fn().mockResolvedValue(undefined),
-    upsertEnsDbVersion: vi.fn().mockResolvedValue(undefined),
-    upsertEnsIndexerPublicConfig: vi.fn().mockResolvedValue(undefined),
-    upsertIndexingStatusSnapshot: vi.fn().mockResolvedValue(undefined),
+    getIndexingMetadataContext: vi.fn().mockResolvedValue(undefined),
+    upsertIndexingMetadataContext: vi.fn().mockResolvedValue(undefined),
   };
 }
 
-export function createMockPublicConfigBuilder(
-  resolvedConfig: EnsIndexerPublicConfig = mockPublicConfig,
-): PublicConfigBuilder {
+export function createMockIndexingMetadataContextInitialized(
+  overrides: Partial<IndexingMetadataContext> = {},
+): IndexingMetadataContext {
   return {
-    getPublicConfig: vi.fn().mockResolvedValue(resolvedConfig),
-  } as unknown as PublicConfigBuilder;
+    statusCode: IndexingMetadataContextStatusCodes.Initialized,
+    indexingStatus: createMockCrossChainSnapshot(),
+    stackInfo: mockStackInfo,
+    ...overrides,
+  };
+}
+
+export function createMockIndexingMetadataContextUninitialized(): IndexingMetadataContext {
+  return {
+    statusCode: IndexingMetadataContextStatusCodes.Uninitialized,
+  };
 }
 
 export function createMockIndexingStatusBuilder(
@@ -106,36 +90,12 @@ export function createMockCrossChainSnapshot(
   };
 }
 
-export function createMockLocalPonderClient(
-  overrides: { isInDevMode?: boolean } = {},
-): LocalPonderClient {
-  const isInDevMode = overrides.isInDevMode ?? false;
-
-  return {
-    isInDevMode,
-  } as unknown as LocalPonderClient;
-}
-
 export function createMockEnsDbWriterWorker(
-  overrides: {
-    ensDbClient?: EnsDbWriter;
-    publicConfigBuilder?: PublicConfigBuilder;
-    indexingStatusBuilder?: IndexingStatusBuilder;
-    isInDevMode?: boolean;
-  } = {},
+  overrides: { ensDbClient?: EnsDbWriter; indexingStatusBuilder?: IndexingStatusBuilder } = {},
 ) {
   const ensDbClient = overrides.ensDbClient ?? createMockEnsDbWriter();
-  const publicConfigBuilder = overrides.publicConfigBuilder ?? createMockPublicConfigBuilder();
   const indexingStatusBuilder =
     overrides.indexingStatusBuilder ?? createMockIndexingStatusBuilder();
-  const localPonderClient = createMockLocalPonderClient({
-    isInDevMode: overrides.isInDevMode ?? false,
-  });
 
-  return new EnsDbWriterWorker(
-    ensDbClient,
-    publicConfigBuilder,
-    indexingStatusBuilder,
-    localPonderClient,
-  );
+  return new EnsDbWriterWorker(ensDbClient, indexingStatusBuilder);
 }
