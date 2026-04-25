@@ -55,12 +55,12 @@ export default createPlugin({
 
     return ponder.createConfig({
       chains: {
-        ...chainsConnectionConfig(config.rpcConfigs, seaport.chain.id),
-        ...chainsConnectionConfig(config.rpcConfigs, ensroot.chain.id),
-        ...chainsConnectionConfig(config.rpcConfigs, basenames.chain.id),
-        ...chainsConnectionConfig(config.rpcConfigs, lineanames.chain.id),
-        ...chainsConnectionConfig(config.rpcConfigs, threednsOptimism.chain.id),
-        ...chainsConnectionConfig(config.rpcConfigs, threednsBase.chain.id),
+        ...chainsConnectionConfig(config.rpcConfigs, seaport.chain.id, config.namespace),
+        ...chainsConnectionConfig(config.rpcConfigs, ensroot.chain.id, config.namespace),
+        ...chainsConnectionConfig(config.rpcConfigs, basenames.chain.id, config.namespace),
+        ...chainsConnectionConfig(config.rpcConfigs, lineanames.chain.id, config.namespace),
+        ...chainsConnectionConfig(config.rpcConfigs, threednsOptimism.chain.id, config.namespace),
+        ...chainsConnectionConfig(config.rpcConfigs, threednsBase.chain.id, config.namespace),
       },
       contracts: {
         [namespaceContract(pluginName, "Seaport")]: {

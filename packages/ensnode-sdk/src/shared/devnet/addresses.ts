@@ -104,15 +104,15 @@ export const DEVNET_CONTRACTS = {
  */
 const DEVNET_MNEMONIC = "test test test test test test test test test test test junk";
 
-/**
- * Named signer accounts from the ens-test-env devnet.
- * Derived from the standard Hardhat mnemonic at account indices 0-3.
- */
 function deriveNormalizedAccount(addressIndex: number) {
   const account = mnemonicToAccount(DEVNET_MNEMONIC, { addressIndex });
   return { ...account, address: toNormalizedAddress(account.address) };
 }
 
+/**
+ * Named signer accounts from the ens-test-env devnet.
+ * Derived from the standard Hardhat mnemonic at account indices 0-3.
+ */
 export const DEVNET_ACCOUNTS = {
   deployer: deriveNormalizedAccount(0),
   owner: deriveNormalizedAccount(1),
