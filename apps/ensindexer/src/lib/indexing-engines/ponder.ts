@@ -15,8 +15,6 @@ import {
   ponder,
 } from "ponder:registry";
 
-import { initIndexingSetup } from "@/lib/indexing-engines/init-indexing-setup";
-
 /**
  * Context passed to event handlers registered with
  * {@link addOnchainEventListener}.
@@ -130,7 +128,6 @@ function buildEventTypeId(eventName: EventNames): EventTypeId {
 }
 
 let eventHandlerPreconditionsFullyExecuted = false;
-let indexingSetupPromise: Promise<void> | null = null;
 let indexingOnchainEventsPromise: Promise<void> | null = null;
 
 /**
@@ -150,22 +147,19 @@ async function eventHandlerPreconditions(eventType: EventTypeId): Promise<void> 
     // Preconditions have already been fully executed, so we can skip executing them again.
     // We can also reset the promises for indexing setup and onchain events to free up memory,
     // since they will never be used again after the preconditions have been fully executed.
-    indexingSetupPromise = null;
     indexingOnchainEventsPromise = null;
     return;
   }
 
   switch (eventType) {
     case EventTypeIds.Setup: {
-      if (indexingSetupPromise === null) {
-        // Init the indexing setup just once. There will be multiple
-        // setup events executed during Ponder startup, but they will
-        // run sequentially, so we can just check if we have already
-        // initialized the indexing setup or not.
-        indexingSetupPromise = initIndexingSetup();
-      }
-
-      return await indexingSetupPromise;
+      // For some ENSIndexer instances, the setup handlers are not defined at all,
+      // for example, if the ENSIndexer instance has only the `ensv2` plugin activated.
+      // In this case, some important logic, such as running migrations for ENSNode Schema
+      // in ENSDb, would not be executed at all, which would cause the ENSIndexer instance
+      // to not work properly. Therefore, all logic required to be executed before
+      // indexing of onchain events should be executed in initIndexingOnchainEvents function.
+      return;
     }
 
     case EventTypeIds.OnchainEvent: {
@@ -174,16 +168,19 @@ async function eventHandlerPreconditions(eventType: EventTypeId): Promise<void> 
         // since Ponder would not allow us to use static imports for modules
         // that internally rely on `ponder:api`. Using dynamic imports solves
         // this issue.
-        const { initIndexingOnchainEvents } = await import("./init-indexing-onchain-events");
-        // Init the indexing of "onchain" events just once in order to
-        // optimize the indexing "hot path", since these events are much
-        // more frequent than setup events.
-        indexingOnchainEventsPromise = initIndexingOnchainEvents().then(() => {
-          // Mark the preconditions as fully executed after the first time we execute
-          // the preconditions for onchain events, since that's the "hot path" and we want to
-          // minimize the overhead of this function in the long run.
-          eventHandlerPreconditionsFullyExecuted = true;
-        });
+        indexingOnchainEventsPromise = import("./init-indexing-onchain-events")
+          .then(({ initIndexingOnchainEvents }) =>
+            // Init the indexing of "onchain" events just once in order to
+            // optimize the indexing "hot path", since these events are much
+            // more frequent than setup events.
+            initIndexingOnchainEvents(),
+          )
+          .then(() => {
+            // Mark the preconditions as fully executed after the first time we execute
+            // the preconditions for onchain events, since that's the "hot path" and we want to
+            // minimize the overhead of this function in the long run.
+            eventHandlerPreconditionsFullyExecuted = true;
+          });
       }
 
       return await indexingOnchainEventsPromise;
