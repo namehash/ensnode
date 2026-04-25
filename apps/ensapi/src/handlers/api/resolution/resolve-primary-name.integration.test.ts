@@ -6,7 +6,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { DEVNET_ACCOUNTS } from "@ensnode/ensnode-sdk/internal";
+import { accounts } from "@ensnode/datasources/devnet";
 
 const BASE_URL = process.env.ENSNODE_URL!;
 
@@ -14,7 +14,7 @@ describe("GET /api/resolve/primary-name/:address/:chainId", () => {
   it.each([
     {
       description: "resolves primary name for owner address on chain 1",
-      address: DEVNET_ACCOUNTS.owner.address,
+      address: accounts.owner.address,
       chainId: "1",
       query: "",
       expectedStatus: 200,
@@ -26,7 +26,7 @@ describe("GET /api/resolve/primary-name/:address/:chainId", () => {
     },
     {
       description: "returns null for user without a primary name",
-      address: DEVNET_ACCOUNTS.user.address,
+      address: accounts.user.address,
       chainId: "1",
       query: "",
       expectedStatus: 200,
@@ -34,7 +34,7 @@ describe("GET /api/resolve/primary-name/:address/:chainId", () => {
     },
     {
       description: "owner address with accelerate=true returns accelerationRequested: true",
-      address: DEVNET_ACCOUNTS.owner.address,
+      address: accounts.owner.address,
       chainId: "1",
       query: "accelerate=true",
       expectedStatus: 200,
@@ -60,7 +60,7 @@ describe("GET /api/resolve/primary-name/:address/:chainId", () => {
     },
     {
       description: "returns 400 for non-numeric chainId",
-      address: DEVNET_ACCOUNTS.owner.address,
+      address: accounts.owner.address,
       chainId: "notachainid",
       query: "",
       expectedStatus: 400,

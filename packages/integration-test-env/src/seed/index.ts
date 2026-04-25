@@ -10,7 +10,7 @@ import {
 } from "viem";
 
 import { ensTestEnvChain } from "@ensnode/datasources";
-import { DEVNET_ACCOUNTS } from "@ensnode/ensnode-sdk/internal";
+import { accounts } from "@ensnode/datasources/devnet";
 
 import { seedPrimaryNameRecords } from "./primary-names";
 import { seedResolverRecords } from "./resolver-records";
@@ -37,10 +37,10 @@ function createDevnetWalletClients(rpcUrl: string): DevnetWalletClients {
   const makeClient = (account: Account): DevnetWalletClient =>
     createDevnetWalletClient(transport, account);
   return {
-    deployer: makeClient(DEVNET_ACCOUNTS.deployer),
-    owner: makeClient(DEVNET_ACCOUNTS.owner),
-    user: makeClient(DEVNET_ACCOUNTS.user),
-    user2: makeClient(DEVNET_ACCOUNTS.user2),
+    deployer: makeClient(accounts.deployer),
+    owner: makeClient(accounts.owner),
+    user: makeClient(accounts.user),
+    user2: makeClient(accounts.user2),
   };
 }
 

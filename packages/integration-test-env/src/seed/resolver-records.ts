@@ -1,13 +1,13 @@
 import { type Address, type Hex, namehash, toHex } from "viem";
 import { packetToBytes } from "viem/ens";
 
-import { DEVNET_ADDRESSES, DEVNET_BYTES, DEVNET_CONTRACTS } from "@ensnode/ensnode-sdk/internal";
+import { addresses, contracts, fixtures } from "@ensnode/datasources/devnet";
 
 import { publicResolverAbi, universalResolverV2Abi } from "./abi";
 import type { DevnetWalletClient, DevnetWalletClients } from "./index";
 
 export async function seedResolverRecords(clients: DevnetWalletClients): Promise<void> {
-  await seedResolverRecordsForName(clients, "test.eth", DEVNET_CONTRACTS.permissionedResolver);
+  await seedResolverRecordsForName(clients, "test.eth", contracts.permissionedResolver);
 }
 
 async function seedResolverRecordsForName(
@@ -33,26 +33,26 @@ async function seedResolverRecordsForName(
 
   // Multi-coin addresses
   // Coin 0 = Bitcoin
-  await setMulticoinAddress(clients.owner, resolver, node, 0n, DEVNET_BYTES.bitcoinAddress);
+  await setMulticoinAddress(clients.owner, resolver, node, 0n, fixtures.bitcoinAddress);
   // Coin 2 = Litecoin
-  await setMulticoinAddress(clients.owner, resolver, node, 2n, DEVNET_BYTES.litecoinAddress);
+  await setMulticoinAddress(clients.owner, resolver, node, 2n, fixtures.litecoinAddress);
 
   // Scalar resolver records
-  await setContenthash(clients.owner, resolver, node, DEVNET_BYTES.contenthash);
-  await setPubkey(clients.owner, resolver, node, DEVNET_BYTES.publicKeyX, DEVNET_BYTES.publicKeyY);
-  await setAbi(clients.owner, resolver, node, 1n, DEVNET_BYTES.abiBytes);
+  await setContenthash(clients.owner, resolver, node, fixtures.contenthash);
+  await setPubkey(clients.owner, resolver, node, fixtures.publicKeyX, fixtures.publicKeyY);
+  await setAbi(clients.owner, resolver, node, 1n, fixtures.abiBytes);
   await setInterfaceImplementer(
     clients.owner,
     resolver,
     node,
-    DEVNET_BYTES.fourBytesInterface,
-    DEVNET_ADDRESSES.one,
+    fixtures.fourBytesInterface,
+    addresses.one,
   );
 }
 
 async function findResolver(client: DevnetWalletClient, name: string): Promise<Address> {
   const [resolver] = await client.readContract({
-    address: DEVNET_CONTRACTS.universalResolverV2,
+    address: contracts.universalResolverV2,
     abi: universalResolverV2Abi,
     functionName: "findResolver",
     args: [toHex(packetToBytes(name))],

@@ -6,7 +6,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { DEVNET_ACCOUNTS, DEVNET_ADDRESSES, DEVNET_BYTES } from "@ensnode/ensnode-sdk/internal";
+import { accounts, addresses, fixtures } from "@ensnode/datasources/devnet";
 
 const BASE_URL = process.env.ENSNODE_URL!;
 
@@ -18,7 +18,7 @@ describe("GET /api/resolve/records/:name", () => {
       query: "addresses=60",
       expectedStatus: 200,
       expectedBody: {
-        records: { addresses: { 60: DEVNET_ACCOUNTS.owner.address } },
+        records: { addresses: { 60: accounts.owner.address } },
         accelerationRequested: false,
         accelerationAttempted: false,
       },
@@ -30,7 +30,7 @@ describe("GET /api/resolve/records/:name", () => {
       query: "addresses=60",
       expectedStatus: 200,
       expectedBody: {
-        records: { addresses: { 60: DEVNET_ACCOUNTS.owner.address } },
+        records: { addresses: { 60: accounts.owner.address } },
         accelerationRequested: false,
         accelerationAttempted: false,
       },
@@ -65,7 +65,7 @@ describe("GET /api/resolve/records/:name", () => {
       expectedStatus: 200,
       expectedBody: {
         records: {
-          addresses: { 60: DEVNET_ACCOUNTS.owner.address },
+          addresses: { 60: accounts.owner.address },
           texts: { description: "example.eth" },
         },
         accelerationRequested: false,
@@ -90,7 +90,7 @@ describe("GET /api/resolve/records/:name", () => {
       query: "addresses=60",
       expectedStatus: 200,
       expectedBody: {
-        records: { addresses: { 60: DEVNET_ACCOUNTS.owner.address } },
+        records: { addresses: { 60: accounts.owner.address } },
         accelerationRequested: false,
         accelerationAttempted: false,
       },
@@ -112,7 +112,7 @@ describe("GET /api/resolve/records/:name", () => {
       query: "addresses=60",
       expectedStatus: 200,
       expectedBody: {
-        records: { addresses: { 60: DEVNET_ACCOUNTS.owner.address } },
+        records: { addresses: { 60: accounts.owner.address } },
         accelerationRequested: false,
         accelerationAttempted: false,
       },
@@ -124,7 +124,7 @@ describe("GET /api/resolve/records/:name", () => {
       query: "addresses=60",
       expectedStatus: 200,
       expectedBody: {
-        records: { addresses: { 60: DEVNET_ACCOUNTS.owner.address } },
+        records: { addresses: { 60: accounts.owner.address } },
         accelerationRequested: false,
         accelerationAttempted: false,
       },
@@ -161,9 +161,9 @@ describe("GET /api/resolve/records/:name", () => {
       expectedBody: {
         records: {
           addresses: {
-            60: DEVNET_ACCOUNTS.owner.address,
-            0: DEVNET_BYTES.bitcoinAddress,
-            2: DEVNET_BYTES.litecoinAddress,
+            60: accounts.owner.address,
+            0: fixtures.bitcoinAddress,
+            2: fixtures.litecoinAddress,
             777777: null,
           },
         },
@@ -183,15 +183,15 @@ describe("GET /api/resolve/records/:name", () => {
         "pubkey=true",
         "version=true",
         "abi=1",
-        `interfaces=${DEVNET_BYTES.fourBytesInterface}`,
+        `interfaces=${fixtures.fourBytesInterface}`,
       ].join("&"),
       expectedStatus: 200,
       expectedBody: {
         records: {
           addresses: {
-            60: DEVNET_ACCOUNTS.owner.address,
-            0: DEVNET_BYTES.bitcoinAddress,
-            2: DEVNET_BYTES.litecoinAddress,
+            60: accounts.owner.address,
+            0: fixtures.bitcoinAddress,
+            2: fixtures.litecoinAddress,
           },
           texts: {
             avatar: "https://example.com/avatar.png",
@@ -201,18 +201,18 @@ describe("GET /api/resolve/records/:name", () => {
             "com.twitter": "ensdomains",
             "com.github": "ensdomains",
           },
-          contenthash: DEVNET_BYTES.contenthash,
+          contenthash: fixtures.contenthash,
           pubkey: {
-            x: DEVNET_BYTES.publicKeyX,
-            y: DEVNET_BYTES.publicKeyY,
+            x: fixtures.publicKeyX,
+            y: fixtures.publicKeyY,
           },
           version: expect.any(String),
           abi: {
             contentType: "1",
-            data: DEVNET_BYTES.abiBytes,
+            data: fixtures.abiBytes,
           },
           interfaces: {
-            [DEVNET_BYTES.fourBytesInterface]: DEVNET_ADDRESSES.one,
+            [fixtures.fourBytesInterface]: addresses.one,
           },
         },
         accelerationRequested: false,
@@ -226,7 +226,7 @@ describe("GET /api/resolve/records/:name", () => {
       query: "addresses=60&accelerate=true",
       expectedStatus: 200,
       expectedBody: {
-        records: { addresses: { 60: DEVNET_ACCOUNTS.owner.address } },
+        records: { addresses: { 60: accounts.owner.address } },
         accelerationRequested: true,
         accelerationAttempted: false,
       },
