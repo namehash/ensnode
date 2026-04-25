@@ -1,7 +1,7 @@
 import pRetry from "p-retry";
 import { prettifyError, ZodError, z } from "zod/v4";
 
-import type { EnsApiPublicConfig } from "@ensnode/ensnode-sdk";
+import { type EnsApiPublicConfig, IndexingMetadataContextStatusCodes } from "@ensnode/ensnode-sdk";
 import {
   buildRpcConfigsFromEnv,
   canFallbackToTheGraph,
@@ -70,13 +70,13 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
     // https://github.com/namehash/ensnode/issues/1806
     const ensIndexerPublicConfig = await pRetry(
       async () => {
-        const config = await ensDbClient.getEnsIndexerPublicConfig();
+        const indexingMetadataContext = await ensDbClient.getIndexingMetadataContext();
 
-        if (!config) {
-          throw new Error("ENSIndexer Public Config not yet available in ENSDb.");
+        if (indexingMetadataContext.statusCode !== IndexingMetadataContextStatusCodes.Initialized) {
+          throw new Error("Indexing metadata context is uninitialized in ENSDb.");
         }
 
-        return config;
+        return indexingMetadataContext.stackInfo.ensIndexer;
       },
       {
         retries: 13, // This allows for a total of over 1 hour of retries with the exponential backoff strategy

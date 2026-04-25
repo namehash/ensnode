@@ -6,6 +6,7 @@ import {
   EnsIndexerIndexingStatusResponseCodes,
   type EnsIndexerIndexingStatusResponseError,
   type EnsIndexerIndexingStatusResponseOk,
+  IndexingMetadataContextStatusCodes,
   serializeEnsIndexerIndexingStatusResponse,
   serializeEnsIndexerPublicConfig,
 } from "@ensnode/ensnode-sdk";
@@ -17,21 +18,21 @@ const app = new Hono();
 
 // include ENSIndexer Public Config endpoint
 app.get("/config", async (c) => {
-  const publicConfig = await ensDbClient.getEnsIndexerPublicConfig();
+  const indexingMetadataContext = await ensDbClient.getIndexingMetadataContext();
 
   // Invariant: the public config is guaranteed to be available in ENSDb after
   // application startup.
-  if (typeof publicConfig === "undefined") {
+  if (indexingMetadataContext.statusCode !== IndexingMetadataContextStatusCodes.Initialized) {
     throw new Error("Unreachable: ENSIndexer Public Config is not available in ENSDb");
   }
 
   // respond with the serialized public config object
-  return c.json(serializeEnsIndexerPublicConfig(publicConfig));
+  return c.json(serializeEnsIndexerPublicConfig(indexingMetadataContext.stackInfo.ensIndexer));
 });
 
 app.get("/indexing-status", async (c) => {
   try {
-    const crossChainSnapshot = await ensDbClient.getIndexingStatusSnapshot();
+    const indexingMetadataContext = await ensDbClient.getIndexingMetadataContext();
 
     // Invariant: the Indexing Status Snapshot is expected to be available in
     // ENSDb shortly after application startup. There is a possibility that
@@ -39,10 +40,11 @@ app.get("/indexing-status", async (c) => {
     // i.e. when ENSDb has not yet been populated with the first snapshot.
     // In this case, we treat the snapshot as unavailable and respond with
     // an error response.
-    if (typeof crossChainSnapshot === "undefined") {
+    if (indexingMetadataContext.statusCode !== IndexingMetadataContextStatusCodes.Initialized) {
       throw new Error("ENSDb does not contain an Indexing Status Snapshot");
     }
 
+    const crossChainSnapshot = indexingMetadataContext.indexingStatus;
     const projectedAt = getUnixTime(new Date());
     const realtimeProjection = createRealtimeIndexingStatusProjection(
       crossChainSnapshot,

@@ -1,5 +1,9 @@
 import { EnsNodeMetadataKeys } from "@ensnode/ensdb-sdk";
-import { type CrossChainIndexingStatusSnapshot, SWRCache } from "@ensnode/ensnode-sdk";
+import {
+  type CrossChainIndexingStatusSnapshot,
+  IndexingMetadataContextStatusCodes,
+  SWRCache,
+} from "@ensnode/ensnode-sdk";
 
 import { ensDbClient } from "@/lib/ensdb/singleton";
 import { lazyProxy } from "@/lib/lazy";
@@ -16,9 +20,11 @@ export const indexingStatusCache = lazyProxy<SWRCache<CrossChainIndexingStatusSn
     new SWRCache<CrossChainIndexingStatusSnapshot>({
       fn: async (_cachedResult) =>
         ensDbClient
-          .getIndexingStatusSnapshot() // get the latest indexing status snapshot
-          .then((snapshot) => {
-            if (snapshot === undefined) {
+          .getIndexingMetadataContext() // get the latest indexing status snapshot
+          .then((indexingMetadataContext) => {
+            if (
+              indexingMetadataContext.statusCode !== IndexingMetadataContextStatusCodes.Initialized
+            ) {
               // An indexing status snapshot has not been found in ENSDb yet.
               // This might happen during application startup, i.e. when ENSDb
               // has not yet been populated with the first snapshot.
@@ -30,7 +36,7 @@ export const indexingStatusCache = lazyProxy<SWRCache<CrossChainIndexingStatusSn
             // Therefore, return it so that this current invocation of `readCache` will:
             // - Replace the currently cached value (if any) with this new value.
             // - Return this non-null value.
-            return snapshot;
+            return indexingMetadataContext.indexingStatus;
           })
           .catch((error) => {
             // Either the indexing status snapshot fetch failed, or the indexing status snapshot was not found in ENSDb yet.
