@@ -1,0 +1,16 @@
+services:
+  ensapi:
+    container_name: ensapi
+    image: ghcr.io/namehash/ensnode/ensapi:latest
+    build:
+      dockerfile: ./apps/ensapi/Dockerfile
+      context: ../..
+    ports:
+      - "4334:4334"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "-s", "http://localhost:4334/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 1m
+      start_interval: 1s

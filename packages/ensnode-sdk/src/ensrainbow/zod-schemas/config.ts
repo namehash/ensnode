@@ -45,12 +45,16 @@ export const makeLabelSetVersionStringSchema = (valueLabel: string = "Label set 
  */
 export const makeEnsRainbowPublicConfigSchema = (valueLabel: string = "EnsRainbowPublicConfig") =>
   z.object({
-    version: z.string().nonempty({ error: `${valueLabel}.version must be a non-empty string.` }),
-    labelSet: z.object({
-      labelSetId: makeLabelSetIdSchema(`${valueLabel}.labelSet.labelSetId`),
+    serverLabelSet: z.object({
+      labelSetId: makeLabelSetIdSchema(`${valueLabel}.serverLabelSet.labelSetId`),
       highestLabelSetVersion: makeLabelSetVersionSchema(
-        `${valueLabel}.labelSet.highestLabelSetVersion`,
+        `${valueLabel}.serverLabelSet.highestLabelSetVersion`,
       ),
     }),
-    recordsCount: makeNonNegativeIntegerSchema(`${valueLabel}.recordsCount`),
+
+    versionInfo: z.object({
+      ensRainbow: z
+        .string()
+        .nonempty({ error: `${valueLabel}.versionInfo.ensRainbow must be a non-empty string.` }),
+    }),
   });

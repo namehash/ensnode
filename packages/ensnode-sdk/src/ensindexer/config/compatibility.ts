@@ -44,22 +44,22 @@ export function validateEnsIndexerPublicConfigCompatibility(
     );
   }
 
-  if (configA.labelSet.labelSetId !== configB.labelSet.labelSetId) {
+  if (configA.clientLabelSet.labelSetId !== configB.clientLabelSet.labelSetId) {
     throw new Error(
       [
-        `'labelSet.labelSetId' must be compatible.`,
-        `Stored Config 'labelSet.labelSetId': '${configA.labelSet.labelSetId}'.`,
-        `Current Config 'labelSet.labelSetId': '${configB.labelSet.labelSetId}'.`,
+        `'clientLabelSet.labelSetId' must be compatible.`,
+        `Stored Config 'clientLabelSet.labelSetId': '${configA.clientLabelSet.labelSetId}'.`,
+        `Current Config 'clientLabelSet.labelSetId': '${configB.clientLabelSet.labelSetId}'.`,
       ].join(" "),
     );
   }
 
-  if (configA.labelSet.labelSetVersion !== configB.labelSet.labelSetVersion) {
+  if (configA.clientLabelSet.labelSetVersion !== configB.clientLabelSet.labelSetVersion) {
     throw new Error(
       [
-        `'labelSet.labelSetVersion' must be compatible.`,
-        `Stored Config 'labelSet.labelSetVersion': '${configA.labelSet.labelSetVersion}'.`,
-        `Current Config 'labelSet.labelSetVersion': '${configB.labelSet.labelSetVersion}'.`,
+        `'clientLabelSet.labelSetVersion' must be compatible.`,
+        `Stored Config 'clientLabelSet.labelSetVersion': '${configA.clientLabelSet.labelSetVersion}'.`,
+        `Current Config 'clientLabelSet.labelSetVersion': '${configB.clientLabelSet.labelSetVersion}'.`,
       ].join(" "),
     );
   }

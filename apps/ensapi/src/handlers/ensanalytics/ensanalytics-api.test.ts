@@ -35,6 +35,8 @@ import {
   type ReferralProgramEditionSlug,
   ReferralProgramEditionStatuses,
   ReferralProgramEditionSummariesResponseCodes,
+  type ReferralProgramRulesPieSplit,
+  type ReferrerLeaderboard,
   ReferrerEditionMetricsTypeIds,
   ReferrerLeaderboardPageResponseCodes,
   type ReferrerLeaderboardPageResponseOk,
@@ -879,7 +881,14 @@ describe("/v1/ensanalytics", () => {
         },
       );
 
-      // Mock caches middleware with a cache for each edition
+      // Each leaderboard carries its edition's own rules so the per-edition summaries don't
+      // collapse onto a single time window and trip the non-overlap invariant on the response.
+      const leaderboardFor = (config: {
+        rules: ReferralProgramRulesPieSplit;
+      }): ReferrerLeaderboard => ({
+        ...emptyReferralLeaderboard,
+        rules: config.rules,
+      });
       const mockEditionsCaches = new Map<
         ReferralProgramEditionSlug,
         SWRCache<ReferralEditionSnapshot>
@@ -887,19 +896,25 @@ describe("/v1/ensanalytics", () => {
         [
           "2025-12",
           {
-            read: async () => ({ leaderboard: emptyReferralLeaderboard }),
+            read: async () => ({
+              leaderboard: leaderboardFor(mockEditionConfigSet.get("2025-12")!),
+            }),
           } as SWRCache<ReferralEditionSnapshot>,
         ],
         [
           "2026-03",
           {
-            read: async () => ({ leaderboard: emptyReferralLeaderboard }),
+            read: async () => ({
+              leaderboard: leaderboardFor(mockEditionConfigSet.get("2026-03")!),
+            }),
           } as SWRCache<ReferralEditionSnapshot>,
         ],
         [
           "2026-06",
           {
-            read: async () => ({ leaderboard: emptyReferralLeaderboard }),
+            read: async () => ({
+              leaderboard: leaderboardFor(mockEditionConfigSet.get("2026-06")!),
+            }),
           } as SWRCache<ReferralEditionSnapshot>,
         ],
       ]);

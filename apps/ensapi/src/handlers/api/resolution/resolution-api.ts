@@ -1,10 +1,10 @@
-import { replaceBigInts } from "@ponder/utils";
 import type { Duration } from "enssdk";
 
-import type {
-  ResolvePrimaryNameResponse,
-  ResolvePrimaryNamesResponse,
-  ResolveRecordsResponse,
+import {
+  type ResolvePrimaryNameResponse,
+  type ResolvePrimaryNamesResponse,
+  type ResolveRecordsResponse,
+  replaceBigInts,
 } from "@ensnode/ensnode-sdk";
 
 import { createApp } from "@/lib/hono-factory";

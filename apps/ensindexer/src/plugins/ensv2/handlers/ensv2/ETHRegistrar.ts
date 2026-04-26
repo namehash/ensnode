@@ -14,6 +14,7 @@ import {
   interpretAddress,
   isRegistrationFullyExpired,
   PluginName,
+  toJson,
 } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
@@ -25,7 +26,6 @@ import {
   ensIndexerSchema,
   type IndexingEngineContext,
 } from "@/lib/indexing-engines/ponder";
-import { toJson } from "@/lib/json-stringify-with-bigints";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs, LogEventBase } from "@/lib/ponder-helpers";
 
@@ -90,7 +90,7 @@ export default function () {
       // Invariant: must be ENSv2Registry Registration
       if (registration.type !== "ENSv2RegistryRegistration") {
         throw new Error(
-          `Invariant(ETHRegistrar:NameRegistered): Registration found but not ENSv2Registry Registration:\n${toJson(registration)}`,
+          `Invariant(ETHRegistrar:NameRegistered): Registration found but not ENSv2Registry Registration:\n${toJson(registration, { pretty: true })}`,
         );
       }
 
@@ -98,7 +98,7 @@ export default function () {
       const isFullyExpired = isRegistrationFullyExpired(registration, event.block.timestamp);
       if (isFullyExpired) {
         throw new Error(
-          `Invariant(ETHRegistrar:NameRegistered): Registration found but expired:\n${toJson(registration)}`,
+          `Invariant(ETHRegistrar:NameRegistered): Registration found but expired:\n${toJson(registration, { pretty: true })}`,
         );
       }
 
@@ -163,7 +163,7 @@ export default function () {
       // Invariant: Must be ENSv2Registry Registration
       if (registration.type !== "ENSv2RegistryRegistration") {
         throw new Error(
-          `Invariant(ETHRegistrar:NameRenewed): Registration found but not ENSv2Registry Registration:\n${toJson(registration)}`,
+          `Invariant(ETHRegistrar:NameRenewed): Registration found but not ENSv2Registry Registration:\n${toJson(registration, { pretty: true })}`,
         );
       }
 
