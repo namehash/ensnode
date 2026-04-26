@@ -5,8 +5,6 @@ import type { EnsDbWriter } from "@ensnode/ensdb-sdk";
 import {
   buildCrossChainIndexingStatusSnapshotOmnichain,
   buildIndexingMetadataContextInitialized,
-  type CrossChainIndexingStatusSnapshot,
-  type EnsIndexerPublicConfig,
   type IndexingMetadataContext,
   IndexingMetadataContextStatusCodes,
 } from "@ensnode/ensnode-sdk";
@@ -54,16 +52,10 @@ export class EnsDbWriterWorker {
   /**
    * Run the ENSDb Writer Worker
    *
-   * The worker performs the following tasks:
-   * 1) A single attempt to upsert ENSDb version into ENSDb.
-   * 2) A single attempt to upsert serialized representation of
-   *   {@link EnsIndexerPublicConfig} into ENSDb.
-   * 3) A recurring attempt to upsert serialized representation of
-   *    {@link CrossChainIndexingStatusSnapshot} into ENSDb.
+   * The worker performs a recurring upsert of
+   * the {@link IndexingMetadataContext} record into ENSDb.
    *
-   * @throws Error if the worker is already running, or
-   *         if the in-memory ENSIndexer Public Config could not be fetched, or
-   *         if the in-memory ENSIndexer Public Config is incompatible with the stored config in ENSDb.
+   * @throws Error if the worker is already running.
    */
   public async run(): Promise<void> {
     // Do not allow multiple concurrent runs of the worker
@@ -71,7 +63,7 @@ export class EnsDbWriterWorker {
       throw new Error("EnsDbWriterWorker is already running");
     }
 
-    // Task 1: recurring upsert of Indexing Metadata Context into ENSDb.
+    // Recurring upsert of Indexing Metadata Context into ENSDb.
     this.indexingStatusInterval = setInterval(
       () => this.upsertIndexingMetadataContext(),
       secondsToMilliseconds(INDEXING_STATUS_RECORD_UPDATE_INTERVAL),

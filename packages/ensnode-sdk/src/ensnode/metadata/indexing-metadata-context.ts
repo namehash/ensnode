@@ -7,7 +7,7 @@ import { validateIndexingMetadataContextInitialized } from "./validate/indexing-
  */
 export const IndexingMetadataContextStatusCodes = {
   /**
-   * Represents that the no indexing metadata context has been initialized
+   * Represents that no indexing metadata context has been initialized
    * for the ENSIndexer Schema Name in the ENSNode Metadata table in ENSDb.
    */
   Uninitialized: "uninitialized",

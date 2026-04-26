@@ -20,7 +20,7 @@ import {
 /**
  * Builds an unvalidated {@link IndexingMetadataContextInitialized} object.
  */
-function buildUnvalidatedIndexingMetadataContextInitializedSchema(
+function buildUnvalidatedIndexingMetadataContextInitialized(
   serializedIndexingMetadataContext: SerializedIndexingMetadataContextInitialized,
 ): Unvalidated<IndexingMetadataContextInitialized> {
   return {
@@ -37,9 +37,8 @@ function buildUnvalidatedIndexingMetadataContextInitializedSchema(
  * validated with {@link makeIndexingMetadataContextSchema}.
  *
  * @param serializedIndexingMetadataContext - The serialized indexing metadata context to build from.
- * @return An unvalidated {@link IndexingMetadataContextInitialized} object.
  */
-function buildUnvalidatedIndexingMetadataContextSchema(
+function buildUnvalidatedIndexingMetadataContext(
   serializedIndexingMetadataContext: SerializedIndexingMetadataContext,
 ): Unvalidated<IndexingMetadataContext> {
   switch (serializedIndexingMetadataContext.statusCode) {
@@ -47,9 +46,7 @@ function buildUnvalidatedIndexingMetadataContextSchema(
       return serializedIndexingMetadataContext;
 
     case IndexingMetadataContextStatusCodes.Initialized:
-      return buildUnvalidatedIndexingMetadataContextInitializedSchema(
-        serializedIndexingMetadataContext,
-      );
+      return buildUnvalidatedIndexingMetadataContextInitialized(serializedIndexingMetadataContext);
   }
 }
 
@@ -63,7 +60,7 @@ export function deserializeIndexingMetadataContext(
   const label = valueLabel ?? "IndexingMetadataContext";
 
   const parsed = makeSerializedIndexingMetadataContextSchema(label)
-    .transform(buildUnvalidatedIndexingMetadataContextSchema)
+    .transform(buildUnvalidatedIndexingMetadataContext)
     .pipe(makeIndexingMetadataContextSchema(label))
     .safeParse(serializedIndexingMetadataContext);
 

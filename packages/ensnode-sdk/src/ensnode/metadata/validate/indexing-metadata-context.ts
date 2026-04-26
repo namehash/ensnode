@@ -9,8 +9,9 @@ import { makeIndexingMetadataContextInitializedSchema } from "../zod-schemas/ind
  */
 export function validateIndexingMetadataContextInitialized(
   maybeIndexingMetadataContext: Unvalidated<IndexingMetadataContextInitialized>,
+  valueLabel?: string,
 ): IndexingMetadataContextInitialized {
-  const result = makeIndexingMetadataContextInitializedSchema().safeParse(
+  const result = makeIndexingMetadataContextInitializedSchema(valueLabel).safeParse(
     maybeIndexingMetadataContext,
   );
 
