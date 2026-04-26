@@ -1,34 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import {
-  buildCrossChainIndexingStatusSnapshotOmnichain,
-  buildIndexingMetadataContextInitialized,
-  type IndexingMetadataContextInitialized,
-} from "@ensnode/ensnode-sdk";
-
 import "@/lib/__test__/mockLogger";
 
-import type { IndexingStatusBuilder } from "@/lib/indexing-status-builder/indexing-status-builder";
-
 import {
-  createMockCrossChainSnapshot,
   createMockEnsDbWriter,
   createMockEnsDbWriterWorker,
+  createMockIndexingMetadataContextBuilder,
   createMockIndexingMetadataContextInitialized,
-  createMockIndexingMetadataContextUninitialized,
-  createMockIndexingStatusBuilder,
-  createMockOmnichainSnapshot,
 } from "./ensdb-writer-worker.mock";
-
-vi.mock("@ensnode/ensnode-sdk", async () => {
-  const actual = await vi.importActual("@ensnode/ensnode-sdk");
-
-  return {
-    ...actual,
-    buildCrossChainIndexingStatusSnapshotOmnichain: vi.fn(),
-    buildIndexingMetadataContextInitialized: vi.fn(),
-  };
-});
 
 describe("EnsDbWriterWorker", () => {
   beforeEach(() => {
@@ -41,23 +20,15 @@ describe("EnsDbWriterWorker", () => {
   });
 
   describe("run() - worker initialization", () => {
-    it("starts the interval for upserting indexing metadata context", async () => {
+    it("starts the interval for updating indexing metadata context", async () => {
       // arrange
-      const omnichainSnapshot = createMockOmnichainSnapshot();
-      const crossChainSnapshot = createMockCrossChainSnapshot({ omnichainSnapshot });
-      const indexingMetadataContext = createMockIndexingMetadataContextInitialized();
+      const context = createMockIndexingMetadataContextInitialized();
+      const indexingMetadataContextBuilder = createMockIndexingMetadataContextBuilder(context);
 
-      vi.mocked(buildCrossChainIndexingStatusSnapshotOmnichain).mockReturnValue(crossChainSnapshot);
-      vi.mocked(buildIndexingMetadataContextInitialized).mockReturnValue(
-        indexingMetadataContext as IndexingMetadataContextInitialized,
-      );
-
-      const ensDbClient = createMockEnsDbWriter({
-        getIndexingMetadataContext: vi.fn().mockResolvedValue(indexingMetadataContext),
-      });
+      const ensDbClient = createMockEnsDbWriter();
       const worker = createMockEnsDbWriterWorker({
         ensDbClient,
-        indexingStatusBuilder: createMockIndexingStatusBuilder(omnichainSnapshot),
+        indexingMetadataContextBuilder,
       });
 
       // act
@@ -66,19 +37,9 @@ describe("EnsDbWriterWorker", () => {
       // advance time to trigger interval
       await vi.advanceTimersByTimeAsync(1000);
 
-      // assert - snapshot should be upserted via upsertIndexingMetadataContext
-      expect(ensDbClient.getIndexingMetadataContext).toHaveBeenCalled();
-      expect(buildCrossChainIndexingStatusSnapshotOmnichain).toHaveBeenCalledWith(
-        omnichainSnapshot,
-        expect.any(Number),
-      );
-      expect(buildIndexingMetadataContextInitialized).toHaveBeenCalledWith(
-        crossChainSnapshot,
-        (indexingMetadataContext as IndexingMetadataContextInitialized).stackInfo,
-      );
-      expect(ensDbClient.upsertIndexingMetadataContext).toHaveBeenCalledWith(
-        indexingMetadataContext,
-      );
+      // assert - worker delegates to indexingMetadataContextBuilder
+      expect(indexingMetadataContextBuilder.getIndexingMetadataContext).toHaveBeenCalled();
+      expect(ensDbClient.upsertIndexingMetadataContext).toHaveBeenCalledWith(context);
 
       // cleanup
       worker.stop();
@@ -102,12 +63,8 @@ describe("EnsDbWriterWorker", () => {
   describe("stop() - worker termination", () => {
     it("stops the interval when stop() is called", async () => {
       // arrange
-      const indexingMetadataContext = createMockIndexingMetadataContextInitialized();
       const upsertIndexingMetadataContext = vi.fn().mockResolvedValue(undefined);
-      const ensDbClient = createMockEnsDbWriter({
-        getIndexingMetadataContext: vi.fn().mockResolvedValue(indexingMetadataContext),
-        upsertIndexingMetadataContext,
-      });
+      const ensDbClient = createMockEnsDbWriter({ upsertIndexingMetadataContext });
       const worker = createMockEnsDbWriterWorker({ ensDbClient });
 
       // act
@@ -148,72 +105,54 @@ describe("EnsDbWriterWorker", () => {
     });
   });
 
-  describe("interval behavior - upsertIndexingMetadataContext", () => {
-    it("throws when indexing metadata context is uninitialized", async () => {
+  describe("interval behavior - updateIndexingMetadataContext", () => {
+    it("calls getIndexingMetadataContext and upserts on each tick", async () => {
       // arrange
-      const indexingMetadataContext = createMockIndexingMetadataContextUninitialized();
-      const ensDbClient = createMockEnsDbWriter({
-        getIndexingMetadataContext: vi.fn().mockResolvedValue(indexingMetadataContext),
+      const context1 = createMockIndexingMetadataContextInitialized();
+      const context2 = createMockIndexingMetadataContextInitialized();
+
+      const indexingMetadataContextBuilder = createMockIndexingMetadataContextBuilder(context1);
+      (indexingMetadataContextBuilder.getIndexingMetadataContext as any)
+        .mockResolvedValueOnce(context1)
+        .mockResolvedValueOnce(context2);
+
+      const ensDbClient = createMockEnsDbWriter();
+      const worker = createMockEnsDbWriterWorker({
+        ensDbClient,
+        indexingMetadataContextBuilder,
       });
-      const worker = createMockEnsDbWriterWorker({ ensDbClient });
 
       // act
       await worker.run();
 
-      // first interval tick - should error but not throw (error is caught and logged)
+      // first tick
       await vi.advanceTimersByTimeAsync(1000);
+      expect(indexingMetadataContextBuilder.getIndexingMetadataContext).toHaveBeenCalledTimes(1);
+      expect(ensDbClient.upsertIndexingMetadataContext).toHaveBeenCalledWith(context1);
 
-      // assert - get should be called but upsert should not (due to error)
-      expect(ensDbClient.getIndexingMetadataContext).toHaveBeenCalledTimes(1);
-      expect(ensDbClient.upsertIndexingMetadataContext).not.toHaveBeenCalled();
+      // second tick
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(indexingMetadataContextBuilder.getIndexingMetadataContext).toHaveBeenCalledTimes(2);
+      expect(ensDbClient.upsertIndexingMetadataContext).toHaveBeenCalledWith(context2);
 
       // cleanup
       worker.stop();
     });
 
-    it("recovers from errors and continues upserting", async () => {
+    it("recovers from getIndexingMetadataContext errors between ticks", async () => {
       // arrange
-      const omnichainSnapshot1 = createMockOmnichainSnapshot({ omnichainIndexingCursor: 100 });
-      const omnichainSnapshot2 = createMockOmnichainSnapshot({ omnichainIndexingCursor: 200 });
+      const context = createMockIndexingMetadataContextInitialized();
+      const indexingMetadataContextBuilder = createMockIndexingMetadataContextBuilder(context);
+      (indexingMetadataContextBuilder.getIndexingMetadataContext as any)
+        .mockResolvedValueOnce(context)
+        .mockRejectedValueOnce(new Error("Builder error"))
+        .mockResolvedValueOnce(context);
 
-      const crossChainSnapshot1 = createMockCrossChainSnapshot({
-        slowestChainIndexingCursor: 100,
-        snapshotTime: 1000,
-        omnichainSnapshot: omnichainSnapshot1,
+      const ensDbClient = createMockEnsDbWriter();
+      const worker = createMockEnsDbWriterWorker({
+        ensDbClient,
+        indexingMetadataContextBuilder,
       });
-      const crossChainSnapshot2 = createMockCrossChainSnapshot({
-        slowestChainIndexingCursor: 200,
-        snapshotTime: 2000,
-        omnichainSnapshot: omnichainSnapshot2,
-      });
-
-      vi.mocked(buildCrossChainIndexingStatusSnapshotOmnichain)
-        .mockReturnValueOnce(crossChainSnapshot1)
-        .mockReturnValueOnce(crossChainSnapshot2)
-        .mockReturnValueOnce(crossChainSnapshot2);
-
-      const indexingMetadataContext = createMockIndexingMetadataContextInitialized();
-      vi.mocked(buildIndexingMetadataContextInitialized)
-        .mockReturnValueOnce(indexingMetadataContext as IndexingMetadataContextInitialized)
-        .mockReturnValueOnce(indexingMetadataContext as IndexingMetadataContextInitialized)
-        .mockReturnValueOnce(indexingMetadataContext as IndexingMetadataContextInitialized);
-
-      const ensDbClient = createMockEnsDbWriter({
-        getIndexingMetadataContext: vi.fn().mockResolvedValue(indexingMetadataContext),
-        upsertIndexingMetadataContext: vi
-          .fn()
-          .mockResolvedValueOnce(undefined)
-          .mockRejectedValueOnce(new Error("DB error"))
-          .mockResolvedValueOnce(undefined),
-      });
-      const indexingStatusBuilder = {
-        getOmnichainIndexingStatusSnapshot: vi
-          .fn()
-          .mockResolvedValueOnce(omnichainSnapshot1)
-          .mockResolvedValueOnce(omnichainSnapshot2)
-          .mockResolvedValueOnce(omnichainSnapshot2),
-      } as unknown as IndexingStatusBuilder;
-      const worker = createMockEnsDbWriterWorker({ ensDbClient, indexingStatusBuilder });
 
       // act
       await worker.run();
@@ -222,8 +161,56 @@ describe("EnsDbWriterWorker", () => {
       await vi.advanceTimersByTimeAsync(1000);
       expect(ensDbClient.upsertIndexingMetadataContext).toHaveBeenCalledTimes(1);
 
-      // second tick - fails with DB error, but continues
+      // second tick - builder error, the catch block rethrows
+      // setInterval keeps running despite the unhandled rejection
+      const handler = vi.fn();
+      process.on("unhandledRejection", handler);
       await vi.advanceTimersByTimeAsync(1000);
+      process.removeListener("unhandledRejection", handler);
+      expect(handler).toHaveBeenCalled();
+      expect(process.exitCode).toBe(1);
+      expect(ensDbClient.upsertIndexingMetadataContext).toHaveBeenCalledTimes(1); // no new upsert
+
+      // third tick - succeeds again
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(ensDbClient.upsertIndexingMetadataContext).toHaveBeenCalledTimes(2);
+
+      // cleanup
+      worker.stop();
+    });
+
+    it("recovers from upsertIndexingMetadataContext errors between ticks", async () => {
+      // arrange
+      const context = createMockIndexingMetadataContextInitialized();
+      const indexingMetadataContextBuilder = createMockIndexingMetadataContextBuilder(context);
+
+      const ensDbClient = createMockEnsDbWriter({
+        upsertIndexingMetadataContext: vi
+          .fn()
+          .mockResolvedValueOnce(undefined)
+          .mockRejectedValueOnce(new Error("DB error"))
+          .mockResolvedValueOnce(undefined),
+      });
+
+      const worker = createMockEnsDbWriterWorker({
+        ensDbClient,
+        indexingMetadataContextBuilder,
+      });
+
+      // act
+      await worker.run();
+
+      // first tick - succeeds
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(ensDbClient.upsertIndexingMetadataContext).toHaveBeenCalledTimes(1);
+
+      // second tick - DB error, the catch block rethrows
+      const handler = vi.fn();
+      process.on("unhandledRejection", handler);
+      await vi.advanceTimersByTimeAsync(1000);
+      process.removeListener("unhandledRejection", handler);
+      expect(handler).toHaveBeenCalled();
+      expect(process.exitCode).toBe(1);
       expect(ensDbClient.upsertIndexingMetadataContext).toHaveBeenCalledTimes(2);
 
       // third tick - succeeds again
@@ -234,63 +221,30 @@ describe("EnsDbWriterWorker", () => {
       worker.stop();
     });
 
-    it("builds cross-chain snapshot with correct parameters", async () => {
+    it("sets process.exitCode on error", async () => {
       // arrange
-      const omnichainSnapshot = createMockOmnichainSnapshot({
-        omnichainIndexingCursor: 500,
-      });
-      const indexingMetadataContext = createMockIndexingMetadataContextInitialized();
-      const ensDbClient = createMockEnsDbWriter({
-        getIndexingMetadataContext: vi.fn().mockResolvedValue(indexingMetadataContext),
-      });
-      const indexingStatusBuilder = createMockIndexingStatusBuilder(omnichainSnapshot);
-      const worker = createMockEnsDbWriterWorker({ ensDbClient, indexingStatusBuilder });
+      const indexingMetadataContextBuilder = createMockIndexingMetadataContextBuilder();
+      (indexingMetadataContextBuilder.getIndexingMetadataContext as any).mockRejectedValue(
+        new Error("Fatal error"),
+      );
 
-      // act
+      const worker = createMockEnsDbWriterWorker({ indexingMetadataContextBuilder });
+
+      // reset exitCode before test
+      process.exitCode = undefined;
+
+      // act - suppress unhandled rejection from the setInterval callback
+      const handler = vi.fn();
+      process.on("unhandledRejection", handler);
+
       await worker.run();
       await vi.advanceTimersByTimeAsync(1000);
 
-      // assert
-      expect(buildCrossChainIndexingStatusSnapshotOmnichain).toHaveBeenCalledWith(
-        omnichainSnapshot,
-        expect.any(Number),
-      );
-
-      // cleanup
-      worker.stop();
-    });
-
-    it("calls upsertIndexingMetadataContext with built context", async () => {
-      // arrange
-      const omnichainSnapshot = createMockOmnichainSnapshot();
-      const crossChainSnapshot = createMockCrossChainSnapshot({ omnichainSnapshot });
-      const indexingMetadataContext = createMockIndexingMetadataContextInitialized();
-
-      vi.mocked(buildCrossChainIndexingStatusSnapshotOmnichain).mockReturnValue(crossChainSnapshot);
-      vi.mocked(buildIndexingMetadataContextInitialized).mockReturnValue(
-        indexingMetadataContext as IndexingMetadataContextInitialized,
-      );
-
-      const ensDbClient = createMockEnsDbWriter({
-        getIndexingMetadataContext: vi.fn().mockResolvedValue(indexingMetadataContext),
-      });
-      const worker = createMockEnsDbWriterWorker({
-        ensDbClient,
-        indexingStatusBuilder: createMockIndexingStatusBuilder(omnichainSnapshot),
-      });
-
-      // act
-      await worker.run();
-      await vi.advanceTimersByTimeAsync(1000);
+      process.removeListener("unhandledRejection", handler);
 
       // assert
-      expect(buildIndexingMetadataContextInitialized).toHaveBeenCalledWith(
-        crossChainSnapshot,
-        (indexingMetadataContext as IndexingMetadataContextInitialized).stackInfo,
-      );
-      expect(ensDbClient.upsertIndexingMetadataContext).toHaveBeenCalledWith(
-        indexingMetadataContext,
-      );
+      expect(handler).toHaveBeenCalled();
+      expect(process.exitCode).toBe(1);
 
       // cleanup
       worker.stop();

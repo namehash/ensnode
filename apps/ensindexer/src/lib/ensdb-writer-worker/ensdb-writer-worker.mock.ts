@@ -2,69 +2,63 @@ import { vi } from "vitest";
 
 import type { EnsDbWriter } from "@ensnode/ensdb-sdk";
 import {
+  ChainIndexingStatusIds,
   type CrossChainIndexingStatusSnapshot,
   CrossChainIndexingStrategyIds,
-  type IndexingMetadataContext,
+  type IndexingMetadataContextInitialized,
   IndexingMetadataContextStatusCodes,
   OmnichainIndexingStatusIds,
   type OmnichainIndexingStatusSnapshot,
+  RangeTypeIds,
 } from "@ensnode/ensnode-sdk";
 
 import { EnsDbWriterWorker } from "@/lib/ensdb-writer-worker/ensdb-writer-worker";
-import type { IndexingStatusBuilder } from "@/lib/indexing-status-builder";
+import type { IndexingMetadataContextBuilder } from "@/lib/indexing-metadata-context-builder/indexing-metadata-context-builder";
 
-// Test fixture for stack info - minimal valid structure for tests
-export const mockStackInfo = {
-  ensDb: { version: "1.0.0" },
-  ensIndexer: {
-    clientLabelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
-  },
-  ensRainbow: {
-    serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
-    versionInfo: { ensRainbow: "1.0.0" },
-  },
-} as any;
+// Test fixtures for IndexingMetadataContext objects
 
-// Helper to create mock objects with consistent typing
-export function createMockEnsDbWriter(
-  overrides: Partial<ReturnType<typeof baseEnsDbWriter>> = {},
-): EnsDbWriter {
+export function createMockCrossChainSnapshot(
+  overrides: Partial<CrossChainIndexingStatusSnapshot> = {},
+): CrossChainIndexingStatusSnapshot {
   return {
-    ...baseEnsDbWriter(),
+    strategy: CrossChainIndexingStrategyIds.Omnichain,
+    slowestChainIndexingCursor: 100,
+    snapshotTime: 200,
+    omnichainSnapshot: {
+      omnichainStatus: OmnichainIndexingStatusIds.Following,
+      omnichainIndexingCursor: 100,
+      chains: new Map([
+        [
+          1,
+          {
+            chainStatus: ChainIndexingStatusIds.Following,
+            latestIndexedBlock: { timestamp: 100, number: 100 },
+            latestKnownBlock: { timestamp: 200, number: 200 },
+            config: {
+              rangeType: RangeTypeIds.LeftBounded,
+              startBlock: { timestamp: 0, number: 0 },
+            },
+          },
+        ],
+      ]),
+    },
     ...overrides,
-  } as unknown as EnsDbWriter;
-}
-
-export function baseEnsDbWriter() {
-  return {
-    getIndexingMetadataContext: vi.fn().mockResolvedValue(undefined),
-    upsertIndexingMetadataContext: vi.fn().mockResolvedValue(undefined),
   };
 }
 
 export function createMockIndexingMetadataContextInitialized(
-  overrides: Partial<IndexingMetadataContext> = {},
-): IndexingMetadataContext {
+  overrides: Partial<IndexingMetadataContextInitialized> = {},
+): IndexingMetadataContextInitialized {
   return {
     statusCode: IndexingMetadataContextStatusCodes.Initialized,
     indexingStatus: createMockCrossChainSnapshot(),
-    stackInfo: mockStackInfo,
+    stackInfo: {
+      ensDb: { versionInfo: { postgresql: "17.4" } },
+      ensIndexer: {} as any,
+      ensRainbow: {} as any,
+    },
     ...overrides,
   };
-}
-
-export function createMockIndexingMetadataContextUninitialized(): IndexingMetadataContext {
-  return {
-    statusCode: IndexingMetadataContextStatusCodes.Uninitialized,
-  };
-}
-
-export function createMockIndexingStatusBuilder(
-  resolvedSnapshot: OmnichainIndexingStatusSnapshot = createMockOmnichainSnapshot(),
-): IndexingStatusBuilder {
-  return {
-    getOmnichainIndexingStatusSnapshot: vi.fn().mockResolvedValue(resolvedSnapshot),
-  } as unknown as IndexingStatusBuilder;
 }
 
 export function createMockOmnichainSnapshot(
@@ -78,24 +72,32 @@ export function createMockOmnichainSnapshot(
   };
 }
 
-export function createMockCrossChainSnapshot(
-  overrides: Partial<CrossChainIndexingStatusSnapshot> = {},
-): CrossChainIndexingStatusSnapshot {
+export function createMockEnsDbWriter(
+  overrides: Partial<Pick<EnsDbWriter, "upsertIndexingMetadataContext">> = {},
+): EnsDbWriter {
   return {
-    strategy: CrossChainIndexingStrategyIds.Omnichain,
-    slowestChainIndexingCursor: 100,
-    snapshotTime: 200,
-    omnichainSnapshot: createMockOmnichainSnapshot(),
+    upsertIndexingMetadataContext: vi.fn().mockResolvedValue(undefined),
     ...overrides,
-  };
+  } as unknown as EnsDbWriter;
+}
+
+export function createMockIndexingMetadataContextBuilder(
+  resolvedContext: IndexingMetadataContextInitialized = createMockIndexingMetadataContextInitialized(),
+): IndexingMetadataContextBuilder {
+  return {
+    getIndexingMetadataContext: vi.fn().mockResolvedValue(resolvedContext),
+  } as unknown as IndexingMetadataContextBuilder;
 }
 
 export function createMockEnsDbWriterWorker(
-  overrides: { ensDbClient?: EnsDbWriter; indexingStatusBuilder?: IndexingStatusBuilder } = {},
+  overrides: {
+    ensDbClient?: EnsDbWriter;
+    indexingMetadataContextBuilder?: IndexingMetadataContextBuilder;
+  } = {},
 ) {
   const ensDbClient = overrides.ensDbClient ?? createMockEnsDbWriter();
-  const indexingStatusBuilder =
-    overrides.indexingStatusBuilder ?? createMockIndexingStatusBuilder();
+  const indexingMetadataContextBuilder =
+    overrides.indexingMetadataContextBuilder ?? createMockIndexingMetadataContextBuilder();
 
-  return new EnsDbWriterWorker(ensDbClient, indexingStatusBuilder);
+  return new EnsDbWriterWorker(ensDbClient, indexingMetadataContextBuilder);
 }
