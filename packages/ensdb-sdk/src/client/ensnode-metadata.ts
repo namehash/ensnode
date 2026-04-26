@@ -23,6 +23,9 @@ export interface EnsNodeMetadataIndexingMetadataContext {
 /**
  * ENSNode Metadata
  *
- * Union type gathering all variants of ENSNode Metadata.
+ * Type alias for ENSNode Metadata records,
+ * currently only includes the record for Indexing Metadata Context,
+ * but can be extended in the future to include more types of
+ * ENSNode Metadata records as needed.
  */
 export type EnsNodeMetadata = EnsNodeMetadataIndexingMetadataContext;

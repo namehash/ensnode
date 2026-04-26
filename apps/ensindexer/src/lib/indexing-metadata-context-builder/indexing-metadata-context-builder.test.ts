@@ -13,6 +13,7 @@ import {
   type OmnichainIndexingStatusSnapshot,
   validateEnsIndexerPublicConfigCompatibility,
 } from "@ensnode/ensnode-sdk";
+import type { LocalPonderClient } from "@ensnode/ponder-sdk";
 
 import "@/lib/__test__/mockLogger";
 
@@ -92,6 +93,28 @@ function createMockStackInfoBuilder(
   } as unknown as StackInfoBuilder;
 }
 
+function createMockLocalPonderClient(options: { isInDevMode?: boolean } = {}): LocalPonderClient {
+  return {
+    isInDevMode: options.isInDevMode ?? false,
+  } as unknown as LocalPonderClient;
+}
+
+function createIndexingMetadataContextBuilder(
+  overrides: {
+    ensDbClient?: EnsDbReader;
+    indexingStatusBuilder?: IndexingStatusBuilder;
+    stackInfoBuilder?: StackInfoBuilder;
+    localPonderClient?: LocalPonderClient;
+  } = {},
+): IndexingMetadataContextBuilder {
+  return new IndexingMetadataContextBuilder(
+    overrides.ensDbClient ?? createMockEnsDbReader(),
+    overrides.indexingStatusBuilder ?? createMockIndexingStatusBuilder(),
+    overrides.stackInfoBuilder ?? createMockStackInfoBuilder(),
+    overrides.localPonderClient ?? createMockLocalPonderClient(),
+  );
+}
+
 describe("IndexingMetadataContextBuilder", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -109,11 +132,11 @@ describe("IndexingMetadataContextBuilder", () => {
         const indexingStatusBuilder = createMockIndexingStatusBuilder(omnichainSnapshotUnstarted);
         const stackInfoBuilder = createMockStackInfoBuilder();
 
-        const builder = new IndexingMetadataContextBuilder(
+        const builder = createIndexingMetadataContextBuilder({
           ensDbClient,
           indexingStatusBuilder,
           stackInfoBuilder,
-        );
+        });
         const result = await builder.getIndexingMetadataContext();
 
         expect(ensDbClient.getIndexingMetadataContext).toHaveBeenCalledOnce();
@@ -133,11 +156,9 @@ describe("IndexingMetadataContextBuilder", () => {
       it("throws when indexing status is not unstarted", async () => {
         const indexingStatusBuilder = createMockIndexingStatusBuilder(omnichainSnapshotFollowing);
 
-        const builder = new IndexingMetadataContextBuilder(
-          createMockEnsDbReader(),
+        const builder = createIndexingMetadataContextBuilder({
           indexingStatusBuilder,
-          createMockStackInfoBuilder(),
-        );
+        });
 
         await expect(builder.getIndexingMetadataContext()).rejects.toThrow(
           /Omnichain indexing status must be "unstarted"/,
@@ -146,18 +167,20 @@ describe("IndexingMetadataContextBuilder", () => {
     });
 
     describe("when stored context is Initialized", () => {
-      it("builds and returns initialized context after validating compatibility", async () => {
+      it("validates compatibility when not in dev mode", async () => {
         const ensDbClient = createMockEnsDbReader({
           getIndexingMetadataContext: vi.fn().mockResolvedValue(indexingMetadataContextInitialized),
         });
         const indexingStatusBuilder = createMockIndexingStatusBuilder(omnichainSnapshotFollowing);
         const stackInfoBuilder = createMockStackInfoBuilder();
+        const localPonderClient = createMockLocalPonderClient({ isInDevMode: false });
 
-        const builder = new IndexingMetadataContextBuilder(
+        const builder = createIndexingMetadataContextBuilder({
           ensDbClient,
           indexingStatusBuilder,
           stackInfoBuilder,
-        );
+          localPonderClient,
+        });
         const result = await builder.getIndexingMetadataContext();
 
         expect(validateEnsIndexerPublicConfigCompatibility).toHaveBeenCalledWith(
@@ -172,7 +195,32 @@ describe("IndexingMetadataContextBuilder", () => {
         expect(result).toBe(indexingMetadataContextInitialized);
       });
 
-      it("throws when stored and in-memory configs are incompatible", async () => {
+      it("skips compatibility validation when in dev mode", async () => {
+        const ensDbClient = createMockEnsDbReader({
+          getIndexingMetadataContext: vi.fn().mockResolvedValue(indexingMetadataContextInitialized),
+        });
+        const indexingStatusBuilder = createMockIndexingStatusBuilder(omnichainSnapshotFollowing);
+        const stackInfoBuilder = createMockStackInfoBuilder();
+        const localPonderClient = createMockLocalPonderClient({ isInDevMode: true });
+
+        const builder = createIndexingMetadataContextBuilder({
+          ensDbClient,
+          indexingStatusBuilder,
+          stackInfoBuilder,
+          localPonderClient,
+        });
+        const result = await builder.getIndexingMetadataContext();
+
+        // Compatibility validation should NOT be called in dev mode
+        expect(validateEnsIndexerPublicConfigCompatibility).not.toHaveBeenCalled();
+        expect(buildIndexingMetadataContextInitialized).toHaveBeenCalledWith(
+          crossChainSnapshot,
+          stackInfo,
+        );
+        expect(result).toBe(indexingMetadataContextInitialized);
+      });
+
+      it("throws when stored and in-memory configs are incompatible (not in dev mode)", async () => {
         vi.mocked(validateEnsIndexerPublicConfigCompatibility).mockImplementation(() => {
           throw new Error("Incompatible ENSIndexer config");
         });
@@ -181,15 +229,33 @@ describe("IndexingMetadataContextBuilder", () => {
           getIndexingMetadataContext: vi.fn().mockResolvedValue(indexingMetadataContextInitialized),
         });
 
-        const builder = new IndexingMetadataContextBuilder(
+        const builder = createIndexingMetadataContextBuilder({
           ensDbClient,
-          createMockIndexingStatusBuilder(omnichainSnapshotFollowing),
-          createMockStackInfoBuilder(),
-        );
+          indexingStatusBuilder: createMockIndexingStatusBuilder(omnichainSnapshotFollowing),
+          localPonderClient: createMockLocalPonderClient({ isInDevMode: false }),
+        });
 
         await expect(builder.getIndexingMetadataContext()).rejects.toThrow(
           "Incompatible ENSIndexer config",
         );
+      });
+
+      it("does not throw on incompatible configs when in dev mode", async () => {
+        vi.mocked(validateEnsIndexerPublicConfigCompatibility).mockImplementation(() => {
+          throw new Error("Incompatible ENSIndexer config");
+        });
+
+        const ensDbClient = createMockEnsDbReader({
+          getIndexingMetadataContext: vi.fn().mockResolvedValue(indexingMetadataContextInitialized),
+        });
+
+        const builder = createIndexingMetadataContextBuilder({
+          ensDbClient,
+          indexingStatusBuilder: createMockIndexingStatusBuilder(omnichainSnapshotFollowing),
+          localPonderClient: createMockLocalPonderClient({ isInDevMode: true }),
+        });
+
+        await expect(builder.getIndexingMetadataContext()).resolves.toBeDefined();
       });
     });
 
@@ -215,11 +281,11 @@ describe("IndexingMetadataContextBuilder", () => {
         return stackInfo;
       });
 
-      const builder = new IndexingMetadataContextBuilder(
+      const builder = createIndexingMetadataContextBuilder({
         ensDbClient,
         indexingStatusBuilder,
         stackInfoBuilder,
-      );
+      });
       await builder.getIndexingMetadataContext();
 
       // All three should have been called (ordering is not deterministic for parallel)

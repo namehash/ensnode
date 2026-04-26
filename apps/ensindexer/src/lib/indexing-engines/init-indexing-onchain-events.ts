@@ -34,6 +34,25 @@ import {
 import { indexingMetadataContextBuilder } from "@/lib/indexing-metadata-context-builder/singleton";
 import { logger } from "@/lib/logger";
 
+async function upsertIndexingMetadataContextRecord(): Promise<void> {
+  const indexingMetadataContext = await indexingMetadataContextBuilder.getIndexingMetadataContext();
+
+  logger.info({
+    msg: `Upserting Indexing Metadata Context Initialized`,
+  });
+  logger.debug({
+    msg: `Indexing Metadata Context`,
+    indexingStatus: indexingMetadataContext.indexingStatus,
+    stackInfo: indexingMetadataContext.stackInfo,
+  });
+
+  await ensDbClient.upsertIndexingMetadataContext(indexingMetadataContext);
+
+  logger.info({
+    msg: `Successfully upserted Indexing Metadata Context Initialized`,
+  });
+}
+
 /**
  * Prepare for executing the "onchain" event handlers.
  *
@@ -74,21 +93,8 @@ export async function initIndexingOnchainEvents(): Promise<void> {
     // by the time ENSIndexer instance executes `initIndexingOnchainEvents`.
     await waitForEnsRainbowToBeHealthy();
 
-    const indexingMetadataContext =
-      await indexingMetadataContextBuilder.getIndexingMetadataContext();
-
-    logger.info({
-      msg: `Upserting Indexing Metadata Context Initialized`,
-    });
-    logger.debug({
-      msg: `Indexing Metadata Context`,
-      indexingStatus: indexingMetadataContext.indexingStatus,
-      stackInfo: indexingMetadataContext.stackInfo,
-    });
-    await ensDbClient.upsertIndexingMetadataContext(indexingMetadataContext);
-    logger.info({
-      msg: `Successfully upserted Indexing Metadata Context Initialized`,
-    });
+    // Upsert the Indexing Metadata Context record into ENSDb
+    await upsertIndexingMetadataContextRecord();
 
     // Before starting to process onchain events, we want to make sure that
     // ENSRainbow is ready to serve the "heal" requests.

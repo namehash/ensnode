@@ -11,6 +11,7 @@ import {
   type OmnichainIndexingStatusSnapshot,
   validateEnsIndexerPublicConfigCompatibility,
 } from "@ensnode/ensnode-sdk";
+import type { LocalPonderClient } from "@ensnode/ponder-sdk";
 
 import type { IndexingStatusBuilder } from "@/lib/indexing-status-builder/indexing-status-builder";
 import { logger } from "@/lib/logger";
@@ -46,6 +47,7 @@ export class IndexingMetadataContextBuilder {
     private readonly ensDbClient: EnsDbReader,
     private readonly indexingStatusBuilder: IndexingStatusBuilder,
     private readonly stackInfoBuilder: StackInfoBuilder,
+    private readonly localPonderClient: LocalPonderClient,
   ) {}
 
   /**
@@ -94,10 +96,18 @@ export class IndexingMetadataContextBuilder {
         stackInfo: storedIndexingMetadataContext.stackInfo,
       });
 
-      invariant_ensIndexerPublicConfigIsCompatibleWithStackInfo(
-        storedIndexingMetadataContext.stackInfo,
-        inMemoryEnsIndexerStackInfo,
-      );
+      // Validate in-memory config object compatibility with the stored one,
+      // if the stored one is available.
+      // The validation is skipped if the local Ponder app is running in dev mode.
+      // This is to improve the development experience during ENSIndexer
+      // development, by allowing to override the stored config in ENSDb with
+      // the current in-memory config, without having to keep them compatible.
+      if (!this.localPonderClient.isInDevMode) {
+        invariant_ensIndexerPublicConfigIsCompatibleWithStackInfo(
+          storedIndexingMetadataContext.stackInfo,
+          inMemoryEnsIndexerStackInfo,
+        );
+      }
     }
 
     return inMemoryIndexingMetadataContext;
