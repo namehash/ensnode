@@ -3,7 +3,7 @@ import config, { initEnvConfig } from "@/config";
 import { serve } from "@hono/node-server";
 
 import { indexingStatusCache } from "@/cache/indexing-status.cache";
-import { getReferralLeaderboardEditionsCaches } from "@/cache/referral-leaderboard-editions.cache";
+import { getReferralEditionSnapshotsCaches } from "@/cache/referral-edition-snapshots.cache";
 import { referralProgramEditionConfigSetCache } from "@/cache/referral-program-edition-set.cache";
 import { redactEnsApiConfig } from "@/config/redact";
 import { sdk } from "@/lib/instrumentation";
@@ -54,7 +54,7 @@ const gracefulShutdown = async () => {
     logger.info("Destroyed referralProgramEditionConfigSetCache");
 
     // Destroy all edition caches (if initialized)
-    const editionsCaches = getReferralLeaderboardEditionsCaches();
+    const editionsCaches = getReferralEditionSnapshotsCaches();
     if (editionsCaches) {
       for (const [editionSlug, cache] of editionsCaches) {
         cache.destroy();

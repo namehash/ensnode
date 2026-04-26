@@ -5,10 +5,16 @@ import {
   type ReferrerMetrics,
 } from "@namehash/ens-referrals";
 import { and, asc, count, desc, eq, gte, isNotNull, lte, ne, sql, sum } from "drizzle-orm";
-import { type NormalizedAddress, stringifyAccountId } from "enssdk";
+import {
+  type Address,
+  type InterpretedName,
+  type NormalizedAddress,
+  stringifyAccountId,
+} from "enssdk";
+import type { Hash } from "viem";
 import { zeroAddress } from "viem";
 
-import { deserializeDuration, priceEth } from "@ensnode/ensnode-sdk";
+import { deserializeDuration, priceEth, RegistrarActionTypes } from "@ensnode/ensnode-sdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import logger from "@/lib/logger";
@@ -118,8 +124,22 @@ export const getReferralEvents = async (rules: ReferralProgramRules): Promise<Re
         // Note: Using raw SQL for COALESCE because Drizzle doesn't natively support it yet.
         // See: https://github.com/drizzle-team/drizzle-orm/issues/3708
         total: sql<string>`COALESCE(${ensIndexerSchema.registrarActions.total}, 0)`.as("total"),
+        // Audit fields (pass-through; the rev-share-cap race carries them on the per-event
+        // accounting record so consumers like the CSV endpoint don't need a second query).
+        actionType: ensIndexerSchema.registrarActions.type,
+        transactionHash: ensIndexerSchema.registrarActions.transactionHash,
+        registrant: ensIndexerSchema.registrarActions.registrant,
+        domainName: ensIndexerSchema.subgraph_domain.name,
       })
       .from(ensIndexerSchema.registrarActions)
+      .innerJoin(
+        ensIndexerSchema.registrationLifecycles,
+        eq(ensIndexerSchema.registrarActions.node, ensIndexerSchema.registrationLifecycles.node),
+      )
+      .innerJoin(
+        ensIndexerSchema.subgraph_domain,
+        eq(ensIndexerSchema.registrationLifecycles.node, ensIndexerSchema.subgraph_domain.id),
+      )
       .where(
         and(
           // Filter by timestamp range
@@ -138,25 +158,43 @@ export const getReferralEvents = async (rules: ReferralProgramRules): Promise<Re
       )
       .orderBy(asc(ensIndexerSchema.registrarActions.id));
 
-    // Type assertion: All fields in NonNullRecord are guaranteed non-null:
-    // 1. `referrer` is guaranteed non-null by isNotNull WHERE filter
-    // 2. `timestamp`, `incrementalDuration` are guaranteed non-null by database schema constraints (NOT NULL columns)
-    // 3. `total` is guaranteed non-null by COALESCE with 0
-    interface NonNullRecord {
-      id: string;
-      referrer: NormalizedAddress;
-      timestamp: bigint;
-      incrementalDuration: bigint;
-      total: string;
-    }
+    return records.map((record) => {
+      // referrer/timestamp/incrementalDuration are guaranteed non-null by the WHERE clause
+      // and NOT NULL schema constraints; total is guaranteed non-null by COALESCE.
+      if (record.referrer === null) {
+        throw new Error(
+          `getReferralEvents: decodedReferrer must be non-null for registrar action '${record.id}'`,
+        );
+      }
+      if (record.domainName === null) {
+        throw new Error(
+          `getReferralEvents: domain.name must exist for registrar action '${record.id}'`,
+        );
+      }
+      switch (record.actionType) {
+        case RegistrarActionTypes.Registration:
+        case RegistrarActionTypes.Renewal:
+          break;
+        default: {
+          const _exhaustive: never = record.actionType;
+          throw new Error(
+            `getReferralEvents: unrecognized action type '${String(_exhaustive)}' for registrar action '${record.id}'`,
+          );
+        }
+      }
 
-    return (records as NonNullRecord[]).map((record) => ({
-      id: record.id,
-      referrer: record.referrer,
-      timestamp: Number(record.timestamp),
-      incrementalDuration: Number(record.incrementalDuration),
-      incrementalRevenueContribution: priceEth(BigInt(record.total)),
-    }));
+      return {
+        id: record.id,
+        referrer: record.referrer as NormalizedAddress,
+        timestamp: Number(record.timestamp),
+        incrementalDuration: Number(record.incrementalDuration),
+        incrementalRevenueContribution: priceEth(BigInt(record.total)),
+        name: record.domainName as InterpretedName,
+        actionType: record.actionType,
+        transactionHash: record.transactionHash as Hash,
+        registrant: record.registrant as Address,
+      } satisfies ReferralEvent;
+    });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     logger.error({ error }, "Failed to fetch referral events from database");

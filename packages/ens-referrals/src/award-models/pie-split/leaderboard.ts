@@ -56,11 +56,19 @@ export interface ReferrerLeaderboardPieSplit {
   accurateAsOf: UnixTimestamp;
 }
 
-export const buildReferrerLeaderboardPieSplit = (
+/**
+ * A point-in-time snapshot of everything computed for a `pie-split` referral program edition.
+ */
+export interface ReferralEditionSnapshotPieSplit {
+  awardModel: typeof ReferralProgramAwardModels.PieSplit;
+  leaderboard: ReferrerLeaderboardPieSplit;
+}
+
+export const buildReferralEditionSnapshotPieSplit = (
   allReferrers: ReferrerMetrics[],
   rules: ReferralProgramRulesPieSplit,
   accurateAsOf: UnixTimestamp,
-): ReferrerLeaderboardPieSplit => {
+): ReferralEditionSnapshotPieSplit => {
   assertLeaderboardInputs(allReferrers, rules, accurateAsOf);
 
   const sortedReferrers = sortReferrerMetrics(allReferrers);
@@ -79,5 +87,13 @@ export const buildReferrerLeaderboardPieSplit = (
 
   const referrers = new Map(awardedReferrers.map((r) => [r.referrer, r]));
 
-  return { awardModel: rules.awardModel, rules, aggregatedMetrics, referrers, accurateAsOf };
+  const leaderboard: ReferrerLeaderboardPieSplit = {
+    awardModel: rules.awardModel,
+    rules,
+    aggregatedMetrics,
+    referrers,
+    accurateAsOf,
+  };
+
+  return { awardModel: rules.awardModel, leaderboard };
 };

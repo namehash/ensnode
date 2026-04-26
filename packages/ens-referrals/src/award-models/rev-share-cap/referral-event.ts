@@ -1,6 +1,7 @@
-import type { Duration, NormalizedAddress, UnixTimestamp } from "enssdk";
+import type { Address, Duration, InterpretedName, NormalizedAddress, UnixTimestamp } from "enssdk";
+import type { Hash } from "viem";
 
-import type { PriceEth } from "@ensnode/ensnode-sdk";
+import type { PriceEth, RegistrarActionType } from "@ensnode/ensnode-sdk";
 
 /**
  * Represents a single raw referral event.
@@ -38,4 +39,24 @@ export interface ReferralEvent {
    * Revenue contribution in ETH from this single referral event.
    */
   incrementalRevenueContribution: PriceEth;
+
+  /**
+   * FQDN of the name the referral applies to.
+   */
+  name: InterpretedName;
+
+  /**
+   * Type of registrar action.
+   */
+  actionType: RegistrarActionType;
+
+  /**
+   * Transaction hash of the onchain registrar action that produced this referral.
+   */
+  transactionHash: Hash;
+
+  /**
+   * Ethereum address of the registrant that paid for / performed the action.
+   */
+  registrant: Address;
 }

@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { ENSNamespaceIds } from "@ensnode/datasources";
 
 import type { EnsApiConfig } from "@/config/config.schema";
-import * as editionsCachesMiddleware from "@/middleware/referral-leaderboard-editions-caches.middleware";
+import * as editionsCachesMiddleware from "@/middleware/referral-edition-snapshots-caches.middleware";
 import * as editionSetMiddleware from "@/middleware/referral-program-edition-set.middleware";
 
 vi.mock("@/config", () => ({
@@ -20,8 +20,8 @@ vi.mock("@/middleware/referral-program-edition-set.middleware", () => ({
   referralProgramEditionConfigSetMiddleware: vi.fn(),
 }));
 
-vi.mock("@/middleware/referral-leaderboard-editions-caches.middleware", () => ({
-  referralLeaderboardEditionsCachesMiddleware: vi.fn(),
+vi.mock("@/middleware/referral-edition-snapshots-caches.middleware", () => ({
+  referralEditionSnapshotsCachesMiddleware: vi.fn(),
 }));
 
 import {
@@ -29,12 +29,13 @@ import {
   deserializeReferralProgramEditionSummariesResponse,
   deserializeReferrerLeaderboardPageResponse,
   deserializeReferrerMetricsEditionsResponse,
+  type ReferralEditionSnapshot,
+  type ReferralProgramAwardModel,
   ReferralProgramAwardModels,
   type ReferralProgramEditionSlug,
   ReferralProgramEditionStatuses,
   ReferralProgramEditionSummariesResponseCodes,
   ReferrerEditionMetricsTypeIds,
-  type ReferrerLeaderboard,
   ReferrerLeaderboardPageResponseCodes,
   type ReferrerLeaderboardPageResponseOk,
   ReferrerMetricsEditionsResponseCodes,
@@ -55,16 +56,17 @@ describe("/v1/ensanalytics", () => {
   describe("/referral-leaderboard", () => {
     it("returns requested records when referrer leaderboard has multiple pages of data", async () => {
       // Arrange: mock cache map with 2025-12
-      const mockEditionsCaches = new Map<ReferralProgramEditionSlug, SWRCache<ReferrerLeaderboard>>(
+      const mockEditionsCaches = new Map<
+        ReferralProgramEditionSlug,
+        SWRCache<ReferralEditionSnapshot>
+      >([
         [
-          [
-            "2025-12",
-            {
-              read: async () => populatedReferrerLeaderboard,
-            } as SWRCache<ReferrerLeaderboard>,
-          ],
+          "2025-12",
+          {
+            read: async () => ({ leaderboard: populatedReferrerLeaderboard }),
+          } as SWRCache<ReferralEditionSnapshot>,
         ],
-      );
+      ]);
 
       // Mock edition set middleware to provide a mock edition set
       const mockEditionConfigSet = new Map([
@@ -79,9 +81,9 @@ describe("/v1/ensanalytics", () => {
 
       // Mock caches middleware to provide the mock caches
       vi.mocked(
-        editionsCachesMiddleware.referralLeaderboardEditionsCachesMiddleware,
+        editionsCachesMiddleware.referralEditionSnapshotsCachesMiddleware,
       ).mockImplementation(async (c, next) => {
-        c.set("referralLeaderboardEditionsCaches", mockEditionsCaches);
+        c.set("referralEditionSnapshotsCaches", mockEditionsCaches);
         return await next();
       });
 
@@ -183,16 +185,17 @@ describe("/v1/ensanalytics", () => {
 
     it("returns empty cached referrer leaderboard when there are no referrals yet", async () => {
       // Arrange: mock cache map with 2025-12
-      const mockEditionsCaches = new Map<ReferralProgramEditionSlug, SWRCache<ReferrerLeaderboard>>(
+      const mockEditionsCaches = new Map<
+        ReferralProgramEditionSlug,
+        SWRCache<ReferralEditionSnapshot>
+      >([
         [
-          [
-            "2025-12",
-            {
-              read: async () => emptyReferralLeaderboard,
-            } as SWRCache<ReferrerLeaderboard>,
-          ],
+          "2025-12",
+          {
+            read: async () => ({ leaderboard: emptyReferralLeaderboard }),
+          } as SWRCache<ReferralEditionSnapshot>,
         ],
-      );
+      ]);
 
       // Mock edition set middleware to provide a mock edition set
       const mockEditionConfigSet = new Map([
@@ -207,9 +210,9 @@ describe("/v1/ensanalytics", () => {
 
       // Mock caches middleware to provide the mock caches
       vi.mocked(
-        editionsCachesMiddleware.referralLeaderboardEditionsCachesMiddleware,
+        editionsCachesMiddleware.referralEditionSnapshotsCachesMiddleware,
       ).mockImplementation(async (c, next) => {
-        c.set("referralLeaderboardEditionsCaches", mockEditionsCaches);
+        c.set("referralEditionSnapshotsCaches", mockEditionsCaches);
         return await next();
       });
 
@@ -245,22 +248,23 @@ describe("/v1/ensanalytics", () => {
 
     it("returns 404 error when unknown edition slug is requested", async () => {
       // Arrange: mock cache map with test-edition-a and test-edition-b
-      const mockEditionsCaches = new Map<ReferralProgramEditionSlug, SWRCache<ReferrerLeaderboard>>(
+      const mockEditionsCaches = new Map<
+        ReferralProgramEditionSlug,
+        SWRCache<ReferralEditionSnapshot>
+      >([
         [
-          [
-            "test-edition-a",
-            {
-              read: async () => populatedReferrerLeaderboard,
-            } as SWRCache<ReferrerLeaderboard>,
-          ],
-          [
-            "test-edition-b",
-            {
-              read: async () => populatedReferrerLeaderboard,
-            } as SWRCache<ReferrerLeaderboard>,
-          ],
+          "test-edition-a",
+          {
+            read: async () => ({ leaderboard: populatedReferrerLeaderboard }),
+          } as SWRCache<ReferralEditionSnapshot>,
         ],
-      );
+        [
+          "test-edition-b",
+          {
+            read: async () => ({ leaderboard: populatedReferrerLeaderboard }),
+          } as SWRCache<ReferralEditionSnapshot>,
+        ],
+      ]);
 
       // Mock edition set middleware to provide a mock edition set
       const mockEditionConfigSet = new Map([
@@ -276,9 +280,9 @@ describe("/v1/ensanalytics", () => {
 
       // Mock caches middleware to provide the mock caches
       vi.mocked(
-        editionsCachesMiddleware.referralLeaderboardEditionsCachesMiddleware,
+        editionsCachesMiddleware.referralEditionSnapshotsCachesMiddleware,
       ).mockImplementation(async (c, next) => {
-        c.set("referralLeaderboardEditionsCaches", mockEditionsCaches);
+        c.set("referralEditionSnapshotsCaches", mockEditionsCaches);
         return await next();
       });
 
@@ -307,22 +311,23 @@ describe("/v1/ensanalytics", () => {
   describe("/referrer/:referrer", () => {
     it("returns referrer metrics for requested editions when referrer exists", async () => {
       // Arrange: mock cache map with multiple editions
-      const mockEditionsCaches = new Map<ReferralProgramEditionSlug, SWRCache<ReferrerLeaderboard>>(
+      const mockEditionsCaches = new Map<
+        ReferralProgramEditionSlug,
+        SWRCache<ReferralEditionSnapshot>
+      >([
         [
-          [
-            "2025-12",
-            {
-              read: async () => populatedReferrerLeaderboard,
-            } as SWRCache<ReferrerLeaderboard>,
-          ],
-          [
-            "2026-03",
-            {
-              read: async () => populatedReferrerLeaderboard,
-            } as SWRCache<ReferrerLeaderboard>,
-          ],
+          "2025-12",
+          {
+            read: async () => ({ leaderboard: populatedReferrerLeaderboard }),
+          } as SWRCache<ReferralEditionSnapshot>,
         ],
-      );
+        [
+          "2026-03",
+          {
+            read: async () => ({ leaderboard: populatedReferrerLeaderboard }),
+          } as SWRCache<ReferralEditionSnapshot>,
+        ],
+      ]);
 
       // Mock edition set middleware to provide a mock edition set
       const mockEditionConfigSet = new Map([
@@ -338,9 +343,9 @@ describe("/v1/ensanalytics", () => {
 
       // Mock caches middleware to provide the mock caches
       vi.mocked(
-        editionsCachesMiddleware.referralLeaderboardEditionsCachesMiddleware,
+        editionsCachesMiddleware.referralEditionSnapshotsCachesMiddleware,
       ).mockImplementation(async (c, next) => {
-        c.set("referralLeaderboardEditionsCaches", mockEditionsCaches);
+        c.set("referralEditionSnapshotsCaches", mockEditionsCaches);
         return await next();
       });
 
@@ -386,22 +391,23 @@ describe("/v1/ensanalytics", () => {
 
     it("returns zero-score metrics for requested editions when referrer does not exist", async () => {
       // Arrange: mock cache map with multiple editions
-      const mockEditionsCaches = new Map<ReferralProgramEditionSlug, SWRCache<ReferrerLeaderboard>>(
+      const mockEditionsCaches = new Map<
+        ReferralProgramEditionSlug,
+        SWRCache<ReferralEditionSnapshot>
+      >([
         [
-          [
-            "2025-12",
-            {
-              read: async () => populatedReferrerLeaderboard,
-            } as SWRCache<ReferrerLeaderboard>,
-          ],
-          [
-            "2026-03",
-            {
-              read: async () => populatedReferrerLeaderboard,
-            } as SWRCache<ReferrerLeaderboard>,
-          ],
+          "2025-12",
+          {
+            read: async () => ({ leaderboard: populatedReferrerLeaderboard }),
+          } as SWRCache<ReferralEditionSnapshot>,
         ],
-      );
+        [
+          "2026-03",
+          {
+            read: async () => ({ leaderboard: populatedReferrerLeaderboard }),
+          } as SWRCache<ReferralEditionSnapshot>,
+        ],
+      ]);
 
       // Mock edition set middleware to provide a mock edition set
       const mockEditionConfigSet = new Map([
@@ -417,9 +423,9 @@ describe("/v1/ensanalytics", () => {
 
       // Mock caches middleware to provide the mock caches
       vi.mocked(
-        editionsCachesMiddleware.referralLeaderboardEditionsCachesMiddleware,
+        editionsCachesMiddleware.referralEditionSnapshotsCachesMiddleware,
       ).mockImplementation(async (c, next) => {
-        c.set("referralLeaderboardEditionsCaches", mockEditionsCaches);
+        c.set("referralEditionSnapshotsCaches", mockEditionsCaches);
         return await next();
       });
 
@@ -475,22 +481,23 @@ describe("/v1/ensanalytics", () => {
 
     it("returns zero-score metrics for requested editions when leaderboards are empty", async () => {
       // Arrange: mock cache map with multiple editions, all empty
-      const mockEditionsCaches = new Map<ReferralProgramEditionSlug, SWRCache<ReferrerLeaderboard>>(
+      const mockEditionsCaches = new Map<
+        ReferralProgramEditionSlug,
+        SWRCache<ReferralEditionSnapshot>
+      >([
         [
-          [
-            "2025-12",
-            {
-              read: async () => emptyReferralLeaderboard,
-            } as SWRCache<ReferrerLeaderboard>,
-          ],
-          [
-            "2026-03",
-            {
-              read: async () => emptyReferralLeaderboard,
-            } as SWRCache<ReferrerLeaderboard>,
-          ],
+          "2025-12",
+          {
+            read: async () => ({ leaderboard: emptyReferralLeaderboard }),
+          } as SWRCache<ReferralEditionSnapshot>,
         ],
-      );
+        [
+          "2026-03",
+          {
+            read: async () => ({ leaderboard: emptyReferralLeaderboard }),
+          } as SWRCache<ReferralEditionSnapshot>,
+        ],
+      ]);
 
       // Mock edition set middleware to provide a mock edition set
       const mockEditionConfigSet = new Map([
@@ -506,9 +513,9 @@ describe("/v1/ensanalytics", () => {
 
       // Mock caches middleware to provide the mock caches
       vi.mocked(
-        editionsCachesMiddleware.referralLeaderboardEditionsCachesMiddleware,
+        editionsCachesMiddleware.referralEditionSnapshotsCachesMiddleware,
       ).mockImplementation(async (c, next) => {
-        c.set("referralLeaderboardEditionsCaches", mockEditionsCaches);
+        c.set("referralEditionSnapshotsCaches", mockEditionsCaches);
         return await next();
       });
 
@@ -562,22 +569,23 @@ describe("/v1/ensanalytics", () => {
 
     it("returns error response when any requested edition cache fails to load", async () => {
       // Arrange: mock cache map where 2025-12 succeeds but 2026-03 fails
-      const mockEditionsCaches = new Map<ReferralProgramEditionSlug, SWRCache<ReferrerLeaderboard>>(
+      const mockEditionsCaches = new Map<
+        ReferralProgramEditionSlug,
+        SWRCache<ReferralEditionSnapshot>
+      >([
         [
-          [
-            "2025-12",
-            {
-              read: async () => populatedReferrerLeaderboard,
-            } as SWRCache<ReferrerLeaderboard>,
-          ],
-          [
-            "2026-03",
-            {
-              read: async () => new Error("Database connection failed"),
-            } as SWRCache<ReferrerLeaderboard>,
-          ],
+          "2025-12",
+          {
+            read: async () => ({ leaderboard: populatedReferrerLeaderboard }),
+          } as SWRCache<ReferralEditionSnapshot>,
         ],
-      );
+        [
+          "2026-03",
+          {
+            read: async () => new Error("Database connection failed"),
+          } as SWRCache<ReferralEditionSnapshot>,
+        ],
+      ]);
 
       // Mock edition set middleware to provide a mock edition set
       const mockEditionConfigSet = new Map([
@@ -593,9 +601,9 @@ describe("/v1/ensanalytics", () => {
 
       // Mock caches middleware to provide the mock caches
       vi.mocked(
-        editionsCachesMiddleware.referralLeaderboardEditionsCachesMiddleware,
+        editionsCachesMiddleware.referralEditionSnapshotsCachesMiddleware,
       ).mockImplementation(async (c, next) => {
-        c.set("referralLeaderboardEditionsCaches", mockEditionsCaches);
+        c.set("referralEditionSnapshotsCaches", mockEditionsCaches);
         return await next();
       });
 
@@ -621,22 +629,23 @@ describe("/v1/ensanalytics", () => {
 
     it("returns error response when all requested edition caches fail to load", async () => {
       // Arrange: mock cache map where all editions fail
-      const mockEditionsCaches = new Map<ReferralProgramEditionSlug, SWRCache<ReferrerLeaderboard>>(
+      const mockEditionsCaches = new Map<
+        ReferralProgramEditionSlug,
+        SWRCache<ReferralEditionSnapshot>
+      >([
         [
-          [
-            "2025-12",
-            {
-              read: async () => new Error("Database connection failed"),
-            } as SWRCache<ReferrerLeaderboard>,
-          ],
-          [
-            "2026-03",
-            {
-              read: async () => new Error("Database connection failed"),
-            } as SWRCache<ReferrerLeaderboard>,
-          ],
+          "2025-12",
+          {
+            read: async () => new Error("Database connection failed"),
+          } as SWRCache<ReferralEditionSnapshot>,
         ],
-      );
+        [
+          "2026-03",
+          {
+            read: async () => new Error("Database connection failed"),
+          } as SWRCache<ReferralEditionSnapshot>,
+        ],
+      ]);
 
       // Mock edition set middleware to provide a mock edition set
       const mockEditionConfigSet = new Map([
@@ -652,9 +661,9 @@ describe("/v1/ensanalytics", () => {
 
       // Mock caches middleware to provide the mock caches
       vi.mocked(
-        editionsCachesMiddleware.referralLeaderboardEditionsCachesMiddleware,
+        editionsCachesMiddleware.referralEditionSnapshotsCachesMiddleware,
       ).mockImplementation(async (c, next) => {
-        c.set("referralLeaderboardEditionsCaches", mockEditionsCaches);
+        c.set("referralEditionSnapshotsCaches", mockEditionsCaches);
         return await next();
       });
 
@@ -681,22 +690,23 @@ describe("/v1/ensanalytics", () => {
 
     it("returns 404 error when unknown edition slug is requested", async () => {
       // Arrange: mock cache map with configured editions
-      const mockEditionsCaches = new Map<ReferralProgramEditionSlug, SWRCache<ReferrerLeaderboard>>(
+      const mockEditionsCaches = new Map<
+        ReferralProgramEditionSlug,
+        SWRCache<ReferralEditionSnapshot>
+      >([
         [
-          [
-            "2025-12",
-            {
-              read: async () => populatedReferrerLeaderboard,
-            } as SWRCache<ReferrerLeaderboard>,
-          ],
-          [
-            "2026-03",
-            {
-              read: async () => populatedReferrerLeaderboard,
-            } as SWRCache<ReferrerLeaderboard>,
-          ],
+          "2025-12",
+          {
+            read: async () => ({ leaderboard: populatedReferrerLeaderboard }),
+          } as SWRCache<ReferralEditionSnapshot>,
         ],
-      );
+        [
+          "2026-03",
+          {
+            read: async () => ({ leaderboard: populatedReferrerLeaderboard }),
+          } as SWRCache<ReferralEditionSnapshot>,
+        ],
+      ]);
 
       // Mock edition set middleware to provide a mock edition set
       const mockEditionConfigSet = new Map([
@@ -712,9 +722,9 @@ describe("/v1/ensanalytics", () => {
 
       // Mock caches middleware to provide the mock caches
       vi.mocked(
-        editionsCachesMiddleware.referralLeaderboardEditionsCachesMiddleware,
+        editionsCachesMiddleware.referralEditionSnapshotsCachesMiddleware,
       ).mockImplementation(async (c, next) => {
-        c.set("referralLeaderboardEditionsCaches", mockEditionsCaches);
+        c.set("referralEditionSnapshotsCaches", mockEditionsCaches);
         return await next();
       });
 
@@ -742,28 +752,29 @@ describe("/v1/ensanalytics", () => {
 
     it("returns only requested edition data when subset is requested", async () => {
       // Arrange: mock cache map with multiple editions
-      const mockEditionsCaches = new Map<ReferralProgramEditionSlug, SWRCache<ReferrerLeaderboard>>(
+      const mockEditionsCaches = new Map<
+        ReferralProgramEditionSlug,
+        SWRCache<ReferralEditionSnapshot>
+      >([
         [
-          [
-            "2025-12",
-            {
-              read: async () => populatedReferrerLeaderboard,
-            } as SWRCache<ReferrerLeaderboard>,
-          ],
-          [
-            "2026-03",
-            {
-              read: async () => populatedReferrerLeaderboard,
-            } as SWRCache<ReferrerLeaderboard>,
-          ],
-          [
-            "2026-06",
-            {
-              read: async () => populatedReferrerLeaderboard,
-            } as SWRCache<ReferrerLeaderboard>,
-          ],
+          "2025-12",
+          {
+            read: async () => ({ leaderboard: populatedReferrerLeaderboard }),
+          } as SWRCache<ReferralEditionSnapshot>,
         ],
-      );
+        [
+          "2026-03",
+          {
+            read: async () => ({ leaderboard: populatedReferrerLeaderboard }),
+          } as SWRCache<ReferralEditionSnapshot>,
+        ],
+        [
+          "2026-06",
+          {
+            read: async () => ({ leaderboard: populatedReferrerLeaderboard }),
+          } as SWRCache<ReferralEditionSnapshot>,
+        ],
+      ]);
 
       // Mock edition set middleware to provide a mock edition set
       const mockEditionConfigSet = new Map([
@@ -780,9 +791,9 @@ describe("/v1/ensanalytics", () => {
 
       // Mock caches middleware to provide the mock caches
       vi.mocked(
-        editionsCachesMiddleware.referralLeaderboardEditionsCachesMiddleware,
+        editionsCachesMiddleware.referralEditionSnapshotsCachesMiddleware,
       ).mockImplementation(async (c, next) => {
-        c.set("referralLeaderboardEditionsCaches", mockEditionsCaches);
+        c.set("referralEditionSnapshotsCaches", mockEditionsCaches);
         return await next();
       });
 
@@ -869,26 +880,33 @@ describe("/v1/ensanalytics", () => {
       );
 
       // Mock caches middleware with a cache for each edition
-      const mockEditionsCaches = new Map<ReferralProgramEditionSlug, SWRCache<ReferrerLeaderboard>>(
+      const mockEditionsCaches = new Map<
+        ReferralProgramEditionSlug,
+        SWRCache<ReferralEditionSnapshot>
+      >([
         [
-          [
-            "2025-12",
-            { read: async () => emptyReferralLeaderboard } as SWRCache<ReferrerLeaderboard>,
-          ],
-          [
-            "2026-03",
-            { read: async () => emptyReferralLeaderboard } as SWRCache<ReferrerLeaderboard>,
-          ],
-          [
-            "2026-06",
-            { read: async () => emptyReferralLeaderboard } as SWRCache<ReferrerLeaderboard>,
-          ],
+          "2025-12",
+          {
+            read: async () => ({ leaderboard: emptyReferralLeaderboard }),
+          } as SWRCache<ReferralEditionSnapshot>,
         ],
-      );
+        [
+          "2026-03",
+          {
+            read: async () => ({ leaderboard: emptyReferralLeaderboard }),
+          } as SWRCache<ReferralEditionSnapshot>,
+        ],
+        [
+          "2026-06",
+          {
+            read: async () => ({ leaderboard: emptyReferralLeaderboard }),
+          } as SWRCache<ReferralEditionSnapshot>,
+        ],
+      ]);
       vi.mocked(
-        editionsCachesMiddleware.referralLeaderboardEditionsCachesMiddleware,
+        editionsCachesMiddleware.referralEditionSnapshotsCachesMiddleware,
       ).mockImplementation(async (c, next) => {
-        c.set("referralLeaderboardEditionsCaches", mockEditionsCaches);
+        c.set("referralEditionSnapshotsCaches", mockEditionsCaches);
         return await next();
       });
 
@@ -928,9 +946,9 @@ describe("/v1/ensanalytics", () => {
 
       // Mock caches middleware (needed by middleware chain even though /editions doesn't use it)
       vi.mocked(
-        editionsCachesMiddleware.referralLeaderboardEditionsCachesMiddleware,
+        editionsCachesMiddleware.referralEditionSnapshotsCachesMiddleware,
       ).mockImplementation(async (c, next) => {
-        c.set("referralLeaderboardEditionsCaches", new Map());
+        c.set("referralEditionSnapshotsCaches", new Map());
         return await next();
       });
 
@@ -947,6 +965,56 @@ describe("/v1/ensanalytics", () => {
         expect(response.error).toBe("Service Unavailable");
         expect(response.errorMessage).toContain("currently unavailable");
       }
+    });
+  });
+
+  describe("/accounting", () => {
+    function mockSnapshotCache(
+      slug: ReferralProgramEditionSlug,
+      awardModel: ReferralProgramAwardModel,
+    ): [ReferralProgramEditionSlug, SWRCache<ReferralEditionSnapshot>] {
+      return [
+        slug,
+        {
+          read: async () => ({ awardModel }) as ReferralEditionSnapshot,
+        } as SWRCache<ReferralEditionSnapshot>,
+      ];
+    }
+
+    function setupAccountingMocks(
+      caches: Map<ReferralProgramEditionSlug, SWRCache<ReferralEditionSnapshot>>,
+    ): void {
+      vi.mocked(
+        editionsCachesMiddleware.referralEditionSnapshotsCachesMiddleware,
+      ).mockImplementation(async (c, next) => {
+        c.set("referralEditionSnapshotsCaches", caches);
+        return await next();
+      });
+    }
+
+    it("returns 404 when the edition slug is unknown", async () => {
+      setupAccountingMocks(
+        new Map([mockSnapshotCache("known-edition", ReferralProgramAwardModels.PieSplit)]),
+      );
+
+      const httpResponse = await app.request("/accounting?edition=unknown");
+
+      expect(httpResponse.status).toBe(404);
+      const body = await httpResponse.text();
+      expect(body).toContain("unknown");
+      expect(body).toContain("known-edition");
+    });
+
+    it("returns 400 when the edition is pie-split (not rev-share-cap)", async () => {
+      setupAccountingMocks(
+        new Map([mockSnapshotCache("pie-edition", ReferralProgramAwardModels.PieSplit)]),
+      );
+
+      const httpResponse = await app.request("/accounting?edition=pie-edition");
+
+      expect(httpResponse.status).toBe(400);
+      const body = await httpResponse.text();
+      expect(body).toContain("rev-share-cap");
     });
   });
 });
