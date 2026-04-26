@@ -127,7 +127,7 @@ function buildEventTypeId(eventName: EventNames): EventTypeId {
   }
 }
 
-let indexingOnchainEventsPromise: Promise<void> | null = null;
+let initIndexingOnchainEventsPromise: Promise<void> | null = null;
 
 /**
  * Execute any necessary preconditions before running an event handler
@@ -154,12 +154,12 @@ async function eventHandlerPreconditions(eventType: EventTypeId): Promise<void> 
     }
 
     case EventTypeIds.OnchainEvent: {
-      if (indexingOnchainEventsPromise === null) {
+      if (initIndexingOnchainEventsPromise === null) {
         // We need to work around the Ponder limitation for importing modules,
         // since Ponder would not allow us to use static imports for modules
         // that internally rely on `ponder:api`. Using dynamic imports solves
         // this issue.
-        indexingOnchainEventsPromise = import("./init-indexing-onchain-events").then(
+        initIndexingOnchainEventsPromise = import("./init-indexing-onchain-events").then(
           ({ initIndexingOnchainEvents }) =>
             // Init the indexing of "onchain" events just once in order to
             // optimize the indexing "hot path", since these events are much
@@ -168,7 +168,7 @@ async function eventHandlerPreconditions(eventType: EventTypeId): Promise<void> 
         );
       }
 
-      return await indexingOnchainEventsPromise;
+      return await initIndexingOnchainEventsPromise;
     }
   }
 }
