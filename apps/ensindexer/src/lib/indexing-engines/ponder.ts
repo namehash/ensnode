@@ -127,7 +127,6 @@ function buildEventTypeId(eventName: EventNames): EventTypeId {
   }
 }
 
-let eventHandlerPreconditionsFullyExecuted = false;
 let indexingOnchainEventsPromise: Promise<void> | null = null;
 
 /**
@@ -143,14 +142,6 @@ let indexingOnchainEventsPromise: Promise<void> | null = null;
  * "onchain" event.
  */
 async function eventHandlerPreconditions(eventType: EventTypeId): Promise<void> {
-  if (eventHandlerPreconditionsFullyExecuted) {
-    // Preconditions have already been fully executed, so we can skip executing them again.
-    // We can also reset the promises for indexing setup and onchain events to free up memory,
-    // since they will never be used again after the preconditions have been fully executed.
-    indexingOnchainEventsPromise = null;
-    return;
-  }
-
   switch (eventType) {
     case EventTypeIds.Setup: {
       // For some ENSIndexer instances, the setup handlers are not defined at all,
@@ -168,19 +159,13 @@ async function eventHandlerPreconditions(eventType: EventTypeId): Promise<void> 
         // since Ponder would not allow us to use static imports for modules
         // that internally rely on `ponder:api`. Using dynamic imports solves
         // this issue.
-        indexingOnchainEventsPromise = import("./init-indexing-onchain-events")
-          .then(({ initIndexingOnchainEvents }) =>
+        indexingOnchainEventsPromise = import("./init-indexing-onchain-events").then(
+          ({ initIndexingOnchainEvents }) =>
             // Init the indexing of "onchain" events just once in order to
             // optimize the indexing "hot path", since these events are much
             // more frequent than setup events.
             initIndexingOnchainEvents(),
-          )
-          .then(() => {
-            // Mark the preconditions as fully executed after the first time we execute
-            // the preconditions for onchain events, since that's the "hot path" and we want to
-            // minimize the overhead of this function in the long run.
-            eventHandlerPreconditionsFullyExecuted = true;
-          });
+        );
       }
 
       return await indexingOnchainEventsPromise;

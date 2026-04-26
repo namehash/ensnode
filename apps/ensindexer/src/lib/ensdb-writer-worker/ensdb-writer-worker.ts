@@ -1,15 +1,9 @@
-import { getUnixTime, secondsToMilliseconds } from "date-fns";
+import { secondsToMilliseconds } from "date-fns";
 import type { Duration } from "enssdk";
 
 import type { EnsDbWriter } from "@ensnode/ensdb-sdk";
-import {
-  buildCrossChainIndexingStatusSnapshotOmnichain,
-  buildIndexingMetadataContextInitialized,
-  type IndexingMetadataContext,
-  IndexingMetadataContextStatusCodes,
-} from "@ensnode/ensnode-sdk";
 
-import type { IndexingStatusBuilder } from "@/lib/indexing-status-builder/indexing-status-builder";
+import type { IndexingMetadataContextBuilder } from "@/lib/indexing-metadata-context-builder/indexing-metadata-context-builder";
 import { logger } from "@/lib/logger";
 
 /**
@@ -36,17 +30,20 @@ export class EnsDbWriterWorker {
   private ensDbClient: EnsDbWriter;
 
   /**
-   * Indexing Status Builder instance used by the worker to read ENSIndexer Indexing Status.
+   * Indexing Metadata Context Builder instance used by the worker to read {@link IndexingMetadataContext}.
    */
-  private indexingStatusBuilder: IndexingStatusBuilder;
+  private indexingMetadataContextBuilder: IndexingMetadataContextBuilder;
 
   /**
    * @param ensDbClient ENSDb Writer instance used by the worker to interact with ENSDb.
-   * @param indexingStatusBuilder Indexing Status Builder instance used by the worker to read ENSIndexer Indexing Status.
+   * @param indexingMetadataContextBuilder Indexing Metadata Context Builder instance used by the worker to read {@link IndexingMetadataContext}.
    */
-  constructor(ensDbClient: EnsDbWriter, indexingStatusBuilder: IndexingStatusBuilder) {
+  constructor(
+    ensDbClient: EnsDbWriter,
+    indexingMetadataContextBuilder: IndexingMetadataContextBuilder,
+  ) {
     this.ensDbClient = ensDbClient;
-    this.indexingStatusBuilder = indexingStatusBuilder;
+    this.indexingMetadataContextBuilder = indexingMetadataContextBuilder;
   }
 
   /**
@@ -63,9 +60,9 @@ export class EnsDbWriterWorker {
       throw new Error("EnsDbWriterWorker is already running");
     }
 
-    // Recurring upsert of Indexing Metadata Context into ENSDb.
+    // Recurring update of the Indexing Metadata Context record in ENSDb.
     this.indexingStatusInterval = setInterval(
-      () => this.upsertIndexingMetadataContext(),
+      () => this.updateIndexingMetadataContext(),
       secondsToMilliseconds(INDEXING_STATUS_RECORD_UPDATE_INTERVAL),
     );
   }
@@ -90,40 +87,29 @@ export class EnsDbWriterWorker {
   }
 
   /**
-   * Upsert the current Indexing Status Snapshot into ENSDb.
+   * Update the current Indexing Status Snapshot into ENSDb.
    *
    * This method is called by the scheduler at regular intervals.
    * Errors are logged but not thrown, to keep the worker running.
    */
-  private async upsertIndexingMetadataContext(): Promise<void> {
+  private async updateIndexingMetadataContext(): Promise<void> {
     try {
-      // get system timestamp for the current iteration
-      const snapshotTime = getUnixTime(new Date());
-      const indexingMetadataContext = await this.ensDbClient.getIndexingMetadataContext();
+      const indexingMetadataContext =
+        await this.indexingMetadataContextBuilder.getIndexingMetadataContext();
 
-      if (indexingMetadataContext.statusCode === IndexingMetadataContextStatusCodes.Uninitialized) {
-        throw new Error(
-          `Cannot upsert Indexing Status Snapshot into ENSDb because Indexing Metadata Context should be be initialized first`,
-        );
-      }
-
-      const omnichainSnapshot =
-        await this.indexingStatusBuilder.getOmnichainIndexingStatusSnapshot();
-
-      const updatedIndexingMetadataContext = buildIndexingMetadataContextInitialized(
-        buildCrossChainIndexingStatusSnapshotOmnichain(omnichainSnapshot, snapshotTime),
-        indexingMetadataContext.stackInfo,
-      );
-
-      await this.ensDbClient.upsertIndexingMetadataContext(updatedIndexingMetadataContext);
+      await this.ensDbClient.upsertIndexingMetadataContext(indexingMetadataContext);
     } catch (error) {
+      // If any error happens during the update of indexing metadata context record in ENSDb,
+      // we want to log the error and exit the process with a non-zero exit code,
+      // since this is a critical failure that prevents the ENSIndexer instance from functioning properly.
       logger.error({
-        msg: "Failed to upsert indexing metadata context",
-        error,
+        msg: "Failed to update indexing metadata context record in ENSDb",
         module: "EnsDbWriterWorker",
+        error,
       });
-      // Do not throw the error, as failure to retrieve the Indexing Status
-      // should not cause the ENSDb Writer Worker to stop functioning.
+
+      process.exitCode = 1;
+      throw error;
     }
   }
 }

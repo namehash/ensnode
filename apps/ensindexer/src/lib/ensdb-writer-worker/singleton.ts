@@ -1,5 +1,5 @@
 import { ensDbClient } from "@/lib/ensdb/singleton";
-import { indexingStatusBuilder } from "@/lib/indexing-status-builder/singleton";
+import { indexingMetadataContextBuilder } from "@/lib/indexing-metadata-context-builder/singleton";
 import { logger } from "@/lib/logger";
 
 import { EnsDbWriterWorker } from "./ensdb-writer-worker";
@@ -20,7 +20,7 @@ export function startEnsDbWriterWorker() {
     throw new Error("EnsDbWriterWorker has already been initialized");
   }
 
-  ensDbWriterWorker = new EnsDbWriterWorker(ensDbClient, indexingStatusBuilder);
+  ensDbWriterWorker = new EnsDbWriterWorker(ensDbClient, indexingMetadataContextBuilder);
 
   ensDbWriterWorker
     .run()

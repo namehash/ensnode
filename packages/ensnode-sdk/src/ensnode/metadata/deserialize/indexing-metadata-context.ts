@@ -65,7 +65,9 @@ export function deserializeIndexingMetadataContext(
     .safeParse(serializedIndexingMetadataContext);
 
   if (parsed.error) {
-    throw new Error(`Cannot validate IndexingMetadataContext:\n${prettifyError(parsed.error)}\n`);
+    throw new Error(
+      `Cannot deserialize IndexingMetadataContext:\n${prettifyError(parsed.error)}\n`,
+    );
   }
   return parsed.data;
 }

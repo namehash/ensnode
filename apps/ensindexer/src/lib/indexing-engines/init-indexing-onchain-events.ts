@@ -23,28 +23,16 @@
  * in this module, which is executed in step 5 b) and is guaranteed to be executed on every ENSIndexer instance startup,
  * regardless of the state of Ponder Checkpoints or whether any setup handlers were registered.
  */
-import { getUnixTime } from "date-fns";
-
-import {
-  buildCrossChainIndexingStatusSnapshotOmnichain,
-  buildEnsIndexerStackInfo,
-  buildIndexingMetadataContextInitialized,
-  IndexingMetadataContextStatusCodes,
-  OmnichainIndexingStatusIds,
-  validateEnsIndexerPublicConfigCompatibility,
-} from "@ensnode/ensnode-sdk";
 
 import { migrateEnsNodeSchema } from "@/lib/ensdb/migrate-ensnode-schema";
 import { ensDbClient } from "@/lib/ensdb/singleton";
 import { startEnsDbWriterWorker } from "@/lib/ensdb-writer-worker/singleton";
 import {
-  ensRainbowClient,
   waitForEnsRainbowToBeHealthy,
   waitForEnsRainbowToBeReady,
 } from "@/lib/ensrainbow/singleton";
-import { indexingStatusBuilder } from "@/lib/indexing-status-builder/singleton";
+import { indexingMetadataContextBuilder } from "@/lib/indexing-metadata-context-builder/singleton";
 import { logger } from "@/lib/logger";
-import { publicConfigBuilder } from "@/lib/public-config-builder/singleton";
 
 /**
  * Prepare for executing the "onchain" event handlers.
@@ -74,104 +62,36 @@ import { publicConfigBuilder } from "@/lib/public-config-builder/singleton";
  * 1. Make ENSDb instance "ready" for ENSDb clients to use.
  */
 export async function initIndexingOnchainEvents(): Promise<void> {
-  // TODO: wait for ENSDb instance to be healthy
-  // Ensure the ENSNode Schema in ENSDb is up to date by running any pending migrations.
-  await migrateEnsNodeSchema();
-
-  // Before calling `ensRainbowClient.config()`, we want to make sure that
-  // the ENSRainbow instance is healthy and ready to serve requests.
-  // This is a quick check, as we expect the ENSRainbow instance to be healthy
-  // by the time ENSIndexer instance executes `initIndexingOnchainEvents`.
-  await waitForEnsRainbowToBeHealthy();
-
   try {
-    const [
-      inMemoryIndexingStatusSnapshot,
-      inMemoryEnsDbPublicConfig,
-      inMemoryEnsIndexerPublicConfig,
-      inMemoryEnsRainbowPublicConfig,
-      storedIndexingMetadataContext,
-    ] = await Promise.all([
-      indexingStatusBuilder.getOmnichainIndexingStatusSnapshot(),
-      ensDbClient.buildEnsDbPublicConfig(),
-      publicConfigBuilder.getPublicConfig(),
-      ensRainbowClient.config(),
-      ensDbClient.getIndexingMetadataContext(),
-    ]);
+    // TODO: wait for ENSDb instance to be healthy before running any queries against it.
 
-    if (
-      storedIndexingMetadataContext.statusCode === IndexingMetadataContextStatusCodes.Uninitialized
-    ) {
-      logger.info({
-        msg: `Indexing Metadata Context is "uninitialized"`,
-      });
+    // Ensure the ENSNode Schema in ENSDb is up to date by running any pending migrations.
+    await migrateEnsNodeSchema();
 
-      // Invariant: indexing status must be "unstarted" when the indexing metadata context is uninitialized,
-      // since we haven't started processing any onchain events yet
-      if (inMemoryIndexingStatusSnapshot.omnichainStatus !== OmnichainIndexingStatusIds.Unstarted) {
-        throw new Error(
-          `Omnichain indexing status must be "unstarted" for "uninitialized" Indexing Metadata Context. Provided omnichain indexing status "${inMemoryIndexingStatusSnapshot.omnichainStatus}".`,
-        );
-      }
-    } else {
-      logger.info({
-        msg: `Indexing Metadata Context is "initialized"`,
-      });
-      logger.debug({
-        msg: `Indexing Metadata Context`,
-        indexingStatus: storedIndexingMetadataContext.indexingStatus,
-        stackInfo: storedIndexingMetadataContext.stackInfo,
-      });
-      // if (ensIndexerPublicConfig.ensIndexerBuildId !== storedIndexingMetadataContext.stackInfo.ensIndexer.ensIndexerBuildId) {
-      // TODO: store the `ensIndexerPublicConfig` object in ENSDb so `storedIndexingMetadataContext.stackInfo.ensIndexer` is updated
-      // }
-      const { ensIndexer: storedEnsIndexerPublicConfig } = storedIndexingMetadataContext.stackInfo;
-      validateEnsIndexerPublicConfigCompatibility(
-        inMemoryEnsIndexerPublicConfig,
-        storedEnsIndexerPublicConfig,
-      );
-    }
+    // Before calling `ensRainbowClient.config()`, we want to make sure that
+    // the ENSRainbow instance is healthy and ready to serve requests.
+    // This is a quick check, as we expect the ENSRainbow instance to be healthy
+    // by the time ENSIndexer instance executes `initIndexingOnchainEvents`.
+    await waitForEnsRainbowToBeHealthy();
 
-    // Build the {@link CrossChainIndexingStatusSnapshot} with the current snapshot time.
-    // This is important to make sure the `snapshotTime` is always up to date in
-    // the indexing status snapshot stored in ENSDb.
-    const now = getUnixTime(new Date());
-    const crossChainIndexingStatusSnapshot = buildCrossChainIndexingStatusSnapshotOmnichain(
-      inMemoryIndexingStatusSnapshot,
-      now,
-    );
-
-    // Build EnsIndexerStackInfo based on the current state of in-memory public
-    // config objects. It's unlikely, but possible, that after the ENSIndexer
-    // instance restarts, some values in the public config objects have changed
-    // compared to the previous instance before the restart. For example,
-    // if the ENSIndexer instance is redeployed with a new version of the code that has different default values for some config parameters, or if there are changes in the environment variables used to build the public config objects.
-    const updatedStackInfo = buildEnsIndexerStackInfo(
-      inMemoryEnsDbPublicConfig,
-      inMemoryEnsIndexerPublicConfig,
-      inMemoryEnsRainbowPublicConfig,
-    );
-
-    const updatedIndexingMetadataContext = buildIndexingMetadataContextInitialized(
-      crossChainIndexingStatusSnapshot,
-      updatedStackInfo,
-    );
+    const indexingMetadataContext =
+      await indexingMetadataContextBuilder.getIndexingMetadataContext();
 
     logger.info({
       msg: `Upserting Indexing Metadata Context Initialized`,
     });
     logger.debug({
       msg: `Indexing Metadata Context`,
-      indexingStatus: updatedIndexingMetadataContext.indexingStatus,
-      stackInfo: updatedIndexingMetadataContext.stackInfo,
+      indexingStatus: indexingMetadataContext.indexingStatus,
+      stackInfo: indexingMetadataContext.stackInfo,
     });
-    await ensDbClient.upsertIndexingMetadataContext(updatedIndexingMetadataContext);
+    await ensDbClient.upsertIndexingMetadataContext(indexingMetadataContext);
     logger.info({
       msg: `Successfully upserted Indexing Metadata Context Initialized`,
     });
 
     // Before starting to process onchain events, we want to make sure that
-    // ENSRainbow is ready and ready to serve the "heal" requests.
+    // ENSRainbow is ready to serve the "heal" requests.
     await waitForEnsRainbowToBeReady();
 
     // TODO: start Indexing Status Sync worker
