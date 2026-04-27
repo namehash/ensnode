@@ -44,13 +44,12 @@ export const byIdLookupResolvers: Record<string, Record<string, Resolver>> = {
       const by = args.by as { id?: RegistryId; contract?: AccountId };
 
       // see if we have an ENSv1VirtualRegistry by id
-      if (by.id !== undefined) {
+      if (by.id) {
         const virtualKey = cache.keyOfEntity({ __typename: "ENSv1VirtualRegistry", id: by.id });
         if (virtualKey && cache.resolve(virtualKey, "id")) return virtualKey;
       }
 
       // otherwise, fall back to concrete by id or contract
-
       const id = by.id ?? (by.contract ? makeConcreteRegistryId(by.contract) : undefined);
       if (id) {
         const v1Key = cache.keyOfEntity({ __typename: "ENSv1Registry", id });
