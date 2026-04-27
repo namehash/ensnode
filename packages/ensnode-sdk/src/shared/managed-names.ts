@@ -1,11 +1,13 @@
 import {
   type AccountId,
+  type AccountIdString,
   asInterpretedName,
   ENS_ROOT_NAME,
   type InterpretedName,
   type Name,
   type Node,
   namehashInterpretedName,
+  stringifyAccountId,
 } from "enssdk";
 
 import { DatasourceNames, type ENSNamespaceId } from "@ensnode/datasources";
@@ -56,9 +58,6 @@ const MANAGED_NAME_BY_NAMESPACE: Partial<Record<ENSNamespaceId, Record<Name, Nam
 /**
  * Produces a mapping of a Managed Name to its concrete Registry and the contracts that operate in
  * its (sub)Registry context.
- *
- * The concrete ENSv1 Registry is included in `contracts` so that its own handlers resolve via the
- * same {@link getManagedName} path.
  */
 const getContractsByManagedName = (namespace: ENSNamespaceId) => {
   const ensRootRegistry = getDatasourceContract(
@@ -151,41 +150,46 @@ const getContractsByManagedName = (namespace: ENSNamespaceId) => {
   } satisfies Record<Name, ManagedNameGroup>;
 };
 
-// Cache of namehash(name) — interpreted names namehash identically regardless of namespace.
-const namehashCache = new Map<Name, Node>();
-const cachedNamehash = (name: Name): Node => {
-  const cached = namehashCache.get(name);
-  if (cached !== undefined) return cached;
+interface ManagedNameResult {
+  name: InterpretedName;
+  node: Node;
+  registry: AccountId;
+}
 
-  const node = namehashInterpretedName(asInterpretedName(name));
-  namehashCache.set(name, node);
-  return node;
-};
+/**
+ * Cache for the memoization of {@link getManagedName} below.
+ */
+const cache = new Map<`${ENSNamespaceId}:${AccountIdString}`, ManagedNameResult>();
 
 /**
  * Given a `contract` in a `namespace`, identify its Managed Name, Node, and the concrete ENSv1
- * Registry whose namegraph it writes into.
+ * Registry in the context of which it operates.
  *
- * @dev Caches the result of namehash(name).
- * @throws if `contract` is not configured under any Managed Name for `namespace`.
+ * @dev memoized by (namespace, contract).
+ * @throws if `contract` is not configured under any Managed Name for `namespace`
  */
 export const getManagedName = (
   namespace: ENSNamespaceId,
   contract: AccountId,
-): { name: InterpretedName; node: Node; registry: AccountId } => {
+): ManagedNameResult => {
+  const cacheKey = `${namespace}:${stringifyAccountId(contract)}` as const;
+  const cached = cache.get(cacheKey);
+  if (cached !== undefined) return cached;
+
   for (const [managedName, group] of Object.entries(getContractsByManagedName(namespace))) {
     const isAnyOfTheContracts = group.contracts.some((_contract) =>
       accountIdEqual(_contract, contract),
     );
     if (isAnyOfTheContracts) {
       const namespaceSpecific = MANAGED_NAME_BY_NAMESPACE[namespace]?.[managedName];
-      // use the namespace-specific Managed Name if specified, otherwise the default
-      // NOTE: we cast to InterpretedName directly to avoid the overhead of asInterpretedName;
-      // both namespaceSpecific and managedName are guaranteed to be InterpretedName (see above)
-      const name = (namespaceSpecific ?? managedName) as InterpretedName;
-      const node = cachedNamehash(name);
 
-      return { name, node, registry: group.registry };
+      // use the namespace-specific Managed Name if specified, otherwise the default
+      const name = asInterpretedName(namespaceSpecific ?? managedName);
+      const node = namehashInterpretedName(name);
+
+      const result: ManagedNameResult = { name, node, registry: group.registry };
+      cache.set(cacheKey, result);
+      return result;
     }
   }
 

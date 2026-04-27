@@ -31,12 +31,6 @@ const registrar = getDatasourceContract(
   "BaseRegistrar",
 );
 
-const controller = getDatasourceContract(
-  ENSNamespaceIds.Mainnet,
-  DatasourceNames.ENSRoot,
-  "LegacyEthRegistrarController",
-);
-
 const ensv1Registry = getDatasourceContract(
   ENSNamespaceIds.Mainnet,
   DatasourceNames.ENSRoot,
@@ -51,7 +45,7 @@ describe("managed-names", () => {
   // NOTE: because the cache isn't resettable between test runs (exporting a reset method isn't worth),
   // we simply enforce that the cache test case be run first via .sequential
   describe.sequential("getManagedName", () => {
-    it("should cache the result of viem#namehash", () => {
+    it("should memoize per (namespace, contract)", () => {
       expect(spy.mock.calls).toHaveLength(0);
 
       expect(getManagedName(registrar)).toMatchObject({ name: "eth", node: ETH_NODE });
@@ -59,9 +53,8 @@ describe("managed-names", () => {
       // first call should invoke namehash
       expect(spy.mock.calls).toHaveLength(1);
 
-      expect(getManagedName(controller)).toMatchObject({ name: "eth", node: ETH_NODE });
-
-      // second call should not invoke namehash
+      // repeat call for the same contract is served from cache
+      expect(getManagedName(registrar)).toMatchObject({ name: "eth", node: ETH_NODE });
       expect(spy.mock.calls).toHaveLength(1);
     });
 
