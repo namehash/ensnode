@@ -6,7 +6,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { DEVNET_OWNER } from "@ensnode/ensnode-sdk/internal";
+import { accounts, addresses, fixtures } from "@ensnode/datasources/devnet";
 
 const BASE_URL = process.env.ENSNODE_URL!;
 
@@ -18,7 +18,7 @@ describe("GET /api/resolve/records/:name", () => {
       query: "addresses=60",
       expectedStatus: 200,
       expectedBody: {
-        records: { addresses: { 60: DEVNET_OWNER } },
+        records: { addresses: { 60: accounts.owner.address } },
         accelerationRequested: false,
         accelerationAttempted: false,
       },
@@ -30,7 +30,7 @@ describe("GET /api/resolve/records/:name", () => {
       query: "addresses=60",
       expectedStatus: 200,
       expectedBody: {
-        records: { addresses: { 60: DEVNET_OWNER } },
+        records: { addresses: { 60: accounts.owner.address } },
         accelerationRequested: false,
         accelerationAttempted: false,
       },
@@ -65,7 +65,7 @@ describe("GET /api/resolve/records/:name", () => {
       expectedStatus: 200,
       expectedBody: {
         records: {
-          addresses: { 60: DEVNET_OWNER },
+          addresses: { 60: accounts.owner.address },
           texts: { description: "example.eth" },
         },
         accelerationRequested: false,
@@ -90,7 +90,7 @@ describe("GET /api/resolve/records/:name", () => {
       query: "addresses=60",
       expectedStatus: 200,
       expectedBody: {
-        records: { addresses: { 60: DEVNET_OWNER } },
+        records: { addresses: { 60: accounts.owner.address } },
         accelerationRequested: false,
         accelerationAttempted: false,
       },
@@ -112,7 +112,7 @@ describe("GET /api/resolve/records/:name", () => {
       query: "addresses=60",
       expectedStatus: 200,
       expectedBody: {
-        records: { addresses: { 60: DEVNET_OWNER } },
+        records: { addresses: { 60: accounts.owner.address } },
         accelerationRequested: false,
         accelerationAttempted: false,
       },
@@ -124,18 +124,109 @@ describe("GET /api/resolve/records/:name", () => {
       query: "addresses=60",
       expectedStatus: 200,
       expectedBody: {
-        records: { addresses: { 60: DEVNET_OWNER } },
+        records: { addresses: { 60: accounts.owner.address } },
         accelerationRequested: false,
         accelerationAttempted: false,
       },
     },
+    // -- Text records (seeded in devnet) --
+    {
+      description: "resolves avatar text record for test.eth",
+      name: "test.eth",
+      query: "texts=avatar",
+      expectedStatus: 200,
+      expectedBody: {
+        records: { texts: { avatar: "https://example.com/avatar.png" } },
+        accelerationRequested: false,
+        accelerationAttempted: false,
+      },
+    },
+    {
+      description: "returns null for unset text record",
+      name: "test.eth",
+      query: "texts=nonexistent.key",
+      expectedStatus: 200,
+      expectedBody: {
+        records: { texts: { "nonexistent.key": null } },
+        accelerationRequested: false,
+        accelerationAttempted: false,
+      },
+    },
+    // -- Multi-coin addresses (seeded in devnet) --
+    {
+      description: "resolves multiple coin types at once for test.eth",
+      name: "test.eth",
+      query: "addresses=60,0,2,777777",
+      expectedStatus: 200,
+      expectedBody: {
+        records: {
+          addresses: {
+            60: accounts.owner.address,
+            0: fixtures.bitcoinAddress,
+            2: fixtures.litecoinAddress,
+            777777: null,
+          },
+        },
+        accelerationRequested: false,
+        accelerationAttempted: false,
+      },
+    },
+    // -- Combined records --
+    {
+      description: "resolves every supported record type for test.eth",
+      name: "test.eth",
+      query: [
+        "name=true",
+        "addresses=60,0,2",
+        "texts=avatar,description,url,email,com.twitter,com.github",
+        "contenthash=true",
+        "pubkey=true",
+        "version=true",
+        "abi=1",
+        `interfaces=${fixtures.fourBytesInterface}`,
+      ].join("&"),
+      expectedStatus: 200,
+      expectedBody: {
+        records: {
+          addresses: {
+            60: accounts.owner.address,
+            0: fixtures.bitcoinAddress,
+            2: fixtures.litecoinAddress,
+          },
+          texts: {
+            avatar: "https://example.com/avatar.png",
+            description: "test.eth",
+            url: "https://ens.domains",
+            email: "test@ens.domains",
+            "com.twitter": "ensdomains",
+            "com.github": "ensdomains",
+          },
+          contenthash: fixtures.contenthash,
+          pubkey: {
+            x: fixtures.publicKeyX,
+            y: fixtures.publicKeyY,
+          },
+          version: expect.any(String),
+          abi: {
+            contentType: "1",
+            data: fixtures.abiBytes,
+          },
+          interfaces: {
+            [fixtures.fourBytesInterface]: addresses.one,
+          },
+        },
+        accelerationRequested: false,
+        accelerationAttempted: false,
+      },
+    },
+    // -- Acceleration --
     {
       description: "test.eth with accelerate=true returns accelerationRequested: true",
       name: "test.eth",
       query: "addresses=60&accelerate=true",
       expectedStatus: 200,
       expectedBody: {
-        records: { addresses: { 60: DEVNET_OWNER } },
+        records: { addresses: { 60: accounts.owner.address } },
         accelerationRequested: true,
         accelerationAttempted: false,
       },

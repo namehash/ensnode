@@ -18,14 +18,21 @@
     "dist"
   ],
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./devnet": "./src/devnet/index.ts"
   },
   "sideEffects": false,
   "publishConfig": {
     "access": "public",
     "exports": {
-      "default": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      ".": {
+        "default": "./dist/index.js",
+        "types": "./dist/index.d.ts"
+      },
+      "./devnet": {
+        "default": "./dist/devnet/index.js",
+        "types": "./dist/devnet/index.d.ts"
+      }
     },
     "main": "./dist/index.js",
     "module": "./dist/index.mjs",
