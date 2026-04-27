@@ -54,6 +54,8 @@ import {
   ponder,
 } from "ponder:registry";
 
+import { logger } from "@/lib/logger";
+
 /**
  * Context passed to event handlers registered with
  * {@link addOnchainEventListener}.
@@ -168,6 +170,31 @@ function buildEventTypeId(eventName: EventNames): EventTypeId {
 
 let initIndexingOnchainEventsPromise: Promise<void> | null = null;
 
+// Cumulative events-per-second tracking across the process lifetime. Logged at most
+// once per minute. Overhead is one Date.now() and a counter increment per event.
+const EPS_LOG_INTERVAL_MS = 60_000;
+let epsTotalEvents = 0;
+let epsStartTime: number | null = null;
+let epsLastLogTime = 0;
+
+function recordEventForEps(): void {
+  const now = Date.now();
+  if (epsStartTime === null) {
+    epsStartTime = now;
+    epsLastLogTime = now;
+  }
+  epsTotalEvents++;
+  if (now - epsLastLogTime <= EPS_LOG_INTERVAL_MS) return;
+  const durationSec = (now - epsStartTime) / 1000;
+  logger.info({
+    msg: "Indexing throughput",
+    events: epsTotalEvents,
+    durationSec: Number(durationSec.toFixed(1)),
+    eps: Number((epsTotalEvents / durationSec).toFixed(2)),
+  });
+  epsLastLogTime = now;
+}
+
 /**
  * Execute any necessary preconditions before running an event handler
  * for a given event type.
@@ -175,12 +202,16 @@ let initIndexingOnchainEventsPromise: Promise<void> | null = null;
  * Some event handlers may have preconditions that need to be met before
  * they can run.
  *
- * This function is idempotent and will only execute its logic once, even if
- * called multiple times. This is to ensure that we affect the "hot path" of
- * indexing as little as possible, since this function is called for every
- * "onchain" event.
+ * The Setup and Onchain preconditions are memoized and execute their logic only
+ * once per process, regardless of how often this function is called — essential
+ * because it's invoked for every indexed event. EPS accounting via
+ * {@link recordEventForEps} runs on every call, but its hot-path cost is a
+ * single Date.now() and a counter increment; structured logging is emitted at
+ * most once per {@link EPS_LOG_INTERVAL_MS}.
  */
 async function eventHandlerPreconditions(eventType: EventTypeId): Promise<void> {
+  recordEventForEps();
+
   switch (eventType) {
     case EventTypeIds.Setup: {
       // For some ENSIndexer instances, the setup handlers are not defined at all,

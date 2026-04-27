@@ -1,6 +1,8 @@
 import type { Context, EventNames } from "ponder:registry";
 import { beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest";
 
+import "@/lib/__test__/mockLogger";
+
 import type { IndexingEngineContext, IndexingEngineEvent } from "./ponder";
 
 const { mockPonderOn } = vi.hoisted(() => ({ mockPonderOn: vi.fn() }));
