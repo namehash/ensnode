@@ -10,6 +10,7 @@ import {
   makeSubdomainNode,
   type Node,
   type NormalizedAddress,
+  type RegistryId,
 } from "enssdk";
 import { isAddressEqual, zeroAddress } from "viem";
 
@@ -63,7 +64,6 @@ export default function () {
     // namegraph; canonicalizing here ensures Old events that pass `nodeIsMigrated` don't fragment
     // domains across two Registry IDs. This is why we use getManagedName over just `getThisAccountId`.
     const { registry } = getManagedName(getThisAccountId(context, event));
-    const concreteRegistryId = makeENSv1RegistryId(registry);
 
     const isTLD = parentNode === ENS_ROOT_NODE;
     const node = makeSubdomainNode(labelHash, parentNode);
@@ -72,43 +72,34 @@ export default function () {
     // this ENSv1Domain's (parent) Registry is either:
     // a) if this is a TLD, the (concrete) ENSv1Registry identified by (chainId, address), or
     // b) the ENSv1VirtualRegistry identified by (chainId, address, parentNode)
-    const parentRegistryId = isTLD
-      ? concreteRegistryId
-      : makeENSv1VirtualRegistryId(registry, parentNode);
-
-    // this ENSv1Domain's (sub) Registry is always an ENSv1VirtualRegistry identified by
-    // (chainId, address, node)
-    const subregistryId = makeENSv1VirtualRegistryId(registry, node);
-
-    // ensure (concrete) ENSv1Registry
-    // Optimization: only if the following is a TLD (reduces the db calls that would be useless if
-    // we ran this on _every_ NewOwner event)
+    let parentRegistryId: RegistryId;
     if (isTLD) {
+      // if this is a TLD, upsert the (concrete) ENSv1Registry representing this Registry contract
+      parentRegistryId = makeENSv1RegistryId(registry);
       await context.ensDb
         .insert(ensIndexerSchema.registry)
-        .values({ id: concreteRegistryId, type: "ENSv1Registry", ...registry })
+        .values({ id: parentRegistryId, type: "ENSv1Registry", ...registry })
+        .onConflictDoNothing();
+    } else {
+      // otherwise, ensure this ENSv1 Domain's parent Domain receives a virtual registry w/ Canonical Domain reference
+      parentRegistryId = makeENSv1VirtualRegistryId(registry, parentNode);
+      await context.ensDb
+        .insert(ensIndexerSchema.registry)
+        .values({
+          id: parentRegistryId,
+          type: "ENSv1VirtualRegistry",
+          chainId: registry.chainId,
+          address: registry.address,
+          node,
+        })
+        .onConflictDoNothing();
+
+      // ensure Canonical Domain reference
+      await context.ensDb
+        .insert(ensIndexerSchema.registryCanonicalDomain)
+        .values({ registryId: parentRegistryId, domainId })
         .onConflictDoNothing();
     }
-
-    // every ENSv1 Domain receives a virtual registry w/ Canonical Domain reference
-    // NOTE: we eagerly upsert the ENSv1VirtualRegistry here, rather than lazily on child name creation
-    // to pay the cost per-parent-domain-event rather than per-child-domain(s)-events
-    await context.ensDb
-      .insert(ensIndexerSchema.registry)
-      .values({
-        id: subregistryId,
-        type: "ENSv1VirtualRegistry",
-        chainId: registry.chainId,
-        address: registry.address,
-        node,
-      })
-      .onConflictDoNothing();
-
-    // ensure Canonical Domain reference
-    await context.ensDb
-      .insert(ensIndexerSchema.registryCanonicalDomain)
-      .values({ registryId: subregistryId, domainId })
-      .onConflictDoNothing();
 
     const ownerId = interpretAddress(owner);
     await ensureAccount(context, owner);
@@ -132,7 +123,6 @@ export default function () {
         // indexing code re-materializes the Domain.ownerId to the NameWrapper-emitted value.
         ownerId,
         rootRegistryOwnerId: ownerId,
-        subregistryId,
       })
       .onConflictDoUpdate({ ownerId, rootRegistryOwnerId: ownerId });
 
