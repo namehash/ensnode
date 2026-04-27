@@ -19,7 +19,7 @@ export async function nodeIsMigrated(context: IndexingEngineContext, node: Node)
   }
 
   const record = await context.ensDb.find(ensIndexerSchema.migratedNode, { node });
-  return !!record;
+  return record !== null;
 }
 
 /**

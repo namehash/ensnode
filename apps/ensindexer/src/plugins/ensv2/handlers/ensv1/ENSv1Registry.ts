@@ -17,7 +17,7 @@ import { getENSRootChainId, interpretAddress, PluginName } from "@ensnode/ensnod
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { ensureDomainEvent } from "@/lib/ensv2/event-db-helpers";
-import { ensureLabel, ensureUnknownLabel } from "@/lib/ensv2/label-db-helpers";
+import { ensureLabel, ensureUnknownLabel, labelExists } from "@/lib/ensv2/label-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { healAddrReverseSubnameLabel } from "@/lib/heal-addr-reverse-subname-label";
 import {
@@ -138,22 +138,26 @@ export default function () {
 
     // Label Healing
     //
-    // If this is a direct subname of addr.reverse, we have 100% on-chain label discovery.
-    //
-    // Note: Per ENSIP-19, only the ENS Root chain may record primary names under the `addr.reverse`
-    // subname. Also per ENSIP-19 no Reverse Names need exist in (shadow)Registries on non-root
-    // chains, so we explicitly only support Root chain addr.reverse-based Reverse Names: ENSIP-19
-    // CoinType-specific Reverse Names (ex: [address].[coinType].reverse) don't actually exist in
-    // the ENS Registry: wildcard resolution is used, so this NewOwner event will never be emitted
-    // with a domain created as a child of a Coin-Type specific Reverse Node (ex: [coinType].reverse).
-    if (
-      parentNode === ADDR_REVERSE_NODE &&
-      context.chain.id === getENSRootChainId(config.namespace)
-    ) {
-      const label = await healAddrReverseSubnameLabel(context, event, labelHash);
-      await ensureLabel(context, label);
-    } else {
-      await ensureUnknownLabel(context, labelHash);
+    // only attempt to heal label if it doesn't already exist
+    const exists = await labelExists(context, labelHash);
+    if (!exists) {
+      // If this is a direct subname of addr.reverse, we have 100% on-chain label discovery.
+      //
+      // Note: Per ENSIP-19, only the ENS Root chain may record primary names under the `addr.reverse`
+      // subname. Also per ENSIP-19 no Reverse Names need exist in (shadow)Registries on non-root
+      // chains, so we explicitly only support Root chain addr.reverse-based Reverse Names: ENSIP-19
+      // CoinType-specific Reverse Names (ex: [address].[coinType].reverse) don't actually exist in
+      // the ENS Registry: wildcard resolution is used, so this NewOwner event will never be emitted
+      // with a domain created as a child of a Coin-Type specific Reverse Node (ex: [coinType].reverse).
+      if (
+        parentNode === ADDR_REVERSE_NODE &&
+        context.chain.id === getENSRootChainId(config.namespace)
+      ) {
+        const label = await healAddrReverseSubnameLabel(context, event, labelHash);
+        await ensureLabel(context, label);
+      } else {
+        await ensureUnknownLabel(context, labelHash);
+      }
     }
 
     // push event to domain history
