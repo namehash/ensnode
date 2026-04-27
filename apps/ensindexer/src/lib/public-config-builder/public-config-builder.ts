@@ -49,6 +49,7 @@ export class PublicConfigBuilder {
     if (typeof this.immutablePublicConfig === "undefined") {
       const [versionInfo, ensRainbowPublicConfig] = await Promise.all([
         this.getEnsIndexerVersionInfo(),
+        // TODO: remove dependency on ENSRainbow by dropping `ensRainbowPublicConfig` from `EnsIndexerPublicConfig`.
         this.ensRainbowClient.config(),
       ]);
 

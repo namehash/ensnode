@@ -1,9 +1,48 @@
 /**
- * This module is an abstraction layer for the Indexing Engine of ENSIndexer.
- * It decouples core indexing logic from Ponder-specific implementation details.
- * Benefits of this decoupling include:
- * - Building a custom context data model.
- * - Implementing shared logic before or after event handlers, if needed.
+ * Ponder Indexing Engine
+ *
+ * This module provides an abstraction layer over the Ponder Indexing Engine
+ * to decouple the core indexing logic of the ENSIndexer from Ponder-specific
+ * implementation details. This allows us to build a custom context data model,
+ * and implement shared logic before or after event handlers, if needed, without
+ * affecting the "hot path" of indexing onchain events.
+ *
+ * Ponder Indexing Engine runs within an ENSIndexer instance, and is responsible
+ * for:
+ * - Managing the Ponder Schema and the ENSIndexer Schema in ENSDb instance.
+ * - Running HTTP server.
+ * - Executing the omnichain indexing strategy for sourcing and handling events.
+ *
+ * The startup sequence of the Ponder Indexing Engine is as follows:
+ * 1. Execute Ponder Config file (apps/ensindexer/ponder/ponder.config.ts),
+ *    Ponder Schema file (apps/ensindexer/ponder/ponder.schema.ts),
+ *    and all event handler files (as per nested imports in
+ *    apps/ensindexer/ponder/src/register-handlers.ts).
+ * 2. Connect to the database and initialize required database objects.
+ *    a) Execute database migrations for the ENSIndexer Schema in ENSDb.
+ *    b) Execute database migrations for the Ponder Schema in ENSDb.
+ * 3. Execute Ponder HTTP API file (apps/ensindexer/ponder/src/api/index.ts)
+ *    and start the HTTP server.
+ * 4. Execute the omnichain indexing strategy
+ *    a) Start sourcing onchain events from the configured RPCs for
+ *       the indexed contracts.
+ *    b) Check if Ponder Checkpoints have been initialized in
+ *       the ENSIndexer Schema in ENSDb. If not, execute
+ *       the setup event handlers (if any), and initialize
+ *       the Ponder Checkpoints in ENSDb.
+ *    c) Once the Ponder Checkpoints are initialized, start executing
+ *       the onchain event handlers for the sourced onchain events.
+ *
+ * The ENSIndexer instance has to be able to execute arbitrary logic
+ * before any onchain event handlers are executed, for example, to set up
+ * necessary state in the ENSNode Schema in ENSDb instance. To achieve this,
+ * we define the {@link addOnchainEventListener} function, which is
+ * a thin wrapper around {@link ponder.on} that allows us to execute additional
+ * logic before the onchain event handlers are executed, while keeping the
+ * "hot path" of indexing onchain events as efficient as possible.
+ *
+ * For more details on Ponder and its concepts, see the Ponder documentation.
+ * @see https://ponder.sh/docs/indexing/overview
  */
 
 export * as ensIndexerSchema from "ponder:schema";

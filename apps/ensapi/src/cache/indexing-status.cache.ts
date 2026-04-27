@@ -43,7 +43,7 @@ export const indexingStatusCache = lazyProxy<IndexingStatusCache>(
             throw new Error("Indexing Metadata Context was uninitialized in ENSDb.");
           }
 
-          // The CrossChainIndexingStatusSnapshot has been successfully built for caching.
+          // The CrossChainIndexingStatusSnapshot has been successfully loaded for caching.
           // Therefore, return it so that this current invocation of `readCache` will:
           // - Replace the currently cached value (if any) with this new value.
           // - Return this non-null value.

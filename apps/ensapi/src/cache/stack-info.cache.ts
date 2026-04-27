@@ -28,6 +28,10 @@ export type EnsNodeStackInfoCache = SWRCache<EnsNodeStackInfo>;
  * by proactive revalidation, since the {@link EnsNodeStackInfo} might change during
  * the lifecycle of the ENSApi instance, for example, when
  * {@link IndexingMetadataContextInitialized.stackInfo} is updated in ENSDb.
+ * This is unlikely to happen at all, and if it does happen, it is likely to be
+ * very infrequent. However, proactive revalidation ensures that if such changes do happen,
+ * the cached value will be updated in a reasonable time frame without requiring
+ * a restart of the ENSApi application.
  *
  * Configuration:
  * - ttl: 1 minute - Allow cached value to be fresh for up to 1 minute.
