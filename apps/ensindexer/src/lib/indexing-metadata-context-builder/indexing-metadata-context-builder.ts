@@ -20,8 +20,6 @@ import type { StackInfoBuilder } from "@/lib/stack-info-builder/stack-info-build
 function invariant_indexingStatusIsUnstartedForIndexingMetadataContextUninitialized(
   inMemoryIndexingStatusSnapshot: OmnichainIndexingStatusSnapshot,
 ): void {
-  // Invariant: indexing status must be "unstarted" when the indexing metadata context is uninitialized,
-  // since we haven't started processing any onchain events yet
   if (inMemoryIndexingStatusSnapshot.omnichainStatus !== OmnichainIndexingStatusIds.Unstarted) {
     throw new Error(
       `Omnichain indexing status must be "unstarted" for "uninitialized" Indexing Metadata Context. Provided omnichain indexing status "${inMemoryIndexingStatusSnapshot.omnichainStatus}".`,
@@ -44,9 +42,35 @@ function invariant_ensIndexerPublicConfigIsCompatibleWithStackInfo(
 
 export class IndexingMetadataContextBuilder {
   constructor(
+    /**
+     * ENSDb Client used to read the currently stored
+     * {@link IndexingMetadataContextInitialized} record from ENSDb,
+     * which the invariant validation logic in
+     * {@link getIndexingMetadataContext} depends on.
+     */
     private readonly ensDbClient: EnsDbReader,
+
+    /**
+     * IndexingStatusBuilder used to get
+     * the current in-memory {@link OmnichainIndexingStatusSnapshot} for building
+     * the "in-memory" {@link IndexingMetadataContextInitialized} object
+     * within {@link getIndexingMetadataContext}.
+     */
     private readonly indexingStatusBuilder: IndexingStatusBuilder,
+
+    /**
+     * StackInfoBuilder used to get
+     * the current in-memory {@link EnsIndexerStackInfo} for building
+     * the "in-memory" {@link IndexingMetadataContextInitialized} object
+     * within {@link getIndexingMetadataContext}.
+     */
     private readonly stackInfoBuilder: StackInfoBuilder,
+
+    /**
+     * Local Ponder Client used to determine if the local Ponder app
+     * is running in dev mode, which affects the validation logic applied
+     * in {@link getIndexingMetadataContext}.
+     */
     private readonly localPonderClient: LocalPonderClient,
   ) {}
 
