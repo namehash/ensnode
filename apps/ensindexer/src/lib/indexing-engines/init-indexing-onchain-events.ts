@@ -1,27 +1,7 @@
 /**
- * This module defines the initialization logic for the onchain event handlers of
- * the Ponder indexing engine executed in an ENSIndexer instance.
- *
- * Onchain event handlers are executed by Ponder once per ENSIndexer instance lifetime,
- * at the start of the omnichain indexing process.
- *
- * ENSIndexer startup sequence executed by Ponder:
- *  1. Connect to the database and initialize required database objects.
- *  2. Start the omnichain indexing process.
- *  3. Check whether Ponder Checkpoints are already initialized.
- *  4. If not:
- *     a) Execute setup handlers, if any were registered.
- *     b) Initialize Ponder Checkpoints.
- *  5. a) Make Ponder HTTP API usable.
- *  5. b) Start executing "onchain" event handlers.
- *
- * Step 4 is skipped on ENSIndexer instance restart if Ponder Checkpoints were
- * already initialized in a previous run. Also, step 4 a) is skipped if
- * no setup handlers were registered. Therefore, we don't implement any init
- * logic for setup handlers. Instead, to guarantee that any necessary initialization logic
- * is executed each time the ENSIndexer instance starts, we implement the init indexing onchain events logic
- * in this module, which is executed in step 5 b) and is guaranteed to be executed on every ENSIndexer instance startup,
- * regardless of the state of Ponder Checkpoints or whether any setup handlers were registered.
+ * This module defines the initialization logic to be executed by
+ * the ENSIndexer instance before it starts executing any "onchain"
+ * event handlers.
  */
 
 import { migrateEnsNodeSchema } from "@/lib/ensdb/migrate-ensnode-schema";
@@ -54,31 +34,18 @@ async function upsertIndexingMetadataContextRecord(): Promise<void> {
 }
 
 /**
- * Prepare for executing the "onchain" event handlers.
+ * Initialize indexing of "onchain" events
  *
- * During Ponder startup, the "onchain" event handlers are executed
- * after all "setup" event handlers have completed.
+ * This function is guaranteed to be called exactly once by
+ * `eventHandlerPreconditions` before executing any "onchain" event handlers,
+ * and is used to initialize the ENSNode Schema.
  *
- * This function is useful to make sure any long-running preconditions for
- * onchain event handlers are met, for example, waiting for
- * the ENSRainbow instance to be ready before processing any onchain events
- * that require data from ENSRainbow.
- *
- * @example A single blocking precondition
- * ```ts
- * await waitForEnsRainbowToBeReady();
- * ```
- *
- * @example Multiple blocking preconditions
- * ```ts
- * await Promise.all([
- *   waitForEnsRainbowToBeReady(),
- *   waitForAnotherPrecondition(),
- * ]);
- * ```
- *
- * Goals of this function:
- * 1. Make ENSDb instance "ready" for ENSDb clients to use.
+ * Each time the ENSIndexer instance starts, the logic in this function will be
+ * executed. Therefore, all logic must be idempotent and concurrency-safe,
+ * to prevent any issues during the startup of the ENSIndexer instance.
+ * For example, multiple ENSIndexer instances might be started at the same time,
+ * and they might all execute the logic in this function concurrently,
+ * so we need to make sure that this does not cause any unexpected side effects.
  */
 export async function initIndexingOnchainEvents(): Promise<void> {
   try {

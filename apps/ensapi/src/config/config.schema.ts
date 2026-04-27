@@ -1,7 +1,7 @@
 import pRetry from "p-retry";
 import { prettifyError, ZodError, z } from "zod/v4";
 
-import { type EnsApiPublicConfig, IndexingMetadataContextStatusCodes } from "@ensnode/ensnode-sdk";
+import type { EnsApiPublicConfig } from "@ensnode/ensnode-sdk";
 import {
   buildRpcConfigsFromEnv,
   canFallbackToTheGraph,
@@ -13,11 +13,11 @@ import {
   TheGraphApiKeySchema,
 } from "@ensnode/ensnode-sdk/internal";
 
+import { stackInfoCache } from "@/cache/stack-info.cache";
 import { ENSApi_DEFAULT_PORT } from "@/config/defaults";
 import ensDbConfig from "@/config/ensdb-config";
 import type { EnsApiEnvironment } from "@/config/environment";
 import { invariant_ensIndexerPublicConfigVersionInfo } from "@/config/validations";
-import { ensDbClient } from "@/lib/ensdb/singleton";
 import logger from "@/lib/logger";
 import { ensApiVersionInfo } from "@/lib/version-info";
 
@@ -70,13 +70,15 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
     // https://github.com/namehash/ensnode/issues/1806
     const ensIndexerPublicConfig = await pRetry(
       async () => {
-        const indexingMetadataContext = await ensDbClient.getIndexingMetadataContext();
+        const ensNodeStackInfo = await stackInfoCache.read();
 
-        if (indexingMetadataContext.statusCode !== IndexingMetadataContextStatusCodes.Initialized) {
-          throw new Error("Indexing metadata context is uninitialized in ENSDb.");
+        if (ensNodeStackInfo instanceof Error) {
+          throw new Error(
+            "EnsNodeStackInfo is not available yet for fetching the EnsIndexerPublicConfig.",
+          );
         }
 
-        return indexingMetadataContext.stackInfo.ensIndexer;
+        return ensNodeStackInfo.ensIndexer;
       },
       {
         retries: 13, // This allows for a total of over 1 hour of retries with the exponential backoff strategy
