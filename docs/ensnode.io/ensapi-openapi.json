@@ -2972,6 +2972,32 @@
           "503": { "description": "Service unavailable" }
         }
       }
+    },
+    "/v1/ensanalytics/accounting": {
+      "get": {
+        "operationId": "getAccountingCsv",
+        "tags": ["ENSAwards"],
+        "summary": "Get Accounting Dump (CSV)",
+        "description": "Returns a full per-event accounting dump for a rev-share-cap edition as a CSV file, ordered chronologically.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "minLength": 1, "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+            "required": true,
+            "name": "edition",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved per-event accounting CSV",
+            "content": { "text/csv": { "schema": { "type": "string" } } }
+          },
+          "400": { "description": "Invalid request" },
+          "404": { "description": "Unknown edition slug" },
+          "500": { "description": "Internal server error" },
+          "503": { "description": "Service unavailable" }
+        }
+      }
     }
   },
   "webhooks": {}
