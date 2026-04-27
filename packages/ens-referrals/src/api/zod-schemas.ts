@@ -24,9 +24,11 @@ import {
   makeReferrerLeaderboardPageRevShareCapSchema,
 } from "../award-models/rev-share-cap/api/zod-schemas";
 import {
+  makeBaseReferralProgramEditionConfigSchema,
   makeBaseReferralProgramEditionSummarySchema,
   makeBaseReferralProgramRulesSchema,
   makeBaseReferrerLeaderboardPageSchema,
+  makeReferralProgramEditionSlugSchema,
 } from "../award-models/shared/api/zod-schemas";
 import type { ReferrerEditionMetricsUnrecognized } from "../award-models/shared/edition-metrics";
 import type { ReferralProgramEditionSummaryUnrecognized } from "../award-models/shared/edition-summary";
@@ -34,6 +36,7 @@ import type { ReferrerLeaderboardPageUnrecognized } from "../award-models/shared
 import type { ReferralProgramRulesUnrecognized } from "../award-models/shared/rules";
 import { ReferralProgramAwardModels } from "../award-models/shared/rules";
 import type { ReferralProgramEditionConfig } from "../edition";
+import { findOverlappingEditionPair } from "../edition";
 import type { ReferrerEditionMetrics } from "../edition-metrics";
 import type { ReferralProgramEditionSummary } from "../edition-summary";
 import type { ReferrerLeaderboardPage } from "../leaderboard-page";
@@ -197,22 +200,6 @@ export const makeReferrerEditionMetricsSchema = (valueLabel: string = "ReferrerE
 };
 
 /**
- * Schema for validating a {@link ReferralProgramEditionSlug}.
- *
- * Runtime validation against configured editions happens at the business logic level.
- */
-export const makeReferralProgramEditionSlugSchema = (
-  valueLabel: string = "ReferralProgramEditionSlug",
-) =>
-  z
-    .string()
-    .min(1, `${valueLabel} must not be empty`)
-    .regex(
-      /^[a-z0-9]+(-[a-z0-9]+)*$/,
-      `${valueLabel} must contain only lowercase letters, digits, and hyphens. Must not start or end with a hyphen.`,
-    );
-
-/**
  * Schema for validating editions array (min 1, max {@link MAX_EDITIONS_PER_REQUEST}, distinct values).
  */
 export const makeReferrerMetricsEditionsArraySchema = (
@@ -282,22 +269,12 @@ export const makeReferrerMetricsEditionsResponseSchema = (
   ]);
 
 /**
- * Schema for the shared base fields of a {@link ReferralProgramEditionConfig}.
- */
-const makeReferralProgramEditionConfigBaseSchema = (valueLabel: string) =>
-  z.object({
-    slug: makeReferralProgramEditionSlugSchema(`${valueLabel}.slug`),
-    displayName: z.string().min(1, `${valueLabel}.displayName must not be empty`),
-    rules: makeBaseReferralProgramRulesSchema(`${valueLabel}.rules`),
-  });
-
-/**
  * Schema for validating a {@link ReferralProgramEditionConfig}.
  */
 export const makeReferralProgramEditionConfigSchema = (
   valueLabel: string = "ReferralProgramEditionConfig",
 ) =>
-  makeReferralProgramEditionConfigBaseSchema(valueLabel).safeExtend({
+  makeBaseReferralProgramEditionConfigSchema(valueLabel).safeExtend({
     rules: makeReferralProgramRulesSchema(`${valueLabel}.rules`),
   });
 
@@ -332,7 +309,7 @@ export const makeReferralProgramEditionConfigSetArraySchema = (
   });
 
   // Schema for extracting base fields from an unrecognized edition.
-  const unrecognizedBaseSchema = makeReferralProgramEditionConfigBaseSchema(
+  const unrecognizedBaseSchema = makeBaseReferralProgramEditionConfigSchema(
     `${valueLabel}[edition]`,
   );
 
@@ -380,6 +357,23 @@ export const makeReferralProgramEditionConfigSetArraySchema = (
         return [];
       }
       slugs.add(edition.slug);
+    }
+
+    // For each subregistryId, editions must not overlap in time. startTime and endTime
+    // are inclusive bounds, so two editions sharing a single instant (A.endTime == B.startTime)
+    // also count as overlapping. Unrecognized editions participate so the "0 or 1 edition per
+    // referral" invariant holds even for forward-compatible models.
+    const overlap = findOverlappingEditionPair(result);
+    if (overlap) {
+      const [a, b] = overlap;
+      ctx.addIssue({
+        code: "custom",
+        message:
+          `${valueLabel}: editions "${a.slug}" and "${b.slug}" have overlapping time ranges ` +
+          `for subregistryId ${a.rules.subregistryId.chainId}:${a.rules.subregistryId.address} ` +
+          `(startTime and endTime are inclusive)`,
+      });
+      return [];
     }
 
     return result;
@@ -442,13 +436,31 @@ export const makeReferralProgramEditionSummarySchema = (
 
 /**
  * Schema for {@link ReferralProgramEditionSummariesData}.
+ *
+ * Enforces the per-subregistryId non-overlap invariant across the editions array
+ * (see {@link findOverlappingEditionPair}).
  */
 export const makeReferralProgramEditionSummariesDataSchema = (
   valueLabel: string = "ReferralProgramEditionSummariesData",
 ) =>
-  z.object({
-    editions: z.array(makeReferralProgramEditionSummarySchema(`${valueLabel}.editions[edition]`)),
-  });
+  z
+    .object({
+      editions: z.array(makeReferralProgramEditionSummarySchema(`${valueLabel}.editions[edition]`)),
+    })
+    .superRefine((data, ctx) => {
+      const overlap = findOverlappingEditionPair(data.editions);
+      if (!overlap) return;
+
+      const [a, b] = overlap;
+      ctx.addIssue({
+        code: "custom",
+        path: ["editions"],
+        message:
+          `${valueLabel}: editions "${a.slug}" and "${b.slug}" have overlapping time ranges ` +
+          `for subregistryId ${a.rules.subregistryId.chainId}:${a.rules.subregistryId.address} ` +
+          `(startTime and endTime are inclusive)`,
+      });
+    });
 
 /**
  * Schema for {@link ReferralProgramEditionSummariesResponseOk}.

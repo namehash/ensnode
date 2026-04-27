@@ -13,3 +13,6 @@
  */
 
 export * from "./api/zod-schemas";
+export * from "./award-models/pie-split/api/zod-schemas";
+export * from "./award-models/rev-share-cap/api/zod-schemas";
+export * from "./award-models/shared/api/zod-schemas";

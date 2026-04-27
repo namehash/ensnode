@@ -21,13 +21,14 @@ const MOCK_ENSAPI_PUBLIC_CONFIG = {
     namespace: ENSNamespaceIds.Mainnet,
     ensIndexerSchemaName: "ensindexer_0",
     ensRainbowPublicConfig: {
-      version: "0.36.0",
-      labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
-      recordsCount: 100,
+      serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+      versionInfo: {
+        ensRainbow: "0.36.0",
+      },
     },
     indexedChainIds: new Set([1]),
     isSubgraphCompatible: false,
-    labelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
+    clientLabelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
     plugins: [PluginName.Subgraph],
     versionInfo: {
       ensDb: "0.36.0",
@@ -58,13 +59,14 @@ describe("ENSApi Config Serialization/Deserialization", () => {
           namespace: ENSNamespaceIds.Mainnet,
           ensIndexerSchemaName: "ensindexer_0",
           ensRainbowPublicConfig: {
-            version: "0.36.0",
-            labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
-            recordsCount: 100,
+            serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+            versionInfo: {
+              ensRainbow: "0.36.0",
+            },
           },
           indexedChainIds: [1],
           isSubgraphCompatible: false,
-          labelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
+          clientLabelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
           plugins: [PluginName.Subgraph],
           versionInfo: {
             ensDb: "0.36.0",
