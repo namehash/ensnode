@@ -12,7 +12,7 @@ import {
 import { type EncodedReferrer, PluginName, toJson } from "@ensnode/ensnode-sdk";
 
 import { ensureDomainEvent } from "@/lib/ensv2/event-db-helpers";
-import { ensureLabel, ensureUnknownLabel } from "@/lib/ensv2/label-db-helpers";
+import { ensureLabel, ensureUnknownLabel, labelExists } from "@/lib/ensv2/label-db-helpers";
 import { getLatestRegistration, getLatestRenewal } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import {
@@ -63,11 +63,13 @@ export default function () {
       );
     }
 
-    // ensure label
+    // if the contract emitted a healed label, ensure that it is indexed
     if (label !== undefined) {
       await ensureLabel(context, label);
     } else {
-      await ensureUnknownLabel(context, labelHash);
+      // otherwise, attempt a heal if not exists
+      const exists = await labelExists(context, labelHash);
+      if (!exists) await ensureUnknownLabel(context, labelHash);
     }
 
     // update registration's base/premium
@@ -103,12 +105,13 @@ export default function () {
       );
     }
 
-    // ensure label
-    // NOTE: technically not necessary, as should be ensured by NameRegistered, but we include here anyway
+    // if the contract emitted a healed label, ensure that it is indexed
     if (label !== undefined) {
       await ensureLabel(context, label);
     } else {
-      await ensureUnknownLabel(context, labelHash);
+      // otherwise, attempt a heal if not exists
+      const exists = await labelExists(context, labelHash);
+      if (!exists) await ensureUnknownLabel(context, labelHash);
     }
 
     const controller = getThisAccountId(context, event);
