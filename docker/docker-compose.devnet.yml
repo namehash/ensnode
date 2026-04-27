@@ -3,14 +3,6 @@ services:
     extends:
       file: services/ensindexer.yml
       service: ensindexer
-    environment:
-      # TODO: in future we will migrate devnet to chain_id=1
-      # need to remove `RPC_URL_15658733` in that case
-      RPC_URL_15658733: http://devnet:8545
-      RPC_URL_1: http://devnet:8545
-      ENSINDEXER_SCHEMA_NAME: docker_devnet_v1
-      LABEL_SET_ID: ens-test-env
-      NAMESPACE: ens-test-env
     env_file:
       - path: envs/.env.docker.common
         required: true
@@ -21,7 +13,7 @@ services:
     depends_on:
       ensrainbow:
         condition: service_healthy
-      postgres:
+      ensdb:
         condition: service_healthy
       devnet:
         condition: service_healthy
@@ -30,14 +22,8 @@ services:
     extends:
       file: services/ensapi.yml
       service: ensapi
-    environment:
-      # TODO: in future we will migrate devnet to chain_id=1
-      # need to remove `RPC_URL_15658733` in that case
-      RPC_URL_15658733: http://devnet:8545
-      RPC_URL_1: http://devnet:8545
-      ENSINDEXER_SCHEMA_NAME: docker_devnet_v1
     depends_on:
-      postgres:
+      ensdb:
         condition: service_healthy
     env_file:
       - path: envs/.env.docker.common
@@ -51,8 +37,6 @@ services:
     extends:
       file: services/ensrainbow.yml
       service: ensrainbow
-    environment:
-      LABEL_SET_ID: ens-test-env
     env_file:
       - path: envs/.env.docker.common
         required: true
@@ -76,10 +60,10 @@ services:
       - path: envs/.env.docker.local
         required: false
 
-  postgres:
+  ensdb:
     extends:
-      file: services/postgres.yml
-      service: postgres
+      file: services/ensdb.yml
+      service: ensdb
     env_file:
       - path: ./envs/.env.docker.common
         required: true
@@ -94,8 +78,8 @@ volumes:
   # compose file that references them — they cannot be inherited via `extends`.
   # Explicit `name:` prevents collision with the base stack's volumes when both
   # are run from the same directory (same project name).
-  postgres_data:
-    name: ensnode_devnet_postgres_data
+  ensdb_data:
+    name: ensnode_devnet_ensdb_data
     driver: local
   ensrainbow_data:
     name: ensnode_devnet_ensrainbow_data

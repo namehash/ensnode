@@ -67,8 +67,8 @@ jobs:
         with:
           commit: "chore(release): version apps"
           title: "Release New Version"
-          version: pnpm changeset:version
-          publish: pnpm changeset-publish
+          version: pnpm changeset:version && pnpm release:postversion
+          publish: pnpm changeset:publish
           createGithubReleases: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
