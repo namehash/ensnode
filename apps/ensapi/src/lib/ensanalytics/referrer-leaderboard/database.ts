@@ -171,6 +171,16 @@ export const getReferralEvents = async (rules: ReferralProgramRules): Promise<Re
           `getReferralEvents: domain.name must exist for registrar action '${record.id}'`,
         );
       }
+      if (record.transactionHash === null) {
+        throw new Error(
+          `getReferralEvents: transactionHash must be non-null for registrar action '${record.id}'`,
+        );
+      }
+      if (record.registrant === null) {
+        throw new Error(
+          `getReferralEvents: registrant must be non-null for registrar action '${record.id}'`,
+        );
+      }
       switch (record.actionType) {
         case RegistrarActionTypes.Registration:
         case RegistrarActionTypes.Renewal:
