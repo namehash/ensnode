@@ -30,10 +30,6 @@ const CANONICAL_REGISTRIES_MAX_DEPTH = 16;
  * to ENSv1 at resolution time for names not (yet) present in ENSv2, so ENSv1 Domains remain
  * canonical from a resolution perspective.
  *
- * Both ENSv1 and ENSv2 Domains set `subregistryId` (ENSv1 Domains to their managed ENSv1
- * VirtualRegistry, ENSv2 Domains to their declared Subregistry), so a single recursive step over
- * `domain.subregistryId` covers both lineages.
- *
  * TODO: could this be optimized further, perhaps as a materialized view?
  */
 export const getCanonicalRegistriesCTE = () => {

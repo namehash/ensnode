@@ -88,16 +88,22 @@ export default function () {
         .values({
           id: parentRegistryId,
           type: "ENSv1VirtualRegistry",
-          chainId: registry.chainId,
-          address: registry.address,
-          node,
+          ...registry,
+          node: parentNode,
         })
         .onConflictDoNothing();
+
+      const parentDomainId = makeENSv1DomainId(registry, parentNode);
+
+      // set the parent Domain's subregistry to said registry
+      await context.ensDb
+        .update(ensIndexerSchema.domain, { id: parentDomainId })
+        .set({ subregistryId: parentRegistryId });
 
       // ensure Canonical Domain reference
       await context.ensDb
         .insert(ensIndexerSchema.registryCanonicalDomain)
-        .values({ registryId: parentRegistryId, domainId })
+        .values({ registryId: parentRegistryId, domainId: parentDomainId })
         .onConflictDoNothing();
     }
 
