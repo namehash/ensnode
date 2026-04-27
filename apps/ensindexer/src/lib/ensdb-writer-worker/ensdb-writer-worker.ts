@@ -38,6 +38,21 @@ export class EnsDbWriterWorker {
   private indexingStatusInterval: ReturnType<typeof setInterval> | null = null;
 
   /**
+   * Tracks the most recently launched snapshot upsert so that {@link stop}
+   * can wait for any in-flight work to settle before returning.
+   */
+  private inFlightSnapshot: Promise<unknown> | undefined;
+
+  /**
+   * Set by {@link stop} to signal an in-progress {@link run} that it should
+   * bail before scheduling the recurring interval. Required because the
+   * external `signal` parameter to `run` may not be aborted in every
+   * cancellation path (e.g. a defensive caller-driven `stop()` in singleton
+   * cleanup).
+   */
+  private stopRequested = false;
+
+  /**
    * ENSDb Client instance used by the worker to interact with ENSDb.
    */
   private ensDbClient: EnsDbWriter;
@@ -87,22 +102,34 @@ export class EnsDbWriterWorker {
    * 3) A recurring attempt to upsert serialized representation of
    *    {@link CrossChainIndexingStatusSnapshot} into ENSDb.
    *
+   * @param signal Optional AbortSignal that, if aborted, causes `run` to bail
+   *               between its async setup steps. Use this to prevent the worker
+   *               from finishing initialization (and starting the recurring
+   *               interval) after the surrounding API instance has begun
+   *               shutting down.
    * @throws Error if the worker is already running, or
    *         if the in-memory ENSIndexer Public Config could not be fetched, or
    *         if the in-memory ENSIndexer Public Config is incompatible with the stored config in ENSDb.
+   * @throws DOMException with `name === "AbortError"` if `signal` is aborted
+   *         or if {@link stop} is called before the recurring interval is scheduled.
    */
-  public async run(): Promise<void> {
+  public async run(signal?: AbortSignal): Promise<void> {
     // Do not allow multiple concurrent runs of the worker
     if (this.isRunning) {
       throw new Error("EnsDbWriterWorker is already running");
     }
 
+    this.stopRequested = false;
+    this.checkCancellation(signal);
+
     // Fetch data required for task 1 and task 2.
     const inMemoryConfig = await this.getValidatedEnsIndexerPublicConfig();
+    this.checkCancellation(signal);
 
     // Task 1: upsert ENSDb version into ENSDb.
     logger.debug({ msg: "Upserting ENSDb version", module: "EnsDbWriterWorker" });
     await this.ensDbClient.upsertEnsDbVersion(inMemoryConfig.versionInfo.ensDb);
+    this.checkCancellation(signal);
     logger.info({
       msg: "Upserted ENSDb version",
       ensDbVersion: inMemoryConfig.versionInfo.ensDb,
@@ -115,16 +142,22 @@ export class EnsDbWriterWorker {
       module: "EnsDbWriterWorker",
     });
     await this.ensDbClient.upsertEnsIndexerPublicConfig(inMemoryConfig);
+    this.checkCancellation(signal);
     logger.info({
       msg: "Upserted ENSIndexer public config",
       module: "EnsDbWriterWorker",
     });
 
     // Task 3: recurring upsert of Indexing Status Snapshot into ENSDb.
-    this.indexingStatusInterval = setInterval(
-      () => this.upsertIndexingStatusSnapshot(),
-      secondsToMilliseconds(INDEXING_STATUS_RECORD_UPDATE_INTERVAL),
-    );
+    // Skip overlapping ticks so a slow upsert can't pile up concurrent
+    // ENSDb writes. With skip-overlap there is at most one in-flight
+    // upsert at a time, which `stop()` then has a single promise to await.
+    this.indexingStatusInterval = setInterval(() => {
+      if (this.inFlightSnapshot) return;
+      this.inFlightSnapshot = this.upsertIndexingStatusSnapshot().finally(() => {
+        this.inFlightSnapshot = undefined;
+      });
+    }, secondsToMilliseconds(INDEXING_STATUS_RECORD_UPDATE_INTERVAL));
   }
 
   /**
@@ -137,12 +170,35 @@ export class EnsDbWriterWorker {
   /**
    * Stop the ENSDb Writer Worker
    *
-   * Stops all recurring tasks in the worker.
+   * Cancels any in-progress {@link run} startup, stops all recurring tasks,
+   * and waits for any in-flight snapshot upsert to settle. Safe to call when
+   * not running.
    */
-  public stop(): void {
+  public async stop(): Promise<void> {
+    this.stopRequested = true;
     if (this.indexingStatusInterval) {
       clearInterval(this.indexingStatusInterval);
       this.indexingStatusInterval = null;
+    }
+    if (this.inFlightSnapshot) {
+      // Errors are already logged inside upsertIndexingStatusSnapshot; swallow here.
+      await this.inFlightSnapshot.catch(() => {});
+      this.inFlightSnapshot = undefined;
+    }
+  }
+
+  /**
+   * Throw an `AbortError` if cancellation has been requested either via the
+   * caller's `AbortSignal` or via an internal {@link stop} call.
+   */
+  private checkCancellation(signal?: AbortSignal): void {
+    signal?.throwIfAborted();
+    if (this.stopRequested) {
+      // Match what `AbortSignal.throwIfAborted()` throws — a DOMException
+      // with `name === "AbortError"` — so callers' `isAbortError` checks
+      // treat both abort sources (external signal and internal stop)
+      // identically.
+      throw new DOMException("Worker stop requested", "AbortError");
     }
   }
 

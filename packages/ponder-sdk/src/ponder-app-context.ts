@@ -13,6 +13,35 @@ export const PonderAppCommands = {
 export type PonderAppCommand = (typeof PonderAppCommands)[keyof typeof PonderAppCommands];
 
 /**
+ * Ponder shutdown manager runtime shape.
+ *
+ * Mirrors `ponder/src/internal/shutdown.ts` — the object Ponder publishes
+ * on `globalThis.PONDER_COMMON.{shutdown,apiShutdown}`. Reload-scoped:
+ * Ponder kills and replaces these on every dev-mode hot reload, so
+ * consumers must always read the current instance fresh and never cache
+ * a captured reference.
+ */
+export interface PonderAppShutdownManager {
+  // Ponder awaits the callback's return value internally, so any value
+  // (sync or async) is accepted. Typed as `unknown` to keep callbacks
+  // that return `void` assignable without a Biome `noConfusingVoidType`
+  // violation.
+  add: (callback: () => unknown) => void;
+  isKilled: boolean;
+  abortController: AbortController;
+}
+
+export function isPonderAppShutdownManager(value: unknown): value is PonderAppShutdownManager {
+  if (typeof value !== "object" || value === null) return false;
+  const obj = value as Record<string, unknown>;
+  return (
+    typeof obj.add === "function" &&
+    typeof obj.isKilled === "boolean" &&
+    obj.abortController instanceof AbortController
+  );
+}
+
+/**
  * Ponder app context
  *
  * Represents the internal context of a local Ponder app.

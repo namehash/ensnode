@@ -7,7 +7,7 @@ import { LocalPonderClient } from "@ensnode/ponder-sdk";
 
 import { getPluginsAllDatasourceNames } from "@/lib/plugin-helpers";
 
-import { localPonderContext } from "./local-ponder-context";
+import { getApiShutdown, localPonderContext } from "./local-ponder-context";
 
 const pluginsAllDatasourceNames = getPluginsAllDatasourceNames(config.plugins);
 const indexedBlockranges = buildIndexedBlockranges(config.namespace, pluginsAllDatasourceNames);
@@ -17,4 +17,6 @@ export const localPonderClient = new LocalPonderClient(
   indexedBlockranges,
   publicClients,
   localPonderContext,
+  // See local-ponder-context.ts for the staleness contract.
+  () => getApiShutdown().abortController.signal,
 );
