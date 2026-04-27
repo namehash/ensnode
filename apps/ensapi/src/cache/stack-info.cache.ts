@@ -67,7 +67,7 @@ export const stackInfoCache = lazyProxy<EnsNodeStackInfoCache>(
 
           const ensIndexerStackInfo = indexingMetadataContext.stackInfo;
           const ensNodeStackInfo = buildEnsNodeStackInfo(
-            buildEnsApiPublicConfig(config),
+            buildEnsApiPublicConfig(config, ensIndexerStackInfo.ensIndexer),
             ensIndexerStackInfo.ensDb,
             ensIndexerStackInfo.ensIndexer,
             ensIndexerStackInfo.ensRainbow,

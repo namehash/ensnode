@@ -111,7 +111,7 @@ export class IndexingMetadataContextBuilder {
 
       // If no IndexingMetadataContext has been initialized in ENSDb yet, then
       // the "in-memory" CrossChainIndexingStatusSnapshot must be in
-      // "unstarted" status,since onchain events indexing has not started yet.
+      // "unstarted" status, since onchain events indexing has not started yet.
       invariant_indexingStatusIsUnstartedForIndexingMetadataContextUninitialized(
         inMemoryIndexingStatusSnapshot,
       );

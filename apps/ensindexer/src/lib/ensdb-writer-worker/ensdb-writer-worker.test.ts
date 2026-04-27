@@ -161,14 +161,8 @@ describe("EnsDbWriterWorker", () => {
       await vi.advanceTimersByTimeAsync(1000);
       expect(ensDbClient.upsertIndexingMetadataContext).toHaveBeenCalledTimes(1);
 
-      // second tick - builder error, the catch block rethrows
-      // setInterval keeps running despite the unhandled rejection
-      const handler = vi.fn();
-      process.on("unhandledRejection", handler);
+      // second tick - builder error, swallowed, no upsert
       await vi.advanceTimersByTimeAsync(1000);
-      process.removeListener("unhandledRejection", handler);
-      expect(handler).toHaveBeenCalled();
-      expect(process.exitCode).toBe(1);
       expect(ensDbClient.upsertIndexingMetadataContext).toHaveBeenCalledTimes(1); // no new upsert
 
       // third tick - succeeds again
@@ -204,13 +198,8 @@ describe("EnsDbWriterWorker", () => {
       await vi.advanceTimersByTimeAsync(1000);
       expect(ensDbClient.upsertIndexingMetadataContext).toHaveBeenCalledTimes(1);
 
-      // second tick - DB error, the catch block rethrows
-      const handler = vi.fn();
-      process.on("unhandledRejection", handler);
+      // second tick - DB error, swallowed, upsert was called but rejected
       await vi.advanceTimersByTimeAsync(1000);
-      process.removeListener("unhandledRejection", handler);
-      expect(handler).toHaveBeenCalled();
-      expect(process.exitCode).toBe(1);
       expect(ensDbClient.upsertIndexingMetadataContext).toHaveBeenCalledTimes(2);
 
       // third tick - succeeds again
@@ -221,7 +210,7 @@ describe("EnsDbWriterWorker", () => {
       worker.stop();
     });
 
-    it("sets process.exitCode on error", async () => {
+    it("does not stop worker or set exitCode on error", async () => {
       // arrange
       const indexingMetadataContextBuilder = createMockIndexingMetadataContextBuilder();
       (indexingMetadataContextBuilder.getIndexingMetadataContext as any).mockRejectedValue(
@@ -233,18 +222,13 @@ describe("EnsDbWriterWorker", () => {
       // reset exitCode before test
       process.exitCode = undefined;
 
-      // act - suppress unhandled rejection from the setInterval callback
-      const handler = vi.fn();
-      process.on("unhandledRejection", handler);
-
+      // act
       await worker.run();
       await vi.advanceTimersByTimeAsync(1000);
 
-      process.removeListener("unhandledRejection", handler);
-
-      // assert
-      expect(handler).toHaveBeenCalled();
-      expect(process.exitCode).toBe(1);
+      // assert - error is swallowed, worker keeps running, no exitCode set
+      expect(worker.isRunning).toBe(true);
+      expect(process.exitCode).toBeUndefined();
 
       // cleanup
       worker.stop();

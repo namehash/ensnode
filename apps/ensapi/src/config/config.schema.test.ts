@@ -34,10 +34,22 @@ vi.mock("@/lib/logger", () => ({
   },
 }));
 
+const mockProcessExit = () =>
+  vi.spyOn(process, "exit").mockImplementation((() => {
+    throw new Error("process.exit");
+  }) as never);
+
 describe("buildConfigFromEnvironment", () => {
   it("returns a valid config object using environment variables", async () => {
+    const exitSpy = mockProcessExit();
+
     const { ensIndexer: ensIndexerPublicConfig } = indexingMetadataContextInitialized.stackInfo;
-    await expect(buildConfigFromEnvironment(BASE_ENV)).resolves.toStrictEqual({
+    const config = await buildConfigFromEnvironment(BASE_ENV);
+
+    expect(exitSpy).not.toHaveBeenCalled();
+    exitSpy.mockRestore();
+
+    expect(config).toStrictEqual({
       port: ENSApi_DEFAULT_PORT,
       ensDbUrl: BASE_ENV.ENSDB_URL,
       ensIndexerSchemaName: BASE_ENV.ENSINDEXER_SCHEMA_NAME,
@@ -59,6 +71,7 @@ describe("buildConfigFromEnvironment", () => {
   });
 
   it("parses REFERRAL_PROGRAM_EDITIONS as a URL object", async () => {
+    const exitSpy = mockProcessExit();
     const editionsUrl = "https://example.com/editions.json";
 
     const config = await buildConfigFromEnvironment({
@@ -66,63 +79,90 @@ describe("buildConfigFromEnvironment", () => {
       REFERRAL_PROGRAM_EDITIONS: editionsUrl,
     });
 
+    expect(exitSpy).not.toHaveBeenCalled();
+    exitSpy.mockRestore();
+
     expect(config.referralProgramEditionConfigSetUrl).toEqual(new URL(editionsUrl));
   });
 
+  it("includes theGraphApiKey when provided", async () => {
+    const exitSpy = mockProcessExit();
+
+    const config = await buildConfigFromEnvironment({
+      ...BASE_ENV,
+      THEGRAPH_API_KEY: "my-api-key",
+    });
+
+    expect(exitSpy).not.toHaveBeenCalled();
+    exitSpy.mockRestore();
+
+    expect(config.theGraphApiKey).toBe("my-api-key");
+  });
+
   describe("Useful error messages", () => {
-    // Mock process.exit to prevent actual exit
-    const mockExit = vi.spyOn(process, "exit").mockImplementation(() => undefined as never);
+    let exitSpy: ReturnType<typeof mockProcessExit>;
 
     beforeEach(() => {
       vi.clearAllMocks();
+      exitSpy = mockProcessExit();
     });
 
     afterEach(() => {
-      mockExit.mockClear();
+      exitSpy.mockRestore();
     });
 
-    const TEST_ENV: EnsApiEnvironment = structuredClone(BASE_ENV);
-
     it("logs error and exits when REFERRAL_PROGRAM_EDITIONS is not a valid URL", async () => {
-      await buildConfigFromEnvironment({
-        ...TEST_ENV,
-        REFERRAL_PROGRAM_EDITIONS: "not-a-url",
-      });
+      const testEnv = structuredClone(BASE_ENV);
 
-      expect(logger.error).toHaveBeenCalledWith(
+      await expect(
+        buildConfigFromEnvironment({
+          ...testEnv,
+          REFERRAL_PROGRAM_EDITIONS: "not-a-url",
+        }),
+      ).rejects.toThrow("process.exit");
+
+      expect(logger.error).toHaveBeenCalledExactlyOnceWith(
         expect.stringContaining("REFERRAL_PROGRAM_EDITIONS is not a valid URL: not-a-url"),
       );
-      expect(process.exit).toHaveBeenCalledWith(1);
+      expect(process.exit).toHaveBeenCalledExactlyOnceWith(1);
     });
 
     it("logs error message when QuickNode RPC config was partially configured (missing endpoint name)", async () => {
-      await buildConfigFromEnvironment({
-        ...TEST_ENV,
-        QUICKNODE_API_KEY: "my-api-key",
-      });
+      const testEnv = structuredClone(BASE_ENV);
 
-      expect(logger.error).toHaveBeenCalledWith(
+      await expect(
+        buildConfigFromEnvironment({
+          ...testEnv,
+          QUICKNODE_API_KEY: "my-api-key",
+        }),
+      ).rejects.toThrow("process.exit");
+
+      expect(logger.error).toHaveBeenCalledExactlyOnceWith(
         new Error(
           "Use of the QUICKNODE_API_KEY environment variable requires use of the QUICKNODE_ENDPOINT_NAME environment variable as well.",
         ),
         "Failed to build EnsApiConfig",
       );
-      expect(process.exit).toHaveBeenCalledWith(1);
+      expect(process.exit).toHaveBeenCalledExactlyOnceWith(1);
     });
 
     it("logs error message when QuickNode RPC config was partially configured (missing API key)", async () => {
-      await buildConfigFromEnvironment({
-        ...TEST_ENV,
-        QUICKNODE_ENDPOINT_NAME: "my-endpoint-name",
-      });
+      const testEnv = structuredClone(BASE_ENV);
 
-      expect(logger.error).toHaveBeenCalledWith(
+      await expect(
+        buildConfigFromEnvironment({
+          ...testEnv,
+          QUICKNODE_ENDPOINT_NAME: "my-endpoint-name",
+        }),
+      ).rejects.toThrow("process.exit");
+
+      expect(logger.error).toHaveBeenCalledExactlyOnceWith(
         new Error(
           "Use of the QUICKNODE_ENDPOINT_NAME environment variable requires use of the QUICKNODE_API_KEY environment variable as well.",
         ),
         "Failed to build EnsApiConfig",
       );
-      expect(process.exit).toHaveBeenCalledWith(1);
+      expect(process.exit).toHaveBeenCalledExactlyOnceWith(1);
     });
   });
 });
@@ -148,7 +188,7 @@ describe("buildEnsApiPublicConfig", () => {
       referralProgramEditionConfigSetUrl: undefined,
     };
 
-    const result = buildEnsApiPublicConfig(ensApiConfig);
+    const result = buildEnsApiPublicConfig(ensApiConfig, ensIndexerPublicConfig);
 
     expect(result).toStrictEqual({
       versionInfo: ensApiVersionInfo,
@@ -172,36 +212,63 @@ describe("buildEnsApiPublicConfig", () => {
       referralProgramEditionConfigSetUrl: undefined,
     };
 
-    const result = buildEnsApiPublicConfig(ensApiConfig);
+    const result = buildEnsApiPublicConfig(ensApiConfig, ensIndexerPublicConfig);
 
-    // Verify that all ENSIndexer public config fields are preserved
     expect(result.ensIndexerPublicConfig).toStrictEqual(ensIndexerPublicConfig);
   });
 
   it("includes the theGraphFallback and redacts api key", () => {
-    const { ensIndexer: ensIndexerPublicConfig } = indexingMetadataContextInitialized.stackInfo;
+    const ensIndexerPublicConfig = {
+      ...indexingMetadataContextInitialized.stackInfo.ensIndexer,
+      plugins: ["subgraph"],
+      isSubgraphCompatible: true,
+    };
+
     const ensApiConfig = {
       port: ENSApi_DEFAULT_PORT,
       ensDbUrl: BASE_ENV.ENSDB_URL,
       ensIndexerSchemaName: BASE_ENV.ENSINDEXER_SCHEMA_NAME,
-      ensIndexerPublicConfig: {
-        ...ensIndexerPublicConfig,
-        plugins: ["subgraph"],
-        isSubgraphCompatible: true,
-      },
+      ensIndexerPublicConfig,
       namespace: ensIndexerPublicConfig.namespace,
       rpcConfigs: new Map(),
       referralProgramEditionConfigSetUrl: undefined,
       theGraphApiKey: "secret-api-key",
     };
 
-    const result = buildEnsApiPublicConfig(ensApiConfig);
+    const result = buildEnsApiPublicConfig(ensApiConfig, ensIndexerPublicConfig);
 
     expect(result.theGraphFallback.canFallback).toBe(true);
     // discriminate the type...
     if (!result.theGraphFallback.canFallback) throw new Error("never");
 
-    // shouldn't have the secret-api-key in the url
-    expect(result.theGraphFallback.url).not.toMatch(/secret-api-key/gi);
+    expect(result.theGraphFallback.url).toBe(
+      "https://gateway.thegraph.com/api/<API_KEY>/subgraphs/id/5XqPmWe6gjyrJtFn9cLy237i4cWw2j9HcUJEXsP5qGtH",
+    );
+  });
+
+  it("returns canFallback=false when no theGraphApiKey is provided even if subgraph compatible", () => {
+    const ensIndexerPublicConfig = {
+      ...indexingMetadataContextInitialized.stackInfo.ensIndexer,
+      plugins: ["subgraph"],
+      isSubgraphCompatible: true,
+    };
+
+    const ensApiConfig = {
+      port: ENSApi_DEFAULT_PORT,
+      ensDbUrl: BASE_ENV.ENSDB_URL,
+      ensIndexerSchemaName: BASE_ENV.ENSINDEXER_SCHEMA_NAME,
+      ensIndexerPublicConfig,
+      namespace: ensIndexerPublicConfig.namespace,
+      rpcConfigs: new Map(),
+      referralProgramEditionConfigSetUrl: undefined,
+      theGraphApiKey: undefined,
+    };
+
+    const result = buildEnsApiPublicConfig(ensApiConfig, ensIndexerPublicConfig);
+
+    expect(result.theGraphFallback).toStrictEqual({
+      canFallback: false,
+      reason: "no-api-key",
+    });
   });
 });

@@ -43,7 +43,7 @@ export const ENSINDEXER_PUBLIC_CONFIG = {
   versionInfo: {
     ensDb: packageJson.version,
     ensIndexer: packageJson.version,
-    ensNormalize: "1.1.1",
+    ensNormalize: "1.11.1",
     ponder: "0.8.0",
   },
 } satisfies SerializedEnsIndexerPublicConfig;

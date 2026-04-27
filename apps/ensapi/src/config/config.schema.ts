@@ -1,7 +1,11 @@
 import pRetry from "p-retry";
 import { prettifyError, ZodError, z } from "zod/v4";
 
-import type { EnsApiPublicConfig } from "@ensnode/ensnode-sdk";
+import {
+  type EnsApiPublicConfig,
+  type EnsIndexerPublicConfig,
+  IndexingMetadataContextStatusCodes,
+} from "@ensnode/ensnode-sdk";
 import {
   buildRpcConfigsFromEnv,
   canFallbackToTheGraph,
@@ -13,11 +17,11 @@ import {
   TheGraphApiKeySchema,
 } from "@ensnode/ensnode-sdk/internal";
 
-import { stackInfoCache } from "@/cache/stack-info.cache";
 import { ENSApi_DEFAULT_PORT } from "@/config/defaults";
 import ensDbConfig from "@/config/ensdb-config";
 import type { EnsApiEnvironment } from "@/config/environment";
 import { invariant_ensIndexerPublicConfigVersionInfo } from "@/config/validations";
+import { ensDbClient } from "@/lib/ensdb/singleton";
 import logger from "@/lib/logger";
 import { ensApiVersionInfo } from "@/lib/version-info";
 
@@ -70,15 +74,17 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
     // https://github.com/namehash/ensnode/issues/1806
     const ensIndexerPublicConfig = await pRetry(
       async () => {
-        const ensNodeStackInfo = await stackInfoCache.read();
+        const indexingMetadataContext = await ensDbClient.getIndexingMetadataContext();
 
-        if (ensNodeStackInfo instanceof Error) {
+        if (
+          indexingMetadataContext.statusCode === IndexingMetadataContextStatusCodes.Uninitialized
+        ) {
           throw new Error(
-            "EnsNodeStackInfo is not available yet for fetching the EnsIndexerPublicConfig.",
+            "EnsIndexerPublicConfig could not be fetched, the IndexingMetadataContext record has not been initialized in ENSDb yet.",
           );
         }
 
-        return ensNodeStackInfo.ensIndexer;
+        return indexingMetadataContext.stackInfo.ensIndexer;
       },
       {
         retries: 13, // This allows for a total of over 1 hour of retries with the exponential backoff strategy
@@ -123,17 +129,20 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
  * @param config - The validated EnsApiConfig object
  * @returns A complete ENSApiPublicConfig object
  */
-export function buildEnsApiPublicConfig(config: EnsApiConfig): EnsApiPublicConfig {
+export function buildEnsApiPublicConfig(
+  ensApiConfig: EnsApiConfig,
+  ensIndexerPublicConfig: EnsIndexerPublicConfig,
+): EnsApiPublicConfig {
   return {
     versionInfo: ensApiVersionInfo,
     theGraphFallback: canFallbackToTheGraph({
-      namespace: config.namespace,
+      namespace: ensIndexerPublicConfig.namespace,
       // NOTE: very important here that we replace the actual server-side api key with a placeholder
       // so that it's not sent to clients as part of the `theGraphFallback.url`. The placeholder must
       // pass validation, of course, but the only validation necessary is that it is a string.
-      theGraphApiKey: config.theGraphApiKey ? "<API_KEY>" : undefined,
-      isSubgraphCompatible: config.ensIndexerPublicConfig.isSubgraphCompatible,
+      theGraphApiKey: ensApiConfig.theGraphApiKey ? "<API_KEY>" : undefined,
+      isSubgraphCompatible: ensIndexerPublicConfig.isSubgraphCompatible,
     }),
-    ensIndexerPublicConfig: config.ensIndexerPublicConfig,
+    ensIndexerPublicConfig,
   };
 }

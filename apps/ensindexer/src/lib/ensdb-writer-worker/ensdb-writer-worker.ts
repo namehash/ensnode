@@ -70,16 +70,6 @@ export class EnsDbWriterWorker {
             module: "EnsDbWriterWorker",
             error,
           });
-
-          // Updating the IndexingMetadataContext record in ENSDb is
-          // a critical operation for the ENSIndexer instance,
-          // therefore if any error happens during this operation,
-          // we want to stop the worker to prevent further errors,
-          // and exit the process with a non-zero exit code.
-          this.stop();
-
-          process.exitCode = 1;
-          throw error;
         }),
       secondsToMilliseconds(INDEXING_STATUS_RECORD_UPDATE_INTERVAL),
     );

@@ -50,7 +50,12 @@ async function upsertIndexingMetadataContextRecord(): Promise<void> {
 export async function initIndexingOnchainEvents(): Promise<void> {
   try {
     // Ensure ENSDb instance is healthy before trying to run any queries against it.
-    await ensDbClient.isHealthy();
+    const isEnsDbHealthy = await ensDbClient.isHealthy();
+
+    // Invariant: ENSDb instance must be healthy by now.
+    if (!isEnsDbHealthy) {
+      throw new Error("ENSDb instance must be healthy");
+    }
 
     // Ensure the ENSNode Schema in ENSDb is up to date by running any pending migrations.
     await migrateEnsNodeSchema();
