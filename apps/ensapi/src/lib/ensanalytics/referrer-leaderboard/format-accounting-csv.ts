@@ -1,9 +1,8 @@
 import type { ReferralAccountingRecordRevShareCap } from "@namehash/ens-referrals";
 
 /**
- * Escape a CSV string cell. Only wraps the value in quotes when it contains a comma, quote,
- * or newline (per RFC 4180). ENS names are guaranteed not to contain commas (see issue #1797),
- * but the `disqualificationReason` is free-form admin input so needs escaping.
+ * Escape a CSV cell per RFC 4180: wrap in quotes when the value contains a comma, quote,
+ * or newline; double up internal quotes.
  */
 function csvCell(value: string): string {
   if (value.includes(",") || value.includes('"') || value.includes("\n") || value.includes("\r")) {
@@ -23,7 +22,7 @@ const CSV_COLUMNS: ReadonlyArray<{
   value: (r: ReferralAccountingRecordRevShareCap) => string;
 }> = [
   { header: "timestamp", value: (r) => new Date(r.timestamp * 1000).toISOString() },
-  { header: "name", value: (r) => csvCell(r.name) },
+  { header: "name", value: (r) => r.name },
   { header: "action", value: (r) => r.actionType },
   { header: "transactionHash", value: (r) => r.transactionHash },
   { header: "incrementalDuration", value: (r) => r.incrementalDuration.toString() },
@@ -52,10 +51,7 @@ const CSV_COLUMNS: ReadonlyArray<{
   { header: "disqualified", value: (r) => (r.tentativeAward.disqualified ? "true" : "false") },
   {
     header: "disqualificationReason",
-    value: (r) =>
-      r.tentativeAward.disqualificationReason
-        ? csvCell(r.tentativeAward.disqualificationReason)
-        : "",
+    value: (r) => r.tentativeAward.disqualificationReason ?? "",
   },
   { header: "maxRevShare", value: (r) => r.tentativeAward.maxRevShare.toString() },
   {
@@ -75,8 +71,8 @@ export function formatAccountingCsv(
   records: ReadonlyArray<ReferralAccountingRecordRevShareCap>,
 ): string {
   const lines = [
-    CSV_COLUMNS.map((c) => c.header).join(","),
-    ...records.map((r) => CSV_COLUMNS.map((c) => c.value(r)).join(",")),
+    CSV_COLUMNS.map((c) => csvCell(c.header)).join(","),
+    ...records.map((r) => CSV_COLUMNS.map((c) => csvCell(c.value(r))).join(",")),
   ];
   return `${lines.join("\r\n")}\r\n`;
 }

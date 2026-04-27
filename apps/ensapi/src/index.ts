@@ -58,7 +58,7 @@ const gracefulShutdown = async () => {
     if (editionsCaches) {
       for (const [editionSlug, cache] of editionsCaches) {
         cache.destroy();
-        logger.info(`Destroyed referralLeaderboardEditionsCache for ${editionSlug}`);
+        logger.info(`Destroyed referralEditionSnapshotsCache for ${editionSlug}`);
       }
     }
 

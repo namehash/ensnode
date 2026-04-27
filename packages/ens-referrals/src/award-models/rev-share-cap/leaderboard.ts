@@ -79,12 +79,25 @@ export interface ReferrerLeaderboardRevShareCap {
 
 /**
  * A point-in-time snapshot of everything computed for a `rev-share-cap` referral program edition.
- *
- * @invariant `accountingRecords` are in chronological onchain order (one per processed event).
  */
 export interface ReferralEditionSnapshotRevShareCap {
+  /**
+   * Discriminant identifying this as a rev-share-cap snapshot.
+   *
+   * @invariant Equals `leaderboard.awardModel` and `leaderboard.rules.awardModel`.
+   */
   awardModel: typeof ReferralProgramAwardModels.RevShareCap;
+
+  /**
+   * The {@link ReferrerLeaderboardRevShareCap} computed from `accountingRecords`.
+   */
   leaderboard: ReferrerLeaderboardRevShareCap;
+
+  /**
+   * Per-event accounting trace.
+   *
+   * @invariant One entry per processed onchain event, in chronological order.
+   */
   accountingRecords: ReferralAccountingRecordRevShareCap[];
 }
 
@@ -126,7 +139,7 @@ export const buildReferralEditionSnapshotRevShareCap = (
   // 1. Sort events into chronological order by onchain execution order.
   const sortedEvents = sortReferralEvents(events);
 
-  // Precompute admin-action lookup (O(1) per event).
+  // Precompute admin-action object lookup for the accounting record.
   const adminActionByReferrer = new Map<NormalizedAddress, AdminAction>();
   for (const action of rules.adminActions) {
     adminActionByReferrer.set(action.referrer, action);

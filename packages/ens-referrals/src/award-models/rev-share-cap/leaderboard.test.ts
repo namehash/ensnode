@@ -1,4 +1,4 @@
-import type { Address, InterpretedName, NormalizedAddress } from "enssdk";
+import { type Address, asInterpretedName, type NormalizedAddress } from "enssdk";
 import type { Hash } from "viem";
 import { beforeEach, describe, expect, it } from "vitest";
 
@@ -85,7 +85,7 @@ function makeEvent(
     timestamp,
     incrementalDuration,
     incrementalRevenueContribution: ZERO_ETH,
-    name: "test.eth" as InterpretedName,
+    name: asInterpretedName("test.eth"),
     actionType: "registration",
     transactionHash: "0x0000000000000000000000000000000000000000000000000000000000000000" as Hash,
     registrant: "0xdddddddddddddddddddddddddddddddddddddddd" as Address,

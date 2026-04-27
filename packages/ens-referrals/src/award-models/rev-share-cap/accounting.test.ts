@@ -1,4 +1,4 @@
-import type { Address, InterpretedName } from "enssdk";
+import { type Address, asInterpretedName } from "enssdk";
 import type { Hash } from "viem";
 import { beforeEach, describe, expect, it } from "vitest";
 
@@ -49,7 +49,7 @@ function makeEvent(
     timestamp,
     incrementalDuration,
     incrementalRevenueContribution: priceEth(0n),
-    name: "test.eth" as InterpretedName,
+    name: asInterpretedName("test.eth"),
     actionType: "registration",
     transactionHash: "0x0000000000000000000000000000000000000000000000000000000000000000" as Hash,
     registrant: "0xdddddddddddddddddddddddddddddddddddddddd" as Address,
@@ -261,8 +261,7 @@ describe("buildReferralEditionSnapshotRevShareCap — per-event trace", () => {
     );
   });
 
-  it("leaderboard returned alongside trace matches buildReferralEditionSnapshotRevShareCap exactly", () => {
-    // Verify that the wrapper and the with-accounting function produce the same leaderboard.
+  it("returns a leaderboard alongside the accounting records that reflects the rules and per-referrer awards", () => {
     const rules = buildTestRules(parseUsdc("10000"));
     const events = [
       makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR),

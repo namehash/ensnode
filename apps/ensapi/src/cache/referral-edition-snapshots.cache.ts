@@ -38,9 +38,9 @@ export type ReferralEditionSnapshotsCacheMap = Map<
 
 /**
  * The list of {@link OmnichainIndexingStatusId} values that are supported for generating
- * referrer leaderboards.
+ * edition snapshots.
  *
- * Other values indicate that we are not ready to generate leaderboards yet.
+ * Other values indicate that we are not ready to generate snapshots yet.
  */
 const supportedOmnichainIndexingStatuses: OmnichainIndexingStatusId[] = [
   OmnichainIndexingStatusIds.Following,
@@ -54,7 +54,7 @@ const supportedOmnichainIndexingStatuses: OmnichainIndexingStatusId[] = [
  * If so, it returns the cached data without re-fetching. Otherwise, it fetches fresh data.
  *
  * @param editionConfig - The edition configuration
- * @returns A function that builds the leaderboard for the given edition
+ * @returns A function that builds the edition snapshot for the given edition
  */
 function createEditionSnapshotBuilder(
   editionConfig: ReferralProgramEditionConfig,
@@ -84,17 +84,17 @@ function createEditionSnapshotBuilder(
     if (indexingStatus instanceof Error) {
       logger.error(
         { error: indexingStatus, editionSlug },
-        `Failed to read indexing status cache while generating referral leaderboard for ${editionSlug}. Cannot proceed without valid indexing status.`,
+        `Failed to read indexing status cache while generating edition snapshot for ${editionSlug}. Cannot proceed without valid indexing status.`,
       );
       throw new Error(
-        `Unable to generate referral leaderboard for ${editionSlug}. indexingStatusCache must have been successfully initialized.`,
+        `Unable to generate edition snapshot for ${editionSlug}. indexingStatusCache must have been successfully initialized.`,
       );
     }
 
     const omnichainIndexingStatus = indexingStatus.omnichainSnapshot.omnichainStatus;
     if (!supportedOmnichainIndexingStatuses.includes(omnichainIndexingStatus)) {
       throw new Error(
-        `Unable to generate referrer leaderboard for ${editionSlug}. Omnichain indexing status is currently ${omnichainIndexingStatus} but must be ${supportedOmnichainIndexingStatuses.join(" or ")}.`,
+        `Unable to generate edition snapshot for ${editionSlug}. Omnichain indexing status is currently ${omnichainIndexingStatus} but must be ${supportedOmnichainIndexingStatuses.join(" or ")}.`,
       );
     }
 
@@ -104,12 +104,12 @@ function createEditionSnapshotBuilder(
     );
     if (latestIndexedBlockRef === null) {
       throw new Error(
-        `Unable to generate referrer leaderboard for ${editionSlug}. Latest indexed block ref for chain ${editionConfig.rules.subregistryId.chainId} is null.`,
+        `Unable to generate edition snapshot for ${editionSlug}. Latest indexed block ref for chain ${editionConfig.rules.subregistryId.chainId} is null.`,
       );
     }
 
     logger.info(
-      `Building referrer leaderboard for ${editionSlug} with rules:\n${JSON.stringify(
+      `Building edition snapshot for ${editionSlug} with rules:\n${JSON.stringify(
         serializeReferralProgramRules(editionConfig.rules),
         null,
         2,
@@ -122,7 +122,7 @@ function createEditionSnapshotBuilder(
     );
 
     logger.info(
-      `Successfully built referrer leaderboard for ${editionSlug} with ${snapshot.leaderboard.referrers.size} referrers`,
+      `Successfully built edition snapshot for ${editionSlug} with ${snapshot.leaderboard.referrers.size} referrers`,
     );
 
     return snapshot;
@@ -165,7 +165,7 @@ export function initializeReferralEditionSnapshotsCaches(
     });
 
     caches.set(editionSlug, cache);
-    logger.info(`Initialized leaderboard cache for ${editionSlug}`);
+    logger.info(`Initialized edition snapshot cache for ${editionSlug}`);
   }
 
   // Cache the instance for subsequent calls
@@ -174,7 +174,7 @@ export function initializeReferralEditionSnapshotsCaches(
 }
 
 /**
- * Gets the cached instance of referral leaderboard editions caches.
+ * Gets the cached instance of referral edition snapshots caches.
  * Returns null if not yet initialized.
  *
  * @returns The cached cache map or null

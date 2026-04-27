@@ -60,7 +60,16 @@ export interface ReferrerLeaderboardPieSplit {
  * A point-in-time snapshot of everything computed for a `pie-split` referral program edition.
  */
 export interface ReferralEditionSnapshotPieSplit {
+  /**
+   * Discriminant identifying this as a pie-split snapshot.
+   *
+   * @invariant Equals `leaderboard.awardModel` and `leaderboard.rules.awardModel`.
+   */
   awardModel: typeof ReferralProgramAwardModels.PieSplit;
+
+  /**
+   * The {@link ReferrerLeaderboardPieSplit} computed for this edition.
+   */
   leaderboard: ReferrerLeaderboardPieSplit;
 }
 

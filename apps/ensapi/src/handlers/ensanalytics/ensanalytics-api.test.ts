@@ -29,6 +29,7 @@ import {
   deserializeReferralProgramEditionSummariesResponse,
   deserializeReferrerLeaderboardPageResponse,
   deserializeReferrerMetricsEditionsResponse,
+  type ReferralAccountingRecordRevShareCap,
   type ReferralEditionSnapshot,
   type ReferralProgramAwardModel,
   ReferralProgramAwardModels,
@@ -36,15 +37,22 @@ import {
   ReferralProgramEditionStatuses,
   ReferralProgramEditionSummariesResponseCodes,
   type ReferralProgramRulesPieSplit,
-  type ReferrerLeaderboard,
   ReferrerEditionMetricsTypeIds,
+  type ReferrerLeaderboard,
   ReferrerLeaderboardPageResponseCodes,
   type ReferrerLeaderboardPageResponseOk,
   ReferrerMetricsEditionsResponseCodes,
   type ReferrerMetricsEditionsResponseOk,
 } from "@namehash/ens-referrals";
+import { asInterpretedName, toNormalizedAddress } from "enssdk";
 
-import { parseTimestamp, parseUsdc, type SWRCache } from "@ensnode/ensnode-sdk";
+import {
+  parseEth,
+  parseTimestamp,
+  parseUsdc,
+  RegistrarActionTypes,
+  type SWRCache,
+} from "@ensnode/ensnode-sdk";
 
 import {
   emptyReferralLeaderboard,
@@ -984,6 +992,8 @@ describe("/v1/ensanalytics", () => {
   });
 
   describe("/accounting", () => {
+    // Minimal snapshot — only `awardModel` is set. Use only for tests that short-circuit
+    // on the awardModel check (404, 400); use mockRevShareCapAccountingCache otherwise.
     function mockSnapshotCache(
       slug: ReferralProgramEditionSlug,
       awardModel: ReferralProgramAwardModel,
@@ -996,15 +1006,67 @@ describe("/v1/ensanalytics", () => {
       ];
     }
 
+    function mockRevShareCapAccountingCache(
+      slug: ReferralProgramEditionSlug,
+      accountingRecords: ReferralAccountingRecordRevShareCap[],
+    ): [ReferralProgramEditionSlug, SWRCache<ReferralEditionSnapshot>] {
+      return [
+        slug,
+        {
+          read: async () =>
+            ({
+              awardModel: ReferralProgramAwardModels.RevShareCap,
+              accountingRecords,
+            }) as ReferralEditionSnapshot,
+        } as SWRCache<ReferralEditionSnapshot>,
+      ];
+    }
+
+    function mockReadErrorCache(
+      slug: ReferralProgramEditionSlug,
+      error: Error,
+    ): [ReferralProgramEditionSlug, SWRCache<ReferralEditionSnapshot>] {
+      return [
+        slug,
+        {
+          read: async () => error,
+        } as unknown as SWRCache<ReferralEditionSnapshot>,
+      ];
+    }
+
     function setupAccountingMocks(
-      caches: Map<ReferralProgramEditionSlug, SWRCache<ReferralEditionSnapshot>>,
+      cachesOrError: Map<ReferralProgramEditionSlug, SWRCache<ReferralEditionSnapshot>> | Error,
     ): void {
       vi.mocked(
         editionsCachesMiddleware.referralEditionSnapshotsCachesMiddleware,
       ).mockImplementation(async (c, next) => {
-        c.set("referralEditionSnapshotsCaches", caches);
+        c.set("referralEditionSnapshotsCaches", cachesOrError);
         return await next();
       });
+    }
+
+    function buildAccountingRecord(): ReferralAccountingRecordRevShareCap {
+      return {
+        registrarActionId: "registration:1:0xabc:0",
+        timestamp: 1735689600,
+        name: asInterpretedName("alice.eth"),
+        actionType: RegistrarActionTypes.Registration,
+        transactionHash: "0xabc",
+        registrant: "0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e",
+        referrer: toNormalizedAddress("0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e"),
+        incrementalDuration: 31536000,
+        tentativeAward: {
+          incrementalRevenueContribution: parseEth("0.01"),
+          accumulatedRevenueContribution: parseEth("0.01"),
+          incrementalBaseRevenueContribution: parseUsdc("100"),
+          accumulatedBaseRevenueContribution: parseUsdc("100"),
+          awardPoolRemaining: parseUsdc("9900"),
+          disqualified: false,
+          maxRevShare: 0.5,
+          effectiveBaseRevShare: 0.5,
+          incrementalTentativeAward: parseUsdc("50"),
+        },
+      } satisfies ReferralAccountingRecordRevShareCap;
     }
 
     it("returns 404 when the edition slug is unknown", async () => {
@@ -1030,6 +1092,66 @@ describe("/v1/ensanalytics", () => {
       expect(httpResponse.status).toBe(400);
       const body = await httpResponse.text();
       expect(body).toContain("rev-share-cap");
+    });
+
+    it("returns 200 with a CSV body for a rev-share-cap edition", async () => {
+      setupAccountingMocks(
+        new Map([mockRevShareCapAccountingCache("rsc-edition", [buildAccountingRecord()])]),
+      );
+
+      const httpResponse = await app.request("/accounting?edition=rsc-edition");
+
+      expect(httpResponse.status).toBe(200);
+      expect(httpResponse.headers.get("content-type")).toBe("text/csv; charset=utf-8");
+      expect(httpResponse.headers.get("content-disposition")).toContain(
+        'filename="accounting-rsc-edition.csv"',
+      );
+
+      // Wiring assertions only: header row present + 1 record row in correct CRLF format.
+      // The exact CSV cell values are exercised by `formatAccountingCsv`'s own unit coverage.
+      const body = await httpResponse.text();
+      const expectedHeaderRow =
+        "timestamp,name,action,transactionHash,incrementalDuration,registrant,referrer," +
+        "incrementalRevenueContributionWei,accumulatedRevenueContributionWei," +
+        "incrementalBaseRevenueContributionUsdc,accumulatedBaseRevenueContributionUsdc," +
+        "awardPoolRemainingUsdc,disqualified,disqualificationReason,maxRevShare," +
+        "effectiveBaseRevShare,incrementalTentativeAwardUsdc";
+      expect(body.startsWith(`${expectedHeaderRow}\r\n`)).toBe(true);
+      expect(body.endsWith("\r\n")).toBe(true);
+
+      // Header row + one record row + trailing CRLF → 3 segments after split on CRLF
+      // (last segment is empty due to the trailing terminator).
+      const segments = body.split("\r\n");
+      expect(segments).toHaveLength(3);
+      expect(segments[2]).toBe("");
+
+      // The record row should have the same column count as the header.
+      const headerColumns = expectedHeaderRow.split(",").length;
+      expect(segments[1].split(",")).toHaveLength(headerColumns);
+    });
+
+    it("returns 503 when the edition snapshots caches map failed to load", async () => {
+      setupAccountingMocks(new Error("Failed to load referral edition snapshots caches"));
+
+      const httpResponse = await app.request("/accounting?edition=any-edition");
+
+      expect(httpResponse.status).toBe(503);
+      const body = await httpResponse.text();
+      expect(body).toContain("Service Unavailable");
+      expect(body).toContain("configuration is unavailable");
+    });
+
+    it("returns 503 when the edition snapshot cache read() resolves to an Error", async () => {
+      setupAccountingMocks(
+        new Map([mockReadErrorCache("rsc-edition", new Error("Failed to build accounting trace"))]),
+      );
+
+      const httpResponse = await app.request("/accounting?edition=rsc-edition");
+
+      expect(httpResponse.status).toBe(503);
+      const body = await httpResponse.text();
+      expect(body).toContain("Service Unavailable");
+      expect(body).toContain("failed to build accounting trace");
     });
   });
 });
