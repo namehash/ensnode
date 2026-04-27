@@ -123,10 +123,13 @@ export default function () {
         // saving a single db op in a hot path (lots of NewOwner events, unsurprisingly!)
         //
         // NOTE: despite Domain.ownerId being materialized from other sources of truth (i.e. Registrars
-        // like BaseRegistrars & NameWrapper) it's ok to always set it here because the Registrar-emitted
-        // events occur _after_ the Registry events. So when a name is registered, for example, the Registry's
-        // owner changes to that of the NameWrapper but then the NameWrapper emits NameWrapped, and this
-        // indexing code re-materializes the Domain.ownerId to the NameWrapper-emitted value.
+        // like BaseRegistrars & NameWrapper) it's ok (and necessary!) to always set it here because:
+        // a) the Root Registry is the source of truth, and other contracts (Registrars, RegistrarControllers)
+        //    may not be in use, and
+        // b) the Registrar-emitted events occur _after_ the Registry events. So when a name is
+        //    wrapped by the NameWrapper, for example, the Registry's owner is updated here to that
+        //    of the NameWrapper, but then the NameWrapper emits NameWrapped, and this plugin
+        //    re-materializes the Domain.ownerId to the NameWrapper-emitted value.
         ownerId,
         rootRegistryOwnerId: ownerId,
       })
