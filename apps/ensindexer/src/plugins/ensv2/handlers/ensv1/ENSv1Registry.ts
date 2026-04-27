@@ -17,7 +17,7 @@ import { isAddressEqual, zeroAddress } from "viem";
 import { getENSRootChainId, interpretAddress, PluginName } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
-import { ensureDomainEvent } from "@/lib/ensv2/event-db-helpers";
+import { ensureDomainEvent, ensureEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel, ensureUnknownLabel, labelExists } from "@/lib/ensv2/label-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { healAddrReverseSubnameLabel } from "@/lib/heal-addr-reverse-subname-label";
@@ -151,7 +151,8 @@ export default function () {
     }
 
     // push event to domain history
-    await ensureDomainEvent(context, event, domainId);
+    const eventId = await ensureEvent(context, event);
+    await ensureDomainEvent(context, domainId, eventId);
   }
 
   async function handleTransfer({
@@ -183,7 +184,8 @@ export default function () {
       .set({ ownerId, rootRegistryOwnerId: ownerId });
 
     // push event to domain history
-    await ensureDomainEvent(context, event, domainId);
+    const eventId = await ensureEvent(context, event);
+    await ensureDomainEvent(context, domainId, eventId);
   }
 
   async function handleNewTTL({
@@ -202,7 +204,8 @@ export default function () {
     const domainId = makeENSv1DomainId(registry, node);
 
     // push event to domain history
-    await ensureDomainEvent(context, event, domainId);
+    const eventId = await ensureEvent(context, event);
+    await ensureDomainEvent(context, domainId, eventId);
   }
 
   async function handleNewResolver({
@@ -224,7 +227,8 @@ export default function () {
     // directly indexed here
 
     // push event to domain history
-    await ensureDomainEvent(context, event, domainId);
+    const eventId = await ensureEvent(context, event);
+    await ensureDomainEvent(context, domainId, eventId);
   }
 
   /**

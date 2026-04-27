@@ -93,7 +93,8 @@ export default function () {
       if (domain) await materializeENSv1DomainEffectiveOwner(context, domainId, to);
 
       // push event to domain history
-      await ensureDomainEvent(context, event, domainId);
+      const eventId = await ensureEvent(context, event);
+      await ensureDomainEvent(context, domainId, eventId);
     },
   );
 
@@ -129,6 +130,7 @@ export default function () {
     }
 
     // insert BaseRegistrar Registration
+    const eventId = await ensureEvent(context, event);
     await ensureAccount(context, registrant);
     await insertLatestRegistration(context, {
       domainId,
@@ -140,7 +142,7 @@ export default function () {
       expiry,
       // all BaseRegistrar-derived Registrars use the same GRACE_PERIOD
       gracePeriod: BigInt(GRACE_PERIOD_SECONDS),
-      eventId: await ensureEvent(context, event),
+      eventId,
     });
 
     // materialize Domain owner if exists
@@ -148,7 +150,7 @@ export default function () {
     if (domain) await materializeENSv1DomainEffectiveOwner(context, domainId, owner);
 
     // push event to domain history
-    await ensureDomainEvent(context, event, domainId);
+    await ensureDomainEvent(context, domainId, eventId);
   }
 
   addOnchainEventListener(
@@ -240,6 +242,7 @@ export default function () {
         .set({ expiry });
 
       // insert Renewal
+      const eventId = await ensureEvent(context, event);
       await insertLatestRenewal(context, registration, {
         domainId,
         duration,
@@ -249,7 +252,7 @@ export default function () {
       });
 
       // push event to domain history
-      await ensureDomainEvent(context, event, domainId);
+      await ensureDomainEvent(context, domainId, eventId);
     },
   );
 }

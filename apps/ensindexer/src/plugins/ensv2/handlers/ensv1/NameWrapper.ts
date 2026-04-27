@@ -146,7 +146,8 @@ export default function () {
     await materializeENSv1DomainEffectiveOwner(context, domainId, to);
 
     // push event to domain history
-    await ensureDomainEvent(context, event, domainId);
+    const eventId = await ensureEvent(context, event);
+    await ensureDomainEvent(context, domainId, eventId);
   }
 
   addOnchainEventListener(
@@ -190,6 +191,8 @@ export default function () {
 
       // materialize domain owner
       await materializeENSv1DomainEffectiveOwner(context, domainId, owner);
+
+      const eventId = await ensureEvent(context, event);
 
       // handle wraps of direct-subname-of-registrar-managed-names
       if (registration && !isFullyExpired && registration.type === "BaseRegistrar") {
@@ -259,12 +262,12 @@ export default function () {
           fuses,
           start: event.block.timestamp,
           expiry,
-          eventId: await ensureEvent(context, event),
+          eventId,
         });
       }
 
       // push event to domain history
-      await ensureDomainEvent(context, event, domainId);
+      await ensureDomainEvent(context, domainId, eventId);
     },
   );
 
@@ -302,7 +305,8 @@ export default function () {
       }
 
       // push event to domain history
-      await ensureDomainEvent(context, event, domainId);
+      const eventId = await ensureEvent(context, event);
+      await ensureDomainEvent(context, domainId, eventId);
 
       // NOTE: we don't need to adjust Domain.ownerId because NameWrapper always calls ens.setOwner
     },
@@ -340,7 +344,8 @@ export default function () {
       });
 
       // push event to domain history
-      await ensureDomainEvent(context, event, domainId);
+      const eventId = await ensureEvent(context, event);
+      await ensureDomainEvent(context, domainId, eventId);
     },
   );
 
@@ -375,7 +380,8 @@ export default function () {
         .set({ expiry });
 
       // push event to domain history
-      await ensureDomainEvent(context, event, domainId);
+      const eventId = await ensureEvent(context, event);
+      await ensureDomainEvent(context, domainId, eventId);
 
       // if this is a NameWrapper Registration, this is a Renewal event. otherwise, this is a wrapped
       // BaseRegistrar Registration, and the Renewal is already being managed

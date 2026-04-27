@@ -11,7 +11,7 @@ import {
 
 import { type EncodedReferrer, PluginName, toJson } from "@ensnode/ensnode-sdk";
 
-import { ensureDomainEvent } from "@/lib/ensv2/event-db-helpers";
+import { ensureDomainEvent, ensureEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel, ensureUnknownLabel, labelExists } from "@/lib/ensv2/label-db-helpers";
 import { getLatestRegistration, getLatestRenewal } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
@@ -79,7 +79,8 @@ export default function () {
       .set({ base, premium, referrer });
 
     // push event to domain history
-    await ensureDomainEvent(context, event, domainId);
+    const eventId = await ensureEvent(context, event);
+    await ensureDomainEvent(context, domainId, eventId);
   }
 
   async function handleNameRenewedByController({
@@ -159,7 +160,8 @@ export default function () {
       .set({ base, premium, referrer });
 
     // push event to domain history
-    await ensureDomainEvent(context, event, domainId);
+    const eventId = await ensureEvent(context, event);
+    await ensureDomainEvent(context, domainId, eventId);
   }
 
   //////////////////////////////////////

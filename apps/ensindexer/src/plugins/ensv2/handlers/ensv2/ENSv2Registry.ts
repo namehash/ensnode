@@ -128,6 +128,7 @@ export default function () {
       .onConflictDoUpdate({ tokenId });
 
     // insert Registration
+    const eventId = await ensureEvent(context, event);
     await ensureAccount(context, registrant);
     await insertLatestRegistration(context, {
       domainId,
@@ -137,11 +138,11 @@ export default function () {
       registrantId: interpretAddress(registrant),
       start: event.block.timestamp,
       expiry,
-      eventId: await ensureEvent(context, event),
+      eventId,
     });
 
     // push event to domain history
-    await ensureDomainEvent(context, event, domainId);
+    await ensureDomainEvent(context, domainId, eventId);
   }
 
   addOnchainEventListener(
@@ -198,7 +199,8 @@ export default function () {
       // previous owner, but i'm not sure if we need to handle that detail here
 
       // push event to domain history
-      await ensureDomainEvent(context, event, domainId);
+      const eventId = await ensureEvent(context, event);
+      await ensureDomainEvent(context, domainId, eventId);
     },
   );
 
@@ -242,7 +244,8 @@ export default function () {
         .set({ expiry });
 
       // push event to domain history
-      await ensureDomainEvent(context, event, domainId);
+      const eventId = await ensureEvent(context, event);
+      await ensureDomainEvent(context, domainId, eventId);
     },
   );
 
@@ -298,7 +301,8 @@ export default function () {
       }
 
       // push event to domain history
-      await ensureDomainEvent(context, event, domainId);
+      const eventId = await ensureEvent(context, event);
+      await ensureDomainEvent(context, domainId, eventId);
     },
   );
 
@@ -330,7 +334,8 @@ export default function () {
         .set({ tokenId: newTokenId });
 
       // push event to domain history
-      await ensureDomainEvent(context, event, domainId);
+      const eventId = await ensureEvent(context, event);
+      await ensureDomainEvent(context, domainId, eventId);
     },
   );
 
@@ -358,7 +363,8 @@ export default function () {
       .set({ ownerId: interpretAddress(owner) });
 
     // push event to domain history
-    await ensureDomainEvent(context, event, domainId);
+    const eventId = await ensureEvent(context, event);
+    await ensureDomainEvent(context, domainId, eventId);
   }
 
   addOnchainEventListener(
