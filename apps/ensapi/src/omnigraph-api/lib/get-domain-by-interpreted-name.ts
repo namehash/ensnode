@@ -3,128 +3,203 @@ import config from "@/config";
 import { trace } from "@opentelemetry/api";
 import { Param, sql } from "drizzle-orm";
 import {
+  type Address,
+  type ChainId,
   type DomainId,
+  ENS_ROOT_NAME,
   type InterpretedName,
   interpretedLabelsToLabelHashPath,
   interpretedNameToInterpretedLabels,
+  type LabelHashPath,
+  makeConcreteRegistryId,
   type RegistryId,
 } from "enssdk";
 
-import { getRootRegistryIds, maybeGetENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
+import { getRootRegistryId, type RequiredAndNotNull } from "@ensnode/ensnode-sdk";
+import { isBridgedResolver } from "@ensnode/ensnode-sdk/internal";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
-import { makeLogger } from "@/lib/logger";
 
 const tracer = trace.getTracer("get-domain-by-interpreted-name");
-const logger = makeLogger("get-domain-by-interpreted-name");
 
 /**
- * Domain lookup by Interpreted Name via forward traversal of the namegraph.
+ * The maximum number of times to follow a Bridged Resolver, as a defense against infinite loops.
+ */
+const MAX_BRIDGE_DEPTH = 2;
+
+/**
+ * The maximum depth to walk the namegraph from any Registry.
+ */
+const MAX_WALK_DEPTH = 16;
+
+interface WalkResultRow {
+  domainId: DomainId;
+  resolver: Address | null;
+  chainId: ChainId | null;
+  depth: number;
+}
+
+/**
+ * Determines whether the WalkResultRow has a resolver set.
+ */
+const hasResolver = (
+  row: WalkResultRow,
+): row is RequiredAndNotNull<WalkResultRow, "resolver" | "chainId"> =>
+  row.resolver !== null && row.chainId !== null;
+
+/**
+ * Domain lookup by Interpreted Name by traversing the namegraph.
  *
- * This mirrors ENS Forward Resolution (walking from the root registry through each label in the name)
- * with the exception that, in ENSv2, expired names are still retrievable: this traversal does _not_
- * check registration expiry, so callers can query Domains even after they are expired.
+ * Walks resolution from the primary Root Registry (ENSv2 Root when defined, otherwise the ENSv1
+ * concrete Root), following Bridged Resolvers as necessary, returning the leaf Domain upon an exact
+ * match. We only operate over indexed data with acceleration implicitly enabled; if the traversal
+ * of the namegraph cannot be accelerated, this function won't be able to identify the Domain
+ * indicated by `name`.
  *
- * For context, in ENSv1, expired names are still resolvable.
- * In ENSv2, the default PermissionedRegistry (and UserRegistry) implement the logic 'if name is
- * expired, it doesn't exist', which means expired names would not be resolvable via Forward Resolution.
- * This choice, however, is made at the Registry level, not within Forward Resolution, so other
- * Registry implementations could choose to do things differently.
+ * Unlike Forward Resolution, this function does not check registration expiry, so callers can
+ * address Domains regardless of expiry status. This means that a Domain identified by this function
+ * may not be accessible by Forward Resolution: an expired Domain in a PermissionedRegistry does not
+ * exist in the context of Forward Resolution.
  *
- * @see https://github.com/ensdomains/contracts-v2/blob/8a5bb130bc25adf68541d55e4a9a9bf453fb37fc/contracts/src/registry/PermissionedRegistry.sol#L217-L220
- * @see https://github.com/ensdomains/contracts-v2/blob/8a5bb130bc25adf68541d55e4a9a9bf453fb37fc/contracts/src/registry/PermissionedRegistry.sol#L223-L226
- *
- * Regardless, this function does not consider a Domain's registration status for retrieval because
- * this traversal is designed to support access to a Domain via API—not Protocol Acceleration—and
- * consumers need to reference Domains regardless of whether they're active or expired.
- *
- * This means that a Domain identified by this function may not be accessible by ENS Forward Resolution:
- * an expired Domain in a PermissionedRegistry/UserRegistry does not exist in the context of
- * Forward Resolution.
- *
- * Note that if a Domain has been migrated from ENSv1 to ENSv2, the ENSv2 Domain entity is returned,
- * mirroring ENS Forward Resolution.
- *
- * Finally, this also means that Domains are addressable by any number of (possibly infinite) Aliases.
- * i.e. if a name 'alias.eth' declares that the registry containing 'sub' is its subregistry but
- * that subregistry declares a different Canonical Domain, we are still able to access the 'sub' Domain
- * via 'sub.alias.eth'. Naturally, 'sub's Canonical Name will continue to be 'sub.canonical.eth',
- * not the alias by which it was queried ('sub.alias.eth').
+ * @dev depends on the Protocol Acceleration plugin which is a hard requirement for ensv2/omnigraph usage
  */
 export async function getDomainIdByInterpretedName(
   name: InterpretedName,
 ): Promise<DomainId | null> {
-  return withActiveSpanAsync(tracer, "getDomainIdByInterpretedName", { name }, async () => {
-    // Traverse from every top-level Root Registry in parallel. ENSv1 is multi-rooted on disk —
-    // each concrete ENSv1Registry (ENSRoot, Basenames, Lineanames) owns its own subtree and is
-    // not linked to the others at the indexed-namegraph level.
-    const roots = getRootRegistryIds(config.namespace);
-    const v2Root = maybeGetENSv2RootRegistryId(config.namespace);
+  if (name === ENS_ROOT_NAME) {
+    throw new Error(`Invariant: the ENS Root Name ('') is not addressable.`);
+  }
 
-    const results = await Promise.all(
-      roots.map((root) =>
-        withActiveSpanAsync(tracer, "traverseFromRoot", { root }, () =>
-          traverseFromRoot(root, name),
-        ),
-      ),
-    );
+  const path = interpretedLabelsToLabelHashPath(interpretedNameToInterpretedLabels(name));
+  if (path.length === 0) {
+    throw new Error(`Invariant: ${name} generated 0 labelHashPath segments.`);
+  }
 
-    logger.debug({ roots, results });
+  if (path.length > MAX_WALK_DEPTH) {
+    throw new Error(`Invariant: Name '${name}' exceeds maximum depth ${MAX_WALK_DEPTH}.`);
+  }
 
-    // prefer the v2 Root's result when present, otherwise the first non-null hit from any v1 root.
-    const v2Index = v2Root ? roots.indexOf(v2Root) : -1;
-    const v2Hit = v2Index >= 0 ? results[v2Index] : null;
-    // TODO: need to implement some resolution logic here to correctly choose which v1 domain ?
-    // i.e. differentiating between bridge.linea.eth on L1 and bridge.linea.eth on L2 requires Bridged Resolver logic...
-    return v2Hit ?? results.find((r): r is DomainId => r !== null) ?? null;
-  });
+  return withActiveSpanAsync(tracer, "getDomainIdByInterpretedName", { name }, () =>
+    resolveCanonicalDomainId(getRootRegistryId(config.namespace), path),
+  );
 }
 
 /**
- * Forward-traverses the namegraph from `rootRegistryId` to retrieve the DomainId addressed by `name`.
+ * Recursively walks the namegraph from `registryId` through `path`, joining each Domain with its
+ * Resolver via Domain-Resolver Relations. If there's an exact match, we return the identified domain,
+ * otherwise if the deepest defined resolver is a Bridged Resolver, we recurse to
+ * that target's Registry and continue walking, otherwise we were unable to identify the Domain.
+ *
+ * For ENSv1 Shadow Registries the bridged Registry's namegraph shadows that of the Root Chain's,
+ * meaning that it is represented as (shadow)RootRegistry -> "eth" -> ENSv1VirtualRegistry for eth
+ * -> "linea" ... etc. So when we recurse into a Shadow Registry we must pass the full `path`.
+ *
+ * In contrast, all ENSv2 Registries are rooted at the name being Bridged (they're relative to their
+ * parent); when recusing we must walk from the _remaining_ segments of `path`.
+ *
+ * Note that for Domains with Bridged Resolvers, we prefer the origin Domain, not the Domain within
+ * the target (shadow) Registry; in practice this means when someone asks for "linea.eth" they'll get
+ * the ENS Root Chain's "linea.eth", NOT the Linea Chain's "linea.eth" in the Linea Shadow Registry.
+ * This makes sense because:
+ *  a) users probably want the ENS Root Chain's "linea.eth" regardless, and
+ *  b) in non-shadow Registries, there's no "linea.eth" to address.
  */
-async function traverseFromRoot(
-  rootRegistryId: RegistryId,
-  name: InterpretedName,
+async function resolveCanonicalDomainId(
+  registryId: RegistryId,
+  path: LabelHashPath,
+  depth = 0,
 ): Promise<DomainId | null> {
-  const labelHashPath = interpretedLabelsToLabelHashPath(interpretedNameToInterpretedLabels(name));
+  // Sanity Check: maximum recursion depth of 2. technically only 1 is necessary because we only
+  // have well-known Bridged Resolvers that bridge from the Root chain to an L2 chain, without
+  // further hops.
+  if (depth > MAX_BRIDGE_DEPTH) {
+    throw new Error(
+      `Invariant(resolveCanonicalDomainId): Bridged Resolver depth exceeded: ${depth}`,
+    );
+  }
 
-  // https://github.com/drizzle-team/drizzle-orm/issues/1289#issuecomment-2688581070
-  const rawLabelHashPathArray = sql`${new Param(labelHashPath)}::text[]`;
+  const rows = await walkCanonicalNamegraph(registryId, path);
+  if (rows.length === 0) return null;
+
+  // otherwise return the leaf
+  const deepest = rows[0];
+  const exact = deepest.depth === path.length;
+
+  // if the exact match has a Resolver set, we don't need to check for Bridged Resolvers
+  // NOTE: this also encodes the "prefer linea.eth on the ENS Root Chain" behavior
+  if (exact && hasResolver(deepest)) return deepest.domainId;
+
+  // otherwise, identify the deepest element with a Resolver
+  const deepestResolver = rows.find(hasResolver);
+  if (deepestResolver) {
+    const bridgesTo = isBridgedResolver(config.namespace, {
+      chainId: deepestResolver.chainId,
+      address: deepestResolver.resolver,
+    });
+
+    // if the deepest Resolver is a Bridged Resolver, recurse to the target Registry
+    if (bridgesTo) {
+      // slice the path according to whether target Registry is a Shadow Registry or not
+      const targetPath = bridgesTo.shadow ? path : path.slice(deepestResolver.depth);
+
+      // Bridged Resolvers only bridge to a Concrete Registry contract, an ENSv1Registry or an
+      // ENSv2Registry, so we can safely construct its id here
+      const targetRegistryId = makeConcreteRegistryId(bridgesTo.registry);
+
+      // then recurse
+      return resolveCanonicalDomainId(targetRegistryId, targetPath, depth + 1);
+    }
+  }
+
+  // finally, return the leaf (if it was the leaf), otherwise not found
+  return exact ? deepest.domainId : null;
+}
+
+/**
+ * Walks the Canonical namegraph from `registryId` through `path` to identify each ancestor Domain,
+ * then LEFT JOINs each Domain to its Resolver via DRR and returns the full path ordered by depth
+ * DESC (deepest first). Resolver-less Domains are kept in the result with `resolver`/`chainId` set
+ * to NULL. Recursion terminates when the path is exhausted or `subregistry_id` becomes NULL (leaf
+ * domain).
+ */
+async function walkCanonicalNamegraph(registryId: RegistryId, path: LabelHashPath) {
+  if (path.length === 0) return [];
+
+  // NOTE: using new Param as per https://github.com/drizzle-team/drizzle-orm/issues/1289#issuecomment-2688581070
+  const rawLabelHashPathArray = sql`${new Param(path)}::text[]`;
 
   const result = await ensDb.execute(sql`
     WITH RECURSIVE path AS (
       SELECT
-        ${rootRegistryId}::text AS next_registry_id,
-        NULL::text AS domain_id,
-        0 AS depth
+        ${registryId}::text AS next_registry_id,
+        NULL::text          AS "domainId",
+        0                   AS depth
 
       UNION ALL
 
       SELECT
-        d.subregistry_id AS next_registry_id,
-        d.id AS domain_id,
+        d.subregistry_id   AS next_registry_id,
+        d.id               AS "domainId",
         path.depth + 1
       FROM path
       JOIN ${ensIndexerSchema.domain} d
         ON d.registry_id = path.next_registry_id
       WHERE d.label_hash = (${rawLabelHashPathArray})[path.depth + 1]
         AND path.depth + 1 <= array_length(${rawLabelHashPathArray}, 1)
+        AND path.depth < ${MAX_WALK_DEPTH}
     )
-    SELECT *
+    SELECT
+      path."domainId",
+      drr.resolver,
+      drr.chain_id AS "chainId",
+      path.depth
     FROM path
-    WHERE domain_id IS NOT NULL
-    ORDER BY depth;
+    LEFT JOIN ${ensIndexerSchema.domainResolverRelation} drr
+      ON drr.domain_id = path."domainId"
+    WHERE path."domainId" IS NOT NULL
+    ORDER BY path.depth DESC;
   `);
 
-  const rows = result.rows as { domain_id: DomainId; depth: number }[];
-
-  if (rows.length === 0) return null;
-
-  // biome-ignore lint/style/noNonNullAssertion: length check above
-  const leaf = rows[rows.length - 1]!;
-  const exact = rows.length === labelHashPath.length;
-
-  return exact ? leaf.domain_id : null;
+  return result.rows as unknown as WalkResultRow[];
 }

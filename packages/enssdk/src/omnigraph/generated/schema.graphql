@@ -1101,7 +1101,9 @@ scalar RenewalId
 
 """A Resolver represents a Resolver contract on-chain."""
 type Resolver {
-  """Whether Resolver is a BridgedResolver."""
+  """
+  If Resolver is a Bridged Resolver, the Registry to which it Bridges resolution.
+  """
   bridged: AccountId
 
   """Contract metadata for this Resolver."""
