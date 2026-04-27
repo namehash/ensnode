@@ -66,7 +66,7 @@ export class IndexingMetadataContextBuilder {
       this.ensDbClient.getIndexingMetadataContext(),
     ]);
 
-    // Build the {@link CrossChainIndexingStatusSnapshot} with the current snapshot time.
+    // Build the CrossChainIndexingStatusSnapshot with the current snapshot time.
     // This is important to make sure the `snapshotTime` is always up to date in
     // the indexing status snapshot stored within the Indexing Metadata Context record in ENSDb.
     const now = getUnixTime(new Date());
@@ -85,19 +85,22 @@ export class IndexingMetadataContextBuilder {
     ) {
       logger.info({ msg: `Indexing Metadata Context is "uninitialized"` });
 
+      // If no IndexingMetadataContext has been initialized in ENSDb yet, then
+      // the "in-memory" CrossChainIndexingStatusSnapshot must be in
+      // "unstarted" status,since onchain events indexing has not started yet.
       invariant_indexingStatusIsUnstartedForIndexingMetadataContextUninitialized(
         inMemoryIndexingStatusSnapshot,
       );
     } else {
-      logger.info({ msg: `Indexing Metadata Context is "initialized"` });
-      logger.debug({
+      logger.debug({ msg: `Indexing Metadata Context is "initialized"` });
+      logger.trace({
         msg: `Indexing Metadata Context`,
         indexingStatus: storedIndexingMetadataContext.indexingStatus,
         stackInfo: storedIndexingMetadataContext.stackInfo,
       });
 
-      // Validate in-memory config object compatibility with the stored one,
-      // if the stored one is available.
+      // For EnsIndexerPublicConfig, validate in-memory config object
+      // compatibility with the stored one, if the stored one is available.
       // The validation is skipped if the local Ponder app is running in dev mode.
       // This is to improve the development experience during ENSIndexer
       // development, by allowing to override the stored config in ENSDb with
