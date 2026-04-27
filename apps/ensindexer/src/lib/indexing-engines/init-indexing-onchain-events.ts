@@ -49,7 +49,8 @@ async function upsertIndexingMetadataContextRecord(): Promise<void> {
  */
 export async function initIndexingOnchainEvents(): Promise<void> {
   try {
-    // TODO: wait for ENSDb instance to be healthy before running any queries against it.
+    // Ensure ENSDb instance is healthy before trying to run any queries against it.
+    await ensDbClient.isHealthy();
 
     // Ensure the ENSNode Schema in ENSDb is up to date by running any pending migrations.
     await migrateEnsNodeSchema();
@@ -62,6 +63,19 @@ export async function initIndexingOnchainEvents(): Promise<void> {
 
     // Upsert the Indexing Metadata Context record into ENSDb
     await upsertIndexingMetadataContextRecord();
+
+    // Invariant: at this point, the ENSDb instance must be considered ready.
+    // This is a defensive check, highly unlikely to ever fail, since we just
+    // have successfully executed database migrations for the ENSNode Schema
+    // and upserted the IndexingMetadataContext record into ENSDb. However,
+    // if any database migration silently failed without throwing an error,
+    // or if the upsert operation for IndexingMetadataContext record was
+    // not completed as expected, the ENSDb instance might not be ready, and
+    // we want to catch this issue before we start processing onchain events.
+    const isEnsDbReady = await ensDbClient.isReady();
+    if (!isEnsDbReady) {
+      throw new Error("ENSDb instance must be ready before onchain events can be indexed.");
+    }
 
     // Before starting to process onchain events, we want to make sure that
     // ENSRainbow is ready to serve the "heal" requests.

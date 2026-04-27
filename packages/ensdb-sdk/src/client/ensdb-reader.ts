@@ -6,6 +6,7 @@ import {
   type EnsDbPublicConfig,
   type EnsDbVersionInfo,
   type IndexingMetadataContext,
+  IndexingMetadataContextStatusCodes,
 } from "@ensnode/ensnode-sdk";
 
 import {
@@ -124,6 +125,36 @@ export class EnsDbReader<
    */
   get ensNodeSchema(): EnsNodeSchema {
     return this._ensNodeSchema;
+  }
+
+  /**
+   * Check if the ENSDb instance is healthy by running a simple query
+   * against it.
+   */
+  async isHealthy(): Promise<boolean> {
+    try {
+      await this.ensDb.execute("SELECT 1;");
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Check if the ENSDb instance is ready by verifying that it is
+   * healthy and the {@link IndexingMetadataContext} has been initialized for
+   * the ENSIndexer Schema used by this ENSDbReader instance.
+   */
+  async isReady(): Promise<boolean> {
+    const isHealthy = await this.isHealthy();
+
+    if (!isHealthy) {
+      return false;
+    }
+
+    const indexingMetadataContext = await this.getIndexingMetadataContext();
+
+    return indexingMetadataContext.statusCode === IndexingMetadataContextStatusCodes.Initialized;
   }
 
   /**

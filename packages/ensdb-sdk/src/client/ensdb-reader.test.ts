@@ -107,6 +107,70 @@ describe("EnsDbReader", () => {
     });
   });
 
+  describe("isHealthy", () => {
+    it("returns true when execute succeeds", async () => {
+      executeMock.mockResolvedValueOnce({ rows: [] });
+
+      const result = await createEnsDbReader().isHealthy();
+
+      expect(result).toBe(true);
+    });
+
+    it("returns false when execute fails", async () => {
+      executeMock.mockRejectedValueOnce(new Error("Connection refused"));
+
+      const result = await createEnsDbReader().isHealthy();
+
+      expect(result).toBe(false);
+    });
+  });
+
+  describe("isReady", () => {
+    it("returns true when healthy and indexing metadata context is initialized", async () => {
+      executeMock.mockResolvedValueOnce({ rows: [] });
+
+      const indexingStatus = deserializeCrossChainIndexingStatusSnapshot(
+        ensDbClientMock.serializedSnapshot,
+      );
+      const ensDbPublicConfig: EnsDbPublicConfig = {
+        versionInfo: { postgresql: "17.4" },
+      };
+      const ensRainbowPublicConfig = {
+        serverLabelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
+        versionInfo: { ensRainbow: "1.9.0" },
+      };
+      const stackInfo = buildEnsIndexerStackInfo(
+        ensDbPublicConfig,
+        ensDbClientMock.publicConfig,
+        ensRainbowPublicConfig,
+      );
+      const context = buildIndexingMetadataContextInitialized(indexingStatus, stackInfo);
+      const serialized = serializeIndexingMetadataContext(context);
+      selectResult.current = [{ value: serialized }];
+
+      const result = await createEnsDbReader().isReady();
+
+      expect(result).toBe(true);
+    });
+
+    it("returns false when healthy but indexing metadata context is uninitialized", async () => {
+      executeMock.mockResolvedValueOnce({ rows: [] });
+      selectResult.current = [];
+
+      const result = await createEnsDbReader().isReady();
+
+      expect(result).toBe(false);
+    });
+
+    it("returns false when not healthy", async () => {
+      executeMock.mockRejectedValueOnce(new Error("Connection refused"));
+
+      const result = await createEnsDbReader().isReady();
+
+      expect(result).toBe(false);
+    });
+  });
+
   describe("getIndexingMetadataContext", () => {
     it("returns an uninitialized context when no record exists", async () => {
       const ensDbReader = createEnsDbReader();
