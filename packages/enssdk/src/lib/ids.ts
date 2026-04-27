@@ -18,7 +18,6 @@ import type {
   PermissionsResourceId,
   PermissionsUserId,
   RegistrationId,
-  RegistryId,
   RenewalId,
   ResolverId,
   ResolverRecordsId,
@@ -37,18 +36,9 @@ export const makeENSv1VirtualRegistryId = (accountId: AccountId, node: Node) =>
   `${makeENSv1RegistryId(accountId)}/${node}` as ENSv1VirtualRegistryId;
 
 /**
- * Stringifies an {@link AccountId} as a {@link RegistryId} union without narrowing to the
- * v1 vs. v2 variant. Use when callsite context cannot determine which concrete variant is
- * appropriate (e.g. client-side cache key reconstruction or polymorphic GraphQL inputs);
- * prefer {@link makeENSv1RegistryId} or {@link makeENSv2RegistryId} when the variant is known.
- */
-export const makeRegistryId = (accountId: AccountId) => stringifyAccountId(accountId) as RegistryId;
-
-/**
  * Stringifies an {@link AccountId} as the id of a concrete Registry — either an
  * {@link ENSv1RegistryId} or an {@link ENSv2RegistryId}, but never an
- * {@link ENSv1VirtualRegistryId} (whose id format includes a trailing `/node` suffix that cannot
- * be produced from an AccountId alone).
+ * {@link ENSv1VirtualRegistryId}.
  */
 export const makeConcreteRegistryId = (accountId: AccountId) =>
   stringifyAccountId(accountId) as ENSv1RegistryId | ENSv2RegistryId;

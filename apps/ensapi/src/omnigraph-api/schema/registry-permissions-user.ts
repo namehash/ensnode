@@ -1,4 +1,4 @@
-import { makeRegistryId } from "enssdk";
+import { makeENSv2RegistryId } from "enssdk";
 
 import type { ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { builder } from "@/omnigraph-api/builder";
@@ -32,7 +32,7 @@ RegistryPermissionsUserRef.implement({
       description: "The Registry in which this Permission is granted.",
       type: RegistryInterfaceRef,
       nullable: false,
-      resolve: ({ chainId, address }) => makeRegistryId({ chainId, address }),
+      resolve: ({ chainId, address }) => makeENSv2RegistryId({ chainId, address }),
     }),
 
     /////////////////////////////////////
