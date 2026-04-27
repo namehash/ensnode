@@ -122,11 +122,13 @@ async function resolveCanonicalDomainId(
   const rows = await walkCanonicalNamegraph(registryId, path);
   if (rows.length === 0) return null;
 
-  // otherwise return the leaf
+  // rows are ORDER BY depth DESC, so deepest element is rows[0]
   const deepest = rows[0];
+
+  // this was an exact match if the depths match the input
   const exact = deepest.depth === path.length;
 
-  // if the exact match has a Resolver set, we don't need to check for Bridged Resolvers
+  // if the exact match has a Resolver set, we can return it outright
   // NOTE: this also encodes the "prefer linea.eth on the ENS Root Chain" behavior
   if (exact && hasResolver(deepest)) return deepest.domainId;
 
@@ -152,7 +154,7 @@ async function resolveCanonicalDomainId(
     }
   }
 
-  // finally, return the leaf (if it was the leaf), otherwise not found
+  // finally, return the exact match if it was the leaf
   return exact ? deepest.domainId : null;
 }
 
