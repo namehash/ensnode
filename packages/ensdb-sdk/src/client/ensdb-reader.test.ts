@@ -5,7 +5,6 @@ import {
   buildIndexingMetadataContextInitialized,
   buildIndexingMetadataContextUninitialized,
   deserializeCrossChainIndexingStatusSnapshot,
-  deserializeIndexingMetadataContext,
   type EnsDbPublicConfig,
   serializeIndexingMetadataContext,
 } from "@ensnode/ensnode-sdk";
@@ -207,8 +206,7 @@ describe("EnsDbReader", () => {
 
       const result = await createEnsDbReader().getIndexingMetadataContext();
 
-      const expected = deserializeIndexingMetadataContext(serialized);
-      expect(result).toStrictEqual(expected);
+      expect(result).toStrictEqual(context);
     });
 
     // This scenario should be impossible due to the primary key constraint on

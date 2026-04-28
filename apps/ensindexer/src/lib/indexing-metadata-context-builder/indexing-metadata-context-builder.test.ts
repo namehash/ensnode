@@ -1,26 +1,27 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { EnsDbReader } from "@ensnode/ensdb-sdk";
 import {
   buildCrossChainIndexingStatusSnapshotOmnichain,
   buildIndexingMetadataContextInitialized,
-  type CrossChainIndexingStatusSnapshot,
-  type EnsIndexerStackInfo,
-  type IndexingMetadataContext,
   type IndexingMetadataContextInitialized,
-  IndexingMetadataContextStatusCodes,
-  OmnichainIndexingStatusIds,
-  type OmnichainIndexingStatusSnapshot,
   validateEnsIndexerPublicConfigCompatibility,
 } from "@ensnode/ensnode-sdk";
-import type { LocalPonderClient } from "@ensnode/ponder-sdk";
 
 import "@/lib/__test__/mockLogger";
 
-import type { IndexingStatusBuilder } from "@/lib/indexing-status-builder/indexing-status-builder";
-import type { StackInfoBuilder } from "@/lib/stack-info-builder/stack-info-builder";
-
-import { IndexingMetadataContextBuilder } from "./indexing-metadata-context-builder";
+import {
+  createIndexingMetadataContextBuilder,
+  createMockEnsDbReader,
+  createMockIndexingStatusBuilder,
+  createMockLocalPonderClient,
+  createMockStackInfoBuilder,
+  crossChainSnapshot,
+  indexingMetadataContextInitialized,
+  indexingMetadataContextUninitialized,
+  omnichainSnapshotFollowing,
+  omnichainSnapshotUnstarted,
+  stackInfo,
+} from "@/lib/indexing-metadata-context-builder/indexing-metadata-context-builder.mock";
 
 vi.mock("@ensnode/ensnode-sdk", async () => {
   const actual = await vi.importActual("@ensnode/ensnode-sdk");
@@ -32,88 +33,6 @@ vi.mock("@ensnode/ensnode-sdk", async () => {
     validateEnsIndexerPublicConfigCompatibility: vi.fn(),
   };
 });
-
-const omnichainSnapshotUnstarted: OmnichainIndexingStatusSnapshot = {
-  omnichainStatus: OmnichainIndexingStatusIds.Unstarted,
-  omnichainIndexingCursor: 0,
-  chains: new Map(),
-};
-
-const omnichainSnapshotFollowing: OmnichainIndexingStatusSnapshot = {
-  omnichainStatus: OmnichainIndexingStatusIds.Following,
-  omnichainIndexingCursor: 100,
-  chains: new Map(),
-};
-
-const crossChainSnapshot: CrossChainIndexingStatusSnapshot = {
-  strategy: "omnichain" as any,
-  slowestChainIndexingCursor: 100,
-  snapshotTime: 200,
-  omnichainSnapshot: omnichainSnapshotFollowing,
-};
-
-const stackInfo: EnsIndexerStackInfo = {
-  ensDb: { versionInfo: { postgresql: "17.4" } },
-  ensIndexer: {} as any,
-  ensRainbow: {} as any,
-};
-
-const indexingMetadataContextInitialized: IndexingMetadataContextInitialized = {
-  statusCode: IndexingMetadataContextStatusCodes.Initialized,
-  indexingStatus: crossChainSnapshot,
-  stackInfo,
-};
-
-const indexingMetadataContextUninitialized: IndexingMetadataContext = {
-  statusCode: IndexingMetadataContextStatusCodes.Uninitialized,
-};
-
-function createMockEnsDbReader(
-  overrides: Partial<Pick<EnsDbReader, "getIndexingMetadataContext">> = {},
-): EnsDbReader {
-  return {
-    getIndexingMetadataContext: vi.fn().mockResolvedValue(indexingMetadataContextUninitialized),
-    ...overrides,
-  } as unknown as EnsDbReader;
-}
-
-function createMockIndexingStatusBuilder(
-  resolvedSnapshot: OmnichainIndexingStatusSnapshot = omnichainSnapshotUnstarted,
-): IndexingStatusBuilder {
-  return {
-    getOmnichainIndexingStatusSnapshot: vi.fn().mockResolvedValue(resolvedSnapshot),
-  } as unknown as IndexingStatusBuilder;
-}
-
-function createMockStackInfoBuilder(
-  resolvedStackInfo: EnsIndexerStackInfo = stackInfo,
-): StackInfoBuilder {
-  return {
-    getStackInfo: vi.fn().mockResolvedValue(resolvedStackInfo),
-  } as unknown as StackInfoBuilder;
-}
-
-function createMockLocalPonderClient(options: { isInDevMode?: boolean } = {}): LocalPonderClient {
-  return {
-    isInDevMode: options.isInDevMode ?? false,
-  } as unknown as LocalPonderClient;
-}
-
-function createIndexingMetadataContextBuilder(
-  overrides: {
-    ensDbClient?: EnsDbReader;
-    indexingStatusBuilder?: IndexingStatusBuilder;
-    stackInfoBuilder?: StackInfoBuilder;
-    localPonderClient?: LocalPonderClient;
-  } = {},
-): IndexingMetadataContextBuilder {
-  return new IndexingMetadataContextBuilder(
-    overrides.ensDbClient ?? createMockEnsDbReader(),
-    overrides.indexingStatusBuilder ?? createMockIndexingStatusBuilder(),
-    overrides.stackInfoBuilder ?? createMockStackInfoBuilder(),
-    overrides.localPonderClient ?? createMockLocalPonderClient(),
-  );
-}
 
 describe("IndexingMetadataContextBuilder", () => {
   beforeEach(() => {

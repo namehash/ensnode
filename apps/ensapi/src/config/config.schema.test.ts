@@ -24,7 +24,6 @@ import {
   VALID_RPC_URL,
 } from "@/config/config.schema.mock";
 import { ENSApi_DEFAULT_PORT } from "@/config/defaults";
-import type { EnsApiEnvironment } from "@/config/environment";
 import logger from "@/lib/logger";
 
 vi.mock("@/lib/logger", () => ({

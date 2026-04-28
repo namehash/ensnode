@@ -77,7 +77,7 @@ export class IndexingMetadataContextBuilder {
   /**
    * Get the current {@link IndexingMetadataContextInitialized} object.
    *
-   * Expected to be called while writing an {@link IndexingMetadataContextInitialized} record into ENSDb
+   * Expected to be called while writing the {@link IndexingMetadataContextInitialized} record in ENSDb.
    */
   async getIndexingMetadataContext(): Promise<IndexingMetadataContextInitialized> {
     const [

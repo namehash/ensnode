@@ -10,9 +10,13 @@ import {
 } from "../../../stack-info/zod-schemas/ensindexer-stack-info";
 import { IndexingMetadataContextStatusCodes } from "../indexing-metadata-context";
 
-const makeSerializedIndexingMetadataContextUninitializedSchema = (_valueLabel?: string) => {
+const makeSerializedIndexingMetadataContextUninitializedSchema = (valueLabel?: string) => {
+  const label = valueLabel ?? "SerializedIndexingMetadataContextUninitialized";
+
   return z.object({
-    statusCode: z.literal(IndexingMetadataContextStatusCodes.Uninitialized),
+    statusCode: z.literal(IndexingMetadataContextStatusCodes.Uninitialized, {
+      error: `${label} must have status code ${IndexingMetadataContextStatusCodes.Uninitialized}`,
+    }),
   });
 };
 
@@ -20,7 +24,9 @@ export const makeSerializedIndexingMetadataContextInitializedSchema = (valueLabe
   const label = valueLabel ?? "SerializedIndexingMetadataContextInitialized";
 
   return z.object({
-    statusCode: z.literal(IndexingMetadataContextStatusCodes.Initialized),
+    statusCode: z.literal(IndexingMetadataContextStatusCodes.Initialized, {
+      error: `${label} must have status code ${IndexingMetadataContextStatusCodes.Initialized}`,
+    }),
     indexingStatus: makeSerializedCrossChainIndexingStatusSnapshotSchema(`${label}.indexingStatus`),
     stackInfo: makeSerializedEnsIndexerStackInfoSchema(`${label}.stackInfo`),
   });
@@ -42,7 +48,9 @@ export const makeIndexingMetadataContextInitializedSchema = (valueLabel?: string
   const label = valueLabel ?? "IndexingMetadataContextInitialized";
 
   return z.object({
-    statusCode: z.literal(IndexingMetadataContextStatusCodes.Initialized),
+    statusCode: z.literal(IndexingMetadataContextStatusCodes.Initialized, {
+      error: `${label} must have status code ${IndexingMetadataContextStatusCodes.Initialized}`,
+    }),
     indexingStatus: makeCrossChainIndexingStatusSnapshotSchema(`${label}.indexingStatus`),
     stackInfo: makeEnsIndexerStackInfoSchema(`${label}.stackInfo`),
   });

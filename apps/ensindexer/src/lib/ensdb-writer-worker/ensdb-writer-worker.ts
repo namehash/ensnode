@@ -8,7 +8,7 @@ import { logger } from "@/lib/logger";
 
 /**
  * Interval in seconds between two consecutive attempts to upsert
- * the Indexing Status Snapshot record into ENSDb.
+ * the IndexingMetadataContext record into ENSDb.
  */
 const INDEXING_STATUS_RECORD_UPDATE_INTERVAL: Duration = 1;
 
@@ -20,7 +20,7 @@ const INDEXING_STATUS_RECORD_UPDATE_INTERVAL: Duration = 1;
  */
 export class EnsDbWriterWorker {
   /**
-   * Interval for recurring updates of Indexing Status Snapshots into ENSDb.
+   * Interval for recurring updates of IndexingMetadataContext record in ENSDb.
    */
   private indexingStatusUpdateInterval: ReturnType<typeof setInterval> | null = null;
 
@@ -61,7 +61,7 @@ export class EnsDbWriterWorker {
       throw new Error("EnsDbWriterWorker is already running");
     }
 
-    // Recurring update of the IndexingMetadataRecord record in ENSDb.
+    // Recurring update of the IndexingMetadataContext record in ENSDb.
     this.indexingStatusUpdateInterval = setInterval(
       () =>
         this.updateIndexingMetadataContext().catch((error) => {
@@ -95,7 +95,7 @@ export class EnsDbWriterWorker {
   }
 
   /**
-   * Update the current Indexing Status Snapshot into ENSDb.
+   * Update the current IndexingMetadataContext into ENSDb.
    *
    * This method is called by the scheduler at regular intervals from {@link run}.
    *

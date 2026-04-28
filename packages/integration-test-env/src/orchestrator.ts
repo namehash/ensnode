@@ -204,7 +204,11 @@ async function pollIndexingStatus(
       try {
         const indexingMetadataContext = await ensDbClient.getIndexingMetadataContext();
 
-        if (indexingMetadataContext.statusCode === IndexingMetadataContextStatusCodes.Initialized) {
+        if (
+          indexingMetadataContext.statusCode === IndexingMetadataContextStatusCodes.Uninitialized
+        ) {
+          console.log("IndexingMetadataContext is uninitialized, waiting...");
+        } else {
           const { omnichainStatus } = indexingMetadataContext.indexingStatus.omnichainSnapshot;
           log(`Omnichain status: ${omnichainStatus}`);
           if (

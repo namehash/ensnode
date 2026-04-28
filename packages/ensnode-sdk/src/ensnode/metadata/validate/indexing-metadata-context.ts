@@ -11,14 +11,13 @@ export function validateIndexingMetadataContextInitialized(
   maybeIndexingMetadataContext: Unvalidated<IndexingMetadataContextInitialized>,
   valueLabel?: string,
 ): IndexingMetadataContextInitialized {
-  const result = makeIndexingMetadataContextInitializedSchema(valueLabel).safeParse(
+  const label = valueLabel ?? "IndexingMetadataContextInitialized";
+  const result = makeIndexingMetadataContextInitializedSchema(label).safeParse(
     maybeIndexingMetadataContext,
   );
 
   if (result.error) {
-    throw new Error(
-      `Cannot validate IndexingMetadataContextInitialized:\n${prettifyError(result.error)}\n`,
-    );
+    throw new Error(`Cannot validate ${label}:\n${prettifyError(result.error)}\n`);
   }
   return result.data;
 }

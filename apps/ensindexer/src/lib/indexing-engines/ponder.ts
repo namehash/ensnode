@@ -202,7 +202,7 @@ function recordEventForEps(): void {
  * Some event handlers may have preconditions that need to be met before
  * they can run.
  *
- * The Setup and Onchain preconditions are memoized and execute their logic only
+ * The Onchain preconditions are memoized and execute their logic only
  * once per process, regardless of how often this function is called — essential
  * because it's invoked for every indexed event. EPS accounting via
  * {@link recordEventForEps} runs on every call, but its hot-path cost is a
