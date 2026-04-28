@@ -11,7 +11,7 @@ import {
 
 import { type EncodedReferrer, PluginName, toJson } from "@ensnode/ensnode-sdk";
 
-import { ensureDomainEvent } from "@/lib/ensv2/event-db-helpers";
+import { ensureDomainEvent, ensureEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel, ensureUnknownLabel, labelExists } from "@/lib/ensv2/label-db-helpers";
 import { getLatestRegistration, getLatestRenewal } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
@@ -51,10 +51,10 @@ export default function () {
     }
 
     const controller = getThisAccountId(context, event);
-    const { node: managedNode } = getManagedName(controller);
+    const { node: managedNode, registry } = getManagedName(controller);
 
     const node = makeSubdomainNode(labelHash, managedNode);
-    const domainId = makeENSv1DomainId(node);
+    const domainId = makeENSv1DomainId(registry, node);
     const registration = await getLatestRegistration(context, domainId);
 
     if (!registration) {
@@ -79,7 +79,8 @@ export default function () {
       .set({ base, premium, referrer });
 
     // push event to domain history
-    await ensureDomainEvent(context, event, domainId);
+    const eventId = await ensureEvent(context, event);
+    await ensureDomainEvent(context, domainId, eventId);
   }
 
   async function handleNameRenewedByController({
@@ -115,9 +116,9 @@ export default function () {
     }
 
     const controller = getThisAccountId(context, event);
-    const { node: managedNode } = getManagedName(controller);
+    const { node: managedNode, registry } = getManagedName(controller);
     const node = makeSubdomainNode(labelHash, managedNode);
-    const domainId = makeENSv1DomainId(node);
+    const domainId = makeENSv1DomainId(registry, node);
     const registration = await getLatestRegistration(context, domainId);
 
     if (!registration) {
@@ -159,7 +160,8 @@ export default function () {
       .set({ base, premium, referrer });
 
     // push event to domain history
-    await ensureDomainEvent(context, event, domainId);
+    const eventId = await ensureEvent(context, event);
+    await ensureDomainEvent(context, domainId, eventId);
   }
 
   //////////////////////////////////////

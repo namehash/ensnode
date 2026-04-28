@@ -13,6 +13,7 @@ import { PluginName } from "@ensnode/ensnode-sdk";
 
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { addOnchainEventListener, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
+import { getManagedName } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import { ensureDomainResolverRelation } from "@/lib/protocol-acceleration/domain-resolver-relationship-db-helpers";
@@ -21,7 +22,7 @@ import { migrateNode, nodeIsMigrated } from "@/lib/protocol-acceleration/registr
 const ensRootChainId = getENSRootChainId(config.namespace);
 
 /**
- * Handler functions for Regsitry contracts in the Protocol Acceleration plugin.
+ * Handler functions for Registry contracts in the Protocol Acceleration plugin.
  * - indexes ENS Root Chain Registry migration status
  * - indexes Node-Resolver Relationships for all Registry contracts
  *
@@ -37,8 +38,10 @@ export default function () {
   }) {
     const { node, resolver } = event.args;
 
-    const registry = getThisAccountId(context, event);
-    const domainId = makeENSv1DomainId(node);
+    // Canonicalize to the concrete ENSv1 Registry that governs this contract's namegraph
+    // (ENSv1Registry vs. ENSv1RegistryOld both canonicalize to the new Registry on mainnet).
+    const { registry } = getManagedName(getThisAccountId(context, event));
+    const domainId = makeENSv1DomainId(registry, node);
 
     await ensureDomainResolverRelation(context, registry, domainId, resolver);
   }
