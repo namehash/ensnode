@@ -10,7 +10,7 @@ const serviceFiles = [
   "docker/services/ensrainbow.yml",
 ];
 
-const semverRegex = /^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/;
+const semverRegex = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
 
 async function getVersionFromEnsapi() {
   const ensapiPackageJsonPath = resolve(rootDir, "apps/ensapi/package.json");
@@ -33,18 +33,19 @@ function validateVersion(version) {
 }
 
 async function updateServiceDefaultTag(version) {
-  const pattern = /\$\{ENSNODE_TAG:-[^}]+\}/g;
+  const testPattern = /\$\{ENSNODE_TAG:-[^}]+\}/;
+  const replacePattern = /\$\{ENSNODE_TAG:-[^}]+\}/g;
   const replacement = `\${ENSNODE_TAG:-${version}}`;
 
   for (const relativePath of serviceFiles) {
     const absolutePath = resolve(rootDir, relativePath);
     const content = await readFile(absolutePath, "utf8");
 
-    if (!pattern.test(content)) {
+    if (!testPattern.test(content)) {
       throw new Error(`Could not find ENSNODE_TAG default expression in ${relativePath}`);
     }
 
-    const updated = content.replace(pattern, replacement);
+    const updated = content.replace(replacePattern, replacement);
     await writeFile(absolutePath, updated, "utf8");
     console.log(`Updated ${relativePath} -> ${version}`);
   }
