@@ -15,7 +15,14 @@ import {
   type RegistryId,
 } from "enssdk";
 
-import { getRootRegistryId, type RequiredAndNotNull } from "@ensnode/ensnode-sdk";
+import { DatasourceNames } from "@ensnode/datasources";
+import {
+  accountIdEqual,
+  getENSv1RootRegistryId,
+  getRootRegistryId,
+  maybeGetDatasourceContract,
+  type RequiredAndNotNull,
+} from "@ensnode/ensnode-sdk";
 import { isBridgedResolver } from "@ensnode/ensnode-sdk/internal";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
@@ -24,9 +31,10 @@ import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
 const tracer = trace.getTracer("get-domain-by-interpreted-name");
 
 /**
- * The maximum number of times to follow a Bridged Resolver, as a defense against infinite loops.
+ * The maximum number of times to hop between disjoint namegraphs, as a defense against infinite loops.
+ * i.e. how many times to follow a Bridged Resolver or fall back from ENSv2 to ENSv1 or vise-versa.
  */
-const MAX_BRIDGE_DEPTH = 2;
+const MAX_HOP_DEPTH = 3;
 
 /**
  * The maximum depth to walk the namegraph from any Registry.
@@ -35,7 +43,7 @@ const MAX_WALK_DEPTH = 16;
 
 interface WalkResultRow {
   domainId: DomainId;
-  resolver: Address | null;
+  address: Address | null;
   chainId: ChainId | null;
   depth: number;
 }
@@ -45,8 +53,8 @@ interface WalkResultRow {
  */
 const hasResolver = (
   row: WalkResultRow,
-): row is RequiredAndNotNull<WalkResultRow, "resolver" | "chainId"> =>
-  row.resolver !== null && row.chainId !== null;
+): row is RequiredAndNotNull<WalkResultRow, "address" | "chainId"> =>
+  row.address !== null && row.chainId !== null;
 
 /**
  * Domain lookup by Interpreted Name by traversing the namegraph.
@@ -110,10 +118,11 @@ async function resolveCanonicalDomainId(
   path: LabelHashPath,
   depth = 0,
 ): Promise<DomainId | null> {
-  // Sanity Check: maximum recursion depth of 2. technically only 1 is necessary because we only
+  // Sanity Check: maximum recursion depth of 3. technically only 2 is necessary because we know we
+  // need to support aonly
   // have well-known Bridged Resolvers that bridge from the Root chain to an L2 chain, without
   // further hops.
-  if (depth > MAX_BRIDGE_DEPTH) {
+  if (depth > MAX_HOP_DEPTH) {
     throw new Error(
       `Invariant(resolveCanonicalDomainId): Bridged Resolver depth exceeded: ${depth}`,
     );
@@ -135,12 +144,23 @@ async function resolveCanonicalDomainId(
   // otherwise, identify the deepest element with a Resolver
   const deepestResolver = rows.find(hasResolver);
   if (deepestResolver) {
-    const bridgesTo = isBridgedResolver(config.namespace, {
-      chainId: deepestResolver.chainId,
-      address: deepestResolver.resolver,
-    });
+    // ENSv1Resolver (ENSv1 Fallback)
+    // if the deepest Resolver is the ENSv1Resolver, fallback to ENSv1
+    const ENSv1Resolver = maybeGetDatasourceContract(
+      config.namespace,
+      DatasourceNames.ENSv2Root,
+      "ENSv1Resolver",
+    );
+    if (ENSv1Resolver && accountIdEqual(deepestResolver, ENSv1Resolver)) {
+      // fallback to ENSv1 using the full path
+      return resolveCanonicalDomainId(getENSv1RootRegistryId(config.namespace), path, depth + 1);
+    }
 
+    // TODO: ENSv2Resolver
+
+    // Bridged Resolver
     // if the deepest Resolver is a Bridged Resolver, recurse to the target Registry
+    const bridgesTo = isBridgedResolver(config.namespace, deepestResolver);
     if (bridgesTo) {
       // slice the path according to whether target Registry is a Shadow Registry or not
       const targetPath = bridgesTo.shadow ? path : path.slice(deepestResolver.depth);
@@ -196,7 +216,7 @@ async function walkCanonicalNamegraph(registryId: RegistryId, path: LabelHashPat
     )
     SELECT
       path."domainId",
-      drr.resolver,
+      drr.resolver AS "address",
       drr.chain_id AS "chainId",
       path.depth
     FROM path
