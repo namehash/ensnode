@@ -355,11 +355,6 @@ export const registration = onchainTable(
   }),
 );
 
-export const latestRegistrationIndex = onchainTable("latest_registration_indexes", (t) => ({
-  domainId: t.text().primaryKey().$type<DomainId>(),
-  registrationIndex: t.integer().notNull(),
-}));
-
 export const registration_relations = relations(registration, ({ one, many }) => ({
   // belongs to a domain
   domain: one(domain, {
@@ -373,6 +368,12 @@ export const registration_relations = relations(registration, ({ one, many }) =>
     references: [account.id],
     relationName: "registrant",
   }),
+
+  // has a latest registration index
+  latestRegistrationIndex: one(latestRegistrationIndex),
+
+  // has a latest renewal index
+  latestRenewalIndex: one(latestRenewalIndex),
 
   // has one unregistrant
   unregistrant: one(account, {
@@ -388,6 +389,19 @@ export const registration_relations = relations(registration, ({ one, many }) =>
   event: one(event, {
     fields: [registration.eventId],
     references: [event.id],
+  }),
+}));
+
+export const latestRegistrationIndex = onchainTable("latest_registration_indexes", (t) => ({
+  domainId: t.text().primaryKey().$type<DomainId>(),
+  registrationIndex: t.integer().notNull(),
+}));
+
+export const latestRegistrationIndex_relations = relations(latestRegistrationIndex, ({ one }) => ({
+  // references domain
+  domain: one(domain, {
+    fields: [latestRegistrationIndex.domainId],
+    references: [domain.id],
   }),
 }));
 
@@ -450,6 +464,14 @@ export const latestRenewalIndex = onchainTable(
   }),
   (t) => ({ pk: primaryKey({ columns: [t.domainId, t.registrationIndex] }) }),
 );
+
+export const latestRenewalIndex_relations = relations(latestRenewalIndex, ({ one }) => ({
+  // references domain
+  domain: one(domain, {
+    fields: [latestRenewalIndex.domainId],
+    references: [domain.id],
+  }),
+}));
 
 ///////////////
 // Permissions
