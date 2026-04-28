@@ -8,52 +8,78 @@ sidebar:
 
 import { LinkCard } from "@astrojs/starlight/components";
 
+Use this page to choose the fastest path for your ENSNode use case: quick testing, app integration, raw API usage, or self-hosting.
+
 The fastest way to query ENSNode is to use the NameHash Labs hosted instances of ENSNode. The **alpha** instance provides support for mainnet, `base.eth`, `linea.eth`, and [3DNS](https://3dns.box) ENS names.
 
 ```
 https://api.alpha.ensnode.io
 ```
 
-For more information about the hosted instances, refer to the following documentation.
+## Choose your quickstart path
+
+Developers use ENSNode in different ways depending on their goals. Pick the path that best matches your use case:
+
+### Quickly test ENSNode data
+
+Choose this if you want the fastest hands-on start with no local setup. This guide shows available hosted endpoints, what each deployment is used for, and how to connect them to ENSAdmin for quick exploration and validation.
 
 <LinkCard
   title="Hosted ENSNode Instances"
   href="/docs/usage/hosted-ensnode-instances"
 />
 
-## Using ENSNode with ensjs
+### Integrate with ENS Omnigraph API
 
-You can use ENSNode with ensjs by providing an ENSNode url in place of the subgraph url in viem's `Chain` object.
+Choose this if you need graphql API access and want to build directly against API responses. This guide will cover endpoints, response shapes, and integration patterns for backend services and data pipelines.
 
-```ts
-import { http, createClient } from "viem";
-import { mainnet } from "viem/chains";
-import { addEnsContracts } from "@ensdomains/ensjs";
-import { getSubgraphRecords } from "@ensdomains/ensjs/subgraph";
+<LinkCard
+  title="ENS Omnigraph API"
+  href="/docs/usage/omnigraph-api"
+/>
 
-const client = createClient({
-  chain: {
-    ...addEnsContracts(mainnet),
-    subgraphs: { ens: { url: "https://api.alpha.ensnode.io/subgraph" } },
-  },
-  transport: http(),
-});
+### Integrate with `enssdk`
 
-const names = await getNamesForAddress(client, { name: "validator.eth" });
-```
+Choose this if you prefer a typed SDK experience for app integration. This guide will cover SDK setup, common query patterns, and recommended usage for production applications.
 
-See the following documentation for examples of how to query ENSNode from ensjs:
+<LinkCard
+  title="Using ENSNode with enssdk"
+  href="/docs/usage/with-enssdk"
+/>
 
-<LinkCard title="Using ENSNode with ensjs" href="/docs/usage/with-ensjs" />
 
-## Using ENSNode's APIs
+### Integrate with `ensjs`
 
-For querying ENSNode via its **GraphQL** API, refer to the following documentation:
+Choose this if your app already uses `ensjs` and you want minimal migration effort. This guide explains how to point `ensjs` to ENSNode's subgraph-compatible endpoint and keep familiar `ensjs` query workflows.
 
-<LinkCard title="Using ENSNode's API" href="/docs/usage/api" />
+<LinkCard
+  title="Using ENSNode with ensjs"
+  href="/docs/usage/with-ensjs"
+/>
 
-## Using ENSNode with `viem/chain`
+### Integrate with `enskit`
 
-If you're integrating with a library that retrieves the url for the ENS Subgraph in a provided `viem/chain` object, see the following documentation for integration.
+Choose this if you are building UI-heavy apps and want reusable ENS-focused components/hooks. This guide will cover how to wire ENSNode-backed data into frontend flows with minimal boilerplate.
 
-<LinkCard title="Using ENSNode with viem/chain" href="/docs/usage/with-viem" />
+<LinkCard
+  title="Using ENSNode with enskit"
+  href="/docs/usage/with-enskit"
+/>
+
+### Integrate through `viem/chain`
+
+Choose this if your tooling expects ENS endpoints via `viem` chain configuration. This guide explains how to configure `viem/chain` objects so ENS-aware libraries can consume ENSNode seamlessly.
+
+<LinkCard
+  title="Using ENSNode with viem/chain"
+  href="/docs/usage/with-viem"
+/>
+
+### Run your own ENSNode
+
+Choose this if you need production ownership of uptime, data freshness strategy, and infrastructure. This guide compares deployment options (Docker, Render, Terraform) and links to the setup steps for each path.
+
+<LinkCard
+  title="Deploying ENSNode"
+  href="/docs/deploying"
+/>

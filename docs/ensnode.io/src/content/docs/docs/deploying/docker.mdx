@@ -9,36 +9,56 @@ import { LinkCard } from '@astrojs/starlight/components';
 
 The Docker images are the easiest way to run or deploy the ENSNode suite of services, both locally and in the cloud.
 
+All commands below are run from the monorepo root.
+
 :::note[Postgres Requirement]
 ENSIndexer runs `CREATE EXTENSION IF NOT EXISTS pg_trgm` at startup to back partial-name search indexes. If you're swapping out the bundled `postgres:17` image for a managed or custom Postgres, make sure the [`pg_trgm`](https://www.postgresql.org/docs/current/pgtrgm.html) extension is available for installation (it ships with stock Postgres contrib and is available for installation on most managed providers).
 :::
+
+
+ENSNode provides several [Docker Compose](https://docs.docker.com/compose/) files for different use cases:
+
+- **`docker/docker-compose.yml`** — base stack for mainnet/sepolia: ensindexer, ensapi, ensrainbow, ensadmin, ensdb (postgres)
+- **`docker/docker-compose.devnet.yml`** — full stack against local devnet (ens-test-env), works out of the box with no configuration required
+- **`docker/docker-compose.orchestrator.yml`** — minimal infra for integration tests (devnet + ensdb), used by test orchestration
+
+To inspect the fully resolved config for any compose file (resolves all `extends`):
+
+```bash
+docker compose -f docker/docker-compose.yml config
+```
+
+### Mainnet / Sepolia
+
+Copy the example env file and configure it (one-time setup):
+
+```bash
+cp docker/envs/.env.docker.example docker/envs/.env.docker.local
+```
 
 <LinkCard
   title="Configure Environment Variables"
   href="/ensindexer/usage/configuration"
 />
 
-ENSNode provides several [Docker Compose](https://docs.docker.com/compose/) files for different use cases:
 
-- **`docker/docker-compose.yml`** — base stack for mainnet/sepolia: ensindexer, ensapi, ensrainbow, ensadmin, ensdb (postgres)
-- **`docker/docker-compose.devnet.yml`** — full stack against local devnet (ens-test-env), works out of the box with no configuration required
-
-### Mainnet / Sepolia
-
-Copy the example env file and configure it:
+Edit `docker/envs/.env.docker.local` to set `NAMESPACE`, `PLUGINS`, and your RPC endpoints (for example `ALCHEMY_API_KEY` or `RPC_URL_1`), then run:
 
 ```bash
-cp docker/envs/.env.docker.example docker/envs/.env.docker.local
-```
-
-Edit `docker/envs/.env.docker.local` to set your `NAMESPACE`, `PLUGINS`, and RPC endpoints (e.g. `ALCHEMY_API_KEY` or `RPC_URL_1`), then run:
-
-```bash
+# Start
 docker compose -f docker/docker-compose.yml up -d
+
+# Stop
+docker compose -f docker/docker-compose.yml down
+
+# Stop and remove volumes
+docker compose -f docker/docker-compose.yml down -v
 ```
 
 
 ### Local devnet
+
+This stack is primarily intended for engineers developing ENS infrastructure and testing against a local chain.
 
 Configuration is optional. To customize defaults (e.g. change `PLUGINS`), copy the example as in previous step and edit it.
 
@@ -48,12 +68,27 @@ Otherwise, skip setup and run directly:
 docker compose -f docker/docker-compose.devnet.yml up -d
 ```
 
+To start only specific services:
 
-<LinkCard
-  title="Docker Compose usage and commands"
-  description="See all use cases, commands, and configuration options in docker/README.md on GitHub."
-  href="https://github.com/namehash/ensnode/blob/main/docker/README.md"
-/>
+```bash
+# Devnet + core services (no ENSAdmin)
+# Useful when you do not need UI
+docker compose -f docker/docker-compose.devnet.yml up -d ensindexer ensapi
+
+# Devnet only
+# Useful when you want only a local EVM chain
+docker compose -f docker/docker-compose.devnet.yml up devnet
+
+# Or
+pnpm devnet
+```
+
+To stop stacks:
+
+```bash
+docker compose -f docker/docker-compose.yml down
+docker compose -f docker/docker-compose.devnet.yml down
+```
 
 <LinkCard
   title="View Docker Compose files on GitHub"
