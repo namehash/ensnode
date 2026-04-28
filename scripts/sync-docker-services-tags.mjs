@@ -26,9 +26,7 @@ async function getVersionFromEnsapi() {
 
 function validateVersion(version) {
   if (!semverRegex.test(version)) {
-    throw new Error(
-      `Invalid version "${version}". Expected SemVer-like value such as 1.10.1`,
-    );
+    throw new Error(`Invalid version "${version}". Expected SemVer-like value such as 1.10.1`);
   }
 }
 
