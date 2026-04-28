@@ -42,7 +42,7 @@ Query data from your ENSDb instance:
 -- Get domains from the ENSIndexer Schema with the `ensindexer_mainnet` ENSIndexer Schema Name
 SELECT * FROM ensindexer_mainnet.v1_domains LIMIT 10;
 
--- Get indexing status for the ENSNode Schema with the `ensindexer_mainnet` ENSIndexer Schema Name
+-- Get indexing status snapshot for the ENSNode Schema with the `ensindexer_mainnet` ENSIndexer Schema Name
 SELECT * FROM "ensnode"."metadata"
 WHERE ens_indexer_schema_name = 'ensindexer_mainnet'
 AND key = 'ensindexer_indexing_status'

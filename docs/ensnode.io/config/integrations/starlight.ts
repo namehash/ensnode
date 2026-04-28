@@ -138,10 +138,6 @@ export function starlight(): AstroIntegration {
               collapsed: false,
               autogenerate: { directory: "ensdb/integrations" },
             },
-            {
-              label: "FAQ",
-              link: "/ensdb/faq",
-            },
           ],
         },
         {

@@ -7,75 +7,35 @@ sidebar:
 ---
 import { Aside } from '@astrojs/starlight/components';
 
-ENSNode is the reference implementation of the [ENSDb standard](/ensdb/concepts/glossary#ensdb-standard), providing a complete ecosystem of tools and services for building with ENSDb. Each ENSNode instance includes:
-- At least one [ENSDb instance](/ensdb/concepts/glossary#ensdb-instance) — The PostgreSQL database following the ENSDb standard.
-- At least one [ENSIndexer instance](/ensdb/concepts/glossary#ensindexer-instance) — The reference ENSDb Writer implementation that writes data into the ENSDb instance.
-- At least one [ENSApi instance](/ensdb/concepts/glossary#ensapi-instance) — The reference ENSDb Reader implementation that serves GraphQL and REST APIs.
+ENSNode is the reference implementation of the [ENSDb standard](/ensdb/concepts/glossary#ensdb-standard), providing a complete ecosystem of tools and services for building with ENSDb.
+
+The core implementation consists of three main components:
+- An [ENSDb instance](/ensdb/concepts/glossary#ensdb-instance) — The PostgreSQL database following the ENSDb standard.
+- An [ENSIndexer instance](/ensdb/concepts/glossary#ensindexer-instance) — The reference ENSDb Writer implementation that writes data into the ENSDb instance.
+- An [ENSApi instance](/ensdb/concepts/glossary#ensapi-instance) — The reference ENSDb Reader implementation that serves GraphQL and REST APIs.
 
 ```mermaid
 flowchart LR
-    subgraph ENSNode["ENSNode Environment"]
-        subgraph ENSNodeMainnet["ENSNode 'Mainnet' instance"]
-            direction LR
-            ENSIndexerMainnet[ENSIndexer 'Mainnet' instance]
-            ENSApiMainnet@{ shape: procs, label: "ENSApi Mainnet instances" }
+    subgraph DeploymentEnv["Deployment Environment"]
+        ENSIndexer[ENSIndexer instance]
+        ENSApi[ENSApi instance]
+
+        subgraph PostgreSQLServer["PostgreSQL Server instance"]
+            ENSDb[(ENSDb instance)]
+            NS(ENSNode Schema)
+            EIS(ENSIndexer Schema)
+
+            ENSDb -->|has| NS
+            ENSDb -->|has| EIS
         end
-
-        subgraph ENSNodeSepolia["ENSNode 'Sepolia' instance"]
-            direction LR
-            ENSIndexerSepolia[ENSIndexer 'Sepolia' instance]
-            ENSApiSepolia[ENSApi 'Sepolia' instance]
-        end
-    end
-
-    subgraph PostgreSQLServer["PostgreSQL Server instance"]
-        ENSDbMainnet[(ENSDb 'Mainnet' instance)]
-        PSMainnet(Ponder Schema)
-        NSMainnet(ENSNode Schema)
-        EISMainnet@{ shape: procs, label: "ENSIndexer Schema" }
-
-        ENSDbMainnet -->|1..1| PSMainnet
-        ENSDbMainnet -->|1..1| NSMainnet
-        ENSDbMainnet -->|1..*| EISMainnet
-
-
-        ENSDbSepolia[(ENSDb 'Sepolia' instance)]
-        PSSepolia(Ponder Schema)
-        NSSepolia(ENSNode Schema)
-        EISSepolia@{ shape: procs, label: "ENSIndexer Schema" }
-
-        ENSDbSepolia -->|1..1| PSSepolia
-        ENSDbSepolia -->|1..1| NSSepolia
-        ENSDbSepolia -->|1..*| EISSepolia
     end
     
-    ENSIndexerMainnet -->|Write| ENSDbMainnet
-    ENSIndexerSepolia -->|Write| ENSDbSepolia
-    ENSApiMainnet -->|Read| ENSDbMainnet
-    ENSApiSepolia -->|Read| ENSDbSepolia
+    ENSIndexer -->|writes| ENSDb
+    ENSApi -->|reads| ENSDb
+
 
 ```
 
 <Aside type="tip" title="Build Your Own">
-  You can build custom writers, readers, or both. The [ENSDb standard](/ensdb/concepts/glossary#ensdb-standard) is implementation-agnostic.
+  You can build custom ENSDb Writers, or ENSDb Readers. The [ENSDb standard](/ensdb/concepts/glossary#ensdb-standard) is implementation-agnostic.
 </Aside>
-
-
-### Single PostgreSQL Server, Multiple ENSDb Instances
-
-A single PostgreSQL server can serve multiple ENSDb instances for different ENS Namespaces. This allows you to have separate ENSDb instances based on your needs. For example:
-- Your production environment can have a dedicated ENSDb instance for ENS data from the ENS Namespace "mainnet".
-- Your staging environment can have a separate ENSDb instance for ENS data from the ENS Namespace "sepolia".
-- Your local development environment can have its own ENSDb instance for testing with local or ephemeral data from the ENS Namespace "ens-test-env".
-
-```mermaid
-flowchart TB
-    subgraph PGServer["PostgreSQL Server"]
-        direction TB
-        Mainnet[(ENSDb Mainnet instance)]
-        Testnet[(ENSDb Sepolia instance)]
-        Devnet[(ENSDb ENS Test Env instance)]
-    end
-```
-
-Each ENSDb instance is an independent database containing complete ENS data for its respective environment.

@@ -43,10 +43,18 @@ Objects contained within a [database schema](#database-schema), including:
 
 An open standard for bi-directional ENS integration. The ENSDb Standard defines:
 - Schema designs for storing ENS data in a [PostgreSQL database](#postgresql-database)
-- Rules and constraints for writers and readers
+- Rules and constraints for [ENSDb Writers](#ensdb-writer) and [ENSDb Readers](#ensdb-reader)
 - A modular architecture enabling interoperability
 
 Any [PostgreSQL database](#postgresql-database) following the ENSDb Standard is an [ENSDb instance](#ensdb-instance).
+
+### ENSDb Writer
+
+Any application that writes ENS data into an [ENSDb instance](#ensdb-instance) following the [ENSDb Standard](#ensdb-standard). For example, [ENSIndexer](#ensindexer) is a reference implementation of an ENSDb Writer. Other implementations of ENSDb Writers can be built in any language, and can use different indexing frameworks (i.e. [Ponder](https://ponder.sh/), [rindexer](https://rindexer.xyz/)), as long as they follow the ENSDb Standard.
+
+### ENSDb Reader
+
+Any application that reads ENS data from an [ENSDb instance](#ensdb-instance) following the [ENSDb Standard](#ensdb-standard). For example, [ENSApi](#ensapi) is a reference implementation of an ENSDb Reader. Other implementations of ENSDb Readers can be built in any language, and can serve different types of APIs (GraphQL, REST, gRPC, etc.), as long as they follow the ENSDb Standard.
 
 ## ENSDb Concepts
 
@@ -61,26 +69,18 @@ For ENSDb, a Drizzle ORM object that defines the structure of [database objects]
 - Constraints
 - Relations
 
-### Schema Checksum
-
-A deterministic checksum computed from a [Schema Definition](#schema-definition). Used to detect when the schema structure and/or semantics change.
-
 ### ENSDb Instance
 
 A [PostgreSQL database](#postgresql-database) that follows the [ENSDb Standard](#ensdb-standard). An ENSDb instance stores indexed ENS data and is composed of three types of database schemas:
 
-- Exactly one [Ponder Schema](#ponder-schema)
 - Exactly one [ENSNode Schema](#ensnode-schema)
 - One or more [ENSIndexer Schemas](#ensindexer-schema)
 
-Multiple [ENSDb instances](#ensdb-instance) can be hosted on the same [PostgreSQL server](#postgresql-server). For example:
-- One ENSDb instance could be used for production workloads and include data for the "mainnet" ENS Namespace.
-- At the same time, another ENSDb instance could be used for testing workloads and include data for the "sepolia" ENS Namespace.
-- At the same time, another ENSDb instance could be used for local development workloads and include data for the "ens-test-env" ENS Namespace.
-
 #### Multi-Tenant ENSDb instance
 
-An [ENSDb instance](#ensdb-instance) is multi-tenant because it can store data from multiple [ENSIndexer instances](#ensindexer-instance) (tenants) in isolated [ENSIndexer Schemas](#ensindexer-schema).
+> This example is based on reference implementations, but the ENSDb standard is implementation-agnostic, so this is just one possible design.
+
+An [ENSDb instance](#ensdb-instance) is considered multi-tenant when it stores data from multiple [ENSIndexer instances](#ensindexer-instance) (tenants) in isolated [ENSIndexer Schemas](#ensindexer-schema).
 
 Within a single [ENSDb instance](#ensdb-instance):
 - Each [ENSIndexer instance](#ensindexer-instance) gets its own [ENSIndexer Schema](#ensindexer-schema) — fully isolated data following the [ENSIndexer Schema Definition](#schema-definition) that was current when the ENSIndexer instance started.
@@ -95,7 +95,7 @@ Ponder runtime is executed by the ENSIndexer instance. It manages fetching oncha
 
 ### Ponder Schema
 
-A [database schema](#database-schema) in the [ENSDb instance](#ensdb-instance) following the [Ponder Schema Definition](#ponder-schema-definition). It has a fixed `ponder_sync` name, and it serves as a shared RPC cache for all [ENSIndexer instances](#ensindexer-instance) connected to the [ENSDb instance](#ensdb-instance). It's lifecycle is managed by Ponder runtime.
+A [database schema](#database-schema) in the [ENSDb instance](#ensdb-instance) following the [Ponder Schema Definition](#ponder-schema-definition). It is an implementation detail of ENSIndexer. It has a fixed `ponder_sync` name, and it serves as a shared RPC cache for all [ENSIndexer instances](#ensindexer-instance) connected to the [ENSDb instance](#ensdb-instance). It's lifecycle is managed by Ponder runtime.
 
 The Ponder Schema enables multiple [ENSIndexer instances](#ensindexer-instance) to share RPC cache, reducing costs and improving indexing speed.
 
@@ -149,28 +149,34 @@ The `key` column identifies the type of metadata:
 
 #### Indexing Metadata Context
 
-A JSON object that provides context about the ENSNode stack the Indexing Status. It includes:
-- `version`: The version of the Indexing Metadata Context structure
-- `data`: The actual context data, whose structure may evolve over time as the needs of the ENSNode stack evolve. The `data` object may include fields such as:
-    - `indexingStatus`: the current Indexing Status of the [ENSIndexer instance](#ensindexer-instance).
-    - `ensDbPublicConfig`: the public config of the [ENSDb instance](#ensdb-instance) that this [ENSIndexer instance](#ensindexer-instance) is connected to.
-    - `ensIndexerPublicConfig`: the public config of the [ENSIndexer instance](#ensindexer-instance) that this metadata record belongs to.
-    - `ensRainbowPublicConfig`: the public config of the ENSRainbow instance that this [ENSIndexer instance](#ensindexer-instance) is connected to. Might be `null` during the ENSNode stack cold start, when the ENSIndexer instance starts before the ENSRainbow instance.
+A JSON object that provides indexing metadata context. The actual context data, whose structure may evolve over time as the needs of the ENSNode stack evolve. The object may include fields such as:
+  - `version`: The version of the Indexing Metadata Context structure
+  - `indexingStatus`: the current Indexing Status of the [ENSIndexer instance](#ensindexer-instance).
+  - `stackInfo`: a group of public config objects that describe the ENSIndexer instance and its dependencies.
+
+### ENSApi
+
+A reference implementation of an [ENSDb Reader](#ensdb-reader) that serves GraphQL and REST APIs from an [ENSDb instance](#ensdb-instance). It is a backend app built on top of [Hono](https://hono.dev/).
 
 ### ENSApi Instance
 
-A running ENSApi process that serves GraphQL and REST APIs from an [ENSDb instance](#ensdb-instance).
+A running [ENSApi](#ensapi) process that serves GraphQL and REST APIs from an [ENSDb instance](#ensdb-instance).
 
 - Any [ENSApi instance](#ensapi-instance) can connect to any [ENSDb instance](#ensdb-instance)
 - Multiple [ENSApi instances](#ensapi-instance) can connect to the same [ENSDb instance](#ensdb-instance) for improved availability
 
+### ENSIndexer
+
+A reference implementation of an [ENSDb Writer](#ensdb-writer) that indexes onchain ENS data and writes to an [ENSDb instance](#ensdb-instance). It is built on top of [Ponder](https://ponder.sh/), a modular blockchain indexing framework.
+
 ### ENSIndexer Instance
 
-A running ENSIndexer process that indexes onchain ENS data and writes to an [ENSIndexer Schema](#ensindexer-schema) in ENSDb.
+A running [ENSIndexer](#ensindexer) process that indexes onchain ENS data and writes to an [ENSIndexer Schema](#ensindexer-schema) in ENSDb.
 
 - Each [ENSIndexer instance](#ensindexer-instance) owns exactly one [ENSIndexer Schema](#ensindexer-schema)
+- Each [ENSIndexer instance](#ensindexer-instance) writes to and reads from the [Ponder Schema](#ponder-schema)
 - Multiple [ENSIndexer instances](#ensindexer-instance) can connect to one [ENSDb instance](#ensdb-instance)
-- Each ENSIndexer instance has a row in the [ENSNode Metadata Table](#ensnode-metadata-table)
+- Each [ENSIndexer instance](#ensindexer-instance) has a row in the [ENSNode Metadata Table](#ensnode-metadata-table)
 
 ### Indexing Status
 
@@ -199,19 +205,18 @@ A TypeScript package published as [`@ensnode/ensdb-sdk`](https://www.npmjs.com/p
 
 The ENSDb SDK includes:
 
-- [EnsDbReader](#ensdb-reader) — Reader implementation for querying ENSDb Metadata, and building custom queries against the [ENSDb instance](#ensdb-instance).
-- [EnsDbWriter](#ensdb-writer) — Writer implementation for ENSNode Metadata and ENSNode migrations.
-- [Schema Definitions](#schema-definition) — Drizzle schemas for [ENSIndexer Schema](#ensindexer-schema) and [ENSNode Schema](#ensnode-schema)
-- [Schema Checksums](#schema-checksum) — Deterministic checksums for ENSIndexer and ENSNode schema definitions.
+- [EnsDbReader Client](#ensdb-reader-client) — An ENSDb client implementation for querying ENSDb Metadata, and building custom queries against the [ENSDb instance](#ensdb-instance).
+- [EnsDbWriter Client](#ensdb-writer-client) — An ENSDb client implementation for writing ENSNode Metadata and executing ENSNode migrations.
+- [Schema Definitions](#schema-definition) — Drizzle schemas for [ENSIndexer Schema](#ensindexer-schema) and [ENSNode Schema](#ensnode-schema).
 
 
-### ENSDb Reader
+### ENSDb Reader Client
 
 A class in [ENSDb SDK](#ensdb-sdk) for querying data from the [ENSDb instance](#ensdb-instance).
 
-### ENSDb Writer
+### ENSDb Writer Client
 
-A class in [ENSDb SDK](#ensdb-sdk) that extends [ENSDb Reader](#ensdb-reader) with write capabilities.
+A class in [ENSDb SDK](#ensdb-sdk) that extends [ENSDb Reader Client](#ensdb-reader-client) with write capabilities.
 
 ## Related Documentation
 

@@ -10,33 +10,32 @@ import { LinkCard, Aside, Card, CardGrid } from '@astrojs/starlight/components';
 
 ## Vision
 
-Get the whole onchain state of ENS in your database.
+Get the whole, live onchain state of ENS in your database.
 
 ## Core Philosophy
 
 ### Open Standard
 
-ENSDb is an open standard for bi-directional ENS integration. It defines a carefully crafted set of database schema designs, rules, and constraints for storing the entire ENS onchain state in a PostgreSQL database — making the data accessible from any programming language.
+ENSDb is an open standard for bi-directional ENS integration. It defines a carefully crafted set of database schema designs, rules, and constraints for storing the ENS onchain state in a PostgreSQL database — making the data accessible from any programming language.
 
-Any app following the standard can:
-- Perform write operations to produce an ENSDb instance.
-- Perform read operations against the ENSDb instance.
+The [ENSDb standard](/ensdb/concepts/glossary#ensdb-standard) is implementation-agnostic, so you have two options: implement your own [ENSDb Writer](/ensdb/concepts/glossary#ensdb-writer) and [ENSDb Reader](/ensdb/concepts/glossary#ensdb-reader) in any language, or use the reference implementations provided by ENSNode — [ENSIndexer](/ensindexer/) as the ENSDb Writer and [ENSApi](/ensapi/)   as the ENSDb Reader.
 
 <Aside type="tip" title="Build in Any Language">
-Each ENSDb instance is a standard PostgreSQL database, so to interact with it, you can use _any programming language_ that has a PostgreSQL driver. Python, Go, Rust, JavaScript, Ruby, Java, C# — the choice is yours.
+Each ENSDb instance is a standard PostgreSQL database, so to interact with it, you can use _any programming language_ that has a PostgreSQL driver. Zig, Rust, Go, Python, JavaScript, Ruby, Java, C# — the choice is yours.
 </Aside>
 
 ## What You Get
 
 ### Complete ENS State
 
-An **ENSDb instance** contains the **entire onchain state of ENS**:
+An **ENSDb instance** contains the **onchain state of ENS**, including:
 
-- All domains (ENSv1 and ENSv2)
-- All registrations and renewals
-- All resolver records and text records
-- All events and ownership history
-- All NFT/token data for names
+- Domains (ENSv1 and ENSv2)
+- Registrations and renewals
+- Resolver records and text records
+- Events and ownership history
+- NFT/token data for names
+- ... and more!
 
 ### PostgreSQL Benefits
 
@@ -56,20 +55,20 @@ ENSDb unlocks a new universe of ENS applications:
 <Card title="Custom APIs" icon="seti:graphql">
 Build specialized GraphQL or REST APIs tailored to your use case. Query exactly the data you need with full SQL power.
 </Card>
-<Card title="Analytics & Dashboards" icon="seti:html">
-Create real-time dashboards and analytics pipelines. Better than Dune — you have the full ENS state locally with sub-second query latency.
+<Card title="Analytics & Dashboards" icon="document">
+Create real-time dashboards and analytics pipelines. Better than Dune — you have the live ENS state locally with sub-second query latency.
 </Card>
 <Card title="CLIs & Developer Tools" icon="seti:shell">
-Build command-line tools for ENS operations. Query domains, check expiration, analyze name patterns — all from your terminal.
+Build command-line tools for ENS operations. Query domains, and any specialized lookup — all from your terminal.
 </Card>
 <Card title="Event-Based Engines" icon="seti:plan">
-Build reactive systems that respond to ENS state changes. Monitor registration lifecycles, ownership transfers, resolver updates.
+Build reactive systems that respond to ENS state changes. Respond to registration lifecycle updates, ownership transfers, resolver updates.
 </Card>
-<Card title="Data Pipelines" icon="seti:csv">
+<Card title="Data Pipelines" icon="seti:plan">
 Feed ENS data into your existing data infrastructure. Sync to data warehouses, trigger webhooks, populate search indexes.
 </Card>
-<Card title="AI & ML Models" icon="seti:python">
-Train machine learning models on complete ENS datasets. Predict name values, detect patterns, analyze market trends.
+<Card title="AI Agents" icon="seti:bicep">
+Build AI agents that can query the ENS state and perform actions based on that data.
 </Card>
 </CardGrid>
 
@@ -107,13 +106,7 @@ Train machine learning models on complete ENS datasets. Predict name values, det
   href="/ensdb/integrations"
 />
 
-<LinkCard
-  title="FAQ"
-  description="Frequently asked questions about ENSDb"
-  href="/ensdb/faq"
-/>
-
 ## Related Projects
 
-- **[ENSIndexer](/ensindexer/)** — The reference ENSDb Writer implementation
-- **[ENSApi](/ensapi/)** — The reference ENSDb Reader implementation
+- **[ENSIndexer](/ensindexer/)** — The reference [ENSDb Writer](/ensdb/concepts/glossary#ensdb-writer) implementation
+- **[ENSApi](/ensapi/)** — The reference [ENSDb Reader](/ensdb/concepts/glossary#ensdb-reader) implementation
