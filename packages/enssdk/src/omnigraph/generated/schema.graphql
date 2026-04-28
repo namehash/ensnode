@@ -845,6 +845,9 @@ type PermissionsUser {
   """The contract within which these Permissions are granted."""
   contract: AccountId!
 
+  """All Events associated with this PermissionsUser."""
+  events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): PermissionsUserEventsConnection
+
   """A unique reference to this PermissionsUser."""
   id: PermissionsUserId!
 
@@ -856,6 +859,17 @@ type PermissionsUser {
 
   """The User for whom these Roles are granted."""
   user: Account!
+}
+
+type PermissionsUserEventsConnection {
+  edges: [PermissionsUserEventsConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type PermissionsUserEventsConnectionEdge {
+  cursor: String!
+  node: Event!
 }
 
 """PermissionsUserId represents a enssdk#PermissionsUserId."""

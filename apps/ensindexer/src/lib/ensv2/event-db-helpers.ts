@@ -1,4 +1,10 @@
-import { type AccountId, type DomainId, makePermissionsId, makeResolverId } from "enssdk";
+import {
+  type AccountId,
+  type DomainId,
+  makePermissionsId,
+  makeResolverId,
+  type PermissionsUserId,
+} from "enssdk";
 import type { Hash } from "viem";
 
 import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
@@ -89,5 +95,16 @@ export async function ensurePermissionsEvent(
   await context.ensDb
     .insert(ensIndexerSchema.permissionsEvent)
     .values({ permissionsId: makePermissionsId(contract), eventId })
+    .onConflictDoNothing();
+}
+
+export async function ensurePermissionsUserEvent(
+  context: IndexingEngineContext,
+  permissionsUserId: PermissionsUserId,
+  eventId: string,
+) {
+  await context.ensDb
+    .insert(ensIndexerSchema.permissionsUserEvent)
+    .values({ permissionsUserId, eventId })
     .onConflictDoNothing();
 }
