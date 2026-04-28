@@ -1,6 +1,6 @@
 import config from "@/config";
 
-import { sql } from "drizzle-orm";
+import { Param, sql } from "drizzle-orm";
 import type { CanonicalPath, DomainId, RegistryId } from "enssdk";
 
 import { getRootRegistryIds } from "@ensnode/ensnode-sdk";
@@ -21,6 +21,10 @@ const MAX_DEPTH = 16;
 export async function getCanonicalPath(domainId: DomainId): Promise<CanonicalPath | null> {
   const rootRegistryIds = getRootRegistryIds(config.namespace);
 
+  // NOTE: using new Param to bind the array as a single text[] parameter, per
+  // https://github.com/drizzle-team/drizzle-orm/issues/1289#issuecomment-2688581070
+  const rootRegistryIdsArray = sql`${new Param(rootRegistryIds)}::text[]`;
+
   const result = await ensDb.execute(sql`
     WITH RECURSIVE upward AS (
       -- Base case: start from the target domain
@@ -34,9 +38,9 @@ export async function getCanonicalPath(domainId: DomainId): Promise<CanonicalPat
       UNION ALL
 
       -- Step upward: domain -> current registry's canonical domain (parent).
-      -- Recursion terminates naturally: roots have no registryCanonicalDomain entry, so the
-      -- JOIN on rcd fails when we reach one. MAX_DEPTH guards against corrupted state. The
-      -- pd.subregistry_id = upward.registry_id clause performs edge authentication.
+      --  1. Recursion stops as soon as we reach a Root Registry or there is no parent to traverse.
+      --  2. MAX_DEPTH guards against corrupted state.
+      --  3. The pd.subregistry_id = upward.registry_id clause performs edge authentication.
       SELECT
         pd.id AS domain_id,
         pd.registry_id,
@@ -47,6 +51,7 @@ export async function getCanonicalPath(domainId: DomainId): Promise<CanonicalPat
       JOIN ${ensIndexerSchema.domain} pd
         ON pd.id = rcd.domain_id AND pd.subregistry_id = upward.registry_id
       WHERE upward.depth < ${MAX_DEPTH}
+        AND upward.registry_id <> ALL(${rootRegistryIdsArray})
     )
     SELECT *
     FROM upward
