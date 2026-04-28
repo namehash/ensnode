@@ -4,7 +4,7 @@ import {
   type LabelHash,
   labelhashLiteralLabel,
   makeENSv2DomainId,
-  makeRegistryId,
+  makeENSv2RegistryId,
   makeStorageId,
   type NormalizedAddress,
   type TokenId,
@@ -62,7 +62,7 @@ export default function () {
     const isReservation = owner === undefined;
 
     const registry = getThisAccountId(context, event);
-    const registryId = makeRegistryId(registry);
+    const registryId = makeENSv2RegistryId(registry);
     const storageId = makeStorageId(tokenId);
     const domainId = makeENSv2DomainId(registry, storageId);
 
@@ -84,7 +84,7 @@ export default function () {
     // TODO(signals) — move to NewRegistry and add invariant here
     await context.ensDb
       .insert(ensIndexerSchema.registry)
-      .values({ id: registryId, ...registry })
+      .values({ id: registryId, type: "ENSv2Registry", ...registry })
       .onConflictDoNothing();
 
     // ensure discovered Label
@@ -111,11 +111,12 @@ export default function () {
       }
     }
 
-    // ensure v2Domain
+    // ensure ENSv2 Domain
     await context.ensDb
-      .insert(ensIndexerSchema.v2Domain)
+      .insert(ensIndexerSchema.domain)
       .values({
         id: domainId,
+        type: "ENSv2Domain",
         tokenId,
         registryId,
         labelHash,
@@ -123,10 +124,11 @@ export default function () {
         // a) this is a Registration, in which case a TransferSingle event will be emitted afterwards, or
         // b) this is a Reservation, in which there is no owner
       })
-      // if the v2Domain exists, this is a re-register after expiration and tokenId will have changed
+      // if the domain exists, this is a re-register after expiration and tokenId will have changed
       .onConflictDoUpdate({ tokenId });
 
     // insert Registration
+    const eventId = await ensureEvent(context, event);
     await ensureAccount(context, registrant);
     await insertLatestRegistration(context, {
       domainId,
@@ -136,11 +138,11 @@ export default function () {
       registrantId: interpretAddress(registrant),
       start: event.block.timestamp,
       expiry,
-      eventId: await ensureEvent(context, event),
+      eventId,
     });
 
     // push event to domain history
-    await ensureDomainEvent(context, event, domainId);
+    await ensureDomainEvent(context, domainId, eventId);
   }
 
   addOnchainEventListener(
@@ -197,7 +199,8 @@ export default function () {
       // previous owner, but i'm not sure if we need to handle that detail here
 
       // push event to domain history
-      await ensureDomainEvent(context, event, domainId);
+      const eventId = await ensureEvent(context, event);
+      await ensureDomainEvent(context, domainId, eventId);
     },
   );
 
@@ -241,7 +244,8 @@ export default function () {
         .set({ expiry });
 
       // push event to domain history
-      await ensureDomainEvent(context, event, domainId);
+      const eventId = await ensureEvent(context, event);
+      await ensureDomainEvent(context, domainId, eventId);
     },
   );
 
@@ -270,7 +274,7 @@ export default function () {
         // subregistry. i.e. the (sub)Registry's Canonical Domain becomes null, making it disjoint because
         // we don't track other domains who have set it as a Subregistry. This is acceptable for now,
         // and obviously isn't an issue once ENS Team implements Canonical Names
-        const previous = await context.ensDb.find(ensIndexerSchema.v2Domain, { id: domainId });
+        const previous = await context.ensDb.find(ensIndexerSchema.domain, { id: domainId });
         if (previous?.subregistryId) {
           await context.ensDb.delete(ensIndexerSchema.registryCanonicalDomain, {
             registryId: previous.subregistryId,
@@ -278,11 +282,11 @@ export default function () {
         }
 
         await context.ensDb
-          .update(ensIndexerSchema.v2Domain, { id: domainId })
+          .update(ensIndexerSchema.domain, { id: domainId })
           .set({ subregistryId: null });
       } else {
         const subregistryAccountId: AccountId = { chainId: context.chain.id, address: subregistry };
-        const subregistryId = makeRegistryId(subregistryAccountId);
+        const subregistryId = makeENSv2RegistryId(subregistryAccountId);
 
         // TODO(canonical-names): this implements last-write-wins heuristic for a Registry's canonical name,
         // replace with real logic once ENS Team implements Canonical Names
@@ -292,12 +296,13 @@ export default function () {
           .onConflictDoUpdate({ domainId });
 
         await context.ensDb
-          .update(ensIndexerSchema.v2Domain, { id: domainId })
+          .update(ensIndexerSchema.domain, { id: domainId })
           .set({ subregistryId });
       }
 
       // push event to domain history
-      await ensureDomainEvent(context, event, domainId);
+      const eventId = await ensureEvent(context, event);
+      await ensureDomainEvent(context, domainId, eventId);
     },
   );
 
@@ -325,11 +330,12 @@ export default function () {
       const domainId = makeENSv2DomainId(registryAccountId, storageId);
 
       await context.ensDb
-        .update(ensIndexerSchema.v2Domain, { id: domainId })
+        .update(ensIndexerSchema.domain, { id: domainId })
         .set({ tokenId: newTokenId });
 
       // push event to domain history
-      await ensureDomainEvent(context, event, domainId);
+      const eventId = await ensureEvent(context, event);
+      await ensureDomainEvent(context, domainId, eventId);
     },
   );
 
@@ -347,17 +353,18 @@ export default function () {
     const domainId = makeENSv2DomainId(registry, storageId);
 
     // TODO(signals): remove this invariant, since we'll only be indexing Registry contracts
-    const registryId = makeRegistryId(registry);
+    const registryId = makeENSv2RegistryId(registry);
     const exists = await context.ensDb.find(ensIndexerSchema.registry, { id: registryId });
     if (!exists) return; // no-op non-Registry ERC1155 Transfers
 
     // update the Domain's ownerId
     await context.ensDb
-      .update(ensIndexerSchema.v2Domain, { id: domainId })
+      .update(ensIndexerSchema.domain, { id: domainId })
       .set({ ownerId: interpretAddress(owner) });
 
     // push event to domain history
-    await ensureDomainEvent(context, event, domainId);
+    const eventId = await ensureEvent(context, event);
+    await ensureDomainEvent(context, domainId, eventId);
   }
 
   addOnchainEventListener(

@@ -16,8 +16,8 @@ export async function materializeENSv1DomainEffectiveOwner(
   // ensure owner
   await ensureAccount(context, owner);
 
-  // update v1Domain's effective owner
+  // update Domain's effective owner
   await context.ensDb
-    .update(ensIndexerSchema.v1Domain, { id })
+    .update(ensIndexerSchema.domain, { id })
     .set({ ownerId: interpretAddress(owner) });
 }

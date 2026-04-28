@@ -61,10 +61,9 @@ export async function ensureEvent(context: IndexingEngineContext, event: LogEven
 
 export async function ensureDomainEvent(
   context: IndexingEngineContext,
-  event: LogEventBase,
   domainId: DomainId,
+  eventId: string,
 ) {
-  const eventId = await ensureEvent(context, event);
   await context.ensDb
     .insert(ensIndexerSchema.domainEvent)
     .values({ domainId, eventId })
@@ -73,10 +72,9 @@ export async function ensureDomainEvent(
 
 export async function ensureResolverEvent(
   context: IndexingEngineContext,
-  event: LogEventBase,
   resolver: AccountId,
+  eventId: string,
 ) {
-  const eventId = await ensureEvent(context, event);
   await context.ensDb
     .insert(ensIndexerSchema.resolverEvent)
     .values({ resolverId: makeResolverId(resolver), eventId })
@@ -85,10 +83,9 @@ export async function ensureResolverEvent(
 
 export async function ensurePermissionsEvent(
   context: IndexingEngineContext,
-  event: LogEventBase,
   contract: AccountId,
+  eventId: string,
 ) {
-  const eventId = await ensureEvent(context, event);
   await context.ensDb
     .insert(ensIndexerSchema.permissionsEvent)
     .values({ permissionsId: makePermissionsId(contract), eventId })

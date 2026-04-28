@@ -122,7 +122,8 @@ export default function () {
       });
 
       // push event to domain history
-      await ensureDomainEvent(context, event, domainId);
+      const eventId = await ensureEvent(context, event);
+      await ensureDomainEvent(context, domainId, eventId);
     },
   );
 
@@ -168,18 +169,19 @@ export default function () {
       }
 
       // insert Renewal
+      const eventId = await ensureEvent(context, event);
       await insertLatestRenewal(context, registration, {
         domainId,
         duration,
         referrer,
-        eventId: await ensureEvent(context, event),
+        eventId,
 
         // TODO(paymentToken)
         base,
       });
 
       // push event to domain history
-      await ensureDomainEvent(context, event, domainId);
+      await ensureDomainEvent(context, domainId, eventId);
     },
   );
 }
