@@ -65,7 +65,7 @@ services:
       file: services/ensdb.yml
       service: ensdb
     env_file:
-      - path: ./envs/.env.docker.common
+      - path: envs/.env.docker.common
         required: true
 
   devnet:
