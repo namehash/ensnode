@@ -39,7 +39,7 @@ Possible key-value pairs are defined by the `EnsNodeMetadata` union type. As of 
 
 | Key | TypeScript type | Description |
 |-----|-----------------|-------------|
-| `indexing_metadata_context` | `IndexingMetadataContextInitialized` | Stores indexing status and stack info§ for the ENSIndexer instance. |
+| `indexing_metadata_context` | `IndexingMetadataContextInitialized` | Stores indexing status and stack info for the ENSIndexer instance. |
 
 ---
 
@@ -266,11 +266,11 @@ Internal rainbow table mapping a `labelHash` to its interpreted label string. Do
 
 #### `registrations`
 
-A registration is keyed by `(domainId, registrationIndex)`.
+A registration is keyed by `id`.
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
-| `id` | `text` | no | Keyed by `(domainId, registrationIndex)`. Primary key. |
+| `id` | `text` | no | A key derived from `(domainId, registrationIndex)`. Primary key. |
 | `domainId` | `text` | no | The registered domain. |
 | `registrationIndex` | `integer` | no | Monotonically increasing index per domain. |
 | `type` | `RegistrationType` | no | The mechanism through which this registration was made. |
@@ -305,11 +305,11 @@ Tracks the highest `registrationIndex` seen for each domain. Used to sequence re
 
 #### `renewals`
 
-A renewal is keyed by `(domainId, registrationIndex, renewalIndex)` and belongs to a specific registration.
+A renewal is keyed by `id` and belongs to a specific registration.
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
-| `id` | `text` | no | Keyed by `(registrationId, index)`. Primary key. |
+| `id` | `text` | no | A key derived from `(domainId, registrationIndex, renewalIndex)`. Primary key. |
 | `domainId` | `text` | no | The renewed domain. |
 | `registrationIndex` | `integer` | no | Index of the parent registration. |
 | `renewalIndex` | `integer` | no | Monotonically increasing index per registration. |
