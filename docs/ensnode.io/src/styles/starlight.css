@@ -123,7 +123,7 @@ a[rel="prev"]:hover {
   color: var(--sl-color-accent);
 }
 
-.content-panel+.content-panel {
+.content-panel + .content-panel {
   border-top: 0;
   padding-top: 0;
 }
@@ -138,11 +138,11 @@ a[rel="prev"]:hover {
   color: var(--sl-color-accent-high);
 }
 
-.sl-markdown-content a:hover:not(:where(.not-content *))>span {
+.sl-markdown-content a:hover:not(:where(.not-content *)) > span {
   color: var(--sl-color-accent);
 }
 
-.sl-markdown-content :is(h1, h2, h3, h4, h5, h6)>a {
+.sl-markdown-content :is(h1, h2, h3, h4, h5, h6) > a {
   color: var(--sl-color-white);
   display: inline;
   text-decoration: none;
@@ -188,7 +188,7 @@ a[rel="prev"]:hover {
   justify-content: space-between;
   margin-top: 3rem;
 
-  &>a {
+  & > a {
     flex-basis: unset;
     flex-grow: unset;
     width: fit-content;
@@ -206,7 +206,7 @@ a[rel="prev"]:hover {
       margin-left: auto;
     }
 
-    &>span {
+    & > span {
       font-size: 0.75rem;
 
       .link-title {
@@ -214,7 +214,7 @@ a[rel="prev"]:hover {
       }
     }
 
-    &>svg {
+    & > svg {
       align-self: self-end;
       color: var(--pagination-arrow-color);
       font-size: 1.25rem;
@@ -222,7 +222,7 @@ a[rel="prev"]:hover {
     }
   }
 
-  &>a:hover>svg {
+  & > a:hover > svg {
     color: var(--sl-color-white);
   }
 }
@@ -234,7 +234,7 @@ a[rel="prev"]:hover {
 }
 
 /* Styling for the list items to prepare for lines */
-#starlight__sidebar>div>ul>li {
+#starlight__sidebar > div > ul > li {
   position: relative;
   /* For absolute positioning of ::before */
 }
@@ -243,13 +243,13 @@ a[rel="prev"]:hover {
  * Add padding-left only to items that will get a line, to make space for it.
  * Note, including :not(:last-child) to de-indent ENSAdmin.
  */
-#starlight__sidebar>div>ul>li:not(:first-child):not(:last-child) {
+#starlight__sidebar > div > ul > li:not(:first-child):not(:last-child) {
   padding-left: 20px;
   /* Space for the line and content */
 }
 
 /* Add margin-bottom for the gap to all LIs except the very last one in the UL */
-#starlight__sidebar>div>ul>li:not(:last-child) {
+#starlight__sidebar > div > ul > li:not(:last-child) {
   margin-bottom: var(--sidebar-item-gap);
 }
 
@@ -257,7 +257,7 @@ a[rel="prev"]:hover {
  * Vertical line segment for relevant list items
  * Note, including :not(:last-child) to de-indent ENSAdmin.
  */
-#starlight__sidebar>div>ul>li:not(:first-child):not(:last-child)::before {
+#starlight__sidebar > div > ul > li:not(:first-child):not(:last-child)::before {
   content: "";
   position: absolute;
   left: 8px;
@@ -271,7 +271,7 @@ a[rel="prev"]:hover {
   /* Default height, covers the item itself */
 }
 
-#starlight__sidebar>div>ul>li:not(:first-child):not(:last-child)::before {
+#starlight__sidebar > div > ul > li:not(:first-child):not(:last-child)::before {
   height: calc(100% + var(--sidebar-item-gap));
 }
 

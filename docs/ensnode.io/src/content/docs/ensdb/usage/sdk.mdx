@@ -31,11 +31,15 @@ import { EnsDbReader } from '@ensnode/ensdb-sdk';
 const ensDbReader =  new EnsDbReader(ensDbConnectionString, ensIndexerSchemaName);
 
 // Get domains from the ENSIndexer Schema 
-const v1Domains = await
- ensDbReader.ensDb.select()
+const v1Domains = await ensDbReader.ensDb
+  .select()
   .from(ensDbReader.ensIndexerSchema.v1Domain)
   .limit(10);
 
-// Get indexing status
-const indexingStatus = await ensDbReader.getIndexingStatusSnapshot()
+// Get indexing status snapshot
+const indexingMetadataContext = await ensDbReader.getIndexingMetadataContext();
+if (indexingMetadataContext.statusCode === IndexingMetadataContextStatusCodes.Initialized) {}
+  const indexingStatusSnapshot = indexingMetadataContext.indexingStatus;
+  // Do something with the indexing status snapshot
+}
 ```

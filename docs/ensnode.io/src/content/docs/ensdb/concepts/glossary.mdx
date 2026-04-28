@@ -83,11 +83,11 @@ A [PostgreSQL database](#postgresql-database) that follows the [ENSDb Standard](
 An [ENSDb instance](#ensdb-instance) is considered multi-tenant when it stores data from multiple [ENSIndexer instances](#ensindexer-instance) (tenants) in isolated [ENSIndexer Schemas](#ensindexer-schema).
 
 Within a single [ENSDb instance](#ensdb-instance):
-- Each [ENSIndexer instance](#ensindexer-instance) gets its own [ENSIndexer Schema](#ensindexer-schema) — fully isolated data following the [ENSIndexer Schema Definition](#schema-definition) that was current when the ENSIndexer instance started.
+- Each [ENSIndexer instance](#ensindexer-instance) gets its own [ENSIndexer Schema](#ensindexer-schema) — fully isolated data following the [ENSIndexer Schema Definition](#ensindexer-schema-definition) that was current when the ENSIndexer instance started.
 - All [ENSIndexer instances](#ensindexer-instance) share the [Ponder Schema](#ponder-schema), including the RPC cache.
 - Metadata of all [ENSIndexer instances](#ensindexer-instance) is tracked in the [ENSNode Schema](#ensnode-schema)
 
-This enables separate indexing by multiple [ENSIndexer instance](#ensindexer-instance) with different configs. The configs may require indexing just certain chains. For example, one [ENSIndexer instance](#ensindexer-instance) is configured to index data just from the Ethereum Mainnet, while another [ENSIndexer instance](#ensindexer-instance) is configured to index data from both, Ethereum Mainnet, and Base Mainnet. Each of these [ENSIndexer instances](#ensindexer-instance) would have its own [ENSIndexer Schema](#ensindexer-schema) in the same [ENSDb instance](#ensdb-instance).
+This enables separate indexing by multiple [ENSIndexer instances](#ensindexer-instance) with different configs. The configs may require indexing just certain chains. For example, one [ENSIndexer instance](#ensindexer-instance) is configured to index data just from the Ethereum Mainnet, while another [ENSIndexer instance](#ensindexer-instance) is configured to index data from both, Ethereum Mainnet, and Base Mainnet. Each of these [ENSIndexer instances](#ensindexer-instance) would have its own [ENSIndexer Schema](#ensindexer-schema) in the same [ENSDb instance](#ensdb-instance).
 
 ### Ponder runtime
 
@@ -95,13 +95,13 @@ Ponder runtime is executed by the ENSIndexer instance. It manages fetching oncha
 
 ### Ponder Schema
 
-A [database schema](#database-schema) in the [ENSDb instance](#ensdb-instance) following the [Ponder Schema Definition](#ponder-schema-definition). It is an implementation detail of ENSIndexer. It has a fixed `ponder_sync` name, and it serves as a shared RPC cache for all [ENSIndexer instances](#ensindexer-instance) connected to the [ENSDb instance](#ensdb-instance). It's lifecycle is managed by Ponder runtime.
+A [database schema](#database-schema) in the [ENSDb instance](#ensdb-instance) following the [Ponder Schema Definition](#ponder-schema-definition). It is an implementation detail of ENSIndexer. It has a fixed `ponder_sync` name, and it serves as a shared RPC cache for all [ENSIndexer instances](#ensindexer-instance) connected to the [ENSDb instance](#ensdb-instance). Its lifecycle is managed by Ponder runtime.
 
 The Ponder Schema enables multiple [ENSIndexer instances](#ensindexer-instance) to share RPC cache, reducing costs and improving indexing speed.
 
 #### Ponder Schema Definition
 
-A [Schema Definition](#schema-definition) that defines the structure of the [Ponder Schema](#ponder-schema) in the [ENSDb instance](#ensdb-instance). This Schema Definition is an implementation detail of Ponder, so we treat is as an opaque black box in ENSDb documentation.
+A [Schema Definition](#schema-definition) that defines the structure of the [Ponder Schema](#ponder-schema) in the [ENSDb instance](#ensdb-instance). This Schema Definition is an implementation detail of Ponder, so we treat it as an opaque black box in ENSDb documentation.
 
 ### ENSNode Schema
 
@@ -220,5 +220,4 @@ A class in [ENSDb SDK](#ensdb-sdk) that extends [ENSDb Reader Client](#ensdb-rea
 
 ## Related Documentation
 
-- [Architecture](/ensdb/concepts/architecture) — How schemas relate and data flows
 - [Database Schemas](/ensdb/concepts/database-schemas) — Deep dive on schema types
