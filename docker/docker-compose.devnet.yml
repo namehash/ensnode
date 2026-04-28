@@ -3,6 +3,8 @@ services:
     extends:
       file: services/ensindexer.yml
       service: ensindexer
+    environment:
+      NAMESPACE: ens-test-env
     env_file:
       - path: envs/.env.docker.common
         required: true
