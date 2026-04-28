@@ -224,6 +224,14 @@ interface Domain {
   """
   path: [Domain!]
 
+  """
+  Resolve ENS records for this Domain via the ENS protocol. Only canonical domains can be resolved. Returns null if the domain is not canonical.
+  """
+  records(
+    """Which records to resolve."""
+    selection: ResolveSelectionInput!
+  ): ResolvedRecords
+
   """The latest Registration for this Domain, if exists."""
   registration: Registration
 
@@ -343,6 +351,14 @@ type ENSv1Domain implements Domain {
   """
   path: [Domain!]
 
+  """
+  Resolve ENS records for this Domain via the ENS protocol. Only canonical domains can be resolved. Returns null if the domain is not canonical.
+  """
+  records(
+    """Which records to resolve."""
+    selection: ResolveSelectionInput!
+  ): ResolvedRecords
+
   """The latest Registration for this Domain, if exists."""
   registration: Registration
 
@@ -393,6 +409,14 @@ type ENSv2Domain implements Domain {
   Permissions for this Domain within its Registry, representing the roles granted to users for this Domain's token.
   """
   permissions(after: String, before: String, first: Int, last: Int, where: DomainPermissionsWhereInput): ENSv2DomainPermissionsConnection
+
+  """
+  Resolve ENS records for this Domain via the ENS protocol. Only canonical domains can be resolved. Returns null if the domain is not canonical.
+  """
+  records(
+    """Which records to resolve."""
+    selection: ResolveSelectionInput!
+  ): ResolvedRecords
 
   """The latest Registration for this Domain, if exists."""
   registration: Registration
@@ -1020,6 +1044,56 @@ type Renewal {
 
 """RenewalId represents a enssdk#RenewalId."""
 scalar RenewalId
+
+"""
+Specifies which ENS records to resolve. At least one field must be set to receive any records.
+"""
+input ResolveSelectionInput {
+  """Coin types to resolve address records for (e.g. `60` for ETH)."""
+  addresses: [CoinType!]
+
+  """
+  Whether to resolve the `name` record (used in Reverse Resolution, ENSIP-19).
+  """
+  reverseName: Boolean
+
+  """Text record keys to resolve (e.g. `avatar`, `description`, `com.)."""
+  texts: [String!]
+}
+
+"""A resolved address record for an ENS name."""
+type ResolvedAddressRecord {
+  """The address value, or null if not set."""
+  address: String
+
+  """The coin type for this address record."""
+  coinType: CoinType!
+}
+
+"""
+Records resolved for a specific ENS name via the ENS protocol. Only selected records are populated.
+"""
+type ResolvedRecords {
+  """Resolved address records for selected coin types."""
+  addresses: [ResolvedAddressRecord!]!
+
+  """
+  The `name` record value used in Reverse Resolution (ENSIP-19), or null if not set or not selected.
+  """
+  reverseName: String
+
+  """Resolved text records for selected keys."""
+  texts: [ResolvedTextRecord!]!
+}
+
+"""A resolved text record for an ENS name."""
+type ResolvedTextRecord {
+  """The text record key."""
+  key: String!
+
+  """The text record value, or null if not set."""
+  value: String
+}
 
 """A Resolver represents a Resolver contract on-chain."""
 type Resolver {

@@ -1,6 +1,8 @@
 import type { InterpretedLabel, InterpretedName } from "enssdk";
 import { beforeAll, describe, expect, it } from "vitest";
 
+import { DEVNET_OWNER } from "@ensnode/ensnode-sdk/internal";
+
 import { DEVNET_ETH_LABELS } from "@/test/integration/devnet-names";
 import {
   DomainSubdomainsPaginated,
@@ -251,4 +253,50 @@ describe("Domain.events filtering (EventsWhereInput)", () => {
     const events = flattenConnection(result.domain.events);
     expect(events.length).toBe(0);
   });
+});
+
+describe("Domain.records", () => {
+  type DomainRecordsResult = {
+    domain: {
+      records: {
+        addresses: Array<{ coinType: number; address: string | null }>;
+        texts: Array<{ key: string; value: string | null }>;
+      } | null;
+    };
+  };
+
+  const DomainRecords = gql`
+    query DomainRecords($name: InterpretedName!, $addresses: [CoinType!], $texts: [String!]) {
+      domain(by: { name: $name }) {
+        records(selection: { addresses: $addresses, texts: $texts }) {
+          addresses { coinType address }
+          texts { key value }
+        }
+      }
+    }
+  `;
+
+  it("resolves ETH address for test.eth", async () => {
+    const result = await request<DomainRecordsResult>(DomainRecords, {
+      name: "test.eth",
+      addresses: [60],
+      texts: [],
+    });
+
+    expect(result.domain.records?.addresses).toEqual([{ coinType: 60, address: DEVNET_OWNER }]);
+    expect(result.domain.records?.texts).toEqual([]);
+  });
+
+  it("resolves address and text records for example.eth", async () => {
+    const result = await request<DomainRecordsResult>(DomainRecords, {
+      name: "example.eth",
+      addresses: [60],
+      texts: ["description"],
+    });
+
+    expect(result.domain.records?.addresses).toEqual([{ coinType: 60, address: DEVNET_OWNER }]);
+    expect(result.domain.records?.texts).toEqual([{ key: "description", value: "example.eth" }]);
+  });
+
+
 });

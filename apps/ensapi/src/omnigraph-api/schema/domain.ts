@@ -11,6 +11,7 @@ import {
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { withSpanAsync } from "@/lib/instrumentation/auto-span";
 import { builder } from "@/omnigraph-api/builder";
+import type { context as graphqlContext } from "@/omnigraph-api/context";
 import {
   orderPaginationBy,
   paginateBy,
@@ -40,8 +41,12 @@ import { EventRef, EventsWhereInput } from "@/omnigraph-api/schema/event";
 import { LabelRef } from "@/omnigraph-api/schema/label";
 import { OrderDirection } from "@/omnigraph-api/schema/order-direction";
 import { PermissionsUserRef } from "@/omnigraph-api/schema/permissions";
+import type { ResolverRecordsResponseBase } from "@ensnode/ensnode-sdk";
+import { resolveForward } from "@/lib/resolution/forward-resolution";
+import { runWithTrace } from "@/lib/tracing/tracing-api";
 import { RegistrationInterfaceRef } from "@/omnigraph-api/schema/registration";
 import { RegistryRef } from "@/omnigraph-api/schema/registry";
+import { ResolvedRecordsRef, ResolveSelectionInput } from "@/omnigraph-api/schema/resolution";
 import { ResolverRef } from "@/omnigraph-api/schema/resolver";
 
 const tracer = trace.getTracer("schema/Domain");
@@ -101,6 +106,37 @@ export type ENSv1Domain = Exclude<typeof ENSv1DomainRef.$inferType, ENSv1DomainI
 export type ENSv2Domain = Exclude<typeof ENSv2DomainRef.$inferType, ENSv2DomainId>;
 export type Domain = Exclude<typeof DomainInterfaceRef.$inferType, DomainId>;
 
+/**
+ * Returns the canonical interpreted name for a domain, or null if the domain is not canonical.
+ * Reuses the canonical path DataLoaders so repeated calls within a request are batched/cached.
+ */
+async function getDomainInterpretedName(
+  domain: Domain,
+  context: ReturnType<typeof graphqlContext>,
+): Promise<ReturnType<typeof interpretedLabelsToInterpretedName> | null> {
+  const canonicalPath = isENSv1Domain(domain)
+    ? await context.loaders.v1CanonicalPath.load(domain.id)
+    : await context.loaders.v2CanonicalPath.load(domain.id);
+
+  if (!canonicalPath) return null;
+
+  const domains = await rejectAnyErrors(
+    DomainInterfaceRef.getDataloader(context).loadMany(canonicalPath),
+  );
+
+  const labels = canonicalPath.map((domainId: DomainId) => {
+    const found = domains.find((d) => d.id === domainId);
+    if (!found) {
+      throw new Error(
+        `Invariant(getDomainInterpretedName): Domain in CanonicalPath not found:\nPath: ${JSON.stringify(canonicalPath)}\nDomainId: ${domainId}`,
+      );
+    }
+    return found.label.interpreted;
+  });
+
+  return interpretedLabelsToInterpretedName(labels);
+}
+
 //////////////////////////////////
 // DomainInterface Implementation
 //////////////////////////////////
@@ -137,31 +173,7 @@ DomainInterfaceRef.implement({
       tracing: true,
       type: "InterpretedName",
       nullable: true,
-      resolve: async (domain, args, context) => {
-        const canonicalPath = isENSv1Domain(domain)
-          ? await context.loaders.v1CanonicalPath.load(domain.id)
-          : await context.loaders.v2CanonicalPath.load(domain.id);
-        if (!canonicalPath) return null;
-
-        // TODO: this could be more efficient if the get*CanonicalPath helpers included the label
-        // join for us.
-        const domains = await rejectAnyErrors(
-          DomainInterfaceRef.getDataloader(context).loadMany(canonicalPath),
-        );
-
-        const labels = canonicalPath.map((domainId) => {
-          const found = domains.find((d) => d.id === domainId);
-          if (!found) {
-            throw new Error(
-              `Invariant(Domain.name): Domain in CanonicalPath not found:\nPath: ${JSON.stringify(canonicalPath)}\nDomainId: ${domainId}`,
-            );
-          }
-
-          return found.label.interpreted;
-        });
-
-        return interpretedLabelsToInterpretedName(labels);
-      },
+      resolve: (domain, args, context) => getDomainInterpretedName(domain, context),
     }),
 
     ///////////////
@@ -204,6 +216,41 @@ DomainInterfaceRef.implement({
       type: ResolverRef,
       nullable: true,
       resolve: (parent) => getDomainResolver(parent.id),
+    }),
+
+    ///////////////////
+    // Domain.records
+    ///////////////////
+    records: t.field({
+      description:
+        "Resolve ENS records for this Domain via the ENS protocol. Only canonical domains can be resolved. Returns null if the domain is not canonical.",
+      type: ResolvedRecordsRef,
+      nullable: true,
+      args: {
+        selection: t.arg({
+          type: ResolveSelectionInput,
+          required: true,
+          description: "Which records to resolve.",
+        }),
+      },
+      resolve: async (domain, { selection }, context) => {
+        const name = await getDomainInterpretedName(domain, context);
+        if (!name) return null;
+
+        const { result } = await runWithTrace(() =>
+          resolveForward(
+            name,
+            {
+              name: selection.reverseName ?? undefined,
+              texts: selection.texts ?? undefined,
+              addresses: selection.addresses ?? undefined,
+            },
+            { accelerate: false, canAccelerate: false },
+          ),
+        );
+
+        return result as ResolverRecordsResponseBase;
+      },
     }),
 
     ///////////////////////
