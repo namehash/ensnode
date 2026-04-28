@@ -22,8 +22,9 @@ const CANONICAL_REGISTRIES_MAX_DEPTH = 16;
 
 /**
  * Builds a recursive CTE that traverses forward from every top-level Root Registry configured for
- * the namespace (all concrete ENSv1Registries plus the ENSv2 Root when defined) to construct a
- * set of all Canonical Registries.
+ * the namespace (the ENSv1 Root Registry, the Basenames and Lineanames ENSv1VirtualRegistries when
+ * configured, and the ENSv2 Root Registry when defined — see {@link getRootRegistryIds}) to
+ * construct a set of all Canonical Registries.
  *
  * A Canonical Registry is one whose Domains are resolvable under the primary resolution pipeline.
  * This includes both the ENSv2 subtree and every ENSv1 subtree: Universal Resolver v2 falls back

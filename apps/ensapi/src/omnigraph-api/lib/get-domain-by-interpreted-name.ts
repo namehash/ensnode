@@ -150,6 +150,9 @@ async function resolveCanonicalDomainId(
       const targetRegistryId = makeConcreteRegistryId(bridgesTo.registry);
 
       // then recurse
+      // NOTE: we blindly return after bridging, which correctly implements the Forward Resolution
+      // behavior which is that the origin Domain, even if there is one, is invisible to resolution
+      // (due to the ancestor Bridged Resolver) and therefore not Canonical
       return resolveCanonicalDomainId(targetRegistryId, targetPath, depth + 1);
     }
   }
