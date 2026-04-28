@@ -1,6 +1,6 @@
 import { PluginName } from "@ensnode/ensnode-sdk";
 
-import { ensureResolverEvent } from "@/lib/ensv2/event-db-helpers";
+import { ensureEvent, ensureResolverEvent } from "@/lib/ensv2/event-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { addOnchainEventListener, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import { namespaceContract } from "@/lib/plugin-helpers";
@@ -23,7 +23,8 @@ export default function () {
     event: LogEventBase;
   }) {
     const resolver = getThisAccountId(context, event);
-    await ensureResolverEvent(context, event, resolver);
+    const eventId = await ensureEvent(context, event);
+    await ensureResolverEvent(context, resolver, eventId);
   }
 
   addOnchainEventListener(
