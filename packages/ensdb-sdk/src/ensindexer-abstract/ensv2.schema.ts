@@ -1,10 +1,10 @@
 import type {
-  Address,
   ChainId,
   DomainId,
   InterpretedLabel,
   LabelHash,
   Node,
+  NormalizedAddress,
   PermissionsId,
   PermissionsResourceId,
   PermissionsUserId,
@@ -96,6 +96,9 @@ export const event = onchainTable(
     // Ponder's event.id
     id: t.text().primaryKey(),
 
+    // sender of the transaction (optionally HCA-aware for supported events)
+    sender: t.hex().notNull().$type<NormalizedAddress>(),
+
     // Event Log Metadata
 
     // chain
@@ -109,11 +112,11 @@ export const event = onchainTable(
     // transaction
     transactionHash: t.hex().notNull().$type<Hash>(),
     transactionIndex: t.integer().notNull(),
-    from: t.hex().notNull().$type<Address>(),
-    to: t.hex().$type<Address>(), // NOTE: a null `to` means this was a tx that deployed a contract
+    from: t.hex().notNull().$type<NormalizedAddress>(),
+    to: t.hex().$type<NormalizedAddress>(), // NOTE: a null `to` means this was a tx that deployed a contract
 
     // log
-    address: t.hex().notNull().$type<Address>(),
+    address: t.hex().notNull().$type<NormalizedAddress>(),
     logIndex: t.integer().notNull().$type<number>(),
     selector: t.hex().notNull().$type<Hash>(),
     topics: t.hex().array().notNull().$type<[Hash, ...Hash[]]>(),
@@ -167,7 +170,7 @@ export const permissionsUserEvent = onchainTable(
 ///////////
 
 export const account = onchainTable("accounts", (t) => ({
-  id: t.hex().primaryKey().$type<Address>(),
+  id: t.hex().primaryKey().$type<NormalizedAddress>(),
 }));
 
 export const account_relations = relations(account, ({ many }) => ({
@@ -196,7 +199,7 @@ export const registry = onchainTable(
     type: registryType().notNull(),
 
     chainId: t.integer().notNull().$type<ChainId>(),
-    address: t.hex().notNull().$type<Address>(),
+    address: t.hex().notNull().$type<NormalizedAddress>(),
 
     // If this is an ENSv1VirtualRegistry, `node` is the namehash of the parent ENSv1 domain that
     // owns it, otherwise null.
@@ -251,10 +254,10 @@ export const domain = onchainTable(
     labelHash: t.hex().notNull().$type<LabelHash>(),
 
     // may have an owner
-    ownerId: t.hex().$type<Address>(),
+    ownerId: t.hex().$type<NormalizedAddress>(),
 
     // If this is an ENSv1Domain, may have a `rootRegistryOwner`, otherwise null.
-    rootRegistryOwnerId: t.hex().$type<Address>(),
+    rootRegistryOwnerId: t.hex().$type<NormalizedAddress>(),
 
     // NOTE: Domain-Resolver Relations tracked via Protocol Acceleration plugin
     // NOTE: parent is derived via registryCanonicalDomain, not stored on the domain row
@@ -331,13 +334,13 @@ export const registration = onchainTable(
 
     // registrar AccountId
     registrarChainId: t.integer().notNull().$type<ChainId>(),
-    registrarAddress: t.hex().notNull().$type<Address>(),
+    registrarAddress: t.hex().notNull().$type<NormalizedAddress>(),
 
     // may reference a registrant
-    registrantId: t.hex().$type<Address>(),
+    registrantId: t.hex().$type<NormalizedAddress>(),
 
     // may reference an unregistrant
-    unregistrantId: t.hex().$type<Address>(),
+    unregistrantId: t.hex().$type<NormalizedAddress>(),
 
     // may have referrer data
     referrer: t.hex().$type<EncodedReferrer>(),
@@ -492,7 +495,7 @@ export const permissions = onchainTable(
     id: t.text().primaryKey().$type<PermissionsId>(),
 
     chainId: t.integer().notNull().$type<ChainId>(),
-    address: t.hex().notNull().$type<Address>(),
+    address: t.hex().notNull().$type<NormalizedAddress>(),
   }),
   (t) => ({
     byId: uniqueIndex().on(t.chainId, t.address),
@@ -510,7 +513,7 @@ export const permissionsResource = onchainTable(
     id: t.text().primaryKey().$type<PermissionsResourceId>(),
 
     chainId: t.integer().notNull().$type<ChainId>(),
-    address: t.hex().notNull().$type<Address>(),
+    address: t.hex().notNull().$type<NormalizedAddress>(),
     resource: t.bigint().notNull(),
   }),
   (t) => ({
@@ -531,9 +534,9 @@ export const permissionsUser = onchainTable(
     id: t.text().primaryKey().$type<PermissionsUserId>(),
 
     chainId: t.integer().notNull().$type<ChainId>(),
-    address: t.hex().notNull().$type<Address>(),
+    address: t.hex().notNull().$type<NormalizedAddress>(),
     resource: t.bigint().notNull(),
-    user: t.hex().notNull().$type<Address>(),
+    user: t.hex().notNull().$type<NormalizedAddress>(),
 
     // has one roles bitmap
     roles: t.bigint().notNull(),
