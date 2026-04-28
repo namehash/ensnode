@@ -16,7 +16,7 @@ All commands are run from the **monorepo root**.
 | `docker/envs/.env.docker.local`          | User config (gitignored). Required for base stack, optional for devnet overrides.      |
 
 > To inspect the fully resolved config for any compose file (resolves all `extends`):
-> 
+>
 > ```
 > docker compose -f docker/docker-compose.yml config
 > ```

@@ -8,7 +8,7 @@ services:
     ports:
       - "42069:42069"
     healthcheck:
-      test: ["CMD", "curl", "--fail", "-s", "http://localhost:42069/health"]
+      test: [ "CMD", "curl", "--fail", "-s", "http://localhost:42069/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
