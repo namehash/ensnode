@@ -24,7 +24,7 @@ yarn add @ensnode/ensdb-sdk
 ### Example Usage
 
 ```typescript
-import { EnsDbReader } from '@ensnode/ensdb-sdk';
+import { EnsDbReader, IndexingMetadataContextStatusCodes } from '@ensnode/ensdb-sdk';
 
 // Connect to a specific ENSDb instance by providing its connection string and
 // the ENSIndexer Schema Name you want to query
@@ -38,7 +38,7 @@ const v1Domains = await ensDbReader.ensDb
 
 // Get indexing status snapshot
 const indexingMetadataContext = await ensDbReader.getIndexingMetadataContext();
-if (indexingMetadataContext.statusCode === IndexingMetadataContextStatusCodes.Initialized) {}
+if (indexingMetadataContext.statusCode === IndexingMetadataContextStatusCodes.Initialized) {
   const indexingStatusSnapshot = indexingMetadataContext.indexingStatus;
   // Do something with the indexing status snapshot
 }

@@ -33,13 +33,13 @@ Possible key-value pairs are defined by the `EnsNodeMetadata` union type. As of 
 | `key` | `text` | no | Allowed keys: `indexing_metadata_context`. |
 | `value` | `jsonb` | no | Guaranteed to be a serialized representation of a JSON object. |
 
-**Primary key:** `(ensIndexerSchemaName, key)` — ensures that there is only one record for each key per ENSIndexer instance.
+**Primary key:** `(ens_indexer_schema_name, key)` — ensures that there is only one record for each key per ENSIndexer instance.
 
 #### Known keys
 
 | Key | TypeScript type | Description |
 |-----|-----------------|-------------|
-| `indexing_metadata_context` | `IndexingMetadataContextInitialized` | Tracks the ENSDb database schema version. |
+| `indexing_metadata_context` | `IndexingMetadataContextInitialized` | Stores indexing status and stack info§ for the ENSIndexer instance. |
 
 ---
 
