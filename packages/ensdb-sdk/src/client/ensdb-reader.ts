@@ -9,6 +9,13 @@ import {
   IndexingMetadataContextStatusCodes,
 } from "@ensnode/ensnode-sdk";
 
+export {
+  IndexingMetadataContext,
+  IndexingMetadataContextInitialized,
+  IndexingMetadataContextStatusCodes,
+  IndexingMetadataContextUninitialized,
+} from "@ensnode/ensnode-sdk";
+
 import {
   type AbstractEnsIndexerSchema,
   buildEnsDbDrizzleClient,

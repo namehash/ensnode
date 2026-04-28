@@ -10,7 +10,7 @@ import { logger } from "@/lib/logger";
  * Interval in seconds between two consecutive attempts to upsert
  * the IndexingMetadataContext record into ENSDb.
  */
-const INDEXING_STATUS_RECORD_UPDATE_INTERVAL: Duration = 1;
+const INDEXING_METADATA_CONTEXT_RECORD_UPDATE_INTERVAL: Duration = 1;
 
 /**
  * ENSDb Writer Worker
@@ -22,7 +22,7 @@ export class EnsDbWriterWorker {
   /**
    * Interval for recurring updates of IndexingMetadataContext record in ENSDb.
    */
-  private indexingStatusUpdateInterval: ReturnType<typeof setInterval> | null = null;
+  private indexingMetadataContextUpdateInterval: ReturnType<typeof setInterval> | null = null;
 
   /**
    * {@link EnsDbWriter} instance used by the worker to interact with ENSDb instance.
@@ -62,7 +62,7 @@ export class EnsDbWriterWorker {
     }
 
     // Recurring update of the IndexingMetadataContext record in ENSDb.
-    this.indexingStatusUpdateInterval = setInterval(
+    this.indexingMetadataContextUpdateInterval = setInterval(
       () =>
         this.updateIndexingMetadataContext().catch((error) => {
           logger.error({
@@ -71,7 +71,7 @@ export class EnsDbWriterWorker {
             error,
           });
         }),
-      secondsToMilliseconds(INDEXING_STATUS_RECORD_UPDATE_INTERVAL),
+      secondsToMilliseconds(INDEXING_METADATA_CONTEXT_RECORD_UPDATE_INTERVAL),
     );
   }
 
@@ -79,7 +79,7 @@ export class EnsDbWriterWorker {
    * Indicates whether the ENSDb Writer Worker is currently running.
    */
   get isRunning(): boolean {
-    return this.indexingStatusUpdateInterval !== null;
+    return this.indexingMetadataContextUpdateInterval !== null;
   }
 
   /**
@@ -88,9 +88,9 @@ export class EnsDbWriterWorker {
    * Stops all recurring tasks in the worker.
    */
   public stop(): void {
-    if (this.indexingStatusUpdateInterval) {
-      clearInterval(this.indexingStatusUpdateInterval);
-      this.indexingStatusUpdateInterval = null;
+    if (this.indexingMetadataContextUpdateInterval) {
+      clearInterval(this.indexingMetadataContextUpdateInterval);
+      this.indexingMetadataContextUpdateInterval = null;
     }
   }
 
