@@ -1,4 +1,7 @@
+import config from "@/config";
+
 import {
+  hasEnsAnalyticsConfigSupport,
   hasEnsAnalyticsIndexingStatusSupport,
   type ReferralEditionSnapshot,
   type ReferralProgramEditionConfig,
@@ -64,11 +67,19 @@ function createEditionSnapshotBuilder(
       }
     }
 
-    // This check duplicates `ensanalyticsApiMiddleware`'s indexing-status gate, but is required
-    // here because `proactivelyInitialize: true` runs the cache builder at startup — before any
-    // request — so the middleware can't gate it. Without this, the cache could capture a snapshot
-    // derived from a not-yet-final indexer state and serve it for the rest of its (effectively
-    // infinite, for closed editions) TTL.
+    // The plugin-support and indexing-status checks below duplicate `ensanalyticsApiMiddleware`'s
+    // gates, but are required here because `proactivelyInitialize: true` runs the cache builder
+    // at startup — before any request — so the middleware can't gate it. Without these checks,
+    // the cache could capture a snapshot derived from a not-yet-final indexer state, or one with
+    // silently dropped rows because a required namespace plugin is inactive, and serve it for the
+    // rest of its (effectively infinite, for closed editions) TTL.
+    const configSupport = hasEnsAnalyticsConfigSupport(config.ensIndexerPublicConfig);
+    if (!configSupport.supported) {
+      throw new Error(
+        `Unable to generate edition snapshot for ${editionSlug}. ${configSupport.reason}`,
+      );
+    }
+
     const indexingStatus = await indexingStatusCache.read();
     if (indexingStatus instanceof Error) {
       logger.error(

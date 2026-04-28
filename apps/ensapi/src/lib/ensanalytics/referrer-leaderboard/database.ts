@@ -132,6 +132,14 @@ export const getReferralEvents = async (rules: ReferralProgramRules): Promise<Re
         domainName: ensIndexerSchema.subgraph_domain.name,
       })
       .from(ensIndexerSchema.registrarActions)
+      // INNER JOINs are total under the ENSAnalytics plugin prerequisites:
+      //   - registrarAction → registrationLifecycle: 1:1 by indexer construction (registrars
+      //     plugin writes both rows together; see registrarActionRelations in the schema).
+      //   - registrationLifecycle → subgraph_domain: cross-plugin invariant guaranteed by
+      //     `hasEnsAnalyticsConfigSupport` (Subgraph + Basenames + Lineanames + Registrars all
+      //     required). Enforced at request time by `ensanalyticsApiMiddleware`, and at cache-build
+      //     time by `referral-edition-snapshots.cache.ts` so the cache can't poison itself with
+      //     silently-dropped rows during proactive init.
       .innerJoin(
         ensIndexerSchema.registrationLifecycles,
         eq(ensIndexerSchema.registrarActions.node, ensIndexerSchema.registrationLifecycles.node),
