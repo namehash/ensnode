@@ -20,13 +20,45 @@ ENSNode provides several [Docker Compose](https://docs.docker.com/compose/) file
 
 - **`docker/docker-compose.yml`** — base stack for mainnet/sepolia: ensindexer, ensapi, ensrainbow, ensadmin, ensdb (postgres)
 - **`docker/docker-compose.devnet.yml`** — full stack against local devnet (ens-test-env), works out of the box with no configuration required
-- **`docker/docker-compose.orchestrator.yml`** — minimal infra for integration tests (devnet + ensdb), used by test orchestration
 
 To inspect the fully resolved config for any compose file (resolves all `extends`):
 
 ```bash
 docker compose -f docker/docker-compose.yml config
 ```
+
+### Choosing `ENSNODE_TAG`
+
+`ENSNODE_TAG` controls which ENSNode image version is pulled for `ensindexer`, `ensapi`, `ensrainbow`, and `ensadmin`.
+
+- If `ENSNODE_TAG` is not set, compose files use the default tag baked into service definitions.
+- For reproducible environments, pin a specific release tag.
+- For quick local testing, you can override it temporarily from the shell.
+
+* One-off override for a single command.
+  
+  ```bash
+  ENSNODE_TAG=1.10.1 docker compose -f docker/docker-compose.yml up -d
+  ```
+
+* Persistent override using `docker/.env`. Docker Compose picks it up automatically.
+  ```bash 
+  echo "ENSNODE_TAG=1.10.1" >> docker/.env
+  docker compose -f docker/docker-compose.yml up -d
+  ```
+
+* Persistent override using `docker/envs/.env.docker.local`. Pass it explicitly with `--env-file`.
+  ```bash 
+  echo "ENSNODE_TAG=1.10.1" >> docker/envs/.env.docker.local
+  docker compose --env-file docker/envs/.env.docker.local -f docker/docker-compose.yml up -d
+  ```
+
+* Persistent override using `export`.
+
+  ```bash
+  export ENSNODE_TAG=1.10.1
+  docker compose -f docker/docker-compose.yml up -d
+  ```
 
 ### Mainnet / Sepolia
 
