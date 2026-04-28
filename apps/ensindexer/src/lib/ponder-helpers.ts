@@ -105,8 +105,8 @@ export function chainsConnectionConfig(
     );
   }
 
-  // NOTE: disable cache on local chains (e.g. ganache, anvil, ens-test-env)
-  const disableCache = chainId === 31337 || chainId === 1337 || chainId === ensTestEnvChain.id;
+  // NOTE: disable cache on ens-test-env
+  const disableCache = chainId === ensTestEnvChain.id;
 
   return {
     [chainId.toString()]: {
