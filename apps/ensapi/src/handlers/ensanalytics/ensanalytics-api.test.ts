@@ -1,8 +1,9 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ENSNamespaceIds } from "@ensnode/datasources";
 
 import type { EnsApiConfig } from "@/config/config.schema";
+import * as ensanalyticsMiddleware from "@/middleware/ensanalytics.middleware";
 import * as editionsCachesMiddleware from "@/middleware/referral-edition-snapshots-caches.middleware";
 import * as editionSetMiddleware from "@/middleware/referral-program-edition-set.middleware";
 
@@ -22,6 +23,22 @@ vi.mock("@/middleware/referral-program-edition-set.middleware", () => ({
 
 vi.mock("@/middleware/referral-edition-snapshots-caches.middleware", () => ({
   referralEditionSnapshotsCachesMiddleware: vi.fn(),
+}));
+
+// The indexing-status middleware is out of scope for these handler-level tests
+// — pass through with a synthetic "following" status.
+vi.mock("@/middleware/indexing-status.middleware", () => ({
+  indexingStatusMiddleware: async (
+    c: { set: (k: string, v: unknown) => void },
+    next: () => Promise<void>,
+  ) => {
+    c.set("indexingStatus", { snapshot: { omnichainSnapshot: { omnichainStatus: "following" } } });
+    return await next();
+  },
+}));
+
+vi.mock("@/middleware/ensanalytics.middleware", () => ({
+  ensanalyticsApiMiddleware: vi.fn(),
 }));
 
 import {
@@ -63,6 +80,104 @@ import {
 import app from "./ensanalytics-api";
 
 describe("/v1/ensanalytics", () => {
+  // Default: prerequisites pass for every test. Tests that exercise the 503 short-circuit
+  // paths override this within their own `it(...)` body.
+  beforeEach(() => {
+    vi.mocked(ensanalyticsMiddleware.ensanalyticsApiMiddleware).mockImplementation(
+      async (c, next) => {
+        c.set("ensAnalyticsPrerequisites", { supported: true });
+        return await next();
+      },
+    );
+  });
+
+  describe("prerequisites short-circuit", () => {
+    const FAILURE_REASON = "test prerequisite failure (e.g. missing 'subgraph' plugin)";
+
+    function setupPrerequisitesUnsupported(): void {
+      vi.mocked(ensanalyticsMiddleware.ensanalyticsApiMiddleware).mockImplementation(
+        async (c, next) => {
+          c.set("ensAnalyticsPrerequisites", { supported: false, reason: FAILURE_REASON });
+          return await next();
+        },
+      );
+      // The downstream middlewares still run; provide minimal stand-ins so the chain
+      // doesn't throw an Invariant. The handler short-circuits on prerequisites before
+      // these are consulted.
+      vi.mocked(editionSetMiddleware.referralProgramEditionConfigSetMiddleware).mockImplementation(
+        async (c, next) => {
+          c.set("referralProgramEditionConfigSet", new Map());
+          return await next();
+        },
+      );
+      vi.mocked(
+        editionsCachesMiddleware.referralEditionSnapshotsCachesMiddleware,
+      ).mockImplementation(async (c, next) => {
+        c.set("referralEditionSnapshotsCaches", new Map());
+        return await next();
+      });
+    }
+
+    it("/referral-leaderboard returns 503 with serialized error when prerequisites fail", async () => {
+      setupPrerequisitesUnsupported();
+
+      const httpResponse = await app.request("/referral-leaderboard?edition=any");
+      const response = deserializeReferrerLeaderboardPageResponse(await httpResponse.json());
+
+      expect(httpResponse.status).toBe(503);
+      expect(response.responseCode).toBe(ReferrerLeaderboardPageResponseCodes.Error);
+      if (response.responseCode === ReferrerLeaderboardPageResponseCodes.Error) {
+        expect(response.error).toBe("Service Unavailable");
+        expect(response.errorMessage).toBe(FAILURE_REASON);
+      }
+    });
+
+    it("/referrer/:address returns 503 with serialized error when prerequisites fail", async () => {
+      setupPrerequisitesUnsupported();
+
+      const httpResponse = await app.request(
+        "/referrer/0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e?editions=any",
+      );
+      const response = deserializeReferrerMetricsEditionsResponse(await httpResponse.json());
+
+      expect(httpResponse.status).toBe(503);
+      expect(response.responseCode).toBe(ReferrerMetricsEditionsResponseCodes.Error);
+      if (response.responseCode === ReferrerMetricsEditionsResponseCodes.Error) {
+        expect(response.error).toBe("Service Unavailable");
+        expect(response.errorMessage).toBe(FAILURE_REASON);
+      }
+    });
+
+    it("/editions returns 503 with serialized error when prerequisites fail", async () => {
+      setupPrerequisitesUnsupported();
+
+      const httpResponse = await app.request("/editions");
+      const response = deserializeReferralProgramEditionSummariesResponse(
+        await httpResponse.json(),
+      );
+
+      expect(httpResponse.status).toBe(503);
+      expect(response.responseCode).toBe(ReferralProgramEditionSummariesResponseCodes.Error);
+      if (response.responseCode === ReferralProgramEditionSummariesResponseCodes.Error) {
+        expect(response.error).toBe("Service Unavailable");
+        expect(response.errorMessage).toBe(FAILURE_REASON);
+      }
+    });
+
+    it("/accounting returns 503 with plain-text body when prerequisites fail", async () => {
+      setupPrerequisitesUnsupported();
+
+      const httpResponse = await app.request("/accounting?edition=any");
+
+      expect(httpResponse.status).toBe(503);
+      // CSV endpoint uses plain text 503 to match its handler-level error convention.
+      expect(httpResponse.headers.get("content-type")).toContain("text/plain");
+      const body = await httpResponse.text();
+      expect(body).toContain("Service Unavailable");
+      expect(body).toContain(FAILURE_REASON);
+    });
+  });
+
   describe("/referral-leaderboard", () => {
     it("returns requested records when referrer leaderboard has multiple pages of data", async () => {
       // Arrange: mock cache map with 2025-12
@@ -1111,7 +1226,7 @@ describe("/v1/ensanalytics", () => {
       // The exact CSV cell values are exercised by `formatAccountingCsv`'s own unit coverage.
       const body = await httpResponse.text();
       const expectedHeaderRow =
-        "timestamp,name,action,transactionHash,incrementalDuration,registrant,referrer," +
+        "referralId,timestamp,name,action,transactionHash,incrementalDuration,registrant,referrer," +
         "incrementalRevenueContributionWei,accumulatedRevenueContributionWei," +
         "incrementalBaseRevenueContributionUsdc,accumulatedBaseRevenueContributionUsdc," +
         "awardPoolRemainingUsdc,disqualified,disqualificationReason,maxRevShare," +

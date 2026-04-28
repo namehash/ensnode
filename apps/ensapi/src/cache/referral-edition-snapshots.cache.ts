@@ -1,4 +1,5 @@
 import {
+  hasEnsAnalyticsIndexingStatusSupport,
   type ReferralEditionSnapshot,
   type ReferralProgramEditionConfig,
   type ReferralProgramEditionConfigSet,
@@ -7,13 +8,7 @@ import {
 } from "@namehash/ens-referrals";
 import { minutesToSeconds } from "date-fns";
 
-import {
-  type CachedResult,
-  getLatestIndexedBlockRef,
-  type OmnichainIndexingStatusId,
-  OmnichainIndexingStatusIds,
-  SWRCache,
-} from "@ensnode/ensnode-sdk";
+import { type CachedResult, getLatestIndexedBlockRef, SWRCache } from "@ensnode/ensnode-sdk";
 
 import { assumeReferralProgramEditionImmutablyClosed } from "@/lib/ensanalytics/referrer-leaderboard/closeout";
 import { getReferralEditionSnapshot } from "@/lib/ensanalytics/referrer-leaderboard/get-referral-edition-snapshot";
@@ -35,17 +30,6 @@ export type ReferralEditionSnapshotsCacheMap = Map<
   ReferralProgramEditionSlug,
   SWRCache<ReferralEditionSnapshot>
 >;
-
-/**
- * The list of {@link OmnichainIndexingStatusId} values that are supported for generating
- * edition snapshots.
- *
- * Other values indicate that we are not ready to generate snapshots yet.
- */
-const supportedOmnichainIndexingStatuses: OmnichainIndexingStatusId[] = [
-  OmnichainIndexingStatusIds.Following,
-  OmnichainIndexingStatusIds.Completed,
-];
 
 /**
  * Creates a cache builder function for a specific edition.
@@ -80,6 +64,11 @@ function createEditionSnapshotBuilder(
       }
     }
 
+    // This check duplicates `ensanalyticsApiMiddleware`'s indexing-status gate, but is required
+    // here because `proactivelyInitialize: true` runs the cache builder at startup — before any
+    // request — so the middleware can't gate it. Without this, the cache could capture a snapshot
+    // derived from a not-yet-final indexer state and serve it for the rest of its (effectively
+    // infinite, for closed editions) TTL.
     const indexingStatus = await indexingStatusCache.read();
     if (indexingStatus instanceof Error) {
       logger.error(
@@ -91,10 +80,12 @@ function createEditionSnapshotBuilder(
       );
     }
 
-    const omnichainIndexingStatus = indexingStatus.omnichainSnapshot.omnichainStatus;
-    if (!supportedOmnichainIndexingStatuses.includes(omnichainIndexingStatus)) {
+    const indexingStatusSupport = hasEnsAnalyticsIndexingStatusSupport(
+      indexingStatus.omnichainSnapshot.omnichainStatus,
+    );
+    if (!indexingStatusSupport.supported) {
       throw new Error(
-        `Unable to generate edition snapshot for ${editionSlug}. Omnichain indexing status is currently ${omnichainIndexingStatus} but must be ${supportedOmnichainIndexingStatuses.join(" or ")}.`,
+        `Unable to generate edition snapshot for ${editionSlug}. ${indexingStatusSupport.reason}`,
       );
     }
 

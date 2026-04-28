@@ -21,6 +21,7 @@ const CSV_COLUMNS: ReadonlyArray<{
   header: string;
   value: (r: ReferralAccountingRecordRevShareCap) => string;
 }> = [
+  { header: "referralId", value: (r) => r.registrarActionId },
   { header: "timestamp", value: (r) => new Date(r.timestamp * 1000).toISOString() },
   { header: "name", value: (r) => r.name },
   { header: "action", value: (r) => r.actionType },

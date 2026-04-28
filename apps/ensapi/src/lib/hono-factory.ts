@@ -4,6 +4,7 @@ import { createFactory } from "hono/factory";
 
 import { errorResponse } from "@/lib/handlers/error-response";
 import type { CanAccelerateMiddlewareVariables } from "@/middleware/can-accelerate.middleware";
+import type { EnsAnalyticsPrerequisitesMiddlewareVariables } from "@/middleware/ensanalytics.middleware";
 import type { IndexingStatusMiddlewareVariables } from "@/middleware/indexing-status.middleware";
 import type { IsRealtimeMiddlewareVariables } from "@/middleware/is-realtime.middleware";
 import type { ReferralEditionSnapshotsCachesMiddlewareVariables } from "@/middleware/referral-edition-snapshots-caches.middleware";
@@ -15,6 +16,7 @@ export type MiddlewareVariables = IndexingStatusMiddlewareVariables &
   CanAccelerateMiddlewareVariables &
   ReferralProgramEditionConfigSetMiddlewareVariables &
   ReferralEditionSnapshotsCachesMiddlewareVariables &
+  EnsAnalyticsPrerequisitesMiddlewareVariables &
   StackInfoMiddlewareVariables;
 
 type AppEnv = { Variables: Partial<MiddlewareVariables> };

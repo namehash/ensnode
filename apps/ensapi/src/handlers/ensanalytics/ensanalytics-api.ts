@@ -20,6 +20,8 @@ import {
 import { formatAccountingCsv } from "@/lib/ensanalytics/referrer-leaderboard/format-accounting-csv";
 import { createApp } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
+import { ensanalyticsApiMiddleware } from "@/middleware/ensanalytics.middleware";
+import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 import { referralEditionSnapshotsCachesMiddleware } from "@/middleware/referral-edition-snapshots-caches.middleware";
 import { referralProgramEditionConfigSetMiddleware } from "@/middleware/referral-program-edition-set.middleware";
 
@@ -34,6 +36,8 @@ const logger = makeLogger("ensanalytics-api");
 
 const app = createApp({
   middlewares: [
+    indexingStatusMiddleware,
+    ensanalyticsApiMiddleware,
     referralProgramEditionConfigSetMiddleware,
     referralEditionSnapshotsCachesMiddleware,
   ],
@@ -43,6 +47,18 @@ const app = createApp({
 app.openapi(getReferralLeaderboardRoute, async (c) => {
   try {
     const { edition, page, recordsPerPage } = c.req.valid("query");
+
+    // Service-prerequisite check (set by ensanalyticsApiMiddleware)
+    if (!c.var.ensAnalyticsPrerequisites.supported) {
+      return c.json(
+        serializeReferrerLeaderboardPageResponse({
+          responseCode: ReferrerLeaderboardPageResponseCodes.Error,
+          error: "Service Unavailable",
+          errorMessage: c.var.ensAnalyticsPrerequisites.reason,
+        } satisfies ReferrerLeaderboardPageResponse),
+        503,
+      );
+    }
 
     // Check if edition set failed to load
     if (c.var.referralEditionSnapshotsCaches instanceof Error) {
@@ -123,6 +139,18 @@ app.openapi(getReferrerDetailRoute, async (c) => {
   try {
     const { referrer } = c.req.valid("param");
     const { editions } = c.req.valid("query");
+
+    // Service-prerequisite check (set by ensanalyticsApiMiddleware)
+    if (!c.var.ensAnalyticsPrerequisites.supported) {
+      return c.json(
+        serializeReferrerMetricsEditionsResponse({
+          responseCode: ReferrerMetricsEditionsResponseCodes.Error,
+          error: "Service Unavailable",
+          errorMessage: c.var.ensAnalyticsPrerequisites.reason,
+        } satisfies ReferrerMetricsEditionsResponse),
+        503,
+      );
+    }
 
     // Check if edition set failed to load
     if (c.var.referralEditionSnapshotsCaches instanceof Error) {
@@ -231,6 +259,18 @@ app.openapi(getReferrerDetailRoute, async (c) => {
 // Get edition summaries
 app.openapi(getEditionsRoute, async (c) => {
   try {
+    // Service-prerequisite check (set by ensanalyticsApiMiddleware)
+    if (!c.var.ensAnalyticsPrerequisites.supported) {
+      return c.json(
+        serializeReferralProgramEditionSummariesResponse({
+          responseCode: ReferralProgramEditionSummariesResponseCodes.Error,
+          error: "Service Unavailable",
+          errorMessage: c.var.ensAnalyticsPrerequisites.reason,
+        } satisfies ReferralProgramEditionSummariesResponse),
+        503,
+      );
+    }
+
     // Check if edition config set failed to load
     if (c.var.referralProgramEditionConfigSet instanceof Error) {
       logger.error(
@@ -338,6 +378,11 @@ app.openapi(getEditionsRoute, async (c) => {
 app.openapi(getAccountingCsvRoute, async (c) => {
   try {
     const { edition } = c.req.valid("query");
+
+    // Service-prerequisite check (set by ensanalyticsApiMiddleware)
+    if (!c.var.ensAnalyticsPrerequisites.supported) {
+      return c.text(`Service Unavailable: ${c.var.ensAnalyticsPrerequisites.reason}`, 503);
+    }
 
     if (c.var.referralEditionSnapshotsCaches instanceof Error) {
       logger.error(
