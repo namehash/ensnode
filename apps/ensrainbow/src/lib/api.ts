@@ -1,5 +1,3 @@
-import packageJson from "@/../package.json" with { type: "json" };
-
 import type { Context as HonoContext } from "hono";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
@@ -14,7 +12,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 import { type EnsRainbow, ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk";
 
-import { DB_SCHEMA_VERSION } from "@/lib/database";
+import type { DbConfig } from "@/config/types";
 import type { ENSRainbowServer } from "@/lib/server";
 import { getErrorMessage } from "@/utils/error-utils";
 import { logger } from "@/utils/logger";
@@ -25,6 +23,7 @@ import { logger } from "@/utils/logger";
 export function createApi(
   server: ENSRainbowServer,
   publicConfig: EnsRainbow.ENSRainbowPublicConfig,
+  dbConfig: DbConfig,
 ): Hono {
   const api = new Hono();
 
@@ -92,7 +91,7 @@ export function createApi(
   api.get("/v1/labels/count", (c: HonoContext) => {
     const countResponse: EnsRainbow.CountSuccess = {
       status: StatusCode.Success,
-      count: publicConfig.recordsCount,
+      count: dbConfig.recordsCount,
       timestamp: new Date().toISOString(),
     };
     return c.json(countResponse);
@@ -100,21 +99,6 @@ export function createApi(
 
   api.get("/v1/config", (c: HonoContext) => {
     return c.json(publicConfig);
-  });
-
-  /**
-   * @deprecated Use GET /v1/config instead. This endpoint will be removed in a future version.
-   */
-  api.get("/v1/version", (c: HonoContext) => {
-    const result: EnsRainbow.VersionResponse = {
-      status: StatusCode.Success,
-      versionInfo: {
-        version: packageJson.version,
-        dbSchemaVersion: DB_SCHEMA_VERSION,
-        labelSet: server.serverLabelSet,
-      },
-    };
-    return c.json(result);
   });
 
   return api;

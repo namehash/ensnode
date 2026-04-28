@@ -577,11 +577,11 @@ export class ENSRainbowDB {
     }
 
     // 3. Check Label Set ID and Highest Label Set Version Existence and Validity
-    let labelSet: EnsRainbowServerLabelSet;
+    let serverLabelSet: EnsRainbowServerLabelSet;
     try {
-      labelSet = await this.getLabelSet();
+      serverLabelSet = await this.getLabelSet();
       logger.info(
-        `Label set verified - ID: ${labelSet.labelSetId}, highest version: ${labelSet.highestLabelSetVersion}`,
+        `Label set verified - ID: ${serverLabelSet.labelSetId}, highest version: ${serverLabelSet.highestLabelSetVersion}`,
       );
     } catch (error) {
       const errorMsg = generatePurgeErrorMessage(`Error checking label set: ${error}`);
@@ -650,9 +650,9 @@ export class ENSRainbowDB {
         // Only proceed with further checks if decoding was successful
 
         // Label set version comparison
-        if (versionedRainbowRecord.labelSetVersion > labelSet.highestLabelSetVersion) {
+        if (versionedRainbowRecord.labelSetVersion > serverLabelSet.highestLabelSetVersion) {
           logger.error(
-            `Label set version mismatch for label "${value}": record set ${versionedRainbowRecord.labelSetVersion} > highest set ${labelSet.highestLabelSetVersion}`,
+            `Label set version mismatch for label "${value}": record set ${versionedRainbowRecord.labelSetVersion} > highest set ${serverLabelSet.highestLabelSetVersion}`,
           );
           labelSetVersionMismatches++;
         }

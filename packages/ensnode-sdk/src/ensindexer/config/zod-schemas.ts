@@ -8,11 +8,10 @@
  */
 import { z } from "zod/v4";
 
-import type { EnsRainbowClientLabelSet, EnsRainbowServerLabelSet } from "../../ensrainbow/types";
 import {
   makeEnsRainbowPublicConfigSchema,
   makeLabelSetIdSchema,
-  makeLabelSetVersionSchema,
+  makeLabelSetVersionStringSchema,
 } from "../../ensrainbow/zod-schemas/config";
 import { uniq } from "../../shared/collections";
 import { makeChainIdSchema, makeENSNamespaceIdSchema } from "../../shared/zod-schemas";
@@ -88,7 +87,7 @@ export const makeFullyPinnedLabelSetSchema = (valueLabel: string = "Label set") 
   }
   return z.object({
     labelSetId: makeLabelSetIdSchema(valueLabelLabelSetId),
-    labelSetVersion: makeLabelSetVersionSchema(valueLabelLabelSetVersion),
+    labelSetVersion: makeLabelSetVersionStringSchema(valueLabelLabelSetVersion),
   });
 };
 
@@ -118,7 +117,10 @@ export const makeENSIndexerVersionInfoSchema = makeEnsIndexerVersionInfoSchema;
 // Invariant: If config.isSubgraphCompatible, the config must pass isSubgraphCompatible(config)
 export function invariant_isSubgraphCompatibleRequirements(
   ctx: ZodCheckFnInput<
-    Pick<EnsIndexerPublicConfig, "namespace" | "plugins" | "isSubgraphCompatible" | "labelSet">
+    Pick<
+      EnsIndexerPublicConfig,
+      "namespace" | "plugins" | "isSubgraphCompatible" | "clientLabelSet"
+    >
   >,
 ) {
   const { value: config } = ctx;
@@ -127,17 +129,16 @@ export function invariant_isSubgraphCompatibleRequirements(
     ctx.issues.push({
       code: "custom",
       input: config,
-      message: `'isSubgraphCompatible' requires only the '${PluginName.Subgraph}' plugin to be active and labelSet must be {labelSetId: "subgraph", labelSetVersion: 0}`,
+      message: `'isSubgraphCompatible' requires only the '${PluginName.Subgraph}' plugin to be active and 'clientLabelSet' must be {labelSetId: "subgraph", labelSetVersion: 0}`,
     });
   }
 }
 
 export function invariant_ensRainbowSupportedLabelSetAndVersion(
-  ctx: ZodCheckFnInput<Pick<EnsIndexerPublicConfig, "labelSet" | "ensRainbowPublicConfig">>,
+  ctx: ZodCheckFnInput<Pick<EnsIndexerPublicConfig, "clientLabelSet" | "ensRainbowPublicConfig">>,
 ) {
-  const clientLabelSet = ctx.value.labelSet satisfies EnsRainbowClientLabelSet;
-  const serverLabelSet = ctx.value.ensRainbowPublicConfig
-    .labelSet satisfies EnsRainbowServerLabelSet;
+  const { clientLabelSet } = ctx.value;
+  const { serverLabelSet } = ctx.value.ensRainbowPublicConfig;
 
   try {
     validateSupportedLabelSetAndVersion(serverLabelSet, clientLabelSet);
@@ -169,7 +170,7 @@ export const makeEnsIndexerPublicConfigSchema = (valueLabel: string = "ENSIndexe
       isSubgraphCompatible: z.boolean({
         error: `${valueLabel}.isSubgraphCompatible must be a boolean value.`,
       }),
-      labelSet: makeFullyPinnedLabelSetSchema(`${valueLabel}.labelSet`),
+      clientLabelSet: makeFullyPinnedLabelSetSchema(`${valueLabel}.clientLabelSet`),
       namespace: makeENSNamespaceIdSchema(`${valueLabel}.namespace`),
       plugins: makePluginsListSchema(`${valueLabel}.plugins`),
       versionInfo: makeEnsIndexerVersionInfoSchema(`${valueLabel}.versionInfo`),
@@ -201,7 +202,7 @@ export const makeSerializedEnsIndexerPublicConfigSchema = (
     isSubgraphCompatible: z.boolean({
       error: `${valueLabel}.isSubgraphCompatible must be a boolean value.`,
     }),
-    labelSet: makeFullyPinnedLabelSetSchema(`${valueLabel}.labelSet`),
+    clientLabelSet: makeFullyPinnedLabelSetSchema(`${valueLabel}.clientLabelSet`),
     namespace: makeENSNamespaceIdSchema(`${valueLabel}.namespace`),
     plugins: makePluginsListSchema(`${valueLabel}.plugins`),
     versionInfo: makeEnsIndexerVersionInfoSchema(`${valueLabel}.versionInfo`),

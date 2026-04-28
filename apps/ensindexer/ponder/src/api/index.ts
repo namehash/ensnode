@@ -11,22 +11,20 @@ import { logger } from "@/lib/logger";
 
 import ensNodeApi from "./handlers/ensnode-api";
 
-// The entry point for the ENSDb Writer Worker. It must be placed inside
-// the `api` directory of the Ponder app to avoid the following build issue:
-// Error: Invalid dependency graph. Config, schema, and indexing function files
-// cannot import objects from the API function file "src/api/index.ts".
 // Before starting the ENSDb Writer Worker, we need to ensure that
 // the ENSNode Schema in ENSDb is up to date by running any pending migrations.
-migrateEnsNodeSchema()
-  .then(startEnsDbWriterWorker)
-  .catch((error) => {
-    logger.error({
-      msg: "Failed to initialize ENSNode metadata",
-      error,
-      module: "ponder-api",
-    });
-    process.exit(1);
+await migrateEnsNodeSchema().catch((error) => {
+  logger.error({
+    msg: "Failed to initialize ENSNode metadata",
+    error,
+    module: "ponder-api",
   });
+  process.exitCode = 1;
+  throw error;
+});
+
+// The entry point for the ENSDb Writer Worker.
+startEnsDbWriterWorker();
 
 const app = new Hono();
 

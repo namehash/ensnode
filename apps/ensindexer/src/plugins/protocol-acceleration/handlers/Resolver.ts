@@ -1,19 +1,26 @@
-import { asLiteralName, bigintToCoinType, type CoinType, ETH_COIN_TYPE } from "enssdk";
+import { and, eq } from "drizzle-orm";
+import {
+  asLiteralName,
+  bigintToCoinType,
+  type CoinType,
+  ETH_COIN_TYPE,
+  makeResolverRecordsId,
+} from "enssdk";
 
 import { ResolverABI } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 import { parseDnsTxtRecordArgs } from "@/lib/dns-helpers";
-import { getThisAccountId } from "@/lib/get-this-account-id";
-import { addOnchainEventListener } from "@/lib/indexing-engines/ponder";
+import { addOnchainEventListener, ensIndexerSchema } from "@/lib/indexing-engines/ponder";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import {
-  ensureResolver,
-  ensureResolverRecords,
+  ensureResolverAndRecords,
   handleResolverAddressRecordUpdate,
+  handleResolverContenthashUpdate,
+  handleResolverDnszonehashUpdate,
   handleResolverNameUpdate,
+  handleResolverPubkeyUpdate,
   handleResolverTextRecordUpdate,
-  makeResolverRecordsCompositeKey,
 } from "@/lib/protocol-acceleration/resolver-db-helpers";
 
 const pluginName = PluginName.ProtocolAcceleration;
@@ -26,15 +33,9 @@ export default function () {
   addOnchainEventListener(
     namespaceContract(pluginName, "Resolver:AddrChanged"),
     async ({ context, event }) => {
-      const { a: address } = event.args;
-      const resolver = getThisAccountId(context, event);
-      await ensureResolver(context, resolver);
-
-      const resolverRecordsKey = makeResolverRecordsCompositeKey(resolver, event);
-      await ensureResolverRecords(context, resolverRecordsKey);
-
-      // the Resolver#AddrChanged event is just Resolver#AddressChanged with implicit coinType of ETH
-      await handleResolverAddressRecordUpdate(context, resolverRecordsKey, ETH_COIN_TYPE, address);
+      const key = await ensureResolverAndRecords(context, event);
+      // Resolver#AddrChanged is Resolver#AddressChanged with implicit coinType ETH
+      await handleResolverAddressRecordUpdate(context, key, ETH_COIN_TYPE, event.args.a);
     },
   );
 
@@ -51,28 +52,16 @@ export default function () {
         return; // ignore if bigint can't be coerced to known CoinType
       }
 
-      const resolver = getThisAccountId(context, event);
-      await ensureResolver(context, resolver);
-
-      const resolverRecordsKey = makeResolverRecordsCompositeKey(resolver, event);
-      await ensureResolverRecords(context, resolverRecordsKey);
-
-      await handleResolverAddressRecordUpdate(context, resolverRecordsKey, coinType, newAddress);
+      const key = await ensureResolverAndRecords(context, event);
+      await handleResolverAddressRecordUpdate(context, key, coinType, newAddress);
     },
   );
 
   addOnchainEventListener(
     namespaceContract(pluginName, "Resolver:NameChanged"),
     async ({ context, event }) => {
-      const name = asLiteralName(event.args.name);
-
-      const resolver = getThisAccountId(context, event);
-      await ensureResolver(context, resolver);
-
-      const resolverRecordsKey = makeResolverRecordsCompositeKey(resolver, event);
-      await ensureResolverRecords(context, resolverRecordsKey);
-
-      await handleResolverNameUpdate(context, resolverRecordsKey, name);
+      const key = await ensureResolverAndRecords(context, event);
+      await handleResolverNameUpdate(context, key, asLiteralName(event.args.name));
     },
   );
 
@@ -82,11 +71,10 @@ export default function () {
       "Resolver:TextChanged(bytes32 indexed node, string indexed indexedKey, string key)",
     ),
     async ({ context, event }) => {
-      const { node, key } = event.args;
+      const { node, key: textKey } = event.args;
 
       // this is a LegacyPublicResolver (DefaultPublicResolver3) event which does not emit `value`,
       // so we fetch it here if possible
-
       // default record value as 'null' which will be interpreted as deletion/non-existence of record
       let value: string | null = null;
       try {
@@ -94,17 +82,12 @@ export default function () {
           abi: ResolverABI,
           address: event.log.address,
           functionName: "text",
-          args: [node, key],
+          args: [node, textKey],
         });
       } catch {} // no-op if readContract throws for whatever reason
 
-      const resolver = getThisAccountId(context, event);
-      await ensureResolver(context, resolver);
-
-      const resolverRecordsKey = makeResolverRecordsCompositeKey(resolver, event);
-      await ensureResolverRecords(context, resolverRecordsKey);
-
-      await handleResolverTextRecordUpdate(context, resolverRecordsKey, key, value);
+      const recordsKey = await ensureResolverAndRecords(context, event);
+      await handleResolverTextRecordUpdate(context, recordsKey, textKey, value);
     },
   );
 
@@ -114,15 +97,9 @@ export default function () {
       "Resolver:TextChanged(bytes32 indexed node, string indexed indexedKey, string key, string value)",
     ),
     async ({ context, event }) => {
-      const { key, value } = event.args;
-
-      const resolver = getThisAccountId(context, event);
-      await ensureResolver(context, resolver);
-
-      const resolverRecordsKey = makeResolverRecordsCompositeKey(resolver, event);
-      await ensureResolverRecords(context, resolverRecordsKey);
-
-      await handleResolverTextRecordUpdate(context, resolverRecordsKey, key, value);
+      const { key: textKey, value } = event.args;
+      const recordsKey = await ensureResolverAndRecords(context, event);
+      await handleResolverTextRecordUpdate(context, recordsKey, textKey, value);
     },
   );
 
@@ -134,16 +111,11 @@ export default function () {
       "Resolver:DNSRecordChanged(bytes32 indexed node, bytes name, uint16 resource, bytes record)",
     ),
     async ({ context, event }) => {
-      const { key, value } = parseDnsTxtRecordArgs(event.args);
-      if (key === null) return; // no key to operate over? args were malformed, ignore event
+      const { key: textKey, value } = parseDnsTxtRecordArgs(event.args);
+      if (textKey === null) return; // no key to operate over? args were malformed, ignore event
 
-      const resolver = getThisAccountId(context, event);
-      await ensureResolver(context, resolver);
-
-      const resolverRecordsKey = makeResolverRecordsCompositeKey(resolver, event);
-      await ensureResolverRecords(context, resolverRecordsKey);
-
-      await handleResolverTextRecordUpdate(context, resolverRecordsKey, key, value);
+      const recordsKey = await ensureResolverAndRecords(context, event);
+      await handleResolverTextRecordUpdate(context, recordsKey, textKey, value);
     },
   );
 
@@ -154,32 +126,96 @@ export default function () {
       "Resolver:DNSRecordChanged(bytes32 indexed node, bytes name, uint16 resource, uint32 ttl, bytes record)",
     ),
     async ({ context, event }) => {
-      const { key, value } = parseDnsTxtRecordArgs(event.args);
-      if (key === null) return; // no key to operate over? args were malformed, ignore event
+      const { key: textKey, value } = parseDnsTxtRecordArgs(event.args);
+      if (textKey === null) return; // no key to operate over? args were malformed, ignore event
 
-      const resolver = getThisAccountId(context, event);
-      await ensureResolver(context, resolver);
-
-      const resolverRecordsKey = makeResolverRecordsCompositeKey(resolver, event);
-      await ensureResolverRecords(context, resolverRecordsKey);
-
-      await handleResolverTextRecordUpdate(context, resolverRecordsKey, key, value);
+      const recordsKey = await ensureResolverAndRecords(context, event);
+      await handleResolverTextRecordUpdate(context, recordsKey, textKey, value);
     },
   );
 
   addOnchainEventListener(
     namespaceContract(pluginName, "Resolver:DNSRecordDeleted"),
     async ({ context, event }) => {
-      const { key } = parseDnsTxtRecordArgs(event.args);
-      if (key === null) return; // no key to operate over? args were malformed, ignore event
+      const { key: textKey } = parseDnsTxtRecordArgs(event.args);
+      if (textKey === null) return; // no key to operate over? args were malformed, ignore event
 
-      const resolver = getThisAccountId(context, event);
-      await ensureResolver(context, resolver);
+      const recordsKey = await ensureResolverAndRecords(context, event);
+      await handleResolverTextRecordUpdate(context, recordsKey, textKey, null);
+    },
+  );
 
-      const resolverRecordsKey = makeResolverRecordsCompositeKey(resolver, event);
-      await ensureResolverRecords(context, resolverRecordsKey);
+  // NOTE: ABIChanged and InterfaceChanged are intentionally NOT registered.
+  // - ABIChanged event omits data (would require a follow-up readContract per event).
+  // - InterfaceChanged has an ERC-165 fallback that cannot be replicated offline.
+  // Both remain selectable via the Resolution API but are always resolved via RPC.
+  // Protocol Acceleration support can be added as desired.
 
-      await handleResolverTextRecordUpdate(context, resolverRecordsKey, key, null);
+  addOnchainEventListener(
+    namespaceContract(pluginName, "Resolver:ContenthashChanged"),
+    async ({ context, event }) => {
+      const key = await ensureResolverAndRecords(context, event);
+      await handleResolverContenthashUpdate(context, key, event.args.hash);
+    },
+  );
+
+  addOnchainEventListener(
+    namespaceContract(pluginName, "Resolver:PubkeyChanged"),
+    async ({ context, event }) => {
+      const { x, y } = event.args;
+      const key = await ensureResolverAndRecords(context, event);
+      await handleResolverPubkeyUpdate(context, key, x, y);
+    },
+  );
+
+  addOnchainEventListener(
+    namespaceContract(pluginName, "Resolver:DNSZonehashChanged"),
+    async ({ context, event }) => {
+      const key = await ensureResolverAndRecords(context, event);
+      await handleResolverDnszonehashUpdate(context, key, event.args.zonehash);
+    },
+  );
+
+  // IVersionableResolver VersionChanged: delete all child records for (chainId, address, node)
+  // and reset scalar columns. Uses raw drizzle via `context.ensDb.sql` to bulk-delete —
+  // this flushes ponder's in-memory cache to Postgres, accepted because VersionChanged is rare.
+  addOnchainEventListener(
+    namespaceContract(pluginName, "Resolver:VersionChanged"),
+    async ({ context, event }) => {
+      const { chainId, address, node } = await ensureResolverAndRecords(context, event);
+
+      await context.ensDb.sql
+        .delete(ensIndexerSchema.resolverAddressRecord)
+        .where(
+          and(
+            eq(ensIndexerSchema.resolverAddressRecord.chainId, chainId),
+            eq(ensIndexerSchema.resolverAddressRecord.address, address),
+            eq(ensIndexerSchema.resolverAddressRecord.node, node),
+          ),
+        );
+
+      await context.ensDb.sql
+        .delete(ensIndexerSchema.resolverTextRecord)
+        .where(
+          and(
+            eq(ensIndexerSchema.resolverTextRecord.chainId, chainId),
+            eq(ensIndexerSchema.resolverTextRecord.address, address),
+            eq(ensIndexerSchema.resolverTextRecord.node, node),
+          ),
+        );
+
+      await context.ensDb
+        .update(ensIndexerSchema.resolverRecords, {
+          id: makeResolverRecordsId({ chainId, address }, node),
+        })
+        .set({
+          name: null,
+          contenthash: null,
+          pubkeyX: null,
+          pubkeyY: null,
+          dnszonehash: null,
+          version: event.args.newVersion,
+        });
     },
   );
 }

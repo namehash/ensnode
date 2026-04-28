@@ -1,9 +1,9 @@
 {
   "name": "@docs/ensrainbow",
   "type": "module",
-  "version": "1.9.0",
+  "version": "1.10.1",
   "license": "MIT",
-  "packageManager": "pnpm@10.28.0",
+  "packageManager": "pnpm@10.33.0",
   "private": true,
   "scripts": {
     "dev": "astro dev",

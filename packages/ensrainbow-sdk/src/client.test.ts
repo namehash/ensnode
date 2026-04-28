@@ -28,7 +28,7 @@ describe("EnsRainbowApiClient", () => {
     expect(client.getOptions()).toEqual({
       endpointUrl: new URL(DEFAULT_ENSRAINBOW_URL),
       cacheCapacity: EnsRainbowApiClient.DEFAULT_CACHE_CAPACITY,
-      labelSet: {
+      clientLabelSet: {
         labelSetId: undefined,
         labelSetVersion: undefined,
       },
@@ -45,7 +45,7 @@ describe("EnsRainbowApiClient", () => {
     expect(client.getOptions()).toEqual({
       endpointUrl: customEndpointUrl,
       cacheCapacity: 0,
-      labelSet: {
+      clientLabelSet: {
         labelSetId: undefined,
         labelSetVersion: undefined,
       },
@@ -57,7 +57,7 @@ describe("EnsRainbowApiClient", () => {
     client = new EnsRainbowApiClient({
       endpointUrl: customEndpointUrl,
       cacheCapacity: 0,
-      labelSet: {
+      clientLabelSet: {
         labelSetId: "subgraph",
         labelSetVersion: undefined,
       },
@@ -66,7 +66,7 @@ describe("EnsRainbowApiClient", () => {
     expect(client.getOptions()).toEqual({
       endpointUrl: customEndpointUrl,
       cacheCapacity: 0,
-      labelSet: {
+      clientLabelSet: {
         labelSetId: "subgraph",
         labelSetVersion: undefined,
       },
@@ -97,7 +97,7 @@ describe("EnsRainbowApiClient", () => {
         new EnsRainbowApiClient({
           endpointUrl: customEndpointUrl,
           cacheCapacity: 0,
-          labelSet: {
+          clientLabelSet: {
             labelSetId: undefined,
             labelSetVersion: 0,
           },
@@ -271,39 +271,16 @@ describe("EnsRainbowApiClient", () => {
     } satisfies EnsRainbow.HealthResponse);
   });
 
-  it("should return version information", async () => {
-    mockFetch.mockResolvedValueOnce({
-      json: () =>
-        Promise.resolve({
-          status: StatusCode.Success,
-          versionInfo: {
-            version: "1.0.0",
-            dbSchemaVersion: 1,
-            labelSet: {
-              labelSetId: "test-label-set-id",
-              highestLabelSetVersion: 123,
-            },
-          },
-        } satisfies EnsRainbow.VersionResponse),
-    });
-
-    const response = await client.version();
-
-    expect(response satisfies EnsRainbow.VersionResponse).toBeTruthy();
-    expect(response.status).toEqual(StatusCode.Success);
-    expect(typeof response.versionInfo.version === "string").toBeTruthy();
-    expect(typeof response.versionInfo.dbSchemaVersion === "number").toBeTruthy();
-  });
-
   describe("config", () => {
     it("should request /v1/config and return public config on success", async () => {
       const configData: EnsRainbow.ENSRainbowPublicConfig = {
-        version: "2.0.0",
-        labelSet: {
+        serverLabelSet: {
           labelSetId: "subgraph",
           highestLabelSetVersion: 5,
         },
-        recordsCount: 133856894,
+        versionInfo: {
+          ensRainbow: "2.0.0",
+        },
       };
 
       mockFetch.mockResolvedValueOnce({

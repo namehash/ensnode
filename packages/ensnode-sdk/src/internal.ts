@@ -12,14 +12,18 @@
  * app/package in the monorepo which requires `@ensnode/ensnode-sdk` dependency.
  */
 
-export * from "./ensapi/api/indexing-status/zod-schemas";
-export * from "./ensapi/api/name-tokens/zod-schemas";
-export * from "./ensapi/api/registrar-actions/zod-schemas";
-export * from "./ensapi/api/resolution/zod-schemas";
-export * from "./ensapi/api/shared/errors/zod-schemas";
-export * from "./ensapi/api/shared/pagination/zod-schemas";
 export * from "./ensapi/config/zod-schemas";
 export * from "./ensindexer/config/zod-schemas";
+export * from "./ensnode/api/indexing-status/zod-schemas";
+export * from "./ensnode/api/name-tokens/examples";
+export * from "./ensnode/api/name-tokens/zod-schemas";
+export * from "./ensnode/api/registrar-actions/examples";
+export * from "./ensnode/api/registrar-actions/zod-schemas";
+export * from "./ensnode/api/resolution/examples";
+export * from "./ensnode/api/resolution/zod-schemas";
+export * from "./ensnode/api/shared/errors/examples";
+export * from "./ensnode/api/shared/errors/zod-schemas";
+export * from "./ensnode/api/shared/pagination/zod-schemas";
 export * from "./omnigraph-api/example-queries";
 export * from "./registrars/zod-schemas";
 export * from "./rpc";
@@ -35,7 +39,10 @@ export * from "./shared/config/zod-schemas";
 export * from "./shared/config-templates";
 export * from "./shared/datasources-with-ensv2-contracts";
 export * from "./shared/datasources-with-resolvers";
+export * from "./shared/devnet-accounts";
+export * from "./shared/interpretation/interpret-address";
 export * from "./shared/interpretation/interpret-record-values";
+export * from "./shared/interpretation/interpret-resolver-values";
 export * from "./shared/log-level";
 export * from "./shared/protocol-acceleration/is-bridged-resolver";
 export * from "./shared/protocol-acceleration/is-ensip-19-reverse-resolver";

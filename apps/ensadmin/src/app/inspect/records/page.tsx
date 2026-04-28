@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
+import { useActiveEnsNodeStackInfo } from "@/hooks/active/use-active-ensnode-stack-info";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 import { DefaultRecordsSelection } from "@/lib/default-records-selection";
 
@@ -33,7 +33,7 @@ export default function ResolveRecordsInspector() {
   const searchParams = useSearchParams();
   const nameFromQuery = (searchParams.get("name")?.trim() || null) as Name | null;
 
-  const namespace = useActiveNamespace();
+  const { namespace } = useActiveEnsNodeStackInfo().ensIndexer;
   const exampleNames = useMemo(
     () => getNamespaceSpecificValue(namespace, EXAMPLE_NAMES),
     [namespace],

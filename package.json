@@ -2,20 +2,22 @@
   "name": "ensnode-monorepo",
   "version": "0.0.1",
   "private": true,
-  "packageManager": "pnpm@10.28.0",
+  "packageManager": "pnpm@10.33.0",
   "scripts": {
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
     "test": "vitest --silent passed-only",
     "test:integration": "vitest --config vitest.integration.config.ts --silent passed-only",
     "test:integration:ci": "pnpm -F @ensnode/integration-test-env start",
+    "audit:osv": "osv-scanner scan source --lockfile pnpm-lock.yaml",
     "typecheck": "pnpm -r --parallel --aggregate-output typecheck",
     "changeset": "changeset",
-    "changeset:next": "changeset version --snapshot next",
+    "changeset:version": "changeset version && pnpm generate:openapi",
+    "changeset:next": "changeset version --snapshot next && pnpm generate:openapi",
     "changeset-publish": "changeset publish",
     "changeset-publish:next": "changeset publish --no-git-tag --snapshot --tag next",
     "packages:prepublish": "pnpm -r prepublish",
-    "devnet": "docker compose up devnet",
+    "devnet": "docker compose -f docker/docker-compose.devnet.yml up devnet",
     "docker:build:ensnode": "pnpm run -w --parallel \"/^docker:build:.*/\"",
     "docker:build:ensindexer": "docker build -f apps/ensindexer/Dockerfile -t ghcr.io/namehash/ensnode/ensindexer:latest .",
     "docker:build:ensadmin": "docker build -f apps/ensadmin/Dockerfile -t ghcr.io/namehash/ensnode/ensadmin:latest .",
@@ -59,19 +61,16 @@
       "kysely@>=0.26.0 <0.28.14": ">=0.28.14",
       "h3@<1.15.9": ">=1.15.9",
       "yaml@>=2.0.0 <2.8.3": ">=2.8.3",
-      "picomatch@<2.3.2": ">=2.3.2",
+      "picomatch@<2.3.2": "^2.3.2",
       "picomatch@>=4.0.0 <4.0.4": ">=4.0.4",
       "smol-toml@<1.6.1": ">=1.6.1",
       "brace-expansion@>=4.0.0 <5.0.5": ">=5.0.5",
       "defu@<=6.1.4": "^6.1.5",
       "vite@>=5.0.0 <=6.4.1": "^6.4.2",
       "axios@<1.15.0": ">=1.15.0",
-      "follow-redirects@<1.16.0": "^1.16.0"
-    },
-    "auditConfig": {
-      "ignoreCves": [
-        "CVE-2026-39356"
-      ]
+      "follow-redirects@<1.16.0": "^1.16.0",
+      "dompurify@<3.4.0": "^3.4.0",
+      "protobufjs@>=7.0.0 <7.5.5": "^7.5.5"
     },
     "ignoredBuiltDependencies": [
       "bun"

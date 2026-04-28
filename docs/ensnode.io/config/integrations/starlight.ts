@@ -107,6 +107,11 @@ export function starlight(): AstroIntegration {
               collapsed: false,
               autogenerate: { directory: "ensapi/contributing" },
             },
+            {
+              label: "Reference",
+              collapsed: false,
+              autogenerate: { directory: "ensapi/reference" },
+            },
           ],
         },
         {

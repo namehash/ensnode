@@ -8,6 +8,13 @@
       "when": 1773743108514,
       "tag": "0000_cultured_captain_cross",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1776456213289,
+      "tag": "0001_enable_ext_pg_trgm",
+      "breakpoints": true
     }
   ]
 }

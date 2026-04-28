@@ -1,5 +1,9 @@
 name: "Test: ENSRainbow Test Image on Ubuntu ARM"
 
+permissions:
+  contents: read
+  packages: read
+
 on:
   workflow_dispatch:
 

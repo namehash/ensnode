@@ -1,3 +1,4 @@
+import type { NormalizedAddress } from "enssdk";
 import z from "zod/v4";
 
 import {
@@ -19,17 +20,36 @@ import {
 } from "../../shared/api/zod-schemas";
 import { ReferrerEditionMetricsTypeIds } from "../../shared/edition-metrics";
 import { ReferralProgramAwardModels } from "../../shared/rules";
+import { type AdminAction, AdminActionTypes } from "../rules";
 
 /**
- * Schema for {@link ReferralProgramEditionDisqualification}.
+ * Schema for {@link AdminActionDisqualification}.
  */
-export const makeReferralProgramEditionDisqualificationSchema = (
-  valueLabel = "ReferralProgramEditionDisqualification",
-) =>
+export const makeAdminActionDisqualificationSchema = (valueLabel = "AdminActionDisqualification") =>
   z.object({
+    actionType: z.literal(AdminActionTypes.Disqualification),
     referrer: makeNormalizedAddressSchema(`${valueLabel}.referrer`),
     reason: z.string().trim().min(1, `${valueLabel}.reason must not be empty`),
   });
+
+/**
+ * Schema for {@link AdminActionWarning}.
+ */
+export const makeAdminActionWarningSchema = (valueLabel = "AdminActionWarning") =>
+  z.object({
+    actionType: z.literal(AdminActionTypes.Warning),
+    referrer: makeNormalizedAddressSchema(`${valueLabel}.referrer`),
+    reason: z.string().trim().min(1, `${valueLabel}.reason must not be empty`),
+  });
+
+/**
+ * Schema for {@link AdminAction}.
+ */
+export const makeAdminActionSchema = (valueLabel = "AdminAction") =>
+  z.discriminatedUnion("actionType", [
+    makeAdminActionDisqualificationSchema(valueLabel),
+    makeAdminActionWarningSchema(valueLabel),
+  ]);
 
 /**
  * Schema for {@link ReferralProgramRulesRevShareCap}.
@@ -48,18 +68,16 @@ export const makeReferralProgramRulesRevShareCapSchema = (
       1,
       `${valueLabel}.maxBaseRevenueShare must be <= 1`,
     ),
-    disqualifications: z
-      .array(
-        makeReferralProgramEditionDisqualificationSchema(`${valueLabel}.disqualifications[item]`),
-      )
+    adminActions: z
+      .array(makeAdminActionSchema(`${valueLabel}.adminActions[item]`))
       // NOTE: addresses are already normalized, so string equivalence here is accurate
       .refine(
         (items) => {
-          const referrers = items.map((d) => d.referrer);
+          const referrers = items.map((a) => a.referrer);
           return new Set(referrers).size === referrers.length;
         },
         {
-          message: `${valueLabel}.disqualifications must not contain duplicate referrer addresses`,
+          message: `${valueLabel}.adminActions must not contain duplicate referrer addresses`,
         },
       )
       .default([]),
@@ -84,12 +102,7 @@ export const makeAwardedReferrerMetricsRevShareCapSchema = (
       isQualified: z.boolean(),
       uncappedAward: makePriceUsdcSchema(`${valueLabel}.uncappedAward`),
       cappedAward: makePriceUsdcSchema(`${valueLabel}.cappedAward`),
-      isAdminDisqualified: z.boolean(),
-      adminDisqualificationReason: z
-        .string()
-        .trim()
-        .min(1, `${valueLabel}.adminDisqualificationReason must not be empty`)
-        .nullable(),
+      adminAction: makeAdminActionSchema(`${valueLabel}.adminAction`).nullable(),
     })
     .refine((data) => data.cappedAward.amount <= data.uncappedAward.amount, {
       message: `${valueLabel}.cappedAward must be <= ${valueLabel}.uncappedAward`,
@@ -97,19 +110,20 @@ export const makeAwardedReferrerMetricsRevShareCapSchema = (
     })
     .refine(
       (data) =>
-        !data.isAdminDisqualified || (data.isQualified === false && data.cappedAward.amount === 0n),
+        data.adminAction?.actionType !== AdminActionTypes.Disqualification ||
+        (data.isQualified === false && data.cappedAward.amount === 0n),
       {
-        message: `When ${valueLabel}.isAdminDisqualified is true, isQualified must be false and cappedAward.amount must be 0`,
-        path: ["isAdminDisqualified"],
+        message: `When ${valueLabel}.adminAction.actionType is Disqualification, isQualified must be false and cappedAward.amount must be 0`,
+        path: ["adminAction"],
       },
     )
-    .refine((data) => data.isAdminDisqualified === (data.adminDisqualificationReason !== null), {
-      message: `${valueLabel}.adminDisqualificationReason must be non-null iff isAdminDisqualified is true`,
-      path: ["adminDisqualificationReason"],
-    })
     .refine((data) => data.isQualified || data.cappedAward.amount === 0n, {
       message: `${valueLabel}.cappedAward must be 0 when isQualified is false`,
       path: ["cappedAward"],
+    })
+    .refine((data) => data.adminAction === null || data.adminAction.referrer === data.referrer, {
+      message: `${valueLabel}.adminAction.referrer must match ${valueLabel}.referrer`,
+      path: ["adminAction", "referrer"],
     });
 
 /**
@@ -131,12 +145,7 @@ export const makeUnrankedReferrerMetricsRevShareCapSchema = (
       isQualified: z.literal(false),
       uncappedAward: makePriceUsdcSchema(`${valueLabel}.uncappedAward`),
       cappedAward: makePriceUsdcSchema(`${valueLabel}.cappedAward`),
-      isAdminDisqualified: z.boolean(),
-      adminDisqualificationReason: z
-        .string()
-        .trim()
-        .min(1, `${valueLabel}.adminDisqualificationReason must not be empty`)
-        .nullable(),
+      adminAction: makeAdminActionSchema(`${valueLabel}.adminAction`).nullable(),
     })
     .refine((data) => data.totalReferrals === 0, {
       message: `${valueLabel}.totalReferrals must be 0 for unranked referrers`,
@@ -162,9 +171,9 @@ export const makeUnrankedReferrerMetricsRevShareCapSchema = (
       message: `${valueLabel}.cappedAward must be 0 for unranked referrers`,
       path: ["cappedAward"],
     })
-    .refine((data) => data.isAdminDisqualified === (data.adminDisqualificationReason !== null), {
-      message: `${valueLabel}.adminDisqualificationReason must be non-null iff isAdminDisqualified is true`,
-      path: ["adminDisqualificationReason"],
+    .refine((data) => data.adminAction === null || data.adminAction.referrer === data.referrer, {
+      message: `${valueLabel}.adminAction.referrer must match ${valueLabel}.referrer`,
+      path: ["adminAction", "referrer"],
     });
 
 /**
@@ -183,6 +192,43 @@ export const makeAggregatedReferrerMetricsRevShareCapSchema = (
     ),
     awardPoolRemaining: makePriceUsdcSchema(`${valueLabel}.awardPoolRemaining`),
   });
+
+/**
+ * Adds {@link z.RefinementCtx} issues when `metricsAdminAction` does not match the entry for
+ * `referrer` in `rulesAdminActions`.
+ */
+const addAdminActionConsistencyIssues = (
+  ctx: z.RefinementCtx,
+  metricsAdminAction: AdminAction | null,
+  referrer: NormalizedAddress,
+  rulesAdminActions: AdminAction[],
+  path: (string | number)[],
+): void => {
+  const expected = rulesAdminActions.find((a) => a.referrer === referrer) ?? null;
+
+  if (expected === null && metricsAdminAction !== null) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `adminAction expected null, got actionType="${metricsAdminAction.actionType}"`,
+      path,
+    });
+    return;
+  }
+
+  if (
+    expected !== null &&
+    (metricsAdminAction === null ||
+      metricsAdminAction.actionType !== expected.actionType ||
+      metricsAdminAction.referrer !== expected.referrer ||
+      metricsAdminAction.reason !== expected.reason)
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `adminAction does not match the corresponding entry in rules.adminActions`,
+      path,
+    });
+  }
+};
 
 /**
  * Schema for {@link ReferrerEditionMetricsRankedRevShareCap}.
@@ -209,6 +255,15 @@ export const makeReferrerEditionMetricsRankedRevShareCapSchema = (
     .refine((data) => data.referrer.cappedAward.amount <= data.rules.awardPool.amount, {
       message: `${valueLabel}.referrer.cappedAward must be <= ${valueLabel}.rules.awardPool`,
       path: ["referrer", "cappedAward", "amount"],
+    })
+    .superRefine((data, ctx) => {
+      addAdminActionConsistencyIssues(
+        ctx,
+        data.referrer.adminAction,
+        data.referrer.referrer,
+        data.rules.adminActions,
+        ["referrer", "adminAction"],
+      );
     });
 
 /**
@@ -232,6 +287,15 @@ export const makeReferrerEditionMetricsUnrankedRevShareCapSchema = (
     .refine((data) => data.awardModel === data.rules.awardModel, {
       message: `${valueLabel}.awardModel must equal ${valueLabel}.rules.awardModel`,
       path: ["awardModel"],
+    })
+    .superRefine((data, ctx) => {
+      addAdminActionConsistencyIssues(
+        ctx,
+        data.referrer.adminAction,
+        data.referrer.referrer,
+        data.rules.adminActions,
+        ["referrer", "adminAction"],
+      );
     });
 
 /**
@@ -293,5 +357,12 @@ export const makeReferrerLeaderboardPageRevShareCapSchema = (
             path: ["referrers", index, "cappedAward", "amount"],
           });
         }
+        addAdminActionConsistencyIssues(
+          ctx,
+          referrer.adminAction,
+          referrer.referrer,
+          data.rules.adminActions,
+          ["referrers", index, "adminAction"],
+        );
       });
     });
