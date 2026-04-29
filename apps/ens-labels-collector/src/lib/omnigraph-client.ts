@@ -35,9 +35,10 @@ function getClient() {
 /**
  * Looks up Labels by a batch of LabelHashes against ENSNode's Omnigraph.
  *
- * The Omnigraph resolver enforces a hard cap (see `LABELS_BY_HASHES_MAX` in
- * `apps/ensapi/src/omnigraph-api/schema/label.ts`); the collector should pre-cap to the same
- * limit to fail fast on the client side before making the request.
+ * The Omnigraph resolver enforces a hard cap on `hashes.length` (see `LABELS_BY_HASHES_MAX`
+ * in `apps/ensapi/src/omnigraph-api/schema/label.ts`). The submissions handler caps raw
+ * labels per request via `MAX_LABELS_PER_SUBMISSION`, sized so that the worst-case expansion
+ * (each label producing both a raw and a normalized hash) stays within the resolver cap.
  */
 export async function lookupLabels(hashes: readonly string[]): Promise<LabelHit[]> {
   if (hashes.length === 0) return [];

@@ -695,7 +695,7 @@ type Label {
 """Look up Labels by a batch of LabelHashes."""
 input LabelsByHashesInput {
   """
-  LabelHashes to look up. Up to 100 hashes per request. Absent labels are simply omitted from the result.
+  LabelHashes to look up. Up to 200 hashes per request. Absent labels are simply omitted from the result.
   """
   hashes: [Hex!]!
 }

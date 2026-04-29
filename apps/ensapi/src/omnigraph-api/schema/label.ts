@@ -39,7 +39,7 @@ LabelRef.implement({
  * Caps the resolver's `inArray` query so a single GraphQL request cannot enumerate
  * the entire `label` table.
  */
-export const LABELS_BY_HASHES_MAX = 100;
+export const LABELS_BY_HASHES_MAX = 200;
 
 export const LabelsByHashesInput = builder.inputType("LabelsByHashesInput", {
   description: "Look up Labels by a batch of LabelHashes.",

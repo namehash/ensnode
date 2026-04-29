@@ -13,15 +13,15 @@ import {
 import { lookupLabels } from "@/lib/omnigraph-client";
 
 /**
- * Mirror of `LABELS_BY_HASHES_MAX` in `apps/ensapi/src/omnigraph-api/schema/label.ts`.
+ * Maximum number of raw labels accepted per `POST /api/submissions` request.
  *
- * The collector pre-caps to the same limit so requests fail fast with a clear 400 instead of
- * trekking to ENSApi only to be rejected.
- *
- * Each submitted label can produce up to 2 hashes (raw + normalized variant), so we accept at
- * most `LABELS_BY_HASHES_MAX / 2` raw labels per request.
+ * This is independent of how many labelhashes each label expands into (1 if already
+ * normalized / unnormalizable, 2 if it has a distinct normalized form). The resolver
+ * cap (`LABELS_BY_HASHES_MAX = 200` in `apps/ensapi/src/omnigraph-api/schema/label.ts`)
+ * is sized to comfortably accommodate the worst case (2 * `MAX_LABELS_PER_SUBMISSION`)
+ * so callers always get the same per-submission limit regardless of normalization.
  */
-export const MAX_LABELS_PER_SUBMISSION = 50;
+export const MAX_LABELS_PER_SUBMISSION = 100;
 
 const SubmissionsRequestSchema = z.object({
   labels: z.array(z.string().min(1).max(1000)).min(1).max(MAX_LABELS_PER_SUBMISSION),

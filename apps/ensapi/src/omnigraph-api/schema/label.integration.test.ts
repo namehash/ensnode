@@ -86,7 +86,7 @@ describe("Query.labels", () => {
   it("rejects requests over the maximum allowed hash count", async () => {
     // generate (LABELS_BY_HASHES_MAX + 1) distinct labelhashes deterministically
     const hashes: LabelHash[] = [];
-    for (let i = 0; i <= 100; i++) {
+    for (let i = 0; i <= 200; i++) {
       const hex = i.toString(16).padStart(64, "0");
       hashes.push(`0x${hex}` as LabelHash);
     }

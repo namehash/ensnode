@@ -182,7 +182,7 @@ describe("POST /api/submissions", () => {
   });
 
   it("rejects oversized batches", async () => {
-    const labels = Array.from({ length: 100 }, (_, i) => `label-${i}`);
+    const labels = Array.from({ length: 101 }, (_, i) => `label-${i}`);
 
     const app = makeApp();
     const res = await app.request("/api/submissions", {
