@@ -178,6 +178,9 @@ importers:
 
   apps/ens-labels-collector:
     dependencies:
+      '@ensnode/ensnode-sdk':
+        specifier: workspace:*
+        version: link:../../packages/ensnode-sdk
       '@hono/node-server':
         specifier: 'catalog:'
         version: 1.19.14(hono@4.12.14)
