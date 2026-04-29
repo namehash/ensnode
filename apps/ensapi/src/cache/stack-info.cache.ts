@@ -41,15 +41,6 @@ export type EnsNodeStackInfoCache = SWRCache<EnsNodeStackInfo>;
  */
 export const stackInfoCache = lazyProxy<EnsNodeStackInfoCache>(
   () =>
-    /**
-     * Cache for ENSNode stack info
-     *
-     * Once initialized successfully, this cache will always return
-     * the same {@link EnsNodeStackInfo} for the lifecycle of the ENSApi instance.
-     *
-     * If initialization fails, it will keep retrying on access until it succeeds,
-     * which is desirable because the {@link EnsNodeStackInfo} is critical for the functioning of the application and we want to recover from transient initialization failures without requiring a restart.
-     */
     new SWRCache<EnsNodeStackInfo>({
       fn: async function loadEnsNodeStackInfo() {
         try {

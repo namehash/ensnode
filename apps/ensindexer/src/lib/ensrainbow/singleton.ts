@@ -119,20 +119,30 @@ export function waitForEnsRainbowToBeReady(): Promise<void> {
     ensRainbowInstance: ensRainbowUrl.href,
   });
 
-  waitForEnsRainbowToBeReadyPromise = pRetry(async () => ensRainbowClient.health(), {
-    retries: 60, // This allows for a total of over 1 hour of retries with 1 minute between attempts.
-    minTimeout: secondsToMilliseconds(60),
-    maxTimeout: secondsToMilliseconds(60),
-    onFailedAttempt: ({ attemptNumber, retriesLeft }) => {
-      logger.warn({
-        msg: `ENSRainbow health check failed`,
-        attempt: attemptNumber,
-        retriesLeft,
-        ensRainbowInstance: ensRainbowUrl.href,
-        advice: `This might be due to ENSRainbow having a cold start, which can take 30+ minutes.`,
-      });
+  waitForEnsRainbowToBeReadyPromise = pRetry(
+    // TODO: replace this count check with an explicit `ready()` method in ENSRainbow Client.
+    async () => {
+      const { count } = await ensRainbowClient.count();
+
+      if (count === 0) {
+        throw new Error("ENSRainbow instance is not ready yet.");
+      }
     },
-  })
+    {
+      retries: 60, // This allows for a total of over 1 hour of retries with 1 minute between attempts.
+      minTimeout: secondsToMilliseconds(60),
+      maxTimeout: secondsToMilliseconds(60),
+      onFailedAttempt: ({ attemptNumber, retriesLeft }) => {
+        logger.warn({
+          msg: `ENSRainbow readiness check failed`,
+          attempt: attemptNumber,
+          retriesLeft,
+          ensRainbowInstance: ensRainbowUrl.href,
+          advice: `This might be due to ENSRainbow having a cold start, which can take 30+ minutes.`,
+        });
+      },
+    },
+  )
     .then(() => {
       logger.info({
         msg: `ENSRainbow instance is ready`,
@@ -141,7 +151,7 @@ export function waitForEnsRainbowToBeReady(): Promise<void> {
     })
     .catch((error) => {
       logger.error({
-        msg: `ENSRainbow health check failed after multiple attempts`,
+        msg: `ENSRainbow readiness check failed after multiple attempts`,
         error,
         ensRainbowInstance: ensRainbowUrl.href,
       });
