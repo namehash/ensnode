@@ -1,7 +1,7 @@
 services:
   ensadmin:
     container_name: ensadmin
-    image: ghcr.io/namehash/ensnode/ensadmin:latest
+    image: ghcr.io/namehash/ensnode/ensadmin:${ENSNODE_VERSION:-1.10.1}
     build:
       dockerfile: ./apps/ensadmin/Dockerfile
       context: ../..

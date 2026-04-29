@@ -5,3 +5,4 @@ export {
 } from "./client";
 export * from "./client-error";
 export * from "./deployments";
+export * from "./metadata";
