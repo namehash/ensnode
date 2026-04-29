@@ -16,6 +16,16 @@ export const yoga = createYoga({
   context,
   // CORS is handled by the Hono middleware in app.ts
   cors: false,
+  maskedErrors:
+    process.env.NODE_ENV === "production"
+      ? true
+      : {
+          maskError(error: unknown) {
+            console.error(error);
+            if (error instanceof Error) return error;
+            return new Error("Internal Server Error");
+          },
+        },
   graphiql: {
     defaultQuery: `query DomainsByOwner {
   account(by: { address: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" }) {
