@@ -6,7 +6,7 @@
 "ensapi": minor
 ---
 
-Introduced `IndexingMetadataContext` data model which a single record type in ENSNode Metadata table replacing three separate record types (`ensdb_version`, `ensindexer_public_config`, `ensindexer_indexing_status`). Also, consolidated startup  init into `initIndexingOnchainEvents()` for reliable execution on every ENSIndexer startup.
+Introduced `IndexingMetadataContext` data model, a single record type in ENSNode Metadata table replacing three separate record types (`ensdb_version`, `ensindexer_public_config`, `ensindexer_indexing_status`). Also, consolidated startup  init into `initIndexingOnchainEvents()` for reliable execution on every ENSIndexer startup.
 
 **ensnode-sdk**: `EnsIndexerStackInfo` added as base type, `EnsNodeStackInfo` refactored to extend it.
 
