@@ -25,6 +25,7 @@ yarn add @ensnode/ensdb-sdk
 
 ```typescript
 import { EnsDbReader, IndexingMetadataContextStatusCodes } from '@ensnode/ensdb-sdk';
+import { eq } from 'drizzle-orm';
 
 // Connect to a specific ENSDb instance by providing its connection string and
 // the ENSIndexer Schema Name you want to query
