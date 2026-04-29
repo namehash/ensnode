@@ -1,3 +1,11 @@
+// Keeps Docker compose service defaults aligned with the current ENSNode release version.
+// Responsibility:
+// - update `${ENSNODE_VERSION:-...}` fallbacks in docker service definitions
+// - validate that the provided version looks like SemVer before writing files
+
+// Usage:
+// node ./scripts/sync-docker-services-tags.mjs 1.10.1-beta.1
+
 import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
@@ -18,7 +26,7 @@ function validateVersion(version) {
   }
 }
 
-async function updateServiceDefaultTag(version) {
+async function updateServiceDefaultVersion(version) {
   const testPattern = /\$\{ENSNODE_VERSION:-[^}]+\}/;
   const replacePattern = /\$\{ENSNODE_VERSION:-[^}]+\}/g;
   const replacement = `\${ENSNODE_VERSION:-${version}}`;
@@ -49,7 +57,7 @@ async function main() {
   }
 
   validateVersion(versionFromArg);
-  await updateServiceDefaultTag(versionFromArg);
+  await updateServiceDefaultVersion(versionFromArg);
 }
 
 main().catch((error) => {
