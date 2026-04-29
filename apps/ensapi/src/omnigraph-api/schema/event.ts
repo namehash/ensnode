@@ -221,5 +221,10 @@ export const AccountEventsWhereInput = builder.inputType("AccountEventsWhereInpu
       type: "BigInt",
       description: "Filter to events at or before this UnixTimestamp.",
     }),
+    from: t.field({
+      type: "Address",
+      description:
+        "Filter to events whose `tx.from` matches. Not HCA-aware — the Account's HCA-aware filter is applied via `sender = Account.id`.",
+    }),
   }),
 });

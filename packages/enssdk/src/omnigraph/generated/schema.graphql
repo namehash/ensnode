@@ -72,6 +72,11 @@ Filter conditions for Account.events (where `sender` is implied by the Account).
 """
 input AccountEventsWhereInput {
   """
+  Filter to events whose `tx.from` matches. Not HCA-aware — the Account's HCA-aware filter is applied via `sender = Account.id`.
+  """
+  from: Address
+
+  """
   Filter to events whose selector (event signature) is one of the provided values.
   """
   selector_in: [Hex!]

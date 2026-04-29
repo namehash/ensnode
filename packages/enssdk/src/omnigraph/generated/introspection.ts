@@ -487,6 +487,13 @@ const introspection = {
         "name": "AccountEventsWhereInput",
         "inputFields": [
           {
+            "name": "from",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Address"
+            }
+          },
+          {
             "name": "selector_in",
             "type": {
               "kind": "LIST",
