@@ -1,18 +1,18 @@
 ---
-title: ENSNode Reference Implementation
-description: Overview of ENSNode, the reference implementation of the ENSDb standard, including its components and architecture.
+title: Reference Implementations
+description: A directory of reference implementation of the ENSDb standard.
 sidebar:
   label: ENSNode Reference Implementation
   order: 1
 ---
 import { Aside } from '@astrojs/starlight/components';
 
-ENSNode is the reference implementation of the [ENSDb standard](/ensdb/concepts/glossary#ensdb-standard), providing a complete ecosystem of tools and services for building with ENSDb.
+ENSNode includes initial reference implementations of the [ENSDb standard](/ensdb/concepts/glossary#ensdb-standard). This includes ENSIndexer as a reference ENSDb writer and ENSApi as a reference ENSDb reader. These are just a few examples of the ecosystem of tools and services that are possible when you build with ENSDb.
 
-The core implementation consists of three main components:
-- An [ENSDb instance](/ensdb/concepts/glossary#ensdb-instance) — The PostgreSQL database following the ENSDb standard.
-- An [ENSIndexer instance](/ensdb/concepts/glossary#ensindexer-instance) — The reference ENSDb Writer implementation that writes data into the ENSDb instance.
-- An [ENSApi instance](/ensdb/concepts/glossary#ensapi-instance) — The reference ENSDb Reader implementation that serves GraphQL and REST APIs.
+This initial reference implementation consists of three main components:
+- An [ENSDb instance](/ensdb/concepts/glossary#ensdb-instance) — A PostgreSQL database following the ENSDb standard.
+- An [ENSIndexer instance](/ensdb/concepts/glossary#ensindexer-instance) — A reference ENSDb Writer implementation that writes data into the ENSDb instance.
+- An [ENSApi instance](/ensdb/concepts/glossary#ensapi-instance) — A reference ENSDb Reader implementation that serves GraphQL and REST APIs.
 
 ```mermaid
 flowchart LR

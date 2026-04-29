@@ -18,17 +18,17 @@ Get the whole, live onchain state of ENS in your database.
 
 ENSDb is an open standard for bi-directional ENS integration. It defines a carefully crafted set of database schema designs, rules, and constraints for storing the ENS onchain state in a PostgreSQL database — making the data accessible from any programming language.
 
-The [ENSDb standard](/ensdb/concepts/glossary#ensdb-standard) is implementation-agnostic, so you have two options: implement your own [ENSDb Writer](/ensdb/concepts/glossary#ensdb-writer) and [ENSDb Reader](/ensdb/concepts/glossary#ensdb-reader) in any language, or use the reference implementations provided by ENSNode — [ENSIndexer](/ensindexer/) as the ENSDb Writer and [ENSApi](/ensapi/) as the ENSDb Reader.
+The [ENSDb standard](/ensdb/concepts/glossary#ensdb-standard) is implementation-agnostic, so you have options: implement your own [ENSDb Writer](/ensdb/concepts/glossary#ensdb-writer) or [ENSDb Reader](/ensdb/concepts/glossary#ensdb-reader) in any language, or use the initial reference implementations provided by ENSNode — [ENSIndexer](/ensindexer/) as an ENSDb Writer and [ENSApi](/ensapi/) as an ENSDb Reader.
 
 <Aside type="tip" title="Build in Any Language">
-Each ENSDb instance is a standard PostgreSQL database, so to interact with it, you can use _any programming language_ that has a PostgreSQL driver. Zig, Rust, Go, Python, JavaScript, Ruby, Java, C# — the choice is yours.
+Each ENSDb instance runs in a standard PostgreSQL database, so to interact with it, you can use _any programming language_ that has a PostgreSQL driver. Zig, Rust, Go, Python, JavaScript, Ruby, Java, C# — the choice is yours.
 </Aside>
 
 ## What You Get
 
 ### Complete ENS State
 
-An **ENSDb instance** contains the **onchain state of ENS**, including:
+An **ENSDb instance** contains the **live onchain state of ENS**, including:
 
 - Domains (ENSv1 and ENSv2)
 - Registrations and renewals
@@ -68,7 +68,7 @@ Build reactive systems that respond to ENS state changes. Respond to registratio
 Feed ENS data into your existing data infrastructure. Sync to data warehouses, trigger webhooks, populate search indexes.
 </Card>
 <Card title="AI Agents" icon="seti:bicep">
-Build AI agents that can query the ENS state and perform actions based on that data.
+Build AI agents that can query ENS state and perform actions based on that data.
 </Card>
 </CardGrid>
 
