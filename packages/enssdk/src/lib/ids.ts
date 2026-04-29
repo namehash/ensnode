@@ -37,6 +37,11 @@ import type {
  *
  * Move back to CAIP-style ids once Ponder's matcher supports parsing CAIP-shaped composite
  * primary keys directly. This is a temporary shape, not the long-term one.
+ *
+ * Note that because we key ENSv2 Domains by StorageId (necessary for stable identifier over time,
+ * since its backing tokenId can change), which is _derived_ from the emitted arguments, ENSv2 Domains
+ * aren't currently prefetchable, and likely won't be without a feature from Ponder that allows
+ * consumers to specify the prefetch key generation per-entity.
  */
 const _stringifyAccountId = ({ chainId, address }: AccountId) => [chainId, address].join("-");
 
