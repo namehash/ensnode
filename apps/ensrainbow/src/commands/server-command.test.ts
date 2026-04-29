@@ -1,4 +1,6 @@
 import { promises as fs } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 import { serve } from "@hono/node-server";
 import { asLiteralLabel, labelhashLiteralLabel } from "enssdk";
@@ -255,8 +257,9 @@ describe("Server Command Tests", () => {
     });
 
     it("After attachDb, /ready returns 200 and /v1/heal serves labels", async () => {
-      const attachDataDir = "test-data-server-pending-attach";
-      await fs.rm(attachDataDir, { recursive: true, force: true });
+      const attachDataDir = await fs.mkdtemp(
+        join(tmpdir(), "ensrainbow-test-server-pending-attach-"),
+      );
 
       const attachDb = await ENSRainbowDB.create(attachDataDir);
       try {

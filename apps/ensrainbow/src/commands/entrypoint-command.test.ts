@@ -1,7 +1,8 @@
 import { EventEmitter } from "node:events";
 import { existsSync } from "node:fs";
-import { mkdir, rm, writeFile } from "node:fs/promises";
-import { dirname, join, resolve } from "node:path";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { dirname, join } from "node:path";
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -60,19 +61,19 @@ vi.mock("node:child_process", () => {
  * here (it requires network + a labelset server).
  */
 describe("entrypointCommand (existing DB on disk)", () => {
-  const testDataDir = resolve(process.cwd(), "test-data-entrypoint");
   const labelSetId = buildLabelSetId("entrypoint-test");
   const labelSetVersion = buildLabelSetVersion(0);
-  const dbSubdir = join(testDataDir, `data-${labelSetId}_${labelSetVersion}`);
-  const markerFile = join(testDataDir, DB_READY_MARKER_FILENAME);
   const port = 3226;
   const endpoint = `http://localhost:${port}`;
 
+  let testDataDir: string;
+  let markerFile: string;
   let handle: EntrypointCommandHandle | undefined;
 
   beforeEach(async () => {
-    await rm(testDataDir, { recursive: true, force: true });
-    await mkdir(testDataDir, { recursive: true });
+    testDataDir = await mkdtemp(join(tmpdir(), "ensrainbow-test-entrypoint-"));
+    const dbSubdir = join(testDataDir, `data-${labelSetId}_${labelSetVersion}`);
+    markerFile = join(testDataDir, DB_READY_MARKER_FILENAME);
 
     // Seed a valid-looking database and marker so the entrypoint skips the download step.
     const db = await ENSRainbowDB.create(dbSubdir);
@@ -130,16 +131,16 @@ describe("entrypointCommand (existing DB on disk)", () => {
 });
 
 describe("entrypointCommand (signal handlers)", () => {
-  const testDataDir = resolve(process.cwd(), "test-data-entrypoint-signals");
   const labelSetId = buildLabelSetId("entrypoint-signal-test");
   const labelSetVersion = buildLabelSetVersion(0);
-  const dbSubdir = join(testDataDir, `data-${labelSetId}_${labelSetVersion}`);
-  const markerFile = join(testDataDir, DB_READY_MARKER_FILENAME);
   const port = 3227;
 
+  let testDataDir: string;
+
   beforeEach(async () => {
-    await rm(testDataDir, { recursive: true, force: true });
-    await mkdir(testDataDir, { recursive: true });
+    testDataDir = await mkdtemp(join(tmpdir(), "ensrainbow-test-entrypoint-signals-"));
+    const dbSubdir = join(testDataDir, `data-${labelSetId}_${labelSetVersion}`);
+    const markerFile = join(testDataDir, DB_READY_MARKER_FILENAME);
 
     const db = await ENSRainbowDB.create(dbSubdir);
     await db.setPrecalculatedRainbowRecordCount(0);
@@ -217,16 +218,18 @@ describe("ENSRainbowServer (pending state smoke test)", () => {
 });
 
 describe("downloadAndExtractDatabase (stale dbSubdir cleanup)", () => {
-  const testDataDir = resolve(process.cwd(), "test-data-entrypoint-extract");
-  const downloadTempDir = join(testDataDir, ".download-temp");
   const dbSchemaVersion = DB_SCHEMA_VERSION as DbSchemaVersion;
   const labelSetId = buildLabelSetId("entrypoint-extract-test");
   const labelSetVersion = buildLabelSetVersion(0);
-  const dbSubdir = join(testDataDir, `data-${labelSetId}_${labelSetVersion}`);
+
+  let testDataDir: string;
+  let downloadTempDir: string;
+  let dbSubdir: string;
 
   beforeEach(async () => {
-    await rm(testDataDir, { recursive: true, force: true });
-    await mkdir(testDataDir, { recursive: true });
+    testDataDir = await mkdtemp(join(tmpdir(), "ensrainbow-test-entrypoint-extract-"));
+    downloadTempDir = join(testDataDir, ".download-temp");
+    dbSubdir = join(testDataDir, `data-${labelSetId}_${labelSetVersion}`);
     await mkdir(dbSubdir, { recursive: true });
     await writeFile(join(dbSubdir, "STALE_FILE"), "stale");
   });
