@@ -23,6 +23,28 @@ import { lookupLabels } from "@/lib/omnigraph-client";
  */
 export const MAX_LABELS_PER_SUBMISSION = 100;
 
+/**
+ * Hard upper bound on how long a single `POST /api/submissions` will wait on the
+ * Omnigraph labels lookup before failing the request. Prevents a stalled upstream
+ * from holding handler resources indefinitely.
+ */
+export const OMNIGRAPH_LOOKUP_TIMEOUT_MS = 10_000;
+
+/**
+ * Races `promise` against a `setTimeout`-backed timeout, rejecting with `Error(message)` on
+ * expiry. The underlying promise is NOT cancelled (the Omnigraph SDK does not currently expose
+ * an `AbortSignal`); we simply stop waiting on it. The unhandled resolution is harmless.
+ */
+function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(message)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => {
+    if (timer !== undefined) clearTimeout(timer);
+  });
+}
+
 const SubmissionsRequestSchema = z.object({
   labels: z.array(z.string().min(1).max(1000)).min(1).max(MAX_LABELS_PER_SUBMISSION),
   callerAddress: z
@@ -107,7 +129,11 @@ export async function submissionsHandler(c: Context) {
   const hashed = labels.map(hashLabel);
   const hashes = collectLookupHashes(hashed);
 
-  const hits = await lookupLabels(hashes);
+  const hits = await withTimeout(
+    lookupLabels(hashes),
+    OMNIGRAPH_LOOKUP_TIMEOUT_MS,
+    `Omnigraph labels lookup timed out after ${OMNIGRAPH_LOOKUP_TIMEOUT_MS}ms`,
+  );
   const classifications = classifySubmissions(hashed, hits);
   const results = classifications.map(toResultItem);
 

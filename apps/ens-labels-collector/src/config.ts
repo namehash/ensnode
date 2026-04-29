@@ -1,11 +1,14 @@
 import { z } from "zod";
 
+import { OptionalPortNumberSchema } from "@ensnode/ensnode-sdk/internal";
+
+/**
+ * Default port for the ens-labels-collector HTTP server. Used when `PORT` env var is unset.
+ */
+export const ENS_LABELS_COLLECTOR_DEFAULT_PORT = 4444;
+
 const ConfigSchema = z.object({
-  PORT: z
-    .string()
-    .optional()
-    .transform((value) => (value === undefined ? 4444 : Number.parseInt(value, 10)))
-    .pipe(z.number().int().min(1).max(65535)),
+  PORT: OptionalPortNumberSchema.default(ENS_LABELS_COLLECTOR_DEFAULT_PORT),
   ENSNODE_URL: z.string().url(),
 });
 

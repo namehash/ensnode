@@ -6,7 +6,7 @@ import {
   labelhashLiteralLabel,
 } from "enssdk";
 import { Hono } from "hono";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/omnigraph-client", () => ({
   lookupLabels: vi.fn(),
@@ -35,6 +35,10 @@ describe("POST /api/submissions", () => {
   beforeEach(() => {
     mockedLookup.mockReset();
     consoleSpy.mockClear();
+  });
+
+  afterAll(() => {
+    consoleSpy.mockRestore();
   });
 
   it("400s on malformed JSON", async () => {

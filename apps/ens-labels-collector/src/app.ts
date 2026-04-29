@@ -14,7 +14,8 @@ app.notFound((c) => errorResponse(c, { message: "Not Found", status: 404 }));
 
 app.onError((error, c) => {
   console.error("[ens-labels-collector] unhandled error", error);
-  return errorResponse(c, { error });
+  // Do not leak the underlying error message to clients; respond with a generic 500.
+  return errorResponse(c, { message: "Internal Server Error", status: 500 });
 });
 
 export default app;

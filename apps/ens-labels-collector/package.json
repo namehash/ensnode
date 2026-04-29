@@ -20,6 +20,7 @@
     "typecheck": "tsgo --noEmit"
   },
   "dependencies": {
+    "@ensnode/ensnode-sdk": "workspace:*",
     "@hono/node-server": "catalog:",
     "enssdk": "workspace:*",
     "graphql": "^16.11.0",

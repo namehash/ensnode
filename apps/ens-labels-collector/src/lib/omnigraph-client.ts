@@ -1,5 +1,6 @@
 import { getConfig } from "@/config";
 
+import type { LabelHash } from "enssdk";
 import { createEnsNodeClient } from "enssdk/core";
 import { graphql, omnigraph } from "enssdk/omnigraph";
 
@@ -40,12 +41,14 @@ function getClient() {
  * labels per request via `MAX_LABELS_PER_SUBMISSION`, sized so that the worst-case expansion
  * (each label producing both a raw and a normalized hash) stays within the resolver cap.
  */
-export async function lookupLabels(hashes: readonly string[]): Promise<LabelHit[]> {
+export async function lookupLabels(hashes: readonly LabelHash[]): Promise<LabelHit[]> {
   if (hashes.length === 0) return [];
 
   const result = await getClient().omnigraph.query({
     query: LabelsByHashes,
-    variables: { hashes: hashes as `0x${string}`[] },
+    // The generated `LabelsByHashes` document types `hashes` as a mutable `Hex[]`, so we copy
+    // the readonly input into a fresh mutable array. No runtime cost beyond an `Array.from`.
+    variables: { hashes: [...hashes] },
   });
 
   if (result.errors && result.errors.length > 0) {
@@ -54,7 +57,7 @@ export async function lookupLabels(hashes: readonly string[]): Promise<LabelHit[
     );
   }
 
-  return (result.data?.labels ?? []) as LabelHit[];
+  return result.data?.labels ?? [];
 }
 
 /**
