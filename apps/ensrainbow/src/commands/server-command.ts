@@ -31,7 +31,11 @@ export async function serverCommand(options: ServerCommandOptions): Promise<void
     console.log("ENSRainbow public config:");
     console.log(stringifyConfig(publicConfig, { pretty: true }));
 
-    const app = createApi(ensRainbowServer, () => publicConfig);
+    const app = createApi(
+      ensRainbowServer,
+      () => publicConfig,
+      () => dbConfig,
+    );
 
     const httpServer = serve({
       fetch: app.fetch,

@@ -100,7 +100,7 @@ describe("config (with base env)", () => {
       vi.stubEnv("LABEL_SET_ID", "subgraph");
       const newConfig = await getConfig();
 
-      expect(newConfig.labelSet.labelSetId).toBe("subgraph");
+      expect(newConfig.clientLabelSet.labelSetId).toBe("subgraph");
       expect(newConfig).not.toBe(initialConfig);
     });
   });
@@ -566,12 +566,12 @@ describe("config (with base env)", () => {
     });
   });
 
-  describe(".labelSet", () => {
-    it("returns the labelSet configuration if both LABEL_SET_ID and LABEL_SET_VERSION are valid", async () => {
+  describe(".clientLabelSet", () => {
+    it("returns the clientLabelSet configuration if both LABEL_SET_ID and LABEL_SET_VERSION are valid", async () => {
       vi.stubEnv("LABEL_SET_ID", "subgraph");
       vi.stubEnv("LABEL_SET_VERSION", "5");
       const config = await getConfig();
-      expect(config.labelSet).toEqual({
+      expect(config.clientLabelSet).toEqual({
         labelSetId: "subgraph",
         labelSetVersion: 5,
       });
@@ -587,7 +587,7 @@ describe("config (with base env)", () => {
         vi.stubEnv("LABEL_SET_VERSION", undefined);
 
         await expect(getConfig()).resolves.toMatchObject({
-          labelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
+          clientLabelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
         });
       });
     });
@@ -602,7 +602,7 @@ describe("config (with base env)", () => {
         vi.stubEnv("LABEL_SET_VERSION", undefined);
 
         await expect(getConfig()).resolves.toMatchObject({
-          labelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
+          clientLabelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
         });
       });
     });
@@ -635,7 +635,7 @@ describe("config (with base env)", () => {
     it("accepts valid LABEL_SET_ID with hyphens", async () => {
       vi.stubEnv("LABEL_SET_ID", "ens-test-env");
       const config = await getConfig();
-      expect(config.labelSet.labelSetId).toBe("ens-test-env");
+      expect(config.clientLabelSet.labelSetId).toBe("ens-test-env");
     });
 
     it("throws an error when LABEL_SET_VERSION is negative", async () => {
@@ -656,7 +656,7 @@ describe("config (with base env)", () => {
     it("accepts zero as a valid LABEL_SET_VERSION", async () => {
       vi.stubEnv("LABEL_SET_VERSION", "0");
       const config = await getConfig();
-      expect(config.labelSet.labelSetVersion).toBe(0);
+      expect(config.clientLabelSet.labelSetVersion).toBe(0);
     });
   });
 });
@@ -848,7 +848,7 @@ describe("config (minimal base env)", () => {
       stubEnv({ SUBGRAPH_COMPAT: "true" });
     });
 
-    it("ens-test-env namespace/labelset is subgraph-compatible", async () => {
+    it("ens-test-env namespace/clientLabelSet is subgraph-compatible", async () => {
       stubEnv({
         NAMESPACE: "ens-test-env",
         LABEL_SET_ID: "ens-test-env",
@@ -857,7 +857,7 @@ describe("config (minimal base env)", () => {
       });
       await expect(getConfig()).resolves.toMatchObject({
         namespace: ENSNamespaceIds.EnsTestEnv,
-        labelSet: {
+        clientLabelSet: {
           labelSetId: "ens-test-env",
           labelSetVersion: 0,
         },

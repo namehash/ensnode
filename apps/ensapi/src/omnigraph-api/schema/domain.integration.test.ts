@@ -1,4 +1,4 @@
-import type { InterpretedLabel, InterpretedName } from "enssdk";
+import type { DomainId, InterpretedLabel, InterpretedName } from "enssdk";
 import { beforeAll, describe, expect, it } from "vitest";
 
 import { DEVNET_ETH_LABELS } from "@/test/integration/devnet-names";
@@ -49,6 +49,69 @@ describe("Domain.subdomains", () => {
     for (const expected of DEVNET_ETH_LABELS) {
       expect(actual, `expected '${expected}' in .eth subdomains`).toContain(expected);
     }
+  });
+});
+
+describe("Domain.path", () => {
+  type DomainPathResult = {
+    domain: {
+      id: DomainId;
+      path: { id: DomainId; name: InterpretedName | null }[] | null;
+    } | null;
+  };
+
+  const DomainPath = gql`
+    query DomainPath($name: InterpretedName!) {
+      domain(by: { name: $name }) {
+        id
+        path {
+          id
+          name
+        }
+      }
+    }
+  `;
+
+  it("returns the full canonical path (leaf → root) for a deep name", async () => {
+    const result = await request<DomainPathResult>(DomainPath, {
+      name: "wallet.linked.parent.eth",
+    });
+
+    expect(result.domain).not.toBeNull();
+    const path = result.domain?.path;
+    expect(path).not.toBeNull();
+
+    const pathNames = (path ?? []).map((d) => d.name);
+    expect(pathNames).toEqual([
+      "wallet.linked.parent.eth",
+      "linked.parent.eth",
+      "parent.eth",
+      "eth",
+    ]);
+  });
+
+  it("collapses aliases to their canonical path", async () => {
+    // `wallet.sub1.sub2.parent.eth` is an alias: `sub1.sub2.parent.eth`'s subregistry was
+    // re-pointed to the registry managed by `linked.parent.eth`. The canonical path must
+    // walk through `linked.parent.eth`, NOT `sub1.sub2.parent.eth` — edge-authentication
+    // in the reverse walk must reject the stale `registryCanonicalDomain` edge.
+    const aliasResult = await request<DomainPathResult>(DomainPath, {
+      name: "wallet.sub1.sub2.parent.eth",
+    });
+    const canonicalResult = await request<DomainPathResult>(DomainPath, {
+      name: "wallet.linked.parent.eth",
+    });
+
+    expect(aliasResult.domain?.id).toBe(canonicalResult.domain?.id);
+
+    const aliasPathNames = (aliasResult.domain?.path ?? []).map((d) => d.name);
+    expect(aliasPathNames).toEqual([
+      "wallet.linked.parent.eth",
+      "linked.parent.eth",
+      "parent.eth",
+      "eth",
+    ]);
+    expect(aliasPathNames).not.toContain("sub1.sub2.parent.eth");
   });
 });
 

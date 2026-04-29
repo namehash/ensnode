@@ -60,7 +60,7 @@ export class PublicConfigBuilder {
       this.immutablePublicConfig = validateEnsIndexerPublicConfig({
         ensIndexerSchemaName: config.ensIndexerSchemaName,
         ensRainbowPublicConfig,
-        labelSet: config.labelSet,
+        clientLabelSet: config.clientLabelSet,
         indexedChainIds: config.indexedChainIds,
         isSubgraphCompatible: config.isSubgraphCompatible,
         namespace: config.namespace,

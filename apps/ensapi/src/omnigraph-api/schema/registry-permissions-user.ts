@@ -1,9 +1,9 @@
-import { makeRegistryId } from "enssdk";
+import { makeENSv2RegistryId } from "enssdk";
 
 import type { ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { builder } from "@/omnigraph-api/builder";
 import { AccountRef } from "@/omnigraph-api/schema/account";
-import { RegistryRef } from "@/omnigraph-api/schema/registry";
+import { RegistryInterfaceRef } from "@/omnigraph-api/schema/registry";
 
 /**
  * Represents a PermissionsUser whose contract is a Registry, providing a semantic `registry` field.
@@ -30,9 +30,9 @@ RegistryPermissionsUserRef.implement({
     /////////////////////////////////////
     registry: t.field({
       description: "The Registry in which this Permission is granted.",
-      type: RegistryRef,
+      type: RegistryInterfaceRef,
       nullable: false,
-      resolve: ({ chainId, address }) => makeRegistryId({ chainId, address }),
+      resolve: ({ chainId, address }) => makeENSv2RegistryId({ chainId, address }),
     }),
 
     /////////////////////////////////////

@@ -30,8 +30,15 @@ async function loadEnsNodeStackInfo(
 
   const ensApiPublicConfig = buildEnsApiPublicConfig(config);
   const ensDbPublicConfig = await ensDbClient.buildEnsDbPublicConfig();
+  const ensIndexerPublicConfig = ensApiPublicConfig.ensIndexerPublicConfig;
+  const ensRainbowPublicConfig = ensIndexerPublicConfig.ensRainbowPublicConfig;
 
-  return buildEnsNodeStackInfo(ensApiPublicConfig, ensDbPublicConfig);
+  return buildEnsNodeStackInfo(
+    ensApiPublicConfig,
+    ensDbPublicConfig,
+    ensIndexerPublicConfig,
+    ensRainbowPublicConfig,
+  );
 }
 
 // lazyProxy defers construction until first use so that this module can be

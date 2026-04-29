@@ -12,6 +12,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 import { type EnsRainbow, ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk";
 
+import type { DbConfig } from "@/config/types";
 import { DbNotReadyError, type ENSRainbowServer } from "@/lib/server";
 import { getErrorMessage } from "@/utils/error-utils";
 import { logger } from "@/utils/logger";
@@ -23,6 +24,14 @@ import { logger } from "@/utils/logger";
  * attached, the supplier returns the final `ENSRainbowPublicConfig` (cached by the caller).
  */
 export type PublicConfigSupplier = () => EnsRainbow.ENSRainbowPublicConfig | null;
+
+/**
+ * Supplier of the current DB config for the API.
+ *
+ * Returns `null` while the server is still bootstrapping its database. Once the database is
+ * attached, the supplier returns the final `DbConfig` (cached by the caller).
+ */
+export type DbConfigSupplier = () => DbConfig | null;
 
 /**
  * Shared 503 response body for endpoints that require the database to be ready.
@@ -42,12 +51,14 @@ function buildServiceUnavailableBody(
 /**
  * Creates and configures the ENS Rainbow API routes.
  *
- * When `publicConfigSupplier` returns `null`, routes that depend on the database respond with
- * HTTP 503 so that clients polling `/ready` can wait for the bootstrap to complete.
+ * When `publicConfigSupplier` (or `dbConfigSupplier`) returns `null`, routes that depend on the
+ * database respond with HTTP 503 so that clients polling `/ready` can wait for the bootstrap to
+ * complete.
  */
 export function createApi(
   server: ENSRainbowServer,
   publicConfigSupplier: PublicConfigSupplier,
+  dbConfigSupplier: DbConfigSupplier,
 ): Hono {
   const api = new Hono();
 
@@ -134,14 +145,14 @@ export function createApi(
   });
 
   api.get("/v1/labels/count", (c: HonoContext) => {
-    const publicConfig = publicConfigSupplier();
-    if (publicConfig === null) {
+    const dbConfig = dbConfigSupplier();
+    if (dbConfig === null) {
       return c.json(buildServiceUnavailableBody(), ErrorCode.ServiceUnavailable);
     }
 
     const countResponse: EnsRainbow.CountSuccess = {
       status: StatusCode.Success,
-      count: publicConfig.recordsCount,
+      count: dbConfig.recordsCount,
       timestamp: new Date().toISOString(),
     };
     return c.json(countResponse);

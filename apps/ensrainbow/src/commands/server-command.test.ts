@@ -36,7 +36,11 @@ describe("Server Command Tests", () => {
       const ensRainbowServer = await ENSRainbowServer.init(db);
       const dbConfig = await buildDbConfig(ensRainbowServer);
       const publicConfig = buildEnsRainbowPublicConfig(dbConfig);
-      app = createApi(ensRainbowServer, () => publicConfig);
+      app = createApi(
+        ensRainbowServer,
+        () => publicConfig,
+        () => dbConfig,
+      );
 
       // Start the server on a different port than what ENSRainbow defaults to
       server = serve({
@@ -139,7 +143,7 @@ describe("Server Command Tests", () => {
   });
 
   describe("GET /v1/labels/count", () => {
-    it("should return count snapshot from startup (same as /v1/config)", async () => {
+    it("should return count snapshot from startup (from dbConfig.recordsCount)", async () => {
       // Count is fixed at server start; changing the DB does not affect the response
       await db.setPrecalculatedRainbowRecordCount(42);
 
@@ -154,17 +158,6 @@ describe("Server Command Tests", () => {
       expect(data).toEqual(expectedData);
       expect(() => new Date(data.timestamp as string)).not.toThrow();
     });
-
-    it("should match recordsCount in /v1/config", async () => {
-      const [countRes, configRes] = await Promise.all([
-        fetch(`http://localhost:${nonDefaultPort}/v1/labels/count`),
-        fetch(`http://localhost:${nonDefaultPort}/v1/config`),
-      ]);
-      const countData = (await countRes.json()) as EnsRainbow.CountSuccess;
-      const configData = (await configRes.json()) as EnsRainbow.ENSRainbowPublicConfig;
-      expect(countData.status).toBe(StatusCode.Success);
-      expect(countData.count).toBe(configData.recordsCount);
-    });
   });
 
   describe("GET /v1/config", () => {
@@ -175,12 +168,10 @@ describe("Server Command Tests", () => {
       expect(response.status).toBe(200);
       const data = (await response.json()) as EnsRainbow.ENSRainbowPublicConfig;
 
-      expect(typeof data.version).toBe("string");
-      expect(data.version.length).toBeGreaterThan(0);
-      expect(data.labelSet.labelSetId).toBe("test-label-set-id");
-      expect(data.labelSet.highestLabelSetVersion).toBe(0);
-      // Config is built on startup with count = 0, so it returns the startup value
-      expect(data.recordsCount).toBe(0);
+      expect(typeof data.versionInfo.ensRainbow).toBe("string");
+      expect(data.versionInfo.ensRainbow.length).toBeGreaterThan(0);
+      expect(data.serverLabelSet.labelSetId).toBe("test-label-set-id");
+      expect(data.serverLabelSet.highestLabelSetVersion).toBe(0);
     });
 
     it("should return same config even if database count changes", async () => {
@@ -192,12 +183,10 @@ describe("Server Command Tests", () => {
       expect(response.status).toBe(200);
       const data = (await response.json()) as EnsRainbow.ENSRainbowPublicConfig;
 
-      expect(typeof data.version).toBe("string");
-      expect(data.version.length).toBeGreaterThan(0);
-      expect(data.labelSet.labelSetId).toBe("test-label-set-id");
-      expect(data.labelSet.highestLabelSetVersion).toBe(0);
-      // Config is built on startup with count = 0, so changing the DB doesn't affect it
-      expect(data.recordsCount).toBe(0);
+      expect(typeof data.versionInfo.ensRainbow).toBe("string");
+      expect(data.versionInfo.ensRainbow.length).toBeGreaterThan(0);
+      expect(data.serverLabelSet.labelSetId).toBe("test-label-set-id");
+      expect(data.serverLabelSet.highestLabelSetVersion).toBe(0);
     });
   });
 
@@ -207,11 +196,17 @@ describe("Server Command Tests", () => {
     let pendingServer: ReturnType<typeof serve>;
     let pendingEnsRainbowServer: ENSRainbowServer;
     let pendingPublicConfig: EnsRainbow.ENSRainbowPublicConfig | null;
+    let pendingDbConfig: Awaited<ReturnType<typeof buildDbConfig>> | null;
 
     beforeAll(async () => {
       pendingEnsRainbowServer = ENSRainbowServer.createPending();
       pendingPublicConfig = null;
-      pendingApp = createApi(pendingEnsRainbowServer, () => pendingPublicConfig);
+      pendingDbConfig = null;
+      pendingApp = createApi(
+        pendingEnsRainbowServer,
+        () => pendingPublicConfig,
+        () => pendingDbConfig,
+      );
       pendingServer = serve({
         fetch: pendingApp.fetch,
         port: pendingPort,
@@ -272,9 +267,8 @@ describe("Server Command Tests", () => {
         await attachDb.addRainbowRecord("pending-label", 0);
 
         await pendingEnsRainbowServer.attachDb(attachDb);
-        pendingPublicConfig = buildEnsRainbowPublicConfig(
-          await buildDbConfig(pendingEnsRainbowServer),
-        );
+        pendingDbConfig = await buildDbConfig(pendingEnsRainbowServer);
+        pendingPublicConfig = buildEnsRainbowPublicConfig(pendingDbConfig);
 
         const readyRes = await fetch(`http://localhost:${pendingPort}/ready`);
         expect(readyRes.status).toBe(200);
@@ -291,8 +285,17 @@ describe("Server Command Tests", () => {
         const configRes = await fetch(`http://localhost:${pendingPort}/v1/config`);
         expect(configRes.status).toBe(200);
         const configData = (await configRes.json()) as EnsRainbow.ENSRainbowPublicConfig;
-        expect(configData.recordsCount).toBe(1);
-        expect(configData.labelSet.labelSetId).toBe("pending-test");
+        expect(configData.serverLabelSet.labelSetId).toBe("pending-test");
+        expect(configData.serverLabelSet.highestLabelSetVersion).toBe(0);
+
+        const countRes = await fetch(`http://localhost:${pendingPort}/v1/labels/count`);
+        expect(countRes.status).toBe(200);
+        const countData = (await countRes.json()) as EnsRainbow.CountResponse;
+        expect(countData).toEqual({
+          status: StatusCode.Success,
+          count: 1,
+          timestamp: expect.any(String),
+        } satisfies EnsRainbow.CountSuccess);
       } finally {
         await pendingEnsRainbowServer.close();
         await fs.rm(attachDataDir, { recursive: true, force: true });

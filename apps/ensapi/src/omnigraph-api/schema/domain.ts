@@ -1,12 +1,9 @@
 import { trace } from "@opentelemetry/api";
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, count, eq, getTableColumns } from "drizzle-orm";
-import {
-  type DomainId,
-  type ENSv1DomainId,
-  type ENSv2DomainId,
-  interpretedLabelsToInterpretedName,
-} from "enssdk";
+import { type DomainId, interpretedLabelsToInterpretedName } from "enssdk";
+
+import type { RequiredAndNotNull, RequiredAndNull } from "@ensnode/ensnode-sdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { withSpanAsync } from "@/lib/instrumentation/auto-span";
@@ -41,65 +38,43 @@ import { LabelRef } from "@/omnigraph-api/schema/label";
 import { OrderDirection } from "@/omnigraph-api/schema/order-direction";
 import { PermissionsUserRef } from "@/omnigraph-api/schema/permissions";
 import { RegistrationInterfaceRef } from "@/omnigraph-api/schema/registration";
-import { RegistryRef } from "@/omnigraph-api/schema/registry";
+import { RegistryInterfaceRef } from "@/omnigraph-api/schema/registry";
 import { ResolverRef } from "@/omnigraph-api/schema/resolver";
 
 const tracer = trace.getTracer("schema/Domain");
-const isENSv1Domain = (domain: Domain): domain is ENSv1Domain => "parentId" in domain;
 
-/////////////////////////////
-// ENSv1Domain & ENSv2Domain
-/////////////////////////////
-
-export const ENSv1DomainRef = builder.loadableObjectRef("ENSv1Domain", {
-  load: (ids: ENSv1DomainId[]) =>
-    withSpanAsync(tracer, "ENSv1Domain.load", { count: ids.length }, () =>
-      ensDb.query.v1Domain.findMany({
-        where: (t, { inArray }) => inArray(t.id, ids),
-        with: { label: true },
-      }),
-    ),
-  toKey: getModelId,
-  cacheResolved: true,
-  sort: true,
-});
-
-export const ENSv2DomainRef = builder.loadableObjectRef("ENSv2Domain", {
-  load: (ids: ENSv2DomainId[]) =>
-    withSpanAsync(tracer, "ENSv2Domain.load", { count: ids.length }, () =>
-      ensDb.query.v2Domain.findMany({
-        where: (t, { inArray }) => inArray(t.id, ids),
-        with: { label: true },
-      }),
-    ),
-  toKey: getModelId,
-  cacheResolved: true,
-  sort: true,
-});
+///////////////////////////////
+// Loadable Interface (Domain)
+///////////////////////////////
 
 export const DomainInterfaceRef = builder.loadableInterfaceRef("Domain", {
-  load: async (ids: DomainId[]): Promise<(ENSv1Domain | ENSv2Domain)[]> => {
-    const [v1Domains, v2Domains] = await Promise.all([
-      ensDb.query.v1Domain.findMany({
-        where: (t, { inArray }) => inArray(t.id, ids as any), // ignore downcast to ENSv1DomainId
+  load: (ids: DomainId[]) =>
+    withSpanAsync(tracer, "Domain.load", { count: ids.length }, () =>
+      ensDb.query.domain.findMany({
+        where: (t, { inArray }) => inArray(t.id, ids),
         with: { label: true },
       }),
-      ensDb.query.v2Domain.findMany({
-        where: (t, { inArray }) => inArray(t.id, ids as any), // ignore downcast to ENSv2DomainId
-        with: { label: true },
-      }),
-    ]);
-
-    return [...v1Domains, ...v2Domains];
-  },
+    ),
   toKey: getModelId,
   cacheResolved: true,
   sort: true,
 });
 
-export type ENSv1Domain = Exclude<typeof ENSv1DomainRef.$inferType, ENSv1DomainId>;
-export type ENSv2Domain = Exclude<typeof ENSv2DomainRef.$inferType, ENSv2DomainId>;
 export type Domain = Exclude<typeof DomainInterfaceRef.$inferType, DomainId>;
+export type DomainInterface = Omit<Domain, "tokenId" | "node" | "rootRegistryOwnerId">;
+export type ENSv1Domain = RequiredAndNotNull<Domain, "node"> &
+  RequiredAndNull<Domain, "tokenId"> & { type: "ENSv1Domain" };
+export type ENSv2Domain = RequiredAndNotNull<Domain, "tokenId"> &
+  RequiredAndNull<Domain, "node" | "rootRegistryOwnerId"> & { type: "ENSv2Domain" };
+
+export const isENSv1Domain = (domain: DomainInterface): domain is ENSv1Domain =>
+  domain.type === "ENSv1Domain";
+
+export const isENSv2Domain = (domain: DomainInterface): domain is ENSv2Domain =>
+  domain.type === "ENSv2Domain";
+
+export const ENSv1DomainRef = builder.objectRef<ENSv1Domain>("ENSv1Domain");
+export const ENSv2DomainRef = builder.objectRef<ENSv2Domain>("ENSv2Domain");
 
 //////////////////////////////////
 // DomainInterface Implementation
@@ -137,14 +112,12 @@ DomainInterfaceRef.implement({
       tracing: true,
       type: "InterpretedName",
       nullable: true,
-      resolve: async (domain, args, context) => {
-        const canonicalPath = isENSv1Domain(domain)
-          ? await context.loaders.v1CanonicalPath.load(domain.id)
-          : await context.loaders.v2CanonicalPath.load(domain.id);
-        if (!canonicalPath) return null;
+      resolve: async (domain, _args, context) => {
+        const canonicalPath = await context.loaders.canonicalPath.load(domain.id);
+        if (canonicalPath instanceof Error) throw canonicalPath;
+        if (canonicalPath === null) return null;
 
-        // TODO: this could be more efficient if the get*CanonicalPath helpers included the label
-        // join for us.
+        // TODO: this could be more efficient if getCanonicalPath included the label join for us.
         const domains = await rejectAnyErrors(
           DomainInterfaceRef.getDataloader(context).loadMany(canonicalPath),
         );
@@ -169,19 +142,33 @@ DomainInterfaceRef.implement({
     ///////////////
     path: t.field({
       description:
-        "The Canonical Path from the ENS Root to this Domain. `path` is null if the Domain is not Canonical.",
+        "The Canonical Path from this Domain to the ENS Root, in leaf→root order and inclusive of this Domain. `path` is null if the Domain is not Canonical.",
       tracing: true,
       type: [DomainInterfaceRef],
       nullable: true,
-      resolve: async (domain, args, context) => {
-        const canonicalPath = isENSv1Domain(domain)
-          ? await context.loaders.v1CanonicalPath.load(domain.id)
-          : await context.loaders.v2CanonicalPath.load(domain.id);
-        if (!canonicalPath) return null;
+      resolve: async (domain, _args, context) => {
+        const canonicalPath = await context.loaders.canonicalPath.load(domain.id);
+        if (canonicalPath instanceof Error) throw canonicalPath;
+        if (canonicalPath === null) return null;
 
         return await rejectAnyErrors(
           DomainInterfaceRef.getDataloader(context).loadMany(canonicalPath),
         );
+      },
+    }),
+
+    /////////////////
+    // Domain.parent
+    /////////////////
+    parent: t.field({
+      description:
+        "The direct parent Domain in the canonical namegraph or null if this Domain is a root-level Domain or is not Canonical.",
+      type: DomainInterfaceRef,
+      nullable: true,
+      resolve: async (domain, _args, context) => {
+        const path = await context.loaders.canonicalPath.load(domain.id);
+        if (path instanceof Error) throw path;
+        return path?.[1] ?? null;
       },
     }),
 
@@ -299,16 +286,16 @@ DomainInterfaceRef.implement({
 ENSv1DomainRef.implement({
   description: "An ENSv1Domain represents an ENSv1 Domain.",
   interfaces: [DomainInterfaceRef],
-  isTypeOf: (domain) => isENSv1Domain(domain as Domain),
+  isTypeOf: (domain) => isENSv1Domain(domain as DomainInterface),
   fields: (t) => ({
-    //////////////////////
-    // ENSv1Domain.parent
-    //////////////////////
-    parent: t.field({
-      description: "The parent Domain of this Domain in the ENSv1 nametree.",
-      type: ENSv1DomainRef,
-      nullable: true,
-      resolve: (parent) => parent.parentId,
+    ///////////////////
+    // ENSv1Domain.node
+    ///////////////////
+    node: t.field({
+      description: "The namehash of this ENSv1 Domain.",
+      type: "Node",
+      nullable: false,
+      resolve: (parent) => parent.node,
     }),
 
     /////////////////////////////////
@@ -330,10 +317,10 @@ ENSv1DomainRef.implement({
 ENSv2DomainRef.implement({
   description: "An ENSv2Domain represents an ENSv2 Domain.",
   interfaces: [DomainInterfaceRef],
-  isTypeOf: (domain) => !isENSv1Domain(domain as Domain),
+  isTypeOf: (domain) => isENSv2Domain(domain as DomainInterface),
   fields: (t) => ({
     //////////////////////
-    // Domain.tokenId
+    // ENSv2Domain.tokenId
     //////////////////////
     tokenId: t.field({
       description: "The ENSv2Domain's current Token Id.",
@@ -342,21 +329,21 @@ ENSv2DomainRef.implement({
       resolve: (parent) => parent.tokenId,
     }),
 
-    //////////////////////
-    // Domain.registry
-    //////////////////////
+    ///////////////////////
+    // ENSv2Domain.registry
+    ///////////////////////
     registry: t.field({
       description: "The Registry under which this ENSv2Domain exists.",
-      type: RegistryRef,
+      type: RegistryInterfaceRef,
       nullable: false,
       resolve: (parent) => parent.registryId,
     }),
 
-    //////////////////////
-    // Domain.subregistry
-    //////////////////////
+    //////////////////////////
+    // ENSv2Domain.subregistry
+    //////////////////////////
     subregistry: t.field({
-      type: RegistryRef,
+      type: RegistryInterfaceRef,
       description: "The Registry this ENSv2Domain declares as its Subregistry, if exists.",
       nullable: true,
       resolve: (parent) => parent.subregistryId,

@@ -275,6 +275,24 @@ PermissionsUserRef.implement({
       nullable: false,
       resolve: (parent) => parent.roles,
     }),
+
+    //////////////////////////
+    // PermissionsUser.events
+    //////////////////////////
+    events: t.connection({
+      description: "All Events associated with this PermissionsUser.",
+      type: EventRef,
+      args: {
+        where: t.arg({ type: EventsWhereInput }),
+      },
+      resolve: (parent, args) =>
+        resolveFindEvents(args, {
+          through: {
+            table: ensIndexerSchema.permissionsUserEvent,
+            scope: eq(ensIndexerSchema.permissionsUserEvent.permissionsUserId, parent.id),
+          },
+        }),
+    }),
   }),
 });
 

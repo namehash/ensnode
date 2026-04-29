@@ -31,7 +31,7 @@ interface EnsRainbowServerLabelSet {
 
 ### `EnsRainbowClientLabelSet`
 
-Provided when constructing `new EnsRainbowApiClient({ labelSet: … })` to pin client expectations:
+Provided when constructing `new EnsRainbowApiClient({ clientLabelSet: … })` to pin client expectations:
 
 ```ts
 interface EnsRainbowClientLabelSet {
@@ -42,11 +42,11 @@ interface EnsRainbowClientLabelSet {
 
 #### Usage Guidelines
 
-1. **Neither field** → accept any labelset and use the latest version (default behaviour).
-2. **Only `labelSetId`** → insist on a specific labelset and use the latest version.
-3. **Both fields** → insist on a specific labelset and version, locking the client to an exact snapshot.
+1. **Neither field** → accept any client label set and use the latest version (default behaviour).
+2. **Only `labelSetId`** → insist on a specific client label set and use the latest version.
+3. **Both fields** → insist on a specific client label set and version, locking the client to an exact snapshot.
 
-This handshake that occurs when **both fields** are set ensures both client and server interpret every heal operation against the **same logical labelset snapshot**, enabling deterministic and reproducible healing results across time.
+This handshake that occurs when **both fields** are set ensures both client and server interpret every heal operation against the **same logical label set snapshot**, enabling deterministic and reproducible healing results across time.
 
 ## Example Usage
 
@@ -57,19 +57,19 @@ import { EnsRainbowApiClient } from '@ensnode/ensrainbow-sdk';
 
 // Default: use latest version of any labelset
 const client1 = new EnsRainbowApiClient({
-  baseUrl: 'https://api.ensrainbow.io'
+  endpointUrl: 'https://api.ensrainbow.io'
 });
 
 // Pin to subgraph labelset, use latest version
 const client2 = new EnsRainbowApiClient({
-  baseUrl: 'https://api.ensrainbow.io',
-  labelSet: { labelSetId: 'subgraph' }
+  endpointUrl: 'https://api.ensrainbow.io',
+  clientLabelSet: { labelSetId: 'subgraph' }
 });
 
 // Pin to exact labelset snapshot for deterministic results across time
 const client3 = new EnsRainbowApiClient({
-  baseUrl: 'https://api.ensrainbow.io',
-  labelSet: { 
+  endpointUrl: 'https://api.ensrainbow.io',
+  clientLabelSet: { 
     labelSetId: 'subgraph', 
     labelSetVersion: 0 
   }

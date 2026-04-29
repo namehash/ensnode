@@ -2,10 +2,9 @@ import type {
   Address,
   ChainId,
   DomainId,
-  ENSv1DomainId,
-  ENSv2DomainId,
   InterpretedLabel,
   LabelHash,
+  Node,
   PermissionsId,
   PermissionsResourceId,
   PermissionsUserId,
@@ -13,6 +12,7 @@ import type {
   RegistryId,
   RenewalId,
   ResolverId,
+  TokenId,
 } from "enssdk";
 import { index, onchainEnum, onchainTable, primaryKey, relations, sql, uniqueIndex } from "ponder";
 import type { BlockNumber, Hash } from "viem";
@@ -35,20 +35,16 @@ import type { EncodedReferrer } from "@ensnode/ensnode-sdk";
  * it's more expensive for us to recursively traverse the namegraph (like evm code does) because our
  * individual roundtrips from the db are relatively more expensive.
  *
- * For the datamodel, this means that instead of a polymorphic Domain entity, representing both v1
- * and v2 Domains, this schema employs separate (but overlapping) v1Domains and v2Domains entities.
- * This avoids resolution-time complications and more accurately represents the on-chain state.
- * Domain polymorphism is applied at the API later, via GraphQL Interfaces, to simplify queries.
- *
  * In general: the indexed schema should match on-chain state as closely as possible, and
  * resolution-time behavior within the ENS protocol should _also_ be implemented at resolution time
- * in ENSApi. The current obvious exception to this is that v1Domain.owner is the _materialized_
- * _effective_ owner of the v1Domain. ENSv1 includes a mind-boggling number of ways to 'own' a v1Domain,
+ * in ENSApi. The current obvious exception is that `domain.ownerId` for ENSv1 Domains is the
+ * _materialized_ _effective_ owner. ENSv1 includes a diverse number of ways to 'own' a domain,
  * including the ENSv1 Registry, various Registrars, and the NameWrapper. The ENSv1 indexing logic
- * within this ENSv2 plugin materialize the v1Domain's effective owner to simplify this aspect of ENS,
- * and enable efficient queries against v1Domain.owner.
+ * within this ENSv2 plugin materializes the effective owner to simplify this aspect of ENS and
+ * enable efficient queries against `domain.ownerId`.
  *
- * Many datamodels are shared between ENSv1 and ENSv2, including Registrations, Renewals, and Resolvers.
+ * When necessary, all datamodels are shared or polymorphic between ENSv1 and ENSv2, including
+ * Domains, Registries, Registrations, Renewals, and Resolvers.
  *
  * Registrations are polymorphic between the defined RegistrationTypes, depending on the associated
  * guarantees (for example, ENSv1 BaseRegistrar Registrations may have a gracePeriod, but ENSv2
@@ -59,20 +55,18 @@ import type { EncodedReferrer } from "@ensnode/ensnode-sdk";
  * new label is encountered onchain, all Domains that use that label are automatically healed at
  * resolution-time.
  *
- * v1Domains exist in a flat namespace and are absolutely addressed by `node`. As such, they describe
- * a simple tree datamodel of:
- *   v1Domain -> v1Domain(s) -> v1Domain(s) -> ...etc
- *
- * v2Domains exist in a set of namegraphs. Each namegraph is a possibly cicular directed graph of
- *   (Root)Registry -> v2Domain(s) -> (sub)Regsitry -> v2Domain(s) -> ...etc
- * with exactly one RootRegistry on the ENS Root Chain establishing the beginning of the _canonical_
- * namegraph. As discussed above, the canonical namegraph is never materialized, only _navigated_
- * at resolution-time, in order to correctly implement the complexities of the ENS protocol.
+ * ENSv1 and ENSv2 both fit the Registry → Domain → (Sub)Registry → Domain → ... namegraph model.
+ * For ENSv1, each domain that has children implicitly owns a "virtual" Registry (a row of type
+ * `ENSv1VirtualRegistry`) whose sole parent is that domain; children of the parent then point their
+ * `registryId` at the virtual registry. Concrete `ENSv1Registry` rows (e.g. the mainnet ENS Registry,
+ * the Basenames Registry, the Lineanames Registry) sit at the top. ENSv2 namegraphs are rooted in
+ * a single `ENSv2Registry` RootRegistry on the ENS Root Chain and are possibly circular directed
+ * graphs. The canonical namegraph is never materialized, only _navigated_ at resolution-time.
  *
  * Note also that the Protocol Acceleration plugin is a hard requirement for the ENSv2 plugin. This
  * allows us to rely on the shared logic for indexing:
  *   a) ENSv1RegistryOld -> ENSv1Registry migration status
- *   b) Domain-Resolver Relations for both v1Domains and v2Domains
+ *   b) Domain-Resolver Relations for both ENSv1 and ENSv2 Domains
  * As such, none of that information is present in this ensv2.schema.ts file.
  *
  * In general, entities are keyed by a nominally-typed `id` that uniquely references them. This
@@ -80,6 +74,9 @@ import type { EncodedReferrer } from "@ensnode/ensnode-sdk";
  * deeply nested entities by a straightforward string ID. In cases where an entity's `id` is composed
  * of multiple pieces of information (for example, a Registry is identified by (chainId, address)),
  * then that information is, as well, included in the entity's columns, not just encoded in the id.
+ * Nowhere in this application, nor in user applications, should an entity's id be parsed for its
+ * constituent parts; all should be available, with their various type guarantees, on the entity
+ * itself.
  *
  * Events are structured as a single "events" table which tracks EVM Event Metadata for any on-chain
  * Event. Then, join tables (DomainEvent, ResolverEvent, etc) track the relationship between an
@@ -156,6 +153,15 @@ export const permissionsEvent = onchainTable(
   (t) => ({ pk: primaryKey({ columns: [t.permissionsId, t.eventId] }) }),
 );
 
+export const permissionsUserEvent = onchainTable(
+  "permissions_user_events",
+  (t) => ({
+    permissionsUserId: t.text().notNull().$type<PermissionsUserId>(),
+    eventId: t.text().notNull(),
+  }),
+  (t) => ({ pk: primaryKey({ columns: [t.permissionsUserId, t.eventId] }) }),
+);
+
 ///////////
 // Account
 ///////////
@@ -166,7 +172,7 @@ export const account = onchainTable("accounts", (t) => ({
 
 export const account_relations = relations(account, ({ many }) => ({
   registrations: many(registration, { relationName: "registrant" }),
-  domains: many(v2Domain),
+  domains: many(domain),
   permissions: many(permissionsUser),
 }));
 
@@ -174,27 +180,39 @@ export const account_relations = relations(account, ({ many }) => ({
 // Registry
 ////////////
 
+export const registryType = onchainEnum("RegistryType", [
+  "ENSv1Registry",
+  "ENSv1VirtualRegistry",
+  "ENSv2Registry",
+]);
+
 export const registry = onchainTable(
   "registries",
   (t) => ({
     // see RegistryId for guarantees
     id: t.text().primaryKey().$type<RegistryId>(),
 
+    // has a type
+    type: registryType().notNull(),
+
     chainId: t.integer().notNull().$type<ChainId>(),
     address: t.hex().notNull().$type<Address>(),
+
+    // If this is an ENSv1VirtualRegistry, `node` is the namehash of the parent ENSv1 domain that
+    // owns it, otherwise null.
+    node: t.hex().$type<Node>(),
   }),
   (t) => ({
-    byId: uniqueIndex().on(t.chainId, t.address),
+    // NOTE: non-unique index because multiple rows can share (chainId, address) across virtual registries
+    byChainAddress: index().on(t.chainId, t.address),
   }),
 );
 
 export const relations_registry = relations(registry, ({ one, many }) => ({
-  domain: one(v2Domain, {
-    relationName: "subregistry",
-    fields: [registry.id],
-    references: [v2Domain.registryId],
-  }),
-  domains: many(v2Domain, { relationName: "registry" }),
+  // domains that declare this registry as their parent registry
+  domains: many(domain, { relationName: "registry" }),
+  // domains that declare this registry as their subregistry
+  domainsAsSubregistry: many(domain, { relationName: "subregistry" }),
   permissions: one(permissions, {
     relationName: "permissions",
     fields: [registry.chainId, registry.address],
@@ -206,84 +224,43 @@ export const relations_registry = relations(registry, ({ one, many }) => ({
 // Domains
 ///////////
 
-export const v1Domain = onchainTable(
-  "v1_domains",
+export const domainType = onchainEnum("DomainType", ["ENSv1Domain", "ENSv2Domain"]);
+
+export const domain = onchainTable(
+  "domains",
   (t) => ({
-    // keyed by node, see ENSv1DomainId for guarantees.
-    id: t.text().primaryKey().$type<ENSv1DomainId>(),
+    // see DomainId for guarantees (ENSv1DomainId: `${ENSv1RegistryId}/${node}`, ENSv2DomainId: CAIP-19)
+    id: t.text().primaryKey().$type<DomainId>(),
 
-    // must have a parent v1Domain (note: root node does not exist in index)
-    parentId: t.text().notNull().$type<ENSv1DomainId>(),
+    // has a type
+    type: domainType().notNull(),
 
-    // may have an owner
-    ownerId: t.hex().$type<Address>(),
+    // belongs to a registry
+    registryId: t.text().notNull().$type<RegistryId>(),
+
+    // may have a subregistry
+    subregistryId: t.text().$type<RegistryId>(),
+
+    // If this is an ENSv2Domain, the TokenId within the ENSv2Registry, otherwise null.
+    tokenId: t.bigint().$type<TokenId>(),
+
+    // If this is an ENSv1Domain, The Domain's namehash, otherwise null.
+    node: t.hex().$type<Node>(),
 
     // represents a labelHash
     labelHash: t.hex().notNull().$type<LabelHash>(),
 
-    // may have a `rootRegistryOwner` (ENSv1Registry's owner()), zeroAddress interpreted as null
+    // may have an owner
+    ownerId: t.hex().$type<Address>(),
+
+    // If this is an ENSv1Domain, may have a `rootRegistryOwner`, otherwise null.
     rootRegistryOwnerId: t.hex().$type<Address>(),
 
     // NOTE: Domain-Resolver Relations tracked via Protocol Acceleration plugin
+    // NOTE: parent is derived via registryCanonicalDomain, not stored on the domain row
   }),
   (t) => ({
-    byParent: index().on(t.parentId),
-    byOwner: index().on(t.ownerId),
-    byLabelHash: index().on(t.labelHash),
-  }),
-);
-
-export const relations_v1Domain = relations(v1Domain, ({ one, many }) => ({
-  // v1Domain
-  parent: one(v1Domain, {
-    fields: [v1Domain.parentId],
-    references: [v1Domain.id],
-  }),
-  children: many(v1Domain, { relationName: "parent" }),
-  rootRegistryOwner: one(account, {
-    relationName: "rootRegistryOwner",
-    fields: [v1Domain.rootRegistryOwnerId],
-    references: [account.id],
-  }),
-
-  // shared
-  owner: one(account, {
-    relationName: "owner",
-    fields: [v1Domain.ownerId],
-    references: [account.id],
-  }),
-  label: one(label, {
-    relationName: "label",
-    fields: [v1Domain.labelHash],
-    references: [label.labelHash],
-  }),
-  registrations: many(registration),
-}));
-
-export const v2Domain = onchainTable(
-  "v2_domains",
-  (t) => ({
-    // see ENSv2DomainId for guarantees
-    id: t.text().primaryKey().$type<ENSv2DomainId>(),
-
-    // has a tokenId
-    tokenId: t.bigint().notNull(),
-
-    // belongs to registry
-    registryId: t.text().notNull().$type<RegistryId>(),
-
-    // may have one subregistry
-    subregistryId: t.text().$type<RegistryId>(),
-
-    // may have an owner
-    ownerId: t.hex().$type<Address>(),
-
-    // represents a labelHash
-    labelHash: t.hex().notNull().$type<LabelHash>(),
-
-    // NOTE: Domain-Resolver Relations tracked via Protocol Acceleration plugin
-  }),
-  (t) => ({
+    byType: index().on(t.type),
     byRegistry: index().on(t.registryId),
     bySubregistry: index().on(t.subregistryId).where(sql`${t.subregistryId} IS NOT NULL`),
     byOwner: index().on(t.ownerId),
@@ -291,28 +268,30 @@ export const v2Domain = onchainTable(
   }),
 );
 
-export const relations_v2Domain = relations(v2Domain, ({ one, many }) => ({
-  // v2Domain
+export const relations_domain = relations(domain, ({ one, many }) => ({
   registry: one(registry, {
     relationName: "registry",
-    fields: [v2Domain.registryId],
+    fields: [domain.registryId],
     references: [registry.id],
   }),
   subregistry: one(registry, {
     relationName: "subregistry",
-    fields: [v2Domain.subregistryId],
+    fields: [domain.subregistryId],
     references: [registry.id],
   }),
-
-  // shared
   owner: one(account, {
     relationName: "owner",
-    fields: [v2Domain.ownerId],
+    fields: [domain.ownerId],
+    references: [account.id],
+  }),
+  rootRegistryOwner: one(account, {
+    relationName: "rootRegistryOwner",
+    fields: [domain.rootRegistryOwnerId],
     references: [account.id],
   }),
   label: one(label, {
     relationName: "label",
-    fields: [v2Domain.labelHash],
+    fields: [domain.labelHash],
     references: [label.labelHash],
   }),
   registrations: many(registration),
@@ -385,20 +364,11 @@ export const registration = onchainTable(
   }),
 );
 
-export const latestRegistrationIndex = onchainTable("latest_registration_indexes", (t) => ({
-  domainId: t.text().primaryKey().$type<DomainId>(),
-  registrationIndex: t.integer().notNull(),
-}));
-
 export const registration_relations = relations(registration, ({ one, many }) => ({
-  // belongs to either v1Domain or v2Domain
-  v1Domain: one(v1Domain, {
+  // belongs to a domain
+  domain: one(domain, {
     fields: [registration.domainId],
-    references: [v1Domain.id],
-  }),
-  v2Domain: one(v2Domain, {
-    fields: [registration.domainId],
-    references: [v2Domain.id],
+    references: [domain.id],
   }),
 
   // has one registrant
@@ -407,6 +377,12 @@ export const registration_relations = relations(registration, ({ one, many }) =>
     references: [account.id],
     relationName: "registrant",
   }),
+
+  // has a latest registration index
+  latestRegistrationIndex: one(latestRegistrationIndex),
+
+  // has a latest renewal index
+  latestRenewalIndex: one(latestRenewalIndex),
 
   // has one unregistrant
   unregistrant: one(account, {
@@ -422,6 +398,19 @@ export const registration_relations = relations(registration, ({ one, many }) =>
   event: one(event, {
     fields: [registration.eventId],
     references: [event.id],
+  }),
+}));
+
+export const latestRegistrationIndex = onchainTable("latest_registration_indexes", (t) => ({
+  domainId: t.text().primaryKey().$type<DomainId>(),
+  registrationIndex: t.integer().notNull(),
+}));
+
+export const latestRegistrationIndex_relations = relations(latestRegistrationIndex, ({ one }) => ({
+  // references domain
+  domain: one(domain, {
+    fields: [latestRegistrationIndex.domainId],
+    references: [domain.id],
   }),
 }));
 
@@ -484,6 +473,14 @@ export const latestRenewalIndex = onchainTable(
   }),
   (t) => ({ pk: primaryKey({ columns: [t.domainId, t.registrationIndex] }) }),
 );
+
+export const latestRenewalIndex_relations = relations(latestRenewalIndex, ({ one }) => ({
+  // references domain
+  domain: one(domain, {
+    fields: [latestRenewalIndex.domainId],
+    references: [domain.id],
+  }),
+}));
 
 ///////////////
 // Permissions
@@ -581,7 +578,7 @@ export const label = onchainTable(
 );
 
 export const label_relations = relations(label, ({ many }) => ({
-  domains: many(v2Domain),
+  domains: many(domain),
 }));
 
 ///////////////////
@@ -596,5 +593,5 @@ export const label_relations = relations(label, ({ many }) => ({
 // Registry contracts, ensuring that they are indexed during construction and are available for storage.
 export const registryCanonicalDomain = onchainTable("registry_canonical_domains", (t) => ({
   registryId: t.text().primaryKey().$type<RegistryId>(),
-  domainId: t.text().notNull().$type<ENSv2DomainId>(),
+  domainId: t.text().notNull().$type<DomainId>(),
 }));

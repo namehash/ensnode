@@ -47,12 +47,12 @@ interface IndexingBehaviorDependencies {
   isSubgraphCompatible: boolean;
 
   /**
-   * Label Set
+   * Label Set for ENSIndexer client requests to ENSRainbow
    *
-   * When `labelSet` changes, the label "healing" results may change during indexing,
+   * When `clientLabelSet` changes, the label "healing" results may change during indexing,
    * which influences the indexing behavior.
    */
-  labelSet: EnsIndexerConfig["labelSet"];
+  clientLabelSet: EnsIndexerConfig["clientLabelSet"];
 
   /**
    * ENSDb Schema Checksum
@@ -112,7 +112,7 @@ const indexingBehaviorDependencies = {
   // injected here to ensure that, if they are configured differently, ponder generates a unique
   // build id to differentiate between runs with otherwise-identical configs (see above).
   isSubgraphCompatible: config.isSubgraphCompatible,
-  labelSet: config.labelSet,
+  clientLabelSet: config.clientLabelSet,
   ensDbSchemaChecksum: ENSDB_SCHEMA_CHECKSUM,
 } satisfies IndexingBehaviorDependencies;
 
