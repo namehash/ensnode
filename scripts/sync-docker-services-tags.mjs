@@ -12,18 +12,6 @@ const serviceFiles = [
 
 const semverRegex = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
 
-async function getVersionFromEnsapi() {
-  const ensapiPackageJsonPath = resolve(rootDir, "apps/ensapi/package.json");
-  const packageJsonContent = await readFile(ensapiPackageJsonPath, "utf8");
-  const packageJson = JSON.parse(packageJsonContent);
-
-  if (typeof packageJson.version !== "string" || packageJson.version.length === 0) {
-    throw new Error("Could not read version from apps/ensapi/package.json");
-  }
-
-  return packageJson.version;
-}
-
 function validateVersion(version) {
   if (!semverRegex.test(version)) {
     throw new Error(`Invalid version "${version}". Expected SemVer-like value such as 1.10.1`);
@@ -35,6 +23,8 @@ async function updateServiceDefaultTag(version) {
   const replacePattern = /\$\{ENSNODE_TAG:-[^}]+\}/g;
   const replacement = `\${ENSNODE_TAG:-${version}}`;
 
+  console.log(`Updating service default tag to ${version}\n`);
+
   for (const relativePath of serviceFiles) {
     const absolutePath = resolve(rootDir, relativePath);
     const content = await readFile(absolutePath, "utf8");
@@ -43,18 +33,21 @@ async function updateServiceDefaultTag(version) {
       throw new Error(`Could not find ENSNODE_TAG default expression in ${relativePath}`);
     }
 
+    const previous = content.match(testPattern)[0];
     const updated = content.replace(replacePattern, replacement);
     await writeFile(absolutePath, updated, "utf8");
-    console.log(`Updated ${relativePath} -> ${version}`);
+    console.log(`Updated ${relativePath}:\t"${previous}" -> "${replacement}"`);
   }
 }
 
 async function main() {
   const versionFromArg = process.argv[2];
-  const version = versionFromArg ?? (await getVersionFromEnsapi());
+  if (typeof versionFromArg !== "string" || versionFromArg.length === 0) {
+    throw new Error("Version argument is required. Usage: node scripts/sync-docker-services-tags.mjs <version>");
+  }
 
-  validateVersion(version);
-  await updateServiceDefaultTag(version);
+  validateVersion(versionFromArg);
+  await updateServiceDefaultTag(versionFromArg);
 }
 
 main().catch((error) => {
