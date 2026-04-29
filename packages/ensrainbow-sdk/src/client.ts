@@ -11,6 +11,40 @@ import {
 
 import { DEFAULT_ENSRAINBOW_URL, ErrorCode, StatusCode } from "./consts";
 
+/**
+ * Error thrown by {@link EnsRainbowApiClient} methods when the ENSRainbow service responds
+ * with a non-2xx HTTP status code.
+ *
+ * Carries the HTTP status code as a structured property (rather than only embedding it in the
+ * error message) so callers can branch their retry/abort logic on the status — e.g. retry on
+ * `503 Service Unavailable` while ENSRainbow bootstraps, but abort immediately on `404`/`500`,
+ * which usually indicate a misconfigured base URL or a hard server failure.
+ *
+ * Network-level failures (DNS, ECONNREFUSED, fetch parse errors) are *not* wrapped in this
+ * class — they propagate as their original `Error` (typically a `TypeError` from `fetch`),
+ * because such failures are commonly transient during cold start and should remain retryable
+ * by callers.
+ */
+export class EnsRainbowHttpError extends Error {
+  readonly name = "EnsRainbowHttpError";
+
+  /**
+   * The HTTP status code returned by the ENSRainbow service.
+   */
+  readonly status: number;
+
+  /**
+   * The HTTP status text returned by the ENSRainbow service, if any.
+   */
+  readonly statusText: string;
+
+  constructor(message: string, status: number, statusText = "") {
+    super(message);
+    this.status = status;
+    this.statusText = statusText;
+  }
+}
+
 export namespace EnsRainbow {
   export type ApiClientOptions = EnsRainbowApiClientOptions;
 
@@ -399,10 +433,12 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
     const response = await fetch(new URL("/health", this.options.endpointUrl));
 
     if (!response.ok) {
-      throw new Error(
+      throw new EnsRainbowHttpError(
         `ENSRainbow health check failed (HTTP ${response.status}${
           response.statusText ? ` ${response.statusText}` : ""
         })`,
+        response.status,
+        response.statusText,
       );
     }
 
@@ -417,9 +453,13 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
    * bootstrapping its database. Clients that require a usable database (e.g. ENSIndexer) should
    * poll this method instead of `health()` during startup.
    *
-   * @throws if the server is not ready yet (HTTP 503) or if the readiness check otherwise fails
-   * (e.g. misrouting/404, server error/500). Callers that treat this as a retryable probe should
-   * retry with backoff.
+   * @throws {EnsRainbowHttpError} if the service responds with a non-2xx status. The thrown
+   * error carries the HTTP `status` so callers can distinguish the retryable bootstrap case
+   * (`503 Service Unavailable`) from likely-non-retryable misconfiguration / server failures
+   * (e.g. `404`, `500`) and abort retries early in the latter cases.
+   * @throws Network/fetch errors (DNS, ECONNREFUSED, etc.) propagate as their original error
+   * type and should generally remain retryable, since they are common during cold start before
+   * the ENSRainbow HTTP server has bound its port.
    */
   async ready(): Promise<EnsRainbow.ReadyResponse> {
     const response = await fetch(new URL("/ready", this.options.endpointUrl));
@@ -430,11 +470,17 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
       }`;
 
       if (response.status === 503) {
-        throw new Error(`ENSRainbow readiness check: service not ready yet (${statusSuffix})`);
+        throw new EnsRainbowHttpError(
+          `ENSRainbow readiness check: service not ready yet (${statusSuffix})`,
+          response.status,
+          response.statusText,
+        );
       }
 
-      throw new Error(
+      throw new EnsRainbowHttpError(
         `ENSRainbow readiness check failed (${statusSuffix}). This usually indicates a non-readiness issue (e.g. wrong base URL, misrouting, or a server error).`,
+        response.status,
+        response.statusText,
       );
     }
 
@@ -443,12 +489,20 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
 
   /**
    * Get the public configuration of the ENSRainbow service.
+   *
+   * @throws {EnsRainbowHttpError} if the service responds with a non-2xx status.
    */
   async config(): Promise<EnsRainbow.ENSRainbowPublicConfig> {
     const response = await fetch(new URL("/v1/config", this.options.endpointUrl));
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch ENSRainbow config: ${response.statusText}`);
+      throw new EnsRainbowHttpError(
+        `Failed to fetch ENSRainbow config: HTTP ${response.status}${
+          response.statusText ? ` ${response.statusText}` : ""
+        }`,
+        response.status,
+        response.statusText,
+      );
     }
 
     return response.json() as Promise<EnsRainbow.ENSRainbowPublicConfig>;
