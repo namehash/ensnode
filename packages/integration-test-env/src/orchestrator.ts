@@ -5,14 +5,14 @@
  * monorepo-level integration tests, then tears everything down.
  *
  * Phases:
- *   1. Postgres + devnet via docker-compose (testcontainers DockerComposeEnvironment)
+ *   1. ENSDb (postgres) + devnet via docker-compose (testcontainers DockerComposeEnvironment)
  *   2. Download pre-built ENSRainbow LevelDB, extract, start ENSRainbow from source
  *   3. Start ENSIndexer, wait for omnichain-following / omnichain-completed
  *   4. Start ENSApi
  *   5. Run `pnpm test:integration` at the monorepo root
  *
  * Design decisions:
- *   - Postgres and devnet are started from docker/docker-compose.orchestrator.yml via
+ *   - ENSDb (postgres) and devnet are started from docker/docker-compose.orchestrator.yml via
  *     testcontainers DockerComposeEnvironment, ensuring the orchestrator always
  *     uses the same images and configuration defined there.
  *   - execa for child process management — automatic cleanup on parent exit,
@@ -22,7 +22,7 @@
  *   - ENSRainbow database is downloaded via the existing shell script and
  *     extracted with tar, mirroring the Docker entrypoint behavior.
  *   - Cleanup stops processes in reverse order (ensapi → ensindexer → ensrainbow)
- *     so DB consumers close connections before Postgres is stopped.
+ *     so DB consumers close connections before ensdb is stopped.
  *   - Abort flag pattern: if a background service crashes during polling/health
  *     checks, the orchestrator fails fast instead of waiting for a timeout.
  *   - SIGINT/SIGTERM handler is guarded against re-entrance (repeated Ctrl-C).
@@ -237,21 +237,21 @@ async function main() {
   log("Starting integration test environment...");
   logVersions();
 
-  // Phase 1: Start Postgres + Devnet via docker-compose
-  log("Starting Postgres and devnet...");
+  // Phase 1: Start ENSDb + Devnet via docker-compose
+  log("Starting ENSDb and Devnet...");
   composeEnvironment = await new DockerComposeEnvironment(
     DOCKER_DIR,
     "docker-compose.orchestrator.yml",
   )
     .withWaitStrategy("devnet", Wait.forHealthCheck())
-    .withWaitStrategy("postgres", Wait.forListeningPorts())
+    .withWaitStrategy("ensdb", Wait.forListeningPorts())
     .withStartupTimeout(120_000)
-    .up(["postgres", "devnet"]);
+    .up(["ensdb", "devnet"]);
 
-  const postgresContainer = composeEnvironment.getContainer("postgres");
-  const postgresPort = postgresContainer.getMappedPort(5432);
-  const ENSDB_URL = `postgresql://postgres:password@localhost:${postgresPort}/postgres`;
-  log(`Postgres is ready (port ${postgresPort})`);
+  const ensdbContainer = composeEnvironment.getContainer("ensdb");
+  const ensdbPort = ensdbContainer.getMappedPort(5432);
+  const ENSDB_URL = `postgresql://postgres:password@localhost:${ensdbPort}/postgres`;
+  log(`ENSDb is ready (port ${ensdbPort})`);
   log("Devnet is ready");
 
   // Phase 2: Download ENSRainbow database and start from source
