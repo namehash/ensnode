@@ -39,7 +39,10 @@ import {
 } from "testcontainers";
 
 import { ENSNamespaceIds } from "@ensnode/datasources";
-import { OmnichainIndexingStatusIds } from "@ensnode/ensnode-sdk";
+import {
+  IndexingMetadataContextStatusCodes,
+  OmnichainIndexingStatusIds,
+} from "@ensnode/ensnode-sdk";
 
 const MONOREPO_ROOT = resolve(import.meta.dirname, "../../..");
 const DOCKER_DIR = resolve(MONOREPO_ROOT, "docker");
@@ -199,9 +202,14 @@ async function pollIndexingStatus(
     while (Date.now() - start < timeoutMs) {
       checkAborted();
       try {
-        const snapshot = await ensDbClient.getIndexingStatusSnapshot();
-        if (snapshot !== undefined) {
-          const omnichainStatus = snapshot.omnichainSnapshot.omnichainStatus;
+        const indexingMetadataContext = await ensDbClient.getIndexingMetadataContext();
+
+        if (
+          indexingMetadataContext.statusCode === IndexingMetadataContextStatusCodes.Uninitialized
+        ) {
+          console.log("IndexingMetadataContext is uninitialized, waiting...");
+        } else {
+          const { omnichainStatus } = indexingMetadataContext.indexingStatus.omnichainSnapshot;
           log(`Omnichain status: ${omnichainStatus}`);
           if (
             omnichainStatus === OmnichainIndexingStatusIds.Following ||
