@@ -139,7 +139,7 @@ export const buildReferralEditionSnapshotRevShareCap = (
   // 1. Sort events into chronological order by onchain execution order.
   const sortedEvents = sortReferralEvents(events);
 
-  // Precompute admin-action object lookup for the accounting record.
+  // Index admin actions by referrer; `rules.adminActions` is validated to have at most one action per referrer.
   const adminActionByReferrer = new Map<NormalizedAddress, AdminAction>();
   for (const action of rules.adminActions) {
     adminActionByReferrer.set(action.referrer, action);

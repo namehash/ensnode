@@ -129,22 +129,25 @@ export const getReferralEvents = async (rules: ReferralProgramRules): Promise<Re
         actionType: ensIndexerSchema.registrarActions.type,
         transactionHash: ensIndexerSchema.registrarActions.transactionHash,
         registrant: ensIndexerSchema.registrarActions.registrant,
+        // Surface the joined-table primary keys so the post-query null checks can
+        // distinguish "lifecycle row missing" from "domain row missing".
+        lifecycleNode: ensIndexerSchema.registrationLifecycles.node,
         domainName: ensIndexerSchema.subgraph_domain.name,
       })
       .from(ensIndexerSchema.registrarActions)
-      // INNER JOINs are total under the ENSAnalytics plugin prerequisites:
-      //   - registrarAction → registrationLifecycle: 1:1 by indexer construction (registrars
-      //     plugin writes both rows together; see registrarActionRelations in the schema).
-      //   - registrationLifecycle → subgraph_domain: cross-plugin invariant guaranteed by
-      //     `hasEnsAnalyticsConfigSupport` (Subgraph + Basenames + Lineanames + Registrars all
-      //     required). Enforced at request time by `ensanalyticsApiMiddleware`, and at cache-build
-      //     time by `referral-edition-snapshots.cache.ts` so the cache can't poison itself with
-      //     silently-dropped rows during proactive init.
-      .innerJoin(
+      // LEFT JOINs + null-throw post-query: the ENSAnalytics plugin prerequisites
+      // (`hasEnsAnalyticsConfigSupport`, enforced by `ensanalyticsApiMiddleware` at request
+      // time and `referral-edition-snapshots.cache.ts` at cache-build time) guarantee both
+      // joined tables are populated for every active namespace. Under those guarantees the
+      // joins behave like INNER joins. We use LEFT joins anyway as a tripwire: if a future
+      // indexer change, race condition, or schema migration ever leaves an orphaned row, the
+      // null-checks below will throw with the specific `registrarAction.id` instead of
+      // silently truncating the leaderboard / accounting.
+      .leftJoin(
         ensIndexerSchema.registrationLifecycles,
         eq(ensIndexerSchema.registrarActions.node, ensIndexerSchema.registrationLifecycles.node),
       )
-      .innerJoin(
+      .leftJoin(
         ensIndexerSchema.subgraph_domain,
         eq(ensIndexerSchema.registrationLifecycles.node, ensIndexerSchema.subgraph_domain.id),
       )
@@ -174,9 +177,14 @@ export const getReferralEvents = async (rules: ReferralProgramRules): Promise<Re
           `getReferralEvents: decodedReferrer must be non-null for registrar action '${record.id}'`,
         );
       }
+      if (record.lifecycleNode === null) {
+        throw new Error(
+          `getReferralEvents: no registrationLifecycles row matched registrar action '${record.id}' (this should be unreachable under the ENSAnalytics plugin prerequisites — file a bug)`,
+        );
+      }
       if (record.domainName === null) {
         throw new Error(
-          `getReferralEvents: domain.name must exist for registrar action '${record.id}'`,
+          `getReferralEvents: no subgraph_domain row (or null name) matched registrar action '${record.id}' (this should be unreachable under the ENSAnalytics plugin prerequisites — file a bug)`,
         );
       }
       if (record.transactionHash === null) {
