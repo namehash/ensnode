@@ -169,21 +169,7 @@ export function waitForEnsRainbowToBeReady(): Promise<void> {
           : `This might be due to ENSRainbow still bootstrapping its database, which can take 30+ minutes during a cold start.`,
       });
     },
-    {
-      retries: 60, // This allows for a total of over 1 hour of retries with 1 minute between attempts.
-      minTimeout: secondsToMilliseconds(60),
-      maxTimeout: secondsToMilliseconds(60),
-      onFailedAttempt: ({ attemptNumber, retriesLeft }) => {
-        logger.warn({
-          msg: `ENSRainbow readiness check failed`,
-          attempt: attemptNumber,
-          retriesLeft,
-          ensRainbowInstance: ensRainbowUrl.href,
-          advice: `This might be due to ENSRainbow having a cold start, which can take 30+ minutes.`,
-        });
-      },
-    },
-  )
+  })
     .then(() => {
       logger.info({
         msg: `ENSRainbow instance is ready`,
