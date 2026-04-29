@@ -122,10 +122,11 @@ ResolverRef.implement({
     // Resolver.bridged
     ////////////////////
     bridged: t.field({
-      description: "Whether Resolver is a BridgedResolver.",
+      description:
+        "If Resolver is a Bridged Resolver, the Registry to which it Bridges resolution.",
       type: AccountIdRef,
       nullable: true,
-      resolve: (parent) => isBridgedResolver(config.namespace, parent),
+      resolve: (parent) => isBridgedResolver(config.namespace, parent)?.registry ?? null,
     }),
 
     ////////////////////////

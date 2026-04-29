@@ -129,6 +129,11 @@ export default {
         address: contracts.ethRegistrar,
         startBlock: 0,
       },
+      ENSv1Resolver: {
+        abi: ResolverABI,
+        address: "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
+        startBlock: 0,
+      },
     },
   },
 

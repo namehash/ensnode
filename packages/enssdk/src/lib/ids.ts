@@ -7,7 +7,10 @@ import type {
   DomainId,
   EACResource,
   ENSv1DomainId,
+  ENSv1RegistryId,
+  ENSv1VirtualRegistryId,
   ENSv2DomainId,
+  ENSv2RegistryId,
   LabelHash,
   Node,
   NormalizedAddress,
@@ -15,7 +18,6 @@ import type {
   PermissionsResourceId,
   PermissionsUserId,
   RegistrationId,
-  RegistryId,
   RenewalId,
   ResolverId,
   ResolverRecordsId,
@@ -24,11 +26,27 @@ import type {
 } from "./types";
 import { AssetNamespaces } from "./types";
 
-export const makeRegistryId = (accountId: AccountId) => stringifyAccountId(accountId) as RegistryId;
+export const makeENSv1RegistryId = (accountId: AccountId) =>
+  stringifyAccountId(accountId) as ENSv1RegistryId;
+
+export const makeENSv2RegistryId = (accountId: AccountId) =>
+  stringifyAccountId(accountId) as ENSv2RegistryId;
+
+export const makeENSv1VirtualRegistryId = (accountId: AccountId, node: Node) =>
+  `${makeENSv1RegistryId(accountId)}/${node}` as ENSv1VirtualRegistryId;
+
+/**
+ * Stringifies an {@link AccountId} as the id of a concrete Registry — either an
+ * {@link ENSv1RegistryId} or an {@link ENSv2RegistryId}, but never an
+ * {@link ENSv1VirtualRegistryId}.
+ */
+export const makeConcreteRegistryId = (accountId: AccountId) =>
+  stringifyAccountId(accountId) as ENSv1RegistryId | ENSv2RegistryId;
 
 export const makeResolverId = (contract: AccountId) => stringifyAccountId(contract) as ResolverId;
 
-export const makeENSv1DomainId = (node: Node) => node as ENSv1DomainId;
+export const makeENSv1DomainId = (accountId: AccountId, node: Node) =>
+  `${makeENSv1RegistryId(accountId)}/${node}` as ENSv1DomainId;
 
 export const makeENSv2DomainId = (registry: AccountId, storageId: StorageId) =>
   stringifyAssetId({

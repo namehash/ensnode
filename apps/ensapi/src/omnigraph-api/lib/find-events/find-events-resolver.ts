@@ -13,7 +13,8 @@ import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
 type EventJoinTable =
   | typeof ensIndexerSchema.domainEvent
   | typeof ensIndexerSchema.resolverEvent
-  | typeof ensIndexerSchema.permissionsEvent;
+  | typeof ensIndexerSchema.permissionsEvent
+  | typeof ensIndexerSchema.permissionsUserEvent;
 
 /**
  * Available filter options for find-events queries.
