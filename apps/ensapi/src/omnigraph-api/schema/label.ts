@@ -28,3 +28,26 @@ LabelRef.implement({
     }),
   }),
 });
+
+//////////
+// Inputs
+//////////
+
+/**
+ * Maximum number of LabelHashes accepted per `Query.labels` request.
+ *
+ * Caps the resolver's `inArray` query so a single GraphQL request cannot enumerate
+ * the entire `label` table.
+ */
+export const LABELS_BY_HASHES_MAX = 100;
+
+export const LabelsByHashesInput = builder.inputType("LabelsByHashesInput", {
+  description: "Look up Labels by a batch of LabelHashes.",
+  fields: (t) => ({
+    hashes: t.field({
+      type: ["Hex"],
+      required: true,
+      description: `LabelHashes to look up. Up to ${LABELS_BY_HASHES_MAX} hashes per request. Absent labels are simply omitted from the result.`,
+    }),
+  }),
+});

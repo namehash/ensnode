@@ -692,6 +692,14 @@ type Label {
   interpreted: InterpretedLabel!
 }
 
+"""Look up Labels by a batch of LabelHashes."""
+input LabelsByHashesInput {
+  """
+  LabelHashes to look up. Up to 100 hashes per request. Absent labels are simply omitted from the result.
+  """
+  hashes: [Hex!]!
+}
+
 """Constructs a reference to a specific Node via one of `name` or `node`."""
 input NameOrNodeInput @oneOf {
   name: InterpretedName
@@ -887,6 +895,11 @@ type Query {
 
   """Find Domains by Name."""
   domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: DomainsWhereInput!): QueryDomainsConnection
+
+  """
+  Look up Labels in the index by a batch of LabelHashes. Each returned Label exposes its `hash` and `interpreted` representation, where `interpreted` is the Encoded LabelHash for unhealed/unknown labels and a normalized literal for healed labels. LabelHashes that are not present in the index are simply omitted from the result.
+  """
+  labels(by: LabelsByHashesInput!): [Label!]!
 
   """Identify Permissions by ID or AccountId."""
   permissions(by: PermissionsIdInput!): Permissions
