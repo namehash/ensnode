@@ -1,7 +1,7 @@
 services:
   ensrainbow:
     container_name: ensrainbow
-    image: ghcr.io/namehash/ensnode/ensrainbow:latest
+    image: ghcr.io/namehash/ensnode/ensrainbow:${ENSNODE_VERSION:-1.10.1}
     build:
       dockerfile: ./apps/ensrainbow/Dockerfile
       context: ../..
@@ -9,7 +9,6 @@ services:
       - "3223:3223"
     volumes:
       - ensrainbow_data:/app/apps/ensrainbow/data
-    restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:3223/health"]
       interval: 30s

@@ -18,7 +18,8 @@
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
     "typecheck": "tsgo --noEmit",
-    "generate:gqlschema": "tsx src/omnigraph-api/lib/write-graphql-schema.ts"
+    "generate:gqlschema": "tsx src/omnigraph-api/lib/write-graphql-schema.ts",
+    "version:current": "node -p \"require('./package.json').version\""
   },
   "dependencies": {
     "@ensdomains/ensjs": "^4.0.2",
