@@ -6,7 +6,7 @@ import { dirname, join, resolve } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { buildLabelSetId, buildLabelSetVersion } from "@ensnode/ensnode-sdk";
-import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
+import { type EnsRainbow, StatusCode } from "@ensnode/ensrainbow-sdk";
 
 import type { AbsolutePath, DbSchemaVersion } from "@/config/types";
 import { DB_SCHEMA_VERSION, ENSRainbowDB } from "@/lib/database";
@@ -116,8 +116,13 @@ describe("entrypointCommand (existing DB on disk)", () => {
     const configRes = await fetch(`${endpoint}/v1/config`);
     expect(configRes.status).toBe(200);
     const configData = (await configRes.json()) as EnsRainbow.ENSRainbowPublicConfig;
-    expect(configData.labelSet.labelSetId).toBe(labelSetId);
-    expect(configData.recordsCount).toBe(0);
+    expect(configData.serverLabelSet.labelSetId).toBe(labelSetId);
+    expect(configData.serverLabelSet.highestLabelSetVersion).toBe(labelSetVersion);
+
+    const countRes = await fetch(`${endpoint}/v1/labels/count`);
+    expect(countRes.status).toBe(200);
+    const countData = (await countRes.json()) as EnsRainbow.CountResponse;
+    expect(countData).toMatchObject({ status: StatusCode.Success, count: 0 });
 
     // Marker should still be present after a successful idempotent attach.
     expect(existsSync(markerFile)).toBe(true);

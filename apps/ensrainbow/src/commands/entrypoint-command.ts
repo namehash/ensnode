@@ -10,7 +10,7 @@ import { stringifyConfig } from "@ensnode/ensnode-sdk/internal";
 import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
 
 import { buildEnsRainbowPublicConfig } from "@/config/public";
-import type { AbsolutePath, DbSchemaVersion } from "@/config/types";
+import type { AbsolutePath, DbConfig, DbSchemaVersion } from "@/config/types";
 import { createApi } from "@/lib/api";
 import { ENSRainbowDB } from "@/lib/database";
 import { buildDbConfig, ENSRainbowServer } from "@/lib/server";
@@ -91,7 +91,12 @@ export async function entrypointCommand(
   const ensRainbowServer = ENSRainbowServer.createPending();
 
   let cachedPublicConfig: EnsRainbow.ENSRainbowPublicConfig | null = null;
-  const app = createApi(ensRainbowServer, () => cachedPublicConfig);
+  let cachedDbConfig: DbConfig | null = null;
+  const app = createApi(
+    ensRainbowServer,
+    () => cachedPublicConfig,
+    () => cachedDbConfig,
+  );
 
   const httpServer = serve({
     fetch: app.fetch,
@@ -155,7 +160,8 @@ export async function entrypointCommand(
     // Defer bootstrap so the HTTP server starts accepting requests first.
     setTimeout(() => {
       runDbBootstrap(options, ensRainbowServer, bootstrapAborter.signal)
-        .then((publicConfig) => {
+        .then(({ publicConfig, dbConfig }) => {
+          cachedDbConfig = dbConfig;
           cachedPublicConfig = publicConfig;
           logger.info(
             "ENSRainbow database bootstrap complete. Service is ready to serve heal requests.",
@@ -184,13 +190,13 @@ export async function entrypointCommand(
  * Idempotent DB bootstrap pipeline.
  *
  * If marker + DB are present, reuse them; otherwise download + extract.
- * Returns the public config for the attached DB.
+ * Returns the public config and DB config for the attached DB.
  */
 async function runDbBootstrap(
   options: EntrypointCommandOptions,
   ensRainbowServer: ENSRainbowServer,
   signal: AbortSignal,
-): Promise<EnsRainbow.ENSRainbowPublicConfig> {
+): Promise<{ publicConfig: EnsRainbow.ENSRainbowPublicConfig; dbConfig: DbConfig }> {
   const { dataDir, dbSchemaVersion, labelSetId, labelSetVersion } = options;
   const downloadTempDir = options.downloadTempDir ?? join(dataDir, ".download-temp");
   const markerFile = join(dataDir, DB_READY_MARKER_FILENAME);
@@ -214,7 +220,8 @@ async function runDbBootstrap(
       }
       await ensRainbowServer.attachDb(existingDb);
       existingDbAttached = true;
-      return buildEnsRainbowPublicConfig(await buildDbConfig(ensRainbowServer));
+      const dbConfig = await buildDbConfig(ensRainbowServer);
+      return { publicConfig: buildEnsRainbowPublicConfig(dbConfig), dbConfig };
     } catch (error) {
       if (error instanceof BootstrapAbortedError || signal.aborted) {
         throw error;
@@ -271,7 +278,8 @@ async function runDbBootstrap(
     // Write marker only after a successful attach.
     await writeFile(markerFile, "");
 
-    return buildEnsRainbowPublicConfig(await buildDbConfig(ensRainbowServer));
+    const dbConfig = await buildDbConfig(ensRainbowServer);
+    return { publicConfig: buildEnsRainbowPublicConfig(dbConfig), dbConfig };
   } catch (error) {
     if (!dbAttached) {
       await safeClose(db);
