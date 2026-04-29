@@ -89,13 +89,9 @@ ENSNode is a modern, multichain indexer for ENS. It supports backwards-compatibl
 
 Documentation for the ENSNode suite of apps is available at [ensnode.io](https://ensnode.io).
 
-## Running with Docker
+## Quickstart
 
-```bash
-docker compose -f docker/docker-compose.yml up -d
-```
-
-See [`docker/README.md`](docker/README.md) for all use cases and commands.
+Learn how to quickly get started with ENSNode through APIs (including Omnigraph), SDKs (`enssdk`), React components (`enskit`), and Docker Compose in the [ENSNode Quickstart Guide](https://ensnode.io/docs).
 
 ## Contributions
 
