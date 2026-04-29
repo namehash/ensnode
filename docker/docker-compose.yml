@@ -3,12 +3,13 @@ services:
     extends:
       file: services/ensindexer.yml
       service: ensindexer
+    restart: unless-stopped
     environment:
       ENSINDEXER_SCHEMA_NAME: docker_ensindexer_v1
     depends_on:
       ensrainbow:
         condition: service_healthy
-      postgres:
+      ensdb:
         condition: service_healthy
     env_file:
       - path: envs/.env.docker.common
@@ -21,10 +22,11 @@ services:
     extends:
       file: services/ensapi.yml
       service: ensapi
+    restart: unless-stopped
     environment:
       ENSINDEXER_SCHEMA_NAME: docker_ensindexer_v1
     depends_on:
-      postgres:
+      ensdb:
         condition: service_healthy
     env_file:
       - path: envs/.env.docker.common
@@ -36,6 +38,7 @@ services:
     extends:
       file: services/ensrainbow.yml
       service: ensrainbow
+    restart: unless-stopped
     env_file:
       - path: envs/.env.docker.common
         required: true
@@ -46,6 +49,7 @@ services:
     extends:
       file: services/ensadmin.yml
       service: ensadmin
+    restart: unless-stopped
     depends_on:
       ensapi:
         condition: service_started
@@ -55,10 +59,11 @@ services:
       - path: envs/.env.docker.local
         required: true
 
-  postgres:
+  ensdb:
     extends:
-      file: services/postgres.yml
-      service: postgres
+      file: services/ensdb.yml
+      service: ensdb
+    restart: unless-stopped
     env_file:
       - path: envs/.env.docker.common
         required: true
@@ -66,7 +71,7 @@ services:
 volumes:
   # Docker Compose requires volumes used by services to be declared in each
   # compose file that references them — they cannot be inherited via `extends`.
-  postgres_data:
+  ensdb_data:
     driver: local
   ensrainbow_data:
     driver: local
