@@ -5,6 +5,7 @@ import {
   type ENSNamespaceId,
   ensTestEnvChain,
   getENSNamespace,
+  sepoliaV2Chain,
 } from "@ensnode/datasources";
 
 import { serializeChainId } from "../serialize";
@@ -125,6 +126,12 @@ export function buildRpcConfigsFromEnv(
     const specificValue = env[`RPC_URL_${chain.id}`];
     if (specificValue) {
       rpcConfigs[serializeChainId(chain.id)] = specificValue;
+      continue;
+    }
+
+    // sepolia-v2 Chain
+    if (chain.id === sepoliaV2Chain.id) {
+      rpcConfigs[serializeChainId(sepoliaV2Chain.id)] = sepoliaV2Chain.rpcUrls.default.http[0];
       continue;
     }
 

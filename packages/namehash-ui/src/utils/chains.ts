@@ -14,7 +14,7 @@ import {
   sepolia,
 } from "viem/chains";
 
-import { ensTestEnvChain } from "@ensnode/datasources";
+import { ensTestEnvChain, sepoliaV2Chain } from "@ensnode/datasources";
 
 export const SUPPORTED_CHAINS = [
   ensTestEnvChain,
@@ -39,6 +39,7 @@ export const SUPPORTED_CHAINS = [
  */
 const CUSTOM_CHAIN_NAMES = new Map<ChainId, string>([
   [ensTestEnvChain.id, "Ethereum Local (ens-test-env)"],
+  [sepoliaV2Chain.id, "Sepolia V2 (virtual)"],
   [mainnet.id, "Mainnet"],
   [sepolia.id, "Ethereum Sepolia"],
   [base.id, "Base"],
