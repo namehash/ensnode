@@ -43,7 +43,9 @@ async function updateServiceDefaultTag(version) {
 async function main() {
   const versionFromArg = process.argv[2];
   if (typeof versionFromArg !== "string" || versionFromArg.length === 0) {
-    throw new Error("Version argument is required. Usage: node scripts/sync-docker-services-tags.mjs <version>");
+    throw new Error(
+      "Version argument is required. Usage: node scripts/sync-docker-services-tags.mjs <version>",
+    );
   }
 
   validateVersion(versionFromArg);
