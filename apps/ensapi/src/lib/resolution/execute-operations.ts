@@ -6,6 +6,7 @@ import {
   type Hex,
   type Name,
   type RecordVersion,
+  toNormalizedAddress,
 } from "enssdk";
 import {
   ContractFunctionExecutionError,
@@ -161,6 +162,6 @@ export function interpretOperationWithRawResult(call: Operation, raw: unknown): 
       return { ...call, result: size(data) === 0 ? null : { contentType, data } };
     }
     case "interfaceImplementer":
-      return { ...call, result: interpretAddress(raw as Address) };
+      return { ...call, result: interpretAddress(toNormalizedAddress(raw as string)) };
   }
 }
