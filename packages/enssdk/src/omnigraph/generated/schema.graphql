@@ -220,7 +220,12 @@ interface Domain {
   owner: Account
 
   """
-  The Canonical Path from the ENS Root to this Domain. `path` is null if the Domain is not Canonical.
+  The direct parent Domain in the canonical namegraph or null if this Domain is a root-level Domain or is not Canonical.
+  """
+  parent: Domain
+
+  """
+  The Canonical Path from this Domain to the ENS Root, in leaf→root order and inclusive of this Domain. `path` is null if the Domain is not Canonical.
   """
   path: [Domain!]
 
@@ -332,14 +337,19 @@ type ENSv1Domain implements Domain {
   """
   name: InterpretedName
 
+  """The namehash of this ENSv1 Domain."""
+  node: Node!
+
   """The owner of this Domain."""
   owner: Account
 
-  """The parent Domain of this Domain in the ENSv1 nametree."""
-  parent: ENSv1Domain
+  """
+  The direct parent Domain in the canonical namegraph or null if this Domain is a root-level Domain or is not Canonical.
+  """
+  parent: Domain
 
   """
-  The Canonical Path from the ENS Root to this Domain. `path` is null if the Domain is not Canonical.
+  The Canonical Path from this Domain to the ENS Root, in leaf→root order and inclusive of this Domain. `path` is null if the Domain is not Canonical.
   """
   path: [Domain!]
 
@@ -365,6 +375,55 @@ type ENSv1Domain implements Domain {
   subdomains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: SubdomainsWhereInput): DomainSubdomainsConnection
 }
 
+"""
+An ENSv1Registry is a concrete ENSv1 Registry contract (the mainnet ENS Registry, the Basenames shadow Registry, or the Lineanames shadow Registry).
+"""
+type ENSv1Registry implements Registry {
+  """
+  Contract metadata for this Registry. If this is an ENSv1VirtualRegistry, this will reference the concrete Registry contract under which the parent Domain exists.
+  """
+  contract: AccountId!
+
+  """The Domains managed by this Registry."""
+  domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: RegistryDomainsWhereInput): RegistryDomainsConnection
+
+  """A unique reference to this Registry."""
+  id: RegistryId!
+
+  """The Domains for which this Registry is a Subregistry."""
+  parents(after: String, before: String, first: Int, last: Int): RegistryParentsConnection
+
+  """The Permissions managed by this Registry."""
+  permissions: Permissions
+}
+
+"""
+An ENSv1VirtualRegistry is the virtual Registry managed by an ENSv1 Domain that has children. It is keyed by `(chainId, address, node)` where `(chainId, address)` identify the concrete Registry that houses the parent Domain, and `node` is the parent Domain's namehash.
+"""
+type ENSv1VirtualRegistry implements Registry {
+  """
+  Contract metadata for this Registry. If this is an ENSv1VirtualRegistry, this will reference the concrete Registry contract under which the parent Domain exists.
+  """
+  contract: AccountId!
+
+  """The Domains managed by this Registry."""
+  domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: RegistryDomainsWhereInput): RegistryDomainsConnection
+
+  """A unique reference to this Registry."""
+  id: RegistryId!
+
+  """
+  The namehash of the parent ENSv1 Domain that owns this virtual Registry.
+  """
+  node: Node!
+
+  """The Domains for which this Registry is a Subregistry."""
+  parents(after: String, before: String, first: Int, last: Int): RegistryParentsConnection
+
+  """The Permissions managed by this Registry."""
+  permissions: Permissions
+}
+
 """An ENSv2Domain represents an ENSv2 Domain."""
 type ENSv2Domain implements Domain {
   """All Events associated with this Domain."""
@@ -385,7 +444,12 @@ type ENSv2Domain implements Domain {
   owner: Account
 
   """
-  The Canonical Path from the ENS Root to this Domain. `path` is null if the Domain is not Canonical.
+  The direct parent Domain in the canonical namegraph or null if this Domain is a root-level Domain or is not Canonical.
+  """
+  parent: Domain
+
+  """
+  The Canonical Path from this Domain to the ENS Root, in leaf→root order and inclusive of this Domain. `path` is null if the Domain is not Canonical.
   """
   path: [Domain!]
 
@@ -429,6 +493,26 @@ type ENSv2DomainPermissionsConnection {
 type ENSv2DomainPermissionsConnectionEdge {
   cursor: String!
   node: PermissionsUser!
+}
+
+"""An ENSv2Registry represents an ENSv2 Registry contract."""
+type ENSv2Registry implements Registry {
+  """
+  Contract metadata for this Registry. If this is an ENSv1VirtualRegistry, this will reference the concrete Registry contract under which the parent Domain exists.
+  """
+  contract: AccountId!
+
+  """The Domains managed by this Registry."""
+  domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: RegistryDomainsWhereInput): RegistryDomainsConnection
+
+  """A unique reference to this Registry."""
+  id: RegistryId!
+
+  """The Domains for which this Registry is a Subregistry."""
+  parents(after: String, before: String, first: Int, last: Int): RegistryParentsConnection
+
+  """The Permissions managed by this Registry."""
+  permissions: Permissions
 }
 
 """
@@ -761,6 +845,9 @@ type PermissionsUser {
   """The contract within which these Permissions are granted."""
   contract: AccountId!
 
+  """All Events associated with this PermissionsUser."""
+  events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): PermissionsUserEventsConnection
+
   """A unique reference to this PermissionsUser."""
   id: PermissionsUserId!
 
@@ -774,12 +861,26 @@ type PermissionsUser {
   user: Account!
 }
 
+type PermissionsUserEventsConnection {
+  edges: [PermissionsUserEventsConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type PermissionsUserEventsConnectionEdge {
+  cursor: String!
+  node: Event!
+}
+
 """PermissionsUserId represents a enssdk#PermissionsUserId."""
 scalar PermissionsUserId
 
 type Query {
   """Identify an Account by ID or Address."""
   account(by: AccountByInput!): Account
+
+  """TODO"""
+  allDomains(after: String, before: String, first: Int, last: Int): QueryAllDomainsConnection
 
   """Identify a Domain by Name or DomainId"""
   domain(by: DomainIdInput!): Domain
@@ -793,7 +894,9 @@ type Query {
   """TODO"""
   registrations(after: String, before: String, first: Int, last: Int): QueryRegistrationsConnection
 
-  """Identify a Registry by ID or AccountId."""
+  """
+  Identify a Registry by ID or AccountId. If querying by `contract`, only concrete Registries will be returned.
+  """
   registry(by: RegistryIdInput!): Registry
 
   """Identify a Resolver by ID or AccountId."""
@@ -802,14 +905,21 @@ type Query {
   """TODO"""
   resolvers(after: String, before: String, first: Int, last: Int): QueryResolversConnection
 
-  """The ENSv2 Root Registry, if exists."""
-  root: Registry
+  """
+  The Root Registry for this namespace. It will be the ENSv2 Root Registry when defined or the ENSv1 Root Registry.
+  """
+  root: Registry!
+}
 
-  """TODO"""
-  v1Domains(after: String, before: String, first: Int, last: Int): QueryV1DomainsConnection
+type QueryAllDomainsConnection {
+  edges: [QueryAllDomainsConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
 
-  """TODO"""
-  v2Domains(after: String, before: String, first: Int, last: Int): QueryV2DomainsConnection
+type QueryAllDomainsConnectionEdge {
+  cursor: String!
+  node: Domain!
 }
 
 type QueryDomainsConnection {
@@ -843,28 +953,6 @@ type QueryResolversConnection {
 type QueryResolversConnectionEdge {
   cursor: String!
   node: Resolver!
-}
-
-type QueryV1DomainsConnection {
-  edges: [QueryV1DomainsConnectionEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type QueryV1DomainsConnectionEdge {
-  cursor: String!
-  node: ENSv1Domain!
-}
-
-type QueryV2DomainsConnection {
-  edges: [QueryV2DomainsConnectionEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type QueryV2DomainsConnectionEdge {
-  cursor: String!
-  node: ENSv2Domain!
 }
 
 """
@@ -923,9 +1011,13 @@ type RegistrationRenewalsConnectionEdge {
   node: Renewal!
 }
 
-"""A Registry represents an ENSv2 Registry contract."""
-type Registry {
-  """Contract metadata for this Registry"""
+"""
+A Registry represents a Registry contract in the ENS namegraph. It may be an ENSv1Registry (a concrete ENSv1 Registry contract), an ENSv1VirtualRegistry (the virtual Registry managed by an ENSv1 domain that has children), or an ENSv2Registry.
+"""
+interface Registry {
+  """
+  Contract metadata for this Registry. If this is an ENSv1VirtualRegistry, this will reference the concrete Registry contract under which the parent Domain exists.
+  """
   contract: AccountId!
 
   """The Domains managed by this Registry."""
@@ -977,7 +1069,7 @@ type RegistryParentsConnection {
 
 type RegistryParentsConnectionEdge {
   cursor: String!
-  node: ENSv2Domain!
+  node: Domain!
 }
 
 type RegistryPermissionsUser {
@@ -1023,7 +1115,9 @@ scalar RenewalId
 
 """A Resolver represents a Resolver contract on-chain."""
 type Resolver {
-  """Whether Resolver is a BridgedResolver."""
+  """
+  If Resolver is a Bridged Resolver, the Registry to which it Bridges resolution.
+  """
   bridged: AccountId
 
   """Contract metadata for this Resolver."""

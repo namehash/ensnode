@@ -245,7 +245,8 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
                 TraceableENSProtocol.ForwardResolution,
                 ForwardResolutionProtocolStep.AccelerateKnownOffchainLookupResolver,
                 {},
-                () => _resolveForward(name, selection, { ...options, registry: bridgesTo }),
+                () =>
+                  _resolveForward(name, selection, { ...options, registry: bridgesTo.registry }),
               );
             }
 

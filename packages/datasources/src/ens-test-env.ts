@@ -128,6 +128,11 @@ export default {
         address: "0x4c4a2f8c81640e47606d3fd77b353e87ba015584",
         startBlock: 0,
       },
+      ENSv1Resolver: {
+        abi: ResolverABI,
+        address: "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
+        startBlock: 0,
+      },
     },
   },
 

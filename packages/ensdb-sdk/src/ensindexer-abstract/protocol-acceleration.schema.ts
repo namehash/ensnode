@@ -57,12 +57,12 @@ export const reverseNameRecord = onchainTable(
 export const domainResolverRelation = onchainTable(
   "domain_resolver_relations",
   (t) => ({
-    // keyed by (chainId, registry, node)
+    // keyed by (chainId, address, node)
     chainId: t.integer().notNull().$type<ChainId>(),
 
     // The Registry (ENSv1Registry or ENSv2Registry)'s AccountId.
     address: t.hex().notNull().$type<Address>(),
-    domainId: t.hex().notNull().$type<DomainId>(),
+    domainId: t.text().notNull().$type<DomainId>(),
 
     // The Domain's assigned Resolver's address (NOTE: always scoped to chainId)
     resolver: t.hex().notNull().$type<Address>(),
