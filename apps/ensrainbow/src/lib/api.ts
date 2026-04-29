@@ -72,7 +72,7 @@ export function createApi(
 
   api.get("/v1/heal/:labelhash", async (c: HonoContext) => {
     if (!server.isReady()) {
-      return c.json(buildServiceUnavailableBody(), ErrorCode.ServiceUnavailable);
+      return c.json(buildServiceUnavailableBody(), 503);
     }
 
     const labelhash = c.req.param("labelhash") as `0x${string}`;
@@ -121,7 +121,7 @@ export function createApi(
     } catch (error) {
       // Handle readiness races during shutdown.
       if (error instanceof DbNotReadyError) {
-        return c.json(buildServiceUnavailableBody(), ErrorCode.ServiceUnavailable);
+        return c.json(buildServiceUnavailableBody(), 503);
       }
       throw error;
     }
@@ -135,7 +135,7 @@ export function createApi(
   api.get("/ready", (c: HonoContext) => {
     // Require both DB attach and config publication to avoid a transient false-ready state.
     if (!server.isReady() || publicConfigSupplier() === null) {
-      return c.json(buildServiceUnavailableBody(), ErrorCode.ServiceUnavailable);
+      return c.json(buildServiceUnavailableBody(), 503);
     }
     const result: EnsRainbow.ReadyResponse = { status: "ok" };
     return c.json(result);
@@ -144,7 +144,7 @@ export function createApi(
   api.get("/v1/labels/count", (c: HonoContext) => {
     const dbConfig = dbConfigSupplier();
     if (dbConfig === null) {
-      return c.json(buildServiceUnavailableBody(), ErrorCode.ServiceUnavailable);
+      return c.json(buildServiceUnavailableBody(), 503);
     }
 
     const countResponse: EnsRainbow.CountSuccess = {
@@ -158,7 +158,7 @@ export function createApi(
   api.get("/v1/config", (c: HonoContext) => {
     const publicConfig = publicConfigSupplier();
     if (publicConfig === null) {
-      return c.json(buildServiceUnavailableBody(), ErrorCode.ServiceUnavailable);
+      return c.json(buildServiceUnavailableBody(), 503);
     }
     return c.json(publicConfig);
   });
