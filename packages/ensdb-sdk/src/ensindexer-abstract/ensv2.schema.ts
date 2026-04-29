@@ -153,6 +153,15 @@ export const permissionsEvent = onchainTable(
   (t) => ({ pk: primaryKey({ columns: [t.permissionsId, t.eventId] }) }),
 );
 
+export const permissionsUserEvent = onchainTable(
+  "permissions_user_events",
+  (t) => ({
+    permissionsUserId: t.text().notNull().$type<PermissionsUserId>(),
+    eventId: t.text().notNull(),
+  }),
+  (t) => ({ pk: primaryKey({ columns: [t.permissionsUserId, t.eventId] }) }),
+);
+
 ///////////
 // Account
 ///////////
