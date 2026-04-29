@@ -257,7 +257,7 @@ export const domain = onchainTable(
     labelHash: t.hex().notNull().$type<LabelHash>(),
 
     // If this is an ENSv1Domain, this is the effective owner of the Domain.
-    // If this is an ENSv2Domain, this is the HCA account address if used, otherwise Transaction.from.
+    // If this is an ENSv2Domain, this is the on-chain owner address (the HCA account address if used).
     ownerId: t.hex().$type<NormalizedAddress>(),
 
     // If this is an ENSv1Domain, may have a `rootRegistryOwner`, otherwise null.
@@ -340,12 +340,12 @@ export const registration = onchainTable(
     registrarChainId: t.integer().notNull().$type<ChainId>(),
     registrarAddress: t.hex().notNull().$type<NormalizedAddress>(),
 
-    // may reference a registrant. If this is an ENSv2 Registration, the HCA account address
-    // if used, otherwise Transaction.from.
+    // may reference a registrant. If this is an ENSv2 Registration, the protocol-emitted
+    // registrant address (the HCA account address if used).
     registrantId: t.hex().$type<NormalizedAddress>(),
 
-    // may reference an unregistrant. If this is an ENSv2 Registration, the HCA account address
-    // if used, otherwise Transaction.from.
+    // may reference an unregistrant. If this is an ENSv2 Registration, the protocol-emitted
+    // unregistrant address (the HCA account address if used).
     unregistrantId: t.hex().$type<NormalizedAddress>(),
 
     // may have referrer data
@@ -542,7 +542,7 @@ export const permissionsUser = onchainTable(
     chainId: t.integer().notNull().$type<ChainId>(),
     address: t.hex().notNull().$type<NormalizedAddress>(),
     resource: t.bigint().notNull(),
-    // The User this Permission is granted to, the HCA account address if used, otherwise Transaction.from.
+    // The user/grantee address this Permission is granted to (the HCA account address if used).
     user: t.hex().notNull().$type<NormalizedAddress>(),
 
     // has one roles bitmap

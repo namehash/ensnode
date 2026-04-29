@@ -167,7 +167,7 @@ type BaseRegistrarRegistration implements Registration {
   referrer: Hex
 
   """
-  The Registrant of a Registration, if exists. For ENSv2 Registrations, the HCA account address if used, otherwise Transaction.from.
+  The Registrant of a Registration, if exists. For ENSv2 Registrations, the protocol-emitted registrant address (the HCA account address if used).
   """
   registrant: Account
 
@@ -183,7 +183,7 @@ type BaseRegistrarRegistration implements Registration {
   start: BigInt!
 
   """
-  The Unregistrant of a Registration, if exists. For ENSv2 Registrations, the HCA account address if used, otherwise Transaction.from.
+  The Unregistrant of a Registration, if exists. For ENSv2 Registrations, the protocol-emitted unregistrant address (the HCA account address if used).
   """
   unregistrant: Account
 
@@ -221,7 +221,7 @@ interface Domain {
   name: InterpretedName
 
   """
-  If this is an ENSv1Domain, this is the effective owner of the Domain. If this is an ENSv2Domain, this is the HCA account address if used, otherwise Transaction.from.
+  If this is an ENSv1Domain, this is the effective owner of the Domain. If this is an ENSv2Domain, this is the on-chain owner address (the HCA account address if used).
   """
   owner: Account
 
@@ -347,7 +347,7 @@ type ENSv1Domain implements Domain {
   node: Node!
 
   """
-  If this is an ENSv1Domain, this is the effective owner of the Domain. If this is an ENSv2Domain, this is the HCA account address if used, otherwise Transaction.from.
+  If this is an ENSv1Domain, this is the effective owner of the Domain. If this is an ENSv2Domain, this is the on-chain owner address (the HCA account address if used).
   """
   owner: Account
 
@@ -449,7 +449,7 @@ type ENSv2Domain implements Domain {
   name: InterpretedName
 
   """
-  If this is an ENSv1Domain, this is the effective owner of the Domain. If this is an ENSv2Domain, this is the HCA account address if used, otherwise Transaction.from.
+  If this is an ENSv1Domain, this is the effective owner of the Domain. If this is an ENSv2Domain, this is the on-chain owner address (the HCA account address if used).
   """
   owner: Account
 
@@ -550,7 +550,7 @@ type ENSv2RegistryRegistration implements Registration {
   referrer: Hex
 
   """
-  The Registrant of a Registration, if exists. For ENSv2 Registrations, the HCA account address if used, otherwise Transaction.from.
+  The Registrant of a Registration, if exists. For ENSv2 Registrations, the protocol-emitted registrant address (the HCA account address if used).
   """
   registrant: Account
 
@@ -566,7 +566,7 @@ type ENSv2RegistryRegistration implements Registration {
   start: BigInt!
 
   """
-  The Unregistrant of a Registration, if exists. For ENSv2 Registrations, the HCA account address if used, otherwise Transaction.from.
+  The Unregistrant of a Registration, if exists. For ENSv2 Registrations, the protocol-emitted unregistrant address (the HCA account address if used).
   """
   unregistrant: Account
 }
@@ -596,7 +596,7 @@ type ENSv2RegistryReservation implements Registration {
   referrer: Hex
 
   """
-  The Registrant of a Registration, if exists. For ENSv2 Registrations, the HCA account address if used, otherwise Transaction.from.
+  The Registrant of a Registration, if exists. For ENSv2 Registrations, the protocol-emitted registrant address (the HCA account address if used).
   """
   registrant: Account
 
@@ -612,7 +612,7 @@ type ENSv2RegistryReservation implements Registration {
   start: BigInt!
 
   """
-  The Unregistrant of a Registration, if exists. For ENSv2 Registrations, the HCA account address if used, otherwise Transaction.from.
+  The Unregistrant of a Registration, if exists. For ENSv2 Registrations, the protocol-emitted unregistrant address (the HCA account address if used).
   """
   unregistrant: Account
 }
@@ -754,7 +754,7 @@ type NameWrapperRegistration implements Registration {
   referrer: Hex
 
   """
-  The Registrant of a Registration, if exists. For ENSv2 Registrations, the HCA account address if used, otherwise Transaction.from.
+  The Registrant of a Registration, if exists. For ENSv2 Registrations, the protocol-emitted registrant address (the HCA account address if used).
   """
   registrant: Account
 
@@ -770,7 +770,7 @@ type NameWrapperRegistration implements Registration {
   start: BigInt!
 
   """
-  The Unregistrant of a Registration, if exists. For ENSv2 Registrations, the HCA account address if used, otherwise Transaction.from.
+  The Unregistrant of a Registration, if exists. For ENSv2 Registrations, the protocol-emitted unregistrant address (the HCA account address if used).
   """
   unregistrant: Account
 }
@@ -890,7 +890,7 @@ type PermissionsUser {
   roles: BigInt!
 
   """
-  The User for whom these Roles are granted: the HCA account address if used, otherwise Transaction.from.
+  The user/grantee address this Permission is granted to (the HCA account address if used).
   """
   user: Account!
 }
@@ -1014,7 +1014,7 @@ interface Registration {
   referrer: Hex
 
   """
-  The Registrant of a Registration, if exists. For ENSv2 Registrations, the HCA account address if used, otherwise Transaction.from.
+  The Registrant of a Registration, if exists. For ENSv2 Registrations, the protocol-emitted registrant address (the HCA account address if used).
   """
   registrant: Account
 
@@ -1030,7 +1030,7 @@ interface Registration {
   start: BigInt!
 
   """
-  The Unregistrant of a Registration, if exists. For ENSv2 Registrations, the HCA account address if used, otherwise Transaction.from.
+  The Unregistrant of a Registration, if exists. For ENSv2 Registrations, the protocol-emitted unregistrant address (the HCA account address if used).
   """
   unregistrant: Account
 }
@@ -1124,7 +1124,7 @@ type RegistryPermissionsUser {
   roles: BigInt!
 
   """
-  The User for whom these Roles are granted: the HCA account address if used, otherwise Transaction.from.
+  The user/grantee address this Permission is granted to (the HCA account address if used).
   """
   user: Account!
 }
@@ -1213,7 +1213,7 @@ type ResolverPermissionsUser {
   roles: BigInt!
 
   """
-  The User for whom these Roles are granted: the HCA account address if used, otherwise Transaction.from.
+  The user/grantee address this Permission is granted to (the HCA account address if used).
   """
   user: Account!
 }
@@ -1279,7 +1279,7 @@ type ThreeDNSRegistration implements Registration {
   referrer: Hex
 
   """
-  The Registrant of a Registration, if exists. For ENSv2 Registrations, the HCA account address if used, otherwise Transaction.from.
+  The Registrant of a Registration, if exists. For ENSv2 Registrations, the protocol-emitted registrant address (the HCA account address if used).
   """
   registrant: Account
 
@@ -1295,7 +1295,7 @@ type ThreeDNSRegistration implements Registration {
   start: BigInt!
 
   """
-  The Unregistrant of a Registration, if exists. For ENSv2 Registrations, the HCA account address if used, otherwise Transaction.from.
+  The Unregistrant of a Registration, if exists. For ENSv2 Registrations, the protocol-emitted unregistrant address (the HCA account address if used).
   """
   unregistrant: Account
 }
