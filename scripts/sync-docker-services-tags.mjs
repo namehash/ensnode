@@ -19,9 +19,9 @@ function validateVersion(version) {
 }
 
 async function updateServiceDefaultTag(version) {
-  const testPattern = /\$\{ENSNODE_TAG:-[^}]+\}/;
-  const replacePattern = /\$\{ENSNODE_TAG:-[^}]+\}/g;
-  const replacement = `\${ENSNODE_TAG:-${version}}`;
+  const testPattern = /\$\{ENSNODE_VERSION:-[^}]+\}/;
+  const replacePattern = /\$\{ENSNODE_VERSION:-[^}]+\}/g;
+  const replacement = `\${ENSNODE_VERSION:-${version}}`;
 
   console.log(`Updating service default tag to ${version}\n`);
 
@@ -30,7 +30,7 @@ async function updateServiceDefaultTag(version) {
     const content = await readFile(absolutePath, "utf8");
 
     if (!testPattern.test(content)) {
-      throw new Error(`Could not find ENSNODE_TAG default expression in ${relativePath}`);
+      throw new Error(`Could not find ENSNODE_VERSION default expression in ${relativePath}`);
     }
 
     const previous = content.match(testPattern)[0];

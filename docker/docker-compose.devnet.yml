@@ -39,8 +39,6 @@ services:
     extends:
       file: services/ensrainbow.yml
       service: ensrainbow
-    environment:
-      NAMESPACE: ens-test-env
     env_file:
       - path: envs/.env.docker.common
         required: true
