@@ -1,0 +1,38 @@
+---
+title: Overview
+description: Understanding the fundamentals of ENSDb architecture, schemas, and data flow.
+sidebar:
+  label: Overview
+  order: 1
+---
+
+import { LinkCard } from '@astrojs/starlight/components';
+
+## Who Should Read This
+
+- **Developers integrating with ENSDb** — Understand the schema structure to write effective queries
+- **DevOps operators running ENSNode** — Understand how ENSDb behaves during different indexing phases
+- **Anyone building custom ENSDb Writers or ENSDb Readers** — Learn the architecture for implementing the ENSDb standard
+
+## Core Concepts
+
+Understanding these fundamentals will help you work effectively with ENSDb, whether you're querying data, integrating with third-party services, or operating an ENSNode instance.
+
+<LinkCard
+  title="Glossary"
+  description="Terminology and definitions used throughout ENSDb documentation."
+  href="/ensdb/concepts/glossary"
+/>
+
+<LinkCard
+  title="Database Schemas"
+  description="Detailed explanation of database schemas: ENSNode Schema, and the ENSIndexer Schema."
+  href="/ensdb/concepts/database-schemas"
+/>
+
+## Next Steps
+
+After understanding these concepts:
+
+1. **[Query ENSDb with SQL](/ensdb/usage/sql)** — Language-agnostic SQL examples
+2. **[Use the TypeScript SDK](/ensdb/usage/sdk)** — Type-safe database access
