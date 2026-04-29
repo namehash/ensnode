@@ -30,7 +30,7 @@ import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-eng
  * hot-path. The cost is one extra "insert on conflict do nothing" per migration, and the storage of
  * that information, naturally, doubles. As of 2026-04-29, the size of the migrated_nodes_by_parent
  * table is ~1GB, meaning that this optimization will consume an additional ~1GB of storage but
- * will result in significatly faster indexing for the ENSv1Registry(Old) events.
+ * will result in significantly faster indexing for the ENSv1Registry(Old) events.
  *
  * See {@link migratedNodeByParent} and {@link migratedNodeByNode} in the ensdb-sdk schema.
  */

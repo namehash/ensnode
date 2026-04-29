@@ -18,7 +18,7 @@ import { onchainTable, primaryKey } from "ponder";
  * be ignored, as the node is considered migrated.
  *
  * Note that this logic is only necessary for the ENS Root Chain, the only chain that includes the
- * Registry migration: we do not track nodes in the the Basenames and Lineanames deployments of the
+ * Registry migration: we do not track nodes in the Basenames and Lineanames deployments of the
  * Registry on their respective chains, for example.
  *
  * Note also that this Registry migration tracking is isolated to the Protocol Acceleration schema/plugin.
@@ -40,8 +40,8 @@ export const migratedNodeByParent = onchainTable(
   "migrated_nodes_by_parent",
   (t) => ({
     // keyed by (parentNode, labelHash)
-    parentNode: t.hex().$type<Node>(),
-    labelHash: t.hex().$type<LabelHash>(),
+    parentNode: t.hex().notNull().$type<Node>(),
+    labelHash: t.hex().notNull().$type<LabelHash>(),
   }),
   (t) => ({
     pk: primaryKey({ columns: [t.parentNode, t.labelHash] }),
@@ -55,5 +55,5 @@ export const migratedNodeByParent = onchainTable(
  * {@link migratedNodeByParent}; both are written together by the migration helper.
  */
 export const migratedNodeByNode = onchainTable("migrated_nodes_by_node", (t) => ({
-  node: t.hex().primaryKey().$type<Node>(),
+  node: t.hex().notNull().primaryKey().$type<Node>(),
 }));
