@@ -141,7 +141,7 @@ RegistrationInterfaceRef.implement({
     ///////////////////////////
     registrant: t.field({
       description:
-        "The Registrant of a Registration, if exists. For ENSv2 Registrations the address is HCA-aware, the HCA account address, if used.",
+        "The Registrant of a Registration, if exists. For ENSv2 Registrations, the HCA account address if used, otherwise Transaction.from.",
       type: AccountRef,
       nullable: true,
       resolve: (parent) => parent.registrantId,
@@ -152,7 +152,7 @@ RegistrationInterfaceRef.implement({
     /////////////////////////////
     unregistrant: t.field({
       description:
-        "The Unregistrant of a Registration, if exists. For ENSv2 Registrations the address is HCA-aware, the HCA account address, if used.",
+        "The Unregistrant of a Registration, if exists. For ENSv2 Registrations, the HCA account address if used, otherwise Transaction.from.",
       type: AccountRef,
       nullable: true,
       resolve: (parent) => parent.unregistrantId,

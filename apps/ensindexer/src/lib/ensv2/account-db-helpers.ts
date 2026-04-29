@@ -1,4 +1,4 @@
-import type { Address, NormalizedAddress } from "enssdk";
+import type { NormalizedAddress } from "enssdk";
 
 import { interpretAddress } from "@ensnode/ensnode-sdk";
 
@@ -10,7 +10,7 @@ import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-eng
  */
 export async function ensureAccount(
   context: IndexingEngineContext,
-  address: Address,
+  address: NormalizedAddress,
 ): Promise<NormalizedAddress | null> {
   const id = interpretAddress(address);
   if (id === null) return null;

@@ -11,7 +11,6 @@ import {
 
 import {
   type EncodedReferrer,
-  interpretAddress,
   isRegistrationFullyExpired,
   PluginName,
   toJson,

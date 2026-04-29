@@ -261,7 +261,7 @@ PermissionsUserRef.implement({
     ////////////////////////
     user: t.field({
       description:
-        "The User for whom these Roles are granted, the HCA account address, if used.",
+        "The User for whom these Roles are granted: the HCA account address if used, otherwise Transaction.from.",
       type: AccountRef,
       nullable: false,
       resolve: (parent) => parent.user,

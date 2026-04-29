@@ -106,8 +106,7 @@ EventRef.implement({
     // Event.sender
     ////////////////
     sender: t.field({
-      description:
-        "The HCA-aware sender of the Event. For ENSv2 events that emit an explicit sender/owner/account argument, this is the HCA account address (if used). For all other events (including all ENSv1 events), falls back to `from` (i.e. `tx.from`).",
+      description: "The HCA account address if used, otherwise Transaction.from.",
       type: "Address",
       nullable: false,
       resolve: (parent) => parent.sender,
@@ -198,7 +197,7 @@ export const EventsWhereInput = builder.inputType("EventsWhereInput", {
     sender: t.field({
       type: "Address",
       description:
-        "Filter to events whose HCA-aware `sender` matches. For ENSv2 events with an explicit sender/owner/account argument, this matches the HCA account address (if used). For other events, falls back to `tx.from`.",
+        "Filter to events whose `sender` matches: the HCA account address if used, otherwise Transaction.from.",
     }),
   }),
 });

@@ -96,9 +96,7 @@ export const event = onchainTable(
     // Ponder's event.id
     id: t.text().primaryKey(),
 
-    // The HCA-aware sender of the event. For ENSv2 events that emit an explicit
-    // `sender`/`owner`/`account` arg, this is set from that arg (the HCA account address, if used).
-    // For all other events (and all ENSv1 events), this falls back to `event.from` (i.e. `tx.from`).
+    // The HCA account address if used, otherwise Transaction.from.
     sender: t.hex().notNull().$type<NormalizedAddress>(),
 
     // Event Log Metadata
@@ -259,7 +257,7 @@ export const domain = onchainTable(
     labelHash: t.hex().notNull().$type<LabelHash>(),
 
     // If this is an ENSv1Domain, this is the effective owner of the Domain.
-    // If this is an ENSv2Domain, this is the HCA-aware owner of the Domain.
+    // If this is an ENSv2Domain, this is the HCA account address if used, otherwise Transaction.from.
     ownerId: t.hex().$type<NormalizedAddress>(),
 
     // If this is an ENSv1Domain, may have a `rootRegistryOwner`, otherwise null.
@@ -342,12 +340,12 @@ export const registration = onchainTable(
     registrarChainId: t.integer().notNull().$type<ChainId>(),
     registrarAddress: t.hex().notNull().$type<NormalizedAddress>(),
 
-    // may reference a registrant. If this is an ENSv2 Registration, the registrant is HCA-aware,
-    // the HCA account address, if used.
+    // may reference a registrant. If this is an ENSv2 Registration, the HCA account address
+    // if used, otherwise Transaction.from.
     registrantId: t.hex().$type<NormalizedAddress>(),
 
-    // may reference an unregistrant. If this is an ENSv2 Registration, the unregistrant is
-    // HCA-aware, the HCA account address, if used.
+    // may reference an unregistrant. If this is an ENSv2 Registration, the HCA account address
+    // if used, otherwise Transaction.from.
     unregistrantId: t.hex().$type<NormalizedAddress>(),
 
     // may have referrer data
@@ -544,7 +542,7 @@ export const permissionsUser = onchainTable(
     chainId: t.integer().notNull().$type<ChainId>(),
     address: t.hex().notNull().$type<NormalizedAddress>(),
     resource: t.bigint().notNull(),
-    // The User this Permission is granted to, the HCA account address, if used.
+    // The User this Permission is granted to, the HCA account address if used, otherwise Transaction.from.
     user: t.hex().notNull().$type<NormalizedAddress>(),
 
     // has one roles bitmap
