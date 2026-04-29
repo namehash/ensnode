@@ -99,7 +99,7 @@ export const event = onchainTable(
     // Event Log Metadata
 
     // chain
-    chainId: t.integer().notNull().$type<ChainId>(),
+    chainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
 
     // block
     blockNumber: t.bigint().notNull().$type<BlockNumber>(),
@@ -195,7 +195,7 @@ export const registry = onchainTable(
     // has a type
     type: registryType().notNull(),
 
-    chainId: t.integer().notNull().$type<ChainId>(),
+    chainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
     address: t.hex().notNull().$type<Address>(),
 
     // If this is an ENSv1VirtualRegistry, `node` is the namehash of the parent ENSv1 domain that
@@ -491,7 +491,7 @@ export const permissions = onchainTable(
   (t) => ({
     id: t.text().primaryKey().$type<PermissionsId>(),
 
-    chainId: t.integer().notNull().$type<ChainId>(),
+    chainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
     address: t.hex().notNull().$type<Address>(),
   }),
   (t) => ({
@@ -509,7 +509,7 @@ export const permissionsResource = onchainTable(
   (t) => ({
     id: t.text().primaryKey().$type<PermissionsResourceId>(),
 
-    chainId: t.integer().notNull().$type<ChainId>(),
+    chainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
     address: t.hex().notNull().$type<Address>(),
     resource: t.bigint().notNull(),
   }),
@@ -530,7 +530,7 @@ export const permissionsUser = onchainTable(
   (t) => ({
     id: t.text().primaryKey().$type<PermissionsUserId>(),
 
-    chainId: t.integer().notNull().$type<ChainId>(),
+    chainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
     address: t.hex().notNull().$type<Address>(),
     resource: t.bigint().notNull(),
     user: t.hex().notNull().$type<Address>(),
