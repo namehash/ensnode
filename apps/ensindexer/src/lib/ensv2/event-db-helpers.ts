@@ -28,7 +28,7 @@ const hasTopics = (topics: LogEventBase["log"]["topics"]): topics is Topics =>
 export async function ensureEvent(
   context: IndexingEngineContext,
   event: LogEventBase,
-  sender?: NormalizedAddress,
+  sender?: NormalizedAddress | null,
 ) {
   // all relevant ENS events obviously have a topic, so we can safely constrain the type of this data
   if (!hasTopics(event.log.topics)) {
