@@ -18,6 +18,14 @@ export class PublicConfigBuilder {
    * the ENSIndexer Public Config.
    */
   private ensRainbowClient: EnsRainbow.ApiClient;
+
+  /**
+   * One-time async readiness hook awaited before the first
+   * `ensRainbowClient.config()` invocation, so callers don't race ENSRainbow's
+   * background bootstrap. Defaults to a no-op for callers that don't need to
+   * gate on readiness (e.g. tests or environments where ENSRainbow is already
+   * known to be ready).
+   */
   private waitForEnsRainbowReady: () => Promise<void>;
 
   /**
@@ -30,6 +38,8 @@ export class PublicConfigBuilder {
 
   /**
    * @param ensRainbowClient ENSRainbow Client instance used to fetch ENSRainbow Public Config
+   * @param waitForEnsRainbowReady One-time async readiness hook awaited before the first
+   *        `ensRainbowClient.config()` invocation. Defaults to a no-op.
    */
   constructor(
     ensRainbowClient: EnsRainbow.ApiClient,

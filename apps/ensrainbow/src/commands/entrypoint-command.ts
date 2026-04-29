@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
-import { existsSync, mkdirSync, rmSync } from "node:fs";
-import { writeFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import { mkdir, rm, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -112,48 +112,67 @@ export async function entrypointCommand(
     signalBootstrapSettled = resolvePromise;
   });
 
-  let alreadyClosed = false;
-  const close = async () => {
-    if (alreadyClosed) return;
-    alreadyClosed = true;
-    logger.info("Shutting down server...");
-    bootstrapAborter.abort();
-    // Wait for bootstrap cleanup before closing shared resources.
-    await bootstrapSettled;
+  // Track signal listeners so close() can detach them when invoked programmatically
+  // (e.g., from tests). `process.once` only auto-removes after firing, so a manual close()
+  // would otherwise leak listeners until the process receives a signal.
+  let signalHandler: (() => void) | undefined;
 
-    let shutdownError: unknown;
+  // Cache the in-flight shutdown so all callers (signal handler, programmatic close()) await
+  // the same work. A boolean guard would let later callers resolve immediately while the
+  // first close() is still tearing down resources.
+  let closePromise: Promise<void> | undefined;
+  const close = (): Promise<void> => {
+    if (closePromise) return closePromise;
 
-    try {
-      await closeHttpServer(httpServer);
-    } catch (error) {
-      shutdownError = error;
-      logger.error(error, "Failed to close HTTP server during shutdown");
-    }
+    closePromise = (async () => {
+      logger.info("Shutting down server...");
 
-    try {
-      await ensRainbowServer.close();
-    } catch (error) {
-      if (shutdownError === undefined) {
-        shutdownError = error;
+      if (signalHandler) {
+        process.removeListener("SIGTERM", signalHandler);
+        process.removeListener("SIGINT", signalHandler);
+        signalHandler = undefined;
       }
-      logger.error(error, "Failed to close ENSRainbow server/database during shutdown");
-    }
 
-    if (shutdownError !== undefined) {
-      throw shutdownError;
-    }
+      bootstrapAborter.abort();
+      // Wait for bootstrap cleanup before closing shared resources.
+      await bootstrapSettled;
 
-    logger.info("Server shutdown complete");
+      let shutdownError: unknown;
+
+      try {
+        await closeHttpServer(httpServer);
+      } catch (error) {
+        shutdownError = error;
+        logger.error(error, "Failed to close HTTP server during shutdown");
+      }
+
+      try {
+        await ensRainbowServer.close();
+      } catch (error) {
+        if (shutdownError === undefined) {
+          shutdownError = error;
+        }
+        logger.error(error, "Failed to close ENSRainbow server/database during shutdown");
+      }
+
+      if (shutdownError !== undefined) {
+        throw shutdownError;
+      }
+
+      logger.info("Server shutdown complete");
+    })();
+
+    return closePromise;
   };
 
   if (options.registerSignalHandlers !== false) {
-    const closeFromSignal = () => {
+    signalHandler = () => {
       // Node does not await signal handlers; swallow errors to avoid unhandled rejections.
       void close().catch(() => {});
     };
 
-    process.once("SIGTERM", closeFromSignal);
-    process.once("SIGINT", closeFromSignal);
+    process.once("SIGTERM", signalHandler);
+    process.once("SIGINT", signalHandler);
   }
 
   const bootstrapComplete = new Promise<void>((resolvePromise) => {
@@ -202,7 +221,7 @@ async function runDbBootstrap(
   const markerFile = join(dataDir, DB_READY_MARKER_FILENAME);
   const dbSubdir = join(dataDir, `data-${labelSetId}_${labelSetVersion}`);
 
-  mkdirSync(dataDir, { recursive: true });
+  await mkdir(dataDir, { recursive: true });
 
   if (existsSync(markerFile) && existsSync(dbSubdir)) {
     logger.info(
@@ -214,19 +233,16 @@ async function runDbBootstrap(
     try {
       throwIfAborted(signal);
       existingDb = await ENSRainbowDB.open(dbSubdir);
-      if (signal.aborted) {
-        await safeClose(existingDb);
-        throw new BootstrapAbortedError();
-      }
+      throwIfAborted(signal);
       await ensRainbowServer.attachDb(existingDb);
       existingDbAttached = true;
       const dbConfig = await buildDbConfig(ensRainbowServer);
       return { publicConfig: buildEnsRainbowPublicConfig(dbConfig), dbConfig };
     } catch (error) {
-      if (error instanceof BootstrapAbortedError || signal.aborted) {
-        throw error;
-      }
-      // Ensure LevelDB lock is released before fallback re-extract.
+      // Always release any opened DB handle/lock first, even when aborting. This prevents
+      // a leaked LevelDB lock when SIGTERM races a non-abort failure (e.g. attachDb throws
+      // while signal.aborted has just become true), since the previous abort-first rethrow
+      // skipped cleanup entirely.
       if (existingDbAttached) {
         try {
           await ensRainbowServer.close();
@@ -239,7 +255,12 @@ async function runDbBootstrap(
       } else if (existingDb !== undefined) {
         await safeClose(existingDb);
       }
-      rmSync(dbSubdir, { recursive: true, force: true });
+
+      if (error instanceof BootstrapAbortedError || signal.aborted) {
+        throw error;
+      }
+
+      await rm(dbSubdir, { recursive: true, force: true });
       logger.warn(
         error,
         "Existing ENSRainbow database failed to open or validate; re-downloading from scratch",
@@ -324,9 +345,10 @@ interface DownloadAndExtractParams {
 async function downloadAndExtractDatabase(params: DownloadAndExtractParams): Promise<void> {
   const { dataDir, dbSchemaVersion, labelSetId, labelSetVersion, downloadTempDir, signal } = params;
 
-  // Clean stale state from previous aborted attempts.
-  rmSync(downloadTempDir, { recursive: true, force: true });
-  mkdirSync(downloadTempDir, { recursive: true });
+  // Clean stale state from previous aborted attempts. Async fs ops keep the event loop
+  // responsive so /health and /ready continue to answer probes during heavy disk I/O.
+  await rm(downloadTempDir, { recursive: true, force: true });
+  await mkdir(downloadTempDir, { recursive: true });
 
   const downloadScript = resolveDownloadScriptPath();
   logger.info(
@@ -358,13 +380,13 @@ async function downloadAndExtractDatabase(params: DownloadAndExtractParams): Pro
   }
 
   logger.info(`Extracting ${archivePath} into ${dataDir}`);
-  mkdirSync(dataDir, { recursive: true });
+  await mkdir(dataDir, { recursive: true });
   // Ensure extraction target is clean; tar does not delete stale partial files.
   const dbSubdir = join(dataDir, `data-${labelSetId}_${labelSetVersion}`);
-  rmSync(dbSubdir, { recursive: true, force: true });
+  await rm(dbSubdir, { recursive: true, force: true });
   await spawnChild("tar", ["-xzf", archivePath, "-C", dataDir, "--strip-components=1"], {}, signal);
 
-  rmSync(downloadTempDir, { recursive: true, force: true });
+  await rm(downloadTempDir, { recursive: true, force: true });
 }
 
 export const __TESTING__ = {
