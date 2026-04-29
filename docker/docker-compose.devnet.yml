@@ -4,13 +4,11 @@ services:
       file: services/ensindexer.yml
       service: ensindexer
     environment:
-      # TODO: in future we will migrate devnet to chain_id=1
-      # need to remove `RPC_URL_15658733` in that case
       RPC_URL_15658733: http://devnet:8545
-      RPC_URL_1: http://devnet:8545
       ENSINDEXER_SCHEMA_NAME: docker_devnet_v1
-      LABEL_SET_ID: ens-test-env
       NAMESPACE: ens-test-env
+      LABEL_SET_ID: ens-test-env
+      LABEL_SET_VERSION: 0
     env_file:
       - path: envs/.env.docker.common
         required: true
@@ -31,10 +29,7 @@ services:
       file: services/ensapi.yml
       service: ensapi
     environment:
-      # TODO: in future we will migrate devnet to chain_id=1
-      # need to remove `RPC_URL_15658733` in that case
       RPC_URL_15658733: http://devnet:8545
-      RPC_URL_1: http://devnet:8545
       ENSINDEXER_SCHEMA_NAME: docker_devnet_v1
     depends_on:
       postgres:
@@ -53,6 +48,8 @@ services:
       service: ensrainbow
     environment:
       LABEL_SET_ID: ens-test-env
+      LABEL_SET_VERSION: 0
+      DB_SCHEMA_VERSION: 3
     env_file:
       - path: envs/.env.docker.common
         required: true

@@ -49,7 +49,8 @@ ResolverPermissionsUserRef.implement({
     // ResolverPermissionsUser.user
     //////////////////////////////////
     user: t.field({
-      description: "The User for whom these Roles are granted.",
+      description:
+        "The User for whom these Roles are granted, the HCA account address, if used.",
       type: AccountRef,
       nullable: false,
       resolve: (parent) => parent.user,

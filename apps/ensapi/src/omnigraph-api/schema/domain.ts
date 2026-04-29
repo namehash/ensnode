@@ -177,7 +177,8 @@ DomainInterfaceRef.implement({
     ////////////////
     owner: t.field({
       type: AccountRef,
-      description: "The owner of this Domain.",
+      description:
+        "If this is an ENSv1Domain, this is the effective owner of the Domain. If this is an ENSv2Domain, this is the HCA-aware owner of the Domain.",
       nullable: true,
       resolve: (parent) => parent.ownerId,
     }),

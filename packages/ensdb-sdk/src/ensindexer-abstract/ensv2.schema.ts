@@ -96,7 +96,9 @@ export const event = onchainTable(
     // Ponder's event.id
     id: t.text().primaryKey(),
 
-    // sender of the transaction (optionally HCA-aware for supported events)
+    // The HCA-aware sender of the event. For ENSv2 events that emit an explicit
+    // `sender`/`owner`/`account` arg, this is set from that arg (the HCA account address, if used).
+    // For all other events (and all ENSv1 events), this falls back to `event.from` (i.e. `tx.from`).
     sender: t.hex().notNull().$type<NormalizedAddress>(),
 
     // Event Log Metadata
@@ -112,6 +114,8 @@ export const event = onchainTable(
     // transaction
     transactionHash: t.hex().notNull().$type<Hash>(),
     transactionIndex: t.integer().notNull(),
+    // `tx.from` — never HCA-aware. Always the EOA/relayer that submitted the transaction.
+    // Use `event.sender` for the HCA-aware actor.
     from: t.hex().notNull().$type<NormalizedAddress>(),
     to: t.hex().$type<NormalizedAddress>(), // NOTE: a null `to` means this was a tx that deployed a contract
 
@@ -125,6 +129,7 @@ export const event = onchainTable(
   (t) => ({
     bySelector: index().on(t.selector),
     byFrom: index().on(t.from),
+    bySender: index().on(t.sender),
     byTimestamp: index().on(t.timestamp),
   }),
 );
@@ -253,7 +258,8 @@ export const domain = onchainTable(
     // represents a labelHash
     labelHash: t.hex().notNull().$type<LabelHash>(),
 
-    // may have an owner
+    // If this is an ENSv1Domain, this is the effective owner of the Domain.
+    // If this is an ENSv2Domain, this is the HCA-aware owner of the Domain.
     ownerId: t.hex().$type<NormalizedAddress>(),
 
     // If this is an ENSv1Domain, may have a `rootRegistryOwner`, otherwise null.
@@ -336,10 +342,12 @@ export const registration = onchainTable(
     registrarChainId: t.integer().notNull().$type<ChainId>(),
     registrarAddress: t.hex().notNull().$type<NormalizedAddress>(),
 
-    // may reference a registrant
+    // may reference a registrant. If this is an ENSv2 Registration, the registrant is HCA-aware,
+    // the HCA account address, if used.
     registrantId: t.hex().$type<NormalizedAddress>(),
 
-    // may reference an unregistrant
+    // may reference an unregistrant. If this is an ENSv2 Registration, the unregistrant is
+    // HCA-aware, the HCA account address, if used.
     unregistrantId: t.hex().$type<NormalizedAddress>(),
 
     // may have referrer data
@@ -536,6 +544,7 @@ export const permissionsUser = onchainTable(
     chainId: t.integer().notNull().$type<ChainId>(),
     address: t.hex().notNull().$type<NormalizedAddress>(),
     resource: t.bigint().notNull(),
+    // The User this Permission is granted to, the HCA account address, if used.
     user: t.hex().notNull().$type<NormalizedAddress>(),
 
     // has one roles bitmap
