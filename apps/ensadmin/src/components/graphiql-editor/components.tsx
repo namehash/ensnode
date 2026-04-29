@@ -20,11 +20,7 @@ const EMPTY_PLUGINS: NonNullable<GraphiQLProps["plugins"]> = [];
  * The GraphiQL editor component used to render the generic GraphiQL editor UI.
  * We use this component to render GraphiQL editors.
  */
-export function GraphiQLEditor({
-  url,
-  plugins = EMPTY_PLUGINS,
-  ...props
-}: GraphiQLPropsWithUrl) {
+export function GraphiQLEditor({ url, plugins = EMPTY_PLUGINS, ...props }: GraphiQLPropsWithUrl) {
   // Memoize the fetcher so its reference is stable across re-renders. Otherwise
   // GraphiQL re-runs schema introspection on every parent re-render (e.g. when
   // a parent subscribes to a 1s-ticking hook), which resets the docs sidebar.
@@ -40,24 +36,33 @@ export function GraphiQLEditor({
     [url],
   );
 
+  // Guard against SSR: hooks run before the early-return below, and `localStorage`
+  // is undefined on the server. Returning `undefined` is safe because the component
+  // returns `null` after the hooks when there's no window.
   const storage = useMemo(() => {
+    if (typeof window === "undefined") return undefined;
     const storageNamespace = `ensnode:graphiql:${url}`;
+    const prefix = `${storageNamespace}:`;
     return {
-      getItem: (key: string) => localStorage.getItem(`${storageNamespace}:${key}`),
-      setItem: (key: string, value: string) =>
-        localStorage.setItem(`${storageNamespace}:${key}`, value),
-      removeItem: (key: string) => localStorage.removeItem(`${storageNamespace}:${key}`),
+      getItem: (key: string) => localStorage.getItem(`${prefix}${key}`),
+      setItem: (key: string, value: string) => localStorage.setItem(`${prefix}${key}`, value),
+      removeItem: (key: string) => localStorage.removeItem(`${prefix}${key}`),
+      // Only clear keys in this namespace so unrelated ENSAdmin state survives.
       clear: () => {
-        localStorage.clear();
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const key = localStorage.key(i);
+          if (key?.startsWith(prefix)) localStorage.removeItem(key);
+        }
       },
-      length: localStorage.length,
+      get length() {
+        return localStorage.length;
+      },
     };
   }, [url]);
 
-  const mergedPlugins = useMemo(
-    () => [HISTORY_PLUGIN, explorerPlugin(), ...plugins],
-    [plugins],
-  );
+  const explorer = useMemo(() => explorerPlugin(), []);
+
+  const mergedPlugins = useMemo(() => [HISTORY_PLUGIN, explorer, ...plugins], [explorer, plugins]);
 
   if (!url || typeof window === "undefined") {
     return null;
