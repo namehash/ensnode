@@ -15,7 +15,6 @@ interface GraphiQLPropsWithUrl extends Omit<GraphiQLProps, "fetcher"> {
 }
 
 const EMPTY_PLUGINS: NonNullable<GraphiQLProps["plugins"]> = [];
-const EXPLORER_PLUGIN = explorerPlugin();
 
 /**
  * The GraphiQL editor component used to render the generic GraphiQL editor UI.
@@ -61,7 +60,11 @@ export function GraphiQLEditor({ url, plugins = EMPTY_PLUGINS, ...props }: Graph
     };
   }, [url]);
 
-  const mergedPlugins = useMemo(() => [HISTORY_PLUGIN, EXPLORER_PLUGIN, ...plugins], [plugins]);
+  // Instantiated per editor instance — explorerPlugin holds editor-scoped state,
+  // so sharing one instance across editors causes them to clobber each other.
+  const explorer = useMemo(() => explorerPlugin(), []);
+
+  const mergedPlugins = useMemo(() => [HISTORY_PLUGIN, explorer, ...plugins], [explorer, plugins]);
 
   if (!url || typeof window === "undefined") {
     return null;
