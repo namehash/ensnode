@@ -160,7 +160,8 @@ the Event responsible for its existence.
 | `timestamp` | `numeric(78)` | no | Block timestamp. |
 | `transactionHash` | `text` | no | Transaction hash. |
 | `transactionIndex` | `integer` | no | Index of the transaction within the block. |
-| `from` | `text` | no | Transaction sender address. |
+| `from` | `text` | no | Transaction sender address (`tx.from`). Never HCA-aware — always the EOA/relayer that submitted the transaction. Use `sender` for the HCA-aware actor. |
+| `sender` | `text` | no | The HCA account address if used, otherwise `Transaction.from`. For ENSv2 events that emit an explicit `sender` / `owner` / `account` argument, this is set from that argument. For all other events (and all ENSv1 events), this falls back to `from` (i.e. `tx.from`). |
 | `to` | `text` | yes | Transaction recipient address. A `null` value means this was a contract-deployment transaction. |
 | `address` | `text` | no | Address of the contract that emitted the log. |
 | `logIndex` | `integer` | no | Index of the log within the transaction. |
@@ -168,7 +169,7 @@ the Event responsible for its existence.
 | `topics` | `text[]` | no | All log topics. |
 | `data` | `text` | no | Log data. |
 
-**Indexes:** `selector`, `from`, `timestamp`.
+**Indexes:** `selector`, `from`, `sender`, `timestamp`.
 
 #### `domain_events`
 
@@ -202,6 +203,17 @@ Join table linking a `permissions` record to its associated `events`.
 | `eventId` | `text` | no |
 
 **Primary key:** `(permissionsId, eventId)`.
+
+#### `permissions_user_events`
+
+Join table linking a `permissions_users` record to its associated `events` — i.e. the per-`(contract, resource, user)` history of role grants, revokes, and bitmap mutations.
+
+| Column | Type | Nullable |
+|--------|------|----------|
+| `permissionsUserId` | `text` | no |
+| `eventId` | `text` | no |
+
+**Primary key:** `(permissionsUserId, eventId)`.
 
 #### `accounts`
 
@@ -244,7 +256,7 @@ Domain-Resolver relations are tracked via the Protocol Acceleration plugin, not 
 | `tokenId` | `numeric(78)` | yes | ENSv2 only: the TokenId within the ENSv2Registry. `null` for ENSv1 domains. |
 | `node` | `text` | yes | ENSv1 only: the domain's namehash. `null` for ENSv2 domains. |
 | `labelHash` | `text` | no | Represents a labelHash. References `labels.labelHash`. |
-| `ownerId` | `text` | yes | Materialized effective owner address. |
+| `ownerId` | `text` | yes | If `ENSv1Domain`, the materialized effective owner address. If `ENSv2Domain`, the on-chain owner address (the HCA account address if used). |
 | `rootRegistryOwnerId` | `text` | yes | ENSv1 only: the owner recorded in the root ENSv1 registry. `null` for ENSv2 domains. |
 
 **Indexes:** `type`, `registryId`, `subregistryId` (partial: non-null only), `ownerId`, `labelHash`.
@@ -279,8 +291,8 @@ A registration is keyed by `id`.
 | `gracePeriod` | `numeric(78)` | yes | Grace period duration in seconds. `BaseRegistrar` only. |
 | `registrarChainId` | `integer` | no | Chain of the registrar contract. |
 | `registrarAddress` | `text` | no | Address of the registrar contract. |
-| `registrantId` | `text` | yes | Account that initiated the registration. |
-| `unregistrantId` | `text` | yes | Account that triggered an unregistration, if applicable. |
+| `registrantId` | `text` | yes | Account that initiated the registration. For ENSv2 Registrations, the protocol-emitted registrant address (the HCA account address if used). |
+| `unregistrantId` | `text` | yes | Account that triggered an unregistration, if applicable. For ENSv2 Registrations, the protocol-emitted unregistrant address (the HCA account address if used). |
 | `referrer` | `text` | yes | Encoded referrer value emitted at registration time. |
 | `fuses` | `integer` | yes | Fuse bitmap. `NameWrapper` and wrapped `BaseRegistrar` only. |
 | `base` | `numeric(78)` | yes | Base registration cost in wei. `BaseRegistrar` and `ENSv2Registrar` only. |
@@ -374,7 +386,7 @@ A user's role bitmap for a specific resource within a `permissions` contract.
 | `chainId` | `integer` | no | Chain of the parent permissions contract. |
 | `address` | `text` | no | Address of the parent permissions contract. |
 | `resource` | `numeric(78)` | no | Resource identifier. |
-| `user` | `text` | no | The user's Ethereum address. |
+| `user` | `text` | no | The user/grantee address this Permission is granted to (the HCA account address if used). |
 | `roles` | `numeric(78)` | no | Roles bitmap for this user on this resource. |
 
 **Indexes:** unique on `(chainId, address, resource, user)`.

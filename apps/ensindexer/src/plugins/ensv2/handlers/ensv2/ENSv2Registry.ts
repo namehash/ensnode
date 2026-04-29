@@ -128,14 +128,14 @@ export default function () {
       .onConflictDoUpdate({ tokenId });
 
     // insert Registration
-    const eventId = await ensureEvent(context, event);
-    await ensureAccount(context, registrant);
+    const registrantId = await ensureAccount(context, registrant);
+    const eventId = await ensureEvent(context, event, registrantId);
     await insertLatestRegistration(context, {
       domainId,
       type: isReservation ? "ENSv2RegistryReservation" : "ENSv2RegistryRegistration",
       registrarChainId: registry.chainId,
       registrarAddress: registry.address,
-      registrantId: interpretAddress(registrant),
+      registrantId,
       start: event.block.timestamp,
       expiry,
       eventId,
@@ -189,17 +189,17 @@ export default function () {
 
       // unregistering a label just immediately sets its expiration to event.block.timestamp, which
       // effectively removes it from resolution (which interprets expired names as non-existent)
-      await ensureAccount(context, unregistrant);
+      const unregistrantId = await ensureAccount(context, unregistrant);
       await context.ensDb.update(ensIndexerSchema.registration, { id: registration.id }).set({
         expiry: event.block.timestamp,
-        unregistrantId: interpretAddress(unregistrant),
+        unregistrantId,
       });
 
       // NOTE(shrugs): PermissionedRegistry also increments eacVersionId and tokenVersionId if there was a
       // previous owner, but i'm not sure if we need to handle that detail here
 
       // push event to domain history
-      const eventId = await ensureEvent(context, event);
+      const eventId = await ensureEvent(context, event, unregistrantId);
       await ensureDomainEvent(context, domainId, eventId);
     },
   );
@@ -217,7 +217,6 @@ export default function () {
         sender: NormalizedAddress;
       }>;
     }) => {
-      // biome-ignore lint/correctness/noUnusedVariables: not sure if we care to index sender
       const { tokenId, newExpiry: expiry, sender } = event.args;
 
       const registry = getThisAccountId(context, event);
@@ -244,7 +243,8 @@ export default function () {
         .set({ expiry });
 
       // push event to domain history
-      const eventId = await ensureEvent(context, event);
+      const senderId = await ensureAccount(context, sender);
+      const eventId = await ensureEvent(context, event, senderId);
       await ensureDomainEvent(context, domainId, eventId);
     },
   );
@@ -259,9 +259,10 @@ export default function () {
       event: EventWithArgs<{
         tokenId: TokenId;
         subregistry: NormalizedAddress;
+        sender: NormalizedAddress;
       }>;
     }) => {
-      const { tokenId, subregistry: _subregistry } = event.args;
+      const { tokenId, subregistry: _subregistry, sender } = event.args;
       const subregistry = interpretAddress(_subregistry);
 
       const registryAccountId = getThisAccountId(context, event);
@@ -301,7 +302,8 @@ export default function () {
       }
 
       // push event to domain history
-      const eventId = await ensureEvent(context, event);
+      const senderId = await ensureAccount(context, sender);
+      const eventId = await ensureEvent(context, event, senderId);
       await ensureDomainEvent(context, domainId, eventId);
     },
   );
@@ -344,9 +346,9 @@ export default function () {
     event,
   }: {
     context: IndexingEngineContext;
-    event: EventWithArgs<{ id: TokenId; to: NormalizedAddress }>;
+    event: EventWithArgs<{ id: TokenId; to: NormalizedAddress; operator: NormalizedAddress }>;
   }) {
-    const { id: tokenId, to: owner } = event.args;
+    const { id: tokenId, to: owner, operator } = event.args;
 
     const storageId = makeStorageId(tokenId);
     const registry = getThisAccountId(context, event);
@@ -358,12 +360,12 @@ export default function () {
     if (!exists) return; // no-op non-Registry ERC1155 Transfers
 
     // update the Domain's ownerId
-    await context.ensDb
-      .update(ensIndexerSchema.domain, { id: domainId })
-      .set({ ownerId: interpretAddress(owner) });
+    const ownerId = await ensureAccount(context, owner);
+    await context.ensDb.update(ensIndexerSchema.domain, { id: domainId }).set({ ownerId });
 
     // push event to domain history
-    const eventId = await ensureEvent(context, event);
+    const operatorId = await ensureAccount(context, operator);
+    const eventId = await ensureEvent(context, event, operatorId);
     await ensureDomainEvent(context, domainId, eventId);
   }
 

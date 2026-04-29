@@ -11,7 +11,6 @@ import {
 
 import {
   type EncodedReferrer,
-  interpretAddress,
   isRegistrationFullyExpired,
   PluginName,
   toJson,
@@ -103,12 +102,11 @@ export default function () {
       }
 
       // upsert registrant
-      await ensureAccount(context, owner);
+      const registrantId = await ensureAccount(context, owner);
 
       // update latest Registration
       await context.ensDb.update(ensIndexerSchema.registration, { id: registration.id }).set({
-        // TODO: reconsider 'Registration.registrant' if ENSv2 doesn't provide explicit 'registrant'
-        registrantId: interpretAddress(owner),
+        registrantId,
 
         // we now know the correct registrar to attribute to, so overwrite
         registrarChainId: registrar.chainId,
@@ -122,7 +120,7 @@ export default function () {
       });
 
       // push event to domain history
-      const eventId = await ensureEvent(context, event);
+      const eventId = await ensureEvent(context, event, registrantId);
       await ensureDomainEvent(context, domainId, eventId);
     },
   );
