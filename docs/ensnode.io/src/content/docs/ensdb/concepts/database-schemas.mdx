@@ -20,7 +20,7 @@ ENSDb instance can have two distinct kinds of database schemas: a single shared 
 The `ensnode` database schema contains shared operational metadata, called ENSNode Metadata, for the entire ENSDb database.
 
 :::note[Multi-tenancy]
-ENSDb supports multiple ENSIndexer instances coexisting in the same database, each with its own isolated database schema. The ENSNode `metadata` table is the central registry that tracks all of them. Each instance identifies itself by writing rows scoped to its own database schema name via the `ensIndexerSchemaName` column.
+ENSDb supports multiple ENSIndexer instances coexisting in the same database, each with its own isolated database schema. The ENSNode `metadata` table is the central registry that tracks all of them. Each instance identifies itself by writing rows scoped to its own database schema name via the `ens_indexer_schema_name` column.
 :::
 
 ### ENSNode Metadata
@@ -29,7 +29,7 @@ Possible key-value pairs are defined by the `EnsNodeMetadata` union type. As of 
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
-| `ensIndexerSchemaName` | `text` | no | References the name of the ENSIndexer Schema that the metadata record belongs to. This allows multi-tenancy where multiple ENSIndexer instances can write to the same ENSNode Metadata table. |
+| `ens_indexer_schema_name` | `text` | no | References the name of the ENSIndexer Schema that the metadata record belongs to. This allows multi-tenancy where multiple ENSIndexer instances can write to the same ENSNode Metadata table. |
 | `key` | `text` | no | Allowed keys: `indexing_metadata_context`. |
 | `value` | `jsonb` | no | Guaranteed to be a serialized representation of a JSON object. |
 
@@ -45,9 +45,9 @@ Possible key-value pairs are defined by the `EnsNodeMetadata` union type. As of 
 
 ## ENSIndexer Schema
 
-Each ENSIndexer instance owns a dedicated database schema in ENSDb. All indexed ENS data for that instance lives within it, fully isolated from other instances. On startup, an ENSIndexer instance registers itself in `ensnode.metadata` using its database schema name as `ensIndexerSchemaName`.
+Each ENSIndexer instance owns a dedicated database schema in ENSDb. All indexed ENS data for that instance lives within it, fully isolated from other instances. On startup, an ENSIndexer instance registers itself in `ensnode.metadata` using its database schema name as `ens_indexer_schema_name`.
 
-The ENSIndexer Schema is modular, composed of five logical database sub-schemas, each implemented for specific requirements by a separate Ponder plugin.
+The ENSIndexer Schema is modular, composed of multiple logical database sub-schemas, each implemented for specific requirements by a separate Ponder plugin.
 
 ---
 
