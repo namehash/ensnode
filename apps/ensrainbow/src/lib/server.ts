@@ -66,9 +66,6 @@ export class ENSRainbowServer {
     return this._serverLabelSet;
   }
 
-  /**
-   * Whether the server has an attached, validated database and is ready to heal labels.
-   */
   public isReady(): boolean {
     return this.db !== undefined && this._serverLabelSet !== undefined;
   }
@@ -119,9 +116,6 @@ export class ENSRainbowServer {
     this.db = db;
   }
 
-  /**
-   * Returns the attached database or throws {@link DbNotReadyError} if not yet ready.
-   */
   private requireDb(): ENSRainbowDB {
     if (this.db === undefined) {
       throw new DbNotReadyError();

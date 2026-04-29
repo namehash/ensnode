@@ -26,10 +26,7 @@ import { logger } from "@/utils/logger";
 export type PublicConfigSupplier = () => EnsRainbow.ENSRainbowPublicConfig | null;
 
 /**
- * Supplier of the current DB config for the API.
- *
- * Returns `null` while the server is still bootstrapping its database. Once the database is
- * attached, the supplier returns the final `DbConfig` (cached by the caller).
+ * Like {@link PublicConfigSupplier}, but yields the {@link DbConfig} snapshot.
  */
 export type DbConfigSupplier = () => DbConfig | null;
 

@@ -61,9 +61,6 @@ export interface EntrypointCommandHandle {
    * Never rejects: non-abort failures terminate the process via `process.exit(1)`.
    */
   readonly bootstrapComplete: Promise<void>;
-  /**
-   * Closes the HTTP server and attached database.
-   */
   close(): Promise<void>;
 }
 
@@ -393,9 +390,6 @@ export const __TESTING__ = {
   downloadAndExtractDatabase,
 };
 
-/**
- * Resolve absolute path to `download-prebuilt-database.sh`.
- */
 function resolveDownloadScriptPath(): string {
   const here = dirname(fileURLToPath(import.meta.url));
   // From `src/commands` or `dist/commands`, go up two levels to app root.
