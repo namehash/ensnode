@@ -1,0 +1,42 @@
+---
+title: ENSIndexer Startup Sequence
+description: Learn about the startup sequence of ENSIndexer.
+sidebar:
+  label: Startup Sequence
+  order: 1
+---
+
+Below is an architecture diagram describing ENSIndexer start sequence in detail.
+
+## Ponder app lifecycle
+
+Here is the top-level view on the ENSIndexer start sequence. It's really the overview of the Ponder app lifecycle running inside the ENSIndexer instance. The example assumes that the ENSIndexer was started with the `ENSINDEXER_SCHEMA_NAME` environment variable set to `prod_0`, but the same sequence applies to any ENSIndexer Schema.
+
+<figure>
+  [![Ponder app lifecycle](/public/ensindexer/startup-sequence/0-overview.png)](/public/ensindexer/startup-sequence/0-overview.png)
+</figure>
+
+## ENSIndexer Schema migrations
+
+When Ponder app lifecycle reaches the "Execute migrations for the `prod_0` ENSIndexer Schema" step, Ponder will execute all pending migrations for the `prod_0` ENSIndexer Schema.
+This ensures that the database schema is up to date before indexing onchain events start.
+
+<figure>
+  [![Executing ENSIndexer Schema migrations](/public/ensindexer/startup-sequence/1-ensindexer-schema-migrations.png)](/public/ensindexer/startup-sequence/1-ensindexer-schema-migrations.png)
+</figure>
+
+## Omnichain indexing strategy
+
+When Ponder app lifecycle reaches the "Run omnichain indexing strategy" step, Ponder will start writing data concurrently to Ponder Schema (caching RPC calls) and ENSIndexer Schema (storing indexed data). ENSIndexer app lifecycle "injects" a special "Execute onchain event handlers preconditions" step. 
+
+<figure>
+  [![Omnichain indexing strategy](/public/ensindexer/startup-sequence/2-omnichain-strategy-execution.png)](/public/ensindexer/startup-sequence/2-omnichain-strategy-execution.png)
+</figure>
+
+### Init onchain event handlers
+
+The special "Execute onchain event handlers preconditions" step occurs before any onchain event is indexed. This allows ENSIndexer to execute ENSNode Schema migrations and populate ENSNode Metadata table with relevant data before any onchain event handlers are executed.
+
+<figure>
+  [![Onchain event handlers preconditions](/public/ensindexer/startup-sequence/3-init-onchain-event-handlers.png)](/public/ensindexer/startup-sequence/3-init-onchain-event-handlers.png)
+</figure>
