@@ -68,7 +68,7 @@
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
-    "postcss": "^8.5.12",
+    "postcss": "catalog:",
     "postcss-cli": "^11.0.1",
     "react": "catalog:",
     "tailwindcss": "catalog:",
