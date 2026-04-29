@@ -29,12 +29,20 @@ import { EnsDbReader, IndexingMetadataContextStatusCodes } from '@ensnode/ensdb-
 // Connect to a specific ENSDb instance by providing its connection string and
 // the ENSIndexer Schema Name you want to query
 const ensDbReader =  new EnsDbReader(ensDbConnectionString, ensIndexerSchemaName);
+const { ensDb, ensIndexerSchema } = ensDbReader;
 
-// Get domains from the ENSIndexer Schema 
-const v1Domains = await ensDbReader.ensDb
+// Get ENS V1 domains from the ENSIndexer Schema 
+const v1Domains = await ensDb
   .select()
-  .from(ensDbReader.ensIndexerSchema.v1Domain)
-  .limit(10);
+  .from(ensIndexerSchema.domain)
+  .where(eq(ensIndexerSchema.domain.type, "ENSv1Domain"));
+
+// Get ENS V2 domains from the ENSIndexer Schema 
+const v2Domains = await ensDb
+  .select()
+  .from(ensIndexerSchema.domain)
+  .where(eq(ensIndexerSchema.domain.type, "ENSv2Domain"));
+
 
 // Get indexing status snapshot
 const indexingMetadataContext = await ensDbReader.getIndexingMetadataContext();
