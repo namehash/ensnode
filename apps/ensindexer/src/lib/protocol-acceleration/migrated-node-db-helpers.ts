@@ -22,7 +22,7 @@ import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-eng
  *
  * Either single-table choice surrenders prefetch on other handlers. Keying solely by
  * `(parentNode, labelHash)` would help the NewOwner hot path but disable prefetching on the other
- * four handlers, which can't reconstruct that pair from `node` without a reverse-index whose lookup
+ * three handlers, which can't reconstruct that pair from `node` without a reverse-index whose lookup
  * key is itself a un-prefetchable namehash.
  *
  * The two-table layout sidesteps both problems: write _both_ rows on every migration, then have each
