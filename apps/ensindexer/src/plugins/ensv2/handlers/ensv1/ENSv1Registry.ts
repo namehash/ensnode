@@ -29,7 +29,10 @@ import {
 import { getManagedName } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
-import { nodeIsMigrated } from "@/lib/protocol-acceleration/registry-migration-status";
+import {
+  nodeIsMigrated,
+  nodeIsMigratedByParentAndLabel,
+} from "@/lib/protocol-acceleration/migrated-node-db-helpers";
 
 const pluginName = PluginName.ENSv2;
 
@@ -250,8 +253,11 @@ export default function () {
       const { label: labelHash, node: parentNode } = event.args;
 
       // ignore the event on ENSv1RegistryOld if node is migrated to new Registry
-      const node = makeSubdomainNode(labelHash, parentNode);
-      const shouldIgnoreEvent = await nodeIsMigrated(context, node);
+      const shouldIgnoreEvent = await nodeIsMigratedByParentAndLabel(
+        context,
+        parentNode,
+        labelHash,
+      );
       if (shouldIgnoreEvent) return;
 
       return handleNewOwner({ context, event });
