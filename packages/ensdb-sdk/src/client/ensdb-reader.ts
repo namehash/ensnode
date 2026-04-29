@@ -10,10 +10,10 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 export {
-  IndexingMetadataContext,
-  IndexingMetadataContextInitialized,
+  type IndexingMetadataContext,
+  type IndexingMetadataContextInitialized,
   IndexingMetadataContextStatusCodes,
-  IndexingMetadataContextUninitialized,
+  type IndexingMetadataContextUninitialized,
 } from "@ensnode/ensnode-sdk";
 
 import {
