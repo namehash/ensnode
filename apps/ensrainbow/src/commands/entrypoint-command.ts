@@ -55,7 +55,7 @@ export interface EntrypointCommandOptions {
    * env-vs-DB label-set mismatch). Defaults to `process.exit`. Tests can override this
    * to assert termination without actually killing the test runner.
    */
-  exit?: (code: number) => never;
+  exit?: (code: number) => void;
 }
 
 /**
@@ -64,7 +64,8 @@ export interface EntrypointCommandOptions {
 export interface EntrypointCommandHandle {
   /**
    * Resolves when bootstrap finishes or is aborted by shutdown.
-   * Never rejects: non-abort failures terminate the process via `process.exit(1)`.
+   * Never rejects: non-abort failures terminate the process via `options.exit(1)`
+   * (defaults to `process.exit(1)`).
    */
   readonly bootstrapComplete: Promise<void>;
   close(): Promise<void>;
@@ -181,6 +182,16 @@ export async function entrypointCommand(
   }
 
   const exit = options.exit ?? ((code: number) => process.exit(code));
+  let exitRequested = false;
+  const requestExit = (code: number) => {
+    exitRequested = true;
+    try {
+      exit(code);
+    } catch (_error) {
+      // Tests may throw from a custom exit hook to short-circuit control flow.
+      // Swallow to avoid this surfacing as a bootstrap failure.
+    }
+  };
 
   const bootstrapComplete = new Promise<void>((resolvePromise) => {
     // Defer bootstrap so the HTTP server starts accepting requests first.
@@ -202,7 +213,7 @@ export async function entrypointCommand(
                 `arguments with the database in the data directory and restart.`,
             );
             resolvePromise();
-            exit(1);
+            requestExit(1);
             return;
           }
 
@@ -218,9 +229,13 @@ export async function entrypointCommand(
             resolvePromise();
             return;
           }
+          if (exitRequested) {
+            resolvePromise();
+            return;
+          }
           logger.error(error, "ENSRainbow database bootstrap failed - exiting");
           resolvePromise();
-          exit(1);
+          requestExit(1);
         })
         .finally(() => {
           signalBootstrapSettled();
