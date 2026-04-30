@@ -74,7 +74,7 @@ variable "namespace" {
 
 variable "referral_program_editions" {
   type    = string
-  default = ""
+  default = null
 }
 
 variable "subgraph_compat" {

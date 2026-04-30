@@ -165,7 +165,7 @@ module "ensindexer" {
   ensindexer_schema_name    = each.value.ensindexer_schema_name
   plugins                   = each.value.plugins
   namespace                 = each.value.namespace
-  referral_program_editions = try(each.value.referral_program_editions, "")
+  referral_program_editions = try(each.value.referral_program_editions, null)
   subgraph_compat           = each.value.subgraph_compat
 
   # Common configuration (spread operator merges the map)
