@@ -3,6 +3,7 @@ import config from "@/config";
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { inArray } from "drizzle-orm";
 import { makeConcreteRegistryId, makePermissionsId, makeResolverId } from "enssdk";
+import { createGraphQLError } from "graphql-yoga";
 
 import { getRootRegistryId } from "@ensnode/ensnode-sdk";
 
@@ -159,8 +160,12 @@ builder.queryType({
         if (by.hashes.length === 0) return [];
 
         if (by.hashes.length > LABELS_BY_HASHES_MAX) {
-          throw new Error(
+          // Use `createGraphQLError` so the client-facing validation message survives Yoga's
+          // default `maskError`, which (correctly) hides plain `Error` instances as
+          // "Unexpected error.".
+          throw createGraphQLError(
             `Too many hashes: received ${by.hashes.length}, max ${LABELS_BY_HASHES_MAX}.`,
+            { extensions: { code: "BAD_USER_INPUT" } },
           );
         }
 

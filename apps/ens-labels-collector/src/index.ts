@@ -12,7 +12,9 @@ const server = serve(
     port: config.port,
   },
   (info) => {
-    console.log(`ens-labels-collector listening on port ${info.port}`);
+    // Operational logs go to stderr so stdout stays a clean JSONL stream of submission records
+    // (see `submissionsHandler` in `src/handlers/submissions.ts`).
+    console.error(`ens-labels-collector listening on port ${info.port}`);
   },
 );
 

@@ -20,15 +20,18 @@ export type Config = {
 let cachedConfig: Config | undefined;
 
 /**
- * Parses the process environment into a {@link Config}.
+ * Parses `process.env` into a {@link Config}.
  *
  * Memoized so repeated calls return the same instance and validation only runs once.
+ * Always reads from `process.env`; tests that need to vary inputs should call
+ * {@link resetConfigCacheForTesting} after mutating `process.env`.
+ *
  * Throws (via Zod) if any required env var is missing or invalid.
  */
-export function getConfig(env: NodeJS.ProcessEnv = process.env): Config {
+export function getConfig(): Config {
   if (cachedConfig) return cachedConfig;
 
-  const parsed = ConfigSchema.parse(env);
+  const parsed = ConfigSchema.parse(process.env);
 
   cachedConfig = {
     port: parsed.PORT,
