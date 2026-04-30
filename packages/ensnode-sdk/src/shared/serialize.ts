@@ -3,10 +3,12 @@ import type { ChainId, ChainIdString, DatetimeISO8601, UrlString } from "enssdk"
 import type {
   Price,
   PriceDai,
+  PriceEns,
   PriceEth,
   PriceUsdc,
   SerializedPrice,
   SerializedPriceDai,
+  SerializedPriceEns,
   SerializedPriceEth,
   SerializedPriceUsdc,
 } from "./currencies";
@@ -62,4 +64,11 @@ export function serializePriceUsdc(price: PriceUsdc): SerializedPriceUsdc {
  */
 export function serializePriceDai(price: PriceDai): SerializedPriceDai {
   return serializePrice(price) as SerializedPriceDai;
+}
+
+/**
+ * Serializes a {@link PriceEns} object.
+ */
+export function serializePriceEns(price: PriceEns): SerializedPriceEns {
+  return serializePrice(price) as SerializedPriceEns;
 }
