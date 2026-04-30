@@ -1,11 +1,7 @@
+import type { NormalizedAddress } from "enssdk";
+import { toNormalizedAddress } from "enssdk";
 import type { Address, Hex } from "viem";
 import { mnemonicToAccount } from "viem/accounts";
-
-type NormalizedAddress = Lowercase<Address>;
-
-function toNormalizedAddress(address: Address): NormalizedAddress {
-  return address.toLowerCase() as NormalizedAddress;
-}
 
 /**
  * Deterministic contract addresses for the ENS contracts-v2 devnet used by ens-test-env.

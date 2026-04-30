@@ -1,9 +1,9 @@
 import { type Address, type Hex, namehash, toHex } from "viem";
 import { packetToBytes } from "viem/ens";
 
+import { ResolverABI, UniversalResolverABI } from "@ensnode/datasources";
 import { addresses, contracts, fixtures } from "@ensnode/datasources/devnet";
 
-import { publicResolverAbi, universalResolverV2Abi } from "./abi";
 import type { DevnetWalletClient, DevnetWalletClients } from "./index";
 
 export async function seedResolverRecords(clients: DevnetWalletClients): Promise<void> {
@@ -53,7 +53,7 @@ async function seedResolverRecordsForName(
 async function findResolver(client: DevnetWalletClient, name: string): Promise<Address> {
   const [resolver] = await client.readContract({
     address: contracts.universalResolverV2,
-    abi: universalResolverV2Abi,
+    abi: UniversalResolverABI,
     functionName: "findResolver",
     args: [toHex(packetToBytes(name))],
   });
@@ -69,7 +69,7 @@ async function setTextRecord(
 ): Promise<void> {
   const hash = await walletClient.writeContract({
     address: resolver,
-    abi: publicResolverAbi,
+    abi: ResolverABI,
     functionName: "setText",
     args: [node, key, value],
   });
@@ -86,7 +86,7 @@ async function setMulticoinAddress(
 ): Promise<void> {
   const hash = await walletClient.writeContract({
     address: resolver,
-    abi: publicResolverAbi,
+    abi: ResolverABI,
     functionName: "setAddr",
     args: [node, coinType, addressBytes],
   });
@@ -102,7 +102,7 @@ async function setContenthash(
 ): Promise<void> {
   const hash = await walletClient.writeContract({
     address: resolver,
-    abi: publicResolverAbi,
+    abi: ResolverABI,
     functionName: "setContenthash",
     args: [node, hashValue],
   });
@@ -119,7 +119,7 @@ async function setPubkey(
 ): Promise<void> {
   const hash = await walletClient.writeContract({
     address: resolver,
-    abi: publicResolverAbi,
+    abi: ResolverABI,
     functionName: "setPubkey",
     args: [node, x, y],
   });
@@ -136,7 +136,7 @@ async function setAbi(
 ): Promise<void> {
   const hash = await walletClient.writeContract({
     address: resolver,
-    abi: publicResolverAbi,
+    abi: ResolverABI,
     functionName: "setABI",
     args: [node, contentType, data],
   });
@@ -153,7 +153,7 @@ async function setInterfaceImplementer(
 ): Promise<void> {
   const hash = await walletClient.writeContract({
     address: resolver,
-    abi: publicResolverAbi,
+    abi: ResolverABI,
     functionName: "setInterface",
     args: [node, interfaceId, implementer],
   });

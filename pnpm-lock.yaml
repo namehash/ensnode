@@ -844,6 +844,9 @@ importers:
       '@ponder/utils':
         specifier: ^0.2.18
         version: 0.2.18(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))
+      enssdk:
+        specifier: workspace:*
+        version: link:../enssdk
     devDependencies:
       '@ensnode/shared-configs':
         specifier: workspace:*

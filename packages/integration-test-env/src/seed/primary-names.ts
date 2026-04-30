@@ -1,6 +1,6 @@
+import { L2ReverseRegistrarABI } from "@ensnode/datasources";
 import { contracts } from "@ensnode/datasources/devnet";
 
-import { ethReverseRegistrarAbi } from "./abi";
 import type { DevnetWalletClient, DevnetWalletClients } from "./index";
 
 export async function seedPrimaryNameRecords(clients: DevnetWalletClients): Promise<void> {
@@ -10,7 +10,7 @@ export async function seedPrimaryNameRecords(clients: DevnetWalletClients): Prom
 async function setPrimaryNameRecord(walletClient: DevnetWalletClient, name: string): Promise<void> {
   const hash = await walletClient.writeContract({
     address: contracts.ethReverseRegistrar,
-    abi: ethReverseRegistrarAbi,
+    abi: L2ReverseRegistrarABI,
     functionName: "setName",
     args: [name],
   });
