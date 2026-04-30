@@ -2972,6 +2972,80 @@
           "503": { "description": "Service unavailable" }
         }
       }
+    },
+    "/health": {
+      "get": {
+        "operationId": "getHealthCheck",
+        "tags": ["Probes"],
+        "summary": "Health Check Endpoint",
+        "description": "Checks the health status of the ENSApi service",
+        "responses": {
+          "200": {
+            "description": "Service is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "responseCode": { "type": "string", "enum": ["ok"] } },
+                  "required": ["responseCode"]
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "responseCode": { "type": "string", "enum": ["error"] },
+                    "message": { "type": "string" }
+                  },
+                  "required": ["responseCode", "message"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ready": {
+      "get": {
+        "operationId": "getReadinessCheck",
+        "tags": ["Probes"],
+        "summary": "Readiness Check Endpoint",
+        "description": "Checks the readiness status of the ENSApi service",
+        "responses": {
+          "200": {
+            "description": "Service is ready",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "responseCode": { "type": "string", "enum": ["ok"] } },
+                  "required": ["responseCode"]
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "responseCode": { "type": "string", "enum": ["error"] },
+                    "message": { "type": "string" }
+                  },
+                  "required": ["responseCode", "message"]
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "webhooks": {}

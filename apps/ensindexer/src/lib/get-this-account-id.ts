@@ -1,4 +1,4 @@
-import type { AccountId } from "enssdk";
+import type { AccountId, NormalizedAddress } from "enssdk";
 
 import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import type { LogEventBase } from "@/lib/ponder-helpers";
@@ -12,4 +12,9 @@ import type { LogEventBase } from "@/lib/ponder-helpers";
 export const getThisAccountId = (
   context: IndexingEngineContext,
   event: Pick<LogEventBase, "log">,
-) => ({ chainId: context.chain.id, address: event.log.address }) satisfies AccountId;
+) =>
+  ({
+    chainId: context.chain.id,
+    // Ponder provides us a NormalizedAddress, cast here to avoid the minor overhead of (as|to)NormalizedAddress
+    address: event.log.address as NormalizedAddress,
+  }) satisfies AccountId;

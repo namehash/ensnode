@@ -148,20 +148,17 @@ export class EnsDbReader<
   }
 
   /**
-   * Check if the ENSDb instance is ready by verifying that it is
-   * healthy and the {@link IndexingMetadataContext} has been initialized for
+   * Check if the ENSDb instance is ready by verifying that
+   * the {@link IndexingMetadataContext} has been initialized for
    * the ENSIndexer Schema used by this ENSDbReader instance.
    */
   async isReady(): Promise<boolean> {
-    const isHealthy = await this.isHealthy();
-
-    if (!isHealthy) {
+    try {
+      const indexingMetadataContext = await this.getIndexingMetadataContext();
+      return indexingMetadataContext.statusCode === IndexingMetadataContextStatusCodes.Initialized;
+    } catch {
       return false;
     }
-
-    const indexingMetadataContext = await this.getIndexingMetadataContext();
-
-    return indexingMetadataContext.statusCode === IndexingMetadataContextStatusCodes.Initialized;
   }
 
   /**
