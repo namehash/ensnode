@@ -73,7 +73,8 @@ variable "namespace" {
 }
 
 variable "referral_program_editions" {
-  type = string
+  type    = string
+  default = ""
 }
 
 variable "subgraph_compat" {
