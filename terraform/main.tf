@@ -93,7 +93,7 @@ locals {
       ensnode_indexer_type         = "alpha-sepolia"
       ensnode_environment_name     = var.render_environment
       ensindexer_schema_name       = "alphaSepoliaSchema-${var.ensnode_version}"
-      plugins                      = "subgraph,basenames,lineanames,registrars,ensv2,protocol-acceleration,"
+      plugins                      = "subgraph,basenames,lineanames,registrars,ensv2,protocol-acceleration"
       namespace                    = "sepolia"
       render_instance_plan         = "starter"
       subgraph_compat              = false
