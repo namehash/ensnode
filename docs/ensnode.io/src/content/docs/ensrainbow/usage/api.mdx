@@ -200,18 +200,18 @@ Success Response:
 
 ```json
 {
-  "version": "0.1.0",
-  "labelSet": {
+  "serverLabelSet": {
     "labelSetId": "subgraph",
     "highestLabelSetVersion": 0
   },
-  "recordsCount": 133856894
+  "versionInfo": {
+    "ensRainbow": "0.1.0"
+  }
 }
 ```
 
 The response contains:
-- `version`: The current version of ENSRainbow
-- `labelSet`: The label set of the loaded database
-  - `labelSetId`: The label set ID of the loaded database
-  - `highestLabelSetVersion`: The highest label set version available in the database
-- `recordsCount`: The total count of labels that can be healed by the ENSRainbow instance
+- `serverLabelSet`: The label set managed by the ENSRainbow instance
+  - `serverLabelSet.labelSetId`: The label set ID of the loaded database
+  - `serverLabelSet.highestLabelSetVersion`: The highest label set version available in the database
+- `versionInfo.ensRainbow`: The current ENSRainbow service version
