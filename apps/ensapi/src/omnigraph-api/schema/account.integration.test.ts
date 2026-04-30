@@ -99,7 +99,7 @@ describe("Account.events", () => {
     expect(events.length).toBeGreaterThan(0);
 
     for (const event of events) {
-      expect(event.from).toBe(DEVNET_DEPLOYER);
+      expect(event.sender).toBe(DEVNET_DEPLOYER);
     }
   });
 });

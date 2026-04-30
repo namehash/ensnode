@@ -1,22 +1,22 @@
 # Minimal compose for CI integration tests.
 # Provides only the infrastructure services needed by orchestrator.ts:
-# devnet (local EVM) and postgres (database).
+# devnet (local EVM) and ensdb (database).
 services:
   devnet:
     extends:
       file: services/devnet.yml
       service: devnet
 
-  postgres:
+  ensdb:
     extends:
-      file: services/postgres.yml
-      service: postgres
+      file: services/ensdb.yml
+      service: ensdb
     env_file:
-      - path: ./envs/.env.docker.common
+      - path: envs/.env.docker.common
         required: true
 
 volumes:
   # Docker Compose requires volumes used by services to be declared in each
   # compose file that references them — they cannot be inherited via `extends`.
-  postgres_data:
+  ensdb_data:
     driver: local

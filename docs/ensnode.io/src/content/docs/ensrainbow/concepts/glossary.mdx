@@ -51,7 +51,7 @@ Non-negative integer that monotonically increases when new labelhash-to-label ma
 
 ## Healable Count
 
-Total number of labels that can currently be healed by the running server. Exposed via `/count`.
+Total number of labels that can currently be healed by the running server. Exposed via `/v1/labels/count`.
 
 **Example:** `7 892 001`
 
@@ -61,7 +61,7 @@ High-level outcome of an API call – either `success` or `error`.
 
 ## Error Code
 
-HTTP-style numeric code describing the error (`400`, `404`, `500`).
+HTTP-style numeric code describing the error (`400`, `404`, `500`, `503`).
 
 ## Rainbow Table
 

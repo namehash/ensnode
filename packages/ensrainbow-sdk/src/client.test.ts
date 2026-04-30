@@ -4,6 +4,7 @@ import {
   type EnsRainbow,
   EnsRainbowApiClient,
   type EnsRainbowApiClientOptions,
+  EnsRainbowHttpError,
   isCacheableHealResponse,
   isHealError,
 } from "./client";
@@ -258,6 +259,9 @@ describe("EnsRainbowApiClient", () => {
 
   it("should return a positive health check", async () => {
     mockFetch.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      statusText: "OK",
       json: () =>
         Promise.resolve({
           status: "ok",
@@ -269,6 +273,80 @@ describe("EnsRainbowApiClient", () => {
     expect(response).toEqual({
       status: "ok",
     } satisfies EnsRainbow.HealthResponse);
+  });
+
+  describe("ready", () => {
+    it("should resolve when the server is ready (HTTP 200)", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: () =>
+          Promise.resolve({
+            status: "ok",
+          } satisfies EnsRainbow.ReadyResponse),
+      });
+
+      const response = await client.ready();
+
+      expect(mockFetch).toHaveBeenCalledWith(new URL("/ready", DEFAULT_ENSRAINBOW_URL));
+      expect(response).toEqual({
+        status: "ok",
+      } satisfies EnsRainbow.ReadyResponse);
+    });
+
+    it("should throw an EnsRainbowHttpError carrying status 503 when the server is not ready yet", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 503,
+        statusText: "Service Unavailable",
+      });
+
+      const error = await client.ready().catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(EnsRainbowHttpError);
+      expect((error as EnsRainbowHttpError).status).toBe(503);
+      expect((error as EnsRainbowHttpError).statusText).toBe("Service Unavailable");
+      expect((error as EnsRainbowHttpError).message).toMatch(/503/);
+    });
+
+    it("should throw an EnsRainbowHttpError carrying the original status for non-503 failures (e.g. 404 misrouting)", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        statusText: "Not Found",
+      });
+
+      const error = await client.ready().catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(EnsRainbowHttpError);
+      expect((error as EnsRainbowHttpError).status).toBe(404);
+      expect((error as EnsRainbowHttpError).message).toMatch(/404/);
+    });
+
+    it("should throw an EnsRainbowHttpError for HTTP 500 server errors", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        statusText: "Internal Server Error",
+      });
+
+      const error = await client.ready().catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(EnsRainbowHttpError);
+      expect((error as EnsRainbowHttpError).status).toBe(500);
+    });
+  });
+
+  describe("health", () => {
+    it("should throw an EnsRainbowHttpError on non-2xx responses with the original status", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 502,
+        statusText: "Bad Gateway",
+      });
+
+      const error = await client.health().catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(EnsRainbowHttpError);
+      expect((error as EnsRainbowHttpError).status).toBe(502);
+      expect((error as EnsRainbowHttpError).statusText).toBe("Bad Gateway");
+    });
   });
 
   describe("config", () => {
@@ -294,10 +372,12 @@ describe("EnsRainbowApiClient", () => {
       expect(response).toEqual(configData);
     });
 
-    it("should throw with fallback message when error body is not valid JSON", async () => {
-      mockFetch.mockResolvedValueOnce({ ok: false, statusText: "Not Found" });
+    it("should throw an EnsRainbowHttpError with the original status when the response is not OK", async () => {
+      mockFetch.mockResolvedValueOnce({ ok: false, status: 404, statusText: "Not Found" });
 
-      await expect(client.config()).rejects.toThrow(/Not Found/);
+      const error = await client.config().catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(EnsRainbowHttpError);
+      expect((error as EnsRainbowHttpError).status).toBe(404);
     });
   });
 });
@@ -378,6 +458,16 @@ describe("HealResponse cacheability", () => {
       status: StatusCode.Error,
       error: "Server error",
       errorCode: ErrorCode.ServerError,
+    };
+
+    expect(isCacheableHealResponse(response)).toBe(false);
+  });
+
+  it("should consider HealServiceUnavailableError responses not cacheable", async () => {
+    const response: EnsRainbow.HealServiceUnavailableError = {
+      status: StatusCode.Error,
+      error: "ENSRainbow is still bootstrapping its database",
+      errorCode: ErrorCode.ServiceUnavailable,
     };
 
     expect(isCacheableHealResponse(response)).toBe(false);

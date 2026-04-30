@@ -2,76 +2,91 @@ import config from "@/config";
 
 import { minutesToSeconds } from "date-fns";
 
+import { EnsNodeMetadataKeys } from "@ensnode/ensdb-sdk";
 import {
   buildEnsNodeStackInfo,
-  type CachedResult,
   type EnsNodeStackInfo,
+  type IndexingMetadataContextInitialized,
+  IndexingMetadataContextStatusCodes,
   SWRCache,
 } from "@ensnode/ensnode-sdk";
 
 import { buildEnsApiPublicConfig } from "@/config/config.schema";
 import { ensDbClient } from "@/lib/ensdb/singleton";
 import { lazyProxy } from "@/lib/lazy";
+import logger from "@/lib/logger";
 
-/**
- * Loads the ENSNode stack info, either from cache if available,
- * or by building it from the public configs of ENSApi and ENSDb.
- *
- * The ENSNode Stack Info object is considered immutable for
- * the lifecycle of an ENSApi process instance, so once it is successfully
- * loaded, it will be cached indefinitely.
- */
-async function loadEnsNodeStackInfo(
-  cachedResult?: CachedResult<EnsNodeStackInfo>,
-): Promise<EnsNodeStackInfo> {
-  if (cachedResult && !(cachedResult.result instanceof Error)) {
-    return cachedResult.result;
-  }
-
-  const ensApiPublicConfig = buildEnsApiPublicConfig(config);
-  const ensDbPublicConfig = await ensDbClient.buildEnsDbPublicConfig();
-  const ensIndexerPublicConfig = ensApiPublicConfig.ensIndexerPublicConfig;
-  const ensRainbowPublicConfig = ensIndexerPublicConfig.ensRainbowPublicConfig;
-
-  return buildEnsNodeStackInfo(
-    ensApiPublicConfig,
-    ensDbPublicConfig,
-    ensIndexerPublicConfig,
-    ensRainbowPublicConfig,
-  );
-}
+export type EnsNodeStackInfoCache = SWRCache<EnsNodeStackInfo>;
 
 // lazyProxy defers construction until first use so that this module can be
 // imported without env vars being present (e.g. during OpenAPI generation).
 // SWRCache with proactivelyInitialize:true starts background polling immediately
 // on construction, which would trigger ensDbClient before env vars are available.
 /**
- * Cache for ENSNode stack info
- * Once successfully loaded, the ENSNode Stack Info is cached indefinitely and
- * never revalidated. This ensures the JSON is only fetched once during
- * the application lifecycle.
+ * Cache for {@link EnsNodeStackInfo}, which is loaded from ENSDb on demand.
+ * Once successfully loaded, the {@link EnsNodeStackInfo} is cached and kept up-to-date
+ * by proactive revalidation, since the {@link EnsNodeStackInfo} might change during
+ * the lifecycle of the ENSApi instance, for example, when
+ * {@link IndexingMetadataContextInitialized.stackInfo} is updated in ENSDb.
+ * This is unlikely to happen at all, and if it does happen, it is likely to be
+ * very infrequent. However, proactive revalidation ensures that if such changes do happen,
+ * the cached value will be updated in a reasonable time frame without requiring
+ * a restart of the ENSApi application.
  *
  * Configuration:
- * - ttl: Infinity - Never expires once cached
- * - errorTtl: 1 minute - If loading fails, retry on next access after 1 minute
- * - proactiveRevalidationInterval: undefined - No proactive revalidation
+ * - ttl: 1 minute - Allow cached value to be fresh for up to 1 minute.
+ * - errorTtl: 1 minute - If loading fails, retry on next access after 1 minute.
+ * - proactiveRevalidationInterval: 5 minutes - Refresh the cached value every 5 minutes.
  * - proactivelyInitialize: true - Load immediately on startup
  */
-export const stackInfoCache = lazyProxy(
+export const stackInfoCache = lazyProxy<EnsNodeStackInfoCache>(
   () =>
-    /**
-     * Cache for ENSNode stack info
-     *
-     * Once initialized successfully, this cache will always return
-     * the same stack info for the lifecycle of the ENSApi instance.
-     *
-     * If initialization fails, it will keep retrying on access until it succeeds, which is desirable because the stack info is critical for the functioning of the application and we want to recover from transient initialization failures without requiring a restart.
-     */
     new SWRCache<EnsNodeStackInfo>({
-      fn: loadEnsNodeStackInfo,
-      ttl: Number.POSITIVE_INFINITY,
+      fn: async function loadEnsNodeStackInfo() {
+        try {
+          const indexingMetadataContext = await ensDbClient.getIndexingMetadataContext();
+
+          if (
+            indexingMetadataContext.statusCode !== IndexingMetadataContextStatusCodes.Initialized
+          ) {
+            // The IndexingMetadataContext has not been initialized in ENSDb yet.
+            // This might happen during application startup, i.e. when ENSDb
+            // has not yet been populated with the IndexingMetadataContext record.
+            // Therefore, throw an error to trigger the subsequent catch handler.
+            throw new Error("Indexing Metadata Context was uninitialized in ENSDb.");
+          }
+
+          const ensIndexerStackInfo = indexingMetadataContext.stackInfo;
+          const ensNodeStackInfo = buildEnsNodeStackInfo(
+            buildEnsApiPublicConfig(config, ensIndexerStackInfo.ensIndexer),
+            ensIndexerStackInfo.ensDb,
+            ensIndexerStackInfo.ensIndexer,
+            ensIndexerStackInfo.ensRainbow,
+          );
+
+          // The EnsNodeStackInfo has been successfully built for caching.
+          // Therefore, return it so that this current invocation of `readCache` will:
+          // - Replace the currently cached value (if any) with this new value.
+          // - Return this non-null value.
+          return ensNodeStackInfo;
+        } catch (error) {
+          // IndexingMetadataContext was uninitialized in ENSDb.
+          // Therefore, throw an error so that this current invocation of `readCache` will:
+          // - Reject the newly fetched response (if any) such that it won't be cached.
+          // - Return the most recently cached value from prior invocations, or `null` if no prior invocation successfully cached a value.
+          logger.error(
+            error,
+            `Error occurred while loading Indexing Metadata Context record from ENSNode Metadata table in ENSDb. ` +
+              `Where clause applied: ("ensIndexerSchemaName" = "${ensDbClient.ensIndexerSchemaName}", "key" = "${EnsNodeMetadataKeys.IndexingMetadataContext}"). ` +
+              `The cached EnsNodeStackInfo object (if any) will not be updated.`,
+          );
+
+          throw error;
+        }
+      },
+      ttl: minutesToSeconds(1),
       errorTtl: minutesToSeconds(1),
-      proactiveRevalidationInterval: undefined,
+      proactiveRevalidationInterval: minutesToSeconds(5),
       proactivelyInitialize: true,
     }),
 );
