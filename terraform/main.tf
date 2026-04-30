@@ -93,7 +93,7 @@ locals {
       ensnode_indexer_type         = "alpha-sepolia"
       ensnode_environment_name     = var.render_environment
       ensindexer_schema_name       = "alphaSepoliaSchema-${var.ensnode_version}"
-      plugins                      = "subgraph,basenames,lineanames,registrars"
+      plugins                      = "subgraph,basenames,lineanames,registrars,ensv2,protocol-acceleration,"
       namespace                    = "sepolia"
       render_instance_plan         = "starter"
       subgraph_compat              = false
@@ -165,7 +165,7 @@ module "ensindexer" {
   ensindexer_schema_name    = each.value.ensindexer_schema_name
   plugins                   = each.value.plugins
   namespace                 = each.value.namespace
-  referral_program_editions = each.value.referral_program_editions
+  referral_program_editions = try(each.value.referral_program_editions, "")
   subgraph_compat           = each.value.subgraph_compat
 
   # Common configuration (spread operator merges the map)
