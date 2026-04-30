@@ -160,6 +160,11 @@ export function starlight(): AstroIntegration {
               ],
             },
             {
+              label: "Concepts",
+              collapsed: false,
+              autogenerate: { directory: "ensindexer/concepts" },
+            },
+            {
               label: "Using ENSIndexer",
               collapsed: false,
               autogenerate: { directory: "ensindexer/usage" },
