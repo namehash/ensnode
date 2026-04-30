@@ -75,7 +75,7 @@ app.get("/health", async (c) => {
 
     return c.json({ responseCode: "ok" });
   } catch (error) {
-    logger.error(error, "Health check failed");
+    logger.debug(error, "Health check failed");
     return c.json({ responseCode: "error", message: "Service Unavailable" }, 503);
   }
 });
@@ -92,7 +92,7 @@ app.get("/ready", async (c) => {
 
     return c.json({ responseCode: "ok" });
   } catch (error) {
-    logger.error(error, "Readiness check failed");
+    logger.debug(error, "Readiness check failed");
     return c.json({ responseCode: "error", message: "Service Unavailable" }, 503);
   }
 });
