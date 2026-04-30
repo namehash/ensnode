@@ -55,5 +55,5 @@ export const migratedNodeByParent = onchainTable(
  * {@link migratedNodeByParent}; both are written together by the migration helper.
  */
 export const migratedNodeByNode = onchainTable("migrated_nodes_by_node", (t) => ({
-  node: t.hex().notNull().primaryKey().$type<Node>(),
+  node: t.hex().primaryKey().$type<Node>(),
 }));
