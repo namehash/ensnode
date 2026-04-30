@@ -2,8 +2,8 @@ import { asInterpretedName, toNormalizedAddress } from "enssdk";
 
 import { DatasourceNames, ENSNamespaceIds } from "@ensnode/datasources";
 
-import { DevnetAccounts } from "../shared/devnet-accounts";
 import { maybeGetDatasourceContract } from "../shared/datasource-contract";
+import { DevnetAccounts } from "../shared/devnet-accounts";
 import type { NamespaceSpecificValue } from "../shared/namespace-specific-value";
 
 const SEPOLIA_V2_V2_ETH_REGISTRY = maybeGetDatasourceContract(
