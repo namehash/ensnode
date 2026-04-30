@@ -127,11 +127,11 @@ process.on("SIGINT", handleShutdown);
 process.on("SIGTERM", handleShutdown);
 
 function log(msg: string) {
-  console.log(`[ci] ${msg}`);
+  console.log(`[orchestrator] ${msg}`);
 }
 
 function logError(msg: string) {
-  console.error(`[ci] ERROR: ${msg}`);
+  console.error(`[orchestrator] ERROR: ${msg}`);
 }
 
 async function waitForHealth(url: string, timeoutMs: number, serviceName: string): Promise<void> {
@@ -254,10 +254,9 @@ async function main() {
     DOCKER_DIR,
     "docker-compose.orchestrator.yml",
   )
-    .withWaitStrategy("devnet", Wait.forHealthCheck())
-    // ensdb has no explicit container_name (see docker-compose.orchestrator.yml), so
-    // testcontainers' parsed container name is "ensdb-1" (project prefix stripped). devnet
-    // keeps its container_name from the shared services/devnet.yml so it stays "devnet".
+    // No service in docker-compose.orchestrator.yml sets container_name, so testcontainers'
+    // parsed container names are "<service>-1" (project prefix stripped) for both.
+    .withWaitStrategy("devnet-1", Wait.forHealthCheck())
     .withWaitStrategy("ensdb-1", Wait.forListeningPorts())
     .withStartupTimeout(120_000)
     .up(["ensdb", "devnet"]);

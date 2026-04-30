@@ -1,6 +1,5 @@
 services:
   ensindexer:
-    container_name: ensindexer
     image: ghcr.io/namehash/ensnode/ensindexer:${ENSNODE_VERSION:-1.10.1}
     build:
       dockerfile: ./apps/ensindexer/Dockerfile

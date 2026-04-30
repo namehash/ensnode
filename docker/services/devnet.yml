@@ -1,10 +1,8 @@
 services:
   devnet:
-    container_name: devnet
     image: ghcr.io/ensdomains/contracts-v2:main-53f1482
-    # NOTE: we run devnet with a custom chainId of 31337 to disambiguate between mainnet and devnet
-    # see packages/datasources/src/lib/chains.ts for additional context
-    command: ./script/runDevnet.ts --testNames --chain 31337
+    # TODO: set devnet chain id here
+    command: ./script/runDevnet.ts --testNames
     pull_policy: always
     ports:
       - "8545:8545"

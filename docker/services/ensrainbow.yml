@@ -1,6 +1,5 @@
 services:
   ensrainbow:
-    container_name: ensrainbow
     image: ghcr.io/namehash/ensnode/ensrainbow:${ENSNODE_VERSION:-1.10.1}
     build:
       dockerfile: ./apps/ensrainbow/Dockerfile

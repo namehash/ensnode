@@ -3,6 +3,7 @@ services:
     extends:
       file: services/ensindexer.yml
       service: ensindexer
+    container_name: ensindexer
     restart: unless-stopped
     environment:
       ENSINDEXER_SCHEMA_NAME: docker_ensindexer_v1
@@ -22,6 +23,7 @@ services:
     extends:
       file: services/ensapi.yml
       service: ensapi
+    container_name: ensapi
     restart: unless-stopped
     environment:
       ENSINDEXER_SCHEMA_NAME: docker_ensindexer_v1
@@ -38,6 +40,7 @@ services:
     extends:
       file: services/ensrainbow.yml
       service: ensrainbow
+    container_name: ensrainbow
     restart: unless-stopped
     env_file:
       - path: envs/.env.docker.common
@@ -49,6 +52,7 @@ services:
     extends:
       file: services/ensadmin.yml
       service: ensadmin
+    container_name: ensadmin
     restart: unless-stopped
     depends_on:
       ensapi:
@@ -63,7 +67,10 @@ services:
     extends:
       file: services/ensdb.yml
       service: ensdb
+    container_name: ensdb
     restart: unless-stopped
+    ports:
+      - "5432:5432"
     env_file:
       - path: envs/.env.docker.common
         required: true
