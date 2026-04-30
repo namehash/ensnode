@@ -255,11 +255,14 @@ async function main() {
     "docker-compose.orchestrator.yml",
   )
     .withWaitStrategy("devnet", Wait.forHealthCheck())
-    .withWaitStrategy("ensdb", Wait.forListeningPorts())
+    // ensdb has no explicit container_name (see docker-compose.orchestrator.yml), so
+    // testcontainers' parsed container name is "ensdb-1" (project prefix stripped). devnet
+    // keeps its container_name from the shared services/devnet.yml so it stays "devnet".
+    .withWaitStrategy("ensdb-1", Wait.forListeningPorts())
     .withStartupTimeout(120_000)
     .up(["ensdb", "devnet"]);
 
-  const ensdbContainer = composeEnvironment.getContainer("ensdb");
+  const ensdbContainer = composeEnvironment.getContainer("ensdb-1");
   const ensdbPort = ensdbContainer.getMappedPort(5432);
   const ENSDB_URL = `postgresql://postgres:password@localhost:${ensdbPort}/postgres`;
   log(`ENSDb is ready (port ${ensdbPort})`);

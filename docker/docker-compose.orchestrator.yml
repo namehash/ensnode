@@ -2,6 +2,8 @@
 # Provides only the infrastructure services needed by orchestrator.ts:
 # devnet (local EVM) and ensdb (database).
 #
+# NOTE: not using container_name so testcontainers gives it a unique one and avoids collisions
+#
 # NOTE: ensdb is inlined (not `extends`-ing services/ensdb.yml) so we can override its host
 # port to ephemeral. The shared services/ensdb.yml binds 5432:5432, which collides with any
 # host-native postgres on a developer machine and silently routes orchestrator connections
@@ -14,8 +16,11 @@ services:
       file: services/devnet.yml
       service: devnet
 
+  # ensdb is inlined (not `extends`-ing services/ensdb.yml) because the shared definition's
+  # `5432:5432` port mapping and `container_name: ensdb` are global resources we want to
+  # override here, and compose-spec's !override / !reset tags aren't recognized by standard
+  # YAML language servers — the inline form keeps the editor lint clean.
   ensdb:
-    container_name: ensdb
     image: postgres:17
     ports:
       - "0:5432"
