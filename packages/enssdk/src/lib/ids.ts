@@ -36,7 +36,8 @@ import type {
  * `:` / `/` payload, so prefetch silently never fires.
  *
  * Move back to CAIP-style ids once Ponder's matcher supports parsing CAIP-shaped composite
- * primary keys directly. This is a temporary shape, not the long-term one.
+ * primary keys directly. This is a temporary shape, not the long-term one. Tracked in
+ * https://github.com/namehash/ensnode/issues/2034.
  *
  * Note that because we key ENSv2 Domains by StorageId (necessary for stable identifier over time,
  * since its backing tokenId can change), which is _derived_ from the emitted arguments, ENSv2 Domains
