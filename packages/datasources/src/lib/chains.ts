@@ -1,14 +1,9 @@
 import { type Chain, localhost, sepolia } from "viem/chains";
 
 /**
- * After devnet commit 5750aae86, the default devnet ChainId was updated to 1. Within the context of
- * Ponder, this collision with mainnet.id ambiguates the mainnet and devnet ponder_sync cache. The
- * collision also affects all chain.id branches in the ENSNode project, as well as potentially any
- * other EVM tooling. To avoid this collision, we use a custom ChainId for the devnet, reverting it
- * to the Anvil default. This disambiguates mainnet and the devnet, avoiding any possible issues.
+ * The devnet's default chain id.
  *
- * It remains a possibility that this fracturing of the expected devnet chain id will lead to
- * downstream incompatibilites or errors.
+ * @see https://github.com/ensdomains/contracts-v2/blob/580c60a20e80decce21cf15aafd762f96a96d544/contracts/script/setup.ts#L55
  */
 const DEVNET_CHAIN_ID = 31337;
 

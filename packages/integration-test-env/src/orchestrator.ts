@@ -37,7 +37,7 @@ import {
   type StartedDockerComposeEnvironment,
   Wait,
 } from "testcontainers";
-import { createTestClient, http } from "viem";
+import { createPublicClient, http } from "viem";
 
 import { ENSNamespaceIds, ensTestEnvChain } from "@ensnode/datasources";
 import {
@@ -266,15 +266,16 @@ async function main() {
   const ENSDB_URL = `postgresql://postgres:password@localhost:${ensdbPort}/postgres`;
   log(`ENSDb is ready (port ${ensdbPort})`);
 
-  // ensures that the devnet chain is always on our expected chain id
-  // TODO: can remove after devnet chain id configuration is supported
-  const client = createTestClient({
-    mode: "anvil",
+  // Devnet Chain Id check
+  const publicClient = createPublicClient({
     transport: http(ensTestEnvChain.rpcUrls.default.http[0]),
   });
-  // @ts-expect-error - anvil_setChainId isn't in viem's typed RPC schema
-  await client.request({ method: "anvil_setChainId", params: [ensTestEnvChain.id] });
-  log(`Set devnet chain id to ${ensTestEnvChain.id}`);
+  const devnetChainId = await publicClient.getChainId();
+  if (devnetChainId !== ensTestEnvChain.id) {
+    throw new Error(
+      `Devnet chain id mismatch: got ${devnetChainId}, expected ${ensTestEnvChain.id}.`,
+    );
+  }
 
   log("Devnet is ready");
 
