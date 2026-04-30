@@ -1,0 +1,54 @@
+---
+title: ENSDb SDK
+sidebar:
+  label: ENSDb SDK
+  order: 2
+---
+
+This page provides an overview of the ENSDb SDK and how to use it in your applications.
+
+## Intro
+
+For TypeScript projects, the [ENSDb SDK](/ensdb/concepts/glossary#ensdb-sdk) provides a convenient and efficient way to interact with your ENSDb instance.
+
+### Installation
+
+You can install the [`@ensnode/ensdb-sdk`](https://www.npmjs.com/package/@ensnode/ensdb-sdk) package from the NPM registry, using your preferred package manager:
+
+```bash
+npm install @ensnode/ensdb-sdk
+pnpm install @ensnode/ensdb-sdk
+yarn add @ensnode/ensdb-sdk
+```
+
+### Example Usage
+
+```typescript
+import { EnsDbReader, IndexingMetadataContextStatusCodes } from '@ensnode/ensdb-sdk';
+import { eq } from 'drizzle-orm';
+
+// Connect to a specific ENSDb instance by providing its connection string and
+// the ENSIndexer Schema Name you want to query
+const ensDbReader =  new EnsDbReader(ensDbConnectionString, ensIndexerSchemaName);
+const { ensDb, ensIndexerSchema } = ensDbReader;
+
+// Get ENS V1 domains from the ENSIndexer Schema 
+const v1Domains = await ensDb
+  .select()
+  .from(ensIndexerSchema.domain)
+  .where(eq(ensIndexerSchema.domain.type, "ENSv1Domain"));
+
+// Get ENS V2 domains from the ENSIndexer Schema 
+const v2Domains = await ensDb
+  .select()
+  .from(ensIndexerSchema.domain)
+  .where(eq(ensIndexerSchema.domain.type, "ENSv2Domain"));
+
+
+// Get indexing status snapshot
+const indexingMetadataContext = await ensDbReader.getIndexingMetadataContext();
+if (indexingMetadataContext.statusCode === IndexingMetadataContextStatusCodes.Initialized) {
+  const indexingStatusSnapshot = indexingMetadataContext.indexingStatus;
+  // Do something with the indexing status snapshot
+}
+```

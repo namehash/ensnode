@@ -5,14 +5,14 @@
  * monorepo-level integration tests, then tears everything down.
  *
  * Phases:
- *   1. Postgres + devnet via docker-compose (testcontainers DockerComposeEnvironment)
+ *   1. ENSDb (postgres) + devnet via docker-compose (testcontainers DockerComposeEnvironment)
  *   2. Download pre-built ENSRainbow LevelDB, extract, start ENSRainbow from source
  *   3. Start ENSIndexer, wait for omnichain-following / omnichain-completed
  *   4. Start ENSApi
  *   5. Run `pnpm test:integration` at the monorepo root
  *
  * Design decisions:
- *   - Postgres and devnet are started from docker/docker-compose.orchestrator.yml via
+ *   - ENSDb (postgres) and devnet are started from docker/docker-compose.orchestrator.yml via
  *     testcontainers DockerComposeEnvironment, ensuring the orchestrator always
  *     uses the same images and configuration defined there.
  *   - execa for child process management — automatic cleanup on parent exit,
@@ -22,7 +22,7 @@
  *   - ENSRainbow database is downloaded via the existing shell script and
  *     extracted with tar, mirroring the Docker entrypoint behavior.
  *   - Cleanup stops processes in reverse order (ensapi → ensindexer → ensrainbow)
- *     so DB consumers close connections before Postgres is stopped.
+ *     so DB consumers close connections before ensdb is stopped.
  *   - Abort flag pattern: if a background service crashes during polling/health
  *     checks, the orchestrator fails fast instead of waiting for a timeout.
  *   - SIGINT/SIGTERM handler is guarded against re-entrance (repeated Ctrl-C).
@@ -37,9 +37,13 @@ import {
   type StartedDockerComposeEnvironment,
   Wait,
 } from "testcontainers";
+import { createTestClient, http } from "viem";
 
-import { ENSNamespaceIds } from "@ensnode/datasources";
-import { OmnichainIndexingStatusIds } from "@ensnode/ensnode-sdk";
+import { ENSNamespaceIds, ensTestEnvChain } from "@ensnode/datasources";
+import {
+  IndexingMetadataContextStatusCodes,
+  OmnichainIndexingStatusIds,
+} from "@ensnode/ensnode-sdk";
 
 const MONOREPO_ROOT = resolve(import.meta.dirname, "../../..");
 const DOCKER_DIR = resolve(MONOREPO_ROOT, "docker");
@@ -97,7 +101,9 @@ async function cleanup() {
 
   if (composeEnvironment) {
     try {
-      await composeEnvironment.down();
+      // removeVolumes ensures the postgres volume is wiped between runs — Ponder rejects schemas
+      // owned by a different prior app, so we cannot reuse the volume across runs.
+      await composeEnvironment.down({ removeVolumes: true, timeout: 10_000 });
     } catch (error) {
       logError(
         `Failed to stop compose environment during cleanup: ${
@@ -199,9 +205,14 @@ async function pollIndexingStatus(
     while (Date.now() - start < timeoutMs) {
       checkAborted();
       try {
-        const snapshot = await ensDbClient.getIndexingStatusSnapshot();
-        if (snapshot !== undefined) {
-          const omnichainStatus = snapshot.omnichainSnapshot.omnichainStatus;
+        const indexingMetadataContext = await ensDbClient.getIndexingMetadataContext();
+
+        if (
+          indexingMetadataContext.statusCode === IndexingMetadataContextStatusCodes.Uninitialized
+        ) {
+          console.log("IndexingMetadataContext is uninitialized, waiting...");
+        } else {
+          const { omnichainStatus } = indexingMetadataContext.indexingStatus.omnichainSnapshot;
           log(`Omnichain status: ${omnichainStatus}`);
           if (
             omnichainStatus === OmnichainIndexingStatusIds.Following ||
@@ -237,21 +248,35 @@ async function main() {
   log("Starting integration test environment...");
   logVersions();
 
-  // Phase 1: Start Postgres + Devnet via docker-compose
-  log("Starting Postgres and devnet...");
+  // Phase 1: Start ENSDb + Devnet via docker-compose
+  log("Starting ENSDb and Devnet...");
   composeEnvironment = await new DockerComposeEnvironment(
     DOCKER_DIR,
     "docker-compose.orchestrator.yml",
   )
     .withWaitStrategy("devnet", Wait.forHealthCheck())
-    .withWaitStrategy("postgres", Wait.forListeningPorts())
+    // ensdb has no explicit container_name (see docker-compose.orchestrator.yml), so
+    // testcontainers' parsed container name is "ensdb-1" (project prefix stripped). devnet
+    // keeps its container_name from the shared services/devnet.yml so it stays "devnet".
+    .withWaitStrategy("ensdb-1", Wait.forListeningPorts())
     .withStartupTimeout(120_000)
-    .up(["postgres", "devnet"]);
+    .up(["ensdb", "devnet"]);
 
-  const postgresContainer = composeEnvironment.getContainer("postgres");
-  const postgresPort = postgresContainer.getMappedPort(5432);
-  const ENSDB_URL = `postgresql://postgres:password@localhost:${postgresPort}/postgres`;
-  log(`Postgres is ready (port ${postgresPort})`);
+  const ensdbContainer = composeEnvironment.getContainer("ensdb-1");
+  const ensdbPort = ensdbContainer.getMappedPort(5432);
+  const ENSDB_URL = `postgresql://postgres:password@localhost:${ensdbPort}/postgres`;
+  log(`ENSDb is ready (port ${ensdbPort})`);
+
+  // ensures that the devnet chain is always on our expected chain id
+  // TODO: can remove after devnet chain id configuration is supported
+  const client = createTestClient({
+    mode: "anvil",
+    transport: http(ensTestEnvChain.rpcUrls.default.http[0]),
+  });
+  // @ts-expect-error - anvil_setChainId isn't in viem's typed RPC schema
+  await client.request({ method: "anvil_setChainId", params: [ensTestEnvChain.id] });
+  log(`Set devnet chain id to ${ensTestEnvChain.id}`);
+
   log("Devnet is ready");
 
   // Phase 2: Download ENSRainbow database and start from source

@@ -15,7 +15,8 @@
     "@ensnode/ensdb-sdk": "workspace:*",
     "@ensnode/ensnode-sdk": "workspace:*",
     "execa": "^9.6.1",
-    "testcontainers": "^11.12.0",
-    "tsx": "^4.7.1"
+    "testcontainers": "^11.14.0",
+    "tsx": "^4.7.1",
+    "viem": "catalog:"
   }
 }

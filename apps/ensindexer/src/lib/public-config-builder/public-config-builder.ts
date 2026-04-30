@@ -20,6 +20,15 @@ export class PublicConfigBuilder {
   private ensRainbowClient: EnsRainbow.ApiClient;
 
   /**
+   * One-time async readiness hook awaited before the first
+   * `ensRainbowClient.config()` invocation, so callers don't race ENSRainbow's
+   * background bootstrap. Defaults to a no-op for callers that don't need to
+   * gate on readiness (e.g. tests or environments where ENSRainbow is already
+   * known to be ready).
+   */
+  private waitForEnsRainbowReady: () => Promise<void>;
+
+  /**
    * Immutable ENSIndexer Public Config
    *
    * The cached ENSIndexer Public Config object, which is built and validated
@@ -29,24 +38,35 @@ export class PublicConfigBuilder {
 
   /**
    * @param ensRainbowClient ENSRainbow Client instance used to fetch ENSRainbow Public Config
+   * @param waitForEnsRainbowReady One-time async readiness hook awaited before the first
+   *        `ensRainbowClient.config()` invocation. Defaults to a no-op.
    */
-  constructor(ensRainbowClient: EnsRainbow.ApiClient) {
+  constructor(
+    ensRainbowClient: EnsRainbow.ApiClient,
+    waitForEnsRainbowReady: () => Promise<void> = async () => {},
+  ) {
     this.ensRainbowClient = ensRainbowClient;
+    this.waitForEnsRainbowReady = waitForEnsRainbowReady;
   }
 
   /**
    * Get ENSIndexer Public Config
    *
-   * Note: ENSIndexer Public Config is cached after the first call, so
-   * subsequent calls will return the cached version without rebuilding it.
+   * Note: The {@link EnsIndexerPublicConfig} object is immutable for
+   * the whole ENSIndexer instance lifecycle. Therefore, the result of
+   * the first {@link getPublicConfig} call is cached and returned for
+   * subsequent calls.
    *
-   * @throws if the built ENSIndexer Public Config does not conform to
+   * @throws if the built {@link EnsIndexerPublicConfig} does not conform to
    *         the expected schema
    */
   async getPublicConfig(): Promise<EnsIndexerPublicConfig> {
     if (typeof this.immutablePublicConfig === "undefined") {
+      await this.waitForEnsRainbowReady();
+
       const [versionInfo, ensRainbowPublicConfig] = await Promise.all([
         this.getEnsIndexerVersionInfo(),
+        // TODO: remove dependency on ENSRainbow by dropping `ensRainbowPublicConfig` from `EnsIndexerPublicConfig`.
         this.ensRainbowClient.config(),
       ]);
 

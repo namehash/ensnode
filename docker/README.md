@@ -6,11 +6,11 @@ All commands are run from the **monorepo root**.
 
 | File                                     | Purpose                                                                                |
 | ---------------------------------------- | -------------------------------------------------------------------------------------- |
-| `docker/docker-compose.yml`              | Base stack — ensindexer, ensapi, ensrainbow, ensadmin, postgres. For mainnet/sepolia.  |
+| `docker/docker-compose.yml`              | Base stack — ensindexer, ensapi, ensrainbow, ensadmin, ensdb. For mainnet/sepolia.     |
 | `docker/docker-compose.devnet.yml`       | Full stack against local devnet (`ens-test-env`). Includes all base services + devnet. |
-| `docker/docker-compose.orchestrator.yml` | Minimal infra for CI — devnet + postgres only. Used by `orchestrator.ts`.              |
+| `docker/docker-compose.orchestrator.yml` | Minimal infra for CI — devnet + ensdb only. Used by `orchestrator.ts`.                 |
 | `docker/services/*.yml`                  | Individual service definitions. Extended by the compose files above.                   |
-| `docker/envs/.env.docker.common`         | Shared env defaults (postgres credentials, internal service URLs). Committed.          |
+| `docker/envs/.env.docker.common`         | Shared env defaults (ensdb credentials, internal service URLs). Committed.             |
 | `docker/envs/.env.docker.devnet`         | Devnet defaults (PLUGINS, etc.). Committed. Works out of the box.                      |
 | `docker/envs/.env.docker.example`        | Example for user-specific config. Copy to `.env.docker.local` for mainnet/sepolia.     |
 | `docker/envs/.env.docker.local`          | User config (gitignored). Required for base stack, optional for devnet overrides.      |
@@ -57,7 +57,7 @@ To override defaults (e.g. change `PLUGINS`), create `docker/envs/.env.docker.lo
 docker compose -f docker/docker-compose.devnet.yml up -d
 
 # Start only devnet + core services (no ensadmin)
-docker compose -f docker/docker-compose.devnet.yml up -d devnet postgres ensrainbow ensindexer ensapi
+docker compose -f docker/docker-compose.devnet.yml up -d ensindexer ensapi
 
 # Start only devnet (quick local EVM node, also shows data information about devnet)
 docker compose -f docker/docker-compose.devnet.yml up devnet
@@ -83,7 +83,7 @@ pnpm docker:build:ensadmin
 
 ### CI / integration tests
 
-Used internally by `orchestrator.ts` via testcontainers. Starts devnet + postgres only.
+Used internally by `orchestrator.ts` via testcontainers. Starts devnet + ensdb only.
 
 ```bash
 pnpm test:integration:ci

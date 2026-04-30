@@ -1,8 +1,8 @@
-import type { Address } from "enssdk";
+import type { NormalizedAddress } from "enssdk";
 import { isAddressEqual, zeroAddress } from "viem";
 
 /**
- * Interprets a viem#Address. zeroAddress is interpreted as null, otherwise Address.
+ * Interprets a NormalizedAddress. zeroAddress is interpreted as null, otherwise as-is.
  */
-export const interpretAddress = (owner: Address) =>
+export const interpretAddress = (owner: NormalizedAddress): NormalizedAddress | null =>
   isAddressEqual(zeroAddress, owner) ? null : owner;

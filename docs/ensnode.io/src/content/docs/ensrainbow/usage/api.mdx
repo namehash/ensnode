@@ -10,14 +10,38 @@ sidebar:
 
 | Endpoint | Purpose | Key Response Types |
 |----------|---------|--------------------|
-| `GET /health` | Liveness probe for orchestration | `{ status: "ok" }` |
+| `GET /health` | Liveness probe — succeeds as soon as the HTTP server is accepting requests | `{ status: "ok" }` |
+| `GET /ready` | Readiness probe — succeeds once the database has been downloaded, validated, and opened | `ReadyResponse`, `ServiceUnavailableError` |
 | `GET /v1/heal/{labelhash}` | Heal a single labelhash | `HealSuccess`, `HealError` |
-| `GET /v1/labels/count` | Current healable label count | `CountSuccess`, `CountServerError` |
-| `GET /v1/config` | Public service config (version, label set, records count) | `EnsRainbowPublicConfig` |
+| `GET /v1/labels/count` | Current healable label count | `CountSuccess`, `CountServerError`, `ServiceUnavailableError` |
+| `GET /v1/config` | Public configuration of the running instance | `ENSRainbowPublicConfig`, `ServiceUnavailableError` |
 
 :::tip[Deterministic Results]
 Pin `labelSetVersion` in your client if you need **deterministic results** across time. See the [Label Sets & Versioning guide](/ensrainbow/concepts/label-sets-and-versioning/) for details.
 :::
+
+## Liveness vs. Readiness
+
+ENSRainbow's container starts its HTTP server immediately so that orchestrators (Docker, Kubernetes, ECS, …) can reach it for liveness checks while the database is still being downloaded and validated on first boot (which can take 30+ minutes for large label sets).
+
+- **`GET /health`** — pure **liveness** probe. Returns `200 { status: "ok" }` as soon as the HTTP server is bound. It does **not** guarantee the database is loaded.
+- **`GET /ready`** — **readiness** probe. Returns `200 { status: "ok" }` only after the database has been downloaded, lite-validated, and opened by the process. While the server is still bootstrapping, it returns `503 Service Unavailable` with a structured error body so clients can poll with backoff.
+
+While the database is not yet ready, the following routes return `503` with the body:
+
+```json
+{
+  "status": "error",
+  "error": "ENSRainbow is still bootstrapping its database",
+  "errorCode": 503
+}
+```
+
+- `GET /v1/heal/{labelhash}`
+- `GET /v1/labels/count`
+- `GET /v1/config`
+
+Clients (including ENSIndexer) should poll `/ready` rather than `/health` before issuing heal requests. The official `ensrainbow-sdk` exposes `client.ready()` exactly for this purpose.
 
 ## Health Check
 
@@ -26,6 +50,24 @@ curl https://api.ensrainbow.io/health
 ```
 
 Response: `{"status":"ok"}`
+
+## Readiness Check
+
+```bash
+curl https://api.ensrainbow.io/ready
+```
+
+Ready response: `{"status":"ok"}`
+
+Not-ready response (HTTP 503):
+
+```json
+{
+  "status": "error",
+  "error": "ENSRainbow is still bootstrapping its database",
+  "errorCode": 503
+}
+```
 
 ## Heal Label
 
