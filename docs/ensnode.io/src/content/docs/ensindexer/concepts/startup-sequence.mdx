@@ -6,20 +6,20 @@ sidebar:
   order: 1
 ---
 
-Below is an architecture diagram describing ENSIndexer start sequence in detail.
+Below are diagrams describing the ENSIndexer startup sequence.
 
 ## Ponder app lifecycle
 
-Here is the top-level view on the ENSIndexer start sequence. It's really the overview of the Ponder app lifecycle running inside the ENSIndexer instance. The example assumes that the ENSIndexer was started with the `ENSINDEXER_SCHEMA_NAME` environment variable set to `prod_0`, but the same sequence applies to any ENSIndexer Schema.
+Here is an overview of the ENSIndexer startup sequence. It summarizes the Ponder app lifecycle running inside an ENSIndexer instance. The example assumes that the ENSIndexer was started with the `ENSINDEXER_SCHEMA_NAME` environment variable set to `prod_0`, but the same sequence applies to any ENSIndexer Schema.
 
 <figure>
   [![Ponder app lifecycle](/ensindexer/startup-sequence/0-overview.png)](/ensindexer/startup-sequence/0-overview.png)
 </figure>
 
-## ENSIndexer Schema migrations
+## ENSIndexer schema migrations
 
-When Ponder app lifecycle reaches the "Execute migrations for the `prod_0` ENSIndexer Schema" step, Ponder will execute all pending migrations for the `prod_0` ENSIndexer Schema.
-This ensures that the database schema is up to date before indexing onchain events start.
+When the Ponder app lifecycle reaches the step for "Execute migrations for the `prod_0` ENSIndexer Schema", Ponder will execute any pending migrations for the `prod_0` ENSIndexer Schema.
+This ensures that the ENSIndexer Schema is up to date before indexing onchain events start.
 
 <figure>
   [![Executing ENSIndexer Schema migrations](/ensindexer/startup-sequence/1-ensindexer-schema-migrations.png)](/ensindexer/startup-sequence/1-ensindexer-schema-migrations.png)
@@ -27,7 +27,7 @@ This ensures that the database schema is up to date before indexing onchain even
 
 ## Omnichain indexing strategy
 
-When Ponder app lifecycle reaches the "Run omnichain indexing strategy" step, Ponder will start writing data concurrently to Ponder Schema (caching RPC calls) and ENSIndexer Schema (storing indexed data). ENSIndexer app lifecycle "injects" a special "Execute onchain event handlers preconditions" step.
+When the Ponder app lifecycle reaches the step to "Run omnichain indexing strategy", Ponder will start writing data concurrently to the Ponder Schema (caching RPC calls) and  the ENSIndexer Schema (storing indexed data). The ENSIndexer app lifecycle "injects" a special step for "Execute onchain event handlers preconditions".
 
 <figure>
   [![Omnichain indexing strategy](/ensindexer/startup-sequence/2-omnichain-strategy-execution.png)](/ensindexer/startup-sequence/2-omnichain-strategy-execution.png)
@@ -35,7 +35,7 @@ When Ponder app lifecycle reaches the "Run omnichain indexing strategy" step, Po
 
 ### Init onchain event handlers
 
-The special "Execute onchain event handlers preconditions" step occurs before any onchain event is indexed. This allows ENSIndexer to execute ENSNode Schema migrations and populate ENSNode Metadata table with relevant data before any onchain event handlers are executed.
+The special step for "Execute onchain event handlers preconditions" occurs before any onchain event is indexed. This enables ENSIndexer to execute ENSNode Schema migrations and populate the ENSNode Metadata table with relevant data before any onchain event handlers are executed.
 
 <figure>
   [![Onchain event handlers preconditions](/ensindexer/startup-sequence/3-init-onchain-event-handlers.png)](/ensindexer/startup-sequence/3-init-onchain-event-handlers.png)
