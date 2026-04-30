@@ -248,20 +248,6 @@ async function main() {
   log("Starting integration test environment...");
   logVersions();
 
-  // Phase 0: best-effort wipe of any stale orchestrator state from a previous (possibly aborted)
-  // run. Without this, an abnormally-terminated prior run leaves behind a postgres volume that
-  // Ponder will reject ("Schema X was previously used by a different Ponder app"). Cleanup() also
-  // tears down volumes on success, so this is the belt to that suspenders.
-  log("Wiping any stale orchestrator state...");
-  try {
-    execaSync("docker", ["compose", "-f", "docker-compose.orchestrator.yml", "down", "-v"], {
-      cwd: DOCKER_DIR,
-      stdio: "ignore",
-    });
-  } catch {
-    // first run, nothing to wipe — this is fine
-  }
-
   // Phase 1: Start ENSDb + Devnet via docker-compose
   log("Starting ENSDb and Devnet...");
   composeEnvironment = await new DockerComposeEnvironment(
