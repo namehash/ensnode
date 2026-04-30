@@ -1,4 +1,4 @@
-import GenericTooltip from "@workspace/docs/ensnode.io/src/components/atoms/GenericTooltip.tsx";
+import { Tooltip } from "@namehash/namehash-ui/legacy";
 import { Balancer } from "react-wrap-balancer";
 
 export default function SearchKeyboardShortcut() {
@@ -21,11 +21,11 @@ export default function SearchKeyboardShortcut() {
 
   return (
     <div className="p-0">
-      <GenericTooltip trigger={InfoIcon}>
+      <Tooltip trigger={InfoIcon}>
         <Balancer as="p" className="text-center w-fit max-w-[186px]">
           Start a search by pressing Ctrl+K on your keyboard
         </Balancer>
-      </GenericTooltip>
+      </Tooltip>
     </div>
   );
 }
