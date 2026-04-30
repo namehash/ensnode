@@ -37,8 +37,9 @@ import {
   type StartedDockerComposeEnvironment,
   Wait,
 } from "testcontainers";
+import { createTestClient, http } from "viem";
 
-import { ENSNamespaceIds } from "@ensnode/datasources";
+import { ENSNamespaceIds, ensTestEnvChain } from "@ensnode/datasources";
 import {
   IndexingMetadataContextStatusCodes,
   OmnichainIndexingStatusIds,
@@ -100,7 +101,9 @@ async function cleanup() {
 
   if (composeEnvironment) {
     try {
-      await composeEnvironment.down();
+      // removeVolumes ensures the postgres volume is wiped between runs — Ponder rejects schemas
+      // owned by a different prior app, so we cannot reuse the volume across runs.
+      await composeEnvironment.down({ removeVolumes: true, timeout: 10_000 });
     } catch (error) {
       logError(
         `Failed to stop compose environment during cleanup: ${
@@ -252,14 +255,28 @@ async function main() {
     "docker-compose.orchestrator.yml",
   )
     .withWaitStrategy("devnet", Wait.forHealthCheck())
-    .withWaitStrategy("ensdb", Wait.forListeningPorts())
+    // ensdb has no explicit container_name (see docker-compose.orchestrator.yml), so
+    // testcontainers' parsed container name is "ensdb-1" (project prefix stripped). devnet
+    // keeps its container_name from the shared services/devnet.yml so it stays "devnet".
+    .withWaitStrategy("ensdb-1", Wait.forListeningPorts())
     .withStartupTimeout(120_000)
     .up(["ensdb", "devnet"]);
 
-  const ensdbContainer = composeEnvironment.getContainer("ensdb");
+  const ensdbContainer = composeEnvironment.getContainer("ensdb-1");
   const ensdbPort = ensdbContainer.getMappedPort(5432);
   const ENSDB_URL = `postgresql://postgres:password@localhost:${ensdbPort}/postgres`;
   log(`ENSDb is ready (port ${ensdbPort})`);
+
+  // ensures that the devnet chain is always on our expected chain id
+  // TODO: can remove after devnet chain id configuration is supported
+  const client = createTestClient({
+    mode: "anvil",
+    transport: http(ensTestEnvChain.rpcUrls.default.http[0]),
+  });
+  // @ts-expect-error - anvil_setChainId isn't in viem's typed RPC schema
+  await client.request({ method: "anvil_setChainId", params: [ensTestEnvChain.id] });
+  log(`Set devnet chain id to ${ensTestEnvChain.id}`);
+
   log("Devnet is ready");
 
   // Phase 2: Download ENSRainbow database and start from source
