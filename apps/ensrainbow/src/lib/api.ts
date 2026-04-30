@@ -41,13 +41,10 @@ function buildServiceUnavailableBody(
 }
 
 /**
- * Creates and configures the ENS Rainbow API routes.
+ * Creates and configures ENSRainbow HTTP routes.
  *
- * `publicConfig` is always available - the entrypoint command builds it eagerly from CLI/env
- * arguments before the database has finished bootstrapping, so `/v1/config` can serve it
- * immediately. When `dbConfigSupplier` returns `null`, routes that depend on the database
- * (e.g. `/v1/labels/count`, `/v1/heal/:labelhash`, `/ready`) respond with HTTP 503 so that
- * clients polling `/ready` can wait for the bootstrap to complete.
+ * `publicConfig` may be built before the DB exists (entrypoint). `dbConfigSupplier` stays `null`
+ * until bootstrap finishes; database-backed routes and `/ready` return 503 until then.
  */
 export function createApi(
   server: ENSRainbowServer,
@@ -68,7 +65,7 @@ export function createApi(
   );
 
   api.get("/v1/heal/:labelhash", async (c: HonoContext) => {
-    if (!server.isReady()) {
+    if (!server.isReady() || dbConfigSupplier() === null) {
       return c.json(buildServiceUnavailableBody(), 503);
     }
 
@@ -130,9 +127,6 @@ export function createApi(
   });
 
   api.get("/ready", (c: HonoContext) => {
-    // `/ready` indicates the database has fully bootstrapped (downloaded, attached, validated).
-    // Require both `server.isReady()` (DB attached) and `dbConfigSupplier() !== null`
-    // (DB-derived config published) to avoid a transient false-ready state.
     if (!server.isReady() || dbConfigSupplier() === null) {
       return c.json(buildServiceUnavailableBody(), 503);
     }

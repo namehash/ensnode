@@ -200,9 +200,7 @@ describe("Server Command Tests", () => {
     beforeAll(async () => {
       pendingEnsRainbowServer = ENSRainbowServer.createPending();
       pendingDbConfig = null;
-      // The entrypoint command builds this in-memory public config eagerly from CLI/env args
-      // before the DB is attached; mirror that here using a label set that does not yet exist
-      // in any database.
+      // Mirror entrypoint: public config from declared label set before DB attach.
       const eagerPublicConfig = buildEnsRainbowPublicConfig({
         serverLabelSet: {
           labelSetId: pendingLabelSetId,

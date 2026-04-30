@@ -5,14 +5,7 @@ import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
 
 import type { DbConfig } from "./types";
 
-/**
- * Build an `EnsRainbowPublicConfig` from a known `EnsRainbowServerLabelSet`.
- *
- * Used by both:
- * - the eager startup path (entrypoint command), where the label set comes from CLI/env args
- *   and the database has not yet been opened, and
- * - the post-bootstrap path, where the label set comes from the opened database.
- */
+/** Builds public config from a label set (CLI/env before DB open, or from DB after open). */
 export function buildEnsRainbowPublicConfigFromLabelSet(
   serverLabelSet: EnsRainbowServerLabelSet,
 ): EnsRainbow.ENSRainbowPublicConfig {

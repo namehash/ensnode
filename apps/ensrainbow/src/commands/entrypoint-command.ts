@@ -93,13 +93,7 @@ export async function entrypointCommand(
 
   const ensRainbowServer = ENSRainbowServer.createPending();
 
-  // Eagerly build an in-memory `EnsRainbowPublicConfig` from CLI/env args so that `/v1/config`
-  // can serve a non-503 response from the moment the HTTP server starts accepting requests.
-  // This removes the cold-start gap for downstream services (e.g. ENSIndexer) that need to
-  // read ENSRainbow's public config to decide how to behave.
-  // The value is `EnsRainbowServerLabelSet.highestLabelSetVersion` because the entrypoint is
-  // committing to download and serve exactly this version; the post-bootstrap validation below
-  // confirms the on-disk database matches.
+  // Public config from CLI/env so `/v1/config` works before attach; validated against DB after bootstrap.
   const argsServerLabelSet: EnsRainbowServerLabelSet = {
     labelSetId: options.labelSetId,
     highestLabelSetVersion: options.labelSetVersion,
@@ -193,11 +187,6 @@ export async function entrypointCommand(
     setTimeout(() => {
       runDbBootstrap(options, ensRainbowServer, bootstrapAborter.signal)
         .then((dbConfig) => {
-          // Validate that the on-disk database actually matches the label set the entrypoint
-          // was configured to serve. The eagerly-built `inMemoryPublicConfig` (as exposed via
-          // `/v1/config` from startup) must agree with the canonical state stored in the DB;
-          // otherwise downstream consumers would have been told a misleading config during the
-          // cold-start window.
           if (
             dbConfig.serverLabelSet.labelSetId !== argsServerLabelSet.labelSetId ||
             dbConfig.serverLabelSet.highestLabelSetVersion !==

@@ -110,8 +110,7 @@ describe("entrypointCommand (existing DB on disk)", () => {
     const healthData = (await healthRes.json()) as EnsRainbow.HealthResponse;
     expect(healthData).toEqual({ status: "ok" });
 
-    // /v1/config must serve the eagerly-built public config from CLI/env args before the DB
-    // attach completes (issue #2020). Note we have NOT awaited bootstrapComplete yet.
+    // /v1/config from CLI/env before bootstrap completes.
     const earlyConfigRes = await fetch(`${endpoint}/v1/config`);
     expect(earlyConfigRes.status).toBe(200);
     const earlyConfigData = (await earlyConfigRes.json()) as EnsRainbow.ENSRainbowPublicConfig;
@@ -140,9 +139,7 @@ describe("entrypointCommand (existing DB on disk)", () => {
 });
 
 describe("entrypointCommand (env-vs-DB label-set mismatch)", () => {
-  // The directory name is keyed off the *configured* label set. By seeding a database whose
-  // internal `labelSetId` / `highestLabelSetVersion` differ from those values, we trigger the
-  // post-bootstrap mismatch check.
+  // DB path uses configured id/version; contents claim a different label set -> mismatch after attach.
   const configuredLabelSetId = buildLabelSetId("entrypoint-mismatch-test");
   const configuredLabelSetVersion = buildLabelSetVersion(0);
   const dbLabelSetId = buildLabelSetId("different-labelset");
@@ -189,8 +186,7 @@ describe("entrypointCommand (env-vs-DB label-set mismatch)", () => {
       exit,
     });
 
-    // /v1/config still serves the *configured* (in-memory) public config during the
-    // mismatch window: the DB-derived one is never published.
+    // Still CLI/env public config; bootstrap fails before publishing db-backed state.
     const configRes = await fetch(`${endpoint}/v1/config`);
     expect(configRes.status).toBe(200);
     const configData = (await configRes.json()) as EnsRainbow.ENSRainbowPublicConfig;
