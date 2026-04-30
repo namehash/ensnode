@@ -4,7 +4,6 @@ import { otel } from "@hono/otel";
 import { cors } from "hono/cors";
 import { html } from "hono/html";
 
-import { ensDbClient } from "@/lib/ensdb/singleton";
 import { errorResponse } from "@/lib/handlers/error-response";
 import { createApp } from "@/lib/hono-factory";
 import logger from "@/lib/logger";
@@ -13,6 +12,7 @@ import { generateOpenApi31Document } from "@/openapi-document";
 import realtimeApi from "./handlers/api/meta/realtime-api";
 import apiRouter from "./handlers/api/router";
 import ensanalyticsApi from "./handlers/ensanalytics/ensanalytics-api";
+import ensApiProbesApi from "./handlers/ensapi-probes/ensapi-probes-api";
 import subgraphApi from "./handlers/subgraph/subgraph-api";
 
 const app = createApp();
@@ -60,41 +60,12 @@ app.route("/v1/ensanalytics", ensanalyticsApi);
 // NOTE: this is legacy endpoint and will be deleted in future. one should use /api/realtime instead
 app.route("/amirealtime", realtimeApi);
 
+// Health check and readiness check endpoints for monitoring and load balancer probes
+app.route("/", ensApiProbesApi);
+
 // generate and return OpenAPI 3.1 document
 app.get("/openapi.json", (c) => {
   return c.json(generateOpenApi31Document(app));
-});
-
-app.get("/health", async (c) => {
-  try {
-    const isEnsDbHealthy = await ensDbClient.isHealthy();
-
-    if (!isEnsDbHealthy) {
-      throw new Error(`ENSDb instance is unhealthy`);
-    }
-
-    return c.json({ responseCode: "ok" });
-  } catch (error) {
-    logger.debug(error, "Health check failed");
-    return c.json({ responseCode: "error", message: "Service Unavailable" }, 503);
-  }
-});
-
-app.get("/ready", async (c) => {
-  try {
-    const isEnsDbReady = await ensDbClient.isReady();
-
-    if (!isEnsDbReady) {
-      throw new Error(
-        `ENSDb instance is not ready. This may indicate that ENSNode Schema migrations were not completed successfully or that the ENSNode Metadata record for ${ensDbClient.ensIndexerSchemaName} ENSIndexer Schema has not been created yet.`,
-      );
-    }
-
-    return c.json({ responseCode: "ok" });
-  } catch (error) {
-    logger.debug(error, "Readiness check failed");
-    return c.json({ responseCode: "error", message: "Service Unavailable" }, 503);
-  }
 });
 
 // log hono errors to console
