@@ -19,8 +19,9 @@ import { lookupLabels } from "@/lib/omnigraph-client";
  * This is independent of how many labelhashes each label expands into (1 if already
  * normalized / unnormalizable, 2 if it has a distinct normalized form). The resolver
  * cap (`LABELS_BY_HASHES_MAX = 200` in `apps/ensapi/src/omnigraph-api/schema/label.ts`)
- * is sized to comfortably accommodate the worst case (2 * `MAX_LABELS_PER_SUBMISSION`)
- * so callers always get the same per-submission limit regardless of normalization.
+ * is sized to exactly accommodate the worst case (2 * `MAX_LABELS_PER_SUBMISSION`).
+ * Keep these limits in sync so callers always get the same per-submission limit
+ * regardless of normalization.
  */
 export const MAX_LABELS_PER_SUBMISSION = 100;
 
