@@ -16,7 +16,11 @@ import { errorResponse } from "@/lib/error-response";
 import type { LabelHit } from "@/lib/labels";
 import { lookupLabels } from "@/lib/omnigraph-client";
 
-import { type SubmissionsResponse, submissionsHandler } from "./submissions";
+import {
+  OMNIGRAPH_LOOKUP_TIMEOUT_MS,
+  type SubmissionsResponse,
+  submissionsHandler,
+} from "./submissions";
 
 const mockedLookup = vi.mocked(lookupLabels);
 
@@ -31,14 +35,17 @@ const CALLER = "0x1234567890123456789012345678901234567890";
 
 describe("POST /api/submissions", () => {
   const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+  const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
   beforeEach(() => {
     mockedLookup.mockReset();
     consoleSpy.mockClear();
+    consoleErrorSpy.mockClear();
   });
 
   afterAll(() => {
     consoleSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
   });
 
   it("400s on malformed JSON", async () => {
@@ -196,6 +203,44 @@ describe("POST /api/submissions", () => {
     });
     expect(res.status).toBe(400);
     expect(mockedLookup).not.toHaveBeenCalled();
+  });
+
+  it("returns 504 when the omnigraph lookup times out", async () => {
+    mockedLookup.mockRejectedValue(new DOMException("The operation timed out.", "TimeoutError"));
+
+    const app = makeApp();
+    const res = await app.request("/api/submissions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ labels: ["foo"], callerAddress: CALLER }),
+    });
+
+    expect(res.status).toBe(504);
+    const json = (await res.json()) as { message: string };
+    expect(json.message).toBe(
+      `Omnigraph labels lookup timed out after ${OMNIGRAPH_LOOKUP_TIMEOUT_MS}ms`,
+    );
+    expect(consoleSpy).not.toHaveBeenCalled();
+    expect(consoleErrorSpy).toHaveBeenCalled();
+  });
+
+  it("returns 502 when the omnigraph lookup fails with a generic error", async () => {
+    mockedLookup.mockRejectedValue(new Error("upstream exploded"));
+
+    const app = makeApp();
+    const res = await app.request("/api/submissions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ labels: ["foo"], callerAddress: CALLER }),
+    });
+
+    expect(res.status).toBe(502);
+    const json = (await res.json()) as { message: string };
+    expect(json.message).toBe("Upstream Omnigraph lookup failed");
+    // The underlying error must be logged (not swallowed) so 502s are debuggable, while
+    // the response itself stays generic and does not leak upstream details.
+    expect(consoleErrorSpy).toHaveBeenCalled();
+    expect(consoleSpy).not.toHaveBeenCalled();
   });
 
   it("dedupes labelhashes before calling the omnigraph client", async () => {
