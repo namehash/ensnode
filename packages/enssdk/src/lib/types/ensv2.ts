@@ -1,18 +1,16 @@
-import type { AccountIdString } from "./shared";
-
 /**
  * An ID that uniquely identifies a concrete ENSv1 Registry contract.
  *
  * @dev see packages/enssdk/src/lib/ids.ts for context
  */
-export type ENSv1RegistryId = AccountIdString & { __brand: "ENSv1RegistryId" };
+export type ENSv1RegistryId = string & { __brand: "ENSv1RegistryId" };
 
 /**
  * An ID that uniquely identifies an ENSv2 Registry contract.
  *
  * @dev see packages/enssdk/src/lib/ids.ts for context
  */
-export type ENSv2RegistryId = AccountIdString & { __brand: "ENSv2RegistryId" };
+export type ENSv2RegistryId = string & { __brand: "ENSv2RegistryId" };
 
 /**
  * An ID that uniquely identifies an ENSv1 Virtual Registry — a virtual registry managed by an
@@ -59,7 +57,7 @@ export type DomainId = ENSv1DomainId | ENSv2DomainId;
  *
  * @dev see packages/enssdk/src/lib/ids.ts for context
  */
-export type PermissionsId = AccountIdString & { __brand: "PermissionsId" };
+export type PermissionsId = string & { __brand: "PermissionsId" };
 
 /**
  * An ID that uniquely identifies a PermissionsResource entity.
@@ -80,7 +78,7 @@ export type PermissionsUserId = string & { __brand: "PermissionsUserId" };
  *
  * @dev see packages/enssdk/src/lib/ids.ts for context
  */
-export type ResolverId = AccountIdString & { __brand: "ResolverId" };
+export type ResolverId = string & { __brand: "ResolverId" };
 
 /**
  * An ID that uniquely identifies a ResolverRecords entity.
