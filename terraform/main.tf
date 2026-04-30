@@ -58,7 +58,7 @@ locals {
       ensnode_indexer_type         = "v2-sepolia"
       ensnode_environment_name     = var.render_environment
       ensindexer_schema_name       = "v2SepoliaSchema-${var.ensnode_version}"
-      plugins                      = "ensv2,protocol-acceleration"
+      plugins                      = "subgraph,ensv2,protocol-acceleration"
       namespace                    = "sepolia"
       render_instance_plan         = "starter"
       subgraph_compat              = false
