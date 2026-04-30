@@ -43,7 +43,8 @@ import type {
  * aren't currently prefetchable, and likely won't be without a feature from Ponder that allows
  * consumers to specify the prefetch key generation per-entity.
  */
-const _stringifyAccountId = ({ chainId, address }: AccountId) => [chainId, address].join("-");
+const _stringifyAccountId = ({ chainId, address }: AccountId) =>
+  [chainId, address.toLowerCase()].join("-");
 
 export const makeENSv1RegistryId = (accountId: AccountId) =>
   _stringifyAccountId(accountId) as ENSv1RegistryId;

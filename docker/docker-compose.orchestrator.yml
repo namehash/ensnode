@@ -1,6 +1,13 @@
 # Minimal compose for CI integration tests.
 # Provides only the infrastructure services needed by orchestrator.ts:
 # devnet (local EVM) and ensdb (database).
+#
+# NOTE: ensdb is inlined (not `extends`-ing services/ensdb.yml) so we can override its host
+# port to ephemeral. The shared services/ensdb.yml binds 5432:5432, which collides with any
+# host-native postgres on a developer machine and silently routes orchestrator connections
+# to that native postgres instead of the docker container — leading to schema-collision
+# MigrationErrors that look like volume-cleanup bugs but aren't. Using "0:5432" lets docker
+# pick an ephemeral host port; orchestrator.ts reads it via testcontainers' getMappedPort().
 services:
   devnet:
     extends:
@@ -8,12 +15,21 @@ services:
       service: devnet
 
   ensdb:
-    extends:
-      file: services/ensdb.yml
-      service: ensdb
+    container_name: ensdb
+    image: postgres:17
+    ports:
+      - "0:5432"
+    volumes:
+      - ensdb_data:/var/lib/postgresql/data
     env_file:
       - path: envs/.env.docker.common
         required: true
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
 volumes:
   # Docker Compose requires volumes used by services to be declared in each

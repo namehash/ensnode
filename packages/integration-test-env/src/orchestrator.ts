@@ -101,7 +101,9 @@ async function cleanup() {
 
   if (composeEnvironment) {
     try {
-      await composeEnvironment.down();
+      // removeVolumes ensures the postgres volume is wiped between runs — Ponder rejects schemas
+      // owned by a different prior app, so we cannot reuse the volume across runs.
+      await composeEnvironment.down({ removeVolumes: true, timeout: 10_000 });
     } catch (error) {
       logError(
         `Failed to stop compose environment during cleanup: ${
@@ -246,6 +248,20 @@ async function main() {
   log("Starting integration test environment...");
   logVersions();
 
+  // Phase 0: best-effort wipe of any stale orchestrator state from a previous (possibly aborted)
+  // run. Without this, an abnormally-terminated prior run leaves behind a postgres volume that
+  // Ponder will reject ("Schema X was previously used by a different Ponder app"). Cleanup() also
+  // tears down volumes on success, so this is the belt to that suspenders.
+  log("Wiping any stale orchestrator state...");
+  try {
+    execaSync("docker", ["compose", "-f", "docker-compose.orchestrator.yml", "down", "-v"], {
+      cwd: DOCKER_DIR,
+      stdio: "ignore",
+    });
+  } catch {
+    // first run, nothing to wipe — this is fine
+  }
+
   // Phase 1: Start ENSDb + Devnet via docker-compose
   log("Starting ENSDb and Devnet...");
   composeEnvironment = await new DockerComposeEnvironment(
@@ -262,16 +278,6 @@ async function main() {
   const ENSDB_URL = `postgresql://postgres:password@localhost:${ensdbPort}/postgres`;
   log(`ENSDb is ready (port ${ensdbPort})`);
   log("Devnet is ready");
-
-  // ensures that the devnet chain is always on our expected chain id
-  // TODO: can remove after devnet chain id configuration is supported
-  const client = createTestClient({
-    mode: "anvil",
-    transport: http(ensTestEnvChain.rpcUrls.default.http[0]),
-  });
-  // @ts-expect-error - anvil_setChainId isn't in viem's typed RPC schema
-  await client.request({ method: "anvil_setChainId", params: [ensTestEnvChain.id] });
-  log(`Set devnet chain id to ${ensTestEnvChain.id}`);
 
   // Phase 2: Download ENSRainbow database and start from source
   const DB_SCHEMA_VERSION = "3";
