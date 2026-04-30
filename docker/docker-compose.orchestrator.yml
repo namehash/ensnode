@@ -5,21 +5,17 @@
 # NOTE: not using container_name so testcontainers gives it a unique one and avoids collisions
 #
 # NOTE: ensdb is inlined (not `extends`-ing services/ensdb.yml) so we can override its host
-# port to ephemeral. The shared services/ensdb.yml binds 5432:5432, which collides with any
-# host-native postgres on a developer machine and silently routes orchestrator connections
-# to that native postgres instead of the docker container — leading to schema-collision
-# MigrationErrors that look like volume-cleanup bugs but aren't. Using "0:5432" lets docker
-# pick an ephemeral host port; orchestrator.ts reads it via testcontainers' getMappedPort().
+# port to ephemeral without using docker-compose-specific !override syntax. The shared
+# services/ensdb.yml binds 5432:5432, which collides with any host-native postgres on a developer
+# machine and silently routes orchestrator connections to that native postgres instead of the
+# docker container — leading to schema-collision errors. Using "0:5432" lets docker pick an ephemeral
+# host port; orchestrator.ts reads it via testcontainers' getMappedPort()
 services:
   devnet:
     extends:
       file: services/devnet.yml
       service: devnet
 
-  # ensdb is inlined (not `extends`-ing services/ensdb.yml) because the shared definition's
-  # `5432:5432` port mapping and `container_name: ensdb` are global resources we want to
-  # override here, and compose-spec's !override / !reset tags aren't recognized by standard
-  # YAML language servers — the inline form keeps the editor lint clean.
   ensdb:
     image: postgres:17
     ports:
@@ -30,14 +26,12 @@ services:
       - path: envs/.env.docker.common
         required: true
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
       interval: 5s
       timeout: 5s
       retries: 5
       start_period: 10s
 
 volumes:
-  # Docker Compose requires volumes used by services to be declared in each
-  # compose file that references them — they cannot be inherited via `extends`.
   ensdb_data:
     driver: local
