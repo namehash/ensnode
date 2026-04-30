@@ -211,7 +211,7 @@ Success Response:
 ```
 
 The response contains:
-- `serverLabelSet`: The label set managed by the ENSRainbow instance
-  - `serverLabelSet.labelSetId`: The label set ID of the loaded database
-  - `serverLabelSet.highestLabelSetVersion`: The highest label set version available in the database
+- `serverLabelSet`: The configured label set (from `LABEL_SET_ID` / `LABEL_SET_VERSION`) used at startup
+  - `serverLabelSet.labelSetId`: Configured label set ID (validated against the database during bootstrap)
+  - `serverLabelSet.highestLabelSetVersion`: Configured label set version (validated against the database during bootstrap)
 - `versionInfo.ensRainbow`: The current ENSRainbow service version
