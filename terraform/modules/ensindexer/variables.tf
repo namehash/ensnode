@@ -72,6 +72,10 @@ variable "namespace" {
   type = string
 }
 
+variable "referral_program_editions" {
+  type = string
+}
+
 variable "subgraph_compat" {
   type = bool
 }

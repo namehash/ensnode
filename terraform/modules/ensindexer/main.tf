@@ -59,7 +59,9 @@ resource "render_web_service" "ensapi" {
     }
   }
 
-  env_vars = local.common_variables
+  env_vars = merge(local.common_variables, {
+    "REFERRAL_PROGRAM_EDITIONS" = { value = var.referral_program_editions },
+  })
 
   # See https://render.com/docs/custom-domains
   custom_domains = [

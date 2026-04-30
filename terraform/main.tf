@@ -82,6 +82,7 @@ locals {
       ensindexer_schema_name       = "alphaSchema-${var.ensnode_version}"
       plugins                      = "subgraph,basenames,lineanames,threedns,protocol-acceleration,registrars,tokenscope"
       namespace                    = "mainnet"
+      referral_program_editions    = "https://ensawards.org/production-editions-v1.10.0.json"
       render_instance_plan         = "standard"
       subgraph_compat              = false
       ensindexer_label_set_id      = "searchlight"
@@ -158,13 +159,14 @@ module "ensindexer" {
   for_each = local.ensindexer_instances
 
   # Instance-specific configuration
-  ensnode_indexer_type     = each.value.ensnode_indexer_type
-  render_instance_plan     = each.value.render_instance_plan
-  ensnode_environment_name = each.value.ensnode_environment_name
-  ensindexer_schema_name   = each.value.ensindexer_schema_name
-  plugins                  = each.value.plugins
-  namespace                = each.value.namespace
-  subgraph_compat          = each.value.subgraph_compat
+  ensnode_indexer_type      = each.value.ensnode_indexer_type
+  render_instance_plan      = each.value.render_instance_plan
+  ensnode_environment_name  = each.value.ensnode_environment_name
+  ensindexer_schema_name    = each.value.ensindexer_schema_name
+  plugins                   = each.value.plugins
+  namespace                 = each.value.namespace
+  referral_program_editions = each.value.referral_program_editions
+  subgraph_compat           = each.value.subgraph_compat
 
   # Common configuration (spread operator merges the map)
   hosted_zone_name = local.hosted_zone_name
