@@ -131,4 +131,43 @@ export const getEditionsRoute = createRoute({
   },
 });
 
-export const routes = [getReferralLeaderboardRoute, getReferrerDetailRoute, getEditionsRoute];
+/**
+ * Query parameters schema for accounting CSV requests.
+ */
+const accountingQuerySchema = z.object({
+  edition: makeReferralProgramEditionSlugSchema("edition"),
+});
+
+export const getAccountingCsvRoute = createRoute({
+  method: "get",
+  path: "/accounting",
+  operationId: "getAccountingCsv",
+  tags: ["ENSAwards"],
+  summary: "Get Accounting Dump (CSV)",
+  description:
+    "Returns a full per-event accounting dump for a rev-share-cap edition as a CSV file, ordered chronologically.",
+  request: {
+    query: accountingQuerySchema,
+  },
+  responses: {
+    200: {
+      description: "Successfully retrieved per-event accounting CSV",
+      content: {
+        "text/csv": {
+          schema: z.string(),
+        },
+      },
+    },
+    400: { description: "Invalid request" },
+    404: { description: "Unknown edition slug" },
+    500: { description: "Internal server error" },
+    503: { description: "Service unavailable" },
+  },
+});
+
+export const routes = [
+  getReferralLeaderboardRoute,
+  getReferrerDetailRoute,
+  getEditionsRoute,
+  getAccountingCsvRoute,
+];

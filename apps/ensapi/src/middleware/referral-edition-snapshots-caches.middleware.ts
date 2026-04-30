@@ -1,16 +1,16 @@
 import {
-  initializeReferralLeaderboardEditionsCaches,
-  type ReferralLeaderboardEditionsCacheMap,
-} from "@/cache/referral-leaderboard-editions.cache";
+  initializeReferralEditionSnapshotsCaches,
+  type ReferralEditionSnapshotsCacheMap,
+} from "@/cache/referral-edition-snapshots.cache";
 import { factory, producing } from "@/lib/hono-factory";
 import type { referralProgramEditionConfigSetMiddleware } from "@/middleware/referral-program-edition-set.middleware";
 
 /**
- * Type definition for the referral leaderboard editions caches middleware context passed to downstream middleware and handlers.
+ * Type definition for the referral edition snapshots caches middleware context passed to downstream middleware and handlers.
  */
-export type ReferralLeaderboardEditionsCachesMiddlewareVariables = {
+export type ReferralEditionSnapshotsCachesMiddlewareVariables = {
   /**
-   * A map from edition slug to its dedicated {@link SWRCache} containing {@link ReferrerLeaderboard}.
+   * A map from edition slug to its dedicated {@link SWRCache} containing a {@link ReferralEditionSnapshot}.
    *
    * Returns an {@link Error} if the referral program edition config set failed to load.
    *
@@ -20,17 +20,17 @@ export type ReferralLeaderboardEditionsCachesMiddlewareVariables = {
    * for other editions.
    *
    * When reading from a specific edition's cache, it will return either:
-   * - The {@link ReferrerLeaderboard} if successfully cached
+   * - The {@link ReferralEditionSnapshot} if successfully cached
    * - An {@link Error} if the cache failed to build
    *
    * Individual edition caches maintain their own stale-while-revalidate behavior, so a previously
    * successfully fetched edition continues serving its data even if a subsequent refresh fails.
    */
-  referralLeaderboardEditionsCaches: ReferralLeaderboardEditionsCacheMap | Error;
+  referralEditionSnapshotsCaches: ReferralEditionSnapshotsCacheMap | Error;
 };
 
 /**
- * Middleware that provides {@link ReferralLeaderboardEditionsCachesMiddlewareVariables}
+ * Middleware that provides {@link ReferralEditionSnapshotsCachesMiddlewareVariables}
  * to downstream middleware and handlers.
  *
  * This middleware depends on {@link referralProgramEditionConfigSetMiddleware} to provide
@@ -40,28 +40,28 @@ export type ReferralLeaderboardEditionsCachesMiddlewareVariables = {
  * Each cache's builder function handles immutability internally - when an edition becomes immutably
  * closed (past the safety window), the builder returns previously cached data without re-fetching.
  */
-export const referralLeaderboardEditionsCachesMiddleware = producing(
-  ["referralLeaderboardEditionsCaches"],
+export const referralEditionSnapshotsCachesMiddleware = producing(
+  ["referralEditionSnapshotsCaches"],
   factory.createMiddleware(async (c, next) => {
     const editionConfigSet = c.get("referralProgramEditionConfigSet");
 
     // Invariant: referralProgramEditionConfigSetMiddleware must be applied before this middleware
     if (editionConfigSet === undefined) {
       throw new Error(
-        "Invariant(referralLeaderboardEditionsCachesMiddleware): referralProgramEditionConfigSetMiddleware required",
+        "Invariant(referralEditionSnapshotsCachesMiddleware): referralProgramEditionConfigSetMiddleware required",
       );
     }
 
     // If edition config set loading failed, propagate the error
     if (editionConfigSet instanceof Error) {
-      c.set("referralLeaderboardEditionsCaches", editionConfigSet);
+      c.set("referralEditionSnapshotsCaches", editionConfigSet);
       await next();
       return;
     }
 
     // Initialize caches for the edition config set
-    const caches = initializeReferralLeaderboardEditionsCaches(editionConfigSet);
-    c.set("referralLeaderboardEditionsCaches", caches);
+    const caches = initializeReferralEditionSnapshotsCaches(editionConfigSet);
+    c.set("referralEditionSnapshotsCaches", caches);
     await next();
   }),
 );
