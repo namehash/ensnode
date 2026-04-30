@@ -2,7 +2,7 @@
 // import { maxDepthPlugin } from "@escape.tech/graphql-armor-max-depth";
 // import { maxTokensPlugin } from "@escape.tech/graphql-armor-max-tokens";
 
-import { createYoga } from "graphql-yoga";
+import { createYoga, maskError } from "graphql-yoga";
 
 import { makeLogger } from "@/lib/logger";
 import { context } from "@/omnigraph-api/context";
@@ -20,10 +20,9 @@ export const yoga = createYoga({
     process.env.NODE_ENV === "production"
       ? true
       : {
-          maskError(error: unknown) {
-            console.error(error);
-            if (error instanceof Error) return error;
-            return new Error("Internal Server Error");
+          maskError(error, message, isDev) {
+            logger.error(error);
+            return maskError(error, message, isDev);
           },
         },
   graphiql: {

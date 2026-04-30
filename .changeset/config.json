@@ -11,6 +11,7 @@
       "ensrainbow",
       "ensapi",
       "fallback-ensapi",
+      "ens-labels-collector",
       "enssdk",
       "enscli",
       "enskit",

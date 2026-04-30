@@ -40,8 +40,14 @@ function getClient() {
  * in `apps/ensapi/src/omnigraph-api/schema/label.ts`). The submissions handler caps raw
  * labels per request via `MAX_LABELS_PER_SUBMISSION`, sized so that the worst-case expansion
  * (each label producing both a raw and a normalized hash) stays within the resolver cap.
+ *
+ * Pass an optional `signal` to forward request cancellation (e.g. handler timeout, client
+ * disconnect) to the underlying HTTP request issued by the Omnigraph SDK.
  */
-export async function lookupLabels(hashes: readonly LabelHash[]): Promise<LabelHit[]> {
+export async function lookupLabels(
+  hashes: readonly LabelHash[],
+  signal?: AbortSignal,
+): Promise<LabelHit[]> {
   if (hashes.length === 0) return [];
 
   const result = await getClient().omnigraph.query({
@@ -49,6 +55,7 @@ export async function lookupLabels(hashes: readonly LabelHash[]): Promise<LabelH
     // The generated `LabelsByHashes` document types `hashes` as a mutable `Hex[]`, so we copy
     // the readonly input into a fresh mutable array. No runtime cost beyond an `Array.from`.
     variables: { hashes: [...hashes] },
+    signal,
   });
 
   if (result.errors && result.errors.length > 0) {

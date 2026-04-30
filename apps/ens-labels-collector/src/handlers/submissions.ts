@@ -31,18 +31,42 @@ export const MAX_LABELS_PER_SUBMISSION = 100;
 export const OMNIGRAPH_LOOKUP_TIMEOUT_MS = 10_000;
 
 /**
- * Races `promise` against a `setTimeout`-backed timeout, rejecting with `Error(message)` on
- * expiry. The underlying promise is NOT cancelled (the Omnigraph SDK does not currently expose
- * an `AbortSignal`); we simply stop waiting on it. The unhandled resolution is harmless.
+ * Runs `fn` with an `AbortSignal` that is aborted after `ms` (rejecting with `Error(message)`)
+ * or when `parentSignal` aborts (propagating the parent's cancellation reason). Both timeout
+ * expiry and parent cancellation actively abort the underlying work via the signal passed to
+ * `fn`, so in-flight HTTP requests can be cancelled rather than left dangling.
  */
-function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  const timeout = new Promise<never>((_, reject) => {
-    timer = setTimeout(() => reject(new Error(message)), ms);
-  });
-  return Promise.race([promise, timeout]).finally(() => {
-    if (timer !== undefined) clearTimeout(timer);
-  });
+async function withTimeout<T>(
+  fn: (signal: AbortSignal) => Promise<T>,
+  ms: number,
+  message: string,
+  parentSignal?: AbortSignal,
+): Promise<T> {
+  const controller = new AbortController();
+
+  const onParentAbort = () => controller.abort(parentSignal?.reason);
+  if (parentSignal) {
+    if (parentSignal.aborted) {
+      controller.abort(parentSignal.reason);
+    } else {
+      parentSignal.addEventListener("abort", onParentAbort, { once: true });
+    }
+  }
+
+  const timeoutError = new Error(message);
+  const timer = setTimeout(() => controller.abort(timeoutError), ms);
+
+  try {
+    return await fn(controller.signal);
+  } catch (err) {
+    if (controller.signal.aborted && controller.signal.reason === timeoutError) {
+      throw timeoutError;
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+    if (parentSignal) parentSignal.removeEventListener("abort", onParentAbort);
+  }
 }
 
 const SubmissionsRequestSchema = z.object({
@@ -130,9 +154,10 @@ export async function submissionsHandler(c: Context) {
   const hashes = collectLookupHashes(hashed);
 
   const hits = await withTimeout(
-    lookupLabels(hashes),
+    (signal) => lookupLabels(hashes, signal),
     OMNIGRAPH_LOOKUP_TIMEOUT_MS,
     `Omnigraph labels lookup timed out after ${OMNIGRAPH_LOOKUP_TIMEOUT_MS}ms`,
+    c.req.raw.signal,
   );
   const classifications = classifySubmissions(hashed, hits);
   const results = classifications.map(toResultItem);
