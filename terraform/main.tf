@@ -82,7 +82,7 @@ locals {
       ensindexer_schema_name       = "alphaSchema-${var.ensnode_version}"
       plugins                      = "subgraph,basenames,lineanames,threedns,protocol-acceleration,registrars,tokenscope"
       namespace                    = "mainnet"
-      referral_program_editions    = "https://ensawards.org/production-editions-v1.10.0.json"
+      referral_program_editions    = "https://ensawards.org/production-editions.json"
       render_instance_plan         = "standard"
       subgraph_compat              = false
       ensindexer_label_set_id      = "searchlight"
