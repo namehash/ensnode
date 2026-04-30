@@ -125,7 +125,7 @@ describe("EnsDbReader", () => {
   });
 
   describe("isReady", () => {
-    it("returns true indexing metadata context is initialized", async () => {
+    it("returns true when indexing metadata context is initialized", async () => {
       const indexingStatus = deserializeCrossChainIndexingStatusSnapshot(
         ensDbClientMock.serializedSnapshot,
       );
