@@ -11,6 +11,7 @@ export const CurrencyIds = {
   ETH: "ETH",
   USDC: "USDC",
   DAI: "DAI",
+  ENS: "ENS",
 } as const;
 
 export type CurrencyId = (typeof CurrencyIds)[keyof typeof CurrencyIds];
@@ -46,7 +47,13 @@ export interface PriceUsdc {
   amount: CurrencyAmount;
 }
 
-export type Price = PriceEth | PriceDai | PriceUsdc;
+export interface PriceEns {
+  currency: typeof CurrencyIds.ENS;
+
+  amount: CurrencyAmount;
+}
+
+export type Price = PriceEth | PriceDai | PriceUsdc | PriceEns;
 
 /**
  * Serialized representation of {@link PriceEth}.
@@ -70,9 +77,20 @@ export interface SerializedPriceUsdc extends Omit<PriceUsdc, "amount"> {
 }
 
 /**
+ * Serialized representation of {@link PriceEns}.
+ */
+export interface SerializedPriceEns extends Omit<PriceEns, "amount"> {
+  amount: SerializedCurrencyAmount;
+}
+
+/**
  * Serialized representation of {@link Price}.
  */
-export type SerializedPrice = SerializedPriceEth | SerializedPriceDai | SerializedPriceUsdc;
+export type SerializedPrice =
+  | SerializedPriceEth
+  | SerializedPriceDai
+  | SerializedPriceUsdc
+  | SerializedPriceEns;
 
 export interface CurrencyInfo {
   id: CurrencyId;
@@ -94,6 +112,11 @@ const currencyInfo: Record<CurrencyId, CurrencyInfo> = {
   [CurrencyIds.DAI]: {
     id: CurrencyIds.DAI,
     name: "Dai Stablecoin",
+    decimals: 18,
+  },
+  [CurrencyIds.ENS]: {
+    id: CurrencyIds.ENS,
+    name: "Ethereum Name Service",
     decimals: 18,
   },
 };
@@ -132,6 +155,16 @@ export function priceDai(amount: Price["amount"]): PriceDai {
   return {
     amount,
     currency: CurrencyIds.DAI,
+  };
+}
+
+/**
+ * Create price in ENS for given amount.
+ */
+export function priceEns(amount: Price["amount"]): PriceEns {
+  return {
+    amount,
+    currency: CurrencyIds.ENS,
   };
 }
 
@@ -381,4 +414,31 @@ export function parseDai(value: string): PriceDai {
   const currencyInfo = getCurrencyInfo(CurrencyIds.DAI);
   const amount = parseUnits(value, currencyInfo.decimals);
   return priceDai(amount);
+}
+
+/**
+ * Parses a string representation of ENS into a {@link PriceEns} object.
+ *
+ * Uses {@link getCurrencyInfo} to get the correct number of decimals (18) for ENS
+ * and {@link parseUnits} from viem to convert the decimal string to a bigint.
+ *
+ * **Note:** Values with more than 18 decimal places will be truncated/rounded by viem's `parseUnits`.
+ *
+ * @param value - The decimal string to parse (e.g., "123.456789012345678" for 123.456789012345678 ENS)
+ * @returns A PriceEns object with the amount in the smallest unit (18 decimals)
+ *
+ * @throws {Error} If value is empty, whitespace-only or untrimmed
+ * @throws {Error} If value represents a negative number
+ * @throws {Error} If value is not a valid decimal string (e.g., "abc", "1.2.3")
+ *
+ * @example
+ * parseEns("123.456789012345678") // returns { currency: "ENS", amount: 123456789012345678000n }
+ * parseEns("1") // returns { currency: "ENS", amount: 1000000000000000000n }
+ * parseEns("0.001") // returns { currency: "ENS", amount: 1000000000000000n }
+ */
+export function parseEns(value: string): PriceEns {
+  validateAmountToParse(value);
+  const currencyInfo = getCurrencyInfo(CurrencyIds.ENS);
+  const amount = parseUnits(value, currencyInfo.decimals);
+  return priceEns(amount);
 }

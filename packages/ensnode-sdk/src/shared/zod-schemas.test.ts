@@ -2,7 +2,14 @@ import { asLiteralLabel, encodeLabelHash, labelhashLiteralLabel } from "enssdk";
 import { describe, expect, it } from "vitest";
 import { prettifyError, type ZodSafeParseResult } from "zod/v4";
 
-import { CurrencyIds, priceDai, priceEth, priceUsdc, type SerializedPrice } from "./currencies";
+import {
+  CurrencyIds,
+  priceDai,
+  priceEns,
+  priceEth,
+  priceUsdc,
+  type SerializedPrice,
+} from "./currencies";
 import {
   makeBooleanStringSchema,
   makeChainIdSchema,
@@ -150,6 +157,13 @@ describe("ENSIndexer: Shared", () => {
       ).toStrictEqual(priceDai(123n));
 
       expect(
+        makePriceSchema().parse({
+          amount: "456",
+          currency: CurrencyIds.ENS,
+        } satisfies SerializedPrice),
+      ).toStrictEqual(priceEns(456n));
+
+      expect(
         formatParseError(
           makePriceSchema().safeParse({
             amount: "-123",
@@ -166,7 +180,7 @@ describe("ENSIndexer: Shared", () => {
             currency: "BTC",
           } satisfies SerializedPrice),
         ),
-      ).toMatch(/Price currency must be one of ETH, USDC, DAI/i);
+      ).toMatch(/Price currency must be one of ETH, USDC, DAI, ENS/i);
     });
 
     describe("NormalizedAddress", () => {
