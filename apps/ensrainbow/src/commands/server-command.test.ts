@@ -38,11 +38,7 @@ describe("Server Command Tests", () => {
       const ensRainbowServer = await ENSRainbowServer.init(db);
       const dbConfig = await buildDbConfig(ensRainbowServer);
       const publicConfig = buildEnsRainbowPublicConfig(dbConfig);
-      app = createApi(
-        ensRainbowServer,
-        () => publicConfig,
-        () => dbConfig,
-      );
+      app = createApi(ensRainbowServer, publicConfig, () => dbConfig);
 
       // Start the server on a different port than what ENSRainbow defaults to
       server = serve({
@@ -192,23 +188,29 @@ describe("Server Command Tests", () => {
     });
   });
 
-  describe("Pending server (no DB attached yet)", () => {
+  describe("Pending server (eagerly built public config, no DB attached yet)", () => {
     const pendingPort = 3225;
+    const pendingLabelSetId = "pending-test";
+    const pendingLabelSetVersion = 7;
     let pendingApp: Hono;
     let pendingServer: ReturnType<typeof serve>;
     let pendingEnsRainbowServer: ENSRainbowServer;
-    let pendingPublicConfig: EnsRainbow.ENSRainbowPublicConfig | null;
     let pendingDbConfig: Awaited<ReturnType<typeof buildDbConfig>> | null;
 
     beforeAll(async () => {
       pendingEnsRainbowServer = ENSRainbowServer.createPending();
-      pendingPublicConfig = null;
       pendingDbConfig = null;
-      pendingApp = createApi(
-        pendingEnsRainbowServer,
-        () => pendingPublicConfig,
-        () => pendingDbConfig,
-      );
+      // The entrypoint command builds this in-memory public config eagerly from CLI/env args
+      // before the DB is attached; mirror that here using a label set that does not yet exist
+      // in any database.
+      const eagerPublicConfig = buildEnsRainbowPublicConfig({
+        serverLabelSet: {
+          labelSetId: pendingLabelSetId,
+          highestLabelSetVersion: pendingLabelSetVersion,
+        },
+        recordsCount: 0,
+      });
+      pendingApp = createApi(pendingEnsRainbowServer, eagerPublicConfig, () => pendingDbConfig);
       pendingServer = serve({
         fetch: pendingApp.fetch,
         port: pendingPort,
@@ -247,13 +249,19 @@ describe("Server Command Tests", () => {
       expect(data.errorCode).toBe(ErrorCode.ServiceUnavailable);
     });
 
-    it("GET /v1/labels/count and /v1/config return 503 while the DB is not attached", async () => {
-      const [countRes, configRes] = await Promise.all([
-        fetch(`http://localhost:${pendingPort}/v1/labels/count`),
-        fetch(`http://localhost:${pendingPort}/v1/config`),
-      ]);
+    it("GET /v1/labels/count returns 503 while the DB is not attached", async () => {
+      const countRes = await fetch(`http://localhost:${pendingPort}/v1/labels/count`);
       expect(countRes.status).toBe(503);
-      expect(configRes.status).toBe(503);
+    });
+
+    it("GET /v1/config returns 200 with the eagerly-built public config while the DB is not attached", async () => {
+      const configRes = await fetch(`http://localhost:${pendingPort}/v1/config`);
+      expect(configRes.status).toBe(200);
+      const configData = (await configRes.json()) as EnsRainbow.ENSRainbowPublicConfig;
+      expect(configData.serverLabelSet.labelSetId).toBe(pendingLabelSetId);
+      expect(configData.serverLabelSet.highestLabelSetVersion).toBe(pendingLabelSetVersion);
+      expect(typeof configData.versionInfo.ensRainbow).toBe("string");
+      expect(configData.versionInfo.ensRainbow.length).toBeGreaterThan(0);
     });
 
     it("After attachDb, /ready returns 200 and /v1/heal serves labels", async () => {
@@ -265,13 +273,12 @@ describe("Server Command Tests", () => {
       try {
         await attachDb.setPrecalculatedRainbowRecordCount(1);
         await attachDb.markIngestionFinished();
-        await attachDb.setLabelSetId("pending-test");
-        await attachDb.setHighestLabelSetVersion(0);
+        await attachDb.setLabelSetId(pendingLabelSetId);
+        await attachDb.setHighestLabelSetVersion(pendingLabelSetVersion);
         await attachDb.addRainbowRecord("pending-label", 0);
 
         await pendingEnsRainbowServer.attachDb(attachDb);
         pendingDbConfig = await buildDbConfig(pendingEnsRainbowServer);
-        pendingPublicConfig = buildEnsRainbowPublicConfig(pendingDbConfig);
 
         const readyRes = await fetch(`http://localhost:${pendingPort}/ready`);
         expect(readyRes.status).toBe(200);
@@ -288,8 +295,8 @@ describe("Server Command Tests", () => {
         const configRes = await fetch(`http://localhost:${pendingPort}/v1/config`);
         expect(configRes.status).toBe(200);
         const configData = (await configRes.json()) as EnsRainbow.ENSRainbowPublicConfig;
-        expect(configData.serverLabelSet.labelSetId).toBe("pending-test");
-        expect(configData.serverLabelSet.highestLabelSetVersion).toBe(0);
+        expect(configData.serverLabelSet.labelSetId).toBe(pendingLabelSetId);
+        expect(configData.serverLabelSet.highestLabelSetVersion).toBe(pendingLabelSetVersion);
 
         const countRes = await fetch(`http://localhost:${pendingPort}/v1/labels/count`);
         expect(countRes.status).toBe(200);

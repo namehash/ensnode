@@ -14,7 +14,7 @@ sidebar:
 | `GET /ready` | Readiness probe — succeeds once the database has been downloaded, validated, and opened | `ReadyResponse`, `ServiceUnavailableError` |
 | `GET /v1/heal/{labelhash}` | Heal a single labelhash | `HealSuccess`, `HealError` |
 | `GET /v1/labels/count` | Current healable label count | `CountSuccess`, `CountServerError`, `ServiceUnavailableError` |
-| `GET /v1/config` | Public configuration of the running instance | `ENSRainbowPublicConfig`, `ServiceUnavailableError` |
+| `GET /v1/config` | Public configuration of the running instance — available immediately at startup | `ENSRainbowPublicConfig` |
 
 :::tip[Deterministic Results]
 Pin `labelSetVersion` in your client if you need **deterministic results** across time. See the [Label Sets & Versioning guide](/ensrainbow/concepts/label-sets-and-versioning/) for details.
@@ -26,6 +26,7 @@ ENSRainbow's container starts its HTTP server immediately so that orchestrators 
 
 - **`GET /health`** — pure **liveness** probe. Returns `200 { status: "ok" }` as soon as the HTTP server is bound. It does **not** guarantee the database is loaded.
 - **`GET /ready`** — **readiness** probe. Returns `200 { status: "ok" }` only after the database has been downloaded, lite-validated, and opened by the process. While the server is still bootstrapping, it returns `503 Service Unavailable` with a structured error body so clients can poll with backoff.
+- **`GET /v1/config`** — **available immediately** at startup. ENSRainbow builds the public config in-memory from its CLI/env arguments (`LABEL_SET_ID`, `LABEL_SET_VERSION`) before the database has finished bootstrapping, so downstream services (e.g. ENSIndexer) can read the public config without waiting on a cold start. When bootstrap finishes, ENSRainbow verifies the database's stored label set matches the configured one and refuses to serve (terminating with a non-zero exit code) on mismatch.
 
 While the database is not yet ready, the following routes return `503` with the body:
 
@@ -39,7 +40,6 @@ While the database is not yet ready, the following routes return `503` with the 
 
 - `GET /v1/heal/{labelhash}`
 - `GET /v1/labels/count`
-- `GET /v1/config`
 
 Clients (including ENSIndexer) should poll `/ready` rather than `/health` before issuing heal requests. The official `ensrainbow-sdk` exposes `client.ready()` exactly for this purpose.
 
