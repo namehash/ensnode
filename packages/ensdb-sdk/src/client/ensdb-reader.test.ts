@@ -125,9 +125,7 @@ describe("EnsDbReader", () => {
   });
 
   describe("isReady", () => {
-    it("returns true when healthy and indexing metadata context is initialized", async () => {
-      executeMock.mockResolvedValueOnce({ rows: [] });
-
+    it("returns true indexing metadata context is initialized", async () => {
       const indexingStatus = deserializeCrossChainIndexingStatusSnapshot(
         ensDbClientMock.serializedSnapshot,
       );
@@ -152,18 +150,7 @@ describe("EnsDbReader", () => {
       expect(result).toBe(true);
     });
 
-    it("returns false when healthy but indexing metadata context is uninitialized", async () => {
-      executeMock.mockResolvedValueOnce({ rows: [] });
-      selectResult.current = [];
-
-      const result = await createEnsDbReader().isReady();
-
-      expect(result).toBe(false);
-    });
-
-    it("returns false when not healthy", async () => {
-      executeMock.mockRejectedValueOnce(new Error("Connection refused"));
-
+    it("returns false when indexing metadata context is uninitialized", async () => {
       const result = await createEnsDbReader().isReady();
 
       expect(result).toBe(false);

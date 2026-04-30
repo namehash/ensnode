@@ -4,6 +4,7 @@ import { otel } from "@hono/otel";
 import { cors } from "hono/cors";
 import { html } from "hono/html";
 
+import { ensDbClient } from "@/lib/ensdb/singleton";
 import { errorResponse } from "@/lib/handlers/error-response";
 import { createApp } from "@/lib/hono-factory";
 import logger from "@/lib/logger";
@@ -65,7 +66,35 @@ app.get("/openapi.json", (c) => {
 });
 
 app.get("/health", async (c) => {
-  return c.json({ message: "fallback ok" });
+  try {
+    const isEnsDbHealthy = await ensDbClient.isHealthy();
+
+    if (!isEnsDbHealthy) {
+      throw new Error(`ENSDb instance is unhealthy`);
+    }
+
+    return c.json({ responseCode: "ok" });
+  } catch (error) {
+    logger.error(error, "Health check failed");
+    return c.json({ responseCode: "error", message: "Service Unavailable" }, 503);
+  }
+});
+
+app.get("/ready", async (c) => {
+  try {
+    const isEnsDbReady = await ensDbClient.isReady();
+
+    if (!isEnsDbReady) {
+      throw new Error(
+        `ENSDb instance is not ready. This may indicate that ENSNode Schema migrations were not completed successfully or that the ENSNode Metadata record for ${ensDbClient.ensIndexerSchemaName} ENSIndexer Schema has not been created yet.`,
+      );
+    }
+
+    return c.json({ responseCode: "ok" });
+  } catch (error) {
+    logger.error(error, "Readiness check failed");
+    return c.json({ responseCode: "error", message: "Service Unavailable" }, 503);
+  }
 });
 
 // log hono errors to console
