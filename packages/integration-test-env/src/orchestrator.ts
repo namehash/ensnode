@@ -277,6 +277,17 @@ async function main() {
   const ensdbPort = ensdbContainer.getMappedPort(5432);
   const ENSDB_URL = `postgresql://postgres:password@localhost:${ensdbPort}/postgres`;
   log(`ENSDb is ready (port ${ensdbPort})`);
+
+  // ensures that the devnet chain is always on our expected chain id
+  // TODO: can remove after devnet chain id configuration is supported
+  const client = createTestClient({
+    mode: "anvil",
+    transport: http(ensTestEnvChain.rpcUrls.default.http[0]),
+  });
+  // @ts-expect-error - anvil_setChainId isn't in viem's typed RPC schema
+  await client.request({ method: "anvil_setChainId", params: [ensTestEnvChain.id] });
+  log(`Set devnet chain id to ${ensTestEnvChain.id}`);
+
   log("Devnet is ready");
 
   // Phase 2: Download ENSRainbow database and start from source

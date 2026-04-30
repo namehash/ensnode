@@ -5,6 +5,7 @@ import {
   makeStorageId,
   type NormalizedAddress,
   type TokenId,
+  toNormalizedAddress,
   type UnixTimestampBigInt,
   type Wei,
 } from "enssdk";
@@ -35,11 +36,14 @@ async function getRegistrarAndRegistry(context: IndexingEngineContext, event: Lo
   const registry: AccountId = {
     chainId: context.chain.id,
     // ETHRegistrar (this contract) provides a handle to its backing Registry
-    address: await context.client.readContract({
-      abi: context.contracts[namespaceContract(pluginName, "ETHRegistrar")].abi,
-      address: event.log.address,
-      functionName: "REGISTRY",
-    }),
+    // NOTE: viem returns checksummed addresses, need to normalize
+    address: toNormalizedAddress(
+      await context.client.readContract({
+        abi: context.contracts[namespaceContract(pluginName, "ETHRegistrar")].abi,
+        address: event.log.address,
+        functionName: "REGISTRY",
+      }),
+    ),
   };
 
   return { registrar, registry };
