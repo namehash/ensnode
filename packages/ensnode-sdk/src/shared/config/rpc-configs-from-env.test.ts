@@ -1,7 +1,7 @@
 import { lineaSepolia } from "viem/chains";
 import { describe, expect, it } from "vitest";
 
-import { ENSNamespaceIds } from "@ensnode/datasources";
+import { ENSNamespaceIds, sepoliaV2Chain } from "@ensnode/datasources";
 
 import { deserializeChainId } from "../deserialize";
 import { isHttpProtocol } from "../url";
@@ -33,7 +33,9 @@ describe("buildRpcConfigsFromEnv", () => {
 
       it.each(Object.entries(rpcConfigs))(
         "can build RPC URL for chainId %d",
-        (_chainId, rpcConfig) => {
+        (chainIdString, rpcConfig) => {
+          const chainId = deserializeChainId(chainIdString);
+          if (chainId === sepoliaV2Chain.id) return; // hardcoded RPC URL bypasses providers
           const [alchemyRpcUrl, drpcRpcUrl, quickNodeRpcUrl] = rpcConfigHttp(rpcConfig);
 
           expect(alchemyRpcUrl.pathname).toContain(ALCHEMY_API_KEY);
@@ -58,6 +60,7 @@ describe("buildRpcConfigsFromEnv", () => {
         "can build RPC URL for chainId %d",
         (chainIdString, rpcConfig) => {
           const chainId = deserializeChainId(chainIdString);
+          if (chainId === sepoliaV2Chain.id) return; // hardcoded RPC URL bypasses providers
           const [alchemyRpcUrl, quickNodeRpcUrl] = rpcConfigHttp(rpcConfig);
 
           expect(alchemyRpcUrl.pathname).toContain(ALCHEMY_API_KEY);
@@ -85,6 +88,7 @@ describe("buildRpcConfigsFromEnv", () => {
         "can build RPC URL for chainId %d",
         (chainIdString, rpcConfig) => {
           const chainId = deserializeChainId(chainIdString);
+          if (chainId === sepoliaV2Chain.id) return; // hardcoded RPC URL bypasses providers
 
           if (chainId !== lineaSepolia.id) {
             const [quickNodeRpcUrl, dRPCRpcUrl] = rpcConfigHttp(rpcConfig);
@@ -114,6 +118,7 @@ describe("buildRpcConfigsFromEnv", () => {
         "can build RPC URL for chainId %d",
         (chainIdString, rpcConfig) => {
           const chainId = deserializeChainId(chainIdString);
+          if (chainId === sepoliaV2Chain.id) return; // hardcoded RPC URL bypasses providers
           const [quickNodeRpcUrl] = rpcConfigHttp(rpcConfig);
 
           if (chainId !== lineaSepolia.id) {
