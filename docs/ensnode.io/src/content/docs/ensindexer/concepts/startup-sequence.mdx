@@ -27,7 +27,7 @@ This ensures that the ENSIndexer Schema is up to date before indexing onchain ev
 
 ## Omnichain indexing strategy
 
-When the Ponder app lifecycle reaches the step to "Run omnichain indexing strategy", Ponder will start writing data concurrently to the Ponder Schema (caching RPC calls) and  the ENSIndexer Schema (storing indexed data). The ENSIndexer app lifecycle "injects" a special step for "Execute onchain event handlers preconditions".
+When the Ponder app lifecycle reaches the step to "Run omnichain indexing strategy", Ponder will start writing data concurrently to the Ponder Schema (caching RPC calls) and the ENSIndexer Schema (storing indexed data). The ENSIndexer app lifecycle "injects" a special step for "Execute onchain event handlers preconditions".
 
 <figure>
   [![Omnichain indexing strategy](/ensindexer/startup-sequence/2-omnichain-strategy-execution.png)](/ensindexer/startup-sequence/2-omnichain-strategy-execution.png)
