@@ -1,10 +1,8 @@
-import { getConfig } from "@/config";
+import { config } from "@/config";
 
 import { serve } from "@hono/node-server";
 
 import app from "@/app";
-
-const config = getConfig();
 
 const server = serve(
   {

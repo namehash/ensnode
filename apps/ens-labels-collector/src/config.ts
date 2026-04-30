@@ -12,38 +12,16 @@ const ConfigSchema = z.object({
   ENSNODE_URL: z.string().url(),
 });
 
-export type Config = {
-  port: number;
-  ensNodeUrl: string;
-};
-
-let cachedConfig: Config | undefined;
+const parsed = ConfigSchema.parse(process.env);
 
 /**
- * Parses `process.env` into a {@link Config}.
- *
- * Memoized so repeated calls return the same instance and validation only runs once.
- * Always reads from `process.env`; tests that need to vary inputs should call
- * {@link resetConfigCacheForTesting} after mutating `process.env`.
+ * Process configuration parsed from `process.env` at module load.
  *
  * Throws (via Zod) if any required env var is missing or invalid.
  */
-export function getConfig(): Config {
-  if (cachedConfig) return cachedConfig;
+export const config = {
+  port: parsed.PORT,
+  ensNodeUrl: parsed.ENSNODE_URL,
+};
 
-  const parsed = ConfigSchema.parse(process.env);
-
-  cachedConfig = {
-    port: parsed.PORT,
-    ensNodeUrl: parsed.ENSNODE_URL,
-  };
-
-  return cachedConfig;
-}
-
-/**
- * Resets the memoized config. Test-only.
- */
-export function resetConfigCacheForTesting(): void {
-  cachedConfig = undefined;
-}
+export type Config = typeof config;

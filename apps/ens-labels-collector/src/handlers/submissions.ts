@@ -9,6 +9,7 @@ import {
   collectLookupHashes,
   hashLabel,
   type LabelClassification,
+  type LabelHit,
 } from "@/lib/labels";
 import { lookupLabels } from "@/lib/omnigraph-client";
 
@@ -30,45 +31,6 @@ export const MAX_LABELS_PER_SUBMISSION = 100;
  */
 export const OMNIGRAPH_LOOKUP_TIMEOUT_MS = 10_000;
 
-/**
- * Runs `fn` with an `AbortSignal` that is aborted after `ms` (rejecting with `Error(message)`)
- * or when `parentSignal` aborts (propagating the parent's cancellation reason). Both timeout
- * expiry and parent cancellation actively abort the underlying work via the signal passed to
- * `fn`, so in-flight HTTP requests can be cancelled rather than left dangling.
- */
-async function withTimeout<T>(
-  fn: (signal: AbortSignal) => Promise<T>,
-  ms: number,
-  message: string,
-  parentSignal?: AbortSignal,
-): Promise<T> {
-  const controller = new AbortController();
-
-  const onParentAbort = () => controller.abort(parentSignal?.reason);
-  if (parentSignal) {
-    if (parentSignal.aborted) {
-      controller.abort(parentSignal.reason);
-    } else {
-      parentSignal.addEventListener("abort", onParentAbort, { once: true });
-    }
-  }
-
-  const timeoutError = new Error(message);
-  const timer = setTimeout(() => controller.abort(timeoutError), ms);
-
-  try {
-    return await fn(controller.signal);
-  } catch (err) {
-    if (controller.signal.aborted && controller.signal.reason === timeoutError) {
-      throw timeoutError;
-    }
-    throw err;
-  } finally {
-    clearTimeout(timer);
-    if (parentSignal) parentSignal.removeEventListener("abort", onParentAbort);
-  }
-}
-
 const SubmissionsRequestSchema = z.object({
   labels: z.array(z.string().min(1).max(1000)).min(1).max(MAX_LABELS_PER_SUBMISSION),
   callerAddress: z
@@ -78,8 +40,6 @@ const SubmissionsRequestSchema = z.object({
     })
     .transform((value) => value.toLowerCase() as Address),
 });
-
-export type SubmissionsRequest = z.infer<typeof SubmissionsRequestSchema>;
 
 export type SubmissionResultItem = {
   rawLabel: string;
@@ -110,7 +70,7 @@ export type SubmissionsResponse = {
  * TODO(#2003): a downstream aggregator can compute leaderboards by `callerAddress` from these
  * lines (per-status counts are already implicit in `items[].status`).
  */
-export type SubmissionLogLine = {
+type SubmissionLogLine = {
   ts: string;
   requestId: string;
   callerAddress: Address;
@@ -126,13 +86,6 @@ function toResultItem(c: LabelClassification): SubmissionResultItem {
   if (c.normalizedLabel !== undefined) item.normalizedLabel = c.normalizedLabel;
   if (c.normalizedLabelHash !== undefined) item.normalizedLabelHash = c.normalizedLabelHash;
   return item;
-}
-
-function generateRequestId(): string {
-  if (typeof globalThis.crypto?.randomUUID === "function") {
-    return globalThis.crypto.randomUUID();
-  }
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
 export async function submissionsHandler(c: Context) {
@@ -153,17 +106,32 @@ export async function submissionsHandler(c: Context) {
   const hashed = labels.map(hashLabel);
   const hashes = collectLookupHashes(hashed);
 
-  const hits = await withTimeout(
-    (signal) => lookupLabels(hashes, signal),
-    OMNIGRAPH_LOOKUP_TIMEOUT_MS,
-    `Omnigraph labels lookup timed out after ${OMNIGRAPH_LOOKUP_TIMEOUT_MS}ms`,
-    c.req.raw.signal,
-  );
+  let hits: LabelHit[];
+  try {
+    // `AbortSignal.any` aborts when either the timeout fires or the client disconnects, so
+    // the upstream HTTP request is cancelled in both cases instead of being left dangling.
+    const signal = AbortSignal.any([
+      AbortSignal.timeout(OMNIGRAPH_LOOKUP_TIMEOUT_MS),
+      c.req.raw.signal,
+    ]);
+    hits = await lookupLabels(hashes, signal);
+  } catch (error) {
+    // Client disconnected mid-flight; the response will be discarded by the framework, but
+    // re-throw so the upstream cancellation is visible in logs (`app.onError`).
+    if (c.req.raw.signal.aborted) throw error;
+    if (error instanceof DOMException && error.name === "TimeoutError") {
+      return errorResponse(c, {
+        message: `Omnigraph labels lookup timed out after ${OMNIGRAPH_LOOKUP_TIMEOUT_MS}ms`,
+        status: 504,
+      });
+    }
+    return errorResponse(c, { message: "Upstream Omnigraph lookup failed", status: 502 });
+  }
   const classifications = classifySubmissions(hashed, hits);
   const results = classifications.map(toResultItem);
 
   const submittedAt = new Date().toISOString();
-  const requestId = generateRequestId();
+  const requestId = crypto.randomUUID();
 
   const logLine: SubmissionLogLine = {
     ts: submittedAt,

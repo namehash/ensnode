@@ -1,4 +1,4 @@
-import { getConfig } from "@/config";
+import { config } from "@/config";
 
 import type { LabelHash } from "enssdk";
 import { createEnsNodeClient } from "enssdk/core";
@@ -21,17 +21,7 @@ export const LabelsByHashes = graphql(`
   }
 `);
 
-let cachedClient: ReturnType<typeof makeClient> | undefined;
-
-function makeClient(url: string) {
-  return createEnsNodeClient({ url }).extend(omnigraph);
-}
-
-function getClient() {
-  if (cachedClient) return cachedClient;
-  cachedClient = makeClient(getConfig().ensNodeUrl);
-  return cachedClient;
-}
+const client = createEnsNodeClient({ url: config.ensNodeUrl }).extend(omnigraph);
 
 /**
  * Looks up Labels by a batch of LabelHashes against ENSNode's Omnigraph.
@@ -50,7 +40,7 @@ export async function lookupLabels(
 ): Promise<LabelHit[]> {
   if (hashes.length === 0) return [];
 
-  const result = await getClient().omnigraph.query({
+  const result = await client.omnigraph.query({
     query: LabelsByHashes,
     // The generated `LabelsByHashes` document types `hashes` as a mutable `Hex[]`, so we copy
     // the readonly input into a fresh mutable array. No runtime cost beyond an `Array.from`.
@@ -65,11 +55,4 @@ export async function lookupLabels(
   }
 
   return result.data?.labels ?? [];
-}
-
-/**
- * Resets the memoized Omnigraph client. Test-only.
- */
-export function resetOmnigraphClientCacheForTesting(): void {
-  cachedClient = undefined;
 }
