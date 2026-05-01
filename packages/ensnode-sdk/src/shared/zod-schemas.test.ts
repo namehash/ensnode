@@ -5,7 +5,7 @@ import { prettifyError, type ZodSafeParseResult } from "zod/v4";
 import {
   CurrencyIds,
   priceDai,
-  priceEns,
+  priceEnsTokens,
   priceEth,
   priceUsdc,
   type SerializedPrice,
@@ -159,9 +159,9 @@ describe("ENSIndexer: Shared", () => {
       expect(
         makePriceSchema().parse({
           amount: "456",
-          currency: CurrencyIds.ENS,
+          currency: CurrencyIds.ENSTokens,
         } satisfies SerializedPrice),
-      ).toStrictEqual(priceEns(456n));
+      ).toStrictEqual(priceEnsTokens(456n));
 
       expect(
         formatParseError(
@@ -180,7 +180,7 @@ describe("ENSIndexer: Shared", () => {
             currency: "BTC",
           } satisfies SerializedPrice),
         ),
-      ).toMatch(/Price currency must be one of ETH, USDC, DAI, ENS/i);
+      ).toMatch(/Price currency must be one of ETH, USDC, DAI, ENSTokens/i);
     });
 
     describe("NormalizedAddress", () => {

@@ -1,7 +1,7 @@
 import type { AccountId, ChainId, ChainIdString, Duration, UrlString } from "enssdk";
 import z, { prettifyError } from "zod/v4";
 
-import type { PriceDai, PriceEns, PriceEth, PriceUsdc } from "./currencies";
+import type { PriceDai, PriceEnsTokens, PriceEth, PriceUsdc } from "./currencies";
 import type { BlockNumber, BlockRef, Datetime } from "./types";
 import {
   makeAccountIdStringSchema,
@@ -11,7 +11,7 @@ import {
   makeDatetimeSchema,
   makeDurationSchema,
   makePriceDaiSchema,
-  makePriceEnsSchema,
+  makePriceEnsTokensSchema,
   makePriceEthSchema,
   makePriceUsdcSchema,
   makeUnixTimestampSchema,
@@ -142,12 +142,15 @@ export function deserializePriceDai(maybePrice: unknown, valueLabel?: string): P
   return parsed.data;
 }
 
-export function deserializePriceEns(maybePrice: unknown, valueLabel?: string): PriceEns {
-  const schema = makePriceEnsSchema(valueLabel);
+export function deserializePriceEnsTokens(
+  maybePrice: unknown,
+  valueLabel?: string,
+): PriceEnsTokens {
+  const schema = makePriceEnsTokensSchema(valueLabel);
   const parsed = schema.safeParse(maybePrice);
 
   if (parsed.error) {
-    throw new Error(`Cannot deserialize PriceEns:\n${prettifyError(parsed.error)}\n`);
+    throw new Error(`Cannot deserialize PriceEnsTokens:\n${prettifyError(parsed.error)}\n`);
   }
 
   return parsed.data;

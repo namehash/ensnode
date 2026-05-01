@@ -2,4 +2,4 @@
 "@ensnode/ensnode-sdk": minor
 ---
 
-Add `$ENS` as a supported currency in `@ensnode/ensnode-sdk`: `CurrencyIds.ENS`, `PriceEns`/`SerializedPriceEns` types, and the `priceEns`, `parseEns`, `serializePriceEns`, `deserializePriceEns` helpers.
+Add `$ENS Tokens` as a supported currency in `@ensnode/ensnode-sdk`: `CurrencyIds.ENSTokens`, `PriceEnsTokens`/`SerializedPriceEnsTokens` types, and the `priceEnsTokens`, `parseEnsTokens`, `serializePriceEnsTokens`, `deserializePriceEnsTokens` helpers.
