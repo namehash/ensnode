@@ -52,7 +52,7 @@ describe("buildReferrerLeaderboardPageContext", () => {
       },
       referrers: new Map<AccountIdString, AwardedReferrerMetricsPieSplit>([
         [
-          acctKey("0x03c098d2bed4609e6ed9beb2c4877741f45f290d"),
+          acctKey("0x6837047f46da1d5d9a79846b25810b92adf456f6"),
           {
             referrer: acct("0x6837047f46da1d5d9a79846b25810b92adf456f6"),
             totalReferrals: 1,
@@ -68,7 +68,7 @@ describe("buildReferrerLeaderboardPageContext", () => {
           },
         ],
         [
-          acctKey("0xabe3fdb4d2cd5f2e7193a4ac380ecb68e899896a"),
+          acctKey("0xd8da6bf26964af9d7eed9e03e53415d37aa96045"),
           {
             referrer: acct("0xd8da6bf26964af9d7eed9e03e53415d37aa96045"),
             totalReferrals: 10,
@@ -84,7 +84,7 @@ describe("buildReferrerLeaderboardPageContext", () => {
           },
         ],
         [
-          acctKey("0xffa596cdf9a69676e689b1a92e5e681711227d75"),
+          acctKey("0x7e491cde0fbf08e51f54c4fb6b9e24afbd18966d"),
           {
             referrer: acct("0x7e491cde0fbf08e51f54c4fb6b9e24afbd18966d"),
             totalReferrals: 6,
