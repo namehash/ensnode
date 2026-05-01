@@ -324,13 +324,20 @@ export const makeAccountIdSchema = (valueLabel: string = "AccountId") =>
 export const makeAccountIdStringSchema = (valueLabel: string = "Account ID String") =>
   z.coerce
     .string()
-    .transform((v) => {
-      const result = new CaipAccountId(v);
-
-      return {
-        chainId: Number(result.chainId.reference),
-        address: result.address,
-      };
+    .transform((v, ctx) => {
+      try {
+        const result = new CaipAccountId(v);
+        return {
+          chainId: Number(result.chainId.reference),
+          address: result.address,
+        };
+      } catch {
+        ctx.addIssue({
+          code: "custom",
+          message: `${valueLabel}: invalid CAIP-10 AccountId string '${v}'`,
+        });
+        return z.NEVER;
+      }
     })
     .pipe(makeAccountIdSchema(valueLabel));
 

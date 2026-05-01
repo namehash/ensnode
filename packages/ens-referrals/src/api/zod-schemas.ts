@@ -9,7 +9,7 @@
 
 import z from "zod/v4";
 
-import { makeNormalizedAddressSchema } from "@ensnode/ensnode-sdk/internal";
+import { makeAccountIdStringSchema } from "@ensnode/ensnode-sdk/internal";
 
 import {
   makeReferralProgramEditionSummaryPieSplitSchema,
@@ -227,7 +227,7 @@ export const makeReferrerMetricsEditionsRequestSchema = (
   valueLabel: string = "ReferrerMetricsEditionsRequest",
 ) =>
   z.object({
-    referrer: makeNormalizedAddressSchema(`${valueLabel}.referrer`),
+    referrer: makeAccountIdStringSchema(`${valueLabel}.referrer`),
     editions: makeReferrerMetricsEditionsArraySchema(`${valueLabel}.editions`),
   });
 

@@ -2934,12 +2934,15 @@
         "operationId": "getReferrerDetail",
         "tags": ["ENSAwards"],
         "summary": "Get Referrer Detail for Editions",
-        "description": "Returns detailed information for a specific referrer for the requested editions. Requires 1-20 distinct edition slugs. All requested editions must be recognized and have cached data, or the request fails.",
+        "description": "Returns detailed information for a specific referrer for the requested editions. The referrer is identified by its CAIP-10 AccountId (URL-encoded, e.g. `eip155%3A1%3A0xabc...`). Requires 1-20 distinct edition slugs. All requested editions must be recognized and have cached data, or the request fails.",
         "parameters": [
           {
-            "schema": { "type": "string", "description": "Referrer Ethereum address" },
+            "schema": {
+              "type": "string",
+              "description": "Referrer CAIP-10 AccountId (e.g. eip155:1:0xabc...)"
+            },
             "required": true,
-            "description": "Referrer Ethereum address",
+            "description": "Referrer CAIP-10 AccountId (e.g. eip155:1:0xabc...)",
             "name": "referrer",
             "in": "path"
           },

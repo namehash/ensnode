@@ -1,11 +1,12 @@
-import type { NormalizedAddress } from "enssdk";
+import { type AccountId, stringifyAccountId } from "enssdk";
 import z from "zod/v4";
 
+import { accountIdEqual } from "@ensnode/ensnode-sdk";
 import {
+  makeAccountIdSchema,
   makeDurationSchema,
   makeFiniteNonNegativeNumberSchema,
   makeNonNegativeIntegerSchema,
-  makeNormalizedAddressSchema,
   makePositiveIntegerSchema,
   makePriceEthSchema,
   makePriceUsdcSchema,
@@ -28,7 +29,7 @@ import { type AdminAction, AdminActionTypes } from "../rules";
 export const makeAdminActionDisqualificationSchema = (valueLabel = "AdminActionDisqualification") =>
   z.object({
     actionType: z.literal(AdminActionTypes.Disqualification),
-    referrer: makeNormalizedAddressSchema(`${valueLabel}.referrer`),
+    referrer: makeAccountIdSchema(`${valueLabel}.referrer`),
     reason: z.string().trim().min(1, `${valueLabel}.reason must not be empty`),
   });
 
@@ -38,7 +39,7 @@ export const makeAdminActionDisqualificationSchema = (valueLabel = "AdminActionD
 export const makeAdminActionWarningSchema = (valueLabel = "AdminActionWarning") =>
   z.object({
     actionType: z.literal(AdminActionTypes.Warning),
-    referrer: makeNormalizedAddressSchema(`${valueLabel}.referrer`),
+    referrer: makeAccountIdSchema(`${valueLabel}.referrer`),
     reason: z.string().trim().min(1, `${valueLabel}.reason must not be empty`),
   });
 
@@ -70,14 +71,13 @@ export const makeReferralProgramRulesRevShareCapSchema = (
     ),
     adminActions: z
       .array(makeAdminActionSchema(`${valueLabel}.adminActions[item]`))
-      // NOTE: addresses are already normalized, so string equivalence here is accurate
       .refine(
         (items) => {
-          const referrers = items.map((a) => a.referrer);
-          return new Set(referrers).size === referrers.length;
+          const keys = items.map((a) => stringifyAccountId(a.referrer));
+          return new Set(keys).size === keys.length;
         },
         {
-          message: `${valueLabel}.adminActions must not contain duplicate referrer addresses`,
+          message: `${valueLabel}.adminActions must not contain duplicate referrer AccountIds`,
         },
       )
       .default([]),
@@ -91,7 +91,7 @@ export const makeAwardedReferrerMetricsRevShareCapSchema = (
 ) =>
   z
     .object({
-      referrer: makeNormalizedAddressSchema(`${valueLabel}.referrer`),
+      referrer: makeAccountIdSchema(`${valueLabel}.referrer`),
       totalReferrals: makeNonNegativeIntegerSchema(`${valueLabel}.totalReferrals`),
       totalIncrementalDuration: makeDurationSchema(`${valueLabel}.totalIncrementalDuration`),
       totalRevenueContribution: makePriceEthSchema(`${valueLabel}.totalRevenueContribution`),
@@ -121,10 +121,14 @@ export const makeAwardedReferrerMetricsRevShareCapSchema = (
       message: `${valueLabel}.cappedAward must be 0 when isQualified is false`,
       path: ["cappedAward"],
     })
-    .refine((data) => data.adminAction === null || data.adminAction.referrer === data.referrer, {
-      message: `${valueLabel}.adminAction.referrer must match ${valueLabel}.referrer`,
-      path: ["adminAction", "referrer"],
-    });
+    .refine(
+      (data) =>
+        data.adminAction === null || accountIdEqual(data.adminAction.referrer, data.referrer),
+      {
+        message: `${valueLabel}.adminAction.referrer must match ${valueLabel}.referrer`,
+        path: ["adminAction", "referrer"],
+      },
+    );
 
 /**
  * Schema for {@link UnrankedReferrerMetricsRevShareCap} (with null rank).
@@ -134,7 +138,7 @@ export const makeUnrankedReferrerMetricsRevShareCapSchema = (
 ) =>
   z
     .object({
-      referrer: makeNormalizedAddressSchema(`${valueLabel}.referrer`),
+      referrer: makeAccountIdSchema(`${valueLabel}.referrer`),
       totalReferrals: makeNonNegativeIntegerSchema(`${valueLabel}.totalReferrals`),
       totalIncrementalDuration: makeDurationSchema(`${valueLabel}.totalIncrementalDuration`),
       totalRevenueContribution: makePriceEthSchema(`${valueLabel}.totalRevenueContribution`),
@@ -171,10 +175,14 @@ export const makeUnrankedReferrerMetricsRevShareCapSchema = (
       message: `${valueLabel}.cappedAward must be 0 for unranked referrers`,
       path: ["cappedAward"],
     })
-    .refine((data) => data.adminAction === null || data.adminAction.referrer === data.referrer, {
-      message: `${valueLabel}.adminAction.referrer must match ${valueLabel}.referrer`,
-      path: ["adminAction", "referrer"],
-    });
+    .refine(
+      (data) =>
+        data.adminAction === null || accountIdEqual(data.adminAction.referrer, data.referrer),
+      {
+        message: `${valueLabel}.adminAction.referrer must match ${valueLabel}.referrer`,
+        path: ["adminAction", "referrer"],
+      },
+    );
 
 /**
  * Schema for {@link AggregatedReferrerMetricsRevShareCap}.
@@ -200,11 +208,11 @@ export const makeAggregatedReferrerMetricsRevShareCapSchema = (
 const addAdminActionConsistencyIssues = (
   ctx: z.RefinementCtx,
   metricsAdminAction: AdminAction | null,
-  referrer: NormalizedAddress,
+  referrer: AccountId,
   rulesAdminActions: AdminAction[],
   path: (string | number)[],
 ): void => {
-  const expected = rulesAdminActions.find((a) => a.referrer === referrer) ?? null;
+  const expected = rulesAdminActions.find((a) => accountIdEqual(a.referrer, referrer)) ?? null;
 
   if (expected === null && metricsAdminAction !== null) {
     ctx.addIssue({
@@ -219,7 +227,7 @@ const addAdminActionConsistencyIssues = (
     expected !== null &&
     (metricsAdminAction === null ||
       metricsAdminAction.actionType !== expected.actionType ||
-      metricsAdminAction.referrer !== expected.referrer ||
+      !accountIdEqual(metricsAdminAction.referrer, expected.referrer) ||
       metricsAdminAction.reason !== expected.reason)
   ) {
     ctx.addIssue({
