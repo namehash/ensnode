@@ -2,7 +2,7 @@ services:
   devnet:
     container_name: devnet
     image: ghcr.io/ensdomains/contracts-v2:main-580c60a
-    command: ./script/runDevnet.ts --testNames --chainId 31337
+    command: ./script/runDevnet.ts --testNames
     pull_policy: always
     ports:
       - "8545:8545"

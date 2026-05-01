@@ -74,10 +74,10 @@ export default {
         address: zeroAddress,
         startBlock,
       },
-      // NOTE: named LegacyETHRegistrarController in deployment
+      // NOTE: named ETHRegistrarController in deployment
       UnwrappedEthRegistrarController: {
         abi: root_UnwrappedEthRegistrarController,
-        address: "0x7e02892cfc2bfd53a75275451d73cf620e793fc0",
+        address: "0xfb3ce5d01e0f33f41dbb39035db9745962f1f968",
         startBlock,
       },
       // NOTE: not in deployment, set to zeroAddress

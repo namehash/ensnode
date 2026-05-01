@@ -55,10 +55,12 @@ const ENSAPI_DIR = resolve(MONOREPO_ROOT, "apps/ensapi");
 const ENSRAINBOW_PORT = 3223;
 const ENSINDEXER_PORT = 42069;
 const ENSAPI_PORT = 4334;
+const ENSDB_PORT = 5433;
 
 // Shared config
 const ENSRAINBOW_URL = `http://localhost:${ENSRAINBOW_PORT}`;
 const ENSINDEXER_SCHEMA_NAME = "ensindexer_integration_test";
+const ENSDB_URL = `postgresql://postgres:password@localhost:${ENSDB_PORT}/postgres`;
 
 // Track resources for cleanup
 const subprocesses: ResultPromise[] = [];
@@ -259,9 +261,7 @@ async function main() {
     .withStartupTimeout(120_000)
     .up(["ensdb", "devnet"]);
 
-  // ensdb-orchestrator binds a fixed host port (5433); see docker-compose.orchestrator.yml.
-  const ENSDB_URL = "postgresql://postgres:password@localhost:5433/postgres";
-  log("ENSDb is ready (port 5433)");
+  log(`ENSDb is ready (port ${ENSDB_PORT})`);
 
   // Devnet Chain Id check
   const publicClient = createPublicClient({
