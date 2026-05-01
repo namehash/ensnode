@@ -28,7 +28,8 @@
       "@docs/ensrainbow",
       "@namehash/ens-referrals",
       "@namehash/namehash-ui",
-      "@ensnode/ensindexer-perf-testing"
+      "@ensnode/ensindexer-perf-testing",
+      "@ensnode/ens-test-kit"
     ]
   ],
   "updateInternalDependencies": "patch",
