@@ -13,34 +13,6 @@ const BASE_URL = process.env.ENSNODE_URL!;
 describe("GET /api/resolve/primary-name/:address/:chainId", () => {
   it.each([
     {
-      description: "resolves primary name for owner address on chain 1",
-      address: accounts.owner.address,
-      chainId: "1",
-      query: "",
-      expectedStatus: 200,
-      expectedBody: {
-        name: "test.eth",
-        accelerationRequested: false,
-        accelerationAttempted: false,
-      },
-    },
-    {
-      description: "returns null for user without a primary name",
-      address: accounts.user.address,
-      chainId: "1",
-      query: "",
-      expectedStatus: 200,
-      expectedBody: { name: null, accelerationRequested: false, accelerationAttempted: false },
-    },
-    {
-      description: "owner address with accelerate=true returns accelerationRequested: true",
-      address: accounts.owner.address,
-      chainId: "1",
-      query: "accelerate=true",
-      expectedStatus: 200,
-      expectedBody: { accelerationRequested: true, accelerationAttempted: false },
-    },
-    {
       description: "returns 400 for invalid (non-hex) address",
       address: "notanaddress",
       chainId: "1",

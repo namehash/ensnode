@@ -1158,6 +1158,9 @@ importers:
       '@ensnode/datasources':
         specifier: workspace:*
         version: link:../datasources
+      '@ensnode/ens-test-kit':
+        specifier: workspace:*
+        version: link:../ens-test-kit
       '@ensnode/ensdb-sdk':
         specifier: workspace:*
         version: link:../ensdb-sdk
