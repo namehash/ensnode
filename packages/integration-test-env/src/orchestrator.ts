@@ -6,7 +6,7 @@
  *
  * Phases:
  *   1. ENSDb (postgres) + devnet via docker-compose (testcontainers DockerComposeEnvironment)
- *   2. Download pre-built ENSRainbow LevelDB, extract, start ENSRainbow from source
+ *   2. Start ENSRainbow via `pnpm entrypoint` (downloads + extracts the prebuilt LevelDB in the background)
  *   3. Start ENSIndexer, wait for omnichain-following / omnichain-completed
  *   4. Start ENSApi
  *   5. Run `pnpm test:integration` at the monorepo root
@@ -19,8 +19,9 @@
  *     forceKillAfterDelay (10s SIGKILL fallback), env inherited from parent.
  *   - Services run from source (pnpm start/serve) rather than Docker so that
  *     CI tests the actual code in the PR.
- *   - ENSRainbow database is downloaded via the existing shell script and
- *     extracted with tar, mirroring the Docker entrypoint behavior.
+ *   - ENSRainbow uses the same `pnpm entrypoint` command as the Docker image —
+ *     it boots the HTTP server immediately and bootstraps the DB asynchronously,
+ *     so we wait on `/ready` (not `/health`) before moving to the next phase.
  *   - Cleanup stops processes in reverse order (ensapi → ensindexer → ensrainbow)
  *     so DB consumers close connections before ensdb is stopped.
  *   - Abort flag pattern: if a background service crashes during polling/health
@@ -28,7 +29,6 @@
  *   - SIGINT/SIGTERM handler is guarded against re-entrance (repeated Ctrl-C).
  */
 
-import { mkdirSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { execaSync, type ResultPromise, execa as spawn } from "execa";
@@ -276,52 +276,27 @@ async function main() {
 
   log("Devnet is ready");
 
-  // Phase 2: Download ENSRainbow database and start from source
+  // Phase 2: Start ENSRainbow via the entrypoint command, which downloads and
+  // extracts the prebuilt database in the background and serves once attached.
   const DB_SCHEMA_VERSION = "3";
   const LABEL_SET_ID = "ens-test-env";
   const LABEL_SET_VERSION = "0";
-  const dataSubdir = `data-${LABEL_SET_ID}_${LABEL_SET_VERSION}`;
-  const ensrainbowDataDir = resolve(ENSRAINBOW_DIR, "data");
-  const downloadTempDir = resolve(ensrainbowDataDir, "_download_temp");
 
-  log("Downloading ENSRainbow database...");
-  execaSync(
-    "bash",
-    [
-      `${ENSRAINBOW_DIR}/scripts/download-prebuilt-database.sh`,
+  log("Starting ENSRainbow (entrypoint will bootstrap the database)...");
+  spawnService(
+    "pnpm",
+    ["entrypoint"],
+    ENSRAINBOW_DIR,
+    {
+      LOG_LEVEL: "error",
       DB_SCHEMA_VERSION,
       LABEL_SET_ID,
       LABEL_SET_VERSION,
-    ],
-    {
-      cwd: ENSRAINBOW_DIR,
-      stdio: "inherit",
-      env: { OUT_DIR: downloadTempDir },
     },
-  );
-
-  // Extract archive into the data directory (matches entrypoint.sh behavior)
-  const archivePath = resolve(
-    downloadTempDir,
-    "databases",
-    DB_SCHEMA_VERSION,
-    `${LABEL_SET_ID}_${LABEL_SET_VERSION}.tgz`,
-  );
-  mkdirSync(ensrainbowDataDir, { recursive: true });
-  execaSync("tar", ["-xzf", archivePath, "-C", ensrainbowDataDir, "--strip-components=1"], {
-    stdio: "inherit",
-  });
-  log("ENSRainbow database extracted");
-
-  log("Starting ENSRainbow...");
-  spawnService(
-    "pnpm",
-    ["serve", "--data-dir", `data/${dataSubdir}`],
-    ENSRAINBOW_DIR,
-    { LOG_LEVEL: "error" },
     "ensrainbow",
   );
-  await waitForHealth(`http://localhost:${ENSRAINBOW_PORT}/health`, 30_000, "ENSRainbow");
+  // /ready returns 200 only after the DB has been downloaded, extracted, and attached.
+  await waitForHealth(`http://localhost:${ENSRAINBOW_PORT}/ready`, 30_000, "ENSRainbow");
 
   // Phase 3: Start ENSIndexer
   log("Starting ENSIndexer...");
