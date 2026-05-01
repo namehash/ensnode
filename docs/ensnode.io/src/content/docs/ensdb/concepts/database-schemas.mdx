@@ -527,15 +527,28 @@ Keyed by `(chainId, resolver, node, key)`, where the composite key segment `(cha
 
 **Relations:** belongs to one `resolver_records` via `(chainId, address, node)`.
 
-#### `migrated_nodes`
+#### `migrated_nodes_by_parent`
 
-Tracks the migration status of a node. Due to a security issue, ENS migrated from the `RegistryOld` contract to a new Registry contract. When indexing events, the indexer must ignore any events on `RegistryOld` for domains that have since been migrated to the new Registry.
+Tracks the migration status of a node, keyed by `(parentNode, labelHash)`. Due to a security issue, ENS migrated from the `RegistryOld` contract to a new Registry contract. When indexing events, the indexer must ignore any events on `RegistryOld` for domains that have since been migrated to the new Registry.
 
-The set of nodes registered in the (new) Registry contract on the ENS Root Chain is stored here. When an event is encountered on the `RegistryOld` contract, if the relevant node exists in this set, the event should be ignored, as the node is considered migrated.
+The set of nodes registered in the (new) Registry contract on the ENS Root Chain is stored here. When a `RegistryOld#NewOwner` event is encountered (which emits both `parentNode` and `labelHash` directly), the relevant row is looked up here; if it exists, the event is ignored.
 
 :::note
 This logic is only necessary for the ENS Root Chain — the only chain that includes the Registry migration. This Registry migration tracking is isolated to the Protocol Acceleration plugin. The subgraph plugin implements its own Registry migration logic. By isolating this logic here, the Protocol Acceleration plugin can be run independently of other plugins. The ENSv2 plugin depends on the Protocol Acceleration plugin in order to piggyback on this Registry migration logic.
 :::
+
+The composite key is chosen so that Ponder's profile-pattern matcher can decompose it from event args directly, keeping the read on the indexing-cache prefetch hot-path.
+
+| Column | Type | Nullable |
+|--------|------|----------|
+| `parentNode` | `text` | no |
+| `labelHash` | `text` | no |
+
+**Primary key:** `(parentNode, labelHash)`.
+
+#### `migrated_nodes_by_node`
+
+Sibling lookup-by-namehash table for `migrated_nodes_by_parent`, keyed by `node`. The three `RegistryOld` handlers (`Transfer` / `NewTTL` / `NewResolver`) emit only the post-namehash `node` and cannot reconstruct the `(parentNode, labelHash)` pair without an unprofileable reverse lookup. Existence in this table is equivalent to existence in `migrated_nodes_by_parent`; both rows are written together by the migration helper. See `apps/ensindexer/src/lib/protocol-acceleration/migrated-node-db-helpers.ts` for the full rationale.
 
 | Column | Type | Nullable |
 |--------|------|----------|

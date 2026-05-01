@@ -1,12 +1,6 @@
 import config from "@/config";
 
-import {
-  type LabelHash,
-  makeENSv1DomainId,
-  makeSubdomainNode,
-  type Node,
-  type NormalizedAddress,
-} from "enssdk";
+import { type LabelHash, makeENSv1DomainId, type Node, type NormalizedAddress } from "enssdk";
 
 import { getENSRootChainId } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
@@ -17,7 +11,7 @@ import { getManagedName } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import { ensureDomainResolverRelation } from "@/lib/protocol-acceleration/domain-resolver-relationship-db-helpers";
-import { migrateNode, nodeIsMigrated } from "@/lib/protocol-acceleration/registry-migration-status";
+import { migrateNode, nodeIsMigrated } from "@/lib/protocol-acceleration/migrated-node-db-helpers";
 
 const ensRootChainId = getENSRootChainId(config.namespace);
 
@@ -69,8 +63,7 @@ export default function () {
       if (context.chain.id !== ensRootChainId) return;
 
       const { label: labelHash, node: parentNode } = event.args;
-      const node = makeSubdomainNode(labelHash, parentNode);
-      await migrateNode(context, node);
+      await migrateNode(context, parentNode, labelHash);
     },
   );
 

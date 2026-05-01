@@ -5,3 +5,7 @@ reason = "drizzle-orm SQL injection via dynamic identifiers (CVE-2026-39356). No
 [[IgnoredVulns]]
 id = "GHSA-j687-52p2-xcff"
 reason = "Astro XSS via define:vars on <script> tags. Not exploitable in ENSNode: docs sites are statically generated and do not pass user-controlled input to define:vars. Upgrading to the fixed version (astro 6.x) requires a major version bump that needs broader testing."
+
+[[IgnoredVulns]]
+id = "GHSA-w5hq-g745-h8pq"
+reason = "uuid missing buffer bounds check in v3/v5/v6. Fix backported to v11.1.1, which our pnpm override resolves to. OSV marks v14.0.0 as the fixed version, but the patch is present in 11.1.1. We do not use uuid directly and our Node engine (>=24) satisfies v14 requirements if a future bump is needed."
