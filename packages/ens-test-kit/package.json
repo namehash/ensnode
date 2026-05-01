@@ -16,8 +16,12 @@
     "testing"
   ],
   "files": [
-    "dist"
+    "dist",
+    "bin"
   ],
+  "bin": {
+    "ens-test-kit": "./bin/ens-test-kit.mjs"
+  },
   "exports": {
     ".": "./src/index.ts",
     "./interfaces": "./src/interfaces/index.ts",
@@ -65,13 +69,15 @@
     "types": "./dist/index.d.ts"
   },
   "scripts": {
+    "build": "tsup",
     "prepublish": "tsup",
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
     "test": "vitest",
     "typecheck": "tsgo --noEmit"
   },
-  "peerDependencies": {
+  "dependencies": {
+    "@ensnode/datasources": "workspace:*",
     "viem": "catalog:"
   },
   "devDependencies": {

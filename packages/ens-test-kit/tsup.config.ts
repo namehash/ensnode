@@ -9,6 +9,7 @@ export default defineConfig({
     "seeder/index": "src/seeder/index.ts",
     "vitest/index": "src/vitest/index.ts",
     "cli/index": "src/cli/index.ts",
+    "cli/seed": "src/cli/seed.ts",
   },
   platform: "neutral",
   format: ["esm"],

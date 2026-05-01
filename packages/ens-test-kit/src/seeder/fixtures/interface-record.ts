@@ -9,20 +9,21 @@ import {
 import { assertExpectedResolver, getResolverAndNode, writeResolverTx } from "./resolver-utils";
 import { getSenderClient } from "./sender-client";
 
-type ContenthashRecordFields = ResolverRecordFields & {
+type InterfaceRecordFields = ResolverRecordFields & {
+  interfaceId: Hex;
   value: Hex;
 };
 
-export type ContenthashRecordFixture = FixtureMeta<"contenthashRecord"> & ContenthashRecordFields;
+export type InterfaceRecordFixture = FixtureMeta<"interfaceRecord"> & InterfaceRecordFields;
 
-export function contenthashRecord(
-  args: FixtureArgs<"contenthashRecord", ContenthashRecordFields>,
-): ContenthashRecordFixture {
-  return buildFixture("contenthashRecord", args);
+export function interfaceRecord(
+  args: FixtureArgs<"interfaceRecord", InterfaceRecordFields>,
+): InterfaceRecordFixture {
+  return buildFixture("interfaceRecord", args);
 }
 
-export async function applyContenthashRecordFixture(
-  fixture: ContenthashRecordFixture,
+export async function applyInterfaceRecordFixture(
+  fixture: InterfaceRecordFixture,
   ctx: SeederContext,
 ): Promise<void> {
   const senderClient = getSenderClient(ctx, fixture.sender);
@@ -30,8 +31,8 @@ export async function applyContenthashRecordFixture(
   await assertExpectedResolver(senderClient, fixture.name, resolver);
   await writeResolverTx(senderClient, {
     resolver,
-    functionName: "setContenthash",
-    data: [node, fixture.value],
-    log: `contenthash ${fixture.name}`,
+    functionName: "setInterface",
+    data: [node, fixture.interfaceId, fixture.value],
+    log: `interface-record ${fixture.name} interfaceId=${fixture.interfaceId}`,
   });
 }

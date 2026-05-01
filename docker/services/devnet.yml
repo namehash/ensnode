@@ -1,15 +1,20 @@
 services:
   devnet:
     container_name: devnet
-    image: ghcr.io/ensdomains/contracts-v2:main-9f26a8f
-    command: ./script/runDevnet.ts --testNames
-    pull_policy: always
+    build:
+      context: ../..
+      dockerfile: packages/ens-test-kit/devnet/Dockerfile
     ports:
       - "8545:8545"
     environment:
       ANVIL_IP_ADDR: "0.0.0.0"
+      SEED_SENTINEL_PATH: "/tmp/ens-test-kit-seeded"
     healthcheck:
-      test: [ "CMD", "curl", "--fail", "-s", "http://localhost:8000/health" ]
+      test:
+        [
+          "CMD-SHELL",
+          "test -f /tmp/ens-test-kit-seeded && curl --fail -s http://localhost:8000/health",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5

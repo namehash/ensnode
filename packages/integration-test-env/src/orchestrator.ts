@@ -45,8 +45,6 @@ import {
   OmnichainIndexingStatusIds,
 } from "@ensnode/ensnode-sdk";
 
-import { seedDevnet } from "./seed/index";
-
 const MONOREPO_ROOT = resolve(import.meta.dirname, "../../..");
 const DOCKER_DIR = resolve(MONOREPO_ROOT, "docker");
 const ENSRAINBOW_DIR = resolve(MONOREPO_ROOT, "apps/ensrainbow");
@@ -279,12 +277,7 @@ async function main() {
 
   log(`Devnet is ready (RPC URL: ${devnetRpcUrl})`);
 
-  // Phase 2: Seed devnet with test data (before indexing starts)
-  log("Seeding devnet...");
-  await seedDevnet(devnetRpcUrl);
-  log("Devnet seeded");
-
-  // Phase 3: Download ENSRainbow database and start from source
+  // Phase 2: Download ENSRainbow database and start from source
   const DB_SCHEMA_VERSION = "3";
   const LABEL_SET_ID = "ens-test-env";
   const LABEL_SET_VERSION = "0";
@@ -305,7 +298,7 @@ async function main() {
   // /ready returns 200 only after the DB has been downloaded, extracted, and attached.
   await waitForHealth(`http://localhost:${ENSRAINBOW_PORT}/ready`, 30_000, "ENSRainbow");
 
-  // Phase 4: Start ENSIndexer
+  // Phase 3: Start ENSIndexer
   log("Starting ENSIndexer...");
   spawnService(
     "pnpm",
@@ -324,10 +317,10 @@ async function main() {
   );
   await waitForHealth(`http://localhost:${ENSINDEXER_PORT}/health`, 60_000, "ENSIndexer");
 
-  // Phase 5: Wait for indexing to complete
+  // Phase 4: Wait for indexing to complete
   await pollIndexingStatus(ENSDB_URL, ENSINDEXER_SCHEMA_NAME, 30_000);
 
-  // Phase 6: Start ENSApi
+  // Phase 5: Start ENSApi
   log("Starting ENSApi...");
   spawnService(
     "pnpm",
@@ -341,7 +334,7 @@ async function main() {
   );
   await waitForHealth(`http://localhost:${ENSAPI_PORT}/health`, 10_000, "ENSApi");
 
-  // Phase 7: Run integration tests
+  // Phase 6: Run integration tests
   log("Running integration tests...");
   execaSync("pnpm", ["test:integration", "--", "--bail", "1"], {
     cwd: MONOREPO_ROOT,
