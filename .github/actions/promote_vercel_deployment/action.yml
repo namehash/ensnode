@@ -35,6 +35,4 @@ runs:
         VERCEL_TOKEN: ${{ inputs.vercel_token }}
         RAILWAY_TOKEN: ${{ inputs.railway_token }}
         RAILWAY_ENVIRONMENT_ID: ${{ inputs.railway_environment_id }}
-      run: |
-        chmod +x ${{ github.action_path }}/promote_vercel_deployment.sh
-        ${{ github.action_path }}/promote_vercel_deployment.sh
+      run: ${{ github.action_path }}/promote_vercel_deployment.sh
