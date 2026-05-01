@@ -314,7 +314,7 @@ export const makePriceDaiSchema = (valueLabel: string = "Price DAI") =>
 /**
  * Schema for {@link PriceEnsTokens} type.
  */
-export const makePriceEnsTokensSchema = (valueLabel: string = "Price ENS") =>
+export const makePriceEnsTokensSchema = (valueLabel: string = "Price ENSTokens") =>
   makePriceCurrencySchema(CurrencyIds.ENSTokens, valueLabel).transform((v) => v as PriceEnsTokens);
 
 /**
