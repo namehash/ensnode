@@ -8,7 +8,7 @@ import { isHttpProtocol } from "../url";
 import { buildRpcConfigsFromEnv } from "./rpc-configs-from-env";
 
 const allPublicEnsNamespaceIds = Object.values(ENSNamespaceIds).filter(
-  (id) => id !== ENSNamespaceIds.EnsTestEnv,
+  (id) => id !== ENSNamespaceIds.EnsTestEnv && id !== ENSNamespaceIds.SepoliaV2,
 );
 
 const rpcConfigHttp = (rpcConfig: string) =>

@@ -66,6 +66,8 @@ services:
     extends:
       file: services/ensdb.yml
       service: ensdb
+    ports:
+      - "5432:5432"
     env_file:
       - path: envs/.env.docker.common
         required: true

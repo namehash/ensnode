@@ -3,6 +3,7 @@ import { asInterpretedName, toNormalizedAddress } from "enssdk";
 import { DatasourceNames, ENSNamespaceIds } from "@ensnode/datasources";
 
 import { maybeGetDatasourceContract } from "../shared/datasource-contract";
+import { DevnetAccounts } from "../shared/devnet-accounts";
 import type { NamespaceSpecificValue } from "../shared/namespace-specific-value";
 
 const SEPOLIA_V2_V2_ETH_REGISTRY = maybeGetDatasourceContract(
@@ -28,12 +29,6 @@ const ENS_TEST_ENV_V2_ETH_REGISTRAR = maybeGetDatasourceContract(
   DatasourceNames.ENSv2Root,
   "ETHRegistrar",
 );
-
-// these addresses are from the devnet accounts output
-const DEVNET_DEPLOYER = toNormalizedAddress("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266");
-const DEVNET_OWNER = toNormalizedAddress("0x70997970C51812dc3A010C7d01b50e0d17dc79C8");
-// biome-ignore lint/correctness/noUnusedVariables: keeping it around for the future
-const DEVNET_USER = toNormalizedAddress("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC");
 
 const VITALIK_ADDRESS = toNormalizedAddress("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045");
 
@@ -186,7 +181,7 @@ query AccountDomains(
 }`,
     variables: {
       default: { address: VITALIK_ADDRESS },
-      [ENSNamespaceIds.EnsTestEnv]: { address: DEVNET_OWNER },
+      [ENSNamespaceIds.EnsTestEnv]: { address: DevnetAccounts.owner.address },
     },
   },
 
@@ -204,7 +199,7 @@ query AccountEvents(
 }`,
     variables: {
       default: { address: VITALIK_ADDRESS },
-      [ENSNamespaceIds.EnsTestEnv]: { address: DEVNET_DEPLOYER },
+      [ENSNamespaceIds.EnsTestEnv]: { address: DevnetAccounts.deployer.address },
     },
   },
 
@@ -287,7 +282,7 @@ query PermissionsByUser($address: Address!) {
   }
 }`,
     variables: {
-      default: { address: DEVNET_DEPLOYER },
+      default: { address: DevnetAccounts.deployer.address },
       // TODO: figure out a good sepolia-v2 user address
       // [ENSNamespaceIds.SepoliaV2]: { address: "" },
     },
@@ -314,7 +309,7 @@ query AccountResolverPermissions($address: Address!) {
   }
 }`,
     variables: {
-      default: { address: DEVNET_DEPLOYER },
+      default: { address: DevnetAccounts.deployer.address },
       // TODO: figure out a good sepolia-v2 user address
       // [ENSNamespaceIds.SepoliaV2]: { address: "" },
     },

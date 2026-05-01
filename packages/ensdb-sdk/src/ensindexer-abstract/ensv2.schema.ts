@@ -102,7 +102,7 @@ export const event = onchainTable(
     // Event Log Metadata
 
     // chain
-    chainId: t.integer().notNull().$type<ChainId>(),
+    chainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
 
     // block
     blockNumber: t.bigint().notNull().$type<BlockNumber>(),
@@ -201,7 +201,7 @@ export const registry = onchainTable(
     // has a type
     type: registryType().notNull(),
 
-    chainId: t.integer().notNull().$type<ChainId>(),
+    chainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
     address: t.hex().notNull().$type<NormalizedAddress>(),
 
     // If this is an ENSv1VirtualRegistry, `node` is the namehash of the parent ENSv1 domain that
@@ -337,7 +337,7 @@ export const registration = onchainTable(
     gracePeriod: t.bigint(),
 
     // registrar AccountId
-    registrarChainId: t.integer().notNull().$type<ChainId>(),
+    registrarChainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
     registrarAddress: t.hex().notNull().$type<NormalizedAddress>(),
 
     // may reference a registrant. If this is an ENSv2 Registration, the protocol-emitted
@@ -500,7 +500,7 @@ export const permissions = onchainTable(
   (t) => ({
     id: t.text().primaryKey().$type<PermissionsId>(),
 
-    chainId: t.integer().notNull().$type<ChainId>(),
+    chainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
     address: t.hex().notNull().$type<NormalizedAddress>(),
   }),
   (t) => ({
@@ -518,7 +518,7 @@ export const permissionsResource = onchainTable(
   (t) => ({
     id: t.text().primaryKey().$type<PermissionsResourceId>(),
 
-    chainId: t.integer().notNull().$type<ChainId>(),
+    chainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
     address: t.hex().notNull().$type<NormalizedAddress>(),
     resource: t.bigint().notNull(),
   }),
@@ -539,7 +539,7 @@ export const permissionsUser = onchainTable(
   (t) => ({
     id: t.text().primaryKey().$type<PermissionsUserId>(),
 
-    chainId: t.integer().notNull().$type<ChainId>(),
+    chainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
     address: t.hex().notNull().$type<NormalizedAddress>(),
     resource: t.bigint().notNull(),
     // The user/grantee address this Permission is granted to (the HCA account address if used).

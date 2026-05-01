@@ -7,18 +7,19 @@ import {
   ENSNamespaceIds,
   ensTestEnvChain,
   getENSNamespace,
+  sepoliaV2Chain,
 } from "@ensnode/datasources";
 
 import { buildAlchemyBaseUrl, buildDRPCUrl, buildQuickNodeURL } from "./build-rpc-urls";
 
 const KEY = "whatever";
 
-const LOCAL_CHAIN_IDS: ChainId[] = [ensTestEnvChain.id];
+const CHAINS_WITHOUT_AUTO_RPC_SUPPORT: ChainId[] = [ensTestEnvChain.id, sepoliaV2Chain.id];
 const ALL_KNOWN_PUBLIC_CHAIN_IDS = Object.values(ENSNamespaceIds)
   .map((namespace) => getENSNamespace(namespace))
   .flatMap((namespace: ENSNamespace) => Object.values(namespace))
   .map((datasource) => datasource.chain.id)
-  .filter((chainId) => !LOCAL_CHAIN_IDS.includes(chainId));
+  .filter((chainId) => !CHAINS_WITHOUT_AUTO_RPC_SUPPORT.includes(chainId));
 
 describe("build-rpc-urls", () => {
   it("should build rpc urls for each known public chain id", () => {

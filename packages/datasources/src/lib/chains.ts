@@ -1,14 +1,19 @@
-import { type Chain, localhost } from "viem/chains";
-
-/**
- * The Default Chain Id for Devnet
- * @see https://github.com/ensdomains/contracts-v2/blob/762de44d60b2588b2e92a6d29df941c4de821ae6/contracts/script/setup.ts#L40
- */
-const DEVNET_DEFAULT_CHAIN_ID = 0xeeeeed;
+import { anvil, type Chain, sepolia } from "viem/chains";
 
 export const ensTestEnvChain = {
-  ...localhost,
-  id: DEVNET_DEFAULT_CHAIN_ID,
+  ...anvil,
+  // NOTE: devnet uses anvil's default chain id of 31337, but we over-specify it here for documentation
+  // https://github.com/ensdomains/contracts-v2/blob/580c60a20e80decce21cf15aafd762f96a96d544/contracts/script/setup.ts#L55
+  id: 31337,
   name: "ens-test-env",
-  rpcUrls: { default: { http: ["http://localhost:8545"] } },
+} as const satisfies Chain;
+
+/**
+ * NOTE: sepoliaV2Chain requires access to the Tenderly Virtual RPC Endpoint configured as
+ * RPC_URL_99911155111.
+ */
+export const sepoliaV2Chain = {
+  ...sepolia,
+  id: 99911155111,
+  name: "Sepolia V2 (Virtual)",
 } as const satisfies Chain;

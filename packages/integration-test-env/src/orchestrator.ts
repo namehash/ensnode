@@ -37,7 +37,7 @@ import {
   type StartedDockerComposeEnvironment,
   Wait,
 } from "testcontainers";
-import { createTestClient, http } from "viem";
+import { createPublicClient, http } from "viem";
 
 import { ENSNamespaceIds, ensTestEnvChain } from "@ensnode/datasources";
 import {
@@ -55,10 +55,12 @@ const ENSAPI_DIR = resolve(MONOREPO_ROOT, "apps/ensapi");
 const ENSRAINBOW_PORT = 3223;
 const ENSINDEXER_PORT = 42069;
 const ENSAPI_PORT = 4334;
+const ENSDB_PORT = 5433;
 
 // Shared config
 const ENSRAINBOW_URL = `http://localhost:${ENSRAINBOW_PORT}`;
 const ENSINDEXER_SCHEMA_NAME = "ensindexer_integration_test";
+const ENSDB_URL = `postgresql://postgres:password@localhost:${ENSDB_PORT}/postgres`;
 
 // Track resources for cleanup
 const subprocesses: ResultPromise[] = [];
@@ -127,11 +129,11 @@ process.on("SIGINT", handleShutdown);
 process.on("SIGTERM", handleShutdown);
 
 function log(msg: string) {
-  console.log(`[ci] ${msg}`);
+  console.log(`[orchestrator] ${msg}`);
 }
 
 function logError(msg: string) {
-  console.error(`[ci] ERROR: ${msg}`);
+  console.error(`[orchestrator] ERROR: ${msg}`);
 }
 
 async function waitForHealth(url: string, timeoutMs: number, serviceName: string): Promise<void> {
@@ -254,28 +256,23 @@ async function main() {
     DOCKER_DIR,
     "docker-compose.orchestrator.yml",
   )
-    .withWaitStrategy("devnet", Wait.forHealthCheck())
-    // ensdb has no explicit container_name (see docker-compose.orchestrator.yml), so
-    // testcontainers' parsed container name is "ensdb-1" (project prefix stripped). devnet
-    // keeps its container_name from the shared services/devnet.yml so it stays "devnet".
-    .withWaitStrategy("ensdb-1", Wait.forListeningPorts())
+    .withWaitStrategy("devnet-orchestrator", Wait.forHealthCheck())
+    .withWaitStrategy("ensdb-orchestrator", Wait.forListeningPorts())
     .withStartupTimeout(120_000)
     .up(["ensdb", "devnet"]);
 
-  const ensdbContainer = composeEnvironment.getContainer("ensdb-1");
-  const ensdbPort = ensdbContainer.getMappedPort(5432);
-  const ENSDB_URL = `postgresql://postgres:password@localhost:${ensdbPort}/postgres`;
-  log(`ENSDb is ready (port ${ensdbPort})`);
+  log(`ENSDb is ready (port ${ENSDB_PORT})`);
 
-  // ensures that the devnet chain is always on our expected chain id
-  // TODO: can remove after devnet chain id configuration is supported
-  const client = createTestClient({
-    mode: "anvil",
+  // Devnet Chain Id check
+  const publicClient = createPublicClient({
     transport: http(ensTestEnvChain.rpcUrls.default.http[0]),
   });
-  // @ts-expect-error - anvil_setChainId isn't in viem's typed RPC schema
-  await client.request({ method: "anvil_setChainId", params: [ensTestEnvChain.id] });
-  log(`Set devnet chain id to ${ensTestEnvChain.id}`);
+  const devnetChainId = await publicClient.getChainId();
+  if (devnetChainId !== ensTestEnvChain.id) {
+    throw new Error(
+      `Devnet chain id mismatch: got ${devnetChainId}, expected ${ensTestEnvChain.id}.`,
+    );
+  }
 
   log("Devnet is ready");
 
