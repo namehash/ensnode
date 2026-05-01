@@ -2,7 +2,7 @@ import { OmnigraphProvider } from "enskit/react/omnigraph";
 import { createEnsNodeClient } from "enssdk/core";
 import { omnigraph } from "enssdk/omnigraph";
 import { StrictMode } from "react";
-import { BrowserRouter, Link, Route, Routes } from "react-router";
+import { HashRouter, Link, Route, Routes } from "react-router";
 
 import { DomainView } from "./DomainView";
 import { PaginationView } from "./PaginationView";
@@ -30,7 +30,7 @@ export function App() {
         <h1>
           <code>enskit</code> Example App
         </h1>
-        <BrowserRouter>
+        <HashRouter>
           <Routes>
             <Route
               path="/"
@@ -46,7 +46,7 @@ export function App() {
             <Route path="/pagination" element={<PaginationView />} />
             <Route path="/registry" element={<RegistryView />} />
           </Routes>
-        </BrowserRouter>
+        </HashRouter>
       </OmnigraphProvider>
     </StrictMode>
   );
