@@ -337,7 +337,7 @@ export const registration = onchainTable(
     gracePeriod: t.bigint(),
 
     // registrar AccountId
-    registrarChainId: t.integer().notNull().$type<ChainId>(),
+    registrarChainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
     registrarAddress: t.hex().notNull().$type<NormalizedAddress>(),
 
     // may reference a registrant. If this is an ENSv2 Registration, the protocol-emitted

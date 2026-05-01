@@ -20,6 +20,7 @@ export const SUPPORTED_CHAINS = [
   ensTestEnvChain,
   mainnet,
   sepolia,
+  sepoliaV2Chain,
   base,
   baseSepolia,
   linea,

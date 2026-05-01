@@ -2,4 +2,4 @@
 "ensindexer": minor
 ---
 
-Updates ens-test-env devnet commit to `53f1482`.
+Updates ens-test-env devnet commit to `580c60a`.

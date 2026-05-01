@@ -9,7 +9,7 @@ services:
     volumes:
       - ensrainbow_data:/app/apps/ensrainbow/data
     healthcheck:
-      test: [ "CMD", "wget", "-q", "--spider", "http://localhost:3223/health" ]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3223/health"]
       interval: 30s
       timeout: 3s
       retries: 3
