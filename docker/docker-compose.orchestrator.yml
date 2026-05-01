@@ -2,25 +2,25 @@
 # Provides only the infrastructure services needed by orchestrator.ts:
 # devnet (local EVM) and ensdb (database).
 #
-# NOTE: no `container_name` is set here so testcontainers gives each container a project-prefixed
-# name and runs do not collide with manually-started stacks (docker-compose.yml /
-# docker-compose.devnet.yml) or with each other.
+# NOTE: container_name is overridden to `*-orchestrator` so testcontainers runs do not collide
+# with manually-started stacks (docker-compose.yml / docker-compose.devnet.yml) or with each other.
 #
-# NOTE: ensdb uses an ephemeral host port ("0:5432") to avoid colliding with any host-native
-# postgres on a developer machine. Orchestrator.ts reads the bound port via testcontainers'
-# getMappedPort().
+# NOTE: ensdb-orchestrator binds host port 5433 (rather than 5432 used by the manual stacks) so
+# it never collides and so developers can `psql -h localhost -p 5433` after a test run.
 services:
   devnet:
     extends:
       file: services/devnet.yml
       service: devnet
+    container_name: devnet-orchestrator
 
   ensdb:
     extends:
       file: services/ensdb.yml
       service: ensdb
+    container_name: ensdb-orchestrator
     ports:
-      - "0:5432"
+      - "5433:5432"
     env_file:
       - path: envs/.env.docker.common
         required: true
