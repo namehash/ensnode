@@ -1,0 +1,40 @@
+name: Promote Vercel Deployment
+description: Promotes the Vercel production deployment whose commit SHA matches
+  the active ENSIndexer image in the given Railway environment. Ensures exact
+  version matching between the active ENSNode and the Vercel project.
+
+inputs:
+  vercel_team_slug:
+    description: "Vercel team slug"
+    required: true
+
+  vercel_project_id:
+    description: "Vercel project ID to promote"
+    required: true
+
+  vercel_token:
+    description: "Vercel API token"
+    required: true
+
+  railway_token:
+    description: "Railway API token"
+    required: true
+
+  railway_environment_id:
+    description: "Railway environment ID containing the active ENSIndexer image"
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Promote
+      shell: bash
+      env:
+        VERCEL_PROJECT_ID: ${{ inputs.vercel_project_id }}
+        VERCEL_TEAM_SLUG: ${{ inputs.vercel_team_slug }}
+        VERCEL_TOKEN: ${{ inputs.vercel_token }}
+        RAILWAY_TOKEN: ${{ inputs.railway_token }}
+        RAILWAY_ENVIRONMENT_ID: ${{ inputs.railway_environment_id }}
+      run: |
+        chmod +x ${{ github.action_path }}/promote_vercel_deployment.sh
+        ${{ github.action_path }}/promote_vercel_deployment.sh
