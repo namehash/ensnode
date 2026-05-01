@@ -2,7 +2,7 @@
 // import { maxDepthPlugin } from "@escape.tech/graphql-armor-max-depth";
 // import { maxTokensPlugin } from "@escape.tech/graphql-armor-max-tokens";
 
-import { createYoga } from "graphql-yoga";
+import { createYoga, maskError } from "graphql-yoga";
 
 import { makeLogger } from "@/lib/logger";
 import { context } from "@/omnigraph-api/context";
@@ -16,6 +16,15 @@ export const yoga = createYoga({
   context,
   // CORS is handled by the Hono middleware in app.ts
   cors: false,
+  maskedErrors:
+    process.env.NODE_ENV === "production"
+      ? true
+      : {
+          maskError(error, message, isDev) {
+            logger.error(error);
+            return maskError(error, message, isDev);
+          },
+        },
   graphiql: {
     defaultQuery: `query DomainsByOwner {
   account(by: { address: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" }) {

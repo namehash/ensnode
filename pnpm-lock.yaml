@@ -176,6 +176,46 @@ importers:
         specifier: 'catalog:'
         version: 4.0.5(@types/debug@4.1.12)(@types/node@24.10.9)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.12))(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.3)
 
+  apps/ens-labels-collector:
+    dependencies:
+      '@ensnode/ensnode-sdk':
+        specifier: workspace:*
+        version: link:../../packages/ensnode-sdk
+      '@hono/node-server':
+        specifier: 'catalog:'
+        version: 1.19.14(hono@4.12.14)
+      enssdk:
+        specifier: workspace:*
+        version: link:../../packages/enssdk
+      graphql:
+        specifier: ^16.11.0
+        version: 16.11.0
+      hono:
+        specifier: 'catalog:'
+        version: 4.12.14
+      viem:
+        specifier: 'catalog:'
+        version: 2.38.5(typescript@5.9.3)(zod@4.3.6)
+      zod:
+        specifier: 'catalog:'
+        version: 4.3.6
+    devDependencies:
+      '@ensnode/shared-configs':
+        specifier: workspace:*
+        version: link:../../packages/shared-configs
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.10.9
+      tsx:
+        specifier: ^4.19.3
+        version: 4.21.0
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      vitest:
+        specifier: 'catalog:'
+        version: 4.0.5(@types/debug@4.1.12)(@types/node@24.10.9)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.12))(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.3)
+
   apps/ensadmin:
     dependencies:
       '@ensnode/datasources':
@@ -10761,7 +10801,7 @@ snapshots:
 
   '@esbuild-kit/core-utils@3.3.2':
     dependencies:
-      esbuild: 0.27.2
+      esbuild: 0.27.4
       source-map-support: 0.5.21
 
   '@esbuild-kit/esm-loader@2.6.5':
@@ -18622,7 +18662,7 @@ snapshots:
 
   tsx@4.21.0:
     dependencies:
-      esbuild: 0.27.2
+      esbuild: 0.27.4
       get-tsconfig: 4.13.0
     optionalDependencies:
       fsevents: 2.3.3

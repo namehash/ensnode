@@ -3274,6 +3274,29 @@ const introspection = {
       },
       {
         "kind": "INPUT_OBJECT",
+        "name": "LabelsByHashesInput",
+        "inputFields": [
+          {
+            "name": "hashes",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Hex"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "isOneOf": false
+      },
+      {
+        "kind": "INPUT_OBJECT",
         "name": "NameOrNodeInput",
         "inputFields": [
           {
@@ -4345,6 +4368,35 @@ const introspection = {
                   "ofType": {
                     "kind": "INPUT_OBJECT",
                     "name": "DomainsWhereInput"
+                  }
+                }
+              }
+            ],
+            "isDeprecated": false
+          },
+          {
+            "name": "labels",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "Label"
+                  }
+                }
+              }
+            },
+            "args": [
+              {
+                "name": "by",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "LabelsByHashesInput"
                   }
                 }
               }

@@ -293,10 +293,17 @@ async function runDbBootstrap(
       throw new BootstrapAbortedError();
     }
 
-    // Write marker only after a successful attach.
+    const dbConfig = await buildDbConfig(ensRainbowServer);
+
+    if (signal.aborted) {
+      throw new BootstrapAbortedError();
+    }
+
+    // Write marker only after a successful attach AND a successful `buildDbConfig` so the
+    // next start does not enter the existing-DB reuse path with a database that has never
+    // passed readiness checks (e.g. missing precalculated record count).
     await writeFile(markerFile, "");
 
-    const dbConfig = await buildDbConfig(ensRainbowServer);
     return { publicConfig: buildEnsRainbowPublicConfig(dbConfig), dbConfig };
   } catch (error) {
     if (!dbAttached) {

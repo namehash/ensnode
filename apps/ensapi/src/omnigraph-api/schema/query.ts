@@ -1,7 +1,9 @@
 import config from "@/config";
 
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
+import { inArray } from "drizzle-orm";
 import { makeConcreteRegistryId, makePermissionsId, makeResolverId } from "enssdk";
+import { createGraphQLError } from "graphql-yoga";
 
 import { getRootRegistryId } from "@ensnode/ensnode-sdk";
 
@@ -25,6 +27,7 @@ import {
   DomainsOrderInput,
   DomainsWhereInput,
 } from "@/omnigraph-api/schema/domain";
+import { LABELS_BY_HASHES_MAX, LabelRef, LabelsByHashesInput } from "@/omnigraph-api/schema/label";
 import { PermissionsIdInput, PermissionsRef } from "@/omnigraph-api/schema/permissions";
 import { RegistrationInterfaceRef } from "@/omnigraph-api/schema/registration";
 import { RegistryIdInput, RegistryInterfaceRef } from "@/omnigraph-api/schema/registry";
@@ -137,6 +140,41 @@ builder.queryType({
       resolve: (parent, args, ctx, info) => {
         if (args.by.id !== undefined) return args.by.id;
         return getDomainIdByInterpretedName(args.by.name);
+      },
+    }),
+
+    /////////////////////////
+    // Find Labels by Hashes
+    /////////////////////////
+    labels: t.field({
+      description:
+        "Look up Labels in the index by a batch of LabelHashes. " +
+        "Each returned Label exposes its `hash` and `interpreted` representation, where " +
+        "`interpreted` is the Encoded LabelHash for unhealed/unknown labels and a normalized " +
+        "literal for healed labels. LabelHashes that are not present in the index are simply " +
+        "omitted from the result.",
+      type: [LabelRef],
+      nullable: false,
+      args: { by: t.arg({ type: LabelsByHashesInput, required: true }) },
+      resolve: async (_parent, { by }) => {
+        if (by.hashes.length === 0) return [];
+
+        if (by.hashes.length > LABELS_BY_HASHES_MAX) {
+          // Use `createGraphQLError` so the client-facing validation message survives Yoga's
+          // default `maskError`, which (correctly) hides plain `Error` instances as
+          // "Unexpected error.".
+          throw createGraphQLError(
+            `Too many hashes: received ${by.hashes.length}, max ${LABELS_BY_HASHES_MAX}.`,
+            { extensions: { code: "BAD_USER_INPUT" } },
+          );
+        }
+
+        const dedupedHashes = Array.from(new Set(by.hashes));
+
+        return ensDb
+          .select()
+          .from(ensIndexerSchema.label)
+          .where(inArray(ensIndexerSchema.label.labelHash, dedupedHashes));
       },
     }),
 
