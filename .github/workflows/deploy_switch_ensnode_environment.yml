@@ -93,9 +93,22 @@ jobs:
           redis-cli -u $REDIS_URL SET traefik/http/routers/ensrainbow-searchlight-api-router/service "${TARGET_ENVIRONMENT}-ensrainbow-searchlight-api"
 
       - name: Promote ENSAdmin Vercel Deployment
-        run: |
-          chmod +x ./.github/scripts/promote_ensadmin.sh
-          ./.github/scripts/promote_ensadmin.sh
+        uses: ./.github/actions/promote_vercel_deployment
+        with:
+          vercel_team_slug: namehash
+          vercel_project_id: prj_nKcHTO12hq9kcgascQMq4xokRhwp
+          vercel_token: ${{ secrets.VERCEL_TOKEN }}
+          railway_token: ${{ secrets.RAILWAY_TOKEN }}
+          railway_environment_id: ${{ env.RAILWAY_ENVIRONMENT_ID }}
+
+      - name: Promote Example App Vercel Deployment
+        uses: ./.github/actions/promote_vercel_deployment
+        with:
+          vercel_team_slug: namehash
+          vercel_project_id: prj_Ux80vjjNyDfXMNvPEQo4zlx6Eq6D
+          vercel_token: ${{ secrets.VERCEL_TOKEN }}
+          railway_token: ${{ secrets.RAILWAY_TOKEN }}
+          railway_environment_id: ${{ env.RAILWAY_ENVIRONMENT_ID }}
 
       - name: Send Slack Notification
         uses: ./.github/actions/send_slack_notification
