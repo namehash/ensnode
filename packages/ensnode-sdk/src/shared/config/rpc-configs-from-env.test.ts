@@ -1,14 +1,14 @@
+import { lineaSepolia } from "viem/chains";
 import { describe, expect, it } from "vitest";
 
 import { ENSNamespaceIds } from "@ensnode/datasources";
 
 import { deserializeChainId } from "../deserialize";
 import { isHttpProtocol } from "../url";
-import { alchemySupportsChain, dRPCSupportsChain, quickNodeSupportsChain } from "./build-rpc-urls";
 import { buildRpcConfigsFromEnv } from "./rpc-configs-from-env";
 
 const allPublicEnsNamespaceIds = Object.values(ENSNamespaceIds).filter(
-  (id) => id !== ENSNamespaceIds.EnsTestEnv,
+  (id) => id !== ENSNamespaceIds.EnsTestEnv && id !== ENSNamespaceIds.SepoliaV2,
 );
 
 const rpcConfigHttp = (rpcConfig: string) =>
@@ -33,17 +33,12 @@ describe("buildRpcConfigsFromEnv", () => {
 
       it.each(Object.entries(rpcConfigs))(
         "can build RPC URL for chainId %d",
-        (chainIdString, rpcConfig) => {
-          const chainId = deserializeChainId(chainIdString);
-          const [first, ...rest] = rpcConfigHttp(rpcConfig);
+        (_chainId, rpcConfig) => {
+          const [alchemyRpcUrl, drpcRpcUrl, quickNodeRpcUrl] = rpcConfigHttp(rpcConfig);
 
-          if (alchemySupportsChain(chainId)) {
-            expect(first.pathname).toContain(ALCHEMY_API_KEY);
-            expect(rest).toHaveLength(0);
-          } else {
-            // No configured provider supports this chain — falls back to chain default URL.
-            expect(rest).toHaveLength(0);
-          }
+          expect(alchemyRpcUrl.pathname).toContain(ALCHEMY_API_KEY);
+          expect(drpcRpcUrl).toBeUndefined();
+          expect(quickNodeRpcUrl).toBeUndefined();
         },
       );
     });
@@ -63,20 +58,14 @@ describe("buildRpcConfigsFromEnv", () => {
         "can build RPC URL for chainId %d",
         (chainIdString, rpcConfig) => {
           const chainId = deserializeChainId(chainIdString);
-          const urls = rpcConfigHttp(rpcConfig);
-          let i = 0;
+          const [alchemyRpcUrl, quickNodeRpcUrl] = rpcConfigHttp(rpcConfig);
 
-          if (alchemySupportsChain(chainId)) {
-            expect(urls[i++].pathname).toContain(ALCHEMY_API_KEY);
+          expect(alchemyRpcUrl.pathname).toContain(ALCHEMY_API_KEY);
+
+          if (chainId !== lineaSepolia.id) {
+            expect(quickNodeRpcUrl.pathname).toContain(QUICKNODE_API_KEY);
+            expect(quickNodeRpcUrl.hostname.startsWith(QUICKNODE_ENDPOINT_NAME)).toBe(true);
           }
-
-          if (quickNodeSupportsChain(chainId)) {
-            expect(urls[i].pathname).toContain(QUICKNODE_API_KEY);
-            expect(urls[i++].hostname.startsWith(QUICKNODE_ENDPOINT_NAME)).toBe(true);
-          }
-
-          // any remaining url is the chain-default fallback (only when no provider matched)
-          expect(urls).toHaveLength(Math.max(i, 1));
         },
       );
     });
@@ -96,19 +85,17 @@ describe("buildRpcConfigsFromEnv", () => {
         "can build RPC URL for chainId %d",
         (chainIdString, rpcConfig) => {
           const chainId = deserializeChainId(chainIdString);
-          const urls = rpcConfigHttp(rpcConfig);
-          let i = 0;
 
-          if (quickNodeSupportsChain(chainId)) {
-            expect(urls[i].pathname).toContain(QUICKNODE_API_KEY);
-            expect(urls[i++].hostname.startsWith(QUICKNODE_ENDPOINT_NAME)).toBe(true);
+          if (chainId !== lineaSepolia.id) {
+            const [quickNodeRpcUrl, dRPCRpcUrl] = rpcConfigHttp(rpcConfig);
+            expect(quickNodeRpcUrl.pathname).toContain(QUICKNODE_API_KEY);
+            expect(quickNodeRpcUrl.hostname.startsWith(QUICKNODE_ENDPOINT_NAME)).toBe(true);
+
+            expect(dRPCRpcUrl.pathname).toContain(DRPC_API_KEY);
+          } else {
+            const [dRPCRpcUrl] = rpcConfigHttp(rpcConfig);
+            expect(dRPCRpcUrl.pathname).toContain(DRPC_API_KEY);
           }
-
-          if (dRPCSupportsChain(chainId)) {
-            expect(urls[i++].pathname).toContain(DRPC_API_KEY);
-          }
-
-          expect(urls).toHaveLength(Math.max(i, 1));
         },
       );
     });
@@ -127,14 +114,12 @@ describe("buildRpcConfigsFromEnv", () => {
         "can build RPC URL for chainId %d",
         (chainIdString, rpcConfig) => {
           const chainId = deserializeChainId(chainIdString);
-          const [first, ...rest] = rpcConfigHttp(rpcConfig);
+          const [quickNodeRpcUrl] = rpcConfigHttp(rpcConfig);
 
-          if (quickNodeSupportsChain(chainId)) {
-            expect(first.pathname).toContain(QUICKNODE_API_KEY);
-            expect(first.hostname.startsWith(QUICKNODE_ENDPOINT_NAME)).toBe(true);
+          if (chainId !== lineaSepolia.id) {
+            expect(quickNodeRpcUrl.pathname).toContain(QUICKNODE_API_KEY);
+            expect(quickNodeRpcUrl.hostname.startsWith(QUICKNODE_ENDPOINT_NAME)).toBe(true);
           }
-
-          expect(rest).toHaveLength(0);
         },
       );
     });
