@@ -1,4 +1,5 @@
 import type { ReferralAccountingRecordRevShareCap } from "@namehash/ens-referrals";
+import { stringifyAccountId } from "enssdk";
 
 /**
  * Escape a CSV cell per RFC 4180: wrap in quotes when the value contains a comma, quote,
@@ -28,7 +29,7 @@ const CSV_COLUMNS: ReadonlyArray<{
   { header: "transactionHash", value: (r) => r.transactionHash },
   { header: "incrementalDuration", value: (r) => r.incrementalDuration.toString() },
   { header: "registrant", value: (r) => r.registrant },
-  { header: "referrer", value: (r) => r.referrer },
+  { header: "referrer", value: (r) => stringifyAccountId(r.referrer) },
   {
     header: "incrementalRevenueContributionWei",
     value: (r) => r.tentativeAward.incrementalRevenueContribution.amount.toString(),

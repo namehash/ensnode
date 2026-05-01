@@ -8,7 +8,7 @@ import {
   makeReferrerMetricsEditionsArraySchema,
 } from "@namehash/ens-referrals/internal";
 
-import { makeNormalizedAddressSchema } from "@ensnode/ensnode-sdk/internal";
+import { makeAccountIdStringSchema } from "@ensnode/ensnode-sdk/internal";
 
 export const basePath = "/v1/ensanalytics";
 
@@ -37,9 +37,11 @@ const referrerLeaderboardPageQuerySchema = z.object({
     .describe("Number of referrers per page"),
 });
 
-// Referrer address parameter schema
-const referrerAddressSchema = z.object({
-  referrer: makeNormalizedAddressSchema("Referrer address").describe("Referrer Ethereum address"),
+// Referrer AccountId path parameter schema (CAIP-10 string, e.g. "eip155:1:0xabc...")
+const referrerAccountIdSchema = z.object({
+  referrer: makeAccountIdStringSchema("Referrer AccountId").describe(
+    "Referrer CAIP-10 AccountId (e.g. eip155:1:0xabc...)",
+  ),
 });
 
 // Editions query parameter schema
@@ -86,9 +88,9 @@ export const getReferrerDetailRoute = createRoute({
   operationId: "getReferrerDetail",
   tags: ["ENSAwards"],
   summary: "Get Referrer Detail for Editions",
-  description: `Returns detailed information for a specific referrer for the requested editions. Requires 1-${MAX_EDITIONS_PER_REQUEST} distinct edition slugs. All requested editions must be recognized and have cached data, or the request fails.`,
+  description: `Returns detailed information for a specific referrer for the requested editions. The referrer is identified by its CAIP-10 AccountId (URL-encoded, e.g. \`eip155%3A1%3A0xabc...\`). Requires 1-${MAX_EDITIONS_PER_REQUEST} distinct edition slugs. All requested editions must be recognized and have cached data, or the request fails.`,
   request: {
-    params: referrerAddressSchema,
+    params: referrerAccountIdSchema,
     query: editionsQuerySchema,
   },
   responses: {

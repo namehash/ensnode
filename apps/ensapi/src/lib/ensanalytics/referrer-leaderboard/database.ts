@@ -91,7 +91,7 @@ export const getReferrerMetrics = async (
 
     return (records as NonNullRecord[]).map((record) => {
       return buildReferrerMetrics(
-        record.referrer,
+        { chainId: rules.subregistryId.chainId, address: record.referrer },
         record.totalReferrals,
         deserializeDuration(record.totalIncrementalDuration),
         priceEth(BigInt(record.totalRevenueContribution)),
@@ -211,7 +211,10 @@ export const getReferralEvents = async (rules: ReferralProgramRules): Promise<Re
 
       return {
         id: record.id,
-        referrer: record.referrer as NormalizedAddress,
+        referrer: {
+          chainId: rules.subregistryId.chainId,
+          address: record.referrer as NormalizedAddress,
+        },
         timestamp: Number(record.timestamp),
         incrementalDuration: Number(record.incrementalDuration),
         incrementalRevenueContribution: priceEth(BigInt(record.total)),

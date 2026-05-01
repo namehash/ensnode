@@ -1,4 +1,10 @@
-import type { NormalizedAddress } from "enssdk";
+import {
+  type AccountId,
+  type AccountIdString,
+  type Address,
+  stringifyAccountId,
+  toNormalizedAddress,
+} from "enssdk";
 import { describe, expect, it, vi } from "vitest";
 
 import { priceEth, priceUsdc } from "@ensnode/ensnode-sdk";
@@ -11,6 +17,12 @@ import {
   type ReferrerLeaderboardPageParams,
 } from "./award-models/shared/leaderboard-page";
 import { ReferralProgramAwardModels } from "./award-models/shared/rules";
+
+const acct = (address: Address): AccountId => ({
+  chainId: 1,
+  address: toNormalizedAddress(address),
+});
+const acctKey = (address: Address): AccountIdString => stringifyAccountId(acct(address));
 
 describe("buildReferrerLeaderboardPageContext", () => {
   const pageParams: ReferrerLeaderboardPageParams = {
@@ -27,10 +39,7 @@ describe("buildReferrerLeaderboardPageContext", () => {
         maxQualifiedReferrers: 10,
         startTime: 1764547200,
         endTime: 1767225599,
-        subregistryId: {
-          chainId: 1,
-          address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
-        },
+        subregistryId: acct("0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85"),
         rulesUrl: new URL("https://example.com/rules"),
         areAwardsDistributed: false,
       },
@@ -41,11 +50,11 @@ describe("buildReferrerLeaderboardPageContext", () => {
         grandTotalQualifiedReferrersFinalScore: 28.05273061366773,
         minFinalScoreToQualify: 0,
       },
-      referrers: new Map<NormalizedAddress, AwardedReferrerMetricsPieSplit>([
+      referrers: new Map<AccountIdString, AwardedReferrerMetricsPieSplit>([
         [
-          "0x03c098d2bed4609e6ed9beb2c4877741f45f290d",
+          acctKey("0x03c098d2bed4609e6ed9beb2c4877741f45f290d"),
           {
-            referrer: "0x6837047f46da1d5d9a79846b25810b92adf456f6",
+            referrer: acct("0x6837047f46da1d5d9a79846b25810b92adf456f6"),
             totalReferrals: 1,
             totalIncrementalDuration: 189302400,
             totalRevenueContribution: priceEth(20_000_000_000_000_000n), // 0.02 ETH
@@ -59,9 +68,9 @@ describe("buildReferrerLeaderboardPageContext", () => {
           },
         ],
         [
-          "0xabe3fdb4d2cd5f2e7193a4ac380ecb68e899896a",
+          acctKey("0xabe3fdb4d2cd5f2e7193a4ac380ecb68e899896a"),
           {
-            referrer: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+            referrer: acct("0xd8da6bf26964af9d7eed9e03e53415d37aa96045"),
             totalReferrals: 10,
             totalIncrementalDuration: 155847533,
             totalRevenueContribution: priceEth(25_000_000_000_000_000n), // 0.025 ETH
@@ -75,9 +84,9 @@ describe("buildReferrerLeaderboardPageContext", () => {
           },
         ],
         [
-          "0xffa596cdf9a69676e689b1a92e5e681711227d75",
+          acctKey("0xffa596cdf9a69676e689b1a92e5e681711227d75"),
           {
-            referrer: "0x7e491cde0fbf08e51f54c4fb6b9e24afbd18966d",
+            referrer: acct("0x7e491cde0fbf08e51f54c4fb6b9e24afbd18966d"),
             totalReferrals: 6,
             totalIncrementalDuration: 119404800,
             totalRevenueContribution: priceEth(15_000_000_000_000_000n), // 0.015 ETH
@@ -116,10 +125,7 @@ describe("buildReferrerLeaderboardPageContext", () => {
         maxQualifiedReferrers: 10,
         startTime: 1764547200,
         endTime: 1767225599,
-        subregistryId: {
-          chainId: 1,
-          address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
-        },
+        subregistryId: acct("0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85"),
         rulesUrl: new URL("https://example.com/rules"),
         areAwardsDistributed: false,
       },
@@ -130,7 +136,7 @@ describe("buildReferrerLeaderboardPageContext", () => {
         grandTotalQualifiedReferrersFinalScore: 28.05273061366773,
         minFinalScoreToQualify: 0,
       },
-      referrers: new Map<NormalizedAddress, AwardedReferrerMetricsPieSplit>(),
+      referrers: new Map<AccountIdString, AwardedReferrerMetricsPieSplit>(),
       accurateAsOf: 1764580368,
     };
 
