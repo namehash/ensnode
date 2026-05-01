@@ -155,11 +155,31 @@ type TestCase<Api> = {
   description: string;
   fixtures: Fixture[];                       // declarative preconditions
   call: (api: Api) => Promise<unknown>;      // what to perform over API. should be simple logic
-  expected: unknown;                         // partial shape to match against
+  expected: Expectation | unknown;           // plain value → partial-object match; wrap for other matchers
 };
 ```
 
 The case is generic in the API it requires. TypeScript enforces case-vs-adapter compatibility at compile time. No runtime tagging.
+
+`expected` is intentionally plain data — **no Vitest `expect` matchers may appear inside a case**. Embedding `expect.*` would tie the catalog to a test runner and break module-load for any non-Vitest consumer (the `seed` CLI, a docs generator, a future JSON exporter). For asymmetric matching the kit ships a small serialisable DSL:
+
+```ts
+// ens-test-kit/src/cases/expectation.ts
+const EXPECTATION = Symbol.for("ens-test-kit.expectation");
+
+export type Expectation =
+  | { [EXPECTATION]: "partial"; value: unknown }
+  | { [EXPECTATION]: "equals"; value: unknown }
+  | { [EXPECTATION]: "arrayContains"; items: unknown[] };
+
+export const expectation = {
+  partial: (value: unknown): Expectation => ({ [EXPECTATION]: "partial", value }),
+  equals: (value: unknown): Expectation => ({ [EXPECTATION]: "equals", value }),
+  arrayContains: (...items: unknown[]): Expectation => ({ [EXPECTATION]: "arrayContains", items }),
+};
+```
+
+`runSuite` inspects `expected`: if it's an `Expectation`, it translates to the appropriate Vitest matcher (`toMatchObject` / `toEqual` / `toEqual(expect.arrayContaining(...))`); otherwise it treats the value as a partial-object expectation (the common case) and calls `toMatchObject`. Cases stay framework-agnostic.
 
 ### Example: a resolution case
 
@@ -228,6 +248,8 @@ A case using both interfaces declares the intersection explicitly:
 
 ```ts
 // ens-test-kit/src/cases/accounts/owned-domains.ts
+import { expectation } from "../expectation";
+
 export const ownershipCases: TestCase<DomainsApi & AccountsApi>[] = [
   {
     id: "accounts.owns.owner-owns-test-eth",
@@ -237,7 +259,7 @@ export const ownershipCases: TestCase<DomainsApi & AccountsApi>[] = [
       const account = await api.getAccount(OWNER_ADDRESS);
       return account?.domains.map((d) => d.name);
     },
-    expected: expect.arrayContaining(["test.eth"]),
+    expected: expectation.arrayContains("test.eth"),
   },
 ];
 ```
@@ -303,7 +325,7 @@ const HANDLERS = {
 
 export async function seedFixtures(rpcUrl: string, fixtures: Fixture[]): Promise<void> {
   const ctx = createSeederContext(rpcUrl);
-  const deduped = dedupeFixtures(fixtures);                 // by id
+  const deduped = dedupeFixtures(fixtures);                 // by id; throws if same id has unequal content
   const ordered = topologicallySort(deduped);               // registrations before records, etc.
   for (const fixture of ordered) {
     const handler = HANDLERS[fixture.kind];
@@ -312,7 +334,7 @@ export async function seedFixtures(rpcUrl: string, fixtures: Fixture[]): Promise
 }
 ```
 
-The seeder is idempotent at the fixture level (same `id` → applied once). Topological ordering handles dependencies (you must register `parent.eth` before setting records on `sub.parent.eth`).
+The seeder is idempotent at the fixture level: a given `id` is applied at most once. `dedupeFixtures` enforces *content consistency* — if two cases contribute a fixture with the same `id` but different fields, the seeder throws at startup rather than silently dropping one and making a downstream case test the wrong on-chain state. Same id + same content → safe reuse; same id + different content → developer error, fail loud. Topological ordering handles dependencies (you must register `parent.eth` before setting records on `sub.parent.eth`).
 
 ## How seeding plugs into Docker
 
