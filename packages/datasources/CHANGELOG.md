@@ -1,5 +1,11 @@
 # @ensnode/ens-deployments
 
+## 1.11.0
+
+### Minor Changes
+
+- [#2036](https://github.com/namehash/ensnode/pull/2036) [`43d8a9b`](https://github.com/namehash/ensnode/commit/43d8a9b838b15719f520cd3f3bbfd1b52a4ad1ce) Thanks [@shrugs](https://github.com/shrugs)! - Update sepolia-v2 namespace to point to the most recent Sepolia V2 deployment on the virtual Sepolia chain.
+
 ## 1.10.1
 
 ## 1.10.0

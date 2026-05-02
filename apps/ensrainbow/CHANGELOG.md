@@ -1,5 +1,26 @@
 # ensrainbow
 
+## 1.11.0
+
+### Minor Changes
+
+- [#1968](https://github.com/namehash/ensnode/pull/1968) [`c29b4c5`](https://github.com/namehash/ensnode/commit/c29b4c5d7a75d9e2893c6d9f3748eacaf1f3c759) Thanks [@djstrong](https://github.com/djstrong)! - ENSRainbow now starts its HTTP server immediately and downloads/validates its database in the background, instead of blocking container startup behind a netcat placeholder.
+  - **New `GET /ready` endpoint**: returns `200 { status: "ok" }` once the database is attached, or `503 Service Unavailable` while ENSRainbow is still bootstrapping. `/health` is now a pure liveness probe that succeeds as soon as the HTTP server is listening.
+  - **503 responses for API routes during bootstrap**: `/v1/heal`, `/v1/labels/count`, and `/v1/config` return a structured `ServiceUnavailableError` (`errorCode: 503`) until the database is ready.
+  - **New Docker entrypoint**: the container now runs `pnpm run entrypoint` from the `apps/ensrainbow` working directory (implemented in Node via `tsx src/cli.ts entrypoint`), which replaces `scripts/entrypoint.sh` and the `netcat` workaround.
+  - **Graceful shutdown during bootstrap**: SIGTERM/SIGINT now abort an in-flight bootstrap. Spawned `download`/`tar` child processes are terminated (SIGTERM → SIGKILL after a 5s grace period) and any partially-opened LevelDB handle is closed before the HTTP server and DB-backed server shut down, so the container exits promptly without leaking child processes or LevelDB locks.
+  - **SDK client**: added `EnsRainbowApiClient.ready()`, plus `EnsRainbow.ReadyResponse` / `EnsRainbow.ServiceUnavailableError` types and `ErrorCode.ServiceUnavailable`. The client now throws a typed `EnsRainbowHttpError` (with structured `status` / `statusText` properties) from `ready()`, `health()`, and `config()` whenever the service responds with a non-2xx HTTP status, so callers can branch their retry/abort logic on the status without parsing message strings.
+  - **ENSIndexer**: `waitForEnsRainbowToBeReady` now polls `/ready` (via `ensRainbowClient.ready()`) instead of `/health`, so it correctly waits for the database to finish bootstrapping. It also aborts retries immediately on non-503 HTTP responses (e.g. `404` from a misconfigured `ENSRAINBOW_URL`, `500` from a broken instance) instead of blocking startup for ~1h, while still retrying on `503 Service Unavailable` and on transient network errors.
+
+  **Migration**: if you previously polled `GET /health` to gate traffic on database readiness, switch to `GET /ready` (or `client.ready()`). `/health` is still available and still returns `200`, but it now indicates liveness only.
+
+### Patch Changes
+
+- Updated dependencies [[`0d8a4b4`](https://github.com/namehash/ensnode/commit/0d8a4b4b7c8c70be904652e2132e7c67fd9e39ef), [`0aa0c5a`](https://github.com/namehash/ensnode/commit/0aa0c5ac7a5636ccdd685de96c9f9f1312a2021b), [`43d8a9b`](https://github.com/namehash/ensnode/commit/43d8a9b838b15719f520cd3f3bbfd1b52a4ad1ce), [`824d819`](https://github.com/namehash/ensnode/commit/824d819d291b2b642d2664d09cb10d6de69a6ea7), [`6173160`](https://github.com/namehash/ensnode/commit/61731608632f62139496656f6231210f63383f20), [`7e77c5c`](https://github.com/namehash/ensnode/commit/7e77c5c2bef96d1a2eb363871fb87379b5f6f7e9), [`0d8a4b4`](https://github.com/namehash/ensnode/commit/0d8a4b4b7c8c70be904652e2132e7c67fd9e39ef), [`c29b4c5`](https://github.com/namehash/ensnode/commit/c29b4c5d7a75d9e2893c6d9f3748eacaf1f3c759), [`0d64d9e`](https://github.com/namehash/ensnode/commit/0d64d9e0c97c48e37f87d2abaaff50ff08df06e4), [`54edf26`](https://github.com/namehash/ensnode/commit/54edf26c15ae9ade9d1a57f1f0195dcd827aad57), [`6173160`](https://github.com/namehash/ensnode/commit/61731608632f62139496656f6231210f63383f20)]:
+  - @ensnode/ensrainbow-sdk@1.11.0
+  - @ensnode/ensnode-sdk@1.11.0
+  - enssdk@1.11.0
+
 ## 1.10.1
 
 ### Patch Changes
@@ -185,7 +206,6 @@
   This change addresses large Docker image sizes and data management challenges.
 
   Key changes:
-
   - A new .ensrainbow data format replaces SQL dumps, supporting label set IDs and versioned label sets for incremental data updates.
   - ENSRainbow is now distributed as a lightweight, data-less Docker image.
   - On first startup, the application downloads a pre-ingested database from R2, significantly reducing setup time.

@@ -1,7 +1,7 @@
 {
   "name": "@ensnode/ensindexer-perf-testing",
   "private": true,
-  "version": "1.10.0",
+  "version": "1.11.0",
   "description": "Local Prometheus + Grafana bundle for benchmarking ENSIndexer throughput.",
   "license": "MIT",
   "scripts": {

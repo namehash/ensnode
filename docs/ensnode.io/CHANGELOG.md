@@ -1,5 +1,20 @@
 # @docs/ensnode
 
+## 1.11.0
+
+### Minor Changes
+
+- [#1942](https://github.com/namehash/ensnode/pull/1942) [`2df3b45`](https://github.com/namehash/ensnode/commit/2df3b45b004365cf9f59952b758646c9a442aa32) Thanks [@tk-o](https://github.com/tk-o)! - Created docs for ENSDb.
+
+- [#2012](https://github.com/namehash/ensnode/pull/2012) [`c4a39bb`](https://github.com/namehash/ensnode/commit/c4a39bb6489609af3e35ad281b5ccb8e25528218) Thanks [@tk-o](https://github.com/tk-o)! - Added "Startup sequence" page to ENSIndexer docs.
+
+### Patch Changes
+
+- [#1965](https://github.com/namehash/ensnode/pull/1965) [`3facf20`](https://github.com/namehash/ensnode/commit/3facf206d7cb144593257cc9cd4e98059e29d792) Thanks [@sevenzing](https://github.com/sevenzing)! - Moved docker-compose.yml file to separate `docker` directory, updates docs and cicd-tests
+
+- Updated dependencies []:
+  - @namehash/namehash-ui@1.11.0
+
 ## 1.10.1
 
 ### Patch Changes
@@ -122,7 +137,6 @@
   This change addresses large Docker image sizes and data management challenges.
 
   Key changes:
-
   - A new .ensrainbow data format replaces SQL dumps, supporting label set IDs and versioned label sets for incremental data updates.
   - ENSRainbow is now distributed as a lightweight, data-less Docker image.
   - On first startup, the application downloads a pre-ingested database from R2, significantly reducing setup time.
