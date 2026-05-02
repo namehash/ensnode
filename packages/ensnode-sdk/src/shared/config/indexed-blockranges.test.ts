@@ -1,5 +1,6 @@
 import type { ChainId } from "enssdk";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { zeroAddress } from "viem";
 
 import * as datasources from "@ensnode/datasources";
 import { type DatasourceName, DatasourceNames, ENSNamespaceIds } from "@ensnode/datasources";
@@ -154,5 +155,40 @@ describe("buildIndexedBlockranges()", () => {
 
     // Assert
     expect(result).toStrictEqual(new Map());
+  });
+
+  it("skips zero-address placeholder contracts", () => {
+    // Arrange
+    // Mirrors the sepolia-v2 shape where some plugin-required contracts are
+    // present only to satisfy the typesystem and carry address: zeroAddress,
+    // startBlock: 0. The merged blockrange should be derived from the real
+    // contracts on the same chain only, not be dragged down to startBlock 0.
+    const ensrootDatasourceConfig: unknown = {
+      chain: { id: 1 },
+      contracts: {
+        registry: { address: "0x0000000000000000000000000000000000000001", startBlock: 100 },
+        placeholder: { address: zeroAddress, startBlock: 0 },
+      },
+    };
+
+    const datasourcesByName: Partial<
+      Record<DatasourceName, ReturnType<typeof datasources.maybeGetDatasource>>
+    > = {
+      [DatasourceNames.ENSRoot]: datasourceMock(ensrootDatasourceConfig),
+    };
+
+    maybeGetDatasourceMock.mockImplementation(
+      (_namespace, datasourceName) => datasourcesByName[datasourceName as DatasourceName],
+    );
+
+    const pluginsRequiredDatasourceNames = new Map([
+      [PluginName.Subgraph, [DatasourceNames.ENSRoot]],
+    ]);
+
+    // Act
+    const result = buildIndexedBlockranges(ENSNamespaceIds.Mainnet, pluginsRequiredDatasourceNames);
+
+    // Assert
+    expect(result).toStrictEqual(new Map([[1, buildBlockNumberRange(100, undefined)]]));
   });
 });
