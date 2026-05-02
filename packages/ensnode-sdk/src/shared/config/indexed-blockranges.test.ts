@@ -1,6 +1,6 @@
 import type { ChainId } from "enssdk";
-import { afterEach, describe, expect, it, vi } from "vitest";
 import { zeroAddress } from "viem";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import * as datasources from "@ensnode/datasources";
 import { type DatasourceName, DatasourceNames, ENSNamespaceIds } from "@ensnode/datasources";
