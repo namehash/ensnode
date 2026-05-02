@@ -109,6 +109,14 @@ describe("entrypointCommand (existing DB on disk)", () => {
     expect(healthRes.status).toBe(200);
     const healthData = (await healthRes.json()) as EnsRainbow.HealthResponse;
     expect(healthData).toEqual({ status: "ok" });
+
+    // /v1/config from CLI/env before bootstrap completes.
+    const earlyConfigRes = await fetch(`${endpoint}/v1/config`);
+    expect(earlyConfigRes.status).toBe(200);
+    const earlyConfigData = (await earlyConfigRes.json()) as EnsRainbow.ENSRainbowPublicConfig;
+    expect(earlyConfigData.serverLabelSet.labelSetId).toBe(labelSetId);
+    expect(earlyConfigData.serverLabelSet.highestLabelSetVersion).toBe(labelSetVersion);
+
     await handle.bootstrapComplete;
 
     const readyRes = await fetch(`${endpoint}/ready`);
@@ -127,6 +135,72 @@ describe("entrypointCommand (existing DB on disk)", () => {
 
     // Marker should still be present after a successful idempotent attach.
     expect(existsSync(markerFile)).toBe(true);
+  });
+});
+
+describe("entrypointCommand (env-vs-DB label-set mismatch)", () => {
+  // DB path uses configured id/version; contents claim a different label set -> mismatch after attach.
+  const configuredLabelSetId = buildLabelSetId("entrypoint-mismatch-test");
+  const configuredLabelSetVersion = buildLabelSetVersion(0);
+  const dbLabelSetId = buildLabelSetId("different-labelset");
+  const dbLabelSetVersion = buildLabelSetVersion(1);
+  const port = 3228;
+  const endpoint = `http://localhost:${port}`;
+
+  let testDataDir: string;
+  let handle: EntrypointCommandHandle | undefined;
+
+  beforeEach(async () => {
+    testDataDir = await mkdtemp(join(tmpdir(), "ensrainbow-test-entrypoint-mismatch-"));
+    const dbSubdir = join(testDataDir, `data-${configuredLabelSetId}_${configuredLabelSetVersion}`);
+    const markerFile = join(testDataDir, DB_READY_MARKER_FILENAME);
+
+    const db = await ENSRainbowDB.create(dbSubdir);
+    await db.setPrecalculatedRainbowRecordCount(0);
+    await db.markIngestionFinished();
+    await db.setLabelSetId(dbLabelSetId);
+    await db.setHighestLabelSetVersion(dbLabelSetVersion);
+    await db.close();
+
+    await writeFile(markerFile, "");
+  });
+
+  afterEach(async () => {
+    if (handle) {
+      await handle.close().catch(() => {});
+      handle = undefined;
+    }
+    await rm(testDataDir, { recursive: true, force: true });
+  });
+
+  it("invokes the exit hook with code 1 and does not flip /ready to 200", async () => {
+    const exit = vi.fn<(code: number) => never>(() => undefined as never);
+
+    handle = await entrypointCommand({
+      port,
+      dataDir: testDataDir as AbsolutePath,
+      dbSchemaVersion: DB_SCHEMA_VERSION as DbSchemaVersion,
+      labelSetId: configuredLabelSetId,
+      labelSetVersion: configuredLabelSetVersion,
+      registerSignalHandlers: false,
+      exit,
+    });
+
+    // Still CLI/env public config; bootstrap fails before publishing db-backed state.
+    const configRes = await fetch(`${endpoint}/v1/config`);
+    expect(configRes.status).toBe(200);
+    const configData = (await configRes.json()) as EnsRainbow.ENSRainbowPublicConfig;
+    expect(configData.serverLabelSet.labelSetId).toBe(configuredLabelSetId);
+    expect(configData.serverLabelSet.highestLabelSetVersion).toBe(configuredLabelSetVersion);
+
+    await handle.bootstrapComplete;
+
+    expect(exit).toHaveBeenCalledTimes(1);
+    expect(exit).toHaveBeenCalledWith(1);
+
+    // /ready must NOT flip to 200 on mismatch - the cachedDbConfig is never set.
+    const readyRes = await fetch(`${endpoint}/ready`);
+    expect(readyRes.status).toBe(503);
   });
 });
 
