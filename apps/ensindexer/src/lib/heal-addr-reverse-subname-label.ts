@@ -1,8 +1,8 @@
 import config from "@/config";
 
-import type { LabelHash, LiteralLabel, NormalizedAddress } from "enssdk";
+import { asLiteralLabel, type LabelHash, type LiteralLabel, type NormalizedAddress } from "enssdk";
 
-import { getENSRootChainId } from "@ensnode/datasources";
+import { ENSNamespaceIds, getENSRootChainId } from "@ensnode/datasources";
 import { toJson } from "@ensnode/ensnode-sdk";
 
 import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
@@ -74,6 +74,11 @@ export async function healAddrReverseSubnameLabel(
     // NOTE: context.client.getTransactionReceipt can throw, so we swallow the error in order to
     // proceed to trace parsing
   }
+
+  // Sepollia-V2 Tenderly Private RPC is rate-limiting the trace_* calls so we bail here for that namespace
+  // so indexing progresses. this function needs to return a LiteralLabel so we return a constant
+  // which effectively produces a noop within the ensv2 label healing pipeline
+  if (config.namespace === ENSNamespaceIds.SepoliaV2) return asLiteralLabel("noop");
 
   // If previous healing methods failed, try all addresses from the transaction trace.
   //
