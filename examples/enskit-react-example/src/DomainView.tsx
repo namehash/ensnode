@@ -1,10 +1,12 @@
 import { EnsureInterpretedName } from "enskit/react";
 import { type FragmentOf, graphql, readFragment, useOmnigraphQuery } from "enskit/react/omnigraph";
 import { asLiteralName, getParentInterpretedName, type InterpretedName } from "enssdk";
+import { useState } from "react";
 import { Link, Navigate, useParams } from "react-router";
 
 const DomainFragment = graphql(`
   fragment DomainFragment on Domain {
+    __typename
     id
     name
     owner { id address }
@@ -13,14 +15,18 @@ const DomainFragment = graphql(`
 
 const DomainByNameQuery = graphql(
   `
-  query DomainByName($name: InterpretedName!) {
+  query DomainByName($name: InterpretedName!, $first: Int!, $after: String) {
     domain(by: { name: $name }) {
       ...DomainFragment
-      subdomains(first: 20) {
+      subdomains(first: $first, after: $after) {
         edges {
           node {
             ...DomainFragment
           }
+        }
+        pageInfo {
+          hasNextPage
+          endCursor
         }
       }
     }
@@ -29,36 +35,45 @@ const DomainByNameQuery = graphql(
   [DomainFragment],
 );
 
+const SUBDOMAINS_PAGE_SIZE = 20;
+
 function SubdomainLink({ data }: { data: FragmentOf<typeof DomainFragment> }) {
   const domain = readFragment(DomainFragment, data);
 
   return (
     <li>
-      <Link to={`/domain/${domain.name}`}>{domain.name}</Link>
-      <span> — {domain.owner?.address ?? "no owner"}</span>
+      <Link to={`/domain/${domain.name}`}>{domain.name}</Link> ({domain.__typename})
+      <span>
+        {" "}
+        — Owner <code>{domain.owner?.address ?? "none"}</code>
+      </span>
     </li>
   );
 }
 
 function RenderDomain({ name }: { name: InterpretedName }) {
+  const [after, setAfter] = useState<string | null>(null);
+
   const [result] = useOmnigraphQuery({
     query: DomainByNameQuery,
-    variables: { name },
+    variables: { name, first: SUBDOMAINS_PAGE_SIZE, after },
   });
 
   const { data, fetching, error } = result;
 
-  if (fetching) return <p>Loading...</p>;
+  if (!data && fetching) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
   if (!data?.domain) return <p>No domain was found with name '{name}'.</p>;
 
   const domain = readFragment(DomainFragment, data.domain);
   const parentName = getParentInterpretedName(name);
+  const { subdomains } = data.domain;
 
   return (
     <div>
       <h2>{domain.name ?? name}</h2>
       <p>Owner: {domain.owner?.address ?? "none"}</p>
+      <p>Version: {domain.__typename}</p>
 
       {parentName && (
         <p>
@@ -67,12 +82,32 @@ function RenderDomain({ name }: { name: InterpretedName }) {
       )}
 
       <h3>Subdomains</h3>
-      <ul>
-        {data.domain.subdomains?.edges.map((edge) => {
-          const { id } = readFragment(DomainFragment, edge.node);
-          return <SubdomainLink key={id} data={edge.node} />;
-        })}
-      </ul>
+      {subdomains && subdomains.edges.length === 0 ? (
+        <p>No Subdomains</p>
+      ) : (
+        <>
+          <p>
+            Showcases trivial cursor-based pagination over a connection (here, a Domain's{" "}
+            <code>subdomains</code>). Use the button below to fetch the next page.
+          </p>
+          <ul>
+            {subdomains?.edges.map((edge) => {
+              const { id } = readFragment(DomainFragment, edge.node);
+              return <SubdomainLink key={id} data={edge.node} />;
+            })}
+          </ul>
+
+          {subdomains?.pageInfo.hasNextPage && (
+            <button
+              type="button"
+              disabled={fetching}
+              onClick={() => setAfter(subdomains.pageInfo.endCursor)}
+            >
+              {fetching ? "Loading..." : "Next page"}
+            </button>
+          )}
+        </>
+      )}
     </div>
   );
 }
@@ -93,7 +128,7 @@ export function DomainView() {
       options={{
         // while not strictly necessary to specify, since we catch the empty string case above, we'll
         // be explicit in this example app and tell enskit that for our purposes, we don't want our
-        // downstream
+        // downstream `children` component to receive the ENS Root Name ("") as a `name` value
         allowENSRootName: false,
 
         // allow the incoming LiteralName to contain Encoded LabelHash segments (e.g. [abcd...xyz])
@@ -115,7 +150,7 @@ export function DomainView() {
         </div>
       )}
     >
-      {(name) => <RenderDomain name={name} />}
+      {(name) => <RenderDomain key={name} name={name} />}
     </EnsureInterpretedName>
   );
 }
