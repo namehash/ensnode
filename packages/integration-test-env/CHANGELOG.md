@@ -1,5 +1,31 @@
 # @ensnode/integration-test-env
 
+## 1.11.0
+
+### Minor Changes
+
+- [#1997](https://github.com/namehash/ensnode/pull/1997) [`0aa0c5a`](https://github.com/namehash/ensnode/commit/0aa0c5ac7a5636ccdd685de96c9f9f1312a2021b) Thanks [@tk-o](https://github.com/tk-o)! - Introduced `IndexingMetadataContext` data model, a single record type in ENSNode Metadata table replacing three separate record types (`ensdb_version`, `ensindexer_public_config`, `ensindexer_indexing_status`). Also, consolidated startup init into `initIndexingOnchainEvents()` for reliable execution on every ENSIndexer startup.
+
+  **ensnode-sdk**: `EnsIndexerStackInfo` added as base type, `EnsNodeStackInfo` refactored to extend it.
+
+  **ensdb-sdk**: For `EnsDbReader`, added following method: `getIndexingMetadataContext()`, `isHealthy()`, `isReady()`. For `EnsDbWriter`, added `upsertIndexingMetadataContext()` method. Old per-record read/write methods removed. `EnsNodeMetadataKeys` reduced to single `IndexingMetadataContext` key.
+
+  **ensindexer**: `IndexingMetadataContextBuilder` and `StackInfoBuilder` added. `EnsDbWriterWorker` simplified to single recurring task. HTTP `/config` and `/indexing-status` endpoints now read from in-memory builders instead of ENSDb. `initializeIndexingSetup`/`initializeIndexingActivation` replaced by `initIndexingOnchainEvents`.
+
+  **ensapi**: `indexing-status.cache` and `stack-info.cache` updated to consume `IndexingMetadataContext`. Config schema updated to fetch `EnsIndexerPublicConfig` from `EnsNodeStackInfo`.
+
+  **integration-test-env**: `pollIndexingStatus` updated to use `getIndexingMetadataContext()`.
+
+### Patch Changes
+
+- [#1965](https://github.com/namehash/ensnode/pull/1965) [`3facf20`](https://github.com/namehash/ensnode/commit/3facf206d7cb144593257cc9cd4e98059e29d792) Thanks [@sevenzing](https://github.com/sevenzing)! - Moved docker-compose.yml file to separate `docker` directory, updates docs and cicd-tests
+
+- Updated dependencies [[`0d8a4b4`](https://github.com/namehash/ensnode/commit/0d8a4b4b7c8c70be904652e2132e7c67fd9e39ef), [`0aa0c5a`](https://github.com/namehash/ensnode/commit/0aa0c5ac7a5636ccdd685de96c9f9f1312a2021b), [`43d8a9b`](https://github.com/namehash/ensnode/commit/43d8a9b838b15719f520cd3f3bbfd1b52a4ad1ce), [`824d819`](https://github.com/namehash/ensnode/commit/824d819d291b2b642d2664d09cb10d6de69a6ea7), [`7e77c5c`](https://github.com/namehash/ensnode/commit/7e77c5c2bef96d1a2eb363871fb87379b5f6f7e9), [`6173160`](https://github.com/namehash/ensnode/commit/61731608632f62139496656f6231210f63383f20), [`0d8a4b4`](https://github.com/namehash/ensnode/commit/0d8a4b4b7c8c70be904652e2132e7c67fd9e39ef), [`0d64d9e`](https://github.com/namehash/ensnode/commit/0d64d9e0c97c48e37f87d2abaaff50ff08df06e4), [`54edf26`](https://github.com/namehash/ensnode/commit/54edf26c15ae9ade9d1a57f1f0195dcd827aad57), [`43d8a9b`](https://github.com/namehash/ensnode/commit/43d8a9b838b15719f520cd3f3bbfd1b52a4ad1ce), [`c186ad8`](https://github.com/namehash/ensnode/commit/c186ad8c0d85c4db8619a436173d7e21f857f689), [`6173160`](https://github.com/namehash/ensnode/commit/61731608632f62139496656f6231210f63383f20)]:
+  - @ensnode/ensnode-sdk@1.11.0
+  - @ensnode/ensdb-sdk@1.11.0
+  - @ensnode/datasources@1.11.0
+  - @ensnode/shared-configs@1.11.0
+
 ## 1.10.1
 
 ### Patch Changes

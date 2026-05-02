@@ -1,5 +1,13 @@
 # @ensnode/ensnode-react
 
+## 1.11.0
+
+### Patch Changes
+
+- Updated dependencies [[`0d8a4b4`](https://github.com/namehash/ensnode/commit/0d8a4b4b7c8c70be904652e2132e7c67fd9e39ef), [`0aa0c5a`](https://github.com/namehash/ensnode/commit/0aa0c5ac7a5636ccdd685de96c9f9f1312a2021b), [`43d8a9b`](https://github.com/namehash/ensnode/commit/43d8a9b838b15719f520cd3f3bbfd1b52a4ad1ce), [`824d819`](https://github.com/namehash/ensnode/commit/824d819d291b2b642d2664d09cb10d6de69a6ea7), [`6173160`](https://github.com/namehash/ensnode/commit/61731608632f62139496656f6231210f63383f20), [`7e77c5c`](https://github.com/namehash/ensnode/commit/7e77c5c2bef96d1a2eb363871fb87379b5f6f7e9), [`0d8a4b4`](https://github.com/namehash/ensnode/commit/0d8a4b4b7c8c70be904652e2132e7c67fd9e39ef), [`0d64d9e`](https://github.com/namehash/ensnode/commit/0d64d9e0c97c48e37f87d2abaaff50ff08df06e4), [`54edf26`](https://github.com/namehash/ensnode/commit/54edf26c15ae9ade9d1a57f1f0195dcd827aad57), [`6173160`](https://github.com/namehash/ensnode/commit/61731608632f62139496656f6231210f63383f20)]:
+  - @ensnode/ensnode-sdk@1.11.0
+  - enssdk@1.11.0
+
 ## 1.10.1
 
 ### Patch Changes
@@ -15,7 +23,6 @@
 - [#1671](https://github.com/namehash/ensnode/pull/1671) [`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5) Thanks [@tk-o](https://github.com/tk-o)! - **Breaking**: Removed `useENSNodeConfig` hook.
 
 - [#1671](https://github.com/namehash/ensnode/pull/1671) [`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5) Thanks [@tk-o](https://github.com/tk-o)! - **Breaking**:
-
   - Replaced `useENSNodeSDKConfig` hook with `useEnsNodeProviderOptions` hook.
   - Renamed `createConfig` function to `createEnsNodeProviderOptions`.
 
@@ -162,7 +169,6 @@
 ### Minor Changes
 
 - [#1158](https://github.com/namehash/ensnode/pull/1158) [`ef7349e`](https://github.com/namehash/ensnode/commit/ef7349e034d4b0fcbf69bfd3c82471ba02e01cc3) Thanks [@notrab](https://github.com/notrab)! - - Add `ASSUME_IMMUTABLE_QUERY` constant for queries that should only fetch once per unique key (similar to SWR's `immutable: true`)
-
   - Apply `ASSUME_IMMUTABLE_QUERY` to `useENSIndexerConfig` so the client fetches the config endpoint once and caches forever
   - Add 10s `refetchInterval` to `useIndexingStatus` for automatic polling of indexing progress
   - Add 10s default `refetchInterval` to `ENSNodeProvider` QueryClient

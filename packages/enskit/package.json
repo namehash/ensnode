@@ -1,6 +1,6 @@
 {
   "name": "enskit",
-  "version": "1.10.1",
+  "version": "1.11.0",
   "type": "module",
   "description": "The ENS toolkit for React applications",
   "license": "MIT",

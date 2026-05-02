@@ -1,5 +1,24 @@
 # ensadmin
 
+## 1.11.0
+
+### Minor Changes
+
+- [#1988](https://github.com/namehash/ensnode/pull/1988) [`0d8a4b4`](https://github.com/namehash/ensnode/commit/0d8a4b4b7c8c70be904652e2132e7c67fd9e39ef) Thanks [@tk-o](https://github.com/tk-o)! - Removed _Records Count_ info from the ENSRainbow card UI on the _Connection_ page.
+
+- [#1988](https://github.com/namehash/ensnode/pull/1988) [`0d8a4b4`](https://github.com/namehash/ensnode/commit/0d8a4b4b7c8c70be904652e2132e7c67fd9e39ef) Thanks [@tk-o](https://github.com/tk-o)! - Renamed `ENSNodeConfig*` components to follow the `EnsNodeStackInfo*` pattern.
+
+### Patch Changes
+
+- [#2001](https://github.com/namehash/ensnode/pull/2001) [`7c1c048`](https://github.com/namehash/ensnode/commit/7c1c04859e187020892f9c40adb53aee2264058f) Thanks [@notrab](https://github.com/notrab)! - Fix ENSAdmin GraphiQL docs sidebar failing to stay open on the omnigraph page. The editor now memoizes its fetcher, storage, and plugins so 1Hz parent re-renders (driven by the realtime indexing-status projection) no longer trigger schema re-introspection.
+
+- Updated dependencies [[`0d8a4b4`](https://github.com/namehash/ensnode/commit/0d8a4b4b7c8c70be904652e2132e7c67fd9e39ef), [`0aa0c5a`](https://github.com/namehash/ensnode/commit/0aa0c5ac7a5636ccdd685de96c9f9f1312a2021b), [`43d8a9b`](https://github.com/namehash/ensnode/commit/43d8a9b838b15719f520cd3f3bbfd1b52a4ad1ce), [`824d819`](https://github.com/namehash/ensnode/commit/824d819d291b2b642d2664d09cb10d6de69a6ea7), [`6173160`](https://github.com/namehash/ensnode/commit/61731608632f62139496656f6231210f63383f20), [`7e77c5c`](https://github.com/namehash/ensnode/commit/7e77c5c2bef96d1a2eb363871fb87379b5f6f7e9), [`0d8a4b4`](https://github.com/namehash/ensnode/commit/0d8a4b4b7c8c70be904652e2132e7c67fd9e39ef), [`0d64d9e`](https://github.com/namehash/ensnode/commit/0d64d9e0c97c48e37f87d2abaaff50ff08df06e4), [`54edf26`](https://github.com/namehash/ensnode/commit/54edf26c15ae9ade9d1a57f1f0195dcd827aad57), [`43d8a9b`](https://github.com/namehash/ensnode/commit/43d8a9b838b15719f520cd3f3bbfd1b52a4ad1ce), [`6173160`](https://github.com/namehash/ensnode/commit/61731608632f62139496656f6231210f63383f20)]:
+  - @ensnode/ensnode-sdk@1.11.0
+  - enssdk@1.11.0
+  - @ensnode/datasources@1.11.0
+  - @ensnode/ensnode-react@1.11.0
+  - @namehash/namehash-ui@1.11.0
+
 ## 1.10.1
 
 ### Patch Changes
@@ -235,7 +254,6 @@
 - [#1261](https://github.com/namehash/ensnode/pull/1261) [`703a12e`](https://github.com/namehash/ensnode/commit/703a12ed307e98ec1c1ce5911b45905ebcad58d8) Thanks [@notrab](https://github.com/notrab)! - Refactored `ConfigInfoAppCard` to use a composable children-based API, converting all components (ENSApi, ENSDb, ENSIndexer, ENSRainbow, and Connection) to use the new `<ConfigInfoItems>`, `<ConfigInfoItem>`, `<ConfigInfoFeatures>`, and `<ConfigInfoFeature>` components for better flexibility and styling control.
 
 - [#1201](https://github.com/namehash/ensnode/pull/1201) [`ceef81e`](https://github.com/namehash/ensnode/commit/ceef81e4a39125b238ab71bb4e0598a1a0771d15) Thanks [@notrab](https://github.com/notrab)! - - Improved ENSNode config info components with better reusability and maintainability (great for mocking too). Introduced `ENSNodeConfigCardDisplay` component that accepts props and extracted a reusable `ENSNodeCard` wrapper that provides consistent header and loading states.
-
   - Added Suspense boundary around `ConnectionsLibraryProvider` in root layout to better handle hydration
   - Added Suspense boundary with skeleton fallback in `LayoutWrapper` to show proper loading states
   - Ensures all pages remain statically generated while respecting existing component loading states
@@ -305,7 +323,6 @@
 - [#1134](https://github.com/namehash/ensnode/pull/1134) [`184dc1e`](https://github.com/namehash/ensnode/commit/184dc1e74721cd4981b19f6a6579437d5f4351c4) Thanks [@Y3drk](https://github.com/Y3drk)! - Create dedicated "Connection" page.
 
 - [#1158](https://github.com/namehash/ensnode/pull/1158) [`ef7349e`](https://github.com/namehash/ensnode/commit/ef7349e034d4b0fcbf69bfd3c82471ba02e01cc3) Thanks [@notrab](https://github.com/notrab)! - - Apply `ASSUME_IMMUTABLE_QUERY` to name detail page - avatar and profile data now fetches once and caches forever
-
   - Remove default `refetchInterval` from app-level QueryClient to allow individual queries to control refetch behavior
 
 - [#1009](https://github.com/namehash/ensnode/pull/1009) [`98983ac`](https://github.com/namehash/ensnode/commit/98983ac3c026073da5133aeb64025cbaf88523c8) Thanks [@tk-o](https://github.com/tk-o)! - Drops `latestSyncedBlock` field from `ChainIndexingBackfillStatus` data model.
@@ -365,7 +382,6 @@
 ### Patch Changes
 
 - [#962](https://github.com/namehash/ensnode/pull/962) [`845a037`](https://github.com/namehash/ensnode/commit/845a03761dc830303a56cd70fe0d57c36d78a663) Thanks [@djstrong](https://github.com/djstrong)! - Add label set information display to ENSAdmin status UI
-
   - Update ENSIndexerDependencyInfo component to display label set details
   - Enhance the configuration and UI representation of ENS indexing status
   - Add mock data support for label set information in status page
