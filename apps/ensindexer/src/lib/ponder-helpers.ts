@@ -151,6 +151,68 @@ export function chainConfigForContract<CONTRACT_CONFIG extends ContractConfig>(
 }
 
 /**
+ * Picks contracts from a datasource's `contracts` map by name, dropping any that are absent
+ * at runtime — e.g. namespace-conditional contracts that don't exist in the active namespace.
+ *
+ * Useful for collecting contracts to pass to {@link mergedChainConfigForContracts}.
+ */
+export function pickContracts(
+  contracts: Record<string, ContractConfig>,
+  names: readonly string[],
+): ContractConfig[] {
+  return names
+    .map((name) => contracts[name] as ContractConfig | undefined)
+    .filter((c): c is ContractConfig => !!c);
+}
+
+/**
+ * Builds a single Ponder `chain: { [chainId]: { address, startBlock, endBlock } }` entry that
+ * spans multiple contracts on the same chain (e.g. all of the .eth RegistrarControllers).
+ *
+ * Use this when one Ponder contract entry should index events from multiple onchain contracts
+ * that share an ABI.
+ *
+ * - `address` is the union of all defined contract addresses on this chain.
+ * - `startBlock` is the earliest contract `startBlock`.
+ * - `endBlock` is the latest contract `endBlock` if every contract specifies one, otherwise undefined.
+ *
+ * The result is then constrained against `globalBlockrange` like {@link chainConfigForContract}.
+ * Pass `contracts` as an array; callers can use `.filter(...)` to drop namespace-conditional ones.
+ */
+export function mergedChainConfigForContracts(
+  globalBlockrange: BlockNumberRange,
+  chainId: number,
+  contracts: readonly ContractConfig[],
+) {
+  const addresses = contracts.flatMap((c) =>
+    Array.isArray(c.address) ? c.address : c.address ? [c.address] : [],
+  );
+
+  const minStartBlock = contracts.reduce(
+    (memo, c) => Math.min(memo, c.startBlock),
+    Number.POSITIVE_INFINITY,
+  );
+
+  const allHaveEnd = contracts.every((c) => c.endBlock !== undefined);
+  const maxEndBlock = allHaveEnd
+    ? contracts.reduce((memo, c) => Math.max(memo, c.endBlock as number), 0)
+    : undefined;
+
+  const { startBlock, endBlock } = constrainBlockrange(
+    globalBlockrange,
+    buildBlockNumberRange(minStartBlock, maxEndBlock),
+  );
+
+  return {
+    [chainId.toString()]: {
+      address: addresses,
+      startBlock,
+      endBlock,
+    },
+  };
+}
+
+/**
  * TODO
  */
 export function chainsConnectionConfigForDatasources(

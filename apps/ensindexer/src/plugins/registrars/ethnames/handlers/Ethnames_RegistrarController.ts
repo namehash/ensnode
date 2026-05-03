@@ -16,19 +16,23 @@ import { getManagedName } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
 
 import { handleRegistrarControllerEvent } from "../../shared/lib/registrar-controller-events";
+import { handleUniversalRegistrarRenewalEvent } from "../../shared/lib/universal-registrar-renewal-with-referrer-events";
 
 /**
- * Registers event handlers with Ponder.
+ * Registers event handlers for the various .eth RegistrarControllers.
  */
 export default function () {
   const pluginName = PluginName.Registrars;
 
   /**
-   * Ethnames_LegacyEthRegistrarController Event Handlers
+   * NameRegistered (yes base cost, no premium, no referral)
+   * - LegacyEthRegistrarController
    */
-
   addOnchainEventListener(
-    namespaceContract(pluginName, "Ethnames_LegacyEthRegistrarController:NameRegistered"),
+    namespaceContract(
+      pluginName,
+      "Ethnames_RegistrarController:NameRegistered(string name, bytes32 indexed label, address indexed owner, uint256 cost, uint256 expires)",
+    ),
     async ({ context, event }) => {
       const {
         id,
@@ -43,10 +47,6 @@ export default function () {
       const node = makeSubdomainNode(labelHash, managedNode);
       const transactionHash = event.transaction.hash;
 
-      /**
-       * Ethnames_LegacyEthRegistrarController does not implement premiums,
-       * however, it implements base cost.
-       */
       const baseCost = priceEth(event.args.cost);
       const premium = priceEth(0n);
       const total = baseCost;
@@ -56,60 +56,6 @@ export default function () {
         total,
       } satisfies RegistrarActionPricingAvailable;
 
-      /**
-       * Ethnames_LegacyEthRegistrarController does not implement referrals or
-       * emits a referrer in events.
-       */
-      const referral = {
-        encodedReferrer: null,
-        decodedReferrer: null,
-      } satisfies RegistrarActionReferralNotApplicable;
-
-      await handleRegistrarControllerEvent(context, {
-        id,
-        node,
-        pricing,
-        referral,
-        transactionHash,
-      });
-    },
-  );
-
-  addOnchainEventListener(
-    namespaceContract(pluginName, "Ethnames_LegacyEthRegistrarController:NameRenewed"),
-    async ({ context, event }) => {
-      const {
-        id,
-        args: {
-          // this field is the labelhash, not the label
-          label: labelHash,
-        },
-      } = event;
-
-      const subregistryId = getThisAccountId(context, event);
-      const { node: managedNode } = getManagedName(subregistryId);
-      const node = makeSubdomainNode(labelHash, managedNode);
-      const transactionHash = event.transaction.hash;
-
-      /**
-       * Ethnames_LegacyEthRegistrarController does not implement premiums,
-       * however, it implements base cost.
-       *
-       * Premium for renewals is always 0 anyway.
-       */
-      const baseCost = priceEth(event.args.cost);
-      const premium = priceEth(0n);
-      const total = baseCost;
-      const pricing = {
-        baseCost,
-        premium,
-        total,
-      } satisfies RegistrarActionPricingAvailable;
-
-      /**
-       * Ethnames_LegacyEthRegistrarController does not implement referrals or
-       * emits a referrer in events.
-       */
       const referral = {
         encodedReferrer: null,
         decodedReferrer: null,
@@ -126,11 +72,13 @@ export default function () {
   );
 
   /**
-   * Ethnames_WrappedEthRegistrarController Event Handlers
+   * WrappedEthRegistrarController: NameRegistered (premium, no referral)
    */
-
   addOnchainEventListener(
-    namespaceContract(pluginName, "Ethnames_WrappedEthRegistrarController:NameRegistered"),
+    namespaceContract(
+      pluginName,
+      "Ethnames_RegistrarController:NameRegistered(string name, bytes32 indexed label, address indexed owner, uint256 baseCost, uint256 premium, uint256 expires)",
+    ),
     async ({ context, event }) => {
       const {
         id,
@@ -145,9 +93,6 @@ export default function () {
       const node = makeSubdomainNode(labelHash, managedNode);
       const transactionHash = event.transaction.hash;
 
-      /**
-       * Ethnames_WrappedEthRegistrarController implements premiums, and base cost.
-       */
       const baseCost = priceEth(event.args.baseCost);
       const premium = priceEth(event.args.premium);
       const total = addPrices(baseCost, premium);
@@ -157,59 +102,6 @@ export default function () {
         total,
       } satisfies RegistrarActionPricingAvailable;
 
-      /**
-       * Ethnames_WrappedEthRegistrarController does not implement referrals or
-       * emits a referrer in events.
-       */
-      const referral = {
-        encodedReferrer: null,
-        decodedReferrer: null,
-      } satisfies RegistrarActionReferralNotApplicable;
-
-      await handleRegistrarControllerEvent(context, {
-        id,
-        node,
-        pricing,
-        referral,
-        transactionHash,
-      });
-    },
-  );
-
-  addOnchainEventListener(
-    namespaceContract(pluginName, "Ethnames_WrappedEthRegistrarController:NameRenewed"),
-    async ({ context, event }) => {
-      const {
-        id,
-        args: {
-          // this field is the labelhash, not the label
-          label: labelHash,
-        },
-      } = event;
-
-      const subregistryId = getThisAccountId(context, event);
-      const { node: managedNode } = getManagedName(subregistryId);
-      const node = makeSubdomainNode(labelHash, managedNode);
-      const transactionHash = event.transaction.hash;
-
-      /**
-       * Ethnames_WrappedEthRegistrarController implements premiums, and base cost.
-       *
-       * Premium for renewals is always 0 anyway.
-       */
-      const baseCost = priceEth(event.args.cost);
-      const premium = priceEth(0n);
-      const total = baseCost;
-      const pricing = {
-        baseCost,
-        premium,
-        total,
-      } satisfies RegistrarActionPricingAvailable;
-
-      /**
-       * Ethnames_WrappedEthRegistrarController does not implement referrals or
-       * emits a referrer in events.
-       */
       const referral = {
         encodedReferrer: null,
         decodedReferrer: null,
@@ -226,11 +118,14 @@ export default function () {
   );
 
   /**
-   * Ethnames_UnwrappedEthRegistrarController Event Handlers
+   * NameRegistered (yes base cost, yes premium, yes referral)
+   * - UnwrappedEthRegistrarController
    */
-
   addOnchainEventListener(
-    namespaceContract(pluginName, "Ethnames_UnwrappedEthRegistrarController:NameRegistered"),
+    namespaceContract(
+      pluginName,
+      "Ethnames_RegistrarController:NameRegistered(string label, bytes32 indexed labelhash, address indexed owner, uint256 baseCost, uint256 premium, uint256 expires, bytes32 referrer)",
+    ),
     async ({ context, event }) => {
       const {
         id,
@@ -245,9 +140,6 @@ export default function () {
       const node = makeSubdomainNode(labelHash, managedNode);
       const transactionHash = event.transaction.hash;
 
-      /**
-       * Ethnames_UnwrappedEthRegistrarController implements premiums, and base cost.
-       */
       const baseCost = priceEth(event.args.baseCost);
       const premium = priceEth(event.args.premium);
       const total = addPrices(baseCost, premium);
@@ -257,13 +149,8 @@ export default function () {
         total,
       } satisfies RegistrarActionPricingAvailable;
 
-      /**
-       * Ethnames_UnwrappedEthRegistrarController implements referrals and
-       * emits a referrer in events.
-       */
       const encodedReferrer = event.args.referrer;
       const decodedReferrer = decodeEncodedReferrer(encodedReferrer);
-
       const referral = {
         encodedReferrer,
         decodedReferrer,
@@ -279,8 +166,63 @@ export default function () {
     },
   );
 
+  /**
+   * NameRenewed (yes base cost, no premium, no referral).
+   * - LegacyEthRegistrarController
+   * - WrappedEthRegistrarController
+   */
   addOnchainEventListener(
-    namespaceContract(pluginName, "Ethnames_UnwrappedEthRegistrarController:NameRenewed"),
+    namespaceContract(
+      pluginName,
+      "Ethnames_RegistrarController:NameRenewed(string name, bytes32 indexed label, uint256 cost, uint256 expires)",
+    ),
+    async ({ context, event }) => {
+      const {
+        id,
+        args: {
+          // this field is the labelhash, not the label
+          label: labelHash,
+        },
+      } = event;
+
+      const subregistryId = getThisAccountId(context, event);
+      const { node: managedNode } = getManagedName(subregistryId);
+      const node = makeSubdomainNode(labelHash, managedNode);
+      const transactionHash = event.transaction.hash;
+
+      const baseCost = priceEth(event.args.cost);
+      const premium = priceEth(0n);
+      const total = baseCost;
+      const pricing = {
+        baseCost,
+        premium,
+        total,
+      } satisfies RegistrarActionPricingAvailable;
+
+      const referral = {
+        encodedReferrer: null,
+        decodedReferrer: null,
+      } satisfies RegistrarActionReferralNotApplicable;
+
+      await handleRegistrarControllerEvent(context, {
+        id,
+        node,
+        pricing,
+        referral,
+        transactionHash,
+      });
+    },
+  );
+
+  /**
+   * NameRenewed (yes base cost, no premium, yes referral)
+   * - UnwrappedEthRegistrarController:
+   */
+  addOnchainEventListener(
+    namespaceContract(
+      pluginName,
+      "Ethnames_RegistrarController:NameRenewed(string label, bytes32 indexed labelhash, uint256 cost, uint256 expires, bytes32 referrer)",
+    ),
     async ({ context, event }) => {
       const {
         id,
@@ -295,11 +237,6 @@ export default function () {
       const node = makeSubdomainNode(labelHash, managedNode);
       const transactionHash = event.transaction.hash;
 
-      /**
-       * Ethnames_UnwrappedEthRegistrarController implements premiums, and base cost.
-       *
-       * Premium for renewals is always 0 anyway.
-       */
       const baseCost = priceEth(event.args.cost);
       const premium = priceEth(0n);
       const total = baseCost;
@@ -309,13 +246,8 @@ export default function () {
         total,
       } satisfies RegistrarActionPricingAvailable;
 
-      /**
-       * Ethnames_UnwrappedEthRegistrarController implements referrals and
-       * emits a referrer in events.
-       */
       const encodedReferrer = event.args.referrer;
       const decodedReferrer = decodeEncodedReferrer(encodedReferrer);
-
       const referral = {
         encodedReferrer,
         decodedReferrer,
@@ -325,6 +257,39 @@ export default function () {
         id,
         node,
         pricing,
+        referral,
+        transactionHash,
+      });
+    },
+  );
+
+  /**
+   * RenewalReferred (no base cost, no premium, yes referrer).
+   * - UniversalRegistrarRenewalWithReferrer
+   */
+  addOnchainEventListener(
+    namespaceContract(pluginName, "Ethnames_RegistrarController:RenewalReferred"),
+    async ({ context, event }) => {
+      const {
+        id,
+        args: { labelHash },
+      } = event;
+
+      const subregistryId = getThisAccountId(context, event);
+      const { node: managedNode } = getManagedName(subregistryId);
+      const node = makeSubdomainNode(labelHash, managedNode);
+      const transactionHash = event.transaction.hash;
+
+      const encodedReferrer = event.args.referrer;
+      const decodedReferrer = decodeEncodedReferrer(encodedReferrer);
+      const referral = {
+        encodedReferrer,
+        decodedReferrer,
+      } satisfies RegistrarActionReferralAvailable;
+
+      await handleUniversalRegistrarRenewalEvent(context, {
+        id,
+        node,
         referral,
         transactionHash,
       });

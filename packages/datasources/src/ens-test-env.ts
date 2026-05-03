@@ -1,5 +1,3 @@
-import { zeroAddress } from "viem";
-
 import { EnhancedAccessControl } from "./abis/ensv2/EnhancedAccessControl";
 import { ETHRegistrar } from "./abis/ensv2/ETHRegistrar";
 import { Registry } from "./abis/ensv2/Registry";
@@ -9,7 +7,6 @@ import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
 import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } from "./abis/root/LegacyEthRegistrarController";
 import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
 import { Registry as root_Registry } from "./abis/root/Registry";
-import { UniversalRegistrarRenewalWithReferrer as root_UniversalRegistrarRenewalWithReferrer } from "./abis/root/UniversalRegistrarRenewalWithReferrer";
 import { UniversalResolverV1 } from "./abis/root/UniversalResolverV1";
 import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
 import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
@@ -80,12 +77,6 @@ export default {
       UnwrappedEthRegistrarController: {
         abi: root_UnwrappedEthRegistrarController,
         address: "0x367761085bf3c12e5da2df99ac6e1a824612b8fb",
-        startBlock: 0,
-      },
-      // NOTE: not in devnet, set to zeroAddress
-      UniversalRegistrarRenewalWithReferrer: {
-        abi: root_UniversalRegistrarRenewalWithReferrer,
-        address: zeroAddress,
         startBlock: 0,
       },
       NameWrapper: {

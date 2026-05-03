@@ -1,5 +1,3 @@
-import { zeroAddress } from "viem";
-
 // ABIs for ENSv2 Datasource
 import { EnhancedAccessControl } from "./abis/ensv2/EnhancedAccessControl";
 import { ETHRegistrar } from "./abis/ensv2/ETHRegistrar";
@@ -7,13 +5,10 @@ import { Registry } from "./abis/ensv2/Registry";
 import { UniversalResolverV2 } from "./abis/ensv2/UniversalResolverV2";
 // ABIs for ENSRoot Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
-import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } from "./abis/root/LegacyEthRegistrarController";
 import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
 import { Registry as root_Registry } from "./abis/root/Registry";
-import { UniversalRegistrarRenewalWithReferrer as root_UniversalRegistrarRenewalWithReferrer } from "./abis/root/UniversalRegistrarRenewalWithReferrer";
 import { UniversalResolverV1 } from "./abis/root/UniversalResolverV1";
 import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
-import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
 // Shared ABIs
 import { StandaloneReverseRegistrar } from "./abis/shared/StandaloneReverseRegistrar";
 import { sepoliaV2Chain } from "./lib/chains";
@@ -30,8 +25,9 @@ export default {
   /**
    * ENS Root contracts deployed on Sepolia for the ENSv1 + ENSv2 test deployment.
    *
-   * NOTE: `UniversalRegistrarRenewalWithReferrer` is a placeholder entry required by the typesystem
-   * due to the registrar plugin; it does not exist on Sepolia V2 and therefore uses the zero address.
+   * NOTE: `LegacyEthRegistrarController`, `WrappedEthRegistrarController`, and
+   * `UniversalRegistrarRenewalWithReferrer` are not part of this deployment and are therefore
+   * omitted; consumers of this datasource must treat them as optional.
    */
   [DatasourceNames.ENSRoot]: {
     chain: sepoliaV2Chain,
@@ -58,29 +54,11 @@ export default {
         address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
         startBlock: 3702731,
       },
-      // NOTE: as per ENS Team, indexing this contract isn't relevant in sepolia-v2 namespace
-      LegacyEthRegistrarController: {
-        abi: root_LegacyEthRegistrarController,
-        address: zeroAddress,
-        startBlock: 0,
-      },
-      // NOTE: as per ENS Team, indexing this contract isn't relevant in sepolia-v2 namespace
-      WrappedEthRegistrarController: {
-        abi: root_WrappedEthRegistrarController,
-        address: zeroAddress,
-        startBlock: 0,
-      },
       // NOTE: named ETHRegistrarController in deployment
       UnwrappedEthRegistrarController: {
         abi: root_UnwrappedEthRegistrarController,
         address: "0xfb3ce5d01e0f33f41dbb39035db9745962f1f968",
         startBlock: 8579988,
-      },
-      // NOTE: not in deployment, set to zeroAddress
-      UniversalRegistrarRenewalWithReferrer: {
-        abi: root_UniversalRegistrarRenewalWithReferrer,
-        address: zeroAddress,
-        startBlock: 0,
       },
       NameWrapper: {
         abi: root_NameWrapper,

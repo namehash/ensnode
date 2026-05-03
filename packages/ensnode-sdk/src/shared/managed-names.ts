@@ -101,20 +101,28 @@ const getContractsByManagedName = (namespace: ENSNamespaceId) => {
       registry: ensRootRegistry,
       contracts: [
         getDatasourceContract(namespace, DatasourceNames.ENSRoot, "BaseRegistrar"),
-        getDatasourceContract(namespace, DatasourceNames.ENSRoot, "LegacyEthRegistrarController"),
-        getDatasourceContract(namespace, DatasourceNames.ENSRoot, "WrappedEthRegistrarController"),
         getDatasourceContract(
           namespace,
           DatasourceNames.ENSRoot,
           "UnwrappedEthRegistrarController",
         ),
-        getDatasourceContract(
+        maybeGetDatasourceContract(
+          namespace,
+          DatasourceNames.ENSRoot,
+          "LegacyEthRegistrarController",
+        ),
+        maybeGetDatasourceContract(
+          namespace,
+          DatasourceNames.ENSRoot,
+          "WrappedEthRegistrarController",
+        ),
+        maybeGetDatasourceContract(
           namespace,
           DatasourceNames.ENSRoot,
           "UniversalRegistrarRenewalWithReferrer",
         ),
         ethnamesNameWrapper,
-      ],
+      ].filter((c): c is AccountId => !!c),
     },
     ...(basenamesRegistry && {
       "base.eth": {
