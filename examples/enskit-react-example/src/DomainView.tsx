@@ -75,7 +75,9 @@ function RenderDomain({ name }: { name: InterpretedName }) {
   return (
     <div>
       <h2>{domain.name ?? name}</h2>
-      <p>Owner: {domain.owner?.address ?? "none"}</p>
+      <p>
+        Owner: {domain.owner?.address ?? (domain.__typename === "ENSv2Domain" ? "Reserved" : "0x0")}
+      </p>
       <p>Version: {domain.__typename}</p>
 
       {parentName && (

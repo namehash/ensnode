@@ -53,15 +53,17 @@ function RenderAccount({ address }: { address: NormalizedAddress }) {
             Showcases cursor-based pagination over <code>Account.domains</code>.
           </p>
           <ul>
-            {domains.edges.map((edge) => (
-              <li key={edge.node.id}>
-                <Link to={`/domain/${edge.node.name}`}>{edge.node.name}</Link> (
-                {edge.node.__typename})
-              </li>
-            ))}
+            {domains.edges.map((edge) => {
+              const display = edge.node.name ?? "Unknown Name";
+              return (
+                <li key={edge.node.id}>
+                  <Link to={`/domain/${display}`}>{display}</Link> ({edge.node.__typename})
+                </li>
+              );
+            })}
           </ul>
 
-          {domains.pageInfo.hasNextPage && (
+          {domains.pageInfo.hasNextPage && domains.pageInfo.endCursor !== null && (
             <button
               type="button"
               disabled={fetching}
