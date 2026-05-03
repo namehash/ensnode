@@ -20,12 +20,12 @@ import {
 describe("makeReferralProgramEditionConfigSetArraySchema", () => {
   const schema = makeReferralProgramEditionConfigSetArraySchema();
 
-  const subregistryId = {
+  const registryId = {
     chainId: 1,
     address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
   };
 
-  // Fixtures share a subregistryId, so their time ranges are chosen to be disjoint
+  // Fixtures share a registryId, so their time ranges are chosen to be disjoint
   // (startTime and endTime are inclusive — abutting ranges count as overlapping).
   const pieSplitEdition = {
     slug: "2025-12",
@@ -36,7 +36,7 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
       maxQualifiedReferrers: 100,
       startTime: 1000000,
       endTime: 1999999,
-      subregistryId,
+      registryId,
       rulesUrl: "https://ensawards.org/rules",
       areAwardsDistributed: false,
     },
@@ -53,7 +53,7 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
       maxBaseRevenueShare: 0.5,
       startTime: 2000000,
       endTime: 2500000,
-      subregistryId,
+      registryId,
       rulesUrl: "https://ensawards.org/rules",
       areAwardsDistributed: false,
     },
@@ -66,7 +66,7 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
       awardModel: "future-model",
       startTime: 2500001,
       endTime: 3000000,
-      subregistryId,
+      registryId,
       rulesUrl: "https://ensawards.org/rules",
       areAwardsDistributed: false,
       someNewField: "extra-data",
@@ -143,7 +143,7 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
       rules: {
         awardModel: "future-model",
         // startTime missing, endTime missing
-        subregistryId,
+        registryId,
         rulesUrl: "https://ensawards.org/rules",
         areAwardsDistributed: false,
       },
@@ -180,8 +180,8 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
     expect(() => schema.parse([pieSplitEdition, duplicateUnrecognized])).toThrow();
   });
 
-  describe("non-overlapping time invariant (per subregistryId)", () => {
-    it("accepts editions for the same subregistry with disjoint time ranges", () => {
+  describe("non-overlapping time invariant (per registryId)", () => {
+    it("accepts editions for the same registry with disjoint time ranges", () => {
       const earlier = {
         ...pieSplitEdition,
         slug: "2025-12",
@@ -197,7 +197,7 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
       expect(result).toHaveLength(2);
     });
 
-    it("rejects editions for the same subregistry whose ranges interior-overlap", () => {
+    it("rejects editions for the same registry whose ranges interior-overlap", () => {
       const a = {
         ...pieSplitEdition,
         slug: "a",
@@ -227,7 +227,7 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
       expect(() => schema.parse([a, b])).toThrow(/overlapping time ranges/i);
     });
 
-    it("accepts overlapping editions when subregistries differ by chainId", () => {
+    it("accepts overlapping editions when registries differ by chainId", () => {
       const a = {
         ...pieSplitEdition,
         slug: "a",
@@ -235,7 +235,7 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
           ...pieSplitEdition.rules,
           startTime: 1000,
           endTime: 2000,
-          subregistryId: { ...subregistryId, chainId: 1 },
+          registryId: { ...registryId, chainId: 1 },
         },
       };
       const b = {
@@ -245,7 +245,7 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
           ...revShareCapEdition.rules,
           startTime: 1000,
           endTime: 2000,
-          subregistryId: { ...subregistryId, chainId: 8453 },
+          registryId: { ...registryId, chainId: 8453 },
         },
       };
 
@@ -253,7 +253,7 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
       expect(result).toHaveLength(2);
     });
 
-    it("accepts overlapping editions when subregistries differ by address", () => {
+    it("accepts overlapping editions when registries differ by address", () => {
       const a = {
         ...pieSplitEdition,
         slug: "a",
@@ -261,7 +261,7 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
           ...pieSplitEdition.rules,
           startTime: 1000,
           endTime: 2000,
-          subregistryId: {
+          registryId: {
             chainId: 1,
             address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
           },
@@ -274,7 +274,7 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
           ...revShareCapEdition.rules,
           startTime: 1000,
           endTime: 2000,
-          subregistryId: {
+          registryId: {
             chainId: 1,
             address: "0x0635513f179d50a207757e05759cbd106d7dfce8",
           },
@@ -285,7 +285,7 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
       expect(result).toHaveLength(2);
     });
 
-    it("rejects an unrecognized edition that overlaps a recognized edition on the same subregistry", () => {
+    it("rejects an unrecognized edition that overlaps a recognized edition on the same registry", () => {
       const recognized = {
         ...pieSplitEdition,
         slug: "recognized",
@@ -305,7 +305,7 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
 describe("makeReferrerLeaderboardPageSchema", () => {
   const schema = makeReferrerLeaderboardPageSchema();
 
-  const subregistryId = {
+  const registryId = {
     chainId: 1,
     address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
   };
@@ -327,7 +327,7 @@ describe("makeReferrerLeaderboardPageSchema", () => {
       maxQualifiedReferrers: 100,
       startTime: 1000000,
       endTime: 2000000,
-      subregistryId,
+      registryId,
       rulesUrl: "https://ensawards.org/rules",
       areAwardsDistributed: false,
     },
@@ -354,7 +354,7 @@ describe("makeReferrerLeaderboardPageSchema", () => {
       maxBaseRevenueShare: 0.5,
       startTime: 1000000,
       endTime: 2000000,
-      subregistryId,
+      registryId,
       rulesUrl: "https://ensawards.org/rules",
       areAwardsDistributed: false,
     },
@@ -430,7 +430,7 @@ describe("makeReferrerLeaderboardPageSchema", () => {
 describe("makeReferralProgramEditionSummarySchema", () => {
   const schema = makeReferralProgramEditionSummarySchema();
 
-  const subregistryId = {
+  const registryId = {
     chainId: 1,
     address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
   };
@@ -446,7 +446,7 @@ describe("makeReferralProgramEditionSummarySchema", () => {
       maxQualifiedReferrers: 100,
       startTime: 1000000,
       endTime: 2000000,
-      subregistryId,
+      registryId,
       rulesUrl: "https://ensawards.org/rules",
       areAwardsDistributed: false,
     },
@@ -465,7 +465,7 @@ describe("makeReferralProgramEditionSummarySchema", () => {
       maxBaseRevenueShare: 0.5,
       startTime: 1000000,
       endTime: 2000000,
-      subregistryId,
+      registryId,
       rulesUrl: "https://ensawards.org/rules",
       areAwardsDistributed: false,
     },
@@ -510,7 +510,7 @@ describe("makeReferralProgramEditionSummarySchema", () => {
         awardModel: "future-model",
         startTime: 2000000,
         endTime: 3000000,
-        subregistryId,
+        registryId,
         rulesUrl: "https://ensawards.org/rules",
         areAwardsDistributed: false,
         someNewField: "extra-data",
@@ -552,7 +552,7 @@ describe("makeReferralProgramEditionSummarySchema", () => {
 describe("makeReferralProgramEditionSummariesDataSchema — non-overlapping time invariant", () => {
   const schema = makeReferralProgramEditionSummariesDataSchema();
 
-  const subregistryId = {
+  const registryId = {
     chainId: 1,
     address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
   };
@@ -561,7 +561,7 @@ describe("makeReferralProgramEditionSummariesDataSchema — non-overlapping time
     slug: string,
     startTime: number,
     endTime: number,
-    registry = subregistryId,
+    registry = registryId,
   ) => ({
     awardModel: ReferralProgramAwardModels.PieSplit,
     slug,
@@ -573,20 +573,20 @@ describe("makeReferralProgramEditionSummariesDataSchema — non-overlapping time
       maxQualifiedReferrers: 100,
       startTime,
       endTime,
-      subregistryId: registry,
+      registryId: registry,
       rulesUrl: "https://ensawards.org/rules",
       areAwardsDistributed: false,
     },
   });
 
-  it("accepts summaries for the same subregistry with disjoint time ranges", () => {
+  it("accepts summaries for the same registry with disjoint time ranges", () => {
     const result = schema.parse({
       editions: [makePieSplitSummary("a", 1000, 1999), makePieSplitSummary("b", 2000, 3000)],
     });
     expect(result.editions).toHaveLength(2);
   });
 
-  it("rejects summaries for the same subregistry whose ranges interior-overlap", () => {
+  it("rejects summaries for the same registry whose ranges interior-overlap", () => {
     expect(() =>
       schema.parse({
         editions: [makePieSplitSummary("a", 1000, 2500), makePieSplitSummary("b", 2000, 3000)],
@@ -602,11 +602,11 @@ describe("makeReferralProgramEditionSummariesDataSchema — non-overlapping time
     ).toThrow(/overlapping time ranges/i);
   });
 
-  it("accepts overlapping summaries when subregistries differ", () => {
+  it("accepts overlapping summaries when registries differ", () => {
     const result = schema.parse({
       editions: [
-        makePieSplitSummary("a", 1000, 2000, { ...subregistryId, chainId: 1 }),
-        makePieSplitSummary("b", 1000, 2000, { ...subregistryId, chainId: 8453 }),
+        makePieSplitSummary("a", 1000, 2000, { ...registryId, chainId: 1 }),
+        makePieSplitSummary("b", 1000, 2000, { ...registryId, chainId: 8453 }),
       ],
     });
     expect(result.editions).toHaveLength(2);
@@ -620,7 +620,7 @@ describe("makeReferralProgramEditionSummariesDataSchema — non-overlapping time
 describe("makeReferrerEditionMetricsSchema", () => {
   const schema = makeReferrerEditionMetricsSchema();
 
-  const subregistryId = {
+  const registryId = {
     chainId: 1,
     address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
   };
@@ -631,7 +631,7 @@ describe("makeReferrerEditionMetricsSchema", () => {
     maxQualifiedReferrers: 100,
     startTime: 1000000,
     endTime: 2000000,
-    subregistryId,
+    registryId,
     rulesUrl: "https://ensawards.org/rules",
     areAwardsDistributed: false,
   };
@@ -657,7 +657,7 @@ describe("makeReferrerEditionMetricsSchema", () => {
     maxBaseRevenueShare: 0.5,
     startTime: 1000000,
     endTime: 2000000,
-    subregistryId,
+    registryId,
     rulesUrl: "https://ensawards.org/rules",
     areAwardsDistributed: false,
   };

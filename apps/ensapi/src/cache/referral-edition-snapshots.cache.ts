@@ -102,11 +102,11 @@ function createEditionSnapshotBuilder(
 
     const latestIndexedBlockRef = getLatestIndexedBlockRef(
       indexingStatus,
-      editionConfig.rules.subregistryId.chainId,
+      editionConfig.rules.registryId.chainId,
     );
     if (latestIndexedBlockRef === null) {
       throw new Error(
-        `Unable to generate edition snapshot for ${editionSlug}. Latest indexed block ref for chain ${editionConfig.rules.subregistryId.chainId} is null.`,
+        `Unable to generate edition snapshot for ${editionSlug}. Latest indexed block ref for chain ${editionConfig.rules.registryId.chainId} is null.`,
       );
     }
 

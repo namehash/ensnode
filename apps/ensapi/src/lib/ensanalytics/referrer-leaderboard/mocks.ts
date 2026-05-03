@@ -18,7 +18,7 @@ import {
 
 import { parseEth, parseUsdc } from "@ensnode/ensnode-sdk";
 
-// All mocks live on the pieSplit edition's subregistry chain (Ethereum mainnet).
+// All mocks live on the pieSplit edition's registry chain (Ethereum mainnet).
 const MOCK_CHAIN_ID = 1;
 const acct = (address: Address): AccountId => ({
   chainId: MOCK_CHAIN_ID,
@@ -32,7 +32,7 @@ const pieSplitRules: ReferralProgramRulesPieSplit = {
   maxQualifiedReferrers: 10,
   startTime: 1735689600,
   endTime: 1767225599,
-  subregistryId: acct("0xd8da6bf26964af9d7eed9e03e53415d37aa96045"),
+  registryId: acct("0xd8da6bf26964af9d7eed9e03e53415d37aa96045"),
   rulesUrl: new URL("https://example.com/rules"),
   areAwardsDistributed: false,
 };

@@ -47,7 +47,7 @@ export const buildReferralProgramRulesPieSplit = (
   maxQualifiedReferrers: number,
   startTime: UnixTimestamp,
   endTime: UnixTimestamp,
-  subregistryId: AccountId,
+  registryId: AccountId,
   rulesUrl: URL,
   areAwardsDistributed: boolean,
 ): ReferralProgramRulesPieSplit => {
@@ -57,7 +57,7 @@ export const buildReferralProgramRulesPieSplit = (
     maxQualifiedReferrers,
     startTime,
     endTime,
-    subregistryId,
+    registryId,
     rulesUrl,
     areAwardsDistributed,
   } satisfies ReferralProgramRulesPieSplit;

@@ -52,7 +52,7 @@ export const makeBaseReferralProgramRulesSchema = (valueLabel: string) =>
       awardModel: z.string(),
       startTime: makeUnixTimestampSchema(`${valueLabel}.startTime`),
       endTime: makeUnixTimestampSchema(`${valueLabel}.endTime`),
-      subregistryId: makeAccountIdSchema(`${valueLabel}.subregistryId`),
+      registryId: makeAccountIdSchema(`${valueLabel}.registryId`),
       rulesUrl: makeUrlSchema(`${valueLabel}.rulesUrl`),
       areAwardsDistributed: z.boolean(),
     })

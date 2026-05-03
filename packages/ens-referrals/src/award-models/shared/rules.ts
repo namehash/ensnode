@@ -47,9 +47,9 @@ export interface BaseReferralProgramRules {
   endTime: UnixTimestamp;
 
   /**
-   * The account ID of the subregistry for the referral program.
+   * The account ID of the registry for the referral program.
    */
-  subregistryId: AccountId;
+  registryId: AccountId;
 
   /**
    * URL to the full rules document for these rules.
@@ -89,7 +89,7 @@ export interface ReferralProgramRulesUnrecognized extends BaseReferralProgramRul
 }
 
 export const validateBaseReferralProgramRules = (rules: BaseReferralProgramRules): void => {
-  makeAccountIdSchema("BaseReferralProgramRules.subregistryId").parse(rules.subregistryId);
+  makeAccountIdSchema("BaseReferralProgramRules.registryId").parse(rules.registryId);
 
   validateUnixTimestamp(rules.startTime);
   validateUnixTimestamp(rules.endTime);

@@ -15,7 +15,7 @@ import {
  *    the `subgraph_domain` table is populated for the names associated with
  *    each registrar action — read to look up `name` for each row.
  *
- * Each ENSAnalytics edition is scoped to a single `subregistryId`, so any one
+ * Each ENSAnalytics edition is scoped to a single `registryId`, so any one
  * edition only joins against rows from its own namespace's `subgraph_domain`.
  * In theory not all of `subgraph` / `basenames` / `lineanames` are required
  * for any single edition. In practice we require all three so that no edition
