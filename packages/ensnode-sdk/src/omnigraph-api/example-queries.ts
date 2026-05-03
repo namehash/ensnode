@@ -32,12 +32,12 @@ const ENS_TEST_ENV_V2_ETH_REGISTRAR = maybeGetDatasourceContract(
 
 const VITALIK_ADDRESS = toNormalizedAddress("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045");
 
-// owns tryingagain.eth + debuggincrap.eth on sepolia-v2 and has resolver permissions on each
-const SEPOLIA_V2_USER_ADDRESS = toNormalizedAddress("0x205d2686da3bf33f64c17f21462c51b5ead462cf");
+// owns sfmonicdeb*.eth (mix of v1 + v2) on sepolia-v2 and holds v2 ETHRegistry permissions
+const SEPOLIA_V2_USER_ADDRESS = toNormalizedAddress("0x2f8e8b1126e75fde0b7f731e7cb5847eba2d2574");
 
 const DEVNET_NAME_WITH_OWNED_RESOLVER = asInterpretedName("example.eth");
 
-const SEPOLIA_V2_NAME_WITH_OWNED_RESOLVER = asInterpretedName("tryingagain.eth");
+const SEPOLIA_V2_NAME_WITH_OWNED_RESOLVER = asInterpretedName("sfmonicdebmig.eth");
 
 export const GRAPHQL_API_EXAMPLE_QUERIES: Array<{
   query: string;
@@ -90,7 +90,7 @@ query FindDomains(
     variables: {
       default: { name: "vitalik", order: { by: "NAME", dir: "DESC" } },
       [ENSNamespaceIds.EnsTestEnv]: { name: "c", order: { by: "NAME", dir: "DESC" } },
-      [ENSNamespaceIds.SepoliaV2]: { name: "trying", order: { by: "NAME", dir: "DESC" } },
+      [ENSNamespaceIds.SepoliaV2]: { name: "sfmonic", order: { by: "NAME", dir: "DESC" } },
     },
   },
 
@@ -120,7 +120,7 @@ query DomainByName($name: InterpretedName!) {
 }`,
     variables: {
       default: { name: "eth" },
-      [ENSNamespaceIds.SepoliaV2]: { name: "tryingagain.eth" },
+      [ENSNamespaceIds.SepoliaV2]: { name: "sfmonicdebmig.eth" },
     },
   },
 
@@ -168,7 +168,7 @@ query DomainEvents($name: InterpretedName!) {
 }`,
     variables: {
       default: { name: "newowner.eth" },
-      [ENSNamespaceIds.SepoliaV2]: { name: "tryingagain.eth" },
+      [ENSNamespaceIds.SepoliaV2]: { name: "sfmonicdebmig.eth" },
     },
   },
 

@@ -5,7 +5,7 @@
   "description": "Local Prometheus + Grafana bundle for benchmarking ENSIndexer throughput.",
   "license": "MIT",
   "scripts": {
-    "up": "docker compose up -d",
+    "start": "docker compose up -d",
     "down": "docker compose down",
     "logs": "docker compose logs -f",
     "wipe": "./wipe.sh",

@@ -45,7 +45,10 @@ function SubdomainLink({ data }: { data: FragmentOf<typeof DomainFragment> }) {
       <Link to={`/domain/${domain.name}`}>{domain.name}</Link> ({domain.__typename})
       <span>
         {" "}
-        — Owner <code>{domain.owner?.address ?? "none"}</code>
+        — Owner{" "}
+        <code>
+          {domain.owner?.address ?? (domain.__typename === "ENSv2Domain" ? "Reserved" : "0x0")}
+        </code>
       </span>
     </li>
   );

@@ -4,9 +4,12 @@ import { omnigraph } from "enssdk/omnigraph";
 import { StrictMode } from "react";
 import { HashRouter, Link, Outlet, Route, Routes } from "react-router";
 
+import { AccountView } from "./AccountView";
 import { DomainView } from "./DomainView";
 import { RegistryView } from "./RegistryView";
 import { SearchView } from "./SearchView";
+
+const EXAMPLE_ACCOUNT_ADDRESS = "0x2f8e8b1126e75fde0b7f731e7cb5847eba2d2574";
 
 /**
  * Gets the ENSNODE_URL from the environment, defaulting to the NameHash-hosted Sepolia-V2 Namespace
@@ -29,6 +32,7 @@ function Layout() {
     <>
       <nav>
         <Link to="/">Home</Link> | <Link to="/domain/eth">Domain Browser</Link> |{" "}
+        <Link to={`/account/${EXAMPLE_ACCOUNT_ADDRESS}`}>Account Browser</Link> |{" "}
         <Link to="/registry">Registry Cache Demo</Link> | <Link to="/search">Search Demo</Link>
       </nav>
       <hr />
@@ -53,6 +57,7 @@ export function App() {
             <Route element={<Layout />}>
               <Route path="/" element={<Home />} />
               <Route path="/domain/:name" element={<DomainView />} />
+              <Route path="/account/:address" element={<AccountView />} />
               <Route path="/search" element={<SearchView />} />
               <Route path="/registry" element={<RegistryView />} />
             </Route>
