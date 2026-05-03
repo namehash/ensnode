@@ -209,7 +209,10 @@ export function mergedChainConfigForContracts(
 
   return {
     [chainId.toString()]: {
-      address: addresses,
+      // when no contract supplies an address, leave `address` undefined so Ponder treats this as
+      // factory-mode ("index any address matching the ABI") rather than an explicit empty list,
+      // which Ponder treats as "index nothing".
+      address: addresses.length > 0 ? addresses : undefined,
       startBlock,
       endBlock,
     },
