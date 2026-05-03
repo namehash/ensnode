@@ -74,7 +74,7 @@ export function SearchView() {
         type="text"
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        placeholder="tryingagain.eth"
+        placeholder="vitalik.eth"
       />
 
       {query.length === 0 ? (
