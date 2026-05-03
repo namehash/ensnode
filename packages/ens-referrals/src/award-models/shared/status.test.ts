@@ -11,7 +11,7 @@ const baseRules = {
   awardModel: ReferralProgramAwardModels.PieSplit,
   startTime: 1000,
   endTime: 2000,
-  subregistryId: { chainId: 1, address: "0x0000000000000000000000000000000000000000" as const },
+  registryId: { chainId: 1, address: "0x0000000000000000000000000000000000000000" as const },
   rulesUrl: new URL("https://example.com/rules"),
 };
 

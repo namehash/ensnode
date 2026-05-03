@@ -33,7 +33,7 @@ export const getReferrerMetrics = async (
    * Step 1: Filter for referrals matching the provided rules:
    * - timestamp is between startDate and endDate (inclusive)
    * - decodedReferrer is not null and not the zero address
-   * - subregistryId matches the provided subregistryId
+   * - registrarActions.subregistryId matches rules.registryId
    *
    * Step 2: Group by decodedReferrer and calculate:
    * - Sum total incrementalDuration for each decodedReferrer
@@ -68,11 +68,8 @@ export const getReferrerMetrics = async (
           isNotNull(ensIndexerSchema.registrarActions.decodedReferrer),
           // Filter by decodedReferrer not zero address
           ne(ensIndexerSchema.registrarActions.decodedReferrer, zeroAddress),
-          // Filter by subregistryId matching the provided subregistryId
-          eq(
-            ensIndexerSchema.registrarActions.subregistryId,
-            stringifyAccountId(rules.subregistryId),
-          ),
+          // Filter by registrarActions.subregistryId matching rules.registryId
+          eq(ensIndexerSchema.registrarActions.subregistryId, stringifyAccountId(rules.registryId)),
         ),
       )
       .groupBy(ensIndexerSchema.registrarActions.decodedReferrer)
@@ -91,7 +88,7 @@ export const getReferrerMetrics = async (
 
     return (records as NonNullRecord[]).map((record) => {
       return buildReferrerMetrics(
-        { chainId: rules.subregistryId.chainId, address: record.referrer },
+        { chainId: rules.registryId.chainId, address: record.referrer },
         record.totalReferrals,
         deserializeDuration(record.totalIncrementalDuration),
         priceEth(BigInt(record.totalRevenueContribution)),
@@ -160,11 +157,8 @@ export const getReferralEvents = async (rules: ReferralProgramRules): Promise<Re
           isNotNull(ensIndexerSchema.registrarActions.decodedReferrer),
           // Filter by decodedReferrer not zero address
           ne(ensIndexerSchema.registrarActions.decodedReferrer, zeroAddress),
-          // Filter by subregistryId matching the provided subregistryId
-          eq(
-            ensIndexerSchema.registrarActions.subregistryId,
-            stringifyAccountId(rules.subregistryId),
-          ),
+          // Filter by registrarActions.subregistryId matching rules.registryId
+          eq(ensIndexerSchema.registrarActions.subregistryId, stringifyAccountId(rules.registryId)),
         ),
       )
       .orderBy(asc(ensIndexerSchema.registrarActions.id));
@@ -212,7 +206,7 @@ export const getReferralEvents = async (rules: ReferralProgramRules): Promise<Re
       return {
         id: record.id,
         referrer: {
-          chainId: rules.subregistryId.chainId,
+          chainId: rules.registryId.chainId,
           address: record.referrer as NormalizedAddress,
         },
         timestamp: Number(record.timestamp),

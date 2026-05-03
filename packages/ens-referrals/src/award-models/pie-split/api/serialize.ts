@@ -35,7 +35,7 @@ export function serializeReferralProgramRulesPieSplit(
     maxQualifiedReferrers: rules.maxQualifiedReferrers,
     startTime: rules.startTime,
     endTime: rules.endTime,
-    subregistryId: rules.subregistryId,
+    registryId: rules.registryId,
     rulesUrl: rules.rulesUrl.toString(),
     areAwardsDistributed: rules.areAwardsDistributed,
   };

@@ -156,7 +156,7 @@ export class ENSReferralsClient {
    *   } else {
    *     const { aggregatedMetrics, referrers, rules } = response.data;
    *     console.log(`Edition: ${editionSlug}`);
-   *     console.log(`Subregistry: ${rules.subregistryId}`);
+   *     console.log(`Registry: ${rules.registryId}`);
    *     console.log(`Total Referrers: ${pageContext.totalRecords}`);
    *     console.log(`Page ${pageContext.page} of ${pageContext.totalPages}`);
    *   }

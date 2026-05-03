@@ -70,7 +70,7 @@ if (response.responseCode === ReferrerLeaderboardPageResponseCodes.Ok) {
     console.log(`Unrecognized award model: ${leaderboardPage.originalAwardModel} - skipping`);
   } else {
     console.log(`Edition: ${editionSlug}`);
-    console.log(`Subregistry: ${leaderboardPage.rules.subregistryId}`);
+    console.log(`Registry: ${leaderboardPage.rules.registryId}`);
     console.log(`Total Referrers: ${leaderboardPage.pageContext.totalRecords}`);
     console.log(
       `Page ${leaderboardPage.pageContext.page} of ${leaderboardPage.pageContext.totalPages}`,

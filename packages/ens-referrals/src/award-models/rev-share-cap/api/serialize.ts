@@ -40,7 +40,7 @@ export function serializeReferralProgramRulesRevShareCap(
     maxBaseRevenueShare: rules.maxBaseRevenueShare,
     startTime: rules.startTime,
     endTime: rules.endTime,
-    subregistryId: rules.subregistryId,
+    registryId: rules.registryId,
     rulesUrl: rules.rulesUrl.toString(),
     areAwardsDistributed: rules.areAwardsDistributed,
     adminActions: rules.adminActions,

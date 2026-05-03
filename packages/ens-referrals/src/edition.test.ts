@@ -9,7 +9,7 @@ import {
   type ReferralProgramEditionConfig,
 } from "./edition";
 
-const subregistry = {
+const registry = {
   chainId: 1,
   address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85" as const,
 };
@@ -18,7 +18,7 @@ const makePieSplitEdition = (
   slug: string,
   startTime: number,
   endTime: number,
-  subregistryId = subregistry,
+  registryId = registry,
 ): ReferralProgramEditionConfig => ({
   slug,
   displayName: slug,
@@ -28,14 +28,14 @@ const makePieSplitEdition = (
     maxQualifiedReferrers: 100,
     startTime,
     endTime,
-    subregistryId,
+    registryId,
     rulesUrl: new URL("https://ensawards.org/rules"),
     areAwardsDistributed: false,
   },
 });
 
 describe("findOverlappingEditionPair", () => {
-  it("returns null when editions are disjoint for the same subregistry", () => {
+  it("returns null when editions are disjoint for the same registry", () => {
     const a = makePieSplitEdition("a", 1000, 1999);
     const b = makePieSplitEdition("b", 2000, 3000);
 
@@ -59,9 +59,9 @@ describe("findOverlappingEditionPair", () => {
     expect(findOverlappingEditionPair([a, b])).not.toBeNull();
   });
 
-  it("returns null when time ranges overlap but subregistries differ", () => {
-    const a = makePieSplitEdition("a", 1000, 2000, { ...subregistry, chainId: 1 });
-    const b = makePieSplitEdition("b", 1000, 2000, { ...subregistry, chainId: 8453 });
+  it("returns null when time ranges overlap but registries differ", () => {
+    const a = makePieSplitEdition("a", 1000, 2000, { ...registry, chainId: 1 });
+    const b = makePieSplitEdition("b", 1000, 2000, { ...registry, chainId: 8453 });
 
     expect(findOverlappingEditionPair([a, b])).toBeNull();
   });
@@ -83,16 +83,16 @@ describe("buildReferralProgramEditionConfigSet — overlap invariant", () => {
     expect(() => buildReferralProgramEditionConfigSet([a, b])).toThrow(/overlapping time ranges/i);
   });
 
-  it("throws when two editions share a subregistry and have touching edges", () => {
+  it("throws when two editions share a registry and have touching edges", () => {
     const a = makePieSplitEdition("a", 1000, 2000);
     const b = makePieSplitEdition("b", 2000, 3000);
 
     expect(() => buildReferralProgramEditionConfigSet([a, b])).toThrow(/overlapping time ranges/i);
   });
 
-  it("builds a set when overlapping editions target different subregistries", () => {
-    const a = makePieSplitEdition("a", 1000, 2000, { ...subregistry, chainId: 1 });
-    const b = makePieSplitEdition("b", 1000, 2000, { ...subregistry, chainId: 8453 });
+  it("builds a set when overlapping editions target different registries", () => {
+    const a = makePieSplitEdition("a", 1000, 2000, { ...registry, chainId: 1 });
+    const b = makePieSplitEdition("b", 1000, 2000, { ...registry, chainId: 8453 });
 
     const set = buildReferralProgramEditionConfigSet([a, b]);
     expect(set.size).toBe(2);

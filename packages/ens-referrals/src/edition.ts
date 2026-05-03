@@ -75,7 +75,7 @@ export type ReferralProgramEditionConfigSet = Map<
  * @param configSet - The edition config set to validate
  * @throws {Error} If any entry violates the invariant that each map key equals the
  *   corresponding config's slug
- * @throws {Error} If any pair of editions sharing a `subregistryId` overlap in time
+ * @throws {Error} If any pair of editions sharing a `registryId` overlap in time
  *   (`startTime` and `endTime` are inclusive — touching edges count as overlap)
  */
 export function validateReferralProgramEditionConfigSet(
@@ -95,15 +95,15 @@ export function validateReferralProgramEditionConfigSet(
     const [a, b] = overlap;
     throw new Error(
       `Edition config set invariant violation: editions "${a.slug}" and "${b.slug}" ` +
-        `have overlapping time ranges for subregistryId ` +
-        `${a.rules.subregistryId.chainId}:${a.rules.subregistryId.address} ` +
+        `have overlapping time ranges for registryId ` +
+        `${a.rules.registryId.chainId}:${a.rules.registryId.address} ` +
         `(startTime and endTime are inclusive)`,
     );
   }
 }
 
 /**
- * Returns the first pair of editions sharing a `subregistryId` whose time ranges overlap,
+ * Returns the first pair of editions sharing a `registryId` whose time ranges overlap,
  * or `null` if none do.
  *
  * `startTime` and `endTime` are inclusive, so ranges sharing a single instant
@@ -117,7 +117,7 @@ export function findOverlappingEditionPair<T extends BaseReferralProgramEditionC
 ): readonly [T, T] | null {
   const byRegistry = new Map<string, T[]>();
   for (const edition of editions) {
-    const key = `${edition.rules.subregistryId.chainId}:${edition.rules.subregistryId.address}`;
+    const key = `${edition.rules.registryId.chainId}:${edition.rules.registryId.address}`;
     const group = byRegistry.get(key);
     if (group) {
       group.push(edition);
@@ -126,7 +126,7 @@ export function findOverlappingEditionPair<T extends BaseReferralProgramEditionC
     }
   }
 
-  // Within each subregistry group, sort by startTime so any overlapping pair is also an
+  // Within each registry group, sort by startTime so any overlapping pair is also an
   // overlap between adjacent editions in this order — one linear pass after the sort suffices.
   for (const group of byRegistry.values()) {
     if (group.length < 2) continue;

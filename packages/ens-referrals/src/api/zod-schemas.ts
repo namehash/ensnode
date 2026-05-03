@@ -359,7 +359,7 @@ export const makeReferralProgramEditionConfigSetArraySchema = (
       slugs.add(edition.slug);
     }
 
-    // For each subregistryId, editions must not overlap in time. startTime and endTime
+    // For each registryId, editions must not overlap in time. startTime and endTime
     // are inclusive bounds, so two editions sharing a single instant (A.endTime == B.startTime)
     // also count as overlapping. Unrecognized editions participate so the "0 or 1 edition per
     // referral" invariant holds even for forward-compatible models.
@@ -370,7 +370,7 @@ export const makeReferralProgramEditionConfigSetArraySchema = (
         code: "custom",
         message:
           `${valueLabel}: editions "${a.slug}" and "${b.slug}" have overlapping time ranges ` +
-          `for subregistryId ${a.rules.subregistryId.chainId}:${a.rules.subregistryId.address} ` +
+          `for registryId ${a.rules.registryId.chainId}:${a.rules.registryId.address} ` +
           `(startTime and endTime are inclusive)`,
       });
       return [];
@@ -437,7 +437,7 @@ export const makeReferralProgramEditionSummarySchema = (
 /**
  * Schema for {@link ReferralProgramEditionSummariesData}.
  *
- * Enforces the per-subregistryId non-overlap invariant across the editions array
+ * Enforces the per-registryId non-overlap invariant across the editions array
  * (see {@link findOverlappingEditionPair}).
  */
 export const makeReferralProgramEditionSummariesDataSchema = (
@@ -457,7 +457,7 @@ export const makeReferralProgramEditionSummariesDataSchema = (
         path: ["editions"],
         message:
           `${valueLabel}: editions "${a.slug}" and "${b.slug}" have overlapping time ranges ` +
-          `for subregistryId ${a.rules.subregistryId.chainId}:${a.rules.subregistryId.address} ` +
+          `for registryId ${a.rules.registryId.chainId}:${a.rules.registryId.address} ` +
           `(startTime and endTime are inclusive)`,
       });
     });
