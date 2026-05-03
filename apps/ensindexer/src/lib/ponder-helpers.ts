@@ -184,6 +184,10 @@ export function mergedChainConfigForContracts(
   chainId: number,
   contracts: readonly ContractConfig[],
 ) {
+  if (contracts.length === 0) {
+    throw new Error("mergedChainConfigForContracts: contracts must not be empty");
+  }
+
   const addresses = contracts.flatMap((c) =>
     Array.isArray(c.address) ? c.address : c.address ? [c.address] : [],
   );
