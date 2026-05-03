@@ -42,7 +42,12 @@ function SubdomainLink({ data }: { data: FragmentOf<typeof DomainFragment> }) {
 
   return (
     <li>
-      <Link to={`/domain/${domain.name}`}>{domain.name}</Link> ({domain.__typename})
+      {domain.name ? (
+        <Link to={`/domain/${domain.name}`}>{domain.name}</Link>
+      ) : (
+        <em>non-canonical domain</em>
+      )}{" "}
+      ({domain.__typename})
       <span>
         {" "}
         — Owner{" "}

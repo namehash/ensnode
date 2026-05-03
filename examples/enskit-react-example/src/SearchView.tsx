@@ -88,7 +88,7 @@ export function SearchView() {
             {data?.domains?.edges.map((edge) => (
               <li key={edge.node.id}>
                 ({edge.node.__typename === "ENSv1Domain" ? "v1" : "v2"}){" "}
-                <Link to={`/domain/${edge.node.name}`}>{edge.node.name ?? edge.node.id}</Link>
+                <Link to={`/domain/${edge.node.name}`}>{edge.node.name}</Link>
               </li>
             ))}
           </ul>
