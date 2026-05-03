@@ -169,8 +169,8 @@ export function pickContracts(
  * Builds a single Ponder `chain: { [chainId]: { address, startBlock, endBlock } }` entry that
  * spans multiple contracts on the same chain (e.g. all of the .eth RegistrarControllers).
  *
- * Use this when one Ponder contract entry should index events from multiple onchain contracts
- * that share an ABI.
+ * Use this when one Ponder contract entry should index events from multiple contracts with addresses
+ * that share an ABI on the same chain.
  *
  * - `address` is the union of all defined contract addresses on this chain.
  * - `startBlock` is the earliest contract `startBlock`.
