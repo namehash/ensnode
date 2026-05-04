@@ -59,9 +59,9 @@ describe("Query.labels", () => {
 
   it("rejects uppercase 0X hex prefix", async () => {
     const badPrefix = `0X${ETH_LABEL_HASH.slice(2)}`;
-    await expect(
-      request(LabelsByLabelHash, { labelHashes: [badPrefix] }),
-    ).rejects.toThrow(/Invalid labelHash/i);
+    await expect(request(LabelsByLabelHash, { labelHashes: [badPrefix] })).rejects.toThrow(
+      /Invalid labelHash/i,
+    );
   });
 
   it("omits LabelHashes that are not present in the index", async () => {

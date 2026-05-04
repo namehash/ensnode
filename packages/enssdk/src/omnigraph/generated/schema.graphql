@@ -733,7 +733,7 @@ scalar LabelHash
 """Look up Labels by a batch of LabelHashes."""
 input LabelsByLabelHashesInput {
   """
-  LabelHashes to look up. Up to 100 LabelHashes per request (each normalized to lowercase at parse time). LabelHashes absent from the index are omitted from the result.
+  LabelHashes to look up. After deduplication, at most 100 distinct LabelHashes per request (each normalized to lowercase at parse time). LabelHashes absent from the index are omitted from the result.
   """
   labelHashes: [LabelHash!]!
 }
