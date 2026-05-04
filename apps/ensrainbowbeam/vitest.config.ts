@@ -9,7 +9,7 @@ export default defineProject({
     },
   },
   test: {
-    name: "ens-labels-collector",
+    name: "ensrainbowbeam",
     exclude: [...configDefaults.exclude, "**/*.integration.test.ts"],
   },
 });

@@ -3,7 +3,7 @@ import type { ClientErrorStatusCode, ServerErrorStatusCode } from "hono/utils/ht
 import { ZodError } from "zod/v4";
 
 /**
- * Standardized error response shape for the ens-labels-collector.
+ * Standardized error response shape for EnsRainbowBeam (`ensrainbowbeam`).
  *
  * Mirrors the shape used elsewhere in the monorepo (see AGENTS.md "API boundaries").
  */

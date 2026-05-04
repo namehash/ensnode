@@ -121,7 +121,7 @@ export async function submissionsHandler(c: Context) {
     // re-throw so the upstream cancellation is visible in logs (`app.onError`).
     if (c.req.raw.signal.aborted) throw error;
     if (error instanceof DOMException && error.name === "TimeoutError") {
-      console.error("[ens-labels-collector] omnigraph lookup timed out", {
+      console.error("[ensrainbowbeam] omnigraph lookup timed out", {
         timeoutMs: OMNIGRAPH_LOOKUP_TIMEOUT_MS,
       });
       return errorResponse(c, {
@@ -131,7 +131,7 @@ export async function submissionsHandler(c: Context) {
     }
     // Log the underlying error so 502s aren't a black box in production. The client
     // still sees a generic message (we don't leak upstream error details).
-    console.error("[ens-labels-collector] omnigraph lookup failed", error);
+    console.error("[ensrainbowbeam] omnigraph lookup failed", error);
     return errorResponse(c, { message: "Upstream Omnigraph lookup failed", status: 502 });
   }
   const classifications = classifySubmissions(hashed, hits);

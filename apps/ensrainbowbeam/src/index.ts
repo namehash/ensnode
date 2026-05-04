@@ -12,7 +12,7 @@ const server = serve(
   (info) => {
     // Operational logs go to stderr so stdout stays a clean JSONL stream of submission records
     // (see `submissionsHandler` in `src/handlers/submissions.ts`).
-    console.error(`ens-labels-collector listening on port ${info.port}`);
+    console.error(`EnsRainbowBeam listening on port ${info.port}`);
   },
 );
 
@@ -47,7 +47,7 @@ const gracefulShutdown = (exitCode: number = 0): Promise<void> => {
   if (!shutdownPromise) {
     shutdownPromise = closeServer()
       .catch((error) => {
-        console.error("[ens-labels-collector] shutdown error", error);
+        console.error("[ensrainbowbeam] shutdown error", error);
         exitCode = exitCode === 0 ? 1 : exitCode;
       })
       .then(() => {
@@ -65,6 +65,6 @@ process.on("SIGTERM", () => {
 });
 
 process.on("uncaughtException", (error) => {
-  console.error("[ens-labels-collector] uncaughtException", error);
+  console.error("[ensrainbowbeam] uncaughtException", error);
   void gracefulShutdown(1);
 });

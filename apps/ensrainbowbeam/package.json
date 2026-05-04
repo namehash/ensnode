@@ -1,16 +1,16 @@
 {
   "private": true,
-  "name": "ens-labels-collector",
+  "name": "ensrainbowbeam",
   "version": "1.10.1",
   "type": "module",
-  "description": "Collects ENS Label submissions and classifies them against ENSNode's Omnigraph index",
+  "description": "EnsRainbowBeam — ingests label submissions and classifies them against ENSNode's Omnigraph index",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/namehash/ensnode.git",
-    "directory": "apps/ens-labels-collector"
+    "directory": "apps/ensrainbowbeam"
   },
-  "homepage": "https://github.com/namehash/ensnode/tree/main/apps/ens-labels-collector",
+  "homepage": "https://github.com/namehash/ensnode/tree/main/apps/ensrainbowbeam",
   "scripts": {
     "start": "tsx src/index.ts",
     "dev": "tsx watch --env-file ./.env.local src/index.ts",

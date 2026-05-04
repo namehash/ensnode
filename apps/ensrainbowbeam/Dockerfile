@@ -9,7 +9,7 @@ COPY . .
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
 FROM deps AS runner
-WORKDIR /app/apps/ens-labels-collector
+WORKDIR /app/apps/ensrainbowbeam
 ENV NODE_ENV=production
 EXPOSE 4444
 

@@ -1,6 +1,8 @@
-# ens-labels-collector
+# EnsRainbowBeam
 
-Receives ENS Label submissions from external callers, classifies each label against ENSNode's
+Workspace package: `ensrainbowbeam` (`apps/ensrainbowbeam`).
+
+Receives ENS label submissions from external callers, classifies each label against ENSNode's
 indexed Label table, and (for now) emits a structured JSON line per submission to stdout.
 
 The app is intentionally minimal; persistent storage, batched on-chain emission, and a
@@ -17,7 +19,7 @@ future row shape so adding a sink later is mechanical.
 
 ## How label classification works
 
-For each submitted raw label the collector:
+For each submitted raw label EnsRainbowBeam:
 
 1. Computes `labelhashLiteralLabel(rawLabel)`.
 2. If the label is normalizable AND the normalized form differs from the raw label, also
@@ -44,7 +46,7 @@ See `.env.local.example` for a local-development template.
 ## Development
 
 ```bash
-pnpm -F ens-labels-collector dev
-pnpm -F ens-labels-collector typecheck
-pnpm -F ens-labels-collector test
+npx pnpm@10.13.1 -F ensrainbowbeam dev
+npx pnpm@10.13.1 -F ensrainbowbeam typecheck
+npx pnpm@10.13.1 -F ensrainbowbeam test
 ```

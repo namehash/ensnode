@@ -3,12 +3,12 @@ import { z } from "zod/v4";
 import { OptionalPortNumberSchema } from "@ensnode/ensnode-sdk/internal";
 
 /**
- * Default port for the ens-labels-collector HTTP server. Used when `PORT` env var is unset.
+ * Default port for EnsRainbowBeam. Used when `PORT` env var is unset.
  */
-export const ENS_LABELS_COLLECTOR_DEFAULT_PORT = 4444;
+export const ENSRAINBOWBEAM_DEFAULT_PORT = 4444;
 
 const ConfigSchema = z.object({
-  PORT: OptionalPortNumberSchema.default(ENS_LABELS_COLLECTOR_DEFAULT_PORT),
+  PORT: OptionalPortNumberSchema.default(ENSRAINBOWBEAM_DEFAULT_PORT),
   ENSNODE_URL: z.string().url(),
 });
 
