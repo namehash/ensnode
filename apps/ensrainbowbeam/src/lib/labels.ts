@@ -2,6 +2,7 @@ import {
   asLiteralLabel,
   encodeLabelHash,
   type InterpretedLabel,
+  type Label,
   type LabelHash,
   type LiteralLabel,
   labelhashLiteralLabel,
@@ -21,15 +22,17 @@ import {
 export type LabelStatus = "unknown_in_index" | "healed_in_index" | "absent_from_index";
 
 /**
- * The hashing result for a single submitted raw label.
+ * The hashing result for a single submitted label.
  *
- * `normalizedLabel` (and its hash) are populated only when the raw label is normalizable
- * AND the normalized form differs from the raw label. Both the raw submission and any
- * normalization branch use {@link LiteralLabel} so callers can submit unnormalized literals
- * deliberately (the service never coerces input to an {@link InterpretedLabel} up front).
+ * `rawLabel` is always a {@link LiteralLabel}: submissions are never typed or coerced as
+ * {@link InterpretedLabel}, so unnormalized discovery remains representable.
+ *
+ * `normalizedLabel` (and its hash) are populated only when the label is normalizable under
+ * ENSIP-15 and the normalized form differs from the raw literal. That branch still hashes via
+ * {@link labelhashLiteralLabel} on a new {@link LiteralLabel} cast of the normalized string.
  */
 export type HashedLabel = {
-  rawLabel: string;
+  rawLabel: LiteralLabel;
   labelHash: LabelHash;
   normalizedLabel?: LiteralLabel;
   normalizedLabelHash?: LabelHash;
@@ -51,22 +54,22 @@ export type LabelHit = {
 };
 
 /**
- * Computes the hash representations of a single raw label.
+ * Computes the hash representations of a single submitted {@link LiteralLabel}.
  *
- * Always computes `labelHash = labelhashLiteralLabel(asLiteralLabel(rawLabel))`. If the label
- * normalizes under ENSIP-15 to a **different string** than the raw submission, also computes
- * hashes for that normalized {@link LiteralLabel}. Normalization failures are tolerated and
+ * Always computes `labelHash = labelhashLiteralLabel(rawLabel)`. If the label normalizes under
+ * ENSIP-15 to a **different string** than the submission, also computes hashes for that
+ * normalized form as a distinct {@link LiteralLabel}. Normalization failures are tolerated and
  * treated as "no normalized variant".
  */
-export function hashLabel(rawLabel: string): HashedLabel {
-  const literal = asLiteralLabel(rawLabel);
-  const labelHash = labelhashLiteralLabel(literal);
+export function hashLabel(rawLabel: LiteralLabel): HashedLabel {
+  const labelHash = labelhashLiteralLabel(rawLabel);
 
   let normalizedLabel: LiteralLabel | undefined;
   let normalizedLabelHash: LabelHash | undefined;
   try {
-    const normalizedInterpreted = normalizeLabel(literal);
-    if (normalizedInterpreted !== rawLabel) {
+    const normalizedInterpreted = normalizeLabel(rawLabel);
+    // Compare as unbranded labels: normalization yields InterpretedLabel; submission is LiteralLabel.
+    if ((normalizedInterpreted as Label) !== (rawLabel as Label)) {
       normalizedLabel = asLiteralLabel(normalizedInterpreted);
       normalizedLabelHash = labelhashLiteralLabel(normalizedLabel);
     }

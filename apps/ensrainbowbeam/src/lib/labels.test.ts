@@ -1,4 +1,5 @@
 import {
+  asLiteralLabel,
   encodeLabelHash,
   type InterpretedLabel,
   type LabelHash,
@@ -19,53 +20,53 @@ const literal = (s: string) => s as LiteralLabel;
 
 describe("hashLabel", () => {
   it("computes labelhash for a normalized lowercase label", () => {
-    const result = hashLabel("vitalik");
+    const result = hashLabel(literal("vitalik"));
     expect(result).toEqual({
-      rawLabel: "vitalik",
+      rawLabel: literal("vitalik"),
       labelHash: labelhashLiteralLabel(literal("vitalik")),
     });
   });
 
   it("does not populate normalizedLabel when raw equals normalized", () => {
-    const result = hashLabel("eth");
+    const result = hashLabel(literal("eth"));
     expect(result.normalizedLabel).toBeUndefined();
     expect(result.normalizedLabelHash).toBeUndefined();
   });
 
   it("populates normalizedLabel + hash when uppercase label normalizes to lowercase", () => {
-    const result = hashLabel("VITALIK");
-    expect(result.rawLabel).toBe("VITALIK");
+    const result = hashLabel(literal("VITALIK"));
+    expect(result.rawLabel).toBe(literal("VITALIK"));
     expect(result.labelHash).toBe(labelhashLiteralLabel(literal("VITALIK")));
-    expect(result.normalizedLabel).toBe("vitalik");
+    expect(result.normalizedLabel).toBe(literal("vitalik"));
     expect(result.normalizedLabelHash).toBe(labelhashLiteralLabel(literal("vitalik")));
     expect(result.normalizedLabelHash).not.toBe(result.labelHash);
   });
 
   it("tolerates unnormalizable labels (e.g. labels with periods)", () => {
-    const result = hashLabel("foo.bar");
-    expect(result.rawLabel).toBe("foo.bar");
+    const result = hashLabel(literal("foo.bar"));
+    expect(result.rawLabel).toBe(literal("foo.bar"));
     expect(result.labelHash).toBe(labelhashLiteralLabel(literal("foo.bar")));
     expect(result.normalizedLabel).toBeUndefined();
     expect(result.normalizedLabelHash).toBeUndefined();
   });
 
   it("tolerates the empty string (cannot normalize)", () => {
-    const result = hashLabel("");
-    expect(result.rawLabel).toBe("");
+    const result = hashLabel(asLiteralLabel(""));
+    expect(result.rawLabel).toBe(asLiteralLabel(""));
     expect(result.normalizedLabel).toBeUndefined();
   });
 
   it("hashes a unicode label", () => {
     const label = "vitalik\u00e9";
-    const result = hashLabel(label);
-    expect(result.labelHash).toBe(labelhashLiteralLabel(label as LiteralLabel));
+    const result = hashLabel(asLiteralLabel(label));
+    expect(result.labelHash).toBe(labelhashLiteralLabel(asLiteralLabel(label)));
   });
 });
 
 describe("collectLookupHashes", () => {
   it("returns the deduped union of raw + normalized labelhashes", () => {
-    const a = hashLabel("VITALIK");
-    const b = hashLabel("vitalik");
+    const a = hashLabel(literal("VITALIK"));
+    const b = hashLabel(literal("vitalik"));
     const hashes = collectLookupHashes([a, b]);
     expect(hashes).toHaveLength(2);
     expect(new Set(hashes).size).toBe(hashes.length);
@@ -74,7 +75,7 @@ describe("collectLookupHashes", () => {
   });
 
   it("ignores undefined normalized hashes", () => {
-    const a = hashLabel("eth");
+    const a = hashLabel(literal("eth"));
     const hashes = collectLookupHashes([a]);
     expect(hashes).toEqual([a.labelHash]);
   });
@@ -95,10 +96,10 @@ describe("isUnhealedHit", () => {
 });
 
 describe("classifySubmissions", () => {
-  const vitalik = hashLabel("vitalik");
-  const eth = hashLabel("eth");
-  const upper = hashLabel("HELLO");
-  const random = hashLabel("zzzdoesnotexistzzz");
+  const vitalik = hashLabel(literal("vitalik"));
+  const eth = hashLabel(literal("eth"));
+  const upper = hashLabel(literal("HELLO"));
+  const random = hashLabel(literal("zzzdoesnotexistzzz"));
 
   function makeHealedHit(hash: LabelHash, label: string): LabelHit {
     return { hash, interpreted: label as InterpretedLabel };

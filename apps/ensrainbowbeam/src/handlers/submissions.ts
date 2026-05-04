@@ -1,4 +1,4 @@
-import type { Address } from "enssdk";
+import { type Address, asLiteralLabel, type LabelHash, type LiteralLabel } from "enssdk";
 import type { Context } from "hono";
 import { isAddress } from "viem";
 import { z } from "zod/v4";
@@ -32,7 +32,11 @@ export const MAX_LABELS_PER_SUBMISSION = 100;
 export const OMNIGRAPH_LOOKUP_TIMEOUT_MS = 10_000;
 
 const SubmissionsRequestSchema = z.object({
-  labels: z.array(z.string().min(1).max(1000)).min(1).max(MAX_LABELS_PER_SUBMISSION),
+  labels: z
+    .array(z.string().min(1).max(1000))
+    .min(1)
+    .max(MAX_LABELS_PER_SUBMISSION)
+    .transform((items) => items.map(asLiteralLabel)),
   callerAddress: z
     .string()
     .refine((value) => isAddress(value, { strict: false }), {
@@ -42,10 +46,10 @@ const SubmissionsRequestSchema = z.object({
 });
 
 export type SubmissionResultItem = {
-  rawLabel: string;
-  labelHash: string;
-  normalizedLabel?: string;
-  normalizedLabelHash?: string;
+  rawLabel: LiteralLabel;
+  labelHash: LabelHash;
+  normalizedLabel?: LiteralLabel;
+  normalizedLabelHash?: LabelHash;
   status: LabelClassification["status"];
 };
 
