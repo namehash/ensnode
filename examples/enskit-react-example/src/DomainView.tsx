@@ -144,36 +144,47 @@ export function DomainView() {
 
   // here we ensure that the provided /domain/:name parameter is an InterpretedName
   return (
-    <EnsureInterpretedName
-      name={asLiteralName(params.name)}
-      //
-      // options for how we interpret user input
-      options={{
-        // while not strictly necessary to specify, since we catch the empty string case above, we'll
-        // be explicit in this example app and tell enskit that for our purposes, we don't want our
-        // downstream `children` component to receive the ENS Root Name ("") as a `name` value
-        allowENSRootName: false,
+    <>
+      <div
+        style={{ border: "1px solid #a94442", padding: "0.75rem", marginBottom: "1rem" }}
+        role="note"
+      >
+        Heads up! sepolia-v2's ENSv1Resolver is misconfigured, and ENSv1-only names aren't
+        resolvable, so they're not currently visible here! This will be fixed by the ENS Team in the
+        near future. If you followed a link to a Domain and it isn't showing up here, it's likely an
+        ENSv1-only name (unmigrated) and isn't currently resolvable.
+      </div>
+      <EnsureInterpretedName
+        name={asLiteralName(params.name)}
+        //
+        // options for how we interpret user input
+        options={{
+          // while not strictly necessary to specify, since we catch the empty string case above, we'll
+          // be explicit in this example app and tell enskit that for our purposes, we don't want our
+          // downstream `children` component to receive the ENS Root Name ("") as a `name` value
+          allowENSRootName: false,
 
-        // allow the incoming LiteralName to contain Encoded LabelHash segments (e.g. [abcd...xyz])
-        allowEncodedLabelHashes: true,
+          // allow the incoming LiteralName to contain Encoded LabelHash segments (e.g. [abcd...xyz])
+          allowEncodedLabelHashes: true,
 
-        // if a user ever navigates to a /domain/:name that contains unnormalizable labels, we want
-        // to represent that label as an encoded labelhash and redirect the user to that canonical page
-        coerceUnnormalizableLabelsToEncodedLabelHashes: true,
-      }}
-      //
-      // this isn't an InterpretedName, but it was coerced to an InterpretedName: redirect the user to the canonical url
-      coerced={(name) => <Navigate to={`/domain/${name}`} replace />}
-      //
-      // this name can't conform to InterpretedName nor can it be coerced: it is malformed: show an error
-      malformed={(name) => (
-        <div>
-          <h2>Invalid name: '{name}'</h2>
-          <Link to="/domain/eth">Back to 'eth' Domain.</Link>
-        </div>
-      )}
-    >
-      {(name) => <RenderDomain key={name} name={name} />}
-    </EnsureInterpretedName>
+          // if a user ever navigates to a /domain/:name that contains unnormalizable labels, we want
+          // to represent that label as an encoded labelhash and redirect the user to that canonical page
+          coerceUnnormalizableLabelsToEncodedLabelHashes: true,
+        }}
+        //
+        // this isn't an InterpretedName, but it was coerced to an InterpretedName: redirect the user to the canonical url
+        coerced={(name) => <Navigate to={`/domain/${name}`} replace />}
+        //
+        // this name can't conform to InterpretedName nor can it be coerced: it is malformed: show an error
+        malformed={(name) => (
+          <div>
+            <h2>Invalid name: '{name}'</h2>
+            <Link to="/domain/eth">Back to 'eth' Domain.</Link>
+          </div>
+        )}
+      >
+        {(name) => <RenderDomain key={name} name={name} />}
+      </EnsureInterpretedName>
+    </>
   );
 }
