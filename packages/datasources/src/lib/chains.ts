@@ -1,4 +1,4 @@
-import { type Chain, localhost, sepolia } from "viem/chains";
+import { anvil, type Chain, sepolia } from "viem/chains";
 
 /**
  * The ens-test-env chain id is 1:
@@ -6,10 +6,11 @@ import { type Chain, localhost, sepolia } from "viem/chains";
  */
 
 export const ensTestEnvChain = {
-  ...localhost,
-  id: 1,
+  ...anvil,
+  // NOTE: devnet uses anvil's default chain id of 31337, but we over-specify it here for documentation
+  // https://github.com/ensdomains/contracts-v2/blob/580c60a20e80decce21cf15aafd762f96a96d544/contracts/script/setup.ts#L55
+  id: 31337,
   name: "ens-test-env",
-  rpcUrls: { default: { http: ["http://localhost:8545"] } },
 } as const satisfies Chain;
 
 /**

@@ -11,7 +11,7 @@ import {
   type ContractConfig,
   type DatasourceName,
   type ENSNamespaceId,
-  ENSNamespaceIds,
+  ensTestEnvChain,
   maybeGetDatasource,
 } from "@ensnode/datasources";
 import { type BlockNumberRange, buildBlockNumberRange, type ChainId } from "@ensnode/ponder-sdk";
@@ -96,7 +96,6 @@ export const constrainBlockrange = (
 export function chainsConnectionConfig(
   rpcConfigs: ENSIndexerConfig["rpcConfigs"],
   chainId: ChainId,
-  namespace?: ENSNamespaceId,
 ) {
   const rpcConfig = rpcConfigs.get(chainId);
 
@@ -106,9 +105,8 @@ export function chainsConnectionConfig(
     );
   }
 
-  // NOTE: disable cache on local chains (e.g. ganache, anvil, ens-test-env)
-  const disableCache =
-    chainId === 31337 || chainId === 1337 || namespace === ENSNamespaceIds.EnsTestEnv;
+  // NOTE: disable cache on ens-test-env
+  const disableCache = chainId === ensTestEnvChain.id;
 
   return {
     [chainId.toString()]: {
@@ -167,7 +165,7 @@ export function chainsConnectionConfigForDatasources(
     .reduce<Record<string, ChainConfig>>(
       (memo, chain) => ({
         ...memo,
-        ...chainsConnectionConfig(rpcConfigs, chain.id, namespace),
+        ...chainsConnectionConfig(rpcConfigs, chain.id),
       }),
       {},
     );
