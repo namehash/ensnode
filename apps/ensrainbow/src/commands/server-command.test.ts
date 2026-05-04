@@ -9,7 +9,10 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { type EnsRainbow, ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk";
 
-import { buildEnsRainbowPublicConfig } from "@/config/public";
+import {
+  buildEnsRainbowPublicConfig,
+  buildEnsRainbowPublicConfigFromLabelSet,
+} from "@/config/public";
 import { createApi } from "@/lib/api";
 import { ENSRainbowDB } from "@/lib/database";
 import { buildDbConfig, ENSRainbowServer } from "@/lib/server";
@@ -201,12 +204,9 @@ describe("Server Command Tests", () => {
       pendingEnsRainbowServer = ENSRainbowServer.createPending();
       pendingDbConfig = null;
       // Mirror entrypoint: public config from declared label set before DB attach.
-      const eagerPublicConfig = buildEnsRainbowPublicConfig({
-        serverLabelSet: {
-          labelSetId: pendingLabelSetId,
-          highestLabelSetVersion: pendingLabelSetVersion,
-        },
-        recordsCount: 0,
+      const eagerPublicConfig = buildEnsRainbowPublicConfigFromLabelSet({
+        labelSetId: pendingLabelSetId,
+        highestLabelSetVersion: pendingLabelSetVersion,
       });
       pendingApp = createApi(pendingEnsRainbowServer, eagerPublicConfig, () => pendingDbConfig);
       pendingServer = serve({

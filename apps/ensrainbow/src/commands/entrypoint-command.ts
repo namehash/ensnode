@@ -52,10 +52,12 @@ export interface EntrypointCommandOptions {
   registerSignalHandlers?: boolean;
   /**
    * Hook used to terminate the process on fatal bootstrap errors (download failure or
-   * env-vs-DB label-set mismatch). Defaults to `process.exit`. Tests can override this
-   * to assert termination without actually killing the test runner.
+   * env-vs-DB label-set mismatch). Defaults to `process.exit`. Implementations must not
+   * return normally (same contract as `process.exit`); otherwise the server keeps running
+   * in a failed bootstrap state. Tests may override with a mock that throws to avoid
+   * exiting the runner.
    */
-  exit?: (code: number) => void;
+  exit?: (code: number) => never;
 }
 
 /**
