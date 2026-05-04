@@ -1,3 +1,4 @@
+import type { Hex } from "viem";
 import {
   type Account,
   type Chain,
@@ -42,6 +43,22 @@ function createDevnetWalletClients(rpcUrl: string): DevnetWalletClients {
     user: makeClient(accounts.user),
     user2: makeClient(accounts.user2),
   };
+}
+
+export const seedReceiptWaitOptions = {
+  pollingInterval: 50,
+  confirmations: 1,
+  timeout: 15_000,
+} as const;
+
+export async function waitForTransactionReceipt(
+  client: DevnetWalletClient,
+  hash: Hex,
+): Promise<void> {
+  await client.waitForTransactionReceipt({
+    hash,
+    ...seedReceiptWaitOptions,
+  });
 }
 
 export async function seedDevnet(rpcUrl: string): Promise<void> {

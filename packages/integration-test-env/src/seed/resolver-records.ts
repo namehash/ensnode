@@ -5,6 +5,7 @@ import { ResolverABI, UniversalResolverABI } from "@ensnode/datasources";
 import { addresses, contracts, fixtures } from "@ensnode/datasources/devnet";
 
 import type { DevnetWalletClient, DevnetWalletClients } from "./index";
+import { waitForTransactionReceipt } from "./index";
 
 export async function seedResolverRecords(clients: DevnetWalletClients): Promise<void> {
   await seedResolverRecordsForName(clients, "test.eth", contracts.permissionedResolver);
@@ -73,7 +74,7 @@ async function setTextRecord(
     functionName: "setText",
     args: [node, key, value],
   });
-  await walletClient.waitForTransactionReceipt({ hash });
+  await waitForTransactionReceipt(walletClient, hash);
   console.log(`[seed] setText("${key}", "${value}") tx: ${hash}`);
 }
 
@@ -90,7 +91,7 @@ async function setMulticoinAddress(
     functionName: "setAddr",
     args: [node, coinType, addressBytes],
   });
-  await walletClient.waitForTransactionReceipt({ hash });
+  await waitForTransactionReceipt(walletClient, hash);
   console.log(`[seed] setAddr(coinType=${coinType}) tx: ${hash}`);
 }
 
@@ -106,7 +107,7 @@ async function setContenthash(
     functionName: "setContenthash",
     args: [node, hashValue],
   });
-  await walletClient.waitForTransactionReceipt({ hash });
+  await waitForTransactionReceipt(walletClient, hash);
   console.log(`[seed] setContenthash() tx: ${hash}`);
 }
 
@@ -123,7 +124,7 @@ async function setPubkey(
     functionName: "setPubkey",
     args: [node, x, y],
   });
-  await walletClient.waitForTransactionReceipt({ hash });
+  await waitForTransactionReceipt(walletClient, hash);
   console.log(`[seed] setPubkey() tx: ${hash}`);
 }
 
@@ -140,7 +141,7 @@ async function setAbi(
     functionName: "setABI",
     args: [node, contentType, data],
   });
-  await walletClient.waitForTransactionReceipt({ hash });
+  await waitForTransactionReceipt(walletClient, hash);
   console.log(`[seed] setABI(contentType=${contentType}) tx: ${hash}`);
 }
 
@@ -157,6 +158,6 @@ async function setInterfaceImplementer(
     functionName: "setInterface",
     args: [node, interfaceId, implementer],
   });
-  await walletClient.waitForTransactionReceipt({ hash });
+  await waitForTransactionReceipt(walletClient, hash);
   console.log(`[seed] setInterface(interfaceId=${interfaceId}) tx: ${hash}`);
 }
