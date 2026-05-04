@@ -18,15 +18,10 @@ import { getErrorMessage } from "@/utils/error-utils";
 import { logger } from "@/utils/logger";
 
 /**
- * Supplier of the current public config for the API.
+ * Supplier of the current {@link DbConfig} snapshot.
  *
  * Returns `null` while the server is still bootstrapping its database. Once the database is
- * attached, the supplier returns the final `ENSRainbowPublicConfig` (cached by the caller).
- */
-export type PublicConfigSupplier = () => EnsRainbow.ENSRainbowPublicConfig | null;
-
-/**
- * Like {@link PublicConfigSupplier}, but yields the {@link DbConfig} snapshot.
+ * attached, the supplier returns the final `DbConfig` (cached by the caller).
  */
 export type DbConfigSupplier = () => DbConfig | null;
 
@@ -46,15 +41,14 @@ function buildServiceUnavailableBody(
 }
 
 /**
- * Creates and configures the ENS Rainbow API routes.
+ * Creates and configures ENSRainbow HTTP routes.
  *
- * When `publicConfigSupplier` (or `dbConfigSupplier`) returns `null`, routes that depend on the
- * database respond with HTTP 503 so that clients polling `/ready` can wait for the bootstrap to
- * complete.
+ * `publicConfig` may be built before the DB exists (entrypoint). `dbConfigSupplier` stays `null`
+ * until bootstrap finishes; database-backed routes and `/ready` return 503 until then.
  */
 export function createApi(
   server: ENSRainbowServer,
-  publicConfigSupplier: PublicConfigSupplier,
+  publicConfig: EnsRainbow.ENSRainbowPublicConfig,
   dbConfigSupplier: DbConfigSupplier,
 ): Hono {
   const api = new Hono();
@@ -71,7 +65,7 @@ export function createApi(
   );
 
   api.get("/v1/heal/:labelhash", async (c: HonoContext) => {
-    if (!server.isReady()) {
+    if (!server.isReady() || dbConfigSupplier() === null) {
       return c.json(buildServiceUnavailableBody(), 503);
     }
 
@@ -133,8 +127,7 @@ export function createApi(
   });
 
   api.get("/ready", (c: HonoContext) => {
-    // Require both DB attach and config publication to avoid a transient false-ready state.
-    if (!server.isReady() || publicConfigSupplier() === null) {
+    if (!server.isReady() || dbConfigSupplier() === null) {
       return c.json(buildServiceUnavailableBody(), 503);
     }
     const result: EnsRainbow.ReadyResponse = { status: "ok" };
@@ -156,10 +149,6 @@ export function createApi(
   });
 
   api.get("/v1/config", (c: HonoContext) => {
-    const publicConfig = publicConfigSupplier();
-    if (publicConfig === null) {
-      return c.json(buildServiceUnavailableBody(), 503);
-    }
     return c.json(publicConfig);
   });
 

@@ -2,8 +2,6 @@ services:
   ensdb:
     container_name: ensdb
     image: postgres:17
-    ports:
-      - "5432:5432"
     volumes:
       - ensdb_data:/var/lib/postgresql/data
     healthcheck:

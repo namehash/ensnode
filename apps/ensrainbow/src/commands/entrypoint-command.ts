@@ -6,10 +6,10 @@ import { fileURLToPath } from "node:url";
 
 import { serve } from "@hono/node-server";
 
+import type { EnsRainbowServerLabelSet } from "@ensnode/ensnode-sdk";
 import { stringifyConfig } from "@ensnode/ensnode-sdk/internal";
-import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
 
-import { buildEnsRainbowPublicConfig } from "@/config/public";
+import { buildEnsRainbowPublicConfigFromLabelSet } from "@/config/public";
 import type { AbsolutePath, DbConfig, DbSchemaVersion } from "@/config/types";
 import { createApi } from "@/lib/api";
 import { ENSRainbowDB } from "@/lib/database";
@@ -50,6 +50,16 @@ export interface EntrypointCommandOptions {
    * Tests should pass `false` to avoid leaking handlers across cases.
    */
   registerSignalHandlers?: boolean;
+  /**
+   * Hook used to terminate the process on fatal bootstrap errors (download failure or
+   * env-vs-DB label-set mismatch). Defaults to `process.exit`. Implementations must not
+   * return normally (same contract as `process.exit`). If a custom hook returns anyway,
+   * {@link entrypointCommand} calls `process.exit(code)` as a fallback so the process
+   * cannot keep serving after a fatal bootstrap error. Tests should throw from the hook
+   * (caught internally) instead of returning, so the test runner is not killed by that
+   * fallback.
+   */
+  exit?: (code: number) => never;
 }
 
 /**
@@ -58,7 +68,8 @@ export interface EntrypointCommandOptions {
 export interface EntrypointCommandHandle {
   /**
    * Resolves when bootstrap finishes or is aborted by shutdown.
-   * Never rejects: non-abort failures terminate the process via `process.exit(1)`.
+   * Never rejects: non-abort failures terminate the process via `options.exit(1)`
+   * (defaults to `process.exit(1)`).
    */
   readonly bootstrapComplete: Promise<void>;
   close(): Promise<void>;
@@ -87,13 +98,15 @@ export async function entrypointCommand(
 
   const ensRainbowServer = ENSRainbowServer.createPending();
 
-  let cachedPublicConfig: EnsRainbow.ENSRainbowPublicConfig | null = null;
+  // Public config from CLI/env so `/v1/config` works before attach; validated against DB after bootstrap.
+  const argsServerLabelSet: EnsRainbowServerLabelSet = {
+    labelSetId: options.labelSetId,
+    highestLabelSetVersion: options.labelSetVersion,
+  };
+  const inMemoryPublicConfig = buildEnsRainbowPublicConfigFromLabelSet(argsServerLabelSet);
+
   let cachedDbConfig: DbConfig | null = null;
-  const app = createApi(
-    ensRainbowServer,
-    () => cachedPublicConfig,
-    () => cachedDbConfig,
-  );
+  const app = createApi(ensRainbowServer, inMemoryPublicConfig, () => cachedDbConfig);
 
   const httpServer = serve({
     fetch: app.fetch,
@@ -172,13 +185,54 @@ export async function entrypointCommand(
     process.once("SIGINT", signalHandler);
   }
 
+  const exit = options.exit ?? ((code: number) => process.exit(code));
+  let exitRequested = false;
+  const requestExit = (code: number) => {
+    exitRequested = true;
+    let exitHookThrew = false;
+    try {
+      exit(code);
+    } catch (_error) {
+      exitHookThrew = true;
+      // Tests may throw from a custom exit hook to short-circuit control flow.
+      // Swallow to avoid this surfacing as a bootstrap failure.
+    }
+    if (!exitHookThrew) {
+      // TypeScript cannot enforce `never` at runtime; a buggy hook could return and leave
+      // HTTP up after resolvePromise() + fatal bootstrap — force termination.
+      logger.error(
+        new Error("ENSRainbow exit hook returned without terminating the process"),
+        "Exit hook violated non-returning contract; calling process.exit as fallback",
+      );
+      process.exit(code);
+    }
+  };
+
   const bootstrapComplete = new Promise<void>((resolvePromise) => {
     // Defer bootstrap so the HTTP server starts accepting requests first.
     setTimeout(() => {
       runDbBootstrap(options, ensRainbowServer, bootstrapAborter.signal)
-        .then(({ publicConfig, dbConfig }) => {
+        .then((dbConfig) => {
+          if (
+            dbConfig.serverLabelSet.labelSetId !== argsServerLabelSet.labelSetId ||
+            dbConfig.serverLabelSet.highestLabelSetVersion !==
+              argsServerLabelSet.highestLabelSetVersion
+          ) {
+            logger.error(
+              `ENSRainbow database label set ` +
+                `${dbConfig.serverLabelSet.labelSetId}@${dbConfig.serverLabelSet.highestLabelSetVersion} ` +
+                `does not match the configured ` +
+                `LABEL_SET_ID=${argsServerLabelSet.labelSetId} / ` +
+                `LABEL_SET_VERSION=${argsServerLabelSet.highestLabelSetVersion}. ` +
+                `Refusing to serve a misconfigured database; please reconcile the env/CLI ` +
+                `arguments with the database in the data directory and restart.`,
+            );
+            resolvePromise();
+            requestExit(1);
+            return;
+          }
+
           cachedDbConfig = dbConfig;
-          cachedPublicConfig = publicConfig;
           logger.info(
             "ENSRainbow database bootstrap complete. Service is ready to serve heal requests.",
           );
@@ -190,8 +244,13 @@ export async function entrypointCommand(
             resolvePromise();
             return;
           }
+          if (exitRequested) {
+            resolvePromise();
+            return;
+          }
           logger.error(error, "ENSRainbow database bootstrap failed - exiting");
-          process.exit(1);
+          resolvePromise();
+          requestExit(1);
         })
         .finally(() => {
           signalBootstrapSettled();
@@ -206,13 +265,13 @@ export async function entrypointCommand(
  * Idempotent DB bootstrap pipeline.
  *
  * If marker + DB are present, reuse them; otherwise download + extract.
- * Returns the public config and DB config for the attached DB.
+ * Returns the {@link DbConfig} read from the attached DB.
  */
 async function runDbBootstrap(
   options: EntrypointCommandOptions,
   ensRainbowServer: ENSRainbowServer,
   signal: AbortSignal,
-): Promise<{ publicConfig: EnsRainbow.ENSRainbowPublicConfig; dbConfig: DbConfig }> {
+): Promise<DbConfig> {
   const { dataDir, dbSchemaVersion, labelSetId, labelSetVersion } = options;
   const downloadTempDir = options.downloadTempDir ?? join(dataDir, ".download-temp");
   const markerFile = join(dataDir, DB_READY_MARKER_FILENAME);
@@ -233,8 +292,7 @@ async function runDbBootstrap(
       throwIfAborted(signal);
       await ensRainbowServer.attachDb(existingDb);
       existingDbAttached = true;
-      const dbConfig = await buildDbConfig(ensRainbowServer);
-      return { publicConfig: buildEnsRainbowPublicConfig(dbConfig), dbConfig };
+      return await buildDbConfig(ensRainbowServer);
     } catch (error) {
       // Always release any opened DB handle/lock first, even when aborting. This prevents
       // a leaked LevelDB lock when SIGTERM races a non-abort failure (e.g. attachDb throws
@@ -304,7 +362,7 @@ async function runDbBootstrap(
     // passed readiness checks (e.g. missing precalculated record count).
     await writeFile(markerFile, "");
 
-    return { publicConfig: buildEnsRainbowPublicConfig(dbConfig), dbConfig };
+    return dbConfig;
   } catch (error) {
     if (!dbAttached) {
       await safeClose(db);

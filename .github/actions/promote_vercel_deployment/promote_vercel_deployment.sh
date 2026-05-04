@@ -1,29 +1,38 @@
 #!/bin/bash
 
-# Identifies the commit sha of images deployed to the incoming active env and ensures that the appropriate
-# ENSAdmin Vercel Deployment is promoted to production. This ensures exact version matching between
-# the active ENSNode and the production ENSAdmin.
-VERCEL_PROJECT_ID=prj_nKcHTO12hq9kcgascQMq4xokRhwp # admin.ensnode.io
-VERCEL_TEAM_SLUG=namehash
+# Identifies the commit sha of the ENSIndexer image deployed to the active Railway environment
+# and promotes the Vercel deployment with that sha to production for the given Vercel project.
+# Ensures exact version matching between the active ENSNode and the production Vercel deployment.
 
 set -euo pipefail
 
-if [ -z "$VERCEL_TOKEN" ]; then
+if [ -z "${VERCEL_PROJECT_ID:-}" ]; then
+  echo "Error: VERCEL_PROJECT_ID is not set or is empty"
+  exit 1
+fi
+
+if [ -z "${VERCEL_TEAM_SLUG:-}" ]; then
+  echo "Error: VERCEL_TEAM_SLUG is not set or is empty"
+  exit 1
+fi
+
+if [ -z "${VERCEL_TOKEN:-}" ]; then
   echo "Error: VERCEL_TOKEN is not set or is empty"
   exit 1
 fi
 
-if [ -z "$RAILWAY_TOKEN" ]; then
+if [ -z "${RAILWAY_TOKEN:-}" ]; then
   echo "Error: RAILWAY_TOKEN is not set or is empty"
   exit 1
 fi
 
-if [ -z "$RAILWAY_ENVIRONMENT_ID" ]; then
+if [ -z "${RAILWAY_ENVIRONMENT_ID:-}" ]; then
   echo "Error: RAILWAY_ENVIRONMENT_ID is not set or is empty"
   exit 1
 fi
 
 echo "Targeting Railway Environment: $RAILWAY_ENVIRONMENT_ID"
+echo "Targeting Vercel Project: $VERCEL_PROJECT_ID"
 
 # first, get deployed ENSIndexer image from Railway Environment
 RAILWAY_SERVICES_OUTPUT=$(curl \

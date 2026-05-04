@@ -2,35 +2,28 @@
 # Provides only the infrastructure services needed by orchestrator.ts:
 # devnet (local EVM) and ensdb (database).
 #
-# NOTE: not using container_name so testcontainers gives it a unique one and avoids collisions
+# NOTE: container_name is overridden to `*-orchestrator` so testcontainers runs do not collide
+# with manually-started stacks (docker-compose.yml / docker-compose.devnet.yml) or with each other.
 #
-# NOTE: ensdb is inlined (not `extends`-ing services/ensdb.yml) so we can override its host
-# port to ephemeral without using docker-compose-specific !override syntax. The shared
-# services/ensdb.yml binds 5432:5432, which collides with any host-native postgres on a developer
-# machine and silently routes orchestrator connections to that native postgres instead of the
-# docker container — leading to schema-collision errors. Using "0:5432" lets docker pick an ephemeral
-# host port; orchestrator.ts reads it via testcontainers' getMappedPort()
+# NOTE: ensdb-orchestrator binds host port 5433 (rather than 5432 used by the manual stacks) so
+# it never collides and so developers can `psql -h localhost -p 5433` after a test run.
 services:
   devnet:
     extends:
       file: services/devnet.yml
       service: devnet
+    container_name: devnet-orchestrator
 
   ensdb:
-    image: postgres:17
+    extends:
+      file: services/ensdb.yml
+      service: ensdb
+    container_name: ensdb-orchestrator
     ports:
-      - "0:5432"
-    volumes:
-      - ensdb_data:/var/lib/postgresql/data
+      - "5433:5432"
     env_file:
       - path: envs/.env.docker.common
         required: true
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
 
 volumes:
   ensdb_data:

@@ -58,7 +58,7 @@ export const domainResolverRelation = onchainTable(
   "domain_resolver_relations",
   (t) => ({
     // keyed by (chainId, address, node)
-    chainId: t.integer().notNull().$type<ChainId>(),
+    chainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
 
     // The Registry (ENSv1Registry or ENSv2Registry)'s AccountId.
     address: t.hex().notNull().$type<Address>(),
@@ -90,7 +90,7 @@ export const resolver = onchainTable(
     // keyed by (chainId, address)
     id: t.text().primaryKey().$type<ResolverId>(),
 
-    chainId: t.integer().notNull().$type<ChainId>(),
+    chainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
     address: t.hex().notNull().$type<Address>(),
   }),
   (t) => ({
@@ -122,7 +122,7 @@ export const resolverRecords = onchainTable(
     // keyed by (chainId, resolver, node)
     id: t.text().primaryKey().$type<ResolverRecordsId>(),
 
-    chainId: t.integer().notNull().$type<ChainId>(),
+    chainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
     address: t.hex().notNull().$type<Address>(),
     node: t.hex().notNull().$type<Node>(),
 
@@ -188,7 +188,7 @@ export const resolverAddressRecord = onchainTable(
   "resolver_address_records",
   (t) => ({
     // keyed by ((chainId, resolver, node), coinType)
-    chainId: t.integer().notNull().$type<ChainId>(),
+    chainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
     address: t.hex().notNull().$type<Address>(),
     node: t.hex().notNull().$type<Node>(),
     // NOTE: all well-known CoinTypes fit into javascript number but NOT postgres .integer, must be
@@ -231,7 +231,7 @@ export const resolverTextRecord = onchainTable(
   "resolver_text_records",
   (t) => ({
     // keyed by ((chainId, resolver, node), key)
-    chainId: t.integer().notNull().$type<ChainId>(),
+    chainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
     address: t.hex().notNull().$type<Address>(),
     node: t.hex().notNull().$type<Node>(),
     key: t.text().notNull(),

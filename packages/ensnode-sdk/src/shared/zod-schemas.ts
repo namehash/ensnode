@@ -27,6 +27,7 @@ import {
   type CurrencyId,
   CurrencyIds,
   type PriceDai,
+  type PriceEnsTokens,
   type PriceEth,
   type PriceUsdc,
   type SerializedPriceEth,
@@ -282,6 +283,7 @@ export const makePriceSchema = (valueLabel: string = "Price") =>
       makePriceCurrencySchema(CurrencyIds.ETH, valueLabel),
       makePriceCurrencySchema(CurrencyIds.USDC, valueLabel),
       makePriceCurrencySchema(CurrencyIds.DAI, valueLabel),
+      makePriceCurrencySchema(CurrencyIds.ENSTokens, valueLabel),
     ],
     { error: `${valueLabel} currency must be one of ${Object.values(CurrencyIds).join(", ")}` },
   );
@@ -308,6 +310,12 @@ export const makePriceUsdcSchema = (valueLabel: string = "Price USDC") =>
  */
 export const makePriceDaiSchema = (valueLabel: string = "Price DAI") =>
   makePriceCurrencySchema(CurrencyIds.DAI, valueLabel).transform((v) => v as PriceDai);
+
+/**
+ * Schema for {@link PriceEnsTokens} type.
+ */
+export const makePriceEnsTokensSchema = (valueLabel: string = "Price ENSTokens") =>
+  makePriceCurrencySchema(CurrencyIds.ENSTokens, valueLabel).transform((v) => v as PriceEnsTokens);
 
 /**
  * Schema for {@link AccountId} type.
