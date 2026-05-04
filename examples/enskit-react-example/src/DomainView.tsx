@@ -1,6 +1,11 @@
 import { EnsureInterpretedName } from "enskit/react";
 import { type FragmentOf, graphql, readFragment, useOmnigraphQuery } from "enskit/react/omnigraph";
-import { asLiteralName, getParentInterpretedName, type InterpretedName } from "enssdk";
+import {
+  asLiteralName,
+  beautifyInterpretedName,
+  getParentInterpretedName,
+  type InterpretedName,
+} from "enssdk";
 import { useState } from "react";
 import { Link, Navigate, useParams } from "react-router";
 
@@ -43,7 +48,7 @@ function SubdomainLink({ data }: { data: FragmentOf<typeof DomainFragment> }) {
   return (
     <li>
       {domain.name ? (
-        <Link to={`/domain/${domain.name}`}>{domain.name}</Link>
+        <Link to={`/domain/${domain.name}`}>{beautifyInterpretedName(domain.name)}</Link>
       ) : (
         <em>non-canonical domain</em>
       )}{" "}
@@ -71,7 +76,7 @@ function RenderDomain({ name }: { name: InterpretedName }) {
 
   if (!data && fetching) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
-  if (!data?.domain) return <p>No domain was found with name '{name}'.</p>;
+  if (!data?.domain) return <p>No domain was found with name '{beautifyInterpretedName(name)}'.</p>;
 
   const domain = readFragment(DomainFragment, data.domain);
   const parentName = getParentInterpretedName(name);
@@ -79,15 +84,22 @@ function RenderDomain({ name }: { name: InterpretedName }) {
 
   return (
     <div>
-      <h2>{domain.name ?? name}</h2>
+      <h2>{beautifyInterpretedName(domain.name ?? name)}</h2>
       <p>
-        Owner: {domain.owner?.address ?? (domain.__typename === "ENSv2Domain" ? "Reserved" : "0x0")}
+        Owner:{" "}
+        {domain.owner ? (
+          <Link to={`/account/${domain.owner.address}`}>{domain.owner.address}</Link>
+        ) : domain.__typename === "ENSv2Domain" ? (
+          "Reserved"
+        ) : (
+          "0x0"
+        )}
       </p>
       <p>Version: {domain.__typename}</p>
 
       {parentName && (
         <p>
-          ← <Link to={`/domain/${parentName}`}>{parentName}</Link>
+          ← <Link to={`/domain/${parentName}`}>{beautifyInterpretedName(parentName)}</Link>
         </p>
       )}
 
@@ -97,8 +109,9 @@ function RenderDomain({ name }: { name: InterpretedName }) {
       ) : (
         <>
           <p>
-            Showcases trivial cursor-based pagination over a connection (here, a Domain's{" "}
-            <code>subdomains</code>). Use the button below to fetch the next page.
+            Showcases trivial cursor-based pagination over a{" "}
+            <a href="https://relay.dev/graphql/connections.htm">Relay Connection</a> (here, a
+            Domain's <code>subdomains</code>). Use the button below to fetch the next page.
           </p>
           <ul>
             {subdomains?.edges.map((edge) => {

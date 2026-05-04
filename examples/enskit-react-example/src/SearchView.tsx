@@ -1,4 +1,5 @@
 import { graphql, useOmnigraphQuery } from "enskit/react/omnigraph";
+import { beautifyInterpretedName } from "enssdk";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 
@@ -90,7 +91,11 @@ export function SearchView() {
             {data?.domains?.edges.map((edge) => (
               <li key={edge.node.id}>
                 ({edge.node.__typename === "ENSv1Domain" ? "v1" : "v2"}){" "}
-                <Link to={`/domain/${edge.node.name}`}>{edge.node.name}</Link>
+                {edge.node.name && (
+                  <Link to={`/domain/${edge.node.name}`}>
+                    {beautifyInterpretedName(edge.node.name)}
+                  </Link>
+                )}
               </li>
             ))}
           </ul>
