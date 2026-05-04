@@ -108,14 +108,24 @@ describe("Query.labels", () => {
     ).rejects.toThrow(/Invalid labelHash/i);
   });
 
-  it("rejects requests over the maximum allowed LabelHash count", async () => {
+  it("rejects requests over the maximum allowed distinct LabelHash count", async () => {
     const labelHashes: LabelHash[] = [];
     for (let i = 0; i <= LABELS_BY_LABELHASH_MAX; i++) {
       labelHashes.push(parseLabelHash(`0x${i.toString(16).padStart(64, "0")}`));
     }
 
     await expect(request(LabelsByLabelHash, { labelHashes })).rejects.toThrow(
-      /Too many LabelHashes/i,
+      /Too many distinct LabelHashes/i,
     );
+  });
+
+  it("allows input with duplicate LabelHashes when the distinct count is within the max", async () => {
+    await expect(
+      request<LabelsByLabelHashResult>(LabelsByLabelHash, {
+        labelHashes: [ETH_LABEL_HASH, ETH_LABEL_HASH, ETH_LABEL_HASH],
+      }),
+    ).resolves.toMatchObject({
+      labels: [{ hash: ETH_LABEL_HASH, interpreted: "eth" }],
+    });
   });
 });

@@ -163,17 +163,17 @@ builder.queryType({
       resolve: async (_parent, { by }) => {
         if (by.labelHashes.length === 0) return [];
 
-        if (by.labelHashes.length > LABELS_BY_LABELHASH_MAX) {
+        const dedupedHashes = Array.from(new Set(by.labelHashes));
+
+        if (dedupedHashes.length > LABELS_BY_LABELHASH_MAX) {
           // Use `createGraphQLError` so the client-facing validation message survives Yoga's
           // default `maskError`, which (correctly) hides plain `Error` instances as
           // "Unexpected error.".
           throw createGraphQLError(
-            `Too many LabelHashes: received ${by.labelHashes.length}, max ${LABELS_BY_LABELHASH_MAX}.`,
+            `Too many distinct LabelHashes: received ${dedupedHashes.length}, max ${LABELS_BY_LABELHASH_MAX}.`,
             { extensions: { code: "BAD_USER_INPUT" } },
           );
         }
-
-        const dedupedHashes = Array.from(new Set(by.labelHashes));
 
         return ensDb
           .select()

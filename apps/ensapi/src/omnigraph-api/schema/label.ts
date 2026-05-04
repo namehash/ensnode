@@ -47,7 +47,7 @@ export const LabelsByLabelHashesInput = builder.inputType("LabelsByLabelHashesIn
     labelHashes: t.field({
       type: ["LabelHash"],
       required: true,
-      description: `LabelHashes to look up. Up to ${LABELS_BY_LABELHASH_MAX} LabelHashes per request (each normalized to lowercase at parse time). LabelHashes absent from the index are omitted from the result.`,
+      description: `LabelHashes to look up. After deduplication, at most ${LABELS_BY_LABELHASH_MAX} distinct LabelHashes per request (each normalized to lowercase at parse time). LabelHashes absent from the index are omitted from the result.`,
     }),
   }),
 });
