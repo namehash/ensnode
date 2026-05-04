@@ -98,11 +98,11 @@ export function useENSAdminFeatures(): ENSAdminFeatures {
   }, [indexingStatusQuery]);
 
   const restApi: FeatureStatus = useMemo(() => {
-    if (configQuery.status === "error") return CONFIG_ERROR_STATUS;
-    if (configQuery.status === "pending") return CONNECTING_STATUS;
+    if (indexingStatusQuery.status === "error") return INDEXING_STATUS_ERROR_STATUS;
+    if (indexingStatusQuery.status === "pending") return CONNECTING_STATUS;
 
     return { type: "supported" };
-  }, [configQuery]);
+  }, [indexingStatusQuery]);
 
   return { registrarActions, subgraph, omnigraph, restApi };
 }
