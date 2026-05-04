@@ -3,7 +3,6 @@ import type { ChainIdString } from "enssdk";
 import {
   type Datasource,
   type ENSNamespaceId,
-  ENSNamespaceIds,
   ensTestEnvChain,
   getENSNamespace,
 } from "@ensnode/datasources";
@@ -130,7 +129,7 @@ export function buildRpcConfigsFromEnv(
     }
 
     // ens-test-env Chain
-    if (namespace === ENSNamespaceIds.EnsTestEnv && chain.id === ensTestEnvChain.id) {
+    if (chain.id === ensTestEnvChain.id) {
       rpcConfigs[serializeChainId(ensTestEnvChain.id)] = ensTestEnvChain.rpcUrls.default.http[0];
       continue;
     }

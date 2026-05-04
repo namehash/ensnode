@@ -17,8 +17,8 @@ export const contracts = {
   dnsTldResolver: "0x998abeb3e57409262ae5b751f60747921b33613e",
   offchainDnsResolver: "0x851356ae760d987e095750cceb3bc6014560891c",
   simplePublicSuffixList: "0xf5059a5d33d5853360d16c683c16e67980206f36",
-  dnsRegistrar: "0x202cce504e04bed6fc0521238ddf04bc9e8e15ab",
-  extendedDnsResolver: "0x4631bcabd6df18d94796344963cb60d44a4136b6",
+  dnsRegistrar: "0xf4b146fba71f41e0592668ffbf264f1d186b2ca8",
+  extendedDnsResolver: "0x86a2ee8faf9a840f7a2c64ca3d51209f9a02081d",
 
   // -- Registries --
   legacyEnsRegistry: "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
@@ -29,11 +29,11 @@ export const contracts = {
 
   // -- Registrars & Controllers --
   baseRegistrar: "0x8a791620dd6260079bf849dc5567adc3f2fdc318",
-  ethRegistrar: "0x4c4a2f8c81640e47606d3fd77b353e87ba015584",
-  legacyEthRegistrarController: "0xfbc22278a96299d91d41c453234d97b4f5eb9b2d",
+  ethRegistrar: "0x21df544947ba3e8b3c32561399e88b52dc8b2823",
+  legacyEthRegistrarController: "0x46b142dd1e924fab83ecc3c08e4d46e82f005e0e",
   wrappedEthRegistrarController: "0x253553366da8546fc250f225fe3d25d0c782303b",
-  ethRegistrarController: "0x1c85638e118b37167e9298c2268758e058ddfda0",
-  batchRegistrar: "0xd8a5a9b31c3c0232e196d518e89fd8bf83acad43",
+  ethRegistrarController: "0x367761085bf3c12e5da2df99ac6e1a824612b8fb",
+  batchRegistrar: "0xdc11f7e700a4c898ae5caddb1082cffa76512add",
 
   // -- Reverse Resolution --
   ethReverseRegistrar: "0x59b670e9fa9d0a427751af201d676719a970857b",
@@ -41,26 +41,19 @@ export const contracts = {
   defaultReverseResolver: "0x5f3f1dbd7b74c6b46e8c44f98792a1daf8d69154",
   ethReverseResolver: "0x7bc06c482dead17c0e297afbc32f6e63d3846650",
   reverseRegistrar: "0x162a433068f51e18b7d13932f27e66a3f99e6890",
-  l2ReverseRegistrar: "0x49fd2be640db2910c2fab69bb8531ab6e76127ff",
+  l2ReverseRegistrar: "0x4631bcabd6df18d94796344963cb60d44a4136b6",
 
   // -- Resolvers --
   ensv1Resolver: "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
   ensv2Resolver: "0xc6e7df5e7b4f2a278906862b61205850344d4e7d",
   ownedResolver: "0x68b1d87f95878fe05b998f19b66f4baba5de1aed",
   permissionedResolver: "0x5ea90acf6555276660760fe629d72932c91f4b8e",
-  legacyPublicResolver: "0x86a2ee8faf9a840f7a2c64ca3d51209f9a02081d",
-  publicResolver: "0xa4899d35897033b927acfcf422bc745916139776",
+  legacyPublicResolver: "0xa4899d35897033b927acfcf422bc745916139776",
+  publicResolver: "0xf953b3a269d80e3eb0f2947630da976b896a8c5b",
   permissionedResolverImpl: "0x809d550fca64d94bd9f66e60752a544199cfac3d",
-  universalResolver: "0x5067457698fd6fa1c6964e416b3f42713513b3dd",
-  universalResolverV2: "0x8198f5d8f8cffe8f9c413d98a0a55aeb8ab9fbb7",
-  upgradableUniversalResolverProxy: "0x0355b7b8cb128fa5692729ab3aaa199c1753f726",
-
-  // -- L2 Reverse Resolvers --
-  arbitrumReverseResolver: "0xf953b3a269d80e3eb0f2947630da976b896a8c5b",
-  baseReverseResolver: "0xaa292e8611adf267e563f334ee42320ac96d0463",
-  lineaReverseResolver: "0x5c74c94173f05da1720953407cbb920f3df9f887",
-  optimismReverseResolver: "0x720472c8ce72c2a2d711333e064abd3e6bbeadd3",
-  scrollReverseResolver: "0xe8d2a1e88c91dcd5433208d4152cc4f399a7e91d",
+  universalResolver: "0xaa292e8611adf267e563f334ee42320ac96d0463",
+  universalResolverV2: "0x0355b7b8cb128fa5692729ab3aaa199c1753f726",
+  upgradableUniversalResolverProxy: "0x202cce504e04bed6fc0521238ddf04bc9e8e15ab",
 
   // -- Infrastructure --
   batchGatewayProvider: "0xdc64a140aa3e981100a9beca4e685f962f0cf6c9",
@@ -72,12 +65,12 @@ export const contracts = {
   verifiableFactory: "0x4ed7c70f96b99c776995fb64377f0d4ab3b0e1c1",
   nameWrapper: "0x5081a39b8a5f0e35a8d959395a630b68b74dd30f",
   unlockedMigrationController: "0xdbc43ba45381e02825b14322cddd15ec4b3164e6",
-  wrapperRegistry: "0x2e2ed0cfd3ad2f1d34481277b3204d807ca2f8c2",
-  lockedMigrationController: "0x51a1ceb83b83f1985a81c295d1ff28afef186e02",
+  wrapperRegistry: "0xd8a5a9b31c3c0232e196d518e89fd8bf83acad43",
+  lockedMigrationController: "0x36b58f5c1969b7b6591d752ea6f5486d069010ab",
   userRegistry: "0x7969c5ed335650692bc04293b07f5bf2e7a673c0",
   staticMetadataService: "0xb0d4afd8879ed9f52b28595d31b441d079b2ca07",
   multicall3: "0xca11bde05977b3631167028862be2a173976ca11",
-  migrationHelper: "0x18e317a7d70d8fbf8e6e893616b52390ebbdb629",
+  migrationHelper: "0x5c74c94173f05da1720953407cbb920f3df9f887",
 
   // -- DNSSEC Algorithms & Digests --
   rsasha1Algorithm: "0xa85233c63b9ee964add6f2cffe00fd84eb32338f",
@@ -89,9 +82,9 @@ export const contracts = {
 
   // -- Pricing --
   standardRentPriceOracle: "0x1429859428c0abc9c2c47c8ee9fbaf82cfa0f20f",
-  staticBulkRenewal: "0x4c2f7092c2ae51d986befee378e50bd4db99c901",
-  dummyOracle: "0xd84379ceae14aa33c123af12424a37803f885889",
-  exponentialPremiumPriceOracle: "0x2b0d36facd61b71cc05ab8f3d2355ec3631c0dd5",
+  staticBulkRenewal: "0x7a9ec1d04904907de0ed7b6839ccdd59c3716ac9",
+  dummyOracle: "0x2b0d36facd61b71cc05ab8f3d2355ec3631c0dd5",
+  exponentialPremiumPriceOracle: "0xfbc22278a96299d91d41c453234d97b4f5eb9b2d",
 
   // -- Mock Tokens --
   mockUsdc: "0xfd471836031dc5108809d173a067e8486b9047a3",
