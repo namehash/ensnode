@@ -4,7 +4,7 @@ import {
   type LabelHash,
   labelhashLiteralLabel,
   makeENSv2DomainId,
-  makeRegistryId,
+  makeENSv2RegistryId,
   makeStorageId,
   type NormalizedAddress,
   type TokenId,
@@ -12,7 +12,12 @@ import {
 } from "enssdk";
 import { hexToBigInt } from "viem";
 
-import { interpretAddress, isRegistrationFullyExpired, PluginName } from "@ensnode/ensnode-sdk";
+import {
+  interpretAddress,
+  isRegistrationFullyExpired,
+  PluginName,
+  toJson,
+} from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { ensureDomainEvent, ensureEvent } from "@/lib/ensv2/event-db-helpers";
@@ -27,7 +32,6 @@ import {
   ensIndexerSchema,
   type IndexingEngineContext,
 } from "@/lib/indexing-engines/ponder";
-import { toJson } from "@/lib/json-stringify-with-bigints";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 
@@ -58,21 +62,21 @@ export default function () {
     const isReservation = owner === undefined;
 
     const registry = getThisAccountId(context, event);
-    const registryId = makeRegistryId(registry);
+    const registryId = makeENSv2RegistryId(registry);
     const storageId = makeStorageId(tokenId);
     const domainId = makeENSv2DomainId(registry, storageId);
 
     // Sanity Check: LabelHash must match Label
     if (labelHash !== labelhashLiteralLabel(label)) {
       throw new Error(
-        `Sanity Check: labelHash !== labelhashLiteralLabel(label)\n${toJson(event.args)}`,
+        `Sanity Check: labelHash !== labelhashLiteralLabel(label)\n${toJson(event.args, { pretty: true })}`,
       );
     }
 
     // Sanity Check: StorageId derived from tokenId must match StorageId derived from LabelHash
     if (storageId !== makeStorageId(hexToBigInt(labelHash))) {
       throw new Error(
-        `Sanity Check: storageId !== makeStorageId(hexToBigInt(labelHash))\n${toJson(event.args)}`,
+        `Sanity Check: storageId !== makeStorageId(hexToBigInt(labelHash))\n${toJson(event.args, { pretty: true })}`,
       );
     }
 
@@ -80,7 +84,7 @@ export default function () {
     // TODO(signals) — move to NewRegistry and add invariant here
     await context.ensDb
       .insert(ensIndexerSchema.registry)
-      .values({ id: registryId, ...registry })
+      .values({ id: registryId, type: "ENSv2Registry", ...registry })
       .onConflictDoNothing();
 
     // ensure discovered Label
@@ -91,7 +95,7 @@ export default function () {
       // Invariant: if this is a Reservation, any existing Registration should be fully expired
       if (registration && !isRegistrationFullyExpired(registration, event.block.timestamp)) {
         throw new Error(
-          `Invariant(ENSv2Registry:Label[Registered|Reserved]): Existing unexpired Registration found, expected none or expired.\n${toJson(registration)}`,
+          `Invariant(ENSv2Registry:Label[Registered|Reserved]): Existing unexpired Registration found, expected none or expired.\n${toJson(registration, { pretty: true })}`,
         );
       }
     } else {
@@ -102,16 +106,17 @@ export default function () {
         !isRegistrationFullyExpired(registration, event.block.timestamp)
       ) {
         throw new Error(
-          `Invariant(ENSv2Registry:Label[Registered|Reserved]): Existing unexpired Registration found, expected none or expired.\n${toJson(registration)}`,
+          `Invariant(ENSv2Registry:Label[Registered|Reserved]): Existing unexpired Registration found, expected none or expired.\n${toJson(registration, { pretty: true })}`,
         );
       }
     }
 
-    // ensure v2Domain
+    // ensure ENSv2 Domain
     await context.ensDb
-      .insert(ensIndexerSchema.v2Domain)
+      .insert(ensIndexerSchema.domain)
       .values({
         id: domainId,
+        type: "ENSv2Domain",
         tokenId,
         registryId,
         labelHash,
@@ -119,24 +124,25 @@ export default function () {
         // a) this is a Registration, in which case a TransferSingle event will be emitted afterwards, or
         // b) this is a Reservation, in which there is no owner
       })
-      // if the v2Domain exists, this is a re-register after expiration and tokenId will have changed
+      // if the domain exists, this is a re-register after expiration and tokenId will have changed
       .onConflictDoUpdate({ tokenId });
 
     // insert Registration
-    await ensureAccount(context, registrant);
+    const registrantId = await ensureAccount(context, registrant);
+    const eventId = await ensureEvent(context, event, registrantId);
     await insertLatestRegistration(context, {
       domainId,
       type: isReservation ? "ENSv2RegistryReservation" : "ENSv2RegistryRegistration",
       registrarChainId: registry.chainId,
       registrarAddress: registry.address,
-      registrantId: interpretAddress(registrant),
+      registrantId,
       start: event.block.timestamp,
       expiry,
-      eventId: await ensureEvent(context, event),
+      eventId,
     });
 
     // push event to domain history
-    await ensureDomainEvent(context, event, domainId);
+    await ensureDomainEvent(context, domainId, eventId);
   }
 
   addOnchainEventListener(
@@ -177,23 +183,24 @@ export default function () {
       // Invariant: The existing Registration must not be expired.
       if (isRegistrationFullyExpired(registration, event.block.timestamp)) {
         throw new Error(
-          `Invariant(ENSv2Registry:LabelUnregistered): Expected unexpired registration but got:\n${toJson(registration)}`,
+          `Invariant(ENSv2Registry:LabelUnregistered): Expected unexpired registration but got:\n${toJson(registration, { pretty: true })}`,
         );
       }
 
       // unregistering a label just immediately sets its expiration to event.block.timestamp, which
       // effectively removes it from resolution (which interprets expired names as non-existent)
-      await ensureAccount(context, unregistrant);
+      const unregistrantId = await ensureAccount(context, unregistrant);
       await context.ensDb.update(ensIndexerSchema.registration, { id: registration.id }).set({
         expiry: event.block.timestamp,
-        unregistrantId: interpretAddress(unregistrant),
+        unregistrantId,
       });
 
       // NOTE(shrugs): PermissionedRegistry also increments eacVersionId and tokenVersionId if there was a
       // previous owner, but i'm not sure if we need to handle that detail here
 
       // push event to domain history
-      await ensureDomainEvent(context, event, domainId);
+      const eventId = await ensureEvent(context, event, unregistrantId);
+      await ensureDomainEvent(context, domainId, eventId);
     },
   );
 
@@ -210,7 +217,6 @@ export default function () {
         sender: NormalizedAddress;
       }>;
     }) => {
-      // biome-ignore lint/correctness/noUnusedVariables: not sure if we care to index sender
       const { tokenId, newExpiry: expiry, sender } = event.args;
 
       const registry = getThisAccountId(context, event);
@@ -227,7 +233,7 @@ export default function () {
       // Invariant: The existing Registration must not be expired.
       if (isRegistrationFullyExpired(registration, event.block.timestamp)) {
         throw new Error(
-          `Invariant(ENSv2Registry:ExpiryUpdated): Expected unexpired Registration but got:\n${toJson(registration)}`,
+          `Invariant(ENSv2Registry:ExpiryUpdated): Expected unexpired Registration but got:\n${toJson(registration, { pretty: true })}`,
         );
       }
 
@@ -237,7 +243,9 @@ export default function () {
         .set({ expiry });
 
       // push event to domain history
-      await ensureDomainEvent(context, event, domainId);
+      const senderId = await ensureAccount(context, sender);
+      const eventId = await ensureEvent(context, event, senderId);
+      await ensureDomainEvent(context, domainId, eventId);
     },
   );
 
@@ -251,9 +259,10 @@ export default function () {
       event: EventWithArgs<{
         tokenId: TokenId;
         subregistry: NormalizedAddress;
+        sender: NormalizedAddress;
       }>;
     }) => {
-      const { tokenId, subregistry: _subregistry } = event.args;
+      const { tokenId, subregistry: _subregistry, sender } = event.args;
       const subregistry = interpretAddress(_subregistry);
 
       const registryAccountId = getThisAccountId(context, event);
@@ -266,7 +275,7 @@ export default function () {
         // subregistry. i.e. the (sub)Registry's Canonical Domain becomes null, making it disjoint because
         // we don't track other domains who have set it as a Subregistry. This is acceptable for now,
         // and obviously isn't an issue once ENS Team implements Canonical Names
-        const previous = await context.ensDb.find(ensIndexerSchema.v2Domain, { id: domainId });
+        const previous = await context.ensDb.find(ensIndexerSchema.domain, { id: domainId });
         if (previous?.subregistryId) {
           await context.ensDb.delete(ensIndexerSchema.registryCanonicalDomain, {
             registryId: previous.subregistryId,
@@ -274,11 +283,11 @@ export default function () {
         }
 
         await context.ensDb
-          .update(ensIndexerSchema.v2Domain, { id: domainId })
+          .update(ensIndexerSchema.domain, { id: domainId })
           .set({ subregistryId: null });
       } else {
         const subregistryAccountId: AccountId = { chainId: context.chain.id, address: subregistry };
-        const subregistryId = makeRegistryId(subregistryAccountId);
+        const subregistryId = makeENSv2RegistryId(subregistryAccountId);
 
         // TODO(canonical-names): this implements last-write-wins heuristic for a Registry's canonical name,
         // replace with real logic once ENS Team implements Canonical Names
@@ -288,12 +297,14 @@ export default function () {
           .onConflictDoUpdate({ domainId });
 
         await context.ensDb
-          .update(ensIndexerSchema.v2Domain, { id: domainId })
+          .update(ensIndexerSchema.domain, { id: domainId })
           .set({ subregistryId });
       }
 
       // push event to domain history
-      await ensureDomainEvent(context, event, domainId);
+      const senderId = await ensureAccount(context, sender);
+      const eventId = await ensureEvent(context, event, senderId);
+      await ensureDomainEvent(context, domainId, eventId);
     },
   );
 
@@ -321,11 +332,12 @@ export default function () {
       const domainId = makeENSv2DomainId(registryAccountId, storageId);
 
       await context.ensDb
-        .update(ensIndexerSchema.v2Domain, { id: domainId })
+        .update(ensIndexerSchema.domain, { id: domainId })
         .set({ tokenId: newTokenId });
 
       // push event to domain history
-      await ensureDomainEvent(context, event, domainId);
+      const eventId = await ensureEvent(context, event);
+      await ensureDomainEvent(context, domainId, eventId);
     },
   );
 
@@ -334,26 +346,27 @@ export default function () {
     event,
   }: {
     context: IndexingEngineContext;
-    event: EventWithArgs<{ id: TokenId; to: NormalizedAddress }>;
+    event: EventWithArgs<{ id: TokenId; to: NormalizedAddress; operator: NormalizedAddress }>;
   }) {
-    const { id: tokenId, to: owner } = event.args;
+    const { id: tokenId, to: owner, operator } = event.args;
 
     const storageId = makeStorageId(tokenId);
     const registry = getThisAccountId(context, event);
     const domainId = makeENSv2DomainId(registry, storageId);
 
     // TODO(signals): remove this invariant, since we'll only be indexing Registry contracts
-    const registryId = makeRegistryId(registry);
+    const registryId = makeENSv2RegistryId(registry);
     const exists = await context.ensDb.find(ensIndexerSchema.registry, { id: registryId });
     if (!exists) return; // no-op non-Registry ERC1155 Transfers
 
     // update the Domain's ownerId
-    await context.ensDb
-      .update(ensIndexerSchema.v2Domain, { id: domainId })
-      .set({ ownerId: interpretAddress(owner) });
+    const ownerId = await ensureAccount(context, owner);
+    await context.ensDb.update(ensIndexerSchema.domain, { id: domainId }).set({ ownerId });
 
     // push event to domain history
-    await ensureDomainEvent(context, event, domainId);
+    const operatorId = await ensureAccount(context, operator);
+    const eventId = await ensureEvent(context, event, operatorId);
+    await ensureDomainEvent(context, domainId, eventId);
   }
 
   addOnchainEventListener(

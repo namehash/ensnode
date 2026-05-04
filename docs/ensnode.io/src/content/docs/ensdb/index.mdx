@@ -1,7 +1,112 @@
 ---
-title: ENSDb Overview
+title: Getting started with ENSDb
+description: ENSDb is an open standard for bi-directional ENS integration. An ENSDb instance is a PostgreSQL database served from a PostgreSQL server — and a single server can serve multiple ENSDb instances.
+sidebar:
+  label: Overview
+  order: 1
 ---
 
-:::caution[Work in Progress]
-This documentation is under active development.
-:::
+import { LinkCard, Aside, Card, CardGrid } from '@astrojs/starlight/components';
+
+## Vision
+
+Get the whole, live onchain state of ENS in your database.
+
+## Core Philosophy
+
+### Open Standard
+
+ENSDb is an open standard for bi-directional ENS integration. It defines a carefully crafted set of database schema designs, rules, and constraints for storing the ENS onchain state in a PostgreSQL database — making the data accessible from any programming language.
+
+The [ENSDb standard](/ensdb/concepts/glossary#ensdb-standard) is implementation-agnostic, so you have options: implement your own [ENSDb Writer](/ensdb/concepts/glossary#ensdb-writer) or [ENSDb Reader](/ensdb/concepts/glossary#ensdb-reader) in any language, or use the initial reference implementations provided by ENSNode — [ENSIndexer](/ensindexer/) as an ENSDb Writer and [ENSApi](/ensapi/) as an ENSDb Reader.
+
+<Aside type="tip" title="Build in Any Language">
+Each ENSDb instance runs in a standard PostgreSQL database, so to interact with it, you can use _any programming language_ that has a PostgreSQL driver. Zig, Rust, Go, Python, JavaScript, Ruby, Java, C# — the choice is yours.
+</Aside>
+
+## What You Get
+
+### Complete ENS State
+
+An **ENSDb instance** contains the **live onchain state of ENS**, including:
+
+- Domains (ENSv1 and ENSv2)
+- Registrations and renewals
+- Resolver records and text records
+- Events and ownership history
+- NFT/token data for names
+- … and more!
+
+### PostgreSQL Benefits
+
+By building on a PostgreSQL database, ENSDb inherits world-class capabilities:
+
+- ACID transactions — Data integrity guarantees
+- Complex queries — Joins, aggregations, window functions
+- Scalability — Replication, sharding, connection pooling
+- Ecosystem — Mature tools, ORMs, dashboards, analytics platforms
+- Reliability — Decades of production-proven technology
+
+## What You Can Build
+
+ENSDb unlocks a new universe of ENS applications:
+
+<CardGrid>
+<Card title="Custom APIs" icon="seti:graphql">
+Build specialized GraphQL or REST APIs tailored to your use case. Query exactly the data you need with full SQL power.
+</Card>
+<Card title="Analytics & Dashboards" icon="document">
+Create real-time dashboards and analytics pipelines. Better than Dune — you have the live ENS state locally with sub-second query latency.
+</Card>
+<Card title="CLIs & Developer Tools" icon="seti:shell">
+Build command-line tools for ENS operations. Query domains, and any specialized lookup — all from your terminal.
+</Card>
+<Card title="Event-Based Engines" icon="seti:plan">
+Build reactive systems that respond to ENS state changes. Respond to registration lifecycle updates, ownership transfers, resolver updates.
+</Card>
+<Card title="Data Pipelines" icon="seti:plan">
+Feed ENS data into your existing data infrastructure. Sync to data warehouses, trigger webhooks, populate search indexes.
+</Card>
+<Card title="AI Agents" icon="seti:bicep">
+Build AI agents that can query ENS state and perform actions based on that data.
+</Card>
+</CardGrid>
+
+## Quick Start
+
+<LinkCard
+  title="Use the ENSDb SDK"
+  description="Quick start with the TypeScript SDK for ENSDb, providing type-safe database access and utilities for working with ENSDb."
+  href="/ensdb/usage/sdk"
+/>
+
+<LinkCard
+  title="Use the SQL Interface"
+  description="Quick start with the SQL interface for ENSDb, allowing you to interact with your ENSDb instance using any PostgreSQL client and SQL queries."
+  href="/ensdb/usage/sql"
+/>
+
+## Documentation Structure
+
+<LinkCard
+  title="Concepts"
+  description="Understand ENSDb architecture, schemas, and data flow"
+  href="/ensdb/concepts"
+/>
+
+<LinkCard
+  title="Usage"
+  description="Learn how to use ENSDb with the SDK and SQL interface"
+  href="/ensdb/usage"
+/>
+
+<LinkCard
+  title="Integrations"
+  description="Learn how to integrate ENSDb with other systems and tools"
+  href="/ensdb/integrations/ensnode"
+/>
+
+## Related Projects
+
+- **[ENSIndexer](/ensindexer/)** — The reference [ENSDb Writer](/ensdb/concepts/glossary#ensdb-writer) implementation
+- **[ENSApi](/ensapi/)** — The reference [ENSDb Reader](/ensdb/concepts/glossary#ensdb-reader) implementation

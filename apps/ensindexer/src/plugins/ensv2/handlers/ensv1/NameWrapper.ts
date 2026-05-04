@@ -21,6 +21,7 @@ import {
   isRegistrationFullyExpired,
   isRegistrationInGracePeriod,
   PluginName,
+  toJson,
 } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
@@ -38,7 +39,6 @@ import {
   ensIndexerSchema,
   type IndexingEngineContext,
 } from "@/lib/indexing-engines/ponder";
-import { toJson } from "@/lib/json-stringify-with-bigints";
 import { logger } from "@/lib/logger";
 import { getManagedName } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
@@ -120,15 +120,16 @@ export default function () {
 
     // otherwise is transfer of existing registration
 
+    const { registry } = getManagedName(getThisAccountId(context, event));
     // the NameWrapper's ERC1155 TokenIds are the ENSv1Domain's Node so we `interpretTokenIdAsNode`
-    const domainId = makeENSv1DomainId(interpretTokenIdAsNode(tokenId));
+    const domainId = makeENSv1DomainId(registry, interpretTokenIdAsNode(tokenId));
     const registration = await getLatestRegistration(context, domainId);
     const isExpired = registration && isRegistrationExpired(registration, event.block.timestamp);
 
     // Invariant: must have Registration
     if (!registration) {
       throw new Error(
-        `Invariant(NameWrapper:Transfer): Registration expected:\n${toJson(registration)}`,
+        `Invariant(NameWrapper:Transfer): Registration expected:\n${toJson(registration, { pretty: true })}`,
       );
     }
 
@@ -136,7 +137,7 @@ export default function () {
     const cannotTransferWhileExpired = registration.fuses && isPccFuseSet(registration.fuses);
     if (isExpired && cannotTransferWhileExpired) {
       throw new Error(
-        `Invariant(NameWrapper:Transfer): Transfer of expired Registration with PARENT_CANNOT_CONTROL set:\n${toJson(registration)} ${JSON.stringify({ isPccFuseSet: isPccFuseSet(registration.fuses ?? 0) })}`,
+        `Invariant(NameWrapper:Transfer): Transfer of expired Registration with PARENT_CANNOT_CONTROL set:\n${toJson(registration, { pretty: true })} ${JSON.stringify({ isPccFuseSet: isPccFuseSet(registration.fuses ?? 0) })}`,
       );
     }
 
@@ -145,7 +146,8 @@ export default function () {
     await materializeENSv1DomainEffectiveOwner(context, domainId, to);
 
     // push event to domain history
-    await ensureDomainEvent(context, event, domainId);
+    const eventId = await ensureEvent(context, event);
+    await ensureDomainEvent(context, domainId, eventId);
   }
 
   addOnchainEventListener(
@@ -169,7 +171,8 @@ export default function () {
       const registrant = owner;
 
       const registrar = getThisAccountId(context, event);
-      const domainId = makeENSv1DomainId(node);
+      const { node: managedNode, registry } = getManagedName(registrar);
+      const domainId = makeENSv1DomainId(registry, node);
 
       // decode name and discover labels
       try {
@@ -189,10 +192,10 @@ export default function () {
       // materialize domain owner
       await materializeENSv1DomainEffectiveOwner(context, domainId, owner);
 
+      const eventId = await ensureEvent(context, event);
+
       // handle wraps of direct-subname-of-registrar-managed-names
       if (registration && !isFullyExpired && registration.type === "BaseRegistrar") {
-        const { node: managedNode } = getManagedName(getThisAccountId(context, event));
-
         // Invariant: Emitted name is a direct subname of the Managed Name
         if (!isDirectSubnameOfManagedName(managedNode, name, node)) {
           throw new Error(
@@ -203,21 +206,21 @@ export default function () {
         // Invariant: Cannot wrap grace period names
         if (isRegistrationInGracePeriod(registration, event.block.timestamp)) {
           throw new Error(
-            `Invariant(NameWrapper:NameWrapped): Cannot wrap direct-subname-of-registrar-managed-names in GRACE_PERIOD \n${toJson(registration)}`,
+            `Invariant(NameWrapper:NameWrapped): Cannot wrap direct-subname-of-registrar-managed-names in GRACE_PERIOD \n${toJson(registration, { pretty: true })}`,
           );
         }
 
         // Invariant: cannot re-wrap, right? NameWrapped -> NameUnwrapped -> NameWrapped
         if (registration.wrapped) {
           throw new Error(
-            `Invariant(NameWrapper:NameWrapped): Re-wrapping already wrapped BaseRegistrar registration\n${toJson(registration)}`,
+            `Invariant(NameWrapper:NameWrapped): Re-wrapping already wrapped BaseRegistrar registration\n${toJson(registration, { pretty: true })}`,
           );
         }
 
         // Invariant: BaseRegistrar always provides expiry
         if (expiry === null) {
           throw new Error(
-            `Invariant(NameWrapper:NameWrapped): Wrap of BaseRegistrar Registration does not include expiry!\n${toJson(registration)}`,
+            `Invariant(NameWrapper:NameWrapped): Wrap of BaseRegistrar Registration does not include expiry!\n${toJson(registration, { pretty: true })}`,
           );
         }
 
@@ -240,7 +243,7 @@ export default function () {
         // Invariant: If there's an existing Registration, it should be expired
         if (registration && !isFullyExpired) {
           throw new Error(
-            `Invariant(NameWrapper:NameWrapped): NameWrapped but there's an existing unexpired non-BaseRegistrar Registration:\n${toJson({ registration, timestamp: event.block.timestamp })}`,
+            `Invariant(NameWrapper:NameWrapped): NameWrapped but there's an existing unexpired non-BaseRegistrar Registration:\n${toJson({ registration, timestamp: event.block.timestamp }, { pretty: true })}`,
           );
         }
 
@@ -259,12 +262,12 @@ export default function () {
           fuses,
           start: event.block.timestamp,
           expiry,
-          eventId: await ensureEvent(context, event),
+          eventId,
         });
       }
 
       // push event to domain history
-      await ensureDomainEvent(context, event, domainId);
+      await ensureDomainEvent(context, domainId, eventId);
     },
   );
 
@@ -279,7 +282,8 @@ export default function () {
     }) => {
       const { node } = event.args;
 
-      const domainId = makeENSv1DomainId(node);
+      const { registry } = getManagedName(getThisAccountId(context, event));
+      const domainId = makeENSv1DomainId(registry, node);
       const registration = await getLatestRegistration(context, domainId);
 
       if (!registration) {
@@ -301,7 +305,8 @@ export default function () {
       }
 
       // push event to domain history
-      await ensureDomainEvent(context, event, domainId);
+      const eventId = await ensureEvent(context, event);
+      await ensureDomainEvent(context, domainId, eventId);
 
       // NOTE: we don't need to adjust Domain.ownerId because NameWrapper always calls ens.setOwner
     },
@@ -321,13 +326,14 @@ export default function () {
     }) => {
       const { node, fuses } = event.args;
 
-      const domainId = makeENSv1DomainId(node);
+      const { registry } = getManagedName(getThisAccountId(context, event));
+      const domainId = makeENSv1DomainId(registry, node);
       const registration = await getLatestRegistration(context, domainId);
 
       // Invariant: must have a Registration
       if (!registration) {
         throw new Error(
-          `Invariant(NameWrapper:FusesSet): Registration expected:\n${toJson(registration)}`,
+          `Invariant(NameWrapper:FusesSet): Registration expected:\n${toJson(registration, { pretty: true })}`,
         );
       }
 
@@ -338,7 +344,8 @@ export default function () {
       });
 
       // push event to domain history
-      await ensureDomainEvent(context, event, domainId);
+      const eventId = await ensureEvent(context, event);
+      await ensureDomainEvent(context, domainId, eventId);
     },
   );
 
@@ -357,13 +364,14 @@ export default function () {
       const { node, expiry: _expiry } = event.args;
       const expiry = interpretExpiry(_expiry);
 
-      const domainId = makeENSv1DomainId(node);
+      const { registry } = getManagedName(getThisAccountId(context, event));
+      const domainId = makeENSv1DomainId(registry, node);
       const registration = await getLatestRegistration(context, domainId);
 
       // Invariant: must have Registration
       if (!registration) {
         throw new Error(
-          `Invariant(NameWrapper:ExpiryExtended): Registration expected\n${toJson(registration)}`,
+          `Invariant(NameWrapper:ExpiryExtended): Registration expected\n${toJson(registration, { pretty: true })}`,
         );
       }
 
@@ -372,7 +380,8 @@ export default function () {
         .set({ expiry });
 
       // push event to domain history
-      await ensureDomainEvent(context, event, domainId);
+      const eventId = await ensureEvent(context, event);
+      await ensureDomainEvent(context, domainId, eventId);
 
       // if this is a NameWrapper Registration, this is a Renewal event. otherwise, this is a wrapped
       // BaseRegistrar Registration, and the Renewal is already being managed

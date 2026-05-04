@@ -108,3 +108,10 @@ export type Unvalidated<T> = DeepPartial<T>;
 export type RequiredAndNotNull<T, K extends keyof T> = T & {
   [P in K]-?: NonNullable<T[P]>;
 };
+
+/**
+ * Marks keys in K as required (not undefined) and null.
+ */
+export type RequiredAndNull<T, K extends keyof T> = T & {
+  [P in K]-?: null;
+};

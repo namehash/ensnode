@@ -27,8 +27,10 @@ import {
   type CurrencyId,
   CurrencyIds,
   type PriceDai,
+  type PriceEnsTokens,
   type PriceEth,
   type PriceUsdc,
+  type SerializedPriceEth,
 } from "./currencies";
 import type { BlockRef, Datetime } from "./types";
 
@@ -242,12 +244,29 @@ const makePriceAmountSchema = (valueLabel: string = "Amount") =>
       error: `${valueLabel} must not be negative.`,
     });
 
+const makeSerializedCurrencyAmountSchema = (valueLabel: string = "Serialized Currency Amount") =>
+  z.string({ error: `${valueLabel} must be a string.` }).regex(/^\d+$/, {
+    error: `${valueLabel} can only contain digits (0-9) and must represent a non-negative integer.`,
+  });
+
 export const makePriceCurrencySchema = (
   currency: CurrencyId,
   valueLabel: string = "Price Currency",
 ) =>
   z.strictObject({
     amount: makePriceAmountSchema(`${valueLabel} amount`),
+
+    currency: z.literal(currency, {
+      error: `${valueLabel} currency must be set to '${currency}'.`,
+    }),
+  });
+
+export const makeSerializedPriceCurrencySchema = (
+  currency: CurrencyId,
+  valueLabel: string = "Price Currency",
+) =>
+  z.strictObject({
+    amount: makeSerializedCurrencyAmountSchema(`${valueLabel} amount`),
 
     currency: z.literal(currency, {
       error: `${valueLabel} currency must be set to '${currency}'.`,
@@ -264,6 +283,7 @@ export const makePriceSchema = (valueLabel: string = "Price") =>
       makePriceCurrencySchema(CurrencyIds.ETH, valueLabel),
       makePriceCurrencySchema(CurrencyIds.USDC, valueLabel),
       makePriceCurrencySchema(CurrencyIds.DAI, valueLabel),
+      makePriceCurrencySchema(CurrencyIds.ENSTokens, valueLabel),
     ],
     { error: `${valueLabel} currency must be one of ${Object.values(CurrencyIds).join(", ")}` },
   );
@@ -273,6 +293,11 @@ export const makePriceSchema = (valueLabel: string = "Price") =>
  */
 export const makePriceEthSchema = (valueLabel: string = "Price ETH") =>
   makePriceCurrencySchema(CurrencyIds.ETH, valueLabel).transform((v) => v as PriceEth);
+
+export const makeSerializedPriceEthSchema = (valueLabel: string = "Serialized Price ETH") =>
+  makeSerializedPriceCurrencySchema(CurrencyIds.ETH, valueLabel).transform(
+    (v) => v as SerializedPriceEth,
+  );
 
 /**
  * Schema for {@link PriceUsdc} type.
@@ -285,6 +310,12 @@ export const makePriceUsdcSchema = (valueLabel: string = "Price USDC") =>
  */
 export const makePriceDaiSchema = (valueLabel: string = "Price DAI") =>
   makePriceCurrencySchema(CurrencyIds.DAI, valueLabel).transform((v) => v as PriceDai);
+
+/**
+ * Schema for {@link PriceEnsTokens} type.
+ */
+export const makePriceEnsTokensSchema = (valueLabel: string = "Price ENSTokens") =>
+  makePriceCurrencySchema(CurrencyIds.ENSTokens, valueLabel).transform((v) => v as PriceEnsTokens);
 
 /**
  * Schema for {@link AccountId} type.

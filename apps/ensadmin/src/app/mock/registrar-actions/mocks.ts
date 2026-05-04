@@ -212,7 +212,7 @@ function registrarActionWithUpdatedIncrementalDuration(
   return {
     ...registrarAction,
     action: { ...registrarAction.action, incrementalDuration },
-    name: asInterpretedName(`incrementalDuration-${incrementalDuration}.${registrarAction.name}`),
+    name: asInterpretedName(`incremental-duration-${incrementalDuration}.${registrarAction.name}`),
   } satisfies NamedRegistrarAction;
 }
 

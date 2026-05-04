@@ -26,7 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
+import { useActiveEnsNodeStackInfo } from "@/hooks/active/use-active-ensnode-stack-info";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 import { getENSIP19SupportedChainIds } from "@/lib/get-ensip19-supported-chain-ids";
 
@@ -42,7 +42,7 @@ export default function ResolvePrimaryNameInspector() {
   const searchParams = useSearchParams();
   const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
 
-  const namespace = useActiveNamespace();
+  const { namespace } = useActiveEnsNodeStackInfo().ensIndexer;
   const exampleAddresses = useMemo(
     () => getNamespaceSpecificValue(namespace, EXAMPLE_ADDRESSES),
     [namespace],

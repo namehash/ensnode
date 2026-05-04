@@ -18,20 +18,20 @@ import {
 } from "./edition";
 
 /**
- * Default ENSNode API endpoint URL
+ * Default ENSNode endpoint URL
  */
 export const DEFAULT_ENSNODE_API_URL = "https://api.alpha.ensnode.io" as const;
 
 /**
- * Configuration options for ENS Referrals API client
+ * Configuration options for an ENS Referrals client
  */
 export interface ClientOptions {
-  /** The ENSNode API URL */
+  /** The ENSNode URL */
   url: URL;
 }
 
 /**
- * ENS Referrals API Client
+ * ENS Referrals Client
  *
  * Provides access to ENS Referrals data and leaderboard information.
  *

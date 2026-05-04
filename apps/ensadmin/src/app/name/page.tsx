@@ -12,7 +12,7 @@ import { getNameDetailsRelativePath, NameLink } from "@/components/name-links";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
+import { useActiveEnsNodeStackInfo } from "@/hooks/active/use-active-ensnode-stack-info";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 
 import { NameDetailPageContent } from "./_components/NameDetailPageContent";
@@ -62,7 +62,7 @@ export default function ExploreNamesPage() {
   const nameFromQuery = searchParams.get("name");
   const [rawInputName, setRawInputName] = useState<Name>("");
 
-  const namespace = useActiveNamespace();
+  const { namespace } = useActiveEnsNodeStackInfo().ensIndexer;
   const exampleNames = useMemo(
     () => getNamespaceSpecificValue(namespace, EXAMPLE_NAMES),
     [namespace],

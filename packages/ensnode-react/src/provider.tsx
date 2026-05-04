@@ -4,18 +4,18 @@
 import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import { createElement, useMemo } from "react";
 
-import { EnsApiClient } from "@ensnode/ensnode-sdk";
+import { EnsNodeClient } from "@ensnode/ensnode-sdk";
 
-import { ENSNodeContext } from "./context";
-import type { ENSNodeSDKConfig } from "./types";
+import { EnsNodeContext } from "./context";
+import type { EnsNodeProviderOptions } from "./types";
 
-export interface ENSNodeProviderProps {
-  /** ENSNode configuration */
-  config: ENSNodeSDKConfig;
+export interface EnsNodeProviderProps {
+  /** ENSNode Provider Options */
+  options: EnsNodeProviderOptions;
 
   /**
    * Optional QueryClient instance. If provided, you must wrap your app with QueryClientProvider yourself.
-   * If not provided, ENSNodeProvider will create and manage its own QueryClient internally.
+   * If not provided, EnsNodeProvider will create and manage its own QueryClient internally.
    */
   queryClient?: QueryClient;
 
@@ -26,21 +26,18 @@ export interface ENSNodeProviderProps {
   queryClientOptions?: ConstructorParameters<typeof QueryClient>[0];
 }
 
-function ENSNodeInternalProvider({
+function EnsNodeInternalProvider({
   children,
-  config,
+  options,
 }: {
   children?: React.ReactNode;
-  config: ENSNodeSDKConfig;
+  options: EnsNodeProviderOptions;
 }) {
-  // Memoize the config to prevent unnecessary re-renders
-  const memoizedConfig = useMemo(() => config, [config]);
-
-  return createElement(ENSNodeContext.Provider, { value: memoizedConfig }, children);
+  return createElement(EnsNodeContext.Provider, { value: options }, children);
 }
 
-export function ENSNodeProvider(parameters: React.PropsWithChildren<ENSNodeProviderProps>) {
-  const { children, config, queryClient, queryClientOptions } = parameters;
+export function EnsNodeProvider(parameters: React.PropsWithChildren<EnsNodeProviderProps>) {
+  const { children, options, queryClient, queryClientOptions } = parameters;
 
   // Check if we're already inside a QueryClientProvider
   let hasExistingQueryClient = false;
@@ -59,12 +56,12 @@ export function ENSNodeProvider(parameters: React.PropsWithChildren<ENSNodeProvi
           "Either remove the queryClient prop to use auto-managed setup, or wrap with QueryClientProvider.",
       );
     }
-    return createElement(ENSNodeInternalProvider, { config, children });
+    return createElement(EnsNodeInternalProvider, { options, children });
   }
 
   // If already inside a QueryClientProvider, just use that
   if (hasExistingQueryClient) {
-    return createElement(ENSNodeInternalProvider, { config, children });
+    return createElement(EnsNodeInternalProvider, { options, children });
   }
 
   // Create our own QueryClient and QueryClientProvider
@@ -87,19 +84,21 @@ export function ENSNodeProvider(parameters: React.PropsWithChildren<ENSNodeProvi
   return createElement(
     QueryClientProvider,
     { client: defaultQueryClient },
-    createElement(ENSNodeInternalProvider, { config, children }),
+    createElement(EnsNodeInternalProvider, { options, children }),
   );
 }
 
 /**
- * Helper function to create ENSNode configuration
+ * Helper function to create ENSNode Provider Options
  */
-export function createConfig(options?: { url?: string | URL }): ENSNodeSDKConfig {
-  const url = options?.url ? new URL(options.url) : EnsApiClient.defaultOptions().url;
+export function createEnsNodeProviderOptions(options?: {
+  url?: string | URL;
+}): EnsNodeProviderOptions {
+  const url = options?.url ? new URL(options.url) : EnsNodeClient.defaultOptions().url;
 
   return {
     client: {
-      ...EnsApiClient.defaultOptions(),
+      ...EnsNodeClient.defaultOptions(),
       url,
     },
   };

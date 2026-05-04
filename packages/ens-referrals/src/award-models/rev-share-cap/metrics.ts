@@ -5,12 +5,12 @@ import { makePriceEthSchema, makePriceUsdcSchema } from "@ensnode/ensnode-sdk/in
 
 import type { ReferrerMetrics } from "../../referrer-metrics";
 import { buildReferrerMetrics, validateReferrerMetrics } from "../../referrer-metrics";
-import { SECONDS_PER_YEAR } from "../../time";
 import type { ReferrerRank } from "../shared/rank";
 import { validateReferrerRank } from "../shared/rank";
 import {
   type AdminAction,
   AdminActionTypes,
+  calcBaseRevenueContribution,
   isReferrerQualifiedRevShareCap,
   type ReferralProgramRulesRevShareCap,
 } from "./rules";
@@ -24,7 +24,7 @@ export interface ReferrerMetricsRevShareCap extends ReferrerMetrics {
    * (`rules.baseAnnualRevenueContribution` × years of incremental duration).
    * Used for qualification and award calculation in the rev-share-cap model.
    *
-   * @invariant Guaranteed to be `priceUsdc(rules.baseAnnualRevenueContribution.amount * BigInt(totalIncrementalDuration) / BigInt(SECONDS_PER_YEAR))`
+   * @invariant Guaranteed to equal `calcBaseRevenueContribution(rules, totalIncrementalDuration)`.
    */
   totalBaseRevenueContribution: PriceUsdc;
 }
@@ -39,9 +39,9 @@ export const validateReferrerMetricsRevShareCap = (
     metrics.totalBaseRevenueContribution,
   );
 
-  const expectedTotalBaseRevenueContribution = priceUsdc(
-    (rules.baseAnnualRevenueContribution.amount * BigInt(metrics.totalIncrementalDuration)) /
-      BigInt(SECONDS_PER_YEAR),
+  const expectedTotalBaseRevenueContribution = calcBaseRevenueContribution(
+    rules,
+    metrics.totalIncrementalDuration,
   );
   if (metrics.totalBaseRevenueContribution.amount !== expectedTotalBaseRevenueContribution.amount) {
     throw new Error(
@@ -54,9 +54,9 @@ export const buildReferrerMetricsRevShareCap = (
   metrics: ReferrerMetrics,
   rules: ReferralProgramRulesRevShareCap,
 ): ReferrerMetricsRevShareCap => {
-  const totalBaseRevenueContribution = priceUsdc(
-    (rules.baseAnnualRevenueContribution.amount * BigInt(metrics.totalIncrementalDuration)) /
-      BigInt(SECONDS_PER_YEAR),
+  const totalBaseRevenueContribution = calcBaseRevenueContribution(
+    rules,
+    metrics.totalIncrementalDuration,
   );
 
   const result = {

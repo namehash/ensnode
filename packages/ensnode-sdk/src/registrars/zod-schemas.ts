@@ -10,6 +10,7 @@ import {
   makeNodeSchema,
   makeNormalizedAddressSchema,
   makePriceEthSchema,
+  makeSerializedPriceEthSchema,
   makeTransactionHashSchema,
   makeUnixTimestampSchema,
 } from "../shared/zod-schemas";
@@ -22,6 +23,8 @@ import {
   type RegistrarActionPricingUnknown,
   type RegistrarActionReferralAvailable,
   RegistrarActionTypes,
+  SerializedRegistrarAction,
+  SerializedRegistrarActionPricing,
 } from "./registrar-action";
 import type { RegistrationLifecycle } from "./registration-lifecycle";
 import { Subregistry } from "./subregistry";
@@ -84,6 +87,27 @@ const makeRegistrarActionPricingSchema = (valueLabel: string = "Registrar Action
         total: z.null(),
       })
       .transform((v) => v as RegistrarActionPricingUnknown),
+  ]);
+
+/**
+ * Schema for parsing objects into {@link SerializedRegistrarActionPricing}.
+ */
+export const makeSerializedRegistrarActionPricingSchema = (
+  valueLabel: string = "Serialized Registrar Action Pricing",
+) =>
+  z.union([
+    // pricing available
+    z.object({
+      baseCost: makeSerializedPriceEthSchema(`${valueLabel} Base Cost`),
+      premium: makeSerializedPriceEthSchema(`${valueLabel} Premium`),
+      total: makeSerializedPriceEthSchema(`${valueLabel} Total`),
+    }),
+    // pricing unknown
+    z.object({
+      baseCost: z.null(),
+      premium: z.null(),
+      total: z.null(),
+    }),
   ]);
 
 /** Invariant: decodedReferrer is based on encodedReferrer */
@@ -156,22 +180,25 @@ const EventIdsSchema = z
   .min(1)
   .transform((v) => v as [RegistrarActionEventId, ...RegistrarActionEventId[]]);
 
+// Base schema without refinements - can be extended
+const makeBaseRegistrarActionSchemaWithoutCheck = (valueLabel: string = "Base Registrar Action") =>
+  z.object({
+    id: EventIdSchema,
+    incrementalDuration: makeDurationSchema(`${valueLabel} Incremental Duration`),
+    registrant: makeNormalizedAddressSchema(`${valueLabel} Registrant`),
+    registrationLifecycle: makeRegistrationLifecycleSchema(`${valueLabel} Registration Lifecycle`),
+    pricing: makeRegistrarActionPricingSchema(`${valueLabel} Pricing`),
+    referral: makeRegistrarActionReferralSchema(`${valueLabel} Referral`),
+    block: makeBlockRefSchema(`${valueLabel} Block`),
+    transactionHash: makeTransactionHashSchema(`${valueLabel} Transaction Hash`),
+    eventIds: EventIdsSchema,
+  });
+
+// Base schema with refinements - used for parsing/validation
 export const makeBaseRegistrarActionSchema = (valueLabel: string = "Base Registrar Action") =>
-  z
-    .object({
-      id: EventIdSchema,
-      incrementalDuration: makeDurationSchema(`${valueLabel} Incremental Duration`),
-      registrant: makeNormalizedAddressSchema(`${valueLabel} Registrant`),
-      registrationLifecycle: makeRegistrationLifecycleSchema(
-        `${valueLabel} Registration Lifecycle`,
-      ),
-      pricing: makeRegistrarActionPricingSchema(`${valueLabel} Pricing`),
-      referral: makeRegistrarActionReferralSchema(`${valueLabel} Referral`),
-      block: makeBlockRefSchema(`${valueLabel} Block`),
-      transactionHash: makeTransactionHashSchema(`${valueLabel} Transaction Hash`),
-      eventIds: EventIdsSchema,
-    })
-    .check(invariant_eventIdsInitialElementIsTheActionId);
+  makeBaseRegistrarActionSchemaWithoutCheck(valueLabel).check(
+    invariant_eventIdsInitialElementIsTheActionId,
+  );
 
 export const makeRegistrarActionRegistrationSchema = (valueLabel: string = "Registration ") =>
   makeBaseRegistrarActionSchema(valueLabel).extend({
@@ -190,4 +217,34 @@ export const makeRegistrarActionSchema = (valueLabel: string = "Registrar Action
   z.discriminatedUnion("type", [
     makeRegistrarActionRegistrationSchema(`${valueLabel} Registration`),
     makeRegistrarActionRenewalSchema(`${valueLabel} Renewal`),
+  ]);
+
+const makeSerializedBaseRegistrarActionSchema = (
+  valueLabel: string = "Serialized Base Registrar Action",
+) =>
+  makeBaseRegistrarActionSchemaWithoutCheck(valueLabel).extend({
+    pricing: makeSerializedRegistrarActionPricingSchema(`${valueLabel} Pricing`),
+  });
+
+const makeSerializedRegistrarActionRegistrationSchema = (
+  valueLabel: string = "Serialized Registration",
+) =>
+  makeSerializedBaseRegistrarActionSchema(valueLabel).extend({
+    type: z.literal(RegistrarActionTypes.Registration),
+  });
+
+const makeSerializedRegistrarActionRenewalSchema = (valueLabel: string = "Serialized Renewal") =>
+  makeSerializedBaseRegistrarActionSchema(valueLabel).extend({
+    type: z.literal(RegistrarActionTypes.Renewal),
+  });
+
+/**
+ * Schema for  {@link SerializedRegistrarAction}
+ */
+export const makeSerializedRegistrarActionSchema = (
+  valueLabel: string = "Serialized Registrar Action",
+) =>
+  z.discriminatedUnion("type", [
+    makeSerializedRegistrarActionRegistrationSchema(`${valueLabel} Registration`),
+    makeSerializedRegistrarActionRenewalSchema(`${valueLabel} Renewal`),
   ]);

@@ -1,8 +1,8 @@
 import DataLoader from "dataloader";
 import { getUnixTime } from "date-fns";
-import type { CanonicalPath, ENSv1DomainId, ENSv2DomainId } from "enssdk";
+import type { CanonicalPath, DomainId } from "enssdk";
 
-import { getV1CanonicalPath, getV2CanonicalPath } from "./lib/get-canonical-path";
+import { getCanonicalPath } from "./lib/get-canonical-path";
 
 /**
  * A Promise.catch handler that provides the thrown error as a resolved value, useful for Dataloaders.
@@ -10,14 +10,9 @@ import { getV1CanonicalPath, getV2CanonicalPath } from "./lib/get-canonical-path
 const errorAsValue = (error: unknown) =>
   error instanceof Error ? error : new Error(String(error));
 
-const createV1CanonicalPathLoader = () =>
-  new DataLoader<ENSv1DomainId, CanonicalPath | null>(async (domainIds) =>
-    Promise.all(domainIds.map((id) => getV1CanonicalPath(id).catch(errorAsValue))),
-  );
-
-const createV2CanonicalPathLoader = () =>
-  new DataLoader<ENSv2DomainId, CanonicalPath | null>(async (domainIds) =>
-    Promise.all(domainIds.map((id) => getV2CanonicalPath(id).catch(errorAsValue))),
+const createCanonicalPathLoader = () =>
+  new DataLoader<DomainId, CanonicalPath | Error | null>(async (domainIds) =>
+    Promise.all(domainIds.map((id) => getCanonicalPath(id).catch(errorAsValue))),
   );
 
 /**
@@ -28,7 +23,6 @@ const createV2CanonicalPathLoader = () =>
 export const context = () => ({
   now: BigInt(getUnixTime(new Date())),
   loaders: {
-    v1CanonicalPath: createV1CanonicalPathLoader(),
-    v2CanonicalPath: createV2CanonicalPathLoader(),
+    canonicalPath: createCanonicalPathLoader(),
   },
 });

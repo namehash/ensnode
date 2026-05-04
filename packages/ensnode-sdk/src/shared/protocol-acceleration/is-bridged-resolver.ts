@@ -8,8 +8,23 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 /**
- * For a given `resolver`, if it is a known Bridged Resolver, return the
- * AccountId describing the (shadow)Registry it defers resolution to.
+ * Result of a Bridged Resolver detection: the AccountId of the (shadow)Registry the resolver
+ * defers to, plus whether that Registry indexes the namegraph from-root (`shadow: true`) or is
+ * rooted at the resolver's name (`shadow: false`).
+ *
+ * For ENSv1 Shadow Registries (Basenames, Lineanames) the L2 contract mirrors the full namegraph
+ * from the ENS root. For any future ENSv2 sub-Registry bridges the bridged Registry is rooted at
+ * the resolver's name.
+ */
+export interface BridgedResolverTarget {
+  registry: AccountId;
+  shadow: boolean;
+}
+
+/**
+ * For a given `resolver`, if it is a known Bridged Resolver, return the AccountId describing the
+ * (shadow)Registry it defers resolution to and a flag indicating whether that Registry indexes
+ * the namegraph from-root.
  *
  * These Bridged Resolvers must abide the following pattern:
  * 1. They _always_ emit OffchainLookup for any resolve() call to a well-known CCIP-Read Gateway,
@@ -33,17 +48,23 @@ import {
 export function isBridgedResolver(
   namespace: ENSNamespaceId,
   resolver: AccountId,
-): AccountId | null {
+): BridgedResolverTarget | null {
   const resolverEq = makeContractMatcher(namespace, resolver);
 
   // the ENSRoot's BasenamesL1Resolver bridges to the Basenames (shadow)Registry
   if (resolverEq(DatasourceNames.ENSRoot, "BasenamesL1Resolver")) {
-    return getDatasourceContract(namespace, DatasourceNames.Basenames, "Registry");
+    return {
+      registry: getDatasourceContract(namespace, DatasourceNames.Basenames, "Registry"),
+      shadow: true,
+    };
   }
 
   // the ENSRoot's LineanamesL1Resolver bridges to the Lineanames (shadow)Registry
   if (resolverEq(DatasourceNames.ENSRoot, "LineanamesL1Resolver")) {
-    return getDatasourceContract(namespace, DatasourceNames.Lineanames, "Registry");
+    return {
+      registry: getDatasourceContract(namespace, DatasourceNames.Lineanames, "Registry"),
+      shadow: true,
+    };
   }
 
   // TODO: ThreeDNS

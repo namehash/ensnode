@@ -1,9 +1,8 @@
 import {
+  type BaseReferralProgramEditionConfig,
   REFERRAL_PROGRAM_EDITION_SLUG_PATTERN,
-  type ReferralProgramEditionSlug,
 } from "../../edition";
 import type {
-  BaseReferralProgramRules,
   ReferralProgramAwardModel,
   ReferralProgramAwardModels,
   ReferralProgramRulesUnrecognized,
@@ -13,7 +12,7 @@ import type { ReferralProgramEditionStatusId } from "./status";
 /**
  * Base fields shared by all edition summary variants.
  */
-export interface BaseReferralProgramEditionSummary {
+export interface BaseReferralProgramEditionSummary extends BaseReferralProgramEditionConfig {
   /**
    * Discriminant: identifies the award model for this edition.
    *
@@ -22,24 +21,9 @@ export interface BaseReferralProgramEditionSummary {
   awardModel: ReferralProgramAwardModel;
 
   /**
-   * Unique slug identifier for the edition.
-   */
-  slug: ReferralProgramEditionSlug;
-
-  /**
-   * Human-readable display name for the edition.
-   */
-  displayName: string;
-
-  /**
    * The current runtime status of the edition.
    */
   status: ReferralProgramEditionStatusId;
-
-  /**
-   * The rules for this edition. Per-model subtypes narrow this to their specific rules type.
-   */
-  rules: BaseReferralProgramRules;
 }
 
 /**

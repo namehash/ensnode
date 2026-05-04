@@ -1,10 +1,19 @@
 import { and, eq } from "drizzle-orm/sql";
 
 import {
-  type CrossChainIndexingStatusSnapshot,
-  deserializeCrossChainIndexingStatusSnapshot,
-  deserializeEnsIndexerPublicConfig,
-  type EnsIndexerPublicConfig,
+  buildIndexingMetadataContextUninitialized,
+  deserializeIndexingMetadataContext,
+  type EnsDbPublicConfig,
+  type EnsDbVersionInfo,
+  type IndexingMetadataContext,
+  IndexingMetadataContextStatusCodes,
+} from "@ensnode/ensnode-sdk";
+
+export {
+  type IndexingMetadataContext,
+  type IndexingMetadataContextInitialized,
+  IndexingMetadataContextStatusCodes,
+  type IndexingMetadataContextUninitialized,
 } from "@ensnode/ensnode-sdk";
 
 import {
@@ -14,12 +23,11 @@ import {
   type EnsDbDrizzleClient,
   type EnsNodeSchema,
 } from "../lib/drizzle";
+import { parsePgVersionInfo } from "../lib/parse-pg-version-info";
 import { EnsNodeMetadataKeys } from "./ensnode-metadata";
 import type {
   SerializedEnsNodeMetadata,
-  SerializedEnsNodeMetadataEnsDbVersion,
-  SerializedEnsNodeMetadataEnsIndexerIndexingStatus,
-  SerializedEnsNodeMetadataEnsIndexerPublicConfig,
+  SerializedEnsNodeMetadataIndexingMetadataContext,
 } from "./serialize/ensnode-metadata";
 
 /**
@@ -127,52 +135,58 @@ export class EnsDbReader<
   }
 
   /**
-   * Get ENSDb Version
-   *
-   * @returns the existing record, or `undefined`.
+   * Check if the ENSDb instance is healthy by running a simple query
+   * against it.
    */
-  async getEnsDbVersion(): Promise<string | undefined> {
-    const record = await this.getEnsNodeMetadata<SerializedEnsNodeMetadataEnsDbVersion>({
-      key: EnsNodeMetadataKeys.EnsDbVersion,
-    });
-
-    return record;
+  async isHealthy(): Promise<boolean> {
+    try {
+      await this.ensDb.execute("SELECT 1;");
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   /**
-   * Get ENSIndexer Public Config
-   *
-   * @returns the existing record, or `undefined`.
+   * Check if the ENSDb instance is ready by verifying that
+   * the {@link IndexingMetadataContext} has been initialized for
+   * the ENSIndexer Schema used by this ENSDbReader instance.
    */
-  async getEnsIndexerPublicConfig(): Promise<EnsIndexerPublicConfig | undefined> {
-    const record = await this.getEnsNodeMetadata<SerializedEnsNodeMetadataEnsIndexerPublicConfig>({
-      key: EnsNodeMetadataKeys.EnsIndexerPublicConfig,
-    });
-
-    if (!record) {
-      return undefined;
+  async isReady(): Promise<boolean> {
+    try {
+      const indexingMetadataContext = await this.getIndexingMetadataContext();
+      return indexingMetadataContext.statusCode === IndexingMetadataContextStatusCodes.Initialized;
+    } catch {
+      return false;
     }
-
-    return deserializeEnsIndexerPublicConfig(record);
   }
 
   /**
-   * Get Indexing Status Snapshot
-   *
-   * @returns the existing record, or `undefined`.
+   * Build ENSDb Public Config
    */
-  async getIndexingStatusSnapshot(): Promise<CrossChainIndexingStatusSnapshot | undefined> {
-    const record = await this.getEnsNodeMetadata<SerializedEnsNodeMetadataEnsIndexerIndexingStatus>(
-      {
-        key: EnsNodeMetadataKeys.EnsIndexerIndexingStatus,
-      },
-    );
+  async buildEnsDbPublicConfig(): Promise<EnsDbPublicConfig> {
+    const versionInfo = await this.buildEnsDbVersionInfo();
+
+    return {
+      versionInfo,
+    };
+  }
+
+  /**
+   * Get Indexing Metadata Context
+   *
+   * @returns the initialized record, or a default uninitialized one if no record exists in ENSDb.
+   */
+  async getIndexingMetadataContext(): Promise<IndexingMetadataContext> {
+    const record = await this.getEnsNodeMetadata<SerializedEnsNodeMetadataIndexingMetadataContext>({
+      key: EnsNodeMetadataKeys.IndexingMetadataContext,
+    });
 
     if (!record) {
-      return undefined;
+      return buildIndexingMetadataContextUninitialized();
     }
 
-    return deserializeCrossChainIndexingStatusSnapshot(record);
+    return deserializeIndexingMetadataContext(record);
   }
 
   /**
@@ -207,5 +221,38 @@ export class EnsDbReader<
     throw new Error(
       `There must be exactly one ENSNodeMetadata record for ('${this.ensIndexerSchemaName}', '${metadata.key}') composite key`,
     );
+  }
+
+  /**
+   * Get PostgreSQL version for the server hosting the ENSDb instance.
+   *
+   * @throws when the version cannot be retrieved or parsed from the query result.
+   */
+  private async getPostgresVersion(): Promise<string> {
+    const result = await this.ensDb.execute<{ version: string }>("SELECT version();");
+
+    // result will be in the form of [{ version: "PostgreSQL 15.5 (Ubuntu 15.5-0ubuntu0.22.04.1) ..." }]
+    const versionString = result.rows[0]?.version;
+
+    try {
+      return parsePgVersionInfo(versionString);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      throw new Error(`Failed to get PostgreSQL version for the ENSDb instance: ${errorMessage}`);
+    }
+  }
+
+  /**
+   * Build ENSDb version info.
+   *
+   * @throws when version info cannot be retrieved or parsed from
+   *         the ENSDb instance.
+   */
+  private async buildEnsDbVersionInfo(): Promise<EnsDbVersionInfo> {
+    const postgresVersion = await this.getPostgresVersion();
+
+    return {
+      postgresql: postgresVersion,
+    };
   }
 }

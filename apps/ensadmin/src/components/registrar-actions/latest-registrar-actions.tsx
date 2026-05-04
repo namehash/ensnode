@@ -2,7 +2,7 @@ import { useRegistrarActions } from "@ensnode/ensnode-react";
 import { RegistrarActionsOrders, RegistrarActionsResponseCodes } from "@ensnode/ensnode-sdk";
 
 import { ErrorInfo } from "@/components/error-info";
-import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
+import { useActiveEnsNodeStackInfo } from "@/hooks/active/use-active-ensnode-stack-info";
 
 import {
   DisplayRegistrarActionsList,
@@ -19,7 +19,7 @@ interface LatestRegistrarActionsProps {
  * Fetches the latest Registrar Actions and displays them.
  */
 export function LatestRegistrarActions({ recordsPerPage }: LatestRegistrarActionsProps) {
-  const namespaceId = useActiveNamespace();
+  const { namespace } = useActiveEnsNodeStackInfo().ensIndexer;
   const query = useRegistrarActions({
     order: RegistrarActionsOrders.LatestRegistrarActions,
     recordsPerPage,
@@ -40,7 +40,7 @@ export function LatestRegistrarActions({ recordsPerPage }: LatestRegistrarAction
   return (
     <DisplayRegistrarActionsList
       title={TITLE}
-      namespaceId={namespaceId}
+      namespaceId={namespace}
       registrarActions={query.data.registrarActions}
     />
   );

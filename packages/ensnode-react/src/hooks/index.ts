@@ -1,5 +1,4 @@
-export * from "./useENSNodeConfig";
-export * from "./useENSNodeSDKConfig";
+export * from "./useEnsNodeProviderOptions";
 export * from "./useIndexingStatus";
 export * from "./useNameTokens";
 export * from "./usePrimaryName";

@@ -16,7 +16,7 @@ import { Pill } from "@/components/pill";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
+import { useActiveEnsNodeStackInfo } from "@/hooks/active/use-active-ensnode-stack-info";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 
 import { EXAMPLE_ADDRESSES } from "../_lib/example-addresses";
@@ -29,7 +29,7 @@ export default function ResolvePrimaryNameInspector() {
   const searchParams = useSearchParams();
   const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
 
-  const namespace = useActiveNamespace();
+  const { namespace } = useActiveEnsNodeStackInfo().ensIndexer;
   const exampleAddresses = useMemo(
     () => getNamespaceSpecificValue(namespace, EXAMPLE_ADDRESSES),
     [namespace],

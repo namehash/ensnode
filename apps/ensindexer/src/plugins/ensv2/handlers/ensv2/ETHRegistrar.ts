@@ -5,15 +5,16 @@ import {
   makeStorageId,
   type NormalizedAddress,
   type TokenId,
+  toNormalizedAddress,
   type UnixTimestampBigInt,
   type Wei,
 } from "enssdk";
 
 import {
   type EncodedReferrer,
-  interpretAddress,
   isRegistrationFullyExpired,
   PluginName,
+  toJson,
 } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
@@ -25,7 +26,6 @@ import {
   ensIndexerSchema,
   type IndexingEngineContext,
 } from "@/lib/indexing-engines/ponder";
-import { toJson } from "@/lib/json-stringify-with-bigints";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs, LogEventBase } from "@/lib/ponder-helpers";
 
@@ -36,11 +36,14 @@ async function getRegistrarAndRegistry(context: IndexingEngineContext, event: Lo
   const registry: AccountId = {
     chainId: context.chain.id,
     // ETHRegistrar (this contract) provides a handle to its backing Registry
-    address: await context.client.readContract({
-      abi: context.contracts[namespaceContract(pluginName, "ETHRegistrar")].abi,
-      address: event.log.address,
-      functionName: "REGISTRY",
-    }),
+    // NOTE: viem returns checksummed addresses, need to normalize
+    address: toNormalizedAddress(
+      await context.client.readContract({
+        abi: context.contracts[namespaceContract(pluginName, "ETHRegistrar")].abi,
+        address: event.log.address,
+        functionName: "REGISTRY",
+      }),
+    ),
   };
 
   return { registrar, registry };
@@ -90,7 +93,7 @@ export default function () {
       // Invariant: must be ENSv2Registry Registration
       if (registration.type !== "ENSv2RegistryRegistration") {
         throw new Error(
-          `Invariant(ETHRegistrar:NameRegistered): Registration found but not ENSv2Registry Registration:\n${toJson(registration)}`,
+          `Invariant(ETHRegistrar:NameRegistered): Registration found but not ENSv2Registry Registration:\n${toJson(registration, { pretty: true })}`,
         );
       }
 
@@ -98,17 +101,16 @@ export default function () {
       const isFullyExpired = isRegistrationFullyExpired(registration, event.block.timestamp);
       if (isFullyExpired) {
         throw new Error(
-          `Invariant(ETHRegistrar:NameRegistered): Registration found but expired:\n${toJson(registration)}`,
+          `Invariant(ETHRegistrar:NameRegistered): Registration found but expired:\n${toJson(registration, { pretty: true })}`,
         );
       }
 
       // upsert registrant
-      await ensureAccount(context, owner);
+      const registrantId = await ensureAccount(context, owner);
 
       // update latest Registration
       await context.ensDb.update(ensIndexerSchema.registration, { id: registration.id }).set({
-        // TODO: reconsider 'Registration.registrant' if ENSv2 doesn't provide explicit 'registrant'
-        registrantId: interpretAddress(owner),
+        registrantId,
 
         // we now know the correct registrar to attribute to, so overwrite
         registrarChainId: registrar.chainId,
@@ -122,7 +124,8 @@ export default function () {
       });
 
       // push event to domain history
-      await ensureDomainEvent(context, event, domainId);
+      const eventId = await ensureEvent(context, event, registrantId);
+      await ensureDomainEvent(context, domainId, eventId);
     },
   );
 
@@ -163,23 +166,24 @@ export default function () {
       // Invariant: Must be ENSv2Registry Registration
       if (registration.type !== "ENSv2RegistryRegistration") {
         throw new Error(
-          `Invariant(ETHRegistrar:NameRenewed): Registration found but not ENSv2Registry Registration:\n${toJson(registration)}`,
+          `Invariant(ETHRegistrar:NameRenewed): Registration found but not ENSv2Registry Registration:\n${toJson(registration, { pretty: true })}`,
         );
       }
 
       // insert Renewal
+      const eventId = await ensureEvent(context, event);
       await insertLatestRenewal(context, registration, {
         domainId,
         duration,
         referrer,
-        eventId: await ensureEvent(context, event),
+        eventId,
 
         // TODO(paymentToken)
         base,
       });
 
       // push event to domain history
-      await ensureDomainEvent(context, event, domainId);
+      await ensureDomainEvent(context, domainId, eventId);
     },
   );
 }

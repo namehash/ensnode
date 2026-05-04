@@ -3,9 +3,9 @@ import config from "@/config";
 import type { LabelHash, LiteralLabel, NormalizedAddress } from "enssdk";
 
 import { getENSRootChainId } from "@ensnode/datasources";
+import { toJson } from "@ensnode/ensnode-sdk";
 
 import type { IndexingEngineContext } from "@/lib/indexing-engines/ponder";
-import { toJson } from "@/lib/json-stringify-with-bigints";
 import { maybeHealLabelByAddrReverseSubname } from "@/lib/maybe-heal-label-by-addr-reverse-subname";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import {
@@ -101,6 +101,6 @@ export async function healAddrReverseSubnameLabel(
 
   // Invariant: by this point, we should have healed all subnames of addr.reverse
   throw new Error(
-    `Invariant(healAddrReverseSubnameLabel): Unable to heal the label for subname of addr.reverse with labelHash '${labelHash}'. Event:\n${toJson(event)}`,
+    `Invariant(healAddrReverseSubnameLabel): Unable to heal the label for subname of addr.reverse with labelHash '${labelHash}'. Event:\n${toJson(event, { pretty: true })}`,
   );
 }

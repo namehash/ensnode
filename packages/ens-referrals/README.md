@@ -17,7 +17,7 @@ npm install @namehash/ens-referrals viem
 ```typescript
 import { ENSReferralsClient } from "@namehash/ens-referrals";
 
-// Create a client with the default ENSNode API URL
+// Create a client with the default ENSNode URL
 const client = new ENSReferralsClient();
 ```
 

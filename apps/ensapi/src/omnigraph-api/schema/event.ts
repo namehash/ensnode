@@ -95,10 +95,21 @@ EventRef.implement({
     // Event.from
     //////////////
     from: t.field({
-      description: "Identifies the sender of the Transaction within which this Event was emitted.",
+      description:
+        "Identifies the sender of the Transaction within which this Event was emitted (`tx.from`). Never HCA-aware — always the EOA/relayer that submitted the transaction. Use `Event.sender` for the HCA-aware actor.",
       type: "Address",
       nullable: false,
       resolve: (parent) => parent.from,
+    }),
+
+    ////////////////
+    // Event.sender
+    ////////////////
+    sender: t.field({
+      description: "The HCA account address if used, otherwise Transaction.from.",
+      type: "Address",
+      nullable: false,
+      resolve: (parent) => parent.sender,
     }),
 
     ////////////
@@ -160,7 +171,7 @@ EventRef.implement({
 
 /**
  * Shared filter for events connections. Used by Domain.events, Resolver.events, Permissions.events,
- * and Account.events (which excludes `from` since it's implied).
+ * and Account.events (which excludes `sender` since it's implied).
  */
 export const EventsWhereInput = builder.inputType("EventsWhereInput", {
   description: "Filter conditions for an events connection.",
@@ -180,16 +191,22 @@ export const EventsWhereInput = builder.inputType("EventsWhereInput", {
     }),
     from: t.field({
       type: "Address",
-      description: "Filter to events sent by this address.",
+      description:
+        "Filter to events whose `tx.from` matches. Not HCA-aware — use `sender` to filter by the HCA account address.",
+    }),
+    sender: t.field({
+      type: "Address",
+      description:
+        "Filter to events whose `sender` matches: the HCA account address if used, otherwise Transaction.from.",
     }),
   }),
 });
 
 /**
- * Like EventsWhereInput but without `from` (used where `from` is implied, e.g. Account.events).
+ * Like EventsWhereInput but without `sender` (used where `sender` is implied, e.g. Account.events).
  */
 export const AccountEventsWhereInput = builder.inputType("AccountEventsWhereInput", {
-  description: "Filter conditions for Account.events (where `from` is implied by the Account).",
+  description: "Filter conditions for Account.events (where `sender` is implied by the Account).",
   fields: (t) => ({
     selector_in: t.field({
       type: ["Hex"],
@@ -203,6 +220,11 @@ export const AccountEventsWhereInput = builder.inputType("AccountEventsWhereInpu
     timestamp_lte: t.field({
       type: "BigInt",
       description: "Filter to events at or before this UnixTimestamp.",
+    }),
+    from: t.field({
+      type: "Address",
+      description:
+        "Filter to events whose `tx.from` matches. Not HCA-aware — the Account's HCA-aware filter is applied via `sender = Account.id`.",
     }),
   }),
 });

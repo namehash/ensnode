@@ -260,7 +260,8 @@ PermissionsUserRef.implement({
     // PermissionsUser.user
     ////////////////////////
     user: t.field({
-      description: "The User for whom these Roles are granted.",
+      description:
+        "The user/grantee address this Permission is granted to (the HCA account address if used).",
       type: AccountRef,
       nullable: false,
       resolve: (parent) => parent.user,
@@ -274,6 +275,24 @@ PermissionsUserRef.implement({
       type: "BigInt",
       nullable: false,
       resolve: (parent) => parent.roles,
+    }),
+
+    //////////////////////////
+    // PermissionsUser.events
+    //////////////////////////
+    events: t.connection({
+      description: "All Events associated with this PermissionsUser.",
+      type: EventRef,
+      args: {
+        where: t.arg({ type: EventsWhereInput }),
+      },
+      resolve: (parent, args) =>
+        resolveFindEvents(args, {
+          through: {
+            table: ensIndexerSchema.permissionsUserEvent,
+            scope: eq(ensIndexerSchema.permissionsUserEvent.permissionsUserId, parent.id),
+          },
+        }),
     }),
   }),
 });

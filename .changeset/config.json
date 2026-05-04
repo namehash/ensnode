@@ -20,14 +20,15 @@
       "@ensnode/ensdb-sdk",
       "@ensnode/ensnode-react",
       "@ensnode/ensnode-sdk",
+      "@ensnode/integration-test-env",
       "@ensnode/ponder-sdk",
       "@ensnode/ponder-subgraph",
       "@ensnode/shared-configs",
       "@docs/ensnode",
       "@docs/ensrainbow",
-      "@docs/mintlify",
       "@namehash/ens-referrals",
-      "@namehash/namehash-ui"
+      "@namehash/namehash-ui",
+      "@ensnode/ensindexer-perf-testing"
     ]
   ],
   "updateInternalDependencies": "patch",

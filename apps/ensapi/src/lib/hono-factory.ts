@@ -8,12 +8,14 @@ import type { IndexingStatusMiddlewareVariables } from "@/middleware/indexing-st
 import type { IsRealtimeMiddlewareVariables } from "@/middleware/is-realtime.middleware";
 import type { ReferralLeaderboardEditionsCachesMiddlewareVariables } from "@/middleware/referral-leaderboard-editions-caches.middleware";
 import type { ReferralProgramEditionConfigSetMiddlewareVariables } from "@/middleware/referral-program-edition-set.middleware";
+import type { StackInfoMiddlewareVariables } from "@/middleware/stack-info.middleware";
 
 export type MiddlewareVariables = IndexingStatusMiddlewareVariables &
   IsRealtimeMiddlewareVariables &
   CanAccelerateMiddlewareVariables &
   ReferralProgramEditionConfigSetMiddlewareVariables &
-  ReferralLeaderboardEditionsCachesMiddlewareVariables;
+  ReferralLeaderboardEditionsCachesMiddlewareVariables &
+  StackInfoMiddlewareVariables;
 
 type AppEnv = { Variables: Partial<MiddlewareVariables> };
 

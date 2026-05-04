@@ -10,20 +10,19 @@ Learn more about [ENSNode](https://ensnode.io/) from [the ENSNode docs](https://
 npm install @ensnode/ensnode-sdk
 ```
 
-## EnsApiClient
+## EnsNodeClient
 
-The `EnsApiClient` provides a unified interface for the ENSApi REST APIs:
+The `EnsNodeClient` provides a unified interface for the ENSNode REST APIs:
 - Resolution API (Protocol Accelerated Forward/Reverse Resolution)
 - Indexing Status API
-- Configuration API
 
 ### Basic Usage
 
 ```typescript
-import { EnsApiClient, evmChainIdToCoinType } from "@ensnode/ensnode-sdk";
+import { EnsNodeClient, evmChainIdToCoinType } from "@ensnode/ensnode-sdk";
 import { mainnet } from "viem/chains";
 
-const client = new EnsApiClient();
+const client = new EnsNodeClient();
 
 // Resolution API: Records Resolution
 const { records } = await client.resolveRecords("jesse.base.eth", {
@@ -152,41 +151,32 @@ console.log(names);
 // }
 ```
 
-#### Configuration API
-
-##### `config()`
-
-Fetches the ENSNode's configuration.
-
-- Returns: `ConfigResponse` - The ENSNode configuration data
-- Throws: Error if the request fails or the ENSNode API returns an error response
-
-```ts
-const config = await client.config();
-console.log(config);
-// Returns the ENSNode configuration including indexed chains, etc.
-```
-
 #### Indexing Status API
 
 ##### `indexingStatus()`
 
-Fetches the ENSNode's multichain indexing status.
+Fetches the ENSNode's omnichain indexing status.
 
 - Returns: `IndexingStatusResponse` - The indexing status data for all indexed chains
 - Throws: Error if the request fails or the ENSNode API returns an error response
 
 ```ts
 // Get current indexing status
-const status = await client.indexingStatus();
-console.log(status);
-// Returns indexing status for all indexed chains
+const indexingStatusResponse = await client.indexingStatus();
+
+if (indexingStatusResponse.responseCode === EnsApiIndexingStatusResponseCodes.Ok) {
+  const { realtimeProjection, stackInfo } = indexingStatusResponse;
+  console.log("RealtimeIndexingStatusProjection:", realtimeProjection);
+  console.log("EnsNodeStackInfo:", stackInfo);
+} else {
+  console.error("Error while fetching Indexing Status");
+}
 ```
 
 ### Configuration
 
 ```typescript
-const client = new EnsApiClient({
+const client = new EnsNodeClient({
   url: new URL("https://my-ensnode-instance.com"),
 });
 ```

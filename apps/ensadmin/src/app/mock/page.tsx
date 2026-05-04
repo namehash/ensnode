@@ -19,8 +19,8 @@ export default function MockList() {
         <CardContent>
           <div className="flex flex-wrap gap-2">
             <Button asChild variant="outline" size="sm">
-              <Link href={retainCurrentRawConnectionUrlParam("/mock/config-info")}>
-                ENSNodeConfigInfo
+              <Link href={retainCurrentRawConnectionUrlParam("/mock/stack-info")}>
+                EnsNodeStackInfo
               </Link>
             </Button>
             <Button asChild variant="outline" size="sm">

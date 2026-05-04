@@ -94,7 +94,7 @@ const ENSIndexerConfigSchema = z
     isSubgraphCompatible: IsSubgraphCompatibleSchema,
     globalBlockrange: BlockrangeSchema,
     ensRainbowUrl: EnsRainbowUrlSchema,
-    labelSet: LabelSetSchema,
+    clientLabelSet: LabelSetSchema,
 
     // include the ENSDbConfig params in the ENSIndexerConfigSchema
     ensDbUrl: z.string(),
@@ -177,7 +177,7 @@ export function buildConfigFromEnvironment(_env: ENSIndexerEnvironment): EnsInde
         endBlock: env.END_BLOCK,
       },
       ensRainbowUrl: env.ENSRAINBOW_URL,
-      labelSet: {
+      clientLabelSet: {
         labelSetId: env.LABEL_SET_ID,
         labelSetVersion: env.LABEL_SET_VERSION,
       },

@@ -12,7 +12,7 @@ describe("EnsIndexerConfig compatibility", () => {
   describe("validateEnsIndexerPublicConfigCompatibility()", () => {
     const config = {
       indexedChainIds: new Set([1, 10, 8453]),
-      labelSet: {
+      clientLabelSet: {
         labelSetId: "test-label-set",
         labelSetVersion: 1,
       },
@@ -67,35 +67,35 @@ describe("EnsIndexerConfig compatibility", () => {
       );
     });
 
-    it("throws error when 'configA.labelSet.labelSetId' is not same as 'configB.labelSet.labelSetId'", () => {
+    it("throws error when 'configA.clientLabelSet.labelSetId' is not same as 'configB.clientLabelSet.labelSetId'", () => {
       const configA = structuredClone(config);
 
       const configB = {
         ...structuredClone(config),
-        labelSet: {
-          ...structuredClone(config.labelSet),
+        clientLabelSet: {
+          ...structuredClone(config.clientLabelSet),
           labelSetId: "different-label-set",
         },
       } satisfies EnsIndexerPublicConfigCompatibilityCheck;
 
       expect(() => validateEnsIndexerPublicConfigCompatibility(configA, configB)).toThrowError(
-        /'labelSet.labelSetId' must be compatible. Stored Config 'labelSet.labelSetId': 'test-label-set'. Current Config 'labelSet.labelSetId': 'different-label-set'/i,
+        /'clientLabelSet.labelSetId' must be compatible. Stored Config 'clientLabelSet.labelSetId': 'test-label-set'. Current Config 'clientLabelSet.labelSetId': 'different-label-set'/i,
       );
     });
 
-    it("throws error when 'configA.labelSet.labelSetVersion' is not same as 'configB.labelSet.labelSetVersion'", () => {
+    it("throws error when 'configA.clientLabelSet.labelSetVersion' is not same as 'configB.clientLabelSet.labelSetVersion'", () => {
       const configA = structuredClone(config);
 
       const configB = {
         ...structuredClone(config),
-        labelSet: {
-          ...structuredClone(config.labelSet),
-          labelSetVersion: config.labelSet.labelSetVersion + 1,
+        clientLabelSet: {
+          ...structuredClone(config.clientLabelSet),
+          labelSetVersion: config.clientLabelSet.labelSetVersion + 1,
         },
       } satisfies EnsIndexerPublicConfigCompatibilityCheck;
 
       expect(() => validateEnsIndexerPublicConfigCompatibility(configA, configB)).toThrowError(
-        /'labelSet.labelSetVersion' must be compatible. Stored Config 'labelSet.labelSetVersion': '1'. Current Config 'labelSet.labelSetVersion': '2'/i,
+        /'clientLabelSet.labelSetVersion' must be compatible. Stored Config 'clientLabelSet.labelSetVersion': '1'. Current Config 'clientLabelSet.labelSetVersion': '2'/i,
       );
     });
 

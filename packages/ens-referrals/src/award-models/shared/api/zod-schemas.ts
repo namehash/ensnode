@@ -8,8 +8,37 @@ import {
   makeUrlSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
+import { REFERRAL_PROGRAM_EDITION_SLUG_PATTERN } from "../../../edition";
 import { REFERRERS_PER_LEADERBOARD_PAGE_MAX } from "../leaderboard-page";
 import { ReferralProgramEditionStatuses } from "../status";
+
+/**
+ * Schema for validating a {@link ReferralProgramEditionSlug}.
+ *
+ * Runtime validation against configured editions happens at the business logic level.
+ */
+export const makeReferralProgramEditionSlugSchema = (
+  valueLabel: string = "ReferralProgramEditionSlug",
+) =>
+  z
+    .string()
+    .min(1, `${valueLabel} must not be empty`)
+    .regex(
+      REFERRAL_PROGRAM_EDITION_SLUG_PATTERN,
+      `${valueLabel} must contain only lowercase letters, digits, and hyphens. Must not start or end with a hyphen.`,
+    );
+
+/**
+ * Loose base schema for {@link BaseReferralProgramEditionConfig}.
+ */
+export const makeBaseReferralProgramEditionConfigSchema = (
+  valueLabel: string = "BaseReferralProgramEditionConfig",
+) =>
+  z.object({
+    slug: makeReferralProgramEditionSlugSchema(`${valueLabel}.slug`),
+    displayName: z.string().min(1, `${valueLabel}.displayName must not be empty`),
+    rules: makeBaseReferralProgramRulesSchema(`${valueLabel}.rules`),
+  });
 
 /**
  * Loose base schema for {@link BaseReferralProgramRules}.
@@ -62,15 +91,12 @@ export const makeReferralProgramStatusSchema = (_valueLabel: string = "status") 
 /**
  * Loose base schema for {@link BaseReferralProgramEditionSummary}.
  *
- * Accepts any string for `rules.awardModel` to support forward-compatible parsing.
+ * Accepts any string for `awardModel` to support forward-compatible parsing.
  */
 export const makeBaseReferralProgramEditionSummarySchema = (valueLabel: string) =>
-  z.object({
+  makeBaseReferralProgramEditionConfigSchema(valueLabel).safeExtend({
     awardModel: z.string(),
-    slug: z.string().min(1, `${valueLabel}.slug must not be empty`),
-    displayName: z.string().min(1, `${valueLabel}.displayName must not be empty`),
     status: makeReferralProgramStatusSchema(`${valueLabel}.status`),
-    rules: makeBaseReferralProgramRulesSchema(`${valueLabel}.rules`),
   });
 
 /**
