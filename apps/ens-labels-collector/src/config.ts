@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/v4";
 
 import { OptionalPortNumberSchema } from "@ensnode/ensnode-sdk/internal";
 

@@ -1,7 +1,7 @@
 import type { Address } from "enssdk";
 import type { Context } from "hono";
 import { isAddress } from "viem";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 import { errorResponse } from "@/lib/error-response";
 import {

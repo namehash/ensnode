@@ -1,6 +1,6 @@
 import type { Context } from "hono";
 import type { ClientErrorStatusCode, ServerErrorStatusCode } from "hono/utils/http-status";
-import { ZodError } from "zod";
+import { ZodError } from "zod/v4";
 
 /**
  * Standardized error response shape for the ens-labels-collector.
