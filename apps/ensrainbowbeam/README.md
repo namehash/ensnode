@@ -13,19 +13,20 @@ future row shape so adding a sink later is mechanical.
 ## Endpoints
 
 - `GET /health` — liveness probe; always returns `{ message: "ok" }`.
-- `POST /api/submissions` — accepts `{ labels: string[], callerAddress: Address }` and
-  responds with per-label classification (`unknown_in_index` / `healed_in_index` /
-  `absent_from_index`).
+- `POST /api/discover` — accepts `{ labels: string[], callerAddress: Address }` and responds
+  with per-label classification (`unknown_in_index` / `healed_in_index` / `absent_from_index`).
 
 ## How label classification works
 
 For each submitted raw label EnsRainbowBeam:
 
-1. Computes `labelhashLiteralLabel(rawLabel)`.
+1. Computes `labelhashLiteralLabel(asLiteralLabel(rawLabel))`.
 2. If the label is normalizable AND the normalized form differs from the raw label, also
-   computes `labelhashLiteralLabel(normalizedLabel)`.
-3. Sends every distinct labelhash to ENSNode via the typed `enssdk/omnigraph` client using
-   the `labels(by: { hashes })` query.
+   computes `labelhashLiteralLabel` for that normalized literal (still a literal-string path —
+   input is never treated as an Encoded LabelHash before hashing).
+3. Sends every distinct LabelHash to ENSNode via the typed `enssdk/omnigraph` client using
+   the `labels(by: { labelHashes })` query (batched when a submission exceeds the Omnigraph
+   per-request cap).
 4. Classifies each submitted label:
    - `unknown_in_index` — at least one of its hashes is present in the index but not yet
      healed (i.e. `interpreted` is the encoded labelhash form). These are the interesting

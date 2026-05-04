@@ -26,14 +26,14 @@ const mockedLookup = vi.mocked(lookupLabels);
 
 function makeApp() {
   const app = new Hono();
-  app.post("/api/submissions", submissionsHandler);
+  app.post("/api/discover", submissionsHandler);
   app.onError((error, c) => errorResponse(c, { error }));
   return app;
 }
 
 const CALLER = "0x1234567890123456789012345678901234567890";
 
-describe("POST /api/submissions", () => {
+describe("POST /api/discover", () => {
   const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
   const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
@@ -50,7 +50,7 @@ describe("POST /api/submissions", () => {
 
   it("400s on malformed JSON", async () => {
     const app = makeApp();
-    const res = await app.request("/api/submissions", {
+    const res = await app.request("/api/discover", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: "not-json",
@@ -62,7 +62,7 @@ describe("POST /api/submissions", () => {
   it("400s when labels is empty", async () => {
     const app = makeApp();
     mockedLookup.mockResolvedValue([]);
-    const res = await app.request("/api/submissions", {
+    const res = await app.request("/api/discover", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ labels: [], callerAddress: CALLER }),
@@ -73,7 +73,7 @@ describe("POST /api/submissions", () => {
 
   it("400s when callerAddress is not a valid EVM address", async () => {
     const app = makeApp();
-    const res = await app.request("/api/submissions", {
+    const res = await app.request("/api/discover", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ labels: ["foo"], callerAddress: "not-an-address" }),
@@ -89,7 +89,7 @@ describe("POST /api/submissions", () => {
     ]);
 
     const app = makeApp();
-    const res = await app.request("/api/submissions", {
+    const res = await app.request("/api/discover", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ labels: ["eth"], callerAddress: CALLER }),
@@ -124,7 +124,7 @@ describe("POST /api/submissions", () => {
     ]);
 
     const app = makeApp();
-    const res = await app.request("/api/submissions", {
+    const res = await app.request("/api/discover", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ labels: ["foo"], callerAddress: CALLER }),
@@ -139,7 +139,7 @@ describe("POST /api/submissions", () => {
     mockedLookup.mockResolvedValue([]);
 
     const app = makeApp();
-    const res = await app.request("/api/submissions", {
+    const res = await app.request("/api/discover", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -158,7 +158,7 @@ describe("POST /api/submissions", () => {
     const mixedCase = "0xAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAa";
 
     const app = makeApp();
-    const res = await app.request("/api/submissions", {
+    const res = await app.request("/api/discover", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ labels: ["foo"], callerAddress: mixedCase }),
@@ -177,7 +177,7 @@ describe("POST /api/submissions", () => {
     mockedLookup.mockResolvedValue([]);
 
     const app = makeApp();
-    const res = await app.request("/api/submissions", {
+    const res = await app.request("/api/discover", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ labels: ["VITALIK"], callerAddress: CALLER }),
@@ -196,7 +196,7 @@ describe("POST /api/submissions", () => {
     const labels = Array.from({ length: 101 }, (_, i) => `label-${i}`);
 
     const app = makeApp();
-    const res = await app.request("/api/submissions", {
+    const res = await app.request("/api/discover", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ labels, callerAddress: CALLER }),
@@ -209,7 +209,7 @@ describe("POST /api/submissions", () => {
     mockedLookup.mockRejectedValue(new DOMException("The operation timed out.", "TimeoutError"));
 
     const app = makeApp();
-    const res = await app.request("/api/submissions", {
+    const res = await app.request("/api/discover", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ labels: ["foo"], callerAddress: CALLER }),
@@ -228,7 +228,7 @@ describe("POST /api/submissions", () => {
     mockedLookup.mockRejectedValue(new Error("upstream exploded"));
 
     const app = makeApp();
-    const res = await app.request("/api/submissions", {
+    const res = await app.request("/api/discover", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ labels: ["foo"], callerAddress: CALLER }),
@@ -247,7 +247,7 @@ describe("POST /api/submissions", () => {
     mockedLookup.mockResolvedValue([]);
 
     const app = makeApp();
-    const res = await app.request("/api/submissions", {
+    const res = await app.request("/api/discover", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ labels: ["foo", "foo", "foo"], callerAddress: CALLER }),

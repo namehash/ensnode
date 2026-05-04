@@ -7,12 +7,14 @@ import {
   type Hex,
   isInterpretedLabel,
   isInterpretedName,
+  type LabelHash,
   type Name,
   type Node,
   type NormalizedAddress,
   type PermissionsId,
   type PermissionsResourceId,
   type PermissionsUserId,
+  parseLabelHash,
   type RegistrationId,
   type RegistryId,
   type RenewalId,
@@ -59,6 +61,13 @@ builder.scalarType("Hex", {
       })
       .transform((val) => val as Hex)
       .parse(value),
+});
+
+builder.scalarType("LabelHash", {
+  description:
+    "LabelHash represents enssdk#LabelHash: a 32-byte (64 hex digit) value, `0x`-prefixed and lowercased.",
+  serialize: (value: LabelHash) => value,
+  parseValue: (value) => parseLabelHash(z.coerce.string().parse(value)),
 });
 
 builder.scalarType("ChainId", {

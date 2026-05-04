@@ -11,6 +11,7 @@ import type {
   Hex,
   InterpretedLabel,
   InterpretedName,
+  LabelHash,
   Node,
   NormalizedAddress,
   PermissionsId,
@@ -60,6 +61,7 @@ export type BuilderScalars = {
   BigInt: { Input: bigint; Output: bigint };
   Address: { Input: NormalizedAddress; Output: NormalizedAddress };
   Hex: { Input: Hex; Output: Hex };
+  LabelHash: { Input: LabelHash; Output: LabelHash };
   ChainId: { Input: ChainId; Output: ChainId };
   CoinType: { Input: CoinType; Output: CoinType };
   Node: { Input: Node; Output: Node };

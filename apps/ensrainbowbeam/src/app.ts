@@ -8,7 +8,7 @@ const app = new Hono();
 
 app.get("/health", healthHandler);
 
-app.post("/api/submissions", submissionsHandler);
+app.post("/api/discover", submissionsHandler);
 
 app.notFound((c) => errorResponse(c, { message: "Not Found", status: 404 }));
 

@@ -1,4 +1,5 @@
 import {
+  asLiteralLabel,
   encodeLabelHash,
   type InterpretedLabel,
   type LabelHash,
@@ -23,12 +24,14 @@ export type LabelStatus = "unknown_in_index" | "healed_in_index" | "absent_from_
  * The hashing result for a single submitted raw label.
  *
  * `normalizedLabel` (and its hash) are populated only when the raw label is normalizable
- * AND the normalized form differs from the raw label.
+ * AND the normalized form differs from the raw label. Both the raw submission and any
+ * normalization branch use {@link LiteralLabel} so callers can submit unnormalized literals
+ * deliberately (the service never coerces input to an {@link InterpretedLabel} up front).
  */
 export type HashedLabel = {
   rawLabel: string;
   labelHash: LabelHash;
-  normalizedLabel?: InterpretedLabel;
+  normalizedLabel?: LiteralLabel;
   normalizedLabelHash?: LabelHash;
 };
 
@@ -50,22 +53,22 @@ export type LabelHit = {
 /**
  * Computes the hash representations of a single raw label.
  *
- * Always computes `labelHash = labelhashLiteralLabel(rawLabel)`. If the raw label is
- * normalizable AND its normalized form differs from the raw value, also computes the
- * normalized form's hash. Normalization failures are tolerated and treated as "no
- * normalized variant" — many submissions will be unnormalizable by design (this app
- * is meant to ingest such labels).
+ * Always computes `labelHash = labelhashLiteralLabel(asLiteralLabel(rawLabel))`. If the label
+ * normalizes under ENSIP-15 to a **different string** than the raw submission, also computes
+ * hashes for that normalized {@link LiteralLabel}. Normalization failures are tolerated and
+ * treated as "no normalized variant".
  */
 export function hashLabel(rawLabel: string): HashedLabel {
-  const labelHash = labelhashLiteralLabel(rawLabel as LiteralLabel);
+  const literal = asLiteralLabel(rawLabel);
+  const labelHash = labelhashLiteralLabel(literal);
 
-  let normalizedLabel: InterpretedLabel | undefined;
+  let normalizedLabel: LiteralLabel | undefined;
   let normalizedLabelHash: LabelHash | undefined;
   try {
-    const candidate = normalizeLabel(rawLabel);
-    if (candidate !== rawLabel) {
-      normalizedLabel = candidate;
-      normalizedLabelHash = labelhashLiteralLabel(candidate as unknown as LiteralLabel);
+    const normalizedInterpreted = normalizeLabel(literal);
+    if (normalizedInterpreted !== rawLabel) {
+      normalizedLabel = asLiteralLabel(normalizedInterpreted);
+      normalizedLabelHash = labelhashLiteralLabel(normalizedLabel);
     }
   } catch {
     // unnormalizable raw label is expected; leave normalized variant undefined
@@ -81,7 +84,7 @@ export function hashLabel(rawLabel: string): HashedLabel {
 
 /**
  * Returns the deduped flat list of labelhashes we want to look up via the Omnigraph
- * `labels(by: { hashes })` query.
+ * `labels(by: { labelHashes })` query.
  */
 export function collectLookupHashes(hashed: readonly HashedLabel[]): LabelHash[] {
   const set = new Set<LabelHash>();

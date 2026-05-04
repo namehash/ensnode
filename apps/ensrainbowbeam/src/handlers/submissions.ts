@@ -14,19 +14,18 @@ import {
 import { lookupLabels } from "@/lib/omnigraph-client";
 
 /**
- * Maximum number of raw labels accepted per `POST /api/submissions` request.
+ * Maximum number of raw labels accepted per `POST /api/discover` request.
  *
  * This is independent of how many labelhashes each label expands into (1 if already
- * normalized / unnormalizable, 2 if it has a distinct normalized form). The resolver
- * cap (`LABELS_BY_HASHES_MAX = 200` in `apps/ensapi/src/omnigraph-api/schema/label.ts`)
- * is sized to exactly accommodate the worst case (2 * `MAX_LABELS_PER_SUBMISSION`).
- * Keep these limits in sync so callers always get the same per-submission limit
- * regardless of normalization.
+ * normalized / unnormalizable, 2 if it has a distinct normalized form). `lookupLabels`
+ * batches Omnigraph requests against `LABELS_BY_LABELHASH_MAX` (see
+ * `apps/ensapi/src/omnigraph-api/schema/label.ts`); the worst-case distinct LabelHash count
+ * per submission is still capped at `2 * MAX_LABELS_PER_SUBMISSION`.
  */
 export const MAX_LABELS_PER_SUBMISSION = 100;
 
 /**
- * Hard upper bound on how long a single `POST /api/submissions` will wait on the
+ * Hard upper bound on how long a single `POST /api/discover` will wait on the
  * Omnigraph labels lookup before failing the request. Prevents a stalled upstream
  * from holding handler resources indefinitely.
  */

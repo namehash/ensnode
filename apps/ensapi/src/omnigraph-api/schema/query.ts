@@ -27,7 +27,11 @@ import {
   DomainsOrderInput,
   DomainsWhereInput,
 } from "@/omnigraph-api/schema/domain";
-import { LABELS_BY_HASHES_MAX, LabelRef, LabelsByHashesInput } from "@/omnigraph-api/schema/label";
+import {
+  LABELS_BY_LABELHASH_MAX,
+  LabelRef,
+  LabelsByLabelHashesInput,
+} from "@/omnigraph-api/schema/label";
 import { PermissionsIdInput, PermissionsRef } from "@/omnigraph-api/schema/permissions";
 import { RegistrationInterfaceRef } from "@/omnigraph-api/schema/registration";
 import { RegistryIdInput, RegistryInterfaceRef } from "@/omnigraph-api/schema/registry";
@@ -155,21 +159,21 @@ builder.queryType({
         "omitted from the result.",
       type: [LabelRef],
       nullable: false,
-      args: { by: t.arg({ type: LabelsByHashesInput, required: true }) },
+      args: { by: t.arg({ type: LabelsByLabelHashesInput, required: true }) },
       resolve: async (_parent, { by }) => {
-        if (by.hashes.length === 0) return [];
+        if (by.labelHashes.length === 0) return [];
 
-        if (by.hashes.length > LABELS_BY_HASHES_MAX) {
+        if (by.labelHashes.length > LABELS_BY_LABELHASH_MAX) {
           // Use `createGraphQLError` so the client-facing validation message survives Yoga's
           // default `maskError`, which (correctly) hides plain `Error` instances as
           // "Unexpected error.".
           throw createGraphQLError(
-            `Too many hashes: received ${by.hashes.length}, max ${LABELS_BY_HASHES_MAX}.`,
+            `Too many LabelHashes: received ${by.labelHashes.length}, max ${LABELS_BY_LABELHASH_MAX}.`,
             { extensions: { code: "BAD_USER_INPUT" } },
           );
         }
 
-        const dedupedHashes = Array.from(new Set(by.hashes));
+        const dedupedHashes = Array.from(new Set(by.labelHashes));
 
         return ensDb
           .select()

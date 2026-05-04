@@ -3251,7 +3251,7 @@ const introspection = {
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "SCALAR",
-                "name": "Hex"
+                "name": "LabelHash"
               }
             },
             "args": [],
@@ -3273,11 +3273,15 @@ const introspection = {
         "interfaces": []
       },
       {
+        "kind": "SCALAR",
+        "name": "LabelHash"
+      },
+      {
         "kind": "INPUT_OBJECT",
-        "name": "LabelsByHashesInput",
+        "name": "LabelsByLabelHashesInput",
         "inputFields": [
           {
-            "name": "hashes",
+            "name": "labelHashes",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -3286,7 +3290,7 @@ const introspection = {
                   "kind": "NON_NULL",
                   "ofType": {
                     "kind": "SCALAR",
-                    "name": "Hex"
+                    "name": "LabelHash"
                   }
                 }
               }
@@ -4396,7 +4400,7 @@ const introspection = {
                   "kind": "NON_NULL",
                   "ofType": {
                     "kind": "INPUT_OBJECT",
-                    "name": "LabelsByHashesInput"
+                    "name": "LabelsByLabelHashesInput"
                   }
                 }
               }

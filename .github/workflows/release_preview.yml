@@ -230,7 +230,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: [ensindexer, ensadmin, ensapi, ensrainbow]
+        app: [ensindexer, ensadmin, ensapi, ensrainbow, ensrainbowbeam]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -342,6 +342,7 @@ jobs:
           docker pull ghcr.io/namehash/ensnode/ensadmin:${{ needs.validate-and-prepare.outputs.docker-tag-base }}-${{ needs.validate-and-prepare.outputs.commit-sha }}
           docker pull ghcr.io/namehash/ensnode/ensapi:${{ needs.validate-and-prepare.outputs.docker-tag-base }}-${{ needs.validate-and-prepare.outputs.commit-sha }}
           docker pull ghcr.io/namehash/ensnode/ensrainbow:${{ needs.validate-and-prepare.outputs.docker-tag-base }}-${{ needs.validate-and-prepare.outputs.commit-sha }}
+          docker pull ghcr.io/namehash/ensnode/ensrainbowbeam:${{ needs.validate-and-prepare.outputs.docker-tag-base }}-${{ needs.validate-and-prepare.outputs.commit-sha }}
           \`\`\`
 
           "
