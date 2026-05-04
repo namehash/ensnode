@@ -21,6 +21,7 @@ import {
   type ResolverId,
   type ResolverRecordsId,
 } from "enssdk";
+import { createGraphQLError } from "graphql-yoga";
 import { isHex, size } from "viem";
 import { z } from "zod/v4";
 
@@ -67,7 +68,14 @@ builder.scalarType("LabelHash", {
   description:
     "LabelHash represents enssdk#LabelHash: a 32-byte (64 hex digit) value, `0x`-prefixed and lowercased.",
   serialize: (value: LabelHash) => value,
-  parseValue: (value) => parseLabelHash(z.coerce.string().parse(value)),
+  parseValue: (value) => {
+    try {
+      return parseLabelHash(z.coerce.string().parse(value));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      throw createGraphQLError(message, { extensions: { code: "BAD_USER_INPUT" } });
+    }
+  },
 });
 
 builder.scalarType("ChainId", {

@@ -40,17 +40,28 @@ describe("Query.labels", () => {
     });
   });
 
-  it("accepts non-normalized (mixed-case hex) LabelHash variables and resolves matches", async () => {
-    const uppercaseVariable = ETH_LABEL_HASH.toUpperCase();
-    expect(parseLabelHash(uppercaseVariable)).toBe(ETH_LABEL_HASH);
+  it("accepts non-normalized (mixed-case hex digits) LabelHash variables and resolves matches", async () => {
+    // Lowercase `0x` prefix only; uppercase `0X` is rejected (see enssdk `parseLabelHash`).
+    const mixedCaseVariable = `0x${ETH_LABEL_HASH.slice(2)
+      .split("")
+      .map((c, i) => (i % 2 === 0 ? c.toUpperCase() : c))
+      .join("")}` as LabelHash;
+    expect(parseLabelHash(mixedCaseVariable)).toBe(ETH_LABEL_HASH);
 
     await expect(
       request<LabelsByLabelHashResult>(LabelsByLabelHash, {
-        labelHashes: [uppercaseVariable as LabelHash],
+        labelHashes: [mixedCaseVariable],
       }),
     ).resolves.toMatchObject({
       labels: [{ hash: ETH_LABEL_HASH, interpreted: "eth" }],
     });
+  });
+
+  it("rejects uppercase 0X hex prefix", async () => {
+    const badPrefix = `0X${ETH_LABEL_HASH.slice(2)}`;
+    await expect(
+      request(LabelsByLabelHash, { labelHashes: [badPrefix] }),
+    ).rejects.toThrow(/Invalid labelHash/i);
   });
 
   it("omits LabelHashes that are not present in the index", async () => {
