@@ -1,6 +1,6 @@
 import type { NormalizedAddress } from "enssdk";
 import { toNormalizedAddress } from "enssdk";
-import type { Address, Hex } from "viem";
+import type { Hex } from "viem";
 import { mnemonicToAccount } from "viem/accounts";
 
 /**
@@ -100,20 +100,34 @@ export const contracts = {
 
 const mnemonic = "test test test test test test test test test test test junk";
 
-function createAccount(addressIndex: number) {
+function createAccount(addressIndex: number, resolver: string) {
   const account = mnemonicToAccount(mnemonic, { addressIndex });
-  return { ...account, address: toNormalizedAddress(account.address) };
+  return {
+    ...account,
+    address: toNormalizedAddress(account.address),
+    resolver: toNormalizedAddress(resolver),
+  };
 }
 
+/**
+ * Named accounts from the ens-test-env devnet.
+ * They are NOT real Ethereum Mainnet or testnet addresses.
+ * You can use `pnpm devnet` to see actual data in devnet
+ *
+ * @see https://github.com/ensdomains/ens-test-env
+ */
 export const accounts = {
-  deployer: createAccount(0),
-  owner: createAccount(1),
-  user: createAccount(2),
-  user2: createAccount(3),
+  deployer: createAccount(0, "0x1F2Ce8886692b90F5754a7d428a2336800a5911B"),
+  owner: createAccount(1, "0x5eA90aCF6555276660760fE629D72932c91f4b8E"),
+  user: createAccount(2, "0xB63aE54076C1c281Ec9395B290aDD470e69140c6"),
+  user2: createAccount(3, "0x5380066832977EB36353fd2B01fb92E751636b84"),
 } as const;
 
+/**
+ * Fixtures for seeding the devnet with test data.
+ */
 export const addresses = {
-  one: toNormalizedAddress(`0x${"1".repeat(40)}` as Address),
+  one: toNormalizedAddress(`0x${"1".repeat(40)}`),
 } as const satisfies Record<string, NormalizedAddress>;
 
 export const fixtures = {
