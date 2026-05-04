@@ -3,8 +3,6 @@ import { beautifyInterpretedName } from "enssdk";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 
-// `canonical: true` guarantees `node.name` is non-null on every result, so the link
-// target / label below can use it directly without a fallback.
 const DomainsByNameQuery = graphql(`
   query DomainsByName($name: String!, $first: Int!, $after: String) {
     domains(where: { name: $name, canonical: true }, first: $first, after: $after) {
