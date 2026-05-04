@@ -174,7 +174,9 @@ describe("entrypointCommand (env-vs-DB label-set mismatch)", () => {
   });
 
   it("invokes the exit hook with code 1 and does not flip /ready to 200", async () => {
-    const exit = vi.fn<(code: number) => never>(() => undefined as never);
+    const exit = vi.fn((code: number): never => {
+      throw new Error(`test exit hook (${code})`);
+    });
 
     handle = await entrypointCommand({
       port,

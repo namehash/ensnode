@@ -53,9 +53,11 @@ export interface EntrypointCommandOptions {
   /**
    * Hook used to terminate the process on fatal bootstrap errors (download failure or
    * env-vs-DB label-set mismatch). Defaults to `process.exit`. Implementations must not
-   * return normally (same contract as `process.exit`); otherwise the server keeps running
-   * in a failed bootstrap state. Tests may override with a mock that throws to avoid
-   * exiting the runner.
+   * return normally (same contract as `process.exit`). If a custom hook returns anyway,
+   * {@link entrypointCommand} calls `process.exit(code)` as a fallback so the process
+   * cannot keep serving after a fatal bootstrap error. Tests should throw from the hook
+   * (caught internally) instead of returning, so the test runner is not killed by that
+   * fallback.
    */
   exit?: (code: number) => never;
 }
@@ -187,11 +189,22 @@ export async function entrypointCommand(
   let exitRequested = false;
   const requestExit = (code: number) => {
     exitRequested = true;
+    let exitHookThrew = false;
     try {
       exit(code);
     } catch (_error) {
+      exitHookThrew = true;
       // Tests may throw from a custom exit hook to short-circuit control flow.
       // Swallow to avoid this surfacing as a bootstrap failure.
+    }
+    if (!exitHookThrew) {
+      // TypeScript cannot enforce `never` at runtime; a buggy hook could return and leave
+      // HTTP up after resolvePromise() + fatal bootstrap — force termination.
+      logger.error(
+        new Error("ENSRainbow exit hook returned without terminating the process"),
+        "Exit hook violated non-returning contract; calling process.exit as fallback",
+      );
+      process.exit(code);
     }
   };
 
