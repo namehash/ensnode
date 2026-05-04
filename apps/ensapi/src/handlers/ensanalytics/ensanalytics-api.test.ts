@@ -1226,11 +1226,15 @@ describe("/v1/ensanalytics", () => {
       // The exact CSV cell values are exercised by `formatAccountingCsv`'s own unit coverage.
       const body = await httpResponse.text();
       const expectedHeaderRow =
-        "referralId,timestamp,name,action,transactionHash,incrementalDuration,registrant,referrer," +
-        "incrementalRevenueContributionWei,accumulatedRevenueContributionWei," +
-        "incrementalBaseRevenueContributionUsdc,accumulatedBaseRevenueContributionUsdc," +
-        "awardPoolRemainingUsdc,disqualified,disqualificationReason,maxRevShare," +
-        "effectiveBaseRevShare,incrementalTentativeAwardUsdc";
+        "referralId,timestamp,name,action,transactionHash," +
+        "incrementalDuration,incrementalDurationDays,registrant,referrer," +
+        "incrementalRevenueContributionWei,incrementalRevenueContribution," +
+        "accumulatedRevenueContributionWei,accumulatedRevenueContribution," +
+        "incrementalBaseRevenueContributionUsdc,incrementalBaseRevenueContribution," +
+        "accumulatedBaseRevenueContributionUsdc,accumulatedBaseRevenueContribution," +
+        "awardPoolRemainingUsdc,awardPoolRemaining," +
+        "disqualified,disqualificationReason,maxRevShare,effectiveBaseRevShare," +
+        "incrementalTentativeAwardUsdc,incrementalTentativeAward";
       expect(body.startsWith(`${expectedHeaderRow}\r\n`)).toBe(true);
       expect(body.endsWith("\r\n")).toBe(true);
 
