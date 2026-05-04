@@ -13,7 +13,7 @@ export const nameSales = onchainTable(
     /**
      * The chain where the sale occurred.
      */
-    chainId: t.integer().notNull(),
+    chainId: t.int8({ mode: "number" }).notNull(),
 
     /**
      * The block number on chainId where the sale occurred.
@@ -144,7 +144,7 @@ export const nameTokens = onchainTable(
     /**
      * The chain that manages the token.
      */
-    chainId: t.integer().notNull(),
+    chainId: t.int8({ mode: "number" }).notNull(),
 
     /**
      * The address of the contract on chainId that manages the token.

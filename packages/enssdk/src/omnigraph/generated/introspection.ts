@@ -487,6 +487,13 @@ const introspection = {
         "name": "AccountEventsWhereInput",
         "inputFields": [
           {
+            "name": "from",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Address"
+            }
+          },
+          {
             "name": "selector_in",
             "type": {
               "kind": "LIST",
@@ -3089,6 +3096,18 @@ const introspection = {
             "isDeprecated": false
           },
           {
+            "name": "sender",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Address"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
             "name": "timestamp",
             "type": {
               "kind": "NON_NULL",
@@ -3176,6 +3195,13 @@ const introspection = {
                   "name": "Hex"
                 }
               }
+            }
+          },
+          {
+            "name": "sender",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Address"
             }
           },
           {

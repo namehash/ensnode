@@ -1,4 +1,4 @@
-import { type Chain, localhost } from "viem/chains";
+import { type Chain, localhost, sepolia } from "viem/chains";
 
 /**
  * The ens-test-env chain id is 1:
@@ -10,4 +10,14 @@ export const ensTestEnvChain = {
   id: 1,
   name: "ens-test-env",
   rpcUrls: { default: { http: ["http://localhost:8545"] } },
+} as const satisfies Chain;
+
+/**
+ * NOTE: sepoliaV2Chain requires access to the Tenderly Virtual RPC Endpoint configured as
+ * RPC_URL_99911155111.
+ */
+export const sepoliaV2Chain = {
+  ...sepolia,
+  id: 99911155111,
+  name: "Sepolia V2 (Virtual)",
 } as const satisfies Chain;

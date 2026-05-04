@@ -5,30 +5,30 @@
  * monorepo-level integration tests, then tears everything down.
  *
  * Phases:
- *   1. Postgres + devnet via docker-compose (testcontainers DockerComposeEnvironment)
- *   2. Download pre-built ENSRainbow LevelDB, extract, start ENSRainbow from source
+ *   1. ENSDb (postgres) + devnet via docker-compose (testcontainers DockerComposeEnvironment)
+ *   2. Start ENSRainbow via `pnpm entrypoint` (downloads + extracts the prebuilt LevelDB in the background)
  *   3. Start ENSIndexer, wait for omnichain-following / omnichain-completed
  *   4. Start ENSApi
  *   5. Run `pnpm test:integration` at the monorepo root
  *
  * Design decisions:
- *   - Postgres and devnet are started from docker/docker-compose.orchestrator.yml via
+ *   - ENSDb (postgres) and devnet are started from docker/docker-compose.orchestrator.yml via
  *     testcontainers DockerComposeEnvironment, ensuring the orchestrator always
  *     uses the same images and configuration defined there.
  *   - execa for child process management — automatic cleanup on parent exit,
  *     forceKillAfterDelay (10s SIGKILL fallback), env inherited from parent.
  *   - Services run from source (pnpm start/serve) rather than Docker so that
  *     CI tests the actual code in the PR.
- *   - ENSRainbow database is downloaded via the existing shell script and
- *     extracted with tar, mirroring the Docker entrypoint behavior.
+ *   - ENSRainbow uses the same `pnpm entrypoint` command as the Docker image —
+ *     it boots the HTTP server immediately and bootstraps the DB asynchronously,
+ *     so we wait on `/ready` (not `/health`) before moving to the next phase.
  *   - Cleanup stops processes in reverse order (ensapi → ensindexer → ensrainbow)
- *     so DB consumers close connections before Postgres is stopped.
+ *     so DB consumers close connections before ensdb is stopped.
  *   - Abort flag pattern: if a background service crashes during polling/health
  *     checks, the orchestrator fails fast instead of waiting for a timeout.
  *   - SIGINT/SIGTERM handler is guarded against re-entrance (repeated Ctrl-C).
  */
 
-import { mkdirSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { execaSync, type ResultPromise, execa as spawn } from "execa";
@@ -37,9 +37,13 @@ import {
   type StartedDockerComposeEnvironment,
   Wait,
 } from "testcontainers";
+import { createPublicClient, http } from "viem";
 
-import { ENSNamespaceIds } from "@ensnode/datasources";
-import { OmnichainIndexingStatusIds } from "@ensnode/ensnode-sdk";
+import { ENSNamespaceIds, ensTestEnvChain } from "@ensnode/datasources";
+import {
+  IndexingMetadataContextStatusCodes,
+  OmnichainIndexingStatusIds,
+} from "@ensnode/ensnode-sdk";
 
 import { seedDevnet } from "./seed/index";
 
@@ -53,10 +57,12 @@ const ENSAPI_DIR = resolve(MONOREPO_ROOT, "apps/ensapi");
 const ENSRAINBOW_PORT = 3223;
 const ENSINDEXER_PORT = 42069;
 const ENSAPI_PORT = 4334;
+const ENSDB_PORT = 5433;
 
 // Shared config
 const ENSRAINBOW_URL = `http://localhost:${ENSRAINBOW_PORT}`;
 const ENSINDEXER_SCHEMA_NAME = "ensindexer_integration_test";
+const ENSDB_URL = `postgresql://postgres:password@localhost:${ENSDB_PORT}/postgres`;
 
 // Track resources for cleanup
 const subprocesses: ResultPromise[] = [];
@@ -99,7 +105,9 @@ async function cleanup() {
 
   if (composeEnvironment) {
     try {
-      await composeEnvironment.down();
+      // removeVolumes ensures the postgres volume is wiped between runs — Ponder rejects schemas
+      // owned by a different prior app, so we cannot reuse the volume across runs.
+      await composeEnvironment.down({ removeVolumes: true, timeout: 10_000 });
     } catch (error) {
       logError(
         `Failed to stop compose environment during cleanup: ${
@@ -123,11 +131,11 @@ process.on("SIGINT", handleShutdown);
 process.on("SIGTERM", handleShutdown);
 
 function log(msg: string) {
-  console.log(`[ci] ${msg}`);
+  console.log(`[orchestrator] ${msg}`);
 }
 
 function logError(msg: string) {
-  console.error(`[ci] ERROR: ${msg}`);
+  console.error(`[orchestrator] ERROR: ${msg}`);
 }
 
 async function waitForHealth(url: string, timeoutMs: number, serviceName: string): Promise<void> {
@@ -201,9 +209,14 @@ async function pollIndexingStatus(
     while (Date.now() - start < timeoutMs) {
       checkAborted();
       try {
-        const snapshot = await ensDbClient.getIndexingStatusSnapshot();
-        if (snapshot !== undefined) {
-          const omnichainStatus = snapshot.omnichainSnapshot.omnichainStatus;
+        const indexingMetadataContext = await ensDbClient.getIndexingMetadataContext();
+
+        if (
+          indexingMetadataContext.statusCode === IndexingMetadataContextStatusCodes.Uninitialized
+        ) {
+          console.log("IndexingMetadataContext is uninitialized, waiting...");
+        } else {
+          const { omnichainStatus } = indexingMetadataContext.indexingStatus.omnichainSnapshot;
           log(`Omnichain status: ${omnichainStatus}`);
           if (
             omnichainStatus === OmnichainIndexingStatusIds.Following ||
@@ -239,25 +252,32 @@ async function main() {
   log("Starting integration test environment...");
   logVersions();
 
-  // Phase 1: Start Postgres + Devnet via docker-compose
-  log("Starting Postgres and devnet...");
+  // Phase 1: Start ENSDb + Devnet via docker-compose
+  log("Starting ENSDb and Devnet...");
   composeEnvironment = await new DockerComposeEnvironment(
     DOCKER_DIR,
     "docker-compose.orchestrator.yml",
   )
-    .withWaitStrategy("devnet", Wait.forHealthCheck())
-    .withWaitStrategy("postgres", Wait.forListeningPorts())
+    .withWaitStrategy("devnet-orchestrator", Wait.forHealthCheck())
+    .withWaitStrategy("ensdb-orchestrator", Wait.forListeningPorts())
     .withStartupTimeout(120_000)
-    .up(["postgres", "devnet"]);
+    .up(["ensdb", "devnet"]);
 
-  const postgresContainer = composeEnvironment.getContainer("postgres");
-  const postgresPort = postgresContainer.getMappedPort(5432);
-  const ENSDB_URL = `postgresql://postgres:password@localhost:${postgresPort}/postgres`;
-  log(`Postgres is ready (port ${postgresPort})`);
-  const devnetContainer = composeEnvironment.getContainer("devnet");
-  const devnetPort = devnetContainer.getMappedPort(8545);
-  const devnetRpcUrl = `http://localhost:${devnetPort}`;
-  log(`Devnet is ready (port ${devnetPort})`);
+  log(`ENSDb is ready (port ${ENSDB_PORT})`);
+
+  // Devnet Chain Id check
+  const devnetRpcUrl = ensTestEnvChain.rpcUrls.default.http[0];
+  const publicClient = createPublicClient({
+    transport: http(devnetRpcUrl),
+  });
+  const devnetChainId = await publicClient.getChainId();
+  if (devnetChainId !== ensTestEnvChain.id) {
+    throw new Error(
+      `Devnet chain id mismatch: got ${devnetChainId}, expected ${ensTestEnvChain.id}.`,
+    );
+  }
+
+  log(`Devnet is ready (RPC URL: ${devnetRpcUrl})`);
 
   // Phase 2: Seed devnet with test data (before indexing starts)
   log("Seeding devnet...");
@@ -268,48 +288,22 @@ async function main() {
   const DB_SCHEMA_VERSION = "3";
   const LABEL_SET_ID = "ens-test-env";
   const LABEL_SET_VERSION = "0";
-  const dataSubdir = `data-${LABEL_SET_ID}_${LABEL_SET_VERSION}`;
-  const ensrainbowDataDir = resolve(ENSRAINBOW_DIR, "data");
-  const downloadTempDir = resolve(ensrainbowDataDir, "_download_temp");
 
-  log("Downloading ENSRainbow database...");
-  execaSync(
-    "bash",
-    [
-      `${ENSRAINBOW_DIR}/scripts/download-prebuilt-database.sh`,
+  log("Starting ENSRainbow (entrypoint will bootstrap the database)...");
+  spawnService(
+    "pnpm",
+    ["entrypoint"],
+    ENSRAINBOW_DIR,
+    {
+      LOG_LEVEL: "error",
       DB_SCHEMA_VERSION,
       LABEL_SET_ID,
       LABEL_SET_VERSION,
-    ],
-    {
-      cwd: ENSRAINBOW_DIR,
-      stdio: "inherit",
-      env: { OUT_DIR: downloadTempDir },
     },
-  );
-
-  // Extract archive into the data directory (matches entrypoint.sh behavior)
-  const archivePath = resolve(
-    downloadTempDir,
-    "databases",
-    DB_SCHEMA_VERSION,
-    `${LABEL_SET_ID}_${LABEL_SET_VERSION}.tgz`,
-  );
-  mkdirSync(ensrainbowDataDir, { recursive: true });
-  execaSync("tar", ["-xzf", archivePath, "-C", ensrainbowDataDir, "--strip-components=1"], {
-    stdio: "inherit",
-  });
-  log("ENSRainbow database extracted");
-
-  log("Starting ENSRainbow...");
-  spawnService(
-    "pnpm",
-    ["serve", "--data-dir", `data/${dataSubdir}`],
-    ENSRAINBOW_DIR,
-    { LOG_LEVEL: "error" },
     "ensrainbow",
   );
-  await waitForHealth(`http://localhost:${ENSRAINBOW_PORT}/health`, 30_000, "ENSRainbow");
+  // /ready returns 200 only after the DB has been downloaded, extracted, and attached.
+  await waitForHealth(`http://localhost:${ENSRAINBOW_PORT}/ready`, 30_000, "ENSRainbow");
 
   // Phase 4: Start ENSIndexer
   log("Starting ENSIndexer...");

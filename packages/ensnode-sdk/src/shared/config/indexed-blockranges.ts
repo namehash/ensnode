@@ -1,4 +1,5 @@
 import type { ChainId } from "enssdk";
+import { zeroAddress } from "viem";
 
 import {
   type ContractConfig,
@@ -37,6 +38,12 @@ export function buildIndexedBlockranges(
       const datasourceContracts = Object.values<ContractConfig>(datasource.contracts);
 
       for (const datasourceContract of datasourceContracts) {
+        // Skip placeholder contracts that exist only to satisfy the typesystem
+        // (e.g. cross-namespace registrar entries set to the zero address). They
+        // are not actually indexed by Ponder, so including their startBlock=0
+        // would incorrectly drag the chain's indexed blockrange lower bound to 0.
+        if (datasourceContract.address === zeroAddress) continue;
+
         const currentChainIndexedBlockrange = indexedBlockranges.get(datasourceChainId);
 
         const contractIndexedBlockrange = buildBlockNumberRange(

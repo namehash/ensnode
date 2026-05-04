@@ -22,7 +22,7 @@ Dashboard panels are tuned for indexer perf work:
 From this package's directory:
 
 ```bash
-pnpm up       # start prometheus + grafana
+pnpm start    # start prometheus + grafana
 pnpm down     # stop and remove containers
 pnpm logs     # tail container logs
 pnpm wipe     # purge prometheus series (useful between benchmark runs)

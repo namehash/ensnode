@@ -1,22 +1,30 @@
 # Minimal compose for CI integration tests.
 # Provides only the infrastructure services needed by orchestrator.ts:
-# devnet (local EVM) and postgres (database).
+# devnet (local EVM) and ensdb (database).
+#
+# NOTE: container_name is overridden to `*-orchestrator` so testcontainers runs do not collide
+# with manually-started stacks (docker-compose.yml / docker-compose.devnet.yml) or with each other.
+#
+# NOTE: ensdb-orchestrator binds host port 5433 (rather than 5432 used by the manual stacks) so
+# it never collides and so developers can `psql -h localhost -p 5433` after a test run.
 services:
   devnet:
     extends:
       file: services/devnet.yml
       service: devnet
+    container_name: devnet-orchestrator
 
-  postgres:
+  ensdb:
     extends:
-      file: services/postgres.yml
-      service: postgres
+      file: services/ensdb.yml
+      service: ensdb
+    container_name: ensdb-orchestrator
+    ports:
+      - "5433:5432"
     env_file:
-      - path: ./envs/.env.docker.common
+      - path: envs/.env.docker.common
         required: true
 
 volumes:
-  # Docker Compose requires volumes used by services to be declared in each
-  # compose file that references them — they cannot be inherited via `extends`.
-  postgres_data:
+  ensdb_data:
     driver: local

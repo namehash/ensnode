@@ -20,7 +20,7 @@ ENSIndexer runs `CREATE EXTENSION IF NOT EXISTS pg_trgm` at startup to back part
 
 ENSNode provides several [Docker Compose](https://docs.docker.com/compose/) files for different use cases:
 
-- **`docker/docker-compose.yml`** — base stack for mainnet/sepolia: ensindexer, ensapi, ensrainbow, ensadmin, postgres
+- **`docker/docker-compose.yml`** — base stack for mainnet/sepolia: ensindexer, ensapi, ensrainbow, ensadmin, ensdb (postgres)
 - **`docker/docker-compose.devnet.yml`** — full stack against local devnet (ens-test-env), works out of the box with no configuration required
 
 ### Mainnet / Sepolia

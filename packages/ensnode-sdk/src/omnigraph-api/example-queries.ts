@@ -32,7 +32,12 @@ const ENS_TEST_ENV_V2_ETH_REGISTRAR = maybeGetDatasourceContract(
 
 const VITALIK_ADDRESS = toNormalizedAddress("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045");
 
+// owns sfmonicdeb*.eth (mix of v1 + v2) on sepolia-v2 and holds v2 ETHRegistry permissions
+const SEPOLIA_V2_USER_ADDRESS = toNormalizedAddress("0x2f8e8b1126e75fde0b7f731e7cb5847eba2d2574");
+
 const DEVNET_NAME_WITH_OWNED_RESOLVER = asInterpretedName("example.eth");
+
+const SEPOLIA_V2_NAME_WITH_OWNED_RESOLVER = asInterpretedName("sfmonicdebmig.eth");
 
 export const GRAPHQL_API_EXAMPLE_QUERIES: Array<{
   query: string;
@@ -85,6 +90,7 @@ query FindDomains(
     variables: {
       default: { name: "vitalik", order: { by: "NAME", dir: "DESC" } },
       [ENSNamespaceIds.EnsTestEnv]: { name: "c", order: { by: "NAME", dir: "DESC" } },
+      [ENSNamespaceIds.SepoliaV2]: { name: "sfmonic", order: { by: "NAME", dir: "DESC" } },
     },
   },
 
@@ -112,7 +118,10 @@ query DomainByName($name: InterpretedName!) {
     }
   }
 }`,
-    variables: { default: { name: "eth" } },
+    variables: {
+      default: { name: "eth" },
+      [ENSNamespaceIds.SepoliaV2]: { name: "sfmonicdebmig.eth" },
+    },
   },
 
   //////////////////////
@@ -157,7 +166,10 @@ query DomainEvents($name: InterpretedName!) {
     }
   }
 }`,
-    variables: { default: { name: "newowner.eth" } },
+    variables: {
+      default: { name: "newowner.eth" },
+      [ENSNamespaceIds.SepoliaV2]: { name: "sfmonicdebmig.eth" },
+    },
   },
 
   ////////////////////
@@ -182,6 +194,7 @@ query AccountDomains(
     variables: {
       default: { address: VITALIK_ADDRESS },
       [ENSNamespaceIds.EnsTestEnv]: { address: accounts.owner.address },
+      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_USER_ADDRESS },
     },
   },
 
@@ -200,6 +213,7 @@ query AccountEvents(
     variables: {
       default: { address: VITALIK_ADDRESS },
       [ENSNamespaceIds.EnsTestEnv]: { address: accounts.deployer.address },
+      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_USER_ADDRESS },
     },
   },
 
@@ -283,8 +297,7 @@ query PermissionsByUser($address: Address!) {
 }`,
     variables: {
       default: { address: accounts.deployer.address },
-      // TODO: figure out a good sepolia-v2 user address
-      // [ENSNamespaceIds.SepoliaV2]: { address: "" },
+      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_USER_ADDRESS },
     },
   },
 
@@ -310,8 +323,7 @@ query AccountResolverPermissions($address: Address!) {
 }`,
     variables: {
       default: { address: accounts.deployer.address },
-      // TODO: figure out a good sepolia-v2 user address
-      // [ENSNamespaceIds.SepoliaV2]: { address: "" },
+      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_USER_ADDRESS },
     },
   },
 
@@ -332,6 +344,7 @@ query DomainResolver($name: InterpretedName!) {
     variables: {
       default: { name: "vitalik.eth" },
       [ENSNamespaceIds.EnsTestEnv]: { name: DEVNET_NAME_WITH_OWNED_RESOLVER },
+      [ENSNamespaceIds.SepoliaV2]: { name: SEPOLIA_V2_NAME_WITH_OWNED_RESOLVER },
     },
   },
 

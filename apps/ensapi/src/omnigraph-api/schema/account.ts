@@ -90,13 +90,14 @@ AccountRef.implement({
     // Account.events
     //////////////////
     events: t.connection({
-      description: "All Events for which this Account is the sender (i.e. `Transaction.from`).",
+      description:
+        "All Events for which this Account is the HCA-aware `sender` (i.e. `Event.sender`).",
       type: EventRef,
       args: {
         where: t.arg({ type: AccountEventsWhereInput }),
       },
       resolve: (parent, args) =>
-        resolveFindEvents({ ...args, where: { ...args.where, from: parent.id } }),
+        resolveFindEvents({ ...args, where: { ...args.where, sender: parent.id } }),
     }),
 
     ///////////////////////

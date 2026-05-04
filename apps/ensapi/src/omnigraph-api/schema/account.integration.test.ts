@@ -101,7 +101,7 @@ describe("Account.events", () => {
     expect(events.length).toBeGreaterThan(0);
 
     for (const event of events) {
-      expect(event.from).toBe(accounts.deployer.address);
+      expect(event.sender).toBe(accounts.deployer.address);
     }
   });
 });
