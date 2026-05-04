@@ -54,7 +54,6 @@ export type SubmissionResultItem = {
 };
 
 export type SubmissionsResponse = {
-  submittedAt: string;
   callerAddress: Address;
   results: SubmissionResultItem[];
 };
@@ -140,11 +139,11 @@ export async function submissionsHandler(c: Context) {
   const classifications = classifySubmissions(hashed, hits);
   const results = classifications.map(toResultItem);
 
-  const submittedAt = new Date().toISOString();
+  const ts = new Date().toISOString();
   const requestId = crypto.randomUUID();
 
   const logLine: SubmissionLogLine = {
-    ts: submittedAt,
+    ts,
     requestId,
     callerAddress,
     items: results,
@@ -152,7 +151,6 @@ export async function submissionsHandler(c: Context) {
   console.log(JSON.stringify(logLine));
 
   const response: SubmissionsResponse = {
-    submittedAt,
     callerAddress,
     results,
   };

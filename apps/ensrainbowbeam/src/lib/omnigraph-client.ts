@@ -1,6 +1,6 @@
 import { config } from "@/config";
 
-import type { LabelHash } from "enssdk";
+import { type LabelHash, OMNIGRAPH_LABELS_BY_LABELHASH_MAX } from "enssdk";
 import { createEnsNodeClient } from "enssdk/core";
 import { graphql, omnigraph } from "enssdk/omnigraph";
 
@@ -10,7 +10,7 @@ import type { LabelHit } from "@/lib/labels";
  * Must equal `LABELS_BY_LABELHASH_MAX` in `apps/ensapi/src/omnigraph-api/schema/label.ts`.
  * EnsRainbowBeam chunks Omnigraph requests so a single submission can exceed this cap.
  */
-const OMNIGRAPH_LABEL_LOOKUP_BATCH_SIZE = 100;
+const OMNIGRAPH_LABEL_LOOKUP_BATCH_SIZE = OMNIGRAPH_LABELS_BY_LABELHASH_MAX;
 
 /**
  * Typed document for the `labels(by: { labelHashes })` Omnigraph query.
@@ -33,7 +33,7 @@ const client = createEnsNodeClient({ url: config.ensNodeUrl }).extend(omnigraph)
  * Looks up Labels by a batch of LabelHashes against ENSNode's Omnigraph.
  *
  * The Omnigraph resolver enforces a hard cap on how many LabelHashes a single query may carry
- * (`LABELS_BY_LABELHASH_MAX` / `OMNIGRAPH_LABEL_LOOKUP_BATCH_SIZE`). When the caller provides
+ * (`OMNIGRAPH_LABELS_BY_LABELHASH_MAX`). When the caller provides
  * more (e.g. a full submission expanding to up to 200 distinct LabelHashes), this function
  * automatically issues multiple batched requests and merges results.
  *

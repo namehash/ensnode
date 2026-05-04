@@ -1,3 +1,5 @@
+import { OMNIGRAPH_LABELS_BY_LABELHASH_MAX } from "enssdk";
+
 import type { ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { builder } from "@/omnigraph-api/builder";
 
@@ -39,7 +41,7 @@ LabelRef.implement({
  * Caps the resolver's `inArray` query so a single GraphQL request cannot enumerate
  * the entire `label` table.
  */
-export const LABELS_BY_LABELHASH_MAX = 100;
+export const LABELS_BY_LABELHASH_MAX = OMNIGRAPH_LABELS_BY_LABELHASH_MAX;
 
 export const LabelsByLabelHashesInput = builder.inputType("LabelsByLabelHashesInput", {
   description: "Look up Labels by a batch of LabelHashes.",

@@ -4,6 +4,7 @@ export default defineConfig({
   entry: {
     client: "src/client.ts",
     consts: "src/consts.ts",
+    "ensrainbowbeam-client": "src/ensrainbowbeam-client.ts",
     index: "src/index.ts",
   },
   platform: "browser",
