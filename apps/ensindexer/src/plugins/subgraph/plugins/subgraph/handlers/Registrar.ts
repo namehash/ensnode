@@ -79,7 +79,7 @@ export default function () {
    * NameRegistered (yes base cost, no premium, no referral)
    * - LegacyEthRegistrarController
    *
-   * `name`/`label` are misnamed onchain — re-map to ENSNode terminology.
+   * `name`/`label` params are misnamed onchain — re-map to proper ENS terminology.
    */
   addOnchainEventListener(
     namespaceContract(
@@ -105,7 +105,7 @@ export default function () {
    * NameRegistered (yes base cost, yes premium, no referral)
    * - WrappedEthRegistrarController
    *
-   * `name`/`label` are misnamed onchain — re-map to ENSNode terminology.
+   * `name`/`label` params are misnamed onchain — re-map to proper ENS terminology.
    * `cost` = baseCost + premium.
    */
   addOnchainEventListener(
@@ -159,7 +159,7 @@ export default function () {
    * - LegacyEthRegistrarController
    * - WrappedEthRegistrarController
    *
-   * `name`/`label` are misnamed onchain — re-map to ENSNode terminology.
+   * `name`/`label` params are misnamed onchain — re-map to proper ENS terminology.
    */
   addOnchainEventListener(
     namespaceContract(

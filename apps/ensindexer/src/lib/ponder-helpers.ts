@@ -156,13 +156,11 @@ export function chainConfigForContract<CONTRACT_CONFIG extends ContractConfig>(
  *
  * Useful for collecting contracts to pass to {@link mergedChainConfigForContracts}.
  */
-export function pickContracts(
-  contracts: Record<string, ContractConfig>,
-  names: readonly string[],
+export function pickContracts<T extends string>(
+  contracts: Partial<Record<T, ContractConfig>>,
+  names: readonly T[],
 ): ContractConfig[] {
-  return names
-    .map((name) => contracts[name] as ContractConfig | undefined)
-    .filter((c): c is ContractConfig => !!c);
+  return names.map((name) => contracts[name]).filter((c): c is ContractConfig => !!c);
 }
 
 /**

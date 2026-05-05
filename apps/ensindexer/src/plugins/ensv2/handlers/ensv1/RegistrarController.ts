@@ -252,9 +252,9 @@ export default function () {
         event: {
           ...event,
           args: {
-            // name is actually label
+            // `name` param is misnamed onchain — re-map to proper ENS terminology
             label: event.args.name,
-            // label is actually labelHash
+            // `label` param is misnamed onchain — re-map to proper ENS terminology
             labelHash: event.args.label,
             baseCost: event.args.cost,
           },
@@ -272,9 +272,9 @@ export default function () {
         event: {
           ...event,
           args: {
-            // name is actually label
+            // `name` param is misnamed onchain — re-map to proper ENS terminology
             label: event.args.name,
-            // label is actually labelHash
+            // `label` param is misnamed onchain — re-map to proper ENS terminology
             labelHash: event.args.label,
           },
         },
