@@ -24,7 +24,7 @@ export const LearnMoreButton = ({
       className={legacyButtonVariants({
         variant: "secondary",
         size: "medium",
-        className: cc("max-w-full overflow-x-hidden", styles),
+        className: cc(["max-w-full overflow-x-hidden", styles]),
       })}
     >
       {text}

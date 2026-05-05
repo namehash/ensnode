@@ -41,6 +41,7 @@ For each submitted raw label EnsRainbowBeam:
 |---------|----------|-------------|
 | `PORT` | no (default `4444`) | HTTP listen port. |
 | `ENSNODE_URL` | yes | Base URL of an ENSNode (ENSApi) instance with Omnigraph at `/api/omnigraph`. |
+| `CORS_ORIGINS` | no | Comma-separated allowlist of CORS origins (e.g. `https://ensrainbow.io,http://localhost:4321`). When unset/empty, no cross-origin requests are allowed. |
 
 See `.env.local.example` for a local-development template.
 

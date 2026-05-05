@@ -1,10 +1,22 @@
+import { config } from "@/config";
+
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 
 import { healthHandler } from "@/handlers/health";
 import { submissionsHandler } from "@/handlers/submissions";
 import { errorResponse } from "@/lib/error-response";
 
 const app = new Hono();
+
+app.use(
+  cors({
+    origin: (origin) => (config.corsOrigins.includes(origin) ? origin : undefined),
+    allowMethods: ["GET", "POST", "OPTIONS"],
+    allowHeaders: ["Content-Type"],
+    maxAge: 86400,
+  }),
+);
 
 app.get("/health", healthHandler);
 

@@ -806,6 +806,9 @@ importers:
       '@astrojs/react':
         specifier: 'catalog:'
         version: 4.4.2(@types/node@24.10.9)(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(tsx@4.21.0)(yaml@2.8.3)
+      '@ensnode/ensrainbow-sdk':
+        specifier: workspace:*
+        version: link:../../packages/ensrainbow-sdk
       '@heroicons/react':
         specifier: ^2.2.0
         version: 2.2.0(react@19.2.1)

@@ -17,6 +17,7 @@
   "dependencies": {
     "@astrojs/react": "catalog:",
     "@heroicons/react": "^2.2.0",
+    "@ensnode/ensrainbow-sdk": "workspace:*",
     "@namehash/namehash-ui": "workspace:*",
     "@tailwindcss/vite": "^4.1.15",
     "astro": "catalog:",
