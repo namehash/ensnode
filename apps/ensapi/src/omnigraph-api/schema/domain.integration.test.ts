@@ -1,5 +1,14 @@
-import type { DomainId, InterpretedLabel, InterpretedName } from "enssdk";
+import {
+  ADDR_REVERSE_NODE,
+  type DomainId,
+  type InterpretedLabel,
+  type InterpretedName,
+  makeENSv1DomainId,
+} from "enssdk";
 import { beforeAll, describe, expect, it } from "vitest";
+
+import { DatasourceNames } from "@ensnode/datasources";
+import { getDatasourceContract } from "@ensnode/ensnode-sdk";
 
 import { DEVNET_ETH_LABELS } from "@/test/integration/devnet-names";
 import {
@@ -108,6 +117,48 @@ describe("Domain.path", () => {
       "eth",
     ]);
     expect(aliasPathNames).not.toContain("sub1.sub2.parent.eth");
+  });
+});
+
+describe("Domain.canonical", () => {
+  type DomainCanonicalResult = {
+    domain: { id: DomainId; canonical: boolean | null } | null;
+  };
+
+  const DomainCanonicalByName = gql`
+    query DomainCanonicalByName($name: InterpretedName!) {
+      domain(by: { name: $name }) { id canonical }
+    }
+  `;
+
+  const DomainCanonicalById = gql`
+    query DomainCanonicalById($id: DomainId!) {
+      domain(by: { id: $id }) { id canonical }
+    }
+  `;
+
+  it("is true for v2-rooted domains", async () => {
+    await expect(
+      request<DomainCanonicalResult>(DomainCanonicalByName, {
+        name: "parent.eth" as InterpretedName,
+      }),
+    ).resolves.toMatchObject({ domain: { canonical: true } });
+  });
+
+  it("is false for ENSv1 addr.reverse", async () => {
+    // addr.reverse only exists on the ENSv1 namegraph and the v1 root is non-canonical in
+    // ens-test-env (the ENSv2 root is the namespace's canonical root). We query by id
+    // because the canonical-name walk only finds canonical domains.
+    const v1RootRegistry = getDatasourceContract(
+      "ens-test-env",
+      DatasourceNames.ENSRoot,
+      "ENSv1Registry",
+    );
+    const id = makeENSv1DomainId(v1RootRegistry, ADDR_REVERSE_NODE);
+
+    await expect(
+      request<DomainCanonicalResult>(DomainCanonicalById, { id }),
+    ).resolves.toMatchObject({ domain: { id, canonical: false } });
   });
 });
 
