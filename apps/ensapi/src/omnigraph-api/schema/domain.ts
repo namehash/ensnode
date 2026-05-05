@@ -103,6 +103,15 @@ DomainInterfaceRef.implement({
       resolve: (parent) => parent.label,
     }),
 
+    ////////////////////
+    // Domain.canonical
+    ////////////////////
+    canonical: t.field({
+      description: "Whether the Domain is Canonical.",
+      type: "Boolean",
+      resolve: (parent) => parent.canonical,
+    }),
+
     ///////////////
     // Domain.name
     ///////////////

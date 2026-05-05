@@ -1043,6 +1043,15 @@ const introspection = {
         "name": "Domain",
         "fields": [
           {
+            "name": "canonical",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
             "name": "events",
             "type": {
               "kind": "OBJECT",
@@ -1626,6 +1635,15 @@ const introspection = {
         "name": "ENSv1Domain",
         "fields": [
           {
+            "name": "canonical",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
             "name": "events",
             "type": {
               "kind": "OBJECT",
@@ -1878,6 +1896,15 @@ const introspection = {
         "name": "ENSv1Registry",
         "fields": [
           {
+            "name": "canonical",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
             "name": "contract",
             "type": {
               "kind": "NON_NULL",
@@ -2012,6 +2039,15 @@ const introspection = {
         "kind": "OBJECT",
         "name": "ENSv1VirtualRegistry",
         "fields": [
+          {
+            "name": "canonical",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
           {
             "name": "contract",
             "type": {
@@ -2159,6 +2195,15 @@ const introspection = {
         "kind": "OBJECT",
         "name": "ENSv2Domain",
         "fields": [
+          {
+            "name": "canonical",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
           {
             "name": "events",
             "type": {
@@ -2548,6 +2593,15 @@ const introspection = {
         "kind": "OBJECT",
         "name": "ENSv2Registry",
         "fields": [
+          {
+            "name": "canonical",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
           {
             "name": "contract",
             "type": {
@@ -5085,6 +5139,15 @@ const introspection = {
         "kind": "INTERFACE",
         "name": "Registry",
         "fields": [
+          {
+            "name": "canonical",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
           {
             "name": "contract",
             "type": {
