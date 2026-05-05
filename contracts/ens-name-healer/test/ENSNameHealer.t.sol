@@ -106,26 +106,12 @@ contract ENSNameHealerTest is Test {
 
     // ── Namehash correctness ──────────────────────────────────────────────
 
-    // Reference namehashes verified against the ENS JS SDK.
-    function test_namehash_eth() public view {
-        bytes32 expected = 0x93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae;
-        assertEq(healer.namehash("eth"), expected);
-    }
-
-    function test_namehash_vitalikEth() public view {
-        // namehash("vitalik.eth")
-        bytes32 expected = 0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835;
-        assertEq(healer.namehash("vitalik.eth"), expected);
-    }
-
-    function test_namehash_multiLabel() public view {
-        // namehash("a.b.eth")
-        bytes32 b_eth = keccak256(abi.encodePacked(
-            bytes32(0x93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae),
-            keccak256("b")
-        ));
-        bytes32 expected = keccak256(abi.encodePacked(b_eth, keccak256("a")));
-        assertEq(healer.namehash("a.b.eth"), expected);
+    function test_namehash_basic_cases() public view {
+        assertEq(healer.namehash(""), 0x0000000000000000000000000000000000000000000000000000000000000000);
+        assertEq(healer.namehash("eth"), 0x93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae);
+        assertEq(healer.namehash("vitalik.eth"), 0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835);
+        assertEq(healer.namehash("a.b.eth"), 0xebc915e66aa50750038115f9be3353f7023247e4ab549b4ba1271481b81890a5);
+        assertEq(healer.namehash("llev.me"), 0xfd61e92511e7897624f7fa44a07886c50edb954f07e608539d3ce4bbf1db31e2);
     }
 
     function test_namehash_distinctForDistinctNames() public view {
@@ -137,6 +123,7 @@ contract ENSNameHealerTest is Test {
 
     function test_submit_emitsNameHealed() public {
         bytes32 expectedHash = healer.namehash("vitalik.eth");
+        // catch indexed expectedHash, indexed submitted, and non-indexed name in data
         vm.expectEmit(true, true, false, true);
         emit NameHealed(expectedHash, "vitalik.eth", submitter);
 
