@@ -129,7 +129,7 @@ overrides:
   brace-expansion@>=4.0.0 <5.0.5: '>=5.0.5'
   defu@<=6.1.4: ^6.1.5
   vite@>=5.0.0 <=6.4.1: ^6.4.2
-  axios@<1.15.0: '>=1.15.0'
+  axios@<1.15.2: ^1.15.2
   follow-redirects@<1.16.0: ^1.16.0
   dompurify@<3.4.0: ^3.4.0
   protobufjs@>=7.0.0 <7.5.5: ^7.5.5
@@ -1330,7 +1330,7 @@ importers:
     dependencies:
       '@scalar/api-reference-react':
         specifier: ^0.9.32
-        version: 0.9.32(@vue/compiler-sfc@3.5.32)(axios@1.15.0)(react@19.2.1)(tailwindcss@4.2.2)(typescript@5.9.3)
+        version: 0.9.32(@vue/compiler-sfc@3.5.32)(axios@1.16.0)(react@19.2.1)(tailwindcss@4.2.2)(typescript@5.9.3)
     devDependencies:
       '@ensnode/shared-configs':
         specifier: workspace:*
@@ -5355,7 +5355,7 @@ packages:
     resolution: {integrity: sha512-SDobKBbPIOe0cVL7QxMzGkuUGHvWTdihi9zOrrWaWUgFKe15cwEcwfWmgrcNzjT6kHnNmWuTajPHoIzUjYNYYQ==}
     peerDependencies:
       async-validator: ^4
-      axios: '>=1.15.0'
+      axios: ^1.15.2
       change-case: ^5
       drauu: ^0.4
       focus-trap: ^7
@@ -5687,8 +5687,8 @@ packages:
     peerDependencies:
       postcss: ^8.5.12
 
-  axios@1.15.0:
-    resolution: {integrity: sha512-wWyJDlAatxk30ZJer+GeCWS209sA42X+N5jU2jy6oHTp7ufw8uzUTVFBX9+wTfAlhiJXGS0Bq7X6efruWjuK9Q==}
+  axios@1.16.0:
+    resolution: {integrity: sha512-6hp5CwvTPlN2A31g5dxnwAX0orzM7pmCRDLnZSX772mv8WDqICwFjowHuPs04Mc8deIld1+ejhtaMn5vp6b+1w==}
 
   axobject-query@4.1.0:
     resolution: {integrity: sha512-qIj0G9wZbMGNLjLmg1PT6v2mE9AH2zlnADJD/2tC6E00hgmhUOfEB6greHPAfLRSufHqROIUTkw6E+M3lH0PTQ==}
@@ -12199,7 +12199,7 @@ snapshots:
       '@iconify/types': 2.0.0
       '@iconify/utils': 2.3.0
       '@types/tar': 6.1.13
-      axios: 1.15.0
+      axios: 1.16.0
       cheerio: 1.0.0
       domhandler: 5.0.3
       extract-zip: 2.0.1
@@ -13737,10 +13737,10 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.59.0':
     optional: true
 
-  '@scalar/agent-chat@0.10.13(@vue/compiler-sfc@3.5.32)(axios@1.15.0)(tailwindcss@4.2.2)(typescript@5.9.3)':
+  '@scalar/agent-chat@0.10.13(@vue/compiler-sfc@3.5.32)(axios@1.16.0)(tailwindcss@4.2.2)(typescript@5.9.3)':
     dependencies:
       '@ai-sdk/vue': 3.0.33(vue@3.5.32(typescript@5.9.3))(zod@4.3.6)
-      '@scalar/api-client': 3.5.1(@vue/compiler-sfc@3.5.32)(axios@1.15.0)(tailwindcss@4.2.2)(typescript@5.9.3)
+      '@scalar/api-client': 3.5.1(@vue/compiler-sfc@3.5.32)(axios@1.16.0)(tailwindcss@4.2.2)(typescript@5.9.3)
       '@scalar/components': 0.24.1(typescript@5.9.3)
       '@scalar/helpers': 0.5.5
       '@scalar/icons': 0.7.2(typescript@5.9.3)
@@ -13776,7 +13776,7 @@ snapshots:
       - typescript
       - universal-cookie
 
-  '@scalar/api-client@3.5.1(@vue/compiler-sfc@3.5.32)(axios@1.15.0)(tailwindcss@4.2.2)(typescript@5.9.3)':
+  '@scalar/api-client@3.5.1(@vue/compiler-sfc@3.5.32)(axios@1.16.0)(tailwindcss@4.2.2)(typescript@5.9.3)':
     dependencies:
       '@headlessui/tailwindcss': 0.2.2(tailwindcss@4.2.2)
       '@headlessui/vue': 1.7.23(vue@3.5.32(typescript@5.9.3))
@@ -13799,7 +13799,7 @@ snapshots:
       '@scalar/workspace-store': 0.49.1(typescript@5.9.3)
       '@types/har-format': 1.2.16
       '@vueuse/core': 13.9.0(vue@3.5.32(typescript@5.9.3))
-      '@vueuse/integrations': 13.9.0(axios@1.15.0)(focus-trap@7.8.0)(fuse.js@7.1.0)(vue@3.5.32(typescript@5.9.3))
+      '@vueuse/integrations': 13.9.0(axios@1.16.0)(focus-trap@7.8.0)(fuse.js@7.1.0)(vue@3.5.32(typescript@5.9.3))
       cookie: 1.1.1
       focus-trap: 7.8.0
       fuse.js: 7.1.0
@@ -13835,9 +13835,9 @@ snapshots:
       - typescript
       - universal-cookie
 
-  '@scalar/api-reference-react@0.9.32(@vue/compiler-sfc@3.5.32)(axios@1.15.0)(react@19.2.1)(tailwindcss@4.2.2)(typescript@5.9.3)':
+  '@scalar/api-reference-react@0.9.32(@vue/compiler-sfc@3.5.32)(axios@1.16.0)(react@19.2.1)(tailwindcss@4.2.2)(typescript@5.9.3)':
     dependencies:
-      '@scalar/api-reference': 1.55.1(@vue/compiler-sfc@3.5.32)(axios@1.15.0)(tailwindcss@4.2.2)(typescript@5.9.3)
+      '@scalar/api-reference': 1.55.1(@vue/compiler-sfc@3.5.32)(axios@1.16.0)(tailwindcss@4.2.2)(typescript@5.9.3)
       '@scalar/types': 0.9.5
       react: 19.2.1
     transitivePeerDependencies:
@@ -13859,11 +13859,11 @@ snapshots:
       - typescript
       - universal-cookie
 
-  '@scalar/api-reference@1.55.1(@vue/compiler-sfc@3.5.32)(axios@1.15.0)(tailwindcss@4.2.2)(typescript@5.9.3)':
+  '@scalar/api-reference@1.55.1(@vue/compiler-sfc@3.5.32)(axios@1.16.0)(tailwindcss@4.2.2)(typescript@5.9.3)':
     dependencies:
       '@headlessui/vue': 1.7.23(vue@3.5.32(typescript@5.9.3))
-      '@scalar/agent-chat': 0.10.13(@vue/compiler-sfc@3.5.32)(axios@1.15.0)(tailwindcss@4.2.2)(typescript@5.9.3)
-      '@scalar/api-client': 3.5.1(@vue/compiler-sfc@3.5.32)(axios@1.15.0)(tailwindcss@4.2.2)(typescript@5.9.3)
+      '@scalar/agent-chat': 0.10.13(@vue/compiler-sfc@3.5.32)(axios@1.16.0)(tailwindcss@4.2.2)(typescript@5.9.3)
+      '@scalar/api-client': 3.5.1(@vue/compiler-sfc@3.5.32)(axios@1.16.0)(tailwindcss@4.2.2)(typescript@5.9.3)
       '@scalar/code-highlight': 0.3.4
       '@scalar/components': 0.24.1(typescript@5.9.3)
       '@scalar/helpers': 0.5.5
@@ -15190,13 +15190,13 @@ snapshots:
       '@vueuse/shared': 13.9.0(vue@3.5.32(typescript@5.9.3))
       vue: 3.5.32(typescript@5.9.3)
 
-  '@vueuse/integrations@13.9.0(axios@1.15.0)(focus-trap@7.8.0)(fuse.js@7.1.0)(vue@3.5.32(typescript@5.9.3))':
+  '@vueuse/integrations@13.9.0(axios@1.16.0)(focus-trap@7.8.0)(fuse.js@7.1.0)(vue@3.5.32(typescript@5.9.3))':
     dependencies:
       '@vueuse/core': 13.9.0(vue@3.5.32(typescript@5.9.3))
       '@vueuse/shared': 13.9.0(vue@3.5.32(typescript@5.9.3))
       vue: 3.5.32(typescript@5.9.3)
     optionalDependencies:
-      axios: 1.15.0
+      axios: 1.16.0
       focus-trap: 7.8.0
       fuse.js: 7.1.0
 
@@ -15608,7 +15608,7 @@ snapshots:
       postcss: 8.5.12
       postcss-value-parser: 4.2.0
 
-  axios@1.15.0:
+  axios@1.16.0:
     dependencies:
       follow-redirects: 1.16.0
       form-data: 4.0.5
