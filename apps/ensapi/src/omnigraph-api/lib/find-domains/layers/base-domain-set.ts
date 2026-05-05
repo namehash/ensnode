@@ -1,5 +1,4 @@
-import { and, eq, sql } from "drizzle-orm";
-import { alias } from "drizzle-orm/pg-core";
+import { eq, sql } from "drizzle-orm";
 import type { DomainId, NormalizedAddress, RegistryId } from "enssdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
@@ -12,41 +11,33 @@ export type BaseDomainSet = ReturnType<typeof domainsBase>;
 /**
  * Universal base domain set: all ENSv1 and ENSv2 Domains with consistent metadata.
  *
- * Returns `{ domainId, ownerId, registryId, parentId, labelHash, sortableLabel }` where `parentId`
- * is derived via the domain's registry → canonical domain link (`registryCanonicalDomain`)
- * and `sortableLabel` is the domain's own interpreted label, used for NAME ordering, and can be
- * overridden by later layers.
+ * Returns `{ domainId, ownerId, registryId, parentId, canonical, labelHash, sortableLabel }`.
  *
  * All downstream filters (owner, parent, registry, name, canonical) operate on this shape.
  */
 export function domainsBase() {
-  const parentDomain = alias(ensIndexerSchema.domain, "parentDomain");
-
   return (
     ensDb
       .select({
         domainId: sql<DomainId>`${ensIndexerSchema.domain.id}`.as("domainId"),
         ownerId: sql<NormalizedAddress | null>`${ensIndexerSchema.domain.ownerId}`.as("ownerId"),
         registryId: sql<RegistryId>`${ensIndexerSchema.domain.registryId}`.as("registryId"),
-        parentId: sql<DomainId | null>`${parentDomain.id}`.as("parentId"),
+        parentId: sql<DomainId | null>`${ensIndexerSchema.registry.canonicalDomainId}`.as(
+          "parentId",
+        ),
+        canonical: sql<boolean>`${ensIndexerSchema.domain.canonical}`.as("canonical"),
         labelHash: sql<string>`${ensIndexerSchema.domain.labelHash}`.as("labelHash"),
         sortableLabel: sql<string | null>`${ensIndexerSchema.label.interpreted}`.as(
           "sortableLabel",
         ),
       })
       .from(ensIndexerSchema.domain)
-      // parentId derivation: domain.registryId → canonical parent domain via registryCanonicalDomain.
-      // The `parentDomain.subregistryId = domain.registryId` clause performs edge authentication.
+      // parent: materialized via `registry.canonicalDomainId`. The bidirectional invariant
+      // (`Domain.canonicalSubregistryId` ↔ `Registry.canonicalDomainId`) guarantees consistency,
+      // so no edge-auth join is required.
       .leftJoin(
-        ensIndexerSchema.registryCanonicalDomain,
-        eq(ensIndexerSchema.registryCanonicalDomain.registryId, ensIndexerSchema.domain.registryId),
-      )
-      .leftJoin(
-        parentDomain,
-        and(
-          eq(parentDomain.id, ensIndexerSchema.registryCanonicalDomain.domainId),
-          eq(parentDomain.subregistryId, ensIndexerSchema.domain.registryId),
-        ),
+        ensIndexerSchema.registry,
+        eq(ensIndexerSchema.registry.id, ensIndexerSchema.domain.registryId),
       )
       // join label for labelHash/sortableLabel
       .leftJoin(
@@ -67,6 +58,7 @@ export function selectBase(base: BaseDomainSet) {
     ownerId: base.ownerId,
     registryId: base.registryId,
     parentId: base.parentId,
+    canonical: base.canonical,
     labelHash: base.labelHash,
     sortableLabel: base.sortableLabel,
   };

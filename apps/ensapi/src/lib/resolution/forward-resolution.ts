@@ -5,6 +5,7 @@ import {
   type AccountId,
   asInterpretedName,
   ENS_ROOT_NAME,
+  ENS_ROOT_NODE,
   type InterpretedName,
   isNormalizedName,
   type Node,
@@ -239,14 +240,19 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           /////////////////////////////////////
           if (accelerate && canAccelerate) {
             const resolver = { chainId, address: activeResolver };
-            const bridgesTo = isBridgedResolver(config.namespace, resolver);
+            // Forward Resolution recurses with the bridged target's AccountId; `originatingNode`
+            // doesn't affect that projection, so a sentinel suffices.
+            const bridgesTo = isBridgedResolver(config.namespace, resolver, ENS_ROOT_NODE);
             if (bridgesTo) {
               return withEnsProtocolStep(
                 TraceableENSProtocol.ForwardResolution,
                 ForwardResolutionProtocolStep.AccelerateKnownOffchainLookupResolver,
                 {},
                 () =>
-                  _resolveForward(name, selection, { ...options, registry: bridgesTo.registry }),
+                  _resolveForward(name, selection, {
+                    ...options,
+                    registry: { chainId: bridgesTo.chainId, address: bridgesTo.address },
+                  }),
               );
             }
 

@@ -91,10 +91,6 @@ describe("Domain.path", () => {
   });
 
   it("collapses aliases to their canonical path", async () => {
-    // `wallet.sub1.sub2.parent.eth` is an alias: `sub1.sub2.parent.eth`'s subregistry was
-    // re-pointed to the registry managed by `linked.parent.eth`. The canonical path must
-    // walk through `linked.parent.eth`, NOT `sub1.sub2.parent.eth` — edge-authentication
-    // in the reverse walk must reject the stale `registryCanonicalDomain` edge.
     const aliasResult = await request<DomainPathResult>(DomainPath, {
       name: "wallet.sub1.sub2.parent.eth",
     });

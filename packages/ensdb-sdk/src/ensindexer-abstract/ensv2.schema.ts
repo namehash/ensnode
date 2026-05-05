@@ -61,7 +61,9 @@ import type { EncodedReferrer } from "@ensnode/ensnode-sdk";
  * `registryId` at the virtual registry. Concrete `ENSv1Registry` rows (e.g. the mainnet ENS Registry,
  * the Basenames Registry, the Lineanames Registry) sit at the top. ENSv2 namegraphs are rooted in
  * a single `ENSv2Registry` RootRegistry on the ENS Root Chain and are possibly circular directed
- * graphs. The canonical namegraph is never materialized, only _navigated_ at resolution-time.
+ * graphs. The full namegraph is never materialized, only _navigated_ at resolution-time, with the
+ * exception of `Registry.canonical`/`canonicalDomainId` ↔ `Domain.canonical`/`canonicalSubregistryId`,
+ * which materialize the canonical subgraph for PK-keyed query-time access.
  *
  * Note also that the Protocol Acceleration plugin is a hard requirement for the ENSv2 plugin. This
  * allows us to rely on the shared logic for indexing:
@@ -207,6 +209,12 @@ export const registry = onchainTable(
     // If this is an ENSv1VirtualRegistry, `node` is the namehash of the parent ENSv1 domain that
     // owns it, otherwise null.
     node: t.hex().$type<Node>(),
+
+    // Whether this Registry is part of the canonical namegraph. See canonicality-db-helpers.ts.
+    canonical: t.boolean().notNull().default(false),
+
+    // Reciprocal of `Domain.canonicalSubregistryId`. The parent Domain in the canonical namegraph.
+    canonicalDomainId: t.text().$type<DomainId>(),
   }),
   (t) => ({
     // NOTE: non-unique index because multiple rows can share (chainId, address) across virtual registries
@@ -263,8 +271,15 @@ export const domain = onchainTable(
     // If this is an ENSv1Domain, may have a `rootRegistryOwner`, otherwise null.
     rootRegistryOwnerId: t.hex().$type<NormalizedAddress>(),
 
+    // Whether this Domain is part of the canonical namegraph. Mirrors the parent Registry's flag.
+    canonical: t.boolean().notNull().default(false),
+
+    // The Subregistry of this Domain that participates in the canonical namegraph (i.e. the
+    // Registry whose `canonicalDomainId` points back to this Domain). May differ from
+    // `subregistryId` when a Bridged Resolver attaches a different Registry under this Domain.
+    canonicalSubregistryId: t.text().$type<RegistryId>(),
+
     // NOTE: Domain-Resolver Relations tracked via Protocol Acceleration plugin
-    // NOTE: parent is derived via registryCanonicalDomain, not stored on the domain row
   }),
   (t) => ({
     byType: index().on(t.type),
@@ -595,13 +610,10 @@ export const label_relations = relations(label, ({ many }) => ({
 // Canonical Names
 ///////////////////
 
-// TODO(canonical-names): this table will be refactored away once Canonical Names are implemented in
-// ENSv2, and we'll be able to store this information directly on the Registry entity, but until
-// then we need a place to track canonical domain references without requiring that a Registry contract
-// has emitted an event (and therefore is indexed)
-// TODO(canonical-names): this table can also disappear once the Signal pattern is implemented for
-// Registry contracts, ensuring that they are indexed during construction and are available for storage.
-export const registryCanonicalDomain = onchainTable("registry_canonical_domains", (t) => ({
+// Children of each Registry, used by the canonicality cascade in canonicality-db-helpers.ts to
+// walk a Registry's children without scanning `domain`. Keyed by `registryId` so a single PK read
+// pulls the whole list — Ponder's row-level prefetch covers the iteration in one round-trip.
+export const registryDomains = onchainTable("registry_domains", (t) => ({
   registryId: t.text().primaryKey().$type<RegistryId>(),
-  domainId: t.text().notNull().$type<DomainId>(),
+  domainIds: t.text().array().notNull().$type<DomainId[]>(),
 }));

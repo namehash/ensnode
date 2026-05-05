@@ -22,8 +22,14 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
+import {
+  ensureDomainInRegistry,
+  handleBridgedResolverChange,
+  setRegistryCanonicalDomain,
+} from "@/lib/ensv2/canonicality-db-helpers";
 import { ensureDomainEvent, ensureEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel, ensureUnknownLabel, labelExists } from "@/lib/ensv2/label-db-helpers";
+import { ensureRegistry } from "@/lib/ensv2/registry-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { healAddrReverseSubnameLabel } from "@/lib/heal-addr-reverse-subname-label";
 import {
@@ -82,43 +88,31 @@ export default function () {
     // b) the ENSv1VirtualRegistry identified by (chainId, address, parentNode)
     let parentRegistryId: RegistryId;
     if (isTLD) {
-      // if this is a TLD, upsert the (concrete) ENSv1Registry representing this Registry contract
       parentRegistryId = makeENSv1RegistryId(registry);
-      await context.ensDb
-        .insert(ensIndexerSchema.registry)
-        .values({ id: parentRegistryId, type: "ENSv1Registry", ...registry })
-        .onConflictDoNothing();
+      await ensureRegistry(context, parentRegistryId, { type: "ENSv1Registry", ...registry });
     } else {
-      // otherwise, ensure this ENSv1 Domain's parent Domain receives a virtual registry w/ Canonical Domain reference
       parentRegistryId = makeENSv1VirtualRegistryId(registry, parentNode);
-      await context.ensDb
-        .insert(ensIndexerSchema.registry)
-        .values({
-          id: parentRegistryId,
-          type: "ENSv1VirtualRegistry",
-          ...registry,
-          node: parentNode,
-        })
-        .onConflictDoNothing();
+      await ensureRegistry(context, parentRegistryId, {
+        type: "ENSv1VirtualRegistry",
+        ...registry,
+        node: parentNode,
+      });
 
       const parentDomainId = makeENSv1DomainId(registry, parentNode);
-
-      // set the parent Domain's subregistry to said registry
       await context.ensDb
         .update(ensIndexerSchema.domain, { id: parentDomainId })
         .set({ subregistryId: parentRegistryId });
 
-      // ensure Canonical Domain reference
-      await context.ensDb
-        .insert(ensIndexerSchema.registryCanonicalDomain)
-        .values({ registryId: parentRegistryId, domainId: parentDomainId })
-        .onConflictDoNothing();
+      await setRegistryCanonicalDomain(context, parentRegistryId, parentDomainId);
     }
 
     const ownerId = interpretAddress(owner);
     await ensureAccount(context, owner);
 
-    // upsert domain
+    // ownerId/rootRegistryOwnerId are always set here despite being materialized from Registrars
+    // (BaseRegistrar, NameWrapper) because (a) the root Registry is the source of truth even when
+    // no Registrar is in use, and (b) Registrar events fire _after_ Registry events, so they
+    // re-materialize over the value we set here.
     await context.ensDb
       .insert(ensIndexerSchema.domain)
       .values({
@@ -127,21 +121,12 @@ export default function () {
         registryId: parentRegistryId,
         node,
         labelHash,
-        // NOTE: the inclusion of ownerId here 'inlines' the logic of `materializeENSv1DomainEffectiveOwner`,
-        // saving a single db op in a hot path (lots of NewOwner events, unsurprisingly!)
-        //
-        // NOTE: despite Domain.ownerId being materialized from other sources of truth (i.e. Registrars
-        // like BaseRegistrars & NameWrapper) it's ok (and necessary!) to always set it here because:
-        // a) the Root Registry is the source of truth, and other contracts (Registrars, RegistrarControllers)
-        //    may not be in use, and
-        // b) the Registrar-emitted events occur _after_ the Registry events. So when a name is
-        //    wrapped by the NameWrapper, for example, the Registry's owner is updated here to that
-        //    of the NameWrapper, but then the NameWrapper emits NameWrapped, and this plugin
-        //    re-materializes the Domain.ownerId to the NameWrapper-emitted value.
         ownerId,
         rootRegistryOwnerId: ownerId,
       })
       .onConflictDoUpdate({ ownerId, rootRegistryOwnerId: ownerId });
+
+    await ensureDomainInRegistry(context, parentRegistryId, domainId);
 
     // Label Healing
     //
@@ -234,9 +219,9 @@ export default function () {
     event,
   }: {
     context: IndexingEngineContext;
-    event: EventWithArgs<{ node: Node }>;
+    event: EventWithArgs<{ node: Node; resolver: NormalizedAddress }>;
   }) {
-    const { node } = event.args;
+    const { node, resolver } = event.args;
 
     // ENSv2 model does not include root node, no-op
     if (node === ENS_ROOT_NODE) return;
@@ -246,6 +231,10 @@ export default function () {
 
     // NOTE: Domain-Resolver relations are handled by the protocol-acceleration plugin and are not
     // directly indexed here
+
+    // Wire/unwire the canonical edge for known Bridged Resolvers (Basenames, Lineanames). This
+    // runs after Protocol Acceleration's NewResolver handler has overwritten the DRR.
+    await handleBridgedResolverChange(context, domainId, node, resolver);
 
     // push event to domain history
     const eventId = await ensureEvent(context, event);

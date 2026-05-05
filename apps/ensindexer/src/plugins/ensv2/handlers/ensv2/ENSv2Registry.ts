@@ -1,6 +1,7 @@
 import {
   type AccountId,
   asLiteralLabel,
+  interpretTokenIdAsNode,
   type LabelHash,
   labelhashLiteralLabel,
   makeENSv2DomainId,
@@ -20,12 +21,18 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
+import {
+  ensureDomainInRegistry,
+  handleBridgedResolverChange,
+  setRegistryCanonicalDomain,
+} from "@/lib/ensv2/canonicality-db-helpers";
 import { ensureDomainEvent, ensureEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel } from "@/lib/ensv2/label-db-helpers";
 import {
   getLatestRegistration,
   insertLatestRegistration,
 } from "@/lib/ensv2/registration-db-helpers";
+import { ensureRegistry } from "@/lib/ensv2/registry-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import {
   addOnchainEventListener,
@@ -82,10 +89,7 @@ export default function () {
 
     // ensure Registry
     // TODO(signals) — move to NewRegistry and add invariant here
-    await context.ensDb
-      .insert(ensIndexerSchema.registry)
-      .values({ id: registryId, type: "ENSv2Registry", ...registry })
-      .onConflictDoNothing();
+    await ensureRegistry(context, registryId, { type: "ENSv2Registry", ...registry });
 
     // ensure discovered Label
     await ensureLabel(context, label);
@@ -126,6 +130,8 @@ export default function () {
       })
       // if the domain exists, this is a re-register after expiration and tokenId will have changed
       .onConflictDoUpdate({ tokenId });
+
+    await ensureDomainInRegistry(context, registryId, domainId);
 
     // insert Registration
     const registrantId = await ensureAccount(context, registrant);
@@ -269,32 +275,20 @@ export default function () {
       const storageId = makeStorageId(tokenId);
       const domainId = makeENSv2DomainId(registryAccountId, storageId);
 
-      // update domain's subregistry
+      // SubregistryUpdated is the on-chain forward pointer; canonicality is driven by ParentUpdated
+      // (which the child Registry emits). Set the raw `subregistryId` here, ensure the referenced
+      // Registry row exists for ParentUpdated to find, and leave canonicality to the dedicated path.
       if (subregistry === null) {
-        // TODO(canonical-names): this last-write-wins heuristic breaks if a domain ever unsets its
-        // subregistry. i.e. the (sub)Registry's Canonical Domain becomes null, making it disjoint because
-        // we don't track other domains who have set it as a Subregistry. This is acceptable for now,
-        // and obviously isn't an issue once ENS Team implements Canonical Names
-        const previous = await context.ensDb.find(ensIndexerSchema.domain, { id: domainId });
-        if (previous?.subregistryId) {
-          await context.ensDb.delete(ensIndexerSchema.registryCanonicalDomain, {
-            registryId: previous.subregistryId,
-          });
-        }
-
         await context.ensDb
           .update(ensIndexerSchema.domain, { id: domainId })
           .set({ subregistryId: null });
       } else {
         const subregistryAccountId: AccountId = { chainId: context.chain.id, address: subregistry };
         const subregistryId = makeENSv2RegistryId(subregistryAccountId);
-
-        // TODO(canonical-names): this implements last-write-wins heuristic for a Registry's canonical name,
-        // replace with real logic once ENS Team implements Canonical Names
-        await context.ensDb
-          .insert(ensIndexerSchema.registryCanonicalDomain)
-          .values({ registryId: subregistryId, domainId })
-          .onConflictDoUpdate({ domainId });
+        await ensureRegistry(context, subregistryId, {
+          type: "ENSv2Registry",
+          ...subregistryAccountId,
+        });
 
         await context.ensDb
           .update(ensIndexerSchema.domain, { id: domainId })
@@ -305,6 +299,106 @@ export default function () {
       const senderId = await ensureAccount(context, sender);
       const eventId = await ensureEvent(context, event, senderId);
       await ensureDomainEvent(context, domainId, eventId);
+    },
+  );
+
+  /**
+   * `ParentUpdated(parent, label, sender)` is emitted by the _child_ Registry to claim its
+   * canonical parent Domain in the namegraph. It may fire in either order relative to the parent
+   * Registry's `SubregistryUpdated`/`LabelRegistered`, so we unconditionally ensure the parent
+   * Registry and parent Domain rows exist before wiring the canonical edge.
+   */
+  addOnchainEventListener(
+    namespaceContract(pluginName, "ENSv2Registry:ParentUpdated"),
+    async ({
+      context,
+      event,
+    }: {
+      context: IndexingEngineContext;
+      event: EventWithArgs<{
+        parent: NormalizedAddress;
+        label: string;
+        sender: NormalizedAddress;
+      }>;
+    }) => {
+      const { parent: _parent, sender } = event.args;
+      const label = asLiteralLabel(event.args.label);
+      const parent = interpretAddress(_parent);
+
+      const thisRegistryAccountId = getThisAccountId(context, event);
+      const thisRegistryId = makeENSv2RegistryId(thisRegistryAccountId);
+      // ParentUpdated MAY fire before any other event on `thisRegistry` — ensure the row exists.
+      await ensureRegistry(context, thisRegistryId, {
+        type: "ENSv2Registry",
+        ...thisRegistryAccountId,
+      });
+
+      if (parent === null) {
+        await setRegistryCanonicalDomain(context, thisRegistryId, null);
+      } else {
+        const parentRegistryAccountId: AccountId = {
+          chainId: context.chain.id,
+          address: parent,
+        };
+        const parentRegistryId = makeENSv2RegistryId(parentRegistryAccountId);
+        const labelHash = labelhashLiteralLabel(label);
+        const parentTokenId = hexToBigInt(labelHash) as TokenId;
+        const parentDomainId = makeENSv2DomainId(
+          parentRegistryAccountId,
+          makeStorageId(parentTokenId),
+        );
+
+        await ensureLabel(context, label);
+        await ensureRegistry(context, parentRegistryId, {
+          type: "ENSv2Registry",
+          ...parentRegistryAccountId,
+        });
+
+        // Parent Domain row must exist for `Domain.canonicalSubregistryId` to point at; the
+        // parent Registry's LabelRegistered may not have arrived yet, so we insert a stub.
+        await context.ensDb
+          .insert(ensIndexerSchema.domain)
+          .values({
+            id: parentDomainId,
+            type: "ENSv2Domain",
+            tokenId: parentTokenId,
+            registryId: parentRegistryId,
+            labelHash,
+          })
+          .onConflictDoNothing();
+
+        await ensureDomainInRegistry(context, parentRegistryId, parentDomainId);
+        await setRegistryCanonicalDomain(context, thisRegistryId, parentDomainId);
+      }
+
+      const senderId = await ensureAccount(context, sender);
+      await ensureEvent(context, event, senderId);
+    },
+  );
+
+  /**
+   * Wire/unwire the canonical edge for known Bridged Resolvers when the Resolver changes. Runs
+   * after Protocol Acceleration's ResolverUpdated handler has overwritten the DRR. ENSv2 bridges
+   * are not yet defined in `isBridgedResolver`, so attach is currently unreachable via this path —
+   * but detach must still run if a previously-attached bridge gets replaced.
+   */
+  addOnchainEventListener(
+    namespaceContract(pluginName, "ENSv2Registry:ResolverUpdated"),
+    async ({
+      context,
+      event,
+    }: {
+      context: IndexingEngineContext;
+      event: EventWithArgs<{ tokenId: bigint; resolver: NormalizedAddress }>;
+    }) => {
+      const { tokenId, resolver } = event.args;
+      const registry = getThisAccountId(context, event);
+      const storageId = makeStorageId(tokenId as never);
+      const domainId = makeENSv2DomainId(registry, storageId);
+      // For ENSv2 originators, `originatingNode` only feeds ENSv1VirtualRegistryId construction
+      // inside `isBridgedResolver`; the tokenId-derived value is forward-compatible.
+      const originatingNode = interpretTokenIdAsNode(tokenId as never);
+      await handleBridgedResolverChange(context, domainId, originatingNode, resolver);
     },
   );
 

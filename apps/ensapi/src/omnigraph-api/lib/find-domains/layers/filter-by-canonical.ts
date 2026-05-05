@@ -2,18 +2,18 @@ import { eq } from "drizzle-orm";
 
 import { ensDb } from "@/lib/ensdb/singleton";
 
-import { getCanonicalRegistriesCTE } from "../canonical-registries-cte";
 import { type BaseDomainSet, selectBase } from "./base-domain-set";
 
 /**
  * Filter a base domain set to only include Canonical Domains.
+ *
+ * Reads the materialized `domain.canonical` flag, which is maintained at index time by the
+ * canonicality db helpers (Registry/Domain bidirectional pointers + cascading flips).
  */
 export function filterByCanonical(base: BaseDomainSet) {
-  const canonicalRegistries = getCanonicalRegistriesCTE();
-
   return ensDb
     .select(selectBase(base))
     .from(base)
-    .innerJoin(canonicalRegistries, eq(canonicalRegistries.id, base.registryId))
+    .where(eq(base.canonical, true))
     .as("baseDomains");
 }

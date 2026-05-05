@@ -28,7 +28,7 @@ const FILTER_BY_NAME_MAX_DEPTH = 8;
  *  - leafId: the deepest child (label "sub1") — the autocomplete result, for ownership check
  *  - headId: the parent of the path (whose label should match partial "paren")
  *
- * Algorithm: Start from the deepest child (leaf) and traverse UP via {@link registryCanonicalDomain}.
+ * Algorithm: Start from the deepest child (leaf) and traverse UP via `registry.canonicalDomainId`.
  */
 function domainsByLabelHashPath(labelHashPath: LabelHashPath) {
   // If no concrete path, return all domains (leaf = head = self)
@@ -47,9 +47,9 @@ function domainsByLabelHashPath(labelHashPath: LabelHashPath) {
   const rawLabelHashPathArray = sql`${new Param(labelHashPath)}::text[]`;
   const pathLength = sql`array_length(${rawLabelHashPathArray}, 1)`;
 
-  // Recursive CTE starting from the deepest child and traversing UP via registryCanonicalDomain.
+  // Recursive CTE starting from the deepest child and traversing UP via registry.canonicalDomainId.
   // 1. Start with domains matching the leaf labelHash (deepest child)
-  // 2. Recursively join parents via rcd, verifying each ancestor's labelHash
+  // 2. Recursively join parents via the materialized canonical edge, verifying each ancestor's labelHash
   // 3. Return both the leaf (for result/ownership) and head (for partial match)
   //
   // NOTE: JOIN (not LEFT JOIN) is intentional — we only match domains with a complete
@@ -64,23 +64,23 @@ function domainsByLabelHashPath(labelHashPath: LabelHashPath) {
       sql`(
         WITH RECURSIVE upward_check AS (
           -- Base case: find the deepest children (leaves of the concrete path) and walk one step
-          -- up via registryCanonicalDomain. The parent.subregistry_id = d.registry_id clause
-          -- performs edge authentication.
+          -- up via registry.canonical_domain_id. The bidirectional invariant guarantees the edge
+          -- is consistent without a separate edge-auth join.
           SELECT
             d.id AS leaf_id,
             parent.id AS current_id,
             1 AS depth
           FROM ${ensIndexerSchema.domain} d
-          JOIN ${ensIndexerSchema.registryCanonicalDomain} rcd
-            ON rcd.registry_id = d.registry_id
+          JOIN ${ensIndexerSchema.registry} r
+            ON r.id = d.registry_id
           JOIN ${ensIndexerSchema.domain} parent
-            ON parent.id = rcd.domain_id AND parent.subregistry_id = d.registry_id
+            ON parent.id = r.canonical_domain_id
           WHERE d.label_hash = (${rawLabelHashPathArray})[${pathLength}]
 
           UNION ALL
 
-          -- Recursive step: traverse UP via registryCanonicalDomain, verifying each ancestor's
-          -- labelHash. The np.subregistry_id = pd.registry_id clause performs edge authentication.
+          -- Recursive step: traverse UP via registry.canonical_domain_id, verifying each
+          -- ancestor's labelHash.
           SELECT
             upward_check.leaf_id,
             np.id AS current_id,
@@ -88,10 +88,10 @@ function domainsByLabelHashPath(labelHashPath: LabelHashPath) {
           FROM upward_check
           JOIN ${ensIndexerSchema.domain} pd
             ON pd.id = upward_check.current_id
-          JOIN ${ensIndexerSchema.registryCanonicalDomain} rcd
-            ON rcd.registry_id = pd.registry_id
+          JOIN ${ensIndexerSchema.registry} pr
+            ON pr.id = pd.registry_id
           JOIN ${ensIndexerSchema.domain} np
-            ON np.id = rcd.domain_id AND np.subregistry_id = pd.registry_id
+            ON np.id = pr.canonical_domain_id
           WHERE upward_check.depth < ${pathLength}
             AND pd.label_hash = (${rawLabelHashPathArray})[${pathLength} - upward_check.depth]
         )

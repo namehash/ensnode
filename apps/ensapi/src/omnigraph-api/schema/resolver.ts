@@ -3,6 +3,7 @@ import config from "@/config";
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, eq } from "drizzle-orm";
 import {
+  ENS_ROOT_NODE,
   makePermissionsId,
   makeResolverRecordsId,
   namehashInterpretedName,
@@ -126,7 +127,12 @@ ResolverRef.implement({
         "If Resolver is a Bridged Resolver, the Registry to which it Bridges resolution.",
       type: AccountIdRef,
       nullable: true,
-      resolve: (parent) => isBridgedResolver(config.namespace, parent)?.registry ?? null,
+      resolve: (parent) => {
+        // The Resolver row isn't tied to a specific name, so pass ENS_ROOT_NODE as a sentinel —
+        // only `chainId, address` are projected here, and those are name-independent.
+        const bridged = isBridgedResolver(config.namespace, parent, ENS_ROOT_NODE);
+        return bridged ? { chainId: bridged.chainId, address: bridged.address } : null;
+      },
     }),
 
     ////////////////////////

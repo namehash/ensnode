@@ -1,9 +1,5 @@
-import config from "@/config";
-
-import { Param, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import type { CanonicalPath, DomainId, RegistryId } from "enssdk";
-
-import { getRootRegistryIds } from "@ensnode/ensnode-sdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 
@@ -12,18 +8,20 @@ const MAX_DEPTH = 16;
 /**
  * Provide the canonical parents for a Domain via reverse traversal of the namegraph.
  *
- * Traversal walks `domain → registry → canonical parent domain` via the
- * {@link registryCanonicalDomain} table and terminates at any top-level Root Registry configured
- * for the namespace (all concrete ENSv1Registries plus the ENSv2 Root when defined). Returns
- * `null` when the resulting path does not terminate at a Root Registry (i.e. the Domain is not
- * canonical).
+ * Walks `domain → registry → registry.canonicalDomainId` upward via the materialized canonical
+ * edge until the registry has no canonical parent (root). Returns `null` when the input Domain is
+ * not itself canonical (`domain.canonical = false`).
  */
 export async function getCanonicalPath(domainId: DomainId): Promise<CanonicalPath | null> {
-  const rootRegistryIds = getRootRegistryIds(config.namespace);
-
-  // NOTE: using new Param to bind the array as a single text[] parameter, per
-  // https://github.com/drizzle-team/drizzle-orm/issues/1289#issuecomment-2688581070
-  const rootRegistryIdsArray = sql`${new Param(rootRegistryIds)}::text[]`;
+  // Short-circuit non-canonical Domains via the materialized flag.
+  const domain = await ensDb.query.domain.findFirst({
+    where: (t, { eq }) => eq(t.id, domainId),
+    columns: { canonical: true },
+  });
+  if (!domain) {
+    throw new Error(`Invariant(getCanonicalPath): DomainId '${domainId}' did not exist.`);
+  }
+  if (!domain.canonical) return null;
 
   const result = await ensDb.execute(sql`
     WITH RECURSIVE upward AS (
@@ -37,21 +35,19 @@ export async function getCanonicalPath(domainId: DomainId): Promise<CanonicalPat
 
       UNION ALL
 
-      -- Step upward: domain -> current registry's canonical domain (parent).
-      --  1. Recursion stops as soon as we reach a Root Registry or there is no parent to traverse.
-      --  2. MAX_DEPTH guards against corrupted state.
-      --  3. The pd.subregistry_id = upward.registry_id clause performs edge authentication.
+      -- Step upward: domain → current registry's canonical parent domain.
+      -- The bidirectional invariant guarantees consistency, so no edge-auth is needed.
+      -- MAX_DEPTH guards against corrupted state.
       SELECT
         pd.id AS domain_id,
         pd.registry_id,
         upward.depth + 1
       FROM upward
-      JOIN ${ensIndexerSchema.registryCanonicalDomain} rcd
-        ON rcd.registry_id = upward.registry_id
+      JOIN ${ensIndexerSchema.registry} r
+        ON r.id = upward.registry_id
       JOIN ${ensIndexerSchema.domain} pd
-        ON pd.id = rcd.domain_id AND pd.subregistry_id = upward.registry_id
+        ON pd.id = r.canonical_domain_id
       WHERE upward.depth < ${MAX_DEPTH}
-        AND upward.registry_id <> ALL(${rootRegistryIdsArray})
     )
     SELECT *
     FROM upward
@@ -59,16 +55,6 @@ export async function getCanonicalPath(domainId: DomainId): Promise<CanonicalPat
   `);
 
   const rows = result.rows as { domain_id: DomainId; registry_id: RegistryId }[];
-
-  if (rows.length === 0) {
-    throw new Error(`Invariant(getCanonicalPath): DomainId '${domainId}' did not exist.`);
-  }
-
-  // Canonical iff the tip of the path terminates at any of the namespace's Root Registries.
-  const tld = rows[rows.length - 1];
-  const isCanonical = rootRegistryIds.includes(tld.registry_id);
-
-  if (!isCanonical) return null;
 
   return rows.map((row) => row.domain_id);
 }
