@@ -114,6 +114,29 @@ contract ENSNameHealer is
         _processName(name, true);
     }
 
+    /// Submit multiple names for healing in a single transaction.
+    ///
+    /// Reverts on the first name that has already been healed (unless
+    /// `healedStorageDisabled` is true). Names processed before the revert
+    /// are not rolled back — the whole transaction reverts.
+    ///
+    /// @param names Array of full dot-separated ENS names.
+    function submitBatch(string[] calldata names) external onlyRole(SUBMITTER_ROLE) whenNotPaused {
+        for (uint256 i = 0; i < names.length; i++) {
+            _processName(names[i], false);
+        }
+    }
+
+    /// Submit multiple names for healing, bypassing the already-healed
+    /// deduplication check for all names in the batch.
+    ///
+    /// @param names Array of full dot-separated ENS names.
+    function forceResubmitBatch(string[] calldata names) external onlyRole(SUBMITTER_ROLE) whenNotPaused {
+        for (uint256 i = 0; i < names.length; i++) {
+            _processName(names[i], true);
+        }
+    }
+
     // ── UUPS ───────────────────────────────────────────────────────────────
 
     function _authorizeUpgrade(address) internal override onlyRole(DEFAULT_ADMIN_ROLE) {}
