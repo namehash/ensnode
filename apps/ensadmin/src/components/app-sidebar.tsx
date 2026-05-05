@@ -50,7 +50,7 @@ const navItems = [
       {
         title: "ENS Omnigraph",
         url: "/api/omnigraph",
-        badge: "ENSv2" as const,
+        badge: "ENSv2 + v1" as const,
       },
       {
         title: "ENS Subgraph",
