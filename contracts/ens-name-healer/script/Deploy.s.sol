@@ -8,7 +8,11 @@ import "../src/ENSNameHealer.sol";
 /// @notice Deploys ENSNameHealer behind an ERC-1967 / UUPS proxy.
 ///
 /// Required environment variables:
-///   ADMIN_ADDRESS  — address to assign DEFAULT_ADMIN_ROLE on the proxy.
+///   ADMIN_ADDRESS      — address to assign DEFAULT_ADMIN_ROLE on the proxy.
+///
+/// Optional environment variables:
+///   SUBMITTER_ADDRESS  — if set, this address is granted SUBMITTER_ROLE
+///                        during deployment (saves a separate grantRole tx).
 ///
 /// Usage:
 ///   forge script script/Deploy.s.sol \
@@ -18,12 +22,18 @@ import "../src/ENSNameHealer.sol";
 contract Deploy is Script {
     function run() external {
         address admin = vm.envAddress("ADMIN_ADDRESS");
+        address submitter = vm.envOr("SUBMITTER_ADDRESS", address(0));
 
         vm.startBroadcast();
 
         ENSNameHealer impl = new ENSNameHealer();
         bytes memory initData = abi.encodeCall(ENSNameHealer.initialize, (admin));
-        ERC1967Proxy proxy = new ERC1967Proxy(address(impl), initData);
+        ENSNameHealer proxy = ENSNameHealer(address(new ERC1967Proxy(address(impl), initData)));
+
+        if (submitter != address(0)) {
+            proxy.grantRole(proxy.SUBMITTER_ROLE(), submitter);
+            console.log("Submitter:     ", submitter);
+        }
 
         vm.stopBroadcast();
 
