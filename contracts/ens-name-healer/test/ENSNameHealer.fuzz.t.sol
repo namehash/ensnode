@@ -168,4 +168,71 @@ contract ENSNameHealerFuzzTest is Test {
         }
         vm.stopPrank();
     }
+
+    // ── batch ─────────────────────────────────────────────────────────────
+
+    /// submitBatch emits exactly one NameHealed per unique name.
+    function testFuzz_submitBatch_emitsOneEventPerName(string[4] calldata input) public {
+        // Build a deduplicated array of non-empty names.
+        string[] memory names = new string[](4);
+        uint256 count;
+        for (uint256 i = 0; i < 4; i++) {
+            if (bytes(input[i]).length == 0) continue;
+            // Skip if already in the list (simple O(n^2) dedup for small N).
+            bool dup;
+            for (uint256 j = 0; j < count; j++) {
+                if (keccak256(bytes(names[j])) == keccak256(bytes(input[i]))) {
+                    dup = true;
+                    break;
+                }
+            }
+            if (!dup) names[count++] = input[i];
+        }
+        // Resize to actual count.
+        string[] memory unique = new string[](count);
+        for (uint256 i = 0; i < count; i++) unique[i] = names[i];
+
+        vm.assume(count > 0);
+
+        vm.recordLogs();
+        vm.prank(submitter);
+        healer.submitBatch(unique);
+
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        bytes32 sig = keccak256("NameHealed(bytes32,string,address)");
+        uint256 emitted;
+        for (uint256 i; i < logs.length; i++) {
+            if (logs[i].topics[0] == sig) emitted++;
+        }
+        assertEq(emitted, count);
+    }
+
+    /// forceResubmitBatch always emits exactly names.length events regardless
+    /// of duplicates or prior state.
+    function testFuzz_forceResubmitBatch_alwaysEmitsForEveryName(
+        string calldata name,
+        uint8 batchSize
+    ) public {
+        vm.assume(bytes(name).length > 0);
+        vm.assume(batchSize > 0 && batchSize <= 10);
+
+        string[] memory names = new string[](batchSize);
+        for (uint256 i = 0; i < batchSize; i++) names[i] = name;
+
+        // First submit to ensure names are already healed.
+        vm.prank(submitter);
+        healer.submit(name);
+
+        vm.recordLogs();
+        vm.prank(submitter);
+        healer.forceResubmitBatch(names);
+
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        bytes32 sig = keccak256("NameHealed(bytes32,string,address)");
+        uint256 emitted;
+        for (uint256 i; i < logs.length; i++) {
+            if (logs[i].topics[0] == sig) emitted++;
+        }
+        assertEq(emitted, batchSize);
+    }
 }

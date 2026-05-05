@@ -257,6 +257,128 @@ contract ENSNameHealerTest is Test {
         healer.submit("vitalik.eth");
     }
 
+    // ── submitBatch ───────────────────────────────────────────────────────
+
+    function test_submitBatch_revertsForNonSubmitter() public {
+        string[] memory names = new string[](1);
+        names[0] = "vitalik.eth";
+        vm.prank(stranger);
+        vm.expectRevert();
+        healer.submitBatch(names);
+    }
+
+    function test_submitBatch_revertsWhenPaused() public {
+        string[] memory names = new string[](1);
+        names[0] = "vitalik.eth";
+        vm.prank(admin);
+        healer.pause();
+        vm.prank(submitter);
+        vm.expectRevert();
+        healer.submitBatch(names);
+    }
+
+    function test_submitBatch_emitsEventForEachName() public {
+        string[] memory names = new string[](3);
+        names[0] = "vitalik.eth";
+        names[1] = "nick.eth";
+        names[2] = "ens.eth";
+
+        vm.recordLogs();
+        vm.prank(submitter);
+        healer.submitBatch(names);
+
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        bytes32 sig = keccak256("NameHealed(bytes32,string,address)");
+        uint256 count;
+        for (uint256 i; i < logs.length; i++) {
+            if (logs[i].topics[0] == sig) count++;
+        }
+        assertEq(count, 3);
+    }
+
+    function test_submitBatch_emptyArrayIsNoop() public {
+        string[] memory names = new string[](0);
+        vm.recordLogs();
+        vm.prank(submitter);
+        healer.submitBatch(names);
+        assertEq(vm.getRecordedLogs().length, 0);
+    }
+
+    function test_submitBatch_revertsOnDuplicateWithinBatch() public {
+        string[] memory names = new string[](2);
+        names[0] = "vitalik.eth";
+        names[1] = "vitalik.eth";
+        vm.prank(submitter);
+        vm.expectRevert();
+        healer.submitBatch(names);
+    }
+
+    function test_submitBatch_revertsOnPreviouslyHealedName() public {
+        vm.prank(submitter);
+        healer.submit("vitalik.eth");
+
+        string[] memory names = new string[](1);
+        names[0] = "vitalik.eth";
+        vm.prank(submitter);
+        vm.expectRevert();
+        healer.submitBatch(names);
+    }
+
+    function test_submitBatch_revertsOnEmptyName() public {
+        string[] memory names = new string[](2);
+        names[0] = "vitalik.eth";
+        names[1] = "";
+        vm.prank(submitter);
+        vm.expectRevert(ENSNameHealer.InvalidName.selector);
+        healer.submitBatch(names);
+    }
+
+    // ── forceResubmitBatch ────────────────────────────────────────────────
+
+    function test_forceResubmitBatch_revertsForNonSubmitter() public {
+        string[] memory names = new string[](1);
+        names[0] = "vitalik.eth";
+        vm.prank(stranger);
+        vm.expectRevert();
+        healer.forceResubmitBatch(names);
+    }
+
+    function test_forceResubmitBatch_revertsWhenPaused() public {
+        string[] memory names = new string[](1);
+        names[0] = "vitalik.eth";
+        vm.prank(admin);
+        healer.pause();
+        vm.prank(submitter);
+        vm.expectRevert();
+        healer.forceResubmitBatch(names);
+    }
+
+    function test_forceResubmitBatch_succeedsOnDuplicates() public {
+        string[] memory names = new string[](2);
+        names[0] = "vitalik.eth";
+        names[1] = "vitalik.eth";
+
+        vm.recordLogs();
+        vm.prank(submitter);
+        healer.forceResubmitBatch(names); // must not revert
+
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        bytes32 sig = keccak256("NameHealed(bytes32,string,address)");
+        uint256 count;
+        for (uint256 i; i < logs.length; i++) {
+            if (logs[i].topics[0] == sig) count++;
+        }
+        assertEq(count, 2);
+    }
+
+    function test_forceResubmitBatch_emptyArrayIsNoop() public {
+        string[] memory names = new string[](0);
+        vm.recordLogs();
+        vm.prank(submitter);
+        healer.forceResubmitBatch(names);
+        assertEq(vm.getRecordedLogs().length, 0);
+    }
+
     // ── Upgradeability ────────────────────────────────────────────────────
 
     function test_upgrade_preservesHealedStorage() public {
