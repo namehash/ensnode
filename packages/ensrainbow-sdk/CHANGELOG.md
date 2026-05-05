@@ -1,5 +1,23 @@
 # @ensnode/ensrainbow-sdk
 
+## 1.11.0
+
+### Minor Changes
+
+- [#2056](https://github.com/namehash/ensnode/pull/2056) [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572) Thanks [@shrugs](https://github.com/shrugs)! - **Breaking**: Updated core data models.
+  - `EnsRainbowApiClientOptions`: renamed `labelSet` → `clientLabelSet`.
+  - `EnsRainbowPublicConfig`:
+    - Replaced `version: string` with `versionInfo: EnsRainbowVersionInfo`.
+    - Renamed `labelSet` → `serverLabelSet`.
+    - Removed `recordsCount`.
+
+- [#2056](https://github.com/namehash/ensnode/pull/2056) [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572) Thanks [@shrugs](https://github.com/shrugs)! - Added `EnsRainbowApiClient.ready()`, plus `EnsRainbow.ReadyResponse` / `EnsRainbow.ServiceUnavailableError` types and `ErrorCode.ServiceUnavailable`. The client now throws a typed `EnsRainbowHttpError` (with structured `status` / `statusText` properties) from `ready()`, `health()`, and `config()` whenever the service responds with a non-2xx HTTP status, so callers can branch their retry/abort logic on the status without parsing message strings.
+
+### Patch Changes
+
+- Updated dependencies [[`92ca54f`](https://github.com/namehash/ensnode/commit/92ca54fa2efbef3f32e2dacd8fdc347ef260a2af), [`7e77c5c`](https://github.com/namehash/ensnode/commit/7e77c5c2bef96d1a2eb363871fb87379b5f6f7e9), [`6173160`](https://github.com/namehash/ensnode/commit/61731608632f62139496656f6231210f63383f20)]:
+  - enssdk@1.11.0
+
 ## 1.10.1
 
 ### Patch Changes
