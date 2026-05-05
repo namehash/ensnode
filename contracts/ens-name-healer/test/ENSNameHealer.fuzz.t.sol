@@ -101,10 +101,7 @@ contract ENSNameHealerFuzzTest is Test {
     }
 
     /// Two distinct non-empty names must produce distinct namehashes.
-    function testFuzz_namehash_distinctForDistinctNames(
-        string calldata a,
-        string calldata b
-    ) public view {
+    function testFuzz_namehash_distinctForDistinctNames(string calldata a, string calldata b) public view {
         vm.assume(bytes(a).length > 0 && bytes(b).length > 0);
         vm.assume(keccak256(bytes(a)) != keccak256(bytes(b)));
         assertTrue(healer.namehash(a) != healer.namehash(b));
@@ -152,10 +149,7 @@ contract ENSNameHealerFuzzTest is Test {
     // ── healedStorageDisabled ─────────────────────────────────────────────
 
     /// When healedStorageDisabled is true, any number of submits never reverts.
-    function testFuzz_healedStorageDisabled_noDuplicateRevert(
-        string calldata name,
-        uint8 n
-    ) public {
+    function testFuzz_healedStorageDisabled_noDuplicateRevert(string calldata name, uint8 n) public {
         vm.assume(bytes(name).length > 0);
         vm.assume(n > 0 && n <= 10);
 
@@ -190,7 +184,9 @@ contract ENSNameHealerFuzzTest is Test {
         }
         // Resize to actual count.
         string[] memory unique = new string[](count);
-        for (uint256 i = 0; i < count; i++) unique[i] = names[i];
+        for (uint256 i = 0; i < count; i++) {
+            unique[i] = names[i];
+        }
 
         vm.assume(count > 0);
 
@@ -209,15 +205,14 @@ contract ENSNameHealerFuzzTest is Test {
 
     /// forceResubmitBatch always emits exactly names.length events regardless
     /// of duplicates or prior state.
-    function testFuzz_forceResubmitBatch_alwaysEmitsForEveryName(
-        string calldata name,
-        uint8 batchSize
-    ) public {
+    function testFuzz_forceResubmitBatch_alwaysEmitsForEveryName(string calldata name, uint8 batchSize) public {
         vm.assume(bytes(name).length > 0);
         vm.assume(batchSize > 0 && batchSize <= 10);
 
         string[] memory names = new string[](batchSize);
-        for (uint256 i = 0; i < batchSize; i++) names[i] = name;
+        for (uint256 i = 0; i < batchSize; i++) {
+            names[i] = name;
+        }
 
         // First submit to ensure names are already healed.
         vm.prank(submitter);

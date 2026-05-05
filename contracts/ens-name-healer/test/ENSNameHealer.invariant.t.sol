@@ -116,8 +116,10 @@ contract ENSNameHealerHandler is Test {
         bytes memory b = bytes(name);
         bytes32 node = bytes32(0);
         uint256 end = b.length;
-        for (uint256 i = b.length; i > 0; ) {
-            unchecked { --i; }
+        for (uint256 i = b.length; i > 0;) {
+            unchecked {
+                --i;
+            }
             if (b[i] == "." || i == 0) {
                 uint256 start = (b[i] == ".") ? i + 1 : 0;
                 uint256 labelLen = end - start;
@@ -161,12 +163,9 @@ contract ENSNameHealerInvariantTest is Test {
         // We can't enumerate all possible keys, so we check a fixed set of
         // well-known namehashes used throughout the test suite.
         bytes32[3] memory knownNodes = [
-            keccak256(abi.encodePacked(bytes32(0), keccak256("eth"))),                   // "eth"
-            keccak256(abi.encodePacked(
-                keccak256(abi.encodePacked(bytes32(0), keccak256("eth"))),
-                keccak256("vitalik")
-            )),  // "vitalik.eth"
-            keccak256(abi.encodePacked(bytes32(0), keccak256("com")))                    // "com"
+            keccak256(abi.encodePacked(bytes32(0), keccak256("eth"))), // "eth"
+            keccak256(abi.encodePacked(keccak256(abi.encodePacked(bytes32(0), keccak256("eth"))), keccak256("vitalik"))), // "vitalik.eth"
+            keccak256(abi.encodePacked(bytes32(0), keccak256("com"))) // "com"
         ];
 
         for (uint256 i; i < knownNodes.length; i++) {

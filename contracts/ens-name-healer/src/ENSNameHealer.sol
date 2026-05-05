@@ -16,12 +16,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 /// recover the readable form of an otherwise unresolvable name.
 ///
 /// @dev Upgradeable via UUPS. Storage layout must be preserved across upgrades.
-contract ENSNameHealer is
-    Initializable,
-    AccessControlUpgradeable,
-    PausableUpgradeable,
-    UUPSUpgradeable
-{
+contract ENSNameHealer is Initializable, AccessControlUpgradeable, PausableUpgradeable, UUPSUpgradeable {
     // ── Roles ──────────────────────────────────────────────────────────────
 
     /// Role for addresses permitted to submit names for healing.
@@ -173,7 +168,7 @@ contract ENSNameHealer is
 
         // Walk right-to-left. When a dot or the start of string is reached,
         // hash the label that spans [start, end) into the accumulator.
-        for (uint256 i = len; i > 0; ) {
+        for (uint256 i = len; i > 0;) {
             unchecked {
                 --i;
             }
