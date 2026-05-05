@@ -1,7 +1,7 @@
 services:
   ensapi:
     container_name: ensapi
-    image: ghcr.io/namehash/ensnode/ensapi:${ENSNODE_VERSION:-1.10.1}
+    image: ghcr.io/namehash/ensnode/ensapi:${ENSNODE_VERSION:-1.11.0}
     build:
       dockerfile: ./apps/ensapi/Dockerfile
       context: ../..
