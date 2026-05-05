@@ -12,7 +12,7 @@ resource "render_web_service" "ensrainbowbeam" {
   }
 
   env_vars = {
-    PORT = { value = tostring(var.port) }
+    PORT        = { value = tostring(var.port) }
     ENSNODE_URL = { value = var.ensnode_url }
   }
 }
