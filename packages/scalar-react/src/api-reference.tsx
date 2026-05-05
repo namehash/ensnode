@@ -62,7 +62,7 @@ export function ScalarApiReference({ url, serverUrl }: ScalarApiReferenceProps) 
       url,
       servers: serverUrl ? [{ url: serverUrl }] : undefined,
       theme: "none",
-      documentDownloadType: true,
+      documentDownloadType: "none",
       hiddenClients: true,
       defaultOpenAllTags: true,
       forceDarkModeState: "light",
