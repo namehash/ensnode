@@ -48,15 +48,17 @@ const navItems = [
     isActive: true,
     items: [
       {
-        title: "Subgraph-Compatible",
-        url: "/api/subgraph",
-      },
-      {
-        title: "Omnigraph (ENS v1 + v2)",
+        title: "ENS Omnigraph",
         url: "/api/omnigraph",
+        badge: "ENSv2" as const,
       },
       {
-        title: "REST API Reference",
+        title: "ENS Subgraph",
+        url: "/api/subgraph",
+        badge: "deprecated" as const,
+      },
+      {
+        title: "REST APIs",
         url: "/api/rest",
       },
     ],

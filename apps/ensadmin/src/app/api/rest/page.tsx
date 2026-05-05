@@ -15,7 +15,7 @@ function RestApiPage() {
 
 export default function Page() {
   return (
-    <RequireENSAdminFeature title="REST API Reference" feature="restApi">
+    <RequireENSAdminFeature title="REST APIs" feature="restApi">
       <RestApiPage />
     </RequireENSAdminFeature>
   );

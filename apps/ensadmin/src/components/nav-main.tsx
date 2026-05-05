@@ -5,6 +5,7 @@ import { ChevronRight, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { TagBadge } from "@/components/tag-badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   SidebarGroup,
@@ -29,6 +30,7 @@ export function NavMain({
     items?: {
       title: string;
       url: string;
+      badge?: string;
     }[];
   }[];
 }) {
@@ -91,6 +93,7 @@ export function NavMain({
                           <SidebarMenuSubButton asChild isActive={isSubItemActive}>
                             <Link href={subItemUrl}>
                               <span>{subItem.title}</span>
+                              {subItem.badge && <TagBadge variant={subItem.badge} />}
                             </Link>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>

@@ -37,7 +37,7 @@ export interface ENSAdminFeatures {
   omnigraph: FeatureStatus;
 
   /**
-   * Whether ENSAdmin's REST API Reference tooling is supported by the connected ENSNode.
+   * Whether ENSAdmin's REST APIs tooling is supported by the connected ENSNode.
    * The REST API is available on any ENSApi instance that serves `/openapi.json`.
    */
   restApi: FeatureStatus;
