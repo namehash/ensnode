@@ -92,7 +92,7 @@ export function NavMain({
                         <SidebarMenuSubItem key={subItem.title}>
                           <SidebarMenuSubButton asChild isActive={isSubItemActive}>
                             <Link href={subItemUrl}>
-                              <span>{subItem.title}</span>
+                              <span className="flex-1 truncate">{subItem.title}</span>
                               {subItem.badge && <TagBadge variant={subItem.badge} />}
                             </Link>
                           </SidebarMenuSubButton>
