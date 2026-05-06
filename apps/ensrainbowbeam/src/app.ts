@@ -1,10 +1,21 @@
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 
 import { healthHandler } from "@/handlers/health";
 import { submissionsHandler } from "@/handlers/submissions";
 import { errorResponse } from "@/lib/error-response";
 
 const app = new Hono();
+
+// Enable CORS broadly (like other ENSNode HTTP services).
+app.use(
+  cors({
+    origin: "*",
+    allowMethods: ["GET", "POST", "OPTIONS"],
+    allowHeaders: ["Content-Type"],
+    maxAge: 86400,
+  }),
+);
 
 app.get("/health", healthHandler);
 
