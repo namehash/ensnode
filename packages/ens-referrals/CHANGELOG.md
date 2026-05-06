@@ -1,5 +1,15 @@
 # @namehash/ens-referrals
 
+## 1.11.1
+
+### Patch Changes
+
+- [#1998](https://github.com/namehash/ensnode/pull/1998) [`d2fdf05`](https://github.com/namehash/ensnode/commit/d2fdf05a2e306afd517b458ecb7e7a43c9120d4a) Thanks [@Goader](https://github.com/Goader)! - Add per-event accounting trace for rev-share-cap editions. The new `ReferralEditionSnapshot` (returned by `buildReferralEditionSnapshot*`) bundles the leaderboard with a chronological array of `ReferralAccountingRecordRevShareCap`.
+
+- Updated dependencies []:
+  - enssdk@1.11.1
+  - @ensnode/ensnode-sdk@1.11.1
+
 ## 1.11.0
 
 ### Minor Changes

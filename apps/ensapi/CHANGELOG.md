@@ -1,5 +1,19 @@
 # ensapi
 
+## 1.11.1
+
+### Patch Changes
+
+- [#1998](https://github.com/namehash/ensnode/pull/1998) [`d2fdf05`](https://github.com/namehash/ensnode/commit/d2fdf05a2e306afd517b458ecb7e7a43c9120d4a) Thanks [@Goader](https://github.com/Goader)! - Add `GET /v1/ensanalytics/accounting?edition={slug}` for rev-share-cap editions: returns a CSV dump of the per-event accounting trace, ordered chronologically.
+
+- Updated dependencies [[`d2fdf05`](https://github.com/namehash/ensnode/commit/d2fdf05a2e306afd517b458ecb7e7a43c9120d4a)]:
+  - @namehash/ens-referrals@1.11.1
+  - enssdk@1.11.1
+  - @ensnode/datasources@1.11.1
+  - @ensnode/ensdb-sdk@1.11.1
+  - @ensnode/ensnode-sdk@1.11.1
+  - @ensnode/ponder-subgraph@1.11.1
+
 ## 1.11.0
 
 ### Minor Changes

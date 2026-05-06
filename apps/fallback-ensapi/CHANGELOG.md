@@ -1,5 +1,13 @@
 # fallback-ensapi
 
+## 1.11.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/datasources@1.11.1
+  - @ensnode/ensnode-sdk@1.11.1
+
 ## 1.11.0
 
 ### Patch Changes
