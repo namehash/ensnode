@@ -5656,8 +5656,8 @@ const introspection = {
           {
             "name": "bridged",
             "type": {
-              "kind": "OBJECT",
-              "name": "AccountId"
+              "kind": "INTERFACE",
+              "name": "Registry"
             },
             "args": [],
             "isDeprecated": false
