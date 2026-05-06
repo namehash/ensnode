@@ -3,7 +3,6 @@ import config from "@/config";
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, eq } from "drizzle-orm";
 import {
-  ENS_ROOT_NODE,
   makePermissionsId,
   makeResolverRecordsId,
   namehashInterpretedName,
@@ -23,6 +22,7 @@ import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
 import { EventRef, EventsWhereInput } from "@/omnigraph-api/schema/event";
 import { NameOrNodeInput } from "@/omnigraph-api/schema/name-or-node";
 import { PermissionsRef } from "@/omnigraph-api/schema/permissions";
+import { RegistryInterfaceRef } from "@/omnigraph-api/schema/registry";
 import { ResolverRecordsRef } from "@/omnigraph-api/schema/resolver-records";
 
 /**
@@ -125,13 +125,11 @@ ResolverRef.implement({
     bridged: t.field({
       description:
         "If Resolver is a Bridged Resolver, the Registry to which it Bridges resolution.",
-      type: AccountIdRef,
+      type: RegistryInterfaceRef,
       nullable: true,
       resolve: (parent) => {
-        // The Resolver row isn't tied to a specific name, so pass ENS_ROOT_NODE as a sentinel —
-        // only `chainId, address` are projected here, and those are name-independent.
-        const bridged = isBridgedResolver(config.namespace, parent, ENS_ROOT_NODE);
-        return bridged ? { chainId: bridged.chainId, address: bridged.address } : null;
+        const bridged = isBridgedResolver(config.namespace, parent);
+        return bridged?.registryId ?? null;
       },
     }),
 

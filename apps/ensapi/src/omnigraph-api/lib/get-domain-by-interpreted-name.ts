@@ -16,15 +16,17 @@ import {
 
 import { DatasourceNames } from "@ensnode/datasources";
 import {
-  accountIdEqual,
   getENSv1RootRegistryId,
+  getENSv2RootRegistryId,
   getRootRegistryId,
-  maybeGetDatasourceContract,
+  makeContractMatcher,
   type RequiredAndNotNull,
 } from "@ensnode/ensnode-sdk";
+import { isBridgedResolver } from "@ensnode/ensnode-sdk/internal";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
+import { MAX_SUPPORTED_NAME_DEPTH } from "@/omnigraph-api/lib/constants";
 
 const tracer = trace.getTracer("get-domain-by-interpreted-name");
 
@@ -34,16 +36,11 @@ const tracer = trace.getTracer("get-domain-by-interpreted-name");
  */
 const MAX_HOP_DEPTH = 3;
 
-/**
- * The maximum depth to walk the namegraph from any Registry.
- */
-const MAX_WALK_DEPTH = 16;
-
 interface WalkResultRow {
   domainId: DomainId;
+  depth: number;
   address: Address | null;
   chainId: ChainId | null;
-  depth: number;
 }
 
 /**
@@ -82,38 +79,41 @@ export async function getDomainIdByInterpretedName(
     throw new Error(`Invariant: ${name} generated 0 labelHashPath segments.`);
   }
 
-  if (path.length > MAX_WALK_DEPTH) {
-    throw new Error(`Invariant: Name '${name}' exceeds maximum depth ${MAX_WALK_DEPTH}.`);
+  if (path.length > MAX_SUPPORTED_NAME_DEPTH) {
+    throw new Error(`Invariant: Name '${name}' exceeds maximum depth ${MAX_SUPPORTED_NAME_DEPTH}.`);
   }
 
   return withActiveSpanAsync(tracer, "getDomainIdByInterpretedName", { name }, () =>
-    resolveCanonicalDomainId(getRootRegistryId(config.namespace), path),
+    forwardWalkNamegraph(getRootRegistryId(config.namespace), path),
   );
 }
 
 /**
- * Bridged Resolver attachments are wired into the canonical namegraph at index time (the bridged
- * (shadow)Registry becomes the originating Domain's `canonicalSubregistryId`), so the walk follows
- * them as ordinary canonical edges without a path-slice. The remaining hop logic preserves the
- * ENSv1 fallback for ENSv1Resolver.
+ * Walks `path` from `registryId` to identify a leaf `domainId`, hopping between disjoint namegraphs
+ * as necessary to implement Resolution logic (Bridged Resolver, ENSv1Resolver, ENSv2Resolver).
  *
- * For Domains with Bridged Resolvers the origin Domain is the correct result — i.e. "linea.eth"
- * resolves to the ENS Root Chain's "linea.eth", not the Linea Chain's shadowed linea.eth. Not only
- * do users want the origin chain's entry the existence of the shadowed linea.eth is an implementation
- * detail of Shadow Registries, and not relevant for traversal/resolution.
+ * This function prefers the leaf Domain within the origin Registry. i.e. if there's an ENSv2 Domain
+ * like example.eth that has as its Resolver the ENSv1Resolver (which sources records from ENSv1's
+ * example.eth's Resolver) this function preferentially returns the ENSv2 example.eth, which is more
+ * correctly the 'resolvable' Domain; the ENSv1 example.eth is more vestigal and not the source of
+ * truth.
+ *
+ * This same logic also encodes the preference that, for a Domain with a Bridged Resolver, the Domain
+ * in the origin Registry (ex: the ENS Root Chain's 'linea.eth' [either ENSv1 or ENSv2]) we return
+ * the ENS Root Chain's linea.eth instead of the Linea Chain's shadowed linea.eth (which, formally,
+ * doesn't exist in the eyes of Resolution).
  */
-async function resolveCanonicalDomainId(
+async function forwardWalkNamegraph(
   registryId: RegistryId,
   path: LabelHashPath,
   depth = 0,
 ): Promise<DomainId | null> {
   if (depth > MAX_HOP_DEPTH) {
-    throw new Error(
-      `Invariant(resolveCanonicalDomainId): Bridged Resolver depth exceeded: ${depth}`,
-    );
+    throw new Error(`Invariant(forwardWalkNamegraph): Hop depth exceeded: ${depth}`);
   }
 
-  const rows = await walkCanonicalNamegraph(registryId, path);
+  // walk the disjoint namegraph by indicated by `registryId` through `path`
+  const rows = await forwardWalkDisjointNamegraph(registryId, path);
   if (rows.length === 0) return null;
 
   // rows are ORDER BY depth DESC, so deepest element is rows[0]
@@ -129,19 +129,32 @@ async function resolveCanonicalDomainId(
   // otherwise, identify the deepest element with a Resolver
   const deepestResolver = rows.find(hasResolver);
   if (deepestResolver) {
-    // ENSv1Resolver (ENSv1 Fallback)
-    // if the deepest Resolver is the ENSv1Resolver, fallback to ENSv1
-    const ENSv1Resolver = maybeGetDatasourceContract(
-      config.namespace,
-      DatasourceNames.ENSv2Root,
-      "ENSv1Resolver",
-    );
-    if (ENSv1Resolver && accountIdEqual(deepestResolver, ENSv1Resolver)) {
-      // fallback to ENSv1 using the full path
-      return resolveCanonicalDomainId(getENSv1RootRegistryId(config.namespace), path, depth + 1);
+    const resolverEq = makeContractMatcher(config.namespace, deepestResolver);
+    // Bridged Resolvers
+    // if the deepest Resolver is a Bridged Resolver, recurse to the target Registry
+    const bridged = isBridgedResolver(config.namespace, deepestResolver);
+    if (bridged) {
+      // to follow a Bridged Resolver, continue walking the namegraph from the target `registryId`
+      // with the remaining portion of `path`
+
+      // NOTE: we blindly return after bridging, which correctly implements the Forward Resolution
+      // behavior in that the origin Domain, even if there is one, is invisible to resolution
+      // (due to the ancestor Bridged Resolver) and therefore not addressable
+      return forwardWalkNamegraph(bridged.registryId, path.slice(deepestResolver.depth), depth + 1);
     }
 
-    // TODO: ENSv2Resolver
+    // ENSv1Resolver (ENSv1 Fallback)
+    // if the deepest Resolver is the ENSv1Resolver, fallback to ENSv1
+    if (resolverEq(DatasourceNames.ENSv2Root, "ENSv1Resolver")) {
+      // to implement the ENSv1Resolver, walk the ENSv1 disjoint namegraph with the full path
+      return forwardWalkNamegraph(getENSv1RootRegistryId(config.namespace), path, depth + 1);
+    }
+
+    // ENSv1Resolver (ENSv2 Fallback)
+    if (resolverEq(DatasourceNames.ENSv2Root, "ENSv2Resolver")) {
+      // to implement the ENSv2Resolver, walk the ENSv2 disjoint namegraph with the full path
+      return forwardWalkNamegraph(getENSv2RootRegistryId(config.namespace), path, depth + 1);
+    }
   }
 
   // finally, return the exact match if it was the leaf
@@ -149,13 +162,12 @@ async function resolveCanonicalDomainId(
 }
 
 /**
- * Walks the Canonical namegraph from `registryId` through `path` to identify each ancestor Domain,
+ * Walks a disjoint namegraph from `registryId` through `path` to identify each ancestor Domain,
  * then LEFT JOINs each Domain to its Resolver via DRR and returns the full path ordered by depth
  * DESC (deepest first). Resolver-less Domains are kept in the result with `resolver`/`chainId` set
- * to NULL. Recursion terminates when the path is exhausted, when a Domain is non-canonical, or
- * when `canonical_subregistry_id` becomes NULL (leaf canonical domain).
+ * to NULL. Recursion terminates when the path is exhausted.
  */
-async function walkCanonicalNamegraph(registryId: RegistryId, path: LabelHashPath) {
+async function forwardWalkDisjointNamegraph(registryId: RegistryId, path: LabelHashPath) {
   if (path.length === 0) return [];
 
   // NOTE: using new Param as per https://github.com/drizzle-team/drizzle-orm/issues/1289#issuecomment-2688581070
@@ -171,16 +183,17 @@ async function walkCanonicalNamegraph(registryId: RegistryId, path: LabelHashPat
       UNION ALL
 
       SELECT
-        d.canonical_subregistry_id  AS next_registry_id,
+        -- NOTE: that here we recurse by domain.subregistry_id NOT domain.canonical_subregistry_id
+        -- as this walk allows addressing of non-canonical Domains
+        d.subregistry_id            AS next_registry_id,
         d.id                        AS "domainId",
         path.depth + 1
       FROM path
       JOIN ${ensIndexerSchema.domain} d
         ON d.registry_id = path.next_registry_id
       WHERE d.label_hash = (${rawLabelHashPathArray})[path.depth + 1]
-        AND d.canonical = TRUE
         AND path.depth + 1 <= array_length(${rawLabelHashPathArray}, 1)
-        AND path.depth < ${MAX_WALK_DEPTH}
+        AND path.depth < ${MAX_SUPPORTED_NAME_DEPTH}
     )
     SELECT
       path."domainId",

@@ -12,13 +12,14 @@ export const DEVNET_NAMES = [
   { name: "sub1.sub2.parent.eth", canonical: "sub1.sub2.parent.eth" },
   { name: "linked.parent.eth", canonical: "linked.parent.eth" },
 
-  // The wallet Registry's `ParentUpdated` claims `sub1.sub2.parent.eth` as its canonical parent;
-  // `linked.parent.eth.subregistry` was re-pointed to the same Registry but emitted no
-  // `ParentUpdated`, so `wallet.linked.parent.eth` is a non-canonical alias and resolves to null.
+  // this name is incorrectly linked
+  // { name: "wallet.linked.parent.eth", canonical: "wallet.linked.parent.eth" },
+
+  // this name is correctly linked
   { name: "wallet.sub1.sub2.parent.eth", canonical: "wallet.sub1.sub2.parent.eth" },
 
   // NOTE: devnet says these are names but neither test.eth or alias.eth declare a subregistry
-  // so their subnames aren't resolvable
+  // so their subnames aren't addressable
   // { name: "sub.alias.eth", canonical: "sub.alias.eth" },
   // { name: "sub.test.eth", canonical: "sub.alias.eth" },
 ];
@@ -27,7 +28,6 @@ export const DEVNET_NAMES = [
 export const DEVNET_ETH_LABELS = DEVNET_NAMES.map(({ name, canonical }) => {
   const isCanonical = name === canonical;
   if (!isCanonical) return null;
-
   if (!name.endsWith(".eth")) return null;
 
   const segments = name.split(".");

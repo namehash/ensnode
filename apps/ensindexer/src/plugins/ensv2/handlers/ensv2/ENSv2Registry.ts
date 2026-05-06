@@ -305,8 +305,7 @@ export default function () {
   /**
    * `ParentUpdated(parent, label, sender)` is emitted by the _child_ Registry to claim its
    * canonical parent Domain in the namegraph. It may fire in either order relative to the parent
-   * Registry's `SubregistryUpdated`/`LabelRegistered`, so we unconditionally ensure the parent
-   * Registry and parent Domain rows exist before wiring the canonical edge.
+   * Registry's `SubregistryUpdated`/`LabelRegistered`.
    */
   addOnchainEventListener(
     namespaceContract(pluginName, "ENSv2Registry:ParentUpdated"),
@@ -321,71 +320,31 @@ export default function () {
         sender: NormalizedAddress;
       }>;
     }) => {
-      const { parent: _parent, sender } = event.args;
       const label = asLiteralLabel(event.args.label);
-      const parent = interpretAddress(_parent);
+      const parent = interpretAddress(event.args.parent);
 
-      const thisRegistryAccountId = getThisAccountId(context, event);
-      const thisRegistryId = makeENSv2RegistryId(thisRegistryAccountId);
-      // ParentUpdated MAY fire before any other event on `thisRegistry` — ensure the row exists.
-      await ensureRegistry(context, thisRegistryId, {
-        type: "ENSv2Registry",
-        ...thisRegistryAccountId,
-      });
+      const registry = getThisAccountId(context, event);
+      const registryId = makeENSv2RegistryId(registry);
 
-      if (parent === null) {
-        await setRegistryCanonicalDomain(context, thisRegistryId, null);
-      } else {
-        const parentRegistryAccountId: AccountId = {
-          chainId: context.chain.id,
-          address: parent,
-        };
-        const parentRegistryId = makeENSv2RegistryId(parentRegistryAccountId);
+      if (parent) {
+        // update the Canonical Domain, cascading the canonicality update to this registry's domains
+        const parentRegistry: AccountId = { chainId: registry.chainId, address: parent };
         const labelHash = labelhashLiteralLabel(label);
-        const parentTokenId = hexToBigInt(labelHash) as TokenId;
-        const parentDomainId = makeENSv2DomainId(
-          parentRegistryAccountId,
-          makeStorageId(parentTokenId),
-        );
+        const domainId = makeENSv2DomainId(parentRegistry, makeStorageId(labelHash));
 
-        await ensureLabel(context, label);
-        await ensureRegistry(context, parentRegistryId, {
-          type: "ENSv2Registry",
-          ...parentRegistryAccountId,
-        });
-
-        // Parent Domain row must exist for `Domain.canonicalSubregistryId` to point at; the
-        // parent Registry's LabelRegistered may not have arrived yet, so we insert a stub.
-        await context.ensDb
-          .insert(ensIndexerSchema.domain)
-          .values({
-            id: parentDomainId,
-            type: "ENSv2Domain",
-            tokenId: parentTokenId,
-            registryId: parentRegistryId,
-            labelHash,
-          })
-          .onConflictDoNothing();
-
-        await ensureDomainInRegistry(context, parentRegistryId, parentDomainId);
-        await setRegistryCanonicalDomain(context, thisRegistryId, parentDomainId);
+        await setRegistryCanonicalDomain(context, registryId, domainId);
+      } else {
+        // unset the Canonical Domain, cascading the canonicality update to this registry's domains
+        await setRegistryCanonicalDomain(context, registryId, null);
       }
 
-      const senderId = await ensureAccount(context, sender);
-      // `ParentUpdated` is recorded as a registry-level event only; intentionally not linked to
-      // domain history via `ensureDomainEvent` for now.
-      // TODO: maybe ParentUpdated also belongs in the domain event history?
-      await ensureEvent(context, event, senderId);
+      // TODO: push event to registry history
+      // const senderId = await ensureAccount(context, event.args.sender);
+      // const eventId = await ensureEvent(context, event, senderId);
+      // await ensureRegistryEvent(context, registryId, eventId);
     },
   );
 
-  /**
-   * Wire/unwire the canonical edge for known Bridged Resolvers when the Resolver changes. Runs
-   * BEFORE Protocol Acceleration's ResolverUpdated handler overwrites the DRR — see
-   * `apps/ensindexer/ponder/src/register-handlers.ts` for the ordering contract. ENSv2 bridges
-   * are not yet defined in `isBridgedResolver`, so attach is currently unreachable via this path —
-   * but detach must still run if a previously-attached bridge gets replaced.
-   */
   addOnchainEventListener(
     namespaceContract(pluginName, "ENSv2Registry:ResolverUpdated"),
     async ({
@@ -399,10 +358,9 @@ export default function () {
       const registry = getThisAccountId(context, event);
       const storageId = makeStorageId(tokenId);
       const domainId = makeENSv2DomainId(registry, storageId);
-      // For ENSv2 originators, `originatingNode` only feeds ENSv1VirtualRegistryId construction
-      // inside `isBridgedResolver`; the tokenId-derived value is forward-compatible.
-      const originatingNode = interpretTokenIdAsNode(tokenId);
-      await handleBridgedResolverChange(context, registry, domainId, originatingNode, resolver);
+
+      // handle changes in resolver that could affect Bridged Resolver Canonical Domain edges
+      await handleBridgedResolverChange(context, registry, domainId, resolver);
     },
   );
 

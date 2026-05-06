@@ -12,6 +12,9 @@ export type BaseDomainSet = ReturnType<typeof domainsBase>;
  * Universal base domain set: all ENSv1 and ENSv2 Domains with consistent metadata.
  *
  * Returns `{ domainId, ownerId, registryId, parentId, canonical, labelHash, sortableLabel }`.
+ * - parentId derived via Domain -> Registry -> canonicalDomainId
+ * - sortableLabel is the Domain's own InterpretedLabel, used for NAME ordering
+ * - all other values are directly sourced from Domain
  *
  * All downstream filters (owner, parent, registry, name, canonical) operate on this shape.
  */

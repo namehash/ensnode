@@ -1,47 +1,31 @@
-import {
-  type AccountId,
-  type ChainId,
-  makeENSv1VirtualRegistryId,
-  type Node,
-  type NormalizedAddress,
-  type RegistryId,
-} from "enssdk";
+import { type AccountId, makeENSv1VirtualRegistryId, type RegistryId } from "enssdk";
 
 import { DatasourceNames } from "@ensnode/datasources";
 import {
   type ENSNamespaceId,
   getDatasourceContract,
+  getManagedName,
   makeContractMatcher,
 } from "@ensnode/ensnode-sdk";
 
 /**
- * Rich description of a Bridged Resolver's target (shadow)Registry. Provides both:
- *  - canonicality wiring at index time (`{ id, type, chainId, address, node }` for upserting), and
- *  - canonical-namegraph forward traversal at query time (`id` alone), and
- *  - the bridged target as an AccountId (`{ chainId, address }`) for Forward Resolution recursion.
- *
- * Currently only ENSv1VirtualRegistry shadow registries (Basenames, Lineanames) are supported;
- * future ENSv2 sub-registry bridges will use `type: "ENSv2Registry"`.
+ * Describes a Bridged Resolver's Target
  */
-export type BridgedResolverRegistry =
-  | {
-      id: RegistryId;
-      type: "ENSv1VirtualRegistry";
-      chainId: ChainId;
-      address: NormalizedAddress;
-      node: Node;
-    }
-  | {
-      id: RegistryId;
-      type: "ENSv2Registry";
-      chainId: ChainId;
-      address: NormalizedAddress;
-    };
+export interface BridgedResolverTarget {
+  /**
+   * The RegistryId of the _specific_ (Concrete or Virtual) Registry to which the Bridged Resolver defers.
+   */
+  registryId: RegistryId;
+
+  /**
+   * The AccountId of the Concrete Registry to which the Bridged Resolver defers.
+   */
+  registry: AccountId;
+}
 
 /**
  * For a given `resolver`, if it is a known Bridged Resolver, return the (shadow)Registry it defers
- * resolution to. The `originatingNode` is the Node of the Domain whose Resolver is being inspected,
- * required for shadow-virtual-registry id construction.
+ * resolution to.
  *
  * These Bridged Resolvers must abide the following pattern:
  * 1. They _always_ emit OffchainLookup for any resolve() call to a well-known CCIP-Read Gateway,
@@ -61,35 +45,31 @@ export type BridgedResolverRegistry =
  * against the (shadow)Registry in question.
  *
  * TODO: these relationships could/should be encoded in an ENSIP
+ * TODO: once Forward Resolution is updated for ENSv2, this likely just returns RegistryId
  */
 export function isBridgedResolver(
   namespace: ENSNamespaceId,
   resolver: AccountId,
-  originatingNode: Node,
-): BridgedResolverRegistry | null {
+): BridgedResolverTarget | null {
   const resolverEq = makeContractMatcher(namespace, resolver);
 
   // the ENSRoot's BasenamesL1Resolver bridges to the Basenames (shadow)Registry
   if (resolverEq(DatasourceNames.ENSRoot, "BasenamesL1Resolver")) {
-    const target = getDatasourceContract(namespace, DatasourceNames.Basenames, "Registry");
+    const registry = getDatasourceContract(namespace, DatasourceNames.Basenames, "Registry");
+    const { node } = getManagedName(namespace, registry);
     return {
-      id: makeENSv1VirtualRegistryId(target, originatingNode),
-      type: "ENSv1VirtualRegistry",
-      chainId: target.chainId,
-      address: target.address,
-      node: originatingNode,
+      registryId: makeENSv1VirtualRegistryId(registry, node),
+      registry,
     };
   }
 
   // the ENSRoot's LineanamesL1Resolver bridges to the Lineanames (shadow)Registry
   if (resolverEq(DatasourceNames.ENSRoot, "LineanamesL1Resolver")) {
-    const target = getDatasourceContract(namespace, DatasourceNames.Lineanames, "Registry");
+    const registry = getDatasourceContract(namespace, DatasourceNames.Lineanames, "Registry");
+    const { node } = getManagedName(namespace, registry);
     return {
-      id: makeENSv1VirtualRegistryId(target, originatingNode),
-      type: "ENSv1VirtualRegistry",
-      chainId: target.chainId,
-      address: target.address,
-      node: originatingNode,
+      registryId: makeENSv1VirtualRegistryId(registry, node),
+      registry,
     };
   }
 

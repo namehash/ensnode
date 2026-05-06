@@ -1184,7 +1184,7 @@ type Resolver {
   """
   If Resolver is a Bridged Resolver, the Registry to which it Bridges resolution.
   """
-  bridged: AccountId
+  bridged: Registry
 
   """Contract metadata for this Resolver."""
   contract: AccountId!
