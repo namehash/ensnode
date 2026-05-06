@@ -9,16 +9,16 @@ import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-eng
 /**
  * Canonicality db helpers.
  *
- * Maintain the bidirectional invariant `Registry → Domain` ↔ `Domain → Registry` for the
- * canonical edge, materialized in two parallel tables:
- *   - `registryCanonicalDomain`  (registryId PK → canonicalDomainId)
- *   - `domainCanonicalSubregistry` (domainId PK → canonicalSubregistryId)
+ * The two unidirectional pointers `Registry.canonicalDomainId` (Registry → Domain) and
+ * `Domain.subregistryId` (Domain → Registry) are written blindly when their respective onchain
+ * events fire. The bidirectional canonical edge is materialized — only when both pointers agree —
+ * into the parallel `domainCanonicalSubregistry` table (`domainId` PK → `canonicalSubregistryId`).
+ * That table is the single source of truth for "this Registry-Domain edge participates in the
+ * canonical namegraph", and the cascade walks it to flip `Registry.canonical` / `Domain.canonical`.
  *
- * The edge is stored in parallel tables (rather than columns on `registry`/`domain`) so it can be
- * recorded before the Registry or Domain row exists. This is necessary because canonicality
- * events can fire before the corresponding entity has been observed onchain — e.g. an ENSv2
- * `ParentUpdated` arriving before the child Registry's first `LabelRegistered`, or a Bridged
- * Resolver attach naming a target Registry that hasn't been seen yet.
+ * The parallel table is keyed by domain so the upward-walk SQL in ENSApi can JOIN on the
+ * canonical subregistry from the registry side; an index on `canonicalSubregistryId` covers that
+ * non-PK direction.
  *
  * The `Registry.canonical` / `Domain.canonical` boolean flags remain on those rows and are
  * updated by the cascade for entities that exist; entities created later inherit canonicality
@@ -71,75 +71,90 @@ export async function ensureDomainInRegistry(
 }
 
 /**
- * Set `registryId`'s canonical parent Domain (or unset if null), maintaining the bidirectional
- * invariant via the `registryCanonicalDomain` ↔ `domainCanonicalSubregistry` parallel tables and
- * cascading canonicality to the registry's subtree.
+ * Set `registryId`'s canonical parent Domain (or unset if null) by writing the unidirectional
+ * `Registry.canonicalDomainId` pointer, then reconciling the bidirectional materialization in
+ * `domainCanonicalSubregistry` (and cascading canonicality) for both the previous and next edges.
  *
- * The Registry and the new canonical Domain need not exist yet — the edge is recorded in the
- * parallel tables regardless. The `canonical` boolean cascade is applied only to rows that
- * already exist; rows created later inherit `canonical` through `ensureDomainInRegistry` /
- * `ensureRegistry`'s seeding of the flag.
+ * The new canonical Domain need not exist yet — `Registry.canonicalDomainId` is set blindly. The
+ * `domainCanonicalSubregistry` row only materializes once `Domain.subregistryId` agrees, which
+ * may happen later via `handleSubregistryUpdated`.
  */
 export async function setRegistryCanonicalDomain(
   context: IndexingEngineContext,
   registryId: RegistryId,
   nextCanonicalDomainId: DomainId | null,
 ): Promise<void> {
-  // first, identfiy this Registry's Previous Canonical Domain
-  const prevEdge = await context.ensDb.find(ensIndexerSchema.registryCanonicalDomain, {
-    registryId,
-  });
-  const prevCanonicalDomainId = prevEdge?.canonicalDomainId ?? null;
+  const registry = await context.ensDb.find(ensIndexerSchema.registry, { id: registryId });
+  if (!registry) {
+    throw new Error(
+      `Invariant(setRegistryCanonicalDomain): Registry ${registryId} does not yet exist.`,
+    );
+  }
+
+  // identfiy this Registry's Previous Canonical Domain
+  const prevCanonicalDomainId = registry?.canonicalDomainId ?? null;
 
   // if this Registry's Canonical Domain isn't changing, no-op (canonicality already consistent)
   if (prevCanonicalDomainId === nextCanonicalDomainId) return;
 
-  // determine whether this Registry was previously Canonical
-  // const registry = await context.ensDb.find(ensIndexerSchema.registry, { id: registryId });
-  // const prevCanonical = registry?.canonical ?? false;
-
-  // fetch Domain if setting
-  const domain = nextCanonicalDomainId
-    ? await context.ensDb.find(ensIndexerSchema.domain, { id: nextCanonicalDomainId })
-    : null;
-
-  // determine whether this Registry should be Canonical by checking the parent Domain. If the
-  // parent Domain doesn't exist yet, this Registry cannot (yet) be Canonical.
-  const nextCanonical = domain?.canonical ?? false;
-
-  // clear the previous Canonical Domain's Canonical Subregistry, since it is no longer
-  // bidirectionally agreed upon (note that we maintain Domain.subregistryId, as that represents the
-  // uni-directional Domain->Registry link)
-  if (prevCanonicalDomainId) {
-    await context.ensDb.delete(ensIndexerSchema.domainCanonicalSubregistry, {
-      domainId: prevCanonicalDomainId,
-    });
-  }
+  // from here, we know that the Registry's Canonical parent Domain is changed...
 
   // set/unset this Registry's Canonical Domain
   // note that this is the uni-directional Registry->Domain link
-  if (nextCanonicalDomainId) {
-    await context.ensDb
-      .insert(ensIndexerSchema.registryCanonicalDomain)
-      .values({ registryId, canonicalDomainId: nextCanonicalDomainId })
-      .onConflictDoUpdate({ canonicalDomainId: nextCanonicalDomainId });
-  } else {
-    await context.ensDb.delete(ensIndexerSchema.registryCanonicalDomain, { registryId });
+  await context.ensDb
+    .update(ensIndexerSchema.registry, { id: registryId })
+    .set({ canonicalDomainId: nextCanonicalDomainId });
+
+  // if previous Canonical Domain, ensure that its canonicality is materialized
+  if (prevCanonicalDomainId) {
+    await materializeAndCascade(context, registryId, prevCanonicalDomainId);
   }
 
-  // iff `Registry → Domain` ↔ `Domain → Registry`, upsert the Domain's Canonical Subregistry
+  // materialize and cascade this regitry's canonicality
+  await materializeAndCascade(context, registryId, nextCanonicalDomainId);
+}
+
+async function materializeAndCascade(
+  context: IndexingEngineContext,
+  registryId: RegistryId,
+  domainId: DomainId | null,
+) {
+  const registry = await context.ensDb.find(ensIndexerSchema.registry, { id: registryId });
+  if (!registry) {
+    throw new Error(`Invariant(materializeAndCascade): Registry ${registryId} does not yet exist.`);
+  }
+
+  const domain = domainId
+    ? await context.ensDb.find(ensIndexerSchema.domain, { id: domainId })
+    : null;
+
+  // iff `Registry → Domain` ↔ `Domain → Registry`, upsert the Domain's Canonical Subregistry;
+  // otherwise, if a stale row for this exact (Domain, Registry) pair exists, clear it.
   // note that this is the materialized bi-directional Domain->Registry link (edge-authenticated)
-  const registryPointsToDomain = domain && nextCanonicalDomainId === domain.id;
+  const registryPointsToDomain = registry.canonicalDomainId === domainId;
   const domainPointsToSubregistry = domain && domain.subregistryId === registryId;
-  if (registryPointsToDomain && domainPointsToSubregistry) {
-    await context.ensDb
-      .insert(ensIndexerSchema.domainCanonicalSubregistry)
-      .values({ domainId: nextCanonicalDomainId, canonicalSubregistryId: registryId })
-      .onConflictDoUpdate({ canonicalSubregistryId: registryId });
+  if (domainId) {
+    if (registryPointsToDomain && domainPointsToSubregistry) {
+      await context.ensDb
+        .insert(ensIndexerSchema.domainCanonicalSubregistry)
+        .values({ domainId, canonicalSubregistryId: registryId })
+        .onConflictDoUpdate({ canonicalSubregistryId: registryId });
+    } else {
+      const existing = await context.ensDb.find(ensIndexerSchema.domainCanonicalSubregistry, {
+        domainId,
+      });
+      // unset Domain's existing Canonical Subregistry iff it was pointing at _this_ Registry
+      if (existing?.canonicalSubregistryId === registryId) {
+        await context.ensDb.delete(ensIndexerSchema.domainCanonicalSubregistry, { domainId });
+      }
+    }
   }
 
-  // Cascade this Registry's canonicality
-  await updateRegistryCanonicality(context, registryId, nextCanonical);
+  // Registry is Canonical iff Domain is Canonical
+  const canonical = domain?.canonical ?? false;
+
+  // cascade this Registry's canonicality
+  await updateRegistryCanonicality(context, registryId, canonical);
 }
 
 /**
@@ -149,8 +164,8 @@ export async function setRegistryCanonicalDomain(
  * The recursion is unbounded by design. ENS names have no formal depth limit, so a fixed cap
  * would abort indexing on legitimately deep namegraphs. Termination relies on the canonical
  * namegraph being a tree (each Registry has at most one canonical parent Domain, enforced by
- * the bidirectional invariant maintained across `registryCanonicalDomain` ↔
- * `domainCanonicalSubregistry`). If that invariant is ever violated and a cycle is introduced,
+ * the bidirectional invariant materialized in `domainCanonicalSubregistry`). If that invariant
+ * is ever violated and a cycle is introduced,
  * this function could recurse indefinitely — that is an accepted trade-off for correctness on
  * legitimately deep names.
  */
@@ -194,6 +209,36 @@ async function updateRegistryCanonicality(
 // check if `Registry → Domain` ↔ `Domain → Registry` and upsert the Domain's Canonical Subregistry
 // and then cascade? that way events on the other side (ENSv2 SubregistryUpdated) reconcile canonicality as well
 // and for ENSv1 maybe we don't need to do anything because the creation order is guaranteed?
+export async function handleSubregistryUpdated(
+  context: IndexingEngineContext,
+  domainId: DomainId,
+  nextSubregistryId: RegistryId | null,
+) {
+  const domain = await context.ensDb.find(ensIndexerSchema.domain, { id: domainId });
+  if (!domain) {
+    throw new Error(`Invariant(handleSubregistryUpdated): Domain ${domainId} does not yet exist.`);
+  }
+
+  // if the Subregistry isn't changing, no-op
+  const prevSubregistryId = domain.subregistryId;
+  if (prevSubregistryId === nextSubregistryId) return;
+
+  // set/unset the Domain's Subregistry
+  // note that this is the uni-directional Domain->Registry link
+  if (nextSubregistryId) {
+    await context.ensDb
+      .update(ensIndexerSchema.domain, { id: domainId })
+      .set({ subregistryId: nextSubregistryId });
+  } else {
+    await context.ensDb
+      .update(ensIndexerSchema.domain, { id: domainId })
+      .set({ subregistryId: null });
+  }
+
+  // materialize and cascade canonicality for the prevous and next subregistries
+  if (prevSubregistryId) await materializeAndCascade(context, prevSubregistryId, domainId);
+  if (nextSubregistryId) await materializeAndCascade(context, nextSubregistryId, domainId);
+}
 
 /**
  * Reconciles the canonical edge for a Domain whose Resolver just changed. Detaches any prior
@@ -207,7 +252,7 @@ export async function handleBridgedResolverChange(
   context: IndexingEngineContext,
   registry: AccountId,
   domainId: DomainId,
-  nextResolver: NormalizedAddress,
+  nextResolver: NormalizedAddress | null,
 ): Promise<void> {
   const prev = await context.ensDb.find(ensIndexerSchema.domainResolverRelation, {
     chainId: registry.chainId,
@@ -215,27 +260,36 @@ export async function handleBridgedResolverChange(
     domainId,
   });
 
-  const prevBridged = prev
-    ? isBridgedResolver(config.namespace, { chainId: prev.chainId, address: prev.resolver })
+  const prevResolver = prev?.resolver;
+
+  const prevBridged = prevResolver
+    ? isBridgedResolver(config.namespace, { chainId: registry.chainId, address: prevResolver })
     : null;
 
-  const nextBridge = isBridgedResolver(config.namespace, {
-    chainId: context.chain.id,
-    address: nextResolver,
-  });
+  const nextBridged = nextResolver
+    ? isBridgedResolver(config.namespace, { chainId: registry.chainId, address: nextResolver })
+    : null;
 
-  // we need to unset the previous bridged resolver's target registry's canonical domain if:
-  const needsUnset =
-    prevBridged && // it was previously bridged AND
-    (!nextBridge || // we're unsetting the resolver entirely OR
-      prevBridged.registryId !== nextBridge.registryId); // we're setting it and it's being changed
+  // the previous and the next are idential, no-op
+  if (prevBridged?.registryId === nextBridged?.registryId) return;
 
-  if (needsUnset) {
+  // if the prevous resolver was a Bridged Resolver, we need to disconnect both links
+  if (prevBridged) {
+    // update the Domain's Subregistry to null
+    await handleSubregistryUpdated(context, domainId, null);
+
+    // update the Registry's Canonical Domain to null
+    // (which will also materialize and cascade canonicality)
     await setRegistryCanonicalDomain(context, prevBridged.registryId, null);
   }
 
-  // if the new resolver is a Bridged Resolver, set the target registry's canonical domain
-  if (nextBridge) {
-    await setRegistryCanonicalDomain(context, nextBridge.registryId, domainId);
+  // if the next resolver is a Bridged Resolver, we need to connect all links
+  if (nextBridged) {
+    // update the Domain's Subregistry
+    await handleSubregistryUpdated(context, domainId, nextBridged.registryId);
+
+    // update the Registry's Canonical Domain
+    // (which will also materialize and cascade canonicality)
+    await setRegistryCanonicalDomain(context, nextBridged.registryId, domainId);
   }
 }

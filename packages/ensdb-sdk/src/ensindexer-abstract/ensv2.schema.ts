@@ -213,6 +213,9 @@ export const registry = onchainTable(
     // owns it, otherwise null.
     node: t.hex().$type<Node>(),
 
+    // the Registry's declared Canonical Domain (uni-directional)
+    canonicalDomainId: t.text().$type<DomainId>(),
+
     // Whether this Registry is part of the canonical namegraph. See canonicality-db-helpers.ts.
     canonical: t.boolean().notNull().default(false),
   }),
@@ -252,7 +255,7 @@ export const domain = onchainTable(
     // belongs to a registry
     registryId: t.text().notNull().$type<RegistryId>(),
 
-    // may have a subregistry
+    // the Domain's declared Subregistry (uni-directional)
     subregistryId: t.text().$type<RegistryId>(),
 
     // If this is an ENSv2Domain, the TokenId within the ENSv2Registry, otherwise null.
@@ -613,22 +616,17 @@ export const registryDomains = onchainTable("registry_domains", (t) => ({
   domainIds: t.text().array().notNull().$type<DomainId[]>(),
 }));
 
-// One half of the bidirectional canonical edge: a Registry's canonical parent Domain.
-// Stored in a parallel table (rather than a column on `registry`) so the edge can be recorded
-// before the Registry row exists (e.g. ParentUpdated firing before any LabelRegistered for the
-// child Registry, or a Bridged Resolver targeting a Registry not yet observed onchain). The
-// reciprocal half lives in `domainCanonicalSubregistry`; both rows are written together by
-// canonicality-db-helpers.ts to maintain the bidirectional invariant.
-export const registryCanonicalDomain = onchainTable("registry_canonical_domains", (t) => ({
-  registryId: t.text().primaryKey().$type<RegistryId>(),
-  canonicalDomainId: t.text().notNull().$type<DomainId>(),
-}));
-
-// The reciprocal half of `registryCanonicalDomain`: a Domain's canonical Subregistry (i.e. the
-// Registry whose canonical parent Domain points back to this Domain). May differ from
-// `Domain.subregistryId` when a Bridged Resolver attaches a different Registry under this Domain.
-// Parallel-table for the same reason as `registryCanonicalDomain`.
-export const domainCanonicalSubregistry = onchainTable("domain_canonical_subregistries", (t) => ({
-  domainId: t.text().primaryKey().$type<DomainId>(),
-  canonicalSubregistryId: t.text().notNull().$type<RegistryId>(),
-}));
+// A bi-directionally edge-authenticated forward pointer from Domain -> Registry, only set if they
+// both agree (`Registry → Domain` ↔ `Domain → Registry`)
+export const domainCanonicalSubregistry = onchainTable(
+  "domain_canonical_subregistries",
+  (t) => ({
+    domainId: t.text().primaryKey().$type<DomainId>(),
+    canonicalSubregistryId: t.text().notNull().$type<RegistryId>(),
+  }),
+  // upward namegraph traversal joins on `canonicalSubregistryId` (the registry that points back
+  // up to a canonical parent Domain), so index it for the recursive CTEs in ENSApi.
+  (t) => ({
+    byCanonicalSubregistry: index().on(t.canonicalSubregistryId),
+  }),
+);

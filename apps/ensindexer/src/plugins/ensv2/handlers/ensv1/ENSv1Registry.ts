@@ -221,7 +221,8 @@ export default function () {
     context: IndexingEngineContext;
     event: EventWithArgs<{ node: Node; resolver: NormalizedAddress }>;
   }) {
-    const { node, resolver } = event.args;
+    const { node } = event.args;
+    const resolver = interpretAddress(event.args.resolver);
 
     // ENSv2 model does not include root node, no-op
     if (node === ENS_ROOT_NODE) return;

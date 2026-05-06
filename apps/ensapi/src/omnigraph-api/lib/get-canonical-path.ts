@@ -34,8 +34,9 @@ export async function getCanonicalPath(domainId: DomainId): Promise<CanonicalPat
 
       UNION ALL
 
-      -- Step upward: domain → current registry's canonical parent domain.
-      -- The bidirectional invariant guarantees consistency, so no edge-auth is needed.
+      -- Step upward: domain → current registry's canonical parent domain via the
+      -- edge-authenticated domain_canonical_subregistries table (which only contains rows
+      -- where both registries.canonical_domain_id and domains.subregistry_id agree).
       -- We allow recursion to one row beyond MAX_DEPTH so we can detect (and throw on) a
       -- legitimate path that exceeds the cap, rather than silently truncating it.
       SELECT
@@ -43,10 +44,10 @@ export async function getCanonicalPath(domainId: DomainId): Promise<CanonicalPat
         pd.registry_id,
         upward.depth + 1
       FROM upward
-      JOIN ${ensIndexerSchema.registryCanonicalDomain} rcd
-        ON rcd.registry_id = upward.registry_id
+      JOIN ${ensIndexerSchema.domainCanonicalSubregistry} dcs
+        ON dcs.canonical_subregistry_id = upward.registry_id
       JOIN ${ensIndexerSchema.domain} pd
-        ON pd.id = rcd.canonical_domain_id
+        ON pd.id = dcs.domain_id
       WHERE upward.depth <= ${MAX_SUPPORTED_NAME_DEPTH}
     )
     SELECT *

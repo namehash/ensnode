@@ -23,6 +23,7 @@ import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import {
   ensureDomainInRegistry,
   handleBridgedResolverChange,
+  handleSubregistryUpdated,
   setRegistryCanonicalDomain,
 } from "@/lib/ensv2/canonicality-db-helpers";
 import { ensureDomainEvent, ensureEvent } from "@/lib/ensv2/event-db-helpers";
@@ -267,32 +268,18 @@ export default function () {
         sender: NormalizedAddress;
       }>;
     }) => {
-      const { tokenId, subregistry: _subregistry, sender } = event.args;
-      const subregistry = interpretAddress(_subregistry);
+      const { tokenId, sender } = event.args;
+      const subregistry = interpretAddress(event.args.subregistry);
 
-      const registryAccountId = getThisAccountId(context, event);
+      const registry = getThisAccountId(context, event);
       const storageId = makeStorageId(tokenId);
-      const domainId = makeENSv2DomainId(registryAccountId, storageId);
+      const domainId = makeENSv2DomainId(registry, storageId);
 
-      // SubregistryUpdated is the on-chain forward pointer; canonicality is driven by ParentUpdated
-      // (which the child Registry emits). Set the raw `subregistryId` here, ensure the referenced
-      // Registry row exists for ParentUpdated to find, and leave canonicality to the dedicated path.
-      if (subregistry === null) {
-        await context.ensDb
-          .update(ensIndexerSchema.domain, { id: domainId })
-          .set({ subregistryId: null });
-      } else {
-        const subregistryAccountId: AccountId = { chainId: context.chain.id, address: subregistry };
-        const subregistryId = makeENSv2RegistryId(subregistryAccountId);
-        await ensureRegistry(context, subregistryId, {
-          type: "ENSv2Registry",
-          ...subregistryAccountId,
-        });
+      const subregistryId = subregistry
+        ? makeENSv2RegistryId({ chainId: registry.chainId, address: subregistry })
+        : null;
 
-        await context.ensDb
-          .update(ensIndexerSchema.domain, { id: domainId })
-          .set({ subregistryId });
-      }
+      await handleSubregistryUpdated(context, domainId, subregistryId);
 
       // push event to domain history
       const senderId = await ensureAccount(context, sender);
@@ -353,7 +340,9 @@ export default function () {
       context: IndexingEngineContext;
       event: EventWithArgs<{ tokenId: TokenId; resolver: NormalizedAddress }>;
     }) => {
-      const { tokenId, resolver } = event.args;
+      const { tokenId } = event.args;
+      const resolver = interpretAddress(event.args.resolver);
+
       const registry = getThisAccountId(context, event);
       const storageId = makeStorageId(tokenId);
       const domainId = makeENSv2DomainId(registry, storageId);
