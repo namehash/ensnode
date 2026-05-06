@@ -2,14 +2,13 @@ import config from "@/config";
 
 import type { RegistryId } from "enssdk";
 
-import { getRootRegistryId } from "@ensnode/ensnode-sdk";
+import { getENSv1RootRegistryId, getENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
 
 import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 
 /**
- * Idempotently insert a Registry row, seeding `canonical = true` only if it is the namespace's
- * primary Root Registry. All other Registries become canonical via ParentUpdated or Bridged
- * Resolver attach.
+ * Idempotently insert a Registry row, seeding `canonical = true` if it is the namespace's
+ * ENSv1 or ENSv2 Root Registry.
  */
 export async function ensureRegistry(
   context: IndexingEngineContext,
@@ -24,7 +23,10 @@ export async function ensureRegistry(
     .values({
       id,
       ...args,
-      canonical: id === getRootRegistryId(config.namespace),
+      canonical:
+        // by default, only the ENSv1 and ENSv2 Root Registries are Canonical
+        id === getENSv1RootRegistryId(config.namespace) ||
+        id === getENSv2RootRegistryId(config.namespace),
     })
     .onConflictDoNothing();
 }

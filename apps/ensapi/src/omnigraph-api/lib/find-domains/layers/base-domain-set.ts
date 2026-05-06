@@ -12,7 +12,7 @@ export type BaseDomainSet = ReturnType<typeof domainsBase>;
  * Universal base domain set: all ENSv1 and ENSv2 Domains with consistent metadata.
  *
  * Returns `{ domainId, ownerId, registryId, parentId, canonical, labelHash, sortableLabel }`.
- * - parentId derived via Domain -> Registry -> canonicalDomainId
+ * - parentId derived via Domain -> registryCanonicalDomain (parallel canonicality table)
  * - sortableLabel is the Domain's own InterpretedLabel, used for NAME ordering
  * - all other values are directly sourced from Domain
  *
@@ -25,9 +25,10 @@ export function domainsBase() {
         domainId: sql<DomainId>`${ensIndexerSchema.domain.id}`.as("domainId"),
         ownerId: sql<NormalizedAddress | null>`${ensIndexerSchema.domain.ownerId}`.as("ownerId"),
         registryId: sql<RegistryId>`${ensIndexerSchema.domain.registryId}`.as("registryId"),
-        parentId: sql<DomainId | null>`${ensIndexerSchema.registry.canonicalDomainId}`.as(
-          "parentId",
-        ),
+        parentId:
+          sql<DomainId | null>`${ensIndexerSchema.registryCanonicalDomain.canonicalDomainId}`.as(
+            "parentId",
+          ),
         canonical: sql<boolean>`${ensIndexerSchema.domain.canonical}`.as("canonical"),
         labelHash: sql<string>`${ensIndexerSchema.domain.labelHash}`.as("labelHash"),
         sortableLabel: sql<string | null>`${ensIndexerSchema.label.interpreted}`.as(
@@ -35,12 +36,12 @@ export function domainsBase() {
         ),
       })
       .from(ensIndexerSchema.domain)
-      // parent: materialized via `registry.canonicalDomainId`. The bidirectional invariant
-      // (`Domain.canonicalSubregistryId` ↔ `Registry.canonicalDomainId`) guarantees consistency,
-      // so no edge-auth join is required.
+      // parent: the canonical edge is materialized in the parallel `registryCanonicalDomain` table
+      // (keyed by registryId). The bidirectional invariant maintained against
+      // `domainCanonicalSubregistry` guarantees consistency, so no edge-auth join is required.
       .leftJoin(
-        ensIndexerSchema.registry,
-        eq(ensIndexerSchema.registry.id, ensIndexerSchema.domain.registryId),
+        ensIndexerSchema.registryCanonicalDomain,
+        eq(ensIndexerSchema.registryCanonicalDomain.registryId, ensIndexerSchema.domain.registryId),
       )
       // join label for labelHash/sortableLabel
       .leftJoin(

@@ -43,10 +43,10 @@ export async function getCanonicalPath(domainId: DomainId): Promise<CanonicalPat
         pd.registry_id,
         upward.depth + 1
       FROM upward
-      JOIN ${ensIndexerSchema.registry} r
-        ON r.id = upward.registry_id
+      JOIN ${ensIndexerSchema.registryCanonicalDomain} rcd
+        ON rcd.registry_id = upward.registry_id
       JOIN ${ensIndexerSchema.domain} pd
-        ON pd.id = r.canonical_domain_id
+        ON pd.id = rcd.canonical_domain_id
       WHERE upward.depth <= ${MAX_SUPPORTED_NAME_DEPTH}
     )
     SELECT *

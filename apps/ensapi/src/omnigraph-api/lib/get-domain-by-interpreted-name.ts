@@ -183,8 +183,9 @@ async function forwardWalkDisjointNamegraph(registryId: RegistryId, path: LabelH
       UNION ALL
 
       SELECT
-        -- NOTE: that here we recurse by domain.subregistry_id NOT domain.canonical_subregistry_id
-        -- as this walk allows addressing of non-canonical Domains
+        -- NOTE: that here we recurse by domain.subregistry_id (the on-chain forward pointer)
+        -- NOT domain_canonical_subregistries.canonical_subregistry_id. This walk addresses
+        -- non-canonical Domains too, so it must follow the raw subregistry edge.
         d.subregistry_id            AS next_registry_id,
         d.id                        AS "domainId",
         path.depth + 1

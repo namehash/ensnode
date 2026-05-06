@@ -1,7 +1,6 @@
 import {
   type AccountId,
   asLiteralLabel,
-  interpretTokenIdAsNode,
   type LabelHash,
   labelhashLiteralLabel,
   makeENSv2DomainId,

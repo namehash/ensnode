@@ -62,8 +62,11 @@ import type { EncodedReferrer } from "@ensnode/ensnode-sdk";
  * the Basenames Registry, the Lineanames Registry) sit at the top. ENSv2 namegraphs are rooted in
  * a single `ENSv2Registry` RootRegistry on the ENS Root Chain and are possibly circular directed
  * graphs. The full namegraph is never materialized, only _navigated_ at resolution-time, with the
- * exception of `Registry.canonical`/`canonicalDomainId` ↔ `Domain.canonical`/`canonicalSubregistryId`,
- * which materialize the canonical subgraph for PK-keyed query-time access.
+ * exception of the canonical subgraph, which is materialized for PK-keyed query-time access:
+ * `Registry.canonical` ↔ `Domain.canonical` flags on the rows themselves, and the bidirectional
+ * canonical edge in the parallel `registryCanonicalDomain` ↔ `domainCanonicalSubregistry` tables.
+ * The edge tables are parallel (rather than columns on `registry`/`domain`) so canonicality can be
+ * recorded before the corresponding Registry or Domain row exists.
  *
  * Note also that the Protocol Acceleration plugin is a hard requirement for the ENSv2 plugin. This
  * allows us to rely on the shared logic for indexing:
@@ -212,9 +215,6 @@ export const registry = onchainTable(
 
     // Whether this Registry is part of the canonical namegraph. See canonicality-db-helpers.ts.
     canonical: t.boolean().notNull().default(false),
-
-    // Reciprocal of `Domain.canonicalSubregistryId`. The parent Domain in the canonical namegraph.
-    canonicalDomainId: t.text().$type<DomainId>(),
   }),
   (t) => ({
     // NOTE: non-unique index because multiple rows can share (chainId, address) across virtual registries
@@ -273,11 +273,6 @@ export const domain = onchainTable(
 
     // Whether this Domain is part of the canonical namegraph. Mirrors the parent Registry's flag.
     canonical: t.boolean().notNull().default(false),
-
-    // The Subregistry of this Domain that participates in the canonical namegraph (i.e. the
-    // Registry whose `canonicalDomainId` points back to this Domain). May differ from
-    // `subregistryId` when a Bridged Resolver attaches a different Registry under this Domain.
-    canonicalSubregistryId: t.text().$type<RegistryId>(),
 
     // NOTE: Domain-Resolver Relations tracked via Protocol Acceleration plugin
   }),
@@ -616,4 +611,24 @@ export const label_relations = relations(label, ({ many }) => ({
 export const registryDomains = onchainTable("registry_domains", (t) => ({
   registryId: t.text().primaryKey().$type<RegistryId>(),
   domainIds: t.text().array().notNull().$type<DomainId[]>(),
+}));
+
+// One half of the bidirectional canonical edge: a Registry's canonical parent Domain.
+// Stored in a parallel table (rather than a column on `registry`) so the edge can be recorded
+// before the Registry row exists (e.g. ParentUpdated firing before any LabelRegistered for the
+// child Registry, or a Bridged Resolver targeting a Registry not yet observed onchain). The
+// reciprocal half lives in `domainCanonicalSubregistry`; both rows are written together by
+// canonicality-db-helpers.ts to maintain the bidirectional invariant.
+export const registryCanonicalDomain = onchainTable("registry_canonical_domains", (t) => ({
+  registryId: t.text().primaryKey().$type<RegistryId>(),
+  canonicalDomainId: t.text().notNull().$type<DomainId>(),
+}));
+
+// The reciprocal half of `registryCanonicalDomain`: a Domain's canonical Subregistry (i.e. the
+// Registry whose canonical parent Domain points back to this Domain). May differ from
+// `Domain.subregistryId` when a Bridged Resolver attaches a different Registry under this Domain.
+// Parallel-table for the same reason as `registryCanonicalDomain`.
+export const domainCanonicalSubregistry = onchainTable("domain_canonical_subregistries", (t) => ({
+  domainId: t.text().primaryKey().$type<DomainId>(),
+  canonicalSubregistryId: t.text().notNull().$type<RegistryId>(),
 }));
