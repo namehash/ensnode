@@ -5,6 +5,7 @@
  */
 
 export * from "./ensv2.schema";
+export * from "./migrated-nodes.schema";
 export * from "./protocol-acceleration.schema";
 export * from "./registrars.schema";
 export * from "./subgraph.schema";

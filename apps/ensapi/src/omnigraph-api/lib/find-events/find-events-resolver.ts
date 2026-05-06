@@ -26,8 +26,10 @@ interface EventsWhere {
   timestamp_gte?: bigint | null;
   /** Filter to events at or before this timestamp. */
   timestamp_lte?: bigint | null;
-  /** Filter to events sent by this address. */
+  /** Filter to events whose `tx.from` matches. Not HCA-aware. */
   from?: Address | null;
+  /** Filter to events whose HCA-aware `sender` matches. */
+  sender?: Address | null;
 }
 
 /**
@@ -49,6 +51,7 @@ function eventsWhereConditions(where?: EventsWhere | null): SQL | undefined {
       ? lte(ensIndexerSchema.event.timestamp, where.timestamp_lte)
       : undefined,
     where.from ? eq(ensIndexerSchema.event.from, where.from) : undefined,
+    where.sender ? eq(ensIndexerSchema.event.sender, where.sender) : undefined,
   );
 }
 

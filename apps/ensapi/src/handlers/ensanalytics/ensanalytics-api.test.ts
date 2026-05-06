@@ -1227,7 +1227,7 @@ describe("/v1/ensanalytics", () => {
       const body = await httpResponse.text();
       const expectedHeaderRow =
         "Referral ID,Timestamp (UTC),Name,Action,Transaction Hash," +
-        "Incremental Duration (s),Incremental Duration (years),Registrant,Referrer," +
+        "Incremental Duration (seconds),Incremental Duration (years),Registrant,Referrer," +
         "Incremental Revenue Contribution (Wei),Incremental Revenue Contribution (ETH)," +
         "Accumulated Revenue Contribution (Wei),Accumulated Revenue Contribution (ETH)," +
         "Incremental Base Revenue Contribution (micro-USDC),Incremental Base Revenue Contribution (USDC)," +

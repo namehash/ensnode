@@ -75,12 +75,17 @@ export default function () {
     },
   );
 
-  ///////////////////////////////
-  // LegacyEthRegistrarController
-  ///////////////////////////////
-
+  /**
+   * NameRegistered (yes base cost, no premium, no referral)
+   * - LegacyEthRegistrarController
+   *
+   * `name`/`label` params are misnamed onchain — re-map to proper ENS terminology.
+   */
   addOnchainEventListener(
-    namespaceContract(pluginName, "LegacyEthRegistrarController:NameRegistered"),
+    namespaceContract(
+      pluginName,
+      "RegistrarController:NameRegistered(string name, bytes32 indexed label, address indexed owner, uint256 cost, uint256 expires)",
+    ),
     async ({ context, event }) => {
       await handleNameRegisteredByController({
         context,
@@ -88,7 +93,6 @@ export default function () {
           ...event,
           args: {
             ...event.args,
-            // LegacyEthRegistrarController incorrectly names its event arguments, so we re-map them here
             label: event.args.name,
             labelHash: event.args.label,
           },
@@ -97,40 +101,26 @@ export default function () {
     },
   );
 
+  /**
+   * NameRegistered (yes base cost, yes premium, no referral)
+   * - WrappedEthRegistrarController
+   *
+   * `name`/`label` params are misnamed onchain — re-map to proper ENS terminology.
+   * `cost` = baseCost + premium.
+   */
   addOnchainEventListener(
-    namespaceContract(pluginName, "LegacyEthRegistrarController:NameRenewed"),
-    async ({ context, event }) => {
-      await handleNameRenewedByController({
-        context,
-        event: {
-          ...event,
-          args: {
-            ...event.args,
-            // LegacyEthRegistrarController incorrectly names its event arguments, so we re-map them here
-            label: event.args.name,
-            labelHash: event.args.label,
-          },
-        },
-      });
-    },
-  );
-
-  ////////////////////////////////
-  // WrappedEthRegistrarController
-  ////////////////////////////////
-
-  addOnchainEventListener(
-    namespaceContract(pluginName, "WrappedEthRegistrarController:NameRegistered"),
+    namespaceContract(
+      pluginName,
+      "RegistrarController:NameRegistered(string name, bytes32 indexed label, address indexed owner, uint256 baseCost, uint256 premium, uint256 expires)",
+    ),
     async ({ context, event }) => {
       await handleNameRegisteredByController({
         context,
         event: {
           ...event,
           args: {
-            // WrappedEthRegistrarController incorrectly names its event arguments, so we re-map them here
             label: event.args.name,
             labelHash: event.args.label,
-            // the WrappedEthRegistrarController#NameRegistered uses baseCost + premium for full cost
             cost: event.args.baseCost + event.args.premium,
           },
         },
@@ -138,8 +128,44 @@ export default function () {
     },
   );
 
+  /**
+   * NameRegistered (yes base cost, yes premium, yes referral)
+   * - UnwrappedEthRegistrarController
+   *
+   * `cost` = baseCost + premium.
+   */
   addOnchainEventListener(
-    namespaceContract(pluginName, "WrappedEthRegistrarController:NameRenewed"),
+    namespaceContract(
+      pluginName,
+      "RegistrarController:NameRegistered(string label, bytes32 indexed labelhash, address indexed owner, uint256 baseCost, uint256 premium, uint256 expires, bytes32 referrer)",
+    ),
+    async ({ context, event }) => {
+      await handleNameRegisteredByController({
+        context,
+        event: {
+          ...event,
+          args: {
+            label: event.args.label,
+            labelHash: event.args.labelhash,
+            cost: event.args.baseCost + event.args.premium,
+          },
+        },
+      });
+    },
+  );
+
+  /**
+   * NameRenewed (yes base cost, no premium, no referral)
+   * - LegacyEthRegistrarController
+   * - WrappedEthRegistrarController
+   *
+   * `name`/`label` params are misnamed onchain — re-map to proper ENS terminology.
+   */
+  addOnchainEventListener(
+    namespaceContract(
+      pluginName,
+      "RegistrarController:NameRenewed(string name, bytes32 indexed label, uint256 cost, uint256 expires)",
+    ),
     async ({ context, event }) => {
       await handleNameRenewedByController({
         context,
@@ -147,7 +173,6 @@ export default function () {
           ...event,
           args: {
             ...event.args,
-            // WrappedEthRegistrarController incorrectly names its event arguments, so we re-map them here
             label: event.args.name,
             labelHash: event.args.label,
           },
@@ -156,31 +181,15 @@ export default function () {
     },
   );
 
-  //////////////////////////////////
-  // UnwrappedEthRegistrarController
-  //////////////////////////////////
-
+  /**
+   * NameRenewed (yes base cost, no premium, yes referral)
+   * - UnwrappedEthRegistrarController
+   */
   addOnchainEventListener(
-    namespaceContract(pluginName, "UnwrappedEthRegistrarController:NameRegistered"),
-    async ({ context, event }) => {
-      await handleNameRegisteredByController({
-        context,
-        event: {
-          ...event,
-          args: {
-            label: event.args.label,
-            // NOTE: remapping `labelhash` to `labelHash` to match ENSNode terminology
-            labelHash: event.args.labelhash,
-            // the UnwrappedEthRegistrarController#NameRegistered uses baseCost + premium for full cost
-            cost: event.args.baseCost + event.args.premium,
-          },
-        },
-      });
-    },
-  );
-
-  addOnchainEventListener(
-    namespaceContract(pluginName, "UnwrappedEthRegistrarController:NameRenewed"),
+    namespaceContract(
+      pluginName,
+      "RegistrarController:NameRenewed(string label, bytes32 indexed labelhash, uint256 cost, uint256 expires, bytes32 referrer)",
+    ),
     async ({ context, event }) => {
       await handleNameRenewedByController({
         context,
@@ -189,9 +198,7 @@ export default function () {
           args: {
             ...event.args,
             label: event.args.label,
-            // NOTE: remapping `labelhash` to `labelHash` to match ENSNode terminology
             labelHash: event.args.labelhash,
-            // UnwrappedEthRegistrarController#NameRenewed provides direct `cost` argument
           },
         },
       });

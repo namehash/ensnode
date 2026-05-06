@@ -1,40 +1,31 @@
-import type {
-  CrossChainIndexingStatusSnapshot,
-  EnsIndexerPublicConfig,
-} from "@ensnode/ensnode-sdk";
+import type { IndexingMetadataContextInitialized } from "@ensnode/ensnode-sdk";
 
 /**
  * Keys used to distinguish records in `ensnode_metadata` table in the ENSDb.
  */
 export const EnsNodeMetadataKeys = {
-  EnsDbVersion: "ensdb_version",
-  EnsIndexerPublicConfig: "ensindexer_public_config",
-  EnsIndexerIndexingStatus: "ensindexer_indexing_status",
+  IndexingMetadataContext: "indexing_metadata_context",
 } as const;
 
 export type EnsNodeMetadataKey = (typeof EnsNodeMetadataKeys)[keyof typeof EnsNodeMetadataKeys];
 
-export interface EnsNodeMetadataEnsDbVersion {
-  key: typeof EnsNodeMetadataKeys.EnsDbVersion;
-  value: string;
-}
-
-export interface EnsNodeMetadataEnsIndexerPublicConfig {
-  key: typeof EnsNodeMetadataKeys.EnsIndexerPublicConfig;
-  value: EnsIndexerPublicConfig;
-}
-
-export interface EnsNodeMetadataEnsIndexerIndexingStatus {
-  key: typeof EnsNodeMetadataKeys.EnsIndexerIndexingStatus;
-  value: CrossChainIndexingStatusSnapshot;
+/**
+ * ENSNode Metadata record for Indexing Metadata Context
+ *
+ * This record is used to store the Indexing Metadata Context in
+ * ENSNode Metadata table for each ENSIndexer instance.
+ */
+export interface EnsNodeMetadataIndexingMetadataContext {
+  key: typeof EnsNodeMetadataKeys.IndexingMetadataContext;
+  value: IndexingMetadataContextInitialized;
 }
 
 /**
  * ENSNode Metadata
  *
- * Union type gathering all variants of ENSNode Metadata.
+ * Type alias for ENSNode Metadata records,
+ * currently only includes the record for Indexing Metadata Context,
+ * but can be extended in the future to include more types of
+ * ENSNode Metadata records as needed.
  */
-export type EnsNodeMetadata =
-  | EnsNodeMetadataEnsDbVersion
-  | EnsNodeMetadataEnsIndexerPublicConfig
-  | EnsNodeMetadataEnsIndexerIndexingStatus;
+export type EnsNodeMetadata = EnsNodeMetadataIndexingMetadataContext;

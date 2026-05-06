@@ -1,4 +1,4 @@
-import type { Address } from "enssdk";
+import type { NormalizedAddress } from "enssdk";
 
 import { interpretAddress } from "@ensnode/ensnode-sdk";
 
@@ -8,12 +8,14 @@ import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-eng
  * Ensures that the account identified by `address` exists.
  * If `address` is the zeroAddress, no-op.
  */
-export async function ensureAccount(context: IndexingEngineContext, address: Address) {
-  const interpreted = interpretAddress(address);
-  if (interpreted === null) return;
+export async function ensureAccount(
+  context: IndexingEngineContext,
+  address: NormalizedAddress,
+): Promise<NormalizedAddress | null> {
+  const id = interpretAddress(address);
+  if (id === null) return null;
 
-  await context.ensDb
-    .insert(ensIndexerSchema.account)
-    .values({ id: interpreted })
-    .onConflictDoNothing();
+  await context.ensDb.insert(ensIndexerSchema.account).values({ id: id }).onConflictDoNothing();
+
+  return id;
 }

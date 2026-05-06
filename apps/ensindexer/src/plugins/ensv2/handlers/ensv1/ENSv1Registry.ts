@@ -14,7 +14,12 @@ import {
 } from "enssdk";
 import { isAddressEqual, zeroAddress } from "viem";
 
-import { getENSRootChainId, interpretAddress, PluginName } from "@ensnode/ensnode-sdk";
+import {
+  ENSNamespaceIds,
+  getENSRootChainId,
+  interpretAddress,
+  PluginName,
+} from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { ensureDomainEvent, ensureEvent } from "@/lib/ensv2/event-db-helpers";
@@ -29,7 +34,10 @@ import {
 import { getManagedName } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
-import { nodeIsMigrated } from "@/lib/protocol-acceleration/registry-migration-status";
+import {
+  nodeIsMigrated,
+  nodeIsMigratedByParentAndLabel,
+} from "@/lib/protocol-acceleration/migrated-node-db-helpers";
 
 const pluginName = PluginName.ENSv2;
 
@@ -150,7 +158,11 @@ export default function () {
       // with a domain created as a child of a Coin-Type specific Reverse Node (ex: [coinType].reverse).
       if (
         parentNode === ADDR_REVERSE_NODE &&
-        context.chain.id === getENSRootChainId(config.namespace)
+        context.chain.id === getENSRootChainId(config.namespace) &&
+        // Sepolia V2 Tenderly Private RPC is rate-limiting the debug_traceTransaction calls so we
+        // avoid addr.reverse healing for that namespace so indexing progresses smoothly
+        // TODO: remove this once Sepolia V2 is decomissioned
+        config.namespace !== ENSNamespaceIds.SepoliaV2
       ) {
         const label = await healAddrReverseSubnameLabel(context, event, labelHash);
         await ensureLabel(context, label);
@@ -250,8 +262,11 @@ export default function () {
       const { label: labelHash, node: parentNode } = event.args;
 
       // ignore the event on ENSv1RegistryOld if node is migrated to new Registry
-      const node = makeSubdomainNode(labelHash, parentNode);
-      const shouldIgnoreEvent = await nodeIsMigrated(context, node);
+      const shouldIgnoreEvent = await nodeIsMigratedByParentAndLabel(
+        context,
+        parentNode,
+        labelHash,
+      );
       if (shouldIgnoreEvent) return;
 
       return handleNewOwner({ context, event });

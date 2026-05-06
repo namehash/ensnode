@@ -1,5 +1,31 @@
 # ensrainbow
 
+## 1.11.0
+
+### Minor Changes
+
+- [#2037](https://github.com/namehash/ensnode/pull/2037) [`1db1637`](https://github.com/namehash/ensnode/commit/1db1637e7ca1b5cff968a5bd4895177de82096bc) Thanks [@djstrong](https://github.com/djstrong)! - ENSRainbow's `GET /v1/config` is now available immediately at startup, removing the cold-start gap that previously forced downstream services (e.g. ENSIndexer) to wait for the entire database download/validation before they could read public config (issue #2020).
+  - The entrypoint command now builds the `EnsRainbowPublicConfig` in-memory from its CLI/env arguments (`LABEL_SET_ID`, `LABEL_SET_VERSION`) before the HTTP server starts accepting requests, so `/v1/config` returns `200` from the first request.
+  - After the background bootstrap finishes, ENSRainbow verifies that the on-disk database's stored label set (`labelSetId` and `highestLabelSetVersion`) matches the configured one. On mismatch it logs a helpful error naming both the expected and actual label sets, refuses to serve, and terminates with exit code `1`.
+  - `/ready` continues to gate on full database readiness (`200` only after the database has been attached and the env-vs-DB validation has passed).
+  - `/v1/heal/{labelhash}` and `/v1/labels/count` continue to return `503 Service Unavailable` while the database is still bootstrapping.
+  - `/health` is unchanged and still returns `200` as soon as the HTTP server is listening.
+
+- [#2056](https://github.com/namehash/ensnode/pull/2056) [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572) Thanks [@shrugs](https://github.com/shrugs)! - ENSRainbow now starts its HTTP server immediately and downloads/validates its database in the background, instead of blocking container startup behind a netcat placeholder.
+  - **New `GET /ready` endpoint**: returns `200 { status: "ok" }` once the database is attached, or `503 Service Unavailable` while ENSRainbow is still bootstrapping. `/health` is now a pure liveness probe that succeeds as soon as the HTTP server is listening.
+  - **503 responses for API routes during bootstrap**: `/v1/heal`, `/v1/labels/count`, and `/v1/config` return a structured `ServiceUnavailableError` (`errorCode: 503`) until the database is ready.
+  - **New Docker entrypoint**: the container now runs `pnpm run entrypoint` from the `apps/ensrainbow` working directory (implemented in Node via `tsx src/cli.ts entrypoint`), which replaces `scripts/entrypoint.sh` and the `netcat` workaround.
+  - **Graceful shutdown during bootstrap**: SIGTERM/SIGINT now abort an in-flight bootstrap. Spawned `download`/`tar` child processes are terminated (SIGTERM → SIGKILL after a 5s grace period) and any partially-opened LevelDB handle is closed before the HTTP server and DB-backed server shut down, so the container exits promptly without leaking child processes or LevelDB locks.
+
+  **Migration**: if you previously polled `GET /health` to gate traffic on database readiness, switch to `GET /ready`. `/health` is still available and still returns `200`, but it now indicates liveness only.
+
+### Patch Changes
+
+- Updated dependencies [[`43d8a9b`](https://github.com/namehash/ensnode/commit/43d8a9b838b15719f520cd3f3bbfd1b52a4ad1ce), [`824d819`](https://github.com/namehash/ensnode/commit/824d819d291b2b642d2664d09cb10d6de69a6ea7), [`6173160`](https://github.com/namehash/ensnode/commit/61731608632f62139496656f6231210f63383f20), [`92ca54f`](https://github.com/namehash/ensnode/commit/92ca54fa2efbef3f32e2dacd8fdc347ef260a2af), [`7e77c5c`](https://github.com/namehash/ensnode/commit/7e77c5c2bef96d1a2eb363871fb87379b5f6f7e9), [`0d8a4b4`](https://github.com/namehash/ensnode/commit/0d8a4b4b7c8c70be904652e2132e7c67fd9e39ef), [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572), [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572), [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572), [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572), [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572), [`6173160`](https://github.com/namehash/ensnode/commit/61731608632f62139496656f6231210f63383f20)]:
+  - @ensnode/ensnode-sdk@1.11.0
+  - enssdk@1.11.0
+  - @ensnode/ensrainbow-sdk@1.11.0
+
 ## 1.10.1
 
 ### Patch Changes
@@ -185,7 +211,6 @@
   This change addresses large Docker image sizes and data management challenges.
 
   Key changes:
-
   - A new .ensrainbow data format replaces SQL dumps, supporting label set IDs and versioned label sets for incremental data updates.
   - ENSRainbow is now distributed as a lightweight, data-less Docker image.
   - On first startup, the application downloads a pre-ingested database from R2, significantly reducing setup time.

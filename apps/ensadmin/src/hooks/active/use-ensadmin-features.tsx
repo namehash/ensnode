@@ -35,6 +35,12 @@ export interface ENSAdminFeatures {
    * Whether ENSAdmin's ENSNode Omnigraph API tooling is supported by the connected ENSNode.
    */
   omnigraph: FeatureStatus;
+
+  /**
+   * Whether ENSAdmin's REST APIs tooling is supported by the connected ENSNode.
+   * The REST API is available on any ENSApi instance that serves `/openapi.json`.
+   */
+  restApi: FeatureStatus;
 }
 
 const prerequisiteResultToFeatureStatus = (result: PrerequisiteResult): FeatureStatus => {
@@ -91,5 +97,12 @@ export function useENSAdminFeatures(): ENSAdminFeatures {
     return prerequisiteResultToFeatureStatus(hasOmnigraphApiConfigSupport(ensIndexerPublicConfig));
   }, [indexingStatusQuery]);
 
-  return { registrarActions, subgraph, omnigraph };
+  const restApi: FeatureStatus = useMemo(() => {
+    if (indexingStatusQuery.status === "error") return INDEXING_STATUS_ERROR_STATUS;
+    if (indexingStatusQuery.status === "pending") return CONNECTING_STATUS;
+
+    return { type: "supported" };
+  }, [indexingStatusQuery]);
+
+  return { registrarActions, subgraph, omnigraph, restApi };
 }
