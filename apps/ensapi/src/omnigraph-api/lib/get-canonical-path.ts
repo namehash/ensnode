@@ -4,18 +4,19 @@ import type { CanonicalPath, DomainId, RegistryId } from "enssdk";
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 
 /**
+ * Maximum depth to walk before throwing. ENS names have no formal depth limit, but at the
+ * Omnigraph API boundary we cap traversal to fail loudly rather than risk an unbounded
+ * recursive CTE if the canonical-tree invariant is ever violated. The cap is detected via an
+ * extra row beyond `MAX_DEPTH`; if that row is produced we throw rather than silently truncate.
+ */
+const MAX_DEPTH = 16;
+
+/**
  * Provide the canonical parents for a Domain via reverse traversal of the namegraph.
  *
  * Walks `domain → registry → registry.canonicalDomainId` upward via the materialized canonical
  * edge until the registry has no canonical parent (root). Returns `null` when the input Domain is
  * not itself canonical (`domain.canonical = false`).
- *
- * The recursion is unbounded by design. ENS names have no formal depth limit, so a fixed cap
- * would silently truncate deep canonical paths. Termination relies on the canonical namegraph
- * being a tree (the bidirectional invariant `Registry.canonicalDomainId` ↔
- * `Domain.canonicalSubregistryId` enforces this). If that invariant is ever violated and a
- * cycle is introduced, this CTE could recurse indefinitely — that is an accepted trade-off
- * for correctness on legitimately deep names.
  */
 export async function getCanonicalPath(domainId: DomainId): Promise<CanonicalPath | null> {
   // Short-circuit non-canonical Domains via the materialized flag.
@@ -42,7 +43,8 @@ export async function getCanonicalPath(domainId: DomainId): Promise<CanonicalPat
 
       -- Step upward: domain → current registry's canonical parent domain.
       -- The bidirectional invariant guarantees consistency, so no edge-auth is needed.
-      -- No depth bound — see function-level comment about the tree assumption.
+      -- We allow recursion to one row beyond MAX_DEPTH so we can detect (and throw on) a
+      -- legitimate path that exceeds the cap, rather than silently truncating it.
       SELECT
         pd.id AS domain_id,
         pd.registry_id,
@@ -52,6 +54,7 @@ export async function getCanonicalPath(domainId: DomainId): Promise<CanonicalPat
         ON r.id = upward.registry_id
       JOIN ${ensIndexerSchema.domain} pd
         ON pd.id = r.canonical_domain_id
+      WHERE upward.depth <= ${MAX_DEPTH}
     )
     SELECT *
     FROM upward
@@ -65,6 +68,12 @@ export async function getCanonicalPath(domainId: DomainId): Promise<CanonicalPat
   if (rows.length === 0) {
     throw new Error(
       `Invariant(getCanonicalPath): DomainId '${domainId}' is canonical but produced no upward path.`,
+    );
+  }
+
+  if (rows.length > MAX_DEPTH) {
+    throw new Error(
+      `Invariant(getCanonicalPath): DomainId '${domainId}' produced a canonical path deeper than ${MAX_DEPTH}.`,
     );
   }
 
