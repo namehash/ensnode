@@ -172,9 +172,9 @@ export default function HealUnknownName() {
             <div className="mt-4 text-sm text-gray-500">No results yet.</div>
           ) : (
             <ul className="mt-4 divide-y divide-gray-100">
-              {results.map((r) => (
+              {results.map((r, i) => (
                 <li
-                  key={`${r.rawLabel}-${r.status}`}
+                  key={`${i}-${r.rawLabel}-${r.status}`}
                   className="py-3 flex items-start justify-between gap-3"
                 >
                   <div className="min-w-0">
