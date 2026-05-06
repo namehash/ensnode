@@ -11,10 +11,11 @@ export const DEVNET_NAMES = [
   { name: "sub2.parent.eth", canonical: "sub2.parent.eth" },
   { name: "sub1.sub2.parent.eth", canonical: "sub1.sub2.parent.eth" },
   { name: "linked.parent.eth", canonical: "linked.parent.eth" },
-  { name: "wallet.linked.parent.eth", canonical: "wallet.linked.parent.eth" },
 
-  // this name is actually correctly aliased
-  { name: "wallet.sub1.sub2.parent.eth", canonical: "wallet.linked.parent.eth" },
+  // The wallet Registry's `ParentUpdated` claims `sub1.sub2.parent.eth` as its canonical parent;
+  // `linked.parent.eth.subregistry` was re-pointed to the same Registry but emitted no
+  // `ParentUpdated`, so `wallet.linked.parent.eth` is a non-canonical alias and resolves to null.
+  { name: "wallet.sub1.sub2.parent.eth", canonical: "wallet.sub1.sub2.parent.eth" },
 
   // NOTE: devnet says these are names but neither test.eth or alias.eth declare a subregistry
   // so their subnames aren't resolvable

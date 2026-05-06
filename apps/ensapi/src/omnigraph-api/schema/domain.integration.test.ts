@@ -83,7 +83,7 @@ describe("Domain.path", () => {
 
   it("returns the full canonical path (leaf → root) for a deep name", async () => {
     const result = await request<DomainPathResult>(DomainPath, {
-      name: "wallet.linked.parent.eth",
+      name: "wallet.sub1.sub2.parent.eth",
     });
 
     expect(result.domain).not.toBeNull();
@@ -92,31 +92,23 @@ describe("Domain.path", () => {
 
     const pathNames = (path ?? []).map((d) => d.name);
     expect(pathNames).toEqual([
-      "wallet.linked.parent.eth",
-      "linked.parent.eth",
+      "wallet.sub1.sub2.parent.eth",
+      "sub1.sub2.parent.eth",
+      "sub2.parent.eth",
       "parent.eth",
       "eth",
     ]);
   });
 
-  it("collapses aliases to their canonical path", async () => {
+  it("does not resolve non-canonical alias paths", async () => {
+    // The wallet Registry's `ParentUpdated` claims `sub1.sub2.parent.eth` as its parent;
+    // `linked.parent.eth.subregistry` was later re-pointed to the same Registry, but no
+    // corresponding `ParentUpdated` was emitted, so `linked.parent.eth` has no canonical
+    // edge into the wallet Registry. Looking up the alias path returns null.
     const aliasResult = await request<DomainPathResult>(DomainPath, {
-      name: "wallet.sub1.sub2.parent.eth",
-    });
-    const canonicalResult = await request<DomainPathResult>(DomainPath, {
       name: "wallet.linked.parent.eth",
     });
-
-    expect(aliasResult.domain?.id).toBe(canonicalResult.domain?.id);
-
-    const aliasPathNames = (aliasResult.domain?.path ?? []).map((d) => d.name);
-    expect(aliasPathNames).toEqual([
-      "wallet.linked.parent.eth",
-      "linked.parent.eth",
-      "parent.eth",
-      "eth",
-    ]);
-    expect(aliasPathNames).not.toContain("sub1.sub2.parent.eth");
+    expect(aliasResult.domain).toBeNull();
   });
 });
 

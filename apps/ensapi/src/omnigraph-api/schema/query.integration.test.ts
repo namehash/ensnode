@@ -127,14 +127,19 @@ describe("Query.domains", () => {
     // there's at least a v2 'eth' domain
     expect(domains.length).toBeGreaterThanOrEqual(1);
 
-    const v1EthDomain = domains.find((d) => d.__typename === "ENSv1Domain" && d.name === "eth");
-    const v2EthDomain = domains.find((d) => d.__typename === "ENSv2Domain" && d.name === "eth");
+    const v1EthDomain = domains.find(
+      (d) => d.__typename === "ENSv1Domain" && d.id === V1_ETH_DOMAIN_ID,
+    );
+    const v2EthDomain = domains.find(
+      (d) => d.__typename === "ENSv2Domain" && d.id === V2_ETH_DOMAIN_ID,
+    );
 
+    // v1 root is non-canonical in ens-test-env (v2 is the namespace's canonical root), so the
+    // v1 'eth' Domain has a null canonical name. Future PRs may surface a fallback name.
     expect(v1EthDomain).toMatchObject({
       id: V1_ETH_DOMAIN_ID,
-      name: "eth",
+      name: null,
       label: { interpreted: "eth" },
-      // ENSv1Domain exposes `node` — the namehash of the canonical name
       node: ETH_NODE,
     });
 
