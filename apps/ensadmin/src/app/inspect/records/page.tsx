@@ -1,8 +1,8 @@
 "use client";
 
 import type { Name } from "enssdk";
-import { User } from "lucide-react";
-import Link from "next/link";
+// import { User } from "lucide-react";
+// import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
@@ -16,7 +16,7 @@ import {
   getRecordResolutionRelativePath,
 } from "@/components/name-links";
 import { Pill } from "@/components/pill";
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -158,17 +158,17 @@ export default function ResolveRecordsInspector() {
           dataKey="records"
           accelerated={accelerated}
           unaccelerated={unaccelerated}
-          headerActions={
-            <Button variant="link" size="sm" asChild>
-              <Link
-                href={retainCurrentRawConnectionUrlParam(getNameDetailsRelativePath(nameFromQuery))}
-                className="inline-flex items-center gap-1"
-              >
-                View Profile
-                <User size={12} />
-              </Link>
-            </Button>
-          }
+          // headerActions={
+          //   <Button variant="link" size="sm" asChild>
+          //     <Link
+          //       href={retainCurrentRawConnectionUrlParam(getNameDetailsRelativePath(nameFromQuery))}
+          //       className="inline-flex items-center gap-1"
+          //     >
+          //       View Profile
+          //       <User size={12} />
+          //     </Link>
+          //   </Button>
+          // }
         />
       )}
     </div>

@@ -3,7 +3,7 @@
   "version": "1.11.0",
   "private": true,
   "type": "module",
-  "description": "Explore the ENS Protocol like never before",
+  "description": "Inspect the ENS Protocol like never before",
   "license": "MIT",
   "packageManager": "pnpm@10.33.0",
   "repository": {

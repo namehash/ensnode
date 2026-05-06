@@ -20,16 +20,16 @@ const navItems = [
     url: "/status",
     icon: Activity,
   },
-  {
-    title: "ENS Explorer",
-    url: "#",
-    icon: Telescope,
-    isActive: true,
-    items: [
-      { title: "Names", url: "/name" },
-      { title: "Registrar Actions", url: "/registrar-actions" },
-    ],
-  },
+  // {
+  //   title: "ENS Explorer",
+  //   url: "#",
+  //   icon: Telescope,
+  //   isActive: true,
+  //   items: [
+  //     { title: "Names", url: "/name" },
+  //     { title: "Registrar Actions", url: "/registrar-actions" },
+  //   ],
+  // },
   {
     title: "ENS Protocol Inspector",
     url: "#",
