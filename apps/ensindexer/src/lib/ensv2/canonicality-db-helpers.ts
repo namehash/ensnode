@@ -22,13 +22,6 @@ import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-eng
  */
 
 /**
- * Maximum cascade depth in {@link updateRegistryCanonicality}. The canonical namegraph is a tree
- * under correct bidirectional-invariant maintenance, so this only triggers if state has been
- * corrupted (in which case we want to fail loudly rather than recurse indefinitely).
- */
-const MAX_CASCADE_DEPTH = 16;
-
-/**
  * Idempotently link `domainId` into `registryId`'s child list and inherit `canonical` from the
  * Registry. If the Domain is already linked, no-op (the cascade in
  * {@link updateRegistryCanonicality} keeps existing children's `canonical` consistent).
@@ -128,23 +121,20 @@ export async function setRegistryCanonicalDomain(
 
 /**
  * Recursively flip `canonical` on `registryId` and every Domain in its child list (and their
- * canonical subtrees). The canonical namegraph is a tree (each Registry has at most one canonical
- * parent Domain, edge-authenticated by the bidirectional invariant), so cycles are unreachable
- * under correct invariant maintenance — `MAX_CASCADE_DEPTH` exists purely to fail loudly on
- * corrupted state rather than recurse indefinitely.
+ * canonical subtrees).
+ *
+ * The recursion is unbounded by design. ENS names have no formal depth limit, so a fixed cap
+ * would abort indexing on legitimately deep namegraphs. Termination relies on the canonical
+ * namegraph being a tree (each Registry has at most one canonical parent Domain, enforced by
+ * the bidirectional invariant `Registry.canonicalDomainId` ↔ `Domain.canonicalSubregistryId`).
+ * If that invariant is ever violated and a cycle is introduced, this function could recurse
+ * indefinitely — that is an accepted trade-off for correctness on legitimately deep names.
  */
 export async function updateRegistryCanonicality(
   context: IndexingEngineContext,
   registryId: RegistryId,
   canonical: boolean,
-  depth = 0,
 ): Promise<void> {
-  if (depth > MAX_CASCADE_DEPTH) {
-    throw new Error(
-      `Invariant(updateRegistryCanonicality): cascade depth exceeded ${MAX_CASCADE_DEPTH} starting at registry '${registryId}'. Bidirectional invariant likely corrupted.`,
-    );
-  }
-
   await context.ensDb.update(ensIndexerSchema.registry, { id: registryId }).set({ canonical });
 
   const children = await context.ensDb.find(ensIndexerSchema.registryDomains, { registryId });
@@ -158,7 +148,7 @@ export async function updateRegistryCanonicality(
 
     const childSubregistry = child?.canonicalSubregistryId ?? null;
     if (childSubregistry) {
-      await updateRegistryCanonicality(context, childSubregistry, canonical, depth + 1);
+      await updateRegistryCanonicality(context, childSubregistry, canonical);
     }
   }
 }

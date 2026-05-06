@@ -114,7 +114,7 @@ describe("Domain.path", () => {
 
 describe("Domain.canonical", () => {
   type DomainCanonicalResult = {
-    domain: { id: DomainId; canonical: boolean | null } | null;
+    domain: { id: DomainId; canonical: boolean } | null;
   };
 
   const DomainCanonicalByName = gql`

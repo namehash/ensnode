@@ -393,15 +393,15 @@ export default function () {
       event,
     }: {
       context: IndexingEngineContext;
-      event: EventWithArgs<{ tokenId: bigint; resolver: NormalizedAddress }>;
+      event: EventWithArgs<{ tokenId: TokenId; resolver: NormalizedAddress }>;
     }) => {
       const { tokenId, resolver } = event.args;
       const registry = getThisAccountId(context, event);
-      const storageId = makeStorageId(tokenId as never);
+      const storageId = makeStorageId(tokenId);
       const domainId = makeENSv2DomainId(registry, storageId);
       // For ENSv2 originators, `originatingNode` only feeds ENSv1VirtualRegistryId construction
       // inside `isBridgedResolver`; the tokenId-derived value is forward-compatible.
-      const originatingNode = interpretTokenIdAsNode(tokenId as never);
+      const originatingNode = interpretTokenIdAsNode(tokenId);
       await handleBridgedResolverChange(context, registry, domainId, originatingNode, resolver);
     },
   );

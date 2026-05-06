@@ -55,11 +55,12 @@ if (config.plugins.includes(PluginName.TokenScope)) {
 //    PREVIOUS Domain-Resolver Relation from the index — ProtocolAcceleration's NewResolver /
 //    ResolverUpdated handlers overwrite that row, so reading must happen first.
 // 3. ProtocolAcceleration's resolver handlers then write the new DRR.
+//
+// Note: NodeMigration is gated on ProtocolAcceleration alone — the ENSv2 plugin has
+// ProtocolAcceleration as a hard requirement, so checking ProtocolAcceleration is sufficient
+// to cover both plugins' needs.
 
-if (
-  config.plugins.includes(PluginName.ENSv2) ||
-  config.plugins.includes(PluginName.ProtocolAcceleration)
-) {
+if (config.plugins.includes(PluginName.ProtocolAcceleration)) {
   attach_NodeMigrationHandlers();
 }
 
