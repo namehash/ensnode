@@ -72,15 +72,15 @@ describe("Registry.canonical", () => {
     }
   `;
 
-  it("is true for the ENSv2 root registry", async () => {
-    await expect(request(RegistryCanonical, { contract: V2_ROOT_REGISTRY })).resolves.toMatchObject(
+  it("is true for the ENSv1 root registry", async () => {
+    await expect(request(RegistryCanonical, { contract: V1_ROOT_REGISTRY })).resolves.toMatchObject(
       { registry: { canonical: true } },
     );
   });
 
-  it("is false for the ENSv1 root registry (in ens-test-env, v2 is the canonical root)", async () => {
-    await expect(request(RegistryCanonical, { contract: V1_ROOT_REGISTRY })).resolves.toMatchObject(
-      { registry: { canonical: false } },
+  it("is true for the ENSv2 root registry", async () => {
+    await expect(request(RegistryCanonical, { contract: V2_ROOT_REGISTRY })).resolves.toMatchObject(
+      { registry: { canonical: true } },
     );
   });
 });

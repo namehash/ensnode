@@ -120,9 +120,8 @@ async function materializeAndCascade(
   domainId: DomainId | null,
 ) {
   const registry = await context.ensDb.find(ensIndexerSchema.registry, { id: registryId });
-  if (!registry) {
-    throw new Error(`Invariant(materializeAndCascade): Registry ${registryId} does not yet exist.`);
-  }
+  // if the Registry doesn't exist yet, no-op
+  if (!registry) return;
 
   const domain = domainId
     ? await context.ensDb.find(ensIndexerSchema.domain, { id: domainId })
@@ -205,10 +204,9 @@ async function updateRegistryCanonicality(
   }
 }
 
-// shouldn't there be a handleSubregistryUpdate here that needs to
-// check if `Registry → Domain` ↔ `Domain → Registry` and upsert the Domain's Canonical Subregistry
-// and then cascade? that way events on the other side (ENSv2 SubregistryUpdated) reconcile canonicality as well
-// and for ENSv1 maybe we don't need to do anything because the creation order is guaranteed?
+/**
+ * Handles canonicality when a Domain updates its Subregistry.
+ */
 export async function handleSubregistryUpdated(
   context: IndexingEngineContext,
   domainId: DomainId,

@@ -312,6 +312,9 @@ export default function () {
       const registry = getThisAccountId(context, event);
       const registryId = makeENSv2RegistryId(registry);
 
+      // TODO(signals): not necessary when signals
+      await ensureRegistry(context, registryId, { type: "ENSv2Registry", ...registry });
+
       if (parent) {
         // update the Canonical Domain, cascading the canonicality update to this registry's domains
         const parentRegistry: AccountId = { chainId: registry.chainId, address: parent };

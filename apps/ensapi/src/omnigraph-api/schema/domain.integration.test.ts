@@ -10,7 +10,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { DatasourceNames } from "@ensnode/datasources";
 import { getDatasourceContract } from "@ensnode/ensnode-sdk";
 
-import { DEVNET_ETH_LABELS } from "@/test/integration/devnet-names";
+import { DEVNET_ETH_LABELS, DEVNET_NAMES } from "@/test/integration/devnet-names";
 import {
   DomainSubdomainsPaginated,
   type PaginatedDomainResult,
@@ -82,33 +82,39 @@ describe("Domain.path", () => {
   `;
 
   it("returns the full canonical path (leaf → root) for a deep name", async () => {
-    const result = await request<DomainPathResult>(DomainPath, {
-      name: "wallet.sub1.sub2.parent.eth",
+    expect(
+      request<DomainPathResult>(DomainPath, { name: "wallet.sub1.sub2.parent.eth" }),
+    ).resolves.toMatchObject({
+      domain: {
+        path: [
+          { name: "wallet.sub1.sub2.parent.eth" },
+          { name: "sub1.sub2.parent.eth" },
+          { name: "sub2.parent.eth" },
+          { name: "parent.eth" },
+          { name: "eth" },
+        ],
+      },
     });
-
-    expect(result.domain).not.toBeNull();
-    const path = result.domain?.path;
-    expect(path).not.toBeNull();
-
-    const pathNames = (path ?? []).map((d) => d.name);
-    expect(pathNames).toEqual([
-      "wallet.sub1.sub2.parent.eth",
-      "sub1.sub2.parent.eth",
-      "sub2.parent.eth",
-      "parent.eth",
-      "eth",
-    ]);
   });
 
-  it("does not resolve non-canonical alias paths", async () => {
-    // The wallet Registry's `ParentUpdated` claims `sub1.sub2.parent.eth` as its parent;
-    // `linked.parent.eth.subregistry` was later re-pointed to the same Registry, but no
-    // corresponding `ParentUpdated` was emitted, so `linked.parent.eth` has no canonical
-    // edge into the wallet Registry. Looking up the alias path returns null.
-    const aliasResult = await request<DomainPathResult>(DomainPath, {
-      name: "wallet.linked.parent.eth",
+  it("returns the canonical path for a linked Name", async () => {
+    // The wallet Registry's `ParentUpdated` claims `sub1.sub2.parent.eth` as its canonical parent.
+    // `linked.parent.eth.subregistry` was later re-pointed to the same Registry without a
+    // corresponding `ParentUpdated`, so `wallet.linked.parent.eth` is an addressable alias whose
+    // canonical lineage walks through `sub1.sub2.parent.eth`
+    expect(
+      request<DomainPathResult>(DomainPath, { name: "wallet.linked.parent.eth" }),
+    ).resolves.toMatchObject({
+      domain: {
+        path: [
+          { name: "wallet.sub1.sub2.parent.eth" },
+          { name: "sub1.sub2.parent.eth" },
+          { name: "sub2.parent.eth" },
+          { name: "parent.eth" },
+          { name: "eth" },
+        ],
+      },
     });
-    expect(aliasResult.domain).toBeNull();
   });
 });
 
@@ -129,18 +135,13 @@ describe("Domain.canonical", () => {
     }
   `;
 
-  it("is true for v2-rooted domains", async () => {
+  it.each(DEVNET_NAMES)("is true for ENSv2 Domain '$name'", async ({ name }) => {
     await expect(
-      request<DomainCanonicalResult>(DomainCanonicalByName, {
-        name: "parent.eth" as InterpretedName,
-      }),
+      request<DomainCanonicalResult>(DomainCanonicalByName, { name }),
     ).resolves.toMatchObject({ domain: { canonical: true } });
   });
 
-  it("is false for ENSv1 addr.reverse", async () => {
-    // addr.reverse only exists on the ENSv1 namegraph and the v1 root is non-canonical in
-    // ens-test-env (the ENSv2 root is the namespace's canonical root). We query by id
-    // because the canonical-name walk only finds canonical domains.
+  it("is true for ENSv1 addr.reverse", async () => {
     const v1RootRegistry = getDatasourceContract(
       "ens-test-env",
       DatasourceNames.ENSRoot,
@@ -150,7 +151,7 @@ describe("Domain.canonical", () => {
 
     await expect(
       request<DomainCanonicalResult>(DomainCanonicalById, { id }),
-    ).resolves.toMatchObject({ domain: { id, canonical: false } });
+    ).resolves.toMatchObject({ domain: { id, canonical: true } });
   });
 });
 

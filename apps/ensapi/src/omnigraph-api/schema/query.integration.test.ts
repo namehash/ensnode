@@ -134,11 +134,11 @@ describe("Query.domains", () => {
       (d) => d.__typename === "ENSv2Domain" && d.id === V2_ETH_DOMAIN_ID,
     );
 
-    // v1 root is non-canonical in ens-test-env (v2 is the namespace's canonical root), so the
-    // v1 'eth' Domain has a null canonical name. Future PRs may surface a fallback name.
+    // both ENSv1 and ENSv2 root registries are canonical (canonicality is about nameability,
+    // not addressability/resolvability), so the v1 'eth' Domain has its own canonical name.
     expect(v1EthDomain).toMatchObject({
       id: V1_ETH_DOMAIN_ID,
-      name: null,
+      name: "eth",
       label: { interpreted: "eth" },
       node: ETH_NODE,
     });
