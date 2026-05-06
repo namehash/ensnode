@@ -8,7 +8,7 @@ import {
 } from "@ensnode/ensrainbow-sdk/ensrainbowbeam-client";
 
 type StatusBadgeProps = {
-  status: "unknown_in_index" | "healed_in_index" | "absent_from_index";
+  status: "unknown_in_index" | "healed_in_index" | "absent_from_index" | "skipped_unnormalized";
 };
 
 function StatusBadge({ status }: StatusBadgeProps) {
@@ -17,7 +17,9 @@ function StatusBadge({ status }: StatusBadgeProps) {
       ? { label: "Unknown", className: "bg-amber-100 text-amber-900" }
       : status === "healed_in_index"
         ? { label: "Healed", className: "bg-emerald-100 text-emerald-900" }
-        : { label: "Absent", className: "bg-gray-100 text-gray-900" };
+        : status === "absent_from_index"
+          ? { label: "Absent", className: "bg-gray-100 text-gray-900" }
+          : { label: "Skipped (unnormalized)", className: "bg-slate-100 text-slate-900" };
 
   return (
     <span
@@ -48,7 +50,7 @@ export default function HealUnknownName() {
     Array<{
       rawLabel: string;
       normalizedLabel?: string;
-      status: "unknown_in_index" | "healed_in_index" | "absent_from_index";
+      status: "unknown_in_index" | "healed_in_index" | "absent_from_index" | "skipped_unnormalized";
     }>
   >([]);
 
@@ -70,11 +72,16 @@ export default function HealUnknownName() {
       });
 
       setResults(
-        res.results.map((item) => ({
-          rawLabel: item.rawLabel,
-          normalizedLabel: item.normalizedLabel,
-          status: item.status,
-        })),
+        res.results.map((item) => {
+          if ("labelHash" in item) {
+            return {
+              rawLabel: item.rawLabel,
+              normalizedLabel: item.normalizedLabel,
+              status: item.status,
+            };
+          }
+          return { rawLabel: item.rawLabel, status: item.status };
+        }),
       );
     } catch (err) {
       if (err instanceof EnsRainbowBeamHttpError) {

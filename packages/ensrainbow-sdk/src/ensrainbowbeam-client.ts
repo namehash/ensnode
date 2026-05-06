@@ -27,15 +27,26 @@ export const ENSRAINBOWBEAM_LABEL_MAX_LENGTH = 1000;
  *
  * @see apps/ensrainbowbeam/src/lib/labels.ts — `LabelStatus`
  */
-export type DiscoverLabelStatus = "unknown_in_index" | "healed_in_index" | "absent_from_index";
+export type DiscoverLabelStatus =
+  | "unknown_in_index"
+  | "healed_in_index"
+  | "absent_from_index"
+  | "skipped_unnormalized";
 
-export type DiscoverResultItem = {
+export type DiscoverClassifiedResultItem = {
   rawLabel: LiteralLabel;
   labelHash: LabelHash;
   normalizedLabel?: LiteralLabel;
   normalizedLabelHash?: LabelHash;
-  status: DiscoverLabelStatus;
+  status: Exclude<DiscoverLabelStatus, "skipped_unnormalized">;
 };
+
+export type DiscoverSkippedResultItem = {
+  rawLabel: LiteralLabel;
+  status: "skipped_unnormalized";
+};
+
+export type DiscoverResultItem = DiscoverClassifiedResultItem | DiscoverSkippedResultItem;
 
 export type DiscoverResponse = {
   callerAddress: NormalizedAddress;

@@ -2,6 +2,7 @@ import {
   asLiteralLabel,
   encodeLabelHash,
   type InterpretedLabel,
+  isNormalizedLabel,
   type Label,
   type LabelHash,
   type LiteralLabel,
@@ -19,7 +20,11 @@ import {
  *   returned hit already carries a healed (normalized literal) interpreted form.
  * - `absent_from_index`: none of the label's hashes are present in the index at all.
  */
-export type LabelStatus = "unknown_in_index" | "healed_in_index" | "absent_from_index";
+export type LabelStatus =
+  | "unknown_in_index"
+  | "healed_in_index"
+  | "absent_from_index"
+  | "skipped_unnormalized";
 
 /**
  * The hashing result for a single submitted label.
@@ -45,6 +50,11 @@ export type LabelClassification = HashedLabel & {
   status: LabelStatus;
 };
 
+export type SkippedLabelClassification = {
+  rawLabel: LiteralLabel;
+  status: "skipped_unnormalized";
+};
+
 /**
  * Subset of `Label` fields returned by the Omnigraph `labels` query that we care about.
  */
@@ -52,6 +62,13 @@ export type LabelHit = {
   hash: LabelHash;
   interpreted: InterpretedLabel;
 };
+
+/**
+ * True when a submitted label is already normalized under ENSIP-15.
+ */
+export function isProcessableLabel(rawLabel: LiteralLabel): boolean {
+  return isNormalizedLabel(rawLabel as unknown as Label);
+}
 
 /**
  * Computes the hash representations of a single submitted {@link LiteralLabel}.

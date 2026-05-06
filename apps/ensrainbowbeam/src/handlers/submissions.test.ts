@@ -173,23 +173,29 @@ describe("POST /api/discover", () => {
     expect(parsed.callerAddress).toBe(mixedCase.toLowerCase());
   });
 
-  it("includes normalized variants in the output when raw differs from normalized", async () => {
-    mockedLookup.mockResolvedValue([]);
+  it("skips unnormalized labels (status: skipped_unnormalized) and does not look them up", async () => {
+    const ethHash = labelhashLiteralLabel("eth" as LiteralLabel);
+    mockedLookup.mockResolvedValue([
+      { hash: ethHash, interpreted: "eth" as InterpretedLabel } satisfies LabelHit,
+    ]);
 
     const app = makeApp();
     const res = await app.request("/api/discover", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ labels: ["VITALIK"], callerAddress: CALLER }),
+      body: JSON.stringify({ labels: ["eth", "VITALIK"], callerAddress: CALLER }),
     });
 
     expect(res.status).toBe(200);
     const json = (await res.json()) as SubmissionsResponse;
-    expect(json.results[0]).toMatchObject({
-      rawLabel: "VITALIK",
-      normalizedLabel: "vitalik",
-    });
-    expect(json.results[0].normalizedLabelHash).toBeDefined();
+
+    expect(json.results).toMatchObject([
+      { rawLabel: "eth", labelHash: ethHash },
+      { rawLabel: "VITALIK", status: "skipped_unnormalized" },
+    ]);
+
+    expect(mockedLookup).toHaveBeenCalledTimes(1);
+    expect(mockedLookup).toHaveBeenCalledWith([ethHash], expect.any(AbortSignal));
   });
 
   it("rejects oversized batches", async () => {

@@ -8,8 +8,10 @@ import {
   classifySubmissions,
   collectLookupHashes,
   hashLabel,
+  isProcessableLabel,
   type LabelClassification,
   type LabelHit,
+  type SkippedLabelClassification,
 } from "@/lib/labels";
 import { lookupLabels } from "@/lib/omnigraph-client";
 
@@ -50,12 +52,16 @@ export type SubmissionResultItem = {
   labelHash: LabelHash;
   normalizedLabel?: LiteralLabel;
   normalizedLabelHash?: LabelHash;
-  status: LabelClassification["status"];
+  status: Exclude<LabelClassification["status"], "skipped_unnormalized">;
 };
+
+export type SkippedSubmissionResultItem = SkippedLabelClassification;
+
+export type SubmissionsResultItem = SubmissionResultItem | SkippedSubmissionResultItem;
 
 export type SubmissionsResponse = {
   callerAddress: Address;
-  results: SubmissionResultItem[];
+  results: SubmissionsResultItem[];
 };
 
 /**
@@ -77,14 +83,14 @@ type SubmissionLogLine = {
   ts: string;
   requestId: string;
   callerAddress: Address;
-  items: SubmissionResultItem[];
+  items: SubmissionsResultItem[];
 };
 
 function toResultItem(c: LabelClassification): SubmissionResultItem {
   const item: SubmissionResultItem = {
     rawLabel: c.rawLabel,
     labelHash: c.labelHash,
-    status: c.status,
+    status: c.status as SubmissionResultItem["status"],
   };
   if (c.normalizedLabel !== undefined) item.normalizedLabel = c.normalizedLabel;
   if (c.normalizedLabelHash !== undefined) item.normalizedLabelHash = c.normalizedLabelHash;
@@ -106,7 +112,12 @@ export async function submissionsHandler(c: Context) {
 
   const { labels, callerAddress } = parsed.data;
 
-  const hashed = labels.map(hashLabel);
+  const indexed = labels.map((rawLabel, idx) => ({ rawLabel, idx }));
+
+  const processable = indexed.filter(({ rawLabel }) => isProcessableLabel(rawLabel));
+  const skipped = indexed.filter(({ rawLabel }) => !isProcessableLabel(rawLabel));
+
+  const hashed = processable.map(({ rawLabel }) => hashLabel(rawLabel));
   const hashes = collectLookupHashes(hashed);
 
   let hits: LabelHit[];
@@ -117,7 +128,7 @@ export async function submissionsHandler(c: Context) {
       AbortSignal.timeout(OMNIGRAPH_LOOKUP_TIMEOUT_MS),
       c.req.raw.signal,
     ]);
-    hits = await lookupLabels(hashes, signal);
+    hits = hashes.length === 0 ? [] : await lookupLabels(hashes, signal);
   } catch (error) {
     // Client disconnected mid-flight; the response will be discarded by the framework, but
     // re-throw so the upstream cancellation is visible in logs (`app.onError`).
@@ -137,7 +148,22 @@ export async function submissionsHandler(c: Context) {
     return errorResponse(c, { message: "Upstream Omnigraph lookup failed", status: 502 });
   }
   const classifications = classifySubmissions(hashed, hits);
-  const results = classifications.map(toResultItem);
+
+  const resultsByIndex: Array<SubmissionsResultItem | undefined> = Array.from({
+    length: labels.length,
+  });
+
+  for (let i = 0; i < processable.length; i++) {
+    resultsByIndex[processable[i].idx] = toResultItem(classifications[i]);
+  }
+
+  for (const { rawLabel, idx } of skipped) {
+    resultsByIndex[idx] = { rawLabel, status: "skipped_unnormalized" };
+  }
+
+  const results = resultsByIndex.filter(
+    (item): item is SubmissionsResultItem => item !== undefined,
+  );
 
   const ts = new Date().toISOString();
   const requestId = crypto.randomUUID();

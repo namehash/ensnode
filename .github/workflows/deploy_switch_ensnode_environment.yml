@@ -93,7 +93,6 @@ jobs:
           redis-cli -u $REDIS_URL SET traefik/http/routers/ensrainbow-searchlight-api-router/service "${TARGET_ENVIRONMENT}-ensrainbow-searchlight-api"
 
           # ENSRAINBOWBEAM
-          # NOTE: Router/service names must match Traefik IaC (likely in namehash-tf-iac-live).
           redis-cli -u $REDIS_URL SET traefik/http/routers/ensrainbowbeam-api-router/service "${TARGET_ENVIRONMENT}-ensrainbowbeam-api"
 
       - name: Promote ENSAdmin Vercel Deployment
