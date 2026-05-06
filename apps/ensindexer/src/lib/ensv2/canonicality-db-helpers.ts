@@ -91,8 +91,8 @@ export async function setRegistryCanonicalDomain(
     );
   }
 
-  // identfiy this Registry's Previous Canonical Domain
-  const prevCanonicalDomainId = registry?.canonicalDomainId ?? null;
+  // identify this Registry's Previous Canonical Domain
+  const prevCanonicalDomainId = registry.canonicalDomainId ?? null;
 
   // if this Registry's Canonical Domain isn't changing, no-op (canonicality already consistent)
   if (prevCanonicalDomainId === nextCanonicalDomainId) return;
@@ -110,7 +110,7 @@ export async function setRegistryCanonicalDomain(
     await materializeAndCascade(context, registryId, prevCanonicalDomainId);
   }
 
-  // materialize and cascade this regitry's canonicality
+  // materialize and cascade this registry's canonicality
   await materializeAndCascade(context, registryId, nextCanonicalDomainId);
 }
 
@@ -233,7 +233,7 @@ export async function handleSubregistryUpdated(
       .set({ subregistryId: null });
   }
 
-  // materialize and cascade canonicality for the prevous and next subregistries
+  // materialize and cascade canonicality for the previous and next subregistries
   if (prevSubregistryId) await materializeAndCascade(context, prevSubregistryId, domainId);
   if (nextSubregistryId) await materializeAndCascade(context, nextSubregistryId, domainId);
 }
@@ -268,10 +268,10 @@ export async function handleBridgedResolverChange(
     ? isBridgedResolver(config.namespace, { chainId: registry.chainId, address: nextResolver })
     : null;
 
-  // the previous and the next are idential, no-op
+  // the previous and the next are identical, no-op
   if (prevBridged?.registryId === nextBridged?.registryId) return;
 
-  // if the prevous resolver was a Bridged Resolver, we need to disconnect both links
+  // if the previous resolver was a Bridged Resolver, we need to disconnect both links
   if (prevBridged) {
     // update the Domain's Subregistry to null
     await handleSubregistryUpdated(context, domainId, null);

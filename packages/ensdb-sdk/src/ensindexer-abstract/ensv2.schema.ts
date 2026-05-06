@@ -63,10 +63,10 @@ import type { EncodedReferrer } from "@ensnode/ensnode-sdk";
  * a single `ENSv2Registry` RootRegistry on the ENS Root Chain and are possibly circular directed
  * graphs. The full namegraph is never materialized, only _navigated_ at resolution-time, with the
  * exception of the canonical subgraph, which is materialized for PK-keyed query-time access:
- * `Registry.canonical` ↔ `Domain.canonical` flags on the rows themselves, and the bidirectional
- * canonical edge in the parallel `registryCanonicalDomain` ↔ `domainCanonicalSubregistry` tables.
- * The edge tables are parallel (rather than columns on `registry`/`domain`) so canonicality can be
- * recorded before the corresponding Registry or Domain row exists.
+ * `Registry.canonical` / `Domain.canonical` flags on the rows themselves, the bidirectional
+ * canonical edge in the parallel `domainCanonicalSubregistry` table, and a per-Registry child list
+ * in `registryDomains` used by the cascade walker. The edge table is parallel (rather than a column
+ * on `domain`) so canonicality can be recorded before the corresponding Domain row exists.
  *
  * Note also that the Protocol Acceleration plugin is a hard requirement for the ENSv2 plugin. This
  * allows us to rely on the shared logic for indexing:

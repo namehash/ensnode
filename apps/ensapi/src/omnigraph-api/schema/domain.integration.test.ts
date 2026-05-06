@@ -82,7 +82,7 @@ describe("Domain.path", () => {
   `;
 
   it("returns the full canonical path (leaf → root) for a deep name", async () => {
-    expect(
+    await expect(
       request<DomainPathResult>(DomainPath, { name: "wallet.sub1.sub2.parent.eth" }),
     ).resolves.toMatchObject({
       domain: {
@@ -102,7 +102,7 @@ describe("Domain.path", () => {
     // `linked.parent.eth.subregistry` was later re-pointed to the same Registry without a
     // corresponding `ParentUpdated`, so `wallet.linked.parent.eth` is an addressable alias whose
     // canonical lineage walks through `sub1.sub2.parent.eth`
-    expect(
+    await expect(
       request<DomainPathResult>(DomainPath, { name: "wallet.linked.parent.eth" }),
     ).resolves.toMatchObject({
       domain: {

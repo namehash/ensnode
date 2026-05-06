@@ -32,7 +32,7 @@ const tracer = trace.getTracer("get-domain-by-interpreted-name");
 
 /**
  * The maximum number of times to hop between disjoint namegraphs, as a defense against infinite loops.
- * i.e. how many times to follow a Bridged Resolver or fall back from ENSv2 to ENSv1 or vise-versa.
+ * i.e. how many times to follow a Bridged Resolver or fall back from ENSv2 to ENSv1 or vice versa.
  */
 const MAX_HOP_DEPTH = 3;
 
@@ -95,7 +95,7 @@ export async function getDomainIdByInterpretedName(
  * This function prefers the leaf Domain within the origin Registry. i.e. if there's an ENSv2 Domain
  * like example.eth that has as its Resolver the ENSv1Resolver (which sources records from ENSv1's
  * example.eth's Resolver) this function preferentially returns the ENSv2 example.eth, which is more
- * correctly the 'resolvable' Domain; the ENSv1 example.eth is more vestigal and not the source of
+ * correctly the 'resolvable' Domain; the ENSv1 example.eth is more vestigial and not the source of
  * truth.
  *
  * This same logic also encodes the preference that, for a Domain with a Bridged Resolver, the Domain
@@ -150,7 +150,7 @@ async function forwardWalkNamegraph(
       return forwardWalkNamegraph(getENSv1RootRegistryId(config.namespace), path, depth + 1);
     }
 
-    // ENSv1Resolver (ENSv2 Fallback)
+    // ENSv2Resolver (ENSv2 Fallback)
     if (resolverEq(DatasourceNames.ENSv2Root, "ENSv2Resolver")) {
       // to implement the ENSv2Resolver, walk the ENSv2 disjoint namegraph with the full path
       return forwardWalkNamegraph(getENSv2RootRegistryId(config.namespace), path, depth + 1);

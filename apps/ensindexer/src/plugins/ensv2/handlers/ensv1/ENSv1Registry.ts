@@ -25,6 +25,7 @@ import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import {
   ensureDomainInRegistry,
   handleBridgedResolverChange,
+  handleSubregistryUpdated,
   setRegistryCanonicalDomain,
 } from "@/lib/ensv2/canonicality-db-helpers";
 import { ensureDomainEvent, ensureEvent } from "@/lib/ensv2/event-db-helpers";
@@ -99,9 +100,9 @@ export default function () {
       });
 
       const parentDomainId = makeENSv1DomainId(registry, parentNode);
-      await context.ensDb
-        .update(ensIndexerSchema.domain, { id: parentDomainId })
-        .set({ subregistryId: parentRegistryId });
+      // route through handleSubregistryUpdated so any prior subregistry edge (e.g. a bridged
+      // attachment) is properly reconciled instead of orphaned by a blind overwrite.
+      await handleSubregistryUpdated(context, parentDomainId, parentRegistryId);
 
       await setRegistryCanonicalDomain(context, parentRegistryId, parentDomainId);
     }
