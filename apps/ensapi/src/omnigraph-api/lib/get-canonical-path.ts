@@ -56,5 +56,13 @@ export async function getCanonicalPath(domainId: DomainId): Promise<CanonicalPat
 
   const rows = result.rows as { domain_id: DomainId; registry_id: RegistryId }[];
 
+  // Defense-in-depth: the existence + canonical check above guarantees the CTE base case yields
+  // at least one row, so this branch is unreachable under correct invariant maintenance.
+  if (rows.length === 0) {
+    throw new Error(
+      `Invariant(getCanonicalPath): DomainId '${domainId}' is canonical but produced no upward path.`,
+    );
+  }
+
   return rows.map((row) => row.domain_id);
 }

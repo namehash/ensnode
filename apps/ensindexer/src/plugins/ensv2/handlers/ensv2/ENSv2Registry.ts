@@ -372,13 +372,17 @@ export default function () {
       }
 
       const senderId = await ensureAccount(context, sender);
+      // `ParentUpdated` is recorded as a registry-level event only; intentionally not linked to
+      // domain history via `ensureDomainEvent` for now.
+      // TODO: maybe ParentUpdated also belongs in the domain event history?
       await ensureEvent(context, event, senderId);
     },
   );
 
   /**
    * Wire/unwire the canonical edge for known Bridged Resolvers when the Resolver changes. Runs
-   * after Protocol Acceleration's ResolverUpdated handler has overwritten the DRR. ENSv2 bridges
+   * BEFORE Protocol Acceleration's ResolverUpdated handler overwrites the DRR — see
+   * `apps/ensindexer/ponder/src/register-handlers.ts` for the ordering contract. ENSv2 bridges
    * are not yet defined in `isBridgedResolver`, so attach is currently unreachable via this path —
    * but detach must still run if a previously-attached bridge gets replaced.
    */
@@ -398,7 +402,7 @@ export default function () {
       // For ENSv2 originators, `originatingNode` only feeds ENSv1VirtualRegistryId construction
       // inside `isBridgedResolver`; the tokenId-derived value is forward-compatible.
       const originatingNode = interpretTokenIdAsNode(tokenId as never);
-      await handleBridgedResolverChange(context, domainId, originatingNode, resolver);
+      await handleBridgedResolverChange(context, registry, domainId, originatingNode, resolver);
     },
   );
 

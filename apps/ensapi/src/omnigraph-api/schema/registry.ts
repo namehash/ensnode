@@ -82,6 +82,7 @@ RegistryInterfaceRef.implement({
     canonical: t.field({
       description: "Whether the Registry is Canonical.",
       type: "Boolean",
+      nullable: false,
       resolve: (parent) => parent.canonical,
     }),
 

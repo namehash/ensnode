@@ -1045,8 +1045,11 @@ const introspection = {
           {
             "name": "canonical",
             "type": {
-              "kind": "SCALAR",
-              "name": "Boolean"
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean"
+              }
             },
             "args": [],
             "isDeprecated": false
@@ -1637,8 +1640,11 @@ const introspection = {
           {
             "name": "canonical",
             "type": {
-              "kind": "SCALAR",
-              "name": "Boolean"
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean"
+              }
             },
             "args": [],
             "isDeprecated": false
@@ -1898,8 +1904,11 @@ const introspection = {
           {
             "name": "canonical",
             "type": {
-              "kind": "SCALAR",
-              "name": "Boolean"
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean"
+              }
             },
             "args": [],
             "isDeprecated": false
@@ -2042,8 +2051,11 @@ const introspection = {
           {
             "name": "canonical",
             "type": {
-              "kind": "SCALAR",
-              "name": "Boolean"
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean"
+              }
             },
             "args": [],
             "isDeprecated": false
@@ -2198,8 +2210,11 @@ const introspection = {
           {
             "name": "canonical",
             "type": {
-              "kind": "SCALAR",
-              "name": "Boolean"
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean"
+              }
             },
             "args": [],
             "isDeprecated": false
@@ -2596,8 +2611,11 @@ const introspection = {
           {
             "name": "canonical",
             "type": {
-              "kind": "SCALAR",
-              "name": "Boolean"
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean"
+              }
             },
             "args": [],
             "isDeprecated": false
@@ -5142,8 +5160,11 @@ const introspection = {
           {
             "name": "canonical",
             "type": {
-              "kind": "SCALAR",
-              "name": "Boolean"
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean"
+              }
             },
             "args": [],
             "isDeprecated": false

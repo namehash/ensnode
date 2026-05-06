@@ -212,7 +212,7 @@ A Domain represents an individual Label within the ENS namegraph. It may or may 
 """
 interface Domain {
   """Whether the Domain is Canonical."""
-  canonical: Boolean
+  canonical: Boolean!
 
   """All Events associated with this Domain."""
   events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): DomainEventsConnection
@@ -338,7 +338,7 @@ input DomainsWhereInput {
 """An ENSv1Domain represents an ENSv1 Domain."""
 type ENSv1Domain implements Domain {
   """Whether the Domain is Canonical."""
-  canonical: Boolean
+  canonical: Boolean!
 
   """All Events associated with this Domain."""
   events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): DomainEventsConnection
@@ -399,7 +399,7 @@ An ENSv1Registry is a concrete ENSv1 Registry contract (the mainnet ENS Registry
 """
 type ENSv1Registry implements Registry {
   """Whether the Registry is Canonical."""
-  canonical: Boolean
+  canonical: Boolean!
 
   """
   Contract metadata for this Registry. If this is an ENSv1VirtualRegistry, this will reference the concrete Registry contract under which the parent Domain exists.
@@ -424,7 +424,7 @@ An ENSv1VirtualRegistry is the virtual Registry managed by an ENSv1 Domain that 
 """
 type ENSv1VirtualRegistry implements Registry {
   """Whether the Registry is Canonical."""
-  canonical: Boolean
+  canonical: Boolean!
 
   """
   Contract metadata for this Registry. If this is an ENSv1VirtualRegistry, this will reference the concrete Registry contract under which the parent Domain exists.
@@ -452,7 +452,7 @@ type ENSv1VirtualRegistry implements Registry {
 """An ENSv2Domain represents an ENSv2 Domain."""
 type ENSv2Domain implements Domain {
   """Whether the Domain is Canonical."""
-  canonical: Boolean
+  canonical: Boolean!
 
   """All Events associated with this Domain."""
   events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): DomainEventsConnection
@@ -528,7 +528,7 @@ type ENSv2DomainPermissionsConnectionEdge {
 """An ENSv2Registry represents an ENSv2 Registry contract."""
 type ENSv2Registry implements Registry {
   """Whether the Registry is Canonical."""
-  canonical: Boolean
+  canonical: Boolean!
 
   """
   Contract metadata for this Registry. If this is an ENSv1VirtualRegistry, this will reference the concrete Registry contract under which the parent Domain exists.
@@ -1077,7 +1077,7 @@ A Registry represents a Registry contract in the ENS namegraph. It may be an ENS
 """
 interface Registry {
   """Whether the Registry is Canonical."""
-  canonical: Boolean
+  canonical: Boolean!
 
   """
   Contract metadata for this Registry. If this is an ENSv1VirtualRegistry, this will reference the concrete Registry contract under which the parent Domain exists.

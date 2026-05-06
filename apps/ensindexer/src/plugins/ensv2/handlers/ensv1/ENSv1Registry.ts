@@ -232,9 +232,9 @@ export default function () {
     // NOTE: Domain-Resolver relations are handled by the protocol-acceleration plugin and are not
     // directly indexed here
 
-    // Wire/unwire the canonical edge for known Bridged Resolvers (Basenames, Lineanames). This
-    // runs after Protocol Acceleration's NewResolver handler has overwritten the DRR.
-    await handleBridgedResolverChange(context, domainId, node, resolver);
+    // Wire/unwire the canonical edge for known Bridged Resolvers (Basenames, Lineanames). Runs
+    // BEFORE Protocol Acceleration overwrites the DRR — the previous resolver is read from there.
+    await handleBridgedResolverChange(context, registry, domainId, node, resolver);
 
     // push event to domain history
     const eventId = await ensureEvent(context, event);
