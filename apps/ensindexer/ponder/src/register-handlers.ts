@@ -53,10 +53,10 @@ if (config.plugins.includes(PluginName.TokenScope)) {
 //    Old-registry guards consult it.
 // 2. ENSv2 runs before ProtocolAcceleration so its `handleBridgedResolverChange` can read the
 //    PREVIOUS Domain-Resolver Relation from the index — ProtocolAcceleration's NewResolver /
-//    ResolverUpdated handlers overwrite that row, so reading must happen first.
+//    ResolverUpdated handlers overwrite that row, so reading MUST happen first.
 // 3. ProtocolAcceleration's resolver handlers then write the new DRR.
 //
-// Note: NodeMigration is gated on ProtocolAcceleration alone — the ENSv2 plugin has
+// Note: NodeMigration is gated on ProtocolAcceleration but the ENSv2 plugin has
 // ProtocolAcceleration as a hard requirement, so checking ProtocolAcceleration is sufficient
 // to cover both plugins' needs.
 
