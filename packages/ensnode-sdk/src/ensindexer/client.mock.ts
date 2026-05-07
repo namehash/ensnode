@@ -8,19 +8,20 @@ import type { SerializedEnsIndexerIndexingStatusResponse } from "./api/indexing-
 import { PluginName } from "./config/types";
 
 export const configResponseMock = {
-  labelSet: {
+  clientLabelSet: {
     labelSetId: "subgraph",
     labelSetVersion: 0,
   },
   indexedChainIds: [1, 8453, 59144, 10, 42161, 534352],
-  databaseSchemaName: "alphaSchema0.31.0",
+  ensIndexerSchemaName: "alphaSchema0.31.0",
   ensRainbowPublicConfig: {
-    version: "0.31.0",
-    labelSet: {
+    serverLabelSet: {
       labelSetId: "subgraph",
       highestLabelSetVersion: 0,
     },
-    recordsCount: 100,
+    versionInfo: {
+      ensRainbow: "0.31.0",
+    },
   },
   isSubgraphCompatible: false,
   namespace: "mainnet",
@@ -33,7 +34,6 @@ export const configResponseMock = {
     PluginName.Registrars,
   ],
   versionInfo: {
-    nodejs: "22.18.0",
     ponder: "0.11.43",
     ensDb: "0.32.0",
     ensIndexer: "0.32.0",

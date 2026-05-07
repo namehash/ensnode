@@ -1,5 +1,19 @@
 # @ensnode/ens-deployments
 
+## 1.11.0
+
+### Minor Changes
+
+- [#2036](https://github.com/namehash/ensnode/pull/2036) [`43d8a9b`](https://github.com/namehash/ensnode/commit/43d8a9b838b15719f520cd3f3bbfd1b52a4ad1ce) Thanks [@shrugs](https://github.com/shrugs)! - Update sepolia-v2 namespace to point to the most recent Sepolia V2 deployment on the virtual Sepolia chain.
+
+### Patch Changes
+
+- [#2049](https://github.com/namehash/ensnode/pull/2049) [`5729ac1`](https://github.com/namehash/ensnode/commit/5729ac18ba029a476ffeca18c9b4bceee417ebdb) Thanks [@shrugs](https://github.com/shrugs)! - Removed `LegacyEthRegistrarController`, `WrappedEthRegistrarController`, and `UniversalRegistrarRenewalWithReferrer` placeholder entries from the `sepolia-v2` namespace, and `UniversalRegistrarRenewalWithReferrer` from `ens-test-env`. `AnyRegistrarControllerABI` now also includes the `UniversalRegistrarRenewalWithReferrer` ABI.
+
+## 1.10.1
+
+## 1.10.0
+
 ## 1.9.0
 
 ## 1.8.1

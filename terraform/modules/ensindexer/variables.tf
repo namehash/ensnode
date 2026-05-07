@@ -45,7 +45,7 @@ variable "ensdb_url" {
   type = string
 }
 
-variable "database_schema" {
+variable "ensindexer_schema_name" {
   type = string
 }
 
@@ -70,6 +70,11 @@ variable "plugins" {
 
 variable "namespace" {
   type = string
+}
+
+variable "referral_program_editions" {
+  type    = string
+  default = null
 }
 
 variable "subgraph_compat" {

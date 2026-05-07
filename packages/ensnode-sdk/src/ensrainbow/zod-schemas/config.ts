@@ -27,23 +27,34 @@ export const makeLabelSetIdSchema = (valueLabel: string = "Label set ID") => {
  *
  * @param valueLabel - The label to use in error messages (e.g., "Label set version", "LABEL_SET_VERSION")
  */
-export const makeLabelSetVersionSchema = (valueLabel: string = "Label set version") => {
-  return z.coerce
-    .number<number>({ error: `${valueLabel} must be an integer.` })
-    .pipe(makeNonNegativeIntegerSchema(valueLabel));
-};
+export const makeLabelSetVersionSchema = (valueLabel: string = "Label set version") =>
+  makeNonNegativeIntegerSchema(valueLabel);
+
+/**
+ * Makes a schema for parsing a label set version string.
+ *
+ * @param valueLabel - The label to use in error messages (e.g., "Label set version", "LABEL_SET_VERSION")
+ */
+export const makeLabelSetVersionStringSchema = (valueLabel: string = "Label set version") =>
+  z.coerce
+    .number<number>({ error: `${valueLabel} must be a non-negative integer` })
+    .pipe(makeLabelSetVersionSchema(valueLabel));
 
 /**
  * Makes a schema for parsing the EnsRainbowPublicConfig object.
  */
 export const makeEnsRainbowPublicConfigSchema = (valueLabel: string = "EnsRainbowPublicConfig") =>
   z.object({
-    version: z.string().nonempty({ error: `${valueLabel}.version must be a non-empty string.` }),
-    labelSet: z.object({
-      labelSetId: makeLabelSetIdSchema(`${valueLabel}.labelSet.labelSetId`),
+    serverLabelSet: z.object({
+      labelSetId: makeLabelSetIdSchema(`${valueLabel}.serverLabelSet.labelSetId`),
       highestLabelSetVersion: makeLabelSetVersionSchema(
-        `${valueLabel}.labelSet.highestLabelSetVersion`,
+        `${valueLabel}.serverLabelSet.highestLabelSetVersion`,
       ),
     }),
-    recordsCount: makeNonNegativeIntegerSchema(`${valueLabel}.recordsCount`),
+
+    versionInfo: z.object({
+      ensRainbow: z
+        .string()
+        .nonempty({ error: `${valueLabel}.versionInfo.ensRainbow must be a non-empty string.` }),
+    }),
   });

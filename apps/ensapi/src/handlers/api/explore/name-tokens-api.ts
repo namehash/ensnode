@@ -1,15 +1,19 @@
 import config from "@/config";
 
-import { namehash } from "viem";
+import {
+  asInterpretedName,
+  getParentInterpretedName,
+  type Node,
+  namehashInterpretedName,
+} from "enssdk";
 
 import {
-  ENS_ROOT,
-  getParentNameFQDN,
   type NameTokensRequest,
   NameTokensResponseCodes,
   NameTokensResponseErrorCodes,
+  type NameTokensResponseErrorIndexingStatusUnsupported,
   type NameTokensResponseErrorNameTokensNotIndexed,
-  type Node,
+  type NameTokensResponseOk,
   type PluginName,
   serializeNameTokensResponse,
 } from "@ensnode/ensnode-sdk";
@@ -57,7 +61,7 @@ app.openapi(getNameTokensRoute, async (c) => {
           details:
             "Indexing status has not yet reached the required state to enable the Name Tokens API.",
         },
-      }),
+      } satisfies NameTokensResponseErrorIndexingStatusUnsupported),
       503,
     );
   }
@@ -66,21 +70,22 @@ app.openapi(getNameTokensRoute, async (c) => {
   let domainId: Node;
 
   if (request.name !== undefined) {
-    const { name } = request;
+    const name = asInterpretedName(request.name);
+    const parentName = getParentInterpretedName(name);
 
-    // return 404 when the requested name was the ENS Root
-    if (name === ENS_ROOT) {
+    // return 404 when the requested name was the ENS Root (which does not have a parent)
+    if (parentName === null) {
       return c.json(
         serializeNameTokensResponse(
           makeNameTokensNotIndexedResponse(
             `The 'name' param must not be ENS Root, no tokens exist for it.`,
           ),
-        ),
+        ) satisfies NameTokensResponseErrorNameTokensNotIndexed,
         404,
       );
     }
 
-    const parentNode = namehash(getParentNameFQDN(name));
+    const parentNode = namehashInterpretedName(parentName);
     const subregistry = indexedSubregistries.find((s) => s.node === parentNode);
 
     // Return 404 response with error code for Name Tokens Not Indexed when
@@ -92,12 +97,12 @@ app.openapi(getNameTokensRoute, async (c) => {
           makeNameTokensNotIndexedResponse(
             `This ENSNode instance has not been configured to index tokens for the requested name: '${name}'`,
           ),
-        ),
+        ) satisfies NameTokensResponseErrorNameTokensNotIndexed,
         404,
       );
     }
 
-    domainId = namehash(name);
+    domainId = namehashInterpretedName(name);
   } else if (request.domainId !== undefined) {
     domainId = request.domainId;
   } else {
@@ -122,7 +127,7 @@ app.openapi(getNameTokensRoute, async (c) => {
         makeNameTokensNotIndexedResponse(
           `No Name Tokens were indexed by this ENSNode instance for the requested ${errorMessageSubject}.`,
         ),
-      ),
+      ) satisfies NameTokensResponseErrorNameTokensNotIndexed,
       404,
     );
   }
@@ -131,7 +136,7 @@ app.openapi(getNameTokensRoute, async (c) => {
     serializeNameTokensResponse({
       responseCode: NameTokensResponseCodes.Ok,
       registeredNameTokens,
-    }),
+    } satisfies NameTokensResponseOk),
     200,
   );
 });

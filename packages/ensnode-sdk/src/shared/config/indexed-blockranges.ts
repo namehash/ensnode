@@ -1,3 +1,5 @@
+import type { ChainId } from "enssdk";
+
 import {
   type ContractConfig,
   type DatasourceName,
@@ -12,7 +14,6 @@ import {
   mergeBlockNumberRanges,
   RangeTypeIds,
 } from "../blockrange";
-import type { ChainId } from "../types";
 
 /**
  * Build a map of indexed blockranges for each indexed chain, based on the ENSIndexer configuration.

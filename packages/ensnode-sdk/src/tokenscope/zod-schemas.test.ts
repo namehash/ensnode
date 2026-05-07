@@ -1,7 +1,6 @@
+import type { AssetId, AssetIdString } from "enssdk";
 import { describe, expect, it } from "vitest";
 
-import type { AssetIdString } from "../shared/serialized-types";
-import type { AssetId } from "../shared/types";
 import { serializeAssetId } from "./assets";
 import { makeAssetIdSchema, makeAssetIdStringSchema } from "./zod-schemas";
 

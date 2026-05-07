@@ -1,7 +1,6 @@
+import type { Name } from "enssdk";
 import type { PropsWithChildren } from "react";
 import * as React from "react";
-
-import { type Name } from "@ensnode/ensnode-sdk";
 
 import { InternalLink } from "@/components/link";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";

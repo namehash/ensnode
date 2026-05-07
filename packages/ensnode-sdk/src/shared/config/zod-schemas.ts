@@ -1,9 +1,9 @@
+import type { ChainId } from "enssdk";
 import { z } from "zod/v4";
 
 import { ENSNamespaceIds } from "@ensnode/datasources";
 
 import { deserializeChainId } from "../deserialize";
-import type { ChainId } from "../types";
 import { isHttpProtocol, isWebSocketProtocol } from "../url";
 import { makeChainIdStringSchema, makeUrlSchema } from "../zod-schemas";
 import type { RpcConfig } from "./types";
@@ -11,15 +11,6 @@ import {
   invariant_rpcEndpointConfigIncludesAtLeastOneHTTPProtocolURL,
   invariant_rpcEndpointConfigIncludesAtMostOneWebSocketsProtocolURL,
 } from "./validatons";
-
-export const DatabaseSchemaNameSchema = z
-  .string({
-    error: "DATABASE_SCHEMA is required.",
-  })
-  .trim()
-  .min(1, {
-    error: "DATABASE_SCHEMA is required and cannot be an empty string.",
-  });
 
 const RpcConfigSchema = z
   .string()

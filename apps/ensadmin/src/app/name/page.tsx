@@ -1,24 +1,18 @@
 "use client";
 
 import { NameDisplay } from "@namehash/namehash-ui";
+import { type InterpretedName, isInterpretedName, isNormalizedName, type Name } from "enssdk";
 import { useRouter, useSearchParams } from "next/navigation";
 import { type ChangeEvent, useMemo, useState } from "react";
 
 import { ENSNamespaceIds } from "@ensnode/datasources";
-import {
-  getNamespaceSpecificValue,
-  isInterpretedName,
-  isNormalizedName,
-  type Name,
-  type NamespaceSpecificValue,
-  type NormalizedName,
-} from "@ensnode/ensnode-sdk";
+import { getNamespaceSpecificValue, type NamespaceSpecificValue } from "@ensnode/ensnode-sdk";
 
 import { getNameDetailsRelativePath, NameLink } from "@/components/name-links";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
+import { useActiveEnsNodeStackInfo } from "@/hooks/active/use-active-ensnode-stack-info";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 import {
   interpretNameFromUserInput,
@@ -28,7 +22,7 @@ import {
 import { NameDetailPageContent } from "./_components/NameDetailPageContent";
 import { InterpretedNameUnsupportedError, UnnormalizedNameError } from "./_components/NameErrors";
 
-const EXAMPLE_NAMES: NamespaceSpecificValue<NormalizedName[]> = {
+const EXAMPLE_NAMES: NamespaceSpecificValue<InterpretedName[]> = {
   default: [
     "vitalik.eth",
     "gregskril.eth",
@@ -42,7 +36,7 @@ const EXAMPLE_NAMES: NamespaceSpecificValue<NormalizedName[]> = {
     "lens.xyz",
     "brantly.eth",
     "lightwalker.eth",
-  ] as NormalizedName[],
+  ] as InterpretedName[],
   [ENSNamespaceIds.Sepolia]: [
     "gregskril.eth",
     "vitalik.eth",
@@ -50,7 +44,7 @@ const EXAMPLE_NAMES: NamespaceSpecificValue<NormalizedName[]> = {
     "recordstest.eth",
     "arrondesean.eth",
     "decode.eth",
-  ] as NormalizedName[],
+  ] as InterpretedName[],
   [ENSNamespaceIds.EnsTestEnv]: [
     "alias.eth",
     "changerole.eth",
@@ -64,7 +58,7 @@ const EXAMPLE_NAMES: NamespaceSpecificValue<NormalizedName[]> = {
     "sub2.parent.eth",
     "test.eth",
     "wallet.linked.parent.eth",
-  ] as NormalizedName[],
+  ] as InterpretedName[],
 };
 
 export default function ExploreNamesPage() {
@@ -74,7 +68,7 @@ export default function ExploreNamesPage() {
   const [rawInputName, setRawInputName] = useState<Name>("");
   const [formError, setFormError] = useState<string | null>(null);
 
-  const namespace = useActiveNamespace();
+  const { namespace } = useActiveEnsNodeStackInfo().ensIndexer;
   const exampleNames = useMemo(
     () => getNamespaceSpecificValue(namespace, EXAMPLE_NAMES),
     [namespace],
@@ -119,7 +113,8 @@ export default function ExploreNamesPage() {
   // see: https://github.com/namehash/ensnode/issues/1140
   if (nameFromQuery !== null && nameFromQuery !== "") {
     if (isNormalizedName(nameFromQuery)) {
-      return <NameDetailPageContent name={nameFromQuery} />;
+      // A NormalizedName is by construction an InterpretedName.
+      return <NameDetailPageContent name={nameFromQuery as InterpretedName} />;
     }
 
     if (isInterpretedName(nameFromQuery)) {

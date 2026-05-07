@@ -24,8 +24,11 @@ function configJSONReplacer(key: string, value: unknown): unknown {
 }
 
 /**
- * Pretty print a JSON object.
+ * Stringify a config object.
  *
- * @param json The JSON object to print
+ * @param json The config object to print
+ * @param options.pretty Whether to pretty print the JSON output. Defaults to false (minified).
+ * @returns The JSON string representation of the config object
  */
-export const prettyPrintJson = (json: any) => JSON.stringify(json, configJSONReplacer, 2);
+export const stringifyConfig = (json: any, options: { pretty: boolean } = { pretty: false }) =>
+  JSON.stringify(json, configJSONReplacer, options.pretty ? 2 : undefined);

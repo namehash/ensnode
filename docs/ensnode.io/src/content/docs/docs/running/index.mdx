@@ -7,6 +7,10 @@ sidebar:
 
 import { LinkCard } from '@astrojs/starlight/components';
 
+:::note[Postgres Requirement]
+ENSIndexer runs `CREATE EXTENSION IF NOT EXISTS pg_trgm` at startup to back partial-name search indexes. Any Postgres instance used as ENSDb must have the [`pg_trgm`](https://www.postgresql.org/docs/current/pgtrgm.html) extension available for installation (it ships with stock Postgres contrib and is available for installation on most managed providers).
+:::
+
 ### Running in ens-test-env
 
 `ens-test-env` provides a local Anvil chain with ENSNode, suitable for testing & developing ENS apps.

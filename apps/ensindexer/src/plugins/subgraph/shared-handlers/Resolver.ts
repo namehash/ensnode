@@ -1,8 +1,9 @@
 import config from "@/config";
 
-import type { Address, Hash, Hex } from "viem";
+import type { Hex, InterfaceId, Node, NormalizedAddress, RecordVersion } from "enssdk";
+import type { Hash } from "viem";
 
-import { hasNullByte, type Node, stripNullBytes, uniq } from "@ensnode/ensnode-sdk";
+import { hasNullByte, stripNullBytes, uniq } from "@ensnode/ensnode-sdk";
 
 import { parseDnsTxtRecordArgs } from "@/lib/dns-helpers";
 import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
@@ -25,7 +26,7 @@ export async function handleAddrChanged({
   event,
 }: {
   context: IndexingEngineContext;
-  event: EventWithArgs<{ node: Node; a: Address }>;
+  event: EventWithArgs<{ node: Node; a: NormalizedAddress }>;
 }) {
   const { a: address, node } = event.args;
   await upsertAccount(context, address);
@@ -59,7 +60,7 @@ export async function handleAddressChanged({
   event,
 }: {
   context: IndexingEngineContext;
-  event: EventWithArgs<{ node: Node; coinType: bigint; newAddress: Address }>;
+  event: EventWithArgs<{ node: Node; coinType: bigint; newAddress: NormalizedAddress }>;
 }) {
   const { node, coinType, newAddress } = event.args;
 
@@ -238,7 +239,7 @@ export async function handleInterfaceChanged({
   event,
 }: {
   context: IndexingEngineContext;
-  event: EventWithArgs<{ node: Node; interfaceID: Hex; implementer: Hex }>;
+  event: EventWithArgs<{ node: Node; interfaceID: InterfaceId; implementer: Hex }>;
 }) {
   const { node, interfaceID, implementer } = event.args;
   const id = makeResolverId(context.chain.id, event.log.address, node);
@@ -264,7 +265,7 @@ export async function handleAuthorisationChanged({
   context: IndexingEngineContext;
   event: EventWithArgs<{
     node: Node;
-    owner: Address;
+    owner: NormalizedAddress;
     target: Hex;
     isAuthorised: boolean;
   }>;
@@ -294,7 +295,7 @@ export async function handleVersionChanged({
   event,
 }: {
   context: IndexingEngineContext;
-  event: EventWithArgs<{ node: Node; newVersion: bigint }>;
+  event: EventWithArgs<{ node: Node; newVersion: RecordVersion }>;
 }) {
   const { node, newVersion } = event.args;
   const id = makeResolverId(context.chain.id, event.log.address, node);
@@ -440,7 +441,7 @@ export async function handleZoneCreated({
   event,
 }: {
   context: IndexingEngineContext;
-  event: EventWithArgs<{ node: Node; version: bigint }>;
+  event: EventWithArgs<{ node: Node; version: RecordVersion }>;
 }) {
   // explicitly ignored / not implemented
 }

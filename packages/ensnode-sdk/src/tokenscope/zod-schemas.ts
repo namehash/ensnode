@@ -1,9 +1,9 @@
 import { AssetId as CaipAssetId } from "caip";
+import { type AssetId, AssetNamespaces } from "enssdk";
 import { zeroAddress } from "viem";
 import { z } from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
-import { type AssetId, AssetNamespaces } from "../shared/types";
 import { makeAccountIdSchema, makeNodeSchema } from "../shared/zod-schemas";
 import { type DomainAssetId, NFTMintStatuses, type SerializedAssetId } from "./assets";
 import {

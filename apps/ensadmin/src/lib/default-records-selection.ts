@@ -1,10 +1,8 @@
+import type { CoinType } from "enssdk";
+import { ETH_COIN_TYPE, evmChainIdToCoinType } from "enssdk";
+
 import { type ENSNamespaceId, ENSNamespaceIds } from "@ensnode/datasources";
-import {
-  CoinType,
-  ETH_COIN_TYPE,
-  evmChainIdToCoinType,
-  ResolverRecordsSelection,
-} from "@ensnode/ensnode-sdk";
+import type { ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 
 import { getENSIP19SupportedChainIds } from "@/lib/get-ensip19-supported-chain-ids";
 

@@ -1,18 +1,16 @@
 "use client";
 
 import { AddressDisplay, getChainName } from "@namehash/namehash-ui";
+import type { Address, DefaultableChainId } from "enssdk";
+import { DEFAULT_EVM_CHAIN_ID } from "enssdk";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useDebouncedValue } from "rooks";
-import { type Address, isAddress } from "viem";
+import { isAddress } from "viem";
 
 import { getENSRootChainId } from "@ensnode/datasources";
 import { usePrimaryName } from "@ensnode/ensnode-react";
-import {
-  DEFAULT_EVM_CHAIN_ID,
-  type DefaultableChainId,
-  getNamespaceSpecificValue,
-} from "@ensnode/ensnode-sdk";
+import { getNamespaceSpecificValue } from "@ensnode/ensnode-sdk";
 import { makeDefaultableChainIdStringSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { RenderRequestsOutput } from "@/app/inspect/_components/render-requests-output";
@@ -28,7 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
+import { useActiveEnsNodeStackInfo } from "@/hooks/active/use-active-ensnode-stack-info";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 import { getENSIP19SupportedChainIds } from "@/lib/get-ensip19-supported-chain-ids";
 
@@ -44,7 +42,7 @@ export default function ResolvePrimaryNameInspector() {
   const searchParams = useSearchParams();
   const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
 
-  const namespace = useActiveNamespace();
+  const { namespace } = useActiveEnsNodeStackInfo().ensIndexer;
   const exampleAddresses = useMemo(
     () => getNamespaceSpecificValue(namespace, EXAMPLE_ADDRESSES),
     [namespace],

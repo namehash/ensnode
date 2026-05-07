@@ -1,19 +1,29 @@
-import packageJson from "@/../package.json" with { type: "json" };
-
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { type ENSIndexerPublicConfig, PluginName } from "@ensnode/ensnode-sdk";
 import type { RpcConfig } from "@ensnode/ensnode-sdk/internal";
+
+import { ensApiVersionInfo } from "@/lib/version-info";
 
 vi.mock("@/lib/ensdb/singleton", () => ({
   ensDbClient: {
-    getEnsIndexerPublicConfig: vi.fn(async () => ENSINDEXER_PUBLIC_CONFIG),
+    getIndexingMetadataContext: vi.fn(async () => indexingMetadataContextInitialized),
+  },
+}));
+
+vi.mock("@/config/ensdb-config", () => ({
+  default: {
+    ensDbUrl: "postgresql://user:password@localhost:5432/mydb",
+    ensIndexerSchemaName: "ensindexer_0",
   },
 }));
 
 import { buildConfigFromEnvironment, buildEnsApiPublicConfig } from "@/config/config.schema";
+import {
+  BASE_ENV,
+  indexingMetadataContextInitialized,
+  VALID_RPC_URL,
+} from "@/config/config.schema.mock";
 import { ENSApi_DEFAULT_PORT } from "@/config/defaults";
-import type { EnsApiEnvironment } from "@/config/environment";
 import logger from "@/lib/logger";
 
 vi.mock("@/lib/logger", () => ({
@@ -23,44 +33,29 @@ vi.mock("@/lib/logger", () => ({
   },
 }));
 
-const VALID_RPC_URL = "https://eth-sepolia.g.alchemy.com/v2/1234";
-
-const BASE_ENV = {
-  DATABASE_URL: "postgresql://user:password@localhost:5432/mydb",
-  RPC_URL_1: VALID_RPC_URL,
-} satisfies EnsApiEnvironment;
-
-const ENSINDEXER_PUBLIC_CONFIG = {
-  namespace: "mainnet",
-  databaseSchemaName: "ensapi",
-  ensRainbowPublicConfig: {
-    version: packageJson.version,
-    labelSet: { labelSetId: "subgraph", highestLabelSetVersion: 0 },
-    recordsCount: 100,
-  },
-  indexedChainIds: new Set([1]),
-  isSubgraphCompatible: false,
-  labelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
-  plugins: [PluginName.Subgraph],
-  versionInfo: {
-    ensDb: packageJson.version,
-    ensIndexer: packageJson.version,
-    ensNormalize: "1.1.1",
-    nodejs: "1.1.1",
-    ponder: "1.1.1",
-  },
-} satisfies ENSIndexerPublicConfig;
+const mockProcessExit = () =>
+  vi.spyOn(process, "exit").mockImplementation((() => {
+    throw new Error("process.exit");
+  }) as never);
 
 describe("buildConfigFromEnvironment", () => {
   it("returns a valid config object using environment variables", async () => {
-    await expect(buildConfigFromEnvironment(BASE_ENV)).resolves.toStrictEqual({
+    const exitSpy = mockProcessExit();
+
+    const { ensIndexer: ensIndexerPublicConfig } = indexingMetadataContextInitialized.stackInfo;
+    const config = await buildConfigFromEnvironment(BASE_ENV);
+
+    expect(exitSpy).not.toHaveBeenCalled();
+    exitSpy.mockRestore();
+
+    expect(config).toStrictEqual({
       port: ENSApi_DEFAULT_PORT,
-      databaseUrl: BASE_ENV.DATABASE_URL,
+      ensDbUrl: BASE_ENV.ENSDB_URL,
+      ensIndexerSchemaName: BASE_ENV.ENSINDEXER_SCHEMA_NAME,
       theGraphApiKey: undefined,
 
-      ensIndexerPublicConfig: ENSINDEXER_PUBLIC_CONFIG,
-      namespace: ENSINDEXER_PUBLIC_CONFIG.namespace,
-      ensIndexerSchemaName: ENSINDEXER_PUBLIC_CONFIG.databaseSchemaName,
+      ensIndexerPublicConfig,
+      namespace: ensIndexerPublicConfig.namespace,
       rpcConfigs: new Map([
         [
           1,
@@ -70,89 +65,116 @@ describe("buildConfigFromEnvironment", () => {
           } satisfies RpcConfig,
         ],
       ]),
-      customReferralProgramEditionConfigSetUrl: undefined,
+      referralProgramEditionConfigSetUrl: undefined,
     });
   });
 
-  it("parses CUSTOM_REFERRAL_PROGRAM_EDITIONS as a URL object", async () => {
-    const customUrl = "https://example.com/editions.json";
+  it("parses REFERRAL_PROGRAM_EDITIONS as a URL object", async () => {
+    const exitSpy = mockProcessExit();
+    const editionsUrl = "https://example.com/editions.json";
 
     const config = await buildConfigFromEnvironment({
       ...BASE_ENV,
-      CUSTOM_REFERRAL_PROGRAM_EDITIONS: customUrl,
+      REFERRAL_PROGRAM_EDITIONS: editionsUrl,
     });
 
-    expect(config.customReferralProgramEditionConfigSetUrl).toEqual(new URL(customUrl));
+    expect(exitSpy).not.toHaveBeenCalled();
+    exitSpy.mockRestore();
+
+    expect(config.referralProgramEditionConfigSetUrl).toEqual(new URL(editionsUrl));
+  });
+
+  it("includes theGraphApiKey when provided", async () => {
+    const exitSpy = mockProcessExit();
+
+    const config = await buildConfigFromEnvironment({
+      ...BASE_ENV,
+      THEGRAPH_API_KEY: "my-api-key",
+    });
+
+    expect(exitSpy).not.toHaveBeenCalled();
+    exitSpy.mockRestore();
+
+    expect(config.theGraphApiKey).toBe("my-api-key");
   });
 
   describe("Useful error messages", () => {
-    // Mock process.exit to prevent actual exit
-    const mockExit = vi.spyOn(process, "exit").mockImplementation(() => undefined as never);
+    let exitSpy: ReturnType<typeof mockProcessExit>;
 
     beforeEach(() => {
       vi.clearAllMocks();
+      exitSpy = mockProcessExit();
     });
 
     afterEach(() => {
-      mockExit.mockClear();
+      exitSpy.mockRestore();
     });
 
-    const TEST_ENV: EnsApiEnvironment = {
-      DATABASE_URL: BASE_ENV.DATABASE_URL,
-    };
+    it("logs error and exits when REFERRAL_PROGRAM_EDITIONS is not a valid URL", async () => {
+      const testEnv = structuredClone(BASE_ENV);
 
-    it("logs error and exits when CUSTOM_REFERRAL_PROGRAM_EDITIONS is not a valid URL", async () => {
-      await buildConfigFromEnvironment({
-        ...TEST_ENV,
-        CUSTOM_REFERRAL_PROGRAM_EDITIONS: "not-a-url",
-      });
+      await expect(
+        buildConfigFromEnvironment({
+          ...testEnv,
+          REFERRAL_PROGRAM_EDITIONS: "not-a-url",
+        }),
+      ).rejects.toThrow("process.exit");
 
-      expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining("CUSTOM_REFERRAL_PROGRAM_EDITIONS is not a valid URL: not-a-url"),
+      expect(logger.error).toHaveBeenCalledExactlyOnceWith(
+        expect.stringContaining("REFERRAL_PROGRAM_EDITIONS is not a valid URL: not-a-url"),
       );
-      expect(process.exit).toHaveBeenCalledWith(1);
+      expect(process.exit).toHaveBeenCalledExactlyOnceWith(1);
     });
 
     it("logs error message when QuickNode RPC config was partially configured (missing endpoint name)", async () => {
-      await buildConfigFromEnvironment({
-        ...TEST_ENV,
-        QUICKNODE_API_KEY: "my-api-key",
-      });
+      const testEnv = structuredClone(BASE_ENV);
 
-      expect(logger.error).toHaveBeenCalledWith(
+      await expect(
+        buildConfigFromEnvironment({
+          ...testEnv,
+          QUICKNODE_API_KEY: "my-api-key",
+        }),
+      ).rejects.toThrow("process.exit");
+
+      expect(logger.error).toHaveBeenCalledExactlyOnceWith(
         new Error(
           "Use of the QUICKNODE_API_KEY environment variable requires use of the QUICKNODE_ENDPOINT_NAME environment variable as well.",
         ),
         "Failed to build EnsApiConfig",
       );
-      expect(process.exit).toHaveBeenCalledWith(1);
+      expect(process.exit).toHaveBeenCalledExactlyOnceWith(1);
     });
 
     it("logs error message when QuickNode RPC config was partially configured (missing API key)", async () => {
-      await buildConfigFromEnvironment({
-        ...TEST_ENV,
-        QUICKNODE_ENDPOINT_NAME: "my-endpoint-name",
-      });
+      const testEnv = structuredClone(BASE_ENV);
 
-      expect(logger.error).toHaveBeenCalledWith(
+      await expect(
+        buildConfigFromEnvironment({
+          ...testEnv,
+          QUICKNODE_ENDPOINT_NAME: "my-endpoint-name",
+        }),
+      ).rejects.toThrow("process.exit");
+
+      expect(logger.error).toHaveBeenCalledExactlyOnceWith(
         new Error(
           "Use of the QUICKNODE_ENDPOINT_NAME environment variable requires use of the QUICKNODE_API_KEY environment variable as well.",
         ),
         "Failed to build EnsApiConfig",
       );
-      expect(process.exit).toHaveBeenCalledWith(1);
+      expect(process.exit).toHaveBeenCalledExactlyOnceWith(1);
     });
   });
 });
 
 describe("buildEnsApiPublicConfig", () => {
   it("returns a valid ENSApi public config with correct structure", () => {
-    const mockConfig = {
+    const { ensIndexer: ensIndexerPublicConfig } = indexingMetadataContextInitialized.stackInfo;
+    const ensApiConfig = {
       port: ENSApi_DEFAULT_PORT,
-      databaseUrl: BASE_ENV.DATABASE_URL,
-      ensIndexerPublicConfig: ENSINDEXER_PUBLIC_CONFIG,
-      namespace: ENSINDEXER_PUBLIC_CONFIG.namespace,
-      ensIndexerSchemaName: ENSINDEXER_PUBLIC_CONFIG.databaseSchemaName,
+      ensDbUrl: BASE_ENV.ENSDB_URL,
+      ensIndexerSchemaName: BASE_ENV.ENSINDEXER_SCHEMA_NAME,
+      ensIndexerPublicConfig,
+      namespace: ensIndexerPublicConfig.namespace,
       rpcConfigs: new Map([
         [
           1,
@@ -162,73 +184,90 @@ describe("buildEnsApiPublicConfig", () => {
           } satisfies RpcConfig,
         ],
       ]),
-      customReferralProgramEditionConfigSetUrl: undefined,
+      referralProgramEditionConfigSetUrl: undefined,
     };
 
-    const result = buildEnsApiPublicConfig(mockConfig);
+    const result = buildEnsApiPublicConfig(ensApiConfig, ensIndexerPublicConfig);
 
     expect(result).toStrictEqual({
-      version: packageJson.version,
+      versionInfo: ensApiVersionInfo,
       theGraphFallback: {
         canFallback: false,
         reason: "not-subgraph-compatible",
       },
-      ensIndexerPublicConfig: ENSINDEXER_PUBLIC_CONFIG,
+      ensIndexerPublicConfig,
     });
   });
 
   it("preserves the complete ENSIndexer public config structure", () => {
-    const mockConfig = {
+    const { ensIndexer: ensIndexerPublicConfig } = indexingMetadataContextInitialized.stackInfo;
+    const ensApiConfig = {
       port: ENSApi_DEFAULT_PORT,
-      databaseUrl: BASE_ENV.DATABASE_URL,
-      ensIndexerPublicConfig: ENSINDEXER_PUBLIC_CONFIG,
-      namespace: ENSINDEXER_PUBLIC_CONFIG.namespace,
-      ensIndexerSchemaName: ENSINDEXER_PUBLIC_CONFIG.databaseSchemaName,
+      ensDbUrl: BASE_ENV.ENSDB_URL,
+      ensIndexerSchemaName: BASE_ENV.ENSINDEXER_SCHEMA_NAME,
+      ensIndexerPublicConfig,
+      namespace: ensIndexerPublicConfig.namespace,
       rpcConfigs: new Map(),
-      customReferralProgramEditionConfigSetUrl: undefined,
+      referralProgramEditionConfigSetUrl: undefined,
     };
 
-    const result = buildEnsApiPublicConfig(mockConfig);
+    const result = buildEnsApiPublicConfig(ensApiConfig, ensIndexerPublicConfig);
 
-    // Verify that all ENSIndexer public config fields are preserved
-    expect(result.ensIndexerPublicConfig.namespace).toBe(ENSINDEXER_PUBLIC_CONFIG.namespace);
-    expect(result.ensIndexerPublicConfig.plugins).toEqual(ENSINDEXER_PUBLIC_CONFIG.plugins);
-    expect(result.ensIndexerPublicConfig.versionInfo).toEqual(ENSINDEXER_PUBLIC_CONFIG.versionInfo);
-    expect(result.ensIndexerPublicConfig.indexedChainIds).toEqual(
-      ENSINDEXER_PUBLIC_CONFIG.indexedChainIds,
-    );
-    expect(result.ensIndexerPublicConfig.isSubgraphCompatible).toBe(
-      ENSINDEXER_PUBLIC_CONFIG.isSubgraphCompatible,
-    );
-    expect(result.ensIndexerPublicConfig.labelSet).toEqual(ENSINDEXER_PUBLIC_CONFIG.labelSet);
-    expect(result.ensIndexerPublicConfig.databaseSchemaName).toBe(
-      ENSINDEXER_PUBLIC_CONFIG.databaseSchemaName,
-    );
+    expect(result.ensIndexerPublicConfig).toStrictEqual(ensIndexerPublicConfig);
   });
 
   it("includes the theGraphFallback and redacts api key", () => {
-    const mockConfig = {
+    const ensIndexerPublicConfig = {
+      ...indexingMetadataContextInitialized.stackInfo.ensIndexer,
+      plugins: ["subgraph"],
+      isSubgraphCompatible: true,
+    };
+
+    const ensApiConfig = {
       port: ENSApi_DEFAULT_PORT,
-      databaseUrl: BASE_ENV.DATABASE_URL,
-      ensIndexerPublicConfig: {
-        ...ENSINDEXER_PUBLIC_CONFIG,
-        plugins: ["subgraph"],
-        isSubgraphCompatible: true,
-      },
-      namespace: ENSINDEXER_PUBLIC_CONFIG.namespace,
-      ensIndexerSchemaName: ENSINDEXER_PUBLIC_CONFIG.databaseSchemaName,
+      ensDbUrl: BASE_ENV.ENSDB_URL,
+      ensIndexerSchemaName: BASE_ENV.ENSINDEXER_SCHEMA_NAME,
+      ensIndexerPublicConfig,
+      namespace: ensIndexerPublicConfig.namespace,
       rpcConfigs: new Map(),
-      customReferralProgramEditionConfigSetUrl: undefined,
+      referralProgramEditionConfigSetUrl: undefined,
       theGraphApiKey: "secret-api-key",
     };
 
-    const result = buildEnsApiPublicConfig(mockConfig);
+    const result = buildEnsApiPublicConfig(ensApiConfig, ensIndexerPublicConfig);
 
     expect(result.theGraphFallback.canFallback).toBe(true);
     // discriminate the type...
     if (!result.theGraphFallback.canFallback) throw new Error("never");
 
-    // shouldn't have the secret-api-key in the url
-    expect(result.theGraphFallback.url).not.toMatch(/secret-api-key/gi);
+    expect(result.theGraphFallback.url).toBe(
+      "https://gateway.thegraph.com/api/<API_KEY>/subgraphs/id/5XqPmWe6gjyrJtFn9cLy237i4cWw2j9HcUJEXsP5qGtH",
+    );
+  });
+
+  it("returns canFallback=false when no theGraphApiKey is provided even if subgraph compatible", () => {
+    const ensIndexerPublicConfig = {
+      ...indexingMetadataContextInitialized.stackInfo.ensIndexer,
+      plugins: ["subgraph"],
+      isSubgraphCompatible: true,
+    };
+
+    const ensApiConfig = {
+      port: ENSApi_DEFAULT_PORT,
+      ensDbUrl: BASE_ENV.ENSDB_URL,
+      ensIndexerSchemaName: BASE_ENV.ENSINDEXER_SCHEMA_NAME,
+      ensIndexerPublicConfig,
+      namespace: ensIndexerPublicConfig.namespace,
+      rpcConfigs: new Map(),
+      referralProgramEditionConfigSetUrl: undefined,
+      theGraphApiKey: undefined,
+    };
+
+    const result = buildEnsApiPublicConfig(ensApiConfig, ensIndexerPublicConfig);
+
+    expect(result.theGraphFallback).toStrictEqual({
+      canFallback: false,
+      reason: "no-api-key",
+    });
   });
 });

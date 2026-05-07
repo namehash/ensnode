@@ -10,7 +10,7 @@ The current devnet image is pinned to:
 ghcr.io/ensdomains/contracts-v2:main-e8696c6
 ```
 
-via the `docker-compose.yml` at the monorepo root.
+via the `docker/docker-compose.orchestrator.yml` file.
 
 ## How It Works
 
@@ -40,7 +40,7 @@ When developing, it's useful to run each service individually so you can restart
 #### 1. Start the devnet
 
 ```sh
-docker compose up devnet
+pnpm devnet
 ```
 
 Runs the ENS contracts-v2 devnet on port 8545.
@@ -56,7 +56,7 @@ brew services start postgresql@17
 or with the local docker compose:
 
 ```sh
-docker compose up postgres
+docker compose -f docker/docker-compose.yml up postgres
 ```
 
 #### 3. Start ENSRainbow
@@ -64,7 +64,7 @@ docker compose up postgres
 Run via docker compose:
 
 ```sh
-docker compose up ensrainbow
+docker compose -f docker/docker-compose.yml up ensrainbow
 ```
 
 Or run it on the host machine from the repo root:
@@ -91,12 +91,9 @@ cd apps/ensindexer && pnpm dev
 with environment variables:
 
 ```env
-DATABASE_SCHEMA=ensindexer_0
 NAMESPACE=ens-test-env
 PLUGINS=ensv2,protocol-acceleration
 ```
-
-`DATABASE_SCHEMA` can be any valid Postgres schema name — just make sure ENSApi uses the same value.
 
 #### 5. Start ENSApi
 
@@ -107,15 +104,15 @@ cd apps/ensapi && pnpm dev
 with environment variables:
 
 ```env
-DATABASE_URL=postgresql://ensnode:ensnode@localhost:5432/ensnode
-ENSINDEXER_SCHEMA_NAME=ensindexer_0
+ENSDB_URL=postgresql://ensnode:ensnode@localhost:5432/ensnode
+ENSINDEXER_SCHEMA_NAME=ensindexer_temp_dev
 ```
 
-`ENSINDEXER_SCHEMA_NAME` must match the `DATABASE_SCHEMA` used by ENSIndexer above.
+`ENSINDEXER_SCHEMA_NAME` must match the `ENSINDEXER_SCHEMA_NAME` used by ENSIndexer above, and `ensindexer_temp_dev` is the schema name used when running ENSIndexer with `pnpm dev`.
 
 #### 6. Run Integration Tests
 
-Finally, you can run vitest on the integration tests using:
+Finally, you can run vitest with the integration test suite using:
 
 ```sh
 pnpm test:integration

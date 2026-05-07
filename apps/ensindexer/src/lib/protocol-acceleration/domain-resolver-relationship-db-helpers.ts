@@ -1,6 +1,5 @@
-import { type Address, isAddressEqual, zeroAddress } from "viem";
-
-import type { AccountId, DomainId } from "@ensnode/ensnode-sdk";
+import type { AccountId, Address, DomainId } from "enssdk";
+import { isAddressEqual, zeroAddress } from "viem";
 
 import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 

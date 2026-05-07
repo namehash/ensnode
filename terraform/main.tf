@@ -46,7 +46,7 @@ locals {
     sepolia = {
       ensnode_indexer_type         = "sepolia"
       ensnode_environment_name     = var.render_environment
-      database_schema              = "sepoliaSchema-${var.ensnode_version}"
+      ensindexer_schema_name       = "sepoliaSchema-${var.ensnode_version}"
       plugins                      = "subgraph"
       namespace                    = "sepolia"
       render_instance_plan         = "starter"
@@ -57,8 +57,8 @@ locals {
     v2-sepolia = {
       ensnode_indexer_type         = "v2-sepolia"
       ensnode_environment_name     = var.render_environment
-      database_schema              = "v2SepoliaSchema-${var.ensnode_version}"
-      plugins                      = "ensv2,protocol-acceleration"
+      ensindexer_schema_name       = "v2SepoliaSchema-${var.ensnode_version}"
+      plugins                      = "subgraph,ensv2,protocol-acceleration"
       namespace                    = "sepolia"
       render_instance_plan         = "starter"
       subgraph_compat              = false
@@ -68,7 +68,7 @@ locals {
     mainnet = {
       ensnode_indexer_type         = "mainnet"
       ensnode_environment_name     = var.render_environment
-      database_schema              = "mainnetSchema-${var.ensnode_version}"
+      ensindexer_schema_name       = "mainnetSchema-${var.ensnode_version}"
       plugins                      = "subgraph"
       namespace                    = "mainnet"
       render_instance_plan         = "standard"
@@ -79,9 +79,10 @@ locals {
     alpha = {
       ensnode_indexer_type         = "alpha"
       ensnode_environment_name     = var.render_environment
-      database_schema              = "alphaSchema-${var.ensnode_version}"
+      ensindexer_schema_name       = "alphaSchema-${var.ensnode_version}"
       plugins                      = "subgraph,basenames,lineanames,threedns,protocol-acceleration,registrars,tokenscope"
       namespace                    = "mainnet"
+      referral_program_editions    = "https://ensawards.org/production-editions.json"
       render_instance_plan         = "standard"
       subgraph_compat              = false
       ensindexer_label_set_id      = "searchlight"
@@ -91,8 +92,8 @@ locals {
     alpha-sepolia = {
       ensnode_indexer_type         = "alpha-sepolia"
       ensnode_environment_name     = var.render_environment
-      database_schema              = "alphaSepoliaSchema-${var.ensnode_version}"
-      plugins                      = "subgraph,basenames,lineanames,registrars"
+      ensindexer_schema_name       = "alphaSepoliaSchema-${var.ensnode_version}"
+      plugins                      = "subgraph,basenames,lineanames,registrars,ensv2,protocol-acceleration"
       namespace                    = "sepolia"
       render_instance_plan         = "starter"
       subgraph_compat              = false
@@ -158,13 +159,14 @@ module "ensindexer" {
   for_each = local.ensindexer_instances
 
   # Instance-specific configuration
-  ensnode_indexer_type     = each.value.ensnode_indexer_type
-  render_instance_plan     = each.value.render_instance_plan
-  ensnode_environment_name = each.value.ensnode_environment_name
-  database_schema          = each.value.database_schema
-  plugins                  = each.value.plugins
-  namespace                = each.value.namespace
-  subgraph_compat          = each.value.subgraph_compat
+  ensnode_indexer_type      = each.value.ensnode_indexer_type
+  render_instance_plan      = each.value.render_instance_plan
+  ensnode_environment_name  = each.value.ensnode_environment_name
+  ensindexer_schema_name    = each.value.ensindexer_schema_name
+  plugins                   = each.value.plugins
+  namespace                 = each.value.namespace
+  referral_program_editions = try(each.value.referral_program_editions, null)
+  subgraph_compat           = each.value.subgraph_compat
 
   # Common configuration (spread operator merges the map)
   hosted_zone_name = local.hosted_zone_name

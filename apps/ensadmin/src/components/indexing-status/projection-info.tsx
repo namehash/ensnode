@@ -1,9 +1,8 @@
 "use client";
 
 import { formatRelativeTime, RelativeTime, useNow } from "@namehash/namehash-ui";
+import type { Duration, UnixTimestamp } from "enssdk";
 import { InfoIcon } from "lucide-react";
-
-import type { Duration, UnixTimestamp } from "@ensnode/ensnode-sdk";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 

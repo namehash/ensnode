@@ -1,9 +1,5 @@
-import {
-  type AccountId,
-  formatAccountId,
-  type Node,
-  type UnixTimestamp,
-} from "@ensnode/ensnode-sdk";
+import type { UnixTimestamp } from "enssdk";
+import { type AccountId, type Node, stringifyAccountId } from "enssdk";
 
 import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 
@@ -36,7 +32,7 @@ export async function insertRegistrationLifecycle(
   },
 ): Promise<void> {
   await context.ensDb.insert(ensIndexerSchema.registrationLifecycles).values({
-    subregistryId: formatAccountId(subregistryId),
+    subregistryId: stringifyAccountId(subregistryId),
     node,
     expiresAt: BigInt(expiresAt),
   });

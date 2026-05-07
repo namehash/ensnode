@@ -1,7 +1,6 @@
 import { ensDbClient } from "@/lib/ensdb/singleton";
-import { indexingStatusBuilder } from "@/lib/indexing-status-builder/singleton";
-import { localPonderClient } from "@/lib/local-ponder-client";
-import { publicConfigBuilder } from "@/lib/public-config-builder/singleton";
+import { indexingMetadataContextBuilder } from "@/lib/indexing-metadata-context-builder/singleton";
+import { logger } from "@/lib/logger";
 
 import { EnsDbWriterWorker } from "./ensdb-writer-worker";
 
@@ -21,12 +20,7 @@ export function startEnsDbWriterWorker() {
     throw new Error("EnsDbWriterWorker has already been initialized");
   }
 
-  ensDbWriterWorker = new EnsDbWriterWorker(
-    ensDbClient,
-    publicConfigBuilder,
-    indexingStatusBuilder,
-    localPonderClient,
-  );
+  ensDbWriterWorker = new EnsDbWriterWorker(ensDbClient, indexingMetadataContextBuilder);
 
   ensDbWriterWorker
     .run()
@@ -35,7 +29,10 @@ export function startEnsDbWriterWorker() {
       // Abort the worker on error to trigger cleanup
       ensDbWriterWorker.stop();
 
-      console.error("EnsDbWriterWorker encountered an error:", error);
+      logger.error({
+        msg: "EnsDbWriterWorker encountered an error",
+        error,
+      });
 
       // Re-throw the error to ensure the application shuts down with a non-zero exit code.
       process.exitCode = 1;

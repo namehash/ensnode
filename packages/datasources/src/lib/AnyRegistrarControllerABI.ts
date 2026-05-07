@@ -5,6 +5,7 @@ import { RegistrarController } from "../abis/basenames/RegistrarController";
 import { UpgradeableRegistrarController } from "../abis/basenames/UpgradeableRegistrarController";
 import { EthRegistrarController } from "../abis/lineanames/EthRegistrarController";
 import { LegacyEthRegistrarController } from "../abis/root/LegacyEthRegistrarController";
+import { UniversalRegistrarRenewalWithReferrer } from "../abis/root/UniversalRegistrarRenewalWithReferrer";
 import { UnwrappedEthRegistrarController } from "../abis/root/UnwrappedEthRegistrarController";
 import { WrappedEthRegistrarController } from "../abis/root/WrappedEthRegistrarController";
 
@@ -13,6 +14,7 @@ export const AnyRegistrarControllerABI = mergeAbis([
   LegacyEthRegistrarController,
   WrappedEthRegistrarController,
   UnwrappedEthRegistrarController,
+  UniversalRegistrarRenewalWithReferrer,
   // basenames
   EarlyAccessRegistrarController,
   RegistrarController,

@@ -2,12 +2,13 @@ import type { ServeCommandConfig } from "@/config";
 
 import { serve } from "@hono/node-server";
 
-import { prettyPrintJson } from "@ensnode/ensnode-sdk/internal";
+import { stringifyConfig } from "@ensnode/ensnode-sdk/internal";
 
 import { buildEnsRainbowPublicConfig } from "@/config/public";
 import { createApi } from "@/lib/api";
 import { ENSRainbowDB } from "@/lib/database";
 import { buildDbConfig, ENSRainbowServer } from "@/lib/server";
+import { closeHttpServer } from "@/utils/http-server";
 import { logger } from "@/utils/logger";
 
 export type ServerCommandOptions = ServeCommandConfig;
@@ -15,7 +16,7 @@ export type ServerCommandOptions = ServeCommandConfig;
 export async function serverCommand(options: ServerCommandOptions): Promise<void> {
   // console.log is used so it can't be skipped by the logger
   console.log("ENSRainbow running with config:");
-  console.log(prettyPrintJson(options));
+  console.log(stringifyConfig(options, { pretty: true }));
 
   logger.info(`ENS Rainbow server starting on port ${options.port}...`);
 
@@ -28,9 +29,9 @@ export async function serverCommand(options: ServerCommandOptions): Promise<void
 
     // console.log is used so it can't be skipped by the logger
     console.log("ENSRainbow public config:");
-    console.log(prettyPrintJson(publicConfig));
+    console.log(stringifyConfig(publicConfig, { pretty: true }));
 
-    const app = createApi(ensRainbowServer, publicConfig);
+    const app = createApi(ensRainbowServer, publicConfig, () => dbConfig);
 
     const httpServer = serve({
       fetch: app.fetch,
@@ -38,20 +39,48 @@ export async function serverCommand(options: ServerCommandOptions): Promise<void
     });
 
     // Handle graceful shutdown
+    let shutdownPromise: Promise<void> | undefined;
     const shutdown = async () => {
-      logger.info("Shutting down server...");
-      try {
-        await httpServer.close();
-        await db.close();
-        logger.info("Server shutdown complete");
-      } catch (error) {
-        logger.error(error, "Error during shutdown:");
-        throw error;
+      if (shutdownPromise) {
+        return shutdownPromise;
       }
+
+      logger.info("Shutting down server...");
+      shutdownPromise = (async () => {
+        let hadShutdownError = false;
+
+        try {
+          await closeHttpServer(httpServer);
+        } catch (error) {
+          hadShutdownError = true;
+          logger.error(error, "Failed to close HTTP server during shutdown");
+        } finally {
+          try {
+            await db.close();
+          } catch (error) {
+            hadShutdownError = true;
+            logger.error(error, "Failed to close database during shutdown");
+          }
+        }
+
+        if (hadShutdownError) {
+          process.exitCode = 1;
+          logger.error("Server shutdown completed with errors");
+          return;
+        }
+
+        logger.info("Server shutdown complete");
+      })();
+
+      return shutdownPromise;
     };
 
-    process.on("SIGTERM", shutdown);
-    process.on("SIGINT", shutdown);
+    process.on("SIGTERM", () => {
+      void shutdown();
+    });
+    process.on("SIGINT", () => {
+      void shutdown();
+    });
   } catch (error) {
     await db.close();
     throw error;

@@ -24,16 +24,17 @@ export const ensDbUrl = "postgres://user:pass@localhost:5432/ensdb";
 export const ensIndexerSchemaName = "ensindexer_0";
 
 export const publicConfig = {
-  databaseSchemaName: ensIndexerSchemaName,
+  ensIndexerSchemaName,
   ensRainbowPublicConfig: {
-    version: "0.32.0",
-    labelSet: {
+    serverLabelSet: {
       labelSetId: "subgraph",
       highestLabelSetVersion: 0,
     },
-    recordsCount: 100,
+    versionInfo: {
+      ensRainbow: "0.32.0",
+    },
   },
-  labelSet: {
+  clientLabelSet: {
     labelSetId: "subgraph",
     labelSetVersion: 0,
   },
@@ -42,7 +43,6 @@ export const publicConfig = {
   namespace: "mainnet",
   plugins: [PluginName.Subgraph],
   versionInfo: {
-    nodejs: "22.10.12",
     ponder: "0.11.25",
     ensDb: "0.32.0",
     ensIndexer: "0.32.0",

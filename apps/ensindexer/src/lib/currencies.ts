@@ -1,7 +1,8 @@
-import { type Address, zeroAddress } from "viem";
+import type { AccountId, Address, ChainId } from "enssdk";
+import { zeroAddress } from "viem";
 import { base, baseSepolia, linea, lineaSepolia, mainnet, optimism, sepolia } from "viem/chains";
 
-import { type AccountId, type ChainId, type CurrencyId, CurrencyIds } from "@ensnode/ensnode-sdk";
+import { type CurrencyId, CurrencyIds } from "@ensnode/ensnode-sdk";
 
 // NOTE: this mapping currently only considers the subset of chains where we have
 // supported token issuing contracts.

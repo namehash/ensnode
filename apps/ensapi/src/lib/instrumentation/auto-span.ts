@@ -9,12 +9,12 @@ import {
 // The following internal functions implement the pattern of executing `fn` in the context of a span
 // named `name` with attributes via `args` and semantic OTel handling of responses / errors.
 
-export async function withActiveSpanAsync<Fn extends (span: Span) => Promise<any>>(
+export async function withActiveSpanAsync<T>(
   tracer: Tracer,
   name: string,
   args: Record<string, AttributeValue>,
-  fn: Fn,
-): Promise<ReturnType<Fn>> {
+  fn: (span: Span) => Promise<T>,
+): Promise<T> {
   return tracer.startActiveSpan(name, async (span) => {
     // add provded args to span attributes
     for (const [key, value] of Object.entries(args)) {
@@ -71,12 +71,12 @@ export function withSpan<Fn extends (span: Span) => any>(
   }
 }
 
-export async function withSpanAsync<Fn extends (span: Span) => Promise<any>>(
+export async function withSpanAsync<T>(
   tracer: Tracer,
   name: string,
   args: Record<string, AttributeValue>,
-  fn: Fn,
-): Promise<ReturnType<Fn>> {
+  fn: (span: Span) => Promise<T>,
+): Promise<T> {
   const span = tracer.startSpan(name);
 
   // add provded args to span attributes

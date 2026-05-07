@@ -1,4 +1,6 @@
-import { ENSNamespaceIds, type Name, type NamespaceSpecificValue } from "@ensnode/ensnode-sdk";
+import type { Name } from "enssdk";
+
+import { ENSNamespaceIds, type NamespaceSpecificValue } from "@ensnode/ensnode-sdk";
 
 export const EXAMPLE_NAMES: NamespaceSpecificValue<Name[]> = {
   default: [

@@ -1,6 +1,7 @@
+import { type Node, stringifyAccountId } from "enssdk";
 import type { Hash } from "viem";
 
-import { formatAccountId, type Node, type RegistrarAction } from "@ensnode/ensnode-sdk";
+import type { RegistrarAction } from "@ensnode/ensnode-sdk";
 
 import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 
@@ -17,6 +18,8 @@ export type LogicalEventKey = string;
 
 /**
  * Make a logical event key for a "logical registrar action".
+ *
+ * @dev the .toLowerCase() is just a sanity check
  */
 export function makeLogicalEventKey({
   node,
@@ -74,7 +77,7 @@ export async function insertRegistrarAction(
   await context.ensDb.insert(ensIndexerSchema.registrarActions).values({
     id,
     type,
-    subregistryId: formatAccountId(subregistryId),
+    subregistryId: stringifyAccountId(subregistryId),
     node,
     incrementalDuration: BigInt(incrementalDuration),
     registrant,

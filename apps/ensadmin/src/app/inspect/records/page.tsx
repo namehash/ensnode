@@ -1,12 +1,13 @@
 "use client";
 
-import { User } from "lucide-react";
-import Link from "next/link";
+import type { Name } from "enssdk";
+// import { User } from "lucide-react";
+// import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import { useRecords } from "@ensnode/ensnode-react";
-import { getNamespaceSpecificValue, type Name } from "@ensnode/ensnode-sdk";
+import { getNamespaceSpecificValue } from "@ensnode/ensnode-sdk";
 
 import { RenderRequestsOutput } from "@/app/inspect/_components/render-requests-output";
 import { ResolveButton } from "@/app/inspect/_components/resolve-button";
@@ -15,11 +16,11 @@ import {
   getRecordResolutionRelativePath,
 } from "@/components/name-links";
 import { Pill } from "@/components/pill";
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
+import { useActiveEnsNodeStackInfo } from "@/hooks/active/use-active-ensnode-stack-info";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 import { DefaultRecordsSelection } from "@/lib/default-records-selection";
 
@@ -32,7 +33,7 @@ export default function ResolveRecordsInspector() {
   const searchParams = useSearchParams();
   const nameFromQuery = (searchParams.get("name")?.trim() || null) as Name | null;
 
-  const namespace = useActiveNamespace();
+  const { namespace } = useActiveEnsNodeStackInfo().ensIndexer;
   const exampleNames = useMemo(
     () => getNamespaceSpecificValue(namespace, EXAMPLE_NAMES),
     [namespace],
@@ -157,17 +158,17 @@ export default function ResolveRecordsInspector() {
           dataKey="records"
           accelerated={accelerated}
           unaccelerated={unaccelerated}
-          headerActions={
-            <Button variant="link" size="sm" asChild>
-              <Link
-                href={retainCurrentRawConnectionUrlParam(getNameDetailsRelativePath(nameFromQuery))}
-                className="inline-flex items-center gap-1"
-              >
-                View Profile
-                <User size={12} />
-              </Link>
-            </Button>
-          }
+          // headerActions={
+          //   <Button variant="link" size="sm" asChild>
+          //     <Link
+          //       href={retainCurrentRawConnectionUrlParam(getNameDetailsRelativePath(nameFromQuery))}
+          //       className="inline-flex items-center gap-1"
+          //     >
+          //       View Profile
+          //       <User size={12} />
+          //     </Link>
+          //   </Button>
+          // }
         />
       )}
     </div>

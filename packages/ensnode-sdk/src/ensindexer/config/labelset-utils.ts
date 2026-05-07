@@ -6,7 +6,7 @@ import type {
 } from "../../ensrainbow";
 import {
   makeLabelSetIdSchema,
-  makeLabelSetVersionSchema,
+  makeLabelSetVersionStringSchema,
 } from "../../ensrainbow/zod-schemas/config";
 
 /**
@@ -26,7 +26,7 @@ export function buildLabelSetId(maybeLabelSetId: string): LabelSetId {
  * @throws If the input is not a valid LabelSetVersion.
  */
 export function buildLabelSetVersion(maybeLabelSetVersion: number | string): LabelSetVersion {
-  return makeLabelSetVersionSchema("LabelSetVersion").parse(maybeLabelSetVersion);
+  return makeLabelSetVersionStringSchema("LabelSetVersion").parse(maybeLabelSetVersion);
 }
 
 /**

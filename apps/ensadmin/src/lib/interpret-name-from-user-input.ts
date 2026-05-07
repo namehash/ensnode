@@ -1,14 +1,12 @@
-import { normalize } from "viem/ens";
-
 import {
-  encodedLabelToLabelhash,
   encodeLabelHash,
   type InterpretedName,
+  isEncodedLabelHash,
   type LiteralLabel,
   labelhashLiteralLabel,
   type Name,
-  type NormalizedName,
-} from "@ensnode/ensnode-sdk";
+} from "enssdk";
+import { normalize } from "viem/ens";
 
 export const NameInterpretationOutcomeResult = {
   /** The input was empty (or whitespace-only). */
@@ -33,7 +31,7 @@ export interface NameInterpretationOutcomeEmpty {
 export interface NameInterpretationOutcomeNormalized {
   outcome: typeof NameInterpretationOutcomeResult.Normalized;
   inputName: Name;
-  interpretation: NormalizedName;
+  interpretation: InterpretedName;
 }
 
 export interface NameInterpretationOutcomeReencoded {
@@ -78,7 +76,7 @@ export function interpretNameFromUserInput(inputName: Name): NameInterpretationO
     try {
       return normalize(label);
     } catch {
-      if (encodedLabelToLabelhash(label) !== null) {
+      if (isEncodedLabelHash(label) || isEncodedLabelHash(label.toLowerCase())) {
         hadReencodedLabels = true;
         return label.toLowerCase();
       } else {
@@ -107,7 +105,7 @@ export function interpretNameFromUserInput(inputName: Name): NameInterpretationO
     return {
       outcome: NameInterpretationOutcomeResult.Normalized,
       inputName,
-      interpretation: interpretation as NormalizedName,
+      interpretation: interpretation as InterpretedName,
     };
   }
 }

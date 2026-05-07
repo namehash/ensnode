@@ -38,6 +38,6 @@ export interface ServeCommandConfig {
  * Metadata read from an opened ENSRainbow database.
  */
 export interface DbConfig {
-  labelSet: EnsRainbowServerLabelSet;
+  serverLabelSet: EnsRainbowServerLabelSet;
   recordsCount: number;
 }

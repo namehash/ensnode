@@ -1,7 +1,4 @@
-import type { Address } from "viem";
-
-import type { Name } from "../ens";
-import type { DefaultableChainId } from "../shared/types";
+import type { Address, DefaultableChainId, Name } from "enssdk";
 
 /**
  * The resolution status for an `Identity`.

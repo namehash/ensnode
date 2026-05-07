@@ -1,6 +1,5 @@
+import type { Node, TokenId } from "enssdk";
 import { hexToBigInt } from "viem";
-
-import type { Node, TokenId } from "@ensnode/ensnode-sdk";
 
 /**
  * ThreeDNSToken's tokenId is the bigint representation of a Domain's Node

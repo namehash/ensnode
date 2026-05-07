@@ -14,7 +14,7 @@ export default defineConfig({
   integrations: [mermaid(), starlight(), sitemap(), react(), mdx(), icon()],
   vite: {
     ssr: {
-      noExternal: ["@namehash/namekit-react", "@namehash/namehash-ui"],
+      noExternal: ["@namehash/namehash-ui"],
     },
     plugins: [tailwindcss()],
   },

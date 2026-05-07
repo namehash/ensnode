@@ -1,4 +1,4 @@
-import type { ReferralProgramEditionConfigSet } from "@namehash/ens-referrals/v1";
+import type { ReferralProgramEditionConfigSet } from "@namehash/ens-referrals";
 
 import { referralProgramEditionConfigSetCache } from "@/cache/referral-program-edition-set.cache";
 import { factory, producing } from "@/lib/hono-factory";

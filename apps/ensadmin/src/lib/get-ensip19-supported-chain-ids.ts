@@ -1,5 +1,7 @@
+import type { ChainId } from "enssdk";
+
 import { DatasourceNames, type ENSNamespaceId, maybeGetDatasource } from "@ensnode/datasources";
-import { type ChainId, uniq } from "@ensnode/ensnode-sdk";
+import { uniq } from "@ensnode/ensnode-sdk";
 
 /**
  * Returns the unique set of chain IDs that support ENSIP-19 reverse resolution

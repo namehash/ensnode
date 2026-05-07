@@ -1,5 +1,28 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+// For config.test.ts, we need a mock that validates env vars without providing defaults,
+// because this test file specifically tests validation failures.
+vi.mock("@/config/ensdb-config", async () => {
+  const { validateEnsDbConfig } =
+    await vi.importActual<typeof import("@ensnode/ensdb-sdk")>("@ensnode/ensdb-sdk");
+  return {
+    default: {
+      get ensDbUrl() {
+        const url = process.env.ENSDB_URL;
+        const schema = process.env.ENSINDEXER_SCHEMA_NAME;
+        validateEnsDbConfig({ ensDbUrl: url, ensIndexerSchemaName: schema });
+        return url;
+      },
+      get ensIndexerSchemaName() {
+        const url = process.env.ENSDB_URL;
+        const schema = process.env.ENSINDEXER_SCHEMA_NAME;
+        validateEnsDbConfig({ ensDbUrl: url, ensIndexerSchemaName: schema });
+        return schema;
+      },
+    },
+  };
+});
+
 import {
   type ENSNamespaceId,
   ensTestEnvChain,
@@ -23,8 +46,8 @@ const VALID_RPC_WS_URL_ALT = "wss://lb.drpc.org/ethereum/987";
 const BASE_ENV: ENSIndexerEnvironment = {
   NAMESPACE: "mainnet",
   PLUGINS: "subgraph",
-  DATABASE_SCHEMA: "ensnode",
-  DATABASE_URL: "postgresql://user:password@localhost:5432/mydb",
+  ENSINDEXER_SCHEMA_NAME: "ensindexer_test",
+  ENSDB_URL: "postgresql://user:password@localhost:5432/mydb",
   ENSRAINBOW_URL: "http://localhost:3223",
   LABEL_SET_ID: "ens-test-env",
   LABEL_SET_VERSION: "0",
@@ -66,7 +89,7 @@ describe("config (with base env)", () => {
       const config = await getConfig();
       expect(config.namespace).toBe("mainnet");
       expect(config.globalBlockrange).toEqual(buildBlockNumberRange(undefined, undefined));
-      expect(config.databaseSchemaName).toBe("ensnode");
+      expect(config.ensIndexerSchemaName).toBe("ensindexer_test");
       expect(config.plugins).toEqual(["subgraph"]);
       expect(config.ensRainbowUrl).toStrictEqual(new URL("http://localhost:3223"));
     });
@@ -77,7 +100,7 @@ describe("config (with base env)", () => {
       vi.stubEnv("LABEL_SET_ID", "subgraph");
       const newConfig = await getConfig();
 
-      expect(newConfig.labelSet.labelSetId).toBe("subgraph");
+      expect(newConfig.clientLabelSet.labelSetId).toBe("subgraph");
       expect(newConfig).not.toBe(initialConfig);
     });
   });
@@ -161,30 +184,26 @@ describe("config (with base env)", () => {
     });
   });
 
-  describe(".databaseSchemaName", () => {
-    it("returns the DATABASE_SCHEMA if set", async () => {
-      vi.stubEnv("DATABASE_SCHEMA", "someschema");
+  describe(".ensIndexerSchemaName", () => {
+    it("returns the ENSINDEXER_SCHEMA_NAME if set", async () => {
+      vi.stubEnv("ENSINDEXER_SCHEMA_NAME", "ensindexer_test_1");
       const config = await getConfig();
-      expect(config.databaseSchemaName).toBe("someschema");
+      expect(config.ensIndexerSchemaName).toBe("ensindexer_test_1");
     });
 
-    it("throws an error when DATABASE_SCHEMA is not set", async () => {
-      vi.stubEnv("DATABASE_SCHEMA", undefined);
-      await expect(getConfig()).rejects.toThrow(/DATABASE_SCHEMA is required/);
+    it("throws an error when ENSINDEXER_SCHEMA_NAME is not set", async () => {
+      vi.stubEnv("ENSINDEXER_SCHEMA_NAME", undefined);
+      await expect(getConfig()).rejects.toThrow(/ENSIndexer Schema Name is required/);
     });
 
-    it("throws an error when DATABASE_SCHEMA is empty", async () => {
-      vi.stubEnv("DATABASE_SCHEMA", "");
-      await expect(getConfig()).rejects.toThrow(
-        /DATABASE_SCHEMA is required and cannot be an empty string/,
-      );
+    it("throws an error when ENSINDEXER_SCHEMA_NAME is empty", async () => {
+      vi.stubEnv("ENSINDEXER_SCHEMA_NAME", "");
+      await expect(getConfig()).rejects.toThrow(/ENSIndexer Schema Name cannot be an empty string/);
     });
 
-    it("throws an error when DATABASE_SCHEMA is only whitespace", async () => {
-      vi.stubEnv("DATABASE_SCHEMA", "   ");
-      await expect(getConfig()).rejects.toThrow(
-        /DATABASE_SCHEMA is required and cannot be an empty string/,
-      );
+    it("throws an error when ENSINDEXER_SCHEMA_NAME is only whitespace", async () => {
+      vi.stubEnv("ENSINDEXER_SCHEMA_NAME", "   ");
+      await expect(getConfig()).rejects.toThrow(/ENSIndexer Schema Name cannot be an empty string/);
     });
   });
 
@@ -387,56 +406,56 @@ describe("config (with base env)", () => {
     });
   });
 
-  describe(".databaseUrl", () => {
+  describe(".ensDbUrl", () => {
     it("accepts a valid PostgreSQL connection string", async () => {
-      vi.stubEnv("DATABASE_URL", "postgresql://user:password@localhost:5432/mydb");
+      vi.stubEnv("ENSDB_URL", "postgresql://user:password@localhost:5432/mydb");
       const config = await getConfig();
-      expect(config.databaseUrl).toBe("postgresql://user:password@localhost:5432/mydb");
+      expect(config.ensDbUrl).toBe("postgresql://user:password@localhost:5432/mydb");
     });
 
     it("accepts a connection string with additional parameters", async () => {
-      vi.stubEnv("DATABASE_URL", "postgresql://user:password@localhost:5432/mydb?sslmode=require");
+      vi.stubEnv("ENSDB_URL", "postgresql://user:password@localhost:5432/mydb?sslmode=require");
       const config = await getConfig();
-      expect(config.databaseUrl).toBe(
+      expect(config.ensDbUrl).toBe(
         "postgresql://user:password@localhost:5432/mydb?sslmode=require",
       );
     });
 
-    it("throws an error if DATABASE_URL is not set", async () => {
-      vi.stubEnv("DATABASE_URL", undefined);
+    it("throws an error if ENSDB_URL is not set", async () => {
+      vi.stubEnv("ENSDB_URL", undefined);
       await expect(getConfig()).rejects.toThrow(/Invalid input/);
     });
 
-    it("throws an error if DATABASE_URL is empty", async () => {
-      vi.stubEnv("DATABASE_URL", "");
+    it("throws an error if ENSDB_URL is empty", async () => {
+      vi.stubEnv("ENSDB_URL", "");
       await expect(getConfig()).rejects.toThrow(/Invalid PostgreSQL connection string/);
     });
 
-    it("throws an error if DATABASE_URL is not a valid postgres connection string", async () => {
-      vi.stubEnv("DATABASE_URL", "not-a-postgres-connection-string");
+    it("throws an error if ENSDB_URL is not a valid postgres connection string", async () => {
+      vi.stubEnv("ENSDB_URL", "not-a-postgres-connection-string");
       await expect(getConfig()).rejects.toThrow(/Invalid PostgreSQL connection string/);
     });
 
-    it("throws an error if DATABASE_URL uses the wrong protocol", async () => {
-      vi.stubEnv("DATABASE_URL", "mysql://user:password@localhost:3306/mydb");
+    it("throws an error if ENSDB_URL uses the wrong protocol", async () => {
+      vi.stubEnv("ENSDB_URL", "mysql://user:password@localhost:3306/mydb");
       await expect(getConfig()).rejects.toThrow(/Invalid PostgreSQL connection string/);
     });
 
-    it("throws an error if DATABASE_URL is missing required components", async () => {
-      vi.stubEnv("DATABASE_URL", "postgresql://localhost:5432");
+    it("throws an error if ENSDB_URL is missing required components", async () => {
+      vi.stubEnv("ENSDB_URL", "postgresql://localhost:5432");
       await expect(getConfig()).rejects.toThrow(/Invalid PostgreSQL connection string/);
     });
 
     it("accepts postgres:// protocol", async () => {
-      vi.stubEnv("DATABASE_URL", "postgres://user:password@localhost:5432/mydb");
+      vi.stubEnv("ENSDB_URL", "postgres://user:password@localhost:5432/mydb");
       const config = await getConfig();
-      expect(config.databaseUrl).toBe("postgres://user:password@localhost:5432/mydb");
+      expect(config.ensDbUrl).toBe("postgres://user:password@localhost:5432/mydb");
     });
 
     it("accepts postgresql:// protocol", async () => {
-      vi.stubEnv("DATABASE_URL", "postgresql://user:password@localhost:5432/mydb");
+      vi.stubEnv("ENSDB_URL", "postgresql://user:password@localhost:5432/mydb");
       const config = await getConfig();
-      expect(config.databaseUrl).toBe("postgresql://user:password@localhost:5432/mydb");
+      expect(config.ensDbUrl).toBe("postgresql://user:password@localhost:5432/mydb");
     });
   });
 
@@ -547,12 +566,12 @@ describe("config (with base env)", () => {
     });
   });
 
-  describe(".labelSet", () => {
-    it("returns the labelSet configuration if both LABEL_SET_ID and LABEL_SET_VERSION are valid", async () => {
+  describe(".clientLabelSet", () => {
+    it("returns the clientLabelSet configuration if both LABEL_SET_ID and LABEL_SET_VERSION are valid", async () => {
       vi.stubEnv("LABEL_SET_ID", "subgraph");
       vi.stubEnv("LABEL_SET_VERSION", "5");
       const config = await getConfig();
-      expect(config.labelSet).toEqual({
+      expect(config.clientLabelSet).toEqual({
         labelSetId: "subgraph",
         labelSetVersion: 5,
       });
@@ -568,7 +587,7 @@ describe("config (with base env)", () => {
         vi.stubEnv("LABEL_SET_VERSION", undefined);
 
         await expect(getConfig()).resolves.toMatchObject({
-          labelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
+          clientLabelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
         });
       });
     });
@@ -583,7 +602,7 @@ describe("config (with base env)", () => {
         vi.stubEnv("LABEL_SET_VERSION", undefined);
 
         await expect(getConfig()).resolves.toMatchObject({
-          labelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
+          clientLabelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
         });
       });
     });
@@ -616,7 +635,7 @@ describe("config (with base env)", () => {
     it("accepts valid LABEL_SET_ID with hyphens", async () => {
       vi.stubEnv("LABEL_SET_ID", "ens-test-env");
       const config = await getConfig();
-      expect(config.labelSet.labelSetId).toBe("ens-test-env");
+      expect(config.clientLabelSet.labelSetId).toBe("ens-test-env");
     });
 
     it("throws an error when LABEL_SET_VERSION is negative", async () => {
@@ -631,13 +650,13 @@ describe("config (with base env)", () => {
 
     it("throws an error when LABEL_SET_VERSION is not a number", async () => {
       vi.stubEnv("LABEL_SET_VERSION", "not-a-number");
-      await expect(getConfig()).rejects.toThrow(/LABEL_SET_VERSION must be an integer/);
+      await expect(getConfig()).rejects.toThrow(/LABEL_SET_VERSION must be a non-negative integer/);
     });
 
     it("accepts zero as a valid LABEL_SET_VERSION", async () => {
       vi.stubEnv("LABEL_SET_VERSION", "0");
       const config = await getConfig();
-      expect(config.labelSet.labelSetVersion).toBe(0);
+      expect(config.clientLabelSet.labelSetVersion).toBe(0);
     });
   });
 });
@@ -647,12 +666,12 @@ describe("config (with base env)", () => {
  */
 describe("config (minimal base env)", () => {
   beforeEach(() => {
-    const { NAMESPACE, ENSRAINBOW_URL, DATABASE_URL, DATABASE_SCHEMA, RPC_URL_1 } = BASE_ENV;
+    const { NAMESPACE, ENSRAINBOW_URL, ENSDB_URL, ENSINDEXER_SCHEMA_NAME, RPC_URL_1 } = BASE_ENV;
     stubEnv({
       NAMESPACE,
       ENSRAINBOW_URL,
-      DATABASE_URL,
-      DATABASE_SCHEMA,
+      ENSDB_URL,
+      ENSINDEXER_SCHEMA_NAME,
       RPC_URL_1,
     });
   });
@@ -829,7 +848,7 @@ describe("config (minimal base env)", () => {
       stubEnv({ SUBGRAPH_COMPAT: "true" });
     });
 
-    it("ens-test-env namespace/labelset is subgraph-compatible", async () => {
+    it("ens-test-env namespace/clientLabelSet is subgraph-compatible", async () => {
       stubEnv({
         NAMESPACE: "ens-test-env",
         LABEL_SET_ID: "ens-test-env",
@@ -838,7 +857,7 @@ describe("config (minimal base env)", () => {
       });
       await expect(getConfig()).resolves.toMatchObject({
         namespace: ENSNamespaceIds.EnsTestEnv,
-        labelSet: {
+        clientLabelSet: {
           labelSetId: "ens-test-env",
           labelSetVersion: 0,
         },

@@ -12,7 +12,7 @@ import { generateOpenApi31Document } from "@/openapi-document";
 import realtimeApi from "./handlers/api/meta/realtime-api";
 import apiRouter from "./handlers/api/router";
 import ensanalyticsApi from "./handlers/ensanalytics/ensanalytics-api";
-import ensanalyticsApiV1 from "./handlers/ensanalytics/ensanalytics-api-v1";
+import ensApiProbesApi from "./handlers/ensapi-probes/ensapi-probes-api";
 import subgraphApi from "./handlers/subgraph/subgraph-api";
 
 const app = createApp();
@@ -53,23 +53,19 @@ app.route("/api", apiRouter);
 // use Subgraph GraphQL API at /subgraph
 app.route("/subgraph", subgraphApi);
 
-// use ENSAnalytics API at /ensanalytics (v0, implicit)
-app.route("/ensanalytics", ensanalyticsApi);
-
-// use ENSAnalytics API v1 at /v1/ensanalytics
-app.route("/v1/ensanalytics", ensanalyticsApiV1);
+// use ENSAnalytics API at /v1/ensanalytics
+app.route("/v1/ensanalytics", ensanalyticsApi);
 
 // use Am I Realtime API at /amirealtime
 // NOTE: this is legacy endpoint and will be deleted in future. one should use /api/realtime instead
 app.route("/amirealtime", realtimeApi);
 
+// Health check and readiness check endpoints for monitoring and load balancer probes
+app.route("/", ensApiProbesApi);
+
 // generate and return OpenAPI 3.1 document
 app.get("/openapi.json", (c) => {
   return c.json(generateOpenApi31Document(app));
-});
-
-app.get("/health", async (c) => {
-  return c.json({ message: "fallback ok" });
 });
 
 // log hono errors to console

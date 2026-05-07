@@ -1,7 +1,7 @@
-import type { Address } from "viem";
+import { type Address, isNormalizedName, type Name } from "enssdk";
 
 import type { ENSNamespaceId } from "@ensnode/datasources";
-import { ENSNamespaceIds, isNormalizedName, type Name } from "@ensnode/ensnode-sdk";
+import { ENSNamespaceIds } from "@ensnode/ensnode-sdk";
 
 /**
  * Get the ENS Manager App URL for the provided namespace.

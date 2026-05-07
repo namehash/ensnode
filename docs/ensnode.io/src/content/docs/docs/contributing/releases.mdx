@@ -110,7 +110,7 @@ In particular, when deploying ENSNode to production environments, using the `lat
 :::
 
 :::caution
-Each ENSIndexer version update is likely to produce an updated [Ponder Build Id](https://ponder.sh/docs/api-reference/ponder/database). When updating your ENSIndexer version, you should expect to update the `DATABASE_SCHEMA` environment variable to point to a new Postgres Database Schema for a complete reindexing with the new Ponder Build Id. A complete reindexing may take over 24 hours depending on your configuration. ENSNode version updates require special coordination and should not be assumed to be a simple version bump.
+Each ENSIndexer version update is likely to produce an updated [Ponder Build Id](https://ponder.sh/docs/api-reference/ponder/database). When updating your ENSIndexer version, you should expect to update the `ENSINDEXER_SCHEMA_NAME` environment variable to point to a new ENSIndexer Schema in ENSDb for a complete reindexing with the new Ponder Build Id. A complete reindexing may take over 24 hours depending on your configuration. ENSNode version updates require special coordination and should not be assumed to be a simple version bump.
 :::
 
 

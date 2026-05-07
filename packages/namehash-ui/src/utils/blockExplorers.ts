@@ -1,6 +1,5 @@
-import type { Address, Hash } from "viem";
-
-import type { ChainId } from "@ensnode/ensnode-sdk";
+import type { Address, ChainId } from "enssdk";
+import type { Hash } from "viem";
 
 import { SUPPORTED_CHAINS } from "./chains";
 

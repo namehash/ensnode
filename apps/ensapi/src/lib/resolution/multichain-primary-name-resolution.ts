@@ -1,11 +1,11 @@
 import config from "@/config";
 
 import { trace } from "@opentelemetry/api";
+import type { ChainId } from "enssdk";
 import { mainnet } from "viem/chains";
 
 import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
 import {
-  type ChainId,
   type MultichainPrimaryNameResolutionArgs,
   type MultichainPrimaryNameResolutionResult,
   uniq,

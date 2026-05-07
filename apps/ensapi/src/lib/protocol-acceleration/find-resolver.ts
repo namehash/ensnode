@@ -3,31 +3,22 @@ import config from "@/config";
 import { bytesToPacket } from "@ensdomains/ensjs/utils";
 import { SpanStatusCode, trace } from "@opentelemetry/api";
 import {
+  type AccountId,
   type Address,
-  isAddressEqual,
-  namehash,
-  type PublicClient,
-  toHex,
-  zeroAddress,
-} from "viem";
+  asInterpretedName,
+  type DomainId,
+  getNameHierarchy,
+  type InterpretedName,
+  namehashInterpretedName,
+} from "enssdk";
+import { isAddressEqual, type PublicClient, toHex, zeroAddress } from "viem";
 import { packetToBytes } from "viem/ens";
 
 import { DatasourceNames, getDatasource } from "@ensnode/datasources";
-import {
-  type AccountId,
-  accountIdEqual,
-  type DomainId,
-  getDatasourceContract,
-  getNameHierarchy,
-  isENSv1Registry,
-  type Name,
-  type Node,
-  type NormalizedName,
-} from "@ensnode/ensnode-sdk";
+import { accountIdEqual, getDatasourceContract, isENSv1Registry } from "@ensnode/ensnode-sdk";
 
 import { ensDb } from "@/lib/ensdb/singleton";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/instrumentation/auto-span";
-import { lazyProxy } from "@/lib/lazy";
 
 type FindResolverResult =
   | {
@@ -35,7 +26,7 @@ type FindResolverResult =
       activeResolver: null;
       requiresWildcardSupport: undefined;
     }
-  | { activeName: Name; requiresWildcardSupport: boolean; activeResolver: Address };
+  | { activeName: InterpretedName; requiresWildcardSupport: boolean; activeResolver: Address };
 
 const NULL_RESULT: FindResolverResult = {
   activeName: null,
@@ -44,12 +35,6 @@ const NULL_RESULT: FindResolverResult = {
 };
 
 const tracer = trace.getTracer("find-resolver");
-
-// lazyProxy defers construction until first use so that this module can be
-// imported without env vars being present (e.g. during OpenAPI generation).
-const ensv1RegistryOld = lazyProxy(() =>
-  getDatasourceContract(config.namespace, DatasourceNames.ENSRoot, "ENSv1RegistryOld"),
-);
 
 /**
  * Identifies `name`'s active resolver in `registry`.
@@ -68,7 +53,7 @@ export async function findResolver({
   publicClient,
 }: {
   registry: AccountId;
-  name: NormalizedName;
+  name: InterpretedName;
   accelerate: boolean;
   canAccelerate: boolean;
   publicClient: PublicClient;
@@ -100,7 +85,7 @@ export async function findResolver({
  */
 async function findResolverWithUniversalResolver(
   publicClient: PublicClient,
-  name: Name,
+  name: InterpretedName,
 ): Promise<FindResolverResult> {
   return withActiveSpanAsync(
     tracer,
@@ -153,7 +138,8 @@ async function findResolverWithUniversalResolver(
       }
 
       // UniversalResolver returns the offset in bytes within the DNS Encoded Name where the activeName begins
-      const activeName: Name = bytesToPacket(dnsEncodedNameBytes.slice(offset));
+      // Invariant: the decoded name is a LiteralName that must conform to InterpretedName
+      const activeName = asInterpretedName(bytesToPacket(dnsEncodedNameBytes.slice(offset)));
 
       return {
         activeName,
@@ -181,7 +167,7 @@ async function findResolverWithUniversalResolver(
  */
 async function findResolverWithIndex(
   registry: AccountId,
-  name: NormalizedName,
+  name: InterpretedName,
 ): Promise<FindResolverResult> {
   return withActiveSpanAsync(
     tracer,
@@ -200,7 +186,7 @@ async function findResolverWithIndex(
 
       // 2. compute domainId of each node
       // NOTE: this is currently ENSv1-specific
-      const nodes = names.map((name) => namehash(name) as Node);
+      const nodes = names.map((name) => namehashInterpretedName(name));
       const domainIds = nodes as DomainId[];
 
       // 3. for each domain, find its associated resolver in the selected registry
@@ -209,6 +195,11 @@ async function findResolverWithIndex(
         "domainResolverRelation.findMany",
         {},
         async () => {
+          const ENSv1RegistryOld = getDatasourceContract(
+            config.namespace,
+            DatasourceNames.ENSRoot,
+            "ENSv1RegistryOld",
+          );
           // the current ENS Root Chain Registry is actually ENSRegistryWithFallback: if a node
           // doesn't exist in its own storage, it directs the lookup to RegistryOld. We must encode
           // this logic here, so that the active resolver of unmigrated nodes can be correctly identified.
@@ -222,8 +213,8 @@ async function findResolverWithIndex(
                   // OR, if the registry is the ENS Root Registry, also include records from RegistryOld
                   isENSv1Registry(config.namespace, registry)
                     ? and(
-                        eq(t.chainId, ensv1RegistryOld.chainId),
-                        eq(t.address, ensv1RegistryOld.address),
+                        eq(t.chainId, ENSv1RegistryOld.chainId),
+                        eq(t.address, ENSv1RegistryOld.address),
                       )
                     : undefined,
                 ),

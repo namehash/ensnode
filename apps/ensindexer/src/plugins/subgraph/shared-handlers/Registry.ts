@@ -1,21 +1,23 @@
 import config from "@/config";
 
-import { type Address, isAddressEqual, zeroAddress } from "viem";
-
-import { getENSRootChainId } from "@ensnode/datasources";
 import {
   ADDR_REVERSE_NODE,
+  asInterpretedLabel,
+  constructSubInterpretedName,
   encodeLabelHash,
-  type InterpretedLabel,
   type InterpretedName,
   type LabelHash,
   type LiteralLabel,
   literalLabelToInterpretedLabel,
   makeSubdomainNode,
   type Node,
+  type NormalizedAddress,
   type SubgraphInterpretedLabel,
   type SubgraphInterpretedName,
-} from "@ensnode/ensnode-sdk";
+} from "enssdk";
+import { isAddressEqual, zeroAddress } from "viem";
+
+import { getENSRootChainId } from "@ensnode/datasources";
 
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { healAddrReverseSubnameLabel } from "@/lib/heal-addr-reverse-subname-label";
@@ -42,7 +44,7 @@ export const handleNewOwner =
       node: Node;
       // NOTE: `label` event arg represents a `LabelHash` for the sub-node under `node`
       label: LabelHash;
-      owner: Address;
+      owner: NormalizedAddress;
     }>;
   }) => {
     const { label: labelHash, node: parentNode, owner } = event.args;
@@ -135,18 +137,19 @@ export const handleNewOwner =
         // Interpret the `healedLabel` Literal Label into an Interpreted Label
         // see https://ensnode.io/docs/reference/terminology#literal-label
         // see https://ensnode.io/docs/reference/terminology#interpreted-label
-        const interpretedLabel = (
+        const interpretedLabel = asInterpretedLabel(
           healedLabel !== null
             ? literalLabelToInterpretedLabel(healedLabel)
-            : encodeLabelHash(labelHash)
-        ) as InterpretedLabel;
+            : encodeLabelHash(labelHash),
+        );
 
         // to construct `Domain.name` use the parent's Name and the Interpreted Label
         // NOTE: for a TLD, the parent is null, so we just use the Label value as is
         // a name constructed of Interpreted Labels is Interpreted
-        const interpretedName = (
-          parent?.name ? `${interpretedLabel}.${parent.name}` : interpretedLabel
-        ) as InterpretedName;
+        const interpretedName = constructSubInterpretedName(
+          interpretedLabel,
+          parent?.name as InterpretedName | undefined,
+        );
 
         await context.ensDb.update(ensIndexerSchema.subgraph_domain, { id: node }).set({
           name: interpretedName,
@@ -175,7 +178,7 @@ export async function handleTransfer({
   event,
 }: {
   context: IndexingEngineContext;
-  event: EventWithArgs<{ node: Node; owner: Address }>;
+  event: EventWithArgs<{ node: Node; owner: NormalizedAddress }>;
 }) {
   const { node, owner } = event.args;
 
@@ -228,7 +231,7 @@ export async function handleNewResolver({
   event,
 }: {
   context: IndexingEngineContext;
-  event: EventWithArgs<{ node: Node; resolver: Address }>;
+  event: EventWithArgs<{ node: Node; resolver: NormalizedAddress }>;
 }) {
   const { node, resolver: resolverAddress } = event.args;
 

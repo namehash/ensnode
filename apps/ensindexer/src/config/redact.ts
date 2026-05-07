@@ -8,7 +8,7 @@ import type { ENSIndexerConfig } from "@/config/types";
 export function redactENSIndexerConfig(config: ENSIndexerConfig) {
   return {
     ...config,
-    databaseUrl: redactString(config.databaseUrl),
+    ensDbUrl: redactString(config.ensDbUrl),
     rpcConfigs: redactRpcConfigs(config.rpcConfigs),
   };
 }

@@ -1,4 +1,4 @@
-import { Link } from "@namehash/namekit-react";
+import { legacyLinkVariants } from "@namehash/namehash-ui/legacy";
 import { Fragment } from "react";
 
 import RainbowLogo from "../../assets/ENSRainbowLogo.svg";
@@ -28,6 +28,12 @@ export default function AboutRainbowSections() {
   );
 }
 
+const linkStyles = legacyLinkVariants({
+  variant: "underline",
+  size: "large",
+  className: "!text-black",
+});
+
 const rainbowSections: AboutRainbowProps[] = [
   {
     sectionHeader: (
@@ -41,28 +47,23 @@ const rainbowSections: AboutRainbowProps[] = [
         These are encoded labelhashes used to represent an unknown label in an ENS name. Without
         name healing, millions of names in the ENS manager app (and other ENS apps) don’t appear
         properly. See the problem for yourself:{" "}
-        <Link
+        <a
           href="https://app.ens.domains/0xfFD1Ac3e8818AdCbe5C597ea076E8D3210B45df5"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-black!"
-          variant="underline"
-          size="large"
+          className={linkStyles}
         >
           Example 1
-        </Link>{" "}
+        </a>{" "}
         and{" "}
-        <Link
+        <a
           href="https://app.ens.domains/[4283f2583432677d3dac6d2c021cdd7ef6855349ea584813ad5811c0e497eb0b].makoto.eth"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-black!"
-          variant="underline"
-          size="large"
+          className={linkStyles}
         >
-          Example 2{/*<span className="text-sm align-text-top">&#129133;</span>*/}
-          {/*TODO: Explore issue with arrows in the link*/}
-        </Link>
+          Example 2
+        </a>
       </>
     ),
     sectionBackgroundName: "",
@@ -86,16 +87,14 @@ const rainbowSections: AboutRainbowProps[] = [
     sectionDescription: (
       <>
         ENSRainbow is a sidecar service for{" "}
-        <Link
+        <a
           href="https://ensnode.io/"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-black!"
-          variant="underline"
-          size="large"
+          className={linkStyles}
         >
           ENSNode
-        </Link>
+        </a>
         , the new multichain indexer for ENSv2.
       </>
     ),

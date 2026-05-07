@@ -14,7 +14,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import type { UseResolvedIdentityParameters } from "../types";
-import { useENSNodeConfig } from "./useENSNodeConfig";
+import { ASSUME_IMMUTABLE_QUERY } from "../utils/query";
 import { usePrimaryName } from "./usePrimaryName";
 
 /**
@@ -24,7 +24,7 @@ import { usePrimaryName } from "./usePrimaryName";
  * @param parameters - Configuration object for the hook
  * @param parameters.identity - An {@link UnresolvedIdentity} containing the {@link DefaultableChainId}
  *                              and {@link Address} to resolve.
- * @param parameters.namespaceId - The {@link ENSNamespaceId} that `identity.chainId` should be interpreted
+ * @param parameters.namespace - The {@link ENSNamespaceId} that `identity.chainId` should be interpreted
  *                                 through (via {@link getResolvePrimaryNameChainIdParam}) to determine the literal
  *                                 chainId that should be used for ENSIP-19 primary name resolution.
  * @param parameters.accelerate - Whether to attempt Protocol Acceleration (default: false)
@@ -39,10 +39,7 @@ import { usePrimaryName } from "./usePrimaryName";
  * - All other properties from the underlying {@link usePrimaryName} query (e.g., `isLoading`, `error`, `refetch`, etc.)
  */
 export function useResolvedIdentity(parameters: UseResolvedIdentityParameters) {
-  const { identity, accelerate, query: _query = {} } = parameters;
-
-  const { data } = useENSNodeConfig();
-  const namespace = data?.ensIndexerPublicConfig.namespace;
+  const { identity, namespace, accelerate, query: _query = {} } = parameters;
 
   const {
     data: primaryNameData,
@@ -56,7 +53,12 @@ export function useResolvedIdentity(parameters: UseResolvedIdentityParameters) {
       namespace ?? ENSNamespaceIds.Mainnet,
     ),
     accelerate,
+    // NOTE: Overriding `gcTime` to prevent unbounded memory growth
+    // in long-running sessions with many identities.
     query: {
+      ...ASSUME_IMMUTABLE_QUERY, // identity changes very rarely
+      gcTime: 60 * 60 * 1000, // 1 hour
+      refetchInterval: false, // not covered by ASSUME_IMMUTABLE_QUERY
       ..._query,
       enabled: (_query.enabled ?? true) && namespace !== undefined,
     },

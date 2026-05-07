@@ -1,5 +1,7 @@
+import type { Name } from "enssdk";
+
 import type { ENSNamespaceId } from "@ensnode/datasources";
-import { ENSNamespaceIds, type Name } from "@ensnode/ensnode-sdk";
+import { ENSNamespaceIds } from "@ensnode/ensnode-sdk";
 
 /**
  * Build the avatar image URL for a name on the given ENS Namespace that (once fetched) would

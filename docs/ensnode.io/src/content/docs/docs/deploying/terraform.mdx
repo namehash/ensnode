@@ -28,6 +28,10 @@ These Terraform scripts are currently specific to ENSNode instances hosted by Na
 - AWS account (for DNS management)
 - AWS S3 bucket defined inside AWS account - `ensnode-terraform` (for Terraform state)
 
+:::note[Postgres Requirement]
+ENSIndexer runs `CREATE EXTENSION IF NOT EXISTS pg_trgm` at startup to back partial-name search indexes. Render's managed Postgres has [`pg_trgm`](https://www.postgresql.org/docs/current/pgtrgm.html) available by default; if you adapt this configuration to a different provider, confirm the extension is available for installation on your Postgres plan.
+:::
+
 ## Configuration
 
 Copy `.env.sample` to `.env.local` and fill in your configuration values:

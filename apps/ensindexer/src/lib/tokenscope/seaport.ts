@@ -1,12 +1,7 @@
+import { type AssetNamespace, AssetNamespaces, type ChainId } from "enssdk";
+
 import type { ENSNamespaceId } from "@ensnode/datasources";
-import {
-  type AssetNamespace,
-  AssetNamespaces,
-  type ChainId,
-  CurrencyIds,
-  type DomainAssetId,
-  uniq,
-} from "@ensnode/ensnode-sdk";
+import { CurrencyIds, type DomainAssetId, uniq } from "@ensnode/ensnode-sdk";
 
 import { getCurrencyIdForContract } from "@/lib/currencies";
 import { getSupportedNFTIssuer } from "@/lib/tokenscope/nft-issuers";

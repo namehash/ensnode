@@ -1,6 +1,17 @@
 import type { CoinType } from "@ensdomains/address-encoder";
 import { AccountId as CaipAccountId } from "caip";
-import { type Address, type Hex, isAddress, isHex, size } from "viem";
+import type {
+  AccountId,
+  AccountIdString,
+  ChainId,
+  DefaultableChainId,
+  Duration,
+  Hex,
+  InterpretedName,
+  Node,
+} from "enssdk";
+import { reinterpretName, toNormalizedAddress } from "enssdk";
+import { isAddress, isHex, size } from "viem";
 /**
  * All zod schemas we define must remain internal implementation details.
  * We want the freedom to move away from zod in the future without impacting
@@ -11,26 +22,17 @@ import { type Address, type Hex, isAddress, isHex, size } from "viem";
  */
 import { z } from "zod/v4";
 
-import { ENSNamespaceIds, type InterpretedName, type Node } from "../ens";
-import { asLowerCaseAddress } from "./address";
+import { ENSNamespaceIds } from "../ens";
 import {
   type CurrencyId,
   CurrencyIds,
   type PriceDai,
+  type PriceEnsTokens,
   type PriceEth,
   type PriceUsdc,
+  type SerializedPriceEth,
 } from "./currencies";
-import { reinterpretName } from "./interpretation/reinterpretation";
-import type { AccountIdString } from "./serialized-types";
-import type {
-  AccountId,
-  BlockRef,
-  ChainId,
-  Datetime,
-  DefaultableChainId,
-  Duration,
-  UnixTimestamp,
-} from "./types";
+import type { BlockRef, Datetime } from "./types";
 
 /**
  * Parses a string value as a boolean.
@@ -149,13 +151,15 @@ export const makeCoinTypeStringSchema = (valueLabel: string = "Coin Type String"
     .pipe(makeCoinTypeSchema(`The numeric value represented by ${valueLabel}`));
 
 /**
- * Parses a serialized representation of an EVM address into a lowercase Address.
+ * Parses a serialized representation of an EVM address into a {@link NormalizedAddress}.
  */
-export const makeLowercaseAddressSchema = (valueLabel: string = "EVM address") =>
+export const makeNormalizedAddressSchema = (valueLabel: string = "EVM address") =>
   z
     .string()
     .check((ctx) => {
-      if (!isAddress(ctx.value)) {
+      // NOTE: we intentionally use isAddress here instead of isNormalizedAddress, which allows this
+      // schema to transform (via toNormalizedAddress) the input into a normalized address.
+      if (!isAddress(ctx.value, { strict: false })) {
         ctx.issues.push({
           code: "custom",
           message: `${valueLabel} must be a valid EVM address`,
@@ -163,7 +167,7 @@ export const makeLowercaseAddressSchema = (valueLabel: string = "EVM address") =
         });
       }
     })
-    .transform((val) => asLowerCaseAddress(val as Address));
+    .transform((val) => toNormalizedAddress(val));
 
 /**
  * Parses an ISO 8601 string representations of {@link Datetime}
@@ -240,12 +244,29 @@ const makePriceAmountSchema = (valueLabel: string = "Amount") =>
       error: `${valueLabel} must not be negative.`,
     });
 
+const makeSerializedCurrencyAmountSchema = (valueLabel: string = "Serialized Currency Amount") =>
+  z.string({ error: `${valueLabel} must be a string.` }).regex(/^\d+$/, {
+    error: `${valueLabel} can only contain digits (0-9) and must represent a non-negative integer.`,
+  });
+
 export const makePriceCurrencySchema = (
   currency: CurrencyId,
   valueLabel: string = "Price Currency",
 ) =>
   z.strictObject({
     amount: makePriceAmountSchema(`${valueLabel} amount`),
+
+    currency: z.literal(currency, {
+      error: `${valueLabel} currency must be set to '${currency}'.`,
+    }),
+  });
+
+export const makeSerializedPriceCurrencySchema = (
+  currency: CurrencyId,
+  valueLabel: string = "Price Currency",
+) =>
+  z.strictObject({
+    amount: makeSerializedCurrencyAmountSchema(`${valueLabel} amount`),
 
     currency: z.literal(currency, {
       error: `${valueLabel} currency must be set to '${currency}'.`,
@@ -262,6 +283,7 @@ export const makePriceSchema = (valueLabel: string = "Price") =>
       makePriceCurrencySchema(CurrencyIds.ETH, valueLabel),
       makePriceCurrencySchema(CurrencyIds.USDC, valueLabel),
       makePriceCurrencySchema(CurrencyIds.DAI, valueLabel),
+      makePriceCurrencySchema(CurrencyIds.ENSTokens, valueLabel),
     ],
     { error: `${valueLabel} currency must be one of ${Object.values(CurrencyIds).join(", ")}` },
   );
@@ -271,6 +293,11 @@ export const makePriceSchema = (valueLabel: string = "Price") =>
  */
 export const makePriceEthSchema = (valueLabel: string = "Price ETH") =>
   makePriceCurrencySchema(CurrencyIds.ETH, valueLabel).transform((v) => v as PriceEth);
+
+export const makeSerializedPriceEthSchema = (valueLabel: string = "Serialized Price ETH") =>
+  makeSerializedPriceCurrencySchema(CurrencyIds.ETH, valueLabel).transform(
+    (v) => v as SerializedPriceEth,
+  );
 
 /**
  * Schema for {@link PriceUsdc} type.
@@ -285,12 +312,18 @@ export const makePriceDaiSchema = (valueLabel: string = "Price DAI") =>
   makePriceCurrencySchema(CurrencyIds.DAI, valueLabel).transform((v) => v as PriceDai);
 
 /**
+ * Schema for {@link PriceEnsTokens} type.
+ */
+export const makePriceEnsTokensSchema = (valueLabel: string = "Price ENSTokens") =>
+  makePriceCurrencySchema(CurrencyIds.ENSTokens, valueLabel).transform((v) => v as PriceEnsTokens);
+
+/**
  * Schema for {@link AccountId} type.
  */
 export const makeAccountIdSchema = (valueLabel: string = "AccountId") =>
   z.strictObject({
     chainId: makeChainIdSchema(`${valueLabel} chain ID`),
-    address: makeLowercaseAddressSchema(`${valueLabel} address`),
+    address: makeNormalizedAddressSchema(`${valueLabel} address`),
   });
 
 /**

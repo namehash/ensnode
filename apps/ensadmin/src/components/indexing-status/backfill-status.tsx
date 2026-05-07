@@ -4,6 +4,7 @@
  */
 
 import { AbsoluteTime } from "@namehash/namehash-ui";
+import type { UnixTimestamp } from "enssdk";
 import { Clock } from "lucide-react";
 
 import {
@@ -12,7 +13,6 @@ import {
   getTimestampForLowestOmnichainStartBlock,
   type RealtimeIndexingStatusProjection,
   sortChainStatusesByStartBlockAsc,
-  type UnixTimestamp,
 } from "@ensnode/ensnode-sdk";
 
 import {

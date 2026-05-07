@@ -132,7 +132,7 @@ const devElements: ListSectionElement[] = [
         <TelegramIcon className="text-white" />
       </div>
     ),
-    link: "http://t.me/ensnode",
+    link: "https://t.me/ensnode",
   },
   {
     header: (

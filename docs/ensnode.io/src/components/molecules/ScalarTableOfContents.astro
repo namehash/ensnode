@@ -1,0 +1,90 @@
+<starlight-toc data-min-h="2" data-max-h="3">
+  <nav aria-labelledby="scalar__on-this-page">
+    <h2 id="scalar__on-this-page">On this page</h2>
+    <ul class="scalar-toc-list"></ul>
+  </nav>
+</starlight-toc>
+
+<script>
+  function buildToc() {
+    const list = document.querySelector('.scalar-toc-list');
+    if (!list) return;
+
+    const headings = document.querySelectorAll('h2.section-header-label[id]');
+    if (headings.length === 0) return false;
+
+    list.innerHTML = '';
+    headings.forEach((h2) => {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.href = `#${h2.id}`;
+      const span = document.createElement('span');
+      span.textContent = h2.textContent?.trim() ?? '';
+      a.appendChild(span);
+      li.appendChild(a);
+
+      // Find h3s that belong to this h2's section
+      const section = h2.closest('.section');
+      if (section) {
+        const h3s = section.querySelectorAll('h3[id]');
+        if (h3s.length > 0) {
+          const subList = document.createElement('ul');
+          h3s.forEach((h3) => {
+            const subLi = document.createElement('li');
+            const subA = document.createElement('a');
+            subA.href = `#${h3.id}`;
+            const subSpan = document.createElement('span');
+            subSpan.textContent = h3.textContent?.trim() ?? '';
+            subA.appendChild(subSpan);
+            subLi.appendChild(subA);
+            subList.appendChild(subLi);
+          });
+          li.appendChild(subList);
+        }
+      }
+
+      list.appendChild(li);
+    });
+
+    return true;
+  }
+
+  // Scalar renders async, so observe for headings to appear
+  if (!buildToc()) {
+    const observer = new MutationObserver(() => {
+      if (buildToc()) observer.disconnect();
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+  }
+</script>
+
+<style>
+  nav :global(ul) {
+    padding: 0;
+    list-style: none;
+  }
+
+  nav :global(a) {
+    --pad-inline: 0.5rem;
+    display: block;
+    border-radius: 0.25rem;
+    padding-block: 0.25rem;
+    padding-inline: var(--pad-inline);
+    line-height: 1.25;
+    color: var(--sl-color-gray-3);
+    font-size: var(--sl-text-xs);
+    text-decoration: none;
+  }
+
+  nav :global(a:hover) {
+    color: var(--sl-color-white);
+  }
+
+  nav :global(a[aria-current='true']) {
+    color: var(--sl-color-text-accent);
+  }
+
+  nav :global(li > ul > li > a) {
+    padding-inline-start: calc(1rem + var(--pad-inline));
+  }
+</style>

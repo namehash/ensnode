@@ -10,12 +10,5 @@
     "cssVariables": true,
     "prefix": "nhui"
   },
-  "aliases": {
-    "components": "@/components",
-    "utils": "@/utils/cn",
-    "ui": "@/components/ui",
-    "lib": "@/lib",
-    "hooks": "@/hooks"
-  },
   "iconLibrary": "lucide"
 }

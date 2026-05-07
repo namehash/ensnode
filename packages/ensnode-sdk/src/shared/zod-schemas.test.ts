@@ -1,9 +1,15 @@
-import { labelhash } from "viem";
+import { asLiteralLabel, encodeLabelHash, labelhashLiteralLabel } from "enssdk";
 import { describe, expect, it } from "vitest";
 import { prettifyError, type ZodSafeParseResult } from "zod/v4";
 
-import { encodeLabelHash } from "../ens";
-import { CurrencyIds, priceDai, priceEth, priceUsdc, type SerializedPrice } from "./currencies";
+import {
+  CurrencyIds,
+  priceDai,
+  priceEnsTokens,
+  priceEth,
+  priceUsdc,
+  type SerializedPrice,
+} from "./currencies";
 import {
   makeBooleanStringSchema,
   makeChainIdSchema,
@@ -11,6 +17,7 @@ import {
   makeDatetimeSchema,
   makeIntegerSchema,
   makeNonNegativeIntegerSchema,
+  makeNormalizedAddressSchema,
   makePositiveIntegerSchema,
   makePriceSchema,
   makeReinterpretedNameSchema,
@@ -150,6 +157,13 @@ describe("ENSIndexer: Shared", () => {
       ).toStrictEqual(priceDai(123n));
 
       expect(
+        makePriceSchema().parse({
+          amount: "456",
+          currency: CurrencyIds.ENSTokens,
+        } satisfies SerializedPrice),
+      ).toStrictEqual(priceEnsTokens(456n));
+
+      expect(
         formatParseError(
           makePriceSchema().safeParse({
             amount: "-123",
@@ -166,13 +180,27 @@ describe("ENSIndexer: Shared", () => {
             currency: "BTC",
           } satisfies SerializedPrice),
         ),
-      ).toMatch(/Price currency must be one of ETH, USDC, DAI/i);
+      ).toMatch(/Price currency must be one of ETH, USDC, DAI, ENSTokens/i);
+    });
+
+    describe("NormalizedAddress", () => {
+      const validAddress = "0x1234567890AbcdEF1234567890aBcdef12345678";
+
+      it("normalizes a valid address", () => {
+        expect(makeNormalizedAddressSchema().parse(validAddress)).toBe(validAddress.toLowerCase());
+      });
+
+      it("rejects invalid input with a useful error", () => {
+        expect(
+          formatParseError(makeNormalizedAddressSchema().safeParse("not-an-address")),
+        ).toContain("EVM address must be a valid EVM address");
+      });
     });
 
     describe("ReinterpretedName", () => {
       const nameWithNormalizedLabels = "tko.basetest.eth";
       const nameWithUnnormalizedLabels = "TKO.basetest.eth";
-      const reinterpretedNameFromUnnormalizedLabels = `${encodeLabelHash(labelhash("TKO"))}.basetest.eth`;
+      const reinterpretedNameFromUnnormalizedLabels = `${encodeLabelHash(labelhashLiteralLabel(asLiteralLabel("TKO")))}.basetest.eth`;
 
       it("can reinterpret a name which includes normalized labels", () => {
         expect(makeReinterpretedNameSchema().parse(nameWithNormalizedLabels)).toBe(

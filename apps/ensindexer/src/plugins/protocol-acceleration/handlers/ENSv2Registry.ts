@@ -1,6 +1,6 @@
-import type { Address } from "viem";
+import { makeENSv2DomainId, makeStorageId, type NormalizedAddress } from "enssdk";
 
-import { getCanonicalId, makeENSv2DomainId, PluginName } from "@ensnode/ensnode-sdk";
+import { PluginName } from "@ensnode/ensnode-sdk";
 
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { addOnchainEventListener, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
@@ -20,14 +20,14 @@ export default function () {
       context: IndexingEngineContext;
       event: EventWithArgs<{
         tokenId: bigint;
-        resolver: Address;
+        resolver: NormalizedAddress;
       }>;
     }) => {
       const { tokenId, resolver } = event.args;
 
       const registry = getThisAccountId(context, event);
-      const canonicalId = getCanonicalId(tokenId);
-      const domainId = makeENSv2DomainId(registry, canonicalId);
+      const storageId = makeStorageId(tokenId);
+      const domainId = makeENSv2DomainId(registry, storageId);
 
       await ensureDomainResolverRelation(context, registry, domainId, resolver);
     },

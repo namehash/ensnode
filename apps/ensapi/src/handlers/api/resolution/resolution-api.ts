@@ -1,8 +1,10 @@
-import type {
-  Duration,
-  ResolvePrimaryNameResponse,
-  ResolvePrimaryNamesResponse,
-  ResolveRecordsResponse,
+import type { Duration } from "enssdk";
+
+import {
+  type ResolvePrimaryNameResponse,
+  type ResolvePrimaryNamesResponse,
+  type ResolveRecordsResponse,
+  replaceBigInts,
 } from "@ensnode/ensnode-sdk";
 
 import { createApp } from "@/lib/hono-factory";
@@ -63,7 +65,11 @@ app.openapi(resolveRecordsRoute, async (c) => {
     ...(showTrace && { trace }),
   } satisfies ResolveRecordsResponse<typeof selection>;
 
-  return c.json(response);
+  // serialize bigints (e.g. `records.version`, `records.abi.contentType`) as strings
+  // NOTE: this matches the openapi wire format
+  // NOTE: the ts client, which uses the ResolverRecordsResponse type, must parse the bigint fields
+  // into native bigints (see packages/ensnode-sdk/src/ensnode/client.ts)
+  return c.json(replaceBigInts(response, String), 200);
 });
 
 /**
@@ -95,7 +101,7 @@ app.openapi(resolvePrimaryNameRoute, async (c) => {
     ...(showTrace && { trace }),
   } satisfies ResolvePrimaryNameResponse;
 
-  return c.json(response);
+  return c.json(response, 200);
 });
 
 /**
@@ -111,7 +117,6 @@ app.openapi(resolvePrimaryNamesRoute, async (c) => {
   const { address } = c.req.valid("param");
   const { chainIds, trace: showTrace, accelerate } = c.req.valid("query");
   const canAccelerate = c.var.canAccelerate;
-
   const { result, trace } = await runWithTrace(() =>
     resolvePrimaryNames(address, chainIds, { accelerate, canAccelerate }),
   );
@@ -124,7 +129,7 @@ app.openapi(resolvePrimaryNamesRoute, async (c) => {
     ...(showTrace && { trace }),
   } satisfies ResolvePrimaryNamesResponse;
 
-  return c.json(response);
+  return c.json(response, 200);
 });
 
 export default app;

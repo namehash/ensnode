@@ -38,6 +38,13 @@ export function createLocalPonderClientMock(overrides?: {
   const ponderAppContext = {
     command: overrides?.ponderAppContext?.command ?? PonderAppCommands.Start,
     localPonderAppUrl: new URL("http://localhost:3000"),
+    logger: {
+      error: () => {},
+      warn: () => {},
+      info: () => {},
+      debug: () => {},
+      trace: () => {},
+    },
   } satisfies PonderAppContext;
 
   return new LocalPonderClient(

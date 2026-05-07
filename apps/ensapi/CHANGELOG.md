@@ -1,5 +1,101 @@
 # ensapi
 
+## 1.11.0
+
+### Minor Changes
+
+- [#2014](https://github.com/namehash/ensnode/pull/2014) [`6bd4154`](https://github.com/namehash/ensnode/commit/6bd4154b40fca1fb3968d57181cbe2404be9296a) Thanks [@shrugs](https://github.com/shrugs)! - Adds HCA-aware `Event.sender` to the Omnigraph API alongside the existing `Event.from`. For ENSv2 events that emit an explicit `sender`/`owner`/`account`/ERC1155 `operator` argument, `Event.sender` is set from that argument (the HCA Smart Account address, if used) and falls back to `tx.from` otherwise. Adds a `sender` filter to `EventsWhereInput`. `Account.events` now filters by `sender` (HCA-aware) instead of `tx.from`. Documents HCA-aware semantics on `Domain.owner`, `Registration.registrant`/`unregistrant`, and `*.PermissionsUser.user`.
+
+- [#2056](https://github.com/namehash/ensnode/pull/2056) [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572) Thanks [@shrugs](https://github.com/shrugs)! - `indexing-status.cache` and `stack-info.cache` updated to consume the new `IndexingMetadataContext` record. Config schema updated to fetch `EnsIndexerPublicConfig` from `EnsNodeStackInfo`.
+
+- [#2007](https://github.com/namehash/ensnode/pull/2007) [`e40ce8f`](https://github.com/namehash/ensnode/commit/e40ce8f1bc32ee7fe5e9511744f9dd2caaa2e96b) Thanks [@shrugs](https://github.com/shrugs)! - Adds `PermissionsUser.events` to the Omnigraph API, exposing the per-role-assignment event history (grants, revokes, role-bitmap mutations) for a specific `(contract, resource, user)` tuple.
+
+- [#1983](https://github.com/namehash/ensnode/pull/1983) [`6173160`](https://github.com/namehash/ensnode/commit/61731608632f62139496656f6231210f63383f20) Thanks [@shrugs](https://github.com/shrugs)! - `Query.root` is now non-null and returns the namespace's Root Registry — preferring the ENSv2 Root Registry when defined, falling back to the ENSv1 Root Registry.
+
+- [#2021](https://github.com/namehash/ensnode/pull/2021) [`6824f35`](https://github.com/namehash/ensnode/commit/6824f35046f3b9c181508c34de098f1221d10630) Thanks [@tk-o](https://github.com/tk-o)! - Integrated ENSDb health check and readiness check into ENSApi `/health` and `/ready` endpoints.
+
+- [#1983](https://github.com/namehash/ensnode/pull/1983) [`6173160`](https://github.com/namehash/ensnode/commit/61731608632f62139496656f6231210f63383f20) Thanks [@shrugs](https://github.com/shrugs)! - Unify `v1Domain` + `v2Domain` into a single polymorphic `domain` table discriminated by a `type` enum (`"ENSv1Domain"` | `"ENSv2Domain"`), and make Registry polymorphic across concrete ENSv1 (mainnet Registry, Basenames Registry, Lineanames Registry), ENSv1 Virtual (per-parent-domain virtual Registry managed by each ENSv1 domain that has children), and ENSv2 Registries.
+
+  ### Breaking schema + id format changes
+  - `ENSv1DomainId` is now a dash-delimited tuple: `${ENSv1RegistryId}-${node}` (was `Node`). Every ENSv1 Domain is addressable through a concrete Registry, so bare `node` values no longer identify a Domain by themselves.
+  - `RegistryId` is a union of `ENSv1RegistryId`, `ENSv1VirtualRegistryId`, and `ENSv2RegistryId`. New id constructors: `makeENSv1RegistryId`, `makeENSv2RegistryId`, `makeENSv1VirtualRegistryId`, and `makeConcreteRegistryId` (returns `ENSv1RegistryId | ENSv2RegistryId` for callsites that only need to address a concrete Registry contract). `makeENSv1DomainId` now takes `(AccountId, Node)`.
+  - `domains` table: replaces `v1_domains` + `v2_domains`. Adds `type`, nullable `tokenId` (non-null iff ENSv2), nullable `node` (non-null iff ENSv1), nullable `rootRegistryOwnerId` (v1 only). `parentId` removed; parent relationships flow through `registryCanonicalDomain` for both v1 and v2.
+  - `registries` table: adds `type` enum column and nullable `node` (non-null iff `ENSv1VirtualRegistry`). Unique `(chainId, address)` index becomes a plain index so virtual Registries can share their concrete parent's `(chainId, address)`.
+  - `registryCanonicalDomain.domainId` is typed as the unified `DomainId`.
+
+  ### GraphQL
+  - `Registry` becomes a GraphQL interface with `ENSv1Registry`, `ENSv1VirtualRegistry`, and `ENSv2Registry` implementations. `ENSv1VirtualRegistry` exposes `node: Node!`.
+  - `Domain` interface gains `parent: Domain` (resolved via the canonical-path dataloader); `ENSv1Domain` exposes `node: Node!` and `rootRegistryOwner`; `ENSv2Domain` exposes `tokenId`, `registry`, `subregistry`, `permissions`.
+  - `Query.registry(by: { contract })` now DB-looks up the concrete Registry by `(chainId, address, type IN (ENSv1Registry, ENSv2Registry))`. Virtual Registries are not addressable via `AccountId` alone.
+
+### Patch Changes
+
+- [#2056](https://github.com/namehash/ensnode/pull/2056) [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572) Thanks [@shrugs](https://github.com/shrugs)! - Migrated to `@ensnode/ensnode-sdk`'s `replaceBigInts` / `toJson` helpers. Dropped the direct `@ponder/utils` dependency from `ensapi`.
+
+- Updated dependencies [[`aa26180`](https://github.com/namehash/ensnode/commit/aa26180b2582a9f3da2b7e766a77779350baf426), [`43d8a9b`](https://github.com/namehash/ensnode/commit/43d8a9b838b15719f520cd3f3bbfd1b52a4ad1ce), [`824d819`](https://github.com/namehash/ensnode/commit/824d819d291b2b642d2664d09cb10d6de69a6ea7), [`5729ac1`](https://github.com/namehash/ensnode/commit/5729ac18ba029a476ffeca18c9b4bceee417ebdb), [`7e77c5c`](https://github.com/namehash/ensnode/commit/7e77c5c2bef96d1a2eb363871fb87379b5f6f7e9), [`6173160`](https://github.com/namehash/ensnode/commit/61731608632f62139496656f6231210f63383f20), [`92ca54f`](https://github.com/namehash/ensnode/commit/92ca54fa2efbef3f32e2dacd8fdc347ef260a2af), [`7e77c5c`](https://github.com/namehash/ensnode/commit/7e77c5c2bef96d1a2eb363871fb87379b5f6f7e9), [`0d8a4b4`](https://github.com/namehash/ensnode/commit/0d8a4b4b7c8c70be904652e2132e7c67fd9e39ef), [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572), [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572), [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572), [`aa26180`](https://github.com/namehash/ensnode/commit/aa26180b2582a9f3da2b7e766a77779350baf426), [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572), [`aa26180`](https://github.com/namehash/ensnode/commit/aa26180b2582a9f3da2b7e766a77779350baf426), [`43d8a9b`](https://github.com/namehash/ensnode/commit/43d8a9b838b15719f520cd3f3bbfd1b52a4ad1ce), [`c186ad8`](https://github.com/namehash/ensnode/commit/c186ad8c0d85c4db8619a436173d7e21f857f689), [`6173160`](https://github.com/namehash/ensnode/commit/61731608632f62139496656f6231210f63383f20)]:
+  - @namehash/ens-referrals@1.11.0
+  - @ensnode/ensnode-sdk@1.11.0
+  - @ensnode/datasources@1.11.0
+  - @ensnode/ensdb-sdk@1.11.0
+  - enssdk@1.11.0
+  - @ensnode/ponder-subgraph@1.11.0
+
+## 1.10.1
+
+### Patch Changes
+
+- Updated dependencies [[`e92fa4d`](https://github.com/namehash/ensnode/commit/e92fa4d28f183b62fb6d9665db3332b43a46f279), [`9d50f64`](https://github.com/namehash/ensnode/commit/9d50f647802fde286dfef2dc23c884801d06b228), [`9d50f64`](https://github.com/namehash/ensnode/commit/9d50f647802fde286dfef2dc23c884801d06b228)]:
+  - @ensnode/ensdb-sdk@1.10.1
+  - @ensnode/ensnode-sdk@1.10.1
+  - @namehash/ens-referrals@1.10.1
+  - enssdk@1.10.1
+  - @ensnode/datasources@1.10.1
+  - @ensnode/ponder-subgraph@1.10.1
+
+## 1.10.0
+
+### Minor Changes
+
+- [#1925](https://github.com/namehash/ensnode/pull/1925) [`b5da4a6`](https://github.com/namehash/ensnode/commit/b5da4a6d78d6c4d0de83ea7928f561757eb8d7f4) Thanks [@Goader](https://github.com/Goader)! - Remove v0 ENS Referrals API. The `/ensanalytics/*` routes are deleted — use `/v1/ensanalytics/*` instead.
+
+- [#1857](https://github.com/namehash/ensnode/pull/1857) [`abc535f`](https://github.com/namehash/ensnode/commit/abc535f9bec8c5c7fb2443aa6ad4bbbc14fbcc7d) Thanks [@shrugs](https://github.com/shrugs)! - Omnigraph API (BREAKING): Removed `ENSv2Domain.canonicalId`.
+
+- [#1967](https://github.com/namehash/ensnode/pull/1967) [`5f341e1`](https://github.com/namehash/ensnode/commit/5f341e14420146db772fc01b1b3c0f4e2d4a3cb7) Thanks [@shrugs](https://github.com/shrugs)! - Resolution API: support `contenthash`, `pubkey`, `abi`, `interfaces`, `dnszonehash`, and `version` selection. Protocol acceleration indexes `contenthash`, `pubkey`, `dnszonehash`, and handles `VersionChanged` (clears records for the node, bumps version). `ABI` (bitmask query, contract-equivalent) and `interface` records are selectable but always resolved via RPC. Adds `ContentType` / `InterfaceId` / `RecordVersion` semantic types to `enssdk`.
+
+- [#1934](https://github.com/namehash/ensnode/pull/1934) [`b8f5be7`](https://github.com/namehash/ensnode/commit/b8f5be761748f75c06ba4da81dd6098eec6ebb9a) Thanks [@shrugs](https://github.com/shrugs)! - Omnigraph API (BREAKING): Renamed `Resolver.records_` argument from `for` to `by` for consistency with other id lookups.
+
+- [#1857](https://github.com/namehash/ensnode/pull/1857) [`abc535f`](https://github.com/namehash/ensnode/commit/abc535f9bec8c5c7fb2443aa6ad4bbbc14fbcc7d) Thanks [@shrugs](https://github.com/shrugs)! - Omnigraph API (BREAKING): API route path changed from `/api/graphql` to `/api/omnigraph`.
+
+- [#1912](https://github.com/namehash/ensnode/pull/1912) [`d5225c0`](https://github.com/namehash/ensnode/commit/d5225c00f4528b09826ca2a59f87271df6c7b330) Thanks [@Goader](https://github.com/Goader)! - Removed the hardcoded "default" referral program edition config set and renamed `CUSTOM_REFERRAL_PROGRAM_EDITIONS` to `REFERRAL_PROGRAM_EDITIONS`. An unset `REFERRAL_PROGRAM_EDITIONS` now means the referral program has zero configured editions, so ENSApi performs no referral-related work against ENSDb. The editions array may also now be empty.
+
+- [#1907](https://github.com/namehash/ensnode/pull/1907) [`b2481d6`](https://github.com/namehash/ensnode/commit/b2481d6dae6f704493140aa63cd4ad1bfd3e3301) Thanks [@Goader](https://github.com/Goader)! - Made `accurateAsOf` a required field in the Registrar Actions API response (`RegistrarActionsResponseOk`).
+
+- [#1828](https://github.com/namehash/ensnode/pull/1828) [`4c99177`](https://github.com/namehash/ensnode/commit/4c991777ac13ffd2cc1fb947e5a47bd7733b112b) Thanks [@tk-o](https://github.com/tk-o)! - Renamed environment variable: `DATABASE_URL` to `ENSDB_URL`.
+
+- [#1671](https://github.com/namehash/ensnode/pull/1671) [`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5) Thanks [@tk-o](https://github.com/tk-o)! - **Breaking**: Removed Config API endpoint at `GET /api/config`. To get the ENSApi Public Config, call the `GET /api/indexing-status` endpoint and reference the `stackInfo.ensApi` field in the OK response.
+
+- [#1845](https://github.com/namehash/ensnode/pull/1845) [`a983e4d`](https://github.com/namehash/ensnode/commit/a983e4d0279942553826bec957d71cae1543398f) Thanks [@shrugs](https://github.com/shrugs)! - Omnigraph API (BREAKING): Removed `Resolver.dedicated` field in advance of PermissionedResolver integration.
+
+- [#1867](https://github.com/namehash/ensnode/pull/1867) [`536149c`](https://github.com/namehash/ensnode/commit/536149c1c214eb01648e13354a57d6caea791499) Thanks [@shrugs](https://github.com/shrugs)! - Change `Query.permissions` to accept `by: { id, contract }` and `Query.account` to accept `by: { id, address }`, matching the `by` input pattern of `Query.registry` and `Query.resolver`.
+
+### Patch Changes
+
+- [#1872](https://github.com/namehash/ensnode/pull/1872) [`9abb302`](https://github.com/namehash/ensnode/commit/9abb30238374f0847a68615827dddafb6dc05dad) Thanks [@sevenzing](https://github.com/sevenzing)! - Add example responses to autogenerated openapi doc
+
+- [#1873](https://github.com/namehash/ensnode/pull/1873) [`2804ec2`](https://github.com/namehash/ensnode/commit/2804ec28eb26caced069dadd38363e2b246c4b87) Thanks [@sevenzing](https://github.com/sevenzing)! - Add integration tests for resolution APIs in ensapi
+
+- [#1919](https://github.com/namehash/ensnode/pull/1919) [`319d619`](https://github.com/namehash/ensnode/commit/319d619f6259f7bda5813c685a993074acb259ba) Thanks [@Goader](https://github.com/Goader)! - Rename `rev-share-limit` award model to `rev-share-cap`.
+
+- [#1854](https://github.com/namehash/ensnode/pull/1854) [`90eeaea`](https://github.com/namehash/ensnode/commit/90eeaea559b073f031197026336636cc43d48550) Thanks [@tk-o](https://github.com/tk-o)! - Updated `ensIndexerSchema` value that is passed into `subgraphGraphQLMiddleware` function.
+
+- Updated dependencies [[`b5da4a6`](https://github.com/namehash/ensnode/commit/b5da4a6d78d6c4d0de83ea7928f561757eb8d7f4), [`b781245`](https://github.com/namehash/ensnode/commit/b781245036e67479ded836df3916ab9675a38285), [`b5da4a6`](https://github.com/namehash/ensnode/commit/b5da4a6d78d6c4d0de83ea7928f561757eb8d7f4), [`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5), [`29afaa6`](https://github.com/namehash/ensnode/commit/29afaa6ad8a3f3c8133241cf1a9324980498ded4), [`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5), [`7fca45d`](https://github.com/namehash/ensnode/commit/7fca45d09dc6e3456fec2cae0827e9d2c54827a6), [`29fcfc7`](https://github.com/namehash/ensnode/commit/29fcfc7a1ab01c3214b5c16fc0e4a349010e9360), [`ab20d4d`](https://github.com/namehash/ensnode/commit/ab20d4ddf7233151bdf5ab78f4f04a5f77c72d87), [`5f341e1`](https://github.com/namehash/ensnode/commit/5f341e14420146db772fc01b1b3c0f4e2d4a3cb7), [`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5), [`b8f5be7`](https://github.com/namehash/ensnode/commit/b8f5be761748f75c06ba4da81dd6098eec6ebb9a), [`c336c79`](https://github.com/namehash/ensnode/commit/c336c79b08e46ce53caa536ebf6158eba9f3e017), [`fc88ee5`](https://github.com/namehash/ensnode/commit/fc88ee5f910de1a94ce2734776d4a5640f839641), [`5c2dc68`](https://github.com/namehash/ensnode/commit/5c2dc687a6b6e6dd31c1f1aeab08e89d3a9a5e36), [`4c99177`](https://github.com/namehash/ensnode/commit/4c991777ac13ffd2cc1fb947e5a47bd7733b112b), [`4c51c75`](https://github.com/namehash/ensnode/commit/4c51c75ec8b3807d0aa988618893b2da07e11a83), [`d5225c0`](https://github.com/namehash/ensnode/commit/d5225c00f4528b09826ca2a59f87271df6c7b330), [`49a0e75`](https://github.com/namehash/ensnode/commit/49a0e75e25d92c4e3ebb08e87abee3e33c0e8101), [`b2481d6`](https://github.com/namehash/ensnode/commit/b2481d6dae6f704493140aa63cd4ad1bfd3e3301), [`9abb302`](https://github.com/namehash/ensnode/commit/9abb30238374f0847a68615827dddafb6dc05dad), [`ed6ee96`](https://github.com/namehash/ensnode/commit/ed6ee9641bfa6f42ddc95955cf8b013c93bf2f4a), [`319d619`](https://github.com/namehash/ensnode/commit/319d619f6259f7bda5813c685a993074acb259ba), [`677db8b`](https://github.com/namehash/ensnode/commit/677db8b67effc6d530716c0a1902244dba56d787)]:
+  - @namehash/ens-referrals@1.10.0
+  - @ensnode/ensnode-sdk@1.10.0
+  - enssdk@1.10.0
+  - @ensnode/ensdb-sdk@1.10.0
+  - @ensnode/datasources@1.10.0
+  - @ensnode/ponder-subgraph@1.10.0
+
 ## 1.9.0
 
 ### Minor Changes
@@ -95,7 +191,6 @@
 - [#1654](https://github.com/namehash/ensnode/pull/1654) [`40b95fb`](https://github.com/namehash/ensnode/commit/40b95fb2cb5209546c0bd38145dbf7c231a968e7) Thanks [@shrugs](https://github.com/shrugs)! - ENSv2 GraphQL API: BREAKING: Removes Account.domains in favor of `Query.domains` with `owner` specified.
 
 - [#1576](https://github.com/namehash/ensnode/pull/1576) [`6e98fb6`](https://github.com/namehash/ensnode/commit/6e98fb677d5021c4bc9d17b01289290d1c286003) Thanks [@shrugs](https://github.com/shrugs)! - The experimental ENSv2 API now supports the following Domain filters, namely matching indexed Domains by name prefix.
-
   - `Query.domains(where: { name?: "example.et", owner?: "0xdead...beef" })`
 
 - [#1705](https://github.com/namehash/ensnode/pull/1705) [`a0be9a6`](https://github.com/namehash/ensnode/commit/a0be9a6fb188fb6dc982ba297896ee5b357c3072) Thanks [@tk-o](https://github.com/tk-o)! - Altered code references accordingly to the updated `EnsIndexerPublicConfig` data model.
@@ -123,22 +218,18 @@
 - [#1680](https://github.com/namehash/ensnode/pull/1680) [`a5f9178`](https://github.com/namehash/ensnode/commit/a5f9178bdd1d4e42440e4ad24daf5df6036f7737) Thanks [@shrugs](https://github.com/shrugs)! - add `Account.domains` and enhance `Domain.subdomains` and `Registry.domains` with filtering and ordering
 
   **`Account.domains`** (new) — paginated connection of domains owned by this account.
-
   - `where: { name?: String, canonical?: Boolean }` — optional partial Interpreted Name filter and canonical filter (defaults to false)
   - `order: { by: NAME | REGISTRATION_TIMESTAMP | REGISTRATION_EXPIRY, dir: ASC | DESC }` — ordering
 
   **`Domain.subdomains`** (enhanced) — paginated connection of subdomains of this domain, now with filtering and ordering.
-
   - `where: { name?: String }` — optional partial Interpreted Name filter
   - `order: { by: NAME | REGISTRATION_TIMESTAMP | REGISTRATION_EXPIRY, dir: ASC | DESC }` — ordering
 
   **`Registry.domains`** (enhanced) — paginated connection of domains in this registry, now with filtering and ordering.
-
   - `where: { name?: String }` — optional partial Interpreted Name filter
   - `order: { by: NAME | REGISTRATION_TIMESTAMP | REGISTRATION_EXPIRY, dir: ASC | DESC }` — ordering
 
   **`Query.domains`** (updated) — `where.name` is now required. Added optional `where.canonical` filter (defaults to false).
-
   - `where: { name: String!, canonical?: Boolean }` — required partial Interpreted Name, optional canonical filter
   - `order: { by: NAME | REGISTRATION_TIMESTAMP | REGISTRATION_EXPIRY, dir: ASC | DESC }` — ordering
 
@@ -160,7 +251,6 @@
 - [#1529](https://github.com/namehash/ensnode/pull/1529) [`b25605b`](https://github.com/namehash/ensnode/commit/b25605b49c09d57dae44ff53092303eb7330df85) Thanks [@notrab](https://github.com/notrab)! - Add production and testnet servers to OpenAPI spec
 
   The OpenAPI specification now includes the following servers:
-
   - https://api.alpha.ensnode.io (ENSNode Alpha - Mainnet)
   - https://api.alpha-sepolia.ensnode.io (ENSNode Alpha - Sepolia Testnet)
   - localhost (Local Development)
@@ -206,7 +296,6 @@
 ### Patch Changes
 
 - [#1485](https://github.com/namehash/ensnode/pull/1485) [`4f3abbe`](https://github.com/namehash/ensnode/commit/4f3abbe6c1447b7d5c5e7f2a39cf250067122877) Thanks [@notrab](https://github.com/notrab)! - Fix openapi validation errors by adding missing route descriptions
-
   - Add `describeRoute` with tags, summary, description, and responses to `/amirealtime`, `/ensanalytics/referrers`, `/ensanalytics/referrers/:referrer`, `/registrar-actions`, and `/registrar-actions/:parentNode` endpoints
   - Add `.describe()` to Zod schema fields for query and path parameters to improve OpenAPI documentation
   - Add OpenAPI tags (`Resolution`, `Meta`, `Explore`, `ENSAwards`) to organize endpoints in the spec
@@ -331,13 +420,11 @@
 - [#1194](https://github.com/namehash/ensnode/pull/1194) [`af52f0b`](https://github.com/namehash/ensnode/commit/af52f0befda8220d56ff26a30208c196acb0d3cb) Thanks [@shrugs](https://github.com/shrugs)! - Introduces the ENSApi application, a separate, horizontally scalable ENSNode API server to replace the legacy `ponder serve` experience.
 
   Connecting ENSApi to:
-
   - your Postgres Database (`DATABASE_URL`, `DATABASE_SCHEMA`),
   - ENSIndexer (`ENSINDEXER_URL`), and
   - an ENS Root Chain RPC (`ALCHEMY_API_KEY`, `RPC_URL_*`)
 
   provides the following APIs:
-
   - ENSIndexer Config API (`/api/config`)
   - ENSIndexer Indexing Status API (`/api/indexing-status`)
   - Legacy ENS Subgraph GraphQL API (`/subgraph`)

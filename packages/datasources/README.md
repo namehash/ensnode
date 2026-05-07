@@ -20,7 +20,7 @@ To use these configurations in your project:
 
 ```ts
 import { getDatasource } from "@ensnode/datasources";
-import { namehash } from "viem";
+import { namehashInterpretedName, asInterpretedName } from "enssdk";
 
 // access the address and abi for the ens root Registry in the canonical mainnet ENS namespace
 const registryConfig = getDatasource('mainnet', 'ensroot').contracts.Registry;
@@ -30,7 +30,7 @@ const vitaliksResolverAddress = await publicClient.readContract({
   abi: registryConfig.abi,
   address: registryConfig.address,
   functionName: "resolver",
-  args: [namehash("vitalik.eth")],
+  args: [namehashInterpretedName(asInterpretedName("vitalik.eth"))],
 });
 ```
 

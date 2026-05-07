@@ -1,5 +1,67 @@
 # @ensnode/ensdb-sdk
 
+## 1.11.0
+
+### Minor Changes
+
+- [#2016](https://github.com/namehash/ensnode/pull/2016) [`7e77c5c`](https://github.com/namehash/ensnode/commit/7e77c5c2bef96d1a2eb363871fb87379b5f6f7e9) Thanks [@shrugs](https://github.com/shrugs)! - `migrated_nodes` renamed to `migrated_nodes_by_parent` and re-keyed by composite `(parentNode, labelHash)` to match the payload of `ENSv1Registry(Old)#NewOwner` events. New sibling `migrated_nodes_by_node` keyed solely by `node` for the three `ENSv1RegistryOld` handlers (`Transfer` / `NewTTL` / `NewResolver`) that emit only `node`. Both rows are written together by the migration helper so each read site addresses whichever key matches its event payload. Schema definitions live in a new `migrated-nodes.schema.ts`.
+
+- [#2056](https://github.com/namehash/ensnode/pull/2056) [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572) Thanks [@shrugs](https://github.com/shrugs)! - Introduced `IndexingMetadataContext` as a single record type in the ENSNode Metadata table, replacing three separate record types (`ensdb_version`, `ensindexer_public_config`, `ensindexer_indexing_status`).
+  - `EnsDbReader`: added `getIndexingMetadataContext()`, `isHealthy()`, `isReady()`.
+  - `EnsDbWriter`: added `upsertIndexingMetadataContext()`.
+  - Old per-record read/write methods removed.
+  - `EnsNodeMetadataKeys` reduced to a single `IndexingMetadataContext` key.
+
+- [#1983](https://github.com/namehash/ensnode/pull/1983) [`6173160`](https://github.com/namehash/ensnode/commit/61731608632f62139496656f6231210f63383f20) Thanks [@shrugs](https://github.com/shrugs)! - Unify `v1Domain` + `v2Domain` into a single polymorphic `domain` table discriminated by a `type` enum (`"ENSv1Domain"` | `"ENSv2Domain"`), and make Registry polymorphic across concrete ENSv1 (mainnet Registry, Basenames Registry, Lineanames Registry), ENSv1 Virtual (per-parent-domain virtual Registry managed by each ENSv1 domain that has children), and ENSv2 Registries.
+
+  ### Breaking schema + id format changes
+  - `ENSv1DomainId` is now a dash-delimited tuple: `${ENSv1RegistryId}-${node}` (was `Node`). Every ENSv1 Domain is addressable through a concrete Registry, so bare `node` values no longer identify a Domain by themselves.
+  - `RegistryId` is a union of `ENSv1RegistryId`, `ENSv1VirtualRegistryId`, and `ENSv2RegistryId`. New id constructors: `makeENSv1RegistryId`, `makeENSv2RegistryId`, `makeENSv1VirtualRegistryId`, and `makeConcreteRegistryId` (returns `ENSv1RegistryId | ENSv2RegistryId` for callsites that only need to address a concrete Registry contract). `makeENSv1DomainId` now takes `(AccountId, Node)`.
+  - `domains` table: replaces `v1_domains` + `v2_domains`. Adds `type`, nullable `tokenId` (non-null iff ENSv2), nullable `node` (non-null iff ENSv1), nullable `rootRegistryOwnerId` (v1 only). `parentId` removed; parent relationships flow through `registryCanonicalDomain` for both v1 and v2.
+  - `registries` table: adds `type` enum column and nullable `node` (non-null iff `ENSv1VirtualRegistry`). Unique `(chainId, address)` index becomes a plain index so virtual Registries can share their concrete parent's `(chainId, address)`.
+  - `registryCanonicalDomain.domainId` is typed as the unified `DomainId`.
+
+  ### GraphQL
+  - `Registry` becomes a GraphQL interface with `ENSv1Registry`, `ENSv1VirtualRegistry`, and `ENSv2Registry` implementations. `ENSv1VirtualRegistry` exposes `node: Node!`.
+  - `Domain` interface gains `parent: Domain` (resolved via the canonical-path dataloader); `ENSv1Domain` exposes `node: Node!` and `rootRegistryOwner`; `ENSv2Domain` exposes `tokenId`, `registry`, `subregistry`, `permissions`.
+  - `Query.registry(by: { contract })` now DB-looks up the concrete Registry by `(chainId, address, type IN (ENSv1Registry, ENSv2Registry))`. Virtual Registries are not addressable via `AccountId` alone.
+
+### Patch Changes
+
+- [#1996](https://github.com/namehash/ensnode/pull/1996) [`c186ad8`](https://github.com/namehash/ensnode/commit/c186ad8c0d85c4db8619a436173d7e21f857f689) Thanks [@tk-o](https://github.com/tk-o)! - Made `EnsDbWriter.migrateEnsNodeSchema` race-condition safe.
+
+- Updated dependencies [[`43d8a9b`](https://github.com/namehash/ensnode/commit/43d8a9b838b15719f520cd3f3bbfd1b52a4ad1ce), [`824d819`](https://github.com/namehash/ensnode/commit/824d819d291b2b642d2664d09cb10d6de69a6ea7), [`6173160`](https://github.com/namehash/ensnode/commit/61731608632f62139496656f6231210f63383f20), [`92ca54f`](https://github.com/namehash/ensnode/commit/92ca54fa2efbef3f32e2dacd8fdc347ef260a2af), [`7e77c5c`](https://github.com/namehash/ensnode/commit/7e77c5c2bef96d1a2eb363871fb87379b5f6f7e9), [`0d8a4b4`](https://github.com/namehash/ensnode/commit/0d8a4b4b7c8c70be904652e2132e7c67fd9e39ef), [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572), [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572), [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572), [`6173160`](https://github.com/namehash/ensnode/commit/61731608632f62139496656f6231210f63383f20)]:
+  - @ensnode/ensnode-sdk@1.11.0
+  - enssdk@1.11.0
+
+## 1.10.1
+
+### Patch Changes
+
+- [#1984](https://github.com/namehash/ensnode/pull/1984) [`e92fa4d`](https://github.com/namehash/ensnode/commit/e92fa4d28f183b62fb6d9665db3332b43a46f279) Thanks [@shrugs](https://github.com/shrugs)! - Hotfix: moved the pg_trgm extension into the ensnode schema to avoid implicit dependency on 'public' schema existing.
+
+- Updated dependencies [[`9d50f64`](https://github.com/namehash/ensnode/commit/9d50f647802fde286dfef2dc23c884801d06b228)]:
+  - @ensnode/ensnode-sdk@1.10.1
+  - enssdk@1.10.1
+
+## 1.10.0
+
+### Minor Changes
+
+- [#1967](https://github.com/namehash/ensnode/pull/1967) [`5f341e1`](https://github.com/namehash/ensnode/commit/5f341e14420146db772fc01b1b3c0f4e2d4a3cb7) Thanks [@shrugs](https://github.com/shrugs)! - Resolution API: support `contenthash`, `pubkey`, `abi`, `interfaces`, `dnszonehash`, and `version` selection. Protocol acceleration indexes `contenthash`, `pubkey`, `dnszonehash`, and handles `VersionChanged` (clears records for the node, bumps version). `ABI` (bitmask query, contract-equivalent) and `interface` records are selectable but always resolved via RPC. Adds `ContentType` / `InterfaceId` / `RecordVersion` semantic types to `enssdk`.
+
+- [#1868](https://github.com/namehash/ensnode/pull/1868) [`c336c79`](https://github.com/namehash/ensnode/commit/c336c79b08e46ce53caa536ebf6158eba9f3e017) Thanks [@tk-o](https://github.com/tk-o)! - Added `validateEnsDbConfig` function to support validation for the `EnsDbConfig` data model.
+
+- [#1856](https://github.com/namehash/ensnode/pull/1856) [`fc88ee5`](https://github.com/namehash/ensnode/commit/fc88ee5f910de1a94ce2734776d4a5640f839641) Thanks [@shrugs](https://github.com/shrugs)! - Re-enable `subgraph_domain.name` indexes (originally disabled in #1819) by pairing a hash index for exact-match lookups with a GIN trigram index (`gin_trgm_ops`) for partial-match filters (`_contains`, `_starts_with`, `_ends_with`). The hash index avoids the btree 8191-byte row size limit triggered by spam names. The trigram index requires the `pg_trgm` Postgres extension, which ENSIndexer now installs automatically via a Drizzle migration (`0001_enable_ext_pg_trgm.sql`) that runs before Ponder starts.
+
+- [#1913](https://github.com/namehash/ensnode/pull/1913) [`4c51c75`](https://github.com/namehash/ensnode/commit/4c51c75ec8b3807d0aa988618893b2da07e11a83) Thanks [@tk-o](https://github.com/tk-o)! - Exported `ENSDB_SCHEMA_CHECKSUM` const which changes when ENSDb Schema definition changes.
+
+### Patch Changes
+
+- Updated dependencies [[`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5), [`29afaa6`](https://github.com/namehash/ensnode/commit/29afaa6ad8a3f3c8133241cf1a9324980498ded4), [`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5), [`7fca45d`](https://github.com/namehash/ensnode/commit/7fca45d09dc6e3456fec2cae0827e9d2c54827a6), [`29fcfc7`](https://github.com/namehash/ensnode/commit/29fcfc7a1ab01c3214b5c16fc0e4a349010e9360), [`5f341e1`](https://github.com/namehash/ensnode/commit/5f341e14420146db772fc01b1b3c0f4e2d4a3cb7), [`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5), [`b8f5be7`](https://github.com/namehash/ensnode/commit/b8f5be761748f75c06ba4da81dd6098eec6ebb9a), [`4c99177`](https://github.com/namehash/ensnode/commit/4c991777ac13ffd2cc1fb947e5a47bd7733b112b), [`b2481d6`](https://github.com/namehash/ensnode/commit/b2481d6dae6f704493140aa63cd4ad1bfd3e3301), [`9abb302`](https://github.com/namehash/ensnode/commit/9abb30238374f0847a68615827dddafb6dc05dad), [`ed6ee96`](https://github.com/namehash/ensnode/commit/ed6ee9641bfa6f42ddc95955cf8b013c93bf2f4a), [`677db8b`](https://github.com/namehash/ensnode/commit/677db8b67effc6d530716c0a1902244dba56d787)]:
+  - @ensnode/ensnode-sdk@1.10.0
+  - enssdk@1.10.0
+
 ## 1.9.0
 
 ### Minor Changes

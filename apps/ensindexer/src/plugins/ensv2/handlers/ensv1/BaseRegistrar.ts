@@ -1,13 +1,19 @@
 import { GRACE_PERIOD_SECONDS } from "@ensdomains/ensjs/utils";
-import { type Address, isAddressEqual, zeroAddress } from "viem";
+import {
+  interpretTokenIdAsLabelHash,
+  makeENSv1DomainId,
+  makeSubdomainNode,
+  type NormalizedAddress,
+  type TokenId,
+  type UnixTimestampBigInt,
+} from "enssdk";
+import { isAddressEqual, zeroAddress } from "viem";
 
 import {
   interpretAddress,
-  interpretTokenIdAsLabelHash,
   isRegistrationFullyExpired,
-  makeENSv1DomainId,
-  makeSubdomainNode,
   PluginName,
+  toJson,
 } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
@@ -24,7 +30,6 @@ import {
   ensIndexerSchema,
   type IndexingEngineContext,
 } from "@/lib/indexing-engines/ponder";
-import { toJson } from "@/lib/json-stringify-with-bigints";
 import { getManagedName } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
@@ -53,9 +58,9 @@ export default function () {
     }: {
       context: IndexingEngineContext;
       event: EventWithArgs<{
-        from: Address;
-        to: Address;
-        tokenId: bigint;
+        from: NormalizedAddress;
+        to: NormalizedAddress;
+        tokenId: TokenId;
       }>;
     }) => {
       const { from, to, tokenId } = event.args;
@@ -74,9 +79,9 @@ export default function () {
 
       const labelHash = interpretTokenIdAsLabelHash(tokenId);
       const registrar = getThisAccountId(context, event);
-      const { node: managedNode } = getManagedName(registrar);
+      const { node: managedNode, registry } = getManagedName(registrar);
       const node = makeSubdomainNode(labelHash, managedNode);
-      const domainId = makeENSv1DomainId(node);
+      const domainId = makeENSv1DomainId(registry, node);
 
       const registration = await getLatestRegistration(context, domainId);
       if (!registration) {
@@ -84,11 +89,12 @@ export default function () {
       }
 
       // materialize Domain owner if exists
-      const domain = await context.ensDb.find(ensIndexerSchema.v1Domain, { id: domainId });
+      const domain = await context.ensDb.find(ensIndexerSchema.domain, { id: domainId });
       if (domain) await materializeENSv1DomainEffectiveOwner(context, domainId, to);
 
       // push event to domain history
-      await ensureDomainEvent(context, event, domainId);
+      const eventId = await ensureEvent(context, event);
+      await ensureDomainEvent(context, domainId, eventId);
     },
   );
 
@@ -98,9 +104,9 @@ export default function () {
   }: {
     context: IndexingEngineContext;
     event: EventWithArgs<{
-      id: bigint;
-      owner: Address;
-      expires: bigint;
+      id: TokenId;
+      owner: NormalizedAddress;
+      expires: UnixTimestampBigInt;
     }>;
   }) {
     const { id: tokenId, owner, expires: expiry } = event.args;
@@ -108,10 +114,10 @@ export default function () {
 
     const labelHash = interpretTokenIdAsLabelHash(tokenId);
     const registrar = getThisAccountId(context, event);
-    const { node: managedNode } = getManagedName(registrar);
+    const { node: managedNode, registry } = getManagedName(registrar);
     const node = makeSubdomainNode(labelHash, managedNode);
 
-    const domainId = makeENSv1DomainId(node);
+    const domainId = makeENSv1DomainId(registry, node);
     const registration = await getLatestRegistration(context, domainId);
     const isFullyExpired =
       registration && isRegistrationFullyExpired(registration, event.block.timestamp);
@@ -119,11 +125,12 @@ export default function () {
     // Invariant: If there is an existing Registration, it must be fully expired.
     if (registration && !isFullyExpired) {
       throw new Error(
-        `Invariant(BaseRegistrar:NameRegistered): Existing unexpired registration found in NameRegistered, expected none or expired.\n${toJson(registration)}`,
+        `Invariant(BaseRegistrar:NameRegistered): Existing unexpired registration found in NameRegistered, expected none or expired.\n${toJson(registration, { pretty: true })}`,
       );
     }
 
     // insert BaseRegistrar Registration
+    const eventId = await ensureEvent(context, event);
     await ensureAccount(context, registrant);
     await insertLatestRegistration(context, {
       domainId,
@@ -135,15 +142,15 @@ export default function () {
       expiry,
       // all BaseRegistrar-derived Registrars use the same GRACE_PERIOD
       gracePeriod: BigInt(GRACE_PERIOD_SECONDS),
-      eventId: await ensureEvent(context, event),
+      eventId,
     });
 
     // materialize Domain owner if exists
-    const domain = await context.ensDb.find(ensIndexerSchema.v1Domain, { id: domainId });
+    const domain = await context.ensDb.find(ensIndexerSchema.domain, { id: domainId });
     if (domain) await materializeENSv1DomainEffectiveOwner(context, domainId, owner);
 
     // push event to domain history
-    await ensureDomainEvent(context, event, domainId);
+    await ensureDomainEvent(context, domainId, eventId);
   }
 
   addOnchainEventListener(
@@ -162,15 +169,15 @@ export default function () {
       event,
     }: {
       context: IndexingEngineContext;
-      event: EventWithArgs<{ id: bigint; expires: bigint }>;
+      event: EventWithArgs<{ id: TokenId; expires: UnixTimestampBigInt }>;
     }) => {
       const { id: tokenId, expires: expiry } = event.args;
 
       const labelHash = interpretTokenIdAsLabelHash(tokenId);
       const registrar = getThisAccountId(context, event);
-      const { node: managedNode } = getManagedName(registrar);
+      const { node: managedNode, registry } = getManagedName(registrar);
       const node = makeSubdomainNode(labelHash, managedNode);
-      const domainId = makeENSv1DomainId(node);
+      const domainId = makeENSv1DomainId(registry, node);
       const registration = await getLatestRegistration(context, domainId);
 
       // Invariant: There must be a Registration to renew.
@@ -183,6 +190,7 @@ export default function () {
               node,
               domainId,
             },
+            { pretty: true },
           )}`,
         );
       }
@@ -192,6 +200,7 @@ export default function () {
         throw new Error(
           `Invariant(BaseRegistrar:NameRenewed): NameRenewed emitted for a non-BaseRegistrar registration:\n${toJson(
             { labelHash, managedNode, node, domainId, registration },
+            { pretty: true },
           )}`,
         );
       }
@@ -201,6 +210,7 @@ export default function () {
         throw new Error(
           `Invariant(BaseRegistrar:NameRenewed): NameRenewed emitted for a BaseRegistrar registration that has a null expiry:\n${toJson(
             { labelHash, managedNode, node, domainId, registration },
+            { pretty: true },
           )}`,
         );
       }
@@ -218,6 +228,7 @@ export default function () {
               registration,
               timestamp: event.block.timestamp,
             },
+            { pretty: true },
           )}`,
         );
       }
@@ -231,6 +242,7 @@ export default function () {
         .set({ expiry });
 
       // insert Renewal
+      const eventId = await ensureEvent(context, event);
       await insertLatestRenewal(context, registration, {
         domainId,
         duration,
@@ -240,7 +252,7 @@ export default function () {
       });
 
       // push event to domain history
-      await ensureDomainEvent(context, event, domainId);
+      await ensureDomainEvent(context, domainId, eventId);
     },
   );
 }

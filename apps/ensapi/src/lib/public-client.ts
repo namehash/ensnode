@@ -1,8 +1,7 @@
 import config from "@/config";
 
+import type { ChainId } from "enssdk";
 import { createPublicClient, fallback, http, type PublicClient } from "viem";
-
-import type { ChainId } from "@ensnode/ensnode-sdk";
 
 const _cache = new Map<ChainId, PublicClient>();
 

@@ -1,9 +1,8 @@
 import { formatDistance, formatDistanceStrict, fromUnixTime } from "date-fns";
 import { millisecondsInSecond } from "date-fns/constants";
+import type { UnixTimestamp } from "enssdk";
 import type * as React from "react";
 import { useEffect, useState } from "react";
-
-import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
 
 import { cn } from "../../utils/cn";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";

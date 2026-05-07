@@ -1,4 +1,4 @@
-import { Button, Link } from "@namehash/namekit-react";
+import { legacyButtonVariants } from "@namehash/namehash-ui/legacy";
 import { TelegramIcon } from "@workspace/docs/ensrainbow.io/src/components/atoms/icons/TelegramIcon.tsx";
 import { Balancer } from "react-wrap-balancer";
 
@@ -21,11 +21,14 @@ export default function JoinTelegram() {
         >
           Get updates, technical support, and connect with our team building the multichain future.
         </Balancer>
-        <Button asChild size="medium" variant="primary">
-          <Link target="_blank" href="http://t.me/ensnode">
-            <TelegramIcon /> Join our Telegram
-          </Link>
-        </Button>
+        <a
+          href="https://t.me/ensnode"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={legacyButtonVariants({ variant: "primary", size: "medium" })}
+        >
+          <TelegramIcon /> Join our Telegram
+        </a>
       </div>
       <img
         className="hidden min-[450px]:flex w-auto h-[280px] shrink-0 object-contain bg-no-repeat"

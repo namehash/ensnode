@@ -1,15 +1,16 @@
 "use client";
 
 import { EnsAvatar, NameDisplay } from "@namehash/namehash-ui";
+import type { InterpretedName } from "enssdk";
 
-import type { ENSNamespaceId, NormalizedName } from "@ensnode/ensnode-sdk";
+import type { ENSNamespaceId } from "@ensnode/ensnode-sdk";
 
 import { ExternalLinkWithIcon } from "@/components/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { beautifyUrl } from "@/lib/beautify-url";
 
 interface ProfileHeaderProps {
-  name: NormalizedName;
+  name: InterpretedName;
   namespaceId: ENSNamespaceId;
   headerImage?: string | null;
   websiteUrl?: string | null;

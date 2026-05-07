@@ -1,7 +1,7 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig({
-  entry: ["src/index.ts"],
+  entry: ["src/index.ts", "src/components/legacy/index.ts"],
   platform: "browser",
   format: ["esm", "cjs"],
   target: "es2022",

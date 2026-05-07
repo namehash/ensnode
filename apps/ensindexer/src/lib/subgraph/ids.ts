@@ -1,8 +1,6 @@
 import config from "@/config";
 
-import type { Address } from "viem";
-
-import type { LabelHash, Node } from "@ensnode/ensnode-sdk";
+import type { Address, LabelHash, Node } from "enssdk";
 
 /**
  * Makes a unique, chain-scoped resolver ID.

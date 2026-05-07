@@ -1,5 +1,5 @@
-import type { Name } from "@ensnode/ensnode-sdk";
-import { beautifyName, isInterpretedName } from "@ensnode/ensnode-sdk";
+import type { Name } from "enssdk";
+import { beautifyName, isInterpretedName } from "enssdk";
 
 interface NameDisplayProps {
   name: Name;

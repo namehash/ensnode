@@ -1,4 +1,5 @@
-import { type Address, getAddress } from "viem";
+import type { Address } from "enssdk";
+import { getAddress } from "viem";
 
 /**
  * Build a URL to the official ENS manager app

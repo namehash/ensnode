@@ -1,14 +1,12 @@
 import { SpanStatusCode, trace } from "@opentelemetry/api";
+import { coinTypeReverseLabel, evmChainIdToCoinType, reverseName } from "enssdk";
 import { isAddress, isAddressEqual } from "viem";
 
 import {
-  coinTypeReverseLabel,
-  evmChainIdToCoinType,
   type ResolverRecordsSelection,
   type ReverseResolutionArgs,
   ReverseResolutionProtocolStep,
   type ReverseResolutionResult,
-  reverseName,
   TraceableENSProtocol,
 } from "@ensnode/ensnode-sdk";
 
@@ -128,7 +126,7 @@ export async function resolveReverse(
           span.setAttribute("resolvedAddress", resolvedAddress);
 
           // Step 8.2 — if the resolvedAddress is not an EVM address, no Primary Name
-          const resolvedAddressIsEVMAddress = isAddress(resolvedAddress);
+          const resolvedAddressIsEVMAddress = isAddress(resolvedAddress, { strict: false });
           if (!resolvedAddressIsEVMAddress) {
             addProtocolStepEvent(
               protocolTracingSpan,

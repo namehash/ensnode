@@ -1,5 +1,87 @@
 # ensindexer
 
+## 1.11.0
+
+### Minor Changes
+
+- [#2036](https://github.com/namehash/ensnode/pull/2036) [`43d8a9b`](https://github.com/namehash/ensnode/commit/43d8a9b838b15719f520cd3f3bbfd1b52a4ad1ce) Thanks [@shrugs](https://github.com/shrugs)! - Updates ens-test-env devnet commit to `580c60a`.
+
+- [#2056](https://github.com/namehash/ensnode/pull/2056) [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572) Thanks [@shrugs](https://github.com/shrugs)! - Consolidated startup init into `initIndexingOnchainEvents()` for reliable execution on every ENSIndexer startup. Added `IndexingMetadataContextBuilder` and `StackInfoBuilder`. `EnsDbWriterWorker` simplified to a single recurring task. The HTTP `/config` and `/indexing-status` endpoints now read from in-memory builders instead of ENSDb. `initializeIndexingSetup` / `initializeIndexingActivation` replaced by `initIndexingOnchainEvents`.
+
+- [#1983](https://github.com/namehash/ensnode/pull/1983) [`6173160`](https://github.com/namehash/ensnode/commit/61731608632f62139496656f6231210f63383f20) Thanks [@shrugs](https://github.com/shrugs)! - Unify `v1Domain` + `v2Domain` into a single polymorphic `domain` table discriminated by a `type` enum (`"ENSv1Domain"` | `"ENSv2Domain"`), and make Registry polymorphic across concrete ENSv1 (mainnet Registry, Basenames Registry, Lineanames Registry), ENSv1 Virtual (per-parent-domain virtual Registry managed by each ENSv1 domain that has children), and ENSv2 Registries.
+
+  ### Breaking schema + id format changes
+  - `ENSv1DomainId` is now a dash-delimited tuple: `${ENSv1RegistryId}-${node}` (was `Node`). Every ENSv1 Domain is addressable through a concrete Registry, so bare `node` values no longer identify a Domain by themselves.
+  - `RegistryId` is a union of `ENSv1RegistryId`, `ENSv1VirtualRegistryId`, and `ENSv2RegistryId`. New id constructors: `makeENSv1RegistryId`, `makeENSv2RegistryId`, `makeENSv1VirtualRegistryId`, and `makeConcreteRegistryId` (returns `ENSv1RegistryId | ENSv2RegistryId` for callsites that only need to address a concrete Registry contract). `makeENSv1DomainId` now takes `(AccountId, Node)`.
+  - `domains` table: replaces `v1_domains` + `v2_domains`. Adds `type`, nullable `tokenId` (non-null iff ENSv2), nullable `node` (non-null iff ENSv1), nullable `rootRegistryOwnerId` (v1 only). `parentId` removed; parent relationships flow through `registryCanonicalDomain` for both v1 and v2.
+  - `registries` table: adds `type` enum column and nullable `node` (non-null iff `ENSv1VirtualRegistry`). Unique `(chainId, address)` index becomes a plain index so virtual Registries can share their concrete parent's `(chainId, address)`.
+  - `registryCanonicalDomain.domainId` is typed as the unified `DomainId`.
+
+  ### GraphQL
+  - `Registry` becomes a GraphQL interface with `ENSv1Registry`, `ENSv1VirtualRegistry`, and `ENSv2Registry` implementations. `ENSv1VirtualRegistry` exposes `node: Node!`.
+  - `Domain` interface gains `parent: Domain` (resolved via the canonical-path dataloader); `ENSv1Domain` exposes `node: Node!` and `rootRegistryOwner`; `ENSv2Domain` exposes `tokenId`, `registry`, `subregistry`, `permissions`.
+  - `Query.registry(by: { contract })` now DB-looks up the concrete Registry by `(chainId, address, type IN (ENSv1Registry, ENSv2Registry))`. Virtual Registries are not addressable via `AccountId` alone.
+
+### Patch Changes
+
+- [#2049](https://github.com/namehash/ensnode/pull/2049) [`5729ac1`](https://github.com/namehash/ensnode/commit/5729ac18ba029a476ffeca18c9b4bceee417ebdb) Thanks [@shrugs](https://github.com/shrugs)! - Fixed a bug in `ensv2` plugin where only `UnwrappedEthRegistrarController` was indexed; `LegacyEthRegistrarController` and `WrappedEthRegistrarController` were silently dropped. Fixes #2048.
+
+- [#2056](https://github.com/namehash/ensnode/pull/2056) [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572) Thanks [@shrugs](https://github.com/shrugs)! - `waitForEnsRainbowToBeReady` now polls `/ready` (via `ensRainbowClient.ready()`) instead of `/health`, so it correctly waits for the database to finish bootstrapping. It also aborts retries immediately on non-503 HTTP responses (e.g. `404` from a misconfigured `ENSRAINBOW_URL`, `500` from a broken instance) instead of blocking startup for ~1h, while still retrying on `503 Service Unavailable` and on transient network errors.
+
+- [#2056](https://github.com/namehash/ensnode/pull/2056) [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572) Thanks [@shrugs](https://github.com/shrugs)! - Migrated to `@ensnode/ensnode-sdk`'s `replaceBigInts` / `toJson` helpers. Dropped the direct `@ponder/utils` dependency from `ensapi`.
+
+- [#1989](https://github.com/namehash/ensnode/pull/1989) [`16ecad1`](https://github.com/namehash/ensnode/commit/16ecad17d148dd8ee9ceefa7ec32818a5f3abfe8) Thanks [@shrugs](https://github.com/shrugs)! - ENSIndexer's ensv2 plugin now avoids attempting to heal addr.reverse subnames if they've already been healed.
+
+- Updated dependencies [[`43d8a9b`](https://github.com/namehash/ensnode/commit/43d8a9b838b15719f520cd3f3bbfd1b52a4ad1ce), [`824d819`](https://github.com/namehash/ensnode/commit/824d819d291b2b642d2664d09cb10d6de69a6ea7), [`5729ac1`](https://github.com/namehash/ensnode/commit/5729ac18ba029a476ffeca18c9b4bceee417ebdb), [`7e77c5c`](https://github.com/namehash/ensnode/commit/7e77c5c2bef96d1a2eb363871fb87379b5f6f7e9), [`6173160`](https://github.com/namehash/ensnode/commit/61731608632f62139496656f6231210f63383f20), [`92ca54f`](https://github.com/namehash/ensnode/commit/92ca54fa2efbef3f32e2dacd8fdc347ef260a2af), [`7e77c5c`](https://github.com/namehash/ensnode/commit/7e77c5c2bef96d1a2eb363871fb87379b5f6f7e9), [`0d8a4b4`](https://github.com/namehash/ensnode/commit/0d8a4b4b7c8c70be904652e2132e7c67fd9e39ef), [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572), [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572), [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572), [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572), [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572), [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572), [`43d8a9b`](https://github.com/namehash/ensnode/commit/43d8a9b838b15719f520cd3f3bbfd1b52a4ad1ce), [`c186ad8`](https://github.com/namehash/ensnode/commit/c186ad8c0d85c4db8619a436173d7e21f857f689), [`6173160`](https://github.com/namehash/ensnode/commit/61731608632f62139496656f6231210f63383f20)]:
+  - @ensnode/ensnode-sdk@1.11.0
+  - @ensnode/datasources@1.11.0
+  - @ensnode/ensdb-sdk@1.11.0
+  - enssdk@1.11.0
+  - @ensnode/ensrainbow-sdk@1.11.0
+  - @ensnode/ponder-sdk@1.11.0
+
+## 1.10.1
+
+### Patch Changes
+
+- [#1984](https://github.com/namehash/ensnode/pull/1984) [`e92fa4d`](https://github.com/namehash/ensnode/commit/e92fa4d28f183b62fb6d9665db3332b43a46f279) Thanks [@shrugs](https://github.com/shrugs)! - Hotfix: moved the pg_trgm extension into the ensnode schema to avoid implicit dependency on 'public' schema existing.
+
+- Updated dependencies [[`e92fa4d`](https://github.com/namehash/ensnode/commit/e92fa4d28f183b62fb6d9665db3332b43a46f279), [`9d50f64`](https://github.com/namehash/ensnode/commit/9d50f647802fde286dfef2dc23c884801d06b228)]:
+  - @ensnode/ensdb-sdk@1.10.1
+  - @ensnode/ensnode-sdk@1.10.1
+  - @ensnode/ensrainbow-sdk@1.10.1
+  - enssdk@1.10.1
+  - @ensnode/datasources@1.10.1
+  - @ensnode/ponder-sdk@1.10.1
+
+## 1.10.0
+
+### Minor Changes
+
+- [#1839](https://github.com/namehash/ensnode/pull/1839) [`1e4bfdc`](https://github.com/namehash/ensnode/commit/1e4bfdcd248520aefa01daaa162ae4002486bace) Thanks [@tk-o](https://github.com/tk-o)! - Replaced `ponder.on` with `addOnchainEventListener`. This change enables more granular management of the indexing process.
+
+- [#1967](https://github.com/namehash/ensnode/pull/1967) [`5f341e1`](https://github.com/namehash/ensnode/commit/5f341e14420146db772fc01b1b3c0f4e2d4a3cb7) Thanks [@shrugs](https://github.com/shrugs)! - Resolution API: support `contenthash`, `pubkey`, `abi`, `interfaces`, `dnszonehash`, and `version` selection. Protocol acceleration indexes `contenthash`, `pubkey`, `dnszonehash`, and handles `VersionChanged` (clears records for the node, bumps version). `ABI` (bitmask query, contract-equivalent) and `interface` records are selectable but always resolved via RPC. Adds `ContentType` / `InterfaceId` / `RecordVersion` semantic types to `enssdk`.
+
+- [#1864](https://github.com/namehash/ensnode/pull/1864) [`065ecbe`](https://github.com/namehash/ensnode/commit/065ecbecd02f3e438d1cc488001b7cd967f2be59) Thanks [@tk-o](https://github.com/tk-o)! - Enhanced application logging approach to use a streamlined logger implementation across ENSIndexer app.
+
+- [#1913](https://github.com/namehash/ensnode/pull/1913) [`4c51c75`](https://github.com/namehash/ensnode/commit/4c51c75ec8b3807d0aa988618893b2da07e11a83) Thanks [@tk-o](https://github.com/tk-o)! - Updated Ponder Config object to include values that indexing behavior depends on. This is to ensure that the Ponder Build ID changes when any value in indexing behavior dependencies changes.
+
+- [#1856](https://github.com/namehash/ensnode/pull/1856) [`fc88ee5`](https://github.com/namehash/ensnode/commit/fc88ee5f910de1a94ce2734776d4a5640f839641) Thanks [@shrugs](https://github.com/shrugs)! - Re-enable `subgraph_domain.name` indexes (originally disabled in #1819) by pairing a hash index for exact-match lookups with a GIN trigram index (`gin_trgm_ops`) for partial-match filters (`_contains`, `_starts_with`, `_ends_with`). The hash index avoids the btree 8191-byte row size limit triggered by spam names. The trigram index requires the `pg_trgm` Postgres extension, which ENSIndexer now installs automatically via a Drizzle migration (`0001_enable_ext_pg_trgm.sql`) that runs before Ponder starts.
+
+- [#1843](https://github.com/namehash/ensnode/pull/1843) [`61d76b5`](https://github.com/namehash/ensnode/commit/61d76b5e1caeb1954e6b6c0d3255201d209569ce) Thanks [@tk-o](https://github.com/tk-o)! - Introduced indexing event handler preconditions to optimize the cross-service availability in an ENSNode instance when ENSRainbow is performing a cold-start.
+
+- [#1828](https://github.com/namehash/ensnode/pull/1828) [`4c99177`](https://github.com/namehash/ensnode/commit/4c991777ac13ffd2cc1fb947e5a47bd7733b112b) Thanks [@tk-o](https://github.com/tk-o)! - Renamed environment variables: `DATABASE_URL` to `ENSDB_URL`, and `DATABASE_SCHEMA` to `ENSINDEXER_SCHEMA_NAME`.
+
+### Patch Changes
+
+- Updated dependencies [[`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5), [`29afaa6`](https://github.com/namehash/ensnode/commit/29afaa6ad8a3f3c8133241cf1a9324980498ded4), [`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5), [`7fca45d`](https://github.com/namehash/ensnode/commit/7fca45d09dc6e3456fec2cae0827e9d2c54827a6), [`29fcfc7`](https://github.com/namehash/ensnode/commit/29fcfc7a1ab01c3214b5c16fc0e4a349010e9360), [`5f341e1`](https://github.com/namehash/ensnode/commit/5f341e14420146db772fc01b1b3c0f4e2d4a3cb7), [`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5), [`b8f5be7`](https://github.com/namehash/ensnode/commit/b8f5be761748f75c06ba4da81dd6098eec6ebb9a), [`c336c79`](https://github.com/namehash/ensnode/commit/c336c79b08e46ce53caa536ebf6158eba9f3e017), [`fc88ee5`](https://github.com/namehash/ensnode/commit/fc88ee5f910de1a94ce2734776d4a5640f839641), [`4c99177`](https://github.com/namehash/ensnode/commit/4c991777ac13ffd2cc1fb947e5a47bd7733b112b), [`1eccf18`](https://github.com/namehash/ensnode/commit/1eccf18d78f48b63e02a8e11e5916ac2f365ea32), [`4c51c75`](https://github.com/namehash/ensnode/commit/4c51c75ec8b3807d0aa988618893b2da07e11a83), [`b2481d6`](https://github.com/namehash/ensnode/commit/b2481d6dae6f704493140aa63cd4ad1bfd3e3301), [`9abb302`](https://github.com/namehash/ensnode/commit/9abb30238374f0847a68615827dddafb6dc05dad), [`ed6ee96`](https://github.com/namehash/ensnode/commit/ed6ee9641bfa6f42ddc95955cf8b013c93bf2f4a), [`065ecbe`](https://github.com/namehash/ensnode/commit/065ecbecd02f3e438d1cc488001b7cd967f2be59), [`677db8b`](https://github.com/namehash/ensnode/commit/677db8b67effc6d530716c0a1902244dba56d787)]:
+  - @ensnode/ensnode-sdk@1.10.0
+  - enssdk@1.10.0
+  - @ensnode/ensdb-sdk@1.10.0
+  - @ensnode/ensrainbow-sdk@1.10.0
+  - @ensnode/ponder-sdk@1.10.0
+  - @ensnode/datasources@1.10.0
+
 ## 1.9.0
 
 ### Minor Changes
@@ -240,13 +322,11 @@
 - [#1194](https://github.com/namehash/ensnode/pull/1194) [`af52f0b`](https://github.com/namehash/ensnode/commit/af52f0befda8220d56ff26a30208c196acb0d3cb) Thanks [@shrugs](https://github.com/shrugs)! - Introduces the ENSApi application, a separate, horizontally scalable ENSNode API server to replace the legacy `ponder serve` experience.
 
   Connecting ENSApi to:
-
   - your Postgres Database (`DATABASE_URL`, `DATABASE_SCHEMA`),
   - ENSIndexer (`ENSINDEXER_URL`), and
   - an ENS Root Chain RPC (`ALCHEMY_API_KEY`, `RPC_URL_*`)
 
   provides the following APIs:
-
   - ENSIndexer Config API (`/api/config`)
   - ENSIndexer Indexing Status API (`/api/indexing-status`)
   - Legacy ENS Subgraph GraphQL API (`/subgraph`)
@@ -281,13 +361,11 @@
 - [#1118](https://github.com/namehash/ensnode/pull/1118) [`22514f8`](https://github.com/namehash/ensnode/commit/22514f82f43c5cdb239631a3ca45c9dd20bbf1db) Thanks [@shrugs](https://github.com/shrugs)! - Introduces new `SUBGRAPH_COMPAT` flag (default false) to configure ENSIndexer's subgraph-compatible indexing behavior and removes the `HEAL_REVERSE_ADDRESSES`, `INDEX_ADDITIONAL_RESOLVER_RECORDS`, and `REPLACE_UNNORMALIZED` configuration flags.
 
   If `SUBGRAPH_COMPAT=true`, the following default configuration is provided:
-
   - `PLUGINS=subgraph`
   - `LABEL_SET_ID=subgraph`
   - `LABEL_SET_VERSION=0`
 
   If `SUBGRAPH_COMPAT=false` (default behavior), the following default configuration is provided:
-
   - `PLUGINS=subgraph,basenames,lineanames,threedns`
   - `LABEL_SET_ID=subgraph`
   - `LABEL_SET_VERSION=0`
@@ -329,7 +407,6 @@
   **Migration Required**
 
   If you're using the `reverse-resolvers` plugin, you need to update your configuration:
-
   1. Replace `reverse-resolvers` with `protocol-acceleration` in your `PLUGINS` environment variable
   2. This is a breaking change that requires re-indexing from scratch due to database schema changes
 
@@ -394,14 +471,12 @@
 ### Patch Changes
 
 - [#962](https://github.com/namehash/ensnode/pull/962) [`845a037`](https://github.com/namehash/ensnode/commit/845a03761dc830303a56cd70fe0d57c36d78a663) Thanks [@djstrong](https://github.com/djstrong)! - Add LABEL_SET_ID and LABEL_SET_VERSION environment variables to ENSIndexer
-
   - Add label set configuration to ENSIndexerConfig, SerializedENSIndexerConfig, and ENSIndexerPublicConfig
   - Update indexing behavior dependencies to prevent starting with different label set configurations
   - Add configuration schema validation and serialization support
   - Enforce Ponder build id changes if configured label set changes
 
 - [#962](https://github.com/namehash/ensnode/pull/962) [`845a037`](https://github.com/namehash/ensnode/commit/845a03761dc830303a56cd70fe0d57c36d78a663) Thanks [@djstrong](https://github.com/djstrong)! - Add label set configuration to Terraform infrastructure
-
   - Add label_set_id and label_set_version variables to ENSIndexer Terraform module
   - Update main Terraform configuration to support label set configuration
   - Enhance deterministic label healing capabilities through infrastructure configuration

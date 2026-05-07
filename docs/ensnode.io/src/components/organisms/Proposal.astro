@@ -1,6 +1,7 @@
 ---
+import { legacyButtonVariants } from "@namehash/namehash-ui/legacy";
+
 import cc from "classcat";
-import ButtonIsland from "../atoms/ButtonIsland";
 
 const flexStyles =
   "flex flex-col flex-nowrap justify-center items-center xl:items-start text-center xl:text-left";
@@ -19,12 +20,7 @@ const namehashS2ProposalYoutube = "https://www.youtube.com/embed/g88tCK5TECU?si=
                     hasn't kept pace. ENSNode solves this with a purpose-built indexer, ensuring ENSv2 and Namechain
                     launch with the complete data foundation the ecosystem requires.</p>
             </div>
-            <ButtonIsland text="Learn more" size="medium" variant="secondary"
-                                   style=`px-[25px] py-[13px] max-sm:w-full max-sm:flex max-sm:justify-center`
-                                   linkData={{
-                                       target: "_blank",
-                                       link: "https://discuss.ens.domains/t/spp2-namehash-labs-application/20502"
-                                   }}/>
+            <a href="https://discuss.ens.domains/t/spp2-namehash-labs-application/20502" target="_blank" rel="noopener noreferrer" class={legacyButtonVariants({variant: "secondary", size: "medium"})}>Learn more</a>
         </div>
         <iframe
                 class="w-full h-auto aspect-[26/17] min-[840px]:w-[520px] min-[840px]:h-[340px] shrink-0 rounded-[20px] object-cover"

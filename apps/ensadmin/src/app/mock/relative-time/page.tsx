@@ -1,10 +1,9 @@
 "use client";
 
 import { AbsoluteTime, InfoIcon, RelativeTime } from "@namehash/namehash-ui";
+import type { UnixTimestamp } from "enssdk";
 import { CheckIcon, X as XIcon } from "lucide-react";
 import { useMemo, useState } from "react";
-
-import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
 
 import mockDataJson from "@/app/mock/relative-time/data.json";
 import { Button } from "@/components/ui/button";

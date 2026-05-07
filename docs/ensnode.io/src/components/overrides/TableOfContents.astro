@@ -1,9 +1,13 @@
 ---
 import Default from "@astrojs/starlight/components/TableOfContents.astro";
 
+import ScalarTableOfContents from "../molecules/ScalarTableOfContents.astro";
 import TelegramInvite from "../molecules/TelegramInvite.astro";
+
+const { starlightRoute } = Astro.locals;
+const isApiReference = starlightRoute.slug === "ensapi/reference/api-reference";
 ---
 
-<Default />
+{isApiReference ? <ScalarTableOfContents /> : <Default />}
 <br />
 <TelegramInvite />

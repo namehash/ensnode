@@ -5,7 +5,6 @@ import { buildUnvalidatedEnsIndexerPublicConfig } from "./deserialize";
 import type { SerializedEnsIndexerPublicConfig } from "./serialized-types";
 import { type EnsIndexerVersionInfo, PluginName } from "./types";
 import {
-  makeDatabaseSchemaNameSchema,
   makeEnsIndexerPublicConfigSchema,
   makeEnsIndexerVersionInfoSchema,
   makeFullyPinnedLabelSetSchema,
@@ -20,16 +19,6 @@ describe("ENSIndexer: Config", () => {
       prettifyError(zodParseError.error!);
 
     describe("Parsing", () => {
-      it("can parse database schema name values", () => {
-        expect(makeDatabaseSchemaNameSchema().parse("public")).toBe("public");
-        expect(makeDatabaseSchemaNameSchema().parse("the_schema")).toBe("the_schema");
-        expect(makeDatabaseSchemaNameSchema().parse("theSchema")).toBe("theSchema");
-
-        expect(formatParseError(makeDatabaseSchemaNameSchema().safeParse(1))).toContain(
-          "Database schema name must be a string",
-        );
-      });
-
       it("can parse a list of plugin name values", () => {
         expect(
           makePluginsListSchema().parse([
@@ -105,14 +94,12 @@ describe("ENSIndexer: Config", () => {
       it("can parse version info values", () => {
         expect(
           makeEnsIndexerVersionInfoSchema().parse({
-            nodejs: "v22.22.22",
             ponder: "0.11.25",
             ensDb: "0.32.0",
             ensIndexer: "0.32.0",
             ensNormalize: "1.11.1",
           } satisfies EnsIndexerVersionInfo),
         ).toStrictEqual({
-          nodejs: "v22.22.22",
           ponder: "0.11.25",
           ensDb: "0.32.0",
           ensIndexer: "0.32.0",
@@ -122,7 +109,6 @@ describe("ENSIndexer: Config", () => {
         expect(
           formatParseError(
             makeEnsIndexerVersionInfoSchema().safeParse({
-              nodejs: "",
               ponder: "",
               ensDb: "",
               ensIndexer: "",
@@ -130,8 +116,6 @@ describe("ENSIndexer: Config", () => {
             } satisfies EnsIndexerVersionInfo),
           ),
         ).toStrictEqual(`✖ Value must be a non-empty string.
-  → at nodejs
-✖ Value must be a non-empty string.
   → at ponder
 ✖ Value must be a non-empty string.
   → at ensDb
@@ -145,7 +129,6 @@ describe("ENSIndexer: Config", () => {
         expect(
           formatParseError(
             makeEnsIndexerVersionInfoSchema().safeParse({
-              nodejs: "v22.22.22",
               ponder: "0.11.25",
               ensDb: "0.32.0",
               ensIndexer: "0.33.0", // Different from ensDb
@@ -158,20 +141,20 @@ describe("ENSIndexer: Config", () => {
       it("validates ENSRainbow label set and version compatibility", () => {
         const baseConfig = {
           ensRainbowPublicConfig: {
-            version: "0.32.0",
-            labelSet: {
+            serverLabelSet: {
               labelSetId: "subgraph",
               highestLabelSetVersion: 0,
             },
-            recordsCount: 100,
+            versionInfo: {
+              ensRainbow: "0.32.0",
+            },
           },
           indexedChainIds: [1], // Use array for serialized config
           isSubgraphCompatible: false, // Set to false to bypass isSubgraphCompatible invariant
           namespace: "mainnet" as const,
           plugins: [PluginName.Subgraph, PluginName.Registrars], // Multiple plugins allowed when not subgraph compatible
-          databaseSchemaName: "test_schema",
+          ensIndexerSchemaName: "ensindexer_0",
           versionInfo: {
-            nodejs: "v22.22.22",
             ponder: "0.11.25",
             ensDb: "0.32.0",
             ensIndexer: "0.32.0",
@@ -185,7 +168,7 @@ describe("ENSIndexer: Config", () => {
             makeEnsIndexerPublicConfigSchema().safeParse(
               buildUnvalidatedEnsIndexerPublicConfig({
                 ...baseConfig,
-                labelSet: { labelSetId: "custom-labels", labelSetVersion: 0 },
+                clientLabelSet: { labelSetId: "custom-labels", labelSetVersion: 0 },
               }),
             ),
           ),
@@ -199,7 +182,7 @@ describe("ENSIndexer: Config", () => {
             makeEnsIndexerPublicConfigSchema().safeParse(
               buildUnvalidatedEnsIndexerPublicConfig({
                 ...baseConfig,
-                labelSet: { labelSetId: "subgraph", labelSetVersion: 5 },
+                clientLabelSet: { labelSetId: "subgraph", labelSetVersion: 5 },
               }),
             ),
           ),
@@ -209,14 +192,15 @@ describe("ENSIndexer: Config", () => {
       it("can parse full ENSIndexerPublicConfig with label set", () => {
         const validConfig = {
           ensRainbowPublicConfig: {
-            version: "0.32.0",
-            labelSet: {
+            serverLabelSet: {
               labelSetId: "subgraph",
               highestLabelSetVersion: 0,
             },
-            recordsCount: 100,
+            versionInfo: {
+              ensRainbow: "0.32.0",
+            },
           },
-          labelSet: {
+          clientLabelSet: {
             labelSetId: "subgraph",
             labelSetVersion: 0,
           },
@@ -224,9 +208,8 @@ describe("ENSIndexer: Config", () => {
           isSubgraphCompatible: true,
           namespace: "mainnet" as const,
           plugins: [PluginName.Subgraph],
-          databaseSchemaName: "test_schema",
+          ensIndexerSchemaName: "ensindexer_0",
           versionInfo: {
-            nodejs: "v22.22.22",
             ponder: "0.11.25",
             ensDb: "0.32.0",
             ensIndexer: "0.32.0",
@@ -245,11 +228,11 @@ describe("ENSIndexer: Config", () => {
             makeEnsIndexerPublicConfigSchema().safeParse(
               buildUnvalidatedEnsIndexerPublicConfig({
                 ...validConfig,
-                labelSet: { ...validConfig.labelSet, labelSetId: "" },
+                clientLabelSet: { ...validConfig.clientLabelSet, labelSetId: "" },
               }),
             ),
           ),
-        ).toContain("labelSet.labelSetId must be 1-50 characters long");
+        ).toContain("clientLabelSet.labelSetId must be 1-50 characters long");
 
         // Test invalid labelSetVersion
         expect(
@@ -257,26 +240,19 @@ describe("ENSIndexer: Config", () => {
             makeEnsIndexerPublicConfigSchema().safeParse(
               buildUnvalidatedEnsIndexerPublicConfig({
                 ...validConfig,
-                labelSet: {
-                  ...validConfig.labelSet,
+                clientLabelSet: {
+                  ...validConfig.clientLabelSet,
                   labelSetVersion: "not-a-number" as unknown as number,
                 },
               }),
             ),
           ),
-        ).toContain("labelSet.labelSetVersion must be an integer");
+        ).toContain("clientLabelSet.labelSetVersion must be a non-negative integer");
       });
     });
 
     describe("Useful error messages", () => {
       it("can apply custom value labels", () => {
-        expect(
-          formatParseError(makeDatabaseSchemaNameSchema("databaseSchema").safeParse("")),
-        ).toContain("databaseSchema is required and must be a non-empty string.");
-        expect(
-          formatParseError(makeDatabaseSchemaNameSchema("DATABASE_SCHEMA env var").safeParse("")),
-        ).toContain("DATABASE_SCHEMA env var is required and must be a non-empty string.");
-
         expect(
           formatParseError(
             makePluginsListSchema("PLUGINS env var").safeParse([

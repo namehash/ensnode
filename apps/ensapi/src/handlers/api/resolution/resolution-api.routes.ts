@@ -1,9 +1,16 @@
 import { createRoute, z } from "@hono/zod-openapi";
 
 import {
+  errorResponseInternalServerErrorExample,
+  errorResponseInvalidAddressExample,
+  errorResponseInvalidNameExample,
+  makeErrorResponseSchema,
   makeResolvePrimaryNameResponseSchema,
   makeResolvePrimaryNamesResponseSchema,
   makeResolveRecordsResponseSchema,
+  resolvePrimaryNameResponseExample,
+  resolvePrimaryNamesResponseExample,
+  resolveRecordsResponseExample,
 } from "@ensnode/ensnode-sdk/internal";
 
 import { params } from "@/lib/handlers/params.schema";
@@ -21,24 +28,34 @@ export const resolveRecordsRoute = createRoute({
     params: z.object({
       name: params.name,
     }),
-    query: z
-      .object({
-        ...params.selectionParams.shape,
-        trace: params.trace,
-        accelerate: params.accelerate,
-      })
-      .transform((value) => {
-        const { trace, accelerate, ...selectionParams } = value;
-        const selection = params.selection.parse(selectionParams);
-        return { selection, trace, accelerate };
-      }),
+    query: params.resolveRecordsQuery,
   },
   responses: {
     200: {
       description: "Successfully resolved records",
       content: {
         "application/json": {
-          schema: makeResolveRecordsResponseSchema(),
+          schema: makeResolveRecordsResponseSchema().openapi({
+            example: resolveRecordsResponseExample,
+          }),
+        },
+      },
+    },
+    400: {
+      description: "Invalid name or query parameters",
+      content: {
+        "application/json": {
+          schema: makeErrorResponseSchema().openapi({ example: errorResponseInvalidNameExample }),
+        },
+      },
+    },
+    500: {
+      description: "Internal server error",
+      content: {
+        "application/json": {
+          schema: makeErrorResponseSchema().openapi({
+            example: errorResponseInternalServerErrorExample,
+          }),
         },
       },
     },
@@ -67,7 +84,29 @@ export const resolvePrimaryNameRoute = createRoute({
       description: "Successfully resolved name",
       content: {
         "application/json": {
-          schema: makeResolvePrimaryNameResponseSchema(),
+          schema: makeResolvePrimaryNameResponseSchema().openapi({
+            example: resolvePrimaryNameResponseExample,
+          }),
+        },
+      },
+    },
+    400: {
+      description: "Invalid address or chain ID",
+      content: {
+        "application/json": {
+          schema: makeErrorResponseSchema().openapi({
+            example: errorResponseInvalidAddressExample,
+          }),
+        },
+      },
+    },
+    500: {
+      description: "Internal server error",
+      content: {
+        "application/json": {
+          schema: makeErrorResponseSchema().openapi({
+            example: errorResponseInternalServerErrorExample,
+          }),
         },
       },
     },
@@ -96,11 +135,31 @@ export const resolvePrimaryNamesRoute = createRoute({
       description: "Successfully resolved records",
       content: {
         "application/json": {
-          schema: makeResolvePrimaryNamesResponseSchema(),
+          schema: makeResolvePrimaryNamesResponseSchema().openapi({
+            example: resolvePrimaryNamesResponseExample,
+          }),
+        },
+      },
+    },
+    400: {
+      description: "Invalid address or chain IDs",
+      content: {
+        "application/json": {
+          schema: makeErrorResponseSchema().openapi({
+            example: errorResponseInvalidAddressExample,
+          }),
+        },
+      },
+    },
+    500: {
+      description: "Internal server error",
+      content: {
+        "application/json": {
+          schema: makeErrorResponseSchema().openapi({
+            example: errorResponseInternalServerErrorExample,
+          }),
         },
       },
     },
   },
 });
-
-export const routes = [resolveRecordsRoute, resolvePrimaryNameRoute, resolvePrimaryNamesRoute];

@@ -52,6 +52,12 @@
 
 name: Release Preview (@preview)
 
+permissions:
+  contents: read
+  id-token: write
+  packages: write
+  pull-requests: write
+
 on:
   workflow_dispatch:
     inputs:
@@ -175,9 +181,6 @@ jobs:
     runs-on: blacksmith-4vcpu-ubuntu-2204
     needs: validate-and-prepare
     if: inputs.publish_target == 'npm-only' || inputs.publish_target == 'npm-and-lambdas' || inputs.publish_target == 'npm-and-ghcr' || inputs.publish_target == 'all'
-    permissions:
-      contents: read
-      id-token: write
     outputs:
       published-version: ${{ steps.publish.outputs.published-version }}
     steps:
@@ -224,9 +227,6 @@ jobs:
     runs-on: blacksmith-4vcpu-ubuntu-2204
     needs: [validate-and-prepare, build-and-publish-npm]
     if: inputs.publish_target == 'npm-and-ghcr' || inputs.publish_target == 'all'
-    permissions:
-      contents: read
-      packages: write
     strategy:
       fail-fast: false
       matrix:
@@ -275,9 +275,6 @@ jobs:
     runs-on: blacksmith-4vcpu-ubuntu-2204
     needs: [validate-and-prepare, build-and-publish-npm, build-and-publish-ghcr, build-and-publish-lambdas]
     if: always() && needs.build-and-publish-npm.result == 'success'
-    permissions:
-      contents: read
-      pull-requests: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6

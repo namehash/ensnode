@@ -1,9 +1,9 @@
-import type { Address, Hash } from "viem";
+import type { Address, Node } from "enssdk";
+import type { Hash } from "viem";
 
 import {
   type EncodedReferrer,
   isRegistrarActionReferralAvailable,
-  type Node,
   type RegistrarActionReferral,
 } from "@ensnode/ensnode-sdk";
 

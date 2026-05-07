@@ -1,8 +1,9 @@
-import { namehash, zeroAddress } from "viem";
+import { type AccountId, ETH_NODE } from "enssdk";
+import { zeroAddress } from "viem";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { DatasourceNames } from "@ensnode/datasources";
-import { type AccountId, ENSNamespaceIds, getDatasourceContract } from "@ensnode/ensnode-sdk";
+import { ENSNamespaceIds, getDatasourceContract } from "@ensnode/ensnode-sdk";
 
 import { getManagedName } from "./managed-names";
 
@@ -30,13 +31,11 @@ const registrar = getDatasourceContract(
   "BaseRegistrar",
 );
 
-const controller = getDatasourceContract(
+const ensv1Registry = getDatasourceContract(
   ENSNamespaceIds.Mainnet,
   DatasourceNames.ENSRoot,
-  "LegacyEthRegistrarController",
+  "ENSv1Registry",
 );
-
-const ETH_NODE = namehash("eth");
 
 describe("managed-names", () => {
   beforeEach(() => {
@@ -46,22 +45,25 @@ describe("managed-names", () => {
   // NOTE: because the cache isn't resettable between test runs (exporting a reset method isn't worth),
   // we simply enforce that the cache test case be run first via .sequential
   describe.sequential("getManagedName", () => {
-    it("should cache the result of viem#namehash", () => {
+    it("should memoize per (namespace, contract)", () => {
       expect(spy.mock.calls).toHaveLength(0);
 
-      expect(getManagedName(registrar)).toStrictEqual({ name: "eth", node: ETH_NODE });
+      expect(getManagedName(registrar)).toMatchObject({ name: "eth", node: ETH_NODE });
 
       // first call should invoke namehash
       expect(spy.mock.calls).toHaveLength(1);
 
-      expect(getManagedName(controller)).toStrictEqual({ name: "eth", node: ETH_NODE });
-
-      // second call should not invoke namehash
+      // repeat call for the same contract is served from cache
+      expect(getManagedName(registrar)).toMatchObject({ name: "eth", node: ETH_NODE });
       expect(spy.mock.calls).toHaveLength(1);
     });
 
-    it("should return the managed name and node for the BaseRegistrar contract", () => {
-      expect(getManagedName(registrar)).toStrictEqual({ name: "eth", node: ETH_NODE });
+    it("should return the managed name, node, and registry for the BaseRegistrar contract", () => {
+      expect(getManagedName(registrar)).toStrictEqual({
+        name: "eth",
+        node: ETH_NODE,
+        registry: ensv1Registry,
+      });
     });
 
     it("should throw an error for a contract without a managed name", () => {

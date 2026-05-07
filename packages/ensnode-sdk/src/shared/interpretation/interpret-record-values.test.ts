@@ -1,3 +1,4 @@
+import { asLiteralName } from "enssdk";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -9,15 +10,15 @@ import {
 
 describe("interpretNameRecordValue", () => {
   it("returns null for empty string", () => {
-    expect(interpretNameRecordValue("")).toBeNull();
+    expect(interpretNameRecordValue(asLiteralName(""))).toBeNull();
   });
 
   it("returns null for non-normalized name", () => {
-    expect(interpretNameRecordValue("NotNormalized.eth")).toBeNull();
+    expect(interpretNameRecordValue(asLiteralName("NotNormalized.eth"))).toBeNull();
   });
 
   it("returns value for normalized name", () => {
-    expect(interpretNameRecordValue("vitalik.eth")).toBe("vitalik.eth");
+    expect(interpretNameRecordValue(asLiteralName("vitalik.eth"))).toBe("vitalik.eth");
   });
 });
 

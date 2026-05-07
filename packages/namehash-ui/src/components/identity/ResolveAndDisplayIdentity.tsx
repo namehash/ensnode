@@ -62,6 +62,7 @@ export function ResolveAndDisplayIdentity({
   const { identity: identityResult } = useResolvedIdentity({
     identity,
     accelerate,
+    namespace: namespaceId,
   });
 
   return (

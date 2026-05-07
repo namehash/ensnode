@@ -1,6 +1,6 @@
-import { Address } from "viem";
+import type { Address, Name } from "enssdk";
 
-import { ENSNamespaceIds, Name, NamespaceSpecificValue } from "@ensnode/ensnode-sdk";
+import { ENSNamespaceIds, type NamespaceSpecificValue } from "@ensnode/ensnode-sdk";
 
 export const EXAMPLE_ADDRESSES: NamespaceSpecificValue<Array<{ address: Address; name: Name }>> = {
   default: [

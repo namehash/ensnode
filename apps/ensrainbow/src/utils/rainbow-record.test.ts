@@ -1,7 +1,6 @@
-import { labelhash } from "viem";
+import { asLiteralLabel, type LabelHash, labelhashLiteralLabel } from "enssdk";
 import { describe, expect, it } from "vitest";
 
-import type { LabelHash } from "@ensnode/ensnode-sdk";
 import { labelHashToBytes } from "@ensnode/ensnode-sdk";
 
 import { buildRainbowRecord } from "./rainbow-record";
@@ -9,7 +8,7 @@ import { buildRainbowRecord } from "./rainbow-record";
 describe("buildRainbowRecord", () => {
   it("should parse a valid line", () => {
     const label = "test-label";
-    const validLabelHash = labelhash(label);
+    const validLabelHash = labelhashLiteralLabel(asLiteralLabel(label));
     const line = `${validLabelHash}\t${label}`;
 
     const record = buildRainbowRecord(line);
@@ -19,7 +18,7 @@ describe("buildRainbowRecord", () => {
 
   it("should handle labels with special characters", () => {
     const label = "test🚀label";
-    const validLabelHash = labelhash(label);
+    const validLabelHash = labelhashLiteralLabel(asLiteralLabel(label));
     const line = `${validLabelHash}\t${label}`;
 
     const record = buildRainbowRecord(line);

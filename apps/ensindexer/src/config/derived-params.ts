@@ -1,5 +1,6 @@
+import type { ChainId } from "enssdk";
+
 import { maybeGetDatasource } from "@ensnode/datasources";
-import type { ChainId } from "@ensnode/ensnode-sdk";
 
 import type { EnsIndexerConfig } from "@/config/types";
 import { getPlugin } from "@/plugins";

@@ -1,8 +1,10 @@
-import { type Address, isAddressEqual, zeroAddress, zeroHash } from "viem";
-
 import {
+  type Address,
+  asInterpretedLabel,
+  constructSubInterpretedName,
   type DNSEncodedLiteralName,
   type DNSEncodedName,
+  type DurationBigInt,
   decodeDNSEncodedLiteralName,
   encodeLabelHash,
   type InterpretedLabel,
@@ -14,7 +16,10 @@ import {
   literalLabelToInterpretedLabel,
   makeSubdomainNode,
   type Node,
-} from "@ensnode/ensnode-sdk";
+  type NormalizedAddress,
+  type UnixTimestampBigInt,
+} from "enssdk";
+import { isAddressEqual, zeroAddress, zeroHash } from "viem";
 
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
@@ -78,7 +83,7 @@ function decodeFQDN(fqdn: DNSEncodedLiteralName): {
   }
 
   // due the invariant above, we know that all of the labels are normalized (and therefore Interpreted Labels)
-  const interpretedLabels = literalLabels as string[] as InterpretedLabel[];
+  const interpretedLabels = literalLabels.map(asInterpretedLabel);
 
   return {
     // biome-ignore lint/style/noNonNullAssertion: ok due to length invariant above
@@ -108,7 +113,7 @@ export async function handleNewOwner({
     node: Node;
     // NOTE: `label` event arg represents a `LabelHash` for the sub-node under `node`
     label: LabelHash;
-    owner: Address;
+    owner: NormalizedAddress;
   }>;
 }) {
   const { label: labelHash, node: parentNode, owner } = event.args;
@@ -176,17 +181,18 @@ export async function handleNewOwner({
     // Interpret the `healedLabel` Literal Label into an Interpreted Label
     // see https://ensnode.io/docs/reference/terminology#literal-label
     // see https://ensnode.io/docs/reference/terminology#interpreted-label
-    const interpretedLabel = (
+    const interpretedLabel = asInterpretedLabel(
       healedLabel !== null
         ? literalLabelToInterpretedLabel(healedLabel)
-        : encodeLabelHash(labelHash)
-    ) as InterpretedLabel;
+        : encodeLabelHash(labelHash),
+    );
 
     // to construct `Domain.name` use the parent's Name and the Interpreted Label
     // NOTE: for a TLD, the parent is null, so we just use the Label value as is
-    const interpretedName = (
-      parent?.name ? `${interpretedLabel}.${parent.name}` : interpretedLabel
-    ) as InterpretedName;
+    const interpretedName = constructSubInterpretedName(
+      interpretedLabel,
+      parent?.name as InterpretedName | undefined,
+    );
 
     await context.ensDb
       .update(ensIndexerSchema.subgraph_domain, { id: node })
@@ -207,7 +213,7 @@ export async function handleTransfer({
   event,
 }: {
   context: IndexingEngineContext;
-  event: EventWithArgs<{ node: Node; owner: Address }>;
+  event: EventWithArgs<{ node: Node; owner: NormalizedAddress }>;
 }) {
   const { node, owner } = event.args;
 
@@ -242,9 +248,9 @@ export async function handleRegistrationCreated({
     // NOTE: `tld` event arg represents a `Node` that is the parent of `node`
     tld: Node;
     fqdn: DNSEncodedName;
-    registrant: Address;
+    registrant: NormalizedAddress;
     controlBitmap: number;
-    expiry: bigint;
+    expiry: UnixTimestampBigInt;
   }>;
 }) {
   const { node, tld, fqdn, registrant, expiry } = event.args;
@@ -303,7 +309,7 @@ export async function handleRegistrationExtended({
   event,
 }: {
   context: IndexingEngineContext;
-  event: EventWithArgs<{ node: Node; duration: bigint; newExpiry: bigint }>;
+  event: EventWithArgs<{ node: Node; duration: DurationBigInt; newExpiry: UnixTimestampBigInt }>;
 }) {
   const { node, newExpiry } = event.args;
 

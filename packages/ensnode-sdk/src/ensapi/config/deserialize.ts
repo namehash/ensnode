@@ -16,7 +16,7 @@ import {
  * @param serializedPublicConfig - The serialized public config to build from.
  * @return An unvalidated {@link EnsApiPublicConfig} object.
  */
-function buildUnvalidatedEnsApiPublicConfig(
+export function buildUnvalidatedEnsApiPublicConfig(
   serializedPublicConfig: SerializedEnsApiPublicConfig,
 ): Unvalidated<EnsApiPublicConfig> {
   return {

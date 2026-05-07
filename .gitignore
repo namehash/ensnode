@@ -19,6 +19,7 @@ dist
 
 # Ponder
 generated
+!packages/enssdk/src/omnigraph/generated/
 .ponder
 
 #jetbrains elements
@@ -32,7 +33,6 @@ generated
 terraform.tfstate*
 
 # Claude
-CLAUDE.md
 .claude
 
 # ENSRainbow data

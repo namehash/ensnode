@@ -1,6 +1,6 @@
-import type { Address } from "viem";
+import type { Address, ENSv1DomainId } from "enssdk";
 
-import { type ENSv1DomainId, interpretAddress } from "@ensnode/ensnode-sdk";
+import { interpretAddress } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
@@ -16,8 +16,8 @@ export async function materializeENSv1DomainEffectiveOwner(
   // ensure owner
   await ensureAccount(context, owner);
 
-  // update v1Domain's effective owner
+  // update Domain's effective owner
   await context.ensDb
-    .update(ensIndexerSchema.v1Domain, { id })
+    .update(ensIndexerSchema.domain, { id })
     .set({ ownerId: interpretAddress(owner) });
 }

@@ -1,9 +1,11 @@
-import packageJson from "@/../package.json" with { type: "json" };
-
 import pRetry from "p-retry";
 import { prettifyError, ZodError, z } from "zod/v4";
 
-import type { EnsApiPublicConfig } from "@ensnode/ensnode-sdk";
+import {
+  type EnsApiPublicConfig,
+  type EnsIndexerPublicConfig,
+  IndexingMetadataContextStatusCodes,
+} from "@ensnode/ensnode-sdk";
 import {
   buildRpcConfigsFromEnv,
   canFallbackToTheGraph,
@@ -16,16 +18,17 @@ import {
 } from "@ensnode/ensnode-sdk/internal";
 
 import { ENSApi_DEFAULT_PORT } from "@/config/defaults";
-import { EnsDbConfigSchema } from "@/config/ensdb-config.schema";
+import ensDbConfig from "@/config/ensdb-config";
 import type { EnsApiEnvironment } from "@/config/environment";
 import { invariant_ensIndexerPublicConfigVersionInfo } from "@/config/validations";
 import { ensDbClient } from "@/lib/ensdb/singleton";
 import logger from "@/lib/logger";
+import { ensApiVersionInfo } from "@/lib/version-info";
 
 /**
- * Schema for validating custom referral program edition config set URL.
+ * Schema for validating the referral program edition config set URL.
  */
-const CustomReferralProgramEditionConfigSetUrlSchema = z
+const ReferralProgramEditionConfigSetUrlSchema = z
   .string()
   .transform((val, ctx) => {
     try {
@@ -33,7 +36,7 @@ const CustomReferralProgramEditionConfigSetUrlSchema = z
     } catch {
       ctx.addIssue({
         code: "custom",
-        message: `CUSTOM_REFERRAL_PROGRAM_EDITIONS is not a valid URL: ${val}`,
+        message: `REFERRAL_PROGRAM_EDITIONS is not a valid URL: ${val}`,
       });
       return z.NEVER;
     }
@@ -47,9 +50,12 @@ const EnsApiConfigSchema = z
     namespace: ENSNamespaceSchema,
     rpcConfigs: RpcConfigsSchema,
     ensIndexerPublicConfig: makeENSIndexerPublicConfigSchema("ensIndexerPublicConfig"),
-    customReferralProgramEditionConfigSetUrl: CustomReferralProgramEditionConfigSetUrlSchema,
+    referralProgramEditionConfigSetUrl: ReferralProgramEditionConfigSetUrlSchema,
+
+    // include the ENSDbConfig params in the EnsApiConfigSchema
+    ensDbUrl: z.string(),
+    ensIndexerSchemaName: z.string(),
   })
-  .extend(EnsDbConfigSchema.shape)
   .check(invariant_rpcConfigsSpecifiedForRootChain)
   .check(invariant_ensIndexerPublicConfigVersionInfo);
 
@@ -68,13 +74,17 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
     // https://github.com/namehash/ensnode/issues/1806
     const ensIndexerPublicConfig = await pRetry(
       async () => {
-        const config = await ensDbClient.getEnsIndexerPublicConfig();
+        const indexingMetadataContext = await ensDbClient.getIndexingMetadataContext();
 
-        if (!config) {
-          throw new Error("ENSIndexer Public Config not yet available in ENSDb.");
+        if (
+          indexingMetadataContext.statusCode === IndexingMetadataContextStatusCodes.Uninitialized
+        ) {
+          throw new Error(
+            "EnsIndexerPublicConfig could not be fetched, the IndexingMetadataContext record has not been initialized in ENSDb yet.",
+          );
         }
 
-        return config;
+        return indexingMetadataContext.stackInfo.ensIndexer;
       },
       {
         retries: 13, // This allows for a total of over 1 hour of retries with the exponential backoff strategy
@@ -90,13 +100,15 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
 
     return EnsApiConfigSchema.parse({
       port: env.PORT,
-      databaseUrl: env.DATABASE_URL,
       theGraphApiKey: env.THEGRAPH_API_KEY,
       ensIndexerPublicConfig,
       namespace: ensIndexerPublicConfig.namespace,
-      ensIndexerSchemaName: ensIndexerPublicConfig.databaseSchemaName,
       rpcConfigs,
-      customReferralProgramEditionConfigSetUrl: env.CUSTOM_REFERRAL_PROGRAM_EDITIONS,
+      referralProgramEditionConfigSetUrl: env.REFERRAL_PROGRAM_EDITIONS,
+
+      // include the validated ENSDb config values in the parsed EnsApiConfig
+      ensDbUrl: ensDbConfig.ensDbUrl,
+      ensIndexerSchemaName: ensDbConfig.ensIndexerSchemaName,
     });
   } catch (error) {
     if (error instanceof ZodError) {
@@ -117,17 +129,20 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
  * @param config - The validated EnsApiConfig object
  * @returns A complete ENSApiPublicConfig object
  */
-export function buildEnsApiPublicConfig(config: EnsApiConfig): EnsApiPublicConfig {
+export function buildEnsApiPublicConfig(
+  ensApiConfig: EnsApiConfig,
+  ensIndexerPublicConfig: EnsIndexerPublicConfig,
+): EnsApiPublicConfig {
   return {
-    version: packageJson.version,
+    versionInfo: ensApiVersionInfo,
     theGraphFallback: canFallbackToTheGraph({
-      namespace: config.namespace,
+      namespace: ensIndexerPublicConfig.namespace,
       // NOTE: very important here that we replace the actual server-side api key with a placeholder
       // so that it's not sent to clients as part of the `theGraphFallback.url`. The placeholder must
       // pass validation, of course, but the only validation necessary is that it is a string.
-      theGraphApiKey: config.theGraphApiKey ? "<API_KEY>" : undefined,
-      isSubgraphCompatible: config.ensIndexerPublicConfig.isSubgraphCompatible,
+      theGraphApiKey: ensApiConfig.theGraphApiKey ? "<API_KEY>" : undefined,
+      isSubgraphCompatible: ensIndexerPublicConfig.isSubgraphCompatible,
     }),
-    ensIndexerPublicConfig: config.ensIndexerPublicConfig,
+    ensIndexerPublicConfig,
   };
 }

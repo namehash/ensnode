@@ -1,7 +1,9 @@
 import config from "@/config";
 
+import { asLiteralName, DEFAULT_EVM_COIN_TYPE, evmChainIdToCoinType } from "enssdk";
+
 import { getENSRootChainId } from "@ensnode/datasources";
-import { DEFAULT_EVM_COIN_TYPE, evmChainIdToCoinType, PluginName } from "@ensnode/ensnode-sdk";
+import { PluginName } from "@ensnode/ensnode-sdk";
 import { interpretNameRecordValue } from "@ensnode/ensnode-sdk/internal";
 
 import { addOnchainEventListener, ensIndexerSchema } from "@/lib/indexing-engines/ponder";
@@ -19,7 +21,8 @@ export default function () {
       "StandaloneReverseRegistrar:NameForAddrChanged",
     ),
     async ({ context, event }) => {
-      const { addr: address, name } = event.args;
+      const { addr: address } = event.args;
+      const name = asLiteralName(event.args.name);
 
       // The DefaultReverseRegistrar on the ENS Root chain manages 'default' names under the default coinType.
       // On any other chain, the L2ReverseRegistrar manages names for that chain's coinType.

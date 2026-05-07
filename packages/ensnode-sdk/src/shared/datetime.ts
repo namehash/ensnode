@@ -1,7 +1,7 @@
 import { getUnixTime } from "date-fns/getUnixTime";
+import type { Duration, UnixTimestamp } from "enssdk";
 
 import { deserializeDuration, deserializeUnixTimestamp } from "./deserialize";
-import type { Duration, UnixTimestamp } from "./types";
 
 /**
  * Duration between two moments in time.

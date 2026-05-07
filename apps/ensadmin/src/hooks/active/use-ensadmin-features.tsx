@@ -1,8 +1,7 @@
 import { useMemo } from "react";
 
-import { useENSNodeConfig } from "@ensnode/ensnode-react";
 import {
-  hasGraphqlApiConfigSupport,
+  hasOmnigraphApiConfigSupport,
   hasRegistrarActionsConfigSupport,
   hasRegistrarActionsIndexingStatusSupport,
   hasSubgraphApiConfigSupport,
@@ -33,9 +32,15 @@ export interface ENSAdminFeatures {
   subgraph: FeatureStatus;
 
   /**
-   * Whether ENSAdmin's ENSNode GraphQL API tooling is supported by the connected ENSNode.
+   * Whether ENSAdmin's ENSNode Omnigraph API tooling is supported by the connected ENSNode.
    */
-  graphql: FeatureStatus;
+  omnigraph: FeatureStatus;
+
+  /**
+   * Whether ENSAdmin's REST APIs tooling is supported by the connected ENSNode.
+   * The REST API is available on any ENSApi instance that serves `/openapi.json`.
+   */
+  restApi: FeatureStatus;
 }
 
 const prerequisiteResultToFeatureStatus = (result: PrerequisiteResult): FeatureStatus => {
@@ -44,11 +49,6 @@ const prerequisiteResultToFeatureStatus = (result: PrerequisiteResult): FeatureS
 };
 
 const CONNECTING_STATUS: FeatureStatus = { type: "connecting" };
-
-const CONFIG_ERROR_STATUS: FeatureStatus = {
-  type: "error",
-  reason: "ENSNode config could not be fetched successfully.",
-};
 
 const INDEXING_STATUS_ERROR_STATUS: FeatureStatus = {
   type: "error",
@@ -59,50 +59,50 @@ const INDEXING_STATUS_ERROR_STATUS: FeatureStatus = {
  * Hook that derives whether certain ENSAdmin features are supported by the connected ENSNode.
  */
 export function useENSAdminFeatures(): ENSAdminFeatures {
-  const configQuery = useENSNodeConfig();
   const indexingStatusQuery = useIndexingStatusWithSwr();
 
   const registrarActions = useMemo<FeatureStatus>(() => {
-    if (configQuery.status === "error") return CONFIG_ERROR_STATUS;
-    if (configQuery.status === "pending") return CONNECTING_STATUS;
+    if (indexingStatusQuery.status === "error") return INDEXING_STATUS_ERROR_STATUS;
+    if (indexingStatusQuery.status === "pending") return CONNECTING_STATUS;
 
-    const { ensIndexerPublicConfig } = configQuery.data;
-    const result = hasRegistrarActionsConfigSupport(ensIndexerPublicConfig);
-    if (!result.supported) return prerequisiteResultToFeatureStatus(result);
+    const { ensIndexer: ensIndexerPublicConfig } = indexingStatusQuery.data.stackInfo;
+    const configSupportResult = hasRegistrarActionsConfigSupport(ensIndexerPublicConfig);
+    if (!configSupportResult.supported)
+      return prerequisiteResultToFeatureStatus(configSupportResult);
 
-    switch (indexingStatusQuery.status) {
-      case "error": {
-        return INDEXING_STATUS_ERROR_STATUS;
-      }
-      case "pending": {
-        return CONNECTING_STATUS;
-      }
-      case "success": {
-        const { realtimeProjection } = indexingStatusQuery.data;
-        const { omnichainSnapshot } = realtimeProjection.snapshot;
+    const { realtimeProjection } = indexingStatusQuery.data;
+    const { omnichainSnapshot } = realtimeProjection.snapshot;
 
-        const result = hasRegistrarActionsIndexingStatusSupport(omnichainSnapshot.omnichainStatus);
-        if (!result.supported) return { type: "not-ready", reason: result.reason };
-        return { type: "supported" };
-      }
-    }
-  }, [configQuery, indexingStatusQuery]);
+    const indexingStatusSupportResult = hasRegistrarActionsIndexingStatusSupport(
+      omnichainSnapshot.omnichainStatus,
+    );
+    if (!indexingStatusSupportResult.supported)
+      return { type: "not-ready", reason: indexingStatusSupportResult.reason };
+    return { type: "supported" };
+  }, [indexingStatusQuery]);
 
   const subgraph: FeatureStatus = useMemo(() => {
-    if (configQuery.status === "error") return CONFIG_ERROR_STATUS;
-    if (configQuery.status === "pending") return CONNECTING_STATUS;
+    if (indexingStatusQuery.status === "error") return INDEXING_STATUS_ERROR_STATUS;
+    if (indexingStatusQuery.status === "pending") return CONNECTING_STATUS;
 
-    const { ensIndexerPublicConfig } = configQuery.data;
+    const { ensIndexer: ensIndexerPublicConfig } = indexingStatusQuery.data.stackInfo;
     return prerequisiteResultToFeatureStatus(hasSubgraphApiConfigSupport(ensIndexerPublicConfig));
-  }, [configQuery]);
+  }, [indexingStatusQuery]);
 
-  const graphql: FeatureStatus = useMemo(() => {
-    if (configQuery.status === "error") return CONFIG_ERROR_STATUS;
-    if (configQuery.status === "pending") return CONNECTING_STATUS;
+  const omnigraph: FeatureStatus = useMemo(() => {
+    if (indexingStatusQuery.status === "error") return INDEXING_STATUS_ERROR_STATUS;
+    if (indexingStatusQuery.status === "pending") return CONNECTING_STATUS;
 
-    const { ensIndexerPublicConfig } = configQuery.data;
-    return prerequisiteResultToFeatureStatus(hasGraphqlApiConfigSupport(ensIndexerPublicConfig));
-  }, [configQuery]);
+    const { ensIndexer: ensIndexerPublicConfig } = indexingStatusQuery.data.stackInfo;
+    return prerequisiteResultToFeatureStatus(hasOmnigraphApiConfigSupport(ensIndexerPublicConfig));
+  }, [indexingStatusQuery]);
 
-  return { registrarActions, subgraph, graphql };
+  const restApi: FeatureStatus = useMemo(() => {
+    if (indexingStatusQuery.status === "error") return INDEXING_STATUS_ERROR_STATUS;
+    if (indexingStatusQuery.status === "pending") return CONNECTING_STATUS;
+
+    return { type: "supported" };
+  }, [indexingStatusQuery]);
+
+  return { registrarActions, subgraph, omnigraph, restApi };
 }

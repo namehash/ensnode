@@ -2,8 +2,8 @@ import { type DocumentNode, Kind, parse, print } from "graphql";
 import type { RequestDocument, Variables } from "graphql-request";
 import { expect } from "vitest";
 
-import { client } from "./ensnode-graphql-api-client";
 import { highlightGraphQL, highlightJSON } from "./highlight";
+import { client } from "./omnigraph-api-client";
 
 export type GraphQLConnection<NODE> = {
   edges: { node: NODE }[];

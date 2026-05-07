@@ -1,11 +1,10 @@
-import type { Address } from "viem";
-
 import {
   addrReverseLabel,
   type LabelHash,
   type LiteralLabel,
   labelhashLiteralLabel,
-} from "@ensnode/ensnode-sdk";
+  type NormalizedAddress,
+} from "enssdk";
 
 /**
  * Attempt to heal the labelHash of an addr.reverse subname using an address.
@@ -14,7 +13,7 @@ import {
  */
 export const maybeHealLabelByAddrReverseSubname = (
   labelHash: LabelHash,
-  address: Address,
+  address: NormalizedAddress,
 ): LiteralLabel | null => {
   // construct an addr.reverse subname label from the provided address
   const maybeLabel = addrReverseLabel(address);

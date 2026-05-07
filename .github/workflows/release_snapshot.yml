@@ -38,6 +38,11 @@
 
 name: Release Snapshot (@next)
 
+permissions:
+  contents: read
+  id-token: write
+  packages: write
+
 on:
   push:
     branches:
@@ -50,9 +55,6 @@ jobs:
     name: Build & Publish Snapshot Packages to NPM
     if: github.repository == 'namehash/ensnode' && !contains(github.event.head_commit.message, 'changeset-release/main')
     runs-on: blacksmith-4vcpu-ubuntu-2204
-    permissions:
-      contents: read
-      id-token: write
     outputs:
       hasChanges: ${{ steps.snapshot.outputs.hasChanges }}
     steps:
@@ -81,7 +83,7 @@ jobs:
 
       - name: Publish snapshot packages to NPM
         if: steps.snapshot.outputs.hasChanges == 'true'
-        run: pnpm changeset-publish:next
+        run: pnpm changeset:publish:next
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -89,11 +91,8 @@ jobs:
   build-and-publish-ghcr:
     name: Build & Publish Snapshot Docker Images to GHCR
     runs-on: blacksmith-4vcpu-ubuntu-2204
-    if: github.repository == 'namehash/ensnode' && !contains(github.event.head_commit.message, 'changeset-release/main') && needs.snapshot.outputs.hasChanges == 'true'
+    if: github.repository == 'namehash/ensnode' && !contains(github.event.head_commit.message, 'changeset-release/main') && needs.build-and-publish-npm.outputs.hasChanges == 'true'
     needs: [build-and-publish-npm]
-    permissions:
-      contents: read
-      packages: write
     strategy:
       fail-fast: false
       matrix:
@@ -127,7 +126,7 @@ jobs:
   build-and-publish-lambdas:
     name: Build & Publish Snapshot Lambdas
     runs-on: blacksmith-4vcpu-ubuntu-2204
-    if: github.repository == 'namehash/ensnode' && !contains(github.event.head_commit.message, 'changeset-release/main') && needs.snapshot.outputs.hasChanges == 'true'
+    if: github.repository == 'namehash/ensnode' && !contains(github.event.head_commit.message, 'changeset-release/main') && needs.build-and-publish-npm.outputs.hasChanges == 'true'
     needs: [build-and-publish-npm]
     strategy:
       fail-fast: false

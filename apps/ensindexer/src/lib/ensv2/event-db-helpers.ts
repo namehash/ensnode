@@ -1,11 +1,12 @@
-import type { Hash } from "viem";
-
 import {
   type AccountId,
   type DomainId,
   makePermissionsId,
   makeResolverId,
-} from "@ensnode/ensnode-sdk";
+  type NormalizedAddress,
+  type PermissionsUserId,
+} from "enssdk";
+import type { Hash } from "viem";
 
 import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 import type { LogEventBase } from "@/lib/ponder-helpers";
@@ -24,7 +25,11 @@ const hasTopics = (topics: LogEventBase["log"]["topics"]): topics is Topics =>
  *
  * @returns event.id
  */
-export async function ensureEvent(context: IndexingEngineContext, event: LogEventBase) {
+export async function ensureEvent(
+  context: IndexingEngineContext,
+  event: LogEventBase,
+  sender?: NormalizedAddress | null,
+) {
   // all relevant ENS events obviously have a topic, so we can safely constrain the type of this data
   if (!hasTopics(event.log.topics)) {
     throw new Error(`Invariant: All events indexed via ensureEvent must have at least one topic.`);
@@ -38,6 +43,9 @@ export async function ensureEvent(context: IndexingEngineContext, event: LogEven
     .insert(ensIndexerSchema.event)
     .values({
       id: event.id,
+
+      // sender override if provided, otherwise transaction.from
+      sender: sender ?? event.transaction.from,
 
       // chain
       chainId: context.chain.id,
@@ -67,10 +75,9 @@ export async function ensureEvent(context: IndexingEngineContext, event: LogEven
 
 export async function ensureDomainEvent(
   context: IndexingEngineContext,
-  event: LogEventBase,
   domainId: DomainId,
+  eventId: string,
 ) {
-  const eventId = await ensureEvent(context, event);
   await context.ensDb
     .insert(ensIndexerSchema.domainEvent)
     .values({ domainId, eventId })
@@ -79,10 +86,9 @@ export async function ensureDomainEvent(
 
 export async function ensureResolverEvent(
   context: IndexingEngineContext,
-  event: LogEventBase,
   resolver: AccountId,
+  eventId: string,
 ) {
-  const eventId = await ensureEvent(context, event);
   await context.ensDb
     .insert(ensIndexerSchema.resolverEvent)
     .values({ resolverId: makeResolverId(resolver), eventId })
@@ -91,12 +97,22 @@ export async function ensureResolverEvent(
 
 export async function ensurePermissionsEvent(
   context: IndexingEngineContext,
-  event: LogEventBase,
   contract: AccountId,
+  eventId: string,
 ) {
-  const eventId = await ensureEvent(context, event);
   await context.ensDb
     .insert(ensIndexerSchema.permissionsEvent)
     .values({ permissionsId: makePermissionsId(contract), eventId })
+    .onConflictDoNothing();
+}
+
+export async function ensurePermissionsUserEvent(
+  context: IndexingEngineContext,
+  permissionsUserId: PermissionsUserId,
+  eventId: string,
+) {
+  await context.ensDb
+    .insert(ensIndexerSchema.permissionsUserEvent)
+    .values({ permissionsUserId, eventId })
     .onConflictDoNothing();
 }
