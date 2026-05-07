@@ -5,6 +5,7 @@ import {
   asInterpretedName,
   asLiteralName,
   type InterpretedName,
+  isInterpretedName,
   isNormalizedName,
   literalNameToInterpretedName,
   type Name,
@@ -67,7 +68,7 @@ const EXAMPLE_NAMES: NamespaceSpecificValue<InterpretedName[]> = {
 export default function ExploreNamesPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const nameFromQuery = searchParams.get("name") as Name | null;
+  const nameFromQuery = searchParams.get("name");
   const [rawInputName, setRawInputName] = useState<Name>("");
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -116,18 +117,15 @@ export default function ExploreNamesPage() {
   // Detail page: validate name from query params using only validation checks (no normalization).
   // see: https://github.com/namehash/ensnode/issues/1140
   if (nameFromQuery !== null && nameFromQuery !== "") {
-    let interpreted: InterpretedName;
-    try {
-      interpreted = asInterpretedName(nameFromQuery);
-    } catch {
+    if (!isInterpretedName(nameFromQuery)) {
       return <UnnormalizedNameError />;
     }
 
-    if (!isNormalizedName(interpreted)) {
+    if (!isNormalizedName(nameFromQuery)) {
       return <InterpretedNameUnsupportedError />;
     }
 
-    return <NameDetailPageContent name={interpreted} />;
+    return <NameDetailPageContent name={nameFromQuery} />;
   }
 
   return (
