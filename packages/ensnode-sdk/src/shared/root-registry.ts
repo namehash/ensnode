@@ -1,4 +1,4 @@
-import { type AccountId, makeENSv1RegistryId, makeENSv2RegistryId } from "enssdk";
+import { type AccountId, makeENSv1RegistryId, makeENSv2RegistryId, type RegistryId } from "enssdk";
 
 import { DatasourceNames, type ENSNamespaceId } from "@ensnode/datasources";
 
@@ -86,3 +86,12 @@ export const maybeGetENSv2RootRegistryId = (namespace: ENSNamespaceId) => {
  */
 export const getRootRegistryId = (namespace: ENSNamespaceId) =>
   maybeGetENSv2RootRegistryId(namespace) ?? getENSv1RootRegistryId(namespace);
+
+/**
+ * Determines whether `registryId` is a Root Registry (ENSv1 Root or, when defined, ENSv2 Root)
+ * for the selected `namespace`. Root Registries are canonical by axiom: they have no parent
+ * edge to derive canonicality from.
+ */
+export const isRootRegistryId = (namespace: ENSNamespaceId, registryId: RegistryId): boolean =>
+  registryId === getENSv1RootRegistryId(namespace) ||
+  registryId === maybeGetENSv2RootRegistryId(namespace);

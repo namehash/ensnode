@@ -62,11 +62,12 @@ import type { EncodedReferrer } from "@ensnode/ensnode-sdk";
  * the Basenames Registry, the Lineanames Registry) sit at the top. ENSv2 namegraphs are rooted in
  * a single `ENSv2Registry` RootRegistry on the ENS Root Chain and are possibly circular directed
  * graphs. The full namegraph is never materialized, only _navigated_ at resolution-time, with the
- * exception of the canonical subgraph, which is materialized for PK-keyed query-time access:
- * `Registry.canonical` / `Domain.canonical` flags on the rows themselves, the bidirectional
- * canonical edge in the parallel `domainCanonicalSubregistry` table, and a per-Registry child list
- * in `registryDomains` used by the cascade walker. The edge table is parallel (rather than a column
- * on `domain`) so canonicality can be recorded before the corresponding Domain row exists.
+ * exception of the canonical subgraph, which is reflected via `Registry.canonical` /
+ * `Domain.canonical` boolean flags on the rows themselves. The bidirectional canonical edge is
+ * NOT materialized in a parallel table; it is derived on demand by checking that the two
+ * unidirectional pointers agree (`Registry.canonicalDomainId = Domain.id`
+ * ↔ `Domain.subregistryId = Registry.id`). Cascading canonicality flips through the subgraph
+ * run as a single recursive-CTE batch UPDATE (see `canonicality-db-helpers.ts`).
  *
  * Note also that the Protocol Acceleration plugin is a hard requirement for the ENSv2 plugin. This
  * allows us to rely on the shared logic for indexing:
@@ -218,6 +219,14 @@ export const registry = onchainTable(
 
     // Whether this Registry is part of the canonical namegraph. See canonicality-db-helpers.ts.
     canonical: t.boolean().notNull().default(false),
+
+    // Synthetic monotonic sentinel: flipped to true the first time a child Domain is registered
+    // under this Registry (see `ensureDomainInRegistry`). Read by `cascadeCanonicality` to skip
+    // the raw-SQL recursive-CTE walk (and its associated Ponder cache flush) when the start
+    // registry provably has no descendants — the dominant case for fresh ENSv1 virtual
+    // registries on first wire-up. Double-underscore prefix marks it as an internal-only
+    // bookkeeping field, not part of the on-chain protocol surface.
+    __hasChildren: t.boolean().notNull().default(false),
   }),
   (t) => ({
     // NOTE: non-unique index because multiple rows can share (chainId, address) across virtual registries
@@ -603,30 +612,3 @@ export const label = onchainTable(
 export const label_relations = relations(label, ({ many }) => ({
   domains: many(domain),
 }));
-
-///////////////////
-// Canonical Names
-///////////////////
-
-// Children of each Registry, used by the canonicality cascade in canonicality-db-helpers.ts to
-// walk a Registry's children without scanning `domain`. Keyed by `registryId` so a single PK read
-// pulls the whole list — Ponder's row-level prefetch covers the iteration in one round-trip.
-export const registryDomains = onchainTable("registry_domains", (t) => ({
-  registryId: t.text().primaryKey().$type<RegistryId>(),
-  domainIds: t.text().array().notNull().$type<DomainId[]>(),
-}));
-
-// A bi-directionally edge-authenticated forward pointer from Domain -> Registry, only set if they
-// both agree (`Registry → Domain` ↔ `Domain → Registry`)
-export const domainCanonicalSubregistry = onchainTable(
-  "domain_canonical_subregistries",
-  (t) => ({
-    domainId: t.text().primaryKey().$type<DomainId>(),
-    canonicalSubregistryId: t.text().notNull().$type<RegistryId>(),
-  }),
-  // upward namegraph traversal joins on `canonicalSubregistryId` (the registry that points back
-  // up to a canonical parent Domain), so index it for the recursive CTEs in ENSApi.
-  (t) => ({
-    byCanonicalSubregistry: index().on(t.canonicalSubregistryId),
-  }),
-);

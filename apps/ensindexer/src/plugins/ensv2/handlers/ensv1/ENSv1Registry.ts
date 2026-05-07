@@ -25,8 +25,8 @@ import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import {
   ensureDomainInRegistry,
   handleBridgedResolverChange,
+  handleRegistryCanonicalDomainUpdated,
   handleSubregistryUpdated,
-  setRegistryCanonicalDomain,
 } from "@/lib/ensv2/canonicality-db-helpers";
 import { ensureDomainEvent, ensureEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel, ensureUnknownLabel, labelExists } from "@/lib/ensv2/label-db-helpers";
@@ -104,7 +104,7 @@ export default function () {
       // attachment) is properly reconciled instead of orphaned by a blind overwrite.
       await handleSubregistryUpdated(context, parentDomainId, parentRegistryId);
 
-      await setRegistryCanonicalDomain(context, parentRegistryId, parentDomainId);
+      await handleRegistryCanonicalDomainUpdated(context, parentRegistryId, parentDomainId);
     }
 
     const ownerId = interpretAddress(owner);

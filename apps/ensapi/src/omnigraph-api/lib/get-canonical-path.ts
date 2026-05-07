@@ -34,9 +34,9 @@ export async function getCanonicalPath(domainId: DomainId): Promise<CanonicalPat
 
       UNION ALL
 
-      -- Step upward: domain → current registry's canonical parent domain via the
-      -- edge-authenticated domain_canonical_subregistries table (which only contains rows
-      -- where both registries.canonical_domain_id and domains.subregistry_id agree).
+      -- Step upward: domain → current registry's canonical parent domain via the bidirectional
+      -- canonical-edge agreement (registries.canonical_domain_id = domains.id AND
+      -- domains.subregistry_id = registries.id), computed on demand at each hop.
       -- We allow recursion to one row beyond MAX_DEPTH so we can detect (and throw on) a
       -- legitimate path that exceeds the cap, rather than silently truncating it.
       SELECT
@@ -44,10 +44,11 @@ export async function getCanonicalPath(domainId: DomainId): Promise<CanonicalPat
         pd.registry_id,
         upward.depth + 1
       FROM upward
-      JOIN ${ensIndexerSchema.domainCanonicalSubregistry} dcs
-        ON dcs.canonical_subregistry_id = upward.registry_id
+      JOIN ${ensIndexerSchema.registry} ur
+        ON ur.id = upward.registry_id
       JOIN ${ensIndexerSchema.domain} pd
-        ON pd.id = dcs.domain_id
+        ON pd.id = ur.canonical_domain_id
+       AND pd.subregistry_id = ur.id
       WHERE upward.depth <= ${MAX_SUPPORTED_NAME_DEPTH}
     )
     SELECT *
@@ -57,14 +58,14 @@ export async function getCanonicalPath(domainId: DomainId): Promise<CanonicalPat
 
   const rows = result.rows as { domain_id: DomainId; registry_id: RegistryId }[];
 
-  // Defense-in-depth: the existence + canonical check above guarantees the CTE base case yields
-  // at least one row, so this branch is unreachable under correct invariant maintenance.
+  // not necessary due to above Domain.canonical check but safety first
   if (rows.length === 0) {
     throw new Error(
       `Invariant(getCanonicalPath): DomainId '${domainId}' is canonical but produced no upward path.`,
     );
   }
 
+  // depth check
   if (rows.length > MAX_SUPPORTED_NAME_DEPTH) {
     throw new Error(
       `Invariant(getCanonicalPath): DomainId '${domainId}' produced a canonical path deeper than ${MAX_SUPPORTED_NAME_DEPTH}.`,

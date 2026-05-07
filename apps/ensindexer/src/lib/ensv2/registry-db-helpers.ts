@@ -2,13 +2,17 @@ import config from "@/config";
 
 import type { RegistryId } from "enssdk";
 
-import { getENSv1RootRegistryId, maybeGetENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
+import { isRootRegistryId } from "@ensnode/ensnode-sdk";
 
 import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 
 /**
- * Idempotently insert a Registry row, seeding `canonical = true` if it is the namespace's
- * ENSv1 or ENSv2 Root Registry.
+ * Idempotently insert a Registry row, seeding `canonical = true` only for the namespace's Root
+ * Registries (ENSv1 root, and ENSv2 root when defined). All other Registries — including ENSv1
+ * concrete and virtual registries — default to `canonical = false` and earn canonicality through
+ * the natural reconcile + cascade flow in `canonicality-db-helpers.ts` once the bidirectional
+ * canonical edge agrees back to a canonical parent Domain. v1 and v2 share the same canonicality
+ * definition: a Registry is canonical iff it can be traced back to a Root via canonical edges.
  */
 export async function ensureRegistry(
   context: IndexingEngineContext,
@@ -23,10 +27,7 @@ export async function ensureRegistry(
     .values({
       id,
       ...args,
-      canonical:
-        // by default, only the ENSv1 and ENSv2 Root Registries are Canonical
-        id === getENSv1RootRegistryId(config.namespace) ||
-        id === maybeGetENSv2RootRegistryId(config.namespace),
+      canonical: isRootRegistryId(config.namespace, id),
     })
     .onConflictDoNothing();
 }

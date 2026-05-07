@@ -23,8 +23,8 @@ import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import {
   ensureDomainInRegistry,
   handleBridgedResolverChange,
+  handleRegistryCanonicalDomainUpdated,
   handleSubregistryUpdated,
-  setRegistryCanonicalDomain,
 } from "@/lib/ensv2/canonicality-db-helpers";
 import { ensureDomainEvent, ensureEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel } from "@/lib/ensv2/label-db-helpers";
@@ -321,10 +321,10 @@ export default function () {
         const labelHash = labelhashLiteralLabel(label);
         const domainId = makeENSv2DomainId(parentRegistry, makeStorageId(labelHash));
 
-        await setRegistryCanonicalDomain(context, registryId, domainId);
+        await handleRegistryCanonicalDomainUpdated(context, registryId, domainId);
       } else {
         // unset the Canonical Domain, cascading the canonicality update to this registry's domains
-        await setRegistryCanonicalDomain(context, registryId, null);
+        await handleRegistryCanonicalDomainUpdated(context, registryId, null);
       }
 
       // TODO: push event to registry history
