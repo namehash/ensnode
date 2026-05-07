@@ -1,0 +1,77 @@
+---
+title: ENSRainbow Concepts
+description: Core concepts, terminology, and technical details for understanding ENSRainbow.
+sidebar:
+  label: Overview
+  order: 0
+---
+
+import { LinkCard } from '@astrojs/starlight/components';
+
+This section covers the fundamental concepts needed to understand and work with ENSRainbow. Whether you're integrating with the API, contributing to the project, or just want to understand how it works, start here.
+
+## Essential Concepts
+
+<LinkCard
+  title="Glossary"
+  description="Comprehensive terminology and definitions used throughout ENSRainbow"
+  href="/docs/components/ensrainbow/concepts/glossary/"
+/>
+
+<LinkCard
+  title="Unknown Labels"
+  description="Understanding the fundamental problem of unknown labels in ENS and how ENSRainbow mitigates it"
+  href="/docs/components/ensrainbow/concepts/unknown-labels/"
+/>
+
+<LinkCard
+  title="Data Model"
+  description="Detailed schema and data organization in ENSRainbow's LevelDB database"
+  href="/docs/components/ensrainbow/concepts/data-model/"
+/>
+
+<LinkCard
+  title="Label Sets & Versioning"
+  description="Understanding ENSRainbow's versioning system and why it's essential for deterministic healing"
+  href="/docs/components/ensrainbow/concepts/label-sets-and-versioning/"
+/>
+
+<LinkCard
+  title="TypeScript Interfaces"
+  description="Type definitions for ENSRainbow's server and client"
+  href="/docs/components/ensrainbow/concepts/typescript-interfaces/"
+/>
+
+## Technical Details
+
+<LinkCard
+  title="Technical Versioning"
+  description="Software versions, database schema compatibility, and operational considerations"
+  href="/docs/components/ensrainbow/concepts/versioning/"
+/>
+
+<LinkCard
+  title="Architecture"
+  description="High-level system architecture and component interactions"
+  href="/docs/components/ensrainbow/concepts/architecture/"
+/>
+
+<LinkCard
+  title="Performance"
+  description="Performance characteristics and optimization considerations"
+  href="/docs/components/ensrainbow/concepts/performance/"
+/>
+
+## Learning Path
+
+If you're new to ENSRainbow, we recommend following this learning path:
+
+1. **Start with the [Glossary](/docs/components/ensrainbow/concepts/glossary/)** to familiarize yourself with key terms
+2. **Read [Unknown Labels](/docs/components/ensrainbow/concepts/unknown-labels/)** to understand the fundamental problem ENSRainbow solves
+3. **Read [Label Sets & Versioning](/docs/components/ensrainbow/concepts/label-sets-and-versioning/)** to understand the core versioning concepts
+4. **Review the [Data Model](/docs/components/ensrainbow/concepts/data-model/)** to see how data is organized
+5. **Check out [TypeScript Interfaces](/docs/components/ensrainbow/concepts/typescript-interfaces/)** if you're planning to use the SDK
+
+For deployment and operational considerations, also review [Technical Versioning](/docs/components/ensrainbow/concepts/versioning/) and [Architecture](/docs/components/ensrainbow/concepts/architecture/).
+
+After understanding these concepts, you'll be ready to dive into the [Usage documentation](/docs/components/ensrainbow/usage/) or [Contributing guides](/docs/components/ensrainbow/contributing/). 

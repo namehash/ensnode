@@ -1,0 +1,22 @@
+---
+title: ENSNode components
+description: Microservices that make up ENSNode—ENSApi, ENSIndexer, ENSDb, ENSRainbow, and ENSAdmin—and how to work on each.
+sidebar:
+  label: Overview
+  order: 1
+---
+
+import { LinkCard, CardGrid } from "@astrojs/starlight/components";
+
+**Developing or contributing to ENSNode?** Use these sections for concepts, deployment, configuration, and contribution guides for the part of the stack you care about.
+
+ENSNode is built from **microservices**. Each service has a clear role in indexing, storage, APIs, healing, or operations.
+
+
+<CardGrid>
+  <LinkCard title="ENSApi" href="/docs/components/ensapi" description="GraphQL, REST, and operational configuration for the API service." />
+  <LinkCard title="ENSIndexer" href="/docs/components/ensindexer" description="Blockchain indexing with Ponder." />
+  <LinkCard title="ENSDb" href="/docs/components/ensdb" description="PostgreSQL schema and direct data access." />
+  <LinkCard title="ENSRainbow" href="/docs/components/ensrainbow" description="Label healing and rainbow tables." />
+  <LinkCard title="ENSAdmin" href="/docs/components/ensadmin" description="Operator dashboard for indexed ENS state." />
+</CardGrid>

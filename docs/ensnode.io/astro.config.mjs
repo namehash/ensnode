@@ -19,11 +19,12 @@ export default defineConfig({
     plugins: [tailwindcss()],
   },
   redirects: {
-    "/ensnode": "/docs",
-    "/ensnode/deploying/railway": "/docs/deploying/railway",
-    "/ensnode/concepts/what-is-ensnode": "/docs/concepts/what-is-ensnode",
-    "/ensnode/running/ens-test-env": "/docs/running/ens-test-env",
-    "/ensnode/concepts/what-is-the-ens-subgraph": "/docs/concepts/what-is-the-ens-subgraph",
+    "/docs": "/docs/build-with-ens",
+    "/ensnode": "/docs/build-with-ens",
+    "/ensnode/deploying/railway": "/docs/components/ensrainbow/deploying/railway",
+    "/ensnode/concepts/what-is-ensnode": "/docs/reference/what-is-ensnode",
+    "/ensnode/running/ens-test-env": "/docs/self-host/ens-test-env",
+    "/ensnode/concepts/what-is-the-ens-subgraph": "/docs/reference/what-is-the-ens-subgraph",
   },
   env: {
     schema: {

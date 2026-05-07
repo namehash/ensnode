@@ -1,0 +1,27 @@
+---
+title: REST API Documentation
+description: How REST API documentation is generated and kept in sync.
+sidebar:
+  label: REST API Docs
+  order: 5
+---
+
+Our REST API docs are rendered by [Scalar](https://scalar.com) directly from a committed OpenAPI spec at [`docs/ensnode.io/ensapi-openapi.json`](https://github.com/namehash/ensnode/blob/main/docs/ensnode.io/ensapi-openapi.json). The Scalar component in the [API Reference](/docs/components/ensapi/reference/api-reference) page imports the spec at build time, so any changes to the spec are reflected on the next docs build.
+
+## Updating the OpenAPI Spec
+
+If you modify any API route schemas in `apps/ensapi`, regenerate and commit the updated spec from the monorepo root:
+
+```bash
+# from the monorepo root
+pnpm generate:openapi
+```
+
+Then commit the updated `docs/ensnode.io/ensapi-openapi.json`.
+
+## OpenAPI Spec Sync Check
+
+On every PR, our CI runs an `openapi-sync-check` job that:
+
+1. Regenerates the OpenAPI spec from the ENSApi route definitions by running `pnpm generate:openapi`
+2. Compares the freshly generated spec against the committed [`docs/ensnode.io/ensapi-openapi.json`](https://github.com/namehash/ensnode/blob/main/docs/ensnode.io/ensapi-openapi.json), failing with a diff if they don't match
