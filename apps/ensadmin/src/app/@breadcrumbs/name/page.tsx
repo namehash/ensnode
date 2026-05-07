@@ -18,6 +18,7 @@ export default function Page() {
   const searchParams = useSearchParams();
   const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
   const exploreNamesBaseHref = retainCurrentRawConnectionUrlParam("/name");
+
   const name = (searchParams.get("name")?.trim() || null) as Name | null;
 
   return (
