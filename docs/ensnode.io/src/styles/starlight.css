@@ -231,8 +231,6 @@ a[rel="prev"]:hover {
   }
 }
 
-/* Topic switcher icons: use Starlight `icon` values from config (rocket, server, …). */
-
 /* Enhance hover and selected states for sidebar items */
 #starlight__sidebar a {
   transition:

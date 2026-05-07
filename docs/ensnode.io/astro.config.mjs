@@ -23,7 +23,6 @@ export default defineConfig({
     "/ensnode": "/docs/build-with-ens",
     "/ensnode/deploying/railway": "/docs/components/ensrainbow/deploying/railway",
     "/ensnode/concepts/what-is-ensnode": "/docs/reference/what-is-ensnode",
-    "/ensnode/running/ens-test-env": "/docs/self-host/ens-test-env",
     "/ensnode/concepts/what-is-the-ens-subgraph": "/docs/reference/what-is-the-ens-subgraph",
   },
   env: {

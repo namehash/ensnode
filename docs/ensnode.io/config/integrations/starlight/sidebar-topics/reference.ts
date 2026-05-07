@@ -41,7 +41,7 @@ export const referenceSidebarTopic = {
     },
     {
       label: "Indexing ENS-Compatible Names",
-      link: "/docs/reference/indexing-ens-compabile-onchain-names",
+      link: "/docs/reference/indexing-ens-compatible-onchain-names",
     },
     {
       label: "Mainnet Subnames of Subregistries",
