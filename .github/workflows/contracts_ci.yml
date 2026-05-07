@@ -41,6 +41,11 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Sync and init submodules
+        run: |
+          git submodule sync --recursive
+          git submodule update --init --recursive
+
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
 
