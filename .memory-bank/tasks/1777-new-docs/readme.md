@@ -80,7 +80,7 @@ Top to bottom in direction of popularity
 
 - **First-impression CTAs**
   - Today: ENSAdmin-connect primary + passive docs secondary.
-  - New: Prefer **guided docs**: Short quickstart (`enssdk` + ENS Omnigraph) **then** an optional **Try in ENSAdmin** control that prefills the viewer with the documented query—rather than dumping users into naked GraphQL UI.
+  - New: Prefer **guided docs**: Short quickstart (`enssdk` + ENS Omnigraph), then choose `enskit` (frontend), `enssdk` (backend), raw graphql endpoint or raw `ensdb`
 
 - **Top-of-mind brand words**
   - Today: Ponder, indexer, plugins, Subgraph
@@ -101,7 +101,7 @@ My assumption is that we have 2 usecases for user to read our documentation
 
 - A1. **App developer (greenfield)** — wallet / app integrations: start at Quickstart → ENS Omnigraph overview → SDK tier that fits (`enskit` / `enssdk` / raw GraphQL).
 - A2. **App developer (migrator)** — migrated from legacy **ENS Subgraph** usage: Migrate guide + parity/differences + optional `viem`/chain subgraph URL bridging only inside that branch.
-- A3. **Custom services on ENSDb** — builders running or consuming ENSDb to build custom ENS services on top of ENSDb. To access ENSDb you need your own ENSNode via `Journey B`
+- A3. **Custom ENS services on that need more that API** — builders running custom ENS services on top of `ENSDb`. To access `ENSDb` you need your own `ENSNode` stack via **Journey B**
 
 **Journey B — "I want to run my own ENSNode" (still important)**
 
@@ -142,7 +142,6 @@ Build with ENS
 ├── Migrate from legacy ENS Subgraph
 │   ├── Why migrate (multichain, ENSv2 story)
 │   ├── How to migrate (query-shape mapping + LLM skill)
-│   ├── Bridge paths — ENSNode-hosted `/subgraph` + `viem`/ensjs subgraph URL patterns. Marked as legacy and we recommend to use ENS Omnigraph
 │
 ├── Hosted Instances & canonical endpoint table
 └── AI / LLM tooling (skills — future docs)
@@ -186,11 +185,14 @@ Self-host ENSNode
 
 ### Topic 3: Reference
 
+
+if something doesnt make sense then remove
+
 ```
 Reference
 ├── ENSNode glossary / terminology
 ├── Roadmap & ENSv2 timeline
-├── Component deep-dives (collapsed by default)
+├── Component deep-dives
 │   ├── ENSApi (architecture, internals, REST endpoints catalog, Protocol Acceleration)
 │   ├── ENSIndexer (Ponder, plugins, handlers)
 │   ├── ENSDb (schema, our future cool snapshots)
@@ -198,6 +200,7 @@ Reference
 │   └── ENSAdmin (the playground UI)
 ├── REST JSON API (Resolution, Registrar Actions, Indexing Status, etc.) — full reference, not promoted
 ├── Subgraph API (legacy)
+│   └── ENSNode-hosted `/subgraph` + `viem`/ensjs subgraph URL patterns. Marked as legacy and we recommend to use ENS Omnigraph
 ├── Changelog / Releases
 └── Contributing
 ```
