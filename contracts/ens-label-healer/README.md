@@ -22,12 +22,6 @@ Copy `.env.example` and fill in the values:
 cp .env.example .env
 ```
 
-Load the env before running `forge` commands:
-
-```bash
-source .env
-```
-
 ## Development
 
 All commands run from `contracts/ens-label-healer/`.
@@ -127,21 +121,28 @@ cast logs --rpc-url http://localhost:8545 \
 
 **Current deployment:**
 
-|          |                                                                                                                     |
-| -------- | ------------------------------------------------------------------------------------------------------------------- |
-| Proxy    | `0x4a4e5632EBa282A2c2c48aB442D7208dfC280E45`                                                                        |
-| Explorer | [eth-sepolia.blockscout.com](https://eth-sepolia.blockscout.com/address/0x4a4e5632EBa282A2c2c48aB442D7208dfC280E45) |
-| Sourcify | [repo.sourcify.dev](https://repo.sourcify.dev/11155111/0x4a4e5632EBa282A2c2c48aB442D7208dfC280E45)                  |
+|          |                                                                                                         |
+| -------- | ------------------------------------------------------------------------------------------------------- |
+| Proxy    | `0x1d7412e45265e935C5b083a8f278183175E8ce3d`                                                            |
+| Explorer | [sepolia.etherscan.io](https://sepolia.etherscan.io/address/0x1d7412e45265e935C5b083a8f278183175E8ce3d) |
+| Sourcify | [repo.sourcify.dev](https://repo.sourcify.dev/11155111/0x1d7412e45265e935C5b083a8f278183175E8ce3d)      |
 
-To deploy a new instance, get Sepolia ETH from a faucet (e.g. [sepoliafaucet.com](https://sepoliafaucet.com)), then:
 
 ```bash
 source .env && forge script script/Deploy.s.sol \
   --rpc-url sepolia \
   --private-key $DEPLOYER_PRIVATE_KEY \
   --broadcast \
-  --verify \
-  --etherscan-api-key $ETHERSCAN_API_KEY
+  --verify
+```
+
+Then grant `SUBMITTER_ROLE`. Requires `PROXY_ADDRESS` and `SUBMITTER_ADDRESS` ENV:
+
+```bash
+forge script script/Grant.s.sol \
+  --rpc-url sepolia \
+  --private-key $DEPLOYER_PRIVATE_KEY \
+  --broadcast
 ```
 
 ### Mainnet
