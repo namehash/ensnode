@@ -30,7 +30,7 @@ source .env
 
 ## Development
 
-All commands run from `contracts/ens-name-healer/`.
+All commands run from `contracts/ens-label-healer/`.
 
 ### Build
 

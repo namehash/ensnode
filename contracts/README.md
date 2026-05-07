@@ -6,7 +6,7 @@ Solidity smart contracts used in the ENSNode ecosystem. Each contract lives in i
 
 | Directory | Contract | Purpose |
 |---|---|---|
-| `ens-name-healer/` | `ENSNameHealer` | On-chain oracle for healing unresolvable ENS names |
+| `ens-label-healer/` | `ENSLabelHealer` | Permissioned on-chain label emitter for unresolved ENS labels |
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ Install Foundry: https://book.getfoundry.sh/getting-started/installation
 Each contract directory is a self-contained Foundry project:
 
 ```bash
-cd ens-name-healer
+cd ens-label-healer
 
 # Build
 forge build
