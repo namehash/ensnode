@@ -1,7 +1,14 @@
 "use client";
 
 import { NameDisplay } from "@namehash/namehash-ui";
-import { type InterpretedName, isInterpretedName, isNormalizedName, type Name } from "enssdk";
+import {
+  asInterpretedName,
+  asLiteralName,
+  type InterpretedName,
+  isNormalizedName,
+  literalNameToInterpretedName,
+  type Name,
+} from "enssdk";
 import { useRouter, useSearchParams } from "next/navigation";
 import { type ChangeEvent, useMemo, useState } from "react";
 
@@ -14,10 +21,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useActiveEnsNodeStackInfo } from "@/hooks/active/use-active-ensnode-stack-info";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
-import {
-  interpretNameFromUserInput,
-  NameInterpretationOutcomeResult,
-} from "@/lib/interpret-name-from-user-input";
 
 import { NameDetailPageContent } from "./_components/NameDetailPageContent";
 import { InterpretedNameUnsupportedError, UnnormalizedNameError } from "./_components/NameErrors";
@@ -36,7 +39,7 @@ const EXAMPLE_NAMES: NamespaceSpecificValue<InterpretedName[]> = {
     "lens.xyz",
     "brantly.eth",
     "lightwalker.eth",
-  ] as InterpretedName[],
+  ].map(asInterpretedName),
   [ENSNamespaceIds.Sepolia]: [
     "gregskril.eth",
     "vitalik.eth",
@@ -44,7 +47,7 @@ const EXAMPLE_NAMES: NamespaceSpecificValue<InterpretedName[]> = {
     "recordstest.eth",
     "arrondesean.eth",
     "decode.eth",
-  ] as InterpretedName[],
+  ].map(asInterpretedName),
   [ENSNamespaceIds.EnsTestEnv]: [
     "alias.eth",
     "changerole.eth",
@@ -58,7 +61,7 @@ const EXAMPLE_NAMES: NamespaceSpecificValue<InterpretedName[]> = {
     "sub2.parent.eth",
     "test.eth",
     "wallet.linked.parent.eth",
-  ] as InterpretedName[],
+  ].map(asInterpretedName),
 };
 
 export default function ExploreNamesPage() {
@@ -80,27 +83,28 @@ export default function ExploreNamesPage() {
     e.preventDefault();
     setFormError(null);
 
-    const result = interpretNameFromUserInput(rawInputName);
+    if (rawInputName.trim() === "") return;
 
-    switch (result.outcome) {
-      case NameInterpretationOutcomeResult.Empty:
-        break;
-      case NameInterpretationOutcomeResult.Normalized: {
-        const href = retainCurrentRawConnectionUrlParam(
-          getNameDetailsRelativePath(result.interpretation),
-        );
-        router.push(href);
-        break;
-      }
-      case NameInterpretationOutcomeResult.Reencoded:
-        setFormError(
-          "The provided input contains encoded labelhashes. Support for resolving names with encoded labelhashes is in progress and coming soon.",
-        );
-        break;
-      case NameInterpretationOutcomeResult.Encoded:
-        setFormError("The provided input is not a valid ENS name.");
-        break;
+    let interpreted: InterpretedName;
+    try {
+      // Allow encoded labelhashes through; throw on unnormalizable labels.
+      interpreted = literalNameToInterpretedName(asLiteralName(rawInputName), {
+        allowEncodedLabelHashes: true,
+      });
+    } catch {
+      setFormError("The provided input is not a valid ENS name.");
+      return;
     }
+
+    if (!isNormalizedName(interpreted)) {
+      setFormError(
+        "The provided input contains encoded labelhashes. Support for resolving names with encoded labelhashes is in progress and coming soon.",
+      );
+      return;
+    }
+
+    const href = retainCurrentRawConnectionUrlParam(getNameDetailsRelativePath(interpreted));
+    router.push(href);
   };
 
   const handleRawInputNameChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -112,16 +116,18 @@ export default function ExploreNamesPage() {
   // Detail page: validate name from query params using only validation checks (no normalization).
   // see: https://github.com/namehash/ensnode/issues/1140
   if (nameFromQuery !== null && nameFromQuery !== "") {
-    if (isNormalizedName(nameFromQuery)) {
-      // A NormalizedName is by construction an InterpretedName.
-      return <NameDetailPageContent name={nameFromQuery as InterpretedName} />;
+    let interpreted: InterpretedName;
+    try {
+      interpreted = asInterpretedName(nameFromQuery);
+    } catch {
+      return <UnnormalizedNameError />;
     }
 
-    if (isInterpretedName(nameFromQuery)) {
+    if (!isNormalizedName(interpreted)) {
       return <InterpretedNameUnsupportedError />;
     }
 
-    return <UnnormalizedNameError />;
+    return <NameDetailPageContent name={interpreted} />;
   }
 
   return (

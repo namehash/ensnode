@@ -1,5 +1,5 @@
 import type { Name } from "enssdk";
-import { beautifyName, isInterpretedName } from "enssdk";
+import { beautifyInterpretedName, isInterpretedName } from "enssdk";
 
 interface NameDisplayProps {
   name: Name;
@@ -19,6 +19,6 @@ export function NameDisplay({ name, className = "nhui:font-medium" }: NameDispla
     return <span className={className}>(invalid name)</span>;
   }
 
-  const beautifiedName = beautifyName(name);
+  const beautifiedName = beautifyInterpretedName(name);
   return <span className={className}>{beautifiedName}</span>;
 }

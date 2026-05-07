@@ -6,7 +6,7 @@ import {
   interpretedNameToInterpretedLabels,
 } from "./interpreted-names-and-labels";
 import { isNormalizedLabel } from "./normalization";
-import type { InterpretedLabel, InterpretedName, Label, Name } from "./types";
+import type { InterpretedName, Label, Name } from "./types";
 
 /**
  * Constructs a name hierarchy from a given InterpretedName.
@@ -71,29 +71,6 @@ export const beautifyName = (name: Name): Name =>
         return ens_beautify(label);
       } else {
         return label;
-      }
-    })
-    .join(".");
-
-/**
- * Formats an InterpretedName for display in UI strings.
- *
- * - Normalized labels are beautified (via ens_beautify).
- * - Non-normalized labels (encoded labelhashes) are lowercased for consistent display.
- *
- * NOTE: This function only takes an InterpretedName, not a raw Name.
- * The return type is Name (not InterpretedName) because beautification
- * may produce labels that are not normalized.
- *
- * @param name - The InterpretedName to format for display.
- */
-export const formatInterpretedNameForDisplay = (name: InterpretedName): Name =>
-  interpretedNameToInterpretedLabels(name)
-    .map((label: InterpretedLabel) => {
-      if (isNormalizedLabel(label)) {
-        return ens_beautify(label);
-      } else {
-        return label.toLowerCase();
       }
     })
     .join(".");
