@@ -1,4 +1,5 @@
-import type { NormalizedAddress } from "enssdk";
+import { type Address, asInterpretedName, type NormalizedAddress } from "enssdk";
+import type { Hash } from "viem";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { parseTimestamp, parseUsdc, priceEth, priceUsdc } from "@ensnode/ensnode-sdk";
@@ -6,7 +7,7 @@ import { parseTimestamp, parseUsdc, priceEth, priceUsdc } from "@ensnode/ensnode
 import { SECONDS_PER_YEAR } from "../../time";
 import { buildReferrerLeaderboardPageContext } from "../shared/leaderboard-page";
 import { ReferralProgramEditionStatuses } from "../shared/status";
-import { buildReferrerLeaderboardRevShareCap } from "./leaderboard";
+import { buildReferralEditionSnapshotRevShareCap } from "./leaderboard";
 import { buildLeaderboardPageRevShareCap } from "./leaderboard-page";
 import type { ReferralEvent } from "./referral-event";
 import { type AdminAction, AdminActionTypes, buildReferralProgramRulesRevShareCap } from "./rules";
@@ -84,6 +85,10 @@ function makeEvent(
     timestamp,
     incrementalDuration,
     incrementalRevenueContribution: ZERO_ETH,
+    name: asInterpretedName("test.eth"),
+    actionType: "registration",
+    transactionHash: "0x0000000000000000000000000000000000000000000000000000000000000000" as Hash,
+    registrant: "0xdddddddddddddddddddddddddddddddddddddddd" as Address,
   };
 }
 
@@ -104,14 +109,14 @@ function warning(referrer: NormalizedAddress, reason: string): AdminAction {
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
-describe("buildReferrerLeaderboardRevShareCap", () => {
+describe("buildReferralEditionSnapshotRevShareCap", () => {
   beforeEach(() => {
     eventIdCounter = 0;
   });
 
   it("returns empty leaderboard when events list is empty", () => {
     const rules = buildTestRules();
-    const result = buildReferrerLeaderboardRevShareCap([], rules, accurateAsOf);
+    const result = buildReferralEditionSnapshotRevShareCap([], rules, accurateAsOf).leaderboard;
 
     expect(result.awardModel).toBe(rules.awardModel);
     expect(result.rules).toBe(rules);
@@ -131,7 +136,11 @@ describe("buildReferrerLeaderboardRevShareCap", () => {
       const events = [makeEvent(ADDR_A, 1000, Math.floor(SECONDS_PER_YEAR / 2))];
       const rules = buildTestRules();
 
-      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
+      const result = buildReferralEditionSnapshotRevShareCap(
+        events,
+        rules,
+        accurateAsOf,
+      ).leaderboard;
       const referrer = result.referrers.get(ADDR_A)!;
 
       expect(referrer).toBeDefined();
@@ -156,7 +165,11 @@ describe("buildReferrerLeaderboardRevShareCap", () => {
         makeEvent(ADDR_A, 2000, Math.floor(SECONDS_PER_YEAR / 2)),
       ];
 
-      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
+      const result = buildReferralEditionSnapshotRevShareCap(
+        events,
+        rules,
+        accurateAsOf,
+      ).leaderboard;
       const referrer = result.referrers.get(ADDR_A)!;
 
       expect(referrer.isQualified).toBe(true);
@@ -176,7 +189,11 @@ describe("buildReferrerLeaderboardRevShareCap", () => {
         makeEvent(ADDR_A, 2000, Math.floor(SECONDS_PER_YEAR / 2)),
       ];
 
-      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
+      const result = buildReferralEditionSnapshotRevShareCap(
+        events,
+        rules,
+        accurateAsOf,
+      ).leaderboard;
       const referrer = result.referrers.get(ADDR_A)!;
 
       expect(referrer.isQualified).toBe(true);
@@ -200,7 +217,11 @@ describe("buildReferrerLeaderboardRevShareCap", () => {
         makeEvent(ADDR_A, 2000, SECONDS_PER_YEAR),
       ];
 
-      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
+      const result = buildReferralEditionSnapshotRevShareCap(
+        events,
+        rules,
+        accurateAsOf,
+      ).leaderboard;
       const referrer = result.referrers.get(ADDR_A)!;
 
       expect(referrer.isQualified).toBe(true);
@@ -222,7 +243,11 @@ describe("buildReferrerLeaderboardRevShareCap", () => {
         makeEvent(ADDR_A, 2000, SECONDS_PER_YEAR),
       ];
 
-      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
+      const result = buildReferralEditionSnapshotRevShareCap(
+        events,
+        rules,
+        accurateAsOf,
+      ).leaderboard;
       const referrer = result.referrers.get(ADDR_A)!;
 
       expect(referrer.isQualified).toBe(true);
@@ -241,7 +266,11 @@ describe("buildReferrerLeaderboardRevShareCap", () => {
       const rules = buildTestRules(priceUsdc(0n));
       const events = [makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR)];
 
-      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
+      const result = buildReferralEditionSnapshotRevShareCap(
+        events,
+        rules,
+        accurateAsOf,
+      ).leaderboard;
       const referrer = result.referrers.get(ADDR_A)!;
 
       expect(referrer.isQualified).toBe(true);
@@ -261,7 +290,11 @@ describe("buildReferrerLeaderboardRevShareCap", () => {
         makeEvent(ADDR_B, 2000, SECONDS_PER_YEAR),
       ];
 
-      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
+      const result = buildReferralEditionSnapshotRevShareCap(
+        events,
+        rules,
+        accurateAsOf,
+      ).leaderboard;
       const referrerA = result.referrers.get(ADDR_A)!;
       const referrerB = result.referrers.get(ADDR_B)!;
 
@@ -285,7 +318,11 @@ describe("buildReferrerLeaderboardRevShareCap", () => {
         makeEvent(ADDR_B, 2000, SECONDS_PER_YEAR),
       ];
 
-      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
+      const result = buildReferralEditionSnapshotRevShareCap(
+        events,
+        rules,
+        accurateAsOf,
+      ).leaderboard;
       const referrerA = result.referrers.get(ADDR_A)!;
       const referrerB = result.referrers.get(ADDR_B)!;
 
@@ -306,7 +343,11 @@ describe("buildReferrerLeaderboardRevShareCap", () => {
         makeEvent(ADDR_C, 3000, SECONDS_PER_YEAR),
       ];
 
-      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
+      const result = buildReferralEditionSnapshotRevShareCap(
+        events,
+        rules,
+        accurateAsOf,
+      ).leaderboard;
       const referrerA = result.referrers.get(ADDR_A)!;
       const referrerB = result.referrers.get(ADDR_B)!;
       const referrerC = result.referrers.get(ADDR_C)!;
@@ -336,7 +377,11 @@ describe("buildReferrerLeaderboardRevShareCap", () => {
         }),
       ];
 
-      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
+      const result = buildReferralEditionSnapshotRevShareCap(
+        events,
+        rules,
+        accurateAsOf,
+      ).leaderboard;
 
       // ADDR_A has the lower (earlier) id, should claim the pool first
       expect(result.referrers.get(ADDR_A)!.cappedAward.amount).toBe(UNCAPPED_AWARD_1Y.amount);
@@ -357,7 +402,11 @@ describe("buildReferrerLeaderboardRevShareCap", () => {
         makeEvent(ADDR_C, 3000, Math.floor(SECONDS_PER_YEAR / 2)),
       ];
 
-      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
+      const result = buildReferralEditionSnapshotRevShareCap(
+        events,
+        rules,
+        accurateAsOf,
+      ).leaderboard;
 
       // ADDR_B: cappedAward $5.00 → rank 1 (highest pool claim)
       // ADDR_A: cappedAward $2.50 → rank 2
@@ -377,7 +426,11 @@ describe("buildReferrerLeaderboardRevShareCap", () => {
         makeEvent(ADDR_B, 2000, SECONDS_PER_YEAR),
       ];
 
-      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
+      const result = buildReferralEditionSnapshotRevShareCap(
+        events,
+        rules,
+        accurateAsOf,
+      ).leaderboard;
 
       // Both have $0 cappedAward; ADDR_A has higher uncappedAward (longer duration) → rank 1
       expect(result.referrers.get(ADDR_A)!.rank).toBe(1);
@@ -391,7 +444,11 @@ describe("buildReferrerLeaderboardRevShareCap", () => {
         makeEvent(ADDR_B, 2000, SECONDS_PER_YEAR * 2),
       ];
 
-      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
+      const result = buildReferralEditionSnapshotRevShareCap(
+        events,
+        rules,
+        accurateAsOf,
+      ).leaderboard;
       const ranks = [...result.referrers.values()].map((r) => r.rank);
       expect(ranks).toEqual([1, 2]);
     });
@@ -405,7 +462,11 @@ describe("buildReferrerLeaderboardRevShareCap", () => {
       const rules = buildTestRules(parseUsdc("2.5"));
       const events = [makeEvent(ADDR_A, 1000, SECONDS_PER_YEAR)];
 
-      const leaderboard = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
+      const leaderboard = buildReferralEditionSnapshotRevShareCap(
+        events,
+        rules,
+        accurateAsOf,
+      ).leaderboard;
       expect(leaderboard.aggregatedMetrics.awardPoolRemaining.amount).toBe(0n);
 
       const pageContext = buildReferrerLeaderboardPageContext({ page: 1 }, leaderboard);
@@ -433,7 +494,11 @@ describe("buildReferrerLeaderboardRevShareCap", () => {
         makeEvent(ADDR_B, 2000, Math.floor(SECONDS_PER_YEAR / 2)), // below threshold: $5 base
       ];
 
-      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
+      const result = buildReferralEditionSnapshotRevShareCap(
+        events,
+        rules,
+        accurateAsOf,
+      ).leaderboard;
       const referrerA = result.referrers.get(ADDR_A)!;
       const referrerB = result.referrers.get(ADDR_B)!;
 
@@ -462,7 +527,11 @@ describe("buildReferrerLeaderboardRevShareCap", () => {
         makeEvent(ADDR_B, 3000, SECONDS_PER_YEAR),
       ];
 
-      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
+      const result = buildReferralEditionSnapshotRevShareCap(
+        events,
+        rules,
+        accurateAsOf,
+      ).leaderboard;
 
       expect(result.aggregatedMetrics.grandTotalReferrals).toBe(3);
       expect(result.aggregatedMetrics.grandTotalIncrementalDuration).toBe(3 * SECONDS_PER_YEAR);
@@ -477,7 +546,11 @@ describe("buildReferrerLeaderboardRevShareCap", () => {
         makeEvent(ADDR_B, 2000, SECONDS_PER_YEAR),
       ];
 
-      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
+      const result = buildReferralEditionSnapshotRevShareCap(
+        events,
+        rules,
+        accurateAsOf,
+      ).leaderboard;
       const referrerA = result.referrers.get(ADDR_A)!;
       const referrerB = result.referrers.get(ADDR_B)!;
 
@@ -500,7 +573,11 @@ describe("buildReferrerLeaderboardRevShareCap", () => {
         makeEvent(ADDR_B, 2000, SECONDS_PER_YEAR), // qualifies normally
       ];
 
-      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
+      const result = buildReferralEditionSnapshotRevShareCap(
+        events,
+        rules,
+        accurateAsOf,
+      ).leaderboard;
       const referrerA = result.referrers.get(ADDR_A)!;
       const referrerB = result.referrers.get(ADDR_B)!;
 
@@ -521,7 +598,11 @@ describe("buildReferrerLeaderboardRevShareCap", () => {
       ]);
       const events = [makeEvent(ADDR_A, 1000, Math.floor(SECONDS_PER_YEAR / 2))];
 
-      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
+      const result = buildReferralEditionSnapshotRevShareCap(
+        events,
+        rules,
+        accurateAsOf,
+      ).leaderboard;
       const referrerA = result.referrers.get(ADDR_A)!;
 
       expect(referrerA.adminAction?.actionType).toBe(AdminActionTypes.Disqualification);
@@ -550,7 +631,11 @@ describe("buildReferrerLeaderboardRevShareCap", () => {
         makeEvent(ADDR_C, 3000, Math.floor(SECONDS_PER_YEAR / 2)),
       ];
 
-      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
+      const result = buildReferralEditionSnapshotRevShareCap(
+        events,
+        rules,
+        accurateAsOf,
+      ).leaderboard;
       const referrerA = result.referrers.get(ADDR_A)!;
       const referrerB = result.referrers.get(ADDR_B)!;
       const referrerC = result.referrers.get(ADDR_C)!;
@@ -583,7 +668,11 @@ describe("buildReferrerLeaderboardRevShareCap", () => {
         makeEvent(ADDR_C, 3000, SECONDS_PER_YEAR), // only C qualifies and claims
       ];
 
-      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
+      const result = buildReferralEditionSnapshotRevShareCap(
+        events,
+        rules,
+        accurateAsOf,
+      ).leaderboard;
       const referrerA = result.referrers.get(ADDR_A)!;
       const referrerB = result.referrers.get(ADDR_B)!;
       const referrerC = result.referrers.get(ADDR_C)!;
@@ -623,7 +712,11 @@ describe("buildReferrerLeaderboardRevShareCap", () => {
         makeEvent(ADDR_B, 2000, SECONDS_PER_YEAR),
       ];
 
-      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
+      const result = buildReferralEditionSnapshotRevShareCap(
+        events,
+        rules,
+        accurateAsOf,
+      ).leaderboard;
       const referrerA = result.referrers.get(ADDR_A)!;
       const referrerB = result.referrers.get(ADDR_B)!;
 
@@ -642,7 +735,11 @@ describe("buildReferrerLeaderboardRevShareCap", () => {
       ]);
       const events = [makeEvent(ADDR_A, 1000, Math.floor(SECONDS_PER_YEAR / 2))];
 
-      const result = buildReferrerLeaderboardRevShareCap(events, rules, accurateAsOf);
+      const result = buildReferralEditionSnapshotRevShareCap(
+        events,
+        rules,
+        accurateAsOf,
+      ).leaderboard;
       const referrerA = result.referrers.get(ADDR_A)!;
 
       expect(referrerA.adminAction?.actionType).toBe(AdminActionTypes.Warning);

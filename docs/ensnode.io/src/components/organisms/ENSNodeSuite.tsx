@@ -24,7 +24,7 @@ const appsSuite: {
       />
     ),
     name: "ENSAdmin",
-    description: "Explore the ENS protocol like never before",
+    description: "Inspect the ENS protocol like never before",
     docsLinkHref: "/ensadmin",
   },
   {
@@ -95,7 +95,10 @@ export default function ENSNodeSuite() {
                   href={namehashApp.docsLinkHref}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={legacyButtonVariants({ variant: "secondary", size: "medium" })}
+                  className={legacyButtonVariants({
+                    variant: "secondary",
+                    size: "medium",
+                  })}
                 >
                   View documentation
                 </a>
