@@ -2,4 +2,8 @@
 "ensadmin": patch
 ---
 
-Add input validation and normalization to the Explore Names form and name detail page. The form uses `interpretNameFromUserInput` to normalize valid inputs before navigating, and shows inline errors for invalid or unsupported names. The detail page validates query params with `isNormalizedName`/`isInterpretedName` and shows appropriate error states. Empty name params show the form instead of a broken detail page.
+Validate name input on the Explore Names page (`/name`). The form normalizes user input before navigating and displays inline errors for unnormalizable names or names with encoded labelhashes (resolution support is in progress). Query params on the detail page are validated against `InterpretedName`.
+
+Unnormalized names and names with encoded labelhashes each show a dedicated error instead of falling through to a broken detail page.
+
+An empty `?name=` shows the form rather than the detail page.
