@@ -2,4 +2,4 @@
 "ensapi": minor
 ---
 
-**Omnigraph (breaking)**: `Resolver.bridged` now returns the bridged target `Registry` (resolved by id) instead of an `AccountId` scalar. Consumers selecting `bridged { ... }` now get the full `Registry` interface and can navigate into the bridged sub-registry's canonical Domain etc.; consumers reading `bridged` as an `AccountId` shape will need to update their selection.
+**Omnigraph (breaking)**: `Resolver.bridged` is no longer an `AccountId` scalar; it now returns the bridged target `Registry` interface. Consumers should change their selection from `bridged` (scalar) to `bridged { ... }` (Registry interface) — the new shape exposes the full `Registry` and allows navigation into the bridged sub-registry's canonical Domain etc.

@@ -92,8 +92,8 @@ export async function ensureDomainInRegistry(
 
 /**
  * Set `registryId`'s canonical parent Domain (or unset if null) by writing the unidirectional
- * `Registry.canonicalDomainId` pointer, then reconciling canonicality for both the previous
- * edge (if any) and the next edge.
+ * `Registry.canonicalDomainId` pointer, then reconciling this Registry's canonicality flag
+ * (which cascades through its descendants if it flips).
  *
  * The new canonical Domain need not exist yet — `Registry.canonicalDomainId` is set blindly. The
  * canonical edge becomes "real" only when `Domain.subregistryId` agrees, which may happen later
@@ -107,7 +107,7 @@ export async function handleRegistryCanonicalDomainUpdated(
   const registry = await context.ensDb.find(ensIndexerSchema.registry, { id: registryId });
   if (!registry) {
     throw new Error(
-      `Invariant(setRegistryCanonicalDomain): Registry ${registryId} does not yet exist.`,
+      `Invariant(handleRegistryCanonicalDomainUpdated): Registry ${registryId} does not yet exist.`,
     );
   }
 
