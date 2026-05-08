@@ -1,5 +1,19 @@
 # ensindexer
 
+## 1.12.0
+
+### Patch Changes
+
+- [#2073](https://github.com/namehash/ensnode/pull/2073) [`9785be0`](https://github.com/namehash/ensnode/commit/9785be086fed0f99aa04fe43fdae18741a5b867b) Thanks [@shrugs](https://github.com/shrugs)! - **ENSIndexer ensv2 plugin**: correctly handle non-UTF-8 `string label` args in `RegistrarController:NameRegistered` and `:NameRenewed` events. ABI-decoding replaces non-UTF-8 byte sequences with U+FFFD, which then fails the labelhash round-trip. Previously this threw a fatal `Invariant(RegistrarController:NameRegistered)` and aborted the run; now the label is treated as unemitted and the heal path indexes the registration under the canonical `labelHash`.
+
+- Updated dependencies [[`4fb7b33`](https://github.com/namehash/ensnode/commit/4fb7b332fd46ee9924dc9dfb55b5a21ff8b8554a)]:
+  - @ensnode/ensnode-sdk@1.12.0
+  - @ensnode/ensdb-sdk@1.12.0
+  - @ensnode/ensrainbow-sdk@1.12.0
+  - enssdk@1.12.0
+  - @ensnode/datasources@1.12.0
+  - @ensnode/ponder-sdk@1.12.0
+
 ## 1.11.1
 
 ### Patch Changes

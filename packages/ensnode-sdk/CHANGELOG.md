@@ -1,5 +1,17 @@
 # @ensnode/ensnode-sdk
 
+## 1.12.0
+
+### Minor Changes
+
+- [#2061](https://github.com/namehash/ensnode/pull/2061) [`4fb7b33`](https://github.com/namehash/ensnode/commit/4fb7b332fd46ee9924dc9dfb55b5a21ff8b8554a) Thanks [@shrugs](https://github.com/shrugs)! - **Breaking (`@ensnode/ensnode-sdk`)**: `getRootRegistryIds` is removed; use the new `isRootRegistryId(namespace, registryId)` predicate to test root membership instead. `getRootRegistryId` (singular, "preferred root") is unchanged.
+
+### Patch Changes
+
+- Updated dependencies []:
+  - enssdk@1.12.0
+  - @ensnode/datasources@1.12.0
+
 ## 1.11.1
 
 ### Patch Changes

@@ -1,5 +1,27 @@
 # ensapi
 
+## 1.12.0
+
+### Minor Changes
+
+- [#2061](https://github.com/namehash/ensnode/pull/2061) [`4fb7b33`](https://github.com/namehash/ensnode/commit/4fb7b332fd46ee9924dc9dfb55b5a21ff8b8554a) Thanks [@shrugs](https://github.com/shrugs)! - **Omnigraph**: expose `Domain.canonical` and `Registry.canonical` on the Omnigraph schema. Both are non-null `Boolean!` fields indicating whether the entity participates in the Canonical Nametree.
+
+- [#2061](https://github.com/namehash/ensnode/pull/2061) [`4fb7b33`](https://github.com/namehash/ensnode/commit/4fb7b332fd46ee9924dc9dfb55b5a21ff8b8554a) Thanks [@shrugs](https://github.com/shrugs)! - **Omnigraph (breaking)**: drop the `canonical: Boolean = false` field from `DomainsWhereInput` (used by `Query.domains`). Every nameable Domain is canonical by definition, so the filter was redundant; the query now always scopes to Canonical Domains. Consumers passing `where: { canonical: true }` should drop the field; consumers relying on `canonical: false` (or default) to surface non-canonical Domains via this query no longer can — read `Domain.canonical` directly or scope by `Account.domains` / `Registry.domains` instead.
+
+- [#2077](https://github.com/namehash/ensnode/pull/2077) [`c2e1047`](https://github.com/namehash/ensnode/commit/c2e10471b95cae47ba02044dd03f550589da8db3) Thanks [@shrugs](https://github.com/shrugs)! - **Omnigraph**: add an `ENSProtocolVersion` enum (`ENSv1` | `ENSv2`) and `where: { version }` filter on `Query.domains` and `Account.domains`.
+
+- [#2061](https://github.com/namehash/ensnode/pull/2061) [`4fb7b33`](https://github.com/namehash/ensnode/commit/4fb7b332fd46ee9924dc9dfb55b5a21ff8b8554a) Thanks [@shrugs](https://github.com/shrugs)! - **Omnigraph (breaking)**: `Resolver.bridged` is no longer an `AccountId` scalar; it now returns the bridged target `Registry` interface. Consumers should change their selection from `bridged` (scalar) to `bridged { ... }` (Registry interface) — the new shape exposes the full `Registry` and allows navigation into the bridged sub-registry's canonical Domain etc.
+
+### Patch Changes
+
+- Updated dependencies [[`4fb7b33`](https://github.com/namehash/ensnode/commit/4fb7b332fd46ee9924dc9dfb55b5a21ff8b8554a)]:
+  - @ensnode/ensnode-sdk@1.12.0
+  - @namehash/ens-referrals@1.12.0
+  - @ensnode/ensdb-sdk@1.12.0
+  - enssdk@1.12.0
+  - @ensnode/datasources@1.12.0
+  - @ensnode/ponder-subgraph@1.12.0
+
 ## 1.11.1
 
 ### Patch Changes
