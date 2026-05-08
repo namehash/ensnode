@@ -398,6 +398,13 @@ const introspection = {
               "kind": "SCALAR",
               "name": "String"
             }
+          },
+          {
+            "name": "version",
+            "type": {
+              "kind": "ENUM",
+              "name": "ENSProtocolVersion"
+            }
           }
         ],
         "isOneOf": false
@@ -1621,9 +1628,30 @@ const introspection = {
                 "name": "String"
               }
             }
+          },
+          {
+            "name": "version",
+            "type": {
+              "kind": "ENUM",
+              "name": "ENSProtocolVersion"
+            }
           }
         ],
         "isOneOf": false
+      },
+      {
+        "kind": "ENUM",
+        "name": "ENSProtocolVersion",
+        "enumValues": [
+          {
+            "name": "ENSv1",
+            "isDeprecated": false
+          },
+          {
+            "name": "ENSv2",
+            "isDeprecated": false
+          }
+        ]
       },
       {
         "kind": "OBJECT",

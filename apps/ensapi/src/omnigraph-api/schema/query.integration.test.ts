@@ -91,8 +91,8 @@ describe("Query.domains", () => {
   };
 
   const QueryDomains = gql`
-    query QueryDomains($name: String!, $order: DomainsOrderInput) {
-      domains(where: { name: $name }, order: $order) {
+    query QueryDomains($name: String!, $version: ENSProtocolVersion, $order: DomainsOrderInput) {
+      domains(where: { name: $name, version: $version }, order: $order) {
         edges {
           node {
             __typename
@@ -147,7 +147,6 @@ describe("Query.domains", () => {
 
   it("returns only canonical domains", async () => {
     const result = await request<QueryDomainsResult>(QueryDomains, { name: "parent" });
-
     const domains = flattenConnection(result.domains);
 
     // parent.eth is canonical (registered under the v2 ETH Registry which descends from the v2 Root)
@@ -162,6 +161,38 @@ describe("Query.domains", () => {
 
   // TODO: devnet fixture needs a known non-canonical Domain to assert exclusion against.
   it.todo("excludes non-canonical domains from the result set");
+
+  describe("version?: ENSProtocolVersion", () => {
+    it("returns any version when unspecified", async () => {
+      const result = await request<QueryDomainsResult>(QueryDomains, {
+        name: "reverse",
+        version: undefined,
+      });
+      const domains = flattenConnection(result.domains);
+      expect(domains.find((d) => d.__typename === "ENSv1Domain")).toBeDefined();
+      expect(domains.find((d) => d.__typename === "ENSv2Domain")).toBeDefined();
+    });
+
+    it("returns only ENSv1Domains when version: ENSv1", async () => {
+      const result = await request<QueryDomainsResult>(QueryDomains, {
+        name: "reverse",
+        version: "ENSv1",
+      });
+      const domains = flattenConnection(result.domains);
+      expect(domains.find((d) => d.__typename === "ENSv1Domain")).toBeDefined();
+      expect(domains.find((d) => d.__typename === "ENSv2Domain")).not.toBeDefined();
+    });
+
+    it("returns only ENSv2Domains when version: ENSv2", async () => {
+      const result = await request<QueryDomainsResult>(QueryDomains, {
+        name: "reverse",
+        version: "ENSv2",
+      });
+      const domains = flattenConnection(result.domains);
+      expect(domains.find((d) => d.__typename === "ENSv1Domain")).not.toBeDefined();
+      expect(domains.find((d) => d.__typename === "ENSv2Domain")).toBeDefined();
+    });
+  });
 });
 
 describe("Query.domain", () => {

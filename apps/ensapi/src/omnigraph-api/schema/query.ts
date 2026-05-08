@@ -13,6 +13,7 @@ import {
   domainsBase,
   filterByCanonical,
   filterByName,
+  filterByVersion,
   withOrderingMetadata,
 } from "@/omnigraph-api/lib/find-domains/layers";
 import { getDomainIdByInterpretedName } from "@/omnigraph-api/lib/get-domain-by-interpreted-name";
@@ -110,8 +111,7 @@ builder.queryType({
     // Find Domains
     ////////////////
     domains: t.connection({
-      description:
-        "Find Canonical Domains by Name. Results are always scoped to Canonical Domains — every nameable Domain is canonical by definition, so a non-canonical filter would be empty.",
+      description: "Find Canonical Domains by Name.",
       type: DomainInterfaceRef,
       args: {
         where: t.arg({ type: DomainsWhereInput, required: true }),
@@ -121,7 +121,8 @@ builder.queryType({
         const base = domainsBase();
         const named = filterByName(base, where.name);
         const canonical = filterByCanonical(named);
-        const domains = withOrderingMetadata(canonical);
+        const versioned = where.version ? filterByVersion(canonical, where.version) : canonical;
+        const domains = withOrderingMetadata(versioned);
 
         return resolveFindDomains(context, { domains, order, ...connectionArgs });
       },

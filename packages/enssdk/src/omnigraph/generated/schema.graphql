@@ -54,6 +54,11 @@ input AccountDomainsWhereInput {
   A partial Interpreted Name by which to search the set of Domains. ex: 'example', 'example.', 'example.et'.
   """
   name: String
+
+  """
+  If set, filters the set of Domains to only those of the specified ENS protocol version.
+  """
+  version: ENSProtocolVersion
 }
 
 type AccountEventsConnection {
@@ -328,6 +333,17 @@ input DomainsWhereInput {
   A partial Interpreted Name by which to search the set of Domains. ex: 'example', 'example.', 'example.et'.
   """
   name: String!
+
+  """
+  If set, filters the set of Domains to only those of the specified ENS protocol version.
+  """
+  version: ENSProtocolVersion
+}
+
+"""An ENS protocol version."""
+enum ENSProtocolVersion {
+  ENSv1
+  ENSv2
 }
 
 """An ENSv1Domain represents an ENSv1 Domain."""
@@ -937,9 +953,7 @@ type Query {
   """Identify a Domain by Name or DomainId"""
   domain(by: DomainIdInput!): Domain
 
-  """
-  Find Canonical Domains by Name. Results are always scoped to Canonical Domains — every nameable Domain is canonical by definition, so a non-canonical filter would be empty.
-  """
+  """Find Canonical Domains by Name."""
   domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: DomainsWhereInput!): QueryDomainsConnection
 
   """Identify Permissions by ID or AccountId."""

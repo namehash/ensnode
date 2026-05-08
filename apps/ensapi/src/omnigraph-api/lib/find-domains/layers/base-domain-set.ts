@@ -9,10 +9,12 @@ import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
  */
 export type BaseDomainSet = ReturnType<typeof domainsBase>;
 
+export type DomainType = (typeof ensIndexerSchema.domainType.enumValues)[number];
+
 /**
  * Universal base domain set: all ENSv1 and ENSv2 Domains with consistent metadata.
  *
- * Returns `{ domainId, ownerId, registryId, parentId, canonical, labelHash, sortableLabel }`.
+ * Returns `{ domainId, type, ownerId, registryId, parentId, canonical, labelHash, sortableLabel }`.
  * - parentId is the canonical parent Domain, derived inline by joining to the parent Registry of
  *   this Domain (`registry.id = domain.registryId`) and then to the parent Domain named by
  *   `registry.canonicalDomainId`, requiring that parent Domain's `subregistryId` agree back to
@@ -31,6 +33,7 @@ export function domainsBase() {
     ensDb
       .select({
         domainId: sql<DomainId>`${ensIndexerSchema.domain.id}`.as("domainId"),
+        type: sql<DomainType>`${ensIndexerSchema.domain.type}`.as("type"),
         ownerId: sql<NormalizedAddress | null>`${ensIndexerSchema.domain.ownerId}`.as("ownerId"),
         registryId: sql<RegistryId>`${ensIndexerSchema.domain.registryId}`.as("registryId"),
         parentId: sql<DomainId | null>`${parentDomain.id}`.as("parentId"),
@@ -68,6 +71,7 @@ export function domainsBase() {
 export function selectBase(base: BaseDomainSet) {
   return {
     domainId: base.domainId,
+    type: base.type,
     ownerId: base.ownerId,
     registryId: base.registryId,
     parentId: base.parentId,

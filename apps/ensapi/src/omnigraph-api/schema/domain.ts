@@ -33,6 +33,7 @@ import {
   PAGINATION_DEFAULT_MAX_SIZE,
   PAGINATION_DEFAULT_PAGE_SIZE,
 } from "@/omnigraph-api/schema/constants";
+import { ENSProtocolVersion } from "@/omnigraph-api/schema/ens-protocol-version";
 import { EventRef, EventsWhereInput } from "@/omnigraph-api/schema/event";
 import { LabelRef } from "@/omnigraph-api/schema/label";
 import { OrderDirection } from "@/omnigraph-api/schema/order-direction";
@@ -439,6 +440,11 @@ export const DomainsWhereInput = builder.inputType("DomainsWhereInput", {
       description:
         "A partial Interpreted Name by which to search the set of Domains. ex: 'example', 'example.', 'example.et'.",
     }),
+    version: t.field({
+      type: ENSProtocolVersion,
+      description:
+        "If set, filters the set of Domains to only those of the specified ENS protocol version.",
+    }),
   }),
 });
 
@@ -453,6 +459,11 @@ export const AccountDomainsWhereInput = builder.inputType("AccountDomainsWhereIn
       description:
         "Optional, defaults to false. If true, filters the set of Domains by those that are Canonical (i.e. reachable by ENS Forward Resolution).",
       defaultValue: false,
+    }),
+    version: t.field({
+      type: ENSProtocolVersion,
+      description:
+        "If set, filters the set of Domains to only those of the specified ENS protocol version.",
     }),
   }),
 });
