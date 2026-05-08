@@ -63,7 +63,7 @@ contract ENSLabelHealerInvariantTest is Test {
         healer = ENSLabelHealer(address(proxy));
 
         vm.prank(admin);
-        healer.grantRole(keccak256("SUBMITTER_ROLE"), submitter);
+        healer.grantSubmitter(submitter);
 
         handler = new ENSLabelHealerHandler(healer, admin, submitter);
         targetContract(address(handler));
