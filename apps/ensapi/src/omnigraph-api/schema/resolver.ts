@@ -129,7 +129,7 @@ ResolverRef.implement({
       nullable: true,
       resolve: (parent) => {
         const bridged = isBridgedResolver(config.namespace, parent);
-        return bridged?.registryId ?? null;
+        return bridged?.targetRegistryId ?? null;
       },
     }),
 

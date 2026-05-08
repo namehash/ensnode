@@ -140,7 +140,11 @@ async function forwardWalkNamegraph(
       // NOTE: we blindly return after bridging, which correctly implements the Forward Resolution
       // behavior in that the origin Domain, even if there is one, is invisible to resolution
       // (due to the ancestor Bridged Resolver) and therefore not addressable
-      return forwardWalkNamegraph(bridged.registryId, path.slice(deepestResolver.depth), depth + 1);
+      return forwardWalkNamegraph(
+        bridged.targetRegistryId,
+        path.slice(deepestResolver.depth),
+        depth + 1,
+      );
     }
 
     // ENSv1Resolver (ENSv1 Fallback)

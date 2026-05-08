@@ -12,20 +12,20 @@ import { getDatasourceContract, maybeGetDatasourceContract } from "./datasource-
 /**
  * Gets the AccountId representing the ENSv1 Registry in the selected `namespace`.
  */
-export const getENSv1Registry = (namespace: ENSNamespaceId) =>
+export const getENSv1RootRegistry = (namespace: ENSNamespaceId) =>
   getDatasourceContract(namespace, DatasourceNames.ENSRoot, "ENSv1Registry");
 
 /**
  * Gets the ENSv1RegistryId representing the ENSv1 Root Registry in the selected `namespace`.
  */
 export const getENSv1RootRegistryId = (namespace: ENSNamespaceId) =>
-  makeENSv1RegistryId(getENSv1Registry(namespace));
+  makeENSv1RegistryId(getENSv1RootRegistry(namespace));
 
 /**
  * Determines whether `contract` is the ENSv1 Registry in `namespace`.
  */
 export const isENSv1Registry = (namespace: ENSNamespaceId, contract: AccountId) =>
-  accountIdEqual(getENSv1Registry(namespace), contract);
+  accountIdEqual(getENSv1RootRegistry(namespace), contract);
 
 //////////////
 // ENSv2

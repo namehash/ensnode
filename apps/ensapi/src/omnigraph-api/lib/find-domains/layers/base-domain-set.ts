@@ -16,8 +16,7 @@ export type BaseDomainSet = ReturnType<typeof domainsBase>;
  * - parentId is the canonical parent Domain, derived inline by joining to the parent Registry of
  *   this Domain (`registry.id = domain.registryId`) and then to the parent Domain named by
  *   `registry.canonicalDomainId`, requiring that parent Domain's `subregistryId` agree back to
- *   the same Registry. This is the bidirectional canonical-edge agreement, computed on demand
- *   in lieu of a materialized parallel table.
+ *   the same Registry. This is the bidirectional canonical-edge agreement that enforces a tree.
  * - sortableLabel is the Domain's own InterpretedLabel, used for NAME ordering
  * - all other values are directly sourced from Domain
  *

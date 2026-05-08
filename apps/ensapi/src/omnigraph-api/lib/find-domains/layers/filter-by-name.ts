@@ -49,14 +49,13 @@ function domainsByLabelHashPath(labelHashPath: LabelHashPath) {
 
   // Recursive CTE starting from the deepest child and traversing UP via the bidirectional
   // canonical-edge agreement (`registries.canonical_domain_id = domains.id` AND
-  // `domains.subregistry_id = registries.id`), computed on demand at each hop in lieu of a
-  // materialized parallel table.
+  // `domains.subregistry_id = registries.id`).
   // 1. Start with domains matching the leaf labelHash (deepest child)
   // 2. Recursively join parents via the agreement check, verifying each ancestor's labelHash
   // 3. Return both the leaf (for result/ownership) and head (for partial match)
   //
   // NOTE: JOIN (not LEFT JOIN) is intentional — we only match domains with a complete
-  // canonical path to the searched FQDN.
+  // canonical path to the searched `labelHashPath`.
   return ensDb
     .select({
       // https://github.com/drizzle-team/drizzle-orm/issues/1242
@@ -129,7 +128,7 @@ export function filterByName(base: BaseDomainSet, name?: string | null) {
   }
 
   if (concrete.length === 0) {
-    // No path traversal — sortableLabel is already the domain's own label from the base set
+    // no path traversal — sortableLabel is already the domain's own label from the base set
     return ensDb
       .select(selectBase(base))
       .from(base)
@@ -141,20 +140,20 @@ export function filterByName(base: BaseDomainSet, name?: string | null) {
       .as("baseDomains");
   }
 
-  // Build path traversal CTE over the unified `domain` table.
+  // build path traversal CTE over the unified `domain` table.
   const labelHashPath = interpretedLabelsToLabelHashPath(concrete);
   const pathResults = domainsByLabelHashPath(labelHashPath);
 
-  // Alias for head domain lookup (to get headLabelHash for label join)
+  // alias for head domain lookup (to get headLabelHash for label join)
   const headDomain = alias(ensIndexerSchema.domain, "headDomain");
   const headLabel = alias(ensIndexerSchema.label, "headLabel");
 
-  // Join base set with path results, look up head domain's label, override sortableLabel.
-  // The inner join on pathResults scopes results to domains matching the concrete path.
+  // join base set with path results, look up head domain's label, override sortableLabel
+  // the INNER JOIN on pathResults scopes results to domains matching the concrete path
   return ensDb
     .select({
       ...selectBase(base),
-      // Override sortableLabel with head domain's label for NAME ordering
+      // override sortableLabel with head domain's label for NAME ordering
       sortableLabel: sql<string | null>`${headLabel.interpreted}`.as("sortableLabel"),
     })
     .from(base)

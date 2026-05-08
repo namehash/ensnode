@@ -7,9 +7,8 @@ import { MAX_SUPPORTED_NAME_DEPTH } from "@/omnigraph-api/lib/constants";
 /**
  * Provide the canonical parents for a Domain via reverse traversal of the namegraph.
  *
- * Walks `domain → registry → registry.canonicalDomainId` upward via the materialized canonical
- * edge until the registry has no canonical parent (root). Returns `null` when the input Domain is
- * not itself canonical (`domain.canonical = false`).
+ * Walks `domain → registry → registry.canonicalDomainId` upward until the registry has no canonical
+ * parent (root). Returns `null` when the input Domain is not itself canonical.
  */
 export async function getCanonicalPath(domainId: DomainId): Promise<CanonicalPath | null> {
   // Short-circuit for non-canonical Domains
@@ -17,9 +16,9 @@ export async function getCanonicalPath(domainId: DomainId): Promise<CanonicalPat
     where: (t, { eq }) => eq(t.id, domainId),
     columns: { canonical: true },
   });
-  if (!domain) {
-    throw new Error(`Invariant(getCanonicalPath): DomainId '${domainId}' did not exist.`);
-  }
+  if (!domain) throw new Error(`Invariant(getCanonicalPath): DomainId '${domainId}' expected.`);
+
+  // if the Domain is not Canonial, there's no path, so we can short-circuit with null
   if (!domain.canonical) return null;
 
   const result = await ensDb.execute(sql`
@@ -36,7 +35,7 @@ export async function getCanonicalPath(domainId: DomainId): Promise<CanonicalPat
 
       -- Step upward: domain → current registry's canonical parent domain via the bidirectional
       -- canonical-edge agreement (registries.canonical_domain_id = domains.id AND
-      -- domains.subregistry_id = registries.id), computed on demand at each hop.
+      -- domains.subregistry_id = registries.id).
       -- We allow recursion to one row beyond MAX_DEPTH so we can detect (and throw on) a
       -- legitimate path that exceeds the cap, rather than silently truncating it.
       SELECT
