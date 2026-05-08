@@ -3,7 +3,7 @@ import type { OpenAPIHono } from "@hono/zod-openapi";
 import { openapiMeta } from "@/openapi-meta";
 
 /**
- * Endpoints to exclude from the generated OpenAPI document.
+ * Deprecated endpoints to exclude from the generated OpenAPI document.
  */
 const HIDE_OPENAPI_ENDPOINTS: string[] = [
   // TODO: remove /amirealtime once the legacy endpoint is deleted.
