@@ -21,7 +21,7 @@ export const openapiMeta = {
     },
     {
       name: "Meta",
-      description: "APIs for indexing status, configuration, and realtime monitoring",
+      description: "APIs for indexing status, ENSNode stack info, and realtime monitoring",
     },
   ],
 };
