@@ -20,6 +20,7 @@ import {
   ensIndexerSchema,
   type IndexingEngineContext,
 } from "@/lib/indexing-engines/ponder";
+import { logger } from "@/lib/logger";
 import { getManagedName } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
@@ -47,10 +48,14 @@ export default function () {
     // treat the label as unemitted and fall through to the heal path; the labelHash is canonical
     // (bytes32) so the registration still indexes correctly under an unknown label.
     const rawLabel = event.args.label ? asLiteralLabel(event.args.label) : undefined;
-    const label =
-      rawLabel !== undefined && labelhashLiteralLabel(rawLabel) === labelHash
-        ? rawLabel
-        : undefined;
+    const labelMatchesHash =
+      rawLabel !== undefined && labelhashLiteralLabel(rawLabel) === labelHash;
+    if (rawLabel !== undefined && !labelMatchesHash) {
+      logger.warn({
+        msg: `RegistrarController:NameRegistered label/labelHash mismatch (non-UTF-8 bytes?): label='${rawLabel}' labelHash='${labelHash}' — treating label as unemitted`,
+      });
+    }
+    const label = labelMatchesHash ? rawLabel : undefined;
 
     const controller = getThisAccountId(context, event);
     const { node: managedNode, registry } = getManagedName(controller);
@@ -102,10 +107,14 @@ export default function () {
     // See note on RegistrarController:NameRegistered above for why this guards against
     // labelhash-mismatch (non-UTF-8 byte sequences in `string` event args) rather than throwing.
     const rawLabel = event.args.label ? asLiteralLabel(event.args.label) : undefined;
-    const label =
-      rawLabel !== undefined && labelhashLiteralLabel(rawLabel) === labelHash
-        ? rawLabel
-        : undefined;
+    const labelMatchesHash =
+      rawLabel !== undefined && labelhashLiteralLabel(rawLabel) === labelHash;
+    if (rawLabel !== undefined && !labelMatchesHash) {
+      logger.warn({
+        msg: `RegistrarController:NameRenewed label/labelHash mismatch (non-UTF-8 bytes?): label='${rawLabel}' labelHash='${labelHash}' — treating label as unemitted`,
+      });
+    }
+    const label = labelMatchesHash ? rawLabel : undefined;
 
     // if the contract emitted a (verified) healed label, ensure that it is indexed
     if (label !== undefined) {
