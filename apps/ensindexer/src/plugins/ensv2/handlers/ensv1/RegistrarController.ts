@@ -4,6 +4,7 @@ import {
   asLiteralLabel,
   type Label,
   type LabelHash,
+  type LiteralLabel,
   labelhashLiteralLabel,
   makeENSv1DomainId,
   makeSubdomainNode,
@@ -27,6 +28,31 @@ import type { EventWithArgs } from "@/lib/ponder-helpers";
 
 const pluginName = PluginName.ENSv2;
 
+/**
+ * Returns the input `label` as LiteralLabel iff it matches the provided `labelHash`.
+ *
+ * NOTE(labelhash-mismatch): If emitted, the label arg should match the emitted labelHash.
+ * If the label is not UTF-8, however, ABI decoding substitutes U+FFFD for non-UTF-8 bytes, and
+ * the original bytes can't be recovered post-decode. When that happens we treat the label as
+ * unknown so the registration still indexes correctly under an unknown label.
+ */
+const literalLabelIffMatchesLabelHash = (
+  label: Label | undefined,
+  labelHash: LabelHash,
+): LiteralLabel | undefined => {
+  if (label === undefined) return undefined;
+
+  const literalLabel = asLiteralLabel(label);
+  const matches = labelhashLiteralLabel(literalLabel) === labelHash;
+  if (matches) return literalLabel;
+
+  logger.warn({
+    msg: `RegistrarController label/labelHash mismatch (non-UTF-8 bytes?): label='${literalLabel}' labelHash='${labelHash}' — treating label as unemitted`,
+  });
+
+  return undefined;
+};
+
 export default function () {
   async function handleNameRegisteredByController({
     context,
@@ -42,20 +68,7 @@ export default function () {
     }>;
   }) {
     const { labelHash, baseCost: base, premium, referrer } = event.args;
-    // If emitted, the label arg should round-trip to the emitted labelHash. ABI-decoding
-    // substitutes U+FFFD for non-UTF-8 bytes (some legacy contracts emit raw bytes in `string`
-    // event args), and the original bytes can't be recovered post-decode. When that happens we
-    // treat the label as unemitted and fall through to the heal path; the labelHash is canonical
-    // (bytes32) so the registration still indexes correctly under an unknown label.
-    const rawLabel = event.args.label ? asLiteralLabel(event.args.label) : undefined;
-    const labelMatchesHash =
-      rawLabel !== undefined && labelhashLiteralLabel(rawLabel) === labelHash;
-    if (rawLabel !== undefined && !labelMatchesHash) {
-      logger.warn({
-        msg: `RegistrarController:NameRegistered label/labelHash mismatch (non-UTF-8 bytes?): label='${rawLabel}' labelHash='${labelHash}' — treating label as unemitted`,
-      });
-    }
-    const label = labelMatchesHash ? rawLabel : undefined;
+    const label = literalLabelIffMatchesLabelHash(event.args.label, labelHash);
 
     const controller = getThisAccountId(context, event);
     const { node: managedNode, registry } = getManagedName(controller);
@@ -96,7 +109,7 @@ export default function () {
   }: {
     context: IndexingEngineContext;
     event: EventWithArgs<{
-      label?: string;
+      label?: Label;
       labelHash: LabelHash;
       baseCost?: bigint;
       premium?: bigint;
@@ -104,17 +117,7 @@ export default function () {
     }>;
   }) {
     const { labelHash, baseCost: base, premium, referrer } = event.args;
-    // See note on RegistrarController:NameRegistered above for why this guards against
-    // labelhash-mismatch (non-UTF-8 byte sequences in `string` event args) rather than throwing.
-    const rawLabel = event.args.label ? asLiteralLabel(event.args.label) : undefined;
-    const labelMatchesHash =
-      rawLabel !== undefined && labelhashLiteralLabel(rawLabel) === labelHash;
-    if (rawLabel !== undefined && !labelMatchesHash) {
-      logger.warn({
-        msg: `RegistrarController:NameRenewed label/labelHash mismatch (non-UTF-8 bytes?): label='${rawLabel}' labelHash='${labelHash}' — treating label as unemitted`,
-      });
-    }
-    const label = labelMatchesHash ? rawLabel : undefined;
+    const label = literalLabelIffMatchesLabelHash(event.args.label, labelHash);
 
     // if the contract emitted a (verified) healed label, ensure that it is indexed
     if (label !== undefined) {
