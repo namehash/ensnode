@@ -69,7 +69,7 @@ export interface BridgedResolverConfig {
  * TODO: these relationships could/should be encoded in an ENSIP
  * TODO: once Forward Resolution is updated for ENSv2, this likely just returns RegistryId
  */
-const getBridgedResolverConfigs = (namespace: ENSNamespaceId): BridgedResolverConfig[] => {
+const buildBridgedResolverConfigs = (namespace: ENSNamespaceId): BridgedResolverConfig[] => {
   const configs: BridgedResolverConfig[] = [];
 
   const basenames = maybeGetDatasource(namespace, DatasourceNames.Basenames);
@@ -106,6 +106,20 @@ const getBridgedResolverConfigs = (namespace: ENSNamespaceId): BridgedResolverCo
     });
   }
 
+  return configs;
+};
+
+// `isBridgedResolver` sits on hot paths (every NewResolver / ResolverUpdated event during
+// indexing, every forward-resolution hop). The configs are a function of `namespace` only and
+// never change at runtime, so memoize per-namespace to avoid re-walking the datasource catalog
+// + recomputing managed-name + node hashes on every call.
+const bridgedResolverConfigsByNamespace = new Map<ENSNamespaceId, BridgedResolverConfig[]>();
+const getBridgedResolverConfigs = (namespace: ENSNamespaceId): BridgedResolverConfig[] => {
+  let configs = bridgedResolverConfigsByNamespace.get(namespace);
+  if (!configs) {
+    configs = buildBridgedResolverConfigs(namespace);
+    bridgedResolverConfigsByNamespace.set(namespace, configs);
+  }
   return configs;
 };
 

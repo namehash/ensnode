@@ -18,7 +18,7 @@ export async function getCanonicalPath(domainId: DomainId): Promise<CanonicalPat
   });
   if (!domain) throw new Error(`Invariant(getCanonicalPath): DomainId '${domainId}' expected.`);
 
-  // if the Domain is not Canonial, there's no path, so we can short-circuit with null
+  // if the Domain is not Canonical, there's no path, so we can short-circuit with null
   if (!domain.canonical) return null;
 
   const result = await ensDb.execute(sql`

@@ -128,7 +128,7 @@ export async function handleRegistryCanonicalDomainUpdated(
 
 /**
  * Handles canonicality when a Domain updates its Subregistry. Similar to
- * `handleRegistryCanonicalDomainUpdated`, the new Subregistry may not yet — `Domain.subregistryId`
+ * `handleRegistryCanonicalDomainUpdated`, the new Subregistry need not exist yet — `Domain.subregistryId`
  * is set blindly. The canonical edge becomes "real" only when `Registry.canonicalDomainId` agrees,
  * which may happen later via `handleRegistryCanonicalDomainUpdated`.
  */
@@ -277,7 +277,7 @@ async function reconcileRegistryCanonicality(
     // if the Registry has children, we use the CTE to bulk-update canonicality for this entire subtree
     await cascadeCanonicality(context, registryId, nextCanonical);
   } else {
-    // if Registry has no descendants, we can just update its own canoniality using ponder cache
+    // if Registry has no descendants, we can just update its own canonicality using ponder cache
     // (this is the ENSv1 fast-path)
     await context.ensDb
       .update(ensIndexerSchema.registry, { id: registryId })
