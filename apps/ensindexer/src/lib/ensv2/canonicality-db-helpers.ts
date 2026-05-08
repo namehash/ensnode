@@ -163,6 +163,26 @@ export async function handleSubregistryUpdated(
  * Reads the previous resolver from the Domain-Resolver Relation. This requires that this helper
  * runs BEFORE Protocol Acceleration's NewResolver/ResolverUpdated handlers, which overwrite the
  * DRR row — see `apps/ensindexer/ponder/src/register-handlers.ts` for the ordering.
+ *
+ * Implied invariants — both currently true for every known Bridged Resolver and relied on by
+ * the helpers below:
+ *
+ * 1) **One originating Domain per bridged Registry.** Each bridged target Registry (e.g. the
+ *    Basenames `ENSv1VirtualRegistry` for `base.eth`, the Lineanames equivalent for `linea.eth`)
+ *    is the canonical sub-registry of exactly one originating mainnet Domain. If two mainnet
+ *    Domains ever pointed at the same bridged Registry via Bridged Resolvers, detaching one
+ *    would clear the canonical-domain pointer used by the other, orphaning the survivor's
+ *    sub-tree. The 1:1 mapping is encoded in `isBridgedResolver`'s `(resolver address) →
+ *    bridged registryId` table.
+ *
+ * 2) **Bridged target Registry is indexed before its originating Domain's Bridged Resolver
+ *    event.** `handleRegistryCanonicalDomainUpdated` throws when the registry row is missing,
+ *    so a Bridged Resolver event firing on the originating Domain before any subname on the
+ *    bridged target chain is indexed (which is what creates the bridged Registry row) would
+ *    crash the indexer. We rely on event ordering: every known Bridged Resolver targets a
+ *    Registry whose first subname predates the Resolver attachment in block order. If a future
+ *    Bridged Resolver violates this, the fix is to call `ensureRegistry(nextBridged.registryId,
+ *    …)` here before the canonical-domain call (mirroring the v1 NewOwner non-TLD path).
  */
 export async function handleBridgedResolverChange(
   context: IndexingEngineContext,

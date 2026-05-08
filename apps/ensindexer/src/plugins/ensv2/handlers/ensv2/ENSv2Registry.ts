@@ -292,6 +292,10 @@ export default function () {
    * `ParentUpdated(parent, label, sender)` is emitted by the _child_ Registry to claim its
    * canonical parent Domain in the namegraph. It may fire in either order relative to the parent
    * Registry's `SubregistryUpdated`/`LabelRegistered`.
+   *
+   * The `parent` address is interpreted as living on the same chain as the emitting (child)
+   * Registry — ENSv2 hierarchical registries are same-chain. Cross-chain parentage is expressed
+   * via Bridged Resolvers (CCIP-Read), not `ParentUpdated`.
    */
   addOnchainEventListener(
     namespaceContract(pluginName, "ENSv2Registry:ParentUpdated"),
