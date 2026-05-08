@@ -8,7 +8,7 @@ import "../src/ENSLabelHealer.sol";
 /// @notice Deploys ENSLabelHealer behind an ERC-1967 / UUPS proxy.
 ///
 /// Required environment variables:
-///   ADMIN_ADDRESS      — address to assign DEFAULT_ADMIN_ROLE on the proxy.
+///   OWNER_ADDRESS      — address to assign ownership on the proxy.
 ///
 /// Usage:
 ///   forge script script/Deploy.s.sol \
@@ -17,12 +17,12 @@ import "../src/ENSLabelHealer.sol";
 ///     --verify
 contract Deploy is Script {
     function run() external {
-        address admin = vm.envAddress("ADMIN_ADDRESS");
+        address owner = vm.envAddress("OWNER_ADDRESS");
 
         vm.startBroadcast();
 
         ENSLabelHealer impl = new ENSLabelHealer();
-        bytes memory initData = abi.encodeCall(ENSLabelHealer.initialize, (admin));
+        bytes memory initData = abi.encodeCall(ENSLabelHealer.initialize, (owner));
         ENSLabelHealer proxy = ENSLabelHealer(address(new ERC1967Proxy(address(impl), initData)));
 
         vm.stopBroadcast();

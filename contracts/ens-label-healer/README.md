@@ -65,9 +65,10 @@ Commit the `.gas-snapshot` file to track gas changes across PRs.
 
 ## Deployment
 
-The deploy script (`script/Deploy.s.sol`) deploys `ENSLabelHealer` behind a UUPS proxy. It reads `ADMIN_ADDRESS` from the environment.
+The deploy script (`script/Deploy.s.sol`) deploys `ENSLabelHealer` behind a UUPS proxy. It reads `OWNER_ADDRESS` from the environment.
 
-The grant script (`script/Grant.s.sol`) grants `SUBMITTER_ROLE` on an existing proxy.
+The grant script (`script/Grant.s.sol`) grants submitter permissions on an existing proxy.
+The revoke script (`script/Revoke.s.sol`) revokes submitter permissions on an existing proxy.
 
 ### Local devnet (Anvil)
 
@@ -80,7 +81,7 @@ anvil
 Deploy using Anvil's pre-funded account 0:
 
 ```bash
-ADMIN_ADDRESS=0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 \
+OWNER_ADDRESS=0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 \
 forge script script/Deploy.s.sol \
   --rpc-url http://localhost:8545 \
   --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 \
@@ -136,10 +137,19 @@ source .env && forge script script/Deploy.s.sol \
   --verify
 ```
 
-Then grant `SUBMITTER_ROLE`. Requires `PROXY_ADDRESS` and `SUBMITTER_ADDRESS` ENV:
+Then allow a submitter. Requires `PROXY_ADDRESS` and `SUBMITTER_ADDRESS` ENV:
 
 ```bash
 forge script script/Grant.s.sol \
+  --rpc-url sepolia \
+  --private-key $DEPLOYER_PRIVATE_KEY \
+  --broadcast
+```
+
+To revoke a submitter:
+
+```bash
+forge script script/Revoke.s.sol \
   --rpc-url sepolia \
   --private-key $DEPLOYER_PRIVATE_KEY \
   --broadcast

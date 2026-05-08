@@ -12,8 +12,6 @@ contract ENSLabelHealerFuzzTest is Test {
     address internal admin = makeAddr("admin");
     address internal submitter = makeAddr("submitter");
 
-    bytes32 internal constant SUBMITTER_ROLE = keccak256("SUBMITTER_ROLE");
-
     function setUp() public {
         impl = new ENSLabelHealer();
         bytes memory initData = abi.encodeCall(ENSLabelHealer.initialize, (admin));
@@ -21,7 +19,7 @@ contract ENSLabelHealerFuzzTest is Test {
         healer = ENSLabelHealer(address(proxy));
 
         vm.prank(admin);
-        healer.grantRole(SUBMITTER_ROLE, submitter);
+        healer.grantSubmitter(submitter);
     }
 
     function testFuzz_submit_emitsForAnyLabel(string calldata label) public {

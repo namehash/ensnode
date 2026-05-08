@@ -13,9 +13,6 @@ contract ENSLabelHealerTest is Test {
     address internal submitter = makeAddr("submitter");
     address internal stranger = makeAddr("stranger");
 
-    bytes32 internal constant SUBMITTER_ROLE = keccak256("SUBMITTER_ROLE");
-    bytes32 internal constant DEFAULT_ADMIN_ROLE = bytes32(0);
-
     event LabelHealed(string label);
 
     function setUp() public {
@@ -25,11 +22,32 @@ contract ENSLabelHealerTest is Test {
         healer = ENSLabelHealer(address(proxy));
 
         vm.prank(admin);
-        healer.grantRole(SUBMITTER_ROLE, submitter);
+        healer.grantSubmitter(submitter);
     }
 
-    function test_initialize_assignsAdminRole() public view {
-        assertTrue(healer.hasRole(DEFAULT_ADMIN_ROLE, admin));
+    function test_initialize_assignsOwner() public view {
+        assertEq(healer.owner(), admin);
+    }
+
+    function test_grantSubmitter_revertsForNonOwner() public {
+        vm.prank(stranger);
+        vm.expectRevert();
+        healer.grantSubmitter(submitter);
+    }
+
+    function test_revokeSubmitter_revertsForNonOwner() public {
+        vm.prank(stranger);
+        vm.expectRevert();
+        healer.revokeSubmitter(submitter);
+    }
+
+    function test_revokeSubmitter_revokesSubmitter() public {
+        vm.prank(admin);
+        healer.revokeSubmitter(submitter);
+
+        vm.prank(submitter);
+        vm.expectRevert();
+        healer.submit("vitalik");
     }
 
     function test_submit_revertsForNonSubmitter() public {
