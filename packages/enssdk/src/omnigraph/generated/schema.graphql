@@ -211,6 +211,9 @@ scalar CoinType
 A Domain represents an individual Label within the ENS namegraph. It may or may not be Canonical. It may be an ENSv1Domain or an ENSv2Domain.
 """
 interface Domain {
+  """Whether the Domain is Canonical."""
+  canonical: Boolean!
+
   """All Events associated with this Domain."""
   events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): DomainEventsConnection
 
@@ -231,7 +234,7 @@ interface Domain {
   owner: Account
 
   """
-  The direct parent Domain in the canonical namegraph or null if this Domain is a root-level Domain or is not Canonical.
+  The direct parent Domain in the canonical nametree or null if this Domain is a root-level Domain or is not Canonical.
   """
   parent: Domain
 
@@ -322,11 +325,6 @@ input DomainsOrderInput {
 """Filter for the top-level domains query."""
 input DomainsWhereInput {
   """
-  Optional, defaults to false. If true, filters the set of Domains by those that are Canonical (i.e. reachable by ENS Forward Resolution). If false, the set of Domains is not filtered, and may include ENSv2 Domains not reachable by ENS Forward Resolution.
-  """
-  canonical: Boolean = false
-
-  """
   A partial Interpreted Name by which to search the set of Domains. ex: 'example', 'example.', 'example.et'.
   """
   name: String!
@@ -334,6 +332,9 @@ input DomainsWhereInput {
 
 """An ENSv1Domain represents an ENSv1 Domain."""
 type ENSv1Domain implements Domain {
+  """Whether the Domain is Canonical."""
+  canonical: Boolean!
+
   """All Events associated with this Domain."""
   events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): DomainEventsConnection
 
@@ -357,7 +358,7 @@ type ENSv1Domain implements Domain {
   owner: Account
 
   """
-  The direct parent Domain in the canonical namegraph or null if this Domain is a root-level Domain or is not Canonical.
+  The direct parent Domain in the canonical nametree or null if this Domain is a root-level Domain or is not Canonical.
   """
   parent: Domain
 
@@ -392,6 +393,9 @@ type ENSv1Domain implements Domain {
 An ENSv1Registry is a concrete ENSv1 Registry contract (the mainnet ENS Registry, the Basenames shadow Registry, or the Lineanames shadow Registry).
 """
 type ENSv1Registry implements Registry {
+  """Whether the Registry is Canonical."""
+  canonical: Boolean!
+
   """
   Contract metadata for this Registry. If this is an ENSv1VirtualRegistry, this will reference the concrete Registry contract under which the parent Domain exists.
   """
@@ -414,6 +418,9 @@ type ENSv1Registry implements Registry {
 An ENSv1VirtualRegistry is the virtual Registry managed by an ENSv1 Domain that has children. It is keyed by `(chainId, address, node)` where `(chainId, address)` identify the concrete Registry that houses the parent Domain, and `node` is the parent Domain's namehash.
 """
 type ENSv1VirtualRegistry implements Registry {
+  """Whether the Registry is Canonical."""
+  canonical: Boolean!
+
   """
   Contract metadata for this Registry. If this is an ENSv1VirtualRegistry, this will reference the concrete Registry contract under which the parent Domain exists.
   """
@@ -439,6 +446,9 @@ type ENSv1VirtualRegistry implements Registry {
 
 """An ENSv2Domain represents an ENSv2 Domain."""
 type ENSv2Domain implements Domain {
+  """Whether the Domain is Canonical."""
+  canonical: Boolean!
+
   """All Events associated with this Domain."""
   events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): DomainEventsConnection
 
@@ -459,7 +469,7 @@ type ENSv2Domain implements Domain {
   owner: Account
 
   """
-  The direct parent Domain in the canonical namegraph or null if this Domain is a root-level Domain or is not Canonical.
+  The direct parent Domain in the canonical nametree or null if this Domain is a root-level Domain or is not Canonical.
   """
   parent: Domain
 
@@ -512,6 +522,9 @@ type ENSv2DomainPermissionsConnectionEdge {
 
 """An ENSv2Registry represents an ENSv2 Registry contract."""
 type ENSv2Registry implements Registry {
+  """Whether the Registry is Canonical."""
+  canonical: Boolean!
+
   """
   Contract metadata for this Registry. If this is an ENSv1VirtualRegistry, this will reference the concrete Registry contract under which the parent Domain exists.
   """
@@ -924,7 +937,9 @@ type Query {
   """Identify a Domain by Name or DomainId"""
   domain(by: DomainIdInput!): Domain
 
-  """Find Domains by Name."""
+  """
+  Find Canonical Domains by Name. Results are always scoped to Canonical Domains — every nameable Domain is canonical by definition, so a non-canonical filter would be empty.
+  """
   domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: DomainsWhereInput!): QueryDomainsConnection
 
   """Identify Permissions by ID or AccountId."""
@@ -1058,6 +1073,9 @@ type RegistrationRenewalsConnectionEdge {
 A Registry represents a Registry contract in the ENS namegraph. It may be an ENSv1Registry (a concrete ENSv1 Registry contract), an ENSv1VirtualRegistry (the virtual Registry managed by an ENSv1 domain that has children), or an ENSv2Registry.
 """
 interface Registry {
+  """Whether the Registry is Canonical."""
+  canonical: Boolean!
+
   """
   Contract metadata for this Registry. If this is an ENSv1VirtualRegistry, this will reference the concrete Registry contract under which the parent Domain exists.
   """
@@ -1163,7 +1181,7 @@ type Resolver {
   """
   If Resolver is a Bridged Resolver, the Registry to which it Bridges resolution.
   """
-  bridged: AccountId
+  bridged: Registry
 
   """Contract metadata for this Resolver."""
   contract: AccountId!

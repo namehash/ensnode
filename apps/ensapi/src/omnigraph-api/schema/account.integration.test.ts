@@ -54,7 +54,7 @@ describe("Account.domains", () => {
       "sub1.sub2.parent.eth",
       "sub2.parent.eth",
       "test.eth",
-      "wallet.linked.parent.eth",
+      "wallet.sub1.sub2.parent.eth",
     ];
 
     for (const name of expected) {

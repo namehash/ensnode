@@ -91,8 +91,8 @@ describe("Query.domains", () => {
   };
 
   const QueryDomains = gql`
-    query QueryDomains($name: String!, $canonical: Boolean, $order: DomainsOrderInput) {
-      domains(where: { name: $name, canonical: $canonical }, order: $order) {
+    query QueryDomains($name: String!, $order: DomainsOrderInput) {
+      domains(where: { name: $name }, order: $order) {
         edges {
           node {
             __typename
@@ -124,32 +124,29 @@ describe("Query.domains", () => {
 
     const domains = flattenConnection(result.domains);
 
-    // there's at least a v2 'eth' domain
-    expect(domains.length).toBeGreaterThanOrEqual(1);
+    // there's at least a v1 and a v2 'eth' domain
+    expect(domains.length).toBeGreaterThanOrEqual(2);
 
-    const v1EthDomain = domains.find((d) => d.__typename === "ENSv1Domain" && d.name === "eth");
-    const v2EthDomain = domains.find((d) => d.__typename === "ENSv2Domain" && d.name === "eth");
-
-    expect(v1EthDomain).toMatchObject({
+    expect(
+      domains.find((d) => d.__typename === "ENSv1Domain" && d.id === V1_ETH_DOMAIN_ID),
+    ).toMatchObject({
       id: V1_ETH_DOMAIN_ID,
       name: "eth",
       label: { interpreted: "eth" },
-      // ENSv1Domain exposes `node` — the namehash of the canonical name
       node: ETH_NODE,
     });
 
-    expect(v2EthDomain).toMatchObject({
+    expect(
+      domains.find((d) => d.__typename === "ENSv2Domain" && d.id === V2_ETH_DOMAIN_ID),
+    ).toMatchObject({
       id: V2_ETH_DOMAIN_ID,
       name: "eth",
       label: { interpreted: "eth" },
     });
   });
 
-  it("filters by canonical", async () => {
-    const result = await request<QueryDomainsResult>(QueryDomains, {
-      name: "parent",
-      canonical: true,
-    });
+  it("returns only canonical domains", async () => {
+    const result = await request<QueryDomainsResult>(QueryDomains, { name: "parent" });
 
     const domains = flattenConnection(result.domains);
 
@@ -164,7 +161,7 @@ describe("Query.domains", () => {
   });
 
   // TODO: devnet fixture needs a known non-canonical Domain to assert exclusion against.
-  it.todo("excludes non-canonical domains when `canonical: true` is set");
+  it.todo("excludes non-canonical domains from the result set");
 });
 
 describe("Query.domain", () => {

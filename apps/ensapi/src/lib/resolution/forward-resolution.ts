@@ -17,7 +17,7 @@ import {
   ForwardResolutionProtocolStep,
   type ForwardResolutionResult,
   getDatasourceContract,
-  getENSv1Registry,
+  getENSv1RootRegistry,
   maybeGetDatasourceContract,
   PluginName,
   type ResolverRecordsSelection,
@@ -99,7 +99,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
   // initially be ENS Root Registry: see `_resolveForward` for additional context.
   return _resolveForward(interpretedName, selection, {
     ...options,
-    registry: getENSv1Registry(config.namespace),
+    registry: getENSv1RootRegistry(config.namespace),
   });
 }
 
@@ -239,14 +239,17 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           /////////////////////////////////////
           if (accelerate && canAccelerate) {
             const resolver = { chainId, address: activeResolver };
-            const bridgesTo = isBridgedResolver(config.namespace, resolver);
-            if (bridgesTo) {
+            const bridged = isBridgedResolver(config.namespace, resolver);
+            if (bridged) {
               return withEnsProtocolStep(
                 TraceableENSProtocol.ForwardResolution,
                 ForwardResolutionProtocolStep.AccelerateKnownOffchainLookupResolver,
                 {},
                 () =>
-                  _resolveForward(name, selection, { ...options, registry: bridgesTo.registry }),
+                  _resolveForward(name, selection, {
+                    ...options,
+                    registry: bridged.targetRegistry,
+                  }),
               );
             }
 

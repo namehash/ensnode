@@ -110,7 +110,8 @@ builder.queryType({
     // Find Domains
     ////////////////
     domains: t.connection({
-      description: "Find Domains by Name.",
+      description:
+        "Find Canonical Domains by Name. Results are always scoped to Canonical Domains — every nameable Domain is canonical by definition, so a non-canonical filter would be empty.",
       type: DomainInterfaceRef,
       args: {
         where: t.arg({ type: DomainsWhereInput, required: true }),
@@ -119,7 +120,7 @@ builder.queryType({
       resolve: (_, { where, order, ...connectionArgs }, context) => {
         const base = domainsBase();
         const named = filterByName(base, where.name);
-        const canonical = where.canonical === true ? filterByCanonical(named) : named;
+        const canonical = filterByCanonical(named);
         const domains = withOrderingMetadata(canonical);
 
         return resolveFindDomains(context, { domains, order, ...connectionArgs });

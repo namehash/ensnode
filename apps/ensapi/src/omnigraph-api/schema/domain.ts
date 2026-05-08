@@ -103,6 +103,16 @@ DomainInterfaceRef.implement({
       resolve: (parent) => parent.label,
     }),
 
+    ////////////////////
+    // Domain.canonical
+    ////////////////////
+    canonical: t.field({
+      description: "Whether the Domain is Canonical.",
+      type: "Boolean",
+      nullable: false,
+      resolve: (parent) => parent.canonical,
+    }),
+
     ///////////////
     // Domain.name
     ///////////////
@@ -162,7 +172,7 @@ DomainInterfaceRef.implement({
     /////////////////
     parent: t.field({
       description:
-        "The direct parent Domain in the canonical namegraph or null if this Domain is a root-level Domain or is not Canonical.",
+        "The direct parent Domain in the canonical nametree or null if this Domain is a root-level Domain or is not Canonical.",
       type: DomainInterfaceRef,
       nullable: true,
       resolve: async (domain, _args, context) => {
@@ -428,11 +438,6 @@ export const DomainsWhereInput = builder.inputType("DomainsWhereInput", {
       required: true,
       description:
         "A partial Interpreted Name by which to search the set of Domains. ex: 'example', 'example.', 'example.et'.",
-    }),
-    canonical: t.boolean({
-      description:
-        "Optional, defaults to false. If true, filters the set of Domains by those that are Canonical (i.e. reachable by ENS Forward Resolution). If false, the set of Domains is not filtered, and may include ENSv2 Domains not reachable by ENS Forward Resolution.",
-      defaultValue: false,
     }),
   }),
 });

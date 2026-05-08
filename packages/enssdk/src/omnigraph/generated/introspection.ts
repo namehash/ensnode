@@ -1043,6 +1043,18 @@ const introspection = {
         "name": "Domain",
         "fields": [
           {
+            "name": "canonical",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
             "name": "events",
             "type": {
               "kind": "OBJECT",
@@ -1601,14 +1613,6 @@ const introspection = {
         "name": "DomainsWhereInput",
         "inputFields": [
           {
-            "name": "canonical",
-            "type": {
-              "kind": "SCALAR",
-              "name": "Boolean"
-            },
-            "defaultValue": "false"
-          },
-          {
             "name": "name",
             "type": {
               "kind": "NON_NULL",
@@ -1625,6 +1629,18 @@ const introspection = {
         "kind": "OBJECT",
         "name": "ENSv1Domain",
         "fields": [
+          {
+            "name": "canonical",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
           {
             "name": "events",
             "type": {
@@ -1878,6 +1894,18 @@ const introspection = {
         "name": "ENSv1Registry",
         "fields": [
           {
+            "name": "canonical",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
             "name": "contract",
             "type": {
               "kind": "NON_NULL",
@@ -2012,6 +2040,18 @@ const introspection = {
         "kind": "OBJECT",
         "name": "ENSv1VirtualRegistry",
         "fields": [
+          {
+            "name": "canonical",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
           {
             "name": "contract",
             "type": {
@@ -2159,6 +2199,18 @@ const introspection = {
         "kind": "OBJECT",
         "name": "ENSv2Domain",
         "fields": [
+          {
+            "name": "canonical",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
           {
             "name": "events",
             "type": {
@@ -2548,6 +2600,18 @@ const introspection = {
         "kind": "OBJECT",
         "name": "ENSv2Registry",
         "fields": [
+          {
+            "name": "canonical",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
           {
             "name": "contract",
             "type": {
@@ -5086,6 +5150,18 @@ const introspection = {
         "name": "Registry",
         "fields": [
           {
+            "name": "canonical",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
             "name": "contract",
             "type": {
               "kind": "NON_NULL",
@@ -5572,8 +5648,8 @@ const introspection = {
           {
             "name": "bridged",
             "type": {
-              "kind": "OBJECT",
-              "name": "AccountId"
+              "kind": "INTERFACE",
+              "name": "Registry"
             },
             "args": [],
             "isDeprecated": false

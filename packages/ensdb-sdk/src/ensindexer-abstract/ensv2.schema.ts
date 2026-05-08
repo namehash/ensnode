@@ -61,7 +61,15 @@ import type { EncodedReferrer } from "@ensnode/ensnode-sdk";
  * `registryId` at the virtual registry. Concrete `ENSv1Registry` rows (e.g. the mainnet ENS Registry,
  * the Basenames Registry, the Lineanames Registry) sit at the top. ENSv2 namegraphs are rooted in
  * a single `ENSv2Registry` RootRegistry on the ENS Root Chain and are possibly circular directed
- * graphs. The canonical namegraph is never materialized, only _navigated_ at resolution-time.
+ * graphs. The full namegraph is never materialized, only _navigated_ at resolution-time, with the
+ * exception of the canonical subgraph, which is reflected via `Registry.canonical` /
+ * `Domain.canonical` boolean flags on the rows themselves. The bidirectional canonical edge is
+ * NOT materialized in a parallel table; it is derived on demand by checking that the two
+ * unidirectional pointers agree (`Registry.canonicalDomainId = Domain.id`
+ * ↔ `Domain.subregistryId = Registry.id`). Cascading canonicality flips through the subgraph
+ * run as either an in-memory PK update (when `Registry.__hasChildren = false`, the dominant case
+ * for fresh ENSv1 virtual registries on first wire-up) or a single recursive-CTE batch UPDATE
+ * otherwise (see `canonicality-db-helpers.ts`).
  *
  * Note also that the Protocol Acceleration plugin is a hard requirement for the ENSv2 plugin. This
  * allows us to rely on the shared logic for indexing:
@@ -207,6 +215,20 @@ export const registry = onchainTable(
     // If this is an ENSv1VirtualRegistry, `node` is the namehash of the parent ENSv1 domain that
     // owns it, otherwise null.
     node: t.hex().$type<Node>(),
+
+    // the Registry's declared Canonical Domain (uni-directional)
+    canonicalDomainId: t.text().$type<DomainId>(),
+
+    // Whether this Registry is part of the canonical nametree. See canonicality-db-helpers.ts.
+    canonical: t.boolean().notNull().default(false),
+
+    // Synthetic monotonic sentinel: flipped to true the first time a child Domain is registered
+    // under this Registry (see `ensureDomainInRegistry`). Read by `cascadeCanonicality` to skip
+    // the raw-SQL recursive-CTE walk (and its associated Ponder cache flush) when the start
+    // registry provably has no descendants — the dominant case for fresh ENSv1 virtual
+    // registries on first wire-up. Double-underscore prefix marks it as an internal-only
+    // bookkeeping field, not part of the on-chain protocol surface.
+    __hasChildren: t.boolean().notNull().default(false),
   }),
   (t) => ({
     // NOTE: non-unique index because multiple rows can share (chainId, address) across virtual registries
@@ -244,7 +266,7 @@ export const domain = onchainTable(
     // belongs to a registry
     registryId: t.text().notNull().$type<RegistryId>(),
 
-    // may have a subregistry
+    // the Domain's declared Subregistry (uni-directional)
     subregistryId: t.text().$type<RegistryId>(),
 
     // If this is an ENSv2Domain, the TokenId within the ENSv2Registry, otherwise null.
@@ -263,8 +285,10 @@ export const domain = onchainTable(
     // If this is an ENSv1Domain, may have a `rootRegistryOwner`, otherwise null.
     rootRegistryOwnerId: t.hex().$type<NormalizedAddress>(),
 
+    // Whether this Domain is part of the canonical nametree. Mirrors the parent Registry's flag.
+    canonical: t.boolean().notNull().default(false),
+
     // NOTE: Domain-Resolver Relations tracked via Protocol Acceleration plugin
-    // NOTE: parent is derived via registryCanonicalDomain, not stored on the domain row
   }),
   (t) => ({
     byType: index().on(t.type),
@@ -589,19 +613,4 @@ export const label = onchainTable(
 
 export const label_relations = relations(label, ({ many }) => ({
   domains: many(domain),
-}));
-
-///////////////////
-// Canonical Names
-///////////////////
-
-// TODO(canonical-names): this table will be refactored away once Canonical Names are implemented in
-// ENSv2, and we'll be able to store this information directly on the Registry entity, but until
-// then we need a place to track canonical domain references without requiring that a Registry contract
-// has emitted an event (and therefore is indexed)
-// TODO(canonical-names): this table can also disappear once the Signal pattern is implemented for
-// Registry contracts, ensuring that they are indexed during construction and are available for storage.
-export const registryCanonicalDomain = onchainTable("registry_canonical_domains", (t) => ({
-  registryId: t.text().primaryKey().$type<RegistryId>(),
-  domainId: t.text().notNull().$type<DomainId>(),
 }));
