@@ -5,7 +5,7 @@ import { mnemonicToAccount } from "viem/accounts";
 
 /**
  * Deterministic contract addresses for the ENS contracts-v2 devnet used by ens-test-env.
- * Keys use the same PascalCase names as the contracts-v2 contract table output. 
+ * Keys use the same PascalCase names as the contracts-v2 contract table output.
  * Use `pnpm devnet` to see actual data in devnet
  *
  * @see docker/services/devnet.yml
