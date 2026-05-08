@@ -49,8 +49,8 @@ catalogs:
       specifier: 0.41.0
       version: 0.41.0
     hono:
-      specifier: ^4.12.14
-      version: 4.12.14
+      specifier: ^4.12.16
+      version: 4.12.18
     lucide-react:
       specifier: ^0.548.0
       version: 0.548.0
@@ -135,6 +135,8 @@ overrides:
   protobufjs@>=7.0.0 <7.5.5: ^7.5.5
   postcss@>=8.0.0 <8.5.12: ^8.5.12
   uuid@>=10.0.0 <11.1.1: ^11.1.1
+  fast-uri@<3.1.2: ^3.1.2
+  fast-xml-builder@<1.1.7: ^1.1.7
 
 patchedDependencies:
   '@changesets/assemble-release-plan@6.0.9':
@@ -355,13 +357,13 @@ importers:
         version: link:../../packages/ponder-subgraph
       '@hono/node-server':
         specifier: 'catalog:'
-        version: 1.19.14(hono@4.12.14)
+        version: 1.19.14(hono@4.12.18)
       '@hono/otel':
         specifier: ^0.2.2
-        version: 0.2.2(hono@4.12.14)
+        version: 0.2.2(hono@4.12.18)
       '@hono/zod-openapi':
         specifier: ^1.2.2
-        version: 1.2.2(hono@4.12.14)(zod@4.3.6)
+        version: 1.2.2(hono@4.12.18)(zod@4.3.6)
       '@namehash/ens-referrals':
         specifier: workspace:*
         version: link:../../packages/ens-referrals
@@ -436,7 +438,7 @@ importers:
         version: 5.16.0(graphql@16.11.0)
       hono:
         specifier: 'catalog:'
-        version: 4.12.14
+        version: 4.12.18
       p-memoize:
         specifier: ^8.0.0
         version: 8.0.0
@@ -448,7 +450,7 @@ importers:
         version: 10.1.0
       ponder-enrich-gql-docs-middleware:
         specifier: ^0.1.3
-        version: 0.1.3(graphql@16.11.0)(hono@4.12.14)
+        version: 0.1.3(graphql@16.11.0)(hono@4.12.18)
       superjson:
         specifier: ^2.2.6
         version: 2.2.6
@@ -533,13 +535,13 @@ importers:
         version: link:../../packages/enssdk
       hono:
         specifier: 'catalog:'
-        version: 4.12.14
+        version: 4.12.18
       p-retry:
         specifier: 'catalog:'
         version: 7.1.1
       ponder:
         specifier: 'catalog:'
-        version: 0.16.6(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@24.10.9)(@types/pg@8.16.0)(hono@4.12.14)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))(yaml@2.8.3)(zod@4.3.6)
+        version: 0.16.6(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@24.10.9)(@types/pg@8.16.0)(hono@4.12.18)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))(yaml@2.8.3)(zod@4.3.6)
       viem:
         specifier: 'catalog:'
         version: 2.38.5(typescript@5.9.3)(zod@4.3.6)
@@ -579,7 +581,7 @@ importers:
         version: 5.0.5
       '@hono/node-server':
         specifier: 'catalog:'
-        version: 1.19.14(hono@4.12.14)
+        version: 1.19.14(hono@4.12.18)
       classic-level:
         specifier: ^1.4.1
         version: 1.4.1
@@ -588,7 +590,7 @@ importers:
         version: link:../../packages/enssdk
       hono:
         specifier: 'catalog:'
-        version: 4.12.14
+        version: 4.12.18
       pino:
         specifier: 'catalog:'
         version: 10.1.0
@@ -646,14 +648,14 @@ importers:
         version: link:../../packages/ensnode-sdk
       hono:
         specifier: 'catalog:'
-        version: 4.12.14
+        version: 4.12.18
     devDependencies:
       '@ensnode/shared-configs':
         specifier: workspace:*
         version: link:../../packages/shared-configs
       '@hono/node-server':
         specifier: 'catalog:'
-        version: 1.19.14(hono@4.12.14)
+        version: 1.19.14(hono@4.12.18)
       '@types/node':
         specifier: 'catalog:'
         version: 24.10.9
@@ -928,7 +930,7 @@ importers:
         version: 0.41.0(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/pg@8.16.0)(kysely@0.28.14)(pg@8.16.3)
       ponder:
         specifier: 'catalog:'
-        version: 0.16.6(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@24.10.9)(@types/pg@8.16.0)(hono@4.12.14)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))(yaml@2.8.3)(zod@4.3.6)
+        version: 0.16.6(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@24.10.9)(@types/pg@8.16.0)(hono@4.12.18)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))(yaml@2.8.3)(zod@4.3.6)
       tsup:
         specifier: 'catalog:'
         version: 8.5.0(jiti@2.6.1)(postcss@8.5.12)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)
@@ -1318,7 +1320,7 @@ importers:
         version: 24.10.9
       hono:
         specifier: 'catalog:'
-        version: 4.12.14
+        version: 4.12.18
       tsup:
         specifier: 'catalog:'
         version: 8.5.0(jiti@2.6.1)(postcss@8.5.12)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)
@@ -6837,11 +6839,11 @@ packages:
   fast-safe-stringify@2.1.1:
     resolution: {integrity: sha512-W+KJc2dmILlPplD/H4K9l9LcAHAfPtP6BY84uVLXQ6Evcz9Lcg33Y2z1IVblT6xdY54PXYVHEv+0Wpq8Io6zkA==}
 
-  fast-uri@3.1.0:
-    resolution: {integrity: sha512-iPeeDKJSWf4IEOasVVrknXpaBV0IApz/gp7S2bb7Z4Lljbl2MGJRqInZiUrQwV16cpzw/D3S5j5Julj/gT52AA==}
+  fast-uri@3.1.2:
+    resolution: {integrity: sha512-rVjf7ArG3LTk+FS6Yw81V1DLuZl1bRbNrev6Tmd/9RaroeeRRJhAt7jg/6YFxbvAQXUCavSoZhPPj6oOx+5KjQ==}
 
-  fast-xml-builder@1.1.5:
-    resolution: {integrity: sha512-4TJn/8FKLeslLAH3dnohXqE3QSoxkhvaMzepOIZytwJXZO69Bfz0HBdDHzOTOon6G59Zrk6VQ2bEiv1t61rfkA==}
+  fast-xml-builder@1.2.0:
+    resolution: {integrity: sha512-00aAWieqff+ZJhsXA4g1g7M8k+7AYoMUUHF+/zFb5U6Uv/P0Vl4QZo84/IcufzYalLuEj9928bXN9PbbFzMF0Q==}
 
   fast-xml-parser@5.7.2:
     resolution: {integrity: sha512-P7oW7tLbYnhOLQk/Gv7cZgzgMPP/XN03K02/Jy6Y/NHzyIAIpxuZIM/YqAkfiXFPxA2CTm7NtCijK9EDu09u2w==}
@@ -7198,8 +7200,8 @@ packages:
     resolution: {integrity: sha512-Xwwo44whKBVCYoliBQwaPvtd/2tYFkRQtXDWj1nackaV2JPXx3L0+Jvd8/qCJ2p+ML0/XVkJ2q+Mr+UVdpJK5w==}
     engines: {node: '>=12.0.0'}
 
-  hono@4.12.14:
-    resolution: {integrity: sha512-am5zfg3yu6sqn5yjKBNqhnTX7Cv+m00ox+7jbaKkrLMRJ4rAdldd1xPd/JzbBWspqaQv6RSTrgFN95EsfhC+7w==}
+  hono@4.12.18:
+    resolution: {integrity: sha512-RWzP96k/yv0PQfyXnWjs6zot20TqfpfsNXhOnev8d1InAxubW93L11/oNUc3tQqn2G0bSdAOBpX+2uDFHV7kdQ==}
     engines: {node: '>=16.9.0'}
 
   hookable@5.5.3:
@@ -10268,6 +10270,10 @@ packages:
     resolution: {integrity: sha512-EvGK8EJ3DhaHfbRlETOWAS5pO9MZITeauHKJyb8wyajUfQUenkIg2MvLDTZ4T/TgIcm3HU0TFBgWWboAZ30UHg==}
     engines: {node: '>=18'}
 
+  xml-naming@0.1.0:
+    resolution: {integrity: sha512-k8KO9hrMyNk6tUWqUfkTEZbezRRpONVOzUTnc97VnCvyj6Tf9lyUR9EDAIeiVLv56jsMcoXEwjW8Kv5yPY52lw==}
+    engines: {node: '>=16.0.0'}
+
   xmlchars@2.2.0:
     resolution: {integrity: sha512-JZnDKK8B0RCDw84FNdDAIpZK+JuJw+s7Lz8nksI7SIuU3UXJJslUthsi+uWBUYOwPFwW7W7PRLRfUKpxjtjFCw==}
 
@@ -12167,27 +12173,27 @@ snapshots:
     dependencies:
       react: 19.2.1
 
-  '@hono/node-server@1.19.14(hono@4.12.14)':
+  '@hono/node-server@1.19.14(hono@4.12.18)':
     dependencies:
-      hono: 4.12.14
+      hono: 4.12.18
 
-  '@hono/otel@0.2.2(hono@4.12.14)':
+  '@hono/otel@0.2.2(hono@4.12.18)':
     dependencies:
       '@opentelemetry/api': 1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a)
       '@opentelemetry/semantic-conventions': 1.37.0
-      hono: 4.12.14
+      hono: 4.12.18
 
-  '@hono/zod-openapi@1.2.2(hono@4.12.14)(zod@4.3.6)':
+  '@hono/zod-openapi@1.2.2(hono@4.12.18)(zod@4.3.6)':
     dependencies:
       '@asteasolutions/zod-to-openapi': 8.4.1(zod@4.3.6)
-      '@hono/zod-validator': 0.7.6(hono@4.12.14)(zod@4.3.6)
-      hono: 4.12.14
+      '@hono/zod-validator': 0.7.6(hono@4.12.18)(zod@4.3.6)
+      hono: 4.12.18
       openapi3-ts: 4.5.0
       zod: 4.3.6
 
-  '@hono/zod-validator@0.7.6(hono@4.12.14)(zod@4.3.6)':
+  '@hono/zod-validator@0.7.6(hono@4.12.18)(zod@4.3.6)':
     dependencies:
-      hono: 4.12.14
+      hono: 4.12.18
       zod: 4.3.6
 
   '@iconify-json/lucide@1.2.71':
@@ -15349,7 +15355,7 @@ snapshots:
   ajv@8.18.0:
     dependencies:
       fast-deep-equal: 3.1.3
-      fast-uri: 3.1.0
+      fast-uri: 3.1.2
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
 
@@ -16771,16 +16777,17 @@ snapshots:
 
   fast-safe-stringify@2.1.1: {}
 
-  fast-uri@3.1.0: {}
+  fast-uri@3.1.2: {}
 
-  fast-xml-builder@1.1.5:
+  fast-xml-builder@1.2.0:
     dependencies:
       path-expression-matcher: 1.5.0
+      xml-naming: 0.1.0
 
   fast-xml-parser@5.7.2:
     dependencies:
       '@nodable/entities': 2.1.0
-      fast-xml-builder: 1.1.5
+      fast-xml-builder: 1.2.0
       path-expression-matcher: 1.5.0
       strnum: 2.2.3
 
@@ -17305,7 +17312,7 @@ snapshots:
 
   highlight.js@11.11.1: {}
 
-  hono@4.12.14: {}
+  hono@4.12.18: {}
 
   hookable@5.5.3: {}
 
@@ -18823,12 +18830,12 @@ snapshots:
       path-data-parser: 0.1.0
       points-on-curve: 0.2.0
 
-  ponder-enrich-gql-docs-middleware@0.1.3(graphql@16.11.0)(hono@4.12.14):
+  ponder-enrich-gql-docs-middleware@0.1.3(graphql@16.11.0)(hono@4.12.18):
     dependencies:
       graphql: 16.11.0
-      hono: 4.12.14
+      hono: 4.12.18
 
-  ponder@0.16.6(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@24.10.9)(@types/pg@8.16.0)(hono@4.12.14)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))(yaml@2.8.3)(zod@4.3.6):
+  ponder@0.16.6(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@24.10.9)(@types/pg@8.16.0)(hono@4.12.18)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))(yaml@2.8.3)(zod@4.3.6):
     dependencies:
       '@babel/code-frame': 7.29.0
       '@commander-js/extra-typings': 12.1.0(commander@12.1.0)
@@ -18836,7 +18843,7 @@ snapshots:
       '@escape.tech/graphql-armor-max-aliases': 2.6.2
       '@escape.tech/graphql-armor-max-depth': 2.4.2
       '@escape.tech/graphql-armor-max-tokens': 2.5.1
-      '@hono/node-server': 1.19.14(hono@4.12.14)
+      '@hono/node-server': 1.19.14(hono@4.12.18)
       '@ponder/utils': 0.2.18(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))
       abitype: 0.10.3(typescript@5.9.3)(zod@4.3.6)
       ansi-escapes: 7.1.1
@@ -18849,7 +18856,7 @@ snapshots:
       glob: 10.5.0
       graphql: 16.8.2
       graphql-yoga: 5.17.1(graphql@16.8.2)
-      hono: 4.12.14
+      hono: 4.12.18
       http-terminator: 3.2.0
       kysely: 0.28.14
       pg: 8.16.3
@@ -20878,6 +20885,8 @@ snapshots:
   ws@8.18.3: {}
 
   xml-name-validator@5.0.0: {}
+
+  xml-naming@0.1.0: {}
 
   xmlchars@2.2.0: {}
 
