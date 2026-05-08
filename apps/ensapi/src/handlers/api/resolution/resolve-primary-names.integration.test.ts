@@ -16,36 +16,42 @@ describe("GET /api/resolve/primary-names/:address", () => {
       description: "resolves primary names for owner address on chain 1",
       address: accounts.owner.address,
       query: "chainIds=1",
-      expectedStatus: 200,
-      expectedBody: {
-        names: { "1": "test.eth" },
-        accelerationRequested: false,
-        accelerationAttempted: false,
+      expected: {
+        status: 200,
+        body: {
+          names: { "1": "test.eth" },
+          accelerationRequested: false,
+          accelerationAttempted: false,
+        },
       },
     },
     {
       description: "resolves all primary names",
       address: accounts.owner.address,
       query: "",
-      expectedStatus: 200,
-      expectedBody: {
-        names: { "1": "test.eth" },
-        accelerationRequested: false,
-        accelerationAttempted: false,
+      expected: {
+        status: 200,
+        body: {
+          names: { "1": "test.eth" },
+          accelerationRequested: false,
+          accelerationAttempted: false,
+        },
       },
     },
     {
       description: "returns 400 for invalid (non-hex) address",
       address: "notanaddress",
       query: "chainIds=1",
-      expectedStatus: 400,
-      expectedBody: {
-        message: "Invalid Input",
-        details: {
-          errors: [],
-          properties: {
-            address: {
-              errors: ["EVM address must be a valid EVM address"],
+      expected: {
+        status: 400,
+        body: {
+          message: "Invalid Input",
+          details: {
+            errors: [],
+            properties: {
+              address: {
+                errors: ["EVM address must be a valid EVM address"],
+              },
             },
           },
         },
@@ -55,19 +61,21 @@ describe("GET /api/resolve/primary-names/:address", () => {
       description: "returns 400 when chainIds contains the default chain id (0)",
       address: accounts.owner.address,
       query: "chainIds=0",
-      expectedStatus: 400,
-      expectedBody: {
-        message: "Invalid Input",
-        details: {
-          errors: [],
-          properties: {
-            chainIds: {
-              errors: [],
-              items: [
-                {
-                  errors: ["Must not be the 'default' EVM chain id (0)."],
-                },
-              ],
+      expected: {
+        status: 400,
+        body: {
+          message: "Invalid Input",
+          details: {
+            errors: [],
+            properties: {
+              chainIds: {
+                errors: [],
+                items: [
+                  {
+                    errors: ["Must not be the 'default' EVM chain id (0)."],
+                  },
+                ],
+              },
             },
           },
         },
@@ -77,26 +85,28 @@ describe("GET /api/resolve/primary-names/:address", () => {
       description: "returns 400 when chainIds contains duplicate chain ids",
       address: accounts.owner.address,
       query: "chainIds=1,1",
-      expectedStatus: 400,
-      expectedBody: {
-        message: "Invalid Input",
-        details: {
-          errors: [],
-          properties: {
-            chainIds: {
-              errors: ["Must be a set of unique entries."],
+      expected: {
+        status: 400,
+        body: {
+          message: "Invalid Input",
+          details: {
+            errors: [],
+            properties: {
+              chainIds: {
+                errors: ["Must be a set of unique entries."],
+              },
             },
           },
         },
       },
     },
-  ])("$description", async ({ address, query, expectedStatus, expectedBody }) => {
+  ])("$description", async ({ address, query, expected }) => {
     const response = await fetch(
       `${BASE_URL}/api/resolve/primary-names/${address}${query ? `?${query}` : ""}`,
     );
     const body = await response.json();
 
-    expect(response.status).toBe(expectedStatus);
-    expect(body).toMatchObject(expectedBody);
+    expect(response.status).toBe(expected.status);
+    expect(body).toMatchObject(expected.body);
   });
 });

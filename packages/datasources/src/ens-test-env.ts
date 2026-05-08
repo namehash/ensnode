@@ -1,25 +1,25 @@
 import { zeroAddress } from "viem";
 
-import { EnhancedAccessControl } from "../abis/ensv2/EnhancedAccessControl";
-import { ETHRegistrar } from "../abis/ensv2/ETHRegistrar";
-import { Registry } from "../abis/ensv2/Registry";
-import { UniversalResolverV2 } from "../abis/ensv2/UniversalResolverV2";
+import { EnhancedAccessControl } from "./abis/ensv2/EnhancedAccessControl";
+import { ETHRegistrar } from "./abis/ensv2/ETHRegistrar";
+import { Registry } from "./abis/ensv2/Registry";
+import { UniversalResolverV2 } from "./abis/ensv2/UniversalResolverV2";
 // ABIs for ENSRoot Datasource
-import { BaseRegistrar as root_BaseRegistrar } from "../abis/root/BaseRegistrar";
-import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } from "../abis/root/LegacyEthRegistrarController";
-import { NameWrapper as root_NameWrapper } from "../abis/root/NameWrapper";
-import { Registry as root_Registry } from "../abis/root/Registry";
-import { UniversalRegistrarRenewalWithReferrer as root_UniversalRegistrarRenewalWithReferrer } from "../abis/root/UniversalRegistrarRenewalWithReferrer";
-import { UniversalResolverV1 } from "../abis/root/UniversalResolverV1";
-import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "../abis/root/UnwrappedEthRegistrarController";
-import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "../abis/root/WrappedEthRegistrarController";
-import { StandaloneReverseRegistrar } from "../abis/shared/StandaloneReverseRegistrar";
-import { ensTestEnvChain } from "../lib/chains";
+import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
+import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } from "./abis/root/LegacyEthRegistrarController";
+import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
+import { Registry as root_Registry } from "./abis/root/Registry";
+import { UniversalRegistrarRenewalWithReferrer as root_UniversalRegistrarRenewalWithReferrer } from "./abis/root/UniversalRegistrarRenewalWithReferrer";
+import { UniversalResolverV1 } from "./abis/root/UniversalResolverV1";
+import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
+import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
+import { StandaloneReverseRegistrar } from "./abis/shared/StandaloneReverseRegistrar";
+import { contracts } from "./devnet/constants";
+import { ensTestEnvChain } from "./lib/chains";
 // Shared ABIs
-import { ResolverABI } from "../lib/ResolverABI";
+import { ResolverABI } from "./lib/ResolverABI";
 // Types
-import { DatasourceNames, type ENSNamespace } from "../lib/types";
-import { contracts } from "./constants";
+import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
 /**
  * The ens-test-env ENSNamespace
@@ -46,13 +46,13 @@ export default {
       // NOTE: named LegacyENSRegistry in devnet
       ENSv1RegistryOld: {
         abi: root_Registry, // Registry was redeployed, same abi
-        address: contracts.legacyEnsRegistry,
+        address: contracts.LegacyENSRegistry,
         startBlock: 0,
       },
       // NOTE: named ENSRegistry in devnet
       ENSv1Registry: {
         abi: root_Registry, // Registry was redeployed, same abi
-        address: contracts.ensRegistry,
+        address: contracts.ENSRegistry,
         startBlock: 0,
       },
       Resolver: {
@@ -62,25 +62,25 @@ export default {
       // NOTE: named BaseRegistrarImplementation in devnet
       BaseRegistrar: {
         abi: root_BaseRegistrar,
-        address: contracts.baseRegistrar,
+        address: contracts.BaseRegistrarImplementation,
         startBlock: 0,
       },
       // NOTE: named LegacyETHRegistrarController in devnet
       LegacyEthRegistrarController: {
         abi: root_LegacyEthRegistrarController,
-        address: contracts.legacyEthRegistrarController,
+        address: contracts.LegacyETHRegistrarController,
         startBlock: 0,
       },
       // NOTE: named WrappedETHRegistrarController in devnet
       WrappedEthRegistrarController: {
         abi: root_WrappedEthRegistrarController,
-        address: contracts.wrappedEthRegistrarController,
+        address: contracts.WrappedETHRegistrarController,
         startBlock: 0,
       },
       // NOTE: named ETHRegistrarController in devnet
       UnwrappedEthRegistrarController: {
         abi: root_UnwrappedEthRegistrarController,
-        address: contracts.ethRegistrarController,
+        address: contracts.ETHRegistrarController,
         startBlock: 0,
       },
       // NOTE: not in devnet, set to zeroAddress
@@ -91,18 +91,18 @@ export default {
       },
       NameWrapper: {
         abi: root_NameWrapper,
-        address: contracts.nameWrapper,
+        address: contracts.NameWrapper,
         startBlock: 0,
       },
       UniversalResolver: {
         abi: UniversalResolverV1,
-        address: contracts.universalResolver,
+        address: contracts.UniversalResolver,
         startBlock: 0,
       },
       // NOTE: named UniversalResolverV2 in devnet
       UniversalResolverV2: {
         abi: UniversalResolverV2,
-        address: contracts.universalResolverV2,
+        address: contracts.UniversalResolverV2,
         startBlock: 0,
       },
     },
@@ -116,22 +116,22 @@ export default {
       EnhancedAccessControl: { abi: EnhancedAccessControl, startBlock: 0 },
       RootRegistry: {
         abi: Registry,
-        address: contracts.rootRegistry,
+        address: contracts.RootRegistry,
         startBlock: 0,
       },
       ETHRegistry: {
         abi: Registry,
-        address: contracts.ethRegistry,
+        address: contracts.ETHRegistry,
         startBlock: 0,
       },
       ETHRegistrar: {
         abi: ETHRegistrar,
-        address: contracts.ethRegistrar,
+        address: contracts.ETHRegistrar,
         startBlock: 0,
       },
       ENSv1Resolver: {
         abi: ResolverABI,
-        address: "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
+        address: contracts.ENSV1Resolver,
         startBlock: 0,
       },
     },
@@ -142,28 +142,28 @@ export default {
     contracts: {
       DefaultReverseRegistrar: {
         abi: StandaloneReverseRegistrar,
-        address: contracts.defaultReverseRegistrar,
+        address: contracts.DefaultReverseRegistrar,
         startBlock: 0,
       },
 
       // NOTE: named DefaultReverseResolver in devnet
       DefaultReverseResolver3: {
         abi: ResolverABI,
-        address: contracts.defaultReverseResolver,
+        address: contracts.DefaultReverseResolver,
         startBlock: 0,
       },
 
       // NOTE: named LegacyPublicResolver in devnet
       DefaultPublicResolver4: {
         abi: ResolverABI,
-        address: contracts.legacyPublicResolver,
+        address: contracts.LegacyPublicResolver,
         startBlock: 0,
       },
 
       // NOTE: named PublicResolver in devnet
       DefaultPublicResolver5: {
         abi: ResolverABI,
-        address: contracts.publicResolver,
+        address: contracts.PublicResolver,
         startBlock: 0,
       },
     },

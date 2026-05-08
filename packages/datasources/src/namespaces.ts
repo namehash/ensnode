@@ -1,4 +1,4 @@
-import ensTestEnv from "./devnet/namespace";
+import ensTestEnv from "./ens-test-env";
 import {
   type DatasourceName,
   DatasourceNames,

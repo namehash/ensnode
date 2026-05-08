@@ -8,7 +8,7 @@ import type { DevnetWalletClient, DevnetWalletClients } from "./index";
 import { waitForTransactionReceipt } from "./index";
 
 export async function seedResolverRecords(clients: DevnetWalletClients): Promise<void> {
-  await seedResolverRecordsForName(clients, "test.eth", contracts.permissionedResolver);
+  await seedResolverRecordsForName(clients, "test.eth", contracts.PermissionedResolver);
 }
 
 async function seedResolverRecordsForName(
@@ -53,7 +53,7 @@ async function seedResolverRecordsForName(
 
 async function findResolver(client: DevnetWalletClient, name: string): Promise<Address> {
   const [resolver] = await client.readContract({
-    address: contracts.universalResolverV2,
+    address: contracts.UniversalResolverV2,
     abi: UniversalResolverABI,
     functionName: "findResolver",
     args: [toHex(packetToBytes(name))],

@@ -6,10 +6,12 @@
  *
  * Phases:
  *   1. ENSDb (postgres) + devnet via docker-compose (testcontainers DockerComposeEnvironment)
- *   2. Start ENSRainbow via `pnpm entrypoint` (downloads + extracts the prebuilt LevelDB in the background)
- *   3. Start ENSIndexer, wait for omnichain-following / omnichain-completed
- *   4. Start ENSApi
- *   5. Run `pnpm test:integration` at the monorepo root
+ *   2. Seed devnet (primary names and resolver records)
+ *   3. Start ENSRainbow via `pnpm entrypoint` (downloads + extracts the prebuilt LevelDB in the background)
+ *   4. Start ENSIndexer
+ *   5. Wait for omnichain-following / omnichain-completed (indexing complete)
+ *   6. Start ENSApi
+ *   7. Run `pnpm test:integration` at the monorepo root
  *
  * Design decisions:
  *   - ENSDb (postgres) and devnet are started from docker/docker-compose.orchestrator.yml via
@@ -63,6 +65,7 @@ const ENSDB_PORT = 5433;
 const ENSRAINBOW_URL = `http://localhost:${ENSRAINBOW_PORT}`;
 const ENSINDEXER_SCHEMA_NAME = "ensindexer_integration_test";
 const ENSDB_URL = `postgresql://postgres:password@localhost:${ENSDB_PORT}/postgres`;
+const RPC_URL = ensTestEnvChain.rpcUrls.default.http[0];
 
 // Track resources for cleanup
 const subprocesses: ResultPromise[] = [];
@@ -266,9 +269,8 @@ async function main() {
   log(`ENSDb is ready (port ${ENSDB_PORT})`);
 
   // Devnet Chain Id check
-  const devnetRpcUrl = ensTestEnvChain.rpcUrls.default.http[0];
   const publicClient = createPublicClient({
-    transport: http(devnetRpcUrl),
+    transport: http(RPC_URL),
   });
   const devnetChainId = await publicClient.getChainId();
   if (devnetChainId !== ensTestEnvChain.id) {
@@ -277,11 +279,11 @@ async function main() {
     );
   }
 
-  log(`Devnet is ready (RPC URL: ${devnetRpcUrl})`);
+  log(`Devnet is ready (RPC URL: ${RPC_URL})`);
 
   // Phase 2: Seed devnet with test data (before indexing starts)
   log("Seeding devnet...");
-  await seedDevnet(devnetRpcUrl);
+  await seedDevnet(RPC_URL);
   log("Devnet seeded");
 
   // Phase 3: Download ENSRainbow database and start from source

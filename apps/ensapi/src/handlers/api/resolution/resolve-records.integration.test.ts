@@ -16,11 +16,13 @@ describe("GET /api/resolve/records/:name", () => {
       description: "resolves ETH address (coin 60) for test.eth",
       name: "test.eth",
       query: "addresses=60",
-      expectedStatus: 200,
-      expectedBody: {
-        records: { addresses: { 60: accounts.owner.address } },
-        accelerationRequested: false,
-        accelerationAttempted: false,
+      expected: {
+        status: 200,
+        body: {
+          records: { addresses: { 60: accounts.owner.address } },
+          accelerationRequested: false,
+          accelerationAttempted: false,
+        },
       },
     },
     {
@@ -28,22 +30,26 @@ describe("GET /api/resolve/records/:name", () => {
         "resolves ETH address for newowner.eth (coin 60 stays as original registrant after token transfer)",
       name: "newowner.eth",
       query: "addresses=60",
-      expectedStatus: 200,
-      expectedBody: {
-        records: { addresses: { 60: accounts.owner.address } },
-        accelerationRequested: false,
-        accelerationAttempted: false,
+      expected: {
+        status: 200,
+        body: {
+          records: { addresses: { 60: accounts.owner.address } },
+          accelerationRequested: false,
+          accelerationAttempted: false,
+        },
       },
     },
     {
       description: "resolves description text record for example.eth",
       name: "example.eth",
       query: "texts=description",
-      expectedStatus: 200,
-      expectedBody: {
-        records: { texts: { description: "example.eth" } },
-        accelerationRequested: false,
-        accelerationAttempted: false,
+      expected: {
+        status: 200,
+        body: {
+          records: { texts: { description: "example.eth" } },
+          accelerationRequested: false,
+          accelerationAttempted: false,
+        },
       },
     },
     {
@@ -51,36 +57,42 @@ describe("GET /api/resolve/records/:name", () => {
         "resolves description text record for alias.eth (resolves via alias to test.eth)",
       name: "alias.eth",
       query: "texts=description",
-      expectedStatus: 200,
-      expectedBody: {
-        records: { texts: { description: "test.eth" } },
-        accelerationRequested: false,
-        accelerationAttempted: false,
+      expected: {
+        status: 200,
+        body: {
+          records: { texts: { description: "test.eth" } },
+          accelerationRequested: false,
+          accelerationAttempted: false,
+        },
       },
     },
     {
       description: "resolves both address and text records for example.eth",
       name: "example.eth",
       query: "addresses=60&texts=description",
-      expectedStatus: 200,
-      expectedBody: {
-        records: {
-          addresses: { 60: accounts.owner.address },
-          texts: { description: "example.eth" },
+      expected: {
+        status: 200,
+        body: {
+          records: {
+            addresses: { 60: accounts.owner.address },
+            texts: { description: "example.eth" },
+          },
+          accelerationRequested: false,
+          accelerationAttempted: false,
         },
-        accelerationRequested: false,
-        accelerationAttempted: false,
       },
     },
     {
       description: "returns null address for reserved.eth (no resolver)",
       name: "reserved.eth",
       query: "addresses=60",
-      expectedStatus: 200,
-      expectedBody: {
-        records: { addresses: { 60: null } },
-        accelerationRequested: false,
-        accelerationAttempted: false,
+      expected: {
+        status: 200,
+        body: {
+          records: { addresses: { 60: null } },
+          accelerationRequested: false,
+          accelerationAttempted: false,
+        },
       },
     },
     {
@@ -88,33 +100,39 @@ describe("GET /api/resolve/records/:name", () => {
         "returns old coin 60 record for sub.unregistered.eth (token burned but resolver records persist)",
       name: "sub.unregistered.eth",
       query: "addresses=60",
-      expectedStatus: 200,
-      expectedBody: {
-        records: { addresses: { 60: accounts.owner.address } },
-        accelerationRequested: false,
-        accelerationAttempted: false,
+      expected: {
+        status: 200,
+        body: {
+          records: { addresses: { 60: accounts.owner.address } },
+          accelerationRequested: false,
+          accelerationAttempted: false,
+        },
       },
     },
     {
       description: "returns null address for nonexistent name",
       name: "thisnamedoesnotexist.eth",
       query: "addresses=60",
-      expectedStatus: 200,
-      expectedBody: {
-        records: { addresses: { 60: null } },
-        accelerationRequested: false,
-        accelerationAttempted: false,
+      expected: {
+        status: 200,
+        body: {
+          records: { addresses: { 60: null } },
+          accelerationRequested: false,
+          accelerationAttempted: false,
+        },
       },
     },
     {
       description: "resolves ETH address for linked.parent.eth (alias to sub1.sub2.parent.eth)",
       name: "linked.parent.eth",
       query: "addresses=60",
-      expectedStatus: 200,
-      expectedBody: {
-        records: { addresses: { 60: accounts.owner.address } },
-        accelerationRequested: false,
-        accelerationAttempted: false,
+      expected: {
+        status: 200,
+        body: {
+          records: { addresses: { 60: accounts.owner.address } },
+          accelerationRequested: false,
+          accelerationAttempted: false,
+        },
       },
     },
     {
@@ -122,11 +140,13 @@ describe("GET /api/resolve/records/:name", () => {
         "resolves ETH address for wallet.linked.parent.eth (alias to wallet.sub1.sub2.parent.eth)",
       name: "wallet.linked.parent.eth",
       query: "addresses=60",
-      expectedStatus: 200,
-      expectedBody: {
-        records: { addresses: { 60: accounts.owner.address } },
-        accelerationRequested: false,
-        accelerationAttempted: false,
+      expected: {
+        status: 200,
+        body: {
+          records: { addresses: { 60: accounts.owner.address } },
+          accelerationRequested: false,
+          accelerationAttempted: false,
+        },
       },
     },
     // -- Text records (seeded in devnet) --
@@ -134,22 +154,26 @@ describe("GET /api/resolve/records/:name", () => {
       description: "resolves avatar text record for test.eth",
       name: "test.eth",
       query: "texts=avatar",
-      expectedStatus: 200,
-      expectedBody: {
-        records: { texts: { avatar: "https://example.com/avatar.png" } },
-        accelerationRequested: false,
-        accelerationAttempted: false,
+      expected: {
+        status: 200,
+        body: {
+          records: { texts: { avatar: "https://example.com/avatar.png" } },
+          accelerationRequested: false,
+          accelerationAttempted: false,
+        },
       },
     },
     {
       description: "returns null for unset text record",
       name: "test.eth",
       query: "texts=nonexistent.key",
-      expectedStatus: 200,
-      expectedBody: {
-        records: { texts: { "nonexistent.key": null } },
-        accelerationRequested: false,
-        accelerationAttempted: false,
+      expected: {
+        status: 200,
+        body: {
+          records: { texts: { "nonexistent.key": null } },
+          accelerationRequested: false,
+          accelerationAttempted: false,
+        },
       },
     },
     // -- Multi-coin addresses (seeded in devnet) --
@@ -157,18 +181,20 @@ describe("GET /api/resolve/records/:name", () => {
       description: "resolves multiple coin types at once for test.eth",
       name: "test.eth",
       query: "addresses=60,0,2,777777",
-      expectedStatus: 200,
-      expectedBody: {
-        records: {
-          addresses: {
-            60: accounts.owner.address,
-            0: fixtures.bitcoinAddress,
-            2: fixtures.litecoinAddress,
-            777777: null,
+      expected: {
+        status: 200,
+        body: {
+          records: {
+            addresses: {
+              60: accounts.owner.address,
+              0: fixtures.bitcoinAddress,
+              2: fixtures.litecoinAddress,
+              777777: null,
+            },
           },
+          accelerationRequested: false,
+          accelerationAttempted: false,
         },
-        accelerationRequested: false,
-        accelerationAttempted: false,
       },
     },
     // -- Combined records --
@@ -185,38 +211,40 @@ describe("GET /api/resolve/records/:name", () => {
         "abi=1",
         `interfaces=${fixtures.fourBytesInterface}`,
       ].join("&"),
-      expectedStatus: 200,
-      expectedBody: {
-        records: {
-          addresses: {
-            60: accounts.owner.address,
-            0: fixtures.bitcoinAddress,
-            2: fixtures.litecoinAddress,
+      expected: {
+        status: 200,
+        body: {
+          records: {
+            addresses: {
+              60: accounts.owner.address,
+              0: fixtures.bitcoinAddress,
+              2: fixtures.litecoinAddress,
+            },
+            texts: {
+              avatar: "https://example.com/avatar.png",
+              description: "test.eth",
+              url: "https://ens.domains",
+              email: "test@ens.domains",
+              "com.twitter": "ensdomains",
+              "com.github": "ensdomains",
+            },
+            contenthash: fixtures.contenthash,
+            pubkey: {
+              x: fixtures.publicKeyX,
+              y: fixtures.publicKeyY,
+            },
+            version: expect.any(String),
+            abi: {
+              contentType: "1",
+              data: fixtures.abiBytes,
+            },
+            interfaces: {
+              [fixtures.fourBytesInterface]: addresses.one,
+            },
           },
-          texts: {
-            avatar: "https://example.com/avatar.png",
-            description: "test.eth",
-            url: "https://ens.domains",
-            email: "test@ens.domains",
-            "com.twitter": "ensdomains",
-            "com.github": "ensdomains",
-          },
-          contenthash: fixtures.contenthash,
-          pubkey: {
-            x: fixtures.publicKeyX,
-            y: fixtures.publicKeyY,
-          },
-          version: expect.any(String),
-          abi: {
-            contentType: "1",
-            data: fixtures.abiBytes,
-          },
-          interfaces: {
-            [fixtures.fourBytesInterface]: addresses.one,
-          },
+          accelerationRequested: false,
+          accelerationAttempted: false,
         },
-        accelerationRequested: false,
-        accelerationAttempted: false,
       },
     },
     // -- Acceleration --
@@ -224,35 +252,41 @@ describe("GET /api/resolve/records/:name", () => {
       description: "test.eth with accelerate=true returns accelerationRequested: true",
       name: "test.eth",
       query: "addresses=60&accelerate=true",
-      expectedStatus: 200,
-      expectedBody: {
-        records: { addresses: { 60: accounts.owner.address } },
-        accelerationRequested: true,
-        accelerationAttempted: false,
+      expected: {
+        status: 200,
+        body: {
+          records: { addresses: { 60: accounts.owner.address } },
+          accelerationRequested: true,
+          accelerationAttempted: false,
+        },
       },
     },
     {
       description: "returns 400 when selection is empty (no addresses, texts, or name)",
       name: "test.eth",
       query: "",
-      expectedStatus: 400,
-      expectedBody: {
-        message: "Invalid Input",
-        details: { errors: ["Selection cannot be empty."] },
+      expected: {
+        status: 400,
+        body: {
+          message: "Invalid Input",
+          details: { errors: ["Selection cannot be empty."] },
+        },
       },
     },
     {
       description: "returns 400 when name is not normalized (uppercase)",
       name: "TEST.ETH",
       query: "addresses=60",
-      expectedStatus: 400,
-      expectedBody: {
-        message: "Invalid Input",
-        details: {
-          errors: [],
-          properties: {
-            name: {
-              errors: ["Must be normalized, see https://docs.ens.domains/resolution/names/"],
+      expected: {
+        status: 400,
+        body: {
+          message: "Invalid Input",
+          details: {
+            errors: [],
+            properties: {
+              name: {
+                errors: ["Must be normalized, see https://docs.ens.domains/resolution/names/"],
+              },
             },
           },
         },
@@ -262,19 +296,21 @@ describe("GET /api/resolve/records/:name", () => {
       description: "returns 400 when addresses contains a non-numeric coin type",
       name: "test.eth",
       query: "addresses=notacointype",
-      expectedStatus: 400,
-      expectedBody: {
-        message: "Invalid Input",
-        details: {
-          errors: [],
-          properties: {
-            addresses: {
-              errors: [],
-              items: [
-                {
-                  errors: ["Coin Type String must represent a non-negative integer (>=0)."],
-                },
-              ],
+      expected: {
+        status: 400,
+        body: {
+          message: "Invalid Input",
+          details: {
+            errors: [],
+            properties: {
+              addresses: {
+                errors: [],
+                items: [
+                  {
+                    errors: ["Coin Type String must represent a non-negative integer (>=0)."],
+                  },
+                ],
+              },
             },
           },
         },
@@ -284,14 +320,16 @@ describe("GET /api/resolve/records/:name", () => {
       description: "returns 400 when addresses contains duplicate coin types",
       name: "test.eth",
       query: "addresses=60,60",
-      expectedStatus: 400,
-      expectedBody: {
-        message: "Invalid Input",
-        details: {
-          errors: [],
-          properties: {
-            addresses: {
-              errors: ["Must be a set of unique entries."],
+      expected: {
+        status: 400,
+        body: {
+          message: "Invalid Input",
+          details: {
+            errors: [],
+            properties: {
+              addresses: {
+                errors: ["Must be a set of unique entries."],
+              },
             },
           },
         },
@@ -301,27 +339,29 @@ describe("GET /api/resolve/records/:name", () => {
       description: "returns 400 when texts contains duplicate keys",
       name: "test.eth",
       query: "texts=avatar,avatar",
-      expectedStatus: 400,
-      expectedBody: {
-        message: "Invalid Input",
-        details: {
-          errors: [],
-          properties: {
-            texts: {
-              errors: ["Must be a set of unique entries."],
+      expected: {
+        status: 400,
+        body: {
+          message: "Invalid Input",
+          details: {
+            errors: [],
+            properties: {
+              texts: {
+                errors: ["Must be a set of unique entries."],
+              },
             },
           },
         },
       },
     },
-  ])("$description", async ({ name, query, expectedStatus, expectedBody }) => {
+  ])("$description", async ({ name, query, expected }) => {
     const encodedName = encodeURIComponent(name);
     const response = await fetch(
       `${BASE_URL}/api/resolve/records/${encodedName}${query ? `?${query}` : ""}`,
     );
     const body = await response.json();
 
-    expect(response.status).toBe(expectedStatus);
-    expect(body).toMatchObject(expectedBody);
+    expect(response.status).toBe(expected.status);
+    expect(body).toMatchObject(expected.body);
   });
 });
