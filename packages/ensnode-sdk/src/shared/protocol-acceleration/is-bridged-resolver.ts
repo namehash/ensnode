@@ -15,6 +15,9 @@ import {
   getManagedName,
 } from "@ensnode/ensnode-sdk";
 
+// simple cache of BridgedResolverConfig by namespace because it's in an indexing hot-path
+const cache = new Map<ENSNamespaceId, BridgedResolverConfig[]>();
+
 /**
  * Describes a Bridged Resolver's origin Domain and target Registry.
  */
@@ -69,7 +72,10 @@ export interface BridgedResolverConfig {
  * TODO: these relationships could/should be encoded in an ENSIP
  * TODO: once Forward Resolution is updated for ENSv2, this likely just returns RegistryId
  */
-const buildBridgedResolverConfigs = (namespace: ENSNamespaceId): BridgedResolverConfig[] => {
+const getBridgedResolverConfigs = (namespace: ENSNamespaceId): BridgedResolverConfig[] => {
+  const cached = cache.get(namespace);
+  if (cached) return cached;
+
   const configs: BridgedResolverConfig[] = [];
 
   const basenames = maybeGetDatasource(namespace, DatasourceNames.Basenames);
@@ -106,20 +112,8 @@ const buildBridgedResolverConfigs = (namespace: ENSNamespaceId): BridgedResolver
     });
   }
 
-  return configs;
-};
+  cache.set(namespace, configs);
 
-// `isBridgedResolver` sits on hot paths (every NewResolver / ResolverUpdated event during
-// indexing, every forward-resolution hop). The configs are a function of `namespace` only and
-// never change at runtime, so memoize per-namespace to avoid re-walking the datasource catalog
-// + recomputing managed-name + node hashes on every call.
-const bridgedResolverConfigsByNamespace = new Map<ENSNamespaceId, BridgedResolverConfig[]>();
-const getBridgedResolverConfigs = (namespace: ENSNamespaceId): BridgedResolverConfig[] => {
-  let configs = bridgedResolverConfigsByNamespace.get(namespace);
-  if (!configs) {
-    configs = buildBridgedResolverConfigs(namespace);
-    bridgedResolverConfigsByNamespace.set(namespace, configs);
-  }
   return configs;
 };
 
