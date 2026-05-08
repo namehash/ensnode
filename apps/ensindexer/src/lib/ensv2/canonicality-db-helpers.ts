@@ -30,7 +30,7 @@ import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-eng
  * The unidirectional pointers `Registry.canonicalDomainId` and `Domain.subregistryId` are written
  * blindly when their onchain events fire, to store the on-chain state as-is. Edge authentication
  * is done on-demand at query time. The boolean flags `Registry.canonical` and `Domain.canonical`
- * are materialized from membership in the canonical namegraph, and are kept up-to-date by reconciling
+ * are materialized from membership in the canonical nametree, and are kept up-to-date by reconciling
  * during updates to the uni-directional pointers.
  *
  * When `reconcileRegistryCanonicality` determines a Registry's flag actually flips, we cascade
@@ -240,7 +240,7 @@ export async function handleBridgedResolverChange(
  *       ∃ Domain P:
  *         P.id = R.canonicalDomainId      // R points up to P
  *         AND P.subregistryId = R.id      // P points down to R (bidirectional agreement)
- *         AND P.canonical                 // P itself is in the canonical namegraph
+ *         AND P.canonical                 // P itself is in the canonical nametree
  *
  * Termination of the cascade walk relies on the canonical subgraph being a tree: each Registry
  * has at most one canonical parent Domain (enforced by the bidirectional agreement check), so

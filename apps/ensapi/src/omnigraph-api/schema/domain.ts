@@ -172,7 +172,7 @@ DomainInterfaceRef.implement({
     /////////////////
     parent: t.field({
       description:
-        "The direct parent Domain in the canonical namegraph or null if this Domain is a root-level Domain or is not Canonical.",
+        "The direct parent Domain in the canonical nametree or null if this Domain is a root-level Domain or is not Canonical.",
       type: DomainInterfaceRef,
       nullable: true,
       resolve: async (domain, _args, context) => {

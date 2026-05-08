@@ -219,7 +219,7 @@ export const registry = onchainTable(
     // the Registry's declared Canonical Domain (uni-directional)
     canonicalDomainId: t.text().$type<DomainId>(),
 
-    // Whether this Registry is part of the canonical namegraph. See canonicality-db-helpers.ts.
+    // Whether this Registry is part of the canonical nametree. See canonicality-db-helpers.ts.
     canonical: t.boolean().notNull().default(false),
 
     // Synthetic monotonic sentinel: flipped to true the first time a child Domain is registered
@@ -285,7 +285,7 @@ export const domain = onchainTable(
     // If this is an ENSv1Domain, may have a `rootRegistryOwner`, otherwise null.
     rootRegistryOwnerId: t.hex().$type<NormalizedAddress>(),
 
-    // Whether this Domain is part of the canonical namegraph. Mirrors the parent Registry's flag.
+    // Whether this Domain is part of the canonical nametree. Mirrors the parent Registry's flag.
     canonical: t.boolean().notNull().default(false),
 
     // NOTE: Domain-Resolver Relations tracked via Protocol Acceleration plugin

@@ -1613,14 +1613,6 @@ const introspection = {
         "name": "DomainsWhereInput",
         "inputFields": [
           {
-            "name": "canonical",
-            "type": {
-              "kind": "SCALAR",
-              "name": "Boolean"
-            },
-            "defaultValue": "false"
-          },
-          {
             "name": "name",
             "type": {
               "kind": "NON_NULL",

@@ -83,16 +83,14 @@ export const maybeGetENSv2RootRegistryId = (namespace: ENSNamespaceId) => {
 /**
  * Gets the RegistryId representing the preferred Root Registry for the selected `namespace` —
  * the ENSv2 Root Registry when defined, otherwise the ENSv1 Root Registry. Used as the entry
- * point for resolution-time namegraph traversal. Note that both ENSv1 and ENSv2 Roots are
- * canonical by axiom in their respective namegraphs; use `isRootRegistryId` to test membership.
+ * point for resolution-time namegraph traversal.
  */
 export const getRootRegistryId = (namespace: ENSNamespaceId) =>
   maybeGetENSv2RootRegistryId(namespace) ?? getENSv1RootRegistryId(namespace);
 
 /**
  * Determines whether `registryId` is a Root Registry (ENSv1 Root or, when defined, ENSv2 Root)
- * for the selected `namespace`. Root Registries are canonical by axiom: they have no parent
- * edge to derive canonicality from.
+ * for the selected `namespace`.
  */
 export const isRootRegistryId = (namespace: ENSNamespaceId, registryId: RegistryId): boolean =>
   registryId === getENSv1RootRegistryId(namespace) ||
