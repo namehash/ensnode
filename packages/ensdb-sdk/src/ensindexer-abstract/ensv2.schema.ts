@@ -67,7 +67,9 @@ import type { EncodedReferrer } from "@ensnode/ensnode-sdk";
  * NOT materialized in a parallel table; it is derived on demand by checking that the two
  * unidirectional pointers agree (`Registry.canonicalDomainId = Domain.id`
  * ↔ `Domain.subregistryId = Registry.id`). Cascading canonicality flips through the subgraph
- * run as a single recursive-CTE batch UPDATE (see `canonicality-db-helpers.ts`).
+ * run as either an in-memory PK update (when `Registry.__hasChildren = false`, the dominant case
+ * for fresh ENSv1 virtual registries on first wire-up) or a single recursive-CTE batch UPDATE
+ * otherwise (see `canonicality-db-helpers.ts`).
  *
  * Note also that the Protocol Acceleration plugin is a hard requirement for the ENSv2 plugin. This
  * allows us to rely on the shared logic for indexing:
