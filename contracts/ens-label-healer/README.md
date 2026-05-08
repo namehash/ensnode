@@ -124,9 +124,9 @@ cast logs --rpc-url http://localhost:8545 \
 
 |          |                                                                                                         |
 | -------- | ------------------------------------------------------------------------------------------------------- |
-| Proxy    | `0x1d7412e45265e935C5b083a8f278183175E8ce3d`                                                            |
-| Explorer | [sepolia.etherscan.io](https://sepolia.etherscan.io/address/0x1d7412e45265e935C5b083a8f278183175E8ce3d) |
-| Sourcify | [repo.sourcify.dev](https://repo.sourcify.dev/11155111/0x1d7412e45265e935C5b083a8f278183175E8ce3d)      |
+| Proxy    | `0xEd1D2d2F79EC4De1ACcc648a6F2aD1366cB846C0`                                                            |
+| Explorer | [sepolia.etherscan.io](https://sepolia.etherscan.io/address/0xEd1D2d2F79EC4De1ACcc648a6F2aD1366cB846C0) |
+| Sourcify | [repo.sourcify.dev](https://repo.sourcify.dev/11155111/0xEd1D2d2F79EC4De1ACcc648a6F2aD1366cB846C0)      |
 
 
 ```bash
