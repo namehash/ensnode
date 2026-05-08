@@ -325,11 +325,6 @@ input DomainsOrderInput {
 """Filter for the top-level domains query."""
 input DomainsWhereInput {
   """
-  Optional, defaults to false. If true, filters the set of Domains by those that are Canonical (i.e. reachable by ENS Forward Resolution). If false, the set of Domains is not filtered, and may include ENSv2 Domains not reachable by ENS Forward Resolution.
-  """
-  canonical: Boolean = false
-
-  """
   A partial Interpreted Name by which to search the set of Domains. ex: 'example', 'example.', 'example.et'.
   """
   name: String!
@@ -942,7 +937,9 @@ type Query {
   """Identify a Domain by Name or DomainId"""
   domain(by: DomainIdInput!): Domain
 
-  """Find Domains by Name."""
+  """
+  Find Canonical Domains by Name. Results are always scoped to Canonical Domains — every nameable Domain is canonical by definition, so a non-canonical filter would be empty.
+  """
   domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: DomainsWhereInput!): QueryDomainsConnection
 
   """Identify Permissions by ID or AccountId."""
