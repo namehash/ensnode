@@ -18,7 +18,7 @@ const inter = Inter({
 
 const siteName = "ENSAdmin";
 const title = "ENSAdmin";
-const description = "Explore the ENS Protocol like never before";
+const description = "Inspect the ENS Protocol like never before";
 
 export const metadata: Metadata = {
   title: title,

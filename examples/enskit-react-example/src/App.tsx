@@ -42,7 +42,12 @@ function Layout() {
 }
 
 function Home() {
-  return <p>Welcome — pick a demo above.</p>;
+  return (
+    <div>
+      <p>Welcome — pick a demo above.</p>
+      <p>Connected to ENSNode at {ENSNODE_URL}</p>
+    </div>
+  );
 }
 
 export function App() {

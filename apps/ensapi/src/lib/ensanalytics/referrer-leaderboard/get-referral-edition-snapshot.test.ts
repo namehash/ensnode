@@ -8,7 +8,7 @@ import { describe, expect, it, vi } from "vitest";
 import { parseEth, parseTimestamp, parseUsdc } from "@ensnode/ensnode-sdk";
 
 import * as database from "./database";
-import { getReferrerLeaderboard } from "./get-referrer-leaderboard";
+import { getReferralEditionSnapshot } from "./get-referral-edition-snapshot";
 import { dbResultsReferrerLeaderboard } from "./mocks";
 
 // Mock the database module
@@ -32,11 +32,11 @@ const rules = buildReferralProgramRulesPieSplit(
 const accurateAsOf = parseTimestamp("2025-11-30T23:59:59Z");
 
 describe("ENSAnalytics Referrer Leaderboard", () => {
-  describe("getReferrerLeaderboard", () => {
+  describe("getReferralEditionSnapshot", () => {
     it("returns a leaderboard of referrers in the requested time period", async () => {
       vi.mocked(database.getReferrerMetrics).mockResolvedValue(dbResultsReferrerLeaderboard);
 
-      const result = await getReferrerLeaderboard(rules, accurateAsOf);
+      const { leaderboard: result } = await getReferralEditionSnapshot(rules, accurateAsOf);
 
       expect(result.awardModel).toBe(ReferralProgramAwardModels.PieSplit);
       if (result.awardModel !== ReferralProgramAwardModels.PieSplit) {
@@ -107,7 +107,7 @@ describe("ENSAnalytics Referrer Leaderboard", () => {
     it("returns an empty list if no referrer leaderboard records were found in database", async () => {
       vi.mocked(database.getReferrerMetrics).mockResolvedValue([]);
 
-      const result = await getReferrerLeaderboard(rules, accurateAsOf);
+      const { leaderboard: result } = await getReferralEditionSnapshot(rules, accurateAsOf);
 
       expect(result).toMatchObject({
         awardModel: rules.awardModel,

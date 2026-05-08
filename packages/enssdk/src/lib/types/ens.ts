@@ -142,6 +142,23 @@ export type LiteralName = Name & { __brand: "LiteralName" };
 export type InterpretedName = Name & { __brand: "InterpretedName" };
 
 /**
+ * A Beautified Name is a Name produced for presentation in a UI from an {@link InterpretedName}.
+ *
+ * Each label is either:
+ * a) an Encoded LabelHash, preserved verbatim from the source InterpretedName, or
+ * b) a Label produced by passing a normalized Label through ENSIP-15 beautification, which is
+ *    guaranteed to be normalizable back to the original normalized Label but is itself NOT
+ *    necessarily normalized (e.g. `"♾"` → `"♾️"`).
+ *
+ * Because (b) is not guaranteed to be normalized, a BeautifiedName is NOT an InterpretedName and
+ * MUST NOT be used as a navigation target, lookup key, or anywhere else that expects an
+ * InterpretedName.
+ *
+ * @dev nominally typed to enforce usage & enhance codebase clarity
+ */
+export type BeautifiedName = Name & { __brand: "BeautifiedName" };
+
+/**
  * A Subgraph Interpreted Label is a Literal Label that is either:
  * a) (if subgraph-indexable): a Literal Label, of unknown normalization status, guaranteed to not
  *   contain any of the subgraph-unindexable UTF-8 characters (and therefore guaranteed not to be

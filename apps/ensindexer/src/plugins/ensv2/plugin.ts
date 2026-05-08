@@ -22,6 +22,8 @@ import {
   constrainBlockrange,
   getRequiredDatasources,
   maybeGetDatasources,
+  mergedChainConfigForContracts,
+  pickContracts,
 } from "@/lib/ponder-helpers";
 
 export const pluginName = PluginName.ENSv2;
@@ -221,51 +223,38 @@ export default createPlugin({
             ///////////////////////////////////
             // Ethnames Registrar Controllers
             ///////////////////////////////////
-            ...chainConfigForContract(
+            ...mergedChainConfigForContracts(
               config.globalBlockrange,
               ensroot.chain.id,
-              ensroot.contracts.LegacyEthRegistrarController,
-            ),
-            ...chainConfigForContract(
-              config.globalBlockrange,
-              ensroot.chain.id,
-              ensroot.contracts.WrappedEthRegistrarController,
-            ),
-            ...chainConfigForContract(
-              config.globalBlockrange,
-              ensroot.chain.id,
-              ensroot.contracts.UnwrappedEthRegistrarController,
+              pickContracts(ensroot.contracts, [
+                "LegacyEthRegistrarController",
+                "WrappedEthRegistrarController",
+                "UnwrappedEthRegistrarController",
+              ]),
             ),
 
             ///////////////////////////////////
             // Basenames Registrar Controllers
             ///////////////////////////////////
-            ...(basenames && {
-              ...chainConfigForContract(
+            ...(basenames &&
+              mergedChainConfigForContracts(
                 config.globalBlockrange,
                 basenames.chain.id,
-                basenames.contracts.EARegistrarController,
-              ),
-              ...chainConfigForContract(
-                config.globalBlockrange,
-                basenames.chain.id,
-                basenames.contracts.RegistrarController,
-              ),
-              ...chainConfigForContract(
-                config.globalBlockrange,
-                basenames.chain.id,
-                basenames.contracts.UpgradeableRegistrarController,
-              ),
-            }),
+                pickContracts(basenames.contracts, [
+                  "EARegistrarController",
+                  "RegistrarController",
+                  "UpgradeableRegistrarController",
+                ]),
+              )),
 
             ////////////////////////////////////
             // Lineanames Registrar Controllers
             ////////////////////////////////////
             ...(lineanames &&
-              chainConfigForContract(
+              mergedChainConfigForContracts(
                 config.globalBlockrange,
                 lineanames.chain.id,
-                lineanames.contracts.EthRegistrarController,
+                pickContracts(lineanames.contracts, ["EthRegistrarController"]),
               )),
           },
         },

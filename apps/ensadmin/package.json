@@ -1,9 +1,9 @@
 {
   "name": "ensadmin",
-  "version": "1.10.1",
+  "version": "1.11.1",
   "private": true,
   "type": "module",
-  "description": "Explore the ENS Protocol like never before",
+  "description": "Inspect the ENS Protocol like never before",
   "license": "MIT",
   "packageManager": "pnpm@10.33.0",
   "repository": {
@@ -25,6 +25,7 @@
     "@ensnode/datasources": "workspace:*",
     "@ensnode/ensnode-react": "workspace:*",
     "@ensnode/ensnode-sdk": "workspace:*",
+    "@ensnode/scalar-react": "workspace:*",
     "enssdk": "workspace:*",
     "@formkit/auto-animate": "^0.9.0",
     "@graphiql/plugin-explorer": "5.1.1",

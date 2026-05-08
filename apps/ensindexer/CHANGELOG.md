@@ -1,5 +1,57 @@
 # ensindexer
 
+## 1.11.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - enssdk@1.11.1
+  - @ensnode/datasources@1.11.1
+  - @ensnode/ensrainbow-sdk@1.11.1
+  - @ensnode/ensdb-sdk@1.11.1
+  - @ensnode/ensnode-sdk@1.11.1
+  - @ensnode/ponder-sdk@1.11.1
+
+## 1.11.0
+
+### Minor Changes
+
+- [#2036](https://github.com/namehash/ensnode/pull/2036) [`43d8a9b`](https://github.com/namehash/ensnode/commit/43d8a9b838b15719f520cd3f3bbfd1b52a4ad1ce) Thanks [@shrugs](https://github.com/shrugs)! - Updates ens-test-env devnet commit to `580c60a`.
+
+- [#2056](https://github.com/namehash/ensnode/pull/2056) [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572) Thanks [@shrugs](https://github.com/shrugs)! - Consolidated startup init into `initIndexingOnchainEvents()` for reliable execution on every ENSIndexer startup. Added `IndexingMetadataContextBuilder` and `StackInfoBuilder`. `EnsDbWriterWorker` simplified to a single recurring task. The HTTP `/config` and `/indexing-status` endpoints now read from in-memory builders instead of ENSDb. `initializeIndexingSetup` / `initializeIndexingActivation` replaced by `initIndexingOnchainEvents`.
+
+- [#1983](https://github.com/namehash/ensnode/pull/1983) [`6173160`](https://github.com/namehash/ensnode/commit/61731608632f62139496656f6231210f63383f20) Thanks [@shrugs](https://github.com/shrugs)! - Unify `v1Domain` + `v2Domain` into a single polymorphic `domain` table discriminated by a `type` enum (`"ENSv1Domain"` | `"ENSv2Domain"`), and make Registry polymorphic across concrete ENSv1 (mainnet Registry, Basenames Registry, Lineanames Registry), ENSv1 Virtual (per-parent-domain virtual Registry managed by each ENSv1 domain that has children), and ENSv2 Registries.
+
+  ### Breaking schema + id format changes
+  - `ENSv1DomainId` is now a dash-delimited tuple: `${ENSv1RegistryId}-${node}` (was `Node`). Every ENSv1 Domain is addressable through a concrete Registry, so bare `node` values no longer identify a Domain by themselves.
+  - `RegistryId` is a union of `ENSv1RegistryId`, `ENSv1VirtualRegistryId`, and `ENSv2RegistryId`. New id constructors: `makeENSv1RegistryId`, `makeENSv2RegistryId`, `makeENSv1VirtualRegistryId`, and `makeConcreteRegistryId` (returns `ENSv1RegistryId | ENSv2RegistryId` for callsites that only need to address a concrete Registry contract). `makeENSv1DomainId` now takes `(AccountId, Node)`.
+  - `domains` table: replaces `v1_domains` + `v2_domains`. Adds `type`, nullable `tokenId` (non-null iff ENSv2), nullable `node` (non-null iff ENSv1), nullable `rootRegistryOwnerId` (v1 only). `parentId` removed; parent relationships flow through `registryCanonicalDomain` for both v1 and v2.
+  - `registries` table: adds `type` enum column and nullable `node` (non-null iff `ENSv1VirtualRegistry`). Unique `(chainId, address)` index becomes a plain index so virtual Registries can share their concrete parent's `(chainId, address)`.
+  - `registryCanonicalDomain.domainId` is typed as the unified `DomainId`.
+
+  ### GraphQL
+  - `Registry` becomes a GraphQL interface with `ENSv1Registry`, `ENSv1VirtualRegistry`, and `ENSv2Registry` implementations. `ENSv1VirtualRegistry` exposes `node: Node!`.
+  - `Domain` interface gains `parent: Domain` (resolved via the canonical-path dataloader); `ENSv1Domain` exposes `node: Node!` and `rootRegistryOwner`; `ENSv2Domain` exposes `tokenId`, `registry`, `subregistry`, `permissions`.
+  - `Query.registry(by: { contract })` now DB-looks up the concrete Registry by `(chainId, address, type IN (ENSv1Registry, ENSv2Registry))`. Virtual Registries are not addressable via `AccountId` alone.
+
+### Patch Changes
+
+- [#2049](https://github.com/namehash/ensnode/pull/2049) [`5729ac1`](https://github.com/namehash/ensnode/commit/5729ac18ba029a476ffeca18c9b4bceee417ebdb) Thanks [@shrugs](https://github.com/shrugs)! - Fixed a bug in `ensv2` plugin where only `UnwrappedEthRegistrarController` was indexed; `LegacyEthRegistrarController` and `WrappedEthRegistrarController` were silently dropped. Fixes #2048.
+
+- [#2056](https://github.com/namehash/ensnode/pull/2056) [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572) Thanks [@shrugs](https://github.com/shrugs)! - `waitForEnsRainbowToBeReady` now polls `/ready` (via `ensRainbowClient.ready()`) instead of `/health`, so it correctly waits for the database to finish bootstrapping. It also aborts retries immediately on non-503 HTTP responses (e.g. `404` from a misconfigured `ENSRAINBOW_URL`, `500` from a broken instance) instead of blocking startup for ~1h, while still retrying on `503 Service Unavailable` and on transient network errors.
+
+- [#2056](https://github.com/namehash/ensnode/pull/2056) [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572) Thanks [@shrugs](https://github.com/shrugs)! - Migrated to `@ensnode/ensnode-sdk`'s `replaceBigInts` / `toJson` helpers. Dropped the direct `@ponder/utils` dependency from `ensapi`.
+
+- [#1989](https://github.com/namehash/ensnode/pull/1989) [`16ecad1`](https://github.com/namehash/ensnode/commit/16ecad17d148dd8ee9ceefa7ec32818a5f3abfe8) Thanks [@shrugs](https://github.com/shrugs)! - ENSIndexer's ensv2 plugin now avoids attempting to heal addr.reverse subnames if they've already been healed.
+
+- Updated dependencies [[`43d8a9b`](https://github.com/namehash/ensnode/commit/43d8a9b838b15719f520cd3f3bbfd1b52a4ad1ce), [`824d819`](https://github.com/namehash/ensnode/commit/824d819d291b2b642d2664d09cb10d6de69a6ea7), [`5729ac1`](https://github.com/namehash/ensnode/commit/5729ac18ba029a476ffeca18c9b4bceee417ebdb), [`7e77c5c`](https://github.com/namehash/ensnode/commit/7e77c5c2bef96d1a2eb363871fb87379b5f6f7e9), [`6173160`](https://github.com/namehash/ensnode/commit/61731608632f62139496656f6231210f63383f20), [`92ca54f`](https://github.com/namehash/ensnode/commit/92ca54fa2efbef3f32e2dacd8fdc347ef260a2af), [`7e77c5c`](https://github.com/namehash/ensnode/commit/7e77c5c2bef96d1a2eb363871fb87379b5f6f7e9), [`0d8a4b4`](https://github.com/namehash/ensnode/commit/0d8a4b4b7c8c70be904652e2132e7c67fd9e39ef), [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572), [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572), [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572), [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572), [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572), [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572), [`43d8a9b`](https://github.com/namehash/ensnode/commit/43d8a9b838b15719f520cd3f3bbfd1b52a4ad1ce), [`c186ad8`](https://github.com/namehash/ensnode/commit/c186ad8c0d85c4db8619a436173d7e21f857f689), [`6173160`](https://github.com/namehash/ensnode/commit/61731608632f62139496656f6231210f63383f20)]:
+  - @ensnode/ensnode-sdk@1.11.0
+  - @ensnode/datasources@1.11.0
+  - @ensnode/ensdb-sdk@1.11.0
+  - enssdk@1.11.0
+  - @ensnode/ensrainbow-sdk@1.11.0
+  - @ensnode/ponder-sdk@1.11.0
+
 ## 1.10.1
 
 ### Patch Changes
@@ -282,13 +334,11 @@
 - [#1194](https://github.com/namehash/ensnode/pull/1194) [`af52f0b`](https://github.com/namehash/ensnode/commit/af52f0befda8220d56ff26a30208c196acb0d3cb) Thanks [@shrugs](https://github.com/shrugs)! - Introduces the ENSApi application, a separate, horizontally scalable ENSNode API server to replace the legacy `ponder serve` experience.
 
   Connecting ENSApi to:
-
   - your Postgres Database (`DATABASE_URL`, `DATABASE_SCHEMA`),
   - ENSIndexer (`ENSINDEXER_URL`), and
   - an ENS Root Chain RPC (`ALCHEMY_API_KEY`, `RPC_URL_*`)
 
   provides the following APIs:
-
   - ENSIndexer Config API (`/api/config`)
   - ENSIndexer Indexing Status API (`/api/indexing-status`)
   - Legacy ENS Subgraph GraphQL API (`/subgraph`)
@@ -323,13 +373,11 @@
 - [#1118](https://github.com/namehash/ensnode/pull/1118) [`22514f8`](https://github.com/namehash/ensnode/commit/22514f82f43c5cdb239631a3ca45c9dd20bbf1db) Thanks [@shrugs](https://github.com/shrugs)! - Introduces new `SUBGRAPH_COMPAT` flag (default false) to configure ENSIndexer's subgraph-compatible indexing behavior and removes the `HEAL_REVERSE_ADDRESSES`, `INDEX_ADDITIONAL_RESOLVER_RECORDS`, and `REPLACE_UNNORMALIZED` configuration flags.
 
   If `SUBGRAPH_COMPAT=true`, the following default configuration is provided:
-
   - `PLUGINS=subgraph`
   - `LABEL_SET_ID=subgraph`
   - `LABEL_SET_VERSION=0`
 
   If `SUBGRAPH_COMPAT=false` (default behavior), the following default configuration is provided:
-
   - `PLUGINS=subgraph,basenames,lineanames,threedns`
   - `LABEL_SET_ID=subgraph`
   - `LABEL_SET_VERSION=0`
@@ -371,7 +419,6 @@
   **Migration Required**
 
   If you're using the `reverse-resolvers` plugin, you need to update your configuration:
-
   1. Replace `reverse-resolvers` with `protocol-acceleration` in your `PLUGINS` environment variable
   2. This is a breaking change that requires re-indexing from scratch due to database schema changes
 
@@ -436,14 +483,12 @@
 ### Patch Changes
 
 - [#962](https://github.com/namehash/ensnode/pull/962) [`845a037`](https://github.com/namehash/ensnode/commit/845a03761dc830303a56cd70fe0d57c36d78a663) Thanks [@djstrong](https://github.com/djstrong)! - Add LABEL_SET_ID and LABEL_SET_VERSION environment variables to ENSIndexer
-
   - Add label set configuration to ENSIndexerConfig, SerializedENSIndexerConfig, and ENSIndexerPublicConfig
   - Update indexing behavior dependencies to prevent starting with different label set configurations
   - Add configuration schema validation and serialization support
   - Enforce Ponder build id changes if configured label set changes
 
 - [#962](https://github.com/namehash/ensnode/pull/962) [`845a037`](https://github.com/namehash/ensnode/commit/845a03761dc830303a56cd70fe0d57c36d78a663) Thanks [@djstrong](https://github.com/djstrong)! - Add label set configuration to Terraform infrastructure
-
   - Add label_set_id and label_set_version variables to ENSIndexer Terraform module
   - Update main Terraform configuration to support label set configuration
   - Enhance deterministic label healing capabilities through infrastructure configuration

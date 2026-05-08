@@ -1,51 +1,38 @@
+import config from "@/config";
+
 import {
+  hasEnsAnalyticsConfigSupport,
+  hasEnsAnalyticsIndexingStatusSupport,
+  type ReferralEditionSnapshot,
   type ReferralProgramEditionConfig,
   type ReferralProgramEditionConfigSet,
   type ReferralProgramEditionSlug,
-  type ReferrerLeaderboard,
   serializeReferralProgramRules,
 } from "@namehash/ens-referrals";
 import { minutesToSeconds } from "date-fns";
 
-import {
-  type CachedResult,
-  getLatestIndexedBlockRef,
-  type OmnichainIndexingStatusId,
-  OmnichainIndexingStatusIds,
-  SWRCache,
-} from "@ensnode/ensnode-sdk";
+import { type CachedResult, getLatestIndexedBlockRef, SWRCache } from "@ensnode/ensnode-sdk";
 
 import { assumeReferralProgramEditionImmutablyClosed } from "@/lib/ensanalytics/referrer-leaderboard/closeout";
-import { getReferrerLeaderboard } from "@/lib/ensanalytics/referrer-leaderboard/get-referrer-leaderboard";
+import { getReferralEditionSnapshot } from "@/lib/ensanalytics/referrer-leaderboard/get-referral-edition-snapshot";
 import { makeLogger } from "@/lib/logger";
 
 import { indexingStatusCache } from "./indexing-status.cache";
 
-const logger = makeLogger("referral-leaderboard-editions-cache");
+const logger = makeLogger("referral-edition-snapshots-cache");
 
 /**
- * Map from edition slug to its leaderboard cache.
+ * Map from edition slug to its snapshot cache.
  *
  * Each edition has its own independent cache. Therefore, each
  * edition's cache can be asynchronously loaded / refreshed from
  * others, and a failure to load data for one edition doesn't break
  * data successfully loaded for other editions.
  */
-export type ReferralLeaderboardEditionsCacheMap = Map<
+export type ReferralEditionSnapshotsCacheMap = Map<
   ReferralProgramEditionSlug,
-  SWRCache<ReferrerLeaderboard>
+  SWRCache<ReferralEditionSnapshot>
 >;
-
-/**
- * The list of {@link OmnichainIndexingStatusId} values that are supported for generating
- * referrer leaderboards.
- *
- * Other values indicate that we are not ready to generate leaderboards yet.
- */
-const supportedOmnichainIndexingStatuses: OmnichainIndexingStatusId[] = [
-  OmnichainIndexingStatusIds.Following,
-  OmnichainIndexingStatusIds.Completed,
-];
 
 /**
  * Creates a cache builder function for a specific edition.
@@ -54,19 +41,21 @@ const supportedOmnichainIndexingStatuses: OmnichainIndexingStatusId[] = [
  * If so, it returns the cached data without re-fetching. Otherwise, it fetches fresh data.
  *
  * @param editionConfig - The edition configuration
- * @returns A function that builds the leaderboard for the given edition
+ * @returns A function that builds the edition snapshot for the given edition
  */
-function createEditionLeaderboardBuilder(
+function createEditionSnapshotBuilder(
   editionConfig: ReferralProgramEditionConfig,
-): (cachedResult?: CachedResult<ReferrerLeaderboard>) => Promise<ReferrerLeaderboard> {
-  return async (cachedResult?: CachedResult<ReferrerLeaderboard>): Promise<ReferrerLeaderboard> => {
+): (cachedResult?: CachedResult<ReferralEditionSnapshot>) => Promise<ReferralEditionSnapshot> {
+  return async (
+    cachedResult?: CachedResult<ReferralEditionSnapshot>,
+  ): Promise<ReferralEditionSnapshot> => {
     const editionSlug = editionConfig.slug;
 
     // Check if cached data is immutable and can be returned as-is
     if (cachedResult && !(cachedResult.result instanceof Error)) {
       const isImmutable = assumeReferralProgramEditionImmutablyClosed(
-        cachedResult.result.rules,
-        cachedResult.result.accurateAsOf,
+        cachedResult.result.leaderboard.rules,
+        cachedResult.result.leaderboard.accurateAsOf,
       );
 
       if (isImmutable) {
@@ -78,21 +67,36 @@ function createEditionLeaderboardBuilder(
       }
     }
 
+    // The plugin-support and indexing-status checks below duplicate `ensanalyticsApiMiddleware`'s
+    // gates, but are required here because `proactivelyInitialize: true` runs the cache builder
+    // at startup — before any request — so the middleware can't gate it. Without these checks,
+    // the cache could capture a snapshot derived from a not-yet-final indexer state, or one with
+    // silently dropped rows because a required namespace plugin is inactive, and serve it for the
+    // rest of its (effectively infinite, for closed editions) TTL.
+    const configSupport = hasEnsAnalyticsConfigSupport(config.ensIndexerPublicConfig);
+    if (!configSupport.supported) {
+      throw new Error(
+        `Unable to generate edition snapshot for ${editionSlug}. ${configSupport.reason}`,
+      );
+    }
+
     const indexingStatus = await indexingStatusCache.read();
     if (indexingStatus instanceof Error) {
       logger.error(
         { error: indexingStatus, editionSlug },
-        `Failed to read indexing status cache while generating referral leaderboard for ${editionSlug}. Cannot proceed without valid indexing status.`,
+        `Failed to read indexing status cache while generating edition snapshot for ${editionSlug}. Cannot proceed without valid indexing status.`,
       );
       throw new Error(
-        `Unable to generate referral leaderboard for ${editionSlug}. indexingStatusCache must have been successfully initialized.`,
+        `Unable to generate edition snapshot for ${editionSlug}. indexingStatusCache must have been successfully initialized.`,
       );
     }
 
-    const omnichainIndexingStatus = indexingStatus.omnichainSnapshot.omnichainStatus;
-    if (!supportedOmnichainIndexingStatuses.includes(omnichainIndexingStatus)) {
+    const indexingStatusSupport = hasEnsAnalyticsIndexingStatusSupport(
+      indexingStatus.omnichainSnapshot.omnichainStatus,
+    );
+    if (!indexingStatusSupport.supported) {
       throw new Error(
-        `Unable to generate referrer leaderboard for ${editionSlug}. Omnichain indexing status is currently ${omnichainIndexingStatus} but must be ${supportedOmnichainIndexingStatuses.join(" or ")}.`,
+        `Unable to generate edition snapshot for ${editionSlug}. ${indexingStatusSupport.reason}`,
       );
     }
 
@@ -102,28 +106,28 @@ function createEditionLeaderboardBuilder(
     );
     if (latestIndexedBlockRef === null) {
       throw new Error(
-        `Unable to generate referrer leaderboard for ${editionSlug}. Latest indexed block ref for chain ${editionConfig.rules.subregistryId.chainId} is null.`,
+        `Unable to generate edition snapshot for ${editionSlug}. Latest indexed block ref for chain ${editionConfig.rules.subregistryId.chainId} is null.`,
       );
     }
 
     logger.info(
-      `Building referrer leaderboard for ${editionSlug} with rules:\n${JSON.stringify(
+      `Building edition snapshot for ${editionSlug} with rules:\n${JSON.stringify(
         serializeReferralProgramRules(editionConfig.rules),
         null,
         2,
       )}`,
     );
 
-    const leaderboard = await getReferrerLeaderboard(
+    const snapshot = await getReferralEditionSnapshot(
       editionConfig.rules,
       latestIndexedBlockRef.timestamp,
     );
 
     logger.info(
-      `Successfully built referrer leaderboard for ${editionSlug} with ${leaderboard.referrers.size} referrers`,
+      `Successfully built edition snapshot for ${editionSlug} with ${snapshot.leaderboard.referrers.size} referrers`,
     );
 
-    return leaderboard;
+    return snapshot;
   };
 }
 
@@ -131,7 +135,7 @@ function createEditionLeaderboardBuilder(
  * Singleton instance of the initialized caches.
  * Ensures caches are only initialized once per application lifecycle.
  */
-let cachedInstance: ReferralLeaderboardEditionsCacheMap | null = null;
+let cachedInstance: ReferralEditionSnapshotsCacheMap | null = null;
 
 /**
  * Initializes caches for all referral program editions in the given edition set.
@@ -144,26 +148,26 @@ let cachedInstance: ReferralLeaderboardEditionsCacheMap | null = null;
  * @param editionConfigSet - The referral program edition config set to initialize caches for
  * @returns A map from edition slug to its dedicated SWRCache
  */
-export function initializeReferralLeaderboardEditionsCaches(
+export function initializeReferralEditionSnapshotsCaches(
   editionConfigSet: ReferralProgramEditionConfigSet,
-): ReferralLeaderboardEditionsCacheMap {
+): ReferralEditionSnapshotsCacheMap {
   // Return cached instance if already initialized
   if (cachedInstance !== null) {
     return cachedInstance;
   }
 
-  const caches: ReferralLeaderboardEditionsCacheMap = new Map();
+  const caches: ReferralEditionSnapshotsCacheMap = new Map();
 
   for (const [editionSlug, editionConfig] of editionConfigSet) {
     const cache = new SWRCache({
-      fn: createEditionLeaderboardBuilder(editionConfig),
+      fn: createEditionSnapshotBuilder(editionConfig),
       ttl: minutesToSeconds(1),
       proactiveRevalidationInterval: minutesToSeconds(2),
       proactivelyInitialize: true,
     });
 
     caches.set(editionSlug, cache);
-    logger.info(`Initialized leaderboard cache for ${editionSlug}`);
+    logger.info(`Initialized edition snapshot cache for ${editionSlug}`);
   }
 
   // Cache the instance for subsequent calls
@@ -172,11 +176,11 @@ export function initializeReferralLeaderboardEditionsCaches(
 }
 
 /**
- * Gets the cached instance of referral leaderboard editions caches.
+ * Gets the cached instance of referral edition snapshots caches.
  * Returns null if not yet initialized.
  *
  * @returns The cached cache map or null
  */
-export function getReferralLeaderboardEditionsCaches(): ReferralLeaderboardEditionsCacheMap | null {
+export function getReferralEditionSnapshotsCaches(): ReferralEditionSnapshotsCacheMap | null {
   return cachedInstance;
 }

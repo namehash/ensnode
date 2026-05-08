@@ -10,6 +10,7 @@ export * from "./award-models/pie-split/metrics";
 export * from "./award-models/pie-split/rules";
 export * from "./award-models/pie-split/score";
 export * from "./award-models/pie-split/status";
+export * from "./award-models/rev-share-cap/accounting";
 export * from "./award-models/rev-share-cap/aggregations";
 export * from "./award-models/rev-share-cap/api/serialized-types";
 export * from "./award-models/rev-share-cap/edition-metrics";
