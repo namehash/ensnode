@@ -49,7 +49,7 @@ catalogs:
       specifier: 0.41.0
       version: 0.41.0
     hono:
-      specifier: ^4.12.16
+      specifier: ^4.12.18
       version: 4.12.18
     lucide-react:
       specifier: ^0.548.0
