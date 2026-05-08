@@ -3,7 +3,7 @@
   "info": {
     "title": "ENSApi APIs",
     "version": "1.11.1",
-    "description": "REST APIs for ENSNode stack as served by ENSApi service"
+    "description": "REST APIs for the ENSNode stack as served by the ENSApi service"
   },
   "servers": [
     { "url": "https://api.alpha.ensnode.io", "description": "ENSNode Alpha (Mainnet)" },
@@ -16,7 +16,7 @@
     { "name": "Resolution", "description": "APIs for resolving ENS names and addresses" },
     {
       "name": "Meta",
-      "description": "APIs for indexing status, configuration, and realtime monitoring"
+      "description": "APIs for indexing status, ENSNode stack info, and realtime monitoring"
     }
   ],
   "components": { "schemas": {}, "parameters": {} },
