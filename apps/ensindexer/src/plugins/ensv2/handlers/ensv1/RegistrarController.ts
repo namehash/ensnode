@@ -36,7 +36,7 @@ const pluginName = PluginName.ENSv2;
  * the original bytes can't be recovered post-decode. When that happens we treat the label as
  * unknown so the registration still indexes correctly under an unknown label.
  */
-const literalLabelIffMatchesLabelHash = (
+const literalLabelIfMatchesLabelHash = (
   label: Label | undefined,
   labelHash: LabelHash,
 ): LiteralLabel | undefined => {
@@ -47,7 +47,7 @@ const literalLabelIffMatchesLabelHash = (
   if (matches) return literalLabel;
 
   logger.warn({
-    msg: `RegistrarController label/labelHash mismatch (non-UTF-8 bytes?): label='${literalLabel}' labelHash='${labelHash}' — treating label as unemitted`,
+    msg: `RegistrarController label/labelHash mismatch (non-UTF-8 bytes?): label='${literalLabel}' labelHash='${labelHash}' — treating label as unknown.`,
   });
 
   return undefined;
@@ -68,7 +68,7 @@ export default function () {
     }>;
   }) {
     const { labelHash, baseCost: base, premium, referrer } = event.args;
-    const label = literalLabelIffMatchesLabelHash(event.args.label, labelHash);
+    const label = literalLabelIfMatchesLabelHash(event.args.label, labelHash);
 
     const controller = getThisAccountId(context, event);
     const { node: managedNode, registry } = getManagedName(controller);
@@ -117,7 +117,7 @@ export default function () {
     }>;
   }) {
     const { labelHash, baseCost: base, premium, referrer } = event.args;
-    const label = literalLabelIffMatchesLabelHash(event.args.label, labelHash);
+    const label = literalLabelIfMatchesLabelHash(event.args.label, labelHash);
 
     // if the contract emitted a (verified) healed label, ensure that it is indexed
     if (label !== undefined) {
