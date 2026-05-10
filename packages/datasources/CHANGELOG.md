@@ -1,5 +1,11 @@
 # @ensnode/ens-deployments
 
+## 1.13.1
+
+### Patch Changes
+
+- [#2082](https://github.com/namehash/ensnode/pull/2082) [`b32f09d`](https://github.com/namehash/ensnode/commit/b32f09dec275196c816b722023a197d3e91a37b1) Thanks [@shrugs](https://github.com/shrugs)! - Hotfix: re-release of 1.13.0 including the documented changes to the Sepolia Namespace to include Basenames and Lineanames L1 Resolvers.
+
 ## 1.13.0
 
 ### Minor Changes

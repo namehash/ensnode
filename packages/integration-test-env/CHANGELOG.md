@@ -1,5 +1,15 @@
 # @ensnode/integration-test-env
 
+## 1.13.1
+
+### Patch Changes
+
+- Updated dependencies [[`b32f09d`](https://github.com/namehash/ensnode/commit/b32f09dec275196c816b722023a197d3e91a37b1)]:
+  - @ensnode/datasources@1.13.1
+  - @ensnode/ensnode-sdk@1.13.1
+  - @ensnode/ensdb-sdk@1.13.1
+  - @ensnode/shared-configs@1.13.1
+
 ## 1.13.0
 
 ### Patch Changes

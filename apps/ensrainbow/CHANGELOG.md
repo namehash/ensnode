@@ -1,5 +1,14 @@
 # ensrainbow
 
+## 1.13.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/ensnode-sdk@1.13.1
+  - @ensnode/ensrainbow-sdk@1.13.1
+  - enssdk@1.13.1
+
 ## 1.13.0
 
 ### Patch Changes
