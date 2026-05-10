@@ -98,6 +98,16 @@ export default {
         address: "0xb7b7dadf4d42a08b3ec1d3a1079959dfbc8cffcc",
         startBlock: 8515717,
       },
+      BasenamesL1Resolver: {
+        abi: ResolverABI,
+        address: "0x084d10c07efeecd9ffc73deb38ecb72f9eeb65ab",
+        startBlock: 6501252,
+      },
+      LineanamesL1Resolver: {
+        abi: ResolverABI,
+        address: "0xb4b2748f543265e7e0d471f5d1bda81da4e74624",
+        startBlock: 10415742,
+      },
     },
   },
 
