@@ -1,5 +1,12 @@
 # @docs/ensnode
 
+## 1.13.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @namehash/namehash-ui@1.13.0
+
 ## 1.12.0
 
 ### Patch Changes

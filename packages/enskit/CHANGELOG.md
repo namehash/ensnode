@@ -1,5 +1,12 @@
 # enskit
 
+## 1.13.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - enssdk@1.13.0
+
 ## 1.12.0
 
 ### Patch Changes
