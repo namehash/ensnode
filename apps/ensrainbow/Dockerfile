@@ -1,14 +1,10 @@
 # Runtime image for ENSRainbow
 FROM node:24-slim AS runtime
 
-# Install only essential system dependencies for runtime
-# netcat-openbsd: Used during container initialization to keep the service port open
-# while the database is being downloaded and validated (which can take up to 20 minutes).
-# Without a listener on the port during this phase, Render's health checks fail and orchestration
-# systems may mark the container as unhealthy or restart it prematurely. See scripts/entrypoint.sh for implementation details.
-# Note: The netcat listener only keeps the port open and accepts connections; it does not respond
-# to HTTP requests, so it will not work with Docker HEALTHCHECK commands that expect HTTP responses. See https://github.com/namehash/ensnode/issues/1610
-RUN apt-get update && apt-get install -y wget tar netcat-openbsd && rm -rf /var/lib/apt/lists/*
+# Install only essential system dependencies for runtime.
+# `wget` and `tar` are required by scripts/download-prebuilt-database.sh, which the in-process
+# entrypoint spawns to fetch the pre-built database archive.
+RUN apt-get update && apt-get install -y wget tar && rm -rf /var/lib/apt/lists/*
 
 # Set up pnpm
 ENV PNPM_HOME="/pnpm"
@@ -34,16 +30,18 @@ COPY apps/ensrainbow/tsconfig.json apps/ensrainbow/
 COPY apps/ensrainbow/vitest.config.ts apps/ensrainbow/
 
 # Make scripts executable
-RUN chmod +x /app/apps/ensrainbow/scripts/entrypoint.sh
 RUN chmod +x /app/apps/ensrainbow/scripts/download-prebuilt-database.sh
 
 # Set environment variables
 ENV NODE_ENV=production
-# PORT will be used by entrypoint.sh, defaulting to 3223 if not set at runtime
-# DB_SCHEMA_VERSION, LABEL_SET_ID, LABEL_SET_VERSION must be provided at runtime to the entrypoint
+# PORT is consumed by the entrypoint command, defaulting to 3223 if not set at runtime.
+# DB_SCHEMA_VERSION, LABEL_SET_ID, LABEL_SET_VERSION must be provided at runtime to the entrypoint.
 
-# Default port, can be overridden by PORT env var for the entrypoint/serve command
+# Default port, can be overridden by PORT env var for the entrypoint command
 EXPOSE 3223
 
-# Set the entrypoint
-ENTRYPOINT ["/app/apps/ensrainbow/scripts/entrypoint.sh"]
+# The entrypoint binds the HTTP server immediately (so /health and /ready respond while the
+# database is still being downloaded) and runs download + validation in the background.
+# See src/commands/entrypoint-command.ts for implementation details.
+WORKDIR /app/apps/ensrainbow
+ENTRYPOINT ["pnpm", "run", "entrypoint"]

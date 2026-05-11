@@ -21,6 +21,7 @@ export const EventFragment = gql`
     transactionHash
     transactionIndex
     from
+    sender
     to
     address
     logIndex
@@ -38,6 +39,7 @@ export type EventResult = {
   transactionHash: Hex;
   transactionIndex: number;
   from: NormalizedAddress;
+  sender: NormalizedAddress;
   to: NormalizedAddress | null;
   address: NormalizedAddress;
   logIndex: number;

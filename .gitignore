@@ -33,7 +33,6 @@ generated
 terraform.tfstate*
 
 # Claude
-CLAUDE.md
 .claude
 
 # ENSRainbow data

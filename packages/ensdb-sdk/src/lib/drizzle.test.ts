@@ -34,7 +34,7 @@ describe("buildIndividualEnsDbSchemas", () => {
     const { concreteEnsIndexerSchema } = buildIndividualEnsDbSchemas(ENSINDEXER_SCHEMA_NAME);
 
     expect(concreteEnsIndexerSchema.event).toBeDefined();
-    expect(concreteEnsIndexerSchema.v1Domain).toBeDefined();
+    expect(concreteEnsIndexerSchema.domain).toBeDefined();
     expect(concreteEnsIndexerSchema.registration).toBeDefined();
     expect(concreteEnsIndexerSchema.registrationType).toBeDefined();
   });
@@ -141,16 +141,16 @@ describe("concrete tables — prototype and Symbol preservation", () => {
 
   it("preserves the Table prototype on cloned tables", () => {
     const { concreteEnsIndexerSchema } = buildIndividualEnsDbSchemas(ENSINDEXER_SCHEMA_NAME);
-    const abstractTable = abstractEnsIndexerSchema.v1Domain;
-    const concreteTable = concreteEnsIndexerSchema.v1Domain;
+    const abstractTable = abstractEnsIndexerSchema.domain;
+    const concreteTable = concreteEnsIndexerSchema.domain;
 
     expect(Object.getPrototypeOf(concreteTable)).toBe(Object.getPrototypeOf(abstractTable));
   });
 
   it("preserves Symbol-keyed properties (IsDrizzleTable, Columns, TableName) on cloned tables", () => {
     const { concreteEnsIndexerSchema } = buildIndividualEnsDbSchemas(ENSINDEXER_SCHEMA_NAME);
-    const abstractTable = abstractEnsIndexerSchema.v1Domain;
-    const concreteTable = concreteEnsIndexerSchema.v1Domain;
+    const abstractTable = abstractEnsIndexerSchema.domain;
+    const concreteTable = concreteEnsIndexerSchema.domain;
 
     expect((concreteTable as any)[IsDrizzleTable]).toBe((abstractTable as any)[IsDrizzleTable]);
     expect((concreteTable as any)[Columns]).toBe((abstractTable as any)[Columns]);
@@ -160,7 +160,7 @@ describe("concrete tables — prototype and Symbol preservation", () => {
   it("isTable() returns true for cloned concrete tables", () => {
     const { concreteEnsIndexerSchema } = buildIndividualEnsDbSchemas(ENSINDEXER_SCHEMA_NAME);
 
-    expect(isTable(concreteEnsIndexerSchema.v1Domain)).toBe(true);
+    expect(isTable(concreteEnsIndexerSchema.domain)).toBe(true);
     expect(isTable(concreteEnsIndexerSchema.registration)).toBe(true);
     expect(isTable(concreteEnsIndexerSchema.event)).toBe(true);
   });

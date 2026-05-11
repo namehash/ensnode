@@ -11,7 +11,11 @@ import { isAddressEqual, zeroAddress } from "viem";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
-import { ensurePermissionsEvent } from "@/lib/ensv2/event-db-helpers";
+import {
+  ensureEvent,
+  ensurePermissionsEvent,
+  ensurePermissionsUserEvent,
+} from "@/lib/ensv2/event-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import {
   addOnchainEventListener,
@@ -95,8 +99,10 @@ export default function () {
           .onConflictDoUpdate({ roles });
       }
 
-      // push event to permissions
-      await ensurePermissionsEvent(context, event, contract);
+      // push event to permissions and permissions user
+      const eventId = await ensureEvent(context, event);
+      await ensurePermissionsEvent(context, contract, eventId);
+      await ensurePermissionsUserEvent(context, permissionsUserId, eventId);
     },
   );
 }

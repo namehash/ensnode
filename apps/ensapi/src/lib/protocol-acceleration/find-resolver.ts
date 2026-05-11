@@ -19,7 +19,6 @@ import { accountIdEqual, getDatasourceContract, isENSv1Registry } from "@ensnode
 
 import { ensDb } from "@/lib/ensdb/singleton";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/instrumentation/auto-span";
-import { lazyProxy } from "@/lib/lazy";
 
 type FindResolverResult =
   | {
@@ -36,12 +35,6 @@ const NULL_RESULT: FindResolverResult = {
 };
 
 const tracer = trace.getTracer("find-resolver");
-
-// lazyProxy defers construction until first use so that this module can be
-// imported without env vars being present (e.g. during OpenAPI generation).
-const ensv1RegistryOld = lazyProxy(() =>
-  getDatasourceContract(config.namespace, DatasourceNames.ENSRoot, "ENSv1RegistryOld"),
-);
 
 /**
  * Identifies `name`'s active resolver in `registry`.
@@ -202,6 +195,11 @@ async function findResolverWithIndex(
         "domainResolverRelation.findMany",
         {},
         async () => {
+          const ENSv1RegistryOld = getDatasourceContract(
+            config.namespace,
+            DatasourceNames.ENSRoot,
+            "ENSv1RegistryOld",
+          );
           // the current ENS Root Chain Registry is actually ENSRegistryWithFallback: if a node
           // doesn't exist in its own storage, it directs the lookup to RegistryOld. We must encode
           // this logic here, so that the active resolver of unmigrated nodes can be correctly identified.
@@ -215,8 +213,8 @@ async function findResolverWithIndex(
                   // OR, if the registry is the ENS Root Registry, also include records from RegistryOld
                   isENSv1Registry(config.namespace, registry)
                     ? and(
-                        eq(t.chainId, ensv1RegistryOld.chainId),
-                        eq(t.address, ensv1RegistryOld.address),
+                        eq(t.chainId, ENSv1RegistryOld.chainId),
+                        eq(t.address, ENSv1RegistryOld.address),
                       )
                     : undefined,
                 ),

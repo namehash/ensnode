@@ -57,7 +57,7 @@ export default function () {
       const { label: labelHash, node: parentNode } = event.args;
       const registry = getThisAccountId(context, event);
       const node = makeSubdomainNode(labelHash, parentNode);
-      const domainId = makeENSv1DomainId(node);
+      const domainId = makeENSv1DomainId(registry, node);
 
       // all ThreeDNSToken nodes have a hardcoded resolver
       const resolver = ThreeDNSResolverByChainId[context.chain.id];

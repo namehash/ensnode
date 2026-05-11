@@ -7,7 +7,7 @@ type Account {
   domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: AccountDomainsWhereInput): AccountDomainsConnection
 
   """
-  All Events for which this Account is the sender (i.e. `Transaction.from`).
+  All Events for which this Account is the HCA-aware `sender` (i.e. `Event.sender`).
   """
   events(after: String, before: String, first: Int, last: Int, where: AccountEventsWhereInput): AccountEventsConnection
 
@@ -54,6 +54,11 @@ input AccountDomainsWhereInput {
   A partial Interpreted Name by which to search the set of Domains. ex: 'example', 'example.', 'example.et'.
   """
   name: String
+
+  """
+  If set, filters the set of Domains to only those of the specified ENS protocol version.
+  """
+  version: ENSProtocolVersion
 }
 
 type AccountEventsConnection {
@@ -68,9 +73,14 @@ type AccountEventsConnectionEdge {
 }
 
 """
-Filter conditions for Account.events (where `from` is implied by the Account).
+Filter conditions for Account.events (where `sender` is implied by the Account).
 """
 input AccountEventsWhereInput {
+  """
+  Filter to events whose `tx.from` matches. Not HCA-aware — the Account's HCA-aware filter is applied via `sender = Account.id`.
+  """
+  from: Address
+
   """
   Filter to events whose selector (event signature) is one of the provided values.
   """
@@ -166,7 +176,9 @@ type BaseRegistrarRegistration implements Registration {
   """The extra `referrer` data provided with a Registration, if exists."""
   referrer: Hex
 
-  """The Registrant of a Registration, if exists."""
+  """
+  The Registrant of a Registration, if exists. For ENSv2 Registrations, the protocol-emitted registrant address (the HCA account address if used).
+  """
   registrant: Account
 
   """The Registrar contract under which this Registration is managed."""
@@ -180,7 +192,9 @@ type BaseRegistrarRegistration implements Registration {
   """A UnixTimestamp indicating when this Registration was created."""
   start: BigInt!
 
-  """The Unregistrant of a Registration, if exists."""
+  """
+  The Unregistrant of a Registration, if exists. For ENSv2 Registrations, the protocol-emitted unregistrant address (the HCA account address if used).
+  """
   unregistrant: Account
 
   """
@@ -202,6 +216,9 @@ scalar CoinType
 A Domain represents an individual Label within the ENS namegraph. It may or may not be Canonical. It may be an ENSv1Domain or an ENSv2Domain.
 """
 interface Domain {
+  """Whether the Domain is Canonical."""
+  canonical: Boolean!
+
   """All Events associated with this Domain."""
   events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): DomainEventsConnection
 
@@ -216,11 +233,18 @@ interface Domain {
   """
   name: InterpretedName
 
-  """The owner of this Domain."""
+  """
+  If this is an ENSv1Domain, this is the effective owner of the Domain. If this is an ENSv2Domain, this is the on-chain owner address (the HCA account address if used).
+  """
   owner: Account
 
   """
-  The Canonical Path from the ENS Root to this Domain. `path` is null if the Domain is not Canonical.
+  The direct parent Domain in the canonical nametree or null if this Domain is a root-level Domain or is not Canonical.
+  """
+  parent: Domain
+
+  """
+  The Canonical Path from this Domain to the ENS Root, in leaf→root order and inclusive of this Domain. `path` is null if the Domain is not Canonical.
   """
   path: [Domain!]
 
@@ -306,18 +330,27 @@ input DomainsOrderInput {
 """Filter for the top-level domains query."""
 input DomainsWhereInput {
   """
-  Optional, defaults to false. If true, filters the set of Domains by those that are Canonical (i.e. reachable by ENS Forward Resolution). If false, the set of Domains is not filtered, and may include ENSv2 Domains not reachable by ENS Forward Resolution.
-  """
-  canonical: Boolean = false
-
-  """
   A partial Interpreted Name by which to search the set of Domains. ex: 'example', 'example.', 'example.et'.
   """
   name: String!
+
+  """
+  If set, filters the set of Domains to only those of the specified ENS protocol version.
+  """
+  version: ENSProtocolVersion
+}
+
+"""An ENS protocol version."""
+enum ENSProtocolVersion {
+  ENSv1
+  ENSv2
 }
 
 """An ENSv1Domain represents an ENSv1 Domain."""
 type ENSv1Domain implements Domain {
+  """Whether the Domain is Canonical."""
+  canonical: Boolean!
+
   """All Events associated with this Domain."""
   events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): DomainEventsConnection
 
@@ -332,14 +365,21 @@ type ENSv1Domain implements Domain {
   """
   name: InterpretedName
 
-  """The owner of this Domain."""
-  owner: Account
-
-  """The parent Domain of this Domain in the ENSv1 nametree."""
-  parent: ENSv1Domain
+  """The namehash of this ENSv1 Domain."""
+  node: Node!
 
   """
-  The Canonical Path from the ENS Root to this Domain. `path` is null if the Domain is not Canonical.
+  If this is an ENSv1Domain, this is the effective owner of the Domain. If this is an ENSv2Domain, this is the on-chain owner address (the HCA account address if used).
+  """
+  owner: Account
+
+  """
+  The direct parent Domain in the canonical nametree or null if this Domain is a root-level Domain or is not Canonical.
+  """
+  parent: Domain
+
+  """
+  The Canonical Path from this Domain to the ENS Root, in leaf→root order and inclusive of this Domain. `path` is null if the Domain is not Canonical.
   """
   path: [Domain!]
 
@@ -365,8 +405,66 @@ type ENSv1Domain implements Domain {
   subdomains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: SubdomainsWhereInput): DomainSubdomainsConnection
 }
 
+"""
+An ENSv1Registry is a concrete ENSv1 Registry contract (the mainnet ENS Registry, the Basenames shadow Registry, or the Lineanames shadow Registry).
+"""
+type ENSv1Registry implements Registry {
+  """Whether the Registry is Canonical."""
+  canonical: Boolean!
+
+  """
+  Contract metadata for this Registry. If this is an ENSv1VirtualRegistry, this will reference the concrete Registry contract under which the parent Domain exists.
+  """
+  contract: AccountId!
+
+  """The Domains managed by this Registry."""
+  domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: RegistryDomainsWhereInput): RegistryDomainsConnection
+
+  """A unique reference to this Registry."""
+  id: RegistryId!
+
+  """The Domains for which this Registry is a Subregistry."""
+  parents(after: String, before: String, first: Int, last: Int): RegistryParentsConnection
+
+  """The Permissions managed by this Registry."""
+  permissions: Permissions
+}
+
+"""
+An ENSv1VirtualRegistry is the virtual Registry managed by an ENSv1 Domain that has children. It is keyed by `(chainId, address, node)` where `(chainId, address)` identify the concrete Registry that houses the parent Domain, and `node` is the parent Domain's namehash.
+"""
+type ENSv1VirtualRegistry implements Registry {
+  """Whether the Registry is Canonical."""
+  canonical: Boolean!
+
+  """
+  Contract metadata for this Registry. If this is an ENSv1VirtualRegistry, this will reference the concrete Registry contract under which the parent Domain exists.
+  """
+  contract: AccountId!
+
+  """The Domains managed by this Registry."""
+  domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: RegistryDomainsWhereInput): RegistryDomainsConnection
+
+  """A unique reference to this Registry."""
+  id: RegistryId!
+
+  """
+  The namehash of the parent ENSv1 Domain that owns this virtual Registry.
+  """
+  node: Node!
+
+  """The Domains for which this Registry is a Subregistry."""
+  parents(after: String, before: String, first: Int, last: Int): RegistryParentsConnection
+
+  """The Permissions managed by this Registry."""
+  permissions: Permissions
+}
+
 """An ENSv2Domain represents an ENSv2 Domain."""
 type ENSv2Domain implements Domain {
+  """Whether the Domain is Canonical."""
+  canonical: Boolean!
+
   """All Events associated with this Domain."""
   events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): DomainEventsConnection
 
@@ -381,11 +479,18 @@ type ENSv2Domain implements Domain {
   """
   name: InterpretedName
 
-  """The owner of this Domain."""
+  """
+  If this is an ENSv1Domain, this is the effective owner of the Domain. If this is an ENSv2Domain, this is the on-chain owner address (the HCA account address if used).
+  """
   owner: Account
 
   """
-  The Canonical Path from the ENS Root to this Domain. `path` is null if the Domain is not Canonical.
+  The direct parent Domain in the canonical nametree or null if this Domain is a root-level Domain or is not Canonical.
+  """
+  parent: Domain
+
+  """
+  The Canonical Path from this Domain to the ENS Root, in leaf→root order and inclusive of this Domain. `path` is null if the Domain is not Canonical.
   """
   path: [Domain!]
 
@@ -431,6 +536,29 @@ type ENSv2DomainPermissionsConnectionEdge {
   node: PermissionsUser!
 }
 
+"""An ENSv2Registry represents an ENSv2 Registry contract."""
+type ENSv2Registry implements Registry {
+  """Whether the Registry is Canonical."""
+  canonical: Boolean!
+
+  """
+  Contract metadata for this Registry. If this is an ENSv1VirtualRegistry, this will reference the concrete Registry contract under which the parent Domain exists.
+  """
+  contract: AccountId!
+
+  """The Domains managed by this Registry."""
+  domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: RegistryDomainsWhereInput): RegistryDomainsConnection
+
+  """A unique reference to this Registry."""
+  id: RegistryId!
+
+  """The Domains for which this Registry is a Subregistry."""
+  parents(after: String, before: String, first: Int, last: Int): RegistryParentsConnection
+
+  """The Permissions managed by this Registry."""
+  permissions: Permissions
+}
+
 """
 ENSv2RegistryRegistration represents a Registration within an ENSv2 Registry.
 """
@@ -455,7 +583,9 @@ type ENSv2RegistryRegistration implements Registration {
   """The extra `referrer` data provided with a Registration, if exists."""
   referrer: Hex
 
-  """The Registrant of a Registration, if exists."""
+  """
+  The Registrant of a Registration, if exists. For ENSv2 Registrations, the protocol-emitted registrant address (the HCA account address if used).
+  """
   registrant: Account
 
   """The Registrar contract under which this Registration is managed."""
@@ -469,7 +599,9 @@ type ENSv2RegistryRegistration implements Registration {
   """A UnixTimestamp indicating when this Registration was created."""
   start: BigInt!
 
-  """The Unregistrant of a Registration, if exists."""
+  """
+  The Unregistrant of a Registration, if exists. For ENSv2 Registrations, the protocol-emitted unregistrant address (the HCA account address if used).
+  """
   unregistrant: Account
 }
 
@@ -497,7 +629,9 @@ type ENSv2RegistryReservation implements Registration {
   """The extra `referrer` data provided with a Registration, if exists."""
   referrer: Hex
 
-  """The Registrant of a Registration, if exists."""
+  """
+  The Registrant of a Registration, if exists. For ENSv2 Registrations, the protocol-emitted registrant address (the HCA account address if used).
+  """
   registrant: Account
 
   """The Registrar contract under which this Registration is managed."""
@@ -511,7 +645,9 @@ type ENSv2RegistryReservation implements Registration {
   """A UnixTimestamp indicating when this Registration was created."""
   start: BigInt!
 
-  """The Unregistrant of a Registration, if exists."""
+  """
+  The Unregistrant of a Registration, if exists. For ENSv2 Registrations, the protocol-emitted unregistrant address (the HCA account address if used).
+  """
   unregistrant: Account
 }
 
@@ -535,7 +671,7 @@ type Event {
   data: Hex!
 
   """
-  Identifies the sender of the Transaction within which this Event was emitted.
+  Identifies the sender of the Transaction within which this Event was emitted (`tx.from`). Never HCA-aware — always the EOA/relayer that submitted the transaction. Use `Event.sender` for the HCA-aware actor.
   """
   from: Address!
 
@@ -544,6 +680,9 @@ type Event {
 
   """The index of this Event's log within the Block."""
   logIndex: Int!
+
+  """The HCA account address if used, otherwise Transaction.from."""
+  sender: Address!
 
   """
   The UnixTimestamp indicating the moment in which this Event was emitted.
@@ -567,13 +706,20 @@ type Event {
 
 """Filter conditions for an events connection."""
 input EventsWhereInput {
-  """Filter to events sent by this address."""
+  """
+  Filter to events whose `tx.from` matches. Not HCA-aware — use `sender` to filter by the HCA account address.
+  """
   from: Address
 
   """
   Filter to events whose selector (event signature) is one of the provided values.
   """
   selector_in: [Hex!]
+
+  """
+  Filter to events whose `sender` matches: the HCA account address if used, otherwise Transaction.from.
+  """
+  sender: Address
 
   """Filter to events at or after this UnixTimestamp."""
   timestamp_gte: BigInt
@@ -641,7 +787,9 @@ type NameWrapperRegistration implements Registration {
   """The extra `referrer` data provided with a Registration, if exists."""
   referrer: Hex
 
-  """The Registrant of a Registration, if exists."""
+  """
+  The Registrant of a Registration, if exists. For ENSv2 Registrations, the protocol-emitted registrant address (the HCA account address if used).
+  """
   registrant: Account
 
   """The Registrar contract under which this Registration is managed."""
@@ -655,7 +803,9 @@ type NameWrapperRegistration implements Registration {
   """A UnixTimestamp indicating when this Registration was created."""
   start: BigInt!
 
-  """The Unregistrant of a Registration, if exists."""
+  """
+  The Unregistrant of a Registration, if exists. For ENSv2 Registrations, the protocol-emitted unregistrant address (the HCA account address if used).
+  """
   unregistrant: Account
 }
 
@@ -761,6 +911,9 @@ type PermissionsUser {
   """The contract within which these Permissions are granted."""
   contract: AccountId!
 
+  """All Events associated with this PermissionsUser."""
+  events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): PermissionsUserEventsConnection
+
   """A unique reference to this PermissionsUser."""
   id: PermissionsUserId!
 
@@ -770,8 +923,21 @@ type PermissionsUser {
   """The Roles this User has been granted within this Resource."""
   roles: BigInt!
 
-  """The User for whom these Roles are granted."""
+  """
+  The user/grantee address this Permission is granted to (the HCA account address if used).
+  """
   user: Account!
+}
+
+type PermissionsUserEventsConnection {
+  edges: [PermissionsUserEventsConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type PermissionsUserEventsConnectionEdge {
+  cursor: String!
+  node: Event!
 }
 
 """PermissionsUserId represents a enssdk#PermissionsUserId."""
@@ -781,10 +947,13 @@ type Query {
   """Identify an Account by ID or Address."""
   account(by: AccountByInput!): Account
 
+  """TODO"""
+  allDomains(after: String, before: String, first: Int, last: Int): QueryAllDomainsConnection
+
   """Identify a Domain by Name or DomainId"""
   domain(by: DomainIdInput!): Domain
 
-  """Find Domains by Name."""
+  """Find Canonical Domains by Name."""
   domains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: DomainsWhereInput!): QueryDomainsConnection
 
   """Identify Permissions by ID or AccountId."""
@@ -793,7 +962,9 @@ type Query {
   """TODO"""
   registrations(after: String, before: String, first: Int, last: Int): QueryRegistrationsConnection
 
-  """Identify a Registry by ID or AccountId."""
+  """
+  Identify a Registry by ID or AccountId. If querying by `contract`, only concrete Registries will be returned.
+  """
   registry(by: RegistryIdInput!): Registry
 
   """Identify a Resolver by ID or AccountId."""
@@ -802,14 +973,21 @@ type Query {
   """TODO"""
   resolvers(after: String, before: String, first: Int, last: Int): QueryResolversConnection
 
-  """The ENSv2 Root Registry, if exists."""
-  root: Registry
+  """
+  The Root Registry for this namespace. It will be the ENSv2 Root Registry when defined or the ENSv1 Root Registry.
+  """
+  root: Registry!
+}
 
-  """TODO"""
-  v1Domains(after: String, before: String, first: Int, last: Int): QueryV1DomainsConnection
+type QueryAllDomainsConnection {
+  edges: [QueryAllDomainsConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
 
-  """TODO"""
-  v2Domains(after: String, before: String, first: Int, last: Int): QueryV2DomainsConnection
+type QueryAllDomainsConnectionEdge {
+  cursor: String!
+  node: Domain!
 }
 
 type QueryDomainsConnection {
@@ -845,28 +1023,6 @@ type QueryResolversConnectionEdge {
   node: Resolver!
 }
 
-type QueryV1DomainsConnection {
-  edges: [QueryV1DomainsConnectionEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type QueryV1DomainsConnectionEdge {
-  cursor: String!
-  node: ENSv1Domain!
-}
-
-type QueryV2DomainsConnection {
-  edges: [QueryV2DomainsConnectionEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type QueryV2DomainsConnectionEdge {
-  cursor: String!
-  node: ENSv2Domain!
-}
-
 """
 A Registration represents a Domain's registration status within the various registries.
 """
@@ -891,7 +1047,9 @@ interface Registration {
   """The extra `referrer` data provided with a Registration, if exists."""
   referrer: Hex
 
-  """The Registrant of a Registration, if exists."""
+  """
+  The Registrant of a Registration, if exists. For ENSv2 Registrations, the protocol-emitted registrant address (the HCA account address if used).
+  """
   registrant: Account
 
   """The Registrar contract under which this Registration is managed."""
@@ -905,7 +1063,9 @@ interface Registration {
   """A UnixTimestamp indicating when this Registration was created."""
   start: BigInt!
 
-  """The Unregistrant of a Registration, if exists."""
+  """
+  The Unregistrant of a Registration, if exists. For ENSv2 Registrations, the protocol-emitted unregistrant address (the HCA account address if used).
+  """
   unregistrant: Account
 }
 
@@ -923,9 +1083,16 @@ type RegistrationRenewalsConnectionEdge {
   node: Renewal!
 }
 
-"""A Registry represents an ENSv2 Registry contract."""
-type Registry {
-  """Contract metadata for this Registry"""
+"""
+A Registry represents a Registry contract in the ENS namegraph. It may be an ENSv1Registry (a concrete ENSv1 Registry contract), an ENSv1VirtualRegistry (the virtual Registry managed by an ENSv1 domain that has children), or an ENSv2Registry.
+"""
+interface Registry {
+  """Whether the Registry is Canonical."""
+  canonical: Boolean!
+
+  """
+  Contract metadata for this Registry. If this is an ENSv1VirtualRegistry, this will reference the concrete Registry contract under which the parent Domain exists.
+  """
   contract: AccountId!
 
   """The Domains managed by this Registry."""
@@ -977,7 +1144,7 @@ type RegistryParentsConnection {
 
 type RegistryParentsConnectionEdge {
   cursor: String!
-  node: ENSv2Domain!
+  node: Domain!
 }
 
 type RegistryPermissionsUser {
@@ -993,7 +1160,9 @@ type RegistryPermissionsUser {
   """The Roles that this Permission grants."""
   roles: BigInt!
 
-  """The User for whom these Roles are granted."""
+  """
+  The user/grantee address this Permission is granted to (the HCA account address if used).
+  """
   user: Account!
 }
 
@@ -1023,8 +1192,10 @@ scalar RenewalId
 
 """A Resolver represents a Resolver contract on-chain."""
 type Resolver {
-  """Whether Resolver is a BridgedResolver."""
-  bridged: AccountId
+  """
+  If Resolver is a Bridged Resolver, the Registry to which it Bridges resolution.
+  """
+  bridged: Registry
 
   """Contract metadata for this Resolver."""
   contract: AccountId!
@@ -1078,7 +1249,9 @@ type ResolverPermissionsUser {
   """The Roles that this Permission grants."""
   roles: BigInt!
 
-  """The User for whom these Roles are granted."""
+  """
+  The user/grantee address this Permission is granted to (the HCA account address if used).
+  """
   user: Account!
 }
 
@@ -1142,7 +1315,9 @@ type ThreeDNSRegistration implements Registration {
   """The extra `referrer` data provided with a Registration, if exists."""
   referrer: Hex
 
-  """The Registrant of a Registration, if exists."""
+  """
+  The Registrant of a Registration, if exists. For ENSv2 Registrations, the protocol-emitted registrant address (the HCA account address if used).
+  """
   registrant: Account
 
   """The Registrar contract under which this Registration is managed."""
@@ -1156,7 +1331,9 @@ type ThreeDNSRegistration implements Registration {
   """A UnixTimestamp indicating when this Registration was created."""
   start: BigInt!
 
-  """The Unregistrant of a Registration, if exists."""
+  """
+  The Unregistrant of a Registration, if exists. For ENSv2 Registrations, the protocol-emitted unregistrant address (the HCA account address if used).
+  """
   unregistrant: Account
 }
 

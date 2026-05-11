@@ -1,5 +1,3 @@
-import { zeroAddress } from "viem";
-
 import { EnhancedAccessControl } from "./abis/ensv2/EnhancedAccessControl";
 import { ETHRegistrar } from "./abis/ensv2/ETHRegistrar";
 import { Registry } from "./abis/ensv2/Registry";
@@ -9,7 +7,6 @@ import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
 import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } from "./abis/root/LegacyEthRegistrarController";
 import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
 import { Registry as root_Registry } from "./abis/root/Registry";
-import { UniversalRegistrarRenewalWithReferrer as root_UniversalRegistrarRenewalWithReferrer } from "./abis/root/UniversalRegistrarRenewalWithReferrer";
 import { UniversalResolverV1 } from "./abis/root/UniversalResolverV1";
 import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
 import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
@@ -67,7 +64,7 @@ export default {
       // NOTE: named LegacyETHRegistrarController in devnet
       LegacyEthRegistrarController: {
         abi: root_LegacyEthRegistrarController,
-        address: "0xfbc22278a96299d91d41c453234d97b4f5eb9b2d",
+        address: "0x46b142dd1e924fab83ecc3c08e4d46e82f005e0e",
         startBlock: 0,
       },
       // NOTE: named WrappedETHRegistrarController in devnet
@@ -79,13 +76,7 @@ export default {
       // NOTE: named ETHRegistrarController in devnet
       UnwrappedEthRegistrarController: {
         abi: root_UnwrappedEthRegistrarController,
-        address: "0x1c85638e118b37167e9298c2268758e058ddfda0",
-        startBlock: 0,
-      },
-      // NOTE: not in devnet, set to zeroAddress
-      UniversalRegistrarRenewalWithReferrer: {
-        abi: root_UniversalRegistrarRenewalWithReferrer,
-        address: zeroAddress,
+        address: "0x367761085bf3c12e5da2df99ac6e1a824612b8fb",
         startBlock: 0,
       },
       NameWrapper: {
@@ -95,13 +86,13 @@ export default {
       },
       UniversalResolver: {
         abi: UniversalResolverV1,
-        address: "0x5067457698fd6fa1c6964e416b3f42713513b3dd",
+        address: "0xaa292e8611adf267e563f334ee42320ac96d0463",
         startBlock: 0,
       },
       // NOTE: named UniversalResolverV2 in devnet
       UniversalResolverV2: {
         abi: UniversalResolverV2,
-        address: "0x8198f5d8f8cffe8f9c413d98a0a55aeb8ab9fbb7",
+        address: "0x0355b7b8cb128fa5692729ab3aaa199c1753f726",
         startBlock: 0,
       },
     },
@@ -125,7 +116,17 @@ export default {
       },
       ETHRegistrar: {
         abi: ETHRegistrar,
-        address: "0x4c4a2f8c81640e47606d3fd77b353e87ba015584",
+        address: "0x21df544947ba3e8b3c32561399e88b52dc8b2823",
+        startBlock: 0,
+      },
+      ENSv1Resolver: {
+        abi: ResolverABI,
+        address: "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
+        startBlock: 0,
+      },
+      ENSv2Resolver: {
+        abi: ResolverABI,
+        address: "0xc6e7df5e7b4f2a278906862b61205850344d4e7d",
         startBlock: 0,
       },
     },
@@ -150,14 +151,14 @@ export default {
       // NOTE: named LegacyPublicResolver in devnet
       DefaultPublicResolver4: {
         abi: ResolverABI,
-        address: "0x86a2ee8faf9a840f7a2c64ca3d51209f9a02081d",
+        address: "0xa4899d35897033b927acfcf422bc745916139776",
         startBlock: 0,
       },
 
       // NOTE: named PublicResolver in devnet
       DefaultPublicResolver5: {
         abi: ResolverABI,
-        address: "0xa4899d35897033b927acfcf422bc745916139776",
+        address: "0xf953b3a269d80e3eb0f2947630da976b896a8c5b",
         startBlock: 0,
       },
     },

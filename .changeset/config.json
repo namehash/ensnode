@@ -27,7 +27,8 @@
       "@docs/ensnode",
       "@docs/ensrainbow",
       "@namehash/ens-referrals",
-      "@namehash/namehash-ui"
+      "@namehash/namehash-ui",
+      "@ensnode/ensindexer-perf-testing"
     ]
   ],
   "updateInternalDependencies": "patch",

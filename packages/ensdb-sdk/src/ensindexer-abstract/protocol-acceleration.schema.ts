@@ -57,12 +57,12 @@ export const reverseNameRecord = onchainTable(
 export const domainResolverRelation = onchainTable(
   "domain_resolver_relations",
   (t) => ({
-    // keyed by (chainId, registry, node)
-    chainId: t.integer().notNull().$type<ChainId>(),
+    // keyed by (chainId, address, node)
+    chainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
 
     // The Registry (ENSv1Registry or ENSv2Registry)'s AccountId.
     address: t.hex().notNull().$type<Address>(),
-    domainId: t.hex().notNull().$type<DomainId>(),
+    domainId: t.text().notNull().$type<DomainId>(),
 
     // The Domain's assigned Resolver's address (NOTE: always scoped to chainId)
     resolver: t.hex().notNull().$type<Address>(),
@@ -90,7 +90,7 @@ export const resolver = onchainTable(
     // keyed by (chainId, address)
     id: t.text().primaryKey().$type<ResolverId>(),
 
-    chainId: t.integer().notNull().$type<ChainId>(),
+    chainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
     address: t.hex().notNull().$type<Address>(),
   }),
   (t) => ({
@@ -122,7 +122,7 @@ export const resolverRecords = onchainTable(
     // keyed by (chainId, resolver, node)
     id: t.text().primaryKey().$type<ResolverRecordsId>(),
 
-    chainId: t.integer().notNull().$type<ChainId>(),
+    chainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
     address: t.hex().notNull().$type<Address>(),
     node: t.hex().notNull().$type<Node>(),
 
@@ -188,7 +188,7 @@ export const resolverAddressRecord = onchainTable(
   "resolver_address_records",
   (t) => ({
     // keyed by ((chainId, resolver, node), coinType)
-    chainId: t.integer().notNull().$type<ChainId>(),
+    chainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
     address: t.hex().notNull().$type<Address>(),
     node: t.hex().notNull().$type<Node>(),
     // NOTE: all well-known CoinTypes fit into javascript number but NOT postgres .integer, must be
@@ -231,7 +231,7 @@ export const resolverTextRecord = onchainTable(
   "resolver_text_records",
   (t) => ({
     // keyed by ((chainId, resolver, node), key)
-    chainId: t.integer().notNull().$type<ChainId>(),
+    chainId: t.int8({ mode: "number" }).notNull().$type<ChainId>(),
     address: t.hex().notNull().$type<Address>(),
     node: t.hex().notNull().$type<Node>(),
     key: t.text().notNull(),
@@ -255,32 +255,4 @@ export const resolverTextRecordRelations = relations(resolverTextRecord, ({ one 
     fields: [resolverTextRecord.chainId, resolverTextRecord.address, resolverTextRecord.node],
     references: [resolverRecords.chainId, resolverRecords.address, resolverRecords.node],
   }),
-}));
-
-/**
- * Tracks the migration status of a node.
- *
- * Due to a security issue, ENS migrated from the RegistryOld contract to a new Registry
- * contract. When indexing events, the indexer must ignore any events on the RegistryOld for domains
- * that have since been migrated to the new Registry.
- *
- * To store the necessary information required to implement this behavior, we track the set of nodes
- * that have been registered in the (new) Registry contract on the ENS Root Chain. When an event is
- * encountered on the RegistryOld contract, if the relevant node exists in this set, the event should
- * be ignored, as the node is considered migrated.
- *
- * Note that this logic is only necessary for the ENS Root Chain, the only chain that includes the
- * Registry migration: we do not track nodes in the the Basenames and Lineanames deployments of the
- * Registry on their respective chains, for example.
- *
- * Note also that this Registry migration tracking is isolated to the Protocol Acceleration schema/plugin.
- * That is, the subgraph plugin implements its own Registry migration logic. By isolating this logic
- * to the Protocol Acceleration plugin, we allow the Protocol Acceleration plugin to be run
- * independently of other plugins.
- *
- * The ensv2 plugin depends on the Protocol Acceleration plugin in order to piggyback on this
- * Registry migration logic.
- */
-export const migratedNode = onchainTable("migrated_nodes", (t) => ({
-  node: t.hex().primaryKey().$type<Node>(),
 }));

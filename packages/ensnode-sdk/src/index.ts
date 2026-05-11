@@ -24,6 +24,7 @@ export * from "./shared/datasource-contract";
 export * from "./shared/datetime";
 export * from "./shared/deserialize";
 export * from "./shared/interpretation";
+export * from "./shared/managed-names";
 export * from "./shared/namespace-specific-value";
 export * from "./shared/null-bytes";
 export * from "./shared/numbers";

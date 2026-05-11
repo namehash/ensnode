@@ -1,13 +1,7 @@
-import { namehashInterpretedName } from "enssdk";
-
-import type { ENSNamespaceId } from "@ensnode/datasources";
+import { DatasourceNames, type ENSNamespaceId } from "@ensnode/datasources";
 import {
-  getBasenamesSubregistryId,
-  getBasenamesSubregistryManagedName,
-  getEthnamesSubregistryId,
-  getEthnamesSubregistryManagedName,
-  getLineanamesSubregistryId,
-  getLineanamesSubregistryManagedName,
+  getManagedName,
+  maybeGetDatasourceContract,
   PluginName,
   type Subregistry,
 } from "@ensnode/ensnode-sdk";
@@ -19,28 +13,18 @@ export function getIndexedSubregistries(
   namespaceId: ENSNamespaceId,
   activePlugins: PluginName[],
 ): Subregistry[] {
-  const indexedSubregistries: Subregistry[] = [];
+  return [
+    { plugin: PluginName.Subgraph, datasource: DatasourceNames.ENSRoot },
+    { plugin: PluginName.Basenames, datasource: DatasourceNames.Basenames },
+    { plugin: PluginName.Lineanames, datasource: DatasourceNames.Lineanames },
+  ].flatMap(({ plugin, datasource }): Subregistry[] => {
+    if (!activePlugins.includes(plugin)) return [];
 
-  if (activePlugins.includes(PluginName.Subgraph)) {
-    indexedSubregistries.push({
-      subregistryId: getEthnamesSubregistryId(namespaceId),
-      node: namehashInterpretedName(getEthnamesSubregistryManagedName(namespaceId)),
-    });
-  }
+    const subregistryId = maybeGetDatasourceContract(namespaceId, datasource, "BaseRegistrar");
+    if (!subregistryId) return [];
 
-  if (activePlugins.includes(PluginName.Basenames)) {
-    indexedSubregistries.push({
-      subregistryId: getBasenamesSubregistryId(namespaceId),
-      node: namehashInterpretedName(getBasenamesSubregistryManagedName(namespaceId)),
-    });
-  }
-
-  if (activePlugins.includes(PluginName.Lineanames)) {
-    indexedSubregistries.push({
-      subregistryId: getLineanamesSubregistryId(namespaceId),
-      node: namehashInterpretedName(getLineanamesSubregistryManagedName(namespaceId)),
-    });
-  }
-
-  return indexedSubregistries;
+    // get the Registrar's Managed Node
+    const { node } = getManagedName(namespaceId, subregistryId);
+    return [{ subregistryId, node }];
+  });
 }

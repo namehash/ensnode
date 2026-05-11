@@ -2,6 +2,7 @@ import {
   buildEditionSummary,
   getReferrerEditionMetrics,
   getReferrerLeaderboardPage,
+  ReferralProgramAwardModels,
   type ReferralProgramEditionSlug,
   type ReferralProgramEditionSummariesResponse,
   ReferralProgramEditionSummariesResponseCodes,
@@ -16,12 +17,16 @@ import {
   serializeReferrerMetricsEditionsResponse,
 } from "@namehash/ens-referrals";
 
+import { formatAccountingCsv } from "@/lib/ensanalytics/referrer-leaderboard/format-accounting-csv";
 import { createApp } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
-import { referralLeaderboardEditionsCachesMiddleware } from "@/middleware/referral-leaderboard-editions-caches.middleware";
+import { ensanalyticsApiMiddleware } from "@/middleware/ensanalytics.middleware";
+import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
+import { referralEditionSnapshotsCachesMiddleware } from "@/middleware/referral-edition-snapshots-caches.middleware";
 import { referralProgramEditionConfigSetMiddleware } from "@/middleware/referral-program-edition-set.middleware";
 
 import {
+  getAccountingCsvRoute,
   getEditionsRoute,
   getReferralLeaderboardRoute,
   getReferrerDetailRoute,
@@ -31,8 +36,10 @@ const logger = makeLogger("ensanalytics-api");
 
 const app = createApp({
   middlewares: [
+    indexingStatusMiddleware,
+    ensanalyticsApiMiddleware,
     referralProgramEditionConfigSetMiddleware,
-    referralLeaderboardEditionsCachesMiddleware,
+    referralEditionSnapshotsCachesMiddleware,
   ],
 });
 
@@ -41,10 +48,22 @@ app.openapi(getReferralLeaderboardRoute, async (c) => {
   try {
     const { edition, page, recordsPerPage } = c.req.valid("query");
 
+    // Service-prerequisite check (set by ensanalyticsApiMiddleware)
+    if (!c.var.ensAnalyticsPrerequisites.supported) {
+      return c.json(
+        serializeReferrerLeaderboardPageResponse({
+          responseCode: ReferrerLeaderboardPageResponseCodes.Error,
+          error: "Service Unavailable",
+          errorMessage: c.var.ensAnalyticsPrerequisites.reason,
+        } satisfies ReferrerLeaderboardPageResponse),
+        503,
+      );
+    }
+
     // Check if edition set failed to load
-    if (c.var.referralLeaderboardEditionsCaches instanceof Error) {
+    if (c.var.referralEditionSnapshotsCaches instanceof Error) {
       logger.error(
-        { error: c.var.referralLeaderboardEditionsCaches },
+        { error: c.var.referralEditionSnapshotsCaches },
         "Referral program edition set failed to load",
       );
       return c.json(
@@ -58,10 +77,10 @@ app.openapi(getReferralLeaderboardRoute, async (c) => {
     }
 
     // Get the specific edition's cache
-    const editionCache = c.var.referralLeaderboardEditionsCaches.get(edition);
+    const editionCache = c.var.referralEditionSnapshotsCaches.get(edition);
 
     if (!editionCache) {
-      const configuredEditions = Array.from(c.var.referralLeaderboardEditionsCaches.keys());
+      const configuredEditions = Array.from(c.var.referralEditionSnapshotsCaches.keys());
       return c.json(
         serializeReferrerLeaderboardPageResponse({
           responseCode: ReferrerLeaderboardPageResponseCodes.Error,
@@ -73,10 +92,10 @@ app.openapi(getReferralLeaderboardRoute, async (c) => {
     }
 
     // Read from the edition's cache
-    const leaderboard = await editionCache.read();
+    const cached = await editionCache.read();
 
     // Check if this specific edition failed to build
-    if (leaderboard instanceof Error) {
+    if (cached instanceof Error) {
       return c.json(
         serializeReferrerLeaderboardPageResponse({
           responseCode: ReferrerLeaderboardPageResponseCodes.Error,
@@ -87,7 +106,10 @@ app.openapi(getReferralLeaderboardRoute, async (c) => {
       );
     }
 
-    const leaderboardPage = getReferrerLeaderboardPage({ page, recordsPerPage }, leaderboard);
+    const leaderboardPage = getReferrerLeaderboardPage(
+      { page, recordsPerPage },
+      cached.leaderboard,
+    );
 
     return c.json(
       serializeReferrerLeaderboardPageResponse({
@@ -118,10 +140,22 @@ app.openapi(getReferrerDetailRoute, async (c) => {
     const { referrer } = c.req.valid("param");
     const { editions } = c.req.valid("query");
 
+    // Service-prerequisite check (set by ensanalyticsApiMiddleware)
+    if (!c.var.ensAnalyticsPrerequisites.supported) {
+      return c.json(
+        serializeReferrerMetricsEditionsResponse({
+          responseCode: ReferrerMetricsEditionsResponseCodes.Error,
+          error: "Service Unavailable",
+          errorMessage: c.var.ensAnalyticsPrerequisites.reason,
+        } satisfies ReferrerMetricsEditionsResponse),
+        503,
+      );
+    }
+
     // Check if edition set failed to load
-    if (c.var.referralLeaderboardEditionsCaches instanceof Error) {
+    if (c.var.referralEditionSnapshotsCaches instanceof Error) {
       logger.error(
-        { error: c.var.referralLeaderboardEditionsCaches },
+        { error: c.var.referralEditionSnapshotsCaches },
         "Referral program edition set failed to load",
       );
       return c.json(
@@ -135,7 +169,7 @@ app.openapi(getReferrerDetailRoute, async (c) => {
     }
 
     // Type narrowing: at this point we know it's not an Error
-    const editionsCaches = c.var.referralLeaderboardEditionsCaches;
+    const editionsCaches = c.var.referralEditionSnapshotsCaches;
 
     // Validate that all requested editions are recognized (exist in the cache map)
     const configuredEditions = Array.from(editionsCaches.keys());
@@ -159,7 +193,8 @@ app.openapi(getReferrerDetailRoute, async (c) => {
         if (!editionCache) {
           throw new Error(`Invariant: edition cache for ${editionSlug} should exist`);
         }
-        const leaderboard = await editionCache.read();
+        const result = await editionCache.read();
+        const leaderboard = result instanceof Error ? result : result.leaderboard;
         return { editionSlug, leaderboard };
       }),
     );
@@ -180,7 +215,7 @@ app.openapi(getReferrerDetailRoute, async (c) => {
       );
     }
 
-    // Type narrowing: at this point all leaderboards are guaranteed to be non-Error
+    // Type narrowing: at this point all cached values are guaranteed to be non-Error
     const validEditionLeaderboards = editionLeaderboards.filter(
       (
         item,
@@ -224,6 +259,18 @@ app.openapi(getReferrerDetailRoute, async (c) => {
 // Get edition summaries
 app.openapi(getEditionsRoute, async (c) => {
   try {
+    // Service-prerequisite check (set by ensanalyticsApiMiddleware)
+    if (!c.var.ensAnalyticsPrerequisites.supported) {
+      return c.json(
+        serializeReferralProgramEditionSummariesResponse({
+          responseCode: ReferralProgramEditionSummariesResponseCodes.Error,
+          error: "Service Unavailable",
+          errorMessage: c.var.ensAnalyticsPrerequisites.reason,
+        } satisfies ReferralProgramEditionSummariesResponse),
+        503,
+      );
+    }
+
     // Check if edition config set failed to load
     if (c.var.referralProgramEditionConfigSet instanceof Error) {
       logger.error(
@@ -241,9 +288,9 @@ app.openapi(getEditionsRoute, async (c) => {
     }
 
     // Check if leaderboard caches failed to load
-    if (c.var.referralLeaderboardEditionsCaches instanceof Error) {
+    if (c.var.referralEditionSnapshotsCaches instanceof Error) {
       logger.error(
-        { error: c.var.referralLeaderboardEditionsCaches },
+        { error: c.var.referralEditionSnapshotsCaches },
         "Referral program leaderboard caches failed to load",
       );
       return c.json(
@@ -262,12 +309,14 @@ app.openapi(getEditionsRoute, async (c) => {
     );
 
     // Read all leaderboard caches in parallel, keeping config colocated with its leaderboard
-    const leaderboardCaches = c.var.referralLeaderboardEditionsCaches;
+    const snapshotCaches = c.var.referralEditionSnapshotsCaches;
     const results = await Promise.all(
       editionConfigs.map(async (config) => {
-        const cache = leaderboardCaches.get(config.slug);
+        const cache = snapshotCaches.get(config.slug);
         if (!cache) throw new Error(`Invariant: edition cache for ${config.slug} should exist`);
-        return { config, leaderboard: await cache.read() };
+        const result = await cache.read();
+        const leaderboard = result instanceof Error ? result : result.leaderboard;
+        return { config, leaderboard };
       }),
     );
 
@@ -322,6 +371,59 @@ app.openapi(getEditionsRoute, async (c) => {
       } satisfies ReferralProgramEditionSummariesResponse),
       500,
     );
+  }
+});
+
+// Get a CSV dump of per-event accounting for a specific edition
+app.openapi(getAccountingCsvRoute, async (c) => {
+  try {
+    const { edition } = c.req.valid("query");
+
+    // Service-prerequisite check (set by ensanalyticsApiMiddleware)
+    if (!c.var.ensAnalyticsPrerequisites.supported) {
+      return c.text(`Service Unavailable: ${c.var.ensAnalyticsPrerequisites.reason}`, 503);
+    }
+
+    if (c.var.referralEditionSnapshotsCaches instanceof Error) {
+      logger.error(
+        { error: c.var.referralEditionSnapshotsCaches },
+        "Referral program edition set failed to load",
+      );
+      return c.text("Service Unavailable: referral program configuration is unavailable", 503);
+    }
+
+    const editionCache = c.var.referralEditionSnapshotsCaches.get(edition);
+    if (!editionCache) {
+      const configuredEditions = Array.from(c.var.referralEditionSnapshotsCaches.keys());
+      return c.text(
+        `Not Found: unknown edition "${edition}". Known editions: ${configuredEditions.join(", ")}`,
+        404,
+      );
+    }
+
+    const cached = await editionCache.read();
+    if (cached instanceof Error) {
+      logger.error({ error: cached, edition }, "Leaderboard cache failed to build");
+      return c.text("Service Unavailable: failed to build accounting trace for this edition", 503);
+    }
+
+    if (cached.awardModel !== ReferralProgramAwardModels.RevShareCap) {
+      return c.text(
+        `Bad Request: edition "${edition}" is not a rev-share-cap edition (awardModel="${cached.awardModel}"). The accounting endpoint only supports rev-share-cap editions.`,
+        400,
+      );
+    }
+
+    c.header("Content-Type", "text/csv; charset=utf-8");
+    c.header("Content-Disposition", `attachment; filename="accounting-${edition}.csv"`);
+    return c.body(formatAccountingCsv(cached.accountingRecords), 200);
+  } catch (error) {
+    logger.error({ error }, "Error in /v1/ensanalytics/accounting endpoint");
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : "An unexpected error occurred while processing your request";
+    return c.text(`Internal server error: ${errorMessage}`, 500);
   }
 });
 

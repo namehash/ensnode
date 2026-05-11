@@ -1,15 +1,16 @@
 import {
   asInterpretedLabel,
-  asInterpretedName,
   type DomainId,
+  ETH_NODE,
   type InterpretedLabel,
   labelhashInterpretedLabel,
   makeENSv1DomainId,
+  makeENSv1RegistryId,
   makeENSv2DomainId,
   makeStorageId,
   type Name,
+  type Node,
   type NormalizedAddress,
-  namehashInterpretedName,
 } from "enssdk";
 import { describe, expect, it } from "vitest";
 
@@ -38,15 +39,40 @@ const V2_ROOT_REGISTRY = getDatasourceContract(
   "RootRegistry",
 );
 
-const V1_ETH_DOMAIN_ID = makeENSv1DomainId(namehashInterpretedName(asInterpretedName("eth")));
+const V1_ROOT_REGISTRY = getDatasourceContract(namespace, DatasourceNames.ENSRoot, "ENSv1Registry");
+
+const V1_ETH_DOMAIN_ID = makeENSv1DomainId(V1_ROOT_REGISTRY, ETH_NODE);
 const V2_ETH_STORAGE_ID = makeStorageId(labelhashInterpretedLabel(asInterpretedLabel("eth")));
 const V2_ETH_DOMAIN_ID = makeENSv2DomainId(V2_ROOT_REGISTRY, V2_ETH_STORAGE_ID);
 
 describe("Query.root", () => {
-  it("returns the root registry", async () => {
-    await expect(request(gql`{ root { id } }`)).resolves.toMatchObject({
+  it("returns the v2 root registry when v2 is defined (preferred over v1)", async () => {
+    await expect(request(gql`{ root { __typename id } }`)).resolves.toMatchObject({
       root: {
+        __typename: "ENSv2Registry",
         id: getENSv2RootRegistryId(namespace),
+      },
+    });
+  });
+});
+
+describe("Query.registry polymorphism", () => {
+  const RegistryByContract = gql`
+    query RegistryByContract($contract: AccountIdInput!) {
+      registry(by: { contract: $contract }) {
+        __typename
+        id
+      }
+    }
+  `;
+
+  it("returns an ENSv1Registry for the devnet ENSv1Registry contract", async () => {
+    await expect(
+      request(RegistryByContract, { contract: V1_ROOT_REGISTRY }),
+    ).resolves.toMatchObject({
+      registry: {
+        __typename: "ENSv1Registry",
+        id: makeENSv1RegistryId(V1_ROOT_REGISTRY),
       },
     });
   });
@@ -60,12 +86,13 @@ describe("Query.domains", () => {
       name: Name;
       label: { interpreted: InterpretedLabel };
       owner: { address: NormalizedAddress };
+      node?: Node;
     }>;
   };
 
   const QueryDomains = gql`
-    query QueryDomains($name: String!, $canonical: Boolean, $order: DomainsOrderInput) {
-      domains(where: { name: $name, canonical: $canonical }, order: $order) {
+    query QueryDomains($name: String!, $version: ENSProtocolVersion, $order: DomainsOrderInput) {
+      domains(where: { name: $name, version: $version }, order: $order) {
         edges {
           node {
             __typename
@@ -76,6 +103,9 @@ describe("Query.domains", () => {
             }
             owner {
               address
+            }
+            ... on ENSv1Domain {
+              node
             }
           }
         }
@@ -94,22 +124,73 @@ describe("Query.domains", () => {
 
     const domains = flattenConnection(result.domains);
 
-    // there's at least a v2 'eth' domain
-    expect(domains.length).toBeGreaterThanOrEqual(1);
+    // there's at least a v1 and a v2 'eth' domain
+    expect(domains.length).toBeGreaterThanOrEqual(2);
 
-    const v1EthDomain = domains.find((d) => d.__typename === "ENSv1Domain" && d.name === "eth");
-    const v2EthDomain = domains.find((d) => d.__typename === "ENSv2Domain" && d.name === "eth");
-
-    expect(v1EthDomain).toMatchObject({
+    expect(
+      domains.find((d) => d.__typename === "ENSv1Domain" && d.id === V1_ETH_DOMAIN_ID),
+    ).toMatchObject({
       id: V1_ETH_DOMAIN_ID,
       name: "eth",
       label: { interpreted: "eth" },
+      node: ETH_NODE,
     });
 
-    expect(v2EthDomain).toMatchObject({
+    expect(
+      domains.find((d) => d.__typename === "ENSv2Domain" && d.id === V2_ETH_DOMAIN_ID),
+    ).toMatchObject({
       id: V2_ETH_DOMAIN_ID,
       name: "eth",
       label: { interpreted: "eth" },
+    });
+  });
+
+  it("returns only canonical domains", async () => {
+    const result = await request<QueryDomainsResult>(QueryDomains, { name: "parent" });
+    const domains = flattenConnection(result.domains);
+
+    // parent.eth is canonical (registered under the v2 ETH Registry which descends from the v2 Root)
+    const parentEth = domains.find((d) => d.name === "parent.eth");
+    expect(parentEth).toBeDefined();
+
+    // every returned domain must have a defined canonical `name` (only canonical domains resolve one)
+    for (const d of domains) {
+      expect(d.name, `expected canonical name for ${d.id}`).toBeTruthy();
+    }
+  });
+
+  // TODO: devnet fixture needs a known non-canonical Domain to assert exclusion against.
+  it.todo("excludes non-canonical domains from the result set");
+
+  describe("version?: ENSProtocolVersion", () => {
+    it("returns any version when unspecified", async () => {
+      const result = await request<QueryDomainsResult>(QueryDomains, {
+        name: "reverse",
+        version: undefined,
+      });
+      const domains = flattenConnection(result.domains);
+      expect(domains.find((d) => d.__typename === "ENSv1Domain")).toBeDefined();
+      expect(domains.find((d) => d.__typename === "ENSv2Domain")).toBeDefined();
+    });
+
+    it("returns only ENSv1Domains when version: ENSv1", async () => {
+      const result = await request<QueryDomainsResult>(QueryDomains, {
+        name: "reverse",
+        version: "ENSv1",
+      });
+      const domains = flattenConnection(result.domains);
+      expect(domains.find((d) => d.__typename === "ENSv1Domain")).toBeDefined();
+      expect(domains.find((d) => d.__typename === "ENSv2Domain")).not.toBeDefined();
+    });
+
+    it("returns only ENSv2Domains when version: ENSv2", async () => {
+      const result = await request<QueryDomainsResult>(QueryDomains, {
+        name: "reverse",
+        version: "ENSv2",
+      });
+      const domains = flattenConnection(result.domains);
+      expect(domains.find((d) => d.__typename === "ENSv1Domain")).not.toBeDefined();
+      expect(domains.find((d) => d.__typename === "ENSv2Domain")).toBeDefined();
     });
   });
 });

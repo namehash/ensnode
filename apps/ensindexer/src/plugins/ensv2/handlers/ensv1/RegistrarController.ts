@@ -4,6 +4,7 @@ import {
   asLiteralLabel,
   type Label,
   type LabelHash,
+  type LiteralLabel,
   labelhashLiteralLabel,
   makeENSv1DomainId,
   makeSubdomainNode,
@@ -11,8 +12,8 @@ import {
 
 import { type EncodedReferrer, PluginName, toJson } from "@ensnode/ensnode-sdk";
 
-import { ensureDomainEvent } from "@/lib/ensv2/event-db-helpers";
-import { ensureLabel, ensureUnknownLabel } from "@/lib/ensv2/label-db-helpers";
+import { ensureDomainEvent, ensureEvent } from "@/lib/ensv2/event-db-helpers";
+import { ensureLabel, ensureUnknownLabel, labelExists } from "@/lib/ensv2/label-db-helpers";
 import { getLatestRegistration, getLatestRenewal } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import {
@@ -20,11 +21,37 @@ import {
   ensIndexerSchema,
   type IndexingEngineContext,
 } from "@/lib/indexing-engines/ponder";
+import { logger } from "@/lib/logger";
 import { getManagedName } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 
 const pluginName = PluginName.ENSv2;
+
+/**
+ * Returns the input `label` as LiteralLabel iff it matches the provided `labelHash`.
+ *
+ * NOTE(labelhash-mismatch): If emitted, the label arg should match the emitted labelHash.
+ * If the label is not UTF-8, however, ABI decoding substitutes U+FFFD for non-UTF-8 bytes, and
+ * the original bytes can't be recovered post-decode. When that happens we treat the label as
+ * unknown so the registration still indexes correctly under an unknown label.
+ */
+const literalLabelIfMatchesLabelHash = (
+  label: Label | undefined,
+  labelHash: LabelHash,
+): LiteralLabel | undefined => {
+  if (label === undefined) return undefined;
+
+  const literalLabel = asLiteralLabel(label);
+  const matches = labelhashLiteralLabel(literalLabel) === labelHash;
+  if (matches) return literalLabel;
+
+  logger.warn({
+    msg: `RegistrarController label/labelHash mismatch (non-UTF-8 bytes?): label='${literalLabel}' labelHash='${labelHash}' — treating label as unknown.`,
+  });
+
+  return undefined;
+};
 
 export default function () {
   async function handleNameRegisteredByController({
@@ -41,20 +68,13 @@ export default function () {
     }>;
   }) {
     const { labelHash, baseCost: base, premium, referrer } = event.args;
-    const label = event.args.label ? asLiteralLabel(event.args.label) : undefined;
-
-    // Invariant: If emitted, label must align with labelHash
-    if (label !== undefined && labelHash !== labelhashLiteralLabel(label)) {
-      throw new Error(
-        `Invariant(RegistrarController:NameRegistered): Emitted label '${label}' does not labelhash to emitted labelHash '${labelHash}'.`,
-      );
-    }
+    const label = literalLabelIfMatchesLabelHash(event.args.label, labelHash);
 
     const controller = getThisAccountId(context, event);
-    const { node: managedNode } = getManagedName(controller);
+    const { node: managedNode, registry } = getManagedName(controller);
 
     const node = makeSubdomainNode(labelHash, managedNode);
-    const domainId = makeENSv1DomainId(node);
+    const domainId = makeENSv1DomainId(registry, node);
     const registration = await getLatestRegistration(context, domainId);
 
     if (!registration) {
@@ -63,11 +83,13 @@ export default function () {
       );
     }
 
-    // ensure label
+    // if the contract emitted a (verified) healed label, ensure that it is indexed
     if (label !== undefined) {
       await ensureLabel(context, label);
     } else {
-      await ensureUnknownLabel(context, labelHash);
+      // otherwise, attempt a heal if not exists
+      const exists = await labelExists(context, labelHash);
+      if (!exists) await ensureUnknownLabel(context, labelHash);
     }
 
     // update registration's base/premium
@@ -77,7 +99,8 @@ export default function () {
       .set({ base, premium, referrer });
 
     // push event to domain history
-    await ensureDomainEvent(context, event, domainId);
+    const eventId = await ensureEvent(context, event);
+    await ensureDomainEvent(context, domainId, eventId);
   }
 
   async function handleNameRenewedByController({
@@ -86,7 +109,7 @@ export default function () {
   }: {
     context: IndexingEngineContext;
     event: EventWithArgs<{
-      label?: string;
+      label?: Label;
       labelHash: LabelHash;
       baseCost?: bigint;
       premium?: bigint;
@@ -94,27 +117,21 @@ export default function () {
     }>;
   }) {
     const { labelHash, baseCost: base, premium, referrer } = event.args;
-    const label = event.args.label ? asLiteralLabel(event.args.label) : undefined;
+    const label = literalLabelIfMatchesLabelHash(event.args.label, labelHash);
 
-    // Invariant: If emitted, label must align with labelHash
-    if (label !== undefined && labelHash !== labelhashLiteralLabel(label)) {
-      throw new Error(
-        `Invariant(RegistrarController:NameRegistered): Emitted label '${label}' does not labelhash to emitted labelHash '${labelHash}'.`,
-      );
-    }
-
-    // ensure label
-    // NOTE: technically not necessary, as should be ensured by NameRegistered, but we include here anyway
+    // if the contract emitted a (verified) healed label, ensure that it is indexed
     if (label !== undefined) {
       await ensureLabel(context, label);
     } else {
-      await ensureUnknownLabel(context, labelHash);
+      // otherwise, attempt a heal if not exists
+      const exists = await labelExists(context, labelHash);
+      if (!exists) await ensureUnknownLabel(context, labelHash);
     }
 
     const controller = getThisAccountId(context, event);
-    const { node: managedNode } = getManagedName(controller);
+    const { node: managedNode, registry } = getManagedName(controller);
     const node = makeSubdomainNode(labelHash, managedNode);
-    const domainId = makeENSv1DomainId(node);
+    const domainId = makeENSv1DomainId(registry, node);
     const registration = await getLatestRegistration(context, domainId);
 
     if (!registration) {
@@ -156,7 +173,8 @@ export default function () {
       .set({ base, premium, referrer });
 
     // push event to domain history
-    await ensureDomainEvent(context, event, domainId);
+    const eventId = await ensureEvent(context, event);
+    await ensureDomainEvent(context, domainId, eventId);
   }
 
   //////////////////////////////////////
@@ -247,9 +265,9 @@ export default function () {
         event: {
           ...event,
           args: {
-            // name is actually label
+            // `name` param is misnamed onchain — re-map to proper ENS terminology
             label: event.args.name,
-            // label is actually labelHash
+            // `label` param is misnamed onchain — re-map to proper ENS terminology
             labelHash: event.args.label,
             baseCost: event.args.cost,
           },
@@ -267,9 +285,9 @@ export default function () {
         event: {
           ...event,
           args: {
-            // name is actually label
+            // `name` param is misnamed onchain — re-map to proper ENS terminology
             label: event.args.name,
-            // label is actually labelHash
+            // `label` param is misnamed onchain — re-map to proper ENS terminology
             labelHash: event.args.label,
           },
         },

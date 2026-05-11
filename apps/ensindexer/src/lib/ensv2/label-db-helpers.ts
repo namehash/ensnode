@@ -11,6 +11,14 @@ import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 
 /**
+ * Determines whether the Label identified by `labelHash` has already been indexed.
+ */
+export async function labelExists(context: IndexingEngineContext, labelHash: LabelHash) {
+  const existing = await context.ensDb.find(ensIndexerSchema.label, { labelHash });
+  return existing !== null;
+}
+
+/**
  * Ensures that the LiteralLabel `label` is interpreted and upserted into the Label rainbow table.
  */
 export async function ensureLabel(context: IndexingEngineContext, label: LiteralLabel) {
@@ -24,14 +32,11 @@ export async function ensureLabel(context: IndexingEngineContext, label: Literal
 }
 
 /**
- * Ensures that the LabelHash `labelHash` is available in the Label rainbow table, attempting an
- * ENSRainbow heal if this is the first time it has been encountered.
+ * Ensures that the LabelHash `labelHash` is available in the Label rainbow table, also attempting
+ * an ENSRainbow heal. To avoid duplicate ENSRainbow healing requests, callers must gate this
+ * function on {@link labelExists} returning false.
  */
 export async function ensureUnknownLabel(context: IndexingEngineContext, labelHash: LabelHash) {
-  // do nothing for existing labels, they're either healed or we don't know them
-  const exists = await context.ensDb.find(ensIndexerSchema.label, { labelHash });
-  if (exists) return;
-
   // attempt ENSRainbow heal
   const healedLabel = await labelByLabelHash(labelHash);
 

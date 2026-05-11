@@ -6,7 +6,7 @@ import type {
   PermissionsUserId,
   RegistryId,
 } from "enssdk";
-import { toEventSelector } from "viem";
+import { pad, toEventSelector } from "viem";
 import { beforeAll, describe, expect, it } from "vitest";
 
 import { DatasourceNames, EnhancedAccessControlABI } from "@ensnode/datasources";
@@ -502,4 +502,98 @@ describe("Permissions.events filtering (EventsWhereInput)", () => {
     const events = flattenConnection(result.permissions.events);
     expect(events.length).toBe(0);
   });
+});
+
+describe("PermissionsUser.events", () => {
+  type PermissionsUserEventsResult = {
+    permissions: {
+      root: {
+        users: GraphQLConnection<PermissionUser & { events: GraphQLConnection<EventResult> }>;
+      };
+    };
+  };
+
+  const PermissionsUserEvents = gql`
+    query PermissionsUserEvents($contract: AccountIdInput!, $where: EventsWhereInput) {
+      permissions(by: { contract: $contract }) {
+        root {
+          users {
+            edges { node {
+              id resource user { address } roles
+              events(where: $where, first: 1000) { edges { node { ...EventFragment } } }
+            } }
+          }
+        }
+      }
+    }
+    ${EventFragment}
+  `;
+
+  let users: (PermissionUser & { events: GraphQLConnection<EventResult> })[];
+
+  beforeAll(async () => {
+    const result = await request<PermissionsUserEventsResult>(PermissionsUserEvents, {
+      contract: V2_ETH_REGISTRY,
+    });
+    users = flattenConnection(result.permissions.root.users);
+    expect(users.length).toBeGreaterThan(0);
+  });
+
+  it("returns events scoped to each PermissionsUser", () => {
+    for (const user of users) {
+      const events = flattenConnection(user.events);
+      expect(events.length).toBeGreaterThan(0);
+
+      // every event must be an EACRolesChanged on the contract
+      for (const event of events) {
+        expect(event.address).toBe(V2_ETH_REGISTRY.address);
+        expect(event.topics[0]).toBe(EAC_ROLES_CHANGED_SELECTOR);
+      }
+    }
+  });
+
+  it("scopes each user's events to that (resource, user)", () => {
+    // EACRolesChanged(resource indexed, account indexed, ...) — so
+    // topics[1] == resource, topics[2] == padded user address
+    for (const user of users) {
+      const events = flattenConnection(user.events);
+      for (const event of events) {
+        expect(BigInt(event.topics[1])).toBe(BigInt(user.resource));
+        expect(event.topics[2]).toBe(pad(user.user.address, { size: 32 }));
+      }
+    }
+  });
+
+  it("filters by selector_in", async () => {
+    const result = await request<PermissionsUserEventsResult>(PermissionsUserEvents, {
+      contract: V2_ETH_REGISTRY,
+      where: { selector_in: [EAC_ROLES_CHANGED_SELECTOR] },
+    });
+    const filteredUsers = flattenConnection(result.permissions.root.users);
+
+    for (const user of filteredUsers) {
+      const events = flattenConnection(user.events);
+      expect(events.length).toBeGreaterThan(0);
+      for (const event of events) {
+        expect(event.topics[0]).toBe(EAC_ROLES_CHANGED_SELECTOR);
+      }
+    }
+  });
+
+  it("filters by empty selector_in returns no results", async () => {
+    const result = await request<PermissionsUserEventsResult>(PermissionsUserEvents, {
+      contract: V2_ETH_REGISTRY,
+      where: { selector_in: [] },
+    });
+    const filteredUsers = flattenConnection(result.permissions.root.users);
+
+    for (const user of filteredUsers) {
+      expect(flattenConnection(user.events).length).toBe(0);
+    }
+  });
+
+  // requires integration-test-env to emit a grant followed by a revoke (newRoleBitmap = 0) for the
+  // same (resource, user). exercises the handler path where the permissionsUser row is deleted but
+  // both EACRolesChanged events must remain joined to the (now-removed) PermissionsUserId.
+  it.todo("preserves event history for a PermissionsUser whose roles were revoked to 0");
 });

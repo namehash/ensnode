@@ -12,8 +12,9 @@ export const getIndexingStatusRoute = createRoute({
   path: "/indexing-status",
   operationId: "getIndexingStatus",
   tags: ["Meta"],
-  summary: "Get ENSIndexer Indexing Status",
-  description: "Returns the indexing status snapshot most recently captured from ENSIndexer",
+  summary: "Get Indexing Status and Stack Info",
+  description:
+    "Returns the latest indexing status snapshot and overall stack info about services in the ENSNode instance",
   responses: {
     200: {
       description: "Successfully retrieved indexing status",

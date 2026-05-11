@@ -1,9 +1,9 @@
 import config from "@/config";
 
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
-import { makePermissionsId, makeRegistryId, makeResolverId } from "enssdk";
+import { makeConcreteRegistryId, makePermissionsId, makeResolverId } from "enssdk";
 
-import { maybeGetENSv2RootRegistryId } from "@ensnode/ensnode-sdk";
+import { getRootRegistryId } from "@ensnode/ensnode-sdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { builder } from "@/omnigraph-api/builder";
@@ -13,6 +13,7 @@ import {
   domainsBase,
   filterByCanonical,
   filterByName,
+  filterByVersion,
   withOrderingMetadata,
 } from "@/omnigraph-api/lib/find-domains/layers";
 import { getDomainIdByInterpretedName } from "@/omnigraph-api/lib/get-domain-by-interpreted-name";
@@ -24,12 +25,10 @@ import {
   DomainInterfaceRef,
   DomainsOrderInput,
   DomainsWhereInput,
-  ENSv1DomainRef,
-  ENSv2DomainRef,
 } from "@/omnigraph-api/schema/domain";
 import { PermissionsIdInput, PermissionsRef } from "@/omnigraph-api/schema/permissions";
 import { RegistrationInterfaceRef } from "@/omnigraph-api/schema/registration";
-import { RegistryIdInput, RegistryRef } from "@/omnigraph-api/schema/registry";
+import { RegistryIdInput, RegistryInterfaceRef } from "@/omnigraph-api/schema/registry";
 import { ResolverIdInput, ResolverRef } from "@/omnigraph-api/schema/resolver";
 
 // don't want them to get familiar/accustomed to these methods until their necessity is certain
@@ -38,45 +37,22 @@ const INCLUDE_DEV_METHODS = process.env.NODE_ENV !== "production";
 builder.queryType({
   fields: (t) => ({
     ...(INCLUDE_DEV_METHODS && {
-      /////////////////////////////
-      // Query.v1Domains (Testing)
-      /////////////////////////////
-      v1Domains: t.connection({
+      //////////////////////////////
+      // Query.allDomains (Testing)
+      //////////////////////////////
+      allDomains: t.connection({
         description: "TODO",
-        type: ENSv1DomainRef,
+        type: DomainInterfaceRef,
         resolve: (parent, args) =>
           lazyConnection({
-            totalCount: () => ensDb.$count(ensIndexerSchema.v1Domain),
+            totalCount: () => ensDb.$count(ensIndexerSchema.domain),
             connection: () =>
               resolveCursorConnection(
                 { ...ID_PAGINATED_CONNECTION_ARGS, args },
                 ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-                  ensDb.query.v1Domain.findMany({
-                    where: paginateBy(ensIndexerSchema.v1Domain.id, before, after),
-                    orderBy: orderPaginationBy(ensIndexerSchema.v1Domain.id, inverted),
-                    limit,
-                    with: { label: true },
-                  }),
-              ),
-          }),
-      }),
-
-      /////////////////////////////
-      // Query.v2Domains (Testing)
-      /////////////////////////////
-      v2Domains: t.connection({
-        description: "TODO",
-        type: ENSv2DomainRef,
-        resolve: (parent, args) =>
-          lazyConnection({
-            totalCount: () => ensDb.$count(ensIndexerSchema.v2Domain),
-            connection: () =>
-              resolveCursorConnection(
-                { ...ID_PAGINATED_CONNECTION_ARGS, args },
-                ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-                  ensDb.query.v2Domain.findMany({
-                    where: paginateBy(ensIndexerSchema.v2Domain.id, before, after),
-                    orderBy: orderPaginationBy(ensIndexerSchema.v2Domain.id, inverted),
+                  ensDb.query.domain.findMany({
+                    where: () => paginateBy(ensIndexerSchema.domain.id, before, after),
+                    orderBy: orderPaginationBy(ensIndexerSchema.domain.id, inverted),
                     limit,
                     with: { label: true },
                   }),
@@ -135,7 +111,7 @@ builder.queryType({
     // Find Domains
     ////////////////
     domains: t.connection({
-      description: "Find Domains by Name.",
+      description: "Find Canonical Domains by Name.",
       type: DomainInterfaceRef,
       args: {
         where: t.arg({ type: DomainsWhereInput, required: true }),
@@ -144,8 +120,9 @@ builder.queryType({
       resolve: (_, { where, order, ...connectionArgs }, context) => {
         const base = domainsBase();
         const named = filterByName(base, where.name);
-        const canonical = where.canonical === true ? filterByCanonical(named) : named;
-        const domains = withOrderingMetadata(canonical);
+        const canonical = filterByCanonical(named);
+        const versioned = where.version ? filterByVersion(canonical, where.version) : canonical;
+        const domains = withOrderingMetadata(versioned);
 
         return resolveFindDomains(context, { domains, order, ...connectionArgs });
       },
@@ -179,13 +156,12 @@ builder.queryType({
     // Get Registry by Id or AccountId
     ///////////////////////////////////
     registry: t.field({
-      description: "Identify a Registry by ID or AccountId.",
-      type: RegistryRef,
+      description:
+        "Identify a Registry by ID or AccountId. If querying by `contract`, only concrete Registries will be returned.",
+      type: RegistryInterfaceRef,
+      nullable: true,
       args: { by: t.arg({ type: RegistryIdInput, required: true }) },
-      resolve: (parent, args, context, info) => {
-        if (args.by.id !== undefined) return args.by.id;
-        return makeRegistryId(args.by.contract);
-      },
+      resolve: (parent, args) => args.by.id ?? makeConcreteRegistryId(args.by.contract),
     }),
 
     ///////////////////////////////////
@@ -218,11 +194,11 @@ builder.queryType({
     // Get Root Registry
     /////////////////////
     root: t.field({
-      description: "The ENSv2 Root Registry, if exists.",
-      type: RegistryRef,
-      // TODO: make this nullable: false after all namespaces define ENSv2Root
-      nullable: true,
-      resolve: () => maybeGetENSv2RootRegistryId(config.namespace),
+      description:
+        "The Root Registry for this namespace. It will be the ENSv2 Root Registry when defined or the ENSv1 Root Registry.",
+      type: RegistryInterfaceRef,
+      nullable: false,
+      resolve: () => getRootRegistryId(config.namespace),
     }),
   }),
 });

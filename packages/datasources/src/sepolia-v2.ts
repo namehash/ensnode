@@ -1,6 +1,3 @@
-import { zeroAddress } from "viem";
-import { sepolia } from "viem/chains";
-
 // ABIs for ENSv2 Datasource
 import { EnhancedAccessControl } from "./abis/ensv2/EnhancedAccessControl";
 import { ETHRegistrar } from "./abis/ensv2/ETHRegistrar";
@@ -8,21 +5,16 @@ import { Registry } from "./abis/ensv2/Registry";
 import { UniversalResolverV2 } from "./abis/ensv2/UniversalResolverV2";
 // ABIs for ENSRoot Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
-import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } from "./abis/root/LegacyEthRegistrarController";
 import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
 import { Registry as root_Registry } from "./abis/root/Registry";
-import { UniversalRegistrarRenewalWithReferrer as root_UniversalRegistrarRenewalWithReferrer } from "./abis/root/UniversalRegistrarRenewalWithReferrer";
 import { UniversalResolverV1 } from "./abis/root/UniversalResolverV1";
 import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
-import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
 // Shared ABIs
 import { StandaloneReverseRegistrar } from "./abis/shared/StandaloneReverseRegistrar";
+import { sepoliaV2Chain } from "./lib/chains";
 import { ResolverABI } from "./lib/ResolverABI";
 // Types
 import { DatasourceNames, type ENSNamespace } from "./lib/types";
-
-// we use the earliest start block for simplicity (it's just for efficiency re: log fetches)
-const startBlock = 10462220;
 
 /**
  * The Sepolia V2 ENSNamespace
@@ -33,154 +25,137 @@ export default {
   /**
    * ENS Root contracts deployed on Sepolia for the ENSv1 + ENSv2 test deployment.
    *
-   * NOTE: `UniversalRegistrarRenewalWithReferrer` is a placeholder entry required by the typesystem
-   * due to the registrar plugin; it does not exist on Sepolia V2 and therefore uses the zero address.
+   * NOTE: `LegacyEthRegistrarController`, `WrappedEthRegistrarController`, and
+   * `UniversalRegistrarRenewalWithReferrer` are not part of this deployment and are therefore
+   * omitted; consumers of this datasource must treat them as optional.
    */
   [DatasourceNames.ENSRoot]: {
-    chain: sepolia,
+    chain: sepoliaV2Chain,
     contracts: {
       // NOTE: named LegacyENSRegistry in deployment
       ENSv1RegistryOld: {
         abi: root_Registry, // Registry was redeployed, same abi
-        address: "0x34f4bf3d71e1e598ee116fe1f279e6726cec889c",
-        startBlock,
+        address: "0x94f523b8261b815b87effcf4d18e6abef18d6e4b",
+        startBlock: 3702721,
       },
       // NOTE: named ENSRegistry in deployment
       ENSv1Registry: {
         abi: root_Registry, // Registry was redeployed, same abi
-        address: "0x7e89b563f936c68c31a360840eb7f9a4aacaf014",
-        startBlock,
+        address: "0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e",
+        startBlock: 3702728,
       },
       Resolver: {
         abi: ResolverABI,
-        startBlock,
+        startBlock: 3702721, // ignores any Resolver events prior to `startBlock` of ENSv1RegistryOld
       },
       // NOTE: named BaseRegistrarImplementation in deployment
       BaseRegistrar: {
         abi: root_BaseRegistrar,
-        address: "0x6409609247722761b8ba96371485de92a6d7b83b",
-        startBlock,
-      },
-      // NOTE: named LegacyETHRegistrarController in deployment
-      LegacyEthRegistrarController: {
-        abi: root_LegacyEthRegistrarController,
-        address: "0x92615558c16edf4ad69fa8cc026b7bcb10e01dfd",
-        startBlock,
-      },
-      // NOTE: named WrappedETHRegistrarController in deployment
-      WrappedEthRegistrarController: {
-        abi: root_WrappedEthRegistrarController,
-        address: "0xeeaa2f99e12917b95e7d6801e0eac9296ada8093",
-        startBlock,
+        address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
+        startBlock: 3702731,
       },
       // NOTE: named ETHRegistrarController in deployment
       UnwrappedEthRegistrarController: {
         abi: root_UnwrappedEthRegistrarController,
-        address: "0xf42df26c1b222bee5a6b78cbb8bbfaa0ba07786a",
-        startBlock,
-      },
-      // NOTE: not in deployment, set to zeroAddress
-      UniversalRegistrarRenewalWithReferrer: {
-        abi: root_UniversalRegistrarRenewalWithReferrer,
-        address: zeroAddress,
-        startBlock,
+        address: "0xfb3ce5d01e0f33f41dbb39035db9745962f1f968",
+        startBlock: 8579988,
       },
       NameWrapper: {
         abi: root_NameWrapper,
-        address: "0xc7e033b8836e4bd55d069d113f018b98478cb091",
-        startBlock,
+        address: "0x0635513f179d50a207757e05759cbd106d7dfce8",
+        startBlock: 3790153,
       },
       UniversalResolver: {
         abi: UniversalResolverV1,
-        address: "0xf8e7a86707ad360daac5d998fd1a6196a6a8823b",
-        startBlock,
+        address: "0x3c85752a5d47dd09d677c645ff2a938b38fbfeba",
+        startBlock: 8928722,
       },
-      // NOTE: named UniversalResolverV2 in deployment
       UniversalResolverV2: {
         abi: UniversalResolverV2,
-        address: "0x4dc74fef4fc6b5a810a1554d431f06c8d8b7451c",
-        startBlock,
+        address: "0xf9c120ad88e5512437ae9518f6c86145318531de",
+        startBlock: 10770794,
       },
     },
   },
 
   [DatasourceNames.ENSv2Root]: {
-    chain: sepolia,
+    chain: sepoliaV2Chain,
     contracts: {
-      Resolver: { abi: ResolverABI, startBlock },
-      Registry: { abi: Registry, startBlock },
-      EnhancedAccessControl: { abi: EnhancedAccessControl, startBlock },
+      // factory-pattern entries: start at the earliest deploy block of any ENSv2 contract (RootRegistry)
+      Resolver: { abi: ResolverABI, startBlock: 10770774 },
+      Registry: { abi: Registry, startBlock: 10770774 },
+      EnhancedAccessControl: { abi: EnhancedAccessControl, startBlock: 10770774 },
       RootRegistry: {
         abi: Registry,
-        address: "0x3a3e15a5d27ff6f05c844313312f2e72096d3ed3",
-        startBlock,
+        address: "0xfd43dc00ab0d0e247a2827d15dddfc5bd9646a29",
+        startBlock: 10770774,
       },
       ETHRegistry: {
         abi: Registry,
-        address: "0x796fff2e907449be8d5921bcc215b1b76d89d080",
-        startBlock,
+        address: "0x31a2bb5d933557cce1b3129993193896d074db92",
+        startBlock: 10770777,
       },
       ETHRegistrar: {
         abi: ETHRegistrar,
-        address: "0x68586418353b771cf2425ed14a07512aa880c532",
-        startBlock,
+        address: "0x26e5e80e8f36607ef401443fb34eea363c86e8f7",
+        startBlock: 10770785,
       },
     },
   },
 
   [DatasourceNames.ReverseResolverRoot]: {
-    chain: sepolia,
+    chain: sepoliaV2Chain,
     contracts: {
       DefaultReverseRegistrar: {
         abi: StandaloneReverseRegistrar,
-        address: "0x348bb9f8c6947c34c74cb0263a954e23a1255553",
-        startBlock,
+        address: "0x4f382928805ba0e23b30cfb75fc9e848e82dfd47",
+        startBlock: 8579966,
       },
 
       // NOTE: named DefaultReverseResolver in deployment
       DefaultReverseResolver3: {
         abi: ResolverABI,
-        address: "0xb03c924c750f0a98002fce829b59c688f4088546",
-        startBlock,
+        address: "0x9dc60e7bd81ccc96774c55214ff389d42ae5e9ac",
+        startBlock: 8580041,
       },
 
       // NOTE: named LegacyPublicResolver in deployment
       DefaultPublicResolver4: {
         abi: ResolverABI,
-        address: "0xc30ba2bd21583605d815826c3807e8224e398e10",
-        startBlock,
+        address: "0x0ceec524b2807841739d3b5e161f5bf1430ffa48",
+        startBlock: 3790166,
       },
 
       // NOTE: named PublicResolver in deployment
       DefaultPublicResolver5: {
         abi: ResolverABI,
-        address: "0x640294a2b2d87e7f522db3e3e3e876764bce170d",
-        startBlock,
+        address: "0xe99638b40e4fff0129d56f03b55b6bbc4bbe49b5",
+        startBlock: 8580001,
       },
       BaseReverseResolver: {
         abi: ResolverABI,
-        address: "0xb16bde9c9573b25ce277977751d480bc848639df",
-        startBlock,
+        address: "0xaf3b3f636be80b6709f5bd3a374d6ac0d0a7c7aa",
+        startBlock: 8580004,
       },
       LineaReverseResolver: {
         abi: ResolverABI,
-        address: "0xe789657ecb3007a748bf5630e3405fa767c82767",
-        startBlock,
+        address: "0x083da1dbc0f379ccda6ac81a934207c3d8a8a205",
+        startBlock: 8580005,
       },
       OptimismReverseResolver: {
         abi: ResolverABI,
-        address: "0xcd91d0cefa6dfa6009ab2338c30491a5886d16f9",
-        startBlock,
+        address: "0xc9ae189772bd48e01410ab3be933637ee9d3aa5f",
+        startBlock: 8580026,
       },
       ArbitrumReverseResolver: {
         abi: ResolverABI,
-        address: "0xb70a40b54683e831bded727c45338780df9d1310",
-        startBlock,
+        address: "0x926f94d2adc77c86cb0050892097d49aadd02e8b",
+        startBlock: 8580003,
       },
       ScrollReverseResolver: {
         abi: ResolverABI,
-        address: "0xc0227efe2c95adc4e3dac14b06533f2bd8b3782d",
-        startBlock,
+        address: "0x9fa59673e43f15bdb8722fdaf5c2107574b99062",
+        startBlock: 8580040,
       },
     },
   },
