@@ -131,7 +131,7 @@ jobs:
     name: ${{ matrix.apps.name }} ${{ matrix.apps.version }}
     # if changesets published our npm packages, also build docker images
     needs: changesets
-    if: startsWith(github.event.head_commit.message, 'Release New Version') && needs.changesets.outputs.published == 'true' && needs.changesets.outputs.publishedApps != '[]'
+    if: needs.changesets.outputs.published == 'true' && needs.changesets.outputs.publishedApps != '[]'
     runs-on: blacksmith-4vcpu-ubuntu-2204
     strategy:
       fail-fast: false
@@ -160,7 +160,7 @@ jobs:
   build-lambdas:
     name: ${{ matrix.lambdas.name }} ${{ matrix.lambdas.version }}
     needs: changesets
-    if: startsWith(github.event.head_commit.message, 'Release New Version') && needs.changesets.outputs.published == 'true' && needs.changesets.outputs.publishedLambdas != '[]'
+    if: needs.changesets.outputs.published == 'true' && needs.changesets.outputs.publishedLambdas != '[]'
     runs-on: blacksmith-4vcpu-ubuntu-2204
     strategy:
       fail-fast: false
@@ -183,7 +183,7 @@ jobs:
     name: Create GitHub Release
     runs-on: blacksmith-4vcpu-ubuntu-2204
     # run only if (1) changesets published our npm packages AND
-    if: startsWith(github.event.head_commit.message, 'Release New Version') && needs.changesets.outputs.published == 'true'
+    if: needs.changesets.outputs.published == 'true'
     # (2) we built and pushed the docker images
     needs: [changesets, build-and-push-ensnode]
     steps:
