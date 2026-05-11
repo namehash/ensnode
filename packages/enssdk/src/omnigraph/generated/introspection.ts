@@ -395,8 +395,8 @@ const introspection = {
           {
             "name": "name",
             "type": {
-              "kind": "SCALAR",
-              "name": "String"
+              "kind": "INPUT_OBJECT",
+              "name": "DomainsNameFilter"
             }
           },
           {
@@ -1573,6 +1573,40 @@ const introspection = {
         "interfaces": []
       },
       {
+        "kind": "INPUT_OBJECT",
+        "name": "DomainsNameFilter",
+        "inputFields": [
+          {
+            "name": "eq",
+            "type": {
+              "kind": "SCALAR",
+              "name": "InterpretedName"
+            }
+          },
+          {
+            "name": "in",
+            "type": {
+              "kind": "LIST",
+              "ofType": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "InterpretedName"
+                }
+              }
+            }
+          },
+          {
+            "name": "starts_with",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String"
+            }
+          }
+        ],
+        "isOneOf": true
+      },
+      {
         "kind": "ENUM",
         "name": "DomainsOrderBy",
         "enumValues": [
@@ -1624,8 +1658,8 @@ const introspection = {
             "type": {
               "kind": "NON_NULL",
               "ofType": {
-                "kind": "SCALAR",
-                "name": "String"
+                "kind": "INPUT_OBJECT",
+                "name": "DomainsNameFilter"
               }
             }
           },
@@ -5416,8 +5450,8 @@ const introspection = {
           {
             "name": "name",
             "type": {
-              "kind": "SCALAR",
-              "name": "String"
+              "kind": "INPUT_OBJECT",
+              "name": "DomainsNameFilter"
             }
           }
         ],
@@ -6164,8 +6198,8 @@ const introspection = {
           {
             "name": "name",
             "type": {
-              "kind": "SCALAR",
-              "name": "String"
+              "kind": "INPUT_OBJECT",
+              "name": "DomainsNameFilter"
             }
           }
         ],

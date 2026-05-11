@@ -8,11 +8,11 @@ import { getRootRegistryId } from "@ensnode/ensnode-sdk";
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { builder } from "@/omnigraph-api/builder";
 import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
+import { applyDomainsNameFilter } from "@/omnigraph-api/lib/find-domains/apply-name-filter";
 import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domains-resolver";
 import {
   domainsBase,
   filterByCanonical,
-  filterByName,
   filterByVersion,
   withOrderingMetadata,
 } from "@/omnigraph-api/lib/find-domains/layers";
@@ -119,7 +119,7 @@ builder.queryType({
       },
       resolve: (_, { where, order, ...connectionArgs }, context) => {
         const base = domainsBase();
-        const named = filterByName(base, where.name);
+        const named = applyDomainsNameFilter(base, where.name);
         const canonical = filterByCanonical(named);
         const versioned = where.version ? filterByVersion(canonical, where.version) : canonical;
         const domains = withOrderingMetadata(versioned);

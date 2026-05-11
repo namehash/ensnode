@@ -42,7 +42,7 @@ export const QueryDomainsPaginated = gql`
     $before: String
   ) {
     domains(
-      where: { name: "e" }
+      where: { name: { starts_with: "e" } }
       order: $order
       first: $first
       after: $after

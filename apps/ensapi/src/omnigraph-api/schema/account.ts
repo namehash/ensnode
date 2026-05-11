@@ -5,11 +5,11 @@ import type { Address } from "enssdk";
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { builder } from "@/omnigraph-api/builder";
 import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
+import { applyDomainsNameFilter } from "@/omnigraph-api/lib/find-domains/apply-name-filter";
 import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domains-resolver";
 import {
   domainsBase,
   filterByCanonical,
-  filterByName,
   filterByOwner,
   filterByVersion,
   withOrderingMetadata,
@@ -80,7 +80,7 @@ AccountRef.implement({
       resolve: (parent, { where, order, ...connectionArgs }, context) => {
         const base = domainsBase();
         const owned = filterByOwner(base, parent.id);
-        const named = filterByName(owned, where?.name);
+        const named = applyDomainsNameFilter(owned, where?.name);
         const canonical = where?.canonical === true ? filterByCanonical(named) : named;
         const versioned = where?.version ? filterByVersion(canonical, where.version) : canonical;
         const domains = withOrderingMetadata(versioned);

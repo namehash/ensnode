@@ -108,18 +108,18 @@ function domainsByLabelHashPath(labelHashPath: LabelHashPath) {
 }
 
 /**
- * Filter a base domain set by name. Parses the name into a concrete labelHash path and a partial
- * label prefix. Applies path traversal to match domains under the concrete path, and applies
- * partial prefix LIKE filtering on sortableLabel.
+ * Filter a base domain set by name prefix. Parses the input into a concrete labelHash path and a
+ * partial label prefix. Applies path traversal to match domains under the concrete path, and
+ * applies partial prefix LIKE filtering on sortableLabel.
  *
  * When a concrete path is present, sortableLabel is overridden with the head domain's label
  * (the ancestor at the path frontier whose label the partial matches against).
  *
  * @param base - A base domain set subquery
- * @param name - Optional partial InterpretedName (e.g. 'examp', 'example.', 'sub.example.eth')
+ * @param startsWith - Optional partial InterpretedName (e.g. 'examp', 'example.', 'sub.example.eth')
  */
-export function filterByName(base: BaseDomainSet, name?: string | null) {
-  const { concrete, partial } = parsePartialInterpretedName(name || "");
+export function filterByName(base: BaseDomainSet, startsWith?: string | null) {
+  const { concrete, partial } = parsePartialInterpretedName(startsWith || "");
 
   if (concrete.length > FILTER_BY_NAME_MAX_DEPTH) {
     throw new Error(

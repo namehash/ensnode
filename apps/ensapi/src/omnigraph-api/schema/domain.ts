@@ -14,10 +14,10 @@ import {
   paginateByInt,
 } from "@/omnigraph-api/lib/connection-helpers";
 import { cursors } from "@/omnigraph-api/lib/cursors";
+import { applyDomainsNameFilter } from "@/omnigraph-api/lib/find-domains/apply-name-filter";
 import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domains-resolver";
 import {
   domainsBase,
-  filterByName,
   filterByParent,
   withOrderingMetadata,
 } from "@/omnigraph-api/lib/find-domains/layers";
@@ -265,7 +265,7 @@ DomainInterfaceRef.implement({
       },
       resolve: (parent, { where, order, ...connectionArgs }, context) => {
         const base = filterByParent(domainsBase(), parent.id);
-        const named = filterByName(base, where?.name);
+        const named = applyDomainsNameFilter(base, where?.name);
         const domains = withOrderingMetadata(named);
 
         return resolveFindDomains(context, { domains, order, ...connectionArgs });
@@ -432,13 +432,44 @@ export const DomainIdInput = builder.inputType("DomainIdInput", {
   }),
 });
 
+/**
+ * @oneOf filter for Domain names. Exactly one of `starts_with`, `eq`, or `in` must be provided.
+ *
+ * - `starts_with`: partial Interpreted Name for autocomplete; exact match on every label except
+ *   the last, prefix match on the last label. ex: 'example', 'example.', 'example.et'.
+ * - `eq`: exact InterpretedName match. Sugar for `in: [eq]`. Combine with `version` to disambiguate
+ *   across ENS protocol versions.
+ * - `in`: exact InterpretedName match against any name in the set. Max 100 items.
+ */
+export const DomainsNameFilter = builder.inputType("DomainsNameFilter", {
+  description:
+    "Filter Domains by name. Exactly one of `starts_with`, `eq`, or `in` must be provided.",
+  isOneOf: true,
+  fields: (t) => ({
+    starts_with: t.string({
+      description:
+        "Partial Interpreted Name for autocomplete. Matches Domains whose Interpreted Name starts with the given value: exact match on every label except the last, prefix match on the last label. ex: 'example', 'example.', 'example.et'. Case-sensitive (InterpretedName labels are normalized).",
+    }),
+    eq: t.field({
+      type: "InterpretedName",
+      description:
+        "Exact InterpretedName match. Sugar for `in: [eq]`. Combine with `version` to disambiguate across ENS protocol versions.",
+    }),
+    in: t.field({
+      type: ["InterpretedName"],
+      description:
+        "Exact InterpretedName match against any name in the set. Max 100 items; requests above the limit return an error.",
+    }),
+  }),
+});
+
 export const DomainsWhereInput = builder.inputType("DomainsWhereInput", {
   description: "Filter for the top-level domains query.",
   fields: (t) => ({
-    name: t.string({
+    name: t.field({
+      type: DomainsNameFilter,
       required: true,
-      description:
-        "A partial Interpreted Name by which to search the set of Domains. ex: 'example', 'example.', 'example.et'.",
+      description: "Filter the set of Domains by name.",
     }),
     version: t.field({
       type: ENSProtocolVersion,
@@ -451,9 +482,9 @@ export const DomainsWhereInput = builder.inputType("DomainsWhereInput", {
 export const AccountDomainsWhereInput = builder.inputType("AccountDomainsWhereInput", {
   description: "Filter for Account.domains query.",
   fields: (t) => ({
-    name: t.string({
-      description:
-        "A partial Interpreted Name by which to search the set of Domains. ex: 'example', 'example.', 'example.et'.",
+    name: t.field({
+      type: DomainsNameFilter,
+      description: "If set, filters the set of Domains by name.",
     }),
     canonical: t.boolean({
       description:
@@ -471,8 +502,9 @@ export const AccountDomainsWhereInput = builder.inputType("AccountDomainsWhereIn
 export const RegistryDomainsWhereInput = builder.inputType("RegistryDomainsWhereInput", {
   description: "Filter for Registry.domains query.",
   fields: (t) => ({
-    name: t.string({
-      description: "A partial Interpreted Name by which to filter Domains in this Registry.",
+    name: t.field({
+      type: DomainsNameFilter,
+      description: "If set, filters the set of Domains in this Registry by name.",
     }),
   }),
 });
@@ -480,8 +512,9 @@ export const RegistryDomainsWhereInput = builder.inputType("RegistryDomainsWhere
 export const SubdomainsWhereInput = builder.inputType("SubdomainsWhereInput", {
   description: "Filter for Domain.subdomains query.",
   fields: (t) => ({
-    name: t.string({
-      description: "A partial Interpreted Name by which to filter subdomains.",
+    name: t.field({
+      type: DomainsNameFilter,
+      description: "If set, filters the set of subdomains by name.",
     }),
   }),
 });

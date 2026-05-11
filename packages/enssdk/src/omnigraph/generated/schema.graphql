@@ -50,10 +50,8 @@ input AccountDomainsWhereInput {
   """
   canonical: Boolean = false
 
-  """
-  A partial Interpreted Name by which to search the set of Domains. ex: 'example', 'example.', 'example.et'.
-  """
-  name: String
+  """If set, filters the set of Domains by name."""
+  name: DomainsNameFilter
 
   """
   If set, filters the set of Domains to only those of the specified ENS protocol version.
@@ -312,6 +310,26 @@ type DomainSubdomainsConnectionEdge {
   node: Domain!
 }
 
+"""
+Filter Domains by name. Exactly one of `starts_with`, `eq`, or `in` must be provided.
+"""
+input DomainsNameFilter @oneOf {
+  """
+  Exact InterpretedName match. Sugar for `in: [eq]`. Combine with `version` to disambiguate across ENS protocol versions.
+  """
+  eq: InterpretedName
+
+  """
+  Exact InterpretedName match against any name in the set. Max 100 items; requests above the limit return an error.
+  """
+  in: [InterpretedName!]
+
+  """
+  Partial Interpreted Name for autocomplete. Matches Domains whose Interpreted Name starts with the given value: exact match on every label except the last, prefix match on the last label. ex: 'example', 'example.', 'example.et'. Case-sensitive (InterpretedName labels are normalized).
+  """
+  starts_with: String
+}
+
 """Fields by which domains can be ordered"""
 enum DomainsOrderBy {
   NAME
@@ -329,10 +347,8 @@ input DomainsOrderInput {
 
 """Filter for the top-level domains query."""
 input DomainsWhereInput {
-  """
-  A partial Interpreted Name by which to search the set of Domains. ex: 'example', 'example.', 'example.et'.
-  """
-  name: String!
+  """Filter the set of Domains by name."""
+  name: DomainsNameFilter!
 
   """
   If set, filters the set of Domains to only those of the specified ENS protocol version.
@@ -1121,10 +1137,8 @@ type RegistryDomainsConnectionEdge {
 
 """Filter for Registry.domains query."""
 input RegistryDomainsWhereInput {
-  """
-  A partial Interpreted Name by which to filter Domains in this Registry.
-  """
-  name: String
+  """If set, filters the set of Domains in this Registry by name."""
+  name: DomainsNameFilter
 }
 
 """RegistryId represents a enssdk#RegistryId."""
@@ -1289,8 +1303,8 @@ scalar ResolverRecordsId
 
 """Filter for Domain.subdomains query."""
 input SubdomainsWhereInput {
-  """A partial Interpreted Name by which to filter subdomains."""
-  name: String
+  """If set, filters the set of subdomains by name."""
+  name: DomainsNameFilter
 }
 
 """ThreeDNSRegistration represents a Registration within ThreeDNSToken."""
