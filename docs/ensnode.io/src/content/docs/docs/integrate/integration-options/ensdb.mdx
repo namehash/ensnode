@@ -1,0 +1,68 @@
+---
+title: ENSDb (PostgreSQL)
+description: Direct database access for self-hosters needing custom queries, analytics, or building custom services beyond what existing APIs expose.
+---
+
+import { LinkCard } from "@astrojs/starlight/components";
+import EnsDbUseCases from "../../../../../components/molecules/EnsDbUseCases.astro";
+
+For special use cases that go beyond what the ENS Omnigraph exposes — you can query the live onchain state of **ENSv2** directly via `SQL`.
+
+**ENSDb** is an open standard that stores the live onchain **ENSv2** state in a carefully-crafted data model within a PostgreSQL database. Because it's plain Postgres, you can use *any* language with a Postgres driver — **TypeScript**, **Python**, **Rust**, **Go**, and more.
+
+:::note[Self-hosting required]
+ENSDb is available when you [self-host ENSNode](/docs/self-host). Each ENSNode instance writes its data into a PostgreSQL database that you own and control — that database **is** your ENSDb instance. The hosted ENSNode instances do not expose direct database access.
+:::
+
+### What you can build with ENSDb
+
+<EnsDbUseCases />
+
+### Example: fetch ENSv2 domains with the ENSDb SDK
+
+```typescript
+import { EnsDbReader } from "@ensnode/ensdb-sdk";
+import { eq } from "drizzle-orm";
+
+const ensDbReader = new EnsDbReader(ensDbConnectionString, ensIndexerSchemaName);
+const { ensDb, ensIndexerSchema } = ensDbReader;
+
+const v2Domains = await ensDb
+  .select()
+  .from(ensIndexerSchema.domain)
+  .where(eq(ensIndexerSchema.domain.type, "ENSv2Domain"));
+```
+
+### Example: fetch ENSv2 domains with raw SQL
+
+```sql
+SELECT * FROM ensindexer_0.domains
+WHERE type = 'ENSv2Domain'
+LIMIT 10;
+```
+
+### Learn more
+
+<LinkCard
+  title="ENSDb overview"
+  description="Architecture, schemas, what you can build, and quick-start guides."
+  href="/docs/services/ensdb"
+/>
+
+<LinkCard
+  title="ENSDb SDK (TypeScript)"
+  description="Type-safe database access and utilities for working with ENSDb."
+  href="/docs/services/ensdb/usage/sdk"
+/>
+
+<LinkCard
+  title="ENSDb SQL interface"
+  description="Connect with any PostgreSQL client and run queries directly."
+  href="/docs/services/ensdb/usage/sql"
+/>
+
+<LinkCard
+  title="Self-host ENSNode"
+  description="Run your own ENSNode instance to get full ENSDb access."
+  href="/docs/self-host"
+/>
