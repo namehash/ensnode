@@ -38,7 +38,7 @@ export const integrateSidebarTopic = {
       ],
     },
     {
-      label: "Integrations",
+      label: "Integration Options",
       collapsed: false,
       items: [
         {

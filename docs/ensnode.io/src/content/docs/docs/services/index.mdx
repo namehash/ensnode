@@ -1,6 +1,6 @@
 ---
 title: ENSNode services
-description: Microservices that make up ENSNode—ENSApi, ENSIndexer, ENSDb, ENSRainbow, and ENSAdmin—and how to work on each.
+description: Introduction to the services that make up the ENSNode stack, including ENSApi, ENSIndexer, ENSDb, ENSRainbow, and ENSAdmin.
 sidebar:
   label: Overview
   order: 1
@@ -10,13 +10,12 @@ import { LinkCard, CardGrid } from "@astrojs/starlight/components";
 
 **Developing or contributing to ENSNode?** Use these sections for concepts, deployment, configuration, and contribution guides for the part of the stack you care about.
 
-ENSNode is built from **microservices**. Each service has a clear role in indexing, storage, APIs, healing, or operations.
-
+Each ENSNode instance is composed of **a set of services**. Each service has a clear role in indexing, storing the onchain state of ENS, APIs, name healing, or operations.
 
 <CardGrid>
-  <LinkCard title="ENSApi" href="/docs/services/ensapi" description="GraphQL, REST, and operational configuration for the API service." />
-  <LinkCard title="ENSIndexer" href="/docs/services/ensindexer" description="Blockchain indexing with Ponder." />
-  <LinkCard title="ENSDb" href="/docs/services/ensdb" description="PostgreSQL schema and direct data access." />
-  <LinkCard title="ENSRainbow" href="/docs/services/ensrainbow" description="Label healing and rainbow tables." />
-  <LinkCard title="ENSAdmin" href="/docs/services/ensadmin" description="Operator dashboard for indexed ENS state." />
+  <LinkCard title="ENSApi" href="/docs/services/ensapi" description="APIs for building on ENS." />
+  <LinkCard title="ENSIndexer" href="/docs/services/ensindexer" description="Multichain indexer for ENSv2." />
+  <LinkCard title="ENSDb" href="/docs/services/ensdb" description="The live, onchain state of ENS in your DB." />
+  <LinkCard title="ENSRainbow" href="/docs/services/ensrainbow" description="Heals unknown ENS names." />
+  <LinkCard title="ENSAdmin" href="/docs/services/ensadmin" description="ENSNode operator dashboard and ENS Protocol Inspector." />
 </CardGrid>
