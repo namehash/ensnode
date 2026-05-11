@@ -1,14 +1,14 @@
 ---
 title: ENSDb (PostgreSQL)
-description: Direct database access for self-hosters needing custom queries, analytics, or services beyond what the APIs expose.
+description: Direct database access for self-hosters needing custom queries, analytics, or building custom services beyond what existing APIs expose.
 ---
 
 import { LinkCard } from "@astrojs/starlight/components";
 import EnsDbUseCases from "../../../../../components/molecules/EnsDbUseCases.astro";
 
-For use cases that go beyond what the ENS Omnigraph exposes — you can query the live onchain state of **ENSv2** directly via `SQL`.
+For special use cases that go beyond what the ENS Omnigraph exposes — you can query the live onchain state of **ENSv2** directly via `SQL`.
 
-**ENSDb** is an open standard that stores the full **ENSv2** state in a PostgreSQL database. Because it's plain Postgres, you can use *any* language with a Postgres driver — **TypeScript**, **Python**, **Rust**, **Go**, and more.
+**ENSDb** is an open standard that stores the live onchain **ENSv2** state in a carefully-crafted data model within a PostgreSQL database. Because it's plain Postgres, you can use *any* language with a Postgres driver — **TypeScript**, **Python**, **Rust**, **Go**, and more.
 
 :::note[Self-hosting required]
 ENSDb is available when you [self-host ENSNode](/docs/self-host). Each ENSNode instance writes its data into a PostgreSQL database that you own and control — that database **is** your ENSDb instance. The hosted ENSNode instances do not expose direct database access.
@@ -36,7 +36,7 @@ const v2Domains = await ensDb
 ### Example: fetch ENSv2 domains with raw SQL
 
 ```sql
-SELECT * FROM ensindexer_mainnet.domains
+SELECT * FROM ensindexer_0.domains
 WHERE type = 'ENSv2Domain'
 LIMIT 10;
 ```
