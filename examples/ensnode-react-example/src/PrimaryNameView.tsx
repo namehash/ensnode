@@ -38,6 +38,7 @@ interface ChainOption {
  * exposed by the active namespace. Matches the composition in
  * `apps/ensadmin/src/app/inspect/primary-name/page.tsx`.
  */
+// TODO: candidate for promotion to `@ensnode/datasources` (no React) duplicates the chain composition in `apps/ensadmin/src/app/inspect/primary-name/page.tsx` + `apps/ensadmin/src/lib/get-ensip19-supported-chain-ids.ts`.
 function getENSIP19ChainOptions(namespace: ENSNamespaceId): ChainOption[] {
   const root = getENSRootChain(namespace);
   const options: ChainOption[] = [
@@ -60,11 +61,14 @@ export function PrimaryNameView() {
   const addressInputId = useId();
   const chainSelectId = useId();
 
-  const chainOptions = useMemo(() => getENSIP19ChainOptions(EXPECTED_NAMESPACE), []);
+  const chainOptions = useMemo(
+    () => getENSIP19ChainOptions(EXPECTED_NAMESPACE),
+    []
+  );
 
   const [address, setAddress] = useState<NormalizedAddress>(DEFAULT_ADDRESS);
   const [chainId, setChainId] = useState<DefaultableChainId>(
-    getENSRootChain(EXPECTED_NAMESPACE).id,
+    getENSRootChain(EXPECTED_NAMESPACE).id
   );
   const [input, setInput] = useState<string>(DEFAULT_INPUT);
   const [inputError, setInputError] = useState<string | null>(null);
@@ -81,7 +85,9 @@ export function PrimaryNameView() {
       setAddress(toNormalizedAddress(input.trim()));
       setInputError(null);
     } catch (err) {
-      setInputError(err instanceof Error ? err.message : "Invalid EVM address.");
+      setInputError(
+        err instanceof Error ? err.message : "Invalid EVM address."
+      );
     }
   };
 
@@ -89,9 +95,9 @@ export function PrimaryNameView() {
     <section>
       <h2>Primary Name</h2>
       <p>
-        Resolves the ENSIP-19 Primary Name for an address on a selected chain using{" "}
-        <code>usePrimaryName</code>. Because ENSIP-19 is multichain, pick which chain's primary name
-        you want to read.
+        Resolves the ENSIP-19 Primary Name for an address on a selected chain
+        using <code>usePrimaryName</code>. Because ENSIP-19 is multichain, pick
+        which chain's primary name you want to read.
       </p>
 
       <form onSubmit={handleSubmit}>
@@ -104,7 +110,9 @@ export function PrimaryNameView() {
             onChange={(event) => setInput(event.target.value)}
             placeholder="0x…"
             aria-invalid={inputError !== null}
-            aria-describedby={inputError ? `${addressInputId}-error` : undefined}
+            aria-describedby={
+              inputError ? `${addressInputId}-error` : undefined
+            }
             style={{ width: "28rem" }}
           />
         </div>
@@ -114,7 +122,9 @@ export function PrimaryNameView() {
           <select
             id={chainSelectId}
             value={chainId}
-            onChange={(event) => setChainId(Number(event.target.value) as DefaultableChainId)}
+            onChange={(event) =>
+              setChainId(Number(event.target.value) as DefaultableChainId)
+            }
           >
             {chainOptions.map((option) => (
               <option key={option.id} value={option.id}>

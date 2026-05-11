@@ -32,7 +32,10 @@ interface RequireActiveConnectionProps {
  * Only once we've confirmed (1) we can reach ENSNode, (2) it returned a usable
  * config, and (3) the namespace matches, do we render `children`.
  */
-export function RequireActiveConnection({ children }: RequireActiveConnectionProps) {
+// TODO: candidate for promotion to `enskit` as it duplicates `apps/ensadmin/src/components/connections/require-active-connection.tsx`
+export function RequireActiveConnection({
+  children,
+}: RequireActiveConnectionProps) {
   const { data, isLoading, error } = useIndexingStatus();
 
   if (isLoading) {
@@ -61,9 +64,9 @@ export function RequireActiveConnection({ children }: RequireActiveConnectionPro
       <section>
         <h2>Connection failed (application)</h2>
         <p>
-          ENSNode answered, but reported that its indexing status is currently unavailable. The
-          instance may still be starting up or its dependencies (ENSDb, ENSIndexer) are not yet
-          healthy.
+          ENSNode answered, but reported that its indexing status is currently
+          unavailable. The instance may still be starting up or its dependencies
+          (ENSDb, ENSIndexer) are not yet healthy.
         </p>
       </section>
     );
@@ -75,13 +78,15 @@ export function RequireActiveConnection({ children }: RequireActiveConnectionPro
       <section>
         <h2>Connection refused (unsupported-namespace)</h2>
         <p>
-          This example app was built for ENS namespace <code>{EXPECTED_NAMESPACE}</code>, but the
-          ENSNode at <code>{ENSNODE_URL.href}</code> is indexing namespace{" "}
+          This example app was built for ENS namespace{" "}
+          <code>{EXPECTED_NAMESPACE}</code>, but the ENSNode at{" "}
+          <code>{ENSNODE_URL.href}</code> is indexing namespace{" "}
           <code>{actualNamespace}</code>.
         </p>
         <p>
           Re-run with <code>VITE_ENS_NAMESPACE={actualNamespace}</code> or point{" "}
-          <code>VITE_ENSNODE_URL</code> at an instance indexing <code>{EXPECTED_NAMESPACE}</code>.
+          <code>VITE_ENSNODE_URL</code> at an instance indexing{" "}
+          <code>{EXPECTED_NAMESPACE}</code>.
         </p>
       </section>
     );
