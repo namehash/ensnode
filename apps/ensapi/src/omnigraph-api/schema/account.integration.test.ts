@@ -85,7 +85,7 @@ describe("Account.domains", () => {
   describe("version?: ENSProtocolVersion", () => {
     it("returns any version when unspecified", async () => {
       const result = await request<AccountDomainsResult>(AccountDomains, {
-        address: DevnetAccounts.owner.address,
+        address: accounts.owner.address,
         version: undefined,
       });
       const domains = flattenConnection(result.account.domains);
@@ -95,7 +95,7 @@ describe("Account.domains", () => {
 
     it("returns only ENSv1Domains when version: ENSv1", async () => {
       const result = await request<AccountDomainsResult>(AccountDomains, {
-        address: DevnetAccounts.owner.address,
+        address: accounts.owner.address,
         version: "ENSv1",
       });
       const domains = flattenConnection(result.account.domains);
@@ -105,7 +105,7 @@ describe("Account.domains", () => {
 
     it("returns only ENSv2Domains when version: ENSv2", async () => {
       const result = await request<AccountDomainsResult>(AccountDomains, {
-        address: DevnetAccounts.owner.address,
+        address: accounts.owner.address,
         version: "ENSv2",
       });
       const domains = flattenConnection(result.account.domains);

@@ -1,5 +1,5 @@
 import type { NormalizedAddress } from "enssdk";
-import { toNormalizedAddress } from "enssdk";
+import { asNormalizedAddress, toNormalizedAddress } from "enssdk";
 import type { Hex } from "viem";
 import { mnemonicToAccount } from "viem/accounts";
 
@@ -115,17 +115,17 @@ function createAccount(addressIndex: number, resolver: NormalizedAddress) {
  * @see https://github.com/ensdomains/ens-test-env
  */
 export const accounts = {
-  deployer: createAccount(0, "0x1f2ce8886692b90f5754a7d428a2336800a5911b" as NormalizedAddress),
-  owner: createAccount(1, "0x5ea90acf6555276660760fe629d72932c91f4b8e" as NormalizedAddress),
-  user: createAccount(2, "0xb63ae54076c1c281ec9395b290add470e69140c6" as NormalizedAddress),
-  user2: createAccount(3, "0x5380066832977eb36353fd2b01fb92e751636b84" as NormalizedAddress),
+  deployer: createAccount(0, asNormalizedAddress("0x1f2ce8886692b90f5754a7d428a2336800a5911b")),
+  owner: createAccount(1, asNormalizedAddress("0x5ea90acf6555276660760fe629d72932c91f4b8e")),
+  user: createAccount(2, asNormalizedAddress("0xb63ae54076c1c281ec9395b290add470e69140c6")),
+  user2: createAccount(3, asNormalizedAddress("0x5380066832977eb36353fd2b01fb92e751636b84")),
 } as const;
 
 /**
  * Fixtures for seeding the devnet with test data.
  */
 export const addresses = {
-  one: toNormalizedAddress(`0x${"1".repeat(40)}`),
+  one: asNormalizedAddress(`0x${"1".repeat(40)}`),
 } as const satisfies Record<string, NormalizedAddress>;
 
 export const fixtures = {
