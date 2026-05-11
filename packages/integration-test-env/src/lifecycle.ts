@@ -5,7 +5,7 @@
  * and provides shared cleanup + signal handling.
  *
  * Two entrypoints consume this module:
- *   - `orchestrator.ts` — CI flow: bringUp() → run tests → cleanup()
+ *   - `ci.ts` — CI flow: bringUp() → run tests → cleanup()
  *   - `start.ts` — manual flow: bringUp() → block until Ctrl+C → cleanup() via signal handler
  */
 

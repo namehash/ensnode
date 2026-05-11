@@ -6,7 +6,7 @@
  *
  * Use this when you want to point `pnpm test:integration` (or anything else) at a long-lived
  * stack from another terminal. For the CI flow that brings up the stack, runs tests, and tears
- * down, use `pnpm start:ci` (orchestrator.ts).
+ * down, use `pnpm start:ci` (ci.ts).
  */
 
 import { bringUp, cleanup, endpoints } from "./lifecycle";

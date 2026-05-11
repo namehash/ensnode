@@ -1,7 +1,7 @@
 /**
  * `pnpm -F @ensnode/integration-test-env start:ci`
  *
- * Integration Test Environment Orchestrator (CI flow).
+ * Integration Test Environment CI flow.
  *
  * Brings up the full stack, runs monorepo-level integration tests, then tears everything down.
  * For the manual flow that brings up the stack and waits for Ctrl+C without running tests, use
@@ -28,7 +28,7 @@ async function main() {
 }
 
 main().catch(async (e: unknown) => {
-  console.error(`[orchestrator] ERROR: ${String(e)}`);
+  console.error(`[ci] ERROR: ${String(e)}`);
   await cleanup();
   process.exit(1);
 });
