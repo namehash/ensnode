@@ -46,7 +46,11 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 jobs:
   changesets:
     name: Changesets
-    if: github.repository == 'namehash/ensnode'
+    # Only run on commits to main that contain "Release New Version" in the commit message,
+    # which indicates a merged Release PR created by the Changesets bot
+    if: >-
+      github.repository == 'namehash/ensnode' &&
+      contains(github.event.head_commit.message, 'Release New Version')
     runs-on: blacksmith-4vcpu-ubuntu-2204
     outputs:
       published: ${{ steps.changesets.outputs.published }}
