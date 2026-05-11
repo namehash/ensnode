@@ -1,4 +1,5 @@
 import {
+  type ChainId,
   DEFAULT_EVM_CHAIN_ID,
   type DefaultableChainId,
   type NormalizedAddress,
@@ -46,7 +47,7 @@ function getENSIP19ChainOptions(namespace: ENSNamespaceId): ChainOption[] {
     { id: root.id, label: `${root.name} — ENS Root` },
   ];
 
-  const seen = new Set<number>([DEFAULT_EVM_CHAIN_ID, root.id]);
+  const seen = new Set<ChainId>([DEFAULT_EVM_CHAIN_ID, root.id]);
   for (const name of REVERSE_RESOLVER_DATASOURCES) {
     const ds = maybeGetDatasource(namespace, name);
     if (!ds || seen.has(ds.chain.id)) continue;
@@ -61,14 +62,11 @@ export function PrimaryNameView() {
   const addressInputId = useId();
   const chainSelectId = useId();
 
-  const chainOptions = useMemo(
-    () => getENSIP19ChainOptions(EXPECTED_NAMESPACE),
-    []
-  );
+  const chainOptions = useMemo(() => getENSIP19ChainOptions(EXPECTED_NAMESPACE), []);
 
   const [address, setAddress] = useState<NormalizedAddress>(DEFAULT_ADDRESS);
   const [chainId, setChainId] = useState<DefaultableChainId>(
-    getENSRootChain(EXPECTED_NAMESPACE).id
+    getENSRootChain(EXPECTED_NAMESPACE).id,
   );
   const [input, setInput] = useState<string>(DEFAULT_INPUT);
   const [inputError, setInputError] = useState<string | null>(null);
@@ -85,9 +83,7 @@ export function PrimaryNameView() {
       setAddress(toNormalizedAddress(input.trim()));
       setInputError(null);
     } catch (err) {
-      setInputError(
-        err instanceof Error ? err.message : "Invalid EVM address."
-      );
+      setInputError(err instanceof Error ? err.message : "Invalid EVM address.");
     }
   };
 
@@ -95,9 +91,9 @@ export function PrimaryNameView() {
     <section>
       <h2>Primary Name</h2>
       <p>
-        Resolves the ENSIP-19 Primary Name for an address on a selected chain
-        using <code>usePrimaryName</code>. Because ENSIP-19 is multichain, pick
-        which chain's primary name you want to read.
+        Resolves the ENSIP-19 Primary Name for an address on a selected chain using{" "}
+        <code>usePrimaryName</code>. Because ENSIP-19 is multichain, pick which chain's primary name
+        you want to read.
       </p>
 
       <form onSubmit={handleSubmit}>
@@ -110,9 +106,7 @@ export function PrimaryNameView() {
             onChange={(event) => setInput(event.target.value)}
             placeholder="0x…"
             aria-invalid={inputError !== null}
-            aria-describedby={
-              inputError ? `${addressInputId}-error` : undefined
-            }
+            aria-describedby={inputError ? `${addressInputId}-error` : undefined}
             style={{ width: "28rem" }}
           />
         </div>
@@ -122,9 +116,7 @@ export function PrimaryNameView() {
           <select
             id={chainSelectId}
             value={chainId}
-            onChange={(event) =>
-              setChainId(Number(event.target.value) as DefaultableChainId)
-            }
+            onChange={(event) => setChainId(Number(event.target.value))}
           >
             {chainOptions.map((option) => (
               <option key={option.id} value={option.id}>

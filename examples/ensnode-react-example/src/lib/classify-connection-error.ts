@@ -1,7 +1,4 @@
-export type ConnectionFailureKind =
-  | "network"
-  | "application"
-  | "unsupported-namespace";
+export type ConnectionFailureKind = "network" | "application" | "unsupported-namespace";
 
 export interface ConnectionFailure {
   kind: ConnectionFailureKind;
