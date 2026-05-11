@@ -6,7 +6,8 @@ sidebar:
   order: 1
 ---
 
-import { LinkCard, Aside, Card, CardGrid } from '@astrojs/starlight/components';
+import { LinkCard, Aside } from "@astrojs/starlight/components";
+import EnsDbUseCases from "../../../../../components/molecules/EnsDbUseCases.astro";
 
 ## Vision
 
@@ -51,26 +52,7 @@ By building on a PostgreSQL database, ENSDb inherits world-class capabilities:
 
 ENSDb unlocks a new universe of ENS applications:
 
-<CardGrid>
-<Card title="Custom APIs" icon="seti:graphql">
-Build specialized GraphQL or REST APIs tailored to your use case. Query exactly the data you need with full SQL power.
-</Card>
-<Card title="Analytics & Dashboards" icon="document">
-Create real-time dashboards and analytics pipelines. Better than Dune — you have the live ENS state locally with sub-second query latency.
-</Card>
-<Card title="CLIs & Developer Tools" icon="seti:shell">
-Build command-line tools for ENS operations. Query domains, and any specialized lookup — all from your terminal.
-</Card>
-<Card title="Event-Based Engines" icon="seti:plan">
-Build reactive systems that respond to ENS state changes. Respond to registration lifecycle updates, ownership transfers, resolver updates.
-</Card>
-<Card title="Data Pipelines" icon="seti:plan">
-Feed ENS data into your existing data infrastructure. Sync to data warehouses, trigger webhooks, populate search indexes.
-</Card>
-<Card title="AI Agents" icon="seti:bicep">
-Build AI agents that can query ENS state and perform actions based on that data.
-</Card>
-</CardGrid>
+<EnsDbUseCases />
 
 ## Quick Start
 
