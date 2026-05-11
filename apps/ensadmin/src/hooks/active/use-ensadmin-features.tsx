@@ -95,7 +95,9 @@ export function useENSAdminFeatures(): ENSAdminFeatures {
     const { realtimeProjection } = indexingStatusQuery.data;
     const { omnichainSnapshot } = realtimeProjection.snapshot;
 
-    const indexingStatusSupportResult = hasSubgraphApiIndexingStatusSupport(omnichainSnapshot);
+    const indexingStatusSupportResult = hasSubgraphApiIndexingStatusSupport(
+      omnichainSnapshot.omnichainStatus,
+    );
     if (!indexingStatusSupportResult.supported)
       return { type: "not-ready", reason: indexingStatusSupportResult.reason };
     return { type: "supported" };
@@ -113,7 +115,9 @@ export function useENSAdminFeatures(): ENSAdminFeatures {
     const { realtimeProjection } = indexingStatusQuery.data;
     const { omnichainSnapshot } = realtimeProjection.snapshot;
 
-    const indexingStatusSupportResult = hasOmnigraphApiIndexingStatusSupport(omnichainSnapshot);
+    const indexingStatusSupportResult = hasOmnigraphApiIndexingStatusSupport(
+      omnichainSnapshot.omnichainStatus,
+    );
     if (!indexingStatusSupportResult.supported)
       return { type: "not-ready", reason: indexingStatusSupportResult.reason };
     return { type: "supported" };

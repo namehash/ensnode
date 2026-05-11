@@ -1,8 +1,5 @@
 import { type EnsIndexerPublicConfig, PluginName } from "../ensindexer/config/types";
-import {
-  OmnichainIndexingStatusIds,
-  type OmnichainIndexingStatusSnapshot,
-} from "../indexing-status";
+import { type OmnichainIndexingStatusId, OmnichainIndexingStatusIds } from "../indexing-status";
 import type { PrerequisiteResult } from "../shared/prerequisites";
 
 /**
@@ -19,19 +16,19 @@ export function hasOmnigraphApiConfigSupport(config: EnsIndexerPublicConfig): Pr
 }
 
 /**
- * Check if provided OmnichainIndexingStatusSnapshot supports the Omnigraph API.
+ * Check if provided OmnichainIndexingStatusId supports the Omnigraph API.
  */
 export function hasOmnigraphApiIndexingStatusSupport(
-  config: OmnichainIndexingStatusSnapshot,
+  indexingStatus: OmnichainIndexingStatusId,
 ): PrerequisiteResult {
   const supported =
-    config.omnichainStatus === OmnichainIndexingStatusIds.Completed ||
-    config.omnichainStatus === OmnichainIndexingStatusIds.Following;
+    indexingStatus === OmnichainIndexingStatusIds.Completed ||
+    indexingStatus === OmnichainIndexingStatusIds.Following;
 
   if (supported) return { supported };
 
   return {
     supported: false,
-    reason: `The connected ENSNode's Omnichain Indexing Status must be "${OmnichainIndexingStatusIds.Completed}" or "${OmnichainIndexingStatusIds.Following}" for the Omnigraph API to be available. Current omnichain indexing status is "${config.omnichainStatus}".`,
+    reason: `The connected ENSNode's Omnichain Indexing Status must be "${OmnichainIndexingStatusIds.Completed}" or "${OmnichainIndexingStatusIds.Following}" for the Omnigraph API to be available. Current omnichain indexing status is "${indexingStatus}".`,
   };
 }

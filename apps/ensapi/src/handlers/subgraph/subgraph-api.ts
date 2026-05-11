@@ -45,7 +45,7 @@ app.use(async (c, next) => {
 
   // 503 if Subgraph API is not available due to indexing status prerequisites not met
   const indexingStatusPrerequisite = hasSubgraphApiIndexingStatusSupport(
-    c.var.indexingStatus.snapshot.omnichainSnapshot,
+    c.var.indexingStatus.snapshot.omnichainSnapshot.omnichainStatus,
   );
 
   if (!indexingStatusPrerequisite.supported) {
