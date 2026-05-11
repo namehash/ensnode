@@ -96,7 +96,11 @@ For ENSv1, each domain that has children implicitly owns a "virtual" Registry (a
 `registryId` at the virtual registry. Concrete `ENSv1Registry` rows (e.g. the mainnet ENS Registry,
 the Basenames Registry, the Lineanames Registry) sit at the top. ENSv2 namegraphs are rooted in
 a single `ENSv2Registry` RootRegistry on the ENS Root Chain and are possibly circular directed
-graphs. The canonical namegraph is never materialized, only _navigated_ at resolution-time.
+graphs. The full namegraph is never materialized, only _navigated_ at resolution-time, with the
+exception of the canonical subgraph, which is reflected via `Registry.canonical` /
+`Domain.canonical` boolean flags on the rows themselves. The bidirectional canonical edge is NOT
+materialized in a parallel table; it is derived on demand by checking that the two unidirectional
+pointers agree (`Registry.canonicalDomainId = Domain.id` ↔ `Domain.subregistryId = Registry.id`).
 
 Note also that the Protocol Acceleration plugin is a hard requirement for the ENSv2 plugin. This
 allows us to rely on the shared logic for indexing:

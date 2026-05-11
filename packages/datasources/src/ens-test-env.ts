@@ -125,6 +125,11 @@ export default {
         address: contracts.ENSV1Resolver,
         startBlock: 0,
       },
+      ENSv2Resolver: {
+        abi: ResolverABI,
+        address: "0xc6e7df5e7b4f2a278906862b61205850344d4e7d",
+        startBlock: 0,
+      },
     },
   },
 

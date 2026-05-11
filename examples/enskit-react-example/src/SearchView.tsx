@@ -66,17 +66,10 @@ export function SearchView() {
     <div>
       <h2>Domain Search</h2>
 
-      <div
-        style={{ border: "1px solid #a94442", padding: "0.75rem", marginBottom: "1rem" }}
-        role="note"
-      >
-        Heads up! We return both ENSv1 and ENSv2 names due to a small bug in our Canonical Name
-        derivation, which will be fixed in the near future.
-      </div>
-
       <p>
-        Showcases live querying via <code>Query.domains(where: {"{ name }"})</code>. Input is
-        debounced by {DEBOUNCE_MS}ms and synced to the URL as <code>?query=</code>.
+        Showcases live querying via <code>Query.domains(where: {"{ name }"})</code>. Only{" "}
+        <b>Canonical</b> Domains are rendered. Input is debounced by {DEBOUNCE_MS}ms and synced to
+        the URL as <code>?query=</code>.
       </p>
 
       <input

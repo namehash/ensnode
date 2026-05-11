@@ -25,7 +25,9 @@ export const basePath = "/api/name-tokens";
  */
 export const nameTokensQuerySchema = z
   .object({
-    domainId: makeNodeSchema("request.domainId").optional().describe("Domain node hash identifier"),
+    domainId: makeNodeSchema("request.domainId")
+      .optional()
+      .describe("Node of the ENS name to look up tokens for, as calculated through namehash(name)"),
     name: params.name.optional().describe("ENS name to look up tokens for"),
   })
   .refine((data) => (data.domainId !== undefined) !== (data.name !== undefined), {

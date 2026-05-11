@@ -1,5 +1,19 @@
 # @ensnode/ens-deployments
 
+## 1.13.1
+
+### Patch Changes
+
+- [#2082](https://github.com/namehash/ensnode/pull/2082) [`b32f09d`](https://github.com/namehash/ensnode/commit/b32f09dec275196c816b722023a197d3e91a37b1) Thanks [@shrugs](https://github.com/shrugs)! - Hotfix: re-release of 1.13.0 including the documented changes to the Sepolia Namespace to include Basenames and Lineanames L1 Resolvers.
+
+## 1.13.0
+
+### Minor Changes
+
+- [#2080](https://github.com/namehash/ensnode/pull/2080) [`57bbef2`](https://github.com/namehash/ensnode/commit/57bbef28e24323a4c2f8326512d185a5e4662254) Thanks [@shrugs](https://github.com/shrugs)! - Fixes BasenamesL1Resolver and LineanamesL1Resolver not being defined in the Sepolia namespace, causing ENSIndexer to crash when indexing Sepolia.
+
+## 1.12.0
+
 ## 1.11.1
 
 ## 1.11.0

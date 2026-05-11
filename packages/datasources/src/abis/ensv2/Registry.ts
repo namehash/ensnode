@@ -550,7 +550,7 @@ export const Registry = [
     ],
     outputs: [
       {
-        name: "tokenId",
+        name: "",
         type: "uint256",
         internalType: "uint256",
       },
@@ -859,31 +859,6 @@ export const Registry = [
       },
     ],
     stateMutability: "view",
-  },
-  {
-    type: "event",
-    name: "Approval",
-    inputs: [
-      {
-        name: "owner",
-        type: "address",
-        indexed: true,
-        internalType: "address",
-      },
-      {
-        name: "approved",
-        type: "address",
-        indexed: true,
-        internalType: "address",
-      },
-      {
-        name: "tokenId",
-        type: "uint256",
-        indexed: true,
-        internalType: "uint256",
-      },
-    ],
-    anonymous: false,
   },
   {
     type: "event",

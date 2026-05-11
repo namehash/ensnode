@@ -5,8 +5,7 @@ export const openapiMeta = {
   info: {
     title: "ENSApi APIs",
     version: packageJson.version,
-    description:
-      "APIs for ENS resolution, navigating the ENS nameforest, and metadata about an ENSNode",
+    description: "REST APIs for the ENSNode stack as served by the ENSApi service",
   },
   servers: [
     { url: "https://api.alpha.ensnode.io", description: "ENSNode Alpha (Mainnet)" },
@@ -22,16 +21,7 @@ export const openapiMeta = {
     },
     {
       name: "Meta",
-      description: "APIs for indexing status, configuration, and realtime monitoring",
-    },
-    {
-      name: "Explore",
-      description:
-        "APIs for exploring the indexed state of ENS, including name tokens and registrar actions",
-    },
-    {
-      name: "ENSAwards",
-      description: "APIs for ENSAwards functionality, including referrer data",
+      description: "APIs for indexing status, ENSNode stack info, and realtime monitoring",
     },
   ],
 };

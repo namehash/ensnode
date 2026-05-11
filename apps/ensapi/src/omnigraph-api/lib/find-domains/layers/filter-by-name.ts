@@ -28,7 +28,7 @@ const FILTER_BY_NAME_MAX_DEPTH = 8;
  *  - leafId: the deepest child (label "sub1") — the autocomplete result, for ownership check
  *  - headId: the parent of the path (whose label should match partial "paren")
  *
- * Algorithm: Start from the deepest child (leaf) and traverse UP via {@link registryCanonicalDomain}.
+ * Algorithm: Start from the deepest child (leaf) and traverse UP via `registry.canonicalDomainId`.
  */
 function domainsByLabelHashPath(labelHashPath: LabelHashPath) {
   // If no concrete path, return all domains (leaf = head = self)
@@ -47,13 +47,15 @@ function domainsByLabelHashPath(labelHashPath: LabelHashPath) {
   const rawLabelHashPathArray = sql`${new Param(labelHashPath)}::text[]`;
   const pathLength = sql`array_length(${rawLabelHashPathArray}, 1)`;
 
-  // Recursive CTE starting from the deepest child and traversing UP via registryCanonicalDomain.
+  // Recursive CTE starting from the deepest child and traversing UP via the bidirectional
+  // canonical-edge agreement (`registries.canonical_domain_id = domains.id` AND
+  // `domains.subregistry_id = registries.id`).
   // 1. Start with domains matching the leaf labelHash (deepest child)
-  // 2. Recursively join parents via rcd, verifying each ancestor's labelHash
+  // 2. Recursively join parents via the agreement check, verifying each ancestor's labelHash
   // 3. Return both the leaf (for result/ownership) and head (for partial match)
   //
   // NOTE: JOIN (not LEFT JOIN) is intentional — we only match domains with a complete
-  // canonical path to the searched FQDN.
+  // canonical path to the searched `labelHashPath`.
   return ensDb
     .select({
       // https://github.com/drizzle-team/drizzle-orm/issues/1242
@@ -64,23 +66,24 @@ function domainsByLabelHashPath(labelHashPath: LabelHashPath) {
       sql`(
         WITH RECURSIVE upward_check AS (
           -- Base case: find the deepest children (leaves of the concrete path) and walk one step
-          -- up via registryCanonicalDomain. The parent.subregistry_id = d.registry_id clause
-          -- performs edge authentication.
+          -- up via the agreement check (parent_registry.canonical_domain_id = parent.id AND
+          -- parent.subregistry_id = parent_registry.id).
           SELECT
             d.id AS leaf_id,
             parent.id AS current_id,
             1 AS depth
           FROM ${ensIndexerSchema.domain} d
-          JOIN ${ensIndexerSchema.registryCanonicalDomain} rcd
-            ON rcd.registry_id = d.registry_id
+          JOIN ${ensIndexerSchema.registry} parent_registry
+            ON parent_registry.id = d.registry_id
           JOIN ${ensIndexerSchema.domain} parent
-            ON parent.id = rcd.domain_id AND parent.subregistry_id = d.registry_id
+            ON parent.id = parent_registry.canonical_domain_id
+           AND parent.subregistry_id = parent_registry.id
           WHERE d.label_hash = (${rawLabelHashPathArray})[${pathLength}]
 
           UNION ALL
 
-          -- Recursive step: traverse UP via registryCanonicalDomain, verifying each ancestor's
-          -- labelHash. The np.subregistry_id = pd.registry_id clause performs edge authentication.
+          -- Recursive step: traverse UP via the agreement check, verifying each ancestor's
+          -- labelHash.
           SELECT
             upward_check.leaf_id,
             np.id AS current_id,
@@ -88,10 +91,11 @@ function domainsByLabelHashPath(labelHashPath: LabelHashPath) {
           FROM upward_check
           JOIN ${ensIndexerSchema.domain} pd
             ON pd.id = upward_check.current_id
-          JOIN ${ensIndexerSchema.registryCanonicalDomain} rcd
-            ON rcd.registry_id = pd.registry_id
+          JOIN ${ensIndexerSchema.registry} pdr
+            ON pdr.id = pd.registry_id
           JOIN ${ensIndexerSchema.domain} np
-            ON np.id = rcd.domain_id AND np.subregistry_id = pd.registry_id
+            ON np.id = pdr.canonical_domain_id
+           AND np.subregistry_id = pdr.id
           WHERE upward_check.depth < ${pathLength}
             AND pd.label_hash = (${rawLabelHashPathArray})[${pathLength} - upward_check.depth]
         )
@@ -124,7 +128,7 @@ export function filterByName(base: BaseDomainSet, name?: string | null) {
   }
 
   if (concrete.length === 0) {
-    // No path traversal — sortableLabel is already the domain's own label from the base set
+    // no path traversal — sortableLabel is already the domain's own label from the base set
     return ensDb
       .select(selectBase(base))
       .from(base)
@@ -136,20 +140,20 @@ export function filterByName(base: BaseDomainSet, name?: string | null) {
       .as("baseDomains");
   }
 
-  // Build path traversal CTE over the unified `domain` table.
+  // build path traversal CTE over the unified `domain` table.
   const labelHashPath = interpretedLabelsToLabelHashPath(concrete);
   const pathResults = domainsByLabelHashPath(labelHashPath);
 
-  // Alias for head domain lookup (to get headLabelHash for label join)
+  // alias for head domain lookup (to get headLabelHash for label join)
   const headDomain = alias(ensIndexerSchema.domain, "headDomain");
   const headLabel = alias(ensIndexerSchema.label, "headLabel");
 
-  // Join base set with path results, look up head domain's label, override sortableLabel.
-  // The inner join on pathResults scopes results to domains matching the concrete path.
+  // join base set with path results, look up head domain's label, override sortableLabel
+  // the INNER JOIN on pathResults scopes results to domains matching the concrete path
   return ensDb
     .select({
       ...selectBase(base),
-      // Override sortableLabel with head domain's label for NAME ordering
+      // override sortableLabel with head domain's label for NAME ordering
       sortableLabel: sql<string | null>`${headLabel.interpreted}`.as("sortableLabel"),
     })
     .from(base)

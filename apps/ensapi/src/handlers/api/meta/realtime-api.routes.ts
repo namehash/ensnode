@@ -16,9 +16,9 @@ export const realtimeGetMeta = createRoute({
   path: "/",
   operationId: "getRealtime",
   tags: ["Meta"],
-  summary: "Check indexing progress",
+  summary: "Check realtime indexing status",
   description:
-    "Checks if the indexing progress is guaranteed to be within a requested worst-case distance of realtime",
+    "Checks if the indexing status is guaranteed to be within a requested worst-case distance of realtime. Note that this is a worst-case distance check. This operation uses the latest cached indexing status snapshot to determine worst-case distance. The true indexing status is generally ahead of the worst-case distance",
   request: {
     query: z.object({
       maxWorstCaseDistance: params.queryParam

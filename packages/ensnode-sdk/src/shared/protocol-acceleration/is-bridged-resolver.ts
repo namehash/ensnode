@@ -1,30 +1,56 @@
-import type { AccountId } from "enssdk";
-
-import { DatasourceNames } from "@ensnode/datasources";
 import {
+  type AccountId,
+  type DomainId,
+  makeENSv1DomainId,
+  makeENSv1VirtualRegistryId,
+  type RegistryId,
+} from "enssdk";
+
+import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
+import {
+  accountIdEqual,
   type ENSNamespaceId,
   getDatasourceContract,
-  makeContractMatcher,
+  getENSv1RootRegistry,
+  getManagedName,
 } from "@ensnode/ensnode-sdk";
 
+// simple cache of BridgedResolverConfig by namespace because it's in an indexing hot-path
+const cache = new Map<ENSNamespaceId, BridgedResolverConfig[]>();
+
 /**
- * Result of a Bridged Resolver detection: the AccountId of the (shadow)Registry the resolver
- * defers to, plus whether that Registry indexes the namegraph from-root (`shadow: true`) or is
- * rooted at the resolver's name (`shadow: false`).
- *
- * For ENSv1 Shadow Registries (Basenames, Lineanames) the L2 contract mirrors the full namegraph
- * from the ENS root. For any future ENSv2 sub-Registry bridges the bridged Registry is rooted at
- * the resolver's name.
+ * Describes a Bridged Resolver's origin Domain and target Registry.
  */
-export interface BridgedResolverTarget {
-  registry: AccountId;
-  shadow: boolean;
+export interface BridgedResolverConfig {
+  /**
+   * The Bridged Resolver connecting the origin Domain to the target Registry.
+   */
+  resolver: AccountId;
+
+  /**
+   * The DomainId of the _legitimate_ originating Domain on the ENS Root chain whose
+   * Bridged Resolver attachment canonicalizes the bridged target Registry. Anyone can set a
+   * known Bridged Resolver (e.g. `BasenamesL1Resolver`) as their resolver, but only the
+   * originating Domain (e.g. mainnet `base.eth`) is the canonical parent of the bridged
+   * target Registry.
+   */
+  originDomainId: DomainId;
+
+  /**
+   * The RegistryId of the _specific_ (Concrete or Virtual) Registry to which the Bridged Resolver defers.
+   */
+  targetRegistryId: RegistryId;
+
+  /**
+   * The AccountId of the Concrete Registry to which the Bridged Resolver defers, necessary for
+   * current ENSv1 Protocol Acceleration implementation.
+   * TODO: refactor Protocol Acceleration to operate over RegistryId instead of AccountId.
+   */
+  targetRegistry: AccountId;
 }
 
 /**
- * For a given `resolver`, if it is a known Bridged Resolver, return the AccountId describing the
- * (shadow)Registry it defers resolution to and a flag indicating whether that Registry indexes
- * the namegraph from-root.
+ * Constructs the known Bridged Resolver Configurations for the provided `namespace`.
  *
  * These Bridged Resolvers must abide the following pattern:
  * 1. They _always_ emit OffchainLookup for any resolve() call to a well-known CCIP-Read Gateway,
@@ -44,30 +70,63 @@ export interface BridgedResolverTarget {
  * against the (shadow)Registry in question.
  *
  * TODO: these relationships could/should be encoded in an ENSIP
+ * TODO: once Forward Resolution is updated for ENSv2, this likely just returns RegistryId
+ */
+const getBridgedResolverConfigs = (namespace: ENSNamespaceId): BridgedResolverConfig[] => {
+  const cached = cache.get(namespace);
+  if (cached) return cached;
+
+  const configs: BridgedResolverConfig[] = [];
+
+  const basenames = maybeGetDatasource(namespace, DatasourceNames.Basenames);
+  if (basenames) {
+    const resolver = getDatasourceContract(
+      namespace,
+      DatasourceNames.ENSRoot,
+      "BasenamesL1Resolver",
+    );
+    const registry = getDatasourceContract(namespace, DatasourceNames.Basenames, "Registry");
+    const { node } = getManagedName(namespace, registry);
+    configs.push({
+      resolver,
+      originDomainId: makeENSv1DomainId(getENSv1RootRegistry(namespace), node),
+      targetRegistry: registry,
+      targetRegistryId: makeENSv1VirtualRegistryId(registry, node),
+    });
+  }
+
+  const lineanames = maybeGetDatasource(namespace, DatasourceNames.Lineanames);
+  if (lineanames) {
+    const resolver = getDatasourceContract(
+      namespace,
+      DatasourceNames.ENSRoot,
+      "LineanamesL1Resolver",
+    );
+    const registry = getDatasourceContract(namespace, DatasourceNames.Lineanames, "Registry");
+    const { node } = getManagedName(namespace, registry);
+    configs.push({
+      resolver,
+      originDomainId: makeENSv1DomainId(getENSv1RootRegistry(namespace), node),
+      targetRegistry: registry,
+      targetRegistryId: makeENSv1VirtualRegistryId(registry, node),
+    });
+  }
+
+  cache.set(namespace, configs);
+
+  return configs;
+};
+
+/**
+ * For a given `resolver`, if it is a known Bridged Resolver, return its Bridged Resolver Config.
  */
 export function isBridgedResolver(
   namespace: ENSNamespaceId,
   resolver: AccountId,
-): BridgedResolverTarget | null {
-  const resolverEq = makeContractMatcher(namespace, resolver);
-
-  // the ENSRoot's BasenamesL1Resolver bridges to the Basenames (shadow)Registry
-  if (resolverEq(DatasourceNames.ENSRoot, "BasenamesL1Resolver")) {
-    return {
-      registry: getDatasourceContract(namespace, DatasourceNames.Basenames, "Registry"),
-      shadow: true,
-    };
-  }
-
-  // the ENSRoot's LineanamesL1Resolver bridges to the Lineanames (shadow)Registry
-  if (resolverEq(DatasourceNames.ENSRoot, "LineanamesL1Resolver")) {
-    return {
-      registry: getDatasourceContract(namespace, DatasourceNames.Lineanames, "Registry"),
-      shadow: true,
-    };
-  }
-
-  // TODO: ThreeDNS
-
-  return null;
+): BridgedResolverConfig | null {
+  return (
+    getBridgedResolverConfigs(namespace).find((config) =>
+      accountIdEqual(config.resolver, resolver),
+    ) ?? null
+  );
 }
