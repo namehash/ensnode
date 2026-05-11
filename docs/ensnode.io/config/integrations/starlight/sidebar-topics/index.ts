@@ -1,11 +1,11 @@
-import { buildWithEnsSidebarTopic } from "./build-with-ens";
-import { componentsSidebarTopic } from "./components";
+import { integrateSidebarTopic } from "./integrate";
+import { servicesSidebarTopic } from "./services";
 import { referenceSidebarTopic } from "./reference";
 import { selfHostSidebarTopic } from "./self-host";
 
 export const starlightSidebarTopicsConfig = [
-  buildWithEnsSidebarTopic,
+  integrateSidebarTopic,
   selfHostSidebarTopic,
   referenceSidebarTopic,
-  componentsSidebarTopic,
+  servicesSidebarTopic,
 ];

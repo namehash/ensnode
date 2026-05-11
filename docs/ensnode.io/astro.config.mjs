@@ -21,7 +21,7 @@ export default defineConfig({
   redirects: {
     "/docs": "/docs/build-with-ens",
     "/ensnode": "/docs/build-with-ens",
-    "/ensnode/deploying/railway": "/docs/components/ensrainbow/deploying/railway",
+    "/ensnode/deploying/railway": "/docs/services/ensrainbow/deploying/railway",
     "/ensnode/concepts/what-is-ensnode": "/docs/reference/what-is-ensnode",
     "/ensnode/concepts/what-is-the-ens-subgraph": "/docs/reference/what-is-the-ens-subgraph",
   },
