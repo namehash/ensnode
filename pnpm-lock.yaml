@@ -841,15 +841,15 @@ importers:
 
   examples/ensnode-react-example:
     dependencies:
+      '@ensnode/datasources':
+        specifier: workspace:*
+        version: link:../../packages/datasources
       '@ensnode/ensnode-react':
         specifier: workspace:*
         version: link:../../packages/ensnode-react
       '@ensnode/ensnode-sdk':
         specifier: workspace:*
         version: link:../../packages/ensnode-sdk
-      '@tanstack/react-query':
-        specifier: ^5.62.14
-        version: 5.90.5(react@19.2.1)
       enssdk:
         specifier: workspace:*
         version: link:../../packages/enssdk

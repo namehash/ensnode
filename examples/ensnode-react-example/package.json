@@ -11,9 +11,9 @@
     "typecheck": "tsgo --noEmit"
   },
   "dependencies": {
+    "@ensnode/datasources": "workspace:*",
     "@ensnode/ensnode-react": "workspace:*",
     "@ensnode/ensnode-sdk": "workspace:*",
-    "@tanstack/react-query": "^5.62.14",
     "enssdk": "workspace:*",
     "react": "catalog:",
     "react-dom": "catalog:"
