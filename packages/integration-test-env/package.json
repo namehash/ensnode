@@ -6,7 +6,8 @@
   "type": "module",
   "description": "Integration test environment orchestration for ENSNode",
   "scripts": {
-    "start": "CI=1 tsx src/orchestrator.ts",
+    "start": "tsx src/start.ts",
+    "start:ci": "CI=1 tsx src/orchestrator.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
