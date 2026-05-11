@@ -29,7 +29,8 @@ export default defineConfig({
     "/ensdb": "/docs/services/ensdb",
     "/ensindexer": "/docs/services/ensindexer",
     "/ensrainbow": "/docs/services/ensrainbow",
-    "/ensrainbow/concepts/label-sets-and-versioning": "/docs/services/ensrainbow/concepts/label-sets-and-versioning",
+    "/ensrainbow/concepts/label-sets-and-versioning":
+      "/docs/services/ensrainbow/concepts/label-sets-and-versioning",
   },
   env: {
     schema: {
