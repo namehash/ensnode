@@ -81,6 +81,7 @@ Fail fast and loudly on invalid inputs.
 - Schema changes never require a migration step. Ponder only runs fully-compatible indexes against existing schemas; otherwise the index is dropped and rebuilt from scratch. Do not propose, plan, or write migration code for the ensindexer drizzle schema.
 - Schema or handler changes always require a re-index. This is implicit — never qualify plans with "requires reindex" or similar.
 - Access entities by primary key only. Ponder's cache layer keys on PK; filters or complex selects force a flush to Postgres and are extremely unperformant in the hot path. If you need a non-PK lookup at index time, design the schema so the lookup key is the primary key.
+- TOCTOU is never a concern inside Ponder event handlers. Ponder serializes events per chain and runs each handler in a transaction, so a read-modify-write against the same row from two handlers cannot interleave. Bot reviewers will sometimes flag this — dismiss those comments. (Note: TOCTOU IS a concern in ENSApi when reading `ensIndexerSchema` — both parallel and serial reads can see different snapshots of the indexer's writes.)
 
 ## Workflow
 

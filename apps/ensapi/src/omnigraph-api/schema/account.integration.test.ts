@@ -24,13 +24,23 @@ import { gql } from "@/test/integration/omnigraph-api-client";
 
 describe("Account.domains", () => {
   type AccountDomainsResult = {
-    account: { domains: GraphQLConnection<{ name: InterpretedName | null }> };
+    account: {
+      domains: GraphQLConnection<{
+        __typename: "ENSv1Domain" | "ENSv2Domain";
+        name: InterpretedName | null;
+      }>;
+    };
   };
 
   const AccountDomains = gql`
-    query AccountDomains($address: Address!) {
+    query AccountDomains($address: Address!, $version: ENSProtocolVersion) {
       account(by: { address: $address }) {
-        domains(order: { by: NAME, dir: ASC }) { edges { node { name } } }
+        domains(
+          where: { version: $version },
+          order: { by: NAME, dir: ASC }
+        ) {
+          edges { node { __typename, name } }
+        }
       }
     }
   `;
@@ -54,7 +64,7 @@ describe("Account.domains", () => {
       "sub1.sub2.parent.eth",
       "sub2.parent.eth",
       "test.eth",
-      "wallet.linked.parent.eth",
+      "wallet.sub1.sub2.parent.eth",
     ];
 
     for (const name of expected) {
@@ -70,6 +80,38 @@ describe("Account.domains", () => {
     const names = domains.map((d) => d.name);
 
     expect(names, "expected 'newowner.eth' in new owner's domains").toContain("newowner.eth");
+  });
+
+  describe("version?: ENSProtocolVersion", () => {
+    it("returns any version when unspecified", async () => {
+      const result = await request<AccountDomainsResult>(AccountDomains, {
+        address: DevnetAccounts.owner.address,
+        version: undefined,
+      });
+      const domains = flattenConnection(result.account.domains);
+      expect(domains.find((d) => d.__typename === "ENSv1Domain")).toBeDefined();
+      expect(domains.find((d) => d.__typename === "ENSv2Domain")).toBeDefined();
+    });
+
+    it("returns only ENSv1Domains when version: ENSv1", async () => {
+      const result = await request<AccountDomainsResult>(AccountDomains, {
+        address: DevnetAccounts.owner.address,
+        version: "ENSv1",
+      });
+      const domains = flattenConnection(result.account.domains);
+      expect(domains.find((d) => d.__typename === "ENSv1Domain")).toBeDefined();
+      expect(domains.find((d) => d.__typename === "ENSv2Domain")).not.toBeDefined();
+    });
+
+    it("returns only ENSv2Domains when version: ENSv2", async () => {
+      const result = await request<AccountDomainsResult>(AccountDomains, {
+        address: DevnetAccounts.owner.address,
+        version: "ENSv2",
+      });
+      const domains = flattenConnection(result.account.domains);
+      expect(domains.find((d) => d.__typename === "ENSv1Domain")).not.toBeDefined();
+      expect(domains.find((d) => d.__typename === "ENSv2Domain")).toBeDefined();
+    });
   });
 });
 

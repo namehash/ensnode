@@ -17,7 +17,7 @@ export default function SplashPage() {
           </div>
 
           <p className="md:text-xl text-muted-foreground max-w-md">
-            Explore the ENS Protocol like never before
+            Inspect the ENS Protocol like never before
           </p>
 
           <Button asChild size="lg">

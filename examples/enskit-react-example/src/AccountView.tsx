@@ -1,5 +1,10 @@
 import { graphql, useOmnigraphQuery } from "enskit/react/omnigraph";
-import { isNormalizedAddress, type NormalizedAddress, toNormalizedAddress } from "enssdk";
+import {
+  beautifyInterpretedName,
+  isNormalizedAddress,
+  type NormalizedAddress,
+  toNormalizedAddress,
+} from "enssdk";
 import { useState } from "react";
 import { Link, Navigate, useParams } from "react-router";
 
@@ -56,7 +61,9 @@ function RenderAccount({ address }: { address: NormalizedAddress }) {
             {domains.edges.map((edge) => (
               <li key={edge.node.id}>
                 {edge.node.name ? (
-                  <Link to={`/domain/${edge.node.name}`}>{edge.node.name}</Link>
+                  <Link to={`/domain/${edge.node.name}`}>
+                    {beautifyInterpretedName(edge.node.name)}
+                  </Link>
                 ) : (
                   <em>non-canonical domain</em>
                 )}{" "}

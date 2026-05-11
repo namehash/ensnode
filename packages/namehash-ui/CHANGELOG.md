@@ -1,5 +1,55 @@
 # @namehash/namehash-ui
 
+## 1.13.1
+
+### Patch Changes
+
+- Updated dependencies [[`b32f09d`](https://github.com/namehash/ensnode/commit/b32f09dec275196c816b722023a197d3e91a37b1)]:
+  - @ensnode/datasources@1.13.1
+  - @ensnode/ensnode-sdk@1.13.1
+  - @ensnode/ensnode-react@1.13.1
+  - enssdk@1.13.1
+
+## 1.13.0
+
+### Patch Changes
+
+- Updated dependencies [[`57bbef2`](https://github.com/namehash/ensnode/commit/57bbef28e24323a4c2f8326512d185a5e4662254)]:
+  - @ensnode/datasources@1.13.0
+  - @ensnode/ensnode-sdk@1.13.0
+  - @ensnode/ensnode-react@1.13.0
+  - enssdk@1.13.0
+
+## 1.12.0
+
+### Patch Changes
+
+- Updated dependencies [[`4fb7b33`](https://github.com/namehash/ensnode/commit/4fb7b332fd46ee9924dc9dfb55b5a21ff8b8554a)]:
+  - @ensnode/ensnode-sdk@1.12.0
+  - @ensnode/ensnode-react@1.12.0
+  - enssdk@1.12.0
+  - @ensnode/datasources@1.12.0
+
+## 1.11.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - enssdk@1.11.1
+  - @ensnode/datasources@1.11.1
+  - @ensnode/ensnode-react@1.11.1
+  - @ensnode/ensnode-sdk@1.11.1
+
+## 1.11.0
+
+### Patch Changes
+
+- Updated dependencies [[`43d8a9b`](https://github.com/namehash/ensnode/commit/43d8a9b838b15719f520cd3f3bbfd1b52a4ad1ce), [`824d819`](https://github.com/namehash/ensnode/commit/824d819d291b2b642d2664d09cb10d6de69a6ea7), [`5729ac1`](https://github.com/namehash/ensnode/commit/5729ac18ba029a476ffeca18c9b4bceee417ebdb), [`6173160`](https://github.com/namehash/ensnode/commit/61731608632f62139496656f6231210f63383f20), [`92ca54f`](https://github.com/namehash/ensnode/commit/92ca54fa2efbef3f32e2dacd8fdc347ef260a2af), [`7e77c5c`](https://github.com/namehash/ensnode/commit/7e77c5c2bef96d1a2eb363871fb87379b5f6f7e9), [`0d8a4b4`](https://github.com/namehash/ensnode/commit/0d8a4b4b7c8c70be904652e2132e7c67fd9e39ef), [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572), [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572), [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572), [`43d8a9b`](https://github.com/namehash/ensnode/commit/43d8a9b838b15719f520cd3f3bbfd1b52a4ad1ce), [`6173160`](https://github.com/namehash/ensnode/commit/61731608632f62139496656f6231210f63383f20)]:
+  - @ensnode/ensnode-sdk@1.11.0
+  - @ensnode/datasources@1.11.0
+  - enssdk@1.11.0
+  - @ensnode/ensnode-react@1.11.0
+
 ## 1.10.1
 
 ### Patch Changes
