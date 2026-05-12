@@ -328,7 +328,8 @@ async function reconcileRegistryCanonicality(
 
   const registry = await context.ensDb.find(ensIndexerSchema.registry, { id: registryId });
   // if there's no registry, we can no-op; this reconciliation is a no-op if a Domain has set a
-  // Subregistry that doesn't exist yet
+  // Subregistry that doesn't exist yet. once the subregistry exists and sets its Canonical Domain,
+  // handleCanonialDomainUpdated will trigger the appropriate reconciliation
   if (!registry) return;
 
   // determine the new canonicality from the current pointer state
