@@ -238,7 +238,7 @@ For ENSv1, each domain that has children implicitly owns a "virtual" Registry (`
 | `chainId` | `bigint` | no | Chain the registry contract is deployed on. |
 | `address` | `text` | no | Address of the registry contract. |
 | `node` | `text` | yes | If this is an `ENSv1VirtualRegistry`, the namehash of the parent ENSv1 domain that owns it, otherwise `null`. |
-| `canonicalDomainId` | `text` | yes | The Registry's declared Canonical Domain (uni-directional). |
+| `canonicalDomainId` | `text` | yes | The Registry's declared Canonical Domain (unidirectional). |
 | `canonical` | `boolean` | no | Whether this Registry is part of the canonical nametree. Default `false`. |
 | `__hasChildren` | `boolean` | no | Internal bookkeeping field. Synthetic monotonic sentinel flipped to `true` the first time a child Domain is registered under this Registry. Used to optimize canonicality cascades. Default `false`. |
 
@@ -401,7 +401,7 @@ A user's role bitmap for a specific resource within a `permissions` contract.
 
 **Relations:** has one `account` (user), belongs to one `permissions` via `(chainId, address)`, belongs to one `permissions_resource` via `(chainId, address, resource)`.
 
-
+---
 
 ### Protocol Acceleration
 
