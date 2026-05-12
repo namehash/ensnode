@@ -1303,8 +1303,8 @@ const introspection = {
                 "ofType": {
                   "kind": "NON_NULL",
                   "ofType": {
-                    "kind": "SCALAR",
-                    "name": "DomainId"
+                    "kind": "INTERFACE",
+                    "name": "Domain"
                   }
                 }
               }

@@ -270,7 +270,7 @@ type DomainCanonical {
   """
   The Canonical Path from this Domain to the ENS Root, leaf→root inclusive of this Domain. Returned as DomainIds.
   """
-  path: [DomainId!]!
+  path: [Domain!]!
 }
 
 type DomainEventsConnection {

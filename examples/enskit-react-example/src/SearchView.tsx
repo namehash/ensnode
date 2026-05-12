@@ -5,9 +5,9 @@ import { Link, useSearchParams } from "react-router";
 
 const DomainsByNameQuery = graphql(`
   query DomainsByName($name: String!, $first: Int!, $after: String) {
-    domains(where: { name: $name, canonical: true }, first: $first, after: $after) {
+    domains(where: { name: $name }, first: $first, after: $after) {
       edges {
-        node { __typename id name }
+        node { __typename id canonical {name} }
       }
       pageInfo {
         hasNextPage
@@ -90,9 +90,9 @@ export function SearchView() {
             {data?.domains?.edges.map((edge) => (
               <li key={edge.node.id}>
                 ({edge.node.__typename === "ENSv1Domain" ? "v1" : "v2"}){" "}
-                {edge.node.name && (
-                  <Link to={`/domain/${edge.node.name}`}>
-                    {beautifyInterpretedName(edge.node.name)}
+                {edge.node.canonical && (
+                  <Link to={`/domain/${edge.node.canonical.name}`}>
+                    {beautifyInterpretedName(edge.node.canonical.name)}
                   </Link>
                 )}
               </li>

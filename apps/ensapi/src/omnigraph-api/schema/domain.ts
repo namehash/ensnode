@@ -79,11 +79,6 @@ export const ENSv2DomainRef = builder.objectRef<ENSv2Domain>("ENSv2Domain");
 ////////////////////////////////
 // DomainCanonical
 ////////////////////////////////
-/**
- * Canonical-tree fields materialized on each Canonical Domain. Source is the parent Domain row;
- * `canonicalName` and `canonicalNode` are direct column reads, `path` is resolved via
- * `getCanonicalPath` (the canonical-edge upward CTE).
- */
 export const DomainCanonicalRef = builder.objectRef<Domain>("DomainCanonical");
 
 DomainCanonicalRef.implement({
@@ -107,7 +102,7 @@ DomainCanonicalRef.implement({
     path: t.field({
       description:
         "The Canonical Path from this Domain to the ENS Root, leaf→root inclusive of this Domain. Returned as DomainIds.",
-      type: ["DomainId"],
+      type: [DomainInterfaceRef],
       nullable: false,
       resolve: async (domain, _args, context) => {
         const canonicalPath = await context.loaders.canonicalPath.load(domain.id);
