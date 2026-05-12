@@ -20,10 +20,6 @@ export const referenceSidebarTopic = {
       link: "/docs/reference/what-is-ensnode",
     },
     {
-      label: "What is the ENS Subgraph?",
-      link: "/docs/reference/what-is-the-ens-subgraph",
-    },
-    {
       label: "REST API",
       link: "/docs/reference/rest-api",
     },
@@ -34,10 +30,6 @@ export const referenceSidebarTopic = {
     {
       label: "ENSNode V2 Notes",
       link: "/docs/reference/ensnode-v2-notes",
-    },
-    {
-      label: "Subgraph Compatibility",
-      link: "/docs/reference/subgraph-compatibility-tooling",
     },
     {
       label: "Indexing ENS-Compatible Names",
@@ -51,6 +43,18 @@ export const referenceSidebarTopic = {
       label: "Subgraph API (Legacy)",
       collapsed: true,
       items: [
+        {
+          label: "What is the ENS Subgraph?",
+          link: "/docs/reference/subgraph-legacy/what-is-the-ens-subgraph",
+        },
+        {
+          label: "Subgraph API",
+          link: "/docs/reference/subgraph-legacy/subgraph-api",
+        },
+        {
+          label: "Subgraph Compatibility Tooling",
+          link: "/docs/reference/subgraph-legacy/subgraph-compatibility-tooling",
+        },
         {
           label: "With ENSjs",
           link: "/docs/reference/subgraph-legacy/with-ensjs",

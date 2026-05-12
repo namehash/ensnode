@@ -7,61 +7,6 @@ sidebar:
 
 import { LinkCard } from "@astrojs/starlight/components";
 
-## Subgraph API
-ENSNode exposes a Subgraph-Compatible GraphQL endpoint at `/subgraph`.
-
-:::note[Subgraph API Compatibility Reference]
-For details on subgraph compatibility, see the Subgraph Compatibility documentation.
-
-<LinkCard
-  href="/docs/reference/what-is-the-ens-subgraph"
-  title="Subgraph Compatibility"
-/>
-:::
-
-### GraphiQL Playground
-
-To explore the schema and run queries, use the GraphiQL Playground below.
-
-<LinkCard
-  href="https://api.alpha.ensnode.io/subgraph"
-  title="Subgraph-compatible GraphiQL Playground"
-/>
-
-### GraphQL Examples
-
-Fetch data about the three most recently-created domains.
-
-```gql
-{
-  domains(orderBy: createdAt, orderDirection: desc, first: 3) {
-    name
-    expiryDate
-  }
-}
-```
-
-```json
-{
-  "data": {
-    "domains": [
-      {
-        "name": "ensanguo.eth",
-        "expiryDate": "1758170255"
-      },
-      {
-        "name": "fiffer.eth",
-        "expiryDate": "2041994243"
-      },
-      {
-        "name": "rifaisicilia.eth",
-        "expiryDate": "1758170039"
-      }
-    ]
-  }
-}
-```
-
 ## Config API
 
 The Config API provides a complete view of an ENSNode instance's public
