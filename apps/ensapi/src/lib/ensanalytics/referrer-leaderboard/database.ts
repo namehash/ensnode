@@ -10,6 +10,7 @@ import {
   type InterpretedName,
   type NormalizedAddress,
   stringifyAccountId,
+  toNormalizedAddress,
 } from "enssdk";
 import type { Hash } from "viem";
 import { zeroAddress } from "viem";
@@ -91,7 +92,10 @@ export const getReferrerMetrics = async (
 
     return (records as NonNullRecord[]).map((record) => {
       return buildReferrerMetrics(
-        { chainId: rules.subregistryId.chainId, address: record.referrer },
+        {
+          chainId: rules.subregistryId.chainId,
+          address: toNormalizedAddress(record.referrer),
+        },
         record.totalReferrals,
         deserializeDuration(record.totalIncrementalDuration),
         priceEth(BigInt(record.totalRevenueContribution)),
@@ -213,7 +217,7 @@ export const getReferralEvents = async (rules: ReferralProgramRules): Promise<Re
         id: record.id,
         referrer: {
           chainId: rules.subregistryId.chainId,
-          address: record.referrer as NormalizedAddress,
+          address: toNormalizedAddress(record.referrer),
         },
         timestamp: Number(record.timestamp),
         incrementalDuration: Number(record.incrementalDuration),

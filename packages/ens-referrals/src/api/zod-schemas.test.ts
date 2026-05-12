@@ -1,3 +1,4 @@
+import { type AccountId, type Address, toNormalizedAddress } from "enssdk";
 import { describe, expect, it } from "vitest";
 
 import { CurrencyIds, parseEth, parseUsdc } from "@ensnode/ensnode-sdk";
@@ -16,6 +17,11 @@ import {
   makeReferrerEditionMetricsSchema,
   makeReferrerLeaderboardPageSchema,
 } from "./zod-schemas";
+
+const acct = (address: Address): AccountId => ({
+  chainId: 1,
+  address: toNormalizedAddress(address),
+});
 
 describe("makeReferralProgramEditionConfigSetArraySchema", () => {
   const schema = makeReferralProgramEditionConfigSetArraySchema();
@@ -644,10 +650,7 @@ describe("makeReferrerEditionMetricsSchema", () => {
     minFinalScoreToQualify: 0,
   };
 
-  const revShareCapReferrerAddress = {
-    chainId: 1,
-    address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
-  };
+  const revShareCapReferrerAddress = acct("0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85");
 
   const revShareCapRules = {
     awardModel: ReferralProgramAwardModels.RevShareCap,
@@ -687,7 +690,7 @@ describe("makeReferrerEditionMetricsSchema", () => {
       type: ReferrerEditionMetricsTypeIds.Ranked,
       rules: pieSplitRules,
       referrer: {
-        referrer: { chainId: 1, address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85" },
+        referrer: acct("0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85"),
         totalReferrals: 5,
         totalIncrementalDuration: 100,
         totalRevenueContribution: parseEth("500"),
@@ -717,7 +720,7 @@ describe("makeReferrerEditionMetricsSchema", () => {
       type: ReferrerEditionMetricsTypeIds.Unranked,
       rules: pieSplitRules,
       referrer: {
-        referrer: { chainId: 1, address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85" },
+        referrer: acct("0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85"),
         totalReferrals: 0,
         totalIncrementalDuration: 0,
         totalRevenueContribution: parseEth("0"),
@@ -873,7 +876,7 @@ describe("makeReferrerEditionMetricsSchema", () => {
         cappedAward: parseUsdc("200"),
         adminAction: {
           ...warningAction,
-          referrer: { chainId: 1, address: "0x0000000000000000000000000000000000000001" },
+          referrer: acct("0x0000000000000000000000000000000000000001"),
         },
       },
       aggregatedMetrics: revShareCapAggregatedMetrics,
@@ -900,7 +903,7 @@ describe("makeReferrerEditionMetricsSchema", () => {
         endTime: 500000, // endTime < startTime → refine violation
       },
       referrer: {
-        referrer: { chainId: 1, address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85" },
+        referrer: acct("0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85"),
         totalReferrals: 5,
         totalIncrementalDuration: 100,
         totalRevenueContribution: parseEth("500"),

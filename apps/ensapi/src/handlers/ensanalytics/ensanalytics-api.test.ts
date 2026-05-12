@@ -528,6 +528,61 @@ describe("/v1/ensanalytics", () => {
       expect(response).toMatchObject(expectedResponse);
     });
 
+    it("accepts a checksum-cased CAIP-10 referrer in the path and returns the same data as the lowercase form", async () => {
+      // Arrange: mock cache map with one edition
+      const mockEditionsCaches = new Map<
+        ReferralProgramEditionSlug,
+        SWRCache<ReferralEditionSnapshot>
+      >([
+        [
+          "2025-12",
+          {
+            read: async () => ({ leaderboard: populatedReferrerLeaderboard }),
+          } as SWRCache<ReferralEditionSnapshot>,
+        ],
+      ]);
+
+      const mockEditionConfigSet = new Map([
+        ["2025-12", { slug: "2025-12", displayName: "Edition 1", rules: {} as any }],
+      ]);
+      vi.mocked(editionSetMiddleware.referralProgramEditionConfigSetMiddleware).mockImplementation(
+        async (c, next) => {
+          c.set("referralProgramEditionConfigSet", mockEditionConfigSet);
+          return await next();
+        },
+      );
+      vi.mocked(
+        editionsCachesMiddleware.referralEditionSnapshotsCachesMiddleware,
+      ).mockImplementation(async (c, next) => {
+        c.set("referralEditionSnapshotsCaches", mockEditionsCaches);
+        return await next();
+      });
+
+      // The leaderboard fixture is keyed by the lowercase AccountIdString. Send a
+      // checksum-cased CAIP-10 in the URL path and confirm the route handler still
+      // matches the same leaderboard entry (i.e. the CAIP-10 parser normalizes the
+      // address case end-to-end).
+      const referrer = acct("0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e");
+      const checksumCasedCaip10 = "eip155:1:0x538e35B2888Ed5BC58CF2825D76cF6265Aa4E31e";
+
+      const httpResponse = await app.request(
+        `/referrer/${encodeURIComponent(checksumCasedCaip10)}?editions=2025-12`,
+      );
+      const response = deserializeReferrerMetricsEditionsResponse(await httpResponse.json());
+
+      expect(httpResponse.status).toBe(200);
+      expect(response.responseCode).toBe(ReferrerMetricsEditionsResponseCodes.Ok);
+      if (response.responseCode === ReferrerMetricsEditionsResponseCodes.Ok) {
+        const edition = response.data["2025-12"]!;
+        expect(edition.awardModel).toBe(ReferralProgramAwardModels.PieSplit);
+        if (edition.awardModel !== ReferralProgramAwardModels.PieSplit) throw new Error();
+        expect(edition.type).toBe(ReferrerEditionMetricsTypeIds.Ranked);
+        if (edition.type !== ReferrerEditionMetricsTypeIds.Ranked) throw new Error();
+        expect(edition.referrer.referrer).toEqual(referrer);
+        expect(edition.referrer.rank).toBe(1);
+      }
+    });
+
     it("returns zero-score metrics for requested editions when referrer does not exist", async () => {
       // Arrange: mock cache map with multiple editions
       const mockEditionsCaches = new Map<
