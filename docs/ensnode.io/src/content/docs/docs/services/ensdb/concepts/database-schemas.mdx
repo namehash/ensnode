@@ -280,7 +280,7 @@ Internal rainbow table mapping a `labelHash` to its interpreted label string. Do
 | `labelHash` | `text` | no | `keccak256` of the label. Primary key. |
 | `interpreted` | `text` | no | The interpreted label string. |
 
-**Indexes:** `interpreted`.
+**Indexes:** `byInterpreted`, `byInterpretedFuzzy`
 
 **Relations:** has many `domains`.
 
