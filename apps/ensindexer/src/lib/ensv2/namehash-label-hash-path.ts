@@ -2,22 +2,21 @@ import {
   encodeLabelHash,
   type InterpretedLabel,
   interpretedLabelsToInterpretedName,
-  type LabelHash,
+  type LabelHashPath,
   type Node,
   namehashInterpretedName,
 } from "enssdk";
 
 /**
- * Namehash a leaf-first labelHash path (i.e. `Domain.canonicalLabelHashPath`) by encoding each
- * labelHash as an EncodedLabelHash, joining into an InterpretedName, then namehashing.
+ * Namehash a LabelHashPath.
  *
- * Used to derive `Domain.canonicalNode` from `Domain.canonicalLabelHashPath`. Robust to label
- * heals — the namehash is over labelHashes, not interpreted labels.
+ * TODO: this could more accurately perform the namehash algorithm over the LabelHashes directly
+ * but we use this simple approach for now
  */
-export function namehashLabelHashPath(labelHashPath: LabelHash[]): Node {
+export function namehashLabelHashPath(labelHashPath: LabelHashPath): Node {
   return namehashInterpretedName(
     interpretedLabelsToInterpretedName(
-      labelHashPath.map((lh) => encodeLabelHash(lh) as unknown as InterpretedLabel),
+      labelHashPath.reverse().map((lh) => encodeLabelHash(lh) as string as InterpretedLabel),
     ),
   );
 }

@@ -4,6 +4,7 @@ import type {
   InterpretedLabel,
   InterpretedName,
   LabelHash,
+  LabelHashPath,
   Node,
   NormalizedAddress,
   PermissionsId,
@@ -295,7 +296,7 @@ export const domain = onchainTable(
     // (all NULL iff `canonical = false`). Maintained inline by `canonicality-db-helpers.ts`.
     // `canonicalLabelHashPath` is leaf-first; `canonicalNode` is the namehash over the path.
     canonicalName: t.text().$type<InterpretedName>(),
-    canonicalLabelHashPath: t.hex().array().$type<LabelHash[]>(),
+    canonicalLabelHashPath: t.hex().array().$type<LabelHashPath>(),
     canonicalNode: t.hex().$type<Node>(),
 
     // NOTE: Domain-Resolver Relations tracked via Protocol Acceleration plugin

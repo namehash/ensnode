@@ -28,8 +28,7 @@ export async function ensureLabel(context: IndexingEngineContext, label: Literal
   const labelHash = labelhashLiteralLabel(label);
   const interpreted = literalLabelToInterpretedLabel(label);
 
-  // Read prior value to detect heal-upgrades (encoded labelhash → real label, or any change).
-  // No row → first time we've seen this labelHash, so no existing canonical Domain references it.
+  // TODO: this re-implements labelExists, can likely DRY it up
   const prev = await context.ensDb.find(ensIndexerSchema.label, { labelHash });
 
   await context.ensDb
@@ -37,9 +36,8 @@ export async function ensureLabel(context: IndexingEngineContext, label: Literal
     .values({ labelHash, interpreted })
     .onConflictDoUpdate({ interpreted });
 
-  if (prev && prev.interpreted !== interpreted) {
-    await cascadeLabelHeal(context, labelHash);
-  }
+  // if this was a heal (was previous seen, now updated), cascade the update to the materialized names
+  if (prev && prev.interpreted !== interpreted) await cascadeLabelHeal(context, labelHash);
 }
 
 /**
