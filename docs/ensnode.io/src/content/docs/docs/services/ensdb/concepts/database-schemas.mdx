@@ -100,7 +100,7 @@ graphs. The full namegraph is never materialized, only _navigated_ at resolution
 exception of the canonical subgraph, which is reflected via `Registry.canonical` /
 `Domain.canonical` boolean flags on the rows themselves. The bidirectional canonical edge is NOT
 materialized in a parallel table; it is derived on demand by checking that the two unidirectional
-pointers agree (`Registry.canonicalDomainId = Domain.id` ↔ `Domain.subregistryId = Registry.id`).
+pointers agree (`Registry.canonicalDomainId = Domain.id` ↔ `Domain.subregistryId = Registry.id`). Cascading canonicality flips through the subgraph run as either an in-memory PK update (when `Registry.__hasChildren = false`, the dominant case for fresh ENSv1 virtual registries on first wire-up) or a single recursive-CTE batch UPDATE otherwise (see `canonicality-db-helpers.ts`).
 
 Note also that the Protocol Acceleration plugin is a hard requirement for the ENSv2 plugin. This
 allows us to rely on the shared logic for indexing:
@@ -238,6 +238,9 @@ For ENSv1, each domain that has children implicitly owns a "virtual" Registry (`
 | `chainId` | `integer` | no | Chain the registry contract is deployed on. |
 | `address` | `text` | no | Address of the registry contract. |
 | `node` | `text` | yes | If this is an `ENSv1VirtualRegistry`, the namehash of the parent ENSv1 domain that owns it, otherwise `null`. |
+| `canonicalDomainId` | `text` | yes | The Registry's declared Canonical Domain (uni-directional). |
+| `canonical` | `boolean` | no | Whether this Registry is part of the canonical nametree. Default `false`. |
+| `__hasChildren` | `boolean` | no | Internal bookkeeping field. Synthetic monotonic sentinel flipped to `true` the first time a child Domain is registered under this Registry. Used to optimize canonicality cascades. Default `false`. |
 
 **Indexes:** `(chainId, address)` — non-unique, because multiple rows can share `(chainId, address)` across virtual registries.
 
@@ -248,7 +251,7 @@ For ENSv1, each domain that has children implicitly owns a "virtual" Registry (`
 The `domain.ownerId` for ENSv1 Domains is the materialized effective owner. ENSv1 includes a diverse number of ways to 'own' a domain, including the ENSv1 Registry, various Registrars, and the NameWrapper. The ENSv1 indexing logic materializes the effective owner to simplify this aspect of ENS and enable efficient queries against `domain.ownerId`.
 
 :::note
-Domain-Resolver relations are tracked via the Protocol Acceleration plugin, not stored on the domain row. The parent domain is derived via `registry_canonical_domains`, not stored on the domain row.
+Domain-Resolver relations are tracked via the Protocol Acceleration plugin, not stored on the domain row. The parent domain is derived via `registries.canonicalDomainId` / `domains.subregistryId` bidirectional verification, not stored on the domain row.
 :::
 
 | Column | Type | Nullable | Description |
@@ -262,6 +265,7 @@ Domain-Resolver relations are tracked via the Protocol Acceleration plugin, not 
 | `labelHash` | `text` | no | Represents a labelHash. References `labels.labelHash`. |
 | `ownerId` | `text` | yes | If `ENSv1Domain`, the materialized effective owner address. If `ENSv2Domain`, the on-chain owner address (the HCA account address if used). |
 | `rootRegistryOwnerId` | `text` | yes | ENSv1 only: the owner recorded in the root ENSv1 registry. `null` for ENSv2 domains. |
+| `canonical` | `boolean` | no | Whether this Domain is part of the canonical nametree. Mirrors the parent Registry's flag. Default `false`. |
 
 **Indexes:** `type`, `registryId`, `subregistryId` (partial: non-null only), `ownerId`, `labelHash`.
 
@@ -397,18 +401,7 @@ A user's role bitmap for a specific resource within a `permissions` contract.
 
 **Relations:** has one `account` (user), belongs to one `permissions` via `(chainId, address)`, belongs to one `permissions_resource` via `(chainId, address, resource)`.
 
-#### `registry_canonical_domains`
 
-Maps each registry to its canonical parent domain. This table will be refactored away once Canonical Names are implemented in ENSv2, at which point this information can be stored directly on the Registry entity. Until then it provides a place to track canonical domain references without requiring that a Registry contract has emitted an event and therefore been indexed.
-
-| Column | Type | Nullable |
-|--------|------|----------|
-| `registryId` | `text` | no |
-| `domainId` | `text` | no |
-
-**Primary key:** `registryId`.
-
----
 
 ### Protocol Acceleration
 
