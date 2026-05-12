@@ -75,20 +75,20 @@ describe("Domain.canonical", () => {
       canonical: {
         name: InterpretedName;
         node: string;
-        path: DomainId[];
+        path: { id: DomainId }[];
       } | null;
     } | null;
   };
 
   const DomainCanonicalByName = gql`
     query DomainCanonicalByName($name: InterpretedName!) {
-      domain(by: { name: $name }) { id canonical { name node path } }
+      domain(by: { name: $name }) { id canonical { name node path { id } } }
     }
   `;
 
   const DomainCanonicalById = gql`
     query DomainCanonicalById($id: DomainId!) {
-      domain(by: { id: $id }) { id canonical { name node path } }
+      domain(by: { id: $id }) { id canonical { name node path { id } } }
     }
   `;
 
@@ -115,7 +115,7 @@ describe("Domain.canonical", () => {
       domain: {
         canonical: {
           name: "wallet.sub1.sub2.parent.eth",
-          path: expect.arrayContaining([expect.any(String)]),
+          path: expect.arrayContaining([{ id: expect.any(String) }]),
         },
       },
     });

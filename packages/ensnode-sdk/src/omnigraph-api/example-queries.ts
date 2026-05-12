@@ -104,7 +104,7 @@ query DomainByName($name: InterpretedName!) {
     __typename
     id
     label { interpreted hash }
-    canonical { name node path }
+    canonical { name node path { id } }
     owner { address }
     subregistry { contract { chainId address } }
 

@@ -33,7 +33,7 @@ describe("omnigraph module (integration)", () => {
     // the 'eth' domain should exist
     expect(result.data!.domain).toMatchObject({
       id: expect.any(String),
-      name: "eth",
+      canonical: { name: "eth" },
       owner: { address: expect.any(String) },
     });
   });
