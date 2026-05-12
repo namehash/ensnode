@@ -1,14 +1,5 @@
-import config from "@/config";
+import { makeENSv1DomainId, type Node, type NormalizedAddress } from "enssdk";
 
-import {
-  type LabelHash,
-  makeENSv1DomainId,
-  makeSubdomainNode,
-  type Node,
-  type NormalizedAddress,
-} from "enssdk";
-
-import { getENSRootChainId } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 import { getThisAccountId } from "@/lib/get-this-account-id";
@@ -17,16 +8,15 @@ import { getManagedName } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import { ensureDomainResolverRelation } from "@/lib/protocol-acceleration/domain-resolver-relationship-db-helpers";
-import { migrateNode, nodeIsMigrated } from "@/lib/protocol-acceleration/registry-migration-status";
-
-const ensRootChainId = getENSRootChainId(config.namespace);
+import { nodeIsMigrated } from "@/lib/protocol-acceleration/migrated-node-db-helpers";
 
 /**
  * Handler functions for Registry contracts in the Protocol Acceleration plugin.
- * - indexes ENS Root Chain Registry migration status
  * - indexes Node-Resolver Relationships for all Registry contracts
  *
- * Note that this registry migration status tracking is isolated to the protocol
+ * Note: ENS Root Chain Registry node-migration status is tracked separately in `node-migration.ts`,
+ * registered before both this plugin and the ENSv2 plugin so its results are available to the
+ * Old-registry guards in either plugin.
  */
 export default function () {
   async function handleNewResolver({
@@ -45,34 +35,6 @@ export default function () {
 
     await ensureDomainResolverRelation(context, registry, domainId, resolver);
   }
-
-  /**
-   * Handles Registry#NewOwner for:
-   * - ENS Root Chain's (new) Registry
-   */
-  addOnchainEventListener(
-    namespaceContract(PluginName.ProtocolAcceleration, "ENSv1Registry:NewOwner"),
-    async ({
-      context,
-      event,
-    }: {
-      context: IndexingEngineContext;
-      event: EventWithArgs<{
-        // NOTE: `node` event arg represents a `Node` that is the _parent_ of the node the NewOwner event is about
-        node: Node;
-        // NOTE: `label` event arg represents a `LabelHash` for the sub-node under `node`
-        label: LabelHash;
-        owner: NormalizedAddress;
-      }>;
-    }) => {
-      // no-op because we only track registry migration status on ENS Root Chain
-      if (context.chain.id !== ensRootChainId) return;
-
-      const { label: labelHash, node: parentNode } = event.args;
-      const node = makeSubdomainNode(labelHash, parentNode);
-      await migrateNode(context, node);
-    },
-  );
 
   /**
    * Handles Registry#NewResolver for:

@@ -11,12 +11,15 @@ import {
   minPrice,
   type Price,
   type PriceDai,
+  type PriceEnsTokens,
   type PriceEth,
   type PriceUsdc,
   parseDai,
+  parseEnsTokens,
   parseEth,
   parseUsdc,
   priceDai,
+  priceEnsTokens,
   priceEth,
   priceUsdc,
   scalePrice,
@@ -29,6 +32,12 @@ describe("Currencies", () => {
       expect(getCurrencyInfo(CurrencyIds.ETH)).toStrictEqual({
         id: CurrencyIds.ETH,
         name: "ETH",
+        decimals: 18,
+      } satisfies CurrencyInfo);
+
+      expect(getCurrencyInfo(CurrencyIds.ENSTokens)).toStrictEqual({
+        id: CurrencyIds.ENSTokens,
+        name: "$ENS Tokens",
         decimals: 18,
       } satisfies CurrencyInfo);
     });
@@ -58,6 +67,15 @@ describe("Currencies", () => {
         amount: 1n,
         currency: CurrencyIds.DAI,
       } satisfies PriceDai);
+    });
+  });
+
+  describe("priceEnsTokens", () => {
+    it("returns correct Price object", () => {
+      expect(priceEnsTokens(1n)).toStrictEqual({
+        amount: 1n,
+        currency: CurrencyIds.ENSTokens,
+      } satisfies PriceEnsTokens);
     });
   });
 
@@ -199,6 +217,13 @@ describe("Currencies", () => {
         expect(result.amount).toBe(500000000000000000n);
       });
 
+      it("should preserve ENSTokens currency type and scale correctly", () => {
+        const price: PriceEnsTokens = priceEnsTokens(1000000000000000000n);
+        const result: PriceEnsTokens = scalePrice(price, 0.5);
+        expect(result.currency).toBe("ENSTokens");
+        expect(result.amount).toBe(500000000000000000n);
+      });
+
       it("should preserve currency when scaling by 1", () => {
         const price = priceUsdc(1000000n);
         const result = scalePrice(price, 1);
@@ -238,6 +263,12 @@ describe("Currencies", () => {
         const price: PriceDai = priceDai(1000000000000000000n);
         const result: PriceDai = scalePrice(price, 0.5);
         expect(result.currency).toBe("DAI");
+      });
+
+      it("should preserve PriceEnsTokens type", () => {
+        const price: PriceEnsTokens = priceEnsTokens(1000000000000000000n);
+        const result: PriceEnsTokens = scalePrice(price, 0.5);
+        expect(result.currency).toBe("ENSTokens");
       });
     });
 
@@ -533,6 +564,102 @@ describe("Currencies", () => {
         expect(() => parseDai("-1")).toThrow("amount must be a non-negative decimal string");
         expect(() => parseDai("-0.5")).toThrow("amount must be a non-negative decimal string");
         expect(() => parseDai("-123.456")).toThrow("amount must be a non-negative decimal string");
+      });
+    });
+  });
+
+  describe("parseEnsTokens", () => {
+    describe("correct format and decimals", () => {
+      it("should return PriceEnsTokens type with correct currency", () => {
+        const result = parseEnsTokens("1");
+        expect(result).toHaveProperty("currency", CurrencyIds.ENSTokens);
+        expect(result).toHaveProperty("amount");
+        expect(result.currency).toBe(CurrencyIds.ENSTokens);
+        expect(typeof result.amount).toBe("bigint");
+      });
+
+      it("should use 18 decimals from getCurrencyInfo", () => {
+        const currencyInfo = getCurrencyInfo(CurrencyIds.ENSTokens);
+        expect(currencyInfo.decimals).toBe(18);
+
+        // Test that it uses 18 decimals by parsing a value with 18 decimal places
+        const result = parseEnsTokens("1.123456789012345678");
+        expect(result.amount).toBe(1123456789012345678n);
+      });
+
+      it("should parse integer ENSTokens values correctly", () => {
+        expect(parseEnsTokens("1")).toEqual({
+          currency: CurrencyIds.ENSTokens,
+          amount: 1000000000000000000n, // 1 $ENS = 10^18 smallest units
+        } satisfies PriceEnsTokens);
+
+        expect(parseEnsTokens("0")).toEqual({
+          currency: CurrencyIds.ENSTokens,
+          amount: 0n,
+        } satisfies PriceEnsTokens);
+
+        expect(parseEnsTokens("123")).toEqual({
+          currency: CurrencyIds.ENSTokens,
+          amount: 123000000000000000000n,
+        } satisfies PriceEnsTokens);
+      });
+
+      it("should parse decimal ENSTokens values correctly", () => {
+        expect(parseEnsTokens("123.456789012345678")).toEqual({
+          currency: CurrencyIds.ENSTokens,
+          amount: 123456789012345678000n,
+        } satisfies PriceEnsTokens);
+
+        expect(parseEnsTokens("0.001")).toEqual({
+          currency: CurrencyIds.ENSTokens,
+          amount: 1000000000000000n,
+        } satisfies PriceEnsTokens);
+
+        expect(parseEnsTokens("0.5")).toEqual({
+          currency: CurrencyIds.ENSTokens,
+          amount: 500000000000000000n,
+        } satisfies PriceEnsTokens);
+      });
+
+      it("should handle small ENSTokens values (minimum unit)", () => {
+        expect(parseEnsTokens("0.000000000000000001")).toEqual({
+          currency: CurrencyIds.ENSTokens,
+          amount: 1n, // 1 smallest unit
+        } satisfies PriceEnsTokens);
+      });
+
+      it("should handle maximum precision (18 decimal places)", () => {
+        expect(parseEnsTokens("1.123456789012345678")).toEqual({
+          currency: CurrencyIds.ENSTokens,
+          amount: 1123456789012345678n,
+        } satisfies PriceEnsTokens);
+      });
+    });
+
+    describe("error handling", () => {
+      it("should throw on invalid format", () => {
+        expect(() => parseEnsTokens("abc")).toThrow();
+        expect(() => parseEnsTokens("1.2.3")).toThrow();
+      });
+
+      it("should throw on empty string", () => {
+        expect(() => parseEnsTokens("")).toThrow("amount must be a non-negative decimal string");
+      });
+
+      it("should throw on whitespace-only string", () => {
+        expect(() => parseEnsTokens("   ")).toThrow("amount must be a non-negative decimal string");
+        expect(() => parseEnsTokens("\t")).toThrow("amount must be a non-negative decimal string");
+        expect(() => parseEnsTokens("\n")).toThrow("amount must be a non-negative decimal string");
+      });
+
+      it("should throw on negative values", () => {
+        expect(() => parseEnsTokens("-1")).toThrow("amount must be a non-negative decimal string");
+        expect(() => parseEnsTokens("-0.5")).toThrow(
+          "amount must be a non-negative decimal string",
+        );
+        expect(() => parseEnsTokens("-123.456")).toThrow(
+          "amount must be a non-negative decimal string",
+        );
       });
     });
   });

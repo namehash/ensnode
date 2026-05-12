@@ -33,6 +33,7 @@ import {
   PAGINATION_DEFAULT_MAX_SIZE,
   PAGINATION_DEFAULT_PAGE_SIZE,
 } from "@/omnigraph-api/schema/constants";
+import { ENSProtocolVersion } from "@/omnigraph-api/schema/ens-protocol-version";
 import { EventRef, EventsWhereInput } from "@/omnigraph-api/schema/event";
 import { LabelRef } from "@/omnigraph-api/schema/label";
 import { OrderDirection } from "@/omnigraph-api/schema/order-direction";
@@ -103,6 +104,16 @@ DomainInterfaceRef.implement({
       resolve: (parent) => parent.label,
     }),
 
+    ////////////////////
+    // Domain.canonical
+    ////////////////////
+    canonical: t.field({
+      description: "Whether the Domain is Canonical.",
+      type: "Boolean",
+      nullable: false,
+      resolve: (parent) => parent.canonical,
+    }),
+
     ///////////////
     // Domain.name
     ///////////////
@@ -162,7 +173,7 @@ DomainInterfaceRef.implement({
     /////////////////
     parent: t.field({
       description:
-        "The direct parent Domain in the canonical namegraph or null if this Domain is a root-level Domain or is not Canonical.",
+        "The direct parent Domain in the canonical nametree or null if this Domain is a root-level Domain or is not Canonical.",
       type: DomainInterfaceRef,
       nullable: true,
       resolve: async (domain, _args, context) => {
@@ -177,7 +188,8 @@ DomainInterfaceRef.implement({
     ////////////////
     owner: t.field({
       type: AccountRef,
-      description: "The owner of this Domain.",
+      description:
+        "If this is an ENSv1Domain, this is the effective owner of the Domain. If this is an ENSv2Domain, this is the on-chain owner address (the HCA account address if used).",
       nullable: true,
       resolve: (parent) => parent.ownerId,
     }),
@@ -428,10 +440,10 @@ export const DomainsWhereInput = builder.inputType("DomainsWhereInput", {
       description:
         "A partial Interpreted Name by which to search the set of Domains. ex: 'example', 'example.', 'example.et'.",
     }),
-    canonical: t.boolean({
+    version: t.field({
+      type: ENSProtocolVersion,
       description:
-        "Optional, defaults to false. If true, filters the set of Domains by those that are Canonical (i.e. reachable by ENS Forward Resolution). If false, the set of Domains is not filtered, and may include ENSv2 Domains not reachable by ENS Forward Resolution.",
-      defaultValue: false,
+        "If set, filters the set of Domains to only those of the specified ENS protocol version.",
     }),
   }),
 });
@@ -447,6 +459,11 @@ export const AccountDomainsWhereInput = builder.inputType("AccountDomainsWhereIn
       description:
         "Optional, defaults to false. If true, filters the set of Domains by those that are Canonical (i.e. reachable by ENS Forward Resolution).",
       defaultValue: false,
+    }),
+    version: t.field({
+      type: ENSProtocolVersion,
+      description:
+        "If set, filters the set of Domains to only those of the specified ENS protocol version.",
     }),
   }),
 });

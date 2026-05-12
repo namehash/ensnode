@@ -76,8 +76,6 @@
   --pagination-arrow-color: var(--color-text-secondary);
   --sl-shadow-md: var(--shadow-md);
   --sl-shadow-sm: var(--shadow-sm);
-
-  --sidebar-item-gap: 4px;
 }
 
 /* Starlight-specific component styles */
@@ -87,10 +85,12 @@
     max-width: var(--max-width-page);
     margin-inline: auto;
   }
+
   nav.sidebar .sidebar-pane {
     position: sticky;
     height: calc(100vh - var(--sl-nav-height));
   }
+
   div.main-frame {
     padding-inline-start: initial;
     flex: 1;
@@ -144,6 +144,7 @@ a[rel="prev"]:hover {
   color: var(--sl-color-white);
   display: inline;
   text-decoration: none;
+
   &:hover {
     text-decoration: underline;
   }
@@ -156,11 +157,17 @@ a[rel="prev"]:hover {
 .sl-markdown-content ul {
   list-style: disc;
   color: var(--sl-color-text);
+  list-style-position: inside;
+}
+
+.sl-markdown-content ul ul {
+  margin-left: 1rem;
 }
 
 .sl-markdown-content ol {
   list-style: decimal;
   color: var(--sl-color-text);
+  list-style-position: inside;
 }
 
 .sl-markdown-content ol li::marker,
@@ -222,82 +229,6 @@ a[rel="prev"]:hover {
   @media screen and (max-width: 400px) {
     font-size: 14px;
   }
-}
-
-/* Styling for the list items to prepare for lines */
-#starlight__sidebar > div > ul > li {
-  position: relative; /* For absolute positioning of ::before */
-}
-
-/*
- * Add padding-left only to items that will get a line, to make space for it.
- * Note, including :not(:last-child) to de-indent ENSAdmin.
- */
-#starlight__sidebar > div > ul > li:not(:first-child):not(:last-child) {
-  padding-left: 20px; /* Space for the line and content */
-}
-
-/* Add margin-bottom for the gap to all LIs except the very last one in the UL */
-#starlight__sidebar > div > ul > li:not(:last-child) {
-  margin-bottom: var(--sidebar-item-gap);
-}
-
-/*
- * Vertical line segment for relevant list items
- * Note, including :not(:last-child) to de-indent ENSAdmin.
- */
-#starlight__sidebar > div > ul > li:not(:first-child):not(:last-child)::before {
-  content: "";
-  position: absolute;
-  left: 8px; /* X-position of the vertical line */
-  top: 0;
-  width: 1px; /* Thickness of the vertical line */
-  background-color: var(--sl-color-hairline-light); /* Line color */
-  height: 100%; /* Default height, covers the item itself */
-}
-
-#starlight__sidebar > div > ul > li:not(:first-child):not(:last-child)::before {
-  height: calc(100% + var(--sidebar-item-gap));
-}
-
-/* Custom icon logic for specific sidebar items based on URL - hack as only
- * icons are supported in starlight. */
-
-/* Styles to replace the default Starlight sidebar icon with a custom image */
-.starlight-sidebar-topics-icon svg {
-  display: none; /* Hide the default SVG icon */
-}
-
-/* Default sidebar icon (parent) */
-.starlight-sidebar-topics-icon {
-  background-image: url("../assets/ensnode.svg");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  width: 16px;
-  height: 16px;
-  display: inline-block;
-}
-
-/* URL based custom icons */
-a[href*="ensindexer"] .starlight-sidebar-topics-icon {
-  background-image: url("../assets/ensindexer.svg");
-}
-
-a[href*="ensrainbow"] .starlight-sidebar-topics-icon {
-  background-image: url("../assets/ensrainbow.svg");
-}
-
-a[href*="ensadmin"] .starlight-sidebar-topics-icon {
-  background-image: url("../assets/ensadmin.svg");
-}
-
-a[href*="ensdb"] .starlight-sidebar-topics-icon {
-  background-image: url("../assets/ensdb.svg");
-}
-
-a[href*="ensapi"] .starlight-sidebar-topics-icon {
-  background-image: url("../assets/ensapi.svg");
 }
 
 /* Enhance hover and selected states for sidebar items */

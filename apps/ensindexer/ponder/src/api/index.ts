@@ -5,26 +5,9 @@ import { cors } from "hono/cors";
 
 import type { ErrorResponse } from "@ensnode/ensnode-sdk";
 
-import { migrateEnsNodeSchema } from "@/lib/ensdb/migrate-ensnode-schema";
-import { startEnsDbWriterWorker } from "@/lib/ensdb-writer-worker/singleton";
 import { logger } from "@/lib/logger";
 
 import ensNodeApi from "./handlers/ensnode-api";
-
-// Before starting the ENSDb Writer Worker, we need to ensure that
-// the ENSNode Schema in ENSDb is up to date by running any pending migrations.
-await migrateEnsNodeSchema().catch((error) => {
-  logger.error({
-    msg: "Failed to initialize ENSNode metadata",
-    error,
-    module: "ponder-api",
-  });
-  process.exitCode = 1;
-  throw error;
-});
-
-// The entry point for the ENSDb Writer Worker.
-startEnsDbWriterWorker();
 
 const app = new Hono();
 

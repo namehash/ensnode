@@ -40,7 +40,7 @@ export default function () {
       const {
         id,
         args: {
-          // this field is the labelhash, not the label
+          // `label` param is misnamed onchain — re-map to proper ENS terminology
           label: labelHash,
         },
       } = event;
@@ -77,7 +77,7 @@ export default function () {
       const {
         id,
         args: {
-          // this field is the labelhash, not the label
+          // `label` param is misnamed onchain — re-map to proper ENS terminology
           label: labelHash,
         },
       } = event;
@@ -114,7 +114,7 @@ export default function () {
       const {
         id,
         args: {
-          // this field is the labelhash, not the label
+          // `label` param is misnamed onchain — re-map to proper ENS terminology
           label: labelHash,
         },
       } = event;
@@ -149,7 +149,7 @@ export default function () {
       const {
         id,
         args: {
-          // this field is the labelhash, not the label
+          // `label` param is misnamed onchain — re-map to proper ENS terminology
           label: labelHash,
         },
       } = event;

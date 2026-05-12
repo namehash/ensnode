@@ -11,6 +11,7 @@ import {
   filterByCanonical,
   filterByName,
   filterByOwner,
+  filterByVersion,
   withOrderingMetadata,
 } from "@/omnigraph-api/lib/find-domains/layers";
 import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-resolver";
@@ -81,7 +82,8 @@ AccountRef.implement({
         const owned = filterByOwner(base, parent.id);
         const named = filterByName(owned, where?.name);
         const canonical = where?.canonical === true ? filterByCanonical(named) : named;
-        const domains = withOrderingMetadata(canonical);
+        const versioned = where?.version ? filterByVersion(canonical, where.version) : canonical;
+        const domains = withOrderingMetadata(versioned);
         return resolveFindDomains(context, { domains, order, ...connectionArgs });
       },
     }),
@@ -90,13 +92,14 @@ AccountRef.implement({
     // Account.events
     //////////////////
     events: t.connection({
-      description: "All Events for which this Account is the sender (i.e. `Transaction.from`).",
+      description:
+        "All Events for which this Account is the HCA-aware `sender` (i.e. `Event.sender`).",
       type: EventRef,
       args: {
         where: t.arg({ type: AccountEventsWhereInput }),
       },
       resolve: (parent, args) =>
-        resolveFindEvents({ ...args, where: { ...args.where, from: parent.id } }),
+        resolveFindEvents({ ...args, where: { ...args.where, sender: parent.id } }),
     }),
 
     ///////////////////////

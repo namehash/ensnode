@@ -3,10 +3,20 @@ import type { OpenAPIHono } from "@hono/zod-openapi";
 import { openapiMeta } from "@/openapi-meta";
 
 /**
- * Endpoints to exclude from the generated OpenAPI document.
- * TODO: remove /amirealtime once the legacy endpoint is deleted.
+ * Deprecated endpoints to exclude from the generated OpenAPI document.
  */
-const HIDE_OPENAPI_ENDPOINTS: string[] = ["/amirealtime"];
+const HIDE_OPENAPI_ENDPOINTS: string[] = [
+  // TODO: remove /amirealtime once the legacy endpoint is deleted.
+  "/amirealtime",
+  // TODO: remove all other endpoints from this list once the legacy endpoints are deleted.
+  "/api/name-tokens",
+  "/api/registrar-actions",
+  "/api/registrar-actions/{parentNode}",
+  "/v1/ensanalytics/referral-leaderboard",
+  "/v1/ensanalytics/referrer/{referrer}",
+  "/v1/ensanalytics/editions",
+  "/v1/ensanalytics/accounting",
+];
 
 type OpenApiDocument = ReturnType<OpenAPIHono["getOpenAPI31Document"]>;
 

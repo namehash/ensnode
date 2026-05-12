@@ -68,7 +68,8 @@ jobs:
           commit: "chore(release): version apps"
           title: "Release New Version"
           version: pnpm changeset:version
-          publish: pnpm changeset-publish
+          # Only publish when this is a merged Release PR (squash merge uses PR title as commit subject)
+          publish: ${{ startsWith(github.event.head_commit.message, 'Release New Version') && 'pnpm changeset:publish' || '' }}
           createGithubReleases: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

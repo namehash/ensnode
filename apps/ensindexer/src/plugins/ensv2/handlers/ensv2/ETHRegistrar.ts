@@ -5,13 +5,13 @@ import {
   makeStorageId,
   type NormalizedAddress,
   type TokenId,
+  toNormalizedAddress,
   type UnixTimestampBigInt,
   type Wei,
 } from "enssdk";
 
 import {
   type EncodedReferrer,
-  interpretAddress,
   isRegistrationFullyExpired,
   PluginName,
   toJson,
@@ -36,11 +36,14 @@ async function getRegistrarAndRegistry(context: IndexingEngineContext, event: Lo
   const registry: AccountId = {
     chainId: context.chain.id,
     // ETHRegistrar (this contract) provides a handle to its backing Registry
-    address: await context.client.readContract({
-      abi: context.contracts[namespaceContract(pluginName, "ETHRegistrar")].abi,
-      address: event.log.address,
-      functionName: "REGISTRY",
-    }),
+    // NOTE: viem returns checksummed addresses, need to normalize
+    address: toNormalizedAddress(
+      await context.client.readContract({
+        abi: context.contracts[namespaceContract(pluginName, "ETHRegistrar")].abi,
+        address: event.log.address,
+        functionName: "REGISTRY",
+      }),
+    ),
   };
 
   return { registrar, registry };
@@ -103,12 +106,11 @@ export default function () {
       }
 
       // upsert registrant
-      await ensureAccount(context, owner);
+      const registrantId = await ensureAccount(context, owner);
 
       // update latest Registration
       await context.ensDb.update(ensIndexerSchema.registration, { id: registration.id }).set({
-        // TODO: reconsider 'Registration.registrant' if ENSv2 doesn't provide explicit 'registrant'
-        registrantId: interpretAddress(owner),
+        registrantId,
 
         // we now know the correct registrar to attribute to, so overwrite
         registrarChainId: registrar.chainId,
@@ -122,7 +124,7 @@ export default function () {
       });
 
       // push event to domain history
-      const eventId = await ensureEvent(context, event);
+      const eventId = await ensureEvent(context, event, registrantId);
       await ensureDomainEvent(context, domainId, eventId);
     },
   );

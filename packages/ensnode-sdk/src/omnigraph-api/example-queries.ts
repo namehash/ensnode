@@ -1,6 +1,7 @@
 import { asInterpretedName, toNormalizedAddress } from "enssdk";
 
 import { DatasourceNames, ENSNamespaceIds } from "@ensnode/datasources";
+import { accounts } from "@ensnode/datasources/devnet";
 
 import { maybeGetDatasourceContract } from "../shared/datasource-contract";
 import type { NamespaceSpecificValue } from "../shared/namespace-specific-value";
@@ -29,15 +30,14 @@ const ENS_TEST_ENV_V2_ETH_REGISTRAR = maybeGetDatasourceContract(
   "ETHRegistrar",
 );
 
-// these addresses are from the devnet accounts output
-const DEVNET_DEPLOYER = toNormalizedAddress("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266");
-const DEVNET_OWNER = toNormalizedAddress("0x70997970C51812dc3A010C7d01b50e0d17dc79C8");
-// biome-ignore lint/correctness/noUnusedVariables: keeping it around for the future
-const DEVNET_USER = toNormalizedAddress("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC");
-
 const VITALIK_ADDRESS = toNormalizedAddress("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045");
 
+// owns sfmonicdeb*.eth (mix of v1 + v2) on sepolia-v2 and holds v2 ETHRegistry permissions
+const SEPOLIA_V2_USER_ADDRESS = toNormalizedAddress("0x2f8e8b1126e75fde0b7f731e7cb5847eba2d2574");
+
 const DEVNET_NAME_WITH_OWNED_RESOLVER = asInterpretedName("example.eth");
+
+const SEPOLIA_V2_NAME_WITH_OWNED_RESOLVER = asInterpretedName("sfmonicdebmig.eth");
 
 export const GRAPHQL_API_EXAMPLE_QUERIES: Array<{
   query: string;
@@ -90,6 +90,7 @@ query FindDomains(
     variables: {
       default: { name: "vitalik", order: { by: "NAME", dir: "DESC" } },
       [ENSNamespaceIds.EnsTestEnv]: { name: "c", order: { by: "NAME", dir: "DESC" } },
+      [ENSNamespaceIds.SepoliaV2]: { name: "sfmonic", order: { by: "NAME", dir: "DESC" } },
     },
   },
 
@@ -117,7 +118,10 @@ query DomainByName($name: InterpretedName!) {
     }
   }
 }`,
-    variables: { default: { name: "eth" } },
+    variables: {
+      default: { name: "eth" },
+      [ENSNamespaceIds.SepoliaV2]: { name: "sfmonicdebmig.eth" },
+    },
   },
 
   //////////////////////
@@ -162,7 +166,10 @@ query DomainEvents($name: InterpretedName!) {
     }
   }
 }`,
-    variables: { default: { name: "newowner.eth" } },
+    variables: {
+      default: { name: "newowner.eth" },
+      [ENSNamespaceIds.SepoliaV2]: { name: "sfmonicdebmig.eth" },
+    },
   },
 
   ////////////////////
@@ -186,7 +193,8 @@ query AccountDomains(
 }`,
     variables: {
       default: { address: VITALIK_ADDRESS },
-      [ENSNamespaceIds.EnsTestEnv]: { address: DEVNET_OWNER },
+      [ENSNamespaceIds.EnsTestEnv]: { address: accounts.owner.address },
+      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_USER_ADDRESS },
     },
   },
 
@@ -204,7 +212,8 @@ query AccountEvents(
 }`,
     variables: {
       default: { address: VITALIK_ADDRESS },
-      [ENSNamespaceIds.EnsTestEnv]: { address: DEVNET_DEPLOYER },
+      [ENSNamespaceIds.EnsTestEnv]: { address: accounts.deployer.address },
+      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_USER_ADDRESS },
     },
   },
 
@@ -287,9 +296,8 @@ query PermissionsByUser($address: Address!) {
   }
 }`,
     variables: {
-      default: { address: DEVNET_DEPLOYER },
-      // TODO: figure out a good sepolia-v2 user address
-      // [ENSNamespaceIds.SepoliaV2]: { address: "" },
+      default: { address: accounts.deployer.address },
+      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_USER_ADDRESS },
     },
   },
 
@@ -314,9 +322,8 @@ query AccountResolverPermissions($address: Address!) {
   }
 }`,
     variables: {
-      default: { address: DEVNET_DEPLOYER },
-      // TODO: figure out a good sepolia-v2 user address
-      // [ENSNamespaceIds.SepoliaV2]: { address: "" },
+      default: { address: accounts.deployer.address },
+      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_USER_ADDRESS },
     },
   },
 
@@ -337,6 +344,7 @@ query DomainResolver($name: InterpretedName!) {
     variables: {
       default: { name: "vitalik.eth" },
       [ENSNamespaceIds.EnsTestEnv]: { name: DEVNET_NAME_WITH_OWNED_RESOLVER },
+      [ENSNamespaceIds.SepoliaV2]: { name: SEPOLIA_V2_NAME_WITH_OWNED_RESOLVER },
     },
   },
 

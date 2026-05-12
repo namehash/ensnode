@@ -1,7 +1,16 @@
-import type { DomainId, InterpretedLabel, InterpretedName } from "enssdk";
+import {
+  ADDR_REVERSE_NODE,
+  type DomainId,
+  type InterpretedLabel,
+  type InterpretedName,
+  makeENSv1DomainId,
+} from "enssdk";
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { DEVNET_ETH_LABELS } from "@/test/integration/devnet-names";
+import { DatasourceNames } from "@ensnode/datasources";
+import { getDatasourceContract } from "@ensnode/ensnode-sdk";
+
+import { DEVNET_ETH_LABELS, DEVNET_NAMES } from "@/test/integration/devnet-names";
 import {
   DomainSubdomainsPaginated,
   type PaginatedDomainResult,
@@ -73,45 +82,76 @@ describe("Domain.path", () => {
   `;
 
   it("returns the full canonical path (leaf → root) for a deep name", async () => {
-    const result = await request<DomainPathResult>(DomainPath, {
-      name: "wallet.linked.parent.eth",
+    await expect(
+      request<DomainPathResult>(DomainPath, { name: "wallet.sub1.sub2.parent.eth" }),
+    ).resolves.toMatchObject({
+      domain: {
+        path: [
+          { name: "wallet.sub1.sub2.parent.eth" },
+          { name: "sub1.sub2.parent.eth" },
+          { name: "sub2.parent.eth" },
+          { name: "parent.eth" },
+          { name: "eth" },
+        ],
+      },
     });
-
-    expect(result.domain).not.toBeNull();
-    const path = result.domain?.path;
-    expect(path).not.toBeNull();
-
-    const pathNames = (path ?? []).map((d) => d.name);
-    expect(pathNames).toEqual([
-      "wallet.linked.parent.eth",
-      "linked.parent.eth",
-      "parent.eth",
-      "eth",
-    ]);
   });
 
-  it("collapses aliases to their canonical path", async () => {
-    // `wallet.sub1.sub2.parent.eth` is an alias: `sub1.sub2.parent.eth`'s subregistry was
-    // re-pointed to the registry managed by `linked.parent.eth`. The canonical path must
-    // walk through `linked.parent.eth`, NOT `sub1.sub2.parent.eth` — edge-authentication
-    // in the reverse walk must reject the stale `registryCanonicalDomain` edge.
-    const aliasResult = await request<DomainPathResult>(DomainPath, {
-      name: "wallet.sub1.sub2.parent.eth",
+  it("returns the canonical path for a linked Name", async () => {
+    // The wallet Registry's `ParentUpdated` claims `sub1.sub2.parent.eth` as its canonical parent.
+    // `linked.parent.eth.subregistry` was later re-pointed to the same Registry without a
+    // corresponding `ParentUpdated`, so `wallet.linked.parent.eth` is an addressable alias whose
+    // canonical lineage walks through `sub1.sub2.parent.eth`
+    await expect(
+      request<DomainPathResult>(DomainPath, { name: "wallet.linked.parent.eth" }),
+    ).resolves.toMatchObject({
+      domain: {
+        path: [
+          { name: "wallet.sub1.sub2.parent.eth" },
+          { name: "sub1.sub2.parent.eth" },
+          { name: "sub2.parent.eth" },
+          { name: "parent.eth" },
+          { name: "eth" },
+        ],
+      },
     });
-    const canonicalResult = await request<DomainPathResult>(DomainPath, {
-      name: "wallet.linked.parent.eth",
-    });
+  });
+});
 
-    expect(aliasResult.domain?.id).toBe(canonicalResult.domain?.id);
+describe("Domain.canonical", () => {
+  type DomainCanonicalResult = {
+    domain: { id: DomainId; canonical: boolean } | null;
+  };
 
-    const aliasPathNames = (aliasResult.domain?.path ?? []).map((d) => d.name);
-    expect(aliasPathNames).toEqual([
-      "wallet.linked.parent.eth",
-      "linked.parent.eth",
-      "parent.eth",
-      "eth",
-    ]);
-    expect(aliasPathNames).not.toContain("sub1.sub2.parent.eth");
+  const DomainCanonicalByName = gql`
+    query DomainCanonicalByName($name: InterpretedName!) {
+      domain(by: { name: $name }) { id canonical }
+    }
+  `;
+
+  const DomainCanonicalById = gql`
+    query DomainCanonicalById($id: DomainId!) {
+      domain(by: { id: $id }) { id canonical }
+    }
+  `;
+
+  it.each(DEVNET_NAMES)("is true for ENSv2 Domain '$name'", async ({ name }) => {
+    await expect(
+      request<DomainCanonicalResult>(DomainCanonicalByName, { name }),
+    ).resolves.toMatchObject({ domain: { canonical: true } });
+  });
+
+  it("is true for ENSv1 addr.reverse", async () => {
+    const v1RootRegistry = getDatasourceContract(
+      "ens-test-env",
+      DatasourceNames.ENSRoot,
+      "ENSv1Registry",
+    );
+    const id = makeENSv1DomainId(v1RootRegistry, ADDR_REVERSE_NODE);
+
+    await expect(
+      request<DomainCanonicalResult>(DomainCanonicalById, { id }),
+    ).resolves.toMatchObject({ domain: { id, canonical: true } });
   });
 });
 

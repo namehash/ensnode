@@ -31,6 +31,12 @@ export const omnigraphCacheExchange = cacheExchange({
       return stringifyAccountId(data as unknown as AccountId);
     },
 
+    // Accounts are keyable by just `address` if `id` is not provided
+    Account: (data) => {
+      const key = data.id ?? data.address;
+      return typeof key === "string" ? key : null;
+    },
+
     // These entities are Embedded Data and don't have a relevant key
     Label: EMBEDDED_DATA,
     WrappedBaseRegistrarRegistration: EMBEDDED_DATA,

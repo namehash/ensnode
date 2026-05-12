@@ -3,6 +3,7 @@ import {
   type DomainId,
   makePermissionsId,
   makeResolverId,
+  type NormalizedAddress,
   type PermissionsUserId,
 } from "enssdk";
 import type { Hash } from "viem";
@@ -24,7 +25,11 @@ const hasTopics = (topics: LogEventBase["log"]["topics"]): topics is Topics =>
  *
  * @returns event.id
  */
-export async function ensureEvent(context: IndexingEngineContext, event: LogEventBase) {
+export async function ensureEvent(
+  context: IndexingEngineContext,
+  event: LogEventBase,
+  sender?: NormalizedAddress | null,
+) {
   // all relevant ENS events obviously have a topic, so we can safely constrain the type of this data
   if (!hasTopics(event.log.topics)) {
     throw new Error(`Invariant: All events indexed via ensureEvent must have at least one topic.`);
@@ -38,6 +43,9 @@ export async function ensureEvent(context: IndexingEngineContext, event: LogEven
     .insert(ensIndexerSchema.event)
     .values({
       id: event.id,
+
+      // sender override if provided, otherwise transaction.from
+      sender: sender ?? event.transaction.from,
 
       // chain
       chainId: context.chain.id,

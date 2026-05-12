@@ -2,9 +2,11 @@ import { useMemo } from "react";
 
 import {
   hasOmnigraphApiConfigSupport,
+  hasOmnigraphApiIndexingStatusSupport,
   hasRegistrarActionsConfigSupport,
   hasRegistrarActionsIndexingStatusSupport,
   hasSubgraphApiConfigSupport,
+  hasSubgraphApiIndexingStatusSupport,
   PrerequisiteResult,
 } from "@ensnode/ensnode-sdk";
 
@@ -35,6 +37,12 @@ export interface ENSAdminFeatures {
    * Whether ENSAdmin's ENSNode Omnigraph API tooling is supported by the connected ENSNode.
    */
   omnigraph: FeatureStatus;
+
+  /**
+   * Whether ENSAdmin's REST APIs tooling is supported by the connected ENSNode.
+   * The REST API is available on any ENSApi instance that serves `/openapi.json`.
+   */
+  restApi: FeatureStatus;
 }
 
 const prerequisiteResultToFeatureStatus = (result: PrerequisiteResult): FeatureStatus => {
@@ -80,7 +88,19 @@ export function useENSAdminFeatures(): ENSAdminFeatures {
     if (indexingStatusQuery.status === "pending") return CONNECTING_STATUS;
 
     const { ensIndexer: ensIndexerPublicConfig } = indexingStatusQuery.data.stackInfo;
-    return prerequisiteResultToFeatureStatus(hasSubgraphApiConfigSupport(ensIndexerPublicConfig));
+    const configSupportResult = hasSubgraphApiConfigSupport(ensIndexerPublicConfig);
+    if (!configSupportResult.supported)
+      return prerequisiteResultToFeatureStatus(configSupportResult);
+
+    const { realtimeProjection } = indexingStatusQuery.data;
+    const { omnichainSnapshot } = realtimeProjection.snapshot;
+
+    const indexingStatusSupportResult = hasSubgraphApiIndexingStatusSupport(
+      omnichainSnapshot.omnichainStatus,
+    );
+    if (!indexingStatusSupportResult.supported)
+      return { type: "not-ready", reason: indexingStatusSupportResult.reason };
+    return { type: "supported" };
   }, [indexingStatusQuery]);
 
   const omnigraph: FeatureStatus = useMemo(() => {
@@ -88,8 +108,27 @@ export function useENSAdminFeatures(): ENSAdminFeatures {
     if (indexingStatusQuery.status === "pending") return CONNECTING_STATUS;
 
     const { ensIndexer: ensIndexerPublicConfig } = indexingStatusQuery.data.stackInfo;
-    return prerequisiteResultToFeatureStatus(hasOmnigraphApiConfigSupport(ensIndexerPublicConfig));
+    const configSupportResult = hasOmnigraphApiConfigSupport(ensIndexerPublicConfig);
+    if (!configSupportResult.supported)
+      return prerequisiteResultToFeatureStatus(configSupportResult);
+
+    const { realtimeProjection } = indexingStatusQuery.data;
+    const { omnichainSnapshot } = realtimeProjection.snapshot;
+
+    const indexingStatusSupportResult = hasOmnigraphApiIndexingStatusSupport(
+      omnichainSnapshot.omnichainStatus,
+    );
+    if (!indexingStatusSupportResult.supported)
+      return { type: "not-ready", reason: indexingStatusSupportResult.reason };
+    return { type: "supported" };
   }, [indexingStatusQuery]);
 
-  return { registrarActions, subgraph, omnigraph };
+  const restApi: FeatureStatus = useMemo(() => {
+    if (indexingStatusQuery.status === "error") return INDEXING_STATUS_ERROR_STATUS;
+    if (indexingStatusQuery.status === "pending") return CONNECTING_STATUS;
+
+    return { type: "supported" };
+  }, [indexingStatusQuery]);
+
+  return { registrarActions, subgraph, omnigraph, restApi };
 }
