@@ -25,6 +25,7 @@ import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-r
 import { getDomainResolver } from "@/omnigraph-api/lib/get-domain-resolver";
 import { getLatestRegistration } from "@/omnigraph-api/lib/get-latest-registration";
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
+import { getRegistryParentDomain } from "@/omnigraph-api/lib/get-registry-parent-domain";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
 import { AccountRef } from "@/omnigraph-api/schema/account";
 import {
@@ -85,13 +86,13 @@ export const ENSv2DomainRef = builder.objectRef<ENSv2Domain>("ENSv2Domain");
 //////////////////////////////////
 DomainInterfaceRef.implement({
   description:
-    "A Domain represents an individual Label within the ENS namegraph. It may or may not be Canonical. It may be an ENSv1Domain or an ENSv2Domain.",
+    "A Domain represents an on-chain Domain, i.e. an individual Label within the ENS namegraph. It may or may not be Canonical. It may be an ENSv1Domain or an ENSv2Domain.",
   fields: (t) => ({
     /////////////
     // Domain.id
     /////////////
     id: t.field({
-      description: "A unique reference to this Domain.",
+      description: "A unique and stable reference to this Domain.",
       type: "DomainId",
       nullable: false,
       resolve: (parent) => parent.id,
@@ -102,7 +103,7 @@ DomainInterfaceRef.implement({
     ////////////////
     label: t.field({
       type: LabelRef,
-      description: "The Label this Domain represents in the ENS Namegraph",
+      description: "The Label this Domain represents in the ENS Namegraph.",
       nullable: false,
       resolve: (parent) => parent.label,
     }),
@@ -112,7 +113,7 @@ DomainInterfaceRef.implement({
     ////////////////////
     canonical: t.field({
       description:
-        "The materialized canonical-tree projection of this Domain (Canonical Name, leaf-to-root canonical path, and namehash). Null when the Domain is not Canonical.",
+        "Metadata (name, path, and node) related to the Domain's canonicality, if known. Null when the Domain is not Canonical.",
       type: DomainCanonicalRef,
       nullable: true,
       resolve: (domain) => (domain.canonical ? domain : null),
@@ -123,16 +124,10 @@ DomainInterfaceRef.implement({
     /////////////////
     parent: t.field({
       description:
-        "The direct parent Domain via a single unidirectional walk up the namegraph (`Domain.registryId` → `Registry.canonicalDomainId`). No edge-authentication check; available for canonical and non-canonical Domains alike. Null when the parent Registry has no canonical Domain set (e.g., a root Registry).",
+        "The direct parent Domain via a single unidirectional walk up the namegraph. Null when the Domain's parent Registry does not declare a parent Domain.",
       type: DomainInterfaceRef,
       nullable: true,
-      resolve: async (domain) => {
-        const registry = await ensDb.query.registry.findFirst({
-          where: (t, { eq }) => eq(t.id, domain.registryId),
-          columns: { canonicalDomainId: true },
-        });
-        return registry?.canonicalDomainId ?? null;
-      },
+      resolve: async (domain) => getRegistryParentDomain(domain.registryId),
     }),
 
     ////////////////
@@ -147,11 +142,31 @@ DomainInterfaceRef.implement({
     }),
 
     ///////////////////
+    // Domain.registry
+    ///////////////////
+    registry: t.field({
+      description: "The Registry under which this Domain exists.",
+      type: RegistryInterfaceRef,
+      nullable: false,
+      resolve: (parent) => parent.registryId,
+    }),
+
+    //////////////////////
+    // Domain.subregistry
+    //////////////////////
+    subregistry: t.field({
+      type: RegistryInterfaceRef,
+      description: "The Registry this Domain declares as its Subregistry, if exists.",
+      nullable: true,
+      resolve: (parent) => parent.subregistryId,
+    }),
+
+    ///////////////////
     // Domain.resolver
     ///////////////////
     resolver: t.field({
       description:
-        "The Resolver that this Domain has assigned, if any. NOTE that this is the Domain's _assigned_ Resolver, _not_ its _effective_ Resolver, which can only be determined by following ENS Forward Resolution and ENSIP-10.",
+        "The Resolver that this Domain has assigned, if any. NOTE that this is the Domain's _assigned_ Resolver, _not_ its _effective_ Resolver, which can only be determined by following ENS Forward Resolution and ENSIP-10. Do NOT use this Domain-Resolver relationship in isolation to resolve records, that operation is NOT ENS Forward Resolution.",
       type: ResolverRef,
       nullable: true,
       resolve: (parent) => getDomainResolver(parent.id),
@@ -248,7 +263,7 @@ DomainInterfaceRef.implement({
 // ENSv1Domain Implementation
 //////////////////////////////
 ENSv1DomainRef.implement({
-  description: "An ENSv1Domain represents an ENSv1 Domain.",
+  description: "An ENSv1Domain represents an on-chain ENSv1 Domain.",
   interfaces: [DomainInterfaceRef],
   isTypeOf: (domain) => isENSv1Domain(domain as DomainInterface),
   fields: (t) => ({
@@ -279,7 +294,7 @@ ENSv1DomainRef.implement({
 // ENSv2Domain Implementation
 //////////////////////////////
 ENSv2DomainRef.implement({
-  description: "An ENSv2Domain represents an ENSv2 Domain.",
+  description: "An ENSv2Domain represents an on-chain ENSv2 Domain.",
   interfaces: [DomainInterfaceRef],
   isTypeOf: (domain) => isENSv2Domain(domain as DomainInterface),
   fields: (t) => ({
@@ -291,26 +306,6 @@ ENSv2DomainRef.implement({
       type: "BigInt",
       nullable: false,
       resolve: (parent) => parent.tokenId,
-    }),
-
-    ///////////////////////
-    // ENSv2Domain.registry
-    ///////////////////////
-    registry: t.field({
-      description: "The Registry under which this ENSv2Domain exists.",
-      type: RegistryInterfaceRef,
-      nullable: false,
-      resolve: (parent) => parent.registryId,
-    }),
-
-    //////////////////////////
-    // ENSv2Domain.subregistry
-    //////////////////////////
-    subregistry: t.field({
-      type: RegistryInterfaceRef,
-      description: "The Registry this ENSv2Domain declares as its Subregistry, if exists.",
-      nullable: true,
-      resolve: (parent) => parent.subregistryId,
     }),
 
     ///////////////////////////
