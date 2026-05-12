@@ -607,7 +607,12 @@ export const label = onchainTable(
     interpreted: t.text().notNull().$type<InterpretedLabel>(),
   }),
   (t) => ({
-    byInterpreted: index().on(t.interpreted),
+    // hash index avoids the btree 8191-byte row-size hazard for spam labels (a single label can
+    // exceed btree's leaf-size limit)
+    byInterpretedExact: index().using("hash", t.interpreted),
+    // GIN trigram index for substring / similarity queries (inline `gin_trgm_ops` via `sql`
+    // because passing it through `.op()` gets dropped by Ponder)
+    byInterpretedFuzzy: index().using("gin", sql`${t.interpreted} gin_trgm_ops`),
   }),
 );
 
