@@ -61,6 +61,12 @@ docker compose -f docker/docker-compose.devnet.yml up -d
   href="https://github.com/namehash/ensnode/blob/main/docker"
 />
 
+<LinkCard
+  title="Building ENSNode Docker Images"
+  description="Learn about building docker images for ENSNode services."
+  href="/docs/reference/contributing/building"
+  />
+
 :::note[Port Mappings]
 Note that while the default `docker/docker-compose.yml` exposes each container's port to the host machine (useful for development), you may only wish to expose ENSApi's `4334` and avoid exposing services like ENSRainbow, ENSAdmin, and Postgres to the wider internet.
 :::
