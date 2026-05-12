@@ -158,7 +158,7 @@ the Event responsible for its existence.
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
 | `id` | `text` | no | Ponder's event ID. Primary key. |
-| `chainId` | `integer` | no | Chain the event was emitted on. |
+| `chainId` | `bigint` | no | Chain the event was emitted on. |
 | `blockNumber` | `numeric(78)` | no | Block number. |
 | `blockHash` | `text` | no | Block hash. |
 | `timestamp` | `numeric(78)` | no | Block timestamp. |
@@ -235,7 +235,7 @@ For ENSv1, each domain that has children implicitly owns a "virtual" Registry (`
 |--------|------|----------|-------------|
 | `id` | `text` | no | See `RegistryId` for guarantees. Primary key. |
 | `type` | `RegistryType` | no | Registry type. |
-| `chainId` | `integer` | no | Chain the registry contract is deployed on. |
+| `chainId` | `bigint` | no | Chain the registry contract is deployed on. |
 | `address` | `text` | no | Address of the registry contract. |
 | `node` | `text` | yes | If this is an `ENSv1VirtualRegistry`, the namehash of the parent ENSv1 domain that owns it, otherwise `null`. |
 | `canonicalDomainId` | `text` | yes | The Registry's declared Canonical Domain (uni-directional). |
@@ -297,7 +297,7 @@ A registration is keyed by `id`.
 | `start` | `numeric(78)` | no | Unix timestamp of registration start. |
 | `expiry` | `numeric(78)` | yes | Unix timestamp of expiry, if applicable. |
 | `gracePeriod` | `numeric(78)` | yes | Grace period duration in seconds. `BaseRegistrar` only. |
-| `registrarChainId` | `integer` | no | Chain of the registrar contract. |
+| `registrarChainId` | `bigint` | no | Chain of the registrar contract. |
 | `registrarAddress` | `text` | no | Address of the registrar contract. |
 | `registrantId` | `text` | yes | Account that initiated the registration. For ENSv2 Registrations, the protocol-emitted registrant address (the HCA account address if used). |
 | `unregistrantId` | `text` | yes | Account that triggered an unregistration, if applicable. For ENSv2 Registrations, the protocol-emitted unregistrant address (the HCA account address if used). |
@@ -362,7 +362,7 @@ An ENSv2 permissions contract instance.
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
 | `id` | `text` | no | Primary key. |
-| `chainId` | `integer` | no | Chain the permissions contract is deployed on. |
+| `chainId` | `bigint` | no | Chain the permissions contract is deployed on. |
 | `address` | `text` | no | Address of the permissions contract. |
 
 **Indexes:** unique on `(chainId, address)`.
@@ -376,7 +376,7 @@ A resource managed by a `permissions` contract.
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
 | `id` | `text` | no | Primary key. |
-| `chainId` | `integer` | no | Chain of the parent permissions contract. |
+| `chainId` | `bigint` | no | Chain of the parent permissions contract. |
 | `address` | `text` | no | Address of the parent permissions contract. |
 | `resource` | `numeric(78)` | no | Resource identifier (a `uint256` token ID or similar). |
 
@@ -391,7 +391,7 @@ A user's role bitmap for a specific resource within a `permissions` contract.
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
 | `id` | `text` | no | Primary key. |
-| `chainId` | `integer` | no | Chain of the parent permissions contract. |
+| `chainId` | `bigint` | no | Chain of the parent permissions contract. |
 | `address` | `text` | no | Address of the parent permissions contract. |
 | `resource` | `numeric(78)` | no | Resource identifier. |
 | `user` | `text` | no | The user/grantee address this Permission is granted to (the HCA account address if used). |
@@ -438,7 +438,7 @@ It is keyed by `(chainId, address, domainId)` to match the on-chain data model o
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
-| `chainId` | `integer` | no | Keyed by `(chainId, registry, node)`. Part of primary key. |
+| `chainId` | `bigint` | no | Keyed by `(chainId, registry, node)`. Part of primary key. |
 | `address` | `text` | no | The Registry (`ENSv1Registry` or `ENSv2Registry`)'s AccountId. Part of primary key. |
 | `domainId` | `text` | no | Part of primary key. |
 | `resolver` | `text` | no | The Domain's assigned Resolver's address. Always scoped to `chainId`. |
@@ -454,7 +454,7 @@ Represents an individual `IResolver` contract that has emitted at least one even
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
 | `id` | `text` | no | Keyed by `(chainId, address)`. Primary key. |
-| `chainId` | `integer` | no | Chain the resolver contract is deployed on. |
+| `chainId` | `bigint` | no | Chain the resolver contract is deployed on. |
 | `address` | `text` | no | Address of the resolver contract. |
 
 **Indexes:** unique on `(chainId, address)`.
@@ -474,7 +474,7 @@ These record values do **not** allow the caller to confidently resolve records f
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
 | `id` | `text` | no | Keyed by `(chainId, resolver, node)`. Primary key. |
-| `chainId` | `integer` | no | Part of the composite key. |
+| `chainId` | `bigint` | no | Part of the composite key. |
 | `address` | `text` | no | Resolver contract address. Part of the composite key. |
 | `node` | `text` | no | The name's namehash. Part of the composite key. |
 | `name` | `text` | yes | The reverse-resolution (ENSIP-3) `name()` record, used for Reverse Resolution. If present, guaranteed to be a non-empty `InterpretedName`. |
@@ -496,7 +496,7 @@ Keyed by `(chainId, resolver, node, coinType)`, where the composite key segment 
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
-| `chainId` | `integer` | no | Part of primary key. |
+| `chainId` | `bigint` | no | Part of primary key. |
 | `address` | `text` | no | Resolver contract address. Part of primary key. |
 | `node` | `text` | no | Name namehash. Part of primary key. |
 | `coinType` | `numeric(78)` | no | All well-known CoinTypes fit into a JavaScript number but NOT a Postgres `integer`, and must be stored as `bigint`. Part of primary key. |
@@ -514,7 +514,7 @@ Keyed by `(chainId, resolver, node, key)`, where the composite key segment `(cha
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
-| `chainId` | `integer` | no | Part of primary key. |
+| `chainId` | `bigint` | no | Part of primary key. |
 | `address` | `text` | no | Resolver contract address. Part of primary key. |
 | `node` | `text` | no | Name namehash. Part of primary key. |
 | `key` | `text` | no | Text record key. Part of primary key. |
@@ -831,7 +831,7 @@ Tracks ENS-related NFT token ownership and secondary market sales via the Seapor
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
 | `id` | `text` | no | Unique and deterministic identifier of the on-chain event associated with the sale. Composite key format: `{chainId}-{blockNumber}-{logIndex}` (e.g. `1-1234567-5`). Primary key. |
-| `chainId` | `integer` | no | The chain where the sale occurred. |
+| `chainId` | `bigint` | no | The chain where the sale occurred. |
 | `blockNumber` | `numeric(78)` | no | The block number on `chainId` where the sale occurred. |
 | `logIndex` | `integer` | no | The log index position of the sale event within `blockNumber`. |
 | `transactionHash` | `text` | no | The EVM transaction hash on `chainId` associated with the sale. |
@@ -857,7 +857,7 @@ After an NFT is indexed, it is never deleted from the index. When an indexed NFT
 |--------|------|----------|-------------|
 | `id` | `text` | no | The CAIP-19 Asset ID of the token. A globally unique reference to this token. Primary key. |
 | `domainId` | `text` | no | The namehash (Node) of the ENS name associated with the token. An ENS name may have more than one distinct token across time. It is also possible for multiple distinct tokens for an ENS name to have a `mintStatus` of `minted` at the same time — for example, when a direct subname of `.eth` is wrapped by the NameWrapper (one `minted` token managed by the `BaseRegistrar`, owned by the NameWrapper; one `minted` token managed by the NameWrapper, owned by the effective owner). |
-| `chainId` | `integer` | no | The chain that manages the token. |
+| `chainId` | `bigint` | no | The chain that manages the token. |
 | `contractAddress` | `text` | no | The address of the contract on `chainId` that manages the token. |
 | `tokenId` | `numeric(78)` | no | The tokenId of the token managed by `contractAddress`. |
 | `assetNamespace` | `text` | no | The CAIP-19 Asset Namespace of the token. Either `erc721` or `erc1155`. |
