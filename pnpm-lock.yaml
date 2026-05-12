@@ -146,7 +146,7 @@ patchedDependencies:
     hash: 4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a
     path: patches/@opentelemetry__api.patch
   '@opentelemetry/otlp-exporter-base':
-    hash: b8c870e92957fbc0bd683ab4e2c0034dc892f663b22f2c8b30daeb8f321bbb8d
+    hash: 1e5f3f5fa82375d902525a5d0be6b280f242f01ac4a6e52952bd8d6841f81171
     path: patches/@opentelemetry__otlp-exporter-base.patch
 
 importers:
@@ -12749,7 +12749,7 @@ snapshots:
       '@grpc/grpc-js': 1.14.3
       '@opentelemetry/api': 1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a)
       '@opentelemetry/core': 2.7.1(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
-      '@opentelemetry/otlp-exporter-base': 0.217.0(patch_hash=b8c870e92957fbc0bd683ab4e2c0034dc892f663b22f2c8b30daeb8f321bbb8d)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
+      '@opentelemetry/otlp-exporter-base': 0.217.0(patch_hash=1e5f3f5fa82375d902525a5d0be6b280f242f01ac4a6e52952bd8d6841f81171)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
       '@opentelemetry/otlp-grpc-exporter-base': 0.217.0(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
       '@opentelemetry/otlp-transformer': 0.217.0(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
       '@opentelemetry/sdk-logs': 0.217.0(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
@@ -12759,7 +12759,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a)
       '@opentelemetry/api-logs': 0.217.0
       '@opentelemetry/core': 2.7.1(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
-      '@opentelemetry/otlp-exporter-base': 0.217.0(patch_hash=b8c870e92957fbc0bd683ab4e2c0034dc892f663b22f2c8b30daeb8f321bbb8d)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
+      '@opentelemetry/otlp-exporter-base': 0.217.0(patch_hash=1e5f3f5fa82375d902525a5d0be6b280f242f01ac4a6e52952bd8d6841f81171)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
       '@opentelemetry/otlp-transformer': 0.217.0(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
       '@opentelemetry/sdk-logs': 0.217.0(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
 
@@ -12768,7 +12768,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a)
       '@opentelemetry/api-logs': 0.217.0
       '@opentelemetry/core': 2.7.1(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
-      '@opentelemetry/otlp-exporter-base': 0.217.0(patch_hash=b8c870e92957fbc0bd683ab4e2c0034dc892f663b22f2c8b30daeb8f321bbb8d)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
+      '@opentelemetry/otlp-exporter-base': 0.217.0(patch_hash=1e5f3f5fa82375d902525a5d0be6b280f242f01ac4a6e52952bd8d6841f81171)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
       '@opentelemetry/otlp-transformer': 0.217.0(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
       '@opentelemetry/resources': 2.7.1(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
       '@opentelemetry/sdk-logs': 0.217.0(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
@@ -12780,7 +12780,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a)
       '@opentelemetry/core': 2.7.1(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
       '@opentelemetry/exporter-metrics-otlp-http': 0.217.0(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
-      '@opentelemetry/otlp-exporter-base': 0.217.0(patch_hash=b8c870e92957fbc0bd683ab4e2c0034dc892f663b22f2c8b30daeb8f321bbb8d)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
+      '@opentelemetry/otlp-exporter-base': 0.217.0(patch_hash=1e5f3f5fa82375d902525a5d0be6b280f242f01ac4a6e52952bd8d6841f81171)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
       '@opentelemetry/otlp-grpc-exporter-base': 0.217.0(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
       '@opentelemetry/otlp-transformer': 0.217.0(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
       '@opentelemetry/resources': 2.7.1(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
@@ -12790,7 +12790,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a)
       '@opentelemetry/core': 2.7.1(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
-      '@opentelemetry/otlp-exporter-base': 0.217.0(patch_hash=b8c870e92957fbc0bd683ab4e2c0034dc892f663b22f2c8b30daeb8f321bbb8d)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
+      '@opentelemetry/otlp-exporter-base': 0.217.0(patch_hash=1e5f3f5fa82375d902525a5d0be6b280f242f01ac4a6e52952bd8d6841f81171)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
       '@opentelemetry/otlp-transformer': 0.217.0(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
       '@opentelemetry/resources': 2.7.1(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
       '@opentelemetry/sdk-metrics': 2.7.1(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
@@ -12800,7 +12800,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a)
       '@opentelemetry/core': 2.7.1(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
       '@opentelemetry/exporter-metrics-otlp-http': 0.217.0(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
-      '@opentelemetry/otlp-exporter-base': 0.217.0(patch_hash=b8c870e92957fbc0bd683ab4e2c0034dc892f663b22f2c8b30daeb8f321bbb8d)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
+      '@opentelemetry/otlp-exporter-base': 0.217.0(patch_hash=1e5f3f5fa82375d902525a5d0be6b280f242f01ac4a6e52952bd8d6841f81171)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
       '@opentelemetry/otlp-transformer': 0.217.0(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
       '@opentelemetry/resources': 2.7.1(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
       '@opentelemetry/sdk-metrics': 2.7.1(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
@@ -12818,7 +12818,7 @@ snapshots:
       '@grpc/grpc-js': 1.14.3
       '@opentelemetry/api': 1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a)
       '@opentelemetry/core': 2.7.1(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
-      '@opentelemetry/otlp-exporter-base': 0.217.0(patch_hash=b8c870e92957fbc0bd683ab4e2c0034dc892f663b22f2c8b30daeb8f321bbb8d)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
+      '@opentelemetry/otlp-exporter-base': 0.217.0(patch_hash=1e5f3f5fa82375d902525a5d0be6b280f242f01ac4a6e52952bd8d6841f81171)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
       '@opentelemetry/otlp-grpc-exporter-base': 0.217.0(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
       '@opentelemetry/otlp-transformer': 0.217.0(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
       '@opentelemetry/resources': 2.7.1(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
@@ -12828,7 +12828,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a)
       '@opentelemetry/core': 2.7.1(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
-      '@opentelemetry/otlp-exporter-base': 0.217.0(patch_hash=b8c870e92957fbc0bd683ab4e2c0034dc892f663b22f2c8b30daeb8f321bbb8d)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
+      '@opentelemetry/otlp-exporter-base': 0.217.0(patch_hash=1e5f3f5fa82375d902525a5d0be6b280f242f01ac4a6e52952bd8d6841f81171)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
       '@opentelemetry/otlp-transformer': 0.217.0(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
       '@opentelemetry/resources': 2.7.1(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
       '@opentelemetry/sdk-trace-base': 2.7.1(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
@@ -12837,7 +12837,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a)
       '@opentelemetry/core': 2.7.1(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
-      '@opentelemetry/otlp-exporter-base': 0.217.0(patch_hash=b8c870e92957fbc0bd683ab4e2c0034dc892f663b22f2c8b30daeb8f321bbb8d)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
+      '@opentelemetry/otlp-exporter-base': 0.217.0(patch_hash=1e5f3f5fa82375d902525a5d0be6b280f242f01ac4a6e52952bd8d6841f81171)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
       '@opentelemetry/otlp-transformer': 0.217.0(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
       '@opentelemetry/resources': 2.7.1(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
       '@opentelemetry/sdk-trace-base': 2.7.1(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
@@ -12859,7 +12859,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@opentelemetry/otlp-exporter-base@0.217.0(patch_hash=b8c870e92957fbc0bd683ab4e2c0034dc892f663b22f2c8b30daeb8f321bbb8d)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))':
+  '@opentelemetry/otlp-exporter-base@0.217.0(patch_hash=1e5f3f5fa82375d902525a5d0be6b280f242f01ac4a6e52952bd8d6841f81171)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))':
     dependencies:
       '@opentelemetry/api': 1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a)
       '@opentelemetry/core': 2.7.1(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
@@ -12870,7 +12870,7 @@ snapshots:
       '@grpc/grpc-js': 1.14.3
       '@opentelemetry/api': 1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a)
       '@opentelemetry/core': 2.7.1(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
-      '@opentelemetry/otlp-exporter-base': 0.217.0(patch_hash=b8c870e92957fbc0bd683ab4e2c0034dc892f663b22f2c8b30daeb8f321bbb8d)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
+      '@opentelemetry/otlp-exporter-base': 0.217.0(patch_hash=1e5f3f5fa82375d902525a5d0be6b280f242f01ac4a6e52952bd8d6841f81171)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
       '@opentelemetry/otlp-transformer': 0.217.0(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
 
   '@opentelemetry/otlp-transformer@0.217.0(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))':
@@ -12933,7 +12933,7 @@ snapshots:
       '@opentelemetry/exporter-trace-otlp-proto': 0.217.0(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
       '@opentelemetry/exporter-zipkin': 2.7.1(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
       '@opentelemetry/instrumentation': 0.217.0(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
-      '@opentelemetry/otlp-exporter-base': 0.217.0(patch_hash=b8c870e92957fbc0bd683ab4e2c0034dc892f663b22f2c8b30daeb8f321bbb8d)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
+      '@opentelemetry/otlp-exporter-base': 0.217.0(patch_hash=1e5f3f5fa82375d902525a5d0be6b280f242f01ac4a6e52952bd8d6841f81171)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
       '@opentelemetry/propagator-b3': 2.7.1(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
       '@opentelemetry/propagator-jaeger': 2.7.1(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
       '@opentelemetry/resources': 2.7.1(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
