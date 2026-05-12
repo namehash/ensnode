@@ -11,7 +11,7 @@ import {
   namehashInterpretedName,
 } from "enssdk";
 
-import { DatasourceNames } from "@ensnode/datasources";
+import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
 import {
   type ForwardResolutionArgs,
   ForwardResolutionProtocolStep,
@@ -19,7 +19,6 @@ import {
   getDatasourceContract,
   getENSv1RootRegistry,
   maybeGetDatasourceContract,
-  PluginName,
   type ResolverRecordsSelection,
   TraceableENSProtocol,
   toJson,
@@ -175,7 +174,10 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           /// 0. Temporary ENSv2 Bailout
           ////////////////////////////
           // TODO: re-enable protocol acceleration for ENSv2
-          if (config.ensIndexerPublicConfig.plugins.includes(PluginName.ENSv2)) {
+          // NOTE: gate on the namespace containing an ENSv2Root datasource rather than the ENSv2
+          // plugin being configured — a namespace may be ENSv1-only even when the ENSv2 plugin is
+          // defined, and forward resolution must follow the ENSv1 path in that case.
+          if (maybeGetDatasource(config.namespace, DatasourceNames.ENSv2Root)) {
             const UniversalResolverAddress =
               getUniversalResolverV2()?.address ?? getUniversalResolverV1().address;
             operations = await withEnsProtocolStep(
