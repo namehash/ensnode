@@ -121,10 +121,10 @@ export async function ensureDomainInRegistry(
       ? await context.ensDb.find(ensIndexerSchema.domain, { id: registry.canonicalDomainId })
       : null;
 
-    // construct the Canonical LabelHashPath
+    // construct the Canonical LabelHashPath (head-first traversal order: root → leaf)
     const canonicalLabelHashPath: LabelHashPath = [
-      labelHash,
       ...(parentDomain?.canonicalLabelHashPath ?? []),
+      labelHash,
     ];
 
     // construct the Canonical Name
@@ -377,7 +377,9 @@ async function reconcileRegistryCanonicality(
 /**
  * Propagate a Label heal to every canonical Domain whose `canonicalLabelHashPath` contains
  * `labelHash`. Re-renders `canonical_name` by joining each path element to its current
- * `label.interpreted` value (preserving leaf-first ordering via WITH ORDINALITY).
+ * `label.interpreted` value. `canonicalLabelHashPath` is head-first (root → leaf), but
+ * `canonicalName` is the standard leaf-first ENS string (e.g. "vitalik.eth"), so the
+ * WITH ORDINALITY rows are joined in DESC ordinal order.
  *
  * `canonicalLabelHashPath` and `canonicalNode` are untouched — label heals don't change labelHashes.
  *
@@ -393,7 +395,7 @@ export async function cascadeLabelHeal(
   await context.ensDb.sql.execute(sql`
     UPDATE ${ensIndexerSchema.domain} AS d
       SET canonical_name = (
-        SELECT string_agg(l.interpreted, '.' ORDER BY p.ord ASC)
+        SELECT string_agg(l.interpreted, '.' ORDER BY p.ord DESC)
         FROM unnest(d.canonical_label_hash_path) WITH ORDINALITY AS p(lh, ord)
         JOIN ${ensIndexerSchema.label} l ON l.label_hash = p.lh
       )
@@ -454,10 +456,12 @@ async function cascadeCanonicality(
       UNION
 
       -- step downward via the canonical-edge agreement, extending parent_path / parent_name by
-      -- the linking Domain's labelHash / interpreted label.
+      -- the linking Domain's labelHash / interpreted label. The path is head-first
+      -- (root → leaf), so we APPEND the labelHash; the name is the standard leaf-first ENS
+      -- string ("vitalik.eth"), so we PREPEND the interpreted label.
       SELECT
         child_reg.id,
-        ARRAY[d.label_hash] || w.parent_path,
+        w.parent_path || ARRAY[d.label_hash],
         COALESCE(l.interpreted || '.' || w.parent_name, l.interpreted)
       FROM walk w
       JOIN ${ensIndexerSchema.domain} d
@@ -471,10 +475,10 @@ async function cascadeCanonicality(
     domain_targets AS (
       -- for each Registry in the walk, enumerate ALL of its child Domains (regardless of whether
       -- they themselves have a canonical-agreeing subregistry) and project the materialized
-      -- path / name.
+      -- path / name. Head-first path → APPEND labelHash; leaf-first name → PREPEND interpreted label.
       SELECT
         d.id AS domain_id,
-        ARRAY[d.label_hash] || w.parent_path AS new_path,
+        w.parent_path || ARRAY[d.label_hash] AS new_path,
         COALESCE(l.interpreted || '.' || w.parent_name, l.interpreted) AS new_name
       FROM walk w
       JOIN ${ensIndexerSchema.domain} d

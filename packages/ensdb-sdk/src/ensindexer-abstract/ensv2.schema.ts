@@ -294,7 +294,9 @@ export const domain = onchainTable(
 
     // Materialized canonical-tree fields. All three are set/cleared atomically with `canonical`
     // (all NULL iff `canonical = false`). Maintained inline by `canonicality-db-helpers.ts`.
-    // `canonicalLabelHashPath` is leaf-first; `canonicalNode` is the namehash over the path.
+    // `canonicalLabelHashPath` is head-first traversal order (root → leaf, per LabelHashPath);
+    // `canonicalName` is the standard leaf-first ENS string; `canonicalNode` is the namehash
+    // over the path.
     canonicalName: t.text().$type<InterpretedName>(),
     canonicalLabelHashPath: t.hex().array().$type<LabelHashPath>(),
     canonicalNode: t.hex().$type<Node>(),

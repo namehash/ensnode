@@ -18,9 +18,8 @@ describe("namehashLabelHashPath", () => {
     expect(namehashLabelHashPath([eth])).toBe(namehashInterpretedName("eth" as InterpretedName));
   });
 
-  it("namehashes a leaf-first path equivalent to dot-joining the labels", () => {
-    // Path is leaf-first: ["wallet", "sub1", "sub2", "parent", "eth"]
-    const labels = ["wallet", "sub1", "sub2", "parent", "eth"];
+  it("namehashes a head-first path equivalent to namehashing the dot-joined leaf-first name", () => {
+    const labels = ["eth", "parent", "sub2", "sub1", "wallet"];
     const path = labels.map(labelHashOf);
 
     expect(namehashLabelHashPath(path)).toBe(
@@ -34,7 +33,8 @@ describe("namehashLabelHashPath", () => {
       "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef" as LabelHash;
     const eth = labelHashOf("eth");
 
-    expect(namehashLabelHashPath([unknown, eth])).toBe(
+    // head-first (root → leaf): [eth, unknown] represents `[<unknown>].eth`
+    expect(namehashLabelHashPath([eth, unknown])).toBe(
       namehashInterpretedName(`[${unknown.slice(2)}].eth` as InterpretedName),
     );
   });
