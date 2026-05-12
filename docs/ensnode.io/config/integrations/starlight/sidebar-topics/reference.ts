@@ -24,10 +24,6 @@ export const referenceSidebarTopic = {
       link: "/docs/reference/rest-api",
     },
     {
-      label: "Querying Best Practices",
-      link: "/docs/reference/querying-best-practices",
-    },
-    {
       label: "ENSNode V2 Notes",
       link: "/docs/reference/ensnode-v2-notes",
     },
@@ -50,6 +46,10 @@ export const referenceSidebarTopic = {
         {
           label: "Subgraph API",
           link: "/docs/reference/subgraph-legacy/subgraph-api",
+        },
+        {
+          label: "Querying Best Practices",
+          link: "/docs/reference/subgraph-legacy/querying-best-practices",
         },
         {
           label: "Subgraph Compatibility Tooling",
