@@ -2,4 +2,4 @@
 "ensapi": patch
 ---
 
-Forward Resolution now gates the ENSv2 bailout on the presence of an `ENSv2Root` datasource in the active namespace rather than on whether the ENSv2 plugin is configured. A namespace may be ENSv1-only even when the ENSv2 plugin is defined, and in that case forward resolution must continue down the ENSv1 path.
+Forward Resolution is no longer disabled on ENSv1-only namespaces when the `ensv2` plugin is enabled. Forward Resolution is only (temporarily) disabled when a namespace has been upgraded to ENSv2. The Resolution API continues to operate in either case, just without Protocol Acceleration (temporarily) when ENSv2 is deployed.
