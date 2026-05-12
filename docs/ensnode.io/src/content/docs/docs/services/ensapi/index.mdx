@@ -8,7 +8,26 @@ sidebar:
 
 import { LinkCard } from '@astrojs/starlight/components';
 
-ENSApi is the API service for ENSNode.
+ENSApi is a web service built on top of [ENSDb](./ensdb), and provides access to indexed ENS data through multiple HTTP APIs.
+
+## GraphQL APIs
+
+### ENS Omnigraph API
+
+The Omnigraph API is the new primary GraphQL API for ENSNode that provides a unified access model for both ENSv1 and ENSv2 data. Write your queries once and get automatic support for ENSv1 and ENSv2 data!
+
+### ENS Subgraph API
+
+The Subgraph API is the legacy GraphQL API for ENSNode that was built to provide a drop-in replacement for The Graph's ENS subgraph. It is now deprecated in favor of the Omnigraph API, but is still available for compatibility reasons.
+
+## REST APIs
+
+ENSApi also provides a set of REST APIs for accessing ENS data. These APIs are designed to be simple and easy to use, and are ideal for use cases where GraphQL is not a good fit.
+
+<LinkCard
+  title="REST APIs Reference"
+  href="/docs/services/ensapi/api-reference"
+/>
 
 ## Configuration
 
