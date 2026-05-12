@@ -28,10 +28,6 @@ export const referenceSidebarTopic = {
       link: "/docs/reference/ensnode-v2-notes",
     },
     {
-      label: "Indexing ENS-Compatible Names",
-      link: "/docs/reference/indexing-ens-compatible-onchain-names",
-    },
-    {
       label: "Mainnet Subnames of Subregistries",
       link: "/docs/reference/mainnet-registered-subnames-of-subregistries",
     },
