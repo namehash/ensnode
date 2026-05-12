@@ -7,6 +7,7 @@ import {
   literalLabelToInterpretedLabel,
 } from "enssdk";
 
+import { cascadeLabelHeal } from "@/lib/ensv2/canonicality-db-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 
@@ -20,15 +21,25 @@ export async function labelExists(context: IndexingEngineContext, labelHash: Lab
 
 /**
  * Ensures that the LiteralLabel `label` is interpreted and upserted into the Label rainbow table.
+ * When this upgrades an existing row's `interpreted` value (a heal), propagates the new value to
+ * every canonical Domain whose `canonicalLabelHashPath` contains this `labelHash`.
  */
 export async function ensureLabel(context: IndexingEngineContext, label: LiteralLabel) {
   const labelHash = labelhashLiteralLabel(label);
   const interpreted = literalLabelToInterpretedLabel(label);
 
+  // Read prior value to detect heal-upgrades (encoded labelhash → real label, or any change).
+  // No row → first time we've seen this labelHash, so no existing canonical Domain references it.
+  const prev = await context.ensDb.find(ensIndexerSchema.label, { labelHash });
+
   await context.ensDb
     .insert(ensIndexerSchema.label)
     .values({ labelHash, interpreted })
     .onConflictDoUpdate({ interpreted });
+
+  if (prev && prev.interpreted !== interpreted) {
+    await cascadeLabelHeal(context, labelHash);
+  }
 }
 
 /**

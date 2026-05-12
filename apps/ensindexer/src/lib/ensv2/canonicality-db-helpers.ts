@@ -1,11 +1,19 @@
 import config from "@/config";
 
 import { sql } from "drizzle-orm";
-import type { AccountId, DomainId, NormalizedAddress, RegistryId } from "enssdk";
+import type {
+  AccountId,
+  DomainId,
+  InterpretedName,
+  LabelHash,
+  NormalizedAddress,
+  RegistryId,
+} from "enssdk";
 
 import { isRootRegistryId } from "@ensnode/ensnode-sdk";
 import { isBridgedResolver } from "@ensnode/ensnode-sdk/internal";
 
+import { namehashLabelHashPath } from "@/lib/ensv2/namehash-label-hash-path";
 import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
 
 /**
@@ -69,6 +77,7 @@ export async function ensureDomainInRegistry(
   context: IndexingEngineContext,
   registryId: RegistryId,
   domainId: DomainId,
+  labelHash: LabelHash,
 ): Promise<void> {
   const registry = await context.ensDb.find(ensIndexerSchema.registry, { id: registryId });
   if (!registry) {
@@ -77,10 +86,47 @@ export async function ensureDomainInRegistry(
     );
   }
 
-  // inherit the parent Registry's current canonical flag
-  await context.ensDb
-    .update(ensIndexerSchema.domain, { id: domainId })
-    .set({ canonical: registry.canonical });
+  // Materialize canonical-tree fields when the parent Registry is canonical. When it isn't,
+  // we rely on two invariants and skip the write entirely:
+  //   1. Fresh Domain rows default to `canonical = false` (column default), so the typical insert
+  //      flow needs no write here.
+  //   2. `cascadeCanonicality` flips every descendant (canonical + the three materialized fields)
+  //      whenever a Registry's `canonical` flag flips, so re-runs of `ensureDomainInRegistry`
+  //      against an existing row always observe the row already in sync with the Registry.
+  if (registry.canonical) {
+    // Invariant: callers ensure the Label row (via ensureLabel / ensureUnknownLabel) before this
+    // function. The Label is required to materialize `canonicalName`.
+    const label = await context.ensDb.find(ensIndexerSchema.label, { labelHash });
+    if (!label) {
+      throw new Error(
+        `Invariant(ensureDomainInRegistry): Label '${labelHash}' must exist before linking Domain '${domainId}'.`,
+      );
+    }
+
+    // Read the canonical parent Domain (if any) to inherit its materialized path/name. Root
+    // Registries have no canonical parent Domain (`canonicalDomainId` is null) and seed the path/name.
+    const parentDomain = registry.canonicalDomainId
+      ? await context.ensDb.find(ensIndexerSchema.domain, { id: registry.canonicalDomainId })
+      : null;
+
+    const canonicalLabelHashPath: LabelHash[] = [
+      labelHash,
+      ...(parentDomain?.canonicalLabelHashPath ?? []),
+    ];
+    const canonicalName = (
+      parentDomain?.canonicalName
+        ? `${label.interpreted}.${parentDomain.canonicalName}`
+        : label.interpreted
+    ) as InterpretedName;
+    const canonicalNode = namehashLabelHashPath(canonicalLabelHashPath);
+
+    await context.ensDb.update(ensIndexerSchema.domain, { id: domainId }).set({
+      canonical: true,
+      canonicalName,
+      canonicalLabelHashPath,
+      canonicalNode,
+    });
+  }
 
   // flip the parent Registry's __hasChildren sentinel on the first child (idempotent thereafter)
   if (!registry.__hasChildren) {
@@ -286,38 +332,105 @@ async function reconcileRegistryCanonicality(
 }
 
 /**
- * Walk the canonical subgraph rooted at `registryId` and set `canonical = nextCanonical` on
- * every Registry and Domain it visits.
+ * Propagate a Label heal to every canonical Domain whose `canonicalLabelHashPath` contains
+ * `labelHash`. Re-renders `canonical_name` by joining each path element to its current
+ * `label.interpreted` value (preserving leaf-first ordering via WITH ORDINALITY).
  *
- * Uses one recursive CTE that enumerates the canonical subgraph by following unidirectional
- * pointers + agreement check, then two data-modifying CTEs that batch-update Registries and their
- * child Domains. The walk visits exactly the rows whose canonicality flag must flip (the
- * `IS DISTINCT FROM` filter skips rows already at the target value, which matters for the start
- * registry — its flag is set in the same statement — and for any descendants that happen to already
- * be consistent).
+ * `canonicalLabelHashPath` and `canonicalNode` are untouched — label heals don't change labelHashes.
+ *
+ * Selectivity comes from the GIN index `byCanonicalLabelHashPath` on `canonical_label_hash_path`.
+ * Note: GIN indexes are applied at realtime by Ponder, not during backfill — backfill-time heal
+ * cascades degenerate to a sequential scan; see specs/materialized-name.md for cost analysis.
  */
+export async function cascadeLabelHeal(
+  context: IndexingEngineContext,
+  labelHash: LabelHash,
+): Promise<void> {
+  await context.ensDb.sql.execute(sql`
+    UPDATE ${ensIndexerSchema.domain} AS d
+      SET canonical_name = (
+        SELECT string_agg(l.interpreted, '.' ORDER BY p.ord ASC)
+        FROM unnest(d.canonical_label_hash_path) WITH ORDINALITY AS p(lh, ord)
+        JOIN ${ensIndexerSchema.label} l ON l.label_hash = p.lh
+      )
+      WHERE d.canonical = true
+        AND d.canonical_label_hash_path @> ARRAY[${labelHash}]::text[];
+  `);
+}
+
+/**
+ * Walk the canonical subgraph rooted at `registryId` and set `canonical = nextCanonical` on
+ * every Registry and Domain it visits, additionally materializing canonical-tree fields on
+ * every affected Domain.
+ *
+ * Two phases:
+ *   - Phase A is a single statement: one recursive CTE that enumerates the canonical subgraph
+ *     by following unidirectional pointers + agreement check, while carrying the partial
+ *     `parent_path` / `parent_name` accumulators down the tree. A data-modifying CTE batch-updates
+ *     Registry rows; the trailing UPDATE batch-updates Domain rows with the materialized
+ *     `canonical_name` / `canonical_label_hash_path`, nulls `canonical_node` (Phase B fills it),
+ *     and `RETURNING`s the updated (id, canonical_label_hash_path) for the JS-RTT pass.
+ *   - Phase B is JS-side: chunked bulk UPDATEs that compute `canonical_node` via
+ *     `namehashLabelHashPath` over each row's `canonical_label_hash_path`. Only runs when
+ *     `nextCanonical = true`; when flipping to false, Phase A already nulled `canonical_node`.
+ *
+ * The `IS DISTINCT FROM` filter skips rows already at the target value (the start registry's
+ * flag is set in the same statement, and any descendants that happen to already be consistent
+ * are no-op'd).
+ */
+const CANONICAL_NODE_BATCH_SIZE = 10_000;
+
 async function cascadeCanonicality(
   context: IndexingEngineContext,
   registryId: RegistryId,
   nextCanonical: boolean,
 ): Promise<void> {
-  await context.ensDb.sql.execute(sql`
-    WITH RECURSIVE walk(registry_id) AS (
-      SELECT ${registryId}::text
+  const changed = await context.ensDb.sql.execute(sql`
+    WITH RECURSIVE walk(registry_id, parent_path, parent_name) AS (
+      -- base: seed parent_path / parent_name from the start registry's canonical parent Domain
+      -- (if any). The start Registry may be a root, in which case no parent Domain exists and
+      -- seeds are () / NULL.
+      SELECT
+        ${registryId}::text,
+        COALESCE(seed.canonical_label_hash_path, ARRAY[]::text[]),
+        seed.canonical_name
+      FROM (
+        SELECT pd.canonical_label_hash_path, pd.canonical_name
+        FROM ${ensIndexerSchema.registry} r
+        LEFT JOIN ${ensIndexerSchema.domain} pd ON pd.id = r.canonical_domain_id
+        WHERE r.id = ${registryId}
+      ) seed
 
       UNION
 
-      -- step downward: from a registry on the canonical subgraph, find each child Domain
-      -- (rows whose registry_id equals the current registry id), then follow that Domain's
-      -- subregistry_id if and only if the child registry agrees back via
-      -- canonical_domain_id = domain.id.
-      SELECT child_reg.id
+      -- step downward via the canonical-edge agreement, extending parent_path / parent_name by
+      -- the linking Domain's labelHash / interpreted label.
+      SELECT
+        child_reg.id,
+        ARRAY[d.label_hash] || w.parent_path,
+        COALESCE(l.interpreted || '.' || w.parent_name, l.interpreted)
       FROM walk w
       JOIN ${ensIndexerSchema.domain} d
         ON d.registry_id = w.registry_id
+      JOIN ${ensIndexerSchema.label} l
+        ON l.label_hash = d.label_hash
       JOIN ${ensIndexerSchema.registry} child_reg
         ON child_reg.id = d.subregistry_id
-      WHERE child_reg.canonical_domain_id = d.id
+       AND child_reg.canonical_domain_id = d.id
+    ),
+    domain_targets AS (
+      -- for each Registry in the walk, enumerate ALL of its child Domains (regardless of whether
+      -- they themselves have a canonical-agreeing subregistry) and project the materialized
+      -- path / name.
+      SELECT
+        d.id AS domain_id,
+        ARRAY[d.label_hash] || w.parent_path AS new_path,
+        COALESCE(l.interpreted || '.' || w.parent_name, l.interpreted) AS new_name
+      FROM walk w
+      JOIN ${ensIndexerSchema.domain} d
+        ON d.registry_id = w.registry_id
+      JOIN ${ensIndexerSchema.label} l
+        ON l.label_hash = d.label_hash
     ),
     upd_reg AS (
       UPDATE ${ensIndexerSchema.registry}
@@ -326,9 +439,35 @@ async function cascadeCanonicality(
           AND canonical IS DISTINCT FROM ${nextCanonical}
         RETURNING id
     )
-    UPDATE ${ensIndexerSchema.domain}
-      SET canonical = ${nextCanonical}
-      WHERE registry_id IN (SELECT registry_id FROM walk)
-        AND canonical IS DISTINCT FROM ${nextCanonical};
+    UPDATE ${ensIndexerSchema.domain} AS d
+      SET canonical = ${nextCanonical},
+          canonical_name = CASE WHEN ${nextCanonical} THEN dt.new_name ELSE NULL END,
+          canonical_label_hash_path = CASE WHEN ${nextCanonical} THEN dt.new_path ELSE NULL END,
+          canonical_node = NULL
+      FROM domain_targets dt
+      WHERE d.id = dt.domain_id
+        AND d.canonical IS DISTINCT FROM ${nextCanonical}
+      RETURNING d.id, d.canonical_label_hash_path;
   `);
+
+  // Phase B: when flipping to canonical, compute and write `canonical_node` per affected Domain.
+  // When flipping to non-canonical, Phase A already nulled `canonical_node` — nothing to do.
+  if (!nextCanonical) return;
+
+  const rows = changed.rows as { id: DomainId; canonical_label_hash_path: LabelHash[] }[];
+  for (let i = 0; i < rows.length; i += CANONICAL_NODE_BATCH_SIZE) {
+    const batch = rows.slice(i, i + CANONICAL_NODE_BATCH_SIZE);
+    const ids = batch.map((r) => r.id);
+    const nodes = batch.map((r) => namehashLabelHashPath(r.canonical_label_hash_path));
+
+    await context.ensDb.sql.execute(sql`
+      UPDATE ${ensIndexerSchema.domain} AS d
+        SET canonical_node = upd.canonical_node
+        FROM (
+          SELECT unnest(${ids}::text[]) AS id,
+                 unnest(${nodes}::text[]) AS canonical_node
+        ) upd
+        WHERE d.id = upd.id;
+    `);
+  }
 }

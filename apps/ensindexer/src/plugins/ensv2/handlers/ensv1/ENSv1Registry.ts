@@ -127,9 +127,8 @@ export default function () {
       })
       .onConflictDoUpdate({ ownerId, rootRegistryOwnerId: ownerId });
 
-    await ensureDomainInRegistry(context, parentRegistryId, domainId);
-
-    // Label Healing
+    // Label Healing — must run before `ensureDomainInRegistry` so the Label row exists when the
+    // canonical-tree materializer reads it.
     //
     // only attempt to heal label if it doesn't already exist
     const exists = await labelExists(context, labelHash);
@@ -156,6 +155,8 @@ export default function () {
         await ensureUnknownLabel(context, labelHash);
       }
     }
+
+    await ensureDomainInRegistry(context, parentRegistryId, domainId, labelHash);
 
     // push event to domain history
     const eventId = await ensureEvent(context, event);

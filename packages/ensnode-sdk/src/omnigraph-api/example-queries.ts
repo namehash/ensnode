@@ -56,7 +56,7 @@ export const GRAPHQL_API_EXAMPLE_QUERIES: Array<{
 #
 # There are also example queries in the tabs above ☝️
 query HelloWorld {
-  domain(by: { name: "eth" }) { name owner { address } }
+  domain(by: { name: "eth" }) { canonical { name } owner { address } }
 }`,
     variables: { default: {} },
   },
@@ -80,7 +80,7 @@ query FindDomains(
         __typename
         id
         label { interpreted hash }
-        name
+        canonical { name }
 
         registration { expiry event { timestamp } }
       }
@@ -104,7 +104,7 @@ query DomainByName($name: InterpretedName!) {
     __typename
     id
     label { interpreted hash }
-    name
+    canonical { name node path }
     owner { address }
 
     ... on ENSv1Domain {
@@ -131,11 +131,11 @@ query DomainByName($name: InterpretedName!) {
     query: `
 query DomainSubdomains($name: InterpretedName!) {
   domain(by: {name: $name}) {
-    name
+    canonical { name }
     subdomains(first: 10) {
       edges {
         node {
-          name
+          canonical { name }
         }
       }
     }
@@ -185,7 +185,7 @@ query AccountDomains(
       edges {
         node {
           label { interpreted }
-          name
+          canonical { name }
         }
       }
     }
@@ -230,7 +230,7 @@ query RegistryDomains(
       edges {
         node {
           label { interpreted }
-          name
+          canonical { name }
         }
       }
     }
@@ -359,17 +359,17 @@ query Namegraph {
     domains {
       edges {
         node {
-          name
+          canonical { name }
 
           subdomains {
             edges {
               node {
-                name
+                canonical { name }
 
                 subdomains {
                   edges {
                     node {
-                      name
+                      canonical { name }
                     }
                   }
                 }

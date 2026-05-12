@@ -1052,11 +1052,8 @@ const introspection = {
           {
             "name": "canonical",
             "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Boolean"
-              }
+              "kind": "OBJECT",
+              "name": "DomainCanonical"
             },
             "args": [],
             "isDeprecated": false
@@ -1131,15 +1128,6 @@ const introspection = {
             "isDeprecated": false
           },
           {
-            "name": "name",
-            "type": {
-              "kind": "SCALAR",
-              "name": "InterpretedName"
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
             "name": "owner",
             "type": {
               "kind": "OBJECT",
@@ -1153,21 +1141,6 @@ const introspection = {
             "type": {
               "kind": "INTERFACE",
               "name": "Domain"
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "path",
-            "type": {
-              "kind": "LIST",
-              "ofType": {
-                "kind": "NON_NULL",
-                "ofType": {
-                  "kind": "INTERFACE",
-                  "name": "Domain"
-                }
-              }
             },
             "args": [],
             "isDeprecated": false
@@ -1292,6 +1265,55 @@ const introspection = {
             "name": "ENSv2Domain"
           }
         ]
+      },
+      {
+        "kind": "OBJECT",
+        "name": "DomainCanonical",
+        "fields": [
+          {
+            "name": "name",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "InterpretedName"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "node",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Node"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "path",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "DomainId"
+                  }
+                }
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          }
+        ],
+        "interfaces": []
       },
       {
         "kind": "OBJECT",
@@ -1660,11 +1682,8 @@ const introspection = {
           {
             "name": "canonical",
             "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Boolean"
-              }
+              "kind": "OBJECT",
+              "name": "DomainCanonical"
             },
             "args": [],
             "isDeprecated": false
@@ -1739,15 +1758,6 @@ const introspection = {
             "isDeprecated": false
           },
           {
-            "name": "name",
-            "type": {
-              "kind": "SCALAR",
-              "name": "InterpretedName"
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
             "name": "node",
             "type": {
               "kind": "NON_NULL",
@@ -1773,21 +1783,6 @@ const introspection = {
             "type": {
               "kind": "INTERFACE",
               "name": "Domain"
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "path",
-            "type": {
-              "kind": "LIST",
-              "ofType": {
-                "kind": "NON_NULL",
-                "ofType": {
-                  "kind": "INTERFACE",
-                  "name": "Domain"
-                }
-              }
             },
             "args": [],
             "isDeprecated": false
@@ -2230,11 +2225,8 @@ const introspection = {
           {
             "name": "canonical",
             "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Boolean"
-              }
+              "kind": "OBJECT",
+              "name": "DomainCanonical"
             },
             "args": [],
             "isDeprecated": false
@@ -2309,15 +2301,6 @@ const introspection = {
             "isDeprecated": false
           },
           {
-            "name": "name",
-            "type": {
-              "kind": "SCALAR",
-              "name": "InterpretedName"
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
             "name": "owner",
             "type": {
               "kind": "OBJECT",
@@ -2331,21 +2314,6 @@ const introspection = {
             "type": {
               "kind": "INTERFACE",
               "name": "Domain"
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "path",
-            "type": {
-              "kind": "LIST",
-              "ofType": {
-                "kind": "NON_NULL",
-                "ofType": {
-                  "kind": "INTERFACE",
-                  "name": "Domain"
-                }
-              }
             },
             "args": [],
             "isDeprecated": false

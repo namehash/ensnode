@@ -216,8 +216,10 @@ scalar CoinType
 A Domain represents an individual Label within the ENS namegraph. It may or may not be Canonical. It may be an ENSv1Domain or an ENSv2Domain.
 """
 interface Domain {
-  """Whether the Domain is Canonical."""
-  canonical: Boolean!
+  """
+  The materialized canonical-tree projection of this Domain (Canonical Name, leaf-to-root canonical path, and namehash). Null when the Domain is not Canonical.
+  """
+  canonical: DomainCanonical
 
   """All Events associated with this Domain."""
   events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): DomainEventsConnection
@@ -229,24 +231,14 @@ interface Domain {
   label: Label!
 
   """
-  The Canonical Name for this Domain. If the Domain is not Canonical, then `name` will be null.
-  """
-  name: InterpretedName
-
-  """
   If this is an ENSv1Domain, this is the effective owner of the Domain. If this is an ENSv2Domain, this is the on-chain owner address (the HCA account address if used).
   """
   owner: Account
 
   """
-  The direct parent Domain in the canonical nametree or null if this Domain is a root-level Domain or is not Canonical.
+  The direct parent Domain via a single unidirectional walk up the namegraph (`Domain.registryId` → `Registry.canonicalDomainId`). No edge-authentication check; available for canonical and non-canonical Domains alike. Null when the parent Registry has no canonical Domain set (e.g., a root Registry).
   """
   parent: Domain
-
-  """
-  The Canonical Path from this Domain to the ENS Root, in leaf→root order and inclusive of this Domain. `path` is null if the Domain is not Canonical.
-  """
-  path: [Domain!]
 
   """The latest Registration for this Domain, if exists."""
   registration: Registration
@@ -263,6 +255,22 @@ interface Domain {
   All Domains that are direct descendents of this Domain in the namegraph.
   """
   subdomains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: SubdomainsWhereInput): DomainSubdomainsConnection
+}
+
+"""
+The materialized canonical-tree projection of a Canonical Domain — Canonical Name, leaf-to-root canonical path (as DomainIds), and namehash.
+"""
+type DomainCanonical {
+  """The Canonical Name for this Domain."""
+  name: InterpretedName!
+
+  """The namehash of this Domain's Canonical Name."""
+  node: Node!
+
+  """
+  The Canonical Path from this Domain to the ENS Root, leaf→root inclusive of this Domain. Returned as DomainIds.
+  """
+  path: [DomainId!]!
 }
 
 type DomainEventsConnection {
@@ -348,8 +356,10 @@ enum ENSProtocolVersion {
 
 """An ENSv1Domain represents an ENSv1 Domain."""
 type ENSv1Domain implements Domain {
-  """Whether the Domain is Canonical."""
-  canonical: Boolean!
+  """
+  The materialized canonical-tree projection of this Domain (Canonical Name, leaf-to-root canonical path, and namehash). Null when the Domain is not Canonical.
+  """
+  canonical: DomainCanonical
 
   """All Events associated with this Domain."""
   events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): DomainEventsConnection
@@ -360,11 +370,6 @@ type ENSv1Domain implements Domain {
   """The Label this Domain represents in the ENS Namegraph"""
   label: Label!
 
-  """
-  The Canonical Name for this Domain. If the Domain is not Canonical, then `name` will be null.
-  """
-  name: InterpretedName
-
   """The namehash of this ENSv1 Domain."""
   node: Node!
 
@@ -374,14 +379,9 @@ type ENSv1Domain implements Domain {
   owner: Account
 
   """
-  The direct parent Domain in the canonical nametree or null if this Domain is a root-level Domain or is not Canonical.
+  The direct parent Domain via a single unidirectional walk up the namegraph (`Domain.registryId` → `Registry.canonicalDomainId`). No edge-authentication check; available for canonical and non-canonical Domains alike. Null when the parent Registry has no canonical Domain set (e.g., a root Registry).
   """
   parent: Domain
-
-  """
-  The Canonical Path from this Domain to the ENS Root, in leaf→root order and inclusive of this Domain. `path` is null if the Domain is not Canonical.
-  """
-  path: [Domain!]
 
   """The latest Registration for this Domain, if exists."""
   registration: Registration
@@ -462,8 +462,10 @@ type ENSv1VirtualRegistry implements Registry {
 
 """An ENSv2Domain represents an ENSv2 Domain."""
 type ENSv2Domain implements Domain {
-  """Whether the Domain is Canonical."""
-  canonical: Boolean!
+  """
+  The materialized canonical-tree projection of this Domain (Canonical Name, leaf-to-root canonical path, and namehash). Null when the Domain is not Canonical.
+  """
+  canonical: DomainCanonical
 
   """All Events associated with this Domain."""
   events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): DomainEventsConnection
@@ -475,24 +477,14 @@ type ENSv2Domain implements Domain {
   label: Label!
 
   """
-  The Canonical Name for this Domain. If the Domain is not Canonical, then `name` will be null.
-  """
-  name: InterpretedName
-
-  """
   If this is an ENSv1Domain, this is the effective owner of the Domain. If this is an ENSv2Domain, this is the on-chain owner address (the HCA account address if used).
   """
   owner: Account
 
   """
-  The direct parent Domain in the canonical nametree or null if this Domain is a root-level Domain or is not Canonical.
+  The direct parent Domain via a single unidirectional walk up the namegraph (`Domain.registryId` → `Registry.canonicalDomainId`). No edge-authentication check; available for canonical and non-canonical Domains alike. Null when the parent Registry has no canonical Domain set (e.g., a root Registry).
   """
   parent: Domain
-
-  """
-  The Canonical Path from this Domain to the ENS Root, in leaf→root order and inclusive of this Domain. `path` is null if the Domain is not Canonical.
-  """
-  path: [Domain!]
 
   """
   Permissions for this Domain within its Registry, representing the roles granted to users for this Domain's token.

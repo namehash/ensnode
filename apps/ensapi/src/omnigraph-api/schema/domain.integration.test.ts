@@ -36,7 +36,6 @@ describe("Domain.subdomains", () => {
   type SubdomainsResult = {
     domain: {
       subdomains: GraphQLConnection<{
-        name: InterpretedName | null;
         label: { interpreted: InterpretedLabel };
       }>;
     };
@@ -45,7 +44,7 @@ describe("Domain.subdomains", () => {
   const DomainSubdomains = gql`
     query DomainSubdomains($name: InterpretedName!) {
       domain(by: { name: $name }) {
-        subdomains { edges { node { name label { interpreted } } } }
+        subdomains { edges { node { label { interpreted } } } }
       }
     }
   `;
@@ -61,87 +60,60 @@ describe("Domain.subdomains", () => {
   });
 });
 
-describe("Domain.path", () => {
-  type DomainPathResult = {
+describe("Domain.canonical", () => {
+  type DomainCanonicalQueryResult = {
     domain: {
       id: DomainId;
-      path: { id: DomainId; name: InterpretedName | null }[] | null;
+      canonical: {
+        name: InterpretedName;
+        node: string;
+        path: DomainId[];
+      } | null;
     } | null;
-  };
-
-  const DomainPath = gql`
-    query DomainPath($name: InterpretedName!) {
-      domain(by: { name: $name }) {
-        id
-        path {
-          id
-          name
-        }
-      }
-    }
-  `;
-
-  it("returns the full canonical path (leaf → root) for a deep name", async () => {
-    await expect(
-      request<DomainPathResult>(DomainPath, { name: "wallet.sub1.sub2.parent.eth" }),
-    ).resolves.toMatchObject({
-      domain: {
-        path: [
-          { name: "wallet.sub1.sub2.parent.eth" },
-          { name: "sub1.sub2.parent.eth" },
-          { name: "sub2.parent.eth" },
-          { name: "parent.eth" },
-          { name: "eth" },
-        ],
-      },
-    });
-  });
-
-  it("returns the canonical path for a linked Name", async () => {
-    // The wallet Registry's `ParentUpdated` claims `sub1.sub2.parent.eth` as its canonical parent.
-    // `linked.parent.eth.subregistry` was later re-pointed to the same Registry without a
-    // corresponding `ParentUpdated`, so `wallet.linked.parent.eth` is an addressable alias whose
-    // canonical lineage walks through `sub1.sub2.parent.eth`
-    await expect(
-      request<DomainPathResult>(DomainPath, { name: "wallet.linked.parent.eth" }),
-    ).resolves.toMatchObject({
-      domain: {
-        path: [
-          { name: "wallet.sub1.sub2.parent.eth" },
-          { name: "sub1.sub2.parent.eth" },
-          { name: "sub2.parent.eth" },
-          { name: "parent.eth" },
-          { name: "eth" },
-        ],
-      },
-    });
-  });
-});
-
-describe("Domain.canonical", () => {
-  type DomainCanonicalResult = {
-    domain: { id: DomainId; canonical: boolean } | null;
   };
 
   const DomainCanonicalByName = gql`
     query DomainCanonicalByName($name: InterpretedName!) {
-      domain(by: { name: $name }) { id canonical }
+      domain(by: { name: $name }) { id canonical { name node path } }
     }
   `;
 
   const DomainCanonicalById = gql`
     query DomainCanonicalById($id: DomainId!) {
-      domain(by: { id: $id }) { id canonical }
+      domain(by: { id: $id }) { id canonical { name node path } }
     }
   `;
 
-  it.each(DEVNET_NAMES)("is true for ENSv2 Domain '$name'", async ({ name }) => {
+  it.each(DEVNET_NAMES)(
+    "materializes canonical.{name, path, node} for '$name'",
+    async ({ name, canonical }) => {
+      const result = await request<DomainCanonicalQueryResult>(DomainCanonicalByName, { name });
+      expect(result.domain?.canonical).not.toBeNull();
+      expect(result.domain!.canonical!.name).toBe(canonical);
+      expect(result.domain!.canonical!.path.length).toBe(canonical.split(".").length);
+    },
+  );
+
+  it("returns the canonical name for a linked Name", async () => {
+    // The wallet Registry's `ParentUpdated` claims `sub1.sub2.parent.eth` as its canonical parent.
+    // `linked.parent.eth.subregistry` was later re-pointed to the same Registry without a
+    // corresponding `ParentUpdated`, so `wallet.linked.parent.eth` is an addressable alias whose
+    // canonical lineage walks through `sub1.sub2.parent.eth`.
     await expect(
-      request<DomainCanonicalResult>(DomainCanonicalByName, { name }),
-    ).resolves.toMatchObject({ domain: { canonical: true } });
+      request<DomainCanonicalQueryResult>(DomainCanonicalByName, {
+        name: "wallet.linked.parent.eth",
+      }),
+    ).resolves.toMatchObject({
+      domain: {
+        canonical: {
+          name: "wallet.sub1.sub2.parent.eth",
+          path: expect.arrayContaining([expect.any(String)]),
+        },
+      },
+    });
   });
 
-  it("is true for ENSv1 addr.reverse", async () => {
+  it("is canonical for ENSv1 addr.reverse", async () => {
     const v1RootRegistry = getDatasourceContract(
       "ens-test-env",
       DatasourceNames.ENSRoot,
@@ -149,9 +121,10 @@ describe("Domain.canonical", () => {
     );
     const id = makeENSv1DomainId(v1RootRegistry, ADDR_REVERSE_NODE);
 
-    await expect(
-      request<DomainCanonicalResult>(DomainCanonicalById, { id }),
-    ).resolves.toMatchObject({ domain: { id, canonical: true } });
+    const result = await request<DomainCanonicalQueryResult>(DomainCanonicalById, { id });
+    expect(result.domain?.id).toBe(id);
+    expect(result.domain?.canonical).not.toBeNull();
+    expect(result.domain!.canonical!.name).toBe("addr.reverse");
   });
 });
 

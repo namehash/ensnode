@@ -1,7 +1,7 @@
 import { trace } from "@opentelemetry/api";
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, count, eq, getTableColumns } from "drizzle-orm";
-import { type DomainId, interpretedLabelsToInterpretedName } from "enssdk";
+import type { DomainId } from "enssdk";
 
 import type { RequiredAndNotNull, RequiredAndNull } from "@ensnode/ensnode-sdk";
 
@@ -26,7 +26,6 @@ import { getDomainResolver } from "@/omnigraph-api/lib/get-domain-resolver";
 import { getLatestRegistration } from "@/omnigraph-api/lib/get-latest-registration";
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
-import { rejectAnyErrors } from "@/omnigraph-api/lib/reject-any-errors";
 import { AccountRef } from "@/omnigraph-api/schema/account";
 import {
   ID_PAGINATED_CONNECTION_ARGS,
@@ -77,6 +76,66 @@ export const isENSv2Domain = (domain: DomainInterface): domain is ENSv2Domain =>
 export const ENSv1DomainRef = builder.objectRef<ENSv1Domain>("ENSv1Domain");
 export const ENSv2DomainRef = builder.objectRef<ENSv2Domain>("ENSv2Domain");
 
+////////////////////////////////
+// DomainCanonical
+////////////////////////////////
+/**
+ * Canonical-tree fields materialized on each Canonical Domain. Source is the parent Domain row;
+ * `canonicalName` and `canonicalNode` are direct column reads, `path` is resolved via
+ * `getCanonicalPath` (the canonical-edge upward CTE).
+ */
+export const DomainCanonicalRef = builder.objectRef<Domain>("DomainCanonical");
+
+DomainCanonicalRef.implement({
+  description:
+    "The materialized canonical-tree projection of a Canonical Domain — Canonical Name, " +
+    "leaf-to-root canonical path (as DomainIds), and namehash.",
+  fields: (t) => ({
+    name: t.field({
+      description: "The Canonical Name for this Domain.",
+      type: "InterpretedName",
+      nullable: false,
+      resolve: (domain) => {
+        if (!domain.canonicalName) {
+          throw new Error(
+            `Invariant(DomainCanonical.name): canonical Domain '${domain.id}' is missing canonicalName.`,
+          );
+        }
+        return domain.canonicalName;
+      },
+    }),
+    path: t.field({
+      description:
+        "The Canonical Path from this Domain to the ENS Root, leaf→root inclusive of this Domain. Returned as DomainIds.",
+      type: ["DomainId"],
+      nullable: false,
+      resolve: async (domain, _args, context) => {
+        const canonicalPath = await context.loaders.canonicalPath.load(domain.id);
+        if (canonicalPath instanceof Error) throw canonicalPath;
+        if (canonicalPath === null) {
+          throw new Error(
+            `Invariant(DomainCanonical.path): canonical Domain '${domain.id}' produced null canonical path.`,
+          );
+        }
+        return canonicalPath;
+      },
+    }),
+    node: t.field({
+      description: "The namehash of this Domain's Canonical Name.",
+      type: "Node",
+      nullable: false,
+      resolve: (domain) => {
+        if (!domain.canonicalNode) {
+          throw new Error(
+            `Invariant(DomainCanonical.node): canonical Domain '${domain.id}' is missing canonicalNode.`,
+          );
+        }
+        return domain.canonicalNode;
+      },
+    }),
+  }),
+});
+
 //////////////////////////////////
 // DomainInterface Implementation
 //////////////////////////////////
@@ -108,64 +167,11 @@ DomainInterfaceRef.implement({
     // Domain.canonical
     ////////////////////
     canonical: t.field({
-      description: "Whether the Domain is Canonical.",
-      type: "Boolean",
-      nullable: false,
-      resolve: (parent) => parent.canonical,
-    }),
-
-    ///////////////
-    // Domain.name
-    ///////////////
-    name: t.field({
       description:
-        "The Canonical Name for this Domain. If the Domain is not Canonical, then `name` will be null.",
-      tracing: true,
-      type: "InterpretedName",
+        "The materialized canonical-tree projection of this Domain (Canonical Name, leaf-to-root canonical path, and namehash). Null when the Domain is not Canonical.",
+      type: DomainCanonicalRef,
       nullable: true,
-      resolve: async (domain, _args, context) => {
-        const canonicalPath = await context.loaders.canonicalPath.load(domain.id);
-        if (canonicalPath instanceof Error) throw canonicalPath;
-        if (canonicalPath === null) return null;
-
-        // TODO: this could be more efficient if getCanonicalPath included the label join for us.
-        const domains = await rejectAnyErrors(
-          DomainInterfaceRef.getDataloader(context).loadMany(canonicalPath),
-        );
-
-        const labels = canonicalPath.map((domainId) => {
-          const found = domains.find((d) => d.id === domainId);
-          if (!found) {
-            throw new Error(
-              `Invariant(Domain.name): Domain in CanonicalPath not found:\nPath: ${JSON.stringify(canonicalPath)}\nDomainId: ${domainId}`,
-            );
-          }
-
-          return found.label.interpreted;
-        });
-
-        return interpretedLabelsToInterpretedName(labels);
-      },
-    }),
-
-    ///////////////
-    // Domain.path
-    ///////////////
-    path: t.field({
-      description:
-        "The Canonical Path from this Domain to the ENS Root, in leaf→root order and inclusive of this Domain. `path` is null if the Domain is not Canonical.",
-      tracing: true,
-      type: [DomainInterfaceRef],
-      nullable: true,
-      resolve: async (domain, _args, context) => {
-        const canonicalPath = await context.loaders.canonicalPath.load(domain.id);
-        if (canonicalPath instanceof Error) throw canonicalPath;
-        if (canonicalPath === null) return null;
-
-        return await rejectAnyErrors(
-          DomainInterfaceRef.getDataloader(context).loadMany(canonicalPath),
-        );
-      },
+      resolve: (domain) => (domain.canonical ? domain : null),
     }),
 
     /////////////////
@@ -173,13 +179,15 @@ DomainInterfaceRef.implement({
     /////////////////
     parent: t.field({
       description:
-        "The direct parent Domain in the canonical nametree or null if this Domain is a root-level Domain or is not Canonical.",
+        "The direct parent Domain via a single unidirectional walk up the namegraph (`Domain.registryId` → `Registry.canonicalDomainId`). No edge-authentication check; available for canonical and non-canonical Domains alike. Null when the parent Registry has no canonical Domain set (e.g., a root Registry).",
       type: DomainInterfaceRef,
       nullable: true,
-      resolve: async (domain, _args, context) => {
-        const path = await context.loaders.canonicalPath.load(domain.id);
-        if (path instanceof Error) throw path;
-        return path?.[1] ?? null;
+      resolve: async (domain) => {
+        const registry = await ensDb.query.registry.findFirst({
+          where: (t, { eq }) => eq(t.id, domain.registryId),
+          columns: { canonicalDomainId: true },
+        });
+        return registry?.canonicalDomainId ?? null;
       },
     }),
 
