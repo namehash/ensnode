@@ -32,10 +32,14 @@ import {
   PAGINATION_DEFAULT_MAX_SIZE,
   PAGINATION_DEFAULT_PAGE_SIZE,
 } from "@/omnigraph-api/schema/constants";
-import { ENSProtocolVersion } from "@/omnigraph-api/schema/ens-protocol-version";
+import { DomainCanonicalRef } from "@/omnigraph-api/schema/domain-canonical";
+import {
+  DomainPermissionsWhereInput,
+  DomainsOrderInput,
+  SubdomainsWhereInput,
+} from "@/omnigraph-api/schema/domain-inputs";
 import { EventRef, EventsWhereInput } from "@/omnigraph-api/schema/event";
 import { LabelRef } from "@/omnigraph-api/schema/label";
-import { OrderDirection } from "@/omnigraph-api/schema/order-direction";
 import { PermissionsUserRef } from "@/omnigraph-api/schema/permissions";
 import { RegistrationInterfaceRef } from "@/omnigraph-api/schema/registration";
 import { RegistryInterfaceRef } from "@/omnigraph-api/schema/registry";
@@ -75,61 +79,6 @@ export const isENSv2Domain = (domain: DomainInterface): domain is ENSv2Domain =>
 
 export const ENSv1DomainRef = builder.objectRef<ENSv1Domain>("ENSv1Domain");
 export const ENSv2DomainRef = builder.objectRef<ENSv2Domain>("ENSv2Domain");
-
-////////////////////////////////
-// DomainCanonical
-////////////////////////////////
-export const DomainCanonicalRef = builder.objectRef<Domain>("DomainCanonical");
-
-DomainCanonicalRef.implement({
-  description:
-    "The materialized canonical-tree projection of a Canonical Domain — Canonical Name, " +
-    "leaf-to-root canonical path (as DomainIds), and namehash.",
-  fields: (t) => ({
-    name: t.field({
-      description: "The Canonical Name for this Domain.",
-      type: "InterpretedName",
-      nullable: false,
-      resolve: (domain) => {
-        if (!domain.canonicalName) {
-          throw new Error(
-            `Invariant(DomainCanonical.name): canonical Domain '${domain.id}' is missing canonicalName.`,
-          );
-        }
-        return domain.canonicalName;
-      },
-    }),
-    path: t.field({
-      description:
-        "The Canonical Path from this Domain to the ENS Root, leaf→root inclusive of this Domain. Returned as DomainIds.",
-      type: [DomainInterfaceRef],
-      nullable: false,
-      resolve: async (domain, _args, context) => {
-        const canonicalPath = await context.loaders.canonicalPath.load(domain.id);
-        if (canonicalPath instanceof Error) throw canonicalPath;
-        if (canonicalPath === null) {
-          throw new Error(
-            `Invariant(DomainCanonical.path): canonical Domain '${domain.id}' produced null canonical path.`,
-          );
-        }
-        return canonicalPath;
-      },
-    }),
-    node: t.field({
-      description: "The namehash of this Domain's Canonical Name.",
-      type: "Node",
-      nullable: false,
-      resolve: (domain) => {
-        if (!domain.canonicalNode) {
-          throw new Error(
-            `Invariant(DomainCanonical.node): canonical Domain '${domain.id}' is missing canonicalNode.`,
-          );
-        }
-        return domain.canonicalNode;
-      },
-    }),
-  }),
-});
 
 //////////////////////////////////
 // DomainInterface Implementation
@@ -414,99 +363,3 @@ ENSv2DomainRef.implement({
     }),
   }),
 });
-
-//////////////////////
-// Inputs
-//////////////////////
-
-export const DomainPermissionsWhereInput = builder.inputType("DomainPermissionsWhereInput", {
-  description: "Filter Permissions over this Domain by a specific User address.",
-  fields: (t) => ({
-    user: t.field({ type: "Address" }),
-  }),
-});
-
-export const DomainIdInput = builder.inputType("DomainIdInput", {
-  description: "Reference a specific Domain.",
-  isOneOf: true,
-  fields: (t) => ({
-    name: t.field({ type: "InterpretedName" }),
-    id: t.field({ type: "DomainId" }),
-  }),
-});
-
-export const DomainsWhereInput = builder.inputType("DomainsWhereInput", {
-  description: "Filter for the top-level domains query.",
-  fields: (t) => ({
-    name: t.string({
-      required: true,
-      description:
-        "A partial Interpreted Name by which to search the set of Domains. ex: 'example', 'example.', 'example.et'.",
-    }),
-    version: t.field({
-      type: ENSProtocolVersion,
-      description:
-        "If set, filters the set of Domains to only those of the specified ENS protocol version.",
-    }),
-  }),
-});
-
-export const AccountDomainsWhereInput = builder.inputType("AccountDomainsWhereInput", {
-  description: "Filter for Account.domains query.",
-  fields: (t) => ({
-    name: t.string({
-      description:
-        "A partial Interpreted Name by which to search the set of Domains. ex: 'example', 'example.', 'example.et'.",
-    }),
-    canonical: t.boolean({
-      description:
-        "Optional, defaults to false. If true, filters the set of Domains by those that are Canonical (i.e. reachable by ENS Forward Resolution).",
-      defaultValue: false,
-    }),
-    version: t.field({
-      type: ENSProtocolVersion,
-      description:
-        "If set, filters the set of Domains to only those of the specified ENS protocol version.",
-    }),
-  }),
-});
-
-export const RegistryDomainsWhereInput = builder.inputType("RegistryDomainsWhereInput", {
-  description: "Filter for Registry.domains query.",
-  fields: (t) => ({
-    name: t.string({
-      description: "A partial Interpreted Name by which to filter Domains in this Registry.",
-    }),
-  }),
-});
-
-export const SubdomainsWhereInput = builder.inputType("SubdomainsWhereInput", {
-  description: "Filter for Domain.subdomains query.",
-  fields: (t) => ({
-    name: t.string({
-      description: "A partial Interpreted Name by which to filter subdomains.",
-    }),
-  }),
-});
-
-//////////////////////
-// Ordering
-//////////////////////
-
-export const DomainsOrderBy = builder.enumType("DomainsOrderBy", {
-  description: "Fields by which domains can be ordered",
-  values: ["NAME", "REGISTRATION_TIMESTAMP", "REGISTRATION_EXPIRY"] as const,
-});
-
-export type DomainsOrderByValue = typeof DomainsOrderBy.$inferType;
-
-export const DomainsOrderInput = builder.inputType("DomainsOrderInput", {
-  description: "Ordering options for domains query. If no order is provided, the default is ASC.",
-  fields: (t) => ({
-    by: t.field({ type: DomainsOrderBy, required: true }),
-    dir: t.field({ type: OrderDirection, defaultValue: "ASC" }),
-  }),
-});
-
-export const DOMAINS_DEFAULT_ORDER_BY: typeof DomainsOrderBy.$inferType = "NAME";
-export const DOMAINS_DEFAULT_ORDER_DIR: typeof OrderDirection.$inferType = "ASC";
