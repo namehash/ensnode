@@ -1,9 +1,17 @@
 import {
   ADDR_REVERSE_NODE,
+  asInterpretedLabel,
   type DomainId,
+  ETH_NODE,
   type InterpretedLabel,
   type InterpretedName,
+  labelhashInterpretedLabel,
   makeENSv1DomainId,
+  makeENSv1RegistryId,
+  makeENSv1VirtualRegistryId,
+  makeENSv2DomainId,
+  makeENSv2RegistryId,
+  makeStorageId,
 } from "enssdk";
 import { beforeAll, describe, expect, it } from "vitest";
 
@@ -125,6 +133,78 @@ describe("Domain.canonical", () => {
     expect(result.domain?.id).toBe(id);
     expect(result.domain?.canonical).not.toBeNull();
     expect(result.domain!.canonical!.name).toBe("addr.reverse");
+  });
+});
+
+describe("Domain.registry and Domain.subregistry", () => {
+  type DomainRegistriesResult = {
+    domain: {
+      registry: { __typename: string; id: string };
+      subregistry: { __typename: string; id: string } | null;
+    } | null;
+  };
+
+  const DomainRegistries = gql`
+    query DomainRegistries($id: DomainId!) {
+      domain(by: { id: $id }) {
+        registry { __typename id }
+        subregistry { __typename id }
+      }
+    }
+  `;
+
+  it("exposes parent and child Registries on the ENSv1 .eth Domain", async () => {
+    const v1RootRegistry = getDatasourceContract(
+      "ens-test-env",
+      DatasourceNames.ENSRoot,
+      "ENSv1Registry",
+    );
+    const id = makeENSv1DomainId(v1RootRegistry, ETH_NODE);
+
+    await expect(request<DomainRegistriesResult>(DomainRegistries, { id })).resolves.toMatchObject({
+      domain: {
+        registry: {
+          __typename: "ENSv1Registry",
+          id: makeENSv1RegistryId(v1RootRegistry),
+        },
+        subregistry: null,
+        // TODO: The DevNet should in the future have some ENSv1 domains that are then migrated, and then the .eth ENSv1 domain will have a subregistry.
+        // subregistry: {
+        //   __typename: "ENSv1VirtualRegistry",
+        //   id: makeENSv1VirtualRegistryId(v1RootRegistry, ETH_NODE),
+        // },
+      },
+    });
+  });
+
+  it("exposes parent and child Registries on the ENSv2 .eth Domain", async () => {
+    const v2RootRegistry = getDatasourceContract(
+      "ens-test-env",
+      DatasourceNames.ENSv2Root,
+      "RootRegistry",
+    );
+    const v2EthRegistry = getDatasourceContract(
+      "ens-test-env",
+      DatasourceNames.ENSv2Root,
+      "ETHRegistry",
+    );
+    const id = makeENSv2DomainId(
+      v2RootRegistry,
+      makeStorageId(labelhashInterpretedLabel(asInterpretedLabel("eth"))),
+    );
+
+    await expect(request<DomainRegistriesResult>(DomainRegistries, { id })).resolves.toMatchObject({
+      domain: {
+        registry: {
+          __typename: "ENSv2Registry",
+          id: makeENSv2RegistryId(v2RootRegistry),
+        },
+        subregistry: {
+          __typename: "ENSv2Registry",
+          id: makeENSv2RegistryId(v2EthRegistry),
+        },
+      },
+    });
   });
 });
 

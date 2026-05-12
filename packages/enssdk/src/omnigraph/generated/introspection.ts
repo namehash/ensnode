@@ -1193,6 +1193,18 @@ const introspection = {
             "isDeprecated": false
           },
           {
+            "name": "registry",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "INTERFACE",
+                "name": "Registry"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
             "name": "resolver",
             "type": {
               "kind": "OBJECT",
@@ -1251,6 +1263,15 @@ const introspection = {
                 }
               }
             ],
+            "isDeprecated": false
+          },
+          {
+            "name": "subregistry",
+            "type": {
+              "kind": "INTERFACE",
+              "name": "Registry"
+            },
+            "args": [],
             "isDeprecated": false
           }
         ],
@@ -1835,6 +1856,18 @@ const introspection = {
             "isDeprecated": false
           },
           {
+            "name": "registry",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "INTERFACE",
+                "name": "Registry"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
             "name": "resolver",
             "type": {
               "kind": "OBJECT",
@@ -1902,6 +1935,15 @@ const introspection = {
                 }
               }
             ],
+            "isDeprecated": false
+          },
+          {
+            "name": "subregistry",
+            "type": {
+              "kind": "INTERFACE",
+              "name": "Registry"
+            },
+            "args": [],
             "isDeprecated": false
           }
         ],

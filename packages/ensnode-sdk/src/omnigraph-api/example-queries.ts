@@ -106,15 +106,10 @@ query DomainByName($name: InterpretedName!) {
     label { interpreted hash }
     canonical { name node path }
     owner { address }
+    subregistry { contract { chainId address } }
 
     ... on ENSv1Domain {
       rootRegistryOwner { address }
-    }
-
-    ... on ENSv2Domain {
-      subregistry {
-        contract { chainId address }
-      }
     }
   }
 }`,

@@ -213,21 +213,21 @@ scalar ChainId
 scalar CoinType
 
 """
-A Domain represents an individual Label within the ENS namegraph. It may or may not be Canonical. It may be an ENSv1Domain or an ENSv2Domain.
+A Domain represents an on-chain Domain, i.e. an individual Label within the ENS namegraph. It may or may not be Canonical. It may be an ENSv1Domain or an ENSv2Domain.
 """
 interface Domain {
   """
-  The materialized canonical-tree projection of this Domain (Canonical Name, leaf-to-root canonical path, and namehash). Null when the Domain is not Canonical.
+  Metadata (name, path, and node) related to the Domain's canonicality, if known. Null when the Domain is not Canonical.
   """
   canonical: DomainCanonical
 
   """All Events associated with this Domain."""
   events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): DomainEventsConnection
 
-  """A unique reference to this Domain."""
+  """A unique and stable reference to this Domain."""
   id: DomainId!
 
-  """The Label this Domain represents in the ENS Namegraph"""
+  """The Label this Domain represents in the ENS Namegraph."""
   label: Label!
 
   """
@@ -236,7 +236,7 @@ interface Domain {
   owner: Account
 
   """
-  The direct parent Domain via a single unidirectional walk up the namegraph (`Domain.registryId` → `Registry.canonicalDomainId`). No edge-authentication check; available for canonical and non-canonical Domains alike. Null when the parent Registry has no canonical Domain set (e.g., a root Registry).
+  The direct parent Domain via a single unidirectional walk up the namegraph. Null when the Domain's parent Registry does not declare a parent Domain.
   """
   parent: Domain
 
@@ -246,8 +246,11 @@ interface Domain {
   """All Registrations for a Domain, including the latest Registration."""
   registrations(after: String, before: String, first: Int, last: Int): DomainRegistrationsConnection
 
+  """The Registry under which this Domain exists."""
+  registry: Registry!
+
   """
-  The Resolver that this Domain has assigned, if any. NOTE that this is the Domain's _assigned_ Resolver, _not_ its _effective_ Resolver, which can only be determined by following ENS Forward Resolution and ENSIP-10.
+  The Resolver that this Domain has assigned, if any. NOTE that this is the Domain's _assigned_ Resolver, _not_ its _effective_ Resolver, which can only be determined by following ENS Forward Resolution and ENSIP-10. Do NOT use this Domain-Resolver relationship in isolation to resolve records, that operation is NOT ENS Forward Resolution.
   """
   resolver: Resolver
 
@@ -255,20 +258,25 @@ interface Domain {
   All Domains that are direct descendents of this Domain in the namegraph.
   """
   subdomains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: SubdomainsWhereInput): DomainSubdomainsConnection
+
+  """The Registry this Domain declares as its Subregistry, if exists."""
+  subregistry: Registry
 }
 
 """
-The materialized canonical-tree projection of a Canonical Domain — Canonical Name, leaf-to-root canonical path (as DomainIds), and namehash.
+Canonicality metadata for a Domain, including its name, node (namehash), and path.
 """
 type DomainCanonical {
   """The Canonical Name for this Domain."""
   name: InterpretedName!
 
-  """The namehash of this Domain's Canonical Name."""
+  """
+  The namehash of this Domain's Canonical Name. Note that this is NOT a stable reference to this Domain; use `Domain.id`.
+  """
   node: Node!
 
   """
-  The Canonical Path from this Domain to the ENS Root, leaf→root inclusive of this Domain. Returned as DomainIds.
+  The Canonical Path from this Domain to the ENS Root, leaf→root inclusive of this Domain.
   """
   path: [Domain!]!
 }
@@ -354,20 +362,20 @@ enum ENSProtocolVersion {
   ENSv2
 }
 
-"""An ENSv1Domain represents an ENSv1 Domain."""
+"""An ENSv1Domain represents an on-chain ENSv1 Domain."""
 type ENSv1Domain implements Domain {
   """
-  The materialized canonical-tree projection of this Domain (Canonical Name, leaf-to-root canonical path, and namehash). Null when the Domain is not Canonical.
+  Metadata (name, path, and node) related to the Domain's canonicality, if known. Null when the Domain is not Canonical.
   """
   canonical: DomainCanonical
 
   """All Events associated with this Domain."""
   events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): DomainEventsConnection
 
-  """A unique reference to this Domain."""
+  """A unique and stable reference to this Domain."""
   id: DomainId!
 
-  """The Label this Domain represents in the ENS Namegraph"""
+  """The Label this Domain represents in the ENS Namegraph."""
   label: Label!
 
   """The namehash of this ENSv1 Domain."""
@@ -379,7 +387,7 @@ type ENSv1Domain implements Domain {
   owner: Account
 
   """
-  The direct parent Domain via a single unidirectional walk up the namegraph (`Domain.registryId` → `Registry.canonicalDomainId`). No edge-authentication check; available for canonical and non-canonical Domains alike. Null when the parent Registry has no canonical Domain set (e.g., a root Registry).
+  The direct parent Domain via a single unidirectional walk up the namegraph. Null when the Domain's parent Registry does not declare a parent Domain.
   """
   parent: Domain
 
@@ -389,8 +397,11 @@ type ENSv1Domain implements Domain {
   """All Registrations for a Domain, including the latest Registration."""
   registrations(after: String, before: String, first: Int, last: Int): DomainRegistrationsConnection
 
+  """The Registry under which this Domain exists."""
+  registry: Registry!
+
   """
-  The Resolver that this Domain has assigned, if any. NOTE that this is the Domain's _assigned_ Resolver, _not_ its _effective_ Resolver, which can only be determined by following ENS Forward Resolution and ENSIP-10.
+  The Resolver that this Domain has assigned, if any. NOTE that this is the Domain's _assigned_ Resolver, _not_ its _effective_ Resolver, which can only be determined by following ENS Forward Resolution and ENSIP-10. Do NOT use this Domain-Resolver relationship in isolation to resolve records, that operation is NOT ENS Forward Resolution.
   """
   resolver: Resolver
 
@@ -403,6 +414,9 @@ type ENSv1Domain implements Domain {
   All Domains that are direct descendents of this Domain in the namegraph.
   """
   subdomains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: SubdomainsWhereInput): DomainSubdomainsConnection
+
+  """The Registry this Domain declares as its Subregistry, if exists."""
+  subregistry: Registry
 }
 
 """
@@ -460,20 +474,20 @@ type ENSv1VirtualRegistry implements Registry {
   permissions: Permissions
 }
 
-"""An ENSv2Domain represents an ENSv2 Domain."""
+"""An ENSv2Domain represents an on-chain ENSv2 Domain."""
 type ENSv2Domain implements Domain {
   """
-  The materialized canonical-tree projection of this Domain (Canonical Name, leaf-to-root canonical path, and namehash). Null when the Domain is not Canonical.
+  Metadata (name, path, and node) related to the Domain's canonicality, if known. Null when the Domain is not Canonical.
   """
   canonical: DomainCanonical
 
   """All Events associated with this Domain."""
   events(after: String, before: String, first: Int, last: Int, where: EventsWhereInput): DomainEventsConnection
 
-  """A unique reference to this Domain."""
+  """A unique and stable reference to this Domain."""
   id: DomainId!
 
-  """The Label this Domain represents in the ENS Namegraph"""
+  """The Label this Domain represents in the ENS Namegraph."""
   label: Label!
 
   """
@@ -482,7 +496,7 @@ type ENSv2Domain implements Domain {
   owner: Account
 
   """
-  The direct parent Domain via a single unidirectional walk up the namegraph (`Domain.registryId` → `Registry.canonicalDomainId`). No edge-authentication check; available for canonical and non-canonical Domains alike. Null when the parent Registry has no canonical Domain set (e.g., a root Registry).
+  The direct parent Domain via a single unidirectional walk up the namegraph. Null when the Domain's parent Registry does not declare a parent Domain.
   """
   parent: Domain
 
@@ -497,11 +511,11 @@ type ENSv2Domain implements Domain {
   """All Registrations for a Domain, including the latest Registration."""
   registrations(after: String, before: String, first: Int, last: Int): DomainRegistrationsConnection
 
-  """The Registry under which this ENSv2Domain exists."""
+  """The Registry under which this Domain exists."""
   registry: Registry!
 
   """
-  The Resolver that this Domain has assigned, if any. NOTE that this is the Domain's _assigned_ Resolver, _not_ its _effective_ Resolver, which can only be determined by following ENS Forward Resolution and ENSIP-10.
+  The Resolver that this Domain has assigned, if any. NOTE that this is the Domain's _assigned_ Resolver, _not_ its _effective_ Resolver, which can only be determined by following ENS Forward Resolution and ENSIP-10. Do NOT use this Domain-Resolver relationship in isolation to resolve records, that operation is NOT ENS Forward Resolution.
   """
   resolver: Resolver
 
@@ -510,7 +524,7 @@ type ENSv2Domain implements Domain {
   """
   subdomains(after: String, before: String, first: Int, last: Int, order: DomainsOrderInput, where: SubdomainsWhereInput): DomainSubdomainsConnection
 
-  """The Registry this ENSv2Domain declares as its Subregistry, if exists."""
+  """The Registry this Domain declares as its Subregistry, if exists."""
   subregistry: Registry
 
   """The ENSv2Domain's current Token Id."""
