@@ -13,7 +13,6 @@ Resolving a Mainnet Primary Name via `usePrimaryName` is just the payoff. The
 interesting part is everything that gates it:
 
 1. **Connection negotiation.** Wait for a healthy `useIndexingStatus` response
-   mounting feature UI.
 2. **Disambiguated error handling.** Connection failures are classified as `network`
    (fetch / DNS / CORS), `application` (bad response, or `responseCode === "error"`),
    or `unsupported-namespace`. See
