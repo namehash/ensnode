@@ -1,5 +1,6 @@
 import { type EnsIndexerPublicConfig, PluginName } from "../ensindexer/config/types";
-import { type OmnichainIndexingStatusId, OmnichainIndexingStatusIds } from "../indexing-status";
+import { hasBackfillCompleted } from "../ensnode/api/prerequisites";
+import type { OmnichainIndexingStatusId } from "../indexing-status";
 import type { PrerequisiteResult } from "../shared/prerequisites";
 
 /**
@@ -21,14 +22,5 @@ export function hasSubgraphApiConfigSupport(config: EnsIndexerPublicConfig): Pre
 export function hasSubgraphApiIndexingStatusSupport(
   indexingStatus: OmnichainIndexingStatusId,
 ): PrerequisiteResult {
-  const supported =
-    indexingStatus === OmnichainIndexingStatusIds.Completed ||
-    indexingStatus === OmnichainIndexingStatusIds.Following;
-
-  if (supported) return { supported };
-
-  return {
-    supported: false,
-    reason: `The connected ENSNode's Omnichain Indexing Status must be "${OmnichainIndexingStatusIds.Completed}" or "${OmnichainIndexingStatusIds.Following}" for the Subgraph API to be available. Current omnichain indexing status is "${indexingStatus}".`,
-  };
+  return hasBackfillCompleted(indexingStatus);
 }
