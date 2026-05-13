@@ -4,6 +4,8 @@
  * event handlers.
  */
 
+import pRetry from "p-retry";
+
 import { migrateEnsNodeSchema } from "@/lib/ensdb/migrate-ensnode-schema";
 import { ensDbClient } from "@/lib/ensdb/singleton";
 import { startEnsDbWriterWorker } from "@/lib/ensdb-writer-worker/singleton";
@@ -15,7 +17,20 @@ import { indexingMetadataContextBuilder } from "@/lib/indexing-metadata-context-
 import { logger } from "@/lib/logger";
 
 async function upsertIndexingMetadataContextRecord(): Promise<void> {
-  const indexingMetadataContext = await indexingMetadataContextBuilder.getIndexingMetadataContext();
+  // indexingMetadataContextBuilder may face transient errors while trying to
+  // build the Indexing Metadata Context, so we allow to retry this operation
+  // a few times before giving up and crashing the ENSIndexer instance.
+  const indexingMetadataContext = await pRetry(
+    () => indexingMetadataContextBuilder.getIndexingMetadataContext(),
+    {
+      retries: 5,
+      onFailedAttempt: ({ error, attemptNumber, retriesLeft }) => {
+        logger.info({
+          msg: ` Building Indexing Metadata Context attempt ${attemptNumber} failed (${error.message}). ${retriesLeft} retries left.`,
+        });
+      },
+    },
+  );
 
   logger.info({
     msg: `Upserting Indexing Metadata Context Initialized`,

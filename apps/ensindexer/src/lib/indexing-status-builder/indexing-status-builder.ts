@@ -92,22 +92,30 @@ export class IndexingStatusBuilder {
       const chainIndexingStatus = chainIndexingStatuses.get(chainId);
       const chainIndexingConfig = chainsIndexingConfig.get(chainId);
 
-      // Invariants ensuring required data is available.
-      if (!chainIndexingStatus) {
-        throw new Error(`Indexing status not found for chain ID ${chainId}`);
+      try {
+        // Invariants ensuring required data is available.
+        if (!chainIndexingStatus) {
+          throw new Error(`Indexing status not found for chain ID ${chainId}`);
+        }
+
+        if (!chainIndexingConfig) {
+          throw new Error(`Indexing config not found for chain ID ${chainId}`);
+        }
+
+        const chainStatusSnapshot = this.buildChainIndexingStatusSnapshot(
+          chainIndexingMetric,
+          chainIndexingStatus,
+          chainIndexingConfig,
+        );
+
+        chainStatusSnapshots.set(chainId, chainStatusSnapshot);
+      } catch (error) {
+        logger.error({
+          msg: `Building indexing status snapshot for chain ID ${chainId} failed`,
+          payload: { chainIndexingConfig, chainIndexingMetrics, chainIndexingStatus },
+        });
+        throw error;
       }
-
-      if (!chainIndexingConfig) {
-        throw new Error(`Indexing config not found for chain ID ${chainId}`);
-      }
-
-      const chainStatusSnapshot = this.buildChainIndexingStatusSnapshot(
-        chainIndexingMetric,
-        chainIndexingStatus,
-        chainIndexingConfig,
-      );
-
-      chainStatusSnapshots.set(chainId, chainStatusSnapshot);
     }
 
     return chainStatusSnapshots;
@@ -131,11 +139,6 @@ export class IndexingStatusBuilder {
   ): ChainIndexingStatusSnapshot {
     const { checkpointBlock } = chainIndexingStatus;
     const { indexedBlockrange } = chainIndexingConfig;
-
-    logger.info({
-      msg: `Building indexing status snapshot for chain`,
-      payload: { chainIndexingConfig, chainIndexingMetrics, chainIndexingStatus },
-    });
 
     // In omnichain ordering, if the startBlock is the same as the
     // status block, the chain has not started yet.
@@ -174,6 +177,15 @@ export class IndexingStatusBuilder {
       }
 
       case ChainIndexingStates.Historical: {
+        // // Metrics and status are fetched concurrently — the checkpoint block
+        // // can briefly advance past the backfill end block. Clamp to maintain
+        // // the invariant: latestIndexedBlock <= backfillEndBlock.
+        // const latestIndexedBlock =
+        //   chainIndexingConfig.backfillEndBlock &&
+        //   isBlockRefBeforeOrEqualTo(chainIndexingConfig.backfillEndBlock, checkpointBlock)
+        //     ? chainIndexingConfig.backfillEndBlock
+        //     : checkpointBlock;
+
         return validateChainIndexingStatusSnapshot({
           chainStatus: ChainIndexingStatusIds.Backfill,
           latestIndexedBlock: checkpointBlock,
@@ -281,7 +293,7 @@ export class IndexingStatusBuilder {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
 
       throw new Error(
-        `Error fetching block for chain ID ${chainId} at block number ${blockNumber}: ${errorMessage}`,
+        `Error fetching block for chain ID ${chainId} at block number ${blockNumber.toString()}: ${errorMessage}`,
       );
     }
   }
