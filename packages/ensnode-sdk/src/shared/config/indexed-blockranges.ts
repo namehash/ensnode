@@ -53,7 +53,7 @@ export function buildIndexedBlockranges(
 
         const contractIndexedBlockrange = buildBlockNumberRange(
           datasourceContract.startBlock,
-          datasourceContract.endBlock || globalBlockrangeEndBlock,
+          datasourceContract.endBlock ?? globalBlockrangeEndBlock,
         );
 
         const indexedBlockrange = currentChainIndexedBlockrange

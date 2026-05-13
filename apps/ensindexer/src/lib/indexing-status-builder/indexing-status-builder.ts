@@ -112,7 +112,12 @@ export class IndexingStatusBuilder {
       } catch (error) {
         logger.error({
           msg: `Building indexing status snapshot for chain ID ${chainId} failed`,
-          payload: { chainIndexingConfig, chainIndexingMetrics, chainIndexingStatus },
+          payload: {
+            chainId,
+            chainIndexingConfig,
+            chainIndexingMetrics,
+            chainIndexingStatus,
+          },
           error,
         });
         throw error;
