@@ -177,18 +177,18 @@ export class IndexingStatusBuilder {
       }
 
       case ChainIndexingStates.Historical: {
-        // // Metrics and status are fetched concurrently — the checkpoint block
-        // // can briefly advance past the backfill end block. Clamp to maintain
-        // // the invariant: latestIndexedBlock <= backfillEndBlock.
-        // const latestIndexedBlock =
-        //   chainIndexingConfig.backfillEndBlock &&
-        //   isBlockRefBeforeOrEqualTo(chainIndexingConfig.backfillEndBlock, checkpointBlock)
-        //     ? chainIndexingConfig.backfillEndBlock
-        //     : checkpointBlock;
+        // Metrics and status are fetched concurrently — the checkpoint block
+        // can briefly advance past the backfill end block. Clamp to maintain
+        // the invariant: latestIndexedBlock <= backfillEndBlock.
+        const latestIndexedBlock =
+          chainIndexingConfig.backfillEndBlock &&
+          isBlockRefBeforeOrEqualTo(chainIndexingConfig.backfillEndBlock, checkpointBlock)
+            ? chainIndexingConfig.backfillEndBlock
+            : checkpointBlock;
 
         return validateChainIndexingStatusSnapshot({
           chainStatus: ChainIndexingStatusIds.Backfill,
-          latestIndexedBlock: checkpointBlock,
+          latestIndexedBlock,
           backfillEndBlock: chainIndexingConfig.backfillEndBlock as Unvalidated<BlockRef>,
           config: indexedBlockrange as Unvalidated<BlockRefRangeWithStartBlock>,
         } satisfies Unvalidated<ChainIndexingStatusSnapshotBackfill>);
