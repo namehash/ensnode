@@ -9,6 +9,7 @@ import {
 
 import type { PluginName } from "../../ensindexer/config/types";
 import {
+  type BlockNumberRange,
   type BlockNumberRangeWithStartBlock,
   buildBlockNumberRange,
   mergeBlockNumberRanges,
@@ -22,6 +23,7 @@ import {
  */
 export function buildIndexedBlockranges(
   namespace: ENSNamespaceId,
+  globalBlockrangeEndBlock: BlockNumberRange["endBlock"],
   pluginsDatasourceNames: Map<PluginName, DatasourceName[]>,
 ): Map<ChainId, BlockNumberRangeWithStartBlock> {
   const indexedBlockranges = new Map<ChainId, BlockNumberRangeWithStartBlock>();
@@ -39,9 +41,16 @@ export function buildIndexedBlockranges(
       for (const datasourceContract of datasourceContracts) {
         const currentChainIndexedBlockrange = indexedBlockranges.get(datasourceChainId);
 
+        if (globalBlockrangeEndBlock && datasourceContract.startBlock > globalBlockrangeEndBlock) {
+          // If the contract's start block is greater than the global end block,
+          // then this contract is not indexed at all, so we can skip it from
+          // consideration in the indexed blockrange.
+          continue;
+        }
+
         const contractIndexedBlockrange = buildBlockNumberRange(
           datasourceContract.startBlock,
-          datasourceContract.endBlock,
+          datasourceContract.endBlock || globalBlockrangeEndBlock,
         );
 
         const indexedBlockrange = currentChainIndexedBlockrange
