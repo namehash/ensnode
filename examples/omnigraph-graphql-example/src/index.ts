@@ -1,5 +1,6 @@
 // you may use a NameHash Hosted ENSNode instance
 // learn more at https://ensnode.io/docs/integrate/hosted-instances
+// biome-ignore lint/style/noNonNullAssertion: invariant
 const ENSNODE_URL = process.env.ENSNODE_URL!;
 
 // The Omnigraph is a standard GraphQL API following the Relay spec.
@@ -26,12 +27,14 @@ interface Domain {
 
 interface QueryResult {
   data?: {
-    domain: (Domain & {
-      subdomains: {
-        totalCount: number;
-        edges: { node: Domain }[];
-      } | null;
-    }) | null;
+    domain:
+      | (Domain & {
+          subdomains: {
+            totalCount: number;
+            edges: { node: Domain }[];
+          } | null;
+        })
+      | null;
   } | null;
   errors?: { message: string }[];
 }
