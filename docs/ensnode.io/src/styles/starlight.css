@@ -154,13 +154,11 @@ a[rel="prev"]:hover {
   display: inline;
 }
 
-.sl-markdown-content ul,
-.sl-markdown-content ol {
+.sl-markdown-content > :where(ul, ol) {
   color: var(--sl-color-text);
-  margin-top: 1em;
-  margin-bottom: 1em;
-  margin-left: 0;
-  padding-left: 40px;
+  margin-block: 1em;
+  margin-inline: 0;
+  padding-inline-start: 40px;
 }
 
 .sl-markdown-content ul {
