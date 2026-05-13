@@ -1,6 +1,6 @@
 "use client";
 
-import type { UndefinedInitialDataOptions } from "@tanstack/react-query";
+import { skipToken, type UndefinedInitialDataOptions } from "@tanstack/react-query";
 
 import {
   EnsNodeClient,
@@ -36,6 +36,15 @@ export const ASSUME_IMMUTABLE_QUERY = {
   refetchOnReconnect: false,
   refetchOnMount: false,
 } as const satisfies Partial<UndefinedInitialDataOptions>;
+
+/**
+ * Query options that disable a useQuery call. Uses `skipToken` so tanstack-query
+ * does not warn about a missing `queryFn`.
+ */
+export const DISABLED_QUERY = {
+  queryKey: ["disabled"] as const,
+  queryFn: skipToken,
+} as const;
 
 /**
  * Query keys for hooks. Simply keys by path and arguments.
