@@ -3,12 +3,19 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-const PACKAGE_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+const EXAMPLE_DIR = join(
+  dirname(fileURLToPath(import.meta.url)),
+  "..",
+  "..",
+  "..",
+  "examples",
+  "enssdk-example",
+);
 
 describe("enssdk-example", () => {
   it("smoke test: completes against the configured ENSNode with exit code 0", () => {
     const result = spawnSync("pnpm", ["start"], {
-      cwd: PACKAGE_ROOT,
+      cwd: EXAMPLE_DIR,
       env: process.env,
       encoding: "utf8",
       timeout: 60_000,

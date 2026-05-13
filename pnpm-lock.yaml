@@ -867,9 +867,18 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
-      vitest:
+
+  examples/omnigraph-graphql-example:
+    devDependencies:
+      '@types/node':
         specifier: 'catalog:'
-        version: 4.0.5(@types/debug@4.1.12)(@types/node@24.10.9)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.12))(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.3)
+        version: 24.10.9
+      tsx:
+        specifier: ^4.7.1
+        version: 4.21.0
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
 
   packages/datasources:
     dependencies:
@@ -1184,6 +1193,10 @@ importers:
       viem:
         specifier: 'catalog:'
         version: 2.38.5(typescript@5.9.3)(zod@4.3.6)
+    devDependencies:
+      vitest:
+        specifier: 'catalog:'
+        version: 4.0.5(@types/debug@4.1.12)(@types/node@24.10.9)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.12))(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.3)
 
   packages/namehash-ui:
     dependencies:
@@ -11542,7 +11555,7 @@ snapshots:
 
   '@esbuild-kit/core-utils@3.3.2':
     dependencies:
-      esbuild: 0.27.2
+      esbuild: 0.27.4
       source-map-support: 0.5.21
 
   '@esbuild-kit/esm-loader@2.6.5':
@@ -14965,14 +14978,6 @@ snapshots:
       '@vitest/utils': 4.0.5
       chai: 6.2.0
       tinyrainbow: 3.0.3
-
-  '@vitest/mocker@4.0.5(vite@6.4.2(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.3))':
-    dependencies:
-      '@vitest/spy': 4.0.5
-      estree-walker: 3.0.3
-      magic-string: 0.30.21
-    optionalDependencies:
-      vite: 6.4.2(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.3)
 
   '@vitest/mocker@4.0.5(vite@6.4.2(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.3))':
     dependencies:
@@ -20504,7 +20509,7 @@ snapshots:
   vitest@4.0.5(@types/debug@4.1.12)(@types/node@24.10.9)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.12))(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.3):
     dependencies:
       '@vitest/expect': 4.0.5
-      '@vitest/mocker': 4.0.5(vite@6.4.2(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.3))
+      '@vitest/mocker': 4.0.5(vite@6.4.2(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.3))
       '@vitest/pretty-format': 4.0.5
       '@vitest/runner': 4.0.5
       '@vitest/snapshot': 4.0.5
