@@ -161,7 +161,10 @@ export class IndexingStatusBuilder {
 
     for (const [chainId, snapshot] of chainStatusSnapshots.entries()) {
       if (snapshot.chainStatus !== ChainIndexingStatusIds.Queued) continue;
-      if (snapshot.config.startBlock.timestamp >= maxAdvancedTimestamp) continue;
+      // Strict `>`: the SDK invariant requires `cursor < earliestQueuedStartBlock`,
+      // so a chain whose `startBlock.timestamp` equals the cursor must also be
+      // promoted to keep the snapshot valid.
+      if (snapshot.config.startBlock.timestamp > maxAdvancedTimestamp) continue;
 
       const chainConfig = chainsIndexingConfig.get(chainId);
       const chainMetric = chainIndexingMetrics.get(chainId);

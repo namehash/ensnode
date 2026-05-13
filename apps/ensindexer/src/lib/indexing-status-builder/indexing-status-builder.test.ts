@@ -707,6 +707,97 @@ describe("IndexingStatusBuilder", () => {
       } satisfies OmnichainIndexingStatusSnapshot);
     });
 
+    it("promotes a Queued chain when its startBlock.ts equals the omnichain cursor", async () => {
+      // Arrange — boundary case: the Queued chain's `startBlock.timestamp`
+      // equals the max `latestIndexedBlock.timestamp` across non-Queued chains.
+      // The SDK invariant requires `cursor < earliestQueuedStartBlock` (strict),
+      // so leaving the chain Queued would still violate the invariant. Validate
+      // that the chain is promoted at equality, not just strict inequality.
+      const chainA = 1;
+      const chainB = 10;
+
+      const publicClientMock = buildPublicClientMock();
+
+      const localMetrics = buildLocalChainsIndexingMetrics(
+        new Map([
+          [
+            chainA,
+            {
+              state: ChainIndexingStates.Historical,
+              latestSyncedBlock: laterBlockRef,
+              historicalTotalBlocks: 100,
+              backfillEndBlock: latestBlockRef.number,
+            } satisfies LocalChainIndexingMetricsHistorical,
+          ],
+          [
+            chainB,
+            {
+              state: ChainIndexingStates.Historical,
+              latestSyncedBlock: laterBlockRef,
+              historicalTotalBlocks: 100,
+              backfillEndBlock: latestBlockRef.number,
+            } satisfies LocalChainIndexingMetricsHistorical,
+          ],
+        ]),
+      );
+
+      const localStatus: PonderIndexingStatus = {
+        chains: new Map([
+          [chainA, { checkpointBlock: laterBlockRef }],
+          [chainB, { checkpointBlock: laterBlockRef }], // == Chain B's startBlock
+        ]),
+      };
+
+      const localPonderClientMock = buildLocalPonderClientMock({
+        metrics: vi.fn().mockResolvedValue(localMetrics),
+        status: vi.fn().mockResolvedValue(localStatus),
+        getIndexedBlockrange: vi.fn((id: number) => {
+          if (id === chainA) return buildBlockNumberRange(earliestBlockRef.number, undefined);
+          if (id === chainB) return buildBlockNumberRange(laterBlockRef.number, undefined);
+          throw new Error(`Unexpected chain ID ${id}`);
+        }),
+        getCachedPublicClient: vi.fn().mockReturnValue(publicClientMock),
+      });
+
+      const builder = new IndexingStatusBuilder(localPonderClientMock as LocalPonderClient);
+
+      // Act
+      const result = await builder.getOmnichainIndexingStatusSnapshot();
+
+      // Assert — Chain B is promoted, snapshot validates as Backfill with
+      // omnichainIndexingCursor == Chain B's startBlock.ts.
+      expect(result).toStrictEqual({
+        omnichainStatus: OmnichainIndexingStatusIds.Backfill,
+        chains: new Map([
+          [
+            chainA,
+            {
+              chainStatus: ChainIndexingStatusIds.Backfill,
+              latestIndexedBlock: laterBlockRef,
+              backfillEndBlock: latestBlockRef,
+              config: {
+                rangeType: RangeTypeIds.LeftBounded,
+                startBlock: earliestBlockRef,
+              },
+            } satisfies ChainIndexingStatusSnapshotBackfill,
+          ],
+          [
+            chainB,
+            {
+              chainStatus: ChainIndexingStatusIds.Backfill,
+              latestIndexedBlock: laterBlockRef, // == Chain B's startBlock
+              backfillEndBlock: latestBlockRef,
+              config: {
+                rangeType: RangeTypeIds.LeftBounded,
+                startBlock: laterBlockRef,
+              },
+            } satisfies ChainIndexingStatusSnapshotBackfill,
+          ],
+        ]),
+        omnichainIndexingCursor: laterBlockRef.timestamp,
+      } satisfies OmnichainIndexingStatusSnapshot);
+    });
+
     it("leaves a Queued chain alone when the omnichain cursor has not reached its startBlock", async () => {
       // Arrange — the inverse case: Chain B's startBlock is in the future
       // relative to Chain A's progress, so it is genuinely Queued.
