@@ -19,7 +19,8 @@
   ],
   "exports": {
     ".": "./src/index.ts",
-    "./internal": "./src/internal.ts"
+    "./internal": "./src/internal.ts",
+    "./omnigraph-api/example-queries": "./src/omnigraph-api/example-queries.ts"
   },
   "sideEffects": false,
   "publishConfig": {

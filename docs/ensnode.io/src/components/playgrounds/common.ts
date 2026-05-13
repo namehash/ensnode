@@ -1,5 +1,5 @@
 // TODO: Update to the latest ENSNode URL
-export const ENSNODE_URL = "https://api.v2-sepolia.green.ensnode.io";
+export const ENSNODE_URL = "https://api.v2-sepolia.ensnode.io";
 
 export function getNiceHeightForSnippet(snippet: string) {
   const linesCount = snippet.split("\n").length;

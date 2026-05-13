@@ -1,0 +1,25 @@
+---
+title: Cookbook
+description: Raw ENS Omnigraph GraphQL recipes with static examples and ENSAdmin links.
+sidebar:
+  order: 1
+---
+
+import { LinkCard, CardGrid } from "@astrojs/starlight/components";
+
+## Recipes
+
+<CardGrid>
+  <LinkCard
+    title="Domain By Name"
+    description="Single domain with v1/v2 fields and subregistry — GraphQL, variables, example response, and ENSAdmin."
+    href="/docs/integrate/omnigraph/cookbook/domain-by-name"
+  />
+  <LinkCard
+    title="Account Domains"
+    description="Domains for an address via account.domains — same pattern as the enssdk playground examples."
+    href="/docs/integrate/omnigraph/cookbook/account-domains"
+  />
+</CardGrid>
+
+More recipes will land here over time.

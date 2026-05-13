@@ -6,7 +6,7 @@ sidebar:
   order: 1
 ---
 
-import EnssdkResolutionApiPlayground from "../../../../components/playgrounds/EnssdkResolutionApi";
+import OmnigraphRecipeExample from "../../../../components/docs/OmnigraphRecipeExample.astro";
 import { LinkCard, CardGrid } from "@astrojs/starlight/components";
 
 ## What is ENSv2?
@@ -33,13 +33,11 @@ This means you can build your ENS integration once against the Omnigraph API and
 
 ## Query ENS name data
 
-The fastest way to query ENS data is with [`enssdk`](/docs/integrate/integration-options/enssdk) — the official TypeScript SDK. It gives you a fully typed GraphQL client pointed at the ENS Omnigraph API.
+The example below is a **raw Omnigraph** GraphQL document plus variables and an illustrative JSON response (values depend on the ENSNode instance and chain). The connection matches the public endpoint used across these docs.
 
-The playground below is live — edit the query or the name and run it against a real ENSNode instance:
+<OmnigraphRecipeExample exampleId="domain-by-name" />
 
-<EnssdkResolutionApiPlayground client:load />
-
-The `client.omnigraph.query(...)` call sends a typed GraphQL query to the [ENS Omnigraph API](/docs/integrate/omnigraph). The `asInterpretedName` helper normalizes the name before querying.
+The `InterpretedName` variable is the string Omnigraph expects for the name (here `sfmonicdebmig.eth` for the Sepolia v2 dataset used by the docs endpoint). In app code you typically build it with [`enssdk`](/docs/integrate/integration-options/enssdk) helpers such as `asInterpretedName`.
 
 ## What's next?
 
@@ -55,8 +53,8 @@ The `client.omnigraph.query(...)` call sends a typed GraphQL query to the [ENS O
     href="/docs/integrate/omnigraph"
   />
   <LinkCard
-    title="📖 Cookbook"
-    description="Ready-to-use query recipes: names by address, resolver records, registration history, multichain queries, and more."
+    title="📖 Omnigraph Cookbook"
+    description="GraphQL-only recipes with static query, variables, response, and a link to try them in ENSAdmin."
     href="/docs/integrate/omnigraph/cookbook"
   />
   <LinkCard

@@ -39,14 +39,26 @@ const DEVNET_NAME_WITH_OWNED_RESOLVER = asInterpretedName("example.eth");
 
 const SEPOLIA_V2_NAME_WITH_OWNED_RESOLVER = asInterpretedName("sfmonicdebmig.eth");
 
-export const GRAPHQL_API_EXAMPLE_QUERIES: Array<{
+export type GraphqlApiExampleQuery = {
+  id: string;
   query: string;
   variables: NamespaceSpecificValue<Record<string, unknown>>;
-}> = [
+};
+
+export function getGraphqlApiExampleQueryById(id: string): GraphqlApiExampleQuery {
+  const found = graphqlApiExampleQueryById.get(id);
+  if (!found) {
+    throw new Error(`Unknown GraphQL API example query id: ${id}`);
+  }
+  return found;
+}
+
+export const GRAPHQL_API_EXAMPLE_QUERIES: GraphqlApiExampleQuery[] = [
   ////////////////
   // Hello World
   ////////////////
   {
+    id: "hello-world",
     query: `#
 # Welcome to this interactive playground for
 # ENSNode's GraphQL API!
@@ -65,6 +77,7 @@ query HelloWorld {
   // Find Domains
   /////////////////
   {
+    id: "find-domains",
     query: `
 query FindDomains(
   $name: String!
@@ -98,6 +111,7 @@ query FindDomains(
   // Domain By Name
   ///////////////////
   {
+    id: "domain-by-name",
     query: `
 query DomainByName($name: InterpretedName!) {
   domain(by: {name: $name}) {
@@ -128,6 +142,7 @@ query DomainByName($name: InterpretedName!) {
   // Domain Subdomains
   //////////////////////
   {
+    id: "domain-subdomains",
     query: `
 query DomainSubdomains($name: InterpretedName!) {
   domain(by: {name: $name}) {
@@ -148,6 +163,7 @@ query DomainSubdomains($name: InterpretedName!) {
   // Domain Events
   /////////////////
   {
+    id: "domain-events",
     query: `
 query DomainEvents($name: InterpretedName!) {
   domain(by: {name: $name}) {
@@ -176,6 +192,7 @@ query DomainEvents($name: InterpretedName!) {
   // Account Domains
   ////////////////////
   {
+    id: "account-domains",
     query: `
 query AccountDomains(
   $address: Address!
@@ -202,6 +219,7 @@ query AccountDomains(
   // Account Events
   ////////////////////
   {
+    id: "account-events",
     query: `
 query AccountEvents(
   $address: Address!
@@ -221,6 +239,7 @@ query AccountEvents(
   // Registry Domains
   /////////////////////
   {
+    id: "registry-domains",
     query: `
 query RegistryDomains(
   $registry: AccountIdInput!
@@ -247,6 +266,7 @@ query RegistryDomains(
   // Permissions By Contract
   ////////////////////////////
   {
+    id: "permissions-by-contract",
     query: `
 query PermissionsByContract(
   $contract: AccountIdInput!
@@ -282,6 +302,7 @@ query PermissionsByContract(
   // Permissions By User
   ////////////////////////
   {
+    id: "permissions-by-user",
     query: `
 query PermissionsByUser($address: Address!) {
   account(by: { address: $address }) {
@@ -305,6 +326,7 @@ query PermissionsByUser($address: Address!) {
   // Account Resolver Permissions
   //////////////////////////////////
   {
+    id: "account-resolver-permissions",
     query: `
 query AccountResolverPermissions($address: Address!) {
   account(by: { address: $address }) {
@@ -331,6 +353,7 @@ query AccountResolverPermissions($address: Address!) {
   // Domain's Assigned Resolver
   //////////////////////////////
   {
+    id: "domain-resolver",
     query: `
 query DomainResolver($name: InterpretedName!) {
   domain(by: { name: $name }) {
@@ -352,6 +375,7 @@ query DomainResolver($name: InterpretedName!) {
   // Namegraph
   //////////////
   {
+    id: "namegraph",
     query: `
 query Namegraph {
   root {
@@ -384,3 +408,7 @@ query Namegraph {
     variables: { default: {} },
   },
 ];
+
+const graphqlApiExampleQueryById = new Map(
+  GRAPHQL_API_EXAMPLE_QUERIES.map((entry) => [entry.id, entry]),
+);

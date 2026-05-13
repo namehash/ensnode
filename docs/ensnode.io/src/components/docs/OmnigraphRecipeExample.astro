@@ -1,0 +1,34 @@
+---
+import OmnigraphRecipePanels from "./OmnigraphRecipePanels.astro";
+
+import { getOmnigraphExampleById } from "../../data/ens-v2-examples-queries";
+import { buildEnsadminOmnigraphUrl } from "../../content/snippets/omnigraphAdmin";
+import { stringifyJsonForDocs } from "../../data/ens-v2-examples-queries/common";
+
+interface Props {
+  exampleId: string;
+  /** Hide curl tab (e.g. if connection is admin-only). */
+  showCurl?: boolean;
+}
+
+const { exampleId, showCurl = true } = Astro.props;
+const example = getOmnigraphExampleById(exampleId);
+const adminUrl = buildEnsadminOmnigraphUrl({
+  query: example.query,
+  connection: example.connection,
+  variables: example.variables,
+});
+const variablesJson = stringifyJsonForDocs(example.variables);
+const responseJson = example.response ? stringifyJsonForDocs(example.response) : null;
+---
+
+<OmnigraphRecipePanels
+  panelId={exampleId}
+  query={example.query}
+  variablesJson={variablesJson}
+  variablesObject={example.variables}
+  responseJson={responseJson}
+  connectionBaseUrl={example.connection}
+  adminUrl={adminUrl}
+  showCurl={showCurl}
+/>

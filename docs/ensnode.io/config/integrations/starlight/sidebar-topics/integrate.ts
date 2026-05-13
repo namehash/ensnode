@@ -29,7 +29,21 @@ export const integrateSidebarTopic = {
         },
         {
           label: "Cookbook",
-          link: "/docs/integrate/omnigraph/cookbook",
+          collapsed: true,
+          items: [
+            {
+              label: "Overview",
+              link: "/docs/integrate/omnigraph/cookbook",
+            },
+            {
+              label: "Domain By Name",
+              link: "/docs/integrate/omnigraph/cookbook/domain-by-name",
+            },
+            {
+              label: "Account Domains",
+              link: "/docs/integrate/omnigraph/cookbook/account-domains",
+            },
+          ],
         },
         {
           label: "Schema Reference",
@@ -51,7 +65,27 @@ export const integrateSidebarTopic = {
         },
         {
           label: "enssdk (TypeScript)",
-          link: "/docs/integrate/integration-options/enssdk",
+          collapsed: false,
+          items: [
+            {
+              label: "Overview",
+              link: "/docs/integrate/integration-options/enssdk",
+            },
+            {
+              label: "Cookbook",
+              collapsed: true,
+              items: [
+                {
+                  label: "Overview",
+                  link: "/docs/integrate/integration-options/enssdk/cookbook",
+                },
+                {
+                  label: "Resolution API",
+                  link: "/docs/integrate/integration-options/enssdk/cookbook/resolution-api",
+                },
+              ],
+            },
+          ],
         },
         {
           label: "Raw GraphQL",

@@ -1,0 +1,21 @@
+---
+import { Code } from "@astrojs/starlight/components";
+
+interface Props {
+  code: string;
+  responseJson: string;
+}
+
+const { code, responseJson } = Astro.props;
+---
+
+<div class="not-prose grid gap-6 lg:grid-cols-2 lg:gap-8">
+  <div class="min-w-0">
+    <p class="mb-2 text-sm font-medium text-gray-900">TypeScript (enssdk)</p>
+    <Code code={code} lang="ts" title="index.ts" />
+  </div>
+  <div class="min-w-0">
+    <p class="mb-2 text-sm font-medium text-gray-900">Example Omnigraph response</p>
+    <Code code={responseJson} lang="json" title="response.json" />
+  </div>
+</div>
