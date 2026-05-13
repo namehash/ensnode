@@ -4,7 +4,7 @@ A minimal TypeScript script demonstrating how to query the ENS Omnigraph API dir
 
 The Omnigraph is a standard GraphQL API following the Relay spec, so any GraphQL client (or plain `fetch`) works.
 
-Companion to the [Raw GraphQL integration guide](https://ensnode.io/docs/integrate/integration-options/raw-graphql).
+Companion to the [Omnigraph GraphQL API integration guide](https://ensnode.io/docs/integrate/integration-options/omnigraph-graphql-api).
 
 ## Usage (with NameHash Hosted Instance)
 
