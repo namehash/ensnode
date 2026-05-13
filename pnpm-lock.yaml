@@ -148,6 +148,9 @@ patchedDependencies:
   '@opentelemetry/otlp-exporter-base':
     hash: 1e5f3f5fa82375d902525a5d0be6b280f242f01ac4a6e52952bd8d6841f81171
     path: patches/@opentelemetry__otlp-exporter-base.patch
+  starlight-llms-txt@0.5.1:
+    hash: b0be40873b81b978ff243b51b244d99ddad85f5b0ff444cc9890cb6a1566277a
+    path: patches/starlight-llms-txt@0.5.1.patch
 
 importers:
 
@@ -754,7 +757,7 @@ importers:
         version: 0.33.5
       starlight-llms-txt:
         specifier: ^0.5.0
-        version: 0.5.1(@astrojs/starlight@0.36.1(astro@5.18.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.59.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)))(astro@5.18.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.59.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3))
+        version: 0.5.1(patch_hash=b0be40873b81b978ff243b51b244d99ddad85f5b0ff444cc9890cb6a1566277a)(@astrojs/starlight@0.36.1(astro@5.18.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.59.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)))(astro@5.18.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.59.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3))
       starlight-sidebar-topics:
         specifier: ^0.4.1
         version: 0.4.1(@astrojs/starlight@0.36.1(astro@5.18.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.59.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)))
@@ -19720,7 +19723,7 @@ snapshots:
     dependencies:
       type-fest: 0.7.1
 
-  starlight-llms-txt@0.5.1(@astrojs/starlight@0.36.1(astro@5.18.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.59.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)))(astro@5.18.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.59.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)):
+  starlight-llms-txt@0.5.1(patch_hash=b0be40873b81b978ff243b51b244d99ddad85f5b0ff444cc9890cb6a1566277a)(@astrojs/starlight@0.36.1(astro@5.18.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.59.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)))(astro@5.18.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.59.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)):
     dependencies:
       '@astrojs/mdx': 4.3.9(astro@5.18.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.59.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3))
       '@astrojs/starlight': 0.36.1(astro@5.18.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.59.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3))

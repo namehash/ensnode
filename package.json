@@ -84,7 +84,8 @@
     "patchedDependencies": {
       "@opentelemetry/api": "patches/@opentelemetry__api.patch",
       "@opentelemetry/otlp-exporter-base": "patches/@opentelemetry__otlp-exporter-base.patch",
-      "@changesets/assemble-release-plan@6.0.9": "patches/@changesets__assemble-release-plan@6.0.9.patch"
+      "@changesets/assemble-release-plan@6.0.9": "patches/@changesets__assemble-release-plan@6.0.9.patch",
+      "starlight-llms-txt@0.5.1": "patches/starlight-llms-txt@0.5.1.patch"
     }
   }
 }
