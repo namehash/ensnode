@@ -85,7 +85,8 @@ import { StrictMode } from "react";
 
 import { DomainView } from "./DomainView";
 
-// you may use a NameHash Hosted ENSNode, learn more at https://ensnode.io/docs/integrate/hosted-instances
+// you may use a NameHash Hosted ENSNode instance
+// learn more at https://ensnode.io/docs/integrate/hosted-instances
 const ENSNODE_URL = import.meta.env.VITE_ENSNODE_URL!
 
 // create and extend an EnsNodeClient with Omnigraph support
@@ -391,11 +392,24 @@ Open the printed URL and you should see the `eth` Domain, its owner, and the fir
 ## Where to go next
 
 - Swap the hardcoded `"eth"` for a name from props or a router — see [`EnsureInterpretedName`](https://github.com/namehash/ensnode/blob/main/examples/enskit-react-example/src/DomainView.tsx) in the example app for safe handling of user-provided names.
-- Browse other queries: account-owned domains, events, registrar permissions, full-text search. See [Omnigraph API examples](/docs/integrate/integration-options/raw-graphql).
+- See the [Omnigraph Cookbook](/docs/integrate/omnigraph/cookbook) for ready-to-copy queries: account-owned domains, events, registrar permissions, full-text search, and more.
+- See the [Omnigraph Schema Reference](/docs/integrate/omnigraph/schema-reference) for the full set of types, fields, and arguments you can query.
 - Need data outside React? Use [`enssdk`](/docs/integrate/integration-options/enssdk) directly with the same `graphql(...)` helper.
 
 <LinkCard
   title="enskit-react-example app"
   description="A full example app with routing, account views, registry cache demo, and search."
   href="https://github.com/namehash/ensnode/tree/main/examples/enskit-react-example"
+/>
+
+<LinkCard
+  title="gql.tada documentation"
+  description="The TypeScript-first GraphQL client that powers enskit's typed queries."
+  href="https://gql-tada.0no.co/"
+/>
+
+<LinkCard
+  title="urql documentation"
+  description="The GraphQL client enskit builds on — useful for understanding cache exchanges and customizing the client."
+  href="https://nearform.com/open-source/urql/"
 />

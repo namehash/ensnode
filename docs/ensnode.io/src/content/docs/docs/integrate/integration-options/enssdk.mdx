@@ -51,7 +51,7 @@ Always pin an **exact** version (no `^` or `~`) of `enssdk`. The Omnigraph Graph
 
 Create `tsconfig.json`:
 
-```json title="tsconfig.json"
+```json title="tsconfig.json" ins={10-15}
 {
   "compilerOptions": {
     "target": "ES2022",
@@ -101,7 +101,8 @@ The `EnsNodeClient` is the entry point. Extend it with the `omnigraph` module to
 import { createEnsNodeClient } from "enssdk/core";
 import { omnigraph } from "enssdk/omnigraph";
 
-// you may use a NameHash Hosted ENSNode, learn more at https://ensnode.io/docs/integrate/hosted-instances
+// you may use a NameHash Hosted ENSNode instance
+// learn more at https://ensnode.io/docs/integrate/hosted-instances
 const ENSNODE_URL = process.env.ENSNODE_URL!;
 
 // create and extend an EnsNodeClient with Omnigraph support
@@ -169,7 +170,7 @@ A few things to notice:
 
 Expand the query to also fetch the Domain's subdomains. `subdomains` is a [Relay Connection](https://relay.dev/graphql/connections.htm) — pass `first: 20` to cap the page, and select `totalCount` to learn how many subdomains exist in total.
 
-```ts title="src/index.ts" ins={7-12,34-40}
+```ts title="src/index.ts" ins={7-12,34-38}
 const HelloWorldQuery = graphql(`
   query HelloWorld($name: InterpretedName!) {
     domain(by: { name: $name }) {
@@ -204,16 +205,14 @@ async function main() {
   console.log(`Owner: ${domain.owner?.address ?? "0x0"}`);
 
   console.log(`\nSubdomains (showing 20 of ${domain.subdomains?.totalCount ?? 0}):`);
-  console.table(
-    (domain.subdomains?.edges ?? []).map(({ node }) => ({
-      name: node.name ? beautifyInterpretedName(node.name) : "<unnamed>",
-      owner: node.owner?.address ?? "0x0",
-    })),
-  );
+  for (const { node } of domain.subdomains?.edges ?? []) {
+    const subName = node.name ? beautifyInterpretedName(node.name) : "<unnamed>";
+    console.log(`  - ${subName} — Owner ${node.owner?.address ?? "0x0"}`);
+  }
 }
 ```
 
-`console.table` renders the rows as a nicely-aligned table in your terminal.
+Notice we're now writing the same name/owner rendering twice — once for the parent Domain and once inside the subdomain loop. We'll fix that next.
 
 To page beyond the first 20, the connection also exposes `pageInfo { hasNextPage endCursor }` and accepts an `after: String` cursor — see [Relay's connection spec](https://relay.dev/graphql/connections.htm).
 
@@ -221,12 +220,13 @@ To page beyond the first 20, the connection also exposes `pageInfo { hasNextPage
 
 Notice we're selecting the same fields (`name`, `owner { address }`) on the parent Domain _and_ on each subdomain, and rendering them the same way. Extract a `DomainFragment` to deduplicate the selection — and get a reusable, fully-typed function that formats a Domain.
 
-```ts title="src/index.ts" ins={3,10-16,18,22,25,30,33-39,53,55,58-65,67-69}
+```ts title="src/index.ts" ins={3,11-17,23,26,31,34-40,56,59}
 import { asInterpretedName, beautifyInterpretedName } from "enssdk";
 import { createEnsNodeClient } from "enssdk/core";
 import { type FragmentOf, graphql, omnigraph, readFragment } from "enssdk/omnigraph";
 
-// you may use a NameHash Hosted ENSNode, learn more at https://ensnode.io/docs/integrate/hosted-instances
+// you may use a NameHash Hosted ENSNode instance
+// learn more at https://ensnode.io/docs/integrate/hosted-instances
 const ENSNODE_URL = process.env.ENSNODE_URL!;
 
 const client = createEnsNodeClient({ url: ENSNODE_URL }).extend(omnigraph);
@@ -278,42 +278,38 @@ async function main() {
 
   console.log(formatDomain(domain));
   console.log(`\nSubdomains (showing 20 of ${totalCount}):`);
-  console.table(
-    (domain.subdomains?.edges ?? []).map(({ node }) => {
-      const sub = readFragment(DomainFragment, node);
-      return {
-        version: sub.__typename,
-        owner: sub.owner?.address ?? "0x0",
-        name: sub.name ? beautifyInterpretedName(sub.name) : "<unnamed>",
-      };
-    }),
-  );
-  console.log(
-    "(if the table's rightmost edge seems malformatted it's because console.table doesn't handle unicode well)",
-  );
+  for (const { node } of domain.subdomains?.edges ?? []) {
+    console.log(`  - ${formatDomain(node)}`);
+  }
 }
 ```
 
-`FragmentOf<typeof DomainFragment>` is the opaque type for any selection that includes `...DomainFragment` — `formatDomain` accepts any of them. `readFragment(DomainFragment, data)` unwraps that opaque type to the typed fields you declared.
+`FragmentOf<typeof DomainFragment>` is the opaque type for any selection that includes `...DomainFragment` — `formatDomain` accepts any of them, including each `node` in the subdomain edges. `readFragment(DomainFragment, data)` unwraps that opaque type to the typed fields you declared.
 
 ## 8. Run it
 
 Point at a hosted ENSNode and go:
 
 ```sh
-ENSNODE_URL=https://api.v2-sepolia.ensnode.io npm start
+ENSNODE_URL=https://api.alpha.green.ensnode.io npm start
 ```
 
 You should see the `eth` Domain, followed by its first 20 subdomains and the total subdomain count.
 
 ## Where to go next
 
-- Move queries into their own modules. `enssdk/omnigraph` re-exports `FragmentOf`, `ResultOf`, and `VariablesOf` from `gql.tada` for typing arguments and return values.
-- Browse other queries: account-owned domains, events, registrar permissions, full-text search. See [Omnigraph API examples](/docs/integrate/integration-options/raw-graphql).
+- See the [Omnigraph Cookbook](/docs/integrate/omnigraph/cookbook) for ready-to-copy queries: account-owned domains, events, registrar permissions, full-text search, and more.
+- See the [Omnigraph Schema Reference](/docs/integrate/omnigraph/schema-reference) for the full set of types, fields, and arguments you can query.
 - Building a React app? Use [`enskit`](/docs/integrate/integration-options/enskit) — same `graphql(...)` helper, with `useOmnigraphQuery` and a graphcache.
 
 <LinkCard
   title="enssdk-example"
   description="The full example script from this guide."
   href="https://github.com/namehash/ensnode/tree/main/examples/enssdk-example"
+/>
+
+<LinkCard
+  title="gql.tada documentation"
+  description="The TypeScript-first GraphQL client that powers enssdk's typed queries."
+  href="https://gql-tada.0no.co/"
 />

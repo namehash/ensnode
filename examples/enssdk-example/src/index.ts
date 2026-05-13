@@ -2,7 +2,8 @@ import { asInterpretedName, beautifyInterpretedName } from "enssdk";
 import { createEnsNodeClient } from "enssdk/core";
 import { type FragmentOf, graphql, omnigraph, readFragment } from "enssdk/omnigraph";
 
-// you may use a NameHash Hosted ENSNode, learn more at https://ensnode.io/docs/integrate/hosted-instances
+// you may use a NameHash Hosted ENSNode instance
+// learn more at https://ensnode.io/docs/integrate/hosted-instances
 // biome-ignore lint/style/noNonNullAssertion: invariant
 const ENSNODE_URL = process.env.ENSNODE_URL!;
 
@@ -59,19 +60,9 @@ async function main() {
   console.log(`Query took ${(elapsed / 1000).toFixed(2)}s`);
   console.log(formatDomain(domain));
   console.log(`\nSubdomains (showing 20 of ${totalCount}):`);
-  console.table(
-    (domain.subdomains?.edges ?? []).map(({ node }) => {
-      const sub = readFragment(DomainFragment, node);
-      return {
-        version: sub.__typename,
-        owner: sub.owner?.address ?? "0x0",
-        name: sub.name ? beautifyInterpretedName(sub.name) : "<unnamed>",
-      };
-    }),
-  );
-  console.log(
-    "(if the table's rightmost edge seems malformatted it's because console.table doesn't handle unicode well)",
-  );
+  for (const { node } of domain.subdomains?.edges ?? []) {
+    console.log(`  - ${formatDomain(node)}`);
+  }
 }
 
 main().catch((err) => {
