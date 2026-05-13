@@ -113,6 +113,7 @@ export class IndexingStatusBuilder {
         logger.error({
           msg: `Building indexing status snapshot for chain ID ${chainId} failed`,
           payload: { chainIndexingConfig, chainIndexingMetrics, chainIndexingStatus },
+          error,
         });
         throw error;
       }

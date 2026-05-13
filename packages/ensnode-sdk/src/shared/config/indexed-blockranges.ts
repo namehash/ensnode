@@ -41,7 +41,10 @@ export function buildIndexedBlockranges(
       for (const datasourceContract of datasourceContracts) {
         const currentChainIndexedBlockrange = indexedBlockranges.get(datasourceChainId);
 
-        if (globalBlockrangeEndBlock && datasourceContract.startBlock > globalBlockrangeEndBlock) {
+        if (
+          typeof globalBlockrangeEndBlock === "number" &&
+          datasourceContract.startBlock > globalBlockrangeEndBlock
+        ) {
           // If the contract's start block is greater than the global end block,
           // then this contract is not indexed at all, so we can skip it from
           // consideration in the indexed blockrange.
