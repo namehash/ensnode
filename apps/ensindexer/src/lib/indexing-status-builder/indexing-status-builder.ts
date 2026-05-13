@@ -124,7 +124,65 @@ export class IndexingStatusBuilder {
       }
     }
 
+    // After crash recovery, a chain that was Queued in the prior run can still
+    // have `checkpointBlock == startBlock` even though the omnichain cursor
+    // (derived from other chains' progress) has advanced past its
+    // `startBlock.timestamp`. The chain is no longer omnichain-queued: Ponder's
+    // per-chain checkpoint just hasn't been bumped yet because no events on
+    // this chain have been processed. Promote it to a degenerate Backfill
+    // snapshot (`latestIndexedBlock = startBlock`) so the snapshot's invariants
+    // hold until Ponder's per-chain checkpoint catches up.
+    this.promoteQueuedChainsPastOmnichainCursor(
+      chainStatusSnapshots,
+      chainIndexingMetrics,
+      chainsIndexingConfig,
+    );
+
     return chainStatusSnapshots;
+  }
+
+  /**
+   * In-place promotion of {@link ChainIndexingStatusIds.Queued} chains to
+   * {@link ChainIndexingStatusIds.Backfill} when the omnichain cursor has
+   * advanced past their startBlock. See call site for full rationale.
+   */
+  private promoteQueuedChainsPastOmnichainCursor(
+    chainStatusSnapshots: Map<ChainId, ChainIndexingStatusSnapshot>,
+    chainIndexingMetrics: Map<ChainId, LocalChainIndexingMetrics>,
+    chainsIndexingConfig: Map<ChainId, ChainIndexingConfig>,
+  ): void {
+    const advancedTimestamps = Array.from(chainStatusSnapshots.values())
+      .filter((s) => s.chainStatus !== ChainIndexingStatusIds.Queued)
+      .map((s) => s.latestIndexedBlock.timestamp);
+
+    if (advancedTimestamps.length === 0) return;
+
+    const maxAdvancedTimestamp = Math.max(...advancedTimestamps);
+
+    for (const [chainId, snapshot] of chainStatusSnapshots.entries()) {
+      if (snapshot.chainStatus !== ChainIndexingStatusIds.Queued) continue;
+      if (snapshot.config.startBlock.timestamp >= maxAdvancedTimestamp) continue;
+
+      const chainConfig = chainsIndexingConfig.get(chainId);
+      const chainMetric = chainIndexingMetrics.get(chainId);
+
+      // backfillEndBlock is only populated when Ponder reports historical state;
+      // if it's missing we lack the data to construct a valid Backfill snapshot,
+      // so leave the chain as Queued.
+      if (chainMetric?.state !== ChainIndexingStates.Historical || !chainConfig?.backfillEndBlock) {
+        continue;
+      }
+
+      chainStatusSnapshots.set(
+        chainId,
+        validateChainIndexingStatusSnapshot({
+          chainStatus: ChainIndexingStatusIds.Backfill,
+          latestIndexedBlock: snapshot.config.startBlock,
+          backfillEndBlock: chainConfig.backfillEndBlock as Unvalidated<BlockRef>,
+          config: snapshot.config as Unvalidated<BlockRefRangeWithStartBlock>,
+        } satisfies Unvalidated<ChainIndexingStatusSnapshotBackfill>),
+      );
+    }
   }
 
   /**
