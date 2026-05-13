@@ -177,5 +177,14 @@ export const servicesSidebarTopic = {
         { label: "Contributing", link: "/docs/services/ensadmin/contributing" },
       ],
     },
+    {
+      label: "ENSEngine",
+      collapsed: true,
+      badge: {
+        text: "Planned",
+        variant: "note",
+      },
+      items: [{ label: "Overview", link: "/docs/services/ensengine" }],
+    },
   ],
 };

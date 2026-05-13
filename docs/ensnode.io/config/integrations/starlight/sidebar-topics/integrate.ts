@@ -61,6 +61,22 @@ export const integrateSidebarTopic = {
           label: "ENSDb (PostgreSQL)",
           link: "/docs/integrate/integration-options/ensdb",
         },
+        {
+          label: "ENSDb snapshots & CLI",
+          link: "/docs/integrate/ensdb-snapshots-and-cli",
+          badge: {
+            text: "Planned",
+            variant: "note",
+          },
+        },
+        {
+          label: "Webhooks & events",
+          link: "/docs/integrate/webhooks-and-events",
+          badge: {
+            text: "Planned",
+            variant: "note",
+          },
+        },
       ],
     },
     {

@@ -34,6 +34,20 @@ ENSNode could handle CCIP-Read logic internally, batch multiple requests to redu
 
 Besides dramatically decreasing latency for client applications, the Protocol Accelerator is also a key step forward in decentralization, away from reliance on centralized offchain gateway servers. This is a big win for the ENS protocol!
 
+## ENSDb CLI & Snapshots
+
+We're investing in [ENSDb](/docs/services/ensdb) as a first-class integration point - and the next big step is making it trivial *and inexpensive* to **operate** an ENSDb and to **share state** across instances. See the full teaser at [ENSDb snapshots & CLI](/docs/integrate/ensdb-snapshots-and-cli).
+
+Goals on this roadmap stream include:
+
+- **Snapshot creation & consumption** - publish a portable, versioned package of an ENSDb instance to a destination like Cloudflare R2, and pull it down to bootstrap a new ENSNode instance in minutes instead of waiting on a full historical backfill. Saves **both time and RPC cost** - consumers don't need to replay history through their own RPC provider to catch up.
+- **Snapshot metadata** - record which ENSIndexer config, version, and chains a snapshot was produced from, so consumers can pick the right one and trust it for their use case.
+- **Snapshot diffing** - compare snapshots produced before and after an indexing change to confirm the change didn't unexpectedly alter indexed data. A powerful safety net for release reviews.
+- **Operational ENSNode CLI** - list indexer instances tracked in an ENSDb, inspect their configuration and indexing status, and clean up schemas that are no longer in use.
+- **Snapshot verification (exploratory)** - strategies for letting third parties confirm a snapshot's integrity, such as multi-publisher hash consensus or signed attestations. Open research, not a commitment.
+
+These capabilities will unlock dramatically faster - and cheaper - iteration for hackathon teams, self-hosters, marketplaces, and anyone building custom services on top of ENSDb.
+
 ## ENS TokenScope: ENS NFT Marketplace Data API
 
 With Reservoir shutting down in the coming months, ENSNode aims to provide replacement infrastructure for tokenized ENS name market data. This includes:
