@@ -9,13 +9,14 @@ import {
   type DomainId,
   getNameHierarchy,
   type InterpretedName,
+  makeENSv1DomainId,
   namehashInterpretedName,
 } from "enssdk";
 import { isAddressEqual, type PublicClient, toHex, zeroAddress } from "viem";
 import { packetToBytes } from "viem/ens";
 
 import { DatasourceNames, getDatasource } from "@ensnode/datasources";
-import { accountIdEqual, getDatasourceContract, isENSv1Registry } from "@ensnode/ensnode-sdk";
+import { accountIdEqual, isENSv1Registry } from "@ensnode/ensnode-sdk";
 
 import { ensDb } from "@/lib/ensdb/singleton";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/instrumentation/auto-span";
@@ -186,8 +187,9 @@ async function findResolverWithIndex(
 
       // 2. compute domainId of each node
       // NOTE: this is currently ENSv1-specific
-      const nodes = names.map((name) => namehashInterpretedName(name));
-      const domainIds = nodes as DomainId[];
+      const domainIds = names.map(
+        (name) => makeENSv1DomainId(registry, namehashInterpretedName(name)) as DomainId,
+      );
 
       // 3. for each domain, find its associated resolver in the selected registry
       const domainResolverRelations = await withSpanAsync(
@@ -195,29 +197,13 @@ async function findResolverWithIndex(
         "domainResolverRelation.findMany",
         {},
         async () => {
-          const ENSv1RegistryOld = getDatasourceContract(
-            config.namespace,
-            DatasourceNames.ENSRoot,
-            "ENSv1RegistryOld",
-          );
-          // the current ENS Root Chain Registry is actually ENSRegistryWithFallback: if a node
-          // doesn't exist in its own storage, it directs the lookup to RegistryOld. We must encode
-          // this logic here, so that the active resolver of unmigrated nodes can be correctly identified.
-          // https://github.com/ensdomains/ens-contracts/blob/be53b9c25be5b2c7326f524bbd34a3939374ab1f/contracts/registry/ENSRegistryWithFallback.sol#L19
+          // NOTE: because DRRs are now canonicalized against the managedName's Registry, we no longer
+          // need to also join ENSv1RegistryOld DRRs if the registry is the ENSv1Registry
           const records = await ensDb.query.domainResolverRelation.findMany({
-            where: (t, { inArray, and, or, eq }) =>
+            where: (t, { inArray, and, eq }) =>
               and(
-                or(
-                  // filter for Domain-Resolver Relationship in the current Registry
-                  and(eq(t.chainId, registry.chainId), eq(t.address, registry.address)),
-                  // OR, if the registry is the ENS Root Registry, also include records from RegistryOld
-                  isENSv1Registry(config.namespace, registry)
-                    ? and(
-                        eq(t.chainId, ENSv1RegistryOld.chainId),
-                        eq(t.address, ENSv1RegistryOld.address),
-                      )
-                    : undefined,
-                ),
+                // filter for Domain-Resolver Relationship in the current Registry
+                and(eq(t.chainId, registry.chainId), eq(t.address, registry.address)),
                 // filter for Domain-Resolver Relations for the following DomainIds
                 inArray(t.domainId, domainIds),
               ),
