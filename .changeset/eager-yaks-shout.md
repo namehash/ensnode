@@ -2,4 +2,4 @@
 "ensapi": patch
 ---
 
-Hotfixes an issue where Accelerated records would always be null
+Resolution API: Protocol Accelerated records now correctly resolve instead of incorrectly always returning `null`.
