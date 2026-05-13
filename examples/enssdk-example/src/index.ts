@@ -44,12 +44,10 @@ function formatDomain(data: FragmentOf<typeof DomainFragment>): string {
 async function main() {
   const name = asInterpretedName("eth");
 
-  const start = performance.now();
   const result = await client.omnigraph.query({
     query: HelloWorldQuery,
     variables: { name },
   });
-  const elapsed = performance.now() - start;
 
   if (result.errors) throw new Error(JSON.stringify(result.errors));
   if (!result.data?.domain) throw new Error(`Domain '${name}' not found`);
@@ -57,7 +55,6 @@ async function main() {
   const { domain } = result.data;
   const totalCount = domain.subdomains?.totalCount ?? 0;
 
-  console.log(`Query took ${(elapsed / 1000).toFixed(2)}s`);
   console.log(formatDomain(domain));
   console.log(`\nSubdomains (showing 20 of ${totalCount}):`);
   for (const { node } of domain.subdomains?.edges ?? []) {
