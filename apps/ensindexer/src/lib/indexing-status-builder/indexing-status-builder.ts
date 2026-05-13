@@ -293,7 +293,7 @@ export class IndexingStatusBuilder {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
 
       throw new Error(
-        `Error fetching block for chain ID ${chainId} at block number ${blockNumber.toString()}: ${errorMessage}`,
+        `Error fetching block for chain ID ${chainId} at block number ${blockNumber}: ${errorMessage}`,
       );
     }
   }
