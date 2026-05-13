@@ -31,6 +31,8 @@ import {
   RangeTypeIds,
 } from "@ensnode/ponder-sdk";
 
+import { logger } from "@/lib/logger";
+
 export class IndexingStatusBuilder {
   /**
    * Immutable Indexing Config
@@ -129,6 +131,11 @@ export class IndexingStatusBuilder {
   ): ChainIndexingStatusSnapshot {
     const { checkpointBlock } = chainIndexingStatus;
     const { indexedBlockrange } = chainIndexingConfig;
+
+    logger.info({
+      msg: `Building indexing status snapshot for chain`,
+      payload: { chainIndexingConfig, chainIndexingMetrics, chainIndexingStatus },
+    });
 
     // In omnichain ordering, if the startBlock is the same as the
     // status block, the chain has not started yet.
