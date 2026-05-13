@@ -21,7 +21,7 @@ ENSNode fully supports the ENSv2 upgrade via the [Omnigraph API](/docs/integrate
 
 TODO: insert the Omnigraph ENSv1 + ENSv2 asset here
 
-You can integrate with ENSNode in many different ways, whether you're using React, any Javascript runtime, or raw GraphQL.
+You can integrate with ENSNode in many different ways, whether you're using React, any JavaScript runtime, or raw GraphQL.
 
 <LinkCard
   title='Full Integration Documentation'
@@ -90,7 +90,7 @@ export function RenderDomainAndSubdomains({ name }: { name: InterpretedName }) {
 
       <h2>Subdomains:</h2>
       <ul>
-        {(data.domain.subdomains?.edges ?? []).map((edge) => {
+        {subdomains?.edges.map((edge) => {
           const { id } = readFragment(DomainFragment, edge.node);
           return (
             <li key={id}>
@@ -117,7 +117,7 @@ export function RenderDomainAndSubdomains({ name }: { name: InterpretedName }) {
 
 ## 2. `enssdk` + Omnigraph
 
-With `enssdk`, leverage ENSNode and the Omnigraph from any Javascript runtime to power your frontend or backend apps. `enssdk` comes with built-in type-safety and editor autocomplete for Omnigraph queries.
+With `enssdk`, leverage ENSNode and the Omnigraph from any JavaScript runtime to power your frontend or backend apps. `enssdk` comes with built-in type-safety and editor autocomplete for Omnigraph queries.
 
 
 ```ts
@@ -164,7 +164,7 @@ query MyDomains($address: Address!) {
 ```
 
 <LinkCard
-  title='Full Omnigraph API Documentation'
+  title='Full Omnigraph GraphQL API Documentation'
   href="/docs/integrate/integration-options/raw-graphql"
 />
 
