@@ -19,7 +19,7 @@ describe("omnigraph-graphql-example", () => {
       cwd: EXAMPLE_DIR,
       env: process.env,
       encoding: "utf8",
-      timeout: 60_000,
+      timeout: 10_000,
     });
 
     // log into vitest's stdout capture so --silent passed-only hides it on success
@@ -27,5 +27,5 @@ describe("omnigraph-graphql-example", () => {
     if (result.stderr) console.error(result.stderr);
 
     expect(result.status).toBe(0);
-  });
+  }, 10_000);
 });
