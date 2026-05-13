@@ -28,6 +28,7 @@
     "@namehash/namehash-ui": "workspace:*",
     "@octokit/rest": "^20.1.2",
     "@scalar/astro": "^0.2.4",
+    "@stackblitz/sdk": "^1.11.0",
     "@tailwindcss/vite": "^4.1.15",
     "astro": "catalog:",
     "astro-font": "catalog:",

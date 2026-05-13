@@ -6,16 +6,72 @@ sidebar:
   order: 1
 ---
 
+import EnssdkResolutionApiPlayground from "../../../../components/playgrounds/EnssdkResolutionApi";
+import { LinkCard, CardGrid } from "@astrojs/starlight/components";
 
-:::caution[Coming Soon]
-We're actively working on this page right now. Check back by May 18th for full content!
-:::
+## What is ENSv2?
 
-This page will be a 60-second quickstart for querying ENSv2 data through ENSNode — including:
+ENSv2 is the next generation of the Ethereum Name Service — a protocol upgrade that moves ENS registries from Ethereum mainnet onto L2s. Names become cheaper to register, faster to update, and natively multichain.
 
-- A **React example** with [enskit](/docs/integrate/integration-options/enskit) using the `useOmnigraphQuery` hook.
-- A **interactive code snippet** with [enssdk](/docs/integrate/integration-options/enssdk) showing a typed ENS Omnigraph query (e.g. look up a domain). Optionally can launch the request against the ENS Omnigraph API and see the response in your browser.
-- Links to [hosted instances](/docs/integrate/hosted-instances) so you can start querying immediately with zero setup.
-- [ENSv2 Readiness](/docs/integrate/ensv2-readiness) — how building with ENSNode today prepares your app for ENSv2.
-- [Integration Options](/docs/integrate/integration-options) — choose the right path: enskit, enssdk, raw GraphQL, or ENSDb.
+ENSv2 is backwards compatible with ENSv1: existing `.eth` names continue to work, and ENSv2 introduces a new registry architecture that supports names across multiple chains simultaneously.
 
+## What is ENS Omnigraph?
+
+ENS Omnigraph is ENSNode's unified GraphQL API for querying ENS name data across every supported chain from a single endpoint.
+
+![ENS Omnigraph diagram](/ensomnigraph.png)
+
+Today, fully supporting ENSv1 requires two separate systems: on-chain resolution (via RPC calls + CCIP-read) and indexed data (via the ENS Subgraph). Neither alone gives a complete picture.
+
+ENS Omnigraph solves this by combining both into one API:
+
+- **Indexes ENSv1 and ENSv2** names across mainnet, Base, Linea, 3DNS, and more
+- **Provides resolution data** — owner, resolver, records, expiry — in a single query
+- **Backwards compatible** with ENSv1, so you can integrate today and get ENSv2 support automatically when it launches
+
+This means you can build your ENS integration once against the Omnigraph API and be ready for ENSv2 before it even launches. See [ENSv2 Readiness](/docs/integrate/ensv2-readiness) for the full story.
+
+## Query ENS name data
+
+The fastest way to query ENS data is with [`enssdk`](/docs/integrate/integration-options/enssdk) — the official TypeScript SDK. It gives you a fully typed GraphQL client pointed at the ENS Omnigraph API.
+
+The playground below is live — edit the query or the name and run it against a real ENSNode instance:
+
+<EnssdkResolutionApiPlayground client:load />
+
+The `client.omnigraph.query(...)` call sends a typed GraphQL query to the [ENS Omnigraph API](/docs/integrate/omnigraph). The `asInterpretedName` helper normalizes the name before querying.
+
+## What's next?
+
+<CardGrid>
+  <LinkCard
+    title="🔀 Integration Options"
+    description="Choose the right path: enssdk, enskit, raw GraphQL, or direct ENSDb access."
+    href="/docs/integrate/integration-options"
+  />
+  <LinkCard
+    title="🕸️ ENS Omnigraph API"
+    description="Schema overview, mental model, and how Omnigraph differs from the legacy ENS Subgraph."
+    href="/docs/integrate/omnigraph"
+  />
+  <LinkCard
+    title="📖 Cookbook"
+    description="Ready-to-use query recipes: names by address, resolver records, registration history, multichain queries, and more."
+    href="/docs/integrate/omnigraph/cookbook"
+  />
+  <LinkCard
+    title="🛠️ enssdk"
+    description="Full SDK reference — createEnsNodeClient, typed queries with gql.tada, and normalization utilities."
+    href="/docs/integrate/integration-options/enssdk"
+  />
+  <LinkCard
+    title="🚀 ENSv2 Readiness"
+    description="How integrating with ENSNode today makes your app ENSv2-ready out of the box."
+    href="/docs/integrate/ensv2-readiness"
+  />
+  <LinkCard
+    title="🌐 Hosted Instances"
+    description="Public ENSNode endpoints you can query immediately with zero setup."
+    href="/docs/integrate/hosted-instances"
+  />
+</CardGrid>

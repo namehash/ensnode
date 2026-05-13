@@ -3,8 +3,57 @@ title: ENSv2 Readiness
 description: How building with ENSNode today prepares your application for ENSv2, even before ENSv2 launches.
 ---
 
-:::caution[Coming Soon]
-We're actively working on this page right now. Check back by May 18th for full content!
-:::
+import { LinkCard, Aside } from "@astrojs/starlight/components";
 
-This page will describe ENSNode's ENSv2 readiness story — how building with ENSNode today prepares your application for ENSv2, even before ENSv2 launches. Ensure that the moment ENSv2 launches, everything in your app continues working seamlessly with zero interruptions!
+
+<Aside type="tip" title="Be ready!">
+Build with **ENS Omnigraph** today and your app will support **ENSv2** the moment it launches — with zero code changes.
+</Aside>
+
+
+## The problem with ENSv1 integrations today
+
+Fully supporting ENSv1 requires two separate systems working in parallel:
+
+1. **On-chain resolution** — RPC calls with CCIP-read support (e.g. via [viem](/docs/reference/subgraph-legacy/with-viem) or [ensjs](/docs/reference/subgraph-legacy/with-ensjs) to resolve names to addresses and records at the current state of the chain.
+2. **Indexed data** — the [ENS Subgraph](/docs/reference/what-is-the-ens-subgraph) for historical data, registration info, reverse records, and browsing names owned by an address.
+
+Neither system alone is complete. 
+The Subgraph gives you queryable indexed history but can lag behind the chain and has no CCIP-read support.
+On-chain resolution gives you accurate live state but no history and no way to browse names.
+
+Most ENS integrations today live with this split — and with **ENSv2**, the complexity only increases as names spread across multiple chains.
+
+## How ENS Omnigraph solves this
+
+The [ENS Omnigraph API](/docs/integrate/omnigraph) is ENSNode's unified GraphQL API that replaces both systems with a single endpoint:
+
+- **Resolution data is indexed** — owner, resolver, records, expiry, and CCIP-read results are resolved and stored at index time, so you get accurate resolution data from a simple GraphQL query with no RPC calls in your app.
+- **Full history and browsability** — all the indexed capabilities of the Subgraph, unified across chains.
+- **Multichain by design** — a single query can span mainnet, Base, Linea, 3DNS, and any future ENSv2 registries.
+
+This means you write one integration instead of two, and you get more accurate data as a result.
+
+## ENSv2 readiness
+
+ENSv2 moves ENS registries from Ethereum mainnet to L2s. When it launches, names may exist across multiple chains, and the current two-system approach becomes even harder to maintain — you would need separate resolution logic and separate Subgraph queries for each chain.
+
+ENSNode is already built for this world:
+
+- ENSNode indexes ENSv2 registries as they come online
+- The ENS Omnigraph API surfaces ENSv2 names alongside ENSv1 names transparently
+- The [enssdk](/docs/integrate/integration-options/enssdk) and [enskit](/docs/integrate/integration-options/enskit) client libraries abstract over chain differences entirely
+
+
+<Aside type="tip" title="The result">
+If you integrate with **ENS Omnigraph** today to support **ENSv1**, you automatically get **ENSv2** support when it launches — your code does not need to change.
+</Aside>
+
+
+## What you need to do
+
+1. **Replace your Subgraph queries** with ENS Omnigraph queries. The [Migration Guide](/docs/integrate/migrate-from-subgraph) will help you with that.
+2. **Remove your RPC resolution calls** from the hot path. Omnigraph already resolves and indexes this data — you can query it directly and save on RPC calls.
+3. **Use [enssdk](/docs/integrate/integration-options/enssdk)** for a fully typed TypeScript client, or query the [raw GraphQL endpoint](/docs/integrate/integration-options/raw-graphql) directly if you prefer.
+
+That's it. There is no ENSv2-specific migration step later.
