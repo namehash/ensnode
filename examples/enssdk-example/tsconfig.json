@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "lib": ["ESNext"],
+    "plugins": [
+      // here we enable the gql.tada typescript plugin
+      {
+        "name": "gql.tada/ts-plugin",
+
+        // because this example is in the ENSNode monorepo, it imports from src
+        "schema": "../../packages/enssdk/src/omnigraph/generated/schema.graphql",
+        // but in a normal app you'd import it from the package like so:
+        // "schema": "node_modules/enssdk/src/omnigraph/generated/schema.graphql",
+
+        "tadaOutputLocation": "./src/generated/graphql-env.d.ts"
+      }
+    ]
+  },
+  "include": ["src"]
+}

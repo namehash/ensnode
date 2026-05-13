@@ -26,8 +26,9 @@
     "docker:build:ensrainbow": "docker build -f apps/ensrainbow/Dockerfile -t ghcr.io/namehash/ensnode/ensrainbow:latest .",
     "docker:build:ensapi": "docker build -f apps/ensapi/Dockerfile -t ghcr.io/namehash/ensnode/ensapi:latest .",
     "otel-desktop-viewer": "docker run -p 8000:8000 -p 4317:4317 -p 4318:4318 davetron5000/otel-desktop-viewer:alpine-3",
-    "generate:openapi": "pnpm -r --if-present generate:openapi",
-    "generate:gqlschema": "pnpm -F ensapi generate:gqlschema && pnpm -F enssdk generate:gqlschema"
+    "generate": "pnpm run -w \"/^generate:.*/\"",
+    "generate:openapi": "pnpm -r generate:openapi",
+    "generate:gqlschema": "pnpm -r generate:gqlschema"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.1",
