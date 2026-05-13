@@ -25,7 +25,6 @@ import {
   ChainIndexingStates,
   type ChainIndexingStatus,
   isBlockRefBeforeOrEqualTo,
-  isBlockRefEqualTo,
   type LocalChainIndexingMetrics,
   type LocalPonderClient,
   RangeTypeIds,
@@ -146,9 +145,19 @@ export class IndexingStatusBuilder {
     const { checkpointBlock } = chainIndexingStatus;
     const { indexedBlockrange } = chainIndexingConfig;
 
-    // In omnichain ordering, if the startBlock is the same as the
-    // status block, the chain has not started yet.
-    if (isBlockRefEqualTo(indexedBlockrange.startBlock, checkpointBlock)) {
+    // Sometimes, after ENSIndexer restards, the queued chain can have a checkpoint block that
+    // is slightly ahead of the start block in the indexed block range.
+    // We define "slightly ahead" as within a gap of `maxAllowedCheckpointGap` blocks.
+    // If the checkpoint block is ahead of the start block, but within this allowed gap,
+    // we treat the checkpoint block as if it were equal to the start block for
+    // the purposes of determining the indexing status snapshot.
+    // This allows us to avoid incorrectly marking a "queued" chain as "backfill" one.
+    const maxAllowedCheckpointGap = 20;
+    // The chain is considered "queued" if the "adjusted" checkpoint block is before
+    // or equal to the start block of the indexed block range.
+    const isQueuedChain =
+      checkpointBlock.number - maxAllowedCheckpointGap <= indexedBlockrange.startBlock.number;
+    if (isQueuedChain) {
       return validateChainIndexingStatusSnapshot({
         chainStatus: ChainIndexingStatusIds.Queued,
         config: indexedBlockrange as Unvalidated<BlockRefRangeWithStartBlock>,
