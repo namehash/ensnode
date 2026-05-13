@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import "@/lib/__test__/mockLogger";
+
 import {
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshotBackfill,
@@ -474,6 +476,66 @@ describe("IndexingStatusBuilder", () => {
   });
 
   describe("Race condition handling", () => {
+    it("clamps latestIndexedBlock to backfillEndBlock when checkpointBlock advances past it in historical", async () => {
+      // Arrange — simulate a race where the checkpoint block has advanced
+      // past the backfill end block between concurrent fetches.
+      const publicClientMock = buildPublicClientMock();
+
+      // checkpointBlock (laterBlockRef/1025) is ahead of backfillEndBlock (earlierBlockRef/1024)
+      const localMetrics = buildLocalChainsIndexingMetrics(
+        new Map([
+          [
+            chainId,
+            {
+              state: ChainIndexingStates.Historical,
+              latestSyncedBlock: latestBlockRef,
+              historicalTotalBlocks: 100,
+              backfillEndBlock: earlierBlockRef.number, // 1024
+            } satisfies LocalChainIndexingMetricsHistorical,
+          ],
+        ]),
+      );
+
+      const localStatus: PonderIndexingStatus = {
+        chains: new Map([[chainId, { checkpointBlock: laterBlockRef }]]), // 1025, ahead of backfillEndBlock
+      };
+
+      const localPonderClientMock = buildLocalPonderClientMock({
+        metrics: vi.fn().mockResolvedValue(localMetrics),
+        status: vi.fn().mockResolvedValue(localStatus),
+        getIndexedBlockrange: vi
+          .fn()
+          .mockReturnValue(buildBlockNumberRange(earliestBlockRef.number, undefined)),
+        getCachedPublicClient: vi.fn().mockReturnValue(publicClientMock),
+      });
+
+      const builder = new IndexingStatusBuilder(localPonderClientMock as LocalPonderClient);
+
+      // Act
+      const result = await builder.getOmnichainIndexingStatusSnapshot();
+
+      // Assert — latestIndexedBlock should be clamped to backfillEndBlock (earlierBlockRef)
+      // instead of the checkpointBlock (laterBlockRef)
+      expect(result).toStrictEqual({
+        omnichainStatus: OmnichainIndexingStatusIds.Backfill,
+        chains: new Map([
+          [
+            chainId,
+            {
+              chainStatus: ChainIndexingStatusIds.Backfill,
+              latestIndexedBlock: earlierBlockRef, // clamped to backfillEndBlock
+              backfillEndBlock: earlierBlockRef,
+              config: {
+                rangeType: RangeTypeIds.LeftBounded,
+                startBlock: earliestBlockRef,
+              },
+            } satisfies ChainIndexingStatusSnapshotBackfill,
+          ],
+        ]),
+        omnichainIndexingCursor: earlierBlockRef.timestamp,
+      } satisfies OmnichainIndexingStatusSnapshot);
+    });
+
     it("clamps latestKnownBlock when checkpointBlock is ahead of latestSyncedBlock in realtime", async () => {
       // Arrange — simulate a race where the checkpoint block has advanced
       // past the synced block metric between concurrent fetches.

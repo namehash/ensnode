@@ -31,6 +31,8 @@ import {
   RangeTypeIds,
 } from "@ensnode/ponder-sdk";
 
+import { logger } from "@/lib/logger";
+
 export class IndexingStatusBuilder {
   /**
    * Immutable Indexing Config
@@ -90,22 +92,36 @@ export class IndexingStatusBuilder {
       const chainIndexingStatus = chainIndexingStatuses.get(chainId);
       const chainIndexingConfig = chainsIndexingConfig.get(chainId);
 
-      // Invariants ensuring required data is available.
-      if (!chainIndexingStatus) {
-        throw new Error(`Indexing status not found for chain ID ${chainId}`);
+      try {
+        // Invariants ensuring required data is available.
+        if (!chainIndexingStatus) {
+          throw new Error(`Indexing status not found for chain ID ${chainId}`);
+        }
+
+        if (!chainIndexingConfig) {
+          throw new Error(`Indexing config not found for chain ID ${chainId}`);
+        }
+
+        const chainStatusSnapshot = this.buildChainIndexingStatusSnapshot(
+          chainIndexingMetric,
+          chainIndexingStatus,
+          chainIndexingConfig,
+        );
+
+        chainStatusSnapshots.set(chainId, chainStatusSnapshot);
+      } catch (error) {
+        logger.error({
+          msg: `Building indexing status snapshot for chain ID ${chainId} failed`,
+          payload: {
+            chainId,
+            chainIndexingConfig,
+            chainIndexingMetrics,
+            chainIndexingStatus,
+          },
+          error,
+        });
+        throw error;
       }
-
-      if (!chainIndexingConfig) {
-        throw new Error(`Indexing config not found for chain ID ${chainId}`);
-      }
-
-      const chainStatusSnapshot = this.buildChainIndexingStatusSnapshot(
-        chainIndexingMetric,
-        chainIndexingStatus,
-        chainIndexingConfig,
-      );
-
-      chainStatusSnapshots.set(chainId, chainStatusSnapshot);
     }
 
     return chainStatusSnapshots;
@@ -167,9 +183,18 @@ export class IndexingStatusBuilder {
       }
 
       case ChainIndexingStates.Historical: {
+        // Metrics and status are fetched concurrently — the checkpoint block
+        // can briefly advance past the backfill end block. Clamp to maintain
+        // the invariant: latestIndexedBlock <= backfillEndBlock.
+        const latestIndexedBlock =
+          chainIndexingConfig.backfillEndBlock &&
+          isBlockRefBeforeOrEqualTo(chainIndexingConfig.backfillEndBlock, checkpointBlock)
+            ? chainIndexingConfig.backfillEndBlock
+            : checkpointBlock;
+
         return validateChainIndexingStatusSnapshot({
           chainStatus: ChainIndexingStatusIds.Backfill,
-          latestIndexedBlock: checkpointBlock,
+          latestIndexedBlock,
           backfillEndBlock: chainIndexingConfig.backfillEndBlock as Unvalidated<BlockRef>,
           config: indexedBlockrange as Unvalidated<BlockRefRangeWithStartBlock>,
         } satisfies Unvalidated<ChainIndexingStatusSnapshotBackfill>);
