@@ -1,5 +1,5 @@
 ---
-"@namehash/namehash-ui": major
+"@namehash/namehash-ui": patch
 "ensadmin": patch
 ---
 
