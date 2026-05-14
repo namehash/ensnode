@@ -1,35 +1,36 @@
 ---
-title: Quickstart
+title: What is ENSAdmin?
+description: An overview of the ENSAdmin project.
+sidebar:
+  label: What is ENSAdmin?
+  order: 1 # Or an appropriate order number
 ---
 
-:::caution[Work in Progress]
-This documentation is under active development.
-:::
+ENSAdmin is a user interface designed to help you monitor and manage your ENSNode instances effectively. It provides a clear overview of your nodes' operational status, the plugins they are currently running, and the progress of their indexing.
 
-The easiest way to run ENSAdmin is via Docker container.
+## Key Features
 
-## Running with Docker
+### Omnigraph API Playground
 
-ENSAdmin is deployed as a Single Page React Application served by nginx on port 4173.
+A powerful GraphQL interface for querying the new Omnigraph API of your ENSNode.
 
-### Using pre-built image
+![ENSAdmin: Omnigraph API Playground](../../../../../assets/ensadmin-omnigraph.png)
 
-```bash
-docker run \
-  -d \
-  -p 4173:4173 \
-  ghcr.io/namehash/ensnode/ensadmin:latest
-```
+### ENS Protocol Inspector
 
-### Running with custom ENSNode URLs
+Inspect and analyze ENSNode data in detail. For example, use the ENS Protocol Inspector for the Primary Name Resolution.
 
-To configure the server connection library:
 
-```bash
-docker run -d \
-  -p 4173:4173 \
-  -e NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY=http://localhost:42069 \
-  ghcr.io/namehash/ensnode/ensadmin:latest
-```
+![ENSAdmin: ENS Protocol Inspector](../../../../../assets/ensadmin-primary-name-inspector.png)
 
-The `NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY` environment variable accepts a comma-separated list of ENSNode URLs that will be offered as connection options in the ENSAdmin interface.
+### ENSNode Stack Info
+
+Get real-time insights into the config of all services running on your ENSNode.
+
+![ENSAdmin: ENSNode Stack Info](../../../../../assets/ensadmin-connection-view.png)
+
+### Indexing Status
+
+Track the indexing status of your ENSNode to understand its current performance.
+
+![ENSAdmin: Indexing Status](../../../../../assets/ensadmin-status-view.png)
