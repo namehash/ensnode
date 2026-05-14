@@ -54,8 +54,8 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/integration-options/enssdk",
         },
         {
-          label: "Raw GraphQL",
-          link: "/docs/integrate/integration-options/raw-graphql",
+          label: "ENS Omnigraph (GraphQL)",
+          link: "/docs/integrate/integration-options/omnigraph-graphql-api",
         },
         {
           label: "ENSDb integration quickstart",
@@ -68,6 +68,10 @@ export const integrateSidebarTopic = {
         {
           label: "ENSEngine (webhooks)",
           link: "/docs/integrate/ensengine",
+        },
+        {
+          label: "ensskills (AI agents)",
+          link: "/docs/integrate/integration-options/ensskills",
         },
       ],
     },

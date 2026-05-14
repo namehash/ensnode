@@ -8,8 +8,34 @@ sidebar:
 
 import { LinkCard } from '@astrojs/starlight/components';
 
-:::note
-This guide covers how to create a plugin for ENSIndexer.
-:::
+## ENSIndexer Plugins
 
-TODO
+ENSNode is extensible through ENSIndexer plugins that implement custom indexing logic and produce custom indexed data models inside ENSDb. This allows you to tailor ENSNode to your specific use case and data needs.
+
+ENSIndexer will only activate the plugins you specify in the `PLUGINS` env variable, so you can choose to only activate the plugins that are relevant to your use case. The `PLUGINS` env variable accepts a comma-separated list of plugin names to be activated. For example, if you want to activate the `ensv2` and `protocol-acceleration` plugins, you can set `PLUGINS=ensv2,protocol-acceleration`.
+
+## Plugin Architecture
+
+Each ENSIndexer plugin is a standalone TypeScript module that can be developed, tested, and deployed independently. The ENSIndexer Plugin can define its own indexed data models and indexing logic. It must include two main files:
+- `event-handlers.ts`: This file defines the event handlers for the plugin, which are functions that will be called when specific onchain events are indexed. The event handlers contain the logic for how to process the indexed data and store it in the relevant indexed data model inside the ENSIndexer Schema.
+- `plugin.ts`: This file defines the plugin itself, including its name, description, and any configuration options, like datasources to be used for specifying onchain contracts that will be indexed.
+
+### Event handlers
+
+The `event-handlers.ts` file has to export a function via default export. This function will only be called by ENSIndexer runtime when the plugin is activated. We leverage this approach to conditionally execute `addOnchainEventListener` calls for active plugins only. This way, ENSIndexer learns which specific onchain events it needs to listen to, and what indexing logic to execute for each indexed event, based on the event handlers from the active plugins.
+
+You need to import the `event-handlers.ts` file from each plugin into [`register-handlers.ts`](https://github.com/namehash/ensnode/blob/main/apps/ensindexer/ponder/src/register-handlers.ts) file. This way ENSIndexer can recognize the event handlers and know when to have them executed during indexing. For example, by checking `config.plugins` value for the specific plugin name, ENSIndexer runtime can conditionally execute relevant `event-handlers.ts` files across all active plugins.
+
+### Plugin definition
+
+The `plugin.ts` file has a default export with the plugin definition object returned from `createPlugin` function. The plugin definition object includes the plugin name, datasources required for the plugin to operate, and the config for contracts to be indexed by ENSIndexer when the plugin is active. 
+
+You need to import the plugin definition object into [`apps/ensindexer/src/plugins/index.ts`](https://github.com/namehash/ensnode/tree/main/apps/ensindexer/src/plugins/index.ts) file and have it included in the `ALL_PLUGINS` array. This way, you let the ENSIndexer runtime know that the plugin is available for activation, which in turn allows you to activate the plugin by including its name in the `PLUGINS` env variable.
+
+## Existing Plugins
+
+You can find the current list of existing ENSIndexer plugins in [the ENSIndexer repository](https://github.com/namehash/ensnode/tree/main/apps/ensindexer/src/plugins).
+
+## Creating Your Own Plugin
+
+If you’re interested in building a plugin, reach out to the NameHash Labs team who is happy to provide support and additional info.

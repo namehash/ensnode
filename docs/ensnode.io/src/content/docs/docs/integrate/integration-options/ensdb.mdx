@@ -4,6 +4,7 @@ description: Direct database access for self-hosters needing custom queries, ana
 ---
 
 import { LinkCard } from "@astrojs/starlight/components";
+import EnsDbSelfHostingNote from "../../../../../components/molecules/EnsDbSelfHostingNote.astro";
 import EnsDbUseCases from "../../../../../components/molecules/EnsDbUseCases.astro";
 
 For special use cases that go beyond what the ENS Omnigraph exposes — you can query the live onchain state of **ENSv2** directly via `SQL`.
@@ -14,9 +15,9 @@ For special use cases that go beyond what the ENS Omnigraph exposes — you can 
 We're building [**`ensdb-cli` & ENSDb snapshots**](/docs/integrate/ensdb-cli) so you can pull down a fresh ENSDb in minutes instead of paying for a full historical RPC backfill among many other benefits.
 :::
 
-:::note[Self-hosting required]
-ENSDb is available when you [self-host ENSNode](/docs/self-host). Each ENSNode instance writes its data into a PostgreSQL database that you own and control — that database **is** your ENSDb instance. The hosted ENSNode instances do not expose direct database access.
-:::
+
+<EnsDbSelfHostingNote />
+
 
 ### What you can build with ENSDb
 

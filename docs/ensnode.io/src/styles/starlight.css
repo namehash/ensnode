@@ -154,30 +154,25 @@ a[rel="prev"]:hover {
   display: inline;
 }
 
-.sl-markdown-content ul {
-  list-style: disc;
+.sl-markdown-content :where(ul, ol) {
   color: var(--sl-color-text);
-  list-style-position: inside;
+  margin-block: 1em;
+  margin-inline: 0;
+  padding-inline-start: 40px;
 }
 
-.sl-markdown-content ul ul {
-  margin-left: 1rem;
+.sl-markdown-content ul {
+  list-style: disc;
 }
 
 .sl-markdown-content ol {
   list-style: decimal;
-  color: var(--sl-color-text);
-  list-style-position: inside;
 }
 
-.sl-markdown-content ol li::marker,
-.sl-markdown-content ul li::marker {
-  color: var(--sl-color-accent);
-}
-
-/* Nested ul inside ol li should have small top margin */
-.sl-markdown-content ol li ul {
-  margin-top: 0.25rem;
+/* Nested lists: tighten indent and vertical spacing */
+.sl-markdown-content :is(ul, ol) :where(ul, ol) {
+  padding-inline-start: 1.5em;
+  margin-block: 0.25rem;
 }
 
 /* Pagination styles */
