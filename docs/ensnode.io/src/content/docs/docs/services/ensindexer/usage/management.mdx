@@ -16,15 +16,19 @@ Each instance of ENSIndexer maintains its own ENSIndexer Schema instance in ENSD
   - Build a completely new index from scratch into `myschema_Y` which may grow to become 100+ GB depending on how ENSIndexer is configured.
   - Still retain all the data in `myschema_X` which could also be 100+ GB...
 - Now imagine you repeat this process across multiple updates to your `ENSINDEXER_SCHEMA_NAME`, you might have hundreds and hundreds of GB of ENSIndexer Schema instances no longer in use that are just taking up disk space in ENSDb instance until you completely run out of disk space.
-- The solution is that you need to manually delete all the old `ENSINDEXER_SCHEMA_NAME` in your ENSDb instance you no longer use.
+- The solution is that you need to manually delete all the old ENSIndexer Schema instances in your ENSDb instance you no longer use.
 
 ### Dropping orphaned ENSIndexer Schemas
 
 If your ENSDb instance has orphaned ENSIndexer Schemas that you no longer use, you can drop them with a SQL command like the following:
 
+:::danger[`DROP SCHEMA ... CASCADE` is a destructive operation!]
+Once executed, this operation is irreversible. Double-check your database connection and schema name before running this in production.
+
 ```sql
 DROP SCHEMA myschema_X CASCADE;
 ```
+:::
 
 ### Dropping the RPC Cache
 
