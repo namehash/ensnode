@@ -19,7 +19,7 @@ Full access to ENS data formerly required two separate data fetching strategies 
 2. **Indexed ENS data** — the [ENS Subgraph](/docs/reference/subgraph-legacy/what-is-the-ens-subgraph) for indexed ENS data, such as discovering names owned by an address and all other ENS state outside of ENS resolutions.
 
 Neither system alone was complete. 
-- ENS resolution gives you resolver records, but no access to all the other state about ENS! ENS Resolutions as exposed through popular libraries such as `viem` and `wagmi` are also painfully "close to the metal", putting the burden on app developers to learn and carefully implement complex details about interpretating raw values returned by the ENS protocol.
+- ENS resolution gives you resolver records, but no access to all the other state about ENS! ENS Resolutions as exposed through popular libraries such as `viem` and `wagmi` are also painfully "close to the metal", putting the burden on app developers to learn and carefully implement complex details about interpreting raw values returned by the ENS protocol.
 - The Subgraph gives you queryable indexed ENS data but has critical limitations, including:
    - The Subgraph is single-chain.
    - The Subgraph has no support for ENSv2's fundamental data model changes.
@@ -27,7 +27,7 @@ Neither system alone was complete.
    - The Subgraph doesn't understand key implementation details of the ENS protocol such as ENSIP-10, ENSIP-19, ENS name normalization (ENSIP-15), etc.
    - The Subgraph exposes too many internal implementation detail complexities of ENS for app developers.
 
-In the past, apps building on ENS have had to live with these split fetching strategies, their limitations, and its downstream complexities. And we should note, **with ENSv2, the complexity of ENS's onchain state space meaningfully increases**.
+In the past, apps building on ENS have had to live with these split fetching strategies, their limitations, and their downstream complexities. And we should note, **with ENSv2, the complexity of ENS's onchain state space meaningfully increases**.
 
 ## How ENSNode solves this
 
