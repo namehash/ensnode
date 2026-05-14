@@ -4,7 +4,6 @@ import {
   createIndexingStatusQueryOptions,
   QueryParameter,
   useEnsNodeProviderOptions,
-  type useIndexingStatus,
   useNow,
   useSwrQuery,
   WithEnsNodeProviderOptions,

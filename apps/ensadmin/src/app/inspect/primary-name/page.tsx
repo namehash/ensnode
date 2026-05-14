@@ -3,7 +3,8 @@
 import { AddressDisplay, getChainName, usePrimaryName } from "@namehash/namehash-ui";
 import type { Address, DefaultableChainId } from "enssdk";
 import { DEFAULT_EVM_CHAIN_ID } from "enssdk";
-import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useDebouncedValue } from "rooks";
 import { isAddress } from "viem";
@@ -37,7 +38,6 @@ const defaultableChainIdStringSchema = makeDefaultableChainIdStringSchema("chain
 // TODO: use shadcn/form, react-hook-form, and zod to make all of this nicer aross the board
 // TODO: sync form state to query params, current just defaulting is supported
 export default function ResolvePrimaryNameInspector() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
 
@@ -66,15 +66,15 @@ export default function ResolvePrimaryNameInspector() {
     setChainId(chainIdFromQuery);
   }, [chainIdFromQuery]);
 
-  const navigateToAddress = (addr: Address, chain: DefaultableChainId) => {
-    setAddress(addr);
-    setChainId(chain);
-    const path = `/inspect/primary-name?address=${encodeURIComponent(
-      addr,
-    )}&chainId=${encodeURIComponent(String(chain))}`;
-    const href = retainCurrentRawConnectionUrlParam(path);
-    router.push(href);
-  };
+  const buildPrimaryNameHref = (addr: Address | string, chain: DefaultableChainId) =>
+    retainCurrentRawConnectionUrlParam(
+      `/inspect/primary-name?address=${encodeURIComponent(addr)}&chainId=${encodeURIComponent(
+        String(chain),
+      )}`,
+    );
+
+  const trimmedAddress = address.trim();
+  const resolveHref = buildPrimaryNameHref(trimmedAddress as Address, chainId);
 
   const additionalChainIds = getENSIP19SupportedChainIds(namespace);
 
@@ -168,12 +168,10 @@ export default function ResolvePrimaryNameInspector() {
             {/* -mx-6 px-6 insets the scroll container against card for prettier scrolling */}
             <div className="flex flex-row overflow-x-scroll gap-2 no-scrollbar -mx-6 px-6">
               {exampleAddresses.map(({ address: exampleAddress, name }) => (
-                <Pill
-                  key={exampleAddress}
-                  onClick={() => navigateToAddress(exampleAddress, chainId)}
-                  className="font-mono"
-                >
-                  <AddressDisplay address={exampleAddress} /> ({name})
+                <Pill key={exampleAddress} asChild className="font-mono">
+                  <Link href={buildPrimaryNameHref(exampleAddress, chainId)}>
+                    <AddressDisplay address={exampleAddress} /> ({name})
+                  </Link>
                 </Pill>
               ))}
             </div>
@@ -181,10 +179,10 @@ export default function ResolvePrimaryNameInspector() {
         </CardContent>
         <CardFooter>
           <ResolveButton
-            canResolve={isAddress(address.trim())}
-            hasChanged={address.trim() !== addressFromQuery || chainId !== chainIdFromQuery}
+            canResolve={isAddress(trimmedAddress)}
+            hasChanged={trimmedAddress !== addressFromQuery || chainId !== chainIdFromQuery}
+            navigateHref={resolveHref}
             onRefetch={refetch}
-            onNavigate={() => navigateToAddress(address.trim() as Address, chainId)}
           />
         </CardFooter>
       </Card>
