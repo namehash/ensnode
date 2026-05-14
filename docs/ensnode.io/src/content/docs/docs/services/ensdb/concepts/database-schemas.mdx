@@ -111,7 +111,7 @@ As such, none of that information is present in this `ensv2.schema.ts` file.
 In general, entities are keyed by a nominally-typed `id` that uniquely references them. This
 allows us to trivially implement cursor-based pagination and allow consumers to reference these
 deeply nested entities by a straightforward string ID. In cases where an entity's `id` is composed
-of multiple pieces of information (for example, a `Registry` is identified by (`chainId`, `address`)),
+of multiple pieces of information (for example, a `registries` record is identified by (`chain_id`, `address`)),
 then that information is, as well, included in the entity's columns, not just encoded in the id.
 Nowhere in this application, nor in user applications, should an entity's id be parsed for its
 constituent parts; all should be available, with their various type guarantees, on the entity
@@ -276,7 +276,7 @@ Internal rainbow table mapping a `label_hash` to its interpreted label string. D
 | `label_hash` | `text` | no | `keccak256` of the label. Primary key. |
 | `interpreted` | `text` | no | The interpreted label string. |
 
-**Indexes:** `by_interpreted_exact`, `by_interpreted_fuzzy`
+ **Indexes:** `interpreted` (hash index for exact match), `interpreted` (GIN trigram index for prefix/substring `LIKE`)
 
 **Relations:** has many `domains`.
 
@@ -337,7 +337,7 @@ A renewal is keyed by `id` and belongs to a specific registration.
 
 **Indexes:** unique on `(domain_id, registration_index, renewal_index)`.
 
-**Relations:** belongs to one `registration` via `(domain_id, registration_index)`, has one `event`.
+**Relations:** belongs to one `registrations` record via `(domain_id, registration_index)`, has one `events` record via `(event_id)`.
 
 #### `latest_renewal_indexes`
 
@@ -434,7 +434,7 @@ It is keyed by `(chain_id, address, domain_id)` to match the on-chain data model
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
-| `chain_id` | `bigint` | no | Keyed by `(chain_id, registry, node)`. Part of primary key. |
+| `chain_id` | `bigint` | no | Keyed by `(chain_id, address, domain_id)`. Part of primary key. |
 | `address` | `text` | no | The Registry (`ENSv1Registry` or `ENSv2Registry`)'s AccountId. Part of primary key. |
 | `domain_id` | `text` | no | Part of primary key. |
 | `resolver` | `text` | no | The Domain's assigned Resolver's address. Always scoped to `chain_id`. |
@@ -461,7 +461,7 @@ Represents an individual `IResolver` contract that has emitted at least one even
 
 Tracks a set of records for a specified `node` within a `resolver` contract on `chain_id`.
 
-Has one `names` record (see ENSIP-3), has many `resolver_address_records` (unique by coinType, see ENSIP-9), and has many `resolver_text_records` (unique by key, see ENSIP-5).
+Represents one `name` resolution record (see ENSIP-3), has many `resolver_address_records` (unique by `coin_type`, see ENSIP-9), and has many `resolver_text_records` (unique by key, see ENSIP-5).
 
 :::caution[Not ENSIP-10 compliant]
 These record values do **not** allow the caller to confidently resolve records for names without following Forward Resolution according to the ENS protocol. A direct query to the database for a record's value is not ENSIP-10 nor CCIP-Read compliant.
@@ -482,7 +482,7 @@ These record values do **not** allow the caller to confidently resolve records f
 
 **Indexes:** unique on `(chain_id, address, node)`.
 
-**Relations:** belongs to one `resolver` via `(chain_id, address)`, has many `resolver_address_records`, has many `resolver_text_records`.
+**Relations:** belongs to one `resolvers` record via `(chain_id, address)`, has many `resolver_address_records`, has many `resolver_text_records`.
 
 #### `resolver_address_records`
 
