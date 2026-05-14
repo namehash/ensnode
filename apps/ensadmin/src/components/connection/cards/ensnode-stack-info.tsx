@@ -582,7 +582,7 @@ function EnsNodeStackInfoCardContent({ ensNodeStackInfo }: { ensNodeStackInfo: E
                 <p>
                   Full Subgraph Compatibility, both, on API-level and data-level. ENSNode can be
                   used as a drop-in replacement for the ENS Subgraph, with guarantees that all data
-                  returned by ENSNode will be fully compatible with the ENS Subgraph data.
+                  returned by ENSNode will be fully aligned with the ENS Subgraph.
                 </p>
               }
             />
@@ -596,9 +596,9 @@ function EnsNodeStackInfoCardContent({ ensNodeStackInfo }: { ensNodeStackInfo: E
               }
               additionalInfo={
                 <p>
-                  API-level Subgraph Compatibility, where data-level compatibility is not guaranteed
-                  due to activated features. For example, a more comprehensive label set being used
-                  for healing labels.
+                  API-level Subgraph Compatibility, where GraphQL APIs are equivalent but a superset
+                  of data is being queried and therefore the data returned for some queries may be
+                  different.
                 </p>
               }
             />
