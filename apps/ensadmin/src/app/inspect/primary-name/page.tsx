@@ -66,15 +66,7 @@ export default function ResolvePrimaryNameInspector() {
     setChainId(chainIdFromQuery);
   }, [chainIdFromQuery]);
 
-  const buildPrimaryNameHref = (addr: Address | string, chain: DefaultableChainId) =>
-    retainCurrentRawConnectionUrlParam(
-      `/inspect/primary-name?address=${encodeURIComponent(addr)}&chainId=${encodeURIComponent(
-        String(chain),
-      )}`,
-    );
-
   const trimmedAddress = address.trim();
-  const resolveHref = buildPrimaryNameHref(trimmedAddress as Address, chainId);
 
   const additionalChainIds = getENSIP19SupportedChainIds(namespace);
 
@@ -169,7 +161,11 @@ export default function ResolvePrimaryNameInspector() {
             <div className="flex flex-row overflow-x-scroll gap-2 no-scrollbar -mx-6 px-6">
               {exampleAddresses.map(({ address: exampleAddress, name }) => (
                 <Pill key={exampleAddress} asChild className="font-mono">
-                  <Link href={buildPrimaryNameHref(exampleAddress, chainId)}>
+                  <Link
+                    href={retainCurrentRawConnectionUrlParam(
+                      `/inspect/primary-name?address=${encodeURIComponent(exampleAddress)}&chainId=${encodeURIComponent(String(chainId))}`,
+                    )}
+                  >
                     <AddressDisplay address={exampleAddress} /> ({name})
                   </Link>
                 </Pill>
@@ -181,7 +177,9 @@ export default function ResolvePrimaryNameInspector() {
           <ResolveButton
             canResolve={isAddress(trimmedAddress)}
             hasChanged={trimmedAddress !== addressFromQuery || chainId !== chainIdFromQuery}
-            navigateHref={resolveHref}
+            navigateHref={retainCurrentRawConnectionUrlParam(
+              `/inspect/primary-name?address=${encodeURIComponent(trimmedAddress)}&chainId=${encodeURIComponent(String(chainId))}`,
+            )}
             onRefetch={refetch}
           />
         </CardFooter>

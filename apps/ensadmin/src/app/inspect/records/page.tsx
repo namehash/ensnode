@@ -51,16 +51,22 @@ export default function ResolveRecordsInspector() {
   const selection = DefaultRecordsSelection[namespace];
 
   const trimmedInputName = inputName.trim();
-  const resolveHref = trimmedInputName
-    ? retainCurrentRawConnectionUrlParam(getRecordResolutionRelativePath(trimmedInputName as Name))
-    : retainCurrentRawConnectionUrlParam("/inspect/records");
+
+  const navigateToName = (name: Name) => {
+    setInputName(name);
+    const href = retainCurrentRawConnectionUrlParam(getRecordResolutionRelativePath(name));
+    router.push(href);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (trimmedInputName === nameFromQuery) {
       refetch();
+    } else if (trimmedInputName) {
+      navigateToName(trimmedInputName);
     } else {
-      router.push(resolveHref);
+      const href = retainCurrentRawConnectionUrlParam("/inspect/records");
+      router.push(href);
     }
   };
 
@@ -146,7 +152,9 @@ export default function ResolveRecordsInspector() {
           <ResolveButton
             canResolve={!!trimmedInputName}
             hasChanged={trimmedInputName !== nameFromQuery}
-            navigateHref={resolveHref}
+            navigateHref={retainCurrentRawConnectionUrlParam(
+              getRecordResolutionRelativePath(trimmedInputName),
+            )}
             onRefetch={refetch}
           />
         </CardFooter>

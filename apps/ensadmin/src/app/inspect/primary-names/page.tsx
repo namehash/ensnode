@@ -43,13 +43,7 @@ export default function ResolvePrimaryNameInspector() {
     setAddress(addressFromQuery ?? exampleAddresses[0].address);
   }, [addressFromQuery, exampleAddresses]);
 
-  const buildPrimaryNamesHref = (addr: Address | string) =>
-    retainCurrentRawConnectionUrlParam(
-      `/inspect/primary-names?address=${encodeURIComponent(addr)}`,
-    );
-
   const trimmedAddress = address.trim();
-  const resolveHref = buildPrimaryNamesHref(trimmedAddress);
 
   const validAddress: Address | null =
     debouncedAddress && isAddress(debouncedAddress) ? debouncedAddress : null;
@@ -116,7 +110,11 @@ export default function ResolvePrimaryNameInspector() {
             <div className="flex flex-row overflow-x-scroll gap-2 no-scrollbar -mx-6 px-6">
               {exampleAddresses.map(({ address: exampleAddress, name }) => (
                 <Pill key={exampleAddress} asChild className="font-mono">
-                  <Link href={buildPrimaryNamesHref(exampleAddress)}>
+                  <Link
+                    href={retainCurrentRawConnectionUrlParam(
+                      `/inspect/primary-names?address=${encodeURIComponent(exampleAddress)}`,
+                    )}
+                  >
                     <AddressDisplay address={exampleAddress} /> ({name})
                   </Link>
                 </Pill>
@@ -128,7 +126,9 @@ export default function ResolvePrimaryNameInspector() {
           <ResolveButton
             canResolve={isAddress(trimmedAddress)}
             hasChanged={trimmedAddress !== addressFromQuery}
-            navigateHref={resolveHref}
+            navigateHref={retainCurrentRawConnectionUrlParam(
+              `/inspect/primary-names?address=${encodeURIComponent(trimmedAddress)}`,
+            )}
             onRefetch={refetch}
           />
         </CardFooter>
