@@ -62,7 +62,7 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/integration-options/ensdb",
         },
         {
-          label: "ENSDb snapshots & CLI",
+          label: "ensdb-cli (Snapshots)",
           link: "/docs/integrate/ensdb-snapshots-and-cli",
           badge: {
             text: "Planned",
@@ -70,8 +70,8 @@ export const integrateSidebarTopic = {
           },
         },
         {
-          label: "Webhooks & events",
-          link: "/docs/integrate/webhooks-and-events",
+          label: "ENSEngine (webhooks)",
+          link: "/docs/integrate/ensengine",
           badge: {
             text: "Planned",
             variant: "note",
