@@ -45,7 +45,9 @@ Events will represent meaningful ENS events, such as:
 ## What this unlocks
 
 ### Cache invalidation
-
+
+Of course, ENSNode will also include metadata letting you know key attributes about ENS data you fetch so that you can wisely implement the best possible caching strategies. For example: If a particular data record is coming from purely onchain data (that will receive a guaranteed ENSEngine event notification as soon as it changes) or if a particular data record is coming from offchain data (such as a resolver record sourced through CCIP-read) and that therefore still requires polling to identify if it has changed.
+
 Build aggressive, edge-friendly caches for ENS data. The goal is to make it practical to cache profiles, avatars, text records, and resolver responses for much longer than polling-based integrations allow, then invalidate them when relevant onchain state changes. That's the foundation for web2-grade UX on a web3 protocol - fast page loads, low RPC fanout, globally distributed reads - without giving up freshness.
 
 Of course, ENSNode will also include metadata letting you know key attributes about ENS data you fetch so that you can wisely implement the best possible caching strategies. For example: If a particular data record is coming from purely onchain data (that will receive a guaranteed ENSEngine event notification as soon as it changes) or if a particular data record is coming from offchain data (such as a resolver record sourced through CCIP-read) and that therefore still requires polling to identify if it has changed.
@@ -75,28 +77,10 @@ ENSEngine builds on solid foundations:
 
 For the architecture overview and code-name notes, see [ENSEngine - How it works](/docs/services/ensengine).
 
-## What this page is not
-
-This page is a teaser, not a spec. There's no subscription endpoint to call yet, no signature verification documented, no SDK to integrate against. Those will arrive in dedicated reference docs once the service ships.
-
-If your app would benefit from any of the use cases above, it's a great time to share what you'd need from this service - we're still shaping it.
-
 ## Related
 
 <LinkCard
-  title="ENSEngine - How it works"
-  description="The planned service behind ENS-native webhooks. Code name is temporary."
+  title="ENSEngine Overview"
+  description="Learn more about ENSEngine."
   href="/docs/services/ensengine"
-/>
-
-<LinkCard
-  title="ENSDb (PostgreSQL)"
-  description="The live ENS state webhooks are built on. Available today via SQL or the ENSDb SDK."
-  href="/docs/integrate/integration-options/ensdb"
-/>
-
-<LinkCard
-  title="ENSDb snapshots & CLI (planned)"
-  description="The other coming-soon capability built on ENSDb: bootstrap a fresh ENSDb in minutes."
-  href="/docs/integrate/ensdb-snapshots-and-cli"
 />
