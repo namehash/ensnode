@@ -46,11 +46,6 @@ Events will represent meaningful ENS events, such as:
 
 ### Cache invalidation
 
-
-Of course, ENSNode will also include metadata letting you know key attributes about ENS data you fetch so that you can wisely implement the best possible caching strategies. For example: If a particular data record is coming from purely onchain data (that will receive a guaranteed ENSEngine event notification as soon as it changes) or if a particular data record is coming from offchain data (such as a resolver record sourced through CCIP-read) and that therefore still requires polling to identify if it has changed.
-
-
-
 Build aggressive, edge-friendly caches for ENS data. The goal is to make it practical to cache profiles, avatars, text records, and resolver responses for much longer than polling-based integrations allow, then invalidate them when relevant onchain state changes. That's the foundation for web2-grade UX on a web3 protocol - fast page loads, low RPC fanout, globally distributed reads - without giving up freshness.
 
 Of course, ENSNode will also include metadata letting you know key attributes about ENS data you fetch so that you can wisely implement the best possible caching strategies. For example: If a particular data record is coming from purely onchain data (that will receive a guaranteed ENSEngine event notification as soon as it changes) or if a particular data record is coming from offchain data (such as a resolver record sourced through CCIP-read) and that therefore still requires polling to identify if it has changed.
@@ -67,7 +62,7 @@ Where this matters:
 Once a reliable change feed exists, a lot of follow-on use cases get dramatically easier to build:
 
 - **Notification services** - expiry reminders, watchlists, security alerts on unexpected transfers, activity bots in Discord/Telegram/Twitter.
-- **Sync to alternative databases** - want to store alternative representations of ENSDb in databases that provide specialized benefits that Postgres doesn't offer, such as Elasticsearch, Typesense, Meliasearch, Redis, Kafka, Google BigQuery, and more? ENSEngine will ensure 100% delivery of database changes to sinks with strict ordering and exactly-once processing.
+- **Sync to alternative databases** - want to store alternative representations of ENSDb in databases that provide specialized benefits that Postgres doesn't offer, such as Elasticsearch, Typesense, Meilisearch, Redis, Kafka, Google BigQuery, and more? ENSEngine will ensure 100% delivery of database changes to sinks with strict ordering and exactly-once processing.
 - **Realtime dashboards** - surface ENS analytics and activity data as it happens.
 
 ## How it works (high level)

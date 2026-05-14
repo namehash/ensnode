@@ -1,0 +1,72 @@
+---
+title: ensdb-cli & ENSDb snapshots
+description: Coming soon - publish, download, and diff snapshots of the live ENS state with the planned ensdb-cli.
+---
+
+import { LinkCard, Aside } from "@astrojs/starlight/components";
+import EnsDbSnapshotsTeaser from "../../../../components/molecules/EnsDbSnapshotsTeaser.astro";
+
+<Aside type="caution" title="Coming soon">
+**`ensdb-cli`** and **ENSDb snapshots** are planned capabilities that are coming soon.
+</Aside>
+
+## The problem
+
+Completing a full historical indexing backfill of ENS from zero is **expensive on two axes: time and money**. A full historical indexing backfill of ENS across mainnet, Basenames, Lineanames, 3DNS, ENSv1, ENSv2, etc generally means days of indexing *and* a heavy RPC bill - every request to your RPC provider, multiplied by every chain, multiplied by every block of 9+ years of ENS history you have to index. That tax is painful for anyone building, prototyping, demoing, or testing.
+
+[ENSDb](/docs/services/ensdb) already gives you the live, onchain state of ENS in a plain PostgreSQL database that any language with a Postgres driver can read. The next step is making it **trivial - and cheap - to bootstrap and operate** that database. That's what ENSDb snapshots and `ensdb-cli` are for.
+
+## What we're building
+
+ENSDb snapshots are **portable, versioned packages of an ENSDb instance** that anyone can publish or consume. Pull one down, restore it into Postgres, and start querying ENS in minutes instead of waiting days to complete 9-years+ of historical indexing backfill from scratch - and **without** being required to send hundreds of thousands of pricy RPC-calls yourself. When you start from a fresh ENSDb snapshot, it's cheap and fast to catch up to realtime indexing.
+
+`ensdb-cli` will be the operator-facing tool around them - the surface where you list indexer instances and their indexing status, generate fresh snapshots, inspect what configuration a snapshot was built with, and clean up schemas you no longer need.
+
+<EnsDbSnapshotsTeaser />
+
+## Who this is for
+
+- **Hackathon teams and prototypers** who want a full ENSDb right now and don't have time or money to wait days on 9+ years of an ENS historical indexing backfill.
+- **Self-hosters** standing up new ENSNode instances who'd rather start from a recent snapshot than backfill from genesis.
+- **CI and testing pipelines** that need deterministic ENS state to run repeatable assertions against.
+- **Maintainers** running release reviews who want to diff indexed data across versions to catch unintended regressions before they ship.
+- **Anyone building specialized ENS services on top of ENSDb** who needs faster iteration loops and lower operational cost.
+
+## How this complements ENSDb
+
+Snapshots and the CLI sit *on top of* the [ENSDb open standard](/docs/services/ensdb). Because ENSDb is just Postgres governed by a well-defined schema, snapshots are portable: any [ENSDb Writer](/docs/services/ensdb/concepts/glossary#ensdb-writer) implementation can produce one, and any [ENSDb Reader](/docs/services/ensdb/concepts/glossary#ensdb-reader) (or your own code) can consume one.
+
+This is the same foundation that powers ENSNode's other planned ENSDb capabilities - including [ENSEngine](/docs/integrate/ensengine), enabling you to react to changes in ENSDb through webhooks and other event-driven strategies without need for polling.
+
+
+## Related
+
+<LinkCard
+  title="ENSDb integration quickstart"
+  description="The integration point these snapshots build on - the live ENS state, ready for SQL or the ENSDb SDK."
+  href="/docs/integrate/integration-options/ensdb"
+/>
+
+<LinkCard
+  title="ENSDb overview"
+  description="Vision, philosophy, and how an ENSDb instance works."
+  href="/docs/services/ensdb"
+/>
+
+<LinkCard
+  title="ENSEngine integration quickstart"
+  description="React to ENS state changes with webhooks & events rather than polling."
+  href="/docs/integrate/ensengine"
+/>
+
+<LinkCard
+  title="ENSEngine overview"
+  description="React to changes in ENSDb through webhooks and other reactive / event-based development strategies."
+  href="/docs/services/ensengine"
+/>
+
+<LinkCard
+  title="Self-host ENSNode"
+  description="Operate your own ENSNode instance to build and publish your own ENSDb snapshots."
+  href="/docs/self-host"
+/>
