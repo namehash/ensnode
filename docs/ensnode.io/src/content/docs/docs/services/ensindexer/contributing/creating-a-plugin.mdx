@@ -12,7 +12,7 @@ import { LinkCard } from '@astrojs/starlight/components';
 
 ENSIndexer is designed to be extensible with plugins that can implement custom indexing logic and data models. This allows you to tailor ENSIndexer to your specific use case and ENS data needs.
 
-ENSIndexer will only active the plugins you specify in the `PLUGINS` env variable, so you can choose to only activate the plugins that are relevant to your use case. The `PLUGINS` env variable accepts a comma-separated list of plugin names to be activated. For example, if you want to activate the `ensv2` and `protocol-acceleration` plugins, you can set `PLUGINS=ensv2,protocol-acceleration`.
+ENSIndexer will only activate the plugins you specify in the `PLUGINS` env variable, so you can choose to only activate the plugins that are relevant to your use case. The `PLUGINS` env variable accepts a comma-separated list of plugin names to be activated. For example, if you want to activate the `ensv2` and `protocol-acceleration` plugins, you can set `PLUGINS=ensv2,protocol-acceleration`.
 
 ## Plugin Architecture
 
@@ -22,7 +22,7 @@ The ENSIndexer plugin is a standalone TypeScript module that can be developed, t
 
 ### Event handlers
 
-The `event-handlers.ts` file has to export a function via default export. This function will be only called by ENSIndexer runtime when the plugin is activated. We leverage this approach to conditionally execute `addOnchainEventListener` calls for active plugins only. This way, ENSIndexer learns which specific onchain events it need to listen to, and what indexing logic to execute for each indexed event, based on the event handlers from the active plugins.
+The `event-handlers.ts` file has to export a function via default export. This function will only be called by ENSIndexer runtime when the plugin is activated. We leverage this approach to conditionally execute `addOnchainEventListener` calls for active plugins only. This way, ENSIndexer learns which specific onchain events it needs to listen to, and what indexing logic to execute for each indexed event, based on the event handlers from the active plugins.
 
 You need to import the `event-handlers.ts` file from each plugin into [`register-handlers.ts`](https://github.com/namehash/ensnode/blob/main/apps/ensindexer/ponder/src/register-handlers.ts) file. This way ENSIndexer can recognize the event handlers and know when to have them executed during indexing. For example, by checking `config.plugins` value for the specific plugin name, ENSIndexer runtime can conditionally execute relevant `event-handlers.ts` files across all active plugins.
 
