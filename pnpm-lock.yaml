@@ -775,6 +775,9 @@ importers:
       '@types/react-dom':
         specifier: 'catalog:'
         version: 19.2.3(@types/react@19.2.7)
+      tsx:
+        specifier: ^4.19.3
+        version: 4.21.0
 
   docs/ensrainbow.io:
     dependencies:

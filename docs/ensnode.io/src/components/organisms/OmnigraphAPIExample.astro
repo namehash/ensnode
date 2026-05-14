@@ -1,18 +1,18 @@
 ---
-import OmnigraphRecipePanels from "./OmnigraphRecipePanels.astro";
+import OmnigraphAPIExamplePanels from "../molecules/OmnigraphAPIExamplePanels.astro";
 
-import { getOmnigraphExampleById } from "../../data/ens-v2-examples-queries";
+import { getOmnigraphExampleById } from "../../data/omnigraph-examples/examples";
 import { buildEnsadminOmnigraphUrl } from "../../content/snippets/omnigraphAdmin";
-import { stringifyJsonForDocs } from "../../data/ens-v2-examples-queries/common";
+import { stringifyJsonForDocs } from "../../lib/playground/utils";
 
 interface Props {
-  exampleId: string;
+  id: string;
   /** Hide curl tab (e.g. if connection is admin-only). */
-  showCurl?: boolean;
+  hideCurl?: boolean;
 }
 
-const { exampleId, showCurl = true } = Astro.props;
-const example = getOmnigraphExampleById(exampleId);
+const { id, hideCurl = false } = Astro.props;
+const example = getOmnigraphExampleById(id);
 const adminUrl = buildEnsadminOmnigraphUrl({
   query: example.query,
   connection: example.connection,
@@ -22,13 +22,13 @@ const variablesJson = stringifyJsonForDocs(example.variables);
 const responseJson = example.response ? stringifyJsonForDocs(example.response) : null;
 ---
 
-<OmnigraphRecipePanels
-  panelId={exampleId}
+<OmnigraphAPIExamplePanels
+  panelId={id}
   query={example.query}
   variablesJson={variablesJson}
   variablesObject={example.variables}
   responseJson={responseJson}
   connectionBaseUrl={example.connection}
   adminUrl={adminUrl}
-  showCurl={showCurl}
+  hideCurl={hideCurl}
 />

@@ -40,8 +40,48 @@ export const integrateSidebarTopic = {
               link: "/docs/integrate/omnigraph/cookbook/domain-by-name",
             },
             {
+              label: "Find Domains",
+              link: "/docs/integrate/omnigraph/cookbook/find-domains",
+            },
+            {
+              label: "Domain Subdomains",
+              link: "/docs/integrate/omnigraph/cookbook/domain-subdomains",
+            },
+            {
+              label: "Domain Events",
+              link: "/docs/integrate/omnigraph/cookbook/domain-events",
+            },
+            {
               label: "Account Domains",
-              link: "/docs/integrate/omnigraph/cookbook/account-domains",
+              link: "/docs/integrate/omnigraph/cookbook/domains-by-address",
+            },
+            {
+              label: "Account Events",
+              link: "/docs/integrate/omnigraph/cookbook/account-events",
+            },
+            {
+              label: "Registry Domains",
+              link: "/docs/integrate/omnigraph/cookbook/registry-domains",
+            },
+            {
+              label: "Permissions By Contract",
+              link: "/docs/integrate/omnigraph/cookbook/permissions-by-contract",
+            },
+            {
+              label: "Permissions By User",
+              link: "/docs/integrate/omnigraph/cookbook/permissions-by-user",
+            },
+            {
+              label: "Account Resolver Permissions",
+              link: "/docs/integrate/omnigraph/cookbook/account-resolver-permissions",
+            },
+            {
+              label: "Domain Resolver",
+              link: "/docs/integrate/omnigraph/cookbook/domain-resolver",
+            },
+            {
+              label: "Namegraph",
+              link: "/docs/integrate/omnigraph/cookbook/namegraph",
             },
           ],
         },

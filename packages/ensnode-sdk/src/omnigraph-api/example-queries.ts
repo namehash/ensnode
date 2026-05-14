@@ -33,11 +33,17 @@ const ENS_TEST_ENV_V2_ETH_REGISTRAR = maybeGetDatasourceContract(
 const VITALIK_ADDRESS = toNormalizedAddress("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045");
 
 // owns sfmonicdeb*.eth (mix of v1 + v2) on sepolia-v2 and holds v2 ETHRegistry permissions
-const SEPOLIA_V2_USER_ADDRESS = toNormalizedAddress("0x2f8e8b1126e75fde0b7f731e7cb5847eba2d2574");
+const _SEPOLIA_V2_USER_ADDRESS = toNormalizedAddress("0x2f8e8b1126e75fde0b7f731e7cb5847eba2d2574");
+
+const SEPOLIA_V2_ADDRESS_WITH_LOT_OF_NAMES = toNormalizedAddress(
+  "0x205d2686da3bf33f64c17f21462c51b5ead462cf",
+);
 
 const DEVNET_NAME_WITH_OWNED_RESOLVER = asInterpretedName("example.eth");
 
 const SEPOLIA_V2_NAME_WITH_OWNED_RESOLVER = asInterpretedName("sfmonicdebmig.eth");
+
+const SEPOLIA_V2_TEST_NAME = asInterpretedName("test-name.eth");
 
 export type GraphqlApiExampleQuery = {
   id: string;
@@ -103,7 +109,7 @@ query FindDomains(
     variables: {
       default: { name: "vitalik", order: { by: "NAME", dir: "DESC" } },
       [ENSNamespaceIds.EnsTestEnv]: { name: "c", order: { by: "NAME", dir: "DESC" } },
-      [ENSNamespaceIds.SepoliaV2]: { name: "sfmonic", order: { by: "NAME", dir: "DESC" } },
+      [ENSNamespaceIds.SepoliaV2]: { name: "test-name", order: { by: "NAME", dir: "DESC" } },
     },
   },
 
@@ -134,7 +140,7 @@ query DomainByName($name: InterpretedName!) {
 }`,
     variables: {
       default: { name: "eth" },
-      [ENSNamespaceIds.SepoliaV2]: { name: "sfmonicdebmig.eth" },
+      [ENSNamespaceIds.SepoliaV2]: { name: SEPOLIA_V2_TEST_NAME },
     },
   },
 
@@ -192,7 +198,7 @@ query DomainEvents($name: InterpretedName!) {
   // Account Domains
   ////////////////////
   {
-    id: "account-domains",
+    id: "domains-by-address",
     query: `
 query AccountDomains(
   $address: Address!
@@ -211,7 +217,7 @@ query AccountDomains(
     variables: {
       default: { address: VITALIK_ADDRESS },
       [ENSNamespaceIds.EnsTestEnv]: { address: accounts.owner.address },
-      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_USER_ADDRESS },
+      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_ADDRESS_WITH_LOT_OF_NAMES },
     },
   },
 
@@ -231,7 +237,7 @@ query AccountEvents(
     variables: {
       default: { address: VITALIK_ADDRESS },
       [ENSNamespaceIds.EnsTestEnv]: { address: accounts.deployer.address },
-      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_USER_ADDRESS },
+      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_ADDRESS_WITH_LOT_OF_NAMES },
     },
   },
 
@@ -294,6 +300,7 @@ query PermissionsByContract(
     variables: {
       // TODO: same as above
       default: { contract: ENS_TEST_ENV_V2_ETH_REGISTRAR },
+      // TODO: example response is empty for this address on Sepolia V2
       [ENSNamespaceIds.SepoliaV2]: { contract: SEPOLIA_V2_V2_ETH_REGISTRAR },
     },
   },
@@ -318,7 +325,8 @@ query PermissionsByUser($address: Address!) {
 }`,
     variables: {
       default: { address: accounts.deployer.address },
-      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_USER_ADDRESS },
+      // TODO: example response is empty for this address on Sepolia V2
+      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_ADDRESS_WITH_LOT_OF_NAMES },
     },
   },
 
@@ -345,7 +353,7 @@ query AccountResolverPermissions($address: Address!) {
 }`,
     variables: {
       default: { address: accounts.deployer.address },
-      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_USER_ADDRESS },
+      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_ADDRESS_WITH_LOT_OF_NAMES },
     },
   },
 

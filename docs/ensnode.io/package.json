@@ -13,6 +13,7 @@
     "astro": "astro",
     "lint": "biome check --write",
     "lint:ci": "biome ci",
+    "cookbook:refresh-responses": "tsx --tsconfig tsconfig.json scripts/fetch-omnigraph-cookbook-responses.mts",
     "generate:openapi": "pnpm --filter ensapi exec tsx --tsconfig tsconfig.json ../../scripts/generate-ensapi-openapi.mts"
   },
   "dependencies": {
@@ -49,6 +50,7 @@
   },
   "devDependencies": {
     "@types/react": "catalog:",
-    "@types/react-dom": "catalog:"
+    "@types/react-dom": "catalog:",
+    "tsx": "^4.19.3"
   }
 }

@@ -1,9 +1,9 @@
 ---
 import { Code } from "@astrojs/starlight/components";
 
-import { buildOmnigraphCurlExample } from "../../lib/omnigraph-recipe";
+import { buildOmnigraphCurlExample } from "../../lib/playground/utils";
 
-export interface OmnigraphRecipePanelsProps {
+export interface OmnigraphAPIExamplePanelsProps {
   /** Unique id prefix for aria / tab wiring (e.g. example id). */
   panelId: string;
   query: string;
@@ -13,7 +13,7 @@ export interface OmnigraphRecipePanelsProps {
   /** ENSNode base URL (same as enssdk `createEnsNodeClient({ url })`). */
   connectionBaseUrl: string;
   adminUrl: string;
-  showCurl?: boolean;
+  hideCurl?: boolean;
 }
 
 const {
@@ -24,7 +24,7 @@ const {
   responseJson,
   connectionBaseUrl,
   adminUrl,
-  showCurl = true,
+  hideCurl = false,
 } = Astro.props;
 
 const uid = panelId.replace(/[^a-zA-Z0-9_-]/g, "-");
@@ -34,19 +34,19 @@ const tabIds = {
   curl: `${uid}-tab-curl`,
 } as const;
 
-const curlExample = showCurl
+const curlExample = !hideCurl
   ? buildOmnigraphCurlExample({ connectionBaseUrl, query, variables: variablesObject })
   : "";
 const tabList: { id: string; label: string }[] = [
   { id: tabIds.vars, label: "Variables" },
   ...(responseJson ? [{ id: tabIds.resp, label: "Response" }] : []),
-  ...(showCurl && curlExample ? [{ id: tabIds.curl, label: "Curl" }] : []),
+  ...(!hideCurl && curlExample ? [{ id: tabIds.curl, label: "Curl" }] : []),
 ];
 ---
 
 <div
-  class="not-content not-prose omnigraph-recipe my-8 rounded-xl border border-black/[0.06] bg-[var(--sl-color-gray-6)] shadow-sm dark:border-white/[0.08] dark:bg-[var(--sl-color-gray-7)]"
-  data-omnigraph-recipe={uid}
+  class="not-content not-prose omnigraph-example overflow-hidden my-8 rounded-xl border border-black/[0.06] bg-[var(--sl-color-gray-6)] shadow-sm dark:border-white/[0.08] dark:bg-[var(--sl-color-gray-7)]"
+  data-omnigraph-example={uid}
 >
   <div
     class="z-20 flex flex-wrap items-center gap-3 border-b border-black/[0.06] bg-[var(--sl-color-gray-6)]/95 px-4 py-3 backdrop-blur-md dark:border-white/[0.08] dark:bg-[var(--sl-color-gray-7)]/95 md:px-5"
@@ -76,11 +76,11 @@ const tabList: { id: string; label: string }[] = [
         id={`${uid}-query-heading`}
         class="inline-flex items-center rounded-full bg-[var(--sl-color-gray-5)] px-2.5 py-0.5 text-[0.7rem] font-medium tracking-wide text-[var(--sl-color-gray-2)] dark:bg-[var(--sl-color-gray-6)]"
       >
-        GraphQL
+        ENS Omnigraph GraphQL
       </span>
       <button
         type="button"
-        class="recipe-copy text-xs font-medium text-[var(--sl-color-gray-2)] transition-colors hover:text-[var(--sl-color-text-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
+        class="example-copy text-xs font-medium text-[var(--sl-color-gray-2)] transition-colors hover:text-[var(--sl-color-text-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
         data-copy-target={`${uid}-raw-query`}
         data-default-label="Copy"
         aria-label="Copy GraphQL query"
@@ -111,7 +111,7 @@ const tabList: { id: string; label: string }[] = [
               aria-selected={i === 0 ? "true" : "false"}
               aria-controls={t.id}
               data-tab-target={t.id}
-              class="recipe-tab relative pb-2.5 pr-4 pt-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
+              class="example-tab relative pb-2.5 pr-4 pt-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
             >
               {t.label}
             </button>
@@ -120,7 +120,7 @@ const tabList: { id: string; label: string }[] = [
         <div class="flex-1" role="none" />
         <button
           type="button"
-          class="recipe-copy mb-2.5 text-xs font-medium text-[var(--sl-color-gray-2)] transition-colors hover:text-[var(--sl-color-text-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
+          class="example-copy mb-2.5 text-xs font-medium text-[var(--sl-color-gray-2)] transition-colors hover:text-[var(--sl-color-text-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
           data-tab-copy
           data-copy-target={`${uid}-raw-vars`}
           data-default-label="Copy"
@@ -136,7 +136,7 @@ const tabList: { id: string; label: string }[] = [
           role="tabpanel"
           aria-labelledby={`${tabIds.vars}-btn`}
           data-tab-panel={tabIds.vars}
-          class="recipe-tab-panel pt-3"
+          class="example-tab-panel pt-3"
         >
           <div class="max-h-[min(38vh,18rem)] min-w-0 overflow-auto overscroll-y-contain [&_.expressive-code]:rounded-lg">
             <Code code={variablesJson} lang="json" title="variables.json" />
@@ -150,7 +150,7 @@ const tabList: { id: string; label: string }[] = [
               role="tabpanel"
               aria-labelledby={`${tabIds.resp}-btn`}
               data-tab-panel={tabIds.resp}
-              class="recipe-tab-panel hidden pt-3"
+              class="example-tab-panel hidden pt-3"
               hidden
             >
               <div class="max-h-[min(50vh,28rem)] min-w-0 overflow-auto overscroll-y-contain [&_.expressive-code]:rounded-lg">
@@ -161,13 +161,13 @@ const tabList: { id: string; label: string }[] = [
         }
 
         {
-          showCurl && curlExample ? (
+          !hideCurl && curlExample ? (
             <div
               id={tabIds.curl}
               role="tabpanel"
               aria-labelledby={`${tabIds.curl}-btn`}
               data-tab-panel={tabIds.curl}
-              class="recipe-tab-panel hidden pt-3"
+              class="example-tab-panel hidden pt-3"
               hidden
             >
               <div class="max-h-[min(50vh,28rem)] min-w-0 overflow-auto overscroll-y-contain [&_.expressive-code]:rounded-lg">
@@ -183,13 +183,12 @@ const tabList: { id: string; label: string }[] = [
 
   <p class="px-4 pb-4 pt-0 text-[0.7rem] leading-relaxed text-[var(--sl-color-gray-3)] md:px-5">
     Response is an illustrative snapshot; live data depends on your ENSNode instance. The curl tab shows a POST to
-    <code class="rounded bg-black/[0.06] px-1 py-0.5 font-mono text-[0.8em] dark:bg-white/[0.08]">/api/omnigraph</code> on your
-    connection base URL (same as enssdk).
+    <code class="rounded bg-black/[0.06] px-1 py-0.5 font-mono text-[0.8em] dark:bg-white/[0.08]">{connectionBaseUrl}/api/omnigraph</code>
   </p>
 </div>
 
 <script define:vars={{ uid }}>
-  const root = document.querySelector(`[data-omnigraph-recipe="${uid}"]`);
+  const root = document.querySelector(`[data-omnigraph-example="${uid}"]`);
   const tabsRoot = root?.querySelector(`[data-tabs-root="${uid}"]`);
   if (root && tabsRoot && !tabsRoot.dataset.bound) {
     tabsRoot.dataset.bound = "true";
@@ -253,18 +252,25 @@ const tabList: { id: string; label: string }[] = [
 </script>
 
 <style>
-  .omnigraph-recipe :global(.expressive-code) {
+  .omnigraph-example :global(.expressive-code) {
     --ec-brdRad: 0.5rem;
   }
 
+  .omnigraph-example :global(span.title) {
+    border-top-left-radius: 9px;
+    border-top-right-radius: 9px;
+    /* optional */
+    border-right: 1px solid var(--color-border);
+  }
 
-  .recipe-tab {
+
+  .example-tab {
     color: var(--sl-color-gray-3);
     background: transparent;
     border: none;
   }
 
-  .recipe-tab:hover {
+  .example-tab:hover {
     color: var(--sl-color-gray-1);
   }
 
@@ -273,12 +279,12 @@ const tabList: { id: string; label: string }[] = [
    * overlapping (and visually cancelling) the tablist container's border-b.
    * z-index: 1 ensures it renders above that border.
    */
-  .recipe-tab[aria-selected="true"] {
+  .example-tab[aria-selected="true"] {
     color: var(--sl-color-text-accent);
     z-index: 1;
   }
 
-  .recipe-tab[aria-selected="true"]::after {
+  .example-tab[aria-selected="true"]::after {
     content: "";
     position: absolute;
     inset-inline-start: 0;
@@ -288,4 +294,5 @@ const tabList: { id: string; label: string }[] = [
     background: var(--sl-color-text-accent);
     border-radius: 2px 2px 0 0;
   }
+
 </style>

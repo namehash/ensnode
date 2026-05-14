@@ -1,6 +1,7 @@
-import { ENSNODE_URL } from "./common";
+import { ENSNODE_URL } from "src/lib/playground/constants";
+import { getNiceHeightForCodeSnippet } from "src/lib/playground/utils";
+import EnssdkPlayground from "../../molecules/EnssdkPlayground";
 
-/** Shared enssdk + Omnigraph example used on Quickstart (static) and in the Cookbook live playground. */
 export const quickstartResolveDomainSnippet = `
 import { createEnsNodeClient } from 'enssdk/core';
 import { omnigraph, graphql } from 'enssdk/omnigraph';
@@ -27,3 +28,14 @@ const result = await client.omnigraph.query({
 });
 console.log('Result:', result.data);
 `.trim();
+
+export default function EnssdkResolutionApiPlayground() {
+  return (
+    <EnssdkPlayground
+      title="ENSNode SDK — Resolution API"
+      description="Query ENS name data in seconds using [`@ensnode/ensnode-sdk`](/docs/integrate/integration-options/enssdk)."
+      fileContent={quickstartResolveDomainSnippet}
+      height={getNiceHeightForCodeSnippet(quickstartResolveDomainSnippet)}
+    />
+  );
+}
