@@ -716,7 +716,7 @@ A complete re-implementation of the legacy ENS Subgraph data model. When the `su
 - `name` — GIN trigram index for partial-match filters (`_contains`, `_starts_with`, `_ends_with`).
 - `labelhash`, `parent_id`, `owner_id`, `registrant_id`, `wrapped_owner_id`, `resolved_address_id`.
 
-**Relations:** has one `subgraph_accounts` record (resolved_address), has one `subgraph_accounts` record (owner), has one `subgraph_accounts` record (registrant), has one `subgraph_accounts` record (wrapped_owner), has one `subgraph_resolvers` record, has one `subgraph_domains` record (parent), has many `subgraph_domains` records (subdomains), has one `subgraph_wrappedDomains` record, has one `subgraph_registrations` record, has many domain event tables.
+**Relations:** has one `subgraph_accounts` record (resolved_address), has one `subgraph_accounts` record (owner), has one `subgraph_accounts` record (registrant), has one `subgraph_accounts` record (wrapped_owner), has one `subgraph_resolvers` record, has one `subgraph_domains` record (parent), has many `subgraph_domains` records (subdomains), has one `subgraph_wrapped_domains` record, has one `subgraph_registrations` record, has many domain event tables.
 
 #### `subgraph_accounts`
 
