@@ -1,6 +1,6 @@
 "use client";
 
-import { AddressDisplay, getChainName } from "@namehash/namehash-ui";
+import { AddressDisplay, getChainName, usePrimaryName } from "@namehash/namehash-ui";
 import type { Address, DefaultableChainId } from "enssdk";
 import { DEFAULT_EVM_CHAIN_ID } from "enssdk";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -9,7 +9,6 @@ import { useDebouncedValue } from "rooks";
 import { isAddress } from "viem";
 
 import { getENSRootChainId } from "@ensnode/datasources";
-import { usePrimaryName } from "@ensnode/ensnode-react";
 import { getNamespaceSpecificValue } from "@ensnode/ensnode-sdk";
 import { makeDefaultableChainIdStringSchema } from "@ensnode/ensnode-sdk/internal";
 

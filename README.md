@@ -171,10 +171,6 @@ Software Development Kit for interacting with data in ENSDb.
 
 Software Development Kit for interacting with ENSNode services and data. Includes common utilities used across ENSNode applications.
 
-### [`packages/ensnode-react`](packages/ensnode-react)
-
-React hooks and providers for the ENSNode API.
-
 ### [`packages/datasources`](packages/datasources)
 
 Convenient catalog of ENSNode-related datasources including chain, contract addresses, start blocks, and event filters.

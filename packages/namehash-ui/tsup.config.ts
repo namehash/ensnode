@@ -10,7 +10,7 @@ export default defineConfig({
   sourcemap: true,
   dts: true,
   clean: true,
-  external: ["react", "react-dom", "@ensnode/ensnode-react"],
+  external: ["react", "react-dom", "@tanstack/react-query", "@ensnode/ensnode-sdk"],
   outDir: "./dist",
   esbuildOptions(options) {
     options.mainFields = ["browser", "module", "main"];

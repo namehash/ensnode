@@ -1,13 +1,12 @@
 "use client";
 
-import { AddressDisplay } from "@namehash/namehash-ui";
+import { AddressDisplay, usePrimaryNames } from "@namehash/namehash-ui";
 import type { Address } from "enssdk";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useDebouncedValue } from "rooks";
 import { isAddress } from "viem";
 
-import { usePrimaryNames } from "@ensnode/ensnode-react";
 import { getNamespaceSpecificValue } from "@ensnode/ensnode-sdk";
 
 import { RenderRequestsOutput } from "@/app/inspect/_components/render-requests-output";

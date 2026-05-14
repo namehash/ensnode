@@ -1,18 +1,18 @@
 "use client";
 
-import { useNow } from "@namehash/namehash-ui";
-import { secondsToMilliseconds } from "date-fns";
-import type { Duration } from "enssdk";
-import { useCallback, useMemo } from "react";
-
 import {
   createIndexingStatusQueryOptions,
   QueryParameter,
   useEnsNodeProviderOptions,
   type useIndexingStatus,
+  useNow,
   useSwrQuery,
   WithEnsNodeProviderOptions,
-} from "@ensnode/ensnode-react";
+} from "@namehash/namehash-ui";
+import { secondsToMilliseconds } from "date-fns";
+import type { Duration } from "enssdk";
+import { useCallback, useMemo } from "react";
+
 import {
   type CrossChainIndexingStatusSnapshotOmnichain,
   createRealtimeIndexingStatusProjection,

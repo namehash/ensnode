@@ -23,7 +23,6 @@
   },
   "dependencies": {
     "@ensnode/datasources": "workspace:*",
-    "@ensnode/ensnode-react": "workspace:*",
     "@ensnode/ensnode-sdk": "workspace:*",
     "@ensnode/scalar-react": "workspace:*",
     "enssdk": "workspace:*",

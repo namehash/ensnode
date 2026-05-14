@@ -1,8 +1,7 @@
 "use client";
 
+import { createEnsNodeProviderOptions, EnsNodeProvider } from "@namehash/namehash-ui";
 import { type PropsWithChildren, useMemo } from "react";
-
-import { createEnsNodeProviderOptions, EnsNodeProvider } from "@ensnode/ensnode-react";
 
 import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
 
@@ -10,7 +9,7 @@ import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
  * Provider component that configures EnsNodeProvider with the currently
  * selected ENSNode connection.
  *
- * This component wraps the EnsNodeProvider from @ensnode/ensnode-react and
+ * This component wraps the EnsNodeProvider from @namehash/namehash-ui and
  * automatically configures it with the URL from the currently selected ENSNode
  * connection URL. It serves as a bridge between the ENSAdmin connection
  * management system and the ENSNode React hooks.
