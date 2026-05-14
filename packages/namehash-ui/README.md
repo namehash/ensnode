@@ -11,7 +11,7 @@ npm install @namehash/namehash-ui @tanstack/react-query sonner
 ```
 
 > [!NOTE]
-> `@tanstack/react-query` and `sonner` are peer dependencies. `@tanstack/react-query` is required when using the ENSNode hooks/provider exported from this package; `sonner` is only required for the `CopyButton` component. Depending on which components you use, you may not need both installed.
+> `@tanstack/react-query` and `sonner` are peer dependencies. `@tanstack/react-query` is required when using the hooks/providers exported from this package; `sonner` is only required for the `CopyButton` component. Depending on which components you use, you may not need both installed.
 
 ## Setup
 
