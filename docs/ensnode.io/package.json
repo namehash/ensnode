@@ -13,7 +13,7 @@
     "astro": "astro",
     "lint": "biome check --write",
     "lint:ci": "biome ci",
-    "cookbook:refresh-responses": "tsx --tsconfig tsconfig.json scripts/fetch-omnigraph-cookbook-responses.mts",
+    "omnigraph-examples:refresh-responses": "tsx --tsconfig tsconfig.json scripts/fetch-omnigraph-example-responses.mts",
     "generate:openapi": "pnpm --filter ensapi exec tsx --tsconfig tsconfig.json ../../scripts/generate-ensapi-openapi.mts"
   },
   "dependencies": {

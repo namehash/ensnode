@@ -4,7 +4,7 @@ description: SDK for ENSv2 development in TypeScript/JavaScript.
 ---
 
 import { LinkCard } from '@astrojs/starlight/components';
-import IntegrateHostedEnsNodeTip from '../../../../../components/molecules/IntegrateHostedEnsNodeTip.astro';
+import IntegrateHostedEnsNodeTip from '../../../../../../components/molecules/IntegrateHostedEnsNodeTip.astro';
 
 `enssdk` is the foundational TypeScript/JavaScript SDK for ENS development. It's a fully modular and tree-shakeable modern TypeScript/JavaScript package that provides ENS-specific types and helpers — usable from any JS runtime, browser or server.
 
@@ -294,7 +294,8 @@ You should see the `eth` Domain, followed by its first 20 subdomains and the tot
 
 ## Where to go next
 
-- See the [Omnigraph Cookbook](/docs/integrate/omnigraph/cookbook) for ready-to-copy queries: account-owned domains, events, registrar permissions, full-text search, and more.
+- Try the [interactive Resolution API example](/docs/integrate/integration-options/enssdk/example): edit and run a typed `enssdk` snippet against a live ENSNode endpoint in the browser.
+- See [Omnigraph examples](/docs/integrate/omnigraph/examples) for ready-to-copy GraphQL queries: account-owned domains, events, registrar permissions, full-text search, and more.
 - See the [Omnigraph Schema Reference](/docs/integrate/omnigraph/schema-reference) for the full set of types, fields, and arguments you can query.
 - Building a React app? Use [`enskit`](/docs/integrate/integration-options/enskit) — same `graphql(...)` helper, with `useOmnigraphQuery` and a graphcache.
 

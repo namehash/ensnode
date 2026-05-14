@@ -1,5 +1,5 @@
-/** Human-authored cookbook copy. Example responses live in `responses.json` (refresh with `pnpm cookbook:refresh-responses`). */
-export const COOKBOOK_META: Record<
+/** Human-authored example copy. Example responses live in `responses.json` (refresh with `pnpm omnigraph-examples:refresh-responses`). */
+export const OMNIGRAPH_EXAMPLES_META: Record<
   string,
   {
     name: string;

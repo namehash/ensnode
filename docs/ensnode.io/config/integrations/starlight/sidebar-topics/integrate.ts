@@ -8,10 +8,6 @@ export const integrateSidebarTopic = {
       link: "/docs/integrate",
     },
     {
-      label: "Why ENSNode?",
-      link: "/docs/integrate/why-ensnode",
-    },
-    {
       label: "ENSv2 Readiness",
       link: "/docs/integrate/ensv2-readiness",
     },
@@ -28,60 +24,60 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/omnigraph",
         },
         {
-          label: "Cookbook",
+          label: "Examples",
           collapsed: true,
           items: [
             {
               label: "Overview",
-              link: "/docs/integrate/omnigraph/cookbook",
+              link: "/docs/integrate/omnigraph/examples",
             },
             {
               label: "Domain By Name",
-              link: "/docs/integrate/omnigraph/cookbook/domain-by-name",
+              link: "/docs/integrate/omnigraph/examples/domain-by-name",
             },
             {
               label: "Find Domains",
-              link: "/docs/integrate/omnigraph/cookbook/find-domains",
+              link: "/docs/integrate/omnigraph/examples/find-domains",
             },
             {
               label: "Domain Subdomains",
-              link: "/docs/integrate/omnigraph/cookbook/domain-subdomains",
+              link: "/docs/integrate/omnigraph/examples/domain-subdomains",
             },
             {
               label: "Domain Events",
-              link: "/docs/integrate/omnigraph/cookbook/domain-events",
+              link: "/docs/integrate/omnigraph/examples/domain-events",
             },
             {
               label: "Account Domains",
-              link: "/docs/integrate/omnigraph/cookbook/domains-by-address",
+              link: "/docs/integrate/omnigraph/examples/domains-by-address",
             },
             {
               label: "Account Events",
-              link: "/docs/integrate/omnigraph/cookbook/account-events",
+              link: "/docs/integrate/omnigraph/examples/account-events",
             },
             {
               label: "Registry Domains",
-              link: "/docs/integrate/omnigraph/cookbook/registry-domains",
+              link: "/docs/integrate/omnigraph/examples/registry-domains",
             },
             {
               label: "Permissions By Contract",
-              link: "/docs/integrate/omnigraph/cookbook/permissions-by-contract",
+              link: "/docs/integrate/omnigraph/examples/permissions-by-contract",
             },
             {
               label: "Permissions By User",
-              link: "/docs/integrate/omnigraph/cookbook/permissions-by-user",
+              link: "/docs/integrate/omnigraph/examples/permissions-by-user",
             },
             {
               label: "Account Resolver Permissions",
-              link: "/docs/integrate/omnigraph/cookbook/account-resolver-permissions",
+              link: "/docs/integrate/omnigraph/examples/account-resolver-permissions",
             },
             {
               label: "Domain Resolver",
-              link: "/docs/integrate/omnigraph/cookbook/domain-resolver",
+              link: "/docs/integrate/omnigraph/examples/domain-resolver",
             },
             {
               label: "Namegraph",
-              link: "/docs/integrate/omnigraph/cookbook/namegraph",
+              link: "/docs/integrate/omnigraph/examples/namegraph",
             },
           ],
         },
@@ -112,18 +108,8 @@ export const integrateSidebarTopic = {
               link: "/docs/integrate/integration-options/enssdk",
             },
             {
-              label: "Cookbook",
-              collapsed: true,
-              items: [
-                {
-                  label: "Overview",
-                  link: "/docs/integrate/integration-options/enssdk/cookbook",
-                },
-                {
-                  label: "Resolution API",
-                  link: "/docs/integrate/integration-options/enssdk/cookbook/resolution-api",
-                },
-              ],
+              label: "Interactive example",
+              link: "/docs/integrate/integration-options/enssdk/example",
             },
           ],
         },

@@ -31,6 +31,35 @@ export default defineConfig({
     "/ensrainbow": "/docs/services/ensrainbow",
     "/ensrainbow/concepts/label-sets-and-versioning":
       "/docs/services/ensrainbow/concepts/label-sets-and-versioning",
+    "/docs/integrate/omnigraph/cookbook": "/docs/integrate/omnigraph/examples",
+    "/docs/integrate/omnigraph/cookbook/domain-by-name":
+      "/docs/integrate/omnigraph/examples/domain-by-name",
+    "/docs/integrate/omnigraph/cookbook/find-domains":
+      "/docs/integrate/omnigraph/examples/find-domains",
+    "/docs/integrate/omnigraph/cookbook/domain-subdomains":
+      "/docs/integrate/omnigraph/examples/domain-subdomains",
+    "/docs/integrate/omnigraph/cookbook/domain-events":
+      "/docs/integrate/omnigraph/examples/domain-events",
+    "/docs/integrate/omnigraph/cookbook/domains-by-address":
+      "/docs/integrate/omnigraph/examples/domains-by-address",
+    "/docs/integrate/omnigraph/cookbook/account-events":
+      "/docs/integrate/omnigraph/examples/account-events",
+    "/docs/integrate/omnigraph/cookbook/registry-domains":
+      "/docs/integrate/omnigraph/examples/registry-domains",
+    "/docs/integrate/omnigraph/cookbook/permissions-by-contract":
+      "/docs/integrate/omnigraph/examples/permissions-by-contract",
+    "/docs/integrate/omnigraph/cookbook/permissions-by-user":
+      "/docs/integrate/omnigraph/examples/permissions-by-user",
+    "/docs/integrate/omnigraph/cookbook/account-resolver-permissions":
+      "/docs/integrate/omnigraph/examples/account-resolver-permissions",
+    "/docs/integrate/omnigraph/cookbook/domain-resolver":
+      "/docs/integrate/omnigraph/examples/domain-resolver",
+    "/docs/integrate/omnigraph/cookbook/namegraph":
+      "/docs/integrate/omnigraph/examples/namegraph",
+    "/docs/integrate/integration-options/enssdk/cookbook":
+      "/docs/integrate/integration-options/enssdk/example",
+    "/docs/integrate/integration-options/enssdk/cookbook/resolution-api":
+      "/docs/integrate/integration-options/enssdk/example",
   },
   env: {
     schema: {

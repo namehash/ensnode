@@ -5,25 +5,25 @@ import { fileURLToPath } from "node:url";
 import { getNamespaceSpecificValue } from "@ensnode/ensnode-sdk";
 import { getGraphqlApiExampleQueryById } from "@ensnode/ensnode-sdk/omnigraph-api/example-queries";
 
-import { COOKBOOK_META } from "../src/data/omnigraph-examples/meta.ts";
+import { OMNIGRAPH_EXAMPLES_META } from "../src/data/omnigraph-examples/meta.ts";
 import { DOCS_OMNIGRAPH_NAMESPACE, ENSNODE_URL } from "../src/lib/playground/constants.ts";
 
 function logStep(message: string, id?: string) {
-  console.log(`[cookbook-refresher] ${message} ${id ? `for '${id}'` : ""}`);
+  console.log(`[omnigraph-examples] ${message} ${id ? `for '${id}'` : ""}`);
 }
 
 function logError(message: string, id?: string) {
-  console.error(`[cookbook-refresher] ERROR: ${message} ${id ? `for example '${id}'` : ""}`);
+  console.error(`[omnigraph-examples] ERROR: ${message} ${id ? `for example '${id}'` : ""}`);
 }
 
-const allCookbookIds = (Object.keys(COOKBOOK_META) as string[]).sort();
+const allExampleIds = (Object.keys(OMNIGRAPH_EXAMPLES_META) as string[]).sort();
 
 const outputPath = join(
   dirname(fileURLToPath(import.meta.url)),
   "../src/data/omnigraph-examples/responses.json",
 );
 
-// Optional filter: `pnpm cookbook:refresh-responses <id>,<id>`
+// Optional filter: `pnpm omnigraph-examples:refresh-responses <id>,<id>`
 const argIds =
   process.argv[2]
     ?.split(",")
@@ -31,22 +31,22 @@ const argIds =
     .filter(Boolean) ?? [];
 
 if (argIds.length > 0) {
-  const unknown = argIds.filter((id) => !allCookbookIds.includes(id));
+  const unknown = argIds.filter((id) => !allExampleIds.includes(id));
   if (unknown.length > 0) {
-    logError(`Unknown cookbook ID(s): ${unknown.join(", ")}. Known: ${allCookbookIds.join(", ")}`);
+    logError(`Unknown example ID(s): ${unknown.join(", ")}. Known: ${allExampleIds.join(", ")}`);
     process.exit(1);
   }
 }
 
-const cookbookIds = argIds.length > 0 ? argIds : allCookbookIds;
+const exampleIds = argIds.length > 0 ? argIds : allExampleIds;
 
 const base = ENSNODE_URL.replace(/\/+$/, "");
 const url = `${base}/api/omnigraph`;
 
 logStep(
   argIds.length > 0
-    ? `Refreshing ${cookbookIds.length} of ${allCookbookIds.length} examples from ${url}: ${cookbookIds.join(", ")}`
-    : `Fetching all ${cookbookIds.length} cookbook examples from ${url}`,
+    ? `Refreshing ${exampleIds.length} of ${allExampleIds.length} examples from ${url}: ${exampleIds.join(", ")}`
+    : `Fetching all ${exampleIds.length} Omnigraph examples from ${url}`,
 );
 
 // When refreshing a subset, load the existing responses so unaffected entries are preserved.
@@ -55,7 +55,7 @@ const out: Record<string, unknown> =
     ? (JSON.parse(readFileSync(outputPath, "utf8")) as Record<string, unknown>)
     : {};
 
-for (const id of cookbookIds) {
+for (const id of exampleIds) {
   logStep("Getting example query", id);
 
   const example = getGraphqlApiExampleQueryById(id);

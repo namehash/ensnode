@@ -4,13 +4,13 @@ import { getGraphqlApiExampleQueryById } from "@ensnode/ensnode-sdk/omnigraph-ap
 import { DOCS_OMNIGRAPH_NAMESPACE, ENSNODE_URL } from "src/lib/playground/constants";
 import { OmnigraphExampleQuerySchema, type OmnigraphExampleQuery } from "src/lib/playground/types";
 
-import { COOKBOOK_META } from "./meta";
-import cookbookResponses from "./responses.json";
+import { OMNIGRAPH_EXAMPLES_META } from "./meta";
+import omnigraphExampleResponses from "./responses.json";
 
-const responsesById = cookbookResponses as Record<string, Record<string, unknown>>;
+const responsesById = omnigraphExampleResponses as Record<string, Record<string, unknown>>;
 
-export const graphqlApiCookbookExamples: OmnigraphExampleQuery[] = Object.entries(
-  COOKBOOK_META,
+export const graphqlApiOmnigraphExamples: OmnigraphExampleQuery[] = Object.entries(
+  OMNIGRAPH_EXAMPLES_META,
 ).map(([id, meta]) => {
   const example = getGraphqlApiExampleQueryById(id);
   const response = responsesById[id];
@@ -26,7 +26,7 @@ export const graphqlApiCookbookExamples: OmnigraphExampleQuery[] = Object.entrie
   });
 });
 
-const byId = new Map(graphqlApiCookbookExamples.map((e) => [e.id, e]));
+const byId = new Map(graphqlApiOmnigraphExamples.map((e) => [e.id, e]));
 
 export function getOmnigraphExampleById(id: string): OmnigraphExampleQuery {
   const found = byId.get(id);

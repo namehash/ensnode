@@ -1,0 +1,15 @@
+---
+title: Resolution API (interactive)
+description: Query a single ENS name with enssdk and the Omnigraph API — interactive playground.
+sidebar:
+  label: Interactive example
+  order: 2
+---
+
+import EnssdkResolutionApiPlayground from "../../../../../../components/playgrounds/interactive/EnssdkResolutionApi";
+
+This page uses [`enssdk`](/docs/integrate/integration-options/enssdk) with the [ENS Omnigraph API](/docs/integrate/omnigraph) to load **owner**, **resolver contract**, and **registration expiry** for a name (default: `nick.eth`). The [Quickstart](/docs/integrate) shows the raw **Domain By Name** GraphQL from `@ensnode/ensnode-sdk`; here you can edit and run a typed client snippet against a real ENSNode endpoint.
+
+<EnssdkResolutionApiPlayground client:load />
+
+[Back to enssdk overview](/docs/integrate/integration-options/enssdk)

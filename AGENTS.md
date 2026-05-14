@@ -44,7 +44,7 @@ Runnable commands for validating changes; lint and format with Biome.
 - Lint and format: `pnpm lint` (fixes where applicable); CI lint: `pnpm lint:ci`
 - Type checking: `pnpm typecheck` (runs typecheck in all workspaces)
   - Always use `pnpm -F <package-name> typecheck`, never call `tsc` or `tsgo` directly
-- Omnigraph cookbook sample responses (docs): after changing SDK Omnigraph example queries/variables in `packages/ensnode-sdk` or when refreshing live JSON shown in the docs cookbook, run `pnpm -F @docs/ensnode cookbook:refresh-responses` (requires `curl`, network). Updates `docs/ensnode.io/src/data/omnigraph-examples/responses.json`.
+- Omnigraph example sample responses (docs): after changing SDK Omnigraph example queries/variables in `packages/ensnode-sdk` or when refreshing live JSON shown in the docs Omnigraph examples, run `pnpm -F @docs/ensnode omnigraph-examples:refresh-responses` (requires `curl`, network). Updates `docs/ensnode.io/src/data/omnigraph-examples/responses.json`.
 
 ## Testing
 
