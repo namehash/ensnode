@@ -61,6 +61,14 @@ export const integrateSidebarTopic = {
           label: "ENSDb (PostgreSQL)",
           link: "/docs/integrate/integration-options/ensdb",
         },
+        {
+          label: "enscli",
+          link: "/docs/integrate/integration-options/enscli",
+        },
+        {
+          label: "ensskills",
+          link: "/docs/integrate/integration-options/ensskills",
+        },
       ],
     },
     {

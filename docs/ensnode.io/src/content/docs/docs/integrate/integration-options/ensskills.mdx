@@ -1,0 +1,46 @@
+---
+title: ensskills
+description: Coming soon — skill bundles that give AI agents an opinionated contract for ENS.
+---
+
+import { Aside, LinkCard } from "@astrojs/starlight/components";
+
+<Aside type="caution" title="Coming soon">
+**`ensskills`** is a planned collection of agent skills for ENS development and ENS lookups. The npm name is reserved; we're still shaping the design and no skills ship yet.
+</Aside>
+
+`ensskills` will be a small, curated set of skills that give AI coding agents — Claude Code, Cursor, Codex, and the rest — a well-defined contract for working with ENS. We want to support users who want a conversational interaction with ENS through their AI assistant, handled by skills that drive [`enscli`](/docs/integrate/integration-options/enscli) behind the scenes, and to streamline the developer experience writing integration code with [`enssdk`](/docs/integrate/integration-options/enssdk), [`enskit`](/docs/integrate/integration-options/enskit), or the raw [Omnigraph API](/docs/integrate/omnigraph).
+
+Left to their own devices, agents love to reinvent the wheel from scratch every prompt — burning through your token budget rediscovering what ENS even is before they get around to the actual task. `ensskills` will be blueprints: focused, versioned bundles that hand the agent the right context for ENS work — no more, no less. The result is agents that produce ENS code that actually works, without the developer having to brief them from scratch every time.
+
+## Built for
+
+- Developers building ENS apps with AI agents in the loop.
+- End-users asking AI assistants ENS-shaped questions and expecting answers grounded in the protocol.
+- Teams moving from the legacy ENS Subgraph onto the Omnigraph.
+
+## Related
+
+<LinkCard
+  title="enscli"
+  description="The CLI ensskills drives at runtime for ENS state lookups."
+  href="/docs/integrate/integration-options/enscli"
+/>
+
+<LinkCard
+  title="enssdk"
+  description="The TypeScript SDK ensskills teaches agents to author code against."
+  href="/docs/integrate/integration-options/enssdk"
+/>
+
+<LinkCard
+  title="enskit"
+  description="The React toolkit ensskills steers agents toward for UI work."
+  href="/docs/integrate/integration-options/enskit"
+/>
+
+<LinkCard
+  title="ENS Omnigraph API"
+  description="The GraphQL API behind all of the above."
+  href="/docs/integrate/omnigraph"
+/>
