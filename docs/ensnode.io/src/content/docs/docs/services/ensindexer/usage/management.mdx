@@ -7,7 +7,7 @@ sidebar:
 
 ## Database operations
 
-Each instance of ENSIndexer maintains its own ENSIndexer Schema instance in ENSDb. The same ENSIndexer instance will always use the same ENSIndexer Schema, even after restarts. However, if you need to update ENSIndexer config, or deploy a new version of ENSIndexer, you will have to update the `ENSINDEXER_SCHEMA_NAME` env variable to point to a new schema, as otherwise, the ENSIndexer instance will detect that the ENSIndexer Schema was already owned by an ENSIndexer instance with different config / indexing logic and will refuse to start.
+Each instance of ENSIndexer maintains its own ENSIndexer Schema instance in ENSDb. The same ENSIndexer instance will always use the same ENSIndexer Schema, even after restarts. However, if you need to update an ENSIndexer config, or deploy a new version of ENSIndexer, you will have to update the `ENSINDEXER_SCHEMA_NAME` env variable to point to a new schema, as otherwise, the ENSIndexer instance will detect that the ENSIndexer Schema was already owned by an ENSIndexer instance with different config / indexing logic and will refuse to start. These measures are taken to protect the state invariants indexing event handlers expect and require.
 
 ### ENSIndexer Schema lifecycle
 - Let's say you're currently running ENSNode version X that's indexing into `ENSINDEXER_SCHEMA_NAME=myschema_X`

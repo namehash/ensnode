@@ -10,14 +10,14 @@ import { LinkCard } from '@astrojs/starlight/components';
 
 ## ENSIndexer Plugins
 
-ENSIndexer is designed to be extensible with plugins that can implement custom indexing logic and data models. This allows you to tailor ENSIndexer to your specific use case and ENS data needs.
+ENSNode is extensible through ENSIndexer plugins that implement custom indexing logic and produce custom indexed data models inside ENSDb. This allows you to tailor ENSNode to your specific use case and data needs.
 
 ENSIndexer will only activate the plugins you specify in the `PLUGINS` env variable, so you can choose to only activate the plugins that are relevant to your use case. The `PLUGINS` env variable accepts a comma-separated list of plugin names to be activated. For example, if you want to activate the `ensv2` and `protocol-acceleration` plugins, you can set `PLUGINS=ensv2,protocol-acceleration`.
 
 ## Plugin Architecture
 
-The ENSIndexer plugin is a standalone TypeScript module that can be developed, tested, and deployed independently. Plugins can define their own data models, and indexing logic. It must include two main files:
-- `event-handlers.ts`: This file defines the event handlers for the plugin, which are functions that will be called when specific ENS events are indexed. The event handlers contain the logic for how to process the indexed data and store it in the ENSIndexer Schema.
+Each ENSIndexer plugin is a standalone TypeScript module that can be developed, tested, and deployed independently. Plugins can define their own indexed data models and indexing logic. It must include two main files:
+- `event-handlers.ts`: This file defines the event handlers for the plugin, which are functions that will be called when specific onchain events are indexed. The event handlers contain the logic for how to process the indexed data and store it in the relevant indexed data model inside the ENSIndexer Schema.
 - `plugin.ts`: This file defines the plugin itself, including its name, description, and any configuration options, like datasources to be used for specifying onchain contracts that will be indexed.
 
 ### Event handlers
