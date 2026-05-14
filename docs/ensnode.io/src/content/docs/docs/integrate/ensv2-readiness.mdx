@@ -16,7 +16,7 @@ import { LinkCard, Aside } from "@astrojs/starlight/components";
 Fully supporting ENSv1 requires two separate systems working in parallel:
 
 1. **On-chain resolution** — RPC calls with CCIP-read support (e.g. via [viem](/docs/reference/subgraph-legacy/with-viem) or [ensjs](/docs/reference/subgraph-legacy/with-ensjs)) to resolve names to addresses and records at the current state of the chain.
-2. **Indexed data** — the [ENS Subgraph](/docs/reference/what-is-the-ens-subgraph) for historical data, registration info, reverse records, and browsing names owned by an address.
+2. **Indexed data** — the [ENS Subgraph](/docs/reference/subgraph-legacy/what-is-the-ens-subgraph) for historical data, registration info, reverse records, and browsing names owned by an address.
 
 Neither system alone is complete. 
 The Subgraph gives you queryable indexed history but can lag behind the chain and has no CCIP-read support.
