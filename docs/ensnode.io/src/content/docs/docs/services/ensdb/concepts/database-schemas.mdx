@@ -239,7 +239,7 @@ For ENSv1, each domain that has children implicitly owns a "virtual" Registry (`
 | `address` | `text` | no | Address of the registry contract. |
 | `node` | `text` | yes | If this is an `ENSv1VirtualRegistry`, the namehash of the parent ENSv1 domain that owns it, otherwise `null`. |
 | `canonical_domain_id` | `text` | yes | The Registry's declared Canonical Domain (unidirectional). |
-| `canonical` | `boolean` | no | Whether this Registry is part of the canonical nametree. Default `false`. |
+| `canonical` | `boolean` | no | Whether this Registry is part of the canonical nametree. This encodes bi-directional agreement between `domains.subregistry_id` and `registries.canonical_domain_id`, so traversal of the canonical nametree filtered to domains/registries where `canonical=true` is safe and doesn't require edge-authenticating oneself (i.e. don't need to compare `domains.subregistry_id` and `registries.canonical_domain_id` in the query, can just `WHERE canonical = true`). Default `false`. |
 | `has_children` | `boolean` | no | Internal bookkeeping field. Synthetic monotonic sentinel flipped to `true` the first time a child Domain is registered under this Registry. Used to optimize canonicality cascades. Default `false`. |
 
 **Indexes:** `(chain_id, address)` — non-unique, because multiple rows can share `(chain_id, address)` across virtual registries.
@@ -261,7 +261,7 @@ The `domains.owner_id` for ENSv1 Domains is the materialized effective owner. EN
 | `label_hash` | `text` | no | Represents a labelHash. References `labels.label_hash`. |
 | `owner_id` | `text` | yes | If `ENSv1Domain`, the materialized effective owner address. If `ENSv2Domain`, the on-chain owner address (the HCA account address if used). |
 | `root_registry_owner_id` | `text` | yes | ENSv1 only: the owner recorded in the root ENSv1 registry. `null` for ENSv2 domains. |
-| `canonical` | `boolean` | no | Whether this Domain is part of the canonical nametree. Mirrors the parent Registry's flag. Default `false`. |
+| `canonical` | `boolean` | no | Whether this Domain is part of the canonical nametree. This encodes bi-directional agreement between `domains.subregistry_id` and `registries.canonical_domain_id`, so traversal of the canonical nametree filtered to domains/registries where `canonical=true` is safe and doesn't require edge-authenticating oneself (i.e. don't need to compare `domains.subregistry_id` and `registries.canonical_domain_id` in the query, can just `WHERE canonical = true`). Mirrors the parent Registry's flag. Default `false`. |
 
 **Indexes:** `type`, `registry_id`, `subregistry_id` (partial: non-null only), `owner_id`, `label_hash`.
 
