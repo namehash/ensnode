@@ -70,10 +70,10 @@ Once a reliable change feed exists, a lot of follow-on use cases get dramaticall
 ENSEngine builds on solid foundations:
 
 1. **[ENSIndexer](/docs/services/ensindexer)** keeps **[ENSDb](/docs/services/ensdb)** up to date with the live, onchain state of ENS - including automatic chain reorg healing.
-2. The planned **[ENSEngine](/docs/services/ensengine)** service watches that database for changes and turns them into enriched, filtered, ENS-aware events.
+2. **[ENSEngine](/docs/services/ensengine)** watches that database for changes and turns them into enriched, filtered, ENS-aware events.
 3. Those events get delivered to **your sinks** - webhooks, cache invalidation hooks, database sync targets, notification systems, and more.
 
-For the architecture overview and code-name notes, see [ENSEngine Overview](/docs/services/ensengine).
+For the architecture overview, see [ENSEngine Overview](/docs/services/ensengine).
 
 ## Related
 

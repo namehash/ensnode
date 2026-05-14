@@ -3,7 +3,7 @@ title: Self-host ENSNode
 description: Decide whether to self-host ENSNode and understand the architecture.
 ---
 
-import { LinkCard, Aside } from "@astrojs/starlight/components";
+import { LinkCard } from "@astrojs/starlight/components";
 import EnsDbSnapshotsTeaser from "../../../../components/molecules/EnsDbSnapshotsTeaser.astro";
 
 
@@ -24,13 +24,9 @@ Running your own ENSNode instance is helpful for those that wish to:
 Note that because ENSNode makes many label healing requests to ENSRainbow while indexing, it's _imperative_ that they be on the same local network to minimize request time.
 :::
 
-## Faster paths we're building
+## Bootstrap from a snapshot (coming soon)
 
-Self-hosting today means standing up a fresh ENSNode instance from zero and waiting on an initial backfill - including the RPC bill that comes with it. We're building **[ENSDb snapshots and an `ensdb-cli`](/docs/integrate/ensdb-cli)** to flatten that ramp.
-
-<Aside type="caution" title="Planned, not yet shipping">
-Snapshots and `ensdb-cli` are **coming soon** - this section is a preview of where self-hosting is heading, not a description of what's available today. APIs, file formats, and release timing are still in flux.
-</Aside>
+Self-hosting today means standing up a fresh ENSNode instance from zero and waiting on an initial backfill - including the RPC bill that comes with it. **[ENSDb snapshots and `ensdb-cli`](/docs/integrate/ensdb-cli)** flatten that ramp.
 
 The headline value props for self-hosters:
 
