@@ -48,6 +48,11 @@ async function upsertIndexingMetadataContextRecord(): Promise<void> {
  * so we need to make sure that this does not cause any unexpected side effects.
  */
 export async function initIndexingOnchainEvents(): Promise<void> {
+  logger.info({
+    msg: "Initializing indexing of onchain events",
+    module: "init-indexing-onchain-events",
+  });
+
   try {
     // Ensure ENSDb instance is healthy before trying to run any queries against it.
     const isEnsDbHealthy = await ensDbClient.isHealthy();

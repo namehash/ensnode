@@ -110,6 +110,9 @@ export function logOperations(
   operations: Operation[],
   logger: { debug: (obj: unknown) => void },
 ): void {
+  // silence this noisy log in CI
+  if (process.env.CI) return;
+
   if (process.env.NODE_ENV !== "production") {
     console.table(tablifyOperations(operations));
   } else {
