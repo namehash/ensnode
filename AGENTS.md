@@ -86,8 +86,8 @@ Fail fast and loudly on invalid inputs.
 
 - Add a changeset when your PR includes a logical change that should bump versions or be communicated in release notes: https://ensnode.io/docs/contributing/prs#changesets
 - Before declaring work complete, run validation in the affected project(s):
-  1. `pnpm -F <affected-project> typecheck`
-  2. `pnpm lint`
-  3. `pnpm test --project <affected-project> [--project <other-affected-project>]`
-  4. If OpenAPI Specs were affected, run `pnpm generate:openapi`
-  5. If the Omnigraph GraphQL Schema was affected, run `pnpm generate:gqlschema`
+  1. If OpenAPI Specs were affected, run `pnpm generate:openapi`
+  2. If the Omnigraph GraphQL Schema was affected, run `pnpm generate:gqlschema`
+  3. `pnpm -F <affected-project> typecheck`
+  4. `pnpm lint`
+  5. `pnpm test --project <affected-project> [--project <other-affected-project>]`
