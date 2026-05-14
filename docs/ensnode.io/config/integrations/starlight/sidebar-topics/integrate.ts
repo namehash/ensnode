@@ -62,16 +62,20 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/integration-options/ensdb",
         },
         {
+          label: "enscli (CLI)",
+          link: "/docs/integrate/integration-options/enscli",
+        },
+        {
+          label: "ensskills (AI agents)",
+          link: "/docs/integrate/integration-options/ensskills",
+        },
+        {
           label: "ensdb-cli (Snapshots)",
           link: "/docs/integrate/ensdb-cli",
         },
         {
           label: "ENSEngine (webhooks)",
           link: "/docs/integrate/ensengine",
-        },
-        {
-          label: "ensskills (AI agents)",
-          link: "/docs/integrate/integration-options/ensskills",
         },
       ],
     },
