@@ -58,24 +58,16 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/integration-options/raw-graphql",
         },
         {
-          label: "ENSDb (PostgreSQL)",
+          label: "ENSDb integration quickstart",
           link: "/docs/integrate/integration-options/ensdb",
         },
         {
           label: "ensdb-cli (Snapshots)",
-          link: "/docs/integrate/ensdb-snapshots-and-cli",
-          badge: {
-            text: "Planned",
-            variant: "note",
-          },
+          link: "/docs/integrate/ensdb-cli",
         },
         {
           label: "ENSEngine (webhooks)",
           link: "/docs/integrate/ensengine",
-          badge: {
-            text: "Planned",
-            variant: "note",
-          },
         },
       ],
     },

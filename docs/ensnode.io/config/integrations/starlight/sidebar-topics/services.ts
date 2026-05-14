@@ -180,10 +180,6 @@ export const servicesSidebarTopic = {
     {
       label: "ENSEngine",
       collapsed: true,
-      badge: {
-        text: "Planned",
-        variant: "note",
-      },
       items: [{ label: "Overview", link: "/docs/services/ensengine" }],
     },
   ],

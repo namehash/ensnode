@@ -45,9 +45,12 @@ Events will represent meaningful ENS events, such as:
 ## What this unlocks
 
 ### Cache invalidation
-
-Of course, ENSNode will also include metadata letting you know key attributes about ENS data you fetch so that you can wisely implement the best possible caching strategies. For example: If a particular data record is coming from purely onchain data (that will receive a guaranteed ENSEngine event notification as soon as it changes) or if a particular data record is coming from offchain data (such as a resolver record sourced through CCIP-read) and that therefore still requires polling to identify if it has changed.
-
+
+
+Of course, ENSNode will also include metadata letting you know key attributes about ENS data you fetch so that you can wisely implement the best possible caching strategies. For example: If a particular data record is coming from purely onchain data (that will receive a guaranteed ENSEngine event notification as soon as it changes) or if a particular data record is coming from offchain data (such as a resolver record sourced through CCIP-read) and that therefore still requires polling to identify if it has changed.
+
+
+
 Build aggressive, edge-friendly caches for ENS data. The goal is to make it practical to cache profiles, avatars, text records, and resolver responses for much longer than polling-based integrations allow, then invalidate them when relevant onchain state changes. That's the foundation for web2-grade UX on a web3 protocol - fast page loads, low RPC fanout, globally distributed reads - without giving up freshness.
 
 Of course, ENSNode will also include metadata letting you know key attributes about ENS data you fetch so that you can wisely implement the best possible caching strategies. For example: If a particular data record is coming from purely onchain data (that will receive a guaranteed ENSEngine event notification as soon as it changes) or if a particular data record is coming from offchain data (such as a resolver record sourced through CCIP-read) and that therefore still requires polling to identify if it has changed.
@@ -75,12 +78,14 @@ ENSEngine builds on solid foundations:
 2. The planned **[ENSEngine](/docs/services/ensengine)** service watches that database for changes and turns them into enriched, filtered, ENS-aware events.
 3. Those events get delivered to **your sinks** - webhooks, cache invalidation hooks, database sync targets, notification systems, and more.
 
-For the architecture overview and code-name notes, see [ENSEngine - How it works](/docs/services/ensengine).
+For the architecture overview and code-name notes, see [ENSEngine Overview](/docs/services/ensengine).
 
 ## Related
 
 <LinkCard
-  title="ENSEngine Overview"
-  description="Learn more about ENSEngine."
+  title="ENSEngine Overview"
+
+  description="Learn more about ENSEngine."
+
   href="/docs/services/ensengine"
 />

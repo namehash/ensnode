@@ -57,34 +57,28 @@ Implementation details behind the watch layer are intentionally not part of this
 
 The top priority for ENSEngine is **cache invalidation**. The goal is an ENS-native invalidation signal that lets apps and CDNs cache ENS data much more aggressively, then react when relevant onchain state changes. That's the foundation for web2-grade latency on a web3 protocol, especially for high-traffic ENS profile views.
 
-Adjacent value props enabled by the same primitive (not promised as separate features):
+Additional key use cases:
 
-- **Notification services** - name-expiry reminders, transfer alerts, registration bots in Discord/Telegram.
-- **Database sync** - keep your own app's database in step with ENS state for marketplaces, portfolio trackers, analytics dashboards, search indices.
-- **Realtime dashboards** - surface activity as it happens, with no polling overhead.
+- **Notification services** - name-expiry reminders, transfer alerts, activity bots in Discord/Telegram/Twitter.
+- **Sync to alternative databases** - want to store alternative representations of ENSDb in databases that provide specialized benefits that Postgres doesn't offer, such as Elasticsearch, Typesense, Meliasearch, Redis, Kafka, Google BigQuery, and more? ENSEngine will ensure 100% delivery of database changes to sinks with strict ordering and exactly-once processing.
+- **Realtime dashboards** - surface ENS analytics and activity data as it happens.
 
-For a longer use-case-focused overview from the *integrate* perspective, see the [Webhooks & events teaser](/docs/integrate/webhooks-and-events).
+For a longer use-case-focused overview from the *integrate* perspective, see the [ENSEngine teaser](/docs/integrate/ensengine).
 
 ## Position in the ENSNode stack
 
-ENSEngine is one of several planned and existing services that build on top of [ENSDb](/docs/services/ensdb). ENSDb is the open standard that holds the live, multichain onchain state of ENS in a plain PostgreSQL database. From there, different services consume that state in different ways:
+ENSEngine is one of several planned and existing services that build on top of [ENSDb](/docs/services/ensdb). ENSDb is the open standard that holds the live, onchain state of ENS in a plain PostgreSQL database. From there, different services consume that state in different ways:
 
 - **[ENSApi](/docs/services/ensapi)** - pull model: GraphQL / REST APIs for clients.
-- **[ENSDb snapshots & CLI](/docs/integrate/ensdb-snapshots-and-cli) (planned)** - operational model: portable snapshots and CLI tooling.
-- **ENSEngine (planned)** - push model: real-time, ENS-aware events delivered to your sinks.
-
-## What this page is not
-
-This is a teaser, not a spec. There is no subscription endpoint to call yet, no SDK to integrate against, no event payload schema to validate. Delivery guarantees (at-least-once, ordering, retries) are aspirations that haven't been committed to in writing yet. Release timing is not promised.
-
-If your use case would benefit from ENS-native, real-time events, it's a great moment to share what you'd need - design choices are still flexible.
+- **[ensdb-cli & ENSDb snapshots](/docs/integrate/ensdb-cli) (planned)** - operational model: portable snapshots and CLI tooling.
+- **[ENSEngine](/docs/services/ensengine) (planned)** - push model: real-time, ENS-aware events delivered to your sinks.
 
 ## Related
 
 <LinkCard
-  title="Webhooks & events (integrate)"
+  title="ENSEngine integration quickstart"
   description="The value-prop teaser written from the perspective of a developer adopting ENSEngine."
-  href="/docs/integrate/webhooks-and-events"
+  href="/docs/integrate/ensengine"
 />
 
 <LinkCard
@@ -94,7 +88,7 @@ If your use case would benefit from ENS-native, real-time events, it's a great m
 />
 
 <LinkCard
-  title="ENSDb snapshots & CLI (planned)"
-  description="The other coming-soon capability built on ENSDb: bootstrap a fresh ENSDb in minutes."
-  href="/docs/integrate/ensdb-snapshots-and-cli"
+  title="ensdb-cli & ENSDb snapshots"
+  description="Portable snapshots and a CLI for bootstrapping fresh instances in minutes."
+  href="/docs/integrate/ensdb-cli"
 />
