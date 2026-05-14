@@ -62,11 +62,11 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/integration-options/ensdb",
         },
         {
-          label: "enscli",
+          label: "enscli (CLI)",
           link: "/docs/integrate/integration-options/enscli",
         },
         {
-          label: "ensskills",
+          label: "ensskills (AI agents)",
           link: "/docs/integrate/integration-options/ensskills",
         },
       ],

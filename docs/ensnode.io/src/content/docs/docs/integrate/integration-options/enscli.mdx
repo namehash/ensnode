@@ -6,7 +6,7 @@ description: Coming soon — an agent- and human-friendly CLI for the ENS Omnigr
 import { Aside, LinkCard } from "@astrojs/starlight/components";
 
 <Aside type="caution" title="Coming soon">
-**`enscli`** is a planned ENS CLI that wraps [`enssdk`](/docs/integrate/integration-options/enssdk) to bring the ENS Omnigraph to the terminal. The npm name is reserved; we're still shaping the design and no commands ship yet.
+**`enscli`** is a planned ENS CLI that wraps [`enssdk`](/docs/integrate/integration-options/enssdk) to bring the ENS Omnigraph to the terminal. The npm name is reserved; we're still shaping the design. `enscli` will ship soon.
 </Aside>
 
 `enscli` will be the terminal-shaped entry point to the [ENS Omnigraph](/docs/integrate/omnigraph) — a single CLI for resolving names, looking up records, searching domains, and running ad-hoc queries against any ENSNode instance.
@@ -18,10 +18,6 @@ Designed to feel natural whether you're driving it yourself or letting an AI age
 - Developers exploring or validating an ENS integration from a terminal, without writing a script first.
 - Operators wiring ENS lookups into shell pipelines, cron, or CI.
 - AI coding agents driving [`ensskills`](/docs/integrate/integration-options/ensskills), which reach into the protocol through `enscli`.
-
-<Aside type="note" title="Looking for `ensdb-cli`?">
-`ensdb-cli` is a separate planned tool — an operator-focused CLI for managing [ENSDb](/docs/services/ensdb) instances, snapshots, and schemas. `enscli` is for *querying* ENS; `ensdb-cli` is for *operating* the database that ENS is indexed into. See [ENSDb snapshots & CLI](/docs/integrate/ensdb-snapshots-and-cli).
-</Aside>
 
 ## Related
 
