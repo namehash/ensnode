@@ -10,9 +10,7 @@ import { LinkCard, CardGrid, Aside } from "@astrojs/starlight/components";
 
 ## What is ENSv2?
 
-ENSv2 is the next generation of the Ethereum Name Service — a protocol upgrade that moves ENS registries from Ethereum mainnet onto L2s. Names become cheaper to register, faster to update, and natively multichain.
-
-ENSv2 is backwards compatible with ENSv1: existing `.eth` names continue to work, and ENSv2 introduces a new registry architecture that supports names across multiple chains simultaneously.
+ENSv2 is the next generation of the Ethereum Name Service — a protocol upgrade that fundamentally changes the onchain data model of ENS.
 
 :::tip[Prepare for ENSv2]
 The ENSv2 upgrade to the ENS protocol is coming **Summer 2026**! Your app, regardless of how it interacts with names, needs to be updated to avoid being left behind.
@@ -24,18 +22,20 @@ The ENSv2 upgrade to the ENS protocol is coming **Summer 2026**! Your app, regar
 
 ## What is ENS Omnigraph?
 
-ENSNode fully supports the ENSv2 upgrade via the [Omnigraph API](/docs/integrate/omnigraph), a _unified_ API over **both** ENSv1 and ENSv2. ENSNode takes the guesswork out of ENS integrations, whether you need to resolve up-to-date records, search all Domains, or see which Domains a user owns (and much, much more).
+ENSNode fully supports ENSv2 via the [Omnigraph API](/docs/integrate/omnigraph), a _unified_ API over **both** ENSv1 and ENSv2. Note how when ENSv2 launches, ENSv1 continues to exist in parallel. ENSNode takes the guesswork out of building on ENS, whether you need to resolve up-to-date records, search all Domains, or see which Domains a user owns (and much, much more).
 
 ![ENS Omnigraph diagram](/ens-omnigraph-diagram.png)
 
-ENS Omnigraph is **backwards compatible** with ENSv1, so you can integrate today and get ENSv2 support automatically when it launches!
+ENS Omnigraph supports both ENSv1 and ENSv2 **concurrently**. This means you can integrate today (before ENSv2 launches) and continue with full ENSv2 support when it goes live with zero downtime!
 
-ENSNode supports many different integration options, whether you're using React, any JavaScript runtime, or raw GraphQL.
+ENSNode supports a full-stack of different integration options, whether you're using React, any JavaScript runtime, raw GraphQL, or looking to go deep and build a new and fully custom service on ENS data.
 
 <LinkCard
   title='Full Integration Documentation'
   href="/docs/integrate/integration-options"
 />
+
+Here's a summary of some popular integration strategies:
 
 ## 1. `enskit` + Omnigraph
 
@@ -189,4 +189,10 @@ query MyDomains($address: Address!) {
   title="omnigraph-graphql-example app"
   description='Check out our omnigraph-graphql-example for a full example app.'
   href="https://github.com/namehash/ensnode/tree/main/examples/omnigraph-graphql-example"
+/>
+
+<LinkCard
+  title='See all Integration Options'
+  description='Includes more advanced integration options not introduced in this quickstart guide'
+  href="/docs/integrate/integration-options"
 />
