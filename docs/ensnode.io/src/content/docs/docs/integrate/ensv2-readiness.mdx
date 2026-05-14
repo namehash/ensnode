@@ -20,7 +20,12 @@ Full access to ENS data formerly required two separate data fetching strategies 
 
 Neither system alone was complete. 
 - ENS resolution gives you resolver records, but no access to all the other state about ENS!
-- The Subgraph gives you queryable indexed ENS data but is single-chain, has no support for ENSv2's fundamental data model changes, cannot perform ENS resolutions, doesn't understand key implementation details of the ENS protocol such as ENSIP-10, ENSIP-19, ENS name normalization (ENSIP-15), etc.., exposes too many internal implementation detail complexities of ENS for app developers, and a number of other key limitations.
+- The Subgraph gives you queryable indexed ENS data but has many limitations, including:
+   - The Subgraph is single-chain.
+   - The Subgraph has no support for ENSv2's fundamental data model changes.
+   - The Subgraph cannot perform ENS resolutions.
+   - The Subgraph doesn't understand key implementation details of the ENS protocol such as ENSIP-10, ENSIP-19, ENS name normalization (ENSIP-15), etc.
+   - The Subgraph exposes too many internal implementation detail complexities of ENS for app developers.
 
 In the past, apps building on ENS have had to live with this split and its downstream complexities. And we should note, with **ENSv2**, the complexity of ENS's onchain state space meaningfully increases.
 
