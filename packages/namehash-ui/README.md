@@ -2,7 +2,7 @@
 
 The contained UI components are for reuse across multiple apps developed by the NameHash Labs team, but are highly opinionated according to our specific apps and therefore aren't intended for the general public.
 
-This package also exports the ENSNode React provider and hooks (e.g. `EnsNodeProvider`, `useRecords`, `usePrimaryName`, `usePrimaryNames`, `useResolvedIdentity`, `useIndexingStatus`, `useRegistrarActions`, `useNameTokens`, `useSwrQuery`, etc.).
+This package also exports various React providers and hooks (e.g. `EnsNodeProvider`, `useRecords`, `usePrimaryName`, `usePrimaryNames`, `useResolvedIdentity`, `useIndexingStatus`, `useRegistrarActions`, `useNameTokens`, `useSwrQuery`, etc.).
 
 ## Installation
 
