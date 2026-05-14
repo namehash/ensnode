@@ -3,13 +3,12 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "jsx": "react-jsx",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "lib": ["ESNext"],
     "plugins": [
-      // here we enable the gql.tada typescript plugin for
+      // here we enable the gql.tada typescript plugin
       {
         "name": "gql.tada/ts-plugin",
         // NOTE: this example is in the ENSNode monorepo, so we imports it from parent directory.

@@ -1,0 +1,16 @@
+{
+  "name": "@ensnode/omnigraph-graphql-example",
+  "private": true,
+  "version": "0.0.1",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "typecheck": "tsgo --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "tsx": "^4.7.1",
+    "typescript": "catalog:"
+  }
+}
