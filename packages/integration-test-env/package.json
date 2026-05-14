@@ -18,5 +18,8 @@
     "testcontainers": "^11.14.0",
     "tsx": "^4.7.1",
     "viem": "catalog:"
+  },
+  "devDependencies": {
+    "vitest": "catalog:"
   }
 }
