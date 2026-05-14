@@ -36,7 +36,7 @@ ENSDb snapshots are **portable, versioned packages of an ENSDb instance** that a
 
 Snapshots and the CLI sit *on top of* the [ENSDb open standard](/docs/services/ensdb). Because ENSDb is just Postgres governed by a well-defined schema, snapshots are portable: any [ENSDb Writer](/docs/services/ensdb/concepts/glossary#ensdb-writer) implementation can produce one, and any [ENSDb Reader](/docs/services/ensdb/concepts/glossary#ensdb-reader) (or your own code) can consume one.
 
-This is the same foundation that powers ENSNode's other planned ENSDb capabilities - including [ENSEngine](/docs/integrate/ensengine), enabling you to react to changes in ENSDb through webhooks and other event-driven strategies without need for polling.
+This is the same foundation that powers ENSNode's other planned ENSDb capabilities - including [ENSEngine](/docs/integrate/integration-options/ensengine), enabling you to react to changes in ENSDb through webhooks and other event-driven strategies without need for polling.
 
 
 ## Related
@@ -56,7 +56,7 @@ This is the same foundation that powers ENSNode's other planned ENSDb capabiliti
 <LinkCard
   title="ENSEngine integration quickstart"
   description="React to ENS state changes with webhooks & events rather than polling."
-  href="/docs/integrate/ensengine"
+  href="/docs/integrate/integration-options/ensengine"
 />
 
 <LinkCard

@@ -71,11 +71,11 @@ export const integrateSidebarTopic = {
         },
         {
           label: "ensdb-cli (Snapshots)",
-          link: "/docs/integrate/ensdb-cli",
+          link: "/docs/integrate/integration-options/ensdb-cli",
         },
         {
           label: "ENSEngine (webhooks)",
-          link: "/docs/integrate/ensengine",
+          link: "/docs/integrate/integration-options/ensengine",
         },
       ],
     },
