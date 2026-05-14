@@ -1,5 +1,6 @@
 import config from "@/config";
 
+import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 import { factory, producing } from "@/lib/hono-factory";
@@ -35,7 +36,10 @@ export const canAccelerateMiddleware = producing(
     /// Temporary ENSv2 Bailout
     ////////////////////////////
     // TODO: re-enable acceleration for ensv2 once implemented
-    if (config.ensIndexerPublicConfig.plugins.includes(PluginName.ENSv2)) {
+    // NOTE: gate on the namespace containing an ENSv2Root datasource rather than the ENSv2
+    // plugin being configured — a namespace may be ENSv1-only even when the ENSv2 plugin is
+    // defined, and forward resolution must follow the ENSv1 path in that case.
+    if (maybeGetDatasource(config.namespace, DatasourceNames.ENSv2Root)) {
       if (!didWarnCannotAccelerateENSv2) {
         logger.warn(
           `ENSApi is temporarily unable to accelerate Resolution API requests while indexing ENSv2. Protocol Acceleration is DISABLED.`,

@@ -29,7 +29,7 @@ export default function () {
     const { node, resolver } = event.args;
 
     // Canonicalize to the concrete ENSv1 Registry that governs this contract's namegraph
-    // (ENSv1Registry vs. ENSv1RegistryOld both canonicalize to the new Registry on mainnet).
+    // (ENSv1Registry vs. ENSv1RegistryOld both canonicalize to ENSv1Registry)
     const { registry } = getManagedName(getThisAccountId(context, event));
     const domainId = makeENSv1DomainId(registry, node);
 
