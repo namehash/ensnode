@@ -1,24 +1,18 @@
 ---
-title: Omnigraph GraphQL API
+title: ENS Omnigraph GraphQL API
 description: Query the ENS Omnigraph API directly via HTTP from any language.
 ---
 
 import { LinkCard } from '@astrojs/starlight/components';
+import IntegrateHostedEnsNodeTip from '../../../../../components/molecules/IntegrateHostedEnsNodeTip.astro';
 
-The Omnigraph is **a GraphQL API** following the [Relay specification](https://relay.dev/graphql/connections.htm). There's no proprietary protocol or transport — any GraphQL client in any language works, from `curl` and `fetch` to [`urql`](https://nearform.com/open-source/urql/), [Apollo](https://www.apollographql.com/), [`graphql-request`](https://github.com/jasonkuhrt/graphql-request), and beyond.
+The Omnigraph is **a GraphQL API** following the [Relay specification](https://relay.dev/graphql/connections.htm). There's no proprietary protocol or transport — any GraphQL client in any language works, from `curl` and `fetch` to [`urql`](https://nearform.com/open-source/urql/), [`Apollo`](https://www.apollographql.com/), [`graphql-request`](https://github.com/jasonkuhrt/graphql-request), and beyond.
 
 This guide walks you through the minimum: a single `fetch` call against `/api/omnigraph` — the same flow as our [omnigraph-graphql-example](https://github.com/namehash/ensnode/tree/main/examples/omnigraph-graphql-example).
 
 If you want end-to-end typed queries (via [`gql.tada`](https://gql-tada.0no.co/)) with editor autocomplete and a built-in client, use [`enssdk`](/docs/integrate/integration-options/enssdk) instead — but if you need to integrate from a language without first-class GraphQL tooling, or you're already in a stack with its own GraphQL client, this is the path.
 
-:::tip[No backend required]
-You don't need to run your own ENSNode to follow this guide — point at any NameHash-hosted instance to get started.
-:::
-
-<LinkCard
-  title="Hosted ENSNode Instances"
-  href="/docs/integrate/hosted-instances"
-/>
+<IntegrateHostedEnsNodeTip includeHostedInstancesLink />
 
 ## 1. The endpoint
 

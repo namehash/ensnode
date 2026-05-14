@@ -4,19 +4,14 @@ description: React toolkit for ENSv2 development, includes fully typed providers
 ---
 
 import { LinkCard, Steps } from '@astrojs/starlight/components';
+import IntegrateHostedEnsNodeTip from '../../../../../components/molecules/IntegrateHostedEnsNodeTip.astro';
 
 `enskit` is the React toolkit for ENSv2 development. It provides a fully typed Omnigraph API client (powered by [`urql`](https://nearform.com/open-source/urql/) and [`gql.tada`](https://gql-tada.0no.co/)), the `OmnigraphProvider`, and the `useOmnigraphQuery` hook for writing type-safe ENS queries with editor autocomplete, Relay-style pagination, and Omnigraph-specific cache directives.
 
 This guide walks you from an empty directory to a working React component that renders an [ENS Domain](/docs/concepts/the-ens-protocol) and a paginated list of its subdomains — the same flow as the [`DomainView`](https://github.com/namehash/ensnode/blob/main/examples/enskit-react-example/src/DomainView.tsx) in our example app.
 
-:::tip[No backend required]
-You don't need to run your own ENSNode to follow this guide — the steps below default to a NameHash-hosted instance. Browse the available deployments below.
-:::
+<IntegrateHostedEnsNodeTip includeHostedInstancesLink />
 
-<LinkCard
-  title="Hosted ENSNode Instances"
-  href="/docs/integrate/hosted-instances"
-/>
 
 ## 1. Scaffold a React app
 

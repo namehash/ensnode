@@ -54,7 +54,7 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/integration-options/enssdk",
         },
         {
-          label: "Omnigraph GraphQL API",
+          label: "ENS Omnigraph (GraphQL)",
           link: "/docs/integrate/integration-options/omnigraph-graphql-api",
         },
         {
