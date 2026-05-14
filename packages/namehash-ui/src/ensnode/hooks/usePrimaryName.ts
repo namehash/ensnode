@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { createPrimaryNameQueryOptions } from "../query";
+import { createPrimaryNameQueryOptions, DISABLED_QUERY } from "../query";
 import type { UsePrimaryNameParameters, WithEnsNodeProviderOptions } from "../types";
 import { useEnsNodeProviderOptions } from "./useEnsNodeProviderOptions";
 
@@ -46,11 +46,11 @@ export function usePrimaryName(parameters: UsePrimaryNameParameters & WithEnsNod
 
   const queryOptions = canEnable
     ? createPrimaryNameQueryOptions(providerOptions, { ...args, address })
-    : { enabled: false, queryKey: ["disabled"] as const };
+    : DISABLED_QUERY;
 
   return useQuery({
     ...queryOptions,
     ...query,
-    enabled: canEnable && (query.enabled ?? queryOptions.enabled),
+    enabled: canEnable && (query.enabled ?? true),
   });
 }
