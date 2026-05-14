@@ -17,14 +17,14 @@ These instances are provided free of charge with no API key required, have no ra
 
 Each ENSNode hosted instance is configured for a specific ENS namespace and activated ENSNode plugins. The ENS namespace is the source of truth for the data indexed by the instance, and the activated ENSNode plugins determine the specific data model for indexing and querying.
 
-Each ENS namespace is defined by onchain state as per implemented ENS protocol version (i.e. ENS V1, ENS V2). Currently, ENSNode supports the following ENS namespaces:
-- ENS V2 Sepolia
-- ENS V1 Mainnet
-- ENS V1 Sepolia
+Each ENS namespace is defined by onchain state as per implemented ENS protocol version (i.e. ENSv1, ENSv2). Currently, ENSNode supports the following ENS namespaces:
+- ENSv2 Sepolia
+- ENSv1 Mainnet
+- ENSv1 Sepolia
 
-### ENS V2 instances
+### ENSv2 instances
 
-These instances demonstrate the latest ENS V2 support in ENSNode.
+These instances demonstrate the latest ENSv2 support in ENSNode.
 
 #### ENSNode 'v2 Sepolia'
 
@@ -36,7 +36,7 @@ These instances demonstrate the latest ENS V2 support in ENSNode.
   purpose="Preview of ENSNode's support for the ENS V2 Sepolia namespace."
 />
 
-## ENS V1 Instances
+## ENSv1 Instances
 
 These instances demonstrate the ENS V1 support in ENSNode.
 
@@ -61,7 +61,7 @@ These ENSNode instances focus on pushing the boundaries of what's possible with 
   instanceURL="https://api.alpha-sepolia.ensnode.io"
   connectWithENSAdminURL="https://admin.ensnode.io/connection?connection=https%3A%2F%2Fapi.alpha-sepolia.ensnode.io"
   namespace="sepolia"
-  plugins="subgraph, basenames, lineanames, registrars, ensv2,protocol-acceleration"
+  plugins="subgraph, basenames, lineanames, registrars, ensv2, protocol-acceleration"
   purpose="Demonstration of ENSNode's multichain ENS indexing capability for the ENS V1 namespace rooted on Sepolia. Provides a superset of the data indexed by the ENS Subgraph. Offers a preview of ENS Protocol Acceleration."
 />
 
