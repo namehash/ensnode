@@ -12,7 +12,7 @@ Companion to the [Omnigraph GraphQL API integration guide](https://ensnode.io/do
 # from the ENSNode monorepo root
 pnpm install
 
-ENSNODE_URL=https://api.v2-sepolia.ensnode.io pnpm -F omnigraph-graphql-example start
+ENSNODE_URL=https://api.alpha.ensnode.io pnpm -F omnigraph-graphql-example start
 ```
 
 ## Usage (with Local ENSNode)

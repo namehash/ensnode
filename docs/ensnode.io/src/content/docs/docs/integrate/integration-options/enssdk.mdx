@@ -37,7 +37,7 @@ mkdir src
 We'll use [`tsx`](https://tsx.is/) to run TypeScript directly without a bundler.
 
 ```sh
-npm install enssdk@1.13.1
+npm install enssdk
 npm install -D tsx typescript @types/node
 ```
 
@@ -61,6 +61,7 @@ Create `tsconfig.json`:
     "esModuleInterop": true,
     "skipLibCheck": true,
     "lib": ["ESNext"],
+    "types": ["node"],
     "plugins": [
       {
         "name": "gql.tada/ts-plugin",
@@ -291,7 +292,7 @@ async function main() {
 Point at a hosted ENSNode and go:
 
 ```sh
-ENSNODE_URL=https://api.alpha.green.ensnode.io npm start
+ENSNODE_URL=https://api.alpha.ensnode.io npm start
 ```
 
 You should see the `eth` Domain, followed by its first 20 subdomains and the total subdomain count.

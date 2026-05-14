@@ -33,7 +33,7 @@ npm install
 ## 2. Install `enskit` and `enssdk`
 
 ```sh
-npm install enskit@1.13.1 enssdk@1.13.1
+npm install enskit enssdk
 ```
 
 :::tip[Pin exact versions]
@@ -384,7 +384,7 @@ export function DomainView() {
 ## 9. Run it
 
 ```sh
-npm run dev
+VITE_ENSNODE_URL=https://api.alpha.ensnode.io npm run dev
 ```
 
 Open the printed URL and you should see the `eth` Domain, its owner, and the first page of its subdomains. Clicking **Next page** advances the cursor.
