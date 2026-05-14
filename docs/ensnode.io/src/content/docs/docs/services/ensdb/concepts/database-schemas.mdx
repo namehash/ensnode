@@ -60,25 +60,25 @@ Defined in [`ensv2.schema.ts`](https://github.com/namehash/ensnode/blob/main/pac
 While the initial approach was a highly materialized view of the ENS protocol, abstracting away
 as many on-chain details as possible, in practice—due to the sheer complexity of the protocol at
 resolution-time—it becomes more or less impossible to appropriately materialize the canonical
-namegraph.
+`namegraph`.
 
 As a result, this schema takes a balanced approach. It mimics on-chain state as closely as possible,
 with the obvious exception of materializing specific state that must trivially filterable. Then,
 resolution-time logic is applied on _top_ of this index, at query-time, mimicking ENS's own resolution-time
 behavior. This forces our implementation to match the protocol as closely as possible, with the
 obvious note that the performance tradeoffs of evm code and our app are different. For example,
-it's more expensive for us to recursively traverse the namegraph (like evm code does) because our
+it's more expensive for us to recursively traverse the `namegraph` (like evm code does) because our
 individual roundtrips from the db are relatively more expensive.
 
 In general: the indexed schema should match on-chain state as closely as possible, and
 resolution-time behavior within the ENS protocol should _also_ be implemented at resolution time
-in ENSApi. The current obvious exception is that `domain.ownerId` for ENSv1 Domains is the
+in ENSApi. The current obvious exception is that `domains.owner_id` for ENSv1 Domains is the
 _materialized_ _effective_ owner. ENSv1 includes a diverse number of ways to 'own' a domain,
 including the ENSv1 Registry, various Registrars, and the NameWrapper. The ENSv1 indexing logic
 within this ENSv2 plugin materializes the effective owner to simplify this aspect of ENS and
-enable efficient queries against `domain.ownerId`.
+enable efficient queries against `domains.owner_id`.
 
-When necessary, all datamodels are shared or polymorphic between ENSv1 and ENSv2, including
+When necessary, all data models are shared or polymorphic between ENSv1 and ENSv2, including
 Domains, Registries, Registrations, Renewals, and Resolvers.
 
 Registrations are polymorphic between the defined RegistrationTypes, depending on the associated
@@ -90,36 +90,36 @@ labelHash -> InterpretedLabel (the Label entity). This ensures that regardless o
 new label is encountered onchain, all Domains that use that label are automatically healed at
 resolution-time.
 
-ENSv1 and ENSv2 both fit the Registry → Domain → (Sub)Registry → Domain → ... namegraph model.
-For ENSv1, each domain that has children implicitly owns a "virtual" Registry (a row of type
+ENSv1 and ENSv2 both fit the `Registry` → `Domain` → (`Sub`)`Registry` → `Domain` → ... `namegraph` model.
+For ENSv1, each domain that has children implicitly owns a "virtual" `Registry` (a row of type
 `ENSv1VirtualRegistry`) whose sole parent is that domain; children of the parent then point their
 `registryId` at the virtual registry. Concrete `ENSv1Registry` rows (e.g. the mainnet ENS Registry,
 the Basenames Registry, the Lineanames Registry) sit at the top. ENSv2 namegraphs are rooted in
 a single `ENSv2Registry` RootRegistry on the ENS Root Chain and are possibly circular directed
 graphs. The full namegraph is never materialized, only _navigated_ at resolution-time, with the
-exception of the canonical subgraph, which is reflected via `Registry.canonical` /
-`Domain.canonical` boolean flags on the rows themselves. The bidirectional canonical edge is NOT
+exception of the canonical subgraph, which is reflected via `registries.canonical` /
+`domains.canonical` boolean flags on the rows themselves. The bidirectional canonical edge is NOT
 materialized in a parallel table; it is derived on demand by checking that the two unidirectional
-pointers agree (`Registry.canonicalDomainId = Domain.id` ↔ `Domain.subregistryId = Registry.id`). Cascading canonicality flips through the subgraph run as either an in-memory PK update (when `Registry.__hasChildren = false`, the dominant case for fresh ENSv1 virtual registries on first wire-up) or a single recursive-CTE batch UPDATE otherwise (see `canonicality-db-helpers.ts`).
+pointers agree (`registries.canonical_domain_id = domains.id` ↔ `domains.subregistry_id = registries.id`).
 
 Note also that the Protocol Acceleration plugin is a hard requirement for the ENSv2 plugin. This
 allows us to rely on the shared logic for indexing:
   a) ENSv1RegistryOld -> ENSv1Registry migration status
   b) Domain-Resolver Relations for both ENSv1 and ENSv2 Domains
-As such, none of that information is present in this ensv2.schema.ts file.
+As such, none of that information is present in this `ensv2.schema.ts` file.
 
 In general, entities are keyed by a nominally-typed `id` that uniquely references them. This
 allows us to trivially implement cursor-based pagination and allow consumers to reference these
 deeply nested entities by a straightforward string ID. In cases where an entity's `id` is composed
-of multiple pieces of information (for example, a Registry is identified by (chainId, address)),
+of multiple pieces of information (for example, a `Registry` is identified by (`chainId`, `address`)),
 then that information is, as well, included in the entity's columns, not just encoded in the id.
 Nowhere in this application, nor in user applications, should an entity's id be parsed for its
 constituent parts; all should be available, with their various type guarantees, on the entity
 itself.
 
 Events are structured as a single "events" table which tracks EVM Event Metadata for any on-chain
-Event. Then, join tables (DomainEvent, ResolverEvent, etc) track the relationship between an
-entity that has many events (Domain, Resolver) to the relevant set of Events.
+Event. Then, join tables (`domain_events`, `resolver_events`, etc) track the relationship between an
+entity that has many events (`domains`, `resolvers`) to the relevant set of Events.
 
 A Registration references the event that initiated the Registration. A Renewal, too, references
 the Event responsible for its existence.
@@ -158,17 +158,17 @@ the Event responsible for its existence.
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
 | `id` | `text` | no | Ponder's event ID. Primary key. |
-| `chainId` | `bigint` | no | Chain the event was emitted on. |
-| `blockNumber` | `numeric(78)` | no | Block number. |
-| `blockHash` | `text` | no | Block hash. |
+| `chain_id` | `bigint` | no | Chain the event was emitted on. |
+| `block_number` | `numeric(78)` | no | Block number. |
+| `block_hash` | `text` | no | Block hash. |
 | `timestamp` | `numeric(78)` | no | Block timestamp. |
-| `transactionHash` | `text` | no | Transaction hash. |
-| `transactionIndex` | `integer` | no | Index of the transaction within the block. |
+| `transaction_hash` | `text` | no | Transaction hash. |
+| `transaction_index` | `integer` | no | Index of the transaction within the block. |
 | `from` | `text` | no | Transaction sender address (`tx.from`). Never HCA-aware — always the EOA/relayer that submitted the transaction. Use `sender` for the HCA-aware actor. |
 | `sender` | `text` | no | The HCA account address if used, otherwise `Transaction.from`. For ENSv2 events that emit an explicit `sender` / `owner` / `account` argument, this is set from that argument. For all other events (and all ENSv1 events), this falls back to `from` (i.e. `tx.from`). |
 | `to` | `text` | yes | Transaction recipient address. A `null` value means this was a contract-deployment transaction. |
 | `address` | `text` | no | Address of the contract that emitted the log. |
-| `logIndex` | `integer` | no | Index of the log within the transaction. |
+| `log_index` | `integer` | no | Index of the log within the transaction. |
 | `selector` | `text` | no | Event topic[0] (the event signature hash). |
 | `topics` | `text[]` | no | All log topics. |
 | `data` | `text` | no | Log data. |
@@ -177,25 +177,25 @@ the Event responsible for its existence.
 
 #### `domain_events`
 
-Join table linking a `domain` to its associated `events`.
+Join table linking a `domains` record to its associated `events`.
 
 | Column | Type | Nullable |
 |--------|------|----------|
-| `domainId` | `text` | no |
-| `eventId` | `text` | no |
+| `domain_id` | `text` | no |
+| `event_id` | `text` | no |
 
-**Primary key:** `(domainId, eventId)`.
+**Primary key:** `(domain_id, event_id)`.
 
 #### `resolver_events`
 
-Join table linking a `resolver` to its associated `events`.
+Join table linking a `resolvers` record to its associated `events`.
 
 | Column | Type | Nullable |
 |--------|------|----------|
-| `resolverId` | `text` | no |
-| `eventId` | `text` | no |
+| `resolver_id` | `text` | no |
+| `event_id` | `text` | no |
 
-**Primary key:** `(resolverId, eventId)`.
+**Primary key:** `(resolver_id, event_id)`.
 
 #### `permissions_events`
 
@@ -203,10 +203,10 @@ Join table linking a `permissions` record to its associated `events`.
 
 | Column | Type | Nullable |
 |--------|------|----------|
-| `permissionsId` | `text` | no |
-| `eventId` | `text` | no |
+| `permissions_id` | `text` | no |
+| `event_id` | `text` | no |
 
-**Primary key:** `(permissionsId, eventId)`.
+**Primary key:** `(permissions_id, event_id)`.
 
 #### `permissions_user_events`
 
@@ -214,10 +214,10 @@ Join table linking a `permissions_users` record to its associated `events` — i
 
 | Column | Type | Nullable |
 |--------|------|----------|
-| `permissionsUserId` | `text` | no |
-| `eventId` | `text` | no |
+| `permissions_user_id` | `text` | no |
+| `event_id` | `text` | no |
 
-**Primary key:** `(permissionsUserId, eventId)`.
+**Primary key:** `(permissions_user_id, event_id)`.
 
 #### `accounts`
 
@@ -229,58 +229,54 @@ Join table linking a `permissions_users` record to its associated `events` — i
 
 #### `registries`
 
-For ENSv1, each domain that has children implicitly owns a "virtual" Registry (`ENSv1VirtualRegistry`) whose sole parent is that domain. Children of the parent then point their `registryId` at the virtual registry. Concrete `ENSv1Registry` rows (e.g. the mainnet ENS Registry, the Basenames Registry, the Lineanames Registry) sit at the top. ENSv2 namegraphs are rooted in a single `ENSv2Registry` RootRegistry.
+For ENSv1, each domain that has children implicitly owns a "virtual" Registry (`ENSv1VirtualRegistry`) whose sole parent is that domain. Children of the parent then point their `registry_id` at the virtual registry. Concrete `ENSv1Registry` rows (e.g. the mainnet ENS Registry, the Basenames Registry, the Lineanames Registry) sit at the top. ENSv2 namegraphs are rooted in a single `ENSv2Registry` RootRegistry.
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
 | `id` | `text` | no | See `RegistryId` for guarantees. Primary key. |
 | `type` | `RegistryType` | no | Registry type. |
-| `chainId` | `bigint` | no | Chain the registry contract is deployed on. |
+| `chain_id` | `bigint` | no | Chain the registry contract is deployed on. |
 | `address` | `text` | no | Address of the registry contract. |
 | `node` | `text` | yes | If this is an `ENSv1VirtualRegistry`, the namehash of the parent ENSv1 domain that owns it, otherwise `null`. |
-| `canonicalDomainId` | `text` | yes | The Registry's declared Canonical Domain (unidirectional). |
+| `canonical_domain_id` | `text` | yes | The Registry's declared Canonical Domain (unidirectional). |
 | `canonical` | `boolean` | no | Whether this Registry is part of the canonical nametree. Default `false`. |
-| `__hasChildren` | `boolean` | no | Internal bookkeeping field. Synthetic monotonic sentinel flipped to `true` the first time a child Domain is registered under this Registry. Used to optimize canonicality cascades. Default `false`. |
+| `has_children` | `boolean` | no | Internal bookkeeping field. Synthetic monotonic sentinel flipped to `true` the first time a child Domain is registered under this Registry. Used to optimize canonicality cascades. Default `false`. |
 
-**Indexes:** `(chainId, address)` — non-unique, because multiple rows can share `(chainId, address)` across virtual registries.
+**Indexes:** `(chain_id, address)` — non-unique, because multiple rows can share `(chain_id, address)` across virtual registries.
 
-**Relations:** has many `domains` (as parent registry), has many `domains` (as subregistry), has one `permissions` via `(chainId, address)`.
+**Relations:** has many `domains` (as parent registry), has many `domains` (as subregistry), has one `permissions` via `(chain_id, address)`.
 
 #### `domains`
 
-The `domain.ownerId` for ENSv1 Domains is the materialized effective owner. ENSv1 includes a diverse number of ways to 'own' a domain, including the ENSv1 Registry, various Registrars, and the NameWrapper. The ENSv1 indexing logic materializes the effective owner to simplify this aspect of ENS and enable efficient queries against `domain.ownerId`.
-
-:::note
-Domain-Resolver relations are tracked via the Protocol Acceleration plugin, not stored on the domain row. The parent domain is derived via `registries.canonicalDomainId` / `domains.subregistryId` bidirectional verification, not stored on the domain row.
-:::
+The `domains.owner_id` for ENSv1 Domains is the materialized effective owner. ENSv1 includes a diverse number of ways to 'own' a domain, including the ENSv1 Registry, various Registrars, and the NameWrapper. The ENSv1 indexing logic materializes the effective owner to simplify this aspect of ENS and enable efficient queries against `domains.owner_id`.
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
 | `id` | `text` | no | ENSv1DomainId: `{ENSv1RegistryId}/{node}`. ENSv2DomainId: CAIP-19 asset identifier. Primary key. |
 | `type` | `DomainType` | no | `ENSv1Domain` or `ENSv2Domain`. |
-| `registryId` | `text` | no | The registry this domain belongs to. |
-| `subregistryId` | `text` | yes | The registry that manages subdomains of this domain, if any. |
-| `tokenId` | `numeric(78)` | yes | ENSv2 only: the TokenId within the ENSv2Registry. `null` for ENSv1 domains. |
+| `registry_id` | `text` | no | The registry this domain belongs to. |
+| `subregistry_id` | `text` | yes | The registry that manages subdomains of this domain, if any. |
+| `token_id` | `numeric(78)` | yes | ENSv2 only: the TokenId within the ENSv2Registry. `null` for ENSv1 domains. |
 | `node` | `text` | yes | ENSv1 only: the domain's namehash. `null` for ENSv2 domains. |
-| `labelHash` | `text` | no | Represents a labelHash. References `labels.labelHash`. |
-| `ownerId` | `text` | yes | If `ENSv1Domain`, the materialized effective owner address. If `ENSv2Domain`, the on-chain owner address (the HCA account address if used). |
-| `rootRegistryOwnerId` | `text` | yes | ENSv1 only: the owner recorded in the root ENSv1 registry. `null` for ENSv2 domains. |
+| `label_hash` | `text` | no | Represents a labelHash. References `labels.label_hash`. |
+| `owner_id` | `text` | yes | If `ENSv1Domain`, the materialized effective owner address. If `ENSv2Domain`, the on-chain owner address (the HCA account address if used). |
+| `root_registry_owner_id` | `text` | yes | ENSv1 only: the owner recorded in the root ENSv1 registry. `null` for ENSv2 domains. |
 | `canonical` | `boolean` | no | Whether this Domain is part of the canonical nametree. Mirrors the parent Registry's flag. Default `false`. |
 
-**Indexes:** `type`, `registryId`, `subregistryId` (partial: non-null only), `ownerId`, `labelHash`.
+**Indexes:** `type`, `registry_id`, `subregistry_id` (partial: non-null only), `owner_id`, `label_hash`.
 
-**Relations:** belongs to one `registry`, belongs to one `registry` (as subregistry), has one `account` (owner), has one `account` (rootRegistryOwner), has one `label`, has many `registrations`.
+**Relations:** belongs to one `registries` record, belongs to one `registries` record (as subregistry), has one `accounts` record (owner), has one `accounts` record (rootRegistryOwner), has one `labels` record, has many `registrations` records.
 
 #### `labels`
 
-Internal rainbow table mapping a `labelHash` to its interpreted label string. Domains reference labels by hash; names are healed at resolution-time.
+Internal rainbow table mapping a `label_hash` to its interpreted label string. Domains reference labels by hash; names are healed at resolution-time.
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
-| `labelHash` | `text` | no | `keccak256` of the label. Primary key. |
+| `label_hash` | `text` | no | `keccak256` of the label. Primary key. |
 | `interpreted` | `text` | no | The interpreted label string. |
 
-**Indexes:** `byInterpreted`, `byInterpretedFuzzy`
+**Indexes:** `by_interpreted_exact`, `by_interpreted_fuzzy`
 
 **Relations:** has many `domains`.
 
@@ -290,38 +286,38 @@ A registration is keyed by `id`.
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
-| `id` | `text` | no | A key derived from `(domainId, registrationIndex)`. Primary key. |
-| `domainId` | `text` | no | The registered domain. |
-| `registrationIndex` | `integer` | no | Monotonically increasing index per domain. |
+| `id` | `text` | no | A key derived from `(domain_id, registration_index)`. Primary key. |
+| `domain_id` | `text` | no | The registered domain. |
+| `registration_index` | `integer` | no | Monotonically increasing index per domain. |
 | `type` | `RegistrationType` | no | The mechanism through which this registration was made. |
 | `start` | `numeric(78)` | no | Unix timestamp of registration start. |
 | `expiry` | `numeric(78)` | yes | Unix timestamp of expiry, if applicable. |
-| `gracePeriod` | `numeric(78)` | yes | Grace period duration in seconds. `BaseRegistrar` only. |
-| `registrarChainId` | `bigint` | no | Chain of the registrar contract. |
-| `registrarAddress` | `text` | no | Address of the registrar contract. |
-| `registrantId` | `text` | yes | Account that initiated the registration. For ENSv2 Registrations, the protocol-emitted registrant address (the HCA account address if used). |
-| `unregistrantId` | `text` | yes | Account that triggered an unregistration, if applicable. For ENSv2 Registrations, the protocol-emitted unregistrant address (the HCA account address if used). |
+| `grace_period` | `numeric(78)` | yes | Grace period duration in seconds. `BaseRegistrar` only. |
+| `registrar_chain_id` | `bigint` | no | Chain of the registrar contract. |
+| `registrar_address` | `text` | no | Address of the registrar contract. |
+| `registrant_id` | `text` | yes | Account that initiated the registration. For ENSv2 Registrations, the protocol-emitted registrant address (the HCA account address if used). |
+| `unregistrant_id` | `text` | yes | Account that triggered an unregistration, if applicable. For ENSv2 Registrations, the protocol-emitted unregistrant address (the HCA account address if used). |
 | `referrer` | `text` | yes | Encoded referrer value emitted at registration time. |
 | `fuses` | `integer` | yes | Fuse bitmap. `NameWrapper` and wrapped `BaseRegistrar` only. |
 | `base` | `numeric(78)` | yes | Base registration cost in wei. `BaseRegistrar` and `ENSv2Registrar` only. |
 | `premium` | `numeric(78)` | yes | Premium cost in wei above base. `BaseRegistrar` only. |
 | `wrapped` | `boolean` | no | Whether the registration is currently wrapped by the NameWrapper. Default `false`. |
-| `eventId` | `text` | no | The event that created this registration record. |
+| `event_id` | `text` | no | The event that created this registration record. |
 
-**Indexes:** unique on `(domainId, registrationIndex)`.
+**Indexes:** unique on `(domain_id, registration_index)`.
 
-**Relations:** belongs to one `domain`, has one `account` (registrant), has one `account` (unregistrant), has many `renewals`, has one `event`.
+**Relations:** belongs to one `domains` record, has one `accounts` record (registrant), has one `accounts` record (unregistrant), has many `renewals`, has one `events` record.
 
 #### `latest_registration_indexes`
 
-Tracks the highest `registrationIndex` seen for each domain. Used to sequence registrations.
+Tracks the highest `registration_index` seen for each domain. Used to sequence registrations.
 
 | Column | Type | Nullable |
 |--------|------|----------|
-| `domainId` | `text` | no |
-| `registrationIndex` | `integer` | no |
+| `domain_id` | `text` | no |
+| `registration_index` | `integer` | no |
 
-**Primary key:** `domainId`.
+**Primary key:** `domain_id`.
 
 #### `renewals`
 
@@ -329,31 +325,31 @@ A renewal is keyed by `id` and belongs to a specific registration.
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
-| `id` | `text` | no | A key derived from `(domainId, registrationIndex, renewalIndex)`. Primary key. |
-| `domainId` | `text` | no | The renewed domain. |
-| `registrationIndex` | `integer` | no | Index of the parent registration. |
-| `renewalIndex` | `integer` | no | Monotonically increasing index per registration. |
+| `id` | `text` | no | A key derived from `(domain_id, registration_index, renewal_index)`. Primary key. |
+| `domain_id` | `text` | no | The renewed domain. |
+| `registration_index` | `integer` | no | Index of the parent registration. |
+| `renewal_index` | `integer` | no | Monotonically increasing index per registration. |
 | `duration` | `numeric(78)` | no | Duration added by this renewal, in seconds. |
 | `referrer` | `text` | yes | Encoded referrer value emitted at renewal time. |
 | `base` | `numeric(78)` | yes | Base renewal cost in wei. |
 | `premium` | `numeric(78)` | yes | Premium cost in wei above base. ENSv1 `RegistrarControllers` only. |
-| `eventId` | `text` | no | The event that created this renewal record. |
+| `event_id` | `text` | no | The event that created this renewal record. |
 
-**Indexes:** unique on `(domainId, registrationIndex, renewalIndex)`.
+**Indexes:** unique on `(domain_id, registration_index, renewal_index)`.
 
-**Relations:** belongs to one `registration` via `(domainId, registrationIndex)`, has one `event`.
+**Relations:** belongs to one `registration` via `(domain_id, registration_index)`, has one `event`.
 
 #### `latest_renewal_indexes`
 
-Tracks the highest `renewalIndex` seen for each registration. Used to sequence renewals.
+Tracks the highest `renewal_index` seen for each registration. Used to sequence renewals.
 
 | Column | Type | Nullable |
 |--------|------|----------|
-| `domainId` | `text` | no |
-| `registrationIndex` | `integer` | no |
-| `renewalIndex` | `integer` | no |
+| `domain_id` | `text` | no |
+| `registration_index` | `integer` | no |
+| `renewal_index` | `integer` | no |
 
-**Primary key:** `(domainId, registrationIndex)`.
+**Primary key:** `(domain_id, registration_index)`.
 
 #### `permissions`
 
@@ -362,10 +358,10 @@ An ENSv2 permissions contract instance.
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
 | `id` | `text` | no | Primary key. |
-| `chainId` | `bigint` | no | Chain the permissions contract is deployed on. |
+| `chain_id` | `bigint` | no | Chain the permissions contract is deployed on. |
 | `address` | `text` | no | Address of the permissions contract. |
 
-**Indexes:** unique on `(chainId, address)`.
+**Indexes:** unique on `(chain_id, address)`.
 
 **Relations:** has many `permissions_resources`, has many `permissions_users`.
 
@@ -376,13 +372,13 @@ A resource managed by a `permissions` contract.
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
 | `id` | `text` | no | Primary key. |
-| `chainId` | `bigint` | no | Chain of the parent permissions contract. |
+| `chain_id` | `bigint` | no | Chain of the parent permissions contract. |
 | `address` | `text` | no | Address of the parent permissions contract. |
 | `resource` | `numeric(78)` | no | Resource identifier (a `uint256` token ID or similar). |
 
-**Indexes:** unique on `(chainId, address, resource)`.
+**Indexes:** unique on `(chain_id, address, resource)`.
 
-**Relations:** belongs to one `permissions` via `(chainId, address)`.
+**Relations:** belongs to one `permissions` via `(chain_id, address)`.
 
 #### `permissions_users`
 
@@ -391,15 +387,15 @@ A user's role bitmap for a specific resource within a `permissions` contract.
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
 | `id` | `text` | no | Primary key. |
-| `chainId` | `bigint` | no | Chain of the parent permissions contract. |
+| `chain_id` | `bigint` | no | Chain of the parent permissions contract. |
 | `address` | `text` | no | Address of the parent permissions contract. |
 | `resource` | `numeric(78)` | no | Resource identifier. |
 | `user` | `text` | no | The user/grantee address this Permission is granted to (the HCA account address if used). |
 | `roles` | `numeric(78)` | no | Roles bitmap for this user on this resource. |
 
-**Indexes:** unique on `(chainId, address, resource, user)`.
+**Indexes:** unique on `(chain_id, address, resource, user)`.
 
-**Relations:** has one `account` (user), belongs to one `permissions` via `(chainId, address)`, belongs to one `permissions_resource` via `(chainId, address, resource)`.
+**Relations:** has one `accounts` record (user), belongs to one `permissions` record via `(chain_id, address)`, belongs to one `permissions_resource` record via `(chain_id, address, resource)`.
 
 ---
 
@@ -425,27 +421,27 @@ These records **cannot** be queried directly and used as a source of truth — y
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
 | `address` | `text` | no | The account address. Part of primary key. |
-| `coinType` | `numeric(78)` | no | ENSIP-19 coin type. Part of primary key. |
-| `value` | `text` | no | Represents the ENSIP-19 Reverse Name Record for a given `(address, coinType)`. Guaranteed to be a non-empty `InterpretedName`. |
+| `coin_type` | `numeric(78)` | no | ENSIP-19 coin type. Part of primary key. |
+| `value` | `text` | no | Represents the ENSIP-19 Reverse Name Record for a given `(address, coin_type)`. Guaranteed to be a non-empty `InterpretedName`. |
 
-**Primary key:** `(address, coinType)`.
+**Primary key:** `(address, coin_type)`.
 
 #### `domain_resolver_relations`
 
 Tracks Domain-Resolver relationships. This powers: (1) Domain-Resolver relationships within the GraphQL API, and (2) accelerated lookups of a Domain's Resolver within the Resolution API.
 
-It is keyed by `(chainId, address, domainId)` to match the on-chain data model of Registry / (shadow)Registry Domain-Resolver relationships.
+It is keyed by `(chain_id, address, domain_id)` to match the on-chain data model of Registry / (shadow)Registry Domain-Resolver relationships.
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
-| `chainId` | `bigint` | no | Keyed by `(chainId, registry, node)`. Part of primary key. |
+| `chain_id` | `bigint` | no | Keyed by `(chain_id, registry, node)`. Part of primary key. |
 | `address` | `text` | no | The Registry (`ENSv1Registry` or `ENSv2Registry`)'s AccountId. Part of primary key. |
-| `domainId` | `text` | no | Part of primary key. |
-| `resolver` | `text` | no | The Domain's assigned Resolver's address. Always scoped to `chainId`. |
+| `domain_id` | `text` | no | Part of primary key. |
+| `resolver` | `text` | no | The Domain's assigned Resolver's address. Always scoped to `chain_id`. |
 
-**Primary key:** `(chainId, address, domainId)`.
+**Primary key:** `(chain_id, address, domain_id)`.
 
-**Relations:** has one `resolver` via `(chainId, resolver)`.
+**Relations:** has one `resolver` via `(chain_id, resolver)`.
 
 #### `resolvers`
 
@@ -453,19 +449,19 @@ Represents an individual `IResolver` contract that has emitted at least one even
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
-| `id` | `text` | no | Keyed by `(chainId, address)`. Primary key. |
-| `chainId` | `bigint` | no | Chain the resolver contract is deployed on. |
+| `id` | `text` | no | Keyed by `(chain_id, address)`. Primary key. |
+| `chain_id` | `bigint` | no | Chain the resolver contract is deployed on. |
 | `address` | `text` | no | Address of the resolver contract. |
 
-**Indexes:** unique on `(chainId, address)`.
+**Indexes:** unique on `(chain_id, address)`.
 
 **Relations:** has many `resolver_records`.
 
 #### `resolver_records`
 
-Tracks a set of records for a specified `node` within a `resolver` contract on `chainId`.
+Tracks a set of records for a specified `node` within a `resolver` contract on `chain_id`.
 
-Has one `name` record (see ENSIP-3), has many `addressRecords` (unique by coinType, see ENSIP-9), and has many `textRecords` (unique by key, see ENSIP-5).
+Has one `names` record (see ENSIP-3), has many `resolver_address_records` (unique by coinType, see ENSIP-9), and has many `resolver_text_records` (unique by key, see ENSIP-5).
 
 :::caution[Not ENSIP-10 compliant]
 These record values do **not** allow the caller to confidently resolve records for names without following Forward Resolution according to the ENS protocol. A direct query to the database for a record's value is not ENSIP-10 nor CCIP-Read compliant.
@@ -473,8 +469,8 @@ These record values do **not** allow the caller to confidently resolve records f
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
-| `id` | `text` | no | Keyed by `(chainId, resolver, node)`. Primary key. |
-| `chainId` | `bigint` | no | Part of the composite key. |
+| `id` | `text` | no | Keyed by `(chain_id, resolver, node)`. Primary key. |
+| `chain_id` | `bigint` | no | Part of the composite key. |
 | `address` | `text` | no | Resolver contract address. Part of the composite key. |
 | `node` | `text` | no | The name's namehash. Part of the composite key. |
 | `name` | `text` | yes | The reverse-resolution (ENSIP-3) `name()` record, used for Reverse Resolution. If present, guaranteed to be a non-empty `InterpretedName`. |
@@ -482,53 +478,53 @@ These record values do **not** allow the caller to confidently resolve records f
 | `pubkeyX` | `text` | yes | PubkeyResolver X coordinate. Invariant: both `pubkeyX` and `pubkeyY` are either both `null` or both set. |
 | `pubkeyY` | `text` | yes | PubkeyResolver Y coordinate. Invariant: both `pubkeyX` and `pubkeyY` are either both `null` or both set. |
 | `dnszonehash` | `text` | yes | `IDNSZoneResolver` zone hash, or `null` if not set. |
-| `version` | `numeric(78)` | yes | `IVersionableResolver` version. `null` when no `VersionChanged` event has been seen for this `(chainId, address, node)` — the resolver may not implement `IVersionableResolver`, or simply may never have been version-bumped. Consumers should treat `null` as "unknown" rather than `0`. |
+| `version` | `numeric(78)` | yes | `IVersionableResolver` version. `null` when no `VersionChanged` event has been seen for this `(chain_id, address, node)` — the resolver may not implement `IVersionableResolver`, or simply may never have been version-bumped. Consumers should treat `null` as "unknown" rather than `0`. |
 
-**Indexes:** unique on `(chainId, address, node)`.
+**Indexes:** unique on `(chain_id, address, node)`.
 
-**Relations:** belongs to one `resolver` via `(chainId, address)`, has many `resolver_address_records`, has many `resolver_text_records`.
+**Relations:** belongs to one `resolver` via `(chain_id, address)`, has many `resolver_address_records`, has many `resolver_text_records`.
 
 #### `resolver_address_records`
 
-Tracks address records for a `node` by `coinType` within a `resolver` on `chainId`.
+Tracks address records for a `node` by `coin_type` within a `resolver` on `chain_id`.
 
-Keyed by `(chainId, resolver, node, coinType)`, where the composite key segment `(chainId, resolver, node)` describes a `resolver_records` entity. A `resolver_address_record` is then additionally keyed by `coinType`.
+Keyed by `(chain_id, resolver, node, coin_type)`, where the composite key segment `(chain_id, resolver, node)` describes a `resolver_records` entity. A `resolver_address_record` is then additionally keyed by `coin_type`.
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
-| `chainId` | `bigint` | no | Part of primary key. |
+| `chain_id` | `bigint` | no | Part of primary key. |
 | `address` | `text` | no | Resolver contract address. Part of primary key. |
 | `node` | `text` | no | Name namehash. Part of primary key. |
-| `coinType` | `numeric(78)` | no | All well-known CoinTypes fit into a JavaScript number but NOT a Postgres `integer`, and must be stored as `bigint`. Part of primary key. |
-| `value` | `text` | no | The value of the Address Record specified by `((chainId, resolver, node), coinType)`. Interpreted by `interpretAddressRecordValue` — see its implementation for additional context and specific guarantees. |
+| `coin_type` | `numeric(78)` | no | All well-known CoinTypes fit into a JavaScript number but NOT a Postgres `integer`, and must be stored as `bigint`. Part of primary key. |
+| `value` | `text` | no | The value of the Address Record specified by `((chain_id, resolver, node), coin_type)`. Interpreted by `interpretAddressRecordValue` — see its implementation for additional context and specific guarantees. |
 
-**Primary key:** `(chainId, address, node, coinType)`.
+**Primary key:** `(chain_id, address, node, coin_type)`.
 
-**Relations:** belongs to one `resolver_records` via `(chainId, address, node)`.
+**Relations:** belongs to one `resolver_records` record via `(chain_id, address, node)`.
 
 #### `resolver_text_records`
 
-Tracks text records for a `node` by `key` within a `resolver` on `chainId`.
+Tracks text records for a `node` by `key` within a `resolver` on `chain_id`.
 
-Keyed by `(chainId, resolver, node, key)`, where the composite key segment `(chainId, resolver, node)` describes a `resolver_records` entity. A `resolver_text_record` is then additionally keyed by `key`.
+Keyed by `(chain_id, resolver, node, key)`, where the composite key segment `(chain_id, resolver, node)` describes a `resolver_records` entity. A `resolver_text_record` is then additionally keyed by `key`.
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
-| `chainId` | `bigint` | no | Part of primary key. |
+| `chain_id` | `bigint` | no | Part of primary key. |
 | `address` | `text` | no | Resolver contract address. Part of primary key. |
 | `node` | `text` | no | Name namehash. Part of primary key. |
 | `key` | `text` | no | Text record key. Part of primary key. |
-| `value` | `text` | no | The value of the Text Record specified by `((chainId, resolver, node), key)`. Interpreted by `interpretTextRecordValue` — see its implementation for additional context and specific guarantees. |
+| `value` | `text` | no | The value of the Text Record specified by `((chain_id, resolver, node), key)`. Interpreted by `interpretTextRecordValue` — see its implementation for additional context and specific guarantees. |
 
-**Primary key:** `(chainId, address, node, key)`.
+**Primary key:** `(chain_id, address, node, key)`.
 
-**Relations:** belongs to one `resolver_records` via `(chainId, address, node)`.
+**Relations:** belongs to one `resolver_records` record via `(chain_id, address, node)`.
 
 #### `migrated_nodes_by_parent`
 
-Tracks the migration status of a node, keyed by `(parentNode, labelHash)`. Due to a security issue, ENS migrated from the `RegistryOld` contract to a new Registry contract. When indexing events, the indexer must ignore any events on `RegistryOld` for domains that have since been migrated to the new Registry.
+Tracks the migration status of a node, keyed by `(parent_node, label_hash)`. Due to a security issue, ENS migrated from the `RegistryOld` contract to a new Registry contract. When indexing events, the indexer must ignore any events on `RegistryOld` for domains that have since been migrated to the new Registry.
 
-The set of nodes registered in the (new) Registry contract on the ENS Root Chain is stored here. When a `RegistryOld#NewOwner` event is encountered (which emits both `parentNode` and `labelHash` directly), the relevant row is looked up here; if it exists, the event is ignored.
+The set of nodes registered in the (new) Registry contract on the ENS Root Chain is stored here. When a `RegistryOld#NewOwner` event is encountered (which emits both `parent_node` and `label_hash` directly), the relevant row is looked up here; if it exists, the event is ignored.
 
 :::note
 This logic is only necessary for the ENS Root Chain — the only chain that includes the Registry migration. This Registry migration tracking is isolated to the Protocol Acceleration plugin. The subgraph plugin implements its own Registry migration logic. By isolating this logic here, the Protocol Acceleration plugin can be run independently of other plugins. The ENSv2 plugin depends on the Protocol Acceleration plugin in order to piggyback on this Registry migration logic.
@@ -538,14 +534,14 @@ The composite key is chosen so that Ponder's profile-pattern matcher can decompo
 
 | Column | Type | Nullable |
 |--------|------|----------|
-| `parentNode` | `text` | no |
-| `labelHash` | `text` | no |
+| `parent_node` | `text` | no |
+| `label_hash` | `text` | no |
 
-**Primary key:** `(parentNode, labelHash)`.
+**Primary key:** `(parent_node, label_hash)`.
 
 #### `migrated_nodes_by_node`
 
-Sibling lookup-by-namehash table for `migrated_nodes_by_parent`, keyed by `node`. The three `RegistryOld` handlers (`Transfer` / `NewTTL` / `NewResolver`) emit only the post-namehash `node` and cannot reconstruct the `(parentNode, labelHash)` pair without an unprofileable reverse lookup. Existence in this table is equivalent to existence in `migrated_nodes_by_parent`; both rows are written together by the migration helper. See `apps/ensindexer/src/lib/protocol-acceleration/migrated-node-db-helpers.ts` for the full rationale.
+Sibling lookup-by-namehash table for `migrated_nodes_by_parent`, keyed by `node`. The three `RegistryOld` handlers (`Transfer` / `NewTTL` / `NewResolver`) emit only the post-namehash `node` and cannot reconstruct the `(parent_node, label_hash)` pair without an unprofileable reverse lookup. Existence in this table is equivalent to existence in `migrated_nodes_by_parent`; both rows are written together by the migration helper. See [`protocol-acceleration/migrated-node-db-helpers.ts`](https://github.com/namehash/ensnode/blob/main/apps/ensindexer/src/lib/protocol-acceleration/migrated-node-db-helpers.ts) for the full rationale.
 
 | Column | Type | Nullable |
 |--------|------|----------|
@@ -582,7 +578,7 @@ These assumptions hold for the current scope of indexing logic but may not hold 
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
-| `subregistryId` | `text` | no | Identifies the chainId and address of the smart contract associated with the subregistry. Guaranteed to be a fully lowercase string formatted according to the CAIP-10 standard. Primary key. |
+| `subregistry_id` | `text` | no | Identifies the chainId and address of the smart contract associated with the subregistry. Guaranteed to be a fully lowercase string formatted according to the CAIP-10 standard. Primary key. |
 | `node` | `text` | no | The node (namehash) of the name the subregistry manages subnames of. Examples: `eth`, `base.eth`, `linea.eth`. Guaranteed to be a fully lowercase hex string representation of 32 bytes. |
 
 **Indexes:** unique on `node`.
@@ -599,13 +595,13 @@ This data model only tracks the **most recently created** registration lifecycle
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
-| `node` | `text` | no | The node (namehash) of the FQDN of the domain the registration lifecycle is associated with. Guaranteed to be a subname of the node of the subregistry identified by `subregistryId`. Guaranteed to be a fully lowercase hex string representation of 32 bytes. Primary key. |
-| `subregistryId` | `text` | no | Identifies the chainId and address of the subregistry smart contract that manages the registration lifecycle. Guaranteed to be a fully lowercase CAIP-10 string. |
-| `expiresAt` | `numeric(78)` | no | Unix timestamp when the Registration Lifecycle is scheduled to expire. |
+| `node` | `text` | no | The node (namehash) of the FQDN of the domain the registration lifecycle is associated with. Guaranteed to be a subname of the node of the subregistry identified by `subregistry_id`. Guaranteed to be a fully lowercase hex string representation of 32 bytes. Primary key. |
+| `subregistry_id` | `text` | no | Identifies the chainId and address of the subregistry smart contract that manages the registration lifecycle. Guaranteed to be a fully lowercase CAIP-10 string. |
+| `expires_at` | `numeric(78)` | no | Unix timestamp when the Registration Lifecycle is scheduled to expire. |
 
-**Indexes:** `subregistryId`.
+**Indexes:** `subregistry_id`.
 
-**Relations:** belongs to one `subregistries`, has many `registrar_actions`.
+**Relations:** belongs to one `subregistries` record, has many `registrar_actions` records.
 
 #### `registrar_actions`
 
@@ -621,23 +617,23 @@ The state from both events is aggregated into a single logical registrar action.
 |--------|------|----------|-------------|
 | `id` | `text` | no | Deterministic and globally unique identifier for the logical registrar action. Represents the *initial* on-chain event associated with the action. Guaranteed to be the first element in `eventIds`. Primary key. See note below about the ID format. |
 | `type` | `registrar_action_type` | no | `registration` or `renewal`. |
-| `subregistryId` | `text` | no | The ID of the subregistry the action was taken on. Identifies the chainId and address of the associated subregistry smart contract. Guaranteed to be a fully lowercase CAIP-10 string. |
+| `subregistry_id` | `text` | no | The ID of the subregistry the action was taken on. Identifies the chainId and address of the associated subregistry smart contract. Guaranteed to be a fully lowercase CAIP-10 string. |
 | `node` | `text` | no | The node (namehash) of the FQDN of the domain associated with the action. Guaranteed to be a fully lowercase hex string representation of 32 bytes. |
-| `incrementalDuration` | `numeric(78)` | no | Duration added to the registration by this action, in seconds. May be `0`. See detailed description below. |
-| `baseCost` | `numeric(78)` | yes | Base cost in wei. Guaranteed to be `null` if and only if `total` is `null`. Otherwise a non-negative value. |
-| `premium` | `numeric(78)` | yes | Premium cost in wei above `baseCost`. Guaranteed to be `null` if and only if `total` is `null`. Guaranteed to be zero when `type` is `renewal`. |
-| `total` | `numeric(78)` | yes | Total cost in wei, equal to the sum of `baseCost` and `premium`. Guaranteed to be `null` if and only if both `baseCost` and `premium` are `null`. |
+| `incremental_duration` | `numeric(78)` | no | Duration added to the registration by this action, in seconds. May be `0`. See detailed description below. |
+| `base_cost` | `numeric(78)` | yes | Base cost in wei. Guaranteed to be `null` if and only if `total` is `null`. Otherwise a non-negative value. |
+| `premium` | `numeric(78)` | yes | Premium cost in wei above `base_cost`. Guaranteed to be `null` if and only if `total` is `null`. Guaranteed to be zero when `type` is `renewal`. |
+| `total` | `numeric(78)` | yes | Total cost in wei, equal to the sum of `base_cost` and `premium`. Guaranteed to be `null` if and only if both `base_cost` and `premium` are `null`. |
 | `registrant` | `text` | no | Identifies the address that initiated the action and is paying `total` (if applicable). May not be the owner of the name — there are no restrictions on who may renew a name, and the initial owner may be distinct from the registrant. Guaranteed to be a fully lowercase address. |
-| `encodedReferrer` | `text` | yes | The raw 32-byte referrer value emitted on-chain. `null` if no referrer information was present in the indexed events. |
-| `decodedReferrer` | `text` | yes | The referrer address decoded from `encodedReferrer` using strict left-zero-padding validation. `null` if `encodedReferrer` is `null`. May be the zero address to represent that an `encodedReferrer` is defined but interpreted as no referrer. Guaranteed to be a fully lowercase address. |
-| `blockNumber` | `numeric(78)` | no | Block number that includes the action. The chainId of this block is the same as is referenced in `subregistryId`. |
-| `timestamp` | `numeric(78)` | no | Unix timestamp of the block referenced by `blockNumber`. |
-| `transactionHash` | `text` | no | Transaction hash of the action. The chainId of this transaction is the same as referenced in `subregistryId`. Note that a single transaction may be associated with any number of logical registrar actions. |
-| `eventIds` | `text[]` | no | Array of Ponder event IDs that contributed to this record. Guarantees: at least 1 element; ordered chronologically by `logIndex` within `blockNumber`; the first element equals the `id` of this record. |
+| `encoded_referrer` | `text` | yes | The raw 32-byte referrer value emitted on-chain. `null` if no referrer information was present in the indexed events. |
+| `decoded_referrer` | `text` | yes | The referrer address decoded from `encoded_referrer` using strict left-zero-padding validation. `null` if `encoded_referrer` is `null`. May be the zero address to represent that an `encoded_referrer` is defined but interpreted as no referrer. Guaranteed to be a fully lowercase address. |
+| `block_number` | `numeric(78)` | no | Block number that includes the action. The chainId of this block is the same as is referenced in `subregistry_id`. |
+| `timestamp` | `numeric(78)` | no | Unix timestamp of the block referenced by `block_number`. |
+| `transaction_hash` | `text` | no | Transaction hash of the action. The chainId of this transaction is the same as referenced in `subregistry_id`. Note that a single transaction may be associated with any number of logical registrar actions. |
+| `event_ids` | `text[]` | no | Array of Ponder event IDs that contributed to this record. Guarantees: at least 1 element; ordered chronologically by `log_index` within `block_number`; the first element equals the `id` of this record. |
 
-**Indexes:** `decodedReferrer`, `timestamp`.
+**Indexes:** `decoded_referrer`, `timestamp`.
 
-**Relations:** belongs to one `registration_lifecycles` via `node`.
+**Relations:** belongs to one `registration_lifecycles` record via `node`.
 
 ##### `id` format
 
@@ -645,20 +641,20 @@ The `id` value is a Ponder checkpoint string — a fixed-length decimal string e
 
 | Field | Width (digits) | Description |
 |-------|----------------|-------------|
-| `blockTimestamp` | 10 | Unix seconds timestamp of the block |
-| `chainId` | 16 | EIP-155 chain ID |
-| `blockNumber` | 16 | Block number |
-| `transactionIndex` | 16 | Index of the transaction within the block |
-| `eventType` | 1 | Internal Ponder event type (always `5`) |
-| `eventIndex` | 16 | Index of the event within the transaction |
+| `block_timestamp` | 10 | Unix seconds timestamp of the block |
+| `chain_id` | 16 | EIP-155 chain ID |
+| `block_number` | 16 | Block number |
+| `transaction_index` | 16 | Index of the transaction within the block |
+| `event_type` | 1 | Internal Ponder event type (always `5`) |
+| `event_index` | 16 | Index of the event within the transaction |
 
-All fields are zero-padded to their fixed widths, so the string has constant length and lexicographic order equals chronological order. Because all registrar actions originate from Ponder log (smart-contract event) handlers, every `id` shares the same `eventType` digit (`5`), making direct lexicographic or bigint comparison safe for establishing total chronological order.
+All fields are zero-padded to their fixed widths, so the string has constant length and lexicographic order equals chronological order. Because all registrar actions originate from Ponder log (smart-contract event) handlers, every `id` shares the same `event_type` digit (`5`), making direct lexicographic or bigint comparison safe for establishing total chronological order.
 
-##### `incrementalDuration` semantics
+##### `incremental_duration` semantics
 
-If `type` is `registration`: represents the duration between `blockTimestamp` and the initial `expiresAt` value that the associated registration lifecycle will be initialized with.
+If `type` is `registration`: represents the duration between `block_timestamp` and the initial `expires_at` value that the associated registration lifecycle will be initialized with.
 
-If `type` is `renewal`: represents the incremental increase in duration made to the `expiresAt` value in the associated registration lifecycle. A registration lifecycle may be extended via renewal even after it expires, as long as it is still within its grace period.
+If `type` is `renewal`: represents the incremental increase in duration made to the `expires_at` value in the associated registration lifecycle. A registration lifecycle may be extended via renewal even after it expires, as long as it is still within its grace period.
 
 **Example:** A registration lifecycle is scheduled to expire on Jan 1 midnight UTC. It is currently 30 days past expiration, with 60 days of grace period remaining.
 
@@ -672,7 +668,7 @@ After the grace period expires entirely, the name is considered "released" and c
 :::caution[Internal implementation detail]
 This table is an **internal implementation detail of ENSIndexer** and should not be queried outside of ENSIndexer. It is used to temporarily store data during event handler execution to correlate multiple on-chain events into a single `registrar_actions` record.
 
-Multiple logical registrar actions may be taken on the same `node` in the same `transactionHash` (e.g. a single transaction that registers and then renews a name twice). To support this, when the last event handler for a logical registrar action has completed its processing, the record referenced by `logicalEventKey` must be removed.
+Multiple logical registrar actions may be taken on the same `node` in the same `transaction_hash` (e.g. a single transaction that registers and then renews a name twice). To support this, when the last event handler for a logical registrar action has completed its processing, the record referenced by `logical_event_key` must be removed.
 :::
 
 **`_ensindexer_registrar_action_metadata_type`** enum:
@@ -683,9 +679,9 @@ Multiple logical registrar actions may be taken on the same `node` in the same `
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
-| `metadataType` | `_ensindexer_registrar_action_metadata_type` | no | The type of internal registrar action metadata being stored. Primary key. |
-| `logicalEventKey` | `text` | no | A fully lowercase string formatted as `{domainId}:{transactionHash}`. |
-| `logicalEventId` | `text` | no | Holds the `id` value of the existing `registrar_actions` record currently being built as an aggregation of on-chain events. Used by subsequent event handlers to identify which logical registrar action to aggregate additional indexed state into. |
+| `metadata_type` | `_ensindexer_registrar_action_metadata_type` | no | The type of internal registrar action metadata being stored. Primary key. |
+| `logical_event_key` | `text` | no | A fully lowercase string formatted as `{domain_id}:{transaction_hash}`. |
+| `logical_event_id` | `text` | no | Holds the `id` value of the existing `registrar_actions` record currently being built as an aggregation of on-chain events. Used by subsequent event handlers to identify which logical registrar action to aggregate additional indexed state into. |
 
 ---
 
@@ -701,26 +697,26 @@ A complete re-implementation of the legacy ENS Subgraph data model. When the `su
 |--------|------|----------|-------------|
 | `id` | `text` | no | The namehash of the name. Primary key. |
 | `name` | `text` | yes | The ENS name that this Domain represents. In subgraph-compatible mode: `null` for the root node, or a Subgraph Interpreted Name. Otherwise: an Interpreted Name (normalized, or consisting entirely of Interpreted Labels). The root node's name is `''` (empty string) rather than `null` in practice. |
-| `labelName` | `text` | yes | The label associated with the Domain. In subgraph-compatible mode: `null` for the root node or a subgraph-unindexable label; otherwise a Subgraph Interpreted Label. In non-compatible mode: `null` exclusively for the root node; otherwise a normalized label, or an Encoded LabelHash for unknown or unnormalized labels. |
-| `labelhash` | `text` | yes | `keccak256(labelName)`. |
-| `parentId` | `text` | yes | The namehash (`id`) of the parent name. |
-| `subdomainCount` | `integer` | no | The number of subdomains. Default `0`. |
-| `resolvedAddressId` | `text` | yes | Address logged from the current resolver, if any. |
-| `resolverId` | `text` | yes | The resolver that controls the domain's settings. |
+| `label_name` | `text` | yes | The label associated with the Domain. In subgraph-compatible mode: `null` for the root node or a subgraph-unindexable label; otherwise a Subgraph Interpreted Label. In non-compatible mode: `null` exclusively for the root node; otherwise a normalized label, or an Encoded LabelHash for unknown or unnormalized labels. |
+| `labelhash` | `text` | yes | `keccak256(label_name)`. |
+| `parent_id` | `text` | yes | The namehash (`id`) of the parent name. |
+| `subdomain_count` | `integer` | no | The number of subdomains. Default `0`. |
+| `resolved_address_id` | `text` | yes | Address logged from the current resolver, if any. |
+| `resolver_id` | `text` | yes | The resolver that controls the domain's settings. |
 | `ttl` | `numeric(78)` | yes | The time-to-live (TTL) value of the domain's records. |
-| `isMigrated` | `boolean` | no | Indicates whether the domain has been migrated to a new registrar. Default `false`. |
-| `createdAt` | `numeric(78)` | no | The time when the domain was created. |
-| `ownerId` | `text` | no | The account that owns the domain. |
-| `registrantId` | `text` | yes | The account that owns the ERC721 NFT for the domain. |
-| `wrappedOwnerId` | `text` | yes | The account that owns the wrapped domain. |
-| `expiryDate` | `numeric(78)` | yes | The expiry date for the domain, from either the registration or the wrapped domain if PCC is burned. |
+| `is_migrated` | `boolean` | no | Indicates whether the domain has been migrated to a new registrar. Default `false`. |
+| `created_at` | `numeric(78)` | no | The time when the domain was created. |
+| `owner_id` | `text` | no | The account that owns the domain. |
+| `registrant_id` | `text` | yes | The account that owns the ERC721 NFT for the domain. |
+| `wrapped_owner_id` | `text` | yes | The account that owns the wrapped domain. |
+| `expiry_date` | `numeric(78)` | yes | The expiry date for the domain, from either the registration or the wrapped domain if PCC is burned. |
 
 **Indexes:**
 - `name` — hash index, because some `name` values exceed the btree max row size (8191 bytes).
 - `name` — GIN trigram index for partial-match filters (`_contains`, `_starts_with`, `_ends_with`).
-- `labelhash`, `parentId`, `ownerId`, `registrantId`, `wrappedOwnerId`, `resolvedAddressId`.
+- `labelhash`, `parent_id`, `owner_id`, `registrant_id`, `wrapped_owner_id`, `resolved_address_id`.
 
-**Relations:** has one `subgraph_account` (resolvedAddress), has one `subgraph_account` (owner), has one `subgraph_account` (registrant), has one `subgraph_account` (wrappedOwner), has one `subgraph_resolver`, has one `subgraph_domain` (parent), has many `subgraph_domain` (subdomains), has one `subgraph_wrappedDomain`, has one `subgraph_registration`, has many domain event tables.
+**Relations:** has one `subgraph_accounts` record (resolved_address), has one `subgraph_accounts` record (owner), has one `subgraph_accounts` record (registrant), has one `subgraph_accounts` record (wrapped_owner), has one `subgraph_resolvers` record, has one `subgraph_domains` record (parent), has many `subgraph_domains` records (subdomains), has one `subgraph_wrappedDomains` record, has one `subgraph_registrations` record, has many domain event tables.
 
 #### `subgraph_accounts`
 
@@ -728,94 +724,94 @@ A complete re-implementation of the legacy ENS Subgraph data model. When the `su
 |--------|------|----------|
 | `id` | `text` | no |
 
-**Relations:** has many `subgraph_domains`, has many `subgraph_wrappedDomains`, has many `subgraph_registrations`.
+**Relations:** has many `subgraph_domains` records, has many `subgraph_wrapped_domains` records, has many `subgraph_registrations` records.
 
 #### `subgraph_resolvers`
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
 | `id` | `text` | no | Unique identifier: concatenation of the domain namehash and the resolver address. Primary key. |
-| `domainId` | `text` | no | The domain that this resolver is associated with. |
+| `domain_id` | `text` | no | The domain that this resolver is associated with. |
 | `address` | `text` | no | The address of the resolver contract. |
-| `addrId` | `text` | yes | The current value of the `addr` record for this resolver, as determined by the associated events. |
-| `contentHash` | `text` | yes | The content hash for this resolver, in binary format. |
+| `addr_id` | `text` | yes | The current value of the `addr` record for this resolver, as determined by the associated events. |
+| `content_hash` | `text` | yes | The content hash for this resolver, in binary format. |
 | `texts` | `text[]` | yes | The set of observed text record keys for this resolver. Nullable (not defaulting to `[]`) to match subgraph behavior. |
-| `coinTypes` | `numeric(78)[]` | yes | The set of observed SLIP-44 coin types for this resolver. Nullable (not defaulting to `[]`) to match subgraph behavior. |
+| `coin_types` | `numeric(78)[]` | yes | The set of observed SLIP-44 coin types for this resolver. Nullable (not defaulting to `[]`) to match subgraph behavior. |
 
-**Indexes:** `domainId`.
+**Indexes:** `domain_id`.
 
-**Relations:** has one `subgraph_account` (addr), has one `subgraph_domain`, has many resolver event tables.
+**Relations:** has one `subgraph_accounts` record (addr), has one `subgraph_domains` record, has many resolver event tables.
 
 #### `subgraph_registrations`
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
 | `id` | `text` | no | The unique identifier of the registration (namehash). Primary key. |
-| `domainId` | `text` | no | The domain name associated with the registration. |
-| `registrationDate` | `numeric(78)` | no | The registration date of the domain. |
-| `expiryDate` | `numeric(78)` | no | The expiry date of the domain. |
+| `domain_id` | `text` | no | The domain name associated with the registration. |
+| `registration_date` | `numeric(78)` | no | The registration date of the domain. |
+| `expiry_date` | `numeric(78)` | no | The expiry date of the domain. |
 | `cost` | `numeric(78)` | yes | The cost associated with the domain registration. |
-| `registrantId` | `text` | no | The account that registered the domain. |
-| `labelName` | `text` | yes | The label associated with the domain registration. In subgraph-compatible mode: `null` for a subgraph-unindexable label; otherwise a Subgraph Interpreted Label. In non-compatible mode: a normalized label, or an Encoded LabelHash for unnormalized labels. `null` is not expected in practice because there is no Registration entity for the root node (the only node with a null labelName). |
+| `registrant_id` | `text` | no | The account that registered the domain. |
+| `label_name` | `text` | yes | The label associated with the domain registration. In subgraph-compatible mode: `null` for a subgraph-unindexable label; otherwise a Subgraph Interpreted Label. In non-compatible mode: a normalized label, or an Encoded LabelHash for unnormalized labels. `null` is not expected in practice because there is no Registration entity for the root node (the only node with a null label_name). |
 
-**Indexes:** `domainId`, `registrationDate`, `expiryDate`.
+**Indexes:** `domain_id`, `registration_date`, `expiry_date`.
 
-**Relations:** has one `subgraph_domain`, has one `subgraph_account` (registrant), has many registration event tables.
+**Relations:** has one `subgraph_domains` record, has one `subgraph_accounts` record (registrant), has many registration event tables.
 
 #### `subgraph_wrapped_domains`
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
 | `id` | `text` | no | The unique identifier for each instance of the WrappedDomain entity. Primary key. |
-| `domainId` | `text` | no | The domain that is wrapped by this WrappedDomain. |
-| `expiryDate` | `numeric(78)` | no | The expiry date of the wrapped domain. |
+| `domain_id` | `text` | no | The domain that is wrapped by this WrappedDomain. |
+| `expiry_date` | `numeric(78)` | no | The expiry date of the wrapped domain. |
 | `fuses` | `integer` | no | The number of fuses remaining on the wrapped domain. |
-| `ownerId` | `text` | no | The account that owns this WrappedDomain. |
+| `owner_id` | `text` | no | The account that owns this WrappedDomain. |
 | `name` | `text` | yes | The name that this WrappedDomain represents. Names are emitted by the NameWrapper contract as DNS-Encoded Names which may be malformed, resulting in `null`. In subgraph-compatible mode: `null` for malformed or subgraph-unindexable labels; otherwise a Subgraph Interpreted Label. In non-compatible mode: `null` for a malformed DNS-Encoded Name; otherwise an Interpreted Name. |
 
-**Indexes:** `domainId`.
+**Indexes:** `domain_id`.
 
-**Relations:** has one `subgraph_domain`, has one `subgraph_account` (owner).
+**Relations:** has one `subgraph_domains` record, has one `subgraph_accounts` record (owner).
 
 #### Event tables
 
-All event tables share the base columns `id` (primary key), `blockNumber`, and `transactionID`. Domain event tables additionally carry `domainId`; registration event tables carry `registrationId`; resolver event tables carry `resolverId`. The indexes on each event table are `(domainId/resolverId/registrationId)` for reverse lookups and `(domainId/resolverId/registrationId, id)` for sorted pagination.
+All event tables share the base columns `id` (primary key), `block_number`, and `transaction_id`. Domain event tables additionally carry `domain_id`; registration event tables carry `registration_id`; resolver event tables carry `resolver_id`. The indexes on each event table are `(domain_id/resolver_id/registration_id)` for reverse lookups and `(domain_id/resolver_id/registration_id, id)` for sorted pagination.
 
 **Domain event tables**
 
 | Table | Additional columns |
 |-------|--------------------|
-| `subgraph_transfers` | `ownerId` |
-| `subgraph_new_owners` | `ownerId`, `parentDomainId` |
-| `subgraph_new_resolvers` | `resolverId` |
+| `subgraph_transfers` | `owner_id` |
+| `subgraph_new_owners` | `owner_id`, `parent_domain_id` |
+| `subgraph_new_resolvers` | `resolver_id` |
 | `subgraph_new_ttls` | `ttl` |
-| `subgraph_wrapped_transfers` | `ownerId` |
-| `subgraph_name_wrapped` | `name`, `fuses`, `ownerId`, `expiryDate` |
-| `subgraph_name_unwrapped` | `ownerId` |
+| `subgraph_wrapped_transfers` | `owner_id` |
+| `subgraph_name_wrapped` | `name`, `fuses`, `owner_id`, `expiry_date` |
+| `subgraph_name_unwrapped` | `owner_id` |
 | `subgraph_fuses_set` | `fuses` |
-| `subgraph_expiry_extended` | `expiryDate` |
+| `subgraph_expiry_extended` | `expiry_date` |
 
 **Registration event tables**
 
 | Table | Additional columns |
 |-------|--------------------|
-| `subgraph_name_registered` | `registrantId`, `expiryDate` |
-| `subgraph_name_renewed` | `expiryDate` |
-| `subgraph_name_transferred` | `newOwnerId` |
+| `subgraph_name_registered` | `registrant_id`, `expiry_date` |
+| `subgraph_name_renewed` | `expiry_date` |
+| `subgraph_name_transferred` | `new_owner_id` |
 
 **Resolver event tables**
 
 | Table | Additional columns |
 |-------|--------------------|
-| `subgraph_addr_changed` | `addrId` |
-| `subgraph_multicoin_addr_changed` | `coinType`, `addr` |
+| `subgraph_addr_changed` | `addr_id` |
+| `subgraph_multicoin_addr_changed` | `coin_type`, `addr` |
 | `subgraph_name_changed` | `name` |
-| `subgraph_abi_changed` | `contentType` |
+| `subgraph_abi_changed` | `content_type` |
 | `subgraph_pubkey_changed` | `x`, `y` |
 | `subgraph_text_changed` | `key`, `value` |
 | `subgraph_contenthash_changed` | `hash` |
-| `subgraph_interface_changed` | `interfaceID`, `implementer` |
-| `subgraph_authorisation_changed` | `owner`, `target`, `isAuthorized` |
+| `subgraph_interface_changed` | `interface_id`, `implementer` |
+| `subgraph_authorisation_changed` | `owner`, `target`, `is_authorized` |
 | `subgraph_version_changed` | `version` |
 
 ---
@@ -830,38 +826,38 @@ Tracks ENS-related NFT token ownership and secondary market sales via the Seapor
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
-| `id` | `text` | no | Unique and deterministic identifier of the on-chain event associated with the sale. Composite key format: `{chainId}-{blockNumber}-{logIndex}` (e.g. `1-1234567-5`). Primary key. |
-| `chainId` | `bigint` | no | The chain where the sale occurred. |
-| `blockNumber` | `numeric(78)` | no | The block number on `chainId` where the sale occurred. |
-| `logIndex` | `integer` | no | The log index position of the sale event within `blockNumber`. |
-| `transactionHash` | `text` | no | The EVM transaction hash on `chainId` associated with the sale. |
-| `orderHash` | `text` | no | The Seaport order hash. |
-| `contractAddress` | `text` | no | The address of the contract on `chainId` that manages `tokenId`. |
-| `tokenId` | `numeric(78)` | no | The tokenId managed by `contractAddress` that was sold. |
-| `assetNamespace` | `text` | no | The CAIP-19 Asset Namespace of the token that was sold. Either `erc721` or `erc1155`. |
-| `assetId` | `text` | no | The CAIP-19 Asset ID of the token that was sold. A globally unique reference to the specific asset. |
-| `domainId` | `text` | no | The namehash (Node) of the ENS domain that was sold. |
-| `buyer` | `text` | no | The account that bought the token controlling ownership of `domainId` from the seller, for the amount of currency associated with the sale. |
-| `seller` | `text` | no | The account that sold the token controlling ownership of `domainId` to the buyer, for the amount of currency associated with the sale. |
+| `id` | `text` | no | Unique and deterministic identifier of the on-chain event associated with the sale. Composite key format: `{chain_id}-{block_number}-{log_index}` (e.g. `1-1234567-5`). Primary key. |
+| `chain_id` | `bigint` | no | The chain where the sale occurred. |
+| `block_number` | `numeric(78)` | no | The block number on `chain_id` where the sale occurred. |
+| `log_index` | `integer` | no | The log index position of the sale event within `block_number`. |
+| `transaction_hash` | `text` | no | The EVM transaction hash on `chain_id` associated with the sale. |
+| `order_hash` | `text` | no | The Seaport order hash. |
+| `contract_address` | `text` | no | The address of the contract on `chain_id` that manages `token_id`. |
+| `token_id` | `numeric(78)` | no | The tokenId managed by `contract_address` that was sold. |
+| `asset_namespace` | `text` | no | The CAIP-19 Asset Namespace of the token that was sold. Either `erc721` or `erc1155`. |
+| `asset_id` | `text` | no | The CAIP-19 Asset ID of the token that was sold. A globally unique reference to the specific asset. |
+| `domain_id` | `text` | no | The namehash (Node) of the ENS domain that was sold. |
+| `buyer` | `text` | no | The account that bought the token controlling ownership of `domain_id` from the seller, for the amount of currency associated with the sale. |
+| `seller` | `text` | no | The account that sold the token controlling ownership of `domain_id` to the buyer, for the amount of currency associated with the sale. |
 | `currency` | `text` | no | Currency of the payment. One of: ETH, USDC, or DAI. |
 | `amount` | `numeric(78)` | no | The amount of currency paid, denominated in the smallest unit. ETH/WETH: wei (1 ETH = 10^18). USDC: micro-units (1 USDC = 10^6). DAI: wei-equivalent (1 DAI = 10^18). |
 | `timestamp` | `numeric(78)` | no | Unix timestamp of the block when the sale occurred. |
 
-**Indexes:** `domainId`, `assetId`, `buyer`, `seller`, `timestamp`.
+**Indexes:** `domain_id`, `asset_id`, `buyer`, `seller`, `timestamp`.
 
 #### `name_tokens`
 
-After an NFT is indexed, it is never deleted from the index. When an indexed NFT is burned on-chain, its record is retained and its `mintStatus` is updated to `burned`. If the NFT is minted again after being burned, `mintStatus` is updated back to `minted`.
+After an NFT is indexed, it is never deleted from the index. When an indexed NFT is burned on-chain, its record is retained and its `mint_status` is updated to `burned`. If the NFT is minted again after being burned, `mint_status` is updated back to `minted`.
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
 | `id` | `text` | no | The CAIP-19 Asset ID of the token. A globally unique reference to this token. Primary key. |
-| `domainId` | `text` | no | The namehash (Node) of the ENS name associated with the token. An ENS name may have more than one distinct token across time. It is also possible for multiple distinct tokens for an ENS name to have a `mintStatus` of `minted` at the same time — for example, when a direct subname of `.eth` is wrapped by the NameWrapper (one `minted` token managed by the `BaseRegistrar`, owned by the NameWrapper; one `minted` token managed by the NameWrapper, owned by the effective owner). |
-| `chainId` | `bigint` | no | The chain that manages the token. |
-| `contractAddress` | `text` | no | The address of the contract on `chainId` that manages the token. |
-| `tokenId` | `numeric(78)` | no | The tokenId of the token managed by `contractAddress`. |
-| `assetNamespace` | `text` | no | The CAIP-19 Asset Namespace of the token. Either `erc721` or `erc1155`. |
-| `owner` | `text` | no | The account that owns the token. Value is the zero address if and only if `mintStatus` is `burned`. Note: the owner of the token for a given `domainId` may differ from the owner of the associated node in the registry. For example, if address X owns `foo.eth` in both the `BaseRegistrar` and the Registry, and X transfers registry ownership directly to Y, the `BaseRegistrar` token owner remains X. The `BaseRegistrar` implements a `reclaim` function allowing the token owner to reclaim registry ownership. |
-| `mintStatus` | `text` | no | Either `minted` or `burned`. |
+| `domain_id` | `text` | no | The namehash (Node) of the ENS name associated with the token. An ENS name may have more than one distinct token across time. It is also possible for multiple distinct tokens for an ENS name to have a `mint_status` of `minted` at the same time — for example, when a direct subname of `.eth` is wrapped by the NameWrapper (one `minted` token managed by the `BaseRegistrar`, owned by the NameWrapper; one `minted` token managed by the NameWrapper, owned by the effective owner). |
+| `chain_id` | `bigint` | no | The chain that manages the token. |
+| `contract_address` | `text` | no | The address of the contract on `chain_id` that manages the token. |
+| `token_id` | `numeric(78)` | no | The tokenId of the token managed by `contract_address`. |
+| `asset_namespace` | `text` | no | The CAIP-19 Asset Namespace of the token. Either `erc721` or `erc1155`. |
+| `owner` | `text` | no | The account that owns the token. Value is the zero address if and only if `mint_status` is `burned`. Note: the owner of the token for a given `domain_id` may differ from the owner of the associated node in the registry. For example, if address X owns `foo.eth` in both the `BaseRegistrar` and the Registry, and X transfers registry ownership directly to Y, the `BaseRegistrar` token owner remains X. The `BaseRegistrar` implements a `reclaim` function allowing the token owner to reclaim registry ownership. |
+| `mint_status` | `text` | no | Either `minted` or `burned`. |
 
-**Indexes:** `domainId`, `owner`.
+**Indexes:** `domain_id`, `owner`.
