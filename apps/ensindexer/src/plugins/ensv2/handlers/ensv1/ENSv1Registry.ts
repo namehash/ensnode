@@ -92,7 +92,7 @@ export default function () {
         context.chain.id === getENSRootChainId(config.namespace) &&
         // Sepolia V2 Tenderly Private RPC is rate-limiting the debug_traceTransaction calls so we
         // avoid addr.reverse healing for that namespace so indexing progresses smoothly
-        // TODO: remove this once Sepolia V2 is decomissioned
+        // TODO: remove this once Sepolia V2 is decommissioned
         config.namespace !== ENSNamespaceIds.SepoliaV2
       ) {
         const label = await healAddrReverseSubnameLabel(context, event, labelHash);

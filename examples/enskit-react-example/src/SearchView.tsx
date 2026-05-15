@@ -87,16 +87,17 @@ export function SearchView() {
         <>
           {fetching && <p>Loading...</p>}
           <ul>
-            {data?.domains?.edges.map((edge) => (
-              <li key={edge.node.id}>
-                ({edge.node.__typename === "ENSv1Domain" ? "v1" : "v2"}){" "}
-                {edge.node.canonical && (
+            {data?.domains?.edges.map((edge) => {
+              if (!edge.node.canonical) return null;
+              return (
+                <li key={edge.node.id}>
+                  ({edge.node.__typename === "ENSv1Domain" ? "v1" : "v2"}){" "}
                   <Link to={`/domain/${edge.node.canonical.name}`}>
                     {beautifyInterpretedName(edge.node.canonical.name)}
                   </Link>
-                )}
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
           {data?.domains && data.domains.edges.length === 0 && !fetching && <p>No matches.</p>}
           {data?.domains?.pageInfo.hasNextPage && (

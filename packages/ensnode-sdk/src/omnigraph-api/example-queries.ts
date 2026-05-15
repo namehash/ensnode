@@ -329,7 +329,7 @@ query AccountResolverPermissions($address: Address!) {
     query: `
 query DomainResolver($name: InterpretedName!) {
   domain(by: { name: $name }) {
-    resolver {
+    assignedResolver {
       records { edges { node { node keys coinTypes } } }
       permissions { resources { edges { node { resource users { edges { node { user { address } roles } } } } } } }
       events { totalCount edges { node { topics data timestamp } } }

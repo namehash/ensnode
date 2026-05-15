@@ -45,7 +45,7 @@ import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-eng
  * are materialized from membership in the canonical nametree, and are kept up-to-date by reconciling
  * during updates to the uni-directional pointers.
  *
- * `reconcileRegistryCanonicality` cascades through the canonical subgraph beneath the Registry
+ * `reconcileRegistryCanonicality` cascades through the canonical nametree beneath the Registry
  * in two situations: (a) the Registry's `canonical` flag flipped, or (b) the Registry's canonical
  * parent Domain identity changed while the flag stays canonical, which leaves descendants'
  * materialized canonical-tree fields (`canonicalName`, `canonicalLabelHashPath`, `canonicalNode`)
@@ -120,6 +120,14 @@ export async function ensureDomainInRegistry(
     const parentDomain = registry.canonicalDomainId
       ? await context.ensDb.find(ensIndexerSchema.domain, { id: registry.canonicalDomainId })
       : null;
+
+    // If we found a canonical parent Domain, it must itself be materialized. Otherwise we'd
+    // silently store a truncated `canonicalName` (just `label.interpreted`) for a non-root Domain.
+    if (parentDomain && !parentDomain.canonicalName) {
+      throw new Error(
+        `Invariant(ensureDomainInRegistry): canonical parentDomain '${parentDomain.id}' is missing canonicalName.`,
+      );
+    }
 
     // construct the Canonical LabelHashPath (head-first traversal order: root → leaf)
     const canonicalLabelHashPath: LabelHashPath = [
@@ -305,7 +313,7 @@ export async function handleBridgedResolverChange(
  * `prevCanonicalDomainId` is the value of `Registry.canonicalDomainId` before whatever mutation
  * prompted this reconcile. Callers that wrote a new value to that pointer
  * (`handleRegistryCanonicalDomainUpdated`) pass the overwritten value; callers that did not
- * touch the pointer (`handleSubregistryUpdated`) pass the unchanged current value. Reconcile
+ * touch the pointer (`handleSubregistryUpdated`) omit the argument (leaving it `undefined`). Reconcile
  * compares it against the current state to detect parent-identity changes: when the pointer
  * swings from one canonical-agreeing parent to another, the flag stays true but descendants'
  * materialized `canonicalName` / `canonicalLabelHashPath` / `canonicalNode` are rooted at the
@@ -329,7 +337,7 @@ async function reconcileRegistryCanonicality(
   const registry = await context.ensDb.find(ensIndexerSchema.registry, { id: registryId });
   // if there's no registry, we can no-op; this reconciliation is a no-op if a Domain has set a
   // Subregistry that doesn't exist yet. once the subregistry exists and sets its Canonical Domain,
-  // handleCanonialDomainUpdated will trigger the appropriate reconciliation
+  // handleRegistryCanonicalDomainUpdated will trigger the appropriate reconciliation
   if (!registry) return;
 
   // determine the new canonicality from the current pointer state
@@ -385,7 +393,7 @@ async function reconcileRegistryCanonicality(
  *
  * Selectivity comes from the GIN index `byCanonicalLabelHashPath` on `canonical_label_hash_path`.
  * Note: GIN indexes are applied at realtime by Ponder, not during backfill — backfill-time heal
- * cascades degenerate to a sequential scan; re-asses whether a lookup table would help, or perhaps
+ * cascades degenerate to a sequential scan; re-assess whether a lookup table would help, or perhaps
  * introduce a non-ponder-managed index on this column via eventHandlerPreconditions.
  */
 export async function cascadeLabelHeal(
@@ -405,12 +413,12 @@ export async function cascadeLabelHeal(
 }
 
 /**
- * Walk the canonical subgraph rooted at `registryId` and set `canonical = nextCanonical` on
+ * Walk the canonical nametree rooted at `registryId` and set `canonical = nextCanonical` on
  * every Registry and Domain it visits, additionally materializing canonical-tree fields on
  * every affected Domain.
  *
  * Two phases:
- *   - Phase A is a single statement: one recursive CTE that enumerates the canonical subgraph
+ *   - Phase A is a single statement: one recursive CTE that enumerates the canonical nametree
  *     by following unidirectional pointers + agreement check, while carrying the partial
  *     `parent_path` / `parent_name` accumulators down the tree. A data-modifying CTE batch-updates
  *     Registry rows; the trailing UPDATE batch-updates Domain rows with the materialized

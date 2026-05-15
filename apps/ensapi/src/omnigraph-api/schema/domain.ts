@@ -86,7 +86,7 @@ export const ENSv2DomainRef = builder.objectRef<ENSv2Domain>("ENSv2Domain");
 //////////////////////////////////
 DomainInterfaceRef.implement({
   description:
-    "A Domain represents an on-chain Domain, i.e. an individual Label within the ENS namegraph. It may or may not be Canonical. It may be an ENSv1Domain or an ENSv2Domain.",
+    "Represents a Domain, i.e. an individual Label within the ENS namegraph. It may or may not be Canonical. It may be an ENSv1Domain or an ENSv2Domain.",
   fields: (t) => ({
     /////////////
     // Domain.id
@@ -103,7 +103,7 @@ DomainInterfaceRef.implement({
     ////////////////
     label: t.field({
       type: LabelRef,
-      description: "The Label this Domain represents in the ENS Namegraph.",
+      description: "The Label associated with this Domain in the ENS Namegraph.",
       nullable: false,
       resolve: (parent) => parent.label,
     }),
@@ -113,7 +113,7 @@ DomainInterfaceRef.implement({
     ////////////////////
     canonical: t.field({
       description:
-        "Metadata (name, path, and node) related to the Domain's canonicality, if known. Null when the Domain is not Canonical.",
+        "Metadata (name, path, and node) related to the Domain's canonicality, if known. Null when the Domain is not in the canonical nametree.",
       type: DomainCanonicalRef,
       nullable: true,
       resolve: (domain) => (domain.canonical ? domain : null),
@@ -161,10 +161,10 @@ DomainInterfaceRef.implement({
       resolve: (parent) => parent.subregistryId,
     }),
 
-    ///////////////////
-    // Domain.resolver
-    ///////////////////
-    resolver: t.field({
+    ///////////////////////////
+    // Domain.assignedResolver
+    ///////////////////////////
+    assignedResolver: t.field({
       description:
         "The Resolver that this Domain has assigned, if any. NOTE that this is the Domain's _assigned_ Resolver, _not_ its _effective_ Resolver, which can only be determined by following ENS Forward Resolution and ENSIP-10. Do NOT use this Domain-Resolver relationship in isolation to resolve records, that operation is NOT ENS Forward Resolution.",
       type: ResolverRef,
@@ -263,7 +263,7 @@ DomainInterfaceRef.implement({
 // ENSv1Domain Implementation
 //////////////////////////////
 ENSv1DomainRef.implement({
-  description: "An ENSv1Domain represents an on-chain ENSv1 Domain.",
+  description: "An ENSv1Domain represents an ENSv1 Domain.",
   interfaces: [DomainInterfaceRef],
   isTypeOf: (domain) => isENSv1Domain(domain as DomainInterface),
   fields: (t) => ({
@@ -294,7 +294,7 @@ ENSv1DomainRef.implement({
 // ENSv2Domain Implementation
 //////////////////////////////
 ENSv2DomainRef.implement({
-  description: "An ENSv2Domain represents an on-chain ENSv2 Domain.",
+  description: "An ENSv2Domain represents an ENSv2 Domain.",
   interfaces: [DomainInterfaceRef],
   isTypeOf: (domain) => isENSv2Domain(domain as DomainInterface),
   fields: (t) => ({

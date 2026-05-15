@@ -1050,6 +1050,15 @@ const introspection = {
         "name": "Domain",
         "fields": [
           {
+            "name": "assignedResolver",
+            "type": {
+              "kind": "OBJECT",
+              "name": "Resolver"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
             "name": "canonical",
             "type": {
               "kind": "OBJECT",
@@ -1200,15 +1209,6 @@ const introspection = {
                 "kind": "INTERFACE",
                 "name": "Registry"
               }
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "resolver",
-            "type": {
-              "kind": "OBJECT",
-              "name": "Resolver"
             },
             "args": [],
             "isDeprecated": false
@@ -1701,6 +1701,15 @@ const introspection = {
         "name": "ENSv1Domain",
         "fields": [
           {
+            "name": "assignedResolver",
+            "type": {
+              "kind": "OBJECT",
+              "name": "Resolver"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
             "name": "canonical",
             "type": {
               "kind": "OBJECT",
@@ -1863,15 +1872,6 @@ const introspection = {
                 "kind": "INTERFACE",
                 "name": "Registry"
               }
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "resolver",
-            "type": {
-              "kind": "OBJECT",
-              "name": "Resolver"
             },
             "args": [],
             "isDeprecated": false
@@ -2265,6 +2265,15 @@ const introspection = {
         "name": "ENSv2Domain",
         "fields": [
           {
+            "name": "assignedResolver",
+            "type": {
+              "kind": "OBJECT",
+              "name": "Resolver"
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
             "name": "canonical",
             "type": {
               "kind": "OBJECT",
@@ -2460,15 +2469,6 @@ const introspection = {
                 "kind": "INTERFACE",
                 "name": "Registry"
               }
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
-            "name": "resolver",
-            "type": {
-              "kind": "OBJECT",
-              "name": "Resolver"
             },
             "args": [],
             "isDeprecated": false

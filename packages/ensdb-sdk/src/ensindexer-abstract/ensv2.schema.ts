@@ -27,7 +27,7 @@ import type { EncodedReferrer } from "@ensnode/ensnode-sdk";
  * While the initial approach was a highly materialized view of the ENS protocol, abstracting away
  * as many on-chain details as possible, in practice—due to the sheer complexity of the protocol at
  * resolution-time—full materialization of resolution behavior is impractical. The canonical
- * subgraph, however, is materialized inline via synchronous handler-side cascades; see
+ * nametree, however, is materialized inline via synchronous handler-side cascades; see
  * `Domain.canonical*` fields and `canonicality-db-helpers.ts`.
  *
  * As a result, this schema takes a balanced approach. It mimics on-chain state as closely as possible,

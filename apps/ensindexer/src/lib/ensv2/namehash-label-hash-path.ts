@@ -13,8 +13,7 @@ import {
  * `LabelHashPath` is head-first (root → leaf), but ENS name strings are leaf-first
  * ("vitalik.eth"), so we reverse before encoding each labelHash as `[<hash>]` and joining.
  *
- * TODO: this could more accurately perform the namehash algorithm over the LabelHashes directly
- * but we use this simple approach for now
+ * TODO: optimize by performing the namehash algorithm over the LabelHashes directly
  */
 export function namehashLabelHashPath(labelHashPath: LabelHashPath): Node {
   return namehashInterpretedName(

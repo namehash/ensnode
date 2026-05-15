@@ -96,8 +96,9 @@ describe("Domain.canonical", () => {
     "materializes canonical.{name, path, node} for '$name'",
     async ({ name, canonical }) => {
       const result = await request<DomainCanonicalQueryResult>(DomainCanonicalByName, { name });
-      expect(result.domain?.canonical).not.toBeNull();
-      expect(result.domain!.canonical!.name).toBe(canonical);
+      expect(result).toMatchObject({
+        domain: { canonical: { name: canonical } },
+      });
       expect(result.domain!.canonical!.path.length).toBe(canonical.split(".").length);
     },
   );
@@ -129,10 +130,11 @@ describe("Domain.canonical", () => {
     );
     const id = makeENSv1DomainId(v1RootRegistry, ADDR_REVERSE_NODE);
 
-    const result = await request<DomainCanonicalQueryResult>(DomainCanonicalById, { id });
-    expect(result.domain?.id).toBe(id);
-    expect(result.domain?.canonical).not.toBeNull();
-    expect(result.domain!.canonical!.name).toBe("addr.reverse");
+    await expect(
+      request<DomainCanonicalQueryResult>(DomainCanonicalById, { id }),
+    ).resolves.toMatchObject({
+      domain: { id, canonical: { name: "addr.reverse" } },
+    });
   });
 });
 
