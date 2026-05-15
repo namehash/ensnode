@@ -4,11 +4,14 @@ import { loadExampleProject } from "./example-project/loadExampleProject";
 import { resolveEnssdkExamplePackageManifest } from "./example-project/resolvePinnedDependencies";
 import type { PlaygroundProject } from "./example-project/types";
 
-const enssdkExampleSourceModules = import.meta.glob("@workspace/examples/enssdk-example/src/**/*", {
-  query: "?raw",
-  import: "default",
-  eager: true,
-}) as Record<string, string>;
+const enssdkExampleSourceModules = import.meta.glob(
+  "../../../../../examples/enssdk-example/src/**/*.{ts,tsx}",
+  {
+    query: "?raw",
+    import: "default",
+    eager: true,
+  },
+) as Record<string, string>;
 
 export function loadEnssdkExampleProject(): PlaygroundProject {
   return loadExampleProject({

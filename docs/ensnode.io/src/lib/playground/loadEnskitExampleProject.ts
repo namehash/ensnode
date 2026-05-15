@@ -9,12 +9,12 @@ import { resolveEnskitExamplePackageManifest } from "./example-project/resolvePi
 import type { PlaygroundProject } from "./example-project/types";
 
 const enskitExampleSourceModules = import.meta.glob(
-  "@workspace/examples/enskit-react-example/src/**/*",
+  "../../../../../examples/enskit-react-example/src/**/*.{ts,tsx}",
   { query: "?raw", import: "default", eager: true },
 ) as Record<string, string>;
 
 const enskitExampleRootModules = import.meta.glob(
-  "@workspace/examples/enskit-react-example/{index.html,vite.config.ts}",
+  "../../../../../examples/enskit-react-example/{index.html,vite.config.ts}",
   { query: "?raw", import: "default", eager: true },
 ) as Record<string, string>;
 
