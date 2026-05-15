@@ -258,14 +258,14 @@ function EnsNodeStackInfoCardContent({ ensNodeStackInfo }: { ensNodeStackInfo: E
     />
   );
 
-  const subgraphCompatabilityFeature = (
-    <InfoCardFeature
-      label="Subgraph Compatibility"
-      key="ENSIndexer Subgraph Compatibility feature"
-      description={subgraphCompatibilityDescription}
-      icon={<IconGraphNetwork width={15} height={15} className="text-[#3F3F46] shrink-0" />}
-    />
-  );
+  // const subgraphCompatabilityFeature = (
+  //   <InfoCardFeature
+  //     label="Subgraph Compatibility"
+  //     key="ENSIndexer Subgraph Compatibility feature"
+  //     description={subgraphCompatibilityDescription}
+  //     icon={<IconGraphNetwork width={15} height={15} className="text-[#3F3F46] shrink-0" />}
+  //   />
+  // );
 
   const ensIndexerFeatures = [
     {
@@ -280,11 +280,16 @@ function EnsNodeStackInfoCardContent({ ensNodeStackInfo }: { ensNodeStackInfo: E
       isActivated: replaceUnnormalizedLabelsActivated,
       feature: replaceUnnormalizedLabelsFeature,
     },
-    {
-      isActivated: subgraphCompatibilityActivated,
-      feature: subgraphCompatabilityFeature,
-    },
+    // {
+    //   isActivated: subgraphCompatibilityActivated,
+    //   feature: subgraphCompatabilityFeature,
+    // },
   ];
+
+  const ensIndexerFeaturesActivated = ensIndexerFeatures.filter(({ isActivated }) => isActivated);
+  const ensIndexerFeaturesDeactivated = ensIndexerFeatures.filter(
+    ({ isActivated }) => !isActivated,
+  );
 
   const ensRootChainId = getENSRootChainId(ensIndexerPublicConfig.namespace);
 
@@ -358,7 +363,7 @@ function EnsNodeStackInfoCardContent({ ensNodeStackInfo }: { ensNodeStackInfo: E
             }
           />
         </InfoCardItems>
-        <InfoCardFeatures activated={ensApiPublicConfig.theGraphFallback.canFallback}>
+        {/* <InfoCardFeatures activated={ensApiPublicConfig.theGraphFallback.canFallback}>
           <InfoCardFeature
             label="Subgraph API Fallback"
             description={
@@ -387,7 +392,7 @@ function EnsNodeStackInfoCardContent({ ensNodeStackInfo }: { ensNodeStackInfo: E
             }
             icon={<History width={15} height={15} className="shrink-0" />}
           />
-        </InfoCardFeatures>
+        </InfoCardFeatures> */}
       </InfoCard>
 
       <InfoCardConnector />
@@ -436,7 +441,7 @@ function EnsNodeStackInfoCardContent({ ensNodeStackInfo }: { ensNodeStackInfo: E
             }
           />
 
-          <InfoCardItem
+          {/* <InfoCardItem
             label="Ponder Schema"
             value={<p className={cardItemValueStyles}>ponder_sync</p>}
             additionalInfo={
@@ -445,7 +450,7 @@ function EnsNodeStackInfoCardContent({ ensNodeStackInfo }: { ensNodeStackInfo: E
                 all ENSIndexer instances using this ENSDb.
               </p>
             }
-          />
+          /> */}
         </InfoCardItems>
       </InfoCard>
 
@@ -554,17 +559,51 @@ function EnsNodeStackInfoCardContent({ ensNodeStackInfo }: { ensNodeStackInfo: E
             }
           />
         </InfoCardItems>
-        <InfoCardFeatures activated={true}>
-          {ensIndexerFeatures
-            .filter((feature) => feature.isActivated)
-            .map((feature) => feature.feature)}
-        </InfoCardFeatures>
-        <InfoCardFeatures activated={false}>
-          {ensIndexerFeatures
-            .filter((feature) => !feature.isActivated)
-            .map((feature) => feature.feature)}
-        </InfoCardFeatures>
+        {ensIndexerFeaturesActivated.length > 0 ? (
+          <InfoCardFeatures activated={true}>
+            {ensIndexerFeaturesActivated.map((feature) => feature.feature)}
+          </InfoCardFeatures>
+        ) : null}
+        {ensIndexerFeaturesDeactivated.length > 0 ? (
+          <InfoCardFeatures activated={false}>
+            {ensIndexerFeaturesDeactivated.map((feature) => feature.feature)}
+          </InfoCardFeatures>
+        ) : null}
         <InfoCardItems>
+          {subgraphCompatibilityActivated ? (
+            <InfoCardItem
+              label="Subgraph Compatibility"
+              value={
+                <ul className={cardItemValueStyles}>
+                  <li>Full Subgraph Compatibility</li>
+                </ul>
+              }
+              additionalInfo={
+                <p>
+                  Full Subgraph Compatibility, both, on API-level and data-level. ENSNode can be
+                  used as a drop-in replacement for the ENS Subgraph, with guarantees that all data
+                  returned by ENSNode will be fully aligned with the ENS Subgraph.
+                </p>
+              }
+            />
+          ) : (
+            <InfoCardItem
+              label="Subgraph Compatibility"
+              value={
+                <ul className={cardItemValueStyles}>
+                  <li>API-level Subgraph Compatibility</li>
+                </ul>
+              }
+              additionalInfo={
+                <p>
+                  API-level Subgraph Compatibility, where GraphQL APIs are equivalent but a superset
+                  of data is being queried and therefore the data returned for some queries may be
+                  different.
+                </p>
+              }
+            />
+          )}
+
           <InfoCardItem
             label="Client LabelSet"
             value={

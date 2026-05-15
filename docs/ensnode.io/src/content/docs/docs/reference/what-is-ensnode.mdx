@@ -16,7 +16,7 @@ ENSNode is the new multichain indexer for ENS and ENSv2. It is built on [Ponder]
 
 ### ENSNode Version 1
 
-ENSNode version 1 (`V1`), discussed here, prioritizes equivalency with the [ENS Subgraph](/docs/reference/what-is-the-ens-subgraph), which drove many architectural decisions.
+ENSNode version 1 (`V1`), discussed here, prioritizes equivalency with the [ENS Subgraph](/docs/reference/subgraph-legacy/what-is-the-ens-subgraph), which drove many architectural decisions.
 
 <LinkCard
   title="ENSNode Roadmap"
@@ -27,24 +27,17 @@ ENSNode version 1 (`V1`), discussed here, prioritizes equivalency with the [ENS 
 ## Core Design Principles
 
 1. **Full Backwards Compatibility w/ ENS Subgraph**
-
    - Full support for existing ENS Subgraph queries used by [`ensjs`](https://github.com/ensdomains/ensjs/) and [`ens-app-v3`](https://github.com/ensdomains/ens-app-v3)
    - Drop-in replacement for applications using the ENS Subgraph
-   - Verified compatibility through extensive testing with [`ens-test-env`](https://github.com/namehash/ens-test-env/) and [ens-subgraph-transition-tools](https://github.com/namehash/ens-subgraph-transition-tools) (see [Subgraph Compatibility](/docs/reference/what-is-the-ens-subgraph))
-
+   - Verified compatibility through extensive testing with [`ens-test-env`](https://github.com/namehash/ens-test-env/) and [ens-subgraph-transition-tools](https://github.com/namehash/ens-subgraph-transition-tools) (see [Subgraph Compatibility](/docs/reference/subgraph-legacy/what-is-the-ens-subgraph))
 2. **Multi-Registry Plugin Architecture**
-
    - Support for indexing ENS data across multiple chains & subregistries (i.e. mainnet, Base, Linea)
    - Plugins can be activated independently or in combination
-
 3. **Built on Ponder**
-
    - Improved indexing speed (>10x faster than ENS Subgraph)
    - Isolated indexing schemas (supporting branches, staging environments)
    - Access your indexed data directly from Postgres
-
 4. **Self-hostable Decentralization Approach**
-
    - Self-hostable infrastructure
    - Bring-your-own Postgres
    - Bring-your-own ENSRainbow

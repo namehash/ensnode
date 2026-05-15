@@ -54,12 +54,20 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/integration-options/enssdk",
         },
         {
-          label: "Raw GraphQL",
-          link: "/docs/integrate/integration-options/raw-graphql",
+          label: "ENS Omnigraph (GraphQL)",
+          link: "/docs/integrate/integration-options/omnigraph-graphql-api",
         },
         {
           label: "ENSDb (PostgreSQL)",
           link: "/docs/integrate/integration-options/ensdb",
+        },
+        {
+          label: "enscli (CLI)",
+          link: "/docs/integrate/integration-options/enscli",
+        },
+        {
+          label: "ensskills (AI agents)",
+          link: "/docs/integrate/integration-options/ensskills",
         },
       ],
     },

@@ -173,8 +173,17 @@ export const servicesSidebarTopic = {
       collapsed: true,
       items: [
         { label: "Overview", link: "/docs/services/ensadmin" },
-        { label: "What is ENSAdmin?", link: "/docs/services/ensadmin/overview/what-is-ensadmin" },
-        { label: "Contributing", link: "/docs/services/ensadmin/contributing" },
+        {
+          label: "Contributing",
+          collapsed: true,
+          items: [
+            { label: "Overview", link: "/docs/services/ensadmin/contributing" },
+            {
+              label: "Using Docker",
+              link: "/docs/services/ensadmin/contributing/docker",
+            },
+          ],
+        },
       ],
     },
   ],

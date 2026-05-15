@@ -10,7 +10,11 @@ import { getPluginsAllDatasourceNames } from "@/lib/plugin-helpers";
 import { localPonderContext } from "./local-ponder-context";
 
 const pluginsAllDatasourceNames = getPluginsAllDatasourceNames(config.plugins);
-const indexedBlockranges = buildIndexedBlockranges(config.namespace, pluginsAllDatasourceNames);
+const indexedBlockranges = buildIndexedBlockranges(
+  config.namespace,
+  config.globalBlockrange.endBlock,
+  pluginsAllDatasourceNames,
+);
 
 export const localPonderClient = new LocalPonderClient(
   config.indexedChainIds,

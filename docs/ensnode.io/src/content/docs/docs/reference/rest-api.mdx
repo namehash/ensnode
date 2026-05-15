@@ -7,129 +7,6 @@ sidebar:
 
 import { LinkCard } from "@astrojs/starlight/components";
 
-## Subgraph API
-ENSNode exposes a Subgraph-Compatible GraphQL endpoint at `/subgraph`.
-
-:::note[Subgraph API Compatibility Reference]
-For details on subgraph compatibility, see the Subgraph Compatibility documentation.
-
-<LinkCard
-  href="/docs/reference/what-is-the-ens-subgraph"
-  title="Subgraph Compatibility"
-/>
-:::
-
-### GraphiQL Playground
-
-To explore the schema and run queries, use the GraphiQL Playground below.
-
-<LinkCard
-  href="https://api.alpha.ensnode.io/subgraph"
-  title="Subgraph-compatible GraphiQL Playground"
-/>
-
-### GraphQL Examples
-
-Fetch data about the three most recently-created domains.
-
-```gql
-{
-  domains(orderBy: createdAt, orderDirection: desc, first: 3) {
-    name
-    expiryDate
-  }
-}
-```
-
-```json
-{
-  "data": {
-    "domains": [
-      {
-        "name": "ensanguo.eth",
-        "expiryDate": "1758170255"
-      },
-      {
-        "name": "fiffer.eth",
-        "expiryDate": "2041994243"
-      },
-      {
-        "name": "rifaisicilia.eth",
-        "expiryDate": "1758170039"
-      }
-    ]
-  }
-}
-```
-
-## Config API
-
-The Config API provides a complete view of an ENSNode instance's public
-configuration, making it easy to understand and verify it's configuration.
-
-**Endpoint:** `GET /api/config`
-
-This endpoint returns the public configuration object containing all
-the essential information about an ENSNode instance,
-including ENS namespace, indexed chains, enabled features, active plugins,
-and dependency versions.
-
-### Key Configuration Details
-
-The response includes several important configuration categories:
-
-- **ENS**: current ENS namespace
-- **Network Configuration**: URLs for ENSAdmin interface, public ENSNode API,
-  and ENSRainbow service
-- **Chains**: Lists of indexed chains
-- **Feature Flags**: Boolean settings for experimental features and optional
-  functionality
-- **Plugins**: Activated plugins
-- **ENSIndexer Version Information**: Ponder framework version,
-  ENSRainbow public config, ENSDb version, ENSIndexer version, [ENS Normalize version](https://www.npmjs.com/package/@adraffy/ens-normalize)
-
-### Example response
-
-```json
-{
-  "indexedChainIds": [
-    1,
-    8453,
-    59144,
-    10,
-    42161,
-    534352
-  ],
-  "ensIndexerSchemaName": "alphaSchema0.35.0",
-  "isSubgraphCompatible": false,
-  "labelSet": {
-    "labelSetId": "subgraph",
-    "labelSetVersion": 0
-  },
-  "namespace": "mainnet",
-  "plugins": [
-    "subgraph",
-    "basenames",
-    "lineanames",
-    "threedns",
-    "protocol-acceleration",
-    "registrars",
-    "tokenscope"
-  ],
-  "versionInfo": {
-    "ponder": "0.16.1",
-    "ensDb": "1.5.1",
-    "ensIndexer": "1.5.1",
-    "ensNormalize": "1.11.1",
-    "ensRainbowPublicConfig": {
-      "version": "1.5.1",
-      "labelSet": { "labelSetId": "subgraph", "highestLabelSetVersion": 0 },
-      "recordsCount": 133856894
-    }
-  }
-}
-```
-
 ## Indexing Status API
 
 Monitor an ENSNode's indexing progress across multiple chains with
@@ -144,60 +21,11 @@ as an omnichain indexing status snapshot.
 Perfect for building monitoring dashboards, health checks, or determining
 whether your ENSNode has caught up with recent onchain activity.
 
-### Understanding the Response
-
-The status response provides both overall and chain-specific information.
-
-### Example response
-
-```json
-{
-  "responseCode": "ok",
-  "realtimeProjection": {
-    "projectedAt": 1760435068,
-    "worstCaseDistance": 199550209,
-    "snapshot": {
-      "strategy": "omnichain",
-      "slowestChainIndexingCursor": 1560884859,
-      "snapshotTime": 1760435068,
-      "omnichainSnapshot": {
-        "omnichainStatus": "omnichain-backfill",
-        "chains": {
-          "1": {
-            "chainStatus": "chain-backfill",
-            "config": {
-              "rangeType": "left-bounded",
-              "startBlock": {
-                "timestamp": 1489165544,
-                "number": 3327417
-              }
-            },
-            "latestIndexedBlock": {
-              "timestamp": 1560884859,
-              "number": 7984099
-            },
-            "backfillEndBlock": {
-              "timestamp": 1760432243,
-              "number": 23574893
-            }
-          },
-          "8453": {
-            "chainStatus": "chain-queued",
-            "config": {
-              "rangeType": "left-bounded",
-              "startBlock": {
-                "timestamp": 1721932307,
-                "number": 17571480
-              }
-            }
-          }
-        },
-        "omnichainIndexingCursor": 1560884859
-      }
-    }
-  }
-}
-```
+<LinkCard
+  title="Indexing Status API Reference"
+  description="Learn more about the Indexing Status API, its response structure, and how to use it to monitor your ENSNode instance."
+  href="/docs/services/ensapi/reference/api-reference"
+/>
 
 ### Realtime Indexing Distance
 
@@ -232,40 +60,8 @@ When you include this parameter it influences the HTTP response code as follows:
 - **Service Unavailable (503)**: The latest indexed block of each chain is NOT guaranteed within the requested distance from realtime.
 
 
-## Registrar Actions API
-
-Query the "logical registrar actions" performed on indexed
-subregistries with the Registrar Actions API. This endpoint returns a list
-of "logical registrar actions", such as "registration" or "renewal".
-
-Each "logical registrar action" refers to:
-- ID of the action,
-- type of the action,
-- incremental duration,
-- registrant address,
-- one registration lifecycle record,
-- pricing details (optionally),
-- referral details (optionally),
-- onchain transaction details (block number, timestamp, transaction hash),
-- event IDs that have ever contributed to the "logical registrar action" record.
-
-Each registration lifecycle record refers to:
-- subregistry that manages this Registration Lifecycle,
-- node (namehash) of the FQDN of the domain the registration lifecycle is
-  associated with,
-- expiry date which identifies when the Registration Lifecycle is scheduled
-  to expire.
-
-Each subregistry includes:
-- subregistry account ID which identifies the chainId and address of
-  the associated subregistry smart contract,
-- node (namehash) of the name the subregistry manages subnames of.
-
-
-**Endpoint:** `GET /api/registrar-actions`
-**Endpoint with custom results count limit:** `GET /api/registrar-actions?limit=5`
-**Endpoint with results sourced for the `namehash('eth')` parent node:** `GET /api/registrar-actions/0x93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae`
-
-### Example response
-
-TDB
+<LinkCard
+  title="Am I Realtime API Reference"
+  description="Learn more about the Am I Realtime API, its response structure, and how to use it to monitor your ENSNode instance."
+  href="/docs/services/ensapi/reference/api-reference"
+/>
