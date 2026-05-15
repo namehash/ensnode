@@ -18,7 +18,7 @@
     "@astrojs/react": "catalog:",
     "@heroicons/react": "^2.2.0",
     "@namehash/namehash-ui": "workspace:*",
-    "@tailwindcss/vite": "^4.1.15",
+    "@tailwindcss/vite": "catalog:",
     "astro": "catalog:",
     "astro-font": "catalog:",
     "astro-seo": "catalog:",
@@ -26,7 +26,7 @@
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-wrap-balancer": "^1.1.1",
-    "tailwindcss": "4.2.2"
+    "tailwindcss": "catalog:"
   },
   "devDependencies": {
     "@types/react": "catalog:",
