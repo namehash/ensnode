@@ -1,44 +1,54 @@
 import sdk, { type EmbedOptions, type Project } from "@stackblitz/sdk";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
-interface CodePlaygroundProps {
-  title: string;
-  description?: string;
-  files: Record<string, string>;
-  dependencies: Record<string, string>;
-  entryFileName?: string;
+import type {
+  PlaygroundProject,
+  PlaygroundTemplate,
+  PlaygroundView,
+} from "src/lib/playground/example-project/types";
+
+type CodePlaygroundProps = PlaygroundProject & {
   height?: number;
   terminalHeight?: number;
+};
+
+function buildStartScript(template: PlaygroundTemplate, entryFileName: string): string {
+  if (template === "vite") {
+    return "vite";
+  }
+  return `tsx ${entryFileName}`;
+}
+
+function embedViewForPlayground(view: PlaygroundView | undefined): EmbedOptions["view"] {
+  switch (view) {
+    case "preview":
+      return "preview";
+    case "both":
+      return "default";
+    default:
+      return "editor";
+  }
 }
 
 export default function CodePlayground({
   title,
   description,
+  template,
   files,
   dependencies,
-  entryFileName = "index.ts",
+  devDependencies,
+  entryFileName,
+  openFile,
+  view,
+  tsconfig,
   height = 500,
   terminalHeight = 35,
 }: CodePlaygroundProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const resolvedOpenFile = openFile ?? entryFileName;
 
-  useEffect(() => {
-    if (!ref.current) return;
-
-    const packageJson = JSON.stringify(
-      {
-        name: title.toLowerCase().replace(/\s+/g, "-"),
-        version: "0.0.0",
-        private: true,
-        type: "module",
-        scripts: { start: `tsx ${entryFileName}` },
-        dependencies: { tsx: "latest", ...dependencies },
-      },
-      null,
-      2,
-    );
-
-    const tsconfig = JSON.stringify(
+  const project = useMemo(() => {
+    const defaultTsconfig = JSON.stringify(
       {
         compilerOptions: {
           target: "es2022",
@@ -51,32 +61,54 @@ export default function CodePlayground({
       2,
     );
 
+    const packageJson = JSON.stringify(
+      {
+        name: title.toLowerCase().replace(/\s+/g, "-"),
+        version: "0.0.0",
+        private: true,
+        type: "module",
+        scripts: { start: buildStartScript(template, entryFileName) },
+        dependencies,
+        devDependencies,
+      },
+      null,
+      2,
+    );
+
     const projectFiles = {
       "package.json": packageJson,
-      "tsconfig.json": tsconfig,
       ...files,
+      "tsconfig.json": files["tsconfig.json"] ?? tsconfig ?? defaultTsconfig,
     };
 
-    const project = {
+    return {
       title,
       description,
-      template: "node",
+      template,
       files: projectFiles,
     } as Project;
-    const options = {
-      openFile: entryFileName,
-      terminalHeight,
-      height,
-      hideNavigation: true,
-      hideExplorer: true,
-      hideDevTools: true,
-      showSidebar: false,
-      view: "editor",
-      theme: "light",
-    } as EmbedOptions;
+  }, [title, description, template, files, dependencies, devDependencies, entryFileName, tsconfig]);
 
-    sdk.embedProject(ref.current, project, options);
-  }, []);
+  const embedOptions = useMemo(
+    () =>
+      ({
+        openFile: resolvedOpenFile,
+        terminalHeight,
+        height,
+        hideNavigation: true,
+        hideExplorer: true,
+        hideDevTools: true,
+        showSidebar: true,
+        view: embedViewForPlayground(view),
+        theme: "light",
+      }) as EmbedOptions,
+    [resolvedOpenFile, terminalHeight, height, view],
+  );
+
+  useEffect(() => {
+    if (!ref.current) return;
+    sdk.embedProject(ref.current, project, embedOptions);
+  }, [project, embedOptions]);
 
   return (
     <div className="not-content">

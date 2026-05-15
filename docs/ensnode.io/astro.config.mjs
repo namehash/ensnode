@@ -61,8 +61,7 @@ export default defineConfig({
       "/docs/integrate/omnigraph/examples/account-resolver-permissions",
     "/docs/integrate/omnigraph/cookbook/domain-resolver":
       "/docs/integrate/omnigraph/examples/domain-resolver",
-    "/docs/integrate/omnigraph/cookbook/namegraph":
-      "/docs/integrate/omnigraph/examples/namegraph",
+    "/docs/integrate/omnigraph/cookbook/namegraph": "/docs/integrate/omnigraph/examples/namegraph",
     "/docs/integrate/integration-options/enssdk/cookbook":
       "/docs/integrate/integration-options/enssdk/example",
     "/docs/integrate/integration-options/enssdk/cookbook/resolution-api":
