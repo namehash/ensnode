@@ -9,9 +9,11 @@ interface Props {
   id: string;
   /** Hide curl tab (e.g. if connection is admin-only). */
   hideCurl?: boolean;
+  hideDescription?: boolean;
+  hideBackToExamples?: boolean;
 }
 
-const { id, hideCurl = false } = Astro.props;
+const { id, hideCurl = false, hideDescription = false, hideBackToExamples = false } = Astro.props;
 const example = getOmnigraphExampleById(id);
 const adminUrl = buildEnsadminOmnigraphUrl({
   query: example.query,
@@ -21,6 +23,8 @@ const adminUrl = buildEnsadminOmnigraphUrl({
 const variablesJson = stringifyJsonForDocs(example.variables);
 const responseJson = example.response ? stringifyJsonForDocs(example.response) : null;
 ---
+
+{!hideDescription && example.description}
 
 <OmnigraphAPIExamplePanels
   panelId={id}
@@ -32,3 +36,11 @@ const responseJson = example.response ? stringifyJsonForDocs(example.response) :
   adminUrl={adminUrl}
   hideCurl={hideCurl}
 />
+
+{
+  !hideBackToExamples && (
+    <p>
+      <a href="/docs/integrate/omnigraph/examples">Back to Examples</a>
+    </p>
+  )
+}
