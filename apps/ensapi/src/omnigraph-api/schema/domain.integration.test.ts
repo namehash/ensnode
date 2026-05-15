@@ -8,7 +8,6 @@ import {
   labelhashInterpretedLabel,
   makeENSv1DomainId,
   makeENSv1RegistryId,
-  makeENSv1VirtualRegistryId,
   makeENSv2DomainId,
   makeENSv2RegistryId,
   makeStorageId,
