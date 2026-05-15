@@ -1,6 +1,7 @@
 import enskitPackageJson from "@workspace/packages/enskit/package.json";
 import enssdkPackageJson from "@workspace/packages/enssdk/package.json";
 import pnpmWorkspaceYaml from "@workspace/pnpm-workspace.yaml?raw";
+import { parse } from "yaml";
 
 const pnpmCatalog = parsePnpmCatalog(pnpmWorkspaceYaml);
 
@@ -31,29 +32,8 @@ export function resolveMonorepoSpecifier(packageName: string, specifier: string)
 }
 
 export function parsePnpmCatalog(source: string): Record<string, string> {
-  const catalog: Record<string, string> = {};
-  let inCatalog = false;
-
-  for (const line of source.split("\n")) {
-    if (line === "catalog:") {
-      inCatalog = true;
-      continue;
-    }
-    if (inCatalog && /^[^\s]/.test(line)) {
-      break;
-    }
-    if (!inCatalog) {
-      continue;
-    }
-
-    const match = line.match(/^ {2}(.+?): (.+)$/);
-    if (!match) {
-      continue;
-    }
-
-    const packageName = match[1].replace(/^"(.+)"$/, "$1");
-    catalog[packageName] = match[2].trim();
-  }
+  const doc = parse(source) as { catalog?: Record<string, string> };
+  const catalog = doc.catalog ?? {};
 
   if (Object.keys(catalog).length === 0) {
     throw new Error("Failed to parse pnpm catalog from pnpm-workspace.yaml");
@@ -89,9 +69,4 @@ export function resolvePeerSpecifier(
   }
 
   return resolveMonorepoSpecifier(packageName, peerSpecifier);
-}
-
-/** @deprecated Use {@link resolvePeerSpecifier} */
-export function resolveEnssdkPeerSpecifier(packageName: string, peerSpecifier: string): string {
-  return resolvePeerSpecifier(packageName, peerSpecifier, [enssdkPackageJson]);
 }

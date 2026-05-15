@@ -5,13 +5,10 @@ import { DocExplorer, DocExplorerStore } from "@graphiql/plugin-doc-explorer";
 import { GraphiQLProvider } from "@graphiql/react";
 import omnigraphSchemaSdl from "enssdk/omnigraph/schema.graphql?raw";
 import { buildSchema } from "graphql";
-import { useMemo } from "react";
 
 const omnigraphSchema = buildSchema(omnigraphSchemaSdl);
 
 export default function OmnigraphSchemaDocExplorer() {
-  const schema = useMemo(() => omnigraphSchema, []);
-
   return (
     <div
       style={{
@@ -32,7 +29,7 @@ export default function OmnigraphSchemaDocExplorer() {
       >
         <GraphiQLProvider
           defaultTheme="light"
-          schema={schema}
+          schema={omnigraphSchema}
           dangerouslyAssumeSchemaIsValid
           fetcher={() => Promise.resolve({})}
         >
