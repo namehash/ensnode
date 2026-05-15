@@ -17,7 +17,6 @@ export function starlight(): AstroIntegration {
       EditLink: "./src/components/overrides/EditLink.astro",
     },
     customCss: [
-      "./src/styles/globals.css",
       "./src/styles/starlight.css",
       "@fontsource/inter/100.css",
       "@fontsource/inter/200.css",

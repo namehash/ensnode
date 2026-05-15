@@ -1,2 +1,3 @@
 @import "@namehash/namehash-ui/styles.css";
 @import "tailwindcss";
+@import "../styles/globals.css";
