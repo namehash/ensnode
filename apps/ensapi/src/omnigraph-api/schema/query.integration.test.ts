@@ -83,7 +83,7 @@ describe("Query.domains", () => {
     domains: GraphQLConnection<{
       __typename: "ENSv1Domain" | "ENSv2Domain";
       id: DomainId;
-      name: Name;
+      canonical: { name: Name } | null;
       label: { interpreted: InterpretedLabel };
       owner: { address: NormalizedAddress };
       node?: Node;
@@ -97,7 +97,9 @@ describe("Query.domains", () => {
           node {
             __typename
             id
-            name
+            canonical {
+              name
+            }
             label {
               interpreted
             }
@@ -131,7 +133,7 @@ describe("Query.domains", () => {
       domains.find((d) => d.__typename === "ENSv1Domain" && d.id === V1_ETH_DOMAIN_ID),
     ).toMatchObject({
       id: V1_ETH_DOMAIN_ID,
-      name: "eth",
+      canonical: { name: "eth" },
       label: { interpreted: "eth" },
       node: ETH_NODE,
     });
@@ -140,7 +142,7 @@ describe("Query.domains", () => {
       domains.find((d) => d.__typename === "ENSv2Domain" && d.id === V2_ETH_DOMAIN_ID),
     ).toMatchObject({
       id: V2_ETH_DOMAIN_ID,
-      name: "eth",
+      canonical: { name: "eth" },
       label: { interpreted: "eth" },
     });
   });
@@ -150,12 +152,12 @@ describe("Query.domains", () => {
     const domains = flattenConnection(result.domains);
 
     // parent.eth is canonical (registered under the v2 ETH Registry which descends from the v2 Root)
-    const parentEth = domains.find((d) => d.name === "parent.eth");
+    const parentEth = domains.find((d) => d.canonical?.name === "parent.eth");
     expect(parentEth).toBeDefined();
 
-    // every returned domain must have a defined canonical `name` (only canonical domains resolve one)
+    // every returned domain must be canonical
     for (const d of domains) {
-      expect(d.name, `expected canonical name for ${d.id}`).toBeTruthy();
+      expect(d.canonical, `expected canonical for ${d.id}`).not.toBeNull();
     }
   });
 
@@ -199,14 +201,14 @@ describe("Query.domain", () => {
   const DomainByName = gql`
     query DomainByName($name: InterpretedName!) {
       domain(by: { name: $name }) {
-        name
+        canonical { name }
       }
     }
   `;
 
   it.each(DEVNET_NAMES)("resolves $name", async ({ name, canonical }) => {
     await expect(request(DomainByName, { name })).resolves.toMatchObject({
-      domain: { name: canonical },
+      domain: { canonical: { name: canonical } },
     });
   });
 

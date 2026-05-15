@@ -51,7 +51,6 @@ const DomainFragment = graphql(`
   fragment DomainFragment on Domain {
     __typename
     id
-    name
     canonical { name }
     owner { id address }
   }
@@ -149,7 +148,7 @@ const HelloWorldQuery = graphql(`
   query HelloWorld {
     domain(by: { name: "eth" }) {
       id
-      name
+      canonical { name }
       owner { address }
     }
   }

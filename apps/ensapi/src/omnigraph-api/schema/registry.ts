@@ -18,11 +18,8 @@ import { getModelId } from "@/omnigraph-api/lib/get-model-id";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
 import { AccountIdInput, AccountIdRef } from "@/omnigraph-api/schema/account-id";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
-import {
-  DomainInterfaceRef,
-  DomainsOrderInput,
-  RegistryDomainsWhereInput,
-} from "@/omnigraph-api/schema/domain";
+import { DomainInterfaceRef } from "@/omnigraph-api/schema/domain";
+import { DomainsOrderInput, RegistryDomainsWhereInput } from "@/omnigraph-api/schema/domain-inputs";
 import { PermissionsRef } from "@/omnigraph-api/schema/permissions";
 
 ///////////////////////////////////

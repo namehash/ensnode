@@ -20,12 +20,12 @@ import { getDomainIdByInterpretedName } from "@/omnigraph-api/lib/get-domain-by-
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
 import { AccountByInput, AccountRef } from "@/omnigraph-api/schema/account";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
+import { DomainInterfaceRef } from "@/omnigraph-api/schema/domain";
 import {
   DomainIdInput,
-  DomainInterfaceRef,
   DomainsOrderInput,
   DomainsWhereInput,
-} from "@/omnigraph-api/schema/domain";
+} from "@/omnigraph-api/schema/domain-inputs";
 import { PermissionsIdInput, PermissionsRef } from "@/omnigraph-api/schema/permissions";
 import { RegistrationInterfaceRef } from "@/omnigraph-api/schema/registration";
 import { RegistryIdInput, RegistryInterfaceRef } from "@/omnigraph-api/schema/registry";

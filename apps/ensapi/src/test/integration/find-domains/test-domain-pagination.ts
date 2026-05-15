@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from "vitest";
 
-import type { DomainsOrderByValue, DomainsOrderInput } from "@/omnigraph-api/schema/domain";
+import type { DomainsOrderByValue, DomainsOrderInput } from "@/omnigraph-api/schema/domain-inputs";
 import type { OrderDirectionValue } from "@/omnigraph-api/schema/order-direction";
 import type { PaginatedDomainResult } from "@/test/integration/find-domains/domain-pagination-queries";
 import {

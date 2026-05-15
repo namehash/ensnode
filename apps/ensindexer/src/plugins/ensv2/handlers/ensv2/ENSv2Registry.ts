@@ -131,7 +131,7 @@ export default function () {
       // if the domain exists, this is a re-register after expiration and tokenId will have changed
       .onConflictDoUpdate({ tokenId });
 
-    await ensureDomainInRegistry(context, registryId, domainId);
+    await ensureDomainInRegistry(context, registryId, domainId, labelHash);
 
     // insert Registration
     const registrantId = await ensureAccount(context, registrant);

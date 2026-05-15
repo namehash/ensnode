@@ -26,12 +26,8 @@ export const yoga = createYoga({
           label
           owner { address }
           registration { expiry }
-          ... on ENSv1Domain {
-            parent { label }
-          }
-          ... on ENSv2Domain {
-            registry { contract {chainId address}}
-          }
+          parent { label }
+          registry { contract { chainId address } }
         }
       }
     }

@@ -73,7 +73,7 @@ An indexer aggregates and reorganizes the representation of ENS's state to make 
 query Domains($adress: String!) {
   domains(where: { owner: $address }) {
     id
-    name
+    canonical { name }
     ...
   }
 }
