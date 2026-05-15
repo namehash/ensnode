@@ -19,7 +19,8 @@ export interface DomainCursor {
   id: DomainId;
 
   /**
-   * The criteria by which the set is ordered. One of NAME, REGISTRATION_TIMESTAMP, or REGISTRATION_EXPIRY.
+   * The criteria by which the set is ordered. One of NAME, DEPTH, REGISTRATION_TIMESTAMP, or
+   * REGISTRATION_EXPIRY.
    */
   by: typeof DomainsOrderBy.$inferType;
 
