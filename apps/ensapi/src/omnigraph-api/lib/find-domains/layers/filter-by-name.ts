@@ -31,7 +31,7 @@ export interface DomainsNameFilterValue {
 export function filterByName(
   base: BaseDomainSet,
   filter: DomainsNameFilterValue | null | undefined,
-): { named: BaseDomainSet; defaultOrder?: typeof DomainsOrderInput.$inferInput } {
+): { named: BaseDomainSet; defaultOrder?: Partial<typeof DomainsOrderInput.$inferInput> } {
   if (!filter) return { named: base };
 
   if (filter.starts_with !== undefined && filter.starts_with !== null) {

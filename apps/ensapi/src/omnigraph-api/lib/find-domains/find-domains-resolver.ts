@@ -23,21 +23,10 @@ import {
   type DomainsOrderBy,
   type DomainsOrderInput,
 } from "@/omnigraph-api/schema/domain-inputs";
-import type { OrderDirection } from "@/omnigraph-api/schema/order-direction";
 
 import { DomainCursors } from "./domain-cursor";
 import { cursorFilter, orderFindDomains } from "./find-domains-resolver-helpers";
 import type { DomainOrderValue } from "./types";
-
-/**
- * Describes the ordering of the set of Domains.
- *
- * @dev derived from the GraphQL Input Types for 1:1 convenience
- */
-interface FindDomainsOrderArg {
-  by?: typeof DomainsOrderBy.$inferType | null;
-  dir?: typeof OrderDirection.$inferType | null;
-}
 
 /**
  * Domain with order value injected.
@@ -95,12 +84,12 @@ export function resolveFindDomains(
      * Optional ordering. Each unset field falls back to `defaultOrder` then the
      * `DOMAINS_DEFAULT_ORDER_*` constants.
      */
-    order?: FindDomainsOrderArg | undefined | null;
+    order?: Partial<typeof DomainsOrderInput.$inferInput> | null;
 
     /**
      * Filter-supplied default `(by, dir)` when the caller doesn't pass `order`.
      */
-    defaultOrder?: typeof DomainsOrderInput.$inferInput;
+    defaultOrder?: Partial<typeof DomainsOrderInput.$inferInput>;
 
     // relay connection args from t.connection
     first?: number | null;
