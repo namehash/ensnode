@@ -89,7 +89,7 @@ const tabList: { id: string; label: string }[] = [
       </button>
     </div>
     <div class="min-w-0 [&_.expressive-code]:rounded-lg">
-      <Code code={query} lang="graphql" title="query.graphql" />
+      <Code code={query} lang="graphql" />
     </div>
   </section>
 
@@ -139,7 +139,7 @@ const tabList: { id: string; label: string }[] = [
           class="example-tab-panel pt-3"
         >
           <div class="max-h-[min(38vh,18rem)] min-w-0 overflow-auto overscroll-y-contain [&_.expressive-code]:rounded-lg">
-            <Code code={variablesJson} lang="json" title="variables.json" />
+            <Code code={variablesJson} lang="json"/>
           </div>
         </div>
 
@@ -154,7 +154,7 @@ const tabList: { id: string; label: string }[] = [
               hidden
             >
               <div class="max-h-[min(50vh,28rem)] min-w-0 overflow-auto overscroll-y-contain [&_.expressive-code]:rounded-lg">
-                <Code code={responseJson} lang="json" title="response.json" />
+                <Code code={responseJson} lang="json" />
               </div>
             </div>
           ) : null
@@ -171,7 +171,7 @@ const tabList: { id: string; label: string }[] = [
               hidden
             >
               <div class="max-h-[min(50vh,28rem)] min-w-0 overflow-auto overscroll-y-contain [&_.expressive-code]:rounded-lg">
-                <Code code={curlExample} lang="bash" title="curl.sh" />
+                <Code code={curlExample} lang="bash" />
               </div>
             </div>
           ) : null
@@ -255,14 +255,6 @@ const tabList: { id: string; label: string }[] = [
   .omnigraph-example :global(.expressive-code) {
     --ec-brdRad: 0.5rem;
   }
-
-  .omnigraph-example :global(span.title) {
-    border-top-left-radius: 9px;
-    border-top-right-radius: 9px;
-    /* optional */
-    border-right: 1px solid var(--color-border);
-  }
-
 
   .example-tab {
     color: var(--sl-color-gray-3);
