@@ -21,12 +21,12 @@ import {
   DOMAINS_DEFAULT_ORDER_BY,
   DOMAINS_DEFAULT_ORDER_DIR,
   type DomainsOrderBy,
+  type DomainsOrderInput,
 } from "@/omnigraph-api/schema/domain-inputs";
 import type { OrderDirection } from "@/omnigraph-api/schema/order-direction";
 
 import { DomainCursors } from "./domain-cursor";
 import { cursorFilter, orderFindDomains } from "./find-domains-resolver-helpers";
-import type { DomainsDefaultOrder } from "./layers/filter-by-name";
 import type { DomainOrderValue } from "./types";
 
 /**
@@ -100,7 +100,7 @@ export function resolveFindDomains(
     /**
      * Filter-supplied default `(by, dir)` when the caller doesn't pass `order`.
      */
-    defaultOrder?: DomainsDefaultOrder;
+    defaultOrder?: typeof DomainsOrderInput.$inferInput;
 
     // relay connection args from t.connection
     first?: number | null;
