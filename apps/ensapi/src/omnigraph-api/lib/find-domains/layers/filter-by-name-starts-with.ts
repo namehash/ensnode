@@ -13,15 +13,15 @@ import { type BaseDomainSet, selectBase } from "./base-domain-set";
  * (e.g. `"vitalik.eth"`), same direction as user input — `"vitalik.et"` matches `"vitalik.eth"`,
  * `"vit"` matches `"vit.eth"`, `"vitalik.eth"`, etc.
  *
- * Ordering is handled by the resolver layer via `defaultOrderBy: "DEPTH"` from `filterByName` —
- * shorter names surface first (`vitalik.eth` over `vitalik.ethereum.foundation` for input
- * `"vitalik.et"`).
+ * Ordering is handled by the resolver layer via `defaultOrder: { by: "DEPTH", dir: "ASC" }` from
+ * `filterByName` — shorter names surface first (`vitalik.eth` over `vitalik.ethereum.foundation`
+ * for input `"vitalik.et"`).
  *
  * @param base - A base domain set subquery
  * @param startsWith - Typeahead prefix (non-empty `InterpretedName` fragment)
  */
 export function filterByNameStartsWith(base: BaseDomainSet, startsWith: string) {
-  // Sanity Check: this occurs at the GrahpQL Input layer
+  // Sanity Check: this occurs at the GraphQL Input layer
   if (startsWith === "") throw new Error(`filterByNameStartsWith startsWith expected`);
 
   // TODO: determine if it's necessary to additionally escape user input for LIKE operator

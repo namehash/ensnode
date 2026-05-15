@@ -439,9 +439,12 @@ export async function cascadeLabelHeal(
  * The Registry UPDATE's `IS DISTINCT FROM` filter skips rows already at the target value (the
  * start registry's flag is set in the same statement, and any descendants that happen to already
  * be consistent are no-op'd). The Domain UPDATE's WHERE filter touches a row when either its
- * flag flipped OR (when staying canonical) its `canonicalLabelHashPath` differs from the
- * freshly-computed path — this second clause handles the parent-identity-changed case where the
- * flag stays canonical but materialized paths are stale.
+ * flag flipped OR (when staying canonical) its `canonicalLabelHashPath` or `canonicalPath`
+ * differs from the freshly-computed path — this second clause handles the parent-identity-changed
+ * case where the flag stays canonical but materialized paths are stale. Both arrays are checked
+ * because two distinct canonical Domains can share a `canonicalLabelHashPath` across protocol
+ * roots (e.g. v1 `linea.eth` and v2 `linea.eth`), so re-parenting a Registry between such Domains
+ * leaves `canonicalLabelHashPath` equal while `canonicalPath` (DomainIds) drifts.
  *
  * Because a canonicalization update may affect an unbounded number of objects in the tree, we
  * batch the subsequent updates to at least buffer the severity of this operation.
@@ -532,7 +535,13 @@ async function cascadeCanonicality(
       WHERE d.id = dt.domain_id
         AND (
           d.canonical IS DISTINCT FROM ${nextCanonical}
-          OR (${nextCanonical} AND d.canonical_label_hash_path IS DISTINCT FROM dt.new_path)
+          OR (
+            ${nextCanonical}
+            AND (
+              d.canonical_label_hash_path IS DISTINCT FROM dt.new_path
+              OR d.canonical_path IS DISTINCT FROM dt.new_path_ids
+            )
+          )
         )
       RETURNING d.id, d.canonical_label_hash_path;
   `);
