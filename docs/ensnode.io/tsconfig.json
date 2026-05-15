@@ -3,8 +3,8 @@
   "include": [".astro/types.d.ts", "**/*"],
   "exclude": ["dist"],
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
+      "*": ["./*"],
       "@workspace/*": ["../../*"]
     },
     "jsx": "react-jsx",

@@ -78,6 +78,64 @@
   --sl-shadow-sm: var(--shadow-sm);
 }
 
+/* Docked sidebar: narrow peek strip on desktop; expands on hover or keyboard focus within nav */
+@media (min-width: 50rem) {
+  .page[data-sidebar-docked] {
+    --sl-sidebar-docked-peek: 1rem;
+    /* Match Starlight splash / no-sidebar content width (default with sidebar is 45rem). */
+    --sl-content-width: 67.5rem;
+  }
+
+  .page[data-sidebar-docked] .main-frame {
+    padding-inline-start: calc(var(--sl-sidebar-docked-peek) + var(--sl-content-pad-x));
+  }
+
+  .page[data-sidebar-docked] nav.sidebar {
+    position: fixed;
+    inset-block: var(--sl-nav-height) 0;
+    inset-inline-start: 0;
+    z-index: var(--sl-z-index-menu);
+    width: var(--sl-sidebar-docked-peek);
+    overflow: hidden;
+    transition: width 0.2s ease;
+    background-color: var(--sl-color-bg-sidebar);
+    border-inline-end: 1px solid var(--sl-color-hairline-shade);
+  }
+
+  .page[data-sidebar-docked] nav.sidebar:hover,
+  .page[data-sidebar-docked] nav.sidebar:focus-within {
+    width: var(--sl-sidebar-width);
+    box-shadow: var(--sl-shadow-md);
+  }
+
+  .page[data-sidebar-docked] nav.sidebar .sidebar-pane {
+    position: absolute;
+    inset: 0;
+    width: var(--sl-sidebar-width);
+    border-inline-end: none;
+  }
+
+  .page[data-sidebar-docked] nav.sidebar::after {
+    content: "›";
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 0;
+    width: var(--sl-sidebar-docked-peek);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--sl-color-gray-3);
+    font-size: 1.125rem;
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .page[data-sidebar-docked] nav.sidebar:hover::after,
+  .page[data-sidebar-docked] nav.sidebar:focus-within::after {
+    opacity: 0;
+  }
+}
+
 /* Starlight-specific component styles */
 @media (min-width: 1484px) {
   .page {
@@ -86,7 +144,7 @@
     margin-inline: auto;
   }
 
-  nav.sidebar .sidebar-pane {
+  .page:not([data-sidebar-docked]) nav.sidebar .sidebar-pane {
     position: sticky;
     height: calc(100vh - var(--sl-nav-height));
   }

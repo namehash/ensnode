@@ -15,7 +15,8 @@
     "lint:ci": "biome ci",
     "omnigraph-examples:refresh-responses": "tsx --tsconfig tsconfig.json scripts/fetch-omnigraph-example-responses.mts",
     "test": "vitest",
-    "generate:openapi": "pnpm --filter ensapi exec tsx --tsconfig tsconfig.json ../../scripts/generate-ensapi-openapi.mts"
+    "generate:openapi": "pnpm --filter ensapi exec tsx --tsconfig tsconfig.json ../../scripts/generate-ensapi-openapi.mts",
+    "typecheck": "tsgo --noEmit"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.9",

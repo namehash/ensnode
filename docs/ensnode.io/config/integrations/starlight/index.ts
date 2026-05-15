@@ -8,6 +8,7 @@ import { starlightSidebarTopicsConfig } from "./sidebar-topics";
 export function starlight(): AstroIntegration {
   return AstroStarlight({
     components: {
+      PageFrame: "./src/components/overrides/PageFrame.astro",
       ThemeProvider: "./src/components/overrides/ThemeProvider.astro",
       ThemeSelect: "./src/components/overrides/ThemeSelect.astro",
       SocialIcons: "./src/components/overrides/SocialIcons.astro",
