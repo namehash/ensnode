@@ -9,10 +9,12 @@ import starlightLlmsTxt from "starlight-llms-txt";
  * relative to `src/content/docs/`).
  *
  * The Interactive example imports a React playground and cannot be rendered by `starlight-llms-txt`.
+ * The Schema Reference imports a React playground and cannot be rendered by `starlight-llms-txt`.
  */
 export const starlightLlmsTxtPlugin = starlightLlmsTxt({
   exclude: [
     "docs/integrate/integration-options/enssdk/example",
     "docs/integrate/integration-options/enskit/example",
+    "docs/integrate/omnigraph/schema-reference",
   ],
 });

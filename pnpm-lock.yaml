@@ -702,6 +702,12 @@ importers:
       '@fontsource/inter':
         specifier: ^5.2.5
         version: 5.2.8
+      '@graphiql/plugin-doc-explorer':
+        specifier: 0.4.1
+        version: 0.4.1(@graphiql/react@0.37.1(@types/node@24.10.9)(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(graphql@16.11.0)(immer@9.0.21)(react-compiler-runtime@19.1.0-rc.1(react@19.2.1))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(use-sync-external-store@1.6.0(react@19.2.1)))(@types/react@19.2.7)(graphql@16.11.0)(immer@9.0.21)(react-compiler-runtime@19.1.0-rc.1(react@19.2.1))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(use-sync-external-store@1.6.0(react@19.2.1))
+      '@graphiql/react':
+        specifier: 0.37.1
+        version: 0.37.1(@types/node@24.10.9)(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(graphql@16.11.0)(immer@9.0.21)(react-compiler-runtime@19.1.0-rc.1(react@19.2.1))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(use-sync-external-store@1.6.0(react@19.2.1))
       '@headlessui/react':
         specifier: ^2.2.0
         version: 2.2.9(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -741,9 +747,15 @@ importers:
       classcat:
         specifier: 5.0.5
         version: 5.0.5
+      enssdk:
+        specifier: workspace:*
+        version: link:../../packages/enssdk
       fuse.js:
         specifier: ^7.1.0
         version: 7.1.0
+      graphql:
+        specifier: ^16.10.0
+        version: 16.11.0
       mermaid:
         specifier: ^11.15.0
         version: 11.15.0
@@ -15000,6 +15012,14 @@ snapshots:
       chai: 6.2.0
       tinyrainbow: 3.0.3
 
+  '@vitest/mocker@4.0.5(vite@6.4.2(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.3))':
+    dependencies:
+      '@vitest/spy': 4.0.5
+      estree-walker: 3.0.3
+      magic-string: 0.30.21
+    optionalDependencies:
+      vite: 6.4.2(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.3)
+
   '@vitest/mocker@4.0.5(vite@6.4.2(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.3))':
     dependencies:
       '@vitest/spy': 4.0.5
@@ -20519,7 +20539,7 @@ snapshots:
   vitest@4.0.5(@types/debug@4.1.12)(@types/node@24.10.9)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.12))(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.3):
     dependencies:
       '@vitest/expect': 4.0.5
-      '@vitest/mocker': 4.0.5(vite@6.4.2(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.3))
+      '@vitest/mocker': 4.0.5(vite@6.4.2(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.3))
       '@vitest/pretty-format': 4.0.5
       '@vitest/runner': 4.0.5
       '@vitest/snapshot': 4.0.5
