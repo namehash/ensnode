@@ -17,7 +17,7 @@ export type PlaygroundPackageManifest = {
   devDependencies: Record<string, string>;
 };
 
-/** What {@link import("../../../components/molecules/CodePlayground").default} consumes. */
+/** What {@link import("@components/molecules/CodePlayground").default} consumes. */
 export type PlaygroundProject = {
   title: string;
   description?: string;

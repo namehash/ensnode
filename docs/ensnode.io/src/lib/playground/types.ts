@@ -1,4 +1,4 @@
-import { z } from "astro:content";
+import { z } from "astro/zod";
 
 /** Arbitrary JSON object (validated as a plain object tree, not a string). */
 const jsonObjectSchema = z.record(z.string(), z.unknown());

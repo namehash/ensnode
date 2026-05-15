@@ -5,6 +5,13 @@
   "compilerOptions": {
     "paths": {
       "*": ["./*"],
+      "@assets/*": ["./src/assets/*"],
+      "@components/*": ["./src/components/*"],
+      "@content/*": ["./src/content/*"],
+      "@data/*": ["./src/data/*"],
+      "@lib/*": ["./src/lib/*"],
+      "@scripts/*": ["./src/scripts/*"],
+      "@styles/*": ["./src/styles/*"],
       "@workspace/*": ["../../*"]
     },
     "jsx": "react-jsx",

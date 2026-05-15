@@ -2,8 +2,8 @@ import { legacyButtonVariants } from "@namehash/namehash-ui/legacy";
 import { TelegramIcon } from "@workspace/docs/ensrainbow.io/src/components/atoms/icons/TelegramIcon.tsx";
 import { Balancer } from "react-wrap-balancer";
 
-import TelegramBanner from "../../assets/telegram_image.svg";
-import MobileTelegramBanner from "../../assets/telegram_mobile_image.svg";
+import TelegramBanner from "@assets/telegram_image.svg";
+import MobileTelegramBanner from "@assets/telegram_mobile_image.svg";
 
 export default function JoinTelegram() {
   return (

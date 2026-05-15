@@ -7,9 +7,9 @@ import { LostENSNamesImage } from "@workspace/docs/ensnode.io/src/components/ato
 import { Fragment } from "react";
 import { Balancer } from "react-wrap-balancer";
 
-import ENSAdminDecentralizationMobileImage from "../../assets/Decentralization.png";
-import InfrastructureGapsMobileImage from "../../assets/InfrastructureGaps.png";
-import ProtocolInnovationsMobileImage from "../../assets/ProtocolInnovations.png";
+import ENSAdminDecentralizationMobileImage from "@assets/Decentralization.png";
+import InfrastructureGapsMobileImage from "@assets/InfrastructureGaps.png";
+import ProtocolInnovationsMobileImage from "@assets/ProtocolInnovations.png";
 import SectionDivider from "../atoms/SectionDivider.tsx";
 import InnovationSection, { type InnovationSectionProps } from "../molecules/InnovationSection.tsx";
 

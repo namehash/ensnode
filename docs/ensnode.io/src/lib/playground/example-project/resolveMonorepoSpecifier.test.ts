@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 
-import { resolveMonorepoSpecifier } from "./resolveMonorepoSpecifier";
+import { parsePnpmCatalog, resolveMonorepoSpecifier } from "./resolveMonorepoSpecifier";
+
+describe("parsePnpmCatalog", () => {
+  it("throws when workspace yaml has no catalog section", () => {
+    expect(() => parsePnpmCatalog("packages:\n  - apps/*\n")).toThrow(
+      "Failed to parse pnpm catalog from pnpm-workspace.yaml",
+    );
+  });
+});
 
 describe("resolveMonorepoSpecifier", () => {
   it("resolves catalog: specifiers from pnpm-workspace.yaml", () => {

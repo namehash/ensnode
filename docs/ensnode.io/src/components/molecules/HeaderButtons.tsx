@@ -2,7 +2,7 @@ import HeaderMobileNavigation from "@workspace/docs/ensnode.io/src/components/mo
 import { GithubIcon } from "@workspace/docs/ensrainbow.io/src/components/atoms/icons/GithubIcon.tsx";
 import { TelegramIcon } from "@workspace/docs/ensrainbow.io/src/components/atoms/icons/TelegramIcon.tsx";
 import { TwitterIcon } from "@workspace/docs/ensrainbow.io/src/components/atoms/icons/TwitterIcon.tsx";
-import "../../styles/onScrollHeader.css";
+import "@styles/onScrollHeader.css";
 
 import cc from "classcat";
 

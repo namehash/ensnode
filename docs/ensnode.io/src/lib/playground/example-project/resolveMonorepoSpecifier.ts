@@ -30,7 +30,7 @@ export function resolveMonorepoSpecifier(packageName: string, specifier: string)
   return specifier;
 }
 
-function parsePnpmCatalog(source: string): Record<string, string> {
+export function parsePnpmCatalog(source: string): Record<string, string> {
   const catalog: Record<string, string> = {};
   let inCatalog = false;
 
@@ -53,6 +53,10 @@ function parsePnpmCatalog(source: string): Record<string, string> {
 
     const packageName = match[1].replace(/^"(.+)"$/, "$1");
     catalog[packageName] = match[2].trim();
+  }
+
+  if (Object.keys(catalog).length === 0) {
+    throw new Error("Failed to parse pnpm catalog from pnpm-workspace.yaml");
   }
 
   return catalog;
