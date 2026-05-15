@@ -22,7 +22,7 @@ const DEVNET_NAME_WITH_OWNED_RESOLVER = asInterpretedName("example.eth");
 describe("Resolver.events", () => {
   type ResolverEventsResult = {
     domain: {
-      resolver: {
+      assignedResolver: {
         events: GraphQLConnection<EventResult>;
       };
     };
@@ -31,7 +31,7 @@ describe("Resolver.events", () => {
   const ResolverEvents = gql`
     query ResolverEvents($name: InterpretedName!) {
       domain(by: { name: $name }) {
-        resolver {
+        assignedResolver {
           events {
             edges {
               node {
@@ -51,7 +51,7 @@ describe("Resolver.events", () => {
       name: DEVNET_NAME_WITH_OWNED_RESOLVER,
     });
 
-    const events = flattenConnection(result.domain.resolver.events);
+    const events = flattenConnection(result.domain.assignedResolver.events);
 
     expect(events.length).toBeGreaterThan(0);
   });
@@ -60,8 +60,8 @@ describe("Resolver.events", () => {
 describe("Resolver.events pagination", () => {
   testEventPagination(async (variables) => {
     const result = await request<{
-      domain: { resolver: { events: PaginatedGraphQLConnection<EventResult> } };
+      domain: { assignedResolver: { events: PaginatedGraphQLConnection<EventResult> } };
     }>(ResolverEventsPaginated, { name: DEVNET_NAME_WITH_OWNED_RESOLVER, ...variables });
-    return result.domain.resolver.events;
+    return result.domain.assignedResolver.events;
   });
 });

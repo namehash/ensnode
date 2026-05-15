@@ -4,17 +4,18 @@ description: Direct database access for self-hosters needing custom queries, ana
 ---
 
 import { LinkCard } from "@astrojs/starlight/components";
+import EnsDbSelfHostingNote from "../../../../../components/molecules/EnsDbSelfHostingNote.astro";
 import EnsDbUseCases from "../../../../../components/molecules/EnsDbUseCases.astro";
 
-For special use cases that go beyond what the ENS Omnigraph exposes — you can query the live onchain state of **ENSv2** directly via `SQL`.
+For special use cases that go beyond what the ENS Omnigraph exposes — you can query the live onchain state of both **ENSv1 and ENSv2** directly via `SQL`.
 
-**ENSDb** is an open standard that stores the live onchain **ENSv2** state in a carefully-crafted data model within a PostgreSQL database. Because it's plain Postgres, you can use *any* language with a Postgres driver — **TypeScript**, **Python**, **Rust**, **Go**, and more.
+**ENSDb** is a bi-directional integration standard for any EnsDbWriter and EnsDbReader implementations to coordinate around the live unified onchain state of ENSv1 **and ENSv2** in a carefully-crafted standardized data model within a PostgreSQL database. Because ENSDb builds on Postgres, you can use *any* language with a Postgres driver — **TypeScript**, **Python**, **Rust**, **Go**, and more.
 
-:::note[Self-hosting required]
-ENSDb is available when you [self-host ENSNode](/docs/self-host). Each ENSNode instance writes its data into a PostgreSQL database that you own and control — that database **is** your ENSDb instance. The hosted ENSNode instances do not expose direct database access.
-:::
 
-### What you can build with ENSDb
+<EnsDbSelfHostingNote />
+
+
+### Inspirations for what you can build with ENSDb
 
 <EnsDbUseCases />
 

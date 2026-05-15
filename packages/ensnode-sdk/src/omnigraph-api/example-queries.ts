@@ -56,7 +56,7 @@ export const GRAPHQL_API_EXAMPLE_QUERIES: Array<{
 #
 # There are also example queries in the tabs above ☝️
 query HelloWorld {
-  domain(by: { name: "eth" }) { name owner { address } }
+  domain(by: { name: "eth" }) { canonical { name } owner { address } }
 }`,
     variables: { default: {} },
   },
@@ -80,7 +80,7 @@ query FindDomains(
         __typename
         id
         label { interpreted hash }
-        name
+        canonical { name }
 
         registration { expiry event { timestamp } }
       }
@@ -110,17 +110,12 @@ query DomainByName($name: InterpretedName!) {
     __typename
     id
     label { interpreted hash }
-    name
+    canonical { name node path { id } }
     owner { address }
+    subregistry { contract { chainId address } }
 
     ... on ENSv1Domain {
       rootRegistryOwner { address }
-    }
-
-    ... on ENSv2Domain {
-      subregistry {
-        contract { chainId address }
-      }
     }
   }
 }`,
@@ -137,11 +132,11 @@ query DomainByName($name: InterpretedName!) {
     query: `
 query DomainSubdomains($name: InterpretedName!) {
   domain(by: {name: $name}) {
-    name
+    canonical { name }
     subdomains(first: 10) {
       edges {
         node {
-          name
+          canonical { name }
         }
       }
     }
@@ -191,7 +186,7 @@ query AccountDomains(
       edges {
         node {
           label { interpreted }
-          name
+          canonical { name }
         }
       }
     }
@@ -236,7 +231,7 @@ query RegistryDomains(
       edges {
         node {
           label { interpreted }
-          name
+          canonical { name }
         }
       }
     }
@@ -340,7 +335,7 @@ query AccountResolverPermissions($address: Address!) {
     query: `
 query DomainResolver($name: InterpretedName!) {
   domain(by: { name: $name }) {
-    resolver {
+    assignedResolver {
       records { edges { node { node keys coinTypes } } }
       permissions { resources { edges { node { resource users { edges { node { user { address } roles } } } } } } }
       events { totalCount edges { node { topics data timestamp } } }
@@ -365,17 +360,17 @@ query Namegraph {
     domains {
       edges {
         node {
-          name
+          canonical { name }
 
           subdomains {
             edges {
               node {
-                name
+                canonical { name }
 
                 subdomains {
                   edges {
                     node {
-                      name
+                      canonical { name }
                     }
                   }
                 }

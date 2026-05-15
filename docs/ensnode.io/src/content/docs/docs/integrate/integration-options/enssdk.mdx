@@ -3,8 +3,308 @@ title: enssdk
 description: SDK for ENSv2 development in TypeScript/JavaScript.
 ---
 
-:::caution[Coming Soon]
-We're actively working on this page right now. Check back by May 18th for full content!
+import { LinkCard } from '@astrojs/starlight/components';
+import IntegrateHostedEnsNodeTip from '../../../../../components/molecules/IntegrateHostedEnsNodeTip.astro';
+
+`enssdk` is the foundational TypeScript/JavaScript SDK for ENS development. It's a fully modular and tree-shakeable modern TypeScript/JavaScript package that provides ENS-specific types and helpers — usable from any JS runtime, browser or server.
+
+`enssdk` also directly integrates with ENSNode, providing an `EnsNodeClient` (via `createEnsNodeClient`) that can be extended with a fully-typed Omnigraph API client (powered by [`gql.tada`](https://gql-tada.0no.co/)).
+
+This guide walks you from an empty directory to a working TypeScript script that queries the `eth` Domain and queries its subdomains — the same flow as our [enssdk-example](https://github.com/namehash/ensnode/tree/main/examples/enssdk-example).
+
+<IntegrateHostedEnsNodeTip includeHostedInstancesLink />
+
+## 1. Scaffold a TypeScript project
+
+If you already have a TypeScript project, skip ahead to [Install `enssdk`](#2-install-enssdk).
+
+Otherwise:
+
+```sh
+mkdir my-ens-script && cd my-ens-script
+npm init -y
+mkdir src
+```
+
+## 2. Install `enssdk`
+
+We'll use [`tsx`](https://tsx.is/) to run TypeScript directly without a bundler.
+
+```sh
+npm install enssdk@1.13.1
+npm install -D tsx typescript @types/node
+```
+
+:::tip[Pin exact versions]
+Always pin an **exact** version (no `^` or `~`) of `enssdk`. The Omnigraph GraphQL schema is bundled inside `enssdk` and consumed by the `gql.tada` TypeScript plugin to type your queries — a minor or patch bump can change the schema and silently drift your generated types away from your queries. Locking the exact version keeps types and runtime in sync.
 :::
 
-This page will cover enssdk — the TypeScript/JavaScript SDK for ENSv2. Includes createEnsNodeClient, fully typed ENS Omnigraph API queries with gql.tada, normalization utilities, and much more.
+## 3. Configure the `gql.tada` TypeScript plugin
+
+`gql.tada` is what gives your `graphql(...)` query strings end-to-end type safety. It reads the Omnigraph schema from `enssdk` at typecheck time.
+
+Create `tsconfig.json`:
+
+```json title="tsconfig.json" ins={10-15}
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "lib": ["ESNext"],
+    "types": ["node"],
+    "plugins": [
+      {
+        "name": "gql.tada/ts-plugin",
+        "schema": "node_modules/enssdk/src/omnigraph/generated/schema.graphql",
+        "tadaOutputLocation": "./src/generated/graphql-env.d.ts"
+      }
+    ]
+  },
+  "include": ["src"]
+}
+```
+
+If you're using VS Code, make sure your workspace is using the workspace TypeScript version so the plugin loads. Add this to `.vscode/settings.json`:
+
+```json title=".vscode/settings.json"
+{
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
+  "js/ts.tsdk.promptToUseWorkspaceVersion": true
+}
+```
+
+Also add a `start` script to `package.json`:
+
+```json title="package.json" ins={3-5}
+{
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/index.ts"
+  }
+}
+```
+
+## 4. Construct the client
+
+The `EnsNodeClient` is the entry point. Extend it with the `omnigraph` module to get the `client.omnigraph.query(...)` method.
+
+```ts title="src/index.ts"
+import { createEnsNodeClient } from "enssdk/core";
+import { omnigraph } from "enssdk/omnigraph";
+
+// you may use a NameHash Hosted ENSNode instance
+// learn more at https://ensnode.io/docs/integrate/hosted-instances
+const ENSNODE_URL = process.env.ENSNODE_URL!;
+
+// create and extend an EnsNodeClient with Omnigraph support
+const client = createEnsNodeClient({ url: ENSNODE_URL }).extend(omnigraph);
+```
+
+## 5. Hello world
+
+Add your first query — look up the `eth` Domain and print its owner and protocol version.
+
+:::tip[InterpretedName]
+An **InterpretedName** is a Name whose labels are each either normalized or represented as an [encoded labelhash](/docs/reference/terminology#encoded-labelhash) (e.g. `[abcd...].eth`) — the canonical, lossless form ENSNode uses to identify a Name. `asInterpretedName("eth")` brands a known-safe string as one; for user input, validate first. See [Interpreted Name](/docs/reference/terminology#interpreted-name) in the terminology reference.
+:::
+
+```ts title="src/index.ts"
+// existing imports...
+
+import { asInterpretedName, beautifyInterpretedName } from "enssdk";
+import { graphql, omnigraph } from "enssdk/omnigraph";
+
+// existing client...
+
+// this is typechecked and editor autocompleted with built-in docs!
+const HelloWorldQuery = graphql(`
+  query HelloWorld($name: InterpretedName!) {
+    domain(by: { name: $name }) {
+      __typename
+      canonical { name }
+      owner { address }
+    }
+  }
+`);
+
+async function main() {
+  const name = asInterpretedName("eth");
+
+  const result = await client.omnigraph.query({
+    query: HelloWorldQuery,
+    variables: { name },
+  });
+
+  if (result.errors) throw new Error(JSON.stringify(result.errors));
+  if (!result.data?.domain) throw new Error(`Domain '${name}' not found`);
+
+  const { domain } = result.data;
+
+  console.log(`Name: ${domain.canonical ? beautifyInterpretedName(domain.canonical.name) : "<unnamed>"}`);
+  console.log(`Version: ${domain.__typename}`);
+  console.log(`Owner: ${domain.owner?.address ?? "0x0"}`);
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
+```
+
+A few things to notice:
+
+- `graphql(...)` parses your query at typecheck time. Hover over `result.data` and you'll see it's typed exactly to your selection set — try removing `owner { address }` from the query and watch the access below become a type error.
+- `domain` is a union of `ENSv1Domain | ENSv2Domain` (both implement the `Domain` interface). The Omnigraph unifies ENSv1 and ENSv2 behind the same query — `__typename` tells you which one you got.
+- `canonical` is `null` for non-canonical Domains (e.g. Domains whose name cannot be inferred). When non-null, `canonical.name` is the Domain's Canonical Name. **Always** guard the access; TypeScript will help you.
+
+## 6. List subdomains
+
+Expand the query to also fetch the Domain's subdomains. `subdomains` is a [Relay Connection](https://relay.dev/graphql/connections.htm) — pass `first: 20` to cap the page, and select `totalCount` to learn how many subdomains exist in total.
+
+```ts title="src/index.ts" ins={7-12,34-38}
+const HelloWorldQuery = graphql(`
+  query HelloWorld($name: InterpretedName!) {
+    domain(by: { name: $name }) {
+      __typename
+      canonical { name }
+      owner { address }
+      subdomains(first: 20) {
+        totalCount
+        edges {
+          node { canonical { name } owner { address } }
+        }
+      }
+    }
+  }
+`);
+
+async function main() {
+  const name = asInterpretedName("eth");
+
+  const result = await client.omnigraph.query({
+    query: HelloWorldQuery,
+    variables: { name },
+  });
+
+  if (result.errors) throw new Error(JSON.stringify(result.errors));
+  if (!result.data?.domain) throw new Error(`Domain '${name}' not found`);
+
+  const { domain } = result.data;
+
+  console.log(`Name: ${domain.canonical ? beautifyInterpretedName(domain.canonical.name) : "<unnamed>"}`);
+  console.log(`Version: ${domain.__typename}`);
+  console.log(`Owner: ${domain.owner?.address ?? "0x0"}`);
+
+  console.log(`\nSubdomains (showing 20 of ${domain.subdomains?.totalCount ?? 0}):`);
+  for (const { node } of domain.subdomains?.edges ?? []) {
+    const subName = node.canonical ? beautifyInterpretedName(node.canonical.name) : "<unnamed>";
+    console.log(`  - ${subName} — Owner ${node.owner?.address ?? "0x0"}`);
+  }
+}
+```
+
+Notice we're now writing the same canonical/owner rendering twice — once for the parent Domain and once inside the subdomain loop. We'll fix that next.
+
+To page beyond the first 20, the connection also exposes `pageInfo { hasNextPage endCursor }` and accepts an `after: String` cursor — see [Relay's connection spec](https://relay.dev/graphql/connections.htm).
+
+## 7. Extract a typed fragment
+
+Notice we're selecting the same fields (`canonical { name }`, `owner { address }`) on the parent Domain _and_ on each subdomain, and rendering them the same way. Extract a `DomainFragment` to deduplicate the selection — and get a reusable, fully-typed function that formats a Domain.
+
+```ts title="src/index.ts" ins={3,11-17,23,26,31,34-40,56,59}
+import { asInterpretedName, beautifyInterpretedName } from "enssdk";
+import { createEnsNodeClient } from "enssdk/core";
+import { type FragmentOf, graphql, omnigraph, readFragment } from "enssdk/omnigraph";
+
+// you may use a NameHash Hosted ENSNode instance
+// learn more at https://ensnode.io/docs/integrate/hosted-instances
+const ENSNODE_URL = process.env.ENSNODE_URL!;
+
+const client = createEnsNodeClient({ url: ENSNODE_URL }).extend(omnigraph);
+
+const DomainFragment = graphql(`
+  fragment DomainFragment on Domain {
+    __typename
+    canonical { name }
+    owner { address }
+  }
+`);
+
+const HelloWorldQuery = graphql(
+  `
+  query HelloWorld($name: InterpretedName!) {
+    domain(by: { name: $name }) {
+      ...DomainFragment
+      subdomains(first: 20) {
+        totalCount
+        edges { node { ...DomainFragment } }
+      }
+    }
+  }
+`,
+  [DomainFragment],
+);
+
+function formatDomain(data: FragmentOf<typeof DomainFragment>): string {
+  // type-safe access to fragment data!
+  const domain = readFragment(DomainFragment, data);
+  const name = domain.canonical ? beautifyInterpretedName(domain.canonical.name) : "<unnamed>";
+  const owner = domain.owner?.address ?? "0x0";
+  return `${name} (${domain.__typename}) — Owner ${owner}`;
+}
+
+async function main() {
+  const name = asInterpretedName("eth");
+
+  const result = await client.omnigraph.query({
+    query: HelloWorldQuery,
+    variables: { name },
+  });
+
+  if (result.errors) throw new Error(JSON.stringify(result.errors));
+  if (!result.data?.domain) throw new Error(`Domain '${name}' not found`);
+
+  const { domain } = result.data;
+  const totalCount = domain.subdomains?.totalCount ?? 0;
+
+  console.log(formatDomain(domain));
+  console.log(`\nSubdomains (showing 20 of ${totalCount}):`);
+  for (const { node } of domain.subdomains?.edges ?? []) {
+    console.log(`  - ${formatDomain(node)}`);
+  }
+}
+```
+
+`FragmentOf<typeof DomainFragment>` is the opaque type for any selection that includes `...DomainFragment` — `formatDomain` accepts any of them, including each `node` in the subdomain edges. `readFragment(DomainFragment, data)` unwraps that opaque type to the typed fields you declared.
+
+## 8. Run it
+
+Point at a hosted ENSNode and go:
+
+```sh
+ENSNODE_URL=https://api.alpha.ensnode.io npm start
+```
+
+You should see the `eth` Domain, followed by its first 20 subdomains and the total subdomain count.
+
+## Where to go next
+
+- See the [Omnigraph Cookbook](/docs/integrate/omnigraph/cookbook) for ready-to-copy queries: account-owned domains, events, registrar permissions, full-text search, and more.
+- See the [Omnigraph Schema Reference](/docs/integrate/omnigraph/schema-reference) for the full set of types, fields, and arguments you can query.
+- Building a React app? Use [`enskit`](/docs/integrate/integration-options/enskit) — same `graphql(...)` helper, with `useOmnigraphQuery` and a graphcache.
+
+<LinkCard
+  title="enssdk-example"
+  description="The full example script from this guide."
+  href="https://github.com/namehash/ensnode/tree/main/examples/enssdk-example"
+/>
+
+<LinkCard
+  title="gql.tada documentation"
+  description="The TypeScript-first GraphQL client that powers enssdk's typed queries."
+  href="https://gql-tada.0no.co/"
+/>

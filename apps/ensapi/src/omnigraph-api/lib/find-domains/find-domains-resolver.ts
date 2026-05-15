@@ -16,13 +16,12 @@ import {
   PAGINATION_DEFAULT_MAX_SIZE,
   PAGINATION_DEFAULT_PAGE_SIZE,
 } from "@/omnigraph-api/schema/constants";
+import { type Domain, DomainInterfaceRef } from "@/omnigraph-api/schema/domain";
 import {
   DOMAINS_DEFAULT_ORDER_BY,
   DOMAINS_DEFAULT_ORDER_DIR,
-  type Domain,
-  DomainInterfaceRef,
   type DomainsOrderBy,
-} from "@/omnigraph-api/schema/domain";
+} from "@/omnigraph-api/schema/domain-inputs";
 import type { OrderDirection } from "@/omnigraph-api/schema/order-direction";
 
 import { DomainCursors } from "./domain-cursor";

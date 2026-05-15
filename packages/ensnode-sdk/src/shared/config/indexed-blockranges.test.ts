@@ -68,7 +68,11 @@ describe("buildIndexedBlockranges()", () => {
     ]);
 
     // Act
-    const result = buildIndexedBlockranges(ENSNamespaceIds.Mainnet, pluginsRequiredDatasourceNames);
+    const result = buildIndexedBlockranges(
+      ENSNamespaceIds.Mainnet,
+      undefined,
+      pluginsRequiredDatasourceNames,
+    );
 
     const expectedEntries = new Map<ChainId, BlockNumberRangeWithStartBlock>([
       [1, buildBlockNumberRange(80, undefined)],
@@ -104,7 +108,11 @@ describe("buildIndexedBlockranges()", () => {
     ]);
 
     // Act
-    const result = buildIndexedBlockranges(ENSNamespaceIds.Mainnet, pluginsRequiredDatasourceNames);
+    const result = buildIndexedBlockranges(
+      ENSNamespaceIds.Mainnet,
+      undefined,
+      pluginsRequiredDatasourceNames,
+    );
 
     // Assert
 
@@ -137,7 +145,11 @@ describe("buildIndexedBlockranges()", () => {
     ]);
 
     // Act
-    const result = buildIndexedBlockranges(ENSNamespaceIds.Mainnet, pluginsRequiredDatasourceNames);
+    const result = buildIndexedBlockranges(
+      ENSNamespaceIds.Mainnet,
+      undefined,
+      pluginsRequiredDatasourceNames,
+    );
 
     // Assert
     expect(result).toStrictEqual(new Map([[8453, buildBlockNumberRange(17571480, undefined)]]));
@@ -150,9 +162,67 @@ describe("buildIndexedBlockranges()", () => {
     const pluginsDatasourceNames = new Map([[PluginName.Subgraph, [DatasourceNames.Seaport]]]);
 
     // Act
-    const result = buildIndexedBlockranges(ENSNamespaceIds.Mainnet, pluginsDatasourceNames);
+    const result = buildIndexedBlockranges(
+      ENSNamespaceIds.Mainnet,
+      undefined,
+      pluginsDatasourceNames,
+    );
 
     // Assert
     expect(result).toStrictEqual(new Map());
+  });
+
+  it("applies global end block to contracts without end block and skips contracts starting after global end block", () => {
+    // Arrange
+    const ensrootDatasourceConfig: unknown = {
+      chain: { id: 1 },
+      contracts: {
+        registry: { startBlock: 100 }, // no endBlock, should use global end block (500)
+        resolver: { startBlock: 80, endBlock: 200 }, // has endBlock, should keep it
+        registrar: { startBlock: 600 }, // startBlock > global end block, should be skipped
+      },
+    };
+
+    const basenamesDatasourceConfig: unknown = {
+      chain: { id: 8453 },
+      contracts: {
+        registry: { startBlock: 5 }, // no endBlock, should use global end block (500)
+      },
+    };
+
+    const datasourcesByName: Partial<
+      Record<DatasourceName, ReturnType<typeof datasources.maybeGetDatasource>>
+    > = {
+      [DatasourceNames.ENSRoot]: datasourceMock(ensrootDatasourceConfig),
+      [DatasourceNames.Basenames]: datasourceMock(basenamesDatasourceConfig),
+    };
+
+    maybeGetDatasourceMock.mockImplementation(
+      (_namespace, datasourceName) => datasourcesByName[datasourceName as DatasourceName],
+    );
+
+    const pluginsRequiredDatasourceNames = new Map([
+      [PluginName.Subgraph, [DatasourceNames.ENSRoot]],
+      [PluginName.Basenames, [DatasourceNames.Basenames]],
+    ]);
+
+    const globalBlockrangeEndBlock = 500;
+
+    // Act
+    const result = buildIndexedBlockranges(
+      ENSNamespaceIds.Mainnet,
+      globalBlockrangeEndBlock,
+      pluginsRequiredDatasourceNames,
+    );
+
+    // Assert
+    const expectedEntries = new Map<ChainId, BlockNumberRangeWithStartBlock>([
+      // Chain 1: min startBlock = 80, max endBlock = max(500 from registry, 200 from resolver) = 500
+      [1, buildBlockNumberRange(80, 500)],
+      // Chain 8453: startBlock = 5, endBlock = 500 (from global)
+      [8453, buildBlockNumberRange(5, 500)],
+    ]);
+
+    expect(result).toStrictEqual(expectedEntries);
   });
 });

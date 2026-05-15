@@ -1,9 +1,9 @@
 diff --git a/package.json b/package.json
-index 56d0bf2a0452aa37c6f3711dc1f63a84faf4ac4a..d44ea725da3137471c3f15bb7617c38c340f7d50 100644
+index 7292934c70b50b1711d3d3a0f762403bc8b35f4a..7b8a8ca380e9a29815f159edac316b2cfd02de9a 100644
 --- a/package.json
 +++ b/package.json
 @@ -3,25 +3,17 @@
-   "version": "0.202.0",
+   "version": "0.217.0",
    "description": "OpenTelemetry OTLP Exporter base (for internal use only)",
    "main": "build/src/index.js",
 -  "module": "build/esm/index.js",
@@ -11,20 +11,20 @@ index 56d0bf2a0452aa37c6f3711dc1f63a84faf4ac4a..d44ea725da3137471c3f15bb7617c38c
    "types": "build/src/index.d.ts",
    "exports": {
      ".": {
--      "module": "./build/esm/index.js",
 -      "esnext": "./build/esnext/index.js",
+-      "module": "./build/esm/index.js",
        "types": "./build/src/index.d.ts",
        "default": "./build/src/index.js"
      },
      "./node-http": {
--      "module": "./build/esm/index-node-http.js",
 -      "esnext": "./build/esnext/index-node-http.js",
+-      "module": "./build/esm/index-node-http.js",
        "types": "./build/src/index-node-http.d.ts",
        "default": "./build/src/index-node-http.js"
      },
      "./browser-http": {
--      "module": "./build/esm/index-browser-http.js",
 -      "esnext": "./build/esnext/index-browser-http.js",
+-      "module": "./build/esm/index-browser-http.js",
        "types": "./build/src/index-browser-http.d.ts",
        "default": "./build/src/index-browser-http.js"
      }

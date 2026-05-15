@@ -1,7 +1,7 @@
 import { trace } from "@opentelemetry/api";
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, count, eq, getTableColumns } from "drizzle-orm";
-import { type DomainId, interpretedLabelsToInterpretedName } from "enssdk";
+import type { DomainId } from "enssdk";
 
 import type { RequiredAndNotNull, RequiredAndNull } from "@ensnode/ensnode-sdk";
 
@@ -26,17 +26,20 @@ import { getDomainResolver } from "@/omnigraph-api/lib/get-domain-resolver";
 import { getLatestRegistration } from "@/omnigraph-api/lib/get-latest-registration";
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
-import { rejectAnyErrors } from "@/omnigraph-api/lib/reject-any-errors";
 import { AccountRef } from "@/omnigraph-api/schema/account";
 import {
   ID_PAGINATED_CONNECTION_ARGS,
   PAGINATION_DEFAULT_MAX_SIZE,
   PAGINATION_DEFAULT_PAGE_SIZE,
 } from "@/omnigraph-api/schema/constants";
-import { ENSProtocolVersion } from "@/omnigraph-api/schema/ens-protocol-version";
+import { DomainCanonicalRef } from "@/omnigraph-api/schema/domain-canonical";
+import {
+  DomainPermissionsWhereInput,
+  DomainsOrderInput,
+  SubdomainsWhereInput,
+} from "@/omnigraph-api/schema/domain-inputs";
 import { EventRef, EventsWhereInput } from "@/omnigraph-api/schema/event";
 import { LabelRef } from "@/omnigraph-api/schema/label";
-import { OrderDirection } from "@/omnigraph-api/schema/order-direction";
 import { PermissionsUserRef } from "@/omnigraph-api/schema/permissions";
 import { RegistrationInterfaceRef } from "@/omnigraph-api/schema/registration";
 import { RegistryInterfaceRef } from "@/omnigraph-api/schema/registry";
@@ -82,13 +85,13 @@ export const ENSv2DomainRef = builder.objectRef<ENSv2Domain>("ENSv2Domain");
 //////////////////////////////////
 DomainInterfaceRef.implement({
   description:
-    "A Domain represents an individual Label within the ENS namegraph. It may or may not be Canonical. It may be an ENSv1Domain or an ENSv2Domain.",
+    "Represents a Domain, i.e. an individual Label within the ENS namegraph. It may or may not be Canonical. It may be an ENSv1Domain or an ENSv2Domain.",
   fields: (t) => ({
     /////////////
     // Domain.id
     /////////////
     id: t.field({
-      description: "A unique reference to this Domain.",
+      description: "A unique and stable reference to this Domain.",
       type: "DomainId",
       nullable: false,
       resolve: (parent) => parent.id,
@@ -99,7 +102,7 @@ DomainInterfaceRef.implement({
     ////////////////
     label: t.field({
       type: LabelRef,
-      description: "The Label this Domain represents in the ENS Namegraph",
+      description: "The Label associated with this Domain in the ENS Namegraph.",
       nullable: false,
       resolve: (parent) => parent.label,
     }),
@@ -108,64 +111,11 @@ DomainInterfaceRef.implement({
     // Domain.canonical
     ////////////////////
     canonical: t.field({
-      description: "Whether the Domain is Canonical.",
-      type: "Boolean",
-      nullable: false,
-      resolve: (parent) => parent.canonical,
-    }),
-
-    ///////////////
-    // Domain.name
-    ///////////////
-    name: t.field({
       description:
-        "The Canonical Name for this Domain. If the Domain is not Canonical, then `name` will be null.",
-      tracing: true,
-      type: "InterpretedName",
+        "Metadata (name, path, and node) related to the Domain's canonicality, if known. Null when the Domain is not in the canonical nametree.",
+      type: DomainCanonicalRef,
       nullable: true,
-      resolve: async (domain, _args, context) => {
-        const canonicalPath = await context.loaders.canonicalPath.load(domain.id);
-        if (canonicalPath instanceof Error) throw canonicalPath;
-        if (canonicalPath === null) return null;
-
-        // TODO: this could be more efficient if getCanonicalPath included the label join for us.
-        const domains = await rejectAnyErrors(
-          DomainInterfaceRef.getDataloader(context).loadMany(canonicalPath),
-        );
-
-        const labels = canonicalPath.map((domainId) => {
-          const found = domains.find((d) => d.id === domainId);
-          if (!found) {
-            throw new Error(
-              `Invariant(Domain.name): Domain in CanonicalPath not found:\nPath: ${JSON.stringify(canonicalPath)}\nDomainId: ${domainId}`,
-            );
-          }
-
-          return found.label.interpreted;
-        });
-
-        return interpretedLabelsToInterpretedName(labels);
-      },
-    }),
-
-    ///////////////
-    // Domain.path
-    ///////////////
-    path: t.field({
-      description:
-        "The Canonical Path from this Domain to the ENS Root, in leaf→root order and inclusive of this Domain. `path` is null if the Domain is not Canonical.",
-      tracing: true,
-      type: [DomainInterfaceRef],
-      nullable: true,
-      resolve: async (domain, _args, context) => {
-        const canonicalPath = await context.loaders.canonicalPath.load(domain.id);
-        if (canonicalPath instanceof Error) throw canonicalPath;
-        if (canonicalPath === null) return null;
-
-        return await rejectAnyErrors(
-          DomainInterfaceRef.getDataloader(context).loadMany(canonicalPath),
-        );
-      },
+      resolve: (domain) => (domain.canonical ? domain : null),
     }),
 
     /////////////////
@@ -173,14 +123,11 @@ DomainInterfaceRef.implement({
     /////////////////
     parent: t.field({
       description:
-        "The direct parent Domain in the canonical nametree or null if this Domain is a root-level Domain or is not Canonical.",
+        "The Domain that this Domain's parent Registry declares as its Canonical Domain, if any. Follows a single unidirectional pointer (`Registry.canonicalDomainId`) and does NOT enforce bidirectional canonical-edge agreement: a non-canonical Domain may have a non-null `parent`, and a canonical Domain's `parent` may itself be non-canonical. Null when the parent Registry does not declare a Canonical Domain.",
       type: DomainInterfaceRef,
       nullable: true,
-      resolve: async (domain, _args, context) => {
-        const path = await context.loaders.canonicalPath.load(domain.id);
-        if (path instanceof Error) throw path;
-        return path?.[1] ?? null;
-      },
+      resolve: async (domain, _args, context) =>
+        context.loaders.registryParentDomain.load(domain.registryId),
     }),
 
     ////////////////
@@ -195,11 +142,31 @@ DomainInterfaceRef.implement({
     }),
 
     ///////////////////
-    // Domain.resolver
+    // Domain.registry
     ///////////////////
-    resolver: t.field({
+    registry: t.field({
+      description: "The Registry under which this Domain exists.",
+      type: RegistryInterfaceRef,
+      nullable: false,
+      resolve: (parent) => parent.registryId,
+    }),
+
+    //////////////////////
+    // Domain.subregistry
+    //////////////////////
+    subregistry: t.field({
+      type: RegistryInterfaceRef,
+      description: "The Registry this Domain declares as its Subregistry, if exists.",
+      nullable: true,
+      resolve: (parent) => parent.subregistryId,
+    }),
+
+    ///////////////////////////
+    // Domain.assignedResolver
+    ///////////////////////////
+    assignedResolver: t.field({
       description:
-        "The Resolver that this Domain has assigned, if any. NOTE that this is the Domain's _assigned_ Resolver, _not_ its _effective_ Resolver, which can only be determined by following ENS Forward Resolution and ENSIP-10.",
+        "The Resolver that this Domain has assigned, if any. NOTE that this is the Domain's _assigned_ Resolver, _not_ its _effective_ Resolver, which can only be determined by following ENS Forward Resolution and ENSIP-10. Do NOT use this Domain-Resolver relationship in isolation to resolve records, that operation is NOT ENS Forward Resolution.",
       type: ResolverRef,
       nullable: true,
       resolve: (parent) => getDomainResolver(parent.id),
@@ -341,26 +308,6 @@ ENSv2DomainRef.implement({
       resolve: (parent) => parent.tokenId,
     }),
 
-    ///////////////////////
-    // ENSv2Domain.registry
-    ///////////////////////
-    registry: t.field({
-      description: "The Registry under which this ENSv2Domain exists.",
-      type: RegistryInterfaceRef,
-      nullable: false,
-      resolve: (parent) => parent.registryId,
-    }),
-
-    //////////////////////////
-    // ENSv2Domain.subregistry
-    //////////////////////////
-    subregistry: t.field({
-      type: RegistryInterfaceRef,
-      description: "The Registry this ENSv2Domain declares as its Subregistry, if exists.",
-      nullable: true,
-      resolve: (parent) => parent.subregistryId,
-    }),
-
     ///////////////////////////
     // ENSv2Domain.permissions
     ///////////////////////////
@@ -411,132 +358,3 @@ ENSv2DomainRef.implement({
     }),
   }),
 });
-
-//////////////////////
-// Inputs
-//////////////////////
-
-export const DomainPermissionsWhereInput = builder.inputType("DomainPermissionsWhereInput", {
-  description: "Filter Permissions over this Domain by a specific User address.",
-  fields: (t) => ({
-    user: t.field({ type: "Address" }),
-  }),
-});
-
-export const DomainIdInput = builder.inputType("DomainIdInput", {
-  description: "Reference a specific Domain.",
-  isOneOf: true,
-  fields: (t) => ({
-    name: t.field({ type: "InterpretedName" }),
-    id: t.field({ type: "DomainId" }),
-  }),
-});
-
-/**
- * @oneOf filter for Domain names. Exactly one of `starts_with`, `eq`, or `in` must be provided.
- *
- * - `starts_with`: partial Interpreted Name for autocomplete; exact match on every label except
- *   the last, prefix match on the last label. ex: 'example', 'example.', 'example.et'.
- * - `eq`: exact InterpretedName match. Sugar for `in: [eq]`. Combine with `version` to disambiguate
- *   across ENS protocol versions.
- * - `in`: exact InterpretedName match against any name in the set. Max 100 items.
- */
-export const DomainsNameFilter = builder.inputType("DomainsNameFilter", {
-  description:
-    "Filter Domains by name. Exactly one of `starts_with`, `eq`, or `in` must be provided.",
-  isOneOf: true,
-  fields: (t) => ({
-    starts_with: t.string({
-      description:
-        "Partial Interpreted Name for autocomplete. Matches Domains whose Interpreted Name starts with the given value: exact match on every label except the last, prefix match on the last label. ex: 'example', 'example.', 'example.et'. Case-sensitive (InterpretedName labels are normalized).",
-    }),
-    eq: t.field({
-      type: "InterpretedName",
-      description:
-        "Exact InterpretedName match. Sugar for `in: [eq]`. Combine with `version` to disambiguate across ENS protocol versions.",
-    }),
-    in: t.field({
-      type: ["InterpretedName"],
-      description:
-        "Exact InterpretedName match against any name in the set. Max 100 items; requests above the limit return an error.",
-    }),
-  }),
-});
-
-export const DomainsWhereInput = builder.inputType("DomainsWhereInput", {
-  description: "Filter for the top-level domains query.",
-  fields: (t) => ({
-    name: t.field({
-      type: DomainsNameFilter,
-      required: true,
-      description: "Filter the set of Domains by name.",
-    }),
-    version: t.field({
-      type: ENSProtocolVersion,
-      description:
-        "If set, filters the set of Domains to only those of the specified ENS protocol version.",
-    }),
-  }),
-});
-
-export const AccountDomainsWhereInput = builder.inputType("AccountDomainsWhereInput", {
-  description: "Filter for Account.domains query.",
-  fields: (t) => ({
-    name: t.field({
-      type: DomainsNameFilter,
-      description: "If set, filters the set of Domains by name.",
-    }),
-    canonical: t.boolean({
-      description:
-        "Optional, defaults to false. If true, filters the set of Domains by those that are Canonical (i.e. reachable by ENS Forward Resolution).",
-      defaultValue: false,
-    }),
-    version: t.field({
-      type: ENSProtocolVersion,
-      description:
-        "If set, filters the set of Domains to only those of the specified ENS protocol version.",
-    }),
-  }),
-});
-
-export const RegistryDomainsWhereInput = builder.inputType("RegistryDomainsWhereInput", {
-  description: "Filter for Registry.domains query.",
-  fields: (t) => ({
-    name: t.field({
-      type: DomainsNameFilter,
-      description: "If set, filters the set of Domains in this Registry by name.",
-    }),
-  }),
-});
-
-export const SubdomainsWhereInput = builder.inputType("SubdomainsWhereInput", {
-  description: "Filter for Domain.subdomains query.",
-  fields: (t) => ({
-    name: t.field({
-      type: DomainsNameFilter,
-      description: "If set, filters the set of subdomains by name.",
-    }),
-  }),
-});
-
-//////////////////////
-// Ordering
-//////////////////////
-
-export const DomainsOrderBy = builder.enumType("DomainsOrderBy", {
-  description: "Fields by which domains can be ordered",
-  values: ["NAME", "REGISTRATION_TIMESTAMP", "REGISTRATION_EXPIRY"] as const,
-});
-
-export type DomainsOrderByValue = typeof DomainsOrderBy.$inferType;
-
-export const DomainsOrderInput = builder.inputType("DomainsOrderInput", {
-  description: "Ordering options for domains query. If no order is provided, the default is ASC.",
-  fields: (t) => ({
-    by: t.field({ type: DomainsOrderBy, required: true }),
-    dir: t.field({ type: OrderDirection, defaultValue: "ASC" }),
-  }),
-});
-
-export const DOMAINS_DEFAULT_ORDER_BY: typeof DomainsOrderBy.$inferType = "NAME";
-export const DOMAINS_DEFAULT_ORDER_DIR: typeof OrderDirection.$inferType = "ASC";
