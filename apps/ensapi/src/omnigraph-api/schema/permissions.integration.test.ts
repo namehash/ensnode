@@ -284,7 +284,7 @@ describe("Resolver.permissions", () => {
   const ResolverPermissions = gql`
     query ResolverPermissions($name: InterpretedName!) {
       domain(by: { name: $name }) {
-        resolver { permissions { id contract { chainId address } } }
+        assignedResolver { permissions { id contract { chainId address } } }
       }
     }
   `;
@@ -292,7 +292,7 @@ describe("Resolver.permissions", () => {
   it("resolves permissions from a resolver", async () => {
     const result = await request<{
       domain: {
-        resolver: {
+        assignedResolver: {
           permissions: {
             id: PermissionsId;
             contract: AccountId;
@@ -302,12 +302,12 @@ describe("Resolver.permissions", () => {
     }>(ResolverPermissions, { name: NAME_WITH_RESOLVER });
 
     expect(
-      result.domain.resolver,
+      result.domain.assignedResolver,
       `expected ${NAME_WITH_RESOLVER} to have a resolver`,
     ).toBeDefined();
-    expect(result.domain.resolver.permissions.id).toBeTruthy();
-    expect(result.domain.resolver.permissions.contract.address).toBeTruthy();
-    expect(result.domain.resolver.permissions.contract.chainId).toBeTruthy();
+    expect(result.domain.assignedResolver.permissions.id).toBeTruthy();
+    expect(result.domain.assignedResolver.permissions.contract.address).toBeTruthy();
+    expect(result.domain.assignedResolver.permissions.contract.chainId).toBeTruthy();
   });
 });
 
