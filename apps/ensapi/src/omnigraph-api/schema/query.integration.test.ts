@@ -220,7 +220,7 @@ describe("Query.domains", () => {
       ).toBeDefined();
 
       // no prefix-matched names like "ethereum" should leak in
-      for (const d of domains) expect(d.name).toBe("eth");
+      for (const d of domains) expect(d.canonical?.name).toBe("eth");
     });
 
     it("eq + version: ENSv1 returns a single domain", async () => {
@@ -233,7 +233,7 @@ describe("Query.domains", () => {
       expect(domains[0]).toMatchObject({
         __typename: "ENSv1Domain",
         id: V1_ETH_DOMAIN_ID,
-        name: "eth",
+        canonical: { name: "eth" },
       });
     });
 
@@ -242,10 +242,10 @@ describe("Query.domains", () => {
         name: { in: ["eth", "parent.eth"] },
       });
       const domains = flattenConnection(result.domains);
-      const names = new Set(domains.map((d) => d.name));
+      const names = new Set(domains.map((d) => d.canonical?.name));
       expect(names.has("eth")).toBe(true);
       expect(names.has("parent.eth")).toBe(true);
-      for (const d of domains) expect(["eth", "parent.eth"]).toContain(d.name);
+      for (const d of domains) expect(["eth", "parent.eth"]).toContain(d.canonical?.name);
     });
 
     it("in returns empty for an empty set", async () => {

@@ -119,12 +119,12 @@ builder.queryType({
       },
       resolve: (_, { where, order, ...connectionArgs }, context) => {
         const base = domainsBase();
-        const named = applyDomainsNameFilter(base, where.name);
+        const { base: named, defaultOrderBy } = applyDomainsNameFilter(base, where.name);
         const canonical = filterByCanonical(named);
         const versioned = where.version ? filterByVersion(canonical, where.version) : canonical;
         const domains = withOrderingMetadata(versioned);
 
-        return resolveFindDomains(context, { domains, order, ...connectionArgs });
+        return resolveFindDomains(context, { domains, order, defaultOrderBy, ...connectionArgs });
       },
     }),
 

@@ -7,7 +7,8 @@ import { type Domain, DomainInterfaceRef } from "@/omnigraph-api/schema/domain";
 export const DomainCanonicalRef = builder.objectRef<Domain>("DomainCanonical");
 
 DomainCanonicalRef.implement({
-  description: "Canonicality metadata for a Domain, including its name, node (namehash), and path.",
+  description:
+    "Canonicality metadata for a Domain, including its name, depth, path, and node (namehash).",
   fields: (t) => ({
     name: t.field({
       description: "The Canonical Name for this Domain.",
@@ -23,24 +24,32 @@ DomainCanonicalRef.implement({
         return domain.canonicalName;
       },
     }),
-    path: t.field({
+    depth: t.field({
       description:
-        "The Canonical Path from this Domain to the ENS Root, leaf→root inclusive of this Domain.",
-      type: [DomainInterfaceRef],
+        "The depth of this Domain, i.e. the number of labels in this Domain's Canonical Name (e.g. 2 for `vitalik.eth`).",
+      type: "Int",
       nullable: false,
-      // TODO: derive `path` from the materialized `canonicalLabelHashPath` column instead of
-      // walking the canonicalPath dataloader. Each ancestor's DomainId can be reconstructed from
-      // the path prefix and the parent Registry chain, then batched through `DomainInterfaceRef`.
-      resolve: async (domain, args, context) => {
-        const canonicalPath = await context.loaders.canonicalPath.load(domain.id);
-        if (canonicalPath instanceof Error) throw canonicalPath;
-        if (canonicalPath === null) {
+      resolve: (domain) => {
+        if (domain.canonicalDepth == null) {
           throw new Error(
-            `Invariant(DomainCanonical.path): canonical Domain '${domain.id}' produced null canonical path.`,
+            `Invariant(DomainCanonical.depth): canonical Domain '${domain.id}' is missing canonicalDepth.`,
           );
         }
-
-        return canonicalPath;
+        return domain.canonicalDepth;
+      },
+    }),
+    path: t.field({
+      description:
+        "The Canonical Path from this Domain to the ENS Root, root→leaf inclusive of this Domain.",
+      type: [DomainInterfaceRef],
+      nullable: false,
+      resolve: (domain) => {
+        if (!domain.canonicalPath) {
+          throw new Error(
+            `Invariant(DomainCanonical.path): canonical Domain '${domain.id}' is missing canonicalPath.`,
+          );
+        }
+        return domain.canonicalPath;
       },
     }),
     node: t.field({

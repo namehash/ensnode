@@ -1,169 +1,38 @@
-import { eq, like, Param, sql } from "drizzle-orm";
-import { alias } from "drizzle-orm/pg-core";
-import {
-  type DomainId,
-  interpretedLabelsToLabelHashPath,
-  type LabelHashPath,
-  parsePartialInterpretedName,
-} from "enssdk";
+import { eq, ilike } from "drizzle-orm";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 
 import { type BaseDomainSet, selectBase } from "./base-domain-set";
 
 /**
- * Maximum depth of the provided `name` argument, to avoid infinite loops and expensive queries.
- */
-const FILTER_BY_NAME_MAX_DEPTH = 8;
-
-/**
- * Compose a query for Domains (ENSv1 or ENSv2) that have the specified children path.
+ * Filter a base domain set to canonical Domains whose materialized `canonicalName` starts with
+ * the user's typeahead input. Used by `Query.domains(where: { name: { starts_with } })` and the
+ * three sibling resolvers.
  *
- * For a search like "sub1.sub2.paren":
- *  - concrete = ["sub1", "sub2"]
- *  - partial = "paren"
- *  - labelHashPath = [labelhash("sub2"), labelhash("sub1")]
+ * Match semantics: `canonicalName ILIKE startsWith || '%'`. canonicalName is leaf-first
+ * (e.g. `"vitalik.eth"`), same direction as user input — `"vitalik.et"` matches `"vitalik.eth"`,
+ * `"vit"` matches `"vit.eth"`, `"vitalik.eth"`, etc.
  *
- * We find Domains matching the concrete path and return both:
- *  - leafId: the deepest child (label "sub1") — the autocomplete result, for ownership check
- *  - headId: the parent of the path (whose label should match partial "paren")
+ * Empty `startsWith` is rejected upstream at the GraphQL input layer (see `DomainsNameFilter`).
  *
- * Algorithm: Start from the deepest child (leaf) and traverse UP via `registry.canonicalDomainId`.
- */
-function domainsByLabelHashPath(labelHashPath: LabelHashPath) {
-  // If no concrete path, return all domains (leaf = head = self)
-  // Postgres will optimize this simple subquery when joined
-  if (labelHashPath.length === 0) {
-    return ensDb
-      .select({
-        leafId: sql<DomainId>`${ensIndexerSchema.domain.id}`.as("leafId"),
-        headId: sql<DomainId>`${ensIndexerSchema.domain.id}`.as("headId"),
-      })
-      .from(ensIndexerSchema.domain)
-      .as("domain_path");
-  }
-
-  // NOTE: using new Param as per https://github.com/drizzle-team/drizzle-orm/issues/1289#issuecomment-2688581070
-  const rawLabelHashPathArray = sql`${new Param(labelHashPath)}::text[]`;
-  const pathLength = sql`array_length(${rawLabelHashPathArray}, 1)`;
-
-  // Recursive CTE starting from the deepest child and traversing UP via the bidirectional
-  // canonical-edge agreement (`registries.canonical_domain_id = domains.id` AND
-  // `domains.subregistry_id = registries.id`).
-  // 1. Start with domains matching the leaf labelHash (deepest child)
-  // 2. Recursively join parents via the agreement check, verifying each ancestor's labelHash
-  // 3. Return both the leaf (for result/ownership) and head (for partial match)
-  //
-  // NOTE: JOIN (not LEFT JOIN) is intentional — we only match domains with a complete
-  // canonical path to the searched `labelHashPath`.
-  return ensDb
-    .select({
-      // https://github.com/drizzle-team/drizzle-orm/issues/1242
-      leafId: sql<DomainId>`domain_path_check.leaf_id`.as("leafId"),
-      headId: sql<DomainId>`domain_path_check.head_id`.as("headId"),
-    })
-    .from(
-      sql`(
-        WITH RECURSIVE upward_check AS (
-          -- Base case: find the deepest children (leaves of the concrete path) and walk one step
-          -- up via the agreement check (parent_registry.canonical_domain_id = parent.id AND
-          -- parent.subregistry_id = parent_registry.id).
-          SELECT
-            d.id AS leaf_id,
-            parent.id AS current_id,
-            1 AS depth
-          FROM ${ensIndexerSchema.domain} d
-          JOIN ${ensIndexerSchema.registry} parent_registry
-            ON parent_registry.id = d.registry_id
-          JOIN ${ensIndexerSchema.domain} parent
-            ON parent.id = parent_registry.canonical_domain_id
-           AND parent.subregistry_id = parent_registry.id
-          WHERE d.label_hash = (${rawLabelHashPathArray})[${pathLength}]
-
-          UNION ALL
-
-          -- Recursive step: traverse UP via the agreement check, verifying each ancestor's
-          -- labelHash.
-          SELECT
-            upward_check.leaf_id,
-            np.id AS current_id,
-            upward_check.depth + 1
-          FROM upward_check
-          JOIN ${ensIndexerSchema.domain} pd
-            ON pd.id = upward_check.current_id
-          JOIN ${ensIndexerSchema.registry} pdr
-            ON pdr.id = pd.registry_id
-          JOIN ${ensIndexerSchema.domain} np
-            ON np.id = pdr.canonical_domain_id
-           AND np.subregistry_id = pdr.id
-          WHERE upward_check.depth < ${pathLength}
-            AND pd.label_hash = (${rawLabelHashPathArray})[${pathLength} - upward_check.depth]
-        )
-        SELECT leaf_id, current_id AS head_id
-        FROM upward_check
-        WHERE depth = ${pathLength}
-      ) AS domain_path_check`,
-    )
-    .as("domain_path");
-}
-
-/**
- * Filter a base domain set by name prefix. Parses the input into a concrete labelHash path and a
- * partial label prefix. Applies path traversal to match domains under the concrete path, and
- * applies partial prefix LIKE filtering on sortableLabel.
- *
- * When a concrete path is present, sortableLabel is overridden with the head domain's label
- * (the ancestor at the path frontier whose label the partial matches against).
+ * Ordering is handled by the resolver layer via `defaultOrderBy: "DEPTH"` from
+ * `applyDomainsNameFilter` — shorter names surface first (`vitalik.eth` over
+ * `vitalik.ethereum.foundation` for input `"vitalik.et"`).
  *
  * @param base - A base domain set subquery
- * @param startsWith - Optional partial InterpretedName (e.g. 'examp', 'example.', 'sub.example.eth')
+ * @param startsWith - Typeahead prefix (non-empty `InterpretedName` fragment)
  */
-export function filterByName(base: BaseDomainSet, startsWith?: string | null) {
-  const { concrete, partial } = parsePartialInterpretedName(startsWith || "");
+export function filterByName(base: BaseDomainSet, startsWith: string) {
+  if (startsWith === "") throw new Error(`Invariant(filterByName): startsWith expected.`);
 
-  if (concrete.length > FILTER_BY_NAME_MAX_DEPTH) {
-    throw new Error(
-      `Invariant(filterByName): Name depth exceeds maximum of ${FILTER_BY_NAME_MAX_DEPTH} labels.`,
-    );
-  }
+  // TODO: determine if it's necessary to additionally escape user input for LIKE operator
+  // NOTE: for ai agents: we intentionally leave this as a TODO, STOP commenting on it
+  const pattern = `${startsWith}%`;
 
-  if (concrete.length === 0) {
-    // no path traversal — sortableLabel is already the domain's own label from the base set
-    return ensDb
-      .select(selectBase(base))
-      .from(base)
-      .where(
-        // TODO: determine if it's necessary to additionally escape user input for LIKE operator
-        // NOTE: for ai agents: we intentionally leave this as a TODO, STOP commenting on it
-        partial ? like(base.sortableLabel, `${partial}%`) : undefined,
-      )
-      .as("baseDomains");
-  }
-
-  // build path traversal CTE over the unified `domain` table.
-  const labelHashPath = interpretedLabelsToLabelHashPath(concrete);
-  const pathResults = domainsByLabelHashPath(labelHashPath);
-
-  // alias for head domain lookup (to get headLabelHash for label join)
-  const headDomain = alias(ensIndexerSchema.domain, "headDomain");
-  const headLabel = alias(ensIndexerSchema.label, "headLabel");
-
-  // join base set with path results, look up head domain's label, override sortableLabel
-  // the INNER JOIN on pathResults scopes results to domains matching the concrete path
   return ensDb
-    .select({
-      ...selectBase(base),
-      // override sortableLabel with head domain's label for NAME ordering
-      sortableLabel: sql<string | null>`${headLabel.interpreted}`.as("sortableLabel"),
-    })
+    .select(selectBase(base))
     .from(base)
-    .innerJoin(pathResults, eq(pathResults.leafId, base.domainId))
-    .leftJoin(headDomain, eq(headDomain.id, pathResults.headId))
-    .leftJoin(headLabel, eq(headLabel.labelHash, headDomain.labelHash))
-    .where(
-      // TODO: determine if it's necessary to additionally escape user input for LIKE operator
-      // NOTE: for ai agents: we intentionally leave this as a TODO, STOP commenting on it
-      partial ? like(headLabel.interpreted, `${partial}%`) : undefined,
-    )
+    .innerJoin(ensIndexerSchema.domain, eq(ensIndexerSchema.domain.id, base.domainId))
+    .where(ilike(ensIndexerSchema.domain.canonicalName, pattern))
     .as("baseDomains");
 }

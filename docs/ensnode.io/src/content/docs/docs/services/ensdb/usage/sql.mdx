@@ -36,18 +36,19 @@ FROM ensnode.metadata;
 
 ### Query Data
 
-Query data from your ENSDb instance:
+Canonical fields (`canonical_name`, `canonical_path`, `canonical_node`, `canonical_depth`) are
+populated on every Domain reachable from the canonical root, across both ENSv1 and ENSv2 — query
+them uniformly without branching by `type`.
 
 ```sql
--- Get ENSv1 domains from the ENSIndexer Schema with the `ensindexer_0` ENSIndexer Schema Name
+-- Fetch a Domain by its canonical name
 SELECT * FROM ensindexer_0.domains
-WHERE type = 'ENSv1Domain'
-LIMIT 10;
+WHERE canonical_name = 'vitalik.eth';
 
--- Get ENSv2 domains from the ENSIndexer Schema with the `ensindexer_0` ENSIndexer Schema Name
-SELECT * FROM ensindexer_0.domains
-WHERE type = 'ENSv2Domain'
-LIMIT 10;
+-- Count an address's Domains, grouped by Domain type
+SELECT type, count(*) FROM ensindexer_0.domains
+WHERE owner_id = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045'
+GROUP BY type;
 
 -- Get indexing status snapshot for the ENSNode Schema with the `ensindexer_0` ENSIndexer Schema Name
 SELECT value -> 'indexingStatus' FROM "ensnode"."metadata"

@@ -77,11 +77,11 @@ AccountRef.implement({
       resolve: (parent, { where, order, ...connectionArgs }, context) => {
         const base = domainsBase();
         const owned = filterByOwner(base, parent.id);
-        const named = applyDomainsNameFilter(owned, where?.name);
+        const { base: named, defaultOrderBy } = applyDomainsNameFilter(owned, where?.name);
         const canonical = where?.canonical === true ? filterByCanonical(named) : named;
         const versioned = where?.version ? filterByVersion(canonical, where.version) : canonical;
         const domains = withOrderingMetadata(versioned);
-        return resolveFindDomains(context, { domains, order, ...connectionArgs });
+        return resolveFindDomains(context, { domains, order, defaultOrderBy, ...connectionArgs });
       },
     }),
 

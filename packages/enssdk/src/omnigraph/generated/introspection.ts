@@ -1292,6 +1292,18 @@ const introspection = {
         "name": "DomainCanonical",
         "fields": [
           {
+            "name": "depth",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Int"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
             "name": "name",
             "type": {
               "kind": "NON_NULL",
@@ -1653,6 +1665,10 @@ const introspection = {
         "kind": "ENUM",
         "name": "DomainsOrderBy",
         "enumValues": [
+          {
+            "name": "DEPTH",
+            "isDeprecated": false
+          },
           {
             "name": "NAME",
             "isDeprecated": false

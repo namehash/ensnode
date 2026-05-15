@@ -1,5 +1,5 @@
 import { and, eq, sql } from "drizzle-orm";
-import type { DomainId } from "enssdk";
+import type { DomainId, InterpretedName } from "enssdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 
@@ -14,7 +14,8 @@ export type DomainsWithOrderingMetadata = ReturnType<typeof withOrderingMetadata
  */
 export type DomainsWithOrderingMetadataResult = {
   id: DomainId;
-  sortableLabel: string | null;
+  canonicalName: InterpretedName | null;
+  canonicalDepth: number | null;
   registrationTimestamp: bigint | null;
   registrationExpiry: bigint | null;
 };
@@ -22,11 +23,10 @@ export type DomainsWithOrderingMetadataResult = {
 /**
  * Enrich a base domain set with ordering metadata.
  *
- * Joins latestRegistrationIndex → registration for registration-based ordering.
- * Uses sortableLabel from the base set for NAME ordering.
+ * Joins latestRegistrationIndex → registration for registration-based ordering. canonicalName /
+ * canonicalDepth pass through from the base set for NAME / DEPTH ordering.
  *
- * Returns a CTE with columns: {id, sortableLabel, registrationTimestamp, registrationExpiry}
- * suitable for cursor-based pagination.
+ * Returns a CTE suitable for cursor-based pagination.
  *
  * @param base - A base domain set (output of any filter layer)
  */
@@ -35,8 +35,9 @@ export function withOrderingMetadata(base: BaseDomainSet) {
     .select({
       id: sql<DomainId>`${base.domainId}`.as("id"),
 
-      // for NAME ordering
-      sortableLabel: base.sortableLabel,
+      // for NAME / DEPTH ordering
+      canonicalName: base.canonicalName,
+      canonicalDepth: base.canonicalDepth,
 
       // for REGISTRATION_TIMESTAMP ordering (materialized on registration)
       registrationTimestamp: ensIndexerSchema.registration.start,

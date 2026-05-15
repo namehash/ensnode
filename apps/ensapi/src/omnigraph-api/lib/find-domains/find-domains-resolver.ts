@@ -57,7 +57,9 @@ function getOrderValueFromResult(
 ): DomainOrderValue {
   switch (orderBy) {
     case "NAME":
-      return result.sortableLabel;
+      return result.canonicalName;
+    case "DEPTH":
+      return result.canonicalDepth;
     case "REGISTRATION_TIMESTAMP":
       return result.registrationTimestamp;
     case "REGISTRATION_EXPIRY":
@@ -80,12 +82,23 @@ export function resolveFindDomains(
   {
     domains,
     order,
+    defaultOrderBy,
     ...connectionArgs
   }: {
-    /** Pre-built domains CTE from `withOrderingMetadata` */
+    /**
+     * Pre-built domains CTE from `withOrderingMetadata`
+     */
     domains: DomainsWithOrderingMetadata;
-    /** Optional ordering; defaults to NAME ASC */
+
+    /**
+     * Optional ordering; falls back to `defaultOrderBy` or DOMAINS_DEFAULT_ORDER_BY
+     */
     order?: FindDomainsOrderArg | undefined | null;
+
+    /**
+     * Filter-supplied default ordering when the caller doesn't pass `order.by`.
+     */
+    defaultOrderBy?: typeof DomainsOrderBy.$inferType;
 
     // relay connection args from t.connection
     first?: number | null;
@@ -94,7 +107,7 @@ export function resolveFindDomains(
     after?: string | null;
   },
 ) {
-  const orderBy = order?.by ?? DOMAINS_DEFAULT_ORDER_BY;
+  const orderBy = order?.by ?? defaultOrderBy ?? DOMAINS_DEFAULT_ORDER_BY;
   const orderDir = order?.dir ?? DOMAINS_DEFAULT_ORDER_DIR;
 
   return lazyConnection({

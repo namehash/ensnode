@@ -23,10 +23,14 @@ export const DomainIdInput = builder.inputType("DomainIdInput", {
 });
 
 /**
+ * Max number of names accepted by `DomainsNameFilter.in`.
+ */
+export const DOMAINS_NAME_FILTER_IN_MAX = 100;
+
+/**
  * @oneOf filter for Domain names. Exactly one of `starts_with`, `eq`, or `in` must be provided.
  *
- * - `starts_with`: partial Interpreted Name for autocomplete; exact match on every label except
- *   the last, prefix match on the last label. ex: 'example', 'example.', 'example.et'.
+ * - `starts_with`: prefix-match on Interpreted Name for typeahead. Case-insensitive.
  * - `eq`: exact InterpretedName match. Sugar for `in: [eq]`. Combine with `version` to disambiguate
  *   across ENS protocol versions.
  * - `in`: exact InterpretedName match against any name in the set. Max 100 items.
@@ -38,17 +42,19 @@ export const DomainsNameFilter = builder.inputType("DomainsNameFilter", {
   fields: (t) => ({
     starts_with: t.string({
       description:
-        "Partial Interpreted Name for autocomplete. Matches Domains whose Interpreted Name starts with the given value: exact match on every label except the last, prefix match on the last label. ex: 'example', 'example.', 'example.et'. Case-sensitive (InterpretedName labels are normalized).",
+        "Prefix-match on Interpreted Name for typeahead. ex: 'vit', 'vitalik.et'. Case-insensitive (InterpretedName labels are normalized).",
+      validate: { minLength: 1 },
     }),
     eq: t.field({
       type: "InterpretedName",
       description:
         "Exact InterpretedName match. Sugar for `in: [eq]`. Combine with `version` to disambiguate across ENS protocol versions.",
+      validate: { minLength: 1 },
     }),
     in: t.field({
       type: ["InterpretedName"],
-      description:
-        "Exact InterpretedName match against any name in the set. Max 100 items; requests above the limit return an error.",
+      description: `Exact InterpretedName match against any name in the set. Max ${DOMAINS_NAME_FILTER_IN_MAX} items.`,
+      validate: { items: { minLength: 1 }, maxLength: DOMAINS_NAME_FILTER_IN_MAX },
     }),
   }),
 });
@@ -115,7 +121,7 @@ export const SubdomainsWhereInput = builder.inputType("SubdomainsWhereInput", {
 
 export const DomainsOrderBy = builder.enumType("DomainsOrderBy", {
   description: "Fields by which domains can be ordered",
-  values: ["NAME", "REGISTRATION_TIMESTAMP", "REGISTRATION_EXPIRY"] as const,
+  values: ["NAME", "DEPTH", "REGISTRATION_TIMESTAMP", "REGISTRATION_EXPIRY"] as const,
 });
 
 export type DomainsOrderByValue = typeof DomainsOrderBy.$inferType;

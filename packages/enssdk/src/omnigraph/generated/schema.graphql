@@ -262,9 +262,14 @@ interface Domain {
 }
 
 """
-Canonicality metadata for a Domain, including its name, node (namehash), and path.
+Canonicality metadata for a Domain, including its name, depth, path, and node (namehash).
 """
 type DomainCanonical {
+  """
+  The depth of this Domain, i.e. the number of labels in this Domain's Canonical Name (e.g. 2 for `vitalik.eth`).
+  """
+  depth: Int!
+
   """The Canonical Name for this Domain."""
   name: InterpretedName!
 
@@ -274,7 +279,7 @@ type DomainCanonical {
   node: Node!
 
   """
-  The Canonical Path from this Domain to the ENS Root, leaf→root inclusive of this Domain.
+  The Canonical Path from this Domain to the ENS Root, root→leaf inclusive of this Domain.
   """
   path: [Domain!]!
 }
@@ -336,18 +341,19 @@ input DomainsNameFilter @oneOf {
   eq: InterpretedName
 
   """
-  Exact InterpretedName match against any name in the set. Max 100 items; requests above the limit return an error.
+  Exact InterpretedName match against any name in the set. Max 100 items.
   """
   in: [InterpretedName!]
 
   """
-  Partial Interpreted Name for autocomplete. Matches Domains whose Interpreted Name starts with the given value: exact match on every label except the last, prefix match on the last label. ex: 'example', 'example.', 'example.et'. Case-sensitive (InterpretedName labels are normalized).
+  Prefix-match on Interpreted Name for typeahead. ex: 'vit', 'vitalik.et'. Case-insensitive (InterpretedName labels are normalized).
   """
   starts_with: String
 }
 
 """Fields by which domains can be ordered"""
 enum DomainsOrderBy {
+  DEPTH
   NAME
   REGISTRATION_EXPIRY
   REGISTRATION_TIMESTAMP
