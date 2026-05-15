@@ -111,9 +111,23 @@ export default function CodePlayground({
     [resolvedOpenFile, terminalHeight, height, view],
   );
 
+  // `project` and `embedOptions` are memoized from all embed-affecting props.
   useEffect(() => {
-    if (!ref.current) return;
-    sdk.embedProject(ref.current, project, embedOptions);
+    const container = ref.current;
+    if (!container) return;
+
+    let disposed = false;
+
+    void (async () => {
+      container.replaceChildren();
+      await sdk.embedProject(container, project, embedOptions);
+      if (disposed) container.replaceChildren();
+    })();
+
+    return () => {
+      disposed = true;
+      container.replaceChildren();
+    };
   }, [project, embedOptions]);
 
   return (
