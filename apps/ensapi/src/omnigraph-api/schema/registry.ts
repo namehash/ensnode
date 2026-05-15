@@ -132,7 +132,7 @@ RegistryInterfaceRef.implement({
       },
       resolve: (parent, { where, order, ...connectionArgs }, context) => {
         const base = filterByRegistry(domainsBase(), parent.id);
-        const { named, defaultOrder } = filterByName(base, where?.name);
+        const { named, defaultOrder } = filterByName(base, where?.name ?? null);
         const domains = withOrderingMetadata(named);
         return resolveFindDomains(context, { domains, order, defaultOrder, ...connectionArgs });
       },

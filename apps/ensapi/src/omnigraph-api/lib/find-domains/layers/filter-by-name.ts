@@ -1,5 +1,7 @@
 import type { InterpretedName } from "enssdk";
 
+import { toJson } from "@ensnode/ensnode-sdk";
+
 import type { DomainsOrderInput } from "@/omnigraph-api/schema/domain-inputs";
 
 import type { BaseDomainSet } from "./base-domain-set";
@@ -30,24 +32,18 @@ export interface DomainsNameFilterValue {
  */
 export function filterByName(
   base: BaseDomainSet,
-  filter: DomainsNameFilterValue | null | undefined,
+  filter: DomainsNameFilterValue | null,
 ): { named: BaseDomainSet; defaultOrder?: Partial<typeof DomainsOrderInput.$inferInput> } {
-  if (!filter) return { named: base };
+  if (filter === null) return { named: base };
 
-  if (filter.starts_with !== undefined && filter.starts_with !== null) {
+  if (filter.starts_with) {
     return {
       named: filterByNameStartsWith(base, filter.starts_with),
       defaultOrder: { by: "DEPTH", dir: "ASC" },
     };
   }
+  if (filter.eq) return { named: filterByNameIn(base, [filter.eq]) };
+  if (filter.in) return { named: filterByNameIn(base, filter.in) };
 
-  if (filter.in !== undefined && filter.in !== null) {
-    return { named: filterByNameIn(base, filter.in) };
-  }
-
-  if (filter.eq !== undefined && filter.eq !== null) {
-    return { named: filterByNameIn(base, [filter.eq]) };
-  }
-
-  return { named: base };
+  throw new Error(`Invariant(filterByName): expected 'filter' to not be empty: ${toJson(filter)}`);
 }
