@@ -26,6 +26,7 @@ import type { OrderDirection } from "@/omnigraph-api/schema/order-direction";
 
 import { DomainCursors } from "./domain-cursor";
 import { cursorFilter, orderFindDomains } from "./find-domains-resolver-helpers";
+import type { DomainsDefaultOrder } from "./layers/filter-by-name";
 import type { DomainOrderValue } from "./types";
 
 /**
@@ -82,7 +83,7 @@ export function resolveFindDomains(
   {
     domains,
     order,
-    defaultOrderBy,
+    defaultOrder,
     ...connectionArgs
   }: {
     /**
@@ -91,14 +92,15 @@ export function resolveFindDomains(
     domains: DomainsWithOrderingMetadata;
 
     /**
-     * Optional ordering; falls back to `defaultOrderBy` or DOMAINS_DEFAULT_ORDER_BY
+     * Optional ordering. Each unset field falls back to `defaultOrder` then the
+     * `DOMAINS_DEFAULT_ORDER_*` constants.
      */
     order?: FindDomainsOrderArg | undefined | null;
 
     /**
-     * Filter-supplied default ordering when the caller doesn't pass `order.by`.
+     * Filter-supplied default `(by, dir)` when the caller doesn't pass `order`.
      */
-    defaultOrderBy?: typeof DomainsOrderBy.$inferType;
+    defaultOrder?: DomainsDefaultOrder;
 
     // relay connection args from t.connection
     first?: number | null;
@@ -107,8 +109,8 @@ export function resolveFindDomains(
     after?: string | null;
   },
 ) {
-  const orderBy = order?.by ?? defaultOrderBy ?? DOMAINS_DEFAULT_ORDER_BY;
-  const orderDir = order?.dir ?? DOMAINS_DEFAULT_ORDER_DIR;
+  const orderBy = order?.by ?? defaultOrder?.by ?? DOMAINS_DEFAULT_ORDER_BY;
+  const orderDir = order?.dir ?? defaultOrder?.dir ?? DOMAINS_DEFAULT_ORDER_DIR;
 
   return lazyConnection({
     totalCount: () =>

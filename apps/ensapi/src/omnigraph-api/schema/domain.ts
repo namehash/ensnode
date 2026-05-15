@@ -232,10 +232,10 @@ DomainInterfaceRef.implement({
       },
       resolve: (parent, { where, order, ...connectionArgs }, context) => {
         const base = filterByParent(domainsBase(), parent.id);
-        const { named, defaultOrderBy } = filterByName(base, where?.name);
+        const { named, defaultOrder } = filterByName(base, where?.name);
         const domains = withOrderingMetadata(named);
 
-        return resolveFindDomains(context, { domains, order, defaultOrderBy, ...connectionArgs });
+        return resolveFindDomains(context, { domains, order, defaultOrder, ...connectionArgs });
       },
     }),
 

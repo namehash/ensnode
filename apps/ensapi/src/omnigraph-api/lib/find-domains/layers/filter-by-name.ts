@@ -1,6 +1,7 @@
 import type { InterpretedName } from "enssdk";
 
 import type { DomainsOrderBy } from "@/omnigraph-api/schema/domain-inputs";
+import type { OrderDirection } from "@/omnigraph-api/schema/order-direction";
 
 import type { BaseDomainSet } from "./base-domain-set";
 import { filterByNameIn } from "./filter-by-name-in";
@@ -19,23 +20,34 @@ export interface DomainsNameFilterValue {
 }
 
 /**
+ * Filter-supplied default `(by, dir)` applied when the caller doesn't pass `order`.
+ */
+export interface DomainsDefaultOrder {
+  by: typeof DomainsOrderBy.$inferType;
+  dir: typeof OrderDirection.$inferType;
+}
+
+/**
  * Apply a `DomainsNameFilter` to a base domain set. Dispatches to the appropriate filter layer
  * based on which `@oneOf` field is set. Returns `{ named: base }` unchanged when `filter` is
  * nullish.
  *
- * - `starts_with` → `filterByNameStartsWith` (typeahead). Surfaces `defaultOrderBy: "DEPTH"` so
- *   resolvers prefer shorter names when the caller doesn't specify an order.
+ * - `starts_with` → `filterByNameStartsWith` (typeahead). Surfaces `defaultOrder: { by: "DEPTH",
+ *   dir: "ASC" }` so resolvers prefer shorter names first when the caller doesn't specify an order.
  * - `eq` → `filterByNameIn([eq])` — sugar for a single-name exact match.
  * - `in` → `filterByNameIn(in)` — exact match against any name in the set.
  */
 export function filterByName(
   base: BaseDomainSet,
   filter: DomainsNameFilterValue | null | undefined,
-): { named: BaseDomainSet; defaultOrderBy?: typeof DomainsOrderBy.$inferType } {
+): { named: BaseDomainSet; defaultOrder?: DomainsDefaultOrder } {
   if (!filter) return { named: base };
 
   if (filter.starts_with !== undefined && filter.starts_with !== null) {
-    return { named: filterByNameStartsWith(base, filter.starts_with), defaultOrderBy: "DEPTH" };
+    return {
+      named: filterByNameStartsWith(base, filter.starts_with),
+      defaultOrder: { by: "DEPTH", dir: "ASC" },
+    };
   }
 
   if (filter.in !== undefined && filter.in !== null) {
