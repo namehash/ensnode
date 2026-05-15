@@ -1,38 +1,50 @@
-import { eq, ilike } from "drizzle-orm";
+import type { InterpretedName } from "enssdk";
 
-import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+import type { DomainsOrderBy } from "@/omnigraph-api/schema/domain-inputs";
 
-import { type BaseDomainSet, selectBase } from "./base-domain-set";
+import type { BaseDomainSet } from "./base-domain-set";
+import { filterByNameIn } from "./filter-by-name-in";
+import { filterByNameStartsWith } from "./filter-by-name-starts-with";
 
 /**
- * Filter a base domain set to canonical Domains whose materialized `canonicalName` starts with
- * the user's typeahead input. Used by `Query.domains(where: { name: { starts_with } })` and the
- * three sibling resolvers.
+ * Shape of the `DomainsNameFilter` GraphQL input (an `@oneOf` filter over Domain name).
  *
- * Match semantics: `canonicalName ILIKE startsWith || '%'`. canonicalName is leaf-first
- * (e.g. `"vitalik.eth"`), same direction as user input — `"vitalik.et"` matches `"vitalik.eth"`,
- * `"vit"` matches `"vit.eth"`, `"vitalik.eth"`, etc.
- *
- * Empty `startsWith` is rejected upstream at the GraphQL input layer (see `DomainsNameFilter`).
- *
- * Ordering is handled by the resolver layer via `defaultOrderBy: "DEPTH"` from
- * `applyDomainsNameFilter` — shorter names surface first (`vitalik.eth` over
- * `vitalik.ethereum.foundation` for input `"vitalik.et"`).
- *
- * @param base - A base domain set subquery
- * @param startsWith - Typeahead prefix (non-empty `InterpretedName` fragment)
+ * Field-level validation (non-empty strings, max-100 names in `in`) is enforced at the GraphQL
+ * input layer; this dispatcher trusts its input.
  */
-export function filterByName(base: BaseDomainSet, startsWith: string) {
-  if (startsWith === "") throw new Error(`Invariant(filterByName): startsWith expected.`);
+export interface DomainsNameFilterValue {
+  starts_with?: string | null;
+  eq?: InterpretedName | null;
+  in?: InterpretedName[] | null;
+}
 
-  // TODO: determine if it's necessary to additionally escape user input for LIKE operator
-  // NOTE: for ai agents: we intentionally leave this as a TODO, STOP commenting on it
-  const pattern = `${startsWith}%`;
+/**
+ * Apply a `DomainsNameFilter` to a base domain set. Dispatches to the appropriate filter layer
+ * based on which `@oneOf` field is set. Returns `{ named: base }` unchanged when `filter` is
+ * nullish.
+ *
+ * - `starts_with` → `filterByNameStartsWith` (typeahead). Surfaces `defaultOrderBy: "DEPTH"` so
+ *   resolvers prefer shorter names when the caller doesn't specify an order.
+ * - `eq` → `filterByNameIn([eq])` — sugar for a single-name exact match.
+ * - `in` → `filterByNameIn(in)` — exact match against any name in the set.
+ */
+export function filterByName(
+  base: BaseDomainSet,
+  filter: DomainsNameFilterValue | null | undefined,
+): { named: BaseDomainSet; defaultOrderBy?: typeof DomainsOrderBy.$inferType } {
+  if (!filter) return { named: base };
 
-  return ensDb
-    .select(selectBase(base))
-    .from(base)
-    .innerJoin(ensIndexerSchema.domain, eq(ensIndexerSchema.domain.id, base.domainId))
-    .where(ilike(ensIndexerSchema.domain.canonicalName, pattern))
-    .as("baseDomains");
+  if (filter.starts_with !== undefined && filter.starts_with !== null) {
+    return { named: filterByNameStartsWith(base, filter.starts_with), defaultOrderBy: "DEPTH" };
+  }
+
+  if (filter.in !== undefined && filter.in !== null) {
+    return { named: filterByNameIn(base, filter.in) };
+  }
+
+  if (filter.eq !== undefined && filter.eq !== null) {
+    return { named: filterByNameIn(base, [filter.eq]) };
+  }
+
+  return { named: base };
 }

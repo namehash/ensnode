@@ -14,10 +14,10 @@ import {
   paginateByInt,
 } from "@/omnigraph-api/lib/connection-helpers";
 import { cursors } from "@/omnigraph-api/lib/cursors";
-import { applyDomainsNameFilter } from "@/omnigraph-api/lib/find-domains/apply-name-filter";
 import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domains-resolver";
 import {
   domainsBase,
+  filterByName,
   filterByParent,
   withOrderingMetadata,
 } from "@/omnigraph-api/lib/find-domains/layers";
@@ -232,7 +232,7 @@ DomainInterfaceRef.implement({
       },
       resolve: (parent, { where, order, ...connectionArgs }, context) => {
         const base = filterByParent(domainsBase(), parent.id);
-        const { base: named, defaultOrderBy } = applyDomainsNameFilter(base, where?.name);
+        const { named, defaultOrderBy } = filterByName(base, where?.name);
         const domains = withOrderingMetadata(named);
 
         return resolveFindDomains(context, { domains, order, defaultOrderBy, ...connectionArgs });

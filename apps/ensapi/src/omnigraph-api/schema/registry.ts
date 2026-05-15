@@ -7,10 +7,10 @@ import type { RequiredAndNotNull, RequiredAndNull } from "@ensnode/ensnode-sdk";
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { builder } from "@/omnigraph-api/builder";
 import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
-import { applyDomainsNameFilter } from "@/omnigraph-api/lib/find-domains/apply-name-filter";
 import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domains-resolver";
 import {
   domainsBase,
+  filterByName,
   filterByRegistry,
   withOrderingMetadata,
 } from "@/omnigraph-api/lib/find-domains/layers";
@@ -132,7 +132,7 @@ RegistryInterfaceRef.implement({
       },
       resolve: (parent, { where, order, ...connectionArgs }, context) => {
         const base = filterByRegistry(domainsBase(), parent.id);
-        const { base: named, defaultOrderBy } = applyDomainsNameFilter(base, where?.name);
+        const { named, defaultOrderBy } = filterByName(base, where?.name);
         const domains = withOrderingMetadata(named);
         return resolveFindDomains(context, { domains, order, defaultOrderBy, ...connectionArgs });
       },
