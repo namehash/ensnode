@@ -28,6 +28,6 @@ describe("loadEnssdkExampleProject", () => {
     expect(project.devDependencies.viem).toBeDefined();
 
     expect(project.entryFileName).toBe("src/index.ts");
-    expect(project.template).toBe("node");
+    expect(project.runtime).toBe("node-tsx");
   });
 });

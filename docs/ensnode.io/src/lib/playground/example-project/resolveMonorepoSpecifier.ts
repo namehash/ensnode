@@ -1,7 +1,13 @@
+import enskitPackageJson from "@workspace/packages/enskit/package.json";
 import enssdkPackageJson from "@workspace/packages/enssdk/package.json";
 import pnpmWorkspaceYaml from "@workspace/pnpm-workspace.yaml?raw";
 
 const pnpmCatalog = parsePnpmCatalog(pnpmWorkspaceYaml);
+
+const workspacePackageVersions: Record<string, string> = {
+  enssdk: enssdkPackageJson.version,
+  enskit: enskitPackageJson.version,
+};
 
 /** Resolve pnpm `catalog:` / `workspace:` specifiers to strings npm can install in StackBlitz. */
 export function resolveMonorepoSpecifier(packageName: string, specifier: string): string {
@@ -14,10 +20,11 @@ export function resolveMonorepoSpecifier(packageName: string, specifier: string)
   }
 
   if (specifier.startsWith("workspace:")) {
-    if (packageName === "enssdk") {
-      return enssdkPackageJson.version;
+    const version = workspacePackageVersions[packageName];
+    if (!version) {
+      throw new Error(`Unsupported workspace dependency "${packageName}" in playground manifest`);
     }
-    throw new Error(`Unsupported workspace dependency "${packageName}" in playground manifest`);
+    return version;
   }
 
   return specifier;
@@ -51,16 +58,26 @@ function parsePnpmCatalog(source: string): Record<string, string> {
   return catalog;
 }
 
-/** Prefer an exact version from enssdk devDependencies when satisfying a peer range. */
-export function resolveEnssdkPeerSpecifier(packageName: string, peerSpecifier: string): string {
-  const enssdkDev = enssdkPackageJson.devDependencies as Record<string, string> | undefined;
-  const pinnedInEnssdk = enssdkDev?.[packageName];
-  if (
-    pinnedInEnssdk &&
-    !pinnedInEnssdk.startsWith("catalog:") &&
-    !pinnedInEnssdk.startsWith("workspace:")
-  ) {
-    return pinnedInEnssdk;
+type PackageJsonWithPeers = {
+  peerDependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+};
+
+/** Satisfy a peer dependency using package devDependency pins, then the pnpm catalog. */
+export function resolvePeerSpecifier(
+  packageName: string,
+  peerSpecifier: string,
+  packages: PackageJsonWithPeers[],
+): string {
+  for (const pkg of packages) {
+    const pinnedInDev = pkg.devDependencies?.[packageName];
+    if (
+      pinnedInDev &&
+      !pinnedInDev.startsWith("catalog:") &&
+      !pinnedInDev.startsWith("workspace:")
+    ) {
+      return pinnedInDev;
+    }
   }
 
   if (packageName in pnpmCatalog) {
@@ -68,4 +85,9 @@ export function resolveEnssdkPeerSpecifier(packageName: string, peerSpecifier: s
   }
 
   return resolveMonorepoSpecifier(packageName, peerSpecifier);
+}
+
+/** @deprecated Use {@link resolvePeerSpecifier} */
+export function resolveEnssdkPeerSpecifier(packageName: string, peerSpecifier: string): string {
+  return resolvePeerSpecifier(packageName, peerSpecifier, [enssdkPackageJson]);
 }

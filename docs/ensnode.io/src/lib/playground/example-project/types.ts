@@ -6,7 +6,8 @@ export type RawExampleProject = {
 /** After text transforms, before StackBlitz-specific assembly. */
 export type TransformedExampleProject = RawExampleProject;
 
-export type PlaygroundTemplate = "node" | "vite";
+/** How the playground runs after `npm install` (always on StackBlitz `template: "node"`). */
+export type PlaygroundRuntime = "node-tsx" | "node-vite";
 
 export type PlaygroundView = "editor" | "preview" | "both";
 
@@ -20,7 +21,7 @@ export type PlaygroundPackageManifest = {
 export type PlaygroundProject = {
   title: string;
   description?: string;
-  template: PlaygroundTemplate;
+  runtime: PlaygroundRuntime;
   files: Record<string, string>;
   dependencies: Record<string, string>;
   devDependencies: Record<string, string>;
@@ -38,7 +39,7 @@ export type EnvReplacement = {
 export type ExampleProjectConfig = {
   title: string;
   description?: string;
-  template: PlaygroundTemplate;
+  runtime: PlaygroundRuntime;
   view?: PlaygroundView;
   entryFileName: string;
   openFile?: string;
@@ -46,4 +47,6 @@ export type ExampleProjectConfig = {
   envReplacements: EnvReplacement[];
   resolvePackageManifest: () => PlaygroundPackageManifest;
   buildTsconfig?: () => string;
+  /** Merged into project files after assembly (e.g. `.env` for Vite). */
+  extraFiles?: Record<string, string>;
 };

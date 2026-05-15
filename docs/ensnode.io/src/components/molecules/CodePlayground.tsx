@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef } from "react";
 
 import type {
   PlaygroundProject,
-  PlaygroundTemplate,
+  PlaygroundRuntime,
   PlaygroundView,
 } from "src/lib/playground/example-project/types";
 
@@ -12,8 +12,11 @@ type CodePlaygroundProps = PlaygroundProject & {
   terminalHeight?: number;
 };
 
-function buildStartScript(template: PlaygroundTemplate, entryFileName: string): string {
-  if (template === "vite") {
+/** StackBlitz SDK templates: https://developer.stackblitz.com/platform/api/javascript-sdk-options#projecttemplate */
+const STACKBLITZ_WEBCONTAINERS_TEMPLATE = "node" as const;
+
+function buildStartScript(runtime: PlaygroundRuntime, entryFileName: string): string {
+  if (runtime === "node-vite") {
     return "vite";
   }
   return `tsx ${entryFileName}`;
@@ -33,7 +36,7 @@ function embedViewForPlayground(view: PlaygroundView | undefined): EmbedOptions[
 export default function CodePlayground({
   title,
   description,
-  template,
+  runtime,
   files,
   dependencies,
   devDependencies,
@@ -67,7 +70,10 @@ export default function CodePlayground({
         version: "0.0.0",
         private: true,
         type: "module",
-        scripts: { start: buildStartScript(template, entryFileName) },
+        scripts: {
+          dev: buildStartScript(runtime, entryFileName),
+          start: buildStartScript(runtime, entryFileName),
+        },
         dependencies,
         devDependencies,
       },
@@ -84,10 +90,10 @@ export default function CodePlayground({
     return {
       title,
       description,
-      template,
+      template: STACKBLITZ_WEBCONTAINERS_TEMPLATE,
       files: projectFiles,
     } as Project;
-  }, [title, description, template, files, dependencies, devDependencies, entryFileName, tsconfig]);
+  }, [title, description, runtime, files, dependencies, devDependencies, entryFileName, tsconfig]);
 
   const embedOptions = useMemo(
     () =>

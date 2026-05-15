@@ -13,7 +13,7 @@ export function loadEnssdkExampleProject(): PlaygroundProject {
   return loadExampleProject({
     title: "enssdk-example",
     description: "Query the eth domain and its subdomains with enssdk.",
-    template: "node",
+    runtime: "node-tsx",
     view: "editor",
     entryFileName: "src/index.ts",
     fetchRaw: () =>

@@ -9,10 +9,10 @@ export function loadExampleProject(config: ExampleProjectConfig): PlaygroundProj
   const { dependencies, devDependencies } = config.resolvePackageManifest();
   const tsconfig = config.buildTsconfig?.() ?? buildNodePlaygroundTsconfig();
 
-  return assemblePlaygroundProject({
+  const project = assemblePlaygroundProject({
     title: config.title,
     description: config.description,
-    template: config.template,
+    runtime: config.runtime,
     view: config.view,
     entryFileName: config.entryFileName,
     openFile: config.openFile,
@@ -21,4 +21,10 @@ export function loadExampleProject(config: ExampleProjectConfig): PlaygroundProj
     devDependencies,
     tsconfig,
   });
+
+  if (config.extraFiles) {
+    project.files = { ...project.files, ...config.extraFiles };
+  }
+
+  return project;
 }

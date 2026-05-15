@@ -32,3 +32,11 @@ export function fetchRawExampleProjectFromGlob(
 ): RawExampleProject {
   return { files: normalizeGlobModules(modules, pathPrefix) };
 }
+
+export function mergeRawExampleProjects(...projects: RawExampleProject[]): RawExampleProject {
+  const files: Record<string, string> = {};
+  for (const project of projects) {
+    Object.assign(files, project.files);
+  }
+  return { files };
+}

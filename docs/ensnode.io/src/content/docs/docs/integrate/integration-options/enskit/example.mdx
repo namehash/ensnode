@@ -1,0 +1,22 @@
+---
+title: Interactive enskit example
+description: Edit and run the enskit-react-example app against a live ENSNode endpoint in your browser.
+tableOfContents: false
+template: splash
+sidebar:
+  order: 2
+---
+
+import EnskitExampleInteractivePlayground from "../../../../../../components/organisms/EnskitExampleInteractivePlayground";
+
+This playground loads the same source as [`enskit-react-example`](https://github.com/namehash/ensnode/tree/main/examples/enskit-react-example): a Vite + React app with routing, domain and account browsers, registry cache, and search — powered by [`enskit`](/docs/integrate/integration-options/enskit) and the [ENS Omnigraph API](/docs/integrate/omnigraph).
+
+:::note[First load may take a moment]
+The editor runs entirely in your browser. The **first time** you open this page, StackBlitz needs to download and install dependencies — that can take a minute or two. Later visits are much faster because your browser caches the environment, even if you refresh the page.
+:::
+
+After the project is ready, edit the app and run **`npm start`** in the terminal to restart the Vite dev server. Use the **preview** pane to interact with the running UI.
+
+<EnskitExampleInteractivePlayground client:load />
+
+[Back to enskit overview](/docs/integrate/integration-options/enskit)

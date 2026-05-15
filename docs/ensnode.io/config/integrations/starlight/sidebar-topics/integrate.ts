@@ -25,7 +25,7 @@ export const integrateSidebarTopic = {
         },
         {
           label: "Examples",
-          collapsed: true,
+          collapsed: false,
           items: [
             {
               label: "Overview",
@@ -97,7 +97,17 @@ export const integrateSidebarTopic = {
         },
         {
           label: "enskit (React)",
-          link: "/docs/integrate/integration-options/enskit",
+          collapsed: false,
+          items: [
+            {
+              label: "Overview",
+              link: "/docs/integrate/integration-options/enskit",
+            },
+            {
+              label: "🚀 Interactive example",
+              link: "/docs/integrate/integration-options/enskit/example",
+            },
+          ],
         },
         {
           label: "enssdk (TypeScript)",

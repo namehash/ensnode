@@ -3,7 +3,7 @@ import type { PlaygroundProject, TransformedExampleProject } from "./types";
 export function assemblePlaygroundProject(params: {
   title: string;
   description?: string;
-  template: PlaygroundProject["template"];
+  runtime: PlaygroundProject["runtime"];
   view?: PlaygroundProject["view"];
   entryFileName: string;
   openFile?: string;
