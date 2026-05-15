@@ -380,6 +380,9 @@ async function reconcileRegistryCanonicality(
       .update(ensIndexerSchema.registry, { id: registryId })
       .set({ canonical: nextCanonical });
   }
+  // else: `needsMaterialization` was true (`nextCanonical && canonicalDomainChanged`) but
+  // `__hasChildren = false` — the Registry stayed canonical under a new parent identity, and
+  // there are no descendants whose materialized fields could be stale. No write needed.
 }
 
 /**
@@ -484,6 +487,14 @@ async function cascadeCanonicality(
       -- for each Registry in the walk, enumerate ALL of its child Domains (regardless of whether
       -- they themselves have a canonical-agreeing subregistry) and project the materialized
       -- path / name. Head-first path → APPEND labelHash; leaf-first name → PREPEND interpreted label.
+      --
+      -- The agreement filter is intentionally omitted here. Membership in the canonical nametree
+      -- is determined per-Domain via Domain.canonical, and every Domain that belongs to a canonical
+      -- Registry inherits that Registry canonical flag (see ensureDomainInRegistry). When the
+      -- Registry flag flips (or its identity-as-parent changes), every Domain row under it must
+      -- follow — including ones whose own subregistryId does not agree, because those Domains
+      -- never seed a separate canonical subtree (the canonical nametree is a strict tree, enforced
+      -- by the bidirectional agreement check on the walk CTE).
       SELECT
         d.id AS domain_id,
         w.parent_path || ARRAY[d.label_hash] AS new_path,
@@ -534,10 +545,7 @@ async function cascadeCanonicality(
     await context.ensDb.sql.execute(sql`
       UPDATE ${ensIndexerSchema.domain} AS d
         SET canonical_node = upd.canonical_node
-        FROM (
-          SELECT unnest(${ids}::text[]) AS id,
-                 unnest(${nodes}::text[]) AS canonical_node
-        ) upd
+        FROM unnest(${ids}::text[], ${nodes}::text[]) AS upd(id, canonical_node)
         WHERE d.id = upd.id;
     `);
   }

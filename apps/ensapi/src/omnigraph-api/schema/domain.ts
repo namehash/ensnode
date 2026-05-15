@@ -123,7 +123,7 @@ DomainInterfaceRef.implement({
     /////////////////
     parent: t.field({
       description:
-        "The direct parent Domain via a single unidirectional walk up the namegraph. Null when the Domain's parent Registry does not declare a parent Domain.",
+        "The Domain that this Domain's parent Registry declares as its Canonical Domain, if any. Follows a single unidirectional pointer (`Registry.canonicalDomainId`) and does NOT enforce bidirectional canonical-edge agreement: a non-canonical Domain may have a non-null `parent`, and a canonical Domain's `parent` may itself be non-canonical. Null when the parent Registry does not declare a Canonical Domain.",
       type: DomainInterfaceRef,
       nullable: true,
       resolve: async (domain, _args, context) =>

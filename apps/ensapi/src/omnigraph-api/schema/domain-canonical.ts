@@ -28,6 +28,9 @@ DomainCanonicalRef.implement({
         "The Canonical Path from this Domain to the ENS Root, leaf→root inclusive of this Domain.",
       type: [DomainInterfaceRef],
       nullable: false,
+      // TODO: derive `path` from the materialized `canonicalLabelHashPath` column instead of
+      // walking the canonicalPath dataloader. Each ancestor's DomainId can be reconstructed from
+      // the path prefix and the parent Registry chain, then batched through `DomainInterfaceRef`.
       resolve: async (domain, args, context) => {
         const canonicalPath = await context.loaders.canonicalPath.load(domain.id);
         if (canonicalPath instanceof Error) throw canonicalPath;
