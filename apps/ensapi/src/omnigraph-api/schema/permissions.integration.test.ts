@@ -183,12 +183,12 @@ describe("Domain.permissions", () => {
     }
   });
 
-  it("filters permissions by user address", async () => {
+  it("filters permissions by user address (eq)", async () => {
     const DomainPermissionsFiltered = gql`
       query DomainPermissionsFiltered($name: InterpretedName!, $user: Address!) {
         domain(by: { name: $name }) {
           ... on ENSv2Domain {
-            permissions(where: { user: $user }) { edges { node { id resource user { address } roles } } }
+            permissions(where: { user: { eq: $user } }) { edges { node { id resource user { address } roles } } }
           }
         }
       }
@@ -199,6 +199,31 @@ describe("Domain.permissions", () => {
     const filtered = await request<DomainPermissionsResult>(DomainPermissionsFiltered, {
       name: "test.eth",
       user: targetUser,
+    });
+    const filteredUsers = flattenConnection(filtered.domain.permissions);
+
+    expect(filteredUsers.length).toBeGreaterThan(0);
+    for (const user of filteredUsers) {
+      expect(user.user.address).toBe(targetUser);
+    }
+  });
+
+  it("filters permissions by user address (in)", async () => {
+    const DomainPermissionsFiltered = gql`
+      query DomainPermissionsFiltered($name: InterpretedName!, $users: [Address!]!) {
+        domain(by: { name: $name }) {
+          ... on ENSv2Domain {
+            permissions(where: { user: { in: $users } }) { edges { node { id resource user { address } roles } } }
+          }
+        }
+      }
+    `;
+
+    const targetUser = allUsers[0].user.address;
+
+    const filtered = await request<DomainPermissionsResult>(DomainPermissionsFiltered, {
+      name: "test.eth",
+      users: [targetUser],
     });
     const filteredUsers = flattenConnection(filtered.domain.permissions);
 
@@ -380,10 +405,10 @@ describe("Permissions.events filtering (EventsWhereInput)", () => {
     expect(allEvents.length).toBeGreaterThan(0);
   });
 
-  it("filters by selector_in", async () => {
+  it("filters by selector eq", async () => {
     const result = await request<PermissionsEventsResult>(PermissionsEventsFiltered, {
       contract: V2_ETH_REGISTRY,
-      where: { selector_in: [EAC_ROLES_CHANGED_SELECTOR] },
+      where: { selector: { eq: EAC_ROLES_CHANGED_SELECTOR } },
     });
     const events = flattenConnection(result.permissions.events);
 
@@ -393,32 +418,34 @@ describe("Permissions.events filtering (EventsWhereInput)", () => {
     }
   });
 
-  it("filters by selector_in with unknown topic returns no results", async () => {
+  it("filters by selector in with unknown topic returns no results", async () => {
     const result = await request<PermissionsEventsResult>(PermissionsEventsFiltered, {
       contract: V2_ETH_REGISTRY,
       where: {
-        selector_in: ["0x0000000000000000000000000000000000000000000000000000000000000001"],
+        selector: {
+          in: ["0x0000000000000000000000000000000000000000000000000000000000000001"],
+        },
       },
     });
     const events = flattenConnection(result.permissions.events);
     expect(events.length).toBe(0);
   });
 
-  it("filters by empty selector_in returns no results", async () => {
+  it("filters by empty selector in returns no results", async () => {
     const result = await request<PermissionsEventsResult>(PermissionsEventsFiltered, {
       contract: V2_ETH_REGISTRY,
-      where: { selector_in: [] },
+      where: { selector: { in: [] } },
     });
     const events = flattenConnection(result.permissions.events);
     expect(events.length).toBe(0);
   });
 
-  it("filters by timestamp_gte", async () => {
+  it("filters by timestamp gte", async () => {
     const midTimestamp = allEvents[Math.floor(allEvents.length / 2)].timestamp;
 
     const result = await request<PermissionsEventsResult>(PermissionsEventsFiltered, {
       contract: V2_ETH_REGISTRY,
-      where: { timestamp_gte: midTimestamp },
+      where: { timestamp: { gte: midTimestamp } },
     });
     const events = flattenConnection(result.permissions.events);
 
@@ -429,12 +456,12 @@ describe("Permissions.events filtering (EventsWhereInput)", () => {
     }
   });
 
-  it("filters by timestamp_lte", async () => {
+  it("filters by timestamp lte", async () => {
     const midTimestamp = allEvents[Math.floor(allEvents.length / 2)].timestamp;
 
     const result = await request<PermissionsEventsResult>(PermissionsEventsFiltered, {
       contract: V2_ETH_REGISTRY,
-      where: { timestamp_lte: midTimestamp },
+      where: { timestamp: { lte: midTimestamp } },
     });
     const events = flattenConnection(result.permissions.events);
 
@@ -451,7 +478,7 @@ describe("Permissions.events filtering (EventsWhereInput)", () => {
 
     const result = await request<PermissionsEventsResult>(PermissionsEventsFiltered, {
       contract: V2_ETH_REGISTRY,
-      where: { timestamp_gte: minTs, timestamp_lte: maxTs },
+      where: { timestamp: { gte: minTs, lte: maxTs } },
       first: 1000,
     });
     const events = flattenConnection(result.permissions.events);
@@ -460,12 +487,12 @@ describe("Permissions.events filtering (EventsWhereInput)", () => {
     expect(events.length).toBe(allEvents.length);
   });
 
-  it("filters by from address", async () => {
+  it("filters by from eq", async () => {
     const targetFrom = allEvents[0].from;
 
     const result = await request<PermissionsEventsResult>(PermissionsEventsFiltered, {
       contract: V2_ETH_REGISTRY,
-      where: { from: targetFrom },
+      where: { from: { eq: targetFrom } },
     });
     const events = flattenConnection(result.permissions.events);
 
@@ -475,12 +502,15 @@ describe("Permissions.events filtering (EventsWhereInput)", () => {
     }
   });
 
-  it("combines selector_in and timestamp_gte", async () => {
+  it("combines selector and timestamp", async () => {
     const midTimestamp = allEvents[Math.floor(allEvents.length / 2)].timestamp;
 
     const result = await request<PermissionsEventsResult>(PermissionsEventsFiltered, {
       contract: V2_ETH_REGISTRY,
-      where: { selector_in: [EAC_ROLES_CHANGED_SELECTOR], timestamp_gte: midTimestamp },
+      where: {
+        selector: { eq: EAC_ROLES_CHANGED_SELECTOR },
+        timestamp: { gte: midTimestamp },
+      },
     });
     const events = flattenConnection(result.permissions.events);
 
@@ -497,7 +527,7 @@ describe("Permissions.events filtering (EventsWhereInput)", () => {
 
     const result = await request<PermissionsEventsResult>(PermissionsEventsFiltered, {
       contract: V2_ETH_REGISTRY,
-      where: { timestamp_gte: (maxTimestamp + 1n).toString() },
+      where: { timestamp: { gte: (maxTimestamp + 1n).toString() } },
     });
     const events = flattenConnection(result.permissions.events);
     expect(events.length).toBe(0);
@@ -564,10 +594,10 @@ describe("PermissionsUser.events", () => {
     }
   });
 
-  it("filters by selector_in", async () => {
+  it("filters by selector eq", async () => {
     const result = await request<PermissionsUserEventsResult>(PermissionsUserEvents, {
       contract: V2_ETH_REGISTRY,
-      where: { selector_in: [EAC_ROLES_CHANGED_SELECTOR] },
+      where: { selector: { eq: EAC_ROLES_CHANGED_SELECTOR } },
     });
     const filteredUsers = flattenConnection(result.permissions.root.users);
 
@@ -580,10 +610,10 @@ describe("PermissionsUser.events", () => {
     }
   });
 
-  it("filters by empty selector_in returns no results", async () => {
+  it("filters by empty selector in returns no results", async () => {
     const result = await request<PermissionsUserEventsResult>(PermissionsUserEvents, {
       contract: V2_ETH_REGISTRY,
-      where: { selector_in: [] },
+      where: { selector: { in: [] } },
     });
     const filteredUsers = flattenConnection(result.permissions.root.users);
 

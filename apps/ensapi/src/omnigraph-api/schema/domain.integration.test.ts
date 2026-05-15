@@ -283,12 +283,12 @@ describe("Domain.events filtering (EventsWhereInput)", () => {
     expect(allEvents.length).toBeGreaterThan(0);
   });
 
-  it("filters by selector_in", async () => {
+  it("filters by selector eq", async () => {
     const targetSelector = allEvents[0].topics[0];
 
     const result = await request<DomainEventsResult>(DomainEventsFiltered, {
       name: NAME_WITH_EVENTS,
-      where: { selector_in: [targetSelector] },
+      where: { selector: { eq: targetSelector } },
     });
     const events = flattenConnection(result.domain.events);
 
@@ -298,32 +298,49 @@ describe("Domain.events filtering (EventsWhereInput)", () => {
     }
   });
 
-  it("filters by selector_in with unknown topic returns no results", async () => {
+  it("filters by selector in", async () => {
+    const targetSelector = allEvents[0].topics[0];
+
+    const result = await request<DomainEventsResult>(DomainEventsFiltered, {
+      name: NAME_WITH_EVENTS,
+      where: { selector: { in: [targetSelector] } },
+    });
+    const events = flattenConnection(result.domain.events);
+
+    expect(events.length).toBeGreaterThan(0);
+    for (const event of events) {
+      expect(event.topics[0]).toBe(targetSelector);
+    }
+  });
+
+  it("filters by selector in with unknown topic returns no results", async () => {
     const result = await request<DomainEventsResult>(DomainEventsFiltered, {
       name: NAME_WITH_EVENTS,
       where: {
-        selector_in: ["0x0000000000000000000000000000000000000000000000000000000000000001"],
+        selector: {
+          in: ["0x0000000000000000000000000000000000000000000000000000000000000001"],
+        },
       },
     });
     const events = flattenConnection(result.domain.events);
     expect(events.length).toBe(0);
   });
 
-  it("filters by empty selector_in returns no results", async () => {
+  it("filters by empty selector in returns no results", async () => {
     const result = await request<DomainEventsResult>(DomainEventsFiltered, {
       name: NAME_WITH_EVENTS,
-      where: { selector_in: [] },
+      where: { selector: { in: [] } },
     });
     const events = flattenConnection(result.domain.events);
     expect(events.length).toBe(0);
   });
 
-  it("filters by timestamp_gte", async () => {
+  it("filters by timestamp gte", async () => {
     const midTimestamp = allEvents[Math.floor(allEvents.length / 2)].timestamp;
 
     const result = await request<DomainEventsResult>(DomainEventsFiltered, {
       name: NAME_WITH_EVENTS,
-      where: { timestamp_gte: midTimestamp },
+      where: { timestamp: { gte: midTimestamp } },
     });
     const events = flattenConnection(result.domain.events);
 
@@ -334,12 +351,12 @@ describe("Domain.events filtering (EventsWhereInput)", () => {
     }
   });
 
-  it("filters by timestamp_lte", async () => {
+  it("filters by timestamp lte", async () => {
     const midTimestamp = allEvents[Math.floor(allEvents.length / 2)].timestamp;
 
     const result = await request<DomainEventsResult>(DomainEventsFiltered, {
       name: NAME_WITH_EVENTS,
-      where: { timestamp_lte: midTimestamp },
+      where: { timestamp: { lte: midTimestamp } },
     });
     const events = flattenConnection(result.domain.events);
 
@@ -356,19 +373,19 @@ describe("Domain.events filtering (EventsWhereInput)", () => {
 
     const result = await request<DomainEventsResult>(DomainEventsFiltered, {
       name: NAME_WITH_EVENTS,
-      where: { timestamp_gte: minTs, timestamp_lte: maxTs },
+      where: { timestamp: { gte: minTs, lte: maxTs } },
       first: 1000,
     });
     const events = flattenConnection(result.domain.events);
     expect(events.length).toBe(allEvents.length);
   });
 
-  it("filters by from address", async () => {
+  it("filters by from eq", async () => {
     const targetFrom = allEvents[0].from;
 
     const result = await request<DomainEventsResult>(DomainEventsFiltered, {
       name: NAME_WITH_EVENTS,
-      where: { from: targetFrom },
+      where: { from: { eq: targetFrom } },
     });
     const events = flattenConnection(result.domain.events);
 
@@ -378,7 +395,7 @@ describe("Domain.events filtering (EventsWhereInput)", () => {
     }
   });
 
-  it("combines selector_in and timestamp_gte", async () => {
+  it("combines selector and timestamp", async () => {
     // pick a seed event from the second half so its selector is guaranteed to
     // appear at or after midTimestamp, avoiding flaky empty-result failures
     const midIndex = Math.floor(allEvents.length / 2);
@@ -388,7 +405,10 @@ describe("Domain.events filtering (EventsWhereInput)", () => {
 
     const result = await request<DomainEventsResult>(DomainEventsFiltered, {
       name: NAME_WITH_EVENTS,
-      where: { selector_in: [targetSelector], timestamp_gte: midTimestamp },
+      where: {
+        selector: { eq: targetSelector },
+        timestamp: { gte: midTimestamp },
+      },
     });
     const events = flattenConnection(result.domain.events);
 
@@ -405,7 +425,7 @@ describe("Domain.events filtering (EventsWhereInput)", () => {
 
     const result = await request<DomainEventsResult>(DomainEventsFiltered, {
       name: NAME_WITH_EVENTS,
-      where: { timestamp_gte: (maxTimestamp + 1n).toString() },
+      where: { timestamp: { gte: (maxTimestamp + 1n).toString() } },
     });
     const events = flattenConnection(result.domain.events);
     expect(events.length).toBe(0);
