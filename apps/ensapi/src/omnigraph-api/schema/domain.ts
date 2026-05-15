@@ -25,7 +25,6 @@ import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-r
 import { getDomainResolver } from "@/omnigraph-api/lib/get-domain-resolver";
 import { getLatestRegistration } from "@/omnigraph-api/lib/get-latest-registration";
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
-import { getRegistryParentDomain } from "@/omnigraph-api/lib/get-registry-parent-domain";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
 import { AccountRef } from "@/omnigraph-api/schema/account";
 import {
@@ -127,7 +126,8 @@ DomainInterfaceRef.implement({
         "The direct parent Domain via a single unidirectional walk up the namegraph. Null when the Domain's parent Registry does not declare a parent Domain.",
       type: DomainInterfaceRef,
       nullable: true,
-      resolve: async (domain) => getRegistryParentDomain(domain.registryId),
+      resolve: async (domain, _args, context) =>
+        context.loaders.registryParentDomain.load(domain.registryId),
     }),
 
     ////////////////
