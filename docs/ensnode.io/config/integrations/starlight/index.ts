@@ -43,6 +43,12 @@ export function starlight(): AstroIntegration {
     },
     head: [
       {
+        tag: "style",
+        content:
+          "@layer base, starlight.base, starlight.reset, starlight.core, starlight.content, starlight.components, starlight.utils, theme, components, utilities;",
+      },
+
+      {
         tag: "meta",
         attrs: {
           property: "og:image",

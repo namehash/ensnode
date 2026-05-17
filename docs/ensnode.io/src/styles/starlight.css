@@ -1,6 +1,7 @@
 /* Starlight CSS File */
 @layer base, starlight, theme, components, utilities;
 
+@import "@namehash/namehash-ui/styles.css";
 @import "@astrojs/starlight-tailwind";
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
@@ -147,6 +148,7 @@
   .page:not([data-sidebar-docked]) nav.sidebar .sidebar-pane {
     position: sticky;
     height: calc(100vh - var(--sl-nav-height));
+    scrollbar-gutter: auto;
   }
 
   div.main-frame {
