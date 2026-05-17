@@ -104,7 +104,11 @@ export const integrateSidebarTopic = {
               link: "/docs/integrate/integration-options/enskit",
             },
             {
-              label: "🚀 Interactive example",
+              label: "Interactive example",
+              badge: {
+                text: "⚡",
+                variant: "tip",
+              },
               link: "/docs/integrate/integration-options/enskit/example",
             },
           ],
@@ -118,7 +122,11 @@ export const integrateSidebarTopic = {
               link: "/docs/integrate/integration-options/enssdk",
             },
             {
-              label: "🚀 Interactive example",
+              label: "Interactive example",
+              badge: {
+                text: "⚡",
+                variant: "tip",
+              },
               link: "/docs/integrate/integration-options/enssdk/example",
             },
           ],
