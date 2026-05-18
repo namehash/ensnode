@@ -6,10 +6,37 @@ import { OrderDirection } from "@/omnigraph-api/schema/order-direction";
 // Inputs
 //////////////////////
 
-export const DomainPermissionsWhereInput = builder.inputType("DomainPermissionsWhereInput", {
-  description: "Filter Permissions over this Domain by a specific User address.",
+/**
+ * Max number of addresses accepted by `DomainPermissionsUserFilter.in`.
+ */
+export const DOMAIN_PERMISSIONS_USER_FILTER_IN_MAX = 10;
+
+/**
+ * @oneOf filter for Permissions users. Exactly one of `eq` or `in` must be provided.
+ */
+export const DomainPermissionsUserFilter = builder.inputType("DomainPermissionsUserFilter", {
+  description: "Filter Permissions by user address. Exactly one of `eq` or `in` must be provided.",
+  isOneOf: true,
   fields: (t) => ({
-    user: t.field({ type: "Address" }),
+    eq: t.field({
+      type: "Address",
+      description: "Exact user address match.",
+    }),
+    in: t.field({
+      type: ["Address"],
+      description: `User address matches any value in the set. Max ${DOMAIN_PERMISSIONS_USER_FILTER_IN_MAX} items. An empty set matches nothing.`,
+      validate: { maxLength: DOMAIN_PERMISSIONS_USER_FILTER_IN_MAX },
+    }),
+  }),
+});
+
+export const DomainPermissionsWhereInput = builder.inputType("DomainPermissionsWhereInput", {
+  description: "Filter Permissions over this Domain by user.",
+  fields: (t) => ({
+    user: t.field({
+      type: DomainPermissionsUserFilter,
+      description: "Filter Permissions to those whose user matches the provided filter.",
+    }),
   }),
 });
 

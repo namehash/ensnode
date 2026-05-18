@@ -1,6 +1,6 @@
 import { trace } from "@opentelemetry/api";
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
-import { and, count, eq, getTableColumns } from "drizzle-orm";
+import { and, count, eq, getTableColumns, inArray, sql } from "drizzle-orm";
 import type { DomainId } from "enssdk";
 
 import type { RequiredAndNotNull, RequiredAndNull } from "@ensnode/ensnode-sdk";
@@ -38,7 +38,8 @@ import {
   DomainsOrderInput,
   SubdomainsWhereInput,
 } from "@/omnigraph-api/schema/domain-inputs";
-import { EventRef, EventsWhereInput } from "@/omnigraph-api/schema/event";
+import { EventRef } from "@/omnigraph-api/schema/event";
+import { EventsWhereInput } from "@/omnigraph-api/schema/event-inputs";
 import { LabelRef } from "@/omnigraph-api/schema/label";
 import { PermissionsUserRef } from "@/omnigraph-api/schema/permissions";
 import { RegistrationInterfaceRef } from "@/omnigraph-api/schema/registration";
@@ -319,11 +320,23 @@ ENSv2DomainRef.implement({
         where: t.arg({ type: DomainPermissionsWhereInput }),
       },
       resolve: (parent, args) => {
+        const userScope = (() => {
+          const user = args.where?.user;
+          if (!user) return undefined;
+
+          const userIn = user.in ?? [user.eq];
+
+          // NOTE: avoid inArray([]) runtime error by short-circuit to an explicit empty result
+          if (userIn.length === 0) return sql`false`;
+
+          return inArray(ensIndexerSchema.permissionsUser.user, userIn);
+        })();
+
         const scope = and(
           // filter by resource === tokenId
           eq(ensIndexerSchema.permissionsUser.resource, parent.tokenId),
           // optionally filter by user
-          args.where?.user ? eq(ensIndexerSchema.permissionsUser.user, args.where.user) : undefined,
+          userScope,
         );
 
         // inner join against this Domain's registry to filter Permissions by those in said registry

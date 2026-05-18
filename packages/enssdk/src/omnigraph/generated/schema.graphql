@@ -17,7 +17,7 @@ type Account {
   """
   The Permissions granted to this Account, optionally filtered to Permissions in a specific contract.
   """
-  permissions(after: String, before: String, first: Int, in: AccountIdInput, last: Int): AccountPermissionsConnection
+  permissions(after: String, before: String, first: Int, last: Int, where: AccountPermissionsWhereInput): AccountPermissionsConnection
 
   """The Permissions on Registries granted to this Account."""
   registryPermissions(after: String, before: String, first: Int, last: Int): AccountRegistryPermissionsConnection
@@ -75,20 +75,17 @@ Filter conditions for Account.events (where `sender` is implied by the Account).
 """
 input AccountEventsWhereInput {
   """
-  Filter to events whose `tx.from` matches. Not HCA-aware — the Account's HCA-aware filter is applied via `sender = Account.id`.
+  Filter to events whose `tx.from` matches the provided filter. Not HCA-aware — the Account's HCA-aware filter is applied via `sender = Account.id`.
   """
-  from: Address
+  from: EventsFromFilter
 
   """
-  Filter to events whose selector (event signature) is one of the provided values.
+  Filter to events whose selector (event signature) matches the provided filter.
   """
-  selector_in: [Hex!]
+  selector: EventsSelectorFilter
 
-  """Filter to events at or after this UnixTimestamp."""
-  timestamp_gte: BigInt
-
-  """Filter to events at or before this UnixTimestamp."""
-  timestamp_lte: BigInt
+  """Filter to events whose UnixTimestamp falls within the provided range."""
+  timestamp: EventsTimestampFilter
 }
 
 """A CAIP-10 Account ID including chainId and address."""
@@ -112,6 +109,14 @@ type AccountPermissionsConnection {
 type AccountPermissionsConnectionEdge {
   cursor: String!
   node: PermissionsUser!
+}
+
+"""Filter for Account.permissions."""
+input AccountPermissionsWhereInput {
+  """
+  If set, filters this Account's Permissions to those granted in this contract.
+  """
+  contract: AccountIdInput
 }
 
 type AccountRegistryPermissionsConnection {
@@ -304,9 +309,23 @@ input DomainIdInput @oneOf {
   name: InterpretedName
 }
 
-"""Filter Permissions over this Domain by a specific User address."""
+"""
+Filter Permissions by user address. Exactly one of `eq` or `in` must be provided.
+"""
+input DomainPermissionsUserFilter @oneOf {
+  """Exact user address match."""
+  eq: Address
+
+  """
+  User address matches any value in the set. Max 10 items. An empty set matches nothing.
+  """
+  in: [Address!]
+}
+
+"""Filter Permissions over this Domain by user."""
 input DomainPermissionsWhereInput {
-  user: Address
+  """Filter Permissions to those whose user matches the provided filter."""
+  user: DomainPermissionsUserFilter
 }
 
 type DomainRegistrationsConnection {
@@ -732,28 +751,81 @@ type Event {
   transactionIndex: Int!
 }
 
+"""
+Filter Events by `tx.from`. Not HCA-aware — use `sender` to filter by the HCA-aware actor. Exactly one of `eq` or `in` must be provided.
+"""
+input EventsFromFilter @oneOf {
+  """Exact `tx.from` match."""
+  eq: Address
+
+  """
+  `tx.from` matches any address in the set. Max 10 items. An empty set matches nothing.
+  """
+  in: [Address!]
+}
+
+"""
+Filter Events by selector (event signature). Exactly one of `eq` or `in` must be provided.
+"""
+input EventsSelectorFilter @oneOf {
+  """Exact selector match."""
+  eq: Hex
+
+  """
+  Selector matches any value in the set. Max 10 items. An empty set matches nothing.
+  """
+  in: [Hex!]
+}
+
+"""
+Filter Events by HCA-aware `sender` (the HCA account address if used, otherwise Transaction.from). Exactly one of `eq` or `in` must be provided.
+"""
+input EventsSenderFilter @oneOf {
+  """Exact `sender` match."""
+  eq: Address
+
+  """
+  `sender` matches any address in the set. Max 10 items. An empty set matches nothing.
+  """
+  in: [Address!]
+}
+
+"""
+Filter Events by timestamp range. At least one bound must be provided. `gt`/`gte` are mutually exclusive; `lt`/`lte` are mutually exclusive.
+"""
+input EventsTimestampFilter {
+  """Filter to events strictly after this UnixTimestamp."""
+  gt: BigInt
+
+  """Filter to events at or after this UnixTimestamp."""
+  gte: BigInt
+
+  """Filter to events strictly before this UnixTimestamp."""
+  lt: BigInt
+
+  """Filter to events at or before this UnixTimestamp."""
+  lte: BigInt
+}
+
 """Filter conditions for an events connection."""
 input EventsWhereInput {
   """
-  Filter to events whose `tx.from` matches. Not HCA-aware — use `sender` to filter by the HCA account address.
+  Filter to events whose `tx.from` matches the provided filter. Not HCA-aware — use `sender` to filter by the HCA-aware actor.
   """
-  from: Address
+  from: EventsFromFilter
 
   """
-  Filter to events whose selector (event signature) is one of the provided values.
+  Filter to events whose selector (event signature) matches the provided filter.
   """
-  selector_in: [Hex!]
+  selector: EventsSelectorFilter
 
   """
-  Filter to events whose `sender` matches: the HCA account address if used, otherwise Transaction.from.
+  Filter to events whose HCA-aware `sender` matches the provided filter (the HCA account address if used, otherwise Transaction.from).
   """
-  sender: Address
+  sender: EventsSenderFilter
 
-  """Filter to events at or after this UnixTimestamp."""
-  timestamp_gte: BigInt
-
-  """Filter to events at or before this UnixTimestamp."""
-  timestamp_lte: BigInt
+  """Filter to events whose UnixTimestamp falls within the provided range."""
+  timestamp: EventsTimestampFilter
 }
 
 """Hex represents viem#Hex."""

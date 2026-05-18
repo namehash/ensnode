@@ -21,7 +21,8 @@ import { AccountIdInput } from "@/omnigraph-api/schema/account-id";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
 import { DomainInterfaceRef } from "@/omnigraph-api/schema/domain";
 import { AccountDomainsWhereInput, DomainsOrderInput } from "@/omnigraph-api/schema/domain-inputs";
-import { AccountEventsWhereInput, EventRef } from "@/omnigraph-api/schema/event";
+import { EventRef } from "@/omnigraph-api/schema/event";
+import { AccountEventsWhereInput } from "@/omnigraph-api/schema/event-inputs";
 import { PermissionsUserRef } from "@/omnigraph-api/schema/permissions";
 import { RegistryPermissionsUserRef } from "@/omnigraph-api/schema/registry-permissions-user";
 import { ResolverPermissionsUserRef } from "@/omnigraph-api/schema/resolver-permissions-user";
@@ -96,7 +97,10 @@ AccountRef.implement({
         where: t.arg({ type: AccountEventsWhereInput }),
       },
       resolve: (parent, args) =>
-        resolveFindEvents({ ...args, where: { ...args.where, sender: parent.id } }),
+        resolveFindEvents({
+          ...args,
+          where: { ...args.where, sender: { eq: parent.id } },
+        }),
     }),
 
     ///////////////////////
@@ -107,17 +111,18 @@ AccountRef.implement({
         "The Permissions granted to this Account, optionally filtered to Permissions in a specific contract.",
       type: PermissionsUserRef,
       args: {
-        in: t.arg({ type: AccountIdInput }),
+        where: t.arg({ type: AccountPermissionsWhereInput }),
       },
       resolve: (parent, args) => {
+        const contract = args.where?.contract;
         const scope = and(
           // this user's permissions
           eq(ensIndexerSchema.permissionsUser.user, parent.id),
           // optionally filtered by contract
-          args.in
+          contract
             ? and(
-                eq(ensIndexerSchema.permissionsUser.chainId, args.in.chainId),
-                eq(ensIndexerSchema.permissionsUser.address, args.in.address),
+                eq(ensIndexerSchema.permissionsUser.chainId, contract.chainId),
+                eq(ensIndexerSchema.permissionsUser.address, contract.address),
               )
             : undefined,
         );
@@ -225,5 +230,15 @@ export const AccountByInput = builder.inputType("AccountByInput", {
   fields: (t) => ({
     id: t.field({ type: "Address" }),
     address: t.field({ type: "Address" }),
+  }),
+});
+
+export const AccountPermissionsWhereInput = builder.inputType("AccountPermissionsWhereInput", {
+  description: "Filter for Account.permissions.",
+  fields: (t) => ({
+    contract: t.field({
+      type: AccountIdInput,
+      description: "If set, filters this Account's Permissions to those granted in this contract.",
+    }),
   }),
 });
