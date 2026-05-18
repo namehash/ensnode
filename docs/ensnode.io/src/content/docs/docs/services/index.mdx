@@ -7,15 +7,35 @@ sidebar:
 ---
 
 import { LinkCard, CardGrid } from "@astrojs/starlight/components";
+import ENSNodeServiceCard from "@workspace/docs/ensnode.io/src/components/atoms/ENSNodeServiceCard.astro"
+import ENSRainbow3DImage from "@workspace/docs/ensnode.io/src/assets/ENSRainbow3D.png";
+import ENSIndexer3DImage from "@workspace/docs/ensnode.io/src/assets/ENSIndexer3D.png";
+import ENSAdmin3DImage from "@workspace/docs/ensnode.io/src/assets/ENSAdmin3D.png";
+import ENSApi3DImage from "@workspace/docs/ensnode.io/src/assets/ENSApi3D.png";
+import ENSDb3DImage from "@workspace/docs/ensnode.io/src/assets/ENSDb3D.png";
 
 **Developing or contributing to ENSNode?** Use these sections for concepts, deployment, configuration, and contribution guides for the part of the stack you care about.
 
 Each ENSNode instance is composed of **a set of services**. Each service has a clear role in indexing, storing the onchain state of ENS, APIs, name healing, or admin operations.
 
-<CardGrid>
-  <LinkCard title="ENSApi" href="/docs/services/ensapi" description="APIs for building on ENS." />
-  <LinkCard title="ENSIndexer" href="/docs/services/ensindexer" description="Multichain indexer for ENSv2." />
-  <LinkCard title="ENSDb" href="/docs/services/ensdb" description="The live, onchain state of ENS in your DB." />
-  <LinkCard title="ENSRainbow" href="/docs/services/ensrainbow" description="Heals unknown ENS names." />
-  <LinkCard title="ENSAdmin" href="/docs/services/ensadmin" description="ENSNode operator dashboard and ENS Protocol Inspector." />
-</CardGrid>
+<div class="w-full h-fit flex flex-col justify-start items-start gap-4 min-[800px]:gap-6 ">
+  <ENSNodeServiceCard title="ENSApi" href="/docs/services/ensapi" description="APIs for building on ENS.">
+    <img slot="icon" src={ENSApi3DImage.src} class="scale-100 w-[125px] sm:w-[150px] lg:w-[175px] h-auto aspect-square max-sm:overflow-hidden" />
+  </ENSNodeServiceCard>
+
+  <ENSNodeServiceCard title="ENSIndexer" href="/docs/services/ensindexer" description="Multichain indexer for ENSv2.">
+    <img slot="icon" src={ENSIndexer3DImage.src} class="scale-190 w-[125px] sm:w-[150px] lg:w-[175px] h-auto aspect-square max-sm:overflow-hidden" />
+  </ENSNodeServiceCard>
+
+  <ENSNodeServiceCard title="ENSDb" href="/docs/services/ensdb" description="The live, onchain state of ENS in your DB.">
+    <img slot="icon" src={ENSDb3DImage.src} class="scale-100 w-[125px] sm:w-[150px] lg:w-[175px] h-auto aspect-square max-sm:overflow-hidden" />
+  </ENSNodeServiceCard>
+
+  <ENSNodeServiceCard title="ENSRainbow" href="/docs/services/ensrainbow" description="Heals unknown ENS names.">
+    <img slot="icon" src={ENSRainbow3DImage.src} class="scale-175 w-[125px] sm:w-[150px] lg:w-[175px] h-auto aspect-square max-sm:overflow-hidden" />
+  </ENSNodeServiceCard>
+
+  <ENSNodeServiceCard title="ENSAdmin" href="/docs/services/ensadmin" description="ENSNode operator dashboard and ENS Protocol Inspector.">
+    <img slot="icon" src={ENSAdmin3DImage.src} class="scale-190 w-[125px] sm:w-[150px] lg:w-[175px] h-auto aspect-square max-sm:overflow-hidden" />
+  </ENSNodeServiceCard>
+</div>
