@@ -82,7 +82,8 @@ export const EventsSenderFilter = builder.inputType("EventsSenderFilter", {
 /**
  * Range filter for Event timestamps. At least one bound must be provided. Bounds may combine
  * (e.g. `{ gte, lte }` for a closed range), but `gt`/`gte` are mutually exclusive, as are
- * `lt`/`lte`. If both a lower and upper bound are provided, the lower must be less than the upper.
+ * `lt`/`lte`. If both a lower and upper bound are provided, the lower must be less than or equal
+ * to the upper.
  */
 export const EventsTimestampFilter = builder.inputType("EventsTimestampFilter", {
   description:
