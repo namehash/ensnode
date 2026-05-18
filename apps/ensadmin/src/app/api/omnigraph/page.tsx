@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 
 import { getNamespaceSpecificValue } from "@ensnode/ensnode-sdk";
-import { GRAPHQL_API_EXAMPLE_QUERIES } from "@ensnode/ensnode-sdk/omnigraph-api/example-queries";
+import { GRAPHQL_API_EXAMPLE_QUERIES } from "@ensnode/ensnode-sdk/internal";
 
 import { GraphiQLEditor } from "@/components/graphiql-editor";
 import { RequireENSAdminFeature } from "@/components/require-ensadmin-feature";
