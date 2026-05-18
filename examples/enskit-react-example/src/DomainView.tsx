@@ -20,7 +20,9 @@ const DomainByNameQuery = graphql(
   query DomainByName($name: InterpretedName!, $first: Int!, $after: String) {
     domain(by: { name: $name }) {
       ...DomainFragment
-      parent { canonical { name { interpreted } } }
+      # # TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
+      # parent { canonical { name { interpreted } } }
+      parent { name }
       subdomains(first: $first, after: $after) {
         edges {
           node {
@@ -103,11 +105,20 @@ function RenderDomain({ name }: { name: InterpretedName }) {
       </p>
       <p>Version: {domain.__typename}</p>
 
+      {/* 
+      TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
       {data.domain.parent?.canonical && (
         <Link to={`/domain/${data.domain.parent.canonical.name.interpreted}`}>
           ← {beautifyInterpretedName(data.domain.parent.canonical.name.interpreted)}
         </Link>
-      )}
+      )} 
+       */}
+      {data.domain.parent?.name && (
+        <Link to={`/domain/${data.domain.parent.name}`}>
+          ← {beautifyInterpretedName(data.domain.parent.name)}
+        </Link>
+      )} 
+
 
       <h3>Subdomains</h3>
       {subdomains && subdomains.edges.length === 0 ? (
