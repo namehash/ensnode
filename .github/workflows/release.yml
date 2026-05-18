@@ -102,7 +102,6 @@ jobs:
             map(select(
                  .name == "@ensnode/datasources"
               or .name == "@ensnode/ens-referrals"
-              or .name == "@ensnode/ensnode-react"
               or .name == "@ensnode/ensdb-sdk"
               or .name == "@ensnode/ensnode-sdk"
               or .name == "@ensnode/ensrainbow-sdk"

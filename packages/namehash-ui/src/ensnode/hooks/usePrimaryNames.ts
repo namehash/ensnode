@@ -2,8 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 
+import { createPrimaryNamesQueryOptions, DISABLED_QUERY } from "../query";
 import type { UsePrimaryNamesParameters, WithEnsNodeProviderOptions } from "../types";
-import { createPrimaryNamesQueryOptions } from "../utils/query";
 import { useEnsNodeProviderOptions } from "./useEnsNodeProviderOptions";
 
 /**
@@ -17,7 +17,7 @@ import { useEnsNodeProviderOptions } from "./useEnsNodeProviderOptions";
  *
  * @example
  * ```typescript
- * import { usePrimaryNames } from "@ensnode/ensnode-react";
+ * import { usePrimaryNames } from "@namehash/namehash-ui";
  *
  * function DisplayPrimaryNames() {
  *   const { data, isLoading, error } = usePrimaryNames({
@@ -50,11 +50,11 @@ export function usePrimaryNames(
 
   const queryOptions = canEnable
     ? createPrimaryNamesQueryOptions(providerOptions, { ...args, address })
-    : { enabled: false, queryKey: ["disabled"] as const };
+    : DISABLED_QUERY;
 
   return useQuery({
     ...queryOptions,
     ...query,
-    enabled: canEnable && (query.enabled ?? queryOptions.enabled),
+    enabled: canEnable && (query.enabled ?? true),
   });
 }

@@ -2,8 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 
 import type { NameTokensRequest, NameTokensResponse } from "@ensnode/ensnode-sdk";
 
+import { createNameTokensQueryOptions } from "../query";
 import type { QueryParameter, WithEnsNodeProviderOptions } from "../types";
-import { createNameTokensQueryOptions } from "../utils/query";
 import { useEnsNodeProviderOptions } from "./useEnsNodeProviderOptions";
 
 type UseNameTokensParameters = NameTokensRequest & QueryParameter<NameTokensResponse>;

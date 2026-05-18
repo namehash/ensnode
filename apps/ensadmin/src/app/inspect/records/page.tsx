@@ -1,12 +1,12 @@
 "use client";
 
+import { useRecords } from "@namehash/namehash-ui";
 import type { Name } from "enssdk";
 // import { User } from "lucide-react";
-// import Link from "next/link";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
-import { useRecords } from "@ensnode/ensnode-react";
 import { getNamespaceSpecificValue } from "@ensnode/ensnode-sdk";
 
 import { RenderRequestsOutput } from "@/app/inspect/_components/render-requests-output";
@@ -50,6 +50,8 @@ export default function ResolveRecordsInspector() {
 
   const selection = DefaultRecordsSelection[namespace];
 
+  const trimmedInputName = inputName.trim();
+
   const navigateToName = (name: Name) => {
     setInputName(name);
     const href = retainCurrentRawConnectionUrlParam(getRecordResolutionRelativePath(name));
@@ -58,11 +60,10 @@ export default function ResolveRecordsInspector() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmed = inputName.trim();
-    if (trimmed === nameFromQuery) {
+    if (trimmedInputName === nameFromQuery) {
       refetch();
-    } else if (trimmed) {
-      navigateToName(trimmed);
+    } else if (trimmedInputName) {
+      navigateToName(trimmedInputName);
     } else {
       const href = retainCurrentRawConnectionUrlParam("/inspect/records");
       router.push(href);
@@ -136,8 +137,12 @@ export default function ResolveRecordsInspector() {
             {/* -mx-6 px-6 insets the scroll container against card for prettier scrolling */}
             <div className="flex flex-row overflow-x-scroll gap-2 no-scrollbar -mx-6 px-6">
               {exampleNames.map((name) => (
-                <Pill key={name} onClick={() => navigateToName(name)} className="font-mono">
-                  {name}
+                <Pill key={name} asChild className="font-mono">
+                  <Link
+                    href={retainCurrentRawConnectionUrlParam(getRecordResolutionRelativePath(name))}
+                  >
+                    {name}
+                  </Link>
                 </Pill>
               ))}
             </div>
@@ -145,10 +150,12 @@ export default function ResolveRecordsInspector() {
         </CardContent>
         <CardFooter>
           <ResolveButton
-            canResolve={!!inputName.trim()}
-            hasChanged={inputName.trim() !== nameFromQuery}
+            canResolve={!!trimmedInputName}
+            hasChanged={trimmedInputName !== nameFromQuery}
+            navigateHref={retainCurrentRawConnectionUrlParam(
+              getRecordResolutionRelativePath(trimmedInputName),
+            )}
             onRefetch={refetch}
-            onNavigate={() => navigateToName(inputName.trim())}
           />
         </CardFooter>
       </Card>

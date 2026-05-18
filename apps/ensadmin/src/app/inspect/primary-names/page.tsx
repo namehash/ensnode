@@ -1,13 +1,13 @@
 "use client";
 
-import { AddressDisplay } from "@namehash/namehash-ui";
+import { AddressDisplay, usePrimaryNames } from "@namehash/namehash-ui";
 import type { Address } from "enssdk";
-import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useDebouncedValue } from "rooks";
 import { isAddress } from "viem";
 
-import { usePrimaryNames } from "@ensnode/ensnode-react";
 import { getNamespaceSpecificValue } from "@ensnode/ensnode-sdk";
 
 import { RenderRequestsOutput } from "@/app/inspect/_components/render-requests-output";
@@ -25,7 +25,6 @@ import { EXAMPLE_ADDRESSES } from "../_lib/example-addresses";
 // TODO: use shadcn/form, react-hook-form, and zod to make all of this nicer aross the board
 // TODO: sync form state to query params, current just defaulting is supported
 export default function ResolvePrimaryNameInspector() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
 
@@ -44,12 +43,7 @@ export default function ResolvePrimaryNameInspector() {
     setAddress(addressFromQuery ?? exampleAddresses[0].address);
   }, [addressFromQuery, exampleAddresses]);
 
-  const navigateToAddress = (addr: Address) => {
-    setAddress(addr);
-    const path = `/inspect/primary-names?address=${encodeURIComponent(addr)}`;
-    const href = retainCurrentRawConnectionUrlParam(path);
-    router.push(href);
-  };
+  const trimmedAddress = address.trim();
 
   const validAddress: Address | null =
     debouncedAddress && isAddress(debouncedAddress) ? debouncedAddress : null;
@@ -115,12 +109,14 @@ export default function ResolvePrimaryNameInspector() {
             {/* -mx-6 px-6 insets the scroll container against card for prettier scrolling */}
             <div className="flex flex-row overflow-x-scroll gap-2 no-scrollbar -mx-6 px-6">
               {exampleAddresses.map(({ address: exampleAddress, name }) => (
-                <Pill
-                  key={exampleAddress}
-                  onClick={() => navigateToAddress(exampleAddress)}
-                  className="font-mono"
-                >
-                  <AddressDisplay address={exampleAddress} /> ({name})
+                <Pill key={exampleAddress} asChild className="font-mono">
+                  <Link
+                    href={retainCurrentRawConnectionUrlParam(
+                      `/inspect/primary-names?address=${encodeURIComponent(exampleAddress)}`,
+                    )}
+                  >
+                    <AddressDisplay address={exampleAddress} /> ({name})
+                  </Link>
                 </Pill>
               ))}
             </div>
@@ -128,10 +124,12 @@ export default function ResolvePrimaryNameInspector() {
         </CardContent>
         <CardFooter>
           <ResolveButton
-            canResolve={isAddress(address.trim())}
-            hasChanged={address.trim() !== addressFromQuery}
+            canResolve={isAddress(trimmedAddress)}
+            hasChanged={trimmedAddress !== addressFromQuery}
+            navigateHref={retainCurrentRawConnectionUrlParam(
+              `/inspect/primary-names?address=${encodeURIComponent(trimmedAddress)}`,
+            )}
             onRefetch={refetch}
-            onNavigate={() => navigateToAddress(address.trim() as Address)}
           />
         </CardFooter>
       </Card>
