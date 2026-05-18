@@ -74,7 +74,7 @@ export const GRAPHQL_API_EXAMPLE_QUERIES: GraphqlApiExampleQuery[] = [
 #
 # There are also example queries in the tabs above ☝️
 query HelloWorld {
-  domain(by: { name: "eth" }) { canonical { name } owner { address } }
+  domain(by: { name: "eth" }) { name owner { address } }
 }`,
     variables: { default: {} },
   },
@@ -86,7 +86,7 @@ query HelloWorld {
     id: "find-domains",
     query: `
 query FindDomains(
-  $name: DomainsNameFilter!
+  $name: String!
   $order: DomainsOrderInput
 ) {
   domains(
@@ -99,7 +99,7 @@ query FindDomains(
         __typename
         id
         label { interpreted hash }
-        canonical { name }
+        name
 
         registration { expiry event { timestamp } }
       }
@@ -107,15 +107,9 @@ query FindDomains(
   }
 }`,
     variables: {
-      default: { name: { starts_with: "vitalik" }, order: { by: "NAME", dir: "DESC" } },
-      [ENSNamespaceIds.EnsTestEnv]: {
-        name: { starts_with: "c" },
-        order: { by: "NAME", dir: "DESC" },
-      },
-      [ENSNamespaceIds.SepoliaV2]: {
-        name: { starts_with: "test-na" },
-        order: { by: "NAME", dir: "DESC" },
-      },
+      default: { name: "vitalik", order: { by: "NAME", dir: "DESC" } },
+      [ENSNamespaceIds.EnsTestEnv]: { name: "c", order: { by: "NAME", dir: "DESC" } },
+      [ENSNamespaceIds.SepoliaV2]: { name: "test-na", order: { by: "NAME", dir: "DESC" } },
     },
   },
 
@@ -130,12 +124,17 @@ query DomainByName($name: InterpretedName!) {
     __typename
     id
     label { interpreted hash }
-    canonical { name node path { id } }
+    name
     owner { address }
-    subregistry { contract { chainId address } }
 
     ... on ENSv1Domain {
       rootRegistryOwner { address }
+    }
+
+    ... on ENSv2Domain {
+      subregistry {
+        contract { chainId address }
+      }
     }
   }
 }`,
@@ -153,11 +152,11 @@ query DomainByName($name: InterpretedName!) {
     query: `
 query DomainSubdomains($name: InterpretedName!) {
   domain(by: {name: $name}) {
-    canonical { name }
+    name
     subdomains(first: 10) {
       edges {
         node {
-          canonical { name }
+          name
         }
       }
     }
@@ -209,7 +208,7 @@ query AccountDomains(
       edges {
         node {
           label { interpreted }
-          canonical { name }
+          name
         }
       }
     }
@@ -256,7 +255,7 @@ query RegistryDomains(
       edges {
         node {
           label { interpreted }
-          canonical { name }
+          name
         }
       }
     }
@@ -366,7 +365,7 @@ query AccountResolverPermissions($address: Address!) {
     query: `
 query DomainResolver($name: InterpretedName!) {
   domain(by: { name: $name }) {
-    assignedResolver {
+    resolver {
       records { edges { node { node keys coinTypes } } }
       permissions { resources { edges { node { resource users { edges { node { user { address } roles } } } } } } }
       events { totalCount edges { node { topics data timestamp } } }
@@ -392,17 +391,17 @@ query Namegraph {
     domains {
       edges {
         node {
-          canonical { name }
+          name
 
           subdomains {
             edges {
               node {
-                canonical { name }
+                name
 
                 subdomains {
                   edges {
                     node {
-                      canonical { name }
+                      name
                     }
                   }
                 }
