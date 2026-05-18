@@ -6,7 +6,8 @@ import {
   type ENSNamespaceId,
   maybeGetDatasource,
 } from "@ensnode/datasources";
-import { accountIdEqual } from "@ensnode/ensnode-sdk";
+
+import { accountIdEqual } from "./account-id";
 
 /**
  * Gets the AccountId for the contract in the specified namespace, datasource, and
