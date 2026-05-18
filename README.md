@@ -19,7 +19,7 @@
 
 # ENSNode
 
-[ENSNode](https://ensnode.io) is the multichain indexer for ENS, with first-class support for [ENSv2](https://roadmap.ens.domains/roadmap/). It exposes a unified GraphQL API — the **ENS Omnigraph** — over both ENSv1 and ENSv2.
+[ENSNode](https://ensnode.io) is the multichain indexer for ENS, with first-class support for [ENSv2](https://roadmap.ens.domains/roadmap/). It exposes a unified GraphQL API — the **ENS Omnigraph API** — over both ENSv1 and ENSv2.
 
 - 📚 **Docs:** [ensnode.io](https://ensnode.io)
 - 🚀 **Quickstart:** [ensnode.io/docs/integrate](https://ensnode.io/docs/integrate)
@@ -41,15 +41,7 @@ query HelloWorld {
 }
 ```
 
-See [`examples/omnigraph-graphql-example`](examples/omnigraph-graphql-example) for the full runnable script, and the [Quickstart](https://ensnode.io/docs/integrate) for `enskit` (React), `enssdk` (TypeScript), and direct GraphQL integrations.
-
-## Running with Docker
-
-```bash
-docker compose -f docker/docker-compose.yml up -d
-```
-
-See [`docker/README.md`](docker/README.md) for all use cases and commands.
+To get started with ENSNode and the Omnigraph API, follow a [Quickstart](https://ensnode.io/docs/integrate).
 
 ## Contributing
 
