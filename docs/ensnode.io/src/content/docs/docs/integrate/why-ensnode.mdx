@@ -13,9 +13,11 @@ This page will explain why ENSNode is the best way to build ENSv2 applications â
 
 ## Why it's important for ENS?
 
-ENS has evolved beyond mainnet, yet indexing hasn't kept pace. 
-ENSNode solves this with a purpose-built indexer, ensuring ENSv2 and Namechain 
-launch with the complete data foundation the ecosystem requires. 
+ENSv2 introduces a completely new onchain data model we refer to as the ENS Namegraph. 
+Additionally, when ENSv2 launches, ENSv1 continues to exist in parallel. 
+The legacy ENS Subgraph cannot support ENSv2. 
+Apps building on ENSv2 need a simple and powerful solution for querying the full unified state of ENSv1 and ENSv2. 
+ENSNode delivers this as a full-stack of integration points for developers building on the future of ENS. 
 <a href="https://discuss.ens.domains/t/spp2-namehash-labs-application/20502" target="_blank" rel="noopener noreferrer">Learn more</a>
 
 <iframe
@@ -29,7 +31,7 @@ launch with the complete data foundation the ecosystem requires.
 
 ### Close critical ENS infrastructure gaps
 
-Indexed ENS data is vital for the upcoming launch of ENSv2 and Namechain. 
+Indexed ENS data is vital for the upcoming launch of ENSv2. 
 Existing ENS indexed data providers (the ENS Subgraph) are fundamentally unsuitable for ENSv2 
 and a replacement is critically required for many of ENSâ€™s most important apps, 
 including the official ENS Manager App among many others.
@@ -40,7 +42,7 @@ including the official ENS Manager App among many others.
 
 Our infrastructure under development removes a strict dependency on many centralized
 offchain gateway servers whose downtime would otherwise shut down impacted multichain ENS
-names that are key to the future of ENSv2 and Namechain, such as subnames of base.eth,
+names that are key to the future of ENSv2, such as subnames of base.eth,
 linea.eth, or tokenized DNS names such as .box names or 3DNS names.
 
 <ENSAdminImage styles="w-full h-auto rounded-2xl rotate-y-180" />
