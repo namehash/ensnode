@@ -191,12 +191,18 @@ The ENS Omnigraph API is a GraphQL API following the Relay specification, so you
   href="https://github.com/namehash/ensnode/tree/main/examples/omnigraph-graphql-example"
 />
 
+### 4. Further Integration Options
+
+Beyond `enskit`, `enssdk`, and the Omnigraph GraphQL API, ENSNode exposes a deeper set of integration surfaces for advanced use cases:
+
+- **ENSDb** — query the indexed ENS dataset directly over Postgres for custom analytics or your own service layer.
+- **enscli** — script ENSNode operations from the command line.
+- **ensskills** — AI agent tooling for working with ENS data.
+- **ensdb-cli** — share and load point-in-time ENSDb snapshots.
+- **ENSEngine** (coming soon) — subscribe to ENS-aware webhooks driven by changes in ENSDb.
+
 <LinkCard
   title='See all Integration Options'
   description='Includes more advanced integration options not introduced in this quickstart guide'
   href="/docs/integrate/integration-options"
 />
-
-:::tip[Coming soon: accelerated self-hosting]
-Planning to self-host? We're building [**`ensdb-cli` & ENSDb snapshots**](/docs/integrate/integration-options/ensdb-cli) so you can stand up a fresh, nearly-current ENSDb in minutes instead of waiting days and spending big on RPC credits to complete a full historical backfill.
-:::
