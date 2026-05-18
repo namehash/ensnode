@@ -5,7 +5,7 @@ import { Link, useSearchParams } from "react-router";
 
 const DomainsByNameQuery = graphql(`
   query DomainsByName($name: String!, $first: Int!, $after: String) {
-    domains(where: { name: $name }, first: $first, after: $after) {
+    domains(where: { name: { starts_with: $name } }, first: $first, after: $after) {
       edges {
         node { __typename id canonical {name} }
       }
@@ -67,9 +67,9 @@ export function SearchView() {
       <h2>Domain Search</h2>
 
       <p>
-        Showcases live querying via <code>Query.domains(where: {"{ name }"})</code>. Only{" "}
-        <b>Canonical</b> Domains are rendered. Input is debounced by {DEBOUNCE_MS}ms and synced to
-        the URL as <code>?query=</code>.
+        Showcases live querying via <code>Query.domains(where: {"{ name: { starts_with } }"})</code>
+        . Only <b>Canonical</b> Domains are rendered. Input is debounced by {DEBOUNCE_MS}ms and
+        synced to the URL as <code>?query=</code>.
       </p>
 
       <input

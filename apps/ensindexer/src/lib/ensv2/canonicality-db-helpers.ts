@@ -48,8 +48,8 @@ import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-eng
  * `reconcileRegistryCanonicality` cascades through the canonical nametree beneath the Registry
  * in two situations: (a) the Registry's `canonical` flag flipped, or (b) the Registry's canonical
  * parent Domain identity changed while the flag stays canonical, which leaves descendants'
- * materialized canonical-tree fields (`canonicalName`, `canonicalLabelHashPath`, `canonicalNode`)
- * rooted at the previous parent's path and therefore stale. Situation (b) only arises when
+ * materialized canonical-tree fields (`canonicalName`, `canonicalLabelHashPath`, `canonicalPath`,
+ * `canonicalDepth`, `canonicalNode`) rooted at the previous parent's path and therefore stale. Situation (b) only arises when
  * `Registry.canonicalDomainId` itself was updated (handled via `handleRegistryCanonicalDomainUpdated`);
  * `handleSubregistryUpdated` cannot change which Domain is the canonical parent of a given Registry,
  * only whether the existing pointer agrees. Two cascade paths:
@@ -135,6 +135,9 @@ export async function ensureDomainInRegistry(
       labelHash,
     ];
 
+    // construct the Canonical Path of DomainIds (head-first, parallel to canonicalLabelHashPath)
+    const canonicalPath: DomainId[] = [...(parentDomain?.canonicalPath ?? []), domainId];
+
     // construct the Canonical Name
     const canonicalName = (
       parentDomain?.canonicalName
@@ -149,6 +152,8 @@ export async function ensureDomainInRegistry(
       canonical: true,
       canonicalName,
       canonicalLabelHashPath,
+      canonicalPath,
+      canonicalDepth: canonicalLabelHashPath.length,
       canonicalNode,
     });
   }
@@ -434,9 +439,12 @@ export async function cascadeLabelHeal(
  * The Registry UPDATE's `IS DISTINCT FROM` filter skips rows already at the target value (the
  * start registry's flag is set in the same statement, and any descendants that happen to already
  * be consistent are no-op'd). The Domain UPDATE's WHERE filter touches a row when either its
- * flag flipped OR (when staying canonical) its `canonicalLabelHashPath` differs from the
- * freshly-computed path — this second clause handles the parent-identity-changed case where the
- * flag stays canonical but materialized paths are stale.
+ * flag flipped OR (when staying canonical) its `canonicalLabelHashPath` or `canonicalPath`
+ * differs from the freshly-computed path — this second clause handles the parent-identity-changed
+ * case where the flag stays canonical but materialized paths are stale. Both arrays are checked
+ * because two distinct canonical Domains can share a `canonicalLabelHashPath` across protocol
+ * roots (e.g. v1 `linea.eth` and v2 `linea.eth`), so re-parenting a Registry between such Domains
+ * leaves `canonicalLabelHashPath` equal while `canonicalPath` (DomainIds) drifts.
  *
  * Because a canonicalization update may affect an unbounded number of objects in the tree, we
  * batch the subsequent updates to at least buffer the severity of this operation.
@@ -449,16 +457,17 @@ async function cascadeCanonicality(
   nextCanonical: boolean,
 ): Promise<void> {
   const changed = await context.ensDb.sql.execute(sql`
-    WITH RECURSIVE walk(registry_id, parent_path, parent_name) AS (
-      -- base: seed parent_path / parent_name from the start registry's canonical parent Domain
-      -- (if any). The start Registry may be a root, in which case no parent Domain exists and
-      -- seeds are () / NULL.
+    WITH RECURSIVE walk(registry_id, parent_path, parent_path_ids, parent_name) AS (
+      -- base: seed parent_path / parent_path_ids / parent_name from the start registry's canonical
+      -- parent Domain (if any). The start Registry may be a root, in which case no parent Domain
+      -- exists and seeds are () / () / NULL.
       SELECT
         ${registryId}::text,
         COALESCE(seed.canonical_label_hash_path, ARRAY[]::text[]),
+        COALESCE(seed.canonical_path, ARRAY[]::text[]),
         seed.canonical_name
       FROM (
-        SELECT pd.canonical_label_hash_path, pd.canonical_name
+        SELECT pd.canonical_label_hash_path, pd.canonical_path, pd.canonical_name
         FROM ${ensIndexerSchema.registry} r
         LEFT JOIN ${ensIndexerSchema.domain} pd ON pd.id = r.canonical_domain_id
         WHERE r.id = ${registryId}
@@ -466,13 +475,14 @@ async function cascadeCanonicality(
 
       UNION
 
-      -- step downward via the canonical-edge agreement, extending parent_path / parent_name by
-      -- the linking Domain's labelHash / interpreted label. The path is head-first
-      -- (root → leaf), so we APPEND the labelHash; the name is the standard leaf-first ENS
-      -- string ("vitalik.eth"), so we PREPEND the interpreted label.
+      -- step downward via the canonical-edge agreement, extending parent_path / parent_path_ids /
+      -- parent_name by the linking Domain's labelHash / id / interpreted label. The path is
+      -- head-first (root → leaf), so we APPEND; the name is the standard leaf-first ENS string
+      -- ("vitalik.eth"), so we PREPEND.
       SELECT
         child_reg.id,
         w.parent_path || ARRAY[d.label_hash],
+        w.parent_path_ids || ARRAY[d.id],
         COALESCE(l.interpreted || '.' || w.parent_name, l.interpreted)
       FROM walk w
       JOIN ${ensIndexerSchema.domain} d
@@ -486,7 +496,8 @@ async function cascadeCanonicality(
     domain_targets AS (
       -- for each Registry in the walk, enumerate ALL of its child Domains (regardless of whether
       -- they themselves have a canonical-agreeing subregistry) and project the materialized
-      -- path / name. Head-first path → APPEND labelHash; leaf-first name → PREPEND interpreted label.
+      -- path / path_ids / name. Head-first → APPEND labelHash and id; leaf-first name → PREPEND
+      -- interpreted label.
       --
       -- The agreement filter is intentionally omitted here. Membership in the canonical nametree
       -- is determined per-Domain via Domain.canonical, and every Domain that belongs to a canonical
@@ -498,6 +509,7 @@ async function cascadeCanonicality(
       SELECT
         d.id AS domain_id,
         w.parent_path || ARRAY[d.label_hash] AS new_path,
+        w.parent_path_ids || ARRAY[d.id] AS new_path_ids,
         COALESCE(l.interpreted || '.' || w.parent_name, l.interpreted) AS new_name
       FROM walk w
       JOIN ${ensIndexerSchema.domain} d
@@ -516,12 +528,20 @@ async function cascadeCanonicality(
       SET canonical = ${nextCanonical},
           canonical_name = CASE WHEN ${nextCanonical} THEN dt.new_name ELSE NULL END,
           canonical_label_hash_path = CASE WHEN ${nextCanonical} THEN dt.new_path ELSE NULL END,
+          canonical_path = CASE WHEN ${nextCanonical} THEN dt.new_path_ids ELSE NULL END,
+          canonical_depth = CASE WHEN ${nextCanonical} THEN array_length(dt.new_path, 1) ELSE NULL END,
           canonical_node = NULL
       FROM domain_targets dt
       WHERE d.id = dt.domain_id
         AND (
           d.canonical IS DISTINCT FROM ${nextCanonical}
-          OR (${nextCanonical} AND d.canonical_label_hash_path IS DISTINCT FROM dt.new_path)
+          OR (
+            ${nextCanonical}
+            AND (
+              d.canonical_label_hash_path IS DISTINCT FROM dt.new_path
+              OR d.canonical_path IS DISTINCT FROM dt.new_path_ids
+            )
+          )
         )
       RETURNING d.id, d.canonical_label_hash_path;
   `);

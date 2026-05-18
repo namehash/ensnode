@@ -395,8 +395,8 @@ const introspection = {
           {
             "name": "name",
             "type": {
-              "kind": "SCALAR",
-              "name": "String"
+              "kind": "INPUT_OBJECT",
+              "name": "DomainsNameFilter"
             }
           },
           {
@@ -1292,6 +1292,18 @@ const introspection = {
         "name": "DomainCanonical",
         "fields": [
           {
+            "name": "depth",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Int"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
             "name": "name",
             "type": {
               "kind": "NON_NULL",
@@ -1616,9 +1628,47 @@ const introspection = {
         "interfaces": []
       },
       {
+        "kind": "INPUT_OBJECT",
+        "name": "DomainsNameFilter",
+        "inputFields": [
+          {
+            "name": "eq",
+            "type": {
+              "kind": "SCALAR",
+              "name": "InterpretedName"
+            }
+          },
+          {
+            "name": "in",
+            "type": {
+              "kind": "LIST",
+              "ofType": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "InterpretedName"
+                }
+              }
+            }
+          },
+          {
+            "name": "starts_with",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String"
+            }
+          }
+        ],
+        "isOneOf": true
+      },
+      {
         "kind": "ENUM",
         "name": "DomainsOrderBy",
         "enumValues": [
+          {
+            "name": "DEPTH",
+            "isDeprecated": false
+          },
           {
             "name": "NAME",
             "isDeprecated": false
@@ -1667,8 +1717,8 @@ const introspection = {
             "type": {
               "kind": "NON_NULL",
               "ofType": {
-                "kind": "SCALAR",
-                "name": "String"
+                "kind": "INPUT_OBJECT",
+                "name": "DomainsNameFilter"
               }
             }
           },
@@ -5426,8 +5476,8 @@ const introspection = {
           {
             "name": "name",
             "type": {
-              "kind": "SCALAR",
-              "name": "String"
+              "kind": "INPUT_OBJECT",
+              "name": "DomainsNameFilter"
             }
           }
         ],
@@ -6174,8 +6224,8 @@ const introspection = {
           {
             "name": "name",
             "type": {
-              "kind": "SCALAR",
-              "name": "String"
+              "kind": "INPUT_OBJECT",
+              "name": "DomainsNameFilter"
             }
           }
         ],

@@ -13,7 +13,8 @@ function getOrderColumn(
   orderBy: typeof DomainsOrderBy.$inferType,
 ) {
   return {
-    NAME: domains.sortableLabel,
+    NAME: domains.canonicalName,
+    DEPTH: domains.canonicalDepth,
     REGISTRATION_TIMESTAMP: domains.registrationTimestamp,
     REGISTRATION_EXPIRY: domains.registrationExpiry,
   }[orderBy];
@@ -83,8 +84,17 @@ export function cursorFilter(
   // NOTE: Drizzle 0.41 doesn't support gt/lt with tuple arrays, so we use raw SQL
   // NOTE: explicit cast required — Postgres can't infer parameter types in tuple comparisons
   const op = useGreaterThan ? ">" : "<";
-  const value =
-    cursor.by === "NAME" ? sql`${cursor.value}::text` : sql`${cursor.value}::numeric(78,0)`;
+  const value = (() => {
+    switch (cursor.by) {
+      case "NAME":
+        return sql`${cursor.value}::text`;
+      case "DEPTH":
+        return sql`${cursor.value}::int`;
+      case "REGISTRATION_TIMESTAMP":
+      case "REGISTRATION_EXPIRY":
+        return sql`${cursor.value}::numeric(78,0)`;
+    }
+  })();
   return sql`(${orderColumn}, ${domains.id}) ${sql.raw(op)} (${value}, ${cursor.id})`;
 }
 

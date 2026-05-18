@@ -1,22 +1,9 @@
 import DataLoader from "dataloader";
 import { getUnixTime } from "date-fns";
 import { inArray } from "drizzle-orm";
-import type { CanonicalPath, DomainId, RegistryId } from "enssdk";
+import type { DomainId, RegistryId } from "enssdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
-
-import { getCanonicalPath } from "./lib/get-canonical-path";
-
-/**
- * A Promise.catch handler that provides the thrown error as a resolved value, useful for Dataloaders.
- */
-const errorAsValue = (error: unknown) =>
-  error instanceof Error ? error : new Error(String(error));
-
-const createCanonicalPathLoader = () =>
-  new DataLoader<DomainId, CanonicalPath | Error | null>(async (domainIds) =>
-    Promise.all(domainIds.map((id) => getCanonicalPath(id).catch(errorAsValue))),
-  );
 
 const createRegistryParentDomainLoader = () =>
   new DataLoader<RegistryId, DomainId | null>(async (registryIds) => {
@@ -39,7 +26,6 @@ const createRegistryParentDomainLoader = () =>
 export const context = () => ({
   now: BigInt(getUnixTime(new Date())),
   loaders: {
-    canonicalPath: createCanonicalPathLoader(),
     registryParentDomain: createRegistryParentDomainLoader(),
   },
 });

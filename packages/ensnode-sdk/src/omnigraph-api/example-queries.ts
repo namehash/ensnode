@@ -67,7 +67,7 @@ query HelloWorld {
   {
     query: `
 query FindDomains(
-  $name: String!
+  $name: DomainsNameFilter!
   $order: DomainsOrderInput
 ) {
   domains(
@@ -88,9 +88,15 @@ query FindDomains(
   }
 }`,
     variables: {
-      default: { name: "vitalik", order: { by: "NAME", dir: "DESC" } },
-      [ENSNamespaceIds.EnsTestEnv]: { name: "c", order: { by: "NAME", dir: "DESC" } },
-      [ENSNamespaceIds.SepoliaV2]: { name: "sfmonic", order: { by: "NAME", dir: "DESC" } },
+      default: { name: { starts_with: "vitalik" }, order: { by: "NAME", dir: "DESC" } },
+      [ENSNamespaceIds.EnsTestEnv]: {
+        name: { starts_with: "c" },
+        order: { by: "NAME", dir: "DESC" },
+      },
+      [ENSNamespaceIds.SepoliaV2]: {
+        name: { starts_with: "sfmonic" },
+        order: { by: "NAME", dir: "DESC" },
+      },
     },
   },
 

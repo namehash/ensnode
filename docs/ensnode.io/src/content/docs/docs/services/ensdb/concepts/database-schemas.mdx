@@ -83,10 +83,12 @@ Registrations are polymorphic between the defined RegistrationTypes, depending o
 guarantees (for example, ENSv1 BaseRegistrar Registrations may have a gracePeriod, but ENSv2
 Registry Registrations do not).
 
-Instead of materializing a Domain's name at any point, we maintain an internal rainbow table of
-labelHash -> InterpretedLabel (the Label entity). This ensures that regardless of how or when a
-new label is encountered onchain, all Domains that use that label are automatically healed at
-resolution-time.
+The `Label` entity (`labelHash` → `InterpretedLabel`) remains the source of truth for label values.
+Canonical-tree fields on `domains` (`canonical_name`, `canonical_label_hash_path`, `canonical_path`,
+`canonical_depth`, `canonical_node`) are materialized inline by the handlers in
+`canonicality-db-helpers.ts`. Label heals propagate to `canonical_name` via a GIN-indexed bulk
+UPDATE outside Ponder's cache; cascade round-trips are bounded to events that already pay a
+flush (canonicality flip, heal of an unknown label).
 
 ENSv1 and ENSv2 both fit the `Registry` → `Domain` → (`Sub`)`Registry` → `Domain` → ... `namegraph` model.
 For ENSv1, each domain that has children implicitly owns a "virtual" `Registry` (a row of type
@@ -99,6 +101,9 @@ exception of the canonical subgraph, which is reflected via `registries.canonica
 `domains.canonical` boolean flags on the rows themselves. The bidirectional canonical edge is NOT
 materialized in a parallel table; it is derived on demand by checking that the two unidirectional
 pointers agree (`registries.canonical_domain_id = domains.id` ↔ `domains.subregistry_id = registries.id`).
+Cascading canonicality flips through the subgraph run as either an in-memory PK update (when
+`registries.has_children = false`, the dominant case for fresh ENSv1 virtual registries on first
+wire-up) or a single recursive-CTE batch UPDATE otherwise (see `canonicality-db-helpers.ts`).
 
 Note also that the Protocol Acceleration plugin is a hard requirement for the Unigraph plugin. This
 allows us to rely on the shared logic for indexing:
@@ -248,7 +253,7 @@ For ENSv1, each domain that has children implicitly owns a "virtual" Registry (`
 The `domains.owner_id` for ENSv1 Domains is the materialized effective owner. ENSv1 includes a diverse number of ways to 'own' a domain, including the ENSv1 Registry, various Registrars, and the NameWrapper. The ENSv1 indexing logic materializes the effective owner to simplify this aspect of ENS and enable efficient queries against `domains.owner_id`.
 
 :::note
-Domain-Resolver relations are tracked via the Protocol Acceleration plugin, not stored on the domain row. The parent domain is derived via `registry_canonical_domains`, not stored on the domain row.
+Domain-Resolver relations are tracked via the Protocol Acceleration plugin, not stored on the domain row. Parent-domain traversal of the canonical nametree is supported directly via the materialized `canonical_path` / `canonical_label_hash_path` arrays; non-canonical traversal walks the `registries.canonical_domain_id` ↔ `domains.subregistry_id` pointers at query-time.
 :::
 
 | Column                   | Type          | Nullable | Description                                                                                                                                  |
@@ -263,8 +268,13 @@ Domain-Resolver relations are tracked via the Protocol Acceleration plugin, not 
 | `owner_id`               | `text`        | yes      | If `ENSv1Domain`, the materialized effective owner address. If `ENSv2Domain`, the on-chain owner address (the HCA account address if used).  |
 | `root_registry_owner_id` | `text`        | yes      | ENSv1 only: the owner recorded in the root ENSv1 registry. `null` for ENSv2 domains.                                                         |
 | `canonical`              | `boolean`     | no       | Whether this Domain is part of the canonical nametree. This encodes bi-directional agreement between `domains.subregistry_id` and `registries.canonical_domain_id`, so traversal of the canonical nametree filtered to domains/registries where `canonical=true` is safe and doesn't require edge-authenticating oneself (i.e. don't need to compare `domains.subregistry_id` and `registries.canonical_domain_id` in the query, can just `WHERE canonical = true`). Mirrors the parent Registry's flag. Default `false`. |
+| `canonical_name`             | `text`        | yes      | Materialized Canonical Name, `NULL` iff `canonical = false`. Maintained by `canonicality-db-helpers.ts`. Example: `"vitalik.eth"`. |
+| `canonical_label_hash_path`  | `text[]`      | yes      | Materialized Canonical LabelHashPath, `NULL` iff `canonical = false`. Head-first (root → leaf), i.e. `[labelhash("eth"), labelhash("vitalik")]` for `"vitalik.eth"`. Maintained by `canonicality-db-helpers.ts`. |
+| `canonical_path`             | `text[]`      | yes      | Materialized Canonical Domain Path, `NULL` iff `canonical = false`. Head-first (root → leaf), i.e. `["eth"`'s `DomainId`, `"vitalik"`'s `DomainId]` for `"vitalik.eth"`. Maintained by `canonicality-db-helpers.ts`. |
+| `canonical_depth`            | `integer`     | yes      | Materialized Canonical Depth, `NULL` iff `canonical = false`. The depth of this Domain in the Canonical Nametree, i.e. the number of Labels in its Canonical Name (e.g. `"eth"` depth 1, `"vitalik.eth"` depth 2). Maintained by `canonicality-db-helpers.ts`. |
+| `canonical_node`             | `text`        | yes      | Materialized Canonical Node, `NULL` iff `canonical = false`. The computed Node (via `namehash`) of this Domain's Canonical Name. Maintained by `canonicality-db-helpers.ts`. |
 
-**Indexes:** `type`, `registry_id`, `subregistry_id` (partial: non-null only), `owner_id`, `label_hash`.
+**Indexes:** `type`, `registry_id`, `subregistry_id` (partial: non-null only), `owner_id`, `label_hash`, `canonical_name` (hash, exact match — avoids the btree 8191-byte row-size hazard for spam names), `canonical_name` (GIN trigram for substring / similarity queries), `canonical_label_hash_path` (GIN containment for `cascadeLabelHeal`'s `canonical_label_hash_path @> ARRAY[lh]` lookup), `canonical_node` (hash, for resolver-record → canonical-domain joins), `canonical_depth` (btree, for `ORDER BY canonical_depth` — typeahead and depth-ordered browse).
 
 **Relations:** belongs to one `registries` record, belongs to one `registries` record (as subregistry), has one `accounts` record (owner), has one `accounts` record (rootRegistryOwner), has one `labels` record, has many `registrations` records.
 
