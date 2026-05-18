@@ -1,4 +1,5 @@
 export * from "./address";
+export * from "./beautify";
 export * from "./caip";
 export * from "./coin-type";
 export * from "./constants";

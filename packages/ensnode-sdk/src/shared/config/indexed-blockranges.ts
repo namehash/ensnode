@@ -1,5 +1,4 @@
 import type { ChainId } from "enssdk";
-import { zeroAddress } from "viem";
 
 import {
   type ContractConfig,
@@ -10,6 +9,7 @@ import {
 
 import type { PluginName } from "../../ensindexer/config/types";
 import {
+  type BlockNumberRange,
   type BlockNumberRangeWithStartBlock,
   buildBlockNumberRange,
   mergeBlockNumberRanges,
@@ -23,6 +23,7 @@ import {
  */
 export function buildIndexedBlockranges(
   namespace: ENSNamespaceId,
+  globalBlockrangeEndBlock: BlockNumberRange["endBlock"],
   pluginsDatasourceNames: Map<PluginName, DatasourceName[]>,
 ): Map<ChainId, BlockNumberRangeWithStartBlock> {
   const indexedBlockranges = new Map<ChainId, BlockNumberRangeWithStartBlock>();
@@ -38,17 +39,21 @@ export function buildIndexedBlockranges(
       const datasourceContracts = Object.values<ContractConfig>(datasource.contracts);
 
       for (const datasourceContract of datasourceContracts) {
-        // Skip placeholder contracts that exist only to satisfy the typesystem
-        // (e.g. cross-namespace registrar entries set to the zero address). They
-        // are not actually indexed by Ponder, so including their startBlock=0
-        // would incorrectly drag the chain's indexed blockrange lower bound to 0.
-        if (datasourceContract.address === zeroAddress) continue;
-
         const currentChainIndexedBlockrange = indexedBlockranges.get(datasourceChainId);
+
+        if (
+          typeof globalBlockrangeEndBlock === "number" &&
+          datasourceContract.startBlock > globalBlockrangeEndBlock
+        ) {
+          // If the contract's start block is greater than the global end block,
+          // then this contract is not indexed at all, so we can skip it from
+          // consideration in the indexed blockrange.
+          continue;
+        }
 
         const contractIndexedBlockrange = buildBlockNumberRange(
           datasourceContract.startBlock,
-          datasourceContract.endBlock,
+          datasourceContract.endBlock ?? globalBlockrangeEndBlock,
         );
 
         const indexedBlockrange = currentChainIndexedBlockrange

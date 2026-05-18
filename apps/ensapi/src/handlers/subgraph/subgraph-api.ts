@@ -8,7 +8,10 @@ import { createDocumentationMiddleware } from "ponder-enrich-gql-docs-middleware
 // Once the lazy proxy implemented for `ensIndexerSchema` export is improved
 // to support Drizzle ORM in `ponder-subgraph` package.
 import * as ensIndexerSchema from "@ensnode/ensdb-sdk/ensindexer-abstract";
-import { hasSubgraphApiConfigSupport } from "@ensnode/ensnode-sdk";
+import {
+  hasSubgraphApiConfigSupport,
+  hasSubgraphApiIndexingStatusSupport,
+} from "@ensnode/ensnode-sdk";
 import { subgraphGraphQLMiddleware } from "@ensnode/ponder-subgraph";
 
 import { createApp } from "@/lib/hono-factory";
@@ -26,20 +29,31 @@ const MAX_REALTIME_DISTANCE_TO_RESOLVE: Duration = 10 * 60; // 10 minutes in sec
 // generate a subgraph-specific subset of the schema
 const subgraphSchema = filterSchemaByPrefix("subgraph_", ensIndexerSchema);
 
-const app = createApp();
+const app = createApp({ middlewares: [indexingStatusMiddleware] });
 
-// 503 if subgraph plugin not available
 app.use(async (c, next) => {
-  const prerequisite = hasSubgraphApiConfigSupport(config.ensIndexerPublicConfig);
-  if (!prerequisite.supported) {
-    return c.text(`Service Unavailable: ${prerequisite.reason}`, 503);
+  const configPrerequisite = hasSubgraphApiConfigSupport(config.ensIndexerPublicConfig);
+  // 503 if Subgraph API is not available due to config prerequisites not met
+  if (!configPrerequisite.supported) {
+    return c.text(`Service Unavailable: ${configPrerequisite.reason}`, 503);
+  }
+
+  // 503 if indexing status snapshot is not available yet
+  if (c.var.indexingStatus instanceof Error) {
+    return c.text(`Service Unavailable: Indexing Status Snapshot is not available yet`, 503);
+  }
+
+  // 503 if Subgraph API is not available due to indexing status prerequisites not met
+  const indexingStatusPrerequisite = hasSubgraphApiIndexingStatusSupport(
+    c.var.indexingStatus.snapshot.omnichainSnapshot.omnichainStatus,
+  );
+
+  if (!indexingStatusPrerequisite.supported) {
+    return c.text(`Service Unavailable: ${indexingStatusPrerequisite.reason}`, 503);
   }
 
   await next();
 });
-
-// inject c.var.indexingStatus
-app.use(indexingStatusMiddleware);
 
 // inject c.var.isRealtime derived from MAX_REALTIME_DISTANCE_TO_RESOLVE
 app.use(makeIsRealtimeMiddleware("subgraph-api", MAX_REALTIME_DISTANCE_TO_RESOLVE));

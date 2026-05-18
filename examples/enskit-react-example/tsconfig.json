@@ -12,12 +12,10 @@
       // here we enable the gql.tada typescript plugin for
       {
         "name": "gql.tada/ts-plugin",
-
-        // because this example is in the ENSNode monorepo, it imports from src
-        "schema": "node_modules/enssdk/src/omnigraph/generated/schema.graphql",
-        // but in a normal app you'd import it from the package like so:
-        // "schema": "node_modules/enssdk/omnigraph/schema.graphql",
-
+        // NOTE: this example is in the ENSNode monorepo, so we imports it from parent directory.
+        // In a ordinary app you'd import it from the package like so:
+        // "schema": "node_modules/enssdk/src/omnigraph/generated/schema.graphql",
+        "schema": "../../packages/enssdk/src/omnigraph/generated/schema.graphql",
         "tadaOutputLocation": "./src/generated/graphql-env.d.ts"
       }
     ]

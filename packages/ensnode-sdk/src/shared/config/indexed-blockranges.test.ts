@@ -1,5 +1,4 @@
 import type { ChainId } from "enssdk";
-import { zeroAddress } from "viem";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import * as datasources from "@ensnode/datasources";
@@ -69,7 +68,11 @@ describe("buildIndexedBlockranges()", () => {
     ]);
 
     // Act
-    const result = buildIndexedBlockranges(ENSNamespaceIds.Mainnet, pluginsRequiredDatasourceNames);
+    const result = buildIndexedBlockranges(
+      ENSNamespaceIds.Mainnet,
+      undefined,
+      pluginsRequiredDatasourceNames,
+    );
 
     const expectedEntries = new Map<ChainId, BlockNumberRangeWithStartBlock>([
       [1, buildBlockNumberRange(80, undefined)],
@@ -105,7 +108,11 @@ describe("buildIndexedBlockranges()", () => {
     ]);
 
     // Act
-    const result = buildIndexedBlockranges(ENSNamespaceIds.Mainnet, pluginsRequiredDatasourceNames);
+    const result = buildIndexedBlockranges(
+      ENSNamespaceIds.Mainnet,
+      undefined,
+      pluginsRequiredDatasourceNames,
+    );
 
     // Assert
 
@@ -138,7 +145,11 @@ describe("buildIndexedBlockranges()", () => {
     ]);
 
     // Act
-    const result = buildIndexedBlockranges(ENSNamespaceIds.Mainnet, pluginsRequiredDatasourceNames);
+    const result = buildIndexedBlockranges(
+      ENSNamespaceIds.Mainnet,
+      undefined,
+      pluginsRequiredDatasourceNames,
+    );
 
     // Assert
     expect(result).toStrictEqual(new Map([[8453, buildBlockNumberRange(17571480, undefined)]]));
@@ -151,23 +162,31 @@ describe("buildIndexedBlockranges()", () => {
     const pluginsDatasourceNames = new Map([[PluginName.Subgraph, [DatasourceNames.Seaport]]]);
 
     // Act
-    const result = buildIndexedBlockranges(ENSNamespaceIds.Mainnet, pluginsDatasourceNames);
+    const result = buildIndexedBlockranges(
+      ENSNamespaceIds.Mainnet,
+      undefined,
+      pluginsDatasourceNames,
+    );
 
     // Assert
     expect(result).toStrictEqual(new Map());
   });
 
-  it("skips zero-address placeholder contracts", () => {
+  it("applies global end block to contracts without end block and skips contracts starting after global end block", () => {
     // Arrange
-    // Mirrors the sepolia-v2 shape where some plugin-required contracts are
-    // present only to satisfy the typesystem and carry address: zeroAddress,
-    // startBlock: 0. The merged blockrange should be derived from the real
-    // contracts on the same chain only, not be dragged down to startBlock 0.
     const ensrootDatasourceConfig: unknown = {
       chain: { id: 1 },
       contracts: {
-        registry: { address: "0x0000000000000000000000000000000000000001", startBlock: 100 },
-        placeholder: { address: zeroAddress, startBlock: 0 },
+        registry: { startBlock: 100 }, // no endBlock, should use global end block (500)
+        resolver: { startBlock: 80, endBlock: 200 }, // has endBlock, should keep it
+        registrar: { startBlock: 600 }, // startBlock > global end block, should be skipped
+      },
+    };
+
+    const basenamesDatasourceConfig: unknown = {
+      chain: { id: 8453 },
+      contracts: {
+        registry: { startBlock: 5 }, // no endBlock, should use global end block (500)
       },
     };
 
@@ -175,6 +194,7 @@ describe("buildIndexedBlockranges()", () => {
       Record<DatasourceName, ReturnType<typeof datasources.maybeGetDatasource>>
     > = {
       [DatasourceNames.ENSRoot]: datasourceMock(ensrootDatasourceConfig),
+      [DatasourceNames.Basenames]: datasourceMock(basenamesDatasourceConfig),
     };
 
     maybeGetDatasourceMock.mockImplementation(
@@ -183,12 +203,26 @@ describe("buildIndexedBlockranges()", () => {
 
     const pluginsRequiredDatasourceNames = new Map([
       [PluginName.Subgraph, [DatasourceNames.ENSRoot]],
+      [PluginName.Basenames, [DatasourceNames.Basenames]],
     ]);
 
+    const globalBlockrangeEndBlock = 500;
+
     // Act
-    const result = buildIndexedBlockranges(ENSNamespaceIds.Mainnet, pluginsRequiredDatasourceNames);
+    const result = buildIndexedBlockranges(
+      ENSNamespaceIds.Mainnet,
+      globalBlockrangeEndBlock,
+      pluginsRequiredDatasourceNames,
+    );
 
     // Assert
-    expect(result).toStrictEqual(new Map([[1, buildBlockNumberRange(100, undefined)]]));
+    const expectedEntries = new Map<ChainId, BlockNumberRangeWithStartBlock>([
+      // Chain 1: min startBlock = 80, max endBlock = max(500 from registry, 200 from resolver) = 500
+      [1, buildBlockNumberRange(80, 500)],
+      // Chain 8453: startBlock = 5, endBlock = 500 (from global)
+      [8453, buildBlockNumberRange(5, 500)],
+    ]);
+
+    expect(result).toStrictEqual(expectedEntries);
   });
 });

@@ -298,7 +298,6 @@ jobs:
           \`\`\`bash
           # Install latest preview for this branch
           pnpm add @ensnode/datasources@${{ needs.validate-and-prepare.outputs.dist-tag }}
-          pnpm add @ensnode/ensnode-react@${{ needs.validate-and-prepare.outputs.dist-tag }}
           pnpm add @ensnode/ensrainbow-sdk@${{ needs.validate-and-prepare.outputs.dist-tag }}
           pnpm add @ensnode/ensdb-sdk@${{ needs.validate-and-prepare.outputs.dist-tag }}
           pnpm add @ensnode/ensnode-sdk@${{ needs.validate-and-prepare.outputs.dist-tag }}

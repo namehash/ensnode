@@ -19,11 +19,25 @@ export default defineConfig({
     plugins: [tailwindcss()],
   },
   redirects: {
-    "/ensnode": "/docs",
-    "/ensnode/deploying/railway": "/docs/deploying/railway",
-    "/ensnode/concepts/what-is-ensnode": "/docs/concepts/what-is-ensnode",
-    "/ensnode/running/ens-test-env": "/docs/running/ens-test-env",
-    "/ensnode/concepts/what-is-the-ens-subgraph": "/docs/concepts/what-is-the-ens-subgraph",
+    "/docs": "/docs/integrate",
+    "/ensnode": "/docs/integrate",
+    "/ensnode/deploying/railway": "/docs/services/ensrainbow/deploying/railway",
+    "/ensnode/concepts/what-is-ensnode": "/docs/reference/what-is-ensnode",
+    "/ensnode/concepts/what-is-the-ens-subgraph":
+      "/docs/reference/subgraph-legacy/what-is-the-ens-subgraph",
+    "/docs/reference/what-is-the-ens-subgraph":
+      "/docs/reference/subgraph-legacy/what-is-the-ens-subgraph",
+    "/docs/reference/querying-best-practices":
+      "/docs/reference/subgraph-legacy/querying-best-practices",
+    "/docs/reference/subgraph-compatibility-tooling":
+      "/docs/reference/subgraph-legacy/subgraph-compatibility-tooling",
+    "/ensadmin": "/docs/services/ensadmin",
+    "/ensapi": "/docs/services/ensapi",
+    "/ensdb": "/docs/services/ensdb",
+    "/ensindexer": "/docs/services/ensindexer",
+    "/ensrainbow": "/docs/services/ensrainbow",
+    "/ensrainbow/concepts/label-sets-and-versioning":
+      "/docs/services/ensrainbow/concepts/label-sets-and-versioning",
   },
   env: {
     schema: {

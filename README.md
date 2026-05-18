@@ -73,7 +73,7 @@ An indexer aggregates and reorganizes the representation of ENS's state to make 
 query Domains($adress: String!) {
   domains(where: { owner: $address }) {
     id
-    name
+    canonical { name }
     ...
   }
 }
@@ -170,10 +170,6 @@ Software Development Kit for interacting with data in ENSDb.
 ### [`packages/ensnode-sdk`](packages/ensnode-sdk)
 
 Software Development Kit for interacting with ENSNode services and data. Includes common utilities used across ENSNode applications.
-
-### [`packages/ensnode-react`](packages/ensnode-react)
-
-React hooks and providers for the ENSNode API.
 
 ### [`packages/datasources`](packages/datasources)
 

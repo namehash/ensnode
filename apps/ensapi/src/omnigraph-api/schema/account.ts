@@ -11,6 +11,7 @@ import {
   filterByCanonical,
   filterByName,
   filterByOwner,
+  filterByVersion,
   withOrderingMetadata,
 } from "@/omnigraph-api/lib/find-domains/layers";
 import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-resolver";
@@ -18,11 +19,8 @@ import { getModelId } from "@/omnigraph-api/lib/get-model-id";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
 import { AccountIdInput } from "@/omnigraph-api/schema/account-id";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
-import {
-  AccountDomainsWhereInput,
-  DomainInterfaceRef,
-  DomainsOrderInput,
-} from "@/omnigraph-api/schema/domain";
+import { DomainInterfaceRef } from "@/omnigraph-api/schema/domain";
+import { AccountDomainsWhereInput, DomainsOrderInput } from "@/omnigraph-api/schema/domain-inputs";
 import { AccountEventsWhereInput, EventRef } from "@/omnigraph-api/schema/event";
 import { PermissionsUserRef } from "@/omnigraph-api/schema/permissions";
 import { RegistryPermissionsUserRef } from "@/omnigraph-api/schema/registry-permissions-user";
@@ -79,10 +77,11 @@ AccountRef.implement({
       resolve: (parent, { where, order, ...connectionArgs }, context) => {
         const base = domainsBase();
         const owned = filterByOwner(base, parent.id);
-        const named = filterByName(owned, where?.name);
+        const { named, defaultOrder } = filterByName(owned, where?.name ?? null);
         const canonical = where?.canonical === true ? filterByCanonical(named) : named;
-        const domains = withOrderingMetadata(canonical);
-        return resolveFindDomains(context, { domains, order, ...connectionArgs });
+        const versioned = where?.version ? filterByVersion(canonical, where.version) : canonical;
+        const domains = withOrderingMetadata(versioned);
+        return resolveFindDomains(context, { domains, order, defaultOrder, ...connectionArgs });
       },
     }),
 

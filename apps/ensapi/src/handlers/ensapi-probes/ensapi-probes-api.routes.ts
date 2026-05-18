@@ -15,7 +15,7 @@ export const healthCheckRoute = createRoute({
   method: "get",
   path: "/health",
   operationId: "getHealthCheck",
-  tags: ["Probes"],
+  tags: ["Meta"],
   summary: "Health Check Endpoint",
   description: "Checks the health status of the ENSApi service",
   responses: {
@@ -42,7 +42,7 @@ export const readinessCheckRoute = createRoute({
   method: "get",
   path: "/ready",
   operationId: "getReadinessCheck",
-  tags: ["Probes"],
+  tags: ["Meta"],
   summary: "Readiness Check Endpoint",
   description: "Checks the readiness status of the ENSApi service",
   responses: {

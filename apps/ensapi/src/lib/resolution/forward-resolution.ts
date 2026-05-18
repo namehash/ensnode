@@ -11,15 +11,14 @@ import {
   namehashInterpretedName,
 } from "enssdk";
 
-import { DatasourceNames } from "@ensnode/datasources";
+import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
 import {
   type ForwardResolutionArgs,
   ForwardResolutionProtocolStep,
   type ForwardResolutionResult,
   getDatasourceContract,
-  getENSv1Registry,
+  getENSv1RootRegistry,
   maybeGetDatasourceContract,
-  PluginName,
   type ResolverRecordsSelection,
   TraceableENSProtocol,
   toJson,
@@ -99,7 +98,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
   // initially be ENS Root Registry: see `_resolveForward` for additional context.
   return _resolveForward(interpretedName, selection, {
     ...options,
-    registry: getENSv1Registry(config.namespace),
+    registry: getENSv1RootRegistry(config.namespace),
   });
 }
 
@@ -175,7 +174,10 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           /// 0. Temporary ENSv2 Bailout
           ////////////////////////////
           // TODO: re-enable protocol acceleration for ENSv2
-          if (config.ensIndexerPublicConfig.plugins.includes(PluginName.ENSv2)) {
+          // NOTE: gate on the namespace containing an ENSv2Root datasource rather than the ENSv2
+          // plugin being configured — a namespace may be ENSv1-only even when the ENSv2 plugin is
+          // defined, and forward resolution must follow the ENSv1 path in that case.
+          if (maybeGetDatasource(config.namespace, DatasourceNames.ENSv2Root)) {
             const UniversalResolverAddress =
               getUniversalResolverV2()?.address ?? getUniversalResolverV1().address;
             operations = await withEnsProtocolStep(
@@ -239,14 +241,17 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           /////////////////////////////////////
           if (accelerate && canAccelerate) {
             const resolver = { chainId, address: activeResolver };
-            const bridgesTo = isBridgedResolver(config.namespace, resolver);
-            if (bridgesTo) {
+            const bridged = isBridgedResolver(config.namespace, resolver);
+            if (bridged) {
               return withEnsProtocolStep(
                 TraceableENSProtocol.ForwardResolution,
                 ForwardResolutionProtocolStep.AccelerateKnownOffchainLookupResolver,
                 {},
                 () =>
-                  _resolveForward(name, selection, { ...options, registry: bridgesTo.registry }),
+                  _resolveForward(name, selection, {
+                    ...options,
+                    registry: bridged.targetRegistry,
+                  }),
               );
             }
 

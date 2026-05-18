@@ -2,7 +2,7 @@ import type { DomainId } from "enssdk";
 
 import { cursors } from "@/omnigraph-api/lib/cursors";
 import type { DomainOrderValue } from "@/omnigraph-api/lib/find-domains/types";
-import type { DomainsOrderBy } from "@/omnigraph-api/schema/domain";
+import type { DomainsOrderBy } from "@/omnigraph-api/schema/domain-inputs";
 import type { OrderDirection } from "@/omnigraph-api/schema/order-direction";
 
 /**
@@ -19,7 +19,8 @@ export interface DomainCursor {
   id: DomainId;
 
   /**
-   * The criteria by which the set is ordered. One of NAME, REGISTRATION_TIMESTAMP, or REGISTRATION_EXPIRY.
+   * The criteria by which the set is ordered. One of NAME, DEPTH, REGISTRATION_TIMESTAMP, or
+   * REGISTRATION_EXPIRY.
    */
   by: typeof DomainsOrderBy.$inferType;
 

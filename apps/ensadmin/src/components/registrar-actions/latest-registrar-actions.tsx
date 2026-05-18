@@ -1,4 +1,5 @@
-import { useRegistrarActions } from "@ensnode/ensnode-react";
+import { useRegistrarActions } from "@namehash/namehash-ui";
+
 import { RegistrarActionsOrders, RegistrarActionsResponseCodes } from "@ensnode/ensnode-sdk";
 
 import { ErrorInfo } from "@/components/error-info";

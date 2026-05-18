@@ -31,7 +31,7 @@ export default function AboutRainbowSections() {
 const linkStyles = legacyLinkVariants({
   variant: "underline",
   size: "large",
-  className: "!text-black",
+  className: "text-black!",
 });
 
 const rainbowSections: AboutRainbowProps[] = [

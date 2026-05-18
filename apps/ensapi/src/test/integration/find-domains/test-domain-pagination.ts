@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from "vitest";
 
-import type { DomainsOrderByValue, DomainsOrderInput } from "@/omnigraph-api/schema/domain";
+import type { DomainsOrderByValue, DomainsOrderInput } from "@/omnigraph-api/schema/domain-inputs";
 import type { OrderDirectionValue } from "@/omnigraph-api/schema/order-direction";
 import type { PaginatedDomainResult } from "@/test/integration/find-domains/domain-pagination-queries";
 import {
@@ -27,16 +27,23 @@ type FetchPage = (
 const ORDER_PERMUTATIONS: Array<{ by: DomainsOrderByValue; dir: OrderDirectionValue }> = [
   { by: "NAME", dir: "ASC" },
   { by: "NAME", dir: "DESC" },
+  { by: "DEPTH", dir: "ASC" },
+  { by: "DEPTH", dir: "DESC" },
   { by: "REGISTRATION_TIMESTAMP", dir: "ASC" },
   { by: "REGISTRATION_TIMESTAMP", dir: "DESC" },
   { by: "REGISTRATION_EXPIRY", dir: "ASC" },
   { by: "REGISTRATION_EXPIRY", dir: "DESC" },
 ];
 
-function getSortValue(domain: PaginatedDomainResult, by: DomainsOrderByValue): string | null {
+function getSortValue(
+  domain: PaginatedDomainResult,
+  by: DomainsOrderByValue,
+): string | number | null {
   switch (by) {
     case "NAME":
-      return domain.label.interpreted;
+      return domain.canonical?.name ?? null;
+    case "DEPTH":
+      return domain.canonical?.depth ?? null;
     case "REGISTRATION_TIMESTAMP":
       return domain.registration?.start ?? null;
     case "REGISTRATION_EXPIRY":
@@ -70,15 +77,31 @@ function assertOrdering(
     }
 
     if (by === "NAME") {
+      const av = a as string;
+      const bv = b as string;
       if (dir === "ASC") {
-        expect(a <= b, `expected "${a}" <= "${b}" at indices ${i},${i + 1} (NAME ASC)`).toBe(true);
+        expect(av <= bv, `expected "${av}" <= "${bv}" at indices ${i},${i + 1} (NAME ASC)`).toBe(
+          true,
+        );
       } else {
-        expect(a >= b, `expected "${a}" >= "${b}" at indices ${i},${i + 1} (NAME DESC)`).toBe(true);
+        expect(av >= bv, `expected "${av}" >= "${bv}" at indices ${i},${i + 1} (NAME DESC)`).toBe(
+          true,
+        );
+      }
+    } else if (by === "DEPTH") {
+      const av = a as number;
+      const bv = b as number;
+      if (dir === "ASC") {
+        expect(av <= bv, `expected ${av} <= ${bv} at indices ${i},${i + 1} (DEPTH ASC)`).toBe(true);
+      } else {
+        expect(av >= bv, `expected ${av} >= ${bv} at indices ${i},${i + 1} (DEPTH DESC)`).toBe(
+          true,
+        );
       }
     } else {
       // bigint string comparison
-      const av = BigInt(a);
-      const bv = BigInt(b);
+      const av = BigInt(a as string);
+      const bv = BigInt(b as string);
       if (dir === "ASC") {
         expect(av <= bv, `expected ${av} <= ${bv} at indices ${i},${i + 1} (${by} ASC)`).toBe(true);
       } else {

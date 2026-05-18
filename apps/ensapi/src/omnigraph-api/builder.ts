@@ -3,6 +3,7 @@ import SchemaBuilder, { type MaybePromise } from "@pothos/core";
 import DataloaderPlugin from "@pothos/plugin-dataloader";
 import RelayPlugin from "@pothos/plugin-relay";
 import TracingPlugin, { isRootField } from "@pothos/plugin-tracing";
+import ZodPlugin from "@pothos/plugin-zod";
 import { AttributeNames, createOpenTelemetryWrapper } from "@pothos/tracing-opentelemetry";
 import type {
   ChainId,
@@ -90,7 +91,7 @@ export const builder = new SchemaBuilder<{
   DefaultEdgesNullability: false;
   DefaultNodeNullability: false;
 }>({
-  plugins: [TracingPlugin, DataloaderPlugin, RelayPlugin],
+  plugins: [TracingPlugin, DataloaderPlugin, RelayPlugin, ZodPlugin],
   tracing: {
     default: (config) => {
       // NOTE: if you need all the tracing possible in order to debug something, you can return true

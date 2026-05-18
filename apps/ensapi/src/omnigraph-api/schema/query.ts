@@ -15,18 +15,19 @@ import {
   domainsBase,
   filterByCanonical,
   filterByName,
+  filterByVersion,
   withOrderingMetadata,
 } from "@/omnigraph-api/lib/find-domains/layers";
 import { getDomainIdByInterpretedName } from "@/omnigraph-api/lib/get-domain-by-interpreted-name";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
 import { AccountByInput, AccountRef } from "@/omnigraph-api/schema/account";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
+import { DomainInterfaceRef } from "@/omnigraph-api/schema/domain";
 import {
   DomainIdInput,
-  DomainInterfaceRef,
   DomainsOrderInput,
   DomainsWhereInput,
-} from "@/omnigraph-api/schema/domain";
+} from "@/omnigraph-api/schema/domain-inputs";
 import {
   LABELS_BY_LABELHASH_MAX,
   LabelRef,
@@ -117,7 +118,7 @@ builder.queryType({
     // Find Domains
     ////////////////
     domains: t.connection({
-      description: "Find Domains by Name.",
+      description: "Find Canonical Domains by Name.",
       type: DomainInterfaceRef,
       args: {
         where: t.arg({ type: DomainsWhereInput, required: true }),
@@ -125,11 +126,12 @@ builder.queryType({
       },
       resolve: (_, { where, order, ...connectionArgs }, context) => {
         const base = domainsBase();
-        const named = filterByName(base, where.name);
-        const canonical = where.canonical === true ? filterByCanonical(named) : named;
-        const domains = withOrderingMetadata(canonical);
+        const { named, defaultOrder } = filterByName(base, where.name);
+        const canonical = filterByCanonical(named);
+        const versioned = where.version ? filterByVersion(canonical, where.version) : canonical;
+        const domains = withOrderingMetadata(versioned);
 
-        return resolveFindDomains(context, { domains, order, ...connectionArgs });
+        return resolveFindDomains(context, { domains, order, defaultOrder, ...connectionArgs });
       },
     }),
 

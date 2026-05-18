@@ -1,8 +1,11 @@
-export type { BaseDomainSet } from "./base-domain-set";
+export type { BaseDomainSet, DomainType } from "./base-domain-set";
 export { domainsBase, selectBase } from "./base-domain-set";
 export { filterByCanonical } from "./filter-by-canonical";
-export { filterByName } from "./filter-by-name";
+export { type DomainsNameFilterValue, filterByName } from "./filter-by-name";
+export { filterByNameIn } from "./filter-by-name-in";
+export { filterByNameStartsWith } from "./filter-by-name-starts-with";
 export { filterByOwner } from "./filter-by-owner";
 export { filterByParent } from "./filter-by-parent";
 export { filterByRegistry } from "./filter-by-registry";
+export { filterByVersion } from "./filter-by-version";
 export { withOrderingMetadata } from "./with-ordering-metadata";

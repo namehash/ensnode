@@ -1,16 +1,34 @@
 import config from "@/config";
 
-import { hasOmnigraphApiConfigSupport } from "@ensnode/ensnode-sdk";
+import {
+  hasOmnigraphApiConfigSupport,
+  hasOmnigraphApiIndexingStatusSupport,
+} from "@ensnode/ensnode-sdk";
 
 import { createApp } from "@/lib/hono-factory";
+import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 
-const app = createApp();
+const app = createApp({ middlewares: [indexingStatusMiddleware] });
 
-// 503 if prerequisites not met
 app.use(async (c, next) => {
-  const prerequisite = hasOmnigraphApiConfigSupport(config.ensIndexerPublicConfig);
-  if (!prerequisite.supported) {
-    return c.text(`Service Unavailable: ${prerequisite.reason}`, 503);
+  const configPrerequisite = hasOmnigraphApiConfigSupport(config.ensIndexerPublicConfig);
+  // 503 if Omnigraph API is not available due to config prerequisites not met
+  if (!configPrerequisite.supported) {
+    return c.text(`Service Unavailable: ${configPrerequisite.reason}`, 503);
+  }
+
+  // 503 if indexing status snapshot is not available yet
+  if (c.var.indexingStatus instanceof Error) {
+    return c.text(`Service Unavailable: Indexing Status Snapshot is not available yet`, 503);
+  }
+
+  // 503 if omnigraph API not available due to indexing status prerequisites not met
+  const indexingStatusPrerequisite = hasOmnigraphApiIndexingStatusSupport(
+    c.var.indexingStatus.snapshot.omnichainSnapshot.omnichainStatus,
+  );
+
+  if (!indexingStatusPrerequisite.supported) {
+    return c.text(`Service Unavailable: ${indexingStatusPrerequisite.reason}`, 503);
   }
 
   await next();

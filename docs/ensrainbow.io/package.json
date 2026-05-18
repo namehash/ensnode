@@ -1,7 +1,7 @@
 {
   "name": "@docs/ensrainbow",
   "type": "module",
-  "version": "1.10.1",
+  "version": "1.13.1",
   "license": "MIT",
   "packageManager": "pnpm@10.33.0",
   "private": true,
@@ -19,7 +19,7 @@
     "@heroicons/react": "^2.2.0",
     "@ensnode/ensrainbow-sdk": "workspace:*",
     "@namehash/namehash-ui": "workspace:*",
-    "@tailwindcss/vite": "^4.1.15",
+    "@tailwindcss/vite": "catalog:",
     "astro": "catalog:",
     "astro-font": "catalog:",
     "astro-seo": "catalog:",
@@ -27,7 +27,7 @@
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-wrap-balancer": "^1.1.1",
-    "tailwindcss": "4.2.2"
+    "tailwindcss": "catalog:"
   },
   "devDependencies": {
     "@types/react": "catalog:",

@@ -1,0 +1,88 @@
+---
+title: ENSDb (PostgreSQL)
+description: Direct database access for self-hosters needing custom queries, analytics, or building custom services beyond what existing APIs expose.
+---
+
+import { LinkCard } from "@astrojs/starlight/components";
+import EnsDbSelfHostingNote from "../../../../../components/molecules/EnsDbSelfHostingNote.astro";
+import EnsDbUseCases from "../../../../../components/molecules/EnsDbUseCases.astro";
+
+For special use cases that go beyond what the ENS Omnigraph exposes — you can query the live onchain state of both **ENSv1 and ENSv2** directly via `SQL`.
+
+**ENSDb** is a bi-directional integration standard for any EnsDbWriter and EnsDbReader implementations to coordinate around the live unified onchain state of ENSv1 **and ENSv2** in a carefully-crafted standardized data model within a PostgreSQL database. Because ENSDb builds on Postgres, you can use *any* language with a Postgres driver — **TypeScript**, **Python**, **Rust**, **Go**, and more.
+
+
+<EnsDbSelfHostingNote />
+
+
+### Inspirations for what you can build with ENSDb
+
+<EnsDbUseCases />
+
+### Example: fetch a Domain by canonical name
+
+Canonical fields (`canonical_name`, `canonical_path`, `canonical_node`, `canonical_depth`) are
+populated on every Domain reachable from the canonical root, across both ENSv1 and ENSv2 — query
+them uniformly without branching by `type`.
+
+```typescript
+import { EnsDbReader } from "@ensnode/ensdb-sdk";
+import { eq } from "drizzle-orm";
+
+const ensDbReader = new EnsDbReader(ensDbConnectionString, ensIndexerSchemaName);
+const { ensDb, ensIndexerSchema } = ensDbReader;
+
+const [vitalik] = await ensDb
+  .select()
+  .from(ensIndexerSchema.domain)
+  .where(eq(ensIndexerSchema.domain.canonicalName, "vitalik.eth"));
+```
+
+```sql
+SELECT * FROM ensindexer_0.domains
+WHERE canonical_name = 'vitalik.eth';
+```
+
+### Example: count an address's Domains by type (ENSv1 vs ENSv2)
+
+```typescript
+import { count, eq } from "drizzle-orm";
+
+const counts = await ensDb
+  .select({ type: ensIndexerSchema.domain.type, count: count() })
+  .from(ensIndexerSchema.domain)
+  .where(eq(ensIndexerSchema.domain.ownerId, "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"))
+  .groupBy(ensIndexerSchema.domain.type);
+```
+
+```sql
+SELECT type, count(*) FROM ensindexer_0.domains
+WHERE owner_id = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045'
+GROUP BY type;
+```
+
+### Learn more
+
+<LinkCard
+  title="ENSDb overview"
+  description="Architecture, schemas, what you can build, and quick-start guides."
+  href="/docs/services/ensdb"
+/>
+
+<LinkCard
+  title="ENSDb SDK (TypeScript)"
+  description="Type-safe database access and utilities for working with ENSDb."
+  href="/docs/services/ensdb/usage/sdk"
+/>
+
+<LinkCard
+  title="ENSDb SQL interface"
+  description="Connect with any PostgreSQL client and run queries directly."
+  href="/docs/services/ensdb/usage/sql"
+/>
+
+<LinkCard
+  title="Self-host ENSNode"
+  description="Run your own ENSNode instance to get full ENSDb access."
+  href="/docs/self-host"
+/>

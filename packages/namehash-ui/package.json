@@ -1,6 +1,6 @@
 {
   "name": "@namehash/namehash-ui",
-  "version": "1.10.1",
+  "version": "1.13.1",
   "type": "module",
   "description": "Opinionated UI components for use in apps published by NameHash Labs",
   "license": "MIT",
@@ -56,7 +56,7 @@
     "test": "vitest"
   },
   "peerDependencies": {
-    "@ensnode/ensnode-react": "workspace:*",
+    "@tanstack/react-query": "^5.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "sonner": "^2.0.3"
@@ -64,6 +64,7 @@
   "devDependencies": {
     "@ensnode/shared-configs": "workspace:*",
     "@tailwindcss/postcss": "^4.1.18",
+    "@tanstack/react-query": "^5.62.14",
     "@testing-library/react": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",

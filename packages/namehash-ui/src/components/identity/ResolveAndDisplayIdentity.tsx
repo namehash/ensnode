@@ -1,6 +1,5 @@
 import type * as React from "react";
 
-import { useResolvedIdentity } from "@ensnode/ensnode-react";
 import {
   type ENSNamespaceId,
   type Identity,
@@ -10,6 +9,7 @@ import {
   type UnresolvedIdentity,
 } from "@ensnode/ensnode-sdk";
 
+import { useResolvedIdentity } from "../../ensnode";
 import { useIsMobile } from "../../hooks/useIsMobile";
 import { cn } from "../../utils/cn";
 import { ChainIcon } from "../chains/ChainIcon";

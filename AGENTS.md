@@ -11,7 +11,6 @@ ENSNode is a multichain ENS indexer monorepo. It indexes ENS names across multip
 - `apps/fallback-ensapi` — AWS Lambda fallback that proxies ENS Subgraph requests when ENSApi is unhealthy
 - `packages/ensdb-sdk` — SDK for interacting with data in ENSDb
 - `packages/ensnode-sdk` — SDK for interacting with ENSNode
-- `packages/ensnode-react` — React hooks and providers for ENSNode API
 - `packages/ensrainbow-sdk` — SDK for interacting with ENSRainbow
 - `packages/datasources` — Catalog of chain datasources (contracts, start blocks, event filters)
 - `packages/ponder-subgraph` — Hono middleware for Subgraph-compatible GraphQL
@@ -81,13 +80,14 @@ Fail fast and loudly on invalid inputs.
 - Schema changes never require a migration step. Ponder only runs fully-compatible indexes against existing schemas; otherwise the index is dropped and rebuilt from scratch. Do not propose, plan, or write migration code for the ensindexer drizzle schema.
 - Schema or handler changes always require a re-index. This is implicit — never qualify plans with "requires reindex" or similar.
 - Access entities by primary key only. Ponder's cache layer keys on PK; filters or complex selects force a flush to Postgres and are extremely unperformant in the hot path. If you need a non-PK lookup at index time, design the schema so the lookup key is the primary key.
+- TOCTOU is never a concern inside Ponder event handlers. Ponder serializes events per chain and runs each handler in a transaction, so a read-modify-write against the same row from two handlers cannot interleave. Bot reviewers will sometimes flag this — dismiss those comments. (Note: TOCTOU IS a concern in ENSApi when reading `ensIndexerSchema` — both parallel and serial reads can see different snapshots of the indexer's writes.)
 
 ## Workflow
 
 - Add a changeset when your PR includes a logical change that should bump versions or be communicated in release notes: https://ensnode.io/docs/contributing/prs#changesets
 - Before declaring work complete, run validation in the affected project(s):
-  1. `pnpm -F <affected-project> typecheck`
-  2. `pnpm lint`
-  3. `pnpm test --project <affected-project> [--project <other-affected-project>]`
-  4. If OpenAPI Specs were affected, run `pnpm generate:openapi`
-  5. If the Omnigraph GraphQL Schema was affected, run `pnpm generate:gqlschema`
+  1. If OpenAPI Specs were affected, run `pnpm generate:openapi`
+  2. If the Omnigraph GraphQL Schema was affected, run `pnpm generate:gqlschema`
+  3. `pnpm -F <affected-project> typecheck`
+  4. `pnpm lint`
+  5. `pnpm test --project <affected-project> [--project <other-affected-project>]`

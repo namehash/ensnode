@@ -4,6 +4,7 @@ import {
   asLiteralLabel,
   type Label,
   type LabelHash,
+  type LiteralLabel,
   labelhashLiteralLabel,
   makeENSv1DomainId,
   makeSubdomainNode,
@@ -20,11 +21,37 @@ import {
   ensIndexerSchema,
   type IndexingEngineContext,
 } from "@/lib/indexing-engines/ponder";
+import { logger } from "@/lib/logger";
 import { getManagedName } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 
 const pluginName = PluginName.ENSv2;
+
+/**
+ * Returns the input `label` as LiteralLabel iff it matches the provided `labelHash`.
+ *
+ * NOTE(labelhash-mismatch): If emitted, the label arg should match the emitted labelHash.
+ * If the label is not UTF-8, however, ABI decoding substitutes U+FFFD for non-UTF-8 bytes, and
+ * the original bytes can't be recovered post-decode. When that happens we treat the label as
+ * unknown so the registration still indexes correctly under an unknown label.
+ */
+const literalLabelIfMatchesLabelHash = (
+  label: Label | undefined,
+  labelHash: LabelHash,
+): LiteralLabel | undefined => {
+  if (label === undefined) return undefined;
+
+  const literalLabel = asLiteralLabel(label);
+  const matches = labelhashLiteralLabel(literalLabel) === labelHash;
+  if (matches) return literalLabel;
+
+  logger.warn({
+    msg: `RegistrarController label/labelHash mismatch (non-UTF-8 bytes?): label='${literalLabel}' labelHash='${labelHash}' — treating label as unknown.`,
+  });
+
+  return undefined;
+};
 
 export default function () {
   async function handleNameRegisteredByController({
@@ -41,14 +68,7 @@ export default function () {
     }>;
   }) {
     const { labelHash, baseCost: base, premium, referrer } = event.args;
-    const label = event.args.label ? asLiteralLabel(event.args.label) : undefined;
-
-    // Invariant: If emitted, label must align with labelHash
-    if (label !== undefined && labelHash !== labelhashLiteralLabel(label)) {
-      throw new Error(
-        `Invariant(RegistrarController:NameRegistered): Emitted label '${label}' does not labelhash to emitted labelHash '${labelHash}'.`,
-      );
-    }
+    const label = literalLabelIfMatchesLabelHash(event.args.label, labelHash);
 
     const controller = getThisAccountId(context, event);
     const { node: managedNode, registry } = getManagedName(controller);
@@ -63,7 +83,7 @@ export default function () {
       );
     }
 
-    // if the contract emitted a healed label, ensure that it is indexed
+    // if the contract emitted a (verified) healed label, ensure that it is indexed
     if (label !== undefined) {
       await ensureLabel(context, label);
     } else {
@@ -89,7 +109,7 @@ export default function () {
   }: {
     context: IndexingEngineContext;
     event: EventWithArgs<{
-      label?: string;
+      label?: Label;
       labelHash: LabelHash;
       baseCost?: bigint;
       premium?: bigint;
@@ -97,16 +117,9 @@ export default function () {
     }>;
   }) {
     const { labelHash, baseCost: base, premium, referrer } = event.args;
-    const label = event.args.label ? asLiteralLabel(event.args.label) : undefined;
+    const label = literalLabelIfMatchesLabelHash(event.args.label, labelHash);
 
-    // Invariant: If emitted, label must align with labelHash
-    if (label !== undefined && labelHash !== labelhashLiteralLabel(label)) {
-      throw new Error(
-        `Invariant(RegistrarController:NameRegistered): Emitted label '${label}' does not labelhash to emitted labelHash '${labelHash}'.`,
-      );
-    }
-
-    // if the contract emitted a healed label, ensure that it is indexed
+    // if the contract emitted a (verified) healed label, ensure that it is indexed
     if (label !== undefined) {
       await ensureLabel(context, label);
     } else {
@@ -252,9 +265,9 @@ export default function () {
         event: {
           ...event,
           args: {
-            // name is actually label
+            // `name` param is misnamed onchain — re-map to proper ENS terminology
             label: event.args.name,
-            // label is actually labelHash
+            // `label` param is misnamed onchain — re-map to proper ENS terminology
             labelHash: event.args.label,
             baseCost: event.args.cost,
           },
@@ -272,9 +285,9 @@ export default function () {
         event: {
           ...event,
           args: {
-            // name is actually label
+            // `name` param is misnamed onchain — re-map to proper ENS terminology
             label: event.args.name,
-            // label is actually labelHash
+            // `label` param is misnamed onchain — re-map to proper ENS terminology
             labelHash: event.args.label,
           },
         },

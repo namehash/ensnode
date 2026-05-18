@@ -1,0 +1,114 @@
+---
+title: Understanding ENSNode V1
+sidebar:
+  order: 2
+---
+
+import { LinkCard } from "@astrojs/starlight/components";
+
+:::note
+This document assumes general knowledge of the ENS protocol and the ENS Subgraph.
+:::
+
+### What is ENSNode
+
+ENSNode is the new multichain indexer for ENS and ENSv2. It is built on [Ponder](https://ponder.sh/) and provides enhanced capabilities over the ENS Subgraph, as well as being more efficient, flexible, and maintainable. ENSNode's enhanced capabilities include multichain and multiregistrar indexing while maintaining backwards compatibility with existing ENS Subgraph APIs.
+
+### ENSNode Version 1
+
+ENSNode version 1 (`V1`), discussed here, prioritizes equivalency with the [ENS Subgraph](/docs/reference/subgraph-legacy/what-is-the-ens-subgraph), which drove many architectural decisions.
+
+<LinkCard
+  title="ENSNode Roadmap"
+  description="Learn about ENSNode's future roadmap."
+  href="/docs/reference/roadmap"
+/>
+
+## Core Design Principles
+
+1. **Full Backwards Compatibility w/ ENS Subgraph**
+   - Full support for existing ENS Subgraph queries used by [`ensjs`](https://github.com/ensdomains/ensjs/) and [`ens-app-v3`](https://github.com/ensdomains/ens-app-v3)
+   - Drop-in replacement for applications using the ENS Subgraph
+   - Verified compatibility through extensive testing with [`ens-test-env`](https://github.com/namehash/ens-test-env/) and [ens-subgraph-transition-tools](https://github.com/namehash/ens-subgraph-transition-tools) (see [Subgraph Compatibility](/docs/reference/subgraph-legacy/what-is-the-ens-subgraph))
+2. **Multi-Registry Plugin Architecture**
+   - Support for indexing ENS data across multiple chains & subregistries (i.e. mainnet, Base, Linea)
+   - Plugins can be activated independently or in combination
+3. **Built on Ponder**
+   - Improved indexing speed (>10x faster than ENS Subgraph)
+   - Isolated indexing schemas (supporting branches, staging environments)
+   - Access your indexed data directly from Postgres
+4. **Self-hostable Decentralization Approach**
+   - Self-hostable infrastructure
+   - Bring-your-own Postgres
+   - Bring-your-own ENSRainbow
+
+## Execution Order
+
+ENSIndexer is a Ponder application, so its execution order is that of a Ponder application. First the `ponder.config.ts` is executed, and then `ponder.schema.ts` and finally all files in `src/` are executed in order to register indexing event handlers via `ponder.on`.
+
+We place all of our application code into the `src/` directory, so it's all eligible for hot-reloading, and event handler registration occurs in each plugin's `event-handlers.ts` file.
+
+## Plugins
+
+ENSIndexer implements the indexing logic for each plugin inside event handlers. Event handlers may optionally be shared across plugins. For example, see the shared event handler functions in `apps/ensindexer/src/handlers/*.ts` which are shared by multiple plugins such as the `subgraph`, `basenames`, and `lineanames` plugins.
+
+Each plugin requires two files:
+
+- `plugin.ts` defines the plugin's overall indexing configuration. See `apps/ensindexer/src/plugins/basenames/plugin.ts` and `apps/ensindexer/src/plugins/lineanames/plugin.ts` for examples.
+- `event-handlers.ts` registers the event handler functions with Ponder at runtime. See `apps/ensindexer/src/plugins/basenames/event-handlers.ts` and `apps/ensindexer/src/plugins/lineanames/event-handlers.ts` for examples.
+
+### Plugin-Scoping
+
+Because plugins indexing subregistries use the shared handlers and may clobber entities created by the `subgraph` plugin—which didn't expect multichain or multi-source entities—, id-generating code is abstracted to be plugin-specific. See the helpers in `apps/ensindexer/src/lib/ids.ts`. In these cases, for the `subgraph` plugin, the original behavior is left un-modified to facilitate 1:1 responses from the subgraph-compatible api.
+
+This scoping also applies to the concept of a "Managed Name" (see `apps/ensindexer/src/lib/managed-names.ts`): some contracts (like Registrars and RegistrarControllers) operate in the context of a Managed Name (like 'eth', 'base.eth', or 'linea.eth'). In the original subgraph implementation, this was hardcoded for the .eth Registrar/RegistrarControllers as the `eth` name, but because ENSNode shares indexing logic between these similar contracts across `.eth` names, `.base.eth` names, etc, we introduce the concept of a contract's "Managed Name" within the context of which it operates.
+
+### Ponder Plugin Integration
+
+#### Contract Namespace
+
+Ponder, by default, does not have the concept of plugins — it assumes that a config is static and that all contract names are known at compile-time. In ENSIndexer, multiple plugins reference contracts of the same name, and further namespacing is required. We namespace plugin-specific contract definitions with a prefix (namely `PluginName`) to avoid collisions (see `apps/ensindexer/src/lib/plugin-helpers.ts` for reference).
+
+#### Contract & Event Typing
+
+Ponder uses the type information of contracts and their abis in the provided config to power the `ponder.on('MyContract:MyEvent', ...)` api, including inferred types for contract names, event names, and event arguments.
+
+In order to replicate this experience with plugins selected at runtime, we use some creative typing in `apps/ensindexer/src/plugins/index.ts` to merge the possible plugin types for Ponder. With this approach we have full type inference for contract and event names/args across the app regardless of which plugins are activated at runtime.
+
+#### Plugin Execution
+
+When ENSIndexer is run, the configs for all of the active plugins (those selected by the user) are merged and ponder runs in `omnichain` (perhaps later: `multichain`) mode to produce the resulting index. The relevant event handlers are attached in each plugin's `event-handlers.ts` which conditionally executes if the plugin is activated in the ENSIndexerConfig.
+
+## @ensnode/datasources
+
+This package provides configurations for each known ENS namespace. An ENS namespace represents a single, unified set of ENS names with a distinct onchain root Registry and the capability to span across multiple chains, subregistries, and offchain resources.
+
+Each namespace is logically independent - for instance, the Sepolia namespace is entirely separate from the canonical mainnet namespace. This package centralizes the contract addresses, start blocks, and other configuration needed to interact with each namespace.
+
+ENSIndexer uses `@ensnode/datasources` to configure its plugins and determine which are available for a given target namespace.
+
+See the [`@ensnode/datasources` README](https://github.com/namehash/ensnode/blob/main/packages/datasources/README.md) for more context on this package & its responsibilities.
+
+## General Execution Flow
+
+The subgraph's codebase is not exhaustively documented or trivially readable. In some cases we've decided to simplify the implementation (ensuring accuracy via [ens-subgraph-transition-tools](https://github.com/namehash/ens-subgraph-transition-tools)) and in others we've elected to match the subgraph's logic closer to 1:1.
+
+In general, however, each handler is written in a more ponder-native way, using ponder's drizzle-inspired entity CRUD apis, rather than the subgraph's active-record-inspired api. It uses minimial branched or nested logic, resulting in code that is much more readable. Along the way we've also documented the purpose of these handlers more exhaustively, which should promote understanding and readability.
+
+## API Layer
+
+ENSIndexer exposes the following API endpoint:
+
+- **Subgraph-Compatible GraphQL** (`/subgraph`)
+
+  - Implements the ENS Subgraph schema and query patterns
+  - Enables gradual migration from existing Subgraph implementations
+  - Maintains compatibility with `ensjs` client library — just replace
+
+## Label Healing with ENSRainbow
+
+ENSIndexer depends on ENSRainbow at runtime to handle the healing of unknown labels. This parallels the ENS Subgraph's reliance on the graph-node's `ens.nameByHash` function.
+
+## Additional Notes in Comments
+
+Additional implementation & background context for certain decisions are included throughout the codebase where relevant, and we encourage curious readers to browse the comments and general structure of the shared handlers & helper libs for further background.

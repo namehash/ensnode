@@ -11,13 +11,8 @@ import { SearchView } from "./SearchView";
 
 const EXAMPLE_ACCOUNT_ADDRESS = "0x2f8e8b1126e75fde0b7f731e7cb5847eba2d2574";
 
-/**
- * Gets the ENSNODE_URL from the environment, defaulting to the NameHash-hosted Sepolia-V2 Namespace
- * at https://api.v2-sepolia.ensnode.io
- *
- * To override, provide ENSNODE_URL in your environment like:
- * ENSNODE_URL=https://api.alpha.ensnode.io pnpm dev
- */
+// you may use a NameHash Hosted ENSNode instance
+// learn more at https://ensnode.io/docs/integrate/hosted-instances
 const ENSNODE_URL = import.meta.env.VITE_ENSNODE_URL ?? "https://api.v2-sepolia.ensnode.io";
 
 console.log(`Connecting to ENSNode at ${ENSNODE_URL}`);
@@ -42,7 +37,12 @@ function Layout() {
 }
 
 function Home() {
-  return <p>Welcome — pick a demo above.</p>;
+  return (
+    <div>
+      <p>Welcome — pick a demo above.</p>
+      <p>Connected to ENSNode at {ENSNODE_URL}</p>
+    </div>
+  );
 }
 
 export function App() {
