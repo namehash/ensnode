@@ -13,7 +13,7 @@ const DomainFragment = graphql(`
   fragment DomainFragment on Domain {
     __typename
     id
-    name
+    canonical { name }
     owner { id address }
   }
 `);
@@ -47,8 +47,10 @@ function SubdomainLink({ data }: { data: FragmentOf<typeof DomainFragment> }) {
 
   return (
     <li>
-      {domain.name ? (
-        <Link to={`/domain/${domain.name}`}>{beautifyInterpretedName(domain.name)}</Link>
+      {domain.canonical ? (
+        <Link to={`/domain/${domain.canonical.name}`}>
+          {beautifyInterpretedName(domain.canonical.name)}
+        </Link>
       ) : (
         <em>non-canonical domain</em>
       )}{" "}
@@ -84,7 +86,7 @@ function RenderDomain({ name }: { name: InterpretedName }) {
 
   return (
     <div>
-      <h2>{beautifyInterpretedName(domain.name ?? name)}</h2>
+      <h2>{beautifyInterpretedName(domain.canonical?.name ?? name)}</h2>
       <p>
         Owner:{" "}
         {domain.owner ? (

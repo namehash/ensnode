@@ -74,6 +74,34 @@ export default function () {
     // if someone mints a node to the zero address, nothing happens in the Registry, so no-op
     if (isAddressEqual(zeroAddress, owner)) return;
 
+    // Label Healing
+    //
+    // only attempt to heal label if it doesn't already exist
+    const exists = await labelExists(context, labelHash);
+    if (!exists) {
+      // If this is a direct subname of addr.reverse, we have 100% on-chain label discovery.
+      //
+      // Note: Per ENSIP-19, only the ENS Root chain may record primary names under the `addr.reverse`
+      // subname. Also per ENSIP-19 no Reverse Names need exist in (shadow)Registries on non-root
+      // chains, so we explicitly only support Root chain addr.reverse-based Reverse Names: ENSIP-19
+      // CoinType-specific Reverse Names (ex: [address].[coinType].reverse) don't actually exist in
+      // the ENS Registry: wildcard resolution is used, so this NewOwner event will never be emitted
+      // with a domain created as a child of a Coin-Type specific Reverse Node (ex: [coinType].reverse).
+      if (
+        parentNode === ADDR_REVERSE_NODE &&
+        context.chain.id === getENSRootChainId(config.namespace) &&
+        // Sepolia V2 Tenderly Private RPC is rate-limiting the debug_traceTransaction calls so we
+        // avoid addr.reverse healing for that namespace so indexing progresses smoothly
+        // TODO: remove this once Sepolia V2 is decommissioned
+        config.namespace !== ENSNamespaceIds.SepoliaV2
+      ) {
+        const label = await healAddrReverseSubnameLabel(context, event, labelHash);
+        await ensureLabel(context, label);
+      } else {
+        await ensureUnknownLabel(context, labelHash);
+      }
+    }
+
     // NOTE: Canonicalize ENSv1Registry vs. ENSv1RegistryOld via `getManagedName(...).registry`.
     // Both Registries share a Managed Name (the ENS Root for mainnet) and write into the same
     // namegraph; canonicalizing here ensures Old events that pass `nodeIsMigrated` don't fragment
@@ -127,35 +155,7 @@ export default function () {
       })
       .onConflictDoUpdate({ ownerId, rootRegistryOwnerId: ownerId });
 
-    await ensureDomainInRegistry(context, parentRegistryId, domainId);
-
-    // Label Healing
-    //
-    // only attempt to heal label if it doesn't already exist
-    const exists = await labelExists(context, labelHash);
-    if (!exists) {
-      // If this is a direct subname of addr.reverse, we have 100% on-chain label discovery.
-      //
-      // Note: Per ENSIP-19, only the ENS Root chain may record primary names under the `addr.reverse`
-      // subname. Also per ENSIP-19 no Reverse Names need exist in (shadow)Registries on non-root
-      // chains, so we explicitly only support Root chain addr.reverse-based Reverse Names: ENSIP-19
-      // CoinType-specific Reverse Names (ex: [address].[coinType].reverse) don't actually exist in
-      // the ENS Registry: wildcard resolution is used, so this NewOwner event will never be emitted
-      // with a domain created as a child of a Coin-Type specific Reverse Node (ex: [coinType].reverse).
-      if (
-        parentNode === ADDR_REVERSE_NODE &&
-        context.chain.id === getENSRootChainId(config.namespace) &&
-        // Sepolia V2 Tenderly Private RPC is rate-limiting the debug_traceTransaction calls so we
-        // avoid addr.reverse healing for that namespace so indexing progresses smoothly
-        // TODO: remove this once Sepolia V2 is decomissioned
-        config.namespace !== ENSNamespaceIds.SepoliaV2
-      ) {
-        const label = await healAddrReverseSubnameLabel(context, event, labelHash);
-        await ensureLabel(context, label);
-      } else {
-        await ensureUnknownLabel(context, labelHash);
-      }
-    }
+    await ensureDomainInRegistry(context, parentRegistryId, domainId, labelHash);
 
     // push event to domain history
     const eventId = await ensureEvent(context, event);

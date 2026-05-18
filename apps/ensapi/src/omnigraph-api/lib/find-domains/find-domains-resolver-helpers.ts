@@ -2,7 +2,7 @@ import { asc, desc, type SQL, sql } from "drizzle-orm";
 
 import type { DomainCursor } from "@/omnigraph-api/lib/find-domains/domain-cursor";
 import type { DomainsWithOrderingMetadata } from "@/omnigraph-api/lib/find-domains/layers/with-ordering-metadata";
-import type { DomainsOrderBy } from "@/omnigraph-api/schema/domain";
+import type { DomainsOrderBy } from "@/omnigraph-api/schema/domain-inputs";
 import type { OrderDirection } from "@/omnigraph-api/schema/order-direction";
 
 /**
