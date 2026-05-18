@@ -11,7 +11,7 @@ CanonicalNameRef.implement({
   fields: (t) => ({
     interpreted: t.field({
       description:
-        "The Canonical Name as an InterpretedName: each label is either a normalized literal Label or an Encoded LabelHash. Suitable for navigation, lookup, and as a stable identifier.",
+        "The Canonical Name as an InterpretedName: each label is either a normalized literal Label or an Encoded LabelHash.",
       type: "InterpretedName",
       nullable: false,
       resolve: (domain) => {
@@ -20,6 +20,7 @@ CanonicalNameRef.implement({
             `Invariant(CanonicalName.interpreted): canonical Domain '${domain.id}' is missing canonicalName.`,
           );
         }
+
         return domain.canonicalName;
       },
     }),

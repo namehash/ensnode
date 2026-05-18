@@ -12,7 +12,7 @@ DomainCanonicalRef.implement({
     "Canonicality metadata for a Domain, including its name, depth, path, and node (namehash).",
   fields: (t) => ({
     name: t.field({
-      description: "The Canonical Name for this Domain, in multiple representations.",
+      description: "The Canonical Name for this Domain.",
       type: CanonicalNameRef,
       nullable: false,
       resolve: (domain) => domain,
