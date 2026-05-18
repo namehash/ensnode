@@ -49,11 +49,11 @@ function SubdomainLink({ data }: { data: FragmentOf<typeof DomainFragment> }) {
     <li>
       {domain.name ? (
         <Link to={`/domain/${domain.name}`}>{beautifyInterpretedName(domain.name)}</Link>
-      // TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
-      // {domain.canonical ? (
-      //   <Link to={`/domain/${domain.canonical.name.interpreted}`}>
-      //     {beautifyInterpretedName(domain.canonical.name.interpreted)}
-      //   </Link>
+        // TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
+        // {domain.canonical ? (
+        //   <Link to={`/domain/${domain.canonical.name.interpreted}`}>
+        //     {beautifyInterpretedName(domain.canonical.name.interpreted)}
+        //   </Link>
       ) : (
         <em>non-canonical domain</em>
       )}{" "}
@@ -117,8 +117,7 @@ function RenderDomain({ name }: { name: InterpretedName }) {
         <Link to={`/domain/${data.domain.parent.name}`}>
           ← {beautifyInterpretedName(data.domain.parent.name)}
         </Link>
-      )} 
-
+      )}
 
       <h3>Subdomains</h3>
       {subdomains && subdomains.edges.length === 0 ? (

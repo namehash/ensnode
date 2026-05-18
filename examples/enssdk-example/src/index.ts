@@ -38,10 +38,10 @@ const HelloWorldQuery = graphql(
 function formatDomain(data: FragmentOf<typeof DomainFragment>): string {
   // type-safe access to fragment data!
   const domain = readFragment(DomainFragment, data);
-// TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
-// const name = domain.canonical
-//   ? beautifyInterpretedName(domain.canonical.name.interpreted)
-//   : "<unnamed>";
+  // TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
+  // const name = domain.canonical
+  //   ? beautifyInterpretedName(domain.canonical.name.interpreted)
+  //   : "<unnamed>";
   const name = domain.name ? beautifyInterpretedName(domain.name) : "<unnamed>";
   const owner = domain.owner?.address ?? "0x0 (means reserved for ENSv2)";
   return `${name} (${domain.__typename}) — Owner ${owner}`;

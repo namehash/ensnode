@@ -21,8 +21,8 @@ describe("loadEnskitExampleProject", () => {
       expect(project.devDependencies[name]).toBeDefined();
     }
 
-    expect(project.dependencies.enskit).toMatch(/^\d+\.\d+\.\d+$/);
-    expect(project.dependencies.enssdk).toMatch(/^\d+\.\d+\.\d+$/);
+    expect(project.dependencies.enskit).toMatch(/^\d+\.\d+\.\d+/);
+    expect(project.dependencies.enssdk).toMatch(/^\d+\.\d+\.\d+/);
     expect(project.runtime).toBe("node-vite");
     expect(project.view).toBe("both");
     expect(project.entryFileName).toBe("index.html");

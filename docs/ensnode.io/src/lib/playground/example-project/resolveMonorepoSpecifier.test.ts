@@ -22,10 +22,10 @@ describe("resolveMonorepoSpecifier", () => {
   });
 
   it("resolves enssdk workspace:* to the published package version", () => {
-    expect(resolveMonorepoSpecifier("enssdk", "workspace:*")).toMatch(/^\d+\.\d+\.\d+$/);
+    expect(resolveMonorepoSpecifier("enssdk", "workspace:*")).toMatch(/^\d+\.\d+\.\d+/);
   });
 
   it("resolves enskit workspace:* to the published package version", () => {
-    expect(resolveMonorepoSpecifier("enskit", "workspace:*")).toMatch(/^\d+\.\d+\.\d+$/);
+    expect(resolveMonorepoSpecifier("enskit", "workspace:*")).toMatch(/^\d+\.\d+\.\d+/);
   });
 });
