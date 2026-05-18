@@ -1,7 +1,7 @@
 ---
 import { Code } from "@astrojs/starlight/components";
 
-import { buildOmnigraphCurlExample } from "@lib/playground/utils";
+import { buildOmnigraphCurlExample, getHostedEnsNodeInstanceDocUrl } from "@lib/playground/utils";
 
 export interface OmnigraphAPIExamplePanelsProps {
   /** Unique id prefix for aria / tab wiring (e.g. example id). */
@@ -12,6 +12,10 @@ export interface OmnigraphAPIExamplePanelsProps {
   responseJson: string | null;
   /** ENSNode base URL (same as enssdk `createEnsNodeClient({ url })`). */
   connectionBaseUrl: string;
+  /** Starlight heading anchor on the hosted instances page (e.g. `ensnode-v2-sepolia`). */
+  hostedInstanceAnchor: string;
+  /** ENS namespace label for the hosted instance (e.g. `sepolia-v2`). */
+  hostedInstanceNamespace: string;
   adminUrl: string;
   hideCurl?: boolean;
 }
@@ -23,9 +27,13 @@ const {
   variablesObject,
   responseJson,
   connectionBaseUrl,
+  hostedInstanceAnchor,
+  hostedInstanceNamespace,
   adminUrl,
   hideCurl = false,
 } = Astro.props;
+
+const hostedInstanceDocUrl = getHostedEnsNodeInstanceDocUrl(hostedInstanceAnchor);
 
 const uid = panelId.replace(/[^a-zA-Z0-9_-]/g, "-");
 const tabIds = {
@@ -60,8 +68,15 @@ const tabList: { id: string; label: string }[] = [
     >
       Run in ENSAdmin
     </a>
-    <span class="hidden text-xs text-[var(--sl-color-gray-3)] sm:block">
-      Opens the hosted playground with this query pre-filled.
+    <span class="hidden text-xs leading-snug text-[var(--sl-color-gray-3)] sm:block">
+      Open an interactive playground to execute this query on our{" "}
+      <a
+        href={hostedInstanceDocUrl}
+        class="text-sm font-semibold text-[var(--sl-color-gray-1)] underline decoration-[var(--sl-color-gray-4)] underline-offset-2 transition-colors hover:text-[var(--sl-color-text-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
+      >
+        {hostedInstanceNamespace}
+      </a>{" "}
+      ENSNode instance.
     </span>
   </div>
 

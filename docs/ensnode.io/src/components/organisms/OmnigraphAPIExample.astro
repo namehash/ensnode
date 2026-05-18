@@ -3,6 +3,7 @@ import OmnigraphAPIExamplePanels from "../molecules/OmnigraphAPIExamplePanels.as
 
 import { getOmnigraphExampleById } from "@data/omnigraph-examples/examples";
 import { buildEnsadminOmnigraphUrl } from "@content/snippets/omnigraphAdmin";
+import { DOCS_HOSTED_INSTANCE_ANCHOR, DOCS_OMNIGRAPH_NAMESPACE } from "@lib/playground/constants";
 import { stringifyJsonForDocs } from "@lib/playground/utils";
 
 interface Props {
@@ -33,6 +34,8 @@ const responseJson = example.response ? stringifyJsonForDocs(example.response) :
   variablesObject={example.variables}
   responseJson={responseJson}
   connectionBaseUrl={example.connection}
+  hostedInstanceAnchor={DOCS_HOSTED_INSTANCE_ANCHOR}
+  hostedInstanceNamespace={DOCS_OMNIGRAPH_NAMESPACE}
   adminUrl={adminUrl}
   hideCurl={hideCurl}
 />

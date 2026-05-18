@@ -44,3 +44,11 @@ export function buildOmnigraphCurlExample(params: {
     `EOF`,
   ].join("\n");
 }
+
+/** Docs path for the hosted ENSNode instances catalog. */
+export const HOSTED_INSTANCES_DOC_PATH = "/docs/integrate/hosted-instances" as const;
+
+/** Link to a hosted instance section (Starlight heading anchor on the hosted instances page). */
+export function getHostedEnsNodeInstanceDocUrl(headingAnchor: string): string {
+  return `${HOSTED_INSTANCES_DOC_PATH}#${headingAnchor}`;
+}
