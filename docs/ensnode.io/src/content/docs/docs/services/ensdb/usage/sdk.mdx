@@ -23,27 +23,31 @@ yarn add @ensnode/ensdb-sdk
 
 ### Example Usage
 
+Canonical fields (`canonicalName`, `canonicalPath`, `canonicalNode`, `canonicalDepth`) are
+populated on every Domain reachable from the canonical root, across both ENSv1 and ENSv2 — query
+them uniformly without branching by `type`.
+
 ```typescript
 import { EnsDbReader, IndexingMetadataContextStatusCodes } from '@ensnode/ensdb-sdk';
-import { eq } from 'drizzle-orm';
+import { count, eq } from 'drizzle-orm';
 
 // Connect to a specific ENSDb instance by providing its connection string and
 // the ENSIndexer Schema Name you want to query
-const ensDbReader =  new EnsDbReader(ensDbConnectionString, ensIndexerSchemaName);
+const ensDbReader = new EnsDbReader(ensDbConnectionString, ensIndexerSchemaName);
 const { ensDb, ensIndexerSchema } = ensDbReader;
 
-// Get ENS V1 domains from the ENSIndexer Schema 
-const v1Domains = await ensDb
+// Fetch a Domain by its canonical name
+const [vitalik] = await ensDb
   .select()
   .from(ensIndexerSchema.domain)
-  .where(eq(ensIndexerSchema.domain.type, "ENSv1Domain"));
+  .where(eq(ensIndexerSchema.domain.canonicalName, "vitalik.eth"));
 
-// Get ENS V2 domains from the ENSIndexer Schema 
-const v2Domains = await ensDb
-  .select()
+// Count an address's Domains, grouped by Domain type (ENSv1 vs ENSv2)
+const counts = await ensDb
+  .select({ type: ensIndexerSchema.domain.type, count: count() })
   .from(ensIndexerSchema.domain)
-  .where(eq(ensIndexerSchema.domain.type, "ENSv2Domain"));
-
+  .where(eq(ensIndexerSchema.domain.ownerId, "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"))
+  .groupBy(ensIndexerSchema.domain.type);
 
 // Get indexing status snapshot
 const indexingMetadataContext = await ensDbReader.getIndexingMetadataContext();

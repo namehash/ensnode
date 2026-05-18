@@ -1,6 +1,6 @@
 import { and, eq, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
-import type { DomainId, NormalizedAddress, RegistryId } from "enssdk";
+import type { DomainId, InterpretedName, NormalizedAddress, RegistryId } from "enssdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 
@@ -14,13 +14,13 @@ export type DomainType = (typeof ensIndexerSchema.domainType.enumValues)[number]
 /**
  * Universal base domain set: all ENSv1 and ENSv2 Domains with consistent metadata.
  *
- * Returns `{ domainId, type, ownerId, registryId, parentId, canonical, labelHash, sortableLabel }`.
- * - parentId is the canonical parent Domain, derived inline by joining to the parent Registry of
- *   this Domain (`registry.id = domain.registryId`) and then to the parent Domain named by
- *   `registry.canonicalDomainId`, requiring that parent Domain's `subregistryId` agree back to
- *   the same Registry. This is the bidirectional canonical-edge agreement that enforces a tree.
- * - sortableLabel is the Domain's own InterpretedLabel, used for NAME ordering
- * - all other values are directly sourced from Domain
+ * `parentId` is the canonical parent Domain, derived inline by joining to the parent Registry of
+ * this Domain (`registry.id = domain.registryId`) and then to the parent Domain named by
+ * `registry.canonicalDomainId`, requiring that parent Domain's `subregistryId` agree back to
+ * the same Registry. This is the bidirectional canonical-edge agreement that enforces a tree.
+ *
+ * `canonicalName` and `canonicalDepth` are sourced directly from Domain's materialized columns
+ * and drive NAME / DEPTH ordering downstream. All other values are directly sourced from Domain.
  *
  * All downstream filters (owner, parent, registry, name, canonical) operate on this shape.
  */
@@ -39,8 +39,11 @@ export function domainsBase() {
         parentId: sql<DomainId | null>`${parentDomain.id}`.as("parentId"),
         canonical: sql<boolean>`${ensIndexerSchema.domain.canonical}`.as("canonical"),
         labelHash: sql<string>`${ensIndexerSchema.domain.labelHash}`.as("labelHash"),
-        sortableLabel: sql<string | null>`${ensIndexerSchema.label.interpreted}`.as(
-          "sortableLabel",
+        canonicalName: sql<InterpretedName | null>`${ensIndexerSchema.domain.canonicalName}`.as(
+          "canonicalName",
+        ),
+        canonicalDepth: sql<number | null>`${ensIndexerSchema.domain.canonicalDepth}`.as(
+          "canonicalDepth",
         ),
       })
       .from(ensIndexerSchema.domain)
@@ -54,11 +57,6 @@ export function domainsBase() {
           eq(parentDomain.id, parentRegistry.canonicalDomainId),
           eq(parentDomain.subregistryId, parentRegistry.id),
         ),
-      )
-      // join label for labelHash/sortableLabel
-      .leftJoin(
-        ensIndexerSchema.label,
-        eq(ensIndexerSchema.label.labelHash, ensIndexerSchema.domain.labelHash),
       )
       .as("baseDomains")
   );
@@ -77,6 +75,7 @@ export function selectBase(base: BaseDomainSet) {
     parentId: base.parentId,
     canonical: base.canonical,
     labelHash: base.labelHash,
-    sortableLabel: base.sortableLabel,
+    canonicalName: base.canonicalName,
+    canonicalDepth: base.canonicalDepth,
   };
 }

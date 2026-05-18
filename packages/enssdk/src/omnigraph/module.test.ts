@@ -20,7 +20,7 @@ describe("omnigraph module", () => {
   });
 
   it("sends a POST request with string query", async () => {
-    const mockResponse = { data: { domain: { name: "nick.eth" } } };
+    const mockResponse = { data: { domain: { canonical: { name: "nick.eth" } } } };
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
       json: () => Promise.resolve(mockResponse),
@@ -29,14 +29,14 @@ describe("omnigraph module", () => {
     const client = createMockClient(mockFetch);
 
     const result = await client.omnigraph.query({
-      query: 'query { domain(by: { name: "nick.eth" }) { name } }',
+      query: 'query { domain(by: { name: "nick.eth" }) { canonical { name } } }',
     });
 
     expect(mockFetch).toHaveBeenCalledWith("https://example.com/api/omnigraph", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        query: 'query { domain(by: { name: "nick.eth" }) { name } }',
+        query: 'query { domain(by: { name: "nick.eth" }) { canonical { name } } }',
         variables: undefined,
       }),
       signal: undefined,
@@ -54,7 +54,7 @@ describe("omnigraph module", () => {
     const client = createMockClient(mockFetch);
 
     await client.omnigraph.query({
-      query: "query($name: String!) { domain(by: { name: $name }) { name } }",
+      query: "query($name: String!) { domain(by: { name: $name }) { canonical { name } } }",
       variables: { name: "nick.eth" },
     });
 
@@ -72,7 +72,7 @@ describe("omnigraph module", () => {
     const client = createMockClient(mockFetch);
 
     await client.omnigraph.query({
-      query: "query { domains { name } }",
+      query: "query { domains { canonical { name } } }",
       signal: controller.signal,
     });
 
@@ -91,7 +91,9 @@ describe("omnigraph module", () => {
     const client = createMockClient(mockFetch);
 
     await expect(
-      client.omnigraph.query({ query: 'query { domain(by: { name: "eth" }) { name } }' }),
+      client.omnigraph.query({
+        query: 'query { domain(by: { name: "eth" }) { canonical { name } } }',
+      }),
     ).rejects.toThrow(`Omnigraph query failed: 401 Unauthorized\n${errorBody}`);
   });
 
@@ -102,7 +104,7 @@ describe("omnigraph module", () => {
     });
 
     const client = createMockClient(mockFetch);
-    const doc = parse('query { domain(by: { name: "nick.eth" }) { name } }');
+    const doc = parse('query { domain(by: { name: "nick.eth" }) { canonical { name } } }');
 
     await client.omnigraph.query({ query: doc });
 

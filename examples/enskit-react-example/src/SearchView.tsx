@@ -5,9 +5,9 @@ import { Link, useSearchParams } from "react-router";
 
 const DomainsByNameQuery = graphql(`
   query DomainsByName($name: String!, $first: Int!, $after: String) {
-    domains(where: { name: $name, canonical: true }, first: $first, after: $after) {
+    domains(where: { name: { starts_with: $name } }, first: $first, after: $after) {
       edges {
-        node { __typename id name }
+        node { __typename id canonical {name} }
       }
       pageInfo {
         hasNextPage
@@ -67,9 +67,9 @@ export function SearchView() {
       <h2>Domain Search</h2>
 
       <p>
-        Showcases live querying via <code>Query.domains(where: {"{ name }"})</code>. Only{" "}
-        <b>Canonical</b> Domains are rendered. Input is debounced by {DEBOUNCE_MS}ms and synced to
-        the URL as <code>?query=</code>.
+        Showcases live querying via <code>Query.domains(where: {"{ name: { starts_with } }"})</code>
+        . Only <b>Canonical</b> Domains are rendered. Input is debounced by {DEBOUNCE_MS}ms and
+        synced to the URL as <code>?query=</code>.
       </p>
 
       <input
@@ -87,16 +87,17 @@ export function SearchView() {
         <>
           {fetching && <p>Loading...</p>}
           <ul>
-            {data?.domains?.edges.map((edge) => (
-              <li key={edge.node.id}>
-                ({edge.node.__typename === "ENSv1Domain" ? "v1" : "v2"}){" "}
-                {edge.node.name && (
-                  <Link to={`/domain/${edge.node.name}`}>
-                    {beautifyInterpretedName(edge.node.name)}
+            {data?.domains?.edges.map((edge) => {
+              if (!edge.node.canonical) return null;
+              return (
+                <li key={edge.node.id}>
+                  ({edge.node.__typename === "ENSv1Domain" ? "v1" : "v2"}){" "}
+                  <Link to={`/domain/${edge.node.canonical.name}`}>
+                    {beautifyInterpretedName(edge.node.canonical.name)}
                   </Link>
-                )}
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
           {data?.domains && data.domains.edges.length === 0 && !fetching && <p>No matches.</p>}
           {data?.domains?.pageInfo.hasNextPage && (

@@ -2,7 +2,9 @@ import type {
   ChainId,
   DomainId,
   InterpretedLabel,
+  InterpretedName,
   LabelHash,
+  LabelHashPath,
   Node,
   NormalizedAddress,
   PermissionsId,
@@ -24,8 +26,9 @@ import type { EncodedReferrer } from "@ensnode/ensnode-sdk";
  *
  * While the initial approach was a highly materialized view of the ENS protocol, abstracting away
  * as many on-chain details as possible, in practice—due to the sheer complexity of the protocol at
- * resolution-time—it becomes more or less impossible to appropriately materialize the canonical
- * namegraph.
+ * resolution-time—full materialization of resolution behavior is impractical. The canonical
+ * nametree, however, is materialized inline via synchronous handler-side cascades; see
+ * `Domain.canonical*` fields and `canonicality-db-helpers.ts`.
  *
  * As a result, this schema takes a balanced approach. It mimics on-chain state as closely as possible,
  * with the obvious exception of materializing specific state that must trivially filterable. Then,
@@ -50,10 +53,12 @@ import type { EncodedReferrer } from "@ensnode/ensnode-sdk";
  * guarantees (for example, ENSv1 BaseRegistrar Registrations may have a gracePeriod, but ENSv2
  * Registry Registrations do not).
  *
- * Instead of materializing a Domain's name at any point, we maintain an internal rainbow table of
- * labelHash -> InterpretedLabel (the Label entity). This ensures that regardless of how or when a
- * new label is encountered onchain, all Domains that use that label are automatically healed at
- * resolution-time.
+ * The `Label` entity (labelHash → InterpretedLabel) remains the source of truth for label values.
+ * Canonical-tree fields on `Domain` (`canonicalName`, `canonicalLabelHashPath`, `canonicalPath`,
+ * `canonicalDepth`, `canonicalNode`) are materialized inline by the handlers in
+ * `canonicality-db-helpers.ts`. Label heals propagate to `canonicalName` via a GIN-indexed bulk
+ * UPDATE outside Ponder's cache; cascade round-trips are bounded to events that already pay a
+ * flush (canonicality flip, heal of an unknown label).
  *
  * ENSv1 and ENSv2 both fit the Registry → Domain → (Sub)Registry → Domain → ... namegraph model.
  * For ENSv1, each domain that has children implicitly owns a "virtual" Registry (a row of type
@@ -288,6 +293,47 @@ export const domain = onchainTable(
     // Whether this Domain is part of the canonical nametree. Mirrors the parent Registry's flag.
     canonical: t.boolean().notNull().default(false),
 
+    /**
+     * Materialized Canonical Name, NULL iff `canonical = false`.
+     * Maintained by `canonicality-db-helpers.ts`.
+     *
+     * @example "vitalik.eth"
+     */
+    canonicalName: t.text().$type<InterpretedName>(),
+
+    /**
+     * Materialized Canonical LabelHashPath, NULL iff `canonical = false`.
+     * Maintained by `canonicality-db-helpers.ts`.
+     *
+     * @dev Note that LabelHashPaths are in traversal-order (i.e. [labelhash("eth"), labelhash("vitalik")]).
+     */
+    canonicalLabelHashPath: t.hex().array().$type<LabelHashPath>(),
+
+    /**
+     * Materialized Canonical Domain Path, NULL iff `canonical = false`.
+     * Maintained by `canonicality-db-helpers.ts`.
+     *
+     * @dev Note that canonicalPath is in traversal-order (i.e. ["eth"'s DomainId, "vitalik"'s DomainId]).
+     */
+    canonicalPath: t.text().array().$type<DomainId[]>(),
+
+    /**
+     * Materialized Canonical Depth, NULL iff `canonical = false`.
+     * Maintained by `canonicality-db-helpers.ts`.
+     *
+     * @dev The depth of this Domain in the Canonical Nametree i.e. the number of Labels in its Canonical Name.
+     * @example "eth" depth 1, "vitalik.eth" depth 2, etc
+     */
+    canonicalDepth: t.integer(),
+
+    /**
+     * Materialized Canonical Node, NULL iff `canonical = false`.
+     * Maintained by `canonicality-db-helpers.ts`.
+     *
+     * @dev the computed Node (via `namehash`) of this Domain's Canonical Name.
+     */
+    canonicalNode: t.hex().$type<Node>(),
+
     // NOTE: Domain-Resolver Relations tracked via Protocol Acceleration plugin
   }),
   (t) => ({
@@ -296,6 +342,18 @@ export const domain = onchainTable(
     bySubregistry: index().on(t.subregistryId).where(sql`${t.subregistryId} IS NOT NULL`),
     byOwner: index().on(t.ownerId),
     byLabelHash: index().on(t.labelHash),
+
+    // hash index avoids the btree 8191-byte row-size hazard for spam names
+    byCanonicalNameExact: index().using("hash", t.canonicalName),
+    // GIN trigram index for substring / similarity queries (inline `gin_trgm_ops` via `sql`
+    // because passing it through `.op()` gets dropped by Ponder)
+    byCanonicalNameFuzzy: index().using("gin", sql`${t.canonicalName} gin_trgm_ops`),
+    // GIN containment for `cascadeLabelHeal`'s `canonical_label_hash_path @> ARRAY[lh]` lookup
+    byCanonicalLabelHashPath: index().using("gin", t.canonicalLabelHashPath),
+    // hash index for resolver-record → canonical-domain joins
+    byCanonicalNode: index().using("hash", t.canonicalNode),
+    // btree for ORDER BY canonical_depth (typeahead and DEPTH-ordered browse)
+    byCanonicalDepth: index().on(t.canonicalDepth),
   }),
 );
 

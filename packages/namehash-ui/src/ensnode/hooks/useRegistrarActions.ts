@@ -2,8 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 
 import type { RegistrarActionsRequest, RegistrarActionsResponse } from "@ensnode/ensnode-sdk";
 
+import { createRegistrarActionsQueryOptions } from "../query";
 import type { QueryParameter, WithEnsNodeProviderOptions } from "../types";
-import { createRegistrarActionsQueryOptions } from "../utils/query";
 import { useEnsNodeProviderOptions } from "./useEnsNodeProviderOptions";
 
 interface UseRegistrarActionsParameters

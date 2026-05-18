@@ -13,7 +13,7 @@ const client = createEnsNodeClient({ url: ENSNODE_URL }).extend(omnigraph);
 const DomainFragment = graphql(`
   fragment DomainFragment on Domain {
     __typename
-    name
+    canonical { name }
     owner { address }
   }
 `);
@@ -36,7 +36,7 @@ const HelloWorldQuery = graphql(
 function formatDomain(data: FragmentOf<typeof DomainFragment>): string {
   // type-safe access to fragment data!
   const domain = readFragment(DomainFragment, data);
-  const name = domain.name ? beautifyInterpretedName(domain.name) : "<unnamed>";
+  const name = domain.canonical ? beautifyInterpretedName(domain.canonical.name) : "<unnamed>";
   const owner = domain.owner?.address ?? "0x0";
   return `${name} (${domain.__typename}) — Owner ${owner}`;
 }

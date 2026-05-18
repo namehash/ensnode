@@ -5,8 +5,8 @@ import type {
   EnsApiIndexingStatusResponse,
 } from "@ensnode/ensnode-sdk";
 
+import { createIndexingStatusQueryOptions } from "../query";
 import type { QueryParameter, WithEnsNodeProviderOptions } from "../types";
-import { createIndexingStatusQueryOptions } from "../utils/query";
 import { useEnsNodeProviderOptions } from "./useEnsNodeProviderOptions";
 
 interface UseIndexingStatusParameters

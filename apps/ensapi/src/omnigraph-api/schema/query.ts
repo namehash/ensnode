@@ -20,12 +20,12 @@ import { getDomainIdByInterpretedName } from "@/omnigraph-api/lib/get-domain-by-
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
 import { AccountByInput, AccountRef } from "@/omnigraph-api/schema/account";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
+import { DomainInterfaceRef } from "@/omnigraph-api/schema/domain";
 import {
   DomainIdInput,
-  DomainInterfaceRef,
   DomainsOrderInput,
   DomainsWhereInput,
-} from "@/omnigraph-api/schema/domain";
+} from "@/omnigraph-api/schema/domain-inputs";
 import { PermissionsIdInput, PermissionsRef } from "@/omnigraph-api/schema/permissions";
 import { RegistrationInterfaceRef } from "@/omnigraph-api/schema/registration";
 import { RegistryIdInput, RegistryInterfaceRef } from "@/omnigraph-api/schema/registry";
@@ -119,12 +119,12 @@ builder.queryType({
       },
       resolve: (_, { where, order, ...connectionArgs }, context) => {
         const base = domainsBase();
-        const named = filterByName(base, where.name);
+        const { named, defaultOrder } = filterByName(base, where.name);
         const canonical = filterByCanonical(named);
         const versioned = where.version ? filterByVersion(canonical, where.version) : canonical;
         const domains = withOrderingMetadata(versioned);
 
-        return resolveFindDomains(context, { domains, order, ...connectionArgs });
+        return resolveFindDomains(context, { domains, order, defaultOrder, ...connectionArgs });
       },
     }),
 
