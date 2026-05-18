@@ -1,4 +1,5 @@
 import { builder } from "@/omnigraph-api/builder";
+import { CanonicalNameRef } from "@/omnigraph-api/schema/canonical-name";
 import { type Domain, DomainInterfaceRef } from "@/omnigraph-api/schema/domain";
 
 ////////////////////////////////
@@ -11,18 +12,10 @@ DomainCanonicalRef.implement({
     "Canonicality metadata for a Domain, including its name, depth, path, and node (namehash).",
   fields: (t) => ({
     name: t.field({
-      description: "The Canonical Name for this Domain.",
-      type: "InterpretedName",
+      description: "The Canonical Name for this Domain, in multiple representations.",
+      type: CanonicalNameRef,
       nullable: false,
-      resolve: (domain) => {
-        if (!domain.canonicalName) {
-          throw new Error(
-            `Invariant(DomainCanonical.name): canonical Domain '${domain.id}' is missing canonicalName.`,
-          );
-        }
-
-        return domain.canonicalName;
-      },
+      resolve: (domain) => domain,
     }),
     depth: t.field({
       description:
@@ -35,6 +28,7 @@ DomainCanonicalRef.implement({
             `Invariant(DomainCanonical.depth): canonical Domain '${domain.id}' is missing canonicalDepth.`,
           );
         }
+
         return domain.canonicalDepth;
       },
     }),
@@ -49,6 +43,7 @@ DomainCanonicalRef.implement({
             `Invariant(DomainCanonical.path): canonical Domain '${domain.id}' is missing canonicalPath.`,
           );
         }
+
         return domain.canonicalPath;
       },
     }),

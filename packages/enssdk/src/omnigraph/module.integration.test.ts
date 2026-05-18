@@ -13,7 +13,7 @@ const HelloWorldQuery = graphql(`
   query HelloWorld {
     domain(by: { name: "eth" }) {
       id
-      canonical { name }
+      canonical { name { interpreted } }
       owner { address }
     }
   }
@@ -27,13 +27,13 @@ describe("omnigraph module (integration)", () => {
 
     // look, our semantic types!
     expectTypeOf(result.data!.domain!.id).toEqualTypeOf<DomainId>();
-    expectTypeOf(result.data!.domain!.canonical!.name).toEqualTypeOf<InterpretedName>();
+    expectTypeOf(result.data!.domain!.canonical!.name.interpreted).toEqualTypeOf<InterpretedName>();
     expectTypeOf(result.data!.domain!.owner!.address).toEqualTypeOf<Address>();
 
     // the 'eth' domain should exist
     expect(result.data!.domain).toMatchObject({
       id: expect.any(String),
-      canonical: { name: "eth" },
+      canonical: { name: { interpreted: "eth" } },
       owner: { address: expect.any(String) },
     });
   });

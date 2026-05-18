@@ -7,7 +7,7 @@ const DomainsByNameQuery = graphql(`
   query DomainsByName($name: String!, $first: Int!, $after: String) {
     domains(where: { name: { starts_with: $name } }, first: $first, after: $after) {
       edges {
-        node { __typename id canonical {name} }
+        node { __typename id canonical { name { interpreted } } }
       }
       pageInfo {
         hasNextPage
@@ -92,8 +92,8 @@ export function SearchView() {
               return (
                 <li key={edge.node.id}>
                   ({edge.node.__typename === "ENSv1Domain" ? "v1" : "v2"}){" "}
-                  <Link to={`/domain/${edge.node.canonical.name}`}>
-                    {beautifyInterpretedName(edge.node.canonical.name)}
+                  <Link to={`/domain/${edge.node.canonical.name.interpreted}`}>
+                    {beautifyInterpretedName(edge.node.canonical.name.interpreted)}
                   </Link>
                 </li>
               );

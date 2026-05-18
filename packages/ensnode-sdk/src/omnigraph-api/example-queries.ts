@@ -56,7 +56,7 @@ export const GRAPHQL_API_EXAMPLE_QUERIES: Array<{
 #
 # There are also example queries in the tabs above ☝️
 query HelloWorld {
-  domain(by: { name: "eth" }) { canonical { name } owner { address } }
+  domain(by: { name: "eth" }) { canonical { name { interpreted } } owner { address } }
 }`,
     variables: { default: {} },
   },
@@ -80,7 +80,7 @@ query FindDomains(
         __typename
         id
         label { interpreted hash }
-        canonical { name }
+        canonical { name { interpreted } }
 
         registration { expiry event { timestamp } }
       }
@@ -110,7 +110,7 @@ query DomainByName($name: InterpretedName!) {
     __typename
     id
     label { interpreted hash }
-    canonical { name node path { id } }
+    canonical { name { interpreted } node path { id } }
     owner { address }
     subregistry { contract { chainId address } }
 
@@ -132,11 +132,11 @@ query DomainByName($name: InterpretedName!) {
     query: `
 query DomainSubdomains($name: InterpretedName!) {
   domain(by: {name: $name}) {
-    canonical { name }
+    canonical { name { interpreted } }
     subdomains(first: 10) {
       edges {
         node {
-          canonical { name }
+          canonical { name { interpreted } }
         }
       }
     }
@@ -186,7 +186,7 @@ query AccountDomains(
       edges {
         node {
           label { interpreted }
-          canonical { name }
+          canonical { name { interpreted } }
         }
       }
     }
@@ -231,7 +231,7 @@ query RegistryDomains(
       edges {
         node {
           label { interpreted }
-          canonical { name }
+          canonical { name { interpreted } }
         }
       }
     }
@@ -335,10 +335,12 @@ query AccountResolverPermissions($address: Address!) {
     query: `
 query DomainResolver($name: InterpretedName!) {
   domain(by: { name: $name }) {
-    assignedResolver {
-      records { edges { node { node keys coinTypes } } }
-      permissions { resources { edges { node { resource users { edges { node { user { address } roles } } } } } } }
-      events { totalCount edges { node { topics data timestamp } } }
+    resolver {
+      assigned {
+        records { edges { node { node keys coinTypes } } }
+        permissions { resources { edges { node { resource users { edges { node { user { address } roles } } } } } } }
+        events { totalCount edges { node { topics data timestamp } } }
+      }
     }
   }
 }`,
@@ -360,17 +362,17 @@ query Namegraph {
     domains {
       edges {
         node {
-          canonical { name }
+          canonical { name { interpreted } }
 
           subdomains {
             edges {
               node {
-                canonical { name }
+                canonical { name { interpreted } }
 
                 subdomains {
                   edges {
                     node {
-                      canonical { name }
+                      canonical { name { interpreted } }
                     }
                   }
                 }

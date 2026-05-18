@@ -15,7 +15,7 @@ const AccountDomainsQuery = graphql(`
       domains(first: $first, after: $after) {
         totalCount
         edges {
-          node { __typename id canonical { name } }
+          node { __typename id canonical { name { interpreted } } }
         }
         pageInfo { hasNextPage endCursor }
       }
@@ -61,8 +61,8 @@ function RenderAccount({ address }: { address: NormalizedAddress }) {
             {domains.edges.map((edge) => (
               <li key={edge.node.id}>
                 {edge.node.canonical ? (
-                  <Link to={`/domain/${edge.node.canonical.name}`}>
-                    {beautifyInterpretedName(edge.node.canonical.name)}
+                  <Link to={`/domain/${edge.node.canonical.name.interpreted}`}>
+                    {beautifyInterpretedName(edge.node.canonical.name.interpreted)}
                   </Link>
                 ) : (
                   <em>non-canonical domain</em>
