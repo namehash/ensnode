@@ -8,6 +8,10 @@ export const integrateSidebarTopic = {
       link: "/docs/integrate",
     },
     {
+      label: "Why ENSNode?",
+      link: "/docs/integrate/why-ensnode",
+    },
+    {
       label: "ENSv2 Readiness",
       link: "/docs/integrate/ensv2-readiness",
     },
