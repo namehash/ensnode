@@ -32,21 +32,21 @@ type EventJoinTable =
 /**
  * @oneOf set-membership filter shape: exactly one of `eq` or `in` is set.
  */
-interface SetFilter<T> {
+type SetFilter<T> = {
   eq?: T | null;
   in?: T[] | null;
-}
+};
 
 /**
  * Range filter shape: at least one bound is set. `gt`/`gte` are mutually exclusive; `lt`/`lte` are
  * mutually exclusive (enforced by the input type's validators).
  */
-interface RangeFilter<T> {
+type RangeFilter<T> = {
   gt?: T | null;
   gte?: T | null;
   lt?: T | null;
   lte?: T | null;
-}
+};
 
 /**
  * Available filter options for find-events queries.
