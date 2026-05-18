@@ -124,9 +124,9 @@ export const EventsTimestampFilter = builder.inputType("EventsTimestampFilter", 
           const lower = data.gt ?? data.gte;
           const upper = data.lt ?? data.lte;
           if (lower == null || upper == null) return true;
-          return lower < upper;
+          return lower <= upper;
         },
-        { message: "Lower bound must be less than upper bound." },
+        { message: "Lower bound must be less than or equal to upper bound." },
       ],
     ],
   },
