@@ -9,6 +9,16 @@ import { LinkCard } from "@astrojs/starlight/components";
 ## Subgraph API
 ENSNode exposes a Subgraph-Compatible GraphQL endpoint at `/subgraph`.
 
+:::caution[Subgraph API Deprecation]
+With the launch of ENSv2 in Summer 2026, the Subgraph-compatible API will become out-of-date; ENSNode still maintains support for the Subgraph-compatible API as described below, but integrators should prefer the ENSv2-ready Omnigraph API.
+
+<LinkCard
+  href="/docs/integrate/omnigraph"
+  title="ENS Omnigraph API"
+  description="ENSv2-ready unified GraphQL API over both ENSv1 and ENSv2 — start here for new integrations."
+/>
+:::
+
 :::note[Subgraph API Compatibility]
 ENSNode provides verified backwards compatibility with the ENS Subgraph. See configuration details below.
 

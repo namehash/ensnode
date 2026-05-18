@@ -27,7 +27,7 @@ The [ENS Omnigraph](/docs/integrate/omnigraph) is a single GraphQL API that retu
 
 ![ENS Omnigraph diagram](/ens-omnigraph-diagram.png)
 
-ENSv1 and ENSv2 coexist after the ENSv2 launch. The Omnigraph hides that split: your code asks for `domain(by: { name: "vitalik.eth" })` and gets a typed result, whether the underlying record is V1 or V2.
+ENSv1 and ENSv2 coexist after the ENSv2 launch. The Omnigraph hides that split: your code asks for `domain(by: { name: "vitalik.eth" })` and gets a typed result, regardless of whether the underlying domain is on ENSv1 or ENSv2.
 
 ## Multichain by default
 
@@ -36,8 +36,7 @@ ENSNode indexes the full ENS namespace across every chain that matters, all from
 - **Mainnet** — the canonical ENS root and `.eth` registrations
 - **Basenames** (`.base.eth`) on Base
 - **Lineanames** (`.linea.eth`) on Linea
-- **3DNS** names (`.box`, tokenized DNS) on Optimism
-- **ENSv2** Namechain (at launch)
+- **3DNS** names (`.box`, tokenized DNS) on Optimism and Base
 
 No more wiring up a per-chain Subgraph, reconciling overlapping namespaces, or writing CCIP-Read logic in your app — ENSNode handles forward and reverse resolution, including offchain gateways, server-side.
 

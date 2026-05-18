@@ -19,7 +19,7 @@
 
 # ENSNode
 
-[ENSNode](https://ensnode.io) is the multichain indexer for ENS, with first-class support for [ENSv2](https://roadmap.ens.domains/roadmap/). It exposes a unified GraphQL API — the **ENS Omnigraph API** — over both ENSv1 and ENSv2.
+[ENSNode](https://ensnode.io) is the multichain indexer for ENS, with first-class support for [ENSv2](https://ens.domains/ensv2). It exposes a unified GraphQL API — the **Omnigraph API** — over both ENSv1 and ENSv2.
 
 - 📚 **Docs:** [ensnode.io](https://ensnode.io)
 - 🚀 **Quickstart:** [ensnode.io/docs/integrate](https://ensnode.io/docs/integrate)

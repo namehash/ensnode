@@ -3,7 +3,7 @@ import { createEnsNodeClient } from "enssdk/core";
 import { type FragmentOf, graphql, omnigraph, readFragment } from "enssdk/omnigraph";
 
 // you may use a NameHash Hosted ENSNode instance
-// learn more at https://ensnode.io/docs/integrate/hosted-instances
+// learn more at https://ensnode.io/docs/hosted-instances
 // biome-ignore lint/style/noNonNullAssertion: invariant
 const ENSNODE_URL = process.env.ENSNODE_URL!;
 

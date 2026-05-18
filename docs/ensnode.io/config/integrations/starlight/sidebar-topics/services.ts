@@ -5,6 +5,24 @@ export const servicesSidebarTopic = {
   items: [
     { label: "Overview", link: "/docs/services" },
     {
+      label: "ENSAdmin",
+      collapsed: true,
+      items: [
+        { label: "Overview", link: "/docs/services/ensadmin" },
+        {
+          label: "Contributing",
+          collapsed: true,
+          items: [
+            { label: "Overview", link: "/docs/services/ensadmin/contributing" },
+            {
+              label: "Using Docker",
+              link: "/docs/services/ensadmin/contributing/docker",
+            },
+          ],
+        },
+      ],
+    },
+    {
       label: "ENSApi",
       collapsed: true,
       items: [
@@ -12,33 +30,6 @@ export const servicesSidebarTopic = {
         { label: "Configuration", link: "/docs/services/ensapi/usage/configuration" },
         { label: "API Reference", link: "/docs/services/ensapi/reference/api-reference" },
         { label: "Contributing", link: "/docs/services/ensapi/contributing" },
-      ],
-    },
-    {
-      label: "ENSIndexer",
-      collapsed: true,
-      items: [
-        { label: "Overview", link: "/docs/services/ensindexer" },
-        { label: "Startup Sequence", link: "/docs/services/ensindexer/concepts/startup-sequence" },
-        {
-          label: "Usage",
-          collapsed: true,
-          items: [
-            { label: "Configuration", link: "/docs/services/ensindexer/usage/configuration" },
-            { label: "Management", link: "/docs/services/ensindexer/usage/management" },
-          ],
-        },
-        {
-          label: "Contributing",
-          collapsed: true,
-          items: [
-            { label: "Overview", link: "/docs/services/ensindexer/contributing" },
-            {
-              label: "Creating a Plugin",
-              link: "/docs/services/ensindexer/contributing/creating-a-plugin",
-            },
-          ],
-        },
       ],
     },
     {
@@ -75,6 +66,33 @@ export const servicesSidebarTopic = {
             {
               label: "Future Possibilities",
               link: "/docs/services/ensdb/integrations/future-possibilities",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      label: "ENSIndexer",
+      collapsed: true,
+      items: [
+        { label: "Overview", link: "/docs/services/ensindexer" },
+        { label: "Startup Sequence", link: "/docs/services/ensindexer/concepts/startup-sequence" },
+        {
+          label: "Usage",
+          collapsed: true,
+          items: [
+            { label: "Configuration", link: "/docs/services/ensindexer/usage/configuration" },
+            { label: "Management", link: "/docs/services/ensindexer/usage/management" },
+          ],
+        },
+        {
+          label: "Contributing",
+          collapsed: true,
+          items: [
+            { label: "Overview", link: "/docs/services/ensindexer/contributing" },
+            {
+              label: "Creating a Plugin",
+              link: "/docs/services/ensindexer/contributing/creating-a-plugin",
             },
           ],
         },
@@ -163,24 +181,6 @@ export const servicesSidebarTopic = {
             {
               label: "System Requirements",
               link: "/docs/services/ensrainbow/contributing/system-requirements",
-            },
-          ],
-        },
-      ],
-    },
-    {
-      label: "ENSAdmin",
-      collapsed: true,
-      items: [
-        { label: "Overview", link: "/docs/services/ensadmin" },
-        {
-          label: "Contributing",
-          collapsed: true,
-          items: [
-            { label: "Overview", link: "/docs/services/ensadmin/contributing" },
-            {
-              label: "Using Docker",
-              link: "/docs/services/ensadmin/contributing/docker",
             },
           ],
         },

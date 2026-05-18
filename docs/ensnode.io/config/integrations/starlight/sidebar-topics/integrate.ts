@@ -29,7 +29,7 @@ export const integrateSidebarTopic = {
         },
         {
           label: "Examples",
-          collapsed: false,
+          collapsed: true,
           items: [
             {
               label: "Overview",
@@ -152,10 +152,6 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/integration-options/ensengine",
         },
       ],
-    },
-    {
-      label: "Hosted Instances",
-      link: "/docs/integrate/hosted-instances",
     },
     {
       label: "AI / LLM Tooling",
