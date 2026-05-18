@@ -135,8 +135,8 @@ export function invariant_validContractConfigs(
   }
 }
 
-// Invariant: ensv2 plugin requires protocol acceleration
-export function invariant_ensv2RequiresProtocolAcceleration(
+// Invariant: unigraph plugin requires protocol acceleration
+export function invariant_unigraphRequiresProtocolAcceleration(
   ctx: ZodCheckFnInput<Pick<EnsIndexerConfig, "plugins">>,
 ) {
   const { value: config } = ctx;

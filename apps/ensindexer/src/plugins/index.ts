@@ -9,7 +9,7 @@ import lineaNamesPlugin from "./subgraph/plugins/lineanames/plugin";
 import subgraphPlugin from "./subgraph/plugins/subgraph/plugin";
 import threednsPlugin from "./subgraph/plugins/threedns/plugin";
 import tokenScopePlugin from "./tokenscope/plugin";
-import ensv2Plugin from "./unigraph/plugin";
+import unigraphPlugin from "./unigraph/plugin";
 
 export const ALL_PLUGINS = [
   subgraphPlugin,
@@ -19,7 +19,7 @@ export const ALL_PLUGINS = [
   tokenScopePlugin,
   protocolAccelerationPlugin,
   registrarsPlugin,
-  ensv2Plugin,
+  unigraphPlugin,
 ] as const;
 
 /**

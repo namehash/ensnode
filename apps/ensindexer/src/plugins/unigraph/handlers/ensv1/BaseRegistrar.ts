@@ -248,7 +248,7 @@ export default function () {
         duration,
         eventId: await ensureEvent(context, event),
         // NOTE: no pricing information from BaseRegistrar#NameRenewed. in ENSv1, this info is
-        // indexed from the Registrar Controllers, see apps/ensindexer/src/plugins/ensv2/handlers/ensv1/RegistrarController.ts
+        // indexed from the Registrar Controllers, see apps/ensindexer/src/plugins/unigraph/handlers/ensv1/RegistrarController.ts
       });
 
       // push event to domain history

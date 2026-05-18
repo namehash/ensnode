@@ -15,7 +15,7 @@ logger.info({
   config: redactENSIndexerConfig(config),
 });
 
-// Log warning about dual activation of subgraph and ensv2 plugins
+// Log warning about dual activation of 'subgraph' and 'unigraph' plugins
 if (config.plugins.includes(PluginName.Subgraph) && config.plugins.includes(PluginName.Unigraph)) {
   logger.warn({
     msg: `Both the '${PluginName.Subgraph}' and '${PluginName.Unigraph}' plugins are enabled. This results in the availability of both the legacy Subgraph-Compatible GraphQL API (/subgraph) _and_ ENSNode's Omnigraph API (/api/omnigraph), and comes with an associated increase in indexing time.`,

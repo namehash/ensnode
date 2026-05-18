@@ -73,7 +73,7 @@ resolution-time behavior within the ENS protocol should _also_ be implemented at
 in ENSApi. The current obvious exception is that `domains.owner_id` for ENSv1 Domains is the
 _materialized_ _effective_ owner. ENSv1 includes a diverse number of ways to 'own' a domain,
 including the ENSv1 Registry, various Registrars, and the NameWrapper. The ENSv1 indexing logic
-within this ENSv2 plugin materializes the effective owner to simplify this aspect of ENS and
+within this Unigraph plugin materializes the effective owner to simplify this aspect of ENS and
 enable efficient queries against `domains.owner_id`.
 
 When necessary, all data models are shared or polymorphic between ENSv1 and ENSv2, including
@@ -100,7 +100,7 @@ exception of the canonical subgraph, which is reflected via `registries.canonica
 materialized in a parallel table; it is derived on demand by checking that the two unidirectional
 pointers agree (`registries.canonical_domain_id = domains.id` ↔ `domains.subregistry_id = registries.id`).
 
-Note also that the Protocol Acceleration plugin is a hard requirement for the ENSv2 plugin. This
+Note also that the Protocol Acceleration plugin is a hard requirement for the Unigraph plugin. This
 allows us to rely on the shared logic for indexing:
 a) ENSv1RegistryOld -> ENSv1Registry migration status
 b) Domain-Resolver Relations for both ENSv1 and ENSv2 Domains
@@ -529,7 +529,7 @@ Tracks the migration status of a node, keyed by `(parent_node, label_hash)`. Due
 The set of nodes registered in the (new) Registry contract on the ENS Root Chain is stored here. When a `RegistryOld#NewOwner` event is encountered (which emits both `parent_node` and `label_hash` directly), the relevant row is looked up here; if it exists, the event is ignored.
 
 :::note
-This logic is only necessary for the ENS Root Chain — the only chain that includes the Registry migration. This Registry migration tracking is isolated to the Protocol Acceleration plugin. The subgraph plugin implements its own Registry migration logic. By isolating this logic here, the Protocol Acceleration plugin can be run independently of other plugins. The ENSv2 plugin depends on the Protocol Acceleration plugin in order to piggyback on this Registry migration logic.
+This logic is only necessary for the ENS Root Chain — the only chain that includes the Registry migration. This Registry migration tracking is isolated to the Protocol Acceleration plugin. The subgraph plugin implements its own Registry migration logic. By isolating this logic here, the Protocol Acceleration plugin can be run independently of other plugins. The Unigraph plugin depends on the Protocol Acceleration plugin in order to piggyback on this Registry migration logic.
 :::
 
 The composite key is chosen so that Ponder's profile-pattern matcher can decompose it from event args directly, keeping the read on the indexing-cache prefetch hot-path.
