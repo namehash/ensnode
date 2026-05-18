@@ -11,16 +11,16 @@ import { describe, expect, it } from "vitest";
 import {
   classifySubmissions,
   collectLookupHashes,
-  hashLabel,
+  labelhashNormalizedLabel,
   isUnhealedHit,
   type LabelHit,
 } from "./labels";
 
 const literal = (s: string) => s as LiteralLabel;
 
-describe("hashLabel", () => {
-  it("computes labelhash for a normalized lowercase label", () => {
-    const result = hashLabel(literal("vitalik"));
+describe("hashNormalizedLabel", () => {
+  it("hashes the normalized form of a lowercase label", () => {
+    const result = labelhashNormalizedLabel(literal("vitalik"));
     expect(result).toEqual({
       rawLabel: literal("vitalik"),
       labelHash: labelhashLiteralLabel(literal("vitalik")),
@@ -28,56 +28,49 @@ describe("hashLabel", () => {
   });
 
   it("does not populate normalizedLabel when raw equals normalized", () => {
-    const result = hashLabel(literal("eth"));
-    expect(result.normalizedLabel).toBeUndefined();
-    expect(result.normalizedLabelHash).toBeUndefined();
+    const result = labelhashNormalizedLabel(literal("eth"));
+    expect(result?.normalizedLabel).toBeUndefined();
+    expect(result?.labelHash).toBe(labelhashLiteralLabel(literal("eth")));
   });
 
-  it("populates normalizedLabel + hash when uppercase label normalizes to lowercase", () => {
-    const result = hashLabel(literal("VITALIK"));
-    expect(result.rawLabel).toBe(literal("VITALIK"));
-    expect(result.labelHash).toBe(labelhashLiteralLabel(literal("VITALIK")));
-    expect(result.normalizedLabel).toBe(literal("vitalik"));
-    expect(result.normalizedLabelHash).toBe(labelhashLiteralLabel(literal("vitalik")));
-    expect(result.normalizedLabelHash).not.toBe(result.labelHash);
+  it("normalizes and hashes uppercase labels (no raw hash)", () => {
+    const result = labelhashNormalizedLabel(literal("VITALIK"));
+    expect(result).toEqual({
+      rawLabel: literal("VITALIK"),
+      normalizedLabel: literal("vitalik"),
+      labelHash: labelhashLiteralLabel(literal("vitalik")),
+    });
+    expect(result?.labelHash).not.toBe(labelhashLiteralLabel(literal("VITALIK")));
   });
 
-  it("tolerates unnormalizable labels (e.g. labels with periods)", () => {
-    const result = hashLabel(literal("foo.bar"));
-    expect(result.rawLabel).toBe(literal("foo.bar"));
-    expect(result.labelHash).toBe(labelhashLiteralLabel(literal("foo.bar")));
-    expect(result.normalizedLabel).toBeUndefined();
-    expect(result.normalizedLabelHash).toBeUndefined();
+  it("returns null for unnormalizable labels (e.g. labels with periods)", () => {
+    expect(labelhashNormalizedLabel(literal("foo.bar"))).toBeNull();
   });
 
-  it("tolerates the empty string (cannot normalize)", () => {
-    const result = hashLabel(asLiteralLabel(""));
-    expect(result.rawLabel).toBe(asLiteralLabel(""));
-    expect(result.normalizedLabel).toBeUndefined();
+  it("returns null for the empty string", () => {
+    expect(labelhashNormalizedLabel(asLiteralLabel(""))).toBeNull();
   });
 
-  it("hashes a unicode label", () => {
+  it("hashes the normalized unicode label", () => {
     const label = "vitalik\u00e9";
-    const result = hashLabel(asLiteralLabel(label));
-    expect(result.labelHash).toBe(labelhashLiteralLabel(asLiteralLabel(label)));
+    const result = labelhashNormalizedLabel(asLiteralLabel(label));
+    expect(result?.labelHash).toBe(labelhashLiteralLabel(asLiteralLabel(label)));
   });
 });
 
 describe("collectLookupHashes", () => {
-  it("returns the deduped union of raw + normalized labelhashes", () => {
-    const a = hashLabel(literal("VITALIK"));
-    const b = hashLabel(literal("vitalik"));
+  it("returns the deduped normalized labelhashes", () => {
+    const a = labelhashNormalizedLabel(literal("VITALIK"));
+    const b = labelhashNormalizedLabel(literal("vitalik"));
+    if (a === null || b === null) throw new Error("test fixture invariant");
     const hashes = collectLookupHashes([a, b]);
-    expect(hashes).toHaveLength(2);
-    expect(new Set(hashes).size).toBe(hashes.length);
-    expect(hashes).toContain(a.labelHash);
-    expect(hashes).toContain(b.labelHash);
+    expect(hashes).toEqual([a.labelHash]);
   });
 
-  it("ignores undefined normalized hashes", () => {
-    const a = hashLabel(literal("eth"));
-    const hashes = collectLookupHashes([a]);
-    expect(hashes).toEqual([a.labelHash]);
+  it("returns one hash per distinct normalized label", () => {
+    const a = labelhashNormalizedLabel(literal("eth"));
+    if (a === null) throw new Error("test fixture invariant");
+    expect(collectLookupHashes([a])).toEqual([a.labelHash]);
   });
 });
 
@@ -96,10 +89,12 @@ describe("isUnhealedHit", () => {
 });
 
 describe("classifySubmissions", () => {
-  const vitalik = hashLabel(literal("vitalik"));
-  const eth = hashLabel(literal("eth"));
-  const upper = hashLabel(literal("HELLO"));
-  const random = hashLabel(literal("zzzdoesnotexistzzz"));
+  const vitalik = labelhashNormalizedLabel(literal("vitalik"));
+  const eth = labelhashNormalizedLabel(literal("eth"));
+  const random = labelhashNormalizedLabel(literal("zzzdoesnotexistzzz"));
+  if (vitalik === null || eth === null || random === null) {
+    throw new Error("test fixture invariant");
+  }
 
   function makeHealedHit(hash: LabelHash, label: string): LabelHit {
     return { hash, interpreted: label as InterpretedLabel };
@@ -124,16 +119,10 @@ describe("classifySubmissions", () => {
     expect(result[0].status).toBe("unknown_in_index");
   });
 
-  it("classifies as unknown_in_index when ANY of the label's hashes is unhealed", () => {
-    // upper has both raw + normalized hashes; if normalized is unhealed but raw is healed,
-    // the submission should still be unknown_in_index.
-    if (upper.normalizedLabelHash === undefined) {
-      throw new Error("test fixture invariant: 'HELLO' must produce a normalized variant");
-    }
-    const result = classifySubmissions(
-      [upper],
-      [makeHealedHit(upper.labelHash, upper.rawLabel), makeUnhealedHit(upper.normalizedLabelHash)],
-    );
+  it("classifies uppercase submissions against the normalized hash only", () => {
+    const upper = labelhashNormalizedLabel(literal("HELLO"));
+    if (upper === null) throw new Error("test fixture invariant");
+    const result = classifySubmissions([upper], [makeUnhealedHit(upper.labelHash)]);
     expect(result[0].status).toBe("unknown_in_index");
   });
 

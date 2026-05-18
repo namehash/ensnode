@@ -2,7 +2,6 @@ import {
   asLiteralLabel,
   encodeLabelHash,
   type InterpretedLabel,
-  isNormalizedLabel,
   type Label,
   type LabelHash,
   type LiteralLabel,
@@ -13,12 +12,13 @@ import {
 /**
  * Per-label classification status against the ENSNode index.
  *
- * - `unknown_in_index`: at least one of the label's hashes is present in the index but its
+ * - `unknown_in_index`: the normalized label's labelhash is present in the index but its
  *   interpreted form is the encoded labelhash (i.e. the literal label has not yet been healed).
  *   These submissions are the interesting candidates for future on-chain emission.
- * - `healed_in_index`: at least one of the label's hashes is present in the index and every
- *   returned hit already carries a healed (normalized literal) interpreted form.
- * - `absent_from_index`: none of the label's hashes are present in the index at all.
+ * - `healed_in_index`: the normalized label's labelhash is present in the index and carries a healed
+ *   (normalized literal) interpreted form.
+ * - `absent_from_index`: the normalized label's labelhash is not present in the index.
+ * - `skipped_unnormalized`: the raw label could not be normalized under ENSIP-15.
  */
 export type LabelStatus =
   | "unknown_in_index"
@@ -27,20 +27,16 @@ export type LabelStatus =
   | "skipped_unnormalized";
 
 /**
- * The hashing result for a single submitted label.
+ * LabelHashing result for a single submitted label that normalized successfully.
  *
  * `rawLabel` is always a {@link LiteralLabel}: submissions are never typed or coerced as
- * {@link InterpretedLabel}, so unnormalized discovery remains representable.
- *
- * `normalizedLabel` (and its hash) are populated only when the label is normalizable under
- * ENSIP-15 and the normalized form differs from the raw literal. That branch still hashes via
- * {@link labelhashLiteralLabel} on a new {@link LiteralLabel} cast of the normalized string.
+ * {@link InterpretedLabel}. `labelHash` is always {@link labelhashLiteralLabel} of the
+ * ENSIP-15-normalized literal only (never the raw submission when it differs).
  */
 export type HashedLabel = {
   rawLabel: LiteralLabel;
   labelHash: LabelHash;
   normalizedLabel?: LiteralLabel;
-  normalizedLabelHash?: LabelHash;
 };
 
 /**
@@ -64,55 +60,32 @@ export type LabelHit = {
 };
 
 /**
- * True when a submitted label is already normalized under ENSIP-15.
- */
-export function isProcessableLabel(rawLabel: LiteralLabel): boolean {
-  return isNormalizedLabel(rawLabel as unknown as Label);
-}
-
-/**
- * Computes the hash representations of a single submitted {@link LiteralLabel}.
+ * Normalizes `rawLabel` under ENSIP-15 and returns its labelhash.
  *
- * Always computes `labelHash = labelhashLiteralLabel(rawLabel)`. If the label normalizes under
- * ENSIP-15 to a **different string** than the submission, also computes hashes for that
- * normalized form as a distinct {@link LiteralLabel}. Normalization failures are tolerated and
- * treated as "no normalized variant".
+ * Returns `null` when normalization fails.
  */
-export function hashLabel(rawLabel: LiteralLabel): HashedLabel {
-  const labelHash = labelhashLiteralLabel(rawLabel);
-
-  let normalizedLabel: LiteralLabel | undefined;
-  let normalizedLabelHash: LabelHash | undefined;
+export function labelhashNormalizedLabel(rawLabel: LiteralLabel): HashedLabel | null {
   try {
     const normalizedInterpreted = normalizeLabel(rawLabel);
-    // Compare as unbranded labels: normalization yields InterpretedLabel; submission is LiteralLabel.
-    if ((normalizedInterpreted as Label) !== (rawLabel as Label)) {
-      normalizedLabel = asLiteralLabel(normalizedInterpreted);
-      normalizedLabelHash = labelhashLiteralLabel(normalizedLabel);
-    }
-  } catch {
-    // unnormalizable raw label is expected; leave normalized variant undefined
-  }
+    const normalizedLabel = asLiteralLabel(normalizedInterpreted);
+    const labelHash = labelhashLiteralLabel(normalizedLabel);
 
-  const result: HashedLabel = { rawLabel, labelHash };
-  if (normalizedLabel !== undefined) {
-    result.normalizedLabel = normalizedLabel;
-    result.normalizedLabelHash = normalizedLabelHash;
+    const result: HashedLabel = { rawLabel, labelHash };
+    if ((normalizedInterpreted as Label) !== (rawLabel as Label)) {
+      result.normalizedLabel = normalizedLabel;
+    }
+    return result;
+  } catch {
+    return null;
   }
-  return result;
 }
 
 /**
- * Returns the deduped flat list of labelhashes we want to look up via the Omnigraph
+ * Returns the deduped flat list of labelhashes to look up via the Omnigraph
  * `labels(by: { labelHashes })` query.
  */
 export function collectLookupHashes(hashed: readonly HashedLabel[]): LabelHash[] {
-  const set = new Set<LabelHash>();
-  for (const item of hashed) {
-    set.add(item.labelHash);
-    if (item.normalizedLabelHash !== undefined) set.add(item.normalizedLabelHash);
-  }
-  return Array.from(set);
+  return Array.from(new Set(hashed.map((item) => item.labelHash)));
 }
 
 /**
@@ -135,17 +108,12 @@ export function classifySubmissions(
   for (const hit of hits) hitsByHash.set(hit.hash, hit);
 
   return hashed.map((item) => {
-    const candidateHashes: LabelHash[] = [item.labelHash];
-    if (item.normalizedLabelHash !== undefined) candidateHashes.push(item.normalizedLabelHash);
-
-    const matchedHits = candidateHashes
-      .map((h) => hitsByHash.get(h))
-      .filter((h): h is LabelHit => h !== undefined);
+    const hit = hitsByHash.get(item.labelHash);
 
     let status: LabelStatus;
-    if (matchedHits.length === 0) {
+    if (hit === undefined) {
       status = "absent_from_index";
-    } else if (matchedHits.some(isUnhealedHit)) {
+    } else if (isUnhealedHit(hit)) {
       status = "unknown_in_index";
     } else {
       status = "healed_in_index";

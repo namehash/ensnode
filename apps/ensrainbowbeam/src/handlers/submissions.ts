@@ -7,8 +7,8 @@ import { errorResponse } from "@/lib/error-response";
 import {
   classifySubmissions,
   collectLookupHashes,
-  hashLabel,
-  isProcessableLabel,
+  labelhashNormalizedLabel,
+  type HashedLabel,
   type LabelClassification,
   type LabelHit,
   type SkippedLabelClassification,
@@ -18,11 +18,9 @@ import { lookupLabels } from "@/lib/omnigraph-client";
 /**
  * Maximum number of raw labels accepted per `POST /api/discover` request.
  *
- * This is independent of how many labelhashes each label expands into (1 if already
- * normalized / unnormalizable, 2 if it has a distinct normalized form). `lookupLabels`
- * batches Omnigraph requests against `LABELS_BY_LABELHASH_MAX` (see
- * `apps/ensapi/src/omnigraph-api/schema/label.ts`); the worst-case distinct LabelHash count
- * per submission is still capped at `2 * MAX_LABELS_PER_SUBMISSION`.
+ * Each processable label contributes at most one distinct LabelHash (its ENSIP-15-normalized
+ * form). `lookupLabels` batches Omnigraph requests against `LABELS_BY_LABELHASH_MAX` (see
+ * `apps/ensapi/src/omnigraph-api/schema/label.ts`).
  */
 export const MAX_LABELS_PER_SUBMISSION = 100;
 
@@ -51,7 +49,6 @@ export type SubmissionResultItem = {
   rawLabel: LiteralLabel;
   labelHash: LabelHash;
   normalizedLabel?: LiteralLabel;
-  normalizedLabelHash?: LabelHash;
   status: Exclude<LabelClassification["status"], "skipped_unnormalized">;
 };
 
@@ -93,7 +90,6 @@ function toResultItem(c: LabelClassification): SubmissionResultItem {
     status: c.status as SubmissionResultItem["status"],
   };
   if (c.normalizedLabel !== undefined) item.normalizedLabel = c.normalizedLabel;
-  if (c.normalizedLabelHash !== undefined) item.normalizedLabelHash = c.normalizedLabelHash;
   return item;
 }
 
@@ -114,10 +110,19 @@ export async function submissionsHandler(c: Context) {
 
   const indexed = labels.map((rawLabel, idx) => ({ rawLabel, idx }));
 
-  const processable = indexed.filter(({ rawLabel }) => isProcessableLabel(rawLabel));
-  const skipped = indexed.filter(({ rawLabel }) => !isProcessableLabel(rawLabel));
+  const processable: Array<{ rawLabel: LiteralLabel; idx: number; hashed: HashedLabel }> = [];
+  const skipped: Array<{ rawLabel: LiteralLabel; idx: number }> = [];
 
-  const hashed = processable.map(({ rawLabel }) => hashLabel(rawLabel));
+  for (const { rawLabel, idx } of indexed) {
+    const hashed = labelhashNormalizedLabel(rawLabel);
+    if (hashed === null) {
+      skipped.push({ rawLabel, idx });
+    } else {
+      processable.push({ rawLabel, idx, hashed });
+    }
+  }
+
+  const hashed = processable.map(({ hashed }) => hashed);
   const hashes = collectLookupHashes(hashed);
 
   let hits: LabelHit[];

@@ -35,9 +35,10 @@ export type DiscoverLabelStatus =
 
 export type DiscoverClassifiedResultItem = {
   rawLabel: LiteralLabel;
+  /** LabelHash of the ENSIP-15-normalized literal (not the raw submission when it differs). */
   labelHash: LabelHash;
+  /** Present when the raw submission differs from its normalized form. */
   normalizedLabel?: LiteralLabel;
-  normalizedLabelHash?: LabelHash;
   status: Exclude<DiscoverLabelStatus, "skipped_unnormalized">;
 };
 

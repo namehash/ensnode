@@ -20,20 +20,19 @@ future row shape so adding a sink later is mechanical.
 
 For each submitted raw label EnsRainbowBeam:
 
-1. Computes `labelhashLiteralLabel(asLiteralLabel(rawLabel))`.
-2. If the label is normalizable AND the normalized form differs from the raw label, also
-   computes `labelhashLiteralLabel` for that normalized literal (still a literal-string path —
-   input is never treated as an Encoded LabelHash before hashing).
-3. Sends every distinct LabelHash to ENSNode via the typed `enssdk/omnigraph` client using
-   the `labels(by: { labelHashes })` query (batched when a submission exceeds the Omnigraph
-   per-request cap).
-4. Classifies each submitted label:
-   - `unknown_in_index` — at least one of its hashes is present in the index but not yet
-     healed (i.e. `interpreted` is the encoded labelhash form). These are the interesting
-     submissions for future on-chain emission.
-   - `healed_in_index` — at least one of its hashes is present in the index and all
-     returned hits are already healed.
-   - `absent_from_index` — none of its hashes are present in the index.
+1. Normalizes the label under ENSIP-15. Labels that cannot be normalized are skipped
+   (`skipped_unnormalized`).
+2. Computes `labelhashLiteralLabel` on the normalized literal only (never on the raw
+   submission when it differs from the normalized form).
+3. Sends every distinct normalized LabelHash to ENSNode via the typed `enssdk/omnigraph`
+   client using the `labels(by: { labelHashes })` query (batched when a submission exceeds
+   the Omnigraph per-request cap).
+4. Classifies each processable label against that single hash:
+   - `unknown_in_index` — the hash is present in the index but not yet healed (i.e.
+     `interpreted` is the encoded labelhash form). These are the interesting submissions for
+     future on-chain emission.
+   - `healed_in_index` — the hash is present and already healed.
+   - `absent_from_index` — the hash is not present in the index.
 
 ## Configuration
 
