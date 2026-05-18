@@ -38,6 +38,7 @@ export default defineConfig({
     "/ensrainbow": "/docs/services/ensrainbow",
     "/ensrainbow/concepts/label-sets-and-versioning":
       "/docs/services/ensrainbow/concepts/label-sets-and-versioning",
+    "/docs/reference/rest-api": "/docs/services/ensapi/reference/api-reference",
   },
   env: {
     schema: {

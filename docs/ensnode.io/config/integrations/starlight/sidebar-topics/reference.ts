@@ -20,10 +20,6 @@ export const referenceSidebarTopic = {
       link: "/docs/reference/what-is-ensnode",
     },
     {
-      label: "REST API",
-      link: "/docs/reference/rest-api",
-    },
-    {
       label: "ENSNode V2 Notes",
       link: "/docs/reference/ensnode-v2-notes",
     },
