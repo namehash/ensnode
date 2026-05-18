@@ -12,13 +12,14 @@ import { schema } from "@/omnigraph-api/schema";
 
 const logger = makeLogger("omnigraph");
 
+// tests exact ZodError or GraphQLError-wrapped ZodError
 const isZodError = (value: unknown): boolean =>
   value instanceof ZodError ||
   (value instanceof GraphQLError && value.originalError instanceof ZodError);
 
-// Yoga logs every execution error at `error` level, including ZodErrors raised by
-// @pothos/plugin-zod for invalid GraphQL inputs. Those are 4xx-class client errors, not
-// server faults — downgrade them to `debug` so server logs aren't flooded with stack traces.
+// Yoga logs every execution error (including GraphQL input validaton errors) at `error` level, but
+// those validation errors are expected, in general, so we downgrade them to `debug` so server logs
+// aren't flooded with stack traces.
 const yogaLogger = {
   debug: logger.debug.bind(logger),
   info: logger.info.bind(logger),
