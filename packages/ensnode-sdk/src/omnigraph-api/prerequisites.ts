@@ -7,7 +7,8 @@ import type { PrerequisiteResult } from "../shared/prerequisites";
  * Check if provided EnsIndexerPublicConfig supports the Omnigraph API.
  */
 export function hasOmnigraphApiConfigSupport(config: EnsIndexerPublicConfig): PrerequisiteResult {
-  const supported = config.plugins.includes(PluginName.Unigraph);
+  const supported =
+    config.plugins.includes(PluginName.Unigraph) || config.plugins.includes(PluginName.ENSv2);
   if (supported) return { supported };
 
   return {
