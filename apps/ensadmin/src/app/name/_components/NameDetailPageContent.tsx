@@ -1,6 +1,6 @@
 "use client";
 
-import type { Name } from "enssdk";
+import type { InterpretedName } from "enssdk";
 
 import { ASSUME_IMMUTABLE_QUERY, useRecords } from "@ensnode/ensnode-react";
 import type { ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
@@ -41,7 +41,7 @@ const AllRequestedTextRecords = [
 ];
 
 interface NameDetailPageContentProps {
-  name: Name;
+  name: InterpretedName;
 }
 
 export function NameDetailPageContent({ name }: NameDetailPageContentProps) {

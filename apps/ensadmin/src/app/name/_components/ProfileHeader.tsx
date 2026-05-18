@@ -1,7 +1,7 @@
 "use client";
 
 import { EnsAvatar, NameDisplay } from "@namehash/namehash-ui";
-import type { Name } from "enssdk";
+import type { InterpretedName } from "enssdk";
 
 import type { ENSNamespaceId } from "@ensnode/ensnode-sdk";
 
@@ -10,7 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { beautifyUrl } from "@/lib/beautify-url";
 
 interface ProfileHeaderProps {
-  name: Name;
+  name: InterpretedName;
   namespaceId: ENSNamespaceId;
   headerImage?: string | null;
   websiteUrl?: string | null;

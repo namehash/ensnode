@@ -1,7 +1,15 @@
 "use client";
 
 import { NameDisplay } from "@namehash/namehash-ui";
-import type { Name } from "enssdk";
+import {
+  asInterpretedName,
+  asLiteralName,
+  type InterpretedName,
+  isInterpretedName,
+  isNormalizedName,
+  literalNameToInterpretedName,
+  type Name,
+} from "enssdk";
 import { useRouter, useSearchParams } from "next/navigation";
 import { type ChangeEvent, useMemo, useState } from "react";
 
@@ -16,8 +24,9 @@ import { useActiveEnsNodeStackInfo } from "@/hooks/active/use-active-ensnode-sta
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 
 import { NameDetailPageContent } from "./_components/NameDetailPageContent";
+import { InterpretedNameUnsupportedError, UnnormalizedNameError } from "./_components/NameErrors";
 
-const EXAMPLE_NAMES: NamespaceSpecificValue<string[]> = {
+const EXAMPLE_NAMES: NamespaceSpecificValue<InterpretedName[]> = {
   default: [
     "vitalik.eth",
     "gregskril.eth",
@@ -31,7 +40,7 @@ const EXAMPLE_NAMES: NamespaceSpecificValue<string[]> = {
     "lens.xyz",
     "brantly.eth",
     "lightwalker.eth",
-  ],
+  ].map(asInterpretedName),
   [ENSNamespaceIds.Sepolia]: [
     "gregskril.eth",
     "vitalik.eth",
@@ -39,7 +48,7 @@ const EXAMPLE_NAMES: NamespaceSpecificValue<string[]> = {
     "recordstest.eth",
     "arrondesean.eth",
     "decode.eth",
-  ],
+  ].map(asInterpretedName),
   [ENSNamespaceIds.EnsTestEnv]: [
     "alias.eth",
     "changerole.eth",
@@ -53,7 +62,7 @@ const EXAMPLE_NAMES: NamespaceSpecificValue<string[]> = {
     "sub2.parent.eth",
     "test.eth",
     "wallet.linked.parent.eth",
-  ],
+  ].map(asInterpretedName),
 };
 
 export default function ExploreNamesPage() {
@@ -61,6 +70,7 @@ export default function ExploreNamesPage() {
   const searchParams = useSearchParams();
   const nameFromQuery = searchParams.get("name");
   const [rawInputName, setRawInputName] = useState<Name>("");
+  const [formError, setFormError] = useState<string | null>(null);
 
   const { namespace } = useActiveEnsNodeStackInfo().ensIndexer;
   const exampleNames = useMemo(
@@ -72,22 +82,49 @@ export default function ExploreNamesPage() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setFormError(null);
 
-    // TODO: Input validation and normalization.
-    // see: https://github.com/namehash/ensnode/issues/1140
+    if (rawInputName.trim() === "") return;
 
-    const href = retainCurrentRawConnectionUrlParam(getNameDetailsRelativePath(rawInputName));
+    let interpreted: InterpretedName;
+    try {
+      // Allow encoded labelhashes through; throw on unnormalizable labels.
+      interpreted = literalNameToInterpretedName(asLiteralName(rawInputName), {
+        allowEncodedLabelHashes: true,
+      });
+    } catch {
+      setFormError("The provided input is not a valid ENS name.");
+      return;
+    }
 
+    if (!isNormalizedName(interpreted)) {
+      setFormError(
+        "The provided input contains encoded labelhashes. Support for resolving names with encoded labelhashes is in progress and coming soon.",
+      );
+      return;
+    }
+
+    const href = retainCurrentRawConnectionUrlParam(getNameDetailsRelativePath(interpreted));
     router.push(href);
   };
 
   const handleRawInputNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
-
+    setFormError(null);
     setRawInputName(e.target.value);
   };
 
-  if (nameFromQuery) {
+  // Detail page: validate name from query params using only validation checks (no normalization).
+  // see: https://github.com/namehash/ensnode/issues/1140
+  if (nameFromQuery !== null && nameFromQuery !== "") {
+    if (!isInterpretedName(nameFromQuery)) {
+      return <UnnormalizedNameError />;
+    }
+
+    if (!isNormalizedName(nameFromQuery)) {
+      return <InterpretedNameUnsupportedError />;
+    }
+
     return <NameDetailPageContent name={nameFromQuery} />;
   }
 
@@ -112,12 +149,13 @@ export default function ExploreNamesPage() {
               />
               <Button
                 type="submit"
-                disabled={rawInputName.length === 0}
+                disabled={rawInputName.trim().length === 0}
                 className="max-sm:self-stretch"
               >
                 View Profile
               </Button>
             </fieldset>
+            {formError && <p className="text-sm text-red-600">{formError}</p>}
           </form>
           <div className="flex flex-col gap-2 justify-center">
             <p className="text-sm font-medium leading-none">Examples:</p>

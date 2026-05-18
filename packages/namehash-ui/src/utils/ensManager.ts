@@ -1,4 +1,4 @@
-import type { Address, Name } from "enssdk";
+import { type Address, isNormalizedName, type Name } from "enssdk";
 
 import type { ENSNamespaceId } from "@ensnode/datasources";
 import { ENSNamespaceIds } from "@ensnode/ensnode-sdk";
@@ -28,10 +28,13 @@ export function getEnsManagerUrl(namespaceId: ENSNamespaceId): URL | null {
 /**
  * Builds the URL of the external ENS Manager App Profile page for a given name and ENS Namespace.
  *
- * @returns URL to the Profile page in the external ENS Manager App for a given name and ENS Namespace,
- * or null if this URL is not known
+ * Returns null if the name is not normalized or the namespace has no known ENS Manager App.
+ *
+ * @returns URL to the Profile page in the external ENS Manager App, or null
  */
 export function getEnsManagerNameDetailsUrl(name: Name, namespaceId: ENSNamespaceId): URL | null {
+  if (!isNormalizedName(name)) return null;
+
   const baseUrl = getEnsManagerUrl(namespaceId);
   if (!baseUrl) return null;
 

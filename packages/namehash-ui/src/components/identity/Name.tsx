@@ -1,5 +1,5 @@
 import type { Name } from "enssdk";
-import { beautifyName } from "enssdk";
+import { beautifyInterpretedName, isInterpretedName } from "enssdk";
 
 interface NameDisplayProps {
   name: Name;
@@ -9,10 +9,16 @@ interface NameDisplayProps {
 /**
  * Displays an ENS name in beautified form.
  *
- * @param name - The name to display in beautified form.
+ * If the provided name is not a valid InterpretedName, displays
+ * "(invalid name)" instead.
  *
+ * @param name - The name to display.
  */
 export function NameDisplay({ name, className = "nhui:font-medium" }: NameDisplayProps) {
-  const beautifiedName = beautifyName(name);
+  if (!isInterpretedName(name)) {
+    return <span className={className}>(invalid name)</span>;
+  }
+
+  const beautifiedName = beautifyInterpretedName(name);
   return <span className={className}>{beautifiedName}</span>;
 }
