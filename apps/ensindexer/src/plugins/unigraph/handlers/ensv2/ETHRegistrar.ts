@@ -29,7 +29,7 @@ import {
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs, LogEventBase } from "@/lib/ponder-helpers";
 
-const pluginName = PluginName.ENSv2;
+const pluginName = PluginName.Unigraph;
 
 async function getRegistrarAndRegistry(context: IndexingEngineContext, event: LogEventBase) {
   const registrar = getThisAccountId(context, event);
@@ -74,7 +74,7 @@ export default function () {
       const { tokenId, owner, referrer, paymentToken, base, premium } = event.args;
 
       // NOTE: Label and Domain operations are handled by ENSv2Registry:NameRegistered
-      // (see apps/ensindexer/src/plugins/ensv2/handlers/ensv2/ENSv2Registry.ts) which occurs
+      // (see apps/ensindexer/src/plugins/unigraph/handlers/ensv2/ENSv2Registry.ts) which occurs
       // _before_ this event. This event upserts the latest Registration with payment info.
 
       const { registrar, registry } = await getRegistrarAndRegistry(context, event);

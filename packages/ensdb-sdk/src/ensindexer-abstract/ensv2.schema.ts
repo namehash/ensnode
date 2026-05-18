@@ -43,7 +43,7 @@ import type { EncodedReferrer } from "@ensnode/ensnode-sdk";
  * in ENSApi. The current obvious exception is that `domain.ownerId` for ENSv1 Domains is the
  * _materialized_ _effective_ owner. ENSv1 includes a diverse number of ways to 'own' a domain,
  * including the ENSv1 Registry, various Registrars, and the NameWrapper. The ENSv1 indexing logic
- * within this ENSv2 plugin materializes the effective owner to simplify this aspect of ENS and
+ * within this Unigraph plugin materializes the effective owner to simplify this aspect of ENS and
  * enable efficient queries against `domain.ownerId`.
  *
  * When necessary, all datamodels are shared or polymorphic between ENSv1 and ENSv2, including
@@ -76,7 +76,7 @@ import type { EncodedReferrer } from "@ensnode/ensnode-sdk";
  * for fresh ENSv1 virtual registries on first wire-up) or a single recursive-CTE batch UPDATE
  * otherwise (see `canonicality-db-helpers.ts`).
  *
- * Note also that the Protocol Acceleration plugin is a hard requirement for the ENSv2 plugin. This
+ * Note also that the Protocol Acceleration plugin is a hard requirement for the Unigraph plugin. This
  * allows us to rely on the shared logic for indexing:
  *   a) ENSv1RegistryOld -> ENSv1Registry migration status
  *   b) Domain-Resolver Relations for both ENSv1 and ENSv2 Domains

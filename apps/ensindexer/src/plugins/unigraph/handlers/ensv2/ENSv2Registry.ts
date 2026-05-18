@@ -42,7 +42,7 @@ import {
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 
-const pluginName = PluginName.ENSv2;
+const pluginName = PluginName.Unigraph;
 
 export default function () {
   /**

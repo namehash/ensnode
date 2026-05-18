@@ -70,12 +70,12 @@ export interface PonderAppLogger {
    * @example
    * ```ts
    * logger.warn({
-   *   msg: "Both the '${PluginName.Subgraph}' and '${PluginName.ENSv2}' plugins are enabled.",
+   *   msg: "Both the '${PluginName.Subgraph}' and '${PluginName.Unigraph}' plugins are enabled.",
    *   effects: "This results in the availability of both the legacy Subgraph-Compatible GraphQL API (/subgraph) _and_ ENSNode's Omnigraph API (/api/omnigraph), and comes with an associated increase in indexing time. If your intent is to have both APIs available in parallel, excellent, otherwise you may benefit from only enabling the plugin for the API you plan to use."
    * });
    *
    * logger.warn({
-   *   msg: "Both the '${PluginName.Subgraph}' and '${PluginName.ENSv2}' plugins are enabled."
+   *   msg: "Both the '${PluginName.Subgraph}' and '${PluginName.Unigraph}' plugins are enabled."
    * });
    * ```
    */

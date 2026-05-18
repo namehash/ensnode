@@ -15,8 +15,8 @@ const ensRootChainId = getENSRootChainId(config.namespace);
 /**
  * Node migration handler — tracks ENSv1RegistryOld → ENSv1Registry migration on the ENS Root Chain.
  *
- * Extracted from the ProtocolAcceleration plugin so it can be registered before both the ENSv2 and
- * ProtocolAcceleration plugins. This guarantees `nodeIsMigrated` reads from a populated table when
+ * Extracted from the 'protocol-acceleration' plugin so it can be registered before both the 'unigraph' and
+ * 'protocol-acceleration' plugins. This guarantees `nodeIsMigrated` reads from a populated table when
  * those plugins' Old-registry guards run.
  */
 export default function () {
