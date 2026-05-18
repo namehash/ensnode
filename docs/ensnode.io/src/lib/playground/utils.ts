@@ -52,3 +52,17 @@ export const HOSTED_INSTANCES_DOC_PATH = "/docs/integrate/hosted-instances" as c
 export function getHostedEnsNodeInstanceDocUrl(headingAnchor: string): string {
   return `${HOSTED_INSTANCES_DOC_PATH}#${headingAnchor}`;
 }
+
+/** ENSAdmin Omnigraph playground deep link (opens in browser). */
+export function buildEnsadminOmnigraphUrl(params: {
+  ensadminBaseUrl: string;
+  query: string;
+  connection: string;
+  variables: Record<string, unknown>;
+}): string {
+  const url = new URL("/api/omnigraph", params.ensadminBaseUrl);
+  url.searchParams.set("query", params.query);
+  url.searchParams.set("connection", params.connection);
+  url.searchParams.set("variables", stringifyJsonForDocs(params.variables));
+  return url.toString();
+}
