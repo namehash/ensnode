@@ -42,7 +42,7 @@ const [vitalik] = await ensDb
   .from(ensIndexerSchema.domain)
   .where(eq(ensIndexerSchema.domain.canonicalName, "vitalik.eth"));
 
-// Count an address's Domains, grouped by Domain type
+// Count an address's Domains, grouped by Domain type (ENSv1 vs ENSv2)
 const counts = await ensDb
   .select({ type: ensIndexerSchema.domain.type, count: count() })
   .from(ensIndexerSchema.domain)
