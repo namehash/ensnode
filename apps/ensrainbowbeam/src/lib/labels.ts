@@ -55,7 +55,7 @@ export type SkippedLabelClassification = {
  * Subset of `Label` fields returned by the Omnigraph `labels` query that we care about.
  */
 export type LabelHit = {
-  hash: LabelHash;
+  labelhash: LabelHash;
   interpreted: InterpretedLabel;
 };
 
@@ -90,10 +90,10 @@ export function collectLookupHashes(hashed: readonly HashedLabel[]): LabelHash[]
 
 /**
  * True when an Omnigraph `Label` row represents an unhealed/unknown label
- * (i.e. its `interpreted` form is the Encoded LabelHash of its `hash`).
+ * (i.e. its `interpreted` form is the Encoded LabelHash of its `labelhash`).
  */
 export function isUnhealedHit(hit: LabelHit): boolean {
-  return hit.interpreted === encodeLabelHash(hit.hash);
+  return hit.interpreted === encodeLabelHash(hit.labelhash);
 }
 
 /**
@@ -105,7 +105,7 @@ export function classifySubmissions(
   hits: readonly LabelHit[],
 ): LabelClassification[] {
   const hitsByHash = new Map<LabelHash, LabelHit>();
-  for (const hit of hits) hitsByHash.set(hit.hash, hit);
+  for (const hit of hits) hitsByHash.set(hit.labelhash, hit);
 
   return hashed.map((item) => {
     const hit = hitsByHash.get(item.labelHash);

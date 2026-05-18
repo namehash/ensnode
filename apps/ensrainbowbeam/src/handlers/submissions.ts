@@ -7,10 +7,10 @@ import { errorResponse } from "@/lib/error-response";
 import {
   classifySubmissions,
   collectLookupHashes,
-  labelhashNormalizedLabel,
   type HashedLabel,
   type LabelClassification,
   type LabelHit,
+  labelhashNormalizedLabel,
   type SkippedLabelClassification,
 } from "@/lib/labels";
 import { lookupLabels } from "@/lib/omnigraph-client";

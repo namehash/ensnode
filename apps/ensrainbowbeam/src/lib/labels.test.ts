@@ -11,9 +11,9 @@ import { describe, expect, it } from "vitest";
 import {
   classifySubmissions,
   collectLookupHashes,
-  labelhashNormalizedLabel,
   isUnhealedHit,
   type LabelHit,
+  labelhashNormalizedLabel,
 } from "./labels";
 
 const literal = (s: string) => s as LiteralLabel;
@@ -77,13 +77,16 @@ describe("collectLookupHashes", () => {
 describe("isUnhealedHit", () => {
   it("returns true when interpreted equals encodeLabelHash(hash)", () => {
     const hash = labelhashLiteralLabel(literal("xyz"));
-    const hit: LabelHit = { hash, interpreted: encodeLabelHash(hash) as InterpretedLabel };
+    const hit: LabelHit = {
+      labelhash: hash,
+      interpreted: encodeLabelHash(hash) as InterpretedLabel,
+    };
     expect(isUnhealedHit(hit)).toBe(true);
   });
 
   it("returns false when interpreted is a healed literal", () => {
     const hash = labelhashLiteralLabel(literal("vitalik"));
-    const hit: LabelHit = { hash, interpreted: "vitalik" as InterpretedLabel };
+    const hit: LabelHit = { labelhash: hash, interpreted: "vitalik" as InterpretedLabel };
     expect(isUnhealedHit(hit)).toBe(false);
   });
 });
@@ -96,12 +99,12 @@ describe("classifySubmissions", () => {
     throw new Error("test fixture invariant");
   }
 
-  function makeHealedHit(hash: LabelHash, label: string): LabelHit {
-    return { hash, interpreted: label as InterpretedLabel };
+  function makeHealedHit(labelhash: LabelHash, label: string): LabelHit {
+    return { labelhash, interpreted: label as InterpretedLabel };
   }
 
-  function makeUnhealedHit(hash: LabelHash): LabelHit {
-    return { hash, interpreted: encodeLabelHash(hash) as InterpretedLabel };
+  function makeUnhealedHit(labelhash: LabelHash): LabelHit {
+    return { labelhash, interpreted: encodeLabelHash(labelhash) as InterpretedLabel };
   }
 
   it("classifies absent labels as absent_from_index", () => {

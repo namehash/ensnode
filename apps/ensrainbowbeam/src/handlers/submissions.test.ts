@@ -85,7 +85,7 @@ describe("POST /api/discover", () => {
   it("classifies a healed label correctly and emits exactly one log line", async () => {
     const ethHash = labelhashLiteralLabel("eth" as LiteralLabel);
     mockedLookup.mockResolvedValue([
-      { hash: ethHash, interpreted: "eth" as InterpretedLabel } satisfies LabelHit,
+      { labelhash: ethHash, interpreted: "eth" as InterpretedLabel } satisfies LabelHit,
     ]);
 
     const app = makeApp();
@@ -120,7 +120,7 @@ describe("POST /api/discover", () => {
   it("classifies an unhealed label as unknown_in_index", async () => {
     const fooHash = labelhashLiteralLabel("foo" as LiteralLabel);
     mockedLookup.mockResolvedValue([
-      { hash: fooHash, interpreted: encodeLabelHash(fooHash) as InterpretedLabel },
+      { labelhash: fooHash, interpreted: encodeLabelHash(fooHash) as InterpretedLabel },
     ]);
 
     const app = makeApp();
@@ -177,8 +177,8 @@ describe("POST /api/discover", () => {
     const ethHash = labelhashLiteralLabel("eth" as LiteralLabel);
     const vitalikHash = labelhashLiteralLabel("vitalik" as LiteralLabel);
     mockedLookup.mockResolvedValue([
-      { hash: ethHash, interpreted: "eth" as InterpretedLabel } satisfies LabelHit,
-      { hash: vitalikHash, interpreted: "vitalik" as InterpretedLabel } satisfies LabelHit,
+      { labelhash: ethHash, interpreted: "eth" as InterpretedLabel } satisfies LabelHit,
+      { labelhash: vitalikHash, interpreted: "vitalik" as InterpretedLabel } satisfies LabelHit,
     ]);
 
     const app = makeApp();

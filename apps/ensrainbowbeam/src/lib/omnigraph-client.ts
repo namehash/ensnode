@@ -69,5 +69,10 @@ export async function lookupLabels(
     }
   }
 
-  return results.flatMap((r) => r.data?.labels ?? []);
+  return results.flatMap((r) =>
+    (r.data?.labels ?? []).map(({ hash, interpreted }) => ({
+      labelhash: hash,
+      interpreted,
+    })),
+  );
 }
