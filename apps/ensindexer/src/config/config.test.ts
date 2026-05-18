@@ -536,18 +536,21 @@ describe("config (with base env)", () => {
   describe("additional checks", () => {
     it("all plugins have requiredDatasourceNames as a subset of allDatasourceNames", () => {
       for (const pluginName of Object.values(PluginName)) {
-        try {
-          const plugin = getPlugin(pluginName);
+        let plugin: ReturnType<typeof getPlugin>;
 
-          const allSet = new Set(plugin.allDatasourceNames);
-          for (const required of plugin.requiredDatasourceNames) {
-            expect(
-              allSet.has(required),
-              `${pluginName}: requiredDatasourceName '${required}' missing from allDatasourceNames`,
-            ).toBe(true);
-          }
+        try {
+          plugin = getPlugin(pluginName);
         } catch {
           // Skip deprecated plugins that may not meet this invariant, but ensure all non-deprecated plugins do.
+          continue;
+        }
+
+        const allSet = new Set(plugin.allDatasourceNames);
+        for (const required of plugin.requiredDatasourceNames) {
+          expect(
+            allSet.has(required),
+            `${pluginName}: requiredDatasourceName '${required}' missing from allDatasourceNames`,
+          ).toBe(true);
         }
       }
     });
