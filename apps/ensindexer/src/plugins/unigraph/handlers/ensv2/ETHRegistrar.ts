@@ -74,7 +74,7 @@ export default function () {
       const { tokenId, owner, referrer, paymentToken, base, premium } = event.args;
 
       // NOTE: Label and Domain operations are handled by ENSv2Registry:NameRegistered
-      // (see apps/ensindexer/src/plugins/ensv2/handlers/ensv2/ENSv2Registry.ts) which occurs
+      // (see apps/ensindexer/src/plugins/unigraph/handlers/ensv2/ENSv2Registry.ts) which occurs
       // _before_ this event. This event upserts the latest Registration with payment info.
 
       const { registrar, registry } = await getRegistrarAndRegistry(context, event);
