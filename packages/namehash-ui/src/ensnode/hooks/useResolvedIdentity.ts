@@ -13,8 +13,8 @@ import {
   type UnresolvedIdentity,
 } from "@ensnode/ensnode-sdk";
 
+import { ASSUME_IMMUTABLE_QUERY } from "../query";
 import type { UseResolvedIdentityParameters } from "../types";
-import { ASSUME_IMMUTABLE_QUERY } from "../utils/query";
 import { usePrimaryName } from "./usePrimaryName";
 
 /**

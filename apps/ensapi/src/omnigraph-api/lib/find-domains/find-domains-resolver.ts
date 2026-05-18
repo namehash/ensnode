@@ -21,22 +21,12 @@ import {
   DOMAINS_DEFAULT_ORDER_BY,
   DOMAINS_DEFAULT_ORDER_DIR,
   type DomainsOrderBy,
+  type DomainsOrderInput,
 } from "@/omnigraph-api/schema/domain-inputs";
-import type { OrderDirection } from "@/omnigraph-api/schema/order-direction";
 
 import { DomainCursors } from "./domain-cursor";
 import { cursorFilter, orderFindDomains } from "./find-domains-resolver-helpers";
 import type { DomainOrderValue } from "./types";
-
-/**
- * Describes the ordering of the set of Domains.
- *
- * @dev derived from the GraphQL Input Types for 1:1 convenience
- */
-interface FindDomainsOrderArg {
-  by?: typeof DomainsOrderBy.$inferType | null;
-  dir?: typeof OrderDirection.$inferType | null;
-}
 
 /**
  * Domain with order value injected.
@@ -57,7 +47,9 @@ function getOrderValueFromResult(
 ): DomainOrderValue {
   switch (orderBy) {
     case "NAME":
-      return result.sortableLabel;
+      return result.canonicalName;
+    case "DEPTH":
+      return result.canonicalDepth;
     case "REGISTRATION_TIMESTAMP":
       return result.registrationTimestamp;
     case "REGISTRATION_EXPIRY":
@@ -80,12 +72,24 @@ export function resolveFindDomains(
   {
     domains,
     order,
+    defaultOrder,
     ...connectionArgs
   }: {
-    /** Pre-built domains CTE from `withOrderingMetadata` */
+    /**
+     * Pre-built domains CTE from `withOrderingMetadata`
+     */
     domains: DomainsWithOrderingMetadata;
-    /** Optional ordering; defaults to NAME ASC */
-    order?: FindDomainsOrderArg | undefined | null;
+
+    /**
+     * Optional ordering. Each unset field falls back to `defaultOrder` then the
+     * `DOMAINS_DEFAULT_ORDER_*` constants.
+     */
+    order?: Partial<typeof DomainsOrderInput.$inferInput> | null;
+
+    /**
+     * Filter-supplied default `(by, dir)` when the caller doesn't pass `order`.
+     */
+    defaultOrder?: Partial<typeof DomainsOrderInput.$inferInput>;
 
     // relay connection args from t.connection
     first?: number | null;
@@ -94,8 +98,8 @@ export function resolveFindDomains(
     after?: string | null;
   },
 ) {
-  const orderBy = order?.by ?? DOMAINS_DEFAULT_ORDER_BY;
-  const orderDir = order?.dir ?? DOMAINS_DEFAULT_ORDER_DIR;
+  const orderBy = order?.by ?? defaultOrder?.by ?? DOMAINS_DEFAULT_ORDER_BY;
+  const orderDir = order?.dir ?? defaultOrder?.dir ?? DOMAINS_DEFAULT_ORDER_DIR;
 
   return lazyConnection({
     totalCount: () =>

@@ -73,6 +73,7 @@ describe("Domain.canonical", () => {
       id: DomainId;
       canonical: {
         name: InterpretedName;
+        depth: number;
         node: string;
         path: { id: DomainId }[];
       } | null;
@@ -81,24 +82,25 @@ describe("Domain.canonical", () => {
 
   const DomainCanonicalByName = gql`
     query DomainCanonicalByName($name: InterpretedName!) {
-      domain(by: { name: $name }) { id canonical { name node path { id } } }
+      domain(by: { name: $name }) { id canonical { name depth node path { id } } }
     }
   `;
 
   const DomainCanonicalById = gql`
     query DomainCanonicalById($id: DomainId!) {
-      domain(by: { id: $id }) { id canonical { name node path { id } } }
+      domain(by: { id: $id }) { id canonical { name depth node path { id } } }
     }
   `;
 
   it.each(DEVNET_NAMES)(
-    "materializes canonical.{name, path, node} for '$name'",
+    "materializes canonical.{name, depth, path, node} for '$name'",
     async ({ name, canonical }) => {
       const result = await request<DomainCanonicalQueryResult>(DomainCanonicalByName, { name });
+      const labelCount = canonical.split(".").length;
       expect(result).toMatchObject({
-        domain: { canonical: { name: canonical } },
+        domain: { canonical: { name: canonical, depth: labelCount } },
       });
-      expect(result.domain!.canonical!.path.length).toBe(canonical.split(".").length);
+      expect(result.domain!.canonical!.path.length).toBe(labelCount);
     },
   );
 

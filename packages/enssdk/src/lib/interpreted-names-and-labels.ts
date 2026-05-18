@@ -264,37 +264,6 @@ export function ensureInterpretedLabel(
 }
 
 /**
- * Parses a Partial InterpretedName into concrete InterpretedLabels and the partial Label.
- *
- * @example
- * ```ts
- * const result = parsePartialInterpretedName("example.et")
- * // { concrete: ["example"], partial: "et" }
- * ```
- *
- * @throws if the provided `partialInterpretedName` is not composed of concrete InterpretedLabels.
- */
-export function parsePartialInterpretedName(partialInterpretedName: Name): {
-  concrete: InterpretedLabel[];
-  partial: string;
-} {
-  if (partialInterpretedName === "") return { concrete: [], partial: "" };
-
-  const concrete = partialInterpretedName.split(".");
-  // note that the concrete.pop mutates `concrete` to exclude the last element
-  // biome-ignore lint/style/noNonNullAssertion: there's always at least one element after a .split
-  const partial = concrete.pop()!;
-
-  if (!concrete.every(isInterpretedLabel)) {
-    throw new Error(
-      `Invariant(parsePartialInterpretedName): Concrete portion of Partial InterpretedName contains segments that are not InterpretedLabels.\n${JSON.stringify(concrete)}`,
-    );
-  }
-
-  return { concrete, partial };
-}
-
-/**
  * Casts a string to a {@link LiteralName}.
  *
  * A LiteralName is a name that should be interpreted as a string literal. It may or may not be

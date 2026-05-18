@@ -10,7 +10,6 @@ import {
   literalLabelsToInterpretedName,
   literalLabelToInterpretedLabel,
   literalNameToInterpretedName,
-  parsePartialInterpretedName,
 } from "./interpreted-names-and-labels";
 import { encodeLabelHash, labelhashLiteralLabel } from "./labelhash";
 import type { InterpretedLabel, InterpretedName, LiteralLabel, Name } from "./types";
@@ -116,65 +115,6 @@ describe("interpretation", () => {
           ["a", "b", "c", interpretedLabelThatLooksLikeALabelHash].map(asInterpretedLabel),
         ),
       ).toEqual(`a.b.c.${interpretedLabelThatLooksLikeALabelHash}`);
-    });
-  });
-
-  describe("parsePartialInterpretedName", () => {
-    it.each([
-      // empty input
-      ["", [], ""],
-      // partial only (no concrete labels)
-      ["t", [], "t"],
-      ["test", [], "test"],
-      ["exam", [], "exam"],
-      ["🔥", [], "🔥"],
-      // concrete TLD with empty partial
-      ["eth.", ["eth"], ""],
-      ["base.", ["base"], ""],
-      // concrete TLD with partial SLD
-      ["test.eth", ["test"], "eth"],
-      ["example.eth", ["example"], "eth"],
-      ["demo.eth", ["demo"], "eth"],
-      ["parent.eth", ["parent"], "eth"],
-      ["bridge.eth", ["bridge"], "eth"],
-      ["examp.eth", ["examp"], "eth"],
-      // concrete SLD with empty partial
-      ["sub.parent.eth.", ["sub", "parent", "eth"], ""],
-      // concrete SLD with partial 3LD
-      ["sub2.parent.eth", ["sub2", "parent"], "eth"],
-      ["linked.parent.eth", ["linked", "parent"], "eth"],
-      // deeper nesting
-      ["sub1.sub2.parent.eth", ["sub1", "sub2", "parent"], "eth"],
-      ["wallet.sub1.sub2.parent.eth", ["wallet", "sub1", "sub2", "parent"], "eth"],
-      ["wallet.linked.parent.eth", ["wallet", "linked", "parent"], "eth"],
-      // partial at various depths
-      ["wal.sub1.sub2.parent.eth", ["wal", "sub1", "sub2", "parent"], "eth"],
-      ["w.sub1.sub2.parent.eth", ["w", "sub1", "sub2", "parent"], "eth"],
-      // with encoded labelhashes in concrete
-      [`${EXAMPLE_ENCODED_LABEL_HASH}.eth`, [EXAMPLE_ENCODED_LABEL_HASH], "eth"],
-      // with encoded labelhash in partial
-      [
-        `example.${EXAMPLE_ENCODED_LABEL_HASH.slice(0, 20)}`,
-        ["example"],
-        EXAMPLE_ENCODED_LABEL_HASH.slice(0, 20),
-      ],
-    ] as [Name, string[], string][])(
-      "parsePartialInterpretedName(%j) → { concrete: %j, partial: %j }",
-      (input, expectedConcrete, expectedPartial) => {
-        expect(parsePartialInterpretedName(input)).toEqual({
-          concrete: expectedConcrete,
-          partial: expectedPartial,
-        });
-      },
-    );
-
-    it.each([
-      "Test.eth", // uppercase in concrete
-      "EXAMPLE.eth", // uppercase in concrete
-      "test\0.eth", // null in concrete
-      "sub.Parent.eth", // uppercase in middle
-    ] as Name[])("throws for invalid concrete label: %j", (input) => {
-      expect(() => parsePartialInterpretedName(input)).toThrow();
     });
   });
 

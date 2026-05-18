@@ -22,13 +22,50 @@ export const DomainIdInput = builder.inputType("DomainIdInput", {
   }),
 });
 
+/**
+ * Max number of names accepted by `DomainsNameFilter.in`.
+ */
+export const DOMAINS_NAME_FILTER_IN_MAX = 100;
+
+/**
+ * @oneOf filter for Domain names. Exactly one of `starts_with`, `eq`, or `in` must be provided.
+ *
+ * - `starts_with`: prefix-match on Interpreted Name for typeahead. Case-insensitive.
+ * - `eq`: exact InterpretedName match. Sugar for `in: [eq]`. Combine with `version` to disambiguate
+ *   across ENS protocol versions.
+ * - `in`: exact InterpretedName match against any name in the set. Max 100 items.
+ */
+export const DomainsNameFilter = builder.inputType("DomainsNameFilter", {
+  description:
+    "Filter Domains by name. Exactly one of `starts_with`, `eq`, or `in` must be provided.",
+  isOneOf: true,
+  fields: (t) => ({
+    starts_with: t.string({
+      description:
+        "Prefix-match on Interpreted Name for typeahead. ex: 'vit', 'vitalik.et'. Case-insensitive (InterpretedName labels are normalized).",
+      validate: { minLength: 1 },
+    }),
+    eq: t.field({
+      type: "InterpretedName",
+      description:
+        "Exact InterpretedName match. Sugar for `in: [eq]`. Combine with `version` to disambiguate across ENS protocol versions.",
+      validate: { minLength: 1 },
+    }),
+    in: t.field({
+      type: ["InterpretedName"],
+      description: `Exact InterpretedName match against any name in the set. Max ${DOMAINS_NAME_FILTER_IN_MAX} items.`,
+      validate: { items: { minLength: 1 }, maxLength: DOMAINS_NAME_FILTER_IN_MAX },
+    }),
+  }),
+});
+
 export const DomainsWhereInput = builder.inputType("DomainsWhereInput", {
   description: "Filter for the top-level domains query.",
   fields: (t) => ({
-    name: t.string({
+    name: t.field({
+      type: DomainsNameFilter,
       required: true,
-      description:
-        "A partial Interpreted Name by which to search the set of Domains. ex: 'example', 'example.', 'example.et'.",
+      description: "Filter the set of Domains by name.",
     }),
     version: t.field({
       type: ENSProtocolVersion,
@@ -41,9 +78,9 @@ export const DomainsWhereInput = builder.inputType("DomainsWhereInput", {
 export const AccountDomainsWhereInput = builder.inputType("AccountDomainsWhereInput", {
   description: "Filter for Account.domains query.",
   fields: (t) => ({
-    name: t.string({
-      description:
-        "A partial Interpreted Name by which to search the set of Domains. ex: 'example', 'example.', 'example.et'.",
+    name: t.field({
+      type: DomainsNameFilter,
+      description: "If set, filters the set of Domains by name.",
     }),
     canonical: t.boolean({
       description:
@@ -61,8 +98,9 @@ export const AccountDomainsWhereInput = builder.inputType("AccountDomainsWhereIn
 export const RegistryDomainsWhereInput = builder.inputType("RegistryDomainsWhereInput", {
   description: "Filter for Registry.domains query.",
   fields: (t) => ({
-    name: t.string({
-      description: "A partial Interpreted Name by which to filter Domains in this Registry.",
+    name: t.field({
+      type: DomainsNameFilter,
+      description: "If set, filters the set of Domains in this Registry by name.",
     }),
   }),
 });
@@ -70,8 +108,9 @@ export const RegistryDomainsWhereInput = builder.inputType("RegistryDomainsWhere
 export const SubdomainsWhereInput = builder.inputType("SubdomainsWhereInput", {
   description: "Filter for Domain.subdomains query.",
   fields: (t) => ({
-    name: t.string({
-      description: "A partial Interpreted Name by which to filter subdomains.",
+    name: t.field({
+      type: DomainsNameFilter,
+      description: "If set, filters the set of subdomains by name.",
     }),
   }),
 });
@@ -82,7 +121,7 @@ export const SubdomainsWhereInput = builder.inputType("SubdomainsWhereInput", {
 
 export const DomainsOrderBy = builder.enumType("DomainsOrderBy", {
   description: "Fields by which domains can be ordered",
-  values: ["NAME", "REGISTRATION_TIMESTAMP", "REGISTRATION_EXPIRY"] as const,
+  values: ["NAME", "DEPTH", "REGISTRATION_TIMESTAMP", "REGISTRATION_EXPIRY"] as const,
 });
 
 export type DomainsOrderByValue = typeof DomainsOrderBy.$inferType;

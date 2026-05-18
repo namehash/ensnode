@@ -4,8 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 
 import type { ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 
+import { createRecordsQueryOptions, DISABLED_QUERY } from "../query";
 import type { UseRecordsParameters, WithEnsNodeProviderOptions } from "../types";
-import { createRecordsQueryOptions } from "../utils/query";
 import { useEnsNodeProviderOptions } from "./useEnsNodeProviderOptions";
 
 /**
@@ -19,7 +19,7 @@ import { useEnsNodeProviderOptions } from "./useEnsNodeProviderOptions";
  *
  * @example
  * ```typescript
- * import { useRecords } from "@ensnode/ensnode-react";
+ * import { useRecords } from "@namehash/namehash-ui";
  *
  * function DisplayNameRecords() {
  *   const { data, isLoading, error } = useRecords({
@@ -60,11 +60,11 @@ export function useRecords<SELECTION extends ResolverRecordsSelection>(
 
   const queryOptions = canEnable
     ? createRecordsQueryOptions(_config, { ...args, name })
-    : { enabled: false, queryKey: ["disabled"] as const };
+    : DISABLED_QUERY;
 
   return useQuery({
     ...queryOptions,
     ...query,
-    enabled: canEnable && (query.enabled ?? queryOptions.enabled),
+    enabled: canEnable && (query.enabled ?? true),
   });
 }
