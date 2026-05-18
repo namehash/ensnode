@@ -11,7 +11,7 @@ export * from "./ensnode";
 export * from "./ensrainbow";
 export * from "./identity";
 export * from "./indexing-status";
-export * from "./omnigraph-api";
+export * from "./omnigraph-api/prerequisites";
 export * from "./registrars";
 export * from "./resolution";
 export * from "./shared/account-id";

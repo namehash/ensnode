@@ -19,6 +19,7 @@
   ],
   "exports": {
     ".": "./src/index.ts",
+    "./omnigraph-api/example-queries": "./src/omnigraph-api/example-queries.ts",
     "./internal": "./src/internal.ts"
   },
   "sideEffects": false,
@@ -33,6 +34,16 @@
         "require": {
           "types": "./dist/index.d.cts",
           "default": "./dist/index.cjs"
+        }
+      },
+      "./omnigraph-api/example-queries": {
+        "import": {
+          "types": "./dist/omnigraph-api/example-queries.d.ts",
+          "default": "./dist/omnigraph-api/example-queries.js"
+        },
+        "require": {
+          "types": "./dist/omnigraph-api/example-queries.d.cts",
+          "default": "./dist/omnigraph-api/example-queries.cjs"
         }
       }
     },
