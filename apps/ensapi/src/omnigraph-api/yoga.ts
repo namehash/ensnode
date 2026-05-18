@@ -2,13 +2,35 @@
 // import { maxDepthPlugin } from "@escape.tech/graphql-armor-max-depth";
 // import { maxTokensPlugin } from "@escape.tech/graphql-armor-max-tokens";
 
+import { GraphQLError } from "graphql";
 import { createYoga } from "graphql-yoga";
+import { ZodError } from "zod/v4";
 
 import { makeLogger } from "@/lib/logger";
 import { context } from "@/omnigraph-api/context";
 import { schema } from "@/omnigraph-api/schema";
 
 const logger = makeLogger("omnigraph");
+
+const isZodError = (value: unknown): boolean =>
+  value instanceof ZodError ||
+  (value instanceof GraphQLError && value.originalError instanceof ZodError);
+
+// Yoga logs every execution error at `error` level, including ZodErrors raised by
+// @pothos/plugin-zod for invalid GraphQL inputs. Those are 4xx-class client errors, not
+// server faults — downgrade them to `debug` so server logs aren't flooded with stack traces.
+const yogaLogger = {
+  debug: logger.debug.bind(logger),
+  info: logger.info.bind(logger),
+  warn: logger.warn.bind(logger),
+  error: (err: unknown) => {
+    if (isZodError(err)) {
+      logger.debug({ err }, "GraphQL input validation rejected");
+      return;
+    }
+    logger.error(err);
+  },
+};
 
 export const yoga = createYoga({
   graphqlEndpoint: "*",
@@ -36,7 +58,7 @@ export const yoga = createYoga({
   },
 
   // integrate logging with pino
-  logging: logger,
+  logging: yogaLogger,
 
   plugins: [
     // TODO: plugins
