@@ -1,5 +1,5 @@
 import { getNamespaceSpecificValue } from "@ensnode/ensnode-sdk";
-import { getGraphqlApiExampleQueryById } from "@ensnode/ensnode-sdk/omnigraph-api/example-queries";
+import { getGraphqlApiExampleQueryById } from "@ensnode/ensnode-sdk/internal";
 
 import { DOCS_OMNIGRAPH_NAMESPACE, ENSNODE_URL } from "src/lib/playground/constants";
 import { OmnigraphExampleQuerySchema, type OmnigraphExampleQuery } from "src/lib/playground/types";
