@@ -41,7 +41,7 @@ function getSortValue(
 ): string | number | null {
   switch (by) {
     case "NAME":
-      return domain.canonical?.name ?? null;
+      return domain.canonical?.name.interpreted ?? null;
     case "DEPTH":
       return domain.canonical?.depth ?? null;
     case "REGISTRATION_TIMESTAMP":

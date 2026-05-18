@@ -96,10 +96,12 @@ export const ResolverEventsPaginated = gql`
     $before: String
   ) {
     domain(by: { name: $name }) {
-      assignedResolver {
-        events(first: $first, after: $after, last: $last, before: $before) {
-          edges { cursor node { ...EventFragment } }
-          pageInfo { ...PageInfoFragment }
+      resolver {
+        assigned {
+          events(first: $first, after: $after, last: $last, before: $before) {
+            edges { cursor node { ...EventFragment } }
+            pageInfo { ...PageInfoFragment }
+          }
         }
       }
     }

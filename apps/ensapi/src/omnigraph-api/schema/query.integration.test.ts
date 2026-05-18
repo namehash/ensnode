@@ -83,7 +83,7 @@ describe("Query.domains", () => {
     domains: GraphQLConnection<{
       __typename: "ENSv1Domain" | "ENSv2Domain";
       id: DomainId;
-      canonical: { name: Name } | null;
+      canonical: { name: { interpreted: Name } } | null;
       label: { interpreted: InterpretedLabel };
       owner: { address: NormalizedAddress };
       node?: Node;
@@ -102,7 +102,9 @@ describe("Query.domains", () => {
             __typename
             id
             canonical {
-              name
+              name {
+                interpreted
+              }
             }
             label {
               interpreted
@@ -139,7 +141,7 @@ describe("Query.domains", () => {
       domains.find((d) => d.__typename === "ENSv1Domain" && d.id === V1_ETH_DOMAIN_ID),
     ).toMatchObject({
       id: V1_ETH_DOMAIN_ID,
-      canonical: { name: "eth" },
+      canonical: { name: { interpreted: "eth" } },
       label: { interpreted: "eth" },
       node: ETH_NODE,
     });
@@ -148,7 +150,7 @@ describe("Query.domains", () => {
       domains.find((d) => d.__typename === "ENSv2Domain" && d.id === V2_ETH_DOMAIN_ID),
     ).toMatchObject({
       id: V2_ETH_DOMAIN_ID,
-      canonical: { name: "eth" },
+      canonical: { name: { interpreted: "eth" } },
       label: { interpreted: "eth" },
     });
   });
@@ -160,7 +162,7 @@ describe("Query.domains", () => {
     const domains = flattenConnection(result.domains);
 
     // parent.eth is canonical (registered under the v2 ETH Registry which descends from the v2 Root)
-    const parentEth = domains.find((d) => d.canonical?.name === "parent.eth");
+    const parentEth = domains.find((d) => d.canonical?.name.interpreted === "parent.eth");
     expect(parentEth).toBeDefined();
 
     // every returned domain must be canonical
@@ -220,7 +222,7 @@ describe("Query.domains", () => {
       ).toBeDefined();
 
       // no prefix-matched names like "ethereum" should leak in
-      for (const d of domains) expect(d.canonical?.name).toBe("eth");
+      for (const d of domains) expect(d.canonical?.name.interpreted).toBe("eth");
     });
 
     it("eq + version: ENSv1 returns a single domain", async () => {
@@ -233,7 +235,7 @@ describe("Query.domains", () => {
       expect(domains[0]).toMatchObject({
         __typename: "ENSv1Domain",
         id: V1_ETH_DOMAIN_ID,
-        canonical: { name: "eth" },
+        canonical: { name: { interpreted: "eth" } },
       });
     });
 
@@ -242,10 +244,11 @@ describe("Query.domains", () => {
         name: { in: ["eth", "parent.eth"] },
       });
       const domains = flattenConnection(result.domains);
-      const names = new Set(domains.map((d) => d.canonical?.name));
+      const names = new Set(domains.map((d) => d.canonical?.name.interpreted));
       expect(names.has("eth")).toBe(true);
       expect(names.has("parent.eth")).toBe(true);
-      for (const d of domains) expect(["eth", "parent.eth"]).toContain(d.canonical?.name);
+      for (const d of domains)
+        expect(["eth", "parent.eth"]).toContain(d.canonical?.name.interpreted);
     });
 
     it("in returns empty for an empty set", async () => {
@@ -270,14 +273,14 @@ describe("Query.domain", () => {
   const DomainByName = gql`
     query DomainByName($name: InterpretedName!) {
       domain(by: { name: $name }) {
-        canonical { name }
+        canonical { name { interpreted } }
       }
     }
   `;
 
   it.each(DEVNET_NAMES)("resolves $name", async ({ name, canonical }) => {
     await expect(request(DomainByName, { name })).resolves.toMatchObject({
-      domain: { canonical: { name: canonical } },
+      domain: { canonical: { name: { interpreted: canonical } } },
     });
   });
 

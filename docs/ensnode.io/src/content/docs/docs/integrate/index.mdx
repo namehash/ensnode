@@ -51,7 +51,7 @@ const DomainFragment = graphql(`
   fragment DomainFragment on Domain {
     __typename
     id
-    canonical { name }
+    canonical { name { interpreted } }
     owner { id address }
   }
 `);
@@ -76,7 +76,7 @@ function RenderDomainFragment({ data }: { data: FragmentOf<typeof DomainFragment
 
   return (
     <>
-      <span>Name: {domain.canonical ? beautifyInterpretedName(domain.canonical.name) : 'Unnamed Domain'}</span>
+      <span>Name: {domain.canonical ? beautifyInterpretedName(domain.canonical.name.interpreted) : 'Unnamed Domain'}</span>
       <span>Protocol Version: {domain.__typename === 'ENSv1Domain' ? 'ENSv1' : 'ENSv2'}</span>
       <span>Owner: {domain.owner ? domain.owner.address : 'Unowned'}</span>
     </>
@@ -148,7 +148,7 @@ const HelloWorldQuery = graphql(`
   query HelloWorld {
     domain(by: { name: "eth" }) {
       id
-      canonical { name }
+      canonical { name { interpreted } }
       owner { address }
     }
   }

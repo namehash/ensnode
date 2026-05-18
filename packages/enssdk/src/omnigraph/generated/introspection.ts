@@ -184,17 +184,17 @@ const introspection = {
                 }
               },
               {
-                "name": "in",
-                "type": {
-                  "kind": "INPUT_OBJECT",
-                  "name": "AccountIdInput"
-                }
-              },
-              {
                 "name": "last",
                 "type": {
                   "kind": "SCALAR",
                   "name": "Int"
+                }
+              },
+              {
+                "name": "where",
+                "type": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "AccountPermissionsWhereInput"
                 }
               }
             ],
@@ -496,35 +496,22 @@ const introspection = {
           {
             "name": "from",
             "type": {
-              "kind": "SCALAR",
-              "name": "Address"
+              "kind": "INPUT_OBJECT",
+              "name": "EventsFromFilter"
             }
           },
           {
-            "name": "selector_in",
+            "name": "selector",
             "type": {
-              "kind": "LIST",
-              "ofType": {
-                "kind": "NON_NULL",
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "Hex"
-                }
-              }
+              "kind": "INPUT_OBJECT",
+              "name": "EventsSelectorFilter"
             }
           },
           {
-            "name": "timestamp_gte",
+            "name": "timestamp",
             "type": {
-              "kind": "SCALAR",
-              "name": "BigInt"
-            }
-          },
-          {
-            "name": "timestamp_lte",
-            "type": {
-              "kind": "SCALAR",
-              "name": "BigInt"
+              "kind": "INPUT_OBJECT",
+              "name": "EventsTimestampFilter"
             }
           }
         ],
@@ -667,6 +654,20 @@ const introspection = {
           }
         ],
         "interfaces": []
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "AccountPermissionsWhereInput",
+        "inputFields": [
+          {
+            "name": "contract",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "AccountIdInput"
+            }
+          }
+        ],
+        "isOneOf": false
       },
       {
         "kind": "OBJECT",
@@ -1038,6 +1039,25 @@ const introspection = {
         "name": "Boolean"
       },
       {
+        "kind": "OBJECT",
+        "name": "CanonicalName",
+        "fields": [
+          {
+            "name": "interpreted",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "InterpretedName"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          }
+        ],
+        "interfaces": []
+      },
+      {
         "kind": "SCALAR",
         "name": "ChainId"
       },
@@ -1049,15 +1069,6 @@ const introspection = {
         "kind": "INTERFACE",
         "name": "Domain",
         "fields": [
-          {
-            "name": "assignedResolver",
-            "type": {
-              "kind": "OBJECT",
-              "name": "Resolver"
-            },
-            "args": [],
-            "isDeprecated": false
-          },
           {
             "name": "canonical",
             "type": {
@@ -1214,6 +1225,18 @@ const introspection = {
             "isDeprecated": false
           },
           {
+            "name": "resolver",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DomainResolver"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
             "name": "subdomains",
             "type": {
               "kind": "OBJECT",
@@ -1308,8 +1331,8 @@ const introspection = {
             "type": {
               "kind": "NON_NULL",
               "ofType": {
-                "kind": "SCALAR",
-                "name": "InterpretedName"
+                "kind": "OBJECT",
+                "name": "CanonicalName"
               }
             },
             "args": [],
@@ -1455,13 +1478,40 @@ const introspection = {
       },
       {
         "kind": "INPUT_OBJECT",
+        "name": "DomainPermissionsUserFilter",
+        "inputFields": [
+          {
+            "name": "eq",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Address"
+            }
+          },
+          {
+            "name": "in",
+            "type": {
+              "kind": "LIST",
+              "ofType": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Address"
+                }
+              }
+            }
+          }
+        ],
+        "isOneOf": true
+      },
+      {
+        "kind": "INPUT_OBJECT",
         "name": "DomainPermissionsWhereInput",
         "inputFields": [
           {
             "name": "user",
             "type": {
-              "kind": "SCALAR",
-              "name": "Address"
+              "kind": "INPUT_OBJECT",
+              "name": "DomainPermissionsUserFilter"
             }
           }
         ],
@@ -1540,6 +1590,22 @@ const introspection = {
                 "kind": "INTERFACE",
                 "name": "Registration"
               }
+            },
+            "args": [],
+            "isDeprecated": false
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
+        "name": "DomainResolver",
+        "fields": [
+          {
+            "name": "assigned",
+            "type": {
+              "kind": "OBJECT",
+              "name": "Resolver"
             },
             "args": [],
             "isDeprecated": false
@@ -1751,15 +1817,6 @@ const introspection = {
         "name": "ENSv1Domain",
         "fields": [
           {
-            "name": "assignedResolver",
-            "type": {
-              "kind": "OBJECT",
-              "name": "Resolver"
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
             "name": "canonical",
             "type": {
               "kind": "OBJECT",
@@ -1921,6 +1978,18 @@ const introspection = {
               "ofType": {
                 "kind": "INTERFACE",
                 "name": "Registry"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "resolver",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DomainResolver"
               }
             },
             "args": [],
@@ -2315,15 +2384,6 @@ const introspection = {
         "name": "ENSv2Domain",
         "fields": [
           {
-            "name": "assignedResolver",
-            "type": {
-              "kind": "OBJECT",
-              "name": "Resolver"
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
             "name": "canonical",
             "type": {
               "kind": "OBJECT",
@@ -2518,6 +2578,18 @@ const introspection = {
               "ofType": {
                 "kind": "INTERFACE",
                 "name": "Registry"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "resolver",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DomainResolver"
               }
             },
             "args": [],
@@ -3327,17 +3399,44 @@ const introspection = {
       },
       {
         "kind": "INPUT_OBJECT",
-        "name": "EventsWhereInput",
+        "name": "EventsFromFilter",
         "inputFields": [
           {
-            "name": "from",
+            "name": "eq",
             "type": {
               "kind": "SCALAR",
               "name": "Address"
             }
           },
           {
-            "name": "selector_in",
+            "name": "in",
+            "type": {
+              "kind": "LIST",
+              "ofType": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Address"
+                }
+              }
+            }
+          }
+        ],
+        "isOneOf": true
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "EventsSelectorFilter",
+        "inputFields": [
+          {
+            "name": "eq",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Hex"
+            }
+          },
+          {
+            "name": "in",
             "type": {
               "kind": "LIST",
               "ofType": {
@@ -3348,26 +3447,102 @@ const introspection = {
                 }
               }
             }
-          },
+          }
+        ],
+        "isOneOf": true
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "EventsSenderFilter",
+        "inputFields": [
           {
-            "name": "sender",
+            "name": "eq",
             "type": {
               "kind": "SCALAR",
               "name": "Address"
             }
           },
           {
-            "name": "timestamp_gte",
+            "name": "in",
+            "type": {
+              "kind": "LIST",
+              "ofType": {
+                "kind": "NON_NULL",
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Address"
+                }
+              }
+            }
+          }
+        ],
+        "isOneOf": true
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "EventsTimestampFilter",
+        "inputFields": [
+          {
+            "name": "gt",
             "type": {
               "kind": "SCALAR",
               "name": "BigInt"
             }
           },
           {
-            "name": "timestamp_lte",
+            "name": "gte",
             "type": {
               "kind": "SCALAR",
               "name": "BigInt"
+            }
+          },
+          {
+            "name": "lt",
+            "type": {
+              "kind": "SCALAR",
+              "name": "BigInt"
+            }
+          },
+          {
+            "name": "lte",
+            "type": {
+              "kind": "SCALAR",
+              "name": "BigInt"
+            }
+          }
+        ],
+        "isOneOf": false
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "EventsWhereInput",
+        "inputFields": [
+          {
+            "name": "from",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "EventsFromFilter"
+            }
+          },
+          {
+            "name": "selector",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "EventsSelectorFilter"
+            }
+          },
+          {
+            "name": "sender",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "EventsSenderFilter"
+            }
+          },
+          {
+            "name": "timestamp",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "EventsTimestampFilter"
             }
           }
         ],

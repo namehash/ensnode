@@ -15,6 +15,8 @@ const AccountDomainsQuery = graphql(`
       domains(first: $first, after: $after) {
         totalCount
         edges {
+          # # TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
+          # node { __typename id canonical { name { interpreted } } }
           node { __typename id  name }
         }
         pageInfo { hasNextPage endCursor }
@@ -60,6 +62,12 @@ function RenderAccount({ address }: { address: NormalizedAddress }) {
           <ul>
             {domains.edges.map((edge) => (
               <li key={edge.node.id}>
+                {/*
+                TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
+                {edge.node.canonical ? (
+                  <Link to={`/domain/${edge.node.canonical.name.interpreted}`}>
+                    {beautifyInterpretedName(edge.node.canonical.name.interpreted)}
+                */}
                 {edge.node.name ? (
                   <Link to={`/domain/${edge.node.name}`}>
                     {beautifyInterpretedName(edge.node.name)}
