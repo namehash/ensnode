@@ -154,10 +154,6 @@ export const integrateSidebarTopic = {
       ],
     },
     {
-      label: "Migrate from ENS Subgraph",
-      link: "/docs/integrate/migrate-from-subgraph",
-    },
-    {
       label: "Hosted Instances",
       link: "/docs/integrate/hosted-instances",
     },

@@ -12,22 +12,6 @@ export const referenceSidebarTopic = {
       link: "/docs/reference/terminology",
     },
     {
-      label: "Roadmap",
-      link: "/docs/reference/roadmap",
-    },
-    {
-      label: "What is ENSNode?",
-      link: "/docs/reference/what-is-ensnode",
-    },
-    {
-      label: "ENSNode V2 Notes",
-      link: "/docs/reference/ensnode-v2-notes",
-    },
-    {
-      label: "Mainnet Subnames of Subregistries",
-      link: "/docs/reference/mainnet-registered-subnames-of-subregistries",
-    },
-    {
       label: "Subgraph API (Legacy)",
       collapsed: true,
       items: [

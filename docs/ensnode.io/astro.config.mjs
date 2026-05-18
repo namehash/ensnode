@@ -36,7 +36,6 @@ export default defineConfig({
     "/docs": "/docs/integrate",
     "/ensnode": "/docs/integrate",
     "/ensnode/deploying/railway": "/docs/services/ensrainbow/deploying/railway",
-    "/ensnode/concepts/what-is-ensnode": "/docs/reference/what-is-ensnode",
     "/ensnode/concepts/what-is-the-ens-subgraph":
       "/docs/reference/subgraph-legacy/what-is-the-ens-subgraph",
     "/docs/reference/what-is-the-ens-subgraph":
