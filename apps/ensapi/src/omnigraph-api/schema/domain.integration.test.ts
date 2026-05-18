@@ -430,4 +430,57 @@ describe("Domain.events filtering (EventsWhereInput)", () => {
     const events = flattenConnection(result.domain.events);
     expect(events.length).toBe(0);
   });
+
+  it("rejects an empty timestamp filter (no bounds)", async () => {
+    await expect(
+      request<DomainEventsResult>(DomainEventsFiltered, {
+        name: NAME_WITH_EVENTS,
+        where: { timestamp: {} },
+      }),
+    ).rejects.toThrow();
+  });
+
+  it("rejects timestamp with both gt and gte", async () => {
+    const t = allEvents[0].timestamp;
+    await expect(
+      request<DomainEventsResult>(DomainEventsFiltered, {
+        name: NAME_WITH_EVENTS,
+        where: { timestamp: { gt: t, gte: t } },
+      }),
+    ).rejects.toThrow();
+  });
+
+  it("rejects timestamp with both lt and lte", async () => {
+    const t = allEvents[0].timestamp;
+    await expect(
+      request<DomainEventsResult>(DomainEventsFiltered, {
+        name: NAME_WITH_EVENTS,
+        where: { timestamp: { lt: t, lte: t } },
+      }),
+    ).rejects.toThrow();
+  });
+
+  it("rejects inverted timestamp range", async () => {
+    const lo = BigInt(allEvents[0].timestamp);
+    const hi = BigInt(allEvents[allEvents.length - 1].timestamp);
+    if (lo === hi) return; // dataset must have a range for this test
+    await expect(
+      request<DomainEventsResult>(DomainEventsFiltered, {
+        name: NAME_WITH_EVENTS,
+        where: { timestamp: { gte: hi.toString(), lte: lo.toString() } },
+      }),
+    ).rejects.toThrow();
+  });
+
+  it("accepts equal lower and upper bounds (pin-point timestamp)", async () => {
+    const t = allEvents[0].timestamp;
+    const result = await request<DomainEventsResult>(DomainEventsFiltered, {
+      name: NAME_WITH_EVENTS,
+      where: { timestamp: { gte: t, lte: t } },
+    });
+    const events = flattenConnection(result.domain.events);
+    for (const event of events) {
+      expect(event.timestamp).toBe(t);
+    }
+  });
 });
