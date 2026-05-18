@@ -26,7 +26,7 @@ import {
   pickContracts,
 } from "@/lib/ponder-helpers";
 
-export const pluginName = PluginName.ENSv2;
+export const pluginName = PluginName.Unigraph;
 
 const REQUIRED_DATASOURCE_NAMES = [
   DatasourceNames.ENSRoot, //

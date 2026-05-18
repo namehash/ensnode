@@ -7,7 +7,6 @@ import config from "@/config";
 
 import { PluginName } from "@ensnode/ensnode-sdk";
 
-import attach_ENSv2Handlers from "@/plugins/ensv2/event-handlers";
 import attach_protocolAccelerationHandlers from "@/plugins/protocol-acceleration/event-handlers";
 import attach_NodeMigrationHandlers from "@/plugins/protocol-acceleration/handlers/node-migration";
 import attach_RegistrarsHandlers from "@/plugins/registrars/event-handlers";
@@ -16,6 +15,7 @@ import attach_LineanamesHandlers from "@/plugins/subgraph/plugins/lineanames/eve
 import attach_SubgraphHandlers from "@/plugins/subgraph/plugins/subgraph/event-handlers";
 import attach_ThreeDNSHandlers from "@/plugins/subgraph/plugins/threedns/event-handlers";
 import attach_TokenscopeHandlers from "@/plugins/tokenscope/event-handlers";
+import attach_UnigraphHandlers from "@/plugins/unigraph/event-handlers";
 
 // Subgraph Plugin
 if (config.plugins.includes(PluginName.Subgraph)) {
@@ -64,8 +64,8 @@ if (config.plugins.includes(PluginName.ProtocolAcceleration)) {
   attach_NodeMigrationHandlers();
 }
 
-if (config.plugins.includes(PluginName.ENSv2)) {
-  attach_ENSv2Handlers();
+if (config.plugins.includes(PluginName.Unigraph)) {
+  attach_UnigraphHandlers();
 }
 
 if (config.plugins.includes(PluginName.ProtocolAcceleration)) {

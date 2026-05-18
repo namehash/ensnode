@@ -58,7 +58,7 @@ const isZeroRoles = (roles: EACRoleBitmap) => roles === 0n;
 
 export default function () {
   addOnchainEventListener(
-    namespaceContract(PluginName.ENSv2, "EnhancedAccessControl:EACRolesChanged"),
+    namespaceContract(PluginName.Unigraph, "EnhancedAccessControl:EACRolesChanged"),
     async ({
       context,
       event,

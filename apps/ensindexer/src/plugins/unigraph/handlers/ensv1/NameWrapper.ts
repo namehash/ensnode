@@ -44,7 +44,7 @@ import { getManagedName } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 
-const pluginName = PluginName.ENSv2;
+const pluginName = PluginName.Unigraph;
 
 /**
  * NameWrapper emits expiry as 0 to mean 'doesn't expire', so we interpret as null.

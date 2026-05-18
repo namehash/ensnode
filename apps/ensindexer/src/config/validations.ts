@@ -142,11 +142,11 @@ export function invariant_ensv2RequiresProtocolAcceleration(
   const { value: config } = ctx;
 
   if (
-    config.plugins.includes(PluginName.ENSv2) &&
+    config.plugins.includes(PluginName.Unigraph) &&
     !config.plugins.includes(PluginName.ProtocolAcceleration)
   ) {
     throw new Error(
-      `The '${PluginName.ENSv2}' plugin depends on the inclusion of '${PluginName.ProtocolAcceleration}' plugin.`,
+      `The '${PluginName.Unigraph}' plugin depends on the inclusion of '${PluginName.ProtocolAcceleration}' plugin.`,
     );
   }
 }

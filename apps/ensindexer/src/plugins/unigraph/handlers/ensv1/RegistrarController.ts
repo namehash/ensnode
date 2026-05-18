@@ -26,7 +26,7 @@ import { getManagedName } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 
-const pluginName = PluginName.ENSv2;
+const pluginName = PluginName.Unigraph;
 
 /**
  * Returns the input `label` as LiteralLabel iff it matches the provided `labelHash`.

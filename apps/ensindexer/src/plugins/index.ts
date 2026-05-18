@@ -2,7 +2,6 @@ import type { PluginName } from "@ensnode/ensnode-sdk";
 
 import type { MergedTypes } from "@/lib/lib-helpers";
 
-import ensv2Plugin from "./ensv2/plugin";
 import protocolAccelerationPlugin from "./protocol-acceleration/plugin";
 import registrarsPlugin from "./registrars/plugin";
 import basenamesPlugin from "./subgraph/plugins/basenames/plugin";
@@ -10,6 +9,7 @@ import lineaNamesPlugin from "./subgraph/plugins/lineanames/plugin";
 import subgraphPlugin from "./subgraph/plugins/subgraph/plugin";
 import threednsPlugin from "./subgraph/plugins/threedns/plugin";
 import tokenScopePlugin from "./tokenscope/plugin";
+import ensv2Plugin from "./unigraph/plugin";
 
 export const ALL_PLUGINS = [
   subgraphPlugin,

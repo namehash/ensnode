@@ -6,7 +6,7 @@ import { addOnchainEventListener, type IndexingEngineContext } from "@/lib/index
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { LogEventBase } from "@/lib/ponder-helpers";
 
-const pluginName = PluginName.ENSv2;
+const pluginName = PluginName.Unigraph;
 
 /**
  * Handlers for Resolver contracts in the ENSv2 plugin. Note that the Protocol Acceleration plugin

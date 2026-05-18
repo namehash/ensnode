@@ -29,7 +29,7 @@ import {
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs, LogEventBase } from "@/lib/ponder-helpers";
 
-const pluginName = PluginName.ENSv2;
+const pluginName = PluginName.Unigraph;
 
 async function getRegistrarAndRegistry(context: IndexingEngineContext, event: LogEventBase) {
   const registrar = getThisAccountId(context, event);

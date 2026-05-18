@@ -46,7 +46,7 @@ import {
   nodeIsMigratedByParentAndLabel,
 } from "@/lib/protocol-acceleration/migrated-node-db-helpers";
 
-const pluginName = PluginName.ENSv2;
+const pluginName = PluginName.Unigraph;
 
 /**
  * Handler functions for ENSv1 Registry contracts.
