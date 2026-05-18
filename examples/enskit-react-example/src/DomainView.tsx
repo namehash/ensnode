@@ -1,11 +1,6 @@
 import { EnsureInterpretedName } from "enskit/react";
 import { type FragmentOf, graphql, readFragment, useOmnigraphQuery } from "enskit/react/omnigraph";
-import {
-  asLiteralName,
-  beautifyInterpretedName,
-  getParentInterpretedName,
-  type InterpretedName,
-} from "enssdk";
+import { asLiteralName, beautifyInterpretedName, type InterpretedName } from "enssdk";
 import { useState } from "react";
 import { Link, Navigate, useParams } from "react-router";
 
@@ -13,7 +8,9 @@ const DomainFragment = graphql(`
   fragment DomainFragment on Domain {
     __typename
     id
-    canonical { name }
+    # # TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
+    # canonical { name { interpreted } }
+    name
     owner { id address }
   }
 `);
@@ -23,6 +20,9 @@ const DomainByNameQuery = graphql(
   query DomainByName($name: InterpretedName!, $first: Int!, $after: String) {
     domain(by: { name: $name }) {
       ...DomainFragment
+      # # TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
+      # parent { canonical { name { interpreted } } }
+      parent { name }
       subdomains(first: $first, after: $after) {
         edges {
           node {
@@ -47,10 +47,13 @@ function SubdomainLink({ data }: { data: FragmentOf<typeof DomainFragment> }) {
 
   return (
     <li>
-      {domain.canonical ? (
-        <Link to={`/domain/${domain.canonical.name}`}>
-          {beautifyInterpretedName(domain.canonical.name)}
-        </Link>
+      {domain.name ? (
+        <Link to={`/domain/${domain.name}`}>{beautifyInterpretedName(domain.name)}</Link>
+        // TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
+        // {domain.canonical ? (
+        //   <Link to={`/domain/${domain.canonical.name.interpreted}`}>
+        //     {beautifyInterpretedName(domain.canonical.name.interpreted)}
+        //   </Link>
       ) : (
         <em>non-canonical domain</em>
       )}{" "}
@@ -81,12 +84,15 @@ function RenderDomain({ name }: { name: InterpretedName }) {
   if (!data?.domain) return <p>No domain was found with name '{beautifyInterpretedName(name)}'.</p>;
 
   const domain = readFragment(DomainFragment, data.domain);
-  const parentName = getParentInterpretedName(name);
   const { subdomains } = data.domain;
 
   return (
     <div>
-      <h2>{beautifyInterpretedName(domain.canonical?.name ?? name)}</h2>
+      {/* 
+      TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
+      <h2>{beautifyInterpretedName(domain.canonical?.name.interpreted ?? name)}</h2>
+      */}
+      <h2>{beautifyInterpretedName(domain.name ?? name)}</h2>
       <p>
         Owner:{" "}
         {domain.owner ? (
@@ -99,10 +105,18 @@ function RenderDomain({ name }: { name: InterpretedName }) {
       </p>
       <p>Version: {domain.__typename}</p>
 
-      {parentName && (
-        <p>
-          ← <Link to={`/domain/${parentName}`}>{beautifyInterpretedName(parentName)}</Link>
-        </p>
+      {/* 
+      TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
+      {data.domain.parent?.canonical && (
+        <Link to={`/domain/${data.domain.parent.canonical.name.interpreted}`}>
+          ← {beautifyInterpretedName(data.domain.parent.canonical.name.interpreted)}
+        </Link>
+      )} 
+       */}
+      {data.domain.parent?.name && (
+        <Link to={`/domain/${data.domain.parent.name}`}>
+          ← {beautifyInterpretedName(data.domain.parent.name)}
+        </Link>
       )}
 
       <h3>Subdomains</h3>

@@ -23,6 +23,7 @@ import {
   invariant_requiredDatasources,
   invariant_requiredDatasourcesSubsetOfAll,
   invariant_rpcConfigsSpecifiedForIndexedChains,
+  invariant_unigraphRequiresProtocolAcceleration,
   invariant_validContractConfigs,
 } from "./validations";
 
@@ -130,6 +131,7 @@ const ENSIndexerConfigSchema = z
   .check(invariant_requiredDatasources)
   .check(invariant_rpcConfigsSpecifiedForRootChain)
   .check(invariant_validContractConfigs)
+  .check(invariant_unigraphRequiresProtocolAcceleration)
   .check(invariant_isSubgraphCompatibleRequirements)
   .check(invariant_rpcConfigsSpecifiedForIndexedChains)
   .check(invariant_globalBlockrange);

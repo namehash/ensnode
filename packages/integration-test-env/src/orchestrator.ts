@@ -45,6 +45,7 @@ import { ENSNamespaceIds, ensTestEnvChain } from "@ensnode/datasources";
 import {
   IndexingMetadataContextStatusCodes,
   OmnichainIndexingStatusIds,
+  PluginName,
 } from "@ensnode/ensnode-sdk";
 
 import { seedDevnet } from "./seed/index";
@@ -317,7 +318,7 @@ async function main() {
       NAMESPACE: ENSNamespaceIds.EnsTestEnv,
       ENSDB_URL,
       ENSINDEXER_SCHEMA_NAME,
-      PLUGINS: "ensv2,protocol-acceleration",
+      PLUGINS: [PluginName.Unigraph, PluginName.ProtocolAcceleration].join(","),
       ENSRAINBOW_URL,
       LABEL_SET_ID,
       LABEL_SET_VERSION,

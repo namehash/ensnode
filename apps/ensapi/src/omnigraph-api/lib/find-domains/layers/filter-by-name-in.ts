@@ -16,8 +16,7 @@ import { type BaseDomainSet, selectBase } from "./base-domain-set";
  * @param names - Exact InterpretedNames to match against
  */
 export function filterByNameIn(base: BaseDomainSet, names: InterpretedName[]) {
-  // Drizzle footgun: `inArray(col, [])` generates `col in ()`, a Postgres syntax error.
-  // Short-circuit to an explicit empty result.
+  // NOTE: avoid inArray([]) runtime error by short-circuit to an explicit empty result
   if (names.length === 0) {
     return ensDb.select(selectBase(base)).from(base).where(sql`false`).as("baseDomains");
   }

@@ -1,4 +1,3 @@
-import { errorResponse } from "@/lib/handlers/error-response";
 import { createApp } from "@/lib/hono-factory";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 
@@ -11,9 +10,10 @@ const app = createApp({ middlewares: [indexingStatusMiddleware] });
 app.openapi(realtimeGetMeta, async (c) => {
   // return 503 response error with details on prerequisite being unavailable
   if (c.var.indexingStatus instanceof Error) {
-    return errorResponse(
-      c,
-      `Invariant(realtime-api): Indexing Status has to be resolved successfully before 'maxWorstCaseDistance' can be applied.`,
+    return c.json(
+      {
+        message: `Invariant(realtime-api): Indexing Status has to be resolved successfully before 'maxWorstCaseDistance' can be applied.`,
+      },
       503,
     );
   }
@@ -25,20 +25,24 @@ app.openapi(realtimeGetMeta, async (c) => {
   // return 503 response error with details on
   // requested `maxWorstCaseDistance` vs. actual `worstCaseDistance`
   if (worstCaseDistance > maxWorstCaseDistance) {
-    return errorResponse(
-      c,
-      `Indexing Status 'worstCaseDistance' must be below or equal to the requested 'maxWorstCaseDistance'; worstCaseDistance = ${worstCaseDistance}; maxWorstCaseDistance = ${maxWorstCaseDistance}`,
+    return c.json(
+      {
+        message: `Indexing Status 'worstCaseDistance' must be below or equal to the requested 'maxWorstCaseDistance'; worstCaseDistance = ${worstCaseDistance}; maxWorstCaseDistance = ${maxWorstCaseDistance}`,
+      },
       503,
     );
   }
 
   // return 200 response OK with current details on `maxWorstCaseDistance`,
   // `slowestChainIndexingCursor`, and `worstCaseDistance`
-  return c.json({
-    maxWorstCaseDistance,
-    slowestChainIndexingCursor,
-    worstCaseDistance,
-  });
+  return c.json(
+    {
+      maxWorstCaseDistance,
+      slowestChainIndexingCursor,
+      worstCaseDistance,
+    },
+    200,
+  );
 });
 
 export default app;

@@ -1,0 +1,51 @@
+---
+import OmnigraphAPIExamplePanels from "../molecules/OmnigraphAPIExamplePanels.astro";
+
+import { ENSADMIN_URL } from "astro:env/client";
+
+import { getOmnigraphExampleById } from "@data/omnigraph-examples/examples";
+import { DOCS_HOSTED_INSTANCE_ANCHOR, DOCS_OMNIGRAPH_NAMESPACE } from "@lib/playground/constants";
+import { buildEnsadminOmnigraphUrl, stringifyJsonForDocs } from "@lib/playground/utils";
+
+interface Props {
+  id: string;
+  /** Hide curl tab (e.g. if connection is admin-only). */
+  hideCurl?: boolean;
+  hideDescription?: boolean;
+  hideBackToExamples?: boolean;
+}
+
+const { id, hideCurl = false, hideDescription = false, hideBackToExamples = false } = Astro.props;
+const example = getOmnigraphExampleById(id);
+const adminUrl = buildEnsadminOmnigraphUrl({
+  ensadminBaseUrl: ENSADMIN_URL,
+  query: example.query,
+  connection: example.connection,
+  variables: example.variables,
+});
+const variablesJson = stringifyJsonForDocs(example.variables);
+const responseJson = example.response ? stringifyJsonForDocs(example.response) : null;
+---
+
+{!hideDescription && example.description}
+
+<OmnigraphAPIExamplePanels
+  panelId={id}
+  query={example.query}
+  variablesJson={variablesJson}
+  variablesObject={example.variables}
+  responseJson={responseJson}
+  connectionBaseUrl={example.connection}
+  hostedInstanceAnchor={DOCS_HOSTED_INSTANCE_ANCHOR}
+  hostedInstanceNamespace={DOCS_OMNIGRAPH_NAMESPACE}
+  adminUrl={adminUrl}
+  hideCurl={hideCurl}
+/>
+
+{
+  !hideBackToExamples && (
+    <p>
+      <a href="/docs/integrate/omnigraph/examples">Back to Examples</a>
+    </p>
+  )
+}

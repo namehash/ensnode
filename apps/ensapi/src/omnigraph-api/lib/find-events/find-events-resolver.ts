@@ -1,5 +1,18 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
-import { and, count, eq, getTableColumns, gte, inArray, lte, type SQL, sql } from "drizzle-orm";
+import {
+  type AnyColumn,
+  and,
+  count,
+  eq,
+  getTableColumns,
+  gt,
+  gte,
+  inArray,
+  lt,
+  lte,
+  type SQL,
+  sql,
+} from "drizzle-orm";
 import type { Address, Hex } from "enssdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
@@ -17,19 +30,53 @@ type EventJoinTable =
   | typeof ensIndexerSchema.permissionsUserEvent;
 
 /**
+ * @oneOf set-membership filter shape: exactly one of `eq` or `in` is set.
+ */
+type SetFilter<T> = {
+  eq?: T | null;
+  in?: T[] | null;
+};
+
+/**
+ * Range filter shape: at least one bound is set. `gt`/`gte` are mutually exclusive; `lt`/`lte` are
+ * mutually exclusive (enforced by the input type's validators).
+ */
+type RangeFilter<T> = {
+  gt?: T | null;
+  gte?: T | null;
+  lt?: T | null;
+  lte?: T | null;
+};
+
+/**
  * Available filter options for find-events queries.
  */
 interface EventsWhere {
-  /** Filter to events whose selector (event signature) matches any of the provided values. */
-  selector_in?: Hex[] | null;
-  /** Filter to events at or after this timestamp. */
-  timestamp_gte?: bigint | null;
-  /** Filter to events at or before this timestamp. */
-  timestamp_lte?: bigint | null;
-  /** Filter to events whose `tx.from` matches. Not HCA-aware. */
-  from?: Address | null;
-  /** Filter to events whose HCA-aware `sender` matches. */
-  sender?: Address | null;
+  selector?: SetFilter<Hex> | null;
+  timestamp?: RangeFilter<bigint> | null;
+  from?: SetFilter<Address> | null;
+  sender?: SetFilter<Address> | null;
+}
+
+function setFilterCondition<T>(column: AnyColumn, filter?: SetFilter<T> | null): SQL | undefined {
+  if (!filter) return undefined;
+  const values = filter.in ?? [filter.eq];
+  // NOTE: avoid inArray([]) runtime error by short-circuit to `false`
+  if (values.length === 0) return sql`false`;
+  return inArray(column, values);
+}
+
+function rangeFilterCondition<T>(
+  column: AnyColumn,
+  filter?: RangeFilter<T> | null,
+): SQL | undefined {
+  if (!filter) return undefined;
+  return and(
+    filter.gt != null ? gt(column, filter.gt) : undefined,
+    filter.gte != null ? gte(column, filter.gte) : undefined,
+    filter.lt != null ? lt(column, filter.lt) : undefined,
+    filter.lte != null ? lte(column, filter.lte) : undefined,
+  );
 }
 
 /**
@@ -39,19 +86,10 @@ function eventsWhereConditions(where?: EventsWhere | null): SQL | undefined {
   if (!where) return undefined;
 
   return and(
-    where.selector_in
-      ? where.selector_in.length
-        ? inArray(ensIndexerSchema.event.selector, where.selector_in)
-        : sql`false`
-      : undefined,
-    typeof where.timestamp_gte === "bigint"
-      ? gte(ensIndexerSchema.event.timestamp, where.timestamp_gte)
-      : undefined,
-    typeof where.timestamp_lte === "bigint"
-      ? lte(ensIndexerSchema.event.timestamp, where.timestamp_lte)
-      : undefined,
-    where.from ? eq(ensIndexerSchema.event.from, where.from) : undefined,
-    where.sender ? eq(ensIndexerSchema.event.sender, where.sender) : undefined,
+    setFilterCondition(ensIndexerSchema.event.selector, where.selector),
+    rangeFilterCondition(ensIndexerSchema.event.timestamp, where.timestamp),
+    setFilterCondition(ensIndexerSchema.event.from, where.from),
+    setFilterCondition(ensIndexerSchema.event.sender, where.sender),
   );
 }
 

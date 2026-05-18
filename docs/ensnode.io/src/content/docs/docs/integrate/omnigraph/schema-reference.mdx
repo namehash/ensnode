@@ -1,10 +1,16 @@
 ---
 title: Schema Reference
 description: Full reference of the ENS Omnigraph GraphQL schema.
+tableOfContents: false
 ---
 
-:::caution[Coming Soon]
-We're actively working on this page right now. Check back by May 18th for full content!
-:::
+import OmnigraphSchemaDocExplorer from "@components/organisms/OmnigraphSchemaDocExplorer.tsx";
 
-This page will provide a full reference of the ENS Omnigraph GraphQL schema — types, queries, fields, and arguments. Generated from the ENSNode introspection output.
+Browse the ENS Omnigraph GraphQL schema — types, fields, and arguments. Sourced from the same SDL as [`enssdk/omnigraph/schema.graphql`](https://github.com/namehash/ensnode/blob/main/packages/enssdk/src/omnigraph/generated/schema.graphql)
+
+* For example queries, see [ENS Omnigraph examples](/docs/integrate/omnigraph/examples)
+
+* For runnable queries in web playground, see [ENSAdmin playground](https://admin.ensnode.io/api/omnigraph).
+
+
+<OmnigraphSchemaDocExplorer client:only="react" />

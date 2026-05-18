@@ -4,7 +4,7 @@ description: Query the ENS Omnigraph API directly via HTTP from any language.
 ---
 
 import { LinkCard } from '@astrojs/starlight/components';
-import IntegrateHostedEnsNodeTip from '../../../../../components/molecules/IntegrateHostedEnsNodeTip.astro';
+import IntegrateHostedEnsNodeTip from '@components/molecules/IntegrateHostedEnsNodeTip.astro';
 
 The Omnigraph is **a GraphQL API** following the [Relay specification](https://relay.dev/graphql/connections.htm). There's no proprietary protocol or transport — any GraphQL client in any language works, from `curl` and `fetch` to [`urql`](https://nearform.com/open-source/urql/), [`Apollo`](https://www.apollographql.com/), [`graphql-request`](https://github.com/jasonkuhrt/graphql-request), and beyond.
 
@@ -12,7 +12,7 @@ This guide walks you through the minimum: a single `fetch` call against `/api/om
 
 If you want end-to-end typed queries (via [`gql.tada`](https://gql-tada.0no.co/)) with editor autocomplete and a built-in client, use [`enssdk`](/docs/integrate/integration-options/enssdk) instead — but if you need to integrate from a language without first-class GraphQL tooling, or you're already in a stack with its own GraphQL client, this is the path.
 
-<IntegrateHostedEnsNodeTip includeHostedInstancesLink />
+<IntegrateHostedEnsNodeTip />
 
 ## 1. The endpoint
 
@@ -32,7 +32,7 @@ A minimum-viable hello world over `curl`:
 ```sh
 curl -sS -X POST \
   -H 'Content-Type: application/json' \
-  -d '{"query":"{ domain(by: { name: \"eth\" }) { canonical { name } owner { address } } }"}' \
+  -d '{"query":"{ domain(by: { name: \"eth\" }) { canonical { name { interpreted } } owner { address } } }"}' \
   https://api.alpha.ensnode.io/api/omnigraph
 ```
 
@@ -78,11 +78,11 @@ const HELLO_WORLD_QUERY = /* GraphQL */ `
   query HelloWorld($name: InterpretedName!) {
     domain(by: { name: $name }) {
       __typename
-      canonical { name }
+      canonical { name { interpreted } }
       owner { address }
       subdomains(first: 20) {
         totalCount
-        edges { node { __typename canonical { name } owner { address } } }
+        edges { node { __typename canonical { name { interpreted } } owner { address } } }
       }
     }
   }
@@ -90,7 +90,7 @@ const HELLO_WORLD_QUERY = /* GraphQL */ `
 
 interface Domain {
   __typename: "ENSv1Domain" | "ENSv2Domain";
-  canonical: { name: string } | null;
+  canonical: { name: { interpreted: string } } | null;
   owner: { address: string } | null;
 }
 
@@ -107,7 +107,7 @@ interface QueryResult {
 }
 
 function formatDomain(domain: Domain): string {
-  const name = domain.canonical?.name ?? "<unnamed>";
+  const name = domain.canonical?.name.interpreted ?? "<unnamed>";
   const owner = domain.owner?.address ?? "0x0";
   return `${name} (${domain.__typename}) — Owner ${owner}`;
 }
@@ -165,7 +165,7 @@ You should see the `eth` Domain, its owner, and the first 20 of its subdomains.
 
 - Want typed queries with editor autocomplete and a real GraphQL client? Use [`enssdk`](/docs/integrate/integration-options/enssdk) — same API, with `gql.tada` types and an `EnsNodeClient`.
 - Building a React app? Use [`enskit`](/docs/integrate/integration-options/enskit) — same `graphql(...)` helper plus `useOmnigraphQuery` and a graphcache.
-- See the [Omnigraph Cookbook](/docs/integrate/omnigraph/cookbook) for ready-to-copy queries: account-owned domains, events, registrar permissions, full-text search, and more.
+- See [Omnigraph examples](/docs/integrate/omnigraph/examples) for ready-to-copy queries: account-owned domains, events, registrar permissions, full-text search, and more.
 - See the [Omnigraph Schema Reference](/docs/integrate/omnigraph/schema-reference) for the full set of types, fields, and arguments you can query.
 
 <LinkCard
