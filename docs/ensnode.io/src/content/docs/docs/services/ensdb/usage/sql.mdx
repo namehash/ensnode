@@ -45,7 +45,7 @@ them uniformly without branching by `type`.
 SELECT * FROM ensindexer_0.domains
 WHERE canonical_name = 'vitalik.eth';
 
--- Count an address's Domains, grouped by Domain type
+-- Count an address's Domains, grouped by Domain type (ENSv1 vs ENSv2)
 SELECT type, count(*) FROM ensindexer_0.domains
 WHERE owner_id = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045'
 GROUP BY type;
