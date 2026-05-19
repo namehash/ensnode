@@ -1,5 +1,24 @@
 # ensadmin
 
+## 1.14.0
+
+### Minor Changes
+
+- [#2090](https://github.com/namehash/ensnode/pull/2090) [`3132a77`](https://github.com/namehash/ensnode/commit/3132a77b809694a4677da69c8c546a4b41eaa583) Thanks [@tk-o](https://github.com/tk-o)! - Added indexing status based guard for Omnigraph API and Subgraph API views.
+
+### Patch Changes
+
+- [#2118](https://github.com/namehash/ensnode/pull/2118) [`bb7ad4a`](https://github.com/namehash/ensnode/commit/bb7ad4ae2c026d87ecb8d2a9ef751bf940bef923) Thanks [@tk-o](https://github.com/tk-o)! - Refined information presented on the "Connection" view.
+
+- [#2113](https://github.com/namehash/ensnode/pull/2113) [`010cd0c`](https://github.com/namehash/ensnode/commit/010cd0cdeec44d5b9b3649533460f9461748013e) Thanks [@notrab](https://github.com/notrab)! - Eliminate the `@ensnode/ensnode-react` package; All developers building on ENSNode from a React-level should use the `enskit` package which specializes for this.
+
+- Updated dependencies [[`3132a77`](https://github.com/namehash/ensnode/commit/3132a77b809694a4677da69c8c546a4b41eaa583), [`1b6abb0`](https://github.com/namehash/ensnode/commit/1b6abb06ac364840770dfcc47526111fdf6fb2c9), [`65cf37c`](https://github.com/namehash/ensnode/commit/65cf37c24c1bd9a7f30ad758c945015ece9c8461), [`010cd0c`](https://github.com/namehash/ensnode/commit/010cd0cdeec44d5b9b3649533460f9461748013e)]:
+  - @ensnode/ensnode-sdk@1.14.0
+  - @namehash/namehash-ui@1.14.0
+  - enssdk@1.14.0
+  - @ensnode/datasources@1.14.0
+  - @ensnode/scalar-react@0.0.0
+
 ## 1.13.1
 
 ### Patch Changes

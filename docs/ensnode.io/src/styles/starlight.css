@@ -200,6 +200,21 @@ a[rel="prev"]:hover {
   color: var(--sl-color-accent);
 }
 
+.sl-markdown-content > p a:not(:has(code)),
+.sl-markdown-content :is(ul, ol) > li a:not(:has(code)),
+.starlight-aside__content a {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+
+  transition:
+    color 0.2s ease-in-out,
+    text-underline-offset 0.2s ease-in-out;
+
+  &:hover {
+    text-underline-offset: 2px;
+  }
+}
+
 .sl-markdown-content :is(h1, h2, h3, h4, h5, h6) > a {
   color: var(--sl-color-white);
   display: inline;
@@ -315,4 +330,16 @@ a.starlight-sidebar-topics-current .starlight-sidebar-topics-icon {
     transform 0.2s ease-in-out,
     filter 0.2s ease-in-out,
     box-shadow 0.2s ease-in-out;
+}
+
+/* Make sure that all non-top-level sidebar items are not enlarged */
+ul.top-level details details > summary .group-label span {
+  @media (min-width: 50rem) {
+    font-size: var(--sl-text-sm);
+  }
+}
+
+/* Make sure that social icons in the sidebar do not move on hover */
+.sidebar-content .social-icons a {
+  transform: none !important;
 }

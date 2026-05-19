@@ -1,5 +1,27 @@
 # ensindexer
 
+## 1.14.0
+
+### Minor Changes
+
+- [#2101](https://github.com/namehash/ensnode/pull/2101) [`7dd0d3f`](https://github.com/namehash/ensnode/commit/7dd0d3ff2905caf357a74470d5630a9ca8bd3369) Thanks [@shrugs](https://github.com/shrugs)! - **Materialize `Domain.canonicalName`, `canonicalLabelHashPath`, and `canonicalNode`** on every Canonical Domain. Indexes: hash on `canonicalName` (exact lookup), GIN trigram on `canonicalName` (substring), GIN on `canonicalLabelHashPath` (heal cascade), hash on `canonicalNode` (resolver-record joins).
+
+- [#2125](https://github.com/namehash/ensnode/pull/2125) [`f6ef397`](https://github.com/namehash/ensnode/commit/f6ef3977931b68997a40fd47755e0fca8d262093) Thanks [@shrugs](https://github.com/shrugs)! - **Materialize `Domain.canonicalPath` and `canonicalDepth`** on every Canonical Domain, alongside the existing `canonicalName` / `canonicalLabelHashPath` / `canonicalNode`. `canonicalPath` is the head-first array of ancestor DomainIds (parallel to `canonicalLabelHashPath`); `canonicalDepth` is the label count. Adds a `byCanonicalDepth` btree index for `ORDER BY canonical_depth` (typeahead, depth-ordered browse).
+
+- [#2128](https://github.com/namehash/ensnode/pull/2128) [`65cf37c`](https://github.com/namehash/ensnode/commit/65cf37c24c1bd9a7f30ad758c945015ece9c8461) Thanks [@tk-o](https://github.com/tk-o)! - Renamed the `ensv2` plugin to `unigraph`. It better conveys the idea of a single unified data model used for indexing both ENSv1 and ENSv2.
+
+### Patch Changes
+
+- [#2108](https://github.com/namehash/ensnode/pull/2108) [`f61d04b`](https://github.com/namehash/ensnode/commit/f61d04b9bef5c0d4931ade6ab2425ac8874328b9) Thanks [@shrugs](https://github.com/shrugs)! - ENSIndexer: fix crash on startup after crash recovery when one or more chains were in Queued status pre-crash. The omnichain status snapshot builder now promotes such chains to Backfill once other chains' progress has advanced past their `startBlock` timestamp, instead of failing the `omnichainIndexingCursor < earliestQueuedStartBlock` invariant.
+
+- Updated dependencies [[`3132a77`](https://github.com/namehash/ensnode/commit/3132a77b809694a4677da69c8c546a4b41eaa583), [`1b6abb0`](https://github.com/namehash/ensnode/commit/1b6abb06ac364840770dfcc47526111fdf6fb2c9), [`7dd0d3f`](https://github.com/namehash/ensnode/commit/7dd0d3ff2905caf357a74470d5630a9ca8bd3369), [`f6ef397`](https://github.com/namehash/ensnode/commit/f6ef3977931b68997a40fd47755e0fca8d262093), [`65cf37c`](https://github.com/namehash/ensnode/commit/65cf37c24c1bd9a7f30ad758c945015ece9c8461), [`75e8aac`](https://github.com/namehash/ensnode/commit/75e8aac2abb044ce55119daab98d20ebcbda8304)]:
+  - @ensnode/ensnode-sdk@1.14.0
+  - @ensnode/ensdb-sdk@1.14.0
+  - @ensnode/ensrainbow-sdk@1.14.0
+  - enssdk@1.14.0
+  - @ensnode/datasources@1.14.0
+  - @ensnode/ponder-sdk@1.14.0
+
 ## 1.13.1
 
 ### Patch Changes
