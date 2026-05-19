@@ -1,11 +1,11 @@
 ---
 title: ENS Omnigraph API
-description: A protocol-native, unified GraphQL API over indexed ENS data — polymorphic across ENSv1 and ENSv2.
+description: The world's first and only API providing unified access to the full state of ENSv1 and ENSv2.
 ---
 
 import { LinkCard, CardGrid } from "@astrojs/starlight/components";
 
-The **ENS Omnigraph API** is the GraphQL API over the indexed Unigraph data model. It's a single, polymorphic schema over **both ENSv1 and ENSv2** — write your query once and get correct, typed results regardless of which protocol version a given Domain lives in.
+The **ENS Omnigraph API** is the world's first and only API providing unified access to the full state of ENSv1 and ENSv2. It's a single, polymorphic GraphQL API over **both ENSv1 and ENSv2** — write your query once and get correct, typed results regardless of which protocol version a given Domain lives in.
 
 ![ENS Omnigraph diagram](/ens-omnigraph-diagram.png)
 
@@ -13,33 +13,33 @@ The Omnigraph is delivered by [ENSApi](/docs/services/ensapi) on top of the inde
 
 ## One unified API over ENSv1 + ENSv2
 
-Both ENSv1 and ENSv2 Domains are indexed concurrently and exposed through the same schema. When ENSv2 launches in **Summer 2026**, the two protocol versions coexist — and the Omnigraph keeps your app working against both, at the same time, with no code changes.
+When ENSv2 launches in **Summer 2026**, the two protocol versions coexist — and the Omnigraph keeps your app working against both, at the same time, with no code changes. Both ENSv1 and ENSv2 Domains are indexed concurrently and exposed through a unified schema.
 
-Addressing a Domain by name (`domain(by: { name: "vitalik.eth" })`) prefers the ENSv2 entity when one exists, and falls back to the ENSv1 entity otherwise. Set-returning queries (`domains(where: { name: ... })`) return both protocol versions, unless explicitly filtered with `version: ENSv1` or `version: ENSv2`.
+Addressing a Domain by name (`domain(by: { name: "vitalik.eth" })`) returns an ENSv2 Domain if the domain has been optionally upgraded by its owner to ENSv2, and returns an ENSv1 Domain otherwise. Set-returning queries (`domains(where: { name: ... })`) return both the ENSv1 and ENSv2 onchain representations of the same domain, unless explicitly filtered with `version: ENSv1` or `version: ENSv2`.
 
 ## What is a Namegraph?
 
-A **Namegraph** is the native data model of ENSv2: it represents names not as a flat mapping of namehashes (as in ENSv1), but as a graph of `Registry → Domain → Registry → Domain → …`. This graph may be cyclic, and within the ENSv2 protocol an unbounded number of _disjoint_ (not connected) Namegraphs may/will exist. Within the unified ENS protocol (v1+v2) there will exist many Namegraphs, at the very least those headed by the ENSv1 Root Registry, Basenames, Lineanames, 3DNS, and the ENSv2 Root Registry.
+A **Namegraph** is the native onchain data model of ENSv2: it represents names not as a flat mapping of namehashes in a Nametable (as in ENSv1), but as a graph of `Registry → Domain → Registry → Domain → …`. This graph may be cyclic, and within the ENSv2 protocol an unbounded number of _disjoint_ (not connected) Namegraphs will exist. Within the unified ENS protocol (v1+v2) there will exist many Namegraphs, at the very least those headed by the ENSv1 Root Registry, Basenames, Lineanames, 3DNS, and the ENSv2 Root Registry.
 
 ## What is the Unigraph?
 
-The **Unigraph** is the entire collection of these disjoint namegraphs, indexed and stitched together using ENS Forward Resolution semantics, into a single navigable Namegraph. The result is a single, uniform data model — every ENSv1 query is the same shape as every ENSv2 query. Navigating the Namegraph from `"eth"` down to `"vitalik.eth"` and beyond looks identical regardless of whether the underlying entities are ENSv1 or ENSv2.
+The **Unigraph** is the entire collection of these disjoint ENSv2 Namegraphs and multiple ENSv1 Nametables, combined together into a single unified data model using ENS Resolution semantics. Navigating the Unigraph from `"eth"` down to `"vitalik.eth"` and beyond looks identical regardless of whether the underlying entities are ENSv1 or ENSv2.
 
-The [`unigraph` plugin](/docs/services/ensindexer) in ENSIndexer is what builds this unified model. It's also where multichain coverage lives: Basenames (`.base.eth`), Lineanames (`.linea.eth`), and 3DNS names (`.box`) are all materialized into the same Namegraph as mainnet `.eth`, so a single query covers all indexable names in one shot.
+The [`unigraph` plugin](/docs/services/ensindexer) in ENSIndexer is what builds this unified model. It's also where multichain coverage lives: Basenames (`.base.eth`), Lineanames (`.linea.eth`), and 3DNS names (`.box`) are all materialized into the same Unigraph as mainnet `.eth`, so a single query covers all indexable names in one shot.
 
 ## Canonicality
 
-Given that a Domain entity (say, the `sub` in `sub.example.eth`) can be reached by infinitely many aliases (for example, `sub.other.eth`), it becomes important to determine a _canonical_ reference to the Domain — this is the **Canonical Name**. Canonicality is also connected to nameability; if a Domain exists on-chain but isn't eventually connected to the Root Registry somehow, **it doesn't have a name!**
+Given that a Domain entity (say, the `sub` in `sub.example.eth`) can be reached by infinitely many aliases (for example, `sub.other.eth`), it becomes important to determine a _canonical_ reference to the Domain — this is the **Canonical Name**. Canonicality is also connected to nameability; if an ENSv2 Domain exists on-chain but isn't eventually connected to the Root Registry somehow, **it doesn't have a name!**
 
 Within the Omnigraph API the complexity of this is reduced, and all Canonical Domains (those with names) are queryable, searchable, and addressable by said name. Domains that are not canonical are _still_ referenceable by `id` (eg. `domain(by: { id: DomainId! })`).
 
-Canonical Domains have a `Domain.canonical` field hosting the canonicality-derived fields such as `name`, `node`, `depth` (i.e. 2 for `vitalik.eth`), and `path` (i.e. `[Domain("eth"), Domain("vitalik.eth")]`).
+Canonical Domains have a `Domain.canonical` field hosting the canonicality-derived fields such as `name`, `node`, `depth` (i.e. 2 for `vitalik.eth`), and `path` from the ENS root (i.e. `[Domain("eth"), Domain("vitalik.eth")]`).
 
 ## Stable IDs vs. Namegraph addressing
 
-Every entity in the Omnigraph has an `id` — a nominally-typed, stable reference to a specific on-chain entity (`DomainId`, `RegistryId`, `RegistrationId`, etc.). When you already know the entity you mean, address it by `id`: `domain(by: { id: "..." })` always returns the same on-chain Domain.
+Every entity in the Omnigraph has an `id` — a nominally-typed, stable reference to a specific on-chain entity (`DomainId`, `RegistryId`, `RegistrationId`, etc.). When you already know the entity you mean, address it by `id`: `domain(by: { id: "..." })` always returns the same on-chain Domain, even if its canonical name changes across time.
 
-Addressing a Domain by **name** is a different operation. It's **Namegraph forward traversal**: `domain(by: { name: "vitalik.eth" })` walks from the ENSv2 Root Registry → `"eth"` in that Registry → the Registry that `"eth"` points at (the EthRegistry) → `"vitalik"` in that Registry. The Domain returned is whichever on-chain entity that path currently resolves to.
+Addressing a Domain by **name** is a different operation. It's **Unigraph forward traversal**: `domain(by: { name: "vitalik.eth" })` walks from the ENSv2 Root Registry → `"eth"` in that Registry → the Registry that `"eth"` points at (the EthRegistry) → `"vitalik"` in that Registry. The Domain returned is whichever on-chain entity (if any) that path currently resolves to.
 
 These two views are not interchangeable:
 
@@ -56,11 +56,11 @@ These two views are not interchangeable:
 - `Registry` → `ENSv1Registry`, `ENSv1VirtualRegistry`, `ENSv2Registry`
 - `Registration` → `BaseRegistrarRegistration`, `NameWrapperRegistration`, `ThreeDNSRegistration`, `ENSv2RegistryRegistration`, `ENSv2RegistryReservation`
 
-Shared fields are available unconditionally on the interface. Protocol- or implementation-specific fields are reached via typed inline fragments — `... on ENSv1Domain { rootRegistryOwner }`, `... on ENSv2Domain { tokenId }`, `... on BaseRegistrarRegistration { wrapped { fuses } }`, `... on NameWrapperRegistration { fuses }`. The result is a single query that compiles, type-checks, and returns the right fields for whichever concrete type each row turns out to be.
+Shared fields are available unconditionally on the interface. Protocol- or implementation-specific fields are reached via typed inline fragments — `... on ENSv1Domain { rootRegistryOwner }`, `... on ENSv2Domain { tokenId }`, `... on BaseRegistrarRegistration { wrapped { fuses } }`, `... on NameWrapperRegistration { fuses }`. The result is a single query that compiles, type-checks, and returns the right fields for whichever concrete type each record turns out to be.
 
 ## Interpreted Names everywhere
 
-Every name and label crossing the Omnigraph surface is an **Interpreted Name** (or Interpreted Label). Each label in an Interpreted Name is either a normalized literal label or an Encoded LabelHash (`[abc123…]`) when the literal isn't known. This eliminates the most common ENS UI footguns — unnormalized labels, unhealed hashes, and rendering surprises — at the schema layer, making UI rendering trivial. See [terminology](/docs/reference/terminology#interpreted-label) for the full definition.
+Every name and label crossing the Omnigraph surface is an **Interpreted Name** (or Interpreted Label). Each label in an Interpreted Name is either a normalized literal label or an Encoded LabelHash (`[abc123…]`) when the literal isn't known or is unnormalized. This eliminates one of the most common ENS UI footguns — unnormalized labels, unhealed hashes, and rendering surprises — at the schema layer, making UI rendering trivial. See [terminology](/docs/reference/terminology#interpreted-label) for the full definition.
 
 ## Relay-spec connections
 

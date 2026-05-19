@@ -23,11 +23,11 @@ The ENSv2 upgrade to the ENS protocol is coming **Summer 2026**! Your app, regar
 
 ## What is the ENS Omnigraph?
 
-ENSNode fully supports ENSv2 via the [Omnigraph API](/docs/integrate/omnigraph), a _unified_ API over **both ENSv1 and ENSv2**. When ENSv2 launches in **Summer 2026**, ENSv1 continues to exist, and apps _must_ be updated to use the new protocol version. ENSNode takes the guesswork out of building on ENS, whether you need to resolve up-to-date records, search all Domains, or see which Domains a user owns (and much, much more).
+ENSNode fully supports ENSv2 via the [ENS Omnigraph API](/docs/integrate/omnigraph), the world's first and only _unified_ API over the full state of **both ENSv1 and ENSv2**. When ENSv2 launches in **Summer 2026**, ENSv1 continues to exist, and apps _must_ be updated to use the new protocol version. ENSNode takes the guesswork out of building on ENS, whether you need to resolve up-to-date records, search all Domains, or see which Domains a user owns (and much, much more).
 
 ![ENS Omnigraph diagram](/ens-omnigraph-diagram.png)
 
-ENS Omnigraph supports both ENSv1 and ENSv2 **concurrently** within the **same datamodel**. This means you can integrate today (before ENSv2 launches) and continue with full ENSv2 support when it goes live, with zero downtime!
+ENS Omnigraph supports both ENSv1 and ENSv2 **concurrently** within the **same unified data model**. This means you can integrate today (before ENSv2 launches) and continue with full ENSv2 support when it goes live, with zero downtime!
 
 ## ENSNode's Integration Options
 
@@ -196,9 +196,9 @@ The ENS Omnigraph API is a GraphQL API following the Relay specification, so you
 Beyond `enskit`, `enssdk`, and the Omnigraph GraphQL API, ENSNode exposes a deeper set of integration surfaces for advanced use cases:
 
 - **ENSDb** — query the indexed ENS dataset directly over Postgres for custom analytics or your own service layer.
-- **enscli** — script ENSNode operations from the command line.
-- **ensskills** — AI agent tooling for working with ENS data.
-- **ensdb-cli** — share and load point-in-time ENSDb snapshots.
+- **enscli** — (coming soon) script ENSNode operations from the command line.
+- **ensskills** — (coming soon) AI agent tooling for working with ENS data.
+- **ensdb-cli** — (coming soon) share and load point-in-time ENSDb snapshots.
 - **ENSEngine** (coming soon) — subscribe to ENS-aware webhooks driven by changes in ENSDb.
 
 <LinkCard

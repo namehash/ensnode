@@ -11,7 +11,7 @@ ENSNode is the full-stack ENSv2 development platform — a single, unified API o
 
 ## Built for ENSv2 from day one
 
-[ENSv2](https://roadmap.ens.domains/roadmap/) is a fundamental change to ENS's onchain data model. The legacy ENS Subgraph wasn't designed for it, and it never will be — single-chain, no resolution, no understanding of the new Namegraph. Apps that stay on the Subgraph will be left behind the moment ENSv2 launches.
+[ENSv2](https://ens.domains/ensv2) is a fundamental change to ENS's onchain data model. The legacy ENS Subgraph wasn't designed for it, and it never will be — single-chain, no resolution, no understanding of the new ENSv2 Namegraph. Apps that stay on the Subgraph will be left behind the moment ENSv2 launches.
 
 ENSNode is built around ENSv2 from the ground up. The same query works against an ENSv1 name today and an ENSv2 name the moment it goes live — with **zero downtime or code changes** in your app.
 
@@ -23,22 +23,22 @@ ENSNode is built around ENSv2 from the ground up. The same query works against a
 
 ## One unified API over ENSv1 + ENSv2
 
-The [ENS Omnigraph](/docs/integrate/omnigraph) is a single GraphQL API that returns a polymorphic, unified view of every ENS Domain — regardless of whether it lives in the ENSv1 nametree, the ENSv2 Namegraph, on mainnet, or on an L2 subregistry.
+The [ENS Omnigraph](/docs/integrate/omnigraph) is a single GraphQL API that returns a polymorphic, unified view of every ENS Domain — regardless of whether it lives in an ENSv1 Nametree, the ENSv2 Namegraph, on mainnet, or on an L2 subregistry such as base.eth subnames on Base.
 
 ![ENS Omnigraph diagram](/ens-omnigraph-diagram.png)
 
-ENSv1 and ENSv2 coexist after the ENSv2 launch. The Omnigraph hides that split: your code asks for `domain(by: { name: "vitalik.eth" })` and gets a typed result, regardless of whether the underlying domain is on ENSv1 or ENSv2.
+ENSv1 and ENSv2 coexist after the ENSv2 launch. The Omnigraph simplifies that split: your code asks for `domain(by: { name: "vitalik.eth" })` and gets a typed result, regardless of whether the underlying domain is on ENSv1 or ENSv2.
 
 ## Multichain by default
 
-ENSNode indexes the full ENS namespace across every chain that matters, all from one query:
+ENSNode provides the world's best indexing coverage for ENS, spanning every chain that matters, including:
 
 - **Mainnet** — the canonical ENS root and `.eth` registrations
 - **Basenames** (`.base.eth`) on Base
 - **Lineanames** (`.linea.eth`) on Linea
 - **3DNS** names (`.box`, tokenized DNS) on Optimism and Base
 
-No more wiring up a per-chain Subgraph, reconciling overlapping namespaces, or writing CCIP-Read logic in your app — ENSNode handles forward and reverse resolution, including offchain gateways, server-side.
+No more wiring up a per-chain Subgraph, reconciling overlapping ENS Nametrees, or writing CCIP-Read logic in your app — ENSNode handles forward and reverse resolution, including offchain gateways, server-side.
 
 ## Full-stack integration surfaces
 

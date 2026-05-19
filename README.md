@@ -19,13 +19,17 @@
 
 # ENSNode
 
-[ENSNode](https://ensnode.io) is the multichain indexer for ENS, with first-class support for [ENSv2](https://ens.domains/ensv2). It exposes a unified GraphQL API — the **Omnigraph API** — over both ENSv1 and ENSv2.
+[ENSNode](https://ensnode.io) is the full-stack development platform for [ENSv2](https://ens.domains/ensv2). Use ENSNode to achieve full ENSv2 readiness even before ENSv2 launches.
+
+The easiest way to get started is through the new **ENS Omnigraph API** — the world's first and only API to support querying the full state of both ENSv1 and ENSv2 in a single unified API.
 
 - 📚 **Docs:** [ensnode.io](https://ensnode.io)
 - 🚀 **Quickstart:** [ensnode.io/docs/integrate](https://ensnode.io/docs/integrate)
 - 💬 **Telegram:** [t.me/ensnode](https://t.me/ensnode)
 
-## Example: query a name via the Omnigraph
+## Example: query the subnames of '.eth' via the ENS Omnigraph API
+
+Note that substantial ENS data is not directly queryable through traditional smart contract RPC calls. Examples include: the subnames of a name, or the names owned by an address. ENSNode is the world's first and only solution that makes the full set of ENS data spanning both ENSv1 and ENSv2 accessible through a single unified API.
 
 ```graphql
 query HelloWorld {
@@ -41,7 +45,7 @@ query HelloWorld {
 }
 ```
 
-To get started with ENSNode and the Omnigraph API, follow a [Quickstart](https://ensnode.io/docs/integrate).
+To get started with ENSNode and the ENS Omnigraph API, follow the [Quickstart](https://ensnode.io/docs/integrate).
 
 ## Contributing
 

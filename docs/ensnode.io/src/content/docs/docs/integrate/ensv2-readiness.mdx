@@ -31,7 +31,7 @@ In the past, apps building on ENS have had to live with these split fetching str
 
 ## How ENSNode solves this
 
-**The Unigraph Data Model** — [ENSIndexer](/docs/services/ensindexer) offers the `unigraph` plugin, which builds a **unified** polymorphic indexed data model in [ENSDb](/docs/services/ensdb) of multiple ENSv1 Nametrees (the ENSv1 onchain state model found in the ENS root registry, Basenames on Base, Lineanames on Linea, 3DNS on Optimism, etc.), and the ENSv2 Namegraph (the ENSv2 onchain state model that ENSv1 domains may optionally be upgraded to, which allows for dynamic reconfiguration of the name hierarchy, including possible cycles and infinite aliases).
+**The Unigraph Data Model** — [ENSIndexer](/docs/services/ensindexer) offers the `unigraph` plugin, which builds a **unified** polymorphic indexed data model in [ENSDb](/docs/services/ensdb) of multiple ENSv1 Nametrees (the ENSv1 onchain state model found in the ENS root registry, Basenames on Base, Lineanames on Linea, 3DNS on Optimism, etc.), and the ENSv2 Namegraph (the ENSv2 onchain state model that ENSv1 domains may optionally be upgraded to, which allows for dynamic reconfiguration of the name hierarchy, including possible cycles, disjoint domains, and infinite aliases).
 
 **The Omnigraph API** — The [ENS Omnigraph API](/docs/integrate/omnigraph) is delivered by [ENSApi](/docs/services/ensapi) and builds upon and refines the Unigraph data model held in [ENSDb](/docs/services/ensdb). The Omnigraph API provides a highly tailored, fully typed GraphQL API that understands ENS protocol implementation details—including ENSIP-10, ENSIP-15, ENSIP-19, and much more—so that you can focus on building your app (and not all the internal implementation complexities of the ENS protocol).
 
@@ -39,11 +39,11 @@ In the past, apps building on ENS have had to live with these split fetching str
 
 ## What You Need to Do
 
-**Resolving Records** — If you're resolving ENS names, you need to ensure that your `resolve` RPC calls go to the new `UniversalResolverV2` contract, when it is deployed or risk stale and incorrect records. This update is usually handled behind the scenes by updating `viem` or `wagmi`, just make sure to update in time!
+**Resolving Records** — If you're exclusively interested in resolving ENS names, you need to ensure that your `resolve` RPC calls go to the new `UniversalResolverV2` contract or risk stale and incorrect results being returned. Depending on your situation, this update may be handled simply by updating `viem` or `wagmi`, but for many apps building on indexed ENS data or with more advanced requirements, additional upgrade actions may be required.
 
-Instead, you can _resolve records via ENSNode_, and enjoy automatic support for ENSv2 when it launches while instantly benefitting from **ENS Protocol Acceleration**, dramatically reducing resolution duration for indexed names.
+For many, the simple solution for ENSv2 readiness will be to adopt the ENS Omnigraph API from ENSNode for all their ENS data needs (both ENSv1 and ENSv2). ENSNode also provides **ENS Protocol Acceleration**, dramatically reducing resolution latency for most names people use.
 
-**Querying ENS Data** — If you're querying ENS names via an indexed service like the legacy Subgraph, you need to update to an ENSv2-ready indexer like ENSNode; after ENSv2 launches, data served by the Subgraph (and any ENSv1-only indexers) will be instantly out of date.
+**Querying ENS Data** — If you're querying ENS names via a legacy API such as the ENS Subgraph you need to update to an ENSv2-ready service like ENSNode; as soon as ENSv2 launches, data served by the Subgraph (and any ENSv1-only indexers) will be instantly unreliable for the true state of ENS.
 
 ## Pick Your Integration
 
