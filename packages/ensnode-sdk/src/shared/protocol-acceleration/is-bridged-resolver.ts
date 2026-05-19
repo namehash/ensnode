@@ -130,3 +130,32 @@ export function isBridgedResolver(
     ) ?? null
   );
 }
+
+/**
+ * Returns true iff `domainId` is the origin Domain of a known Bridged Resolver.
+ *
+ * `Domain.subregistryId` on a bridge origin (e.g. mainnet `base.eth`, `linea.eth`) is owned by
+ * `handleBridgedResolverChange` — it must point at the bridged target Registry on the L2 chain
+ * so the canonical edge to that target Registry can agree. Chain-local subname events on the
+ * origin Domain must not overwrite that pointer.
+ */
+export function isBridgeOriginDomain(namespace: ENSNamespaceId, domainId: DomainId): boolean {
+  return getBridgedResolverConfigs(namespace).some((config) => config.originDomainId === domainId);
+}
+
+/**
+ * Returns true iff `registryId` is the target Registry of a known Bridged Resolver.
+ *
+ * `Registry.canonicalDomainId` on a bridged target (e.g. the Basenames/Lineanames L2 Registries)
+ * is owned by `handleBridgedResolverChange` — it must point at the mainnet origin Domain so the
+ * canonical edge can agree. Chain-local subname events on the target Registry must not overwrite
+ * that pointer with the L2-side Domain ID.
+ */
+export function isBridgedTargetRegistry(
+  namespace: ENSNamespaceId,
+  registryId: RegistryId,
+): boolean {
+  return getBridgedResolverConfigs(namespace).some(
+    (config) => config.targetRegistryId === registryId,
+  );
+}
