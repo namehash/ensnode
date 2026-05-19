@@ -17,7 +17,7 @@ const isZodError = (value: unknown): boolean =>
   value instanceof ZodError ||
   (value instanceof GraphQLError && value.originalError instanceof ZodError);
 
-// Yoga logs every execution error (including GraphQL input validaton errors) at `error` level, but
+// Yoga logs every execution error (including GraphQL input validation errors) at `error` level, but
 // those validation errors are expected, in general, so we downgrade them to `debug` so server logs
 // aren't flooded with stack traces.
 const yogaLogger = {
