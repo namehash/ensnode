@@ -1,5 +1,6 @@
 ---
 import { Code } from "@astrojs/starlight/components";
+import type { ENSNamespaceId } from "@ensnode/ensnode-sdk";
 
 import { buildOmnigraphCurlExample, getHostedEnsNodeInstanceDocUrl } from "@lib/playground/utils";
 import ENSAdminLogoDark from "@components/atoms/logos/astro/ENSAdminLogoDark.astro";
@@ -16,7 +17,7 @@ export interface OmnigraphAPIExamplePanelsProps {
   /** Starlight heading anchor on the hosted instances page (e.g. `ensnode-v2-sepolia`). */
   hostedInstanceAnchor: string;
   /** ENS namespace label for the hosted instance (e.g. `sepolia-v2`). */
-  hostedInstanceNamespace: string;
+  hostedInstanceNamespace: ENSNamespaceId;
   adminUrl: string;
   hideCurl?: boolean;
 }

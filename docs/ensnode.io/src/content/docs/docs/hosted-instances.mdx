@@ -1,10 +1,11 @@
 ---
-title: Using Hosted ENSNode Instances
+title: Hosted ENSNode Instances
 sidebar:
-  label: Hosted ENSNode Instances
+  label: Overview
   order: 1
 ---
 
+import { LinkCard } from "@astrojs/starlight/components";
 import HostedEnsNodeInstances from "@components/molecules/HostedEnsNodeInstances.astro";
 
 ## Hosted Instances
@@ -15,21 +16,25 @@ These instances are provided free of charge with no API key required, have no ra
 
 ### Available instance configurations
 
-Each ENSNode hosted instance is configured for a specific ENS namespace and activated ENSNode plugins. The ENS namespace is the source of truth for the data indexed by the instance, and the activated ENSNode plugins determine the specific data model produced by indexing and available for querying.
+Each ENSNode hosted instance is configured for a specific ENS **namespace** and activated ENSNode **plugins**. The ENS namespace identifies which ENS protocol deployment will be indexed by ENSNode (ex: mainnet or sepolia). The activated plugins determine the specific indexed data model ENSIndexer will produce in ENSDb and therefore which APIs ENSApi will make available to query.
 
-Each ENS namespace is associated with a particular ENS root registry deployment, which may or may not have completed the transition from ENSv1 to ENSv2. Currently, ENSNode supports the following ENS namespaces:
+Each ENS namespace is associated with a particular ENS Root Registry deployment, which may or may not have completed the transition from ENSv1 to ENSv2. Currently, ENSNode supports the following ENS namespaces:
 - `mainnet` (ENSv1)
 - `sepolia` (ENSv1)
-- `sepolia-v2` (An independent deployment of ENS to Sepolia that is already upgraded to ENSv2)
-- `ens-test-env` (A deployment of ENSv2 to a local Anvil chain for development and testing. For details see https://github.com/ensdomains/ens-test-env and https://github.com/ensdomains/contracts-v2)
+- `sepolia-v2` (ENSv1+ENSv2 — An independent deployment of ENS to Sepolia that is already upgraded to ENSv2)
+- `ens-test-env` (ENSv1+ENSv2 — A deployment of ENSv2 to a local Anvil chain for development and testing. For details see https://github.com/ensdomains/ens-test-env and https://github.com/ensdomains/contracts-v2)
 
 More details about ENS namespaces can be found inside [ENSNode's datasources package](https://github.com/namehash/ensnode/tree/main/packages/datasources).
 
-### ENSv2 instances
+### ENSv2 Instances
 
 These instances are associated with an ENS namespace that has upgraded to ENSv2 and demonstrate the latest ENSv2 support in ENSNode.
 
 #### ENSNode 'v2 Sepolia'
+
+:::tip[v2 Sepolia]
+The `sepolia-v2` namespace is undergoing active development by the ENS Labs team who is continuing to release updated ENSv2 contracts. It should be considered experimental.
+:::
 
 <HostedEnsNodeInstances
   instanceURL="https://api.v2-sepolia.ensnode.io"
@@ -42,7 +47,6 @@ These instances are associated with an ENS namespace that has upgraded to ENSv2 
 ## ENSv1 Instances
 
 These instances are associated with an ENS namespace that has **NOT** upgraded to ENSv2 yet and are still operating under ENSv1. These demonstrate how the ENS Omnigraph API, enssdk, enskit, and the full stack of ENSNode services provide support to developers to become ENSv2 ready even before ENSv2 launches.
-
 
 ### Alpha-style Deployments
 
@@ -92,6 +96,12 @@ These ENSNode instances focus on maximizing backwards compatibility with the ENS
   purpose="Demonstration of ENSNode's backwards compatibility with the ENS Subgraph. Provides 1:1 Subgraph compatible data on Sepolia."
 />
 
-## Endpoints
+## Start building
 
-For more details on how to use these instances, refer to the [ENSNode Quickstart](/docs/integrate).
+Pick an instance above, then jump into the Quickstart for integration options to start making use of it.
+
+<LinkCard
+  title="ENSNode Quickstart"
+  href="/docs/integrate"
+  description="Wire enskit, enssdk, or the ENS Omnigraph API up to a hosted instance in a few minutes."
+/>

@@ -5,7 +5,7 @@ import { ENSADMIN_URL } from "astro:env/client";
 
 import { getOmnigraphExampleById } from "@data/omnigraph-examples/examples";
 import { DOCS_HOSTED_INSTANCE_ANCHOR, DOCS_OMNIGRAPH_NAMESPACE } from "@lib/playground/constants";
-import { buildEnsadminOmnigraphUrl, stringifyJsonForDocs } from "@lib/playground/utils";
+import { buildEnsAdminOmnigraphUrl, stringifyJsonForDocs } from "@lib/playground/utils";
 
 interface Props {
   id: string;
@@ -17,7 +17,7 @@ interface Props {
 
 const { id, hideCurl = false, hideDescription = false, hideBackToExamples = false } = Astro.props;
 const example = getOmnigraphExampleById(id);
-const adminUrl = buildEnsadminOmnigraphUrl({
+const adminUrl = buildEnsAdminOmnigraphUrl({
   ensadminBaseUrl: ENSADMIN_URL,
   query: example.query,
   connection: example.connection,
