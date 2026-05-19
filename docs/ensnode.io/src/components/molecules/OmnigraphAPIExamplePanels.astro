@@ -3,6 +3,7 @@ import { Code } from "@astrojs/starlight/components";
 import type { ENSNamespaceId } from "@ensnode/ensnode-sdk";
 
 import { buildOmnigraphCurlExample, getHostedEnsNodeInstanceDocUrl } from "@lib/playground/utils";
+import ENSAdminLogoDark from "@components/atoms/logos/astro/ENSAdminLogoDark.astro";
 
 export interface OmnigraphAPIExamplePanelsProps {
   /** Unique id prefix for aria / tab wiring (e.g. example id). */
@@ -62,11 +63,12 @@ const tabList: { id: string; label: string }[] = [
     style="top: calc(var(--sl-nav-height, 3.5rem) + var(--sl-mobile-toc-height, 0px) + 0.25rem);"
   >
     <a
-      class="inline-flex shrink-0 items-center justify-center rounded-lg bg-[var(--sl-color-text-accent)] px-4 py-1.5 text-sm font-semibold text-[var(--sl-color-black)] no-underline transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
+      class="inline-flex shrink-0 items-center justify-between gap-2 rounded-lg bg-[var(--sl-color-text-accent)] p-1.5 pr-2 text-sm font-semibold text-[var(--sl-color-black)] no-underline transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
       href={adminUrl}
       target="_blank"
       rel="noopener noreferrer"
     >
+      <ENSAdminLogoDark className="h-5 w-auto shrink-0" />
       Run in ENSAdmin
     </a>
     <span class="hidden text-xs leading-snug text-[var(--sl-color-gray-3)] sm:block">
