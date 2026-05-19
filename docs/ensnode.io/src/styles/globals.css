@@ -96,9 +96,13 @@ div.header {
   }
 }
 
-.dialog-frame button {
+.dialog-frame button.pagefind-ui__search-clear {
+  display: none;
+}
+
+.dialog-frame > button {
   @media (min-width: 50rem) {
-    visibility: hidden;
+    display: none;
   }
 
   border-radius: 8px;

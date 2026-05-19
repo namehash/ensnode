@@ -2,6 +2,10 @@
 import type { AstroLogoProps } from "./shared-types";
 
 const { className, ...props } = Astro.props as AstroLogoProps;
+
+const uid = crypto.randomUUID();
+const radialGradientId = `paint0_radial_${uid}`;
+const linearGradientId = `paint1_linear_${uid}`;
 ---
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -13,11 +17,11 @@ const { className, ...props } = Astro.props as AstroLogoProps;
   >
     <path
       d="M2.85693 2.85718H37.1426V37.1429H2.85693V2.85718Z"
-      fill="url(#paint0_radial_767_1094)"
+      fill={`url(#${radialGradientId})`}
     />
     <path
       d="M19.9998 8.57153L37.1426 37.143H2.85693L19.9998 8.57153Z"
-      fill="url(#paint1_linear_767_1094)"
+      fill={`url(#${linearGradientId})`}
     />
     <path d="M7.14286 30H32.8569L33.7109 31.4286H6.28906L7.14286 30Z" fill="#2364E8" />
     <path d="M11.4287 22.8572H28.5714L29.4272 24.2857H10.5747L11.4287 22.8572Z" fill="#2364E8" />
@@ -30,7 +34,7 @@ const { className, ...props } = Astro.props as AstroLogoProps;
     />
     <defs>
       <radialGradient
-        id="paint0_radial_767_1094"
+        id={radialGradientId}
         cx="0"
         cy="0"
         r="1"
@@ -41,7 +45,7 @@ const { className, ...props } = Astro.props as AstroLogoProps;
         <stop offset="1" stop-color="#A9C5FF" />
       </radialGradient>
       <linearGradient
-        id="paint1_linear_767_1094"
+        id={linearGradientId}
         x1="19.9998"
         y1="8.57153"
         x2="19.9998"
