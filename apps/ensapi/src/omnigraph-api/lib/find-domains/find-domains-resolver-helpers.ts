@@ -18,6 +18,14 @@ import type { OrderDirection } from "@/omnigraph-api/schema/order-direction";
  * 1024 bytes, well under the limit and within the realm of reasonable name lengths (mainnet avg
  * is ~126). Queries MUST sort by this same expression for the planner to use the index for
  * ordered scan; raw `canonical_name` ORDER BY falls back to a full scan + sort.
+ *
+ * An alternative solution is to redefine InterpretedLabel to enforce a maximum byte length of 255 before
+ * being truncated into an Encoded LabelHash — this mirros a name's resolvability (must be dns-encodable)
+ * and allows us to avoid storing spam names. Then we'd also have to produce an b-tree indexed
+ * materializedCanonicalName field that's length-capped as well to fit the btree index. Then we could
+ * query against that column instead of the full InterpretedName. All of that would avoid this
+ * LEFT(...) expression index and the necessity for the query pattern to match the defined index
+ * (to avoid the full scan).
  */
 export const CANONICAL_NAME_SORT_PREFIX = 256;
 
