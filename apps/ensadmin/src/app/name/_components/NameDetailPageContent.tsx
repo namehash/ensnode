@@ -1,8 +1,8 @@
 "use client";
 
+import { ASSUME_IMMUTABLE_QUERY, useRecords } from "@namehash/namehash-ui";
 import type { Name } from "enssdk";
 
-import { ASSUME_IMMUTABLE_QUERY, useRecords } from "@ensnode/ensnode-react";
 import type { ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 
 import { Card, CardContent } from "@/components/ui/card";

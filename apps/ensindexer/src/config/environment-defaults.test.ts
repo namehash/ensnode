@@ -55,14 +55,14 @@ describe("environment-defaults", () => {
       // test runtime behavior for specific cases.
 
       // partial config provided by user
-      const PROVIDED: any = { labelSet: { labelSetVersion: "1" } };
+      const PROVIDED: any = { clientLabelSet: { labelSetVersion: "1" } };
 
       // full default set
-      const DEFAULTS: any = { labelSet: { labelSetId: "subgraph", labelSetVersion: "0" } };
+      const DEFAULTS: any = { clientLabelSet: { labelSetId: "subgraph", labelSetVersion: "0" } };
 
       // applyDefaults correctly provides the nested value without clobbering user-provided nested value
       expect(applyDefaults(PROVIDED, DEFAULTS)).toStrictEqual({
-        labelSet: {
+        clientLabelSet: {
           labelSetId: "subgraph",
           labelSetVersion: "1",
         },

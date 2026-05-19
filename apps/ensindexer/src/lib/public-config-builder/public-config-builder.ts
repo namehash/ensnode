@@ -37,23 +37,26 @@ export class PublicConfigBuilder {
   /**
    * Get ENSIndexer Public Config
    *
-   * Note: ENSIndexer Public Config is cached after the first call, so
-   * subsequent calls will return the cached version without rebuilding it.
+   * Note: The {@link EnsIndexerPublicConfig} object is immutable for
+   * the whole ENSIndexer instance lifecycle. Therefore, the result of
+   * the first {@link getPublicConfig} call is cached and returned for
+   * subsequent calls.
    *
-   * @throws if the built ENSIndexer Public Config does not conform to
+   * @throws if the built {@link EnsIndexerPublicConfig} does not conform to
    *         the expected schema
    */
   async getPublicConfig(): Promise<EnsIndexerPublicConfig> {
     if (typeof this.immutablePublicConfig === "undefined") {
       const [versionInfo, ensRainbowPublicConfig] = await Promise.all([
         this.getEnsIndexerVersionInfo(),
+        // TODO: remove dependency on ENSRainbow by dropping `ensRainbowPublicConfig` from `EnsIndexerPublicConfig`.
         this.ensRainbowClient.config(),
       ]);
 
       this.immutablePublicConfig = validateEnsIndexerPublicConfig({
         ensIndexerSchemaName: config.ensIndexerSchemaName,
         ensRainbowPublicConfig,
-        labelSet: config.labelSet,
+        clientLabelSet: config.clientLabelSet,
         indexedChainIds: config.indexedChainIds,
         isSubgraphCompatible: config.isSubgraphCompatible,
         namespace: config.namespace,

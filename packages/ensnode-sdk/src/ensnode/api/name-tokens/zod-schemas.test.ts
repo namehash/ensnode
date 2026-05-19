@@ -3,9 +3,14 @@ import { describe, expect, it } from "vitest";
 
 import { NFTMintStatuses } from "../../../tokenscope/assets";
 import { NameTokenOwnershipTypes } from "../../../tokenscope/name-token";
+import {
+  nameTokensNotIndexedExample,
+  nameTokensResponseOkExample,
+  nameTokensServiceUnavailableExample,
+} from "./examples";
 import { NameTokensResponseCodes, type NameTokensResponseOk } from "./response";
 import type { SerializedNameTokensResponseOk } from "./serialized-response";
-import { makeNameTokensResponseSchema } from "./zod-schemas";
+import { makeNameTokensResponseErrorSchema, makeNameTokensResponseSchema } from "./zod-schemas";
 
 const responseOk = {
   responseCode: NameTokensResponseCodes.Ok,
@@ -56,6 +61,26 @@ const responseOk = {
 } satisfies SerializedNameTokensResponseOk;
 
 describe("Name Tokens: Zod Schemas", () => {
+  it("nameTokensServiceUnavailableExample passes error schema", () => {
+    expect(
+      makeNameTokensResponseErrorSchema().safeParse(nameTokensServiceUnavailableExample).success,
+    ).toBe(true);
+  });
+
+  it("nameTokensNotIndexedExample passes error schema", () => {
+    expect(makeNameTokensResponseErrorSchema().safeParse(nameTokensNotIndexedExample).success).toBe(
+      true,
+    );
+  });
+
+  it("nameTokensResponseOkExample passes schema", () => {
+    expect(
+      makeNameTokensResponseSchema("Name Tokens Response", true).safeParse(
+        nameTokensResponseOkExample,
+      ).success,
+    ).toBe(true);
+  });
+
   it("can parse response OK correctly", () => {
     const schema = makeNameTokensResponseSchema();
     const parsed = schema.safeParse(responseOk);

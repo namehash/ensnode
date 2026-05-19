@@ -1,5 +1,126 @@
 # ensadmin
 
+## 1.14.0
+
+### Minor Changes
+
+- [#2090](https://github.com/namehash/ensnode/pull/2090) [`3132a77`](https://github.com/namehash/ensnode/commit/3132a77b809694a4677da69c8c546a4b41eaa583) Thanks [@tk-o](https://github.com/tk-o)! - Added indexing status based guard for Omnigraph API and Subgraph API views.
+
+### Patch Changes
+
+- [#2118](https://github.com/namehash/ensnode/pull/2118) [`bb7ad4a`](https://github.com/namehash/ensnode/commit/bb7ad4ae2c026d87ecb8d2a9ef751bf940bef923) Thanks [@tk-o](https://github.com/tk-o)! - Refined information presented on the "Connection" view.
+
+- [#2113](https://github.com/namehash/ensnode/pull/2113) [`010cd0c`](https://github.com/namehash/ensnode/commit/010cd0cdeec44d5b9b3649533460f9461748013e) Thanks [@notrab](https://github.com/notrab)! - Eliminate the `@ensnode/ensnode-react` package; All developers building on ENSNode from a React-level should use the `enskit` package which specializes for this.
+
+- Updated dependencies [[`3132a77`](https://github.com/namehash/ensnode/commit/3132a77b809694a4677da69c8c546a4b41eaa583), [`1b6abb0`](https://github.com/namehash/ensnode/commit/1b6abb06ac364840770dfcc47526111fdf6fb2c9), [`65cf37c`](https://github.com/namehash/ensnode/commit/65cf37c24c1bd9a7f30ad758c945015ece9c8461), [`010cd0c`](https://github.com/namehash/ensnode/commit/010cd0cdeec44d5b9b3649533460f9461748013e)]:
+  - @ensnode/ensnode-sdk@1.14.0
+  - @namehash/namehash-ui@1.14.0
+  - enssdk@1.14.0
+  - @ensnode/datasources@1.14.0
+  - @ensnode/scalar-react@0.0.0
+
+## 1.13.1
+
+### Patch Changes
+
+- Updated dependencies [[`b32f09d`](https://github.com/namehash/ensnode/commit/b32f09dec275196c816b722023a197d3e91a37b1)]:
+  - @ensnode/datasources@1.13.1
+  - @ensnode/ensnode-sdk@1.13.1
+  - @namehash/namehash-ui@1.13.1
+  - @ensnode/ensnode-react@1.13.1
+  - enssdk@1.13.1
+  - @ensnode/scalar-react@0.0.0
+
+## 1.13.0
+
+### Patch Changes
+
+- Updated dependencies [[`57bbef2`](https://github.com/namehash/ensnode/commit/57bbef28e24323a4c2f8326512d185a5e4662254)]:
+  - @ensnode/datasources@1.13.0
+  - @ensnode/ensnode-sdk@1.13.0
+  - @namehash/namehash-ui@1.13.0
+  - @ensnode/ensnode-react@1.13.0
+  - enssdk@1.13.0
+  - @ensnode/scalar-react@0.0.0
+
+## 1.12.0
+
+### Patch Changes
+
+- Updated dependencies [[`4fb7b33`](https://github.com/namehash/ensnode/commit/4fb7b332fd46ee9924dc9dfb55b5a21ff8b8554a)]:
+  - @ensnode/ensnode-sdk@1.12.0
+  - @ensnode/ensnode-react@1.12.0
+  - @namehash/namehash-ui@1.12.0
+  - enssdk@1.12.0
+  - @ensnode/datasources@1.12.0
+  - @ensnode/scalar-react@0.0.0
+
+## 1.11.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - enssdk@1.11.1
+  - @ensnode/datasources@1.11.1
+  - @ensnode/ensnode-react@1.11.1
+  - @ensnode/ensnode-sdk@1.11.1
+  - @namehash/namehash-ui@1.11.1
+  - @ensnode/scalar-react@0.0.0
+
+## 1.11.0
+
+### Minor Changes
+
+- [#1988](https://github.com/namehash/ensnode/pull/1988) [`0d8a4b4`](https://github.com/namehash/ensnode/commit/0d8a4b4b7c8c70be904652e2132e7c67fd9e39ef) Thanks [@tk-o](https://github.com/tk-o)! - Removed _Records Count_ info from the ENSRainbow card UI on the _Connection_ page.
+
+- [#1988](https://github.com/namehash/ensnode/pull/1988) [`0d8a4b4`](https://github.com/namehash/ensnode/commit/0d8a4b4b7c8c70be904652e2132e7c67fd9e39ef) Thanks [@tk-o](https://github.com/tk-o)! - Renamed `ENSNodeConfig*` components to follow the `EnsNodeStackInfo*` pattern.
+
+### Patch Changes
+
+- [#2001](https://github.com/namehash/ensnode/pull/2001) [`7c1c048`](https://github.com/namehash/ensnode/commit/7c1c04859e187020892f9c40adb53aee2264058f) Thanks [@notrab](https://github.com/notrab)! - Fix ENSAdmin GraphiQL docs sidebar failing to stay open on the omnigraph page. The editor now memoizes its fetcher, storage, and plugins so 1Hz parent re-renders (driven by the realtime indexing-status projection) no longer trigger schema re-introspection.
+
+- [#1951](https://github.com/namehash/ensnode/pull/1951) [`c56e32c`](https://github.com/namehash/ensnode/commit/c56e32c22cf6994f6eb76dd1f17efbb9b3578858) Thanks [@notrab](https://github.com/notrab)! - Introduced interactive REST API Reference playground (`/api/rest`) powered by Scalar, enabling discovery and testing of all REST APIs published by a connected ENSApi instance. Added `@ensnode/scalar-react` wrapper package.
+
+- Updated dependencies [[`43d8a9b`](https://github.com/namehash/ensnode/commit/43d8a9b838b15719f520cd3f3bbfd1b52a4ad1ce), [`824d819`](https://github.com/namehash/ensnode/commit/824d819d291b2b642d2664d09cb10d6de69a6ea7), [`5729ac1`](https://github.com/namehash/ensnode/commit/5729ac18ba029a476ffeca18c9b4bceee417ebdb), [`6173160`](https://github.com/namehash/ensnode/commit/61731608632f62139496656f6231210f63383f20), [`92ca54f`](https://github.com/namehash/ensnode/commit/92ca54fa2efbef3f32e2dacd8fdc347ef260a2af), [`7e77c5c`](https://github.com/namehash/ensnode/commit/7e77c5c2bef96d1a2eb363871fb87379b5f6f7e9), [`0d8a4b4`](https://github.com/namehash/ensnode/commit/0d8a4b4b7c8c70be904652e2132e7c67fd9e39ef), [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572), [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572), [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572), [`43d8a9b`](https://github.com/namehash/ensnode/commit/43d8a9b838b15719f520cd3f3bbfd1b52a4ad1ce), [`6173160`](https://github.com/namehash/ensnode/commit/61731608632f62139496656f6231210f63383f20)]:
+  - @ensnode/ensnode-sdk@1.11.0
+  - @ensnode/datasources@1.11.0
+  - enssdk@1.11.0
+  - @ensnode/ensnode-react@1.11.0
+  - @namehash/namehash-ui@1.11.0
+  - @ensnode/scalar-react@0.0.0
+
+## 1.10.1
+
+### Patch Changes
+
+- Updated dependencies [[`9d50f64`](https://github.com/namehash/ensnode/commit/9d50f647802fde286dfef2dc23c884801d06b228)]:
+  - @ensnode/ensnode-sdk@1.10.1
+  - @ensnode/ensnode-react@1.10.1
+  - @namehash/namehash-ui@1.10.1
+  - enssdk@1.10.1
+  - @ensnode/datasources@1.10.1
+
+## 1.10.0
+
+### Minor Changes
+
+- [#1671](https://github.com/namehash/ensnode/pull/1671) [`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5) Thanks [@tk-o](https://github.com/tk-o)! - Replaced the `useENSNodeConfig` hook with `useEnsNodeStackInfo` hook. The `useEnsNodeStackInfo` hook leverages the updated data model returned from the `useIndexingStatusWithSwr` hook.
+
+- [#1828](https://github.com/namehash/ensnode/pull/1828) [`4c99177`](https://github.com/namehash/ensnode/commit/4c991777ac13ffd2cc1fb947e5a47bd7733b112b) Thanks [@tk-o](https://github.com/tk-o)! - Updated the Connection view to reference "ENSIndexer Schema Name".
+
+### Patch Changes
+
+- [#1840](https://github.com/namehash/ensnode/pull/1840) [`52495c0`](https://github.com/namehash/ensnode/commit/52495c06883ee9a9667322079aba3e1bf763a1b3) Thanks [@notrab](https://github.com/notrab)! - Fix sidebar navigation to only preserve the connection query param, preventing page-specific params like name from leaking between routes.
+
+- [#1816](https://github.com/namehash/ensnode/pull/1816) [`ab1750c`](https://github.com/namehash/ensnode/commit/ab1750c1bf37756b85124a7c8ce07fcd0610b96f) Thanks [@notrab](https://github.com/notrab)! - Make the Record Resolution Inspector URL shareable by driving name state from query params, with cross-navigation links between name profiles and record inspection.
+
+- Updated dependencies [[`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5), [`29afaa6`](https://github.com/namehash/ensnode/commit/29afaa6ad8a3f3c8133241cf1a9324980498ded4), [`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5), [`7fca45d`](https://github.com/namehash/ensnode/commit/7fca45d09dc6e3456fec2cae0827e9d2c54827a6), [`29fcfc7`](https://github.com/namehash/ensnode/commit/29fcfc7a1ab01c3214b5c16fc0e4a349010e9360), [`5f341e1`](https://github.com/namehash/ensnode/commit/5f341e14420146db772fc01b1b3c0f4e2d4a3cb7), [`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5), [`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5), [`b8f5be7`](https://github.com/namehash/ensnode/commit/b8f5be761748f75c06ba4da81dd6098eec6ebb9a), [`4c99177`](https://github.com/namehash/ensnode/commit/4c991777ac13ffd2cc1fb947e5a47bd7733b112b), [`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5), [`b2481d6`](https://github.com/namehash/ensnode/commit/b2481d6dae6f704493140aa63cd4ad1bfd3e3301), [`9abb302`](https://github.com/namehash/ensnode/commit/9abb30238374f0847a68615827dddafb6dc05dad), [`ed6ee96`](https://github.com/namehash/ensnode/commit/ed6ee9641bfa6f42ddc95955cf8b013c93bf2f4a), [`29afaa6`](https://github.com/namehash/ensnode/commit/29afaa6ad8a3f3c8133241cf1a9324980498ded4), [`29afaa6`](https://github.com/namehash/ensnode/commit/29afaa6ad8a3f3c8133241cf1a9324980498ded4), [`677db8b`](https://github.com/namehash/ensnode/commit/677db8b67effc6d530716c0a1902244dba56d787), [`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5)]:
+  - @ensnode/ensnode-sdk@1.10.0
+  - enssdk@1.10.0
+  - @ensnode/ensnode-react@1.10.0
+  - @namehash/namehash-ui@1.10.0
+  - @ensnode/datasources@1.10.0
+
 ## 1.9.0
 
 ### Patch Changes
@@ -203,7 +324,6 @@
 - [#1261](https://github.com/namehash/ensnode/pull/1261) [`703a12e`](https://github.com/namehash/ensnode/commit/703a12ed307e98ec1c1ce5911b45905ebcad58d8) Thanks [@notrab](https://github.com/notrab)! - Refactored `ConfigInfoAppCard` to use a composable children-based API, converting all components (ENSApi, ENSDb, ENSIndexer, ENSRainbow, and Connection) to use the new `<ConfigInfoItems>`, `<ConfigInfoItem>`, `<ConfigInfoFeatures>`, and `<ConfigInfoFeature>` components for better flexibility and styling control.
 
 - [#1201](https://github.com/namehash/ensnode/pull/1201) [`ceef81e`](https://github.com/namehash/ensnode/commit/ceef81e4a39125b238ab71bb4e0598a1a0771d15) Thanks [@notrab](https://github.com/notrab)! - - Improved ENSNode config info components with better reusability and maintainability (great for mocking too). Introduced `ENSNodeConfigCardDisplay` component that accepts props and extracted a reusable `ENSNodeCard` wrapper that provides consistent header and loading states.
-
   - Added Suspense boundary around `ConnectionsLibraryProvider` in root layout to better handle hydration
   - Added Suspense boundary with skeleton fallback in `LayoutWrapper` to show proper loading states
   - Ensures all pages remain statically generated while respecting existing component loading states
@@ -273,7 +393,6 @@
 - [#1134](https://github.com/namehash/ensnode/pull/1134) [`184dc1e`](https://github.com/namehash/ensnode/commit/184dc1e74721cd4981b19f6a6579437d5f4351c4) Thanks [@Y3drk](https://github.com/Y3drk)! - Create dedicated "Connection" page.
 
 - [#1158](https://github.com/namehash/ensnode/pull/1158) [`ef7349e`](https://github.com/namehash/ensnode/commit/ef7349e034d4b0fcbf69bfd3c82471ba02e01cc3) Thanks [@notrab](https://github.com/notrab)! - - Apply `ASSUME_IMMUTABLE_QUERY` to name detail page - avatar and profile data now fetches once and caches forever
-
   - Remove default `refetchInterval` from app-level QueryClient to allow individual queries to control refetch behavior
 
 - [#1009](https://github.com/namehash/ensnode/pull/1009) [`98983ac`](https://github.com/namehash/ensnode/commit/98983ac3c026073da5133aeb64025cbaf88523c8) Thanks [@tk-o](https://github.com/tk-o)! - Drops `latestSyncedBlock` field from `ChainIndexingBackfillStatus` data model.
@@ -333,7 +452,6 @@
 ### Patch Changes
 
 - [#962](https://github.com/namehash/ensnode/pull/962) [`845a037`](https://github.com/namehash/ensnode/commit/845a03761dc830303a56cd70fe0d57c36d78a663) Thanks [@djstrong](https://github.com/djstrong)! - Add label set information display to ENSAdmin status UI
-
   - Update ENSIndexerDependencyInfo component to display label set details
   - Enhance the configuration and UI representation of ENS indexing status
   - Add mock data support for label set information in status page

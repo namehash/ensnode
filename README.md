@@ -89,6 +89,14 @@ ENSNode is a modern, multichain indexer for ENS. It supports backwards-compatibl
 
 Documentation for the ENSNode suite of apps is available at [ensnode.io](https://ensnode.io).
 
+## Running with Docker
+
+```bash
+docker compose -f docker/docker-compose.yml up -d
+```
+
+See [`docker/README.md`](docker/README.md) for all use cases and commands.
+
 ## Contributions
 
 We welcome community contributions and feedback—please see [CONTRIBUTING.md](CONTRIBUTING.md) for more information.
@@ -162,10 +170,6 @@ Software Development Kit for interacting with data in ENSDb.
 ### [`packages/ensnode-sdk`](packages/ensnode-sdk)
 
 Software Development Kit for interacting with ENSNode services and data. Includes common utilities used across ENSNode applications.
-
-### [`packages/ensnode-react`](packages/ensnode-react)
-
-React hooks and providers for the ENSNode API.
 
 ### [`packages/datasources`](packages/datasources)
 

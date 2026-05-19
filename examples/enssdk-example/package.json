@@ -1,0 +1,21 @@
+{
+  "name": "@ensnode/enssdk-example",
+  "private": true,
+  "version": "0.0.1",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "typecheck": "tsgo --noEmit",
+    "generate:gqlschema": "gql.tada generate-output"
+  },
+  "dependencies": {
+    "enssdk": "0.0.0-preview-fix-sha-89c022b-20260519094840"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "gql.tada": "^1.8.10",
+    "tsx": "^4.7.1",
+    "typescript": "catalog:"
+  }
+}

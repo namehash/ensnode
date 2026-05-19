@@ -11,6 +11,7 @@ import { ReferralProgramAwardModels } from "../award-models/shared/rules";
 import { ReferralProgramEditionStatuses } from "../award-models/shared/status";
 import {
   makeReferralProgramEditionConfigSetArraySchema,
+  makeReferralProgramEditionSummariesDataSchema,
   makeReferralProgramEditionSummarySchema,
   makeReferrerEditionMetricsSchema,
   makeReferrerLeaderboardPageSchema,
@@ -24,6 +25,8 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
     address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
   };
 
+  // Fixtures share a subregistryId, so their time ranges are chosen to be disjoint
+  // (startTime and endTime are inclusive — abutting ranges count as overlapping).
   const pieSplitEdition = {
     slug: "2025-12",
     displayName: "December 2025",
@@ -32,7 +35,7 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
       awardPool: parseUsdc("1000"),
       maxQualifiedReferrers: 100,
       startTime: 1000000,
-      endTime: 2000000,
+      endTime: 1999999,
       subregistryId,
       rulesUrl: "https://ensawards.org/rules",
       areAwardsDistributed: false,
@@ -48,8 +51,8 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
       minBaseRevenueContribution: parseUsdc("10"),
       baseAnnualRevenueContribution: parseUsdc("5"),
       maxBaseRevenueShare: 0.5,
-      startTime: 1000000,
-      endTime: 2000000,
+      startTime: 2000000,
+      endTime: 2500000,
       subregistryId,
       rulesUrl: "https://ensawards.org/rules",
       areAwardsDistributed: false,
@@ -61,7 +64,7 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
     displayName: "March 2026",
     rules: {
       awardModel: "future-model",
-      startTime: 2000000,
+      startTime: 2500001,
       endTime: 3000000,
       subregistryId,
       rulesUrl: "https://ensawards.org/rules",
@@ -124,7 +127,7 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
     const result = schema.parse([pieSplitEdition, futureModelEdition]);
     const unrecognized = result.find((e) => e.slug === "2026-03");
 
-    expect(unrecognized!.rules.startTime).toBe(2000000);
+    expect(unrecognized!.rules.startTime).toBe(2500001);
     expect(unrecognized!.rules.endTime).toBe(3000000);
     expect(unrecognized!.rules.rulesUrl).toBeInstanceOf(URL);
     expect(unrecognized!.rules.rulesUrl.href).toBe("https://ensawards.org/rules");
@@ -175,6 +178,127 @@ describe("makeReferralProgramEditionConfigSetArraySchema", () => {
     };
 
     expect(() => schema.parse([pieSplitEdition, duplicateUnrecognized])).toThrow();
+  });
+
+  describe("non-overlapping time invariant (per subregistryId)", () => {
+    it("accepts editions for the same subregistry with disjoint time ranges", () => {
+      const earlier = {
+        ...pieSplitEdition,
+        slug: "2025-12",
+        rules: { ...pieSplitEdition.rules, startTime: 1000, endTime: 1999 },
+      };
+      const later = {
+        ...revShareCapEdition,
+        slug: "2026-01",
+        rules: { ...revShareCapEdition.rules, startTime: 2000, endTime: 3000 },
+      };
+
+      const result = schema.parse([earlier, later]);
+      expect(result).toHaveLength(2);
+    });
+
+    it("rejects editions for the same subregistry whose ranges interior-overlap", () => {
+      const a = {
+        ...pieSplitEdition,
+        slug: "a",
+        rules: { ...pieSplitEdition.rules, startTime: 1000, endTime: 2500 },
+      };
+      const b = {
+        ...revShareCapEdition,
+        slug: "b",
+        rules: { ...revShareCapEdition.rules, startTime: 2000, endTime: 3000 },
+      };
+
+      expect(() => schema.parse([a, b])).toThrow(/overlapping time ranges/i);
+    });
+
+    it("rejects editions that only touch at a single boundary (endTime === startTime)", () => {
+      const a = {
+        ...pieSplitEdition,
+        slug: "a",
+        rules: { ...pieSplitEdition.rules, startTime: 1000, endTime: 2000 },
+      };
+      const b = {
+        ...revShareCapEdition,
+        slug: "b",
+        rules: { ...revShareCapEdition.rules, startTime: 2000, endTime: 3000 },
+      };
+
+      expect(() => schema.parse([a, b])).toThrow(/overlapping time ranges/i);
+    });
+
+    it("accepts overlapping editions when subregistries differ by chainId", () => {
+      const a = {
+        ...pieSplitEdition,
+        slug: "a",
+        rules: {
+          ...pieSplitEdition.rules,
+          startTime: 1000,
+          endTime: 2000,
+          subregistryId: { ...subregistryId, chainId: 1 },
+        },
+      };
+      const b = {
+        ...revShareCapEdition,
+        slug: "b",
+        rules: {
+          ...revShareCapEdition.rules,
+          startTime: 1000,
+          endTime: 2000,
+          subregistryId: { ...subregistryId, chainId: 8453 },
+        },
+      };
+
+      const result = schema.parse([a, b]);
+      expect(result).toHaveLength(2);
+    });
+
+    it("accepts overlapping editions when subregistries differ by address", () => {
+      const a = {
+        ...pieSplitEdition,
+        slug: "a",
+        rules: {
+          ...pieSplitEdition.rules,
+          startTime: 1000,
+          endTime: 2000,
+          subregistryId: {
+            chainId: 1,
+            address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
+          },
+        },
+      };
+      const b = {
+        ...revShareCapEdition,
+        slug: "b",
+        rules: {
+          ...revShareCapEdition.rules,
+          startTime: 1000,
+          endTime: 2000,
+          subregistryId: {
+            chainId: 1,
+            address: "0x0635513f179d50a207757e05759cbd106d7dfce8",
+          },
+        },
+      };
+
+      const result = schema.parse([a, b]);
+      expect(result).toHaveLength(2);
+    });
+
+    it("rejects an unrecognized edition that overlaps a recognized edition on the same subregistry", () => {
+      const recognized = {
+        ...pieSplitEdition,
+        slug: "recognized",
+        rules: { ...pieSplitEdition.rules, startTime: 1000, endTime: 2000 },
+      };
+      const unrecognized = {
+        ...futureModelEdition,
+        slug: "unrecognized",
+        rules: { ...futureModelEdition.rules, startTime: 1500, endTime: 2500 },
+      };
+
+      expect(() => schema.parse([recognized, unrecognized])).toThrow(/overlapping time ranges/i);
+    });
   });
 });
 
@@ -422,6 +546,74 @@ describe("makeReferralProgramEditionSummarySchema", () => {
     };
 
     expect(() => schema.parse(input)).toThrow();
+  });
+});
+
+describe("makeReferralProgramEditionSummariesDataSchema — non-overlapping time invariant", () => {
+  const schema = makeReferralProgramEditionSummariesDataSchema();
+
+  const subregistryId = {
+    chainId: 1,
+    address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
+  };
+
+  const makePieSplitSummary = (
+    slug: string,
+    startTime: number,
+    endTime: number,
+    registry = subregistryId,
+  ) => ({
+    awardModel: ReferralProgramAwardModels.PieSplit,
+    slug,
+    displayName: slug,
+    status: ReferralProgramEditionStatuses.Active,
+    rules: {
+      awardModel: ReferralProgramAwardModels.PieSplit,
+      awardPool: parseUsdc("1000"),
+      maxQualifiedReferrers: 100,
+      startTime,
+      endTime,
+      subregistryId: registry,
+      rulesUrl: "https://ensawards.org/rules",
+      areAwardsDistributed: false,
+    },
+  });
+
+  it("accepts summaries for the same subregistry with disjoint time ranges", () => {
+    const result = schema.parse({
+      editions: [makePieSplitSummary("a", 1000, 1999), makePieSplitSummary("b", 2000, 3000)],
+    });
+    expect(result.editions).toHaveLength(2);
+  });
+
+  it("rejects summaries for the same subregistry whose ranges interior-overlap", () => {
+    expect(() =>
+      schema.parse({
+        editions: [makePieSplitSummary("a", 1000, 2500), makePieSplitSummary("b", 2000, 3000)],
+      }),
+    ).toThrow(/overlapping time ranges/i);
+  });
+
+  it("rejects summaries that only touch at a single boundary (endTime === startTime)", () => {
+    expect(() =>
+      schema.parse({
+        editions: [makePieSplitSummary("a", 1000, 2000), makePieSplitSummary("b", 2000, 3000)],
+      }),
+    ).toThrow(/overlapping time ranges/i);
+  });
+
+  it("accepts overlapping summaries when subregistries differ", () => {
+    const result = schema.parse({
+      editions: [
+        makePieSplitSummary("a", 1000, 2000, { ...subregistryId, chainId: 1 }),
+        makePieSplitSummary("b", 1000, 2000, { ...subregistryId, chainId: 8453 }),
+      ],
+    });
+    expect(result.editions).toHaveLength(2);
+  });
+
+  it("accepts an empty editions array", () => {
+    expect(schema.parse({ editions: [] })).toEqual({ editions: [] });
   });
 });
 

@@ -67,7 +67,9 @@ jobs:
         with:
           commit: "chore(release): version apps"
           title: "Release New Version"
-          publish: pnpm changeset-publish
+          version: pnpm changeset:version
+          # Only publish when this is a merged Release PR (squash merge uses PR title as commit subject)
+          publish: ${{ startsWith(github.event.head_commit.message, 'Release New Version') && 'pnpm changeset:publish' || '' }}
           createGithubReleases: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -100,7 +102,6 @@ jobs:
             map(select(
                  .name == "@ensnode/datasources"
               or .name == "@ensnode/ens-referrals"
-              or .name == "@ensnode/ensnode-react"
               or .name == "@ensnode/ensdb-sdk"
               or .name == "@ensnode/ensnode-sdk"
               or .name == "@ensnode/ensrainbow-sdk"

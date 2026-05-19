@@ -6,51 +6,61 @@
 
 import { describe, expect, it } from "vitest";
 
-import { DEVNET_OWNER, DEVNET_USER } from "@ensnode/ensnode-sdk/internal";
+import { accounts } from "@ensnode/datasources/devnet";
 
 const BASE_URL = process.env.ENSNODE_URL!;
 
 describe("GET /api/resolve/primary-name/:address/:chainId", () => {
   it.each([
     {
-      description:
-        "resolves primary name for owner address on chain 1 (no primary name set in devnet)",
-      address: DEVNET_OWNER,
+      description: "resolves primary name for owner address on chain 1",
+      address: accounts.owner.address,
       chainId: "1",
       query: "",
-      expectedStatus: 200,
-      expectedBody: { name: null, accelerationRequested: false, accelerationAttempted: false },
+      expected: {
+        status: 200,
+        body: {
+          name: "test.eth",
+          accelerationRequested: false,
+          accelerationAttempted: false,
+        },
+      },
     },
     {
-      description:
-        "resolves primary name for user address on chain 1 (no primary name set in devnet)",
-      address: DEVNET_USER,
+      description: "returns null for user without a primary name",
+      address: accounts.user.address,
       chainId: "1",
       query: "",
-      expectedStatus: 200,
-      expectedBody: { name: null, accelerationRequested: false, accelerationAttempted: false },
+      expected: {
+        status: 200,
+        body: { name: null, accelerationRequested: false, accelerationAttempted: false },
+      },
     },
     {
       description: "owner address with accelerate=true returns accelerationRequested: true",
-      address: DEVNET_OWNER,
+      address: accounts.owner.address,
       chainId: "1",
       query: "accelerate=true",
-      expectedStatus: 200,
-      expectedBody: { accelerationRequested: true, accelerationAttempted: false },
+      expected: {
+        status: 200,
+        body: { accelerationRequested: true, accelerationAttempted: false },
+      },
     },
     {
       description: "returns 400 for invalid (non-hex) address",
       address: "notanaddress",
       chainId: "1",
       query: "",
-      expectedStatus: 400,
-      expectedBody: {
-        message: "Invalid Input",
-        details: {
-          errors: [],
-          properties: {
-            address: {
-              errors: ["EVM address must be a valid EVM address"],
+      expected: {
+        status: 400,
+        body: {
+          message: "Invalid Input",
+          details: {
+            errors: [],
+            properties: {
+              address: {
+                errors: ["EVM address must be a valid EVM address"],
+              },
             },
           },
         },
@@ -58,29 +68,33 @@ describe("GET /api/resolve/primary-name/:address/:chainId", () => {
     },
     {
       description: "returns 400 for non-numeric chainId",
-      address: DEVNET_OWNER,
+      address: accounts.owner.address,
       chainId: "notachainid",
       query: "",
-      expectedStatus: 400,
-      expectedBody: {
-        message: "Invalid Input",
-        details: {
-          errors: [],
-          properties: {
-            chainId: {
-              errors: ["Defaultable Chain ID String must represent a non-negative integer (>=0)."],
+      expected: {
+        status: 400,
+        body: {
+          message: "Invalid Input",
+          details: {
+            errors: [],
+            properties: {
+              chainId: {
+                errors: [
+                  "Defaultable Chain ID String must represent a non-negative integer (>=0).",
+                ],
+              },
             },
           },
         },
       },
     },
-  ])("$description", async ({ address, chainId, query, expectedStatus, expectedBody }) => {
+  ])("$description", async ({ address, chainId, query, expected }) => {
     const response = await fetch(
       `${BASE_URL}/api/resolve/primary-name/${address}/${chainId}${query ? `?${query}` : ""}`,
     );
     const body = await response.json();
 
-    expect(response.status).toBe(expectedStatus);
-    expect(body).toMatchObject(expectedBody);
+    expect(response.status).toBe(expected.status);
+    expect(body).toMatchObject(expected.body);
   });
 });

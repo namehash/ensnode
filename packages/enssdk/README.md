@@ -32,7 +32,7 @@ const client = createEnsNodeClient({ url: "https://api.alpha.ensnode.io" })
 const MyQuery = graphql(`
   query MyQuery($name: Name!) {
     domain(by: { name: $name }) {
-      name
+      canonical { name { interpreted } }
       registration { expiry }
     }
   }

@@ -1,15 +1,15 @@
 "use client";
 
-import { AddressDisplay, getChainName } from "@namehash/namehash-ui";
+import { AddressDisplay, getChainName, usePrimaryName } from "@namehash/namehash-ui";
 import type { Address, DefaultableChainId } from "enssdk";
 import { DEFAULT_EVM_CHAIN_ID } from "enssdk";
-import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useDebouncedValue } from "rooks";
 import { isAddress } from "viem";
 
 import { getENSRootChainId } from "@ensnode/datasources";
-import { usePrimaryName } from "@ensnode/ensnode-react";
 import { getNamespaceSpecificValue } from "@ensnode/ensnode-sdk";
 import { makeDefaultableChainIdStringSchema } from "@ensnode/ensnode-sdk/internal";
 
@@ -38,7 +38,6 @@ const defaultableChainIdStringSchema = makeDefaultableChainIdStringSchema("chain
 // TODO: use shadcn/form, react-hook-form, and zod to make all of this nicer aross the board
 // TODO: sync form state to query params, current just defaulting is supported
 export default function ResolvePrimaryNameInspector() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
 
@@ -67,15 +66,7 @@ export default function ResolvePrimaryNameInspector() {
     setChainId(chainIdFromQuery);
   }, [chainIdFromQuery]);
 
-  const navigateToAddress = (addr: Address, chain: DefaultableChainId) => {
-    setAddress(addr);
-    setChainId(chain);
-    const path = `/inspect/primary-name?address=${encodeURIComponent(
-      addr,
-    )}&chainId=${encodeURIComponent(String(chain))}`;
-    const href = retainCurrentRawConnectionUrlParam(path);
-    router.push(href);
-  };
+  const trimmedAddress = address.trim();
 
   const additionalChainIds = getENSIP19SupportedChainIds(namespace);
 
@@ -169,12 +160,14 @@ export default function ResolvePrimaryNameInspector() {
             {/* -mx-6 px-6 insets the scroll container against card for prettier scrolling */}
             <div className="flex flex-row overflow-x-scroll gap-2 no-scrollbar -mx-6 px-6">
               {exampleAddresses.map(({ address: exampleAddress, name }) => (
-                <Pill
-                  key={exampleAddress}
-                  onClick={() => navigateToAddress(exampleAddress, chainId)}
-                  className="font-mono"
-                >
-                  <AddressDisplay address={exampleAddress} /> ({name})
+                <Pill key={exampleAddress} asChild className="font-mono">
+                  <Link
+                    href={retainCurrentRawConnectionUrlParam(
+                      `/inspect/primary-name?address=${encodeURIComponent(exampleAddress)}&chainId=${encodeURIComponent(String(chainId))}`,
+                    )}
+                  >
+                    <AddressDisplay address={exampleAddress} /> ({name})
+                  </Link>
                 </Pill>
               ))}
             </div>
@@ -182,10 +175,12 @@ export default function ResolvePrimaryNameInspector() {
         </CardContent>
         <CardFooter>
           <ResolveButton
-            canResolve={isAddress(address.trim())}
-            hasChanged={address.trim() !== addressFromQuery || chainId !== chainIdFromQuery}
+            canResolve={isAddress(trimmedAddress)}
+            hasChanged={trimmedAddress !== addressFromQuery || chainId !== chainIdFromQuery}
+            navigateHref={retainCurrentRawConnectionUrlParam(
+              `/inspect/primary-name?address=${encodeURIComponent(trimmedAddress)}&chainId=${encodeURIComponent(String(chainId))}`,
+            )}
             onRefetch={refetch}
-            onNavigate={() => navigateToAddress(address.trim() as Address, chainId)}
           />
         </CardFooter>
       </Card>

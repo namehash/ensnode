@@ -1,7 +1,6 @@
 import { prettifyError } from "zod/v4";
 
-import { buildUnvalidatedEnsApiPublicConfig } from "../../ensapi/config/deserialize";
-import { buildUnvalidatedEnsIndexerPublicConfig } from "../../ensindexer/config/deserialize";
+import { buildUnvalidatedEnsApiPublicConfig } from "../../ensapi";
 import type { Unvalidated } from "../../shared/types";
 import type { EnsNodeStackInfo } from "../ensnode-stack-info";
 import type { SerializedEnsNodeStackInfo } from "../serialize/ensnode-stack-info";
@@ -9,6 +8,7 @@ import {
   makeEnsNodeStackInfoSchema,
   makeSerializedEnsNodeStackInfoSchema,
 } from "../zod-schemas/ensnode-stack-info";
+import { buildUnvalidatedEnsIndexerStackInfo } from "./ensindexer-stack-info";
 
 /**
  * Builds an unvalidated {@link EnsNodeStackInfo} object to be
@@ -20,16 +20,9 @@ import {
 export function buildUnvalidatedEnsNodeStackInfo(
   serializedStackInfo: SerializedEnsNodeStackInfo,
 ): Unvalidated<EnsNodeStackInfo> {
-  // Stack info for ENSApi and ENSIndexer requires deserialization,
-  // so we handle them separately here before returning
-  // the final stack info object. Stack info for ENSDb and ENSRainbow can be
-  // passed through directly since they don't require deserialization.
-  const { ensApi, ensIndexer, ...rest } = serializedStackInfo;
-
   return {
-    ...rest,
-    ensApi: buildUnvalidatedEnsApiPublicConfig(ensApi),
-    ensIndexer: buildUnvalidatedEnsIndexerPublicConfig(ensIndexer),
+    ...buildUnvalidatedEnsIndexerStackInfo(serializedStackInfo),
+    ensApi: buildUnvalidatedEnsApiPublicConfig(serializedStackInfo.ensApi),
   };
 }
 

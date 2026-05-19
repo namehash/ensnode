@@ -1,24 +1,22 @@
 import DataLoader from "dataloader";
 import { getUnixTime } from "date-fns";
-import type { CanonicalPath, ENSv1DomainId, ENSv2DomainId } from "enssdk";
+import { inArray } from "drizzle-orm";
+import type { DomainId, RegistryId } from "enssdk";
 
-import { getV1CanonicalPath, getV2CanonicalPath } from "./lib/get-canonical-path";
+import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 
-/**
- * A Promise.catch handler that provides the thrown error as a resolved value, useful for Dataloaders.
- */
-const errorAsValue = (error: unknown) =>
-  error instanceof Error ? error : new Error(String(error));
-
-const createV1CanonicalPathLoader = () =>
-  new DataLoader<ENSv1DomainId, CanonicalPath | null>(async (domainIds) =>
-    Promise.all(domainIds.map((id) => getV1CanonicalPath(id).catch(errorAsValue))),
-  );
-
-const createV2CanonicalPathLoader = () =>
-  new DataLoader<ENSv2DomainId, CanonicalPath | null>(async (domainIds) =>
-    Promise.all(domainIds.map((id) => getV2CanonicalPath(id).catch(errorAsValue))),
-  );
+const createRegistryParentDomainLoader = () =>
+  new DataLoader<RegistryId, DomainId | null>(async (registryIds) => {
+    const rows = await ensDb
+      .select({
+        id: ensIndexerSchema.registry.id,
+        canonicalDomainId: ensIndexerSchema.registry.canonicalDomainId,
+      })
+      .from(ensIndexerSchema.registry)
+      .where(inArray(ensIndexerSchema.registry.id, registryIds as RegistryId[]));
+    const byId = new Map(rows.map((r) => [r.id, r.canonicalDomainId ?? null]));
+    return registryIds.map((id) => byId.get(id) ?? null);
+  });
 
 /**
  * Constructs a new GraphQL Context per-request.
@@ -28,7 +26,6 @@ const createV2CanonicalPathLoader = () =>
 export const context = () => ({
   now: BigInt(getUnixTime(new Date())),
   loaders: {
-    v1CanonicalPath: createV1CanonicalPathLoader(),
-    v2CanonicalPath: createV2CanonicalPathLoader(),
+    registryParentDomain: createRegistryParentDomainLoader(),
   },
 });

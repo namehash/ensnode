@@ -1,5 +1,77 @@
 # @docs/ensnode
 
+## 1.14.0
+
+### Minor Changes
+
+- [#2094](https://github.com/namehash/ensnode/pull/2094) [`f06399e`](https://github.com/namehash/ensnode/commit/f06399e9beb2ac8aa3b13ff2645cee2cdf89d74f) Thanks [@tk-o](https://github.com/tk-o)! - Updated database schemas page in ENSDb docs.
+
+### Patch Changes
+
+- [#2106](https://github.com/namehash/ensnode/pull/2106) [`c4b00ae`](https://github.com/namehash/ensnode/commit/c4b00ae68075ef8f1ceb1aabf8a4804db21c85ff) Thanks [@shrugs](https://github.com/shrugs)! - Updates the Omnigraph Integration Documentation with comprehensive getting started examples and walkthroughs.
+
+- Updated dependencies [[`3132a77`](https://github.com/namehash/ensnode/commit/3132a77b809694a4677da69c8c546a4b41eaa583), [`1b6abb0`](https://github.com/namehash/ensnode/commit/1b6abb06ac364840770dfcc47526111fdf6fb2c9), [`65cf37c`](https://github.com/namehash/ensnode/commit/65cf37c24c1bd9a7f30ad758c945015ece9c8461), [`010cd0c`](https://github.com/namehash/ensnode/commit/010cd0cdeec44d5b9b3649533460f9461748013e)]:
+  - @ensnode/ensnode-sdk@1.14.0
+  - @namehash/namehash-ui@1.14.0
+  - enssdk@1.14.0
+
+## 1.13.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @namehash/namehash-ui@1.13.1
+
+## 1.13.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @namehash/namehash-ui@1.13.0
+
+## 1.12.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @namehash/namehash-ui@1.12.0
+
+## 1.11.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @namehash/namehash-ui@1.11.1
+
+## 1.11.0
+
+### Minor Changes
+
+- [#1942](https://github.com/namehash/ensnode/pull/1942) [`2df3b45`](https://github.com/namehash/ensnode/commit/2df3b45b004365cf9f59952b758646c9a442aa32) Thanks [@tk-o](https://github.com/tk-o)! - Created docs for ENSDb.
+
+- [#2012](https://github.com/namehash/ensnode/pull/2012) [`c4a39bb`](https://github.com/namehash/ensnode/commit/c4a39bb6489609af3e35ad281b5ccb8e25528218) Thanks [@tk-o](https://github.com/tk-o)! - Added "Startup sequence" page to ENSIndexer docs.
+
+### Patch Changes
+
+- [#2056](https://github.com/namehash/ensnode/pull/2056) [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572) Thanks [@shrugs](https://github.com/shrugs)! - Updated docs and CI test paths to reflect the new `docker/` location of `docker-compose.yml`.
+
+- Updated dependencies []:
+  - @namehash/namehash-ui@1.11.0
+
+## 1.10.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @namehash/namehash-ui@1.10.1
+
+## 1.10.0
+
+### Patch Changes
+
+- Updated dependencies [[`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5)]:
+  - @namehash/namehash-ui@1.10.0
+
 ## 1.9.0
 
 ### Minor Changes
@@ -108,7 +180,6 @@
   This change addresses large Docker image sizes and data management challenges.
 
   Key changes:
-
   - A new .ensrainbow data format replaces SQL dumps, supporting label set IDs and versioned label sets for incremental data updates.
   - ENSRainbow is now distributed as a lightweight, data-less Docker image.
   - On first startup, the application downloads a pre-ingested database from R2, significantly reducing setup time.

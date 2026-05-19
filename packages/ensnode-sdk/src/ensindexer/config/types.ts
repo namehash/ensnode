@@ -16,7 +16,9 @@ export enum PluginName {
   ProtocolAcceleration = "protocol-acceleration",
   Registrars = "registrars",
   TokenScope = "tokenscope",
+  /** @deprecated use {@link PluginName.Unigraph} instead */
   ENSv2 = "ensv2",
+  Unigraph = "unigraph",
 }
 
 /**
@@ -78,7 +80,7 @@ export interface EnsIndexerPublicConfig {
   /**
    * The "fully pinned" label set reference that ENSIndexer will request ENSRainbow use for deterministic label healing across time. This label set reference is "fully pinned" as it requires both the labelSetId and labelSetVersion fields to be defined.
    */
-  labelSet: Required<EnsRainbowClientLabelSet>;
+  clientLabelSet: Required<EnsRainbowClientLabelSet>;
 
   /**
    * The name of the ENSIndexer Schema in the ENSDb instance,
@@ -127,7 +129,7 @@ export interface EnsIndexerPublicConfig {
    *
    * If {@link isSubgraphCompatible} is true, the following invariants are true for the ENSIndexerConfig:
    * 1. only the 'subgraph' plugin is enabled, and
-   * 2. the labelSet must be { labelSetId: 'subgraph', labelSetVersion: 0 }
+   * 2. the {@link clientLabelSet} must be { labelSetId: 'subgraph', labelSetVersion: 0 }
    *
    * If {@link isSubgraphCompatible} is false, ENSIndexer will additionally:
    *

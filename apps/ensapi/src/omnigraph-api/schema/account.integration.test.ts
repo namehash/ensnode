@@ -1,7 +1,7 @@
 import type { InterpretedName } from "enssdk";
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { DEVNET_DEPLOYER, DEVNET_OWNER, DEVNET_USER } from "@ensnode/ensnode-sdk/internal";
+import { accounts } from "@ensnode/datasources/devnet";
 
 import {
   AccountDomainsPaginated,
@@ -24,21 +24,33 @@ import { gql } from "@/test/integration/omnigraph-api-client";
 
 describe("Account.domains", () => {
   type AccountDomainsResult = {
-    account: { domains: GraphQLConnection<{ name: InterpretedName | null }> };
+    account: {
+      domains: GraphQLConnection<{
+        __typename: "ENSv1Domain" | "ENSv2Domain";
+        canonical: { name: { interpreted: InterpretedName } } | null;
+      }>;
+    };
   };
 
   const AccountDomains = gql`
-    query AccountDomains($address: Address!) {
+    query AccountDomains($address: Address!, $version: ENSProtocolVersion) {
       account(by: { address: $address }) {
-        domains(order: { by: NAME, dir: ASC }) { edges { node { name } } }
+        domains(
+          where: { version: $version },
+          order: { by: NAME, dir: ASC }
+        ) {
+          edges { node { __typename, canonical { name { interpreted } } } }
+        }
       }
     }
   `;
 
   it("returns domains owned by the devnet owner", async () => {
-    const result = await request<AccountDomainsResult>(AccountDomains, { address: DEVNET_OWNER });
+    const result = await request<AccountDomainsResult>(AccountDomains, {
+      address: accounts.owner.address,
+    });
     const domains = flattenConnection(result.account.domains);
-    const names = domains.map((d) => d.name);
+    const names = domains.map((d) => d.canonical?.name.interpreted);
 
     const expected = [
       "alias.eth",
@@ -52,7 +64,7 @@ describe("Account.domains", () => {
       "sub1.sub2.parent.eth",
       "sub2.parent.eth",
       "test.eth",
-      "wallet.linked.parent.eth",
+      "wallet.sub1.sub2.parent.eth",
     ];
 
     for (const name of expected) {
@@ -62,12 +74,44 @@ describe("Account.domains", () => {
 
   it("returns domains owned by the new owner", async () => {
     const result = await request<AccountDomainsResult>(AccountDomains, {
-      address: DEVNET_USER,
+      address: accounts.user.address,
     });
     const domains = flattenConnection(result.account.domains);
-    const names = domains.map((d) => d.name);
+    const names = domains.map((d) => d.canonical?.name.interpreted);
 
     expect(names, "expected 'newowner.eth' in new owner's domains").toContain("newowner.eth");
+  });
+
+  describe("version?: ENSProtocolVersion", () => {
+    it("returns any version when unspecified", async () => {
+      const result = await request<AccountDomainsResult>(AccountDomains, {
+        address: accounts.owner.address,
+        version: undefined,
+      });
+      const domains = flattenConnection(result.account.domains);
+      expect(domains.find((d) => d.__typename === "ENSv1Domain")).toBeDefined();
+      expect(domains.find((d) => d.__typename === "ENSv2Domain")).toBeDefined();
+    });
+
+    it("returns only ENSv1Domains when version: ENSv1", async () => {
+      const result = await request<AccountDomainsResult>(AccountDomains, {
+        address: accounts.owner.address,
+        version: "ENSv1",
+      });
+      const domains = flattenConnection(result.account.domains);
+      expect(domains.find((d) => d.__typename === "ENSv1Domain")).toBeDefined();
+      expect(domains.find((d) => d.__typename === "ENSv2Domain")).not.toBeDefined();
+    });
+
+    it("returns only ENSv2Domains when version: ENSv2", async () => {
+      const result = await request<AccountDomainsResult>(AccountDomains, {
+        address: accounts.owner.address,
+        version: "ENSv2",
+      });
+      const domains = flattenConnection(result.account.domains);
+      expect(domains.find((d) => d.__typename === "ENSv1Domain")).not.toBeDefined();
+      expect(domains.find((d) => d.__typename === "ENSv2Domain")).toBeDefined();
+    });
   });
 });
 
@@ -75,7 +119,7 @@ describe("Account.domains pagination", () => {
   testDomainPagination(async (variables) => {
     const result = await request<{
       account: { domains: PaginatedGraphQLConnection<PaginatedDomainResult> };
-    }>(AccountDomainsPaginated, { address: DEVNET_OWNER, ...variables });
+    }>(AccountDomainsPaginated, { address: accounts.owner.address, ...variables });
     return result.account.domains;
   });
 });
@@ -92,14 +136,14 @@ describe("Account.events", () => {
 
   it("returns events for the devnet deployer", async () => {
     const result = await request<AccountEventsResult>(AccountEvents, {
-      address: DEVNET_DEPLOYER,
+      address: accounts.deployer.address,
     });
     const events = flattenConnection(result.account.events);
 
     expect(events.length).toBeGreaterThan(0);
 
     for (const event of events) {
-      expect(event.from).toBe(DEVNET_DEPLOYER);
+      expect(event.sender).toBe(accounts.deployer.address);
     }
   });
 });
@@ -108,7 +152,7 @@ describe("Account.events pagination", () => {
   testEventPagination(async (variables) => {
     const result = await request<{
       account: { events: PaginatedGraphQLConnection<EventResult> };
-    }>(AccountEventsPaginated, { address: DEVNET_DEPLOYER, ...variables });
+    }>(AccountEventsPaginated, { address: accounts.deployer.address, ...variables });
     return result.account.events;
   });
 });
@@ -127,7 +171,7 @@ describe("Account.events filtering (AccountEventsWhereInput)", () => {
 
   beforeAll(async () => {
     const result = await request<AccountEventsResult>(AccountEventsFiltered, {
-      address: DEVNET_DEPLOYER,
+      address: accounts.deployer.address,
       first: 1000,
     });
     // events are returned in ascending order, so first/last access yields min/max values
@@ -135,12 +179,12 @@ describe("Account.events filtering (AccountEventsWhereInput)", () => {
     expect(allEvents.length).toBeGreaterThan(0);
   });
 
-  it("filters by selector_in", async () => {
+  it("filters by selector eq", async () => {
     const targetSelector = allEvents[0].topics[0];
 
     const result = await request<AccountEventsResult>(AccountEventsFiltered, {
-      address: DEVNET_DEPLOYER,
-      where: { selector_in: [targetSelector] },
+      address: accounts.deployer.address,
+      where: { selector: { eq: targetSelector } },
     });
     const events = flattenConnection(result.account.events);
 
@@ -150,32 +194,49 @@ describe("Account.events filtering (AccountEventsWhereInput)", () => {
     }
   });
 
-  it("filters by selector_in with unknown topic returns no results", async () => {
+  it("filters by selector in", async () => {
+    const targetSelector = allEvents[0].topics[0];
+
     const result = await request<AccountEventsResult>(AccountEventsFiltered, {
-      address: DEVNET_DEPLOYER,
+      address: accounts.deployer.address,
+      where: { selector: { in: [targetSelector] } },
+    });
+    const events = flattenConnection(result.account.events);
+
+    expect(events.length).toBeGreaterThan(0);
+    for (const event of events) {
+      expect(event.topics[0]).toBe(targetSelector);
+    }
+  });
+
+  it("filters by selector in with unknown topic returns no results", async () => {
+    const result = await request<AccountEventsResult>(AccountEventsFiltered, {
+      address: accounts.deployer.address,
       where: {
-        selector_in: ["0x0000000000000000000000000000000000000000000000000000000000000001"],
+        selector: {
+          in: ["0x0000000000000000000000000000000000000000000000000000000000000001"],
+        },
       },
     });
     const events = flattenConnection(result.account.events);
     expect(events.length).toBe(0);
   });
 
-  it("filters by empty selector_in returns no results", async () => {
+  it("filters by empty selector in returns no results", async () => {
     const result = await request<AccountEventsResult>(AccountEventsFiltered, {
-      address: DEVNET_DEPLOYER,
-      where: { selector_in: [] },
+      address: accounts.deployer.address,
+      where: { selector: { in: [] } },
     });
     const events = flattenConnection(result.account.events);
     expect(events.length).toBe(0);
   });
 
-  it("filters by timestamp_gte", async () => {
+  it("filters by timestamp gte", async () => {
     const midTimestamp = allEvents[Math.floor(allEvents.length / 2)].timestamp;
 
     const result = await request<AccountEventsResult>(AccountEventsFiltered, {
-      address: DEVNET_DEPLOYER,
-      where: { timestamp_gte: midTimestamp },
+      address: accounts.deployer.address,
+      where: { timestamp: { gte: midTimestamp } },
     });
     const events = flattenConnection(result.account.events);
 
@@ -186,12 +247,12 @@ describe("Account.events filtering (AccountEventsWhereInput)", () => {
     }
   });
 
-  it("filters by timestamp_lte", async () => {
+  it("filters by timestamp lte", async () => {
     const midTimestamp = allEvents[Math.floor(allEvents.length / 2)].timestamp;
 
     const result = await request<AccountEventsResult>(AccountEventsFiltered, {
-      address: DEVNET_DEPLOYER,
-      where: { timestamp_lte: midTimestamp },
+      address: accounts.deployer.address,
+      where: { timestamp: { lte: midTimestamp } },
     });
     const events = flattenConnection(result.account.events);
 
@@ -207,15 +268,15 @@ describe("Account.events filtering (AccountEventsWhereInput)", () => {
     const maxTs = allEvents[allEvents.length - 1].timestamp;
 
     const result = await request<AccountEventsResult>(AccountEventsFiltered, {
-      address: DEVNET_DEPLOYER,
-      where: { timestamp_gte: minTs, timestamp_lte: maxTs },
+      address: accounts.deployer.address,
+      where: { timestamp: { gte: minTs, lte: maxTs } },
       first: 1000,
     });
     const events = flattenConnection(result.account.events);
     expect(events.length).toBe(allEvents.length);
   });
 
-  it("combines selector_in and timestamp_gte", async () => {
+  it("combines selector and timestamp", async () => {
     // pick a seed event from the second half so its selector is guaranteed to
     // appear at or after midTimestamp, avoiding flaky empty-result failures
     const midIndex = Math.floor(allEvents.length / 2);
@@ -224,8 +285,11 @@ describe("Account.events filtering (AccountEventsWhereInput)", () => {
     const midTimestamp = seedEvent.timestamp;
 
     const result = await request<AccountEventsResult>(AccountEventsFiltered, {
-      address: DEVNET_DEPLOYER,
-      where: { selector_in: [targetSelector], timestamp_gte: midTimestamp },
+      address: accounts.deployer.address,
+      where: {
+        selector: { eq: targetSelector },
+        timestamp: { gte: midTimestamp },
+      },
     });
     const events = flattenConnection(result.account.events);
 
@@ -241,8 +305,8 @@ describe("Account.events filtering (AccountEventsWhereInput)", () => {
     const maxTimestamp = BigInt(allEvents[allEvents.length - 1].timestamp);
 
     const result = await request<AccountEventsResult>(AccountEventsFiltered, {
-      address: DEVNET_DEPLOYER,
-      where: { timestamp_gte: (maxTimestamp + 1n).toString() },
+      address: accounts.deployer.address,
+      where: { timestamp: { gte: (maxTimestamp + 1n).toString() } },
     });
     const events = flattenConnection(result.account.events);
     expect(events.length).toBe(0);

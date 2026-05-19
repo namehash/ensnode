@@ -6,106 +6,53 @@ import type {
   ResolverRecordsSelection,
 } from "@ensnode/ensnode-sdk";
 
-import type { ResolveCallsAndResults } from "./resolve-calls-and-results";
-
-export interface IndexedResolverRecords {
-  name: string | null;
-  addressRecords: { coinType: bigint; value: string }[];
-  textRecords: { key: string; value: string }[];
-}
+import type { Operation } from "./operations";
 
 /**
- * Formats IndexedResolverRecords into a ResolverRecordsResponse based on the provided selection.
+ * Folds a set of Operations into a ResolverRecordsResponse.
  *
- * @param selection - The selection specifying which records to include in the response
- * @param records - The indexed resolver records to format
- * @returns A formatted ResolverRecordsResponse containing only the requested records
+ * SELECTION is a type-only argument — callers pass it explicitly (e.g.
+ * `makeRecordsResponse<SELECTION>(operations)`) to shape the return type.
  */
-export function makeRecordsResponseFromIndexedRecords<SELECTION extends ResolverRecordsSelection>(
-  selection: SELECTION,
-  records: IndexedResolverRecords,
+export function makeRecordsResponse<SELECTION extends ResolverRecordsSelection>(
+  operations: Operation[],
 ): ResolverRecordsResponse<SELECTION> {
-  const response: Partial<ResolverRecordsResponseBase> = {};
-
-  if (selection.name) {
-    response.name = records.name;
-  }
-
-  if (selection.addresses) {
-    response.addresses = selection.addresses.reduce(
-      (memo, coinType) => {
-        memo[coinType] =
-          records.addressRecords.find((r) => bigintToCoinType(r.coinType) === coinType)?.value ||
-          null;
-        return memo;
-      },
-      {} as ResolverRecordsResponseBase["addresses"],
-    );
-  }
-
-  if (selection.texts) {
-    response.texts = selection.texts.reduce(
-      (memo, key) => {
-        memo[key] = records.textRecords.find((r) => r.key === key)?.value ?? null;
-        return memo;
-      },
-      {} as ResolverRecordsResponseBase["texts"],
-    );
-  }
-
-  // cast response as the inferred type based on SELECTION
-  return response as ResolverRecordsResponse<SELECTION>;
-}
-
-export function makeRecordsResponseFromResolveResults<SELECTION extends ResolverRecordsSelection>(
-  selection: SELECTION,
-  results: ResolveCallsAndResults<SELECTION>,
-): ResolverRecordsResponse<SELECTION> {
-  const response: Partial<ResolverRecordsResponseBase> = {};
-
-  if (selection.name) {
-    const nameResult = results.find(({ call: { functionName } }) => functionName === "name");
-    const name = (nameResult?.result as string | null) || null;
-    response.name = name;
-  }
-
-  if (selection.addresses) {
-    response.addresses = selection.addresses.reduce(
-      (memo, coinType) => {
-        const addressRecord = results.find(
-          ({ call: { functionName, args } }) =>
-            functionName === "addr" && bigintToCoinType(args[1] as bigint) === coinType,
-        );
-        memo[coinType] = (addressRecord?.result as string | null) || null;
-        return memo;
-      },
-      {} as ResolverRecordsResponseBase["addresses"],
-    );
-  }
-
-  if (selection.texts) {
-    response.texts = selection.texts.reduce(
-      (memo, key) => {
-        const textRecord = results.find(
-          ({ call: { functionName, args } }) => functionName === "text" && args[1] === key,
-        );
-        memo[key] = (textRecord?.result as string | null) || null;
-        return memo;
-      },
-      {} as ResolverRecordsResponseBase["texts"],
-    );
-  }
-
-  // cast response as the inferred type based on SELECTION
-  return response as ResolverRecordsResponse<SELECTION>;
-}
-
-export function makeEmptyResolverRecordsResponse<SELECTION extends ResolverRecordsSelection>(
-  selection: SELECTION,
-) {
-  return makeRecordsResponseFromIndexedRecords(selection, {
-    name: null,
-    addressRecords: [],
-    textRecords: [],
-  });
+  return operations.reduce<Partial<ResolverRecordsResponseBase>>((memo, op) => {
+    switch (op.functionName) {
+      case "name":
+        memo.name = op.result ?? null;
+        break;
+      case "contenthash":
+        memo.contenthash = op.result ?? null;
+        break;
+      case "pubkey":
+        memo.pubkey = op.result ?? null;
+        break;
+      case "zonehash":
+        memo.dnszonehash = op.result ?? null;
+        break;
+      case "recordVersions":
+        memo.version = op.result ?? null;
+        break;
+      case "ABI":
+        memo.abi = op.result ?? null;
+        break;
+      case "addr": {
+        memo.addresses ??= {} as ResolverRecordsResponseBase["addresses"];
+        memo.addresses[bigintToCoinType(op.args[1])] = op.result ?? null;
+        break;
+      }
+      case "text": {
+        memo.texts ??= {} as ResolverRecordsResponseBase["texts"];
+        memo.texts[op.args[1]] = op.result ?? null;
+        break;
+      }
+      case "interfaceImplementer": {
+        memo.interfaces ??= {} as ResolverRecordsResponseBase["interfaces"];
+        memo.interfaces[op.args[1]] = op.result ?? null;
+        break;
+      }
+    }
+    return memo;
+  }, {}) as ResolverRecordsResponse<SELECTION>;
 }

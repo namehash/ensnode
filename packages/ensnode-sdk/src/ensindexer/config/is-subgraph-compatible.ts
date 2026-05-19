@@ -9,7 +9,7 @@ import { type EnsIndexerPublicConfig, PluginName } from "./types";
  * @see https://ensnode.io/docs/concepts/what-is-the-ens-subgraph
  */
 export function isSubgraphCompatible(
-  config: Pick<EnsIndexerPublicConfig, "namespace" | "plugins" | "labelSet">,
+  config: Pick<EnsIndexerPublicConfig, "namespace" | "plugins" | "clientLabelSet">,
 ): boolean {
   // 1. only the subgraph plugin is active
   const onlySubgraphPluginActivated =
@@ -17,10 +17,11 @@ export function isSubgraphCompatible(
 
   // 2. label set id must be "subgraph" and version must be 0
   const isSubgraphLabelSet =
-    config.labelSet.labelSetId === "subgraph" && config.labelSet.labelSetVersion === 0;
+    config.clientLabelSet.labelSetId === "subgraph" && config.clientLabelSet.labelSetVersion === 0;
 
   const isEnsTestEnvLabelSet =
-    config.labelSet.labelSetId === "ens-test-env" && config.labelSet.labelSetVersion === 0;
+    config.clientLabelSet.labelSetId === "ens-test-env" &&
+    config.clientLabelSet.labelSetVersion === 0;
 
   // config should be considered subgraph-compatible if in ens-test-env namespace with ens-test-env labelset
   const labelSetIsSubgraphCompatible =

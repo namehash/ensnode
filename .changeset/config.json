@@ -18,15 +18,16 @@
       "@ensnode/datasources",
       "@ensnode/ensrainbow-sdk",
       "@ensnode/ensdb-sdk",
-      "@ensnode/ensnode-react",
       "@ensnode/ensnode-sdk",
+      "@ensnode/integration-test-env",
       "@ensnode/ponder-sdk",
       "@ensnode/ponder-subgraph",
       "@ensnode/shared-configs",
       "@docs/ensnode",
       "@docs/ensrainbow",
       "@namehash/ens-referrals",
-      "@namehash/namehash-ui"
+      "@namehash/namehash-ui",
+      "@ensnode/ensindexer-perf-testing"
     ]
   ],
   "updateInternalDependencies": "patch",

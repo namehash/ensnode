@@ -1,0 +1,39 @@
+---
+title: Managing ENSIndexer Instances
+sidebar:
+  label: Management
+  order: 8
+---
+
+## Database operations
+
+Each instance of ENSIndexer maintains its own ENSIndexer Schema instance in ENSDb. The same ENSIndexer instance will always use the same ENSIndexer Schema, even after restarts. However, if you need to update an ENSIndexer config, or deploy a new version of ENSIndexer, you will have to update the `ENSINDEXER_SCHEMA_NAME` env variable to point to a new schema, as otherwise, the ENSIndexer instance will detect that the ENSIndexer Schema was already owned by an ENSIndexer instance with different config / indexing logic and will refuse to start. These measures are taken to protect the state invariants indexing event handlers expect and require.
+
+### ENSIndexer Schema lifecycle
+- Let's say you're currently running ENSNode version X that's indexing into `ENSINDEXER_SCHEMA_NAME=myschema_X`
+- Now, when you upgrade to ENSNode version Y, if you try to continue using `ENSINDEXER_SCHEMA_NAME=myschema_X` then ENSIndexer will immediately terminate with an error because indexing logic or config will be different.
+- Therefore, you must update the `ENSINDEXER_SCHEMA_NAME` to `myschema_Y`, which will:
+  - Build a completely new index from scratch into `myschema_Y` which may grow to become 100+ GB depending on how ENSIndexer is configured.
+  - Still retain all the data in `myschema_X` which could also be 100+ GB...
+- Now imagine you repeat this process across multiple updates to your `ENSINDEXER_SCHEMA_NAME`, you might have hundreds and hundreds of GB of ENSIndexer Schema instances no longer in use that are just taking up disk space in ENSDb instance until you completely run out of disk space.
+- The solution is that you need to manually delete all the old ENSIndexer Schema instances in your ENSDb instance you no longer use.
+
+### Dropping orphaned ENSIndexer Schemas
+
+If your ENSDb instance has orphaned ENSIndexer Schemas that you no longer use, you can drop them with a SQL command like the following:
+
+:::danger[`DROP SCHEMA ... CASCADE` is a destructive operation!]
+Once executed, this operation is irreversible. Double-check your database connection and schema name before running this in production.
+
+```sql
+DROP SCHEMA myschema_X CASCADE;
+```
+:::
+
+### Dropping the RPC Cache
+
+Ponder internal state is kept in the `ponder_sync` database schema. Notably, it holds the RPC Cache. If you'd like to drop your RPC cache and any internal Ponder state, you can:
+
+```sql
+DROP SCHEMA ponder_sync CASCADE;
+```

@@ -1,6 +1,6 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, eq } from "drizzle-orm";
-import type { ENSv1DomainId, RegistrationId } from "enssdk";
+import type { RegistrationId } from "enssdk";
 import { hexToBigInt } from "viem";
 
 import {
@@ -21,7 +21,7 @@ import {
   PAGINATION_DEFAULT_MAX_SIZE,
   PAGINATION_DEFAULT_PAGE_SIZE,
 } from "@/omnigraph-api/schema/constants";
-import { DomainInterfaceRef } from "@/omnigraph-api/schema/domain";
+import { DomainInterfaceRef, isENSv1Domain } from "@/omnigraph-api/schema/domain";
 import { EventRef } from "@/omnigraph-api/schema/event";
 import { RenewalRef } from "@/omnigraph-api/schema/renewal";
 
@@ -140,7 +140,8 @@ RegistrationInterfaceRef.implement({
     // Registration.registrant
     ///////////////////////////
     registrant: t.field({
-      description: "The Registrant of a Registration, if exists.",
+      description:
+        "The Registrant of a Registration, if exists. For ENSv2 Registrations, the protocol-emitted registrant address (the HCA account address if used).",
       type: AccountRef,
       nullable: true,
       resolve: (parent) => parent.registrantId,
@@ -150,7 +151,8 @@ RegistrationInterfaceRef.implement({
     // Registration.unregistrant
     /////////////////////////////
     unregistrant: t.field({
-      description: "The Unregistrant of a Registration, if exists.",
+      description:
+        "The Unregistrant of a Registration, if exists. For ENSv2 Registrations, the protocol-emitted unregistrant address (the HCA account address if used).",
       type: AccountRef,
       nullable: true,
       resolve: (parent) => parent.unregistrantId,
@@ -343,8 +345,21 @@ WrappedBaseRegistrarRegistrationRef.implement({
       description: "The TokenID for this Domain in the NameWrapper.",
       type: "BigInt",
       nullable: false,
-      // NOTE: only ENSv1 Domains can be wrapped, id is guaranteed to be ENSv1DomainId === Node
-      resolve: (parent) => hexToBigInt(parent.domainId as ENSv1DomainId),
+      // Only ENSv1 Domains can be wrapped; the NameWrapper's ERC1155 tokenId is the Domain's node.
+      resolve: async (parent, _args, ctx) => {
+        const domain = await DomainInterfaceRef.getDataloader(ctx).load(parent.domainId);
+        if (!domain) {
+          throw new Error(
+            `Invariant(WrappedBaseRegistrarRegistration.tokenId): Domain '${parent.domainId}' not found.`,
+          );
+        }
+        if (!isENSv1Domain(domain)) {
+          throw new Error(
+            `Invariant(WrappedBaseRegistrarRegistration.tokenId): expected ENSv1Domain for domainId '${parent.domainId}', got ${domain.type}.`,
+          );
+        }
+        return hexToBigInt(domain.node);
+      },
     }),
 
     /////////////////

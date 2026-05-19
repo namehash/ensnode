@@ -1,6 +1,7 @@
 /* Starlight CSS File */
 @layer base, starlight, theme, components, utilities;
 
+@import "@namehash/namehash-ui/styles.css";
 @import "@astrojs/starlight-tailwind";
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
@@ -76,8 +77,64 @@
   --pagination-arrow-color: var(--color-text-secondary);
   --sl-shadow-md: var(--shadow-md);
   --sl-shadow-sm: var(--shadow-sm);
+}
 
-  --sidebar-item-gap: 4px;
+/* Docked sidebar: narrow peek strip on desktop; expands on hover or keyboard focus within nav */
+@media (min-width: 50rem) {
+  .page[data-sidebar-docked] {
+    --sl-sidebar-docked-peek: 1rem;
+    /* Match Starlight splash / no-sidebar content width (default with sidebar is 45rem). */
+    --sl-content-width: 67.5rem;
+  }
+
+  .page[data-sidebar-docked] .main-frame {
+    padding-inline-start: calc(var(--sl-sidebar-docked-peek) + var(--sl-content-pad-x));
+  }
+
+  .page[data-sidebar-docked] nav.sidebar {
+    position: fixed;
+    inset-block: var(--sl-nav-height) 0;
+    inset-inline-start: 0;
+    z-index: var(--sl-z-index-menu);
+    width: var(--sl-sidebar-docked-peek);
+    overflow: hidden;
+    transition: width 0.2s ease;
+    background-color: var(--sl-color-bg-sidebar);
+    border-inline-end: 1px solid var(--sl-color-hairline-shade);
+  }
+
+  .page[data-sidebar-docked] nav.sidebar:hover,
+  .page[data-sidebar-docked] nav.sidebar:focus-within {
+    width: var(--sl-sidebar-width);
+    box-shadow: var(--sl-shadow-md);
+  }
+
+  .page[data-sidebar-docked] nav.sidebar .sidebar-pane {
+    position: absolute;
+    inset: 0;
+    width: var(--sl-sidebar-width);
+    border-inline-end: none;
+  }
+
+  .page[data-sidebar-docked] nav.sidebar::after {
+    content: "›";
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 0;
+    width: var(--sl-sidebar-docked-peek);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--sl-color-gray-3);
+    font-size: 1.125rem;
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .page[data-sidebar-docked] nav.sidebar:hover::after,
+  .page[data-sidebar-docked] nav.sidebar:focus-within::after {
+    opacity: 0;
+  }
 }
 
 /* Starlight-specific component styles */
@@ -87,10 +144,13 @@
     max-width: var(--max-width-page);
     margin-inline: auto;
   }
-  nav.sidebar .sidebar-pane {
+
+  .page:not([data-sidebar-docked]) nav.sidebar .sidebar-pane {
     position: sticky;
     height: calc(100vh - var(--sl-nav-height));
+    scrollbar-gutter: auto;
   }
+
   div.main-frame {
     padding-inline-start: initial;
     flex: 1;
@@ -144,6 +204,7 @@ a[rel="prev"]:hover {
   color: var(--sl-color-white);
   display: inline;
   text-decoration: none;
+
   &:hover {
     text-decoration: underline;
   }
@@ -153,24 +214,25 @@ a[rel="prev"]:hover {
   display: inline;
 }
 
+.sl-markdown-content :where(ul, ol) {
+  color: var(--sl-color-text);
+  margin-block: 1em;
+  margin-inline: 0;
+  padding-inline-start: 40px;
+}
+
 .sl-markdown-content ul {
   list-style: disc;
-  color: var(--sl-color-text);
 }
 
 .sl-markdown-content ol {
   list-style: decimal;
-  color: var(--sl-color-text);
 }
 
-.sl-markdown-content ol li::marker,
-.sl-markdown-content ul li::marker {
-  color: var(--sl-color-accent);
-}
-
-/* Nested ul inside ol li should have small top margin */
-.sl-markdown-content ol li ul {
-  margin-top: 0.25rem;
+/* Nested lists: tighten indent and vertical spacing */
+.sl-markdown-content :is(ul, ol) :where(ul, ol) {
+  padding-inline-start: 1.5em;
+  margin-block: 0.25rem;
 }
 
 /* Pagination styles */
@@ -222,82 +284,6 @@ a[rel="prev"]:hover {
   @media screen and (max-width: 400px) {
     font-size: 14px;
   }
-}
-
-/* Styling for the list items to prepare for lines */
-#starlight__sidebar > div > ul > li {
-  position: relative; /* For absolute positioning of ::before */
-}
-
-/*
- * Add padding-left only to items that will get a line, to make space for it.
- * Note, including :not(:last-child) to de-indent ENSAdmin.
- */
-#starlight__sidebar > div > ul > li:not(:first-child):not(:last-child) {
-  padding-left: 20px; /* Space for the line and content */
-}
-
-/* Add margin-bottom for the gap to all LIs except the very last one in the UL */
-#starlight__sidebar > div > ul > li:not(:last-child) {
-  margin-bottom: var(--sidebar-item-gap);
-}
-
-/*
- * Vertical line segment for relevant list items
- * Note, including :not(:last-child) to de-indent ENSAdmin.
- */
-#starlight__sidebar > div > ul > li:not(:first-child):not(:last-child)::before {
-  content: "";
-  position: absolute;
-  left: 8px; /* X-position of the vertical line */
-  top: 0;
-  width: 1px; /* Thickness of the vertical line */
-  background-color: var(--sl-color-hairline-light); /* Line color */
-  height: 100%; /* Default height, covers the item itself */
-}
-
-#starlight__sidebar > div > ul > li:not(:first-child):not(:last-child)::before {
-  height: calc(100% + var(--sidebar-item-gap));
-}
-
-/* Custom icon logic for specific sidebar items based on URL - hack as only
- * icons are supported in starlight. */
-
-/* Styles to replace the default Starlight sidebar icon with a custom image */
-.starlight-sidebar-topics-icon svg {
-  display: none; /* Hide the default SVG icon */
-}
-
-/* Default sidebar icon (parent) */
-.starlight-sidebar-topics-icon {
-  background-image: url("../assets/ensnode.svg");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  width: 16px;
-  height: 16px;
-  display: inline-block;
-}
-
-/* URL based custom icons */
-a[href*="ensindexer"] .starlight-sidebar-topics-icon {
-  background-image: url("../assets/ensindexer.svg");
-}
-
-a[href*="ensrainbow"] .starlight-sidebar-topics-icon {
-  background-image: url("../assets/ensrainbow.svg");
-}
-
-a[href*="ensadmin"] .starlight-sidebar-topics-icon {
-  background-image: url("../assets/ensadmin.svg");
-}
-
-a[href*="ensdb"] .starlight-sidebar-topics-icon {
-  background-image: url("../assets/ensdb.svg");
-}
-
-a[href*="ensapi"] .starlight-sidebar-topics-icon {
-  background-image: url("../assets/ensapi.svg");
 }
 
 /* Enhance hover and selected states for sidebar items */

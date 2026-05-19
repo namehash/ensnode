@@ -11,6 +11,40 @@ import {
 
 import { DEFAULT_ENSRAINBOW_URL, ErrorCode, StatusCode } from "./consts";
 
+/**
+ * Error thrown by {@link EnsRainbowApiClient} methods when the ENSRainbow service responds
+ * with a non-2xx HTTP status code.
+ *
+ * Carries the HTTP status code as a structured property (rather than only embedding it in the
+ * error message) so callers can branch their retry/abort logic on the status — e.g. retry on
+ * `503 Service Unavailable` while ENSRainbow bootstraps, but abort immediately on `404`/`500`,
+ * which usually indicate a misconfigured base URL or a hard server failure.
+ *
+ * Network-level failures (DNS, ECONNREFUSED, fetch parse errors) are *not* wrapped in this
+ * class — they propagate as their original `Error` (typically a `TypeError` from `fetch`),
+ * because such failures are commonly transient during cold start and should remain retryable
+ * by callers.
+ */
+export class EnsRainbowHttpError extends Error {
+  readonly name = "EnsRainbowHttpError";
+
+  /**
+   * The HTTP status code returned by the ENSRainbow service.
+   */
+  readonly status: number;
+
+  /**
+   * The HTTP status text returned by the ENSRainbow service, if any.
+   */
+  readonly statusText: string;
+
+  constructor(message: string, status: number, statusText = "") {
+    super(message);
+    this.status = status;
+    this.statusText = statusText;
+  }
+}
+
 export namespace EnsRainbow {
   export type ApiClientOptions = EnsRainbowApiClientOptions;
 
@@ -32,6 +66,14 @@ export namespace EnsRainbow {
 
     health(): Promise<HealthResponse>;
 
+    /**
+     * Check whether the ENSRainbow service has finished bootstrapping and is ready to serve requests.
+     *
+     * Throws when the service is not ready (e.g. 503 while the database is still being downloaded
+     * or validated) so callers can retry.
+     */
+    ready(): Promise<ReadyResponse>;
+
     getOptions(): Readonly<EnsRainbowApiClientOptions>;
   }
 
@@ -41,6 +83,23 @@ export namespace EnsRainbow {
 
   export interface HealthResponse {
     status: "ok";
+  }
+
+  /**
+   * Response returned by `GET /ready` when the ENSRainbow service is ready to serve requests.
+   */
+  export interface ReadyResponse {
+    status: "ok";
+  }
+
+  /**
+   * Generic error shape used by endpoints that return 503 Service Unavailable while the
+   * database is still bootstrapping (downloading, extracting, or validating).
+   */
+  export interface ServiceUnavailableError {
+    status: typeof StatusCode.Error;
+    error: string;
+    errorCode: typeof ErrorCode.ServiceUnavailable;
   }
 
   export interface BaseHealResponse<Status extends StatusCode, Error extends ErrorCode> {
@@ -81,17 +140,29 @@ export namespace EnsRainbow {
     errorCode: typeof ErrorCode.BadRequest;
   }
 
+  export interface HealServiceUnavailableError
+    extends BaseHealResponse<typeof StatusCode.Error, typeof ErrorCode.ServiceUnavailable> {
+    status: typeof StatusCode.Error;
+    label?: never;
+    error: string;
+    errorCode: typeof ErrorCode.ServiceUnavailable;
+  }
+
   export type HealResponse =
     | HealSuccess
     | HealNotFoundError
     | HealServerError
-    | HealBadRequestError;
+    | HealBadRequestError
+    | HealServiceUnavailableError;
   export type HealError = Exclude<HealResponse, HealSuccess>;
 
   /**
-   * Server errors should not be cached.
+   * Server errors and transient bootstrap errors should not be cached.
    */
-  export type CacheableHealResponse = Exclude<HealResponse, HealServerError>;
+  export type CacheableHealResponse = Exclude<
+    HealResponse,
+    HealServerError | HealServiceUnavailableError
+  >;
 
   export interface BaseCountResponse<Status extends StatusCode, Error extends ErrorCode> {
     status: Status;
@@ -120,7 +191,16 @@ export namespace EnsRainbow {
     errorCode: typeof ErrorCode.ServerError;
   }
 
-  export type CountResponse = CountSuccess | CountServerError;
+  export interface CountServiceUnavailableError
+    extends BaseCountResponse<typeof StatusCode.Error, typeof ErrorCode.ServiceUnavailable> {
+    status: typeof StatusCode.Error;
+    count?: never;
+    timestamp?: never;
+    error: string;
+    errorCode: typeof ErrorCode.ServiceUnavailable;
+  }
+
+  export type CountResponse = CountSuccess | CountServerError | CountServiceUnavailableError;
 
   /**
    * Complete public configuration object for ENSRainbow.
@@ -145,7 +225,7 @@ export interface EnsRainbowApiClientOptions {
   endpointUrl: URL;
 
   /**
-   * Optional label set preferences that the ENSRainbow server at endpointUrl is expected to
+   * Optional client label set preferences that the ENSRainbow server at endpointUrl is expected to
    * support. If provided, enables deterministic heal results across time, such that only
    * labels from label sets with versions less than or equal to this value will be returned.
    * Therefore, even if the ENSRainbow server later ingests label sets with greater versions
@@ -159,7 +239,7 @@ export interface EnsRainbowApiClientOptions {
    * will be returned.
    * When `labelSetVersion` is defined, `labelSetId` must also be defined.
    */
-  labelSet?: EnsRainbowClientLabelSet;
+  clientLabelSet?: EnsRainbowClientLabelSet;
 }
 
 /**
@@ -178,7 +258,7 @@ export interface EnsRainbowApiClientOptions {
 export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
   private readonly options: EnsRainbowApiClientOptions;
   private readonly cache: Cache<LabelHash, EnsRainbow.CacheableHealResponse>;
-  private readonly labelSetSearchParams: URLSearchParams;
+  private readonly clientLabelSetSearchParams: URLSearchParams;
 
   public static readonly DEFAULT_CACHE_CAPACITY = 1000;
 
@@ -191,23 +271,23 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
     return {
       endpointUrl: new URL(DEFAULT_ENSRAINBOW_URL),
       cacheCapacity: EnsRainbowApiClient.DEFAULT_CACHE_CAPACITY,
-      labelSet: buildEnsRainbowClientLabelSet(),
+      clientLabelSet: buildEnsRainbowClientLabelSet(),
     };
   }
 
   constructor(options: Partial<EnsRainbow.ApiClientOptions> = {}) {
-    const { labelSet: optionsLabelSet, ...rest } = options;
+    const { clientLabelSet: optionsClientLabelSet, ...rest } = options;
     const defaultOptions = EnsRainbowApiClient.defaultOptions();
 
     const copiedLabelSet = buildEnsRainbowClientLabelSet(
-      optionsLabelSet?.labelSetId,
-      optionsLabelSet?.labelSetVersion,
+      optionsClientLabelSet?.labelSetId,
+      optionsClientLabelSet?.labelSetVersion,
     );
 
     this.options = {
       ...defaultOptions,
       ...rest,
-      labelSet: copiedLabelSet,
+      clientLabelSet: copiedLabelSet,
     };
 
     this.cache = new LruCache<LabelHash, EnsRainbow.CacheableHealResponse>(
@@ -215,14 +295,17 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
     );
 
     // Pre-compute query parameters for label set options
-    this.labelSetSearchParams = new URLSearchParams();
-    if (this.options.labelSet?.labelSetId !== undefined) {
-      this.labelSetSearchParams.append("label_set_id", this.options.labelSet.labelSetId);
+    this.clientLabelSetSearchParams = new URLSearchParams();
+    if (this.options.clientLabelSet?.labelSetId !== undefined) {
+      this.clientLabelSetSearchParams.append(
+        "label_set_id",
+        this.options.clientLabelSet.labelSetId,
+      );
     }
-    if (this.options.labelSet?.labelSetVersion !== undefined) {
-      this.labelSetSearchParams.append(
+    if (this.options.clientLabelSet?.labelSetVersion !== undefined) {
+      this.clientLabelSetSearchParams.append(
         "label_set_version",
-        this.options.labelSet.labelSetVersion.toString(),
+        this.options.clientLabelSet.labelSetVersion.toString(),
       );
     }
   }
@@ -291,7 +374,7 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
     const url = new URL(`/v1/heal/${normalizedLabelHash}`, this.options.endpointUrl);
 
     // Apply pre-computed label set query parameters
-    this.labelSetSearchParams.forEach((value, key) => {
+    this.clientLabelSetSearchParams.forEach((value, key) => {
       url.searchParams.append(key, value);
     });
 
@@ -349,17 +432,77 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
   async health(): Promise<EnsRainbow.HealthResponse> {
     const response = await fetch(new URL("/health", this.options.endpointUrl));
 
+    if (!response.ok) {
+      throw new EnsRainbowHttpError(
+        `ENSRainbow health check failed (HTTP ${response.status}${
+          response.statusText ? ` ${response.statusText}` : ""
+        })`,
+        response.status,
+        response.statusText,
+      );
+    }
+
     return response.json() as Promise<EnsRainbow.HealthResponse>;
   }
 
   /**
+   * Check whether the ENSRainbow service is ready (database is downloaded, validated, and open).
+   *
+   * Unlike {@link EnsRainbowApiClient.health}, which is a pure liveness probe that succeeds as soon
+   * as the HTTP server is accepting requests, `ready()` only resolves once the service has finished
+   * bootstrapping its database. Clients that require a usable database (e.g. ENSIndexer) should
+   * poll this method instead of `health()` during startup.
+   *
+   * @throws {EnsRainbowHttpError} if the service responds with a non-2xx status. The thrown
+   * error carries the HTTP `status` so callers can distinguish the retryable bootstrap case
+   * (`503 Service Unavailable`) from likely-non-retryable misconfiguration / server failures
+   * (e.g. `404`, `500`) and abort retries early in the latter cases.
+   * @throws Network/fetch errors (DNS, ECONNREFUSED, etc.) propagate as their original error
+   * type and should generally remain retryable, since they are common during cold start before
+   * the ENSRainbow HTTP server has bound its port.
+   */
+  async ready(): Promise<EnsRainbow.ReadyResponse> {
+    const response = await fetch(new URL("/ready", this.options.endpointUrl));
+
+    if (!response.ok) {
+      const statusSuffix = `HTTP ${response.status}${
+        response.statusText ? ` ${response.statusText}` : ""
+      }`;
+
+      if (response.status === 503) {
+        throw new EnsRainbowHttpError(
+          `ENSRainbow readiness check: service not ready yet (${statusSuffix})`,
+          response.status,
+          response.statusText,
+        );
+      }
+
+      throw new EnsRainbowHttpError(
+        `ENSRainbow readiness check failed (${statusSuffix}). This usually indicates a non-readiness issue (e.g. wrong base URL, misrouting, or a server error).`,
+        response.status,
+        response.statusText,
+      );
+    }
+
+    return response.json() as Promise<EnsRainbow.ReadyResponse>;
+  }
+
+  /**
    * Get the public configuration of the ENSRainbow service.
+   *
+   * @throws {EnsRainbowHttpError} if the service responds with a non-2xx status.
    */
   async config(): Promise<EnsRainbow.ENSRainbowPublicConfig> {
     const response = await fetch(new URL("/v1/config", this.options.endpointUrl));
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch ENSRainbow config: ${response.statusText}`);
+      throw new EnsRainbowHttpError(
+        `Failed to fetch ENSRainbow config: HTTP ${response.status}${
+          response.statusText ? ` ${response.statusText}` : ""
+        }`,
+        response.status,
+        response.statusText,
+      );
     }
 
     return response.json() as Promise<EnsRainbow.ENSRainbowPublicConfig>;
@@ -375,7 +518,7 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
     const deepCopy = {
       cacheCapacity: this.options.cacheCapacity,
       endpointUrl: new URL(this.options.endpointUrl.href),
-      labelSet: this.options.labelSet ? { ...this.options.labelSet } : undefined,
+      clientLabelSet: this.options.clientLabelSet ? { ...this.options.clientLabelSet } : undefined,
     } satisfies EnsRainbowApiClientOptions;
 
     return Object.freeze(deepCopy);
@@ -405,5 +548,9 @@ export const isHealError = (
 export const isCacheableHealResponse = (
   response: EnsRainbow.HealResponse,
 ): response is EnsRainbow.CacheableHealResponse => {
-  return response.status === StatusCode.Success || response.errorCode !== ErrorCode.ServerError;
+  if (response.status === StatusCode.Success) return true;
+  return (
+    response.errorCode !== ErrorCode.ServerError &&
+    response.errorCode !== ErrorCode.ServiceUnavailable
+  );
 };

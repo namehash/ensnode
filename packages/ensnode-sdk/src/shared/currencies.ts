@@ -11,6 +11,7 @@ export const CurrencyIds = {
   ETH: "ETH",
   USDC: "USDC",
   DAI: "DAI",
+  ENSTokens: "ENSTokens",
 } as const;
 
 export type CurrencyId = (typeof CurrencyIds)[keyof typeof CurrencyIds];
@@ -46,7 +47,13 @@ export interface PriceUsdc {
   amount: CurrencyAmount;
 }
 
-export type Price = PriceEth | PriceDai | PriceUsdc;
+export interface PriceEnsTokens {
+  currency: typeof CurrencyIds.ENSTokens;
+
+  amount: CurrencyAmount;
+}
+
+export type Price = PriceEth | PriceDai | PriceUsdc | PriceEnsTokens;
 
 /**
  * Serialized representation of {@link PriceEth}.
@@ -70,9 +77,20 @@ export interface SerializedPriceUsdc extends Omit<PriceUsdc, "amount"> {
 }
 
 /**
+ * Serialized representation of {@link PriceEnsTokens}.
+ */
+export interface SerializedPriceEnsTokens extends Omit<PriceEnsTokens, "amount"> {
+  amount: SerializedCurrencyAmount;
+}
+
+/**
  * Serialized representation of {@link Price}.
  */
-export type SerializedPrice = SerializedPriceEth | SerializedPriceDai | SerializedPriceUsdc;
+export type SerializedPrice =
+  | SerializedPriceEth
+  | SerializedPriceDai
+  | SerializedPriceUsdc
+  | SerializedPriceEnsTokens;
 
 export interface CurrencyInfo {
   id: CurrencyId;
@@ -94,6 +112,11 @@ const currencyInfo: Record<CurrencyId, CurrencyInfo> = {
   [CurrencyIds.DAI]: {
     id: CurrencyIds.DAI,
     name: "Dai Stablecoin",
+    decimals: 18,
+  },
+  [CurrencyIds.ENSTokens]: {
+    id: CurrencyIds.ENSTokens,
+    name: "$ENS Tokens",
     decimals: 18,
   },
 };
@@ -132,6 +155,16 @@ export function priceDai(amount: Price["amount"]): PriceDai {
   return {
     amount,
     currency: CurrencyIds.DAI,
+  };
+}
+
+/**
+ * Create price in ENS Tokens for given amount.
+ */
+export function priceEnsTokens(amount: Price["amount"]): PriceEnsTokens {
+  return {
+    amount,
+    currency: CurrencyIds.ENSTokens,
   };
 }
 
@@ -178,6 +211,74 @@ export function addPrices<const PriceType extends Price = Price>(
       currency: firstPrice.currency,
     },
   ) as PriceType;
+}
+
+/**
+ * Subtract price B from price A.
+ *
+ * @param a the minuend {@link Price} value.
+ * @param b the subtrahend {@link Price} value.
+ * @returns the resulting {@link Price} (`a - b`) with the same currency as the inputs.
+ * @throws if the prices have different currencies.
+ * @throws if the result would be negative ({@link CurrencyAmount} must be non-negative).
+ */
+export function subtractPrice<const PriceType extends Price = Price>(
+  a: PriceType,
+  b: PriceType,
+): PriceType {
+  if (!isPriceCurrencyEqual(a, b)) {
+    throw new Error("All prices must have the same currency to be subtracted.");
+  }
+
+  const resultAmount = a.amount - b.amount;
+
+  if (resultAmount < 0n) {
+    throw new Error("subtractPrice result must be non-negative.");
+  }
+
+  return { amount: resultAmount, currency: a.currency } as PriceType;
+}
+
+/**
+ * Return the smallest of the given {@link Price} values.
+ *
+ * @param prices at least two {@link Price} values to compare.
+ * @returns the {@link Price} with the smallest amount. Ties return the first
+ *          such value in argument order.
+ * @throws if not all prices have the same currency.
+ */
+export function minPrice<const PriceType extends Price = Price>(
+  ...prices: [PriceType, PriceType, ...PriceType[]]
+): PriceType {
+  const firstPrice = prices[0];
+  const allPricesInSameCurrency = prices.every((price) => isPriceCurrencyEqual(firstPrice, price));
+
+  if (allPricesInSameCurrency === false) {
+    throw new Error("All prices must have the same currency to be compared.");
+  }
+
+  return prices.reduce((acc, price) => (price.amount < acc.amount ? price : acc));
+}
+
+/**
+ * Return the largest of the given {@link Price} values.
+ *
+ * @param prices at least two {@link Price} values to compare.
+ * @returns the {@link Price} with the largest amount. Ties return the first
+ *          such value in argument order.
+ * @throws if not all prices have the same currency.
+ */
+export function maxPrice<const PriceType extends Price = Price>(
+  ...prices: [PriceType, PriceType, ...PriceType[]]
+): PriceType {
+  const firstPrice = prices[0];
+  const allPricesInSameCurrency = prices.every((price) => isPriceCurrencyEqual(firstPrice, price));
+
+  if (allPricesInSameCurrency === false) {
+    throw new Error("All prices must have the same currency to be compared.");
+  }
+
+  return prices.reduce((acc, price) => (price.amount > acc.amount ? price : acc));
 }
 
 /**
@@ -313,4 +414,31 @@ export function parseDai(value: string): PriceDai {
   const currencyInfo = getCurrencyInfo(CurrencyIds.DAI);
   const amount = parseUnits(value, currencyInfo.decimals);
   return priceDai(amount);
+}
+
+/**
+ * Parses a string representation of ENS Tokens into a {@link PriceEnsTokens} object.
+ *
+ * Uses {@link getCurrencyInfo} to get the correct number of decimals (18) for ENS Tokens
+ * and {@link parseUnits} from viem to convert the decimal string to a bigint.
+ *
+ * **Note:** Values with more than 18 decimal places will be truncated/rounded by viem's `parseUnits`.
+ *
+ * @param value - The decimal string to parse (e.g., "123.456789012345678" for 123.456789012345678 ENS Tokens)
+ * @returns A PriceEnsTokens object with the amount in the smallest unit (18 decimals)
+ *
+ * @throws {Error} If value is empty, whitespace-only or untrimmed
+ * @throws {Error} If value represents a negative number
+ * @throws {Error} If value is not a valid decimal string (e.g., "abc", "1.2.3")
+ *
+ * @example
+ * parseEnsTokens("123.456789012345678") // returns { currency: "ENSTokens", amount: 123456789012345678000n }
+ * parseEnsTokens("1") // returns { currency: "ENSTokens", amount: 1000000000000000000n }
+ * parseEnsTokens("0.001") // returns { currency: "ENSTokens", amount: 1000000000000000n }
+ */
+export function parseEnsTokens(value: string): PriceEnsTokens {
+  validateAmountToParse(value);
+  const currencyInfo = getCurrencyInfo(CurrencyIds.ENSTokens);
+  const amount = parseUnits(value, currencyInfo.decimals);
+  return priceEnsTokens(amount);
 }

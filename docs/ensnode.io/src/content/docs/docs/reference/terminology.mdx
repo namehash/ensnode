@@ -16,15 +16,15 @@ A **Subregistry** is any data structure outside of the [Registry](https://docs.e
 
 Some specific implementations of subregistries include:
 
-* The [BaseRegistrar](https://github.com/ensdomains/ens-contracts/blob/staging/contracts/ethregistrar/BaseRegistrarImplementation.sol) that holds supplemental state for direct subnames of .eth. This includes state for ERC721 NFTs and expiry times.
-* The [NameWrapper](https://docs.ens.domains/terminology#name-wrapper), which serves as a subregistry for the entire ENS root (all ENS names).  This includes state for ERC1155 NFTs, expiry times, and fuses.
-  * Note how direct subnames of .eth are an example of multiple subregistries potentially holding supplemental state for a name outside the Registry.
-* The contracts on Base that manage supplemental state for direct subnames of [base.eth](https://www.base.org/names).
-* The contracts on Linea that manage supplemental state for direct subnames of [linea.eth](https://names.linea.build/).
-* The contracts on Base / Optimism that manage supplemental state for DNS names managed by [3DNS](https://3dns.box/).
-* The offchain databases that manage supplemental state for direct subnames of [uni.eth](https://blog.uniswap.org/introducing-uni-eth-your-unique-web3-username).
-* The offchain databases that manage supplemental state for direct subnames of [cb.id](https://help.coinbase.com/en/wallet/managing-account/coinbase-ens-support).
-* DNS nameservers for (essentially) all DNS names. Since ENS is a superset of DNS, (essentially) any DNS name is an ENS name. Therefore, whenever supplemental state associated with a DNS name is updated in a DNS nameserver, a subregistry is being updated.
+- The [BaseRegistrar](https://github.com/ensdomains/ens-contracts/blob/staging/contracts/ethregistrar/BaseRegistrarImplementation.sol) that holds supplemental state for direct subnames of .eth. This includes state for ERC721 NFTs and expiry times.
+- The [NameWrapper](https://docs.ens.domains/terminology#name-wrapper), which serves as a subregistry for the entire ENS root (all ENS names). This includes state for ERC1155 NFTs, expiry times, and fuses.
+  - Note how direct subnames of .eth are an example of multiple subregistries potentially holding supplemental state for a name outside the Registry.
+- The contracts on Base that manage supplemental state for direct subnames of [base.eth](https://www.base.org/names).
+- The contracts on Linea that manage supplemental state for direct subnames of [linea.eth](https://names.linea.build/).
+- The contracts on Base / Optimism that manage supplemental state for DNS names managed by [3DNS](https://3dns.box/).
+- The offchain databases that manage supplemental state for direct subnames of [uni.eth](https://blog.uniswap.org/introducing-uni-eth-your-unique-web3-username).
+- The offchain databases that manage supplemental state for direct subnames of [cb.id](https://help.coinbase.com/en/wallet/managing-account/coinbase-ens-support).
+- DNS nameservers for (essentially) all DNS names. Since ENS is a superset of DNS, (essentially) any DNS name is an ENS name. Therefore, whenever supplemental state associated with a DNS name is updated in a DNS nameserver, a subregistry is being updated.
 
 ### Subregistrar
 
@@ -32,15 +32,16 @@ A **Subregistrar** is any system that is a [Registrar](https://docs.ens.domains/
 
 This definition expands the definition of Registrar to include cases such as:
 
-* The [ETHRegistrarController](https://github.com/ensdomains/ens-contracts/blob/staging/contracts/ethregistrar/ETHRegistrarController.sol) that writes to BaseRegistrar (the owner of the "eth" TLD). Note how the definition of "Registrar" in the official ENS glossary only includes contracts that are pointed to by the owner field of the Registry. Therefore, the BaseRegistrar is a Registrar (and a Subregistry), while the ETHRegistrarController is a Subregistrar.
-* The contracts on Base that write to the Subregistry for direct subnames of base.eth. These contracts live on Base, therefore they cannot meet the definition of Registrar because they can't be set as the owner in the Registry on Ethereum mainnet.
-* The offchain systems that write to the offchain databases associated with direct subnames of uni.eth and cb.id.
-* Any NFT marketplace that supports the exchange of an NFT representing ownership of an ENS name. Each time a NFT is exchanged, state about that NFT must be updated within a related subregistry. Therefore the marketplace enabling that trade is a Subregistrar.
-* Any DNS registrar, as ENS is a superset of DNS.
+- The [ETHRegistrarController](https://github.com/ensdomains/ens-contracts/blob/staging/contracts/ethregistrar/ETHRegistrarController.sol) that writes to BaseRegistrar (the owner of the "eth" TLD). Note how the definition of "Registrar" in the official ENS glossary only includes contracts that are pointed to by the owner field of the Registry. Therefore, the BaseRegistrar is a Registrar (and a Subregistry), while the ETHRegistrarController is a Subregistrar.
+- The contracts on Base that write to the Subregistry for direct subnames of base.eth. These contracts live on Base, therefore they cannot meet the definition of Registrar because they can't be set as the owner in the Registry on Ethereum mainnet.
+- The offchain systems that write to the offchain databases associated with direct subnames of uni.eth and cb.id.
+- Any NFT marketplace that supports the exchange of an NFT representing ownership of an ENS name. Each time a NFT is exchanged, state about that NFT must be updated within a related subregistry. Therefore the marketplace enabling that trade is a Subregistrar.
+- Any DNS registrar, as ENS is a superset of DNS.
 
 ### Shadow Registry
 
 A **Shadow Registry** is a Subregistry meeting ALL of the following constraints:
+
 1. Not the Registry;
 2. Implemented as a smart contract exposing the same interface as the Registry;
 3. Used as part of the source of truth for a CCIP-Read Gateway Server for ENSIP-10 (wildcard resolution) powered subnames.
@@ -89,12 +90,12 @@ When rendering a **name**, one must take care to differentiate between an _unkno
 
 ### LabelHash, labelhash function
 
-In this terminology reference, we say that the **LabelHash** of a **Label** is the result of calling the **`labelhash` function** with that **Label** as input. For the complete technical definition, see the [ENSRainbow Glossary](/docs/ensrainbow/concepts/glossary#labelhash).
+In this terminology reference, we say that the **LabelHash** of a **Label** is the result of calling the **`labelhash` function** with that **Label** as input. For the complete technical definition, see the [ENSRainbow Glossary](/docs/services/ensrainbow/concepts/glossary#labelhash).
 
 That is, `0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc` is the **LabelHash** of `vitalik`, which is the result of calling the **`labelhash` function** like so:
 
 ```ts
-import { labelhashInterpretedLabel, asInterpretedLabel } from 'enssdk';
+import { labelhashInterpretedLabel, asInterpretedLabel } from "enssdk";
 const labelHash = labelhashInterpretedLabel(asInterpretedLabel("vitalik"));
 ```
 
@@ -161,31 +162,39 @@ ENSNode's indexing pipeline transforms raw blockchain data into user-friendly fo
 When processing ENS data, it's important to distinguish between the literal data read from blockchain sources and the interpreted form used in applications:
 
 ### Literal Label
+
 A **Literal Label** is the raw label data as it exists in onchain storage or event data, before any processing or interpretation. This represents the exact bytes or string as emitted by contracts.
 
 ### Interpreted Label
+
 An **Interpreted Label** is a **Label** that is either:
+
 - (if normalized): a normalized **Literal Label**
 - (if not normalized or **Unknown**): an **Encoded LabelHash**
 
 Apps building on ENSNode should take special note to align their implementation of **ENS Normalize** with the **ENS Normalize** used by the ENSNode they use. The **ENS Normalize** version used by each ENSNode can be referenced in the ENSIndexer Config API.
 
 ### Literal Name
+
 A **Literal Name** is a Name exclusively composed of 0 or more **Literal Labels**.
 
 ### Interpreted Name
+
 An **Interpreted Name** is a Name exclusively composed of 0 or more **Interpreted Labels**.
 
 ## Subgraph Indexability & Label/Name Interpretation
 
 ### Subgraph-Indexable Labels / Subgraph-Unindexable Labels
+
 The legacy ENS Subgraph specifies that **Unknown Labels** and labels containing certain UTF-8 characters are "invalid". We refer to this concept as `subgraph-indexable` and `subgraph-unindexable`.
 
 A **Literal Label** is `subgraph-unindexable` if it:
-  - is an **Unknown Label**, or
-  - contains any of the following prohibited UTF-8 characters.
+
+- is an **Unknown Label**, or
+- contains any of the following prohibited UTF-8 characters.
 
 The `subgraph-unindexable` UTF-8 characters are:
+
 1. `\0` (null byte) - PostgreSQL does not allow storing this character in text fields
 2. `.` (period) - Conflicts with ENS label separator logic
 3. `[` (left square bracket) - Conflicts with "unknown label" representations
@@ -194,9 +203,12 @@ The `subgraph-unindexable` UTF-8 characters are:
 A `subgraph-indexable` **Literal Label** is a **Known Literal Label** that does NOT contain any of the prohibited UTF-8 characters.
 
 ### Subgraph Interpreted Label
+
 A **Subgraph Interpreted Label** is a **Label** that is either:
+
 - (if `subgraph-indexable`): a **Literal Label** guaranteed to not contain any of the `subgraph-unindexable` UTF-8 characters, or
 - (if `subgraph-unindexable`): an Encoded LabelHash.
 
 ### Subgraph Interpreted Name
+
 A **Subgraph Interpreted Name** is a name exclusively composed of 0 or more **Subgraph Interpreted Labels**.

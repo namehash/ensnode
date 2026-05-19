@@ -24,12 +24,12 @@ export interface ResponsePageContextWithNoRecords extends Required<RequestPagePa
   /**
    * The start index of the records on the page (0-indexed)
    */
-  startIndex: undefined;
+  startIndex?: undefined;
 
   /**
    * The end index of the records on the page (0-indexed)
    */
-  endIndex: undefined;
+  endIndex?: undefined;
 }
 
 export interface ResponsePageContextWithRecords extends Required<RequestPageParams> {

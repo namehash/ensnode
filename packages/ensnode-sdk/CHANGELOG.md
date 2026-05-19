@@ -1,5 +1,150 @@
 # @ensnode/ensnode-sdk
 
+## 1.14.0
+
+### Minor Changes
+
+- [#2090](https://github.com/namehash/ensnode/pull/2090) [`3132a77`](https://github.com/namehash/ensnode/commit/3132a77b809694a4677da69c8c546a4b41eaa583) Thanks [@tk-o](https://github.com/tk-o)! - Added indexing status based functions for checking Omnigraph API and Subgraph API availability.
+
+- [#2102](https://github.com/namehash/ensnode/pull/2102) [`1b6abb0`](https://github.com/namehash/ensnode/commit/1b6abb06ac364840770dfcc47526111fdf6fb2c9) Thanks [@tk-o](https://github.com/tk-o)! - Added `globalBlockrangeEndBlock` param to `buildIndexedBlockranges`.
+
+- [#2128](https://github.com/namehash/ensnode/pull/2128) [`65cf37c`](https://github.com/namehash/ensnode/commit/65cf37c24c1bd9a7f30ad758c945015ece9c8461) Thanks [@tk-o](https://github.com/tk-o)! - Renamed the `ensv2` plugin to `unigraph`. It better conveys the idea of a single unified data model used for indexing both ENSv1 and ENSv2.
+
+### Patch Changes
+
+- Updated dependencies []:
+  - enssdk@1.14.0
+  - @ensnode/datasources@1.14.0
+
+## 1.13.1
+
+### Patch Changes
+
+- Updated dependencies [[`b32f09d`](https://github.com/namehash/ensnode/commit/b32f09dec275196c816b722023a197d3e91a37b1)]:
+  - @ensnode/datasources@1.13.1
+  - enssdk@1.13.1
+
+## 1.13.0
+
+### Patch Changes
+
+- Updated dependencies [[`57bbef2`](https://github.com/namehash/ensnode/commit/57bbef28e24323a4c2f8326512d185a5e4662254)]:
+  - @ensnode/datasources@1.13.0
+  - enssdk@1.13.0
+
+## 1.12.0
+
+### Minor Changes
+
+- [#2061](https://github.com/namehash/ensnode/pull/2061) [`4fb7b33`](https://github.com/namehash/ensnode/commit/4fb7b332fd46ee9924dc9dfb55b5a21ff8b8554a) Thanks [@shrugs](https://github.com/shrugs)! - **Breaking (`@ensnode/ensnode-sdk`)**: `getRootRegistryIds` is removed; use the new `isRootRegistryId(namespace, registryId)` predicate to test root membership instead. `getRootRegistryId` (singular, "preferred root") is unchanged.
+
+### Patch Changes
+
+- Updated dependencies []:
+  - enssdk@1.12.0
+  - @ensnode/datasources@1.12.0
+
+## 1.11.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - enssdk@1.11.1
+  - @ensnode/datasources@1.11.1
+
+## 1.11.0
+
+### Minor Changes
+
+- [#2036](https://github.com/namehash/ensnode/pull/2036) [`43d8a9b`](https://github.com/namehash/ensnode/commit/43d8a9b838b15719f520cd3f3bbfd1b52a4ad1ce) Thanks [@shrugs](https://github.com/shrugs)! - Replaces the flat `DEVNET_DEPLOYER` / `DEVNET_OWNER` / `DEVNET_USER` / `DEVNET_USER2` constants exported from `@ensnode/ensnode-sdk/internal` with a single `DevnetAccounts` object that groups each account's `address` and `resolver`. Consumers must migrate to `DevnetAccounts.{deployer,owner,user,user2}.{address,resolver}`.
+
+- [#2017](https://github.com/namehash/ensnode/pull/2017) [`824d819`](https://github.com/namehash/ensnode/commit/824d819d291b2b642d2664d09cb10d6de69a6ea7) Thanks [@Goader](https://github.com/Goader)! - Add `$ENS Tokens` as a supported currency in `@ensnode/ensnode-sdk`: `CurrencyIds.ENSTokens`, `PriceEnsTokens`/`SerializedPriceEnsTokens` types, and the `priceEnsTokens`, `parseEnsTokens`, `serializePriceEnsTokens`, `deserializePriceEnsTokens` helpers.
+
+- [#1983](https://github.com/namehash/ensnode/pull/1983) [`6173160`](https://github.com/namehash/ensnode/commit/61731608632f62139496656f6231210f63383f20) Thanks [@shrugs](https://github.com/shrugs)! - Centralized Managed Name and Root Registry helpers.
+  - **Removed:** `getEthnamesSubregistryId`, `getEthnamesSubregistryManagedName`, `getBasenamesSubregistryId`, `getBasenamesSubregistryManagedName`, `getLineanamesSubregistryId`, `getLineanamesSubregistryManagedName`.
+  - **Added:** `getManagedName(namespace, contract)` — given any contract in the ENSv1 ecosystem, returns its Managed Name, namehash, and concrete ENSv1 Registry. Replaces the per-plugin helpers above. Also exposes `isNameWrapper(namespace, contract)`.
+  - **Added:** `getRootRegistryId(namespace)` returns the namespace's primary Root Registry (prefers ENSv2 when defined). `getRootRegistryIds(namespace)` returns every top-level Root Registry — concrete ENSv1 Root, Basenames/Lineanames `base.eth`/`linea.eth` ENSv1VirtualRegistries, and the ENSv2 Root when defined — for consumers that walk the full canonical-set tree.
+  - **Added:** `getENSv1RootRegistryId(namespace)`.
+
+- [#1988](https://github.com/namehash/ensnode/pull/1988) [`0d8a4b4`](https://github.com/namehash/ensnode/commit/0d8a4b4b7c8c70be904652e2132e7c67fd9e39ef) Thanks [@tk-o](https://github.com/tk-o)! - Introduced a set of "stack info" data models: `EnsIndexerStackInfo`, `EnsNodeStackInfo`.
+
+- [#2056](https://github.com/namehash/ensnode/pull/2056) [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572) Thanks [@shrugs](https://github.com/shrugs)! - Added `EnsIndexerStackInfo` as a base type; refactored `EnsNodeStackInfo` to extend it.
+
+- [#2056](https://github.com/namehash/ensnode/pull/2056) [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572) Thanks [@shrugs](https://github.com/shrugs)! - **Breaking**: `EnsIndexerPublicConfig`: renamed `labelSet` → `clientLabelSet`.
+
+- [#2056](https://github.com/namehash/ensnode/pull/2056) [`0e7c601`](https://github.com/namehash/ensnode/commit/0e7c6011abbb2f49fbf6ee89168919f2d58fa572) Thanks [@shrugs](https://github.com/shrugs)! - Added `replaceBigInts` (sourced from `@ponder/utils`) and `toJson` helpers to `@ensnode/ensnode-sdk`. `toJson` takes an options object (`{ pretty?: boolean }`) with `pretty` defaulting to `false` — pass `{ pretty: true }` for indented output.
+
+- [#1983](https://github.com/namehash/ensnode/pull/1983) [`6173160`](https://github.com/namehash/ensnode/commit/61731608632f62139496656f6231210f63383f20) Thanks [@shrugs](https://github.com/shrugs)! - Unify `v1Domain` + `v2Domain` into a single polymorphic `domain` table discriminated by a `type` enum (`"ENSv1Domain"` | `"ENSv2Domain"`), and make Registry polymorphic across concrete ENSv1 (mainnet Registry, Basenames Registry, Lineanames Registry), ENSv1 Virtual (per-parent-domain virtual Registry managed by each ENSv1 domain that has children), and ENSv2 Registries.
+
+  ### Breaking schema + id format changes
+  - `ENSv1DomainId` is now a dash-delimited tuple: `${ENSv1RegistryId}-${node}` (was `Node`). Every ENSv1 Domain is addressable through a concrete Registry, so bare `node` values no longer identify a Domain by themselves.
+  - `RegistryId` is a union of `ENSv1RegistryId`, `ENSv1VirtualRegistryId`, and `ENSv2RegistryId`. New id constructors: `makeENSv1RegistryId`, `makeENSv2RegistryId`, `makeENSv1VirtualRegistryId`, and `makeConcreteRegistryId` (returns `ENSv1RegistryId | ENSv2RegistryId` for callsites that only need to address a concrete Registry contract). `makeENSv1DomainId` now takes `(AccountId, Node)`.
+  - `domains` table: replaces `v1_domains` + `v2_domains`. Adds `type`, nullable `tokenId` (non-null iff ENSv2), nullable `node` (non-null iff ENSv1), nullable `rootRegistryOwnerId` (v1 only). `parentId` removed; parent relationships flow through `registryCanonicalDomain` for both v1 and v2.
+  - `registries` table: adds `type` enum column and nullable `node` (non-null iff `ENSv1VirtualRegistry`). Unique `(chainId, address)` index becomes a plain index so virtual Registries can share their concrete parent's `(chainId, address)`.
+  - `registryCanonicalDomain.domainId` is typed as the unified `DomainId`.
+
+  ### GraphQL
+  - `Registry` becomes a GraphQL interface with `ENSv1Registry`, `ENSv1VirtualRegistry`, and `ENSv2Registry` implementations. `ENSv1VirtualRegistry` exposes `node: Node!`.
+  - `Domain` interface gains `parent: Domain` (resolved via the canonical-path dataloader); `ENSv1Domain` exposes `node: Node!` and `rootRegistryOwner`; `ENSv2Domain` exposes `tokenId`, `registry`, `subregistry`, `permissions`.
+  - `Query.registry(by: { contract })` now DB-looks up the concrete Registry by `(chainId, address, type IN (ENSv1Registry, ENSv2Registry))`. Virtual Registries are not addressable via `AccountId` alone.
+
+### Patch Changes
+
+- Updated dependencies [[`5729ac1`](https://github.com/namehash/ensnode/commit/5729ac18ba029a476ffeca18c9b4bceee417ebdb), [`92ca54f`](https://github.com/namehash/ensnode/commit/92ca54fa2efbef3f32e2dacd8fdc347ef260a2af), [`7e77c5c`](https://github.com/namehash/ensnode/commit/7e77c5c2bef96d1a2eb363871fb87379b5f6f7e9), [`43d8a9b`](https://github.com/namehash/ensnode/commit/43d8a9b838b15719f520cd3f3bbfd1b52a4ad1ce), [`6173160`](https://github.com/namehash/ensnode/commit/61731608632f62139496656f6231210f63383f20)]:
+  - @ensnode/datasources@1.11.0
+  - enssdk@1.11.0
+
+## 1.10.1
+
+### Patch Changes
+
+- [#1973](https://github.com/namehash/ensnode/pull/1973) [`9d50f64`](https://github.com/namehash/ensnode/commit/9d50f647802fde286dfef2dc23c884801d06b228) Thanks [@Goader](https://github.com/Goader)! - Add `subtractPrice`, `minPrice`, and `maxPrice` helpers to `@ensnode/ensnode-sdk`.
+
+- Updated dependencies []:
+  - enssdk@1.10.1
+  - @ensnode/datasources@1.10.1
+
+## 1.10.0
+
+### Minor Changes
+
+- [#1671](https://github.com/namehash/ensnode/pull/1671) [`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5) Thanks [@tk-o](https://github.com/tk-o)! - **Breaking**: Replaced the `config()` method in the `EnsNodeClient` class with the extended data model returned from the `indexingStatus()` method.
+
+- [#1863](https://github.com/namehash/ensnode/pull/1863) [`29afaa6`](https://github.com/namehash/ensnode/commit/29afaa6ad8a3f3c8133241cf1a9324980498ded4) Thanks [@Y3drk](https://github.com/Y3drk)! - **Breaking**: Renamed `ENSNodeClient` to `EnsNodeClient`.
+
+- [#1671](https://github.com/namehash/ensnode/pull/1671) [`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5) Thanks [@tk-o](https://github.com/tk-o)! - Introduced `EnsNodeStackInfo` data model.
+
+- [#1858](https://github.com/namehash/ensnode/pull/1858) [`7fca45d`](https://github.com/namehash/ensnode/commit/7fca45d09dc6e3456fec2cae0827e9d2c54827a6) Thanks [@tk-o](https://github.com/tk-o)! - Removed `nodejs` field from `EnsIndexerVersionInfo` data model.
+
+- [#1889](https://github.com/namehash/ensnode/pull/1889) [`29fcfc7`](https://github.com/namehash/ensnode/commit/29fcfc7a1ab01c3214b5c16fc0e4a349010e9360) Thanks [@shrugs](https://github.com/shrugs)! - Migrated core ENS types and utilities from `ensnode-sdk` to `enssdk`:
+  - `UnixTimestamp` type moved to enssdk
+  - `normalizeName` function (wraps `@adraffy/ens-normalize`) added; `isNormalizedName`/`isNormalizedLabel` consolidated into `normalization.ts`
+  - `makeSubdomainNode` moved to enssdk
+  - `reinterpretLabel`/`reinterpretName` moved to enssdk
+  - `labelhash` renamed to `labelhashInterpretedLabel` (requires branded `InterpretedLabel` input)
+  - `namehash` renamed to `namehashInterpretedName` (requires branded `InterpretedName` input)
+  - Added `asInterpretedLabel`, `asInterpretedName`, `asLiteralLabel` validated cast helpers
+  - Subregistry managed name functions now return `InterpretedName`
+  - Removed `@adraffy/ens-normalize` dependency from ensnode-sdk (provided by enssdk)
+
+- [#1967](https://github.com/namehash/ensnode/pull/1967) [`5f341e1`](https://github.com/namehash/ensnode/commit/5f341e14420146db772fc01b1b3c0f4e2d4a3cb7) Thanks [@shrugs](https://github.com/shrugs)! - Resolution API: support `contenthash`, `pubkey`, `abi`, `interfaces`, `dnszonehash`, and `version` selection. Protocol acceleration indexes `contenthash`, `pubkey`, `dnszonehash`, and handles `VersionChanged` (clears records for the node, bumps version). `ABI` (bitmask query, contract-equivalent) and `interface` records are selectable but always resolved via RPC. Adds `ContentType` / `InterfaceId` / `RecordVersion` semantic types to `enssdk`.
+
+- [#1671](https://github.com/namehash/ensnode/pull/1671) [`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5) Thanks [@tk-o](https://github.com/tk-o)! - Replaced the `EnsApiConfigResponse` data model by adding `stackInfo` field to the `EnsApiIndexingStatusResponseOk` data model.
+
+- [#1828](https://github.com/namehash/ensnode/pull/1828) [`4c99177`](https://github.com/namehash/ensnode/commit/4c991777ac13ffd2cc1fb947e5a47bd7733b112b) Thanks [@tk-o](https://github.com/tk-o)! - Renamed the `databaseSchemaName` field on `EnsIndexerPublicConfig` type to `ensIndexerSchemaName`.
+
+- [#1907](https://github.com/namehash/ensnode/pull/1907) [`b2481d6`](https://github.com/namehash/ensnode/commit/b2481d6dae6f704493140aa63cd4ad1bfd3e3301) Thanks [@Goader](https://github.com/Goader)! - Made `accurateAsOf` a required field in the Registrar Actions API response (`RegistrarActionsResponseOk`).
+
+- [#1859](https://github.com/namehash/ensnode/pull/1859) [`ed6ee96`](https://github.com/namehash/ensnode/commit/ed6ee9641bfa6f42ddc95955cf8b013c93bf2f4a) Thanks [@tk-o](https://github.com/tk-o)! - Replaced `version` field with `versionInfo` field in the `EnsApiPublicConfig` data model. This change allows tracking the version of `@adraffy/ens-normalize` package used in ENSApi.
+
+### Patch Changes
+
+- [#1872](https://github.com/namehash/ensnode/pull/1872) [`9abb302`](https://github.com/namehash/ensnode/commit/9abb30238374f0847a68615827dddafb6dc05dad) Thanks [@sevenzing](https://github.com/sevenzing)! - Moved examples to separate file to reuse them in ensapi, such that we can test examples in ensnode-sdk with schema parsing and show them in openapi docs
+
+- Updated dependencies [[`29fcfc7`](https://github.com/namehash/ensnode/commit/29fcfc7a1ab01c3214b5c16fc0e4a349010e9360), [`5f341e1`](https://github.com/namehash/ensnode/commit/5f341e14420146db772fc01b1b3c0f4e2d4a3cb7), [`b8f5be7`](https://github.com/namehash/ensnode/commit/b8f5be761748f75c06ba4da81dd6098eec6ebb9a), [`677db8b`](https://github.com/namehash/ensnode/commit/677db8b67effc6d530716c0a1902244dba56d787)]:
+  - enssdk@1.10.0
+  - @ensnode/datasources@1.10.0
+
 ## 1.9.0
 
 ### Minor Changes
@@ -306,7 +451,6 @@
 ### Patch Changes
 
 - [#962](https://github.com/namehash/ensnode/pull/962) [`845a037`](https://github.com/namehash/ensnode/commit/845a03761dc830303a56cd70fe0d57c36d78a663) Thanks [@djstrong](https://github.com/djstrong)! - Add label set configuration support to ENSNode SDK
-
   - Add label set configuration types to ENSIndexerConfig
   - Update configuration serialization and deserialization
   - Add Zod schema validation for label set configuration

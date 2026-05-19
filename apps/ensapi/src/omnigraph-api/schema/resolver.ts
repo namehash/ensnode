@@ -19,9 +19,11 @@ import { getModelId } from "@/omnigraph-api/lib/get-model-id";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
 import { AccountIdInput, AccountIdRef } from "@/omnigraph-api/schema/account-id";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
-import { EventRef, EventsWhereInput } from "@/omnigraph-api/schema/event";
+import { EventRef } from "@/omnigraph-api/schema/event";
+import { EventsWhereInput } from "@/omnigraph-api/schema/event-inputs";
 import { NameOrNodeInput } from "@/omnigraph-api/schema/name-or-node";
 import { PermissionsRef } from "@/omnigraph-api/schema/permissions";
+import { RegistryInterfaceRef } from "@/omnigraph-api/schema/registry";
 import { ResolverRecordsRef } from "@/omnigraph-api/schema/resolver-records";
 
 /**
@@ -122,10 +124,14 @@ ResolverRef.implement({
     // Resolver.bridged
     ////////////////////
     bridged: t.field({
-      description: "Whether Resolver is a BridgedResolver.",
-      type: AccountIdRef,
+      description:
+        "If Resolver is a Bridged Resolver, the Registry to which it Bridges resolution.",
+      type: RegistryInterfaceRef,
       nullable: true,
-      resolve: (parent) => isBridgedResolver(config.namespace, parent),
+      resolve: (parent) => {
+        const bridged = isBridgedResolver(config.namespace, parent);
+        return bridged?.targetRegistryId ?? null;
+      },
     }),
 
     ////////////////////////

@@ -4,7 +4,7 @@ import { InfoCardConnector } from "@/components/connection/shared/info-card";
 
 import { ConnectionInfo } from "./cards/connection-info";
 import { ENSAdminInfo } from "./cards/ensadmin-info";
-import { ENSNodeConfigInfo } from "./cards/ensnode-info";
+import { LoadAndDisplayEnsNodeStackInfo } from "./cards/ensnode-stack-info";
 
 export default function DisplayConnectionDetails() {
   return (
@@ -18,7 +18,7 @@ export default function DisplayConnectionDetails() {
 
         <InfoCardConnector />
 
-        <ENSNodeConfigInfo />
+        <LoadAndDisplayEnsNodeStackInfo />
       </div>
     </section>
   );

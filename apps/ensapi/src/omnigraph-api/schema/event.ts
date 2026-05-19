@@ -95,10 +95,21 @@ EventRef.implement({
     // Event.from
     //////////////
     from: t.field({
-      description: "Identifies the sender of the Transaction within which this Event was emitted.",
+      description:
+        "Identifies the sender of the Transaction within which this Event was emitted (`tx.from`). Never HCA-aware — always the EOA/relayer that submitted the transaction. Use `Event.sender` for the HCA-aware actor.",
       type: "Address",
       nullable: false,
       resolve: (parent) => parent.from,
+    }),
+
+    ////////////////
+    // Event.sender
+    ////////////////
+    sender: t.field({
+      description: "The HCA account address if used, otherwise Transaction.from.",
+      type: "Address",
+      nullable: false,
+      resolve: (parent) => parent.sender,
     }),
 
     ////////////
@@ -150,59 +161,6 @@ EventRef.implement({
       type: "Hex",
       nullable: false,
       resolve: (parent) => parent.data,
-    }),
-  }),
-});
-
-//////////
-// Inputs
-//////////
-
-/**
- * Shared filter for events connections. Used by Domain.events, Resolver.events, Permissions.events,
- * and Account.events (which excludes `from` since it's implied).
- */
-export const EventsWhereInput = builder.inputType("EventsWhereInput", {
-  description: "Filter conditions for an events connection.",
-  fields: (t) => ({
-    selector_in: t.field({
-      type: ["Hex"],
-      description:
-        "Filter to events whose selector (event signature) is one of the provided values.",
-    }),
-    timestamp_gte: t.field({
-      type: "BigInt",
-      description: "Filter to events at or after this UnixTimestamp.",
-    }),
-    timestamp_lte: t.field({
-      type: "BigInt",
-      description: "Filter to events at or before this UnixTimestamp.",
-    }),
-    from: t.field({
-      type: "Address",
-      description: "Filter to events sent by this address.",
-    }),
-  }),
-});
-
-/**
- * Like EventsWhereInput but without `from` (used where `from` is implied, e.g. Account.events).
- */
-export const AccountEventsWhereInput = builder.inputType("AccountEventsWhereInput", {
-  description: "Filter conditions for Account.events (where `from` is implied by the Account).",
-  fields: (t) => ({
-    selector_in: t.field({
-      type: ["Hex"],
-      description:
-        "Filter to events whose selector (event signature) is one of the provided values.",
-    }),
-    timestamp_gte: t.field({
-      type: "BigInt",
-      description: "Filter to events at or after this UnixTimestamp.",
-    }),
-    timestamp_lte: t.field({
-      type: "BigInt",
-      description: "Filter to events at or before this UnixTimestamp.",
     }),
   }),
 });

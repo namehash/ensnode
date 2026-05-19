@@ -21,6 +21,7 @@ export const EventFragment = gql`
     transactionHash
     transactionIndex
     from
+    sender
     to
     address
     logIndex
@@ -38,6 +39,7 @@ export type EventResult = {
   transactionHash: Hex;
   transactionIndex: number;
   from: NormalizedAddress;
+  sender: NormalizedAddress;
   to: NormalizedAddress | null;
   address: NormalizedAddress;
   logIndex: number;
@@ -95,9 +97,11 @@ export const ResolverEventsPaginated = gql`
   ) {
     domain(by: { name: $name }) {
       resolver {
-        events(first: $first, after: $after, last: $last, before: $before) {
-          edges { cursor node { ...EventFragment } }
-          pageInfo { ...PageInfoFragment }
+        assigned {
+          events(first: $first, after: $after, last: $last, before: $before) {
+            edges { cursor node { ...EventFragment } }
+            pageInfo { ...PageInfoFragment }
+          }
         }
       }
     }

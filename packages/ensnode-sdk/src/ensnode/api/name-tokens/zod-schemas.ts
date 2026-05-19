@@ -8,7 +8,7 @@ import {
 } from "../../../shared/zod-schemas";
 import { NameTokenOwnershipTypes } from "../../../tokenscope/name-token";
 import { makeNameTokenSchema } from "../../../tokenscope/zod-schemas";
-import { ErrorResponseSchema } from "../shared/errors/zod-schemas";
+import { makeErrorResponseSchema } from "../shared/errors/zod-schemas";
 import {
   NameTokensResponse,
   NameTokensResponseCodes,
@@ -104,7 +104,7 @@ export const makeNameTokensResponseErrorNameTokensNotIndexedSchema = (
   z.strictObject({
     responseCode: z.literal(NameTokensResponseCodes.Error),
     errorCode: z.literal(NameTokensResponseErrorCodes.NameTokensNotIndexed),
-    error: ErrorResponseSchema,
+    error: makeErrorResponseSchema(),
   });
 
 /**
@@ -116,7 +116,7 @@ export const makeNameTokensResponseErrorEnsIndexerConfigUnsupported = (
   z.strictObject({
     responseCode: z.literal(NameTokensResponseCodes.Error),
     errorCode: z.literal(NameTokensResponseErrorCodes.EnsIndexerConfigUnsupported),
-    error: ErrorResponseSchema,
+    error: makeErrorResponseSchema(),
   });
 /**
  * Schema for {@link NameTokensResponseErrorIndexingStatusUnsupported}
@@ -127,7 +127,7 @@ export const makeNameTokensResponseErrorNameIndexingStatusUnsupported = (
   z.strictObject({
     responseCode: z.literal(NameTokensResponseCodes.Error),
     errorCode: z.literal(NameTokensResponseErrorCodes.IndexingStatusUnsupported),
-    error: ErrorResponseSchema,
+    error: makeErrorResponseSchema(),
   });
 /**
  * Schema for {@link NameTokensResponseError}

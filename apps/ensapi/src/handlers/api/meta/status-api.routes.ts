@@ -12,8 +12,9 @@ export const getIndexingStatusRoute = createRoute({
   path: "/indexing-status",
   operationId: "getIndexingStatus",
   tags: ["Meta"],
-  summary: "Get ENSIndexer Indexing Status",
-  description: "Returns the indexing status snapshot most recently captured from ENSIndexer",
+  summary: "Get Indexing Status and Stack Info",
+  description:
+    "Monitor an ENSNode's indexing progress across multiple chains. This endpoint provides a realtime indexing projection at the given moment, and overall stack info about services in the ENSNode instance. The projection includes a cross-chain indexing status snapshot that collects chain status snapshots for each indexed chain. At the moment, the cross-chain indexing status snapshot can be represented as an omnichain indexing status snapshot. Perfect for building monitoring dashboards, health checks, or determining whether your ENSNode has caught up with recent onchain activity.",
   responses: {
     200: {
       description: "Successfully retrieved indexing status",
@@ -33,5 +34,3 @@ export const getIndexingStatusRoute = createRoute({
     },
   },
 });
-
-export const routes = [getIndexingStatusRoute];

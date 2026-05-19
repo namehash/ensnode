@@ -1,9 +1,24 @@
-import type { InterpretedLabel, InterpretedName } from "enssdk";
+import {
+  ADDR_REVERSE_NODE,
+  asInterpretedLabel,
+  type DomainId,
+  ETH_NODE,
+  type InterpretedLabel,
+  type InterpretedName,
+  labelhashInterpretedLabel,
+  makeENSv1DomainId,
+  makeENSv1RegistryId,
+  makeENSv2DomainId,
+  makeENSv2RegistryId,
+  makeStorageId,
+} from "enssdk";
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { DEVNET_OWNER } from "@ensnode/ensnode-sdk/internal";
+import { DatasourceNames } from "@ensnode/datasources";
+import { accounts } from "@ensnode/datasources/devnet";
+import { getDatasourceContract } from "@ensnode/ensnode-sdk";
 
-import { DEVNET_ETH_LABELS } from "@/test/integration/devnet-names";
+import { DEVNET_ETH_LABELS, DEVNET_NAMES } from "@/test/integration/devnet-names";
 import {
   DomainSubdomainsPaginated,
   type PaginatedDomainResult,
@@ -29,7 +44,6 @@ describe("Domain.subdomains", () => {
   type SubdomainsResult = {
     domain: {
       subdomains: GraphQLConnection<{
-        name: InterpretedName | null;
         label: { interpreted: InterpretedLabel };
       }>;
     };
@@ -38,7 +52,7 @@ describe("Domain.subdomains", () => {
   const DomainSubdomains = gql`
     query DomainSubdomains($name: InterpretedName!) {
       domain(by: { name: $name }) {
-        subdomains { edges { node { name label { interpreted } } } }
+        subdomains { edges { node { label { interpreted } } } }
       }
     }
   `;
@@ -51,6 +65,150 @@ describe("Domain.subdomains", () => {
     for (const expected of DEVNET_ETH_LABELS) {
       expect(actual, `expected '${expected}' in .eth subdomains`).toContain(expected);
     }
+  });
+});
+
+describe("Domain.canonical", () => {
+  type DomainCanonicalQueryResult = {
+    domain: {
+      id: DomainId;
+      canonical: {
+        name: { interpreted: InterpretedName };
+        depth: number;
+        node: string;
+        path: { id: DomainId }[];
+      } | null;
+    } | null;
+  };
+
+  const DomainCanonicalByName = gql`
+    query DomainCanonicalByName($name: InterpretedName!) {
+      domain(by: { name: $name }) { id canonical { name { interpreted } depth node path { id } } }
+    }
+  `;
+
+  const DomainCanonicalById = gql`
+    query DomainCanonicalById($id: DomainId!) {
+      domain(by: { id: $id }) { id canonical { name { interpreted } depth node path { id } } }
+    }
+  `;
+
+  it.each(DEVNET_NAMES)(
+    "materializes canonical.{name, depth, path, node} for '$name'",
+    async ({ name, canonical }) => {
+      const result = await request<DomainCanonicalQueryResult>(DomainCanonicalByName, { name });
+      const labelCount = canonical.split(".").length;
+      expect(result).toMatchObject({
+        domain: { canonical: { name: { interpreted: canonical }, depth: labelCount } },
+      });
+      expect(result.domain!.canonical!.path.length).toBe(labelCount);
+    },
+  );
+
+  it("returns the canonical name for a linked Name", async () => {
+    // The wallet Registry's `ParentUpdated` claims `sub1.sub2.parent.eth` as its canonical parent.
+    // `linked.parent.eth.subregistry` was later re-pointed to the same Registry without a
+    // corresponding `ParentUpdated`, so `wallet.linked.parent.eth` is an addressable alias whose
+    // canonical lineage walks through `sub1.sub2.parent.eth`.
+    await expect(
+      request<DomainCanonicalQueryResult>(DomainCanonicalByName, {
+        name: "wallet.linked.parent.eth",
+      }),
+    ).resolves.toMatchObject({
+      domain: {
+        canonical: {
+          name: { interpreted: "wallet.sub1.sub2.parent.eth" },
+          path: expect.arrayContaining([{ id: expect.any(String) }]),
+        },
+      },
+    });
+  });
+
+  it("is canonical for ENSv1 addr.reverse", async () => {
+    const v1RootRegistry = getDatasourceContract(
+      "ens-test-env",
+      DatasourceNames.ENSRoot,
+      "ENSv1Registry",
+    );
+    const id = makeENSv1DomainId(v1RootRegistry, ADDR_REVERSE_NODE);
+
+    await expect(
+      request<DomainCanonicalQueryResult>(DomainCanonicalById, { id }),
+    ).resolves.toMatchObject({
+      domain: { id, canonical: { name: { interpreted: "addr.reverse" } } },
+    });
+  });
+});
+
+describe("Domain.registry and Domain.subregistry", () => {
+  type DomainRegistriesResult = {
+    domain: {
+      registry: { __typename: string; id: string };
+      subregistry: { __typename: string; id: string } | null;
+    } | null;
+  };
+
+  const DomainRegistries = gql`
+    query DomainRegistries($id: DomainId!) {
+      domain(by: { id: $id }) {
+        registry { __typename id }
+        subregistry { __typename id }
+      }
+    }
+  `;
+
+  it("exposes parent and child Registries on the ENSv1 .eth Domain", async () => {
+    const v1RootRegistry = getDatasourceContract(
+      "ens-test-env",
+      DatasourceNames.ENSRoot,
+      "ENSv1Registry",
+    );
+    const id = makeENSv1DomainId(v1RootRegistry, ETH_NODE);
+
+    await expect(request<DomainRegistriesResult>(DomainRegistries, { id })).resolves.toMatchObject({
+      domain: {
+        registry: {
+          __typename: "ENSv1Registry",
+          id: makeENSv1RegistryId(v1RootRegistry),
+        },
+        subregistry: null,
+        // TODO: The DevNet should in the future have some ENSv1 domains that are then migrated, and then the .eth ENSv1 domain will have a subregistry.
+        // subregistry: {
+        //   __typename: "ENSv1VirtualRegistry",
+        //   id: makeENSv1VirtualRegistryId(v1RootRegistry, ETH_NODE),
+        // },
+      },
+    });
+  });
+
+  it("exposes parent and child Registries on the ENSv2 .eth Domain", async () => {
+    const v2RootRegistry = getDatasourceContract(
+      "ens-test-env",
+      DatasourceNames.ENSv2Root,
+      "RootRegistry",
+    );
+    const v2EthRegistry = getDatasourceContract(
+      "ens-test-env",
+      DatasourceNames.ENSv2Root,
+      "ETHRegistry",
+    );
+    const id = makeENSv2DomainId(
+      v2RootRegistry,
+      makeStorageId(labelhashInterpretedLabel(asInterpretedLabel("eth"))),
+    );
+
+    await expect(request<DomainRegistriesResult>(DomainRegistries, { id })).resolves.toMatchObject({
+      domain: {
+        registry: {
+          __typename: "ENSv2Registry",
+          id: makeENSv2RegistryId(v2RootRegistry),
+        },
+        subregistry: {
+          __typename: "ENSv2Registry",
+          id: makeENSv2RegistryId(v2EthRegistry),
+        },
+      },
+    });
   });
 });
 
@@ -126,12 +284,12 @@ describe("Domain.events filtering (EventsWhereInput)", () => {
     expect(allEvents.length).toBeGreaterThan(0);
   });
 
-  it("filters by selector_in", async () => {
+  it("filters by selector eq", async () => {
     const targetSelector = allEvents[0].topics[0];
 
     const result = await request<DomainEventsResult>(DomainEventsFiltered, {
       name: NAME_WITH_EVENTS,
-      where: { selector_in: [targetSelector] },
+      where: { selector: { eq: targetSelector } },
     });
     const events = flattenConnection(result.domain.events);
 
@@ -141,32 +299,49 @@ describe("Domain.events filtering (EventsWhereInput)", () => {
     }
   });
 
-  it("filters by selector_in with unknown topic returns no results", async () => {
+  it("filters by selector in", async () => {
+    const targetSelector = allEvents[0].topics[0];
+
+    const result = await request<DomainEventsResult>(DomainEventsFiltered, {
+      name: NAME_WITH_EVENTS,
+      where: { selector: { in: [targetSelector] } },
+    });
+    const events = flattenConnection(result.domain.events);
+
+    expect(events.length).toBeGreaterThan(0);
+    for (const event of events) {
+      expect(event.topics[0]).toBe(targetSelector);
+    }
+  });
+
+  it("filters by selector in with unknown topic returns no results", async () => {
     const result = await request<DomainEventsResult>(DomainEventsFiltered, {
       name: NAME_WITH_EVENTS,
       where: {
-        selector_in: ["0x0000000000000000000000000000000000000000000000000000000000000001"],
+        selector: {
+          in: ["0x0000000000000000000000000000000000000000000000000000000000000001"],
+        },
       },
     });
     const events = flattenConnection(result.domain.events);
     expect(events.length).toBe(0);
   });
 
-  it("filters by empty selector_in returns no results", async () => {
+  it("filters by empty selector in returns no results", async () => {
     const result = await request<DomainEventsResult>(DomainEventsFiltered, {
       name: NAME_WITH_EVENTS,
-      where: { selector_in: [] },
+      where: { selector: { in: [] } },
     });
     const events = flattenConnection(result.domain.events);
     expect(events.length).toBe(0);
   });
 
-  it("filters by timestamp_gte", async () => {
+  it("filters by timestamp gte", async () => {
     const midTimestamp = allEvents[Math.floor(allEvents.length / 2)].timestamp;
 
     const result = await request<DomainEventsResult>(DomainEventsFiltered, {
       name: NAME_WITH_EVENTS,
-      where: { timestamp_gte: midTimestamp },
+      where: { timestamp: { gte: midTimestamp } },
     });
     const events = flattenConnection(result.domain.events);
 
@@ -177,12 +352,12 @@ describe("Domain.events filtering (EventsWhereInput)", () => {
     }
   });
 
-  it("filters by timestamp_lte", async () => {
+  it("filters by timestamp lte", async () => {
     const midTimestamp = allEvents[Math.floor(allEvents.length / 2)].timestamp;
 
     const result = await request<DomainEventsResult>(DomainEventsFiltered, {
       name: NAME_WITH_EVENTS,
-      where: { timestamp_lte: midTimestamp },
+      where: { timestamp: { lte: midTimestamp } },
     });
     const events = flattenConnection(result.domain.events);
 
@@ -199,19 +374,19 @@ describe("Domain.events filtering (EventsWhereInput)", () => {
 
     const result = await request<DomainEventsResult>(DomainEventsFiltered, {
       name: NAME_WITH_EVENTS,
-      where: { timestamp_gte: minTs, timestamp_lte: maxTs },
+      where: { timestamp: { gte: minTs, lte: maxTs } },
       first: 1000,
     });
     const events = flattenConnection(result.domain.events);
     expect(events.length).toBe(allEvents.length);
   });
 
-  it("filters by from address", async () => {
+  it("filters by from eq", async () => {
     const targetFrom = allEvents[0].from;
 
     const result = await request<DomainEventsResult>(DomainEventsFiltered, {
       name: NAME_WITH_EVENTS,
-      where: { from: targetFrom },
+      where: { from: { eq: targetFrom } },
     });
     const events = flattenConnection(result.domain.events);
 
@@ -221,7 +396,7 @@ describe("Domain.events filtering (EventsWhereInput)", () => {
     }
   });
 
-  it("combines selector_in and timestamp_gte", async () => {
+  it("combines selector and timestamp", async () => {
     // pick a seed event from the second half so its selector is guaranteed to
     // appear at or after midTimestamp, avoiding flaky empty-result failures
     const midIndex = Math.floor(allEvents.length / 2);
@@ -231,7 +406,10 @@ describe("Domain.events filtering (EventsWhereInput)", () => {
 
     const result = await request<DomainEventsResult>(DomainEventsFiltered, {
       name: NAME_WITH_EVENTS,
-      where: { selector_in: [targetSelector], timestamp_gte: midTimestamp },
+      where: {
+        selector: { eq: targetSelector },
+        timestamp: { gte: midTimestamp },
+      },
     });
     const events = flattenConnection(result.domain.events);
 
@@ -248,10 +426,63 @@ describe("Domain.events filtering (EventsWhereInput)", () => {
 
     const result = await request<DomainEventsResult>(DomainEventsFiltered, {
       name: NAME_WITH_EVENTS,
-      where: { timestamp_gte: (maxTimestamp + 1n).toString() },
+      where: { timestamp: { gte: (maxTimestamp + 1n).toString() } },
     });
     const events = flattenConnection(result.domain.events);
     expect(events.length).toBe(0);
+  });
+
+  it("rejects an empty timestamp filter (no bounds)", async () => {
+    await expect(
+      request<DomainEventsResult>(DomainEventsFiltered, {
+        name: NAME_WITH_EVENTS,
+        where: { timestamp: {} },
+      }),
+    ).rejects.toThrow();
+  });
+
+  it("rejects timestamp with both gt and gte", async () => {
+    const t = allEvents[0].timestamp;
+    await expect(
+      request<DomainEventsResult>(DomainEventsFiltered, {
+        name: NAME_WITH_EVENTS,
+        where: { timestamp: { gt: t, gte: t } },
+      }),
+    ).rejects.toThrow();
+  });
+
+  it("rejects timestamp with both lt and lte", async () => {
+    const t = allEvents[0].timestamp;
+    await expect(
+      request<DomainEventsResult>(DomainEventsFiltered, {
+        name: NAME_WITH_EVENTS,
+        where: { timestamp: { lt: t, lte: t } },
+      }),
+    ).rejects.toThrow();
+  });
+
+  it("rejects inverted timestamp range", async () => {
+    const lo = BigInt(allEvents[0].timestamp);
+    const hi = BigInt(allEvents[allEvents.length - 1].timestamp);
+    if (lo === hi) return; // dataset must have a range for this test
+    await expect(
+      request<DomainEventsResult>(DomainEventsFiltered, {
+        name: NAME_WITH_EVENTS,
+        where: { timestamp: { gte: hi.toString(), lte: lo.toString() } },
+      }),
+    ).rejects.toThrow();
+  });
+
+  it("accepts equal lower and upper bounds (pin-point timestamp)", async () => {
+    const t = allEvents[0].timestamp;
+    const result = await request<DomainEventsResult>(DomainEventsFiltered, {
+      name: NAME_WITH_EVENTS,
+      where: { timestamp: { gte: t, lte: t } },
+    });
+    const events = flattenConnection(result.domain.events);
+    for (const event of events) {
+      expect(event.timestamp).toBe(t);
+    }
   });
 });
 
@@ -283,7 +514,9 @@ describe("Domain.records", () => {
       texts: [],
     });
 
-    expect(result.domain.records?.addresses).toEqual([{ coinType: 60, address: DEVNET_OWNER }]);
+    expect(result.domain.records?.addresses).toEqual([
+      { coinType: 60, address: accounts.owner.address },
+    ]);
     expect(result.domain.records?.texts).toEqual([]);
   });
 
@@ -294,9 +527,9 @@ describe("Domain.records", () => {
       texts: ["description"],
     });
 
-    expect(result.domain.records?.addresses).toEqual([{ coinType: 60, address: DEVNET_OWNER }]);
+    expect(result.domain.records?.addresses).toEqual([
+      { coinType: 60, address: accounts.owner.address },
+    ]);
     expect(result.domain.records?.texts).toEqual([{ key: "description", value: "example.eth" }]);
   });
-
-
 });

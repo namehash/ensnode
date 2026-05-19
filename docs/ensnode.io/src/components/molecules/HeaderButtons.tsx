@@ -2,7 +2,7 @@ import HeaderMobileNavigation from "@workspace/docs/ensnode.io/src/components/mo
 import { GithubIcon } from "@workspace/docs/ensrainbow.io/src/components/atoms/icons/GithubIcon.tsx";
 import { TelegramIcon } from "@workspace/docs/ensrainbow.io/src/components/atoms/icons/TelegramIcon.tsx";
 import { TwitterIcon } from "@workspace/docs/ensrainbow.io/src/components/atoms/icons/TwitterIcon.tsx";
-import "../../styles/onScrollHeader.css";
+import "@styles/onScrollHeader.css";
 
 import cc from "classcat";
 
@@ -14,7 +14,7 @@ export default function HeaderButtons({ isScrollable }: HeaderButtonsProps) {
     <>
       <div className="hidden sm:flex items-center justify-end gap-1">
         <a
-          href="/docs"
+          href="/docs/integrate"
           className="text-black border-transparent hover:bg-black/5 transition text-base rounded-lg border font-medium inline-flex gap-2 items-center whitespace-nowrap no-underline py-2 px-4"
         >
           <p

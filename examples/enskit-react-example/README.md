@@ -4,6 +4,8 @@ A minimal React app demonstrating how to use `enskit` and `enssdk` to query the 
 
 The app connects to a local ENSNode instance and includes demos for browsing domains, registry cache usage, and paginated queries.
 
+This app is hosted at [https://enskit-react-example.ensnode.io/](https://enskit-react-example.ensnode.io/) and pulls data from the NameHash-hosted Sepolia V2 Namespace.
+
 ## Usage (with NameHash Hosted Instance)
 
 ```sh

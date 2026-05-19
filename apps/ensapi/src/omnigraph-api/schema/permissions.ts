@@ -18,7 +18,8 @@ import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
 import { AccountRef } from "@/omnigraph-api/schema/account";
 import { AccountIdInput, AccountIdRef } from "@/omnigraph-api/schema/account-id";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
-import { EventRef, EventsWhereInput } from "@/omnigraph-api/schema/event";
+import { EventRef } from "@/omnigraph-api/schema/event";
+import { EventsWhereInput } from "@/omnigraph-api/schema/event-inputs";
 
 export const PermissionsRef = builder.loadableObjectRef("Permissions", {
   load: (ids: PermissionsId[]) =>
@@ -260,7 +261,8 @@ PermissionsUserRef.implement({
     // PermissionsUser.user
     ////////////////////////
     user: t.field({
-      description: "The User for whom these Roles are granted.",
+      description:
+        "The user/grantee address this Permission is granted to (the HCA account address if used).",
       type: AccountRef,
       nullable: false,
       resolve: (parent) => parent.user,
@@ -274,6 +276,24 @@ PermissionsUserRef.implement({
       type: "BigInt",
       nullable: false,
       resolve: (parent) => parent.roles,
+    }),
+
+    //////////////////////////
+    // PermissionsUser.events
+    //////////////////////////
+    events: t.connection({
+      description: "All Events associated with this PermissionsUser.",
+      type: EventRef,
+      args: {
+        where: t.arg({ type: EventsWhereInput }),
+      },
+      resolve: (parent, args) =>
+        resolveFindEvents(args, {
+          through: {
+            table: ensIndexerSchema.permissionsUserEvent,
+            scope: eq(ensIndexerSchema.permissionsUserEvent.permissionsUserId, parent.id),
+          },
+        }),
     }),
   }),
 });

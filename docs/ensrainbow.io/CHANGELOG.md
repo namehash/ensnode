@@ -1,5 +1,61 @@
 # @docs/ensrainbow
 
+## 1.14.0
+
+### Patch Changes
+
+- Updated dependencies [[`010cd0c`](https://github.com/namehash/ensnode/commit/010cd0cdeec44d5b9b3649533460f9461748013e)]:
+  - @namehash/namehash-ui@1.14.0
+
+## 1.13.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @namehash/namehash-ui@1.13.1
+
+## 1.13.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @namehash/namehash-ui@1.13.0
+
+## 1.12.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @namehash/namehash-ui@1.12.0
+
+## 1.11.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @namehash/namehash-ui@1.11.1
+
+## 1.11.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @namehash/namehash-ui@1.11.0
+
+## 1.10.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @namehash/namehash-ui@1.10.1
+
+## 1.10.0
+
+### Patch Changes
+
+- Updated dependencies [[`d9ab6b0`](https://github.com/namehash/ensnode/commit/d9ab6b07c0e77bfdd3a49326e75caaa14d7ca2e5)]:
+  - @namehash/namehash-ui@1.10.0
+
 ## 1.9.0
 
 ### Minor Changes

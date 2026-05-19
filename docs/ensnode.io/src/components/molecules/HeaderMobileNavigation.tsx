@@ -8,7 +8,7 @@ import { TwitterIcon } from "@workspace/docs/ensrainbow.io/src/components/atoms/
 import cc from "classcat";
 import { Fragment } from "react";
 
-import ENSNode2D from "../../assets/dark-logo.svg";
+import ENSNode2D from "@assets/dark-logo.svg";
 
 export default function HeaderMobileNavigation() {
   const MobileNavigationLinks = [

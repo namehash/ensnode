@@ -82,7 +82,7 @@ export function RequireENSAdminFeatureView({
           ) : (
             <Button asChild>
               <InternalLink href={retainCurrentRawConnectionUrlParam("/connection")}>
-                See ENSNode Config
+                See ENSNode Stack Info
               </InternalLink>
             </Button>
           )}

@@ -1,13 +1,17 @@
 import { asInterpretedName } from "enssdk";
 import { describe, expect, it } from "vitest";
 
+import { registrarActionsResponseOkExample } from "./examples";
 import { RegistrarActionsResponseCodes, type RegistrarActionsResponseError } from "./response";
 import type {
   SerializedNamedRegistrarAction,
   SerializedRegistrarActionsResponseError,
   SerializedRegistrarActionsResponseOk,
 } from "./serialized-response";
-import { makeRegistrarActionsResponseSchema } from "./zod-schemas";
+import {
+  makeRegistrarActionsResponseSchema,
+  makeSerializedRegistrarActionsResponseOkSchema,
+} from "./zod-schemas";
 
 describe("ENSNode API Schema", () => {
   describe("Registrar Actions API", () => {
@@ -125,8 +129,22 @@ describe("ENSNode API Schema", () => {
       expect(() => makeRegistrarActionsResponseSchema().parse(validResponseOk)).not.toThrowError();
     });
 
+    it("registrarActionsResponseOkExample passes schema", () => {
+      expect(
+        makeRegistrarActionsResponseSchema().safeParse(registrarActionsResponseOkExample).success,
+      ).toBe(true);
+    });
+
+    it("can deserialize ResponseOk object via domain schema", () => {
+      const serialized = makeRegistrarActionsResponseSchema().parse(
+        registrarActionsResponseOkExample,
+      );
+      expect(() => makeRegistrarActionsResponseSchema().parse(serialized)).not.toThrowError();
+    });
+
     it("rejects ResponseOk object missing required accurateAsOf", () => {
-      const { accurateAsOf: _accurateAsOf, ...invalidResponseOk } = validResponseOk;
+      const { accurateAsOf: _accurateAsOf, ...invalidResponseOk } =
+        registrarActionsResponseOkExample;
 
       expect(() => makeRegistrarActionsResponseSchema().parse(invalidResponseOk)).toThrowError();
     });
@@ -138,6 +156,25 @@ describe("ENSNode API Schema", () => {
         responseCode: RegistrarActionsResponseCodes.Error,
         error: validResponseError.error,
       } satisfies RegistrarActionsResponseError);
+    });
+
+    describe("makeSerializedRegistrarActionsResponseOkSchema", () => {
+      it("registrarActionsResponseOkExample passes schema", () => {
+        expect(
+          makeSerializedRegistrarActionsResponseOkSchema().safeParse(
+            registrarActionsResponseOkExample,
+          ).success,
+        ).toBe(true);
+      });
+
+      it("rejects ResponseOk object missing required accurateAsOf", () => {
+        const { accurateAsOf: _accurateAsOf, ...invalidResponseOk } =
+          registrarActionsResponseOkExample;
+
+        expect(
+          makeSerializedRegistrarActionsResponseOkSchema().safeParse(invalidResponseOk).success,
+        ).toBe(false);
+      });
     });
   });
 });

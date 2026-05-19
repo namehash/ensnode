@@ -2,6 +2,8 @@ import { serializeNameToken } from "../../../tokenscope/name-token";
 import {
   type NameTokensResponse,
   NameTokensResponseCodes,
+  type NameTokensResponseError,
+  type NameTokensResponseOk,
   type RegisteredNameTokens,
 } from "./response";
 import type {
@@ -26,6 +28,10 @@ export function serializeRegisteredNameTokens({
   };
 }
 
+export function serializeNameTokensResponse(
+  response: NameTokensResponseOk,
+): SerializedNameTokensResponseOk;
+export function serializeNameTokensResponse<T extends NameTokensResponseError>(response: T): T;
 export function serializeNameTokensResponse(
   response: NameTokensResponse,
 ): SerializedNameTokensResponse {

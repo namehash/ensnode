@@ -4,9 +4,9 @@ import cc from "classcat";
 import { Fragment } from "react";
 import { Balancer } from "react-wrap-balancer";
 
-import ENSAdmin3DImage from "../../assets/ENSAdmin3D.png";
-import ENSIndexer3DImage from "../../assets/ENSIndexer3D.png";
-import ENSRainbow3DImage from "../../assets/ENSRainbow3D.png";
+import ENSAdmin3DImage from "@assets/ENSAdmin3D.png";
+import ENSIndexer3DImage from "@assets/ENSIndexer3D.png";
+import ENSRainbow3DImage from "@assets/ENSRainbow3D.png";
 import JoinTelegram from "../molecules/JoinTelegram.tsx";
 
 const appsSuite: {
@@ -24,7 +24,7 @@ const appsSuite: {
       />
     ),
     name: "ENSAdmin",
-    description: "Explore the ENS protocol like never before",
+    description: "Inspect the ENS protocol like never before",
     docsLinkHref: "/ensadmin",
   },
   {
@@ -95,7 +95,10 @@ export default function ENSNodeSuite() {
                   href={namehashApp.docsLinkHref}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={legacyButtonVariants({ variant: "secondary", size: "medium" })}
+                  className={legacyButtonVariants({
+                    variant: "secondary",
+                    size: "medium",
+                  })}
                 >
                   View documentation
                 </a>

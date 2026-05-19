@@ -1,4 +1,4 @@
-import type { DomainId, InterpretedLabel, Name } from "enssdk";
+import type { DomainId, InterpretedName } from "enssdk";
 
 import { gql } from "@/test/integration/omnigraph-api-client";
 
@@ -14,8 +14,7 @@ const PageInfoFragment = gql`
 const PaginatedDomainFragment = gql`
   fragment PaginatedDomainFragment on Domain {
     id
-    name
-    label { interpreted }
+    canonical { name { interpreted } depth }
     registration {
       expiry
       start
@@ -25,8 +24,7 @@ const PaginatedDomainFragment = gql`
 
 export type PaginatedDomainResult = {
   id: DomainId;
-  name: Name | null;
-  label: { interpreted: InterpretedLabel };
+  canonical: { name: { interpreted: InterpretedName }; depth: number } | null;
   registration: {
     expiry: string | null;
     start: string;
@@ -42,7 +40,7 @@ export const QueryDomainsPaginated = gql`
     $before: String
   ) {
     domains(
-      where: { name: "e" }
+      where: { name: { starts_with: "e" } }
       order: $order
       first: $first
       after: $after

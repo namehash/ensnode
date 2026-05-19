@@ -9,4 +9,5 @@ export const ErrorCode = {
   BadRequest: 400,
   NotFound: 404,
   ServerError: 500,
+  ServiceUnavailable: 503,
 } as const;

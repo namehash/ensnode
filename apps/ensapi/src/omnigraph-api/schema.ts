@@ -3,6 +3,8 @@ import { builder } from "@/omnigraph-api/builder";
 import "./schema/account-id";
 import "./schema/connection";
 import "./schema/domain";
+import "./schema/domain-canonical";
+import "./schema/domain-inputs";
 import "./schema/event";
 import "./schema/label";
 import "./schema/name-or-node";
