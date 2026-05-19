@@ -69,9 +69,6 @@ export const domainResolverRelation = onchainTable(
   }),
   (t) => ({
     pk: primaryKey({ columns: [t.chainId, t.address, t.domainId] }),
-    // secondary lookup by domainId only: namegraph walk in
-    // get-domain-by-interpreted-name.ts left-joins on `domain_id` alone, which the PK
-    // (leading-column chain_id, address) cannot serve.
     byDomain: index().on(t.domainId),
   }),
 );

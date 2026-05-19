@@ -31,7 +31,7 @@ import type { ENSProtocolVersion } from "@/omnigraph-api/schema/ens-protocol-ver
 type DomainWithOrderValue = Domain & { __orderValue: DomainOrderValue };
 
 const tracer = trace.getTracer("find-domains");
-const logger = makeLogger("find-domains-resolver");
+const logger = makeLogger("find-domains");
 
 const DOMAINS_DEFAULT_ORDER = { by: "NAME", dir: "ASC" } satisfies DomainsOrderValue;
 
