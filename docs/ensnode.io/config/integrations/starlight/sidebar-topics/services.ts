@@ -15,6 +15,11 @@ export const servicesSidebarTopic = {
       ],
     },
     {
+      label: "ENSAnalytics",
+      collapsed: true,
+      items: [{ label: "Overview", link: "/docs/services/ensanalytics" }],
+    },
+    {
       label: "ENSIndexer",
       collapsed: true,
       items: [

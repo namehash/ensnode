@@ -1,0 +1,68 @@
+---
+title: ENSAnalytics
+description: A planned analytics engine for ENS — cohorts, behavior, policy impact, and custom dashboards on top of ENSDb.
+sidebar:
+  label: Overview
+  order: 1
+---
+
+import { Aside, LinkCard } from "@astrojs/starlight/components";
+
+<Aside type="note" title="Our vision">
+**ENSAnalytics** is our vision for an analytics engine on top of [ENSDb](/docs/services/ensdb). The [ENS Referral Program](https://ensawards.org/ens-referral-program) is the first slice of it running today.
+</Aside>
+
+ENSAnalytics will be the analytics layer that turns the live state of ENS into the kind of insights a protocol team, a registrar, or an app builder actually wants to act on.
+
+Look at any product business and the analytics dashboard is the steering wheel — which cohorts of users stick around, which campaigns convert, which segments are quietly worth more than the loud ones. ENS deserves the same lens. Today most of that signal is locked inside [ENSDb](/docs/services/ensdb) as raw events. You can count names and count registrations, but answering *"which registrars retain users best?"* or *"how does behavior shift in the second year of holding a name?"* still means writing one-off SQL or stitching subgraph queries together by hand.
+
+## What we're building toward
+
+A few directions we're particularly excited about.
+
+### Cohorts and behavior
+
+How long has each holder been in ENS, what did they renew, what did they let expire, how did their record-set evolve? Group accounts into cohorts by entry date, by registrar, by the kind of names they hold, and watch how those cohorts behave over time. Cluster on activity rather than on a single hardcoded segmentation — the interesting stories tend to live in the slices nobody pre-defined.
+
+### Policy levers
+
+Run a referral edition, change a renewal price, ship a new ENSv2 feature, then *see* what it did. By cohort, by chain, by registrar. Today this kind of analysis happens in spreadsheets after the fact; we want it to happen in a dashboard while it's still actionable.
+
+### Custom dashboards
+
+Registrars, the ENS DAO, and apps each care about a different slice of the same data. ENSAnalytics will let operators compose their own dashboards — the metrics that matter to a Basenames operator are not the metrics that matter to a DAO budget review — without forking the service.
+
+### The ENS Referral Program
+
+The [ENS Referral Program](https://ensawards.org/ens-referral-program) is the first analytics product we've shipped on ENS. Leaderboards, advocate detail pages, full per-referral award accounting — all of it driven by aggregations over ENSDb, surfaced through an API, rendered on [ENSAwards](https://ensawards.org). It's the smallest end-to-end version of the bigger vision, and we're using it to learn what the more general engine should look like.
+
+## Built for
+
+- The ENS DAO and its delegates, evaluating program impact and renewal economics across cohorts, chains, and time.
+- Registrars across the indexed namespace (mainnet `.eth`, Basenames, Lineanames, 3DNS, and what gets indexed next) wanting to see how their users compare to the rest of ENS.
+- App builders adding ENS to their product and wanting to know which features actually move the needle.
+- Anyone running a referral program, growth campaign, or pricing change on ENS and wanting to measure what it did.
+
+## How it fits
+
+ENSAnalytics will sit on top of [ENSDb](/docs/services/ensdb), the same way [ENSApi](/docs/services/ensapi) does — a separate service that reads the live indexed state of ENS and turns it into aggregates, time series, cohorts, and rollups. Apps like [ENSAwards](https://ensawards.org) consume the API, operators run their own queries against the engine, and the underlying name and registration data stays exactly where it already lives.
+
+## Related
+
+<LinkCard
+  title="ENSDb"
+  description="The live onchain state of ENS that ENSAnalytics aggregates over."
+  href="/docs/services/ensdb"
+/>
+
+<LinkCard
+  title="ENS Referral Program (ENSAwards)"
+  description="The first slice of the broader ENSAnalytics vision, live on ENS today."
+  href="https://ensawards.org/ens-referral-program"
+/>
+
+<LinkCard
+  title="ENSDb future possibilities"
+  description="Streaming ENSDb into data warehouses, event engines, and cache layers."
+  href="/docs/services/ensdb/integrations/future-possibilities"
+/>
