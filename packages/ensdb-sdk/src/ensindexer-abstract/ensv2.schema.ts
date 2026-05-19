@@ -338,10 +338,13 @@ export const domain = onchainTable(
   }),
   (t) => ({
     byType: index().on(t.type),
-    byRegistry: index().on(t.registryId),
     bySubregistry: index().on(t.subregistryId).where(sql`${t.subregistryId} IS NOT NULL`),
     byOwner: index().on(t.ownerId),
     byLabelHash: index().on(t.labelHash),
+    // composite for (registry_id, label_hash) lookups (namegraph walk in
+    // get-domain-by-interpreted-name.ts); leading-column prefix also serves
+    // registry_id-only lookups, so no separate byRegistry index is needed.
+    byRegistryAndLabelHash: index().on(t.registryId, t.labelHash),
 
     // hash index avoids the btree 8191-byte row-size hazard for spam names
     byCanonicalNameExact: index().using("hash", t.canonicalName),
