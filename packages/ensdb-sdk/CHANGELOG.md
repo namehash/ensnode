@@ -1,5 +1,21 @@
 # @ensnode/ensdb-sdk
 
+## 1.14.0
+
+### Minor Changes
+
+- [#2101](https://github.com/namehash/ensnode/pull/2101) [`7dd0d3f`](https://github.com/namehash/ensnode/commit/7dd0d3ff2905caf357a74470d5630a9ca8bd3369) Thanks [@shrugs](https://github.com/shrugs)! - **Materialize `Domain.canonicalName`, `canonicalLabelHashPath`, and `canonicalNode`** on every Canonical Domain. Indexes: hash on `canonicalName` (exact lookup), GIN trigram on `canonicalName` (substring), GIN on `canonicalLabelHashPath` (heal cascade), hash on `canonicalNode` (resolver-record joins).
+
+- [#2125](https://github.com/namehash/ensnode/pull/2125) [`f6ef397`](https://github.com/namehash/ensnode/commit/f6ef3977931b68997a40fd47755e0fca8d262093) Thanks [@shrugs](https://github.com/shrugs)! - **Materialize `Domain.canonicalPath` and `canonicalDepth`** on every Canonical Domain, alongside the existing `canonicalName` / `canonicalLabelHashPath` / `canonicalNode`. `canonicalPath` is the head-first array of ancestor DomainIds (parallel to `canonicalLabelHashPath`); `canonicalDepth` is the label count. Adds a `byCanonicalDepth` btree index for `ORDER BY canonical_depth` (typeahead, depth-ordered browse).
+
+### Patch Changes
+
+- [#2096](https://github.com/namehash/ensnode/pull/2096) [`75e8aac`](https://github.com/namehash/ensnode/commit/75e8aac2abb044ce55119daab98d20ebcbda8304) Thanks [@shrugs](https://github.com/shrugs)! - Replace the default btree index on `label.interpreted` with a hash index (for exact-match lookups) and a GIN trigram index (for substring / prefix `LIKE` queries). Avoids the btree 8191-byte leaf-size hazard that surfaces when a single label exceeds the limit (e.g. spam names), which previously crashed `create_indexes` at the historical→realtime boundary.
+
+- Updated dependencies [[`3132a77`](https://github.com/namehash/ensnode/commit/3132a77b809694a4677da69c8c546a4b41eaa583), [`1b6abb0`](https://github.com/namehash/ensnode/commit/1b6abb06ac364840770dfcc47526111fdf6fb2c9), [`65cf37c`](https://github.com/namehash/ensnode/commit/65cf37c24c1bd9a7f30ad758c945015ece9c8461)]:
+  - @ensnode/ensnode-sdk@1.14.0
+  - enssdk@1.14.0
+
 ## 1.13.1
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "ensadmin",
-  "version": "1.13.1",
+  "version": "1.14.0",
   "private": true,
   "type": "module",
   "description": "Inspect the ENS Protocol like never before",
@@ -23,9 +23,9 @@
   },
   "dependencies": {
     "@ensnode/datasources": "workspace:*",
-    "@ensnode/ensnode-sdk": "0.0.0-preview-fix-sha-89c022b-20260518142147",
+    "@ensnode/ensnode-sdk": "0.0.0-preview-fix-sha-89c022b-20260519094840",
     "@ensnode/scalar-react": "workspace:*",
-    "enssdk": "0.0.0-preview-fix-sha-89c022b-20260518142147",
+    "enssdk": "0.0.0-preview-fix-sha-89c022b-20260519094840",
     "@formkit/auto-animate": "^0.9.0",
     "@graphiql/plugin-explorer": "5.1.1",
     "@graphiql/react": "0.37.1",

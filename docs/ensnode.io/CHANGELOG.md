@@ -1,5 +1,20 @@
 # @docs/ensnode
 
+## 1.14.0
+
+### Minor Changes
+
+- [#2094](https://github.com/namehash/ensnode/pull/2094) [`f06399e`](https://github.com/namehash/ensnode/commit/f06399e9beb2ac8aa3b13ff2645cee2cdf89d74f) Thanks [@tk-o](https://github.com/tk-o)! - Updated database schemas page in ENSDb docs.
+
+### Patch Changes
+
+- [#2106](https://github.com/namehash/ensnode/pull/2106) [`c4b00ae`](https://github.com/namehash/ensnode/commit/c4b00ae68075ef8f1ceb1aabf8a4804db21c85ff) Thanks [@shrugs](https://github.com/shrugs)! - Updates the Omnigraph Integration Documentation with comprehensive getting started examples and walkthroughs.
+
+- Updated dependencies [[`3132a77`](https://github.com/namehash/ensnode/commit/3132a77b809694a4677da69c8c546a4b41eaa583), [`1b6abb0`](https://github.com/namehash/ensnode/commit/1b6abb06ac364840770dfcc47526111fdf6fb2c9), [`65cf37c`](https://github.com/namehash/ensnode/commit/65cf37c24c1bd9a7f30ad758c945015ece9c8461), [`010cd0c`](https://github.com/namehash/ensnode/commit/010cd0cdeec44d5b9b3649533460f9461748013e)]:
+  - @ensnode/ensnode-sdk@1.14.0
+  - @namehash/namehash-ui@1.14.0
+  - enssdk@1.14.0
+
 ## 1.13.1
 
 ### Patch Changes
