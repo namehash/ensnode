@@ -41,7 +41,7 @@ const SEPOLIA_V2_ADDRESS_WITH_LOT_OF_NAMES = toNormalizedAddress(
 
 const DEVNET_NAME_WITH_OWNED_RESOLVER = asInterpretedName("example.eth");
 
-const SEPOLIA_V2_NAME_WITH_OWNED_RESOLVER = asInterpretedName("sfmonicdebmig.eth");
+const SEPOLIA_V2_NAME_WITH_OWNED_RESOLVER = asInterpretedName("demomigration.eth");
 
 const SEPOLIA_V2_TEST_NAME = asInterpretedName("test-name.eth");
 
