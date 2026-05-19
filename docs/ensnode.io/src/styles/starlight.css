@@ -329,3 +329,8 @@ a.starlight-sidebar-topics-current .starlight-sidebar-topics-icon {
     filter 0.2s ease-in-out,
     box-shadow 0.2s ease-in-out;
 }
+
+/* Make sure that all non-top-level sidebar items are not enlarged */
+ul.top-level details details > summary .group-label span {
+  font-size: var(--sl-text-sm);
+}
