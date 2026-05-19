@@ -341,9 +341,9 @@ export const domain = onchainTable(
     bySubregistry: index().on(t.subregistryId).where(sql`${t.subregistryId} IS NOT NULL`),
     byOwner: index().on(t.ownerId),
     byLabelHash: index().on(t.labelHash),
-    // composite for (registry_id, label_hash) lookups (namegraph walk in
-    // get-domain-by-interpreted-name.ts); leading-column prefix also serves
-    // registry_id-only lookups, so no separate byRegistry index is needed.
+    // Composite for `(registry_id, label_hash)` lookups (namegraph walk in
+    // get-domain-by-interpreted-name.ts). The leading `registry_id` column also serves
+    // `WHERE registry_id = X` lookups via prefix scan.
     byRegistryAndLabelHash: index().on(t.registryId, t.labelHash),
 
     // composite for `WHERE registry_id = X ORDER BY canonical_name LIMIT N` (Domain.subdomains
@@ -370,6 +370,18 @@ export const domain = onchainTable(
     byCanonicalNode: index().using("hash", t.canonicalNode),
     // btree for ORDER BY canonical_depth (typeahead and DEPTH-ordered browse)
     byCanonicalDepth: index().on(t.canonicalDepth),
+
+    // Partial indexes for `Query.domains`, which hardcodes `WHERE canonical = true`. Without a
+    // leading `registry_id` predicate the composite `byRegistryAndCanonicalNameLeft` is unusable,
+    // and a `canonical = true` filter against the full table forces a parallel seq scan + top-N
+    // heapsort. These partials cover only the ~36% of rows that are canonical and let the planner
+    // satisfy `ORDER BY ... LIMIT` directly from the index for NAME / DEPTH browses.
+    byCanonicalNameLeftWhereCanonical: index()
+      .on(sql`left(${t.canonicalName}, 256)`, t.id)
+      .where(sql`${t.canonical} = true`),
+    byCanonicalDepthWhereCanonical: index()
+      .on(t.canonicalDepth, t.id)
+      .where(sql`${t.canonical} = true`),
   }),
 );
 

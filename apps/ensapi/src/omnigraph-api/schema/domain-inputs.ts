@@ -1,6 +1,6 @@
 import { builder } from "@/omnigraph-api/builder";
 import { ENSProtocolVersion } from "@/omnigraph-api/schema/ens-protocol-version";
-import { OrderDirection } from "@/omnigraph-api/schema/order-direction";
+import { OrderDirection, type OrderDirectionValue } from "@/omnigraph-api/schema/order-direction";
 
 //////////////////////
 // Inputs
@@ -161,5 +161,4 @@ export const DomainsOrderInput = builder.inputType("DomainsOrderInput", {
   }),
 });
 
-export const DOMAINS_DEFAULT_ORDER_BY: typeof DomainsOrderBy.$inferType = "NAME";
-export const DOMAINS_DEFAULT_ORDER_DIR: typeof OrderDirection.$inferType = "ASC";
+export type DomainsOrderValue = { by: DomainsOrderByValue; dir: OrderDirectionValue };

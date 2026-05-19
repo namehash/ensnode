@@ -9,6 +9,7 @@ import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { withSpanAsync } from "@/lib/instrumentation/auto-span";
 import { builder } from "@/omnigraph-api/builder";
 import {
+  EMPTY_CONNECTION,
   orderPaginationBy,
   paginateBy,
   paginateByInt,
@@ -223,18 +224,15 @@ DomainInterfaceRef.implement({
         where: t.arg({ type: SubdomainsWhereInput }),
         order: t.arg({ type: DomainsOrderInput }),
       },
-      resolve: (parent, { where, order, ...connectionArgs }, context) =>
-        // Forward-walk: a Domain's subdomains are the domains in its declared subregistry.
-        // When `parent.subregistryId` is null (no declared subregistry) `resolveFindDomains`
-        // treats `registryId: null` as "match nothing" and returns an empty connection.
-        resolveFindDomains(context, {
-          where: {
-            registryId: parent.subregistryId,
-            name: where?.name,
-          },
+      resolve: (parent, { where, order, ...connectionArgs }, context) => {
+        if (!parent.subregistryId) return EMPTY_CONNECTION;
+
+        return resolveFindDomains(context, {
+          where: { ...where, registryId: parent.subregistryId },
           order,
           ...connectionArgs,
-        }),
+        });
+      },
     }),
 
     //////////////////

@@ -126,10 +126,7 @@ RegistryInterfaceRef.implement({
       },
       resolve: (parent, { where, order, ...connectionArgs }, context) =>
         resolveFindDomains(context, {
-          where: {
-            registryId: parent.id,
-            name: where?.name,
-          },
+          where: { ...where, registryId: parent.id },
           order,
           ...connectionArgs,
         }),

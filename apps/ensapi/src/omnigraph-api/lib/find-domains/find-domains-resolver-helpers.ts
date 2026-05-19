@@ -7,8 +7,11 @@ import type { OrderDirection } from "@/omnigraph-api/schema/order-direction";
 
 /**
  * Length cap (in characters) of the `canonical_name` prefix used by:
- *   1. the `(registry_id, left(canonical_name, N), id)` composite btree on `domains`, and
- *   2. all NAME-ordered queries' ORDER BY and cursor-comparison expressions.
+ *   1. the `(registry_id, left(canonical_name, N), id)` composite btree on `domains`,
+ *   2. all NAME-ordered queries' ORDER BY expressions, and
+ *   3. the value stored in `DomainCursor.value` when ordering by NAME — pre-truncated at
+ *      encode time via {@link truncateNameForCursor} so filter-time comparisons are simple
+ *      tuple compares against the index expression with no per-row `left(...)` re-application.
  *
  * The btree per-tuple max is ~2712 bytes; with `registry_id` and `id` consuming ~240 bytes of
  * that, ~2400 bytes remain for the prefix expression. 256 chars × max 4-byte UTF-8 codepoint =
@@ -19,9 +22,19 @@ import type { OrderDirection } from "@/omnigraph-api/schema/order-direction";
 export const CANONICAL_NAME_SORT_PREFIX = 256;
 
 /**
+ * Truncate a `canonicalName` to the cursor / index prefix length. Used when writing the cursor
+ * value for NAME orderings — callers slice once at encode time so the encoded cursor stays small
+ * (long names can hit thousands of characters) and `cursorFilter` can compare directly against
+ * the index expression without re-applying `left(...)` per row.
+ */
+export function truncateNameForCursor(name: string | null): string | null {
+  return name === null ? null : name.slice(0, CANONICAL_NAME_SORT_PREFIX);
+}
+
+/**
  * The order column / expression for each `DomainsOrderBy` value.
  *
- * Computed lazily on call so importing this module doesn't access the lazyProxy-backed
+ * Computed lazily using sql template so importing this module doesn't access the lazyProxy-backed
  * `ensIndexerSchema` at module load time (test harnesses import it without env-driven DB
  * config wired up).
  */
@@ -72,39 +85,27 @@ export function cursorFilter(
 
   const orderColumn = getOrderColumn(cursor.by);
 
-  // Determine comparison direction:
-  // - "after" with ASC = greater than cursor
-  // - "after" with DESC = less than cursor
-  // - "before" with ASC = less than cursor
-  // - "before" with DESC = greater than cursor
+  // "after" with ASC and "before" with DESC both step forward in cursor order (greater-than).
   const useGreaterThan = (direction === "after") !== (queryOrderDir === "DESC");
+  const op = sql.raw(useGreaterThan ? ">" : "<");
+  const idCmp = sql`${ensIndexerSchema.domain.id} ${op} ${cursor.id}`;
 
-  // Handle NULL cursor values explicitly (PostgreSQL tuple comparison with NULL yields NULL/unknown)
-  // With NULLS LAST ordering: non-NULL values come before NULL values
+  // NULL cursor values need explicit handling because Postgres tuple comparison with NULL yields
+  // NULL/unknown. With NULLS LAST ordering, non-NULL values come before NULL values.
   if (cursor.value === null) {
-    if (direction === "after") {
-      // "after" a NULL = other NULLs with appropriate id comparison
-      return useGreaterThan
-        ? sql`(${orderColumn} IS NULL AND ${ensIndexerSchema.domain.id} > ${cursor.id})`
-        : sql`(${orderColumn} IS NULL AND ${ensIndexerSchema.domain.id} < ${cursor.id})`;
-    } else {
-      // "before" a NULL = all non-NULLs (they come before NULLs) + NULLs with appropriate id
-      return useGreaterThan
-        ? sql`(${orderColumn} IS NOT NULL OR (${orderColumn} IS NULL AND ${ensIndexerSchema.domain.id} > ${cursor.id}))`
-        : sql`(${orderColumn} IS NOT NULL OR (${orderColumn} IS NULL AND ${ensIndexerSchema.domain.id} < ${cursor.id}))`;
-    }
+    return direction === "after"
+      ? sql`(${orderColumn} IS NULL AND ${idCmp})`
+      : sql`(${orderColumn} IS NOT NULL OR (${orderColumn} IS NULL AND ${idCmp}))`;
   }
 
-  // Non-null cursor: use tuple comparison
-  // NOTE: Drizzle 0.41 doesn't support gt/lt with tuple arrays, so we use raw SQL
-  // NOTE: explicit cast required — Postgres can't infer parameter types in tuple comparisons
-  const op = useGreaterThan ? ">" : "<";
+  // Drizzle 0.41 doesn't support gt/lt with tuple arrays, so we use raw SQL.
+  // Explicit cast required — Postgres can't infer parameter types in tuple comparisons.
   const value = (() => {
     switch (cursor.by) {
       case "NAME":
-        // Truncate the cursor's stored name to match the index expression, so the comparison
-        // operates on the same prefix that the index is keyed on.
-        return sql`left(${cursor.value}::text, ${sql.raw(String(CANONICAL_NAME_SORT_PREFIX))})`;
+        // Already pre-truncated at encode time (see `truncateNameForCursor`), so this matches
+        // the index expression `left(canonical_name, CANONICAL_NAME_SORT_PREFIX)` directly.
+        return sql`${cursor.value}::text`;
       case "DEPTH":
         return sql`${cursor.value}::int`;
       case "REGISTRATION_TIMESTAMP":
@@ -112,7 +113,8 @@ export function cursorFilter(
         return sql`${cursor.value}::numeric(78,0)`;
     }
   })();
-  return sql`(${orderColumn}, ${ensIndexerSchema.domain.id}) ${sql.raw(op)} (${value}, ${cursor.id})`;
+
+  return sql`(${orderColumn}, ${ensIndexerSchema.domain.id}) ${op} (${value}, ${cursor.id})`;
 }
 
 /**

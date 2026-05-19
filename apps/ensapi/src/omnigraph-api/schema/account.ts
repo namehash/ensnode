@@ -69,12 +69,7 @@ AccountRef.implement({
       },
       resolve: (parent, { where, order, ...connectionArgs }, context) =>
         resolveFindDomains(context, {
-          where: {
-            ownerId: parent.id,
-            name: where?.name,
-            canonical: where?.canonical,
-            version: where?.version,
-          },
+          where: { ...where, ownerId: parent.id },
           order,
           ...connectionArgs,
         }),

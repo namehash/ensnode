@@ -40,3 +40,17 @@ export const paginateByInt = (
  */
 export const orderPaginationBy = (column: Column, inverted: boolean) =>
   inverted ? desc(column) : asc(column);
+
+/**
+ * An empty Relay Connection, used when short-circuiting connection resolvers.
+ */
+export const EMPTY_CONNECTION = {
+  edges: [],
+  pageInfo: {
+    hasNextPage: false,
+    hasPreviousPage: false,
+    startCursor: null,
+    endCursor: null,
+  },
+  totalCount: 0,
+};

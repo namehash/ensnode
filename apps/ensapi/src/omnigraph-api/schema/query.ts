@@ -112,11 +112,7 @@ builder.queryType({
       },
       resolve: (_, { where, order, ...connectionArgs }, context) =>
         resolveFindDomains(context, {
-          where: {
-            name: where.name,
-            canonical: true,
-            version: where.version,
-          },
+          where: { ...where, canonical: true },
           order,
           ...connectionArgs,
         }),
