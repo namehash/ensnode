@@ -15,12 +15,6 @@ import {
 } from "@/omnigraph-api/lib/connection-helpers";
 import { cursors } from "@/omnigraph-api/lib/cursors";
 import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domains-resolver";
-import {
-  domainsBase,
-  filterByName,
-  filterByParent,
-  withOrderingMetadata,
-} from "@/omnigraph-api/lib/find-domains/layers";
 import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-resolver";
 import { getLatestRegistration } from "@/omnigraph-api/lib/get-latest-registration";
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
@@ -229,13 +223,18 @@ DomainInterfaceRef.implement({
         where: t.arg({ type: SubdomainsWhereInput }),
         order: t.arg({ type: DomainsOrderInput }),
       },
-      resolve: (parent, { where, order, ...connectionArgs }, context) => {
-        const base = filterByParent(domainsBase(), parent.id);
-        const { named, defaultOrder } = filterByName(base, where?.name ?? null);
-        const domains = withOrderingMetadata(named);
-
-        return resolveFindDomains(context, { domains, order, defaultOrder, ...connectionArgs });
-      },
+      resolve: (parent, { where, order, ...connectionArgs }, context) =>
+        // Forward-walk: a Domain's subdomains are the domains in its declared subregistry.
+        // When `parent.subregistryId` is null (no declared subregistry) `resolveFindDomains`
+        // treats `registryId: null` as "match nothing" and returns an empty connection.
+        resolveFindDomains(context, {
+          where: {
+            registryId: parent.subregistryId,
+            name: where?.name,
+          },
+          order,
+          ...connectionArgs,
+        }),
     }),
 
     //////////////////

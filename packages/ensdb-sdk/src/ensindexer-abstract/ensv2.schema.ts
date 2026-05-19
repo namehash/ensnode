@@ -346,6 +346,19 @@ export const domain = onchainTable(
     // registry_id-only lookups, so no separate byRegistry index is needed.
     byRegistryAndLabelHash: index().on(t.registryId, t.labelHash),
 
+    // composite for `WHERE registry_id = X ORDER BY canonical_name LIMIT N` (Domain.subdomains
+    // and other find-domains queries when ordering by NAME). Uses `left(canonical_name, 256)`
+    // to bound the index tuple under btree's per-tuple max (~2712 bytes): 256 chars × max 4-byte
+    // UTF-8 = 1024 bytes, leaving ample room for the registry_id and id columns. Names beyond
+    // 256 chars (currently <0.0001% of mainnet) collide on the truncated prefix and tie-break by
+    // id; this is acceptable since such names are invariably spam. Callers MUST sort by the same
+    // expression for the planner to use this index for ordered scan.
+    byRegistryAndCanonicalNameLeft: index().on(
+      t.registryId,
+      sql`left(${t.canonicalName}, 256)`,
+      t.id,
+    ),
+
     // hash index avoids the btree 8191-byte row-size hazard for spam names
     byCanonicalNameExact: index().using("hash", t.canonicalName),
     // GIN trigram index for substring / similarity queries (inline `gin_trgm_ops` via `sql`

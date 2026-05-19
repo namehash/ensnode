@@ -1,23 +1,41 @@
 import { asc, desc, type SQL, sql } from "drizzle-orm";
 
+import { ensIndexerSchema } from "@/lib/ensdb/singleton";
 import type { DomainCursor } from "@/omnigraph-api/lib/find-domains/domain-cursor";
-import type { DomainsWithOrderingMetadata } from "@/omnigraph-api/lib/find-domains/layers/with-ordering-metadata";
 import type { DomainsOrderBy } from "@/omnigraph-api/schema/domain-inputs";
 import type { OrderDirection } from "@/omnigraph-api/schema/order-direction";
 
 /**
- * Get the order column for a given DomainsOrderBy value.
+ * Length cap (in characters) of the `canonical_name` prefix used by:
+ *   1. the `(registry_id, left(canonical_name, N), id)` composite btree on `domains`, and
+ *   2. all NAME-ordered queries' ORDER BY and cursor-comparison expressions.
+ *
+ * The btree per-tuple max is ~2712 bytes; with `registry_id` and `id` consuming ~240 bytes of
+ * that, ~2400 bytes remain for the prefix expression. 256 chars × max 4-byte UTF-8 codepoint =
+ * 1024 bytes, well under the limit and within the realm of reasonable name lengths (mainnet avg
+ * is ~126). Queries MUST sort by this same expression for the planner to use the index for
+ * ordered scan; raw `canonical_name` ORDER BY falls back to a full scan + sort.
  */
-function getOrderColumn(
-  domains: DomainsWithOrderingMetadata,
-  orderBy: typeof DomainsOrderBy.$inferType,
-) {
-  return {
-    NAME: domains.canonicalName,
-    DEPTH: domains.canonicalDepth,
-    REGISTRATION_TIMESTAMP: domains.registrationTimestamp,
-    REGISTRATION_EXPIRY: domains.registrationExpiry,
-  }[orderBy];
+export const CANONICAL_NAME_SORT_PREFIX = 256;
+
+/**
+ * The order column / expression for each `DomainsOrderBy` value.
+ *
+ * Computed lazily on call so importing this module doesn't access the lazyProxy-backed
+ * `ensIndexerSchema` at module load time (test harnesses import it without env-driven DB
+ * config wired up).
+ */
+function getOrderColumn(orderBy: typeof DomainsOrderBy.$inferType): SQL {
+  switch (orderBy) {
+    case "NAME":
+      return sql`left(${ensIndexerSchema.domain.canonicalName}, ${sql.raw(String(CANONICAL_NAME_SORT_PREFIX))})`;
+    case "DEPTH":
+      return sql`${ensIndexerSchema.domain.canonicalDepth}`;
+    case "REGISTRATION_TIMESTAMP":
+      return sql`${ensIndexerSchema.registration.start}`;
+    case "REGISTRATION_EXPIRY":
+      return sql`${ensIndexerSchema.registration.expiry}`;
+  }
 }
 
 /**
@@ -26,17 +44,14 @@ function getOrderColumn(
  * Uses tuple comparison for non-NULL cursor values, and explicit NULL handling
  * for NULL cursor values (since PostgreSQL tuple comparison with NULL yields NULL/unknown).
  *
- * @param domains - The domains CTE
  * @param cursor - The decoded DomainCursor
  * @param queryOrderBy - The order field for the current query (must match cursor.by)
  * @param queryOrderDir - The order direction for the current query (must match cursor.dir)
  * @param direction - "after" for forward pagination, "before" for backward
  * @throws if cursor.by does not match queryOrderBy
  * @throws if cursor.dir does not match queryOrderDir
- * @returns SQL expression for the cursor filter
  */
 export function cursorFilter(
-  domains: DomainsWithOrderingMetadata,
   cursor: DomainCursor,
   queryOrderBy: typeof DomainsOrderBy.$inferType,
   queryOrderDir: typeof OrderDirection.$inferType,
@@ -55,7 +70,7 @@ export function cursorFilter(
     );
   }
 
-  const orderColumn = getOrderColumn(domains, cursor.by);
+  const orderColumn = getOrderColumn(cursor.by);
 
   // Determine comparison direction:
   // - "after" with ASC = greater than cursor
@@ -70,13 +85,13 @@ export function cursorFilter(
     if (direction === "after") {
       // "after" a NULL = other NULLs with appropriate id comparison
       return useGreaterThan
-        ? sql`(${orderColumn} IS NULL AND ${domains.id} > ${cursor.id})`
-        : sql`(${orderColumn} IS NULL AND ${domains.id} < ${cursor.id})`;
+        ? sql`(${orderColumn} IS NULL AND ${ensIndexerSchema.domain.id} > ${cursor.id})`
+        : sql`(${orderColumn} IS NULL AND ${ensIndexerSchema.domain.id} < ${cursor.id})`;
     } else {
       // "before" a NULL = all non-NULLs (they come before NULLs) + NULLs with appropriate id
       return useGreaterThan
-        ? sql`(${orderColumn} IS NOT NULL OR (${orderColumn} IS NULL AND ${domains.id} > ${cursor.id}))`
-        : sql`(${orderColumn} IS NOT NULL OR (${orderColumn} IS NULL AND ${domains.id} < ${cursor.id}))`;
+        ? sql`(${orderColumn} IS NOT NULL OR (${orderColumn} IS NULL AND ${ensIndexerSchema.domain.id} > ${cursor.id}))`
+        : sql`(${orderColumn} IS NOT NULL OR (${orderColumn} IS NULL AND ${ensIndexerSchema.domain.id} < ${cursor.id}))`;
     }
   }
 
@@ -87,7 +102,9 @@ export function cursorFilter(
   const value = (() => {
     switch (cursor.by) {
       case "NAME":
-        return sql`${cursor.value}::text`;
+        // Truncate the cursor's stored name to match the index expression, so the comparison
+        // operates on the same prefix that the index is keyed on.
+        return sql`left(${cursor.value}::text, ${sql.raw(String(CANONICAL_NAME_SORT_PREFIX))})`;
       case "DEPTH":
         return sql`${cursor.value}::int`;
       case "REGISTRATION_TIMESTAMP":
@@ -95,7 +112,7 @@ export function cursorFilter(
         return sql`${cursor.value}::numeric(78,0)`;
     }
   })();
-  return sql`(${orderColumn}, ${domains.id}) ${sql.raw(op)} (${value}, ${cursor.id})`;
+  return sql`(${orderColumn}, ${ensIndexerSchema.domain.id}) ${sql.raw(op)} (${value}, ${cursor.id})`;
 }
 
 /**
@@ -110,13 +127,12 @@ export function isEffectiveDesc(
 }
 
 export function orderFindDomains(
-  domains: DomainsWithOrderingMetadata,
   orderBy: typeof DomainsOrderBy.$inferType,
   orderDir: typeof OrderDirection.$inferType,
   inverted: boolean,
 ): SQL[] {
   const effectiveDesc = isEffectiveDesc(orderDir, inverted);
-  const orderColumn = getOrderColumn(domains, orderBy);
+  const orderColumn = getOrderColumn(orderBy);
 
   // Always use NULLS LAST so unregistered domains (NULL registration fields)
   // appear at the end regardless of sort direction
@@ -125,7 +141,9 @@ export function orderFindDomains(
     : sql`${orderColumn} ASC NULLS LAST`;
 
   // Always include id as tiebreaker for stable ordering
-  const tiebreaker = effectiveDesc ? desc(domains.id) : asc(domains.id);
+  const tiebreaker = effectiveDesc
+    ? desc(ensIndexerSchema.domain.id)
+    : asc(ensIndexerSchema.domain.id);
 
   return [primaryOrder, tiebreaker];
 }

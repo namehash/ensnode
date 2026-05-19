@@ -6,14 +6,6 @@ import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { builder } from "@/omnigraph-api/builder";
 import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
 import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domains-resolver";
-import {
-  domainsBase,
-  filterByCanonical,
-  filterByName,
-  filterByOwner,
-  filterByVersion,
-  withOrderingMetadata,
-} from "@/omnigraph-api/lib/find-domains/layers";
 import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-resolver";
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
@@ -75,15 +67,17 @@ AccountRef.implement({
         where: t.arg({ type: AccountDomainsWhereInput }),
         order: t.arg({ type: DomainsOrderInput }),
       },
-      resolve: (parent, { where, order, ...connectionArgs }, context) => {
-        const base = domainsBase();
-        const owned = filterByOwner(base, parent.id);
-        const { named, defaultOrder } = filterByName(owned, where?.name ?? null);
-        const canonical = where?.canonical === true ? filterByCanonical(named) : named;
-        const versioned = where?.version ? filterByVersion(canonical, where.version) : canonical;
-        const domains = withOrderingMetadata(versioned);
-        return resolveFindDomains(context, { domains, order, defaultOrder, ...connectionArgs });
-      },
+      resolve: (parent, { where, order, ...connectionArgs }, context) =>
+        resolveFindDomains(context, {
+          where: {
+            ownerId: parent.id,
+            name: where?.name,
+            canonical: where?.canonical,
+            version: where?.version,
+          },
+          order,
+          ...connectionArgs,
+        }),
     }),
 
     //////////////////

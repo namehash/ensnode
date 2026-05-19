@@ -9,13 +9,6 @@ import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { builder } from "@/omnigraph-api/builder";
 import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
 import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domains-resolver";
-import {
-  domainsBase,
-  filterByCanonical,
-  filterByName,
-  filterByVersion,
-  withOrderingMetadata,
-} from "@/omnigraph-api/lib/find-domains/layers";
 import { getDomainIdByInterpretedName } from "@/omnigraph-api/lib/get-domain-by-interpreted-name";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
 import { AccountByInput, AccountRef } from "@/omnigraph-api/schema/account";
@@ -117,15 +110,16 @@ builder.queryType({
         where: t.arg({ type: DomainsWhereInput, required: true }),
         order: t.arg({ type: DomainsOrderInput }),
       },
-      resolve: (_, { where, order, ...connectionArgs }, context) => {
-        const base = domainsBase();
-        const { named, defaultOrder } = filterByName(base, where.name);
-        const canonical = filterByCanonical(named);
-        const versioned = where.version ? filterByVersion(canonical, where.version) : canonical;
-        const domains = withOrderingMetadata(versioned);
-
-        return resolveFindDomains(context, { domains, order, defaultOrder, ...connectionArgs });
-      },
+      resolve: (_, { where, order, ...connectionArgs }, context) =>
+        resolveFindDomains(context, {
+          where: {
+            name: where.name,
+            canonical: true,
+            version: where.version,
+          },
+          order,
+          ...connectionArgs,
+        }),
     }),
 
     //////////////////////////////////
