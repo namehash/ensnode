@@ -33,7 +33,7 @@ import { onchainTable, primaryKey } from "ponder";
  * pattern matcher recover the key from event args. See the helper module's block comment for the
  * full rationale.
  *
- * The ensv2 plugin depends on the Protocol Acceleration plugin in order to piggyback on this
+ * The Unigraph plugin depends on the Protocol Acceleration plugin in order to piggyback on this
  * Registry migration logic.
  */
 export const migratedNodeByParent = onchainTable(

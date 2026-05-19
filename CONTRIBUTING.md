@@ -4,10 +4,7 @@ Thank you for your interest in contributing to ENSNode! We welcome contributions
 
 ## Documentation
 
-For detailed contribution guidelines and setup instructions:
-
-- **ENSNode**: Visit [ENSNode Contributing Guide](https://ensnode.io/docs/contributing)
-- **ENSRainbow**: Visit [ENSRainbow Contributing Guide](https://ensnode.io/ensrainbow/contributing)
+For detailed setup instructions, visit the [ENSNode Contributing Guide](https://ensnode.io/docs/reference/contributing).
 
 ## Getting Help
 

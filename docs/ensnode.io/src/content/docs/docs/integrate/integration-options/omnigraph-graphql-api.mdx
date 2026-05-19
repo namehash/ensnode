@@ -4,7 +4,7 @@ description: Query the ENS Omnigraph API directly via HTTP from any language.
 ---
 
 import { LinkCard } from '@astrojs/starlight/components';
-import IntegrateHostedEnsNodeTip from '../../../../../components/molecules/IntegrateHostedEnsNodeTip.astro';
+import IntegrateHostedEnsNodeTip from '@components/molecules/IntegrateHostedEnsNodeTip.astro';
 
 The Omnigraph is **a GraphQL API** following the [Relay specification](https://relay.dev/graphql/connections.htm). There's no proprietary protocol or transport — any GraphQL client in any language works, from `curl` and `fetch` to [`urql`](https://nearform.com/open-source/urql/), [`Apollo`](https://www.apollographql.com/), [`graphql-request`](https://github.com/jasonkuhrt/graphql-request), and beyond.
 
@@ -12,7 +12,7 @@ This guide walks you through the minimum: a single `fetch` call against `/api/om
 
 If you want end-to-end typed queries (via [`gql.tada`](https://gql-tada.0no.co/)) with editor autocomplete and a built-in client, use [`enssdk`](/docs/integrate/integration-options/enssdk) instead — but if you need to integrate from a language without first-class GraphQL tooling, or you're already in a stack with its own GraphQL client, this is the path.
 
-<IntegrateHostedEnsNodeTip includeHostedInstancesLink />
+<IntegrateHostedEnsNodeTip />
 
 ## 1. The endpoint
 
@@ -71,7 +71,7 @@ Create `src/index.ts`. The whole script is a single `fetch` against `/api/omnigr
 
 ```ts title="src/index.ts"
 // you may use a NameHash Hosted ENSNode instance
-// learn more at https://ensnode.io/docs/integrate/hosted-instances
+// learn more at https://ensnode.io/docs/hosted-instances
 const ENSNODE_URL = process.env.ENSNODE_URL!;
 
 const HELLO_WORLD_QUERY = /* GraphQL */ `
@@ -165,7 +165,7 @@ You should see the `eth` Domain, its owner, and the first 20 of its subdomains.
 
 - Want typed queries with editor autocomplete and a real GraphQL client? Use [`enssdk`](/docs/integrate/integration-options/enssdk) — same API, with `gql.tada` types and an `EnsNodeClient`.
 - Building a React app? Use [`enskit`](/docs/integrate/integration-options/enskit) — same `graphql(...)` helper plus `useOmnigraphQuery` and a graphcache.
-- See the [Omnigraph Cookbook](/docs/integrate/omnigraph/cookbook) for ready-to-copy queries: account-owned domains, events, registrar permissions, full-text search, and more.
+- See [Omnigraph examples](/docs/integrate/omnigraph/examples) for ready-to-copy queries: account-owned domains, events, registrar permissions, full-text search, and more.
 - See the [Omnigraph Schema Reference](/docs/integrate/omnigraph/schema-reference) for the full set of types, fields, and arguments you can query.
 
 <LinkCard

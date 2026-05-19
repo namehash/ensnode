@@ -58,9 +58,15 @@ export const makeRealtimeIndexingStatusProjectionSchema = (
 ) =>
   z
     .object({
-      projectedAt: makeUnixTimestampSchema(valueLabel),
-      worstCaseDistance: makeDurationSchema(valueLabel),
-      snapshot: makeCrossChainIndexingStatusSnapshotSchema(valueLabel),
+      projectedAt: makeUnixTimestampSchema(valueLabel).describe(
+        "The timestamp representing 'now' as of the time this projection was generated.",
+      ),
+      worstCaseDistance: makeDurationSchema(valueLabel).describe(
+        "The distance between `projectedAt` and `snapshot.slowestChainIndexingCursor` in seconds. This is a worst-case distance because it assumes no indexing progress has been made since `snapshot.snapshotTime` and that each indexed chain has added a new block as of `projectedAt`.",
+      ),
+      snapshot: makeCrossChainIndexingStatusSnapshotSchema(valueLabel).describe(
+        "The cross-chain indexing status snapshot that this projection is based on.",
+      ),
     })
     .check(invariant_realtimeIndexingStatusProjectionProjectedAtIsAfterOrEqualToSnapshotTime)
     .check(invariant_realtimeIndexingStatusProjectionWorstCaseDistanceIsCorrect);
@@ -72,7 +78,13 @@ export const makeSerializedRealtimeIndexingStatusProjectionSchema = (
   valueLabel: string = "Value",
 ) =>
   z.object({
-    snapshot: makeSerializedCrossChainIndexingStatusSnapshotSchema(valueLabel),
-    projectedAt: makeUnixTimestampSchema(valueLabel),
-    worstCaseDistance: makeDurationSchema(valueLabel),
+    snapshot: makeSerializedCrossChainIndexingStatusSnapshotSchema(valueLabel).describe(
+      "The cross-chain indexing status snapshot that this projection is based on.",
+    ),
+    projectedAt: makeUnixTimestampSchema(valueLabel).describe(
+      "The timestamp representing 'now' as of the time this projection was generated.",
+    ),
+    worstCaseDistance: makeDurationSchema(valueLabel).describe(
+      "The distance between `projectedAt` and `snapshot.slowestChainIndexingCursor` in seconds. This is a worst-case distance because it assumes no indexing progress has been made since `snapshot.snapshotTime` and that each indexed chain has added a new block as of `projectedAt`.",
+    ),
   });

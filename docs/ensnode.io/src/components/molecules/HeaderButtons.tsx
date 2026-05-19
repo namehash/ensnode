@@ -2,17 +2,26 @@ import HeaderMobileNavigation from "@workspace/docs/ensnode.io/src/components/mo
 import { GithubIcon } from "@workspace/docs/ensrainbow.io/src/components/atoms/icons/GithubIcon.tsx";
 import { TelegramIcon } from "@workspace/docs/ensrainbow.io/src/components/atoms/icons/TelegramIcon.tsx";
 import { TwitterIcon } from "@workspace/docs/ensrainbow.io/src/components/atoms/icons/TwitterIcon.tsx";
-import "../../styles/onScrollHeader.css";
+import "@styles/onScrollHeader.css";
 
 import cc from "classcat";
 
 export type HeaderButtonsProps = {
   isScrollable: boolean;
+  mobileAdaptable?: boolean;
 };
-export default function HeaderButtons({ isScrollable }: HeaderButtonsProps) {
+export default function HeaderButtons({
+  isScrollable,
+  mobileAdaptable = true,
+}: HeaderButtonsProps) {
   return (
     <>
-      <div className="hidden sm:flex items-center justify-end gap-1">
+      <div
+        className={cc([
+          "items-center justify-end gap-1",
+          mobileAdaptable ? "hidden sm:flex" : "flex",
+        ])}
+      >
         <a
           href="/docs/integrate"
           className="text-black border-transparent hover:bg-black/5 transition text-base rounded-lg border font-medium inline-flex gap-2 items-center whitespace-nowrap no-underline py-2 px-4"
@@ -51,7 +60,12 @@ export default function HeaderButtons({ isScrollable }: HeaderButtonsProps) {
           <TelegramIcon className={cc({ onScrollElement: isScrollable })} />
         </a>
       </div>
-      <div className="sm:hidden flex items-center justify-center gap-1">
+      <div
+        className={cc([
+          mobileAdaptable ? "flex sm:hidden" : "hidden",
+          "items-center justify-center gap-1",
+        ])}
+      >
         <HeaderMobileNavigation />
       </div>
     </>

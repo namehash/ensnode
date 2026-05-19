@@ -1,3 +1,5 @@
+import { fileURLToPath } from "node:url";
+
 import mdx from "@astrojs/mdx";
 import react from "@astrojs/react";
 import tailwindcss from "@tailwindcss/vite";
@@ -13,6 +15,18 @@ export default defineConfig({
   trailingSlash: "never",
   integrations: [mermaid(), starlight(), sitemap(), react(), mdx(), icon()],
   vite: {
+    resolve: {
+      alias: {
+        "@assets": fileURLToPath(new URL("./src/assets", import.meta.url)),
+        "@components": fileURLToPath(new URL("./src/components", import.meta.url)),
+        "@content": fileURLToPath(new URL("./src/content", import.meta.url)),
+        "@data": fileURLToPath(new URL("./src/data", import.meta.url)),
+        "@lib": fileURLToPath(new URL("./src/lib", import.meta.url)),
+        "@scripts": fileURLToPath(new URL("./src/scripts", import.meta.url)),
+        "@styles": fileURLToPath(new URL("./src/styles", import.meta.url)),
+        "@workspace": fileURLToPath(new URL("../..", import.meta.url)),
+      },
+    },
     ssr: {
       noExternal: ["@namehash/namehash-ui"],
     },
@@ -22,7 +36,6 @@ export default defineConfig({
     "/docs": "/docs/integrate",
     "/ensnode": "/docs/integrate",
     "/ensnode/deploying/railway": "/docs/services/ensrainbow/deploying/railway",
-    "/ensnode/concepts/what-is-ensnode": "/docs/reference/what-is-ensnode",
     "/ensnode/concepts/what-is-the-ens-subgraph":
       "/docs/reference/subgraph-legacy/what-is-the-ens-subgraph",
     "/docs/reference/what-is-the-ens-subgraph":
@@ -38,6 +51,13 @@ export default defineConfig({
     "/ensrainbow": "/docs/services/ensrainbow",
     "/ensrainbow/concepts/label-sets-and-versioning":
       "/docs/services/ensrainbow/concepts/label-sets-and-versioning",
+    "/docs/reference/rest-api": "/docs/services/ensapi/reference/api-reference",
+    "/docs/integrate/hosted-instances": "/docs/hosted-instances",
+    "/docs/integrate/migrate-from-subgraph": "/docs/integrate/ensv2-readiness",
+    "/docs/reference/ensnode-v2-notes": "/docs/integrate/ensv2-readiness",
+    "/docs/reference/mainnet-registered-subnames-of-subregistries": "/docs/integrate/omnigraph",
+    "/docs/reference/roadmap": "/docs/integrate/ensv2-readiness",
+    "/docs/reference/what-is-ensnode": "/docs/integrate/why-ensnode",
   },
   env: {
     schema: {

@@ -33,20 +33,38 @@ const ENS_TEST_ENV_V2_ETH_REGISTRAR = maybeGetDatasourceContract(
 const VITALIK_ADDRESS = toNormalizedAddress("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045");
 
 // owns sfmonicdeb*.eth (mix of v1 + v2) on sepolia-v2 and holds v2 ETHRegistry permissions
-const SEPOLIA_V2_USER_ADDRESS = toNormalizedAddress("0x2f8e8b1126e75fde0b7f731e7cb5847eba2d2574");
+const _SEPOLIA_V2_USER_ADDRESS = toNormalizedAddress("0x2f8e8b1126e75fde0b7f731e7cb5847eba2d2574");
+
+const SEPOLIA_V2_ADDRESS_WITH_LOT_OF_NAMES = toNormalizedAddress(
+  "0x205d2686da3bf33f64c17f21462c51b5ead462cf",
+);
 
 const DEVNET_NAME_WITH_OWNED_RESOLVER = asInterpretedName("example.eth");
 
 const SEPOLIA_V2_NAME_WITH_OWNED_RESOLVER = asInterpretedName("sfmonicdebmig.eth");
 
-export const GRAPHQL_API_EXAMPLE_QUERIES: Array<{
+const SEPOLIA_V2_TEST_NAME = asInterpretedName("test-name.eth");
+
+export type GraphqlApiExampleQuery = {
+  id: string;
   query: string;
   variables: NamespaceSpecificValue<Record<string, unknown>>;
-}> = [
+};
+
+export function getGraphqlApiExampleQueryById(id: string): GraphqlApiExampleQuery {
+  const found = graphqlApiExampleQueryById.get(id);
+  if (!found) {
+    throw new Error(`Unknown GraphQL API example query id: ${id}`);
+  }
+  return found;
+}
+
+export const GRAPHQL_API_EXAMPLE_QUERIES: GraphqlApiExampleQuery[] = [
   ////////////////
   // Hello World
   ////////////////
   {
+    id: "hello-world",
     query: `#
 # Welcome to this interactive playground for
 # ENSNode's GraphQL API!
@@ -65,6 +83,7 @@ query HelloWorld {
   // Find Domains
   /////////////////
   {
+    id: "find-domains",
     query: `
 query FindDomains(
   $name: DomainsNameFilter!
@@ -94,7 +113,7 @@ query FindDomains(
         order: { by: "NAME", dir: "DESC" },
       },
       [ENSNamespaceIds.SepoliaV2]: {
-        name: { starts_with: "sfmonic" },
+        name: { starts_with: "test-na" },
         order: { by: "NAME", dir: "DESC" },
       },
     },
@@ -104,6 +123,7 @@ query FindDomains(
   // Domain By Name
   ///////////////////
   {
+    id: "domain-by-name",
     query: `
 query DomainByName($name: InterpretedName!) {
   domain(by: {name: $name}) {
@@ -121,7 +141,7 @@ query DomainByName($name: InterpretedName!) {
 }`,
     variables: {
       default: { name: "eth" },
-      [ENSNamespaceIds.SepoliaV2]: { name: "sfmonicdebmig.eth" },
+      [ENSNamespaceIds.SepoliaV2]: { name: SEPOLIA_V2_TEST_NAME },
     },
   },
 
@@ -129,6 +149,7 @@ query DomainByName($name: InterpretedName!) {
   // Domain Subdomains
   //////////////////////
   {
+    id: "domain-subdomains",
     query: `
 query DomainSubdomains($name: InterpretedName!) {
   domain(by: {name: $name}) {
@@ -149,6 +170,7 @@ query DomainSubdomains($name: InterpretedName!) {
   // Domain Events
   /////////////////
   {
+    id: "domain-events",
     query: `
 query DomainEvents($name: InterpretedName!) {
   domain(by: {name: $name}) {
@@ -177,6 +199,7 @@ query DomainEvents($name: InterpretedName!) {
   // Account Domains
   ////////////////////
   {
+    id: "domains-by-address",
     query: `
 query AccountDomains(
   $address: Address!
@@ -195,7 +218,7 @@ query AccountDomains(
     variables: {
       default: { address: VITALIK_ADDRESS },
       [ENSNamespaceIds.EnsTestEnv]: { address: accounts.owner.address },
-      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_USER_ADDRESS },
+      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_ADDRESS_WITH_LOT_OF_NAMES },
     },
   },
 
@@ -203,6 +226,7 @@ query AccountDomains(
   // Account Events
   ////////////////////
   {
+    id: "account-events",
     query: `
 query AccountEvents(
   $address: Address!
@@ -214,7 +238,7 @@ query AccountEvents(
     variables: {
       default: { address: VITALIK_ADDRESS },
       [ENSNamespaceIds.EnsTestEnv]: { address: accounts.deployer.address },
-      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_USER_ADDRESS },
+      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_ADDRESS_WITH_LOT_OF_NAMES },
     },
   },
 
@@ -222,6 +246,7 @@ query AccountEvents(
   // Registry Domains
   /////////////////////
   {
+    id: "registry-domains",
     query: `
 query RegistryDomains(
   $registry: AccountIdInput!
@@ -248,6 +273,7 @@ query RegistryDomains(
   // Permissions By Contract
   ////////////////////////////
   {
+    id: "permissions-by-contract",
     query: `
 query PermissionsByContract(
   $contract: AccountIdInput!
@@ -275,6 +301,7 @@ query PermissionsByContract(
     variables: {
       // TODO: same as above
       default: { contract: ENS_TEST_ENV_V2_ETH_REGISTRAR },
+      // TODO: example response is empty for this address on Sepolia V2
       [ENSNamespaceIds.SepoliaV2]: { contract: SEPOLIA_V2_V2_ETH_REGISTRAR },
     },
   },
@@ -283,6 +310,7 @@ query PermissionsByContract(
   // Permissions By User
   ////////////////////////
   {
+    id: "permissions-by-user",
     query: `
 query PermissionsByUser($address: Address!) {
   account(by: { address: $address }) {
@@ -298,7 +326,8 @@ query PermissionsByUser($address: Address!) {
 }`,
     variables: {
       default: { address: accounts.deployer.address },
-      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_USER_ADDRESS },
+      // TODO: example response is empty for this address on Sepolia V2
+      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_ADDRESS_WITH_LOT_OF_NAMES },
     },
   },
 
@@ -306,6 +335,7 @@ query PermissionsByUser($address: Address!) {
   // Account Resolver Permissions
   //////////////////////////////////
   {
+    id: "account-resolver-permissions",
     query: `
 query AccountResolverPermissions($address: Address!) {
   account(by: { address: $address }) {
@@ -324,7 +354,7 @@ query AccountResolverPermissions($address: Address!) {
 }`,
     variables: {
       default: { address: accounts.deployer.address },
-      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_USER_ADDRESS },
+      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_ADDRESS_WITH_LOT_OF_NAMES },
     },
   },
 
@@ -332,6 +362,7 @@ query AccountResolverPermissions($address: Address!) {
   // Domain's Assigned Resolver
   //////////////////////////////
   {
+    id: "domain-resolver",
     query: `
 query DomainResolver($name: InterpretedName!) {
   domain(by: { name: $name }) {
@@ -355,6 +386,7 @@ query DomainResolver($name: InterpretedName!) {
   // Namegraph
   //////////////
   {
+    id: "namegraph",
     query: `
 query Namegraph {
   root {
@@ -387,3 +419,7 @@ query Namegraph {
     variables: { default: {} },
   },
 ];
+
+const graphqlApiExampleQueryById = new Map(
+  GRAPHQL_API_EXAMPLE_QUERIES.map((entry) => [entry.id, entry]),
+);
