@@ -20,8 +20,8 @@ import type { OrderDirection } from "@/omnigraph-api/schema/order-direction";
  * ordered scan; raw `canonical_name` ORDER BY falls back to a full scan + sort.
  *
  * An alternative solution is to redefine InterpretedLabel to enforce a maximum byte length of 255 before
- * being truncated into an Encoded LabelHash — this mirros a name's resolvability (must be dns-encodable)
- * and allows us to avoid storing spam names. Then we'd also have to produce an b-tree indexed
+ * being truncated into an Encoded LabelHash — this mirrors a name's resolvability (must be dns-encodable)
+ * and allows us to avoid storing spam names. Then we'd also have to produce a b-tree-indexed
  * materializedCanonicalName field that's length-capped as well to fit the btree index. Then we could
  * query against that column instead of the full InterpretedName. All of that would avoid this
  * LEFT(...) expression index and the necessity for the query pattern to match the defined index
@@ -34,9 +34,13 @@ export const CANONICAL_NAME_SORT_PREFIX = 256;
  * value for NAME orderings — callers slice once at encode time so the encoded cursor stays small
  * (long names can hit thousands of characters) and `cursorFilter` can compare directly against
  * the index expression without re-applying `left(...)` per row.
+ *
+ * Uses code-point iteration (`[...name]`) rather than `String.slice`, which counts UTF-16 code
+ * units and would split surrogate pairs. Postgres `left(text, N)` counts characters (code
+ * points), so this keeps the JS-side and DB-side prefixes byte-identical.
  */
 export function truncateNameForCursor(name: string | null): string | null {
-  return name === null ? null : name.slice(0, CANONICAL_NAME_SORT_PREFIX);
+  return name === null ? null : [...name].slice(0, CANONICAL_NAME_SORT_PREFIX).join("");
 }
 
 /**

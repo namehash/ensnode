@@ -255,7 +255,15 @@ export function resolveFindDomains(
                   return domain.canonicalDepth;
                 case "REGISTRATION_TIMESTAMP":
                 case "REGISTRATION_EXPIRY":
-                  return registrationValueById?.get(domain.id) ?? null;
+                  // `registrationValueById` is populated iff `needsRegistrationJoin` is true,
+                  // which is exactly the REGISTRATION_* arms here. `loadedDomains` is keyed by
+                  // the same ids as `results`, so the lookup is guaranteed to hit.
+                  if (registrationValueById === null) {
+                    throw new Error(
+                      `Invariant: registrationValueById should be populated when orderBy=${orderBy}`,
+                    );
+                  }
+                  return registrationValueById.get(domain.id) ?? null;
               }
             })();
             return { ...domain, __orderValue };
