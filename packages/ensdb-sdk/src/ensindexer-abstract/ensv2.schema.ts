@@ -370,18 +370,6 @@ export const domain = onchainTable(
     byCanonicalNode: index().using("hash", t.canonicalNode),
     // btree for ORDER BY canonical_depth (typeahead and DEPTH-ordered browse)
     byCanonicalDepth: index().on(t.canonicalDepth),
-
-    // Partial indexes for `Query.domains`, which hardcodes `WHERE canonical = true`. Without a
-    // leading `registry_id` predicate the composite `byRegistryAndCanonicalNameLeft` is unusable,
-    // and a `canonical = true` filter against the full table forces a parallel seq scan + top-N
-    // heapsort. These partials cover only the ~36% of rows that are canonical and let the planner
-    // satisfy `ORDER BY ... LIMIT` directly from the index for NAME / DEPTH browses.
-    byCanonicalNameLeftWhereCanonical: index()
-      .on(sql`left(${t.canonicalName}, 256)`, t.id)
-      .where(sql`${t.canonical} = true`),
-    byCanonicalDepthWhereCanonical: index()
-      .on(t.canonicalDepth, t.id)
-      .where(sql`${t.canonical} = true`),
   }),
 );
 

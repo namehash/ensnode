@@ -111,11 +111,7 @@ builder.queryType({
         order: t.arg({ type: DomainsOrderInput }),
       },
       resolve: (_, { where, order, ...connectionArgs }, context) =>
-        resolveFindDomains(context, {
-          where: { ...where, canonical: true },
-          order,
-          ...connectionArgs,
-        }),
+        resolveFindDomains(context, { where, order, ...connectionArgs }),
     }),
 
     //////////////////////////////////
