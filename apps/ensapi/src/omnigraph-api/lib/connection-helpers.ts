@@ -2,6 +2,7 @@ import { and, asc, desc, gt, lt } from "drizzle-orm";
 import z from "zod/v4";
 
 import { cursors } from "@/omnigraph-api/lib/cursors";
+import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
 
 type Column = Parameters<typeof lt>[0];
 
@@ -44,13 +45,15 @@ export const orderPaginationBy = (column: Column, inverted: boolean) =>
 /**
  * An empty Relay Connection, used when short-circuiting connection resolvers.
  */
-export const EMPTY_CONNECTION = {
-  edges: [],
-  pageInfo: {
-    hasNextPage: false,
-    hasPreviousPage: false,
-    startCursor: null,
-    endCursor: null,
-  },
-  totalCount: 0,
-};
+export const EMPTY_CONNECTION = lazyConnection({
+  totalCount: async () => 0,
+  connection: async () => ({
+    edges: [],
+    pageInfo: {
+      hasNextPage: false,
+      hasPreviousPage: false,
+      startCursor: null,
+      endCursor: null,
+    },
+  }),
+});
