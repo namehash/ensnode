@@ -332,5 +332,12 @@ a.starlight-sidebar-topics-current .starlight-sidebar-topics-icon {
 
 /* Make sure that all non-top-level sidebar items are not enlarged */
 ul.top-level details details > summary .group-label span {
-  font-size: var(--sl-text-sm);
+  @media (min-width: 50rem) {
+    font-size: var(--sl-text-sm);
+  }
+}
+
+/* Make sure that social icons in the sidebar do not move on hover */
+.sidebar-content .social-icons a {
+  transform: none !important;
 }
