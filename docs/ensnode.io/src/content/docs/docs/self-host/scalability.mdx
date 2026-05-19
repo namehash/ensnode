@@ -27,7 +27,7 @@ ENSDb is built on PostgreSQL, which provides mature, production-proven mechanism
 2. **Replicas**: The primary ENSDb instance asynchronously replicates its data to one or more ENSDb read replicas.
 3. **Read scaling**: You can connect any number of ENSApi instances to the ENSDb primary instance or to any ENSDb replica.
 
-Because ENSApi is read-only, it can safely connect to an ENSDb replica without risking stale writes or replication conflicts. As your query load grows, you simply add more PostgreSQL replicas for ENSDb primary instance and more ENSApi instances pointing to them.
+Because ENSApi is read-only, it can safely connect to an ENSDb replica without risking stale writes or replication conflicts. As your query load grows, you simply add more PostgreSQL replicas for the ENSDb primary instance and more ENSApi instances pointing to them.
 
 ## Deployment Example
 
