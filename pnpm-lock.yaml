@@ -182,6 +182,9 @@ importers:
       prettier:
         specifier: 'catalog:'
         version: 3.6.2
+      prettier-plugin-astro:
+        specifier: 'catalog:'
+        version: 0.14.1
       tsup:
         specifier: 'catalog:'
         version: 8.5.0(jiti@2.6.1)(postcss@8.5.12)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)

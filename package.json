@@ -37,6 +37,7 @@
     "@typescript/native-preview": "7.0.0-dev.20260128.1",
     "jsdom": "^27.0.1",
     "prettier": "catalog:",
+    "prettier-plugin-astro": "catalog:",
     "tsup": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
