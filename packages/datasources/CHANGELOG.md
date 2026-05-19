@@ -1,5 +1,12 @@
 # @ensnode/ens-deployments
 
+## 1.14.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - enssdk@1.14.0
+
 ## 1.13.1
 
 ### Patch Changes
