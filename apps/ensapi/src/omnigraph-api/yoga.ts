@@ -24,12 +24,12 @@ const yogaLogger = {
   debug: logger.debug.bind(logger),
   info: logger.info.bind(logger),
   warn: logger.warn.bind(logger),
-  error: (err: unknown) => {
+  error: (err: unknown, ..._rest: unknown[]) => {
     if (isZodError(err)) {
       logger.debug({ err }, "GraphQL input validation rejected");
       return;
     }
-    logger.error(err);
+    logger.error({ err }, "GraphQL execution error");
   },
 };
 
