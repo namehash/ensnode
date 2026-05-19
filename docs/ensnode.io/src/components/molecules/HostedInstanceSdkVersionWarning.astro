@@ -17,23 +17,23 @@ const isEnskit = target === "enskit";
 const isBoth = target === "both";
 
 const sdkList = isEnskit
-  ? "`enskit@1.13.1` and `enssdk@1.13.1`"
+  ? "<code>enskit@1.13.1</code> and <code>enssdk@1.13.1</code>"
   : isBoth
-    ? "`enssdk@1.13.1` (and `enskit@1.13.1` when using React)"
-    : "`enssdk@1.13.1`";
+    ? "<code>enssdk@1.13.1</code> (and <code>enskit@1.13.1</code> when using React)"
+    : "<code>enssdk@1.13.1</code>";
 ---
 
 <Aside type="caution" title="Version compatibility with hosted instances">
-  Our hosted ENSNode instances currently run ENSNode v1.13. If you are querying them from your own app, you **must** use {sdkList}. The latest published versions (`1.14.0+`) contain breaking changes in the Omnigraph API data model not yet deployed to our hosted infrastructure. Use these exact install commands:
+  Our hosted ENSNode instances currently run ENSNode v1.13. If you are querying them from your own app, you <strong>must</strong> use <span set:html={sdkList} />. The latest published versions (<code>1.14.0+</code>) contain breaking changes in the Omnigraph API data model not yet deployed to our hosted infrastructure. Use these exact install commands:
 
   {isBoth ? (
-    <pre><code>npm install enssdk@1.13.1
+    <pre>npm install enssdk@1.13.1
 # or, for React apps:
-npm install enskit@1.13.1 enssdk@1.13.1</code></pre>
+npm install enskit@1.13.1 enssdk@1.13.1</pre>
   ) : isEnskit ? (
-    <pre><code>npm install enskit@1.13.1 enssdk@1.13.1</code></pre>
+    <pre>npm install enskit@1.13.1 enssdk@1.13.1</pre>
   ) : (
-    <pre><code>npm install enssdk@1.13.1</code></pre>
+    <pre>npm install enssdk@1.13.1</pre>
   )}
 
   This notice will be removed once the hosted instances are upgraded.
