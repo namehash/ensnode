@@ -17,6 +17,7 @@ export * from "./ensindexer/config/zod-schemas";
 export * from "./ensnode/api/indexing-status/zod-schemas";
 export * from "./ensnode/api/name-tokens/examples";
 export * from "./ensnode/api/name-tokens/zod-schemas";
+export * from "./ensnode/api/realtime/zod-schemas";
 export * from "./ensnode/api/registrar-actions/examples";
 export * from "./ensnode/api/registrar-actions/zod-schemas";
 export * from "./ensnode/api/resolution/examples";

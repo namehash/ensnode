@@ -1,0 +1,94 @@
+---
+title: ENSEngine
+description: Coming soon - the ENSNode service for push-based, reactive ENS functionality. Watches your ENSDb for changes and turns them into ENS-aware webhooks.
+sidebar:
+  label: Overview
+  order: 1
+---
+
+import { LinkCard, Aside } from "@astrojs/starlight/components";
+
+<Aside type="caution" title="Coming soon">
+**ENSEngine** is a planned ENSNode service.
+</Aside>
+
+## Vision
+
+Make ENS state changes **subscribable**.
+
+Today, building an app that reacts to ENS - when an avatar changes, when a name is transferred, when a renewal happens - means either polling endlessly or running your own indexer. Both are heavy. ENSEngine exists to remove that work and turn ENS into a push-based protocol from the consumer's point of view: subscribe, get notified, build.
+
+## What it is
+
+ENSEngine is the part of ENSNode that **watches your ENSDb for changes in real time and delivers ENS-aware events** - including webhooks - to any sink you configure.
+
+It sits alongside [ENSIndexer](/docs/services/ensindexer), [ENSDb](/docs/services/ensdb), [ENSRainbow](/docs/services/ensrainbow), [ENSApi](/docs/services/ensapi), and [ENSAdmin](/docs/services/ensadmin) as the home for reactive / event-based functionality across the ENSNode stack.
+
+## How it works
+
+```mermaid
+flowchart TD
+  Indexer["ENSIndexer<br/>(keeps ENSDb up to date)"]
+  Db["ENSDb<br/>(live onchain state of ENS)"]
+  subgraph engine [ENSEngine]
+    Watch["Watches ENSDb for changes"]
+    Process["Enriches, filters, transforms, routes ENS events"]
+    Watch --> Process
+  end
+  Sinks["Your sinks: webhooks, cache invalidation, notifications, db sync, ..."]
+  Indexer --> Db
+  Db --> engine
+  engine --> Sinks
+```
+
+In one sentence: **ENSIndexer keeps ENSDb fresh, ENSEngine watches ENSDb for changes and turns them into ENS-aware events for any sink you configure.**
+
+The internal pipeline is intentionally simple to describe:
+
+- **Watch** - observe ENSDb in real time as ENSIndexer updates it.
+- **Enrich** - attach ENS-level context to raw changes so consumers don't have to.
+- **Filter** - apply subscription rules so each sink only sees events it cares about.
+- **Transform** - shape events into the right payload for each sink type.
+- **Route** - deliver to webhooks, cache-invalidation hooks, database sync targets, notification systems, and more.
+
+Implementation details behind the watch layer are intentionally not part of this teaser. Those will land in dedicated docs when the service ships.
+
+## What it unlocks
+
+The top priority for ENSEngine is **cache invalidation**. The goal is an ENS-native invalidation signal that lets apps and CDNs cache ENS data much more aggressively, then react when relevant onchain state changes. That's the foundation for web2-grade latency on a web3 protocol, especially for high-traffic ENS profile views.
+
+Additional key use cases:
+
+- **Notification services** - name-expiry reminders, transfer alerts, activity bots in Discord/Telegram/Twitter.
+- **Sync to alternative databases** - want to store alternative representations of ENSDb in databases that provide specialized benefits that Postgres doesn't offer, such as Elasticsearch, Typesense, Meilisearch, Redis, Kafka, Google BigQuery, and more? ENSEngine will ensure 100% delivery of database changes to sinks with strict ordering and exactly-once processing.
+- **Realtime dashboards** - surface ENS analytics and activity data as it happens.
+
+For a longer use-case-focused overview from the *integrate* perspective, see the [ENSEngine teaser](/docs/integrate/integration-options/ensengine).
+
+## Position in the ENSNode stack
+
+ENSEngine is one of several planned and existing services that build on top of [ENSDb](/docs/services/ensdb). ENSDb is the open standard that holds the live, onchain state of ENS in a plain PostgreSQL database. From there, different services consume that state in different ways:
+
+- **[ENSApi](/docs/services/ensapi)** - pull model: GraphQL / REST APIs for clients.
+- **[ensdb-cli & ENSDb snapshots](/docs/integrate/integration-options/ensdb-cli)** - operational model: portable snapshots and CLI tooling.
+- **[ENSEngine](/docs/services/ensengine)** - push model: real-time, ENS-aware events delivered to your sinks.
+
+## Related
+
+<LinkCard
+  title="ENSEngine Integration Quickstart"
+  description="The value-prop teaser written from the perspective of a developer adopting ENSEngine."
+  href="/docs/integrate/integration-options/ensengine"
+/>
+
+<LinkCard
+  title="ENSDb overview"
+  description="The foundation ENSEngine builds on - the live, onchain state of ENS in plain Postgres."
+  href="/docs/services/ensdb"
+/>
+
+<LinkCard
+  title="ensdb-cli & ENSDb snapshots"
+  description="Portable snapshots and a CLI for bootstrapping fresh instances in minutes."
+  href="/docs/integrate/integration-options/ensdb-cli"
+/>

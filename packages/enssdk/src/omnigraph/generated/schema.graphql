@@ -209,6 +209,14 @@ type BaseRegistrarRegistration implements Registration {
 """BigInt represents non-fractional signed whole numeric values."""
 scalar BigInt
 
+"""A Canonical Name, exposed in each representation we support."""
+type CanonicalName {
+  """
+  The Canonical Name as an InterpretedName: each label is either a normalized literal Label or an Encoded LabelHash.
+  """
+  interpreted: InterpretedName!
+}
+
 """ChainId represents a enssdk#ChainId."""
 scalar ChainId
 
@@ -219,11 +227,6 @@ scalar CoinType
 Represents a Domain, i.e. an individual Label within the ENS namegraph. It may or may not be Canonical. It may be an ENSv1Domain or an ENSv2Domain.
 """
 interface Domain {
-  """
-  The Resolver that this Domain has assigned, if any. NOTE that this is the Domain's _assigned_ Resolver, _not_ its _effective_ Resolver, which can only be determined by following ENS Forward Resolution and ENSIP-10. Do NOT use this Domain-Resolver relationship in isolation to resolve records, that operation is NOT ENS Forward Resolution.
-  """
-  assignedResolver: Resolver
-
   """
   Metadata (name, path, and node) related to the Domain's canonicality, if known. Null when the Domain is not in the canonical nametree.
   """
@@ -257,6 +260,9 @@ interface Domain {
   """The Registry under which this Domain exists."""
   registry: Registry!
 
+  """Resolver relationship metadata for this Domain."""
+  resolver: DomainResolver!
+
   """
   All Domains that are direct descendents of this Domain in the namegraph.
   """
@@ -276,7 +282,7 @@ type DomainCanonical {
   depth: Int!
 
   """The Canonical Name for this Domain."""
-  name: InterpretedName!
+  name: CanonicalName!
 
   """
   The namehash of this Domain's Canonical Name. Note that this is NOT a stable reference to this Domain; use `Domain.id`.
@@ -337,6 +343,14 @@ type DomainRegistrationsConnection {
 type DomainRegistrationsConnectionEdge {
   cursor: String!
   node: Registration!
+}
+
+"""Metadata describing this Domain's relationship to its Resolver(s)."""
+type DomainResolver {
+  """
+  The Resolver that this Domain has assigned, if any. NOTE that this is the Domain's _assigned_ Resolver, _not_ its _effective_ Resolver, which can only be determined by following ENS Forward Resolution and ENSIP-10. Do NOT use this Domain-Resolver relationship in isolation to resolve records, that operation is NOT ENS Forward Resolution.
+  """
+  assigned: Resolver
 }
 
 type DomainSubdomainsConnection {
@@ -406,11 +420,6 @@ enum ENSProtocolVersion {
 """An ENSv1Domain represents an ENSv1 Domain."""
 type ENSv1Domain implements Domain {
   """
-  The Resolver that this Domain has assigned, if any. NOTE that this is the Domain's _assigned_ Resolver, _not_ its _effective_ Resolver, which can only be determined by following ENS Forward Resolution and ENSIP-10. Do NOT use this Domain-Resolver relationship in isolation to resolve records, that operation is NOT ENS Forward Resolution.
-  """
-  assignedResolver: Resolver
-
-  """
   Metadata (name, path, and node) related to the Domain's canonicality, if known. Null when the Domain is not in the canonical nametree.
   """
   canonical: DomainCanonical
@@ -445,6 +454,9 @@ type ENSv1Domain implements Domain {
 
   """The Registry under which this Domain exists."""
   registry: Registry!
+
+  """Resolver relationship metadata for this Domain."""
+  resolver: DomainResolver!
 
   """
   The rootRegistryOwner of this Domain, i.e. the owner() of this Domain within the ENSv1 Registry.
@@ -518,11 +530,6 @@ type ENSv1VirtualRegistry implements Registry {
 """An ENSv2Domain represents an ENSv2 Domain."""
 type ENSv2Domain implements Domain {
   """
-  The Resolver that this Domain has assigned, if any. NOTE that this is the Domain's _assigned_ Resolver, _not_ its _effective_ Resolver, which can only be determined by following ENS Forward Resolution and ENSIP-10. Do NOT use this Domain-Resolver relationship in isolation to resolve records, that operation is NOT ENS Forward Resolution.
-  """
-  assignedResolver: Resolver
-
-  """
   Metadata (name, path, and node) related to the Domain's canonicality, if known. Null when the Domain is not in the canonical nametree.
   """
   canonical: DomainCanonical
@@ -559,6 +566,9 @@ type ENSv2Domain implements Domain {
 
   """The Registry under which this Domain exists."""
   registry: Registry!
+
+  """Resolver relationship metadata for this Domain."""
+  resolver: DomainResolver!
 
   """
   All Domains that are direct descendents of this Domain in the namegraph.

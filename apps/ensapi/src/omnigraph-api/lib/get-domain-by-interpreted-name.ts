@@ -65,7 +65,7 @@ const hasResolver = (
  * may not be accessible by Forward Resolution: an expired Domain in a PermissionedRegistry does not
  * exist in the context of Forward Resolution.
  *
- * @dev depends on the Protocol Acceleration plugin which is a hard requirement for ensv2/omnigraph usage
+ * @dev depends on the Protocol Acceleration plugin which is a hard requirement for the Omnigraph API usage.
  */
 export async function getDomainIdByInterpretedName(
   name: InterpretedName,

@@ -7,10 +7,11 @@ sidebar:
 ---
 
 import { LinkCard, CardGrid, Aside } from "@astrojs/starlight/components";
+import OmnigraphAPIExample from "@components/organisms/OmnigraphAPIExample.astro";
 
 ## What is ENSv2?
 
-ENSv2 is the next generation of the Ethereum Name Service — a protocol upgrade that fundamentally changes the onchain data model of ENS.
+[ENSv2](https://ens.domains/ensv2) is the next generation of the Ethereum Name Service — a protocol upgrade that fundamentally changes the onchain data model of ENS.
 
 :::tip[Prepare for ENSv2]
 The ENSv2 upgrade to the ENS protocol is coming **Summer 2026**! Your app, regardless of how it interacts with names, needs to be updated to avoid being left behind.
@@ -50,7 +51,7 @@ const DomainFragment = graphql(`
   fragment DomainFragment on Domain {
     __typename
     id
-    canonical { name }
+    canonical { name { interpreted } }
     owner { id address }
   }
 `);
@@ -75,7 +76,7 @@ function RenderDomainFragment({ data }: { data: FragmentOf<typeof DomainFragment
 
   return (
     <>
-      <span>Name: {domain.canonical ? beautifyInterpretedName(domain.canonical.name) : 'Unnamed Domain'}</span>
+      <span>Name: {domain.canonical ? beautifyInterpretedName(domain.canonical.name.interpreted) : 'Unnamed Domain'}</span>
       <span>Protocol Version: {domain.__typename === 'ENSv1Domain' ? 'ENSv1' : 'ENSv2'}</span>
       <span>Owner: {domain.owner ? domain.owner.address : 'Unowned'}</span>
     </>
@@ -127,6 +128,12 @@ export function RenderDomainAndSubdomains({ name }: { name: InterpretedName }) {
   href="https://github.com/namehash/ensnode/tree/main/examples/enskit-react-example"
 />
 
+<LinkCard
+  title="⚡ Interactive enskit example"
+  description="Edit and run the enskit-react-example app in your browser with a live preview."
+  href="/docs/integrate/integration-options/enskit/example"
+/>
+
 ### 2. `enssdk` + Omnigraph
 
 With `enssdk`, leverage ENSNode and the Omnigraph from any JavaScript runtime to power your frontend or backend apps. `enssdk` comes with built-in type-safety and editor autocomplete for Omnigraph queries.
@@ -141,7 +148,7 @@ const HelloWorldQuery = graphql(`
   query HelloWorld {
     domain(by: { name: "eth" }) {
       id
-      canonical { name }
+      canonical { name { interpreted } }
       owner { address }
     }
   }
@@ -162,24 +169,19 @@ const result = await client.omnigraph.query({ query: HelloWorldQuery });
   href="https://github.com/namehash/ensnode/tree/main/examples/enssdk-example"
 />
 
+
+<LinkCard
+  title="⚡ Interactive enssdk example"
+  description="Edit and run the enssdk-example script in your browser."
+  href="/docs/integrate/integration-options/enssdk/example"
+/>
+
 ### 3. ENS Omnigraph GraphQL API
 
 The ENS Omnigraph API is a GraphQL API following the Relay specification, so you get built-in support for efficient infinite pagination and idiomatic access to all of the ENS protocol within a _unified_ ENSv1 + ENSv2 datamodel.
 
-```gql
-query MyDomains($address: Address!) {
-  account(by: { address: $address }) {
-    domains {
-      edges {
-        node {
-          label { interpreted }
-          canonical { name }
-        }
-      }
-    }
-  }
-}
-```
+
+<OmnigraphAPIExample id="domains-by-address" hideDescription hideBackToExamples />
 
 <LinkCard
   title='Full ENS Omnigraph GraphQL API Documentation'
@@ -197,3 +199,7 @@ query MyDomains($address: Address!) {
   description='Includes more advanced integration options not introduced in this quickstart guide'
   href="/docs/integrate/integration-options"
 />
+
+:::tip[Coming soon: accelerated self-hosting]
+Planning to self-host? We're building [**`ensdb-cli` & ENSDb snapshots**](/docs/integrate/integration-options/ensdb-cli) so you can stand up a fresh, nearly-current ENSDb in minutes instead of waiting days and spending big on RPC credits to complete a full historical backfill.
+:::

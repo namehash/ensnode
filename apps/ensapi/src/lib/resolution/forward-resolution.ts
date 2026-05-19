@@ -175,7 +175,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           ////////////////////////////
           // TODO: re-enable protocol acceleration for ENSv2
           // NOTE: gate on the namespace containing an ENSv2Root datasource rather than the ENSv2
-          // plugin being configured — a namespace may be ENSv1-only even when the ENSv2 plugin is
+          // plugin being configured — a namespace may be ENSv1-only even when the Unigraph plugin is
           // defined, and forward resolution must follow the ENSv1 path in that case.
           if (maybeGetDatasource(config.namespace, DatasourceNames.ENSv2Root)) {
             const UniversalResolverAddress =

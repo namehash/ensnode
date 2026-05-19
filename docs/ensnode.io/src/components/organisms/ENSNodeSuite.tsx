@@ -4,9 +4,9 @@ import cc from "classcat";
 import { Fragment } from "react";
 import { Balancer } from "react-wrap-balancer";
 
-import ENSAdmin3DImage from "../../assets/ENSAdmin3D.png";
-import ENSIndexer3DImage from "../../assets/ENSIndexer3D.png";
-import ENSRainbow3DImage from "../../assets/ENSRainbow3D.png";
+import ENSAdmin3DImage from "@assets/ENSAdmin3D.png";
+import ENSIndexer3DImage from "@assets/ENSIndexer3D.png";
+import ENSRainbow3DImage from "@assets/ENSRainbow3D.png";
 import JoinTelegram from "../molecules/JoinTelegram.tsx";
 
 const appsSuite: {

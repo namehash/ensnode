@@ -28,8 +28,62 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/omnigraph",
         },
         {
-          label: "Cookbook",
-          link: "/docs/integrate/omnigraph/cookbook",
+          label: "Examples",
+          collapsed: false,
+          items: [
+            {
+              label: "Overview",
+              link: "/docs/integrate/omnigraph/examples",
+            },
+            {
+              label: "Domain By Name",
+              link: "/docs/integrate/omnigraph/examples/domain-by-name",
+            },
+            {
+              label: "Find Domains",
+              link: "/docs/integrate/omnigraph/examples/find-domains",
+            },
+            {
+              label: "Domain Subdomains",
+              link: "/docs/integrate/omnigraph/examples/domain-subdomains",
+            },
+            {
+              label: "Domain Events",
+              link: "/docs/integrate/omnigraph/examples/domain-events",
+            },
+            {
+              label: "Account Domains",
+              link: "/docs/integrate/omnigraph/examples/domains-by-address",
+            },
+            {
+              label: "Account Events",
+              link: "/docs/integrate/omnigraph/examples/account-events",
+            },
+            {
+              label: "Registry Domains",
+              link: "/docs/integrate/omnigraph/examples/registry-domains",
+            },
+            {
+              label: "Permissions By Contract",
+              link: "/docs/integrate/omnigraph/examples/permissions-by-contract",
+            },
+            {
+              label: "Permissions By User",
+              link: "/docs/integrate/omnigraph/examples/permissions-by-user",
+            },
+            {
+              label: "Account Resolver Permissions",
+              link: "/docs/integrate/omnigraph/examples/account-resolver-permissions",
+            },
+            {
+              label: "Domain Resolver",
+              link: "/docs/integrate/omnigraph/examples/domain-resolver",
+            },
+            {
+              label: "Namegraph",
+              link: "/docs/integrate/omnigraph/examples/namegraph",
+            },
+          ],
         },
         {
           label: "Schema Reference",
@@ -47,18 +101,38 @@ export const integrateSidebarTopic = {
         },
         {
           label: "enskit (React)",
-          link: "/docs/integrate/integration-options/enskit",
+          collapsed: false,
+          items: [
+            {
+              label: "Overview",
+              link: "/docs/integrate/integration-options/enskit",
+            },
+            {
+              label: "⚡ Interactive example",
+              link: "/docs/integrate/integration-options/enskit/example",
+            },
+          ],
         },
         {
           label: "enssdk (TypeScript)",
-          link: "/docs/integrate/integration-options/enssdk",
+          collapsed: false,
+          items: [
+            {
+              label: "Overview",
+              link: "/docs/integrate/integration-options/enssdk",
+            },
+            {
+              label: "⚡ Interactive example",
+              link: "/docs/integrate/integration-options/enssdk/example",
+            },
+          ],
         },
         {
           label: "ENS Omnigraph (GraphQL)",
           link: "/docs/integrate/integration-options/omnigraph-graphql-api",
         },
         {
-          label: "ENSDb (PostgreSQL)",
+          label: "ENSDb Integration Quickstart",
           link: "/docs/integrate/integration-options/ensdb",
         },
         {
@@ -68,6 +142,14 @@ export const integrateSidebarTopic = {
         {
           label: "ensskills (AI agents)",
           link: "/docs/integrate/integration-options/ensskills",
+        },
+        {
+          label: "ensdb-cli (Snapshots)",
+          link: "/docs/integrate/integration-options/ensdb-cli",
+        },
+        {
+          label: "ENSEngine (webhooks)",
+          link: "/docs/integrate/integration-options/ensengine",
         },
       ],
     },

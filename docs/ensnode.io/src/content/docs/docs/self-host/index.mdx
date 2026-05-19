@@ -4,6 +4,7 @@ description: Decide whether to self-host ENSNode and understand the architecture
 ---
 
 import { LinkCard } from "@astrojs/starlight/components";
+import EnsDbSnapshotsTeaser from "../../../../components/molecules/EnsDbSnapshotsTeaser.astro";
 
 
 This page will help you decide whether to self-host ENSNode or use the hosted instances. Includes architecture overview of the ENSNode stack (ENSIndexer, ENSDb, ENSRainbow, ENSApi).
@@ -22,6 +23,20 @@ Running your own ENSNode instance is helpful for those that wish to:
 :::note[Private Networking]
 Note that because ENSNode makes many label healing requests to ENSRainbow while indexing, it's _imperative_ that they be on the same local network to minimize request time.
 :::
+
+## Bootstrap from a snapshot (coming soon)
+
+Self-hosting today means standing up a fresh ENSNode instance from zero and waiting on an initial backfill - including the RPC bill that comes with it. **[ENSDb snapshots and `ensdb-cli`](/docs/integrate/integration-options/ensdb-cli)** flatten that ramp.
+
+The headline value props for self-hosters:
+
+<EnsDbSnapshotsTeaser />
+
+<LinkCard
+  title="Read the full teaser"
+  description="Problem, outcomes, and who this is for — all in one page."
+  href="/docs/integrate/integration-options/ensdb-cli"
+/>
 
 ### Deploying with Docker
 

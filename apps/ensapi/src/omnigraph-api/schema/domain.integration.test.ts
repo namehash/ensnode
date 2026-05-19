@@ -72,7 +72,7 @@ describe("Domain.canonical", () => {
     domain: {
       id: DomainId;
       canonical: {
-        name: InterpretedName;
+        name: { interpreted: InterpretedName };
         depth: number;
         node: string;
         path: { id: DomainId }[];
@@ -82,13 +82,13 @@ describe("Domain.canonical", () => {
 
   const DomainCanonicalByName = gql`
     query DomainCanonicalByName($name: InterpretedName!) {
-      domain(by: { name: $name }) { id canonical { name depth node path { id } } }
+      domain(by: { name: $name }) { id canonical { name { interpreted } depth node path { id } } }
     }
   `;
 
   const DomainCanonicalById = gql`
     query DomainCanonicalById($id: DomainId!) {
-      domain(by: { id: $id }) { id canonical { name depth node path { id } } }
+      domain(by: { id: $id }) { id canonical { name { interpreted } depth node path { id } } }
     }
   `;
 
@@ -98,7 +98,7 @@ describe("Domain.canonical", () => {
       const result = await request<DomainCanonicalQueryResult>(DomainCanonicalByName, { name });
       const labelCount = canonical.split(".").length;
       expect(result).toMatchObject({
-        domain: { canonical: { name: canonical, depth: labelCount } },
+        domain: { canonical: { name: { interpreted: canonical }, depth: labelCount } },
       });
       expect(result.domain!.canonical!.path.length).toBe(labelCount);
     },
@@ -116,7 +116,7 @@ describe("Domain.canonical", () => {
     ).resolves.toMatchObject({
       domain: {
         canonical: {
-          name: "wallet.sub1.sub2.parent.eth",
+          name: { interpreted: "wallet.sub1.sub2.parent.eth" },
           path: expect.arrayContaining([{ id: expect.any(String) }]),
         },
       },
@@ -134,7 +134,7 @@ describe("Domain.canonical", () => {
     await expect(
       request<DomainCanonicalQueryResult>(DomainCanonicalById, { id }),
     ).resolves.toMatchObject({
-      domain: { id, canonical: { name: "addr.reverse" } },
+      domain: { id, canonical: { name: { interpreted: "addr.reverse" } } },
     });
   });
 });
