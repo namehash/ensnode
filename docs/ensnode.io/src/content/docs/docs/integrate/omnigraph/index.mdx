@@ -64,7 +64,7 @@ Every name and label crossing the Omnigraph surface is an **Interpreted Name** (
 
 ## Relay-spec connections
 
-Every list field in the schema is a [Relay-spec Connection](https://relay.dev/graphql/connections.htm) with `edges`, `pageInfo`, and `totalCount`. Cursor-based pagination is idiomatic in urql, Apollo, Relay, and most modern GraphQL clients — infinite scroll and stable pagination work out of the box, with no per-endpoint plumbing.
+Collection and paginated relationship fields in the schema follow the [Relay-spec Connection](https://relay.dev/graphql/connections.htm) pattern with `edges`, `pageInfo`, and `totalCount`. Some fields like `DomainCanonical.path` and `Event.topics` are plain arrays without pagination support. Cursor-based pagination is idiomatic in urql, Apollo, Relay, and most modern GraphQL clients — infinite scroll and stable pagination work out of the box, with no per-endpoint plumbing.
 
 ## A complete audit log of ENS Events
 
