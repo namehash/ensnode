@@ -33,9 +33,11 @@ Because ENSApi is read-only, it can safely connect to an ENSDb replica without r
 
 A scalable ENSNode deployment might look like this:
 
+![ENSNode Scalable Deployment Architecture](/ensnode-scalability.svg)
+
 - **One ENSIndexer instance** → writes to the ENSDb primary instance
-- **One ENSDb primary instance** → replicates asynchronously to `N` replicas
-- **Multiple ENSApi instances** → each connected to the ENSDb primary instance or any ENSDb replica (often load-balanced across replicas)
+- **One ENSDb primary instance** → replicates asynchronously to `M` replicas
+- **Multiple ENSApi instances** → each of `N` instances connected to the ENSDb primary instance or any ENSDb replica (often load-balanced across replicas)
 - **One ENSRainbow instance** → co-located with ENSIndexer instance on the same local network for fast label healing
 
 This architecture lets you scale reads independently of writes, matching your infrastructure to your actual traffic patterns.
