@@ -4,8 +4,8 @@
   "private": true,
   "packageManager": "pnpm@10.33.0",
   "scripts": {
-    "lint": "biome check --write .",
-    "lint:ci": "biome ci",
+    "lint": "pnpm exec prettier --write \"**/*.md\" && pnpm -r --parallel --if-present run format && biome check --write .",
+    "lint:ci": "pnpm exec prettier --check \"**/*.md\" && pnpm -r --parallel --if-present run format:check && biome ci",
     "test": "vitest --silent passed-only",
     "test:integration": "vitest --config vitest.integration.config.ts --silent passed-only",
     "test:integration:ci": "pnpm -F @ensnode/integration-test-env start",
@@ -36,6 +36,7 @@
     "@changesets/cli": "^2.29.8",
     "@typescript/native-preview": "7.0.0-dev.20260128.1",
     "jsdom": "^27.0.1",
+    "prettier": "catalog:",
     "tsup": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"

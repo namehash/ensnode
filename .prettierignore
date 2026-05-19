@@ -1,0 +1,14 @@
+# Dependencies and build output (prettier ignores node_modules by default; listed for clarity)
+node_modules
+dist
+build
+.next
+.astro
+.ponder
+generated
+
+# Lockfiles
+pnpm-lock.yaml
+
+# Generated changelogs — owned by changesets, do not reformat
+**/CHANGELOG.md
