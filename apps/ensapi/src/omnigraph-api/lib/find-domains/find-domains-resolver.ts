@@ -1,7 +1,7 @@
 import { trace } from "@opentelemetry/api";
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, count, eq, ilike, inArray, type SQL, sql } from "drizzle-orm";
-import type { InterpretedName, NormalizedAddress, RegistryId } from "enssdk";
+import type { NormalizedAddress, RegistryId } from "enssdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
@@ -21,7 +21,11 @@ import {
   PAGINATION_DEFAULT_PAGE_SIZE,
 } from "@/omnigraph-api/schema/constants";
 import { type Domain, DomainInterfaceRef } from "@/omnigraph-api/schema/domain";
-import type { DomainsOrderInput, DomainsOrderValue } from "@/omnigraph-api/schema/domain-inputs";
+import type {
+  DomainsNameFilter,
+  DomainsOrderInput,
+  DomainsOrderValue,
+} from "@/omnigraph-api/schema/domain-inputs";
 import type { ENSProtocolVersion } from "@/omnigraph-api/schema/ens-protocol-version";
 
 type DomainWithOrderValue = Domain & { __orderValue: DomainOrderValue };
@@ -30,15 +34,6 @@ const tracer = trace.getTracer("find-domains");
 const logger = makeLogger("find-domains-resolver");
 
 const DOMAINS_DEFAULT_ORDER = { by: "NAME", dir: "ASC" } satisfies DomainsOrderValue;
-
-/**
- * @oneOf filter shape over Domain name. Mirrors the GraphQL `DomainsNameFilter` input.
- */
-export interface DomainsNameFilterValue {
-  starts_with?: string | null;
-  eq?: InterpretedName | null;
-  in?: InterpretedName[] | null;
-}
 
 /**
  * Compound filter shape consumed by `resolveFindDomains`. Each property is optional; the resolver
@@ -52,7 +47,7 @@ export interface DomainsWhere {
   ownerId?: NormalizedAddress | null;
   registryId?: RegistryId | null;
   canonical?: boolean | null;
-  name?: DomainsNameFilterValue | null;
+  name?: typeof DomainsNameFilter.$inferInput | null;
   version?: typeof ENSProtocolVersion.$inferType | null;
 }
 
@@ -67,7 +62,7 @@ const VERSION_TO_DOMAIN_TYPE: Record<
 /**
  * Build the SQL condition for `where.name`.
  */
-function nameCondition(filter: DomainsNameFilterValue): SQL | undefined {
+function nameCondition(filter: typeof DomainsNameFilter.$inferInput): SQL {
   if (filter.starts_with) {
     return ilike(ensIndexerSchema.domain.canonicalName, `${filter.starts_with}%`);
   }
@@ -133,7 +128,9 @@ export function resolveFindDomains(
     // by registryId
     where?.registryId ? eq(ensIndexerSchema.domain.registryId, where.registryId) : undefined,
     // by canonical
-    where?.canonical === true ? eq(ensIndexerSchema.domain.canonical, true) : undefined,
+    where?.canonical !== undefined && where?.canonical !== null
+      ? eq(ensIndexerSchema.domain.canonical, where.canonical)
+      : undefined,
     // by name
     where?.name ? nameCondition(where.name) : undefined,
     // by version
