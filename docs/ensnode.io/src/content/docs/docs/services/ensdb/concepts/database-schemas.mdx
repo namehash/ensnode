@@ -274,7 +274,7 @@ Domain-Resolver relations are tracked via the Protocol Acceleration plugin, not 
 | `canonical_depth`            | `integer`     | yes      | Materialized Canonical Depth, `NULL` iff `canonical = false`. The depth of this Domain in the Canonical Nametree, i.e. the number of Labels in its Canonical Name (e.g. `"eth"` depth 1, `"vitalik.eth"` depth 2). Maintained by `canonicality-db-helpers.ts`. |
 | `canonical_node`             | `text`        | yes      | Materialized Canonical Node, `NULL` iff `canonical = false`. The computed Node (via `namehash`) of this Domain's Canonical Name. Maintained by `canonicality-db-helpers.ts`. |
 
-**Indexes:** `type`, `registry_id`, `subregistry_id` (partial: non-null only), `owner_id`, `label_hash`, `canonical_name` (hash, exact match — avoids the btree 8191-byte row-size hazard for spam names), `canonical_name` (GIN trigram for substring / similarity queries), `canonical_label_hash_path` (GIN containment for `cascadeLabelHeal`'s `canonical_label_hash_path @> ARRAY[lh]` lookup), `canonical_node` (hash, for resolver-record → canonical-domain joins), `canonical_depth` (btree, for `ORDER BY canonical_depth` — typeahead and depth-ordered browse).
+**Indexes:** `type`, `subregistry_id` (partial: non-null only), `owner_id`, `label_hash`, `(registry_id, label_hash)` (composite; leading-column prefix also serves `WHERE registry_id = X` lookups, so no separate `registry_id` index is needed), `(registry_id, left(canonical_name, 256), id)` (composite expression index for registry-scoped `WHERE registry_id = X ORDER BY canonical_name LIMIT N` — the `Domain.subdomains` shape; the 256-char prefix bounds the index tuple under btree's per-tuple max, and NAME-ordered queries must sort by the same `left(...)` expression for the planner to use this index for ordered scan), `canonical_name` (hash, exact match — avoids the btree 8191-byte row-size hazard for spam names), `canonical_name` (GIN trigram for substring / similarity queries), `canonical_label_hash_path` (GIN containment for `cascadeLabelHeal`'s `canonical_label_hash_path @> ARRAY[lh]` lookup), `canonical_node` (hash, for resolver-record → canonical-domain joins), `canonical_depth` (btree, for `ORDER BY canonical_depth` — typeahead and depth-ordered browse).
 
 **Relations:** belongs to one `registries` record, belongs to one `registries` record (as subregistry), has one `accounts` record (owner), has one `accounts` record (rootRegistryOwner), has one `labels` record, has many `registrations` records.
 
@@ -452,6 +452,8 @@ It is keyed by `(chain_id, address, domain_id)` to match the on-chain data model
 | `resolver`  | `text`    | no       | The Domain's assigned Resolver's address. Always scoped to `chain_id`.              |
 
 **Primary key:** `(chain_id, address, domain_id)`.
+
+**Indexes:** `domain_id` — secondary lookup off the PK. The namegraph-walk recursive CTE in `get-domain-by-interpreted-name` left-joins on `domain_id` alone, which the PK (leading-column `chain_id, address`) cannot serve.
 
 **Relations:** has one `resolver` via `(chain_id, resolver)`.
 
