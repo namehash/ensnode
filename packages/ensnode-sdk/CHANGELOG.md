@@ -1,5 +1,21 @@
 # @ensnode/ensnode-sdk
 
+## 1.14.0
+
+### Minor Changes
+
+- [#2090](https://github.com/namehash/ensnode/pull/2090) [`3132a77`](https://github.com/namehash/ensnode/commit/3132a77b809694a4677da69c8c546a4b41eaa583) Thanks [@tk-o](https://github.com/tk-o)! - Added indexing status based functions for checking Omnigraph API and Subgraph API availability.
+
+- [#2102](https://github.com/namehash/ensnode/pull/2102) [`1b6abb0`](https://github.com/namehash/ensnode/commit/1b6abb06ac364840770dfcc47526111fdf6fb2c9) Thanks [@tk-o](https://github.com/tk-o)! - Added `globalBlockrangeEndBlock` param to `buildIndexedBlockranges`.
+
+- [#2128](https://github.com/namehash/ensnode/pull/2128) [`65cf37c`](https://github.com/namehash/ensnode/commit/65cf37c24c1bd9a7f30ad758c945015ece9c8461) Thanks [@tk-o](https://github.com/tk-o)! - Renamed the `ensv2` plugin to `unigraph`. It better conveys the idea of a single unified data model used for indexing both ENSv1 and ENSv2.
+
+### Patch Changes
+
+- Updated dependencies []:
+  - enssdk@1.14.0
+  - @ensnode/datasources@1.14.0
+
 ## 1.13.1
 
 ### Patch Changes

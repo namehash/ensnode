@@ -54,7 +54,7 @@ export function getHostedEnsNodeInstanceDocUrl(headingAnchor: string): string {
 }
 
 /** ENSAdmin Omnigraph playground deep link (opens in browser). */
-export function buildEnsadminOmnigraphUrl(params: {
+export function buildEnsAdminOmnigraphUrl(params: {
   ensadminBaseUrl: string;
   query: string;
   connection: string;

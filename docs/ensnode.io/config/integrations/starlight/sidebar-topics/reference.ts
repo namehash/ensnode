@@ -47,7 +47,7 @@ export const referenceSidebarTopic = {
     },
     {
       label: "Contributing",
-      collapsed: true,
+      collapsed: false,
       items: [
         { label: "Overview", link: "/docs/reference/contributing" },
         { label: "Creating Pull Requests", link: "/docs/reference/contributing/prs" },
