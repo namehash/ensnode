@@ -389,8 +389,7 @@ const introspection = {
             "type": {
               "kind": "SCALAR",
               "name": "Boolean"
-            },
-            "defaultValue": "false"
+            }
           },
           {
             "name": "name",
