@@ -1,0 +1,48 @@
+---
+title: ENSNode Scalability
+description: Understand how ENSNode's architecture enables horizontal scaling through PostgreSQL replication.
+sidebar:
+  label: Scalability
+  order: 3
+---
+
+import { LinkCard } from '@astrojs/starlight/components';
+
+ENSNode's architecture is designed for excellent scalability. By separating write and read workloads and building on PostgreSQL, you can scale your ENSNode deployment to handle high request volumes without impacting indexing performance.
+
+## Single Writer, Many Readers
+
+The ENSNode architecture naturally separates writes from reads:
+
+- **ENSIndexer** is the sole writer to ENSDb. It processes blockchain events and updates the database with the latest ENS state.
+- **ENSApi** is a read-only service. It serves GraphQL and REST API requests by querying ENSDb, but never writes to it.
+
+This separation insulates ENSIndexer from high request volumes. Whether you serve 10 requests per second or 10,000, the indexing process remains unaffected because ENSApi does not compete with ENSIndexer for database write locks or indexer resources.
+
+## Scale ENSDb with PostgreSQL Replication
+
+ENSDb is built on PostgreSQL, which provides mature, production-proven mechanisms for horizontal scaling. The most common approach is **asynchronous replication**:
+
+1. **Primary (master)**: ENSIndexer instance writes to a single ENSDb primary instance.
+2. **Replicas**: The primary ENSDb instance asynchronously replicates its data to one or more ENSDb read replicas.
+3. **Read scaling**: You can connect any number of ENSApi instances to the ENSDb primary instance or to any ENSDb replica.
+
+Because ENSApi is read-only, it can safely connect to an ENSDb replica without risking stale writes or replication conflicts. As your query load grows, you simply add more PostgreSQL replicas for ENSDb primary instance and more ENSApi instances pointing to them.
+
+## Deployment Example
+
+A scalable ENSNode deployment might look like this:
+
+- **One ENSIndexer instance** → writes to the ENSDb primary instance
+- **One ENSDb primary instance** → replicates asynchronously to `N` replicas
+- **Multiple ENSApi instances** → each connected to the ENSDb primary instance or any ENSDb replica (often load-balanced across replicas)
+- **One ENSRainbow instance** → co-located with ENSIndexer instance on the same local network for fast label healing
+
+This architecture lets you scale reads independently of writes, matching your infrastructure to your actual traffic patterns.
+
+## Further Reading
+
+<LinkCard title="ENSApi Overview" href="/docs/services/ensapi" />
+<LinkCard title="ENSDb Overview" href="/docs/services/ensdb" />
+<LinkCard title="ENSIndexer Overview" href="/docs/services/ensindexer" />
+<LinkCard title="ENSRainbow Overview" href="/docs/services/ensrainbow" />
