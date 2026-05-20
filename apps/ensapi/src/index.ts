@@ -1,4 +1,4 @@
-import config, { initEnvConfig } from "@/config";
+import { initEnvConfig } from "@/config";
 
 import { serve } from "@hono/node-server";
 
@@ -6,6 +6,7 @@ import { indexingStatusCache } from "@/cache/indexing-status.cache";
 import { getReferralEditionSnapshotsCaches } from "@/cache/referral-edition-snapshots.cache";
 import { referralProgramEditionConfigSetCache } from "@/cache/referral-program-edition-set.cache";
 import { redactEnsApiConfig } from "@/config/redact";
+import di from "@/di";
 import { sdk } from "@/lib/instrumentation";
 import logger from "@/lib/logger";
 import { writeGraphQLSchema } from "@/omnigraph-api/lib/write-graphql-schema";
@@ -21,10 +22,13 @@ sdk.start();
 const server = serve(
   {
     fetch: app.fetch,
-    port: config.port,
+    port: di.context.ensApiConfig.port,
   },
   async (info) => {
-    logger.info({ config: redactEnsApiConfig(config) }, `ENSApi listening on port ${info.port}`);
+    logger.info(
+      { config: redactEnsApiConfig(di.context.ensApiConfig) },
+      `ENSApi listening on port ${info.port}`,
+    );
 
     // Write the generated graphql schema in the background
     void writeGraphQLSchema();

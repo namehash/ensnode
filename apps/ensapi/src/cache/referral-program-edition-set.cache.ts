@@ -1,5 +1,3 @@
-import config from "@/config";
-
 import {
   buildReferralProgramEditionConfigSet,
   ENSReferralsClient,
@@ -10,6 +8,7 @@ import { minutesToSeconds } from "date-fns";
 
 import { type CachedResult, SWRCache } from "@ensnode/ensnode-sdk";
 
+import di from "@/di";
 import { lazyProxy } from "@/lib/lazy";
 import { makeLogger } from "@/lib/logger";
 
@@ -32,20 +31,22 @@ function partiallyRedactUrl(url: URL): string {
 async function loadReferralProgramEditionConfigSet(
   _cachedResult?: CachedResult<ReferralProgramEditionConfigSet>,
 ): Promise<ReferralProgramEditionConfigSet> {
+  const { referralProgramEditionConfigSetUrl } = di.context.ensApiConfig;
+
   // If no URL is configured, treat the referral program as having zero editions.
-  if (!config.referralProgramEditionConfigSetUrl) {
+  if (!referralProgramEditionConfigSetUrl) {
     logger.info(
       "REFERRAL_PROGRAM_EDITIONS is not set; referral program edition config set is empty",
     );
     return buildReferralProgramEditionConfigSet([]);
   }
 
-  const logSafeUrl = partiallyRedactUrl(config.referralProgramEditionConfigSetUrl);
+  const logSafeUrl = partiallyRedactUrl(referralProgramEditionConfigSetUrl);
 
   logger.info(`Loading referral program edition config set from: ${logSafeUrl}`);
   try {
     const editionConfigSet = await ENSReferralsClient.getReferralProgramEditionConfigSet(
-      config.referralProgramEditionConfigSetUrl,
+      referralProgramEditionConfigSetUrl,
     );
 
     // Strip any unrecognized editions immediately — they are client-side forward-compatibility

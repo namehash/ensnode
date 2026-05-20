@@ -1,5 +1,3 @@
-import config from "@/config";
-
 import { eq } from "drizzle-orm/sql";
 import { type AccountId, asInterpretedName, type Node, type UnixTimestamp } from "enssdk";
 
@@ -13,6 +11,7 @@ import {
   type RegisteredNameTokens,
 } from "@ensnode/ensnode-sdk";
 
+import di from "@/di";
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 
 interface FindRegisteredNameTokensForDomainRecord {
@@ -103,7 +102,7 @@ function _recordsToRegisteredNameTokens(
     } satisfies AccountId;
     // biome-ignore lint/style/noNonNullAssertion: domain.name guaranteed to exist
     const name = asInterpretedName(record.domains.name!);
-    const ownership = getNameTokenOwnership(config.namespace, name, owner);
+    const ownership = getNameTokenOwnership(di.context.ensNamespaceId, name, owner);
     const token = _recordToNameToken(record, ownership);
     const expiresAt = bigIntToNumber(record.registrationLifecycles.expiresAt);
 
