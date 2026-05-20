@@ -204,11 +204,12 @@ export const ResolvedRecordsRef = builder
             description: "ERC-165 interface ids to resolve (4-byte hex selectors).",
           }),
         },
-        resolve: (r) =>
+        resolve: (r, { ids }) =>
+          // preserve the order of requested interface ids
           r.interfaces
-            ? Object.entries(r.interfaces).map(([interfaceId, implementer]) => ({
-                interfaceId: interfaceId as InterfaceId,
-                implementer,
+            ? ids.map((interfaceId) => ({
+                interfaceId,
+                implementer: r.interfaces![interfaceId] ?? null,
               }))
             : [],
       }),
@@ -222,8 +223,9 @@ export const ResolvedRecordsRef = builder
             description: "Text record keys to resolve (e.g. `avatar`, `description`).",
           }),
         },
-        resolve: (r) =>
-          r.texts ? Object.entries(r.texts).map(([key, value]) => ({ key, value })) : [],
+        resolve: (r, { keys }) =>
+          // preserve the order of requested text keys
+          r.texts ? keys.map((key) => ({ key, value: r.texts![key] ?? null })) : [],
       }),
       addresses: t.field({
         description: "Resolved address records for the requested coin types.",
@@ -236,11 +238,12 @@ export const ResolvedRecordsRef = builder
             description: "Coin types to resolve (e.g. `60` for ETH).",
           }),
         },
-        resolve: (r) =>
+        resolve: (r, { coinTypes }) =>
           r.addresses
-            ? Object.entries(r.addresses).map(([coinType, address]) => ({
-                coinType: Number(coinType) as CoinType,
-                address,
+            ? // preserve the order of requested coin types
+              coinTypes.map((coinType) => ({
+                coinType,
+                address: r.addresses![coinType] ?? null,
               }))
             : [],
       }),

@@ -19,7 +19,10 @@ import {
 export const EMPTY_RECORDS_SELECTION_MESSAGE = "Records selection cannot be empty.";
 
 /** Recursively flatten a GraphQL selection set into Field nodes (expanding fragments). */
-function collectFieldNodes(graphqlSelectionSet: SelectionSetNode, info: GraphQLResolveInfo): FieldNode[] {
+function collectFieldNodes(
+  graphqlSelectionSet: SelectionSetNode,
+  info: GraphQLResolveInfo,
+): FieldNode[] {
   const fields: FieldNode[] = [];
 
   for (const graphqlSelection of graphqlSelectionSet.selections) {

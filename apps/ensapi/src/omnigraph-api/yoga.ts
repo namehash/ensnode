@@ -16,7 +16,6 @@ import { schema } from "@/omnigraph-api/schema";
 
 const logger = makeLogger("omnigraph");
 
-
 // tests exact ZodError or GraphQLError-wrapped ZodError
 const isZodError = (value: unknown): boolean =>
   value instanceof ZodError ||
