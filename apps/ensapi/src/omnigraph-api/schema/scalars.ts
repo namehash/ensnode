@@ -5,6 +5,8 @@ import {
   type CoinType,
   type DomainId,
   type Hex,
+  type InterfaceId,
+  isInterfaceId,
   isInterpretedLabel,
   isInterpretedName,
   type Name,
@@ -71,6 +73,25 @@ builder.scalarType("CoinType", {
   description: "CoinType represents a enssdk#CoinType.",
   serialize: (value: CoinType) => value,
   parseValue: (value) => makeCoinTypeSchema("CoinType").parse(value),
+});
+
+builder.scalarType("InterfaceId", {
+  description: "InterfaceId represents a ERC-165 interface id (4-byte hex selector).",
+  serialize: (value: InterfaceId) => value,
+  parseValue: (value) =>
+    z.coerce
+      .string()
+      .check((ctx) => {
+        if (!isInterfaceId(ctx.value)) {
+          ctx.issues.push({
+            code: "custom",
+            message: "Must be a 4-byte hex (0x + 8 hex chars)",
+            input: ctx.value,
+          });
+        }
+      })
+      .transform((val) => val.toLowerCase() as InterfaceId)
+      .parse(value),
 });
 
 builder.scalarType("Node", {

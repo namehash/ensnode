@@ -14,6 +14,7 @@ import { withSpanAsync } from "@/lib/instrumentation/auto-span";
 import { resolveForward } from "@/lib/resolution/forward-resolution";
 import { runWithTrace } from "@/lib/tracing/tracing-api";
 import { builder } from "@/omnigraph-api/builder";
+import { buildRecordsSelectionFromResolveInfo } from "@/omnigraph-api/lib/build-records-selection";
 import {
   orderPaginationBy,
   paginateBy,
@@ -50,7 +51,7 @@ import { LabelRef } from "@/omnigraph-api/schema/label";
 import { PermissionsUserRef } from "@/omnigraph-api/schema/permissions";
 import { RegistrationInterfaceRef } from "@/omnigraph-api/schema/registration";
 import { RegistryInterfaceRef } from "@/omnigraph-api/schema/registry";
-import { ResolvedRecordsRef, ResolveSelectionInput } from "@/omnigraph-api/schema/resolution";
+import { ResolvedRecordsRef } from "@/omnigraph-api/schema/resolution";
 
 const tracer = trace.getTracer("schema/Domain");
 
@@ -183,30 +184,17 @@ DomainInterfaceRef.implement({
     ///////////////////
     records: t.field({
       description:
-        "Resolve ENS records for this Domain via the ENS protocol. Only canonical domains can be resolved. Returns null if the domain is not canonical.",
+        "Resolve ENS records for this Domain via the ENS protocol. Only canonical, normalized names can be resolved. Returns null if the domain is not canonical.",
       type: ResolvedRecordsRef,
       nullable: true,
-      args: {
-        selection: t.arg({
-          type: ResolveSelectionInput,
-          required: true,
-          description: "Which records to resolve.",
-        }),
-      },
-      resolve: async (domain, { selection }, context) => {
+      resolve: async (domain, _args, _context, info) => {
         const name = domain.canonicalName;
         if (!name) return null;
 
+        const selection = buildRecordsSelectionFromResolveInfo(info);
+
         const { result } = await runWithTrace(() =>
-          resolveForward(
-            name,
-            {
-              name: selection.reverseName ?? undefined,
-              texts: selection.texts ?? undefined,
-              addresses: selection.addresses ?? undefined,
-            },
-            { accelerate: false, canAccelerate: false },
-          ),
+          resolveForward(name, selection, { accelerate: false, canAccelerate: false }),
         );
 
         return result as ResolverRecordsResponseBase;

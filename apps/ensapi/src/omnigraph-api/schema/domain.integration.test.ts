@@ -1,6 +1,7 @@
 import {
   ADDR_REVERSE_NODE,
   asInterpretedLabel,
+  type CoinType,
   type DomainId,
   ETH_NODE,
   type InterpretedLabel,
@@ -15,7 +16,7 @@ import {
 import { beforeAll, describe, expect, it } from "vitest";
 
 import { DatasourceNames } from "@ensnode/datasources";
-import { accounts } from "@ensnode/datasources/devnet";
+import { accounts, addresses, fixtures } from "@ensnode/datasources/devnet";
 import { getDatasourceContract } from "@ensnode/ensnode-sdk";
 
 import { DEVNET_ETH_LABELS, DEVNET_NAMES } from "@/test/integration/devnet-names";
@@ -490,35 +491,69 @@ describe("Domain.records", () => {
   type DomainRecordsResult = {
     domain: {
       records: {
-        addresses: Array<{ coinType: number; address: string | null }>;
+        addresses: Array<{ coinType: CoinType; address: string | null }>;
+        texts: Array<{ key: string; value: string | null }>;
+      } | null;
+    };
+  };
+
+  type DomainAllRecordsResult = {
+    domain: {
+      records: {
+        reverseName: string | null;
+        contenthash: string | null;
+        pubkey: { x: string; y: string } | null;
+        dnszonehash: string | null;
+        version: string | null;
+        abi: { contentType: string; data: string } | null;
+        interfaces: Array<{ interfaceId: string; implementer: string | null }>;
+        addresses: Array<{ coinType: CoinType; address: string | null }>;
         texts: Array<{ key: string; value: string | null }>;
       } | null;
     };
   };
 
   const DomainRecords = gql`
-    query DomainRecords($name: InterpretedName!, $addresses: [CoinType!], $texts: [String!]) {
+    query DomainRecords($name: InterpretedName!, $addresses: [CoinType!]!, $texts: [String!]!) {
       domain(by: { name: $name }) {
-        records(selection: { addresses: $addresses, texts: $texts }) {
-          addresses { coinType address }
-          texts { key value }
+        records {
+          addresses(coinTypes: $addresses) { coinType address }
+          texts(keys: $texts) { key value }
         }
       }
     }
   `;
 
-  it("resolves ETH address for test.eth", async () => {
-    const result = await request<DomainRecordsResult>(DomainRecords, {
-      name: "test.eth",
-      addresses: [60],
-      texts: [],
-    });
+  const DomainRecordsAll = gql`
+    query DomainRecordsAll(
+      $name: InterpretedName!
+      $addresses: [CoinType!]!
+      $texts: [String!]!
+      $contentTypeMask: BigInt!
+      $interfaceIds: [InterfaceId!]!
+    ) {
+      domain(by: { name: $name }) {
+        records {
+          reverseName
+          contenthash
+          pubkey { x y }
+          dnszonehash
+          version
+          abi(contentTypeMask: $contentTypeMask) { contentType data }
+          interfaces(ids: $interfaceIds) { interfaceId implementer }
+          addresses(coinTypes: $addresses) { coinType address }
+          texts(keys: $texts) { key value }
+        }
+      }
+    }
+  `;
 
-    expect(result.domain.records?.addresses).toEqual([
-      { coinType: 60, address: accounts.owner.address },
-    ]);
-    expect(result.domain.records?.texts).toEqual([]);
-  });
+  const textRecordsByKey = (texts: Array<{ key: string; value: string | null }>) =>
+    Object.fromEntries(texts.map(({ key, value }) => [key, value]));
+
+  const addressRecordsByCoinType = (
+    addresses: Array<{ coinType: CoinType; address: string | null }>,
+  ) => Object.fromEntries(addresses.map(({ coinType, address }) => [coinType, address]));
 
   it("resolves address and text records for example.eth", async () => {
     const result = await request<DomainRecordsResult>(DomainRecords, {
@@ -531,5 +566,43 @@ describe("Domain.records", () => {
       { coinType: 60, address: accounts.owner.address },
     ]);
     expect(result.domain.records?.texts).toEqual([{ key: "description", value: "example.eth" }]);
+  });
+
+  it("resolves every supported record type for test.eth", async () => {
+    const result = await request<DomainAllRecordsResult>(DomainRecordsAll, {
+      name: "test.eth",
+      addresses: [60, 0, 2],
+      texts: ["avatar", "description", "url", "email", "com.twitter", "com.github"],
+      contentTypeMask: "1",
+      interfaceIds: [fixtures.fourBytesInterface],
+    });
+
+    const records = result.domain.records;
+    expect(records).toBeDefined();
+
+    expect(records?.contenthash).toBe(fixtures.contenthash);
+    expect(records?.pubkey).toEqual({ x: fixtures.publicKeyX, y: fixtures.publicKeyY });
+    expect(records?.dnszonehash).toBeNull();
+    expect(records?.version).toEqual(expect.any(String));
+    expect(records?.abi).toEqual({
+      contentType: "1",
+      data: fixtures.abiBytes,
+    });
+    expect(records?.interfaces).toEqual([
+      { interfaceId: fixtures.fourBytesInterface, implementer: addresses.one },
+    ]);
+    expect(addressRecordsByCoinType(records?.addresses ?? [])).toEqual({
+      60: accounts.owner.address,
+      0: fixtures.bitcoinAddress,
+      2: fixtures.litecoinAddress,
+    });
+    expect(textRecordsByKey(records?.texts ?? [])).toEqual({
+      avatar: "https://example.com/avatar.png",
+      description: "test.eth",
+      url: "https://ens.domains",
+      email: "test@ens.domains",
+      "com.twitter": "ensdomains",
+      "com.github": "ensdomains",
+    });
   });
 });

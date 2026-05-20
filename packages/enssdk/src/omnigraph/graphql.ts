@@ -5,6 +5,7 @@ import type {
   CoinType,
   DomainId,
   Hex,
+  InterfaceId,
   InterpretedLabel,
   InterpretedName,
   Node,
@@ -40,6 +41,7 @@ export type OmnigraphScalars = {
   Hex: Hex;
   ChainId: ChainId;
   CoinType: CoinType;
+  InterfaceId: InterfaceId;
   InterpretedName: InterpretedName;
   InterpretedLabel: InterpretedLabel;
   Node: Node;

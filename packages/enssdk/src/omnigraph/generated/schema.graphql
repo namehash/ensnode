@@ -252,12 +252,9 @@ interface Domain {
   parent: Domain
 
   """
-  Resolve ENS records for this Domain via the ENS protocol. Only canonical domains can be resolved. Returns null if the domain is not canonical.
+  Resolve ENS records for this Domain via the ENS protocol. Only canonical, normalized names can be resolved. Returns null if the domain is not canonical.
   """
-  records(
-    """Which records to resolve."""
-    selection: ResolveSelectionInput!
-  ): ResolvedRecords
+  records: ResolvedRecords
 
   """The latest Registration for this Domain, if exists."""
   registration: Registration
@@ -455,12 +452,9 @@ type ENSv1Domain implements Domain {
   parent: Domain
 
   """
-  Resolve ENS records for this Domain via the ENS protocol. Only canonical domains can be resolved. Returns null if the domain is not canonical.
+  Resolve ENS records for this Domain via the ENS protocol. Only canonical, normalized names can be resolved. Returns null if the domain is not canonical.
   """
-  records(
-    """Which records to resolve."""
-    selection: ResolveSelectionInput!
-  ): ResolvedRecords
+  records: ResolvedRecords
 
   """The latest Registration for this Domain, if exists."""
   registration: Registration
@@ -575,12 +569,9 @@ type ENSv2Domain implements Domain {
   permissions(after: String, before: String, first: Int, last: Int, where: DomainPermissionsWhereInput): ENSv2DomainPermissionsConnection
 
   """
-  Resolve ENS records for this Domain via the ENS protocol. Only canonical domains can be resolved. Returns null if the domain is not canonical.
+  Resolve ENS records for this Domain via the ENS protocol. Only canonical, normalized names can be resolved. Returns null if the domain is not canonical.
   """
-  records(
-    """Which records to resolve."""
-    selection: ResolveSelectionInput!
-  ): ResolvedRecords
+  records: ResolvedRecords
 
   """The latest Registration for this Domain, if exists."""
   registration: Registration
@@ -864,6 +855,9 @@ input EventsWhereInput {
 
 """Hex represents viem#Hex."""
 scalar Hex
+
+"""InterfaceId represents a ERC-165 interface id (4-byte hex selector)."""
+scalar InterfaceId
 
 """InterpretedLabel represents a enssdk#InterpretedLabel."""
 scalar InterpretedLabel
@@ -1322,20 +1316,10 @@ type Renewal {
 """RenewalId represents a enssdk#RenewalId."""
 scalar RenewalId
 
-"""
-Specifies which ENS records to resolve. At least one field must be set to receive any records.
-"""
-input ResolveSelectionInput {
-  """Coin types to resolve address records for (e.g. `60` for ETH)."""
-  addresses: [CoinType!]
-
-  """
-  Whether to resolve the `name` record (used in Reverse Resolution, ENSIP-19).
-  """
-  reverseName: Boolean
-
-  """Text record keys to resolve (e.g. `avatar`, `description`, `com.)."""
-  texts: [String!]
+"""A resolved ABI record for an ENS name."""
+type ResolvedAbiRecord {
+  contentType: BigInt!
+  data: Hex!
 }
 
 """A resolved address record for an ENS name."""
@@ -1347,20 +1331,64 @@ type ResolvedAddressRecord {
   coinType: CoinType!
 }
 
-"""
-Records resolved for a specific ENS name via the ENS protocol. Only selected records are populated.
-"""
+"""A resolved ERC-165 interface implementer record for an ENS name."""
+type ResolvedInterfaceRecord {
+  implementer: Address
+  interfaceId: InterfaceId!
+}
+
+"""A resolved PubkeyResolver (x, y) pair for an ENS name."""
+type ResolvedPubkeyRecord {
+  x: Hex!
+  y: Hex!
+}
+
+"""Records resolved for a specific ENS name via the ENS protocol."""
 type ResolvedRecords {
-  """Resolved address records for selected coin types."""
-  addresses: [ResolvedAddressRecord!]!
+  """
+  The first stored ABI matching the requested content-type bitmask, or null if not set.
+  """
+  abi(
+    """
+    Content-type bitmask; the resolver returns the first stored ABI whose bit is set (lowest bit first).
+    """
+    contentTypeMask: BigInt!
+  ): ResolvedAbiRecord
+
+  """Resolved address records for the requested coin types."""
+  addresses(
+    """Coin types to resolve (e.g. `60` for ETH)."""
+    coinTypes: [CoinType!]!
+  ): [ResolvedAddressRecord!]!
+
+  """The ENSIP-7 contenthash record raw bytes, or null if not set."""
+  contenthash: Hex
+
+  """The IDNSZoneResolver zonehash raw bytes, or null if not set."""
+  dnszonehash: Hex
+
+  """Resolved ERC-165 interface implementer records for the requested ids."""
+  interfaces(
+    """ERC-165 interface ids to resolve (4-byte hex selectors)."""
+    ids: [InterfaceId!]!
+  ): [ResolvedInterfaceRecord!]!
+
+  """The PubkeyResolver (x, y) pair, or null if not set."""
+  pubkey: ResolvedPubkeyRecord
 
   """
-  The `name` record value used in Reverse Resolution (ENSIP-19), or null if not set or not selected.
+  The `name` record value used in Reverse Resolution (ENSIP-19), or null if not set.
   """
   reverseName: String
 
-  """Resolved text records for selected keys."""
-  texts: [ResolvedTextRecord!]!
+  """Resolved text records for the requested keys."""
+  texts(
+    """Text record keys to resolve (e.g. `avatar`, `description`)."""
+    keys: [String!]!
+  ): [ResolvedTextRecord!]!
+
+  """The IVersionableResolver version, or null if not set or unavailable."""
+  version: BigInt
 }
 
 """A resolved text record for an ENS name."""
