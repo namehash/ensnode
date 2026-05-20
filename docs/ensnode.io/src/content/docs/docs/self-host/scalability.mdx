@@ -37,7 +37,7 @@ An ENSNode deployment with _massive_ horizontal scaling might look like this:
 
 - **One ENSIndexer instance** → writes to the ENSDb primary instance
 - **One ENSDb primary instance** → replicates asynchronously to `M` replicas
-- **Multiple ENSApi instances** → each of `N` instances connected to the ENSDb primary instance or any ENSDb replica (often load-balanced across replicas)
+- **Multiple ENSApi instances** → each of `N` instances connected to one of the ENSDb replicas (often load-balanced across replicas)
 - **One ENSRainbow instance** → co-located with ENSIndexer instance on the same local network for fast label healing
 
 Only the largest ENSNode deployments will need such a complex setup. Still, it's good to know that if you need massive scalability, we have you covered! The ENSNode architecture lets you scale reads independently of writes, matching your infrastructure to your actual traffic patterns.
