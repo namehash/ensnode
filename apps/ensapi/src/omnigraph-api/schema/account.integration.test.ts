@@ -312,3 +312,70 @@ describe("Account.events filtering (AccountEventsWhereInput)", () => {
     expect(events.length).toBe(0);
   });
 });
+
+describe("Account.primaryNames", () => {
+  type AccountPrimaryNamesResult = {
+    account: {
+      primaryNames: Array<{ chainId: number; name: string | null }>;
+    };
+  };
+
+  const AccountPrimaryNames = gql`
+    query AccountPrimaryNames($address: Address!, $chainIds: [DefaultableChainId!]) {
+      account(by: { address: $address }) {
+        primaryNames(chainIds: $chainIds) {
+          chainId
+          name
+        }
+      }
+    }
+  `;
+
+  const AccountPrimaryNamesAllChains = gql`
+    query AccountPrimaryNamesAllChains($address: Address!) {
+      account(by: { address: $address }) {
+        primaryNames {
+          chainId
+          name
+        }
+      }
+    }
+  `;
+
+  it("resolves primary name for owner on chain 1", async () => {
+    const result = await request<AccountPrimaryNamesResult>(AccountPrimaryNames, {
+      address: accounts.owner.address,
+      chainIds: [1],
+    });
+
+    expect(result.account.primaryNames).toEqual([{ chainId: 1, name: "test.eth" }]);
+  });
+
+  it("returns null for user without a primary name", async () => {
+    const result = await request<AccountPrimaryNamesResult>(AccountPrimaryNames, {
+      address: accounts.user.address,
+      chainIds: [1],
+    });
+
+    expect(result.account.primaryNames).toEqual([{ chainId: 1, name: null }]);
+  });
+
+  it("resolves all ENSIP-19 supported chains when chainIds is omitted from the query", async () => {
+    const result = await request<AccountPrimaryNamesResult>(AccountPrimaryNamesAllChains, {
+      address: accounts.owner.address,
+    });
+
+    expect(result.account.primaryNames).toEqual(
+      expect.arrayContaining([{ chainId: 1, name: "test.eth" }]),
+    );
+  });
+
+  it("rejects default chain id combined with other chain ids", async () => {
+    await expect(
+      request(AccountPrimaryNames, {
+        address: accounts.owner.address,
+        chainIds: [0, 1],
+      }),
+    ).rejects.toThrow();
+  });
+});

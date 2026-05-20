@@ -19,6 +19,16 @@ type Account {
   """
   permissions(after: String, before: String, first: Int, last: Int, where: AccountPermissionsWhereInput): AccountPermissionsConnection
 
+  """
+  ENSIP-19 primary names for this Account. Omit chainIds to resolve all ENSIP-19 supported chains.
+  """
+  primaryNames(
+    """
+    Chain ids to resolve primary names for. Use 0 for the default EVM chain per ENSIP-19. Omit to resolve all ENSIP-19 supported chains.
+    """
+    chainIds: [DefaultableChainId!]
+  ): [PrimaryNameByChain!]!
+
   """The Permissions on Registries granted to this Account."""
   registryPermissions(after: String, before: String, first: Int, last: Int): AccountRegistryPermissionsConnection
 
@@ -222,6 +232,11 @@ scalar ChainId
 
 """CoinType represents a enssdk#CoinType."""
 scalar CoinType
+
+"""
+DefaultableChainId represents a enssdk#DefaultableChainId. Use 0 for the default EVM chain per ENSIP-19.
+"""
+scalar DefaultableChainId
 
 """
 Represents a Domain, i.e. an individual Label within the ENS namegraph. It may or may not be Canonical. It may be an ENSv1Domain or an ENSv2Domain.
@@ -1070,6 +1085,19 @@ type PermissionsUserEventsConnectionEdge {
 
 """PermissionsUserId represents a enssdk#PermissionsUserId."""
 scalar PermissionsUserId
+
+"""An ENSIP-19 primary name for an Account on a specific chain."""
+type PrimaryNameByChain {
+  """
+  The chain on which the primary name was resolved. 0 denotes the default EVM chain per ENSIP-19.
+  """
+  chainId: DefaultableChainId!
+
+  """
+  The validated primary name for this Account on this chain, or null if none is set.
+  """
+  name: InterpretedName
+}
 
 type Query {
   """Identify an Account by ID or Address."""

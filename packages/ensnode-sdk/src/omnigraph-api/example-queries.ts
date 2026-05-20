@@ -145,6 +145,34 @@ query DomainByName($name: InterpretedName!) {
     },
   },
 
+  ////////////////////
+  // Domain Records
+  ////////////////////
+  {
+    id: "domain-records",
+    query: `
+query DomainRecords(
+  $name: InterpretedName!
+) {
+  domain(by: { name: $name }) {
+    canonical { name { interpreted } }
+    records {
+      addresses(coinTypes: [60]) { coinType address }
+      texts(keys: ["description"]) { key value }
+    }
+  }
+}`,
+    variables: {
+      default: { name: "vitalik.eth" },
+      [ENSNamespaceIds.EnsTestEnv]: {
+        name: DEVNET_NAME_WITH_OWNED_RESOLVER,
+      },
+      [ENSNamespaceIds.SepoliaV2]: {
+        name: SEPOLIA_V2_NAME_WITH_OWNED_RESOLVER,
+      },
+    },
+  },
+
   //////////////////////
   // Domain Subdomains
   //////////////////////
@@ -212,6 +240,28 @@ query AccountDomains(
           canonical { name { interpreted } }
         }
       }
+    }
+  }
+}`,
+    variables: {
+      default: { address: VITALIK_ADDRESS },
+      [ENSNamespaceIds.EnsTestEnv]: { address: accounts.owner.address },
+      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_ADDRESS_WITH_LOT_OF_NAMES },
+    },
+  },
+
+  /////////////////////////
+  // Account Primary Names
+  /////////////////////////
+  {
+    id: "account-primary-names",
+    query: `
+query AccountPrimaryNames($address: Address!) {
+  account(by: { address: $address }) {
+    address
+    primaryNames {
+      chainId
+      name
     }
   }
 }`,

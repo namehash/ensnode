@@ -1,8 +1,40 @@
-import type { CoinType, Hex, InterfaceId, NormalizedAddress } from "enssdk";
+import type {
+  CoinType,
+  DefaultableChainId,
+  Hex,
+  InterfaceId,
+  InterpretedName,
+  NormalizedAddress,
+} from "enssdk";
 
 import type { ResolverRecordsResponseBase } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/omnigraph-api/builder";
+
+//////////////////////
+// PrimaryNameByChain
+//////////////////////
+export const PrimaryNameByChainRef = builder
+  .objectRef<{ chainId: DefaultableChainId; name: InterpretedName | null }>("PrimaryNameByChain")
+  .implement({
+    description: "An ENSIP-19 primary name for an Account on a specific chain.",
+    fields: (t) => ({
+      chainId: t.field({
+        description:
+          "The chain on which the primary name was resolved. 0 denotes the default EVM chain per ENSIP-19.",
+        type: "DefaultableChainId",
+        nullable: false,
+        resolve: (r) => r.chainId,
+      }),
+      name: t.field({
+        description:
+          "The validated primary name for this Account on this chain, or null if none is set.",
+        type: "InterpretedName",
+        nullable: true,
+        resolve: (r) => r.name,
+      }),
+    }),
+  });
 
 ///////////////////////
 // ResolvedTextRecord

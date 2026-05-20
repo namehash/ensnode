@@ -201,6 +201,38 @@ const introspection = {
             "isDeprecated": false
           },
           {
+            "name": "primaryNames",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PrimaryNameByChain"
+                  }
+                }
+              }
+            },
+            "args": [
+              {
+                "name": "chainIds",
+                "type": {
+                  "kind": "LIST",
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "ChainId"
+                    }
+                  }
+                }
+              }
+            ],
+            "isDeprecated": false
+          },
+          {
             "name": "registryPermissions",
             "type": {
               "kind": "OBJECT",
@@ -4571,6 +4603,34 @@ const introspection = {
       {
         "kind": "SCALAR",
         "name": "PermissionsUserId"
+      },
+      {
+        "kind": "OBJECT",
+        "name": "PrimaryNameByChain",
+        "fields": [
+          {
+            "name": "chainId",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "ChainId"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "name",
+            "type": {
+              "kind": "SCALAR",
+              "name": "InterpretedName"
+            },
+            "args": [],
+            "isDeprecated": false
+          }
+        ],
+        "interfaces": []
       },
       {
         "kind": "OBJECT",

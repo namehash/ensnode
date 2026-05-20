@@ -8,6 +8,7 @@ import { AttributeNames, createOpenTelemetryWrapper } from "@pothos/tracing-open
 import type {
   ChainId,
   CoinType,
+  DefaultableChainId,
   DomainId,
   Hex,
   InterfaceId,
@@ -63,6 +64,7 @@ export type BuilderScalars = {
   Address: { Input: NormalizedAddress; Output: NormalizedAddress };
   Hex: { Input: Hex; Output: Hex };
   ChainId: { Input: ChainId; Output: ChainId };
+  DefaultableChainId: { Input: DefaultableChainId; Output: DefaultableChainId };
   CoinType: { Input: CoinType; Output: CoinType };
   InterfaceId: { Input: InterfaceId; Output: InterfaceId };
   Node: { Input: Node; Output: Node };

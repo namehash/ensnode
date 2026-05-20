@@ -1,8 +1,10 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, count, eq, getTableColumns } from "drizzle-orm";
-import type { Address } from "enssdk";
+import type { Address, DefaultableChainId, InterpretedName } from "enssdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+import { resolvePrimaryNames } from "@/lib/resolution/multichain-primary-name-resolution";
+import { runWithTrace } from "@/lib/tracing/tracing-api";
 import { builder } from "@/omnigraph-api/builder";
 import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
 import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domains-resolver";
@@ -17,6 +19,7 @@ import {
 import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-resolver";
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
+import { validatePrimaryNamesChainIds } from "@/omnigraph-api/lib/validate-primary-names-chain-ids";
 import { AccountIdInput } from "@/omnigraph-api/schema/account-id";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
 import { DomainInterfaceRef } from "@/omnigraph-api/schema/domain";
@@ -25,6 +28,7 @@ import { EventRef } from "@/omnigraph-api/schema/event";
 import { AccountEventsWhereInput } from "@/omnigraph-api/schema/event-inputs";
 import { PermissionsUserRef } from "@/omnigraph-api/schema/permissions";
 import { RegistryPermissionsUserRef } from "@/omnigraph-api/schema/registry-permissions-user";
+import { PrimaryNameByChainRef } from "@/omnigraph-api/schema/resolution";
 import { ResolverPermissionsUserRef } from "@/omnigraph-api/schema/resolver-permissions-user";
 
 export const AccountRef = builder.loadableObjectRef("Account", {
@@ -63,6 +67,39 @@ AccountRef.implement({
       type: "Address",
       nullable: false,
       resolve: (parent) => parent.id,
+    }),
+
+    ////////////////////////
+    // Account.primaryNames
+    ////////////////////////
+    primaryNames: t.field({
+      description:
+        "ENSIP-19 primary names for this Account. Omit chainIds to resolve all ENSIP-19 supported chains.",
+      type: [PrimaryNameByChainRef],
+      nullable: false,
+      args: {
+        chainIds: t.arg({
+          type: ["DefaultableChainId"],
+          required: false,
+          description:
+            "Chain ids to resolve primary names for. Use 0 for the default EVM chain per ENSIP-19. Omit to resolve all ENSIP-19 supported chains.",
+        }),
+      },
+      resolve: async (account, { chainIds }) => {
+        validatePrimaryNamesChainIds(chainIds);
+
+        const { result } = await runWithTrace(() =>
+          resolvePrimaryNames(account.id, chainIds ?? undefined, {
+            accelerate: false,
+            canAccelerate: false,
+          }),
+        );
+
+        return Object.entries(result).map(([chainId, name]) => ({
+          chainId: Number(chainId) as DefaultableChainId,
+          name: name as InterpretedName | null,
+        }));
+      },
     }),
 
     ////////////////////
