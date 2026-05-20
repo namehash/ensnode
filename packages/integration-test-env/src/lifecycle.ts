@@ -273,7 +273,7 @@ function logVersions() {
  * Note: `devnet` includes ensdb (coupled via docker-compose) and seeding. `ensindexer` includes
  * waiting for indexing to reach following/completed.
  *
- * On failure, runs cleanup() and rethrows.
+ * On failure, throws — callers are responsible for calling cleanup().
  */
 export async function bringUp(options: { only?: Set<Service> } = {}): Promise<void> {
   const { only } = options;

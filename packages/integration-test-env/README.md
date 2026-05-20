@@ -36,10 +36,16 @@ Two entrypoints share that bring-up:
 pnpm start
 ```
 
-Brings up the full stack and blocks until Ctrl+C. The required ports must be available (8545, 8000, 3223, 42069, 4334). Once it's up, run integration tests from another terminal:
+Brings up the full stack and blocks until Ctrl+C. The required ports must be available (8545, 5433, 3223, 42069, 4334). Once it's up, run integration tests from another terminal (`test:integration` is a monorepo-root script):
 
 ```sh
 pnpm test:integration
+```
+
+To bring up only a subset of services, pass `--only` with a comma-separated list (valid: `devnet`, `ensrainbow`, `ensindexer`, `ensapi`). Omitted services aren't started, so their ports aren't required:
+
+```sh
+pnpm start --only devnet,ensrainbow
 ```
 
 ### Full CI pipeline (bring up + tests + tear down)
