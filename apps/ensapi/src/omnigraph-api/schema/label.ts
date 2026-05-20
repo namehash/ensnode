@@ -1,3 +1,5 @@
+import { beautifyInterpretedLabel } from "enssdk";
+
 import type { ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { builder } from "@/omnigraph-api/builder";
 
@@ -25,6 +27,17 @@ LabelRef.implement({
       type: "InterpretedLabel",
       nullable: false,
       resolve: (parent) => parent.interpreted,
+    }),
+
+    ///////////////////
+    // Label.beautified
+    ///////////////////
+    beautified: t.field({
+      description:
+        "The Label as a BeautifiedLabel: the Interpreted Label beautified per ENSIP-15 (https://docs.ens.domains/ensip/15) for display. An Encoded LabelHash is preserved verbatim. Display-only; use `interpreted` for lookup keys. \n(@see https://ensnode.io/docs/reference/terminology#interpreted-label)",
+      type: "BeautifiedLabel",
+      nullable: false,
+      resolve: (parent) => beautifyInterpretedLabel(parent.interpreted),
     }),
   }),
 });

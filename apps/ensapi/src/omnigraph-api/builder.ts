@@ -6,6 +6,8 @@ import TracingPlugin, { isRootField } from "@pothos/plugin-tracing";
 import ZodPlugin from "@pothos/plugin-zod";
 import { AttributeNames, createOpenTelemetryWrapper } from "@pothos/tracing-opentelemetry";
 import type {
+  BeautifiedLabel,
+  BeautifiedName,
   ChainId,
   CoinType,
   DomainId,
@@ -68,6 +70,8 @@ export type BuilderScalars = {
   Node: { Input: Node; Output: Node };
   InterpretedName: { Input: InterpretedName; Output: InterpretedName };
   InterpretedLabel: { Input: InterpretedLabel; Output: InterpretedLabel };
+  BeautifiedName: { Input: BeautifiedName; Output: BeautifiedName };
+  BeautifiedLabel: { Input: BeautifiedLabel; Output: BeautifiedLabel };
   DomainId: { Input: DomainId; Output: DomainId };
   RegistryId: { Input: RegistryId; Output: RegistryId };
   ResolverId: { Input: ResolverId; Output: ResolverId };
