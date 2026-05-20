@@ -46,9 +46,9 @@ const responseJson = example.response ? stringifyJsonForDocs(example.response) :
 
 {
   !hideBackToExamples && (
-    <p class="group w-fit flex flex-row justify-start items-center gap-2">
-      <Icon name="left-arrow" class="h-5 w-5 inline text-[var(--sl-color-accent)] group-hover:text-black" />
-      <a href="/docs/integrate/omnigraph/examples">Back to Examples</a>
-    </p>
+    <a class="group w-fit flex flex-row justify-start items-center gap-2" href="/docs/integrate/omnigraph/examples">
+      <Icon name="left-arrow" class="h-5 w-5 text-[var(--sl-color-accent)] group-hover:text-black" />
+      <p class="not-content m-0 underline underline-offset-4 group-hover:underline-offset-2 transition-all duration-200">Back to Examples </p>
+    </a>
   )
 }

@@ -47,8 +47,8 @@ export default function HeaderMobileNavigation({
           <>
             <Popover.Button
               className={cc([
-                "sm:hidden relative z-30 cursor-pointer rounded-lg transition-all duration-200 px-[11px] py-[13px]",
-                isScrollable ? "onScrollContainer" : "hover:bg-black/5",
+                "sm:hidden relative z-30 cursor-pointer rounded-lg transition-all duration-200 px-[11px] py-[13px] focus:outline-none focus-visible:outline-2",
+                isScrollable ? "onScrollContainer" : "hover:bg-black/5 focus-visible:outline-black",
               ])}
             >
               <span className="sr-only">Open menu</span>
@@ -73,7 +73,7 @@ export default function HeaderMobileNavigation({
                     >
                       <img src={ENSNode2D.src} className="h-8" alt="ENSNode" />
                     </a>
-                    <Popover.Button className="transition rounded-lg border-0 inline-flex items-center whitespace-nowrap underline-none hover:bg-[#272727] cursor-pointer transition-all duration-200 p-2">
+                    <Popover.Button className="rounded-lg border-0 inline-flex items-center whitespace-nowrap underline-none hover:bg-[#272727] cursor-pointer transition-all duration-200 p-2">
                       {/*NOTE: this results in a browser error (not-breaking) but is directly copied from namekit.io solution*/}
                       <span className="sr-only">Close menu</span>
                       <XMarkIcon className="block h-6 w-6 text-white" aria-hidden="true" />
