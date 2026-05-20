@@ -5,3 +5,15 @@
 .onScrollElement.scrolled {
   color: black;
 }
+
+.onScrollMobileNavigation {
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+}
+
+.onScrollMobileNavigation.scrolled {
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+}

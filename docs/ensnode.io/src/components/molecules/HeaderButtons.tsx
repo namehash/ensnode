@@ -66,7 +66,7 @@ export default function HeaderButtons({
           "items-center justify-center gap-1",
         ])}
       >
-        <HeaderMobileNavigation />
+        <HeaderMobileNavigation isScrollable={isScrollable} />
       </div>
     </>
   );
