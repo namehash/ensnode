@@ -28,9 +28,7 @@ type Account {
     """
     chainIds: [ChainId!]
 
-    """
-    When true, disables protocol acceleration and resolves via the full on-chain specification.
-    """
+    """When true, disables protocol acceleration feature."""
     disableAcceleration: Boolean = false
   ): [PrimaryNameByChain!]!
 
@@ -270,9 +268,7 @@ interface Domain {
   Resolve ENS records for this Domain via the ENS protocol. Only canonical, normalized names can be resolved. Returns null if the domain is not canonical.
   """
   records(
-    """
-    When true, disables protocol acceleration and resolves via the full on-chain specification.
-    """
+    """When true, disables protocol acceleration feature."""
     disableAcceleration: Boolean = false
   ): ResolvedRecords
 
@@ -475,9 +471,7 @@ type ENSv1Domain implements Domain {
   Resolve ENS records for this Domain via the ENS protocol. Only canonical, normalized names can be resolved. Returns null if the domain is not canonical.
   """
   records(
-    """
-    When true, disables protocol acceleration and resolves via the full on-chain specification.
-    """
+    """When true, disables protocol acceleration feature."""
     disableAcceleration: Boolean = false
   ): ResolvedRecords
 
@@ -597,9 +591,7 @@ type ENSv2Domain implements Domain {
   Resolve ENS records for this Domain via the ENS protocol. Only canonical, normalized names can be resolved. Returns null if the domain is not canonical.
   """
   records(
-    """
-    When true, disables protocol acceleration and resolves via the full on-chain specification.
-    """
+    """When true, disables protocol acceleration feature."""
     disableAcceleration: Boolean = false
   ): ResolvedRecords
 

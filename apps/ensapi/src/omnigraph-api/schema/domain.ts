@@ -192,7 +192,7 @@ DomainInterfaceRef.implement({
           required: false,
           defaultValue: false,
           description:
-            "When true, disables protocol acceleration and resolves via the full on-chain specification.",
+            "When true, disables protocol acceleration feature.",
         }),
       },
       resolve: async (domain, { disableAcceleration }, context, info) => {
