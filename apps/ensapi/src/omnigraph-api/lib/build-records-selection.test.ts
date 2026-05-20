@@ -61,7 +61,7 @@ function buildMockResolvedRecordsType() {
 
 const ResolvedRecordsType = buildMockResolvedRecordsType();
 
-function resolveInfoForRecordsSubselection(subselection: string): GraphQLResolveInfo {
+function parseRecordsFieldNode(subselection: string) {
   const document = parse(`{ records { ${subselection} } }`);
   const operation = document.definitions[0];
   if (operation.kind !== "OperationDefinition") throw new Error("expected operation");
@@ -69,20 +69,36 @@ function resolveInfoForRecordsSubselection(subselection: string): GraphQLResolve
   const recordsField = operation.selectionSet.selections[0];
   if (recordsField.kind !== "Field") throw new Error("expected field");
 
+  return recordsField;
+}
+
+function mockResolveInfo(
+  fieldNodes: ReturnType<typeof parseRecordsFieldNode>[],
+  variableValues: Record<string, unknown> = {},
+): GraphQLResolveInfo {
   return {
-    fieldNodes: [recordsField],
+    fieldNodes,
     fragments: {},
     returnType: ResolvedRecordsType,
-    variableValues: {},
+    variableValues,
   } as unknown as GraphQLResolveInfo;
+}
+
+function resolveInfoForRecordsSubselection(subselection: string): GraphQLResolveInfo {
+  return mockResolveInfo([parseRecordsFieldNode(subselection)]);
+}
+
+/** Simulates GraphQL passing multiple AST field nodes for the same `records` resolver. */
+function resolveInfoForMultipleRecordsFieldNodes(...subselections: string[]): GraphQLResolveInfo {
+  return mockResolveInfo(subselections.map(parseRecordsFieldNode));
 }
 
 describe("buildRecordsSelectionFromResolveInfo", () => {
   it.each(RECORDS_SELECTION_SIMPLE_FIELDS)(
-    "selects $graphqlField as $selectionKey",
-    ({ graphqlField, selectionKey }) => {
+    "selects $graphqlField as $recordsSelectionKey",
+    ({ graphqlField, recordsSelectionKey }) => {
       const info = resolveInfoForRecordsSubselection(graphqlField);
-      expect(buildRecordsSelectionFromResolveInfo(info)).toEqual({ [selectionKey]: true });
+      expect(buildRecordsSelectionFromResolveInfo(info)).toEqual({ [recordsSelectionKey]: true });
     },
   );
 
@@ -131,6 +147,18 @@ describe("buildRecordsSelectionFromResolveInfo", () => {
     expect(buildRecordsSelectionFromResolveInfo(info)).toEqual({ name: true });
   });
 
+  it("merges selections from multiple field nodes", () => {
+    const info = resolveInfoForMultipleRecordsFieldNodes(
+      'texts(keys: ["description"])',
+      "addresses(coinTypes: [60])",
+    );
+
+    expect(buildRecordsSelectionFromResolveInfo(info)).toEqual({
+      texts: ["description"],
+      addresses: [60],
+    });
+  });
+
   it("throws when selection is empty", () => {
     const info = resolveInfoForRecordsSubselection("__typename");
     expect(() => buildRecordsSelectionFromResolveInfo(info)).toThrow(
@@ -139,26 +167,7 @@ describe("buildRecordsSelectionFromResolveInfo", () => {
   });
 
   it("throws when only unknown fields are selected", () => {
-    const info = {
-      fieldNodes: [
-        {
-          kind: "Field",
-          name: { kind: "Name", value: "records" },
-          selectionSet: {
-            kind: "SelectionSet",
-            selections: [
-              {
-                kind: "Field",
-                name: { kind: "Name", value: "unknownField" },
-              },
-            ],
-          },
-        },
-      ],
-      fragments: {},
-      returnType: ResolvedRecordsType,
-      variableValues: {},
-    } as unknown as GraphQLResolveInfo;
+    const info = resolveInfoForRecordsSubselection("unknownField");
 
     expect(() => buildRecordsSelectionFromResolveInfo(info)).toThrow(
       EMPTY_RECORDS_SELECTION_MESSAGE,

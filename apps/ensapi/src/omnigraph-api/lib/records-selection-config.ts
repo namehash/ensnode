@@ -14,14 +14,17 @@ export type RecordsSelectionParametricKey = Extract<
 
 export type RecordsSelectionSimpleField = {
   graphqlField: string;
-  selectionKey: RecordsSelectionSimpleKey;
+  recordsSelectionKey: RecordsSelectionSimpleKey;
 };
 
 export type RecordsSelectionParametricField = {
   graphqlField: string;
   argName: string;
-  selectionKey: RecordsSelectionParametricKey;
-  applySelection: (selection: ResolverRecordsSelection, args: Record<string, unknown>) => void;
+  recordsSelectionKey: RecordsSelectionParametricKey;
+  applyToRecordsSelection: (
+    recordsSelection: ResolverRecordsSelection,
+    args: Record<string, unknown>,
+  ) => void;
 };
 
 /**
@@ -29,11 +32,11 @@ export type RecordsSelectionParametricField = {
  * Querying the field (no args) selects that record for resolution.
  */
 export const RECORDS_SELECTION_SIMPLE_FIELDS = [
-  { graphqlField: "reverseName", selectionKey: "name" },
-  { graphqlField: "contenthash", selectionKey: "contenthash" },
-  { graphqlField: "pubkey", selectionKey: "pubkey" },
-  { graphqlField: "dnszonehash", selectionKey: "dnszonehash" },
-  { graphqlField: "version", selectionKey: "version" },
+  { graphqlField: "reverseName", recordsSelectionKey: "name" },
+  { graphqlField: "contenthash", recordsSelectionKey: "contenthash" },
+  { graphqlField: "pubkey", recordsSelectionKey: "pubkey" },
+  { graphqlField: "dnszonehash", recordsSelectionKey: "dnszonehash" },
+  { graphqlField: "version", recordsSelectionKey: "version" },
 ] as const satisfies readonly RecordsSelectionSimpleField[];
 
 /**
@@ -43,33 +46,33 @@ export const RECORDS_SELECTION_PARAMETRIC_FIELDS = [
   {
     graphqlField: "texts",
     argName: "keys",
-    selectionKey: "texts",
-    applySelection: (selection, args) => {
-      selection.texts = args.keys as string[];
+    recordsSelectionKey: "texts",
+    applyToRecordsSelection: (recordsSelection, args) => {
+      recordsSelection.texts = args.keys as string[];
     },
   },
   {
     graphqlField: "addresses",
     argName: "coinTypes",
-    selectionKey: "addresses",
-    applySelection: (selection, args) => {
-      selection.addresses = args.coinTypes as CoinType[];
+    recordsSelectionKey: "addresses",
+    applyToRecordsSelection: (recordsSelection, args) => {
+      recordsSelection.addresses = args.coinTypes as CoinType[];
     },
   },
   {
     graphqlField: "abi",
     argName: "contentTypeMask",
-    selectionKey: "abi",
-    applySelection: (selection, args) => {
-      selection.abi = args.contentTypeMask as ContentType;
+    recordsSelectionKey: "abi",
+    applyToRecordsSelection: (recordsSelection, args) => {
+      recordsSelection.abi = args.contentTypeMask as ContentType;
     },
   },
   {
     graphqlField: "interfaces",
     argName: "ids",
-    selectionKey: "interfaces",
-    applySelection: (selection, args) => {
-      selection.interfaces = args.ids as InterfaceId[];
+    recordsSelectionKey: "interfaces",
+    applyToRecordsSelection: (recordsSelection, args) => {
+      recordsSelection.interfaces = args.ids as InterfaceId[];
     },
   },
 ] as const satisfies readonly RecordsSelectionParametricField[];

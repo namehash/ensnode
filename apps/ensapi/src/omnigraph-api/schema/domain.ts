@@ -198,10 +198,10 @@ DomainInterfaceRef.implement({
         const name = domain.canonicalName;
         if (!name) return null;
 
-        const selection = buildRecordsSelectionFromResolveInfo(info);
+        const recordsSelection = buildRecordsSelectionFromResolveInfo(info);
 
         const { result } = await runWithTrace(() =>
-          resolveForward(name, selection, {
+          resolveForward(name, recordsSelection, {
             accelerate: !disableAcceleration,
             canAccelerate: context.canAccelerate,
           }),
