@@ -64,19 +64,19 @@ builder.scalarType("Hex", {
 });
 
 builder.scalarType("ChainId", {
-  description: "ChainId represents a enssdk#ChainId.",
+  description: "ChainId represents an enssdk#ChainId.",
   serialize: (value: ChainId) => value,
   parseValue: (value) => makeChainIdSchema("ChainId").parse(value),
 });
 
 builder.scalarType("CoinType", {
-  description: "CoinType represents a enssdk#CoinType.",
+  description: "CoinType represents an enssdk#CoinType.",
   serialize: (value: CoinType) => value,
   parseValue: (value) => makeCoinTypeSchema("CoinType").parse(value),
 });
 
 builder.scalarType("Node", {
-  description: "Node represents a enssdk#Node.",
+  description: "Node represents an enssdk#Node.",
   serialize: (value: Node) => value,
   parseValue: (value) =>
     z.coerce
@@ -95,7 +95,7 @@ builder.scalarType("Node", {
 });
 
 builder.scalarType("InterpretedName", {
-  description: "InterpretedName represents a enssdk#InterpretedName.",
+  description: "InterpretedName represents an enssdk#InterpretedName.",
   serialize: (value: Name) => value,
   parseValue: (value) =>
     z.coerce
@@ -115,7 +115,7 @@ builder.scalarType("InterpretedName", {
 });
 
 builder.scalarType("InterpretedLabel", {
-  description: "InterpretedLabel represents a enssdk#InterpretedLabel.",
+  description: "InterpretedLabel represents an enssdk#InterpretedLabel.",
   serialize: (value: Name) => value,
   parseValue: (value) =>
     z.coerce
@@ -135,7 +135,7 @@ builder.scalarType("InterpretedLabel", {
 
 builder.scalarType("BeautifiedName", {
   description:
-    "BeautifiedName represents a enssdk#BeautifiedName: an InterpretedName whose normalized labels have been beautified per ENSIP-15 (https://docs.ens.domains/ensip/15) for display. It is display-only and MUST NOT be used as a navigation target or lookup key.",
+    "BeautifiedName represents an enssdk#BeautifiedName: an InterpretedName whose normalized labels have been beautified per ENSIP-15 (https://docs.ens.domains/ensip/15) for display. It is display-only and MUST NOT be used as a navigation target or lookup key.",
   serialize: (value: BeautifiedName) => value,
   parseValue: (value) =>
     z.coerce
@@ -146,7 +146,7 @@ builder.scalarType("BeautifiedName", {
 
 builder.scalarType("BeautifiedLabel", {
   description:
-    "BeautifiedLabel represents a enssdk#BeautifiedLabel: an InterpretedLabel beautified per ENSIP-15 (https://docs.ens.domains/ensip/15) for display. It is display-only and MUST NOT be used as a lookup key.",
+    "BeautifiedLabel represents an enssdk#BeautifiedLabel: an InterpretedLabel beautified per ENSIP-15 (https://docs.ens.domains/ensip/15) for display. It is display-only and MUST NOT be used as a lookup key.",
   serialize: (value: BeautifiedLabel) => value,
   parseValue: (value) =>
     z.coerce
@@ -156,7 +156,7 @@ builder.scalarType("BeautifiedLabel", {
 });
 
 builder.scalarType("DomainId", {
-  description: "DomainId represents a enssdk#DomainId.",
+  description: "DomainId represents an enssdk#DomainId.",
   serialize: (value: DomainId) => value,
   parseValue: (value) =>
     z.coerce
@@ -166,7 +166,7 @@ builder.scalarType("DomainId", {
 });
 
 builder.scalarType("RegistryId", {
-  description: "RegistryId represents a enssdk#RegistryId.",
+  description: "RegistryId represents an enssdk#RegistryId.",
   serialize: (value: RegistryId) => value,
   parseValue: (value) =>
     z.coerce
@@ -176,7 +176,7 @@ builder.scalarType("RegistryId", {
 });
 
 builder.scalarType("ResolverId", {
-  description: "ResolverId represents a enssdk#ResolverId.",
+  description: "ResolverId represents an enssdk#ResolverId.",
   serialize: (value: ResolverId) => value,
   parseValue: (value) =>
     z.coerce
@@ -186,7 +186,7 @@ builder.scalarType("ResolverId", {
 });
 
 builder.scalarType("PermissionsId", {
-  description: "PermissionsId represents a enssdk#PermissionsId.",
+  description: "PermissionsId represents an enssdk#PermissionsId.",
   serialize: (value: PermissionsId) => value,
   parseValue: (value) =>
     z.coerce
@@ -196,7 +196,7 @@ builder.scalarType("PermissionsId", {
 });
 
 builder.scalarType("PermissionsResourceId", {
-  description: "PermissionsResourceId represents a enssdk#PermissionsResourceId.",
+  description: "PermissionsResourceId represents an enssdk#PermissionsResourceId.",
   serialize: (value: PermissionsResourceId) => value,
   parseValue: (value) =>
     z.coerce
@@ -206,7 +206,7 @@ builder.scalarType("PermissionsResourceId", {
 });
 
 builder.scalarType("PermissionsUserId", {
-  description: "PermissionsUserId represents a enssdk#PermissionsUserId.",
+  description: "PermissionsUserId represents an enssdk#PermissionsUserId.",
   serialize: (value: PermissionsUserId) => value,
   parseValue: (value) =>
     z.coerce
@@ -216,7 +216,7 @@ builder.scalarType("PermissionsUserId", {
 });
 
 builder.scalarType("RegistrationId", {
-  description: "RegistrationId represents a enssdk#RegistrationId.",
+  description: "RegistrationId represents an enssdk#RegistrationId.",
   serialize: (value: RegistrationId) => value,
   parseValue: (value) =>
     z.coerce
@@ -226,7 +226,7 @@ builder.scalarType("RegistrationId", {
 });
 
 builder.scalarType("RenewalId", {
-  description: "RenewalId represents a enssdk#RenewalId.",
+  description: "RenewalId represents an enssdk#RenewalId.",
   serialize: (value: RenewalId) => value,
   parseValue: (value) =>
     z.coerce
@@ -236,7 +236,7 @@ builder.scalarType("RenewalId", {
 });
 
 builder.scalarType("ResolverRecordsId", {
-  description: "ResolverRecordsId represents a enssdk#ResolverRecordsId.",
+  description: "ResolverRecordsId represents an enssdk#ResolverRecordsId.",
   serialize: (value: ResolverRecordsId) => value,
   parseValue: (value) =>
     z.coerce

@@ -1031,6 +1031,14 @@ const introspection = {
       },
       {
         "kind": "SCALAR",
+        "name": "BeautifiedLabel"
+      },
+      {
+        "kind": "SCALAR",
+        "name": "BeautifiedName"
+      },
+      {
+        "kind": "SCALAR",
         "name": "BigInt"
       },
       {
@@ -1041,6 +1049,18 @@ const introspection = {
         "kind": "OBJECT",
         "name": "CanonicalName",
         "fields": [
+          {
+            "name": "beautified",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "BeautifiedName"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
           {
             "name": "interpreted",
             "type": {
@@ -3571,6 +3591,18 @@ const introspection = {
         "kind": "OBJECT",
         "name": "Label",
         "fields": [
+          {
+            "name": "beautified",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "BeautifiedLabel"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
           {
             "name": "hash",
             "type": {
