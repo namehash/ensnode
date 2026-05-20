@@ -12,7 +12,7 @@ import IntegrateHostedEnsNodeTip from '@components/molecules/IntegrateHostedEnsN
 
 This guide walks you from an empty directory to a working TypeScript script that queries the `eth` Domain and queries its subdomains — the same flow as our [enssdk-example](https://github.com/namehash/ensnode/tree/main/examples/enssdk-example).
 
-<IntegrateHostedEnsNodeTip />
+<IntegrateHostedEnsNodeTip for="enssdk" />
 
 ## 1. Scaffold a TypeScript project
 
@@ -35,8 +35,10 @@ npm install enssdk@1.13.1
 npm install -D tsx typescript @types/node
 ```
 
-:::tip[Pin exact versions]
+:::caution[Pin exact versions — hosted instance compatibility]
 Always pin an **exact** version (no `^` or `~`) of `enssdk`. The Omnigraph GraphQL schema is bundled inside `enssdk` and consumed by the `gql.tada` TypeScript plugin to type your queries — a minor or patch bump can change the schema and silently drift your generated types away from your queries. Locking the exact version keeps types and runtime in sync.
+
+**Important:** Our hosted ENSNode instances currently run ENSNode v1.13. The latest published version of `enssdk` is `1.14.0+`, which contains breaking changes in the Omnigraph API data model not yet deployed to our hosted infrastructure. If you are querying a hosted instance from your own app, you **must** use `enssdk@1.13.1` to avoid type errors and runtime mismatches. This notice will be removed once the hosted instances are upgraded.
 :::
 
 

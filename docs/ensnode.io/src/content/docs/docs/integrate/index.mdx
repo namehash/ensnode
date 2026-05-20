@@ -7,6 +7,7 @@ sidebar:
 ---
 
 import { LinkCard, CardGrid, Aside } from "@astrojs/starlight/components";
+import HostedInstanceSdkVersionWarning from "@components/molecules/HostedInstanceSdkVersionWarning.astro";
 import OmnigraphAPIExample from "@components/organisms/OmnigraphAPIExample.astro";
 
 ## What is ENSv2?
@@ -43,6 +44,9 @@ Here's a summary of some popular integration strategies:
 ### 1. `enskit` + Omnigraph
 
 With `enskit`, leverage ENSNode and the Omnigraph to power your React components using `useOmnigraphQuery`. `enskit` comes with built-in type-safety, Omnigraph-specific cache directives, easy infinite pagination, and much much more.
+
+<HostedInstanceSdkVersionWarning for="enskit" />
+
 
 ```tsx
 // this is fully typechecked and supports editor autocomplete!
@@ -136,6 +140,9 @@ export function RenderDomainAndSubdomains({ name }: { name: InterpretedName }) {
 ### 2. `enssdk` + Omnigraph
 
 With `enssdk`, leverage ENSNode and the Omnigraph from any JavaScript runtime to power your frontend or backend apps. `enssdk` comes with built-in type-safety and editor autocomplete for Omnigraph queries.
+
+<HostedInstanceSdkVersionWarning for="enssdk" />
+
 
 ```ts
 // create and extend an EnsNodeClient with Omnigraph API support
