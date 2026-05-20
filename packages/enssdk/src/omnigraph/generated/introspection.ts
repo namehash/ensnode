@@ -224,7 +224,7 @@ const introspection = {
                     "kind": "NON_NULL",
                     "ofType": {
                       "kind": "SCALAR",
-                      "name": "ChainId"
+                      "name": "DefaultableChainId"
                     }
                   }
                 }
@@ -1096,6 +1096,10 @@ const introspection = {
       {
         "kind": "SCALAR",
         "name": "CoinType"
+      },
+      {
+        "kind": "SCALAR",
+        "name": "DefaultableChainId"
       },
       {
         "kind": "INTERFACE",
@@ -4614,7 +4618,7 @@ const introspection = {
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "SCALAR",
-                "name": "ChainId"
+                "name": "DefaultableChainId"
               }
             },
             "args": [],
