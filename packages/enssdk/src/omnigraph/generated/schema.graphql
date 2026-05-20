@@ -1078,9 +1078,6 @@ type Query {
   """Identify an Account by ID or Address."""
   account(by: AccountByInput!): Account
 
-  """TODO"""
-  allDomains(after: String, before: String, first: Int, last: Int): QueryAllDomainsConnection
-
   """Identify a Domain by Name or DomainId"""
   domain(by: DomainIdInput!): Domain
 
@@ -1090,9 +1087,6 @@ type Query {
   """Identify Permissions by ID or AccountId."""
   permissions(by: PermissionsIdInput!): Permissions
 
-  """TODO"""
-  registrations(after: String, before: String, first: Int, last: Int): QueryRegistrationsConnection
-
   """
   Identify a Registry by ID or AccountId. If querying by `contract`, only concrete Registries will be returned.
   """
@@ -1101,24 +1095,10 @@ type Query {
   """Identify a Resolver by ID or AccountId."""
   resolver(by: ResolverIdInput!): Resolver
 
-  """TODO"""
-  resolvers(after: String, before: String, first: Int, last: Int): QueryResolversConnection
-
   """
-  The Root Registry for this namespace. It will be the ENSv2 Root Registry when defined or the ENSv1 Root Registry.
+  The Root Registry for this namespace. It will be the ENSv2 Root Registry when defined, otherwise the ENSv1 Root Registry.
   """
   root: Registry!
-}
-
-type QueryAllDomainsConnection {
-  edges: [QueryAllDomainsConnectionEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type QueryAllDomainsConnectionEdge {
-  cursor: String!
-  node: Domain!
 }
 
 type QueryDomainsConnection {
@@ -1130,28 +1110,6 @@ type QueryDomainsConnection {
 type QueryDomainsConnectionEdge {
   cursor: String!
   node: Domain!
-}
-
-type QueryRegistrationsConnection {
-  edges: [QueryRegistrationsConnectionEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type QueryRegistrationsConnectionEdge {
-  cursor: String!
-  node: Registration!
-}
-
-type QueryResolversConnection {
-  edges: [QueryResolversConnectionEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type QueryResolversConnectionEdge {
-  cursor: String!
-  node: Resolver!
 }
 
 """
