@@ -1,19 +1,12 @@
-import { initEnvConfig } from "@/config";
-
 import { serve } from "@hono/node-server";
 
-import { indexingStatusCache } from "@/cache/indexing-status.cache";
 import { getReferralEditionSnapshotsCaches } from "@/cache/referral-edition-snapshots.cache";
-import { referralProgramEditionConfigSetCache } from "@/cache/referral-program-edition-set.cache";
-import { redactEnsApiConfig } from "@/config/redact";
 import di from "@/di";
 import { sdk } from "@/lib/instrumentation";
 import logger from "@/lib/logger";
 import { writeGraphQLSchema } from "@/omnigraph-api/lib/write-graphql-schema";
 
 import app from "./app";
-
-await initEnvConfig(process.env);
 
 // start ENSNode API OpenTelemetry SDK
 sdk.start();
@@ -25,16 +18,13 @@ const server = serve(
     port: di.context.ensApiConfig.port,
   },
   async (info) => {
-    logger.info(
-      { config: redactEnsApiConfig(di.context.ensApiConfig) },
-      `ENSApi listening on port ${info.port}`,
-    );
-
     // Write the generated graphql schema in the background
     void writeGraphQLSchema();
 
-    // proactively read the indexing status to warm cache
-    void indexingStatusCache.read();
+    // proactively warm up caches in the background
+    void Promise.all([di.context.indexingStatusCache.read(), di.context.stackInfoCache.read()]);
+
+    logger.info(`ENSApi listening on port ${info.port}`);
   },
 );
 
@@ -54,7 +44,7 @@ const gracefulShutdown = async () => {
     logger.info("Destroyed tracing instrumentation");
 
     // Destroy referral program edition config set cache
-    referralProgramEditionConfigSetCache.destroy();
+    di.context.referralProgramEditionConfigSetCache.destroy();
     logger.info("Destroyed referralProgramEditionConfigSetCache");
 
     // Destroy all edition caches (if initialized)
@@ -66,7 +56,7 @@ const gracefulShutdown = async () => {
       }
     }
 
-    indexingStatusCache.destroy();
+    di.context.indexingStatusCache.destroy();
     logger.info("Destroyed indexingStatusCache");
 
     await closeServer();

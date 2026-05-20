@@ -1,27 +1,14 @@
-import pRetry from "p-retry";
 import { prettifyError, ZodError, z } from "zod/v4";
 
+import type { EnsApiPublicConfig, EnsIndexerPublicConfig } from "@ensnode/ensnode-sdk";
 import {
-  type EnsApiPublicConfig,
-  type EnsIndexerPublicConfig,
-  IndexingMetadataContextStatusCodes,
-} from "@ensnode/ensnode-sdk";
-import {
-  buildRpcConfigsFromEnv,
   canFallbackToTheGraph,
-  ENSNamespaceSchema,
-  invariant_rpcConfigsSpecifiedForRootChain,
-  makeENSIndexerPublicConfigSchema,
   OptionalPortNumberSchema,
-  RpcConfigsSchema,
   TheGraphApiKeySchema,
 } from "@ensnode/ensnode-sdk/internal";
 
 import { ENSApi_DEFAULT_PORT } from "@/config/defaults";
-import ensDbConfig from "@/config/ensdb-config";
 import type { EnsApiEnvironment } from "@/config/environment";
-import { invariant_ensIndexerPublicConfigVersionInfo } from "@/config/validations";
-import { ensDbClient } from "@/lib/ensdb/singleton";
 import logger from "@/lib/logger";
 import { ensApiVersionInfo } from "@/lib/version-info";
 
@@ -43,72 +30,26 @@ const ReferralProgramEditionConfigSetUrlSchema = z
   })
   .optional();
 
-const EnsApiConfigSchema = z
-  .object({
-    port: OptionalPortNumberSchema.default(ENSApi_DEFAULT_PORT),
-    theGraphApiKey: TheGraphApiKeySchema,
-    namespace: ENSNamespaceSchema,
-    rpcConfigs: RpcConfigsSchema,
-    ensIndexerPublicConfig: makeENSIndexerPublicConfigSchema("ensIndexerPublicConfig"),
-    referralProgramEditionConfigSetUrl: ReferralProgramEditionConfigSetUrlSchema,
-
-    // include the ENSDbConfig params in the EnsApiConfigSchema
-    ensDbUrl: z.string(),
-    ensIndexerSchemaName: z.string(),
-  })
-  .check(invariant_rpcConfigsSpecifiedForRootChain)
-  .check(invariant_ensIndexerPublicConfigVersionInfo);
+const EnsApiConfigSchema = z.object({
+  port: OptionalPortNumberSchema.default(ENSApi_DEFAULT_PORT),
+  theGraphApiKey: TheGraphApiKeySchema,
+  referralProgramEditionConfigSetUrl: ReferralProgramEditionConfigSetUrlSchema,
+});
 
 export type EnsApiConfig = z.infer<typeof EnsApiConfigSchema>;
 
 /**
- * Builds the EnsApiConfig from an EnsApiEnvironment object, fetching the EnsIndexerPublicConfig.
+ * Builds the EnsApiConfig from an EnsApiEnvironment object.
  *
  * @returns A validated EnsApiConfig object
  * @throws Error with formatted validation messages if environment parsing fails
  */
-export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promise<EnsApiConfig> {
+export function buildConfigFromEnvironment(env: EnsApiEnvironment): EnsApiConfig {
   try {
-    // TODO: transfer the responsibility of fetching
-    // the ENSIndexer Public Config to a middleware layer, as per:
-    // https://github.com/namehash/ensnode/issues/1806
-    const ensIndexerPublicConfig = await pRetry(
-      async () => {
-        const indexingMetadataContext = await ensDbClient.getIndexingMetadataContext();
-
-        if (
-          indexingMetadataContext.statusCode === IndexingMetadataContextStatusCodes.Uninitialized
-        ) {
-          throw new Error(
-            "EnsIndexerPublicConfig could not be fetched, the IndexingMetadataContext record has not been initialized in ENSDb yet.",
-          );
-        }
-
-        return indexingMetadataContext.stackInfo.ensIndexer;
-      },
-      {
-        retries: 13, // This allows for a total of over 1 hour of retries with the exponential backoff strategy
-        onFailedAttempt: ({ error, attemptNumber, retriesLeft }) => {
-          logger.info(
-            `ENSIndexer Public Config fetch attempt ${attemptNumber} failed (${error.message}). ${retriesLeft} retries left.`,
-          );
-        },
-      },
-    );
-
-    const rpcConfigs = buildRpcConfigsFromEnv(env, ensIndexerPublicConfig.namespace);
-
     return EnsApiConfigSchema.parse({
       port: env.PORT,
       theGraphApiKey: env.THEGRAPH_API_KEY,
-      ensIndexerPublicConfig,
-      namespace: ensIndexerPublicConfig.namespace,
-      rpcConfigs,
       referralProgramEditionConfigSetUrl: env.REFERRAL_PROGRAM_EDITIONS,
-
-      // include the validated ENSDb config values in the parsed EnsApiConfig
-      ensDbUrl: ensDbConfig.ensDbUrl,
-      ensIndexerSchemaName: ensDbConfig.ensIndexerSchemaName,
     });
   } catch (error) {
     if (error instanceof ZodError) {

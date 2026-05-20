@@ -1,12 +1,14 @@
-import ensApiConfig from "@/config";
-
 import type { ChainId } from "enssdk";
 import { createPublicClient, fallback, http, type PublicClient } from "viem";
 
 import { type ENSNamespaceId, getENSRootChainId } from "@ensnode/datasources";
 import type { EnsDbConfig, EnsDbReader } from "@ensnode/ensdb-sdk";
 import type { EnsNodeStackInfo } from "@ensnode/ensnode-sdk";
-import type { RpcConfig } from "@ensnode/ensnode-sdk/internal";
+import {
+  buildRpcConfigsFromEnv,
+  type RpcConfig,
+  RpcConfigsSchema,
+} from "@ensnode/ensnode-sdk/internal";
 import { subgraphGraphQLMiddleware } from "@ensnode/ponder-subgraph";
 
 import { type IndexingStatusCache, indexingStatusCache } from "@/cache/indexing-status.cache";
@@ -17,6 +19,7 @@ import {
 import type { EnsNodeStackInfoCache } from "@/cache/stack-info.cache";
 import { stackInfoCache } from "@/cache/stack-info.cache";
 import type { EnsApiConfig } from "@/config/config.schema";
+import { buildConfigFromEnvironment } from "@/config/config.schema";
 import ensDbConfig from "@/config/ensdb-config";
 import type { EnsApiEnvironment } from "@/config/environment";
 import { ensDbClient } from "@/lib/ensdb/singleton";
@@ -67,7 +70,7 @@ export function buildEnsApiDiContext(env: NodeJS.ProcessEnv): EnsApiDiContext {
 
     get ensApiConfig(): EnsApiConfig {
       if (!instances.ensApiConfig) {
-        instances.ensApiConfig = ensApiConfig;
+        instances.ensApiConfig = buildConfigFromEnvironment(env);
       }
 
       return instances.ensApiConfig;
@@ -96,28 +99,30 @@ export function buildEnsApiDiContext(env: NodeJS.ProcessEnv): EnsApiDiContext {
       return context.stackInfo.ensIndexer.namespace;
     },
 
+    get rootChainRpcConfig(): RpcConfig {
+      if (!instances.rootChainRpcConfig) {
+        const unvalidatedRpcConfigs = buildRpcConfigsFromEnv(env, context.ensNamespaceId);
+        const rpcConfigs = RpcConfigsSchema.parse(unvalidatedRpcConfigs);
+        const rootChainRpcConfig = rpcConfigs.get(context.rootChainId);
+
+        if (!rootChainRpcConfig) {
+          throw new Error(
+            `RPC configuration for root chain (chainId: ${context.rootChainId}) is required but was not found in the environment variables.`,
+          );
+        }
+
+        instances.rootChainRpcConfig = rootChainRpcConfig;
+      }
+
+      return instances.rootChainRpcConfig;
+    },
+
     get rootChainId(): ChainId {
       if (!instances.rootChainId) {
         instances.rootChainId = getENSRootChainId(context.ensNamespaceId);
       }
 
       return instances.rootChainId;
-    },
-
-    get rootChainRpcConfig(): RpcConfig {
-      if (!instances.rootChainRpcConfig) {
-        const rpcConfig = context.ensApiConfig.rpcConfigs.get(context.rootChainId);
-
-        if (!rpcConfig) {
-          throw new Error(
-            `RPC configuration for root chain (chainId: ${context.rootChainId}) is required but was not found in the environment variables.`,
-          );
-        }
-
-        instances.rootChainRpcConfig = rpcConfig;
-      }
-
-      return instances.rootChainRpcConfig;
     },
 
     get rootChainPublicClient(): PublicClient {
