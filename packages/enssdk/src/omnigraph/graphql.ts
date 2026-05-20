@@ -3,7 +3,6 @@ import { initGraphQLTada } from "gql.tada";
 import type {
   ChainId,
   CoinType,
-  DefaultableChainId,
   DomainId,
   Hex,
   InterfaceId,
@@ -41,7 +40,6 @@ export type OmnigraphScalars = {
   Address: NormalizedAddress;
   Hex: Hex;
   ChainId: ChainId;
-  DefaultableChainId: DefaultableChainId;
   CoinType: CoinType;
   InterfaceId: InterfaceId;
   InterpretedName: InterpretedName;

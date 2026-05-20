@@ -1,6 +1,6 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, count, eq, getTableColumns } from "drizzle-orm";
-import type { Address, DefaultableChainId, InterpretedName } from "enssdk";
+import type { Address, ChainId, InterpretedName } from "enssdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { resolvePrimaryNames } from "@/lib/resolution/multichain-primary-name-resolution";
@@ -79,24 +79,30 @@ AccountRef.implement({
       nullable: false,
       args: {
         chainIds: t.arg({
-          type: ["DefaultableChainId"],
+          type: ["ChainId"],
           required: false,
           description:
-            "Chain ids to resolve primary names for. Use 0 for the default EVM chain per ENSIP-19. Omit to resolve all ENSIP-19 supported chains.",
+            "Chain ids to resolve primary names for. Omit to resolve all ENSIP-19 supported chains.",
+        }),
+        disableAcceleration: t.arg.boolean({
+          required: false,
+          defaultValue: false,
+          description:
+            "When true, disables protocol acceleration and resolves via the full on-chain specification.",
         }),
       },
-      resolve: async (account, { chainIds }) => {
+      resolve: async (account, { chainIds, disableAcceleration }, context) => {
         validatePrimaryNamesChainIds(chainIds);
 
         const { result } = await runWithTrace(() =>
           resolvePrimaryNames(account.id, chainIds ?? undefined, {
-            accelerate: false,
-            canAccelerate: false,
+            accelerate: !disableAcceleration,
+            canAccelerate: context.canAccelerate,
           }),
         );
 
         return Object.entries(result).map(([chainId, name]) => ({
-          chainId: Number(chainId) as DefaultableChainId,
+          chainId: Number(chainId) as ChainId,
           name: name as InterpretedName | null,
         }));
       },

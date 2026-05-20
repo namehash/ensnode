@@ -5,15 +5,19 @@
 import { createYoga } from "graphql-yoga";
 
 import { makeLogger } from "@/lib/logger";
-import { context } from "@/omnigraph-api/context";
+import {
+  createOmnigraphContext,
+  type OmnigraphContext,
+  type OmnigraphYogaServerContext,
+} from "@/omnigraph-api/context";
 import { schema } from "@/omnigraph-api/schema";
 
 const logger = makeLogger("omnigraph");
 
-export const yoga = createYoga({
+export const yoga = createYoga<OmnigraphYogaServerContext, OmnigraphContext>({
   graphqlEndpoint: "*",
   schema,
-  context,
+  context: ({ canAccelerate }) => createOmnigraphContext({ canAccelerate }),
   // CORS is handled by the Hono middleware in app.ts
   cors: false,
   graphiql: {

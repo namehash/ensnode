@@ -3,7 +3,6 @@ import {
   asInterpretedName,
   type ChainId,
   type CoinType,
-  type DefaultableChainId,
   type DomainId,
   type Hex,
   type InterfaceId,
@@ -28,7 +27,6 @@ import { z } from "zod/v4";
 import {
   makeChainIdSchema,
   makeCoinTypeSchema,
-  makeDefaultableChainIdSchema,
   makeNormalizedAddressSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
@@ -69,13 +67,6 @@ builder.scalarType("ChainId", {
   description: "ChainId represents a enssdk#ChainId.",
   serialize: (value: ChainId) => value,
   parseValue: (value) => makeChainIdSchema("ChainId").parse(value),
-});
-
-builder.scalarType("DefaultableChainId", {
-  description:
-    "DefaultableChainId represents a enssdk#DefaultableChainId. Use 0 for the default EVM chain per ENSIP-19.",
-  serialize: (value: DefaultableChainId) => value,
-  parseValue: (value) => makeDefaultableChainIdSchema("DefaultableChainId").parse(value),
 });
 
 builder.scalarType("CoinType", {

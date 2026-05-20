@@ -187,14 +187,25 @@ DomainInterfaceRef.implement({
         "Resolve ENS records for this Domain via the ENS protocol. Only canonical, normalized names can be resolved. Returns null if the domain is not canonical.",
       type: ResolvedRecordsRef,
       nullable: true,
-      resolve: async (domain, _args, _context, info) => {
+      args: {
+        disableAcceleration: t.arg.boolean({
+          required: false,
+          defaultValue: false,
+          description:
+            "When true, disables protocol acceleration and resolves via the full on-chain specification.",
+        }),
+      },
+      resolve: async (domain, { disableAcceleration }, context, info) => {
         const name = domain.canonicalName;
         if (!name) return null;
 
         const selection = buildRecordsSelectionFromResolveInfo(info);
 
         const { result } = await runWithTrace(() =>
-          resolveForward(name, selection, { accelerate: false, canAccelerate: false }),
+          resolveForward(name, selection, {
+            accelerate: !disableAcceleration,
+            canAccelerate: context.canAccelerate,
+          }),
         );
 
         return result as ResolverRecordsResponseBase;

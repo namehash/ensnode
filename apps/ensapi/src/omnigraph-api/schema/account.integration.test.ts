@@ -321,7 +321,7 @@ describe("Account.primaryNames", () => {
   };
 
   const AccountPrimaryNames = gql`
-    query AccountPrimaryNames($address: Address!, $chainIds: [DefaultableChainId!]) {
+    query AccountPrimaryNames($address: Address!, $chainIds: [ChainId!]) {
       account(by: { address: $address }) {
         primaryNames(chainIds: $chainIds) {
           chainId
@@ -370,7 +370,7 @@ describe("Account.primaryNames", () => {
     );
   });
 
-  it("rejects default chain id combined with other chain ids", async () => {
+  it("rejects chain id 0 at GraphQL validation", async () => {
     await expect(
       request(AccountPrimaryNames, {
         address: accounts.owner.address,

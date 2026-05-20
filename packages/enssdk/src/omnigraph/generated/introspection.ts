@@ -224,10 +224,18 @@ const introspection = {
                     "kind": "NON_NULL",
                     "ofType": {
                       "kind": "SCALAR",
-                      "name": "DefaultableChainId"
+                      "name": "ChainId"
                     }
                   }
                 }
+              },
+              {
+                "name": "disableAcceleration",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean"
+                },
+                "defaultValue": "false"
               }
             ],
             "isDeprecated": false
@@ -1098,10 +1106,6 @@ const introspection = {
         "name": "CoinType"
       },
       {
-        "kind": "SCALAR",
-        "name": "DefaultableChainId"
-      },
-      {
         "kind": "INTERFACE",
         "name": "Domain",
         "fields": [
@@ -1207,7 +1211,16 @@ const introspection = {
               "kind": "OBJECT",
               "name": "ResolvedRecords"
             },
-            "args": [],
+            "args": [
+              {
+                "name": "disableAcceleration",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean"
+                },
+                "defaultValue": "false"
+              }
+            ],
             "isDeprecated": false
           },
           {
@@ -1975,7 +1988,16 @@ const introspection = {
               "kind": "OBJECT",
               "name": "ResolvedRecords"
             },
-            "args": [],
+            "args": [
+              {
+                "name": "disableAcceleration",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean"
+                },
+                "defaultValue": "false"
+              }
+            ],
             "isDeprecated": false
           },
           {
@@ -2584,7 +2606,16 @@ const introspection = {
               "kind": "OBJECT",
               "name": "ResolvedRecords"
             },
-            "args": [],
+            "args": [
+              {
+                "name": "disableAcceleration",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean"
+                },
+                "defaultValue": "false"
+              }
+            ],
             "isDeprecated": false
           },
           {
@@ -4618,7 +4649,7 @@ const introspection = {
               "kind": "NON_NULL",
               "ofType": {
                 "kind": "SCALAR",
-                "name": "DefaultableChainId"
+                "name": "ChainId"
               }
             },
             "args": [],

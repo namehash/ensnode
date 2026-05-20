@@ -24,9 +24,14 @@ type Account {
   """
   primaryNames(
     """
-    Chain ids to resolve primary names for. Use 0 for the default EVM chain per ENSIP-19. Omit to resolve all ENSIP-19 supported chains.
+    Chain ids to resolve primary names for. Omit to resolve all ENSIP-19 supported chains.
     """
-    chainIds: [DefaultableChainId!]
+    chainIds: [ChainId!]
+
+    """
+    When true, disables protocol acceleration and resolves via the full on-chain specification.
+    """
+    disableAcceleration: Boolean = false
   ): [PrimaryNameByChain!]!
 
   """The Permissions on Registries granted to this Account."""
@@ -234,11 +239,6 @@ scalar ChainId
 scalar CoinType
 
 """
-DefaultableChainId represents a enssdk#DefaultableChainId. Use 0 for the default EVM chain per ENSIP-19.
-"""
-scalar DefaultableChainId
-
-"""
 Represents a Domain, i.e. an individual Label within the ENS namegraph. It may or may not be Canonical. It may be an ENSv1Domain or an ENSv2Domain.
 """
 interface Domain {
@@ -269,7 +269,12 @@ interface Domain {
   """
   Resolve ENS records for this Domain via the ENS protocol. Only canonical, normalized names can be resolved. Returns null if the domain is not canonical.
   """
-  records: ResolvedRecords
+  records(
+    """
+    When true, disables protocol acceleration and resolves via the full on-chain specification.
+    """
+    disableAcceleration: Boolean = false
+  ): ResolvedRecords
 
   """The latest Registration for this Domain, if exists."""
   registration: Registration
@@ -469,7 +474,12 @@ type ENSv1Domain implements Domain {
   """
   Resolve ENS records for this Domain via the ENS protocol. Only canonical, normalized names can be resolved. Returns null if the domain is not canonical.
   """
-  records: ResolvedRecords
+  records(
+    """
+    When true, disables protocol acceleration and resolves via the full on-chain specification.
+    """
+    disableAcceleration: Boolean = false
+  ): ResolvedRecords
 
   """The latest Registration for this Domain, if exists."""
   registration: Registration
@@ -586,7 +596,12 @@ type ENSv2Domain implements Domain {
   """
   Resolve ENS records for this Domain via the ENS protocol. Only canonical, normalized names can be resolved. Returns null if the domain is not canonical.
   """
-  records: ResolvedRecords
+  records(
+    """
+    When true, disables protocol acceleration and resolves via the full on-chain specification.
+    """
+    disableAcceleration: Boolean = false
+  ): ResolvedRecords
 
   """The latest Registration for this Domain, if exists."""
   registration: Registration
@@ -1088,10 +1103,8 @@ scalar PermissionsUserId
 
 """An ENSIP-19 primary name for an Account on a specific chain."""
 type PrimaryNameByChain {
-  """
-  The chain on which the primary name was resolved. 0 denotes the default EVM chain per ENSIP-19.
-  """
-  chainId: DefaultableChainId!
+  """The chain on which the primary name was resolved."""
+  chainId: ChainId!
 
   """
   The validated primary name for this Account on this chain, or null if none is set.

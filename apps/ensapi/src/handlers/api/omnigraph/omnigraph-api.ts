@@ -1,14 +1,26 @@
 import config from "@/config";
 
+import type { Duration } from "enssdk";
+
 import {
   hasOmnigraphApiConfigSupport,
   hasOmnigraphApiIndexingStatusSupport,
 } from "@ensnode/ensnode-sdk";
 
 import { createApp } from "@/lib/hono-factory";
+import { canAccelerateMiddleware } from "@/middleware/can-accelerate.middleware";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
+import { makeIsRealtimeMiddleware } from "@/middleware/is-realtime.middleware";
 
-const app = createApp({ middlewares: [indexingStatusMiddleware] });
+const MAX_REALTIME_DISTANCE_TO_ACCELERATE: Duration = 60;
+
+const app = createApp({
+  middlewares: [
+    indexingStatusMiddleware,
+    makeIsRealtimeMiddleware("omnigraph-api", MAX_REALTIME_DISTANCE_TO_ACCELERATE),
+    canAccelerateMiddleware,
+  ],
+});
 
 app.use(async (c, next) => {
   const configPrerequisite = hasOmnigraphApiConfigSupport(config.ensIndexerPublicConfig);

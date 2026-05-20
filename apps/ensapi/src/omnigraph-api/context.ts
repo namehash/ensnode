@@ -4,6 +4,10 @@ import { inArray } from "drizzle-orm";
 import type { DomainId, RegistryId } from "enssdk";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+import type { CanAccelerateMiddlewareVariables } from "@/middleware/can-accelerate.middleware";
+
+/** Server context passed from Hono into GraphQL Yoga via `yoga.fetch(request, serverContext)`. */
+export type OmnigraphYogaServerContext = CanAccelerateMiddlewareVariables;
 
 const createRegistryParentDomainLoader = () =>
   new DataLoader<RegistryId, DomainId | null>(async (registryIds) => {
@@ -23,9 +27,12 @@ const createRegistryParentDomainLoader = () =>
  *
  * @dev make sure that anything that is per-request (like dataloaders) are newly created in this fn
  */
-export const context = () => ({
+export const createOmnigraphContext = (serverContext: OmnigraphYogaServerContext) => ({
   now: BigInt(getUnixTime(new Date())),
   loaders: {
     registryParentDomain: createRegistryParentDomainLoader(),
   },
+  canAccelerate: serverContext.canAccelerate,
 });
+
+export type OmnigraphContext = ReturnType<typeof createOmnigraphContext>;

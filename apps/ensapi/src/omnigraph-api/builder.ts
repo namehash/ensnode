@@ -8,7 +8,6 @@ import { AttributeNames, createOpenTelemetryWrapper } from "@pothos/tracing-open
 import type {
   ChainId,
   CoinType,
-  DefaultableChainId,
   DomainId,
   Hex,
   InterfaceId,
@@ -28,7 +27,7 @@ import type {
 import { getNamedType } from "graphql";
 import superjson from "superjson";
 
-import type { context } from "@/omnigraph-api/context";
+import type { OmnigraphContext } from "@/omnigraph-api/context";
 
 const tracer = trace.getTracer("graphql");
 const createSpan = createOpenTelemetryWrapper(tracer, {
@@ -64,7 +63,6 @@ export type BuilderScalars = {
   Address: { Input: NormalizedAddress; Output: NormalizedAddress };
   Hex: { Input: Hex; Output: Hex };
   ChainId: { Input: ChainId; Output: ChainId };
-  DefaultableChainId: { Input: DefaultableChainId; Output: DefaultableChainId };
   CoinType: { Input: CoinType; Output: CoinType };
   InterfaceId: { Input: InterfaceId; Output: InterfaceId };
   Node: { Input: Node; Output: Node };
@@ -82,7 +80,7 @@ export type BuilderScalars = {
 };
 
 export const builder = new SchemaBuilder<{
-  Context: ReturnType<typeof context>;
+  Context: OmnigraphContext;
   Scalars: BuilderScalars;
 
   // the following ensures via typechecker that every t.connection returns a totalCount field

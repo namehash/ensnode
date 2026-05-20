@@ -1,6 +1,6 @@
 import type {
+  ChainId,
   CoinType,
-  DefaultableChainId,
   Hex,
   InterfaceId,
   InterpretedName,
@@ -15,14 +15,13 @@ import { builder } from "@/omnigraph-api/builder";
 // PrimaryNameByChain
 //////////////////////
 export const PrimaryNameByChainRef = builder
-  .objectRef<{ chainId: DefaultableChainId; name: InterpretedName | null }>("PrimaryNameByChain")
+  .objectRef<{ chainId: ChainId; name: InterpretedName | null }>("PrimaryNameByChain")
   .implement({
     description: "An ENSIP-19 primary name for an Account on a specific chain.",
     fields: (t) => ({
       chainId: t.field({
-        description:
-          "The chain on which the primary name was resolved. 0 denotes the default EVM chain per ENSIP-19.",
-        type: "DefaultableChainId",
+        description: "The chain on which the primary name was resolved.",
+        type: "ChainId",
         nullable: false,
         resolve: (r) => r.chainId,
       }),
