@@ -206,11 +206,26 @@ type BaseRegistrarRegistration implements Registration {
   wrapped: WrappedBaseRegistrarRegistration
 }
 
+"""
+BeautifiedLabel represents a enssdk#BeautifiedLabel: an InterpretedLabel beautified per ENSIP-15 (https://docs.ens.domains/ensip/15) for display. It is display-only and MUST NOT be used as a lookup key.
+"""
+scalar BeautifiedLabel
+
+"""
+BeautifiedName represents a enssdk#BeautifiedName: an InterpretedName whose normalized labels have been beautified per ENSIP-15 (https://docs.ens.domains/ensip/15) for display. It is display-only and MUST NOT be used as a navigation target or lookup key.
+"""
+scalar BeautifiedName
+
 """BigInt represents non-fractional signed whole numeric values."""
 scalar BigInt
 
 """A Canonical Name, exposed in each representation we support."""
 type CanonicalName {
+  """
+  The Canonical Name as a BeautifiedName: the InterpretedName with its normalized labels beautified per ENSIP-15 (https://docs.ens.domains/ensip/15) for display. Encoded LabelHash labels are preserved verbatim. Display-only; use `interpreted` for navigation targets and lookup keys.
+  """
+  beautified: BeautifiedName!
+
   """
   The Canonical Name as an InterpretedName: each label is either a normalized literal Label or an Encoded LabelHash.
   """
@@ -851,6 +866,12 @@ scalar InterpretedName
 Represents a Label within ENS, providing its hash and interpreted representation.
 """
 type Label {
+  """
+  The Label as a BeautifiedLabel: the Interpreted Label beautified per ENSIP-15 (https://docs.ens.domains/ensip/15) for display. An Encoded LabelHash is preserved verbatim. Display-only; use `interpreted` for lookup keys. 
+  (@see https://ensnode.io/docs/reference/terminology#interpreted-label)
+  """
+  beautified: BeautifiedLabel!
+
   """
   The Label's LabelHash
   (@see https://ensnode.io/docs/reference/terminology#labels-labelhashes-labelhash-function)

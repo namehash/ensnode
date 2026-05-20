@@ -1,6 +1,8 @@
 import {
   asInterpretedLabel,
   asInterpretedName,
+  type BeautifiedLabel,
+  type BeautifiedName,
   type ChainId,
   type CoinType,
   type DomainId,
@@ -128,6 +130,28 @@ builder.scalarType("InterpretedLabel", {
         }
       })
       .transform((val) => asInterpretedLabel(val))
+      .parse(value),
+});
+
+builder.scalarType("BeautifiedName", {
+  description:
+    "BeautifiedName represents a enssdk#BeautifiedName: an InterpretedName whose normalized labels have been beautified per ENSIP-15 (https://docs.ens.domains/ensip/15) for display. It is display-only and MUST NOT be used as a navigation target or lookup key.",
+  serialize: (value: BeautifiedName) => value,
+  parseValue: (value) =>
+    z.coerce
+      .string()
+      .transform((val) => val as BeautifiedName)
+      .parse(value),
+});
+
+builder.scalarType("BeautifiedLabel", {
+  description:
+    "BeautifiedLabel represents a enssdk#BeautifiedLabel: an InterpretedLabel beautified per ENSIP-15 (https://docs.ens.domains/ensip/15) for display. It is display-only and MUST NOT be used as a lookup key.",
+  serialize: (value: BeautifiedLabel) => value,
+  parseValue: (value) =>
+    z.coerce
+      .string()
+      .transform((val) => val as BeautifiedLabel)
       .parse(value),
 });
 
