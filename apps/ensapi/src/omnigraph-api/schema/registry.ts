@@ -8,12 +8,6 @@ import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { builder } from "@/omnigraph-api/builder";
 import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
 import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domains-resolver";
-import {
-  domainsBase,
-  filterByName,
-  filterByRegistry,
-  withOrderingMetadata,
-} from "@/omnigraph-api/lib/find-domains/layers";
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
 import { AccountIdInput, AccountIdRef } from "@/omnigraph-api/schema/account-id";
@@ -130,12 +124,12 @@ RegistryInterfaceRef.implement({
         where: t.arg({ type: RegistryDomainsWhereInput }),
         order: t.arg({ type: DomainsOrderInput }),
       },
-      resolve: (parent, { where, order, ...connectionArgs }, context) => {
-        const base = filterByRegistry(domainsBase(), parent.id);
-        const { named, defaultOrder } = filterByName(base, where?.name ?? null);
-        const domains = withOrderingMetadata(named);
-        return resolveFindDomains(context, { domains, order, defaultOrder, ...connectionArgs });
-      },
+      resolve: (parent, { where, order, ...connectionArgs }, context) =>
+        resolveFindDomains(context, {
+          where: { ...where, registryId: parent.id },
+          order,
+          ...connectionArgs,
+        }),
     }),
 
     ////////////////////////

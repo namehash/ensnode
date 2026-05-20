@@ -100,7 +100,7 @@ import { createEnsNodeClient } from "enssdk/core";
 import { omnigraph } from "enssdk/omnigraph";
 
 // you may use a NameHash Hosted ENSNode instance
-// learn more at https://ensnode.io/docs/integrate/hosted-instances
+// learn more at https://ensnode.io/docs/hosted-instances
 const ENSNODE_URL = process.env.ENSNODE_URL!;
 
 // create and extend an EnsNodeClient with Omnigraph support
@@ -224,7 +224,7 @@ import { createEnsNodeClient } from "enssdk/core";
 import { type FragmentOf, graphql, omnigraph, readFragment } from "enssdk/omnigraph";
 
 // you may use a NameHash Hosted ENSNode instance
-// learn more at https://ensnode.io/docs/integrate/hosted-instances
+// learn more at https://ensnode.io/docs/hosted-instances
 const ENSNODE_URL = process.env.ENSNODE_URL!;
 
 const client = createEnsNodeClient({ url: ENSNODE_URL }).extend(omnigraph);

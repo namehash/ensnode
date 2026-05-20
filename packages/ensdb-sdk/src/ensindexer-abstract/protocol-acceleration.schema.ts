@@ -12,7 +12,7 @@ import type {
   ResolverId,
   ResolverRecordsId,
 } from "enssdk";
-import { onchainTable, primaryKey, relations, uniqueIndex } from "ponder";
+import { index, onchainTable, primaryKey, relations, uniqueIndex } from "ponder";
 
 /**
  * Tracks an Account's ENSIP-19 Reverse Name Records by CoinType.
@@ -69,6 +69,7 @@ export const domainResolverRelation = onchainTable(
   }),
   (t) => ({
     pk: primaryKey({ columns: [t.chainId, t.address, t.domainId] }),
+    byDomain: index().on(t.domainId),
   }),
 );
 

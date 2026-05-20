@@ -20,6 +20,7 @@ import {
   interpretAddress,
   PluginName,
 } from "@ensnode/ensnode-sdk";
+import { isBridgedTargetRegistry, isBridgeOriginDomain } from "@ensnode/ensnode-sdk/internal";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import {
@@ -128,11 +129,27 @@ export default function () {
       });
 
       const parentDomainId = makeENSv1DomainId(registry, parentNode);
-      // route through handleSubregistryUpdated so any prior subregistry edge (e.g. a bridged
-      // attachment) is properly reconciled instead of orphaned by a blind overwrite.
-      await handleSubregistryUpdated(context, parentDomainId, parentRegistryId);
 
-      await handleRegistryCanonicalDomainUpdated(context, parentRegistryId, parentDomainId);
+      // The bridged-resolver canonical edge owns both `Domain.subregistryId` on a bridge origin
+      // (L1, e.g. mainnet `linea.eth` → L2 Lineanames Registry) and `Registry.canonicalDomainId`
+      // on a bridged target (L2, e.g. Lineanames Registry → mainnet `linea.eth`). Chain-local
+      // subname events would otherwise clobber whichever pointer matches the current chain:
+      //   - L1 NewOwner for a subname of `linea.eth` would reset `linea.eth.subregistryId` to
+      //     the mainnet virtual registry.
+      //   - L2 NewOwner for any Lineaname subname would reset the L2 bridged Registry's
+      //     `canonicalDomainId` to the L2-side `linea.eth` Domain.
+      // Either clobber breaks the bidirectional agreement and de-canonicalizes the bridged
+      // subtree. Skip the corresponding write when the parent matches a known bridge endpoint.
+
+      // only update subregistry if this is not the origin domain
+      if (!isBridgeOriginDomain(config.namespace, parentDomainId)) {
+        await handleSubregistryUpdated(context, parentDomainId, parentRegistryId);
+      }
+
+      // only update canonical domain if this is not a target registry
+      if (!isBridgedTargetRegistry(config.namespace, parentRegistryId)) {
+        await handleRegistryCanonicalDomainUpdated(context, parentRegistryId, parentDomainId);
+      }
     }
 
     const ownerId = interpretAddress(owner);
