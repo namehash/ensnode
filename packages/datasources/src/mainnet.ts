@@ -135,9 +135,6 @@ export default {
      *
      * The owner of 'base.eth' in the ENS Registry in the mainnet ENS namespace (e.g. Coinbase)
      * has the ability to change this configuration at any time.
-     *
-     * See the reference documentation for additional context:
-     * docs/ensnode/src/content/docs/reference/mainnet-registered-subnames-of-subregistries.mdx
      */
     chain: base,
     contracts: {
@@ -214,9 +211,6 @@ export default {
      *
      * The owner of 'linea.eth' in the ENS Registry in the mainnet ENS namespace (e.g. Consensys)
      * has the ability to change this configuration at any time.
-     *
-     * See the reference documentation for additional context:
-     * docs/ensnode/src/content/docs/reference/mainnet-registered-subnames-of-subregistries.mdx
      */
     chain: linea,
     contracts: {

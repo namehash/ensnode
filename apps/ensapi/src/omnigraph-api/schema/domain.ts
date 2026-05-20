@@ -16,18 +16,13 @@ import { runWithTrace } from "@/lib/tracing/tracing-api";
 import { builder } from "@/omnigraph-api/builder";
 import { buildRecordsSelectionFromResolveInfo } from "@/omnigraph-api/lib/build-records-selection";
 import {
+  EMPTY_CONNECTION,
   orderPaginationBy,
   paginateBy,
   paginateByInt,
 } from "@/omnigraph-api/lib/connection-helpers";
 import { cursors } from "@/omnigraph-api/lib/cursors";
 import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domains-resolver";
-import {
-  domainsBase,
-  filterByName,
-  filterByParent,
-  withOrderingMetadata,
-} from "@/omnigraph-api/lib/find-domains/layers";
 import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-resolver";
 import { getLatestRegistration } from "@/omnigraph-api/lib/get-latest-registration";
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
@@ -270,11 +265,13 @@ DomainInterfaceRef.implement({
         order: t.arg({ type: DomainsOrderInput }),
       },
       resolve: (parent, { where, order, ...connectionArgs }, context) => {
-        const base = filterByParent(domainsBase(), parent.id);
-        const { named, defaultOrder } = filterByName(base, where?.name ?? null);
-        const domains = withOrderingMetadata(named);
+        if (!parent.subregistryId) return EMPTY_CONNECTION;
 
-        return resolveFindDomains(context, { domains, order, defaultOrder, ...connectionArgs });
+        return resolveFindDomains(context, {
+          where: { ...where, registryId: parent.subregistryId },
+          order,
+          ...connectionArgs,
+        });
       },
     }),
 

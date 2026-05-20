@@ -46,7 +46,7 @@ export function buildOmnigraphCurlExample(params: {
 }
 
 /** Docs path for the hosted ENSNode instances catalog. */
-export const HOSTED_INSTANCES_DOC_PATH = "/docs/integrate/hosted-instances" as const;
+export const HOSTED_INSTANCES_DOC_PATH = "/docs/hosted-instances" as const;
 
 /** Link to a hosted instance section (Starlight heading anchor on the hosted instances page). */
 export function getHostedEnsNodeInstanceDocUrl(headingAnchor: string): string {
@@ -54,7 +54,7 @@ export function getHostedEnsNodeInstanceDocUrl(headingAnchor: string): string {
 }
 
 /** ENSAdmin Omnigraph playground deep link (opens in browser). */
-export function buildEnsadminOmnigraphUrl(params: {
+export function buildEnsAdminOmnigraphUrl(params: {
   ensadminBaseUrl: string;
   query: string;
   connection: string;

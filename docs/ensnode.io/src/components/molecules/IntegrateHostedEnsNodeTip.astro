@@ -1,13 +1,25 @@
 ---
 import { Aside, LinkCard } from "@astrojs/starlight/components";
+import HostedInstanceSdkVersionWarning from "./HostedInstanceSdkVersionWarning.astro";
+
+interface Props {
+  /**
+   * Which SDK the warning should target. Passed through to HostedInstanceSdkVersionWarning.
+   * - "enssdk": enssdk-only warning
+   * - "enskit": both enskit and enssdk warning
+   * - "both": mention both enssdk and enskit, show both install commands (default)
+   */
+  for?: "enssdk" | "enskit" | "both";
+}
+
+const { for: target = "both" } = Astro.props;
 ---
 
 <Aside type="tip" title="No backend required">
 You don't need to run your own ENSNode to follow this guide — the steps below default to a NameHash-hosted instance. Browse the available deployments below.
 </Aside>
+<HostedInstanceSdkVersionWarning for={target} />
 <LinkCard
   title="Hosted ENSNode Instances"
-  href="/docs/integrate/hosted-instances"
+  href="/docs/hosted-instances"
 />
-
-

@@ -15,5 +15,9 @@ export const selfHostSidebarTopic = {
       label: "Terraform",
       link: "/docs/self-host/terraform",
     },
+    {
+      label: "Scalability",
+      link: "/docs/self-host/scalability",
+    },
   ],
 };
