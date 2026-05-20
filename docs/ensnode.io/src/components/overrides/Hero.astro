@@ -3,11 +3,11 @@ import { Image } from "astro:assets";
 import { Balancer } from "react-wrap-balancer";
 import backgroundImage from "@assets/hero_bg_image.png";
 import heroImage from "@assets/hero_image.png";
-import { legacyButtonVariants } from "@workspace/packages/namehash-ui/src/components/legacy";
+import { legacyButtonVariants } from "@namehash/namehash-ui/legacy";
 ---
-<section class="w-full h-screen flex flex-col flex-nowrap justify-center items-center bg-black max-sm:pb-10 max-sm:pt-[96px]">
-    <Image src={backgroundImage} alt="background image" aria-hidden="true" class="absolute w-full h-screen z-0 object-center object-cover select-none hidden sm:block" quality={100}/>
-    <div class="w-full max-w-[1280px] flex flex-col lg:flex-row justify-center sm:justify-between items-center gap-10 px-5 sm:px-8 sm:max-lg:pt-20">
+<section class="w-full h-screen flex flex-col flex-nowrap justify-center items-center bg-black relative">
+    <Image src={backgroundImage} alt="background image" aria-hidden="true" class="absolute w-full h-screen z-0 object-center object-cover select-none" quality={100}/>
+    <div class="w-full max-w-[1280px] flex flex-col lg:flex-row justify-center sm:justify-between items-center gap-10 px-5 sm:px-8 max-lg:pt-20 max-sm:pb-8">
             <div class="relative z-10 not-content antialiased flex flex-col flex-nowrap gap-8 justify-center items-center lg:items-start">
         <div class="flex flex-col flex-nowrap justify-center items-start gap-4">
             <h1 class="max-w-[650px] w-full font-bold leading-10 sm:leading-[68px] text-4xl sm:text-[52px] text-white max-lg:text-center">
