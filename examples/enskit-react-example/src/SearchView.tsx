@@ -5,9 +5,11 @@ import { Link, useSearchParams } from "react-router";
 
 const DomainsByNameQuery = graphql(`
   query DomainsByName($name: String!, $first: Int!, $after: String) {
-    domains(where: { name: { starts_with: $name } }, first: $first, after: $after) {
+    domains(where: { name: $name }, first: $first, after: $after) {
       edges {
-        node { __typename id canonical {name} }
+        # # TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
+        # node { __typename id canonical { name { interpreted } } }
+        node { __typename id name }
       }
       pageInfo {
         hasNextPage
@@ -67,9 +69,9 @@ export function SearchView() {
       <h2>Domain Search</h2>
 
       <p>
-        Showcases live querying via <code>Query.domains(where: {"{ name: { starts_with } }"})</code>
-        . Only <b>Canonical</b> Domains are rendered. Input is debounced by {DEBOUNCE_MS}ms and
-        synced to the URL as <code>?query=</code>.
+        Showcases live querying via <code>Query.domains(where: {"{ name }"})</code>. Only{" "}
+        <b>Canonical</b> Domains are rendered. Input is debounced by {DEBOUNCE_MS}ms and synced to
+        the URL as <code>?query=</code>.
       </p>
 
       <input
@@ -88,12 +90,17 @@ export function SearchView() {
           {fetching && <p>Loading...</p>}
           <ul>
             {data?.domains?.edges.map((edge) => {
-              if (!edge.node.canonical) return null;
+              if (!edge.node.name) return null;
               return (
                 <li key={edge.node.id}>
                   ({edge.node.__typename === "ENSv1Domain" ? "v1" : "v2"}){" "}
-                  <Link to={`/domain/${edge.node.canonical.name}`}>
-                    {beautifyInterpretedName(edge.node.canonical.name)}
+                  <Link to={`/domain/${edge.node.name}`}>
+                    {beautifyInterpretedName(edge.node.name)}
+                    {/* 
+                  TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
+                  <Link to={`/domain/${edge.node.canonical.name.interpreted}`}>
+                    {beautifyInterpretedName(edge.node.canonical.name.interpreted)}
+                    */}
                   </Link>
                 </li>
               );

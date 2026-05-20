@@ -1,8 +1,8 @@
 ---
 import { getCollection } from "astro:content";
 import { Icon } from "astro-icon/components";
-import StaticHeader from "../components/molecules/StaticHeader.astro";
-import ExampleCard from "../components/organisms/ExampleCard.astro";
+import StaticHeader from "@components/molecules/StaticHeader.astro";
+import ExampleCard from "@components/organisms/ExampleCard.astro";
 import Layout from "../layouts/Layout.astro";
 
 const examples = await getCollection("examples");

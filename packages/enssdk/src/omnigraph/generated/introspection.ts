@@ -389,8 +389,7 @@ const introspection = {
             "type": {
               "kind": "SCALAR",
               "name": "Boolean"
-            },
-            "defaultValue": "false"
+            }
           },
           {
             "name": "name",
@@ -1039,6 +1038,25 @@ const introspection = {
         "name": "Boolean"
       },
       {
+        "kind": "OBJECT",
+        "name": "CanonicalName",
+        "fields": [
+          {
+            "name": "interpreted",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "InterpretedName"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          }
+        ],
+        "interfaces": []
+      },
+      {
         "kind": "SCALAR",
         "name": "ChainId"
       },
@@ -1050,15 +1068,6 @@ const introspection = {
         "kind": "INTERFACE",
         "name": "Domain",
         "fields": [
-          {
-            "name": "assignedResolver",
-            "type": {
-              "kind": "OBJECT",
-              "name": "Resolver"
-            },
-            "args": [],
-            "isDeprecated": false
-          },
           {
             "name": "canonical",
             "type": {
@@ -1215,6 +1224,18 @@ const introspection = {
             "isDeprecated": false
           },
           {
+            "name": "resolver",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DomainResolver"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
             "name": "subdomains",
             "type": {
               "kind": "OBJECT",
@@ -1309,8 +1330,8 @@ const introspection = {
             "type": {
               "kind": "NON_NULL",
               "ofType": {
-                "kind": "SCALAR",
-                "name": "InterpretedName"
+                "kind": "OBJECT",
+                "name": "CanonicalName"
               }
             },
             "args": [],
@@ -1577,6 +1598,22 @@ const introspection = {
       },
       {
         "kind": "OBJECT",
+        "name": "DomainResolver",
+        "fields": [
+          {
+            "name": "assigned",
+            "type": {
+              "kind": "OBJECT",
+              "name": "Resolver"
+            },
+            "args": [],
+            "isDeprecated": false
+          }
+        ],
+        "interfaces": []
+      },
+      {
+        "kind": "OBJECT",
         "name": "DomainSubdomainsConnection",
         "fields": [
           {
@@ -1779,15 +1816,6 @@ const introspection = {
         "name": "ENSv1Domain",
         "fields": [
           {
-            "name": "assignedResolver",
-            "type": {
-              "kind": "OBJECT",
-              "name": "Resolver"
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
             "name": "canonical",
             "type": {
               "kind": "OBJECT",
@@ -1949,6 +1977,18 @@ const introspection = {
               "ofType": {
                 "kind": "INTERFACE",
                 "name": "Registry"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "resolver",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DomainResolver"
               }
             },
             "args": [],
@@ -2343,15 +2383,6 @@ const introspection = {
         "name": "ENSv2Domain",
         "fields": [
           {
-            "name": "assignedResolver",
-            "type": {
-              "kind": "OBJECT",
-              "name": "Resolver"
-            },
-            "args": [],
-            "isDeprecated": false
-          },
-          {
             "name": "canonical",
             "type": {
               "kind": "OBJECT",
@@ -2546,6 +2577,18 @@ const introspection = {
               "ofType": {
                 "kind": "INTERFACE",
                 "name": "Registry"
+              }
+            },
+            "args": [],
+            "isDeprecated": false
+          },
+          {
+            "name": "resolver",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DomainResolver"
               }
             },
             "args": [],

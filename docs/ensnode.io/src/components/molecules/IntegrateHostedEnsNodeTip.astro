@@ -1,32 +1,25 @@
 ---
 import { Aside, LinkCard } from "@astrojs/starlight/components";
-
-type Variant = "withDeployments" | "quickstart";
+import HostedInstanceSdkVersionWarning from "./HostedInstanceSdkVersionWarning.astro";
 
 interface Props {
-  variant?: Variant;
-  includeHostedInstancesLink?: boolean;
+  /**
+   * Which SDK the warning should target. Passed through to HostedInstanceSdkVersionWarning.
+   * - "enssdk": enssdk-only warning
+   * - "enskit": both enskit and enssdk warning
+   * - "both": mention both enssdk and enskit, show both install commands (default)
+   */
+  for?: "enssdk" | "enskit" | "both";
 }
 
-const { variant = "withDeployments", includeHostedInstancesLink = false } = Astro.props;
-
-const body: Record<Variant, string> = {
-  withDeployments:
-    "You don't need to run your own ENSNode to follow this guide — the steps below default to a NameHash-hosted instance. Browse the available deployments below.",
-  quickstart:
-    "You don't need to run your own ENSNode to follow this guide — point at any NameHash-hosted instance to get started.",
-};
+const { for: target = "both" } = Astro.props;
 ---
 
 <Aside type="tip" title="No backend required">
-  {body[variant]}
+You don't need to run your own ENSNode to follow this guide — the steps below default to a NameHash-hosted instance. Browse the available deployments below.
 </Aside>
-
-{
-  includeHostedInstancesLink ? (
-    <LinkCard
-      title="Hosted ENSNode Instances"
-      href="/docs/integrate/hosted-instances"
-    />
-  ) : null
-}
+<HostedInstanceSdkVersionWarning for={target} />
+<LinkCard
+  title="Hosted ENSNode Instances"
+  href="/docs/hosted-instances"
+/>

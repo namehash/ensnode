@@ -215,7 +215,7 @@ async function eventHandlerPreconditions(eventType: EventTypeId): Promise<void> 
   switch (eventType) {
     case EventTypeIds.Setup: {
       // For some ENSIndexer instances, the setup handlers are not defined at all,
-      // for example, if the ENSIndexer instance has only the `ensv2` plugin activated.
+      // for example, if the ENSIndexer instance has only the `unigraph` plugin activated.
       // In this case, some important logic, such as running migrations for ENSNode Schema
       // in ENSDb, would not be executed at all, which would cause the ENSIndexer instance
       // to not work properly. Therefore, all logic required to be executed before

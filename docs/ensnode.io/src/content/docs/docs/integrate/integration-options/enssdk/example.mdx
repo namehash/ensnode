@@ -1,0 +1,29 @@
+---
+title: Interactive enssdk example ⚡
+description: Edit and run the enssdk-example script against a live ENSNode endpoint in your browser.
+tableOfContents: false
+sidebarDocked: true
+sidebar:
+  order: 2
+---
+
+import EnssdkExampleInteractivePlayground from "@components/organisms/EnssdkExampleInteractivePlayground";
+import HostedInstanceSdkVersionWarning from "@components/molecules/HostedInstanceSdkVersionWarning.astro";
+
+This playground loads the same source as [`enssdk-example`](https://github.com/namehash/ensnode/tree/main/examples/enssdk-example): a TypeScript script that queries the `eth` domain and lists its first 20 subdomains via [`enssdk`](/docs/integrate/integration-options/enssdk) and the [ENS Omnigraph API](/docs/integrate/omnigraph).
+
+<HostedInstanceSdkVersionWarning for="enssdk" />
+
+:::note[First load may take a few minutes]
+The embedded StackBlitz editor runs entirely in your browser. Downloading and installing all npm packages may take a few minutes. Watch the install progress in the terminal of the StackBlitz editor.
+:::
+
+You can edit the script and run **`npm start`** in the terminal to run it again.
+
+:::caution[StackBlitz embed outage]
+StackBlitz is having problems with embedded WebContainer projects as of **May 19**. If the editor does not load, use the **Fork on StackBlitz** button in the bottom left to open and run the example on stackblitz.com.
+:::
+
+<EnssdkExampleInteractivePlayground client:load height="700" />
+
+[Back to enssdk overview](/docs/integrate/integration-options/enssdk)

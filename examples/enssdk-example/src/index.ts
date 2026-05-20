@@ -3,7 +3,7 @@ import { createEnsNodeClient } from "enssdk/core";
 import { type FragmentOf, graphql, omnigraph, readFragment } from "enssdk/omnigraph";
 
 // you may use a NameHash Hosted ENSNode instance
-// learn more at https://ensnode.io/docs/integrate/hosted-instances
+// learn more at https://ensnode.io/docs/hosted-instances
 // biome-ignore lint/style/noNonNullAssertion: invariant
 const ENSNODE_URL = process.env.ENSNODE_URL!;
 
@@ -13,7 +13,9 @@ const client = createEnsNodeClient({ url: ENSNODE_URL }).extend(omnigraph);
 const DomainFragment = graphql(`
   fragment DomainFragment on Domain {
     __typename
-    canonical { name }
+    # # TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
+    # canonical { name { interpreted } }
+    name
     owner { address }
   }
 `);
@@ -36,12 +38,17 @@ const HelloWorldQuery = graphql(
 function formatDomain(data: FragmentOf<typeof DomainFragment>): string {
   // type-safe access to fragment data!
   const domain = readFragment(DomainFragment, data);
-  const name = domain.canonical ? beautifyInterpretedName(domain.canonical.name) : "<unnamed>";
-  const owner = domain.owner?.address ?? "0x0";
+  // TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
+  // const name = domain.canonical
+  //   ? beautifyInterpretedName(domain.canonical.name.interpreted)
+  //   : "<unnamed>";
+  const name = domain.name ? beautifyInterpretedName(domain.name) : "<unnamed>";
+  const owner = domain.owner?.address ?? "0x0 (means reserved for ENSv2)";
   return `${name} (${domain.__typename}) — Owner ${owner}`;
 }
 
 async function main() {
+  console.log(`Querying ENSNode at ${ENSNODE_URL}...`);
   const name = asInterpretedName("eth");
 
   const result = await client.omnigraph.query({

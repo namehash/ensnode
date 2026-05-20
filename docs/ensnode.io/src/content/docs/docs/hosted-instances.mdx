@@ -1,0 +1,110 @@
+---
+title: Hosted ENSNode Instances
+sidebar:
+  label: Overview
+  order: 1
+---
+
+import { LinkCard } from "@astrojs/starlight/components";
+import HostedEnsNodeInstances from "@components/molecules/HostedEnsNodeInstances.astro";
+import HostedInstanceSdkVersionWarning from "@components/molecules/HostedInstanceSdkVersionWarning.astro";
+
+## Hosted Instances
+
+NameHash Labs provides freely available hosted instances for ENS developers looking to get started quickly.
+
+These instances are provided free of charge with no API key required, have no rate limiting, and are maintained and monitored by the NameHash Labs team.
+
+<HostedInstanceSdkVersionWarning for="both" />
+
+### Available instance configurations
+
+Each ENSNode hosted instance is configured for a specific ENS **namespace** and activated ENSNode **plugins**. The ENS namespace identifies which ENS protocol deployment will be indexed by ENSNode (ex: mainnet or sepolia). The activated plugins determine the specific indexed data model ENSIndexer will produce in ENSDb and therefore which APIs ENSApi will make available to query.
+
+Each ENS namespace is associated with a particular ENS Root Registry deployment, which may or may not have completed the transition from ENSv1 to ENSv2. Currently, ENSNode supports the following ENS namespaces:
+- `mainnet` (ENSv1)
+- `sepolia` (ENSv1)
+- `sepolia-v2` (ENSv1+ENSv2 — An independent deployment of ENS to Sepolia that is already upgraded to ENSv2)
+- `ens-test-env` (ENSv1+ENSv2 — A deployment of ENSv2 to a local Anvil chain for development and testing. For details see https://github.com/ensdomains/ens-test-env and https://github.com/ensdomains/contracts-v2)
+
+More details about ENS namespaces can be found inside [ENSNode's datasources package](https://github.com/namehash/ensnode/tree/main/packages/datasources).
+
+### ENSv2 Instances
+
+These instances are associated with an ENS namespace that has upgraded to ENSv2 and demonstrate the latest ENSv2 support in ENSNode.
+
+#### ENSNode 'v2 Sepolia'
+
+:::tip[v2 Sepolia]
+The `sepolia-v2` namespace is undergoing active development by the ENS Labs team who is continuing to release updated ENSv2 contracts. It should be considered experimental.
+:::
+
+<HostedEnsNodeInstances
+  instanceURL="https://api.v2-sepolia.ensnode.io"
+  connectWithENSAdminURL="https://admin.ensnode.io/connection?connection=https%3A%2F%2Fapi.v2-sepolia.ensnode.io"
+  namespace="sepolia-v2"
+  plugins="unigraph, protocol-acceleration"
+  purpose="Demonstration of ENSNode's support for an ENS namespace that has already transitioned to ENSv2."
+/>
+
+## ENSv1 Instances
+
+These instances are associated with an ENS namespace that has **NOT** upgraded to ENSv2 yet and are still operating under ENSv1. These demonstrate how the ENS Omnigraph API, enssdk, enskit, and the full stack of ENSNode services provide support to developers to become ENSv2 ready even before ENSv2 launches.
+
+### Alpha-style Deployments
+
+These ENSNode instances focus on pushing the boundaries of what's possible with ENSNode.
+
+#### ENSNode 'Alpha'
+
+<HostedEnsNodeInstances
+  instanceURL="https://api.alpha.ensnode.io"
+  connectWithENSAdminURL="https://admin.ensnode.io/connection?connection=https%3A%2F%2Fapi.alpha.ensnode.io"
+  namespace="mainnet"
+  plugins="subgraph, basenames, lineanames, threedns, unigraph, protocol-acceleration, registrars, tokenscope"
+  purpose="Demonstration of ENSNode's multichain ENS indexing capability for an ENS namespace (mainnet) that is still operating ENSv1. Experience how the ENS Omnigraph API, enssdk, enskit, and the full stack of ENSNode services provide support to developers to become ENSv2 ready even before ENSv2 launches. Provides a superset of the data indexed by the ENS Subgraph. Offers a preview of ENS Protocol Acceleration."
+/>
+
+#### ENSNode 'Alpha-Sepolia'
+
+<HostedEnsNodeInstances
+  instanceURL="https://api.alpha-sepolia.ensnode.io"
+  connectWithENSAdminURL="https://admin.ensnode.io/connection?connection=https%3A%2F%2Fapi.alpha-sepolia.ensnode.io"
+  namespace="sepolia"
+  plugins="subgraph, basenames, lineanames, registrars, unigraph, protocol-acceleration"
+  purpose="Demonstration of ENSNode's multichain ENS indexing capability for an ENS namespace (sepolia) that is still operating ENSv1. Experience how the ENS Omnigraph API, enssdk, enskit, and the full stack of ENSNode services provide support to developers to become ENSv2 ready even before ENSv2 launches. Provides a superset of the data indexed by the ENS Subgraph. Offers a preview of ENS Protocol Acceleration."
+/>
+
+### Subgraph-style Deployments
+
+These ENSNode instances focus on maximizing backwards compatibility with the ENS Subgraph.
+
+#### ENSNode 'Mainnet'
+
+<HostedEnsNodeInstances
+  instanceURL="https://api.mainnet.ensnode.io"
+  connectWithENSAdminURL="https://admin.ensnode.io/connection?connection=https%3A%2F%2Fapi.mainnet.ensnode.io"
+  namespace="mainnet"
+  plugins="subgraph"
+  purpose="Demonstration of ENSNode's backwards compatibility with the ENS Subgraph. Provides 1:1 Subgraph compatible data on mainnet."
+/>
+
+#### ENSNode 'Sepolia'
+
+<HostedEnsNodeInstances
+  instanceURL="https://api.sepolia.ensnode.io"
+  connectWithENSAdminURL="https://admin.ensnode.io/connection?connection=https%3A%2F%2Fapi.sepolia.ensnode.io"
+  namespace="sepolia"
+  plugins="subgraph"
+  purpose="Demonstration of ENSNode's backwards compatibility with the ENS Subgraph. Provides 1:1 Subgraph compatible data on Sepolia."
+/>
+
+## Start building
+
+Pick an instance above, then jump into the Quickstart for integration options to start making use of it.
+
+<LinkCard
+  title="ENSNode Quickstart"
+  href="/docs/integrate"
+  description="Wire enskit, enssdk, or the ENS Omnigraph API up to a hosted instance in a few minutes."
+/>

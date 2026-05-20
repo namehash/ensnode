@@ -1,0 +1,22 @@
+---
+import { Icon } from "astro-icon/components";
+
+interface ENSNodeServiceCardProps {
+  title: string;
+  description: string;
+  href: string;
+}
+
+const { title, description, href } = Astro.props as ENSNodeServiceCardProps;
+---
+
+<a href={href} class="not-content group w-full h-fit min-h-[100px] flex flex-row justify-between items-center gap-5 border border-gray-200 hover:border-gray-300 hover:shadow-xs cursor-pointer rounded-2xl overflow-hidden p-4">
+    <div class="w-fit flex flex-row justify-start items-center gap-5">
+        <slot name="icon"/>
+        <div class="not-content w-full h-fit flex flex-col justify-start items-start gap-2">
+            <h4 class="not-content text-2xl leading-normal font-semibold text-black">{title}</h4>
+            <p class="not-content text-base leading-normal text-[var(--sl-color-text)]">{description}</p>
+        </div>
+    </div>
+    <Icon name="lucide:chevron-right" class="not-content h-10 w-10 shrink-0 text-gray-200 group-hover:text-gray-300" />
+</a>

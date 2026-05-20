@@ -9,20 +9,14 @@ import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { withSpanAsync } from "@/lib/instrumentation/auto-span";
 import { builder } from "@/omnigraph-api/builder";
 import {
+  EMPTY_CONNECTION,
   orderPaginationBy,
   paginateBy,
   paginateByInt,
 } from "@/omnigraph-api/lib/connection-helpers";
 import { cursors } from "@/omnigraph-api/lib/cursors";
 import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domains-resolver";
-import {
-  domainsBase,
-  filterByName,
-  filterByParent,
-  withOrderingMetadata,
-} from "@/omnigraph-api/lib/find-domains/layers";
 import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-resolver";
-import { getDomainResolver } from "@/omnigraph-api/lib/get-domain-resolver";
 import { getLatestRegistration } from "@/omnigraph-api/lib/get-latest-registration";
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
@@ -38,13 +32,13 @@ import {
   DomainsOrderInput,
   SubdomainsWhereInput,
 } from "@/omnigraph-api/schema/domain-inputs";
+import { DomainResolverRef } from "@/omnigraph-api/schema/domain-resolver";
 import { EventRef } from "@/omnigraph-api/schema/event";
 import { EventsWhereInput } from "@/omnigraph-api/schema/event-inputs";
 import { LabelRef } from "@/omnigraph-api/schema/label";
 import { PermissionsUserRef } from "@/omnigraph-api/schema/permissions";
 import { RegistrationInterfaceRef } from "@/omnigraph-api/schema/registration";
 import { RegistryInterfaceRef } from "@/omnigraph-api/schema/registry";
-import { ResolverRef } from "@/omnigraph-api/schema/resolver";
 
 const tracer = trace.getTracer("schema/Domain");
 
@@ -162,15 +156,14 @@ DomainInterfaceRef.implement({
       resolve: (parent) => parent.subregistryId,
     }),
 
-    ///////////////////////////
-    // Domain.assignedResolver
-    ///////////////////////////
-    assignedResolver: t.field({
-      description:
-        "The Resolver that this Domain has assigned, if any. NOTE that this is the Domain's _assigned_ Resolver, _not_ its _effective_ Resolver, which can only be determined by following ENS Forward Resolution and ENSIP-10. Do NOT use this Domain-Resolver relationship in isolation to resolve records, that operation is NOT ENS Forward Resolution.",
-      type: ResolverRef,
-      nullable: true,
-      resolve: (parent) => getDomainResolver(parent.id),
+    ///////////////////
+    // Domain.resolver
+    ///////////////////
+    resolver: t.field({
+      description: "Resolver relationship metadata for this Domain.",
+      type: DomainResolverRef,
+      nullable: false,
+      resolve: (parent) => parent.id,
     }),
 
     ///////////////////////
@@ -232,11 +225,13 @@ DomainInterfaceRef.implement({
         order: t.arg({ type: DomainsOrderInput }),
       },
       resolve: (parent, { where, order, ...connectionArgs }, context) => {
-        const base = filterByParent(domainsBase(), parent.id);
-        const { named, defaultOrder } = filterByName(base, where?.name ?? null);
-        const domains = withOrderingMetadata(named);
+        if (!parent.subregistryId) return EMPTY_CONNECTION;
 
-        return resolveFindDomains(context, { domains, order, defaultOrder, ...connectionArgs });
+        return resolveFindDomains(context, {
+          where: { ...where, registryId: parent.subregistryId },
+          order,
+          ...connectionArgs,
+        });
       },
     }),
 

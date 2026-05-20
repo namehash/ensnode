@@ -1,0 +1,18 @@
+diff --git a/llms-full.txt.ts b/llms-full.txt.ts
+index cdc3a34c0555c4a556224f63d937d976c669eef0..45d60f54994240e93277021cb649237c4874f4ce 100644
+--- a/llms-full.txt.ts
++++ b/llms-full.txt.ts
+@@ -1,4 +1,5 @@
+ import type { APIRoute } from 'astro';
++import { starlightLllmsTxtContext } from 'virtual:starlight-llms-txt/context';
+ import { generateLlmsTxt } from './generator';
+ import { getSiteTitle } from './utils';
+ 
+@@ -9,6 +10,7 @@ export const GET: APIRoute = async (context) => {
+ 	const body = await generateLlmsTxt(context, {
+ 		minify: false,
+ 		description: `This is the full developer documentation for ${getSiteTitle()}`,
++		exclude: starlightLllmsTxtContext.exclude,
+ 	});
+ 	return new Response(body);
+ };

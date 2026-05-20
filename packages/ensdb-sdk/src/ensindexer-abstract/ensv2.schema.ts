@@ -43,7 +43,7 @@ import type { EncodedReferrer } from "@ensnode/ensnode-sdk";
  * in ENSApi. The current obvious exception is that `domain.ownerId` for ENSv1 Domains is the
  * _materialized_ _effective_ owner. ENSv1 includes a diverse number of ways to 'own' a domain,
  * including the ENSv1 Registry, various Registrars, and the NameWrapper. The ENSv1 indexing logic
- * within this ENSv2 plugin materializes the effective owner to simplify this aspect of ENS and
+ * within this Unigraph plugin materializes the effective owner to simplify this aspect of ENS and
  * enable efficient queries against `domain.ownerId`.
  *
  * When necessary, all datamodels are shared or polymorphic between ENSv1 and ENSv2, including
@@ -76,7 +76,7 @@ import type { EncodedReferrer } from "@ensnode/ensnode-sdk";
  * for fresh ENSv1 virtual registries on first wire-up) or a single recursive-CTE batch UPDATE
  * otherwise (see `canonicality-db-helpers.ts`).
  *
- * Note also that the Protocol Acceleration plugin is a hard requirement for the ENSv2 plugin. This
+ * Note also that the Protocol Acceleration plugin is a hard requirement for the Unigraph plugin. This
  * allows us to rely on the shared logic for indexing:
  *   a) ENSv1RegistryOld -> ENSv1Registry migration status
  *   b) Domain-Resolver Relations for both ENSv1 and ENSv2 Domains
@@ -338,10 +338,26 @@ export const domain = onchainTable(
   }),
   (t) => ({
     byType: index().on(t.type),
-    byRegistry: index().on(t.registryId),
     bySubregistry: index().on(t.subregistryId).where(sql`${t.subregistryId} IS NOT NULL`),
     byOwner: index().on(t.ownerId),
     byLabelHash: index().on(t.labelHash),
+    // Composite for `(registry_id, label_hash)` lookups (namegraph walk in
+    // get-domain-by-interpreted-name.ts). The leading `registry_id` column also serves
+    // `WHERE registry_id = X` lookups via prefix scan.
+    byRegistryAndLabelHash: index().on(t.registryId, t.labelHash),
+
+    // composite for `WHERE registry_id = X ORDER BY canonical_name LIMIT N` (Domain.subdomains
+    // and other find-domains queries when ordering by NAME). Uses `left(canonical_name, 256)`
+    // to bound the index tuple under btree's per-tuple max (~2712 bytes): 256 chars × max 4-byte
+    // UTF-8 = 1024 bytes, leaving ample room for the registry_id and id columns. Names beyond
+    // 256 chars (currently <0.0001% of mainnet) collide on the truncated prefix and tie-break by
+    // id; this is acceptable since such names are invariably spam. Callers MUST sort by the same
+    // expression for the planner to use this index for ordered scan.
+    byRegistryAndCanonicalNameLeft: index().on(
+      t.registryId,
+      sql`left(${t.canonicalName}, 256)`,
+      t.id,
+    ),
 
     // hash index avoids the btree 8191-byte row-size hazard for spam names
     byCanonicalNameExact: index().using("hash", t.canonicalName),

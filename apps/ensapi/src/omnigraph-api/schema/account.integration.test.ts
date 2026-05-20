@@ -27,7 +27,7 @@ describe("Account.domains", () => {
     account: {
       domains: GraphQLConnection<{
         __typename: "ENSv1Domain" | "ENSv2Domain";
-        canonical: { name: InterpretedName } | null;
+        canonical: { name: { interpreted: InterpretedName } } | null;
       }>;
     };
   };
@@ -39,7 +39,7 @@ describe("Account.domains", () => {
           where: { version: $version },
           order: { by: NAME, dir: ASC }
         ) {
-          edges { node { __typename, canonical { name } } }
+          edges { node { __typename, canonical { name { interpreted } } } }
         }
       }
     }
@@ -50,7 +50,7 @@ describe("Account.domains", () => {
       address: accounts.owner.address,
     });
     const domains = flattenConnection(result.account.domains);
-    const names = domains.map((d) => d.canonical?.name);
+    const names = domains.map((d) => d.canonical?.name.interpreted);
 
     const expected = [
       "alias.eth",
@@ -77,7 +77,7 @@ describe("Account.domains", () => {
       address: accounts.user.address,
     });
     const domains = flattenConnection(result.account.domains);
-    const names = domains.map((d) => d.canonical?.name);
+    const names = domains.map((d) => d.canonical?.name.interpreted);
 
     expect(names, "expected 'newowner.eth' in new owner's domains").toContain("newowner.eth");
   });

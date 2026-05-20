@@ -7,6 +7,6 @@ import type { ErrorResponse } from "./response";
  */
 export const makeErrorResponseSchema = () =>
   z.object({
-    message: z.string(),
-    details: z.optional(z.unknown()),
+    message: z.string().describe("A description of the error that occurred."),
+    details: z.optional(z.unknown()).describe("Additional details about the error."),
   });

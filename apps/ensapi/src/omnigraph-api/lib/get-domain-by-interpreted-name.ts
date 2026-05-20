@@ -25,7 +25,7 @@ import {
 import { isBridgedResolver } from "@ensnode/ensnode-sdk/internal";
 
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
-import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
+import { withActiveSpanAsync, withSpanAsync } from "@/lib/instrumentation/auto-span";
 import { MAX_SUPPORTED_NAME_DEPTH } from "@/omnigraph-api/lib/constants";
 
 const tracer = trace.getTracer("get-domain-by-interpreted-name");
@@ -65,7 +65,7 @@ const hasResolver = (
  * may not be accessible by Forward Resolution: an expired Domain in a PermissionedRegistry does not
  * exist in the context of Forward Resolution.
  *
- * @dev depends on the Protocol Acceleration plugin which is a hard requirement for ensv2/omnigraph usage
+ * @dev depends on the Protocol Acceleration plugin which is a hard requirement for the Omnigraph API usage.
  */
 export async function getDomainIdByInterpretedName(
   name: InterpretedName,
@@ -177,7 +177,8 @@ async function forwardWalkDisjointNamegraph(registryId: RegistryId, path: LabelH
   // NOTE: using new Param as per https://github.com/drizzle-team/drizzle-orm/issues/1289#issuecomment-2688581070
   const rawLabelHashPathArray = sql`${new Param(path)}::text[]`;
 
-  const result = await ensDb.execute(sql`
+  const result = await withSpanAsync(tracer, "forward-walk", { registryId, path }, () =>
+    ensDb.execute(sql`
     WITH RECURSIVE path AS (
       SELECT
         ${registryId}::text         AS next_registry_id,
@@ -209,7 +210,8 @@ async function forwardWalkDisjointNamegraph(registryId: RegistryId, path: LabelH
       ON drr.domain_id = path."domainId"
     WHERE path."domainId" IS NOT NULL
     ORDER BY path.depth DESC;
-  `);
+  `),
+  );
 
   return result.rows as unknown as WalkResultRow[];
 }

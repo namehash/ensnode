@@ -1,5 +1,5 @@
 // you may use a NameHash Hosted ENSNode instance
-// learn more at https://ensnode.io/docs/integrate/hosted-instances
+// learn more at https://ensnode.io/docs/hosted-instances
 // biome-ignore lint/style/noNonNullAssertion: invariant
 const ENSNODE_URL = process.env.ENSNODE_URL!;
 
@@ -9,11 +9,15 @@ const HELLO_WORLD_QUERY = /* GraphQL */ `
   query HelloWorld($name: InterpretedName!) {
     domain(by: { name: $name }) {
       __typename
-      canonical { name }
+      # # TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
+      # canonical { name { interpreted } }
+      name
       owner { address }
       subdomains(first: 20) {
         totalCount
-        edges { node { __typename canonical { name } owner { address } } }
+        # # TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
+        # edges { node { __typename canonical { name { interpreted } } owner { address } } }
+        edges { node { __typename name owner { address } } }
       }
     }
   }
@@ -21,7 +25,9 @@ const HELLO_WORLD_QUERY = /* GraphQL */ `
 
 interface Domain {
   __typename: "ENSv1Domain" | "ENSv2Domain";
-  canonical: { name: string } | null;
+  // TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
+  // canonical: { name: { interpreted: string } } | null;
+  name: string;
   owner: { address: string } | null;
 }
 
@@ -40,12 +46,15 @@ interface QueryResult {
 }
 
 function formatDomain(domain: Domain): string {
-  const name = domain.canonical?.name ?? "<unnamed>";
+  // TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
+  // const name = domain.canonical?.name.interpreted ?? "<unnamed>";
+  const name = domain.name ?? "<unnamed>";
   const owner = domain.owner?.address ?? "0x0";
   return `${name} (${domain.__typename}) — Owner ${owner}`;
 }
 
 async function main() {
+  console.log(`Querying ENSNode at ${ENSNODE_URL}...`);
   const response = await fetch(new URL("/api/omnigraph", ENSNODE_URL), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
