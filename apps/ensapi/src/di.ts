@@ -4,11 +4,7 @@ import { createPublicClient, fallback, http, type PublicClient } from "viem";
 import { type ENSNamespaceId, getENSRootChainId } from "@ensnode/datasources";
 import type { EnsDbConfig, EnsDbReader } from "@ensnode/ensdb-sdk";
 import type { EnsNodeStackInfo } from "@ensnode/ensnode-sdk";
-import {
-  buildRpcConfigsFromEnv,
-  type RpcConfig,
-  RpcConfigsSchema,
-} from "@ensnode/ensnode-sdk/internal";
+import type { RpcConfig } from "@ensnode/ensnode-sdk/internal";
 import { subgraphGraphQLMiddleware } from "@ensnode/ponder-subgraph";
 
 import { type IndexingStatusCache, indexingStatusCache } from "@/cache/indexing-status.cache";
@@ -19,7 +15,7 @@ import {
 import type { EnsNodeStackInfoCache } from "@/cache/stack-info.cache";
 import { stackInfoCache } from "@/cache/stack-info.cache";
 import type { EnsApiConfig } from "@/config/config.schema";
-import { buildConfigFromEnvironment } from "@/config/config.schema";
+import { buildConfigFromEnvironment, buildRootChainRpcConfig } from "@/config/config.schema";
 import ensDbConfig from "@/config/ensdb-config";
 import type { EnsApiEnvironment } from "@/config/environment";
 import { ensDbClient } from "@/lib/ensdb/singleton";
@@ -101,17 +97,10 @@ export function buildEnsApiDiContext(env: NodeJS.ProcessEnv): EnsApiDiContext {
 
     get rootChainRpcConfig(): RpcConfig {
       if (!instances.rootChainRpcConfig) {
-        const unvalidatedRpcConfigs = buildRpcConfigsFromEnv(env, context.ensNamespaceId);
-        const rpcConfigs = RpcConfigsSchema.parse(unvalidatedRpcConfigs);
-        const rootChainRpcConfig = rpcConfigs.get(context.rootChainId);
-
-        if (!rootChainRpcConfig) {
-          throw new Error(
-            `RPC configuration for root chain (chainId: ${context.rootChainId}) is required but was not found in the environment variables.`,
-          );
-        }
-
-        instances.rootChainRpcConfig = rootChainRpcConfig;
+        instances.rootChainRpcConfig = buildRootChainRpcConfig(
+          context.ensApiEnvironment,
+          context.ensNamespaceId,
+        );
       }
 
       return instances.rootChainRpcConfig;

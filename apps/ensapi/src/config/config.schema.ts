@@ -1,9 +1,17 @@
 import { prettifyError, ZodError, z } from "zod/v4";
 
-import type { EnsApiPublicConfig, EnsIndexerPublicConfig } from "@ensnode/ensnode-sdk";
 import {
+  type ENSNamespaceId,
+  type EnsApiPublicConfig,
+  type EnsIndexerPublicConfig,
+  getENSRootChainId,
+} from "@ensnode/ensnode-sdk";
+import {
+  buildRpcConfigsFromEnv,
   canFallbackToTheGraph,
   OptionalPortNumberSchema,
+  type RpcConfig,
+  RpcConfigsSchema,
   TheGraphApiKeySchema,
 } from "@ensnode/ensnode-sdk/internal";
 
@@ -41,8 +49,10 @@ export type EnsApiConfig = z.infer<typeof EnsApiConfigSchema>;
 /**
  * Builds the EnsApiConfig from an EnsApiEnvironment object.
  *
+ * Note: If error occurs during parsing/validation, the error will be logged and the process
+ * will exit with code 1.
+ *
  * @returns A validated EnsApiConfig object
- * @throws Error with formatted validation messages if environment parsing fails
  */
 export function buildConfigFromEnvironment(env: EnsApiEnvironment): EnsApiConfig {
   try {
@@ -51,6 +61,45 @@ export function buildConfigFromEnvironment(env: EnsApiEnvironment): EnsApiConfig
       theGraphApiKey: env.THEGRAPH_API_KEY,
       referralProgramEditionConfigSetUrl: env.REFERRAL_PROGRAM_EDITIONS,
     });
+  } catch (error) {
+    if (error instanceof ZodError) {
+      logger.error(`Failed to parse environment configuration: \n${prettifyError(error)}\n`);
+    } else if (error instanceof Error) {
+      logger.error(error, `Failed to build EnsApiConfig`);
+    } else {
+      logger.error(`Unknown Error`);
+    }
+
+    process.exit(1);
+  }
+}
+
+/**
+ * Builds the RPC config for the root chain based on the provided environment and ENS namespace ID.
+ * @param env - The environment variables for the ENSApi
+ * @param ensNamespaceId - The ENS namespace ID
+ * @returns The RPC config for the root chain
+ *
+ * Note: If error occurs during parsing/validation, the error will be logged and the process
+ * will exit with code 1.
+ */
+export function buildRootChainRpcConfig(
+  env: EnsApiEnvironment,
+  ensNamespaceId: ENSNamespaceId,
+): RpcConfig {
+  try {
+    const unvalidatedRpcConfigs = buildRpcConfigsFromEnv(env, ensNamespaceId);
+    const rootChainId = getENSRootChainId(ensNamespaceId);
+    const rpcConfigs = RpcConfigsSchema.parse(unvalidatedRpcConfigs);
+    const rootChainRpcConfig = rpcConfigs.get(rootChainId);
+
+    if (!rootChainRpcConfig) {
+      throw new Error(
+        `RPC configuration for root chain (chainId: ${rootChainId}) is required but was not found in the environment variables.`,
+      );
+    }
+
+    return rootChainRpcConfig;
   } catch (error) {
     if (error instanceof ZodError) {
       logger.error(`Failed to parse environment configuration: \n${prettifyError(error)}\n`);
