@@ -4,7 +4,7 @@ export default function ScrollHeader() {
     const defaultImage = document.getElementsByClassName("defaultImage")[0];
     const onScrollImage = document.getElementsByClassName("onScrollImage")[0];
     const headerButtons = document.getElementsByClassName("onScrollElement");
-    const headerMobileNavigation = document.getElementsByClassName("onScrollMobileNavigation");
+    const headerMobileNavigation = document.getElementsByClassName("onScrollContainer");
 
     const scrollWatcher = document.createElement("div");
 

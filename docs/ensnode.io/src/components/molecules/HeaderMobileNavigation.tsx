@@ -48,7 +48,7 @@ export default function HeaderMobileNavigation({
             <Popover.Button
               className={cc([
                 "sm:hidden relative z-30 cursor-pointer rounded-lg transition-all duration-200 px-[11px] py-[13px]",
-                isScrollable ? "onScrollMobileNavigation" : "hover:bg-black/5",
+                isScrollable ? "onScrollContainer" : "hover:bg-black/5",
               ])}
             >
               <span className="sr-only">Open menu</span>
