@@ -548,13 +548,6 @@ describe("Domain.records", () => {
     }
   `;
 
-  const textRecordsByKey = (texts: Array<{ key: string; value: string | null }>) =>
-    Object.fromEntries(texts.map(({ key, value }) => [key, value]));
-
-  const addressRecordsByCoinType = (
-    addresses: Array<{ coinType: CoinType; address: string | null }>,
-  ) => Object.fromEntries(addresses.map(({ coinType, address }) => [coinType, address]));
-
   it("resolves address and text records for example.eth", async () => {
     const result = await request<DomainRecordsResult>(DomainRecords, {
       name: "example.eth",
@@ -562,10 +555,14 @@ describe("Domain.records", () => {
       texts: ["description"],
     });
 
-    expect(result.domain.records?.addresses).toEqual([
-      { coinType: 60, address: accounts.owner.address },
-    ]);
-    expect(result.domain.records?.texts).toEqual([{ key: "description", value: "example.eth" }]);
+    expect(result).toMatchObject({
+      domain: {
+        records: {
+          texts: [{ key: "description", value: "example.eth" }],
+          addresses: [{ coinType: 60, address: accounts.owner.address }],
+        },
+      },
+    });
   });
 
   it("resolves every supported record type for test.eth", async () => {
@@ -577,32 +574,30 @@ describe("Domain.records", () => {
       interfaceIds: [fixtures.fourBytesInterface],
     });
 
-    const records = result.domain.records;
-    expect(records).toBeDefined();
-
-    expect(records?.contenthash).toBe(fixtures.contenthash);
-    expect(records?.pubkey).toEqual({ x: fixtures.publicKeyX, y: fixtures.publicKeyY });
-    expect(records?.dnszonehash).toBeNull();
-    expect(records?.version).toEqual(expect.any(String));
-    expect(records?.abi).toEqual({
-      contentType: "1",
-      data: fixtures.abiBytes,
-    });
-    expect(records?.interfaces).toEqual([
-      { interfaceId: fixtures.fourBytesInterface, implementer: addresses.one },
-    ]);
-    expect(addressRecordsByCoinType(records?.addresses ?? [])).toEqual({
-      60: accounts.owner.address,
-      0: fixtures.bitcoinAddress,
-      2: fixtures.litecoinAddress,
-    });
-    expect(textRecordsByKey(records?.texts ?? [])).toEqual({
-      avatar: "https://example.com/avatar.png",
-      description: "test.eth",
-      url: "https://ens.domains",
-      email: "test@ens.domains",
-      "com.twitter": "ensdomains",
-      "com.github": "ensdomains",
+    expect(result).toMatchObject({
+      domain: {
+        records: {
+          contenthash: fixtures.contenthash,
+          pubkey: { x: fixtures.publicKeyX, y: fixtures.publicKeyY },
+          dnszonehash: null,
+          version: expect.any(String),
+          abi: { contentType: "1", data: fixtures.abiBytes },
+          interfaces: [{ interfaceId: fixtures.fourBytesInterface, implementer: addresses.one }],
+          addresses: [
+            { coinType: 60, address: accounts.owner.address },
+            { coinType: 0, address: fixtures.bitcoinAddress },
+            { coinType: 2, address: fixtures.litecoinAddress },
+          ],
+          texts: [
+            { key: "avatar", value: "https://example.com/avatar.png" },
+            { key: "description", value: "test.eth" },
+            { key: "url", value: "https://ens.domains" },
+            { key: "email", value: "test@ens.domains" },
+            { key: "com.twitter", value: "ensdomains" },
+            { key: "com.github", value: "ensdomains" },
+          ],
+        },
+      },
     });
   });
 });

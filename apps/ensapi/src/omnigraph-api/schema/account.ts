@@ -87,8 +87,7 @@ AccountRef.implement({
         disableAcceleration: t.arg.boolean({
           required: false,
           defaultValue: false,
-          description:
-            "When true, disables protocol acceleration feature.",
+          description: "When true, disables protocol acceleration feature.",
         }),
       },
       resolve: async (account, { chainIds, disableAcceleration }, context) => {
