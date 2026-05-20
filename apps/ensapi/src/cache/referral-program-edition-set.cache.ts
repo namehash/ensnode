@@ -72,7 +72,7 @@ async function loadReferralProgramEditionConfigSet(
   }
 }
 
-type ReferralProgramEditionConfigSetCache = SWRCache<ReferralProgramEditionConfigSet>;
+export type ReferralProgramEditionConfigSetCache = SWRCache<ReferralProgramEditionConfigSet>;
 
 /**
  * SWR Cache for the referral program edition config set.
