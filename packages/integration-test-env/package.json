@@ -6,6 +6,7 @@
   "type": "module",
   "description": "Integration test environment orchestration for ENSNode",
   "scripts": {
+    "seed:devnet": "tsx src/seed-cli.ts",
     "start": "CI=1 tsx src/orchestrator.ts",
     "typecheck": "tsc --noEmit"
   },
