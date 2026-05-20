@@ -26,7 +26,7 @@ import { describe, expect, it } from "vitest";
 import { DatasourceNames } from "@ensnode/datasources";
 import { getDatasourceContract } from "@ensnode/ensnode-sdk";
 
-import { getPublicClient } from "@/lib/public-client";
+import di from "@/di";
 import { executeOperations } from "@/lib/resolution/execute-operations";
 import { makeOperations } from "@/lib/resolution/operations";
 
@@ -38,7 +38,7 @@ const NAME_WITH_ENCODED_LABELHASHES = interpretedLabelsToInterpretedName([
 
 const EXPECTED_DESCRIPTION = "example.eth";
 
-const publicClient = getPublicClient(ensTestEnvChain.id);
+const publicClient = di.context.rootChainPublicClient;
 
 const UniversalResolverV2 = getDatasourceContract(
   ENSNamespaceIds.EnsTestEnv,
