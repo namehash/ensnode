@@ -1,12 +1,12 @@
 import {
-  asInterpretedLabel,
-  asInterpretedName,
   type BeautifiedLabel,
   type BeautifiedName,
   type ChainId,
   type CoinType,
   type DomainId,
   type Hex,
+  type InterpretedLabel,
+  type InterpretedName,
   isInterpretedLabel,
   isInterpretedName,
   type Name,
@@ -110,7 +110,7 @@ builder.scalarType("InterpretedName", {
           });
         }
       })
-      .transform((val) => asInterpretedName(val))
+      .transform((val) => val as InterpretedName)
       .parse(value),
 });
 
@@ -129,7 +129,7 @@ builder.scalarType("InterpretedLabel", {
           });
         }
       })
-      .transform((val) => asInterpretedLabel(val))
+      .transform((val) => val as InterpretedLabel)
       .parse(value),
 });
 
