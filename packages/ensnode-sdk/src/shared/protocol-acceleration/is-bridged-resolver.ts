@@ -139,8 +139,14 @@ export function isBridgedResolver(
  * so the canonical edge to that target Registry can agree. Chain-local subname events on the
  * origin Domain must not overwrite that pointer.
  */
-export function isBridgeOriginDomain(namespace: ENSNamespaceId, domainId: DomainId): boolean {
-  return getBridgedResolverConfigs(namespace).some((config) => config.originDomainId === domainId);
+export function isBridgedOriginDomain(
+  namespace: ENSNamespaceId,
+  domainId: DomainId,
+): BridgedResolverConfig | null {
+  return (
+    getBridgedResolverConfigs(namespace).find((config) => config.originDomainId === domainId) ??
+    null
+  );
 }
 
 /**
@@ -154,8 +160,9 @@ export function isBridgeOriginDomain(namespace: ENSNamespaceId, domainId: Domain
 export function isBridgedTargetRegistry(
   namespace: ENSNamespaceId,
   registryId: RegistryId,
-): boolean {
-  return getBridgedResolverConfigs(namespace).some(
-    (config) => config.targetRegistryId === registryId,
+): BridgedResolverConfig | null {
+  return (
+    getBridgedResolverConfigs(namespace).find((config) => config.targetRegistryId === registryId) ??
+    null
   );
 }

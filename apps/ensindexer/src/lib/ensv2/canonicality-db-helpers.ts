@@ -279,27 +279,11 @@ export async function handleBridgedResolverChange(
   // NOTE: this also covers the "neither are bridged resolvers" case (null === null)
   if (prevBridged?.targetRegistryId === nextBridged?.targetRegistryId) return;
 
-  // if the previous resolver was a Bridged Resolver, we need to disconnect both links
-  if (prevBridged) {
-    // update the domain's indicated subregistry
-    await handleSubregistryUpdated(context, domainId, null);
-
-    // only update the Registry's Canonical Domain iff this is the correct originating Domain
-    if (prevBridged.originDomainId === domainId) {
-      await handleRegistryCanonicalDomainUpdated(context, prevBridged.targetRegistryId, null);
-    }
-  }
+  // if the previous resolver was a Bridged Resolver, we need to disconnect the subregistry
+  if (prevBridged) await handleSubregistryUpdated(context, domainId, null);
 
   // if the next resolver is a Bridged Resolver, we need to update the Domain's Subregistry
-  if (nextBridged) {
-    // update the domain's indicated subregistry
-    await handleSubregistryUpdated(context, domainId, nextBridged.targetRegistryId);
-
-    // only update the Registry's Canonical Domain iff this is the correct originating Domain
-    if (nextBridged.originDomainId === domainId) {
-      await handleRegistryCanonicalDomainUpdated(context, nextBridged.targetRegistryId, domainId);
-    }
-  }
+  if (nextBridged) await handleSubregistryUpdated(context, domainId, nextBridged.targetRegistryId);
 }
 
 /**
