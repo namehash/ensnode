@@ -7,8 +7,6 @@ const DomainsByNameQuery = graphql(`
   query DomainsByName($name: String!, $first: Int!, $after: String) {
     domains(where: { name: $name }, first: $first, after: $after) {
       edges {
-        # # TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
-        # node { __typename id canonical { name { interpreted } } }
         node { __typename id name }
       }
       pageInfo {
@@ -96,11 +94,6 @@ export function SearchView() {
                   ({edge.node.__typename === "ENSv1Domain" ? "v1" : "v2"}){" "}
                   <Link to={`/domain/${edge.node.name}`}>
                     {beautifyInterpretedName(edge.node.name)}
-                    {/* 
-                  TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
-                  <Link to={`/domain/${edge.node.canonical.name.interpreted}`}>
-                    {beautifyInterpretedName(edge.node.canonical.name.interpreted)}
-                    */}
                   </Link>
                 </li>
               );
