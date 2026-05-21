@@ -270,7 +270,7 @@ export async function handleBridgedResolverChange(
   // NOTE: this also covers the "neither are bridged resolvers" case (null === null)
   if (prevBridged?.targetRegistryId === nextBridged?.targetRegistryId) return;
 
-  // handle the domain's implicit SubregistryUpdated evnet
+  // handle the domain's implicit SubregistryUpdated event
   await handleSubregistryUpdated(context, domainId, nextBridged?.targetRegistryId ?? null);
 }
 
