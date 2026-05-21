@@ -37,6 +37,12 @@ if (existsSync(versionDir)) {
 const sdl = readFileSync(sdkSchemaPath, "utf8");
 const schema = buildSchema(sdl);
 
+const sdkVersion = (
+  JSON.parse(readFileSync(join(here, "../../../packages/ensnode-sdk/package.json"), "utf8")) as {
+    version: string;
+  }
+).version;
+
 const examples = (
   GRAPHQL_API_EXAMPLE_QUERIES as Array<{ id: string; query: string; variables: unknown }>
 ).map((ex) => ({
@@ -67,7 +73,7 @@ writeFileSync(join(versionDir, "schema.graphql"), sdl, "utf8");
 writeFileSync(join(versionDir, "examples.json"), `${JSON.stringify(examples, null, 2)}\n`, "utf8");
 writeFileSync(
   join(versionDir, "snapshot.json"),
-  `${JSON.stringify({ version, commit, endpoint: ENSNODE_URL, snapshottedAt: new Date().toISOString().slice(0, 10) }, null, 2)}\n`,
+  `${JSON.stringify({ version, commit, sdkVersion, schemaTag: version, endpoint: ENSNODE_URL, snapshottedAt: new Date().toISOString().slice(0, 10) }, null, 2)}\n`,
   "utf8",
 );
 
