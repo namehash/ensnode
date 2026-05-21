@@ -82,7 +82,7 @@
 /* Docked sidebar: narrow peek strip on desktop; expands on hover or keyboard focus within nav */
 @media (min-width: 50rem) {
   .page[data-sidebar-docked] {
-    --sl-sidebar-docked-peek: 1rem;
+    --sl-sidebar-docked-peek: 4rem;
     /* Match Starlight splash / no-sidebar content width (default with sidebar is 45rem). */
     --sl-content-width: 67.5rem;
   }
@@ -94,7 +94,6 @@
   .page[data-sidebar-docked] nav.sidebar {
     position: fixed;
     inset-block: var(--sl-nav-height) 0;
-    inset-inline-start: 0;
     z-index: var(--sl-z-index-menu);
     width: var(--sl-sidebar-docked-peek);
     overflow: hidden;
@@ -116,24 +115,24 @@
     border-inline-end: none;
   }
 
-  .page[data-sidebar-docked] nav.sidebar::after {
-    content: "›";
-    position: absolute;
-    inset-block: 0;
-    inset-inline-end: 0;
-    width: var(--sl-sidebar-docked-peek);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--sl-color-gray-3);
-    font-size: 1.125rem;
-    line-height: 1;
-    pointer-events: none;
+  /* Docked + collapsed: show only the top-level topic icons */
+  .page[data-sidebar-docked] nav.sidebar:not(:hover):not(:focus-within)
+    .sidebar-content
+    > :not(.starlight-sidebar-topics) {
+    display: none;
   }
 
-  .page[data-sidebar-docked] nav.sidebar:hover::after,
-  .page[data-sidebar-docked] nav.sidebar:focus-within::after {
-    opacity: 0;
+  .page[data-sidebar-docked]
+    nav.sidebar:not(:hover):not(:focus-within)
+    .starlight-sidebar-topics-icon
+    + div {
+    display: none;
+  }
+
+  /* Docked + collapsed: Highlight only the icon of the current topic */
+  .page[data-sidebar-docked] nav.sidebar:not(:hover):not(:focus-within)
+    a.starlight-sidebar-topics-current {
+    background-color: transparent !important;
   }
 }
 
