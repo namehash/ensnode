@@ -35,6 +35,7 @@ export default defineConfig({
   redirects: {
     "/docs": "/docs/integrate",
     "/ensnode": "/docs/integrate",
+    "/examples": "/docs/integrate/omnigraph/examples",
     "/ensnode/deploying/railway": "/docs/services/ensrainbow/deploying/railway",
     "/docs/integrate/subgraph/what-is-the-ens-subgraph": "/docs/integrate/subgraph",
     "/docs/integrate/subgraph/subgraph-api": "/docs/integrate/subgraph/schema-reference",
