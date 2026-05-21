@@ -15,25 +15,23 @@ import { resolveReverse } from "@/lib/resolution/reverse-resolution";
 const tracer = trace.getTracer("multichain-primary-name-resolution");
 
 const getENSIP19SupportedChainIds = () => {
-  return [
+  return uniq([
     // always include Mainnet, because its chainId corresponds to the ENS Root Chain's coinType,
     // regardless of the current namespace
     mainnet.id,
 
     // then include any ENSIP-19 Supported Chains defined in this namespace
-    ...uniq(
-      [
-        maybeGetDatasource(di.context.ensNamespaceId, DatasourceNames.ReverseResolverRoot),
-        maybeGetDatasource(di.context.ensNamespaceId, DatasourceNames.ReverseResolverBase),
-        maybeGetDatasource(di.context.ensNamespaceId, DatasourceNames.ReverseResolverLinea),
-        maybeGetDatasource(di.context.ensNamespaceId, DatasourceNames.ReverseResolverOptimism),
-        maybeGetDatasource(di.context.ensNamespaceId, DatasourceNames.ReverseResolverArbitrum),
-        maybeGetDatasource(di.context.ensNamespaceId, DatasourceNames.ReverseResolverScroll),
-      ]
-        .filter((ds) => ds !== undefined)
-        .map((ds) => ds.chain.id),
-    ),
-  ];
+    ...[
+      maybeGetDatasource(di.context.ensNamespaceId, DatasourceNames.ReverseResolverRoot),
+      maybeGetDatasource(di.context.ensNamespaceId, DatasourceNames.ReverseResolverBase),
+      maybeGetDatasource(di.context.ensNamespaceId, DatasourceNames.ReverseResolverLinea),
+      maybeGetDatasource(di.context.ensNamespaceId, DatasourceNames.ReverseResolverOptimism),
+      maybeGetDatasource(di.context.ensNamespaceId, DatasourceNames.ReverseResolverArbitrum),
+      maybeGetDatasource(di.context.ensNamespaceId, DatasourceNames.ReverseResolverScroll),
+    ]
+      .filter((ds) => ds !== undefined)
+      .map((ds) => ds.chain.id),
+  ]);
 };
 
 /**

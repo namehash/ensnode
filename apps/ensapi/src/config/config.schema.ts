@@ -104,7 +104,7 @@ export function buildRootChainRpcConfig(
     if (error instanceof ZodError) {
       logger.error(`Failed to parse environment configuration: \n${prettifyError(error)}\n`);
     } else if (error instanceof Error) {
-      logger.error(error, `Failed to build EnsApiConfig`);
+      logger.error(error, `Failed to build the root chain RPC config`);
     } else {
       logger.error(`Unknown Error`);
     }

@@ -134,7 +134,7 @@ describe("buildConfigFromEnvironment", () => {
         new Error(
           "Use of the QUICKNODE_API_KEY environment variable requires use of the QUICKNODE_ENDPOINT_NAME environment variable as well.",
         ),
-        "Failed to build EnsApiConfig",
+        "Failed to build the root chain RPC config",
       );
       expect(process.exit).toHaveBeenCalledExactlyOnceWith(1);
     });
@@ -156,7 +156,7 @@ describe("buildConfigFromEnvironment", () => {
         new Error(
           "Use of the QUICKNODE_ENDPOINT_NAME environment variable requires use of the QUICKNODE_API_KEY environment variable as well.",
         ),
-        "Failed to build EnsApiConfig",
+        "Failed to build the root chain RPC config",
       );
       expect(process.exit).toHaveBeenCalledExactlyOnceWith(1);
     });
