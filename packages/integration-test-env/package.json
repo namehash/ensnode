@@ -6,7 +6,6 @@
   "type": "module",
   "description": "Integration test environment orchestration for ENSNode",
   "scripts": {
-    "seed:devnet": "tsx src/seed-cli.ts",
     "start": "tsx src/start.ts",
     "start:ci": "CI=1 tsx src/ci.ts",
     "typecheck": "tsc --noEmit"

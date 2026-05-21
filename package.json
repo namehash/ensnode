@@ -19,7 +19,6 @@
     "release:postversion": "pnpm docker:version:sync && pnpm generate:openapi",
     "packages:prepublish": "pnpm -r prepublish",
     "devnet": "docker compose -f docker/services/devnet.yml up",
-    "seed:devnet": "pnpm -F @ensnode/integration-test-env seed:devnet",
     "docker:build:ensnode": "pnpm run -w --parallel \"/^docker:build:.*/\"",
     "docker:version:sync": "node ./scripts/sync-docker-services-tags.mjs \"$(pnpm -F ensapi -s version:current)\"",
     "docker:build:ensindexer": "docker build -f apps/ensindexer/Dockerfile -t ghcr.io/namehash/ensnode/ensindexer:latest .",
