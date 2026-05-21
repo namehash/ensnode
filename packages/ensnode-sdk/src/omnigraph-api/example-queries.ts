@@ -3,28 +3,28 @@ import { asInterpretedName, toNormalizedAddress } from "enssdk";
 import { DatasourceNames, ENSNamespaceIds } from "@ensnode/datasources";
 import { accounts } from "@ensnode/datasources/devnet";
 
-import { maybeGetDatasourceContract } from "../shared/datasource-contract";
+import { getDatasourceContract } from "../shared/datasource-contract";
 import type { NamespaceSpecificValue } from "../shared/namespace-specific-value";
 
-const SEPOLIA_V2_V2_ETH_REGISTRY = maybeGetDatasourceContract(
+const SEPOLIA_V2_V2_ETH_REGISTRY = getDatasourceContract(
   ENSNamespaceIds.SepoliaV2,
   DatasourceNames.ENSv2Root,
   "ETHRegistry",
 );
 
-const SEPOLIA_V2_V2_ETH_REGISTRAR = maybeGetDatasourceContract(
+const SEPOLIA_V2_V2_ETH_REGISTRAR = getDatasourceContract(
   ENSNamespaceIds.SepoliaV2,
   DatasourceNames.ENSv2Root,
   "ETHRegistrar",
 );
 
-const ENS_TEST_ENV_V2_ETH_REGISTRY = maybeGetDatasourceContract(
+const ENS_TEST_ENV_V2_ETH_REGISTRY = getDatasourceContract(
   ENSNamespaceIds.EnsTestEnv,
   DatasourceNames.ENSv2Root,
   "ETHRegistry",
 );
 
-const ENS_TEST_ENV_V2_ETH_REGISTRAR = maybeGetDatasourceContract(
+const ENS_TEST_ENV_V2_ETH_REGISTRAR = getDatasourceContract(
   ENSNamespaceIds.EnsTestEnv,
   DatasourceNames.ENSv2Root,
   "ETHRegistrar",
@@ -45,13 +45,13 @@ const SEPOLIA_V2_NAME_WITH_OWNED_RESOLVER = asInterpretedName("sfmonicdebmig.eth
 
 const SEPOLIA_V2_TEST_NAME = asInterpretedName("test-name.eth");
 
-const MAINNET_PUBLIC_RESOLVER = maybeGetDatasourceContract(
+const MAINNET_PUBLIC_RESOLVER = getDatasourceContract(
   ENSNamespaceIds.Mainnet,
   DatasourceNames.ReverseResolverRoot,
   "DefaultPublicResolver5",
 );
 
-const SEPOLIA_V2_PUBLIC_RESOLVER = maybeGetDatasourceContract(
+const SEPOLIA_V2_PUBLIC_RESOLVER = getDatasourceContract(
   ENSNamespaceIds.SepoliaV2,
   DatasourceNames.ReverseResolverRoot,
   "DefaultPublicResolver5",
