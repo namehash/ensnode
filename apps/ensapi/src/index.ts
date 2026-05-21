@@ -11,6 +11,8 @@ import app from "./app";
 
 // start ENSNode API OpenTelemetry SDK
 sdk.start();
+// initialize DI container and its resources
+di.init();
 
 // start hono server
 const server = serve(
@@ -47,10 +49,6 @@ const gracefulShutdown = async () => {
     await sdk.shutdown();
     logger.info("Destroyed tracing instrumentation");
 
-    // Destroy referral program edition config set cache
-    di.context.referralProgramEditionConfigSetCache.destroy();
-    logger.info("Destroyed referralProgramEditionConfigSetCache");
-
     // Destroy all edition caches (if initialized)
     const editionsCaches = getReferralEditionSnapshotsCaches();
     if (editionsCaches) {
@@ -60,8 +58,8 @@ const gracefulShutdown = async () => {
       }
     }
 
-    di.context.indexingStatusCache.destroy();
-    logger.info("Destroyed indexingStatusCache");
+    // Destroy DI container resources
+    di.destroy();
 
     await closeServer();
     logger.info("Closed application server");
