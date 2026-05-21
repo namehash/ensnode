@@ -6,18 +6,22 @@ sidebar:
 
 import { LinkCard } from "@astrojs/starlight/components";
 
-:::note
-The following serves as background information regarding the ENS Subgraph and describes the ecosystem & context in which ENSNode was developed. It is not necessary for running ENSNode.
-:::
+:::danger[The ENS Subgraph is legacy — do not build new ENSv2 apps on it]
+The ENS Subgraph predates ENSv2 and **cannot** carry your app into it. If you're integrating ENS today, start with the [ENS Omnigraph API](/docs/integrate/omnigraph) or [ENS Unigraph SQL](/docs/integrate/unigraph) instead. Three reasons the Subgraph falls short:
 
-:::caution[Subgraph API Deprecation]
-As soon as ENSv2 launches in Summer 2026, the ENS Subgraph can no longer be relied on; ENSNode will still maintain support for the Subgraph-compatible API as described below, but integrators should prefer the ENSv2-ready Omnigraph API.
+- **ENSv1 only — instantly out of date.** The Subgraph data model has no concept of ENSv2. The moment ENSv2 launches (Summer 2026), apps still reading the Subgraph are looking at a stale, partial view of ENS.
+- **Single-chain only — misses most names.** The Subgraph indexes a single chain, so it never sees Basenames (`.base.eth`), Lineanames (`.linea.eth`), or 3DNS names (`.box`). The Unigraph indexes all of them into one unified model.
+- **No resolution — and slow when you bolt it on.** The Subgraph doesn't resolve names; you're left making your own RPC calls, which are slow. ENS Protocol Acceleration resolves names against the indexed Unigraph up to **100× faster**, with no RPC round-trips in your app.
 
 <LinkCard
   href="/docs/integrate/omnigraph"
   title="ENS Omnigraph API"
   description="ENSv2-ready unified GraphQL API over both ENSv1 and ENSv2 — start here for new integrations."
 />
+:::
+
+:::note
+The rest of this page is background on the ENS Subgraph and the ecosystem ENSNode grew out of. ENSNode maintains a verified Subgraph-compatible API for migrating existing integrations, but it is **not** the path forward for ENSv2.
 :::
 
 ## The Graph & Graph Node
@@ -67,7 +71,7 @@ ENSNode has developed tooling to verify subgraph compatibility and ease migratio
 
 <LinkCard
   title="Subgraph Compatibility Tooling"
-  href="/docs/reference/subgraph-legacy/subgraph-compatibility-tooling"
+  href="/docs/integrate/subgraph/subgraph-compatibility-tooling"
 />
 
 ## Subgraph-Compatible GraphQL API Reference

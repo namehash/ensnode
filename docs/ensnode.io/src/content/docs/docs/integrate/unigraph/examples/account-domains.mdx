@@ -1,0 +1,31 @@
+---
+title: Account Domains
+description: Count an address's Domains, grouped by protocol version (ENSv1 vs ENSv2).
+sidebar:
+  label: Account Domains
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+Count the Domains owned by an address, grouped by Domain `type` (`ENSv1Domain` vs `ENSv2Domain`) — a single query spanning both protocol versions. See [Connect](/docs/integrate/unigraph/examples) for setup.
+
+<Tabs syncKey="unigraph-client">
+  <TabItem label="SQL">
+```sql
+SELECT type, count(*) FROM ensindexer_0.domains
+WHERE owner_id = '0xd8da6bf26964af9d7eed9e03e53415d37aa96045'
+GROUP BY type;
+```
+  </TabItem>
+  <TabItem label="ensdb-sdk (TypeScript)">
+```typescript
+import { count, eq } from 'drizzle-orm';
+
+const counts = await ensDb
+  .select({ type: ensIndexerSchema.domain.type, count: count() })
+  .from(ensIndexerSchema.domain)
+  .where(eq(ensIndexerSchema.domain.ownerId, "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"))
+  .groupBy(ensIndexerSchema.domain.type);
+```
+  </TabItem>
+</Tabs>

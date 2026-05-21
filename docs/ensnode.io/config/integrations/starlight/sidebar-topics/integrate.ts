@@ -20,7 +20,7 @@ export const integrateSidebarTopic = {
       collapsed: false,
       badge: {
         text: "NEW",
-        variant: "tip",
+        variant: "success",
       },
       items: [
         {
@@ -88,6 +88,84 @@ export const integrateSidebarTopic = {
         {
           label: "Schema Reference",
           link: "/docs/integrate/omnigraph/schema-reference",
+        },
+      ],
+    },
+    {
+      label: "ENS Unigraph SQL",
+      collapsed: false,
+      badge: {
+        text: "NEW",
+        variant: "success",
+      },
+      items: [
+        {
+          label: "Overview",
+          link: "/docs/integrate/unigraph",
+        },
+        {
+          label: "Examples",
+          collapsed: true,
+          items: [
+            {
+              label: "Overview",
+              link: "/docs/integrate/unigraph/examples",
+            },
+            {
+              label: "Domain by Name",
+              link: "/docs/integrate/unigraph/examples/domain-by-name",
+            },
+            {
+              label: "Account Domains",
+              link: "/docs/integrate/unigraph/examples/account-domains",
+            },
+            {
+              label: "Indexing Status",
+              link: "/docs/integrate/unigraph/examples/indexing-status",
+            },
+          ],
+        },
+        {
+          label: "Schema Reference",
+          link: "/docs/integrate/unigraph/schema-reference",
+        },
+      ],
+    },
+    {
+      label: "ENS Subgraph",
+      collapsed: true,
+      badge: {
+        text: "LEGACY",
+        variant: "danger",
+      },
+      items: [
+        {
+          label: "Overview",
+          link: "/docs/integrate/subgraph/what-is-the-ens-subgraph",
+        },
+        {
+          label: "Subgraph API",
+          link: "/docs/integrate/subgraph/subgraph-api",
+        },
+        {
+          label: "Querying Best Practices",
+          link: "/docs/integrate/subgraph/querying-best-practices",
+        },
+        {
+          label: "Subgraph Compatibility Tooling",
+          link: "/docs/integrate/subgraph/subgraph-compatibility-tooling",
+        },
+        {
+          label: "With ENSjs",
+          link: "/docs/integrate/subgraph/with-ensjs",
+        },
+        {
+          label: "With Viem",
+          link: "/docs/integrate/subgraph/with-viem",
+        },
+        {
+          label: "Subgraph Dependents",
+          link: "/docs/integrate/subgraph/subgraph-dependents",
         },
       ],
     },
