@@ -1,8 +1,21 @@
 import { describe, expect, it } from "vitest";
 
-import { beautifyInterpretedName } from "./beautify";
+import { beautifyInterpretedLabel, beautifyInterpretedName } from "./beautify";
 import { ENS_ROOT_NAME } from "./constants";
 import { asInterpretedName } from "./interpreted-names-and-labels";
+import type { InterpretedLabel } from "./types";
+
+describe("beautifyInterpretedLabel", () => {
+  it("beautifies a normalized label", () => {
+    expect(beautifyInterpretedLabel("♾♾♾♾" as InterpretedLabel)).toEqual("♾️♾️♾️♾️");
+  });
+
+  it("preserves an Encoded LabelHash label verbatim", () => {
+    const label =
+      "[0000000000000000000000000000000000000000000000000000000000000001]" as InterpretedLabel;
+    expect(beautifyInterpretedLabel(label)).toEqual(label);
+  });
+});
 
 describe("beautifyInterpretedName", () => {
   it("returns the ENS Root Name unchanged", () => {

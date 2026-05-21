@@ -206,21 +206,36 @@ type BaseRegistrarRegistration implements Registration {
   wrapped: WrappedBaseRegistrarRegistration
 }
 
+"""
+BeautifiedLabel represents an enssdk#BeautifiedLabel: an InterpretedLabel beautified per ENSIP-15 (https://docs.ens.domains/ensip/15) for display. It is display-only and MUST NOT be used as a lookup key.
+"""
+scalar BeautifiedLabel
+
+"""
+BeautifiedName represents an enssdk#BeautifiedName: an InterpretedName whose normalized labels have been beautified per ENSIP-15 (https://docs.ens.domains/ensip/15) for display. It is display-only and MUST NOT be used as a navigation target or lookup key.
+"""
+scalar BeautifiedName
+
 """BigInt represents non-fractional signed whole numeric values."""
 scalar BigInt
 
 """A Canonical Name, exposed in each representation we support."""
 type CanonicalName {
   """
+  The Canonical Name as a BeautifiedName: the InterpretedName with its normalized labels beautified per ENSIP-15 (https://docs.ens.domains/ensip/15) for display. Encoded LabelHash labels are preserved verbatim. Display-only; use `interpreted` for navigation targets and lookup keys.
+  """
+  beautified: BeautifiedName!
+
+  """
   The Canonical Name as an InterpretedName: each label is either a normalized literal Label or an Encoded LabelHash.
   """
   interpreted: InterpretedName!
 }
 
-"""ChainId represents a enssdk#ChainId."""
+"""ChainId represents an enssdk#ChainId."""
 scalar ChainId
 
-"""CoinType represents a enssdk#CoinType."""
+"""CoinType represents an enssdk#CoinType."""
 scalar CoinType
 
 """
@@ -306,7 +321,7 @@ type DomainEventsConnectionEdge {
   node: Event!
 }
 
-"""DomainId represents a enssdk#DomainId."""
+"""DomainId represents an enssdk#DomainId."""
 scalar DomainId
 
 """Reference a specific Domain."""
@@ -841,16 +856,22 @@ input EventsWhereInput {
 """Hex represents viem#Hex."""
 scalar Hex
 
-"""InterpretedLabel represents a enssdk#InterpretedLabel."""
+"""InterpretedLabel represents an enssdk#InterpretedLabel."""
 scalar InterpretedLabel
 
-"""InterpretedName represents a enssdk#InterpretedName."""
+"""InterpretedName represents an enssdk#InterpretedName."""
 scalar InterpretedName
 
 """
 Represents a Label within ENS, providing its hash and interpreted representation.
 """
 type Label {
+  """
+  The Label as a BeautifiedLabel: the Interpreted Label beautified per ENSIP-15 (https://docs.ens.domains/ensip/15) for display. An Encoded LabelHash is preserved verbatim. Display-only; use `interpreted` for lookup keys. 
+  (@see https://ensnode.io/docs/reference/terminology#interpreted-label)
+  """
+  beautified: BeautifiedLabel!
+
   """
   The Label's LabelHash
   (@see https://ensnode.io/docs/reference/terminology#labels-labelhashes-labelhash-function)
@@ -919,7 +940,7 @@ type NameWrapperRegistration implements Registration {
   unregistrant: Account
 }
 
-"""Node represents a enssdk#Node."""
+"""Node represents an enssdk#Node."""
 scalar Node
 
 """Sort direction"""
@@ -964,7 +985,7 @@ type PermissionsEventsConnectionEdge {
   node: Event!
 }
 
-"""PermissionsId represents a enssdk#PermissionsId."""
+"""PermissionsId represents an enssdk#PermissionsId."""
 scalar PermissionsId
 
 """Address Permissions by ID or AccountId."""
@@ -991,7 +1012,7 @@ type PermissionsResource {
   users(after: String, before: String, first: Int, last: Int): PermissionsResourceUsersConnection
 }
 
-"""PermissionsResourceId represents a enssdk#PermissionsResourceId."""
+"""PermissionsResourceId represents an enssdk#PermissionsResourceId."""
 scalar PermissionsResourceId
 
 type PermissionsResourceUsersConnection {
@@ -1050,15 +1071,12 @@ type PermissionsUserEventsConnectionEdge {
   node: Event!
 }
 
-"""PermissionsUserId represents a enssdk#PermissionsUserId."""
+"""PermissionsUserId represents an enssdk#PermissionsUserId."""
 scalar PermissionsUserId
 
 type Query {
   """Identify an Account by ID or Address."""
   account(by: AccountByInput!): Account
-
-  """TODO"""
-  allDomains(after: String, before: String, first: Int, last: Int): QueryAllDomainsConnection
 
   """Identify a Domain by Name or DomainId"""
   domain(by: DomainIdInput!): Domain
@@ -1069,9 +1087,6 @@ type Query {
   """Identify Permissions by ID or AccountId."""
   permissions(by: PermissionsIdInput!): Permissions
 
-  """TODO"""
-  registrations(after: String, before: String, first: Int, last: Int): QueryRegistrationsConnection
-
   """
   Identify a Registry by ID or AccountId. If querying by `contract`, only concrete Registries will be returned.
   """
@@ -1080,24 +1095,10 @@ type Query {
   """Identify a Resolver by ID or AccountId."""
   resolver(by: ResolverIdInput!): Resolver
 
-  """TODO"""
-  resolvers(after: String, before: String, first: Int, last: Int): QueryResolversConnection
-
   """
-  The Root Registry for this namespace. It will be the ENSv2 Root Registry when defined or the ENSv1 Root Registry.
+  The Root Registry for this namespace. It will be the ENSv2 Root Registry when defined, otherwise the ENSv1 Root Registry.
   """
   root: Registry!
-}
-
-type QueryAllDomainsConnection {
-  edges: [QueryAllDomainsConnectionEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type QueryAllDomainsConnectionEdge {
-  cursor: String!
-  node: Domain!
 }
 
 type QueryDomainsConnection {
@@ -1109,28 +1110,6 @@ type QueryDomainsConnection {
 type QueryDomainsConnectionEdge {
   cursor: String!
   node: Domain!
-}
-
-type QueryRegistrationsConnection {
-  edges: [QueryRegistrationsConnectionEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type QueryRegistrationsConnectionEdge {
-  cursor: String!
-  node: Registration!
-}
-
-type QueryResolversConnection {
-  edges: [QueryResolversConnectionEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type QueryResolversConnectionEdge {
-  cursor: String!
-  node: Resolver!
 }
 
 """
@@ -1179,7 +1158,7 @@ interface Registration {
   unregistrant: Account
 }
 
-"""RegistrationId represents a enssdk#RegistrationId."""
+"""RegistrationId represents an enssdk#RegistrationId."""
 scalar RegistrationId
 
 type RegistrationRenewalsConnection {
@@ -1235,7 +1214,7 @@ input RegistryDomainsWhereInput {
   name: DomainsNameFilter
 }
 
-"""RegistryId represents a enssdk#RegistryId."""
+"""RegistryId represents an enssdk#RegistryId."""
 scalar RegistryId
 
 """Address a Registry by ID or AccountId."""
@@ -1295,7 +1274,7 @@ type Renewal {
   referrer: Hex
 }
 
-"""RenewalId represents a enssdk#RenewalId."""
+"""RenewalId represents an enssdk#RenewalId."""
 scalar RenewalId
 
 """A Resolver represents a Resolver contract on-chain."""
@@ -1335,7 +1314,7 @@ type ResolverEventsConnectionEdge {
   node: Event!
 }
 
-"""ResolverId represents a enssdk#ResolverId."""
+"""ResolverId represents an enssdk#ResolverId."""
 scalar ResolverId
 
 """Address a Resolver by ID or AccountId."""
@@ -1392,7 +1371,7 @@ type ResolverRecordsConnectionEdge {
   node: ResolverRecords!
 }
 
-"""ResolverRecordsId represents a enssdk#ResolverRecordsId."""
+"""ResolverRecordsId represents an enssdk#ResolverRecordsId."""
 scalar ResolverRecordsId
 
 """Filter for Domain.subdomains query."""

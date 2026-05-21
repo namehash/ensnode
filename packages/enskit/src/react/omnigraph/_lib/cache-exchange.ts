@@ -40,6 +40,9 @@ export const omnigraphCacheExchange = cacheExchange({
     // These entities are Embedded Data and don't have a relevant key
     Label: EMBEDDED_DATA,
     WrappedBaseRegistrarRegistration: EMBEDDED_DATA,
+    CanonicalName: EMBEDDED_DATA,
+    DomainCanonical: EMBEDDED_DATA,
+    DomainResolver: EMBEDDED_DATA,
   },
   resolvers: mergeResolverMaps(
     // produce relayPagination() local resolvers for each t.connection in the schema

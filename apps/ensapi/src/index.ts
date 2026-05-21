@@ -4,6 +4,7 @@ import { getReferralEditionSnapshotsCaches } from "@/cache/referral-edition-snap
 import di from "@/di";
 import { sdk } from "@/lib/instrumentation";
 import logger from "@/lib/logger";
+import { INCLUDE_DEV_METHODS } from "@/omnigraph-api/lib/include-dev-methods";
 import { writeGraphQLSchema } from "@/omnigraph-api/lib/write-graphql-schema";
 
 import app from "./app";
@@ -18,8 +19,11 @@ const server = serve(
     port: di.context.ensApiConfig.port,
   },
   async (info) => {
-    // Write the generated graphql schema in the background
-    void writeGraphQLSchema();
+    // Write the generated graphql schema in the background. Skipped when
+    // a) in production, or
+    // b) dev methods are enabled (to avoid dirty schema diff)
+    const shouldWriteSchema = !(process.env.NODE_ENV === "production") && !INCLUDE_DEV_METHODS;
+    if (shouldWriteSchema) void writeGraphQLSchema();
 
     // proactively warm up caches in the background
     void Promise.all([di.context.indexingStatusCache.read(), di.context.stackInfoCache.read()]);

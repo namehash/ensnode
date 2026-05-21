@@ -1,6 +1,8 @@
 import { initGraphQLTada } from "gql.tada";
 
 import type {
+  BeautifiedLabel,
+  BeautifiedName,
   ChainId,
   CoinType,
   DomainId,
@@ -42,6 +44,8 @@ export type OmnigraphScalars = {
   CoinType: CoinType;
   InterpretedName: InterpretedName;
   InterpretedLabel: InterpretedLabel;
+  BeautifiedName: BeautifiedName;
+  BeautifiedLabel: BeautifiedLabel;
   Node: Node;
   DomainId: DomainId;
   RegistryId: RegistryId;

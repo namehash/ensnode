@@ -9,6 +9,7 @@ import { builder } from "@/omnigraph-api/builder";
 import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
 import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domains-resolver";
 import { getDomainIdByInterpretedName } from "@/omnigraph-api/lib/get-domain-by-interpreted-name";
+import { INCLUDE_DEV_METHODS } from "@/omnigraph-api/lib/include-dev-methods";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
 import { AccountByInput, AccountRef } from "@/omnigraph-api/schema/account";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
@@ -23,9 +24,6 @@ import { RegistrationInterfaceRef } from "@/omnigraph-api/schema/registration";
 import { RegistryIdInput, RegistryInterfaceRef } from "@/omnigraph-api/schema/registry";
 import { ResolverIdInput, ResolverRef } from "@/omnigraph-api/schema/resolver";
 
-// don't want them to get familiar/accustomed to these methods until their necessity is certain
-const INCLUDE_DEV_METHODS = process.env.NODE_ENV !== "production";
-
 builder.queryType({
   fields: (t) => ({
     ...(INCLUDE_DEV_METHODS && {
@@ -33,7 +31,7 @@ builder.queryType({
       // Query.allDomains (Testing)
       //////////////////////////////
       allDomains: t.connection({
-        description: "TODO",
+        description: "n/a, dev method",
         type: DomainInterfaceRef,
         resolve: (parent, args) =>
           lazyConnection({
@@ -56,7 +54,7 @@ builder.queryType({
       // Query.resolvers (Testing)
       /////////////////////////////
       resolvers: t.connection({
-        description: "TODO",
+        description: "n/a, dev method",
         type: ResolverRef,
         resolve: (parent, args) =>
           lazyConnection({
@@ -79,7 +77,7 @@ builder.queryType({
       // Query.registrations (Testing)
       /////////////////////////////////
       registrations: t.connection({
-        description: "TODO",
+        description: "n/a, dev method",
         type: RegistrationInterfaceRef,
         resolve: (parent, args) =>
           lazyConnection({
@@ -180,7 +178,7 @@ builder.queryType({
     /////////////////////
     root: t.field({
       description:
-        "The Root Registry for this namespace. It will be the ENSv2 Root Registry when defined or the ENSv1 Root Registry.",
+        "The Root Registry for this namespace. It will be the ENSv2 Root Registry when defined, otherwise the ENSv1 Root Registry.",
       type: RegistryInterfaceRef,
       nullable: false,
       resolve: () => getRootRegistryId(di.context.ensNamespaceId),
