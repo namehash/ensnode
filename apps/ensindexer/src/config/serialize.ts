@@ -45,7 +45,6 @@ export function serializeRedactedENSIndexerConfig(
     ensDbUrl: redactedConfig.ensDbUrl,
     ensRainbowUrl: serializeUrl(redactedConfig.ensRainbowUrl),
     clientLabelSet: redactedConfig.clientLabelSet,
-    globalBlockrange: redactedConfig.globalBlockrange,
     indexedChainIds: serializeIndexedChainIds(redactedConfig.indexedChainIds),
     isSubgraphCompatible: redactedConfig.isSubgraphCompatible,
     namespace: redactedConfig.namespace,

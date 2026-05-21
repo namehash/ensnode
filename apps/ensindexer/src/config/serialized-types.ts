@@ -26,7 +26,10 @@ export interface SerializedRpcConfig extends Omit<RpcConfig, "httpRPCs" | "webso
  * Serialized representation of {@link ENSIndexerConfig}
  */
 export interface SerializedENSIndexerConfig
-  extends Omit<ENSIndexerConfig, "ensRainbowUrl" | "indexedChainIds" | "rpcConfigs" | "plugins"> {
+  extends Omit<
+    ENSIndexerConfig,
+    "ensRainbowUrl" | "indexedChainIds" | "rpcConfigs" | "plugins" | "chainEndBlocks"
+  > {
   /**
    * Serialized representation of {@link ENSIndexerConfig.ensRainbowUrl}.
    */

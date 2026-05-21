@@ -17,6 +17,7 @@ import {
 
 import { createPlugin, namespaceContract } from "@/lib/plugin-helpers";
 import {
+  blockrangeForChain,
   chainConfigForContract,
   chainsConnectionConfigForDatasources,
   constrainBlockrange,
@@ -90,7 +91,7 @@ export default createPlugin({
             (memo, datasource) => ({
               ...memo,
               [datasource.chain.id.toString()]: constrainBlockrange(
-                config.globalBlockrange,
+                blockrangeForChain(config.chainEndBlocks, datasource.chain.id),
                 buildBlockNumberRange(
                   datasource.contracts.Resolver.startBlock,
                   datasource.contracts.Resolver.endBlock,
@@ -108,7 +109,7 @@ export default createPlugin({
           abi: ensroot.contracts.ENSv1RegistryOld.abi,
           chain: {
             ...chainConfigForContract(
-              config.globalBlockrange,
+              config.chainEndBlocks,
               ensroot.chain.id,
               ensroot.contracts.ENSv1RegistryOld,
             ),
@@ -123,21 +124,21 @@ export default createPlugin({
           chain: {
             // ENS Root Chain Registry
             ...chainConfigForContract(
-              config.globalBlockrange,
+              config.chainEndBlocks,
               ensroot.chain.id,
               ensroot.contracts.ENSv1Registry,
             ),
             // Basenames (shadow)Registry
             ...(basenames &&
               chainConfigForContract(
-                config.globalBlockrange,
+                config.chainEndBlocks,
                 basenames.chain.id,
                 basenames.contracts.Registry,
               )),
             // Lineanames (shadow)Registry
             ...(lineanames &&
               chainConfigForContract(
-                config.globalBlockrange,
+                config.chainEndBlocks,
                 lineanames.chain.id,
                 lineanames.contracts.Registry,
               )),
@@ -153,7 +154,7 @@ export default createPlugin({
             (memo, datasource) => ({
               ...memo,
               ...chainConfigForContract(
-                config.globalBlockrange,
+                config.chainEndBlocks,
                 datasource.chain.id,
                 datasource.contracts.Registry,
               ),
@@ -170,13 +171,13 @@ export default createPlugin({
           chain: {
             ...(threednsOptimism &&
               chainConfigForContract(
-                config.globalBlockrange,
+                config.chainEndBlocks,
                 threednsOptimism.chain.id,
                 threednsOptimism.contracts.ThreeDNSToken,
               )),
             ...(threednsBase &&
               chainConfigForContract(
-                config.globalBlockrange,
+                config.chainEndBlocks,
                 threednsBase.chain.id,
                 threednsBase.contracts.ThreeDNSToken,
               )),
@@ -192,42 +193,42 @@ export default createPlugin({
             // the Root chain's DefaultReverseRegistrar (is StandaloneReverseRegistrar)
             ...(rrRoot &&
               chainConfigForContract(
-                config.globalBlockrange,
+                config.chainEndBlocks,
                 rrRoot.chain.id,
                 rrRoot.contracts.DefaultReverseRegistrar,
               )),
             // Base's L2ReverseRegistrar (is StandaloneReverseRegistrar)
             ...(rrBase &&
               chainConfigForContract(
-                config.globalBlockrange,
+                config.chainEndBlocks,
                 rrBase.chain.id,
                 rrBase.contracts.L2ReverseRegistrar,
               )),
             // Linea's L2ReverseRegistrar (is StandaloneReverseRegistrar)
             ...(rrLinea &&
               chainConfigForContract(
-                config.globalBlockrange,
+                config.chainEndBlocks,
                 rrLinea.chain.id,
                 rrLinea.contracts.L2ReverseRegistrar,
               )),
             // Optimism's L2ReverseRegistrar (is StandaloneReverseRegistrar)
             ...(rrOptimism &&
               chainConfigForContract(
-                config.globalBlockrange,
+                config.chainEndBlocks,
                 rrOptimism.chain.id,
                 rrOptimism.contracts.L2ReverseRegistrar,
               )),
             // Arbitrum's L2ReverseRegistrar (is StandaloneReverseRegistrar)
             ...(rrArbitrum &&
               chainConfigForContract(
-                config.globalBlockrange,
+                config.chainEndBlocks,
                 rrArbitrum.chain.id,
                 rrArbitrum.contracts.L2ReverseRegistrar,
               )),
             // Scroll's L2ReverseRegistrar (is StandaloneReverseRegistrar)
             ...(rrScroll &&
               chainConfigForContract(
-                config.globalBlockrange,
+                config.chainEndBlocks,
                 rrScroll.chain.id,
                 rrScroll.contracts.L2ReverseRegistrar,
               )),

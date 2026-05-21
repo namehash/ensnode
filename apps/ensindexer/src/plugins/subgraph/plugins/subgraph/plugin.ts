@@ -39,24 +39,24 @@ export default createPlugin({
       contracts: {
         [namespaceContract(pluginName, "ENSv1RegistryOld")]: {
           chain: chainConfigForContract(
-            config.globalBlockrange,
+            config.chainEndBlocks,
             chain.id,
             contracts.ENSv1RegistryOld,
           ),
           abi: contracts.ENSv1RegistryOld.abi,
         },
         [namespaceContract(pluginName, "ENSv1Registry")]: {
-          chain: chainConfigForContract(config.globalBlockrange, chain.id, contracts.ENSv1Registry),
+          chain: chainConfigForContract(config.chainEndBlocks, chain.id, contracts.ENSv1Registry),
           abi: contracts.ENSv1Registry.abi,
         },
         [namespaceContract(pluginName, "BaseRegistrar")]: {
-          chain: chainConfigForContract(config.globalBlockrange, chain.id, contracts.BaseRegistrar),
+          chain: chainConfigForContract(config.chainEndBlocks, chain.id, contracts.BaseRegistrar),
           abi: contracts.BaseRegistrar.abi,
         },
         [namespaceContract(pluginName, "RegistrarController")]: {
           abi: AnyRegistrarControllerABI,
           chain: mergedChainConfigForContracts(
-            config.globalBlockrange,
+            config.chainEndBlocks,
             chain.id,
             pickContracts(contracts, [
               "LegacyEthRegistrarController",
@@ -66,12 +66,12 @@ export default createPlugin({
           ),
         },
         [namespaceContract(pluginName, "NameWrapper")]: {
-          chain: chainConfigForContract(config.globalBlockrange, chain.id, contracts.NameWrapper),
+          chain: chainConfigForContract(config.chainEndBlocks, chain.id, contracts.NameWrapper),
           abi: contracts.NameWrapper.abi,
         },
         // NOTE: shared (non-namespaced) Resolver definition/implementation (see plugins/shared/Resolver.ts)
         Resolver: {
-          chain: chainConfigForContract(config.globalBlockrange, chain.id, contracts.Resolver),
+          chain: chainConfigForContract(config.chainEndBlocks, chain.id, contracts.Resolver),
           abi: contracts.Resolver.abi,
         },
       },
