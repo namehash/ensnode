@@ -22,7 +22,7 @@ import type { BlockNumber, Hash } from "viem";
 import type { EncodedReferrer } from "@ensnode/ensnode-sdk";
 
 /**
- * The ENSv2 Schema
+ * The Unigraph Schema
  *
  * While the initial approach was a highly materialized view of the ENS protocol, abstracting away
  * as many on-chain details as possible, in practice—due to the sheer complexity of the protocol at
@@ -80,7 +80,7 @@ import type { EncodedReferrer } from "@ensnode/ensnode-sdk";
  * allows us to rely on the shared logic for indexing:
  *   a) ENSv1RegistryOld -> ENSv1Registry migration status
  *   b) Domain-Resolver Relations for both ENSv1 and ENSv2 Domains
- * As such, none of that information is present in this ensv2.schema.ts file.
+ * As such, none of that information is present in this unigraph.schema.ts file.
  *
  * In general, entities are keyed by a nominally-typed `id` that uniquely references them. This
  * allows us to trivially implement cursor-based pagination and allow consumers to reference these
