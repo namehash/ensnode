@@ -33,7 +33,7 @@ const ENS_TEST_ENV_V2_ETH_REGISTRAR = maybeGetDatasourceContract(
 const VITALIK_ADDRESS = toNormalizedAddress("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045");
 
 // owns sfmonicdeb*.eth (mix of v1 + v2) on sepolia-v2 and holds v2 ETHRegistry permissions
-const _SEPOLIA_V2_USER_ADDRESS = toNormalizedAddress("0x2f8e8b1126e75fde0b7f731e7cb5847eba2d2574");
+const SEPOLIA_V2_USER_ADDRESS = toNormalizedAddress("0x2f8e8b1126e75fde0b7f731e7cb5847eba2d2574");
 
 const SEPOLIA_V2_ADDRESS_WITH_LOT_OF_NAMES = toNormalizedAddress(
   "0x205d2686da3bf33f64c17f21462c51b5ead462cf",
@@ -415,6 +415,54 @@ query Namegraph {
       }
     }
   }
+}`,
+    variables: { default: {} },
+  },
+
+  /////////////////////////////
+  // ENSv1 → ENSv2 Migration
+  /////////////////////////////
+  {
+    id: "account-migrated-names",
+    query: `
+query AccountMigratedNames($address: Address!) {
+  account(by: { address: $address }) {
+    v1DomainsCount: domains(where: { version: ENSv1 }) { totalCount }
+    v2DomainsCount: domains(where: { version: ENSv2 }) { totalCount }
+  }
+}`,
+    variables: {
+      default: { address: VITALIK_ADDRESS },
+      [ENSNamespaceIds.SepoliaV2]: { address: SEPOLIA_V2_USER_ADDRESS },
+    },
+  },
+  {
+    id: "batch-migration-check",
+    query: `
+query BatchENSv2MigrationCheck($names: [InterpretedName!]!) {
+  domains(where: { name: { in: $names } }) {
+    edges {
+      node {
+        id
+        label { interpreted }
+        canonical { name { interpreted } }
+      }
+    }
+  }
+}`,
+    variables: {
+      default: { names: ["vitalik.eth", "nick.eth"] },
+      [ENSNamespaceIds.SepoliaV2]: {
+        names: ["demomigration.eth", "sfmonicdebmig.eth", "test-name.eth"],
+      },
+    },
+  },
+  {
+    id: "eth-by-version",
+    query: `
+query GetEthDomains {
+  v1Eth: domains(where: { name: { eq: "eth" }, version: ENSv1 }) { edges { node { id } } }
+  v2Eth: domains(where: { name: { eq: "eth" }, version: ENSv2 }) { edges { node { id } } }
 }`,
     variables: { default: {} },
   },

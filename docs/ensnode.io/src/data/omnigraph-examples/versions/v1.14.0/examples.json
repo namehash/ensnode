@@ -97,5 +97,24 @@
     "id": "namegraph",
     "query": "query Namegraph {\n  root {\n    id\n    domains {\n      edges {\n        node {\n          canonical { name { interpreted } }\n\n          subdomains {\n            edges {\n              node {\n                canonical { name { interpreted } }\n\n                subdomains {\n                  edges {\n                    node {\n                      canonical { name { interpreted } }\n                    }\n                  }\n                }\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n}",
     "variables": {}
+  },
+  {
+    "id": "account-migrated-names",
+    "query": "query AccountMigratedNames($address: Address!) {\n  account(by: { address: $address }) {\n    v1DomainsCount: domains(where: { version: ENSv1 }) { totalCount }\n    v2DomainsCount: domains(where: { version: ENSv2 }) { totalCount }\n  }\n}",
+    "variables": {
+      "address": "0x2f8e8b1126e75fde0b7f731e7cb5847eba2d2574"
+    }
+  },
+  {
+    "id": "batch-migration-check",
+    "query": "query BatchENSv2MigrationCheck($names: [InterpretedName!]!) {\n  domains(where: { name: { in: $names } }) {\n    edges {\n      node {\n        id\n        label { interpreted }\n        canonical { name { interpreted } }\n      }\n    }\n  }\n}",
+    "variables": {
+      "names": ["demomigration.eth", "sfmonicdebmig.eth", "test-name.eth"]
+    }
+  },
+  {
+    "id": "eth-by-version",
+    "query": "query GetEthDomains {\n  v1Eth: domains(where: { name: { eq: \"eth\" }, version: ENSv1 }) { edges { node { id } } }\n  v2Eth: domains(where: { name: { eq: \"eth\" }, version: ENSv2 }) { edges { node { id } } }\n}",
+    "variables": {}
   }
 ]
