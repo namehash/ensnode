@@ -1,0 +1,101 @@
+[
+  {
+    "id": "hello-world",
+    "query": "#\n# Welcome to this interactive playground for\n# ENSNode's GraphQL API!\n#\n# You can get started by typing your query here or by using\n# the Explorer on the left to select the data you want to query.\n#\n# There are also example queries in the tabs above ☝️\nquery HelloWorld {\n  domain(by: { name: \"eth\" }) { canonical { name { interpreted } } owner { address } }\n}",
+    "variables": {}
+  },
+  {
+    "id": "find-domains",
+    "query": "query FindDomains(\n  $name: DomainsNameFilter!\n  $order: DomainsOrderInput\n) {\n  domains(\n    where: { name: $name }\n    order: $order\n    first: 20\n  ) {\n    edges {\n      node {\n        __typename\n        id\n        label { interpreted hash }\n        canonical { name { interpreted } }\n\n        registration { expiry event { timestamp } }\n      }\n    }\n  }\n}",
+    "variables": {
+      "name": {
+        "starts_with": "test-na"
+      },
+      "order": {
+        "by": "NAME",
+        "dir": "DESC"
+      }
+    }
+  },
+  {
+    "id": "domain-by-name",
+    "query": "query DomainByName($name: InterpretedName!) {\n  domain(by: {name: $name}) {\n    __typename\n    id\n    label { interpreted hash }\n    canonical { name { interpreted } node path { id } }\n    owner { address }\n    subregistry { contract { chainId address } }\n\n    ... on ENSv1Domain {\n      rootRegistryOwner { address }\n    }\n  }\n}",
+    "variables": {
+      "name": "test-name.eth"
+    }
+  },
+  {
+    "id": "domain-subdomains",
+    "query": "query DomainSubdomains($name: InterpretedName!) {\n  domain(by: {name: $name}) {\n    canonical { name { interpreted } }\n    subdomains(first: 10) {\n      edges {\n        node {\n          canonical { name { interpreted } }\n        }\n      }\n    }\n  }\n}",
+    "variables": {
+      "name": "eth"
+    }
+  },
+  {
+    "id": "domain-events",
+    "query": "query DomainEvents($name: InterpretedName!) {\n  domain(by: {name: $name}) {\n    events {\n      totalCount\n      edges {\n        node {\n          from\n          to\n          topics\n          data\n          timestamp\n          transactionHash\n        }\n      }\n    }\n  }\n}",
+    "variables": {
+      "name": "sfmonicdebmig.eth"
+    }
+  },
+  {
+    "id": "domains-by-address",
+    "query": "query AccountDomains(\n  $address: Address!\n) {\n  account(by: { address: $address }) {\n    domains {\n      edges {\n        node {\n          label { interpreted }\n          canonical { name { interpreted } }\n        }\n      }\n    }\n  }\n}",
+    "variables": {
+      "address": "0x205d2686da3bf33f64c17f21462c51b5ead462cf"
+    }
+  },
+  {
+    "id": "account-events",
+    "query": "query AccountEvents(\n  $address: Address!\n) {\n  account(by: { address: $address }) {\n    events { totalCount edges { node { topics data timestamp } } }\n  }\n}",
+    "variables": {
+      "address": "0x205d2686da3bf33f64c17f21462c51b5ead462cf"
+    }
+  },
+  {
+    "id": "registry-domains",
+    "query": "query RegistryDomains(\n  $registry: AccountIdInput!\n) {\n  registry(by: { contract: $registry }) {\n    domains {\n      edges {\n        node {\n          label { interpreted }\n          canonical { name { interpreted } }\n        }\n      }\n    }\n  }\n}",
+    "variables": {
+      "registry": {
+        "chainId": 99911155111,
+        "address": "0x31a2bb5d933557cce1b3129993193896d074db92"
+      }
+    }
+  },
+  {
+    "id": "permissions-by-contract",
+    "query": "query PermissionsByContract(\n  $contract: AccountIdInput!\n) {\n  permissions(by: { contract: $contract }) {\n    resources {\n      edges {\n        node {\n          resource\n          users {\n            edges {\n              node {\n                id\n                user { address }\n                roles\n              }\n            }\n          }\n        }\n      }\n    }\n    events { totalCount edges { node { topics data timestamp } } }\n  }\n}",
+    "variables": {
+      "contract": {
+        "chainId": 99911155111,
+        "address": "0x26e5e80e8f36607ef401443fb34eea363c86e8f7"
+      }
+    }
+  },
+  {
+    "id": "permissions-by-user",
+    "query": "query PermissionsByUser($address: Address!) {\n  account(by: { address: $address }) {\n    permissions {\n      edges {\n        node {\n          resource\n          roles\n        }\n      }\n    }\n  }\n}",
+    "variables": {
+      "address": "0x205d2686da3bf33f64c17f21462c51b5ead462cf"
+    }
+  },
+  {
+    "id": "account-resolver-permissions",
+    "query": "query AccountResolverPermissions($address: Address!) {\n  account(by: { address: $address }) {\n    resolverPermissions {\n      edges {\n        node {\n          resolver {\n            contract {\n              address\n            }\n          }\n        }\n      }\n    }\n  }\n}",
+    "variables": {
+      "address": "0x205d2686da3bf33f64c17f21462c51b5ead462cf"
+    }
+  },
+  {
+    "id": "domain-resolver",
+    "query": "query DomainResolver($name: InterpretedName!) {\n  domain(by: { name: $name }) {\n    resolver {\n      assigned {\n        records { edges { node { node keys coinTypes } } }\n        permissions { resources { edges { node { resource users { edges { node { user { address } roles } } } } } } }\n        events { totalCount edges { node { topics data timestamp } } }\n      }\n    }\n  }\n}",
+    "variables": {
+      "name": "demomigration.eth"
+    }
+  },
+  {
+    "id": "namegraph",
+    "query": "query Namegraph {\n  root {\n    id\n    domains {\n      edges {\n        node {\n          canonical { name { interpreted } }\n\n          subdomains {\n            edges {\n              node {\n                canonical { name { interpreted } }\n\n                subdomains {\n                  edges {\n                    node {\n                      canonical { name { interpreted } }\n                    }\n                  }\n                }\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n}",
+    "variables": {}
+  }
+]

@@ -1,0 +1,8 @@
+{
+  "version": "v1.14.0",
+  "commit": "49400ce8b",
+  "sdkVersion": "1.14.0",
+  "schemaTag": "v1.14.0",
+  "endpoint": "https://api.v2-sepolia.ensnode.io",
+  "snapshottedAt": "2026-05-21"
+}
