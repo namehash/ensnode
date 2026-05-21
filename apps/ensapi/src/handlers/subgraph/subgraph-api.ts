@@ -1,23 +1,14 @@
-import config from "@/config";
-
 import type { Duration } from "enssdk";
 import { createDocumentationMiddleware } from "ponder-enrich-gql-docs-middleware";
 
-// FIXME: use the import from:
-// import { ensIndexerSchema } from "@/lib/ensdb/singleton";
-// Once the lazy proxy implemented for `ensIndexerSchema` export is improved
-// to support Drizzle ORM in `ponder-subgraph` package.
-import * as ensIndexerSchema from "@ensnode/ensdb-sdk/ensindexer-abstract";
 import {
   hasSubgraphApiConfigSupport,
   hasSubgraphApiIndexingStatusSupport,
 } from "@ensnode/ensnode-sdk";
-import { subgraphGraphQLMiddleware } from "@ensnode/ponder-subgraph";
 
+import di from "@/di";
 import { createApp } from "@/lib/hono-factory";
-import { lazy } from "@/lib/lazy";
 import { makeSubgraphApiDocumentation } from "@/lib/subgraph/api-documentation";
-import { filterSchemaByPrefix } from "@/lib/subgraph/filter-schema-by-prefix";
 import { fixContentLengthMiddleware } from "@/middleware/fix-content-length.middleware";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 import { makeIsRealtimeMiddleware } from "@/middleware/is-realtime.middleware";
@@ -26,13 +17,10 @@ import { thegraphFallbackMiddleware } from "@/middleware/thegraph-fallback.middl
 
 const MAX_REALTIME_DISTANCE_TO_RESOLVE: Duration = 10 * 60; // 10 minutes in seconds
 
-// generate a subgraph-specific subset of the schema
-const subgraphSchema = filterSchemaByPrefix("subgraph_", ensIndexerSchema);
-
 const app = createApp({ middlewares: [indexingStatusMiddleware] });
 
 app.use(async (c, next) => {
-  const configPrerequisite = hasSubgraphApiConfigSupport(config.ensIndexerPublicConfig);
+  const configPrerequisite = hasSubgraphApiConfigSupport(di.context.stackInfo.ensIndexer);
   // 503 if Subgraph API is not available due to config prerequisites not met
   if (!configPrerequisite.supported) {
     return c.text(`Service Unavailable: ${configPrerequisite.reason}`, 503);
@@ -70,53 +58,18 @@ app.use(createDocumentationMiddleware(makeSubgraphApiDocumentation(), { path: "/
 // inject _meta into the hono (and yoga) context for the subgraph middleware
 app.use(subgraphMetaMiddleware);
 
-// lazy() defers construction until first use so that this module can be
-// imported without env vars being present (e.g. during OpenAPI generation).
-const getSubgraphMiddleware = lazy(() =>
-  subgraphGraphQLMiddleware({
-    databaseUrl: config.ensDbUrl,
-    databaseSchema: config.ensIndexerSchemaName,
-    schema: subgraphSchema,
-    // describes the polymorphic (interface) relationships in the schema
-    polymorphicConfig: {
-      types: {
-        DomainEvent: [
-          subgraphSchema.transfer,
-          subgraphSchema.newOwner,
-          subgraphSchema.newResolver,
-          subgraphSchema.newTTL,
-          subgraphSchema.wrappedTransfer,
-          subgraphSchema.nameWrapped,
-          subgraphSchema.nameUnwrapped,
-          subgraphSchema.fusesSet,
-          subgraphSchema.expiryExtended,
-        ],
-        RegistrationEvent: [
-          subgraphSchema.nameRegistered,
-          subgraphSchema.nameRenewed,
-          subgraphSchema.nameTransferred,
-        ],
-        ResolverEvent: [
-          subgraphSchema.addrChanged,
-          subgraphSchema.multicoinAddrChanged,
-          subgraphSchema.nameChanged,
-          subgraphSchema.abiChanged,
-          subgraphSchema.pubkeyChanged,
-          subgraphSchema.textChanged,
-          subgraphSchema.contenthashChanged,
-          subgraphSchema.interfaceChanged,
-          subgraphSchema.authorisationChanged,
-          subgraphSchema.versionChanged,
-        ],
-      },
-      fields: {
-        "Domain.events": "DomainEvent",
-        "Registration.events": "RegistrationEvent",
-        "Resolver.events": "ResolverEvent",
-      },
-    },
-  }),
-);
-app.use((c, next) => getSubgraphMiddleware()(c, next));
+// inject the GraphQL middleware for the Subgraph API
+app.use(async (c, next) => {
+  // Note: we import the middleware with a dynamic import to defer its construction until runtime.
+  // This allows the middleware internal logic to only access the DI container at runtime,
+  // which prevents potential issues with eager evaluation of the DI container's dependencies.
+  // Thanks to the dynamic import, the `gql.middleware` module to be resolved just once,
+  // and reused for subsequent requests.
+  const subgraphApiGqlMiddleware = await import("@/lib/subgraph/gql.middleware").then(
+    (mod) => mod.default,
+  );
+
+  return subgraphApiGqlMiddleware(c, next);
+});
 
 export default app;

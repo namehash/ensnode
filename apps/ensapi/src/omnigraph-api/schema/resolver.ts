@@ -1,5 +1,3 @@
-import config from "@/config";
-
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, eq } from "drizzle-orm";
 import {
@@ -11,6 +9,7 @@ import {
 
 import { isBridgedResolver } from "@ensnode/ensnode-sdk/internal";
 
+import di from "@/di";
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { builder } from "@/omnigraph-api/builder";
 import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
@@ -129,7 +128,7 @@ ResolverRef.implement({
       type: RegistryInterfaceRef,
       nullable: true,
       resolve: (parent) => {
-        const bridged = isBridgedResolver(config.namespace, parent);
+        const bridged = isBridgedResolver(di.context.namespace, parent);
         return bridged?.targetRegistryId ?? null;
       },
     }),

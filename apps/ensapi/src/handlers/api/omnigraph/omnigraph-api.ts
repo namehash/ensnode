@@ -1,17 +1,16 @@
-import config from "@/config";
-
 import {
   hasOmnigraphApiConfigSupport,
   hasOmnigraphApiIndexingStatusSupport,
 } from "@ensnode/ensnode-sdk";
 
+import di from "@/di";
 import { createApp } from "@/lib/hono-factory";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 
 const app = createApp({ middlewares: [indexingStatusMiddleware] });
 
 app.use(async (c, next) => {
-  const configPrerequisite = hasOmnigraphApiConfigSupport(config.ensIndexerPublicConfig);
+  const configPrerequisite = hasOmnigraphApiConfigSupport(di.context.stackInfo.ensIndexer);
   // 503 if Omnigraph API is not available due to config prerequisites not met
   if (!configPrerequisite.supported) {
     return c.text(`Service Unavailable: ${configPrerequisite.reason}`, 503);
