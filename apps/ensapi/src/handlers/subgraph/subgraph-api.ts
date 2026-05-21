@@ -58,6 +58,9 @@ app.use(createDocumentationMiddleware(makeSubgraphApiDocumentation(), { path: "/
 // inject _meta into the hono (and yoga) context for the subgraph middleware
 app.use(subgraphMetaMiddleware);
 
-app.use(di.context.subgraphApiGqlMiddleware);
+// inject the GraphQL middleware for the Subgraph API
+// note: we wrap the middleware in a function to defer its construction until runtime,
+// which allows lazy-loading of DI context dependencies
+app.use(async (c, next) => di.context.subgraphApiGqlMiddleware(c, next));
 
 export default app;
