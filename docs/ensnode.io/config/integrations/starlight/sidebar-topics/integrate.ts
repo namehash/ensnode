@@ -16,6 +16,50 @@ export const integrateSidebarTopic = {
       link: "/docs/integrate/ensv2-readiness",
     },
     {
+      label: "ENS Subgraph",
+      collapsed: true,
+      badge: {
+        text: "LEGACY",
+        variant: "danger",
+      },
+      items: [
+        {
+          label: "Overview",
+          link: "/docs/integrate/subgraph",
+        },
+        {
+          label: "Examples",
+          collapsed: true,
+          items: [
+            {
+              label: "Overview",
+              link: "/docs/integrate/subgraph/examples",
+            },
+            {
+              label: "With ENSjs",
+              link: "/docs/integrate/subgraph/examples/with-ensjs",
+            },
+            {
+              label: "With Viem",
+              link: "/docs/integrate/subgraph/examples/with-viem",
+            },
+          ],
+        },
+        {
+          label: "Schema Reference",
+          link: "/docs/integrate/subgraph/schema-reference",
+        },
+        {
+          label: "Querying Best Practices",
+          link: "/docs/integrate/subgraph/querying-best-practices",
+        },
+        {
+          label: "Subgraph Dependents",
+          link: "/docs/integrate/subgraph/subgraph-dependents",
+        },
+      ],
+    },
+    {
       label: "ENS Omnigraph API",
       collapsed: false,
       badge: {
@@ -190,44 +234,6 @@ export const integrateSidebarTopic = {
         {
           label: "ENSEngine (webhooks)",
           link: "/docs/integrate/integration-options/ensengine",
-        },
-      ],
-    },
-    {
-      label: "ENS Subgraph",
-      collapsed: true,
-      badge: {
-        text: "LEGACY",
-        variant: "danger",
-      },
-      items: [
-        {
-          label: "Overview",
-          link: "/docs/integrate/subgraph/what-is-the-ens-subgraph",
-        },
-        {
-          label: "Subgraph API",
-          link: "/docs/integrate/subgraph/subgraph-api",
-        },
-        {
-          label: "Querying Best Practices",
-          link: "/docs/integrate/subgraph/querying-best-practices",
-        },
-        {
-          label: "Subgraph Compatibility Tooling",
-          link: "/docs/integrate/subgraph/subgraph-compatibility-tooling",
-        },
-        {
-          label: "With ENSjs",
-          link: "/docs/integrate/subgraph/with-ensjs",
-        },
-        {
-          label: "With Viem",
-          link: "/docs/integrate/subgraph/with-viem",
-        },
-        {
-          label: "Subgraph Dependents",
-          link: "/docs/integrate/subgraph/subgraph-dependents",
         },
       ],
     },

@@ -36,21 +36,22 @@ export default defineConfig({
     "/docs": "/docs/integrate",
     "/ensnode": "/docs/integrate",
     "/ensnode/deploying/railway": "/docs/services/ensrainbow/deploying/railway",
-    "/ensnode/concepts/what-is-the-ens-subgraph":
-      "/docs/integrate/subgraph/what-is-the-ens-subgraph",
-    "/docs/reference/what-is-the-ens-subgraph": "/docs/integrate/subgraph/what-is-the-ens-subgraph",
+    "/docs/integrate/subgraph/what-is-the-ens-subgraph": "/docs/integrate/subgraph",
+    "/docs/integrate/subgraph/subgraph-api": "/docs/integrate/subgraph/schema-reference",
+    "/docs/integrate/subgraph/with-ensjs": "/docs/integrate/subgraph/examples/with-ensjs",
+    "/docs/integrate/subgraph/with-viem": "/docs/integrate/subgraph/examples/with-viem",
+    "/docs/integrate/subgraph/subgraph-compatibility-tooling": "/docs/integrate/subgraph",
+    "/ensnode/concepts/what-is-the-ens-subgraph": "/docs/integrate/subgraph",
+    "/docs/reference/what-is-the-ens-subgraph": "/docs/integrate/subgraph",
     "/docs/reference/querying-best-practices": "/docs/integrate/subgraph/querying-best-practices",
-    "/docs/reference/subgraph-compatibility-tooling":
-      "/docs/integrate/subgraph/subgraph-compatibility-tooling",
-    "/docs/reference/subgraph-legacy/what-is-the-ens-subgraph":
-      "/docs/integrate/subgraph/what-is-the-ens-subgraph",
-    "/docs/reference/subgraph-legacy/subgraph-api": "/docs/integrate/subgraph/subgraph-api",
+    "/docs/reference/subgraph-compatibility-tooling": "/docs/integrate/subgraph",
+    "/docs/reference/subgraph-legacy/what-is-the-ens-subgraph": "/docs/integrate/subgraph",
+    "/docs/reference/subgraph-legacy/subgraph-api": "/docs/integrate/subgraph/schema-reference",
     "/docs/reference/subgraph-legacy/querying-best-practices":
       "/docs/integrate/subgraph/querying-best-practices",
-    "/docs/reference/subgraph-legacy/subgraph-compatibility-tooling":
-      "/docs/integrate/subgraph/subgraph-compatibility-tooling",
-    "/docs/reference/subgraph-legacy/with-ensjs": "/docs/integrate/subgraph/with-ensjs",
-    "/docs/reference/subgraph-legacy/with-viem": "/docs/integrate/subgraph/with-viem",
+    "/docs/reference/subgraph-legacy/subgraph-compatibility-tooling": "/docs/integrate/subgraph",
+    "/docs/reference/subgraph-legacy/with-ensjs": "/docs/integrate/subgraph/examples/with-ensjs",
+    "/docs/reference/subgraph-legacy/with-viem": "/docs/integrate/subgraph/examples/with-viem",
     "/docs/reference/subgraph-legacy/subgraph-dependents":
       "/docs/integrate/subgraph/subgraph-dependents",
     "/ensadmin": "/docs/services/ensadmin",
