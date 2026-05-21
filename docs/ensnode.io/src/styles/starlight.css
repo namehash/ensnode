@@ -308,11 +308,40 @@ a[rel="prev"]:hover {
     background-color 0.2s ease-in-out;
 }
 
-/* Only apply hover effects to non-selected items */
-#starlight__sidebar a:not([aria-current="page"]):hover {
+/* Only apply hover effects to: 
+* * non-selected items 
+* * not open expandable items (counterpart of non-selected for normal items) 
+*/
+#starlight__sidebar a:not([aria-current="page"]):hover,
+#starlight__sidebar details:not([open]):hover {
   background-color: rgba(128, 128, 128, 0.1);
   transform: translateX(2px);
   border-radius: 6px;
+}
+
+/** Additional styling required for the
+ * expandable items in the sidebar
+ */
+#starlight__sidebar details:not([open]) {
+  transition: all 0.2s ease-in-out;
+  color: var(--sl-color-gray-2);
+  &:hover,
+  span:hover {
+    color: var(--sl-color-white);
+  }
+}
+
+/** Add accent color to the expanded item in the sidebar
+ * (like we add accent background to the selected item)
+ */
+#starlight__sidebar details:is([open]) > summary {
+  > .group-label span:not(.sl-badge) {
+    color: var(--sl-color-accent);
+  }
+
+  > svg {
+    fill: var(--sl-color-accent);
+  }
 }
 
 a.starlight-sidebar-topics-current {
@@ -332,13 +361,18 @@ a.starlight-sidebar-topics-current .starlight-sidebar-topics-icon {
     box-shadow 0.2s ease-in-out;
 }
 
-/* Make sure that all non-top-level sidebar items are not enlarged and non-bold */
+/* Make sure that all non-top-level sidebar items are:
+ * * not enlarged
+ * * not bolded 
+ * * the same color as the rest of the sidebar text
+ */
 ul.top-level details details > summary .group-label span {
   @media (min-width: 50rem) {
     font-size: var(--sl-text-sm);
   }
 
   font-weight: normal;
+  color: var(--sl-color-gray-2);
 }
 
 /* Make sure that social icons in the sidebar do not move on hover */
