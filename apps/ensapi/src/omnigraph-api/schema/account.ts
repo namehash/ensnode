@@ -90,11 +90,11 @@ AccountRef.implement({
           }),
         );
 
-        // Object.entries erases key/value types,
-        // but values are already ChainId / InterpretedName | null,
-        // so cast is safe.
+        // Object.entries returns key/value pairs as [string, string | null],
+        // but the values are already ChainId / InterpretedName | null,
+        // so the cast is safe.
         return Object.entries(result).map(([chainId, name]) => ({
-          chainId: chainId as unknown as ChainId,
+          chainId: Number(chainId) as ChainId,
           name: name as InterpretedName | null,
         }));
       },
