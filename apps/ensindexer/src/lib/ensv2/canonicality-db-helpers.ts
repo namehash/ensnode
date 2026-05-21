@@ -240,18 +240,9 @@ export async function handleSubregistryUpdated(
  * runs BEFORE Protocol Acceleration's NewResolver/ResolverUpdated handlers, which overwrite the
  * DRR row — see `apps/ensindexer/ponder/src/register-handlers.ts` for the ordering.
  *
- * We allow any originating Domain to set the Bridged Resolver's target Registry as its Subregistry
- * (which is correct for aliased forward walks [i.e. domains are correctly addressable by
- * "example.fakebase.eth"]) but only set the target Registry's Canonical Domain iff this is the
- * expected originating Domain.
- *
- * Implied invariant: Bridged target Registry is indexed before its originating Domain's Bridged
- * Resolver event. `handleRegistryCanonicalDomainUpdated` throws when the registry row is missing,
- * so a Bridged Resolver event firing on the originating Domain before any subname on the
- * bridged target chain is indexed (which is what creates the bridged Registry row) would
- * crash the indexer. If a future Bridged Resolver violates this, we should mirror the logic
- * above and have two uni-directional pointer update helpers (one on ResolverChange [SubregistryUpdated]
- * and one on Bridged Registry creation [CanonicalDomainUpdated]).
+ * This helper manages only the originating Domain's `subregistryId` (pointing it at the Bridged
+ * Resolver's target Registry, or clearing it). The target Registry's `canonicalDomainId` is owned
+ * by the registry-creation path in `ENSv1Registry.ts`, not here.
  */
 export async function handleBridgedResolverChange(
   context: IndexingEngineContext,

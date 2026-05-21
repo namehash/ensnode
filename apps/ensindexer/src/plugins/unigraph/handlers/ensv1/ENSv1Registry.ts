@@ -157,7 +157,7 @@ export default function () {
         // To mimic the behavior of ENSv2, we handle an implicit ParentUpdated event for this registry.
         const bridged = isBridgedTargetRegistry(config.namespace, parentRegistryId);
         if (bridged) {
-          // if this is a Target Registry, its Canonical Name should be updated to that of the bridge origin
+          // if this is a Target Registry, its Canonical Domain should be updated to that of the bridge origin
           // (which will then correctly cascade canonicality)
           await handleRegistryCanonicalDomainUpdated(
             context,
