@@ -13,6 +13,8 @@ import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-eng
  * the natural reconcile + cascade flow in `canonicality-db-helpers.ts` once the bidirectional
  * canonical edge agrees back to a canonical parent Domain. v1 and v2 share the same canonicality
  * definition: a Registry is canonical iff it can be traced back to a Root via canonical edges.
+ *
+ * @returns whether the registry was created by this operation
  */
 export async function ensureRegistry(
   context: IndexingEngineContext,
@@ -21,13 +23,14 @@ export async function ensureRegistry(
     typeof ensIndexerSchema.registry.$inferInsert,
     "type" | "chainId" | "address" | "node"
   >,
-) {
-  await context.ensDb
-    .insert(ensIndexerSchema.registry)
-    .values({
-      id,
-      ...args,
-      canonical: isRootRegistryId(config.namespace, id),
-    })
-    .onConflictDoNothing();
+): Promise<boolean> {
+  const existing = await context.ensDb.find(ensIndexerSchema.registry, { id });
+  if (existing) return false;
+
+  await context.ensDb.insert(ensIndexerSchema.registry).values({
+    id,
+    ...args,
+    canonical: isRootRegistryId(config.namespace, id),
+  });
+  return true;
 }
