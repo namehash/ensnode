@@ -223,7 +223,6 @@ describe("buildEnsApiPublicConfig", () => {
 
     const ensApiConfig = {
       port: ENSApi_DEFAULT_PORT,
-      ensDbUrl: BASE_ENV.ENSDB_URL,
       referralProgramEditionConfigSetUrl: undefined,
       theGraphApiKey: undefined,
     };
