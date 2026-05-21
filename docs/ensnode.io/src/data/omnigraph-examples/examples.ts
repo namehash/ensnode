@@ -3,13 +3,7 @@ import { OmnigraphExampleQuerySchema, type OmnigraphExampleQuery } from "src/lib
 
 import { ACTIVE_OMNIGRAPH_VERSION } from "./active";
 import { OMNIGRAPH_EXAMPLES_META } from "./meta";
-
-/** A frozen, version-locked example query. Variables are pre-resolved for the docs namespace. */
-interface SnapshotExample {
-  id: string;
-  query: string;
-  variables: Record<string, unknown>;
-}
+import type { SnapshotExample } from "./types";
 
 // Eagerly load every version snapshot, then select the active one. Vite can't import a
 // runtime-variable path directly, so glob all and key by path.

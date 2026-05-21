@@ -1,11 +1,8 @@
 import { buildSchema, parse, validate } from "graphql";
 import { describe, expect, it } from "vitest";
 
-interface SnapshotExample {
-  id: string;
-  query: string;
-  variables: Record<string, unknown>;
-}
+import { ACTIVE_OMNIGRAPH_VERSION } from "./active";
+import type { SnapshotExample } from "./types";
 
 const schemas = import.meta.glob<string>("./versions/*/schema.graphql", {
   query: "?raw",
@@ -20,6 +17,11 @@ const examples = import.meta.glob<SnapshotExample[]>("./versions/*/examples.json
 describe("Omnigraph version snapshots", () => {
   it("has at least one version snapshot", () => {
     expect(Object.keys(schemas).length).toBeGreaterThan(0);
+  });
+
+  it("ACTIVE_OMNIGRAPH_VERSION has a committed snapshot", () => {
+    expect(schemas[`./versions/${ACTIVE_OMNIGRAPH_VERSION}/schema.graphql`]).toBeDefined();
+    expect(examples[`./versions/${ACTIVE_OMNIGRAPH_VERSION}/examples.json`]).toBeDefined();
   });
 
   for (const schemaPath of Object.keys(schemas)) {

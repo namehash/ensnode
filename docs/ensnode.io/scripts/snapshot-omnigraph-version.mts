@@ -22,6 +22,11 @@ if (!version) {
   console.error("Usage: pnpm omnigraph:snapshot <version>");
   process.exit(1);
 }
+// Used as a directory name; reject anything that could escape the versions/ dir.
+if (!/^[0-9A-Za-z._-]+$/.test(version) || version.includes("..")) {
+  console.error(`Invalid version "${version}": use only letters, digits, '.', '_', '-'.`);
+  process.exit(1);
+}
 
 const here = dirname(fileURLToPath(import.meta.url));
 const versionDir = join(here, `../src/data/omnigraph-examples/versions/${version}`);
