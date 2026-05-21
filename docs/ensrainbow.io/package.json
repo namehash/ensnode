@@ -13,8 +13,8 @@
     "astro": "astro",
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
-    "format": "prettier --write \"**/*.astro\"",
-    "format:check": "prettier --check \"**/*.astro\""
+    "lint:prettier": "prettier --write \"**/*.astro\"",
+    "lint:prettier:ci": "prettier --check \"**/*.astro\""
   },
   "dependencies": {
     "@astrojs/react": "catalog:",

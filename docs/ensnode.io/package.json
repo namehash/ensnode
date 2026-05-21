@@ -13,8 +13,8 @@
     "astro": "astro",
     "lint": "biome check --write",
     "lint:ci": "biome ci",
-    "format": "prettier --write \"**/*.astro\"",
-    "format:check": "prettier --check \"**/*.astro\"",
+    "lint:prettier": "prettier --write \"**/*.astro\"",
+    "lint:prettier:ci": "prettier --check \"**/*.astro\"",
     "omnigraph-examples:refresh-responses": "tsx --tsconfig tsconfig.json scripts/fetch-omnigraph-example-responses.mts",
     "test": "vitest",
     "generate:openapi": "pnpm --filter ensapi exec tsx --tsconfig tsconfig.json ../../scripts/generate-ensapi-openapi.mts"
