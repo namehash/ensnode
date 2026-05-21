@@ -73,14 +73,10 @@ export const OMNIGRAPH_EXAMPLES_META: Record<
     description: "Count an account's ENSv1 vs ENSv2 domains to gauge its migration progress.",
     category: "Migration",
   },
-  "batch-migration-check": {
-    name: "Batch Migration Check",
-    description: "Look up a batch of names and their canonical ENSv2 identity in one request.",
-    category: "Migration",
-  },
   "eth-by-version": {
     name: "ETH TLD By Version",
-    description: "Resolve the .eth TLD's Domain id in each ENS protocol version.",
+    description:
+      "Load the .eth TLD across protocol versions: one Domain per version, discriminated by `__typename` (ENSv1Domain / ENSv2Domain).",
     category: "Migration",
   },
 };

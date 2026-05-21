@@ -106,15 +106,8 @@
     }
   },
   {
-    "id": "batch-migration-check",
-    "query": "query BatchENSv2MigrationCheck($names: [InterpretedName!]!) {\n  domains(where: { name: { in: $names } }) {\n    edges {\n      node {\n        id\n        label { interpreted }\n        canonical { name { interpreted } }\n      }\n    }\n  }\n}",
-    "variables": {
-      "names": ["demomigration.eth", "sfmonicdebmig.eth", "test-name.eth"]
-    }
-  },
-  {
     "id": "eth-by-version",
-    "query": "query GetEthDomains {\n  v1Eth: domains(where: { name: { eq: \"eth\" }, version: ENSv1 }) { edges { node { id } } }\n  v2Eth: domains(where: { name: { eq: \"eth\" }, version: ENSv2 }) { edges { node { id } } }\n}",
+    "query": "query GetEthDomains {\n  domains(where: { name: { eq: \"eth\" } }) {\n    edges {\n      node {\n        __typename\n        id\n      }\n    }\n  }\n}",
     "variables": {}
   }
 ]

@@ -409,92 +409,6 @@
       }
     }
   },
-  "batch-migration-check": {
-    "data": {
-      "domains": {
-        "edges": [
-          {
-            "node": {
-              "id": "99911155111-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xf03176dd9df28dc055c2a488db60771e1274da47e6817bba60a4d430b1f07eab",
-              "label": {
-                "interpreted": "demomigration"
-              },
-              "canonical": {
-                "name": {
-                  "interpreted": "demomigration.eth"
-                }
-              }
-            }
-          },
-          {
-            "node": {
-              "id": "99911155111-0x31a2bb5d933557cce1b3129993193896d074db92-16667255088511032258734869288656151879694984502659291947785833813622625665024",
-              "label": {
-                "interpreted": "demomigration"
-              },
-              "canonical": {
-                "name": {
-                  "interpreted": "demomigration.eth"
-                }
-              }
-            }
-          },
-          {
-            "node": {
-              "id": "99911155111-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0xe508b211ae047459a93f1869551a45d46e6df1a402871ede77e66a1ede37e441",
-              "label": {
-                "interpreted": "sfmonicdebmig"
-              },
-              "canonical": {
-                "name": {
-                  "interpreted": "sfmonicdebmig.eth"
-                }
-              }
-            }
-          },
-          {
-            "node": {
-              "id": "99911155111-0x31a2bb5d933557cce1b3129993193896d074db92-56628501608342160994796573703641383006095849910938450752019652776110824882176",
-              "label": {
-                "interpreted": "sfmonicdebmig"
-              },
-              "canonical": {
-                "name": {
-                  "interpreted": "sfmonicdebmig.eth"
-                }
-              }
-            }
-          },
-          {
-            "node": {
-              "id": "99911155111-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x527f8d39fa87ac23b6431913e880aa29425dc0450651a22d9a3b881a29661a0b",
-              "label": {
-                "interpreted": "test-name"
-              },
-              "canonical": {
-                "name": {
-                  "interpreted": "test-name.eth"
-                }
-              }
-            }
-          },
-          {
-            "node": {
-              "id": "99911155111-0x31a2bb5d933557cce1b3129993193896d074db92-18650549467948381174706470291653511222307197070371999253038345217664991887360",
-              "label": {
-                "interpreted": "test-name"
-              },
-              "canonical": {
-                "name": {
-                  "interpreted": "test-name.eth"
-                }
-              }
-            }
-          }
-        ]
-      }
-    }
-  },
   "domain-by-name": {
     "data": {
       "domain": {
@@ -527,7 +441,6 @@
     "data": {
       "domain": {
         "events": {
-          "totalCount": 3,
           "edges": [
             {
               "node": {
@@ -574,7 +487,8 @@
                 "transactionHash": "0x2e1e3b9dbd5c0c354894ccc7aa00107b2fa504fa3fda44b7a36c71098ca897f6"
               }
             }
-          ]
+          ],
+          "totalCount": 3
         }
       }
     }
@@ -989,19 +903,17 @@
   },
   "eth-by-version": {
     "data": {
-      "v1Eth": {
+      "domains": {
         "edges": [
           {
             "node": {
+              "__typename": "ENSv1Domain",
               "id": "99911155111-0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e-0x93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae"
             }
-          }
-        ]
-      },
-      "v2Eth": {
-        "edges": [
+          },
           {
             "node": {
+              "__typename": "ENSv2Domain",
               "id": "99911155111-0xfd43dc00ab0d0e247a2827d15dddfc5bd9646a29-35894389512221139346028120028875095598761990588366713962827482865183915769856"
             }
           }
@@ -2295,7 +2207,6 @@
     "data": {
       "permissions": {
         "events": {
-          "totalCount": 1,
           "edges": [
             {
               "node": {
@@ -2308,7 +2219,8 @@
                 "timestamp": "1777666931"
               }
             }
-          ]
+          ],
+          "totalCount": 1
         },
         "resources": {
           "edges": [

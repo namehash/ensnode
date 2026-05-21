@@ -437,32 +437,17 @@ query AccountMigratedNames($address: Address!) {
     },
   },
   {
-    id: "batch-migration-check",
-    query: `
-query BatchENSv2MigrationCheck($names: [InterpretedName!]!) {
-  domains(where: { name: { in: $names } }) {
-    edges {
-      node {
-        id
-        label { interpreted }
-        canonical { name { interpreted } }
-      }
-    }
-  }
-}`,
-    variables: {
-      default: { names: ["vitalik.eth", "nick.eth"] },
-      [ENSNamespaceIds.SepoliaV2]: {
-        names: ["demomigration.eth", "sfmonicdebmig.eth", "test-name.eth"],
-      },
-    },
-  },
-  {
     id: "eth-by-version",
     query: `
 query GetEthDomains {
-  v1Eth: domains(where: { name: { eq: "eth" }, version: ENSv1 }) { edges { node { id } } }
-  v2Eth: domains(where: { name: { eq: "eth" }, version: ENSv2 }) { edges { node { id } } }
+  domains(where: { name: { eq: "eth" } }) {
+    edges {
+      node {
+        __typename
+        id
+      }
+    }
+  }
 }`,
     variables: { default: {} },
   },
