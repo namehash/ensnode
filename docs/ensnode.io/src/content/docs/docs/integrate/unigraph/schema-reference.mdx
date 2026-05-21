@@ -25,7 +25,7 @@ however, is materialized inline via synchronous handler-side cascades; see the `
 on `domains` and `canonicality-db-helpers.ts`.
 
 As a result, this schema takes a balanced approach. It mimics on-chain state as closely as possible,
-with the obvious exception of materializing specific state that must trivially filterable. Then,
+with the obvious exception of materializing specific state that must be trivially filterable. Then,
 resolution-time logic is applied on _top_ of this index, at query-time, mimicking ENS's own resolution-time
 behavior. This forces our implementation to match the protocol as closely as possible, with the
 obvious note that the performance tradeoffs of evm code and our app are different. For example,
