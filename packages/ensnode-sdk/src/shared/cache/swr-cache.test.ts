@@ -903,4 +903,55 @@ describe("SWRCache", () => {
       cache.destroy();
     });
   });
+
+  describe("peek", () => {
+    it("throws when cache is not initialized", () => {
+      const fn = vi.fn(async () => "value1");
+      const cache = new SWRCache({ fn, ttl: 1 });
+
+      expect(() => cache.peek()).toThrow("Cache is not initialized yet");
+    });
+
+    it("returns cached value without triggering revalidation", async () => {
+      const fn = vi.fn(async () => "value1");
+      const cache = new SWRCache({ fn, ttl: 1 });
+
+      await cache.read();
+      expect(fn).toHaveBeenCalledTimes(1);
+
+      const result = cache.peek();
+      expect(result).toBe("value1");
+      expect(fn).toHaveBeenCalledTimes(1); // no revalidation triggered
+    });
+
+    it("returns cached error when result is an Error", async () => {
+      const error = new Error("Cached error");
+      const fn = vi.fn(async () => {
+        throw error;
+      });
+      const cache = new SWRCache({ fn, ttl: 1 });
+
+      await cache.read();
+
+      const result = cache.peek();
+
+      expect(result).toBeInstanceOf(Error);
+    });
+
+    it("returns stale cached value without revalidating", async () => {
+      const fn = vi.fn(async () => "value1");
+      const cache = new SWRCache({ fn, ttl: 1 });
+
+      await cache.read();
+      expect(fn).toHaveBeenCalledTimes(1);
+
+      // advance past TTL
+      vi.advanceTimersByTime(2000);
+
+      // peek should return stale value synchronously without triggering revalidation
+      const result = cache.peek();
+      expect(result).toBe("value1");
+      expect(fn).toHaveBeenCalledTimes(1);
+    });
+  });
 });

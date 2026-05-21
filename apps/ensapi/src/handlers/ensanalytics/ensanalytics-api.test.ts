@@ -1,21 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ENSNamespaceIds } from "@ensnode/datasources";
-
-import type { EnsApiConfig } from "@/config/config.schema";
 import * as ensanalyticsMiddleware from "@/middleware/ensanalytics.middleware";
 import * as editionsCachesMiddleware from "@/middleware/referral-edition-snapshots-caches.middleware";
 import * as editionSetMiddleware from "@/middleware/referral-program-edition-set.middleware";
-
-vi.mock("@/config", () => ({
-  get default() {
-    const mockedConfig: Pick<EnsApiConfig, "namespace"> = {
-      namespace: ENSNamespaceIds.Mainnet,
-    };
-
-    return mockedConfig;
-  },
-}));
 
 vi.mock("@/middleware/referral-program-edition-set.middleware", () => ({
   referralProgramEditionConfigSetMiddleware: vi.fn(),

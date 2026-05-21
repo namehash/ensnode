@@ -1,10 +1,9 @@
-import config from "@/config";
-
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { makeConcreteRegistryId, makePermissionsId, makeResolverId } from "enssdk";
 
 import { getRootRegistryId } from "@ensnode/ensnode-sdk";
 
+import di from "@/di";
 import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
 import { builder } from "@/omnigraph-api/builder";
 import { orderPaginationBy, paginateBy } from "@/omnigraph-api/lib/connection-helpers";
@@ -182,7 +181,7 @@ builder.queryType({
         "The Root Registry for this namespace. It will be the ENSv2 Root Registry when defined, otherwise the ENSv1 Root Registry.",
       type: RegistryInterfaceRef,
       nullable: false,
-      resolve: () => getRootRegistryId(config.namespace),
+      resolve: () => getRootRegistryId(di.context.namespace),
     }),
   }),
 });

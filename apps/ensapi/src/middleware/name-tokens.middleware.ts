@@ -1,5 +1,3 @@
-import config from "@/config";
-
 import {
   NameTokensResponseCodes,
   NameTokensResponseErrorCodes,
@@ -7,6 +5,7 @@ import {
   serializeNameTokensResponse,
 } from "@ensnode/ensnode-sdk";
 
+import di from "@/di";
 import { factory } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
 
@@ -36,7 +35,7 @@ export const nameTokensApiMiddleware = factory.createMiddleware(
       throw new Error(`Invariant(name-tokens.middleware): indexingStatusMiddleware required`);
     }
 
-    if (!nameTokensPrerequisites.hasEnsIndexerConfigSupport(config.ensIndexerPublicConfig)) {
+    if (!nameTokensPrerequisites.hasEnsIndexerConfigSupport(di.context.stackInfo.ensIndexer)) {
       return c.json(
         serializeNameTokensResponse({
           responseCode: NameTokensResponseCodes.Error,
