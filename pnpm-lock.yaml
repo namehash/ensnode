@@ -695,8 +695,8 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0(@astrojs/starlight@0.39.2(astro@6.3.3(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.59.0)(tsx@4.21.0)(yaml@2.8.3))(typescript@5.9.3))(tailwindcss@4.3.0)
       '@ensnode/ensnode-sdk':
-        specifier: 0.0.0-preview-fix-sha-89c022b-20260519094840
-        version: 0.0.0-preview-fix-sha-89c022b-20260519094840(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(typescript@5.9.3)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))
+        specifier: workspace:*
+        version: link:../../packages/ensnode-sdk
       '@fontsource/inter':
         specifier: ^5.2.5
         version: 5.2.8
@@ -746,8 +746,8 @@ importers:
         specifier: 5.0.5
         version: 5.0.5
       enssdk:
-        specifier: 0.0.0-preview-fix-sha-89c022b-20260519094840
-        version: 0.0.0-preview-fix-sha-89c022b-20260519094840(gql.tada@1.9.1(graphql@16.11.0)(typescript@5.9.3))(graphql@16.11.0)(viem@2.50.3(typescript@5.9.3)(zod@4.3.6))
+        specifier: workspace:*
+        version: link:../../packages/enssdk
       fuse.js:
         specifier: ^7.1.0
         version: 7.1.0
