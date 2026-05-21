@@ -334,11 +334,11 @@ a[rel="prev"]:hover {
  * (like we add accent background to the selected item)
  */
 #starlight__sidebar details:is([open]) > summary {
-  > .group-label span:not(.sl-badge) {
+  & > .group-label span:not(.sl-badge) {
     color: var(--sl-color-accent);
   }
 
-  > svg {
+  & > svg {
     fill: var(--sl-color-accent);
   }
 }
