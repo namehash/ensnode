@@ -72,7 +72,7 @@ export async function findResolver({
   // Invariant: UniversalResolver#findResolver only works for ENS Root Registry
   if (!isENSv1Registry(di.context.ensNamespaceId, registry)) {
     throw new Error(
-      `Invariant(findResolver): UniversalResolver#findResolver only identifies active resolvers agains the ENs Root Registry, but a different Registry contract was passed: ${JSON.stringify(registry)}.`,
+      `Invariant(findResolver): UniversalResolver#findResolver only identifies active resolvers against the ENS Root Registry, but a different Registry contract was passed: ${JSON.stringify(registry)}.`,
     );
   }
 

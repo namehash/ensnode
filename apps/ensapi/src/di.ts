@@ -193,7 +193,7 @@ export function buildEnsApiDiContext(ensApiEnvironment: EnsApiEnvironment): EnsA
       const stackInfo = context.stackInfoCache.peek();
 
       if (stackInfo instanceof Error) {
-        throw new Error("Stack info is not available in the stackInfoCache.");
+        throw stackInfo;
       }
 
       return stackInfo;
