@@ -332,11 +332,13 @@ a.starlight-sidebar-topics-current .starlight-sidebar-topics-icon {
     box-shadow 0.2s ease-in-out;
 }
 
-/* Make sure that all non-top-level sidebar items are not enlarged */
+/* Make sure that all non-top-level sidebar items are not enlarged and non-bold */
 ul.top-level details details > summary .group-label span {
   @media (min-width: 50rem) {
     font-size: var(--sl-text-sm);
   }
+
+  font-weight: normal;
 }
 
 /* Make sure that social icons in the sidebar do not move on hover */

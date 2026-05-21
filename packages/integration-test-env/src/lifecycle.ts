@@ -1,34 +1,12 @@
 /**
- * Integration Test Environment Orchestrator
+ * Integration Test Environment Lifecycle
  *
- * Spins up the full ENSNode stack against the ens-test-env devnet, runs
- * monorepo-level integration tests, then tears everything down.
+ * Brings up the full ENSNode stack (ENSDb + devnet → seed → ENSRainbow → ENSIndexer → ENSApi)
+ * and provides shared cleanup + signal handling.
  *
- * Phases:
- *   1. ENSDb (postgres) + devnet via docker-compose (testcontainers DockerComposeEnvironment)
- *   2. Seed devnet (primary names and resolver records)
- *   3. Start ENSRainbow via `pnpm entrypoint` (downloads + extracts the prebuilt LevelDB in the background)
- *   4. Start ENSIndexer
- *   5. Wait for omnichain-following / omnichain-completed (indexing complete)
- *   6. Start ENSApi
- *   7. Run `pnpm test:integration` at the monorepo root
- *
- * Design decisions:
- *   - ENSDb (postgres) and devnet are started from docker/docker-compose.orchestrator.yml via
- *     testcontainers DockerComposeEnvironment, ensuring the orchestrator always
- *     uses the same images and configuration defined there.
- *   - execa for child process management — automatic cleanup on parent exit,
- *     forceKillAfterDelay (10s SIGKILL fallback), env inherited from parent.
- *   - Services run from source (pnpm start/serve) rather than Docker so that
- *     CI tests the actual code in the PR.
- *   - ENSRainbow uses the same `pnpm entrypoint` command as the Docker image —
- *     it boots the HTTP server immediately and bootstraps the DB asynchronously,
- *     so we wait on `/ready` (not `/health`) before moving to the next phase.
- *   - Cleanup stops processes in reverse order (ensapi → ensindexer → ensrainbow)
- *     so DB consumers close connections before ensdb is stopped.
- *   - Abort flag pattern: if a background service crashes during polling/health
- *     checks, the orchestrator fails fast instead of waiting for a timeout.
- *   - SIGINT/SIGTERM handler is guarded against re-entrance (repeated Ctrl-C).
+ * Two entrypoints consume this module:
+ *   - `ci.ts` — CI flow: bringUp() → run tests → cleanup()
+ *   - `start.ts` — manual flow: bringUp() → block until Ctrl+C → cleanup() via signal handler
  */
 
 import { resolve } from "node:path";
@@ -68,6 +46,37 @@ const ENSINDEXER_SCHEMA_NAME = "ensindexer_integration_test";
 const ENSDB_URL = `postgresql://postgres:password@localhost:${ENSDB_PORT}/postgres`;
 const RPC_URL = ensTestEnvChain.rpcUrls.default.http[0];
 
+export const endpoints = {
+  ensapi: `http://localhost:${ENSAPI_PORT}`,
+  ensindexer: `http://localhost:${ENSINDEXER_PORT}`,
+  ensrainbow: ENSRAINBOW_URL,
+  ensdb: ENSDB_URL,
+  devnetRpc: RPC_URL,
+} as const;
+
+export const ALL_SERVICES = ["devnet", "ensrainbow", "ensindexer", "ensapi"] as const;
+export type Service = (typeof ALL_SERVICES)[number];
+
+/**
+ * Parse a comma-separated `--only` value (e.g. "devnet,ensrainbow") into a Set of services.
+ * Throws on unknown service names.
+ */
+export function parseOnly(value: string): Set<Service> {
+  const items = value
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (items.length === 0) {
+    throw new Error(`--only requires at least one service. Valid: ${ALL_SERVICES.join(", ")}`);
+  }
+  for (const item of items) {
+    if (!(ALL_SERVICES as readonly string[]).includes(item)) {
+      throw new Error(`Unknown service: "${item}". Valid: ${ALL_SERVICES.join(", ")}`);
+    }
+  }
+  return new Set(items as Service[]);
+}
+
 // Track resources for cleanup
 const subprocesses: ResultPromise[] = [];
 let composeEnvironment: StartedDockerComposeEnvironment | undefined;
@@ -90,7 +99,7 @@ function setAborted(reason: string) {
   abortReason = reason;
 }
 
-async function cleanup() {
+export async function cleanup() {
   cleanupInProgress = true;
   log("Cleaning up...");
 
@@ -128,18 +137,19 @@ async function handleShutdown() {
   cleanupInProgress = true;
   log("Shutting down...");
   await cleanup();
-  process.exit(1);
+  // SIGINT/SIGTERM is a user-initiated shutdown, not an error — exit 0.
+  process.exit(0);
 }
 
 process.on("SIGINT", handleShutdown);
 process.on("SIGTERM", handleShutdown);
 
 function log(msg: string) {
-  console.log(`[orchestrator] ${msg}`);
+  console.log(`[lifecycle] ${msg}`);
 }
 
 function logError(msg: string) {
-  console.error(`[orchestrator] ERROR: ${msg}`);
+  console.error(`[lifecycle] ERROR: ${msg}`);
 }
 
 async function waitForHealth(url: string, timeoutMs: number, serviceName: string): Promise<void> {
@@ -252,115 +262,139 @@ function logVersions() {
   log(`  Docker:   ${execaSync("docker", ["--version"]).stdout.trim()}`);
 }
 
-async function main() {
+/**
+ * Bring up the integration test environment: ENSDb + Devnet, seed, ENSRainbow, ENSIndexer,
+ * wait for indexing to complete, ENSApi. Returns once every selected service is healthy.
+ *
+ * Pass `only` to start a subset (e.g. `new Set(["devnet", "ensrainbow"])`) — useful when you
+ * want to iterate on ensindexer/ensapi locally and have the rest auto-managed. When omitted,
+ * the full stack starts.
+ *
+ * Note: `devnet` includes ensdb (coupled via docker-compose) and seeding. `ensindexer` includes
+ * waiting for indexing to reach following/completed.
+ *
+ * On failure, throws — callers are responsible for calling cleanup().
+ */
+export async function bringUp(options: { only?: Set<Service> } = {}): Promise<void> {
+  const { only } = options;
+  const should = (svc: Service) => !only || only.has(svc);
+
   log("Starting integration test environment...");
+  if (only) log(`Only starting: ${[...only].join(", ")}`);
   logVersions();
 
   // Phase 1: Start ENSDb + Devnet via docker-compose
-  log("Starting ENSDb and Devnet...");
-  composeEnvironment = await new DockerComposeEnvironment(
-    DOCKER_DIR,
-    "docker-compose.orchestrator.yml",
-  )
-    .withWaitStrategy("devnet-orchestrator", Wait.forHealthCheck())
-    .withWaitStrategy("ensdb-orchestrator", Wait.forListeningPorts())
-    .withStartupTimeout(120_000)
-    .up(["ensdb", "devnet"]);
+  if (should("devnet")) {
+    log("Starting ENSDb and Devnet...");
+    composeEnvironment = await new DockerComposeEnvironment(
+      DOCKER_DIR,
+      "docker-compose.orchestrator.yml",
+    )
+      .withWaitStrategy("devnet-orchestrator", Wait.forHealthCheck())
+      .withWaitStrategy("ensdb-orchestrator", Wait.forListeningPorts())
+      .withStartupTimeout(120_000)
+      .up(["ensdb", "devnet"]);
 
-  log(`ENSDb is ready (port ${ENSDB_PORT})`);
+    log(`ENSDb is ready (port ${ENSDB_PORT})`);
 
-  // Devnet Chain Id check
-  const publicClient = createPublicClient({
-    transport: http(RPC_URL),
-  });
-  const devnetChainId = await publicClient.getChainId();
-  if (devnetChainId !== ensTestEnvChain.id) {
-    throw new Error(
-      `Devnet chain id mismatch: got ${devnetChainId}, expected ${ensTestEnvChain.id}.`,
-    );
+    // Devnet Chain Id check
+    const publicClient = createPublicClient({
+      transport: http(RPC_URL),
+    });
+    const devnetChainId = await publicClient.getChainId();
+    if (devnetChainId !== ensTestEnvChain.id) {
+      throw new Error(
+        `Devnet chain id mismatch: got ${devnetChainId}, expected ${ensTestEnvChain.id}.`,
+      );
+    }
+
+    log(`Devnet is ready (RPC URL: ${RPC_URL})`);
+
+    // Phase 2: Seed devnet with test data (before indexing starts)
+    log("Seeding devnet...");
+    await seedDevnet(RPC_URL);
+    log("Devnet seeded");
   }
-
-  log(`Devnet is ready (RPC URL: ${RPC_URL})`);
-
-  // Phase 2: Seed devnet with test data (before indexing starts)
-  log("Seeding devnet...");
-  await seedDevnet(RPC_URL);
-  log("Devnet seeded");
 
   // Phase 3: Download ENSRainbow database and start from source
   const DB_SCHEMA_VERSION = "3";
   const LABEL_SET_ID = "ens-test-env";
   const LABEL_SET_VERSION = "0";
 
-  log("Starting ENSRainbow (entrypoint will bootstrap the database)...");
-  spawnService(
-    "pnpm",
-    ["entrypoint"],
-    ENSRAINBOW_DIR,
-    {
-      LOG_LEVEL: "error",
-      DB_SCHEMA_VERSION,
-      LABEL_SET_ID,
-      LABEL_SET_VERSION,
-    },
-    "ensrainbow",
-  );
-  // /ready returns 200 only after the DB has been downloaded, extracted, and attached.
-  await waitForHealth(`http://localhost:${ENSRAINBOW_PORT}/ready`, 30_000, "ENSRainbow");
+  if (should("ensrainbow")) {
+    log("Starting ENSRainbow (entrypoint will bootstrap the database)...");
+    spawnService(
+      "pnpm",
+      ["entrypoint"],
+      ENSRAINBOW_DIR,
+      {
+        // Default to error to keep the stack output readable. ensrainbow's info/warn output is
+        // very chatty and obscures everything else; if you need to debug ensrainbow specifically,
+        // change this locally.
+        LOG_LEVEL: "error",
+        DB_SCHEMA_VERSION,
+        LABEL_SET_ID,
+        LABEL_SET_VERSION,
+      },
+      "ensrainbow",
+    );
+    // /ready returns 200 only after the DB has been downloaded, extracted, and attached.
+    await waitForHealth(`${ENSRAINBOW_URL}/ready`, 30_000, "ENSRainbow");
+  }
 
   // Phase 4: Start ENSIndexer
-  log("Starting ENSIndexer...");
-  spawnService(
-    "pnpm",
-    ["start"],
-    ENSINDEXER_DIR,
-    {
-      NAMESPACE: ENSNamespaceIds.EnsTestEnv,
-      ENSDB_URL,
-      ENSINDEXER_SCHEMA_NAME,
-      PLUGINS: [PluginName.Unigraph, PluginName.ProtocolAcceleration].join(","),
-      ENSRAINBOW_URL,
-      LABEL_SET_ID,
-      LABEL_SET_VERSION,
-    },
-    "ensindexer",
-  );
-  await waitForHealth(`http://localhost:${ENSINDEXER_PORT}/health`, 60_000, "ENSIndexer");
+  if (should("ensindexer")) {
+    log("Starting ENSIndexer...");
+    spawnService(
+      "pnpm",
+      ["start"],
+      ENSINDEXER_DIR,
+      {
+        NAMESPACE: ENSNamespaceIds.EnsTestEnv,
+        ENSDB_URL,
+        ENSINDEXER_SCHEMA_NAME,
+        PLUGINS: [PluginName.Unigraph, PluginName.ProtocolAcceleration].join(","),
+        ENSRAINBOW_URL,
+        LABEL_SET_ID,
+        LABEL_SET_VERSION,
+      },
+      "ensindexer",
+    );
+    await waitForHealth(`http://localhost:${ENSINDEXER_PORT}/health`, 60_000, "ENSIndexer");
 
-  // Phase 5: Wait for indexing to complete
-  await pollIndexingStatus(ENSDB_URL, ENSINDEXER_SCHEMA_NAME, 30_000);
+    // Phase 5: Wait for indexing to complete
+    await pollIndexingStatus(ENSDB_URL, ENSINDEXER_SCHEMA_NAME, 30_000);
+  }
 
   // Phase 6: Start ENSApi
-  log("Starting ENSApi...");
-  spawnService(
-    "pnpm",
-    ["start"],
-    ENSAPI_DIR,
-    {
-      ENSDB_URL,
-      ENSINDEXER_SCHEMA_NAME,
-    },
-    "ensapi",
-  );
-  await waitForHealth(`http://localhost:${ENSAPI_PORT}/health`, 10_000, "ENSApi");
+  if (should("ensapi")) {
+    log("Starting ENSApi...");
+    spawnService(
+      "pnpm",
+      ["start"],
+      ENSAPI_DIR,
+      {
+        ENSDB_URL,
+        ENSINDEXER_SCHEMA_NAME,
+      },
+      "ensapi",
+    );
+    await waitForHealth(`${endpoints.ensapi}/health`, 10_000, "ENSApi");
+  }
+}
 
-  // Phase 7: Run integration tests
+/**
+ * Run `pnpm test:integration` at the monorepo root against the running stack.
+ * Throws if vitest exits non-zero.
+ */
+export function runIntegrationTests(): void {
   log("Running integration tests...");
   execaSync("pnpm", ["test:integration", "--", "--bail", "1"], {
     cwd: MONOREPO_ROOT,
     stdio: "inherit",
     env: {
-      ENSNODE_URL: `http://localhost:${ENSAPI_PORT}`,
+      ENSNODE_URL: endpoints.ensapi,
     },
   });
   log("Integration tests passed!");
-
-  await cleanup();
-  process.exit(0);
 }
-
-main().catch(async (e: unknown) => {
-  logError(String(e));
-  await cleanup();
-  process.exit(1);
-});
