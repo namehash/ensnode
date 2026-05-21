@@ -40,6 +40,9 @@ export const omnigraphCacheExchange = cacheExchange({
     // These entities are Embedded Data and don't have a relevant key
     Label: EMBEDDED_DATA,
     WrappedBaseRegistrarRegistration: EMBEDDED_DATA,
+    CanonicalName: EMBEDDED_DATA,
+    DomainCanonical: EMBEDDED_DATA,
+    DomainResolver: EMBEDDED_DATA,
     PrimaryNameByChain: EMBEDDED_DATA,
     ResolvedAbiRecord: EMBEDDED_DATA,
     ResolvedAddressRecord: EMBEDDED_DATA,

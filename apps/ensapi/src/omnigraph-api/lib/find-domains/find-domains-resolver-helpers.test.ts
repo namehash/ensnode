@@ -1,6 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
-
-vi.mock("@/config", () => ({ default: { namespace: "mainnet" } }));
+import { describe, expect, it } from "vitest";
 
 import { isEffectiveDesc } from "./find-domains-resolver-helpers";
 
