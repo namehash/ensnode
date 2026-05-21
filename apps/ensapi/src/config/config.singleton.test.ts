@@ -1,10 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import di from "@/di";
+
 vi.mock("@/lib/logger", () => ({
   default: {
     error: vi.fn(),
     info: vi.fn(),
   },
+  makeLogger: vi.fn(() => ({
+    error: vi.fn(),
+    info: vi.fn(),
+  })),
 }));
 
 const VALID_ENSDB_URL = "postgresql://user:password@localhost:5432/mydb";
@@ -18,14 +24,13 @@ describe("ensdb singleton bootstrap", () => {
   });
 
   afterEach(() => {
+    di.destroy();
     vi.unstubAllEnvs();
   });
 
   it("constructs EnsDbReader from real env wiring without errors", async () => {
-    const { ensDbClient, ensDb, ensIndexerSchema } = await import("@/lib/ensdb/singleton");
-
-    // ensDbClient is a lazyProxy — construction is deferred until first property access.
-    // Accessing a property triggers EnsDbReader construction; verify it succeeds.
+    di.init();
+    const { ensDbClient, ensDb, ensIndexerSchema } = di.context;
     expect(ensDbClient.ensIndexerSchemaName).toBe(VALID_ENSINDEXER_SCHEMA_NAME);
     expect(ensDb).toBeDefined();
     expect(ensIndexerSchema).toBeDefined();
@@ -38,10 +43,8 @@ describe("ensdb singleton bootstrap", () => {
     const { default: logger } = await import("@/lib/logger");
 
     vi.stubEnv("ENSDB_URL", "");
-    // ensDbClient is a lazyProxy — import succeeds but first property access triggers construction,
-    // which calls buildEnsDbConfigFromEnvironment and exits on invalid config.
-    const { ensDbClient } = await import("@/lib/ensdb/singleton");
-    expect(() => ensDbClient.ensDb).toThrow("process.exit");
+    di.init();
+    expect(() => di.context.ensDbClient).toThrow("process.exit");
 
     expect(logger.error).toHaveBeenCalled();
     expect(mockExit).toHaveBeenCalledWith(1);
@@ -55,10 +58,8 @@ describe("ensdb singleton bootstrap", () => {
     const { default: logger } = await import("@/lib/logger");
 
     vi.stubEnv("ENSINDEXER_SCHEMA_NAME", "");
-    // ensDbClient is a lazyProxy — import succeeds but first property access triggers construction,
-    // which calls buildEnsDbConfigFromEnvironment and exits on invalid config.
-    const { ensDbClient } = await import("@/lib/ensdb/singleton");
-    expect(() => ensDbClient.ensDb).toThrow("process.exit");
+    di.init();
+    expect(() => di.context.ensDbClient).toThrow("process.exit");
 
     expect(logger.error).toHaveBeenCalled();
     expect(mockExit).toHaveBeenCalledWith(1);
