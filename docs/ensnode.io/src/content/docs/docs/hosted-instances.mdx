@@ -9,15 +9,23 @@ import { LinkCard } from "@astrojs/starlight/components";
 import HostedEnsNodeInstances from "@components/molecules/HostedEnsNodeInstances.astro";
 import HostedInstanceSdkVersionWarning from "@components/molecules/HostedInstanceSdkVersionWarning.astro";
 
+export const subgraphCompatibilityApiLevel = `API-level Subgraph Compatibility, where GraphQL APIs are equivalent but a superset of data is being queried and therefore the data returned for some queries may be different.`;
+export const subgraphCompatibilityFull = `Full Subgraph Compatibility, both, on API-level and data-level. ENSNode can be used as a drop-in replacement for the ENS Subgraph, with guarantees that all data returned by ENSNode will be fully aligned with the ENS Subgraph.`;
+export const omnigraphForEnsV1 = ` Powered by a polymorphic GraphQL API with native support for both ENSv1 and ENSv2, though data is exclusively sourced from ENSv1. ENSNode can be used as a future-proof integration point for your app to smoothly transition to ENSv2 when you need.`;
+export const omnigraphForEnsV1AndEnsV2 = `Powered by a polymorphic GraphQL API with native support for both ENSv1 and ENSv2. When ENSv2 launches in Summer 2026, data from two protocol versions coexist — and the ENS Omnigraph API will keep your app working against both, at the same time, with no code changes. Domains from ENSv1 and ENSv2 are indexed concurrently and exposed through a unified schema.`;
+export const omnigraphUnavaialble = `Not activated due to this instance's focus on maximum compatibility with the ENS Subgraph.`;
+export const ensProtocolAccelerationAvailable = `Radically accelerated resolution of most ENS queries. ENSNode’s architecture unlocks near-instant bulk resolution of live ENS records, including name resolution configurations that span across multiple chains.`;
+export const ensProtocolAccelerationUnavailable = `Not activated due to this instance's focus on maximum compatibility with the ENS Subgraph.`;
+
 ## Hosted Instances
 
 NameHash Labs provides freely available hosted instances for ENS developers looking to get started quickly.
 
-These instances are provided free of charge with no API key required, have no rate limiting, and are maintained and monitored by the NameHash Labs team.
+These instances are currently provided free of charge with no API key required, have no rate limiting, and are maintained and monitored by the NameHash Labs team.
 
 <HostedInstanceSdkVersionWarning for="both" />
 
-### Available instance configurations
+### ENS Namespaces
 
 Each ENSNode hosted instance is configured for a specific ENS **namespace** and activated ENSNode **plugins**. The ENS namespace identifies which ENS protocol deployment will be indexed by ENSNode (ex: mainnet or sepolia). The activated plugins determine the specific indexed data model ENSIndexer will produce in ENSDb and therefore which APIs ENSApi will make available to query.
 
@@ -43,9 +51,21 @@ The `sepolia-v2` namespace is undergoing active development by the ENS Labs team
   instanceURL="https://api.v2-sepolia.ensnode.io"
   connectWithENSAdminURL="https://admin.ensnode.io/connection?connection=https%3A%2F%2Fapi.v2-sepolia.ensnode.io"
   namespace="sepolia-v2"
-  plugins="unigraph, protocol-acceleration"
-  purpose="Demonstration of ENSNode's support for an ENS namespace that has already transitioned to ENSv2."
-/>
+  deployments="(ENSv1+ENSv2)"
+  plugins="subgraph, unigraph, protocol-acceleration"
+  >
+  <Fragment slot="ens-omnigraph-api">
+    {omnigraphForEnsV1AndEnsV2}
+  </Fragment>
+
+  <Fragment slot="ens-subgraph-api">
+    {subgraphCompatibilityApiLevel}
+  </Fragment>
+
+  <Fragment slot="ens-protocol-acceleration">
+    {ensProtocolAccelerationAvailable}
+  </Fragment>
+</HostedEnsNodeInstances>
 
 ## ENSv1 Instances
 
@@ -61,9 +81,21 @@ These ENSNode instances focus on pushing the boundaries of what's possible with 
   instanceURL="https://api.alpha.ensnode.io"
   connectWithENSAdminURL="https://admin.ensnode.io/connection?connection=https%3A%2F%2Fapi.alpha.ensnode.io"
   namespace="mainnet"
+  deployments="(ENSv1 only)"
   plugins="subgraph, basenames, lineanames, threedns, unigraph, protocol-acceleration, registrars, tokenscope"
-  purpose="Demonstration of ENSNode's multichain ENS indexing capability for an ENS namespace (mainnet) that is still operating ENSv1. Experience how the ENS Omnigraph API, enssdk, enskit, and the full stack of ENSNode services provide support to developers to become ENSv2 ready even before ENSv2 launches. Provides a superset of the data indexed by the ENS Subgraph. Offers a preview of ENS Protocol Acceleration."
-/>
+>
+  <Fragment slot="ens-omnigraph-api">
+    {omnigraphForEnsV1}
+  </Fragment>
+
+  <Fragment slot="ens-subgraph-api">
+    {subgraphCompatibilityApiLevel}
+  </Fragment>
+
+  <Fragment slot="ens-protocol-acceleration">
+    {ensProtocolAccelerationAvailable}
+  </Fragment>
+</HostedEnsNodeInstances>
 
 #### ENSNode 'Alpha-Sepolia'
 
@@ -71,9 +103,21 @@ These ENSNode instances focus on pushing the boundaries of what's possible with 
   instanceURL="https://api.alpha-sepolia.ensnode.io"
   connectWithENSAdminURL="https://admin.ensnode.io/connection?connection=https%3A%2F%2Fapi.alpha-sepolia.ensnode.io"
   namespace="sepolia"
+  deployments="(ENSv1 only)"
   plugins="subgraph, basenames, lineanames, registrars, unigraph, protocol-acceleration"
-  purpose="Demonstration of ENSNode's multichain ENS indexing capability for an ENS namespace (sepolia) that is still operating ENSv1. Experience how the ENS Omnigraph API, enssdk, enskit, and the full stack of ENSNode services provide support to developers to become ENSv2 ready even before ENSv2 launches. Provides a superset of the data indexed by the ENS Subgraph. Offers a preview of ENS Protocol Acceleration."
-/>
+  >
+  <Fragment slot="ens-omnigraph-api">
+    {omnigraphForEnsV1}
+  </Fragment>
+
+  <Fragment slot="ens-subgraph-api">
+    {subgraphCompatibilityApiLevel}
+  </Fragment>
+
+  <Fragment slot="ens-protocol-acceleration">
+    {ensProtocolAccelerationAvailable}
+  </Fragment>
+</HostedEnsNodeInstances>
 
 ### Subgraph-style Deployments
 
@@ -85,9 +129,21 @@ These ENSNode instances focus on maximizing backwards compatibility with the ENS
   instanceURL="https://api.mainnet.ensnode.io"
   connectWithENSAdminURL="https://admin.ensnode.io/connection?connection=https%3A%2F%2Fapi.mainnet.ensnode.io"
   namespace="mainnet"
+  deployments="(ENSv1 only)"
   plugins="subgraph"
-  purpose="Demonstration of ENSNode's backwards compatibility with the ENS Subgraph. Provides 1:1 Subgraph compatible data on mainnet."
-/>
+  >
+  <Fragment slot="ens-omnigraph-api">
+    {omnigraphUnavaialble}
+  </Fragment>
+
+  <Fragment slot="ens-subgraph-api">
+    {subgraphCompatibilityFull}
+  </Fragment>
+
+  <Fragment slot="ens-protocol-acceleration">
+    {ensProtocolAccelerationUnavailable}
+  </Fragment>
+</HostedEnsNodeInstances>
 
 #### ENSNode 'Sepolia'
 
@@ -95,9 +151,21 @@ These ENSNode instances focus on maximizing backwards compatibility with the ENS
   instanceURL="https://api.sepolia.ensnode.io"
   connectWithENSAdminURL="https://admin.ensnode.io/connection?connection=https%3A%2F%2Fapi.sepolia.ensnode.io"
   namespace="sepolia"
+  deployments="(ENSv1 only)"
   plugins="subgraph"
-  purpose="Demonstration of ENSNode's backwards compatibility with the ENS Subgraph. Provides 1:1 Subgraph compatible data on Sepolia."
-/>
+  >
+  <Fragment slot="ens-omnigraph-api">
+    {omnigraphUnavaialble}
+  </Fragment>
+
+  <Fragment slot="ens-subgraph-api">
+    {subgraphCompatibilityFull}
+  </Fragment>
+
+  <Fragment slot="ens-protocol-acceleration">
+    {ensProtocolAccelerationUnavailable}
+  </Fragment>
+</HostedEnsNodeInstances>
 
 ## Start building
 

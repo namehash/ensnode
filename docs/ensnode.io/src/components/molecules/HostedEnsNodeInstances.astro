@@ -1,7 +1,9 @@
 ---
 import ENSAdminLogoDark from "@components/atoms/logos/astro/ENSAdminLogoDark.astro";
 
-const { instanceURL, connectWithENSAdminURL, namespace, plugins, purpose } = Astro.props;
+const { instanceURL, connectWithENSAdminURL, namespace, deployments, plugins, purpose } =
+  Astro.props;
+export const ensNodeVersion = "v.1.13.1";
 ---
 <table style={{marginTop: "0"}}>
     <tbody>
@@ -17,17 +19,32 @@ const { instanceURL, connectWithENSAdminURL, namespace, plugins, purpose } = Ast
         </td>
     </tr>
     <tr>
+        <td style={{verticalAlign: "middle"}}>ENSNode Version</td>
+        <td>{ensNodeVersion}</td>
+    </tr>
+    <tr>
         <td style={{verticalAlign: "middle"}}>ENS Namespace</td>
         <td>{namespace}</td>
+    </tr>
+    <tr>
+        <td style={{verticalAlign: "middle"}}>ENS Deployments</td>
+        <td>{deployments}</td>
     </tr>
     <tr>
         <td>Active Plugins</td>
         <td>{plugins}</td>
     </tr>
     <tr>
-        <td>Purpose</td>
+        <td>APIs</td>
         <td>
-            {purpose}
+            <dl class="list-disc list-inside">
+                <dt>ENS Omnigraph API</dt>
+                <dd><slot name="ens-omnigraph-api" /></dd>
+                <dt>ENS Protocol Acceleration</dt>
+                <dd><slot name="ens-protocol-acceleration" /></dd>
+                <dt>ENS Subgraph API</dt>
+                <dd><slot name="ens-subgraph-api" /></dd>
+            </dl>
         </td>
     </tr>
     </tbody>

@@ -1,5 +1,5 @@
 ---
-import { Aside } from "@astrojs/starlight/components";
+import { Aside, LinkButton } from "@astrojs/starlight/components";
 
 interface Props {
   /**
@@ -24,7 +24,7 @@ const sdkList = isEnskit
 ---
 
 <Aside type="caution" title="Version compatibility with hosted instances">
-  Our hosted ENSNode instances currently run ENSNode v1.13. If you are querying them from your own app, you <strong>must</strong> use <span set:html={sdkList} />. The latest published versions (<code>1.14.0+</code>) contain breaking changes in the Omnigraph API data model not yet deployed to our hosted infrastructure. Use these exact install commands:
+  <a href="/docs/hosted-instances">Our hosted ENSNode instances</a> currently run ENSNode v1.13. If you are querying them from your own app, you <strong>must</strong> use <span set:html={sdkList} />. The latest published versions (<code>1.14.0+</code>) contain breaking changes in the Omnigraph API data model not yet deployed to our hosted infrastructure. Use these exact install commands:
 
   {isBoth ? (
     <pre>npm install enssdk@1.13.1
