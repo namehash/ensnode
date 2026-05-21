@@ -67,8 +67,9 @@ import type { EncodedReferrer } from "@ensnode/ensnode-sdk";
  * the Basenames Registry, the Lineanames Registry) sit at the top. ENSv2 namegraphs are rooted in
  * a single `ENSv2Registry` RootRegistry on the ENS Root Chain and are possibly circular directed
  * graphs. The full namegraph is never materialized, only _navigated_ at resolution-time, with the
- * exception of the canonical subgraph, which is reflected via `Registry.canonical` /
- * `Domain.canonical` boolean flags on the rows themselves. The bidirectional canonical edge is
+ * exception of the **Canonical Nametree** — the set of Domains that have an inferrable Canonical
+ * Name — which _is_ materialized inline: the `Registry.canonical` / `Domain.canonical` membership
+ * flags plus the `Domain.canonical*` name/path/depth fields on the rows themselves. The bidirectional canonical edge is
  * NOT materialized in a parallel table; it is derived on demand by checking that the two
  * unidirectional pointers agree (`Registry.canonicalDomainId = Domain.id`
  * ↔ `Domain.subregistryId = Registry.id`). Cascading canonicality flips through the subgraph

@@ -20,8 +20,9 @@ Defined in [`unigraph.schema.ts`](https://github.com/namehash/ensnode/blob/main/
 :::note[Design principles]
 While the initial approach was a highly materialized view of the ENS protocol, abstracting away
 as many on-chain details as possible, in practice—due to the sheer complexity of the protocol at
-resolution-time—it becomes more or less impossible to appropriately materialize the canonical
-`namegraph`.
+resolution-time—full materialization of resolution behavior is impractical. The Canonical Nametree,
+however, is materialized inline via synchronous handler-side cascades; see the `canonical*` fields
+on `domains` and `canonicality-db-helpers.ts`.
 
 As a result, this schema takes a balanced approach. It mimics on-chain state as closely as possible,
 with the obvious exception of materializing specific state that must trivially filterable. Then,
@@ -60,8 +61,9 @@ For ENSv1, each domain that has children implicitly owns a "virtual" `Registry` 
 the Basenames Registry, the Lineanames Registry) sit at the top. ENSv2 namegraphs are rooted in
 a single `ENSv2Registry` RootRegistry on the ENS Root Chain and are possibly circular directed
 graphs. The full namegraph is never materialized, only _navigated_ at resolution-time, with the
-exception of the canonical subgraph, which is reflected via `registries.canonical` /
-`domains.canonical` boolean flags on the rows themselves. The bidirectional canonical edge is NOT
+exception of the Canonical Nametree (the set of Domains with an inferrable Canonical Name), which
+_is_ materialized inline: the `registries.canonical` / `domains.canonical` membership flags plus the
+`domains.canonical*` name/path/depth fields on the rows themselves. The bidirectional canonical edge is NOT
 materialized in a parallel table; it is derived on demand by checking that the two unidirectional
 pointers agree (`registries.canonical_domain_id = domains.id` ↔ `domains.subregistry_id = registries.id`).
 Cascading canonicality flips through the subgraph run as either an in-memory PK update (when
