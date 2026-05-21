@@ -220,7 +220,7 @@ export async function handleSubregistryUpdated(
   const prevSubregistryId = domain.subregistryId;
   if (prevSubregistryId === nextSubregistryId) return;
 
-  // set/unset the Domain's Subregistry (uni-directional Domain → Registry link)
+  // update the Domain's Subregistry (uni-directional Domain → Registry link)
   await context.ensDb
     .update(ensIndexerSchema.domain, { id: domainId })
     .set({ subregistryId: nextSubregistryId });
@@ -279,11 +279,8 @@ export async function handleBridgedResolverChange(
   // NOTE: this also covers the "neither are bridged resolvers" case (null === null)
   if (prevBridged?.targetRegistryId === nextBridged?.targetRegistryId) return;
 
-  // if the previous resolver was a Bridged Resolver, we need to disconnect the subregistry
-  if (prevBridged) await handleSubregistryUpdated(context, domainId, null);
-
-  // if the next resolver is a Bridged Resolver, we need to update the Domain's Subregistry
-  if (nextBridged) await handleSubregistryUpdated(context, domainId, nextBridged.targetRegistryId);
+  // handle the domain's implicit SubregistryUpdated evnet
+  await handleSubregistryUpdated(context, domainId, nextBridged?.targetRegistryId ?? null);
 }
 
 /**
