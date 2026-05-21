@@ -41,7 +41,51 @@ ENSNode supports a full range of different integration options across the stack,
 
 Here's a summary of some popular integration strategies:
 
-### 1. `enskit` + Omnigraph
+### 1. `enssdk` + Omnigraph
+
+With `enssdk`, leverage ENSNode and the Omnigraph from any JavaScript runtime to power your frontend or backend apps. `enssdk` comes with built-in type-safety and editor autocomplete for Omnigraph queries.
+
+<HostedInstanceSdkVersionWarning for="enssdk" />
+
+
+```ts
+// create and extend an EnsNodeClient with Omnigraph API support
+const client = createEnsNodeClient({ url: process.env.ENSNODE_URL! }).extend(omnigraph);
+
+// this is fully typechecked and supports editor autocomplete!
+const HelloWorldQuery = graphql(`
+  query HelloWorld {
+    domain(by: { name: "eth" }) {
+      id
+      canonical { name { interpreted } }
+      owner { address }
+    }
+  }
+`);
+
+// `result` is fully typed!
+const result = await client.omnigraph.query({ query: HelloWorldQuery });
+```
+
+<LinkCard
+  title='Full enssdk Integration Documentation'
+  href="/docs/integrate/integration-options/enssdk"
+/>
+
+<LinkCard
+  title="enssdk-example app"
+  description='Check out our enssdk-example for a full example app.'
+  href="https://github.com/namehash/ensnode/tree/main/examples/enssdk-example"
+/>
+
+
+<LinkCard
+  title="Interactive enssdk example ⚡"
+  description="Edit and run the enssdk-example script in your browser."
+  href="/docs/integrate/integration-options/enssdk/example"
+/>
+
+### 2. `enskit` + Omnigraph
 
 With `enskit`, leverage ENSNode and the Omnigraph to power your React components using `useOmnigraphQuery`. `enskit` comes with built-in type-safety, Omnigraph-specific cache directives, easy infinite pagination, and much much more.
 
@@ -137,50 +181,6 @@ export function RenderDomainAndSubdomains({ name }: { name: InterpretedName }) {
   href="/docs/integrate/integration-options/enskit/example"
 />
 
-### 2. `enssdk` + Omnigraph
-
-With `enssdk`, leverage ENSNode and the Omnigraph from any JavaScript runtime to power your frontend or backend apps. `enssdk` comes with built-in type-safety and editor autocomplete for Omnigraph queries.
-
-<HostedInstanceSdkVersionWarning for="enssdk" />
-
-
-```ts
-// create and extend an EnsNodeClient with Omnigraph API support
-const client = createEnsNodeClient({ url: process.env.ENSNODE_URL! }).extend(omnigraph);
-
-// this is fully typechecked and supports editor autocomplete!
-const HelloWorldQuery = graphql(`
-  query HelloWorld {
-    domain(by: { name: "eth" }) {
-      id
-      canonical { name { interpreted } }
-      owner { address }
-    }
-  }
-`);
-
-// `result` is fully typed!
-const result = await client.omnigraph.query({ query: HelloWorldQuery });
-```
-
-<LinkCard
-  title='Full enssdk Integration Documentation'
-  href="/docs/integrate/integration-options/enssdk"
-/>
-
-<LinkCard
-  title="enssdk-example app"
-  description='Check out our enssdk-example for a full example app.'
-  href="https://github.com/namehash/ensnode/tree/main/examples/enssdk-example"
-/>
-
-
-<LinkCard
-  title="Interactive enssdk example ⚡"
-  description="Edit and run the enssdk-example script in your browser."
-  href="/docs/integrate/integration-options/enssdk/example"
-/>
-
 ### 3. ENS Omnigraph GraphQL API
 
 The ENS Omnigraph API is a GraphQL API following the Relay specification, so you get built-in support for efficient infinite pagination and idiomatic access to all of the ENS protocol within a _unified_ ENSv1 + ENSv2 datamodel.
@@ -200,7 +200,7 @@ The ENS Omnigraph API is a GraphQL API following the Relay specification, so you
 
 ### 4. Further Integration Options
 
-Beyond `enskit`, `enssdk`, and the Omnigraph GraphQL API, ENSNode exposes a deeper set of integration surfaces for advanced use cases:
+Beyond `enssdk`, `enskit`, and the Omnigraph GraphQL API, ENSNode exposes a deeper set of integration surfaces for advanced use cases:
 
 - **ENSDb** — query the indexed ENS dataset directly over Postgres for custom analytics or your own service layer.
 - **enscli** — (coming soon) script ENSNode operations from the command line.

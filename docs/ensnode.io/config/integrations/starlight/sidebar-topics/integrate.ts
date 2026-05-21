@@ -100,20 +100,6 @@ export const integrateSidebarTopic = {
           link: "/docs/integrate/integration-options",
         },
         {
-          label: "enskit (React)",
-          collapsed: false,
-          items: [
-            {
-              label: "Overview",
-              link: "/docs/integrate/integration-options/enskit",
-            },
-            {
-              label: "Interactive example ⚡",
-              link: "/docs/integrate/integration-options/enskit/example",
-            },
-          ],
-        },
-        {
           label: "enssdk (TypeScript)",
           collapsed: false,
           items: [
@@ -124,6 +110,20 @@ export const integrateSidebarTopic = {
             {
               label: "Interactive example ⚡",
               link: "/docs/integrate/integration-options/enssdk/example",
+            },
+          ],
+        },
+        {
+          label: "enskit (React)",
+          collapsed: false,
+          items: [
+            {
+              label: "Overview",
+              link: "/docs/integrate/integration-options/enskit",
+            },
+            {
+              label: "Interactive example ⚡",
+              link: "/docs/integrate/integration-options/enskit/example",
             },
           ],
         },
