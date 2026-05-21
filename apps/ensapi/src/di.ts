@@ -2,7 +2,7 @@ import type { ChainId } from "enssdk";
 import { createPublicClient, fallback, http, type PublicClient } from "viem";
 
 import { type ENSNamespaceId, getENSRootChainId } from "@ensnode/datasources";
-import type { EnsDbConfig, EnsDbReader } from "@ensnode/ensdb-sdk";
+import { type EnsDbConfig, EnsDbReader } from "@ensnode/ensdb-sdk";
 import type { EnsNodeStackInfo } from "@ensnode/ensnode-sdk";
 import type { RpcConfig } from "@ensnode/ensnode-sdk/internal";
 
@@ -15,9 +15,8 @@ import type { EnsNodeStackInfoCache } from "@/cache/stack-info.cache";
 import { stackInfoCache } from "@/cache/stack-info.cache";
 import type { EnsApiConfig } from "@/config/config.schema";
 import { buildConfigFromEnvironment, buildRootChainRpcConfig } from "@/config/config.schema";
-import ensDbConfig from "@/config/ensdb-config";
+import { buildEnsDbConfigFromEnvironment } from "@/config/ensdb-config";
 import type { EnsApiEnvironment } from "@/config/environment";
-import { ensDbClient } from "@/lib/ensdb/singleton";
 import { makeLogger } from "@/lib/logger";
 
 const logger = makeLogger("di");
@@ -106,13 +105,18 @@ export function buildEnsApiDiContext(ensApiEnvironment: EnsApiEnvironment): EnsA
 
     get ensDbConfig(): EnsDbConfig {
       if (instances.ensDbConfig === undefined) {
-        instances.ensDbConfig = ensDbConfig;
+        instances.ensDbConfig = buildEnsDbConfigFromEnvironment(ensApiEnvironment);
       }
       return instances.ensDbConfig;
     },
 
     get ensDbClient(): EnsDbReader {
-      return ensDbClient;
+      if (instances.ensDbClient === undefined) {
+        const { ensDbUrl, ensIndexerSchemaName } = context.ensDbConfig;
+        instances.ensDbClient = new EnsDbReader(ensDbUrl, ensIndexerSchemaName);
+      }
+
+      return instances.ensDbClient;
     },
 
     get ensDb(): EnsDbReader["ensDb"] {
