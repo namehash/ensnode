@@ -1,6 +1,6 @@
 import { makeResolverId } from "enssdk";
 
-import type { ensIndexerSchema } from "@/lib/ensdb/singleton";
+import type di from "@/di";
 import { builder } from "@/omnigraph-api/builder";
 import { AccountRef } from "@/omnigraph-api/schema/account";
 import { ResolverRef } from "@/omnigraph-api/schema/resolver";
@@ -9,7 +9,7 @@ import { ResolverRef } from "@/omnigraph-api/schema/resolver";
  * Represents a PermissionsUser whose contract is a Resolver, providing a semantic `resolver` field.
  */
 export const ResolverPermissionsUserRef =
-  builder.objectRef<typeof ensIndexerSchema.permissionsUser.$inferSelect>(
+  builder.objectRef<typeof di.context.ensIndexerSchema.permissionsUser.$inferSelect>(
     "ResolverPermissionsUser",
   );
 
