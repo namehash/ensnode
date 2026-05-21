@@ -15,9 +15,13 @@ const ensRootChainId = getENSRootChainId(config.namespace);
 /**
  * Node migration handler — tracks ENSv1RegistryOld → ENSv1Registry migration on the ENS Root Chain.
  *
- * Extracted from the 'protocol-acceleration' plugin so it can be registered before both the 'unigraph' and
- * 'protocol-acceleration' plugins. This guarantees `nodeIsMigrated` reads from a populated table when
- * those plugins' Old-registry guards run.
+ * Extracted from the 'protocol-acceleration' plugin so its migration tracking is callable when
+ * either plugin is active, independent of plugin selection.
+ *
+ * Correctness does NOT depend on handler registration order: this writes `nodeIsMigrated` on the
+ * new Registry's `ENSv1Registry:NewOwner`, while the Old-registry guards read it on
+ * `ENSv1RegistryOld:*` events. Those are different logs, so Ponder's checkpoint ordering guarantees
+ * a node's migration is processed before any later Old-registry event that consults it.
  */
 export default function () {
   addOnchainEventListener(

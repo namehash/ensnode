@@ -12,7 +12,7 @@ import type {
 } from "enssdk";
 
 import { isRootRegistryId } from "@ensnode/ensnode-sdk";
-import { isBridgedResolver } from "@ensnode/ensnode-sdk/internal";
+import { isBridgedResolver, isBridgedTargetRegistry } from "@ensnode/ensnode-sdk/internal";
 
 import { namehashLabelHashPath } from "@/lib/ensv2/namehash-label-hash-path";
 import { ensIndexerSchema, type IndexingEngineContext } from "@/lib/indexing-engines/ponder";
@@ -236,9 +236,10 @@ export async function handleSubregistryUpdated(
  * Reconciles the canonical edge for a Domain whose Resolver just changed. Detaches any prior
  * bridged target and attaches the new one (when the new resolver is a known Bridged Resolver).
  *
- * Reads the previous resolver from the Domain-Resolver Relation. This requires that this helper
- * runs BEFORE Protocol Acceleration's NewResolver/ResolverUpdated handlers, which overwrite the
- * DRR row — see `apps/ensindexer/ponder/src/register-handlers.ts` for the ordering.
+ * Derives the previous bridged target from the Domain's own `subregistryId` (the field this helper
+ * owns) rather than the Domain-Resolver Relation. Protocol Acceleration's NewResolver/ResolverUpdated
+ * handlers overwrite the DRR row for the SAME event, so reading the DRR here would depend on
+ * cross-plugin handler ordering. Reading `subregistryId` keeps this helper order-independent.
  *
  * This helper manages only the originating Domain's `subregistryId` (pointing it at the Bridged
  * Resolver's target Registry, or clearing it). The target Registry's `canonicalDomainId` is owned
@@ -250,24 +251,18 @@ export async function handleBridgedResolverChange(
   domainId: DomainId,
   nextResolver: NormalizedAddress | null,
 ): Promise<void> {
-  const prev = await context.ensDb.find(ensIndexerSchema.domainResolverRelation, {
-    chainId: registry.chainId,
-    address: registry.address,
-    domainId,
-  });
-
-  const prevResolver = prev?.resolver;
-
-  const prevBridged = prevResolver
-    ? isBridgedResolver(config.namespace, { chainId: registry.chainId, address: prevResolver })
-    : null;
-
   const nextBridged = nextResolver
     ? isBridgedResolver(config.namespace, { chainId: registry.chainId, address: nextResolver })
     : null;
 
-  // the previous and the next are identical, no-op
-  // NOTE: this also covers the "neither are bridged resolvers" case (null === null)
+  // the Domain's current bridged target, derived from its own `subregistryId` rather than the DRR
+  const domain = await context.ensDb.find(ensIndexerSchema.domain, { id: domainId });
+  const prevBridged = domain?.subregistryId
+    ? isBridgedTargetRegistry(config.namespace, domain.subregistryId)
+    : null;
+
+  // the previous and the next bridged targets are identical, no-op
+  // NOTE: this also covers the "neither is a bridged resolver" case (null === null)
   if (prevBridged?.targetRegistryId === nextBridged?.targetRegistryId) return;
 
   // handle the domain's implicit SubregistryUpdated event
