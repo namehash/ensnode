@@ -1,7 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { RpcConfig } from "@ensnode/ensnode-sdk/internal";
-
 import { ensApiVersionInfo } from "@/lib/version-info";
 
 vi.mock("@/lib/ensdb/singleton", () => ({
@@ -24,11 +22,7 @@ import {
   buildEnsApiPublicConfig,
   buildRootChainRpcConfig,
 } from "@/config/config.schema";
-import {
-  BASE_ENV,
-  indexingMetadataContextInitialized,
-  VALID_RPC_URL,
-} from "@/config/config.schema.mock";
+import { BASE_ENV, indexingMetadataContextInitialized } from "@/config/config.schema.mock";
 import { ENSApi_DEFAULT_PORT } from "@/config/defaults";
 import logger from "@/lib/logger";
 
@@ -168,19 +162,6 @@ describe("buildEnsApiPublicConfig", () => {
     const { ensIndexer: ensIndexerPublicConfig } = indexingMetadataContextInitialized.stackInfo;
     const ensApiConfig = {
       port: ENSApi_DEFAULT_PORT,
-      ensDbUrl: BASE_ENV.ENSDB_URL,
-      ensIndexerSchemaName: BASE_ENV.ENSINDEXER_SCHEMA_NAME,
-      ensIndexerPublicConfig,
-      namespace: ensIndexerPublicConfig.namespace,
-      rpcConfigs: new Map([
-        [
-          1,
-          {
-            httpRPCs: [new URL(VALID_RPC_URL)],
-            websocketRPC: undefined,
-          } satisfies RpcConfig,
-        ],
-      ]),
       referralProgramEditionConfigSetUrl: undefined,
     };
 
@@ -243,10 +224,6 @@ describe("buildEnsApiPublicConfig", () => {
     const ensApiConfig = {
       port: ENSApi_DEFAULT_PORT,
       ensDbUrl: BASE_ENV.ENSDB_URL,
-      ensIndexerSchemaName: BASE_ENV.ENSINDEXER_SCHEMA_NAME,
-      ensIndexerPublicConfig,
-      namespace: ensIndexerPublicConfig.namespace,
-      rpcConfigs: new Map(),
       referralProgramEditionConfigSetUrl: undefined,
       theGraphApiKey: undefined,
     };

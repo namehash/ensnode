@@ -27,9 +27,6 @@ const server = serve(
     const shouldWriteSchema = !(process.env.NODE_ENV === "production") && !INCLUDE_DEV_METHODS;
     if (shouldWriteSchema) void writeGraphQLSchema();
 
-    // proactively warm up caches in the background
-    void Promise.all([di.context.indexingStatusCache.read(), di.context.stackInfoCache.read()]);
-
     logger.info(`ENSApi listening on port ${info.port}`);
   },
 );
@@ -46,6 +43,11 @@ const closeServer = () =>
 // perform graceful shutdown
 const gracefulShutdown = async () => {
   try {
+    // Close the server to stop accepting new requests
+    await closeServer();
+    logger.info("Closed application server");
+
+    // Shutdown the OpenTelemetry SDK to flush any remaining spans
     await sdk.shutdown();
     logger.info("Destroyed tracing instrumentation");
 
@@ -60,9 +62,6 @@ const gracefulShutdown = async () => {
 
     // Destroy DI container resources
     di.destroy();
-
-    await closeServer();
-    logger.info("Closed application server");
 
     process.exit(0);
   } catch (error) {

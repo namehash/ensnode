@@ -27,11 +27,6 @@ const logger = makeLogger("di");
  */
 export interface EnsApiDiContext {
   /**
-   * The environment variables for ENSApi.
-   */
-  ensApiEnvironment: EnsApiEnvironment;
-
-  /**
    * The ENSApi config.
    */
   ensApiConfig: EnsApiConfig;
@@ -97,24 +92,20 @@ export interface EnsApiDiContext {
   stackInfo: EnsNodeStackInfo;
 }
 
-export function buildEnsApiDiContext(env: NodeJS.ProcessEnv): EnsApiDiContext {
+export function buildEnsApiDiContext(ensApiEnvironment: EnsApiEnvironment): EnsApiDiContext {
   const instances = {} as EnsApiDiContext;
 
   const context = {
-    get ensApiEnvironment(): EnsApiEnvironment {
-      return env;
-    },
-
     get ensApiConfig(): EnsApiConfig {
-      if (!instances.ensApiConfig) {
-        instances.ensApiConfig = buildConfigFromEnvironment(env);
+      if (instances.ensApiConfig === undefined) {
+        instances.ensApiConfig = buildConfigFromEnvironment(ensApiEnvironment);
       }
 
       return instances.ensApiConfig;
     },
 
     get ensDbConfig(): EnsDbConfig {
-      if (!instances.ensDbConfig) {
+      if (instances.ensDbConfig === undefined) {
         instances.ensDbConfig = ensDbConfig;
       }
       return instances.ensDbConfig;
@@ -137,9 +128,9 @@ export function buildEnsApiDiContext(env: NodeJS.ProcessEnv): EnsApiDiContext {
     },
 
     get rootChainRpcConfig(): RpcConfig {
-      if (!instances.rootChainRpcConfig) {
+      if (instances.rootChainRpcConfig === undefined) {
         instances.rootChainRpcConfig = buildRootChainRpcConfig(
-          context.ensApiEnvironment,
+          ensApiEnvironment,
           context.ensNamespaceId,
         );
       }
@@ -148,7 +139,7 @@ export function buildEnsApiDiContext(env: NodeJS.ProcessEnv): EnsApiDiContext {
     },
 
     get rootChainId(): ChainId {
-      if (!instances.rootChainId) {
+      if (instances.rootChainId === undefined) {
         instances.rootChainId = getENSRootChainId(context.ensNamespaceId);
       }
 
@@ -156,7 +147,7 @@ export function buildEnsApiDiContext(env: NodeJS.ProcessEnv): EnsApiDiContext {
     },
 
     get rootChainPublicClient(): PublicClient {
-      if (!instances.rootChainPublicClient) {
+      if (instances.rootChainPublicClient === undefined) {
         // Create an viem#PublicClient that uses a fallback() transport with all specified HTTP RPCs
         instances.rootChainPublicClient = createPublicClient({
           transport: fallback(
@@ -169,7 +160,7 @@ export function buildEnsApiDiContext(env: NodeJS.ProcessEnv): EnsApiDiContext {
     },
 
     get indexingStatusCache(): IndexingStatusCache {
-      if (!instances.indexingStatusCache) {
+      if (instances.indexingStatusCache === undefined) {
         instances.indexingStatusCache = indexingStatusCache;
       }
 
@@ -177,7 +168,7 @@ export function buildEnsApiDiContext(env: NodeJS.ProcessEnv): EnsApiDiContext {
     },
 
     get referralProgramEditionConfigSetCache(): ReferralProgramEditionConfigSetCache {
-      if (!instances.referralProgramEditionConfigSetCache) {
+      if (instances.referralProgramEditionConfigSetCache === undefined) {
         instances.referralProgramEditionConfigSetCache = referralProgramEditionConfigSetCache;
       }
 
@@ -185,7 +176,7 @@ export function buildEnsApiDiContext(env: NodeJS.ProcessEnv): EnsApiDiContext {
     },
 
     get stackInfoCache(): EnsNodeStackInfoCache {
-      if (!instances.stackInfoCache) {
+      if (instances.stackInfoCache === undefined) {
         instances.stackInfoCache = stackInfoCache;
       }
 
