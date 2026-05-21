@@ -17,6 +17,11 @@ function logError(message: string, id?: string) {
 
 // Target version defaults to the active one; override to fill responses for a staged version.
 const version = process.env.OMNIGRAPH_VERSION ?? ACTIVE_OMNIGRAPH_VERSION;
+// Used as a directory name; reject anything that could escape the versions/ dir.
+if (!/^[0-9A-Za-z._-]+$/.test(version) || version.includes("..")) {
+  logError(`Invalid version "${version}": use only letters, digits, '.', '_', '-'.`);
+  process.exit(1);
+}
 const versionDir = join(
   dirname(fileURLToPath(import.meta.url)),
   `../src/data/omnigraph-examples/versions/${version}`,

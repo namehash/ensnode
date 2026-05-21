@@ -8,6 +8,7 @@ import { buildSchema, parse, validate } from "graphql";
 import { getNamespaceSpecificValue } from "@ensnode/ensnode-sdk";
 import { GRAPHQL_API_EXAMPLE_QUERIES } from "@ensnode/ensnode-sdk/internal";
 
+import type { SnapshotExample } from "../src/data/omnigraph-examples/types.ts";
 import { DOCS_OMNIGRAPH_NAMESPACE, ENSNODE_URL } from "../src/lib/playground/constants.ts";
 
 // Freeze the CURRENT workspace SDK omnigraph bundle (examples + schema) into a version
@@ -48,12 +49,10 @@ const sdkVersion = (
   }
 ).version;
 
-const examples = (
-  GRAPHQL_API_EXAMPLE_QUERIES as Array<{ id: string; query: string; variables: unknown }>
-).map((ex) => ({
+const examples: SnapshotExample[] = GRAPHQL_API_EXAMPLE_QUERIES.map((ex) => ({
   id: ex.id,
   query: ex.query.trim(),
-  variables: getNamespaceSpecificValue(DOCS_OMNIGRAPH_NAMESPACE, ex.variables as never),
+  variables: getNamespaceSpecificValue(DOCS_OMNIGRAPH_NAMESPACE, ex.variables),
 }));
 
 // Fail fast if any example is invalid against this version's schema.
