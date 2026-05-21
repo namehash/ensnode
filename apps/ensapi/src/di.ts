@@ -5,7 +5,6 @@ import { type ENSNamespaceId, getENSRootChainId } from "@ensnode/datasources";
 import type { EnsDbConfig, EnsDbReader } from "@ensnode/ensdb-sdk";
 import type { EnsNodeStackInfo } from "@ensnode/ensnode-sdk";
 import type { RpcConfig } from "@ensnode/ensnode-sdk/internal";
-import { subgraphGraphQLMiddleware } from "@ensnode/ponder-subgraph";
 
 import { type IndexingStatusCache, indexingStatusCache } from "@/cache/indexing-status.cache";
 import {
@@ -20,7 +19,6 @@ import ensDbConfig from "@/config/ensdb-config";
 import type { EnsApiEnvironment } from "@/config/environment";
 import { ensDbClient } from "@/lib/ensdb/singleton";
 import { makeLogger } from "@/lib/logger";
-import { filterSchemaByPrefix } from "@/lib/subgraph/filter-schema-by-prefix";
 
 const logger = makeLogger("di");
 
@@ -97,8 +95,6 @@ export interface EnsApiDiContext {
    * Synchronous getter for {@link EnsNodeStackInfo} that reads from the {@link stackInfoCache}.
    */
   stackInfo: EnsNodeStackInfo;
-
-  subgraphApiGqlMiddleware: ReturnType<typeof subgraphGraphQLMiddleware>;
 }
 
 export function buildEnsApiDiContext(env: NodeJS.ProcessEnv): EnsApiDiContext {
@@ -210,59 +206,6 @@ export function buildEnsApiDiContext(env: NodeJS.ProcessEnv): EnsApiDiContext {
       }
 
       return stackInfo;
-    },
-
-    get subgraphApiGqlMiddleware(): ReturnType<typeof subgraphGraphQLMiddleware> {
-      if (!instances.subgraphApiGqlMiddleware) {
-        // generate a subgraph-specific subset of the schema
-        const subgraphSchema = filterSchemaByPrefix("subgraph_", context.ensIndexerSchema);
-
-        instances.subgraphApiGqlMiddleware = subgraphGraphQLMiddleware({
-          databaseUrl: context.ensDbConfig.ensDbUrl,
-          databaseSchema: context.ensDbConfig.ensIndexerSchemaName,
-          schema: subgraphSchema,
-          // describes the polymorphic (interface) relationships in the schema
-          polymorphicConfig: {
-            types: {
-              DomainEvent: [
-                subgraphSchema.transfer,
-                subgraphSchema.newOwner,
-                subgraphSchema.newResolver,
-                subgraphSchema.newTTL,
-                subgraphSchema.wrappedTransfer,
-                subgraphSchema.nameWrapped,
-                subgraphSchema.nameUnwrapped,
-                subgraphSchema.fusesSet,
-                subgraphSchema.expiryExtended,
-              ],
-              RegistrationEvent: [
-                subgraphSchema.nameRegistered,
-                subgraphSchema.nameRenewed,
-                subgraphSchema.nameTransferred,
-              ],
-              ResolverEvent: [
-                subgraphSchema.addrChanged,
-                subgraphSchema.multicoinAddrChanged,
-                subgraphSchema.nameChanged,
-                subgraphSchema.abiChanged,
-                subgraphSchema.pubkeyChanged,
-                subgraphSchema.textChanged,
-                subgraphSchema.contenthashChanged,
-                subgraphSchema.interfaceChanged,
-                subgraphSchema.authorisationChanged,
-                subgraphSchema.versionChanged,
-              ],
-            },
-            fields: {
-              "Domain.events": "DomainEvent",
-              "Registration.events": "RegistrationEvent",
-              "Resolver.events": "ResolverEvent",
-            },
-          },
-        });
-      }
-
-      return instances.subgraphApiGqlMiddleware;
     },
   } satisfies EnsApiDiContext;
 

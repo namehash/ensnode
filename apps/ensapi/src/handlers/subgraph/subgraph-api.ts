@@ -59,8 +59,17 @@ app.use(createDocumentationMiddleware(makeSubgraphApiDocumentation(), { path: "/
 app.use(subgraphMetaMiddleware);
 
 // inject the GraphQL middleware for the Subgraph API
-// note: we wrap the middleware in a function to defer its construction until runtime,
-// which allows lazy-loading of DI context dependencies
-app.use(async (c, next) => di.context.subgraphApiGqlMiddleware(c, next));
+app.use(async (c, next) => {
+  // Note: we import the middleware with a dynamic import to defer its construction until runtime.
+  // This allows the middleware internal logic to only access the DI container at runtime,
+  // which prevents potential issues with eager evaluation of the DI container's dependencies.
+  // Thanks to the dynamic import, the `gql.middleware` module to be resolved just once,
+  // and reused for subsequent requests.
+  const subgraphApiGqlMiddleware = await import("@/lib/subgraph/gql.middleware").then(
+    (mod) => mod.default,
+  );
+
+  return subgraphApiGqlMiddleware(c, next);
+});
 
 export default app;
