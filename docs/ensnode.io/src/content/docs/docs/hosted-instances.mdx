@@ -10,10 +10,10 @@ import HostedEnsNodeInstances from "@components/molecules/HostedEnsNodeInstances
 import HostedInstanceSdkVersionWarning from "@components/molecules/HostedInstanceSdkVersionWarning.astro";
 
 export const subgraphCompatibilityApiLevel = `API-level Subgraph Compatibility, where GraphQL APIs are equivalent but a superset of data is being queried and therefore the data returned for some queries may be different.`;
-export const subgraphCompatibilityFull = `Full Subgraph Compatibility, both, on API-level and data-level. ENSNode can be used as a drop-in replacement for the ENS Subgraph, with guarantees that all data returned by ENSNode will be fully aligned with the ENS Subgraph.`;
-export const omnigraphForEnsV1 = ` Powered by a polymorphic GraphQL API with native support for both ENSv1 and ENSv2, though data is exclusively sourced from ENSv1. ENSNode can be used as a future-proof integration point for your app to smoothly transition to ENSv2 when you need.`;
+export const subgraphCompatibilityFull = `Full Subgraph Compatibility at both the API-level and the data-level. ENSNode can be used as a drop-in replacement for the ENS Subgraph, with guarantees that all data returned by ENSNode will be fully aligned with the ENS Subgraph.`;
+export const omnigraphForEnsV1 = `Powered by a polymorphic GraphQL API with native support for both ENSv1 and ENSv2, though data is exclusively sourced from ENSv1. ENSNode can be used as a future-proof integration point for your app to smoothly transition to ENSv2 when you need.`;
 export const omnigraphForEnsV1AndEnsV2 = `Powered by a polymorphic GraphQL API with native support for both ENSv1 and ENSv2. When ENSv2 launches in Summer 2026, data from two protocol versions coexist — and the ENS Omnigraph API will keep your app working against both, at the same time, with no code changes. Domains from ENSv1 and ENSv2 are indexed concurrently and exposed through a unified schema.`;
-export const omnigraphUnavaialble = `Not activated due to this instance's focus on maximum compatibility with the ENS Subgraph.`;
+export const omnigraphUnavailable = `Not activated due to this instance's focus on maximum compatibility with the ENS Subgraph.`;
 export const ensProtocolAccelerationAvailable = `Radically accelerated resolution of most ENS queries. ENSNode’s architecture unlocks near-instant bulk resolution of live ENS records, including name resolution configurations that span across multiple chains.`;
 export const ensProtocolAccelerationUnavailable = `Not activated due to this instance's focus on maximum compatibility with the ENS Subgraph.`;
 
@@ -133,7 +133,7 @@ These ENSNode instances focus on maximizing backwards compatibility with the ENS
   plugins="subgraph"
   >
   <Fragment slot="ens-omnigraph-api">
-    {omnigraphUnavaialble}
+    {omnigraphUnavailable}
   </Fragment>
 
   <Fragment slot="ens-subgraph-api">
@@ -155,7 +155,7 @@ These ENSNode instances focus on maximizing backwards compatibility with the ENS
   plugins="subgraph"
   >
   <Fragment slot="ens-omnigraph-api">
-    {omnigraphUnavaialble}
+    {omnigraphUnavailable}
   </Fragment>
 
   <Fragment slot="ens-subgraph-api">

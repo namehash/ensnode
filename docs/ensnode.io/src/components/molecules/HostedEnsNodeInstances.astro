@@ -1,9 +1,8 @@
 ---
 import ENSAdminLogoDark from "@components/atoms/logos/astro/ENSAdminLogoDark.astro";
 
-const { instanceURL, connectWithENSAdminURL, namespace, deployments, plugins, purpose } =
-  Astro.props;
-export const ensNodeVersion = "v.1.13.1";
+const { instanceURL, connectWithENSAdminURL, namespace, deployments, plugins } = Astro.props;
+export const ensNodeVersion = "v1.13.1";
 ---
 <table style={{marginTop: "0"}}>
     <tbody>
@@ -37,7 +36,7 @@ export const ensNodeVersion = "v.1.13.1";
     <tr>
         <td>APIs</td>
         <td>
-            <dl class="list-disc list-inside">
+            <dl>
                 <dt>ENS Omnigraph API</dt>
                 <dd><slot name="ens-omnigraph-api" /></dd>
                 <dt>ENS Protocol Acceleration</dt>
