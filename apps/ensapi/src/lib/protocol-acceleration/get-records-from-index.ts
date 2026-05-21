@@ -40,7 +40,7 @@ export async function getRecordsFromIndex<SELECTION extends ResolverRecordsSelec
   if (!row) return null;
 
   const implementsAddressRecordDefaulting = staticResolverImplementsAddressRecordDefaulting(
-    di.context.ensNamespaceId,
+    di.context.namespace,
     resolver,
   );
 

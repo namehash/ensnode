@@ -25,7 +25,7 @@ export const thegraphFallbackMiddleware = factory.createMiddleware(async (c, nex
   }
 
   const fallback = canFallbackToTheGraph({
-    namespace: di.context.ensNamespaceId,
+    namespace: di.context.namespace,
     theGraphApiKey: di.context.ensApiConfig.theGraphApiKey,
     isSubgraphCompatible: di.context.stackInfo.ensIndexer.isSubgraphCompatible,
   });
@@ -45,7 +45,7 @@ export const thegraphFallbackMiddleware = factory.createMiddleware(async (c, nex
       }
       case "no-subgraph-url": {
         logger.warn(
-          `ENSApi can NOT fallback to The Graph: the connected ENSIndexer's namespace ('${di.context.ensNamespaceId}') is not supported by The Graph.`,
+          `ENSApi can NOT fallback to The Graph: the connected ENSIndexer's namespace ('${di.context.namespace}') is not supported by The Graph.`,
         );
         break;
       }

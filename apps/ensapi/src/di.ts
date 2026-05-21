@@ -54,10 +54,10 @@ export interface EnsApiDiContext {
   /**
    * The ENS Namespace ID used by the ENSApi instance.
    */
-  ensNamespaceId: ENSNamespaceId;
+  namespace: ENSNamespaceId;
 
   /**
-   * Chain ID of the ENS Root Chain for the {@link ensNamespaceId}.
+   * Chain ID of the ENS Root Chain for the {@link namespace}.
    */
   rootChainId: ChainId;
 
@@ -123,7 +123,7 @@ export function buildEnsApiDiContext(ensApiEnvironment: EnsApiEnvironment): EnsA
       return context.ensDbClient.ensIndexerSchema;
     },
 
-    get ensNamespaceId(): ENSNamespaceId {
+    get namespace(): ENSNamespaceId {
       return context.stackInfo.ensIndexer.namespace;
     },
 
@@ -131,7 +131,7 @@ export function buildEnsApiDiContext(ensApiEnvironment: EnsApiEnvironment): EnsA
       if (instances.rootChainRpcConfig === undefined) {
         instances.rootChainRpcConfig = buildRootChainRpcConfig(
           ensApiEnvironment,
-          context.ensNamespaceId,
+          context.namespace,
         );
       }
 
@@ -140,7 +140,7 @@ export function buildEnsApiDiContext(ensApiEnvironment: EnsApiEnvironment): EnsA
 
     get rootChainId(): ChainId {
       if (instances.rootChainId === undefined) {
-        instances.rootChainId = getENSRootChainId(context.ensNamespaceId);
+        instances.rootChainId = getENSRootChainId(context.namespace);
       }
 
       return instances.rootChainId;
@@ -218,7 +218,7 @@ export function buildEnsApiDiContext(ensApiEnvironment: EnsApiEnvironment): EnsA
  * ```ts
  * const di = new EnsApiDiContainer();
  * di.init(); // Initializes the DI context and any necessary resources
- * const ensNamespaceId = di.context.ensNamespaceId; // Access a member of the DI context
+ * const namespace = di.context.namespace; // Access a member of the DI context
  * di.destroy(); // Clean up resources when they are no longer needed
  * ```
  */

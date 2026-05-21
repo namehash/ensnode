@@ -22,12 +22,12 @@ const getENSIP19SupportedChainIds = () => {
 
     // then include any ENSIP-19 Supported Chains defined in this namespace
     ...[
-      maybeGetDatasource(di.context.ensNamespaceId, DatasourceNames.ReverseResolverRoot),
-      maybeGetDatasource(di.context.ensNamespaceId, DatasourceNames.ReverseResolverBase),
-      maybeGetDatasource(di.context.ensNamespaceId, DatasourceNames.ReverseResolverLinea),
-      maybeGetDatasource(di.context.ensNamespaceId, DatasourceNames.ReverseResolverOptimism),
-      maybeGetDatasource(di.context.ensNamespaceId, DatasourceNames.ReverseResolverArbitrum),
-      maybeGetDatasource(di.context.ensNamespaceId, DatasourceNames.ReverseResolverScroll),
+      maybeGetDatasource(di.context.namespace, DatasourceNames.ReverseResolverRoot),
+      maybeGetDatasource(di.context.namespace, DatasourceNames.ReverseResolverBase),
+      maybeGetDatasource(di.context.namespace, DatasourceNames.ReverseResolverLinea),
+      maybeGetDatasource(di.context.namespace, DatasourceNames.ReverseResolverOptimism),
+      maybeGetDatasource(di.context.namespace, DatasourceNames.ReverseResolverArbitrum),
+      maybeGetDatasource(di.context.namespace, DatasourceNames.ReverseResolverScroll),
     ]
       .filter((ds) => ds !== undefined)
       .map((ds) => ds.chain.id),

@@ -128,7 +128,7 @@ ResolverRef.implement({
       type: RegistryInterfaceRef,
       nullable: true,
       resolve: (parent) => {
-        const bridged = isBridgedResolver(di.context.ensNamespaceId, parent);
+        const bridged = isBridgedResolver(di.context.namespace, parent);
         return bridged?.targetRegistryId ?? null;
       },
     }),

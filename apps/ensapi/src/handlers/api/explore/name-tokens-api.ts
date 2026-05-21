@@ -78,7 +78,7 @@ app.openapi(getNameTokensRoute, async (c) => {
     }
 
     const indexedSubregistries = getIndexedSubregistries(
-      di.context.ensNamespaceId,
+      di.context.namespace,
       di.context.stackInfo.ensIndexer.plugins as PluginName[],
     );
     const parentNode = namehashInterpretedName(parentName);

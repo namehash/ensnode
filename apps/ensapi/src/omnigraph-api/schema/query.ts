@@ -181,7 +181,7 @@ builder.queryType({
         "The Root Registry for this namespace. It will be the ENSv2 Root Registry when defined, otherwise the ENSv1 Root Registry.",
       type: RegistryInterfaceRef,
       nullable: false,
-      resolve: () => getRootRegistryId(di.context.ensNamespaceId),
+      resolve: () => getRootRegistryId(di.context.namespace),
     }),
   }),
 });

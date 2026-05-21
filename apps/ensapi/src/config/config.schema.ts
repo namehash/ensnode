@@ -77,7 +77,7 @@ export function buildConfigFromEnvironment(env: EnsApiEnvironment): EnsApiConfig
 /**
  * Builds the RPC config for the root chain based on the provided environment and ENS namespace ID.
  * @param env - The environment variables for the ENSApi
- * @param ensNamespaceId - The ENS namespace ID
+ * @param namespace - The ENS namespace ID
  * @returns The RPC config for the root chain
  *
  * Note: If error occurs during parsing/validation, the error will be logged and the process
@@ -85,11 +85,11 @@ export function buildConfigFromEnvironment(env: EnsApiEnvironment): EnsApiConfig
  */
 export function buildRootChainRpcConfig(
   env: EnsApiEnvironment,
-  ensNamespaceId: ENSNamespaceId,
+  namespace: ENSNamespaceId,
 ): RpcConfig {
   try {
-    const unvalidatedRpcConfigs = buildRpcConfigsFromEnv(env, ensNamespaceId);
-    const rootChainId = getENSRootChainId(ensNamespaceId);
+    const unvalidatedRpcConfigs = buildRpcConfigsFromEnv(env, namespace);
+    const rootChainId = getENSRootChainId(namespace);
     const rpcConfigs = RpcConfigsSchema.parse(unvalidatedRpcConfigs);
     const rootChainRpcConfig = rpcConfigs.get(rootChainId);
 

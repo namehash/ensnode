@@ -38,7 +38,7 @@ export const canAccelerateMiddleware = producing(
     // NOTE: gate on the namespace containing an ENSv2Root datasource rather than the ENSv2
     // plugin being configured — a namespace may be ENSv1-only even when the Unigraph plugin is
     // defined, and forward resolution must follow the ENSv1 path in that case.
-    if (maybeGetDatasource(di.context.ensNamespaceId, DatasourceNames.ENSv2Root)) {
+    if (maybeGetDatasource(di.context.namespace, DatasourceNames.ENSv2Root)) {
       if (!didWarnCannotAccelerateENSv2) {
         logger.warn(
           `ENSApi is temporarily unable to accelerate Resolution API requests while indexing ENSv2. Protocol Acceleration is DISABLED.`,

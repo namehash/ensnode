@@ -102,7 +102,7 @@ function _recordsToRegisteredNameTokens(
     } satisfies AccountId;
     // biome-ignore lint/style/noNonNullAssertion: domain.name guaranteed to exist
     const name = asInterpretedName(record.domains.name!);
-    const ownership = getNameTokenOwnership(di.context.ensNamespaceId, name, owner);
+    const ownership = getNameTokenOwnership(di.context.namespace, name, owner);
     const token = _recordToNameToken(record, ownership);
     const expiresAt = bigIntToNumber(record.registrationLifecycles.expiresAt);
 

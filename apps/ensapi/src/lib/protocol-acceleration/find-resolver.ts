@@ -70,7 +70,7 @@ export async function findResolver({
   }
 
   // Invariant: UniversalResolver#findResolver only works for ENS Root Registry
-  if (!isENSv1Registry(di.context.ensNamespaceId, registry)) {
+  if (!isENSv1Registry(di.context.namespace, registry)) {
     throw new Error(
       `Invariant(findResolver): UniversalResolver#findResolver only identifies active resolvers against the ENS Root Registry, but a different Registry contract was passed: ${JSON.stringify(registry)}.`,
     );
@@ -97,7 +97,7 @@ async function findResolverWithUniversalResolver(
         contracts: {
           UniversalResolver: { address, abi },
         },
-      } = getDatasource(di.context.ensNamespaceId, DatasourceNames.ENSRoot);
+      } = getDatasource(di.context.namespace, DatasourceNames.ENSRoot);
 
       // 2. Call UniversalResolver#findResolver via RPC
       const dnsEncodedNameBytes = packetToBytes(name);
