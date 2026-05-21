@@ -35,4 +35,4 @@ export const createOmnigraphContext = (serverContext: OmnigraphYogaServerContext
   canAccelerate: serverContext.canAccelerate,
 });
 
-export type OmnigraphContext = ReturnType<typeof createOmnigraphContext>;
+export type Context = ReturnType<typeof createOmnigraphContext>;

@@ -8,8 +8,8 @@ import { ZodError } from "zod/v4";
 
 import { makeLogger } from "@/lib/logger";
 import {
+  type Context,
   createOmnigraphContext,
-  type OmnigraphContext,
   type OmnigraphYogaServerContext,
 } from "@/omnigraph-api/context";
 import { schema } from "@/omnigraph-api/schema";
@@ -37,10 +37,10 @@ const yogaLogger = {
   },
 };
 
-export const yoga = createYoga<OmnigraphYogaServerContext, OmnigraphContext>({
+export const yoga = createYoga<OmnigraphYogaServerContext, Context>({
   graphqlEndpoint: "*",
   schema,
-  context: ({ canAccelerate }) => createOmnigraphContext({ canAccelerate }),
+  context: createOmnigraphContext,
   // CORS is handled by the Hono middleware in app.ts
   cors: false,
   graphiql: {

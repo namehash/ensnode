@@ -15,11 +15,11 @@ import { describe, expect, it } from "vitest";
 import {
   buildRecordsSelectionFromResolveInfo,
   EMPTY_RECORDS_SELECTION_MESSAGE,
-} from "@/omnigraph-api/lib/build-records-selection";
+} from "@/omnigraph-api/lib/resolution/build-records-selection";
 import {
   RECORDS_SELECTION_PARAMETRIC_FIELDS,
   RECORDS_SELECTION_SIMPLE_FIELDS,
-} from "@/omnigraph-api/lib/records-selection-config";
+} from "@/omnigraph-api/lib/resolution/records-selection-config";
 
 const stringListArg = new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLString)));
 const intListArg = new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLInt)));

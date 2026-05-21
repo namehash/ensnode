@@ -83,6 +83,7 @@ builder.scalarType("InterfaceId", {
   parseValue: (value) =>
     z.coerce
       .string()
+      .transform((val) => val.toLowerCase())
       .check((ctx) => {
         if (!isInterfaceId(ctx.value)) {
           ctx.issues.push({
@@ -92,7 +93,7 @@ builder.scalarType("InterfaceId", {
           });
         }
       })
-      .transform((val) => val.toLowerCase() as InterfaceId)
+      .transform((val) => val as InterfaceId)
       .parse(value),
 });
 

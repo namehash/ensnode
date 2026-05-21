@@ -14,7 +14,6 @@ import { withSpanAsync } from "@/lib/instrumentation/auto-span";
 import { resolveForward } from "@/lib/resolution/forward-resolution";
 import { runWithTrace } from "@/lib/tracing/tracing-api";
 import { builder } from "@/omnigraph-api/builder";
-import { buildRecordsSelectionFromResolveInfo } from "@/omnigraph-api/lib/build-records-selection";
 import {
   EMPTY_CONNECTION,
   orderPaginationBy,
@@ -27,6 +26,7 @@ import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-r
 import { getLatestRegistration } from "@/omnigraph-api/lib/get-latest-registration";
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
+import { buildRecordsSelectionFromResolveInfo } from "@/omnigraph-api/lib/resolution/build-records-selection";
 import { AccountRef } from "@/omnigraph-api/schema/account";
 import {
   ID_PAGINATED_CONNECTION_ARGS,
@@ -182,6 +182,7 @@ DomainInterfaceRef.implement({
         "Resolve ENS records for this Domain via the ENS protocol. Only canonical, normalized names can be resolved. Returns null if the domain is not canonical.",
       type: ResolvedRecordsRef,
       nullable: true,
+      tracing: true,
       args: {
         disableAcceleration: t.arg.boolean({
           required: false,

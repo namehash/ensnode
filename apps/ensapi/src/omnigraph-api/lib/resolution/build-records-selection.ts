@@ -14,7 +14,7 @@ import { isSelectionEmpty, type ResolverRecordsSelection } from "@ensnode/ensnod
 import {
   getParametricRecordsSelectionField,
   getSimpleRecordsSelectionField,
-} from "@/omnigraph-api/lib/records-selection-config";
+} from "@/omnigraph-api/lib/resolution/records-selection-config";
 
 export const EMPTY_RECORDS_SELECTION_MESSAGE = "Records selection cannot be empty.";
 

@@ -29,7 +29,7 @@ import type {
 import { getNamedType } from "graphql";
 import superjson from "superjson";
 
-import type { OmnigraphContext } from "@/omnigraph-api/context";
+import type { Context } from "@/omnigraph-api/context";
 
 const tracer = trace.getTracer("graphql");
 const createSpan = createOpenTelemetryWrapper(tracer, {
@@ -84,7 +84,7 @@ export type BuilderScalars = {
 };
 
 export const builder = new SchemaBuilder<{
-  Context: OmnigraphContext;
+  Context: Context;
   Scalars: BuilderScalars;
 
   // the following ensures via typechecker that every t.connection returns a totalCount field

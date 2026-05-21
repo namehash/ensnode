@@ -549,13 +549,13 @@ describe("Domain.records", () => {
   `;
 
   it("resolves address and text records for example.eth", async () => {
-    const result = await request<DomainRecordsResult>(DomainRecords, {
-      name: "example.eth",
-      addresses: [60],
-      texts: ["description"],
-    });
-
-    expect(result).toMatchObject({
+    await expect(
+      request<DomainRecordsResult>(DomainRecords, {
+        name: "example.eth",
+        addresses: [60],
+        texts: ["description"],
+      }),
+    ).resolves.toMatchObject({
       domain: {
         records: {
           texts: [{ key: "description", value: "example.eth" }],
@@ -566,15 +566,15 @@ describe("Domain.records", () => {
   });
 
   it("resolves every supported record type for test.eth", async () => {
-    const result = await request<DomainAllRecordsResult>(DomainRecordsAll, {
-      name: "test.eth",
-      addresses: [60, 0, 2],
-      texts: ["avatar", "description", "url", "email", "com.twitter", "com.github"],
-      contentTypeMask: "1",
-      interfaceIds: [fixtures.fourBytesInterface],
-    });
-
-    expect(result).toMatchObject({
+    await expect(
+      request<DomainAllRecordsResult>(DomainRecordsAll, {
+        name: "test.eth",
+        addresses: [60, 0, 2],
+        texts: ["avatar", "description", "url", "email", "com.twitter", "com.github"],
+        contentTypeMask: "1",
+        interfaceIds: [fixtures.fourBytesInterface],
+      }),
+    ).resolves.toMatchObject({
       domain: {
         records: {
           contenthash: fixtures.contenthash,

@@ -11,7 +11,6 @@ import { resolveFindDomains } from "@/omnigraph-api/lib/find-domains/find-domain
 import { resolveFindEvents } from "@/omnigraph-api/lib/find-events/find-events-resolver";
 import { getModelId } from "@/omnigraph-api/lib/get-model-id";
 import { lazyConnection } from "@/omnigraph-api/lib/lazy-connection";
-import { validatePrimaryNamesChainIds } from "@/omnigraph-api/lib/validate-primary-names-chain-ids";
 import { AccountIdInput } from "@/omnigraph-api/schema/account-id";
 import { ID_PAGINATED_CONNECTION_ARGS } from "@/omnigraph-api/schema/constants";
 import { DomainInterfaceRef } from "@/omnigraph-api/schema/domain";
@@ -75,6 +74,7 @@ AccountRef.implement({
           required: false,
           description:
             "Chain ids to resolve primary names for. Omit to resolve all ENSIP-19 supported chains.",
+          validate: { minLength: 1 },
         }),
         disableAcceleration: t.arg.boolean({
           required: false,
@@ -83,8 +83,6 @@ AccountRef.implement({
         }),
       },
       resolve: async (account, { chainIds, disableAcceleration }, context) => {
-        validatePrimaryNamesChainIds(chainIds);
-
         const { result } = await runWithTrace(() =>
           resolvePrimaryNames(account.id, chainIds ?? undefined, {
             accelerate: !disableAcceleration,
@@ -92,8 +90,11 @@ AccountRef.implement({
           }),
         );
 
+        // Object.entries erases key/value types,
+        // but values are already ChainId / InterpretedName | null,
+        // so cast is safe.
         return Object.entries(result).map(([chainId, name]) => ({
-          chainId: Number(chainId) as ChainId,
+          chainId: chainId as unknown as ChainId,
           name: name as InterpretedName | null,
         }));
       },
