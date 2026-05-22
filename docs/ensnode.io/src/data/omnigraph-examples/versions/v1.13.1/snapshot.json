@@ -1,0 +1,9 @@
+{
+  "version": "v1.13.1",
+  "commit": "89c022b",
+  "sdkVersion": "0.0.0-preview-fix-sha-89c022b-20260519094840",
+  "schemaTag": "v1.13.1",
+  "endpoint": "https://api.v2-sepolia.ensnode.io",
+  "snapshottedAt": "2026-05-21",
+  "note": "Bootstrap snapshot. v1.13.1 predates the Omnigraph examples feature, so examples + responses were frozen from the production-pinned SDK preview (which validates 13/13 against the v1.13.1 schema), not from the v1.13.1 release commit."
+}
