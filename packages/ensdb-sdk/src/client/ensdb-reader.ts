@@ -190,6 +190,16 @@ export class EnsDbReader<
   }
 
   /**
+   * Destroy the ENSDbReader instance by closing the ENSDb connection pool.
+   */
+  async destroy(): Promise<void> {
+    // @ts-expect-error - Drizzle Client does not have `end` method in its type definition,
+    // but it does exist in the actual implementation and is necessary to properly close
+    // the connection pool to the ENSDb instance when destroying the ENSDbReader instance.
+    await this.ensDb.$client.end();
+  }
+
+  /**
    * Get ENSNode Metadata record
    *
    * @returns selected record in ENSDb.

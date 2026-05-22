@@ -9,7 +9,7 @@ import {
   type RequiredAndNotNull,
 } from "@ensnode/ensnode-sdk";
 
-import { ensDb, ensIndexerSchema } from "@/lib/ensdb/singleton";
+import di from "@/di";
 import { builder } from "@/omnigraph-api/builder";
 import { orderPaginationBy, paginateByInt } from "@/omnigraph-api/lib/connection-helpers";
 import { cursors } from "@/omnigraph-api/lib/cursors";
@@ -26,10 +26,12 @@ import { EventRef } from "@/omnigraph-api/schema/event";
 import { RenewalRef } from "@/omnigraph-api/schema/renewal";
 
 export const RegistrationInterfaceRef = builder.loadableInterfaceRef("Registration", {
-  load: (ids: RegistrationId[]) =>
-    ensDb.query.registration.findMany({
+  load: (ids: RegistrationId[]) => {
+    const { ensDb } = di.context;
+    return ensDb.query.registration.findMany({
       where: (t, { inArray }) => inArray(t.id, ids),
-    }),
+    });
+  },
   toKey: getModelId,
   cacheResolved: true,
   sort: true,
@@ -166,6 +168,7 @@ RegistrationInterfaceRef.implement({
         "Renewals that have occurred within this Registration's lifespan to extend its expiration.",
       type: RenewalRef,
       resolve: (parent, args) => {
+        const { ensDb, ensIndexerSchema } = di.context;
         const scope = and(
           eq(ensIndexerSchema.renewal.domainId, parent.domainId),
           eq(ensIndexerSchema.renewal.registrationIndex, parent.registrationIndex),
