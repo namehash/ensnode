@@ -325,18 +325,16 @@ a[rel="prev"]:hover {
 #starlight__sidebar details details > summary:hover {
   transition: all 0.2s ease-in-out;
   color: var(--sl-color-gray-2);
-  &:hover,
-  &:hover span {
+  color: var(--sl-color-white);
+
+  & span {
     color: var(--sl-color-white);
   }
 }
 
 #starlight__sidebar details > summary:hover {
   transition: all 0.2s ease-in-out;
-
-  &:hover {
-    color: var(--sl-color-white);
-  }
+  color: var(--sl-color-white);
 }
 
 a.starlight-sidebar-topics-current {
