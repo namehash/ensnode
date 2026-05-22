@@ -1,5 +1,3 @@
-import config from "@/config";
-
 import { minutesToSeconds } from "date-fns";
 
 import { EnsNodeMetadataKeys } from "@ensnode/ensdb-sdk";
@@ -56,9 +54,14 @@ export const stackInfoCache = lazyProxy<EnsNodeStackInfoCache>(
             throw new Error("Indexing Metadata Context was uninitialized in ENSDb.");
           }
 
+          // Async import `di` here to avoid circular dependency between this cache module and the DI container module.
+          // NOTE: It will not be required soon, as we plan to create a factory function for this cache
+          // that accepts the necessary dependencies as parameters, instead of importing from the DI container.
+          const di = await import("@/di").then((mod) => mod.default);
+
           const ensIndexerStackInfo = indexingMetadataContext.stackInfo;
           const ensNodeStackInfo = buildEnsNodeStackInfo(
-            buildEnsApiPublicConfig(config, ensIndexerStackInfo.ensIndexer),
+            buildEnsApiPublicConfig(di.context.ensApiConfig, ensIndexerStackInfo.ensIndexer),
             ensIndexerStackInfo.ensDb,
             ensIndexerStackInfo.ensIndexer,
             ensIndexerStackInfo.ensRainbow,

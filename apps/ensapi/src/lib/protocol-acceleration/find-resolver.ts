@@ -1,5 +1,3 @@
-import config from "@/config";
-
 import { bytesToPacket } from "@ensdomains/ensjs/utils";
 import { SpanStatusCode, trace } from "@opentelemetry/api";
 import {
@@ -18,6 +16,7 @@ import { packetToBytes } from "viem/ens";
 import { DatasourceNames, getDatasource } from "@ensnode/datasources";
 import { accountIdEqual, isENSv1Registry } from "@ensnode/ensnode-sdk";
 
+import di from "@/di";
 import { ensDb } from "@/lib/ensdb/singleton";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/instrumentation/auto-span";
 
@@ -71,9 +70,9 @@ export async function findResolver({
   }
 
   // Invariant: UniversalResolver#findResolver only works for ENS Root Registry
-  if (!isENSv1Registry(config.namespace, registry)) {
+  if (!isENSv1Registry(di.context.namespace, registry)) {
     throw new Error(
-      `Invariant(findResolver): UniversalResolver#findResolver only identifies active resolvers agains the ENs Root Registry, but a different Registry contract was passed: ${JSON.stringify(registry)}.`,
+      `Invariant(findResolver): UniversalResolver#findResolver only identifies active resolvers against the ENS Root Registry, but a different Registry contract was passed: ${JSON.stringify(registry)}.`,
     );
   }
 
@@ -98,7 +97,7 @@ async function findResolverWithUniversalResolver(
         contracts: {
           UniversalResolver: { address, abi },
         },
-      } = getDatasource(config.namespace, DatasourceNames.ENSRoot);
+      } = getDatasource(di.context.namespace, DatasourceNames.ENSRoot);
 
       // 2. Call UniversalResolver#findResolver via RPC
       const dnsEncodedNameBytes = packetToBytes(name);

@@ -132,30 +132,39 @@ export function isBridgedResolver(
 }
 
 /**
- * Returns true iff `domainId` is the origin Domain of a known Bridged Resolver.
+ * Returns the `BridgedResolverConfig` for `domainId` if it is the origin Domain of a known
+ * Bridged Resolver, or `null` otherwise.
  *
  * `Domain.subregistryId` on a bridge origin (e.g. mainnet `base.eth`, `linea.eth`) is owned by
  * `handleBridgedResolverChange` — it must point at the bridged target Registry on the L2 chain
  * so the canonical edge to that target Registry can agree. Chain-local subname events on the
  * origin Domain must not overwrite that pointer.
  */
-export function isBridgeOriginDomain(namespace: ENSNamespaceId, domainId: DomainId): boolean {
-  return getBridgedResolverConfigs(namespace).some((config) => config.originDomainId === domainId);
+export function isBridgedOriginDomain(
+  namespace: ENSNamespaceId,
+  domainId: DomainId,
+): BridgedResolverConfig | null {
+  return (
+    getBridgedResolverConfigs(namespace).find((config) => config.originDomainId === domainId) ??
+    null
+  );
 }
 
 /**
- * Returns true iff `registryId` is the target Registry of a known Bridged Resolver.
+ * Returns the `BridgedResolverConfig` for `registryId` if it is the target Registry of a known
+ * Bridged Resolver, or `null` otherwise.
  *
  * `Registry.canonicalDomainId` on a bridged target (e.g. the Basenames/Lineanames L2 Registries)
- * is owned by `handleBridgedResolverChange` — it must point at the mainnet origin Domain so the
- * canonical edge can agree. Chain-local subname events on the target Registry must not overwrite
- * that pointer with the L2-side Domain ID.
+ * is owned by the registry-creation path in `ENSv1Registry.ts` — it must point at the mainnet
+ * origin Domain so the canonical edge can agree. Chain-local subname events on the target Registry
+ * must not overwrite that pointer with the L2-side Domain ID.
  */
 export function isBridgedTargetRegistry(
   namespace: ENSNamespaceId,
   registryId: RegistryId,
-): boolean {
-  return getBridgedResolverConfigs(namespace).some(
-    (config) => config.targetRegistryId === registryId,
+): BridgedResolverConfig | null {
+  return (
+    getBridgedResolverConfigs(namespace).find((config) => config.targetRegistryId === registryId) ??
+    null
   );
 }

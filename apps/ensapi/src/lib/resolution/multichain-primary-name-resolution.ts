@@ -1,7 +1,4 @@
-import config from "@/config";
-
 import { trace } from "@opentelemetry/api";
-import type { ChainId } from "enssdk";
 import { mainnet } from "viem/chains";
 
 import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
@@ -11,31 +8,31 @@ import {
   uniq,
 } from "@ensnode/ensnode-sdk";
 
+import di from "@/di";
 import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
-import { lazy } from "@/lib/lazy";
 import { resolveReverse } from "@/lib/resolution/reverse-resolution";
 
 const tracer = trace.getTracer("multichain-primary-name-resolution");
 
-const getENSIP19SupportedChainIds = lazy<ChainId[]>(() => [
-  // always include Mainnet, because its chainId corresponds to the ENS Root Chain's coinType,
-  // regardless of the current namespace
-  mainnet.id,
+const getENSIP19SupportedChainIds = () => {
+  return uniq([
+    // always include Mainnet, because its chainId corresponds to the ENS Root Chain's coinType,
+    // regardless of the current namespace
+    mainnet.id,
 
-  // then include any ENSIP-19 Supported Chains defined in this namespace
-  ...uniq(
-    [
-      maybeGetDatasource(config.namespace, DatasourceNames.ReverseResolverRoot),
-      maybeGetDatasource(config.namespace, DatasourceNames.ReverseResolverBase),
-      maybeGetDatasource(config.namespace, DatasourceNames.ReverseResolverLinea),
-      maybeGetDatasource(config.namespace, DatasourceNames.ReverseResolverOptimism),
-      maybeGetDatasource(config.namespace, DatasourceNames.ReverseResolverArbitrum),
-      maybeGetDatasource(config.namespace, DatasourceNames.ReverseResolverScroll),
+    // then include any ENSIP-19 Supported Chains defined in this namespace
+    ...[
+      maybeGetDatasource(di.context.namespace, DatasourceNames.ReverseResolverRoot),
+      maybeGetDatasource(di.context.namespace, DatasourceNames.ReverseResolverBase),
+      maybeGetDatasource(di.context.namespace, DatasourceNames.ReverseResolverLinea),
+      maybeGetDatasource(di.context.namespace, DatasourceNames.ReverseResolverOptimism),
+      maybeGetDatasource(di.context.namespace, DatasourceNames.ReverseResolverArbitrum),
+      maybeGetDatasource(di.context.namespace, DatasourceNames.ReverseResolverScroll),
     ]
       .filter((ds) => ds !== undefined)
       .map((ds) => ds.chain.id),
-  ),
-]);
+  ]);
+};
 
 /**
  * Implements batch resolution of an address' Primary Name across the provided `chainIds`.
