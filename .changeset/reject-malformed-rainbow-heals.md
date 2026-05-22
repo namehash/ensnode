@@ -2,4 +2,4 @@
 "@ensnode/ensrainbow-sdk": patch
 ---
 
-ensrainbow-sdk now rejects malformed rainbow records: a healed label whose labelhash does not match the requested labelHash is treated as unhealable.
+`@ensnode/ensrainbow-sdk` now rejects malformed rainbow records: a healed label whose `labelHash` does not match the requested `labelHash` is considered `NotFound`.
