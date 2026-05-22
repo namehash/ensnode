@@ -261,7 +261,10 @@ class EnsApiDiContainer {
       // Initialize the ENSDb client and verify connectivity to the database.
       logger.info("Initializing ENSDb client and verifying connectivity to ENSDb");
       await this.context.ensDbClient.isHealthy();
-      logger.info("Successfully connected to ENSDb");
+      logger.info(
+        { ensIndexerSchemaName: this.context.ensDbConfig.ensIndexerSchemaName },
+        "Successfully connected to ENSDb",
+      );
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
       throw new Error(
@@ -272,12 +275,15 @@ class EnsApiDiContainer {
     try {
       // Initialize caches
       logger.info("Initializing caches");
-      await Promise.all([
+      const [indexingStatus, stackInfo, referralProgramEditionConfigSet] = await Promise.all([
         this.context.indexingStatusCache.read(),
         this.context.stackInfoCache.read(),
         this.context.referralProgramEditionConfigSetCache.read(),
       ]);
-      logger.info("Caches initialized");
+      logger.info(
+        { indexingStatus, stackInfo, referralProgramEditionConfigSet },
+        "Caches initialized",
+      );
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
       throw new Error(
@@ -290,7 +296,10 @@ class EnsApiDiContainer {
     try {
       logger.info("Initializing RPC client for the ENS Root Chain");
       await this.context.rootChainPublicClient.getBlockNumber();
-      logger.info("Successfully connected to the ENS Root Chain RPC");
+      logger.info(
+        { rootChainId: this.context.rootChainId },
+        "Successfully connected to the ENS Root Chain RPC",
+      );
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
       throw new Error(
@@ -317,6 +326,10 @@ class EnsApiDiContainer {
     this.context.indexingStatusCache.destroy();
     this.context.referralProgramEditionConfigSetCache.destroy();
     logger.info("Caches destroyed");
+
+    // Destroy the ENSDb client to close the connection pool to ENSDb
+    this.context.ensDbClient.destroy();
+    logger.info("ENSDb client destroyed");
 
     this._context = undefined;
   }
