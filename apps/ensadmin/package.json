@@ -1,6 +1,6 @@
 {
   "name": "ensadmin",
-  "version": "1.14.0",
+  "version": "1.15.0",
   "private": true,
   "type": "module",
   "description": "Inspect the ENS Protocol like never before",
