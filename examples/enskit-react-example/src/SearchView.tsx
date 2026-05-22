@@ -94,13 +94,9 @@ export function SearchView() {
               return (
                 <li key={edge.node.id}>
                   ({edge.node.__typename === "ENSv1Domain" ? "v1" : "v2"}){" "}
-                  <Link to={`/domain/${edge.node.name}`}>
+                  {/* link by DomainId so the exact ENSv1/ENSv2 variant the user clicked is preserved */}
+                  <Link to={`/domain/id/${edge.node.id}`}>
                     {beautifyInterpretedName(edge.node.name)}
-                    {/* 
-                  TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
-                  <Link to={`/domain/${edge.node.canonical.name.interpreted}`}>
-                    {beautifyInterpretedName(edge.node.canonical.name.interpreted)}
-                    */}
                   </Link>
                 </li>
               );

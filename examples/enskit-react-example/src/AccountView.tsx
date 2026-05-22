@@ -63,13 +63,13 @@ function RenderAccount({ address }: { address: NormalizedAddress }) {
             {domains.edges.map((edge) => (
               <li key={edge.node.id}>
                 {/*
-                TODO: after upgrading v2-sepolia to have materialized canonical name, update this to:
-                {edge.node.canonical ? (
-                  <Link to={`/domain/${edge.node.canonical.name.interpreted}`}>
-                    {beautifyInterpretedName(edge.node.canonical.name.interpreted)}
+                TODO: after upgrading v2-sepolia to have materialized canonical name, update the label to:
+                <Link to={`/domain/id/${edge.node.id}`}>
+                  {beautifyInterpretedName(edge.node.canonical.name.interpreted)}
                 */}
                 {edge.node.name ? (
-                  <Link to={`/domain/${edge.node.name}`}>
+                  // link by DomainId so the exact ENSv1/ENSv2 variant the user clicked is preserved
+                  <Link to={`/domain/id/${edge.node.id}`}>
                     {beautifyInterpretedName(edge.node.name)}
                   </Link>
                 ) : (

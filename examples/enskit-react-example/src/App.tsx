@@ -5,7 +5,7 @@ import { StrictMode } from "react";
 import { HashRouter, Link, Outlet, Route, Routes } from "react-router";
 
 import { AccountView } from "./AccountView";
-import { DomainView } from "./DomainView";
+import { DomainByIdView, DomainByNameView } from "./DomainView";
 import { RegistryView } from "./RegistryView";
 import { SearchView } from "./SearchView";
 
@@ -26,7 +26,7 @@ function Layout() {
   return (
     <>
       <nav>
-        <Link to="/">Home</Link> | <Link to="/domain/eth">Domain Browser</Link> |{" "}
+        <Link to="/">Home</Link> | <Link to="/domain/name/eth">Domain Browser</Link> |{" "}
         <Link to={`/account/${EXAMPLE_ACCOUNT_ADDRESS}`}>Account Browser</Link> |{" "}
         <Link to="/registry">Registry Cache Demo</Link> | <Link to="/search">Search Demo</Link>
       </nav>
@@ -56,7 +56,8 @@ export function App() {
           <Routes>
             <Route element={<Layout />}>
               <Route path="/" element={<Home />} />
-              <Route path="/domain/:name" element={<DomainView />} />
+              <Route path="/domain/name/:name" element={<DomainByNameView />} />
+              <Route path="/domain/id/:id" element={<DomainByIdView />} />
               <Route path="/account/:address" element={<AccountView />} />
               <Route path="/search" element={<SearchView />} />
               <Route path="/registry" element={<RegistryView />} />
