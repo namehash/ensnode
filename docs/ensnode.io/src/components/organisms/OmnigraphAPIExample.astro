@@ -7,6 +7,12 @@ import { ENSADMIN_URL } from "astro:env/client";
 
 import { getOmnigraphExampleById } from "@data/omnigraph-examples/examples";
 import { DOCS_HOSTED_INSTANCE_ANCHOR, DOCS_OMNIGRAPH_NAMESPACE } from "@lib/playground/constants";
+import {
+  buildEnskitSetupSnippets,
+  buildEnskitSnippet,
+  buildEnssdkSetupSnippets,
+  buildEnssdkSnippet,
+} from "@lib/omnigraph-examples/build-integration-snippets";
 import { buildEnsAdminOmnigraphUrl, stringifyJsonForDocs } from "@lib/playground/utils";
 
 interface Props {
@@ -27,6 +33,10 @@ const adminUrl = buildEnsAdminOmnigraphUrl({
 });
 const variablesJson = stringifyJsonForDocs(example.variables);
 const responseJson = example.response ? stringifyJsonForDocs(example.response) : null;
+const enssdkSnippet = buildEnssdkSnippet({ query: example.query, variables: example.variables });
+const enskitSnippet = buildEnskitSnippet({ query: example.query, variables: example.variables });
+const enssdkSetupSnippets = buildEnssdkSetupSnippets();
+const enskitSetupSnippets = buildEnskitSetupSnippets();
 ---
 
 {!hideDescription && example.description}
@@ -42,6 +52,10 @@ const responseJson = example.response ? stringifyJsonForDocs(example.response) :
   hostedInstanceNamespace={DOCS_OMNIGRAPH_NAMESPACE}
   adminUrl={adminUrl}
   hideCurl={hideCurl}
+  enssdkSnippet={enssdkSnippet}
+  enskitSnippet={enskitSnippet}
+  enssdkSetupSnippets={enssdkSetupSnippets}
+  enskitSetupSnippets={enskitSetupSnippets}
 />
 
 {

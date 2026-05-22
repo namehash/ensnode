@@ -1,9 +1,14 @@
 ---
-import { Code } from "@astrojs/starlight/components";
+import { Code, Icon } from "@astrojs/starlight/components";
 import type { ENSNamespaceId } from "@ensnode/ensnode-sdk";
 
 import { buildOmnigraphCurlExample, getHostedEnsNodeInstanceDocUrl } from "@lib/playground/utils";
+import {
+  SETUP_PACKAGE_MANAGERS,
+  type SetupPackageManager,
+} from "@lib/omnigraph-examples/build-integration-snippets";
 import ENSAdminLogoDark from "@components/atoms/logos/astro/ENSAdminLogoDark.astro";
+import StackBlitzLogo from "@components/atoms/logos/astro/StackBlitzLogo.astro";
 
 export interface OmnigraphAPIExamplePanelsProps {
   /** Unique id prefix for aria / tab wiring (e.g. example id). */
@@ -20,6 +25,10 @@ export interface OmnigraphAPIExamplePanelsProps {
   hostedInstanceNamespace: ENSNamespaceId;
   adminUrl: string;
   hideCurl?: boolean;
+  enssdkSnippet: string;
+  enskitSnippet: string;
+  enssdkSetupSnippets: Record<SetupPackageManager, string>;
+  enskitSetupSnippets: Record<SetupPackageManager, string>;
 }
 
 const {
@@ -33,182 +42,506 @@ const {
   hostedInstanceNamespace,
   adminUrl,
   hideCurl = false,
+  enssdkSnippet,
+  enskitSnippet,
+  enssdkSetupSnippets,
+  enskitSetupSnippets,
 } = Astro.props;
 
 const hostedInstanceDocUrl = getHostedEnsNodeInstanceDocUrl(hostedInstanceAnchor);
 
 const uid = panelId.replace(/[^a-zA-Z0-9_-]/g, "-");
-const tabIds = {
-  vars: `${uid}-tab-vars`,
-  resp: `${uid}-tab-resp`,
-  curl: `${uid}-tab-curl`,
-} as const;
 
 const curlExample = !hideCurl
   ? buildOmnigraphCurlExample({ connectionBaseUrl, query, variables: variablesObject })
   : "";
-const tabList: { id: string; label: string }[] = [
-  { id: tabIds.vars, label: "Variables" },
-  ...(responseJson ? [{ id: tabIds.resp, label: "Response" }] : []),
-  ...(!hideCurl && curlExample ? [{ id: tabIds.curl, label: "Curl" }] : []),
+
+// Secondary tab list for GraphQL panel
+const graphqlSecondaryTabs: { id: string; label: string; copyRaw: string }[] = [
+  { id: `${uid}-tab-vars`, label: "Variables", copyRaw: `${uid}-raw-vars` },
+  ...(responseJson
+    ? [{ id: `${uid}-tab-resp`, label: "Response", copyRaw: `${uid}-raw-resp` }]
+    : []),
+  ...(!hideCurl && curlExample
+    ? [{ id: `${uid}-tab-curl`, label: "Curl", copyRaw: `${uid}-raw-curl` }]
+    : []),
 ];
+
+function buildSetupPackageManagerTabs(prefix: "enssdk" | "enskit") {
+  return SETUP_PACKAGE_MANAGERS.map((pm) => ({
+    id: `${uid}-tab-setup-${prefix}-${pm}`,
+    label: pm,
+    icon: pm,
+    copyRaw: `${uid}-raw-setup-${prefix}-${pm}`,
+  }));
+}
+
+const enssdkSetupTabs = buildSetupPackageManagerTabs("enssdk");
+const enskitSetupTabs = buildSetupPackageManagerTabs("enskit");
 ---
 
 <div
   class="not-content not-prose omnigraph-example overflow-hidden my-8 rounded-xl border border-black/[0.06] bg-[var(--sl-color-gray-6)] shadow-sm dark:border-white/[0.08] dark:bg-[var(--sl-color-gray-7)]"
   data-omnigraph-example={uid}
 >
+  <!-- Primary integration tab bar -->
   <div
-    class="z-20 flex flex-wrap items-center gap-3 border-b border-black/[0.06] bg-[var(--sl-color-gray-6)]/95 px-4 py-3 backdrop-blur-md dark:border-white/[0.08] dark:bg-[var(--sl-color-gray-7)]/95 md:px-5"
-    style="top: calc(var(--sl-nav-height, 3.5rem) + var(--sl-mobile-toc-height, 0px) + 0.25rem);"
+    class="flex items-end gap-0 border-b border-black/[0.06] dark:border-white/[0.08] px-4 md:px-5 pt-3"
+    role="tablist"
+    aria-label="Integration method"
+    data-integration-tabs={uid}
   >
-    <a
-      class="inline-flex shrink-0 items-center justify-between gap-2 rounded-lg bg-[var(--sl-color-text-accent)] p-1.5 pr-2 text-sm font-semibold text-[var(--sl-color-black)] no-underline transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
-      href={adminUrl}
-      target="_blank"
-      rel="noopener noreferrer"
+    <button
+      type="button"
+      role="tab"
+      id={`${uid}-int-tab-graphql`}
+      aria-selected="true"
+      aria-controls={`${uid}-int-graphql`}
+      data-integration-tab="graphql"
+      class="integration-tab example-tab relative pb-2.5 pr-4 pt-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
     >
-      <ENSAdminLogoDark className="h-5 w-auto shrink-0" />
-      Run in ENSAdmin
-    </a>
-    <span class="hidden text-xs leading-snug text-[var(--sl-color-gray-3)] sm:block">
-      Open an interactive playground to execute this query on our{" "}
-      <a
-        href={hostedInstanceDocUrl}
-        class="text-sm font-semibold text-[var(--sl-color-gray-1)] underline decoration-[var(--sl-color-gray-4)] underline-offset-2 transition-colors hover:text-[var(--sl-color-text-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
-      >
-        {hostedInstanceNamespace}
-      </a>{" "}
-      ENSNode instance.
-    </span>
+      Omnigraph (GraphQL)
+    </button>
+    <button
+      type="button"
+      role="tab"
+      id={`${uid}-int-tab-enssdk`}
+      aria-selected="false"
+      aria-controls={`${uid}-int-enssdk`}
+      data-integration-tab="enssdk"
+      class="integration-tab example-tab relative pb-2.5 pr-4 pt-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
+    >
+      enssdk (TypeScript)
+    </button>
+    <button
+      type="button"
+      role="tab"
+      id={`${uid}-int-tab-enskit`}
+      aria-selected="false"
+      aria-controls={`${uid}-int-enskit`}
+      data-integration-tab="enskit"
+      class="integration-tab example-tab relative pb-2.5 pr-4 pt-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
+    >
+      enskit (React)
+    </button>
   </div>
 
+  <!-- Hidden raw text for copy buttons -->
   <pre id={`${uid}-raw-query`} class="sr-only">{query}</pre>
   <pre id={`${uid}-raw-vars`} class="sr-only">{variablesJson}</pre>
   {responseJson ? <pre id={`${uid}-raw-resp`} class="sr-only">{responseJson}</pre> : null}
   {curlExample ? <pre id={`${uid}-raw-curl`} class="sr-only">{curlExample}</pre> : null}
+  <pre id={`${uid}-raw-enssdk`} class="sr-only">{enssdkSnippet}</pre>
+  <pre id={`${uid}-raw-enskit`} class="sr-only">{enskitSnippet}</pre>
+  {
+    SETUP_PACKAGE_MANAGERS.map((pm) => (
+      <pre id={`${uid}-raw-setup-enssdk-${pm}`} class="sr-only">
+        {enssdkSetupSnippets[pm]}
+      </pre>
+    ))
+  }
+  {
+    SETUP_PACKAGE_MANAGERS.map((pm) => (
+      <pre id={`${uid}-raw-setup-enskit-${pm}`} class="sr-only">
+        {enskitSetupSnippets[pm]}
+      </pre>
+    ))
+  }
 
-  <section class="border-b border-black/[0.05] px-4 pb-5 pt-4 dark:border-white/[0.06] md:px-5" aria-labelledby={`${uid}-query-heading`}>
-    <div class="mb-2.5 flex items-center justify-between">
-      <span
-        id={`${uid}-query-heading`}
-        class="inline-flex items-center rounded-full bg-[var(--sl-color-gray-5)] px-2.5 py-0.5 text-[0.7rem] font-medium tracking-wide text-[var(--sl-color-gray-2)] dark:bg-[var(--sl-color-gray-6)]"
+  <!-- ── Omnigraph (GraphQL) panel ── -->
+  <div
+    id={`${uid}-int-graphql`}
+    data-integration-panel="graphql"
+    role="tabpanel"
+    aria-labelledby={`${uid}-int-tab-graphql`}
+  >
+    <!-- Action bar -->
+    <div class="flex flex-wrap items-center gap-3 border-b border-black/[0.06] dark:border-white/[0.08] bg-[var(--sl-color-gray-6)]/95 px-4 py-3 backdrop-blur-md dark:bg-[var(--sl-color-gray-7)]/95 md:px-5">
+      <a
+        class="inline-flex shrink-0 items-center justify-between gap-2 rounded-lg bg-[var(--sl-color-text-accent)] p-1.5 pr-2 text-sm font-semibold text-[var(--sl-color-black)] no-underline transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
+        href={adminUrl}
+        target="_blank"
+        rel="noopener noreferrer"
       >
-        ENS Omnigraph GraphQL
+        <ENSAdminLogoDark className="h-5 w-auto shrink-0" />
+        Run in ENSAdmin
+      </a>
+      <span class="hidden text-xs leading-snug text-[var(--sl-color-gray-3)] sm:block">
+        Open an interactive playground to execute this query on our{" "}
+        <a
+          href={hostedInstanceDocUrl}
+          class="text-sm font-semibold text-[var(--sl-color-gray-1)] underline decoration-[var(--sl-color-gray-4)] underline-offset-2 transition-colors hover:text-[var(--sl-color-text-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
+        >
+          {hostedInstanceNamespace}
+        </a>{" "}
+        ENSNode instance.
       </span>
-      <button
-        type="button"
-        class="example-copy text-xs font-medium text-[var(--sl-color-gray-2)] transition-colors hover:text-[var(--sl-color-text-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
-        data-copy-target={`${uid}-raw-query`}
-        data-default-label="Copy"
-        aria-label="Copy GraphQL query"
-      >
-        Copy
-      </button>
     </div>
-    <div class="min-w-0 [&_.expressive-code]:rounded-lg">
-      <Code code={query} lang="graphql" />
-    </div>
-  </section>
 
-  <section class="px-4 py-5 md:px-5" aria-labelledby={`${uid}-secondary-heading`}>
-    <h3 id={`${uid}-secondary-heading`} class="sr-only">Payload and transport examples</h3>
-
-    <div class="omnigraph-tabs flex flex-col" data-tabs-root={uid}>
-      <div
-        class="flex items-end gap-0 border-b border-black/[0.06] dark:border-white/[0.08]"
-        role="tablist"
-        aria-label="Example formats"
-      >
-        {
-          tabList.map((t, i) => (
-            <button
-              type="button"
-              role="tab"
-              id={`${t.id}-btn`}
-              aria-selected={i === 0 ? "true" : "false"}
-              aria-controls={t.id}
-              data-tab-target={t.id}
-              class="example-tab relative pb-2.5 pr-4 pt-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
-            >
-              {t.label}
-            </button>
-          ))
-        }
-        <div class="flex-1" role="none" />
+    <!-- GraphQL query block -->
+    <section class="border-b border-black/[0.05] px-4 pb-5 pt-4 dark:border-white/[0.06] md:px-5" aria-labelledby={`${uid}-query-heading`}>
+      <div class="mb-2.5 flex items-center justify-between">
+        <span
+          id={`${uid}-query-heading`}
+          class="inline-flex items-center rounded-full bg-[var(--sl-color-gray-5)] px-2.5 py-0.5 text-[0.7rem] font-medium tracking-wide text-[var(--sl-color-gray-2)] dark:bg-[var(--sl-color-gray-6)]"
+        >
+          GraphQL Query
+        </span>
         <button
           type="button"
-          class="example-copy mb-2.5 text-xs font-medium text-[var(--sl-color-gray-2)] transition-colors hover:text-[var(--sl-color-text-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
-          data-tab-copy
-          data-copy-target={`${uid}-raw-vars`}
+          class="example-copy text-xs font-medium text-[var(--sl-color-gray-2)] transition-colors hover:text-[var(--sl-color-text-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
+          data-copy-target={`${uid}-raw-query`}
           data-default-label="Copy"
-          aria-label="Copy current tab content"
+          aria-label="Copy GraphQL query"
         >
           Copy
         </button>
       </div>
-
-      <div class="relative min-h-[8rem]">
-        <div
-          id={tabIds.vars}
-          role="tabpanel"
-          aria-labelledby={`${tabIds.vars}-btn`}
-          data-tab-panel={tabIds.vars}
-          class="example-tab-panel pt-3"
-        >
-          <div class="max-h-[min(38vh,18rem)] min-w-0 overflow-auto overscroll-y-contain [&_.expressive-code]:rounded-lg">
-            <Code code={variablesJson} lang="json"/>
-          </div>
-        </div>
-
-        {
-          responseJson ? (
-            <div
-              id={tabIds.resp}
-              role="tabpanel"
-              aria-labelledby={`${tabIds.resp}-btn`}
-              data-tab-panel={tabIds.resp}
-              class="example-tab-panel hidden pt-3"
-              hidden
-            >
-              <div class="max-h-[min(50vh,28rem)] min-w-0 overflow-auto overscroll-y-contain [&_.expressive-code]:rounded-lg">
-                <Code code={responseJson} lang="json" />
-              </div>
-            </div>
-          ) : null
-        }
-
-        {
-          !hideCurl && curlExample ? (
-            <div
-              id={tabIds.curl}
-              role="tabpanel"
-              aria-labelledby={`${tabIds.curl}-btn`}
-              data-tab-panel={tabIds.curl}
-              class="example-tab-panel hidden pt-3"
-              hidden
-            >
-              <div class="max-h-[min(50vh,28rem)] min-w-0 overflow-auto overscroll-y-contain [&_.expressive-code]:rounded-lg">
-                <Code code={curlExample} lang="bash" />
-              </div>
-            </div>
-          ) : null
-        }
-
+      <div class="min-w-0 [&_.expressive-code]:rounded-lg">
+        <Code code={query} lang="graphql" />
       </div>
-    </div>
-  </section>
+    </section>
 
-  <p class="px-4 pb-4 pt-0 text-[0.7rem] leading-relaxed text-[var(--sl-color-gray-3)] md:px-5">
-    Response is an illustrative snapshot; live data depends on your ENSNode instance. The curl tab shows a POST to
-    <code class="rounded bg-black/[0.06] px-1 py-0.5 font-mono text-[0.8em] dark:bg-white/[0.08]">{connectionBaseUrl}/api/omnigraph</code>
-  </p>
+    <!-- Secondary tabs: Variables / Response / Curl -->
+    <section class="px-4 py-5 md:px-5" aria-labelledby={`${uid}-secondary-heading`}>
+      <h3 id={`${uid}-secondary-heading`} class="sr-only">Payload and transport examples</h3>
+      <div class="omnigraph-tabs flex flex-col" data-tabs-root={`${uid}-graphql`}>
+        <div class="flex items-end gap-0 border-b border-black/[0.06] dark:border-white/[0.08]" role="tablist" aria-label="Example formats">
+          {
+            graphqlSecondaryTabs.map((t, i) => (
+              <button
+                type="button"
+                role="tab"
+                id={`${t.id}-btn`}
+                aria-selected={i === 0 ? "true" : "false"}
+                aria-controls={t.id}
+                data-tab-target={t.id}
+                data-copy-raw={t.copyRaw}
+                class="example-tab relative pb-2.5 pr-4 pt-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
+              >
+                {t.label}
+              </button>
+            ))
+          }
+          <div class="flex-1" role="none" />
+          <button
+            type="button"
+            class="example-copy mb-2.5 text-xs font-medium text-[var(--sl-color-gray-2)] transition-colors hover:text-[var(--sl-color-text-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
+            data-tab-copy
+            data-copy-target={`${uid}-raw-vars`}
+            data-default-label="Copy"
+            aria-label="Copy current tab content"
+          >
+            Copy
+          </button>
+        </div>
+        <div class="relative min-h-[8rem]">
+          <div id={`${uid}-tab-vars`} role="tabpanel" aria-labelledby={`${uid}-tab-vars-btn`} data-tab-panel={`${uid}-tab-vars`} class="example-tab-panel pt-3">
+            <div class="max-h-[min(38vh,19rem)] min-w-0 overflow-auto overscroll-y-contain [&_.expressive-code]:rounded-lg">
+              <Code code={variablesJson} lang="json" />
+            </div>
+          </div>
+          {
+            responseJson ? (
+              <div id={`${uid}-tab-resp`} role="tabpanel" aria-labelledby={`${uid}-tab-resp-btn`} data-tab-panel={`${uid}-tab-resp`} class="example-tab-panel hidden pt-3" hidden>
+                <div class="max-h-[min(50vh,28rem)] min-w-0 overflow-auto overscroll-y-contain [&_.expressive-code]:rounded-lg">
+                  <Code code={responseJson} lang="json" />
+                </div>
+              </div>
+            ) : null
+          }
+          {
+            !hideCurl && curlExample ? (
+              <div id={`${uid}-tab-curl`} role="tabpanel" aria-labelledby={`${uid}-tab-curl-btn`} data-tab-panel={`${uid}-tab-curl`} class="example-tab-panel hidden pt-3" hidden>
+                <div class="max-h-[min(50vh,28rem)] min-w-0 overflow-auto overscroll-y-contain [&_.expressive-code]:rounded-lg">
+                  <Code code={curlExample} lang="bash" />
+                </div>
+              </div>
+            ) : null
+          }
+        </div>
+      </div>
+    </section>
+
+    <p class="px-4 pb-4 pt-0 text-[0.7rem] leading-relaxed text-[var(--sl-color-gray-3)] md:px-5">
+      Response is an illustrative snapshot; live data depends on your ENSNode instance. The curl tab shows a POST to
+      <code class="rounded bg-black/[0.06] px-1 py-0.5 font-mono text-[0.8em] dark:bg-white/[0.08]">{connectionBaseUrl}/api/omnigraph</code>
+    </p>
+  </div>
+
+  <!-- ── enssdk panel ── -->
+  <div
+    id={`${uid}-int-enssdk`}
+    data-integration-panel="enssdk"
+    role="tabpanel"
+    aria-labelledby={`${uid}-int-tab-enssdk`}
+    hidden
+    class="hidden"
+  >
+    <!-- Action bar -->
+    <div class="flex flex-wrap items-center gap-3 border-b border-black/[0.06] dark:border-white/[0.08] bg-[var(--sl-color-gray-6)]/95 px-4 py-3 backdrop-blur-md dark:bg-[var(--sl-color-gray-7)]/95 md:px-5">
+      <button
+        type="button"
+        disabled
+        aria-disabled="true"
+        class="inline-flex shrink-0 items-center gap-2 rounded-lg bg-[var(--sl-color-text-accent)] p-1.5 pr-2 text-sm font-semibold text-[var(--sl-color-black)] opacity-50 cursor-not-allowed"
+      >
+        <StackBlitzLogo className="h-5 w-auto shrink-0" />
+        Run in StackBlitz
+      </button>
+      <span class="hidden text-xs leading-snug text-[var(--sl-color-gray-3)] sm:block">
+        Open an interactive playground to execute this query on our{" "}
+        <a
+          href={hostedInstanceDocUrl}
+          class="text-sm font-semibold text-[var(--sl-color-gray-1)] underline decoration-[var(--sl-color-gray-4)] underline-offset-2 transition-colors hover:text-[var(--sl-color-text-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
+        >
+          {hostedInstanceNamespace}
+        </a>{" "}
+        ENSNode instance.
+      </span>
+    </div>
+
+    <!-- enssdk snippet block -->
+    <section class="border-b border-black/[0.05] px-4 pb-5 pt-4 dark:border-white/[0.06] md:px-5">
+      <div class="mb-2.5 flex items-center justify-between">
+        <span class="inline-flex items-center rounded-full bg-[var(--sl-color-gray-5)] px-2.5 py-0.5 text-[0.7rem] font-medium tracking-wide text-[var(--sl-color-gray-2)] dark:bg-[var(--sl-color-gray-6)]">
+          TypeScript
+        </span>
+        <button
+          type="button"
+          class="example-copy text-xs font-medium text-[var(--sl-color-gray-2)] transition-colors hover:text-[var(--sl-color-text-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
+          data-copy-target={`${uid}-raw-enssdk`}
+          data-default-label="Copy"
+          aria-label="Copy enssdk snippet"
+        >
+          Copy
+        </button>
+      </div>
+      <div class="min-w-0 [&_.expressive-code]:rounded-lg">
+        <Code code={enssdkSnippet} lang="typescript" />
+      </div>
+    </section>
+
+    <!-- Setup steps -->
+    <section class="px-4 py-5 md:px-5" aria-labelledby={`${uid}-enssdk-setup-heading`}>
+      <h3 id={`${uid}-enssdk-setup-heading`} class="sr-only">enssdk setup</h3>
+      <div class="omnigraph-tabs flex flex-col" data-tabs-root={`${uid}-enssdk-setup`}>
+        <div
+          class="flex items-end gap-0 border-b border-black/[0.06] dark:border-white/[0.08]"
+          role="tablist"
+          aria-label="Package manager"
+        >
+          {
+            enssdkSetupTabs.map((t, i) => (
+              <button
+                type="button"
+                role="tab"
+                id={`${t.id}-btn`}
+                aria-selected={i === 0 ? "true" : "false"}
+                aria-controls={t.id}
+                data-tab-target={t.id}
+                data-copy-raw={t.copyRaw}
+                class="example-tab setup-pm-tab relative inline-flex items-center gap-1.5 pb-2.5 pr-4 pt-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
+              >
+                <Icon name={t.icon} class="setup-pm-tab-icon shrink-0" size="1.125em" />
+                {t.label}
+              </button>
+            ))
+          }
+          <div class="flex-1" role="none" />
+          <button
+            type="button"
+            class="example-copy mb-2.5 text-xs font-medium text-[var(--sl-color-gray-2)] transition-colors hover:text-[var(--sl-color-text-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
+            data-tab-copy
+            data-copy-target={`${uid}-raw-setup-enssdk-npm`}
+            data-default-label="Copy"
+            aria-label="Copy enssdk setup steps"
+          >
+            Copy
+          </button>
+        </div>
+        <div class="relative min-h-[8rem]">
+          {
+            SETUP_PACKAGE_MANAGERS.map((pm, i) => (
+              <div
+                id={`${uid}-tab-setup-enssdk-${pm}`}
+                role="tabpanel"
+                aria-labelledby={`${uid}-tab-setup-enssdk-${pm}-btn`}
+                data-tab-panel={`${uid}-tab-setup-enssdk-${pm}`}
+                class:list={["example-tab-panel pt-3", { hidden: i !== 0 }]}
+                hidden={i !== 0}
+              >
+                <div class="max-h-[min(38vh,19rem)] min-w-0 overflow-auto overscroll-y-contain [&_.expressive-code]:rounded-lg">
+                  <Code code={enssdkSetupSnippets[pm]} lang="bash" />
+                </div>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <p class="px-4 pb-4 pt-0 text-[0.7rem] leading-relaxed text-[var(--sl-color-gray-3)] md:px-5">
+      See the{" "}
+      <a href="/docs/integrate/integration-options/enssdk" class="underline underline-offset-2 hover:text-[var(--sl-color-text-accent)]">enssdk docs</a>
+      {" "}for gql.tada plugin and tsconfig setup.
+    </p>
+  </div>
+
+  <!-- ── enskit panel ── -->
+  <div
+    id={`${uid}-int-enskit`}
+    data-integration-panel="enskit"
+    role="tabpanel"
+    aria-labelledby={`${uid}-int-tab-enskit`}
+    hidden
+    class="hidden"
+  >
+    <!-- Action bar -->
+    <div class="flex flex-wrap items-center gap-3 border-b border-black/[0.06] dark:border-white/[0.08] bg-[var(--sl-color-gray-6)]/95 px-4 py-3 backdrop-blur-md dark:bg-[var(--sl-color-gray-7)]/95 md:px-5">
+      <button
+        type="button"
+        disabled
+        aria-disabled="true"
+        class="inline-flex shrink-0 items-center gap-2 rounded-lg bg-[var(--sl-color-text-accent)] p-1.5 pr-2 text-sm font-semibold text-[var(--sl-color-black)] opacity-50 cursor-not-allowed"
+      >
+        <StackBlitzLogo className="h-5 w-auto shrink-0" />
+        Run in StackBlitz
+      </button>
+      <span class="hidden text-xs leading-snug text-[var(--sl-color-gray-3)] sm:block">
+        Open an interactive playground to execute this query on our{" "}
+        <a
+          href={hostedInstanceDocUrl}
+          class="text-sm font-semibold text-[var(--sl-color-gray-1)] underline decoration-[var(--sl-color-gray-4)] underline-offset-2 transition-colors hover:text-[var(--sl-color-text-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
+        >
+          {hostedInstanceNamespace}
+        </a>{" "}
+        ENSNode instance.
+      </span>
+    </div>
+
+    <!-- enskit snippet block -->
+    <section class="border-b border-black/[0.05] px-4 pb-5 pt-4 dark:border-white/[0.06] md:px-5">
+      <div class="mb-2.5 flex items-center justify-between">
+        <span class="inline-flex items-center rounded-full bg-[var(--sl-color-gray-5)] px-2.5 py-0.5 text-[0.7rem] font-medium tracking-wide text-[var(--sl-color-gray-2)] dark:bg-[var(--sl-color-gray-6)]">
+          TSX (React)
+        </span>
+        <button
+          type="button"
+          class="example-copy text-xs font-medium text-[var(--sl-color-gray-2)] transition-colors hover:text-[var(--sl-color-text-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
+          data-copy-target={`${uid}-raw-enskit`}
+          data-default-label="Copy"
+          aria-label="Copy enskit snippet"
+        >
+          Copy
+        </button>
+      </div>
+      <div class="min-w-0 [&_.expressive-code]:rounded-lg">
+        <Code code={enskitSnippet} lang="tsx" />
+      </div>
+    </section>
+
+    <!-- Setup steps -->
+    <section class="px-4 py-5 md:px-5" aria-labelledby={`${uid}-enskit-setup-heading`}>
+      <h3 id={`${uid}-enskit-setup-heading`} class="sr-only">enskit setup</h3>
+      <div class="omnigraph-tabs flex flex-col" data-tabs-root={`${uid}-enskit-setup`}>
+        <div
+          class="flex items-end gap-0 border-b border-black/[0.06] dark:border-white/[0.08]"
+          role="tablist"
+          aria-label="Package manager"
+        >
+          {
+            enskitSetupTabs.map((t, i) => (
+              <button
+                type="button"
+                role="tab"
+                id={`${t.id}-btn`}
+                aria-selected={i === 0 ? "true" : "false"}
+                aria-controls={t.id}
+                data-tab-target={t.id}
+                data-copy-raw={t.copyRaw}
+                class="example-tab setup-pm-tab relative inline-flex items-center gap-1.5 pb-2.5 pr-4 pt-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
+              >
+                <Icon name={t.icon} class="setup-pm-tab-icon shrink-0" size="1.125em" />
+                {t.label}
+              </button>
+            ))
+          }
+          <div class="flex-1" role="none" />
+          <button
+            type="button"
+            class="example-copy mb-2.5 text-xs font-medium text-[var(--sl-color-gray-2)] transition-colors hover:text-[var(--sl-color-text-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sl-color-text-accent)]"
+            data-tab-copy
+            data-copy-target={`${uid}-raw-setup-enskit-npm`}
+            data-default-label="Copy"
+            aria-label="Copy enskit setup steps"
+          >
+            Copy
+          </button>
+        </div>
+        <div class="relative min-h-[8rem]">
+          {
+            SETUP_PACKAGE_MANAGERS.map((pm, i) => (
+              <div
+                id={`${uid}-tab-setup-enskit-${pm}`}
+                role="tabpanel"
+                aria-labelledby={`${uid}-tab-setup-enskit-${pm}-btn`}
+                data-tab-panel={`${uid}-tab-setup-enskit-${pm}`}
+                class:list={["example-tab-panel pt-3", { hidden: i !== 0 }]}
+                hidden={i !== 0}
+              >
+                <div class="max-h-[min(38vh,19rem)] min-w-0 overflow-auto overscroll-y-contain [&_.expressive-code]:rounded-lg">
+                  <Code code={enskitSetupSnippets[pm]} lang="bash" />
+                </div>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <p class="px-4 pb-4 pt-0 text-[0.7rem] leading-relaxed text-[var(--sl-color-gray-3)] md:px-5">
+      See the{" "}
+      <a href="/docs/integrate/integration-options/enskit" class="underline underline-offset-2 hover:text-[var(--sl-color-text-accent)]">enskit docs</a>
+      {" "}for gql.tada plugin and provider setup.
+    </p>
+  </div>
 </div>
 
 <script define:vars={{ uid }}>
   const root = document.querySelector(`[data-omnigraph-example="${uid}"]`);
-  const tabsRoot = root?.querySelector(`[data-tabs-root="${uid}"]`);
-  if (root && tabsRoot && !tabsRoot.dataset.bound) {
+  if (!root) return;
+
+  // ── Integration (primary) tab switching ──
+  const integrationTabsEl = root.querySelector(`[data-integration-tabs="${uid}"]`);
+  const integrationPanels = [...root.querySelectorAll("[data-integration-panel]")];
+  const integrationButtons = integrationTabsEl
+    ? [...integrationTabsEl.querySelectorAll("[data-integration-tab]")]
+    : [];
+
+  function activateIntegration(name) {
+    for (const btn of integrationButtons) {
+      btn.setAttribute("aria-selected", btn.dataset.integrationTab === name ? "true" : "false");
+    }
+    for (const panel of integrationPanels) {
+      const on = panel.dataset.integrationPanel === name;
+      panel.classList.toggle("hidden", !on);
+      panel.toggleAttribute("hidden", !on);
+    }
+  }
+
+  if (integrationTabsEl) {
+    integrationTabsEl.addEventListener("click", (e) => {
+      const btn = e.target instanceof Element ? e.target.closest("[data-integration-tab]") : null;
+      if (btn && integrationTabsEl.contains(btn)) {
+        activateIntegration(btn.dataset.integrationTab);
+      }
+    });
+  }
+
+  // ── Secondary tab switching (bind each data-tabs-root independently) ──
+  for (const tabsRoot of root.querySelectorAll("[data-tabs-root]")) {
+    if (tabsRoot.dataset.bound) continue;
     tabsRoot.dataset.bound = "true";
 
     const buttons = [...tabsRoot.querySelectorAll("[data-tab-target]")];
@@ -218,19 +551,16 @@ const tabList: { id: string; label: string }[] = [
     const copyTargetMap = {};
     for (const btn of buttons) {
       const tabId = btn.getAttribute("data-tab-target");
-      if (!tabId) continue;
-      copyTargetMap[tabId] = tabId.replace(`${uid}-tab-`, `${uid}-raw-`);
+      const rawId = btn.getAttribute("data-copy-raw");
+      if (tabId && rawId) copyTargetMap[tabId] = rawId;
     }
 
     function activate(targetId) {
       for (const btn of buttons) {
-        const id = btn.getAttribute("data-tab-target");
-        const on = id === targetId;
-        btn.setAttribute("aria-selected", on ? "true" : "false");
+        btn.setAttribute("aria-selected", btn.getAttribute("data-tab-target") === targetId ? "true" : "false");
       }
       for (const panel of panels) {
-        const id = panel.getAttribute("data-tab-panel");
-        const on = id === targetId;
+        const on = panel.getAttribute("data-tab-panel") === targetId;
         panel.classList.toggle("hidden", !on);
         panel.toggleAttribute("hidden", !on);
       }
@@ -241,32 +571,27 @@ const tabList: { id: string; label: string }[] = [
     }
 
     tabsRoot.addEventListener("click", (e) => {
-      const t = e.target;
-      if (!(t instanceof Element)) return;
-      const btn = t.closest("[data-tab-target]");
-      if (!btn || !tabsRoot.contains(btn)) return;
-      const id = btn.getAttribute("data-tab-target");
-      if (id) activate(id);
-    });
-
-    root.addEventListener("click", (e) => {
-      const t = e.target;
-      if (!(t instanceof Element)) return;
-      const copyBtn = t.closest("[data-copy-target]");
-      if (!copyBtn || !root.contains(copyBtn)) return;
-      const targetId = copyBtn.getAttribute("data-copy-target");
-      const el = targetId ? document.getElementById(targetId) : null;
-      const text = el?.textContent ?? "";
-      if (!text) return;
-      const defaultLabel = copyBtn.getAttribute("data-default-label") ?? "Copy";
-      void navigator.clipboard.writeText(text).then(() => {
-        copyBtn.textContent = "Copied!";
-        setTimeout(() => {
-          copyBtn.textContent = defaultLabel;
-        }, 1600);
-      });
+      const btn = e.target instanceof Element ? e.target.closest("[data-tab-target]") : null;
+      if (btn && tabsRoot.contains(btn)) {
+        activate(btn.getAttribute("data-tab-target"));
+      }
     });
   }
+
+  // ── Copy buttons ──
+  root.addEventListener("click", (e) => {
+    const copyBtn = e.target instanceof Element ? e.target.closest("[data-copy-target]") : null;
+    if (!copyBtn || !root.contains(copyBtn)) return;
+    const targetId = copyBtn.getAttribute("data-copy-target");
+    const el = targetId ? document.getElementById(targetId) : null;
+    const text = el?.textContent ?? "";
+    if (!text) return;
+    const defaultLabel = copyBtn.getAttribute("data-default-label") ?? "Copy";
+    void navigator.clipboard.writeText(text).then(() => {
+      copyBtn.textContent = "Copied!";
+      setTimeout(() => { copyBtn.textContent = defaultLabel; }, 1600);
+    });
+  });
 </script>
 
 <style>
@@ -305,4 +630,11 @@ const tabList: { id: string; label: string }[] = [
     border-radius: 2px 2px 0 0;
   }
 
+  .setup-pm-tab-icon {
+    opacity: 0.9;
+  }
+
+  .setup-pm-tab[aria-selected="true"] .setup-pm-tab-icon {
+    opacity: 1;
+  }
 </style>
