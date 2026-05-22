@@ -3,43 +3,16 @@ import { Aside } from "@astrojs/starlight/components";
 
 import { ACTIVE_OMNIGRAPH_VERSION } from "@data/omnigraph-examples/active";
 
-interface Props {
-  /**
-   * Which SDK(s) the warning is for.
-   * - "enssdk": only enssdk
-   * - "enskit": both enskit and enssdk (enskit depends on enssdk)
-   * - "both": mention both enssdk and enskit, show both install commands
-   */
-  for?: "enssdk" | "enskit" | "both";
-}
-
-const { for: target = "enssdk" } = Astro.props;
-
-const isEnskit = target === "enskit";
-const isBoth = target === "both";
-
 // The SDK version is locked to the production-deployed Omnigraph version (see
 // `@data/omnigraph-examples/active`). The SDK bundles the Omnigraph schema, so pinning the matching
 // version keeps gql.tada's generated types aligned with the deployed API. Updates on promotion.
-const sdkVersion = ACTIVE_OMNIGRAPH_VERSION.replace(/^v/, "");
-
-const sdkList = isEnskit
-  ? `<code>enskit@${sdkVersion}</code> and <code>enssdk@${sdkVersion}</code>`
-  : isBoth
-    ? `<code>enssdk@${sdkVersion}</code> (and <code>enskit@${sdkVersion}</code> when using React)`
-    : `<code>enssdk@${sdkVersion}</code>`;
+const VERSION = ACTIVE_OMNIGRAPH_VERSION.replace(/^v/, "");
 ---
 
 <Aside type="caution" title="Version compatibility with hosted instances">
-  Our hosted ENSNode instances run ENSNode <code>{sdkVersion}</code>. The Omnigraph GraphQL schema is bundled inside the SDK and consumed by the <code>gql.tada</code> TypeScript plugin to type your queries, so pin an <strong>exact</strong> version (no <code>^</code> or <code>~</code>) of <span set:html={sdkList} /> to keep your generated types matched to the deployed schema. Use these exact install commands:
+  Our hosted ENSNode instances run ENSNode <code>{VERSION}</code>. The Omnigraph GraphQL schema is bundled inside the SDK and consumed by the <code>gql.tada</code> TypeScript plugin to type your queries, so pin an <strong>exact</strong> version (no <code>^</code> or <code>~</code>) of <code>enssdk@{VERSION}</code> (and <code>enskit@{VERSION}</code> when using React) to keep your generated types matched to the deployed schema. Use these exact install commands:
 
-  {isBoth ? (
-    <pre>{`npm install enssdk@${sdkVersion}
+  <pre>{`npm install enssdk@${VERSION}
 # or, for React apps:
-npm install enskit@${sdkVersion} enssdk@${sdkVersion}`}</pre>
-  ) : isEnskit ? (
-    <pre>{`npm install enskit@${sdkVersion} enssdk@${sdkVersion}`}</pre>
-  ) : (
-    <pre>{`npm install enssdk@${sdkVersion}`}</pre>
-  )}
+npm install enskit@${VERSION} enssdk@${VERSION}`}</pre>
 </Aside>
